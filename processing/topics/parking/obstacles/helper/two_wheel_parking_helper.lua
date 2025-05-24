@@ -28,9 +28,15 @@ function two_wheel_parking_conditions(tags, value)
   return tags.amenity == value and (
     tags[value..":position"] == "lane" or
     tags[value..":position"] == "street_side" or
+    tags[value..":position"] == "shoulder" or
     tags[value..":position"] == "kerb_extension" or
     tags["position"] == "lane" or
     tags["position"] == "street_side" or
-    tags["position"] == "kerb_extension"
+    tags["position"] == "shoulder" or
+    tags["position"] == "kerb_extension" or
+    tags["parking"] == "lane" or
+    tags["parking"] == "street_side" or
+    tags["parking"] == "shoulder" or
+    tags["parking"] == "kerb_extension"
   )
 end
