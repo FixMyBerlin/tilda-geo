@@ -32,5 +32,7 @@ function osm2pgsql.process_way(object)
   off_street_parking_areas(object)
 end
 
--- function osm2pgsql.process_relation(object)
--- end
+function osm2pgsql.process_relation(object)
+  parking_obstacle_areas(object)
+  off_street_parking_areas(object)
+end

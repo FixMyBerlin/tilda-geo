@@ -14,12 +14,13 @@ local db_table = osm2pgsql.define_table({
     { column = 'id',      type = 'text',      not_null = true },
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
-    { column = 'geom',    type = 'polygon', projection = 5243 },
+    -- `geometry` means either Polygon or MultiPolygon (in this cases
+    { column = 'geom',    type = 'geometry', projection = 5243 },
   },
 })
 
 function parking_obstacle_areas(object)
-  if not object.is_closed then return end
+  if (object.type == "way" and not object.is_closed) then return end
   if next(object.tags) == nil then return end
 
   local result = categorize_area(object)
@@ -29,7 +30,7 @@ function parking_obstacle_areas(object)
     row_tags.tags = cleaned_tags
     parking_errors(result.object, replaced_tags, 'parking_obstacle_areas')
 
-    local row = MergeTable({ geom = result.object:as_polygon() }, row_tags)
+    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_tags)
     db_table:insert(row)
   end
 

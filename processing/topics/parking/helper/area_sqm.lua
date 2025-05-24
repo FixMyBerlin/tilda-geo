@@ -1,5 +1,8 @@
 local function area_sqm(object)
-  return object:as_polygon():transform(5243):area()
+  if object:as_multipolygon():srid() == 5243 then
+    return object:as_multipolygon():area()
+  end
+  return object:as_multipolygon():transform(5243):area()
 end
 
 return area_sqm
