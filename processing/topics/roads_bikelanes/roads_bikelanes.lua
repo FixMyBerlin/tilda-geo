@@ -78,7 +78,6 @@ local bikelanesTable = osm2pgsql.define_table({
 
 local bikelanesPresenceTable = osm2pgsql.define_table({
   name = 'bikelanesPresence',
-  -- Note: We populate a custom `osm_id` (with unique ID values) below.
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     { column = 'id',      type = 'text',      not_null = true },
