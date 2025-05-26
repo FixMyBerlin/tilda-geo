@@ -2,6 +2,7 @@ import { $, sql } from 'bun'
 import { OSM_DOWNLOAD_DIR, OSM_FILTERED_DIR, PERSISTENT_DIR } from '../constants/directories.const'
 import { initializeCustomFunctionsDataTables, initializeSchemaData } from '../dataTables/dataTables'
 import { initializeCustomFunctionDiffing, initializeSchemaBackup } from '../diffing/diffing'
+import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
 import { initializeLuaPackagePath } from '../utils/initializeLuaPackagePath'
 import { initializeMetadataTable } from './metadata'
 
@@ -25,6 +26,9 @@ export async function initialize() {
 
   // osm2pgsql LUA
   await initializeLuaPackagePath('runProcessing')
+
+  // See ../pseudoTags
+  await downloadPseudoTagsData()
 
   return true
 }

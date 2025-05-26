@@ -42,3 +42,8 @@ export const ID_FILTERED_FILE = `id_filtered.osm.pbf`
  * The path to save auto generated types to.
  */
 export const TYPES_DIR = '/data/processingTypes'
+
+/**
+ * The path to save data for pseudoTags in.
+ */
+export const PSEUDO_TAGS_DATA = '/data/pseudoTagsData'
