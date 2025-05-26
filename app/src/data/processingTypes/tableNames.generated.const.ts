@@ -14,12 +14,15 @@ const tableNames = [
   'boundaries',
   'boundaryLabels',
   'landuse',
+  'off_street_parking_area_labels',
+  'off_street_parking_areas',
+  'off_street_parking_points',
+  'parking_errors',
   'places',
   'poiClassification',
   'publicTransport',
   'roads',
   'roadsPathClasses',
-  'todos_lines',
   'trafficSigns',
 ]
 export type TableNames = (typeof tableNames)[number]
