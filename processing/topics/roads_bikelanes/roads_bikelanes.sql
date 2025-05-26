@@ -68,21 +68,3 @@ WHERE
     WHERE
       rn % 2 = 0
   );
-
--- TASK: Copy Mapillary Coverage Tags to tables
--- ====================
-DO $$
-BEGIN
-  PERFORM copy_mapillary_coverage_tags ('public."todos_lines"');
-  PERFORM copy_mapillary_coverage_tags ('public."bikelanes"');
-  PERFORM copy_mapillary_coverage_tags ('public."roads"');
-  PERFORM copy_mapillary_coverage_tags ('public."roadsPathClasses"');
-  PERFORM copy_mapillary_coverage_tags ('public."todos_lines"');
-END $$;
-
--- TASK: Cleanup `todos_lines` for Campaigns that should only include ways with mapillary coverage
--- ====================
-DO $$
-BEGIN
-  PERFORM delete_todos_lines_without_mapillary_coverage ();
-END $$;
