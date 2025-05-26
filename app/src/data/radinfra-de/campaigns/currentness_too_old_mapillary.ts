@@ -1,22 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const currentness_too_old: CampaignType = {
-  id: 'currentness_too_old',
+export const currentness_too_old_mapillary: CampaignType = {
+  id: 'currentness_too_old_mapillary',
   todoKey: 'currentness_too_old',
-  title: 'Sehr lange nicht geprüfte Radinfra',
-  pubDate: new Date('2025-01-01T15:00'),
+  title: 'Sehr lange nicht geprüfte Radinfra (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'currentness',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
-  description: 'Diese Kampagne enthält Wege, die seit mehr als 10 Jahren nicht editiert wurden.',
+  visibility: 'promote',
+  description:
+    'Diese Kampagne enthält Wege, die seit mehr als 10 Jahren nicht editiert wurden. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte prüfe und aktualisiere diese Infrastruktur.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.a0qx0.f6&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 51041,
+    // id: ,
     checkinComment: 'Radinfrastruktur überprüft.',
     checkinSource: 'radinfra_de',
-    resultsLimited: true,
+    resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg ist seit vielen Jahren nicht mehr überprüft worden.
@@ -36,5 +38,5 @@ Dieser Weg ist seit vielen Jahren nicht mehr überprüft worden.
 * [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
 * [OpenStreetMap](%%OSM_URL%%)
-`,
+`, // Filter info is added in `buildTaskInstructions`
 }

@@ -1,7 +1,7 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
 import { Markdown } from '@/src/app/_components/text/Markdown'
-import { TodoId } from '@/src/data/processingTypes/todoIds.const'
+import { TodoKey } from '@/src/data/processingTypes/todoKeys.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { buildHashtags } from '@/src/data/radinfra-de/utils/buildHashtags'
 import { buildTaskInstructions } from '@/src/data/radinfra-de/utils/buildTaskInstructions'
@@ -48,16 +48,16 @@ const fetchMapRouletteTask = async (
   return maprouletteTaskSchema.parse(json)
 }
 
-type Props = { projectKey: TodoId } & Omit<NoticeMaproulette, 'sourceId'>
+type Props = { todoKey: TodoKey } & Omit<NoticeMaproulette, 'sourceId'>
 
 export const NoticeMaprouletteTask = ({
-  projectKey,
+  todoKey,
   osmTypeIdString,
   kind,
   properties,
   geometry,
 }: Props) => {
-  const radinfraCampaign = campaigns?.find((c) => c.id === projectKey)
+  const radinfraCampaign = campaigns?.find((c) => c.id === todoKey)
   const maprouletteCampaign =
     radinfraCampaign?.maprouletteChallenge.enabled === true ? radinfraCampaign : undefined
   const mapRouletteId =
@@ -81,7 +81,7 @@ export const NoticeMaprouletteTask = ({
   if (geometry?.type !== 'LineString') return null
 
   const text = buildTaskInstructions({
-    projectKey,
+    todoKey,
     osmTypeIdString,
     kind: kind || 'UNKOWN', // Fallback is needed because TS cannot know that we only use this when the `kind` is known
     geometry: geometry as LineString, // Guarded above
@@ -123,8 +123,8 @@ export const NoticeMaprouletteTask = ({
   const completed = data?.status && maprouletteStatusCompleted.includes(data.status)
 
   return (
-    <Fragment key={projectKey}>
-      <h2>{radinfraCampaign?.title || `${projectKey} (in Arbeit)`}</h2>
+    <Fragment key={todoKey}>
+      <h2>{radinfraCampaign?.title || `${todoKey} (in Arbeit)`}</h2>
       {!!mapRouletteId && (
         <p className="-mt-5 text-right text-xs">
           <LinkExternal

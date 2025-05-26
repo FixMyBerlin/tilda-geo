@@ -1,23 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const mixed_cycleway_both: CampaignType = {
-  id: 'mixed_cycleway_both',
+export const mixed_cycleway_both_mapillary: CampaignType = {
+  id: 'mixed_cycleway_both_mapillary',
   todoKey: 'mixed_cycleway_both',
-  title: 'Überschneidende Tags (`cycleway*`)',
-  pubDate: new Date('2025-02-17T10:00'),
+  title: 'Überschneidende Tags (`cycleway*`) (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
-    'Dieser Weg hat Tags die sich überschneiden: `cycleway` (Angabe für beide Seiten) in Kombination mit `cycleway:left|right` (Angabe für eine bestimmte Seite).',
+    'Dieser Weg hat Tags die sich überschneiden: `cycleway` (Angabe für beide Seiten) in Kombination mit `cycleway:left|right` (Angabe für eine bestimmte Seite). Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte kontrolliere die Angaben und ändere sie, so dass sie eindeutig sind.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.2j1vo.3dc&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 51093,
+    // id: ,
     checkinComment: 'Überschneidende Tags präzisiert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg hat Tags die sich überschneiden:

@@ -2,6 +2,7 @@ import { CampaignType } from '../schema/campaignsSchema'
 
 export const missing_access_tag_240: CampaignType = {
   id: 'missing_access_tag_240',
+  todoKey: 'missing_access_tag_240',
   title: 'Fehlende Zugangs-Tags bei Geh- & Radwege',
   pubDate: new Date('2025-01-01T15:00'),
   category: 'traffic_signs',

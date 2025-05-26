@@ -1,7 +1,7 @@
-import { todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { todoKeys } from '@/src/data/processingTypes/todoKeys.const'
 
 export const todoMarkdownToMaprouletteCampaignKey = (todos: string | undefined) => {
-  return todoIds
+  return todoKeys
     .map((project) => {
       if (todos?.includes(`* ${project}\n`)) {
         return project

@@ -1,10 +1,10 @@
-import { TableId } from '@/src/data/processingTypes/tableId.generated.const'
+import { TableNames } from '@/src/data/processingTypes/tableNames.generated.const'
 import { geoDataClient } from '../../prisma-client'
 
-const lengthCounterIdentifier = (id: TableId) =>
-  `atlas_aggregate_${id.toLowerCase()}` as `atlas_aggregate_${Lowercase<TableId>}`
-const segmentizedTableIdentifier = (id: TableId) =>
-  `temp_${id.toLowerCase()}_segmentized` as `temp_${Lowercase<TableId>}_segmentized`
+const lengthCounterIdentifier = (id: TableNames) =>
+  `atlas_aggregate_${id.toLowerCase()}` as `atlas_aggregate_${Lowercase<TableNames>}`
+const segmentizedTableIdentifier = (id: TableNames) =>
+  `temp_${id.toLowerCase()}_segmentized` as `temp_${Lowercase<TableNames>}_segmentized`
 
 async function registerCustomFunctions() {
   const segmentizeLinestringPromise = geoDataClient.$executeRaw`
@@ -70,7 +70,7 @@ async function registerCustomFunctions() {
     CREATE INDEX IF NOT EXISTS "temp_roads_segmentized_aggregator_idx" ON temp_bikelanes_segmentized (aggregator_key);`,
   ])
 
-  const counterPromises = ['roads', 'bikelanes'].map((id: TableId) => {
+  const counterPromises = ['roads', 'bikelanes'].map((id: TableNames) => {
     return geoDataClient.$executeRawUnsafe(`
       CREATE OR REPLACE FUNCTION ${lengthCounterIdentifier(id)}(input_polygon Geometry(MultiPolygon, 3857))
       RETURNS JSONB AS $$

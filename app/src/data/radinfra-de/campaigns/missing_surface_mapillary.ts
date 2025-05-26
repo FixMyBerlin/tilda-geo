@@ -1,18 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_surface: CampaignType = {
-  id: 'missing_surface',
+export const missing_surface_mapillary: CampaignType = {
+  id: 'missing_surface_mapillary',
   todoKey: 'missing_surface',
-  title: 'Ergänze Angaben zur Oberfläche',
-  pubDate: new Date('2025-01-01T15:00'),
+  title: 'Ergänze Angaben zur Oberfläche (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'surface',
   recommendedAction: 'streetcomplete',
-  visibility: 'hidden',
-  description: 'Diese Karte zeigt Wege, bei denen die Angabe zur Oberfläche fehlt.',
+  visibility: 'secondary',
+  description:
+    'Diese Karte zeigt Wege, bei denen die Angabe zur Oberfläche fehlt. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze die Oberfläche / den Belag `surface` und gerne auch die Oberflächenqualität `smoothness`.**',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.k0cbo.f6&v=2',
   maprouletteChallenge: {
-    enabled: false,
+    enabled: true,
+    // id: ,
+    checkinComment: 'Angabe zur Oberflächenqualität ergänzt.',
+    checkinSource: 'radinfra_de',
+    resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Diesem Weg fehlt eine Angabe zur Oberfläche/Belag.

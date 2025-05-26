@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { todoKeys } from '../../processingTypes/todoKeys.const'
 import { campaignCategories } from './utils/campaignCategorySelect'
 import { recommendedActions } from './utils/recommendedActionSelect'
 import { visibilityOptions } from './utils/visibilitySelect'
@@ -20,11 +21,13 @@ const MaprouletteEnabled = z.object({
   // The results are ordered by length, shorter ways are cut of first.
   // This field is used to show a notice to users so they know this is likely to happen.
   resultsLimited: z.boolean(),
+  filterMapillary: z.union([z.literal('pano_regular'), z.literal('pano')]).optional(),
 })
 const MaprouletteDisabled = z.object({ enabled: z.literal(false) })
 
 const CampaignBaseSchema = z.object({
   id: z.string(),
+  todoKey: z.enum(todoKeys),
   title: z.string(),
   pubDate: InputDateTimeSchema,
   visibility: z.enum(visibilityOptions),

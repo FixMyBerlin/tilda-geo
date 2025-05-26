@@ -1,19 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const needs_clarification_track: CampaignType = {
-  id: 'needs_clarification_track',
+export const needs_clarification_track_mapillary: CampaignType = {
+  id: 'needs_clarification_track_mapillary',
   todoKey: 'needs_clarification_track',
-  title: 'Führungsform `track` unklar',
-  pubDate: new Date('2025-02-17T10:00'),
+  title: 'Führungsform `track` unklar (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
-    'Diesee Wege sind als `cycleway=track` eingetragen. Es fehlen ihnen aber Attribute, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.',
+    'Diesee Wege sind als `cycleway=track` eingetragen. Es fehlen ihnen aber Attribute, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze weitere Tags, um eine präzise Kategorisierung sicherzustellen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.a0qx0.3dc&v=2',
   maprouletteChallenge: {
-    enabled: false,
+    enabled: true,
+    // id: ,
+    checkinComment: 'Angabe zur Führungsform ergänzt.',
+    checkinSource: 'radinfra_de',
+    resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg ist als \`cycleway=track\` eingetragen. Das sind nicht genug Daten, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.

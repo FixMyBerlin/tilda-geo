@@ -1,23 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const unexpected_bicycle_access_on_footway: CampaignType = {
-  id: 'unexpected_bicycle_access_on_footway',
+export const unexpected_bicycle_access_on_footway_mapillary: CampaignType = {
+  id: 'unexpected_bicycle_access_on_footway_mapillary',
   todoKey: 'unexpected_bicycle_access_on_footway',
-  title: 'Straßenklasse Fußweg unerwartet',
-  pubDate: new Date('2025-01-01T15:00'),
+  title: 'Straßenklasse Fußweg unerwartet (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
-    'Diese Kampagne enthält Fußwege, die gleichzeitig Angaben zur Radinfrastruktur haben.',
+    'Diese Kampagne enthält Fußwege, die gleichzeitig Angaben zur Radinfrastruktur haben. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte prüfe das Tagging. Eventuell ist eine andere Straßenklasse angebracht.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.50y84.f6&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 50883,
+    // id:,
     checkinComment: 'Straßenklasse Fußweg in Kombination mit Radinfrastruktur verbessert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg verwendet eine unerwarte Kombination an Tags: Er ist als Gehweg attributiert aber gleichzeitig als für Fahrrad vorgesehen Infrastruktur.

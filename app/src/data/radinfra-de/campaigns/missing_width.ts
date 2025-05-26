@@ -2,11 +2,12 @@ import { CampaignType } from '../schema/campaignsSchema'
 
 export const missing_width: CampaignType = {
   id: 'missing_width',
+  todoKey: 'missing_width',
   title: 'Ergänze Angaben zur Breite',
   pubDate: new Date('2025-01-01T15:00'),
   category: 'width',
   recommendedAction: 'streetcomplete',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description:
     'Diese Karte zeigt Wege, bei denen die Angabe zur Breite der Radinfrastruktur fehlt.',
   task: '**Bitte ergänze die Breite der Radinfrastruktur `width`.**',

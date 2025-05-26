@@ -1,23 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_segregated: CampaignType = {
-  id: 'missing_segregated',
+export const missing_segregated_mapillary: CampaignType = {
+  id: 'missing_segregated_mapillary',
   todoKey: 'missing_segregated',
-  title: 'Gemeinsame oder getrennte Führung?',
-  pubDate: new Date('2024-09-20T15:00'),
+  title: 'Gemeinsame oder getrennte Führung? (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
-    'Diese Kampagne enthält Wege, die sowohl von Fahrrad- als auch Fußverkehr genutzt werden. Es fehlt aber die Angabe, ob eine Trennung der Verkehrsformen vorliegt.',
+    'Diese Kampagne enthält Wege, die sowohl von Fahrrad- als auch Fußverkehr genutzt werden. Es fehlt aber die Angabe, ob eine Trennung der Verkehrsformen vorliegt. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze die Angabe `segregated=yes` oder `no`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.1a3pg.f6&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 50887,
+    // id: ,
     checkinComment: 'Angabe zu `segregated` ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg wird vom Fußverkehr und Radverkehr genutzt (laut Verkehrszeichen oder Zugangs-Tagging).

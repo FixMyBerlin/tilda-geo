@@ -1,23 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const needs_clarification: CampaignType = {
-  id: 'needs_clarification',
+export const needs_clarification_mapillary: CampaignType = {
+  id: 'needs_clarification_mapillary',
   todoKey: 'needs_clarification',
-  title: 'Führungsform unklar',
-  pubDate: new Date('2025-01-01T15:00'),
+  title: 'Führungsform unklar (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'promote',
   description:
-    'Diese Kampagne enthält Radinfrastruktur, die nicht eindeutig kategorisiert werden konnte.',
+    'Diese Kampagne enthält Radinfrastruktur, die nicht eindeutig kategorisiert werden konnte. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte prüfe das Tagging und ergänze weitere Attribute, die bei der Kategorisierung helfen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.2j1vo.f6&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 50891,
+    // id: ,
     checkinComment: 'Angabe zur Führungsform ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Diese Radinfrastruktur konnte nicht richtig kategorisiert werden.

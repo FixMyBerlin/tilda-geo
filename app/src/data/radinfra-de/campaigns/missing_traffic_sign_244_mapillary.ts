@@ -1,22 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_traffic_sign_244: CampaignType = {
-  id: 'missing_traffic_sign_244',
+export const missing_traffic_sign_244_mapillary: CampaignType = {
+  id: 'missing_traffic_sign_244_mapillary',
   todoKey: 'missing_traffic_sign_244',
-  title: 'Ergänze das Verkehrszeichen bei Fahrradstraßen',
-  pubDate: new Date('2024-09-20T15:00'),
+  title: 'Ergänze das Verkehrszeichen bei Fahrradstraßen (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
-  description: 'Diese Kampagne enthält Fahrradstraße ohne zugehörigen Verkehrszeichen-Tag.',
+  visibility: 'promote',
+  description:
+    'Diese Kampagne enthält Fahrradstraße ohne zugehörigen Verkehrszeichen-Tag. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze fehlende Verkehrszeichen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.hrb610.3dc&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 49357,
+    // id: ,
     checkinComment: 'Verkehrszeichen an Fahrradstraße ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg ist als Fahrradstraße getaggt, **jedoch fehlt der zugehörige Verkehrszeichen-Tag.**

@@ -1,19 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_oneway: CampaignType = {
-  id: 'missing_oneway',
+export const missing_oneway_mapillary: CampaignType = {
+  id: 'missing_oneway_mapillary',
   todoKey: 'missing_oneway',
-  title: 'Ergänze Angaben zur Verkehrsrichtung',
-  pubDate: new Date('2025-03-01T15:00'),
+  title: 'Ergänze Angaben zur Verkehrsrichtung (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'radinfra',
-  recommendedAction: 'map',
-  visibility: 'hidden',
+  recommendedAction: 'maproulette',
+  visibility: 'secondary',
   description:
-    'Diese Karte zeigt Wege, bei denen die Angabe zur Verkehrsrichtung der Radinfrastruktur fehlt.',
+    'Diese Karte zeigt Wege, bei denen die Angabe zur Verkehrsrichtung der Radinfrastruktur fehlt. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze, ob in eine oder beide Richtungen gefahren werden darf.**',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1ops5da.54i84.3cw&v=2',
   maprouletteChallenge: {
-    enabled: false,
+    enabled: true,
+    // id: ,
+    checkinComment: 'Angaben zur Verkehrsrichtung ergänzt.',
+    checkinSource: 'radinfra_de',
+    resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Diesem Weg fehlt eine Angabe zur Verkehrsrichtung.

@@ -13,39 +13,38 @@ export async function generateTypes(processedTables: string[]) {
 
   console.log('[DEV] Generating types...')
 
-  writeTableIdTypes(processedTables)
-  writeTodoIdTypes()
+  writeTableNameTypes(processedTables)
+  writeTodoKeyTypes()
 
   autoformatTypeFiles()
 }
 
-async function writeTableIdTypes(processedTables: string[]) {
+async function writeTableNameTypes(processedTables: string[]) {
   if (params.processOnlyTopics.length > 0) {
     console.info('[DEV] Generating types:', 'Skipped because `PROCESS_ONLY_TOPICS` is present')
     return
   }
 
-  const typeFile = join(TYPES_DIR, 'tableId.generated.const.ts')
+  const typeFile = join(TYPES_DIR, 'tableNames.generated.const.ts')
   const content = prefixGeneratedFiles(
-    `export type TableId = ${
-      processedTables
-        .sort()
-        .map((tableName) => `'${tableName}'`)
-        .join(' | ') || 'ERROR'
-    }`,
+    `const tableNames = [${processedTables
+      .sort()
+      .map((tableName) => `'${tableName}'`)
+      .join(',\n')}]
+export type TableNames = (typeof tableNames)[number]`,
   )
 
   await Bun.write(typeFile, content)
 }
 
-async function callLuaForNames(luaFilename: 'ExtractBikelaneTodos' | 'ExtractRoadTodos') {
+async function callLuaForNames(luaFilename: 'ExtractBikelaneTodoKeys' | 'ExtractRoadTodoKeys') {
   try {
     const rawResult = await $`lua /processing/utils/types/${luaFilename}.lua`.text()
     const lines = rawResult.split('\n').filter(Boolean).sort()
     const result = lines
       .map((line) => line.split(';'))
-      .map(([id, todoTableOnly]) => {
-        return { id, todoTableOnly: JSON.parse(todoTableOnly) as boolean }
+      .map(([key, todoTableOnly]) => {
+        return { key, todoTableOnly: JSON.parse(todoTableOnly) as boolean }
       })
     return result
   } catch (error) {
@@ -53,38 +52,38 @@ async function callLuaForNames(luaFilename: 'ExtractBikelaneTodos' | 'ExtractRoa
   }
 }
 
-async function writeTodoIdTypes() {
-  const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
+async function writeTodoKeyTypes() {
+  const typeFilePath = join(TYPES_DIR, 'todoKeys.generated.const.ts')
   const typeFile = Bun.file(typeFilePath)
 
-  const bikelaneTodoNames = await callLuaForNames('ExtractBikelaneTodos')
+  const bikelaneTodoNames = await callLuaForNames('ExtractBikelaneTodoKeys')
   const bikelaneTodoNamesTableAndField = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === false)
-    .map((e) => e.id)
+    .map((e) => e.key)
   const bikelaneTodoNamesTableOnly = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === true)
-    .map((e) => e.id)
+    .map((e) => e.key)
 
-  const roadTodoNames = await callLuaForNames('ExtractRoadTodos')
+  const roadTodoNames = await callLuaForNames('ExtractRoadTodoKeys')
   const roadTodoNamesTableAndField = roadTodoNames
     .filter((e) => e.todoTableOnly === false)
-    .map((e) => e.id)
+    .map((e) => e.key)
   const roadTodoNamesTableOnly = roadTodoNames
     .filter((e) => e.todoTableOnly === true)
-    .map((e) => e.id)
+    .map((e) => e.key)
 
   const fileContent = `
-  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
-  export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
+  export const bikelaneTodoKeysTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
+  export type BikelaneTodoKeysTableAndField = (typeof bikelaneTodoKeysTableAndField)[number]
 
-  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
-  export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
+  export const bikelaneTodoKeysTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
+  export type BikelaneTodoKeysTableOnly = (typeof bikelaneTodoKeysTableOnly)[number]
 
-  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
-  export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
+  export const roadTodoKeysTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
+  export type RoadTodoKeysTableAndField = (typeof roadTodoKeysTableAndField)[number]
 
-  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
-  export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
+  export const roadTodoKeysTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
+  export type RoadTodoKeysTableOnly = (typeof roadTodoKeysTableOnly)[number]
   `
 
   const content = prefixGeneratedFiles(fileContent)

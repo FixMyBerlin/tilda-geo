@@ -1,4 +1,3 @@
-import { CAMPAIGN_API_BASE_URL } from '@/src/app/api/maproulette/data/[projectKey]/_utils/campaignApiBaseUrl.const'
 import {
   CampaignMaprouletteSchema,
   CampaignMaprouletteType,
@@ -17,6 +16,7 @@ import {
   type UpdateMapRouletteChallengeType,
 } from './schema'
 import { maprouletteChallengeUrl } from './utils/maprouletteChallengeUrl'
+import { maprouletteRemoteGeoJsonUrl } from './utils/maprouletteRemoteGeoJsonUrl'
 
 // https://bun.sh/guides/process/argv
 const { values } = parseArgs({
@@ -28,17 +28,23 @@ const { values } = parseArgs({
   allowPositionals: true,
 })
 
-function dataCreateChallenge({ id, ...astroCampaignData }: CampaignMaprouletteType) {
-  const hashtags = buildHashtags(id, astroCampaignData.category, true)
+function dataCreateChallenge({
+  id,
+  todoKey,
+  maprouletteChallenge,
+  ...astroCampaignData
+}: CampaignMaprouletteType) {
+  const hashtags = buildHashtags(todoKey, astroCampaignData.category, true)
+
   const challengeData: CreateMapRouletteChallengeType = {
     ...defaultChallenge,
     name: astroCampaignData.title,
     infoLink: `https://radinfra.de/kampagnen/${id}/`,
-    remoteGeoJson: `${CAMPAIGN_API_BASE_URL}${id}`,
-    enabled: astroCampaignData.maprouletteChallenge.enabled,
+    remoteGeoJson: maprouletteRemoteGeoJsonUrl(todoKey, maprouletteChallenge),
+    enabled: maprouletteChallenge.enabled,
     description: astroCampaignData.description,
-    checkinComment: `${astroCampaignData.maprouletteChallenge.checkinComment}  ${hashtags.join(' ')}`,
-    checkinSource: astroCampaignData.maprouletteChallenge.checkinSource,
+    checkinComment: `${maprouletteChallenge.checkinComment}  ${hashtags.join(' ')}`,
+    checkinSource: maprouletteChallenge.checkinSource,
     dataOriginDate: startOfDay(new Date()).toISOString(), // We skip this; the tasks have their own updatedAt at the bottom of the task description
   }
   return CreateMapRouletteChallengeSchema.parse(challengeData)

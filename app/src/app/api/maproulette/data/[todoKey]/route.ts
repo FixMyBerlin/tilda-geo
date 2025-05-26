@@ -1,6 +1,6 @@
 import { isProd } from '@/src/app/_components/utils/isEnv'
 import { osmTypeIdString } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
-import { todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { todoKeys } from '@/src/data/processingTypes/todoKeys.const'
 import { geoDataClient } from '@/src/server/prisma-client'
 import { ProcessingDates } from '@/src/server/regions/schemas'
 import { feature, featureCollection } from '@turf/turf'
@@ -14,29 +14,31 @@ import { buildTaskInstructions } from '../../../../../data/radinfra-de/utils/bui
 
 const MaprouletteSchema = z
   .object({
-    projectKey: z.enum(todoIds),
+    todoKey: z.enum(todoKeys),
     download: z
       .string()
       .transform((val) => val === 'true')
       .nullish(),
+    filterMapillary: z.enum(['pano_regular', 'pano']).nullable(),
   })
   .strict()
 
 // For testing:
 // Germany http://127.0.0.1:5173/api/maproulette/missing_traffic_sign_244
 // Germany http://127.0.0.1:5173/api/maproulette/missing_traffic_sign_244?download=true
-export async function GET(request: NextRequest, { params }: { params: { projectKey: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { todoKey: string } }) {
   const rawSearchParams = request.nextUrl.searchParams
   const parsedParams = MaprouletteSchema.safeParse({
-    projectKey: params.projectKey,
+    todoKey: params.todoKey,
     download: rawSearchParams.get('download'),
+    filterMapillary: rawSearchParams.get('filterMapillary'),
   })
 
   // VALIDATE PARAMS
   if (parsedParams.success === false) {
     return NextResponse.json({ error: 'Invalid input', ...parsedParams.error }, { status: 404 })
   }
-  const { projectKey, download } = parsedParams.data
+  const { todoKey, download } = parsedParams.data
 
   try {
     // SELECT `osm_data_from`
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
       geometry: LineString
     }[]
 
-    // NOTE: `todos_lines.tags->>${projectKey}` will automatically be wrapped like `todos_lines.tags->>'foo'`
+    // NOTE: `todos_lines.tags->>${todoKey}` will automatically be wrapped like `todos_lines.tags->>'foo'`
     // Docs:
     // `ST_Transform` changes projection
     // `ST_SimplifyPreserveTopology` simplifies the geometry (number of nodes) https://postgis.net/docs/ST_SimplifyPreserveTopology.html
@@ -71,7 +73,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
         todos_lines.osm_type as osm_type,
         todos_lines.osm_id as osm_id,
         todos_lines.id as id,
-        todos_lines.tags->>${projectKey} as priority,
+        todos_lines.tags->>${todoKey} as priority,
         todos_lines.meta->'category' AS kind,
         ST_AsGeoJSON(
           ST_SimplifyPreserveTopology(
@@ -81,7 +83,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
           6
         )::jsonb AS geometry
       FROM public.todos_lines as todos_lines
-      WHERE todos_lines.tags ? ${projectKey}
+      WHERE todos_lines.tags ? ${todoKey}
       ORDER BY todos_lines.length DESC
       LIMIT 40000;
     `
@@ -92,14 +94,14 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
     const outputFilePath = path.resolve(
       'public',
       'temp',
-      `api-maproulette-${projectKey}-temp-${Date.now()}.geojson`,
+      `api-maproulette-${todoKey}-temp-${Date.now()}.geojson`,
     )
     const fileStream = fs.createWriteStream(outputFilePath)
 
     // ADD MAPROULETTE TASK DATA
-    console.log('INFO', 'api/maproulette/[projectKey]/route.ts:', {
+    console.log('INFO', 'api/maproulette/[todoKey]/route.ts:', {
       resultSize: sqlWays.length,
-      projectKey,
+      todoKey,
     })
     for (const sqlWay of sqlWays) {
       const { osm_type, osm_id, id, priority, kind, geometry } = sqlWay
@@ -108,7 +110,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
       let text: undefined | string = undefined
       try {
         text = buildTaskInstructions({
-          projectKey,
+          todoKey,
           osmTypeIdString: osmTypeId,
           kind,
           geometry,
@@ -116,7 +118,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
       } catch (error) {
         console.log(
           'ERROR',
-          'api/maproulette/[projectKey]/route.ts',
+          'api/maproulette/[todoKey]/route.ts',
           'in maprouletteTaskDescriptionMarkdown',
           error,
           { osm_type, osm_id, id, priority, kind, geometry },
@@ -153,7 +155,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
     const fileBuffer = await fs.promises.readFile(outputFilePath)
     await fs.promises.unlink(outputFilePath) // delete file
 
-    const filename = `maproulette-${projectKey}-newline-delimited-geojson.json`
+    const filename = `maproulette-${todoKey}-newline-delimited-geojson.json`
     const optionalDownloadHeader =
       download === true
         ? { 'Content-Disposition': `attachment; filename="${filename}"` }

@@ -1,5 +1,5 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
-import { todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { todoKeys } from '@/src/data/processingTypes/todoKeys.const'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { GeoJsonProperties } from 'geojson'
 import { MapGeoJSONFeature } from 'react-map-gl/maplibre'
@@ -32,12 +32,12 @@ export const NoticeMaproulette = ({
   // This is how we store todos on `bikelanes`, `roads`
   const todosKeyFromTodoTag = todoMarkdownToMaprouletteCampaignKey(properties?.todos)
   // This is how we store todos on `todos_lines`
-  const todoKeysFromKeys = todoIds.filter((id) => Object.keys(properties).includes(id))
+  const todoKeysFromKeys = todoKeys.filter((id) => Object.keys(properties).includes(id))
   // When we are on `bikelanes`, `roads`, we only show some todos
-  const maprouletteProjectKeys =
+  const maprouletteTodoKeys =
     sourceId === 'atlas_todos_lines' ? todoKeysFromKeys : todosKeyFromTodoTag
 
-  if (!maprouletteProjectKeys.length || !osmTypeIdString || geometry?.type !== 'LineString') {
+  if (!maprouletteTodoKeys.length || !osmTypeIdString || geometry?.type !== 'LineString') {
     return null
   }
 
@@ -53,8 +53,8 @@ export const NoticeMaproulette = ({
       >
         <summary className="cursor-pointer hover:font-semibold">
           {/* NOTE: `maprouletteProjectKeys` is not ideal here because we might show viewer text block which is decided in the child component */}
-          Aufgabe{maprouletteProjectKeys.length > 1 ? 'n' : ''} zur Datenverbesserung (
-          {maprouletteProjectKeys.length})
+          Aufgabe{maprouletteTodoKeys.length > 1 ? 'n' : ''} zur Datenverbesserung (
+          {maprouletteTodoKeys.length})
         </summary>
 
         {showOsmEditWarning && (
@@ -72,11 +72,11 @@ export const NoticeMaproulette = ({
         )}
 
         <div className="my-0 ml-3">
-          {maprouletteProjectKeys.map((projectKey) => {
+          {maprouletteTodoKeys.map((todoKey) => {
             return (
               <NoticeMaprouletteTask
-                key={projectKey}
-                projectKey={projectKey}
+                key={todoKey}
+                todoKey={todoKey}
                 osmTypeIdString={osmTypeIdString}
                 kind={kind}
                 properties={properties}

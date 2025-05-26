@@ -8,7 +8,7 @@ BikelaneTodo.__index = BikelaneTodo
 -- @param args table
 -- @param args.id string
 -- @param args.desc string
--- @param args.todoTableOnly boolean
+-- @param args.todoTableOnly boolean -- If true, hidden from Inspector; If false, visible in Inspector and Campaigns
 -- @param args.conditions function
 function BikelaneTodo.new(args)
   local self = setmetatable({}, BikelaneTodo)
@@ -249,9 +249,29 @@ local missing_width = BikelaneTodo.new({
   id = "missing_width",
   desc = "Ways without `width`",
   todoTableOnly = true,
+  priority =  function(_, resultTags)
+    if resultTags.surface == 'sett' then return "1" end
+    if resultTags.surface ~= nil then return "2" end
+    return "3"
+  end,
+  conditions = function(_, resultTags)
+    return resultTags.width == nil
+      and resultTags.category ~= 'cyclwayLink'
+      and resultTags.category ~= 'crossing'
+      and resultTags.category ~= 'pedestrianAreaBicycleYes'
+      and resultTags.category ~= 'needsClarification'
+      and not ContainsSubstring(resultTags.category, 'cyclewayOnHighway')
+      and not ContainsSubstring(resultTags.category, 'sharedBusLane')
+  end
+})
+local missing_width_surface_sett = BikelaneTodo.new({
+  id = "missing_width_surface_sett",
+  desc = "Ways without `width` but `surface=sett`",
+  todoTableOnly = true,
   priority = function(_, _) return "1" end,
   conditions = function(_, resultTags)
     return resultTags.width == nil
+      and resultTags.surface == 'sett' -- When surface=sett, one can count the stones to get the width
       and resultTags.category ~= 'cyclwayLink'
       and resultTags.category ~= 'crossing'
       and resultTags.category ~= 'pedestrianAreaBicycleYes'
@@ -276,7 +296,6 @@ local missing_surface = BikelaneTodo.new({
       and not ContainsSubstring(resultTags.category, 'sharedBusLane')
   end
 })
-
 local missing_oneway = BikelaneTodo.new({
   id = "missing_oneway",
   desc = "Ways without explicit `oneway`",
@@ -320,6 +339,7 @@ BikelaneTodos = {
   -- Other
   currentness_too_old,
   missing_width,
+  missing_width_surface_sett,
   missing_surface,
   missing_oneway,
 }

@@ -2,6 +2,7 @@ import { CampaignType } from '../schema/campaignsSchema'
 
 export const adjoining_or_isolated: CampaignType = {
   id: 'adjoining_or_isolated',
+  todoKey: 'adjoining_or_isolated',
   title: 'Straßenbegleitend oder selbstständig geführt?',
   pubDate: new Date('2025-01-01T15:00'),
   category: 'radinfra',

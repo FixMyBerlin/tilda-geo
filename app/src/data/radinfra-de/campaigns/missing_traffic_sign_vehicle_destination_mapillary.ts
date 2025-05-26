@@ -1,23 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_traffic_sign_vehicle_destination: CampaignType = {
-  id: 'missing_traffic_sign_vehicle_destination',
+export const missing_traffic_sign_vehicle_destination_mapillary: CampaignType = {
+  id: 'missing_traffic_sign_vehicle_destination_mapillary',
   todoKey: 'missing_traffic_sign_vehicle_destination',
-  title: 'Ergänze das Verkehrszeichen »Anlieger frei«',
-  pubDate: new Date('2024-10-01T15:00'),
+  title: 'Ergänze das Verkehrszeichen »Anlieger frei« (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
-    'Diese Kampagne enthält Fahrradstraßen mit der Freigabe »Anlieger frei« für Kfz. Es fehlt jedoch das zugehörige Zusatzzeichen.',
+    'Diese Kampagne enthält Fahrradstraßen mit der Freigabe »Anlieger frei« für Kfz. Es fehlt jedoch das zugehörige Zusatzzeichen. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder korrigiere den Zugangs-Tag`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.4funno.f6&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: 49363,
+    // id: ,
     checkinComment: 'Verkehrszeichen und access-Tagging vereinheitlicht.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
+    filterMapillary: 'pano_regular',
   },
   taskTemplate: `
 Dieser Weg ist als Fahrradstraße mit Freigabe für Kfz getaggt, **jedoch fehlt der zugehörige Verkehrszeichen-Tag (Zusatzzeichen).**

@@ -1,18 +1,24 @@
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_traffic_sign: CampaignType = {
-  id: 'missing_traffic_sign',
+export const missing_traffic_sign_mapillary: CampaignType = {
+  id: 'missing_traffic_sign_mapillary',
   todoKey: 'missing_traffic_sign',
-  title: 'Ergänze das Verkehrszeichen der Radinfrastruktur',
-  pubDate: new Date('2025-01-01T15:00'),
+  title: 'Ergänze das Verkehrszeichen der Radinfrastruktur (Mapillary)',
+  pubDate: new Date('2025-05-26T15:00'),
   category: 'traffic_signs',
-  recommendedAction: 'map',
-  visibility: 'hidden',
-  description: 'Diese Karte enthält Radinfrastruktur der ein Verkehrszeichen-Tag fehlt.',
+  recommendedAction: 'maproulette',
+  visibility: 'secondary',
+  description:
+    'Diese Karte enthält Radinfrastruktur der ein Verkehrszeichen-Tag fehlt. Zudem sind nur Wege enthalten, für die Mapillary-Straßenfotos verfügbar sind.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder ein explizites `traffic_sign=none`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.13zkn8.f6&v=2',
   maprouletteChallenge: {
-    enabled: false,
+    enabled: true,
+    // id: ,
+    checkinComment: 'Angabe zur Beschilderung ergänzt.',
+    checkinSource: 'radinfra_de',
+    resultsLimited: false,
+    filterMapillary: 'pano',
   },
   taskTemplate: `
 Für diese Infrastruktur ist kein Verkehrszeichen-Tag hinterlegt. Gerade für Fuß- und Fahrrad-Infrastruktur ist es sehr hilfreich, das Verkehrszeichen explizit zu erfassen.
