@@ -26,6 +26,8 @@ require("ToTodoTags")
 require("BikeSuitability")
 require("Log")
 local round = require('round')
+local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
+local mapillary_coverage = require('mapillary_coverage')
 
 local roadsTable = osm2pgsql.define_table({
   name = 'roads',
@@ -130,6 +132,9 @@ local todoLiniesTable = osm2pgsql.define_table({
 })
 
 
+-- ====== (B.1) Prepare pseudo tags ======
+local mapillary_coverage_data = load_csv_mapillary_coverage()
+
 function osm2pgsql.process_way(object)
   local tags = object.tags
 
@@ -146,7 +151,11 @@ function osm2pgsql.process_way(object)
   -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
   if tags.area == 'yes' then return end
 
-  -- ====== (B) General conversions ======
+  -- ====== (B.1) Initialize and apply pseudo tags ======
+  local mapillary_coverage_lines = mapillary_coverage_data:get()
+  object.tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
+
+  -- ====== (B.2) General conversions ======
   ConvertCyclewayOppositeSchema(tags)
   -- Calculate and format length, see also https://github.com/osm2pgsql-dev/osm2pgsql/discussions/1756#discussioncomment-3614364
   -- Use https://epsg.io/5243 (same as `presenceStats.sql`); update `atlas_roads--length--tooltip` if changed.
