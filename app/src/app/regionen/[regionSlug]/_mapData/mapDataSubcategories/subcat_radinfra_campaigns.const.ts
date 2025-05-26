@@ -1,5 +1,4 @@
 import { mapillaryCoverageDateString } from '@/src/data/mapillaryCoverage.const'
-import { TodoKey, todoKeys } from '@/src/data/processingTypes/todoKeys.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { campaignCategorySelect } from '@/src/data/radinfra-de/schema/utils/campaignCategorySelect'
 import { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
@@ -10,7 +9,7 @@ const subcatId = 'campaigns'
 const source = 'atlas_todos_lines'
 const sourceLayer = 'todos_lines'
 export type SubcatRadinfraCampaignId = typeof subcatId
-export type SubcatRadinfraCampaignStyleIds = 'default' | TodoKey
+export type SubcatRadinfraCampaignStyleIds = 'default' | string
 
 export const campaignLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
@@ -50,25 +49,22 @@ export const subcat_radinfra_campaigns: FileMapDataSubcategory = {
       }),
       legends: campaignLegend,
     },
-    // NOTE: We still iterate over the generated campaign ids here.
-    // This way we only show what the data really has.
-    // And we also show unfinished campaigns that don't have text, yet.
-    ...todoKeys.map((todoId) => {
-      const campaign = campaigns.find((c) => c.todoKey === todoId)
+    ...campaigns.map((campaign) => {
+      const todoKey = campaign.todoKey
       const category = campaignCategorySelect.find(
         (entry) => entry.value === campaign?.category,
       )?.label
 
       return {
-        id: todoId,
-        name: campaign?.title || `${todoId} (in Arbeit)`,
+        id: campaign.id,
+        name: campaign.title,
         category: category || 'In Vorbereitung',
         desc: null,
         layers: mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_radinfra_campaign,
           source,
           sourceLayer,
-          additionalFilter: ['has', todoId],
+          additionalFilter: ['has', todoKey],
         }),
         legends: campaignLegend,
       }

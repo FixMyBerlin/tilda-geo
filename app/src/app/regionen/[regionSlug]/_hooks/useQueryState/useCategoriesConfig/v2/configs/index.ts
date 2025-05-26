@@ -5,6 +5,7 @@ import { _14zbfci } from './_14zbfci'
 import { _166cmie } from './_166cmie'
 import { _17dmq3y } from './_17dmq3y'
 import { _1874z8l } from './_1874z8l'
+import { _19iytj7 } from './_19iytj7'
 import { _19sklui } from './_19sklui'
 import { _1cjo3ur } from './_1cjo3ur'
 import { _1d3t4i0 } from './_1d3t4i0'
@@ -13,6 +14,7 @@ import { _1e6163i } from './_1e6163i'
 import { _1gk36d0 } from './_1gk36d0'
 import { _1j7ax4m } from './_1j7ax4m'
 import { _1k7izoy } from './_1k7izoy'
+import { _1kpi1ep } from './_1kpi1ep'
 import { _1lhd7a } from './_1lhd7a'
 import { _1ljsnj0 } from './_1ljsnj0'
 import { _1ops5da } from './_1ops5da'
@@ -50,6 +52,7 @@ export const configs = {
   '166cmie': _166cmie,
   '17dmq3y': _17dmq3y,
   '1874z8l': _1874z8l,
+  '19iytj7': _19iytj7,
   '19sklui': _19sklui,
   '1cjo3ur': _1cjo3ur,
   '1d3t4i0': _1d3t4i0,
@@ -58,6 +61,7 @@ export const configs = {
   '1gk36d0': _1gk36d0,
   '1j7ax4m': _1j7ax4m,
   '1k7izoy': _1k7izoy,
+  '1kpi1ep': _1kpi1ep,
   '1lhd7a': _1lhd7a,
   '1ljsnj0': _1ljsnj0,
   '1ops5da': _1ops5da,
