@@ -10,6 +10,7 @@ applyTo: '**/*.lua'
   - `busted` is our testing framework https://lunarmodules.github.io/busted/
   - `inspect` is to print / inspect tables https://github.com/kikito/inspect.lua — our own helper around that is called `Log(object, 'logging prefix')`
   - `penlight` is to add python like helpers to lua https://lunarmodules.github.io/Penlight/
+  - `ftcsv` is to read CSV files https://github.com/FourierTransformer/ftcsv, https://luarocks.org/modules/fouriertransformer/ftcsv
   - We can add more helpers if this makes our code cleaner; make a suggestion if that applies.
 - We use camel_case for our file names and functions and variables.
   - However, there are legacy functions that are still using MixedCase. Don't change this during an unrelated edit.
