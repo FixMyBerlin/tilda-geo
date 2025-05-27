@@ -4,6 +4,7 @@ import { initializeCustomFunctionsDataTables, initializeSchemaData } from '../da
 import { initializeCustomFunctionDiffing, initializeSchemaBackup } from '../diffing/diffing'
 import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
 import { initializeLuaPackagePath } from '../utils/initializeLuaPackagePath'
+import { isDev } from '../utils/isDev'
 import { initializeMetadataTable } from './metadata'
 
 /** Initialize Folder, Schema, Custom SQL Functions, Tables */
@@ -12,6 +13,12 @@ export async function initialize() {
 
   await sql`CREATE EXTENSION IF NOT EXISTS postgis`
   await sql`CREATE EXTENSION IF NOT EXISTS pgRouting`
+
+  // Check lua packages:
+  if (isDev) {
+    console.log('[DEV] Installed Lua Packages:')
+    await $`luarocks list`
+  }
 
   // See ./diffing
   await initializeSchemaBackup()

@@ -68,13 +68,3 @@ WHERE
     WHERE
       rn % 2 = 0
   );
-
--- TASK: Copy Mapillary Coverage Tags to tables
--- ====================
-DO $$
-BEGIN
-  PERFORM copy_mapillary_coverage_tags ('public."todos_lines"');
-  PERFORM copy_mapillary_coverage_tags ('public."bikelanes"');
-  PERFORM copy_mapillary_coverage_tags ('public."roads"');
-  PERFORM copy_mapillary_coverage_tags ('public."roadsPathClasses"');
-END $$;

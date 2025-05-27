@@ -26,6 +26,7 @@ require("ToTodoTags")
 require("BikeSuitability")
 require("Log")
 local round = require('round')
+local mapillary_coverage = require('mapillary_coverage')
 
 local roadsTable = osm2pgsql.define_table({
   name = 'roads',
@@ -170,6 +171,7 @@ function osm2pgsql.process_way(object)
     name = results.name,
     length = length,
     road = results.road,
+    mapillary_coverage = mapillary_coverage(object.id)
   }
   for _, cycleway in ipairs(cycleways) do
     if cycleway._infrastructureExists then
