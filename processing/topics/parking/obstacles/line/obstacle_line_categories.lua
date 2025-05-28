@@ -7,13 +7,13 @@ local TAG_HELPER = require('tag_helper')
 
 obstacle_line_categories = {
   class_obstacle_category.new({
-    id = 'kerb_lowered', -- https://www.openstreetmap.org/way/814637433
+    id = 'kerb_driveway', -- https://www.openstreetmap.org/way/814637433
     side_schema = nil,
     side_key = nil,
     perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
-      return tags.barrier == 'kerb' and tags.kerb == 'lowered'
+      return tags.barrier == 'kerb' and (tags.kerb == 'lowered' or tags.kerb == 'flush')
     end,
     tags = function(tags) return {
       barrier = tags.barrier,
