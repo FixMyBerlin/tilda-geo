@@ -1,6 +1,6 @@
 -- We have a table data.mapillary_coverage which we update manually.
 -- On every run, we copy the latest data from that table to some of our user facing tables.
--- For now, we add those mapillary_* keys to the tags column.
+-- For now, we add those mapillary_* keys to the `meta` column.
 --
 CREATE OR REPLACE FUNCTION copy_mapillary_coverage_tags (target_table text) RETURNS void AS $$
 BEGIN
@@ -10,11 +10,11 @@ BEGIN
     WHERE table_schema = 'data'
       AND table_name = 'mapillary_coverage'
   ) THEN
-        -- Dynamic SQL to update the passed table
+    -- Dynamic SQL to update the passed table
     EXECUTE format(
       'UPDATE %s t
-       SET tags = jsonb_set(
-         COALESCE(t.tags, ''{}''),
+       SET meta = jsonb_set(
+         COALESCE(t.meta, ''{}''),
          ''{mapillary_coverage}'',
          to_jsonb(m.mapillary_coverage)
        )
@@ -23,6 +23,7 @@ BEGIN
       target_table
     );
   ELSE
+  --
     RAISE NOTICE 'Skipped: data.mapillary_coverage does not exist';
   END IF;
 
