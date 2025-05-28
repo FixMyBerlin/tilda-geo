@@ -13,23 +13,43 @@ export const bikelaneTodoIdsTableAndField = [
   'needs_clarification',
   'needs_clarification_track',
   'unexpected_bicycle_access_on_footway',
+  // (prettier: one line per entry)
 ] as const
 export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
 
 export const bikelaneTodoIdsTableOnly = [
+  'advisory_or_exclusive__mapillary',
   'currentness_too_old',
+  'currentness_too_old__mapillary',
   'malformed_traffic_sign',
+  'malformed_traffic_sign__mapillary',
+  'missing_oneway__mapillary',
+  'missing_segregated__mapillary',
   'missing_surface',
+  'missing_surface__mapillary',
   'missing_traffic_sign',
   'missing_traffic_sign_244',
+  'missing_traffic_sign_244__mapillary',
+  'missing_traffic_sign__mapillary',
   'missing_traffic_sign_vehicle_destination',
   'missing_width',
   'missing_width_surface_sett__mapillary',
+  'mixed_cycleway_both__mapillary',
+  'needs_clarification__mapillary',
+  'needs_clarification_track__mapillary',
+  'unexpected_bicycle_access_on_footway__mapillary',
+  // (prettier: one line per entry)
 ] as const
 export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
-export const roadTodoIdsTableAndField = ['deprecated_cycleway_shared'] as const
+export const roadTodoIdsTableAndField = [
+  'deprecated_cycleway_shared',
+  'deprecated_cycleway_shared__mapillary',
+  // (prettier: one line per entry)
+] as const
 export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
 
-export const roadTodoIdsTableOnly = [] as const
+export const roadTodoIdsTableOnly = [
+  // (prettier: one line per entry)
+] as const
 export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
