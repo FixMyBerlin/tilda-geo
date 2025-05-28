@@ -305,4 +305,17 @@ obstacle_point_categories = {
     tags_cc = {},
     apply_parking_capacity_fallback = false,
   }),
+  class_obstacle_category.new({
+    id = 'vending_parking_tickets',
+    side_schema = nil,
+    side_key = nil,
+    perform_snap = 'self',
+    perform_buffer = function(tags) return 1 end,
+    conditions = function(tags)
+      return TAG_HELPER.is_obstacle_parking(tags) and tags.amenity == 'vending_machine'
+    end,
+    tags = function(tags) return { amenity = tags.amenity } end,
+    tags_cc = { 'vending', 'zone' },
+    apply_parking_capacity_fallback = false,
+  }),
 }
