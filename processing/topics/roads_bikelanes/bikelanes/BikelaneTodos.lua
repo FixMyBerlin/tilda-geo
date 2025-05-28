@@ -8,7 +8,7 @@ BikelaneTodo.__index = BikelaneTodo
 -- @param args table
 -- @param args.id string
 -- @param args.desc string
--- @param args.todoTableOnly boolean
+-- @param args.todoTableOnly boolean -- If true: hidden from Inspector; If false: visible in Inspector and Campaign-Dropdown
 -- @param args.conditions function
 function BikelaneTodo.new(args)
   local self = setmetatable({}, BikelaneTodo)
@@ -246,12 +246,32 @@ local currentness_too_old = BikelaneTodo.new({
   end
 })
 local missing_width = BikelaneTodo.new({
-  id = "missing_width",
-  desc = "Ways without `width`",
+  id = 'missing_width',
+  desc = 'Ways without `width`',
   todoTableOnly = true,
-  priority = function(_, _) return "1" end,
+  priority =  function(_, resultTags)
+    if resultTags.surface == 'sett' then return '1' end
+    if resultTags.surface ~= nil then return '2' end
+    return '3'
+  end,
   conditions = function(_, resultTags)
     return resultTags.width == nil
+      and resultTags.category ~= 'cyclwayLink'
+      and resultTags.category ~= 'crossing'
+      and resultTags.category ~= 'pedestrianAreaBicycleYes'
+      and resultTags.category ~= 'needsClarification'
+      and not ContainsSubstring(resultTags.category, 'cyclewayOnHighway')
+      and not ContainsSubstring(resultTags.category, 'sharedBusLane')
+  end
+})
+local missing_width_surface_sett__mapillary = BikelaneTodo.new({
+  id = 'missing_width_surface_sett__mapillary',
+  desc = 'Ways without `width` but `surface=sett` to count stones',
+  todoTableOnly = true,
+  priority = function(_, _) return '1' end,
+  conditions = function(_, resultTags)
+    return resultTags.width == nil
+      and resultTags.surface == 'sett' -- When surface=sett, one can count the stones to get the width
       and resultTags.category ~= 'cyclwayLink'
       and resultTags.category ~= 'crossing'
       and resultTags.category ~= 'pedestrianAreaBicycleYes'
@@ -319,6 +339,7 @@ BikelaneTodos = {
   unexpected_bicycle_access_on_footway,
   -- Other
   currentness_too_old,
+  missing_width_surface_sett__mapillary,
   missing_width,
   missing_surface,
   missing_oneway,

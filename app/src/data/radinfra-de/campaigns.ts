@@ -12,6 +12,7 @@ import { missing_traffic_sign } from './campaigns/missing_traffic_sign'
 import { missing_traffic_sign_244 } from './campaigns/missing_traffic_sign_244'
 import { missing_traffic_sign_vehicle_destination } from './campaigns/missing_traffic_sign_vehicle_destination'
 import { missing_width } from './campaigns/missing_width'
+import { missing_width_surface_sett__mapillary } from './campaigns/missing_width_surface_sett__mapillary'
 import { mixed_cycleway_both } from './campaigns/mixed_cycleway_both'
 import { needs_clarification } from './campaigns/needs_clarification'
 import { needs_clarification_track } from './campaigns/needs_clarification_track'
@@ -35,6 +36,7 @@ const rawCampaigns = [
   missing_traffic_sign,
   missing_traffic_sign_244,
   missing_traffic_sign_vehicle_destination,
+  missing_width_surface_sett__mapillary,
   missing_width,
   deprecated_cycleway_shared,
   missing_oneway,

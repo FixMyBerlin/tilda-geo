@@ -24,6 +24,7 @@ export const bikelaneTodoIdsTableOnly = [
   'missing_traffic_sign_244',
   'missing_traffic_sign_vehicle_destination',
   'missing_width',
+  'missing_width_surface_sett__mapillary',
 ] as const
 export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
