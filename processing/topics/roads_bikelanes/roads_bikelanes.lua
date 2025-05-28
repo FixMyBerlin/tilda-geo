@@ -152,7 +152,7 @@ function osm2pgsql.process_way(object)
   if tags.area == 'yes' then return end
 
   -- ====== (B.1) Initialize pseudo tags ======
-  local mapillary_coverage_rows = mapillary_coverage_data:get()
+  local mapillary_coverage_lines = mapillary_coverage_data:get()
 
   -- ====== (B.2) General conversions ======
   ConvertCyclewayOppositeSchema(tags)
@@ -178,7 +178,7 @@ function osm2pgsql.process_way(object)
     name = results.name,
     length = length,
     road = results.road,
-    mapillary_coverage = mapillary_coverage(mapillary_coverage_rows, object.id)
+    mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
   }
   for _, cycleway in ipairs(cycleways) do
     if cycleway._infrastructureExists then

@@ -2,23 +2,40 @@ require('init')
 local ftcsv = require('ftcsv')
 local pl_path = require('pl.path')
 require('Log')
+local inspect = require('inspect')
 
 -- Generic CSV loader that returns the full parsed table, cached
 local function load_csv(csv_path)
-  local cache = nil
+  local cached_lines = nil
 
   return {
     get = function(self)
-      local start = os.time()
-      if cache then return cache end
+      local log_start = os.time()
+      if cached_lines then return cached_lines end
+
       if not pl_path.exists(csv_path) then
         Log('ERROR: CSV file not found: ' .. csv_path, 'csv_lookup')
-        cache = {}
-        return cache
+        cached_lines = {}
+        return cached_lines
       end
-      cache = ftcsv.parse(csv_path)
-      print('CSV: File cached (' .. os.difftime(os.time(), start) .. 's, '..#cache..' rows) '..csv_path)
-      return cache
+
+      -- `rows` format: { { osm_id = "123", mapillary_coverage = "value" },… }
+      rows = ftcsv.parse(csv_path)
+
+      -- Transform the data into a hash map for quick lookup
+      -- `cached_lines` format: { [123] => { mapillary_coverage = "value" },… }
+      cached_lines = cached_lines or {}
+      for _, row in ipairs(rows) do
+        local id = tonumber(row['osm_id'])
+        if id then
+          cached_lines[id] = row
+          cached_lines[id]['osm_id'] = nil -- cleanup
+        end
+      end
+
+      print('CSV: File cached (' .. os.difftime(os.time(), log_start) .. 's, ' .. #cached_lines .. ' rows) ' .. csv_path .. ' — Example: ' .. inspect(cached_lines[1]))
+
+      return cached_lines
     end,
   }
 end
