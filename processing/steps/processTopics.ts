@@ -31,7 +31,7 @@ async function runSQL(topic: Topic) {
   if (exists) {
     try {
       console.time(`Running SQL ${psqlFile}`)
-      await $`psql -q -f ${psqlFile}`
+      await $`psql -v ON_ERROR_STOP=1 -q -f ${psqlFile}`
       console.timeEnd(`Running SQL ${psqlFile}`)
     } catch (error) {
       throw new Error(`Failed to run SQL file "${psqlFile}": ${error}`)
