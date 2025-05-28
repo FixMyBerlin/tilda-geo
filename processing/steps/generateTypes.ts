@@ -74,16 +74,24 @@ async function writeTodoIdTypes() {
     .map((e) => e.id)
 
   const fileContent = `
-  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
+  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
 
-  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
+  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
-  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
+  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
 
-  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
+  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
   `
 
