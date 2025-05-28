@@ -18,6 +18,8 @@
 -- * KERBS
 \i '/processing/topics/parking/custom_functions/kerb_tangent.sql'
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
+\i '/processing/topics/parking/custom_functions/cut_kerb_at_corner.sql'
+
 -- * INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/intersection_angle.sql'
 \i '/processing/topics/parking/custom_functions/get_intersection_corners.sql'
@@ -30,6 +32,8 @@
 \i '/processing/topics/parking/roads/5_find_intersection_corners.sql'
 \i '/processing/topics/parking/roads/6_find_driveways.sql'
 \i '/processing/topics/parking/roads/7_build_graph.sql'
+\i '/processing/topics/parking/roads/8_cut_kerbs.sql'
+
 
 -- HANDLE OBSTACLES
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'
