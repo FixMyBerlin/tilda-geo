@@ -29,6 +29,7 @@
 \i '/processing/topics/parking/roads/4_find_intersections.sql'
 \i '/processing/topics/parking/roads/5_find_intersection_corners.sql'
 \i '/processing/topics/parking/roads/6_find_driveways.sql'
+\i '/processing/topics/parking/roads/7_build_graph.sql'
 
 -- HANDLE OBSTACLES
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'
