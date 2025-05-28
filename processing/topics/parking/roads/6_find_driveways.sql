@@ -13,7 +13,7 @@ FROM
   JOIN _parking_intersections i ON nrm.node_id = i.node_id
 WHERE
   i.driveway_degree > 0
-  AND i.degree <> i.driveway_degree
+  AND i.road_degree > 1
   AND r.is_driveway;
 
 -- SHORTEN the driveway

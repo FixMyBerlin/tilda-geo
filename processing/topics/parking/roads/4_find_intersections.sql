@@ -14,7 +14,12 @@ WITH
   intersections AS (
     SELECT
       nrm.node_id,
-      SUM(1 + (NOT is_terminal_node)::INT) AS degree,
+      SUM(
+        (NOT is_driveway)::INT + (
+          NOT is_terminal_node
+          AND NOT is_driveway
+        )::INT
+      ) AS road_degree,
       SUM(
         is_driveway::INT + (
           NOT is_terminal_node
@@ -31,8 +36,9 @@ WITH
   )
 SELECT
   i.node_id,
-  i.degree,
+  i.road_degree,
   i.driveway_degree,
+  i.road_degree + i.driveway_degree AS total_degree,
   ST_PointN (road.geom, nrm.idx) AS geom
   --
   INTO _parking_intersections
@@ -42,7 +48,7 @@ FROM
   AND i.node_id = nrm.node_id
   JOIN _parking_roads road ON road.osm_id = nrm.way_id
 WHERE
-  i.degree > 2;
+  i.road_degree + i.driveway_degree > 2;
 
 -- MISC
 ALTER TABLE _parking_intersections

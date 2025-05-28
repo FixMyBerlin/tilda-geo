@@ -5,7 +5,9 @@ DROP TABLE IF EXISTS _parking_intersection_corners;
 -- find the intersection points of the kerbs
 SELECT
   i.node_id as intersection_id,
-  i.degree,
+  i.road_degree,
+  i.driveway_degree,
+  i.total_degree,
   corners as geom
   --
   INTO _parking_intersection_corners
@@ -13,7 +15,7 @@ FROM
   _parking_intersections as i
   CROSS JOIN LATERAL find_intersection_corners (i.node_id, 140) AS corners
 WHERE
-  i.driveway_degree = 0;
+  i.road_degree > 2;
 
 -- CLEANUP
 ALTER TABLE _parking_intersection_corners
