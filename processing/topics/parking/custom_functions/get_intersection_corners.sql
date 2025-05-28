@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
   intersection GEOMETRY,
-  is_driveway BOOLEAN,
+  has_driveway BOOLEAN,
+  has_road BOOLEAN,
   kerb1_id BIGINT,
   kerb2_id BIGINT
 ) AS $$
@@ -27,7 +28,8 @@ BEGIN
   kerb_pairs AS (
     SELECT
       ST_Intersection(kerb1.geom, kerb2.geom) AS geom,
-      kerb1.is_driveway OR kerb2.is_driveway as is_drievway,
+      kerb1.is_driveway OR kerb2.is_driveway as has_driveway,
+      NOT kerb1.is_driveway OR NOT kerb2.is_driveway as has_road,
       kerb1.id as kerb1_id,
       kerb2.id as kerb2_id
     FROM road_pairs rp

@@ -19,7 +19,8 @@ SELECT
 FROM
   _parking_intersection_corners
 WHERE
-  NOT is_driveway;
+  NOT has_driveway
+  AND has_road;
 
 -- INSERT driveway buffers (rectangles)
 INSERT INTO
