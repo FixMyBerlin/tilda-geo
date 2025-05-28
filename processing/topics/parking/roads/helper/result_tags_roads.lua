@@ -27,8 +27,8 @@ function result_tags_roads(object)
     width_source = width_source,
     -- NOTE: In the future we might want to also check `placement`
     -- (More about `placement` in https://strassenraumkarte.osm-berlin.org/posts/2021-12-31-micromap-update)
-    perform_offset_left = width / 2 * -1,
-    perform_offset_right = width / 2,
+    perform_offset_left = width / 2 ,
+    perform_offset_right = -(width / 2),
   }
 
   local tags_cc = {
