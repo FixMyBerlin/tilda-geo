@@ -9,6 +9,8 @@ SELECT
   i.road_degree,
   i.driveway_degree,
   i.total_degree,
+  corner.kerb1_id,
+  corner.kerb2_id,
   corner.is_driveway,
   corner.intersection as geom INTO _parking_intersection_corners
 FROM

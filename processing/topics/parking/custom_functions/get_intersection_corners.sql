@@ -1,4 +1,9 @@
-CREATE OR REPLACE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (intersection GEOMETRY, is_driveway BOOLEAN) AS $$
+CREATE OR REPLACE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
+  intersection GEOMETRY,
+  is_driveway BOOLEAN,
+  kerb1_id BIGINT,
+  kerb2_id BIGINT
+) AS $$
 BEGIN
   RETURN QUERY
   -- get the ways that are connected to the intersection
@@ -22,7 +27,9 @@ BEGIN
   kerb_pairs AS (
     SELECT
       ST_Intersection(kerb1.geom, kerb2.geom) AS geom,
-      kerb1.is_driveway OR kerb2.is_driveway as is_drievway
+      kerb1.is_driveway OR kerb2.is_driveway as is_drievway,
+      kerb1.id as kerb1_id,
+      kerb2.id as kerb2_id
     FROM road_pairs rp
     JOIN _parking_kerbs kerb1 ON kerb1.osm_id = rp.road_id1
     JOIN _parking_kerbs kerb2 ON kerb2.osm_id = rp.road_id2
