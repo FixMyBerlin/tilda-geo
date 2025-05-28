@@ -23,6 +23,12 @@ FROM
       )
   ) AS kerb_sides ("side", "offset");
 
+UPDATE _parking_kerbs
+SET
+  geom = ST_Reverse (geom)
+WHERE
+  side = 'right';
+
 ALTER TABLE _parking_kerbs
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
