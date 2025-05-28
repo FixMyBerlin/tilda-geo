@@ -57,7 +57,7 @@ SELECT
     (tags ->> 'perform_buffer')::float,
     'endcap=flat'
   ) as geom,
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'size', (tags ->> 'perform_buffer')::float,
     'category', 'crossing'
