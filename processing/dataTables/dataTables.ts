@@ -7,5 +7,6 @@ export async function initializeSchemaData() {
 
 export async function initializeCustomFunctionsDataTables() {
   await $`psql -q -f ./dataTables/copy_mapillary_coverage_tags.sql`
+  await $`psql -q -f ./dataTables/delete_todos_lines_without_mapillary_coverage.sql`
   return true
 }
