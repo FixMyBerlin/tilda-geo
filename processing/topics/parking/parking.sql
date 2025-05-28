@@ -38,5 +38,8 @@
 \i '/processing/topics/parking/obstacles/1_points_locate_on_kerb.sql'
 \i '/processing/topics/parking/obstacles/2_points_create_kerb_tangents.sql'
 
+-- HANDLE PARKINGS
+\i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
+
 -- CREATE PUNCHING AREAS
 \i '/processing/topics/parking/punching_areas.sql'
