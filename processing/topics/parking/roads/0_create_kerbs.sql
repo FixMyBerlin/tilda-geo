@@ -1,33 +1,28 @@
 DROP TABLE IF EXISTS _parking_kerbs;
 
 SELECT
-  ROW_NUMBER() OVER () as id,
+  ROW_NUMBER() OVER () AS id,
+  ST_OffsetCurve (geom, kerb_sides.offset) AS geom,
   kerb_sides.side,
-  kerb_sides.geom,
+  kerb_sides.offset,
   osm_type,
   osm_id,
-  tags ->> 'name' as street_name,
+  tags ->> 'name' AS street_name,
   is_parking,
   is_driveway,
   tags,
-  meta
-  --
-  INTO _parking_kerbs
+  meta INTO _parking_kerbs
 FROM
   _parking_roads
   CROSS JOIN LATERAL (
     VALUES
-      (
-        'left',
-        ST_OffsetCurve (geom, (tags ->> 'perform_offset_left')::numeric)
-      ),
+      ('left', (tags ->> 'perform_offset_left')::numeric),
       (
         'right',
-        ST_OffsetCurve (geom, (tags ->> 'perform_offset_right')::numeric)
+        (tags ->> 'perform_offset_right')::numeric
       )
-  ) AS kerb_sides (side, geom);
+  ) AS kerb_sides ("side", "offset");
 
---
 ALTER TABLE _parking_kerbs
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

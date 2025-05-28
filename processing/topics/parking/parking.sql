@@ -37,6 +37,7 @@
 \i '/processing/topics/parking/obstacles/0_points_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/1_points_locate_on_road.sql'
 \i '/processing/topics/parking/obstacles/2_points_create_kerb_tangents.sql'
+\i '/processing/topics/parking/obstacles/3_points_create_crossings.sql'
 
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'

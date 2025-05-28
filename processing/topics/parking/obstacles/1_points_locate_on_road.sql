@@ -1,8 +1,8 @@
 -- PREPARE
 DROP TABLE IF EXISTS _parking_obstacle_points_located;
 
-SELECT DISTINCT
-  ON (nrm.node_id) nrm.idx,
+SELECT
+  nrm.idx,
   nrm.way_id,
   p.osm_id,
   p.osm_type,
