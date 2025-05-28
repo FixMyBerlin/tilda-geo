@@ -68,6 +68,23 @@ SELECT
 FROM
   _parking_crossings;
 
+-- INSERT driveway buffers (rectangles)
+INSERT INTO
+  _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
+SELECT
+  id::TEXT,
+  osm_id as id,
+  ST_Buffer (geom, (tags ->> 'perform_buffer')::float) as geom,
+  tags || jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', 'obstacle'
+    /* sql-formatter-enable */
+  ) AS tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
+  0 AS minzoom
+FROM
+  _parking_obstacle_points_projected;
+
 -- MISC
 ALTER TABLE _parking_punching_areas
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
