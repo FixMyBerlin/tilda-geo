@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS _parking_punching_areas;
 -- INSERT driveway buffers (rectangles)
 -- @var: "5" is the buffer in meter where no parking is allowed legally
 SELECT
-  id,
-  intersection_id,
+  id::TEXT,
+  intersection_id as osm_id,
   ST_Buffer (geom, 5) as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
@@ -23,9 +23,10 @@ WHERE
 
 -- INSERT driveway buffers (rectangles)
 INSERT INTO
-  _parking_punching_areas (id, geom, tags, meta, minzoom)
+  _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
 SELECT
-  osm_id as id,
+  id::TEXT,
+  osm_id,
   ST_Buffer (
     geom,
     ((tags ->> 'width')::float / 2)::float,
@@ -44,6 +45,28 @@ SELECT
   0 AS minzoom
 FROM
   _parking_driveways;
+
+-- INSERT driveway buffers (rectangles)
+INSERT INTO
+  _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
+SELECT
+  id::TEXT,
+  osm_id as id,
+  ST_Buffer (
+    geom,
+    (tags ->> 'perform_buffer')::float,
+    'endcap=flat'
+  ) as geom,
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'size', (tags ->> 'perform_buffer')::float,
+    'category', 'crossing'
+    /* sql-formatter-enable */
+  ) AS tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
+  0 AS minzoom
+FROM
+  _parking_crossings;
 
 -- MISC
 ALTER TABLE _parking_punching_areas

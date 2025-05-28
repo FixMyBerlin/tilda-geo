@@ -17,8 +17,10 @@ $$ LANGUAGE plpgsql STABLE;
 DROP TABLE IF EXISTS _parking_crossings;
 
 SELECT
+  opl.id,
   opl.osm_id,
   opl.tags,
+  opl.meta,
   create_road_crossing (opl.way_id, opl.idx, k.offset * 1.1) as geom INTO _parking_crossings
 FROM
   _parking_obstacle_points_located opl
