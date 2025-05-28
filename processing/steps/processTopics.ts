@@ -1,6 +1,6 @@
 import { $ } from 'bun'
 import { join } from 'path'
-import { CONSTANTS_DIR, TOPIC_DIR } from '../constants/directories.const'
+import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { topicsConfig, type Topic } from '../constants/topics.const'
 import {
   backupTable,
@@ -95,16 +95,24 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   }
 
   // when the constants have changed we disable all diffing functionality
-  const constantsChanged = await directoryHasChanged(CONSTANTS_DIR)
+  const constantsDirChanged = await directoryHasChanged(CONSTANTS_DIR)
   updateDirectoryHash(CONSTANTS_DIR)
-  if (constantsChanged) {
-    console.log('ℹ️ Constants have changed. Rerunning all code.')
+  if (constantsDirChanged) {
+    console.log('ℹ️ processing/constants have changed. Rerunning all code.')
+  }
+
+  // when the constants have changed we disable all diffing functionality
+  const dataTablesDirChanged = await directoryHasChanged(DATA_TABLE_DIR)
+  updateDirectoryHash(DATA_TABLE_DIR)
+  if (dataTablesDirChanged) {
+    console.log('ℹ️ processing/dataTables have changed. Rerunning all code.')
   }
 
   const skipCode =
     params.skipUnchanged &&
     !helpersChanged &&
-    !constantsChanged &&
+    !constantsDirChanged &&
+    !dataTablesDirChanged &&
     !fileChanged &&
     params.processOnlyBbox !== null
   const diffChanges = params.computeDiffs && !fileChanged

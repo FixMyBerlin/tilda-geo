@@ -34,6 +34,11 @@ export const TOPIC_DIR = '/processing/topics'
 export const CONSTANTS_DIR = '/processing/constants'
 
 /**
+ * The path to the directory containing dataTable information.
+ */
+export const DATA_TABLE_DIR = '/processing/dataTables'
+
+/**
  * The file name for the id filtered OSM file.
  */
 export const ID_FILTERED_FILE = `id_filtered.osm.pbf`
