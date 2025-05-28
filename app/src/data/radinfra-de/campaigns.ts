@@ -16,7 +16,6 @@ import { missing_width_surface_sett__mapillary } from './campaigns/missing_width
 import { mixed_cycleway_both } from './campaigns/mixed_cycleway_both'
 import { needs_clarification } from './campaigns/needs_clarification'
 import { needs_clarification_track } from './campaigns/needs_clarification_track'
-import { test_maproulette_updates } from './campaigns/test_maproulette_updates'
 import { unexpected_bicycle_access_on_footway } from './campaigns/unexpected_bicycle_access_on_footway'
 import { CampaignSchema } from './schema/campaignsSchema'
 
@@ -56,4 +55,3 @@ const collectCampaigns = (rawCampaigns) => {
 }
 
 export const campaigns = collectCampaigns(rawCampaigns)
-export const campaignsIncludingTest = collectCampaigns([...rawCampaigns, test_maproulette_updates])
