@@ -32,6 +32,7 @@ export const bikelaneTodoIdsTableOnly = [
   'missing_traffic_sign_244__mapillary',
   'missing_traffic_sign__mapillary',
   'missing_traffic_sign_vehicle_destination',
+  'missing_traffic_sign_vehicle_destination__mapillary',
   'missing_width',
   'missing_width_surface_sett__mapillary',
   'mixed_cycleway_both__mapillary',
