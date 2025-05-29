@@ -12,6 +12,7 @@ import { _1dhu3si } from './_1dhu3si'
 import { _1e6163i } from './_1e6163i'
 import { _1gk36d0 } from './_1gk36d0'
 import { _1j7ax4m } from './_1j7ax4m'
+import { _1jfr013 } from './_1jfr013'
 import { _1k7izoy } from './_1k7izoy'
 import { _1lhd7a } from './_1lhd7a'
 import { _1ljsnj0 } from './_1ljsnj0'
@@ -25,6 +26,7 @@ import { _1swjsz2 } from './_1swjsz2'
 import { _1tdocms } from './_1tdocms'
 import { _1x5utcr } from './_1x5utcr'
 import { _1xgd8y8 } from './_1xgd8y8'
+import { _508ozp } from './_508ozp'
 import { _bv3m8i } from './_bv3m8i'
 import { _diykzs } from './_diykzs'
 import { _e6ilf4 } from './_e6ilf4'
@@ -57,6 +59,7 @@ export const configs = {
   '1e6163i': _1e6163i,
   '1gk36d0': _1gk36d0,
   '1j7ax4m': _1j7ax4m,
+  '1jfr013': _1jfr013,
   '1k7izoy': _1k7izoy,
   '1lhd7a': _1lhd7a,
   '1ljsnj0': _1ljsnj0,
@@ -70,6 +73,7 @@ export const configs = {
   '1tdocms': _1tdocms,
   '1x5utcr': _1x5utcr,
   '1xgd8y8': _1xgd8y8,
+  '508ozp': _508ozp,
   bv3m8i: _bv3m8i,
   diykzs: _diykzs,
   e6ilf4: _e6ilf4,
