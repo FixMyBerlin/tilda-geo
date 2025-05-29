@@ -10,7 +10,7 @@ describe("CollectTodos", function()
     local expected = {
       [1] = {
         ["id"] = "deprecated_cycleway_shared",
-        ["priority"] = "prio1",
+        ["priority"] = "prio2",
         ["todoTableOnly"] = false,
       },
     }
