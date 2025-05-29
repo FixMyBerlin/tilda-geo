@@ -53,6 +53,19 @@ async function callLuaForNames(luaFilename: 'ExtractBikelaneTodos' | 'ExtractRoa
   }
 }
 
+function sortMapillarySpecial(a: string, b: string) {
+  // Remove __mapillary for base comparison
+  const baseA = a.replace(/__mapillary$/, '')
+  const baseB = b.replace(/__mapillary$/, '')
+  if (baseA === baseB) {
+    // If both are the same base, non-mapillary comes first
+    if (a.endsWith('__mapillary')) return 1
+    if (b.endsWith('__mapillary')) return -1
+    return 0
+  }
+  return baseA < baseB ? -1 : 1
+}
+
 async function writeTodoIdTypes() {
   const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
   const typeFile = Bun.file(typeFilePath)
@@ -61,17 +74,21 @@ async function writeTodoIdTypes() {
   const bikelaneTodoNamesTableAndField = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === false)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
   const bikelaneTodoNamesTableOnly = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === true)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
 
   const roadTodoNames = await callLuaForNames('ExtractRoadTodos')
   const roadTodoNamesTableAndField = roadTodoNames
     .filter((e) => e.todoTableOnly === false)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
   const roadTodoNamesTableOnly = roadTodoNames
     .filter((e) => e.todoTableOnly === true)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
 
   const fileContent = `
   export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
