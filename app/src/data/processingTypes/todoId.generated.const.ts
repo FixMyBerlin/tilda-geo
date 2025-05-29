@@ -45,7 +45,6 @@ export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
 export const roadTodoIdsTableAndField = [
   'deprecated_cycleway_shared',
-  'deprecated_cycleway_shared__mapillary',
   // (prettier: one line per entry)
 ] as const
 export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]

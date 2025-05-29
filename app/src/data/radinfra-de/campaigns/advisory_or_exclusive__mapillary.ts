@@ -1,19 +1,20 @@
+import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const advisory_or_exclusive: CampaignType = {
-  id: 'advisory_or_exclusive',
-  title: 'Schutzstreifen oder Angebotsstreifen?',
-  pubDate: new Date('2025-01-01T15:00'),
+export const advisory_or_exclusive__mapillary: CampaignType = {
+  id: 'advisory_or_exclusive__mapillary',
+  title: 'Schutzstreifen oder Angebotsstreifen? (Mapillary)',
+  pubDate: new Date('2025-05-28T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
     'Diese Kampagne enthält Radinfrastruktur auf der Fahrbahn bei der die Angabe fehlt, ob es sich um einen Schutzstreifen oder Angebotsstreifen handelt.',
   task: '**Bitte prüfe die Radinfrastruktur und ergänze die nötigen Attribute.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.6rt0.f6&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.6rt0.f6&v=2', // TODO
   maprouletteChallenge: {
     enabled: true,
-    id: 50888,
+    // id: ,
     checkinComment: 'Angabe zur Führungsform ergänzt (Schutzstreifen oder Angebotsstreifen).',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
@@ -40,5 +41,6 @@ Bitte präzisiere das Tagging.
 * [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
 * [OpenStreetMap](%%OSM_URL%%)
-`,
+
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
 }

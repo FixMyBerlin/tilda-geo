@@ -1,19 +1,20 @@
+import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const missing_traffic_sign_vehicle_destination: CampaignType = {
-  id: 'missing_traffic_sign_vehicle_destination',
-  title: 'Ergänze das Verkehrszeichen »Anlieger frei«',
-  pubDate: new Date('2024-10-01T15:00'),
+export const missing_traffic_sign_vehicle_destination__mapillary: CampaignType = {
+  id: 'missing_traffic_sign_vehicle_destination__mapillary',
+  title: 'Ergänze das Verkehrszeichen »Anlieger frei« (Mapillary)',
+  pubDate: new Date('2024-05-28T15:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
     'Diese Kampagne enthält Fahrradstraßen mit der Freigabe »Anlieger frei« für Kfz. Es fehlt jedoch das zugehörige Zusatzzeichen.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder korrigiere den Zugangs-Tag`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.4funno.f6&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.4funno.f6&v=2', // TODO
   maprouletteChallenge: {
     enabled: true,
-    id: 49363,
+    // id: ,
     checkinComment: 'Verkehrszeichen und access-Tagging vereinheitlicht.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
@@ -41,5 +42,6 @@ Ergänze gerne auch einen \`mapillary=*\` Tag auf dem das Verkehrszeichen zu seh
 * [OpenStreetMap](%%OSM_URL%%)
 
 Wenn keine Änderung nötig ist, ergänze gerne einen \`check_date=*\` Tag um zu signalisieren, dass alle Tags geprüft wurden und aktuell sind. Das hilft bei der Auswertung.
-`,
+
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
 }

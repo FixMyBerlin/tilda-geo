@@ -1,19 +1,20 @@
+import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const needs_clarification: CampaignType = {
-  id: 'needs_clarification',
-  title: 'Führungsform unklar',
-  pubDate: new Date('2025-01-01T15:00'),
+export const needs_clarification__mapillary: CampaignType = {
+  id: 'needs_clarification__mapillary',
+  title: 'Führungsform unklar (Mapillary)',
+  pubDate: new Date('2025-05-28T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'promote',
   description:
     'Diese Kampagne enthält Radinfrastruktur, die nicht eindeutig kategorisiert werden konnte.',
   task: '**Bitte prüfe das Tagging und ergänze weitere Attribute, die bei der Kategorisierung helfen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.2j1vo.f6&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.2j1vo.f6&v=2', // TODO
   maprouletteChallenge: {
     enabled: true,
-    id: 50891,
+    // id: ,
     checkinComment: 'Angabe zur Führungsform ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
@@ -42,5 +43,6 @@ Wenn du ein aussagekräftiges Foto in Mapillary siehst, füge es als \`mapillary
 * [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
 * [OpenStreetMap](%%OSM_URL%%)
-`,
+
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
 }

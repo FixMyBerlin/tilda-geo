@@ -1,18 +1,23 @@
+import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const needs_clarification_track: CampaignType = {
-  id: 'needs_clarification_track',
-  title: 'Führungsform `track` unklar',
-  pubDate: new Date('2025-02-17T10:00'),
+export const needs_clarification_track__mapillary: CampaignType = {
+  id: 'needs_clarification_track__mapillary',
+  title: 'Führungsform `track` unklar (Mapillary)',
+  pubDate: new Date('2025-05-28T10:00'),
   category: 'radinfra',
-  recommendedAction: 'map',
-  visibility: 'hidden',
+  recommendedAction: 'maproulette',
+  visibility: 'secondary',
   description:
     'Diesee Wege sind als `cycleway=track` eingetragen. Es fehlen ihnen aber Attribute, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.',
   task: '**Bitte ergänze weitere Tags, um eine präzise Kategorisierung sicherzustellen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.a0qx0.3dc&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.a0qx0.3dc&v=2', // TODO
   maprouletteChallenge: {
-    enabled: false,
+    enabled: true,
+    // id: ,
+    checkinComment: 'Angabe zur Führungsform ergänzt.',
+    checkinSource: 'radinfra_de',
+    resultsLimited: false,
   },
   taskTemplate: `
 Dieser Weg ist als \`cycleway=track\` eingetragen. Das sind nicht genug Daten, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.
@@ -44,5 +49,6 @@ _Wenn du dir zutraust die Geometrie umzuwandeln:_ In vielen Fällen bietet es si
 * [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
 * [OpenStreetMap](%%OSM_URL%%)
-`,
+
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
 }

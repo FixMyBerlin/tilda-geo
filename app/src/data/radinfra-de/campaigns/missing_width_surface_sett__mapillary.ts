@@ -3,9 +3,9 @@ import { CampaignType } from '../schema/campaignsSchema'
 export const missing_width_surface_sett__mapillary: CampaignType = {
   id: 'missing_width_surface_sett__mapillary',
   title: 'Ergänze Angaben zur Breite (Mapillary)',
-  pubDate: new Date('2025-05-26T15:00'),
+  pubDate: new Date('2025-05-28T15:00'),
   category: 'width',
-  recommendedAction: 'streetcomplete',
+  recommendedAction: 'maproulette',
   visibility: 'secondary',
   description:
     'Diese Karte zeigt Wege, bei denen die Angabe zur Breite der Radinfrastruktur fehlt und die Oberfläche Pflastersteine sind.',
