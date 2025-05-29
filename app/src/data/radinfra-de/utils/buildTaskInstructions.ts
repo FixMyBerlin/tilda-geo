@@ -37,7 +37,11 @@ export const buildTaskInstructions = ({ projectKey, osmTypeIdString, kind, geome
       '%%MAPILLARY_URL_END%%',
       mapillaryUrl(endPoint, { yearsAgo: 2, zoom: 17, trafficSign: 'all' }),
     ],
-    ['%%ATLAS_URL%%', `https://tilda-geo.de/regionen/radinfra?map=17/${centerLat}/${centerLng}`],
+    [
+      '%%ATLAS_URL%%',
+      //
+      `https://tilda-geo.de/regionen/radinfra?map=17/${centerLat}/${centerLng}`,
+    ],
     [
       '%%OSM_URL%%', //
       `https://www.openstreetmap.org/${osmTypeIdString}`,

@@ -42,18 +42,8 @@ local deprecated_cycleway_shared = RoadTodo.new({
     return objectTags.cycleway == "shared"
   end
 })
-local deprecated_cycleway_shared__mapillary = RoadTodo.new({
-  id = "deprecated_cycleway_shared__mapillary",
-  desc = "The tagging `cycleway=shared` is deprecated and should be replaced or removed.",
-  todoTableOnly = false,
-  priority = function(_, _) return "1" end,
-  conditions = function(objectTags, resultTags)
-    return objectTags.mapillary_coverage and deprecated_cycleway_shared(objectTags, resultTags)
-  end
-})
 
 RoadTodos = {
   -- REMINDER: Always use snake_case, never camelCase
-  deprecated_cycleway_shared__mapillary,
   deprecated_cycleway_shared,
 }

@@ -1,18 +1,19 @@
+import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const malformed_traffic_sign: CampaignType = {
-  id: 'malformed_traffic_sign',
-  title: 'Fehler im Verkehrszeichen-Tag',
-  pubDate: new Date('2025-02-17T10:00'),
+export const malformed_traffic_sign__mapillary: CampaignType = {
+  id: 'malformed_traffic_sign__mapillary',
+  title: 'Fehler im Verkehrszeichen-Tag (Mapillary)',
+  pubDate: new Date('2025-05-28T10:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description: 'Diese Kampagne enthält Wege mit einem Fehler im Wert des `traffic_sign*`-Tags',
   task: '**Bitte prüfe und korrigiere den Wert der Tags `traffic_sign`, `traffic_sign:forward`, `traffic_sign:backward`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.27xwlg.3dc&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.27xwlg.3dc&v=2', // TODO
   maprouletteChallenge: {
     enabled: true,
-    id: 51092,
+    // id: ,
     checkinComment: '`traffic_sign:*` korrigiert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
@@ -34,5 +35,6 @@ Das Verkehrszeichen-Tag an diese Weg enthält einen Fehler.
 * [Mapillary-Link vom Anfang der Straße](%%MAPILLARY_URL_START%%)
 * [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
-`,
+
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
 }

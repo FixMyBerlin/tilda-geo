@@ -1,19 +1,20 @@
+import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
-export const mixed_cycleway_both: CampaignType = {
-  id: 'mixed_cycleway_both',
-  title: 'Überschneidende `cycleway:SIDE`-Tags',
-  pubDate: new Date('2025-02-17T10:00'),
+export const mixed_cycleway_both__mapillary: CampaignType = {
+  id: 'mixed_cycleway_both__mapillary',
+  title: 'Überschneidende `cycleway:SIDE`-Tags (Mapillary)',
+  pubDate: new Date('2025-05-28T10:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'hidden',
+  visibility: 'secondary',
   description:
     'Dieser Weg hat Tags die sich überschneiden: `cycleway` (Angabe für beide Seiten) in Kombination mit `cycleway:left|right` (Angabe für eine bestimmte Seite).',
   task: '**Bitte kontrolliere die Angaben und ändere sie, so dass sie eindeutig sind.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.2j1vo.3dc&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.2j1vo.3dc&v=2', // TODO
   maprouletteChallenge: {
     enabled: true,
-    id: 51093,
+    // id: ,
     checkinComment: 'Überschneidende Tags präzisiert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
@@ -40,5 +41,6 @@ In wenigen fällen kommt ein Tagging wie \`cycleway=left\` vor. Das ist ein Tagg
 * [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
 * [OpenStreetMap](%%OSM_URL%%)
-`,
+
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
 }
