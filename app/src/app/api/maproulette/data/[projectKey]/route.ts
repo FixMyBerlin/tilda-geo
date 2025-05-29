@@ -1,6 +1,6 @@
 import { isProd } from '@/src/app/_components/utils/isEnv'
 import { osmTypeIdString } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
-import { todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { geoDataClient } from '@/src/server/prisma-client'
 import { ProcessingDates } from '@/src/server/regions/schemas'
 import { feature, featureCollection } from '@turf/turf'

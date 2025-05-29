@@ -1,7 +1,7 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
 import { Markdown } from '@/src/app/_components/text/Markdown'
-import { TodoId } from '@/src/data/processingTypes/todoIds.const'
+import { TodoId } from '@/src/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { buildHashtags } from '@/src/data/radinfra-de/utils/buildHashtags'
 import { buildTaskInstructions } from '@/src/data/radinfra-de/utils/buildTaskInstructions'

@@ -1,5 +1,5 @@
 import { mapillaryCoverageDateString } from '@/src/data/mapillaryCoverage.const'
-import { TodoId, todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { TodoId, todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { campaignCategorySelect } from '@/src/data/radinfra-de/schema/utils/campaignCategorySelect'
 import { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'

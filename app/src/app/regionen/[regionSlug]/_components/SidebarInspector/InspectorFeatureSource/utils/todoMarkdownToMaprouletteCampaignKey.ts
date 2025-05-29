@@ -1,4 +1,4 @@
-import { todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 
 export const todoMarkdownToMaprouletteCampaignKey = (todos: string | undefined) => {
   return todoIds

@@ -1,7 +1,7 @@
 import { translations } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/translations.const'
 import { mapillaryUrl } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/pointFromGeometry'
-import { TodoId } from '@/src/data/processingTypes/todoIds.const'
+import { TodoId } from '@/src/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { point } from '@turf/turf'
 import { LineString } from 'geojson'
