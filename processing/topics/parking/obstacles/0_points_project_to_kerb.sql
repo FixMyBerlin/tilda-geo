@@ -1,5 +1,7 @@
+-- PREPARE
 DROP TABLE IF EXISTS _parking_obstacle_points_projected CASCADE;
 
+-- INSERT
 SELECT
   osm_type,
   osm_id,
@@ -12,11 +14,12 @@ SELECT
 FROM
   _parking_obstacle_points;
 
---
+-- CLEANUP
 DELETE FROM _parking_obstacle_points_projected
 WHERE
   geom IS NULL;
 
+-- MISC
 ALTER TABLE _parking_obstacle_points_projected
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

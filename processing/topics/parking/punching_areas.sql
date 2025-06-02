@@ -9,7 +9,8 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'intersection_corner',
-    'size', 5
+    'source', 'intersections',
+    'diameter', 5
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta,
@@ -35,11 +36,11 @@ SELECT
   ) as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
-    'size', ((tags ->> 'width')::float / 2)::float,
     'category', 'driveway',
-    'highway', tags ->> 'highway',
-    'road', tags ->> 'road',
-    'width', tags ->> 'width'
+    'source', 'driveways',
+    'width', tags ->> 'width',
+    -- 'highway', tags ->> 'highway',
+    'road', tags ->> 'road'
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
@@ -58,10 +59,11 @@ SELECT
     (tags ->> 'perform_buffer')::float,
     'endcap=flat'
   ) as geom,
-  tags || jsonb_build_object(
+  jsonb_build_object(
     /* sql-formatter-disable */
-    'size', (tags ->> 'perform_buffer')::float,
-    'category', 'crossing'
+    'category', tags ->> 'category',
+    'source', 'crossing',
+    'width', (tags ->> 'perform_buffer')::float
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
@@ -76,10 +78,11 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, (tags ->> 'perform_buffer')::float) as geom,
-  tags || jsonb_build_object(
+  jsonb_build_object(
     /* sql-formatter-disable */
-    'category', 'obstacle',
-    'size', (tags ->> 'perform_buffer')::float
+    'category', tags ->> 'category',
+    'source', 'obstacles',
+    'diameter', (tags ->> 'perform_buffer')::float
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
