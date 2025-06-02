@@ -52,7 +52,7 @@ INSERT INTO
   _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
 SELECT
   id::TEXT,
-  osm_id as id,
+  osm_id,
   ST_Buffer (
     geom,
     (tags ->> 'perform_buffer')::float,
@@ -74,12 +74,12 @@ INSERT INTO
   _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
 SELECT
   id::TEXT,
-  osm_id as id,
+  osm_id,
   ST_Buffer (geom, (tags ->> 'perform_buffer')::float) as geom,
   tags || jsonb_build_object(
     /* sql-formatter-disable */
-    'category', 'obstacle'
-    'size', (tags ->> 'perform_buffer')::float,
+    'category', 'obstacle',
+    'size', (tags ->> 'perform_buffer')::float
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
