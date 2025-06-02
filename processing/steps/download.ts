@@ -3,7 +3,7 @@ import { basename, join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
 import { readPersistent, writePersistent } from '../utils/persistentData'
-import { synologyLogError, synologyLogInfo } from '../utils/synology'
+import { synologyLogError } from '../utils/synology'
 import { filteredFilePath } from './filter'
 
 /**
@@ -38,10 +38,13 @@ export async function waitForFreshData() {
     // TEMPORARY: Some more debugging info
     const log = {
       today: new Date().toISOString(),
-      file: new Date(lastModified).toISOString(),
+      newFileLastModified: new Date(lastModified).toISOString(),
       next: todaysDate === new Date(lastModified).toDateString() ? 'process' : 'wait',
     }
-    synologyLogInfo(`waitForFreshData try ${tries}: ${JSON.stringify({ log }, undefined, 1)}`)
+    console.log(
+      `waitForFreshData try ${tries}: ${JSON.stringify(log, undefined, 0)}`,
+      response.headers,
+    )
 
     // Check if last modified date is today
     const lastModifiedDate = new Date(lastModified).toDateString()
