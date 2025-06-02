@@ -11,7 +11,9 @@ SELECT
   is_parking,
   is_driveway,
   tags,
-  meta INTO _parking_kerbs
+  meta
+  --
+  INTO _parking_kerbs
 FROM
   _parking_roads
   CROSS JOIN LATERAL (

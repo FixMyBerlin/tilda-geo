@@ -1,7 +1,9 @@
 DROP TABLE IF EXISTS _parking_edges;
 
 SELECT
-  (segmentize_way_to_edges (osm_id)).* INTO _parking_edges
+  (segmentize_way_to_edges (osm_id)).*
+  --
+  INTO _parking_edges
 FROM
   _parking_roads
 WHERE

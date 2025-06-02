@@ -13,7 +13,9 @@ SELECT
   corner.kerb2_id,
   corner.has_driveway,
   corner.has_road,
-  corner.intersection as geom INTO _parking_intersection_corners
+  corner.intersection as geom
+  --
+  INTO _parking_intersection_corners
 FROM
   _parking_intersections as i
   CROSS JOIN LATERAL get_intersection_corners (i.node_id, 140) AS corner

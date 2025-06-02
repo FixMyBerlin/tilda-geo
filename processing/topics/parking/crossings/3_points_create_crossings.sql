@@ -6,6 +6,7 @@ DECLARE
   azimuth double precision;
 BEGIN
   SELECT geom INTO road_geom FROM _parking_roads WHERE osm_id = road_id;
+
   point_geom := ST_PointN(road_geom, idx);
 
   azimuth := line_azimuth_at_index(road_geom, idx, 1) + pi() / 2 ;
