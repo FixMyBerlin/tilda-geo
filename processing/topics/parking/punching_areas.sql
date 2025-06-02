@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS _parking_punching_areas;
 
--- INSERT driveway buffers (rectangles)
+-- INSERT "intersection_corner" buffers (circle)
 -- @var: "5" is the buffer in meter where no parking is allowed legally
 SELECT
   id::TEXT,
@@ -22,7 +22,7 @@ WHERE
   NOT has_driveway
   AND has_road;
 
--- INSERT driveway buffers (rectangles)
+-- INSERT "driveway" buffers (rectangles)
 INSERT INTO
   _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
 SELECT
@@ -47,7 +47,7 @@ SELECT
 FROM
   _parking_driveways;
 
--- INSERT driveway buffers (rectangles)
+-- INSERT "crossing" buffers (rectangles)
 INSERT INTO
   _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
 SELECT
@@ -69,7 +69,7 @@ SELECT
 FROM
   _parking_crossings;
 
--- INSERT driveway buffers (rectangles)
+-- INSERT "obstacle" buffers (circle)
 INSERT INTO
   _parking_punching_areas (id, osm_id, geom, tags, meta, minzoom)
 SELECT
@@ -79,6 +79,7 @@ SELECT
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'obstacle'
+    'size', (tags ->> 'perform_buffer')::float,
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
