@@ -6,8 +6,6 @@ require("obstacle_area_categories")
 function categorize_area(object)
   for _, category in ipairs(obstacle_area_categories) do
     if category:is_active(object.tags) then
-      object.tags.side = category.perform_snap
-
       return {
         category = category,
         object = object

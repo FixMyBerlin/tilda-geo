@@ -8,9 +8,6 @@ local TAG_HELPER = require('tag_helper')
 obstacle_line_categories = {
   class_obstacle_category.new({
     id = 'kerb_driveway', -- https://www.openstreetmap.org/way/814637433
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags.barrier == 'kerb' and (tags.kerb == 'lowered' or tags.kerb == 'flush')
@@ -24,9 +21,6 @@ obstacle_line_categories = {
   }),
   class_obstacle_category.new({
     id = 'barrier',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and (
@@ -40,9 +34,6 @@ obstacle_line_categories = {
   }),
   -- class_obstacle_category.new({
   --   id = 'path',
-  --   side_schema = nil,
-  --   side_key = nil,
-  --   perform_snap = 'self',
   --   perform_buffer = function(tags) return nil end,
   --   conditions = function(tags)
   --     return TAG_HELPER.is_obstacle_parking(tags) and (

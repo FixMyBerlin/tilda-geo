@@ -1,5 +1,7 @@
+-- PREPARE
 DROP TABLE IF EXISTS _parking_kerb_tangents;
 
+--
 SELECT DISTINCT
   osm_id,
   tags,
@@ -7,8 +9,9 @@ SELECT DISTINCT
   --
   INTO _parking_kerb_tangents
 FROM
-  _parking_obstacle_points_located;
+  _parking_crossing_points_located;
 
+-- MISC
 ALTER TABLE _parking_kerb_tangents
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

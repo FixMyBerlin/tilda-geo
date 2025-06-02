@@ -14,19 +14,24 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
+-- CLEANUP
 DROP TABLE IF EXISTS _parking_crossings;
 
+-- INSERT "parking_crossings" from located crossing points
 SELECT
   opl.id,
   opl.osm_id,
   opl.tags,
   opl.meta,
-  create_road_crossing (opl.way_id, opl.idx, k.offset * 1.1) as geom INTO _parking_crossings
+  create_road_crossing (opl.way_id, opl.idx, k.offset * 1.1) as geom
+  --
+  INTO _parking_crossings
 FROM
-  _parking_obstacle_points_located opl
+  _parking_crossing_points_located opl
   JOIN _parking_kerbs k ON way_id = k.osm_id
   AND opl.tags ->> 'side' = k.side;
 
+-- MISC
 ALTER TABLE _parking_crossings
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

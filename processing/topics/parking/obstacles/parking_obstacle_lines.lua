@@ -17,7 +17,7 @@ local db_table = osm2pgsql.define_table({
   },
 })
 
-function parking_obstacle_lines(object)
+local function parking_obstacle_lines(object)
   if object.is_closed then return end
   if next(object.tags) == nil then return end
 
@@ -34,3 +34,5 @@ function parking_obstacle_lines(object)
   end
 
 end
+
+return parking_obstacle_lines

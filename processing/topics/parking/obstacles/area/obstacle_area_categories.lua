@@ -10,9 +10,6 @@ end
 obstacle_area_categories = {
   class_obstacle_category.new({
     id = 'bicycle_parking',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags) return two_wheel_parking_conditions(tags, 'bicycle_parking') end,
     tags = function(tags) return two_wheel_parking_tags(tags, 'bicycle_parking') end,
@@ -21,9 +18,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'motorcycle_parking',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags) return two_wheel_parking_conditions(tags, 'motorcycle_parking') end,
     tags = function(tags) return two_wheel_parking_tags(tags, 'motorcycle_parking') end,
@@ -32,9 +26,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'small_electric_vehicle_parking',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags) return two_wheel_parking_conditions(tags, 'small_electric_vehicle_parking') end,
     tags = function(tags) return two_wheel_parking_tags(tags, 'small_electric_vehicle_parking') end,
@@ -43,9 +34,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'bicycle_rental',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags) return two_wheel_parking_conditions(tags, 'bicycle_rental') end,
     tags = function(tags) return two_wheel_parking_tags(tags, 'bicycle_rental') end,
@@ -54,9 +42,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'mobility_hub',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags) return two_wheel_parking_conditions(tags, 'mobility_hub') end,
     tags = function(tags) return two_wheel_parking_tags(tags, 'mobility_hub') end,
@@ -65,9 +50,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'parklet',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags.leisure == 'parklet' or tags.leisure == 'outdoor_seating' and tags.outdoor_seating == 'parklet'
@@ -78,9 +60,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'road_marking_restricted_area',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags['area:highway'] == 'prohibited'
@@ -93,9 +72,6 @@ obstacle_area_categories = {
     -- https://www.openstreetmap.org/way/1198952905
     -- https://www.openstreetmap.org/way/1181489790 disabled
     id = 'parking_lane',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'lane'
@@ -107,9 +83,6 @@ obstacle_area_categories = {
   class_obstacle_category.new({
     -- https://www.openstreetmap.org/way/559505481
     id = 'parking_street_side',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'street_side'
@@ -120,9 +93,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'parking_kerb',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and (tags.parking == 'on_kerb' or tags.parking == 'half_on_kerb')
@@ -133,9 +103,6 @@ obstacle_area_categories = {
   }),
   class_obstacle_category.new({
     id = 'parking_shoulder',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'shoulder'
@@ -147,9 +114,6 @@ obstacle_area_categories = {
   class_obstacle_category.new({
     -- https://www.openstreetmap.org/way/1127983079
     id = 'tree_pit',
-    side_schema = nil,
-    side_key = nil,
-    perform_snap = 'self',
     perform_buffer = function(tags) return nil end,
     conditions = function(tags)
       return is_obstacle_parking(tags) and tags.landuse == "tree_pit"

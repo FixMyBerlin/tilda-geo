@@ -10,9 +10,7 @@ SELECT
   -- TODO: the tollerance here is too large, we need to decrease it once we have better offset values for the kerbs
   INTO _parking_obstacle_points_projected
 FROM
-  _parking_obstacle_points
-WHERE
-  tags ->> 'perform_snap' = 'self';
+  _parking_obstacle_points;
 
 --
 DELETE FROM _parking_obstacle_points_projected
