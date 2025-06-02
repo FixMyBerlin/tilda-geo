@@ -13,7 +13,7 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
     'osm_id',
     'osm_type',
     'osm_url',
-    'update_at',
+    'updated_at',
     'updated_age',
     // 'verified_at',
     // 'verified',

@@ -50,7 +50,7 @@ describe("`categorize_area`", function()
     local area = 100
     local result_tags = result_tags_obstacles(result, area)
     assert.are.equal(result_tags.id, "way/"..object.id)
-    assert.are.equal(type(result_tags.meta.update_at), "string")
+    assert.are.equal(type(result_tags.meta.updated_at), "string")
     assert.are.equal(result_tags.tags.osm_mapillary, object.tags.mapillary)
     assert.are.equal(result_tags.tags.not_copied, nil)
   end)
