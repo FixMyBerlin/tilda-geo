@@ -11,16 +11,19 @@ SELECT
 FROM
   _parking_parkings p,
   LATERAL ST_Dump (
-    ST_Difference (
-      p.geom,
-      (
-        SELECT
-          ST_Union (c.geom)
-        FROM
-          _parking_cutout_areas c
-        WHERE
-          c.geom && p.geom
-      )
+    COALESCE(
+      ST_Difference (
+        p.geom,
+        (
+          SELECT
+            ST_Union (c.geom)
+          FROM
+            _parking_cutout_areas c
+          WHERE
+            c.geom && p.geom
+        )
+      ),
+      p.geom
     )
   ) AS d;
 
