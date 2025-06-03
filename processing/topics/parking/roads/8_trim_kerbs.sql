@@ -17,7 +17,7 @@ WITH
   )
 UPDATE _parking_kerbs k
 SET
-  geom = cut_kerb_at_corner (fk.intersection_id, fk.corner_geom, k.id)
+  geom = trim_kerb_at_corner (fk.intersection_id, fk.corner_geom, k.id)
 FROM
   flat_kerbs fk
 WHERE
