@@ -46,5 +46,5 @@
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
 
--- CREATE PUNCHING AREAS
-\i '/processing/topics/parking/punching_areas.sql'
+-- CREATE CUTOUT AREAS
+\i '/processing/topics/parking/cutout_areas.sql'
