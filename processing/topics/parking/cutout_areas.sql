@@ -10,7 +10,7 @@ SELECT
     /* sql-formatter-disable */
     'category', 'intersection_corner',
     'source', 'intersections',
-    'diameter', 5
+    'radius', 5
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta,
@@ -82,7 +82,7 @@ SELECT
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacles',
-    'diameter', (tags ->> 'perform_buffer')::float
+    'radius', (tags ->> 'perform_buffer')::float
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
