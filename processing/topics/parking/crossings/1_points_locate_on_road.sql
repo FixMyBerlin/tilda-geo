@@ -14,10 +14,7 @@ SELECT
   INTO _parking_crossing_points_located
 FROM
   _parking_crossing_points p
-  JOIN _parking_node_road_mapping nrm ON p.osm_id = nrm.node_id
-ORDER BY
-  nrm.node_id,
-  nrm.way_id DESC;
+  JOIN _parking_node_road_mapping nrm ON p.osm_id = nrm.node_id;
 
 -- MISC
 ALTER TABLE _parking_crossing_points_located
