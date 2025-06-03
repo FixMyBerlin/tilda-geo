@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS parkings;
 
 SELECT
-  p.id || '/' || d.path[1] AS id,
+  COALESCE(p.id || '/' || d.path[1], p.id) AS id,
   p.osm_type,
   p.osm_id,
   p.side,
