@@ -2,7 +2,7 @@ import { $ } from 'bun'
 import { basename, join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
-import { readPersistent, writePersistent } from '../utils/persistentData'
+import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
 import { synologyLogError } from '../utils/synology'
 import { filteredFilePath } from './filter'
 
@@ -98,7 +98,7 @@ export async function downloadFile() {
   if (!eTag) {
     throw new Error('No ETag found')
   }
-  if (fileExists && eTag === (await readPersistent(fileName))) {
+  if (fileExists && eTag === (await readHashFromFile(fileName))) {
     console.log('⏩ Skipped download because the file has not changed.')
     return { fileName, fileChanged: false }
   }
@@ -114,7 +114,7 @@ export async function downloadFile() {
   }
 
   // Save etag
-  writePersistent(fileName, eTag)
+  writeHashForFile(fileName, eTag)
 
   return { fileName, fileChanged: true }
 }

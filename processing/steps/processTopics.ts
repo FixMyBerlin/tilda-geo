@@ -136,7 +136,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Topic: Skip topic based on ENV
     if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
       console.log(
-        `⏩ Skipping topic ${topic} based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
+        `⏩ Skipping topic "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
       )
       continue
     }

@@ -11,7 +11,7 @@ export const OSM_FILTERED_DIR = '/data/filtered'
 /**
  * The path to the directory containing persistent data. E.g. directory hashes.
  */
-export const PERSISTENT_DIR = '/data/hashes'
+export const HASH_DIR = '/data/hashes'
 
 /**
  * The path to the directory containing the OSMIUM filter expressions.

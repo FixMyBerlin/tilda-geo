@@ -1,17 +1,17 @@
 import { join } from 'path'
-import { PERSISTENT_DIR } from '../constants/directories.const'
+import { HASH_DIR } from '../constants/directories.const'
 
-const filePath = (id: string) => join(PERSISTENT_DIR, id)
+const hashPath = (id: string) => join(HASH_DIR, id)
 
-export async function readPersistent(id: string) {
-  const file = await Bun.file(filePath(id))
+export async function readHashFromFile(pathAsFilename: string) {
+  const file = await Bun.file(hashPath(pathAsFilename))
   if (await file.exists()) {
     return file.text()
   }
   return ''
 }
 
-export async function writePersistent(id: string, data: string) {
-  const file = await Bun.file(filePath(id))
+export async function writeHashForFile(pathAsFilename: string, data: string) {
+  const file = await Bun.file(hashPath(pathAsFilename))
   return Bun.write(file, data)
 }
