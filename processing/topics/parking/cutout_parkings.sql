@@ -18,7 +18,7 @@ FROM
           SELECT
             ST_Union (c.geom)
           FROM
-            _parking_cutout_areas c
+            _parking_cutouts c
           WHERE
             c.geom && p.geom
         )
