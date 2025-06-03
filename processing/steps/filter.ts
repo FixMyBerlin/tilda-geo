@@ -2,10 +2,10 @@ import { bboxPolygon, featureCollection, union } from '@turf/turf'
 import { $ } from 'bun'
 import { join } from 'path'
 import {
-  FILTER_DIR,
-  FILTER_EXPRESSIONS,
   ID_FILTERED_FILE,
   OSM_FILTERED_DIR,
+  OSMIUM_FILTER_BBOX_DIR,
+  OSMIUM_FILTER_EXPRESSIONS_DIR,
 } from '../constants/directories.const'
 import type { TopicConfigBbox } from '../constants/topics.const'
 import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
@@ -18,6 +18,8 @@ import { originalFilePath } from './download'
  * @returns full path to the file
  */
 export const filteredFilePath = (fileName: string) => join(OSM_FILTERED_DIR, fileName)
+const OSMIUM_FILTER_EXPRESSIONS_FILE = `${OSMIUM_FILTER_EXPRESSIONS_DIR}/filter-expressions.txt`
+const OSMIUM_FILTER_BBOX_FILE = `${OSMIUM_FILTER_BBOX_DIR}/merged-bboxes.geojson`
 
 /**
  * Filter the OSM file wiht osmiumm and the given filter expressions.
@@ -27,19 +29,19 @@ export const filteredFilePath = (fileName: string) => join(OSM_FILTERED_DIR, fil
  * @returns the resulting file's name
  */
 export async function tagFilter(fileName: string, fileChanged: boolean) {
-  const filePath = filteredFilePath(fileName)
-  const fileMissing = !(await Bun.file(filePath).exists())
+  const pbfPath = filteredFilePath(fileName)
+  const pbfMissing = !(await Bun.file(pbfPath).exists())
 
   // Only run tag filters if the file or the filters have changed
-  const filtersChanged = await directoryHasChanged(FILTER_DIR)
-  const runFilter = fileChanged || filtersChanged || fileMissing
-  if (fileChanged || filtersChanged || fileMissing) {
+  const filtersChanged = await directoryHasChanged(OSMIUM_FILTER_EXPRESSIONS_DIR)
+  const runFilter = fileChanged || filtersChanged || pbfMissing
+  if (runFilter) {
     console.log('Filtering the OSM file...')
     try {
       await $`osmium tags-filter \
                   --overwrite \
-                  --expressions ${FILTER_EXPRESSIONS} \
-                  --output=${filePath} \
+                  --expressions ${OSMIUM_FILTER_EXPRESSIONS_FILE} \
+                  --output=${pbfPath} \
                   ${originalFilePath(fileName)}`
     } catch (error) {
       throw new Error(`Failed to filter the OSM file: ${error}`)
@@ -47,15 +49,11 @@ export async function tagFilter(fileName: string, fileChanged: boolean) {
   } else {
     console.log(
       '⏩ Skipping tag filter. The file and filters are unchanged.',
-      JSON.stringify({
-        fileChanged,
-        filtersChanged,
-        fileMissing,
-      }),
+      JSON.stringify({ fileChanged, filtersChanged, pbfMissing }),
     )
   }
 
-  updateDirectoryHash(FILTER_DIR)
+  updateDirectoryHash(OSMIUM_FILTER_EXPRESSIONS_DIR)
 
   return { fileName, fileChanged: runFilter }
 }
@@ -98,26 +96,25 @@ export async function bboxesFilter(
     throw new Error(`Failed to merge bboxes ${JSON.stringify(bboxes)}`)
   }
 
-  const filterFile = filteredFilePath(`${outputName.split('.').at(0)}_filter.geojson`)
-  Bun.write(filterFile, JSON.stringify(mergedBboxPolygonFeatures))
+  Bun.write(OSMIUM_FILTER_BBOX_FILE, JSON.stringify(mergedBboxPolygonFeatures))
 
   const filedPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
-  const filterDirChanged = await directoryHasChanged(FILTER_DIR)
+  const filterDirChanged = await directoryHasChanged(OSMIUM_FILTER_BBOX_DIR)
   if (filedPbfExists && !filterDirChanged) {
     console.log(
       '⏩ Skipping osmium extract for bboxFilter. The directory that stores the bbox filter geojson did not change.',
-      JSON.stringify({ fileExists: filedPbfExists, FILTER_DIR, filterFile }),
+      JSON.stringify({ filedPbfExists, OSMIUM_FILTER_BBOX_FILE }),
     )
     return
   }
-  updateDirectoryHash(FILTER_DIR)
+  updateDirectoryHash(OSMIUM_FILTER_BBOX_DIR)
 
-  console.log('ℹ️ Filtering the OSM file with bboxes...', filterFile)
+  console.log('ℹ️ Filtering the OSM file with bboxes...', OSMIUM_FILTER_BBOX_FILE)
   try {
     await $`osmium extract \
               --overwrite \
               --set-bounds \
-              --polygon ${filterFile} \
+              --polygon ${OSMIUM_FILTER_BBOX_FILE} \
               --output ${filteredFilePath(outputName)} \
               ${filteredFilePath(fileName)}`
   } catch (error) {

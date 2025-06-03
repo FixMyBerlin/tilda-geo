@@ -14,14 +14,10 @@ export const OSM_FILTERED_DIR = '/data/filtered'
 export const HASH_DIR = '/data/hashes'
 
 /**
- * The path to the directory containing the OSMIUM filter expressions.
+ * The path to the directory containing the OSMIUM filter.
  */
-export const FILTER_DIR = '/processing/filter'
-
-/**
- * The path to the file containing the OSMIUM filter expressions.
- */
-export const FILTER_EXPRESSIONS = `${FILTER_DIR}/filter-expressions.txt`
+export const OSMIUM_FILTER_EXPRESSIONS_DIR = '/processing/filter/osmiumTagFilter'
+export const OSMIUM_FILTER_BBOX_DIR = '/processing/filter/osmiumBboxFilter'
 
 /**
  * The path to the directory containing the topics.
