@@ -19,7 +19,7 @@ function amenity_parking_tags(tags)
     parking = tags.parking, -- sanitized by 'conditions'
     orientation = sanitize_for_logging(tags.orientation, { 'perpendicular', 'parallel', 'diagonal' }),
     informal = sanitize_for_logging(tags.informal, { 'yes' }),
-    access = sanitize_for_logging(tags.access, { 'no', 'private', 'permissive' }, { 'yes' }),
+    access = sanitize_for_logging(tags.access, { 'no', 'private', 'permissive', 'permit' }, { 'yes' }),
     markings = sanitize_for_logging(tags.markings, { 'yes', 'no' }),
     disabled = sanitize_for_logging(tags.disabled, { 'private', 'designated' }),
     restriction = sanitize_for_logging(tags.restriction, { 'charging_only', 'loading_only' }),
