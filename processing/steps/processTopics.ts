@@ -149,7 +149,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       innerBboxes = [params.processOnlyBbox]
     }
 
-    // Bboxes: Crate filtered source file
+    // Bboxes: Create filtered source file
     if (innerBboxes) {
       innerFileName = `${topic}_extracted.osm.pbf`
       await bboxesFilter(fileName, innerFileName, innerBboxes)

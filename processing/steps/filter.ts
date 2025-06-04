@@ -98,12 +98,12 @@ export async function bboxesFilter(
 
   Bun.write(OSMIUM_FILTER_BBOX_FILE, JSON.stringify(mergedBboxPolygonFeatures))
 
-  const filedPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
+  const filteredPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
   const filterDirChanged = await directoryHasChanged(OSMIUM_FILTER_BBOX_DIR)
-  if (filedPbfExists && !filterDirChanged) {
+  if (filteredPbfExists && !filterDirChanged) {
     console.log(
       '⏩ Skipping osmium extract for bboxFilter. The directory that stores the bbox filter geojson did not change.',
-      JSON.stringify({ filedPbfExists, OSMIUM_FILTER_BBOX_FILE }),
+      JSON.stringify({ filteredPbfExists, OSMIUM_FILTER_BBOX_FILE }),
     )
     return
   }
