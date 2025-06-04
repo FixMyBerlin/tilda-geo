@@ -28,3 +28,4 @@ Software tests:
 
 Formatting:
 - Use 2 spaces for indentation.
+- Use single quotes in lua files whenever possible
