@@ -20,6 +20,7 @@ local db_table = osm2pgsql.define_table({
   },
 })
 
+-- Type way (area) and relation (areas)
 local function parking_separate_parking_areas(object)
   if (object.type == 'way' and not object.is_closed) then return end
   if next(object.tags) == nil then return end

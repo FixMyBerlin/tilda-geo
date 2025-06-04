@@ -48,7 +48,7 @@ end
 
 ---Create capacity taga from tags or fallback.
 ---Handles area and point datas.
----@param type string<'way'|'node'> -- object.type, see https://osm2pgsql.org/doc/manual-v1.html#processing-callbacks
+---@param type string<'way'|'node'|'relation'> -- object.type, see https://osm2pgsql.org/doc/manual-v1.html#processing-callbacks
 ---@param tags table
 ---@param area number|nil
 ---@return table<{ area: number, capacity: number, capacity_confidence: "high"|"medium"|"low", capacity_source: string }>
@@ -58,7 +58,7 @@ function class_separate_parking_category:get_capacity(type, tags, area)
   -- For areas, we expect to have a `area` value passed in.
   -- Based on that we either either return confidenc=high from tags.capacity
   -- or confidence=medium from area.
-  if type == 'way' then
+  if type == 'way' or type == 'relation' then
     if not area then error('class_separate_parking_category:get_capacity requires an area=<Number> value for area data.') end
 
     local result_from_capacity_tag = capacity_from_tag(tags, area)
