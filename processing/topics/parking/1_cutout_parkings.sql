@@ -22,6 +22,10 @@ FROM
             _parking_cutouts c
           WHERE
             c.geom && p.geom
+            AND (
+              NOT c.tags ? 'street:name'
+              OR c.tags ->> 'street:name' = p.street_name
+            )
         )
       ),
       p.geom

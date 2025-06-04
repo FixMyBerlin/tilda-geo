@@ -65,7 +65,7 @@ SELECT
     'source', 'crossing',
     'width', (tags ->> 'perform_buffer')::float
     /* sql-formatter-enable */
-  ) AS tags,
+  ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
   0 AS minzoom
 FROM
@@ -84,7 +84,7 @@ SELECT
     'source', 'obstacle_points',
     'radius', (tags ->> 'perform_buffer')::float
     /* sql-formatter-enable */
-  ) AS tags,
+  ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
   0 AS minzoom
 FROM
@@ -102,7 +102,7 @@ SELECT
     'category', tags ->> 'category',
     'source', 'obstacle_areas'
     /* sql-formatter-enable */
-  ) AS tags,
+  ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
   0 AS minzoom
 FROM
@@ -120,7 +120,7 @@ SELECT
     'category', tags ->> 'category',
     'source', 'obstacle_lines'
     /* sql-formatter-enable */
-  ) AS tags,
+  ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
   0 AS minzoom
 FROM
@@ -138,7 +138,7 @@ SELECT
     'category', tags ->> 'category',
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
-  ) AS tags,
+  ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
   0 AS minzoom
 FROM
