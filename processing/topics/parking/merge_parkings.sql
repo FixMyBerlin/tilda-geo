@@ -28,13 +28,12 @@ WITH
       clustered_parkings
   )
 SELECT
+  ROW_NUMBER() OVER () AS id,
   street_name,
   cluster_id,
   side,
   array_agg(osm_id) AS original_osm_ids,
-  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom AS geom
-  --
-  INTO parkings_merged
+  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom AS geom INTO parkings_merged
 FROM
   clustered
 GROUP BY
