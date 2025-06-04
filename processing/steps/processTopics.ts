@@ -145,8 +145,14 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       console.log(
         `ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
       )
-      // Bboxes: Create filtered source file
-      await bboxesFilter(fileName, [params.processOnlyBbox])
+      // @ts-expect-error the readonly part gets in the way here…
+      innerBboxes = [params.processOnlyBbox]
+    }
+
+    // Bboxes: Crate filtered source file
+    if (innerBboxes) {
+      innerFileName = `${topic}_extracted.osm.pbf`
+      await bboxesFilter(fileName, innerFileName, innerBboxes)
     }
 
     // Get all tables related to `topic`

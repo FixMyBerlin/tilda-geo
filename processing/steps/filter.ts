@@ -81,7 +81,11 @@ export async function idFilter(fileName: string, ids: string) {
   return { fileName: ID_FILTERED_FILE, fileChanged: true }
 }
 
-export async function bboxesFilter(fileName: string, bboxes: Readonly<Array<TopicConfigBbox>>) {
+export async function bboxesFilter(
+  fileName: string,
+  outputName: string,
+  bboxes: Readonly<Array<TopicConfigBbox>>,
+) {
   // Generate the osmium filter file.
   // We need to merge the bboxes to prevent https://github.com/osmcode/osmium-tool/issues/266
   const mergedBboxPolygonFeatures =
@@ -94,8 +98,7 @@ export async function bboxesFilter(fileName: string, bboxes: Readonly<Array<Topi
 
   Bun.write(OSMIUM_FILTER_BBOX_FILE, JSON.stringify(mergedBboxPolygonFeatures))
 
-  const pbfFileName = filteredFilePath(`bbox_filtered_${fileName}`)
-  const filedPbfExists = await Bun.file(pbfFileName).exists()
+  const filedPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
   const filterDirChanged = await directoryHasChanged(OSMIUM_FILTER_BBOX_DIR)
   if (filedPbfExists && !filterDirChanged) {
     console.log(
@@ -112,7 +115,7 @@ export async function bboxesFilter(fileName: string, bboxes: Readonly<Array<Topi
               --overwrite \
               --set-bounds \
               --polygon ${OSMIUM_FILTER_BBOX_FILE} \
-              --output ${pbfFileName} \
+              --output ${filteredFilePath(outputName)} \
               ${filteredFilePath(fileName)}`
   } catch (error) {
     throw new Error(`Failed to filter the OSM file by polygon: ${error}`)
