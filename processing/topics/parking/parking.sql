@@ -53,6 +53,8 @@
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
 
 -- CREATE CUTOUT AREAS
-\i '/processing/topics/parking/create_cutouts.sql'
-\i '/processing/topics/parking/cutout_parkings.sql'
-\i '/processing/topics/parking/merge_parkings.sql'
+\i '/processing/topics/parking/0_create_cutouts.sql'
+\i '/processing/topics/parking/1_cutout_parkings.sql'
+\i '/processing/topics/parking/2_cutout_separate_parkings.sql'
+\i '/processing/topics/parking/3_merge_parkings.sql'
+\i '/processing/topics/parking/4_estimate_parking_capacity.sql'
