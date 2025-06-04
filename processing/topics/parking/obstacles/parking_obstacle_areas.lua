@@ -1,9 +1,9 @@
 require('init')
-require("Log")
-require("MergeTable")
-require("categorize_area")
-require("sanitize_cleaner")
-require("parking_errors")
+require('Log')
+require('MergeTable')
+require('categorize_area')
+require('sanitize_cleaner')
+require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
 local area_sqm = require('area_sqm')
 
@@ -20,7 +20,7 @@ local db_table = osm2pgsql.define_table({
 })
 
 local function parking_obstacle_areas(object)
-  if (object.type == "way" and not object.is_closed) then return end
+  if (object.type == 'way' and not object.is_closed) then return end
   if next(object.tags) == nil then return end
 
   local result = categorize_area(object)

@@ -1,7 +1,7 @@
 require('init')
-require("Log")
 local capacity_from_tag = require('capacity_from_tag')
 local round = require('round')
+require('Log')
 
 ---@meta
 ---@class ObstacleCategory
@@ -12,7 +12,7 @@ class_obstacle_category.__index = class_obstacle_category
 --- id: string,
 --- perform_buffer: fun(tags: table):(number|nil), -- Radius in meters for adding a buffer or 0.
 --- tags: fun(tags: table):(table), -- Tags which have to be sanitized in the category.
---- tags_cc: table, -- Tags which will be prefixed with "osm_" and copied as is.
+--- tags_cc: table, -- Tags which will be prefixed with 'osm_' and copied as is.
 --- conditions: fun(tags: table): (boolean),
 --- apply_parking_capacity_fallback: boolean, -- The obstacles table holds read obstacles but also street parking data that was mapped separately. For those we want to add capacity data based on their area.
 --- }

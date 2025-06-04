@@ -1,11 +1,11 @@
 require('init')
-require("CopyTags")
-require("MergeTable")
-require("DefaultId")
-require("Metadata")
-require("Log")
+require('CopyTags')
+require('MergeTable')
+require('DefaultId')
+require('Metadata')
+require('Log')
 
-local function result_tags_obstacles(result, area)
+local function result_tags_obstacles(result)
   local id = DefaultId(result.object)
 
   local result_tags = {
@@ -15,10 +15,10 @@ local function result_tags_obstacles(result, area)
   }
 
   local global_tags_cc = {
-    "mapillary",
+    'mapillary',
   }
-  CopyTags(result_tags, result.object.tags, global_tags_cc, "osm_")
-  CopyTags(result_tags, result.object.tags, result.category.tags_cc, "osm_")
+  CopyTags(result_tags, result.object.tags, global_tags_cc, 'osm_')
+  CopyTags(result_tags, result.object.tags, result.category.tags_cc, 'osm_')
   MergeTable(result_tags, result.category:get_tags(result.object.tags)) -- those are sanitized already
   if area ~= nil then
     MergeTable(result_tags, result.category:get_capacity(result.object.tags, area))

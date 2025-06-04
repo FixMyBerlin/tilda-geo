@@ -1,8 +1,8 @@
 require('init')
-require("Clone")
-require("Log")
-require("obstacle_point_categories")
-require("transform_point_direction_tags")
+require('Clone')
+require('Log')
+require('obstacle_point_categories')
+require('transform_point_direction_tags')
 
 -- Categorize the object and picks the best result (with the largest buffer).
 ---@class ObstacleObject

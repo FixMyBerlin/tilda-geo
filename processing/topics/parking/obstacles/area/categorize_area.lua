@@ -1,6 +1,6 @@
 require('init')
-require("Log")
-require("obstacle_area_categories")
+require('Log')
+require('obstacle_area_categories')
 
 ---@return table<string, { category: ObstacleCategory, object: OSMObject} | { category: nil, object: nil}>
 function categorize_area(object)
