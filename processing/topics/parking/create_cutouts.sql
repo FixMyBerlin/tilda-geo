@@ -90,7 +90,7 @@ SELECT
 FROM
   _parking_obstacle_points_projected;
 
--- INSERT "obstacle" buffers (circle)
+-- INSERT "obstacle" buffers (buffered lines)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
 SELECT
@@ -107,6 +107,24 @@ SELECT
   0 AS minzoom
 FROM
   _parking_obstacle_areas_projected;
+
+-- INSERT "obstacle" buffers (buffered lines)
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+SELECT
+  id::TEXT,
+  osm_id,
+  ST_Buffer (geom, 0.2) as geom,
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', tags ->> 'category',
+    'source', 'obstacle_lineas'
+    /* sql-formatter-enable */
+  ) AS tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
+  0 AS minzoom
+FROM
+  _parking_obstacle_lines_projected;
 
 -- MISC
 ALTER TABLE _parking_cutouts
