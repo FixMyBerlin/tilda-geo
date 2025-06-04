@@ -22,6 +22,7 @@ function amenity_parking_tags(tags)
     access = sanitize_for_logging(tags.access, { 'no', 'private', 'permissive' }, { 'yes' }),
     markings = sanitize_for_logging(tags.markings, { 'yes', 'no' }),
     disabled = sanitize_for_logging(tags.disabled, { 'private', 'designated' }),
+    restriction = sanitize_for_logging(tags.restriction, { 'charging_only', 'loading_only' }),
     traffic_sign = SanitizeTrafficSign(tags.traffic_sign),
   }
 end
