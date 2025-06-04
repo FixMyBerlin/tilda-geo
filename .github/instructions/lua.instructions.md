@@ -5,7 +5,7 @@ applyTo: '**/*.lua'
 - This is LUA embedded into osm2pgsql.
   - That means we have access to a few helpers from https://osm2pgsql.org/doc/manual.html#lua-library-for-flex-output.
   - There is also the special `osm2pgsql` class that we use all over which is documented at https://osm2pgsql.org/doc/manual.html.
-- We have helper libraries installed which can be found in [processing.Dockerfile](../processing.Dockerfile)
+- We have helper libraries installed which can be found in [processing.Dockerfile](../../processing.Dockerfile)
   - Use those rather than create helper functions from scratch.
   - `busted` is our testing framework https://lunarmodules.github.io/busted/
   - `inspect` is to print / inspect tables https://github.com/kikito/inspect.lua — our own helper around that is called `Log(object, 'logging prefix')`
