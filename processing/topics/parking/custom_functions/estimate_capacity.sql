@@ -1,18 +1,20 @@
 CREATE OR REPLACE FUNCTION estimate_capacity (length NUMERIC, orientation TEXT) RETURNS INTEGER AS $$
 DECLARE
-  car_length NUMERIC;
+  car_length NUMERIC := 5;
+  car_width NUMERIC := 2.5;
+  parking_angle NUMERIC := Radians(60); -- 0 degrees = parallel
+  space_per_car NUMERIC;
   padding NUMERIC;
   n_cars INTEGER;
 BEGIN
+
   IF orientation = 'parallel' OR orientation IS NULL THEN
-    car_length := 6.0;
-    padding := 0.5;
+    space_per_car := car_length;
   ELSIF orientation = 'diagonal' THEN
-    car_length := 4.5;
-    padding := 0.2;
+    space_per_car := Cos(parking_angle) * car_length + Sin(parking_angle) * car_width;
+    -- TODO maybe also transfrom the padding to diagonal?
   ELSIF orientation = 'perpendicular' THEN
-    car_length := 3;
-    padding := 0.3;
+    space_per_car := car_width;
   ELSE
     RAISE EXCEPTION 'Invalid orientation: %, must be "parallel" or "diagonal"', orientation;
   END IF;
