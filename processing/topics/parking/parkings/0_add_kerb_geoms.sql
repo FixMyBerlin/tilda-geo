@@ -17,3 +17,9 @@ WHERE
 -- ALTER TABLE _parking_edges
 -- ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 CREATE INDEX parking_parkings_geom_idx ON _parking_parkings USING GIST (geom);
+
+DO $$
+BEGIN
+  RAISE NOTICE 'Finished adding kerb geometries at %', clock_timestamp();
+END
+$$;

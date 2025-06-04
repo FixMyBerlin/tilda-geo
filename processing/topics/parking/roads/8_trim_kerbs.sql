@@ -25,4 +25,8 @@ WHERE
   AND k.is_driveway
   AND GeometryType (k.geom) = 'LINESTRING';
 
-;
+DO $$
+BEGIN
+  RAISE NOTICE 'Finished trimming kerbs at %', clock_timestamp();
+END
+$$;

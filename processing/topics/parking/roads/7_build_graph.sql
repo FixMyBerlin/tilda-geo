@@ -11,3 +11,9 @@ WHERE
 
 ALTER TABLE _parking_edges
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+DO $$
+BEGIN
+  RAISE NOTICE 'Finished building graph at %', clock_timestamp();
+END
+$$;
