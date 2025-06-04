@@ -7,6 +7,7 @@ SELECT
   p.side,
   p.tags,
   p.meta,
+  p.street_name,
   d.geom INTO parkings
 FROM
   _parking_parkings p,

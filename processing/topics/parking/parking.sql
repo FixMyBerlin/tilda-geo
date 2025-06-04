@@ -53,3 +53,4 @@
 -- CREATE CUTOUT AREAS
 \i '/processing/topics/parking/create_cutouts.sql'
 \i '/processing/topics/parking/cutout_parkings.sql'
+\i '/processing/topics/parking/merge_parkings.sql'
