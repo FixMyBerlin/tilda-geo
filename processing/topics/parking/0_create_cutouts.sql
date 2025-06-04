@@ -118,7 +118,7 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
-    'source', 'obstacle_lineas'
+    'source', 'obstacle_lines'
     /* sql-formatter-enable */
   ) AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
