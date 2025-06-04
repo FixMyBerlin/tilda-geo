@@ -1,6 +1,6 @@
 services:
   processing:
-    image: public.ecr.aws/n0p8j4k5/atlas/processing:${ENVIRONMENT}-latest
+    image: public.ecr.aws/n0p8j4k5/tilda/processing:${ENVIRONMENT}-latest
     container_name: processing
     environment:
       PGHOST: ${DATABASE_HOST}
@@ -37,7 +37,7 @@ services:
     logging:
       driver: journald
   app:
-    image: public.ecr.aws/n0p8j4k5/atlas/app:${ENVIRONMENT}-latest
+    image: public.ecr.aws/n0p8j4k5/tilda/app:${ENVIRONMENT}-latest
     container_name: app
     restart: unless-stopped
     environment:
