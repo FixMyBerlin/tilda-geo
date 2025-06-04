@@ -33,15 +33,19 @@
 \i '/processing/topics/parking/roads/7_build_graph.sql'
 \i '/processing/topics/parking/roads/8_trim_kerbs.sql'
 
--- HANDLE CROSSING and similar structures
+-- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'
 \i '/processing/topics/parking/crossings/2_points_create_kerb_tangents.sql'
 \i '/processing/topics/parking/crossings/3_points_create_crossings.sql'
 
--- HANDLE OBSTACLES and similar structures
+-- HANDLE OBSTACLES
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/0_lines_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/0_points_project_to_kerb.sql'
+
+-- HANDLE SEPARATE PARKINGS
+\i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
+\i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
 
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'

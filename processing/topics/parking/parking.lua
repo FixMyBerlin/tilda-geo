@@ -1,6 +1,8 @@
 require('init')
+local parking_separate_parking_areas = require('parking_separate_parking_areas')
 local parking_obstacle_areas = require('parking_obstacle_areas')
 local parking_obstacle_lines = require('parking_obstacle_lines')
+local parking_separate_parking_points = require('parking_separate_parking_points')
 local parking_obstacle_points = require('parking_obstacle_points')
 local parking_crossing_points = require('parking_crossing_points')
 local off_street_parking_points = require('off_street_parking_points')
@@ -17,13 +19,16 @@ require('Log')
 
 function osm2pgsql.process_node(object)
   parking_crossing_points(object)
+  parking_separate_parking_points(object)
   parking_obstacle_points(object)
 
   off_street_parking_points(object)
 end
 
 function osm2pgsql.process_way(object)
+  parking_separate_parking_areas(object)
   parking_obstacle_areas(object)
+  off_street_parking_areas(object)
 
   parking_obstacle_lines(object)
 
@@ -31,11 +36,10 @@ function osm2pgsql.process_way(object)
   parking_roads(object)
 
   parking_parkings(object)
-
-  off_street_parking_areas(object)
 end
 
 function osm2pgsql.process_relation(object)
+  parking_separate_parking_areas(object)
   parking_obstacle_areas(object)
   off_street_parking_areas(object)
 end

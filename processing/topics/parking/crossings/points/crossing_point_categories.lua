@@ -13,7 +13,6 @@ local crossing_point_categories = {
     end,
     tags = function(tags) return {} end,
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
-    apply_parking_capacity_fallback = false,
   }),
   class_crossing_category.new({
     id = 'crossing_marked',
@@ -25,7 +24,6 @@ local crossing_point_categories = {
     end,
     tags = function(tags) return {} end,
     tags_cc = {},
-    apply_parking_capacity_fallback = false,
   }),
   class_crossing_category.new({
     id = 'crossing_buffer_marking',
@@ -37,7 +35,6 @@ local crossing_point_categories = {
     end,
     tags = function(tags) return {} end,
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
-    apply_parking_capacity_fallback = false,
   }),
   class_crossing_category.new({
     id = 'crossing_kerb_extension',
@@ -49,7 +46,6 @@ local crossing_point_categories = {
     end,
     tags = function(tags) return {} end,
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
-    apply_parking_capacity_fallback = false,
   }),
   class_crossing_category.new({
     -- https://overpass-turbo.eu/s/24o4
@@ -65,7 +61,6 @@ local crossing_point_categories = {
     end,
     tags = function(tags) return { traffic_calming = tags.traffic_calming, direction = tags.direction } end,
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
-    apply_parking_capacity_fallback = false,
   }),
   class_crossing_category.new({
     -- https://overpass-turbo.eu/s/24o4
@@ -79,7 +74,6 @@ local crossing_point_categories = {
     end,
     tags = function(tags) return { traffic_calming = 'choker' } end,
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
-    apply_parking_capacity_fallback = false,
   }),
 }
 
