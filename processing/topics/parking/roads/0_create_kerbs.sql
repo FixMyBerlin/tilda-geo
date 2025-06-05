@@ -8,7 +8,7 @@ SELECT
   osm_type,
   osm_id,
   tags ->> 'name' AS street_name,
-  is_parking,
+  has_parking,
   is_driveway,
   tags,
   meta

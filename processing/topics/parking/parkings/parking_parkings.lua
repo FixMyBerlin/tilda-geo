@@ -2,7 +2,7 @@ require('init')
 require("Log")
 require("MergeTable")
 require("result_tags_parkings")
-require("is_parking")
+require("has_parking")
 require("transform_parkings")
 
 local db_table = osm2pgsql.define_table({
@@ -20,7 +20,7 @@ local db_table = osm2pgsql.define_table({
 })
 
 function parking_parkings(object)
-  if not is_parking(object.tags) then return end
+  if not has_parking(object.tags) then return end
 
   local transformed_objects = transform_parkings(object)
   for _, transformed_object in pairs(transformed_objects) do

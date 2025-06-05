@@ -5,7 +5,7 @@ require("is_road")
 require("is_driveway")
 require("Sanitize")
 
-function is_parking(tags)
+function has_parking(tags)
   -- We expect explict parking tagging on roads.
   -- Either parking allowed in some form; or explicitly disallowed; or missing.
   if is_road(tags) then

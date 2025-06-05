@@ -14,7 +14,7 @@ BEGIN
   FOR kerb IN
     SELECT geom
     FROM _parking_kerbs_merged
-    WHERE is_parking AND ST_DWithin(input_geom, geom, tolerance)
+    WHERE has_parking AND ST_DWithin(input_geom, geom, tolerance)
     ORDER BY ST_Distance(input_geom, geom)
     LIMIT k
   LOOP

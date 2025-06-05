@@ -5,7 +5,7 @@ require("Metadata")
 require("RoadClassificationRoadValue")
 require("road_name")
 require("is_driveway")
-require("is_parking")
+require("has_parking")
 require("road_width")
 
 function result_tags_roads(object)
@@ -21,7 +21,7 @@ function result_tags_roads(object)
     name = road_name(object.tags),
     category = category,
     is_driveway = is_driveway,
-    is_parking = is_parking(object.tags),
+    has_parking = has_parking(object.tags),
     width = width,
     width_confidence = width_confidence,
     width_source = width_source,
