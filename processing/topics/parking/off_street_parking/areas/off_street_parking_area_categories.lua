@@ -9,7 +9,7 @@ local function category_tags(tags)
     amenity = tags.amenity,
     building = tags.building,
     parking = tags.parking,
-    access = sanitize_for_logging(tags.access, { 'employees', 'customers', 'permissive', 'private' }, { 'yes' }),
+    access = sanitize_for_logging(tags.access, { 'employees', 'customers', 'permissive', 'private', 'permit' }, { 'yes' }),
   }
 end
 
