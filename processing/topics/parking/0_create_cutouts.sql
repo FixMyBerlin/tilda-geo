@@ -1,5 +1,7 @@
 DROP TABLE IF EXISTS _parking_cutouts;
 
+DROP TABLE IF EXISTS _parking_discarded_cutouts;
+
 -- INSERT "intersection_corner" buffers (circle)
 -- @var: "5" is the buffer in meter where no parking is allowed legally
 SELECT
@@ -144,11 +146,51 @@ SELECT
 FROM
   _parking_separate_parking_areas_projected;
 
+CREATE INDEX parking_cutout_areas_geom_idx ON _parking_intersections USING GIST (geom);
+
+-- get all ids for cutouts that need to be discarded
+SELECT
+  c.id INTO TEMP to_discard
+FROM
+  _parking_cutouts c
+  JOIN _parking_parkings p ON c.geom && p.geom
+WHERE
+  ST_Intersects (c.geom, p.geom)
+  AND (
+    c.tags ->> 'highway' = 'turning_circle'
+    OR c.tags ->> 'highway' = 'bus_stop'
+  )
+  AND p.tags ->> 'parking' = 'no';
+
+CREATE INDEX to_discard_idx ON to_discard USING BTREE (id);
+
+SELECT
+  * INTO _parking_discarded_cutouts
+FROM
+  _parking_cutouts
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      to_discard
+  );
+
+DELETE FROM _parking_cutouts
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      to_discard
+  );
+
 -- MISC
 ALTER TABLE _parking_cutouts
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
-CREATE INDEX parking_cutout_areas_geom_idx ON _parking_intersections USING GIST (geom);
+ALTER TABLE _parking_discarded_cutouts
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 DO $$
 BEGIN
