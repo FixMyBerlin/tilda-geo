@@ -6,10 +6,6 @@ UPDATE parkings_merged
 SET
   length = ST_Length (geom);
 
-DELETE FROM parkings_merged
-WHERE
-  length < 2.5;
-
 -- estimate capacity
 ALTER TABLE parkings_merged
 ADD COLUMN capacity numeric;
@@ -17,6 +13,10 @@ ADD COLUMN capacity numeric;
 UPDATE parkings_merged
 SET
   capacity = estimate_capacity (length, orientation);
+
+DELETE FROM parkings_merged
+WHERE
+  capacity < 2.5;
 
 -- MISC
 ALTER TABLE parkings_merged
