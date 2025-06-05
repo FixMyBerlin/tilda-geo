@@ -10,7 +10,6 @@ RUN apt update && apt install -y lua5.3 liblua5.3-dev luarocks
 RUN luarocks install busted && \
     luarocks install inspect && \
     luarocks install penlight
-COPY processing /processing/
 
 ENTRYPOINT [ "busted" ]
 CMD ["--pattern=%.test%.lua$", "/processing/topics/"]
@@ -41,6 +40,11 @@ RUN mkdir /data
 
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH=/root/.bun/bin:$PATH
+
+# copy the source code
+COPY processing /processing/
+
+# install bun packages
 RUN bun install
 
 CMD bun run /processing/index.ts
