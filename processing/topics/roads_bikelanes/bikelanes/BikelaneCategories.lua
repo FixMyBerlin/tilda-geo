@@ -550,7 +550,10 @@ local sharedBusLaneBikeWithBus = BikelaneCategory.new({
       return true
     end
     local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
-    if osm2pgsql.has_prefix(trafficSign, "DE:237") and ContainsSubstring(trafficSign, "1024-14") then
+    if osm2pgsql.has_prefix(trafficSign, "DE:237") and (
+        ContainsSubstring(trafficSign, "1024-14") or  -- Bus frei
+        ContainsSubstring(trafficSign, '1026-32') -- Linienverkehr frei
+      ) then
       return true
     end
   end
