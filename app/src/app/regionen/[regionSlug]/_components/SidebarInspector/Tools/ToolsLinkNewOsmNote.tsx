@@ -35,7 +35,8 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
         setShowOsmNotesParam(true)
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         // Note: The zoom will be specified by the `bounds` prop in <OsmNotesNewMap/>
-        setNewOsmNoteMapParam({ zoom: 12, lng, lat })
+        // BUT it needs to be > 17 so that `roundByZoom` keeps precision of 5
+        setNewOsmNoteMapParam({ zoom: 18, lng, lat })
       }}
     >
       Hinweis zu diesem Kartenobjekt erstellen
