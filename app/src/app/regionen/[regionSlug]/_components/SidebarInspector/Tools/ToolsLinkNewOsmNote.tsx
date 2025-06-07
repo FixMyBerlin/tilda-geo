@@ -22,11 +22,9 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
   const { setOsmNewNoteFeature } = useOsmNotesActions()
   const { setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
 
-  const [lng, lat] = pointFromGeometry(geometry)
-
   const { osmType, osmId } = extractOsmTypeIdByConfig(properties, osmIdConfig)
 
-  if (!mainMap || !lng || !lat || !properties || !geometry || !osmType || !osmId) return null
+  if (!mainMap || !properties || !geometry || !osmType || !osmId) return null
 
   return (
     <button
@@ -36,6 +34,7 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         // Note: The zoom will be specified by the `bounds` prop in <OsmNotesNewMap/>
         // BUT it needs to be > 17 so that `roundByZoom` keeps precision of 5
+        const [lng, lat] = pointFromGeometry(geometry)
         setNewOsmNoteMapParam({ zoom: 18, lng, lat })
       }}
     >

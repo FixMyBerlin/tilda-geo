@@ -39,9 +39,9 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
   }
 
   let initialViewState: MapProps['initialViewState'] = {
-    longitude: newNoteMapParam?.lng,
-    latitude: newNoteMapParam?.lat,
     zoom: newNoteMapParam?.zoom,
+    latitude: newNoteMapParam?.lat,
+    longitude: newNoteMapParam?.lng,
   }
   const osmNewNoteFeature = useOsmNewNoteFeature()
   if (osmNewNoteFeature) {
