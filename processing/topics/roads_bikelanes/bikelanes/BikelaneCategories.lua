@@ -154,15 +154,19 @@ local footAndCyclewayShared = BikelaneCategory.new({
       return true
     end
 
-    -- https://www.openstreetmap.org/way/440072364 highway=service
-    if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
-      return true
-    end
-    if tags.segregated == "no" and tags.bicycle == "yes" and tags.foot == "yes"  then
-      return true
-    end
-    if ContainsSubstring(trafficSign, "240") then
-      return true
+    -- Only apply the following conditions on cycleway-like highways.
+    -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
+    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway') then
+      -- https://www.openstreetmap.org/way/440072364 highway=service
+      if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
+        return true
+      end
+      if tags.segregated == "no" and tags.bicycle == "yes" and tags.foot == "yes"  then
+        return true
+      end
+      if ContainsSubstring(trafficSign, "240") then
+        return true
+      end
     end
   end
 })
@@ -189,15 +193,19 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
       return true
     end
 
-    if tags.segregated == "yes" and tags.bicycle == "designated" and tags.foot == "designated" then
+    -- Only apply the following conditions on cycleway-like highways.
+    -- This makes sure direct tagging on other highways classes does not match this category.
+    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway') then
+      if tags.segregated == "yes" and tags.bicycle == "designated" and tags.foot == "designated" then
+          return true
+      end
+      if tags.segregated == "yes" and tags.bicycle == "yes" and tags.foot == "yes"  then
         return true
-    end
-    if tags.segregated == "yes" and tags.bicycle == "yes" and tags.foot == "yes"  then
-      return true
-    end
+      end
 
-    if ContainsSubstring(trafficSign, "241") and tags.highway ~= "footway" then
-      return true
+      if ContainsSubstring(trafficSign, "241") and tags.highway ~= "footway" then
+        return true
+      end
     end
 
     -- Edge case: https://www.openstreetmap.org/way/1319011143#map=18/52.512226/13.288552
