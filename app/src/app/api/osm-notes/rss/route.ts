@@ -1,3 +1,4 @@
+import { bboxPolygon, booleanPointInPolygon } from '@turf/turf'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
@@ -59,6 +60,10 @@ export async function GET(request: NextRequest) {
   const response = await fetch(apiUrl.toString(), { next: { revalidate: 3600 } })
   let rssItems = ''
 
+  // Germany bbox: [5.866, 47.270, 15.042, 55.058]
+  const germanyBbox: [number, number, number, number] = [5.866, 47.27, 15.042, 55.058]
+  const germanyPolygon = bboxPolygon(germanyBbox)
+
   if (!response.ok) {
     rssItems = `
       <item>
@@ -84,6 +89,11 @@ export async function GET(request: NextRequest) {
       `
     } else {
       rssItems = parsed.data.features
+        .filter((feature: any) => {
+          // Only include notes inside Germany bbox
+          const coords = feature.geometry.coordinates
+          return booleanPointInPolygon(coords, germanyPolygon)
+        })
         .map((feature: any) => {
           const props = feature.properties
           const id = props.id
