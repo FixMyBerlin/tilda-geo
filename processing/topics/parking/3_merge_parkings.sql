@@ -1,47 +1,95 @@
--- properties that are in tags and need to be clustered should be separate columns so we can index them properly
+-- Merge lines that have the same (explisitldy defined) properties.
+-- ==========
+--
+-- REMINDER: We need to update those properies manually whenever we add relevant data
+-- When we don't, we will randomly merge lines and loose data.
+-- See processing/topics/parking/parkings/helper/result_tags_parkings.lua
+--
+--
+-- 1. Create a TEMP table and  that we use for clustering
+-- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
+-- The temp table is dropped automatically once our db connection is closed.
 SELECT
   p.*,
-  tags ->> 'orientation' as orientation INTO TEMP clustered_parkings
+  -- REMINDER: Every value here need to be defined in multiple places
+  -- 'street_name' is already a separate column
+  -- 'side' is already a separate column
+  tags ->> 'orientation' as orientation,
+  tags ->> 'parking' as parking,
+  tags ->> 'road_width' as road_width
+  -- TODO LATER: restrictions
+  -- tags ->> 'surface' as surface,
+  -- TODO LATER: surface: Wir müssen die road surface übernehmen auf parking surface aber nur wenn parking surface nil. Und dann ist die confidence medium weil wir es übernommen haben
+  --
+  INTO TEMP cluster_candidates
 FROM
   parkings p;
 
-CREATE INDEX clustered_parkings_idx ON clustered_parkings USING BTREE (osm_id, side, orientation);
+CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
+  osm_id,
+  -- REMINDER: Every value here need to be defined in multiple places
+  street_name,
+  side,
+  orientation,
+  parking,
+  road_width
+  -- /REMINDER
+);
 
--- create one table where connected linestrings are merged which is later used to snap to
+CREATE INDEX cluster_candidates_geom_idx ON cluster_candidates USING GIST (geom);
+
+-- 2. Create the result table.
+-- Create one table where connected linestrings are merged which is later used to snap to
 DROP TABLE IF EXISTS parkings_merged;
 
 -- We merge after grouping by street name and side, so that the merged kerbs should correspond to the street kerbs
 WITH
   clustered AS (
     SELECT
-      street_name,
       osm_id,
       geom,
+      -- REMINDER: Every value here need to be defined in multiple places
+      street_name,
       side,
       orientation,
+      parking,
+      road_width,
+      -- /REMINDER
       ST_ClusterDBSCAN (geom, eps := 0.005, minpoints := 1) OVER (
         PARTITION BY
+          -- REMINDER: Every value here need to be defined in multiple places
           street_name,
           side,
-          orientation
+          orientation,
+          parking,
+          road_width
+          -- /REMINDER
       ) AS cluster_id
     FROM
-      clustered_parkings
+      cluster_candidates
   )
 SELECT
   ROW_NUMBER() OVER () AS id,
-  street_name,
   cluster_id,
+  -- REMINDER: Every value here need to be defined in multiple places
+  street_name,
   side,
   orientation,
+  parking,
+  road_width,
+  -- /REMINDER
   array_agg(osm_id) AS original_osm_ids,
   (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom AS geom INTO parkings_merged
 FROM
   clustered
 GROUP BY
-  orientation,
+  -- REMINDER: Every value here need to be defined in multiple places
   street_name,
   side,
+  orientation,
+  parking,
+  road_width,
+  -- /REMINDER
   cluster_id;
 
 DO $$

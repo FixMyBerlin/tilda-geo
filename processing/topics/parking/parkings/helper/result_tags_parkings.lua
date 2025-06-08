@@ -46,6 +46,8 @@ function result_tags_parkings(object)
   }
   local allowed_access = {"yes", "no", "private", "customers", "delivery", "permissive", "permit", "residents", "designated", "unknown"}
 
+  -- REMINDER: Wenever we add tags, we need to consider updating processing/topics/parking/3_merge_parkings.sql
+  -- Otherwise we risk to data loss due to the mergin of lines.
   local result_tags = {}
   MergeTable(result_tags, object.tags) -- tags specified in transform_parkings()
 
