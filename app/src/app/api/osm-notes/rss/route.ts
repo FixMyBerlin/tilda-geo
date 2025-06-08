@@ -92,12 +92,31 @@ export async function GET(request: NextRequest) {
           const updatedAt =
             comments.length > 0 ? comments[comments.length - 1].date : props.date_created
 
+          // Build description with per-comment status change info
+          let lastStatus: string | null = null
           const description = comments
-            .map((comment: any) => {
+            .map((comment: any, idx: number) => {
               const user = comment.user || 'Anonymous'
               const date = comment.date
               const text = comment.text
-              return `<p><strong>${user} – ${new Date(date).toLocaleString('de-DE')}:</strong></p><blockquote>${text}</blockquote>`
+              let statusChange = ''
+              // Detect status change for this comment
+              if (comment.action === 'closed' && lastStatus !== 'closed') {
+                statusChange = '<em>Status: open ⇒ closed</em><br>'
+                lastStatus = 'closed'
+              } else if (
+                (comment.action === 'opened' || comment.action === 'reopened') &&
+                lastStatus === 'closed'
+              ) {
+                statusChange = '<em>Status: closed ⇒ open</em><br>'
+                lastStatus = 'open'
+              } else if (
+                idx === 0 &&
+                (comment.action === 'opened' || comment.action === 'reopened')
+              ) {
+                lastStatus = 'open'
+              }
+              return `<p><strong>${user} – ${new Date(date).toLocaleString('de-DE')}:</strong></p>${statusChange}<blockquote>${text}</blockquote>`
             })
             .join('<hr>')
 
