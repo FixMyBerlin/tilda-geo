@@ -11,7 +11,7 @@ export const missing_oneway__mapillary: CampaignType = {
   description:
     'Diese Karte zeigt Wege, bei denen die Angabe zur Verkehrsrichtung der Radinfrastruktur fehlt.',
   task: '**Bitte ergänze, ob in eine oder beide Richtungen gefahren werden darf.**',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1ops5da.54i84.3cw&v=2', // TODO
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.hreog5.16g9vk&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,

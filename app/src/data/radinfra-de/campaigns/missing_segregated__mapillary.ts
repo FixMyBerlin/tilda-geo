@@ -11,7 +11,7 @@ export const missing_segregated__mapillary: CampaignType = {
   description:
     'Diese Kampagne enthält Wege, die sowohl von Fahrrad- als auch Fußverkehr genutzt werden. Es fehlt aber die Angabe, ob eine Trennung der Verkehrsformen vorliegt.',
   task: '**Bitte ergänze die Angabe `segregated=yes` oder `no`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.1a3pg.f6&v=2', // TODO
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16g9vm&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,

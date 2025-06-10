@@ -10,7 +10,7 @@ export const currentness_too_old__mapillary: CampaignType = {
   visibility: 'promote',
   description: 'Diese Kampagne enthält Wege, die seit mehr als 10 Jahren nicht editiert wurden.',
   task: '**Bitte prüfe und aktualisiere diese Infrastruktur.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=508ozp.4nyd.16g9vl&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.54gn9.16g9vk&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,

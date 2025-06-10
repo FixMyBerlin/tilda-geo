@@ -10,7 +10,7 @@ export const missing_surface__mapillary: CampaignType = {
   visibility: 'secondary',
   description: 'Diese Karte zeigt Wege, bei denen die Angabe zur Oberfläche fehlt.',
   task: '**Bitte ergänze die Oberfläche / den Belag `surface` und gerne auch die Oberflächenqualität `smoothness`.**',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.k0cbo.f6&v=2', // TODO
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16g9vs&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,

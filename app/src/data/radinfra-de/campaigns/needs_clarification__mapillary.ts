@@ -11,7 +11,7 @@ export const needs_clarification__mapillary: CampaignType = {
   description:
     'Diese Kampagne enthält Radinfrastruktur, die nicht eindeutig kategorisiert werden konnte.',
   task: '**Bitte prüfe das Tagging und ergänze weitere Attribute, die bei der Kategorisierung helfen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.2j1vo.f6&v=2', // TODO
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16gz5s&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,

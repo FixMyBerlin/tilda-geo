@@ -11,7 +11,7 @@ export const mixed_cycleway_both__mapillary: CampaignType = {
   description:
     'Dieser Weg hat Tags die sich überschneiden: `cycleway` (Angabe für beide Seiten) in Kombination mit `cycleway:left|right` (Angabe für eine bestimmte Seite).',
   task: '**Bitte kontrolliere die Angaben und ändere sie, so dass sie eindeutig sind.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.2j1vo.3dc&v=2', // TODO
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16gg74&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,

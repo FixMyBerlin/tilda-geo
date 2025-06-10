@@ -10,7 +10,7 @@ export const missing_traffic_sign__mapillary: CampaignType = {
   visibility: 'secondary',
   description: 'Diese Karte enthält Radinfrastruktur der ein Verkehrszeichen-Tag fehlt.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder ein explizites `traffic_sign=none`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.13zkn8.f6&v=2', // TODO
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16g9wg&v=2',
   maprouletteChallenge: {
     enabled: true,
     // id: ,
