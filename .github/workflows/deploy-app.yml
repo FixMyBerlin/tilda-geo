@@ -61,8 +61,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            public.ecr.aws/n0p8j4k5/atlas/app:${{ github.sha }}
-            public.ecr.aws/n0p8j4k5/atlas/app:${{ inputs.ENVIRONMENT }}-latest
+            public.ecr.aws/n0p8j4k5/tilda/app:${{ github.sha }}
+            public.ecr.aws/n0p8j4k5/tilda/app:${{ inputs.ENVIRONMENT }}-latest
           build-args: |
             NEXT_PUBLIC_APP_ENV=${{ inputs.NEXT_PUBLIC_APP_ENV }}
             NEXT_PUBLIC_APP_ORIGIN=${{ inputs.NEXT_PUBLIC_APP_ORIGIN }}
@@ -71,7 +71,7 @@ jobs:
       - name: Push image
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n0p8j4k5/
-          docker push --all-tags public.ecr.aws/n0p8j4k5/atlas/app
+          docker push --all-tags public.ecr.aws/n0p8j4k5/tilda/app
   restart_app:
     runs-on: ubuntu-latest
     needs: [diff_app, build_app]
