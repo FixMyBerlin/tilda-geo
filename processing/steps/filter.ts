@@ -81,10 +81,19 @@ export async function idFilter(fileName: string, ids: string) {
   return { fileName: ID_FILTERED_FILE, fileChanged: true }
 }
 
+/**
+ * Createa filtered pbf files based on bboxes.
+ * Skip if present but never when fileChanged==true
+ * @param filename
+ * @param outputName
+ * @param bboxes Array of Bboxes as defined int processing/constants/topics.const.ts
+ * @param fileChanged whether the file has changed since the last run
+ */
 export async function bboxesFilter(
   fileName: string,
   outputName: string,
   bboxes: Readonly<Array<TopicConfigBbox>>,
+  fileChanged: boolean,
 ) {
   // Generate the osmium filter file.
   // We need to merge the bboxes to prevent https://github.com/osmcode/osmium-tool/issues/266
@@ -100,16 +109,19 @@ export async function bboxesFilter(
 
   const filteredPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
   const filterDirChanged = await directoryHasChanged(OSMIUM_FILTER_BBOX_DIR)
-  if (filteredPbfExists && !filterDirChanged) {
+  if (!fileChanged && filteredPbfExists && !filterDirChanged) {
     console.log(
       '⏩ Skipping osmium extract for bboxFilter. The directory that stores the bbox filter geojson did not change.',
-      JSON.stringify({ filteredPbfExists, OSMIUM_FILTER_BBOX_FILE }),
+      JSON.stringify({ filteredPbfExists, OSMIUM_FILTER_BBOX_FILE, fileChanged }),
     )
     return
   }
   updateDirectoryHash(OSMIUM_FILTER_BBOX_DIR)
 
-  console.log('ℹ️ Filtering the OSM file with bboxes...', OSMIUM_FILTER_BBOX_FILE)
+  console.log(
+    'ℹ️ Filtering the OSM file with bboxes...',
+    JSON.stringify({ OSMIUM_FILTER_BBOX_FILE, fileChanged }),
+  )
   try {
     await $`osmium extract \
               --overwrite \
