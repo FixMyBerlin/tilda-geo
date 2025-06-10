@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START merging kerbs %', clock_timestamp(); END $$;
+
 -- create one table where connected linestrings are merged which is later used to snap to
 DROP TABLE IF EXISTS _parking_kerbs_merged;
 
@@ -43,9 +45,3 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 CREATE INDEX parking_kerbs_merged_geom_idx ON _parking_kerbs_merged USING GIST (geom);
 
 CREATE INDEX parking_kerbs_merged_idx ON _parking_kerbs_merged USING GIN (original_osm_ids);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished merging kerbs %', clock_timestamp();
-END
-$$;

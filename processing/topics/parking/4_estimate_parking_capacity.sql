@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START estimating parking capacity at %', clock_timestamp(); END $$;
+
 -- add length and delete short parkings
 ALTER TABLE parkings_merged
 ADD COLUMN length numeric;
@@ -26,9 +28,3 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 CREATE INDEX parkings_merged_geom_idx ON parkings_merged USING GIST (geom);
 
 CREATE INDEX parkings_merged_idx ON parkings_merged USING GIN (original_osm_ids);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished estimating parking capacity at %', clock_timestamp();
-END
-$$;

@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START creating kerbs %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_kerbs;
 
 SELECT
@@ -43,9 +45,3 @@ CREATE INDEX parking_kerbs_moved_joint_idx_side ON _parking_kerbs USING BTREE (o
 CREATE INDEX parking_kerbs_moved_joint_name_side ON _parking_kerbs USING BTREE (street_name, side);
 
 CREATE INDEX parking_kerbs_moved_geom_idx ON _parking_kerbs USING GIST (geom);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished creating kerbs %', clock_timestamp();
-END
-$$;

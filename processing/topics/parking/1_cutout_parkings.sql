@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START cutting out parkings at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS parkings;
 
 SELECT
@@ -37,9 +39,3 @@ ALTER TABLE parkings
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished cutting out parkings at %', clock_timestamp();
-END
-$$;

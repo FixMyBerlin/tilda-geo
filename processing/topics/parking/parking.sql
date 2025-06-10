@@ -27,8 +27,6 @@
 \i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
 \i '/processing/topics/parking/custom_functions/get_pair_normal.sql'
 
-
-
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
 \i '/processing/topics/parking/roads/1_merge_kerbs.sql'
@@ -55,7 +53,6 @@
 -- \i '/processing/topics/parking/separate_parkings/1_parking_corners.sql'
 -- \i '/processing/topics/parking/separate_parkings/1_parking_normals.sql'
 
-
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
 
@@ -65,3 +62,5 @@
 \i '/processing/topics/parking/2_cutout_separate_parkings.sql'
 \i '/processing/topics/parking/3_merge_parkings.sql'
 \i '/processing/topics/parking/4_estimate_parking_capacity.sql'
+
+DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;

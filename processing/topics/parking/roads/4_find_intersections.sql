@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START finding intersections at %', clock_timestamp(); END $$;
+
 -- PREPARE
 DROP TABLE IF EXISTS _parking_intersections;
 
@@ -55,9 +57,3 @@ ALTER TABLE _parking_intersections
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_intersections_idx ON _parking_intersections USING BTREE (node_id);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished finding intersections at %', clock_timestamp();
-END
-$$;

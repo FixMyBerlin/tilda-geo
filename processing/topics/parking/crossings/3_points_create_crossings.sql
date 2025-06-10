@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START creating kerb tangents %', clock_timestamp(); END $$;
+
 --
 CREATE OR REPLACE FUNCTION create_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$
 DECLARE
@@ -35,9 +37,3 @@ FROM
 -- MISC
 ALTER TABLE _parking_crossings
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished creating kerb tangents %', clock_timestamp();
-END
-$$;

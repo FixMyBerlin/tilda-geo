@@ -1,4 +1,5 @@
--- PREPARE
+DO $$ BEGIN RAISE NOTICE 'START calculating intersection corners at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_intersection_corners;
 
 -- for each road intersection where the roads incide with an angle smaller than 140 degrees
@@ -25,9 +26,3 @@ WHERE
 -- CLEANUP
 ALTER TABLE _parking_intersection_corners
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished calculating intersection corners at %', clock_timestamp();
-END
-$$;

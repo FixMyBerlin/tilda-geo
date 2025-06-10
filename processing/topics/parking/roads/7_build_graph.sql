@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START building graph at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_edges;
 
 SELECT
@@ -11,9 +13,3 @@ WHERE
 
 ALTER TABLE _parking_edges
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished building graph at %', clock_timestamp();
-END
-$$;

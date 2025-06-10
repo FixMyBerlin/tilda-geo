@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START calculating parking normals at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_separate_parking_normals;
 
 SELECT
@@ -15,9 +17,3 @@ ALTER TABLE _parking_separate_parking_normals
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX separate_parking_normals_idx ON _parking_separate_parking_normals USING BTREE (osm_id);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished calculating parking normals at %', clock_timestamp();
-END
-$$;

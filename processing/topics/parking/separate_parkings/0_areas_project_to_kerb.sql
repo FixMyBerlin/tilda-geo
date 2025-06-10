@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp(); END $$;
+
 -- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
@@ -25,9 +27,3 @@ ALTER TABLE _parking_separate_parking_areas_projected
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX idx_parking_separate_parking_areas_projected_geom ON _parking_separate_parking_areas_projected USING gist (geom);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished projecting obstacle areas at %', clock_timestamp();
-END
-$$;

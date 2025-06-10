@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START creating cutout areas at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_cutouts;
 
 DROP TABLE IF EXISTS _parking_discarded_cutouts;
@@ -191,9 +193,3 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 ALTER TABLE _parking_discarded_cutouts
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished creating cutout areas at %', clock_timestamp();
-END
-$$;

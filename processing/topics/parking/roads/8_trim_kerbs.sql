@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START trimming kerbs at %', clock_timestamp(); END $$;
+
 WITH
   flat_kerbs AS (
     SELECT
@@ -24,9 +26,3 @@ WHERE
   k.id = fk.kerb_id
   AND k.is_driveway
   AND GeometryType (k.geom) = 'LINESTRING';
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished trimming kerbs at %', clock_timestamp();
-END
-$$;

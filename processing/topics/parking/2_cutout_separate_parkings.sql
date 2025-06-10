@@ -1,3 +1,7 @@
+DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_timestamp(); END $$;
+
+-- INFO: Drop table happesn in cutout_parkings.sql
+-- PROCESS
 INSERT INTO
   parkings (id, osm_type, osm_id, tags, meta, geom)
 SELECT
@@ -26,9 +30,3 @@ FROM
       p.geom
     )
   ) AS d;
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished cutting out separate parkings at %', clock_timestamp();
-END
-$$;

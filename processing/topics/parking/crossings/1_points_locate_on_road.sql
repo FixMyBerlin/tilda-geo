@@ -1,4 +1,5 @@
--- PREPARE
+DO $$ BEGIN RAISE NOTICE 'START locating obstacle points on kerb at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_crossing_points_located;
 
 SELECT
@@ -19,9 +20,3 @@ FROM
 -- MISC
 ALTER TABLE _parking_crossing_points_located
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished locating obstacle points on kerb at %', clock_timestamp();
-END
-$$;

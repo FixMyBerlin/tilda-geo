@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
+
 -- Merge lines that have the same (explisitldy defined) properties.
 -- ==========
 --
@@ -91,9 +93,3 @@ GROUP BY
   road_width,
   -- /REMINDER
   cluster_id;
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished merging parkings %', clock_timestamp();
-END
-$$;
