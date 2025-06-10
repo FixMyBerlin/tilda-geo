@@ -43,9 +43,9 @@ async function runSQL(topic: Topic) {
  * Run the given topic's lua file with osm2pgsql on the given file
  */
 async function runLua(fileName: string, topic: Topic) {
-  console.log('runTopic: runLua', topic)
   const filePath = filteredFilePath(fileName)
   const luaFile = `${mainFilePath(topic)}.lua`
+  console.log('runTopic: runLua', topic, JSON.stringify({ luaFile, filePath }))
   try {
     // Did not find an easy way to use $(Shell) and make the `--bbox` optional
     await $`osm2pgsql \
@@ -160,7 +160,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Bboxes: Create filtered source file
     if (innerBboxes) {
       innerFileName = `${topic}_extracted.osm.pbf`
-      await bboxesFilter(fileName, innerFileName, innerBboxes)
+      await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
     }
 
     // Get all tables related to `topic`
