@@ -21,6 +21,7 @@ function parseParameters() {
     processOnlyBbox: process.env.PROCESS_ONLY_BBOX
       ? (process.env.PROCESS_ONLY_BBOX.split(',').map((t) => Number(t.trim())) as TopicConfigBbox)
       : null,
+    osm2pgsqlLogLevel: process.env.OSM2PGSQL_LOG_LEVEL || 'info',
   }
 }
 

@@ -15,6 +15,7 @@ services:
       SKIP_WARM_CACHE:
       PROCESS_ONLY_TOPICS:
       PROCESS_ONLY_BBOX:
+      OSM2PGSQL_LOG_LEVEL:
       TILES_URL:
       ID_FILTER:
       ENVIRONMENT:

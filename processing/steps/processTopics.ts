@@ -54,6 +54,7 @@ async function runLua(fileName: string, topic: Topic) {
               --output=flex \
               --extra-attributes \
               --style=${luaFile} \
+              --log-level=${params.osm2pgsqlLogLevel} \
               ${filePath}`
   } catch (error) {
     throw new Error(`Failed to run lua file "${luaFile}": ${error}`)
