@@ -17,6 +17,11 @@ local db_table = osm2pgsql.define_table({
   },
 })
 
+-- NOTE: This is unused ATM.
+-- See https://github.com/FixMyBerlin/private-issues/issues/2557 for more.
+-- We leave it in because it is fast and it's easier to evaluate the linked issue based on the data.
+-- TOOD: Once used, remove the "UNUSED_" from the category ID.
+--
 local function parking_crossing_lines(object)
   if object.is_closed then return end
   if next(object.tags) == nil then return end

@@ -4,6 +4,7 @@ require('Log')
 
 crossing_line_categories = {
   class_crossing_category.new({
+    -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
     id = 'crossing_zebra_way',
     side_schema = 'none',
     side_key = nil,
@@ -30,6 +31,7 @@ crossing_line_categories = {
     tags_cc = {},
   }),
   class_crossing_category.new({
+    -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
     id = 'crossing_table_way',
     side_schema = 'none',
     side_key = nil,
@@ -55,6 +57,7 @@ crossing_line_categories = {
     tags_cc = {},
   }),
   class_crossing_category.new({
+    -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
     id = 'crossing_way',
     side_schema = 'none',
     side_key = nil,
