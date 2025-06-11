@@ -6,7 +6,7 @@ export const currentness_too_old: CampaignType = {
   pubDate: new Date('2025-01-01T15:00'),
   category: 'currentness',
   recommendedAction: 'maproulette',
-  visibility: 'promote',
+  visibility: 'hidden',
   description: 'Diese Kampagne enthält Wege, die seit mehr als 10 Jahren nicht editiert wurden.',
   task: '**Bitte prüfe und aktualisiere diese Infrastruktur.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.a0qx0.f6&v=2',

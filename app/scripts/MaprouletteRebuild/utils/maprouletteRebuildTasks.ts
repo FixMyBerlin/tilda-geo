@@ -1,4 +1,4 @@
-import { campaignsIncludingTest } from '@/src/data/radinfra-de/campaigns'
+import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { CampaignMaprouletteSchema } from '@/src/data/radinfra-de/schema/campaignsSchema'
 import chalk from 'chalk'
 import { maprouletteChallengeUrl } from '../../MaprouletteCreate/utils/maprouletteChallengeUrl'
@@ -10,7 +10,7 @@ export const logPrefix = '[MaprouletteRebuild]'
 export async function maprouletteRebuildTasks(filter?: string | undefined) {
   console.log(logPrefix, 'START', filter ? `– ${yellow(`using filter "${filter}"`)}` : '')
 
-  for await (const campaign of campaignsIncludingTest) {
+  for await (const campaign of campaigns) {
     // SKIP WHEN MR OFF
     if (campaign.maprouletteChallenge.enabled === false) {
       console.log('\t', logPrefix, white('↷ SKIP'), campaign.id)

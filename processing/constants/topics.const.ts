@@ -21,10 +21,10 @@ const config = [
   ['trafficSigns', null],
   ['boundaries', null],
   ['places', null],
-  ['landuse', null],
   ['publicTransport', null],
   ['poiClassification', null],
   ['barriers', null],
+  ['landuse', null], // requires roads_bikelanes, places
   ['parking', [bboxBerlin, bboxBiBi]],
 ] as const
 

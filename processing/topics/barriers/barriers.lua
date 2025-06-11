@@ -56,14 +56,14 @@ local function isAreaBarrier(object)
   local isBarrier = false
 
   if tags.natural == 'water' then
-    local area = object:as_multipolygon():transform(3857):area()
+    local area = object:as_multipolygon():transform(5243):area()
     tags.area = area
     -- TODO: IMO it would be better to have this check on the single polygons of a multipolygon
     if area > 100000 then
       isBarrier = true
       tags.area = area
     elseif object.type == 'way' then
-      local circumference = object:as_linestring():transform(3857):length()
+      local circumference = object:as_linestring():transform(5243):length()
       tags.circumference = circumference
       if circumference > 1000 then
         isBarrier = isBarrier or (area / circumference) < 3

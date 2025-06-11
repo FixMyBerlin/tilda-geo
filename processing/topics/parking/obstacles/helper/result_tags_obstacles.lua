@@ -1,26 +1,24 @@
 require('init')
-require("CopyTags")
-require("MergeTable")
-require("DefaultId")
-require("Metadata")
-require("Log")
+require('CopyTags')
+require('MergeTable')
+require('DefaultId')
+require('Metadata')
+require('Log')
 
-function result_tags_obstacles(result)
-  local id = DefaultId(result.object) .. "/" .. result.object.tags.side
+local function result_tags_obstacles(result)
+  local id = DefaultId(result.object)
 
   local result_tags = {
     category = result.category.id,
     source = result.category.source,
-    side = result.object.tags.side,
     perform_buffer = result.category:get_perform_buffer(result.object.tags),
-    perform_snap = result.category.perform_snap,
   }
 
   local global_tags_cc = {
-    "mapillary",
+    'mapillary',
   }
-  CopyTags(result_tags, result.object.tags, global_tags_cc, "osm_")
-  CopyTags(result_tags, result.object.tags, result.category.tags_cc, "osm_")
+  CopyTags(result_tags, result.object.tags, global_tags_cc, 'osm_')
+  CopyTags(result_tags, result.object.tags, result.category.tags_cc, 'osm_')
   MergeTable(result_tags, result.category:get_tags(result.object.tags)) -- those are sanitized already
 
   local result_meta = Metadata(result)
@@ -32,3 +30,5 @@ function result_tags_obstacles(result)
     meta = result_meta,
   }
 end
+
+return result_tags_obstacles

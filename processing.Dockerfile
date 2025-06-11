@@ -7,10 +7,13 @@ RUN apt update && apt install -y lua5.3 liblua5.3-dev luarocks
 # `busted` is our testing framework https://lunarmodules.github.io/busted/
 # `inspect` is to print / inspect tables https://github.com/kikito/inspect.lua
 # `penlight` is to add python like helpers to lua https://lunarmodules.github.io/Penlight/, https://github.com/lunarmodules/Penlight, https://luarocks.org/modules/tieske/penlight
+# `ftcsv` is to read CSV files https://github.com/FourierTransformer/ftcsv, https://luarocks.org/modules/fouriertransformer/ftcsv
+#
+# REMINDER: `docker compose build processing` is required to install new packages
 RUN luarocks install busted && \
     luarocks install inspect && \
-    luarocks install penlight
-COPY processing /processing/
+    luarocks install penlight && \
+    luarocks install ftcsv
 
 ENTRYPOINT [ "busted" ]
 CMD ["--pattern=%.test%.lua$", "/processing/topics/"]
@@ -41,6 +44,11 @@ RUN mkdir /data
 
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH=/root/.bun/bin:$PATH
+
+# copy the source code
+COPY processing /processing/
+
+# install bun packages
 RUN bun install
 
 CMD bun run /processing/index.ts

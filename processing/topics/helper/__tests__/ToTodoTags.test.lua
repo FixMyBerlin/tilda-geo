@@ -10,7 +10,7 @@ describe("ToTodoTags", function()
     local todos = CollectTodos(RoadTodos, tagsObject, {})
       local result = ToTodoTags(todos)
 
-    assert.are.same(result, { ['deprecated_cycleway_shared'] = 'prio1' })
+    assert.are.same(result, { ['deprecated_cycleway_shared'] = 'prio2' })
   end)
 
   it('Handle empty list', function()

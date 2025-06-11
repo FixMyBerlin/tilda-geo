@@ -2,8 +2,8 @@ import { $ } from 'bun'
 import { basename, join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
-import { readPersistent, writePersistent } from '../utils/persistentData'
-import { synologyLogError, synologyLogInfo } from '../utils/synology'
+import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
+import { synologyLogError } from '../utils/synology'
 import { filteredFilePath } from './filter'
 
 /**
@@ -38,10 +38,13 @@ export async function waitForFreshData() {
     // TEMPORARY: Some more debugging info
     const log = {
       today: new Date().toISOString(),
-      file: new Date(lastModified).toISOString(),
+      newFileLastModified: new Date(lastModified).toISOString(),
       next: todaysDate === new Date(lastModified).toDateString() ? 'process' : 'wait',
     }
-    synologyLogInfo(`waitForFreshData try ${tries}: ${JSON.stringify({ log }, undefined, 1)}`)
+    console.log(
+      `waitForFreshData try ${tries}: ${JSON.stringify(log, undefined, 0)}`,
+      response.headers,
+    )
 
     // Check if last modified date is today
     const lastModifiedDate = new Date(lastModified).toDateString()
@@ -95,7 +98,7 @@ export async function downloadFile() {
   if (!eTag) {
     throw new Error('No ETag found')
   }
-  if (fileExists && eTag === (await readPersistent(fileName))) {
+  if (fileExists && eTag === (await readHashFromFile(fileName))) {
     console.log('⏩ Skipped download because the file has not changed.')
     return { fileName, fileChanged: false }
   }
@@ -111,7 +114,7 @@ export async function downloadFile() {
   }
 
   // Save etag
-  writePersistent(fileName, eTag)
+  writeHashForFile(fileName, eTag)
 
   return { fileName, fileChanged: true }
 }

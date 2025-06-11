@@ -53,38 +53,83 @@ async function callLuaForNames(luaFilename: 'ExtractBikelaneTodos' | 'ExtractRoa
   }
 }
 
+// The sort here is also the sort in the dropdown of the subcategory.
+function sortMapillarySpecial(a: string, b: string) {
+  // Remove __mapillary for base comparison
+  const baseA = a.replace(/__mapillary$/, '')
+  const baseB = b.replace(/__mapillary$/, '')
+  if (baseA === baseB) {
+    // If both are the same base, non-mapillary comes first
+    if (a.endsWith('__mapillary')) return 1
+    if (b.endsWith('__mapillary')) return -1
+    return 0
+  }
+  return baseA < baseB ? -1 : 1
+}
+
 async function writeTodoIdTypes() {
   const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
   const typeFile = Bun.file(typeFilePath)
 
   const bikelaneTodoNames = await callLuaForNames('ExtractBikelaneTodos')
+  const bikelaneTodos = bikelaneTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
   const bikelaneTodoNamesTableAndField = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === false)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
   const bikelaneTodoNamesTableOnly = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === true)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
 
   const roadTodoNames = await callLuaForNames('ExtractRoadTodos')
+  const roadTodos = roadTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
   const roadTodoNamesTableAndField = roadTodoNames
     .filter((e) => e.todoTableOnly === false)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
   const roadTodoNamesTableOnly = roadTodoNames
     .filter((e) => e.todoTableOnly === true)
     .map((e) => e.id)
+    .sort(sortMapillarySpecial)
+
+  const todos = [...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id).sort(sortMapillarySpecial)
 
   const fileContent = `
-  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
+  export const bikelaneTodoIds = [${bikelaneTodos.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
+  export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
+
+  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
 
-  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
+  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
-  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}] as const
+  export const roadTodoIds = [${roadTodos.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
+  export type RoadTodoId = (typeof roadTodoIds)[number]
+
+  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
 
-  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}] as const
+  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
   export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
+
+  export const todoIds = [${todos.map((name) => `'${name}'`).join(',')}
+  // (prettier: one line per entry)
+  ] as const
+  export type TodoId = (typeof todoIds)[number]
   `
 
   const content = prefixGeneratedFiles(fileContent)

@@ -1,6 +1,7 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
+import { Markdown } from '@/src/app/_components/text/Markdown'
 import { isProd } from '@/src/app/_components/utils/isEnv'
-import { CheckIcon, LinkIcon, LockClosedIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, LockClosedIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useDataParam } from '../../../_hooks/useQueryState/useDataParam'
 import { useRegionDatasets } from '../../../_hooks/useRegionDatasets/useRegionDatasets'
@@ -54,25 +55,12 @@ export const SelectDataset = ({
             aria-hidden="true"
           />
           <div className="flex grow justify-between gap-1 font-medium">
-            <span>
-              {name}
-              {selected && updatedAt && <span className="text-gray-500"> {updatedAt}</span>}
-            </span>
+            <span>{name}</span>
             {!isPublic && (
               <LockClosedIcon
                 className="h-4 w-4 flex-none text-gray-400"
                 title="Datensatz nur für angemeldete Nutzer:innen mit Rechten für die Region sichtbar."
               />
-            )}
-            {!isProd && githubUrl && (
-              <LinkExternal
-                blank
-                href={githubUrl}
-                className="absolute bottom-0 right-0 text-pink-500 hover:text-pink-800"
-                title='Öffne den Datensatz im "tilda-static-data" Repository auf GitHub; Link nur in Dev und Staging sichtbar.'
-              >
-                <LinkIcon className="h-4 w-4" />
-              </LinkExternal>
             )}
           </div>
         </div>
@@ -81,42 +69,56 @@ export const SelectDataset = ({
             {description}
           </p>
         )}
-        {selected && dataSourceMarkdown && (
-          // <Markdown markdown={dataSourceMarkdown} />
-          <p className="text-xs leading-4">{dataSourceMarkdown}</p>
-        )}
-        {selected && attributionHtml && (
-          <>
-            <p
-              className="mt-1 text-xs leading-4"
-              dangerouslySetInnerHTML={{ __html: attributionHtml }}
-            />
-            {licence && (
-              <p className="text-xs leading-4">
-                Lizenz: {licence}
-                {licenceOsmCompatible === 'licence' && ' (OSM-kompatibel)'}
-                {licenceOsmCompatible === 'waiver' && ' (OSM kompatible Zusatzvereinbarung)'}
-                {licenceOsmCompatible === 'no' && ' (nicht OSM kompatibel)'}
-              </p>
-            )}
-          </>
-        )}
-        {selected && legends && Boolean(legends?.length) && (
-          <ul>
-            {legends.map((legend) => {
-              return (
-                <li
-                  className="group relative mt-1 flex items-center font-normal leading-tight"
-                  key={legend.id}
-                >
-                  <div className="h-5 w-5 flex-none">{iconFromLegend(legend)}</div>
-                  <LegendNameDesc name={legend.name} desc={legend.desc} />
-                </li>
-              )
-            })}
-          </ul>
-        )}
       </button>
+      {selected && (
+        <div className="border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pb-1.5 pt-1 text-xs leading-4 prose-a:underline-offset-1">
+          {updatedAt && <p>{updatedAt}</p>}
+          {dataSourceMarkdown && (
+            <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
+            // <p className="text-xs leading-4">{dataSourceMarkdown}</p>
+          )}
+          {attributionHtml && (
+            <>
+              <p dangerouslySetInnerHTML={{ __html: attributionHtml }} />
+              {licence && (
+                <p>
+                  Lizenz: {licence}
+                  {licenceOsmCompatible === 'licence' && ' (OSM-kompatibel)'}
+                  {licenceOsmCompatible === 'waiver' && ' (OSM kompatible Zusatzvereinbarung)'}
+                  {licenceOsmCompatible === 'no' && ' (nicht OSM kompatibel)'}
+                </p>
+              )}
+            </>
+          )}
+          {legends && Boolean(legends?.length) && (
+            <ul>
+              {legends.map((legend) => {
+                return (
+                  <li
+                    className="group relative mt-1 flex items-center font-normal leading-tight"
+                    key={legend.id}
+                  >
+                    <div className="h-5 w-5 flex-none">{iconFromLegend(legend)}</div>
+                    <LegendNameDesc name={legend.name} desc={legend.desc} />
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          {!isProd && githubUrl && (
+            <p>
+              <LinkExternal
+                blank
+                href={githubUrl}
+                className="text-pink-500 hover:text-pink-800"
+                title='Öffne den Datensatz im "tilda-static-data" Repository auf GitHub; Link nur in Dev und Staging sichtbar.'
+              >
+                Github Statische Daten
+              </LinkExternal>
+            </p>
+          )}
+        </div>
+      )}
     </li>
   )
 }

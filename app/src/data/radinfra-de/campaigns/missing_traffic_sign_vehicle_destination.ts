@@ -6,7 +6,7 @@ export const missing_traffic_sign_vehicle_destination: CampaignType = {
   pubDate: new Date('2024-10-01T15:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description:
     'Diese Kampagne enthält Fahrradstraßen mit der Freigabe »Anlieger frei« für Kfz. Es fehlt jedoch das zugehörige Zusatzzeichen.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder korrigiere den Zugangs-Tag`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',

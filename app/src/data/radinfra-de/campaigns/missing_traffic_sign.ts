@@ -2,11 +2,11 @@ import { CampaignType } from '../schema/campaignsSchema'
 
 export const missing_traffic_sign: CampaignType = {
   id: 'missing_traffic_sign',
-  title: 'Ergänze das Verkehrszeichen (Radinfrastruktur)',
+  title: 'Ergänze das Verkehrszeichen der Radinfrastruktur',
   pubDate: new Date('2025-01-01T15:00'),
   category: 'traffic_signs',
   recommendedAction: 'map',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description: 'Diese Karte enthält Radinfrastruktur der ein Verkehrszeichen-Tag fehlt.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder ein explizites `traffic_sign=none`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.13zkn8.f6&v=2',

@@ -1,5 +1,5 @@
 import { mapillaryCoverageDateString } from '@/src/data/mapillaryCoverage.const'
-import { bikelaneTodoIds, roadTodoIds, TodoId } from '@/src/data/processingTypes/todoIds.const'
+import { TodoId, todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { campaignCategorySelect } from '@/src/data/radinfra-de/schema/utils/campaignCategorySelect'
 import { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
@@ -53,7 +53,7 @@ export const subcat_radinfra_campaigns: FileMapDataSubcategory = {
     // NOTE: We still iterate over the generated campaign ids here.
     // This way we only show what the data really has.
     // And we also show unfinished campaigns that don't have text, yet.
-    ...[...bikelaneTodoIds, ...roadTodoIds].map((todoId) => {
+    ...todoIds.map((todoId) => {
       const campaign = campaigns.find((c) => c.id === todoId)
       const category = campaignCategorySelect.find(
         (entry) => entry.value === campaign?.category,

@@ -1,13 +1,13 @@
-describe("`is_parking`", function()
+describe("`has_parking`", function()
   require('init')
-  require("is_parking")
+  require("has_parking")
   require("Log")
 
   it('ignores non highway', function()
     local tags = {
       ["foo"] = 'bar',
     }
-    local result = is_parking(tags)
+    local result = has_parking(tags)
     assert.are.is_false(result)
   end)
 
@@ -15,7 +15,7 @@ describe("`is_parking`", function()
     local tags = {
       ["highway"] = 'residential',
     }
-    local result = is_parking(tags)
+    local result = has_parking(tags)
     assert.are.is_true(result)
   end)
 
@@ -24,7 +24,7 @@ describe("`is_parking`", function()
       ["highway"] = 'service',
       ["parking:left"] = 'lane',
     }
-    local result = is_parking(tags)
+    local result = has_parking(tags)
     assert.are.is_true(result)
   end)
 
@@ -33,7 +33,7 @@ describe("`is_parking`", function()
       ["highway"] = 'service',
       ["parking:left"] = 'yes',
     }
-    local result = is_parking(tags)
+    local result = has_parking(tags)
     assert.are.is_false(result)
   end)
 
@@ -41,7 +41,7 @@ describe("`is_parking`", function()
     local tags = {
       ["highway"] = 'service',
     }
-    local result = is_parking(tags)
+    local result = has_parking(tags)
     assert.are.is_false(result)
   end)
 end)

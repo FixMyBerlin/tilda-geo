@@ -5,6 +5,7 @@ import { getOsmApiUrl } from '@/src/app/_components/utils/getOsmUrl'
 import { useHasPermissions } from '@/src/app/_hooks/useHasPermissions'
 import { useSession } from '@blitzjs/auth'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import { useOsmNewNoteFeature } from '../../../_hooks/mapState/userMapNotes'
 import { useNewOsmNoteMapParam } from '../../../_hooks/useQueryState/useNotesOsmParams'
 import { osmOrgUrl, osmTypeIdString } from '../../SidebarInspector/Tools/osmUrls/osmUrls'
@@ -46,6 +47,7 @@ export const OsmNotesNewForm = () => {
 
   const hasPermissions = useHasPermissions()
   const region = useRegion()
+  const searchParams = useSearchParams()
   const commentedFeatureId =
     osmNewNoteFeature?.osmType && osmNewNoteFeature?.osmId
       ? osmTypeIdString(osmNewNoteFeature.osmType, osmNewNoteFeature.osmId)
@@ -55,8 +57,17 @@ export const OsmNotesNewForm = () => {
 
     // Text snippes for regular comment
     const footerMemberHashtag = hasPermissions ? `#${region.slug}-member` : '#visitor'
+
     const footerUrl = region.public
-      ? `${appBaseUrl.production}/regionen/${region.slug}`
+      ? (() => {
+          // Recreate the current URL with all params except the osmNotes(=true)
+          const params = new URLSearchParams(searchParams?.toString())
+          params.delete('osmNote')
+          const paramString = params.toString()
+          return paramString
+            ? `${appBaseUrl.production}/regionen/${region.slug}?${paramString}`
+            : `${appBaseUrl.production}/regionen/${region.slug}`
+        })()
       : appBaseUrl.production
     const footerWiki = 'https://osm.wiki/FixMyCity_GmbH/TILDA'
     const footer = `\n--\n#TILDA ${footerMemberHashtag} ${footerUrl} ${footerWiki}`

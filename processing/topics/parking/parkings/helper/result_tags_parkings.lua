@@ -44,8 +44,10 @@ function result_tags_parkings(object)
   local allowed_reasons = {
     "bus_lane", "rails", "bus_stop", "crossing", "cycleway", "driveway", "dual_carriage", "fire_lane", "junction", "loading_zone", "markings", "narrow", "passenger_loading_zone", "priority_road", "street_cleaning", "turnaround", "turn_lane", "living_street"
   }
-  local allowed_access = {"yes", "no", "private", "customers", "delivery", "permissive", "residents", "designated", "unknown"}
+  local allowed_access = {"yes", "no", "private", "customers", "delivery", "permissive", "permit", "residents", "designated", "unknown"}
 
+  -- REMINDER: Wenever we add tags, we need to consider updating processing/topics/parking/3_merge_parkings.sql
+  -- Otherwise we risk to data loss due to the mergin of lines.
   local result_tags = {}
   MergeTable(result_tags, object.tags) -- tags specified in transform_parkings()
 

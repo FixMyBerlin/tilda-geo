@@ -4,14 +4,8 @@ require("HighwayClasses")
 
 function BikelanesPresence(object, cycleways)
   local tags = object.tags
-  local presence = {}
-  local sides = { "left", "self", "right" }
-  for _, cycleway in ipairs(cycleways) do
-    local side = cycleway._side
-    presence[side] = presence[side] or cycleway.category
-  end
 
-  -- Guard
+  -- GUARD: Skip some roads
   if PathClasses[tags.highway] or tags.highway == 'pedestrian' then
     return nil
   end
@@ -19,6 +13,15 @@ function BikelanesPresence(object, cycleways)
     return nil
   end
 
+  -- STEP: For each side, fill the cyclway category. The first one "wins".
+  local presence = {}
+  local sides = { "left", "self", "right" }
+  for _, cycleway in ipairs(cycleways) do
+    local side = cycleway._side
+    presence[side] = presence[side] or cycleway.category
+  end
+
+  -- STEP: Handle special cases
   -- Set sides to "not_expeced" based on road class OR when infra is present on the center
   local noInfrastructureOnSidesExpected = Set({
     "residential",

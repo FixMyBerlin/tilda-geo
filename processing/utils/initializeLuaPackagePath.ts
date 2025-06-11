@@ -2,7 +2,11 @@ import { readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 import { isDev } from './isDev'
 
-export const initializeLuaPackagePath = async () => {
+const packagePathPrefix = { runProcessing: './', runTests: './processing' }
+
+export const initializeLuaPackagePath = async (
+  directoryContext: keyof typeof packagePathPrefix,
+) => {
   const rootDir = './'
   // Default package.path is "/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;/usr/share/lua/5.3/?.lua;/usr/share/lua/5.3/?/init.lua;./?.lua;./?/init.lua"
   // Which means in order to just `require('init')` we need to put the file into `./processing/init.lua`
@@ -16,23 +20,26 @@ export const initializeLuaPackagePath = async () => {
       if (entry.isDirectory()) {
         await walk(fullPath)
       } else if (entry.isFile() && entry.name.endsWith('.lua')) {
-        seen.add(relative('.', dir).replaceAll('\\', '/')) // Normalize for Windows too
+        seen.add(relative(packagePathPrefix[directoryContext], dir).replaceAll('\\', '/')) // Normalize for Windows too
       }
     }
   }
 
   await walk(rootDir)
 
-  const pathEntries = Array.from(seen)
+  const pathLines = Array.from(seen)
     .filter((p) => !p.includes('__tests__'))
-    .map((p) => `/processing/${p}/?.lua`)
-    .join(';')
+    .sort((a, b) => a.localeCompare(b))
+    .map((p) => {
+      return `package.path = package.path .. ";/${['processing', p, '?.lua'].filter(Boolean).join('/')}"`
+    })
+    .join('\n')
 
   const luaCode = `-- Auto-generated using processing/utils/initializeLuaPackagePath.ts
 -- Runs on every processing run.
 -- Extends the package.path to include all folders that have a .lua file (except for '__test__' folders).
 -- We import this file via \`require('init')\` in every lua file.
-package.path = package.path .. ";${pathEntries}"
+${pathLines}
 
 -- print('Known package path from \`init.lua\`: ' .. package.path) -- Use for temp debugging only because it breaks our \`writeTodoIdTypes\` helper because this print is added to that resuls "array".
 `
@@ -40,6 +47,6 @@ package.path = package.path .. ";${pathEntries}"
   await Bun.write(resultFile, luaCode)
   console.log(
     'Processing: `init.lua`s `package.path` was updated',
-    isDev ? { pathEntries, resultFile } : '',
+    isDev ? { pathEntries: pathLines, resultFile } : '',
   )
 }

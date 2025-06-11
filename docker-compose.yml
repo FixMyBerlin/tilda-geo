@@ -1,6 +1,6 @@
 services:
   processing:
-    image: public.ecr.aws/n0p8j4k5/atlas/processing:${ENVIRONMENT}-latest
+    image: public.ecr.aws/n0p8j4k5/tilda/processing:${ENVIRONMENT}-latest
     container_name: processing
     environment:
       PGHOST: ${DATABASE_HOST}
@@ -15,6 +15,7 @@ services:
       SKIP_WARM_CACHE:
       PROCESS_ONLY_TOPICS:
       PROCESS_ONLY_BBOX:
+      OSM2PGSQL_LOG_LEVEL:
       TILES_URL:
       ID_FILTER:
       ENVIRONMENT:
@@ -37,7 +38,7 @@ services:
     logging:
       driver: journald
   app:
-    image: public.ecr.aws/n0p8j4k5/atlas/app:${ENVIRONMENT}-latest
+    image: public.ecr.aws/n0p8j4k5/tilda/app:${ENVIRONMENT}-latest
     container_name: app
     restart: unless-stopped
     environment:
@@ -73,7 +74,7 @@ services:
     logging:
       driver: journald
   tiles:
-    image: ghcr.io/maplibre/martin:v0.14.2
+    image: ghcr.io/maplibre/martin:v0.17.0
     container_name: tiles
     command: "--config /config.yaml"
     restart: unless-stopped

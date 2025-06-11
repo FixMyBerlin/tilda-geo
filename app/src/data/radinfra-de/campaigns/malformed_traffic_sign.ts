@@ -6,7 +6,7 @@ export const malformed_traffic_sign: CampaignType = {
   pubDate: new Date('2025-02-17T10:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description: 'Diese Kampagne enthält Wege mit einem Fehler im Wert des `traffic_sign*`-Tags',
   task: '**Bitte prüfe und korrigiere den Wert der Tags `traffic_sign`, `traffic_sign:forward`, `traffic_sign:backward`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.27xwlg.3dc&v=2',

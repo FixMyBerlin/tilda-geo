@@ -11,6 +11,7 @@ local off_street_parking_point_categories = {
       parking = sanitize_for_logging(tags.parking, { 'depot', 'underground', 'multi-storey' })
     } end,
     tags_cc = { 'access' },
+    capacity_from_area = nil,
   }),
   class_off_street_parking_category.new({
     id = 'garage_entrance', -- https://www.openstreetmap.org/node/7773846323
@@ -20,6 +21,7 @@ local off_street_parking_point_categories = {
       parking = sanitize_for_logging(tags.parking, { 'depot', 'underground', 'multi-storey' })
     } end,
     tags_cc = { 'access' },
+    capacity_from_area = nil,
   }),
 }
 

@@ -5,11 +5,12 @@ applyTo: '**/*.lua'
 - This is LUA embedded into osm2pgsql.
   - That means we have access to a few helpers from https://osm2pgsql.org/doc/manual.html#lua-library-for-flex-output.
   - There is also the special `osm2pgsql` class that we use all over which is documented at https://osm2pgsql.org/doc/manual.html.
-- We have helper libraries installed which can be found in [processing.Dockerfile](../processing.Dockerfile)
+- We have helper libraries installed which can be found in [processing.Dockerfile](../../processing.Dockerfile)
   - Use those rather than create helper functions from scratch.
   - `busted` is our testing framework https://lunarmodules.github.io/busted/
   - `inspect` is to print / inspect tables https://github.com/kikito/inspect.lua — our own helper around that is called `Log(object, 'logging prefix')`
   - `penlight` is to add python like helpers to lua https://lunarmodules.github.io/Penlight/
+  - `ftcsv` is to read CSV files https://github.com/FourierTransformer/ftcsv, https://luarocks.org/modules/fouriertransformer/ftcsv
   - We can add more helpers if this makes our code cleaner; make a suggestion if that applies.
 - We use camel_case for our file names and functions and variables.
   - However, there are legacy functions that are still using MixedCase. Don't change this during an unrelated edit.
@@ -28,3 +29,4 @@ Software tests:
 
 Formatting:
 - Use 2 spaces for indentation.
+- Use single quotes in lua files whenever possible

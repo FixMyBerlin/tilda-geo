@@ -78,7 +78,9 @@ export async function synologyLogInfo(message: string) {
   if (!params.synologyLogToken) {
     return
   }
-  await logToSynology(message, params.synologyLogToken)
+  // SYNOLOGY LOGGING DISABLED
+  // We will migrate to a different service.
+  // await logToSynology(message, params.synologyLogToken)
 }
 
 /**
@@ -91,5 +93,7 @@ export async function synologyLogError(message: string) {
   if (!params.synologyErrorLogToken) {
     return
   }
-  await logToSynology(message, params.synologyErrorLogToken)
+  // SYNOLOGY LOGGING DISABLED
+  // We will migrate to a different service.
+  // await logToSynology(message, params.synologyErrorLogToken)
 }

@@ -1,6 +1,6 @@
 import { $ } from 'bun'
 import { join } from 'path'
-import { CONSTANTS_DIR, TOPIC_DIR } from '../constants/directories.const'
+import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { topicsConfig, type Topic } from '../constants/topics.const'
 import {
   backupTable,
@@ -31,7 +31,7 @@ async function runSQL(topic: Topic) {
   if (exists) {
     try {
       console.time(`Running SQL ${psqlFile}`)
-      await $`psql -q -f ${psqlFile}`
+      await $`psql -v ON_ERROR_STOP=1 -q -f ${psqlFile}`
       console.timeEnd(`Running SQL ${psqlFile}`)
     } catch (error) {
       throw new Error(`Failed to run SQL file "${psqlFile}": ${error}`)
@@ -43,9 +43,9 @@ async function runSQL(topic: Topic) {
  * Run the given topic's lua file with osm2pgsql on the given file
  */
 async function runLua(fileName: string, topic: Topic) {
-  console.log('runTopic: runLua', topic)
   const filePath = filteredFilePath(fileName)
   const luaFile = `${mainFilePath(topic)}.lua`
+  console.log('runTopic: runLua', topic, JSON.stringify({ luaFile, filePath }))
   try {
     // Did not find an easy way to use $(Shell) and make the `--bbox` optional
     await $`osm2pgsql \
@@ -54,6 +54,7 @@ async function runLua(fileName: string, topic: Topic) {
               --output=flex \
               --extra-attributes \
               --style=${luaFile} \
+              --log-level=${params.osm2pgsqlLogLevel} \
               ${filePath}`
   } catch (error) {
     throw new Error(`Failed to run lua file "${luaFile}": ${error}`)
@@ -95,16 +96,24 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   }
 
   // when the constants have changed we disable all diffing functionality
-  const constantsChanged = await directoryHasChanged(CONSTANTS_DIR)
+  const constantsDirChanged = await directoryHasChanged(CONSTANTS_DIR)
   updateDirectoryHash(CONSTANTS_DIR)
-  if (constantsChanged) {
-    console.log('ℹ️ Constants have changed. Rerunning all code.')
+  if (constantsDirChanged) {
+    console.log('ℹ️ processing/constants have changed. Rerunning all code.')
+  }
+
+  // when the constants have changed we disable all diffing functionality
+  const dataTablesDirChanged = await directoryHasChanged(DATA_TABLE_DIR)
+  updateDirectoryHash(DATA_TABLE_DIR)
+  if (dataTablesDirChanged) {
+    console.log('ℹ️ processing/dataTables have changed. Rerunning all code.')
   }
 
   const skipCode =
     params.skipUnchanged &&
     !helpersChanged &&
-    !constantsChanged &&
+    !constantsDirChanged &&
+    !dataTablesDirChanged &&
     !fileChanged &&
     params.processOnlyBbox !== null
   const diffChanges = params.computeDiffs && !fileChanged
@@ -136,7 +145,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Topic: Skip topic based on ENV
     if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
       console.log(
-        `⏩ Skipping topic ${topic} based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
+        `⏩ Skipping topic "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
       )
       continue
     }
@@ -149,10 +158,10 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       innerBboxes = [params.processOnlyBbox]
     }
 
-    // Bboxes: Crate filtered source file
+    // Bboxes: Create filtered source file
     if (innerBboxes) {
       innerFileName = `${topic}_extracted.osm.pbf`
-      await bboxesFilter(fileName, innerFileName, innerBboxes)
+      await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
     }
 
     // Get all tables related to `topic`

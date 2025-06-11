@@ -1,30 +1,23 @@
 require('init')
-require("Log")
+require('Log')
 
 ---@meta
-
 ---@class ObstacleCategory
 class_obstacle_category = {}
 class_obstacle_category.__index = class_obstacle_category
 
 ---@param args {
 --- id: string,
---- side_schema: 'side_suffix'|'side_value'|'direction_key'|nil, -- The tagging schema used to encode the SIDE in the tag(s). Requires `side_key` and `perform_snap=side`. `side_suffix` is not implemented, yet.
---- side_key: string|nil, -- The OSM Key that has the value of "left|right|both"; nil=perform_snap=self (no side). For `direction_key` a prefixed `side_key` is needed like `_side_key_traffic_calming`. This will receive the SIDE value.
---- perform_snap: 'side'|'self', -- A mode for snapping. `side` will create one object per side.
 --- perform_buffer: fun(tags: table):(number|nil), -- Radius in meters for adding a buffer or 0.
 --- tags: fun(tags: table):(table), -- Tags which have to be sanitized in the category.
---- tags_cc: table, -- Tags which will be prefixed with "osm_" and copied as is.
---- conditions: fun(tags: table): (boolean) }
+--- tags_cc: table, -- Tags which will be prefixed with 'osm_' and copied as is.
+--- conditions: fun(tags: table): (boolean),
+--- }
 function class_obstacle_category.new(args)
   ---@class ObstacleCategory
   local self = setmetatable({}, class_obstacle_category)
   self.id = args.id
 
-  self.side_schema = args.side_schema
-  self.side_key = args.side_key
-
-  self.perform_snap = args.perform_snap
   self._perform_buffer = args.perform_buffer -- use category:get_perform_buffer(tags)
 
   self._tags = args.tags -- use category:get_tags(tags)

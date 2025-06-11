@@ -6,7 +6,7 @@ export const missing_traffic_sign_244: CampaignType = {
   pubDate: new Date('2024-09-20T15:00'),
   category: 'traffic_signs',
   recommendedAction: 'maproulette',
-  visibility: 'promote',
+  visibility: 'hidden',
   description: 'Diese Kampagne enthält Fahrradstraße ohne zugehörigen Verkehrszeichen-Tag.',
   task: '**Bitte ergänze fehlende Verkehrszeichen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=v92cax.hrb610.3dc&v=2',

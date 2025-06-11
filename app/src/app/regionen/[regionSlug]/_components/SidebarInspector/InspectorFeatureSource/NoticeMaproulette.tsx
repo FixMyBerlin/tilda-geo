@@ -1,5 +1,5 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
-import { todoIds } from '@/src/data/processingTypes/todoIds.const'
+import { todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { GeoJsonProperties } from 'geojson'
 import { MapGeoJSONFeature } from 'react-map-gl/maplibre'

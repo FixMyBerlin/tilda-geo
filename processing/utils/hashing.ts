@@ -1,5 +1,5 @@
 import { $ } from 'bun'
-import { readPersistent, writePersistent } from './persistentData'
+import { readHashFromFile, writeHashForFile } from './persistentData'
 
 /**
  * Compute the hash(es) of a directory. It iterates all files recursively and sorts them before hashing.
@@ -20,7 +20,7 @@ async function computeDirectoryHash(path: string) {
  * @param path The path to the directory
  */
 export async function updateDirectoryHash(path: string) {
-  return writePersistent(path, await computeDirectoryHash(path))
+  return writeHashForFile(path, await computeDirectoryHash(path))
 }
 
 /**
@@ -29,7 +29,7 @@ export async function updateDirectoryHash(path: string) {
  * @returns
  */
 export async function directoryHasChanged(path: string) {
-  const oldHash = await readPersistent(path)
+  const oldHash = await readHashFromFile(path)
   const newHash = await computeDirectoryHash(path)
   return oldHash !== newHash
 }

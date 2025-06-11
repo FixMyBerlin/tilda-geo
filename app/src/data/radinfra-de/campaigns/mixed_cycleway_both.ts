@@ -2,11 +2,11 @@ import { CampaignType } from '../schema/campaignsSchema'
 
 export const mixed_cycleway_both: CampaignType = {
   id: 'mixed_cycleway_both',
-  title: 'Überschneidende Tags (`cycleway*`)',
+  title: 'Überschneidende `cycleway:SIDE`-Tags',
   pubDate: new Date('2025-02-17T10:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description:
     'Dieser Weg hat Tags die sich überschneiden: `cycleway` (Angabe für beide Seiten) in Kombination mit `cycleway:left|right` (Angabe für eine bestimmte Seite).',
   task: '**Bitte kontrolliere die Angaben und ändere sie, so dass sie eindeutig sind.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',

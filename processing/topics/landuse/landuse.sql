@@ -1,0 +1,35 @@
+-- EXPERIMENT:
+-- Trying to get road data based on generated settlement areas.
+--
+-- However, this fails ATM with data for Germany:
+--
+-- 2025-06-09 07:44:43 Topic "landuse" started
+-- 2025-06-09 07:44:43 runTopic: runLua landuse
+-- 2025-06-09 07:44:43 2025-06-09 07:44:43  osm2pgsql version 1.11.0
+-- 2025-06-09 07:44:43 2025-06-09 07:44:43  Database version: 17.5 (Debian 17.5-1.pgdg110+1)
+-- 2025-06-09 07:44:43 2025-06-09 07:44:43  PostGIS version: 3.5
+-- 2025-06-09 07:44:43 2025-06-09 07:44:43  Storing properties to table '"public"."osm2pgsql_properties"'.
+-- 2025-06-09 07:46:58 runTopic: runSQL landuse
+-- 2025-06-09 07:46:36  Reading input files done in 113s (1m 53s).
+-- 2025-06-09 07:46:36 2025-06-09 07:46:36    Processed 236222204 nodes in 10s - 23622k/s
+-- 2025-06-09 07:46:36 2025-06-09 07:46:36    Processed 31850335 ways in 93s (1m 33s) - 342k/s
+-- 2025-06-09 07:46:36 2025-06-09 07:46:36    Processed 446498 relations in 10s - 45k/s
+-- 2025-06-09 07:46:37 2025-06-09 07:46:37  No marked ways (Skipping stage 2).
+-- 2025-06-09 07:46:37 2025-06-09 07:46:37  Clustering table 'landuse' by geometry...
+-- 2025-06-09 07:46:45 2025-06-09 07:46:45  Creating index on table 'landuse' ("minzoom","geom")...
+-- 2025-06-09 07:46:55 2025-06-09 07:46:55  Creating index on table 'landuse' ("id")...
+-- 2025-06-09 07:46:57 2025-06-09 07:46:57  Analyzing table 'landuse'...
+-- 2025-06-09 07:46:58 2025-06-09 07:46:58  All postprocessing on table 'landuse' done in 20s.
+-- 2025-06-09 07:46:58 2025-06-09 07:46:58  Storing properties to table '"public"."osm2pgsql_properties"'.
+-- 2025-06-09 07:46:58 2025-06-09 07:46:58  osm2pgsql took 134s (2m 14s) overall.
+-- 2025-06-09 07:46:58 psql:/processing/topics/landuse/landuse_settlements.sql:7: NOTICE:  table "_landuse_settlements" does not exist, skipping
+-- 2025-06-09 07:56:14 psql:/processing/topics/landuse/landuse_settlements.sql:87: server closed the connection unexpectedly
+-- 2025-06-09 07:56:14     This probably means the server terminated abnormally
+-- 2025-06-09 07:56:14     before or while processing the request.
+-- 2025-06-09 07:56:14 psql:/processing/topics/landuse/landuse_settlements.sql:87: error: connection to server was lost
+-- 2025-06-09 07:56:14 ERROR synologyLogError Processing failed: Error: Failed to run SQL file "/processing/topics/landuse/landuse.sql": ShellError: Failed with exit code 2
+--
+--
+-- \i '/processing/topics/landuse/landuse_settlements.sql'
+-- \i '/processing/topics/landuse/roads_in_settlements.sql'
+-- \i '/processing/topics/landuse/bikelanes_outside_settlements.sql'

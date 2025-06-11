@@ -6,7 +6,7 @@ export const missing_oneway: CampaignType = {
   pubDate: new Date('2025-03-01T15:00'),
   category: 'radinfra',
   recommendedAction: 'map',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description:
     'Diese Karte zeigt Wege, bei denen die Angabe zur Verkehrsrichtung der Radinfrastruktur fehlt.',
   task: '**Bitte ergänze, ob in eine oder beide Richtungen gefahren werden darf.**',

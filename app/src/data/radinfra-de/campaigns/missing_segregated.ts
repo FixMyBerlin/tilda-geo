@@ -6,7 +6,7 @@ export const missing_segregated: CampaignType = {
   pubDate: new Date('2024-09-20T15:00'),
   category: 'radinfra',
   recommendedAction: 'maproulette',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description:
     'Diese Kampagne enthält Wege, die sowohl von Fahrrad- als auch Fußverkehr genutzt werden. Es fehlt aber die Angabe, ob eine Trennung der Verkehrsformen vorliegt.',
   task: '**Bitte ergänze die Angabe `segregated=yes` oder `no`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',

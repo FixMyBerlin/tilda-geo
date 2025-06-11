@@ -1,4 +1,5 @@
--- PREPARE
+DO $$ BEGIN RAISE NOTICE 'START finding driveways at %', clock_timestamp(); END $$;
+
 DROP TABLE IF EXISTS _parking_driveways;
 
 -- CREATE driveway table based on roads with `is_driveway=true`
@@ -13,7 +14,8 @@ FROM
   JOIN _parking_intersections i ON nrm.node_id = i.node_id
 WHERE
   i.driveway_degree > 0
-  AND i.degree <> i.driveway_degree
+  -- TODO: maybe the line below should be > 0
+  AND i.road_degree > 1
   AND r.is_driveway;
 
 -- SHORTEN the driveway
@@ -39,9 +41,3 @@ SET
 -- MISC
 ALTER TABLE _parking_driveways
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-DO $$
-BEGIN
-  RAISE NOTICE 'Finished finding driveways at %', clock_timestamp();
-END
-$$;

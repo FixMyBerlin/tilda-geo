@@ -6,7 +6,7 @@ export const needs_clarification_track: CampaignType = {
   pubDate: new Date('2025-02-17T10:00'),
   category: 'radinfra',
   recommendedAction: 'map',
-  visibility: 'secondary',
+  visibility: 'hidden',
   description:
     'Diesee Wege sind als `cycleway=track` eingetragen. Es fehlen ihnen aber Attribute, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.',
   task: '**Bitte ergänze weitere Tags, um eine präzise Kategorisierung sicherzustellen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
