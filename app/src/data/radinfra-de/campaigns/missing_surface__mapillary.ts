@@ -13,7 +13,7 @@ export const missing_surface__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16g9vs&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52425,
     checkinComment: 'Angabe zu Oberflächenqualität ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

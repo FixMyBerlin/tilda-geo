@@ -13,7 +13,7 @@ export const missing_traffic_sign_244__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16g9z4&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52427,
     checkinComment: 'Verkehrszeichen an Fahrradstraße ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

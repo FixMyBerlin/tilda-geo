@@ -14,7 +14,7 @@ export const missing_traffic_sign_vehicle_destination__mapillary: CampaignType =
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16ga9s&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52428,
     checkinComment: 'Verkehrszeichen und access-Tagging vereinheitlicht.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

@@ -14,7 +14,7 @@ export const mixed_cycleway_both__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16gg74&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52431,
     checkinComment: 'Überschneidende Tags präzisiert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

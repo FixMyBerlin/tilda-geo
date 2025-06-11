@@ -13,7 +13,7 @@ export const currentness_too_old__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.54gn9.16g9vk&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52421,
     checkinComment: 'Radinfrastruktur überprüft.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

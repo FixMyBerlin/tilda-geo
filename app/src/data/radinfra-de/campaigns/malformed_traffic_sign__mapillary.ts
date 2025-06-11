@@ -13,7 +13,7 @@ export const malformed_traffic_sign__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.1431hh.16g9vk&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52422,
     checkinComment: '`traffic_sign:*` korrigiert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

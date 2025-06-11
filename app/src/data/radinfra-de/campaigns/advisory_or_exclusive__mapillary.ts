@@ -14,7 +14,7 @@ export const advisory_or_exclusive__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.1dm4l.16g9vk&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52420,
     checkinComment: 'Angabe zur Führungsform ergänzt (Schutzstreifen oder Angebotsstreifen).',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

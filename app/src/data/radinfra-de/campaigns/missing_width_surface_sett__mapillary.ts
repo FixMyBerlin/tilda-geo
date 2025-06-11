@@ -13,7 +13,7 @@ export const missing_width_surface_sett__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16gbgg&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52429,
     checkinComment: 'Angabe zur Breite ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

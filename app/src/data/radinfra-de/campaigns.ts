@@ -56,7 +56,6 @@ const rawCampaigns = [
   missing_traffic_sign_vehicle_destination,
   missing_traffic_sign,
   missing_width_surface_sett__mapillary,
-  missing_width_surface_sett__mapillary,
   missing_width,
   mixed_cycleway_both__mapillary,
   mixed_cycleway_both,

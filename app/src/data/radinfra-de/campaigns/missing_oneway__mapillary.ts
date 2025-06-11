@@ -14,7 +14,7 @@ export const missing_oneway__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.hreog5.16g9vk&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52423,
     checkinComment: 'Angabe zu Verkehrsrichtung ergänzt.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,

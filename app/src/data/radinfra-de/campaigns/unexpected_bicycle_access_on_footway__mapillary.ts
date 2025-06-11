@@ -14,7 +14,7 @@ export const unexpected_bicycle_access_on_footway__mapillary: CampaignType = {
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16rif4&v=2',
   maprouletteChallenge: {
     enabled: true,
-    // id: ,
+    id: 52434,
     checkinComment: 'Straßenklasse Fußweg in Kombination mit Radinfrastruktur verbessert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
