@@ -27,6 +27,7 @@ function parking_roads(object)
   local is_road = is_road(object.tags)
   local is_driveway = is_driveway(object.tags)
   if not (is_road or is_driveway) then return end
+  if object.tags.area == 'yes' then return end -- exclude areas like https://www.openstreetmap.org/way/185835333
 
   local row_tags = result_tags_roads(object)
   local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, object)
