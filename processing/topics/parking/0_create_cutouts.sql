@@ -150,6 +150,10 @@ FROM
 
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
+CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));
+
+CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
+
 -- get all ids for cutouts that need to be discarded
 SELECT
   c.id INTO TEMP to_discard

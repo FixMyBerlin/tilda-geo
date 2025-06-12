@@ -41,3 +41,7 @@ ALTER TABLE _parking_parkings2_cut
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_parkings2_cut_geom_idx ON _parking_parkings2_cut USING GIST (geom);
+
+CREATE INDEX parking_parkings2_cut_osm_id_side_idx ON _parking_parkings2_cut (osm_id, side);
+
+CREATE INDEX parking_parkings2_cut_street_name_idx ON _parking_parkings2_cut (street_name);
