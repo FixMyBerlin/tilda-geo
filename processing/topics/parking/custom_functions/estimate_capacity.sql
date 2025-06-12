@@ -20,7 +20,7 @@ BEGIN
     space_per_car := car_width;
     padding := padding_prependicular;
   ELSE
-    RAISE EXCEPTION 'Invalid orientation: %, must be "parallel" or "diagonal"', orientation;
+    RAISE EXCEPTION 'Invalid orientation: "%", must be "parallel" or "diagonal"', orientation;
   END IF;
 
   -- The total length need to account for: n * car_length + (n - 1) * padding
