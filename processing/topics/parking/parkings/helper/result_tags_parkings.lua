@@ -51,10 +51,14 @@ function result_tags_parkings(object)
   local result_tags = {}
   MergeTable(result_tags, object.tags) -- tags specified in transform_parkings()
 
+  local width, width_confidence, width_source = road_width(object.tags)
+
   local specific_tags = {
     -- ROAD
     name = road_name(object.tags),
-    road_width = road_width(object.tags),
+    road_width = width,
+    road_width_confidence = width_confidence,
+    road_width_source = width_source,
     road = RoadClassificationRoadValue(object._parent_tags),
     operator_type = operator_type_value(object),
     -- PARKING
