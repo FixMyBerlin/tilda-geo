@@ -155,7 +155,7 @@ SELECT
   c.id INTO TEMP to_discard
 FROM
   _parking_cutouts c
-  JOIN _parking_parkings p ON c.geom && p.geom
+  JOIN _parking_parkings1_road p ON c.geom && p.geom
 WHERE
   ST_Intersects (c.geom, p.geom)
   AND (
