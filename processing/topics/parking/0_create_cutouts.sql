@@ -148,14 +148,18 @@ SELECT
 FROM
   _parking_separate_parking_areas_projected;
 
-CREATE INDEX parking_cutout_areas_geom_idx ON _parking_intersections USING GIST (geom);
+CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
+
+CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));
+
+CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
 
 -- get all ids for cutouts that need to be discarded
 SELECT
   c.id INTO TEMP to_discard
 FROM
   _parking_cutouts c
-  JOIN _parking_parkings p ON c.geom && p.geom
+  JOIN _parking_parkings1_road p ON c.geom && p.geom
 WHERE
   ST_Intersects (c.geom, p.geom)
   AND (

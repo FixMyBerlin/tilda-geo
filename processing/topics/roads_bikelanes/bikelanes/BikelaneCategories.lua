@@ -170,7 +170,7 @@ local footAndCyclewayShared = BikelaneCategory.new({
     end
   end
 })
-local footAndCycleway_adjoining, footAndCyclewayShared_isolated, footAndCyclewayShared_adjoiningOrIsolated = CreateSubcategoriesAdjoiningOrIsolated(footAndCyclewayShared)
+local footAndCyclewayShared_adjoining, footAndCyclewayShared_isolated, footAndCyclewayShared_adjoiningOrIsolated = CreateSubcategoriesAdjoiningOrIsolated(footAndCyclewayShared)
 
 -- Case: "Getrennter Rad- und Gehweg"
 -- traffic_sign=DE:241-30, https://wiki.openstreetmap.org/wiki/DE:Tag:traffic_sign=DE:241-30
@@ -622,7 +622,7 @@ local categoryDefinitions = {
   sharedMotorVehicleLane,
   -- Detailed tagging cases
   cyclewayOnHighwayBetweenLanes,
-  footAndCycleway_adjoining,
+  footAndCyclewayShared_adjoining,
   footAndCyclewayShared_isolated,
   footAndCyclewayShared_adjoiningOrIsolated,
   footAndCyclewaySegregated_adjoining,

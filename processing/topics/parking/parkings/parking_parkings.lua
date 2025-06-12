@@ -6,7 +6,7 @@ require("has_parking")
 require("transform_parkings")
 
 local db_table = osm2pgsql.define_table({
-  name = '_parking_parkings',
+  name = '_parking_parkings1_road',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     { column = 'id',      type = 'text',      not_null = true },
@@ -28,7 +28,7 @@ function parking_parkings(object)
     local row_tags = result_tags_parkings(transformed_object)
     local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, transformed_object.tags)
     row_tags.tags = cleaned_tags
-    parking_errors(transformed_object, replaced_tags, 'parking_parkings')
+    parking_errors(transformed_object, replaced_tags, 'parking_parkings1_road')
 
     -- Note: No geometry for this table
     db_table:insert(row_tags)

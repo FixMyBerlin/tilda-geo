@@ -30,7 +30,7 @@ function parking_roads(object)
   if object.tags.area == 'yes' then return end -- exclude areas like https://www.openstreetmap.org/way/185835333
 
   local row_tags = result_tags_roads(object)
-  local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, object)
+  local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, object.tags)
   row_tags.tags = cleaned_tags
   parking_errors(object, replaced_tags, 'parking_roads')
 
