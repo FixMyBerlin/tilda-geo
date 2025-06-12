@@ -56,4 +56,6 @@ WHERE
 ALTER TABLE _parking_intersections
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
-CREATE INDEX parking_intersections_idx ON _parking_intersections USING BTREE (node_id);
+CREATE INDEX parking_intersections_geom_idx ON _parking_intersections USING GIST (geom);
+
+CREATE INDEX parking_intersections_node_id_idx ON _parking_intersections USING BTREE (node_id);

@@ -148,7 +148,7 @@ SELECT
 FROM
   _parking_separate_parking_areas_projected;
 
-CREATE INDEX parking_cutout_areas_geom_idx ON _parking_intersections USING GIST (geom);
+CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
 -- get all ids for cutouts that need to be discarded
 SELECT
