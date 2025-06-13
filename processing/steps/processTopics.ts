@@ -81,7 +81,6 @@ export async function runTopic(fileName: string, topic: Topic) {
 export async function processTopics(fileName: string, fileChanged: boolean) {
   const tableListPublic = await getSchemaTables('public')
   const tableListBackup = await getSchemaTables('backup')
-  const processedTables = new Set<string>()
 
   // drop all previous diffs
   if (!params.freezeData) {
@@ -166,9 +165,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     }
 
     // Get all tables related to `topic`
-    // This needs to happen first, so `processedTables` includes what we skip below
     const topicTables = await getTopicTables(topic)
-    topicTables.forEach((table) => processedTables.add(table))
 
     logStart(`Topic "${topic}"`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
