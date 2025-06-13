@@ -1,6 +1,6 @@
 require('init')
 require('class_off_street_parking_category')
-require('sanitize_for_logging')
+local SANITIZE_TAGS = require('sanitize_tags')
 local round = require('round')
 
 local function category_tags(tags)
@@ -9,7 +9,7 @@ local function category_tags(tags)
     amenity = tags.amenity,
     building = tags.building,
     parking = tags.parking,
-    access = sanitize_for_logging(tags.access, { 'employees', 'customers', 'permissive', 'private', 'permit' }, { 'yes' }),
+    access = SANITIZE_TAGS.access(tags.access)
   }
 end
 

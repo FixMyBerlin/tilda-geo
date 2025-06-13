@@ -1,6 +1,5 @@
 require('init')
 require('DefaultId')
-require('sanitize_for_logging')
 
 local db_table = osm2pgsql.define_table({
   name = 'parking_errors',

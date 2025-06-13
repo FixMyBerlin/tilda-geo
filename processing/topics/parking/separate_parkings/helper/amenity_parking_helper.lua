@@ -1,6 +1,6 @@
 require('init')
-require('sanitize_for_logging')
 require('SanitizeTrafficSign')
+local SANITIZE_TAGS = require('sanitize_tags')
 require('Log')
 
 function amenity_parking_point_radius(tags)
@@ -17,13 +17,13 @@ function amenity_parking_tags(tags)
   return {
     amenity = tags.amenity,
     parking = tags.parking, -- sanitized by 'conditions'
-    orientation = sanitize_for_logging(tags.orientation, { 'perpendicular', 'parallel', 'diagonal' }),
-    informal = sanitize_for_logging(tags.informal, { 'yes' }),
-    access = sanitize_for_logging(tags.access, { 'no', 'private', 'permissive', 'permit' }, { 'yes' }),
-    markings = sanitize_for_logging(tags.markings, { 'yes', 'no' }),
-    disabled = sanitize_for_logging(tags.disabled, { 'private', 'designated' }),
-    restriction = sanitize_for_logging(tags.restriction, { 'charging_only', 'loading_only' }),
-    traffic_sign = SanitizeTrafficSign(tags.traffic_sign),
+    orientation = SANITIZE_TAGS.orientation(tags.orientation),
+    informal = SANITIZE_TAGS.informal(tags.informal),
+    access = SANITIZE_TAGS.access(tags.access),
+    markings = SANITIZE_TAGS.markings(tags.markings),
+    disabled = SANITIZE_TAGS.disabled(tags.disabled),
+    restriction = SANITIZE_TAGS.restriction(tags.restriction),
+    traffic_sign = SANITIZE_TAGS.traffic_sign(tags.traffic_sign),
   }
 end
 

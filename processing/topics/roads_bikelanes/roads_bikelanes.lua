@@ -204,7 +204,7 @@ function osm2pgsql.process_way(object)
           id = cycleway._id,
           table = 'bikelanes',
           tags = cycleway._todo_list,
-          meta = meta,
+          meta = MergeTable(meta, { mapillary_coverage = object_tags.mapillary_coverage }),
           length = math.floor(cycleway_road_tags.length),
           geom = object:as_linestring(),
           minzoom = 0
@@ -297,7 +297,7 @@ function osm2pgsql.process_way(object)
         id = DefaultId(object),
         table = "roads",
         tags = cycleway_road_tags._todo_list,
-        meta = meta,
+        meta = MergeTable(meta, { mapillary_coverage = object_tags.mapillary_coverage }),
         length = math.floor(cycleway_road_tags.length),
         geom = object:as_linestring(),
         minzoom = 0
