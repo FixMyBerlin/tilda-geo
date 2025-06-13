@@ -1,5 +1,4 @@
 require('init')
-require('sanitize_for_logging')
 require('class_separate_parking_category')
 require('amenity_parking_helper')
 
