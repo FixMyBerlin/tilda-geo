@@ -14,6 +14,7 @@ import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { synologyLogInfo } from '../utils/synology'
 import { bboxesFilter, filteredFilePath } from './filter'
+import { writeMetadata } from './metadata'
 
 const topicPath = (topic: Topic) => join(TOPIC_DIR, topic)
 const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
@@ -200,5 +201,8 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   }
 
   const timeElapsed = logEnd('Processing Topics')
-  return { timeElapsed, processedTables: Array.from(processedTables) }
+
+  await writeMetadata(fileName, timeElapsed)
+
+  return { processedTables: Array.from(processedTables) }
 }
