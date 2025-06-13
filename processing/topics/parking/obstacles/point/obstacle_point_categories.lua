@@ -150,4 +150,15 @@ obstacle_point_categories = {
     tags = function(tags) return { amenity = tags.amenity } end,
     tags_cc = { 'vending', 'zone' },
   }),
+  class_obstacle_category.new({
+    -- https://wiki.openstreetmap.org/wiki/DE:Tag:emergency=fire_hydrant
+    -- https://overpass-turbo.eu/s/261C
+    id = 'fire_hydrant',
+    perform_buffer = function(tags) return 0.5 end,
+    conditions = function(tags)
+      return TAG_HELPER.is_obstacle_parking(tags) and tags.emergency == 'fire_hydrant'
+    end,
+    tags = function(tags) return { emergency = tags.emergency } end,
+    tags_cc = { 'ref', 'fire_hydrant:type', 'fire_hydrant:position' },
+  }),
 }
