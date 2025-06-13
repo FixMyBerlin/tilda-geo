@@ -200,6 +200,4 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   const timeElapsed = logEnd('Processing Topics')
 
   await writeMetadata(fileName, timeElapsed)
-
-  return { processedTables: Array.from(processedTables) }
 }

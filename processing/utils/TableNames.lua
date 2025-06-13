@@ -35,6 +35,7 @@ local function validate_columns(columnList)
 end
 
 local function define_x_table(name, columns)
+  -- REMINDER: `getTopicTables` in `processing/diffing/diffing.ts` has `ignoreTableNames` which is a list of tables that we skip for certain use cases.
   if not name:match("^_") then -- don't expose tables that start with "_"
     validate_columns(columns)
     print(name)
