@@ -41,10 +41,7 @@ export async function waitForFreshData() {
       newFileLastModified: new Date(lastModified).toISOString(),
       next: todaysDate === new Date(lastModified).toDateString() ? 'process' : 'wait',
     }
-    console.log(
-      `waitForFreshData try ${tries}: ${JSON.stringify(log, undefined, 0)}`,
-      response.headers,
-    )
+    console.log(`waitForFreshData try ${tries}: ${JSON.stringify(log, undefined, 0)}`)
 
     // Check if last modified date is today
     const lastModifiedDate = new Date(lastModified).toDateString()
