@@ -77,9 +77,9 @@ local SANITIZE_TAGS = {
         -- Concrete
         'concrete', 'concrete:plates', 'concrete:lanes',
         -- Stone/brick types
-        'paving_stones', 'sett', 'cobblestone', 'bricks', 'stone', 'pebblestone',
+        'paving_stones', 'sett', 'cobblestone', 'bricks', 'stone',
         -- Ground/earthy
-        'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel',
+        'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel', 'pebblestone',
         -- Material
         'wood', 'woodchips', 'metal', 'plastic', 'rubber', 'grass_paver',
       },
