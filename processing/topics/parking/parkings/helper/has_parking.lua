@@ -24,6 +24,10 @@ function has_parking_tags(tags)
 end
 
 local function has_parking(tags)
+  -- We never expect parking information on highway=pedestrian … but at the the same time we still need it in is_roads (and not is_driveway) to create intersection corners.
+  if tags.highway == 'pedestrian' then
+    return has_parking_tags(tags)
+  end
 
   -- We expect explict parking tagging on roads.
   -- Either parking allowed in some form; or explicitly disallowed; or missing.
