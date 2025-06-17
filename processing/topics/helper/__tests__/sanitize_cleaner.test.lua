@@ -1,7 +1,7 @@
 
 require('init')
-require("sanitize_cleaner")
-require("sanitize_for_logging") -- DISALLOWED_VALUE
+local sanitize_cleaner = require('sanitize_cleaner')
+local SANITIZE_VALUES = require('sanitize_values')
 
 describe("sanitize_cleaner", function()
   it("returns cleaned tags and no replaced if all allowed", function()
@@ -13,7 +13,7 @@ describe("sanitize_cleaner", function()
   end)
 
   it("replaces disallowed values with nil and collects replaced", function()
-    local tags_to_clean = { foo = "foo_value", nono = DISALLOWED_VALUE }
+    local tags_to_clean = { foo = "foo_value", nono = SANITIZE_VALUES.disallowed }
     local object_tags = { foo = "foo_value", nono = "nono_value" }
     local cleaned, replaced = sanitize_cleaner(tags_to_clean, object_tags)
     assert.are.same(cleaned, { foo = "foo_value", nono = nil })
@@ -21,7 +21,7 @@ describe("sanitize_cleaner", function()
   end)
 
   it("handles multiple disallowed values", function()
-    local tags_to_clean = { foo = "foo_value", nono = DISALLOWED_VALUE, nono2 = DISALLOWED_VALUE }
+    local tags_to_clean = { foo = "foo_value", nono = SANITIZE_VALUES.disallowed, nono2 = SANITIZE_VALUES.disallowed }
     local object_tags = { foo = "foo_value", nono = "nono_value", nono2 = "nono2_value" }
     local cleaned, replaced = sanitize_cleaner(tags_to_clean, object_tags)
     assert.are.same(cleaned, { foo = "foo_value", nono = nil, nono2 = nil })

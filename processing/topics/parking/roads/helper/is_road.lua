@@ -2,7 +2,7 @@ require('init')
 require("Set")
 require("Log")
 
-function is_road(tags)
+local function is_road(tags)
   if not tags.highway then return false end
 
   local allowed_highways = Set({
@@ -21,3 +21,5 @@ function is_road(tags)
   if ( is_allowed_highway or is_construction_highway) then return true end
   return false
 end
+
+return is_road

@@ -1,6 +1,6 @@
 require('init')
-require('sanitize_for_logging')
 require('SanitizeTrafficSign')
+local sanitize_for_logging = require('sanitize_for_logging')
 
 local SANITIZE_TAGS = {
   parking = function(value)
