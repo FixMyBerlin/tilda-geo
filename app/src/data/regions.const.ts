@@ -1,7 +1,8 @@
-import imageBibi from '@/src/app/_components/assets/bibi-logo.svg'
-import imageNudafa from '@/src/app/_components/assets/nudafa-logo.svg'
-import imageParking from '@/src/app/_components/assets/osm-parkraum-logo-2025.svg'
-import imageRadinfra from '@/src/app/_components/assets/radinfra-logo.svg'
+import svgBibi from '@/src/app/_components/assets/bibi-logo.svg'
+import svgInfravelo from '@/src/app/_components/assets/infravelo.svg'
+import svgNudafa from '@/src/app/_components/assets/nudafa-logo.svg'
+import svgParking from '@/src/app/_components/assets/osm-parkraum-logo-2025.svg'
+import svgRadinfra from '@/src/app/_components/assets/radinfra-logo.svg'
 import imageTrTo from '@/src/app/_components/assets/trto-logo.png'
 import { categories } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataCategories/categories.const'
 import {
@@ -81,6 +82,7 @@ export type RegionSlug =
   | 'bb-pg' // Land Brandenburg Projektgruppe
   | 'bb-sg' // Land Brandenburg Steuerungsgruppe
   | 'bb' // Öffentlich, Land Brandenburg
+  | 'infravelo'
   | 'berlin'
   | 'bibi'
   | 'deutschland'
@@ -116,7 +118,7 @@ export const staticRegion: StaticRegion[] = [
       min: [9.0671, 48.9229],
       max: [9.1753, 48.9838],
     },
-    logoPath: imageBibi,
+    logoPath: svgBibi,
     logoWhiteBackgroundRequired: false,
     categories: [
       // The order here specifies the order in the UI
@@ -198,6 +200,44 @@ export const staticRegion: StaticRegion[] = [
     notes: 'osmNotes',
   },
   {
+    slug: 'infravelo',
+    name: 'InfraVelo',
+    fullName: 'InfraVelo / Berlin',
+    product: 'radverkehr',
+    osmRelationIds: [62422],
+    map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
+    bbox: {
+      min: [13.2809, 52.46],
+      max: [13.4929, 52.5528],
+    },
+    logoPath: svgInfravelo,
+    logoWhiteBackgroundRequired: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'bikelanes',
+      'roads',
+      'surface',
+      // 'parking',
+      // 'bicycleParking',
+      // 'poi',
+      'mapillary',
+    ],
+    backgroundSources: [
+      ...defaultBackgroundSources,
+      'strassenbefahrung',
+      'alkis',
+      'areal2025',
+      'areal2024',
+      'areal2023',
+      'areal2022',
+      'areal2021',
+      'areal2020',
+      'areal2019',
+      'parkraumkarte_neukoelln',
+    ],
+    notes: 'atlasNotes',
+  },
+  {
     slug: 'parkraum-berlin',
     name: 'Parkraum Berlin',
     fullName: 'Parkraum Berlin',
@@ -205,7 +245,7 @@ export const staticRegion: StaticRegion[] = [
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
     bbox: null,
-    logoPath: imageParking,
+    logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
       'parking',
@@ -236,7 +276,7 @@ export const staticRegion: StaticRegion[] = [
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
     bbox: null,
-    logoPath: imageParking,
+    logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
       'roads',
@@ -268,7 +308,7 @@ export const staticRegion: StaticRegion[] = [
     osmRelationIds: [],
     map: { lat: 52.4918, lng: 13.4261, zoom: 13.5 },
     bbox: null,
-    logoPath: imageParking,
+    logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
       'parking',
@@ -311,7 +351,7 @@ export const staticRegion: StaticRegion[] = [
       min: [13.3579, 52.2095],
       max: [13.825, 52.4784],
     },
-    logoPath: imageNudafa,
+    logoPath: svgNudafa,
     logoWhiteBackgroundRequired: true,
     categories: [
       // The order here specifies the order in the UI
@@ -785,7 +825,7 @@ export const staticRegion: StaticRegion[] = [
     osmRelationIds: [],
     map: { lat: 51.07, lng: 13.35, zoom: 6 },
     bbox: null,
-    logoPath: imageRadinfra,
+    logoPath: svgRadinfra,
     logoWhiteBackgroundRequired: false,
     navigationLinks: [
       { name: 'Was ist radinfra.de', href: 'https://radinfra.de/' },
