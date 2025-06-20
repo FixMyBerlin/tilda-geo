@@ -18,7 +18,7 @@ export const generatePMTilesFile = async (inputFullFile: string, outputFolder: s
   //
   // NOTE IMPROVEMENT: We might want to make this an optional flag that we specify based on the meta.js?
   // The goal would be to have lines merged automatically instead of just dropped in spieces
-  // BUT, the docs suggest it does not work for linestrings… https://github.com/felt/tippecanoe?tab=readme-ov-file#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
+  // BUT, the docs suggest it does not work for linestrings… https://github.com/felt/tippecanoe#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
   // --coalesce-smallest-as-needed
 
   Bun.spawnSync(
@@ -30,7 +30,7 @@ export const generatePMTilesFile = async (inputFullFile: string, outputFolder: s
       '--simplify-only-low-zooms',
       // Combine the area of very small polygons into small squares that represent their combined area only at zoom levels below the maximum.
       '--no-tiny-polygon-reduction-at-maximum-zoom',
-      // Preserve typology when possible https://github.com/felt/tippecanoe?tab=readme-ov-file#line-and-polygon-simplification
+      // Preserve typology when possible https://github.com/felt/tippecanoe#line-and-polygon-simplification
       '--no-simplification-of-shared-nodes',
       // Lowest zoom level for which tiles are generated (default `0`) (`6` is all of Germany on a Laptop, `8` is a litte smaller than a State in Germany)
       '--minimum-zoom=7',
@@ -49,9 +49,9 @@ export const generatePMTilesFile = async (inputFullFile: string, outputFolder: s
       '--smallest-maximum-zoom-guess=8',
       // If you use -rg, it will guess a drop rate that will keep at most 50,000 features in the densest tile https://github.com/felt/tippecanoe#dropping-a-fixed-fraction-of-features-by-zoom-level
       '-rg',
-      // https://github.com/felt/tippecanoe?tab=readme-ov-file#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
+      // https://github.com/felt/tippecanoe#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
       '--drop-densest-as-needed',
-      // https://github.com/felt/tippecanoe?tab=readme-ov-file#zoom-levels
+      // https://github.com/felt/tippecanoe#zoom-levels
       '--extend-zooms-if-still-dropping',
       '--layer=default',
       inputFullFile,
