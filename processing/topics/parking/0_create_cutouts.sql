@@ -100,7 +100,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.2) as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
@@ -118,7 +118,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.2) as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
@@ -136,7 +136,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.2) as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
