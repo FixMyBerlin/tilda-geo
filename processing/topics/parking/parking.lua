@@ -14,8 +14,20 @@ require('parking_roads')
 require('Log')
 
 
-local parkingsTable = osm2pgsql.define_table({
+osm2pgsql.define_table({
   name = 'parkings',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'multilinestring', projection = 5243 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
+
+osm2pgsql.define_table({
+  name = 'parkings_no',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     { column = 'id',   type = 'text', not_null = true },
