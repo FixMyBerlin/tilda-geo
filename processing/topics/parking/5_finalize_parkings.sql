@@ -5,14 +5,14 @@ SELECT
   0,
   id,
   CASE
-    WHEN pm.tags ? 'capacity' THEN pm.tags
+    WHEN pm.tags ->> 'capacity' <> NULL THEN pm.tags || '{"capacity_source": "tag", "capacity_confidence": "high"}'::JSONB
     ELSE pm.tags || jsonb_build_object(
       'capacity',
       estimated_capacity,
       'capacity_source',
       'estimated',
       'capacity_confidence',
-      'low'
+      'medium'
     )
   END,
   '{}'::jsonb,

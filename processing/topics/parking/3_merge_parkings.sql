@@ -36,7 +36,7 @@ CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
   orientation,
   parking,
   road_width,
-  capacity
+  source
   -- /REMINDER
 );
 
@@ -59,8 +59,9 @@ WITH
       parking,
       road_width,
       capacity,
+      source,
       -- /REMINDER
-      ST_ClusterDBSCAN (geom, eps := 0.005, minpoints := 1) OVER (
+      ST_ClusterDBSCAN (geom, eps := 0.01, minpoints := 1) OVER (
         PARTITION BY
           -- REMINDER: Every value here need to be defined in multiple places
           street_name,
@@ -68,7 +69,7 @@ WITH
           orientation,
           parking,
           road_width,
-          capacity
+          source
           -- /REMINDER
       ) AS cluster_id
     FROM
@@ -89,8 +90,10 @@ SELECT
     parking,
     'road_width',
     road_width,
+    'source',
+    source,
     'capacity',
-    capacity
+    SUM(capacity::NUMERIC)
   ) as tags,
   -- /REMINDER
   array_agg(osm_id) AS original_osm_ids,
@@ -106,6 +109,6 @@ GROUP BY
   orientation,
   parking,
   road_width,
-  capacity,
+  source,
   -- /REMINDER
   cluster_id;
