@@ -34,7 +34,15 @@ FROM
       ),
       p.geom
     )
-  ) AS d;
+  ) AS d
+WHERE
+  p.tags ->> 'parking' NOT IN (
+    'no',
+    'separate',
+    'not_expected',
+    'missing',
+    'separate'
+  );
 
 -- MISC
 ALTER TABLE _parking_parkings2_cut

@@ -34,7 +34,13 @@ SELECT
 FROM
   _parking_parkings1_road p
 WHERE
-  p.tags ->> 'parking' = 'no';
+  p.tags ->> 'parking' IN (
+    'no',
+    'separate',
+    'not_expected',
+    'missing',
+    'separate'
+  );
 
 -- MISC
 DROP INDEX IF EXISTS parkings_geom_idx;
