@@ -10,15 +10,15 @@ SET
 
 -- estimate capacity
 ALTER TABLE _parking_parkings3_merged
-ADD COLUMN capacity numeric;
+ADD COLUMN estimated_capacity numeric;
 
 UPDATE _parking_parkings3_merged
 SET
-  capacity = estimate_capacity (length, orientation);
+  estimated_capacity = estimate_capacity (length, tags ->> 'orientation');
 
 DELETE FROM _parking_parkings3_merged
 WHERE
-  capacity < 2.5;
+  estimated_capacity < 2.5;
 
 -- MISC
 ALTER TABLE _parking_parkings3_merged

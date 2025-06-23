@@ -18,7 +18,8 @@ SELECT
   -- 'side' is already a separate column
   tags ->> 'orientation' as orientation,
   tags ->> 'parking' as parking,
-  tags ->> 'road_width' as road_width
+  tags ->> 'road_width' as road_width,
+  tags ->> 'capacity' as capacity
   -- TODO LATER: restrictions
   -- tags ->> 'surface' as surface,
   -- TODO LATER: surface: Wir müssen die road surface übernehmen auf parking surface aber nur wenn parking surface nil. Und dann ist die confidence medium weil wir es übernommen haben
@@ -34,7 +35,8 @@ CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
   side,
   orientation,
   parking,
-  road_width
+  road_width,
+  capacity
   -- /REMINDER
 );
 
@@ -56,6 +58,7 @@ WITH
       orientation,
       parking,
       road_width,
+      capacity,
       -- /REMINDER
       ST_ClusterDBSCAN (geom, eps := 0.005, minpoints := 1) OVER (
         PARTITION BY
@@ -64,7 +67,8 @@ WITH
           side,
           orientation,
           parking,
-          road_width
+          road_width,
+          capacity
           -- /REMINDER
       ) AS cluster_id
     FROM
@@ -74,11 +78,20 @@ SELECT
   ROW_NUMBER() OVER () AS id,
   cluster_id,
   -- REMINDER: Every value here need to be defined in multiple places
-  street_name,
-  side,
-  orientation,
-  parking,
-  road_width,
+  jsonb_build_object(
+    'street:name',
+    street_name,
+    'side',
+    side,
+    'orientation',
+    orientation,
+    'parking',
+    parking,
+    'road_width',
+    road_width,
+    'capacity',
+    capacity
+  ) as tags,
   -- /REMINDER
   array_agg(osm_id) AS original_osm_ids,
   (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom AS geom
@@ -93,5 +106,6 @@ GROUP BY
   orientation,
   parking,
   road_width,
+  capacity,
   -- /REMINDER
   cluster_id;
