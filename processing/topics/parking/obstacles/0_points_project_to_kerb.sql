@@ -9,7 +9,7 @@ SELECT
   id,
   tags,
   meta,
-  project_to_k_closest_kerbs (geom, 5, 1) as geom
+  (project_to_k_closest_kerbs (geom, 5, 1)).*
   -- TODO: the tollerance here is too large, we need to decrease it once we have better offset values for the kerbs
   INTO _parking_obstacle_points_projected
 FROM
