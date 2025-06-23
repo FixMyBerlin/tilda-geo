@@ -20,7 +20,7 @@ SELECT
   osm_id,
   p.tags,
   p.kerb_side,
-  'separate_parkings' as source,
+  'separate_parking_areas' as source,
   p.meta,
   d.geom
 FROM

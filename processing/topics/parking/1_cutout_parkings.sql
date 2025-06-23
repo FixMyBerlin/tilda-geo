@@ -37,7 +37,7 @@ FROM
     )
   ) AS d
 WHERE
-  p.tags ->> 'parking' NOT IN (
+  p.tags ->> 'road_parkings' NOT IN (
     'no',
     'separate',
     'not_expected',
