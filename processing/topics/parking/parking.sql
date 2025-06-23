@@ -29,12 +29,11 @@
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
-\i '/processing/topics/parking/roads/1_merge_kerbs.sql'
-\i '/processing/topics/parking/roads/4_find_intersections.sql'
-\i '/processing/topics/parking/roads/5_find_intersection_corners.sql'
-\i '/processing/topics/parking/roads/6_find_driveways.sql'
-\i '/processing/topics/parking/roads/7_build_graph.sql'
-\i '/processing/topics/parking/roads/8_trim_kerbs.sql'
+\i '/processing/topics/parking/roads/1_find_intersections.sql'
+\i '/processing/topics/parking/roads/2_find_intersection_corners.sql'
+\i '/processing/topics/parking/roads/3_find_driveways.sql'
+\i '/processing/topics/parking/roads/4_build_graph.sql'
+\i '/processing/topics/parking/roads/5_trim_kerbs.sql'
 
 -- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'
