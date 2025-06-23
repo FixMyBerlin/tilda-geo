@@ -21,6 +21,12 @@ SELECT
 FROM
   _parking_parkings3_merged pm;
 
+UPDATE parkings
+SET
+  geom = ST_Reverse (geom)
+WHERE
+  tags ->> 'side' = 'left';
+
 INSERT INTO
   parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
 SELECT
