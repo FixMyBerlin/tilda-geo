@@ -8,6 +8,7 @@ SELECT
   p.osm_id,
   p.side,
   p.tags,
+  'parkings' as source,
   p.meta,
   p.street_name,
   d.geom
