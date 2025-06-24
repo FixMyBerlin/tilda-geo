@@ -1,12 +1,11 @@
 require('init')
 require('Set')
 require('Log')
-
-DISALLOWED_VALUE = 'DISALLOWED_VALUE'
+local SANITIZE_VALUES = require('sanitize_values')
 
 -- Sanitize with fallback DISALLOWED_VALUE.
 -- Use together with sanitize_cleanup_and_log()
-function sanitize_for_logging(value, allowed, ignored)
+local function sanitize_for_logging(value, allowed, ignored)
   if value == nil then
     return nil
   end
@@ -19,5 +18,7 @@ function sanitize_for_logging(value, allowed, ignored)
     return nil
   end
 
-  return DISALLOWED_VALUE
+  return SANITIZE_VALUES.disallowed
 end
+
+return sanitize_for_logging

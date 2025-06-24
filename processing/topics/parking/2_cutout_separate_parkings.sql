@@ -4,12 +4,23 @@ DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_times
 --
 -- PROCESS
 INSERT INTO
-  _parking_parkings2_cut (id, osm_type, osm_id, tags, meta, geom)
+  _parking_parkings2_cut (
+    id,
+    osm_type,
+    osm_id,
+    tags,
+    side,
+    source,
+    meta,
+    geom
+  )
 SELECT
-  COALESCE(p.id || '/' || d.path[1], p.id) AS id,
+  COALESCE(p.id || '/' || d.path[1], p.id),
   p.osm_type,
   osm_id,
   p.tags,
+  p.kerb_side,
+  'separate_parking_areas' as source,
   p.meta,
   d.geom
 FROM

@@ -27,6 +27,10 @@ FROM
       )
   ) AS kerb_sides ("side", "offset");
 
+DELETE FROM _parking_kerbs
+WHERE
+  ST_GeometryType (geom) = 'ST_MultiLineString';
+
 UPDATE _parking_kerbs
 SET
   geom = ST_Reverse (geom)

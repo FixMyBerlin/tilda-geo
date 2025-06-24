@@ -1,29 +1,29 @@
 require('init')
-require("Set")
-require("Log")
-require("is_road")
+require('Set')
+require('Log')
+local is_road = require('is_road')
 
 -- Emergency roads are sometimes mapped as hw=path|footway but still require a driveway treatment
 -- Therefore all ways that allow any vehicle or emergency access are included.
 local function driveway_like_road(tags)
   return (
-    (tags.motor_vehicle ~= nil and tags.motor_vehicle ~= "no") or
-    (tags.vehicle ~= nil and tags.vehicle ~= "no" and tags.motor_vehicle ~= "no") or
-    (tags.emergency ~= nil and tags.emergency ~= "no")
+    (tags.motor_vehicle ~= nil and tags.motor_vehicle ~= 'no') or
+    (tags.vehicle ~= nil and tags.vehicle ~= 'no' and tags.motor_vehicle ~= 'no') or
+    (tags.emergency ~= nil and tags.emergency ~= 'no')
   )
 end
 
-function is_driveway(tags)
+local function is_driveway(tags)
   if not tags.highway then return false end
   if is_road(tags) then return false end
 
   local allowed_highways = Set({
-    "service",
-    "track",
-    "bus_guideway",
+    'service',
+    'track',
+    'bus_guideway',
   })
   local is_allowed_highway = allowed_highways[tags.highway] or false
-  local is_construction_highway = (tags.highway == "construction" and allowed_highways[tags.construction]) or false
+  local is_construction_highway = (tags.highway == 'construction' and allowed_highways[tags.construction]) or false
 
   if (
     is_allowed_highway or
@@ -33,3 +33,5 @@ function is_driveway(tags)
 
   return false
 end
+
+return is_driveway

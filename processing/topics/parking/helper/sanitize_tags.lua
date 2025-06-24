@@ -1,6 +1,6 @@
 require('init')
-require('sanitize_for_logging')
 require('SanitizeTrafficSign')
+local sanitize_for_logging = require('sanitize_for_logging')
 
 local SANITIZE_TAGS = {
   parking = function(value)
@@ -49,7 +49,7 @@ local SANITIZE_TAGS = {
   end,
   reason = function (value)
     return sanitize_for_logging(value, {
-      'bus_lane', 'rails', 'bus_stop', 'crossing', 'cycleway', 'driveway', 'dual_carriage', 'fire_lane', 'junction', 'loading_zone', 'markings', 'narrow', 'passenger_loading_zone', 'priority_road', 'street_cleaning', 'turnaround', 'turn_lane', 'living_street'
+      'narrow', 'cycleway', 'turn_lane', 'bus_lane', 'bus_stop', 'turnaround', 'priority_road', 'living_street', 'dual_carriage', 'markings', 'rails', 'structure', 'junction', 'driveway', 'crossing', 'fire_lane', 'loading_zone', 'passenger_loading_zone', 'street_cleaning'
     })
   end,
   staggered = function (value)
@@ -77,9 +77,9 @@ local SANITIZE_TAGS = {
         -- Concrete
         'concrete', 'concrete:plates', 'concrete:lanes',
         -- Stone/brick types
-        'paving_stones', 'sett', 'cobblestone', 'bricks', 'stone', 'pebblestone',
+        'paving_stones', 'sett', 'cobblestone', 'bricks', 'stone',
         -- Ground/earthy
-        'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel',
+        'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel', 'pebblestone',
         -- Material
         'wood', 'woodchips', 'metal', 'plastic', 'rubber', 'grass_paver',
       },

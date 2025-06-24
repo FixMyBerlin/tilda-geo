@@ -1,9 +1,9 @@
 describe("`result_tags_parkings`", function()
   require('init')
-  require("transform_parkings")
-  require("result_tags_parkings")
-  require("Log")
-  require("osm2pgsql")
+  require('transform_parkings')
+  require('result_tags_parkings')
+  require('Log')
+  require('osm2pgsql')
 
   it('works', function()
     local input_object = {

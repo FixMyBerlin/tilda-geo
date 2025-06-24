@@ -1,6 +1,6 @@
 describe('`is_driveway`', function()
   require('init')
-  require('is_driveway')
+  local is_driveway = require('is_driveway')
   require('Log')
 
   it('ignores non highway', function()

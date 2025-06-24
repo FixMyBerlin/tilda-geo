@@ -1,11 +1,34 @@
 require('init')
-require("Set")
-require("Log")
-require("is_road")
-require("is_driveway")
-require("Sanitize")
+require('Set')
+require('Log')
+local is_road = require('is_road')
+local is_driveway = require('is_driveway')
+local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_VALUES = require('sanitize_values')
 
-function has_parking(tags)
+function has_parking_tags(tags)
+  -- TODO @Supaplex030: Include 'yes' because we need to transform it…
+  -- TODO @Supaplex030: Exclude 'no' because that might be over-tagging and we don't want to promote it to parking-infrastructure?
+
+  local both = SANITIZE_TAGS.parking(tags['parking:both'])
+  local left = SANITIZE_TAGS.parking(tags['parking:left'])
+  local right = SANITIZE_TAGS.parking(tags['parking:right'])
+  if (
+    (both ~= nil and both ~= SANITIZE_VALUES.disallowed) or
+    (left ~= nil and left ~= SANITIZE_VALUES.disallowed) or
+    (right ~= nil and right ~= SANITIZE_VALUES.disallowed)
+  ) then
+    return true
+  end
+  return false
+end
+
+local function has_parking(tags)
+  -- We never expect parking information on highway=pedestrian … but at the the same time we still need it in is_roads (and not is_driveway) to create intersection corners.
+  if tags.highway == 'pedestrian' then
+    return has_parking_tags(tags)
+  end
+
   -- We expect explict parking tagging on roads.
   -- Either parking allowed in some form; or explicitly disallowed; or missing.
   if is_road(tags) then
@@ -13,16 +36,12 @@ function has_parking(tags)
   end
 
   -- We only include driveways with explicit parking tagging.
-  -- However "yes" and other values are not considered explicit.
+  -- However 'yes' and other values are not considered explicit.
   if is_driveway(tags) then
-    local allowed_values = {"no", "lane", "street_side", "on_kerb", "half_on_kerb", "shoulder", "separate"}
-    local both = Sanitize(tags['parking:both'], allowed_values)
-    local left = Sanitize(tags['parking:left'], allowed_values)
-    local right = Sanitize(tags['parking:right'], allowed_values)
-    if(both or left or right) then
-      return true
-    end
+    return has_parking_tags(tags)
   end
 
   return false
 end
+
+return has_parking

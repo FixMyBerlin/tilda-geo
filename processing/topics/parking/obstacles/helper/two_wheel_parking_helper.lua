@@ -1,6 +1,6 @@
 require('init')
 require('capacity_normalization')
-require('sanitize_for_logging')
+local sanitize_for_logging = require('sanitize_for_logging')
 require('MergeTable')
 require('Log')
 

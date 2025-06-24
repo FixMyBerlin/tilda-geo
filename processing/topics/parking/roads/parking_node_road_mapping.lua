@@ -1,10 +1,10 @@
 require('init')
-require("Log")
-require("MergeTable")
-require("result_tags_roads")
-require("is_road")
-require("is_driveway")
-require("has_parking")
+require('Log')
+require('MergeTable')
+require('result_tags_roads')
+local is_road = require('is_road')
+local is_driveway = require('is_driveway')
+local has_parking = require('has_parking')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_node_road_mapping',

@@ -8,6 +8,7 @@ SELECT
   p.osm_id,
   p.side,
   p.tags,
+  'parkings' as source,
   p.meta,
   p.street_name,
   d.geom
@@ -34,7 +35,15 @@ FROM
       ),
       p.geom
     )
-  ) AS d;
+  ) AS d
+WHERE
+  p.tags ->> 'road_parkings' NOT IN (
+    'no',
+    'separate',
+    'not_expected',
+    'missing',
+    'separate'
+  );
 
 -- MISC
 ALTER TABLE _parking_parkings2_cut

@@ -8,7 +8,6 @@ import {
 import { idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
-import { writeMetadata } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
 import { logPadded, logTileInfo } from './utils/logging'
 import { params } from './utils/parameters'
@@ -32,10 +31,8 @@ async function main() {
     if (idFilterResponse) ({ fileName, fileChanged } = idFilterResponse)
 
     console.log('Processing:', 'Handle Topics')
-    const { timeElapsed, processedTables } = await processTopics(fileName, fileChanged)
-
-    await generateTypes(processedTables)
-    await writeMetadata(fileName, timeElapsed)
+    await processTopics(fileName, fileChanged)
+    await generateTypes()
 
     console.log('Processing:', 'Finishing up')
     // Call the frontend update hook which registers sql functions and starts the analysis run

@@ -9,8 +9,8 @@ require("road_name")
 require("Log")
 require("road_width")
 require("ParseLength")
-require("this_or_that")
 require('result_tags_value_helpers')
+local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 
 -- EXAMPLE
@@ -97,9 +97,11 @@ function result_tags_parkings(object)
   }
   MergeTable(result_tags, specific_tags)
 
-  local result_tags_surface = {
-    surface = SANITIZE_TAGS.surface(object.tags.surface) or SANITIZE_TAGS.surface(object._parent_tags.surface)
-  }
+  local result_tags_surface = this_or_that(
+    "surface",
+    { value = SANITIZE_TAGS.surface(object.tags.surface), confidence = "high", source = "tag" },
+    { value = SANITIZE_TAGS.surface(object._parent_tags.surface), confidence = "medium", source = "parent_highway" }
+  )
   MergeTable(result_tags, result_tags_surface)
 
   local tags_cc = {

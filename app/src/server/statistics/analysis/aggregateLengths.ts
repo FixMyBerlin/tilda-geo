@@ -104,6 +104,7 @@ async function registerCustomFunctions() {
     ...counterPromises,
   ])
 }
+
 export async function aggregateLengths() {
   await geoDataClient.$connect()
   await registerCustomFunctions()

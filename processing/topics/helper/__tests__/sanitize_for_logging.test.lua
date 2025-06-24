@@ -1,5 +1,5 @@
 require('init')
-require('sanitize_for_logging')
+local sanitize_for_logging = require('sanitize_for_logging')
 
 describe('sanitize_for_logging', function()
   it('returns value if allowed', function()

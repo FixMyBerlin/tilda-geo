@@ -9,6 +9,7 @@ export type SourcesRasterIds =
   | 'maptiler-satellite-v1'
   | 'maptiler-satellite'
   | 'mapbox-satellite'
+  | 'areal2025'
   | 'areal2024'
   | 'areal2023'
   | 'areal2022'
@@ -129,6 +130,15 @@ export const sourcesBackgroundsRaster: MapDataBackgroundSource<SourcesRasterIds>
   //     "<a href='https://wiki.openstreetmap.org/wiki/DigitalGlobe'>Terms & Feedback</a>",
   // },
   {
+    id: 'areal2025',
+    name: 'Berlin: Luftbilder 2025',
+    tiles: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-dop20rgb/{z}/{x}/{y}.png',
+    tileSize: 256,
+    maxzoom: 21,
+    minzoom: 10,
+    attributionHtml: 'Geoportal Berlin / Digitale farbige Orthophotos 2025 (DOP20RGB)',
+  },
+  {
     id: 'areal2024',
     name: 'Berlin: Luftbilder 2024',
     tiles: 'https://tiles.codefor.de/berlin-2024-dop20rgbi/{z}/{x}/{y}.png',
@@ -136,7 +146,7 @@ export const sourcesBackgroundsRaster: MapDataBackgroundSource<SourcesRasterIds>
     maxzoom: 21,
     minzoom: 10,
     attributionHtml:
-      '<a target="_blank" href="https://gdi.berlin.de/geonetwork/srv/ger/catalog.search#/metadata/07ec4c16-723f-32ea-9580-411d8fe4f7e7">Geoportal Berlin / Digitale farbige TrueOrthophotos 2024 (DOP20RGBI)</a>',
+      '<a target="_blank" href="https://gdi.berlin.de/geonetwork/srv/ger/catalog.search#/metadata/07ec4c16-723f-32ea-9580-411d8fe4f7e7">Geoportal Berlin / Digitale farbige TrueOrthophotos 2024 (DOP20RGB)</a>',
   },
   {
     id: 'areal2023',

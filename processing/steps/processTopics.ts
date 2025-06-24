@@ -14,6 +14,7 @@ import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { synologyLogInfo } from '../utils/synology'
 import { bboxesFilter, filteredFilePath } from './filter'
+import { writeMetadata } from './metadata'
 
 const topicPath = (topic: Topic) => join(TOPIC_DIR, topic)
 const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
@@ -80,7 +81,6 @@ export async function runTopic(fileName: string, topic: Topic) {
 export async function processTopics(fileName: string, fileChanged: boolean) {
   const tableListPublic = await getSchemaTables('public')
   const tableListBackup = await getSchemaTables('backup')
-  const processedTables = new Set<string>()
 
   // drop all previous diffs
   if (!params.freezeData) {
@@ -165,9 +165,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     }
 
     // Get all tables related to `topic`
-    // This needs to happen first, so `processedTables` includes what we skip below
     const topicTables = await getTopicTables(topic)
-    topicTables.forEach((table) => processedTables.add(table))
 
     logStart(`Topic "${topic}"`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
@@ -200,5 +198,6 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   }
 
   const timeElapsed = logEnd('Processing Topics')
-  return { timeElapsed, processedTables: Array.from(processedTables) }
+
+  await writeMetadata(fileName, timeElapsed)
 }

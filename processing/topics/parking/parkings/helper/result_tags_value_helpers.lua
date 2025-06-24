@@ -1,7 +1,7 @@
 require('init')
 require("Log")
 require("Sanitize")
-require("is_driveway")
+local is_driveway = require('is_driveway')
 local SANITIZE_TAGS = require('sanitize_tags')
 
 -- `parking` is our main tag.

@@ -1,28 +1,35 @@
 -- this function projects a given geometry to the k closest kerbs
 -- the parameter tolerance define the maximum distance to the closest kerb
+DROP FUNCTION IF EXISTS project_to_k_closest_kerbs (geometry, double precision, integer);
+
 CREATE OR REPLACE FUNCTION project_to_k_closest_kerbs (
   input_geom geometry,
   tolerance double precision,
   k integer
-) RETURNS geometry AS $$
+) RETURNS TABLE (
+  kerb_id bigint,
+  kerb_side text,
+  kerb_tags jsonb,
+  geom geometry
+) AS $$
 DECLARE
-  kerb geometry;
-  projected geometry;
-  result geometry := NULL;
+  kerb RECORD;
+  projected_geom geometry;
 BEGIN
-  -- get the k closest kerbs w.r.t the input_geom
   FOR kerb IN
-    SELECT geom
-    FROM _parking_kerbs_merged
-    WHERE has_parking AND ST_DWithin(input_geom, geom, tolerance)
-    ORDER BY ST_Distance(input_geom, geom)
+    SELECT  pk.id, pk.side, pk.geom, pk.tags
+    FROM _parking_kerbs pk
+    WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
+    ORDER BY ST_Distance(input_geom, pk.geom)
     LIMIT k
   LOOP
-    -- project the input_geom to the kerb and collect the results
-    projected := project_to_line(input_geom, kerb);
-    result := ST_Collect(result, projected);
+    kerb_id := kerb.id;
+    kerb_side := kerb.side;
+    kerb_tags := kerb.tags;
+    geom := project_to_line(input_geom, kerb.geom);
+    RETURN NEXT;
   END LOOP;
 
-  RETURN result;
+  RETURN;
 END;
 $$ LANGUAGE plpgsql STABLE;

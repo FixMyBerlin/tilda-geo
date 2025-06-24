@@ -1,7 +1,7 @@
 require('init')
 require('DefaultId')
 require('Metadata')
-require('sanitize_cleaner')
+local sanitize_cleaner = require('sanitize_cleaner')
 local result_tags_off_street_parking = require('result_tags_off_street_parking')
 local categorize_off_street_parking = require('categorize_off_street_parking')
 local off_street_parking_point_categories = require('off_street_parking_point_categories')

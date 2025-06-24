@@ -33,6 +33,7 @@ import { _eu560i } from './_eu560i'
 import { _gdl8v6 } from './_gdl8v6'
 import { _ife2uk } from './_ife2uk'
 import { _l464fe } from './_l464fe'
+import { _l6jzgk } from './_l6jzgk'
 import { _nq3m12 } from './_nq3m12'
 import { _pdqyyt } from './_pdqyyt'
 import { _qver32 } from './_qver32'
@@ -80,6 +81,7 @@ export const configs = {
   gdl8v6: _gdl8v6,
   ife2uk: _ife2uk,
   l464fe: _l464fe,
+  l6jzgk: _l6jzgk,
   nq3m12: _nq3m12,
   pdqyyt: _pdqyyt,
   qver32: _qver32,

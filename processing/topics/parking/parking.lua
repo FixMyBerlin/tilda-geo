@@ -13,6 +13,32 @@ require('parking_node_road_mapping')
 require('parking_roads')
 require('Log')
 
+
+osm2pgsql.define_table({
+  name = 'parkings',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'multilinestring', projection = 5243 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
+
+osm2pgsql.define_table({
+  name = 'parkings_no',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'multilinestring', projection = 5243 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
+
+
 -- NOTE ON PROJECTIONS:
 -- All `paring_*` tables use EPSG:5243
 --  which is optimized for Germany and uses Meters

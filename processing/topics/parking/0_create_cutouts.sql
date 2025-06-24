@@ -100,7 +100,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.2) as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
@@ -118,7 +118,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.2) as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
@@ -136,7 +136,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.2) as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
@@ -150,6 +150,8 @@ FROM
 
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
+-- NOTE TODO: Test those new indexes for performance improvements
+-- CREATE INDEX parking_cutouts_geom_highway_busstop_idx ON _parking_cutouts USING GIST (geom) INCLUDE ((tags ->> 'highway'), (tags ->> 'bus_stop'));
 CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));
 
 CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
@@ -168,8 +170,8 @@ WHERE
   )
   AND p.tags ->> 'parking' = 'no';
 
-CREATE INDEX to_discard_idx ON to_discard USING BTREE (id);
-
+-- NOTE TODO: Test those new indexes for performance improvements
+-- CREATE INDEX to_discard_idx ON to_discard USING BTREE (id);
 SELECT
   * INTO _parking_discarded_cutouts
 FROM

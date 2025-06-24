@@ -2,7 +2,7 @@ require('init')
 require('Log')
 require('MergeTable')
 local categorize_and_transform_crossing_points = require('categorize_and_transform_crossing_points')
-require('sanitize_cleaner')
+local sanitize_cleaner = require('sanitize_cleaner')
 require('parking_errors')
 local result_tags_crossings = require('result_tags_crossings')
 

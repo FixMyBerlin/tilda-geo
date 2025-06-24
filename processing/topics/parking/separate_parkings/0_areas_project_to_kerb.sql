@@ -12,7 +12,7 @@ SELECT
   meta,
   -- @var "2": Max distance (radius) (Meter) for snapping
   -- @var "6": Max number of kerbs that gets snapped to
-  project_to_k_closest_kerbs (geom, 2, 6) as geom
+  (project_to_k_closest_kerbs (geom, 2, 6)).*
   --
   INTO _parking_separate_parking_areas_projected
 FROM

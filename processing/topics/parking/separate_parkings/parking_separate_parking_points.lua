@@ -1,7 +1,7 @@
 require('init')
 require('Log')
 require('MergeTable')
-require('sanitize_cleaner')
+local sanitize_cleaner = require('sanitize_cleaner')
 require('parking_errors')
 local separate_parking_point_categories = require('separate_parking_point_categories')
 local categorize_separate_parking = require('categorize_separate_parking')
