@@ -34,15 +34,20 @@ export const generatePMTilesFile = async (inputFullFile: string, outputFolder: s
       '--no-simplification-of-shared-nodes',
       // Lowest zoom level for which tiles are generated (default `0`) (`6` is all of Germany on a Laptop, `8` is a litte smaller than a State in Germany)
       '--minimum-zoom=7',
+      // https://github.com/felt/tippecanoe#zoom-levels
+      // Increases precision but causes tile drops. => We cannot use this for everything
+      // '--generate-variable-depth-tile-pyramid',
       //
-      // // NOTE IMPROVEMENT eUVM: Reevaluate if we want to set something like this
-      // // Automatically choose a maxzoom that should be sufficient to clearly distinguish the features and the detail within each feature https://github.com/felt/tippecanoe#zoom-levels
-      // '--maximum-zoom=20',
+      // Automatically choose a maxzoom that should be sufficient to clearly distinguish the features and the detail within each feature
+      // https://github.com/felt/tippecanoe#zoom-levels
+      // TEST: Did not see any effect in precision ("Verbindungspunkte" Berlin). Stayed with whatever is happening by default.
+      // '--maximum-zoom=17',
       //
-      // // NOTE IMPROVEMENT eUVM: Test out `full-detail` to increase precision at high zoom level
-      // // https://github.com/felt/tippecanoe?tab=readme-ov-file#tile-resolution
-      // // https://github.com/felt/tippecanoe/issues/89
-      // '--full-detail=2', // we use those settings for eUVM: lines: 2, areas: 12
+      // Specify some level of detail indicator for max zoom. The number is not a zoom value but
+      // https://github.com/felt/tippecanoe#tile-resolution
+      // https://github.com/felt/tippecanoe/issues/89
+      // ARCHIVE: we use those settings for eUVM: lines: 2, areas: 12
+      // '--full-detail=23',
       //
       // Smallest maxzoom which is acceptable for our precision requirements, is higher, if tippecanoe guesses a higher maxzoom, it will be used ttps://github.com/felt/tippecanoe#zoom-levels
       // Automatic --maximum-zoom didn't have the required precision
