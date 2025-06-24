@@ -2,7 +2,7 @@ require('init')
 require('Log')
 require('MergeTable')
 local categorize_obstacle_points = require('categorize_obstacle_points')
-require('sanitize_cleaner')
+local sanitize_cleaner = require('sanitize_cleaner')
 require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
 
