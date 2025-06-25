@@ -21,6 +21,13 @@ local SANITIZE_TAGS = {
     if transformations[tags.surface] then
       tags.surface = transformations[tags.surface]
     end
+    -- Treat special cases:
+    if tags.surface == 'sett' then
+      local size = parse_length(tags['sett:length'])
+      if size <= 8 then return 'mosaic_sett' end
+      if size <= 13 then return 'small_sett' end
+      if size > 13 then return 'large_sett' end
+    end
     -- Sanitize values:
     return sanitize_for_logging(tags.surface, {
         -- Common
