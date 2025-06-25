@@ -3,12 +3,11 @@ require("CopyTags")
 require("MergeTable")
 require("DefaultId")
 require("Metadata")
-require("ParseLength")
 require("RoadClassificationRoadValue")
 require("road_name")
 require("Log")
 require("road_width")
-require("ParseLength")
+local parse_length = require('parse_length')
 require('result_tags_value_helpers')
 local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
@@ -59,12 +58,12 @@ function result_tags_parkings(object)
     -- PARKING
     parking = parking_value(object),
     orientation = SANITIZE_TAGS.orientation(object.tags.orientation),
-    capacity = ParseLength(object.tags.capacity),
     markings = SANITIZE_TAGS.markings(object.tags.markings),
     direction = SANITIZE_TAGS.direction(object.tags.direction),
     reason = SANITIZE_TAGS.reason(object.tags.reason),
     staggered = SANITIZE_TAGS.staggered(object.tags.staggered),
     restriction = SANITIZE_TAGS.restriction(object.tags.restriction),
+    capacity = parse_length(object.tags.capacity),
     ["restriction:conditional"] = object.tags["restriction:conditional"],
     ["restriction:bus"] = object.tags["restriction:bus"],
     ["restriction:hgv"] = object.tags["restriction:hgv"],
