@@ -15,6 +15,7 @@ require("DeriveTrafficSigns")
 require("CollectTodos")
 require("ToMarkdownList")
 require("ToTodoTags")
+local parse_length = require('parse_length')
 
 local tags_copied = {
   "mapillary",

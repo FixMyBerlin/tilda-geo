@@ -11,6 +11,7 @@ local parse_length = require('parse_length')
 require('result_tags_value_helpers')
 local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 
 -- EXAMPLE
 -- INPUT
@@ -54,22 +55,22 @@ function result_tags_parkings(object)
     road_width_confidence = width_confidence,
     road_width_source = width_source,
     road = RoadClassificationRoadValue(object._parent_tags),
-    operator_type = SANITIZE_TAGS.operator_type(object.tags.operator_type),
+    operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags.operator_type),
     -- PARKING
     parking = parking_value(object),
-    orientation = SANITIZE_TAGS.orientation(object.tags.orientation),
-    markings = SANITIZE_TAGS.markings(object.tags.markings),
-    direction = SANITIZE_TAGS.direction(object.tags.direction),
-    reason = SANITIZE_TAGS.reason(object.tags.reason),
-    staggered = SANITIZE_TAGS.staggered(object.tags.staggered),
-    restriction = SANITIZE_TAGS.restriction(object.tags.restriction),
+    orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
     capacity = parse_length(object.tags.capacity),
+    markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
+    direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
+    reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
+    staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
+    restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
     ["restriction:conditional"] = object.tags["restriction:conditional"],
     ["restriction:bus"] = object.tags["restriction:bus"],
     ["restriction:hgv"] = object.tags["restriction:hgv"],
-    ["restriction:reason"] = SANITIZE_TAGS.reason(object.tags["restriction:reason"]),
+    ["restriction:reason"] = SANITIZE_PARKING_TAGS.reason(object.tags["restriction:reason"]),
     ["restriction:reason:conditional"] = object.tags["restriction:reason:conditional"],
-    fee = SANITIZE_TAGS.fee(object.tags.fee),
+    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
     ["fee:conditional"] = object.tags["fee:conditional"],
     charge = object.tags.charge,
     ["charge:conditional"] = object.tags["charge:conditional"],
@@ -78,28 +79,28 @@ function result_tags_parkings(object)
     ["maxstay:motorhome"] = object.tags["maxstay:motorhome"],
     -- ZONE
     zone = object.tags.zone,
-    ["authentication:disc"] = SANITIZE_TAGS.authentication_disc(object.tags["authentication:disc"]),
+    ["authentication:disc"] = SANITIZE_PARKING_TAGS.authentication_disc(object.tags["authentication:disc"]),
     ["authentication:disc:conditional"] = object.tags["authentication:disc:conditional"],
     -- ACCESS
     access = SANITIZE_TAGS.access(object.tags.access),
     ["access:conditional"] = object.tags["access:conditional"],
     private = object.tags.private,
     ["private:conditional"] = object.tags["private:conditional"],
-    disabled = SANITIZE_TAGS.disabled(object.tags.disabled),
+    disabled = SANITIZE_PARKING_TAGS.disabled(object.tags.disabled),
     ["disabled:conditional"] = object.tags["disabled:conditional"],
-    taxi = SANITIZE_TAGS.taxi(object.tags.taxi),
+    taxi = SANITIZE_PARKING_TAGS.taxi(object.tags.taxi),
     ["taxi:conditional"] = object.tags["taxi:conditional"],
-    motorcar = SANITIZE_TAGS.motorcar(object.tags.motorcar),
+    motorcar = SANITIZE_PARKING_TAGS.motorcar(object.tags.motorcar),
     ["motorcar:conditional"] = object.tags["motorcar:conditional"],
-    hgv = SANITIZE_TAGS.hgv(object.tags.hgv),
+    hgv = SANITIZE_PARKING_TAGS.hgv(object.tags.hgv),
     ["hgv:conditional"] = object.tags["hgv:conditional"],
   }
   MergeTable(result_tags, specific_tags)
 
   local result_tags_surface = this_or_that(
     "surface",
-    { value = SANITIZE_TAGS.surface(object.tags.surface), confidence = "high", source = "tag" },
-    { value = SANITIZE_TAGS.surface(object._parent_tags.surface), confidence = "medium", source = "parent_highway" }
+    { value = SANITIZE_TAGS.surface(object.tags), confidence = "high", source = "tag" },
+    { value = SANITIZE_TAGS.surface(object._parent_tags), confidence = "medium", source = "parent_highway" }
   )
   MergeTable(result_tags, result_tags_surface)
 
