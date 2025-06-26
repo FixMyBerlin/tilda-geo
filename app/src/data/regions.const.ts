@@ -208,8 +208,8 @@ export const staticRegion: StaticRegion[] = [
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
     bbox: {
-      min: [13.2809, 52.46],
-      max: [13.4929, 52.5528],
+      min: [13.0883, 52.3382],
+      max: [13.7611, 52.6755],
     },
     logoPath: svgInfravelo,
     logoWhiteBackgroundRequired: true,
