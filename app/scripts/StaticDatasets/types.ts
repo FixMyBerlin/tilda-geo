@@ -64,5 +64,7 @@ type MapDataDatasetsSource = {
 export type MetaData = {
   regions: RegionSlug[]
   public: boolean
+  /** @desc Change the tippecanoe settings  */
+  geometricPrecision?: 'mask' | 'regular' | 'high' | null
   configs: MapDataDatasetsSource[]
 }
