@@ -5,6 +5,7 @@ import {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
 } from '@/src/app/regionen/[regionSlug]/_mapData/types'
+import { RegionSlug } from '@/src/data/regions.const'
 import { CircleLayer, FillLayer, HeatmapLayer, LineLayer, SymbolLayer } from 'react-map-gl/maplibre'
 
 // a modified version of MapDataDatasetsSource from '../../src/app/regionen/[regionSlug]/_mapData/types'
@@ -61,7 +62,7 @@ type MapDataDatasetsSource = {
 }
 
 export type MetaData = {
-  regions: string[]
+  regions: RegionSlug[]
   public: boolean
   configs: MapDataDatasetsSource[]
 }
