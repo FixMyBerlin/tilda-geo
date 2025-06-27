@@ -15,9 +15,19 @@ local SANITIZE_TAGS = {
     if tags.surface == nil then return nil end
     -- Transform known but unsupported values to values that we support:
     local transformations = {
+      -- Ground
       earth = 'ground', mud = 'ground', clay = 'ground', dirt = 'ground',
-      rock = 'stone',
+      ['dirt/sand'] = 'ground',
+      -- Sett
       unhewn_cobblestone = 'sett',
+      ['cobblestone:flattened'] = 'sett',
+      -- Stone
+      rock = 'stone', ['stone:plates'] = 'stone',
+      -- Paving Stones
+      ['paving_stones:20'] = 'paving_stones', -- we don't transform the tags['paving_stones:length'] = 20 for now because we don't use it
+      ['paving_stones:30'] = 'paving_stones', -- we don't transform the tags (yet)
+      -- Other
+      tartan = 'rubber',
     }
     if transformations[tags.surface] then
       tags.surface = transformations[tags.surface]
@@ -38,7 +48,7 @@ local SANITIZE_TAGS = {
         -- Concrete
         'concrete', 'concrete:plates', 'concrete:lanes',
         -- Stone/brick types
-        'paving_stones', 'sett', 'cobblestone', 'bricks', 'stone',
+        'paving_stones', 'paving_stones:lanes', 'sett', 'cobblestone', 'bricks', 'stone',
         -- Ground/earthy
         'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel', 'pebblestone',
         -- Material
