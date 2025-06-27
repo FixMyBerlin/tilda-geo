@@ -1,5 +1,5 @@
 require('init')
-require("ParseLength")
+local parse_length = require('parse_length')
 
 local highway_width_fallbacks = {
   ["primary"] = 17,
@@ -23,7 +23,7 @@ local highway_width_fallbacks = {
 --@return string width_source 'tag', 'highway_default', or 'highway_default_and_oneway'
 function road_width(tags)
   if tags.width then
-    local width = ParseLength(tags.width)
+    local width = parse_length(tags.width)
     if width then
       return width, 'high', 'tag'
     end

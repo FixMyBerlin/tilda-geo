@@ -438,7 +438,9 @@ local missing_surface = BikelaneTodo.new({
     return "2"
   end,
   conditions = function(objectTags, resultTags)
-    return resultTags.surface == nil
+    -- Either the surface is missing. But also surface values that are not derived from the osm tag, should be added.
+    -- (ATM all values are derive from osm tags, see processing/topics/helper/DeriveSurface.lua)
+    return (resultTags.surface == nil or resultTags.surface_source ~= 'tag')
       and resultTags.category ~= 'cyclwayLink'
       and resultTags.category ~= 'needsClarification'
       and not ContainsSubstring(resultTags.category, 'cyclewayOnHighway')

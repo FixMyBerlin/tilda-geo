@@ -1,8 +1,7 @@
 require('init')
-require('SanitizeTrafficSign')
 local sanitize_for_logging = require('sanitize_for_logging')
 
-local SANITIZE_TAGS = {
+local SANITIZE_PARKING_TAGS = {
   parking = function(value)
     return sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
   end,
@@ -11,10 +10,6 @@ local SANITIZE_TAGS = {
   end,
   operator_type = function(value)
     return sanitize_for_logging(value, { 'public', 'private' })
-  end,
-  access = function (value)
-    -- TOOD: How to handle… { 'unknown' }
-    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents' }, { 'yes' })
   end,
   taxi = function (value)
     return sanitize_for_logging(value, { 'yes', 'designated' })
@@ -41,9 +36,6 @@ local SANITIZE_TAGS = {
     -- TODO: How to handle… { 'none' })
     return sanitize_for_logging(value, { 'no_parking', 'no_stopping', 'no_standing', 'loading_only', 'charging_only' })
   end,
-  traffic_sign = function (value)
-    return SanitizeTrafficSign(value)
-  end,
   direction = function (value)
     return sanitize_for_logging(value, { 'back_in', 'head_in' })
   end,
@@ -61,34 +53,9 @@ local SANITIZE_TAGS = {
   authentication_disc = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
-  surface = function (value)
-    local transformations = {
-      earth = 'ground', mud = 'ground', clay = 'ground', dirt = 'ground',
-      rock = 'stone',
-    }
-    if transformations[value] then
-      value = transformations[value]
-    end
-    return sanitize_for_logging(value, {
-        -- Common
-        'asphalt',
-        -- Unspecific
-        'paved', 'unpaved',
-        -- Concrete
-        'concrete', 'concrete:plates', 'concrete:lanes',
-        -- Stone/brick types
-        'paving_stones', 'sett', 'cobblestone', 'bricks', 'stone',
-        -- Ground/earthy
-        'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel', 'pebblestone',
-        -- Material
-        'wood', 'woodchips', 'metal', 'plastic', 'rubber', 'grass_paver',
-      },
-      { 'ice', 'snow', 'salt', }
-    )
-  end,
   parking_entrance = function(value)
     return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey' })
   end,
 }
 
-return SANITIZE_TAGS
+return SANITIZE_PARKING_TAGS

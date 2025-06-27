@@ -25,7 +25,7 @@ function osm2pgsql.process_relation(object)
   local tags = object.tags
   local result_tags = {}
 
-  -- Supposed to be 'km', always. TODO: Ideally modify ParseLength to handle different default units.
+  -- Supposed to be 'km', always. TODO: Ideally modify parse_length to handle different default units.
   result_tags.distance = tonumber(tags.distance)
   result_tags.network = Sanitize(tags.network, { 'lcn', 'rcn', 'ncn', 'icn' })
   -- "Radschnellverbindungen", 15x https://taginfo.geofabrik.de/europe:germany/keys/cycle_highway#values

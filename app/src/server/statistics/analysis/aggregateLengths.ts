@@ -32,7 +32,7 @@ async function registerCustomFunctions() {
 
   const bikelanesSegmentizedPromise = geoDataClient.$transaction([
     geoDataClient.$executeRaw`
-    CREATE TABLE IF NOT EXISTS temp_bikelanes_segmentized AS
+    CREATE TABLE IF NOT EXISTS "temp_bikelanes_segmentized" AS
       SELECT
         id,
         tags->>'category' AS aggregator_key,
@@ -52,7 +52,7 @@ async function registerCustomFunctions() {
 
   const roadsSegmentizedPromiset = geoDataClient.$transaction([
     geoDataClient.$executeRaw`
-    CREATE TABLE IF NOT EXISTS temp_roads_segmentized AS
+    CREATE TABLE IF NOT EXISTS "temp_roads_segmentized" AS
       SELECT
         id,
         tags->>'road' AS aggregator_key,

@@ -3,16 +3,16 @@ require('Set')
 require('Log')
 local is_road = require('is_road')
 local is_driveway = require('is_driveway')
-local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local SANITIZE_VALUES = require('sanitize_values')
 
 function has_parking_tags(tags)
   -- TODO @Supaplex030: Include 'yes' because we need to transform it…
   -- TODO @Supaplex030: Exclude 'no' because that might be over-tagging and we don't want to promote it to parking-infrastructure?
 
-  local both = SANITIZE_TAGS.parking(tags['parking:both'])
-  local left = SANITIZE_TAGS.parking(tags['parking:left'])
-  local right = SANITIZE_TAGS.parking(tags['parking:right'])
+  local both = SANITIZE_PARKING_TAGS.parking(tags['parking:both'])
+  local left = SANITIZE_PARKING_TAGS.parking(tags['parking:left'])
+  local right = SANITIZE_PARKING_TAGS.parking(tags['parking:right'])
   if (
     (both ~= nil and both ~= SANITIZE_VALUES.disallowed) or
     (left ~= nil and left ~= SANITIZE_VALUES.disallowed) or

@@ -1,32 +1,16 @@
-local function surfaceDirect(surface)
-  if surface ~= nil then
+local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_VALUES = require('sanitize_values')
+
+local function surfaceDirect(tags)
+  if tags.surface ~= nil then
     local source = "tag"
     local confidence = "high"
 
-    -- TODO: Later, we should add this…
-    -- We only support some smoothness values to make thinks easier for the user
-    -- local surfaceNormalization = {
-    --   ["excellent"] = "excellent",
-    --   ["very_good"] = "excellent",
-    --   ["good"] = "good",
-    --   ["intermediate"] = "intermediate",
-    --   ["bad"] = "bad",
-    --   ["very_bad"] = "very_bad",
-    --   ["impassable"] = "very_bad",
-    --   ["horrible"] = "very_bad",
-    --   ["very_horrible"] = "very_bad",
-    -- }
-    -- value = surfaceNormalization[value]
+    -- We use the same sanitizer but we dont have a setup to handle the disallowed values, yet, so we remove them right away.
+    -- In the future, we want to setup a system similar to _parking_errors.
+    local surface = SANITIZE_TAGS.surface(tags)
+    if surface == SANITIZE_VALUES.disallowed then return nil, nil, nil end
 
-    -- if value == nil then
-    --   value = nil
-    --   source = "tag_normalized"
-    --   confidence = "nothing_found"
-    -- end
-
-    -- if value and value ~= surface then
-    --   source = "tag_normalized"
-    -- end
     return surface, source, confidence
   end
 
@@ -34,6 +18,6 @@ local function surfaceDirect(surface)
 end
 
 function DeriveSurface(tags)
-  local surface, source, confidence = surfaceDirect(tags.surface)
+  local surface, source, confidence = surfaceDirect(tags)
   return { surface = surface, surface_source = source, surface_confidence = confidence }
 end

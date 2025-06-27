@@ -85,20 +85,21 @@ export const SelectDatasets = ({
             leaveTo="transform scale-95 opacity-0"
           >
             <DisclosurePanel static as="section" className="mb-2 mt-1">
-              <div className="mt-1 text-right">
-                {allActive ? (
-                  <button
-                    onClick={deactivateAll}
-                    className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
-                  >
-                    Alle deaktivieren
-                  </button>
-                ) : (
+              <div className="mx-1 mt-1 flex items-center justify-end gap-1">
+                {!allActive && (
                   <button
                     onClick={activateAll}
                     className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
                   >
                     Alle aktivieren
+                  </button>
+                )}
+                {active && (
+                  <button
+                    onClick={deactivateAll}
+                    className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
+                  >
+                    Alle deaktivieren
                   </button>
                 )}
               </div>

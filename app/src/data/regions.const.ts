@@ -105,6 +105,7 @@ export type RegionSlug =
   | 'testing'
   | 'trto'
   | 'woldegk'
+  | 'trassenscout-umfragen'
 
 export const staticRegion: StaticRegion[] = [
   {
@@ -207,8 +208,8 @@ export const staticRegion: StaticRegion[] = [
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
     bbox: {
-      min: [13.2809, 52.46],
-      max: [13.4929, 52.5528],
+      min: [13.0883, 52.3382],
+      max: [13.7611, 52.6755],
     },
     logoPath: svgInfravelo,
     logoWhiteBackgroundRequired: true,
@@ -474,6 +475,24 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: defaultBackgroundSources,
     notes: 'atlasNotes',
+  },
+  {
+    slug: 'trassenscout-umfragen',
+    name: '[INTERN] TS Umfragen',
+    fullName: '[INTERN] Trassenscout Umfrage-Daten',
+    product: 'radverkehr',
+    osmRelationIds: [],
+    map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
+    bbox: null,
+    externalLogoPath: null,
+    logoWhiteBackgroundRequired: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'roads',
+      'mapillary',
+    ],
+    backgroundSources: defaultBackgroundSources,
+    notes: 'disabled',
   },
   {
     slug: 'ostalbkreis',

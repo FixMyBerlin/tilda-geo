@@ -1,11 +1,11 @@
-require("ParseLength")
+local parse_length = require('parse_length')
 
 -- * @desc TODO
 -- * @returns TODO
 function RoadWidth(tags)
   local width = tags["width"] or tags["est_width"]
   if width then
-    width = ParseLength(width)
+    width = parse_length(width)
     if width then return width end
   end
 
