@@ -12,6 +12,7 @@ local SANITIZE_TAGS = {
     return SanitizeTrafficSign(value)
   end,
   surface = function (tags)
+    if tags.surface == nil then return nil end
     -- Transform known but unsupported values to values that we support:
     local transformations = {
       earth = 'ground', mud = 'ground', clay = 'ground', dirt = 'ground',
@@ -24,9 +25,9 @@ local SANITIZE_TAGS = {
     -- Treat special cases:
     if tags.surface == 'sett' then
       local size = parse_length(tags['sett:length'])
-      if size <= 8 then return 'mosaic_sett' end
-      if size <= 13 then return 'small_sett' end
-      if size > 13 then return 'large_sett' end
+      if size and size <= 8 then return 'mosaic_sett' end
+      if size and size <= 13 then return 'small_sett' end
+      if size and size > 13 then return 'large_sett' end
     end
     -- Sanitize values:
     return sanitize_for_logging(tags.surface, {
