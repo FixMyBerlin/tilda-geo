@@ -1,8 +1,7 @@
 require('init')
 require("Log")
 require("Sanitize")
-local is_driveway = require('is_driveway')
-local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 
 -- `parking` is our main tag.
 -- for is_driveway this is alway some precise value (because everything else is excluded)
@@ -10,7 +9,7 @@ local SANITIZE_TAGS = require('sanitize_tags')
 -- except for dual_carriageway|s when we fall back to "not_expected" instead of "missing"
 function parking_value(object)
   -- We allow "yes" as unspecified value for edge cases when the position is not yet know
-  local result = SANITIZE_TAGS.parking(object.tags.parking)
+  local result = SANITIZE_PARKING_TAGS.parking(object.tags.parking)
   if (object._parent_tags.dual_carriageway == "yes") then
     result = result or 'not_expected'
   end

@@ -1,8 +1,5 @@
--- require('init')
--- require("osm2pgsql") -- Warning: Don't include this, it will fail the processing for unkown reasons.
-
 -- Makes sure our sanitized `width` only holds "meter" values and only numbers
-function ParseLength(length)
+local function parse_length(length)
   local val, unit = osm2pgsql.split_unit(length, 'm')
   if val then
     if unit == 'cm' then
@@ -20,3 +17,5 @@ function ParseLength(length)
   end
   return nil
 end
+
+return parse_length

@@ -116,50 +116,65 @@ export async function computeDiff(table: string) {
 
   // create the diff table
   await sql.unsafe(`
-    CREATE TABLE ${diffTableId} AS
+    CREATE TABLE IF NOT EXISTS ${diffTableId} AS
     SELECT id, tags, meta, geom FROM ${tableId}
     WITH NO DATA`)
 
   // compute diff
-  const modifiedPromise: Promise<number> = sql.unsafe(`
-    INSERT INTO ${diffTableId} (id, tags, meta, geom)
-    SELECT
-      new_id AS id,
-      jsonb_diff(old_tags, new_tags) || ${changeTypes.modified} AS tags,
-      new_meta AS meta,
-      new_geom AS geom
+  const modifiedPromise = sql
+    .unsafe(
+      `INSERT INTO ${diffTableId} (id, tags, meta, geom)
+      SELECT
+        new_id AS id,
+        jsonb_diff(old_tags, new_tags) || ${changeTypes.modified} AS tags,
+        new_meta AS meta,
+        new_geom AS geom
+        FROM ${joinedTableId}
+        WHERE new_id IS NOT NULL AND old_id IS NOT NULL AND old_tags <> new_tags
+        RETURNING 1`,
+    )
+    .values()
+
+  const addedPromise = sql
+    .unsafe(
+      `INSERT INTO ${diffTableId} (id, tags, meta, geom)
+      SELECT
+        new_id AS id,
+        new_tags || ${changeTypes.added} AS tags,
+        new_meta AS meta,
+        new_geom AS geom
       FROM ${joinedTableId}
-      WHERE new_id IS NOT NULL AND old_id IS NOT NULL AND old_tags <> new_tags`)
+      WHERE old_id IS NULL
+      RETURNING 1`,
+    )
+    .values()
 
-  const addedPromise: Promise<number> = sql.unsafe(`
-    INSERT INTO ${diffTableId} (id, tags, meta, geom)
-    SELECT
-      new_id AS id,
-      new_tags || ${changeTypes.added} AS tags,
-      new_meta AS meta,
-      new_geom AS geom
-    FROM ${joinedTableId}
-    WHERE old_id IS NULL`)
-
-  const removedPromise: Promise<number> = sql.unsafe(`
-    INSERT INTO ${diffTableId} (id, tags, meta, geom)
-    SELECT
-      old_id AS id,
-      old_tags || ${changeTypes.removed} AS tags,
-      old_meta AS meta,
-      old_geom AS geom
-    FROM ${joinedTableId}
-    WHERE new_id IS NULL`)
+  const removedPromise = sql
+    .unsafe(
+      `INSERT INTO ${diffTableId} (id, tags, meta, geom)
+      SELECT
+        old_id AS id,
+        old_tags || ${changeTypes.removed} AS tags,
+        old_meta AS meta,
+        old_geom AS geom
+      FROM ${joinedTableId}
+      WHERE new_id IS NULL
+      RETURNING 1`,
+    )
+    .values()
 
   return Promise.all([modifiedPromise, addedPromise, removedPromise]).then(
-    async ([nModified, nAdded, nRemoved]) => {
+    async ([rawModified, rawAdded, rawRemoved]) => {
+      const nModified = rawModified.length
+      const nAdded = rawAdded.length
+      const nRemoved = rawRemoved.length
       const nTotal = nModified + nAdded + nRemoved
       if (nTotal === 0) {
         await dropDiffTable(table)
       } else {
         createSpatialIndex(table)
       }
-      await sql`DROP TABLE IF EXISTS ${sql(joinedTableId)}`
+      await sql.unsafe(`DROP TABLE IF EXISTS ${joinedTableId}`)
       return {
         table,
         nTotal,

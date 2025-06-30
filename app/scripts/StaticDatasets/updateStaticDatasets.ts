@@ -140,7 +140,7 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
     logInfo(`Generating pmtiles file......`, dryRun)
     uploadFilepath = dryRun
       ? '/tmp/does-not-exist.pmtiles'
-      : await generatePMTilesFile(transformedFilepath, tempFolder)
+      : await generatePMTilesFile(transformedFilepath, tempFolder, metaData.geometricPrecision)
     uploadType = 'PMTILES'
   } else {
     console.log('  File is small and will be uploaded as geojson.')

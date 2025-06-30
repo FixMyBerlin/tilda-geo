@@ -34,7 +34,6 @@ local function normalizeSmoothness(smoothness)
   return nil, nil, nil
 end
 
-
 local function deriveSmoothnessFromSurface(surface)
   local surfaceToSmoothness = {
     ["cobblestone:flattened"] = "bad",
@@ -113,7 +112,6 @@ local function deriveSmoothnessFromSurface(surface)
     ["tiles"] = "bad",
   }
 
-
   if not surface then
     return nil, nil, nil, "Please add surface=*"
   end
@@ -127,15 +125,9 @@ local function deriveSmoothnessFromSurface(surface)
     if smoothness then
       source = 'surface_to_smoothness'
       confidence = 'medium'
-      todo = "Please review surface=" ..
-          surface .. " which is a non standard value (List surfaceToSmoothnessNonStandardValues)"
-    else
-      todo = "Please review surface=" ..
-          surface ..
-          " which is a non standard value. Maybe fix it or add it to our list surfaceToSmoothnessNonStandardValues."
     end
   end
-  return smoothness, source, confidence, todo
+  return smoothness, source, confidence
 end
 
 -- https://wiki.openstreetmap.org/wiki/Key:mtb:scale
@@ -145,9 +137,9 @@ local function deriveSmoothnessFromMTBScale(scale)
     return nil, nil, nil, "no_mtb:scale_given"
   end
   if Set({ "0", "0+", "0-" })[scale] then
-    return "bad", "mtb:scale_to_smoothness", "medium", nil
+    return "bad", "mtb:scale_to_smoothness", "medium"
   end
-  return "very_bad", "mtb:scale_to_smoothness", "medium", nil
+  return "very_bad", "mtb:scale_to_smoothness", "medium"
 end
 
 -- Wiki https://wiki.openstreetmap.org/wiki/Key:tracktype
@@ -156,7 +148,7 @@ end
 -- Mapping of Smoothness<>Surface (Legacy) https://wiki.openstreetmap.org/wiki/Berlin/Verkehrswende/smoothness
 local function deriveSmoothnessFromTrackType(type)
   if not type then
-    return nil, nil, nil, "no_tracktype_given"
+    return nil, nil, nil
   end
   local trackTypeToSmoothness = {
     ["grade1"] = "good",
@@ -167,9 +159,9 @@ local function deriveSmoothnessFromTrackType(type)
   }
   local smoothness = trackTypeToSmoothness[type]
   if smoothness then
-    return smoothness, "tracktype_to_smoothness", "medium", nil
+    return smoothness, "tracktype_to_smoothness", "medium"
   end
-  return nil, nil, nil, nil
+  return nil, nil, nil
 end
 
 function DeriveSmoothness(tags)
