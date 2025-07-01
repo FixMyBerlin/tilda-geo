@@ -18,7 +18,7 @@ SET
 
 DELETE FROM _parking_parkings3_merged
 WHERE
-  estimated_capacity < 2.5;
+  estimated_capacity < 1;
 
 -- MISC
 ALTER TABLE _parking_parkings3_merged
