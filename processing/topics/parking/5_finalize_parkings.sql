@@ -19,7 +19,7 @@ SELECT
   geom,
   0
 FROM
-  _parking_parkings3_merged pm;
+  _parking_parkings_merged pm;
 
 UPDATE parkings
 SET
@@ -38,7 +38,7 @@ SELECT
   geom,
   0
 FROM
-  _parking_parkings1_road p
+  _parking_road_parkings p
 WHERE
   p.tags ->> 'parking' IN (
     'no',

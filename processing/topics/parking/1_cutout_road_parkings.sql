@@ -1,6 +1,6 @@
-DO $$ BEGIN RAISE NOTICE 'START cutting out _parking_parkings2_cut at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START cutting out _parking_parkings_cutted at %', clock_timestamp(); END $$;
 
-DROP TABLE IF EXISTS _parking_parkings2_cut;
+DROP TABLE IF EXISTS _parking_parkings_cutted;
 
 SELECT
   COALESCE(p.id || '/' || d.path[1], p.id) AS id,
@@ -13,9 +13,9 @@ SELECT
   p.street_name,
   d.geom
   --
-  INTO _parking_parkings2_cut
+  INTO _parking_parkings_cutted
 FROM
-  _parking_parkings1_road p,
+  _parking_road_parkings p,
   LATERAL ST_Dump (
     COALESCE(
       ST_Difference (
@@ -46,11 +46,11 @@ WHERE
   );
 
 -- MISC
-ALTER TABLE _parking_parkings2_cut
+ALTER TABLE _parking_parkings_cutted
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
-CREATE INDEX parking_parkings2_cut_geom_idx ON _parking_parkings2_cut USING GIST (geom);
+CREATE INDEX parking_parkings_cut_geom_idx ON _parking_parkings_cutted USING GIST (geom);
 
-CREATE INDEX parking_parkings2_cut_osm_id_side_idx ON _parking_parkings2_cut (osm_id, side);
+CREATE INDEX parking_parkings_cut_osm_id_side_idx ON _parking_parkings_cutted (osm_id, side);
 
-CREATE INDEX parking_parkings2_cut_street_name_idx ON _parking_parkings2_cut (street_name);
+CREATE INDEX parking_parkings_cut_street_name_idx ON _parking_parkings_cutted (street_name);

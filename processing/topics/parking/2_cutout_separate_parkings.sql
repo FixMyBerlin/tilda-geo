@@ -4,7 +4,7 @@ DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_times
 --
 -- PROCESS
 INSERT INTO
-  _parking_parkings2_cut (
+  _parking_parkings_cutted (
     id,
     osm_type,
     osm_id,
