@@ -76,7 +76,12 @@ WITH
       cluster_candidates
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  side || string_agg(
+    osm_id::TEXT,
+    '-'
+    ORDER BY
+      osm_id
+  ) AS id,
   cluster_id,
   -- REMINDER: Every value here need to be defined in multiple places
   jsonb_build_object(
