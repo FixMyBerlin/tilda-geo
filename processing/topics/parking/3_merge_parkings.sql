@@ -102,7 +102,7 @@ SELECT
   ) as tags,
   -- /REMINDER
   array_agg(osm_id) AS original_osm_ids,
-  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom AS geom
+  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom::geometry (LINESTRING) AS geom
   --
   INTO _parking_parkings_merged
 FROM

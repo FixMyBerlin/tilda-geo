@@ -48,6 +48,15 @@ WHERE
     'separate'
   );
 
+DROP TABLE IF EXISTS parkings_dumped;
+
+SELECT
+  ROW_NUMBER() OVER () AS id,
+  tags,
+  dump_parkings (geom, (tags ->> 'capacity')::INTEGER) as geom INTO parkings_dumped
+FROM
+  parkings;
+
 -- MISC
 DROP INDEX IF EXISTS parkings_geom_idx;
 
@@ -56,3 +65,10 @@ CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
 DROP INDEX IF EXISTS parkings_no_geom_idx;
 
 CREATE INDEX parkings_no_geom_idx ON parkings_no USING GIST (geom);
+
+ALTER TABLE parkings_dumped
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+DROP INDEX IF EXISTS parkings_dumped_geom_idx;
+
+CREATE INDEX parkings_dumped_geom_idx ON parkings_dumped USING GIST (geom);
