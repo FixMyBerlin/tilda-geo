@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION project_to_k_closest_kerbs (
   tolerance double precision,
   k integer
 ) RETURNS TABLE (
-  kerb_id bigint,
+  kerb_id text,
   kerb_side text,
   kerb_tags jsonb,
   geom geometry

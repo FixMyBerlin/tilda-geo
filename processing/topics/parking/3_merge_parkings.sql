@@ -29,7 +29,6 @@ FROM
   _parking_parkings_cutted p;
 
 CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
-  osm_id,
   -- REMINDER: Every value here need to be defined in multiple places
   street_name,
   side,
@@ -50,6 +49,7 @@ DROP TABLE IF EXISTS _parking_parkings_merged;
 WITH
   clustered AS (
     SELECT
+      id,
       osm_id,
       geom,
       -- REMINDER: Every value here need to be defined in multiple places
@@ -76,11 +76,11 @@ WITH
       cluster_candidates
   )
 SELECT
-  side || string_agg(
-    osm_id::TEXT,
+  string_agg(
+    id,
     '-'
     ORDER BY
-      osm_id
+      id
   ) AS id,
   cluster_id,
   -- REMINDER: Every value here need to be defined in multiple places

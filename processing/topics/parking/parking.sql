@@ -18,7 +18,7 @@
 -- * … FOR KERBS
 \i '/processing/topics/parking/custom_functions/kerb_tangent.sql'
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
-\i '/processing/topics/parking/custom_functions/cut_kerb_at_corner.sql'
+\i '/processing/topics/parking/custom_functions/trim_kerb_at_corner.sql'
 -- * … FOR INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/intersection_angle.sql'
 \i '/processing/topics/parking/custom_functions/get_intersection_corners.sql'

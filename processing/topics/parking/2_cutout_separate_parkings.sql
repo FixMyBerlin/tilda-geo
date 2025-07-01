@@ -15,7 +15,10 @@ INSERT INTO
     geom
   )
 SELECT
-  COALESCE(p.id || '/' || d.path[1], p.id),
+  COALESCE(
+    p.kerb_id || '/' || p.id || '/' || d.path[1],
+    p.kerb_id || '/' || p.id
+  ),
   p.osm_type,
   osm_id,
   p.tags,

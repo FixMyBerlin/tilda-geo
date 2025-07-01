@@ -3,7 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START creating kerbs %', clock_timestamp(); END $$;
 DROP TABLE IF EXISTS _parking_kerbs;
 
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  id || '/' || kerb_sides.side AS id,
   ST_OffsetCurve (geom, kerb_sides.offset) AS geom,
   kerb_sides.side,
   kerb_sides.offset,
