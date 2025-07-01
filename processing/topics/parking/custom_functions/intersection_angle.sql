@@ -1,5 +1,7 @@
+DROP FUNCTION IF EXISTS intersection_angle;
+
 -- TODO: sometimes we miss intersection corners because the roads are splitted close to the intersection, see: https://viewer.tilda-geo.de/?map=19.2/52.47141/13.34039&search=parking&source=Staging&layers=parking_intersection_corners,parking_intersections,_parking_roads
-CREATE OR REPLACE FUNCTION intersection_angle (
+CREATE FUNCTION intersection_angle (
   intersection_id BIGINT,
   road_id1 BIGINT,
   road_id2 BIGINT

@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION segmentize_way_to_edges (way_id BIGINT) RETURNS TABLE (
+DROP FUNCTION IF EXISTS segmentize_way_to_edges;
+
+CREATE FUNCTION segmentize_way_to_edges (way_id BIGINT) RETURNS TABLE (
   id TEXT,
   source BIGINT,
   target BIGINT,

@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION get_polygon_corners (poly geometry, max_angle_degrees float) RETURNS TABLE (
+DROP FUNCTION IF EXISTS get_polygon_corners;
+
+CREATE FUNCTION get_polygon_corners (poly geometry, max_angle_degrees float) RETURNS TABLE (
   corner_idx integer,
   geom geometry,
   angle double precision

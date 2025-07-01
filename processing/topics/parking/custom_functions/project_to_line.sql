@@ -1,6 +1,8 @@
+DROP FUNCTION IF EXISTS project_to_line;
+
 -- this function projects all points of input_geom to the line
 -- returns the substring that is spanned by the projected points
-CREATE OR REPLACE FUNCTION project_to_line (input_geom geometry, line geometry) RETURNS geometry AS $$
+CREATE FUNCTION project_to_line (input_geom geometry, line geometry) RETURNS geometry AS $$
 DECLARE
   rec RECORD;
   point_on_line geometry;

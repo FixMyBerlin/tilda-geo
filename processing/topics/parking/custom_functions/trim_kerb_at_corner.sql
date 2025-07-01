@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION trim_kerb_at_corner (
+DROP FUNCTION IF EXISTS trim_kerb_at_corner;
+
+CREATE FUNCTION trim_kerb_at_corner (
   intersection_id BIGINT,
   corner_geom GEOMETRY,
   kerb_id TEXT

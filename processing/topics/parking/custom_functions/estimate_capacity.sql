@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION estimate_capacity (length NUMERIC, orientation TEXT) RETURNS INTEGER AS $$
+DROP FUNCTION IF EXISTS estimate_capacity;
+
+CREATE FUNCTION estimate_capacity (length NUMERIC, orientation TEXT) RETURNS INTEGER AS $$
 DECLARE
   car_length NUMERIC := 4.4;
   car_width NUMERIC := 2;
