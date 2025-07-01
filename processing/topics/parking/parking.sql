@@ -60,9 +60,9 @@
 \i '/processing/topics/parking/0_create_cutouts.sql'
 \i '/processing/topics/parking/1_cutout_road_parkings.sql'
 \i '/processing/topics/parking/2_cutout_separate_parkings.sql'
-\i '/processing/topics/parking/3_merge_parkings.sql'
-\i '/processing/topics/parking/4_estimate_parking_capacity.sql'
-\i '/processing/topics/parking/5_finalize_parkings.sql'
-
+\i '/processing/topics/parking/3_redistribute_parking_capacities.sql'
+\i '/processing/topics/parking/4_merge_parkings.sql'
+\i '/processing/topics/parking/5_estimate_parking_capacities.sql'
+\i '/processing/topics/parking/6_finalize_parkings.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;
