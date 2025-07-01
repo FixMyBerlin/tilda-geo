@@ -60,14 +60,14 @@ SELECT
   osm_id,
   ST_Buffer (
     geom,
-    (tags ->> 'perform_buffer')::float,
+    (tags ->> 'buffer_radius')::float,
     'endcap=flat'
   ) as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
-    'width', (tags ->> 'perform_buffer')::float
+    'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
@@ -81,12 +81,12 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, (tags ->> 'perform_buffer')::float) as geom,
+  ST_Buffer (geom, (tags ->> 'buffer_radius')::float) as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_points',
-    'radius', (tags ->> 'perform_buffer')::float
+    'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
@@ -157,8 +157,8 @@ SELECT
   ST_Buffer (
     geom,
     LEAST(
-      - (tags ->> 'perform_offset_right')::NUMERIC,
-      (tags ->> 'perform_offset_left')::NUMERIC
+      (tags ->> 'offset_right')::NUMERIC,
+      (tags ->> 'offset_left')::NUMERIC
     ) * 0.9,
     'endcap=flat'
   ) as geom,

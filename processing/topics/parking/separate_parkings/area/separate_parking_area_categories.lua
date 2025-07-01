@@ -12,7 +12,7 @@ local separate_parking_point_categories = {
     -- https://www.openstreetmap.org/way/1198952905
     -- https://www.openstreetmap.org/way/1181489790 disabled
     id = 'parking_lane',
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'lane'
     end,
@@ -23,7 +23,7 @@ local separate_parking_point_categories = {
   class_separate_parking_category.new({
     -- https://www.openstreetmap.org/way/559505481
     id = 'parking_street_side',
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'street_side'
     end,
@@ -33,7 +33,7 @@ local separate_parking_point_categories = {
   }),
   class_separate_parking_category.new({
     id = 'parking_kerb',
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and (tags.parking == 'on_kerb' or tags.parking == 'half_on_kerb')
     end,
@@ -43,7 +43,7 @@ local separate_parking_point_categories = {
   }),
   class_separate_parking_category.new({
     id = 'parking_shoulder',
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'shoulder'
     end,

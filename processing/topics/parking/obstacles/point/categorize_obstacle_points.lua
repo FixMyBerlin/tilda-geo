@@ -22,7 +22,7 @@ local function categorize_obstacle_points(object)
 
   for _, category in ipairs(obstacle_point_categories) do
     if category:is_active(object.tags) then
-      local buffer = category:get_perform_buffer(object.tags)
+      local buffer = category:get_buffer_radius(object.tags)
       if buffer and buffer > max_buffer then
         max_buffer = buffer
         best_result.category = category

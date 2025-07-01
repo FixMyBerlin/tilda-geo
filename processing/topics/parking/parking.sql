@@ -4,7 +4,7 @@
 --
 -- Guidelines:
 -- - Put all decisions (that are feasable) into LUA and pass them to SQL via tags.
--- - Use "command tags" like "perform_buffer".
+-- - Use "command tags" like "buffer_radius".
 -- - Extract complex SQL into functions.
 -- - Split code into files and document them.
 -- - Indexes are handled by the SQL files.

@@ -20,11 +20,8 @@ FROM
   _parking_roads
   CROSS JOIN LATERAL (
     VALUES
-      ('left', (tags ->> 'perform_offset_left')::numeric),
-      (
-        'right',
-        (tags ->> 'perform_offset_right')::numeric
-      )
+      ('left', (tags ->> 'offset_left')::numeric),
+      ('right', - (tags ->> 'offset_right')::numeric)
   ) AS kerb_sides ("side", "offset");
 
 DELETE FROM _parking_kerbs

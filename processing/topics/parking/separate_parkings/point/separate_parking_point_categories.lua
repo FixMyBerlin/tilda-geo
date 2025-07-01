@@ -5,7 +5,7 @@ require('amenity_parking_helper')
 local separate_parking_point_categories = {
   class_separate_parking_category.new({
     id = 'parking_lane',
-    perform_buffer = function(tags) return amenity_parking_point_radius(tags) end,
+    buffer_radius = function(tags) return amenity_parking_point_radius(tags) end,
     conditions = function(tags)
       return tags['amenity'] == 'parking' and tags['parking'] == 'lane'
     end,
@@ -14,7 +14,7 @@ local separate_parking_point_categories = {
   }),
   class_separate_parking_category.new({
     id = 'parking_street_side',
-    perform_buffer = function(tags) return amenity_parking_point_radius(tags) end,
+    buffer_radius = function(tags) return amenity_parking_point_radius(tags) end,
     conditions = function(tags)
       return tags['amenity'] == 'parking' and tags['parking'] == 'street_side'
     end,
@@ -23,7 +23,7 @@ local separate_parking_point_categories = {
     }),
   class_separate_parking_category.new({
     id = 'parking_kerb',
-    perform_buffer = function(tags) return amenity_parking_point_radius(tags) end,
+    buffer_radius = function(tags) return amenity_parking_point_radius(tags) end,
     conditions = function(tags)
       return tags.amenity == 'parking' and (tags.parking == 'on_kerb' or tags.parking == 'half_on_kerb')
     end,
@@ -32,7 +32,7 @@ local separate_parking_point_categories = {
   }),
   class_separate_parking_category.new({
     id = 'parking_shoulder',
-    perform_buffer = function(tags) return amenity_parking_point_radius(tags) end,
+    buffer_radius = function(tags) return amenity_parking_point_radius(tags) end,
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'shoulder'
     end,

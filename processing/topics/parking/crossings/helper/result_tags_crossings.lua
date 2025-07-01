@@ -12,7 +12,7 @@ local function result_tags_crossings(result)
     category = result.category.id,
     source = result.category.source,
     side = result.object.tags.side,
-    perform_buffer = result.category:get_perform_buffer(result.object.tags),
+    buffer_radius = result.category:get_buffer_radius(result.object.tags),
   }
 
   local global_tags_cc = {

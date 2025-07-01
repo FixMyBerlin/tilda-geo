@@ -46,7 +46,7 @@ local function categorize_and_transform_crossing_points(object)
           local both_key = category.side_key .. ':both'
 
           if object.tags[side_key] or object.tags[both_key] then
-            local buffer = category:get_perform_buffer(object.tags)
+            local buffer = category:get_buffer_radius(object.tags)
             if buffer > max_buffer[side] then
               max_buffer[side] = buffer
               best_result[side].category = category
@@ -86,7 +86,7 @@ local function categorize_and_transform_crossing_points(object)
 
           for _, side in ipairs(side_set) do
             -- Log(category, '333')
-            local buffer = category:get_perform_buffer(object.tags)
+            local buffer = category:get_buffer_radius(object.tags)
             -- Log(buffer, '333aaa')
             -- Log(side, '333bbb')
             -- Log(max_buffer[side], '333ccc')
@@ -106,7 +106,7 @@ local function categorize_and_transform_crossing_points(object)
         -- Points that are always transformed to left/right
         if(not category.side_key) then
           for _, side in ipairs({ 'left', 'right' }) do
-            local buffer = category:get_perform_buffer(object.tags)
+            local buffer = category:get_buffer_radius(object.tags)
             if buffer > max_buffer[side] then
               max_buffer[side] = buffer
               best_result[side].category = category

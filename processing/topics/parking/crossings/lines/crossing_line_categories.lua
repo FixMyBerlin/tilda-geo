@@ -8,7 +8,7 @@ crossing_line_categories = {
     id = 'crossing_zebra_way',
     side_schema = 'none',
     side_key = nil,
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.highway and (
         tags.footway == 'crossing' or
@@ -35,7 +35,7 @@ crossing_line_categories = {
     id = 'crossing_table_way',
     side_schema = 'none',
     side_key = nil,
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.highway and (
         tags.footway == 'crossing' or
@@ -61,7 +61,7 @@ crossing_line_categories = {
     id = 'crossing_way',
     side_schema = 'none',
     side_key = nil,
-    perform_buffer = function(tags) return nil end,
+    buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.highway and (
         tags.footway == 'crossing' or
