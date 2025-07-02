@@ -1,6 +1,6 @@
 -- first we delete all parking lots where the length of the geometry is zero.
-delete from _parking_parkings_cutted
-where
+DELETE FROM _parking_parkings_cutted
+WHERE
   ST_Length (geom) = 0;
 
 -- then we redistribute the parking capacities based on the length of the geometry and the original capacity.
@@ -8,22 +8,28 @@ where
 WITH
   total_lengths AS (
     SELECT
-      id,
-      SUM(ST_Length (geom)) AS length
+      osm_id,
+      SUM(ST_Length (geom)) AS length,
+      COUNT(*) AS count
     FROM
       _parking_parkings_cutted
+    WHERE
+      tags ? 'capacity'
     GROUP BY
-      id
+      osm_id
   )
 UPDATE _parking_parkings_cutted pc
 SET
   tags = tags || jsonb_build_object(
-    'tags',
-    (tags ->> 'capacity')::numeric * ST_Length (pc.geom) / tl.length,
+    'capacity',
+    ROUND(
+      (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length
+    ),
     'capacity_source',
     'tag (redistributed)'
   )
 FROM
   total_lengths tl
 WHERE
-  pc.id = tl.id;
+  count > 1
+  AND pc.osm_id = tl.osm_id;

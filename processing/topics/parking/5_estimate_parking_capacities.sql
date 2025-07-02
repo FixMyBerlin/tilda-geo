@@ -16,9 +16,15 @@ UPDATE _parking_parkings_merged
 SET
   estimated_capacity = estimate_capacity (length, tags ->> 'orientation');
 
+UPDATE _parking_parkings_merged pm
+SET
+  tags = jsonb_set(tags, '{capacity}', to_jsonb(estimated_capacity)) || '{"capacity_source": "estimated", "capacity_confidence": "medium"}'
+WHERE
+  tags ->> 'capacity' IS NULL;
+
 DELETE FROM _parking_parkings_merged
 WHERE
-  estimated_capacity < 1;
+  (tags ->> 'capacity')::INTEGER < 1;
 
 -- MISC
 ALTER TABLE _parking_parkings_merged
