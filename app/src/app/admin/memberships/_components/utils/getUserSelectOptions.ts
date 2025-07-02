@@ -7,7 +7,7 @@ export type UserSelectOptions = Prettify<(Partial<User> & Required<Pick<User, 'i
 export const getUserSelectOptions = (users: UserSelectOptions) => {
   const result: [number | string, string][] = [['', '(Keine Auswahl)']]
   users.forEach((u) => {
-    result.push([u.id, [getFullname(u), `<${u.email}>`].join(' ')])
+    result.push([u.id, [`OSM: ${u.osmName}`, getFullname(u), u.email].filter(Boolean).join(' – ')])
   })
   return result
 }
