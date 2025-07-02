@@ -27,7 +27,7 @@ BEGIN
 
   -- The total length need to account for: n * car_length + (n - 1) * padding
   -- We solve for n:
-  n_cars := ROUND((length + padding) / (car_length + padding));
+  n_cars := ROUND((length + padding) / (space_per_car + padding));
 
   RETURN n_cars;
 END;
