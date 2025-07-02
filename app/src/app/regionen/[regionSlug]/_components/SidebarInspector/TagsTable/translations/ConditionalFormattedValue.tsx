@@ -160,6 +160,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'highway',
     'smoothness',
     'surface',
+    'surface_color',
     'category',
     'traffic_sign',
     'traffic_sign:forward',

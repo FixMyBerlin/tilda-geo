@@ -1,11 +1,7 @@
 import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
 import { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRow } from './TagsTableRow'
-import {
-  TagsTableRowColor,
-  tableKeyColor,
-  tableKeyColors,
-} from './compositTableRows/TagsTableRowColor'
+import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
 import {
   TagsTableRowCompositHighway,
   tableKeyHighway,
@@ -148,26 +144,6 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                 />
               )
             }
-            case tableKeyColor: {
-              return (
-                <TagsTableRowColor
-                  key={cleanedKey}
-                  sourceId={sourceId}
-                  tagKey={key}
-                  properties={properties}
-                />
-              )
-            }
-            case tableKeyColors: {
-              return (
-                <TagsTableRowColor
-                  key={cleanedKey}
-                  sourceId={sourceId}
-                  tagKey={key}
-                  properties={properties}
-                />
-              )
-            }
             case tableKeyWikipedia: {
               return (
                 <TagsTableRowWikipedia
@@ -199,6 +175,17 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
               )
             }
             default: {
+              if (tableKeysColor.includes(cleanedKey)) {
+                return (
+                  <TagsTableRowColor
+                    key={cleanedKey}
+                    sourceId={sourceId}
+                    tagKey={key}
+                    properties={properties}
+                  />
+                )
+              }
+
               // Hide all properties that should only be shown if a value is present.
               if (!properties[cleanedKey] && key.includes('__if_present')) {
                 return null

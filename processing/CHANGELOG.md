@@ -4,7 +4,12 @@ This is an manual and incomplete list of change to the data structure.
 
 ## 2025-07~02
 
-### `raods`, `roadsPathClasses`
+### `bikelanes`
+
+- Introduce `surface_color` as sanitized value
+- Remove `osm_surface:colour`
+
+### `roads`, `roadsPathClasses`
 
 - Rename `road_oneway` to `oneway_road`
 - Rename `road_oneway:bicycle` to `oneway_bicycle`

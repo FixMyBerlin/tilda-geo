@@ -16,13 +16,13 @@ require("CollectTodos")
 require("ToMarkdownList")
 require("ToTodoTags")
 local parse_length = require('parse_length')
+local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
 local tags_copied = {
   "mapillary",
   "description",
 }
 local tags_prefixed = {
-  'surface:colour',
   'separation',
   'separation:left',
   'separation:right',
@@ -80,6 +80,7 @@ function Bikelanes(object)
           oneway = DeriveOneway(transformed_tags, category),
           bridge = Sanitize(object_tags.bridge, { "yes" }),
           tunnel = Sanitize(object_tags.tunnel, { "yes" }),
+          surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags)
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))

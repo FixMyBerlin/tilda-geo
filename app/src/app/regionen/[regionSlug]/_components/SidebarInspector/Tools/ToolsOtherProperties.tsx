@@ -23,6 +23,7 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
     'sign',
     'prefix',
     'id',
+    'mapillary_coverage',
   ]
   const otherOsmProperties = Object.entries(feature.properties)
     .sort((a, b) => a[0].localeCompare(b[0]))
