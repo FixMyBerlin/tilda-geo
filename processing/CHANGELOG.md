@@ -8,6 +8,7 @@ This is an manual and incomplete list of change to the data structure.
 
 - Rename `road_oneway` to `oneway_road`
 - Rename `road_oneway:bicycle` to `oneway_bicycle`
+- Remove `highway=service + service=drive-through` from the data; we did not render this
 
 ## 2025-06
 

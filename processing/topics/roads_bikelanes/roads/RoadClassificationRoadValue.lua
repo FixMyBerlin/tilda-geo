@@ -43,24 +43,28 @@ function RoadClassificationRoadValue(tags)
 
   -- Service
   -- https://wiki.openstreetmap.org/wiki/DE:Key:service
+  -- https://taginfo.openstreetmap.org/keys/service#values
   if tags.highway == "service" then
     local service_mapping = {
+      -- REMINDER: Keep this in sync with `processing/topics/helper/ExcludeHighways.lua`
       alley = 'service_alley',
-      driveway = 'service_driveway',
-      parking_isle = 'service_parking_aisle'
+      driveway = 'service_driveway', -- UNUSED, see ExcludeHighways.lua
+      parking_isle = 'service_parking_aisle', -- UNUSED, see ExcludeHighways.lua
     }
-    -- Fallbacks:
-    road_value = service_mapping[tags.service] or 'service_uncategorized'
-    -- https://taginfo.openstreetmap.org/keys/service#values
+    road_value = service_mapping[tags.service]
+
     if tags.service == nil then
       road_value = "service_road"
     end
+
+    -- Fallback -- UNUSED, see ExcludeHighways.lua
+    road_value = road_value or 'service_uncategorized'
   end
 
   -- Fahrradstraßen
   if tags.bicycle_road == 'yes' then
-      -- traffic_sign=DE:244.1
-      road_value = "bicycle_road"
+    -- traffic_sign=DE:244.1
+    road_value = "bicycle_road"
   end
 
   return road_value
