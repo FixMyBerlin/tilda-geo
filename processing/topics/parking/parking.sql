@@ -64,5 +64,7 @@
 \i '/processing/topics/parking/4_merge_parkings.sql'
 \i '/processing/topics/parking/5_estimate_parking_capacities.sql'
 \i '/processing/topics/parking/6_finalize_parkings.sql'
+\i '/processing/topics/parking/7_voronoi.sql'
+
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;
