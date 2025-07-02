@@ -16,8 +16,8 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   roads: {
     stylingKeys: [
       'road',
-      'road_oneway',
-      'road_oneway:bicycle',
+      'oneway',
+      'oneway_bicycle',
       // 'lit',
       'maxspeed',
       'smoothness',

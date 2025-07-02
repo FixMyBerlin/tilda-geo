@@ -1880,7 +1880,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square', 'line-miter-limit': 0 },
                 filter: [
                   'all',
-                  ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+                  ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -1914,8 +1914,8 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square' },
                 filter: [
                   'all',
-                  ['has', 'road_oneway'],
-                  ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+                  ['has', 'oneway'],
+                  ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -2154,8 +2154,8 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square', 'line-miter-limit': 0 },
                 filter: [
                   'all',
-                  ['has', 'road_oneway'],
-                  ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+                  ['has', 'oneway'],
+                  ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -2189,7 +2189,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square' },
                 filter: [
                   'all',
-                  ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+                  ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -2661,8 +2661,8 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 minzoom: 11,
                 filter: [
                   'all',
-                  ['has', 'road_oneway'],
-                  ['match', ['get', 'road_oneway:bicycle'], ['no', 'yes'], false, true],
+                  ['has', 'oneway'],
+                  ['match', ['get', 'oneway_bicycle'], ['no', 'yes'], false, true],
                   [
                     'match',
                     ['get', 'road'],
@@ -2692,7 +2692,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 paint: {
                   'line-color': [
                     'match',
-                    ['get', 'road_oneway'],
+                    ['get', 'oneway'],
                     ['yes_dual_carriageway'],
                     '#f1e9f2',
                     ['yes'],
@@ -2708,7 +2708,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 minzoom: 11,
                 filter: [
                   'all',
-                  ['has', 'road_oneway:bicycle'],
+                  ['has', 'oneway_bicycle'],
                   [
                     'match',
                     ['get', 'road'],
@@ -2722,7 +2722,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 paint: {
                   'line-color': [
                     'match',
-                    ['get', 'road_oneway:bicycle'],
+                    ['get', 'oneway_bicycle'],
                     ['no'],
                     '#54f8b6',
                     ['yes'],
@@ -2739,7 +2739,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square', 'line-miter-limit': 0 },
                 filter: [
                   'all',
-                  ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+                  ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -2779,8 +2779,8 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square' },
                 filter: [
                   'all',
-                  ['has', 'road_oneway'],
-                  ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+                  ['has', 'oneway'],
+                  ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -2899,7 +2899,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square', 'line-miter-limit': 0 },
                 filter: [
                   'all',
-                  ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+                  ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
                   [
                     'match',
                     ['get', 'road'],
@@ -2923,7 +2923,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: { 'line-cap': 'square' },
                 filter: [
                   'all',
-                  ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+                  ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
                   [
                     'match',
                     ['get', 'road'],

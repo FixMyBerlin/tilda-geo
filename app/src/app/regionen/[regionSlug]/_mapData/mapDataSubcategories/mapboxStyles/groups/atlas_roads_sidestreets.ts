@@ -175,8 +175,8 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
     },
     filter: [
       'all',
-      ['has', 'road_oneway'],
-      ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+      ['has', 'oneway'],
+      ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
       [
         'match',
         ['get', 'road'],
@@ -210,7 +210,7 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
     },
     filter: [
       'all',
-      ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+      ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
       [
         'match',
         ['get', 'road'],
