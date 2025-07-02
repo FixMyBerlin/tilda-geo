@@ -4,7 +4,7 @@ SELECT
   'c',
   0,
   id,
-  tags,
+  jsonb_set(tags, '{length}', to_jsonb(length)),
   '{}'::jsonb,
   geom,
   0
