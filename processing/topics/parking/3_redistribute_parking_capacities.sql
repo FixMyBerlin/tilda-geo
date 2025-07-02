@@ -26,7 +26,7 @@ SET
       (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length
     ),
     'capacity_source',
-    'tag (redistributed)'
+    pc.tags ->> 'capacity_source' || ' (redistributed)'
   )
 FROM
   total_lengths tl
