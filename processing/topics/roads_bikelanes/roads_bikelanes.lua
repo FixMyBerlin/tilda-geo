@@ -145,7 +145,7 @@ function osm2pgsql.process_way(object)
   local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
   if not allowed_highways[object_tags.highway] then return end
 
-  local excludeHighway, _ = ExcludeHighways(object_tags)
+  local excludeHighway = ExcludeHighways(object_tags)
   if excludeHighway then return end
 
   -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
