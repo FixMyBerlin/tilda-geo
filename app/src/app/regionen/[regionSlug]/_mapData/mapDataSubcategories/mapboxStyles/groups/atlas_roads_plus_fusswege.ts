@@ -60,7 +60,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
     },
     filter: [
       'all',
-      ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+      ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
       [
         'match',
         ['get', 'road'],
@@ -84,7 +84,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
     },
     filter: [
       'all',
-      ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+      ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
       [
         'match',
         ['get', 'road'],

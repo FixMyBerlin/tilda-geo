@@ -1,5 +1,7 @@
 --
-CREATE OR REPLACE FUNCTION kerb_tangent (
+DROP FUNCTION IF EXISTS kerb_tangent;
+
+CREATE FUNCTION kerb_tangent (
   road_id BIGINT,
   idx INTEGER,
   side TEXT,

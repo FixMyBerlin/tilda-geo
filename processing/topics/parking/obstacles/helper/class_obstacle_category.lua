@@ -8,7 +8,7 @@ class_obstacle_category.__index = class_obstacle_category
 
 ---@param args {
 --- id: string,
---- perform_buffer: fun(tags: table):(number|nil), -- Radius in meters for adding a buffer or 0.
+--- buffer_radius: fun(tags: table):(number|nil), -- Radius in meters for adding a buffer or 0.
 --- tags: fun(tags: table):(table), -- Tags which have to be sanitized in the category.
 --- tags_cc: table, -- Tags which will be prefixed with 'osm_' and copied as is.
 --- conditions: fun(tags: table): (boolean),
@@ -18,7 +18,7 @@ function class_obstacle_category.new(args)
   local self = setmetatable({}, class_obstacle_category)
   self.id = args.id
 
-  self._perform_buffer = args.perform_buffer -- use category:get_perform_buffer(tags)
+  self._buffer_radius = args.buffer_radius -- use category:get_buffer_radius(tags)
 
   self._tags = args.tags -- use category:get_tags(tags)
   self.tags_cc = args.tags_cc
@@ -35,8 +35,8 @@ end
 
 ---@param tags table
 ---@return number|nil
-function class_obstacle_category:get_perform_buffer(tags)
-  return self._perform_buffer(tags)
+function class_obstacle_category:get_buffer_radius(tags)
+  return self._buffer_radius(tags)
 end
 
 ---@return table

@@ -145,7 +145,7 @@ function osm2pgsql.process_way(object)
   local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
   if not allowed_highways[object_tags.highway] then return end
 
-  local excludeHighway, _ = ExcludeHighways(object_tags)
+  local excludeHighway = ExcludeHighways(object_tags)
   if excludeHighway then return end
 
   -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
@@ -153,7 +153,7 @@ function osm2pgsql.process_way(object)
 
   -- ====== (B.1) Initialize and apply pseudo tags ======
   local mapillary_coverage_lines = mapillary_coverage_data:get()
-  object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
+  local mapillary_coverage_value = mapillary_coverage(mapillary_coverage_lines, object.id)
 
   -- ====== (B.2) General conversions ======
   ConvertCyclewayOppositeSchema(object_tags)
@@ -162,50 +162,54 @@ function osm2pgsql.process_way(object)
   local length = round(object:as_linestring():transform(5243):length(), 2)
 
   -- ====== (C) Compute results and insert ======
-  local result_tags = {
+  local road_result_tags = {
     name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'],
     length = length,
-    mapillary_coverage = object_tags.mapillary_coverage,
+    mapillary_coverage = mapillary_coverage_value,
   }
 
-  MergeTable(result_tags, RoadClassification(object))
-  MergeTable(result_tags, Lit(object))
-  MergeTable(result_tags, SurfaceQuality(object))
+  MergeTable(road_result_tags, RoadClassification(object))
+  MergeTable(road_result_tags, Lit(object))
+  MergeTable(road_result_tags, SurfaceQuality(object))
 
   -- (C.1a) WRITE `bikelanes` table
   -- (C.1b) WRITE `todoLiniesTable` table for bikelanes
   local cycleways = Bikelanes(object)
-  local cycleway_road_tags = {
-    name = result_tags.name,
+  local cycleway_result_tags = {
+    name = road_result_tags.name,
+    road = road_result_tags.road,
     length = length,
-    road = result_tags.road,
-    mapillary_coverage = object_tags.mapillary_coverage,
+    mapillary_coverage = mapillary_coverage_value,
   }
   for _, cycleway in ipairs(cycleways) do
     if cycleway._infrastructureExists then
-      local public_tags = ExtractPublicTags(cycleway)
-      public_tags._parent_highway = cycleway._parent_highway
       local meta = Metadata(object)
+      cycleway_result_tags._parent_highway = cycleway._parent_highway
+      -- Don't think this is used anywhere anymore; delete…
       -- meta.age = cycleway._age
+      -- Don't think this is relevant anymore, we don't pass cyclway as a full object anywhere; delete…
+      -- cycleway.segregated = nil -- no idea why that is present in the inspector frontend for way 9717355
 
-      cycleway.segregated = nil -- no idea why that is present in the inspector frontend for way 9717355
       bikelanesTable:insert({
         id = cycleway._id,
-        tags = MergeTable(public_tags, cycleway_road_tags),
+        tags = MergeTable(ExtractPublicTags(cycleway), cycleway_result_tags),
         meta = meta,
         geom = object:as_linestring(),
         minzoom = 0
       })
 
       if next(cycleway._todo_list) ~= nil then
-        meta.todos = public_tags.todos
-        meta.category = public_tags.category
+        local todo_meta = {
+          todos = cycleway.todos,
+          category = cycleway.category,
+          mapillary_coverage = mapillary_coverage_value,
+        }
         todoLiniesTable:insert({
           id = cycleway._id,
           table = 'bikelanes',
           tags = cycleway._todo_list,
-          meta = MergeTable(meta, { mapillary_coverage = object_tags.mapillary_coverage }),
-          length = math.floor(cycleway_road_tags.length),
+          meta = MergeTable(todo_meta, meta),
+          length = math.floor(cycleway_result_tags.length),
           geom = object:as_linestring(),
           minzoom = 0
         })
@@ -218,7 +222,7 @@ function osm2pgsql.process_way(object)
   if presence ~= nil and
     (presence.bikelane_left ~= "not_expected"
     or presence.bikelane_right ~= "not_expected"
-    or presence.bikelane_self ~= "not_expected")then
+    or presence.bikelane_self ~= "not_expected") then
     bikelanesPresenceTable:insert({
       id = DefaultId(object),
       tags = presence,
@@ -229,40 +233,38 @@ function osm2pgsql.process_way(object)
   end
 
   if not (PathClasses[object_tags.highway] or object_tags.highway == 'pedestrian') then
-    MergeTable(cycleway_road_tags, Maxspeed(object))
+    MergeTable(road_result_tags, Maxspeed(object))
   end
-  MergeTable(cycleway_road_tags, presence)
-  local todos = CollectTodos(RoadTodos, object_tags, cycleway_road_tags)
-  cycleway_road_tags._todo_list = ToTodoTags(todos)
-  cycleway_road_tags.todos = ToMarkdownList(todos)
+  MergeTable(road_result_tags, presence)
+  local todos = CollectTodos(RoadTodos, object_tags, road_result_tags)
+  road_result_tags._todo_list = ToTodoTags(todos)
+  road_result_tags.todos = ToMarkdownList(todos)
 
   -- We need sidewalk for Biklanes(), but not for `roads`
   if not IsSidepath(object_tags) then
     local meta = Metadata(object)
 
-    MergeTable(meta, {
-      age = AgeInDays(ParseCheckDate(object_tags["check_date"])),
-      -- surface_age = results._surface_age,
-      -- smoothness_age = results._smoothness_age,
-      -- maxspeed_age = results._maxspeed_age, -- unused
-      -- lit_age = results._lit_age -- unused
-    })
+    -- Don't think this is used anywhere anymore; delete…
+    -- MergeTable(meta, {
+    --   age = AgeInDays(ParseCheckDate(object_tags["check_date"])),
+    --   -- surface_age = results._surface_age,
+    --   -- smoothness_age = results._smoothness_age,
+    --   -- maxspeed_age = results._maxspeed_age, -- unused
+    --   -- lit_age = results._lit_age -- unused
+    -- })
 
     -- (C.3) WRITE `bikeSuitability` table
     local bikeSuitability = CategorizeBikeSuitability(object_tags)
     if bikeSuitability then
       local bike_suitability_tags = {
         bikeSuitability = bikeSuitability.id,
-        traffic_sign = cycleway_road_tags.traffic_sign,
       }
-      MergeTable(bike_suitability_tags, cycleway_road_tags)
-      MergeTable(bike_suitability_tags, RoadClassification(object))
-      MergeTable(bike_suitability_tags, SurfaceQuality(object))
+      MergeTable(bike_suitability_tags, road_result_tags)
 
       bikeSuitabilityTable:insert({
         id = DefaultId(object),
         tags = ExtractPublicTags(bike_suitability_tags),
-        meta = Metadata(object),
+        meta = meta,
         geom = object:as_linestring(),
         minzoom = 0
       })
@@ -272,33 +274,36 @@ function osm2pgsql.process_way(object)
     if PathClasses[object_tags.highway] then
       roadsPathClassesTable:insert({
         id = DefaultId(object),
-        tags = ExtractPublicTags(cycleway_road_tags),
+        tags = ExtractPublicTags(road_result_tags),
         meta = meta,
         geom = object:as_linestring(),
-        minzoom = PathsGeneralization(object_tags, cycleway_road_tags)
+        minzoom = PathsGeneralization(object_tags, road_result_tags)
       })
     else
       -- The `ref` (e.g. "B 264") is used in your map style and only relevant for higher road classes.
-      cycleway_road_tags.name_ref = object_tags.ref
+      road_result_tags.name_ref = object_tags.ref
       roadsTable:insert({
         id = DefaultId(object),
-        tags = ExtractPublicTags(cycleway_road_tags),
+        tags = ExtractPublicTags(road_result_tags),
         meta = meta,
         geom = object:as_linestring(),
-        minzoom = RoadGeneralization(object_tags, cycleway_road_tags)
+        minzoom = RoadGeneralization(object_tags, road_result_tags)
       })
     end
 
     -- (C.4b) WRITE `todoLiniesTable` table for roads
-    if next(cycleway_road_tags._todo_list) ~= nil then
-      meta.road = cycleway_road_tags.road
-      meta.todos = cycleway_road_tags.todos
+    if next(road_result_tags._todo_list) ~= nil then
+      local todo_meta = {
+        todos = road_result_tags.todos,
+        category = road_result_tags.category,
+        mapillary_coverage = mapillary_coverage_value,
+      }
       todoLiniesTable:insert({
         id = DefaultId(object),
         table = "roads",
-        tags = cycleway_road_tags._todo_list,
-        meta = MergeTable(meta, { mapillary_coverage = object_tags.mapillary_coverage }),
-        length = math.floor(cycleway_road_tags.length),
+        tags = road_result_tags._todo_list,
+        meta = MergeTable(todo_meta, meta),
+        length = math.floor(road_result_tags.length),
         geom = object:as_linestring(),
         minzoom = 0
       })

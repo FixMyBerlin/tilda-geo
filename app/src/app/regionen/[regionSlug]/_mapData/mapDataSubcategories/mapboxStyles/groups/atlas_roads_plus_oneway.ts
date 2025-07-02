@@ -8,8 +8,8 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
     minzoom: 11,
     filter: [
       'all',
-      ['has', 'road_oneway'],
-      ['match', ['get', 'road_oneway:bicycle'], ['no', 'yes'], false, true],
+      ['has', 'oneway'],
+      ['match', ['get', 'oneway_bicycle'], ['no', 'yes'], false, true],
       [
         'match',
         ['get', 'road'],
@@ -32,7 +32,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
     paint: {
       'line-color': [
         'match',
-        ['get', 'road_oneway'],
+        ['get', 'oneway'],
         ['yes_dual_carriageway'],
         '#f1e9f2',
         ['yes'],
@@ -44,13 +44,13 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
   },
   {
     minzoom: 11,
-    filter: ['has', 'road_oneway:bicycle'],
+    filter: ['has', 'oneway_bicycle'],
     type: 'line',
     id: 'oneway-road-bicycle',
     paint: {
       'line-color': [
         'match',
-        ['get', 'road_oneway:bicycle'],
+        ['get', 'oneway_bicycle'],
         ['no'],
         '#54f8b6',
         ['yes'],
@@ -68,7 +68,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
     },
     filter: [
       'all',
-      ['match', ['get', 'road_oneway:bicycle'], ['no'], true, false],
+      ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
       [
         'match',
         ['get', 'road'],
@@ -101,8 +101,8 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
     },
     filter: [
       'all',
-      ['has', 'road_oneway'],
-      ['match', ['get', 'road_oneway'], ['yes', 'implicit_yes'], true, false],
+      ['has', 'oneway'],
+      ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
       [
         'match',
         ['get', 'road'],

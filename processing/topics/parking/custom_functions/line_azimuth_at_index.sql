@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION line_azimuth_at_index (geom geometry, idx integer, direction integer) RETURNS double precision AS $$
+DROP FUNCTION IF EXISTS line_azimuth_at_index;
+
+CREATE FUNCTION line_azimuth_at_index (geom geometry, idx integer, direction integer) RETURNS double precision AS $$
 DECLARE
   npoints integer := ST_NPoints(geom);
   pt1 geometry;

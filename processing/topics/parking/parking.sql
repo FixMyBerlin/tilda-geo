@@ -4,7 +4,7 @@
 --
 -- Guidelines:
 -- - Put all decisions (that are feasable) into LUA and pass them to SQL via tags.
--- - Use "command tags" like "perform_buffer".
+-- - Use "command tags" like "buffer_radius".
 -- - Extract complex SQL into functions.
 -- - Split code into files and document them.
 -- - Indexes are handled by the SQL files.
@@ -18,7 +18,7 @@
 -- * … FOR KERBS
 \i '/processing/topics/parking/custom_functions/kerb_tangent.sql'
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
-\i '/processing/topics/parking/custom_functions/cut_kerb_at_corner.sql'
+\i '/processing/topics/parking/custom_functions/trim_kerb_at_corner.sql'
 -- * … FOR INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/intersection_angle.sql'
 \i '/processing/topics/parking/custom_functions/get_intersection_corners.sql'
@@ -26,6 +26,7 @@
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
 \i '/processing/topics/parking/custom_functions/get_pair_normal.sql'
+\i '/processing/topics/parking/custom_functions/dump_parkings.sql'
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
@@ -57,11 +58,11 @@
 
 -- CREATE CUTOUT AREAS
 \i '/processing/topics/parking/0_create_cutouts.sql'
-\i '/processing/topics/parking/1_cutout_parkings.sql'
+\i '/processing/topics/parking/1_cutout_road_parkings.sql'
 \i '/processing/topics/parking/2_cutout_separate_parkings.sql'
-\i '/processing/topics/parking/3_merge_parkings.sql'
-\i '/processing/topics/parking/4_estimate_parking_capacity.sql'
-\i '/processing/topics/parking/5_finalize_parkings.sql'
-
+\i '/processing/topics/parking/3_redistribute_parking_capacities.sql'
+\i '/processing/topics/parking/4_merge_parkings.sql'
+\i '/processing/topics/parking/5_estimate_parking_capacities.sql'
+\i '/processing/topics/parking/6_finalize_parkings.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;

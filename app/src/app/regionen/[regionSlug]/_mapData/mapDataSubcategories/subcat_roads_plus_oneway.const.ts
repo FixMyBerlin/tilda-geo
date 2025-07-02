@@ -36,7 +36,7 @@ export const subcat_roads_plus_oneway: FileMapDataSubcategory = {
           style: { type: 'line', color: '#fad329', width: 2 },
         },
         {
-          id: 'oneway-bile',
+          id: 'oneway-bike',
           name: 'Mit Radfreigabe',
           style: { type: 'line', color: '#54f8b6', width: 2 },
         },

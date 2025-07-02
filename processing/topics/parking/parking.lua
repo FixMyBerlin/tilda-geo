@@ -21,7 +21,7 @@ osm2pgsql.define_table({
     { column = 'id',   type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'multilinestring', projection = 5243 },
+    { column = 'geom', type = 'linestring', projection = 5243 },
     { column = 'minzoom', type = 'integer' },
   },
 })

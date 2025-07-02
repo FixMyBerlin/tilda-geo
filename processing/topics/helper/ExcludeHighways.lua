@@ -32,16 +32,20 @@ function ExcludeHighways(tags)
 
   -- Skip all unwanted `highway=service + service=<value>` values
   -- The key can have random values, we mainly want to skip
-  -- - "driveway" which we consider implicitly private
-  -- - "parking_aisle" which do not consider part of the road network (need a regular service highway if other roads connect)
-  -- - "emergency_access" which we consider a special kind of driveway
-  local allowed_service = Set({ "alley", "drive-through" })
+  -- - 'driveway' which we consider implicitly private
+  -- - 'parking_aisle' which we do not consider part of the road network (they need a regular service highway if other roads connect)
+  -- - 'emergency_access' which we consider a special kind of driveway
+  -- - 'drive-through' which we do not consider part of the road network; and which results in false positives for our oneway-plus layer
+  --
+  -- REMINDER: Keep this in sync with processing/topics/roads_bikelanes/roads/RoadClassificationRoadValue.lua
+  local allowed_service = Set({ 'alley' })
   if tags.service and not allowed_service[tags.service] then
-    return true, "Excluded by `service=" .. tags.service .. "`"
-  end
-  if tags.man_made == 'pier' then
-    return true, "Excluded by `man_made=pier`"
+    return true, 'Excluded by `service=' .. tags.service .. '`'
   end
 
-  return false, ""
+  if tags.man_made == 'pier' then
+    return true, 'Excluded by `man_made=pier`'
+  end
+
+  return false, ''
 end

@@ -5,6 +5,8 @@ import { Pill } from '@/src/app/_components/text/Pill'
 import deleteMembership from '@/src/server/memberships/mutations/deleteMembership'
 import getUsersAndMemberships from '@/src/server/users/queries/getUsersAndMemberships'
 import { useMutation, useQuery } from '@blitzjs/rpc'
+import { formatDistanceToNow } from 'date-fns'
+import { de } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
 import { Breadcrumb } from '../_components/Breadcrumb'
 import { HeaderWrapper } from '../_components/HeaderWrapper'
@@ -58,16 +60,24 @@ export default function AdminMembershipsPage() {
             return (
               <tr key={user.id}>
                 <td className="h-20 py-4 pl-4 pr-3 text-sm sm:pl-6">
-                  <strong>{getFullname(user)}</strong>
+                  <strong>OSM: {user.osmName}</strong>{' '}
+                  <span className="text-gray-400">({user.osmId})</span>
                   {user.role === 'ADMIN' && (
                     <Pill color="yellow" className="ml-1">
                       Admin
                     </Pill>
                   )}
                   <br />
-                  {user.email}
+                  {getFullname(user) || '–'}
                   <br />
-                  OSM: {user.osmName} ({user.osmId})
+                  {user.email || '–'}
+                  <br />
+                  {user.createdAt.toLocaleDateString()}{' '}
+                  <span className="text-gray-400">
+                    (
+                    {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: de })}
+                    )
+                  </span>
                 </td>
                 <td className="h-20 py-4 pl-4 pr-3 text-sm sm:pr-6">
                   {user?.Membership?.length === 0 ? (

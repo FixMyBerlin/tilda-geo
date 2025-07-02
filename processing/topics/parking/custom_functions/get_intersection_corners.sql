@@ -1,9 +1,11 @@
-CREATE OR REPLACE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
+DROP FUNCTION IF EXISTS get_intersection_corners;
+
+CREATE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
   intersection GEOMETRY,
   has_driveway BOOLEAN,
   has_road BOOLEAN,
-  kerb1_id BIGINT,
-  kerb2_id BIGINT
+  kerb1_id TEXT,
+  kerb2_id TEXT
 ) AS $$
 BEGIN
   RETURN QUERY

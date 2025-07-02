@@ -3,7 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START creating kerbs %', clock_timestamp(); END $$;
 DROP TABLE IF EXISTS _parking_kerbs;
 
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  id || '/' || kerb_sides.side AS id,
   ST_OffsetCurve (geom, kerb_sides.offset) AS geom,
   kerb_sides.side,
   kerb_sides.offset,
@@ -20,11 +20,8 @@ FROM
   _parking_roads
   CROSS JOIN LATERAL (
     VALUES
-      ('left', (tags ->> 'perform_offset_left')::numeric),
-      (
-        'right',
-        (tags ->> 'perform_offset_right')::numeric
-      )
+      ('left', (tags ->> 'offset_left')::numeric),
+      ('right', - (tags ->> 'offset_right')::numeric)
   ) AS kerb_sides ("side", "offset");
 
 DELETE FROM _parking_kerbs

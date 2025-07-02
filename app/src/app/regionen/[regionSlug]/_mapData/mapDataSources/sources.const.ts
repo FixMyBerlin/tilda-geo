@@ -216,8 +216,8 @@ export const sources: MapDataSource<
         // Same as 'roadsPathClasses'
         'name',
         'road',
-        'road_oneway',
-        'road_oneway:bicycle__if_present',
+        'oneway',
+        'oneway_bicycle__if_present',
         'composit_surface_smoothness',
         'composit_lit',
         'composit_maxspeed',
@@ -254,8 +254,8 @@ export const sources: MapDataSource<
         // Same as 'roads'
         'name',
         'road',
-        'road_oneway',
-        'road_oneway:bicycle__if_present',
+        'oneway',
+        'oneway_bicycle__if_present',
         'composit_surface_smoothness',
         'composit_lit',
         'composit_maxspeed',

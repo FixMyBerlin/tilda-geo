@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION get_pair_normal (a geometry, b geometry, len float) RETURNS geometry AS $$
+DROP FUNCTION IF EXISTS get_pair_normal;
+
+CREATE FUNCTION get_pair_normal (a geometry, b geometry, len float) RETURNS geometry AS $$
 DECLARE
   normal_azimuth double precision := ST_Azimuth(a, b) + pi() / 2;
   midpoint geometry := ST_Centroid(ST_Union(a, b));

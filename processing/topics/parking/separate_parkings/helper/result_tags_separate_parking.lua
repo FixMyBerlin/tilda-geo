@@ -11,7 +11,7 @@ local function result_tags_separate_parking(result, area)
   local result_tags = {
     category = result.category.id,
     source = result.category.source,
-    perform_buffer = result.category:get_perform_buffer(result.object.tags),
+    buffer_radius = result.category:get_buffer_radius(result.object.tags),
   }
 
   local global_tags_cc = {

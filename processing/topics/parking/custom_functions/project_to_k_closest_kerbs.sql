@@ -1,13 +1,13 @@
 -- this function projects a given geometry to the k closest kerbs
 -- the parameter tolerance define the maximum distance to the closest kerb
-DROP FUNCTION IF EXISTS project_to_k_closest_kerbs (geometry, double precision, integer);
+DROP FUNCTION IF EXISTS project_to_k_closest_kerbs;
 
-CREATE OR REPLACE FUNCTION project_to_k_closest_kerbs (
+CREATE FUNCTION project_to_k_closest_kerbs (
   input_geom geometry,
   tolerance double precision,
   k integer
 ) RETURNS TABLE (
-  kerb_id bigint,
+  kerb_id text,
   kerb_side text,
   kerb_tags jsonb,
   geom geometry

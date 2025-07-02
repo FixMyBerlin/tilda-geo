@@ -26,10 +26,9 @@ SELECT
   --
   INTO TEMP cluster_candidates
 FROM
-  _parking_parkings2_cut p;
+  _parking_parkings_cutted p;
 
 CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
-  osm_id,
   -- REMINDER: Every value here need to be defined in multiple places
   street_name,
   side,
@@ -44,12 +43,13 @@ CREATE INDEX cluster_candidates_geom_idx ON cluster_candidates USING GIST (geom)
 
 -- 2. Create the result table.
 -- Create one table where connected linestrings are merged which is later used to snap to
-DROP TABLE IF EXISTS _parking_parkings3_merged;
+DROP TABLE IF EXISTS _parking_parkings_merged;
 
 -- We merge after grouping by street name and side, so that the merged kerbs should correspond to the street kerbs
 WITH
   clustered AS (
     SELECT
+      id,
       osm_id,
       geom,
       -- REMINDER: Every value here need to be defined in multiple places
@@ -76,7 +76,12 @@ WITH
       cluster_candidates
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  string_agg(
+    id,
+    '-'
+    ORDER BY
+      id
+  ) AS id,
   cluster_id,
   -- REMINDER: Every value here need to be defined in multiple places
   jsonb_build_object(
@@ -97,9 +102,9 @@ SELECT
   ) as tags,
   -- /REMINDER
   array_agg(osm_id) AS original_osm_ids,
-  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom AS geom
+  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom::geometry (LINESTRING) AS geom
   --
-  INTO _parking_parkings3_merged
+  INTO _parking_parkings_merged
 FROM
   clustered
 GROUP BY

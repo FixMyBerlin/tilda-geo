@@ -60,14 +60,14 @@ SELECT
   osm_id,
   ST_Buffer (
     geom,
-    (tags ->> 'perform_buffer')::float,
+    (tags ->> 'buffer_radius')::float,
     'endcap=flat'
   ) as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
-    'width', (tags ->> 'perform_buffer')::float
+    'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
@@ -81,12 +81,12 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, (tags ->> 'perform_buffer')::float) as geom,
+  ST_Buffer (geom, (tags ->> 'buffer_radius')::float) as geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_points',
-    'radius', (tags ->> 'perform_buffer')::float
+    'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ) || tags AS tags,
   jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
@@ -148,6 +148,31 @@ SELECT
 FROM
   _parking_separate_parking_areas_projected;
 
+-- INSERT roads
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+SELECT
+  id::TEXT,
+  osm_id,
+  ST_Buffer (
+    geom,
+    LEAST(
+      (tags ->> 'offset_right')::NUMERIC,
+      (tags ->> 'offset_left')::NUMERIC
+    ) * 0.9,
+    'endcap=flat'
+  ) as geom,
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', tags ->> 'category',
+    'source', 'parking_roads'
+    /* sql-formatter-enable */
+  ) || tags AS tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
+  0 AS minzoom
+FROM
+  _parking_roads;
+
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
 -- NOTE TODO: Test those new indexes for performance improvements
@@ -161,7 +186,7 @@ SELECT
   c.id INTO TEMP to_discard
 FROM
   _parking_cutouts c
-  JOIN _parking_parkings1_road p ON c.geom && p.geom
+  JOIN _parking_road_parkings p ON c.geom && p.geom
 WHERE
   ST_Intersects (c.geom, p.geom)
   AND (

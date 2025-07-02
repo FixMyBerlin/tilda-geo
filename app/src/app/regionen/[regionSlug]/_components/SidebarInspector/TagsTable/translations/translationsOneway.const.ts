@@ -8,11 +8,11 @@ export const translationsOneway = {
   'atlas_bikelanes--oneway=implicit_yes': 'Wahrscheinlich eine Richtung', //  Wir verwenden hier nicht "Einrichtungsradweg" da diese Angabe für bspw. Buspuren irreführend ist
   'atlas_bikelanes--oneway=no': 'Beide Richtungen',
   'atlas_bikelanes--oneway=yes': 'Eine Richtung', //  Wir verwenden hier nicht "Einrichtungsradweg" da diese Angabe für bspw. Buspuren irreführend ist
-  'atlas_roads--road_oneway--key': 'Verkehrsrichtung',
-  'atlas_roads--road_oneway:bicycle--key': 'Verkehrsrichtung Fahrrad',
-  'atlas_roads--road_oneway:bicycle=no': 'Beide Richtungen für Radverkehr',
-  'atlas_roads--road_oneway:bicycle=yes': 'Eine Richtung (auch für Radverkehr)',
-  'atlas_roads--road_oneway=no': 'Beide Richtungen',
-  'atlas_roads--road_oneway=yes_dual_carriageway': 'Einbahnstraße da separate Geometrie pro Seite',
-  'atlas_roads--road_oneway=yes': 'Einbahnstraße',
+  'atlas_roads--oneway--key': 'Verkehrsrichtung',
+  'atlas_roads--oneway_bicycle--key': 'Verkehrsrichtung Fahrrad',
+  'atlas_roads--oneway_bicycle=no': 'Beide Richtungen für Radverkehr',
+  'atlas_roads--oneway_bicycle=yes': 'Eine Richtung (auch für Radverkehr)',
+  'atlas_roads--oneway=no': 'Beide Richtungen',
+  'atlas_roads--oneway=yes_dual_carriageway': 'Einbahnstraße da separate Geometrie pro Seite',
+  'atlas_roads--oneway=yes': 'Einbahnstraße',
 }
