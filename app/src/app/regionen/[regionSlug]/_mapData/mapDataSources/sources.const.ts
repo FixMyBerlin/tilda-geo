@@ -138,6 +138,8 @@ export const sources: MapDataSource<
         'oneway',
         'traffic_sign',
         'width',
+        'separation_left__if_present',
+        'separation_right__if_present',
         'composit_surface_smoothness',
         'surface_color__if_present',
         'composit_mapillary',

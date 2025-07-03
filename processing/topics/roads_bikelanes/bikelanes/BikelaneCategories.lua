@@ -5,6 +5,7 @@ require("CreateSubcategoriesAdjoiningOrIsolated")
 require("SanitizeTrafficSign")
 require("DeriveSmoothness")
 require("HighwayClasses")
+local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
 BikelaneCategory = {}
 BikelaneCategory.__index = BikelaneCategory
@@ -214,11 +215,14 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
     -- But in some cases, it is OK to map traffic_mode:right=foot but there is a separation.
     -- Those cases are not `footAndCyclewaySegregated`. So if a separation is given, this has to be "no".
     -- Eg. https://www.openstreetmap.org/way/244549219
-    local separation_right = tags['separation:right'] or tags['separation:both'] or tags['separation']
+    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
     local separation_condition = true
     if(separation_right ~= nil) then separation_condition = separation_right == "no" end
-    local traffic_mode_right = tags['traffic_mode:right'] or tags['traffic_mode:both'] or tags['traffic_mode']
-    if tags.highway == "cycleway" and traffic_mode_right == "foot" and separation_condition then
+
+    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
+    local traffic_mode_condition = traffic_mode_right == "foot"
+
+    if tags.highway == "cycleway" and traffic_mode_condition and separation_condition then
       return true
     end
   end
@@ -464,50 +468,17 @@ local protectedCyclewayOnHighway = BikelaneCategory.new({
   implicitOneWay = true, -- 'oneway=implicit_yes', its still "lane"-like and wider RVA would likely be tagged explicitly
   implicitOneWayConfidence = 'medium',
   condition = function(tags)
-    -- Only include center line tagged cycleways
-    if tags._prefix == nil then
-      return false
+    -- Has to have physical separation left
+    -- All separation values are physical separations except for 'no'
+    local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
+    local has_separation_left = separation_left ~= nil and separation_left ~= 'no'
+    -- OR, for counter flow bikelanes with motorized traffic on the right, has to have physical separation right
+    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
+    local has_separation_right = separation_right ~= nil and separation_right ~= 'no'
+    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
+    if has_separation_left or (traffic_mode_right == 'motor_vehicle' and has_separation_right) then
+      return true
     end
-
-    -- We don't use our `Set` pattern here because we need a Substring check
-    local function isPhysicalSeperation(separation)
-      local physicalSeparations = {
-        'bollard',
-        'bump',
-        'fence',
-        'flex_post',
-        'jersey_barrier',
-        'kerb',
-        'parking_lane',
-        'planter',
-        'separation_kerb',
-        'vertical_panel',
-      }
-      for _, value in pairs(physicalSeparations) do
-        if ContainsSubstring(separation, value) then
-          return true
-        end
-      end
-    end
-
-    -- We go from specific to general tags (:side > :both > '')
-    local separation_left = tags['separation:left'] or tags['separation:both'] or tags['separation']
-    local separation_right = tags['separation:right'] or tags['separation:both'] or tags['separation']
-
-    -- Has to have physical separation left, else exit
-    if not isPhysicalSeperation(separation_left) then
-      return false
-    end
-
-    -- Check also the left separation for the rare case that there is motorized traffic on the right hand side
-    local traffic_mode_right = tags['traffic_mode:right'] or tags['traffic_mode:both'] or tags['traffic_mode']
-    if ContainsSubstring(traffic_mode_right, 'motor_vehicle') then
-      if not isPhysicalSeperation(separation_right) then
-        return false
-      end
-    end
-
-    return true
   end
 })
 

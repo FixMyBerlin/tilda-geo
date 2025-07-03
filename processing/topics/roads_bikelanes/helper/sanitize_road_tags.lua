@@ -31,6 +31,81 @@ local SANITIZE_ROAD_TAGS = {
     --   {}
     -- )
   end,
+  separation = function (tags, side)
+    -- The side-unspecific tags.separation is deprecated. We interpret it as 'in the direction of travel', meaning left
+    local value = tags['separation:' .. side] or tags['separation:both']
+    if side == 'left' then value = value or tags['separation'] end
+    if value == nil then return nil end
+
+    -- TEMP: Helper to find transformations
+    -- SELECT
+    --   id,
+    --   COALESCE(
+    --     tags->>'osm_separation',
+    --     tags->>'osm_separation:left',
+    --     tags->>'osm_separation:right'
+    --   ) AS osm_separation_value
+    -- FROM public.bikelanes
+    -- WHERE
+    --   (
+    --     tags->>'osm_separation' LIKE '%;%' OR
+    --     tags->>'osm_separation:left' LIKE '%;%' OR
+    --     tags->>'osm_separation:right' LIKE '%;%'
+    --   );
+
+    -- SELECT
+    --   value,
+    --   COUNT(*) AS count
+    -- FROM (
+    --   SELECT tags->>'osm_separation' AS value
+    --   FROM public.bikelanes
+    --   WHERE tags->>'osm_separation' LIKE '%;%'
+    --   UNION ALL
+    --   SELECT tags->>'osm_separation:left' AS value
+    --   FROM public.bikelanes
+    --   WHERE tags->>'osm_separation:left' LIKE '%;%'
+    --   UNION ALL
+    --   SELECT tags->>'osm_separation:right' AS value
+    --   FROM public.bikelanes
+    --   WHERE tags->>'osm_separation:right' LIKE '%;%'
+    -- ) AS all_values
+    -- GROUP BY value
+    -- ORDER BY count DESC;
+
+
+    -- Transform known but unsupported values to values that we support:
+    local transformations = {
+      ['separation_kerb'] = 'bump',
+      ['lane_separator'] = 'bump',
+      ['surface'] = 'no',
+      ['tree_row;kerb'] = 'tree_row', -- primary separation is 'tree_row'
+      ['kerb;tree_row'] = 'tree_row', -- primary separation is 'tree_row'
+      ['tree_row;kerb;parking_lane'] = 'tree_row', -- primary separation is 'tree_row'
+      ['grass_verge;tree_row'] = 'tree_row', -- primary separation is 'tree_row'
+      ['kerb;greenery'] = 'kerb', -- primary
+      ['parking_lane;kerb'] = 'parking_lane', -- primary
+      ['solid_line;parking_lane'] = 'parking_lane', -- deprecated value
+    }
+    if transformations[value] then
+      value = transformations[value]
+    end
+    -- Sanitize values:
+    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
+    return Sanitize(value, {
+      'no',
+      'bollar', 'flex_post', 'vertical_panel', 'studs', 'bump', 'planter', 'kerb', 'fence', 'jersey_barrier', 'guard_rail', 'structure', 'ditch', 'greenery', 'hedge', 'tree_row', 'cone',
+      -- We preserver some combinations but transform other
+      'kerb;parking_lane', -- sidewalk but additional protection
+      'kerb;bollard', -- meaning, its still on the side walk
+      'yes' -- unspecific
+    })
+    -- return sanitize_for_logging(
+    --   value,
+    --   { … },
+    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
+    --   {}
+    -- )
+  end,
 }
 
 return SANITIZE_ROAD_TAGS

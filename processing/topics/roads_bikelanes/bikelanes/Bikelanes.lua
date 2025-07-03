@@ -23,9 +23,6 @@ local tags_copied = {
   "description",
 }
 local tags_prefixed = {
-  'separation',
-  'separation:left',
-  'separation:right',
   'traffic_mode',
   'traffic_mode:left',
   'traffic_mode:right',
@@ -80,7 +77,9 @@ function Bikelanes(object)
           oneway = DeriveOneway(transformed_tags, category),
           bridge = Sanitize(object_tags.bridge, { "yes" }),
           tunnel = Sanitize(object_tags.tunnel, { "yes" }),
-          surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags)
+          surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags),
+          separation_left = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'left'),
+          separation_right = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'right'),
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))

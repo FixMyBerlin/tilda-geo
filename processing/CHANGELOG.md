@@ -9,6 +9,10 @@ This is an manual and incomplete list of change to the data structure.
 - Introduce `surface_color` as sanitized value
 - Remove `osm_surface:colour`
 
+- Introduce `separation_left`, `separation_right` as sanitized values
+- Remove `osm_separation*` values
+- Improve bikelane category `protectedCyclewayOnHighway`
+
 ### `roads`, `roadsPathClasses`
 
 - Rename `road_oneway` to `oneway_road`
