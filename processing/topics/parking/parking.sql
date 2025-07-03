@@ -35,6 +35,8 @@
 \i '/processing/topics/parking/roads/3_find_driveways.sql'
 \i '/processing/topics/parking/roads/4_build_graph.sql'
 \i '/processing/topics/parking/roads/5_trim_kerbs.sql'
+\i '/processing/topics/parking/roads/6_driveway_corners_kerbs.sql'
+
 
 -- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'

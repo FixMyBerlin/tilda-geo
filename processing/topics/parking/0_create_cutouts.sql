@@ -24,6 +24,22 @@ WHERE
   NOT has_driveway
   AND has_road;
 
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta)
+SELECT
+  id::TEXT,
+  kerb_osm_id,
+  ST_Buffer (geom, 0.6, 'endcap=flat'),
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', 'driveway_corner_kerb',
+    'source', 'driveway_corner_kerbs'
+    /* sql-formatter-enable */
+  ),
+  '{}'::jsonb
+FROM
+  _parking_driveway_corner_kerbs;
+
 -- INSERT "driveway" buffers (rectangles)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
