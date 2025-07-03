@@ -8,8 +8,8 @@ DROP TABLE IF EXISTS _parking_discarded_cutouts;
 -- @var: "5" is the buffer in meter where no parking is allowed legally
 SELECT
   id::TEXT,
-  intersection_id as osm_id,
-  ST_Buffer (geom, 5) as geom,
+  intersection_id AS osm_id,
+  ST_Buffer (geom, 5) AS geom,
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'intersection_corner',
@@ -17,10 +17,7 @@ SELECT
     'radius', 5
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta,
-  0 AS minzoom
-  --
-  INTO _parking_cutouts
+  '{}'::jsonb AS meta INTO _parking_cutouts
 FROM
   _parking_intersection_corners
 WHERE
@@ -29,7 +26,7 @@ WHERE
 
 -- INSERT "driveway" buffers (rectangles)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -37,7 +34,7 @@ SELECT
     geom,
     ((tags ->> 'width')::float / 2)::float,
     'endcap=flat'
-  ) as geom,
+  ),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'driveway',
@@ -46,15 +43,14 @@ SELECT
     -- 'highway', tags ->> 'highway',
     'road', tags ->> 'road'
     /* sql-formatter-enable */
-  ) AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ),
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_driveways;
 
 -- INSERT "crossing" buffers (rectangles)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -62,95 +58,90 @@ SELECT
     geom,
     (tags ->> 'buffer_radius')::float,
     'endcap=flat'
-  ) as geom,
+  ),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
     'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
-  ) || tags AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_crossings;
 
 -- INSERT "obstacle_point" buffers (circle)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, (tags ->> 'buffer_radius')::float) as geom,
+  ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_points',
     'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
-  ) || tags AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_points_projected;
 
 -- INSERT "obstacle_area" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat'),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_areas'
     /* sql-formatter-enable */
-  ) || tags AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_areas_projected;
 
 -- INSERT "obstacle_line" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat'),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_lines'
     /* sql-formatter-enable */
-  ) || tags AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_lines_projected;
 
 -- INSERT "obstacle" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.6, 'endcap=flat') as geom,
+  ST_Buffer (geom, 0.6, 'endcap=flat'),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
-  ) || tags AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_areas_projected;
 
 -- INSERT roads
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta, minzoom)
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -161,15 +152,14 @@ SELECT
       (tags ->> 'offset_left')::NUMERIC
     ) * 0.9,
     'endcap=flat'
-  ) as geom,
+  ),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'parking_roads'
     /* sql-formatter-enable */
-  ) || tags AS tags,
-  jsonb_build_object('updated_at', meta ->> 'updated_at') AS meta,
-  0 AS minzoom
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_roads;
 
