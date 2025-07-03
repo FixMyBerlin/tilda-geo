@@ -1,6 +1,7 @@
 // Prettier: Overwrite via app/.prettierrc.mjs
 import { translationsOneway } from './translationsOneway.const'
 import { translationsParking } from './translationsParking.const'
+import { translationsSeparationTrafficModeMarking } from './translationsSeparationTrafficModeMarking.const'
 
 // Legend:
 // - "ALL--" stands for "all sources". Those translations are applied without checking the soureId
@@ -9,6 +10,7 @@ import { translationsParking } from './translationsParking.const'
 export const translations: { [key: string]: string } = {
   ...translationsParking,
   ...translationsOneway,
+  ...translationsSeparationTrafficModeMarking,
   'ALL--_parent_highway--key': 'Straßentyp Fahrbahn',
   'ALL--category--key': 'Führungsform',
   'ALL--category=bicycleRoad_vehicleDestination': 'Fahrradstraße mit Anlieger frei',
