@@ -468,6 +468,11 @@ local protectedCyclewayOnHighway = BikelaneCategory.new({
   implicitOneWay = true, -- 'oneway=implicit_yes', its still "lane"-like and wider RVA would likely be tagged explicitly
   implicitOneWayConfidence = 'medium',
   condition = function(tags)
+    -- Only target sidepath like ways
+    if not IsSidepath(tags) then
+      return false
+    end
+
     -- Has to have physical separation left
     -- All separation values are physical separations except for 'no'
     local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
