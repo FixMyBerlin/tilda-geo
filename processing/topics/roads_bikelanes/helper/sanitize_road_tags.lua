@@ -106,6 +106,23 @@ local SANITIZE_ROAD_TAGS = {
     --   {}
     -- )
   end,
+  buffer = function (tags, side)
+    -- The side-unspecific tags.buffer is deprecated. We interpret it as 'in the direction of travel', meaning left
+    local value = tags['buffer:' .. side] or tags['buffer:both']
+    if side == 'left' then value = value or tags['buffer'] end
+    if value == nil then return nil end
+
+    -- We want values of type number, so we have to change no-strings to 0
+    local transformations = {
+      ['no'] = 0,
+      ['none'] = 0,
+    }
+    if transformations[value] then
+      value = transformations[value]
+    end
+
+    return parse_length(value)
+  end,
 }
 
 return SANITIZE_ROAD_TAGS

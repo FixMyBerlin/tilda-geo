@@ -80,6 +80,8 @@ function Bikelanes(object)
           surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags),
           separation_left = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'left'),
           separation_right = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'right'),
+          buffer_left = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'left'),
+          buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
