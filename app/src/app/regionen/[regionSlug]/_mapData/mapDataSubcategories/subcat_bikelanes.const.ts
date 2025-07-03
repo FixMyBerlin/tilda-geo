@@ -121,7 +121,7 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
       name: 'Geschuetzter Radfahrstreifen',
       style: {
         type: 'line',
-        color: '#2dd4bf',
+        color: '#7a0ff5',
       },
     },
     {
