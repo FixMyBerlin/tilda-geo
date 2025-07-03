@@ -222,7 +222,7 @@ describe("Bikelanes", function()
           assert.are.equal("needsClarification", v.category)
         end
         if v._side == 'left' and v.prefix == 'cycleway' then
-          assert.are.equal("protectedCyclewayOnHighway", v.category)
+          assert.are.equal("cyclewayOnHighwayProtected", v.category)
         end
       end
     end)

@@ -10,8 +10,12 @@ This is an manual and incomplete list of change to the data structure.
 - Remove `osm_surface:colour`
 
 - Introduce `separation_left`, `separation_right` as sanitized values
-- Remove `osm_separation*` values
-- Improve bikelane category `protectedCyclewayOnHighway`
+- Introduce `marking_left`, `marking_right` as sanitized values
+- Introduce `traffic_mode_left`, `traffic_mode_right` as sanitized values
+- Introduce `buffer_left`, `buffer_right` as number (meters) values
+- Remove `osm_separation*`, `osm_marking*`, `osm_traffic_mode*` values
+- Rename bikelane category `cyclewayOnHighwayProtected` (was: `protectedCyclewayOnHighway`)
+- Improve bikelane category `cyclewayOnHighwayProtected`
 
 ### `roads`, `roadsPathClasses`
 

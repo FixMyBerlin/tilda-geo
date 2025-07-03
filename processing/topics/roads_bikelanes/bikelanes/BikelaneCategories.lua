@@ -460,9 +460,8 @@ local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
   end
 })
 
--- TODO: maybe rename to cyclewayOnHighwayProtected ?
-local protectedCyclewayOnHighway = BikelaneCategory.new({
-  id = 'protectedCyclewayOnHighway',
+local cyclewayOnHighwayProtected = BikelaneCategory.new({
+  id = 'cyclewayOnHighwayProtected',
   desc = 'Protected bikelanes e.g. bikelanes with physical separation from motorized traffic.',
   infrastructureExists = true,
   implicitOneWay = true, -- 'oneway=implicit_yes', its still "lane"-like and wider RVA would likely be tagged explicitly
@@ -592,7 +591,7 @@ local categoryDefinitions = {
   dataNo,
   isSeparate,
   implicitOneWay,
-  protectedCyclewayOnHighway,
+  cyclewayOnHighwayProtected,
   cyclewayLink,
   crossing,
   bicycleRoad_vehicleDestination,

@@ -147,7 +147,7 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_details: MapboxStyleLayer[] 
     },
   },
   {
-    filter: ['match', ['get', 'category'], 'protectedCyclewayOnHighway', true, false],
+    filter: ['match', ['get', 'category'], 'cyclewayOnHighwayProtected', true, false],
     type: 'line',
     id: 'Geschuetzter Radfahrstreifen',
     paint: {
