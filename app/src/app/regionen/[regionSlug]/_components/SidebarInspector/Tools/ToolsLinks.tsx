@@ -5,7 +5,6 @@ import {
   MapDataSourceInspectorEditor,
 } from '@/src/app/regionen/[regionSlug]/_mapData/types'
 import { InspectorFeature } from '../Inspector'
-import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
 import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import {
@@ -16,6 +15,8 @@ import {
   osmEditRapidUrl,
   osmOrgUrl,
 } from './osmUrls/osmUrls'
+import { ToolsLinkNewAtlasNote } from './ToolsLinkNewAtlasNote'
+import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
 
 type Props = {
   feature: InspectorFeature['feature']
@@ -88,6 +89,11 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
       )}
 
       <ToolsLinkNewOsmNote
+        properties={feature.properties}
+        geometry={feature.geometry}
+        osmIdConfig={osmIdConfig}
+      />
+      <ToolsLinkNewAtlasNote
         properties={feature.properties}
         geometry={feature.geometry}
         osmIdConfig={osmIdConfig}

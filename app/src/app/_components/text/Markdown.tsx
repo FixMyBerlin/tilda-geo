@@ -39,6 +39,7 @@ const MdH6 = (props: any) => (
   </p>
 )
 const MdA = (props: any) => <Link blank href={props.href} {...props} />
+const MdHr = (props: any) => <hr className="my-2" {...props} />
 
 const components = {
   h1: MdH1,
@@ -48,6 +49,7 @@ const components = {
   h5: MdH5,
   h6: MdH6,
   a: MdA,
+  hr: MdHr,
 }
 
 export const Markdown = ({ markdown, className }: Props) => {
