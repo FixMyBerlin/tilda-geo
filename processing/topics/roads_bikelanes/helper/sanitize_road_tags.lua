@@ -1,5 +1,6 @@
 require('init')
 local sanitize_for_logging = require('sanitize_for_logging')
+local parse_length = require('parse_length')
 require('Sanitize')
 
 local SANITIZE_ROAD_TAGS = {
@@ -37,42 +38,6 @@ local SANITIZE_ROAD_TAGS = {
     if side == 'left' then value = value or tags['separation'] end
     if value == nil then return nil end
 
-    -- TEMP: Helper to find transformations
-    -- SELECT
-    --   id,
-    --   COALESCE(
-    --     tags->>'osm_separation',
-    --     tags->>'osm_separation:left',
-    --     tags->>'osm_separation:right'
-    --   ) AS osm_separation_value
-    -- FROM public.bikelanes
-    -- WHERE
-    --   (
-    --     tags->>'osm_separation' LIKE '%;%' OR
-    --     tags->>'osm_separation:left' LIKE '%;%' OR
-    --     tags->>'osm_separation:right' LIKE '%;%'
-    --   );
-
-    -- SELECT
-    --   value,
-    --   COUNT(*) AS count
-    -- FROM (
-    --   SELECT tags->>'osm_separation' AS value
-    --   FROM public.bikelanes
-    --   WHERE tags->>'osm_separation' LIKE '%;%'
-    --   UNION ALL
-    --   SELECT tags->>'osm_separation:left' AS value
-    --   FROM public.bikelanes
-    --   WHERE tags->>'osm_separation:left' LIKE '%;%'
-    --   UNION ALL
-    --   SELECT tags->>'osm_separation:right' AS value
-    --   FROM public.bikelanes
-    --   WHERE tags->>'osm_separation:right' LIKE '%;%'
-    -- ) AS all_values
-    -- GROUP BY value
-    -- ORDER BY count DESC;
-
-
     -- Transform known but unsupported values to values that we support:
     local transformations = {
       ['separation_kerb'] = 'bump',
@@ -98,6 +63,53 @@ local SANITIZE_ROAD_TAGS = {
       'kerb;parking_lane', -- sidewalk but additional protection
       'kerb;bollard', -- meaning, its still on the side walk
       'yes' -- unspecific
+    })
+    -- return sanitize_for_logging(
+    --   value,
+    --   { … },
+    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
+    --   {}
+    -- )
+  end,
+  marking = function (tags, side)
+    -- The side-unspecific tags.marking is deprecated. We interpret it as 'in the direction of travel', meaning left
+    local value = tags['marking:' .. side] or tags['marking:both']
+    if side == 'left' then value = value or tags['marking'] end
+    if value == nil then return nil end
+
+    -- Sanitize values:
+    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
+    return Sanitize(value, {
+      'solid_line', 'dashed_line', 'double_solid_line', 'barred_area', 'pictogram', 'surface',
+    })
+    -- return sanitize_for_logging(
+    --   value,
+    --   { … },
+    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
+    --   {}
+    -- )
+  end,
+  traffic_mode = function (tags, side)
+    -- The side-unspecific tags.traffic_mode is deprecated. We interpret it as 'in the direction of travel', meaning left
+    local value = tags['traffic_mode:' .. side] or tags['traffic_mode:both']
+    if side == 'left' then value = value or tags['traffic_mode'] end
+    if value == nil then return nil end
+
+    -- Transform known but unsupported values to values that we support:
+    local transformations = {
+      ['foot;bicycle'] = 'foot',
+      ['motorized'] = 'motor_vehicle',
+      ['none'] = 'no',
+    }
+    if transformations[value] then
+      value = transformations[value]
+    end
+
+    -- Sanitize values:
+    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
+      return Sanitize(value, {
+      'no',
+      'motor_vehicle', 'parking', 'psv', 'bicycle', 'foot'
     })
     -- return sanitize_for_logging(
     --   value,

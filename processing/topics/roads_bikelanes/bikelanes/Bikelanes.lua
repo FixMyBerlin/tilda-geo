@@ -22,11 +22,7 @@ local tags_copied = {
   "mapillary",
   "description",
 }
-local tags_prefixed = {
-  'traffic_mode',
-  'traffic_mode:left',
-  'traffic_mode:right',
-}
+local tags_prefixed = {}
 local sideSignMap = {
   ["left"] = 1,
   ["right"] = -1
@@ -82,6 +78,10 @@ function Bikelanes(object)
           separation_right = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'right'),
           buffer_left = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'left'),
           buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
+          marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
+          marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
+          traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'left'),
+          traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'right'),
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
