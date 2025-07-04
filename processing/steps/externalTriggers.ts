@@ -15,15 +15,11 @@ async function triggerPrivateApi(endpoint: string) {
     return
   }
 
-  try {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`The ${endpoint} endpoint failed with status code ${response.status}.`)
-    }
-  } catch (error) {
+  const response = await fetch(url)
+  if (!response.ok) {
     console.warn(
-      `⚠️  Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
-      error,
+      `⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
+      response.status,
     )
   }
 }
@@ -46,10 +42,17 @@ export async function triggerCacheWarming() {
  */
 export async function clearCache() {
   try {
+    const { stdout: sizeBefore } = await $`du -sh /var/cache/nginx`
+    const sizeBeforeStr = sizeBefore.toString().trim()
     await $`rm -rf "/var/cache/nginx/*"`
-    console.log('Succesfully cleared the cache.')
+    const { stdout: sizeAfter } = await $`du -sh /var/cache/nginx`
+    const sizeAfterStr = sizeAfter.toString().trim()
+    console.log(
+      'Cache:',
+      `Succesfully cleared the cache. Size before: ${sizeBeforeStr}, after: ${sizeAfterStr}`,
+    )
   } catch (error) {
-    console.warn('Clearing the cache failed:', error)
+    console.warn('⚠️ Clearing the cache failed:', error)
   }
 }
 
