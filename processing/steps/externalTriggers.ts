@@ -32,7 +32,12 @@ export async function triggerPostProcessing() {
   return triggerPrivateApi('post-processing-hook')
 }
 export async function triggerCacheWarming() {
-  return triggerPrivateApi('warm-cache')
+  if (params.skipWarmCache) {
+    console.log('Cache:', 'Trigger cache warming')
+    return triggerPrivateApi('warm-cache')
+  } else {
+    console.log('⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
+  }
 }
 
 /**
