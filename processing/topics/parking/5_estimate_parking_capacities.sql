@@ -29,7 +29,7 @@ SELECT
 FROM
   _parking_parkings_merged
 WHERE
-  (tags ->> 'capacity')::INTEGER < 1;
+  (tags ->> 'capacity')::NUMERIC < 1;
 
 UPDATE _parking_discarded
 SET
@@ -44,6 +44,14 @@ WHERE
       id
     FROM
       _parking_discarded
+  );
+
+UPDATE _parking_parkings_merged
+SET
+  tags = jsonb_set(
+    tags,
+    '{capacity}',
+    to_jsonb(ROUND(((tags ->> 'capacity')::NUMERIC)))
   );
 
 -- MISC

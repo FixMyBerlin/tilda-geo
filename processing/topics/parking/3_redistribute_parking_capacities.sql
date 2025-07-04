@@ -22,9 +22,7 @@ UPDATE _parking_parkings_cutted pc
 SET
   tags = tags || jsonb_build_object(
     'capacity',
-    ROUND(
-      (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length
-    ),
+    (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
     'capacity_source',
     pc.tags ->> 'capacity_source' || ' (redistributed)'
   )
