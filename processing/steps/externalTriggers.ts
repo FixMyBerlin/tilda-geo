@@ -42,14 +42,13 @@ export async function triggerCacheWarming() {
  */
 export async function clearCache() {
   try {
-    const { stdout: sizeBefore } = await $`du -sh /var/cache/nginx`
-    const sizeBeforeStr = sizeBefore.toString().trim()
-    const { stdout: sizeAfter } = await $`du -sh /var/cache/nginx`
-    const sizeAfterStr = sizeAfter.toString().trim()
+    const sizeBeforeStr = await $`du -sh /srv/cache`.text()
     await $`rm -rf /srv/cache/*`
+    const sizeAfterStr = await $`du -sh /srv/cache`.text()
     console.log(
       'Cache:',
-      `Succesfully cleared the cache. Size before: ${sizeBeforeStr}, after: ${sizeAfterStr}`,
+      'Succesfully cleared the cache.',
+      `Size before: ${sizeBeforeStr}, after: ${sizeAfterStr}`,
     )
   } catch (error) {
     console.warn('⚠️ Clearing the cache failed:', error)
