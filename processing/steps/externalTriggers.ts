@@ -44,9 +44,9 @@ export async function clearCache() {
   try {
     const { stdout: sizeBefore } = await $`du -sh /var/cache/nginx`
     const sizeBeforeStr = sizeBefore.toString().trim()
-    await $`rm -rf "/var/cache/nginx/*"`
     const { stdout: sizeAfter } = await $`du -sh /var/cache/nginx`
     const sizeAfterStr = sizeAfter.toString().trim()
+    await $`rm -rf /srv/cache/*`
     console.log(
       'Cache:',
       `Succesfully cleared the cache. Size before: ${sizeBeforeStr}, after: ${sizeAfterStr}`,
