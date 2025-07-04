@@ -50,7 +50,10 @@ UPDATE _parking_parkings_merged
 SET
   tags = tags || jsonb_build_object(
     'capacity',
-    ROUND(((tags ->> 'capacity')::NUMERIC))
+    CASE
+      WHEN (tags ->> 'capacity')::NUMERIC < 10 THEN FLOOR((tags ->> 'capacity')::NUMERIC)
+      ELSE ROUND(((tags ->> 'capacity')::NUMERIC))
+    END
   );
 
 -- MISC
