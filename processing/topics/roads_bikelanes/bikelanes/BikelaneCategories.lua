@@ -217,10 +217,10 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
     -- Eg. https://www.openstreetmap.org/way/244549219
     local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
     local separation_condition = true
-    if(separation_right ~= nil) then separation_condition = separation_right == "no" end
+    if(separation_right ~= nil) then separation_condition = separation_right == 'no' end
 
     local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
-    local traffic_mode_condition = traffic_mode_right == "foot"
+    local traffic_mode_condition = traffic_mode_right == 'foot'
 
     if tags.highway == "cycleway" and traffic_mode_condition and separation_condition then
       return true
@@ -462,15 +462,13 @@ local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
 
 local cyclewayOnHighwayProtected = BikelaneCategory.new({
   id = 'cyclewayOnHighwayProtected',
-  desc = 'Protected bikelanes e.g. bikelanes with physical separation from motorized traffic.',
+  desc = 'Protected bikelanes (PBL) e.g. bikelanes with physical separation from motorized traffic.',
   infrastructureExists = true,
   implicitOneWay = true, -- 'oneway=implicit_yes', its still "lane"-like and wider RVA would likely be tagged explicitly
   implicitOneWayConfidence = 'medium',
   condition = function(tags)
     -- Only target sidepath like ways
-    if not IsSidepath(tags) then
-      return false
-    end
+    if not IsSidepath(tags) then return false end
 
     -- We exclude separation that signals that the cycleway is not on the street but on the sidewalk
     local allowed_separation_values = Set({
