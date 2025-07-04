@@ -12,6 +12,7 @@ require("RoadGeneralization")
 require("SurfaceQuality")
 require("Bikelanes")
 require("BikelanesPresence")
+require("BikeLaneGeneralization")
 require("MergeTable")
 require("CopyTags")
 require("IsSidepath")
@@ -195,7 +196,7 @@ function osm2pgsql.process_way(object)
         tags = MergeTable(ExtractPublicTags(cycleway), cycleway_result_tags),
         meta = meta,
         geom = object:as_linestring(),
-        minzoom = 0
+        minzoom = BikeLaneGeneralization(object_tags, cycleway_result_tags)
       })
 
       if next(cycleway._todo_list) ~= nil then
