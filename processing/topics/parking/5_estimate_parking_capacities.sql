@@ -18,7 +18,7 @@ SET
 
 UPDATE _parking_parkings_merged pm
 SET
-  tags = jsonb_set(tags, '{capacity}', to_jsonb(estimated_capacity)) || '{"capacity_source": "estimated", "capacity_confidence": "medium"}'
+  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated", "capacity_confidence": "medium"}'::JSONB
 WHERE
   tags ->> 'capacity' IS NULL;
 
@@ -48,10 +48,9 @@ WHERE
 
 UPDATE _parking_parkings_merged
 SET
-  tags = jsonb_set(
-    tags,
-    '{capacity}',
-    to_jsonb(ROUND(((tags ->> 'capacity')::NUMERIC)))
+  tags = tags || jsonb_build_object(
+    'capacity',
+    ROUND(((tags ->> 'capacity')::NUMERIC))
   );
 
 -- MISC
