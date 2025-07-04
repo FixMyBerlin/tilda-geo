@@ -189,7 +189,7 @@ CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source')
 
 -- get all ids for cutouts that need to be discarded
 SELECT
-  c.id INTO TEMP to_discard
+  c.* INTO _parking_discarded_cutouts
 FROM
   _parking_cutouts c
   JOIN _parking_road_parkings p ON c.geom && p.geom
@@ -201,19 +201,7 @@ WHERE
   )
   AND p.tags ->> 'parking' = 'no';
 
--- NOTE TODO: Test those new indexes for performance improvements
--- CREATE INDEX to_discard_idx ON to_discard USING BTREE (id);
-SELECT
-  * INTO _parking_discarded_cutouts
-FROM
-  _parking_cutouts
-WHERE
-  id IN (
-    SELECT
-      id
-    FROM
-      to_discard
-  );
+CREATE INDEX parking_discared_cutouts_idx ON _parking_discarded_cutouts USING BTREE (id);
 
 DELETE FROM _parking_cutouts
 WHERE
@@ -221,7 +209,7 @@ WHERE
     SELECT
       id
     FROM
-      to_discard
+      _parking_discarded_cutouts
   );
 
 -- MISC
