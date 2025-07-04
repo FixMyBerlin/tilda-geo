@@ -54,7 +54,7 @@ local SANITIZE_TAGS = {
         -- Ground/earthy
         'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel', 'pebblestone',
         -- Material
-        'wood', 'woodchips', 'metal', 'plastic', 'rubber', 'grass_paver',
+        'wood', 'woodchips', 'metal', 'metal_grid', 'plastic', 'rubber', 'grass_paver',
       },
       -- Values that we ignore (not part of the logging, just silently `nil`ed)
       { 'ice', 'snow', 'salt', }
