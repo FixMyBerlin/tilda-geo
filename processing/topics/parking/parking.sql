@@ -51,9 +51,7 @@
 -- HANDLE SEPARATE PARKINGS
 \i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
--- TEMP disabled, see https://github.com/FixMyBerlin/private-issues/issues/2524#issuecomment-2958746495
--- \i '/processing/topics/parking/separate_parkings/1_parking_corners.sql'
--- \i '/processing/topics/parking/separate_parkings/1_parking_normals.sql'
+\i '/processing/topics/parking/separate_parkings/1_parking_normals.sql'
 
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
