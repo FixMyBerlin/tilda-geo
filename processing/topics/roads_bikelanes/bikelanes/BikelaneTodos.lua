@@ -316,7 +316,7 @@ local needs_clarification_track = BikelaneTodo.new({
     return '2'
   end,
   conditions = function(objectTags, resultTags)
-    if resultTags.category == "protectedCyclewayOnHighway" then return false end
+    if resultTags.category == "cyclewayOnHighwayProtected" then return false end
     if objectTags._parent == nil then return false end
 
     -- Some cases are tagged sufficiently with `cycleway:SIDE:segregated` or `cycleway:SIDE:traffic_signs`

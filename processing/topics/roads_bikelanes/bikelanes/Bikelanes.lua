@@ -16,20 +16,13 @@ require("CollectTodos")
 require("ToMarkdownList")
 require("ToTodoTags")
 local parse_length = require('parse_length')
+local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
 local tags_copied = {
   "mapillary",
   "description",
 }
-local tags_prefixed = {
-  'surface:colour',
-  'separation',
-  'separation:left',
-  'separation:right',
-  'traffic_mode',
-  'traffic_mode:left',
-  'traffic_mode:right',
-}
+local tags_prefixed = {}
 local sideSignMap = {
   ["left"] = 1,
   ["right"] = -1
@@ -80,6 +73,15 @@ function Bikelanes(object)
           oneway = DeriveOneway(transformed_tags, category),
           bridge = Sanitize(object_tags.bridge, { "yes" }),
           tunnel = Sanitize(object_tags.tunnel, { "yes" }),
+          surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags),
+          separation_left = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'left'),
+          separation_right = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'right'),
+          buffer_left = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'left'),
+          buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
+          marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
+          marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
+          traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'left'),
+          traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'right'),
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))

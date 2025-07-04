@@ -2,7 +2,7 @@ describe("`BikelaneCategories`", function()
   require('init')
   require("osm2pgsql")
   require("BikelaneCategories")
-  local inspect = require('inspect')
+  require('Log')
 
   describe('`footAndCyclewaySegregated`:', function()
     it('`hw=cycleway` should get the category', function()
@@ -71,7 +71,7 @@ describe("`BikelaneCategories`", function()
         ["highway"] = 'cycleway',
         ["cycleway"] = 'shared',
       }
-      -- print('xxx'..inspect(CategorizeBikelane(tags)))
+      -- Log(CategorizeBikelane(tags))
       assert.are.equal(CategorizeBikelane(tags), nil)
     end)
 
@@ -80,7 +80,7 @@ describe("`BikelaneCategories`", function()
         ["highway"] = 'footway',
         ["bicycle"] = 'designated',
       }
-      -- print('xxx'..inspect(CategorizeBikelane(tags)))
+      -- Log(CategorizeBikelane(tags))
       local category = CategorizeBikelane(tags).id
       assert.are.equal(category, 'needsClarification')
     end)
@@ -90,9 +90,33 @@ describe("`BikelaneCategories`", function()
         ["highway"] = 'path',
         ["bicycle"] = 'designated',
       }
-      -- print('xxx'..inspect(CategorizeBikelane(tags)))
+      -- Log(CategorizeBikelane(tags))
       local category = CategorizeBikelane(tags).id
       assert.are.equal(category, 'needsClarification')
+    end)
+  end)
+
+  describe('`cyclewayOnHighwayProtected`:', function()
+    it('works', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['is_sidepath'] = 'yes',
+        ['separation:left'] = 'bollard',
+      }
+      -- Log(CategorizeBikelane(tags))
+      local category = CategorizeBikelane(tags).id
+      assert.are.equal(category, 'cyclewayOnHighwayProtected')
+    end)
+
+    it('but not for Hochboardradwege', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['is_sidepath'] = 'yes',
+        ['separation:left'] = 'kerb',
+      }
+      -- Log(CategorizeBikelane(tags))
+      local category = CategorizeBikelane(tags).id
+      assert.are.equal(category, 'cycleway_adjoining')
     end)
   end)
 end)

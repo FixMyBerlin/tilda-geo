@@ -52,6 +52,7 @@ export const ConditionalFormattedKey: React.FC<Props> = ({ sourceId, tagKey }) =
     '_parent_highway',
     'composit_surface_smoothness',
     'composit_mapillary',
+    'surface_color',
     'highway',
     'name',
     'description',

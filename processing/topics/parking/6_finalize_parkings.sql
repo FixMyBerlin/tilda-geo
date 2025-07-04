@@ -4,17 +4,7 @@ SELECT
   'c',
   0,
   id,
-  CASE
-    WHEN pm.tags ->> 'capacity' IS NOT NULL THEN pm.tags || '{"capacity_source": "tag", "capacity_confidence": "high"}'::JSONB
-    ELSE pm.tags || jsonb_build_object(
-      'capacity',
-      estimated_capacity,
-      'capacity_source',
-      'estimated',
-      'capacity_confidence',
-      'medium'
-    )
-  END,
+  tags || jsonb_build_object('length', length),
   '{}'::jsonb,
   geom,
   0

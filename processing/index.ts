@@ -43,9 +43,7 @@ async function main() {
 
     // Handle cache warming hook
     await clearCache()
-    if (!params.skipWarmCache) {
-      await triggerCacheWarming()
-    }
+    await triggerCacheWarming()
 
     logTileInfo()
   } catch (error) {

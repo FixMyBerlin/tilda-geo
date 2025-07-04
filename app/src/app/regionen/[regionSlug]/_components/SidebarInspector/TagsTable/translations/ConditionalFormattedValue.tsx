@@ -87,6 +87,8 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     { key: 'maxstay', suffix: 'Minuten' }, // bietigheim-bissingen_parking_areas
     { key: 'parking:levels', suffix: 'Stockwerke' }, // bietigheim-bissingen_parking_areas
     { key: 'distance', suffix: 'km' }, // bikeroutes
+    { key: 'buffer_left', suffix: 'm' }, // bikelanes
+    { key: 'buffer_right', suffix: 'm' }, // bikelanes
   ]
   const numberConfig = numberConfigs.find(
     (c) => c.key === tagKey || prefixWithOsm(c.key) === tagKey,
@@ -160,6 +162,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'highway',
     'smoothness',
     'surface',
+    'surface_color',
     'category',
     'traffic_sign',
     'traffic_sign:forward',

@@ -19,7 +19,9 @@ SELECT
   tags ->> 'orientation' as orientation,
   tags ->> 'parking' as parking,
   tags ->> 'road_width' as road_width,
-  tags ->> 'capacity' as capacity
+  tags ->> 'capacity' as capacity,
+  tags ->> 'capacity_source' as capacity_source,
+  tags ->> 'capacity_confidence' as capacity_confidence
   -- TODO LATER: restrictions
   -- tags ->> 'surface' as surface,
   -- TODO LATER: surface: Wir müssen die road surface übernehmen auf parking surface aber nur wenn parking surface nil. Und dann ist die confidence medium weil wir es übernommen haben
@@ -35,6 +37,8 @@ CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
   orientation,
   parking,
   road_width,
+  capacity_source,
+  capacity_confidence,
   source
   -- /REMINDER
 );
@@ -59,6 +63,8 @@ WITH
       parking,
       road_width,
       capacity,
+      capacity_source,
+      capacity_confidence,
       source,
       -- /REMINDER
       ST_ClusterDBSCAN (geom, eps := 0.01, minpoints := 1) OVER (
@@ -69,6 +75,8 @@ WITH
           orientation,
           parking,
           road_width,
+          capacity_source,
+          capacity_confidence,
           source
           -- /REMINDER
       ) AS cluster_id
@@ -98,7 +106,11 @@ SELECT
     'source',
     source,
     'capacity',
-    SUM(capacity::NUMERIC)
+    SUM(capacity::NUMERIC),
+    'capacity_source',
+    capacity_source,
+    'capacity_confidence',
+    capacity_confidence
   ) as tags,
   -- /REMINDER
   array_agg(osm_id) AS original_osm_ids,
@@ -114,6 +126,8 @@ GROUP BY
   orientation,
   parking,
   road_width,
+  capacity_source,
+  capacity_confidence,
   source,
   -- /REMINDER
   cluster_id;

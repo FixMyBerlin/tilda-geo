@@ -100,12 +100,12 @@ describe("Bikelanes", function()
       assert.are.equal(result[1].category, "footAndCyclewaySegregated_adjoining")
     end)
 
-    it('separate cycle and foot geometry with traffic_mode and separation=something', function()
+    it('separate cycle and foot geometry with traffic_mode and separation=yes', function()
       local input_object = {
         tags = {
           highway = 'cycleway',
           ["traffic_mode:right"] = 'foot',
-          ["separation:right"] = 'something',
+          ["separation:right"] = 'yes', -- not nil, not 'no'
           is_sidepath = 'yes',
         },
         id = 1,
@@ -222,7 +222,7 @@ describe("Bikelanes", function()
           assert.are.equal("needsClarification", v.category)
         end
         if v._side == 'left' and v.prefix == 'cycleway' then
-          assert.are.equal("protectedCyclewayOnHighway", v.category)
+          assert.are.equal("cyclewayOnHighwayProtected", v.category)
         end
       end
     end)
@@ -231,9 +231,9 @@ describe("Bikelanes", function()
       local input_object = {
         tags = {
           highway = 'tertiary',
-          ['cycleway:right:separation:left'] = 'line',
+          ['cycleway:right:separation:left'] = 'no',
           ['cycleway:left:separation:left'] = 'vertical_panel',
-          ['cycleway:left:traffic_mode:right'] = 'motor_vehicle'
+          -- ['cycleway:left:traffic_mode:right'] = 'motor_vehicle'
         },
         id = 1,
         type = 'way'
@@ -245,7 +245,7 @@ describe("Bikelanes", function()
           assert.are.equal("needsClarification", v.category)
         end
         if v._side == 'left' and v.prefix == 'cycleway' then
-          assert.are.equal("needsClarification", v.category)
+          assert.are.equal("cyclewayOnHighwayProtected", v.category)
         end
       end
     end)
@@ -255,8 +255,7 @@ describe("Bikelanes", function()
         highway = 'primary',
         tags = {
           ['cycleway:left'] = 'lane',
-          ['cycleway:left:bicyle'] = 'yes',
-          ['cycleway:left:separation:left'] = 'yes'
+          ['cycleway:left:separation:left'] = 'bollard'
         },
         id = 1,
         type = 'way'

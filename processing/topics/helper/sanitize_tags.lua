@@ -19,8 +19,9 @@ local SANITIZE_TAGS = {
       earth = 'ground', mud = 'ground', clay = 'ground', dirt = 'ground',
       ['dirt/sand'] = 'ground',
       -- Sett
-      unhewn_cobblestone = 'sett',
-      ['cobblestone:flattened'] = 'sett',
+      cobblestone = 'large_sett',
+      unhewn_cobblestone = 'large_sett',
+      ['cobblestone:flattened'] = 'large_sett',
       -- Stone
       rock = 'stone', ['stone:plates'] = 'stone',
       -- Paving Stones
@@ -33,11 +34,12 @@ local SANITIZE_TAGS = {
       tags.surface = transformations[tags.surface]
     end
     -- Treat special cases:
+    -- https://wiki.openstreetmap.org/wiki/Tag:surface%3Dsett#Size
     if tags.surface == 'sett' then
       local size = parse_length(tags['sett:length'])
-      if size and size <= 8 then return 'mosaic_sett' end
-      if size and size <= 13 then return 'small_sett' end
-      if size and size > 13 then return 'large_sett' end
+      if size and size <= 0.08 then return 'mosaic_sett' end
+      if size and size <= 0.13 then return 'small_sett' end
+      if size and size > 0.13 then return 'large_sett' end
     end
     -- Sanitize values:
     return sanitize_for_logging(tags.surface, {
@@ -48,11 +50,11 @@ local SANITIZE_TAGS = {
         -- Concrete
         'concrete', 'concrete:plates', 'concrete:lanes',
         -- Stone/brick types
-        'paving_stones', 'paving_stones:lanes', 'sett', 'cobblestone', 'bricks', 'stone',
+        'paving_stones', 'paving_stones:lanes', 'sett', 'bricks', 'stone',
         -- Ground/earthy
         'ground', 'grass', 'sand', 'compacted', 'fine_gravel', 'gravel', 'pebblestone',
         -- Material
-        'wood', 'woodchips', 'metal', 'plastic', 'rubber', 'grass_paver',
+        'wood', 'woodchips', 'metal', 'metal_grid', 'plastic', 'rubber', 'grass_paver',
       },
       -- Values that we ignore (not part of the logging, just silently `nil`ed)
       { 'ice', 'snow', 'salt', }

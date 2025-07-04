@@ -1,15 +1,15 @@
 DROP FUNCTION IF EXISTS estimate_capacity;
 
-CREATE FUNCTION estimate_capacity (length NUMERIC, orientation TEXT) RETURNS INTEGER AS $$
+CREATE FUNCTION estimate_capacity (length NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
 DECLARE
   car_length NUMERIC := 4.4;
-  car_width NUMERIC := 2;
+  car_width NUMERIC := 2.0;
   parking_angle NUMERIC := Radians(60); -- 0 degrees = perpendicular
   space_per_car NUMERIC;
   padding_parallel NUMERIC := 0.8;
   padding_prependicular NUMERIC := 0.5;
   padding NUMERIC;
-  n_cars INTEGER;
+  n_cars NUMERIC;
 BEGIN
 
   IF orientation = 'parallel' OR orientation IS NULL THEN
@@ -27,7 +27,7 @@ BEGIN
 
   -- The total length need to account for: n * car_length + (n - 1) * padding
   -- We solve for n:
-  n_cars := ROUND((length + padding) / (car_length + padding));
+  n_cars := (length + padding) / (space_per_car + padding);
 
   RETURN n_cars;
 END;

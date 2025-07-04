@@ -35,6 +35,8 @@
 \i '/processing/topics/parking/roads/3_find_driveways.sql'
 \i '/processing/topics/parking/roads/4_build_graph.sql'
 \i '/processing/topics/parking/roads/5_trim_kerbs.sql'
+\i '/processing/topics/parking/roads/6_driveway_corners_kerbs.sql'
+
 
 -- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'
@@ -49,9 +51,7 @@
 -- HANDLE SEPARATE PARKINGS
 \i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
--- TEMP disabled, see https://github.com/FixMyBerlin/private-issues/issues/2524#issuecomment-2958746495
--- \i '/processing/topics/parking/separate_parkings/1_parking_corners.sql'
--- \i '/processing/topics/parking/separate_parkings/1_parking_normals.sql'
+\i '/processing/topics/parking/separate_parkings/1_parking_normals.sql'
 
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
@@ -64,5 +64,7 @@
 \i '/processing/topics/parking/4_merge_parkings.sql'
 \i '/processing/topics/parking/5_estimate_parking_capacities.sql'
 \i '/processing/topics/parking/6_finalize_parkings.sql'
+\i '/processing/topics/parking/7_voronoi.sql'
+
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;

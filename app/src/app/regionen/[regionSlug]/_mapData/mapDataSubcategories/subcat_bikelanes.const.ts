@@ -117,11 +117,11 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
       },
     },
     {
-      id: 'protectedCyclewayOnHighway',
+      id: 'cyclewayOnHighwayProtected',
       name: 'Geschuetzter Radfahrstreifen',
       style: {
         type: 'line',
-        color: '#2dd4bf',
+        color: '#7a0ff5',
       },
     },
     {

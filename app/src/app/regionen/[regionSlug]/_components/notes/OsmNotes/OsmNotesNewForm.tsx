@@ -16,7 +16,6 @@ import { useQueryKey } from './utils/useQueryKey'
 export const OsmNotesNewForm = () => {
   const session = useSession()
   const { newOsmNoteMapParam, setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
-  const osmNewNoteFeature = useOsmNewNoteFeature()
 
   const queryClient = useQueryClient()
   const apiUrl = getOsmApiUrl('/notes.json')
@@ -48,6 +47,7 @@ export const OsmNotesNewForm = () => {
   const hasPermissions = useHasPermissions()
   const region = useRegion()
   const searchParams = useSearchParams()
+  const osmNewNoteFeature = useOsmNewNoteFeature()
   const commentedFeatureId =
     osmNewNoteFeature?.osmType && osmNewNoteFeature?.osmId
       ? osmTypeIdString(osmNewNoteFeature.osmType, osmNewNoteFeature.osmId)

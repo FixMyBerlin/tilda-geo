@@ -3,7 +3,12 @@ import { buttonStylesOnYellow } from '@/src/app/_components/links/styles'
 import createNote from '@/src/server/notes/mutations/createNote'
 import { getQueryClient, useMutation } from '@blitzjs/rpc'
 import dompurify from 'dompurify'
+import {
+  useNewNoteTildaDeeplink,
+  useOsmNewNoteFeature,
+} from '../../../_hooks/mapState/userMapNotes'
 import { useNewAtlasNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
+import { osmOrgUrl, osmTypeIdString } from '../../SidebarInspector/Tools/osmUrls/osmUrls'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 import { useQueryKey } from './utils/useQueryKey'
 
@@ -12,6 +17,12 @@ export const AtlasNotesNewForm = () => {
   const { newAtlasNoteMapParam, setNewAtlasNoteMapParam } = useNewAtlasNoteMapParam()
   const regionSlug = useRegionSlug()
   const queryKey = useQueryKey()
+  const osmNewNoteFeature = useOsmNewNoteFeature()
+  const newNoteTildaDeeplink = useNewNoteTildaDeeplink()
+  const commentedFeatureId =
+    osmNewNoteFeature?.osmType && osmNewNoteFeature?.osmId
+      ? osmTypeIdString(osmNewNoteFeature.osmType, osmNewNoteFeature.osmId)
+      : null
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -22,13 +33,27 @@ export const AtlasNotesNewForm = () => {
 
     const sanitize = (input: string | undefined) => (input ? dompurify.sanitize(input) : input)
 
+    // Text snippets for comment on a specific feature
+    let featureFooter = ''
+    if (osmNewNoteFeature?.osmType && osmNewNoteFeature?.osmId) {
+      const footerFeatureOsmUrl = osmOrgUrl({
+        osmType: osmNewNoteFeature.osmType,
+        osmId: osmNewNoteFeature.osmId,
+      })
+      featureFooter = `\n---\nDieser Hinweis bezieht sich auf ${commentedFeatureId} – [TILDA](${newNoteTildaDeeplink}), [OSM](${footerFeatureOsmUrl})`
+    }
+
+    const userCommentText =
+      sanitize(new FormData(event.currentTarget).get('body')?.toString()) || undefined
+    const fullComment = `${userCommentText}\n${featureFooter}`
+
     createNoteMutation(
       {
         regionSlug,
         subject: sanitize(new FormData(event.currentTarget).get('subject')!.toString())!,
         latitude: newAtlasNoteMapParam.lat,
         longitude: newAtlasNoteMapParam.lng,
-        body: sanitize(new FormData(event.currentTarget).get('body')?.toString()) || undefined,
+        body: fullComment,
       },
       {
         onSuccess: () => {
@@ -49,7 +74,12 @@ export const AtlasNotesNewForm = () => {
       <form className="p-4" onSubmit={handleSubmit}>
         <p className="leading-snug">
           Interne Hinweise sind nur für angemeldete Nutzer:innen sichtbar, die für diese Region
-          freigeschaltet wurden.
+          freigeschaltet wurden.{' '}
+          {commentedFeatureId ? (
+            <>
+              Dieser Hinweis bezieht sich auf <code className="text-xs">{commentedFeatureId}</code>.
+            </>
+          ) : null}
         </p>
         <label>
           <span className="sr-only">Betreff</span>

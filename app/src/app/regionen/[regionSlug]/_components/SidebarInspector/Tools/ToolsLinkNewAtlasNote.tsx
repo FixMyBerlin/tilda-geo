@@ -3,11 +3,11 @@ import { useMap } from 'react-map-gl/maplibre'
 import { StoreFeaturesInspector } from '../../../_hooks/mapState/useMapState'
 import { useOsmNotesActions } from '../../../_hooks/mapState/userMapNotes'
 import {
-  useNewOsmNoteMapParam,
-  useShowOsmNotesParam,
-} from '../../../_hooks/useQueryState/useNotesOsmParams'
+  useNewAtlasNoteMapParam,
+  useShowAtlasNotesParam,
+} from '../../../_hooks/useQueryState/useNotesAtlasParams'
 import { MapDataOsmIdConfig } from '../../../_mapData/types'
-import { useStaticRegion } from '../../regionUtils/useStaticRegion'
+import { useAllowAtlasNotes } from '../../notes/AtlasNotes/utils/useAllowAtlasNotes'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import { pointFromGeometry } from './osmUrls/pointFromGeometry'
 
@@ -17,16 +17,16 @@ type Props = {
   osmIdConfig: MapDataOsmIdConfig
 }
 
-export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props) => {
+export const ToolsLinkNewAtlasNote = ({ properties, geometry, osmIdConfig }: Props) => {
   const { mainMap } = useMap()
-  const { setShowOsmNotesParam } = useShowOsmNotesParam()
+  const { setShowAtlasNotesParam } = useShowAtlasNotesParam()
   const { setOsmNewNoteFeature, setNewNoteTildaDeeplink } = useOsmNotesActions()
-  const { setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
+  const { setNewAtlasNoteMapParam } = useNewAtlasNoteMapParam()
 
   const { osmType, osmId } = extractOsmTypeIdByConfig(properties, osmIdConfig)
 
-  const region = useStaticRegion()
-  if (!region || region.notes !== 'osmNotes') return null
+  const allowAtlasNotes = useAllowAtlasNotes()
+  if (!allowAtlasNotes) return null
 
   if (!mainMap || !properties || !geometry || !osmType || !osmId) return null
 
@@ -34,16 +34,16 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
     <button
       className={buttonStyles}
       onClick={() => {
-        setShowOsmNotesParam(true)
+        setShowAtlasNotesParam(true)
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         setNewNoteTildaDeeplink(window.location.href)
-        // Note: The zoom will be specified by the `bounds` prop in <OsmNotesNewMap/>
+        // Note: The zoom will be specified by the `bounds` prop in <AtlasNotesNewMap/>
         // BUT it needs to be > 17 so that `roundByZoom` keeps precision of 5
         const [lng, lat] = pointFromGeometry(geometry)
-        setNewOsmNoteMapParam({ zoom: 18, lng, lat })
+        setNewAtlasNoteMapParam({ zoom: 18, lng, lat })
       }}
     >
-      Hinweis zu diesem Kartenobjekt erstellen
+      internen Hinweis zu diesem Kartenobjekt erstellen
     </button>
   )
 }

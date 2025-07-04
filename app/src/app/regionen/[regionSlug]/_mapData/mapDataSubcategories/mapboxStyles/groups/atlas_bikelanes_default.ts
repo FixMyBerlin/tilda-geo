@@ -121,7 +121,7 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
         'bicycleRoad',
         'footAndCyclewaySegregated_isolated',
         'cycleway_adjoiningOrIsolated',
-        'protectedCyclewayOnHighway',
+        'cyclewayOnHighwayProtected',
       ],
       true,
       false,
