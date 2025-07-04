@@ -58,7 +58,7 @@ local SANITIZE_ROAD_TAGS = {
     -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
     return Sanitize(value, {
       'no',
-      'bollar', 'flex_post', 'vertical_panel', 'studs', 'bump', 'planter', 'kerb', 'fence', 'jersey_barrier', 'guard_rail', 'structure', 'ditch', 'greenery', 'hedge', 'tree_row', 'cone',
+      'bollard', 'flex_post', 'vertical_panel', 'studs', 'bump', 'planter', 'kerb', 'fence', 'jersey_barrier', 'guard_rail', 'structure', 'ditch', 'greenery', 'hedge', 'tree_row', 'cone',
       -- We preserver some combinations but transform other
       'kerb;parking_lane', -- sidewalk but additional protection
       'kerb;bollard', -- meaning, its still on the side walk
