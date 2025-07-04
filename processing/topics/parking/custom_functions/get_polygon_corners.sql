@@ -13,6 +13,11 @@ DECLARE
   b geometry;
   c geometry;
 BEGIN
+  -- If the polygon is not a valid polygon, return nothing
+  IF n IS NULL THEN
+    RETURN;
+  END IF;
+
   corner_idx := 1;
   FOR i IN 1..n LOOP
     -- 1 and n are the same point so we have to skip them at the boundary cases
