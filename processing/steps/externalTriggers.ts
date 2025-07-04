@@ -29,10 +29,10 @@ export async function triggerPostProcessing() {
 }
 export async function triggerCacheWarming() {
   if (params.skipWarmCache) {
+    console.log('⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
+  } else {
     console.log('Cache:', 'Trigger cache warming')
     return triggerPrivateApi('warm-cache')
-  } else {
-    console.log('⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
   }
 }
 
