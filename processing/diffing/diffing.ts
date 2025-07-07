@@ -115,8 +115,9 @@ export async function computeDiff(table: string) {
     FULL OUTER JOIN ${tableId} ON ${backupTableId}.id = ${tableId}.id`)
 
   // create the diff table
+  await dropDiffTable(table)
   await sql.unsafe(`
-    CREATE TABLE IF NOT EXISTS ${diffTableId} AS
+    CREATE TABLE ${diffTableId} AS
     SELECT id, tags, meta, geom FROM ${tableId}
     WITH NO DATA`)
 
