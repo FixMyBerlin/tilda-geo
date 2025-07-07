@@ -41,7 +41,7 @@ export const translations: { [key: string]: string } = {
   'ALL--category=sharedBusLaneBikeWithBus': 'Radfahrstreifen mit Freigabe Busverkehr',
   'ALL--category=sharedBusLaneBusWithBike': 'Bussonderfahrstreifen mit Fahrrad frei',
   'ALL--category=sharedMotorVehicleLane': 'Gemeinsamer Fahrstreifen', // Anteilig genutzten Fahrstreifen
-  'ALL--composit_mapillary--key': 'Mapillary',
+  'ALL--composit_mapillary--key': 'Straßenfotos (Mapillary)',
   'ALL--composit_surface_smoothness--key': 'Oberflächenqualität',
   'ALL--confidence=high': 'Hoch',
   'ALL--confidence=medium': 'Mittel',

@@ -8,7 +8,6 @@ require("MergeTable")
 require("RoadClassificationRoadValue")
 
 local tags_copied = {
-  "mapillary",
   "description",
 }
 local tags_prefixed = {}

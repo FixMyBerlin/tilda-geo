@@ -41,7 +41,8 @@ export const InspectorFeatureAtlasGeo = ({ sourceKey, feature }: InspectorFeatur
             geometry={geometry}
           />
 
-          <MapillaryIframe visible={sourceId.includes('mapillary')} properties={properties} />
+          {/* Mapillary Source: Show preview */}
+          <MapillaryIframe visible={sourceId.includes('mapillary')} pKey={properties.id} />
 
           <div className="py-1">{/* Spacer */}</div>
 

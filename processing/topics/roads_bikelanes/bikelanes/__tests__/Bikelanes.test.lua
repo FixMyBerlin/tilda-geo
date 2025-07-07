@@ -54,6 +54,48 @@ describe("Bikelanes", function()
     end)
   end)
 
+  describe('Handle `mapillary*` cases', function()
+    it('simple mapillary', function()
+      local input_object = {
+        tags = {
+          highway = 'cycleway',
+          mapillary = 'm123',
+          ['mapillary:forward'] = 'mf123',
+          ['mapillary:backward'] = 'mb123',
+          ['source:traffic_sign:mapillary'] = 'scm123',
+          bicycle_road = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object)
+      assert.are.equal(result[1].category, "bicycleRoad")
+      assert.are.equal(result[1].mapillary, 'm123')
+      assert.are.equal(result[1]['mapillary_forward'], 'mf123')
+      assert.are.equal(result[1]['mapillary_backward'], 'mb123')
+      assert.are.equal(result[1]['mapillary_traffic_sign'], 'scm123')
+    end)
+
+    it('left right mapillary', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          mapillary = 'm123',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'advisory',
+          ['cycleway:right:mapillary'] = 'crm345',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object)
+
+      assert.are.equal("cyclewayOnHighway_advisory", result[1].category)
+      assert.are.equal('crm345', result[1].mapillary)
+    end)
+
+  end)
+
   describe('Handle footAndCyclewaySegregated with traffic_mode', function()
     it('simple footAndCyclewaySegregated', function()
       local input_object = {

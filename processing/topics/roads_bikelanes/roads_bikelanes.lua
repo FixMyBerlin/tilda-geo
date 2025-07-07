@@ -167,6 +167,10 @@ function osm2pgsql.process_way(object)
     name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'],
     length = length,
     mapillary_coverage = mapillary_coverage_value,
+    mapillary = object_tags.mapillary,
+    mapillary_forward = object_tags['mapillary:forward'],
+    mapillary_backward = object_tags['mapillary:backward'],
+    mapillary_traffic_sign = object_tags['source:traffic_sign:mapillary'],
   }
 
   MergeTable(road_result_tags, RoadClassification(object))
@@ -181,7 +185,12 @@ function osm2pgsql.process_way(object)
     road = road_result_tags.road,
     length = length,
     mapillary_coverage = mapillary_coverage_value,
+    mapillary = cycleways.mapillary or road_result_tags.mapillary,
+    mapillary_forward = cycleways.mapillary_forward or road_result_tags.mapillary_forward,
+    mapillary_backward = cycleways.mapillary_backward or road_result_tags.mapillary_backward,
+    mapillary_traffic_sign = cycleways.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
   }
+
   for _, cycleway in ipairs(cycleways) do
     if cycleway._infrastructureExists then
       local meta = Metadata(object)
