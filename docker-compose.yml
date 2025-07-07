@@ -30,7 +30,6 @@ services:
       - osmfiles:/data
       - db_postgres_17:/data/db
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./cache:/var/cache/nginx
       - ./app/src/data/processingTypes:/data/processingTypes
     depends_on:
       db:

@@ -1,10 +1,6 @@
+import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
-import {
-  clearCache,
-  restartTileServer,
-  triggerCacheWarming,
-  triggerPostProcessing,
-} from './steps/externalTriggers'
+import { restartTileServer, triggerPostProcessing } from './steps/externalTriggers'
 import { idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
@@ -41,9 +37,8 @@ async function main() {
     // Restart `tiles` container to refresh `/catalog`
     await restartTileServer()
 
-    // Handle cache warming hook
-    await clearCache()
-    await triggerCacheWarming()
+    // Delete cache and trigger cache warming
+    await updateCache()
 
     logTileInfo()
   } catch (error) {

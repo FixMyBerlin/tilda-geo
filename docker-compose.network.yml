@@ -54,7 +54,6 @@ services:
     ports:
       - "4444:80"
     volumes:
-      - ./cache:/var/cache/nginx
       - ./logs:/var/log/nginx
     configs:
       - source: nginx_conf
