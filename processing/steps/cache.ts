@@ -26,9 +26,8 @@ export async function clearCache() {
     await $`rm -rf /cache_nginx_proxy/*`
     const sizeAfterStr = await $`du -sh /cache_nginx_proxy`.text()
     console.log(
-      'Cache:',
-      'Succesfully cleared the cache',
-      `(before ${sizeBeforeStr} – after ${sizeAfterStr})`,
+      'Cache: Successfully cleared the cache ',
+      `(before ${sizeBeforeStr.trim()} – after ${sizeAfterStr.trim()})`,
     )
   } catch (error) {
     console.warn('⚠️ Clearing the cache failed:', error)
