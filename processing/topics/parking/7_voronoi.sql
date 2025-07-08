@@ -1,14 +1,14 @@
-DROP TABLE IF EXISTS parkings_voronoi;
+DROP TABLE IF EXISTS parkings_euvm_qa_voronoi;
 
 SELECT
-  * INTO parkings_voronoi
+  * INTO parkings_euvm_qa_voronoi
 FROM
   data.euvm_qa_voronoi;
 
-ALTER TABLE parkings_voronoi
+ALTER TABLE parkings_euvm_qa_voronoi
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
 
-ALTER TABLE parkings_voronoi
+ALTER TABLE parkings_euvm_qa_voronoi
 ADD COLUMN count_fmc INTEGER;
 
 WITH
@@ -17,12 +17,12 @@ WITH
       v.id,
       COUNT(p.*) AS count_fmc
     FROM
-      parkings_voronoi v
+      parkings_euvm_qa_voronoi v
       LEFT JOIN parkings_dumped p ON ST_Contains (v.geom, p.geom)
     GROUP BY
       v.id
   )
-UPDATE parkings_voronoi pv
+UPDATE parkings_euvm_qa_voronoi pv
 SET
   count_fmc = COALESCE(c.count_fmc, 0)
 FROM
@@ -30,17 +30,17 @@ FROM
 WHERE
   pv.id = c.id;
 
-ALTER TABLE parkings_voronoi
+ALTER TABLE parkings_euvm_qa_voronoi
 ADD COLUMN difference INTEGER;
 
-UPDATE parkings_voronoi
+UPDATE parkings_euvm_qa_voronoi
 SET
   difference = count_euvm - count_fmc;
 
-ALTER TABLE parkings_voronoi
+ALTER TABLE parkings_euvm_qa_voronoi
 ADD COLUMN relative NUMERIC;
 
-UPDATE parkings_voronoi
+UPDATE parkings_euvm_qa_voronoi
 SET
   relative = CASE
     WHEN count_euvm <> 0 THEN count_fmc::NUMERIC / count_euvm::NUMERIC
