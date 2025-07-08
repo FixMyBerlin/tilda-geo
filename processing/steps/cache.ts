@@ -17,17 +17,18 @@ export async function updateCache() {
 
 /**
  * Clears the cache of the nginx server.
- * This requires the /var/cache/nginx directory from the nginx container to be mounted in this container.
+ * See `cache_proxy/.README.md` for details.
  */
 export async function clearCache() {
   try {
-    const sizeBeforeStr = await $`du -sh /srv/cache`.text()
-    await $`rm -rf /srv/cache/*`
-    const sizeAfterStr = await $`du -sh /srv/cache`.text()
+    const sizeBeforeStr = await $`du -sh /cache_nginx_proxy`.text()
+    // Corresponts to `docker-compose.yml` processing.volumes
+    await $`rm -rf /cache_nginx_proxy/*`
+    const sizeAfterStr = await $`du -sh /cache_nginx_proxy`.text()
     console.log(
       'Cache:',
-      'Succesfully cleared the cache.',
-      `Size before: ${sizeBeforeStr}, after: ${sizeAfterStr}`,
+      'Succesfully cleared the cache',
+      `(before ${sizeBeforeStr} – after ${sizeAfterStr})`,
     )
   } catch (error) {
     console.warn('⚠️ Clearing the cache failed:', error)

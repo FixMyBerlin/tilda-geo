@@ -55,6 +55,8 @@ services:
       - "4444:80"
     volumes:
       - ./logs:/var/log/nginx
+      # See cache_proxy/.README.md
+      - ./cache_proxy:/var/cache/nginx
     configs:
       - source: nginx_conf
         target: /etc/nginx/nginx.conf

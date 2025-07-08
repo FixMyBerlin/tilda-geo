@@ -31,6 +31,8 @@ services:
       - db_postgres_17:/data/db
       - /var/run/docker.sock:/var/run/docker.sock
       - ./app/src/data/processingTypes:/data/processingTypes
+      # See cache_proxy/.README.md
+      - ./cache_proxy:/cache_nginx_proxy
     depends_on:
       db:
         condition: service_healthy
