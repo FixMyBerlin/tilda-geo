@@ -9,6 +9,11 @@ function parseParameters() {
     idFilter: process.env.ID_FILTER || '',
     apiKey: process.env.ATLAS_API_KEY || '',
     computeDiffs: process.env.COMPUTE_DIFFS === '1',
+    computeDiffBbox: process.env.PROCESS_COMPUTE_DIFF_BBOX
+      ? (process.env.PROCESS_COMPUTE_DIFF_BBOX.split(',').map((t) =>
+          Number(t.trim()),
+        ) as TopicConfigBbox)
+      : null,
     freezeData: process.env.FREEZE_DATA === '1',
     skipUnchanged: process.env.SKIP_UNCHANGED === '1',
     environment: process.env.ENVIRONMENT || '',

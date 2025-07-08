@@ -77,6 +77,8 @@ It will compare the `tags` column to the previous run.
 
 Whenever we talk about `diff`s in this code, this feature is referenced.
 
+The `PROCESS_COMPUTE_DIFF_BBOX` bbox specifies which area is used for the diff. This allows to reduce the data size of the diff.
+
 #### Reference
 
 - With `FREEZE_DATA=0` you see the changes to the last run on every run
