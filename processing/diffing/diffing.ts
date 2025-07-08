@@ -8,25 +8,6 @@ const backupTableIdentifier = (table: string) => `backup."${table}"` as const
 const diffTableIdentifier = (table: string) => `public."${table}_diff"` as const
 const tableIdentifier = (table: string) => `public."${table}"` as const
 
-/**
- * Create a PostGIS geometry from bbox coordinates [minLon, minLat, maxLon, maxLat]
- * @param bbox Array of [minLon, minLat, maxLon, maxLat]
- * @returns PostGIS geometry SQL string in SRID 3857 to match the data
- */
-function createBboxGeometry(bbox: [number, number, number, number]) {
-  const [minLon, minLat, maxLon, maxLat] = bbox
-  return `ST_Transform(ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, 4326), 3857)`
-}
-
-/**
- * Get the spatial filter condition for bbox filtering
- * @param bboxGeometry PostGIS geometry string for the bbox
- * @returns SQL WHERE condition for spatial filtering
- */
-function getSpatialFilterCondition(bboxGeometry: string) {
-  return `ST_Intersects(geom, ${bboxGeometry})`
-}
-
 export async function getTopicTables(topic: Topic) {
   try {
     // Some tables don't follow the strict schema that is required for the diffing to work.
@@ -76,35 +57,33 @@ export async function getSchemaTables(schema: string) {
 
 /**
  * Backup the given table by copying it to the `backup` schema.
- * If computeDiffBbox is provided, only backup data within that bbox.
+ * Only backup data within the computeDiffBbox if provided, otherwise skip backup.
  * @returns the Promise of the query
  */
 export async function backupTable(table: string) {
+  if (!params.computeDiffBbox) throw new Error('params.computeDiffBbox required')
+
   const tableId = tableIdentifier(table)
   const backupTableId = backupTableIdentifier(table)
   await sql.unsafe(`DROP TABLE IF EXISTS ${backupTableId}`)
 
-  if (params.computeDiffBbox) {
-    const bboxGeometry = createBboxGeometry(params.computeDiffBbox)
-    const spatialCondition = getSpatialFilterCondition(bboxGeometry)
-    await sql.unsafe(`
-      CREATE TABLE ${backupTableId} AS
-      SELECT * FROM ${tableId}
-      WHERE ${spatialCondition}
-    `)
-    if (isDev) {
-      console.log(
-        'Diffing: Recreated backup table with bbox filter',
-        JSON.stringify({ table, computeDiffBbox: params.computeDiffBbox }),
-      )
-    }
-  } else {
-    await sql.unsafe(`CREATE TABLE ${backupTableId} AS TABLE ${tableId}`)
-    if (isDev) {
-      console.log('Diffing: Recreated backup table', JSON.stringify({ table }))
-    }
+  const [minLon, minLat, maxLon, maxLat] = params.computeDiffBbox
+
+  await sql.unsafe(`
+    CREATE TABLE ${backupTableId} AS
+    SELECT * FROM ${tableId}
+    WHERE ST_Intersects(
+      geom,
+      ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, ST_SRID(geom))
+    )
+  `)
+
+  if (isDev) {
+    console.log(
+      'Diffing: Recreated backup table with bbox filter',
+      JSON.stringify({ table, computeDiffBbox: params.computeDiffBbox }),
+    )
   }
-  return
 }
 
 export async function dropDiffTable(table: string) {
@@ -123,10 +102,13 @@ async function createSpatialIndex(table: string) {
 
 /**
  * Diff the given table with the backup table and store the result in the `table_diff` table.
+ * Only perform diffing if computeDiffBbox is provided, otherwise skip.
  * @param table
  * @returns the number of added, removed and modified entries
  */
 export async function computeDiff(table: string) {
+  if (!params.computeDiffBbox) throw new Error('params.computeDiffBbox required')
+
   const tableId = tableIdentifier(table)
   const backupTableId = backupTableIdentifier(table)
   const diffTableId = diffTableIdentifier(table)
@@ -140,40 +122,28 @@ export async function computeDiff(table: string) {
   // compute full outer join
   await sql.unsafe(`DROP TABLE IF EXISTS ${joinedTableId}`)
 
-  if (params.computeDiffBbox) {
-    const bboxGeometry = createBboxGeometry(params.computeDiffBbox)
-    const spatialCondition = getSpatialFilterCondition(bboxGeometry)
+  const [minLon, minLat, maxLon, maxLat] = params.computeDiffBbox
 
-    await sql.unsafe(`
-      CREATE TABLE ${joinedTableId} AS
-      SELECT
-        ${tableId}.tags AS new_tags,
-        ${tableId}.id AS new_id,
-        ${tableId}.meta AS new_meta,
-        ${tableId}.geom AS new_geom,
-        ${backupTableId}.tags AS old_tags,
-        ${backupTableId}.id AS old_id,
-        ${backupTableId}.meta AS old_meta,
-        ${backupTableId}.geom AS old_geom
-      FROM ${backupTableId}
-      FULL OUTER JOIN ${tableId} ON ${backupTableId}.id = ${tableId}.id
-      WHERE (${tableId}.geom IS NULL OR ${spatialCondition.replace('geom', `${tableId}.geom`)})
-        AND (${backupTableId}.geom IS NULL OR ${spatialCondition.replace('geom', `${backupTableId}.geom`)})`)
-  } else {
-    await sql.unsafe(`
-      CREATE TABLE ${joinedTableId} AS
-      SELECT
-        ${tableId}.tags AS new_tags,
-        ${tableId}.id AS new_id,
-        ${tableId}.meta AS new_meta,
-        ${tableId}.geom AS new_geom,
-        ${backupTableId}.tags AS old_tags,
-        ${backupTableId}.id AS old_id,
-        ${backupTableId}.meta AS old_meta,
-        ${backupTableId}.geom AS old_geom
-      FROM ${backupTableId}
-      FULL OUTER JOIN ${tableId} ON ${backupTableId}.id = ${tableId}.id`)
-  }
+  await sql.unsafe(`
+    CREATE TABLE ${joinedTableId} AS
+    SELECT
+      ${tableId}.tags AS new_tags,
+      ${tableId}.id AS new_id,
+      ${tableId}.meta AS new_meta,
+      ${tableId}.geom AS new_geom,
+      ${backupTableId}.tags AS old_tags,
+      ${backupTableId}.id AS old_id,
+      ${backupTableId}.meta AS old_meta,
+      ${backupTableId}.geom AS old_geom
+    FROM ${backupTableId}
+    FULL OUTER JOIN ${tableId} ON ${backupTableId}.id = ${tableId}.id
+    WHERE
+      ${tableId}.geom IS NULL
+      OR ST_Intersects(
+        ${tableId}.geom,
+        ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, ST_SRID(${tableId}.geom))
+      )
+  `)
 
   // create the diff table
   await dropDiffTable(table)
@@ -265,9 +235,15 @@ function printDiffInfo(diffInfo: Awaited<ReturnType<typeof computeDiff>>) {
 
 /**
  * Diff the given tables and print the results.
+ * Only performs diffing if computeDiffBbox is provided, otherwise skips diffing.
  * @param tables
  */
 export async function diffTables(tables: string[]) {
+  if (!params.computeDiffBbox) {
+    console.log('Diffing: Skipping diffTables (no bbox provided)', JSON.stringify({ tables }))
+    return
+  }
+
   console.log(
     'Diffing: diffTables',
     JSON.stringify({ tables, computeDiffBbox: params.computeDiffBbox }),
