@@ -26,7 +26,7 @@
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
 \i '/processing/topics/parking/custom_functions/get_pair_normal.sql'
-\i '/processing/topics/parking/custom_functions/dump_parkings.sql'
+\i '/processing/topics/parking/custom_functions/generate_parkings_sum_points.sql'
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
