@@ -2,6 +2,14 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-07~07
+
+### `bikelanes`, `roads`
+
+- Introduce `mapillary`, `mapillary_forward`, `mapillary_backward`, `mapillary_traffic_sign`
+
+  For `bikelanes`mapped on the centerlines thore are the`cycleway:left|rigth:\*` tags with a fallback to the centerline tags.
+
 ## 2025-07~02
 
 ### `bikelanes`

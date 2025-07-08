@@ -1,6 +1,0 @@
-This folder exists to test if flushing the nginx cache from the app container works.
-The setting below in docker-compose.yml is required for this to work
-volumes:
-  - ./cache:/var/cache/nginx
-
-More on this in `/warm-cache`.

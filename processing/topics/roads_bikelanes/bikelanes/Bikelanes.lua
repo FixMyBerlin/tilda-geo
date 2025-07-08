@@ -19,7 +19,6 @@ local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
 local tags_copied = {
-  "mapillary",
   "description",
 }
 local tags_prefixed = {}
@@ -82,6 +81,10 @@ function Bikelanes(object)
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
           traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'left'),
           traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'right'),
+          mapillary = transformed_tags.mapillary,
+          mapillary_forward = transformed_tags['mapillary:forward'],
+          mapillary_backward = transformed_tags['mapillary:backward'],
+          mapillary_traffic_sign = transformed_tags['source:traffic_sign:mapillary'],
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))

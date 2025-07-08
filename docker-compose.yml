@@ -23,6 +23,7 @@ services:
       SYNOLOGY_ERROR_LOG_TOKEN:
       SYNOLOGY_URL:
       COMPUTE_DIFFS:
+      PROCESS_COMPUTE_DIFF_BBOX:
       FREEZE_DATA:
       ATLAS_API_KEY:
       FORCE_COLOR: 1
@@ -30,8 +31,9 @@ services:
       - osmfiles:/data
       - db_postgres_17:/data/db
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./cache:/var/cache/nginx
       - ./app/src/data/processingTypes:/data/processingTypes
+      # See cache_proxy/.README.md
+      - ./cache_proxy:/cache_nginx_proxy
     depends_on:
       db:
         condition: service_healthy
