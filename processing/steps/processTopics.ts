@@ -2,13 +2,7 @@ import { $ } from 'bun'
 import { join } from 'path'
 import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { topicsConfig, type Topic } from '../constants/topics.const'
-import {
-  backupTable,
-  diffTables,
-  dropDiffTable,
-  getSchemaTables,
-  getTopicTables,
-} from '../diffing/diffing'
+import { backupTable, diffTables, getSchemaTables, getTopicTables } from '../diffing/diffing'
 import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
@@ -81,11 +75,6 @@ export async function runTopic(fileName: string, topic: Topic) {
 export async function processTopics(fileName: string, fileChanged: boolean) {
   const tableListPublic = await getSchemaTables('public')
   const tableListBackup = await getSchemaTables('backup')
-
-  // drop all previous diffs
-  if (!params.freezeData) {
-    tableListPublic.forEach(dropDiffTable)
-  }
 
   // when the helpers have changed we disable all diffing functionality
   const helperPath = join(TOPIC_DIR, 'helper')
