@@ -74,7 +74,7 @@ export async function createReferenceTable(table: string) {
     SELECT * FROM ${tableId}
     WHERE ST_Intersects(
       geom,
-      ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, ST_SRID(geom))
+      ST_Transform(ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, 4326), ST_SRID(geom))
     )
   `)
 
@@ -141,7 +141,7 @@ export async function computeDiff(table: string) {
       ${tableId}.geom IS NULL
       OR ST_Intersects(
         ${tableId}.geom,
-        ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, ST_SRID(${tableId}.geom))
+        ST_Transform(ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, 4326), ST_SRID(${tableId}.geom))
       )
   `)
 
