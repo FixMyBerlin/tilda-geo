@@ -71,20 +71,22 @@ Whenever we talk about `hash`es in this code, this feature is referenced.
 
 ### Processing: Inspect changes
 
-With `COMPUTE_DIFFS=1` the system will create `<tablename>_diff` tables that contain only changed entries.
+With `PROCESSING_DIFFING_MODE=previous` or `PROCESSING_DIFFING_MODE=fixed` the system will create `public.<tablename>_diff` tables that contain only changed entries.
 
 It will compare the `tags` column to the previous run.
 
 Whenever we talk about `diff`s in this code, this feature is referenced.
 
-The `PROCESS_COMPUTE_DIFF_BBOX` bbox specifies which area is used for the diff. This allows to reduce the data size of the diff.
+The `PROCESSING_DIFFING_BBOX` bbox (required when diffing is on) specifies which area is used for the diff. This allows to reduce the data size of the diff.
 
 #### Reference
 
-- With `FREEZE_DATA=0` you see the changes to the last run on every run
-- With `FREEZE_DATA=1` you see the changes to the last reference-run, allowing you to compare your changes to a certain version of your data. The reference will be the last time you ran with `FREEZE_DATA=0`. In this case the system will **not** update the `diffing_reference.<tablename>` tables. This flag will be ignored if `COMPUTE_DIFFS=0`.
+- With `PROCESSING_DIFFING_MODE=previous` you see the changes to the last run on every run
+- With `PROCESSING_DIFFING_MODE=fixed` you see the changes to the last reference-run, allowing you to compare your changes to a certain version of your data.
+  The reference will be the last time you ran with `PROCESSING_DIFFING_MODE=previous`.
+  With `fixed` the system will **not** update the `diffing_reference.<tablename>` tables.
 
-To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `COMPUTE_DIFFS=0`.
+To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `PROCESSING_DIFFING_MODE=off`.
 
 ### Process only a single object
 

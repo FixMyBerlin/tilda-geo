@@ -57,17 +57,17 @@ export async function getSchemaTables(schema: string) {
 
 /**
  * Create reference table by copying it to the `diffing_reference` schema.
- * Only store data within the computeDiffBbox if provided, otherwise skip.
+ * Only store data within the diffing bbox if provided, otherwise skip.
  * @returns the Promise of the query
  */
 export async function createReferenceTable(table: string) {
-  if (!params.computeDiffBbox) throw new Error('params.computeDiffBbox required')
+  if (!params.diffingBbox) throw new Error('Required param `env.PROCESSING_DIFFING_BBOX` missing')
 
   const tableId = tableIdentifier(table)
   const referenceTableId = referenceTableIdentifier(table)
   await sql.unsafe(`DROP TABLE IF EXISTS ${referenceTableId}`)
 
-  const [minLon, minLat, maxLon, maxLat] = params.computeDiffBbox
+  const [minLon, minLat, maxLon, maxLat] = params.diffingBbox
 
   await sql.unsafe(`
     CREATE TABLE ${referenceTableId} AS
@@ -81,7 +81,7 @@ export async function createReferenceTable(table: string) {
   if (isDev) {
     console.log(
       'Diffing: Recreated reference table with bbox filter',
-      JSON.stringify({ table, computeDiffBbox: params.computeDiffBbox }),
+      JSON.stringify({ table, diffingBbox: params.diffingBbox }),
     )
   }
 }
@@ -102,12 +102,12 @@ async function createSpatialIndex(table: string) {
 
 /**
  * Diff the given table with the reference table and store the result in the `table_diff` table.
- * Only perform diffing if computeDiffBbox is provided, otherwise skip.
+ * Only perform diffing if diffing bbox is provided, otherwise skip.
  * @param table
  * @returns the number of added, removed and modified entries
  */
 export async function computeDiff(table: string) {
-  if (!params.computeDiffBbox) throw new Error('params.computeDiffBbox required')
+  if (!params.diffingBbox) throw new Error('Required param `env.PROCESSING_DIFFING_BBOX` missing')
 
   const tableId = tableIdentifier(table)
   const referenceTableId = referenceTableIdentifier(table)
@@ -122,7 +122,7 @@ export async function computeDiff(table: string) {
   // compute full outer join
   await sql.unsafe(`DROP TABLE IF EXISTS ${joinedTableId}`)
 
-  const [minLon, minLat, maxLon, maxLat] = params.computeDiffBbox
+  const [minLon, minLat, maxLon, maxLat] = params.diffingBbox
 
   await sql.unsafe(`
     CREATE TABLE ${joinedTableId} AS
@@ -235,19 +235,16 @@ function printDiffInfo(diffInfo: Awaited<ReturnType<typeof computeDiff>>) {
 
 /**
  * Diff the given tables and print the results.
- * Only performs diffing if computeDiffBbox is provided, otherwise skips diffing.
+ * Only performs diffing if diffing bbox is provided, otherwise skips diffing.
  * @param tables
  */
 export async function diffTables(tables: string[]) {
-  if (!params.computeDiffBbox) {
+  if (!params.diffingBbox) {
     console.log('Diffing: Skipping diffTables (no bbox provided)', JSON.stringify({ tables }))
     return
   }
 
-  console.log(
-    'Diffing: diffTables',
-    JSON.stringify({ tables, computeDiffBbox: params.computeDiffBbox }),
-  )
+  console.log('Diffing: diffTables', JSON.stringify({ tables, diffingBbox: params.diffingBbox }))
 
   // compute all diffs in parallel
   const diffResults = await Promise.all(tables.map((table) => computeDiff(table)))

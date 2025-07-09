@@ -81,6 +81,6 @@ jobs:
               -e "s|^SYNOLOGY_URL=.*$|SYNOLOGY_URL='${{ secrets.SYNOLOGY_URL }}'|" \
               -e "s|^SKIP_DOWNLOAD=.*$|SKIP_DOWNLOAD='${{ vars.SKIP_DOWNLOAD }}'|" \
               -e "s|^SKIP_UNCHANGED=.*$|SKIP_UNCHANGED='${{ vars.SKIP_UNCHANGED }}'|" \
-              -e "s|^COMPUTE_DIFFS=.*$|COMPUTE_DIFFS='${{ vars.COMPUTE_DIFFS }}'|" \
-              -e "s|^PROCESS_COMPUTE_DIFF_BBOX=.*$|PROCESS_COMPUTE_DIFF_BBOX='${{ vars.PROCESS_COMPUTE_DIFF_BBOX }}'|" \
+              -e "s|^PROCESSING_DIFFING_MODE=.*$|PROCESSING_DIFFING_MODE='${{ vars.PROCESSING_DIFFING_MODE }}'|" \
+              -e "s|^PROCESSING_DIFFING_BBOX=.*$|PROCESSING_DIFFING_BBOX='${{ vars.PROCESSING_DIFFING_BBOX }}'|" \
               .env

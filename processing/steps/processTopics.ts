@@ -110,7 +110,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     !dataTablesDirChanged &&
     !fileChanged &&
     params.processOnlyBbox !== null
-  const diffChanges = params.computeDiffs && !fileChanged
+  const diffChanges = params.diffingMode !== 'off' && !fileChanged
 
   logStart('Processing Topics')
 
@@ -167,12 +167,13 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Create reference tables for diffing
     if (diffChanges) {
       console.log('Diffing:', 'Create reference tables')
-      // With `freezeData=true` (which is `FREEZE_DATA=1`) we only create reference tables that are not already created (making sure the reference is complete).
+      // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
       // Which means existing reference tables don't change (are frozen).
       // Learn more in [processing/README](../../processing/README.md#reference)
-      const toCreateReference = params.freezeData
-        ? processedTopicTables.difference(tableListReference)
-        : processedTopicTables
+      const toCreateReference =
+        params.diffingMode === 'fixed'
+          ? processedTopicTables.difference(tableListReference)
+          : processedTopicTables
       await Promise.all(Array.from(toCreateReference).map(createReferenceTable))
     }
 
@@ -189,8 +190,8 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     } else {
       console.log(
         'Diffing:',
-        'Skipp diffing',
-        JSON.stringify({ diffChanges, computeDiffs: params.computeDiffs, fileChanged }),
+        'Skip diffing',
+        JSON.stringify({ diffChanges, diffingMode: params.diffingMode, fileChanged }),
       )
     }
 
