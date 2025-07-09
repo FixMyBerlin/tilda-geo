@@ -3,9 +3,8 @@ import { join } from 'path'
 import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { topicsConfig, type Topic } from '../constants/topics.const'
 import {
-  backupTable,
+  createReferenceTable,
   diffTables,
-  dropDiffTable,
   getSchemaTables,
   getTopicTables,
 } from '../diffing/diffing'
@@ -80,12 +79,7 @@ export async function runTopic(fileName: string, topic: Topic) {
  */
 export async function processTopics(fileName: string, fileChanged: boolean) {
   const tableListPublic = await getSchemaTables('public')
-  const tableListBackup = await getSchemaTables('backup')
-
-  // drop all previous diffs
-  if (!params.freezeData) {
-    tableListPublic.forEach(dropDiffTable)
-  }
+  const tableListReference = await getSchemaTables('diffing_reference')
 
   // when the helpers have changed we disable all diffing functionality
   const helperPath = join(TOPIC_DIR, 'helper')
@@ -116,7 +110,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     !dataTablesDirChanged &&
     !fileChanged &&
     params.processOnlyBbox !== null
-  const diffChanges = params.computeDiffs && !fileChanged
+  const diffChanges = params.diffingMode !== 'off' && !fileChanged
 
   logStart('Processing Topics')
 
@@ -170,16 +164,17 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     logStart(`Topic "${topic}"`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
 
-    // Backup all tables related to topic
+    // Create reference tables for diffing
     if (diffChanges) {
-      console.log('Diffing:', 'Backup tables')
-      // With `freezeData=true` (which is `FREEZE_DATA=1`) we only backup tables that are not already backed up (making sure the backup is complete).
-      // Which means existing backup tables don't change (are frozen).
+      console.log('Diffing:', 'Create reference tables')
+      // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
+      // Which means existing reference tables don't change (are frozen).
       // Learn more in [processing/README](../../processing/README.md#reference)
-      const toBackup = params.freezeData
-        ? processedTopicTables.difference(tableListBackup)
-        : processedTopicTables
-      await Promise.all(Array.from(toBackup).map(backupTable))
+      const toCreateReference =
+        params.diffingMode === 'fixed'
+          ? processedTopicTables.difference(tableListReference)
+          : processedTopicTables
+      await Promise.all(Array.from(toCreateReference).map(createReferenceTable))
     }
 
     // Run the topic with osm2pgsql (LUA) and the sql processing
@@ -192,6 +187,12 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     if (diffChanges) {
       console.log('Diffing:', 'Update diffs')
       await diffTables(Array.from(processedTopicTables))
+    } else {
+      console.log(
+        'Diffing:',
+        'Skip diffing',
+        JSON.stringify({ diffChanges, diffingMode: params.diffingMode, fileChanged }),
+      )
     }
 
     logEnd(`Topic "${topic}"`)

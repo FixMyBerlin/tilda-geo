@@ -171,6 +171,7 @@ function osm2pgsql.process_way(object)
     mapillary_forward = object_tags['mapillary:forward'],
     mapillary_backward = object_tags['mapillary:backward'],
     mapillary_traffic_sign = object_tags['source:traffic_sign:mapillary'],
+    description = object_tags.description or object_tags.note,
   }
 
   MergeTable(road_result_tags, RoadClassification(object))
@@ -189,6 +190,7 @@ function osm2pgsql.process_way(object)
     mapillary_forward = cycleways.mapillary_forward or road_result_tags.mapillary_forward,
     mapillary_backward = cycleways.mapillary_backward or road_result_tags.mapillary_backward,
     mapillary_traffic_sign = cycleways.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
+    description = cycleways.description or road_result_tags.description,
   }
 
   for _, cycleway in ipairs(cycleways) do

@@ -35,9 +35,9 @@ jobs:
             cd /srv/
             export WAIT_FOR_FRESH_DATA=1
             export SKIP_DOWNLOAD=0
-            export COMPUTE_DIFFS=0
+            export PROCESSING_DIFFING_MODE=off
             docker compose down processing
             docker compose up -d processing
             unset WAIT_FOR_FRESH_DATA
             unset SKIP_DOWNLOAD
-            unset COMPUTE_DIFFS
+            unset PROCESSING_DIFFING_MODE

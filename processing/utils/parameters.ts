@@ -1,4 +1,13 @@
+import { z } from 'zod'
 import type { TopicConfigBbox } from '../constants/topics.const'
+
+export type DiffingMode = 'off' | 'previous' | 'fixed'
+
+function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
+  return envVar ? (envVar.split(',').map((t) => Number(t.trim())) as TopicConfigBbox) : null
+}
+
+const diffingModeSchema = z.enum(['off', 'previous', 'fixed'])
 
 function parseParameters() {
   return {
@@ -8,13 +17,8 @@ function parseParameters() {
     fileURL: new URL(process.env.OSM_DOWNLOAD_URL || ''),
     idFilter: process.env.ID_FILTER || '',
     apiKey: process.env.ATLAS_API_KEY || '',
-    computeDiffs: process.env.COMPUTE_DIFFS === '1',
-    computeDiffBbox: process.env.PROCESS_COMPUTE_DIFF_BBOX
-      ? (process.env.PROCESS_COMPUTE_DIFF_BBOX.split(',').map((t) =>
-          Number(t.trim()),
-        ) as TopicConfigBbox)
-      : null,
-    freezeData: process.env.FREEZE_DATA === '1',
+    diffingMode: diffingModeSchema.parse(process.env.PROCESSING_DIFFING_MODE),
+    diffingBbox: parseBbox(process.env.PROCESSING_DIFFING_BBOX),
     skipUnchanged: process.env.SKIP_UNCHANGED === '1',
     environment: process.env.ENVIRONMENT || '',
     synologyLogToken: process.env.SYNOLOGY_LOG_TOKEN,
@@ -23,9 +27,7 @@ function parseParameters() {
     processOnlyTopics: process.env.PROCESS_ONLY_TOPICS
       ? process.env.PROCESS_ONLY_TOPICS.split(',').map((t) => t.trim())
       : [],
-    processOnlyBbox: process.env.PROCESS_ONLY_BBOX
-      ? (process.env.PROCESS_ONLY_BBOX.split(',').map((t) => Number(t.trim())) as TopicConfigBbox)
-      : null,
+    processOnlyBbox: parseBbox(process.env.PROCESS_ONLY_BBOX),
     osm2pgsqlLogLevel: process.env.OSM2PGSQL_LOG_LEVEL || 'info',
   }
 }

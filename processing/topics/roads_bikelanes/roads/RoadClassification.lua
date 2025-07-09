@@ -7,9 +7,7 @@ local parse_length = require('parse_length')
 require("MergeTable")
 require("RoadClassificationRoadValue")
 
-local tags_copied = {
-  "description",
-}
+local tags_copied = {}
 local tags_prefixed = {}
 
 function RoadClassification(object)
