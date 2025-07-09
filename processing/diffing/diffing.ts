@@ -4,7 +4,7 @@ import type { Topic } from '../constants/topics.const'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 
-const backupTableIdentifier = (table: string) => `backup."${table}"` as const
+const referenceTableIdentifier = (table: string) => `diffing_reference."${table}"` as const
 const diffTableIdentifier = (table: string) => `public."${table}_diff"` as const
 const tableIdentifier = (table: string) => `public."${table}"` as const
 
@@ -33,8 +33,8 @@ export async function getTopicTables(topic: Topic) {
   }
 }
 
-export async function initializeSchemaBackup() {
-  return sql`CREATE SCHEMA IF NOT EXISTS backup`
+export async function initializeDiffingReferenceSchema() {
+  return sql`CREATE SCHEMA IF NOT EXISTS diffing_reference`
 }
 
 export async function initializeCustomFunctionDiffing() {
@@ -56,21 +56,21 @@ export async function getSchemaTables(schema: string) {
 }
 
 /**
- * Backup the given table by copying it to the `backup` schema.
- * Only backup data within the computeDiffBbox if provided, otherwise skip backup.
+ * Create reference table by copying it to the `diffing_reference` schema.
+ * Only store data within the computeDiffBbox if provided, otherwise skip.
  * @returns the Promise of the query
  */
-export async function backupTable(table: string) {
+export async function createReferenceTable(table: string) {
   if (!params.computeDiffBbox) throw new Error('params.computeDiffBbox required')
 
   const tableId = tableIdentifier(table)
-  const backupTableId = backupTableIdentifier(table)
-  await sql.unsafe(`DROP TABLE IF EXISTS ${backupTableId}`)
+  const referenceTableId = referenceTableIdentifier(table)
+  await sql.unsafe(`DROP TABLE IF EXISTS ${referenceTableId}`)
 
   const [minLon, minLat, maxLon, maxLat] = params.computeDiffBbox
 
   await sql.unsafe(`
-    CREATE TABLE ${backupTableId} AS
+    CREATE TABLE ${referenceTableId} AS
     SELECT * FROM ${tableId}
     WHERE ST_Intersects(
       geom,
@@ -80,7 +80,7 @@ export async function backupTable(table: string) {
 
   if (isDev) {
     console.log(
-      'Diffing: Recreated backup table with bbox filter',
+      'Diffing: Recreated reference table with bbox filter',
       JSON.stringify({ table, computeDiffBbox: params.computeDiffBbox }),
     )
   }
@@ -101,7 +101,7 @@ async function createSpatialIndex(table: string) {
 }
 
 /**
- * Diff the given table with the backup table and store the result in the `table_diff` table.
+ * Diff the given table with the reference table and store the result in the `table_diff` table.
  * Only perform diffing if computeDiffBbox is provided, otherwise skip.
  * @param table
  * @returns the number of added, removed and modified entries
@@ -110,9 +110,9 @@ export async function computeDiff(table: string) {
   if (!params.computeDiffBbox) throw new Error('params.computeDiffBbox required')
 
   const tableId = tableIdentifier(table)
-  const backupTableId = backupTableIdentifier(table)
+  const referenceTableId = referenceTableIdentifier(table)
   const diffTableId = diffTableIdentifier(table)
-  const joinedTableId = `backup."${table}_joined"`
+  const joinedTableId = `diffing_reference."${table}_joined"`
   const changeTypes = {
     added: `'{"CHANGE": "added"}'`,
     removed: `'{"CHANGE": "removed"}'`,
@@ -131,12 +131,12 @@ export async function computeDiff(table: string) {
       ${tableId}.id AS new_id,
       ${tableId}.meta AS new_meta,
       ${tableId}.geom AS new_geom,
-      ${backupTableId}.tags AS old_tags,
-      ${backupTableId}.id AS old_id,
-      ${backupTableId}.meta AS old_meta,
-      ${backupTableId}.geom AS old_geom
-    FROM ${backupTableId}
-    FULL OUTER JOIN ${tableId} ON ${backupTableId}.id = ${tableId}.id
+      ${referenceTableId}.tags AS old_tags,
+      ${referenceTableId}.id AS old_id,
+      ${referenceTableId}.meta AS old_meta,
+      ${referenceTableId}.geom AS old_geom
+    FROM ${referenceTableId}
+    FULL OUTER JOIN ${tableId} ON ${referenceTableId}.id = ${tableId}.id
     WHERE
       ${tableId}.geom IS NULL
       OR ST_Intersects(

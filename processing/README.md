@@ -82,7 +82,7 @@ The `PROCESS_COMPUTE_DIFF_BBOX` bbox specifies which area is used for the diff. 
 #### Reference
 
 - With `FREEZE_DATA=0` you see the changes to the last run on every run
-- With `FREEZE_DATA=1` you see the changes to the last reference-run, allowing you to compare your changes to a certain version of your data. The reference will be the last time you ran with `FREEZE_DATA=0`. In this case the system will **not** update the `backup.<tablename>` tables. This flag will be ignored if `COMPUTE_DIFFS=0`.
+- With `FREEZE_DATA=1` you see the changes to the last reference-run, allowing you to compare your changes to a certain version of your data. The reference will be the last time you ran with `FREEZE_DATA=0`. In this case the system will **not** update the `diffing_reference.<tablename>` tables. This flag will be ignored if `COMPUTE_DIFFS=0`.
 
 To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `COMPUTE_DIFFS=0`.
 

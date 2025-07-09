@@ -1,7 +1,10 @@
 import { $, sql } from 'bun'
 import { HASH_DIR, OSM_DOWNLOAD_DIR, OSM_FILTERED_DIR } from '../constants/directories.const'
 import { initializeCustomFunctionsDataTables, initializeSchemaData } from '../dataTables/dataTables'
-import { initializeCustomFunctionDiffing, initializeSchemaBackup } from '../diffing/diffing'
+import {
+  initializeCustomFunctionDiffing,
+  initializeDiffingReferenceSchema,
+} from '../diffing/diffing'
 import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
 import { initializeLuaPackagePath } from '../utils/initializeLuaPackagePath'
 import { isDev } from '../utils/isDev'
@@ -21,7 +24,7 @@ export async function initialize() {
   }
 
   // See ./diffing
-  await initializeSchemaBackup()
+  await initializeDiffingReferenceSchema()
   await initializeCustomFunctionDiffing()
 
   // See ../dataTables
