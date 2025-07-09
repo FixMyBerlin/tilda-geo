@@ -181,6 +181,12 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     if (diffChanges) {
       console.log('Diffing:', 'Update diffs')
       await diffTables(Array.from(processedTopicTables))
+    } else {
+      console.log(
+        'Diffing:',
+        'Skipp diffing',
+        JSON.stringify({ diffChanges, computeDiffs: params.computeDiffs, fileChanged }),
+      )
     }
 
     logEnd(`Topic "${topic}"`)
