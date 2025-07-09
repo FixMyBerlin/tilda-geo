@@ -18,9 +18,7 @@ require("ToTodoTags")
 local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
-local tags_copied = {
-  "description",
-}
+local tags_copied = {}
 local tags_prefixed = {}
 local sideSignMap = {
   ["left"] = 1,
@@ -85,6 +83,7 @@ function Bikelanes(object)
           mapillary_forward = transformed_tags['mapillary:forward'],
           mapillary_backward = transformed_tags['mapillary:backward'],
           mapillary_traffic_sign = transformed_tags['source:traffic_sign:mapillary'],
+          description = transformed_tags.description or transformed_tags.note,
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
