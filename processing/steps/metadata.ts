@@ -1,4 +1,5 @@
 import { $, sql } from 'bun'
+import { berlinTimeString } from '../utils/berlinTime'
 import { filteredFilePath } from './filter'
 
 /**
@@ -44,5 +45,11 @@ export async function writeMetadata(fileName: string, processingDurationMS: numb
     processing_duration: processingDuration,
     osm_data_from: new Date(await getFileTimestamp(fileName)),
   }
+
+  console.log(
+    'Processing:',
+    'Writing meta data',
+    JSON.stringify({ ...data, osm_data_from_localtime: berlinTimeString(data.osm_data_from) }),
+  )
   return sql`INSERT INTO public.meta ${sql(data)}`
 }

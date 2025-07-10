@@ -1,4 +1,5 @@
 import chalk from 'chalk'
+import { berlinTimeString } from './berlinTime'
 import { formatTimestamp } from './formatTimestamp'
 import { params } from './parameters'
 import { synologyLogInfo } from './synology'
@@ -39,5 +40,6 @@ export function logTileInfo() {
       params.environment.charAt(0).toUpperCase() + params.environment.slice(1)
     console.log(`Tile Inspector: https://viewer.tilda-geo.de/?source=${environmentCapitalized}`)
     console.log(`Tile Catalog:   ${tileURLs[params.environment as keyof typeof tileURLs]}`)
+    console.log('Processing:', 'Finished', berlinTimeString(new Date()))
   }
 }
