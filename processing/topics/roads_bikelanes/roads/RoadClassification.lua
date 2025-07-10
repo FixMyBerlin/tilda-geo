@@ -37,6 +37,7 @@ function RoadClassification(object)
   CopyTags(result_tags, tags, tags_copied)
   CopyTags(result_tags, tags, tags_prefixed, "osm_")
   result_tags.width = parse_length(tags.width)
+  result_tags.width_source = tags['source:width']
   result_tags.bridge = Sanitize(tags.bridge, { "yes" })
   result_tags.tunnel = Sanitize(tags.tunnel, { "yes" })
   MergeTable(result_tags, DeriveTrafficSigns(tags))

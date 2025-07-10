@@ -35,9 +35,13 @@ import {
   TagsTableRowCompositTrassencoutSurveyResponse,
   tableKeyTrassencoutSurveyResponse,
 } from './compositTableRows/TagsTableRowCompositTrassencoutSurveyResponse'
+import {
+  TagsTableRowCompositWidth,
+  tableKeyWidth,
+} from './compositTableRows/TagsTableRowCompositWidth'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
 import { TagsTableRowWikipedia, tableKeyWikipedia } from './compositTableRows/TagsTableRowWikipedia'
-import { cleanKey } from './utils/cleanKey'
+import { KEY_IF_PRESENCE, cleanKey } from './utils/cleanKey'
 
 type Props = {
   properties: InspectorFeatureProperty
@@ -174,6 +178,16 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                 />
               )
             }
+            case tableKeyWidth: {
+              return (
+                <TagsTableRowCompositWidth
+                  key={cleanedKey}
+                  sourceId={sourceId}
+                  tagKey={key}
+                  properties={properties}
+                />
+              )
+            }
             default: {
               if (tableKeysColor.includes(cleanedKey)) {
                 return (
@@ -187,7 +201,7 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
               }
 
               // Hide all properties that should only be shown if a value is present.
-              if (!properties[cleanedKey] && key.includes('__if_present')) {
+              if (!properties[cleanedKey] && key.includes(KEY_IF_PRESENCE)) {
                 return null
               }
 
