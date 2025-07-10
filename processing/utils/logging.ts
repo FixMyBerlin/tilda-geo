@@ -2,7 +2,6 @@ import chalk from 'chalk'
 import { berlinTimeString } from './berlinTime'
 import { formatTimestamp } from './formatTimestamp'
 import { params } from './parameters'
-import { synologyLogInfo } from './synology'
 import { endTimer, startTimer } from './timeTracking'
 
 const lineLength = process.stdout.columns || 120
@@ -13,7 +12,6 @@ export function logPadded(left: string, right: string = '') {
 
 export function logStart(id: string) {
   const message = `${id} started`
-  synologyLogInfo(message)
   logPadded(message)
   startTimer(id)
 }
@@ -23,7 +21,6 @@ export function logEnd(id: string) {
   const timeFormatted = formatTimestamp(timeElapsed)
 
   const message = `${id} finished`
-  synologyLogInfo(`${message} in ${timeFormatted}`)
   logPadded(message, timeFormatted)
   return timeElapsed
 }

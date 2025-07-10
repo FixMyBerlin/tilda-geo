@@ -8,7 +8,6 @@ import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
 import { params } from './utils/parameters'
-import { synologyLogError } from './utils/synology'
 
 async function main() {
   try {
@@ -44,7 +43,7 @@ async function main() {
     logTileInfo()
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
-    synologyLogError(`Processing failed: ${error}`)
+    console.error('ERROR: Processing failed', error)
   }
 }
 
