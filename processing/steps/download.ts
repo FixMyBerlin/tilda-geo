@@ -3,7 +3,6 @@ import { basename, join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
-import { synologyLogError } from '../utils/synology'
 import { filteredFilePath } from './filter'
 
 /**
@@ -52,8 +51,9 @@ export async function waitForFreshData() {
     tries++
     // If we exceeded the maximum number of tries, return false and log to Synology
     if (tries >= maxTries) {
-      synologyLogError(
-        `Timeout exceeded while waiting for fresh data. File is from ${new Date(lastModified).toISOString()}`,
+      console.log(
+        'ERROR: Timeout exceeded while waiting for fresh data.',
+        `Now using file from ${new Date(lastModified).toISOString()}`,
       )
       return false
     }
