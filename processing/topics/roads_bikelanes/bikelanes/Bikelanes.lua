@@ -67,6 +67,7 @@ function Bikelanes(object)
           -- _age = AgeInDays(ParseCheckDate(tags["check_date"])),
           prefix = transformed_tags._prefix,
           width = parse_length(transformed_tags.width),
+          width_source = transformed_tags['source:width'],
           oneway = DeriveOneway(transformed_tags, category),
           bridge = Sanitize(object_tags.bridge, { "yes" }),
           tunnel = Sanitize(object_tags.tunnel, { "yes" }),

@@ -2,6 +2,7 @@
 import { translationsOneway } from './translationsOneway.const'
 import { translationsParking } from './translationsParking.const'
 import { translationsSeparationTrafficModeMarking } from './translationsSeparationTrafficModeMarking.const'
+import { translationsWdith } from './translationsWdith.const'
 
 // Legend:
 // - "ALL--" stands for "all sources". Those translations are applied without checking the soureId
@@ -11,6 +12,7 @@ export const translations: { [key: string]: string } = {
   ...translationsParking,
   ...translationsOneway,
   ...translationsSeparationTrafficModeMarking,
+  ...translationsWdith,
   'ALL--_parent_highway--key': 'Straßentyp Fahrbahn',
   'ALL--category--key': 'Führungsform',
   'ALL--category=bicycleRoad_vehicleDestination': 'Fahrradstraße mit Anlieger frei',
@@ -121,7 +123,6 @@ export const translations: { [key: string]: string } = {
   'ALL--traffic_sign:forward--key': 'Beschilderung in Verkehrsrichtung',
   'ALL--traffic_sign:forward=none': 'Unbeschildert',
   'ALL--traffic_sign=none': 'Unbeschildert',
-  'ALL--width--key': 'Breite',
   'atlas_bicycleParking--capacity--key': 'Anzahl Fahrrad-Stellplätze',
   'atlas_bicycleParking--capacity:cargo_bike--key': 'Anzahl Lastenfahrrad-Stellplätze',
   'atlas_bicycleParking--title': 'Fahrradstellplätze',

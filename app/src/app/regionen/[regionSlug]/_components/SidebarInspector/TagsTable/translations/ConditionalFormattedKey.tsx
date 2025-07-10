@@ -61,6 +61,7 @@ export const ConditionalFormattedKey: React.FC<Props> = ({ sourceId, tagKey }) =
     'traffic_sign:forward',
     'traffic_sign:backward',
     'width',
+    'composit_width',
     'maxspeed',
     'length',
   ]
