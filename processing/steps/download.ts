@@ -21,7 +21,7 @@ export async function waitForFreshData() {
     return
   }
 
-  const maxTries = 30 // 7,5 hours (at 15 Min per try)
+  const maxTries = 50 // ~10 hours (at 15 Min per try)
   const timeoutMinutes = 15
   const todaysDate = new Date().toDateString()
   let tries = 0
