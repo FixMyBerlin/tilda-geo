@@ -19,7 +19,10 @@ See [`index.ts`](./index.ts) for more.
 
 ### Freshness of source data
 
-We use the [public Germany export from Geofabrik](https://download.geofabrik.de/europe/germany.html) which includes OSM Data up until ~20:00 h of the previous day. All processing is done on this dataset.
+The data is updated daily based on OSM extracts provided by [Geofabrik for Germany](https://download.geofabrik.de/europe/germany.html).
+It includes OSM changes up until ~20:00 h of teh previous day.
+The processing should be finished at about 6:00 h of the current day (+/- 2 h).
+Which data is used in the app is visible in the download modal (Download-Icon on the bottom right of the map).
 
 ### Freshness of processed data
 
@@ -126,6 +129,24 @@ Additionally all tests are being run in the [husky](https://typicode.github.io/h
 **Good to know:**
 
 - To use the `Log` helper (`require("Log")`) to inspect and print data ([Docs](https://github.com/kikito/inspect.lua?tab=readme-ov-file#installation))
+
+## Geofabrik OAuth
+
+Geofabrik provides two datasets. We use the internal download when possible and fall back to the public data.
+The internal download includes the osm username but more importantly it is ready a few hours before the public download is.
+
+More: https://osm-internal.download.geofabrik.de/
+
+To use OAuth-protected downloads from Geofabrik, configure the `PROCESS_GEOFABRIK_*` environment variables and update the download URL, see [.env.example](../.env.example).
+
+The OAuth implementation uses [Geofabrik's official `oauth_cookie_client.py`](https://github.com/geofabrik/sendfile_osm_oauth_protector) which handles Cookie authentication automatically during processing.
+
+Our high level setup is:
+
+1. [processing.Dockerfile](/processing.Dockerfile) downloads the newest verion of the `oauth_cookie_client.py`
+2. On each processing-run ([processing/index.ts](/processing/index.ts))
+   1. We first [`initializeOAuth`](/processing/steps/initializeOAuth.ts) which gives us a **valid cookie** by running the python script or **falls back to the public URL**.
+   2. We [download](/processing/steps/download.ts) the either the public or internal pdf file.
 
 ## Deployment
 

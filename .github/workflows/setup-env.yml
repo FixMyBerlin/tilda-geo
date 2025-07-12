@@ -62,7 +62,7 @@ jobs:
               -e "s|^DATABASE_USER=.*$|DATABASE_USER='${{ secrets.DATABASE_USER }}'|" \
               -e "s|^DATABASE_PASSWORD=.*$|DATABASE_PASSWORD='${{ secrets.DATABASE_PASSWORD }}'|" \
               -e "s|^DATABASE_NAME=.*$|DATABASE_NAME='${{ secrets.DATABASE_NAME }}'|" \
-              -e "s|^OSM_DOWNLOAD_URL=.*$|OSM_DOWNLOAD_URL='${{ vars.OSM_DOWNLOAD_URL }}'|" \
+              -e "s|^PROCESS_GEOFABRIK_DOWNLOAD_URL=.*$|PROCESS_GEOFABRIK_DOWNLOAD_URL='${{ vars.PROCESS_GEOFABRIK_DOWNLOAD_URL }}'|" \
               -e "s|^TILES_URL=.*$|TILES_URL='${{ inputs.TILES_URL }}'|" \
               -e "s|^CACHELESS_URL=.*$|CACHELESS_URL='${{ inputs.CACHELESS_URL }}'|" \
               -e "s|^NEXT_PUBLIC_APP_ORIGIN=.*$|NEXT_PUBLIC_APP_ORIGIN='${{ inputs.NEXT_PUBLIC_APP_ORIGIN }}'|"\

@@ -7,7 +7,7 @@ export async function updateCache() {
   // Cache handling is based on ngnix which we don't run locally.
   // We had issues with the cache not being cleared on the server and it's not worth to port the fix to local when it does not do anything, actually.
   if (isDev) {
-    console.log('⏩ Skipping cache handling on development')
+    console.log('Finishing up: ⏩ Skipping cache handling on development')
     return
   }
 
@@ -26,19 +26,19 @@ export async function clearCache() {
     await $`rm -rf /cache_nginx_proxy/*`
     const sizeAfterStr = await $`du -sh /cache_nginx_proxy`.text()
     console.log(
-      'Cache: Successfully cleared the cache ',
+      'Finishing up: Successfully cleared the cache ',
       `(before ${sizeBeforeStr.trim()} – after ${sizeAfterStr.trim()})`,
     )
   } catch (error) {
-    console.warn('⚠️ Clearing the cache failed:', error)
+    console.warn('[ERROR] Finishing up: ⚠️ Clearing the cache failed:', error)
   }
 }
 
 export async function triggerCacheWarming() {
   if (params.skipWarmCache) {
-    console.log('⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
+    console.log('Finishing up: ⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
   } else {
-    console.log('Cache:', 'Trigger cache warming')
+    console.log('Finishing up: Trigger cache warming…')
     return triggerPrivateApi('warm-cache')
   }
 }

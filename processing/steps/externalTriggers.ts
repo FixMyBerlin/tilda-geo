@@ -8,7 +8,7 @@ export async function triggerPrivateApi(endpoint: string) {
 
   if (isDev) {
     console.info(
-      '👉 Action recommended:',
+      'Finishing up: 👉 Action recommended:',
       'In DEV, the processing cannot trigger API calls. You should do this manually:',
       `curl "${url}"`,
     )
@@ -18,7 +18,7 @@ export async function triggerPrivateApi(endpoint: string) {
   const response = await fetch(url)
   if (!response.ok) {
     console.warn(
-      `⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
+      `[ERROR] Finishing up: ⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
       response.status,
     )
   }
@@ -35,8 +35,9 @@ export async function triggerPostProcessing() {
 export async function restartTileServer() {
   try {
     await $`docker restart tiles > /dev/null`
-    console.log('Succesfully restarted the tiles container.')
+    console.log('Finishing up: Succesfully restarted the tiles container.')
   } catch (error) {
+    console.warn('[ERROR] Finishing up: ⚠️ Restarting the tiles container failed.', error)
     throw new Error(`Restarting the tiles container failed: ${error}`)
   }
 }

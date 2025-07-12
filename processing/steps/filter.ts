@@ -36,7 +36,7 @@ export async function tagFilter(fileName: string, fileChanged: boolean) {
   const filtersChanged = await directoryHasChanged(OSMIUM_FILTER_EXPRESSIONS_DIR)
   const runFilter = fileChanged || filtersChanged || pbfMissing
   if (runFilter) {
-    console.log('Filtering the OSM file...')
+    console.log('Filter: Filtering the OSM file...')
     try {
       await $`osmium tags-filter \
                   --overwrite \
@@ -48,7 +48,7 @@ export async function tagFilter(fileName: string, fileChanged: boolean) {
     }
   } else {
     console.log(
-      '⏩ Skipping tag filter. The file and filters are unchanged.',
+      'Filter: ⏩ Skipping tag filter. The file and filters are unchanged.',
       JSON.stringify({ fileChanged, filtersChanged, pbfMissing }),
     )
   }
