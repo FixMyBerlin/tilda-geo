@@ -18,16 +18,12 @@ const oauthCredentialSchema = z
 const urlSchema = z.string().url('Must be a valid URL')
 
 function parseParameters() {
-  const osmUsername = oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME)
-  const osmPassword = oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD)
-
   return {
     waitForFreshData: process.env.WAIT_FOR_FRESH_DATA === '1',
     skipDownload: process.env.SKIP_DOWNLOAD === '1',
     skipWarmCache: process.env.SKIP_WARM_CACHE === '1',
-    useOAuth: osmUsername && osmPassword,
-    osmUsername,
-    osmPassword,
+    osmUsername: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME),
+    osmPassword: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD),
     pbfDownloadUrl: urlSchema.parse(process.env.PROCESS_GEOFABRIK_DOWNLOAD_URL),
     idFilter: process.env.ID_FILTER || '',
     apiKey: process.env.ATLAS_API_KEY || '',

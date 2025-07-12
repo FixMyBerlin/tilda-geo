@@ -40,22 +40,22 @@ export async function ensureOAuthReady() {
  * Returns { isValid: boolean, cookiePath?: string, cookieContent?: string, httpCookie?: string }
  */
 export async function hasValidOAuthCookie() {
-  if (!params.useOAuth) {
-    return { isValid: true } // OAuth not required
+  if (!(params.osmUsername && params.osmPassword)) {
+    return { isValid: false } as const
   }
 
   try {
     const cookieContent = await getCookieFile()
     if (!cookieContent) {
       console.log('[ERROR] Geofabrik OAuth: getCookieFile failed')
-      return { isValid: false }
+      return { isValid: false } as const
     }
 
     // Parse the Netscape cookie format
     const httpCookie = parseNetscapeCookie(cookieContent)
     if (!httpCookie) {
       console.log('[ERROR] Geofabrik OAuth: parseNetscapeCookie failed')
-      return { isValid: false }
+      return { isValid: false } as const
     }
 
     // Check if cookie is valid using the cookie status API
@@ -76,17 +76,17 @@ export async function hasValidOAuthCookie() {
           cookiePath: COOKIE_FILE,
           cookieContent,
           httpCookie,
-        }
+        } as const
       } else {
         console.log('[ERROR] Geofabrik OAuth: Cookie validation failed.', JSON.stringify(status))
       }
     } else {
       console.log('[ERROR] Geofabrik OAuth: Cookie status API request failed.', response)
     }
-    return { isValid: false }
+    return { isValid: false } as const
   } catch (error) {
     console.error('[ERROR] Geofabrik OAuth: Could not verify cookie status:', error)
-    return { isValid: false }
+    return { isValid: false } as const
   }
 }
 
@@ -95,7 +95,12 @@ export async function hasValidOAuthCookie() {
  * This will authenticate with OSM and get a cookie for authenticated downloads
  */
 async function createOAuthCookie() {
-  console.log('Geofabrik OAuth: Create new cookie…')
+  if (params.osmUsername && params.osmPassword) {
+    console.log('Geofabrik OAuth: Create new cookie…')
+  } else {
+    console.log('Geofabrik OAuth: ⏩ Skipping cookie creation – usename, passwort missing')
+    return
+  }
 
   try {
     // Create settings file
