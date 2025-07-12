@@ -1,6 +1,5 @@
 import { logPadded } from '../utils/logging'
 import { ensureOAuthReady } from '../utils/oauth'
-import { params } from '../utils/parameters'
 
 /**
  * Initialize OAuth authentication if needed
@@ -9,9 +8,7 @@ import { params } from '../utils/parameters'
 export async function initializeOAuth() {
   logPadded('Processing: Geofabrik OAuth')
 
-  if (params.useOAuth) {
-    await ensureOAuthReady()
-  } else {
-    console.log('Geofabrik OAuth: ⏩ Skipping OAuth authentication – Username, Password missing')
-  }
+  // Check if everything is set up for OAuth
+  // … or fall back to pulic data.
+  await ensureOAuthReady()
 }
