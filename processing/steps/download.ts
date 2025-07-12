@@ -21,6 +21,8 @@ export async function waitForFreshData() {
     console.log('Download: ⏩ Skipping `waitForFreshData` due to `WAIT_FOR_FRESH_DATA=0`')
     return
   }
+  // Get last modified date with appropriate authentication
+  const cookieCheck = await hasValidOAuthCookie()
 
   const maxTries = 50 // ~10 hours (at 15 Min per try)
   const timeoutMinutes = 15
@@ -28,11 +30,9 @@ export async function waitForFreshData() {
   let tries = 0
 
   while (true) {
-    // Get last modified date with appropriate authentication
-    const headers = await getAuthHeaders()
     const response = await fetch(params.pbfDownloadUrl, {
       method: 'HEAD',
-      headers,
+      headers: getAuthHeaders(cookieCheck.httpCookie),
     })
     const lastModified = response.headers.get('Last-Modified')
     if (!lastModified) {
@@ -93,11 +93,18 @@ export async function downloadFile() {
   }
 
   // Ensure we have OAuth authentication if required and check if file has changed
-  const headers = await getAuthHeaders()
-  const eTag = await fetch(params.pbfDownloadUrl, {
+  const cookieCheck = await hasValidOAuthCookie()
+  const eTagResponse = await fetch(params.pbfDownloadUrl, {
     method: 'HEAD',
-    headers,
-  }).then((response) => response.headers.get('ETag'))
+    headers: getAuthHeaders(cookieCheck.httpCookie),
+  })
+  if (!eTagResponse.ok) {
+    console.log(
+      `Download: ⚠️ Failed to get ETag, HTTP ${eTagResponse.status}: ${eTagResponse.statusText}`,
+      eTagResponse,
+    )
+  }
+  const eTag = eTagResponse.headers.get('ETag')
 
   if (eTag && fileExists && eTag === (await readHashFromFile(fileName))) {
     console.log('Download: ⏩ Skipped download because the file has not changed.')
@@ -105,22 +112,27 @@ export async function downloadFile() {
   }
 
   if (!eTag) {
-    console.log('Download: ⚠️  No ETag found, will download file regardless of cache')
+    console.log(
+      'Download: ⚠️ No ETag found, will download file regardless of cache',
+      JSON.stringify({ pbfDownloadUrl: params.pbfDownloadUrl, cookieCheck }),
+    )
   }
 
   // Download file and write to disc
-  console.log(`Download: Downloading ${params.pbfDownloadUrl}…`)
+  const downloadMethod = cookieCheck.isValid ? 'internal (OAuth)' : 'public'
+  console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
   try {
-    const cookieCheck = await hasValidOAuthCookie()
     if (cookieCheck.isValid && cookieCheck.cookiePath) {
       await $`wget --quiet --load-cookies ${cookieCheck.cookiePath} --max-redirect 0 --output-document ${filePath} ${params.pbfDownloadUrl}`
     } else {
       // Public download
-      await $`wget --quiet --output-document=${filePath} ${params.pbfDownloadUrl}`
+      await $`wget --quiet --output-document ${filePath} ${params.pbfDownloadUrl}`
     }
   } catch (error) {
-    const downloadMethod = params.useOAuth ? 'internal (OAuth)' : 'public'
-    console.error(`[ERROR] Download: Failed to download ${downloadMethod} file: ${error}`)
+    console.error(
+      `[ERROR] Download: Failed to download ${downloadMethod} file: ${error}`,
+      JSON.stringify(cookieCheck),
+    )
     throw new Error(`Download: Failed to download ${downloadMethod} file: ${error}`)
   }
 

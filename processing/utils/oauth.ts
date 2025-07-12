@@ -16,11 +16,13 @@ const OAUTH_SETTINGS_FILE = join(OSM_DOWNLOAD_DIR, 'oauth_settings.json')
  */
 export async function ensureOAuthReady() {
   if ((await hasValidOAuthCookie()).isValid) {
+    console.log('Geofabrik OAuth: OAuth is ready with existing cookie')
     return true
   }
 
   await createOAuthCookie()
   if ((await hasValidOAuthCookie()).isValid) {
+    console.log('Geofabrik OAuth: OAuth is ready with fresh cookie')
     return true
   }
 
@@ -169,12 +171,11 @@ async function getCookieFile() {
 /**
  * Get headers for HTTP requests, including OAuth cookie if enabled
  */
-export async function getAuthHeaders() {
+export function getAuthHeaders(httpCookie: string | undefined) {
   const headers: HeadersInit = {}
 
-  const cookieCheck = await hasValidOAuthCookie()
-  if (cookieCheck.isValid && cookieCheck.httpCookie) {
-    headers['Cookie'] = cookieCheck.httpCookie
+  if (httpCookie) {
+    headers['Cookie'] = httpCookie
   }
 
   return headers
