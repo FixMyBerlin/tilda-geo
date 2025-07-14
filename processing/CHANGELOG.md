@@ -2,6 +2,12 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-06-14
+
+### All tables
+
+- Add `updated_by` as the OSM user name of the account to last change this object.
+- Add `changeset_id` as the id of the OSM changeset.
 ## 2025-07~07
 
 ### `bikelanes`, `roads`
