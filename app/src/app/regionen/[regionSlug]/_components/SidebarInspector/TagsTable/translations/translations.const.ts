@@ -48,10 +48,6 @@ export const translations: { [key: string]: string } = {
   'ALL--confidence=high': 'Hoch',
   'ALL--confidence=medium': 'Mittel',
   'ALL--description--key': 'Hinweis aus OSM',
-  'ALL--fresh=fresh_check_at': 'Wert wurde in den letzten 2 Jahre überprüft und die Prüfung explizit vermerkt.',
-  'ALL--fresh=fresh_updated_at': 'Wert ist wahrscheinlich aktuell da die Attribute der Geometrie in den letzten 2 Jahren editiert wurden.',
-  'ALL--fresh=outdated_check_at': 'Es wurde ein explizites Prüf-Datum erfasst das aber älter als 2 Jahre ist.',
-  'ALL--fresh=outdated_updated_at': 'Die Attribute dieser Geometrie wurden länger als 2 Jahre nicht bearbeitet.',
   'ALL--highway--key': 'Straßentyp',
   'ALL--highway=bicycle_road': 'Fahrradstraße', // roads--category
   'ALL--highway=construction': 'Straße ist in Bau',
