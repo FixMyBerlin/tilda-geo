@@ -29,7 +29,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   kerb_osm_id,
-  ST_Buffer (geom, 0.6, 'endcap=flat'),
+  ST_Buffer (geom, 0.01, 'endcap=flat'),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'driveway_corner_kerb',
