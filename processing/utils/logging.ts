@@ -11,8 +11,7 @@ export function logPadded(left: string, right: string = '') {
 }
 
 export function logStart(id: string) {
-  const message = `${id} started`
-  logPadded(message)
+  logPadded(id, berlinTimeString(new Date()))
   startTimer(id)
 }
 
@@ -20,12 +19,13 @@ export function logEnd(id: string) {
   const timeElapsed = endTimer(id)
   const timeFormatted = formatTimestamp(timeElapsed)
 
-  const message = `${id} finished`
-  logPadded(message, timeFormatted)
+  console.log(`${id} finished in ${timeFormatted}`)
   return timeElapsed
 }
 
 export function logTileInfo() {
+  logPadded('Processing: Finished', berlinTimeString(new Date()))
+
   const tileURLs = {
     development: 'http://localhost:3000/catalog',
     staging: 'https://staging-tiles.tilda-geo.de/catalog',
@@ -37,6 +37,5 @@ export function logTileInfo() {
       params.environment.charAt(0).toUpperCase() + params.environment.slice(1)
     console.log(`Tile Inspector: https://viewer.tilda-geo.de/?source=${environmentCapitalized}`)
     console.log(`Tile Catalog:   ${tileURLs[params.environment as keyof typeof tileURLs]}`)
-    console.log('Processing:', 'Finished', berlinTimeString(new Date()))
   }
 }

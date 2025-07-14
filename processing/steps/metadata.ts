@@ -7,13 +7,14 @@ import { filteredFilePath } from './filter'
  * @returns the Promise of the query
  */
 export async function initializeMetadataTable() {
-  return sql`
+  await sql`
     CREATE TABLE IF NOT EXISTS public.meta (
       id SERIAL PRIMARY KEY,
       processed_at TIMESTAMP,
       processing_duration TIME,
       osm_data_from TIMESTAMP
     )`
+  return true
 }
 
 /**

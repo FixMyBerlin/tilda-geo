@@ -36,7 +36,7 @@ LABEL maintainer="FixMyCity - https://fixmycity.de"
 COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
 
 RUN apt update && \
-  apt install -y osm2pgsql osmium-tool wget curl && \
+  apt install -y osm2pgsql osmium-tool wget curl python3 python3-requests && \
   apt upgrade -y
 
 # 'data' folder is root
@@ -47,6 +47,10 @@ ENV PATH=/root/.bun/bin:$PATH
 
 # copy the source code
 COPY processing /processing/
+
+# Download and setup Geofabrik OAuth client to /usr/local/bin (outside the mounted volume)
+RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.com/geofabrik/sendfile_osm_oauth_protector/master/oauth_cookie_client.py && \
+    chmod +x /usr/local/bin/oauth_cookie_client.py
 
 # install bun packages
 RUN bun install

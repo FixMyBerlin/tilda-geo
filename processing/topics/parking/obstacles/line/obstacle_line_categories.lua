@@ -7,7 +7,7 @@ local TAG_HELPER = require('tag_helper')
 
 obstacle_line_categories = {
   class_obstacle_category.new({
-    id = 'kerb_driveway', -- https://www.openstreetmap.org/way/814637433
+    id = 'kerb_lowered', -- https://www.openstreetmap.org/way/814637433
     buffer_radius = function(tags) return nil end,
     conditions = function(tags)
       return tags.barrier == 'kerb' and (tags.kerb == 'lowered' or tags.kerb == 'flush')

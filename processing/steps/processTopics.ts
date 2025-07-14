@@ -77,6 +77,8 @@ export async function runTopic(fileName: string, topic: Topic) {
  * @param fileChanged whether the file has changed since the last run
  */
 export async function processTopics(fileName: string, fileChanged: boolean) {
+  logStart('Processing: Topics')
+
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
 
@@ -111,8 +113,6 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     params.processOnlyBbox !== null
   const diffChanges = params.diffingMode !== 'off' && !fileChanged
 
-  logStart('Processing Topics')
-
   for (const [topic, bboxes] of Array.from(topicsConfig)) {
     let innerBboxes = bboxes
     let innerFileName = fileName
@@ -121,7 +121,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     const topicChanged = await directoryHasChanged(topicPath(topic))
     if (skipCode && !topicChanged) {
       console.log(
-        `⏩ Skipping topic "${topic}".`,
+        `Topics: ⏩ Skipping "${topic}".`,
         "The code hasn't changed and `SKIP_UNCHANGED` is active.",
       )
       continue
@@ -129,14 +129,14 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Topic: Skip topic based on ENV
     if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
       console.log(
-        `⏩ Skipping topic "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
+        `Topics: ⏩ Skipping "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
       )
       continue
     }
     // Bboxes: Overwrite bboxes based on ENV
     if (params.processOnlyBbox?.length === 4) {
       console.log(
-        `ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
+        `Skipping topic: ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
       )
       // @ts-expect-error the readonly part gets in the way here…
       innerBboxes = [params.processOnlyBbox]
@@ -151,7 +151,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Get all tables related to `topic`
     const topicTables = await getTopicTables(topic)
 
-    logStart(`Topic "${topic}"`)
+    logStart(`Topics: ${topic}`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
 
     // Create reference tables for diffing
@@ -185,10 +185,10 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       )
     }
 
-    logEnd(`Topic "${topic}"`)
+    logEnd(`Topics: ${topic}`)
   }
 
-  const timeElapsed = logEnd('Processing Topics')
+  const timeElapsed = logEnd('Processing: Topics')
 
   await writeMetadata(fileName, timeElapsed)
 }

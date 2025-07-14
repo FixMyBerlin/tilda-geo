@@ -1,6 +1,7 @@
 import { $ } from 'bun'
 import { basename, join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
+import { getAuthHeaders, hasValidOAuthCookie } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
 import { filteredFilePath } from './filter'
@@ -17,9 +18,11 @@ export const originalFilePath = (fileName: string) => join(OSM_DOWNLOAD_DIR, fil
  */
 export async function waitForFreshData() {
   if (!params.waitForFreshData) {
-    console.log('⏩ Skipping `waitForFreshData` due to `WAIT_FOR_FRESH_DATA=0`')
+    console.log('Download: ⏩ Skipping `waitForFreshData` due to `WAIT_FOR_FRESH_DATA=0`')
     return
   }
+  // Get last modified date with appropriate authentication
+  const cookieCheck = await hasValidOAuthCookie()
 
   const maxTries = 50 // ~10 hours (at 15 Min per try)
   const timeoutMinutes = 15
@@ -27,20 +30,22 @@ export async function waitForFreshData() {
   let tries = 0
 
   while (true) {
-    // Get last modified date
-    const response = await fetch(params.fileURL.toString(), { method: 'HEAD' })
+    const response = await fetch(params.pbfDownloadUrl, {
+      method: 'HEAD',
+      headers: getAuthHeaders(cookieCheck.httpCookie),
+    })
     const lastModified = response.headers.get('Last-Modified')
     if (!lastModified) {
       throw new Error('No Last-Modified header found')
     }
 
-    // TEMPORARY: Some more debugging info
+    // Check if last modified date is today
     const log = {
       today: new Date().toISOString(),
       newFileLastModified: new Date(lastModified).toISOString(),
       next: todaysDate === new Date(lastModified).toDateString() ? 'process' : 'wait',
     }
-    console.log(`waitForFreshData try ${tries}: ${JSON.stringify(log, undefined, 0)}`)
+    console.log(`Download: \`waitForFreshData\` try ${tries}: ${JSON.stringify(log, undefined, 0)}`)
 
     // Check if last modified date is today
     const lastModifiedDate = new Date(lastModified).toDateString()
@@ -52,7 +57,7 @@ export async function waitForFreshData() {
     // If we exceeded the maximum number of tries, return false and log to Synology
     if (tries >= maxTries) {
       console.log(
-        'ERROR: Timeout exceeded while waiting for fresh data.',
+        '[ERROR] Download: Timeout exceeded while waiting for fresh data.',
         `Now using file from ${new Date(lastModified).toISOString()}`,
       )
       return false
@@ -68,8 +73,7 @@ export async function waitForFreshData() {
  * When the files eTag is the same as the last download, the download will be skipped.
  */
 export async function downloadFile() {
-  const downloadUrl = params.fileURL.toString()
-  const fileName = basename(downloadUrl)
+  const fileName = basename(params.pbfDownloadUrl)
   const filePath = originalFilePath(fileName)
   const fileExists = await Bun.file(filePath).exists()
   const filteredFileExists = await Bun.file(filteredFilePath(fileName)).exists()
@@ -78,7 +82,7 @@ export async function downloadFile() {
   // We also check for the filteredFile because that is the one we actually need; if that is there, this is enough
   if ((fileExists || filteredFileExists) && params.skipDownload) {
     console.log(
-      '⏩ Skipping download. The file already exist and `SKIP_DOWNLOAD` is active.',
+      'Download: ⏩ Skipping download. The file already exist and `SKIP_DOWNLOAD` is active.',
       JSON.stringify({
         fileExists,
         filteredFileExists,
@@ -88,30 +92,54 @@ export async function downloadFile() {
     return { fileName, fileChanged: false }
   }
 
-  // Check if file has changed
-  const eTag = await fetch(downloadUrl, { method: 'HEAD' }).then((response) =>
-    response.headers.get('ETag'),
-  )
-  if (!eTag) {
-    throw new Error('No ETag found')
+  // Ensure we have OAuth authentication if required and check if file has changed
+  const cookieCheck = await hasValidOAuthCookie()
+  const eTagResponse = await fetch(params.pbfDownloadUrl, {
+    method: 'HEAD',
+    headers: getAuthHeaders(cookieCheck.httpCookie),
+  })
+  if (!eTagResponse.ok) {
+    console.log(
+      `Download: ⚠️ Failed to get ETag, HTTP ${eTagResponse.status}: ${eTagResponse.statusText}`,
+      eTagResponse,
+    )
   }
-  if (fileExists && eTag === (await readHashFromFile(fileName))) {
-    console.log('⏩ Skipped download because the file has not changed.')
+  const eTag = eTagResponse.headers.get('ETag')
+
+  if (eTag && fileExists && eTag === (await readHashFromFile(fileName))) {
+    console.log('Download: ⏩ Skipped download because the file has not changed.')
     return { fileName, fileChanged: false }
   }
 
-  // Download file and write to disc
-  console.log(`Downloading file "${fileName}"...`)
-  try {
-    await $`wget --quiet --output-document=${filePath} ${downloadUrl}`
-  } catch (error) {
-    throw new Error(
-      `Failed to download file with \`wget --quiet --output-document=${filePath} ${downloadUrl}\``,
+  if (!eTag) {
+    console.log(
+      'Download: ⚠️ No ETag found, will download file regardless of cache',
+      JSON.stringify({ pbfDownloadUrl: params.pbfDownloadUrl, cookieCheck }),
     )
   }
 
-  // Save etag
-  writeHashForFile(fileName, eTag)
+  // Download file and write to disc
+  const downloadMethod = cookieCheck.isValid ? 'internal (OAuth)' : 'public'
+  console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
+  try {
+    if (cookieCheck.isValid && cookieCheck.cookiePath) {
+      await $`wget --quiet --load-cookies ${cookieCheck.cookiePath} --max-redirect 0 --output-document ${filePath} ${params.pbfDownloadUrl}`
+    } else {
+      // Public download
+      await $`wget --quiet --output-document ${filePath} ${params.pbfDownloadUrl}`
+    }
+  } catch (error) {
+    console.error(
+      `[ERROR] Download: Failed to download ${downloadMethod} file: ${error}`,
+      JSON.stringify(cookieCheck),
+    )
+    throw new Error(`Download: Failed to download ${downloadMethod} file: ${error}`)
+  }
+
+  // Save etag if available
+  if (eTag) {
+    writeHashForFile(fileName, eTag)
+  }
 
   return { fileName, fileChanged: true }
 }

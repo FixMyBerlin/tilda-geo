@@ -4,6 +4,7 @@ import { restartTileServer, triggerPostProcessing } from './steps/externalTrigge
 import { idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
+import { initializeOAuth } from './steps/initializeOAuth'
 import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
@@ -11,26 +12,27 @@ import { params } from './utils/parameters'
 
 async function main() {
   try {
-    logPadded('Processing')
-    console.log('Processing:', 'Initialize', berlinTimeString(new Date()))
+    logPadded('Processing', berlinTimeString(new Date()))
+
     await initialize()
 
-    console.log('Processing:', 'Handle Data')
+    await initializeOAuth()
+
+    logPadded('Processing: Download', berlinTimeString(new Date()))
     await waitForFreshData()
     let { fileName, fileChanged } = await downloadFile()
 
-    console.log('Processing:', 'Handle Filter')
+    logPadded('Processing: Filter', berlinTimeString(new Date()))
     const tagFilterResponse = await tagFilter(fileName, fileChanged)
     if (tagFilterResponse) ({ fileName, fileChanged } = tagFilterResponse)
 
     const idFilterResponse = await idFilter(fileName, params.idFilter)
     if (idFilterResponse) ({ fileName, fileChanged } = idFilterResponse)
 
-    console.log('Processing:', 'Handle Topics')
     await processTopics(fileName, fileChanged)
     await generateTypes()
 
-    console.log('Processing:', 'Finishing up')
+    logPadded('Processing: Finishing up', berlinTimeString(new Date()))
     // Call the frontend update hook which registers sql functions and starts the analysis run
     await triggerPostProcessing()
 
@@ -43,7 +45,7 @@ async function main() {
     logTileInfo()
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
-    console.error('ERROR: Processing failed', error)
+    console.error('[ERROR] Processing failed (catchall)', error)
   }
 }
 

@@ -2,6 +2,15 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-06-14
+
+### All tables
+
+- Add `updated_by` as the OSM user name of the account to last change this object.
+- Add `changeset_id` as the id of the OSM changeset.
+- Modify `updated_at` which was a time string and is now the time in seconds since the epoch (midnight 1970-01-01)
+  - Note: We will remove `updated_age` in the near future to reduce complexity.
+
 ## 2025-07~07
 
 ### `bikelanes`, `roads`

@@ -46,7 +46,7 @@ ${pathLines}
 
   await Bun.write(resultFile, luaCode)
   console.log(
-    'Processing: `init.lua`s `package.path` was updated',
-    isDev ? { pathEntries: pathLines, resultFile } : '',
+    'Initialize: `init.lua`s `package.path` was updated',
+    isDev ? JSON.stringify({ pathEntries: pathLines, resultFile }) : '',
   )
 }

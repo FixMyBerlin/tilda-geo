@@ -13,6 +13,7 @@ export const downloadPseudoTagsData = async () => {
 }
 
 async function handleMapillaryCoverage() {
+  console.log('Initialize: Pseudo Tags')
   const sourceDir = join(import.meta.dir, './mapillaryCoverageSource')
   const dataDir = join(PSEUDO_TAGS_DATA, './mapillaryCoverageData')
 
@@ -22,11 +23,14 @@ async function handleMapillaryCoverage() {
   const dataChanged = await directoryHasChanged(dataDir)
 
   if (sourceChanged || dataChanged) {
-    console.log('Pseudo Tags:', 'Downloading Mapillary Coverage', {
-      mapillaryCoverageSource,
-      dataChanged,
-      sourceChanged,
-    })
+    console.log(
+      'Pseudo Tags: Downloading Mapillary Coverage',
+      JSON.stringify({
+        mapillaryCoverageSource,
+        dataChanged,
+        sourceChanged,
+      }),
+    )
     // Ensure data directory exists
     if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true })
     // Download CSV using Bun
@@ -41,10 +45,12 @@ async function handleMapillaryCoverage() {
     await updateDirectoryHash(dataDir)
     await updateDirectoryHash(sourceDir)
     console.log(
-      'Initialize: Pseudo tags data for Mapillary coverage downloaded.',
+      'Pseudo Tags: Pseudo tags data for Mapillary coverage downloaded.',
       humanFileSize(size),
     )
   } else {
-    console.log('⏩ Skipping pseudo tags, Mapillary coverage source and data did not change.')
+    console.log(
+      'Pseudo Tags: ⏩ Skipping download – Mapillary coverage source and data did not change.',
+    )
   }
 }
