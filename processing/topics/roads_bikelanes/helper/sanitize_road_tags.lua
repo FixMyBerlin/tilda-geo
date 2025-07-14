@@ -11,6 +11,7 @@ local SANITIZE_ROAD_TAGS = {
     local transformations = {
       -- https://taginfo.geofabrik.de/europe:germany/keys/surface%3Acolour#values
       -- (Reminder: This list shows values for roofs and such as well as ways)
+      ['none'] = 'no',
       ['grey'] = 'no',
       ['gray'] = 'no',
       ['#888888'] = 'no',
