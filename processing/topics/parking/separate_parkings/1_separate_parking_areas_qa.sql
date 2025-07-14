@@ -30,11 +30,26 @@ ADD COLUMN area_difference NUMERIC;
 
 UPDATE _parking_separate_parking_areas_qa
 SET
-  area_difference = (area - area_estimated) / area;
+  area_difference = area - area_estimated;
 
+ALTER TABLE _parking_separate_parking_areas_qa
+ADD COLUMN area_difference_relative NUMERIC;
+
+UPDATE _parking_separate_parking_areas_qa
+SET
+  area_difference_relative = area_difference / area;
+
+-- delete every entry where we overestimated the area by less than 30%
 DELETE FROM _parking_separate_parking_areas_qa
 WHERE
-  ABS(area_difference) < 0.3;
+  area_difference_relative < 0
+  AND ABS(area_difference_relative) < 0.3;
+
+-- delete every entry where underestimated the area by less than 20%
+DELETE FROM _parking_separate_parking_areas_qa
+WHERE
+  area_difference_relative > 0
+  and area_difference_relative < 0.2;
 
 ALTER TABLE _parking_separate_parking_areas_qa
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
