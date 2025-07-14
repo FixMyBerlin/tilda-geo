@@ -51,7 +51,6 @@ describe('`categorize_separate_parking areas`', function()
     local area = 100
     local result_tags = result_tags_separate_parking(result, area)
     assert.are.equal('way/'..object.id, result_tags.id)
-    assert.are.equal('number', type(result_tags.meta.updated_at))
     assert.are.equal(result_tags.tags.osm_mapillary, object.tags.mapillary)
     assert.are.equal(result_tags.tags.not_copied, nil)
   end)

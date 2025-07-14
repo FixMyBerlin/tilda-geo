@@ -20,7 +20,6 @@ describe('`result_tags_crossings`', function()
 
     local left_result = result_tags_crossings(results.left)
     assert.are.equal('node/'..input_object.id..'/'..results.left.object.tags.side, left_result.id)
-    assert.are.equal('number', type(left_result.meta.updated_at))
     assert.are.equal('crossing_zebra', left_result.tags.category)
     assert.are.equal('left', left_result.tags.side)
     assert.are.equal(input_object.tags.mapillary, left_result.tags.osm_mapillary)

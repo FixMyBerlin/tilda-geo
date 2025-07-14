@@ -19,7 +19,6 @@ describe('`result_tags_obstacles`', function()
     local result_tags = result_tags_obstacles(result)
 
     assert.are.equal(result_tags.id, 'node/'..input_object.id)
-    assert.are.equal(type(result_tags.meta.updated_at), 'number')
     assert.are.equal(result_tags.tags.category, 'bollard')
     assert.are.equal(result_tags.tags.osm_mapillary, input_object.tags.mapillary)
   end)

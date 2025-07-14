@@ -1,5 +1,6 @@
 require('init')
 require("TimeUtils")
+require('Log')
 
 -- * @desc Metadata of the given osm object
 -- * @returns `meta` object
