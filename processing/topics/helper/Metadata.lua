@@ -6,7 +6,7 @@ require("TimeUtils")
 function Metadata(object)
   local meta = {
     -- Reminder: Age of last tag modification; just moving the nodes don't touch the timestamp; but adding/removing nodes does
-    ["updated_at"] = os.date('!%Y-%m-%dT%H:%M:%SZ', object.timestamp),
+    ["updated_at"] = object.timestamp,
     ["updated_age"] = AgeInDays(object.timestamp),
     -- Not present in anonymized osm file:
     -- See https://osm2pgsql.org/doc/manual.html#extra-attributes
