@@ -16,7 +16,7 @@ SELECT
   a.corner_idx AS start_idx,
   b.corner_idx AS end_idx,
   a.osm_id,
-  get_pair_normal (a.geom, b.geom, 0.5) AS geom INTO _parking_separate_parking_normals
+  get_pair_normal (a.geom, b.geom, 6.0) AS geom INTO _parking_separate_parking_normals
 FROM
   separate_parking_corners a
   JOIN separate_parking_corners b ON a.osm_id = b.osm_id
