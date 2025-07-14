@@ -24,8 +24,6 @@
 \i '/processing/topics/parking/custom_functions/get_intersection_corners.sql'
 \i '/processing/topics/parking/custom_functions/segmentize_way_to_edges.sql'
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
-\i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
-\i '/processing/topics/parking/custom_functions/get_pair_normal.sql'
 \i '/processing/topics/parking/custom_functions/generate_parkings_sum_points.sql'
 
 -- HANDLE ROADS
@@ -51,7 +49,6 @@
 -- HANDLE SEPARATE PARKINGS
 \i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
-\i '/processing/topics/parking/separate_parkings/1_parking_normals.sql'
 
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
