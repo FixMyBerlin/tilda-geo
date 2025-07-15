@@ -4,6 +4,7 @@ local result_tags_off_street_parking = require('result_tags_off_street_parking')
 local categorize_off_street_parking = require('categorize_off_street_parking')
 local off_street_parking_area_categories = require('off_street_parking_area_categories')
 local area_sqm = require('area_sqm')
+require('parking_errors')
 
 local db_table_area = osm2pgsql.define_table({
   name = 'off_street_parking_areas',

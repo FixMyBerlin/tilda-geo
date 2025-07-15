@@ -5,6 +5,7 @@ require('result_tags_parkings')
 local has_parking = require('has_parking')
 local sanitize_cleaner = require('sanitize_cleaner')
 require('transform_parkings')
+require('parking_errors')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_road_parkings',
