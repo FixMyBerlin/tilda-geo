@@ -51,6 +51,17 @@ local separate_parking_point_categories = {
     tags_cc = amenity_parking_tags_cc(),
     apply_parking_capacity_fallback = true,
   }),
+  class_separate_parking_category.new({
+    -- See https://github.com/FixMyBerlin/private-issues/issues/2604
+    id = 'parking_median',
+    buffer_radius = function(tags) return nil end,
+    conditions = function(tags)
+      return tags.amenity == 'parking' and tags.parking == 'surface' and tags.location == 'median'
+    end,
+    tags = function(tags) return amenity_parking_tags(tags) end,
+    tags_cc = amenity_parking_tags_cc(),
+    apply_parking_capacity_fallback = true,
+  }),
 }
 
 return separate_parking_point_categories
