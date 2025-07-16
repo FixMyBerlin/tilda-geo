@@ -1,3 +1,60 @@
+SELECT
+  id INTO TEMP TABLE _to_discard
+FROM
+  _parking_parkings_merged p
+WHERE
+  p.tags ->> 'parking' IN (
+    'no',
+    'separate',
+    'not_expected',
+    'missing',
+    'separate'
+  );
+
+CREATE INDEX _to_discard_id_idx ON _to_discard USING btree (id);
+
+INSERT INTO
+  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
+SELECT
+  'c',
+  0,
+  id,
+  tags || '{"reason": "parking_tag"}'::JSONB,
+  '{}'::JSONB,
+  geom,
+  0
+FROM
+  _parking_parkings_merged p
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      _to_discard
+  );
+
+DELETE FROM _parking_parkings_merged
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      _to_discard
+  );
+
+INSERT INTO
+  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
+SELECT
+  'c',
+  0,
+  id,
+  tags || '{"reason": "capacity < 1"}'::JSONB,
+  '{}'::JSONB,
+  geom,
+  0
+FROM
+  _parking_discarded;
+
 INSERT INTO
   parkings (osm_type, osm_id, id, tags, meta, geom, minzoom)
 SELECT
@@ -16,40 +73,6 @@ SET
   geom = ST_Reverse (geom)
 WHERE
   tags ->> 'side' = 'left';
-
-INSERT INTO
-  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
-SELECT
-  osm_type,
-  osm_id,
-  id,
-  tags || '{"reason": "parking_tag"}'::JSONB,
-  meta,
-  geom,
-  0
-FROM
-  _parking_road_parkings p
-WHERE
-  p.tags ->> 'parking' IN (
-    'no',
-    'separate',
-    'not_expected',
-    'missing',
-    'separate'
-  );
-
-INSERT INTO
-  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
-SELECT
-  'c',
-  0,
-  id,
-  tags || '{"reason": "capacity < 1"}'::JSONB,
-  '{}'::JSONB,
-  geom,
-  0
-FROM
-  _parking_discarded;
 
 DROP TABLE IF EXISTS parkings_sum_points;
 
