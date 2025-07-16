@@ -1,4 +1,6 @@
 import { Link } from '@/src/app/_components/links/Link'
+import { format, formatDistanceToNow, fromUnixTime } from 'date-fns'
+import { de } from 'date-fns/locale'
 import { InspectorFeature } from '../Inspector'
 
 type Props = {
@@ -90,6 +92,20 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
             })
           ) : (
             <p>./.</p>
+          )}
+          {feature.properties.updated_at && (
+            <p className="mt-3">
+              <strong className="font-semibold">Letzte Änderung:</strong>
+              <br />
+              {format(fromUnixTime(Number(feature.properties.updated_at)), 'dd.MM.yyyy HH:mm:ss', {
+                locale: de,
+              })}
+              <br />
+              {formatDistanceToNow(fromUnixTime(Number(feature.properties.updated_at)), {
+                addSuffix: true,
+                locale: de,
+              })}
+            </p>
           )}
         </div>
       </div>
