@@ -1,17 +1,11 @@
 -- Move bikelanes based on offset
--- 1. Project to cartesian coordinates
+-- 1. Change projection (to EPSG:5243) to allow geometric operations
 -- 2. Move the geometry by offset (+ left / - right)
---    Because negative offsets reverse the order and we want the right side to be aligned we reverse the order again
---    Additionally we check wether the geometry is `simple` because otherwise we might get a MLString
---    for the same reason we simplify the geometries
--- 3. Reverse order for right side
---
--- Ideas for improvements:
--- IDEA 1: maybe we can transform closed geometries with some sort of buffer function:
---   at least for the cases where we buffer "outside"(side=right) this should always yield a LineString
--- IDEA 2: scale around center of geom (would require to estimate the scaling factor)
---   Query below shows the geometries that would result in MultiLineString
--- SELECT * from "bikelanes" WHERE not ST_IsSimple(geom) or ST_IsClosed(geom);
+--    - This reverses the geometry direction for negative offset values (right hand side) which is good and bad
+--      - Good, because we now have a different direction per side
+--      - Bad, because the direction is for left hand traffic, now (See step 3)
+--    - Additionally we check wether the geometry is `simple` because otherwise we might get a MLString for the same reason we simplify the geometries
+-- 3. Reverse direction of geometry for all ways (see "Bad" above)
 --
 DO $$ BEGIN RAISE NOTICE 'START move bikelanes by offset %', clock_timestamp(); END $$;
 
