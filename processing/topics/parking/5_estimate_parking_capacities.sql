@@ -36,26 +36,6 @@ SET
 WHERE
   tags ->> 'capacity' IS NULL;
 
-DROP TABLE IF EXISTS _parking_discarded;
-
-SELECT
-  * INTO _parking_discarded
-FROM
-  _parking_parkings_merged
-WHERE
-  (tags ->> 'capacity')::NUMERIC < 1;
-
-CREATE INDEX parking_discarded_idx ON _parking_discarded USING BTREE (id);
-
-DELETE FROM _parking_parkings_merged
-WHERE
-  id IN (
-    SELECT
-      id
-    FROM
-      _parking_discarded
-  );
-
 UPDATE _parking_parkings_merged
 SET
   tags = tags || jsonb_build_object(
@@ -70,12 +50,7 @@ SET
 ALTER TABLE _parking_parkings_merged
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
-ALTER TABLE _parking_discarded
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
 -- create an index on the merged table
 CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
 
 CREATE INDEX parking_parkings_merged_osm_ids_idx ON _parking_parkings_merged USING GIN (original_osm_ids);
-
-CREATE INDEX parking_parkings_discared_geom_idx ON _parking_discarded USING GIST (geom);

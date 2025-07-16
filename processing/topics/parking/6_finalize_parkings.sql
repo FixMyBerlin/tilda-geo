@@ -1,6 +1,6 @@
 -- filter parkings that don't allow parking
 SELECT
-  id INTO TEMP TABLE to_discard
+  id INTO TEMP TABLE parking_prohibited
 FROM
   _parking_parkings_merged p
 WHERE
@@ -12,7 +12,7 @@ WHERE
     'separate'
   );
 
-CREATE INDEX to_discard_id_idx ON to_discard USING btree (id);
+CREATE INDEX parking_prohibited_id_idx ON parking_prohibited USING btree (id);
 
 INSERT INTO
   parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
@@ -31,7 +31,7 @@ WHERE
     SELECT
       id
     FROM
-      to_discard
+      parking_prohibited
   );
 
 DELETE FROM _parking_parkings_merged
@@ -40,8 +40,18 @@ WHERE
     SELECT
       id
     FROM
-      to_discard
+      parking_prohibited
   );
+
+-- filter parkings with capacity < 1
+SELECT
+  id INTO TEMP capacity_too_low
+FROM
+  _parking_parkings_merged
+WHERE
+  (tags ->> 'capacity')::NUMERIC < 1;
+
+CREATE INDEX parking_discarded_idx ON capacity_too_low USING BTREE (id);
 
 INSERT INTO
   parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
@@ -54,8 +64,25 @@ SELECT
   geom,
   0
 FROM
-  _parking_discarded;
+  _parking_parkings_merged
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      capacity_too_low
+  );
 
+DELETE FROM _parking_parkings_merged
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      capacity_too_low
+  );
+
+-- insert remaining parkings into the merged table
 INSERT INTO
   parkings (osm_type, osm_id, id, tags, meta, geom, minzoom)
 SELECT
