@@ -31,10 +31,6 @@ FROM
 WHERE
   (tags ->> 'capacity')::NUMERIC < 1;
 
-UPDATE _parking_discarded
-SET
-  tags = tags || '{"reason": "capacity < 1"}'::JSONB;
-
 CREATE INDEX parking_discarded_idx ON _parking_discarded USING BTREE (id);
 
 DELETE FROM _parking_parkings_merged

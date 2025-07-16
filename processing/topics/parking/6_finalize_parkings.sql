@@ -23,7 +23,7 @@ SELECT
   osm_type,
   osm_id,
   id,
-  tags,
+  tags || '{"reason": "parking_tag"}'::JSONB,
   meta,
   geom,
   0
@@ -37,6 +37,19 @@ WHERE
     'missing',
     'separate'
   );
+
+INSERT INTO
+  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
+SELECT
+  'c',
+  0,
+  id,
+  tags || '{"reason": "capacity < 1"}'::JSONB,
+  '{}'::JSONB,
+  geom,
+  0
+FROM
+  _parking_discarded;
 
 DROP TABLE IF EXISTS parkings_sum_points;
 
