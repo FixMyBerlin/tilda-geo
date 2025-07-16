@@ -27,7 +27,8 @@ SELECT
   Null as way_id,
   opl.tags || '{"geometry_source": "generated"}'::jsonb AS tags,
   opl.meta,
-  ABS(k.offset) + 0.2 as length,
+  -- we increase this length to be safe when we project on to the real crossing geometry
+  ABS(k.offset) + 1 as length,
   estimate_road_crossing (opl.way_id, opl.idx, k.offset * 3) as geom
   --
   INTO _parking_crossings
