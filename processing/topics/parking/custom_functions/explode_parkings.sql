@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS generate_parkings_sum_points;
+DROP FUNCTION IF EXISTS explode_parkings;
 
-CREATE FUNCTION generate_parkings_sum_points (geom geometry, capacity integer) RETURNS SETOF geometry AS $$
+CREATE FUNCTION explode_parkings (geom geometry, capacity integer) RETURNS SETOF geometry AS $$
 DECLARE
   i integer;
   spacing float;

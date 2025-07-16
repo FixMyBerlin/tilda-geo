@@ -74,20 +74,20 @@ SET
 WHERE
   tags ->> 'side' = 'left';
 
-DROP TABLE IF EXISTS parkings_sum_points;
+DROP TABLE IF EXISTS parkings_quantized;
 
 WITH
   sum_points AS (
     SELECT
       tags || '{"capacity": 1}'::JSONB as tags,
-      generate_parkings_sum_points (geom, (tags ->> 'capacity')::INTEGER) as geom
+      explode_parkings (geom, (tags ->> 'capacity')::INTEGER) as geom
     FROM
       parkings
   )
 SELECT
   ROW_NUMBER() OVER () AS id,
   tags,
-  ST_SetSRID (geom, 5243) as geom INTO parkings_sum_points
+  ST_SetSRID (geom, 5243) as geom INTO parkings_quantized
 FROM
   sum_points;
 
@@ -121,9 +121,9 @@ DROP INDEX IF EXISTS parkings_separate_geom_idx;
 
 CREATE INDEX parkings_separate_geom_idx ON parkings_separate USING GIST (geom);
 
-ALTER TABLE parkings_sum_points
+ALTER TABLE parkings_quantized
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
 
-DROP INDEX IF EXISTS parkings_sum_points_geom_idx;
+DROP INDEX IF EXISTS parkings_quantized_geom_idx;
 
-CREATE INDEX parkings_sum_points_geom_idx ON parkings_sum_points USING GIST (geom);
+CREATE INDEX parkings_quantized_geom_idx ON parkings_quantized USING GIST (geom);

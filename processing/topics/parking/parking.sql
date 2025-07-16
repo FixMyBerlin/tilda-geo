@@ -23,7 +23,7 @@
 \i '/processing/topics/parking/custom_functions/get_intersection_corners.sql'
 \i '/processing/topics/parking/custom_functions/segmentize_way_to_edges.sql'
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
-\i '/processing/topics/parking/custom_functions/generate_parkings_sum_points.sql'
+\i '/processing/topics/parking/custom_functions/explode_parkings.sql'
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'

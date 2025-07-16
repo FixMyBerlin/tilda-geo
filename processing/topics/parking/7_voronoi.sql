@@ -15,7 +15,7 @@ WITH
       COUNT(p.*) AS count_fmc
     FROM
       parkings_euvm_qa_voronoi v
-      LEFT JOIN parkings_sum_points p ON ST_Contains (v.geom, p.geom)
+      LEFT JOIN parkings_quantized p ON ST_Contains (v.geom, p.geom)
     GROUP BY
       v.id
   )
