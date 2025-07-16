@@ -87,21 +87,27 @@ WITH
 SELECT
   ROW_NUMBER() OVER () AS id,
   tags,
-  geom INTO parkings_sum_points
+  ST_SetSRID (geom, 5243) as geom INTO parkings_sum_points
 FROM
   sum_points;
+
+ALTER TABLE parkings
+ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
 
 -- MISC
 DROP INDEX IF EXISTS parkings_geom_idx;
 
 CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
 
+ALTER TABLE parkings_no
+ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
+
 DROP INDEX IF EXISTS parkings_no_geom_idx;
 
 CREATE INDEX parkings_no_geom_idx ON parkings_no USING GIST (geom);
 
 ALTER TABLE parkings_sum_points
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
 
 DROP INDEX IF EXISTS parkings_sum_points_geom_idx;
 

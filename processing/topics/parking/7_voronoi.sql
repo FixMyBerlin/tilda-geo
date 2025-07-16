@@ -6,9 +6,6 @@ FROM
   data.euvm_qa_voronoi;
 
 ALTER TABLE parkings_euvm_qa_voronoi
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
-
-ALTER TABLE parkings_euvm_qa_voronoi
 ADD COLUMN count_fmc INTEGER;
 
 WITH
