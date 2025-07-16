@@ -31,6 +31,4 @@ WHERE
 
 UPDATE bikelanes
 SET
-  geom = ST_Reverse (geom)
-WHERE
-  (tags ->> 'offset')::numeric > 0;
+  geom = ST_Reverse (geom);

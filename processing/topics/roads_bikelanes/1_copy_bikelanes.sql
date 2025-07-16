@@ -9,9 +9,3 @@ SELECT
   *
 FROM
   bikelanes;
-
-UPDATE _bikelanes_centerline
-SET
-  geom = ST_Reverse (geom)
-WHERE
-  (tags ->> 'offset')::numeric > 0;
