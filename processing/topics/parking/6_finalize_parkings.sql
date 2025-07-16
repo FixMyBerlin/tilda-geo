@@ -40,12 +40,20 @@ WHERE
 
 DROP TABLE IF EXISTS parkings_sum_points;
 
+WITH
+  sum_points AS (
+    SELECT
+      tags || '{"capacity": 1}'::JSONB as tags,
+      generate_parkings_sum_points (geom, (tags ->> 'capacity')::INTEGER) as geom
+    FROM
+      parkings
+  )
 SELECT
   ROW_NUMBER() OVER () AS id,
   tags,
-  generate_parkings_sum_points (geom, (tags ->> 'capacity')::INTEGER) as geom INTO parkings_sum_points
+  geom INTO parkings_sum_points
 FROM
-  parkings;
+  sum_points;
 
 -- MISC
 DROP INDEX IF EXISTS parkings_geom_idx;
