@@ -19,13 +19,13 @@ local db_table = osm2pgsql.define_table({
 
 local ncm = osm2pgsql.define_table({
   name = '_parking_node_crossing_mapping',
-  ids = { type = 'way', id_column = 'crossing_id',  index='always' },
+  ids = { type = 'way', id_column = 'way_id',  index='always' },
   columns = {
     { column = 'node_id',      type = 'bigint',      not_null = true },
   },
   indexes = {
     { column = 'node_id', method = 'btree'},
-    { column = 'crossing_id', method = 'btree'},
+    { column = 'way_id', method = 'btree'},
   }
 })
 

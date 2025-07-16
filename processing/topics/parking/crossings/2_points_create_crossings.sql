@@ -24,9 +24,11 @@ DROP TABLE IF EXISTS _parking_crossings;
 SELECT
   opl.id,
   opl.osm_id,
+  Null as way_id,
   opl.tags || '{"geometry_source": "generated"}'::jsonb AS tags,
   opl.meta,
-  estimate_road_crossing (opl.way_id, opl.idx, k.offset * 1.1) as geom
+  ABS(k.offset) + 0.2 as length,
+  estimate_road_crossing (opl.way_id, opl.idx, k.offset * 3) as geom
   --
   INTO _parking_crossings
 FROM
