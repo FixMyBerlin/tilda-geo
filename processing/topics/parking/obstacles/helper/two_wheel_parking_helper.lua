@@ -21,6 +21,7 @@ function two_wheel_parking_tags(tags, value)
 end
 
 function two_wheel_parking_tags_cc(value)
+  -- NOTE: We have 'capacity' and 'osm_capacity' to make it easier to understand what 'capacity_normalization' does
   return { value..':position', 'position', 'capacity' }
 end
 
