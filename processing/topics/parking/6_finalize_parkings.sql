@@ -91,10 +91,18 @@ SELECT
 FROM
   sum_points;
 
+INSERT INTO
+  parkings_separate (osm_type, osm_id, id, tags, meta, geom, minzoom)
+SELECT
+  *,
+  0
+FROM
+  _parking_separate_parking_areas;
+
+-- MISC
 ALTER TABLE parkings
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
 
--- MISC
 DROP INDEX IF EXISTS parkings_geom_idx;
 
 CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
@@ -105,6 +113,13 @@ ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857)
 DROP INDEX IF EXISTS parkings_no_geom_idx;
 
 CREATE INDEX parkings_no_geom_idx ON parkings_no USING GIST (geom);
+
+ALTER TABLE parkings_separate
+ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
+
+DROP INDEX IF EXISTS parkings_separate_geom_idx;
+
+CREATE INDEX parkings_separate_geom_idx ON parkings_separate USING GIST (geom);
 
 ALTER TABLE parkings_sum_points
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);

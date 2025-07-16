@@ -38,6 +38,18 @@ osm2pgsql.define_table({
   },
 })
 
+osm2pgsql.define_table({
+  name = 'parkings_separate',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'polygon', projection = 5243 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
+
 
 -- NOTE ON PROJECTIONS:
 -- All `paring_*` tables use EPSG:5243
