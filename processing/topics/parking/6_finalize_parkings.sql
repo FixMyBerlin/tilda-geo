@@ -1,5 +1,6 @@
+-- filter parkings that don't allow parking
 SELECT
-  id INTO TEMP TABLE _to_discard
+  id INTO TEMP TABLE to_discard
 FROM
   _parking_parkings_merged p
 WHERE
@@ -11,7 +12,7 @@ WHERE
     'separate'
   );
 
-CREATE INDEX _to_discard_id_idx ON _to_discard USING btree (id);
+CREATE INDEX to_discard_id_idx ON to_discard USING btree (id);
 
 INSERT INTO
   parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
@@ -30,7 +31,7 @@ WHERE
     SELECT
       id
     FROM
-      _to_discard
+      to_discard
   );
 
 DELETE FROM _parking_parkings_merged
@@ -39,7 +40,7 @@ WHERE
     SELECT
       id
     FROM
-      _to_discard
+      to_discard
   );
 
 INSERT INTO
@@ -74,6 +75,7 @@ SET
 WHERE
   tags ->> 'side' = 'left';
 
+-- explode parkings into quantized points
 DROP TABLE IF EXISTS parkings_quantized;
 
 WITH
