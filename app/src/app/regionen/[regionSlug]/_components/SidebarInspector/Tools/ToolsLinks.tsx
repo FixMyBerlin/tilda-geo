@@ -9,7 +9,6 @@ import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import {
   historyUrl,
-  mapillaryKeyUrl,
   mapillaryUrl,
   osmEditIdUrl,
   osmEditRapidUrl,
@@ -32,7 +31,6 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
   const historyUrlHref = historyUrl(osmTypeId)
   const mapillaryUrlHref = mapillaryUrl(feature.geometry)
-  const mapillaryKeyUrlHref = mapillaryKeyUrl(feature.properties.mapillary)
 
   return (
     <section className="flex flex-wrap gap-3 pb-1 text-xs">
@@ -79,12 +77,6 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
       {mapillaryUrlHref && (
         <LinkExternal blank button href={mapillaryUrlHref}>
           Mapillary
-        </LinkExternal>
-      )}
-
-      {mapillaryKeyUrlHref && (
-        <LinkExternal blank button href={mapillaryKeyUrlHref}>
-          Mapillary Foto
         </LinkExternal>
       )}
 
