@@ -16,7 +16,6 @@
 \i '/processing/topics/parking/custom_functions/project_to_k_closest_kerbs.sql'
 \i '/processing/topics/parking/custom_functions/project_to_line.sql'
 -- * … FOR KERBS
-\i '/processing/topics/parking/custom_functions/kerb_tangent.sql'
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
 \i '/processing/topics/parking/custom_functions/trim_kerb_at_corner.sql'
 -- * … FOR INTERSECTIONS
@@ -38,8 +37,7 @@
 
 -- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'
-\i '/processing/topics/parking/crossings/2_points_create_kerb_tangents.sql'
-\i '/processing/topics/parking/crossings/3_points_create_crossings.sql'
+\i '/processing/topics/parking/crossings/2_points_create_crossings.sql'
 
 -- HANDLE OBSTACLES
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'
