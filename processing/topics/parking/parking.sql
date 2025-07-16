@@ -38,6 +38,7 @@
 -- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'
 \i '/processing/topics/parking/crossings/2_points_create_crossings.sql'
+\i '/processing/topics/parking/crossings/1_lines_project_crossings.sql'
 
 -- HANDLE OBSTACLES
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'

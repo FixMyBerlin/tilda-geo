@@ -17,6 +17,18 @@ local db_table = osm2pgsql.define_table({
   },
 })
 
+local ncm = osm2pgsql.define_table({
+  name = '_parking_node_crossing_mapping',
+  ids = { type = 'way', id_column = 'crossing_id',  index='always' },
+  columns = {
+    { column = 'node_id',      type = 'bigint',      not_null = true },
+  },
+  indexes = {
+    { column = 'node_id', method = 'btree'},
+    { column = 'crossing_id', method = 'btree'},
+  }
+})
+
 -- NOTE: This is unused ATM.
 -- See https://github.com/FixMyBerlin/private-issues/issues/2557 for more.
 -- We leave it in because it is fast and it's easier to evaluate the linked issue based on the data.
@@ -36,6 +48,10 @@ local function parking_crossing_lines(object)
 
     local row = MergeTable({ geom = result.object:as_linestring() }, row_tags)
     db_table:insert(row)
+
+    for _, node_id in ipairs(object.nodes) do
+      ncm:insert({node_id = node_id})
+    end
   end
 end
 
