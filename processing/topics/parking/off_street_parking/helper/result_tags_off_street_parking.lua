@@ -21,7 +21,6 @@ local function result_tags_off_street_parking(result, area)
   end
 
   local result_meta = Metadata(result)
-  result_meta.updated_age = nil -- Lets start without this because it adds work and might not be needed
 
   return {
     id = DefaultId(result.object),

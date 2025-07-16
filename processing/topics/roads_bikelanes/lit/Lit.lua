@@ -19,8 +19,6 @@ function Lit(object)
     end
   end
 
-  -- result_tags._lit_age = AgeInDays(ParseCheckDate(tags["check_date:lit"])) -- unused
-
   CopyTags(result_tags, tags, tags_copied)
   CopyTags(result_tags, tags, tags_prefixed, "osm_")
 

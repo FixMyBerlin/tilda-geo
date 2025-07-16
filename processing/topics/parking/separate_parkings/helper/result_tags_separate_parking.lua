@@ -23,7 +23,6 @@ local function result_tags_separate_parking(result, area)
   MergeTable(result_tags, result.category:get_capacity(result.object.type, result.object.tags, area))
 
   local result_meta = Metadata(result)
-  result_meta.updated_age = nil -- Lets start without this because it adds work and might not be needed
 
   return {
     id = id,

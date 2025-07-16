@@ -23,7 +23,6 @@ local function result_tags_crossings(result)
   MergeTable(result_tags, result.category:get_tags(result.object.tags)) -- those are sanitized already
 
   local result_meta = Metadata(result)
-  result_meta.updated_age = nil -- Lets start without this because it adds work and might not be needed
 
   return {
     id = id,

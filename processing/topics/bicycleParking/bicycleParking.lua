@@ -80,7 +80,6 @@ local function processTags(tags)
   CopyTags(result_tags, tags, tags_cc, "osm_")
   result_tags.traffic_sign = SanitizeTrafficSign(tags.traffic_sign)
 
-  -- result_tags._age = AgeInDays(ParseCheckDate(tags["check_date"]))
   return result_tags
 end
 
@@ -88,7 +87,6 @@ function osm2pgsql.process_node(object)
   if exitProcessing(object) then return end
   local result_tags = processTags(object.tags)
   local meta = Metadata(object)
-  -- meta.age = result_tags._age
 
   nodeTable:insert({
     tags = ExtractPublicTags(result_tags),
@@ -103,7 +101,6 @@ function osm2pgsql.process_way(object)
   if exitProcessing(object) then return end
   local result_tags = processTags(object.tags)
   local meta = Metadata(object)
-  -- meta.age = result_tags._age
 
   -- convert bicycle parking mapped as lines or areas to points by taking the centroid
   nodeTable:insert({

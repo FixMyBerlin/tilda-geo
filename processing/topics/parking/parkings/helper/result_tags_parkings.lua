@@ -116,7 +116,6 @@ function result_tags_parkings(object)
   CopyTags(result_tags, object.tags, tags_cc, "osm_")
 
   local result_meta = Metadata(object)
-  result_meta.updated_age = nil -- Lets start without this because it adds work and might not be needed
 
   return {
     id = id,

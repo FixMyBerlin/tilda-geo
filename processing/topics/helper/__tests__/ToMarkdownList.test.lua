@@ -20,7 +20,7 @@ describe("ToMarkdownList", function()
   end)
 
   it('Handle empty list with todoTableOnly=true', function()
-    local tagsObject = { cycleway = "track", _updated_age = 5925 }
+    local tagsObject = { cycleway = "track", _age_in_days = 5925 }
     local todos = CollectTodos(BikelaneTodos, tagsObject, {})
     local result = ToMarkdownList(todos)
     assert.are.same(result, nil)

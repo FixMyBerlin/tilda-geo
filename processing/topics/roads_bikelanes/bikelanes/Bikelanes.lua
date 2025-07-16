@@ -56,7 +56,7 @@ function Bikelanes(object)
         _side = transformed_tags._side,
         _infrastructureExists = category.infrastructureExists,
         _implicitOneWayConfidence = category.implicitOneWayConfidence,
-        _updated_age = AgeInDays(object.timestamp),
+        _age_in_days = AgeInDays(object.timestamp),
         category = category.id,
       }
 
@@ -64,7 +64,6 @@ function Bikelanes(object)
         MergeTable(result_tags, {
           _id = DefaultId(object),
           _infrastructureExists = true,
-          -- _age = AgeInDays(ParseCheckDate(tags["check_date"])),
           prefix = transformed_tags._prefix,
           width = parse_length(transformed_tags.width),
           width_source = object_tags['source:cycleway:' .. transformed_tags._side .. ':width'] or transformed_tags['source:width'],
@@ -99,7 +98,6 @@ function Bikelanes(object)
           result_tags._id = DefaultId(object) .. '/' .. transformed_tags._prefix .. '/' .. transformed_tags._side
           result_tags._parent_highway = transformed_tags._parent_highway
           result_tags.offset = sideSignMap[transformed_tags._side] * RoadWidth(object_tags) / 2
-          -- result_tags._age = AgeInDays(ParseCheckDate(tags["check_date:" .. transformedTags._prefix]))
         end
 
         local todos = CollectTodos(BikelaneTodos, transformed_tags, result_tags)
