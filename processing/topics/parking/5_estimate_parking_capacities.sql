@@ -41,7 +41,7 @@ SET
   tags = tags || jsonb_build_object(
     'capacity',
     CASE
-      WHEN (tags ->> 'capacity')::NUMERIC < 10 THEN FLOOR((tags ->> 'capacity')::NUMERIC)
+      WHEN ((tags ->> 'capacity')::NUMERIC + 0.1) < 10 THEN FLOOR((tags ->> 'capacity')::NUMERIC)
       ELSE ROUND(((tags ->> 'capacity')::NUMERIC))
     END
   );
