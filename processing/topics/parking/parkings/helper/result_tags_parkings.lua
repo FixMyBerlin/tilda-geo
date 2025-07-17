@@ -48,6 +48,14 @@ function result_tags_parkings(object)
 
   local width, width_confidence, width_source = road_width(object.tags)
 
+  local capacity = parse_length(object.tags.capacity)
+  local capacity_source = nil
+  local capacity_confidence = nil
+  if capacity ~= nil then
+    capacity_source = "tag"
+    capacity_confidence = "high"
+  end
+
   local specific_tags = {
     -- ROAD
     name = road_name(object.tags),
@@ -59,7 +67,9 @@ function result_tags_parkings(object)
     -- PARKING
     parking = parking_value(object),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
-    capacity = parse_length(object.tags.capacity),
+    capacity = capacity,
+    capacity_source = capacity_source,
+    capacity_confidence = capacity_confidence,
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
