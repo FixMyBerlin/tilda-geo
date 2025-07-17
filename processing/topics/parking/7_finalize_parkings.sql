@@ -12,12 +12,14 @@ SELECT
 FROM
   _parking_parkings_merged pm;
 
+-- reverse direction of left hand side kerbs
 UPDATE parkings
 SET
   geom = ST_Reverse (geom)
 WHERE
   tags ->> 'side' = 'left';
 
+-- insert all cutouts except "roads" into the final 'parkings_cutouts' table
 INSERT INTO
   parkings_cutouts (osm_type, osm_id, id, tags, meta, geom, minzoom)
 SELECT
@@ -32,13 +34,6 @@ FROM
   _parking_cutouts pc
 WHERE
   tags ->> 'source' <> 'parking_roads';
-
--- reverse direction of left hand side kerbs
-UPDATE parkings
-SET
-  geom = ST_Reverse (geom)
-WHERE
-  tags ->> 'side' = 'left';
 
 -- explode parkings into quantized points
 DROP TABLE IF EXISTS parkings_quantized;
@@ -84,7 +79,6 @@ DROP INDEX IF EXISTS parkings_separate_geom_idx;
 
 CREATE INDEX parkings_separate_geom_idx ON parkings_separate USING GIST (geom);
 
--- MISC
 ALTER TABLE parkings_quantized
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
 
