@@ -28,7 +28,9 @@ require("BikeSuitability")
 require("Log")
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
+local load_csv_is_sidepath_no = require('load_csv_is_sidepath_no')
 local mapillary_coverage = require('mapillary_coverage')
+local is_sidepath_no = require('is_sidepath_no')
 
 local roadsTable = osm2pgsql.define_table({
   name = 'roads',
@@ -135,6 +137,7 @@ local todoLiniesTable = osm2pgsql.define_table({
 
 -- ====== (B.1) Prepare pseudo tags ======
 local mapillary_coverage_data = load_csv_mapillary_coverage()
+local is_sidepath_no_data = load_csv_is_sidepath_no()
 
 function osm2pgsql.process_way(object)
   local object_tags = object.tags
@@ -155,6 +158,8 @@ function osm2pgsql.process_way(object)
   -- ====== (B.1) Initialize and apply pseudo tags ======
   local mapillary_coverage_lines = mapillary_coverage_data:get()
   local mapillary_coverage_value = mapillary_coverage(mapillary_coverage_lines, object.id)
+  local is_sidepath_no_lines = is_sidepath_no_data:get()
+  local is_sidepath_no_value = is_sidepath_no(is_sidepath_no_lines, object.id)
 
   -- ====== (B.2) General conversions ======
   ConvertCyclewayOppositeSchema(object_tags)
@@ -172,6 +177,7 @@ function osm2pgsql.process_way(object)
     mapillary_backward = object_tags['mapillary:backward'],
     mapillary_traffic_sign = object_tags['source:traffic_sign:mapillary'],
     description = object_tags.description or object_tags.note,
+    is_sidepath_candidate = is_sidepath_no_value ~= nil
   }
 
   MergeTable(road_result_tags, RoadClassification(object))
@@ -191,6 +197,7 @@ function osm2pgsql.process_way(object)
     mapillary_backward = cycleways.mapillary_backward or road_result_tags.mapillary_backward,
     mapillary_traffic_sign = cycleways.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
     description = cycleways.description or road_result_tags.description,
+    is_sidepath_candidate = is_sidepath_no_value ~= nil
   }
 
   for _, cycleway in ipairs(cycleways) do

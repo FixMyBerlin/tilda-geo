@@ -22,11 +22,11 @@ local function load_csv(csv_path)
         return cached_lines
       end
 
-      -- `rows` format: { { osm_id = "123", mapillary_coverage = "value" },… }
+      -- `rows` format: { { osm_id = "123", is_side = "value" },… }
       rows = ftcsv.parse(csv_path)
 
       -- Transform the data into a hash map for quick lookup
-      -- `cached_lines` format: { [123] => { mapillary_coverage = "value" },… }
+      -- `cached_lines` format: { [123] => { is_side = "value" },… }
       cached_lines = cached_lines or {}
       for _, row in ipairs(rows) do
         local id = tonumber(row['osm_id'])
