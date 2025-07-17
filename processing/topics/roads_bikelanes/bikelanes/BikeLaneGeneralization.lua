@@ -8,8 +8,8 @@ require("Set")
 --- Return the minzoom for paths
 function BikeLaneGeneralization(original_tags, result_tags)
   local length = result_tags.length
-  if length < 50 then
-    return 10
+  if length < 100 then
+    return 9
   end
   return 0
 end
