@@ -5,6 +5,9 @@ WHERE
 
 -- then we redistribute the parking capacities based on the length of the geometry and the original capacity.
 -- this is done by calculating the total length of all geometries with the same id and then redistributing the capacity proportionally for each geometry.
+ALTER TABLE _parking_parkings_cutted
+ADD COLUMN fraction numeric;
+
 WITH
   total_lengths AS (
     SELECT
@@ -20,14 +23,18 @@ WITH
   )
 UPDATE _parking_parkings_cutted pc
 SET
-  tags = tags || jsonb_build_object(
-    'capacity',
-    (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
-    'capacity_source',
-    pc.tags ->> 'capacity_source' || ' (redistributed)'
-  )
+  fraction = ST_Length (pc.geom) / tl.length
 FROM
   total_lengths tl
 WHERE
   count > 1
   AND pc.osm_id = tl.osm_id;
+
+UPDATE _parking_parkings_cutted
+SET
+  tags = tags - 'area' || jsonb_build_object(
+    'capacity',
+    (tags ->> 'capacity')::NUMERIC * fraction,
+    'capacity_source',
+    tags ->> 'capacity_source' || ' (redistributed)'
+  );
