@@ -18,7 +18,7 @@ SET
 
 UPDATE _parking_parkings_merged pm
 SET
-  tags = tags || jsonb_build_object('capacity', estimated_area) || '{"area_source": "estimated", "area_confidence": "medium"}'::JSONB
+  tags = tags || jsonb_build_object('area', estimated_area) || '{"area_source": "estimated", "area_confidence": "medium"}'::JSONB
 WHERE
   tags ->> 'area' IS NULL;
 
