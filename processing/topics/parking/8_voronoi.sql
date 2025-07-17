@@ -6,13 +6,13 @@ FROM
   data.euvm_qa_voronoi;
 
 ALTER TABLE parkings_euvm_qa_voronoi
-ADD COLUMN count_fmc INTEGER;
+ADD COLUMN count_current INTEGER;
 
 WITH
   counts AS (
     SELECT
       v.id,
-      COUNT(p.*) AS count_fmc
+      COUNT(p.*) AS count_current
     FROM
       parkings_euvm_qa_voronoi v
       LEFT JOIN parkings_quantized p ON ST_Contains (v.geom, p.geom)
@@ -21,7 +21,7 @@ WITH
   )
 UPDATE parkings_euvm_qa_voronoi pv
 SET
-  count_fmc = COALESCE(c.count_fmc, 0)
+  count_current = COALESCE(c.count_current, 0)
 FROM
   counts c
 WHERE
@@ -32,7 +32,7 @@ ADD COLUMN difference INTEGER;
 
 UPDATE parkings_euvm_qa_voronoi
 SET
-  difference = count_euvm - count_fmc;
+  difference = count_reference - count_current;
 
 ALTER TABLE parkings_euvm_qa_voronoi
 ADD COLUMN relative NUMERIC;
@@ -40,6 +40,6 @@ ADD COLUMN relative NUMERIC;
 UPDATE parkings_euvm_qa_voronoi
 SET
   relative = CASE
-    WHEN count_euvm <> 0 THEN count_fmc::NUMERIC / count_euvm::NUMERIC
+    WHEN count_reference <> 0 THEN count_current::NUMERIC / count_reference::NUMERIC
     ELSE NULL
   END;
