@@ -11,7 +11,9 @@ const prettierConfig = {
   overrides: [
     {
       files:
-        'src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/*.const.ts',
+        // ./src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/*
+        // See https://github.com/prettier/prettier-cli/issues/70
+        '**/translations/*.const.ts',
       options: {
         printWidth: 1000,
       },

@@ -154,7 +154,7 @@ ${content}
 
 async function autoformatTypeFiles() {
   try {
-    await $`bunx prettier -w --config=/processing/.prettierrc ${TYPES_DIR} > /dev/null`
+    await $`bunx prettier --experimental-cli -write --config=/processing/.prettierrc ${TYPES_DIR} > /dev/null`
   } catch (error) {
     throw new Error(`Failed to run prettier on auto generated types: ${error}`)
   }

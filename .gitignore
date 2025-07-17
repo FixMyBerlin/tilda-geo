@@ -16,7 +16,7 @@
 # Nginx
 logs/
 
-
+/node_modules
 processing/node_modules
 
 # run helper
