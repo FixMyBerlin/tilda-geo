@@ -19,11 +19,11 @@ export const editorUrl = ({ urlTemplate, geometry, osmTypeId, editorId, zoom }: 
 
   return urlTemplate
     .toString()
-    .replace('{zoom}', zoom?.toString() ?? '19')
-    .replace('{latitude}', lat.toString())
-    .replace('{longitude}', lng.toString())
-    .replace('{short_osm_type}', osmTypeId?.osmType ? shortOsmType[osmTypeId?.osmType] : '')
-    .replace('{long_osm_type}', osmTypeId?.osmType || '')
-    .replace('{editor_id}', editorId || '')
-    .replace('{osm_id}', osmTypeId?.osmId?.toString() ?? '')
+    .replaceAll('{zoom}', zoom?.toString() ?? '19')
+    .replaceAll('{latitude}', lat.toString())
+    .replaceAll('{longitude}', lng.toString())
+    .replaceAll('{short_osm_type}', osmTypeId?.osmType ? shortOsmType[osmTypeId?.osmType] : '')
+    .replaceAll('{long_osm_type}', osmTypeId?.osmType || '')
+    .replaceAll('{editor_id}', editorId || '')
+    .replaceAll('{osm_id}', osmTypeId?.osmId?.toString() ?? '')
 }
