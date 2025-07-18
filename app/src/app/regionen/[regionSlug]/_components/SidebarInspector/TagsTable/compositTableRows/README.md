@@ -5,7 +5,6 @@ The goal is to allow special table cells that composit multiple keys or show key
 How it works:
 
 1. Add the `documentedKeys` in `sources.const.ts`
-
    - prefix them with `composit_*`
    - (the `*` can be whatever, but listing the keys is a good idea)
    - eg: `composit_surface_smoothness``

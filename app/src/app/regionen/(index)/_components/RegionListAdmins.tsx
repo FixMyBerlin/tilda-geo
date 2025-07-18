@@ -19,7 +19,9 @@ export const RegionListAdmins = async () => {
         </div>
 
         <div className="my-10 grid grid-cols-2 border-l border-t border-gray-200 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
-          {nonPublicRegions?.map((region) => <RegionTeaser key={region.slug} region={region} />)}
+          {nonPublicRegions?.map((region) => (
+            <RegionTeaser key={region.slug} region={region} />
+          ))}
           {nonPublicRegions?.length === 0 && (
             <div className="p-4 font-semibold text-gray-400">Keine Regionen</div>
           )}
