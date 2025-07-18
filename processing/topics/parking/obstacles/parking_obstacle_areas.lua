@@ -2,7 +2,6 @@ require('init')
 require('Log')
 require('MergeTable')
 require('categorize_area')
-local sanitize_cleaner = require('sanitize_cleaner')
 local LOG_ERROR = require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
 
@@ -23,13 +22,10 @@ local function parking_obstacle_areas(object)
 
   local result = categorize_area(object)
   if result.object then
-    local row_tags = result_tags_obstacles(result)
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, result.object.tags)
-    row_tags.tags = cleaned_tags
-    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_tags)
+    local row_data, replaced_tags = result_tags_obstacles(result)
+    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_obstacle_areas')
-
     -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.
     -- With `:num_geometries()` we filter to only allow polygons which is our table column data type.
     if row.geom:num_geometries() == 1 then

@@ -12,6 +12,7 @@ require('result_tags_value_helpers')
 local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local sanitize_cleaner = require('sanitize_cleaner')
 
 -- EXAMPLE
 -- INPUT
@@ -127,10 +128,12 @@ function result_tags_parkings(object)
 
   local result_meta = Metadata(object)
 
+  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
+
   return {
     id = id,
     side = object.tags.side,
-    tags = result_tags,
+    tags = cleaned_tags,
     meta = result_meta,
-  }
+  }, replaced_tags
 end

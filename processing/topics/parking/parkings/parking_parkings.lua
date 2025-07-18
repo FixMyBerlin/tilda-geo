@@ -3,7 +3,6 @@ require('Log')
 require('MergeTable')
 require('result_tags_parkings')
 local has_parking = require('has_parking')
-local sanitize_cleaner = require('sanitize_cleaner')
 require('transform_parkings')
 
 local db_table = osm2pgsql.define_table({
@@ -25,11 +24,9 @@ function parking_parkings(object)
 
   local transformed_objects = transform_parkings(object)
   for _, transformed_object in pairs(transformed_objects) do
-    local row_tags = result_tags_parkings(transformed_object)
-    local cleaned_tags = sanitize_cleaner(row_tags.tags, transformed_object.tags)
-    row_tags.tags = cleaned_tags
+    local row_data = result_tags_parkings(transformed_object)
 
     -- Note: No geometry for this table
-    db_table:insert(row_tags)
+    db_table:insert(row_data)
   end
 end

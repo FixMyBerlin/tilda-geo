@@ -4,6 +4,7 @@ require("MergeTable")
 require("DefaultId")
 require("Metadata")
 require("Log")
+local sanitize_cleaner = require('sanitize_cleaner')
 
 local function result_tags_off_street_parking(result, area)
   local result_tags = {
@@ -22,11 +23,13 @@ local function result_tags_off_street_parking(result, area)
 
   local result_meta = Metadata(result)
 
+  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, result.object.tags)
+
   return {
     id = DefaultId(result.object),
-    tags = result_tags,
+    tags = cleaned_tags,
     meta = result_meta,
-  }
+  }, replaced_tags
 end
 
 return result_tags_off_street_parking

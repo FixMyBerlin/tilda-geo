@@ -2,7 +2,6 @@ require('init')
 require('Log')
 require('MergeTable')
 local categorize_and_transform_crossing_points = require('categorize_and_transform_crossing_points')
-local sanitize_cleaner = require('sanitize_cleaner')
 local LOG_ERROR = require('parking_errors')
 local result_tags_crossings = require('result_tags_crossings')
 
@@ -23,9 +22,7 @@ local function parking_crossing_points(object)
   local self_left_right = categorize_and_transform_crossing_points(object)
   for _, result in pairs(self_left_right) do
     if result.object then
-      local row_data = result_tags_crossings(result)
-      local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
-      row_data.tags = cleaned_tags
+      local row_data, replaced_tags = result_tags_crossings(result)
       local row = MergeTable({ geom = result.object:as_point() }, row_data)
 
       LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_crossing_points')

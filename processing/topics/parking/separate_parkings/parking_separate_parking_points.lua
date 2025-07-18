@@ -1,7 +1,6 @@
 require('init')
 require('Log')
 require('MergeTable')
-local sanitize_cleaner = require('sanitize_cleaner')
 local LOG_ERROR = require('parking_errors')
 local separate_parking_point_categories = require('separate_parking_point_categories')
 local categorize_separate_parking = require('categorize_separate_parking')
@@ -23,10 +22,8 @@ local function parking_separate_parking_points(object)
 
   local result = categorize_separate_parking(object, separate_parking_point_categories)
   if result.object then
-    local row_data = result_tags_separate_parking(result, nil)
+    local row_data, replaced_tags = result_tags_separate_parking(result, nil)
     local row = MergeTable({ geom = result.object:as_point() }, row_data)
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
-    row_data.tags = cleaned_tags
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_points')
     db_table:insert(row)

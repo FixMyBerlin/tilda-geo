@@ -1,7 +1,6 @@
 require('init')
 require('DefaultId')
 require('Metadata')
-local sanitize_cleaner = require('sanitize_cleaner')
 local result_tags_off_street_parking = require('result_tags_off_street_parking')
 local categorize_off_street_parking = require('categorize_off_street_parking')
 local off_street_parking_point_categories = require('off_street_parking_point_categories')
@@ -28,9 +27,7 @@ local function off_street_parking_points(object)
 
   local result = categorize_off_street_parking(object, off_street_parking_point_categories)
   if result.object then
-    local row_data = result_tags_off_street_parking(result)
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
-    row_data.tags = cleaned_tags
+    local row_data, replaced_tags = result_tags_off_street_parking(result)
     local row = MergeTable({ geom = result.object:as_point() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'off_street_parking_points')

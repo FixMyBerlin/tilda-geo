@@ -2,7 +2,6 @@ require('init')
 require('Log')
 require('MergeTable')
 require('categorize_line')
-local sanitize_cleaner = require('sanitize_cleaner')
 local LOG_ERROR = require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
 
@@ -23,9 +22,7 @@ local function parking_obstacle_lines(object)
 
   local result = categorize_line(object)
   if result.object then
-    local row_data = result_tags_obstacles(result)
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
-    row_data.tags = cleaned_tags
+    local row_data, replaced_tags = result_tags_obstacles(result)
     local row = MergeTable({ geom = result.object:as_linestring() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_obstacle_lines')
