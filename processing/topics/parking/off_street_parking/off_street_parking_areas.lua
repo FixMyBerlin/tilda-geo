@@ -4,7 +4,7 @@ local result_tags_off_street_parking = require('result_tags_off_street_parking')
 local categorize_off_street_parking = require('categorize_off_street_parking')
 local off_street_parking_area_categories = require('off_street_parking_area_categories')
 local area_sqm = require('area_sqm')
-require('parking_errors')
+local LOG_ERROR = require('parking_errors')
 
 local db_table_area = osm2pgsql.define_table({
   name = 'off_street_parking_areas',
@@ -13,8 +13,7 @@ local db_table_area = osm2pgsql.define_table({
     { column = 'id',   type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
-    -- `geometry` means either Polygon or MultiPolygon (in this cases)
-    { column = 'geom', type = 'geometry' }, -- default projection for vector tiles
+    { column = 'geom', type = 'polygon' }, -- default projection for vector tiles
     { column = 'minzoom', type = 'integer' },
   },
   indexes = {
@@ -45,20 +44,26 @@ local function off_street_parking_areas(object)
 
   local result = categorize_off_street_parking(object, off_street_parking_area_categories)
   if result.object then
-    local row_tags = result_tags_off_street_parking(result, area_sqm(result.object))
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, result.object.tags)
-    row_tags.tags = cleaned_tags
-    parking_errors(result.object, replaced_tags, 'off_street_parking_areas')
+    local row_data = result_tags_off_street_parking(result, area_sqm(result.object))
+    local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
+    row_data.tags = cleaned_tags
+    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
 
-    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_tags)
-    db_table_area:insert(row)
+    LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'off_street_parking_areas')
+    -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.
+    -- With `:num_geometries()` we filter to only allow polygons which is our table column data type.
+    if row.geom:num_geometries() == 1 then
+      db_table_area:insert(row)
 
-    local label_row_tags = {
-      id = row_tags.id,
-      tags = { capacity = row_tags.tags.capacity }
-    }
-    local label_row = MergeTable({ geom = result.object:as_multipolygon():pole_of_inaccessibility() }, label_row_tags)
-    db_table_label:insert(label_row)
+      local label_row_tags = {
+        id = row_data.id,
+        tags = { capacity = row_data.tags.capacity }
+      }
+      local label_row = MergeTable({ geom = row.geom:pole_of_inaccessibility() }, label_row_tags)
+      db_table_label:insert(label_row)
+    else
+      LOG_ERROR.RELATION(result.object, row.geom, 'off_street_parking_areas')
+    end
   end
 end
 

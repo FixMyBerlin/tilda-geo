@@ -3,7 +3,7 @@ require('Log')
 require('MergeTable')
 local categorize_obstacle_points = require('categorize_obstacle_points')
 local sanitize_cleaner = require('sanitize_cleaner')
-require('parking_errors')
+local LOG_ERROR = require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
 
 local db_table = osm2pgsql.define_table({
@@ -22,12 +22,12 @@ local function parking_obstacle_points(object)
 
   local result = categorize_obstacle_points(object)
   if result.object then
-    local row_tags = result_tags_obstacles(result)
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, result.object.tags)
-    row_tags.tags = cleaned_tags
-    parking_errors(result.object, replaced_tags, 'parking_obstacle_points')
+    local row_data = result_tags_obstacles(result)
+    local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
+    row_data.tags = cleaned_tags
+    local row = MergeTable({ geom = result.object:as_point() }, row_data)
 
-    local row = MergeTable({ geom = result.object:as_point() }, row_tags)
+    LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_obstacle_points')
     db_table:insert(row)
   end
 end

@@ -77,17 +77,17 @@ function osm2pgsql.process_node(object)
 end
 
 function osm2pgsql.process_way(object)
-  parking_separate_parking_areas(object)
-  parking_obstacle_areas(object)
-  off_street_parking_areas(object)
+  -- parking_separate_parking_areas(object)
+  -- parking_obstacle_areas(object)
+  -- off_street_parking_areas(object)
 
-  parking_crossing_lines(object)
-  parking_obstacle_lines(object)
+  -- parking_crossing_lines(object)
+  -- parking_obstacle_lines(object)
 
-  parking_node_road_mapping(object)
-  parking_roads(object)
+  -- parking_node_road_mapping(object)
+  -- parking_roads(object)
 
-  parking_parkings(object)
+  -- parking_parkings(object)
 end
 
 function osm2pgsql.process_relation(object)

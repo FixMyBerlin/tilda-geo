@@ -3,7 +3,7 @@ require('Log')
 require('MergeTable')
 local categorize_crossing_line = require('categorize_crossing_line')
 local sanitize_cleaner = require('sanitize_cleaner')
-require('parking_errors')
+local LOG_ERROR = require('parking_errors')
 local result_tags_crossings = require('result_tags_crossings')
 
 local db_table = osm2pgsql.define_table({
@@ -40,13 +40,12 @@ local function parking_crossing_lines(object)
 
   local result = categorize_crossing_line(object)
   if result.object then
+    local row_data = result_tags_crossings(result)
+    local cleaned_tags, replaced_tags = sanitize_cleaner(row_data.tags, result.object.tags)
+    row_data.tags = cleaned_tags
+    local row = MergeTable({ geom = result.object:as_linestring() }, row_data)
 
-    local row_tags = result_tags_crossings(result)
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, result.object.tags)
-    row_tags.tags = cleaned_tags
-    parking_errors(result.object, replaced_tags, 'parking_crossing_lines')
-
-    local row = MergeTable({ geom = result.object:as_linestring() }, row_tags)
+    LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_crossing_lines')
     db_table:insert(row)
 
     for _, node_id in ipairs(object.nodes) do
