@@ -110,7 +110,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     !constantsDirChanged &&
     !dataTablesDirChanged &&
     !fileChanged &&
-    params.processOnlyBbox !== null
+    params.processOnlyBbox === null
   const diffChanges = params.diffingMode !== 'off' && !fileChanged
 
   for (const [topic, bboxes] of Array.from(topicsConfig)) {
@@ -138,7 +138,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
           dataTablesDirChanged,
           fileChanged,
           paramProcessOnlyBbox: params.processOnlyBbox,
-          paramProcessOnlyBboxBoolean: params.processOnlyBbox !== null,
+          paramProcessOnlyBboxBoolean: params.processOnlyBbox === null,
         }),
       )
     }
