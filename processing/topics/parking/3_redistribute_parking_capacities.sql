@@ -29,6 +29,8 @@ SET
     'capacity_source',
     tags ->> 'capacity_source' || ' (redistributed)'
   )
+FROM
+  total_lengths tl
 WHERE
-  count > 1
+  tl.count > 1
   AND pc.osm_id = tl.osm_id;
