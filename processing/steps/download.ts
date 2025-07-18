@@ -1,10 +1,10 @@
 import { $ } from 'bun'
-import { basename, join } from 'path'
+import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
+import { checkSkipDownload } from '../utils/checkSkipDownload'
 import { getAuthHeaders, hasValidOAuthCookie } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
-import { filteredFilePath } from './filter'
 
 /**
  * Get the full path to the downloaded file.
@@ -73,22 +73,9 @@ export async function waitForFreshData() {
  * When the files eTag is the same as the last download, the download will be skipped.
  */
 export async function downloadFile() {
-  const fileName = basename(params.pbfDownloadUrl)
-  const filePath = originalFilePath(fileName)
-  const fileExists = await Bun.file(filePath).exists()
-  const filteredFileExists = await Bun.file(filteredFilePath(fileName)).exists()
-
-  // Check if file already exists
-  // We also check for the filteredFile because that is the one we actually need; if that is there, this is enough
-  if ((fileExists || filteredFileExists) && params.skipDownload) {
-    console.log(
-      'Download: ⏩ Skipping download. The file already exist and `SKIP_DOWNLOAD` is active.',
-      JSON.stringify({
-        fileExists,
-        filteredFileExists,
-        skipDownload: params.skipDownload,
-      }),
-    )
+  const { fileName, fileExists, filePath, skipDownload } = await checkSkipDownload()
+  if (skipDownload) {
+    console.log('Download: ⏩ Skipping download because file exists and `SKIP_DOWNLOAD` is active')
     return { fileName, fileChanged: false }
   }
 
