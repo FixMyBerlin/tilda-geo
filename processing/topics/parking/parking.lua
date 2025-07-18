@@ -50,7 +50,6 @@ osm2pgsql.define_table({
   },
 })
 
-
 osm2pgsql.define_table({
   name = 'parkings_cutouts',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
@@ -58,7 +57,8 @@ osm2pgsql.define_table({
     { column = 'id',   type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'polygon', projection = 3857 },
+    -- 'geometry' means 'polygon' and 'multipolygon'
+    { column = 'geom', type = 'geometry', projection = 3857 },
     { column = 'minzoom', type = 'integer' },
   },
 })
