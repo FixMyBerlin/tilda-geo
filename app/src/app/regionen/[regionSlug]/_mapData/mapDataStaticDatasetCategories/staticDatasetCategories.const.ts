@@ -90,7 +90,7 @@ export const staticDatasetCategories = {
   },
   'berlin/infravelo_results': {
     order: 2,
-    title: 'Prozessierung',
+    title: 'infraVelo Prozessierung',
     subtitle: 'Statische Ergebnisse der Prozessierung.',
   },
   'woldegk/primary': {

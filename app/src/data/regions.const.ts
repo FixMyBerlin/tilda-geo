@@ -202,8 +202,8 @@ export const staticRegion: StaticRegion[] = [
   },
   {
     slug: 'infravelo',
-    name: 'InfraVelo',
-    fullName: 'InfraVelo / Berlin',
+    name: 'infraVelo',
+    fullName: 'infraVelo / Berlin',
     product: 'radverkehr',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
