@@ -14,8 +14,9 @@ local highway_width_fallbacks = {
   ["pedestrian"] = 11,
   ["road"] = 11,
   ["service"] = 4,
-  ["track"] = 2.5,
   ["bus_guideway"] = 3,
+  ["track"] = 2.5,
+  ["footway"] = 2.5,
 }
 
 --@return number width The calculated or parsed width in meters
