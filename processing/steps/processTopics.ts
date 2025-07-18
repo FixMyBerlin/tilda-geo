@@ -125,6 +125,22 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
         "The code hasn't changed and `SKIP_UNCHANGED` is active.",
       )
       continue
+    } else {
+      console.log(
+        '[DEBUGGING] processTopics skipping code:',
+        JSON.stringify({
+          skipBoolean: skipCode && !topicChanged,
+          skipCode,
+          topicChanged,
+          paramsSkipUnchanged: params.skipUnchanged,
+          helpersChanged,
+          constantsDirChanged,
+          dataTablesDirChanged,
+          fileChanged,
+          paramProcessOnlyBbox: params.processOnlyBbox,
+          paramProcessOnlyBboxBoolean: params.processOnlyBbox !== null,
+        }),
+      )
     }
     // Topic: Skip topic based on ENV
     if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
