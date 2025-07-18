@@ -23,18 +23,12 @@ WITH
   )
 UPDATE _parking_parkings_cutted pc
 SET
-  fraction = ST_Length (pc.geom) / tl.length
-FROM
-  total_lengths tl
+  tags = tags - 'area' || jsonb_build_object(
+    'capacity',
+    (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
+    'capacity_source',
+    tags ->> 'capacity_source' || ' (redistributed)'
+  )
 WHERE
   count > 1
   AND pc.osm_id = tl.osm_id;
-
-UPDATE _parking_parkings_cutted
-SET
-  tags = tags - 'area' || jsonb_build_object(
-    'capacity',
-    (tags ->> 'capacity')::NUMERIC * fraction,
-    'capacity_source',
-    tags ->> 'capacity_source' || ' (redistributed)'
-  );
