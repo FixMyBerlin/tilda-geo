@@ -46,6 +46,7 @@ export const SidebarInspector = () => {
   }
 
   if (
+    map &&
     mapLoaded && // before map is not completely loaded we can't queryRenderedFeatures()
     // TODO: See https://github.com/FixMyBerlin/private-issues/issues/1775
     // eslint-disable-next-line react-compiler/react-compiler

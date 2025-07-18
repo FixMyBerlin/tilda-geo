@@ -54,20 +54,24 @@ describe("BikelaneTodos", function()
   end)
 
   describe('`currentness_too_old`:', function()
-    it('15 year old way shows up in category', function()
-      local input_object = {
-        tags = {
-          ["highway"] = 'cycleway',
-        },
-        meta = {
-          ["updated_age"] = 5475,
-        },
-        id = 1,
-        type = 'way'
-      }
-      local result = Bikelanes(input_object)
-      assert.are.equal(TableIncludes(result[1]._todo_list, "currentness_too_old"), false)
-    end)
+    -- We cannot test the age part well because I don't know how to stub object.timestamp.
+    -- This test is a false positive because it always returns true
+    --
+    -- it('15 year old way shows up in category', function()
+    --   local input_object = {
+    --     tags = {
+    --       ["highway"] = 'cycleway',
+    --     },
+    --     meta = {
+    --       -- We removed this way to store the age. But it was never why this test was green…
+    --       ["updated_age"] = 5475,
+    --     },
+    --     id = 1,
+    --     type = 'way'
+    --   }
+    --   local result = Bikelanes(input_object)
+    --   assert.are.equal(TableIncludes(result[1]._todo_list, "currentness_too_old"), false)
+    -- end)
   end)
 
   describe('`advisory_or_exclusive`:', function()

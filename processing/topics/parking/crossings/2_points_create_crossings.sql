@@ -1,7 +1,7 @@
 DO $$ BEGIN RAISE NOTICE 'START creating kerb tangents %', clock_timestamp(); END $$;
 
 --
-CREATE OR REPLACE FUNCTION create_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$
+CREATE OR REPLACE FUNCTION estimate_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$
 DECLARE
   road_geom geometry;
   point_geom geometry;
@@ -11,7 +11,7 @@ BEGIN
 
   point_geom := ST_PointN(road_geom, idx);
 
-  azimuth := line_azimuth_at_index(road_geom, idx, 1) + pi() / 2 ;
+  azimuth := line_azimuth_at_index(road_geom, idx, 1) - pi() / 2 ;
 
   RETURN ST_MakeLine(point_geom, ST_Project(point_geom, length, azimuth));
 END;
@@ -24,9 +24,12 @@ DROP TABLE IF EXISTS _parking_crossings;
 SELECT
   opl.id,
   opl.osm_id,
-  opl.tags,
+  Null as way_id,
+  opl.tags || '{"geometry_source": "generated"}'::jsonb AS tags,
   opl.meta,
-  create_road_crossing (opl.way_id, opl.idx, k.offset * 1.1) as geom
+  -- we increase this length to be safe when we project on to the real crossing geometry
+  ABS(k.offset) + 1 as length,
+  estimate_road_crossing (opl.way_id, opl.idx, k.offset * 3) as geom
   --
   INTO _parking_crossings
 FROM

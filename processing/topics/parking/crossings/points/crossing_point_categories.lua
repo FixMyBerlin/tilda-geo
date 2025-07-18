@@ -4,6 +4,17 @@ local helper = require('crossing_point_categories_helper')
 
 local crossing_point_categories = {
   class_crossing_category.new({
+    id = 'crossing_traffic_signals',
+    side_schema = 'none',
+    side_key = nil,
+    buffer_radius = function(tags) return 2 end,
+    conditions = function(tags)
+      return tags['crossing'] == 'traffic_signals' or tags['crossing:signals'] == 'yes'
+    end,
+    tags = function(tags) return {} end,
+    tags_cc = { 'crossing', 'crossing:signals', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
+  }),
+  class_crossing_category.new({
     id = 'crossing_zebra',
     side_schema = 'none',
     side_key = nil,

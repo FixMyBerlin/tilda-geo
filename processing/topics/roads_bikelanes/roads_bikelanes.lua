@@ -197,10 +197,6 @@ function osm2pgsql.process_way(object)
     if cycleway._infrastructureExists then
       local meta = Metadata(object)
       cycleway_result_tags._parent_highway = cycleway._parent_highway
-      -- Don't think this is used anywhere anymore; delete…
-      -- meta.age = cycleway._age
-      -- Don't think this is relevant anymore, we don't pass cyclway as a full object anywhere; delete…
-      -- cycleway.segregated = nil -- no idea why that is present in the inspector frontend for way 9717355
 
       bikelanesTable:insert({
         id = cycleway._id,
@@ -255,15 +251,6 @@ function osm2pgsql.process_way(object)
   -- We need sidewalk for Biklanes(), but not for `roads`
   if not IsSidepath(object_tags) then
     local meta = Metadata(object)
-
-    -- Don't think this is used anywhere anymore; delete…
-    -- MergeTable(meta, {
-    --   age = AgeInDays(ParseCheckDate(object_tags["check_date"])),
-    --   -- surface_age = results._surface_age,
-    --   -- smoothness_age = results._smoothness_age,
-    --   -- maxspeed_age = results._maxspeed_age, -- unused
-    --   -- lit_age = results._lit_age -- unused
-    -- })
 
     -- (C.3) WRITE `bikeSuitability` table
     local bikeSuitability = CategorizeBikeSuitability(object_tags)

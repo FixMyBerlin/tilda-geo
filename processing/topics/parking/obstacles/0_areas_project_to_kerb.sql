@@ -19,7 +19,9 @@ FROM
 
 DELETE FROM _parking_obstacle_areas_projected
 WHERE
-  geom IS NULL;
+  geom IS NULL
+  OR ST_GeometryType (geom) <> 'ST_LineString'
+  OR ST_Length (geom) < 0.3;
 
 -- MISC
 ALTER TABLE _parking_obstacle_areas_projected

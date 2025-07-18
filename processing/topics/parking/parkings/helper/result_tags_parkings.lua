@@ -12,6 +12,7 @@ require('result_tags_value_helpers')
 local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local sanitize_cleaner = require('sanitize_cleaner')
 
 -- EXAMPLE
 -- INPUT
@@ -48,6 +49,14 @@ function result_tags_parkings(object)
 
   local width, width_confidence, width_source = road_width(object.tags)
 
+  local capacity = parse_length(object.tags.capacity)
+  local capacity_source = nil
+  local capacity_confidence = nil
+  if capacity ~= nil then
+    capacity_source = "tag"
+    capacity_confidence = "high"
+  end
+
   local specific_tags = {
     -- ROAD
     name = road_name(object.tags),
@@ -59,7 +68,9 @@ function result_tags_parkings(object)
     -- PARKING
     parking = parking_value(object),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
-    capacity = parse_length(object.tags.capacity),
+    capacity = capacity,
+    capacity_source = capacity_source,
+    capacity_confidence = capacity_confidence,
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
@@ -116,12 +127,13 @@ function result_tags_parkings(object)
   CopyTags(result_tags, object.tags, tags_cc, "osm_")
 
   local result_meta = Metadata(object)
-  result_meta.updated_age = nil -- Lets start without this because it adds work and might not be needed
+
+  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
 
   return {
     id = id,
     side = object.tags.side,
-    tags = result_tags,
+    tags = cleaned_tags,
     meta = result_meta,
-  }
+  }, replaced_tags
 end

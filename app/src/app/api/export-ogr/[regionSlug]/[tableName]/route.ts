@@ -105,7 +105,7 @@ export async function GET(
     const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
     const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
       const numberKeywordsEquals = ['age', 'length', 'width', 'offset']
-      const numberKeywordsIncludes = ['_age']
+      const numberKeywordsIncludes = []
       const shouldCastToNumber = key.startsWith('osm_')
         ? false
         : numberKeywordsEquals.some((keyword) => key == keyword) ||

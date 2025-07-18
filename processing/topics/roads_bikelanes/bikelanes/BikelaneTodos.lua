@@ -374,13 +374,13 @@ local currentness_too_old = BikelaneTodo.new({
   desc = "Infrastructure that has not been edited for about 10 years",
   todoTableOnly = true,
   priority = function(objectTags, resultTags)
-    if objectTags.mapillary_coverage and resultTags._updated_age >= days_in_year * 15 then return "1" end
-    if objectTags.mapillary_coverage and resultTags._updated_age >= days_in_year * 12 then return "2" end
+    if objectTags.mapillary_coverage and resultTags._age_in_days >= days_in_year * 15 then return "1" end
+    if objectTags.mapillary_coverage and resultTags._age_in_days >= days_in_year * 12 then return "2" end
     return "3"
   end,
   conditions = function(objectTags, resultTags)
     -- Sync date with `app/src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/groups/radinfra_currentness.ts`
-    return resultTags.category ~= nil and resultTags._updated_age ~= nil and resultTags._updated_age >= days_in_year*10
+    return resultTags.category ~= nil and resultTags._age_in_days ~= nil and resultTags._age_in_days >= days_in_year*10
   end
 })
 local currentness_too_old__mapillary = BikelaneTodo.new({
@@ -388,8 +388,8 @@ local currentness_too_old__mapillary = BikelaneTodo.new({
   desc = "Infrastructure that has not been edited for about 10 years",
   todoTableOnly = true,
   priority = function(objectTags, resultTags)
-    if resultTags._updated_age >= days_in_year * 15 then return "1" end
-    if resultTags._updated_age >= days_in_year * 12 then return "2" end
+    if resultTags._age_in_days >= days_in_year * 15 then return "1" end
+    if resultTags._age_in_days >= days_in_year * 12 then return "2" end
     return "3"
   end,
   conditions = function(objectTags, resultTags)

@@ -21,7 +21,7 @@ osm2pgsql.define_table({
     { column = 'id',   type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'linestring', projection = 5243 },
+    { column = 'geom', type = 'linestring', projection = 3857 },
     { column = 'minzoom', type = 'integer' },
   },
 })
@@ -33,11 +33,35 @@ osm2pgsql.define_table({
     { column = 'id',   type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'multilinestring', projection = 5243 },
+    { column = 'geom', type = 'multilinestring', projection = 3857 },
     { column = 'minzoom', type = 'integer' },
   },
 })
 
+osm2pgsql.define_table({
+  name = 'parkings_separate',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'polygon', projection = 3857 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
+
+osm2pgsql.define_table({
+  name = 'parkings_cutouts',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    -- 'geometry' means 'polygon' and 'multipolygon'
+    { column = 'geom', type = 'geometry', projection = 3857 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
 
 -- NOTE ON PROJECTIONS:
 -- All `paring_*` tables use EPSG:5243

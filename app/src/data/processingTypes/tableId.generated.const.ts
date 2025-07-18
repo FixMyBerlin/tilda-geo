@@ -19,6 +19,7 @@ export type TableId =
   | 'off_street_parking_points'
   | 'parkings'
   | 'parkings_no'
+  | 'parkings_separate'
   | 'places'
   | 'poiClassification'
   | 'publicTransport'

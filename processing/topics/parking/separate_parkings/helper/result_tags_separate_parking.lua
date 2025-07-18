@@ -4,6 +4,7 @@ require('MergeTable')
 require('DefaultId')
 require('Metadata')
 require('Log')
+local sanitize_cleaner = require('sanitize_cleaner')
 
 local function result_tags_separate_parking(result, area)
   local id = DefaultId(result.object)
@@ -23,13 +24,14 @@ local function result_tags_separate_parking(result, area)
   MergeTable(result_tags, result.category:get_capacity(result.object.type, result.object.tags, area))
 
   local result_meta = Metadata(result)
-  result_meta.updated_age = nil -- Lets start without this because it adds work and might not be needed
+
+  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, result.object.tags)
 
   return {
     id = id,
-    tags = result_tags,
+    tags = cleaned_tags,
     meta = result_meta,
-  }
+  }, replaced_tags
 end
 
 return result_tags_separate_parking

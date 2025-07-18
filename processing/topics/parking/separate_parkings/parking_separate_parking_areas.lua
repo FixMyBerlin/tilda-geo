@@ -1,8 +1,7 @@
 require('init')
 require('Log')
 require('MergeTable')
-local sanitize_cleaner = require('sanitize_cleaner')
-require('parking_errors')
+local LOG_ERROR = require('parking_errors')
 local separate_parking_area_categories = require('separate_parking_area_categories')
 local categorize_separate_parking = require('categorize_separate_parking')
 local result_tags_separate_parking = require('result_tags_separate_parking')
@@ -15,8 +14,7 @@ local db_table = osm2pgsql.define_table({
     { column = 'id',      type = 'text',      not_null = true },
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
-    -- `geometry` means either Polygon or MultiPolygon (in this cases)
-    { column = 'geom',    type = 'geometry', projection = 5243 },
+    { column = 'geom',    type = 'polygon', projection = 5243 },
   },
 })
 
@@ -27,13 +25,17 @@ local function parking_separate_parking_areas(object)
 
   local result = categorize_separate_parking(object, separate_parking_area_categories)
   if result.object then
-    local row_tags = result_tags_separate_parking(result, area_sqm(result.object))
-    local cleaned_tags, replaced_tags = sanitize_cleaner(row_tags.tags, result.object.tags)
-    row_tags.tags = cleaned_tags
-    parking_errors(result.object, replaced_tags, 'parking_separate_parking_areas')
+    local row_data, replaced_tags = result_tags_separate_parking(result, area_sqm(result.object))
+    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
 
-    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_tags)
-    db_table:insert(row)
+    LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_areas')
+    -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.
+    -- With `:num_geometries()` we filter to only allow polygons which is our table column data type.
+    if row.geom:num_geometries() == 1 then
+      db_table:insert(row)
+    else
+      LOG_ERROR.RELATION(result.object, row.geom, 'parking_separate_parking_areas')
+    end
   end
 
 end

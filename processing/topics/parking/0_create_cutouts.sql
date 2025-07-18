@@ -29,7 +29,7 @@ INSERT INTO
 SELECT
   id::TEXT,
   kerb_osm_id,
-  ST_Buffer (geom, 0.6, 'endcap=flat'),
+  ST_Buffer (geom, 0.01, 'endcap=flat'),
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'driveway_corner_kerb',
@@ -138,7 +138,7 @@ SELECT
 FROM
   _parking_obstacle_lines_projected;
 
--- INSERT "obstacle" buffers (buffered lines)
+-- INSERT "parking area" buffers (buffered lines)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
@@ -154,6 +154,23 @@ SELECT
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_areas_projected;
+
+-- INSERT "parking area" buffers (buffered lines)
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta)
+SELECT
+  id::TEXT,
+  osm_id,
+  ST_Buffer (geom, 0.6, 'endcap=flat'),
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', tags ->> 'category',
+    'source', 'separate_parking_points'
+    /* sql-formatter-enable */
+  ) || tags,
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
+FROM
+  _parking_separate_parking_points_projected;
 
 -- INSERT roads
 INSERT INTO

@@ -1,7 +1,7 @@
 require('init')
 require('DefaultId')
 
-local db_table = osm2pgsql.define_table({
+local db_table_error = osm2pgsql.define_table({
   name = 'parking_errors',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
@@ -21,14 +21,14 @@ local db_table = osm2pgsql.define_table({
   }
 })
 
--- Called right before other tables are inserted.
--- Handles point, line and area data but stores them as points (centroid)
--- `tags` are based on sanitize_for_logging.lua and sanitize_cleaner.lua
-local function parking_errors(object, geom, tags, caller_name, error_type, instruction)
-  local point_geom = nil
-  if(object.type == 'node') then point_geom = geom end
-  if(object.type == 'way') then point_geom = geom:centroid() end
-  if(object.type == 'relation') then point_geom = geom:centroid() end
+-- Local function to log parking errors
+local function log_parking_error(object, tags, caller_name, error_type, instruction)
+  if next(tags) == nil and error_type ~= 'RELATION' then return end
+
+  local geom = nil
+  if(object.type == 'node') then geom = object:as_point() end
+  if(object.type == 'way') then geom = object:as_multilinestring():centroid() end
+  if(object.type == 'relation') then geom = object:as_multilinestring():centroid() end
 
   local error_tags = {}
   if tags then
@@ -43,22 +43,22 @@ local function parking_errors(object, geom, tags, caller_name, error_type, instr
 
   local row = {
     id = DefaultId(object),
-    geom = point_geom,
+    geom = geom,
     tags = error_tags,
     meta = {},
     minzoom = 0
   }
-  db_table:insert(row)
+  db_table_error:insert(row)
 end
 
 local LOG_ERROR = {
-  SANITIZED_VALUE = function(object, geom, tags, caller_name)
-    parking_errors(object, geom, tags, caller_name, 'SANITIZED_VALUE',
+  SANITIZED_VALUE = function(object, tags, caller_name)
+    log_parking_error(object, tags, caller_name, 'SANITIZED_VALUE',
       'These tags have values that were not accepted by our sanitization. Please review the values, fix the data, or update the sanitization.')
   end,
-  RELATION = function(object, geom, caller_name)
-    parking_errors(object, geom, {}, caller_name, 'RELATION',
-      'This is a relation that would be processed as a multipolygon. Multipolygons are not supported in our processing. Please restructuring the data to use separate areas instead.')
+  RELATION = function(object, caller_name)
+    log_parking_error(object, {}, caller_name, 'RELATION',
+      object.id .. ' is a Relation what would become a MultiPolygon. We don\'t support MultiPolygons in our processing. Consider reworking the data to separate areas.')
   end
 }
 

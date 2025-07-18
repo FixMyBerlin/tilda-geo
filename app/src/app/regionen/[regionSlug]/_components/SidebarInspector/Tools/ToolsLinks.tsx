@@ -9,7 +9,6 @@ import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import {
   historyUrl,
-  mapillaryKeyUrl,
   mapillaryUrl,
   osmEditIdUrl,
   osmEditRapidUrl,
@@ -30,9 +29,26 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
-  const historyUrlHref = historyUrl(osmTypeId)
   const mapillaryUrlHref = mapillaryUrl(feature.geometry)
-  const mapillaryKeyUrlHref = mapillaryKeyUrl(feature.properties.mapillary)
+
+  const changesetLinks = [
+    {
+      title: 'Änderungshistorie',
+      url: historyUrl(osmTypeId),
+    },
+    {
+      title: 'Changeset',
+      url:
+        Boolean(feature.properties.changeset_id) &&
+        `https://www.openstreetmap.org/changeset/${feature.properties.changeset_id}`,
+    },
+    {
+      title: 'OSMCha',
+      url:
+        Boolean(feature.properties.changeset_id) &&
+        `https://osmcha.org/changesets/${feature.properties.changeset_id}`,
+    },
+  ]
 
   return (
     <section className="flex flex-wrap gap-3 pb-1 text-xs">
@@ -70,21 +86,9 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         </LinkExternal>
       )}
 
-      {historyUrlHref && (
-        <LinkExternal blank button href={historyUrlHref}>
-          Änderungshistorie
-        </LinkExternal>
-      )}
-
       {mapillaryUrlHref && (
         <LinkExternal blank button href={mapillaryUrlHref}>
           Mapillary
-        </LinkExternal>
-      )}
-
-      {mapillaryKeyUrlHref && (
-        <LinkExternal blank button href={mapillaryKeyUrlHref}>
-          Mapillary Foto
         </LinkExternal>
       )}
 
@@ -98,6 +102,20 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         geometry={feature.geometry}
         osmIdConfig={osmIdConfig}
       />
+
+      <div>
+        {changesetLinks.map(({ title, url }) => {
+          if (!url) return null
+          return (
+            <>
+              <LinkExternal key={url} blank href={url}>
+                {title}
+              </LinkExternal>
+              <span className="last:hidden"> &bull; </span>
+            </>
+          )
+        })}
+      </div>
     </section>
   )
 }

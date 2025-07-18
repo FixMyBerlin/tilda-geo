@@ -88,6 +88,11 @@ export const staticDatasetCategories = {
     title: 'Changing Cities Monitoring',
     subtitle: 'Statische Geodaten zum Monitoring des Radnetzes von Changing Cities.',
   },
+  'berlin/infravelo_results': {
+    order: 2,
+    title: 'Prozessierung',
+    subtitle: 'Statische Ergebnisse der Prozessierung.',
+  },
   'woldegk/primary': {
     order: 1,
     title: 'Aktuelle Planungen',
