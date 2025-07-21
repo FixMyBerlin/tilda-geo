@@ -82,7 +82,7 @@ function Bikelanes(object)
           mapillary = transformed_tags.mapillary,
           mapillary_forward = transformed_tags['mapillary:forward'],
           mapillary_backward = transformed_tags['mapillary:backward'],
-          mapillary_traffic_sign = transformed_tags['source:traffic_sign:mapillary'],
+          mapillary_traffic_sign = object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'] or transformed_tags['source:traffic_sign:mapillary'],
           description = transformed_tags.description or transformed_tags.note,
         })
 
