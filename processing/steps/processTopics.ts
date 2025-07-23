@@ -152,7 +152,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Bboxes: Overwrite bboxes based on ENV
     if (params.processOnlyBbox?.length === 4) {
       console.log(
-        `Skipping topic: ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
+        `Topics: ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
       )
       // @ts-expect-error the readonly part gets in the way here…
       innerBboxes = [params.processOnlyBbox]
