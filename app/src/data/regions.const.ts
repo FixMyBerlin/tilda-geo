@@ -237,6 +237,11 @@ export const staticRegion: StaticRegion[] = [
       'parkraumkarte_neukoelln',
     ],
     notes: 'atlasNotes',
+    cacheWarming: {
+      minZoom: 9,
+      maxZoom: 13,
+      tables: ['bikelanes', 'roads', 'roadsPathClasses'],
+    },
   },
   {
     slug: 'parkraum-berlin',
@@ -617,7 +622,7 @@ export const staticRegion: StaticRegion[] = [
     notes: 'osmNotes',
     cacheWarming: {
       minZoom: 8,
-      maxZoom: 11,
+      maxZoom: 10,
       // TODO: extend to allow joined tables
       tables: [
         'bikelanes',
