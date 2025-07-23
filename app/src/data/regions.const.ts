@@ -202,8 +202,8 @@ export const staticRegion: StaticRegion[] = [
   },
   {
     slug: 'infravelo',
-    name: 'InfraVelo',
-    fullName: 'InfraVelo / Berlin',
+    name: 'infraVelo',
+    fullName: 'infraVelo / Berlin',
     product: 'radverkehr',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
@@ -237,6 +237,11 @@ export const staticRegion: StaticRegion[] = [
       'parkraumkarte_neukoelln',
     ],
     notes: 'atlasNotes',
+    cacheWarming: {
+      minZoom: 9,
+      maxZoom: 13,
+      tables: ['bikelanes', 'roads', 'roadsPathClasses'],
+    },
   },
   {
     slug: 'parkraum-berlin',
@@ -617,7 +622,7 @@ export const staticRegion: StaticRegion[] = [
     notes: 'osmNotes',
     cacheWarming: {
       minZoom: 8,
-      maxZoom: 11,
+      maxZoom: 10,
       // TODO: extend to allow joined tables
       tables: [
         'bikelanes',

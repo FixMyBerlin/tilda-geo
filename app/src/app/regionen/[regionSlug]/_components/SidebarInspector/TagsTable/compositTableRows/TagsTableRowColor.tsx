@@ -22,7 +22,9 @@ export const TagsTableRowColor = ({
       <div className="flex items-center gap-2">
         {values.map((color) => (
           <div key={color} className="flex items-center gap-1.5">
-            <div style={{ backgroundColor: color }} className="h-5 w-5 rounded-full" />
+            {color !== 'no' && (
+              <div style={{ backgroundColor: color }} className="h-5 w-5 rounded-full" />
+            )}
             {color.startsWith('#') ? (
               color
             ) : (

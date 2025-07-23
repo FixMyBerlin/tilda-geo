@@ -20,7 +20,9 @@ export const RegionListPermissions = async () => {
       </div>
 
       <div className="my-10 grid grid-cols-2 border-l border-t border-gray-200 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
-        {permissionsRegions?.map((region) => <RegionTeaser key={region.slug} region={region} />)}
+        {permissionsRegions?.map((region) => (
+          <RegionTeaser key={region.slug} region={region} />
+        ))}
         {permissionsRegions?.length === 0 && (
           <div className="col-span-4 p-4 font-normal text-gray-500">
             Ihr Account ist noch für keine Region freigeschaltet.

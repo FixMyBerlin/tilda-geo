@@ -68,7 +68,7 @@ export type MapDataDatasetsSource<TIds> = {
 
 export type MapDataSourceInspectorEditor = {
   name: string
-  /** @desc `properties[idKey]` will replace `{editor_id_key}` in the URL */
+  /** @desc `properties[idKey]` will replace `{editor_id}` in the URL */
   idKey?: string
   /** @desc Allowed replacements are `{zoom}`, `{latitude}`, `{longitude}`, `{short_osm_type}`, `{long_osm_type}`, `{editor_id}`, `{osm_id}` */
   urlTemplate: `https://${string}`
