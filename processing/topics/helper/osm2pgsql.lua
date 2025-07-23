@@ -1,6 +1,6 @@
 -- Copy of https://github.com/openstreetmap/osm2pgsql/blob/master/src/init.lua
 -- We need to copy and modify this in order to be able to use those helpers in our `*.test.lua` files
--- We can still use the "original" osm2pgsql in our code elswhere, just for tests we need to also `require("osm2pgsql")`.
+-- We can still use the "original" osm2pgsql in our code elswhere, just for tests we need to also `require('osm2pgsql')`.
 
 osm2pgsql = {}
 
