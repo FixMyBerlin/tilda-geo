@@ -9,7 +9,7 @@ export const searchParamsRegistry = {
   osmNote: 'osmNote', // show new osmNotes dialogue
   atlasNotes: 'notes', // show atlasNotes on the map
   atlasNote: 'atlasNote', // show new atlasNotes dialogue
-  atlasNotesFilter: 'atlasNotesFilter',
+  atlasNotesFilter: 'atlasNotesFilter', // TODO: We renamed everything to internalNotes except the URL param. We need to add a migration for this.
   osmNotesFilter: 'osmNotesFilter',
   debugMap: 'debugMap',
 } as const

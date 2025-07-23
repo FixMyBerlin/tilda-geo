@@ -3,7 +3,7 @@ import { useRegionDatasets } from '../../_hooks/useRegionDatasets/useRegionDatas
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureAtlasGeo } from './InspectorFeatureAtlasGeo'
-import { InspectorFeatureAtlasNote } from './InspectorFeatureAtlasNote'
+import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
 import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 
@@ -38,7 +38,7 @@ export const Inspector = ({ features }: Props) => {
         }
         if (inspectObject.source === 'atlas-notes') {
           return (
-            <InspectorFeatureAtlasNote
+            <InspectorFeatureInternalNote
               key={`atlas-note-${inspectObject?.properties?.id}`}
               noteId={inspectObject.properties.id}
             />

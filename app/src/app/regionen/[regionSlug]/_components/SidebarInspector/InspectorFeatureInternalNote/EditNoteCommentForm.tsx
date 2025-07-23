@@ -10,7 +10,7 @@ import { TrashIcon } from '@heroicons/react/24/outline'
 import dompurify from 'dompurify'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { useQueryKey } from '../../notes/AtlasNotes/utils/useQueryKey'
+import { useQueryKey } from '../../notes/InternalNotes/utils/useQueryKey'
 import { useStaticRegion } from '../../regionUtils/useStaticRegion'
 import { useIsAuthor } from './utils/useIsAuthor'
 type Props = { comment: NoteComment }

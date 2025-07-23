@@ -5,7 +5,7 @@ export const useNotesActiveByZoom = () => {
   const { mainMap } = useMap()
   const { showOsmNotesParam } = useShowOsmNotesParam()
 
-  // AtlasNotes should be visible always, we load all data anyways
+  // InternalNotes should be visible always, we load all data anyways
   let minZoomNotesActive = 5
   if (showOsmNotesParam) {
     // OsmNotes however need stonger limit, because the API will only return a limited number of notes and we don't handle this "pagination" well, yet

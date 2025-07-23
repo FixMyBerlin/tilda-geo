@@ -2,7 +2,7 @@ import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQ
 import { useDataParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useDataParam'
 import { useRegionDatasets } from '@/src/app/regionen/[regionSlug]/_hooks/useRegionDatasets/useRegionDatasets'
 import { MapDataCategoryConfig } from '../../../_hooks/useQueryState/useCategoriesConfig/type'
-import { useShowAtlasNotesParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
+import { useShowInternalNotesParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
 import { useShowOsmNotesParam } from '../../../_hooks/useQueryState/useNotesOsmParams'
 import { getSourceData } from '../../../_mapData/utils/getMapDataUtils'
 import { createLayerKeyAtlasGeo } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
@@ -10,7 +10,7 @@ import {
   createDatasetSourceLayerKey,
   createSourceKeyStaticDatasets,
 } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
-import { atlasNotesLayerId } from '../SourcesAndLayers/SourcesLayersAtlasNotes'
+import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
@@ -69,9 +69,9 @@ export const useInteractiveLayers = () => {
   if (showOsmNotesParam) {
     activeCategoryLayerIds.push(osmNotesLayerId)
   }
-  const { showAtlasNotesParam } = useShowAtlasNotesParam()
-  if (showAtlasNotesParam) {
-    activeCategoryLayerIds.push(atlasNotesLayerId)
+  const { showInternalNotesParam } = useShowInternalNotesParam()
+  if (showInternalNotesParam) {
+    activeCategoryLayerIds.push(internalNotesLayerId)
   }
 
   // active layer from datasets

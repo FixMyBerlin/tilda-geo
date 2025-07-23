@@ -1,18 +1,18 @@
 import { Prisma } from '@prisma/client'
 import db from '../index'
 
-const seedAtlasNotes = async () => {
+const seedInternalNotes = async () => {
   // We cannot automate selecting the regions due to import errors with the logo svgs in regions.const.
   // We will have to create a custom region list here, for now.
-  // const regionsWithAtlasNotes = staticRegion.filter((r) => r.notes === 'atlasNotes')
-  const regionsWithAtlasNotes = [
+  // const regionsWithInternalNotes = staticRegion.filter((r) => r.notes === 'atlasNotes')
+  const regionsWithInternalNotes = [
     {
       slug: 'bb-sg',
       map: { lat: 52.3968, lng: 13.0342 },
     },
   ]
 
-  const seedAtlasNoteComments: Prisma.NoteCommentUncheckedCreateInput[] = [
+  const seedInternalNoteComments: Prisma.NoteCommentUncheckedCreateInput[] = [
     {
       userId: 1,
       noteId: 999, // replaced below
@@ -26,9 +26,9 @@ const seedAtlasNotes = async () => {
     },
   ]
 
-  for (const region of regionsWithAtlasNotes) {
+  for (const region of regionsWithInternalNotes) {
     const regionForId = await db.region.findFirstOrThrow({ where: { slug: region.slug } })
-    const seedAtlasNotes: Prisma.NoteUncheckedCreateInput = {
+    const seedInternalNotes: Prisma.NoteUncheckedCreateInput = {
       userId: 2,
       regionId: regionForId.id,
       subject: 'X nicht Y',
@@ -43,12 +43,12 @@ An dieser Stelle ist nicht X sondern Y zu finden.
       latitude: region.map.lat,
       longitude: region.map.lng,
     }
-    const note = await db.note.create({ data: seedAtlasNotes })
-    for (const comment of seedAtlasNoteComments) {
+    const note = await db.note.create({ data: seedInternalNotes })
+    for (const comment of seedInternalNoteComments) {
       await db.noteComment.create({ data: { ...comment, noteId: note.id } })
     }
 
-    const seedResolvedAtlasNotes: Prisma.NoteUncheckedCreateInput = {
+    const seedResolvedInternalNotes: Prisma.NoteUncheckedCreateInput = {
       userId: 1,
       regionId: regionForId.id,
       subject: 'Prüfen ob Z richtig ist',
@@ -58,8 +58,8 @@ An dieser Stelle ist nicht X sondern Y zu finden.
       latitude: region.map.lat + 0.2,
       longitude: region.map.lng + 0.2,
     }
-    await db.note.create({ data: seedResolvedAtlasNotes })
+    await db.note.create({ data: seedResolvedInternalNotes })
   }
 }
 
-export default seedAtlasNotes
+export default seedInternalNotes

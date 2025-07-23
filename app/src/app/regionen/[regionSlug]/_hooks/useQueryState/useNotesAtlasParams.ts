@@ -4,19 +4,19 @@ import { searchParamsRegistry } from './searchParamsRegistry'
 import { createMemoizer } from './utils/createMemoizer'
 import { parseMapParam, serializeMapParam } from './utils/mapParam'
 
-const useShowAtlasNotesParamMemoizer = createMemoizer()
-const useNewAtlasNoteMapParamMemoizer = createMemoizer()
-const useAtlasFilterParamMemoizer = createMemoizer()
+const useShowInternalNotesParamMemoizer = createMemoizer()
+const useNewInternalNoteMapParamMemoizer = createMemoizer()
+const useInternalFilterParamMemoizer = createMemoizer()
 
-export const useShowAtlasNotesParam = () => {
-  const [showAtlasNotesParam, setShowAtlasNotesParam] = useQueryState(
+export const useShowInternalNotesParam = () => {
+  const [showInternalNotesParam, setShowInternalNotesParam] = useQueryState(
     searchParamsRegistry.atlasNotes,
     parseAsBoolean.withDefault(false),
   )
-  return useShowAtlasNotesParamMemoizer({ showAtlasNotesParam, setShowAtlasNotesParam })
+  return useShowInternalNotesParamMemoizer({ showInternalNotesParam, setShowInternalNotesParam })
 }
 
-const newAtlasNoteMapParamParser = createParser({
+const newInternalNoteMapParamParser = createParser({
   parse: (query) => parseMapParam(query),
   serialize: (object) => serializeMapParam(object),
 }).withOptions({
@@ -25,25 +25,25 @@ const newAtlasNoteMapParamParser = createParser({
   throttleMs: 1000,
 })
 
-export const useNewAtlasNoteMapParam = () => {
-  const [newAtlasNoteMapParam, setNewAtlasNoteMapParam] = useQueryState(
+export const useNewInternalNoteMapParam = () => {
+  const [newInternalNoteMapParam, setNewInternalNoteMapParam] = useQueryState(
     searchParamsRegistry.atlasNote,
-    newAtlasNoteMapParamParser,
+    newInternalNoteMapParamParser,
   )
-  return useNewAtlasNoteMapParamMemoizer({ newAtlasNoteMapParam, setNewAtlasNoteMapParam })
+  return useNewInternalNoteMapParamMemoizer({ newInternalNoteMapParam, setNewInternalNoteMapParam })
 }
 
-export const zodAtlasFilterParam = z.object({
+export const zodInternalNotesFilterParam = z.object({
   query: z.string().optional().nullable(),
   completed: z.boolean().optional().nullable(),
   user: z.coerce.number().optional().nullable(),
   commented: z.boolean().optional().nullable(),
 })
 
-export const useAtlasFilterParam = () => {
-  const [atlasNotesFilterParam, setAtlasNotesFilterParam] = useQueryState(
+export const useInternalNotesFilterParam = () => {
+  const [internalNotesFilterParam, setInternalNotesFilterParam] = useQueryState(
     searchParamsRegistry.atlasNotesFilter,
-    parseAsJson(zodAtlasFilterParam.parse),
+    parseAsJson(zodInternalNotesFilterParam.parse),
   )
-  return useAtlasFilterParamMemoizer({ atlasNotesFilterParam, setAtlasNotesFilterParam })
+  return useInternalFilterParamMemoizer({ internalNotesFilterParam, setInternalNotesFilterParam })
 }

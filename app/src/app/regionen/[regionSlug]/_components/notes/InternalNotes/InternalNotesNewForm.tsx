@@ -7,14 +7,14 @@ import {
   useNewNoteTildaDeeplink,
   useOsmNewNoteFeature,
 } from '../../../_hooks/mapState/userMapNotes'
-import { useNewAtlasNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
+import { useNewInternalNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
 import { osmOrgUrl, osmTypeIdString } from '../../SidebarInspector/Tools/osmUrls/osmUrls'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 import { useQueryKey } from './utils/useQueryKey'
 
-export const AtlasNotesNewForm = () => {
+export const InternalNotesNewForm = () => {
   const [createNoteMutation, { isLoading, error }] = useMutation(createNote)
-  const { newAtlasNoteMapParam, setNewAtlasNoteMapParam } = useNewAtlasNoteMapParam()
+  const { newInternalNoteMapParam, setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
   const regionSlug = useRegionSlug()
   const queryKey = useQueryKey()
   const osmNewNoteFeature = useOsmNewNoteFeature()
@@ -27,7 +27,7 @@ export const AtlasNotesNewForm = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!newAtlasNoteMapParam || !regionSlug) {
+    if (!newInternalNoteMapParam || !regionSlug) {
       return
     }
 
@@ -51,14 +51,14 @@ export const AtlasNotesNewForm = () => {
       {
         regionSlug,
         subject: sanitize(new FormData(event.currentTarget).get('subject')!.toString())!,
-        latitude: newAtlasNoteMapParam.lat,
-        longitude: newAtlasNoteMapParam.lng,
+        latitude: newInternalNoteMapParam.lat,
+        longitude: newInternalNoteMapParam.lng,
         body: fullComment,
       },
       {
         onSuccess: () => {
           getQueryClient().invalidateQueries(queryKey)
-          setNewAtlasNoteMapParam(null)
+          setNewInternalNoteMapParam(null)
         },
       },
     )

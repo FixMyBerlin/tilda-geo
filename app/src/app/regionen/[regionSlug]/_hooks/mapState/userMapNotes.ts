@@ -29,7 +29,7 @@ const useMapNotes = create<Store>((set) => {
   return {
     // Data for <Inspector> AND <SourcesLayersOsmNotes>
     osmNotesFeatures: featureCollection([]),
-    // Data for <OsmNotesNew>, <AtlasNotesNew>
+    // Data for <OsmNotesNew>, <InternalNotesNew>
     osmNewNoteFeature: undefined,
     newNoteTildaDeeplink: undefined,
 

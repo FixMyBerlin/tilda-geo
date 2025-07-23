@@ -3,33 +3,33 @@ import { useQuery } from '@blitzjs/rpc'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useMapInspectorFeatures } from '../../../_hooks/mapState/useMapState'
 import {
-  useAtlasFilterParam,
-  useShowAtlasNotesParam,
+  useInternalNotesFilterParam,
+  useShowInternalNotesParam,
 } from '../../../_hooks/useQueryState/useNotesAtlasParams'
-import { useAllowAtlasNotes } from '../../notes/AtlasNotes/utils/useAllowAtlasNotes'
+import { useAllowInternalNotes } from '../../notes/InternalNotes/utils/useAllowInternalNotes'
 import { useStaticRegion } from '../../regionUtils/useStaticRegion'
 
-export const atlasNotesLayerId = 'atlas-notes'
+export const internalNotesLayerId = 'internal-notes'
 
-export const SourcesLayersAtlasNotes = () => {
-  const { showAtlasNotesParam } = useShowAtlasNotesParam()
+export const SourcesLayersInternalNotes = () => {
+  const { showInternalNotesParam } = useShowInternalNotesParam()
   const region = useStaticRegion()!
-  const allowAtlasNotes = useAllowAtlasNotes()
+  const allowInternalNotes = useAllowInternalNotes()
   const inspectorFeatures = useMapInspectorFeatures()
 
-  const { atlasNotesFilterParam } = useAtlasFilterParam()
+  const { internalNotesFilterParam } = useInternalNotesFilterParam()
 
   // For now, we load all notes, but minimized data. We will want to scope this to the viewport later.
   const [result] = useQuery(
     getNotesAndCommentsForRegion,
-    { regionSlug: region.slug, filter: atlasNotesFilterParam },
-    { enabled: allowAtlasNotes },
+    { regionSlug: region.slug, filter: internalNotesFilterParam },
+    { enabled: allowInternalNotes },
   )
   if (result === undefined) return null
-  if (!allowAtlasNotes) return null
+  if (!allowInternalNotes) return null
 
   const selectedFeatureIds = inspectorFeatures
-    .filter((feature) => feature.source === 'atlas-notes')
+    .filter((feature) => feature.source === internalNotesLayerId)
     .map((feature) => (feature?.properties?.id || 0) as number)
 
   return (
@@ -40,7 +40,7 @@ export const SourcesLayersAtlasNotes = () => {
       data={result.featureCollection}
       // attribution="" Internal data / copyrighted
     >
-      {showAtlasNotesParam && (
+      {showInternalNotesParam && (
         <>
           <Layer
             id="atlas-notes-hover"
@@ -54,7 +54,7 @@ export const SourcesLayersAtlasNotes = () => {
             filter={['in', 'id', ...selectedFeatureIds]}
           />
           <Layer
-            id={atlasNotesLayerId}
+            id={internalNotesLayerId}
             key="atlas-notes"
             source="atlas-notes"
             type="symbol"

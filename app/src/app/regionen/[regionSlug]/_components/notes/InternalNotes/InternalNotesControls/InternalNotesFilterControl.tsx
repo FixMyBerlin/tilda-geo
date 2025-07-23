@@ -1,6 +1,6 @@
 import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
 import { getFullname } from '@/src/app/admin/memberships/_components/utils/getFullname'
-import { useAtlasFilterParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useNotesAtlasParams'
+import { useInternalNotesFilterParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useNotesAtlasParams'
 import getNotesAndCommentsForRegion from '@/src/server/notes/queries/getNotesAndCommentsForRegion'
 import { useQuery } from '@blitzjs/rpc'
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
@@ -18,16 +18,16 @@ export const menuItemClasses = (active: boolean) => {
   )
 }
 
-export const AtlasNotesFilterControl = () => {
+export const InternalNotesFilterControl = () => {
   const { slug: regionSlug } = useStaticRegion()!
-  const { atlasNotesFilterParam, setAtlasNotesFilterParam } = useAtlasFilterParam()
+  const { internalNotesFilterParam, setInternalNotesFilterParam } = useInternalNotesFilterParam()
   const queryKey = useQueryKey()
   const [{ authors, stats }, { isLoading }] = useQuery(
     getNotesAndCommentsForRegion,
-    { regionSlug, filter: atlasNotesFilterParam },
+    { regionSlug, filter: internalNotesFilterParam },
     { queryKey },
   )
-  const noFilterActive = !Object.values(atlasNotesFilterParam || {}).some(
+  const noFilterActive = !Object.values(internalNotesFilterParam || {}).some(
     (value) => value !== undefined,
   )
 
@@ -39,7 +39,7 @@ export const AtlasNotesFilterControl = () => {
     state: Record<string, any>,
   ) => {
     e.preventDefault()
-    setAtlasNotesFilterParam({ ...atlasNotesFilterParam, ...state })
+    setInternalNotesFilterParam({ ...internalNotesFilterParam, ...state })
   }
 
   return (
@@ -70,7 +70,7 @@ export const AtlasNotesFilterControl = () => {
           </MenuHeading>
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.completed === true)}
+            className={menuItemClasses(internalNotesFilterParam?.completed === true)}
             onClick={(e) => handleMenuClick(e, { completed: true })}
           >
             Nur erledigte Hinweise{' '}
@@ -78,7 +78,7 @@ export const AtlasNotesFilterControl = () => {
           </MenuItem>
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.completed === false)}
+            className={menuItemClasses(internalNotesFilterParam?.completed === false)}
             onClick={(e) => handleMenuClick(e, { completed: false })}
           >
             Nur offene Hinweise{' '}
@@ -86,7 +86,7 @@ export const AtlasNotesFilterControl = () => {
           </MenuItem>
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.completed === undefined)}
+            className={menuItemClasses(internalNotesFilterParam?.completed === undefined)}
             onClick={(e) => handleMenuClick(e, { completed: undefined })}
           >
             Offen & erledigt
@@ -102,7 +102,7 @@ export const AtlasNotesFilterControl = () => {
               <MenuItem
                 key={author.id}
                 as="button"
-                className={menuItemClasses(atlasNotesFilterParam?.user === author.id)}
+                className={menuItemClasses(internalNotesFilterParam?.user === author.id)}
                 onClick={(e) => handleMenuClick(e, { user: author.id })}
               >
                 {author.currentUser
@@ -114,7 +114,7 @@ export const AtlasNotesFilterControl = () => {
           })}
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.user === undefined)}
+            className={menuItemClasses(internalNotesFilterParam?.user === undefined)}
             onClick={(e) => handleMenuClick(e, { user: undefined })}
           >
             Alle Nutzer
@@ -127,7 +127,7 @@ export const AtlasNotesFilterControl = () => {
           </MenuHeading>
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.commented === true)}
+            className={menuItemClasses(internalNotesFilterParam?.commented === true)}
             onClick={(e) => handleMenuClick(e, { commented: true })}
           >
             Nur kommentierte Hinweise{' '}
@@ -135,7 +135,7 @@ export const AtlasNotesFilterControl = () => {
           </MenuItem>
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.commented === false)}
+            className={menuItemClasses(internalNotesFilterParam?.commented === false)}
             onClick={(e) => handleMenuClick(e, { commented: false })}
           >
             Nur unkommentierte Hinweise{' '}
@@ -143,7 +143,7 @@ export const AtlasNotesFilterControl = () => {
           </MenuItem>
           <MenuItem
             as="button"
-            className={menuItemClasses(atlasNotesFilterParam?.commented === undefined)}
+            className={menuItemClasses(internalNotesFilterParam?.commented === undefined)}
             onClick={(e) => handleMenuClick(e, { commented: undefined })}
           >
             Kommentiert & unkommentiert
@@ -157,7 +157,7 @@ export const AtlasNotesFilterControl = () => {
           <MenuItem
             as="form"
             className={twJoin(
-              atlasNotesFilterParam?.query !== undefined ? 'bg-yellow-100' : '',
+              internalNotesFilterParam?.query !== undefined ? 'bg-yellow-100' : '',
               'relative p-2',
             )}
             onSubmit={(e) => {
@@ -180,7 +180,7 @@ export const AtlasNotesFilterControl = () => {
                   handleMenuClick(e, { query: e.currentTarget.value })
                 }
               }}
-              defaultValue={atlasNotesFilterParam?.query || ''}
+              defaultValue={internalNotesFilterParam?.query || ''}
             />
             <div className="absolute inset-y-3 right-3 flex items-center gap-1">
               <button

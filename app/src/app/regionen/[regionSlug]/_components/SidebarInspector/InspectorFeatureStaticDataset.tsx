@@ -4,7 +4,7 @@ import { useRegionDatasets } from '../../_hooks/useRegionDatasets/useRegionDatas
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { Disclosure } from './Disclosure/Disclosure'
 import { InspectorFeature } from './Inspector'
-import { RegionBbPgNewPriorityNoteButton } from './InspectorFeatureAtlasNote/RegionBbPgNewPriorityNoteButton'
+import { RegionBbPgNewPriorityNoteButton } from './InspectorFeatureInternalNote/RegionBbPgNewPriorityNoteButton'
 import { TagsTable } from './TagsTable/TagsTable'
 import { translations } from './TagsTable/translations/translations.const'
 import { ToolsLinks } from './Tools/ToolsLinks'

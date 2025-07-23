@@ -14,7 +14,7 @@ import {
   osmEditRapidUrl,
   osmOrgUrl,
 } from './osmUrls/osmUrls'
-import { ToolsLinkNewAtlasNote } from './ToolsLinkNewAtlasNote'
+import { ToolsLinkNewInternalNote } from './ToolsLinkNewInternalNote'
 import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
 
 type Props = {
@@ -97,7 +97,7 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         geometry={feature.geometry}
         osmIdConfig={osmIdConfig}
       />
-      <ToolsLinkNewAtlasNote
+      <ToolsLinkNewInternalNote
         properties={feature.properties}
         geometry={feature.geometry}
         osmIdConfig={osmIdConfig}

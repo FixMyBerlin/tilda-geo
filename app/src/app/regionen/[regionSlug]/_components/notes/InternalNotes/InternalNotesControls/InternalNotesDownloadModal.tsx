@@ -4,7 +4,7 @@ import { appBaseUrl } from '@/src/app/_components/utils/appBaseUrl.const'
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useStaticRegion } from '../../../regionUtils/useStaticRegion'
 
-export const AtlasNotesDownloadModal = () => {
+export const InternalNotesDownloadModal = () => {
   const region = useStaticRegion()!
 
   return (

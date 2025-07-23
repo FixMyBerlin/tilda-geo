@@ -5,14 +5,14 @@ import { useSession } from '@blitzjs/auth'
 import { getQueryClient, useMutation } from '@blitzjs/rpc'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
-import { useShowAtlasNotesParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
-import { useQueryKey } from '../../notes/AtlasNotes/utils/useQueryKey'
+import { useShowInternalNotesParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
+import { useQueryKey } from '../../notes/InternalNotes/utils/useQueryKey'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 import { InspectorFeature } from '../Inspector'
 import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 
 export const RegionBbPgNewPriorityNoteButton = ({ feature }: Pick<InspectorFeature, 'feature'>) => {
-  const { setShowAtlasNotesParam } = useShowAtlasNotesParam()
+  const { setShowInternalNotesParam } = useShowInternalNotesParam()
   const [createNoteMutation, { isLoading, error }] = useMutation(createNote)
   const regionSlug = useRegionSlug()
   const queryKey = useQueryKey()
@@ -30,7 +30,7 @@ export const RegionBbPgNewPriorityNoteButton = ({ feature }: Pick<InspectorFeatu
   const handleSubmit = async (
     importance: 'höchste Priorität' | 'hohe Priorität' | 'geringere Priorität',
   ) => {
-    setShowAtlasNotesParam(true)
+    setShowInternalNotesParam(true)
 
     const body = `
 Priorität: ${importance}
