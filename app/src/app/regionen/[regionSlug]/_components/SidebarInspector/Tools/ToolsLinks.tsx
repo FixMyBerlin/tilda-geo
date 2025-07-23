@@ -4,6 +4,7 @@ import {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
 } from '@/src/app/regionen/[regionSlug]/_mapData/types'
+import { Fragment } from 'react'
 import { InspectorFeature } from '../Inspector'
 import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
@@ -104,12 +105,12 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         {changesetLinks.map(({ title, url }) => {
           if (!url) return null
           return (
-            <>
-              <LinkExternal key={url} blank href={url}>
+            <Fragment key={url}>
+              <LinkExternal blank href={url}>
                 {title}
               </LinkExternal>
               <span className="last:hidden"> &bull; </span>
-            </>
+            </Fragment>
           )
         })}
       </div>
