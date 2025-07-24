@@ -1,4 +1,5 @@
 import { $ } from 'bun'
+import chalk from 'chalk'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
@@ -26,7 +27,9 @@ export async function ensureOAuthReady() {
     return true
   }
 
-  console.log('Geofabrik OAuth: OAuth initialization failed; falling back to public data')
+  console.log(
+    chalk.red('Geofabrik OAuth: OAuth initialization failed; falling back to public data'),
+  )
   params.pbfDownloadUrl = params.pbfDownloadUrl
     .replaceAll('osm-internal.download.geofabrik.de', 'download.geofabrik.de')
     .replaceAll('-internal', '')
