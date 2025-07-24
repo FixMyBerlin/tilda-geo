@@ -1,5 +1,5 @@
 import db from '@/db'
-import { zodAtlasFilterParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useNotesAtlasParams'
+import { zodInternalNotesFilterParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useNotesAtlasParams'
 import { resolver } from '@blitzjs/rpc'
 import { featureCollection, point } from '@turf/turf'
 import { z } from 'zod'
@@ -7,7 +7,7 @@ import getNotesAndCommentsForRegion from './getNotesAndCommentsForRegion'
 
 const Schema = z.object({
   regionSlug: z.string(),
-  filter: zodAtlasFilterParam.nullish(),
+  filter: zodInternalNotesFilterParam.nullish(),
 })
 
 export type NotesAndCommentsFeatureCollection = Awaited<
@@ -38,7 +38,7 @@ export default resolver.pipe(
 
     const notePoints = notes.map((note) => {
       const coordinates = [note.longitude, note.latitude]
-      // We transform the properties for <SourcesLayersAtlasNotes />
+      // We transform the properties for <SourcesLayersInternalNotes />
       const properties = {
         id: note.id,
         status: note.resolvedAt ? 'closed' : 'open',

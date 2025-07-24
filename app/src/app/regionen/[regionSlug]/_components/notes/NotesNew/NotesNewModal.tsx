@@ -2,17 +2,17 @@ import { CloseButton } from '@/src/app/_components/CloseButton/CloseButton'
 import { Dialog, Transition, TransitionChild } from '@headlessui/react'
 import { Fragment, useRef } from 'react'
 import { useOsmNotesActions } from '../../../_hooks/mapState/userMapNotes'
-import { useNewAtlasNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
+import { useNewInternalNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
 import { useNewOsmNoteMapParam } from '../../../_hooks/useQueryState/useNotesOsmParams'
 
 export const NotesNewModal = ({ children }: { children: React.ReactNode }) => {
-  const { setNewAtlasNoteMapParam } = useNewAtlasNoteMapParam()
+  const { setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
   const { setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
   const { setOsmNewNoteFeature } = useOsmNotesActions()
   const closeButtonRef = useRef(null)
 
   const setClose = () => {
-    setNewAtlasNoteMapParam(null)
+    setNewInternalNoteMapParam(null)
     setNewOsmNoteMapParam(null)
     setOsmNewNoteFeature(undefined)
   }

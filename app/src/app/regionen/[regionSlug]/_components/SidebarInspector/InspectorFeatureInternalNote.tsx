@@ -8,15 +8,15 @@ import { useQuery } from '@blitzjs/rpc'
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import { Suspense } from 'react'
 import { Disclosure } from './Disclosure/Disclosure'
-import { AtlasNote } from './InspectorFeatureAtlasNote/AtlasNote'
-import { AtlasNoteComment } from './InspectorFeatureAtlasNote/AtlasNoteComment'
-import { NewNoteCommentForm } from './InspectorFeatureAtlasNote/NewNoteCommentForm'
+import { InternalNote } from './InspectorFeatureInternalNote/InternalNote'
+import { InternalNoteComment } from './InspectorFeatureInternalNote/InternalNoteComment'
+import { NewNoteCommentForm } from './InspectorFeatureInternalNote/NewNoteCommentForm'
 
 type Props = {
   noteId: NotesAndCommentsFeatureCollection['featureCollection']['features'][number]['properties']['id']
 }
 
-export const InspectorFeatureAtlasNoteWithQuery = ({ noteId }: Props) => {
+export const InspectorFeatureInternalNoteWithQuery = ({ noteId }: Props) => {
   const [noteAndComments] = useQuery(getNoteAndComments, { id: noteId })
 
   // All users with permissions on the region may also read notes and commens
@@ -36,13 +36,13 @@ export const InspectorFeatureAtlasNoteWithQuery = ({ noteId }: Props) => {
         objectId={String(noteAndComments.id)}
       >
         <section className="bg-blue-50 px-3 py-5">
-          <AtlasNote note={noteAndComments} />
+          <InternalNote note={noteAndComments} />
 
           <ul>
             {noteAndComments.noteComments?.map((comment) => {
               return (
                 <li key={comment.id} className="mt-5 border-t border-t-gray-200 pt-5">
-                  <AtlasNoteComment comment={comment} />
+                  <InternalNoteComment comment={comment} />
                 </li>
               )
             })}
@@ -58,10 +58,10 @@ export const InspectorFeatureAtlasNoteWithQuery = ({ noteId }: Props) => {
   )
 }
 
-export const InspectorFeatureAtlasNote = ({ noteId }: Props) => {
+export const InspectorFeatureInternalNote = ({ noteId }: Props) => {
   return (
     <Suspense fallback={<Spinner className="my-3" size="5" />}>
-      <InspectorFeatureAtlasNoteWithQuery noteId={noteId} />
+      <InspectorFeatureInternalNoteWithQuery noteId={noteId} />
     </Suspense>
   )
 }

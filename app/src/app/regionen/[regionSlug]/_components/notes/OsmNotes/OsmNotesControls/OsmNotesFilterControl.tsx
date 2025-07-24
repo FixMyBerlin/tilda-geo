@@ -6,7 +6,7 @@ import { Fragment } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { useOsmNotesFeatures } from '../../../../_hooks/mapState/userMapNotes'
 import { useOsmFilterParam } from '../../../../_hooks/useQueryState/useNotesOsmParams'
-import { menuItemClasses } from '../../AtlasNotes/AtlasNotesControls/AtlasNotesFilterControl'
+import { menuItemClasses } from '../../InternalNotes/InternalNotesControls/InternalNotesFilterControl'
 
 export const OsmNotesFilterControl = () => {
   const { osmNotesFilterParam, setOsmNotesFilterParam } = useOsmFilterParam()

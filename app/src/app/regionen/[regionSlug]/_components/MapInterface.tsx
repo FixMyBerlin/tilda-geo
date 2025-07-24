@@ -12,7 +12,7 @@ import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
 import { BackgroundLegend } from './background/BackgroundLegend'
 import { SelectBackground } from './background/SelectBackground'
-import { AtlasNotes } from './notes/AtlasNotes/AtlasNotes'
+import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
 
 export const MapInterface = () => {
@@ -38,7 +38,7 @@ export const MapInterface = () => {
         >
           <LoadingIndicator />
           <OsmNotes />
-          <AtlasNotes />
+          <InternalNotes />
           <DownloadModal />
           <SelectBackground />
           <BackgroundLegend />

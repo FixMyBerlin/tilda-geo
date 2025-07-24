@@ -17,6 +17,8 @@ require("ToMarkdownList")
 require("ToTodoTags")
 local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
+local deriveBikelaneSurface = require('deriveBikelaneSurface')
+local deriveBikelaneSmoothness = require('deriveBikelaneSmoothness')
 
 local tags_copied = {}
 local tags_prefixed = {}
@@ -87,8 +89,8 @@ function Bikelanes(object)
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
-        MergeTable(result_tags, DeriveSmoothness(transformed_tags))
-        MergeTable(result_tags, DeriveSurface(transformed_tags))
+        MergeTable(result_tags, deriveBikelaneSurface(transformed_tags, category.id))
+        MergeTable(result_tags, deriveBikelaneSmoothness(transformed_tags, category.id))
         CopyTags(result_tags, transformed_tags, tags_prefixed, 'osm_')
         -- copy original tags
         CopyTags(result_tags, object_tags, tags_copied)

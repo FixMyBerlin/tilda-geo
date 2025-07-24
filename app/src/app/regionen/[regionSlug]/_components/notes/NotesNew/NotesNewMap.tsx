@@ -11,19 +11,19 @@ import {
   type ViewStateChangeEvent,
 } from 'react-map-gl/maplibre'
 import { useOsmNewNoteFeature } from '../../../_hooks/mapState/userMapNotes'
-import { useNewAtlasNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
+import { useNewInternalNoteMapParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
 import { useNewOsmNoteMapParam } from '../../../_hooks/useQueryState/useNotesOsmParams'
 import { SourceLayerFeature } from './SourceLayerFeature'
 import { SourceLayerForRegion } from './SourceLayerForRegion'
 
 type Props = {
-  mapId: 'newAtlasNoteMap' | 'newOsmNoteMap'
+  mapId: 'newInternalNoteMap' | 'newOsmNoteMap'
   newNoteMapParam:
     | ReturnType<typeof useNewOsmNoteMapParam>['newOsmNoteMapParam']
-    | ReturnType<typeof useNewAtlasNoteMapParam>['newAtlasNoteMapParam']
+    | ReturnType<typeof useNewInternalNoteMapParam>['newInternalNoteMapParam']
   setNewNoteMapParam:
     | ReturnType<typeof useNewOsmNoteMapParam>['setNewOsmNoteMapParam']
-    | ReturnType<typeof useNewAtlasNoteMapParam>['setNewAtlasNoteMapParam']
+    | ReturnType<typeof useNewInternalNoteMapParam>['setNewInternalNoteMapParam']
 }
 
 export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Props) => {

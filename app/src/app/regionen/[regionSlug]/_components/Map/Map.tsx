@@ -32,7 +32,7 @@ import { Search } from './Search/Search'
 import { SourceGeojson } from './SourcesAndLayers/SourceGeojson/SourceGeojson'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
-import { SourcesLayersAtlasNotes } from './SourcesAndLayers/SourcesLayersAtlasNotes'
+import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
 import { SourcesLayersRegionMask } from './SourcesAndLayers/SourcesLayersRegionMask'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
@@ -267,7 +267,7 @@ export const Map = () => {
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
       <SourcesLayersOsmNotes />
-      <SourcesLayersAtlasNotes />
+      <SourcesLayersInternalNotes />
       {isDev ? <SourceGeojson /> : null}
       <AttributionControl compact={true} position="bottom-left" />
 

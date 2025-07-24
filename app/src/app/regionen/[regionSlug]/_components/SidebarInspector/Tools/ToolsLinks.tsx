@@ -4,6 +4,7 @@ import {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
 } from '@/src/app/regionen/[regionSlug]/_mapData/types'
+import { Fragment } from 'react'
 import { InspectorFeature } from '../Inspector'
 import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
@@ -14,7 +15,7 @@ import {
   osmEditRapidUrl,
   osmOrgUrl,
 } from './osmUrls/osmUrls'
-import { ToolsLinkNewAtlasNote } from './ToolsLinkNewAtlasNote'
+import { ToolsLinkNewInternalNote } from './ToolsLinkNewInternalNote'
 import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
 
 type Props = {
@@ -51,68 +52,65 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
   ]
 
   return (
-    <section className="flex flex-wrap gap-3 pb-1 text-xs">
-      {editors?.map(({ urlTemplate, name, idKey }) => {
-        const url = editorUrl({
-          urlTemplate,
-          geometry: feature.geometry,
-          osmTypeId,
-          editorId: idKey && feature.properties[idKey],
-        })
-        if (!url) return null
-        return (
-          <LinkExternal key={name} blank button href={url}>
-            {name}
+    <section className="pb-1 text-xs">
+      <div className="flex flex-wrap gap-3">
+        {editors?.map(({ urlTemplate, name, idKey }) => {
+          const url = editorUrl({
+            urlTemplate,
+            geometry: feature.geometry,
+            osmTypeId,
+            editorId: idKey && feature.properties[idKey],
+          })
+          if (!url) return null
+          return (
+            <LinkExternal key={name} blank button href={url}>
+              {name}
+            </LinkExternal>
+          )
+        })}
+        {osmUrlHref && (
+          <LinkExternal blank button href={osmUrlHref}>
+            OpenStreetMap
           </LinkExternal>
-        )
-      })}
+        )}
+        {osmEditIdUrlHref && (
+          <LinkExternal blank button href={osmEditIdUrlHref}>
+            Bearbeiten (iD)
+          </LinkExternal>
+        )}
+        {/* Just for testing for now… */}
+        {!isProd && osmEditRapidUrlHref && (
+          <LinkExternal blank button href={osmEditRapidUrlHref}>
+            Bearbeiten (Rapid) (Staging only)
+          </LinkExternal>
+        )}
+        {mapillaryUrlHref && (
+          <LinkExternal blank button href={mapillaryUrlHref}>
+            Mapillary
+          </LinkExternal>
+        )}
+        <ToolsLinkNewOsmNote
+          properties={feature.properties}
+          geometry={feature.geometry}
+          osmIdConfig={osmIdConfig}
+        />
+        <ToolsLinkNewInternalNote
+          properties={feature.properties}
+          geometry={feature.geometry}
+          osmIdConfig={osmIdConfig}
+        />
+      </div>
 
-      {osmUrlHref && (
-        <LinkExternal blank button href={osmUrlHref}>
-          OpenStreetMap
-        </LinkExternal>
-      )}
-
-      {osmEditIdUrlHref && (
-        <LinkExternal blank button href={osmEditIdUrlHref}>
-          Bearbeiten (iD)
-        </LinkExternal>
-      )}
-
-      {/* Just for testing for now… */}
-      {!isProd && osmEditRapidUrlHref && (
-        <LinkExternal blank button href={osmEditRapidUrlHref}>
-          Bearbeiten (Rapid) (Staging only)
-        </LinkExternal>
-      )}
-
-      {mapillaryUrlHref && (
-        <LinkExternal blank button href={mapillaryUrlHref}>
-          Mapillary
-        </LinkExternal>
-      )}
-
-      <ToolsLinkNewOsmNote
-        properties={feature.properties}
-        geometry={feature.geometry}
-        osmIdConfig={osmIdConfig}
-      />
-      <ToolsLinkNewAtlasNote
-        properties={feature.properties}
-        geometry={feature.geometry}
-        osmIdConfig={osmIdConfig}
-      />
-
-      <div>
+      <div className="pt-1">
         {changesetLinks.map(({ title, url }) => {
           if (!url) return null
           return (
-            <>
-              <LinkExternal key={url} blank href={url}>
+            <Fragment key={url}>
+              <LinkExternal blank href={url}>
                 {title}
               </LinkExternal>
               <span className="last:hidden"> &bull; </span>
-            </>
+            </Fragment>
           )
         })}
       </div>

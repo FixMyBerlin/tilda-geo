@@ -12,7 +12,7 @@ type Props = {
   comment: NoteComment
 }
 
-export const AtlasNoteComment = ({ comment }: Props) => {
+export const InternalNoteComment = ({ comment }: Props) => {
   return (
     <>
       <Markdown

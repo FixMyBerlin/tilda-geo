@@ -175,5 +175,6 @@ function DeriveSmoothness(tags)
   if smoothness == nil then
     smoothness, smoothness_source, smoothness_confidence = deriveSmoothnessFromMTBScale(tags["mtb:scale"])
   end
+
   return { smoothness = smoothness, smoothness_source = smoothness_source, smoothness_confidence = smoothness_confidence }
 end

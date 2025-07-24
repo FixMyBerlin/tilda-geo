@@ -13,7 +13,7 @@ type Props = {
   note: NoteAndComments
 }
 
-export const AtlasNote = ({ note }: Props) => {
+export const InternalNote = ({ note }: Props) => {
   return (
     <>
       <div className="border-l-4 border-white pl-3">
