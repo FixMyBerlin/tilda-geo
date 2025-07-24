@@ -35,7 +35,7 @@ local function deriveBikelaneSmoothness(tags, categoryId)
     if applyParentSmoothness then
       local parentSmoothnessResult = DeriveSmoothness(tags._parent)
       smoothness = parentSmoothnessResult.smoothness
-      smoothness_source = 'parent_highway_' .. parentSmoothnessResult.smoothness_source
+      smoothness_source = parentSmoothnessResult.smoothness_source and 'parent_highway_' .. parentSmoothnessResult.smoothness_source
       smoothness_confidence = parentSmoothnessResult.smoothness_confidence
     end
 

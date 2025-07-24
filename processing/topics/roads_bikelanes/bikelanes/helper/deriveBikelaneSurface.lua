@@ -12,7 +12,7 @@ local function deriveBikelaneSurface(tags, categoryId)
   if copyValueFromParent and surface == nil and tags._parent and tags._parent.surface then
     local parentSurfaceResult = DeriveSurface(tags._parent)
     surface = parentSurfaceResult.surface
-    surface_source = 'parent_highway_' .. parentSurfaceResult.surface_source
+    surface_source = parentSurfaceResult.surface_source and 'parent_highway_' .. parentSurfaceResult.surface_source
     surface_confidence = parentSurfaceResult.surface_confidence
   end
 
