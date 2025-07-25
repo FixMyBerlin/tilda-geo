@@ -85,7 +85,7 @@ function Bikelanes(object)
           mapillary_forward = transformed_tags['mapillary:forward'],
           mapillary_backward = transformed_tags['mapillary:backward'],
           mapillary_traffic_sign = object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'] or transformed_tags['source:traffic_sign:mapillary'],
-          description = transformed_tags.description or transformed_tags.note,
+          description = transformed_tags.description or transformed_tags.note or object_tags['note:cycleway:' .. transformed_tags._side] or object_tags['note:cycleway'],
         })
 
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
