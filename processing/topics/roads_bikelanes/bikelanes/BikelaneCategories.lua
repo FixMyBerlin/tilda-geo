@@ -274,9 +274,11 @@ local cyclewaySeparated = BikelaneCategory.new({
   implicitOneWay = false, -- 'oneway=assumed_no' because its "track"-like and `oneway=yes` (more commonly tagged in cities) is usually explicit
   implicitOneWayConfidence = 'low',
   condition = function(tags)
-    -- Testcase: The "not 'lane'" part is needed for places like https://www.openstreetmap.org/way/964589554 which have the traffic sign but are not separated.
+    -- CASE: GUARD Centerline "lane"
+    -- Needed for places like https://www.openstreetmap.org/way/964589554 which have the traffic sign but are not separated.
     if (tags.cycleway == "lane") then return false end
 
+    -- CASE: Centerline
     -- traffic_sign=DE:237, "Radweg", https://wiki.openstreetmap.org/wiki/DE:Tag:traffic%20sign=DE:237
     -- cycleway=track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=track
     -- cycleway=opposite_track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=opposite_track
@@ -284,6 +286,7 @@ local cyclewaySeparated = BikelaneCategory.new({
       return true
     end
 
+    -- CASE: Everything that has a traffic sign DE:237
     -- Sometimes users add a `traffic_sign=DE:237` right on the `highway=secondard` but it should be `cycleway:right:traffic_sign`
     -- We only allow the follow highway tags. This will still produce false positives but less so.
     -- And looking at the _parent_highway and left|right|nil|both tags for this is way to complex.
