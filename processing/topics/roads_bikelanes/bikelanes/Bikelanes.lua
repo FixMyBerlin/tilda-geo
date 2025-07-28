@@ -81,7 +81,7 @@ function Bikelanes(object)
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
           traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'left'),
           traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'right'),
-          mapillary = object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'] or transformed_tags.mapillary,
+          mapillary = transformed_tags.mapillary or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'] or object_tags['source:cycleway:mapillary'],
           mapillary_forward = transformed_tags['mapillary:forward'],
           mapillary_backward = transformed_tags['mapillary:backward'],
           mapillary_traffic_sign = object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'] or transformed_tags['source:traffic_sign:mapillary'],
