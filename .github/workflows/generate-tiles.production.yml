@@ -3,6 +3,7 @@ name: Regenerate Production Tiles
 on:
   workflow_dispatch:
   schedule:
+    # Every day at 2:00 AM UTC
     - cron: '0 2 * * *'
 jobs:
   generate-tiles:
