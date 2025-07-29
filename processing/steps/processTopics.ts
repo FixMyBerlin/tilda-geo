@@ -150,7 +150,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       continue
     }
     // Bboxes: Overwrite bboxes based on ENV
-    if (params.processOnlyBbox?.length === 4) {
+    if (params.processOnlyBbox?.length === 4 && params.idFilter === false) {
       console.log(
         `Topics: ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
       )
@@ -159,7 +159,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     }
 
     // Bboxes: Create filtered source file
-    if (innerBboxes) {
+    if (innerBboxes && params.idFilter === false) {
       innerFileName = `${topic}_extracted.osm.pbf`
       await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
     }
