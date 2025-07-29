@@ -14,12 +14,13 @@ local DIRECTIONAL_PARKING_INFERENCE_CATEGORIES = Set({
 
 -- If parking lane exists and is not explicitly 'no', infer parking traffic mode
 local function inferTrafficModeFromParking(centerlineTags, side)
-  local value = SANITIZE_PARKING_TAGS.parking(centerlineTags['parking:' .. side] or centerlineTags['parking:both'])
-  if value ~= nil and value ~= 'no' and value ~= SANITIZE_VALUES.disallowed then
-    return 'parking'
-  end
+  local raw_value = centerlineTags['parking:' .. side] or centerlineTags['parking:both']
+  local value = SANITIZE_PARKING_TAGS.parking(raw_value)
 
-  return nil
+  if value == nil then return nil end
+  if value == 'no' then return nil end
+  if value == SANITIZE_VALUES.disallowed then return nil end
+  return 'parking'
 end
 
 local function deriveTrafficMode(bikelaneTags, centerlineTags, categoryId, side)
@@ -44,13 +45,8 @@ local function deriveTrafficMode(bikelaneTags, centerlineTags, categoryId, side)
 
   -- CASE 'lane' bike infra: use only the transformed side
   if DIRECTIONAL_PARKING_INFERENCE_CATEGORIES[categoryId] ~= nil then
-    if side == 'left' then
-      traffic_mode_left = nil
-      traffic_mode_right = inferTrafficModeFromParking(centerlineTags, 'left')
-    else
-      traffic_mode_left = nil
-      traffic_mode_right = inferTrafficModeFromParking(centerlineTags, 'right')
-    end
+    traffic_mode_left = nil
+    traffic_mode_right = inferTrafficModeFromParking(centerlineTags, side)
   end
 
   return { traffic_mode_left = traffic_mode_left, traffic_mode_right = traffic_mode_right }
