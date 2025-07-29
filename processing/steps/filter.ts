@@ -65,7 +65,7 @@ export async function tagFilter(fileName: string, fileChanged: boolean) {
  * @returns the resulting file's name
  */
 export async function idFilter(fileName: string, ids: string) {
-  if (params.idFilter === '') return
+  if (params.idFilter === false) return
 
   console.log(`Filtering the OSM file with \`ID_FILTER=${ids}\`...`)
   try {

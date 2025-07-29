@@ -25,7 +25,7 @@ function parseParameters() {
     osmUsername: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME),
     osmPassword: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD),
     pbfDownloadUrl: urlSchema.parse(process.env.PROCESS_GEOFABRIK_DOWNLOAD_URL),
-    idFilter: process.env.ID_FILTER || '',
+    idFilter: process.env.ID_FILTER || (false as const),
     apiKey: process.env.ATLAS_API_KEY || '',
     diffingMode: diffingModeSchema.parse(process.env.PROCESSING_DIFFING_MODE),
     diffingBbox: parseBbox(process.env.PROCESSING_DIFFING_BBOX),
