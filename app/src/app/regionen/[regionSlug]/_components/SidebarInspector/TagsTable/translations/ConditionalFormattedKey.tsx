@@ -64,6 +64,7 @@ export const ConditionalFormattedKey: React.FC<Props> = ({ sourceId, tagKey }) =
     'composit_width',
     'maxspeed',
     'length',
+    'livecycle',
   ]
   if (!translations[key] && simpleTranslFallbackKeys.includes(tagKey)) {
     key = `ALL--${tagKey}--key`

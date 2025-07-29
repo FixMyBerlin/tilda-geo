@@ -45,8 +45,7 @@ local cyclewayTransformation = CenterLineTransformation.new({
 
 local transformations = { cyclewayTransformation, footwayTransformation } -- order matters for presence
 
-function Bikelanes(object)
-  local object_tags = object.tags
+function Bikelanes(object_tags, object)
   local result_bikelanes = {}
 
   -- generate cycleways from center line tagging, also includes the original object with `side = self`
@@ -68,6 +67,7 @@ function Bikelanes(object)
           _id = DefaultId(object),
           _infrastructureExists = true,
           prefix = transformed_tags._prefix,
+          livecycle = transformed_tags.livecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.livecycle,
           width = parse_length(transformed_tags.width),
           width_source = object_tags['source:cycleway:' .. transformed_tags._side .. ':width'] or transformed_tags['source:width'],
           oneway = DeriveOneway(transformed_tags, category),

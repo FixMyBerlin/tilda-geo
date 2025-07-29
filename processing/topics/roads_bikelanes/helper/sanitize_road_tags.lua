@@ -136,6 +136,11 @@ local SANITIZE_ROAD_TAGS = {
 
     return parse_length(value)
   end,
+  temporary = function (tags)
+    if tags.temporary == 'yes' then
+      return 'temporary'
+    end
+  end,
 }
 
 return SANITIZE_ROAD_TAGS

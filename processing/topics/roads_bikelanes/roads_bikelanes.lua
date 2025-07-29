@@ -15,6 +15,7 @@ require("BikelanesPresence")
 require("BikeLaneGeneralization")
 require("MergeTable")
 require("CopyTags")
+require("Clone")
 require("IsSidepath")
 require("ExtractPublicTags")
 require("round")
@@ -26,9 +27,11 @@ require("ToMarkdownList")
 require("ToTodoTags")
 require("BikeSuitability")
 require("Log")
+local transform_construction_prefix = require('transform_construction_prefix')
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
+local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
 local roadsTable = osm2pgsql.define_table({
   name = 'roads',
@@ -137,13 +140,20 @@ local todoLiniesTable = osm2pgsql.define_table({
 local mapillary_coverage_data = load_csv_mapillary_coverage()
 
 function osm2pgsql.process_way(object)
-  local object_tags = object.tags
+  local raw_tags = object.tags
+  local object_tags = StructuredClone(raw_tags)
 
   -- ====== (A) Filter-Guards ======
   if not object_tags.highway then return end
 
-  -- Skip stuff like "construction", "proposed", "platform" (Haltestellen), "rest_area" (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
+  -- Skip stuff like "construction" (some), "proposed", "platform" (Haltestellen), "rest_area" (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
   local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
+  if allowed_highways[object_tags.construction] then
+    -- Transform `highway=construction + construction=ALLOW_LIST`. Only data with missing `construction=*` is skipped.
+    object_tags.highway = object_tags.construction
+    object_tags.livecycle = 'construction'
+    object_tags.construction = nil
+  end
   if not allowed_highways[object_tags.highway] then return end
 
   local excludeHighway = ExcludeHighways(object_tags)
@@ -158,6 +168,7 @@ function osm2pgsql.process_way(object)
 
   -- ====== (B.2) General conversions ======
   ConvertCyclewayOppositeSchema(object_tags)
+  transform_construction_prefix(object_tags)
   -- Calculate and format length, see also https://github.com/osm2pgsql-dev/osm2pgsql/discussions/1756#discussioncomment-3614364
   -- Use https://epsg.io/5243 (same as `presenceStats.sql`); update `atlas_roads--length--tooltip` if changed.
   local length = round(object:as_linestring():transform(5243):length(), 2)
@@ -166,6 +177,7 @@ function osm2pgsql.process_way(object)
   local road_result_tags = {
     name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name'],
     length = length,
+    livecycle = object_tags.livecycle or SANITIZE_ROAD_TAGS.temporary(object_tags),
     mapillary_coverage = mapillary_coverage_value,
     mapillary = object_tags.mapillary,
     mapillary_forward = object_tags['mapillary:forward'],
@@ -173,14 +185,13 @@ function osm2pgsql.process_way(object)
     mapillary_traffic_sign = object_tags['source:traffic_sign:mapillary'],
     description = object_tags.description or object_tags.note,
   }
-
-  MergeTable(road_result_tags, RoadClassification(object))
-  MergeTable(road_result_tags, Lit(object))
-  MergeTable(road_result_tags, SurfaceQuality(object))
+  MergeTable(road_result_tags, RoadClassification(object_tags))
+  MergeTable(road_result_tags, Lit(object_tags))
+  MergeTable(road_result_tags, SurfaceQuality(object_tags))
 
   -- (C.1a) WRITE `bikelanes` table
   -- (C.1b) WRITE `todoLiniesTable` table for bikelanes
-  local cycleways = Bikelanes(object)
+  local cycleways = Bikelanes(object_tags, object)
   for _, cycleway in ipairs(cycleways) do
     if cycleway._infrastructureExists then
       local cycleway_result_tags = {
@@ -225,7 +236,7 @@ function osm2pgsql.process_way(object)
   end
 
   -- (C.2) WRITE `presence` table
-  local presence = BikelanesPresence(object, cycleways)
+  local presence = BikelanesPresence(object_tags, cycleways)
   if presence ~= nil and
     (presence.bikelane_left ~= "not_expected"
     or presence.bikelane_right ~= "not_expected"
