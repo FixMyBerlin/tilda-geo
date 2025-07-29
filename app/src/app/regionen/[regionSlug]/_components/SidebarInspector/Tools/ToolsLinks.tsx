@@ -101,7 +101,7 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         />
       </div>
 
-      <div className="pt-1">
+      <div className="mt-3">
         {changesetLinks.map(({ title, url }) => {
           if (!url) return null
           return (
