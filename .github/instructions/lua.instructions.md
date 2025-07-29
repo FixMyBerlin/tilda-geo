@@ -20,12 +20,15 @@ applyTo: '**/*.lua'
 - Preserve code comments that are still relevant.
 
 Software tests:
+- To run the test, to go to `/` and run `./processing/run-tests.sh`. Do this to evaluate the test result yourself. You cannot run single files, you always have to run the whole suite.
 - Are always in a `__tests__` folder in the same directory or one directory up.
 - They need to have a name like `file_name_of_functions.test.lua`. So the same name as the file that is being tested postfixed with ".test".
 - They use busted internally but that is automatically loaded and does not need to be required.
 - Use `require("foo")` to load the function that is being tested.
 - Always add `require('Log')` and `require('init')`
 - To run the test, to got `./` and run `./processing/run-tests.sh`
+- Usually use `assert.are.same()` which is a deep compare (Docs: https://lunarmodules.github.io/busted/#assert-same)
+- In an assert, the first param is always the result of our function: `assert.are.same(result_of_function, {'EXPECTED_VALUE'})`. Busted will show in the consol: `result_of_function` as the "Passed in" value. `{'EXPECTED_VALUE'}` as the "Expected" value.
 
 Formatting:
 - Use 2 spaces for indentation.

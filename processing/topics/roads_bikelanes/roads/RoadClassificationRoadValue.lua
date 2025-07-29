@@ -1,14 +1,16 @@
 function RoadClassificationRoadValue(tags)
-  local road_value = nil
-  if (tags.highway == nil) then return road_value end
+  if (tags.highway == nil) then return nil end
 
+  local road_value = tags.highway
   -- https://wiki.openstreetmap.org/wiki/DE:Key:highway
   -- In general, we use the OSM highway value as category, but have a few special cases below.
   local highway_mapping = {
     road = "unspecified_road",
     steps = "footway_steps",
   }
-  road_value = highway_mapping[tags.highway] or tags.highway
+  if highway_mapping[tags.highway] then
+    road_value = highway_mapping[tags.highway]
+  end
 
   -- Sidewalks
   if (tags.highway == 'footway' and tags.footway == 'sidewalk')

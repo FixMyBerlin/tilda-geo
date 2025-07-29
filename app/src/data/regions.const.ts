@@ -213,6 +213,7 @@ export const staticRegion: StaticRegion[] = [
     },
     logoPath: svgInfravelo,
     logoWhiteBackgroundRequired: true,
+    showSearch: true,
     categories: [
       // The order here specifies the order in the UI
       'bikelanes',

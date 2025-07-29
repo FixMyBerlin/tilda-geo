@@ -11,7 +11,18 @@ import { mapillaryKeyUrl } from '../../Tools/osmUrls/osmUrls'
 import { ConditionalFormattedKey } from '../translations/ConditionalFormattedKey'
 import { CompositTableRow } from './types'
 
-const mapillarySchema = z.string().or(z.undefined())
+const mapillarySchema = z
+  .string()
+  .transform((val) => {
+    if (val.includes(';')) {
+      return val
+        .split(';')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    }
+    return [val.trim()]
+  })
+  .or(z.undefined())
 
 export const tableKeyMapillary = 'composit_mapillary'
 export const TagsTableRowCompositMapillary = ({
@@ -19,17 +30,24 @@ export const TagsTableRowCompositMapillary = ({
   tagKey,
   properties,
 }: CompositTableRow) => {
-  const keyDefault = mapillarySchema.parse(properties.mapillary)
-  const keyForward = mapillarySchema.parse(properties.mapillary_forward)
-  const keyBackward = mapillarySchema.parse(properties.mapillary_backward)
-  const keyTrafficSign = mapillarySchema.parse(properties.mapillary_traffic_sign)
+  const keyDefaults = mapillarySchema.parse(properties.mapillary) || []
+  const keyForwards = mapillarySchema.parse(properties.mapillary_forward) || []
+  const keyBackwards = mapillarySchema.parse(properties.mapillary_backward) || []
+  const keyTrafficSigns = mapillarySchema.parse(properties.mapillary_traffic_sign) || []
 
   const [openDefault, setOpenDefault] = useState(false)
   const [openForward, setOpenForward] = useState(false)
   const [openBackward, setOpenBackward] = useState(false)
   const [openTrafficSign, setOpenTrafficSign] = useState(false)
 
-  if (!keyDefault && !keyForward && !keyBackward && !keyTrafficSign) return null
+  if (
+    !keyDefaults.length &&
+    !keyForwards.length &&
+    !keyBackwards.length &&
+    !keyTrafficSigns.length
+  ) {
+    return null
+  }
 
   // Return table is a manual version of <TagsTableRow>
   // which we copied here to allow for colspan=2 for the images
@@ -41,7 +59,7 @@ export const TagsTableRowCompositMapillary = ({
         </td>
         <td className="px-3 py-2 text-sm text-gray-500">
           <ul className="space-y-1">
-            {keyDefault && (
+            {keyDefaults.length > 0 && (
               <li className="flex items-center justify-between">
                 <button
                   type="button"
@@ -50,12 +68,16 @@ export const TagsTableRowCompositMapillary = ({
                   aria-pressed={openDefault}
                 >
                   <OpenCloseIcon open={openDefault} />
-                  <span>Standard</span>
+                  <span>Standard {keyDefaults.length > 1 ? `(${keyDefaults.length})` : ''}</span>
                 </button>
-                <MapillaryNewWindowLink pKey={keyDefault} />
+                <div className="flex gap-1">
+                  {keyDefaults.map((key) => (
+                    <MapillaryNewWindowLink key={key} pKey={key} />
+                  ))}
+                </div>
               </li>
             )}
-            {keyForward && (
+            {keyForwards.length > 0 && (
               <li className="flex items-center justify-between">
                 <button
                   type="button"
@@ -64,12 +86,18 @@ export const TagsTableRowCompositMapillary = ({
                   aria-pressed={openForward}
                 >
                   <OpenCloseIcon open={openForward} />
-                  <span>Fahrtrichtung</span>
+                  <span>
+                    Fahrtrichtung {keyForwards.length > 1 ? `(${keyForwards.length})` : ''}
+                  </span>
                 </button>
-                <MapillaryNewWindowLink pKey={keyForward} />
+                <div className="flex gap-1">
+                  {keyForwards.map((key) => (
+                    <MapillaryNewWindowLink key={key} pKey={key} />
+                  ))}
+                </div>
               </li>
             )}
-            {keyBackward && (
+            {keyBackwards.length > 0 && (
               <li className="flex items-center justify-between">
                 <button
                   type="button"
@@ -78,12 +106,18 @@ export const TagsTableRowCompositMapillary = ({
                   aria-pressed={openBackward}
                 >
                   <OpenCloseIcon open={openBackward} />
-                  <span>Gegenrichtung</span>
+                  <span>
+                    Gegenrichtung {keyBackwards.length > 1 ? `(${keyBackwards.length})` : ''}
+                  </span>
                 </button>
-                <MapillaryNewWindowLink pKey={keyBackward} />
+                <div className="flex gap-1">
+                  {keyBackwards.map((key) => (
+                    <MapillaryNewWindowLink key={key} pKey={key} />
+                  ))}
+                </div>
               </li>
             )}
-            {keyTrafficSign && (
+            {keyTrafficSigns.length > 0 && (
               <li className="flex items-center justify-between">
                 <button
                   type="button"
@@ -92,42 +126,65 @@ export const TagsTableRowCompositMapillary = ({
                   aria-pressed={openTrafficSign}
                 >
                   <OpenCloseIcon open={openTrafficSign} />
-                  <span>Verkehrszeichen</span>
+                  <span>
+                    Verkehrszeichen{' '}
+                    {keyTrafficSigns.length > 1 ? `(${keyTrafficSigns.length})` : ''}
+                  </span>
                 </button>
-                <MapillaryNewWindowLink pKey={keyTrafficSign} />
+                <div className="flex gap-1">
+                  {keyTrafficSigns.map((key) => (
+                    <MapillaryNewWindowLink key={key} pKey={key} />
+                  ))}
+                </div>
               </li>
             )}
           </ul>
         </td>
       </tr>
 
-      {openDefault && keyDefault && (
-        <tr>
-          <td colSpan={2} className="bg-gray-200">
-            <MapillaryIframe visible={openDefault} pKey={keyDefault} />
-          </td>
-        </tr>
+      {openDefault && keyDefaults.length > 0 && (
+        <>
+          {keyDefaults.map((key) => (
+            <tr key={`default-${key}`}>
+              <td colSpan={2} className="bg-gray-200">
+                <MapillaryIframe visible={openDefault} pKey={key} />
+              </td>
+            </tr>
+          ))}
+        </>
       )}
-      {openForward && keyForward && (
-        <tr>
-          <td colSpan={2} className="bg-gray-200">
-            <MapillaryIframe visible={openForward} pKey={keyForward} />
-          </td>
-        </tr>
+      {openForward && keyForwards.length > 0 && (
+        <>
+          {keyForwards.map((key) => (
+            <tr key={`forward-${key}`}>
+              <td colSpan={2} className="bg-gray-200">
+                <MapillaryIframe visible={openForward} pKey={key} />
+              </td>
+            </tr>
+          ))}
+        </>
       )}
-      {openBackward && keyBackward && (
-        <tr>
-          <td colSpan={2} className="bg-gray-200">
-            <MapillaryIframe visible={openBackward} pKey={keyBackward} />
-          </td>
-        </tr>
+      {openBackward && keyBackwards.length > 0 && (
+        <>
+          {keyBackwards.map((key) => (
+            <tr key={`backward-${key}`}>
+              <td colSpan={2} className="bg-gray-200">
+                <MapillaryIframe visible={openBackward} pKey={key} />
+              </td>
+            </tr>
+          ))}
+        </>
       )}
-      {openTrafficSign && keyTrafficSign && (
-        <tr>
-          <td colSpan={2} className="bg-gray-200">
-            <MapillaryIframe visible={openTrafficSign} pKey={keyTrafficSign} />
-          </td>
-        </tr>
+      {openTrafficSign && keyTrafficSigns.length > 0 && (
+        <>
+          {keyTrafficSigns.map((key) => (
+            <tr key={`traffic-sign-${key}`}>
+              <td colSpan={2} className="bg-gray-200">
+                <MapillaryIframe visible={openTrafficSign} pKey={key} />
+              </td>
+            </tr>
+          ))}
+        </>
       )}
     </>
   )

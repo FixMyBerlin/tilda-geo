@@ -2,14 +2,12 @@ require('init')
 require("transformations")
 require("HighwayClasses")
 
-function BikelanesPresence(object, cycleways)
-  local tags = object.tags
-
+function BikelanesPresence(object_tags, cycleways)
   -- GUARD: Skip some roads
-  if PathClasses[tags.highway] or tags.highway == 'pedestrian' then
+  if PathClasses[object_tags.highway] or object_tags.highway == 'pedestrian' then
     return nil
   end
-  if HighwayClasses[tags.highway] then
+  if HighwayClasses[object_tags.highway] then
     return nil
   end
 
@@ -30,7 +28,7 @@ function BikelanesPresence(object, cycleways)
     'service',
     'pedestrian', -- unreachable due to PathClasses guard
   })
-  if noInfrastructureOnSidesExpected[tags.highway] or presence.self then
+  if noInfrastructureOnSidesExpected[object_tags.highway] or presence.self then
     for _, side in pairs(sides) do presence[side] = presence[side] or 'not_expected' end
   end
 
@@ -45,7 +43,7 @@ function BikelanesPresence(object, cycleways)
     'tertiary', 'tertiary_link',
     'secondary', 'secondary_link',
   })
-  if noInfrastructureOnSelfAssumed[tags.highway] then
+  if noInfrastructureOnSelfAssumed[object_tags.highway] then
     -- Set center to "not_expected" based on road class
     presence.self = presence.self or 'not_expected'
 
@@ -62,12 +60,12 @@ function BikelanesPresence(object, cycleways)
   end
 
   -- Set left to "not_expected" if street is oneway for car and bike
-  if tags.oneway == 'yes' and tags['oneway:bicycle'] ~= 'no' then
+  if object_tags.oneway == 'yes' and object_tags['oneway:bicycle'] ~= 'no' then
     presence.left = presence.left or 'not_expected'
   end
 
   -- Set left side to "not_expected" for junctions
-  if tags.junction == 'roundabout' then
+  if object_tags.junction == 'roundabout' then
     presence.left = presence.left or 'not_expected'
   end
 

@@ -39,6 +39,7 @@ import {
   TagsTableRowCompositWidth,
   tableKeyWidth,
 } from './compositTableRows/TagsTableRowCompositWidth'
+import { TagsTableRowLivecycle } from './compositTableRows/TagsTableRowLivecycle'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
 import { TagsTableRowWikipedia, tableKeyWikipedia } from './compositTableRows/TagsTableRowWikipedia'
 import { KEY_IF_PRESENCE, cleanKey } from './utils/cleanKey'
@@ -73,6 +74,13 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200">
+        <TagsTableRowLivecycle
+          key="livecycle"
+          sourceId={sourceId}
+          tagKey="livecycle"
+          properties={properties}
+        />
+
         {keys?.map((key) => {
           const cleanedKey = cleanKey(key)
 

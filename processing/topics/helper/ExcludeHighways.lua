@@ -1,33 +1,33 @@
-require("Set")
+require('Set')
 
 ---@return boolean, string
 -- If and why a highway object should be excluded based on its tags.
 -- @return true/false, reason
 function ExcludeHighways(tags)
   -- Skip all non standard access values
-  local forbidden_accesses = Set({ "private", "no", "destination", "delivery", "permit" })
+  local forbidden_accesses = Set({ 'private', 'no', 'destination', 'delivery', 'permit' })
   if tags.access and forbidden_accesses[tags.access] then
-    return true, "Excluded by `forbidden_accesses` for `access=" .. tags.access .. "`"
+    return true, 'Excluded by `forbidden_accesses` for `access=' .. tags.access .. '`'
   end
-  if (tags.highway == "footway" or tags.highway == "path")
+  if (tags.highway == 'footway' or tags.highway == 'path')
       and tags.foot and forbidden_accesses[tags.foot] then
-    return true, "Excluded by `forbidden_accesses` for `foot=" .. tags.foot .. "`"
+    return true, 'Excluded by `forbidden_accesses` for `foot=' .. tags.foot .. '`'
   end
   if tags.highway == 'cycleway'
       and tags.bicycle and forbidden_accesses[tags.bicycle] then
-    return true, "Excluded by `forbidden_accesses` for `bicycle=" .. tags.bicycle .. "`"
+    return true, 'Excluded by `forbidden_accesses` for `bicycle=' .. tags.bicycle .. '`'
   end
 
   if tags.operator == 'private' then
-    return true, "Excluded by `operator=private`"
+    return true, 'Excluded by `operator=private`'
   end
 
   if tags.indoor == 'yes' then
-    return true, "Excluded by `indoor=yes`"
+    return true, 'Excluded by `indoor=yes`'
   end
 
   if tags.informal == 'yes' then
-    return true, "Excluded by `informal=yes`"
+    return true, 'Excluded by `informal=yes`'
   end
 
   -- Skip all unwanted `highway=service + service=<value>` values

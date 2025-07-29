@@ -17,6 +17,7 @@ require("ToMarkdownList")
 require("ToTodoTags")
 local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
+local deriveTrafficMode = require('deriveTrafficMode')
 local deriveBikelaneSurface = require('deriveBikelaneSurface')
 local deriveBikelaneSmoothness = require('deriveBikelaneSmoothness')
 
@@ -44,8 +45,7 @@ local cyclewayTransformation = CenterLineTransformation.new({
 
 local transformations = { cyclewayTransformation, footwayTransformation } -- order matters for presence
 
-function Bikelanes(object)
-  local object_tags = object.tags
+function Bikelanes(object_tags, object)
   local result_bikelanes = {}
 
   -- generate cycleways from center line tagging, also includes the original object with `side = self`
@@ -67,6 +67,7 @@ function Bikelanes(object)
           _id = DefaultId(object),
           _infrastructureExists = true,
           prefix = transformed_tags._prefix,
+          livecycle = transformed_tags.livecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.livecycle,
           width = parse_length(transformed_tags.width),
           width_source = object_tags['source:cycleway:' .. transformed_tags._side .. ':width'] or transformed_tags['source:width'],
           oneway = DeriveOneway(transformed_tags, category),
@@ -79,15 +80,14 @@ function Bikelanes(object)
           buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
           marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
-          traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'left'),
-          traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(transformed_tags, 'right'),
-          mapillary = object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'] or transformed_tags.mapillary,
-          mapillary_forward = transformed_tags['mapillary:forward'],
-          mapillary_backward = transformed_tags['mapillary:backward'],
+          mapillary = transformed_tags.mapillary or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'] or object_tags['source:cycleway:mapillary'],
+          mapillary_forward = transformed_tags['mapillary:forward'] or object_tags['source:cycleway:mapillary:forward'],
+          mapillary_backward = transformed_tags['mapillary:backward'] or object_tags['source:cycleway:mapillary:backward'],
           mapillary_traffic_sign = object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'] or transformed_tags['source:traffic_sign:mapillary'],
-          description = transformed_tags.description or transformed_tags.note,
+          description = transformed_tags.description or transformed_tags.note or object_tags['note:cycleway:' .. transformed_tags._side] or object_tags['note:cycleway'],
         })
 
+        MergeTable(result_tags, deriveTrafficMode(transformed_tags, object_tags, category.id, transformed_tags._side))
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
         MergeTable(result_tags, deriveBikelaneSurface(transformed_tags, category.id))
         MergeTable(result_tags, deriveBikelaneSmoothness(transformed_tags, category.id))

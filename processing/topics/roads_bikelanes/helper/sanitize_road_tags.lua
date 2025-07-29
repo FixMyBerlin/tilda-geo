@@ -108,7 +108,7 @@ local SANITIZE_ROAD_TAGS = {
 
     -- Sanitize values:
     -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-      return Sanitize(value, {
+    return Sanitize(value, {
       'no',
       'motor_vehicle', 'parking', 'psv', 'bicycle', 'foot'
     })
@@ -135,6 +135,11 @@ local SANITIZE_ROAD_TAGS = {
     end
 
     return parse_length(value)
+  end,
+  temporary = function (tags)
+    if tags.temporary == 'yes' then
+      return 'temporary'
+    end
   end,
 }
 

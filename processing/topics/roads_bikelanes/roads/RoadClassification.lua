@@ -1,19 +1,14 @@
 require('init')
 require("Set")
-require("CopyTags")
 require("Sanitize")
 require("DeriveTrafficSigns")
 local parse_length = require('parse_length')
 require("MergeTable")
 require("RoadClassificationRoadValue")
 
-local tags_copied = {}
-local tags_prefixed = {}
-
-function RoadClassification(object)
-  local tags = object.tags
+function RoadClassification(object_tags)
   local result_tags = {
-    road = RoadClassificationRoadValue(object.tags)
+    road = RoadClassificationRoadValue(object_tags)
   }
 
   -- Mischverkehr
@@ -26,21 +21,19 @@ function RoadClassification(object)
 
   -- Note: We do not pass 'oneway=no' to the 'oneway' key
   -- because it is the default which we do not want to show in the UI.
-  result_tags.oneway = Sanitize(tags.oneway, { "yes" })
-  if tags.oneway == 'yes' and tags.dual_carriageway == 'yes' then
+  result_tags.oneway = Sanitize(object_tags.oneway, { "yes" })
+  if object_tags.oneway == 'yes' and object_tags.dual_carriageway == 'yes' then
     result_tags.oneway = 'yes_dual_carriageway'
   end
-  if tags['oneway:bicycle'] then
-    result_tags['oneway_bicycle'] = Sanitize(tags['oneway:bicycle'], { 'yes', 'no' })
+  if object_tags['oneway:bicycle'] then
+    result_tags['oneway_bicycle'] = Sanitize(object_tags['oneway:bicycle'], { 'yes', 'no' })
   end
 
-  CopyTags(result_tags, tags, tags_copied)
-  CopyTags(result_tags, tags, tags_prefixed, "osm_")
-  result_tags.width = parse_length(tags.width)
-  result_tags.width_source = tags['source:width']
-  result_tags.bridge = Sanitize(tags.bridge, { "yes" })
-  result_tags.tunnel = Sanitize(tags.tunnel, { "yes" })
-  MergeTable(result_tags, DeriveTrafficSigns(tags))
+  result_tags.width = parse_length(object_tags.width)
+  result_tags.width_source = object_tags['source:width']
+  result_tags.bridge = Sanitize(object_tags.bridge, { "yes" })
+  result_tags.tunnel = Sanitize(object_tags.tunnel, { "yes" })
+  MergeTable(result_tags, DeriveTrafficSigns(object_tags))
 
   return result_tags
 end
