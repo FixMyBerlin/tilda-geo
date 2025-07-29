@@ -181,22 +181,21 @@ function osm2pgsql.process_way(object)
   -- (C.1a) WRITE `bikelanes` table
   -- (C.1b) WRITE `todoLiniesTable` table for bikelanes
   local cycleways = Bikelanes(object)
-  local cycleway_result_tags = {
-    name = road_result_tags.name,
-    road = road_result_tags.road,
-    length = length,
-    mapillary_coverage = mapillary_coverage_value,
-    mapillary = cycleways.mapillary or road_result_tags.mapillary,
-    mapillary_forward = cycleways.mapillary_forward or road_result_tags.mapillary_forward,
-    mapillary_backward = cycleways.mapillary_backward or road_result_tags.mapillary_backward,
-    mapillary_traffic_sign = cycleways.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
-    description = cycleways.description or road_result_tags.description,
-  }
-
   for _, cycleway in ipairs(cycleways) do
     if cycleway._infrastructureExists then
+      local cycleway_result_tags = {
+        name = road_result_tags.name,
+        road = road_result_tags.road,
+        length = length,
+        mapillary_coverage = mapillary_coverage_value,
+        mapillary = cycleway.mapillary or road_result_tags.mapillary,
+        mapillary_forward = cycleway.mapillary_forward or road_result_tags.mapillary_forward,
+        mapillary_backward = cycleway.mapillary_backward or road_result_tags.mapillary_backward,
+        mapillary_traffic_sign = cycleway.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
+        description = cycleway.description or road_result_tags.description,
+        _parent_highway = cycleway._parent_highway
+      }
       local meta = Metadata(object)
-      cycleway_result_tags._parent_highway = cycleway._parent_highway
 
       bikelanesTable:insert({
         id = cycleway._id,
