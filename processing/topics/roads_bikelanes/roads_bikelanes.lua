@@ -164,7 +164,7 @@ function osm2pgsql.process_way(object)
 
   -- ====== (C) Compute results and insert ======
   local road_result_tags = {
-    name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'],
+    name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name'],
     length = length,
     mapillary_coverage = mapillary_coverage_value,
     mapillary = object_tags.mapillary,
