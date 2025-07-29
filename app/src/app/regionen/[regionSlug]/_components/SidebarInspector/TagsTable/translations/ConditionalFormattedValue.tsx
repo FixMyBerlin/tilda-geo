@@ -89,6 +89,8 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     { key: 'distance', suffix: 'km' }, // bikeroutes
     { key: 'buffer_left', suffix: 'm' }, // bikelanes
     { key: 'buffer_right', suffix: 'm' }, // bikelanes
+    { key: 'tilda_osm_id', suffix: undefined }, // infravelo
+    { key: 'tilda_width', suffix: 'm' }, // infravelo
   ]
   const numberConfig = numberConfigs.find(
     (c) => c.key === tagKey || prefixWithOsm(c.key) === tagKey,
