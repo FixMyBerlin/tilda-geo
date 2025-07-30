@@ -2,6 +2,7 @@ import { StoreFeaturesInspector } from '../../_hooks/mapState/useMapState'
 import { useRegionDatasets } from '../../_hooks/useRegionDatasets/useRegionDatasets'
 import { internalNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersOsmNotes'
+import { qaSourceId } from '../Map/SourcesAndLayers/SourcesLayersQa'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureAtlasGeo } from './InspectorFeatureAtlasGeo'
@@ -44,6 +45,17 @@ export const Inspector = ({ features }: Props) => {
               key={`${internalNotesSourceId}-${inspectObject?.properties?.id}`}
               noteId={inspectObject.properties.id}
             />
+          )
+        }
+        if (inspectObject.source === qaSourceId) {
+          return (
+            <pre key={`${qaSourceId}-${inspectObject?.properties?.id}`}>
+              <code>{JSON.stringify(inspectObject, undefined, 2)}</code>
+            </pre>
+            // <InspectorFeatureInternalNote
+            //   key={`atlas-note-${inspectObject?.properties?.id}`}
+            //   noteId={inspectObject.properties.id}
+            // />
           )
         }
 

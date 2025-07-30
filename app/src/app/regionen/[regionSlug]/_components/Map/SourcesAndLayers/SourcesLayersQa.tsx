@@ -6,7 +6,7 @@ import { useQaParam } from '../../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 
 export const qaLayerId = 'qa-layer'
-const qaSourceId = 'qa-source'
+export const qaSourceId = 'qa-source'
 
 export const SourcesLayersQa = () => {
   const { qaParamData } = useQaParam()

@@ -4,6 +4,7 @@ import { useRegionDatasets } from '@/src/app/regionen/[regionSlug]/_hooks/useReg
 import { MapDataCategoryConfig } from '../../../_hooks/useQueryState/useCategoriesConfig/type'
 import { useShowInternalNotesParam } from '../../../_hooks/useQueryState/useNotesAtlasParams'
 import { useShowOsmNotesParam } from '../../../_hooks/useQueryState/useNotesOsmParams'
+import { useQaParam } from '../../../_hooks/useQueryState/useQaParam'
 import { getSourceData } from '../../../_mapData/utils/getMapDataUtils'
 import { createLayerKeyAtlasGeo } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import {
@@ -12,6 +13,7 @@ import {
 } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
+import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
 
@@ -72,6 +74,10 @@ export const useInteractiveLayers = () => {
   const { showInternalNotesParam } = useShowInternalNotesParam()
   if (showInternalNotesParam) {
     activeCategoryLayerIds.push(internalNotesLayerId)
+  }
+  const { qaParamData } = useQaParam()
+  if (qaParamData.configSlug && qaParamData.style !== 'none') {
+    activeCategoryLayerIds.push(qaLayerId)
   }
 
   // active layer from datasets
