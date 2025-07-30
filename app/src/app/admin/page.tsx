@@ -17,6 +17,9 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/regions">Regionen</Link>
         </li>
         <li>
+          <Link href="/admin/qa-configs">QA Konfigurationen</Link>
+        </li>
+        <li>
           <Link href="/admin/verifications">Verifications</Link>
         </li>
         <li>
