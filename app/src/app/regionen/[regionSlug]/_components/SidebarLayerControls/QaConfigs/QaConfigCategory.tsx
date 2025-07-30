@@ -16,42 +16,18 @@ export const QaConfigCategory = ({
     createdAt: Date
   }
 }) => {
-  const { qaParam, setQaParam } = useQaParam()
+  const { qaParamData, setQaParamData } = useQaParam()
 
-  // Parse current QA param to get config and style using "--" as separator
-  const parseQaParam = (param: string) => {
-    if (!param) return { configSlug: '', style: 'none' as QaStyleKey }
-
-    const parts = param.split('--')
-    if (parts.length < 2) return { configSlug: '', style: 'none' as QaStyleKey }
-
-    const style = parts[parts.length - 1] as QaStyleKey
-    const configSlug = parts.slice(0, -1).join('--')
-    return { configSlug, style }
-  }
-
-  const { configSlug, style } = parseQaParam(qaParam)
-  const isSelected = configSlug === qaConfig.slug
-
-  // Determine which radio button should be checked for this QA config
-  const getCheckedStyle = (): QaStyleKey => {
-    if (isSelected) {
-      return style
-    } else {
-      // If this QA config is not active, show "none" as selected
-      return 'none'
-    }
-  }
+  const isSelected = qaParamData.configSlug === qaConfig.slug
+  const currentStyle = isSelected ? qaParamData.style : 'none'
 
   const handleStyleChange = (newStyle: QaStyleKey) => {
     if (newStyle === 'none') {
       // Deactivate this QA config
-      setQaParam('')
+      setQaParamData({ configSlug: '', style: 'none' })
     } else {
-      // Activate this QA config with the selected style using "--" as separator
-      // This automatically deactivates any other QA config since only one can be active
-      const newQaParam = `${qaConfig.slug}--${newStyle}`
-      setQaParam(newQaParam)
+      // Activate this QA config with the selected style
+      setQaParamData({ configSlug: qaConfig.slug, style: newStyle })
     }
   }
 
@@ -105,7 +81,7 @@ export const QaConfigCategory = ({
                       type="radio"
                       name={`qa-style-${qaConfig.slug}`}
                       value={option.key}
-                      checked={getCheckedStyle() === option.key}
+                      checked={currentStyle === option.key}
                       onChange={() => handleStyleChange(option.key)}
                       className="h-3 w-3 text-yellow-600 focus:ring-yellow-500"
                     />
