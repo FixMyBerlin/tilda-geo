@@ -63,6 +63,9 @@ model QaConfig {
   // Reference to existing data table (with schema prefix)
   mapTable    String   // e.g., "public.qa_parkings_euvm"
 
+  // Map attribution for the source
+  mapAttribution String? // e.g., "QA Data: tilda-geo.de"
+
   // Thresholds for automatic system evaluation
   goodThreshold      Float   @default(0.2)  // relative <= 0.2 difference = GOOD
   needsReviewThreshold Float   @default(0.5)  // relative <= 0.5 difference = NEEDS_REVIEW
@@ -310,157 +313,20 @@ This allows the API route to compare `previous_relative` vs `current_relative` t
 
 ### API Route for QA Updates
 
-Create `app/src/app/api/qa/update-after-processing/route.ts`:
+**Implemented**: `app/src/app/api/private/post-processing-qa-update/route.ts`
 
-```typescript
-export async function POST(request: Request) {
-  // Get all active QA configs from database
-  const qaConfigs = await db.qaConfig.findMany({
-    where: { isActive: true },
-    include: { region: true }
-  })
+The API route is called automatically after processing completes and:
 
-  for (const config of qaConfigs) {
-    // Get areas from the map table
-    const areas = await getAreasFromMapTable(config.mapTable)
-
-    for (const area of areas) {
-      const systemStatus = calculateSystemStatus(area.relative, config)
-
-      await upsertQaEvaluationWithRules(config.id, area.id, {
-        systemStatus,
-        previousRelative: area.previous_relative,
-        currentRelative: area.relative
-      })
-    }
-  }
-
-  return Response.json({ success: true })
-}
-
-// Helper function to calculate system status based on relative value and thresholds
-function calculateSystemStatus(relative: number | null, config: QaConfig): QaSystemStatus {
-  if (relative === null) {
-    return 'NEEDS_REVIEW' // Handle NULL relative values
-  }
-
-  const difference = Math.abs(relative - 1.0)
-
-  if (difference <= config.goodThreshold) {
-    return 'GOOD'
-  } else if (difference <= config.needsReviewThreshold) {
-    return 'NEEDS_REVIEW'
-  } else {
-    return 'PROBLEMATIC'
-  }
-}
-```
-
-### Update Rules Logic
-
-```typescript
-async function upsertQaEvaluationWithRules(
-  configId: number,
-  areaId: string,
-  evaluation: {
-    systemStatus: QaSystemStatus
-    previousRelative: number | null
-    currentRelative: number | null
-  }
-) {
-  const previousEvaluation = await getCurrentEvaluation(configId, areaId)
-
-  // Check if data changed significantly
-  const dataChanged = hasSignificantChange(
-    evaluation.previousRelative,
-    evaluation.currentRelative
-  )
-
-  if (!dataChanged) {
-    // No significant change - no new evaluation needed
-    return previousEvaluation
-  }
-
-    // Check if we need to create a new evaluation or keep existing
-  if (shouldCreateNewEvaluation(previousEvaluation, evaluation.systemStatus)) {
-    return db.qaEvaluation.create({
-      data: {
-        configId,
-        areaId,
-        systemStatus: evaluation.systemStatus,
-        evaluatorType: 'SYSTEM',
-        // Reset user decision (set to null)
-        userStatus: null,
-        body: null,
-        userId: null,
-      }
-    })
-  } else {
-    // No change needed - keep existing evaluation
-    return previousEvaluation
-  }
-}
-
-// Helper function to get current evaluation for an area
-function getCurrentEvaluation(configId: number, areaId: string) {
-  return db.qaEvaluation.findFirst({
-    where: { configId, areaId },
-    orderBy: { createdAt: 'desc' }
-  })
-}
-
-// Helper function to determine if we need to create a new evaluation
-function shouldCreateNewEvaluation(
-  previousEvaluation: QaEvaluation | null,
-  newSystemStatus: QaSystemStatus
-): boolean {
-  if (!previousEvaluation) return true
-
-  const previousSystemStatus = previousEvaluation.systemStatus
-  const hasUserDecision = previousEvaluation.userStatus !== null
-
-  // If no user decision, create new evaluation if system status changed
-  if (!hasUserDecision) {
-    return previousSystemStatus !== newSystemStatus
-  }
-
-  // If user decision exists, only create new evaluation if we need to reset it
-  return shouldResetUserDecision(previousSystemStatus, newSystemStatus, true)
-}
-
-// Helper function to determine if user decision should be reset
-function shouldResetUserDecision(
-  previousSystemStatus: QaSystemStatus,
-  newSystemStatus: QaSystemStatus,
-  hasUserDecision: boolean
-): boolean {
-  if (!hasUserDecision) return false
-
-  // Reset if system got worse
-  if (isSystemWorse(previousSystemStatus, newSystemStatus)) return true
-
-  // Reset if system improved significantly (user should re-evaluate)
-  if (isSystemBetter(previousSystemStatus, newSystemStatus)) return true
-
-  return false
-}
-
-function isSystemWorse(previous: QaSystemStatus, current: QaSystemStatus): boolean {
-  const severity = { 'GOOD': 1, 'NEEDS_REVIEW': 2, 'PROBLEMATIC': 3 }
-  return severity[current] > severity[previous]
-}
-
-function isSystemBetter(previous: QaSystemStatus, current: QaSystemStatus): boolean {
-  const severity = { 'GOOD': 1, 'NEEDS_REVIEW': 2, 'PROBLEMATIC': 3 }
-  return severity[current] < severity[previous]
-}
-
-
-```
+1. **Gets all active QA configs** from the database
+2. **Queries each config's map table** to get areas with relative values
+3. **Calculates system status** for each area based on thresholds
+4. **Applies update rules** to determine if new evaluations are needed
+5. **Creates new evaluations** when data has changed significantly
+6. **Preserves user decisions** according to the case analysis table
 
 ### Processing Workflow Integration
 
-Update `processing/index.ts` to trigger QA updates:
+**Implemented**: Updated `processing/index.ts` to trigger QA updates:
 
 ```typescript
 // In processing/index.ts after processTopics
@@ -471,6 +337,8 @@ await triggerQaUpdates()
 
 // ... rest of existing workflow
 ```
+
+The `triggerQaUpdates()` function calls the private API endpoint `/api/private/post-processing-qa-update` which updates all QA evaluations based on the latest processing results.
 
 ## Inspector Display Logic
 
