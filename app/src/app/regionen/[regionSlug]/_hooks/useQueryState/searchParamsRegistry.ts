@@ -12,4 +12,5 @@ export const searchParamsRegistry = {
   atlasNotesFilter: 'atlasNotesFilter', // TODO: We renamed everything to internalNotes except the URL param. We need to add a migration for this.
   osmNotesFilter: 'osmNotesFilter',
   debugMap: 'debugMap',
+  qa: 'qa', // QA layer selection
 } as const

@@ -1,6 +1,6 @@
 import { Link } from '@/src/app/_components/links/Link'
 import { invoke } from '@/src/blitz-server'
-import getQaConfigs from '@/src/server/qa-configs/queries/getQaConfigs'
+import getQaConfigsForAdmin from '@/src/server/qa-configs/queries/getQaConfigsForAdmin'
 import { Metadata } from 'next'
 import { Breadcrumb } from '../_components/Breadcrumb'
 import { HeaderWrapper } from '../_components/HeaderWrapper'
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 }
 
 export default async function AdminQaConfigsPage() {
-  const qaConfigs = await invoke(getQaConfigs, {})
+  const qaConfigs = await invoke(getQaConfigsForAdmin, {})
 
   return (
     <>
