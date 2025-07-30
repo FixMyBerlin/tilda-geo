@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
+export const GuardEnpointSchema = z.object({
+  apiKey: z.string(),
+})
+
 export function guardEnpoint(req: NextRequest, schema: z.ZodObject<{ apiKey: z.ZodString }, any>) {
   // Parse and validate the query string
   const requestUrl = new URL(req.url)
