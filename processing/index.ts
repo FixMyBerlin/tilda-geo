@@ -43,6 +43,9 @@ async function main() {
     // Delete cache and (frontend) trigger cache warming
     await updateCache()
 
+    // Frontend: Trigger QA evaluation updates for all regions
+    await triggerPrivateApi('post-processing-qa-update')
+
     logTileInfo()
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
