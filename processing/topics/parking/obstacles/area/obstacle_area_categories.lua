@@ -56,10 +56,10 @@ obstacle_area_categories = {
     id = 'road_marking_restricted_area',
     buffer_radius = function(tags) return nil end,
     conditions = function(tags)
-      return tags['area:highway'] == 'prohibited'
+      return tags['area:highway'] == 'prohibited' or tags.road_marking == 'restriction'
     end,
     tags = function(tags) return {} end,
-    tags_cc = { 'area:highway' },
+    tags_cc = { 'area:highway', 'road_marking' },
   }),
   class_obstacle_category.new({
     -- https://www.openstreetmap.org/way/1127983079
