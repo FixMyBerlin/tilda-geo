@@ -34,7 +34,6 @@ describe('mergeCategoriesConfig()', () => {
           styles: [
             { ...defaultStyleObject, id: 'default', active: true }, // change to false
             { ...defaultStyleObject, id: 'completeness', active: false }, // change to true
-            { ...defaultStyleObject, id: 'verification', active: false },
             { ...defaultStyleObject, id: 'freshness', active: false },
           ],
         },

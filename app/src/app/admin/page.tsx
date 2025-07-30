@@ -20,9 +20,6 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/qa-configs">QA Konfigurationen</Link>
         </li>
         <li>
-          <Link href="/admin/verifications">Verifications</Link>
-        </li>
-        <li>
           <Link href="/admin/memberships">Nutzer & Mitgliedschaften</Link>
         </li>
         <li>

@@ -14,7 +14,6 @@ export type SubcatBikelanesStyleIds =
   | 'default'
   | 'details'
   | 'width'
-  | 'verification'
   | 'completeness'
   | 'freshness'
   | 'bikelane_oneway_arrows'

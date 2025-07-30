@@ -1,6 +1,5 @@
 import { MapDataSource } from '../types'
 import { SourceExportApiIdentifier } from './export/exportIdentifier'
-import { SourceVerificationApiIdentifier } from './verification/verificationIdentifier'
 
 export type SourcesParkingId =
   | 'parkraumParking'
@@ -9,11 +8,7 @@ export type SourcesParkingId =
   | 'parkraumParkingPoints'
   | 'parkraumParkingStats'
 
-export const sourcesParking: MapDataSource<
-  SourcesParkingId,
-  SourceVerificationApiIdentifier,
-  SourceExportApiIdentifier
->[] = [
+export const sourcesParking: MapDataSource<SourcesParkingId, SourceExportApiIdentifier>[] = [
   {
     id: 'parkraumParking',
     tiles:
@@ -50,7 +45,6 @@ export const sourcesParking: MapDataSource<
       ],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -78,7 +72,6 @@ export const sourcesParking: MapDataSource<
     osmIdConfig: undefined,
     inspector: { enabled: false }, // Those layers have no properties anyways
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -94,7 +87,6 @@ export const sourcesParking: MapDataSource<
     osmIdConfig: undefined,
     inspector: { enabled: false },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: {
       enabled: true,
       keys: ['capacity'],
@@ -139,7 +131,6 @@ export const sourcesParking: MapDataSource<
       ],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -171,7 +162,6 @@ export const sourcesParking: MapDataSource<
       ],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },

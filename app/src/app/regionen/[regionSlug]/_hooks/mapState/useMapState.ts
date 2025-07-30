@@ -1,4 +1,3 @@
-import { TCreateVerificationSchema } from '@/src/server/bikelane-verifications/schemas'
 import { isEqual } from 'lodash'
 import { LngLatBounds } from 'maplibre-gl'
 import { MapGeoJSONFeature } from 'react-map-gl/maplibre'
@@ -9,7 +8,6 @@ export type Store = StoreMapLoadedState &
   StoreMapDataLoadingState &
   StoreFeaturesInspector &
   StoreCalculator &
-  StoreLocalUpdates &
   StoreSizes &
   Actions
 
@@ -39,10 +37,6 @@ export type StoreCalculator = {
   }[]
 }
 
-type StoreLocalUpdates = {
-  localUpdates: Omit<TCreateVerificationSchema, 'id'>[]
-}
-
 type Actions = {
   actions: {
     setMapLoaded: (mapLoaded: Store['mapLoaded']) => void
@@ -55,7 +49,6 @@ type Actions = {
     setCalculatorAreasWithFeatures: (
       calculatorAreasWithFeatures: Store['calculatorAreasWithFeatures'],
     ) => void
-    addLocalUpdate: (id: Omit<TCreateVerificationSchema, 'id'>) => void
   }
 }
 
@@ -74,8 +67,6 @@ export const useMapState = create<Store>((set, get) => {
     inspectorFeatures: [],
     // Data for <Inspector> AND <LayerHighlight>
     calculatorAreasWithFeatures: [],
-    // Data for optimistic updates; show verification immediately <LayerHightlight>
-    localUpdates: [],
     mapBounds: null,
     inspectorSize: { width: 0, height: 0 },
     sidebarSize: { width: 0, height: 0 },
@@ -86,12 +77,6 @@ export const useMapState = create<Store>((set, get) => {
       resetInspectorFeatures: () => set({ inspectorFeatures: [] }),
       setCalculatorAreasWithFeatures: (calculatorAreasWithFeatures) =>
         set({ calculatorAreasWithFeatures }),
-      addLocalUpdate: (update) => {
-        const { localUpdates } = get()
-        set({
-          localUpdates: [...localUpdates, update],
-        })
-      },
       setMapBounds: (bounds) => set({ mapBounds: bounds }),
       setInspectorSize: (size) => setIfChanged(get, set, 'inspectorSize', size),
       setSidebarSize: (size) => {
@@ -106,7 +91,6 @@ export const useMapDataLoading = () => useMapState((state) => state.mapDataLoadi
 export const useMapInspectorFeatures = () => useMapState((state) => state.inspectorFeatures)
 export const useMapCalculatorAreasWithFeatures = () =>
   useMapState((state) => state.calculatorAreasWithFeatures)
-export const useMapLocalUpdates = () => useMapState((state) => state.localUpdates)
 export const useMapBounds = () => useMapState((state) => state.mapBounds)
 export const useMapInspectorSize = () => useMapState((state) => state.inspectorSize)
 export const useMapSidebarSize = () => useMapState((state) => state.sidebarSize)

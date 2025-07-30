@@ -1,5 +1,4 @@
 import seedInternalNotes from './seeds/atlasNotes'
-import seedBikelaneVerification from './seeds/bikelaneVerification'
 import seedMemberships from './seeds/memberships'
 import seedUploads from './seeds/pmtiles'
 import seedRegions from './seeds/regions'
@@ -10,7 +9,6 @@ import seedUsers from './seeds/users'
  */
 const seed = async () => {
   await seedRegions()
-  await seedBikelaneVerification()
   await seedUsers()
   await seedMemberships()
   await seedUploads()

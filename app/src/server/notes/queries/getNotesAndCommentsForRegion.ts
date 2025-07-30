@@ -15,7 +15,7 @@ export type NotesAndCommentsFeatureCollection = Awaited<
 >
 
 export default resolver.pipe(
-  // resolver.authorize(), // membership Check is done below becaues we don't want to throw
+  // resolver.authorize(), // membership Check is done below because we don't want to throw
   resolver.zod(Schema),
   async ({ regionSlug, filter }, ctx) => {
     const { session } = ctx
