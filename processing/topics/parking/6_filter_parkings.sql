@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp(); END $$;
+
 -- filter parkings that don't allow parking
 SELECT
   id INTO TEMP TABLE parking_prohibited

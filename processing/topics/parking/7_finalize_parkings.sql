@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START finlize parkings at %', clock_timestamp(); END $$;
+
 -- insert remaining parkings into the final 'parkings' table
 INSERT INTO
   parkings (osm_type, osm_id, id, tags, meta, geom, minzoom)
