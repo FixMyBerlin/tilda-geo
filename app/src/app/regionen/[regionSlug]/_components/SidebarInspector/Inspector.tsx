@@ -1,5 +1,7 @@
 import { StoreFeaturesInspector } from '../../_hooks/mapState/useMapState'
 import { useRegionDatasets } from '../../_hooks/useRegionDatasets/useRegionDatasets'
+import { internalNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersInternalNotes'
+import { osmNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureAtlasGeo } from './InspectorFeatureAtlasGeo'
@@ -28,18 +30,18 @@ export const Inspector = ({ features }: Props) => {
         if (!sourceKey) return null
 
         // Inspector-Block for Notes
-        if (inspectObject.source === 'osm-notes') {
+        if (inspectObject.source === osmNotesSourceId) {
           return (
             <InspectorFeatureOsmNote
-              key={`osm-note-${inspectObject?.properties?.id}`}
+              key={`${osmNotesSourceId}-${inspectObject?.properties?.id}`}
               feature={inspectObject}
             />
           )
         }
-        if (inspectObject.source === 'atlas-notes') {
+        if (inspectObject.source === internalNotesSourceId) {
           return (
             <InspectorFeatureInternalNote
-              key={`atlas-note-${inspectObject?.properties?.id}`}
+              key={`${internalNotesSourceId}-${inspectObject?.properties?.id}`}
               noteId={inspectObject.properties.id}
             />
           )

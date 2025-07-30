@@ -3,7 +3,8 @@ import { useMapInspectorFeatures } from '../../../_hooks/mapState/useMapState'
 import { useShowOsmNotesParam } from '../../../_hooks/useQueryState/useNotesOsmParams'
 import { useFilteredOsmNotes } from './utils/useFilteredOsmNotes'
 
-export const osmNotesLayerId = 'osm-notes'
+export const osmNotesLayerId = 'osm-notes-layer'
+export const osmNotesSourceId = 'osm-notes-source'
 
 export const SourcesLayersOsmNotes = () => {
   const { showOsmNotesParam } = useShowOsmNotesParam()
@@ -11,24 +12,25 @@ export const SourcesLayersOsmNotes = () => {
   const filteredFeatures = useFilteredOsmNotes()
 
   const selectedFeatureIds = inspectorFeatures
-    .filter((feature) => feature.source === 'osm-notes')
+    .filter((feature) => feature.source === osmNotesSourceId)
     .map((feature) => (feature?.id || 0) as number)
 
   return (
-    <Source
-      id="osm-notes"
-      key="osm-notes"
-      type="geojson"
-      data={filteredFeatures}
-      attribution="Notes: openstreetmap.org"
-    >
+    <>
+      <Source
+        id={osmNotesSourceId}
+        key={osmNotesSourceId}
+        type="geojson"
+        data={filteredFeatures}
+        attribution="Notes: openstreetmap.org"
+      />
       {showOsmNotesParam && (
         <>
           {/* Highlight "tilda" notes */}
           <Layer
-            id="osm-notes-tilda"
-            key="osm-notes-tilda"
-            source="osm-notes"
+            id={`${osmNotesLayerId}-tilda`}
+            key={`${osmNotesLayerId}-tilda`}
+            source={osmNotesSourceId}
             type="circle"
             paint={{
               'circle-radius': 12,
@@ -37,9 +39,9 @@ export const SourcesLayersOsmNotes = () => {
             filter={['get', 'tilda']}
           />
           <Layer
-            id="osm-notes-hover"
-            key="osm-notes-hover"
-            source="osm-notes"
+            id={`${osmNotesLayerId}-hover`}
+            key={`${osmNotesLayerId}-hover`}
+            source={osmNotesSourceId}
             type="circle"
             paint={{
               'circle-radius': 12,
@@ -57,8 +59,8 @@ export const SourcesLayersOsmNotes = () => {
           />
           <Layer
             id={osmNotesLayerId}
-            key="osm-notes"
-            source="osm-notes"
+            key={osmNotesLayerId}
+            source={osmNotesSourceId}
             type="symbol"
             paint={{
               // See `useNotesActiveByZoom` about this opacity.
@@ -84,6 +86,6 @@ export const SourcesLayersOsmNotes = () => {
           />
         </>
       )}
-    </Source>
+    </>
   )
 }
