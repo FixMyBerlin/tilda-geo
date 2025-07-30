@@ -11,6 +11,7 @@ const seedQaConfigs = async () => {
       label: 'eUVM Parkraum 2025',
       isActive: true,
       mapTable: 'public.qa_parkings_euvm',
+      mapAttribution: 'QA Data: tilda-geo.de',
       goodThreshold: 0.2,
       needsReviewThreshold: 0.5,
       problematicThreshold: 1.0,

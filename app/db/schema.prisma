@@ -198,6 +198,9 @@ model QaConfig {
   // Reference to existing data table (with schema prefix)
   mapTable String // e.g., "public.qa_parkings_euvm"
 
+  // Map attribution for the source
+  mapAttribution String? // e.g., "QA Data: tilda-geo.de"
+
   // Thresholds for automatic system evaluation
   goodThreshold        Float @default(0.2) // relative <= 0.2 difference = GOOD
   needsReviewThreshold Float @default(0.5) // relative <= 0.5 difference = NEEDS_REVIEW

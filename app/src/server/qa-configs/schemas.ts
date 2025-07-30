@@ -6,6 +6,7 @@ export const QaConfigSchema = z.object({
   label: z.string(),
   isActive: z.boolean(),
   mapTable: z.string(),
+  mapAttribution: z.string().optional(),
   goodThreshold: z.number().min(0).max(1),
   needsReviewThreshold: z.number().min(0).max(1),
   problematicThreshold: z.number().min(0).max(1),

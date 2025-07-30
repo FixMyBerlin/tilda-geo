@@ -14,6 +14,7 @@ const QaConfigFormInputSchema = z.object({
   label: z.string(),
   isActive: z.string(),
   mapTable: z.string(),
+  mapAttribution: z.string().optional(),
   goodThreshold: z.string(),
   needsReviewThreshold: z.string(),
   problematicThreshold: z.string(),
@@ -46,6 +47,11 @@ export function QaConfigForm<S extends z.ZodType<any, any>>(props: FormProps<S>)
         name="mapTable"
         label="Map Table"
         help="Name der Datenbanktabelle (z.B. 'public.qa_parkings_euvm')"
+      />
+      <LabeledTextField
+        name="mapAttribution"
+        label="Map Attribution"
+        help="Attribution für die Kartenquelle (z.B. 'QA Data: &copy; OpenStreetMap; tilda-geo.de')"
       />
       <LabeledTextField
         name="goodThreshold"

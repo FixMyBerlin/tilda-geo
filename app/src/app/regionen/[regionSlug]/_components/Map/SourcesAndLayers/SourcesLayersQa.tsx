@@ -13,7 +13,7 @@ export const SourcesLayersQa = () => {
   const regionSlug = useRegionSlug()
   const [qaConfigs] = useQuery(getQaConfigsForRegion, { regionSlug: regionSlug! })
 
-  const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.configSlug)
+  const activeQaConfig = qaConfigs?.find(config => config.slug === qaParamData.configSlug)
 
   // Don't render if no QA config is selected or if style is 'none'
   if (!activeQaConfig || qaParamData.style === 'none') {
@@ -32,6 +32,7 @@ export const SourcesLayersQa = () => {
         url={dataUrl}
         // NOTE: We will likely have to make the promoteId part of the config
         promoteId={'id'}
+        attribution={activeQaConfig.mapAttribution || ''}
       />
       <Layer
         id={qaLayerId}
