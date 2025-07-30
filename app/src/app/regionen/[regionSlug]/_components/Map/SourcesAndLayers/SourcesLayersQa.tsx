@@ -13,7 +13,7 @@ export const SourcesLayersQa = () => {
   const regionSlug = useRegionSlug()
   const [qaConfigs] = useQuery(getQaConfigsForRegion, { regionSlug: regionSlug! })
 
-  const activeQaConfig = qaConfigs?.find(config => config.slug === qaParamData.configSlug)
+  const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.configSlug)
 
   // Don't render if no QA config is selected or if style is 'none'
   if (!activeQaConfig || qaParamData.style === 'none') {

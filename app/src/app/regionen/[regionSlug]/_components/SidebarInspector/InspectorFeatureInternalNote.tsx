@@ -3,7 +3,6 @@ import { isDev } from '@/src/app/_components/utils/isEnv'
 import { useHasPermissions } from '@/src/app/_hooks/useHasPermissions'
 import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
 import getNoteAndComments from '@/src/server/notes/queries/getNoteAndComments'
-import { NotesAndCommentsFeatureCollection } from '@/src/server/notes/queries/getNotesAndCommentsForRegion'
 import { useQuery } from '@blitzjs/rpc'
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import { Suspense } from 'react'
@@ -13,7 +12,7 @@ import { InternalNoteComment } from './InspectorFeatureInternalNote/InternalNote
 import { NewNoteCommentForm } from './InspectorFeatureInternalNote/NewNoteCommentForm'
 
 type Props = {
-  noteId: NotesAndCommentsFeatureCollection['featureCollection']['features'][number]['properties']['id']
+  noteId: number
 }
 
 export const InspectorFeatureInternalNoteWithQuery = ({ noteId }: Props) => {
