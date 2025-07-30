@@ -1,4 +1,5 @@
 import { Spinner } from '@/src/app/_components/Spinner/Spinner'
+import { formatDateTime } from '@/src/app/_components/date/formatDate'
 import { Link } from '@/src/app/_components/links/Link'
 import { proseClasses } from '@/src/app/_components/text/prose'
 import { getOsmUrl } from '@/src/app/_components/utils/getOsmUrl'
@@ -36,7 +37,8 @@ const InspectorFeatureOsmNoteWithQuery = ({ feature: { properties } }: Props) =>
         {thread.comments?.map((comment, index) => {
           const firstComment = index === 0
           const splitDate = comment.date.split(' ')
-          const date = new Date(`${splitDate[0]}T${splitDate[1]}Z`).toLocaleString('de-DE')
+          const date = new Date(`${splitDate[0]}T${splitDate[1]}Z`)
+          const formattedDate = formatDateTime(date)
           const userHasPermssionOnRegion = comment.user === osmName
 
           return (
@@ -51,7 +53,7 @@ const InspectorFeatureOsmNoteWithQuery = ({ feature: { properties } }: Props) =>
                 <strong>
                   <OsmUserLink osmName={comment.user} />
                 </strong>{' '}
-                kommentierte am {date}:
+                kommentierte am {formattedDate}:
               </div>
 
               <div

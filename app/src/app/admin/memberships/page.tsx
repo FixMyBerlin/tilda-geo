@@ -1,12 +1,12 @@
 'use client'
+import { formatDate } from '@/src/app/_components/date/formatDate'
+import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { Link } from '@/src/app/_components/links/Link'
 import { linkStyles } from '@/src/app/_components/links/styles'
 import { Pill } from '@/src/app/_components/text/Pill'
 import deleteMembership from '@/src/server/memberships/mutations/deleteMembership'
 import getUsersAndMemberships from '@/src/server/users/queries/getUsersAndMemberships'
 import { useMutation, useQuery } from '@blitzjs/rpc'
-import { formatDistanceToNow } from 'date-fns'
-import { de } from 'date-fns/locale'
 import { useRouter } from 'next/navigation'
 import { Breadcrumb } from '../_components/Breadcrumb'
 import { HeaderWrapper } from '../_components/HeaderWrapper'
@@ -72,12 +72,8 @@ export default function AdminMembershipsPage() {
                   <br />
                   {user.email || '–'}
                   <br />
-                  {user.createdAt.toLocaleDateString()}{' '}
-                  <span className="text-gray-400">
-                    (
-                    {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true, locale: de })}
-                    )
-                  </span>
+                  {formatDate(user.createdAt)}{' '}
+                  <span className="text-gray-400">({formatRelativeTime(user.createdAt)})</span>
                 </td>
                 <td className="h-20 py-4 pl-4 pr-3 text-sm sm:pr-6">
                   {user?.Membership?.length === 0 ? (

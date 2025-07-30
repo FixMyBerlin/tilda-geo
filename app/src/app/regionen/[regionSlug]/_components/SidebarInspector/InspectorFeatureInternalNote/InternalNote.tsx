@@ -1,3 +1,4 @@
+import { formatDateTime } from '@/src/app/_components/date/formatDate'
 import { Markdown } from '@/src/app/_components/text/Markdown'
 import { proseClasses } from '@/src/app/_components/text/prose'
 import { NoteAndComments } from '@/src/server/notes/queries/getNoteAndComments'
@@ -6,7 +7,6 @@ import { twJoin } from 'tailwind-merge'
 import { OsmUserLink } from '../OsmUserLink'
 import { EditNoteForm } from './EditNoteForm'
 import { EditNoteResolvedAtForm } from './EditNoteResolvedAtForm'
-import { localDateTime } from './utils/localDateTime'
 import { wasUpdated } from './utils/wasUpdated'
 
 type Props = {
@@ -41,8 +41,8 @@ export const InternalNote = ({ note }: Props) => {
               />
             </strong>
             {wasUpdated(note) ? <br /> : ', '}
-            {localDateTime(note.createdAt)}
-            {wasUpdated(note) && <>, aktualisiert {localDateTime(note.updatedAt)}</>}
+            {formatDateTime(note.createdAt)}
+            {wasUpdated(note) && <>, aktualisiert {formatDateTime(note.updatedAt)}</>}
           </div>
 
           <EditNoteResolvedAtForm note={note} />
