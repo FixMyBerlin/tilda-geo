@@ -9,12 +9,14 @@ const tilesBaseUrl = {
 export const getTilesUrl = (path?: string) => {
   let base = tilesBaseUrl[envKey]
 
-  // NEXT_PUBLIC_TILES_ENV is a helper for local develoment
+  // NEXT_PUBLIC_TILES_ENV is a helper for local development
   if (process.env.NEXT_PUBLIC_TILES_ENV) {
     base = tilesBaseUrl[process.env.NEXT_PUBLIC_TILES_ENV]
   }
 
-  return path ? `${base}${path}` : base
+  if (!path) return base
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path
+  return `${base}/${cleanPath}`
 }
 
 export const makeTileUrlCacheless = ({ url, cacheless }: { url: string; cacheless: boolean }) => {

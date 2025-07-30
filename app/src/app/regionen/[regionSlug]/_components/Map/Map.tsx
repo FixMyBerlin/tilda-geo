@@ -34,6 +34,7 @@ import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRa
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
+import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersRegionMask } from './SourcesAndLayers/SourcesLayersRegionMask'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
@@ -268,6 +269,7 @@ export const Map = () => {
       <SourcesLayersStaticDatasets />
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
+      <SourcesLayersQa />
       {isDev ? <SourceGeojson /> : null}
       <AttributionControl compact={true} position="bottom-left" />
 
