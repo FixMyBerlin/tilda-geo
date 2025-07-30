@@ -8,6 +8,7 @@ import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyU
 import { InspectorFeatureAtlasGeo } from './InspectorFeatureAtlasGeo'
 import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
 import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
+import { InspectorFeatureQa } from './InspectorFeatureQa'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 
 export type InspectorFeatureProperty = NonNullable<GeoJSON.GeoJsonProperties>
@@ -49,13 +50,10 @@ export const Inspector = ({ features }: Props) => {
         }
         if (inspectObject.source === qaSourceId) {
           return (
-            <pre key={`${qaSourceId}-${inspectObject?.properties?.id}`}>
-              <code>{JSON.stringify(inspectObject, undefined, 2)}</code>
-            </pre>
-            // <InspectorFeatureInternalNote
-            //   key={`atlas-note-${inspectObject?.properties?.id}`}
-            //   noteId={inspectObject.properties.id}
-            // />
+            <InspectorFeatureQa
+              key={`${qaSourceId}-${inspectObject?.properties?.id}`}
+              feature={inspectObject}
+            />
           )
         }
 
