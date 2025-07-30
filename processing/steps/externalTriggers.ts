@@ -24,10 +24,6 @@ export async function triggerPrivateApi(endpoint: string) {
   }
 }
 
-export async function triggerPostProcessing() {
-  return triggerPrivateApi('post-processing-hook')
-}
-
 /**
  * Restarts the tiles container to refresh the /catalog endpoint.
  * This requires that the docker socket is mounted in this container.
