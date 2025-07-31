@@ -5,13 +5,14 @@ import {
   UserIcon,
   XCircleIcon,
 } from '@heroicons/react/20/solid'
+import { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@prisma/client'
 
 // QA System Status Colors (from specification)
 export const QA_SYSTEM_STATUS_COLORS = {
   GOOD: '#009E73', // Green - no review needed
   NEEDS_REVIEW: '#E69F00', // Yellow - requires human evaluation
   PROBLEMATIC: '#D55E00', // Red - action needed
-} as const
+} as const satisfies Record<QaSystemStatus, `#${string}`>
 
 // QA User Status Colors (from specification)
 export const QA_USER_STATUS_COLORS = {
@@ -19,7 +20,7 @@ export const QA_USER_STATUS_COLORS = {
   OK_REFERENCE_ERROR: '#0066CC', // Blue - user confirmed OK
   NOT_OK_DATA_ERROR: '#D55E00', // Red - user confirmed problem
   NOT_OK_PROCESSING_ERROR: '#D55E00', // Red - user confirmed problem
-} as const
+} as const satisfies Record<QaEvaluationStatus, `#${string}`>
 
 // System Status Configuration
 export const systemStatusConfig = {
@@ -47,7 +48,7 @@ export const systemStatusConfig = {
     icon: XCircleIcon,
     description: 'Große Abweichung - dringende Überprüfung erforderlich',
   },
-} as const
+} as const satisfies Record<QaSystemStatus, Object>
 
 // User Status Configuration
 export const userStatusConfig = {
@@ -71,7 +72,7 @@ export const userStatusConfig = {
     color: 'text-red-600',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_PROCESSING_ERROR,
   },
-} as const
+} as const satisfies Record<QaEvaluationStatus, Object>
 
 // Evaluator Type Configuration
 export const evaluatorTypeConfig = {
@@ -85,7 +86,7 @@ export const evaluatorTypeConfig = {
     icon: UserIcon,
     color: 'text-blue-500',
   },
-} as const
+} as const satisfies Record<QaEvaluatorType, Object>
 
 // User Status Options for Form
 export const userStatusOptions = [
@@ -113,10 +114,9 @@ export const userStatusOptions = [
     description: 'Differenz nicht OK, Verarbeitung muss korrigiert werden',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_PROCESSING_ERROR,
   },
-] as const
-
-// Type helpers
-export type SystemStatusConfig = typeof systemStatusConfig
-export type UserStatusConfig = typeof userStatusConfig
-export type EvaluatorTypeConfig = typeof evaluatorTypeConfig
-export type UserStatusOption = (typeof userStatusOptions)[number]
+] as const satisfies Array<{
+  value: QaEvaluationStatus
+  label: string
+  description: string
+  hexColor: (typeof QA_USER_STATUS_COLORS)[keyof typeof QA_USER_STATUS_COLORS]
+}>
