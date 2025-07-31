@@ -67,7 +67,7 @@ function Bikelanes(object_tags, object)
           _id = DefaultId(object),
           _infrastructureExists = true,
           prefix = transformed_tags._prefix,
-          livecycle = transformed_tags.livecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.livecycle,
+          lifecycle = transformed_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.lifecycle,
           width = parse_length(transformed_tags.width),
           width_source = object_tags['source:cycleway:' .. transformed_tags._side .. ':width'] or transformed_tags['source:width'],
           oneway = DeriveOneway(transformed_tags, category),

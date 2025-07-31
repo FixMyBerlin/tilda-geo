@@ -7,8 +7,8 @@ This is an manual and incomplete list of change to the data structure.
 ### `raods`, `roadsPathClasses`, `bikelanes``
 
 - Ways in `construction` are now transformed into their provided infrastructure, including prefixed data `construction:*`
-- With `livecycle=construction` to indicate this transformation
-- And `livecycle=temporary` to indicate temporary ways during construction (based on `temporary=yes`)
+- With `lifecycle=construction` to indicate this transformation
+- And `lifecycle=temporary` to indicate temporary ways during construction (based on `temporary=yes`)
 
 ## 2025-07-14, -16
 

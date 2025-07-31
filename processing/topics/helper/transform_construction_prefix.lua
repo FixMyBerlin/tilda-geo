@@ -33,17 +33,17 @@ local function transform_construction_prefix(destTags)
     -- Delete the prefixed tag
     destTags[key] = nil
 
-    -- Add the livecycle-tag to track this modification
+    -- Add the lifecycle-tag to track this modification
     -- Place it at the right 'layer' based on the base tag structure
     if has_prefix(base_tag, 'cycleway:') then
-      -- For cycleway:left, cycleway:right, cycleway:both -> cycleway:SIDE:livecycle
-      destTags[base_tag .. ':livecycle'] = 'construction'
+      -- For cycleway:left, cycleway:right, cycleway:both -> cycleway:SIDE:lifecycle
+      destTags[base_tag .. ':lifecycle'] = 'construction'
     elseif has_prefix(base_tag, 'sidewalk:') then
-      -- For sidewalk:left, sidewalk:right, sidewalk:both -> sidewalk:SIDE:livecycle
-      destTags[base_tag .. ':livecycle'] = 'construction'
+      -- For sidewalk:left, sidewalk:right, sidewalk:both -> sidewalk:SIDE:lifecycle
+      destTags[base_tag .. ':lifecycle'] = 'construction'
     else
-      -- For highway, bicycle_road, etc. -> livecycle
-      destTags['livecycle'] = 'construction'
+      -- For highway, bicycle_road, etc. -> lifecycle
+      destTags['lifecycle'] = 'construction'
     end
   end
 

@@ -1,4 +1,4 @@
-import { isDev } from '@/src/app/_components/utils/isEnv'
+import { isDev, isStaging } from '@/src/app/_components/utils/isEnv'
 import { useRegionDatasets } from '@/src/app/regionen/[regionSlug]/_hooks/useRegionDatasets/useRegionDatasets'
 import React from 'react'
 import { FormattedMessage } from 'react-intl'
@@ -64,14 +64,15 @@ export const ConditionalFormattedKey: React.FC<Props> = ({ sourceId, tagKey }) =
     'composit_width',
     'maxspeed',
     'length',
-    'livecycle',
+    'lifecycle',
   ]
   if (!translations[key] && simpleTranslFallbackKeys.includes(tagKey)) {
     key = `ALL--${tagKey}--key`
   }
 
-  // It will take a while to translate everything. This fallback does look better on production.
-  const defaultMessage = isDev ? key : tagKey
+  if (isDev || isStaging) {
+    console.log('Inspector: Missing translation', { missing: key, fallback: tagKey })
+  }
 
-  return <FormattedMessage id={key} defaultMessage={defaultMessage} />
+  return <FormattedMessage id={key} defaultMessage={tagKey} />
 }

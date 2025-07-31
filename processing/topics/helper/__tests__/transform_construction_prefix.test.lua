@@ -11,7 +11,7 @@ describe('transform_construction_prefix', function()
       -- Check the mutated input table
       assert.are.same(tags, {
         bicycle_road = 'yes',
-        livecycle = 'construction'
+        lifecycle = 'construction'
       })
 
       -- Check the returned unmodified_tags (should be empty since no original bicycle_road existed)
@@ -28,7 +28,7 @@ describe('transform_construction_prefix', function()
       -- Check the mutated input table
       assert.are.same(tags, {
         maxspeed = '30',
-        livecycle = 'construction'
+        lifecycle = 'construction'
       })
 
       -- Check the returned unmodified_tags contains the original value
@@ -47,7 +47,7 @@ describe('transform_construction_prefix', function()
       assert.are.same(tags, {
         bicycle_road = 'yes',
         highway = 'primary',
-        livecycle = 'construction'
+        lifecycle = 'construction'
       })
 
       assert.are.same(unmodified_tags, {})
@@ -55,37 +55,37 @@ describe('transform_construction_prefix', function()
   end)
 
   describe('cycleway lifecycle tag placement', function()
-    it('adds cycleway:left:livecycle for construction:cycleway:left', function()
+    it('adds cycleway:left:lifecycle for construction:cycleway:left', function()
       local tags = { ['construction:cycleway:left'] = 'lane' }
       local unmodified_tags = transform_construction_prefix(tags)
 
       assert.are.same(tags, {
         ['cycleway:left'] = 'lane',
-        ['cycleway:left:livecycle'] = 'construction'
+        ['cycleway:left:lifecycle'] = 'construction'
       })
 
       assert.are.same(unmodified_tags, {})
     end)
 
-    it('adds cycleway:right:livecycle for construction:cycleway:right', function()
+    it('adds cycleway:right:lifecycle for construction:cycleway:right', function()
       local tags = { ['construction:cycleway:right'] = 'track' }
       local unmodified_tags = transform_construction_prefix(tags)
 
       assert.are.same(tags, {
         ['cycleway:right'] = 'track',
-        ['cycleway:right:livecycle'] = 'construction'
+        ['cycleway:right:lifecycle'] = 'construction'
       })
 
       assert.are.same(unmodified_tags, {})
     end)
 
-    it('adds cycleway:both:livecycle for construction:cycleway:both', function()
+    it('adds cycleway:both:lifecycle for construction:cycleway:both', function()
       local tags = { ['construction:cycleway:both'] = 'lane' }
       local unmodified_tags = transform_construction_prefix(tags)
 
       assert.are.same(tags, {
         ['cycleway:both'] = 'lane',
-        ['cycleway:both:livecycle'] = 'construction'
+        ['cycleway:both:lifecycle'] = 'construction'
       })
 
       assert.are.same(unmodified_tags, {})
@@ -93,13 +93,13 @@ describe('transform_construction_prefix', function()
   end)
 
   describe('sidewalk lifecycle tag placement', function()
-    it('adds sidewalk:left:livecycle for construction:sidewalk:left', function()
+    it('adds sidewalk:left:lifecycle for construction:sidewalk:left', function()
       local tags = { ['construction:sidewalk:left'] = 'yes' }
       local unmodified_tags = transform_construction_prefix(tags)
 
       assert.are.same(tags, {
         ['sidewalk:left'] = 'yes',
-        ['sidewalk:left:livecycle'] = 'construction'
+        ['sidewalk:left:lifecycle'] = 'construction'
       })
 
       assert.are.same(unmodified_tags, {})
@@ -146,8 +146,8 @@ describe('transform_construction_prefix', function()
         name = 'Test Street',
         bicycle_road = 'yes',
         ['cycleway:left'] = 'lane',
-        livecycle = 'construction',
-        ['cycleway:left:livecycle'] = 'construction'
+        lifecycle = 'construction',
+        ['cycleway:left:lifecycle'] = 'construction'
       })
 
       assert.are.same(unmodified_tags, {})

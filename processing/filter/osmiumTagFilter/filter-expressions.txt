@@ -38,6 +38,7 @@ r/route
 # Topic: parking
 nw/amenity
 nw/area:highway
+nw/road_marking
 nw/barrier
 nw/bicycle_parking:position
 nw/bicycle_rental:position

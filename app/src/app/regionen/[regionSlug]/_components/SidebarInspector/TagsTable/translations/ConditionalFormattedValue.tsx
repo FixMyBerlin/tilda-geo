@@ -89,6 +89,8 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     { key: 'distance', suffix: 'km' }, // bikeroutes
     { key: 'buffer_left', suffix: 'm' }, // bikelanes
     { key: 'buffer_right', suffix: 'm' }, // bikelanes
+    { key: 'tilda_osm_id', suffix: undefined }, // infravelo
+    { key: 'tilda_width', suffix: 'm' }, // infravelo
   ]
   const numberConfig = numberConfigs.find(
     (c) => c.key === tagKey || prefixWithOsm(c.key) === tagKey,
@@ -171,14 +173,15 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     // 'fresh', // true key is `maxspeed_fresh`, `surface_fresh`, … but we overwrite that when passing props
     'width_source',
     'length',
-    'livecycle',
+    'lifecycle',
   ]
   if (!translations[translationKey] && nonCategorizedTagKeys.includes(tagKey)) {
     translationKey = `ALL--${tagKey}=${tagValue}`
   }
 
-  // It will take a while to translate everything. This fallback does look better on production.
-  const defaultMessage = isDev || isStaging ? translationKey : tagValue
+  if (isDev || isStaging) {
+    console.log('Inspector: Missing translation', { missing: translationKey, fallback: tagValue })
+  }
 
-  return <FormattedMessage id={translationKey} defaultMessage={defaultMessage} />
+  return <FormattedMessage id={translationKey} defaultMessage={tagValue} />
 }
