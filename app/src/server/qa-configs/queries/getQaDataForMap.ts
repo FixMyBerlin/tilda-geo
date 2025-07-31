@@ -64,6 +64,7 @@ export default resolver.pipe(
       }
     })
 
+    console.log(`✅ getQaDataForMap: returning ${qaData.length} map data entries`)
     return qaData
   },
 )
