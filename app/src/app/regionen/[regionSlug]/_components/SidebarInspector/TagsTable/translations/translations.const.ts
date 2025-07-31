@@ -74,9 +74,9 @@ export const translations: { [key: string]: string } = {
   'ALL--highway=unspecified_road_category': 'Unkategorisierte Straße', // roads--category
   'ALL--length--key': 'Länge',
   'ALL--length--tooltip': 'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
-  'ALL--livecycle--key': 'Status',
-  'ALL--livecycle=construction': 'In Bau',
-  'ALL--livecycle=temporary': 'Temporärer Weg',
+  'ALL--lifecycle--key': 'Status',
+  'ALL--lifecycle=construction': 'In Bau',
+  'ALL--lifecycle=temporary': 'Temporärer Weg',
   'ALL--maxspeed--key': 'Höchstgeschwindigkeit',
   'ALL--name--key': 'Name',
   'ALL--smoothness=bad': 'Schlecht',
