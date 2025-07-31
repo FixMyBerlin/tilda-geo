@@ -7,6 +7,7 @@ import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 
 export const qaLayerId = 'qa-layer'
 export const qaSourceId = 'qa-source'
+export const qaMinZoom = 13
 
 export const SourcesLayersQa = () => {
   const { qaParamData } = useQaParam()
@@ -33,6 +34,7 @@ export const SourcesLayersQa = () => {
         // NOTE: We will likely have to make the promoteId part of the config
         promoteId={'id'}
         attribution={activeQaConfig.mapAttribution || ''}
+        minzoom={qaMinZoom}
       />
       <Layer
         id={qaLayerId}

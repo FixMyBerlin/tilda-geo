@@ -28,6 +28,7 @@ import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspect
 import { isSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { Calculator } from './Calculator/Calculator'
+import { QaZoomNotice } from './QaZoomNotice'
 import { Search } from './Search/Search'
 import { SourceGeojson } from './SourcesAndLayers/SourceGeojson/SourceGeojson'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
@@ -279,6 +280,7 @@ export const Map = () => {
       <Calculator />
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}
+      <QaZoomNotice />
     </MapGl>
   )
 }
