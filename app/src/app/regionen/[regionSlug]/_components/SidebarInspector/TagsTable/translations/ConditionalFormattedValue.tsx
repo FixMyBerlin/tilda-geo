@@ -173,7 +173,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     // 'fresh', // true key is `maxspeed_fresh`, `surface_fresh`, … but we overwrite that when passing props
     'width_source',
     'length',
-    'livecycle',
+    'lifecycle',
   ]
   if (!translations[translationKey] && nonCategorizedTagKeys.includes(tagKey)) {
     translationKey = `ALL--${tagKey}=${tagValue}`

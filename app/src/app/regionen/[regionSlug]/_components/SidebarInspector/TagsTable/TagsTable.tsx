@@ -1,6 +1,5 @@
 import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
 import { InspectorFeatureProperty } from '../Inspector'
-import { TagsTableRow } from './TagsTableRow'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
 import {
   TagsTableRowCompositHighway,
@@ -39,9 +38,10 @@ import {
   TagsTableRowCompositWidth,
   tableKeyWidth,
 } from './compositTableRows/TagsTableRowCompositWidth'
-import { TagsTableRowLivecycle } from './compositTableRows/TagsTableRowLivecycle'
+import { TagsTableRowlifecycle } from './compositTableRows/TagsTableRowLifecycle'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
 import { TagsTableRowWikipedia, tableKeyWikipedia } from './compositTableRows/TagsTableRowWikipedia'
+import { TagsTableRow } from './TagsTableRow'
 import { KEY_IF_PRESENCE, cleanKey } from './utils/cleanKey'
 
 type Props = {
@@ -74,10 +74,10 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200">
-        <TagsTableRowLivecycle
-          key="livecycle"
+        <TagsTableRowlifecycle
+          key="lifecycle"
           sourceId={sourceId}
-          tagKey="livecycle"
+          tagKey="lifecycle"
           properties={properties}
         />
 

@@ -6,7 +6,7 @@ import { ValueDisclosure, ValueDisclosureButton, ValueDisclosurePanel } from '..
 import { SvgFaPersonDigging } from './icons/SvgFaPersonDigging'
 import { CompositTableRow } from './types'
 
-const livecycleStyle = {
+const lifecycleStyle = {
   construction: {
     icon: <SvgFaPersonDigging className="size-5 text-amber-600" />,
     colorClass: 'text-amber-600',
@@ -23,30 +23,30 @@ const livecycleStyle = {
     icon: <QuestionMarkCircleIcon className="size-5 text-amber-600" />,
     colorClass: '',
     description:
-      'Bitte schicken Sie diese URL an feedback@fixmycity.de mit dem Hinweis: Fehler im Inspector für das Attribut "livecycle".',
+      'Bitte schicken Sie diese URL an feedback@fixmycity.de mit dem Hinweis: Fehler im Inspector für das Attribut "lifecycle".',
   },
 }
 
-export const TagsTableRowLivecycle = ({
+export const TagsTableRowlifecycle = ({
   sourceId,
-  tagKey: _, // is always `livecycle`
+  tagKey: _, // is always `lifecycle`
   properties,
 }: CompositTableRow) => {
-  const livecycleValue = properties['livecycle']
-  if (!livecycleValue) return null
+  const lifecycleValue = properties['lifecycle']
+  if (!lifecycleValue) return null
 
-  const style = livecycleStyle[livecycleValue] || livecycleStyle.fallback
+  const style = lifecycleStyle[lifecycleValue] || lifecycleStyle.fallback
 
   return (
-    <TagsTableRow sourceId={sourceId} tagKey={'livecycle'} tagValue={undefined}>
+    <TagsTableRow sourceId={sourceId} tagKey={'lifecycle'} tagValue={undefined}>
       <ValueDisclosure>
         <ValueDisclosureButton>
           <div className={twJoin(style.colorClass, 'flex items-center gap-2')}>
             {style.icon}
             <ConditionalFormattedValue
               sourceId={sourceId}
-              tagKey={'livecycle'}
-              tagValue={livecycleValue}
+              tagKey={'lifecycle'}
+              tagValue={lifecycleValue}
             />
           </div>
         </ValueDisclosureButton>

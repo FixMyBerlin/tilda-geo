@@ -151,7 +151,7 @@ function osm2pgsql.process_way(object)
   if allowed_highways[object_tags.construction] then
     -- Transform `highway=construction + construction=ALLOW_LIST`. Only data with missing `construction=*` is skipped.
     object_tags.highway = object_tags.construction
-    object_tags.livecycle = 'construction'
+    object_tags.lifecycle = 'construction'
     object_tags.construction = nil
   end
   if not allowed_highways[object_tags.highway] then return end
@@ -177,7 +177,7 @@ function osm2pgsql.process_way(object)
   local road_result_tags = {
     name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name'],
     length = length,
-    livecycle = object_tags.livecycle or SANITIZE_ROAD_TAGS.temporary(object_tags),
+    lifecycle = object_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(object_tags),
     mapillary_coverage = mapillary_coverage_value,
     mapillary = object_tags.mapillary,
     mapillary_forward = object_tags['mapillary:forward'],
