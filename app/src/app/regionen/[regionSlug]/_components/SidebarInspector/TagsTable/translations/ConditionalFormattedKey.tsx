@@ -70,8 +70,9 @@ export const ConditionalFormattedKey: React.FC<Props> = ({ sourceId, tagKey }) =
     key = `ALL--${tagKey}--key`
   }
 
-  // It will take a while to translate everything. This fallback does look better on production.
-  const defaultMessage = isDev ? key : tagKey
+  if (isDev || isStaging) {
+    console.log('Inspector: Missing translation', { missing: key, fallback: tagKey })
+  }
 
-  return <FormattedMessage id={key} defaultMessage={defaultMessage} />
+  return <FormattedMessage id={key} defaultMessage={tagKey} />
 }

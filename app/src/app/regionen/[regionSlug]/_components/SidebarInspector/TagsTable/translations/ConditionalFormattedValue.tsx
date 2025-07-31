@@ -179,8 +179,9 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     translationKey = `ALL--${tagKey}=${tagValue}`
   }
 
-  // It will take a while to translate everything. This fallback does look better on production.
-  const defaultMessage = isDev || isStaging ? translationKey : tagValue
+  if (isDev || isStaging) {
+    console.log('Inspector: Missing translation', { missing: translationKey, fallback: tagValue })
+  }
 
-  return <FormattedMessage id={translationKey} defaultMessage={defaultMessage} />
+  return <FormattedMessage id={translationKey} defaultMessage={tagValue} />
 }
