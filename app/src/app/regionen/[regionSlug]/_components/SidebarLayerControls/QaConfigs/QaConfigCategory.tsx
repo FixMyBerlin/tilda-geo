@@ -35,7 +35,7 @@ export const QaConfigCategory = ({
     <Disclosure>
       {({ open }) => (
         <>
-          <DisclosureButton className="group flex justify-between border-t border-t-gray-200 text-left hover:bg-yellow-50">
+          <DisclosureButton className="group flex justify-between border-t border-t-gray-200 bg-amber-50 text-left hover:bg-yellow-50">
             <div
               className={twJoin(
                 'ml-1.5 flex min-h-[3rem] w-full flex-col items-start text-sm leading-[17px]',
