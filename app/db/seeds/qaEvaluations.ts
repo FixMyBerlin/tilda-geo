@@ -110,8 +110,22 @@ export default async function seed() {
     },
   ]
 
+  // Test data for area 3512: processing error test
+  const evaluations3512 = [
+    {
+      areaId: '3512',
+      configId: qaConfig.id,
+      systemStatus: QaSystemStatus.PROBLEMATIC,
+      userStatus: QaEvaluationStatus.NOT_OK_PROCESSING_ERROR,
+      body: 'Verarbeitungsfehler erkannt - Algorithmus muss korrigiert werden',
+      evaluatorType: QaEvaluatorType.USER,
+      userId: user1.id,
+      createdAt: new Date('2024-01-17T10:00:00Z'),
+    },
+  ]
+
   // Create all evaluations
-  const allEvaluations = [...evaluations3511, ...evaluations3510]
+  const allEvaluations = [...evaluations3511, ...evaluations3510, ...evaluations3512]
 
   for (const evaluation of allEvaluations) {
     await db.qaEvaluation.upsert({

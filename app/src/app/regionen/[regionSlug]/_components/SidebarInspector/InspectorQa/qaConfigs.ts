@@ -21,6 +21,36 @@ export const QA_USER_STATUS_COLORS = {
   NOT_OK_PROCESSING_ERROR: '#D55E00', // Red - user confirmed problem
 } as const satisfies Record<QaEvaluationStatus, `#${string}`>
 
+// System status to letter mapping for optimization
+export const SYSTEM_STATUS_TO_LETTER = {
+  GOOD: 'G', // Good
+  NEEDS_REVIEW: 'N', // Needs Review
+  PROBLEMATIC: 'P', // Problematic
+} as const satisfies Record<QaSystemStatus, string>
+
+// Letter to system status mapping for translation back
+export const LETTER_TO_SYSTEM_STATUS: Record<string, QaSystemStatus> = {
+  G: 'GOOD',
+  N: 'NEEDS_REVIEW',
+  P: 'PROBLEMATIC',
+} as const satisfies Record<string, QaSystemStatus>
+
+// User status to letter mapping for optimization (only user status needed for filtering)
+export const USER_STATUS_TO_LETTER = {
+  OK_STRUCTURAL_CHANGE: 'S', // Structural
+  OK_REFERENCE_ERROR: 'R', // Reference
+  NOT_OK_DATA_ERROR: 'D', // Data
+  NOT_OK_PROCESSING_ERROR: 'P', // Processing
+} as const satisfies Record<QaEvaluationStatus, string>
+
+// Letter to user status mapping for translation back
+export const LETTER_TO_USER_STATUS: Record<string, QaEvaluationStatus> = {
+  S: 'OK_STRUCTURAL_CHANGE',
+  R: 'OK_REFERENCE_ERROR',
+  D: 'NOT_OK_DATA_ERROR',
+  P: 'NOT_OK_PROCESSING_ERROR',
+} as const satisfies Record<string, QaEvaluationStatus>
+
 // System Status Configuration
 export const systemStatusConfig = {
   GOOD: {

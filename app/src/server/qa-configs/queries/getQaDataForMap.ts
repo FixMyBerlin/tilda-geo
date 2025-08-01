@@ -2,6 +2,8 @@ import db from '@/db'
 import {
   QA_SYSTEM_STATUS_COLORS,
   QA_USER_STATUS_COLORS,
+  SYSTEM_STATUS_TO_LETTER,
+  USER_STATUS_TO_LETTER,
 } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/InspectorQa/qaConfigs'
 import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
 import { resolver } from '@blitzjs/rpc'
@@ -16,7 +18,8 @@ const Schema = z.object({
 
 export type QaMapData = {
   areaId: string
-  displayColor: string
+  systemStatus: string | null // Letter representing system status (G, N, P)
+  userStatus: string | null // Letter representing user status (S, R, D, P)
 }
 
 // Helper function to determine display color based on evaluation status
@@ -52,15 +55,17 @@ export default resolver.pipe(
       distinct: ['areaId'],
     })
 
-    // Return only areaId and display color for map styling
+    // Return areaId and status information for map styling and filtering
     const qaData: QaMapData[] = evaluations.map((evaluation) => {
       const systemStatus = evaluation.systemStatus
       const userStatus = evaluation.userStatus
-      const displayColor = getDisplayColor(systemStatus, userStatus)
+      const systemStatusLetter = SYSTEM_STATUS_TO_LETTER[systemStatus]
+      const userStatusLetter = userStatus ? USER_STATUS_TO_LETTER[userStatus] : null
 
       return {
         areaId: evaluation.areaId,
-        displayColor,
+        systemStatus: systemStatusLetter,
+        userStatus: userStatusLetter,
       }
     })
 

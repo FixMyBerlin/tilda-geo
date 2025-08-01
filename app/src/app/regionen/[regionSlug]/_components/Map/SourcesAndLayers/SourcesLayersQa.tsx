@@ -1,4 +1,8 @@
 import { getTilesUrl } from '@/src/app/_components/utils/getTilesUrl'
+import {
+  systemStatusConfig,
+  userStatusConfig,
+} from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/InspectorQa/qaConfigs'
 import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsForRegion'
 import { useQuery } from '@blitzjs/rpc'
 import { Fragment } from 'react'
@@ -50,7 +54,24 @@ export const SourcesLayersQa = () => {
           source-layer={vectorSourceName}
           type="fill"
           paint={{
-            'fill-color': ['coalesce', ['feature-state', 'qaColor'], 'gray'],
+            'fill-color': [
+              'case',
+              ['==', ['feature-state', 'userStatus'], 'S'],
+              userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'R'],
+              userStatusConfig.OK_REFERENCE_ERROR.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'D'],
+              userStatusConfig.NOT_OK_DATA_ERROR.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'P'],
+              userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'G'],
+              systemStatusConfig.GOOD.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'N'],
+              systemStatusConfig.NEEDS_REVIEW.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'P'],
+              systemStatusConfig.PROBLEMATIC.hexColor,
+              'gray',
+            ],
             'fill-opacity': [
               'case',
               [
@@ -61,7 +82,24 @@ export const SourcesLayersQa = () => {
               0,
               0.7,
             ],
-            'fill-outline-color': ['coalesce', ['feature-state', 'qaColor'], '#333333'],
+            'fill-outline-color': [
+              'case',
+              ['==', ['feature-state', 'userStatus'], 'S'],
+              userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'R'],
+              userStatusConfig.OK_REFERENCE_ERROR.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'D'],
+              userStatusConfig.NOT_OK_DATA_ERROR.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'P'],
+              userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'G'],
+              systemStatusConfig.GOOD.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'N'],
+              systemStatusConfig.NEEDS_REVIEW.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'P'],
+              systemStatusConfig.PROBLEMATIC.hexColor,
+              '#333333',
+            ],
           }}
         />
         <Layer
@@ -70,7 +108,24 @@ export const SourcesLayersQa = () => {
           source-layer={vectorSourceName}
           type="line"
           paint={{
-            'line-color': ['coalesce', ['feature-state', 'qaColor'], '#333333'],
+            'line-color': [
+              'case',
+              ['==', ['feature-state', 'userStatus'], 'S'],
+              userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'R'],
+              userStatusConfig.OK_REFERENCE_ERROR.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'D'],
+              userStatusConfig.NOT_OK_DATA_ERROR.hexColor,
+              ['==', ['feature-state', 'userStatus'], 'P'],
+              userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'G'],
+              systemStatusConfig.GOOD.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'N'],
+              systemStatusConfig.NEEDS_REVIEW.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'P'],
+              systemStatusConfig.PROBLEMATIC.hexColor,
+              '#333333',
+            ],
             'line-width': 3,
             'line-opacity': [
               'case',

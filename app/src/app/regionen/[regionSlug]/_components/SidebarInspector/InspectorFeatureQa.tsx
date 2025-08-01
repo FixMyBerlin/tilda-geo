@@ -8,10 +8,11 @@ import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvalua
 import { getQueryClient, getQueryKey, useMutation, useQuery } from '@blitzjs/rpc'
 import { useState } from 'react'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
+import { useQaMapState } from '../../_hooks/mapState/useQaMapState'
 import { useQaParam } from '../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
 import { Disclosure } from './Disclosure/Disclosure'
-import { userStatusConfig } from './InspectorQa/qaConfigs'
+import { USER_STATUS_TO_LETTER, userStatusConfig } from './InspectorQa/qaConfigs'
 import { QaEvaluationCard } from './InspectorQa/QaEvaluationCard'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
@@ -25,6 +26,7 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
   const regionSlug = useRegionSlug()
   const { qaParamData } = useQaParam()
   const { mainMap } = useMap()
+  const { filterQaDataByStyle } = useQaMapState()
   const [showForm, setShowForm] = useState(false)
 
   const [evaluations] = useQuery(getQaEvaluationsForArea, {
@@ -61,7 +63,9 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
     const targetFeature = qaFeatures[0] // Should only be one feature
     if (targetFeature) {
       mainMap.setFeatureState(targetFeature, {
-        qaColor: statusConfig.hexColor,
+        userStatus: USER_STATUS_TO_LETTER[userStatus as keyof typeof USER_STATUS_TO_LETTER],
+        // Keep existing system status
+        systemStatus: targetFeature.state?.systemStatus || null,
       })
     }
 
@@ -77,10 +81,10 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
       const currentMapData = queryClient.getQueryData<QaMapData[]>(mapDataQueryKey) || []
 
       // Create optimistic map data entry
-      const statusConfig = userStatusConfig[userStatus as keyof typeof userStatusConfig]
       const optimisticMapData: QaMapData = {
         areaId: feature.properties.id.toString(),
-        displayColor: statusConfig.hexColor,
+        systemStatus: targetFeature?.state?.systemStatus || null,
+        userStatus: USER_STATUS_TO_LETTER[userStatus as keyof typeof USER_STATUS_TO_LETTER],
       }
 
       // Update or add the optimistic entry
@@ -93,8 +97,11 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
         updatedMapData.push(optimisticMapData)
       }
 
-      // Update cache optimistically
-      queryClient.setQueryData(mapDataQueryKey, updatedMapData)
+      // Apply the same filter rules to the optimistic update
+      const filteredMapData = filterQaDataByStyle(updatedMapData, qaParamData.style)
+
+      // Update cache optimistically with filtered data
+      queryClient.setQueryData(mapDataQueryKey, filteredMapData)
     }
   }
 
