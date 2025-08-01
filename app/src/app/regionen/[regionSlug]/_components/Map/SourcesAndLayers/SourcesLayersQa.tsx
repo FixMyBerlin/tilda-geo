@@ -1,10 +1,13 @@
 import { getTilesUrl } from '@/src/app/_components/utils/getTilesUrl'
 import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsForRegion'
 import { useQuery } from '@blitzjs/rpc'
+import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useQaMapState } from '../../../_hooks/mapState/useQaMapState'
 import { useQaParam } from '../../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
+import { getLayerHighlightId } from '../utils/layerHighlight'
+import { LayerHighlight } from './LayerHighlight'
 
 export const qaLayerId = 'qa-layer'
 export const qaSourceId = 'qa-source'
@@ -40,18 +43,64 @@ export const SourcesLayersQa = () => {
         attribution={activeQaConfig.mapAttribution || ''}
         minzoom={qaMinZoom}
       />
-      <Layer
-        id={qaLayerId}
-        key={qaLayerId}
-        source={qaSourceId}
-        source-layer={vectorSourceName}
-        type="fill"
-        paint={{
-          'fill-color': ['coalesce', ['feature-state', 'qaColor'], 'gray'],
-          'fill-opacity': 0.7,
-          'fill-outline-color': ['coalesce', ['feature-state', 'qaColor'], '#333333'],
-        }}
-      />
+      <Fragment key={qaLayerId}>
+        <Layer
+          id={qaLayerId}
+          source={qaSourceId}
+          source-layer={vectorSourceName}
+          type="fill"
+          paint={{
+            'fill-color': ['coalesce', ['feature-state', 'qaColor'], 'gray'],
+            'fill-opacity': [
+              'case',
+              [
+                'any',
+                ['boolean', ['feature-state', 'hover'], false],
+                ['boolean', ['feature-state', 'selected'], false],
+              ],
+              0,
+              0.7,
+            ],
+            'fill-outline-color': ['coalesce', ['feature-state', 'qaColor'], '#333333'],
+          }}
+        />
+        <Layer
+          id={`${qaLayerId}-outline`}
+          source={qaSourceId}
+          source-layer={vectorSourceName}
+          type="line"
+          paint={{
+            'line-color': ['coalesce', ['feature-state', 'qaColor'], '#333333'],
+            'line-width': 3,
+            'line-opacity': [
+              'case',
+              [
+                'any',
+                ['boolean', ['feature-state', 'hover'], false],
+                ['boolean', ['feature-state', 'selected'], false],
+              ],
+              0,
+              1,
+            ],
+          }}
+        />
+        <LayerHighlight
+          id={getLayerHighlightId(qaLayerId)}
+          source={qaSourceId}
+          source-layer={vectorSourceName}
+          type="fill"
+          paint={{}}
+        />
+        <LayerHighlight
+          id={getLayerHighlightId(`${qaLayerId}-outline`)}
+          source={qaSourceId}
+          source-layer={vectorSourceName}
+          type="line"
+          paint={{
+            'line-width': 3,
+          }}
+        />
+      </Fragment>
     </>
   )
 }
