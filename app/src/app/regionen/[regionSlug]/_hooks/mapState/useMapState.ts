@@ -17,6 +17,7 @@ type StoreMapLoadedState = {
 
 type StoreMapDataLoadingState = {
   mapDataLoading: boolean
+  setFeatureStateLoading: boolean
 }
 
 type StoreSizes = {
@@ -41,6 +42,7 @@ type Actions = {
   actions: {
     setMapLoaded: (mapLoaded: Store['mapLoaded']) => void
     setMapDataLoading: (mapDataLoading: Store['mapDataLoading']) => void
+    setSetFeatureStateLoading: (setFeatureStateLoading: Store['setFeatureStateLoading']) => void
     setMapBounds: (mapBounds: Store['mapBounds']) => void
     setInspectorSize: (inspectorSize: Store['inspectorSize']) => void
     setSidebarSize: (sidebarSize: Store['sidebarSize']) => void
@@ -63,6 +65,8 @@ export const useMapState = create<Store>((set, get) => {
     mapLoaded: false,
     // Toggels <LoadingIndicator>
     mapDataLoading: false,
+    // Toggels <LoadingIndicator> for feature state updates
+    setFeatureStateLoading: false,
     // Data for <Inspector> AND <LayerHighlight>
     inspectorFeatures: [],
     // Data for <Inspector> AND <LayerHighlight>
@@ -73,6 +77,7 @@ export const useMapState = create<Store>((set, get) => {
     actions: {
       setMapLoaded: (mapLoaded) => set({ mapLoaded }),
       setMapDataLoading: (mapDataLoading) => set({ mapDataLoading }),
+      setSetFeatureStateLoading: (setFeatureStateLoading) => set({ setFeatureStateLoading }),
       setInspectorFeatures: (inspectorFeatures) => set({ inspectorFeatures }),
       resetInspectorFeatures: () => set({ inspectorFeatures: [] }),
       setCalculatorAreasWithFeatures: (calculatorAreasWithFeatures) =>
@@ -87,7 +92,8 @@ export const useMapState = create<Store>((set, get) => {
 })
 
 export const useMapLoaded = () => useMapState((state) => state.mapLoaded)
-export const useMapDataLoading = () => useMapState((state) => state.mapDataLoading)
+export const useShowMapLoadingIndicator = () =>
+  useMapState((state) => state.mapDataLoading || state.setFeatureStateLoading)
 export const useMapInspectorFeatures = () => useMapState((state) => state.inspectorFeatures)
 export const useMapCalculatorAreasWithFeatures = () =>
   useMapState((state) => state.calculatorAreasWithFeatures)

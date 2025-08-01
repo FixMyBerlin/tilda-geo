@@ -1,11 +1,11 @@
 import { Spinner } from '@/src/app/_components/Spinner/Spinner'
 import { Tooltip } from '@/src/app/_components/Tooltip/Tooltip'
-import { useMapDataLoading } from '../../_hooks/mapState/useMapState'
+import { useShowMapLoadingIndicator } from '../../_hooks/mapState/useMapState'
 
 export const LoadingIndicator = () => {
-  const mapDataLoading = useMapDataLoading()
+  const showIndicator = useShowMapLoadingIndicator()
 
-  if (mapDataLoading === false) return null
+  if (showIndicator === false) return null
 
   return (
     <div className="relative rounded-md bg-teal-700">
