@@ -1,8 +1,8 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
-import { CheckBadgeIcon, ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
-import { CheckBadgeIcon as CheckBadgeIconOutline } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useQaParam } from '../../../_hooks/useQueryState/useQaParam'
+import { QaIcon } from '../../SidebarInspector/InspectorQa/QaIcon'
 import { QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
 
 export const QaConfigCategory = ({
@@ -44,11 +44,7 @@ export const QaConfigCategory = ({
               )}
             >
               <h2 className="flex items-center gap-1 font-semibold">
-                {qaConfig.isActive ? (
-                  <CheckBadgeIcon className="size-5 flex-none" />
-                ) : (
-                  <CheckBadgeIconOutline className="size-5 flex-none" />
-                )}
+                <QaIcon isActive={qaConfig.isActive} className="size-5" />
                 <span>
                   {qaConfig.label}{' '}
                   {/* {qaConfig.isActive ? null : <Pill color="gray">deaktiviert</Pill>} */}

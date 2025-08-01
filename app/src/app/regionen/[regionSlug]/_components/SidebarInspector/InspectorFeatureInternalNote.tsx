@@ -4,6 +4,7 @@ import { useHasPermissions } from '@/src/app/_hooks/useHasPermissions'
 import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
 import getNoteAndComments from '@/src/server/notes/queries/getNoteAndComments'
 import { useQuery } from '@blitzjs/rpc'
+import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 import { Suspense } from 'react'
 import { Disclosure } from './Disclosure/Disclosure'
 import { InternalNote } from './InspectorFeatureInternalNote/InternalNote'
@@ -26,7 +27,12 @@ export const InspectorFeatureInternalNoteWithQuery = ({ noteId }: Props) => {
   return (
     <div className="mt-5 w-full rounded-2xl">
       <Disclosure
-        title={noteAndComments.subject}
+        title={
+          <span className="inline-flex items-center gap-2 leading-tight">
+            <ChatBubbleLeftRightIcon className="size-4 flex-none" aria-hidden="true" />
+            {noteAndComments.subject}
+          </span>
+        }
         objectId={String(noteAndComments.id)}
         showLockIcon={true}
       >

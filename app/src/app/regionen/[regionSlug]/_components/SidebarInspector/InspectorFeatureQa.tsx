@@ -18,6 +18,7 @@ import { Disclosure } from './Disclosure/Disclosure'
 import { systemStatusConfig, userStatusConfig, userStatusOptions } from './InspectorQa/qaConfigs'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
+import { QaIcon } from './InspectorQa/QaIcon'
 
 type Props = {
   feature: MapGeoJSONFeature // Area geometry from QA layer with required id property
@@ -140,7 +141,12 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
 
   return (
     <Disclosure
-      title="Qualitätssicherung"
+      title={
+        <span className="inline-flex items-center gap-2 leading-tight">
+          <QaIcon isActive={activeQaConfig?.isActive ?? false} className="size-4" />
+          Qualitätssicherung
+        </span>
+      }
       objectId={feature.properties.id.toString()}
       showLockIcon={true}
     >
