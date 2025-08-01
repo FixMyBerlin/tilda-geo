@@ -3,7 +3,6 @@ import {
   CogIcon,
   ExclamationTriangleIcon,
   UserIcon,
-  XCircleIcon,
 } from '@heroicons/react/20/solid'
 import { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@prisma/client'
 
@@ -45,7 +44,7 @@ export const systemStatusConfig = {
     color: 'bg-red-500',
     textColor: 'text-red-500',
     hexColor: QA_SYSTEM_STATUS_COLORS.PROBLEMATIC,
-    icon: XCircleIcon,
+    icon: ExclamationTriangleIcon,
     description: 'Große Abweichung - dringende Überprüfung erforderlich',
   },
 } as const satisfies Record<QaSystemStatus, Object>
@@ -93,7 +92,7 @@ export const userStatusOptions = [
   {
     value: 'OK_STRUCTURAL_CHANGE' as const,
     label: 'OK - Strukturelle Änderung',
-    description: 'Differenz OK, verursacht durch strukturelle Änderung im Gebiet wie Bauarbeiten',
+    description: 'Differenz OK, verursacht durch bspw. Bauarbeiten im Gebiet',
     hexColor: QA_USER_STATUS_COLORS.OK_STRUCTURAL_CHANGE,
   },
   {

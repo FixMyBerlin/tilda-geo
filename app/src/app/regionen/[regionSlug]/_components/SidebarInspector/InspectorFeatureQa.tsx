@@ -1,18 +1,21 @@
+import { formatDateTime } from '@/src/app/_components/date/formatDate'
 import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
-import { buttonStyles } from '@/src/app/_components/links/styles'
+import { buttonStylesOnYellow } from '@/src/app/_components/links/styles'
 import { isDev } from '@/src/app/_components/utils/isEnv'
+import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
 import createQaEvaluation from '@/src/server/qa-configs/mutations/createQaEvaluation'
 import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsForRegion'
 import getQaDataForMap, { QaMapData } from '@/src/server/qa-configs/queries/getQaDataForMap'
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { getQueryClient, getQueryKey, useMutation, useQuery } from '@blitzjs/rpc'
+import { ExclamationTriangleIcon, LockClosedIcon, UserIcon } from '@heroicons/react/20/solid'
 import { QaSystemStatus } from '@prisma/client'
 import { useState } from 'react'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
-import { twJoin } from 'tailwind-merge'
 import { useQaParam } from '../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
-import { systemStatusConfig, userStatusConfig } from './InspectorQa/qaConfigs'
+import { Disclosure } from './Disclosure/Disclosure'
+import { systemStatusConfig, userStatusConfig, userStatusOptions } from './InspectorQa/qaConfigs'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
 
@@ -39,8 +42,20 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
   const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.configSlug)
 
   const latestEvaluation = evaluations?.[0]
-  const systemStatus = latestEvaluation?.systemStatus || 'NEEDS_REVIEW'
-  const config = systemStatusConfig[systemStatus as QaSystemStatus]
+  const hasEvaluation = !!latestEvaluation
+  const systemStatus = latestEvaluation?.systemStatus
+  const userStatus = latestEvaluation?.userStatus
+  const evaluatorType = latestEvaluation?.evaluatorType
+
+  // Determine the current state
+  const hasSystemEvaluation = hasEvaluation && systemStatus !== null
+  const hasUserEvaluation = hasEvaluation && userStatus !== null
+
+  // Get configs for display
+  const systemConfig = systemStatus ? systemStatusConfig[systemStatus as QaSystemStatus] : null
+  const userConfig = userStatus
+    ? userStatusOptions.find((option) => option.value === userStatus)
+    : null
 
   // Optimistic update function
   const updateFeatureStateOptimistically = (userStatus: string, body?: string) => {
@@ -115,44 +130,104 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
     }
   }
 
-  const { geometry: _, _geometry: __, _vectorTileFeature: ___, ...debugRest } = feature
+  // Determine form visibility based on UX state
+  // Primary: System evaluation exists but no user evaluation
+  // Secondary: Everything else (no evaluation OR has user evaluation)
+  const shouldShowFormPrimary = hasEvaluation && systemStatus !== null && userStatus === null
+  const isFormVisible = shouldShowFormPrimary || (!shouldShowFormPrimary && showForm)
+
+  const { geometry: _, _geometry: __, _vectorTileFeature: ___, ...debugSelectedFeature } = feature
 
   return (
-    <div className="space-y-4">
-      {/* System Status */}
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0">
-          <div className={twJoin('rounded-full p-2 text-white', config.color)}>
-            <config.icon className="h-5 w-5" aria-hidden="true" />
+    <Disclosure
+      title={
+        <span className="inline-flex items-center gap-2 leading-tight">
+          <LockClosedIcon className="size-5 flex-none" /> Qualitätssicherung
+        </span>
+      }
+      objectId={feature.properties.id.toString()}
+    >
+      <div className="bg-amber-50 px-3 py-5">
+        {/* Header Section */}
+        <header className="space-y-3 rounded-lg bg-gray-50 p-4">
+          {/* 1. User or System Evaluation with Date */}
+          <div className="flex min-w-0 flex-1 justify-between space-x-4">
+            <div className="flex items-center gap-2">
+              {hasUserEvaluation && userConfig ? (
+                <>
+                  <UserIcon className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium text-gray-900">
+                    {latestEvaluation?.author?.firstName ||
+                      latestEvaluation?.author?.osmName ||
+                      'Benutzer'}
+                  </span>
+                </>
+              ) : hasSystemEvaluation && systemConfig ? (
+                <>
+                  <systemConfig.icon className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-900">System</span>
+                </>
+              ) : (
+                <>
+                  <ExclamationTriangleIcon className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-900">Keine Bewertung</span>
+                </>
+              )}
+            </div>
+            {latestEvaluation && (
+              <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                <time title={formatDateTime(new Date(latestEvaluation.createdAt))}>
+                  {formatRelativeTime(latestEvaluation.createdAt)}
+                </time>
+              </div>
+            )}
           </div>
+
+          {/* 2. Result (Icon + Text) */}
+          <div className="flex items-center gap-2">
+            {hasUserEvaluation && userConfig ? (
+              <>
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: userConfig.hexColor }}
+                />
+                <span className="text-sm text-gray-700">{userConfig.label}</span>
+              </>
+            ) : hasSystemEvaluation && systemConfig ? (
+              <>
+                <div
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: systemConfig.hexColor }}
+                />
+                <span className="text-sm text-gray-700">{systemConfig.label}</span>
+              </>
+            ) : (
+              <>
+                <div className="h-3 w-3 rounded-full bg-gray-400" />
+                <span className="text-sm text-gray-700">Keine Bewertung</span>
+              </>
+            )}
+          </div>
+        </header>
+
+        {/* User Evaluation Form */}
+        {isFormVisible ? (
+          <QaEvaluationForm onSubmit={handleSubmit} isLoading={isLoading} />
+        ) : (
+          <button onClick={() => setShowForm(true)} className={buttonStylesOnYellow}>
+            {hasUserEvaluation ? 'Bewertung aktualisieren' : 'Bewertung hinzufügen'}
+          </button>
+        )}
+
+        {/* 5. Always expanded list of all evaluations */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-gray-900">Bewertungsverlauf</h4>
+          <QaEvaluationHistory evaluations={evaluations} />
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-gray-900">{config.label}</h3>
-          <p className="text-sm text-gray-600">{config.description}</p>
-          {latestEvaluation && (
-            <p className="mt-1 text-xs text-gray-500">
-              Letzte Aktualisierung: {formatRelativeTime(latestEvaluation.createdAt)}
-            </p>
-          )}
-        </div>
+
+        {isDev && <ObjectDump data={debugSelectedFeature} />}
+        {isDev && <ObjectDump data={evaluations} />}
       </div>
-
-      {/* User Evaluation Form */}
-      {!showForm ? (
-        <button
-          onClick={() => setShowForm(true)}
-          className={twJoin(buttonStyles, 'w-full bg-white px-3 py-2 text-sm')}
-        >
-          Bewertung hinzufügen
-        </button>
-      ) : (
-        <QaEvaluationForm onSubmit={handleSubmit} isLoading={isLoading} />
-      )}
-
-      {/* Evaluation History */}
-      <QaEvaluationHistory evaluations={evaluations} />
-
-      {isDev && <pre className="text-xs leading-tight">{JSON.stringify(debugRest, null, 2)}</pre>}
-    </div>
+    </Disclosure>
   )
 }
