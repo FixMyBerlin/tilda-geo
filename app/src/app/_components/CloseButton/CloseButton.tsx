@@ -20,7 +20,7 @@ export const CloseButton = React.forwardRef<HTMLButtonElement, Props>(
         )}
       >
         <span className="sr-only">Schließen</span>
-        <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+        <XMarkIcon className="block size-6" aria-hidden="true" />
       </button>
     )
   },
