@@ -69,11 +69,6 @@ export const SidebarInspector = () => {
 
   const renderFeatures = !!features.length
 
-  const className = twJoin(
-    'absolute bottom-0 right-0 top-0 z-20 w-[35rem] max-w-full overflow-y-scroll bg-white p-5 pr-3 shadow-md',
-    !renderFeatures && 'pointer-events-none opacity-0',
-  )
-
   const { setFeaturesParam } = useFeaturesParam()
   const handleClose = () => {
     setFeaturesParam(null)
@@ -81,7 +76,13 @@ export const SidebarInspector = () => {
   }
 
   return (
-    <div ref={ref} className={className}>
+    <div
+      ref={ref}
+      className={twJoin(
+        'absolute bottom-0 right-0 top-0 z-20 w-[35rem] max-w-full overflow-y-scroll bg-white p-5 pr-3 shadow-md',
+        !renderFeatures && 'pointer-events-none opacity-0',
+      )}
+    >
       <Suspense fallback={<Spinner />}>
         {renderFeatures ? (
           <>
