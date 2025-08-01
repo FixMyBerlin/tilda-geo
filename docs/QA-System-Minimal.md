@@ -1,3 +1,13 @@
+# Documentation of the QA system
+
+## Requirements for new QA configs
+
+- The source table needs to have an unique id column; that id has to be a string.
+- Creating the source table is done manually in SQL (see voronoi.sql for parking).
+- The evaluations are based on the relative difference between source data and tilda data.
+- The previous relative difference is stored on the source data each run.
+
+
 # Minimal QA System for Parking Data
 
 ## Overview
