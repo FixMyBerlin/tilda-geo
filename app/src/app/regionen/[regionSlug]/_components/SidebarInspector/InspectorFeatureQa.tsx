@@ -1,5 +1,3 @@
-import { formatDateTime } from '@/src/app/_components/date/formatDate'
-import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { buttonStylesOnYellow } from '@/src/app/_components/links/styles'
 import { isDev } from '@/src/app/_components/utils/isEnv'
 import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
@@ -8,14 +6,13 @@ import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsF
 import getQaDataForMap, { QaMapData } from '@/src/server/qa-configs/queries/getQaDataForMap'
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { getQueryClient, getQueryKey, useMutation, useQuery } from '@blitzjs/rpc'
-import { ExclamationTriangleIcon, UserIcon } from '@heroicons/react/20/solid'
-import { QaSystemStatus } from '@prisma/client'
 import { useState } from 'react'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
 import { useQaParam } from '../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
 import { Disclosure } from './Disclosure/Disclosure'
-import { systemStatusConfig, userStatusConfig, userStatusOptions } from './InspectorQa/qaConfigs'
+import { userStatusConfig } from './InspectorQa/qaConfigs'
+import { QaEvaluationCard } from './InspectorQa/QaEvaluationCard'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
 import { QaIcon } from './InspectorQa/QaIcon'
@@ -46,20 +43,10 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
   const hasEvaluation = !!latestEvaluation
   const systemStatus = latestEvaluation?.systemStatus
   const userStatus = latestEvaluation?.userStatus
-  const evaluatorType = latestEvaluation?.evaluatorType
-
-  // Determine the current state
-  const hasSystemEvaluation = hasEvaluation && systemStatus !== null
   const hasUserEvaluation = hasEvaluation && userStatus !== null
 
-  // Get configs for display
-  const systemConfig = systemStatus ? systemStatusConfig[systemStatus as QaSystemStatus] : null
-  const userConfig = userStatus
-    ? userStatusOptions.find((option) => option.value === userStatus)
-    : null
-
   // Optimistic update function
-  const updateFeatureStateOptimistically = (userStatus: string, body?: string) => {
+  const updateFeatureStateOptimistically = (userStatus: string) => {
     if (!mainMap) return
 
     const statusConfig = userStatusConfig[userStatus as keyof typeof userStatusConfig]
@@ -114,7 +101,7 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
   const handleSubmit = async (userStatus: string, body?: string) => {
     try {
       // Optimistic update - immediately update the map and cache
-      updateFeatureStateOptimistically(userStatus, body)
+      updateFeatureStateOptimistically(userStatus)
 
       // Submit to server
       await createEvaluationMutation({
@@ -124,6 +111,16 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
         userStatus: userStatus as any,
         body,
       })
+
+      // Revalidate the evaluations data to refresh the inspector
+      const queryClient = getQueryClient()
+      const evaluationsQueryKey = getQueryKey(getQaEvaluationsForArea, {
+        configSlug: qaParamData.configSlug,
+        areaId: feature.properties.id.toString(),
+        regionSlug: regionSlug!,
+      })
+      await queryClient.invalidateQueries({ queryKey: evaluationsQueryKey })
+
       setShowForm(false)
     } catch (error) {
       console.error('Failed to create evaluation:', error)
@@ -150,83 +147,30 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
       objectId={feature.properties.id.toString()}
       showLockIcon={true}
     >
-      <div className="bg-amber-50 px-3 py-5">
-        {/* Header Section */}
-        <header className="space-y-3 rounded-lg bg-gray-50 p-4">
-          {/* 1. User or System Evaluation with Date */}
-          <div className="flex min-w-0 flex-1 justify-between space-x-4">
-            <div className="flex items-center gap-2">
-              {hasUserEvaluation && userConfig ? (
-                <>
-                  <UserIcon className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm font-medium text-gray-900">
-                    {latestEvaluation?.author?.firstName ||
-                      latestEvaluation?.author?.osmName ||
-                      'Benutzer'}
-                  </span>
-                </>
-              ) : hasSystemEvaluation && systemConfig ? (
-                <>
-                  <systemConfig.icon className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-900">System</span>
-                </>
-              ) : (
-                <>
-                  <ExclamationTriangleIcon className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-900">Keine Bewertung</span>
-                </>
-              )}
-            </div>
-            {latestEvaluation && (
-              <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                <time title={formatDateTime(new Date(latestEvaluation.createdAt))}>
-                  {formatRelativeTime(latestEvaluation.createdAt)}
-                </time>
-              </div>
-            )}
-          </div>
-
-          {/* 2. Result (Icon + Text) */}
-          <div className="flex items-center gap-2">
-            {hasUserEvaluation && userConfig ? (
-              <>
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: userConfig.hexColor }}
-                />
-                <span className="text-sm text-gray-700">{userConfig.label}</span>
-              </>
-            ) : hasSystemEvaluation && systemConfig ? (
-              <>
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: systemConfig.hexColor }}
-                />
-                <span className="text-sm text-gray-700">{systemConfig.label}</span>
-              </>
-            ) : (
-              <>
-                <div className="h-3 w-3 rounded-full bg-gray-400" />
-                <span className="text-sm text-gray-700">Keine Bewertung</span>
-              </>
-            )}
-          </div>
-        </header>
+      <div className="bg-violet-50 px-3 py-5">
+        {/* Header Section - Full Latest Evaluation */}
+        {latestEvaluation && <QaEvaluationCard evaluation={latestEvaluation} variant="header" />}
 
         {/* User Evaluation Form */}
-        {isFormVisible ? (
-          <QaEvaluationForm onSubmit={handleSubmit} isLoading={isLoading} />
-        ) : (
-          <button onClick={() => setShowForm(true)} className={buttonStylesOnYellow}>
-            {hasUserEvaluation ? 'Bewertung aktualisieren' : 'Bewertung hinzufügen'}
-          </button>
-        )}
+        <section className="mt-5">
+          {isFormVisible ? (
+            <QaEvaluationForm onSubmit={handleSubmit} isLoading={isLoading} />
+          ) : (
+            <button onClick={() => setShowForm(true)} className={buttonStylesOnYellow}>
+              {hasUserEvaluation ? 'Bewertung aktualisieren' : 'Bewertung hinzufügen'}
+            </button>
+          )}
+        </section>
 
         {/* 5. Always expanded list of all evaluations */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium text-gray-900">Bewertungsverlauf</h4>
-          <QaEvaluationHistory evaluations={evaluations} />
-        </div>
+        {evaluations.length > 1 && (
+          <div className="mt-5">
+            <h4 className="mb-2 text-sm font-medium text-gray-900">
+              Bewertungsverlauf ({evaluations.length - 1})
+            </h4>
+            <QaEvaluationHistory evaluations={evaluations} />
+          </div>
+        )}
 
         {isDev && <ObjectDump data={debugSelectedFeature} />}
         {isDev && <ObjectDump data={evaluations} />}

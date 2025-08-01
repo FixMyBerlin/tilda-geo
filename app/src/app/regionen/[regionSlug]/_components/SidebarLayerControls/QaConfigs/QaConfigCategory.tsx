@@ -35,7 +35,14 @@ export const QaConfigCategory = ({
     <Disclosure>
       {({ open }) => (
         <>
-          <DisclosureButton className="group flex justify-between border-t border-t-gray-200 bg-amber-50 text-left hover:bg-yellow-50">
+          <DisclosureButton
+            className={twJoin(
+              'group flex justify-between border-t border-t-gray-200 text-left',
+              open || isSelected
+                ? 'bg-violet-50 hover:bg-violet-100'
+                : 'bg-gray-50 hover:bg-gray-100',
+            )}
+          >
             <div
               className={twJoin(
                 'ml-1.5 flex min-h-[3rem] w-full flex-col items-start text-sm leading-[17px]',
@@ -51,7 +58,7 @@ export const QaConfigCategory = ({
                 </span>
               </h2>
             </div>
-            <div className="flex min-h-[3rem] flex-none items-center justify-center px-1 text-yellow-500">
+            <div className="flex min-h-[3rem] flex-none items-center justify-center px-1 text-violet-500">
               {open ? (
                 <ChevronDownIcon className="h-7 w-7" />
               ) : (
@@ -79,7 +86,7 @@ export const QaConfigCategory = ({
                       value={option.key}
                       checked={currentStyle === option.key}
                       onChange={() => handleStyleChange(option.key)}
-                      className="h-3 w-3 text-yellow-600 focus:ring-yellow-500"
+                      className="h-3 w-3 text-violet-600 focus:ring-violet-500"
                     />
                     <span>{option.label}</span>
                   </label>

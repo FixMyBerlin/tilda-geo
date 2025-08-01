@@ -43,16 +43,15 @@ export const QaEvaluationForm = ({ onSubmit, isLoading }: Props) => {
                   disabled={isLoading}
                 />
               </div>
-              <div className="ml-3 flex items-center gap-2">
-                {/* Color indicator */}
+              <div className="ml-2">
+                {/* Status pill */}
                 <div
-                  className="h-3 w-3 rounded-full border border-gray-300"
+                  className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white"
                   style={{ backgroundColor: option.hexColor }}
-                />
+                >
+                  {option.label}
+                </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700 group-hover:text-gray-800">
-                    {option.label}
-                  </div>
                   <div className="mt-1 text-xs text-gray-500">{option.description}</div>
                 </div>
               </div>

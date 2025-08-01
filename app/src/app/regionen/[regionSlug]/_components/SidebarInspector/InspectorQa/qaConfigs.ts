@@ -83,7 +83,7 @@ export const evaluatorTypeConfig = {
   USER: {
     label: 'Benutzer',
     icon: UserIcon,
-    color: 'text-blue-500',
+    color: 'text-gray-500',
   },
 } as const satisfies Record<QaEvaluatorType, Object>
 
