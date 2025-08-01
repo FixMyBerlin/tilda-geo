@@ -8,7 +8,7 @@ import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsF
 import getQaDataForMap, { QaMapData } from '@/src/server/qa-configs/queries/getQaDataForMap'
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { getQueryClient, getQueryKey, useMutation, useQuery } from '@blitzjs/rpc'
-import { ExclamationTriangleIcon, LockClosedIcon, UserIcon } from '@heroicons/react/20/solid'
+import { ExclamationTriangleIcon, UserIcon } from '@heroicons/react/20/solid'
 import { QaSystemStatus } from '@prisma/client'
 import { useState } from 'react'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
@@ -140,12 +140,9 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
 
   return (
     <Disclosure
-      title={
-        <span className="inline-flex items-center gap-2 leading-tight">
-          <LockClosedIcon className="size-5 flex-none" /> Qualitätssicherung
-        </span>
-      }
+      title="Qualitätssicherung"
       objectId={feature.properties.id.toString()}
+      showLockIcon={true}
     >
       <div className="bg-amber-50 px-3 py-5">
         {/* Header Section */}

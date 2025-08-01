@@ -30,6 +30,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
         <Disclosure
           title={<>Statische Daten {quote(sourceData.name)}</>}
           objectId={feature.properties.osm_id}
+          showLockIcon={!sourceData.isPublic}
         >
           <p
             dangerouslySetInnerHTML={{ __html: sourceData.attributionHtml }}
