@@ -47,6 +47,7 @@
     "RegionalMasks:update:createPmtiles": "bun ./scripts/RegionalMasks/createPmtiles.ts",
     "RegionalMasks:update:upload": "bun ./scripts/RegionalMasks/upload.ts",
     "MapboxTilesets:update": "bun ./scripts/MapboxTilesets/process.ts",
+    "TranslationAnalysis:update": "bun ./scripts/TranslationAnalysis/analyze.ts",
     "MaprouletteCreate": "bun run scripts/MaprouletteCreate/process.ts",
     "MaprouletteRebuild": "bun run scripts/MaprouletteRebuild/process.ts",
     "Maproulette:help": "echo -e '\\033[0;32m Help: Use `npm run MaprouletteCreate -- --filter FOOBAR` \\033[0m' && echo -e '\\033[0;32m Rebuild: Use `npm run MaprouletteRebuild -- --filter FOOBAR` \\033[0m'",
