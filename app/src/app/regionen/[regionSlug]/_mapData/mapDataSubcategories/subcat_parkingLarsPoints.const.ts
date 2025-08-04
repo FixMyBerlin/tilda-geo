@@ -4,14 +4,14 @@ import { mapboxStyleGroupLayers_parking_calculator } from './mapboxStyles/groups
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingPoints'
-export type SubcatParkingPointsId = typeof subcatId
-export type SubcatParkingPointsStyleIds = 'default'
+export type SubcatParkingLarsPointsId = typeof subcatId
+export type SubcatParkingLarsPointsStyleIds = 'default'
 
-export const subcat_parkingPoints: FileMapDataSubcategory = {
+export const subcat_parkingLarsPoints: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Parkplätze zählen',
   ui: 'dropdown',
-  sourceId: 'parkraumParkingPoints',
+  sourceId: 'lars_parking_points',
   beforeId: undefined,
   styles: [
     defaultStyleHidden,
@@ -21,7 +21,7 @@ export const subcat_parkingPoints: FileMapDataSubcategory = {
       desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_calculator,
-        source: 'parkraumParkingPoints',
+        source: 'lars_parking_points',
         sourceLayer: 'processing.parking_spaces',
       }),
     },

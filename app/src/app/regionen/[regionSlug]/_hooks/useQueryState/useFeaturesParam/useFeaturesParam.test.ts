@@ -31,7 +31,7 @@ const allTestData = [
   // feature with numeric id and LineString geometry
   {
     map: {
-      source: 'cat:parking--source:parkraumParkingAreas--subcat:parkingAreas',
+      source: 'cat:parking--source:lars_parking_areas--subcat:parkingAreas',
       id: 9718,
       geometry: {
         type: 'Polygon',
@@ -48,7 +48,7 @@ const allTestData = [
       },
     },
     url: {
-      sourceId: 'parkraumParkingAreas',
+      sourceId: 'lars_parking_areas',
       id: 9718,
       coordinates: [9.118744, 48.948085, 9.119004, 48.948291],
     },

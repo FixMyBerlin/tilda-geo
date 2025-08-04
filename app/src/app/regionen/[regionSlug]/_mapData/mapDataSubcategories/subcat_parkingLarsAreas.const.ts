@@ -4,10 +4,10 @@ import { mapboxStyleGroupLayers_parking_areas } from './mapboxStyles/groups/park
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingAreas'
-const source = 'parkraumParkingAreas'
+const source = 'lars_parking_areas'
 const sourceLayer = 'processing.parking_poly'
-export type SubcatParkingAreasId = typeof subcatId
-export type SubcatParkingAreasStyleIds = 'default' | 'street_side'
+export type SubcatParkingLarsAreasId = typeof subcatId
+export type SubcatParkingLarsAreasStyleIds = 'default' | 'street_side'
 
 const defaultLegend = [
   {
@@ -32,11 +32,11 @@ const defaultLegend = [
   },
 ] satisfies FileMapDataSubcategoryStyleLegend[]
 
-export const subcat_parkingAreas: FileMapDataSubcategory = {
+export const subcat_parkingLarsAreas: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Flächenparkplätze',
   ui: 'dropdown',
-  sourceId: 'parkraumParkingAreas',
+  sourceId: 'lars_parking_areas',
   beforeId: undefined,
   styles: [
     defaultStyleHidden,

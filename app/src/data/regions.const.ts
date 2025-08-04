@@ -128,7 +128,7 @@ export const staticRegion: StaticRegion[] = [
       'roads',
       'surface',
       'lit',
-      'parking',
+      'parkingLars',
       'mapillary',
     ],
     backgroundSources: defaultBackgroundSources,
@@ -180,7 +180,7 @@ export const staticRegion: StaticRegion[] = [
       'bikelanes',
       'roads',
       'surface',
-      'parking',
+      'parkingLars',
       'bicycleParking',
       'poi',
       'mapillary',
@@ -219,7 +219,7 @@ export const staticRegion: StaticRegion[] = [
       'bikelanes',
       'roads',
       'surface',
-      // 'parking',
+      // 'parkingLars',
       // 'bicycleParking',
       // 'poi',
       'mapillary',
@@ -255,7 +255,7 @@ export const staticRegion: StaticRegion[] = [
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
-      'parking',
+      'parkingLars',
       // 'trafficSigns', // NOTE: Not finished, yet
       'mapillary',
     ],
@@ -318,7 +318,7 @@ export const staticRegion: StaticRegion[] = [
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
-      'parking',
+      'parkingLars',
       // 'trafficSigns', // NOTE: Not finished, yet
       'mapillary',
     ],

@@ -5,10 +5,10 @@ import { mapboxStyleGroupLayers_parking_stats_length } from './mapboxStyles/grou
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingStats'
-const source = 'parkraumParkingStats'
+const source = 'lars_parking_stats'
 const sourceLayer = 'processing.boundaries_stats'
-export type SubcatParkingStatsId = typeof subcatId
-export type SubcatParkingStatsStyleIds =
+export type SubcatParkingLarsStatsId = typeof subcatId
+export type SubcatParkingLarsStatsStyleIds =
   | 'stats-admin-level-4'
   | 'default'
   | 'stats-admin-level-10'
@@ -16,7 +16,7 @@ export type SubcatParkingStatsStyleIds =
   | 'length-admin-level-9'
   | 'length-admin-level-10'
 
-export const subcat_parkingStats: FileMapDataSubcategory = {
+export const subcat_parkingLarsStats: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Statistik',
   ui: 'dropdown',

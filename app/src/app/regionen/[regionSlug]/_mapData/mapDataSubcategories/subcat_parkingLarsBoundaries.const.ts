@@ -4,15 +4,15 @@ import { mapboxStyleGroupLayers_parking_boundaries } from './mapboxStyles/groups
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingBoundaries'
-const source = 'parkraumParkingStats'
+const source = 'lars_parking_stats'
 const sourceLayer = 'processing.boundaries_stats'
-export type SubcatParkingBoundariesId = typeof subcatId
-export type SubcatParkingBoundariesStyleIds =
+export type SubcatParkingLarsBoundariesId = typeof subcatId
+export type SubcatParkingLarsBoundariesStyleIds =
   | 'boundaries-admin-level-4'
   | 'boundaries-admin-level-9'
   | 'default'
 
-export const subcat_parkingBoundaries: FileMapDataSubcategory = {
+export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Grenzen',
   ui: 'dropdown',

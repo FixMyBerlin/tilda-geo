@@ -6,7 +6,7 @@ import {
 import { MapDataSource } from '../types'
 import { apiKeyMapbox, apiKeyMapillary } from './apiKeys.const'
 import { SourceExportApiIdentifier } from './export/exportIdentifier'
-import { sourcesParking, SourcesParkingId } from './sourcesParking.const'
+import { SourcesParkingLarsId, sourcesParkingLars } from './sourcesParkingLars.const'
 
 type AtlasSourceId =
   | 'atlas_barriers'
@@ -31,13 +31,13 @@ type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapil
 
 // TODO type MapDataConfigSourcesIds = typeof sources[number]['id']
 export type SourcesId =
-  | SourcesParkingId
+  | SourcesParkingLarsId
   | AtlasSourceId
   | MapillarySourceId
   | 'accidents_unfallatlas'
 
 export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
-  ...sourcesParking,
+  ...sourcesParkingLars,
   {
     id: 'atlas_boundaries',
     tiles: getTilesUrl(

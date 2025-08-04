@@ -11,15 +11,15 @@ import { mapboxStyleGroupLayers_parking_obstacles } from './mapboxStyles/groups/
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingDebug'
-const source = 'parkraumParkingDebug'
-export type SubcatParkingDebugId = typeof subcatId
-export type SubcatParkingDebugStyleIds = 'default' | 'presence' | 'debugLengthPerCapacity'
+const source = 'lars_parking_debug'
+export type SubcatParkingLarsDebugId = typeof subcatId
+export type SubcatParkingLarsDebugStyleIds = 'default' | 'presence' | 'debugLengthPerCapacity'
 
-export const subcat_parkingDebug: FileMapDataSubcategory = {
+export const subcat_parkingLarsDebug: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Parkraum Debug',
   ui: 'dropdown',
-  sourceId: 'parkraumParkingDebug',
+  sourceId: 'lars_parking_debug',
   beforeId: undefined,
   styles: [
     defaultStyleHidden,

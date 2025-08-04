@@ -55,27 +55,30 @@ import {
   SubcatMaxspeedPlusPresenceId,
   SubcatMaxspeedPlusPresenceStyleIds,
 } from './mapDataSubcategories/subcat_maxspeed_plus_presence'
-import { SubcatParkingId, SubcatParkingStyleIds } from './mapDataSubcategories/subcat_parking.const'
 import {
-  SubcatParkingAreasId,
-  SubcatParkingAreasStyleIds,
-} from './mapDataSubcategories/subcat_parkingAreas.const'
+  SubcatParkingLarsId,
+  SubcatParkingLarsStyleIds,
+} from './mapDataSubcategories/subcat_parkingLars.const'
 import {
-  SubcatParkingBoundariesId,
-  SubcatParkingBoundariesStyleIds,
-} from './mapDataSubcategories/subcat_parkingBoundaries.const'
+  SubcatParkingLarsAreasId,
+  SubcatParkingLarsAreasStyleIds,
+} from './mapDataSubcategories/subcat_parkingLarsAreas.const'
 import {
-  SubcatParkingDebugId,
-  SubcatParkingDebugStyleIds,
-} from './mapDataSubcategories/subcat_parkingDebug.const'
+  SubcatParkingLarsBoundariesId,
+  SubcatParkingLarsBoundariesStyleIds,
+} from './mapDataSubcategories/subcat_parkingLarsBoundaries.const'
 import {
-  SubcatParkingPointsId,
-  SubcatParkingPointsStyleIds,
-} from './mapDataSubcategories/subcat_parkingPoints.const'
+  SubcatParkingLarsDebugId,
+  SubcatParkingLarsDebugStyleIds,
+} from './mapDataSubcategories/subcat_parkingLarsDebug.const'
 import {
-  SubcatParkingStatsId,
-  SubcatParkingStatsStyleIds,
-} from './mapDataSubcategories/subcat_parkingStats.const'
+  SubcatParkingLarsPointsId,
+  SubcatParkingLarsPointsStyleIds,
+} from './mapDataSubcategories/subcat_parkingLarsPoints.const'
+import {
+  SubcatParkingLarsStatsId,
+  SubcatParkingLarsStatsStyleIds,
+} from './mapDataSubcategories/subcat_parkingLarsStats.const'
 import { SubcatPoiId, SubcatPoiStyleIds } from './mapDataSubcategories/subcat_poi.const'
 import {
   SubcatPoiBoundariesId,
@@ -149,12 +152,12 @@ export type SubcategoryId =
   | SubcatMapillaryCoverageId
   | SubcatMaxspeedId
   | SubcatMaxspeedPlusPresenceId
-  | SubcatParkingAreasId
-  | SubcatParkingBoundariesId
-  | SubcatParkingDebugId
-  | SubcatParkingId
-  | SubcatParkingPointsId
-  | SubcatParkingStatsId
+  | SubcatParkingLarsAreasId
+  | SubcatParkingLarsBoundariesId
+  | SubcatParkingLarsDebugId
+  | SubcatParkingLarsId
+  | SubcatParkingLarsPointsId
+  | SubcatParkingLarsStatsId
   | SubcatPoiBoundariesId
   | SubcatPoiId
   | SubcatPoiPlacesId
@@ -172,6 +175,7 @@ export type SubcategoryId =
   | SubcatSignsId
   | SubcatSurfaceBikelaneId
   | SubcatSurfaceRoadsId
+  | 'parking' // LEGACY for app/src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/configs/_*.ts
 
 type StyleIdDefaults = StaticMapDataCategory['subcategories'][number]['defaultStyle']
 
@@ -192,12 +196,12 @@ export type StyleId =
   | SubcatMapillaryCoverageStyleIds
   | SubcatMaxspeedPlusPresenceStyleIds
   | SubcatMaxspeedStyleIds
-  | SubcatParkingAreasStyleIds
-  | SubcatParkingBoundariesStyleIds
-  | SubcatParkingDebugStyleIds
-  | SubcatParkingPointsStyleIds
-  | SubcatParkingStatsStyleIds
-  | SubcatParkingStyleIds
+  | SubcatParkingLarsAreasStyleIds
+  | SubcatParkingLarsBoundariesStyleIds
+  | SubcatParkingLarsDebugStyleIds
+  | SubcatParkingLarsPointsStyleIds
+  | SubcatParkingLarsStatsStyleIds
+  | SubcatParkingLarsStyleIds
   | SubcatPoiBoundariesStyleIds
   | SubcatPoiPlacesStyleIds
   | SubcatPoiPlusBarriersStyleIds

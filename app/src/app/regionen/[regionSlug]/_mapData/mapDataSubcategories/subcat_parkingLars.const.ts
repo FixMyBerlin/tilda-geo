@@ -7,17 +7,17 @@ import { mapboxStyleGroupLayers_parking_parkinglines_missing } from './mapboxSty
 import { mapboxStyleGroupLayers_parking_parkinglines_surface } from './mapboxStyles/groups/parking_parkinglines_surface'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
-const subcatId = 'parking'
-const source = 'parkraumParking'
+const subcatId = 'parkingLars'
+const source = 'lars_parking'
 const sourceLayer = 'processing.parking_segments'
-export type SubcatParkingId = typeof subcatId
-export type SubcatParkingStyleIds = 'default' | 'presence' | 'missing' | 'surface' | 'raw'
+export type SubcatParkingLarsId = typeof subcatId
+export type SubcatParkingLarsStyleIds = 'default' | 'presence' | 'missing' | 'surface' | 'raw'
 
-export const subcat_parking: FileMapDataSubcategory = {
+export const subcat_parkingLars: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Parkraum',
   ui: 'dropdown',
-  sourceId: 'parkraumParking',
+  sourceId: 'lars_parking',
   beforeId: undefined,
   styles: [
     defaultStyleHidden,
@@ -33,7 +33,7 @@ export const subcat_parking: FileMapDataSubcategory = {
         }),
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
-          source: 'parkraumParking',
+          source: 'lars_parking',
           sourceLayer: 'processing.parking_segments_label',
         }),
       ].flat(),
@@ -45,7 +45,7 @@ export const subcat_parking: FileMapDataSubcategory = {
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
-          source: 'parkraumParking',
+          source: 'lars_parking',
           sourceLayer: 'processing.parking_segments_label',
         }),
         mapboxStyleLayers({
@@ -149,7 +149,7 @@ export const subcat_parking: FileMapDataSubcategory = {
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
-          source: 'parkraumParking',
+          source: 'lars_parking',
           sourceLayer: 'processing.parking_segments_label',
         }),
         mapboxStyleLayers({

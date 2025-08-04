@@ -13,11 +13,11 @@ export const additionalSourceKeys = ['osm-notes'] as const
 type SourceNames = SourcesId | (typeof additionalSourceKeys)[number]
 export const numericSourceIds: Record<number, SourceNames> = {
   1: 'osm-notes',
-  2: 'parkraumParking',
-  3: 'parkraumParkingDebug',
-  4: 'parkraumParkingPoints',
-  5: 'parkraumParkingAreas',
-  6: 'parkraumParkingStats',
+  2: 'lars_parking',
+  3: 'lars_parking_debug',
+  4: 'lars_parking_points',
+  5: 'lars_parking_areas',
+  6: 'lars_parking_stats',
   7: 'atlas_boundaries',
   8: 'atlas_presenceStats',
   9: 'accidents_unfallatlas',
