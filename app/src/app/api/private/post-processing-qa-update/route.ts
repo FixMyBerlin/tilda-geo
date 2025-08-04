@@ -1,4 +1,5 @@
 import db from '@/db'
+import { getQaTableName } from '@/src/server/qa-configs/utils/getQaTableName'
 import { QaSystemStatus } from '@prisma/client'
 import { NextRequest } from 'next/server'
 import { guardEnpoint, GuardEnpointSchema } from '../_utils/guardEndpoint'
@@ -129,9 +130,7 @@ export async function GET(request: NextRequest) {
 
     for (const config of qaConfigs) {
       // Get areas from the map table
-      const tableName = config.mapTable.startsWith('public.')
-        ? config.mapTable
-        : `public.${config.mapTable}`
+      const tableName = getQaTableName(config.mapTable)
 
       // Query the map table to get areas with their relative values
       // Include areas with null relative values (they need review)
