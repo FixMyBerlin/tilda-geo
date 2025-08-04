@@ -120,4 +120,30 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.1yvm8bes/#14/52.51622/13.37036',
     bbox: bboxPartOfNorthGermany,
   },
+  // Parking tables
+  parkings: {
+    sourceLayer: 'parkings',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  parkings_cutouts: {
+    sourceLayer: 'parkings_cutouts',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  parkings_quantized: {
+    sourceLayer: 'parkings_quantized',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  parkings_separate: {
+    sourceLayer: 'parkings_separate',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  parkings_no: {
+    sourceLayer: 'parkings_no',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
 }
