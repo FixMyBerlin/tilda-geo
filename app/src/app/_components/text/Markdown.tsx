@@ -55,13 +55,16 @@ const components = {
 export const Markdown = ({ markdown, className }: Props) => {
   if (!markdown) return null
 
+  // Process newlines: convert single newlines to line breaks
+  const processedMarkdown = markdown.replace(/\n(?!\n)/g, '  \n')
+
   return (
     <div className={twMerge(proseClasses, className)}>
       <Remark
         remarkToRehypeOptions={{ allowDangerousHtml: true }}
         rehypeReactOptions={{ components }}
       >
-        {markdown}
+        {processedMarkdown}
       </Remark>
     </div>
   )
