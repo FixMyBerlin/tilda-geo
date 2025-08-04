@@ -105,4 +105,24 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: [],
     minzoom: 0,
   },
+  parkings: {
+    stylingKeys: [],
+    minzoom: 0,
+  },
+  parkings_cutouts: {
+    stylingKeys: [],
+    minzoom: 11,
+  },
+  parkings_quantized: {
+    stylingKeys: [],
+    minzoom: 11,
+  },
+  parkings_separate: {
+    stylingKeys: [],
+    minzoom: 0,
+  },
+  parkings_no: {
+    stylingKeys: [],
+    minzoom: 0,
+  },
 }
