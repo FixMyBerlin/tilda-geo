@@ -32,6 +32,7 @@ import { subcat_signs } from '../mapDataSubcategories/subcat_signs.const'
 import { subcat_surface_bikelane } from '../mapDataSubcategories/subcat_surface_bikelane'
 import { subcat_surface_roads } from '../mapDataSubcategories/subcat_surface_roads.const'
 import { StaticMapDataCategory } from '../types'
+import { parkingTildaCategories } from './parkingTildaCategories.const'
 import { radinfraCategories } from './radinfraCategories.const'
 
 export const categories: StaticMapDataCategory[] = [
@@ -123,8 +124,8 @@ export const categories: StaticMapDataCategory[] = [
   },
   {
     id: 'parkingLars',
-    name: 'Parkraum',
-    desc: 'Parken im Straßenraum',
+    name: 'Parkraum (Community)',
+    desc: 'Parken im Straßenraum – Community-Prozessierung',
     subcategories: [
       { ...subcat_parkingLars, defaultStyle: 'default' },
       { ...subcat_parkingLarsPoints, defaultStyle: 'hidden' },
@@ -165,4 +166,5 @@ export const categories: StaticMapDataCategory[] = [
     subcategories: [{ ...subcat_accidents, defaultStyle: 'default' }],
   },
   ...radinfraCategories,
+  ...parkingTildaCategories,
 ]

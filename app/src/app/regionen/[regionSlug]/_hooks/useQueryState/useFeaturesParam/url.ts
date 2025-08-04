@@ -37,4 +37,9 @@ export const numericSourceIds: Record<number, SourceNames> = {
   23: 'atlas_bikeSuitability',
   24: 'atlas_todos_lines',
   25: 'atlas_aggregated_lengths',
+  26: 'tilda_parkings',
+  27: 'tilda_parkings_cutouts',
+  28: 'tilda_parkings_quantized',
+  29: 'tilda_parkings_separate',
+  30: 'tilda_parkings_no',
 }
