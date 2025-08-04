@@ -4,6 +4,7 @@ import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
 import createQaEvaluation from '@/src/server/qa-configs/mutations/createQaEvaluation'
 import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsForRegion'
 import getQaDataForMap, { QaMapData } from '@/src/server/qa-configs/queries/getQaDataForMap'
+import getQaDecisionDataForArea from '@/src/server/qa-configs/queries/getQaDecisionDataForArea'
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { getQueryClient, getQueryKey, useMutation, useQuery } from '@blitzjs/rpc'
 import { useState } from 'react'
@@ -30,6 +31,12 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
   const [showForm, setShowForm] = useState(false)
 
   const [evaluations] = useQuery(getQaEvaluationsForArea, {
+    configSlug: qaParamData.configSlug,
+    areaId: feature.properties.id.toString(),
+    regionSlug: regionSlug!,
+  })
+
+  const [decisionData] = useQuery(getQaDecisionDataForArea, {
     configSlug: qaParamData.configSlug,
     areaId: feature.properties.id.toString(),
     regionSlug: regionSlug!,
@@ -156,7 +163,13 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
     >
       <div className="bg-violet-50 px-3 py-5">
         {/* Header Section - Full Latest Evaluation */}
-        {latestEvaluation && <QaEvaluationCard evaluation={latestEvaluation} variant="header" />}
+        {latestEvaluation && (
+          <QaEvaluationCard
+            evaluation={latestEvaluation}
+            decisionData={decisionData}
+            variant="header"
+          />
+        )}
 
         {/* User Evaluation Form */}
         <section className="mt-5">
@@ -179,8 +192,9 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
           </div>
         )}
 
-        {isDev && <ObjectDump data={debugSelectedFeature} />}
-        {isDev && <ObjectDump data={evaluations} />}
+        {isDev && <ObjectDump title="decisionData" data={decisionData} />}
+        {isDev && <ObjectDump title="selectedFeature" data={debugSelectedFeature} />}
+        {isDev && <ObjectDump title="evaluations" data={evaluations} />}
       </div>
     </Disclosure>
   )

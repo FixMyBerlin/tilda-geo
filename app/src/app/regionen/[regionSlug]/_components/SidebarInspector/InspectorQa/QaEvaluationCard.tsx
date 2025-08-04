@@ -1,16 +1,19 @@
 import { formatDateTime } from '@/src/app/_components/date/formatDate'
 import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { Markdown } from '@/src/app/_components/text/Markdown'
+import { QaDecisionData } from '@/src/server/qa-configs/queries/getQaDecisionDataForArea'
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { systemStatusConfig, userStatusConfig } from './qaConfigs'
+import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
 import { QaEvaluatorDisplay } from './QaEvaluatorDisplay'
 
 type Props = {
   evaluation: Awaited<ReturnType<typeof getQaEvaluationsForArea>>[number]
+  decisionData?: QaDecisionData | null
   variant?: 'header' | 'history'
 }
 
-export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => {
+export const QaEvaluationCard = ({ evaluation, decisionData, variant = 'history' }: Props) => {
   const date = new Date(evaluation.createdAt)
   const systemConfig = systemStatusConfig[evaluation.systemStatus]
   const userConfig = evaluation.userStatus ? userStatusConfig[evaluation.userStatus] : null
@@ -45,7 +48,10 @@ export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => 
         <QaEvaluatorDisplay evaluation={evaluation} />
       </div>
 
-      {/* 2. Comment */}
+      {/* 2. Decision Data (only for header variant) */}
+      {variant === 'header' && <QaDecisionDataComponent decisionData={decisionData || null} />}
+
+      {/* 3. Comment */}
       {evaluation.body && (
         <div className="text-sm text-gray-700">
           <Markdown
