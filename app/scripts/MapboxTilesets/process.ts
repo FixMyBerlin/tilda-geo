@@ -23,6 +23,20 @@ async function main() {
     console.log('\n')
     const datasetKey = dataset[0] as SourceExportApiIdentifier
     const { sourceLayer, uploadUrl, bbox } = dataset[1]
+
+    // Check if files already exist
+    const fgbFile = `${folderFgb}/atlas_${datasetKey}.fgb`
+    const mbtilesFile = `${folderMbtiles}/atlas_${datasetKey}.mbtiles`
+
+    if (fs.existsSync(fgbFile) && fs.existsSync(mbtilesFile)) {
+      console.log(
+        chalk.inverse.bold(chalk.yellow('  SKIP')),
+        `${datasetKey} - files already exist`,
+        { uploadUrl },
+      )
+      continue
+    }
+
     try {
       // Fetch Export API
       const apiKey = process.env.ATLAS_API_KEY
@@ -37,13 +51,11 @@ async function main() {
       }
 
       // For debugging: Write JSON Response
-      const fgbFile = `${folderFgb}/atlas_${datasetKey}.fgb`
       console.log(chalk.inverse.bold(chalk.yellow('  WRITE')), fgbFile)
       const fgbBuffer = await fetchExportFgb.arrayBuffer()
       fs.writeFileSync(fgbFile, Buffer.from(fgbBuffer))
 
       // Create mbTiles with Tippecanoe
-      const mbtilesFile = `${folderMbtiles}/atlas_${datasetKey}.mbtiles`
       console.log(chalk.inverse.bold('  RUN'), 'tippecanoe', mbtilesFile)
       Bun.spawnSync(
         [
