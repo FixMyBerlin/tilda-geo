@@ -17,7 +17,7 @@ const QaConfigFormInputSchema = z.object({
   mapAttribution: z.string().optional(),
   goodThreshold: z.string(),
   needsReviewThreshold: z.string(),
-  problematicThreshold: z.string(),
+
   regionId: z.string(),
 })
 
@@ -47,7 +47,7 @@ export default function AdminNewQaConfigPage() {
           mapAttribution: '',
           goodThreshold: '0.2',
           needsReviewThreshold: '0.5',
-          problematicThreshold: '1.0',
+
           regionId: '',
         }}
         onSubmit={async (values) => {
@@ -60,7 +60,7 @@ export default function AdminNewQaConfigPage() {
               mapAttribution: values.mapAttribution || '',
               goodThreshold: parseFloat(values.goodThreshold),
               needsReviewThreshold: parseFloat(values.needsReviewThreshold),
-              problematicThreshold: parseFloat(values.problematicThreshold),
+
               regionId: parseInt(values.regionId),
             })
             router.refresh()

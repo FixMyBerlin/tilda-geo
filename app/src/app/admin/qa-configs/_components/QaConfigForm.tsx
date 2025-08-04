@@ -17,7 +17,7 @@ const QaConfigFormInputSchema = z.object({
   mapAttribution: z.string().optional(),
   goodThreshold: z.string(),
   needsReviewThreshold: z.string(),
-  problematicThreshold: z.string(),
+
   regionId: z.string(),
 })
 
@@ -71,15 +71,7 @@ export function QaConfigForm<S extends z.ZodType<any, any>>(props: FormProps<S>)
         max={1}
         step={0.1}
       />
-      <LabeledTextField
-        name="problematicThreshold"
-        label="Problematic Threshold"
-        type="number"
-        help="Schwellenwert für 'Problem' Status (0.0 - 1.0)"
-        min={0}
-        max={1}
-        step={0.1}
-      />
+
       <LabeledRadiobuttonGroup
         scope="isActive"
         items={[

@@ -9,7 +9,6 @@ export const QaConfigSchema = z.object({
   mapAttribution: z.string().optional(),
   goodThreshold: z.number().min(0).max(1),
   needsReviewThreshold: z.number().min(0).max(1),
-  problematicThreshold: z.number().min(0).max(1),
   regionId: z.number(),
 })
 
@@ -20,14 +19,12 @@ export const QaConfigFormSchema = QaConfigSchema.omit({
   regionId: true,
   goodThreshold: true,
   needsReviewThreshold: true,
-  problematicThreshold: true,
 }).merge(
   z.object({
     isActive: trueOrFalse,
     regionId: z.string(),
     goodThreshold: z.coerce.number(),
     needsReviewThreshold: z.coerce.number(),
-    problematicThreshold: z.coerce.number(),
   }),
 )
 

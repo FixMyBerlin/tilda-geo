@@ -204,7 +204,6 @@ model QaConfig {
   // Thresholds for automatic system evaluation
   goodThreshold        Float @default(0.2) // relative <= 0.2 difference = GOOD
   needsReviewThreshold Float @default(0.5) // relative <= 0.5 difference = NEEDS_REVIEW
-  problematicThreshold Float @default(1.0) // relative > 0.5 difference = PROBLEMATIC
 
   region   Region @relation(fields: [regionId], references: [id])
   regionId Int

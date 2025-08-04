@@ -46,7 +46,7 @@ export function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div>
               <span className="font-medium text-gray-500">Good Threshold:</span>
               <span className="ml-2 text-gray-900">{config.goodThreshold}</span>
@@ -54,10 +54,6 @@ export function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
             <div>
               <span className="font-medium text-gray-500">Needs Review:</span>
               <span className="ml-2 text-gray-900">{config.needsReviewThreshold}</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-500">Problematic:</span>
-              <span className="ml-2 text-gray-900">{config.problematicThreshold}</span>
             </div>
           </div>
         </div>
