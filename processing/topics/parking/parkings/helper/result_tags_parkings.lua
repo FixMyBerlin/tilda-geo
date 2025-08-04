@@ -64,7 +64,7 @@ function result_tags_parkings(object)
     road_width_confidence = width_confidence,
     road_width_source = width_source,
     road = RoadClassificationRoadValue(object._parent_tags),
-    operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags.operator_type),
+    operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
     -- PARKING
     parking = parking_value(object),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
