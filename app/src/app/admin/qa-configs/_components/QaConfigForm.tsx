@@ -57,7 +57,7 @@ export function QaConfigForm<S extends z.ZodType<any, any>>(props: FormProps<S>)
         name="goodThreshold"
         label="Good Threshold"
         type="number"
-        help="Schwellenwert für 'Gut' Status (0.0 - 1.0)"
+        help="Maximale Abweichung für 'Gut' Status (grün). Bei Abweichung ≤ diesem Wert wird der Status als 'Gut' eingestuft."
         min={0}
         max={1}
         step={0.1}
@@ -66,7 +66,7 @@ export function QaConfigForm<S extends z.ZodType<any, any>>(props: FormProps<S>)
         name="needsReviewThreshold"
         label="Needs Review Threshold"
         type="number"
-        help="Schwellenwert für 'Überprüfung nötig' Status (0.0 - 1.0)"
+        help="Maximale Abweichung für 'Überprüfung nötig' Status (gelb). Bei Abweichung > Good Threshold aber ≤ diesem Wert wird der Status als 'Überprüfung nötig' eingestuft. Alles darüber wird als 'Problem' (rot) markiert."
         min={0}
         max={1}
         step={0.1}
