@@ -91,6 +91,11 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     { key: 'buffer_right', suffix: 'm' }, // bikelanes
     { key: 'tilda_osm_id', suffix: undefined }, // infravelo
     { key: 'tilda_width', suffix: 'm' }, // infravelo
+    { key: 'radius', suffix: 'm' }, // parkings_cutouts
+    { key: 'area', suffix: 'm²' }, // area values
+    { key: 'circumference', suffix: 'm' }, // circumference values
+    { key: 'buffer_radius', suffix: 'm' }, // buffer radius values
+    { key: 'direction', suffix: '°' }, // direction values in degrees
   ]
   const numberConfig = numberConfigs.find(
     (c) => c.key === tagKey || prefixWithOsm(c.key) === tagKey,
