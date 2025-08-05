@@ -242,20 +242,40 @@ local footwayBicycleYes = BikelaneCategory.new({
   implicitOneWay = true, -- 'oneway=implicit_yes' because its "shared lane"-like
   implicitOneWayConfidence = 'low',
   condition = function(tags)
-    -- mtb:scale=* is a strong indicator for path' that we do not want to show, so we skip them;
-    --    This will likely need a better solution in the future.
-    --    Eg https://www.openstreetmap.org/way/23366687
-    if tags["mtb:scale"] then return end
+    -- 1. Check highway type: has to be footway or path
+    if tags.highway ~= "footway" and tags.highway ~= "path" then
+      return
+    end
 
-    if tags.highway == "footway" or tags.highway == "path" then
-      if tags.bicycle == "yes" then
-        return true
+    -- 2. Check bicycle access: has to have bicycle=yes or the right traffic sign
+    if tags.bicycle ~= "yes" and not ContainsSubstring(SanitizeTrafficSign(tags.traffic_sign), "1022-10") then
+      return
+    end
+
+    -- 3. Handle mtb:scale conditions
+    if tags['mtb:scale'] ~= nil then
+      -- Clean up the value by removing +, -, and spaces
+      local cleanedValue = string.gsub(tags['mtb:scale'], "[%+%-%s]", "")
+      local numericValue = tonumber(cleanedValue)
+
+      -- If conversion fails (e.g., "unknown", "not_string"), exit the category
+      if numericValue == nil then
+        return
       end
-      local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
-      if ContainsSubstring(trafficSign, "1022-10") then
-        return true
+
+      -- mtb:scale > 1 is a strong indicator for path' that we do not want to show.
+      -- We do allow '0', '1' though, because those are OKish to use and sometimes mapped on "regular" footways.
+      if numericValue > 1 then
+        return
+      end
+
+      -- When mtb:scale is present, we need either traffic_sign or is_sidepath
+      if tags.traffic_sign == nil and tags.is_sidepath == nil then
+        return
       end
     end
+
+    return true
   end
 })
 local footwayBicycleYes_adjoining, footwayBicycleYes_isolated, footwayBicycleYes_adjoiningOrIsolated = CreateSubcategoriesAdjoiningOrIsolated(footwayBicycleYes)
