@@ -1,5 +1,5 @@
 // We use bun.sh to run this file
-import { getExportApiBboxUrl } from '@/src/app/_components/utils/getExportApiUrl'
+import { getExportOgrApiBboxUrl } from '@/src/app/_components/utils/getExportApiUrl'
 import { SourceExportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
 import chalk from 'chalk'
 import fs from 'node:fs'
@@ -18,7 +18,7 @@ async function main() {
   )
   Bun.spawnSync(['open', folderMbtiles])
 
-  // Fetch, Write, Transform
+  // Fetch, Write, Transform with GDAL API
   for (const dataset of Object.entries(tilesetConfigs)) {
     console.log('\n')
     const datasetKey = dataset[0] as SourceExportApiIdentifier
@@ -38,10 +38,10 @@ async function main() {
     }
 
     try {
-      // Fetch Export API
+      // Fetch Export API with GDAL (better quality data)
       const apiKey = process.env.ATLAS_API_KEY
       // The `apiKey` will skip the region check (hence the `noRegion`)
-      const url = getExportApiBboxUrl('noRegion', datasetKey, bbox, 'staging', apiKey)
+      const url = getExportOgrApiBboxUrl('noRegion', datasetKey, bbox, 'fgb', 'staging', apiKey)
       console.log(chalk.inverse.bold(chalk.yellow('  FETCH')), url)
       const fetchExportFgb = await fetch(url)
 
@@ -50,7 +50,7 @@ async function main() {
         continue
       }
 
-      // For debugging: Write JSON Response
+      // For debugging: Write FGB Response
       console.log(chalk.inverse.bold(chalk.yellow('  WRITE')), fgbFile)
       const fgbBuffer = await fetchExportFgb.arrayBuffer()
       fs.writeFileSync(fgbFile, Buffer.from(fgbBuffer))
