@@ -69,7 +69,10 @@ function Bikelanes(object_tags, object)
           prefix = transformed_tags._prefix,
           lifecycle = transformed_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.lifecycle,
           width = parse_length(transformed_tags.width),
-          width_source = object_tags['source:cycleway:' .. transformed_tags._side .. ':width'] or transformed_tags['source:width'],
+          width_source = transformed_tags['source:width']
+            or object_tags['source:cycleway:' .. transformed_tags._side .. ':width']
+            or object_tags['source:cycleway:both:width']
+            or object_tags['source:cycleway:width'],
           oneway = DeriveOneway(transformed_tags, category),
           bridge = Sanitize(object_tags.bridge, { "yes" }),
           tunnel = Sanitize(object_tags.tunnel, { "yes" }),
@@ -80,11 +83,22 @@ function Bikelanes(object_tags, object)
           buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
           marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
-          mapillary = transformed_tags.mapillary or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'] or object_tags['source:cycleway:mapillary'],
+          mapillary = transformed_tags.mapillary
+            or object_tags.mapillary
+            or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary']
+            or object_tags['source:cycleway:both:mapillary']
+            or object_tags['source:cycleway:mapillary'],
           mapillary_forward = transformed_tags['mapillary:forward'] or object_tags['source:cycleway:mapillary:forward'],
           mapillary_backward = transformed_tags['mapillary:backward'] or object_tags['source:cycleway:mapillary:backward'],
-          mapillary_traffic_sign = object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'] or transformed_tags['source:traffic_sign:mapillary'],
-          description = transformed_tags.description or transformed_tags.note or object_tags['note:cycleway:' .. transformed_tags._side] or object_tags['note:cycleway'],
+          mapillary_traffic_sign = transformed_tags['traffic_sign:mapillary']
+            or object_tags['source:traffic_sign:mapillary']
+            or object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary']
+            or object_tags['source:cycleway:both:traffic_sign:mapillary']
+            or object_tags['source:cycleway:traffic_sign:mapillary'],
+          description = transformed_tags.description or transformed_tags.note
+            or object_tags['note:cycleway:' .. transformed_tags._side]
+            or object_tags['note:cycleway:both']
+            or object_tags['note:cycleway'],
         })
 
         MergeTable(result_tags, deriveTrafficMode(transformed_tags, object_tags, category.id, transformed_tags._side))
