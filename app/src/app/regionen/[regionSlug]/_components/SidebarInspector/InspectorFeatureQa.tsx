@@ -8,6 +8,7 @@ import getQaDecisionDataForArea from '@/src/server/qa-configs/queries/getQaDecis
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { getQueryClient, getQueryKey, useMutation, useQuery } from '@blitzjs/rpc'
 import { useState } from 'react'
+import { IntlProvider } from 'react-intl'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
 import { useQaMapState } from '../../_hooks/mapState/useQaMapState'
 import { useQaParam } from '../../_hooks/useQueryState/useQaParam'
@@ -18,6 +19,7 @@ import { QaEvaluationCard } from './InspectorQa/QaEvaluationCard'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
 import { QaIcon } from './InspectorQa/QaIcon'
+import { translations } from './TagsTable/translations/translations.const'
 
 type Props = {
   feature: MapGeoJSONFeature // Area geometry from QA layer with required id property
@@ -151,51 +153,53 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
   const { geometry: _, _geometry: __, _vectorTileFeature: ___, ...debugSelectedFeature } = feature
 
   return (
-    <Disclosure
-      title={
-        <span className="inline-flex items-center gap-2 leading-tight">
-          <QaIcon isActive={activeQaConfig?.isActive ?? false} className="size-4" />
-          Qualitätssicherung
-        </span>
-      }
-      objectId={feature.properties.id.toString()}
-      showLockIcon={true}
-    >
-      <div className="bg-violet-50 px-3 py-5">
-        {/* Header Section - Full Latest Evaluation */}
-        {latestEvaluation && (
-          <QaEvaluationCard
-            evaluation={latestEvaluation}
-            decisionData={decisionData}
-            variant="header"
-          />
-        )}
-
-        {/* User Evaluation Form */}
-        <section className="mt-5">
-          {isFormVisible ? (
-            <QaEvaluationForm onSubmit={handleSubmit} isLoading={isLoading} />
-          ) : (
-            <button onClick={() => setShowForm(true)} className={buttonStylesOnYellow}>
-              {hasUserEvaluation ? 'Bewertung aktualisieren' : 'Bewertung hinzufügen'}
-            </button>
+    <IntlProvider messages={translations} locale="de" defaultLocale="de">
+      <Disclosure
+        title={
+          <span className="inline-flex items-center gap-2 leading-tight">
+            <QaIcon isActive={activeQaConfig?.isActive ?? false} className="size-4" />
+            Qualitätssicherung
+          </span>
+        }
+        objectId={feature.properties.id.toString()}
+        showLockIcon={true}
+      >
+        <div className="bg-violet-50 px-3 py-5">
+          {/* Header Section - Full Latest Evaluation */}
+          {latestEvaluation && (
+            <QaEvaluationCard
+              evaluation={latestEvaluation}
+              decisionData={decisionData}
+              variant="header"
+            />
           )}
-        </section>
 
-        {/* 5. Always expanded list of all evaluations */}
-        {evaluations.length > 1 && (
-          <div className="mt-5">
-            <h4 className="mb-2 text-sm font-medium text-gray-900">
-              Bewertungsverlauf ({evaluations.length - 1})
-            </h4>
-            <QaEvaluationHistory evaluations={evaluations} />
-          </div>
-        )}
+          {/* User Evaluation Form */}
+          <section className="mt-5">
+            {isFormVisible ? (
+              <QaEvaluationForm onSubmit={handleSubmit} isLoading={isLoading} />
+            ) : (
+              <button onClick={() => setShowForm(true)} className={buttonStylesOnYellow}>
+                {hasUserEvaluation ? 'Bewertung aktualisieren' : 'Bewertung hinzufügen'}
+              </button>
+            )}
+          </section>
 
-        {isDev && <ObjectDump title="decisionData" data={decisionData} />}
-        {isDev && <ObjectDump title="selectedFeature" data={debugSelectedFeature} />}
-        {isDev && <ObjectDump title="evaluations" data={evaluations} />}
-      </div>
-    </Disclosure>
+          {/* 5. Always expanded list of all evaluations */}
+          {evaluations.length > 1 && (
+            <div className="mt-5">
+              <h4 className="mb-2 text-sm font-medium text-gray-900">
+                Bewertungsverlauf ({evaluations.length - 1})
+              </h4>
+              <QaEvaluationHistory evaluations={evaluations} />
+            </div>
+          )}
+
+          {isDev && <ObjectDump title="decisionData" data={decisionData} />}
+          {isDev && <ObjectDump title="selectedFeature" data={debugSelectedFeature} />}
+          {isDev && <ObjectDump title="evaluations" data={evaluations} />}
+        </div>
+      </Disclosure>
+    </IntlProvider>
   )
 }

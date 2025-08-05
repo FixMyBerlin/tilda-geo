@@ -26,12 +26,11 @@ export const Inspector = ({ features }: Props) => {
   const regionDatasets = useRegionDatasets()
 
   return (
-    <>
+    <div className="space-y-4">
       {features.map((inspectObject) => {
         const sourceKey = String(inspectObject.source) // Format: `category:lit--source:atlas_lit--subcategory:lit`
         if (!sourceKey) return null
 
-        // Inspector-Block for Notes
         if (inspectObject.source === osmNotesSourceId) {
           return (
             <InspectorFeatureOsmNote
@@ -80,6 +79,6 @@ export const Inspector = ({ features }: Props) => {
           />
         )
       })}
-    </>
+    </div>
   )
 }

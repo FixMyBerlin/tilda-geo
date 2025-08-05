@@ -25,37 +25,35 @@ export const InspectorFeatureInternalNoteWithQuery = ({ noteId }: Props) => {
   }
 
   return (
-    <div className="mt-5 w-full rounded-2xl">
-      <Disclosure
-        title={
-          <span className="inline-flex items-center gap-2 leading-tight">
-            <ChatBubbleLeftRightIcon className="size-4 flex-none" aria-hidden="true" />
-            {noteAndComments.subject}
-          </span>
-        }
-        objectId={String(noteAndComments.id)}
-        showLockIcon={true}
-      >
-        <section className="bg-blue-50 px-3 py-5">
-          <InternalNote note={noteAndComments} />
+    <Disclosure
+      title={
+        <span className="inline-flex items-center gap-2 leading-tight">
+          <ChatBubbleLeftRightIcon className="size-4 flex-none" aria-hidden="true" />
+          {noteAndComments.subject}
+        </span>
+      }
+      objectId={String(noteAndComments.id)}
+      showLockIcon={true}
+    >
+      <section className="bg-blue-50 px-3 py-5">
+        <InternalNote note={noteAndComments} />
 
-          <ul>
-            {noteAndComments.noteComments?.map((comment) => {
-              return (
-                <li key={comment.id} className="mt-5 border-t border-t-gray-200 pt-5">
-                  <InternalNoteComment comment={comment} />
-                </li>
-              )
-            })}
-            <li className="mt-5 border-t border-t-gray-200 pt-5">
-              <NewNoteCommentForm noteId={noteAndComments.id} />
-            </li>
-          </ul>
-        </section>
+        <ul>
+          {noteAndComments.noteComments?.map((comment) => {
+            return (
+              <li key={comment.id} className="mt-5 border-t border-t-gray-200 pt-5">
+                <InternalNoteComment comment={comment} />
+              </li>
+            )
+          })}
+          <li className="mt-5 border-t border-t-gray-200 pt-5">
+            <NewNoteCommentForm noteId={noteAndComments.id} />
+          </li>
+        </ul>
+      </section>
 
-        {isDev && <ObjectDump data={noteAndComments} />}
-      </Disclosure>
-    </div>
+      {isDev && <ObjectDump data={noteAndComments} />}
+    </Disclosure>
   )
 }
 

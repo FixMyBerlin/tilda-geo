@@ -25,38 +25,36 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
   const datasetTranslations = { ...translations, ...(sourceData.inspector.translations || {}) }
 
   return (
-    <div className="mt-5 w-full rounded-2xl bg-white">
-      <IntlProvider messages={datasetTranslations} locale="de" defaultLocale="de">
-        <Disclosure
-          title={<>Statische Daten {quote(sourceData.name)}</>}
-          objectId={feature.properties.osm_id}
-          showLockIcon={!sourceData.isPublic}
-        >
-          <p
-            dangerouslySetInnerHTML={{ __html: sourceData.attributionHtml }}
-            className="border-b py-1.5 pl-4 pr-3 text-gray-400"
-          />
-          <TagsTable
-            properties={feature.properties}
-            sourceDocumentedKeys={sourceData.inspector.documentedKeys}
-            sourceId={sourceId}
-          />
+    <IntlProvider messages={datasetTranslations} locale="de" defaultLocale="de">
+      <Disclosure
+        title={<>Statische Daten {quote(sourceData.name)}</>}
+        objectId={feature.properties.osm_id}
+        showLockIcon={!sourceData.isPublic}
+      >
+        <p
+          dangerouslySetInnerHTML={{ __html: sourceData.attributionHtml }}
+          className="border-b py-1.5 pl-4 pr-3 text-gray-400"
+        />
+        <TagsTable
+          properties={feature.properties}
+          sourceDocumentedKeys={sourceData.inspector.documentedKeys}
+          sourceId={sourceId}
+        />
 
-          <RegionBbPgNewPriorityNoteButton feature={feature} />
+        <RegionBbPgNewPriorityNoteButton feature={feature} />
 
-          <ToolsWrapper>
-            <ToolsLinks
-              feature={feature}
-              editors={sourceData.inspector.editors}
-              osmIdConfig={sourceData.osmIdConfig}
-            />
-            <ToolsOtherProperties
-              feature={feature}
-              documentedKeys={sourceData.inspector.documentedKeys}
-            />
-          </ToolsWrapper>
-        </Disclosure>
-      </IntlProvider>
-    </div>
+        <ToolsWrapper>
+          <ToolsLinks
+            feature={feature}
+            editors={sourceData.inspector.editors}
+            osmIdConfig={sourceData.osmIdConfig}
+          />
+          <ToolsOtherProperties
+            feature={feature}
+            documentedKeys={sourceData.inspector.documentedKeys}
+          />
+        </ToolsWrapper>
+      </Disclosure>
+    </IntlProvider>
   )
 }

@@ -28,45 +28,43 @@ export const InspectorFeatureAtlasGeo = ({ sourceKey, feature }: InspectorFeatur
   if (!sourceId) return null
 
   return (
-    <div className="mt-5 w-full rounded-2xl bg-white">
-      <IntlProvider messages={translations} locale="de" defaultLocale="de">
-        <Disclosure title={<FormattedMessage id={`${sourceId}--title`} />} objectId={osmTypeId}>
-          <NoticeTransformedGeometry visible={properties?.prefix} />
+    <IntlProvider messages={translations} locale="de" defaultLocale="de">
+      <Disclosure title={<FormattedMessage id={`${sourceId}--title`} />} objectId={osmTypeId}>
+        <NoticeTransformedGeometry visible={properties?.prefix} />
 
-          <NoticeMaproulette
-            sourceId={sourceId}
-            osmTypeIdString={osmTypeId}
-            kind={properties?.category || properties?.road}
-            properties={properties}
-            geometry={geometry}
+        <NoticeMaproulette
+          sourceId={sourceId}
+          osmTypeIdString={osmTypeId}
+          kind={properties?.category || properties?.road}
+          properties={properties}
+          geometry={geometry}
+        />
+
+        {/* Mapillary Source: Show preview */}
+        <MapillaryIframe visible={sourceId.includes('mapillary')} pKey={properties.id} />
+
+        <div className="py-1">{/* Spacer */}</div>
+
+        <TagsTable
+          properties={properties}
+          sourceDocumentedKeys={sourceData.inspector.documentedKeys}
+          sourceId={sourceId}
+        />
+
+        {/* <Verification properties={properties} sourceId={sourceId} /> */}
+
+        <ToolsWrapper>
+          <ToolsLinks
+            feature={feature}
+            editors={sourceData.inspector.editors}
+            osmIdConfig={sourceData.osmIdConfig}
           />
-
-          {/* Mapillary Source: Show preview */}
-          <MapillaryIframe visible={sourceId.includes('mapillary')} pKey={properties.id} />
-
-          <div className="py-1">{/* Spacer */}</div>
-
-          <TagsTable
-            properties={properties}
-            sourceDocumentedKeys={sourceData.inspector.documentedKeys}
-            sourceId={sourceId}
+          <ToolsOtherProperties
+            feature={feature}
+            documentedKeys={sourceData.inspector.documentedKeys}
           />
-
-          {/* <Verification properties={properties} sourceId={sourceId} /> */}
-
-          <ToolsWrapper>
-            <ToolsLinks
-              feature={feature}
-              editors={sourceData.inspector.editors}
-              osmIdConfig={sourceData.osmIdConfig}
-            />
-            <ToolsOtherProperties
-              feature={feature}
-              documentedKeys={sourceData.inspector.documentedKeys}
-            />
-          </ToolsWrapper>
-        </Disclosure>
-      </IntlProvider>
-    </div>
+        </ToolsWrapper>
+      </Disclosure>
+    </IntlProvider>
   )
 }
