@@ -4,6 +4,7 @@ import { numberConfigs } from '@/src/app/regionen/[regionSlug]/_components/Sideb
 import { exportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
 import { getBlitzContext } from '@/src/blitz-server'
 import { geoDataClient } from '@/src/server/prisma-client'
+import chalk from 'chalk'
 import fs from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
 import { exec } from 'node:child_process'
@@ -118,16 +119,24 @@ export async function GET(
         : `${columnType}->>'${key}' AS "${sanitizedKey}"`
     }
 
-    const tagColumns = tagKeyQuery.map(({ key }) => generateColumn(key, 'tags')).join(',\n')
-    const metaColumns = metaKeyQuery.map(({ key }) => generateColumn(key, 'meta')).join(',\n')
+    const tagColumns = tagKeyQuery.map(({ key }) => generateColumn(key, 'tags'))
+    const metaColumns = metaKeyQuery.map(({ key }) => generateColumn(key, 'meta'))
+    const columns = [...tagColumns, ...metaColumns].filter(Boolean).join(',\n')
+
+    if (columns === '') {
+      console.error(
+        chalk.red(`api/export-ogr: SQL Query ${tableName} broken due to missing data`),
+        { columns, tagKeyQuery, metaKeyQuery },
+      )
+    }
+
     const sqlQuery = `
       SELECT
         id,
         geom,
         osm_id,
         osm_type,
-        ${tagColumns},
-        ${metaColumns}
+        ${columns}
       FROM public."${tableName}"
       WHERE geom && ST_Transform(
         (SELECT ST_SetSRID(ST_MakeEnvelope(${minlon}, ${minlat}, ${maxlon}, ${maxlat}), 4326)),
