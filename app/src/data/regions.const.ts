@@ -285,7 +285,10 @@ export const staticRegion: StaticRegion[] = [
     product: 'parkraum',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
-    bbox: null,
+    bbox: {
+      min: [13.0883, 52.3382],
+      max: [13.7611, 52.6755],
+    },
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
@@ -308,7 +311,7 @@ export const staticRegion: StaticRegion[] = [
       'areal2019',
       'parkraumkarte_neukoelln',
     ],
-    hideDownload: true,
+    hideDownload: false,
     notes: 'atlasNotes',
   },
   {
