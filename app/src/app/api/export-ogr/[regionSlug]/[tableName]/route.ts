@@ -1,5 +1,6 @@
 import db from '@/db'
 import { isDev, isProd } from '@/src/app/_components/utils/isEnv'
+import { numberConfigs } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/_utils/numberConfig'
 import { exportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
 import { getBlitzContext } from '@/src/blitz-server'
 import { geoDataClient } from '@/src/server/prisma-client'
@@ -104,7 +105,7 @@ export async function GET(
 
     const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
     const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
-      const numberKeywordsEquals = ['age', 'length', 'width', 'offset']
+      const numberKeywordsEquals = numberConfigs.map(({ key }) => key)
       const numberKeywordsIncludes = []
       const shouldCastToNumber = key.startsWith('osm_')
         ? false
