@@ -4,7 +4,6 @@ import { numberConfigs } from '@/src/app/regionen/[regionSlug]/_components/Sideb
 import { exportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
 import { getBlitzContext } from '@/src/blitz-server'
 import { geoDataClient } from '@/src/server/prisma-client'
-import chalk from 'chalk'
 import fs from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
 import { exec } from 'node:child_process'
@@ -104,6 +103,17 @@ export async function GET(
         FROM "${tableName}"
       `)
 
+    // Check if osm_id and osm_type columns exist in the table
+    const columnExistsQuery: Array<{ column_name: string }> = await geoDataClient.$queryRawUnsafe(`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = '${tableName}'
+        AND column_name IN ('osm_id', 'osm_type')
+      `)
+    const existingColumns = columnExistsQuery.map(({ column_name }) => column_name)
+    const hasOsmId = existingColumns.includes('osm_id')
+    const hasOsmType = existingColumns.includes('osm_type')
+
     const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
     const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
       const numberKeywordsEquals = numberConfigs.map(({ key }) => key)
@@ -119,24 +129,19 @@ export async function GET(
         : `${columnType}->>'${key}' AS "${sanitizedKey}"`
     }
 
-    const tagColumns = tagKeyQuery.map(({ key }) => generateColumn(key, 'tags'))
-    const metaColumns = metaKeyQuery.map(({ key }) => generateColumn(key, 'meta'))
-    const columns = [...tagColumns, ...metaColumns].filter(Boolean).join(',\n')
-
-    if (columns === '') {
-      console.error(
-        chalk.red(`api/export-ogr: SQL Query ${tableName} broken due to missing data`),
-        { columns, tagKeyQuery, metaKeyQuery },
-      )
-    }
+    const columns = [
+      'id',
+      'geom',
+      hasOsmId ? 'osm_id' : undefined,
+      hasOsmType ? 'osm_type' : undefined,
+      ...tagKeyQuery.map(({ key }) => generateColumn(key, 'tags')),
+      ...metaKeyQuery.map(({ key }) => generateColumn(key, 'meta')),
+    ]
+      .filter(Boolean)
+      .join(',\n')
 
     const sqlQuery = `
-      SELECT
-        id,
-        geom,
-        osm_id,
-        osm_type,
-        ${columns}
+      SELECT ${columns}
       FROM public."${tableName}"
       WHERE geom && ST_Transform(
         (SELECT ST_SetSRID(ST_MakeEnvelope(${minlon}, ${minlat}, ${maxlon}, ${maxlat}), 4326)),
