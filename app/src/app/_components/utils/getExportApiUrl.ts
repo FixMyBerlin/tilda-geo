@@ -38,3 +38,15 @@ export const getExportApiBboxUrl = (
 
   return url.toString()
 }
+
+export const getExportOgrApiBboxUrl = (
+  regionSlug: string,
+  apiIdentifier: SourceExportApiIdentifier,
+  bbox: NonNullable<StaticRegion['bbox']>,
+  format: 'geojson' | 'gpkg' | 'fgb' = 'fgb',
+  env?: typeof process.env.NEXT_PUBLIC_APP_ENV,
+  apiKey?: string,
+) => {
+  const baseUrl = getExportApiBboxUrl(regionSlug, apiIdentifier, bbox, env, apiKey)
+  return `${baseUrl.replace('export', 'export-ogr')}&format=${format}`
+}
