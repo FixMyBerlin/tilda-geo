@@ -35,7 +35,7 @@ const filterQaDataByStyle = (data: QaMapData[], style: string) => {
       })
     case 'user-pending':
       return data.filter((item) => {
-        return item.userStatus === null && item.systemStatus !== null
+        return item.userStatus === null && item.systemStatus !== null && item.systemStatus !== 'G'
       })
     default:
       return data
