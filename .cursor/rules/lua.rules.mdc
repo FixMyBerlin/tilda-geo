@@ -1,0 +1,7 @@
+---
+description: Cursor rules for Lua
+globs: '**/*.lua'
+alwaysApply: true
+---
+
+Read .github/instructions/lua.instructions.md

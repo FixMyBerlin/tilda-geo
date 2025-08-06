@@ -2,6 +2,7 @@
 applyTo: '**/*.lua'
 ---
 
+## General
 - This is LUA embedded into osm2pgsql.
   - That means we have access to a few helpers from https://osm2pgsql.org/doc/manual.html#lua-library-for-flex-output.
   - There is also the special `osm2pgsql` class that we use all over which is documented at https://osm2pgsql.org/doc/manual.html.
@@ -19,8 +20,8 @@ applyTo: '**/*.lua'
 - To require a function, used to put everything in the global namespace like `require("function_name")` the file and then use `function_name`. But for new helper methods, we return from the helper file and require via  `local function_name = require("function_name")`.
 - Preserve code comments that are still relevant.
 
-Software tests:
-- To run the test, to go to `/` and run `./processing/run-tests.sh`. Do this to evaluate the test result yourself. You cannot run single files, you always have to run the whole suite.
+## Software tests
+- To run the test, to go to the root folder and run `./processing/run-tests.sh`. Do this to evaluate the test result yourself. You cannot run single files, you always have to run the whole suite.
 - Are always in a `__tests__` folder in the same directory or one directory up.
 - They need to have a name like `file_name_of_functions.test.lua`. So the same name as the file that is being tested postfixed with ".test".
 - They use busted internally but that is automatically loaded and does not need to be required.
@@ -30,6 +31,6 @@ Software tests:
 - Usually use `assert.are.same()` which is a deep compare (Docs: https://lunarmodules.github.io/busted/#assert-same)
 - In an assert, the first param is always the result of our function: `assert.are.same(result_of_function, {'EXPECTED_VALUE'})`. Busted will show in the consol: `result_of_function` as the "Passed in" value. `{'EXPECTED_VALUE'}` as the "Expected" value.
 
-Formatting:
+## Formatting
 - Use 2 spaces for indentation.
 - Use single quotes in lua files whenever possible
