@@ -79,7 +79,7 @@ export const useQaMapState = () => {
     return filterQaDataByStyle(currentQaData, qaParamData.style)
   }, [currentQaData, qaParamData.style])
 
-  const shouldUpdateFeatureStates = mainMap !== undefined && mapLoaded && filteredQaData.length > 0
+  const shouldUpdateFeatureStates = mainMap !== undefined && mapLoaded
 
   // Extract setFeatureState logic into a function
   const updateFeatureStates = useCallback(() => {
