@@ -150,4 +150,19 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.1ph2lg2x/#14/52.51622/13.37036',
     bbox: bboxBrandenburg,
   },
+  off_street_parking_areas: {
+    sourceLayer: 'off_street_parking_areas',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.3hcu94l9/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  off_street_parking_points: {
+    sourceLayer: 'off_street_parking_points',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.6sf78qtk/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  off_street_parking_area_labels: {
+    sourceLayer: 'off_street_parking_area_labels',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.8w7zl0bm/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
 }

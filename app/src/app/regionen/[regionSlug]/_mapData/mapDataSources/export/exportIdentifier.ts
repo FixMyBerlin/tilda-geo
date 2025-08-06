@@ -26,6 +26,9 @@ export const exportApiIdentifier = [
   'parkings_quantized',
   'parkings_separate',
   'parkings_no',
+  'off_street_parking_areas',
+  'off_street_parking_points',
+  'off_street_parking_area_labels',
 ] as const
 
 export type SourceExportApiIdentifier = (typeof exportApiIdentifier)[number]
