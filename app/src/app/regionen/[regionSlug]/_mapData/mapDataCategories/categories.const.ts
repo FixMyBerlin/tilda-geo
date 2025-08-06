@@ -12,12 +12,12 @@ import { subcat_lit } from '../mapDataSubcategories/subcat_lit.const'
 import { subcat_lit_plus_completeness } from '../mapDataSubcategories/subcat_lit_plus_completeness.const'
 import { subcat_mapillaryCoverage } from '../mapDataSubcategories/subcat_mapillaryCoverage.const'
 import { subcat_maxspeed } from '../mapDataSubcategories/subcat_maxspeed.const'
-import { subcat_parking } from '../mapDataSubcategories/subcat_parking.const'
-import { subcat_parkingAreas } from '../mapDataSubcategories/subcat_parkingAreas.const'
-import { subcat_parkingBoundaries } from '../mapDataSubcategories/subcat_parkingBoundaries.const'
-import { subcat_parkingDebug } from '../mapDataSubcategories/subcat_parkingDebug.const'
-import { subcat_parkingPoints } from '../mapDataSubcategories/subcat_parkingPoints.const'
-import { subcat_parkingStats } from '../mapDataSubcategories/subcat_parkingStats.const'
+import { subcat_parkingLars } from '../mapDataSubcategories/subcat_parkingLars.const'
+import { subcat_parkingLarsAreas } from '../mapDataSubcategories/subcat_parkingLarsAreas.const'
+import { subcat_parkingLarsBoundaries } from '../mapDataSubcategories/subcat_parkingLarsBoundaries.const'
+import { subcat_parkingLarsDebug } from '../mapDataSubcategories/subcat_parkingLarsDebug.const'
+import { subcat_parkingLarsPoints } from '../mapDataSubcategories/subcat_parkingLarsPoints.const'
+import { subcat_parkingLarsStats } from '../mapDataSubcategories/subcat_parkingLarsStats.const'
 import { subcat_poi } from '../mapDataSubcategories/subcat_poi.const'
 import { subcat_poi_boundaries } from '../mapDataSubcategories/subcat_poi_boundaries.const'
 import { subcat_poi_places } from '../mapDataSubcategories/subcat_poi_places.const'
@@ -32,6 +32,7 @@ import { subcat_signs } from '../mapDataSubcategories/subcat_signs.const'
 import { subcat_surface_bikelane } from '../mapDataSubcategories/subcat_surface_bikelane'
 import { subcat_surface_roads } from '../mapDataSubcategories/subcat_surface_roads.const'
 import { StaticMapDataCategory } from '../types'
+import { parkingTildaCategories } from './parkingTildaCategories.const'
 import { radinfraCategories } from './radinfraCategories.const'
 
 export const categories: StaticMapDataCategory[] = [
@@ -122,16 +123,16 @@ export const categories: StaticMapDataCategory[] = [
     ],
   },
   {
-    id: 'parking',
-    name: 'Parkraum',
-    desc: 'Parken im Straßenraum',
+    id: 'parkingLars',
+    name: 'Parkraum (Community)',
+    desc: 'Parken im Straßenraum – Community-Prozessierung',
     subcategories: [
-      { ...subcat_parking, defaultStyle: 'default' },
-      { ...subcat_parkingPoints, defaultStyle: 'hidden' },
-      { ...subcat_parkingAreas, defaultStyle: 'default' },
-      { ...subcat_parkingDebug, defaultStyle: 'hidden' },
-      { ...subcat_parkingStats, defaultStyle: 'hidden' },
-      { ...subcat_parkingBoundaries, defaultStyle: 'hidden' },
+      { ...subcat_parkingLars, defaultStyle: 'default' },
+      { ...subcat_parkingLarsPoints, defaultStyle: 'hidden' },
+      { ...subcat_parkingLarsAreas, defaultStyle: 'default' },
+      { ...subcat_parkingLarsDebug, defaultStyle: 'hidden' },
+      { ...subcat_parkingLarsStats, defaultStyle: 'hidden' },
+      { ...subcat_parkingLarsBoundaries, defaultStyle: 'hidden' },
       { ...subcat_signs, defaultStyle: 'hidden' },
       // { id: 'mapillaryCoverage', defaultStyle: "hidden" },
       // { id: 'accidents', defaultStyle: "hidden" },
@@ -165,4 +166,5 @@ export const categories: StaticMapDataCategory[] = [
     subcategories: [{ ...subcat_accidents, defaultStyle: 'default' }],
   },
   ...radinfraCategories,
+  ...parkingTildaCategories,
 ]

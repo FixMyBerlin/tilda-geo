@@ -9,7 +9,12 @@ type Props = {
 export const InspectorHeader = ({ count, handleClose }: Props) => {
   return (
     <>
-      <h2 className={twJoin('text-base font-medium text-gray-900', count > 1 ? '' : 'text-white')}>
+      <h2
+        className={twJoin(
+          'mb-3 text-base font-medium text-gray-900',
+          count > 1 ? '' : 'text-white',
+        )}
+      >
         {count} Elemente:
       </h2>
       <CloseButton onClick={handleClose} positionClasses="right-3 top-3" />

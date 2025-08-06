@@ -17,6 +17,10 @@ const bboxPartOfNorthGermany = {
   min: [6.635773437502678, 50.666899472786724],
   max: [13.842804687502621, 53.422653072698324],
 } satisfies StaticRegion['bbox']
+const bboxNeukoelln = {
+  min: [13.389234353393391, 52.462071347640034],
+  max: [13.476194386902677, 52.49780866576984],
+} satisfies StaticRegion['bbox']
 
 // Datasets:
 export const tilesetConfigs: Record<
@@ -95,7 +99,7 @@ export const tilesetConfigs: Record<
   },
   bikelanesPresence: {
     sourceLayer: 'bikelanesPresence',
-    uploadUrl: '', //
+    uploadUrl: 'https://console.mapbox.com/studio/tilesets/hejco.d5smuoi3/#14/52.51622/13.37036',
     bbox: bboxPartOfNorthGermany,
   },
   bikeSuitability: {
@@ -119,5 +123,46 @@ export const tilesetConfigs: Record<
     sourceLayer: 'todos_lines',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.1yvm8bes/#14/52.51622/13.37036',
     bbox: bboxPartOfNorthGermany,
+  },
+  // Parking tables
+  parkings: {
+    sourceLayer: 'parkings',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.3fc178dr/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  parkings_cutouts: {
+    sourceLayer: 'parkings_cutouts',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.ackli54b/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  parkings_quantized: {
+    sourceLayer: 'parkings_quantized',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.7k74d6ok/#14/52.51622/13.37036',
+    bbox: bboxNeukoelln,
+  },
+  parkings_separate: {
+    sourceLayer: 'parkings_separate',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.aizmu2ft/#14/52.51622/13.37036',
+    bbox: bboxNeukoelln,
+  },
+  parkings_no: {
+    sourceLayer: 'parkings_no',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.1ph2lg2x/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  off_street_parking_areas: {
+    sourceLayer: 'off_street_parking_areas',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.3hcu94l9/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  off_street_parking_points: {
+    sourceLayer: 'off_street_parking_points',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.6sf78qtk/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
+  off_street_parking_area_labels: {
+    sourceLayer: 'off_street_parking_area_labels',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.8w7zl0bm/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
   },
 }

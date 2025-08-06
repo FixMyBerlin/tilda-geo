@@ -1,7 +1,9 @@
 import db from '@/db'
 import { zodInternalNotesFilterParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useNotesAtlasParams'
+import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
 import { resolver } from '@blitzjs/rpc'
 import { featureCollection, point } from '@turf/turf'
+import { Ctx } from 'blitz'
 import { z } from 'zod'
 import getNotesAndCommentsForRegion from './getNotesAndCommentsForRegion'
 
@@ -15,10 +17,14 @@ export type NotesAndCommentsFeatureCollection = Awaited<
 >
 
 export default resolver.pipe(
-  // resolver.authorize(), // membership Check is done below becaues we don't want to throw
+  // resolver.authorize(), // membership Check is done below because we don't want to throw
   resolver.zod(Schema),
-  async ({ regionSlug, filter }, ctx) => {
-    const { session } = ctx
+  async ({ regionSlug, filter }, { session }: Ctx) => {
+    // Check authorization using the helper
+    const { isAuthorized } = await checkRegionAuthorization(session, regionSlug)
+    if (!isAuthorized) {
+      return { featureCollection: featureCollection([]) }
+    }
 
     const notes = await db.note.findMany({
       where: { region: { slug: regionSlug } },
@@ -50,22 +56,8 @@ export default resolver.pipe(
       return point(coordinates, properties, { id: note.id })
     })
 
-    // Only logged in users see data
-    if (!session?.userId) {
-      return { featureCollection: featureCollection([] as typeof notePoints) }
-    }
-
-    // Only logged members (or admins) see data
-    const memberships = await db.membership.findMany({ where: { userId: session.userId } })
-    const membershipRegionIds = memberships.map((membership) => membership.regionId)
-
-    const regionNotes =
-      session.role === 'ADMIN'
-        ? notePoints
-        : notePoints.filter((note) => membershipRegionIds.includes(note.properties.regionId))
-
     // Filter data
-    let filteredNotes = regionNotes
+    let filteredNotes = notePoints
     if (filter) {
       // Filter by `query` on note.body/subject or any note.comment.body
       filteredNotes = filteredNotes.filter((note) => {
@@ -101,7 +93,7 @@ export default resolver.pipe(
 
     // A list of all authors that have written notes (only notes, not comments)
     // Used for the <FilterControl>
-    const authorIds = [...new Set(regionNotes.map((note) => note.properties.authorId))]
+    const authorIds = [...new Set(notePoints.map((note) => note.properties.authorId))]
     const authors = authorIds.map((authorId) => {
       const authorNotes = notes.filter((note) => note.author.id === authorId)
       const author = authorNotes?.[0]?.author
@@ -118,10 +110,10 @@ export default resolver.pipe(
     // Count stats for notes, always counting the **unfiletered** list
     // Used in <FilterControl> before any filteres are applied (because after, the numbers are wrong and hard to calculated wihtout a faceted search)
     const stats = {
-      commented: regionNotes.filter((n) => n.properties.hasComments === true).length,
-      uncommented: regionNotes.filter((n) => n.properties.hasComments === false).length,
-      completed: regionNotes.filter((n) => n.properties.status === 'closed').length,
-      uncompleted: regionNotes.filter((n) => n.properties.status === 'open').length,
+      commented: notePoints.filter((n) => n.properties.hasComments === true).length,
+      uncommented: notePoints.filter((n) => n.properties.hasComments === false).length,
+      completed: notePoints.filter((n) => n.properties.status === 'closed').length,
+      uncompleted: notePoints.filter((n) => n.properties.status === 'open').length,
       filteredTotal: filteredNotes.length,
     }
 

@@ -1,10 +1,14 @@
 import { StoreFeaturesInspector } from '../../_hooks/mapState/useMapState'
 import { useRegionDatasets } from '../../_hooks/useRegionDatasets/useRegionDatasets'
+import { internalNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersInternalNotes'
+import { osmNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersOsmNotes'
+import { qaSourceId } from '../Map/SourcesAndLayers/SourcesLayersQa'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureAtlasGeo } from './InspectorFeatureAtlasGeo'
 import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
 import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
+import { InspectorFeatureQa } from './InspectorFeatureQa'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 
 export type InspectorFeatureProperty = NonNullable<GeoJSON.GeoJsonProperties>
@@ -22,25 +26,32 @@ export const Inspector = ({ features }: Props) => {
   const regionDatasets = useRegionDatasets()
 
   return (
-    <>
+    <div className="space-y-4">
       {features.map((inspectObject) => {
         const sourceKey = String(inspectObject.source) // Format: `category:lit--source:atlas_lit--subcategory:lit`
         if (!sourceKey) return null
 
-        // Inspector-Block for Notes
-        if (inspectObject.source === 'osm-notes') {
+        if (inspectObject.source === osmNotesSourceId) {
           return (
             <InspectorFeatureOsmNote
-              key={`osm-note-${inspectObject?.properties?.id}`}
+              key={`${osmNotesSourceId}-${inspectObject?.properties?.id}`}
               feature={inspectObject}
             />
           )
         }
-        if (inspectObject.source === 'atlas-notes') {
+        if (inspectObject.source === internalNotesSourceId) {
           return (
             <InspectorFeatureInternalNote
-              key={`atlas-note-${inspectObject?.properties?.id}`}
+              key={`${internalNotesSourceId}-${inspectObject?.properties?.id}`}
               noteId={inspectObject.properties.id}
+            />
+          )
+        }
+        if (inspectObject.source === qaSourceId) {
+          return (
+            <InspectorFeatureQa
+              key={`${qaSourceId}-${inspectObject?.properties?.id}`}
+              feature={inspectObject}
             />
           )
         }
@@ -68,6 +79,6 @@ export const Inspector = ({ features }: Props) => {
           />
         )
       })}
-    </>
+    </div>
   )
 }

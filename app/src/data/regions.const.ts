@@ -128,7 +128,8 @@ export const staticRegion: StaticRegion[] = [
       'roads',
       'surface',
       'lit',
-      'parking',
+      'parkingLars',
+      'parkingTilda',
       'mapillary',
     ],
     backgroundSources: defaultBackgroundSources,
@@ -180,7 +181,8 @@ export const staticRegion: StaticRegion[] = [
       'bikelanes',
       'roads',
       'surface',
-      'parking',
+      'parkingTilda',
+      'parkingLars',
       'bicycleParking',
       'poi',
       'mapillary',
@@ -219,7 +221,7 @@ export const staticRegion: StaticRegion[] = [
       'bikelanes',
       'roads',
       'surface',
-      // 'parking',
+      // 'parkingLars',
       // 'bicycleParking',
       // 'poi',
       'mapillary',
@@ -255,7 +257,8 @@ export const staticRegion: StaticRegion[] = [
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
-      'parking',
+      'parkingTilda',
+      'parkingLars',
       // 'trafficSigns', // NOTE: Not finished, yet
       'mapillary',
     ],
@@ -282,13 +285,17 @@ export const staticRegion: StaticRegion[] = [
     product: 'parkraum',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
-    bbox: null,
+    bbox: {
+      min: [13.0883, 52.3382],
+      max: [13.7611, 52.6755],
+    },
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
+      // Sort
+      'parkingTilda',
+      'parkingLars',
       'roads',
-      // 'parking', // only static data
-      // 'trafficSigns', // NOTE: Not finished, yet
       'mapillary',
     ],
     backgroundSources: [
@@ -304,7 +311,7 @@ export const staticRegion: StaticRegion[] = [
       'areal2019',
       'parkraumkarte_neukoelln',
     ],
-    hideDownload: true,
+    hideDownload: false,
     notes: 'atlasNotes',
   },
   {
@@ -318,7 +325,7 @@ export const staticRegion: StaticRegion[] = [
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
     categories: [
-      'parking',
+      'parkingLars',
       // 'trafficSigns', // NOTE: Not finished, yet
       'mapillary',
     ],

@@ -7,6 +7,7 @@ import useResizeObserver from 'use-resize-observer'
 import { useMapActions } from '../../_hooks/mapState/useMapState'
 import { useBreakpoint } from '../utils/useBreakpoint'
 import { Categories } from './Categories/Categories'
+import { QaConfigCategories } from './QaConfigs/QaConfigCategories'
 import { StaticDatasetCategories } from './StaticDatasets/StaticDatasetCategories'
 
 const SidebarLayerControlsChildren = () => {
@@ -17,6 +18,9 @@ const SidebarLayerControlsChildren = () => {
       </Suspense>
       <Suspense fallback={<SmallSpinner />}>
         <StaticDatasetCategories />
+      </Suspense>
+      <Suspense fallback={<SmallSpinner />}>
+        <QaConfigCategories />
       </Suspense>
     </>
   )

@@ -32,15 +32,15 @@ const createMatchExpression = ({
 const opacity = createMatchExpression({
   valueNone: 0,
   valueHover: 0.5,
-  valueSelected: 1,
-  valueHoverSelected: 1,
+  valueSelected: 0.8,
+  valueHoverSelected: 0.8,
 })
 
 const color = createMatchExpression({
   valueNone: 'black',
   valueHover: '#ff9933',
   valueSelected: '#ff0000',
-  valueHoverSelected: '#ff6600',
+  valueHoverSelected: '#ff0000', // Same as selected when both hover and selected
 })
 
 export const LayerHighlight = (props: LayerProps) => {
@@ -61,10 +61,20 @@ export const LayerHighlight = (props: LayerProps) => {
       'line-opacity': opacity,
     }
   } else if (layerProps.type === 'fill') {
-    layerProps.paint = {
-      ...layerProps.paint,
-      'fill-color': color,
-      'fill-opacity': opacity,
+    // For fill layers, create an inner ring instead of filling the entire area
+    layerProps = {
+      ...layerProps,
+      type: 'line',
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round',
+      },
+      paint: {
+        'line-color': color,
+        'line-opacity': opacity,
+        'line-width': 10,
+        'line-offset': -5, // Creates inner ring effect
+      },
     }
   } else if (layerProps.type === 'circle') {
     layerProps.paint = {

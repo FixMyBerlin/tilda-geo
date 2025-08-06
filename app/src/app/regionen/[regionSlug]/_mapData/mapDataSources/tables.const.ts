@@ -19,5 +19,10 @@ export type TableId =
   | 'trafficSigns'
   // | 'aggregated_lengths' // Statistik; Does not work, see https://github.com/FixMyBerlin/private-issues/issues/2240
   | 'todos_lines'
+  | 'parkings'
+  | 'parkings_cutouts'
+  | 'parkings_quantized'
+  | 'parkings_separate'
+  | 'parkings_no'
 
 export type UnionTiles<T extends string> = T | `${T},${T}`

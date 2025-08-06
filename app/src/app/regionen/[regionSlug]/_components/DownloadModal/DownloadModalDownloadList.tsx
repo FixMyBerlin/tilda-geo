@@ -1,6 +1,9 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { ogrFormats } from '@/src/app/api/export-ogr/[regionSlug]/[tableName]/_utils/ogrFormats.const'
-import { getExportApiBboxUrl } from '../../../../_components/utils/getExportApiUrl'
+import {
+  getExportApiBboxUrl,
+  getExportOgrApiBboxUrl,
+} from '../../../../_components/utils/getExportApiUrl'
 import { sources } from '../../_mapData/mapDataSources/sources.const'
 import { useRegion } from '../regionUtils/useRegion'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
@@ -12,14 +15,12 @@ export const DownloadModalDownloadList = () => {
 
   // Get the bbox from our region data
   const { bbox } = useRegion()
+  if (!bbox) return null
 
   return (
     <ul className="mb-2 divide-y divide-gray-200 border-y border-gray-200">
       {exportEnabledSources.map((sourceData) => {
         if (!sourceData.export.apiIdentifier) return null
-        const url = bbox
-          ? getExportApiBboxUrl(regionSlug!, sourceData.export.apiIdentifier, bbox)
-          : undefined
 
         return (
           <li key={sourceData.id} className="py-5">
@@ -51,21 +52,19 @@ export const DownloadModalDownloadList = () => {
             </table>
 
             <div className="flex gap-2">
-              {url && (
-                <LinkExternal
-                  href={url}
-                  classNameOverwrite="w-28 flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
-                  download
-                  blank
-                >
-                  <strong className="mb-0.5 block text-xs font-medium text-gray-900">
-                    Download:
-                  </strong>
-                  <span className="block w-full border-0 p-0 font-mono text-gray-500 placeholder-gray-500 focus:ring-0 sm:text-sm">
-                    FlatGeoBuf
-                  </span>
-                </LinkExternal>
-              )}
+              <LinkExternal
+                href={getExportApiBboxUrl(regionSlug!, sourceData.export.apiIdentifier, bbox)}
+                classNameOverwrite="w-28 flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
+                download
+                blank
+              >
+                <strong className="mb-0.5 block text-xs font-medium text-gray-900">
+                  Download:
+                </strong>
+                <span className="block w-full border-0 p-0 font-mono text-gray-500 placeholder-gray-500 focus:ring-0 sm:text-sm">
+                  FlatGeoBuf
+                </span>
+              </LinkExternal>
 
               <div className="grow rounded-md border border-gray-300 px-3 py-2 shadow-sm focus-within:border-yellow-500 focus-within:ring-1 focus-within:ring-yellow-500">
                 <label
@@ -86,24 +85,27 @@ export const DownloadModalDownloadList = () => {
               </div>
             </div>
             <div className="mt-1 space-x-3 text-xs">
-              {url && (
-                <>
-                  Beta:{' '}
-                  {Object.entries(ogrFormats).map(([param, name]) => {
-                    return (
-                      <LinkExternal
-                        key={param}
-                        href={`${url.replace('export', 'export-ogr')}&format=${param}`}
-                        className="text-xs"
-                        download
-                        blank
-                      >
-                        {name}
-                      </LinkExternal>
-                    )
-                  })}
-                </>
-              )}
+              <>
+                Beta:{' '}
+                {Object.entries(ogrFormats).map(([param, name]) => {
+                  return (
+                    <LinkExternal
+                      key={param}
+                      href={getExportOgrApiBboxUrl(
+                        regionSlug!,
+                        sourceData.export.apiIdentifier!,
+                        bbox,
+                        param as 'geojson' | 'gpkg' | 'fgb',
+                      )}
+                      className="text-xs"
+                      download
+                      blank
+                    >
+                      {name}
+                    </LinkExternal>
+                  )
+                })}
+              </>
             </div>
           </li>
         )

@@ -6,8 +6,8 @@ import {
 import { MapDataSource } from '../types'
 import { apiKeyMapbox, apiKeyMapillary } from './apiKeys.const'
 import { SourceExportApiIdentifier } from './export/exportIdentifier'
-import { sourcesParking, SourcesParkingId } from './sourcesParking.const'
-import { SourceVerificationApiIdentifier } from './verification/verificationIdentifier'
+import { SourcesParkingLarsId, sourcesParkingLars } from './sourcesParkingLars.const'
+import { SourcesParkingTildaId, sourcesParkingTilda } from './sourcesParkingTilda.const'
 
 type AtlasSourceId =
   | 'atlas_barriers'
@@ -32,17 +32,15 @@ type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapil
 
 // TODO type MapDataConfigSourcesIds = typeof sources[number]['id']
 export type SourcesId =
-  | SourcesParkingId
+  | SourcesParkingLarsId
+  | SourcesParkingTildaId
   | AtlasSourceId
   | MapillarySourceId
   | 'accidents_unfallatlas'
 
-export const sources: MapDataSource<
-  SourcesId,
-  SourceVerificationApiIdentifier,
-  SourceExportApiIdentifier
->[] = [
-  ...sourcesParking,
+export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
+  ...sourcesParkingLars,
+  ...sourcesParkingTilda,
   {
     id: 'atlas_boundaries',
     tiles: getTilesUrl(
@@ -60,7 +58,6 @@ export const sources: MapDataSource<
       documentedKeys: ['name', 'admin_level'],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -95,7 +92,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -114,7 +110,6 @@ export const sources: MapDataSource<
       highlightingKey: 'unfall_id',
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -154,10 +149,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: true },
-    verification: {
-      enabled: false,
-      // apiIdentifier: 'bikelanes',
-    },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -198,7 +189,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -238,7 +228,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -278,7 +267,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -303,7 +291,6 @@ export const sources: MapDataSource<
       documentedKeys: ['composit_road_bikelanes'],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false }, // can be exported as part of `roads`, `roadsPathClasses`
   },
@@ -329,7 +316,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false }, // can be exported as part of `roads`, `roadsPathClasses`
   },
@@ -349,7 +335,6 @@ export const sources: MapDataSource<
       documentedKeys: ['name', 'category'],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -374,7 +359,6 @@ export const sources: MapDataSource<
       documentedKeys: ['name', 'category', 'type'],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -399,7 +383,6 @@ export const sources: MapDataSource<
       documentedKeys: ['name', 'place', 'population', 'population:date'],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: {
       enabled: true,
@@ -422,7 +405,6 @@ export const sources: MapDataSource<
     osmIdConfig: { osmTypeId: 'id' },
     inspector: { enabled: false },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -442,7 +424,6 @@ export const sources: MapDataSource<
       documentedKeys: ['landuse'],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },
@@ -469,7 +450,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false }, // TODO
     export: {
       enabled: true,
@@ -494,7 +474,6 @@ export const sources: MapDataSource<
       documentedKeys: ['traffic_sign'],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false }, // TODO
     export: {
       enabled: true,
@@ -519,7 +498,6 @@ export const sources: MapDataSource<
       documentedKeys: [],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false }, // TODO
     export: { enabled: false },
   },
@@ -539,7 +517,6 @@ export const sources: MapDataSource<
       documentedKeys: [],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false }, // TODO
     export: {
       enabled: true,
@@ -579,7 +556,6 @@ export const sources: MapDataSource<
       ],
     },
     // presence: { enabled: false },
-    verification: { enabled: false },
     calculator: { enabled: false },
     export: { enabled: false },
   },

@@ -90,17 +90,6 @@ type MapDataSourceInspector =
       enabled: false
     }
 
-type MapDataSourceVerifcation<TVerIds> =
-  | {
-      enabled: true
-      /** @desc Identifier for the verification API URL; verification is configured on the subcategory (`allowVerify`) */
-      apiIdentifier: TVerIds
-    }
-  | {
-      enabled: false
-      apiIdentifier?: undefined
-    }
-
 export type MapDataSourceCalculator =
   | {
       enabled: true
@@ -137,7 +126,7 @@ export type MapDataOsmIdConfig =
   | { osmTypeId: string }
 
 /** @desc: Our own vector tile layers configured in 'sources.const.ts' */
-export type MapDataSource<TIds, TVerIds, TExpIds> = {
+export type MapDataSource<TIds, TExpIds> = {
   id: TIds
   /** @desc URL of the vector tiles */
   tiles: string
@@ -157,8 +146,6 @@ export type MapDataSource<TIds, TVerIds, TExpIds> = {
   // presence: {
   //   enabled: boolean
   // }
-  /** @desc Inspector: Enable and configure in app verification */
-  verification: MapDataSourceVerifcation<TVerIds>
   /** @desc Calculator: Enable and configure calculator feature */
   calculator: MapDataSourceCalculator
   /** @desc Export: Enable and configure data export */

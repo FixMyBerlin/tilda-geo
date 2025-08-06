@@ -5,6 +5,7 @@ import { memoize } from 'lodash'
 import { createParser, useQueryState } from 'nuqs'
 import { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { z } from 'zod'
+import { osmNotesSourceId } from '../../../_components/Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { parseSourceKeyAtlasGeo } from '../../../_components/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { parseSourceKeyStaticDatasets } from '../../../_components/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { searchParamsRegistry } from '../searchParamsRegistry'
@@ -24,8 +25,8 @@ export const convertToUrlFeature = (feature: MapGeoJSONFeature): UrlFeature => {
   const { id, source, geometry } = feature
   let sourceId: string
   const atlasGeoSourceId = parseSourceKeyAtlasGeo(source).sourceId
-  if (source === 'osm-notes') {
-    sourceId = 'osm-notes'
+  if (source === osmNotesSourceId) {
+    sourceId = osmNotesSourceId
   } else if (atlasGeoSourceId) {
     sourceId = atlasGeoSourceId
   } else {

@@ -20,6 +20,15 @@ export const exportApiIdentifier = [
   'barrierLines',
   // 'aggregated_lengths', // Does not work because the table does not conform to the required table structure with `tags` and `meta`
   'todos_lines',
+  // Parking tables
+  'parkings',
+  'parkings_cutouts',
+  'parkings_quantized',
+  'parkings_separate',
+  'parkings_no',
+  'off_street_parking_areas',
+  'off_street_parking_points',
+  'off_street_parking_area_labels',
 ] as const
 
 export type SourceExportApiIdentifier = (typeof exportApiIdentifier)[number]

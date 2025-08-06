@@ -34,17 +34,17 @@ generator client {
 // --------------------------------------
 
 model User {
-  id             Int           @id @default(autoincrement())
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id             Int            @id @default(autoincrement())
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   //
-  osmId          Int           @unique
+  osmId          Int            @unique
   osmName        String?
   osmDescription String?
   osmAvatar      String?
   hashedPassword String?
-  role           UserRoleEnum  @default(USER)
-  email          String?       @unique
+  role           UserRoleEnum   @default(USER)
+  email          String?        @unique
   firstName      String?
   lastName       String?
   //
@@ -53,6 +53,7 @@ model User {
   Membership     Membership[]
   Note           Note[]
   NoteComment    NoteComment[]
+  qaEvaluations  QaEvaluation[]
 }
 
 enum UserRoleEnum {
@@ -96,17 +97,6 @@ enum TokenType {
   RESET_PASSWORD
 }
 
-model BikelaneVerification {
-  id          Int      @id @default(autoincrement())
-  //
-  osm_type    String   @db.VarChar
-  osm_id      String
-  verified_at DateTime @default(now())
-  verified_by BigInt?
-  verified    String
-  comment     String?
-}
-
 model Region {
   id           Int      @id @default(autoincrement())
   createdAt    DateTime @default(now())
@@ -119,6 +109,7 @@ model Region {
   Membership Membership[]
   uploads    Upload[]
   Note       Note[]
+  qaConfigs  QaConfig[]
 }
 
 model Membership {
@@ -192,4 +183,79 @@ model NoteComment {
   noteId    Int
   //
   body      String
+}
+
+// QA System Models
+model QaConfig {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slug     String // e.g., "euvm_parking_capacity"
+  label    String // e.g., "eUVM Parkplätze Kapazität"
+  isActive Boolean @default(true)
+
+  // Reference to existing data table (with schema prefix)
+  mapTable String // e.g., "public.qa_parkings_euvm"
+
+  // Map attribution for the source
+  mapAttribution String? // e.g., "QA Data: tilda-geo.de"
+
+  // Thresholds for automatic system evaluation
+  goodThreshold        Float @default(0.1) // relative <= 0.1 difference = GOOD
+  needsReviewThreshold Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
+
+  region   Region @relation(fields: [regionId], references: [id])
+  regionId Int
+
+  qaEvaluations QaEvaluation[]
+
+  @@unique([regionId, slug])
+}
+
+model QaEvaluation {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Reference to row in existing data table (could be voronoi, h3, etc.)
+  areaId String // Links to public.qa_parkings_euvm.id
+
+  // System automatic evaluation (based on thresholds)
+  systemStatus QaSystemStatus @default(NEEDS_REVIEW)
+
+  // Manual user evaluation status
+  userStatus QaEvaluationStatus? // NULL means no user decision yet
+
+  // Optional evaluation text/reasoning (only for user evaluations)
+  body String?
+
+  config   QaConfig @relation(fields: [configId], references: [id])
+  configId Int
+
+  // Evaluator tracking - either system or user
+  evaluatorType QaEvaluatorType @default(SYSTEM)
+  author        User?           @relation(fields: [userId], references: [id])
+  userId        Int?
+
+  // Remove unique constraint to allow evaluation history
+  // @@unique([configId, areaId])  // REMOVED
+}
+
+enum QaSystemStatus {
+  GOOD // Green - no review needed
+  NEEDS_REVIEW // Yellow - medium difference
+  PROBLEMATIC // Red - large difference
+}
+
+enum QaEvaluationStatus {
+  OK_STRUCTURAL_CHANGE // "Diff OK, caused by structural change in the area like construction"
+  OK_REFERENCE_ERROR // "Diff OK, caused by wrong past/reference data"
+  NOT_OK_DATA_ERROR // "Diff not OK, current data needs to be fixed"
+  NOT_OK_PROCESSING_ERROR // "Diff not OK, processing needs to be fixed"
+}
+
+enum QaEvaluatorType {
+  SYSTEM
+  USER
 }

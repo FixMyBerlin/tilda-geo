@@ -1,5 +1,5 @@
-import db from '../index'
 import { Prisma } from '@prisma/client'
+import db from '../index'
 
 const seedRegions = async () => {
   const seedRegions: Prisma.RegionUncheckedCreateInput[] = [
@@ -70,6 +70,11 @@ const seedRegions = async () => {
     },
     {
       slug: 'bb-beteiligung',
+      public: false,
+      exportPublic: false,
+    },
+    {
+      slug: 'parkraum-berlin-euvm',
       public: false,
       exportPublic: false,
     },

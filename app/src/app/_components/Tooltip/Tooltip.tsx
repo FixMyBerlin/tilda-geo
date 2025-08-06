@@ -7,7 +7,7 @@ interface Props {
   children: React.ReactNode
 }
 
-export const Tooltip: React.FC<Props> = ({ text, children, className }) => {
+export const Tooltip = ({ text, children, className }: Props) => {
   const [positionTop, setPotitionTop] = useState(0)
   const parentWrapperRef = useRef<HTMLDivElement>(null)
 

@@ -3,9 +3,8 @@ import { isDev } from '@/src/app/_components/utils/isEnv'
 import { useHasPermissions } from '@/src/app/_hooks/useHasPermissions'
 import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
 import getNoteAndComments from '@/src/server/notes/queries/getNoteAndComments'
-import { NotesAndCommentsFeatureCollection } from '@/src/server/notes/queries/getNotesAndCommentsForRegion'
 import { useQuery } from '@blitzjs/rpc'
-import { LockClosedIcon } from '@heroicons/react/20/solid'
+import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 import { Suspense } from 'react'
 import { Disclosure } from './Disclosure/Disclosure'
 import { InternalNote } from './InspectorFeatureInternalNote/InternalNote'
@@ -13,7 +12,7 @@ import { InternalNoteComment } from './InspectorFeatureInternalNote/InternalNote
 import { NewNoteCommentForm } from './InspectorFeatureInternalNote/NewNoteCommentForm'
 
 type Props = {
-  noteId: NotesAndCommentsFeatureCollection['featureCollection']['features'][number]['properties']['id']
+  noteId: number
 }
 
 export const InspectorFeatureInternalNoteWithQuery = ({ noteId }: Props) => {
@@ -26,35 +25,35 @@ export const InspectorFeatureInternalNoteWithQuery = ({ noteId }: Props) => {
   }
 
   return (
-    <div className="mt-5 w-full rounded-2xl">
-      <Disclosure
-        title={
-          <span className="inline-flex items-center gap-2 leading-tight">
-            <LockClosedIcon className="size-5 flex-none" /> {noteAndComments.subject}
-          </span>
-        }
-        objectId={String(noteAndComments.id)}
-      >
-        <section className="bg-blue-50 px-3 py-5">
-          <InternalNote note={noteAndComments} />
+    <Disclosure
+      title={
+        <span className="inline-flex items-center gap-2 leading-tight">
+          <ChatBubbleLeftRightIcon className="size-4 flex-none" aria-hidden="true" />
+          {noteAndComments.subject}
+        </span>
+      }
+      objectId={String(noteAndComments.id)}
+      showLockIcon={true}
+    >
+      <section className="bg-blue-50 px-3 py-5">
+        <InternalNote note={noteAndComments} />
 
-          <ul>
-            {noteAndComments.noteComments?.map((comment) => {
-              return (
-                <li key={comment.id} className="mt-5 border-t border-t-gray-200 pt-5">
-                  <InternalNoteComment comment={comment} />
-                </li>
-              )
-            })}
-            <li className="mt-5 border-t border-t-gray-200 pt-5">
-              <NewNoteCommentForm noteId={noteAndComments.id} />
-            </li>
-          </ul>
-        </section>
+        <ul>
+          {noteAndComments.noteComments?.map((comment) => {
+            return (
+              <li key={comment.id} className="mt-5 border-t border-t-gray-200 pt-5">
+                <InternalNoteComment comment={comment} />
+              </li>
+            )
+          })}
+          <li className="mt-5 border-t border-t-gray-200 pt-5">
+            <NewNoteCommentForm noteId={noteAndComments.id} />
+          </li>
+        </ul>
+      </section>
 
-        {isDev && <ObjectDump data={noteAndComments} />}
-      </Disclosure>
-    </div>
+      {isDev && <ObjectDump data={noteAndComments} />}
+    </Disclosure>
   )
 }
 

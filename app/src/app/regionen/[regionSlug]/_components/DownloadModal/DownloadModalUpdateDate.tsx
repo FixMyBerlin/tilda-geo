@@ -1,6 +1,8 @@
 import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
 import getAtlasGeoMetadata from '@/src/server/regions/queries/getAtlasGeoMetadata'
 import { useQuery } from '@blitzjs/rpc'
+import { format } from 'date-fns'
+import { de } from 'date-fns/locale'
 import { Suspense } from 'react'
 
 export const DownloadModalUpdateDate = () => {
@@ -18,12 +20,11 @@ const DownloadModalUpdateDateDate = () => {
   const [metadata] = useQuery(getAtlasGeoMetadata, {})
 
   if (!metadata?.osm_data_from) return null
+  const date = new Date(metadata.osm_data_from)
   return (
     <>
-      {new Date(metadata.osm_data_from).toLocaleDateString('de-DE')}{' '}
-      <span className="text-gray-400">
-        {new Date(metadata.osm_data_from).toLocaleTimeString('de-DE')}
-      </span>
+      {format(date, 'dd.MM.yyyy', { locale: de })}{' '}
+      <span className="text-gray-400">{format(date, 'HH:mm', { locale: de })}</span>
     </>
   )
 }

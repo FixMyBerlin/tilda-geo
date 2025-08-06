@@ -10,7 +10,13 @@ console.log(chalk.inverse.bold('START'), __filename)
 
 // Configuration
 const baseMapStyle = `https://api.maptiler.com/maps/08357855-50d4-44e1-ac9f-ea099d9de4a5/style.json?key=${MAPTILER_API_KEY}`
-const keys = ['atlas-style-package-1', 'atlas-style-package-2', 'atlas-style-package-3', 'parking']
+const keys = [
+  'tilda-style-package-1',
+  'tilda-style-package-2',
+  'tilda-style-package-3-radinfra',
+  'tilda-style-package-4-parkraum',
+  'parking',
+]
 const apiConfigs = [
   // The order in this array specifies which sprite "wins" when sprite filenames are identical (the last entry "wins")
   {
@@ -18,28 +24,35 @@ const apiConfigs = [
     // Style https://studio.mapbox.com/styles/osm-verkehrswende/clev6ho1i00hd01o9bfo80n9q/edit/#17.14/52.484928/13.430058
     enabled: process.env.MAPBOX_PARKING_STYLE_ACCESS_TOKEN,
     apiUrl: `https://api.mapbox.com/styles/v1/osm-verkehrswende/clev6ho1i00hd01o9bfo80n9q?fresh=true&access_token=${process.env.MAPBOX_PARKING_STYLE_ACCESS_TOKEN}`,
-    mapboxGroupPrefix: 'parking_',
+    mapboxGroupPrefix: ['parking_'],
   },
   {
-    key: 'atlas-style-package-3-radinfra',
+    key: 'tilda-style-package-4-parkraum',
+    // Style https://studio.mapbox.com/styles/hejco/cmbf4ffqq000701qxe5oedq4v/edit/#13.49/48.95568/9.13281
+    enabled: process.env.MAPBOX_STYLE_ACCESS_TOKEN,
+    apiUrl: `https://api.mapbox.com/styles/v1/hejco/cmbf4ffqq000701qxe5oedq4v?fresh=true&access_token=${process.env.MAPBOX_STYLE_ACCESS_TOKEN}`,
+    mapboxGroupPrefix: ['tilda_'],
+  },
+  {
+    key: 'tilda-style-package-3-radinfra',
     // Style https://studio.mapbox.com/styles/hejco/cm5qlrsda004401sb9c3bbc6w/edit/#13.49/48.95568/9.13281
     enabled: process.env.MAPBOX_STYLE_ACCESS_TOKEN,
     apiUrl: `https://api.mapbox.com/styles/v1/hejco/cm5qlrsda004401sb9c3bbc6w?fresh=true&access_token=${process.env.MAPBOX_STYLE_ACCESS_TOKEN}`,
-    mapboxGroupPrefix: 'radinfra_',
+    mapboxGroupPrefix: ['tilda_', 'radinfra_'],
   },
   {
-    key: 'atlas-style-package-2',
+    key: 'tilda-style-package-2',
     // Style https://studio.mapbox.com/styles/hejco/clfs9mdh9007n01t6lw99gyqr/edit/#13.49/48.95568/9.13281
     enabled: process.env.MAPBOX_STYLE_ACCESS_TOKEN,
     apiUrl: `https://api.mapbox.com/styles/v1/hejco/clfs9mdh9007n01t6lw99gyqr?fresh=true&access_token=${process.env.MAPBOX_STYLE_ACCESS_TOKEN}`,
-    mapboxGroupPrefix: 'atlas_',
+    mapboxGroupPrefix: ['tilda_', 'atlas_'],
   },
   {
-    key: 'atlas-style-package-1',
+    key: 'tilda-style-package-1',
     // Style https://studio.mapbox.com/styles/hejco/cl706a84j003v14o23n2r81w7/edit/#13.49/48.95568/9.13281
     enabled: process.env.MAPBOX_STYLE_ACCESS_TOKEN,
     apiUrl: `https://api.mapbox.com/styles/v1/hejco/cl706a84j003v14o23n2r81w7?fresh=true&access_token=${process.env.MAPBOX_STYLE_ACCESS_TOKEN}`,
-    mapboxGroupPrefix: 'atlas_',
+    mapboxGroupPrefix: ['tilda_', 'atlas_'],
   },
 ].filter((c) => c.enabled)
 
@@ -68,7 +81,7 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
     .map((entry) => {
       const key = entry[0] as string
       const values = entry[1] as MapBoxGroupEntry
-      if (values.name.startsWith(mapboxGroupPrefix)) {
+      if (mapboxGroupPrefix.some((prefix) => values.name.startsWith(prefix))) {
         return {
           folderId: key,
           folderName: values.name,
@@ -136,7 +149,7 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
     style_owner: rawData.owner,
     style_name: rawData.name,
     debug_changed_names: {
-      about: `The folder names in Mapbox need to follow a pattern of \`${mapboxGroupPrefix}[DataIdentifier]_[OptionalStyleIdentifier]\`, otherwise the script will create unexpected results. During processing, we cleanup the names. If any names show up below, those need to be fixed in Mapbox to prevent errors.`,
+      about: `The folder names in Mapbox need to follow a pattern of \`${mapboxGroupPrefix.join(' or ')}[DataIdentifier]_[OptionalStyleIdentifier]\`, otherwise the script will create unexpected results. During processing, we cleanup the names. If any names show up below, those need to be fixed in Mapbox to prevent errors.`,
       changedNamesForDebugging,
     },
   }

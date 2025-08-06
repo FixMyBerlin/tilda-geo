@@ -1,3 +1,4 @@
+import { formatDateTime } from '@/src/app/_components/date/formatDate'
 import { Markdown } from '@/src/app/_components/text/Markdown'
 import { proseClasses } from '@/src/app/_components/text/prose'
 import type { NoteComment } from '@/src/server/notes/queries/getNoteAndComments'
@@ -5,7 +6,6 @@ import dompurify from 'dompurify'
 import { twJoin } from 'tailwind-merge'
 import { OsmUserLink } from '../OsmUserLink'
 import { EditNoteCommentForm } from './EditNoteCommentForm'
-import { localDateTime } from './utils/localDateTime'
 import { wasUpdated } from './utils/wasUpdated'
 
 type Props = {
@@ -34,8 +34,8 @@ export const InternalNoteComment = ({ comment }: Props) => {
             />
           </strong>
           {wasUpdated(comment) ? <br /> : ', '}
-          {localDateTime(comment.createdAt)}
-          {wasUpdated(comment) && <>, aktualisiert {localDateTime(comment.updatedAt)}</>}
+          {formatDateTime(comment.createdAt)}
+          {wasUpdated(comment) && <>, aktualisiert {formatDateTime(comment.updatedAt)}</>}
         </div>
 
         <EditNoteCommentForm comment={comment} />

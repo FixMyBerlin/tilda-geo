@@ -119,4 +119,161 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(category, 'cycleway_adjoining')
     end)
   end)
+
+  describe('`footwayBicycleYes` with mtb:scale conditions:', function()
+    it('should return footwayBicycleYes when mtb:scale is nil', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoiningOrIsolated')
+    end)
+
+    it('should return nil when mtb:scale is "0" without traffic_sign or is_sidepath', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '0',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should return nil when mtb:scale is "not_number"', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = 'not_number',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should return nil when mtb:scale is "0+" without traffic_sign or is_sidepath', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '0+',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should return footwayBicycleYes when mtb:scale is "0-" with traffic_sign', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '0-',
+        ['traffic_sign'] = 'DE:1022-10',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoiningOrIsolated')
+    end)
+
+    it('should return footwayBicycleYes when mtb:scale is "+0" with is_sidepath', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '+0',
+        ['is_sidepath'] = 'yes',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('should return nil when mtb:scale is "unknown"', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = 'unknown',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should return footwayBicycleYes when mtb:scale is 0 with traffic_sign', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = 0,
+        ['traffic_sign'] = 'DE:1022-10',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoiningOrIsolated')
+    end)
+
+    it('should return footwayBicycleYes when mtb:scale is "0" with traffic_sign', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '0',
+        ['traffic_sign'] = 'DE:1022-10',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoiningOrIsolated')
+    end)
+
+    it('should return footwayBicycleYes when mtb:scale is "0" with is_sidepath', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '0',
+        ['is_sidepath'] = 'yes',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('should return nil when mtb:scale is "0" without traffic_sign or is_sidepath', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '0',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should return nil when mtb:scale is "1"', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '1',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should work with path highway and mtb:scale is 0 with is_sidepath', function()
+      local tags = {
+        ['highway'] = 'path',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = 0,
+        ['is_sidepath'] = 'yes',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result.id, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('should work with path highway and mtb:scale >= "3"', function()
+      local tags = {
+        ['highway'] = 'path',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = '3',
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+
+    it('should return nil when mtb:scale is 0 but no traffic_sign or is_sidepath', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['bicycle'] = 'yes',
+        ['mtb:scale'] = 0,
+      }
+      local result = CategorizeBikelane(tags)
+      assert.are.equal(result, nil)
+    end)
+  end)
 end)

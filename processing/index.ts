@@ -1,6 +1,6 @@
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
-import { restartTileServer, triggerPostProcessing } from './steps/externalTriggers'
+import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
 import { idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
@@ -33,14 +33,18 @@ async function main() {
     await generateTypes()
 
     logPadded('Processing: Finishing up', berlinTimeString(new Date()))
-    // Call the frontend update hook which registers sql functions and starts the analysis run
-    await triggerPostProcessing()
+
+    // Frontend: Registers sql functions and starts the analysis run
+    await triggerPrivateApi('post-processing-hook')
 
     // Restart `tiles` container to refresh `/catalog`
     await restartTileServer()
 
-    // Delete cache and trigger cache warming
+    // Delete cache and (frontend) trigger cache warming
     await updateCache()
+
+    // Frontend: Trigger QA evaluation updates for all regions
+    await triggerPrivateApi('post-processing-qa-update')
 
     logTileInfo()
   } catch (error) {

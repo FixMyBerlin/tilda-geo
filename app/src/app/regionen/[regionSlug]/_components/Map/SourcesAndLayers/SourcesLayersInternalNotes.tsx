@@ -9,7 +9,8 @@ import {
 import { useAllowInternalNotes } from '../../notes/InternalNotes/utils/useAllowInternalNotes'
 import { useStaticRegion } from '../../regionUtils/useStaticRegion'
 
-export const internalNotesLayerId = 'internal-notes'
+export const internalNotesLayerId = 'internal-notes-layer'
+export const internalNotesSourceId = 'internal-notes-source'
 
 export const SourcesLayersInternalNotes = () => {
   const { showInternalNotesParam } = useShowInternalNotesParam()
@@ -29,23 +30,24 @@ export const SourcesLayersInternalNotes = () => {
   if (!allowInternalNotes) return null
 
   const selectedFeatureIds = inspectorFeatures
-    .filter((feature) => feature.source === internalNotesLayerId)
+    .filter((feature) => feature.source === internalNotesSourceId)
     .map((feature) => (feature?.properties?.id || 0) as number)
 
   return (
-    <Source
-      id="atlas-notes"
-      key="atlas-notes"
-      type="geojson"
-      data={result.featureCollection}
-      // attribution="" Internal data / copyrighted
-    >
+    <>
+      <Source
+        id={internalNotesSourceId}
+        key={internalNotesSourceId}
+        type="geojson"
+        data={result.featureCollection}
+        // attribution="" Internal data / copyrighted
+      />
       {showInternalNotesParam && (
         <>
           <Layer
-            id="atlas-notes-hover"
-            key="atlas-notes-hover"
-            source="atlas-notes"
+            id={`${internalNotesLayerId}-hover`}
+            key={`${internalNotesLayerId}-hover`}
+            source={internalNotesSourceId}
             type="circle"
             paint={{
               'circle-radius': 12,
@@ -55,8 +57,8 @@ export const SourcesLayersInternalNotes = () => {
           />
           <Layer
             id={internalNotesLayerId}
-            key="atlas-notes"
-            source="atlas-notes"
+            key={internalNotesLayerId}
+            source={internalNotesSourceId}
             type="symbol"
             layout={{
               visibility: 'visible',
@@ -76,6 +78,6 @@ export const SourcesLayersInternalNotes = () => {
           />
         </>
       )}
-    </Source>
+    </>
   )
 }

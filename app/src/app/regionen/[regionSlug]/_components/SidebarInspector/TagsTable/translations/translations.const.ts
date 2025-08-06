@@ -1,6 +1,7 @@
 // Prettier: Overwrite via app/.prettierrc.mjs
 import { translationsOneway } from './translationsOneway.const'
-import { translationsParking } from './translationsParking.const'
+import { translationsParkingLars } from './translationsParkingLars.const'
+import { translationsParkingTilda } from './translationsParkingTilda.const'
 import { translationsSeparationTrafficModeMarking } from './translationsSeparationTrafficModeMarking.const'
 import { translationsWdith } from './translationsWdith.const'
 
@@ -9,7 +10,8 @@ import { translationsWdith } from './translationsWdith.const'
 // - "ALL--category" is replaced with 'ALL--highway' in `ConditionalFormattedValue`
 /* prettier-ignore */
 export const translations: { [key: string]: string } = {
-  ...translationsParking,
+  ...translationsParkingLars,
+  ...translationsParkingTilda,
   ...translationsOneway,
   ...translationsSeparationTrafficModeMarking,
   ...translationsWdith,

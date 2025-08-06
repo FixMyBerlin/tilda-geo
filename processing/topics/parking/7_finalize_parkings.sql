@@ -1,3 +1,5 @@
+DO $$ BEGIN RAISE NOTICE 'START finlize parkings at %', clock_timestamp(); END $$;
+
 -- insert remaining parkings into the final 'parkings' table
 INSERT INTO
   parkings (osm_type, osm_id, id, tags, meta, geom, minzoom)
@@ -42,6 +44,7 @@ WITH
   sum_points AS (
     SELECT
       tags || '{"capacity": 1}'::JSONB as tags,
+      meta,
       explode_parkings (geom, (tags ->> 'capacity')::INTEGER) as geom
     FROM
       parkings
@@ -49,7 +52,11 @@ WITH
 SELECT
   ROW_NUMBER() OVER () AS id,
   tags,
-  ST_Transform (geom, 3857) as geom INTO parkings_quantized
+  meta,
+  ST_Transform (geom, 3857) as geom,
+  0 as minzoom
+  --
+  INTO parkings_quantized
 FROM
   sum_points;
 

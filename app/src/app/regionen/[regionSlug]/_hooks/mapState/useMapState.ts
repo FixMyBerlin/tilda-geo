@@ -1,4 +1,3 @@
-import { TCreateVerificationSchema } from '@/src/server/bikelane-verifications/schemas'
 import { isEqual } from 'lodash'
 import { LngLatBounds } from 'maplibre-gl'
 import { MapGeoJSONFeature } from 'react-map-gl/maplibre'
@@ -9,7 +8,6 @@ export type Store = StoreMapLoadedState &
   StoreMapDataLoadingState &
   StoreFeaturesInspector &
   StoreCalculator &
-  StoreLocalUpdates &
   StoreSizes &
   Actions
 
@@ -19,6 +17,7 @@ type StoreMapLoadedState = {
 
 type StoreMapDataLoadingState = {
   mapDataLoading: boolean
+  setFeatureStateLoading: boolean
 }
 
 type StoreSizes = {
@@ -39,14 +38,11 @@ export type StoreCalculator = {
   }[]
 }
 
-type StoreLocalUpdates = {
-  localUpdates: Omit<TCreateVerificationSchema, 'id'>[]
-}
-
 type Actions = {
   actions: {
     setMapLoaded: (mapLoaded: Store['mapLoaded']) => void
     setMapDataLoading: (mapDataLoading: Store['mapDataLoading']) => void
+    setSetFeatureStateLoading: (setFeatureStateLoading: Store['setFeatureStateLoading']) => void
     setMapBounds: (mapBounds: Store['mapBounds']) => void
     setInspectorSize: (inspectorSize: Store['inspectorSize']) => void
     setSidebarSize: (sidebarSize: Store['sidebarSize']) => void
@@ -55,7 +51,6 @@ type Actions = {
     setCalculatorAreasWithFeatures: (
       calculatorAreasWithFeatures: Store['calculatorAreasWithFeatures'],
     ) => void
-    addLocalUpdate: (id: Omit<TCreateVerificationSchema, 'id'>) => void
   }
 }
 
@@ -70,28 +65,23 @@ export const useMapState = create<Store>((set, get) => {
     mapLoaded: false,
     // Toggels <LoadingIndicator>
     mapDataLoading: false,
+    // Toggels <LoadingIndicator> for feature state updates
+    setFeatureStateLoading: false,
     // Data for <Inspector> AND <LayerHighlight>
     inspectorFeatures: [],
     // Data for <Inspector> AND <LayerHighlight>
     calculatorAreasWithFeatures: [],
-    // Data for optimistic updates; show verification immediately <LayerHightlight>
-    localUpdates: [],
     mapBounds: null,
     inspectorSize: { width: 0, height: 0 },
     sidebarSize: { width: 0, height: 0 },
     actions: {
       setMapLoaded: (mapLoaded) => set({ mapLoaded }),
       setMapDataLoading: (mapDataLoading) => set({ mapDataLoading }),
+      setSetFeatureStateLoading: (setFeatureStateLoading) => set({ setFeatureStateLoading }),
       setInspectorFeatures: (inspectorFeatures) => set({ inspectorFeatures }),
       resetInspectorFeatures: () => set({ inspectorFeatures: [] }),
       setCalculatorAreasWithFeatures: (calculatorAreasWithFeatures) =>
         set({ calculatorAreasWithFeatures }),
-      addLocalUpdate: (update) => {
-        const { localUpdates } = get()
-        set({
-          localUpdates: [...localUpdates, update],
-        })
-      },
       setMapBounds: (bounds) => set({ mapBounds: bounds }),
       setInspectorSize: (size) => setIfChanged(get, set, 'inspectorSize', size),
       setSidebarSize: (size) => {
@@ -102,11 +92,11 @@ export const useMapState = create<Store>((set, get) => {
 })
 
 export const useMapLoaded = () => useMapState((state) => state.mapLoaded)
-export const useMapDataLoading = () => useMapState((state) => state.mapDataLoading)
+export const useShowMapLoadingIndicator = () =>
+  useMapState((state) => state.mapDataLoading || state.setFeatureStateLoading)
 export const useMapInspectorFeatures = () => useMapState((state) => state.inspectorFeatures)
 export const useMapCalculatorAreasWithFeatures = () =>
   useMapState((state) => state.calculatorAreasWithFeatures)
-export const useMapLocalUpdates = () => useMapState((state) => state.localUpdates)
 export const useMapBounds = () => useMapState((state) => state.mapBounds)
 export const useMapInspectorSize = () => useMapState((state) => state.inspectorSize)
 export const useMapSidebarSize = () => useMapState((state) => state.sidebarSize)

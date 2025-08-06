@@ -28,12 +28,14 @@ import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspect
 import { isSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { Calculator } from './Calculator/Calculator'
+import { QaZoomNotice } from './QaZoomNotice'
 import { Search } from './Search/Search'
 import { SourceGeojson } from './SourcesAndLayers/SourceGeojson/SourceGeojson'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
+import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersRegionMask } from './SourcesAndLayers/SourcesLayersRegionMask'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
@@ -268,6 +270,7 @@ export const Map = () => {
       <SourcesLayersStaticDatasets />
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
+      <SourcesLayersQa />
       {isDev ? <SourceGeojson /> : null}
       <AttributionControl compact={true} position="bottom-left" />
 
@@ -277,6 +280,7 @@ export const Map = () => {
       <Calculator />
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}
+      <QaZoomNotice />
     </MapGl>
   )
 }
