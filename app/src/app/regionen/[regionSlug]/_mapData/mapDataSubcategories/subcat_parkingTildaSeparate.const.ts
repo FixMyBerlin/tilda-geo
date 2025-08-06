@@ -1,5 +1,6 @@
 import { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
+import { mapboxStyleGroupLayers_tilda_areas } from './mapboxStyles/groups/tilda_areas'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaSeparate'
@@ -21,26 +22,7 @@ export const subcat_parkingTildaSeparate: FileMapDataSubcategory = {
       name: 'Standard',
       desc: null,
       layers: mapboxStyleLayers({
-        layers: [
-          {
-            id: 'parking-areas',
-            type: 'fill',
-            paint: {
-              'fill-color': [
-                'case',
-                ['==', ['get', 'parking'], 'multi-storey'],
-                'rgb(233, 91, 84)',
-                ['==', ['get', 'parking'], 'underground'],
-                'rgb(142, 192, 169)',
-                ['==', ['get', 'parking'], 'carport_s'],
-                'rgb(251, 206, 74)',
-                'rgb(48, 159, 219)',
-              ],
-              'fill-opacity': 0.7,
-            },
-            filter: ['==', '$type', 'Polygon'],
-          },
-        ],
+        layers: mapboxStyleGroupLayers_tilda_areas,
         source,
         sourceLayer,
       }),

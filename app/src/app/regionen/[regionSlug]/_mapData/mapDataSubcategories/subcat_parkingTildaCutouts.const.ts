@@ -1,5 +1,6 @@
 import { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
+import { mapboxStyleGroupLayers_tilda_cutouts } from './mapboxStyles/groups/tilda_cutouts'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaCutouts'
@@ -21,17 +22,7 @@ export const subcat_parkingTildaCutouts: FileMapDataSubcategory = {
       name: 'Standard',
       desc: null,
       layers: mapboxStyleLayers({
-        layers: [
-          {
-            id: 'parking-cutouts',
-            type: 'fill',
-            paint: {
-              'fill-color': 'rgb(255, 0, 0)',
-              'fill-opacity': 0.5,
-            },
-            filter: ['==', '$type', 'Polygon'],
-          },
-        ],
+        layers: mapboxStyleGroupLayers_tilda_cutouts,
         source,
         sourceLayer,
       }),

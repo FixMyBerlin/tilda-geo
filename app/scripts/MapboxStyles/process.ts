@@ -31,7 +31,7 @@ const apiConfigs = [
     // Style https://studio.mapbox.com/styles/hejco/cmbf4ffqq000701qxe5oedq4v/edit/#13.49/48.95568/9.13281
     enabled: process.env.MAPBOX_STYLE_ACCESS_TOKEN,
     apiUrl: `https://api.mapbox.com/styles/v1/hejco/cmbf4ffqq000701qxe5oedq4v?fresh=true&access_token=${process.env.MAPBOX_STYLE_ACCESS_TOKEN}`,
-    mapboxGroupPrefix: ['tilda_', 'parking_'],
+    mapboxGroupPrefix: ['tilda_'],
   },
   {
     key: 'tilda-style-package-3-radinfra',
