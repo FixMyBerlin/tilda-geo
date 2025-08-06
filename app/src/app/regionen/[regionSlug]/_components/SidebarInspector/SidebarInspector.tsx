@@ -90,7 +90,8 @@ export const SidebarInspector = () => {
             <Inspector features={features} />
             <style
               dangerouslySetInnerHTML={{
-                __html: '.maplibregl-ctrl-top-right { right: 35rem }',
+                __html:
+                  '.maplibregl-ctrl-top-right { right: 35rem } [data-map-controls="true"] { right: calc(35rem + 10px) }',
               }}
             />
           </>
