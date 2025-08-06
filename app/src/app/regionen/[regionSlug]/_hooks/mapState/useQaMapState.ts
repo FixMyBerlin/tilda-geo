@@ -53,7 +53,7 @@ export const useQaMapState = () => {
   const [qaConfigs] = useQuery(
     getQaConfigsForRegion,
     { regionSlug: regionSlug! },
-    { staleTime: 2 * 60 * 1000 }, // 120 seconds (2 minutes)
+    { staleTime: 5 * 60 * 1000 }, // 300 seconds (5 minutes)
   )
 
   // Memoize active config to prevent unnecessary re-renders
