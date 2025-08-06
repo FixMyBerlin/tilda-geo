@@ -7,13 +7,15 @@ export const SourceLayerFeature = () => {
   if (!osmNewNoteFeature) return null
 
   return (
-    <Source
-      id="geometry_from_inspector"
-      type="geojson"
-      data={featureCollection([feature(osmNewNoteFeature.geometry)])}
-    >
+    <>
+      <Source
+        id="geometry_from_inspector"
+        type="geojson"
+        data={featureCollection([feature(osmNewNoteFeature.geometry)])}
+      />
       <Layer
         id="osm_notes_new_map_geometry_area"
+        source="geometry_from_inspector"
         type="fill"
         paint={{
           'fill-color': '#14b8a6',
@@ -24,6 +26,7 @@ export const SourceLayerFeature = () => {
       />
       <Layer
         id="osm_notes_new_map_geometry_point"
+        source="geometry_from_inspector"
         type="circle"
         paint={{
           'circle-radius': 8,
@@ -34,6 +37,7 @@ export const SourceLayerFeature = () => {
       />
       <Layer
         id="osm_notes_new_map_geometry_line"
+        source="geometry_from_inspector"
         type="line"
         paint={{
           'line-width': 12,
@@ -42,6 +46,6 @@ export const SourceLayerFeature = () => {
         }}
         filter={['==', '$type', 'LineString']}
       />
-    </Source>
+    </>
   )
 }

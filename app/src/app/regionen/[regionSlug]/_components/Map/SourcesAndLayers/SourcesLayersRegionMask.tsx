@@ -14,7 +14,8 @@ export const SourcesLayersRegionMask: React.FC = () => {
   if (!regionSlug) return null
 
   return (
-    <Source id="mask" key={`source:${id}`} type="vector" url={createPmtilesUrl(url)}>
+    <>
+      <Source id="mask" key={`source:${id}`} type="vector" url={createPmtilesUrl(url)} />
       <Layer
         id="mask-buffer"
         type="fill"
@@ -55,6 +56,6 @@ export const SourcesLayersRegionMask: React.FC = () => {
         }}
         filter={['all', ['==', 'region', regionSlug], ['==', 'kind', 'boundary']]}
       />
-    </Source>
+    </>
   )
 }

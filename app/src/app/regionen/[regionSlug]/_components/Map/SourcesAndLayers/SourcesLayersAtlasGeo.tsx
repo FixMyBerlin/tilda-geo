@@ -8,7 +8,7 @@ import { useBackgroundParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQu
 import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { debugLayerStyles } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/debugLayerStyles'
 import { FilterSpecification } from 'maplibre-gl'
-import React, { memo } from 'react'
+import { Fragment, memo } from 'react'
 import { Layer, LayerProps, Source } from 'react-map-gl/maplibre'
 import { getSourceData } from '../../../_mapData/utils/getMapDataUtils'
 import {
@@ -43,7 +43,7 @@ const SourcesLayersAtlasGeoMemoized = memo(function SourcesLayersAtlasGeoMemoize
       {/* ========== categories ========== */}
       {categoriesConfig.map((categoryConfig) => {
         return (
-          <React.Fragment key={categoryConfig.id}>
+          <Fragment key={categoryConfig.id}>
             {/* ========== subcategories ========== */}
             {categoryConfig.subcategories.map((subcategoryConfig) => {
               const sourceData = getSourceData(subcategoryConfig?.sourceId)
@@ -61,15 +61,16 @@ const SourcesLayersAtlasGeoMemoized = memo(function SourcesLayersAtlasGeoMemoize
               })
 
               return (
-                <Source
-                  key={sourceKey}
-                  id={sourceKey}
-                  type="vector"
-                  tiles={[tileUrl]}
-                  promoteId={sourceData.promoteId}
-                  maxzoom={sourceData.maxzoom}
-                  minzoom={sourceData.minzoom}
-                >
+                <Fragment key={sourceKey}>
+                  <Source
+                    id={sourceKey}
+                    key={sourceKey}
+                    type="vector"
+                    tiles={[tileUrl]}
+                    promoteId={sourceData.promoteId}
+                    maxzoom={sourceData.maxzoom}
+                    minzoom={sourceData.minzoom}
+                  />
                   {/* ========== styles ========== */}
                   {subcategoryConfig.styles.map((styleConfig) => {
                     const currStyleConfig = subcategoryConfig.styles.find(
@@ -129,21 +130,21 @@ const SourcesLayersAtlasGeoMemoized = memo(function SourcesLayersAtlasGeoMemoize
                       const layerHighlightId = getLayerHighlightId(layer.id)
 
                       return (
-                        <React.Fragment key={layerId}>
+                        <Fragment key={layerId}>
                           <Layer key={layerId} {...layerProps} />
                           <LayerHighlight
                             key={layerHighlightId}
                             {...layerProps}
                             id={layerHighlightId}
                           />
-                        </React.Fragment>
+                        </Fragment>
                       )
                     })
                   })}
-                </Source>
+                </Fragment>
               )
             })}
-          </React.Fragment>
+          </Fragment>
         )
       })}
     </>

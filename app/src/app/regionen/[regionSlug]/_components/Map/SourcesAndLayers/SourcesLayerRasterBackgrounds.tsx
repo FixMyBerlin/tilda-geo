@@ -1,6 +1,6 @@
 import { useRegion } from '@/src/app/regionen/[regionSlug]/_components/regionUtils/useRegion'
 import { useBackgroundParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useBackgroundParam'
-import React from 'react'
+import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { sourcesBackgroundsRaster } from '../../../_mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { layerVisibility } from '../utils/layerVisibility'
@@ -40,24 +40,26 @@ export const SourcesLayerRasterBackgrounds: React.FC = () => {
         // })
 
         return (
-          <Source
-            id={backgroundId}
-            key={backgroundId}
-            type="raster"
-            tiles={[tiles]}
-            attribution={enhancedAttributionHtml}
-            {...(maxzoom ? { maxzoom } : {})}
-            {...(minzoom ? { minzoom } : {})}
-            {...(tileSize ? { tileSize } : {})}
-          >
+          <Fragment key={backgroundId}>
+            <Source
+              id={backgroundId}
+              key={backgroundId}
+              type="raster"
+              tiles={[tiles]}
+              attribution={enhancedAttributionHtml}
+              {...(maxzoom ? { maxzoom } : {})}
+              {...(minzoom ? { minzoom } : {})}
+              {...(tileSize ? { tileSize } : {})}
+            />
             <Layer
               id={id}
+              key={id}
               type="raster"
               source={backgroundId}
               layout={layerVisibility(visible)}
               beforeId={beforeId}
             />
-          </Source>
+          </Fragment>
         )
       })}
     </>

@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useRegionDatasets } from '../../../_hooks/useRegionDatasets/useRegionDatasets'
 import { createPmtilesUrl } from '../../Map/SourcesAndLayers/utils/createPmtilesUrl'
@@ -23,12 +24,8 @@ export const SourceLayerInfravelo = () => {
     <>
       {datasets.map((dataset) => {
         return (
-          <Source
-            key={dataset.id}
-            id={dataset.id}
-            type="vector"
-            url={createPmtilesUrl(dataset.url)}
-          >
+          <Fragment key={dataset.id}>
+            <Source id={dataset.id} type="vector" url={createPmtilesUrl(dataset.url)} />
             {dataset.layers?.map((layer) => {
               const layerId = createDatasetSourceLayerKey(dataset.id, dataset.subId, layer.id)
               return (
@@ -44,7 +41,7 @@ export const SourceLayerInfravelo = () => {
                 />
               )
             })}
-          </Source>
+          </Fragment>
         )
       })}
     </>
