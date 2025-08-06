@@ -3,7 +3,7 @@ import { USER_STATUS_TO_LETTER } from '@/src/app/regionen/[regionSlug]/_componen
 import getQaConfigsForRegion from '@/src/server/qa-configs/queries/getQaConfigsForRegion'
 import getQaDataForMap, { QaMapData } from '@/src/server/qa-configs/queries/getQaDataForMap'
 import { useQuery } from '@blitzjs/rpc'
-import { useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
 import { qaLayerId, qaSourceId } from '../../_components/Map/SourcesAndLayers/SourcesLayersQa'
 import { useRegionSlug } from '../../_components/regionUtils/useRegionSlug'
@@ -82,7 +82,7 @@ export const useQaMapState = () => {
   const shouldUpdateFeatureStates = mainMap !== undefined && mapLoaded && filteredQaData.length > 0
 
   // Extract setFeatureState logic into a function
-  const updateFeatureStates = () => {
+  const updateFeatureStates = useCallback(() => {
     if (!shouldUpdateFeatureStates) {
       return
     }
@@ -124,7 +124,7 @@ export const useQaMapState = () => {
     }
 
     if (!isProd) console.timeEnd('useQaMapState setFeatureState')
-  }
+  }, [currentQaData, filteredQaData, mainMap, shouldUpdateFeatureStates])
 
   // Initial loading effect - runs when QA data first loads or style changes
   useEffect(() => {
@@ -133,7 +133,7 @@ export const useQaMapState = () => {
       updateFeatureStates()
       setSetFeatureStateLoading(false)
     }
-  }, [shouldUpdateFeatureStates, setSetFeatureStateLoading, qaParamData.style])
+  }, [shouldUpdateFeatureStates, setSetFeatureStateLoading, qaParamData.style, updateFeatureStates])
 
   // Data loading effect - runs when QA source data is loaded
   useEffect(() => {
@@ -153,7 +153,7 @@ export const useQaMapState = () => {
     return () => {
       mainMap.getMap().off('data', handleData)
     }
-  }, [mainMap, shouldUpdateFeatureStates, setSetFeatureStateLoading])
+  }, [mainMap, shouldUpdateFeatureStates, setSetFeatureStateLoading, updateFeatureStates])
 
   return {
     qaData: currentQaData,
