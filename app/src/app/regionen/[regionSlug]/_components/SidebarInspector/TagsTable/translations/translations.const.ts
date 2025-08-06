@@ -1,6 +1,7 @@
 // Prettier: Overwrite via app/.prettierrc.mjs
 import { translationsOneway } from './translationsOneway.const'
 import { translationsParkingLars } from './translationsParkingLars.const'
+import { translationsParkingTilda } from './translationsParkingTilda.const'
 import { translationsSeparationTrafficModeMarking } from './translationsSeparationTrafficModeMarking.const'
 import { translationsWdith } from './translationsWdith.const'
 
@@ -10,6 +11,7 @@ import { translationsWdith } from './translationsWdith.const'
 /* prettier-ignore */
 export const translations: { [key: string]: string } = {
   ...translationsParkingLars,
+  ...translationsParkingTilda,
   ...translationsOneway,
   ...translationsSeparationTrafficModeMarking,
   ...translationsWdith,
