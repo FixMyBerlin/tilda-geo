@@ -15,8 +15,8 @@ export const QA_SYSTEM_STATUS_COLORS = {
 
 // QA User Status Colors (from specification)
 export const QA_USER_STATUS_COLORS = {
-  OK_STRUCTURAL_CHANGE: '#0066CC', // Blue - user confirmed OK
-  OK_REFERENCE_ERROR: '#0066CC', // Blue - user confirmed OK
+  OK_STRUCTURAL_CHANGE: '#009E73', // Green - user confirmed OK
+  OK_REFERENCE_ERROR: '#009E73', // Green - user confirmed OK
   NOT_OK_DATA_ERROR: '#D55E00', // Red - user confirmed problem
   NOT_OK_PROCESSING_ERROR: '#D55E00', // Red - user confirmed problem
 } as const satisfies Record<QaEvaluationStatus, `#${string}`>
