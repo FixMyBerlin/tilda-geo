@@ -8,7 +8,10 @@ import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
 import { QaEvaluatorDisplay } from './QaEvaluatorDisplay'
 
 type Props = {
-  evaluation: Awaited<ReturnType<typeof getQaEvaluationsForArea>>[number]
+  evaluation: Pick<
+    Awaited<ReturnType<typeof getQaEvaluationsForArea>>[number],
+    'createdAt' | 'systemStatus' | 'userStatus' | 'body' | 'evaluatorType' | 'author'
+  >
   decisionData?: QaDecisionData | null
   variant?: 'header' | 'history'
 }
@@ -21,8 +24,8 @@ export const QaEvaluationCard = ({ evaluation, decisionData, variant = 'history'
   const isHeader = variant === 'header'
   const pillPadding = isHeader ? 'px-3 py-1' : 'px-2 py-1'
   const cardClasses = isHeader
-    ? 'space-y-3 rounded-lg bg-white p-4'
-    : 'space-y-2 rounded-lg border border-gray-200 p-3'
+    ? 'space-y-3 rounded-lg bg-white p-4 w-full'
+    : 'space-y-2 rounded-lg border border-gray-200 p-3 w-full'
 
   return (
     <div className={cardClasses}>
