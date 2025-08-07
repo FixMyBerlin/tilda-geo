@@ -29,7 +29,7 @@ applyTo: '**/*.lua'
 - Always add `require('Log')` and `require('init')`
 - To run the test, to got `./` and run `./processing/run-tests.sh`
 - Usually use `assert.are.same()` which is a deep compare (Docs: https://lunarmodules.github.io/busted/#assert-same)
-- In an assert, the first param is always the result of our function: `assert.are.same(result_of_function, {'EXPECTED_VALUE'})`. Busted will show in the consol: `result_of_function` as the "Passed in" value. `{'EXPECTED_VALUE'}` as the "Expected" value.
+- In assertions, follow this pattern: `assert.are.same(actual_result, expected_result)`. Busted will show: `expected_result` as "Passed in" and `actual_result` as "Expected" in the console output. The `actual_result` is the result of the tested function. The `expected_result` is what we define as "right".
 
 ## Formatting
 - Use 2 spaces for indentation.
