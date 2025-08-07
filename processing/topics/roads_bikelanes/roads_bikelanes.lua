@@ -28,6 +28,7 @@ require("ToTodoTags")
 require("BikeSuitability")
 require("Log")
 local transform_construction_prefix = require('transform_construction_prefix')
+local transform_cycleway_both_postfix = require('transform_cycleway_both_postfix')
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
@@ -169,6 +170,8 @@ function osm2pgsql.process_way(object)
   -- ====== (B.2) General conversions ======
   ConvertCyclewayOppositeSchema(object_tags)
   transform_construction_prefix(object_tags)
+  transform_cycleway_both_postfix(object_tags)
+
   -- Calculate and format length, see also https://github.com/osm2pgsql-dev/osm2pgsql/discussions/1756#discussioncomment-3614364
   -- Use https://epsg.io/5243 (same as `presenceStats.sql`); update `atlas_roads--length--tooltip` if changed.
   local length = round(object:as_linestring():transform(5243):length(), 2)
