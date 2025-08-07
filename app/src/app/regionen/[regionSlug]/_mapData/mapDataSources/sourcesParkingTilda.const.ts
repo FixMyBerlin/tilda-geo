@@ -63,7 +63,7 @@ export const sourcesParkingTilda: MapDataSource<
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['source', 'capacity', 'surface', 'operator_type'],
+      documentedKeys: ['category', 'source', 'buffer_radius'],
     },
     calculator: { enabled: false },
     export: {
