@@ -26,7 +26,13 @@ The QA system uses a dual-status approach:
 - System status is used as fallback when no user evaluation exists
 - Areas with no evaluations show as gray (neutral)
 
-### 2. Status Override Table
+### 2. User Decision Protection Rule
+
+**Critical Rule**: When a user has marked an area as NOT_OK (either `NOT_OK_DATA_ERROR` or `NOT_OK_PROCESSING_ERROR`), the system should **NOT** overwrite this decision with new PROBLEMATIC or NEEDS_REVIEW evaluations. Only GOOD system evaluations are allowed to overwrite NOT_OK user decisions, as this indicates the problem has been resolved.
+
+**Rationale**: If a user has identified a problem and marked it as NOT_OK, the system should not override this decision with new problematic evaluations. The user's assessment takes precedence until the system detects that the issue has been resolved (GOOD status).
+
+### 3. Status Override Table
 
 | Previous System Status | Previous User Status | New System Status | Action |
 |---|---|---|---|
@@ -49,19 +55,20 @@ The QA system uses a dual-status approach:
 | **PROBLEMATIC**        | OK_*     | NEEDS_REVIEW | No change needed (system improved)      |
 | **PROBLEMATIC**        | OK_*     | PROBLEMATIC  | No change needed                        |
 | **GOOD**               | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
-| **GOOD**               | NOT_OK_* | NEEDS_REVIEW | No change needed                        |
-| **GOOD**               | NOT_OK_* | PROBLEMATIC  | No change needed                        |
+| **GOOD**               | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
+| **GOOD**               | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
 | **NEEDS_REVIEW**       | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
-| **NEEDS_REVIEW**       | NOT_OK_* | NEEDS_REVIEW | No change needed                        |
-| **NEEDS_REVIEW**       | NOT_OK_* | PROBLEMATIC  | No change needed                        |
+| **NEEDS_REVIEW**       | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
+| **NEEDS_REVIEW**       | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
 | **PROBLEMATIC**        | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
-| **PROBLEMATIC**        | NOT_OK_* | NEEDS_REVIEW | Reset user decision (system improved)   |
-| **PROBLEMATIC**        | NOT_OK_* | PROBLEMATIC  | No change needed                        |
+| **PROBLEMATIC**        | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
+| **PROBLEMATIC**        | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
 
 **Legend:**
 - **OK_*** = `OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`
 - **NOT_OK_*** = `NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`
 - **Reset user decision** = Create new evaluation with userStatus, body, userId set to null
+- **NO CHANGE** = Keep existing evaluation unchanged (user decision protection)
 
 ## Data Flow
 
