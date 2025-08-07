@@ -4,4 +4,4 @@ globs: '**/*.lua'
 alwaysApply: true
 ---
 
-Read .github/instructions/lua.instructions.md
+Read [`.github/instructions/lua.instructions.md`](../../.github/instructions/lua.instructions.md)

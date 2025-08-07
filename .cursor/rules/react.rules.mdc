@@ -4,4 +4,4 @@ globs: '**/*.tsx,**/*.ts'
 alwaysApply: true
 ---
 
-Read .github/instructions/react.instructions.md
+Read [`.github/instructions/react.instructions.md`](../../.github/instructions/react.instructions.md)

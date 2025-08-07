@@ -1,0 +1,7 @@
+---
+description: Cursor rules for TypeScript and React
+globs: '**/*.sql,**/*.prisma'
+alwaysApply: true
+---
+
+Read [`.github/instructions/sql.instructions.md`](../../.github/instructions/sql.instructions.md)
