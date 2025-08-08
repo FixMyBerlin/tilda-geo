@@ -127,13 +127,8 @@ export default async function seed() {
   // Create all evaluations
   const allEvaluations = [...evaluations3511, ...evaluations3510, ...evaluations3512]
 
-  for (const evaluation of allEvaluations) {
-    await db.qaEvaluation.upsert({
-      where: {
-        id: -1, // This will never match, so it will always create
-      },
-      update: {},
-      create: evaluation,
-    })
-  }
+  // Use createMany for better performance and to avoid ID conflicts
+  await db.qaEvaluation.createMany({
+    data: allEvaluations,
+  })
 }
