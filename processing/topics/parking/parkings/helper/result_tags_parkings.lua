@@ -81,12 +81,12 @@ function result_tags_parkings(object)
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
     restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
-    ['restriction:bus'] = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:bus']),
-    ['restriction:hgv'] = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:hgv']),
-    ['restriction:reason'] = SANITIZE_PARKING_TAGS.reason(object.tags['restriction:reason']),
+    restriction_bus = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:bus']),
+    restriction_hgv = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:hgv']),
+    restriction_reason = SANITIZE_PARKING_TAGS.reason(object.tags['restriction:reason']),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
     maxstay = SANITIZE_PARKING_TAGS.maxstay(object.tags.maxstay),
-    ['maxstay:motorhome'] = SANITIZE_PARKING_TAGS.maxstay(object.tags['maxstay:motorhome']),
+    maxstay_motorhome = SANITIZE_PARKING_TAGS.maxstay(object.tags['maxstay:motorhome']),
     access = SANITIZE_TAGS.access(object.tags.access),
     private = SANITIZE_TAGS.access(object.tags.private),
     disabled = SANITIZE_PARKING_TAGS.disabled(object.tags.disabled),
@@ -94,7 +94,7 @@ function result_tags_parkings(object)
     motorcar = SANITIZE_PARKING_TAGS.motorcar(object.tags.motorcar),
     hgv = SANITIZE_PARKING_TAGS.hgv(object.tags.hgv),
     zone = object.tags.zone,
-    ['authentication:disc'] = SANITIZE_PARKING_TAGS.authentication_disc(object.tags['authentication:disc']),
+    authentication_disc = SANITIZE_PARKING_TAGS.authentication_disc(object.tags['authentication:disc']),
   }
   MergeTable(result_tags, specific_tags)
 
