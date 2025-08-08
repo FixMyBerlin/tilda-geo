@@ -9,6 +9,7 @@ export const numberConfigs: { key: string; suffix?: string }[] = [
   { key: 'maxheight', suffix: 'm' },
   { key: 'population', suffix: 'Einwohner:innen' },
   { key: 'width', suffix: 'm' },
+  { key: 'road_width', suffix: 'm' },
   { key: 'sum_km', suffix: 'km' }, // parkraumParkingStats
   { key: 'lane_km', suffix: 'km' }, // parkraumParkingStats
   { key: 'd_other_km', suffix: 'km' }, // parkraumParkingStats

@@ -43,9 +43,7 @@ export const sourcesParkingTilda: MapDataSource<
         'orientation',
         'position',
         'direction',
-        'capacity',
-        'capacity_source',
-        'capacity_confidence',
+        'composit_capacity',
         'markings__if_present',
         'reason__if_present',
         'staggered__if_present',
@@ -152,11 +150,9 @@ export const sourcesParkingTilda: MapDataSource<
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        // New condition fields
         'condition_category',
         'condition_vehicles',
-
-        // Parking fields
+        'composit_capacity',
         'parking',
         'access',
         'operator_type',

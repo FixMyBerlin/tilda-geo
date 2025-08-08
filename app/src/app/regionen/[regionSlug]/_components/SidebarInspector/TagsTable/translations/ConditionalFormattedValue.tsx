@@ -105,6 +105,11 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     atlas_roadsPathClasses: 'atlas_roads',
     atlas_bikelanesPresence: 'atlas_roads',
     atlas_bikeSuitability: 'atlas_roads',
+    tilda_parkings: 'tilda_parkings',
+    tilda_parkings_cutouts: 'tilda_parkings',
+    tilda_parkings_no: 'tilda_parkings',
+    tilda_parkings_separate: 'tilda_parkings',
+    off_street_parking: 'tilda_parkings',
   }
   const lookAtThisSourceFirst = Object.keys(lookAtFirstSources).find((s) => s === sourceId)
   if (lookAtThisSourceFirst) {

@@ -2,6 +2,10 @@ import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
 import { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
 import {
+  TagsTableRowCompositCapacity,
+  tableKeyCapacity,
+} from './compositTableRows/TagsTableRowCompositCapacity'
+import {
   TagsTableRowCompositHighway,
   tableKeyHighway,
 } from './compositTableRows/TagsTableRowCompositHighway'
@@ -179,6 +183,16 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
             case tableKeyTrassencoutSurveyResponse: {
               return (
                 <TagsTableRowCompositTrassencoutSurveyResponse
+                  key={cleanedKey}
+                  sourceId={sourceId}
+                  tagKey={key}
+                  properties={properties}
+                />
+              )
+            }
+            case tableKeyCapacity: {
+              return (
+                <TagsTableRowCompositCapacity
                   key={cleanedKey}
                   sourceId={sourceId}
                   tagKey={key}
