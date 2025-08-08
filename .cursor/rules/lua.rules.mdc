@@ -1,7 +1,5 @@
 ---
-description: Cursor rules for Lua
-globs: '**/*.lua'
-alwaysApply: true
+globs: **/*.lua
+alwaysApply: false
 ---
-
 Read [`.github/instructions/lua.instructions.md`](../../.github/instructions/lua.instructions.md)

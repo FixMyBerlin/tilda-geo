@@ -1,7 +1,5 @@
 ---
-description: Cursor rules for TypeScript and React
-globs: '**/*.tsx,**/*.ts'
-alwaysApply: true
+globs: **/*.tsx,**/*.ts
+alwaysApply: false
 ---
-
 Read [`.github/instructions/react.instructions.md`](../../.github/instructions/react.instructions.md)
