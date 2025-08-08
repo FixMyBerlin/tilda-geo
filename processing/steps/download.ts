@@ -2,7 +2,7 @@ import { $ } from 'bun'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
-import { getAuthHeaders, hasValidOAuthCookie } from '../utils/oauth'
+import { ensureOAuthReady, getAuthHeaders } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
 
@@ -21,8 +21,6 @@ export async function waitForFreshData() {
     console.log('Download: ⏩ Skipping `waitForFreshData` due to `WAIT_FOR_FRESH_DATA=0`')
     return
   }
-  // Get last modified date with appropriate authentication
-  const cookieCheck = await hasValidOAuthCookie()
 
   const maxTries = 50 // ~10 hours (at 15 Min per try)
   const timeoutMinutes = 15
@@ -30,9 +28,12 @@ export async function waitForFreshData() {
   let tries = 0
 
   while (true) {
+    // Ensure OAuth is ready before each iteration
+    const cookieCheck = await ensureOAuthReady()
+
     const response = await fetch(params.pbfDownloadUrl, {
       method: 'HEAD',
-      headers: getAuthHeaders(cookieCheck.httpCookie),
+      headers: getAuthHeaders(cookieCheck?.httpCookie),
     })
     const lastModified = response.headers.get('Last-Modified')
     if (!lastModified) {
@@ -80,10 +81,10 @@ export async function downloadFile() {
   }
 
   // Ensure we have OAuth authentication if required and check if file has changed
-  const cookieCheck = await hasValidOAuthCookie()
+  const cookieCheck = await ensureOAuthReady()
   const eTagResponse = await fetch(params.pbfDownloadUrl, {
     method: 'HEAD',
-    headers: getAuthHeaders(cookieCheck.httpCookie),
+    headers: getAuthHeaders(cookieCheck?.httpCookie),
   })
   if (!eTagResponse.ok) {
     console.log(
@@ -106,10 +107,10 @@ export async function downloadFile() {
   }
 
   // Download file and write to disc
-  const downloadMethod = cookieCheck.isValid ? 'internal (OAuth)' : 'public'
+  const downloadMethod = cookieCheck?.isValid ? 'internal (OAuth)' : 'public'
   console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
   try {
-    if (cookieCheck.isValid && cookieCheck.cookiePath) {
+    if (cookieCheck?.isValid && cookieCheck.cookiePath) {
       await $`wget --quiet --load-cookies ${cookieCheck.cookiePath} --max-redirect 0 --output-document ${filePath} ${params.pbfDownloadUrl}`
     } else {
       // Public download

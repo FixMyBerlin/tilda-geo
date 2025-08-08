@@ -4,7 +4,6 @@ import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
 import { idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
-import { initializeOAuth } from './steps/initializeOAuth'
 import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
@@ -15,8 +14,6 @@ async function main() {
     logPadded('Processing', berlinTimeString(new Date()))
 
     await initialize()
-
-    await initializeOAuth()
 
     logPadded('Processing: Download', berlinTimeString(new Date()))
     await waitForFreshData()

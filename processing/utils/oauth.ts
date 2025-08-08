@@ -12,19 +12,21 @@ const OAUTH_SETTINGS_FILE = join(OSM_DOWNLOAD_DIR, 'oauth_settings.json')
 
 /**
  * Ensure we have a valid OAuth cookie, getting a new one if needed
- * Returns true if OAuth is ready, false if OAuth is disabled
+ * Returns cookie information if OAuth is ready, null if OAuth is disabled or failed
  * If OAuth fails, falls back to public download by modifying params
  */
 export async function ensureOAuthReady() {
-  if ((await hasValidOAuthCookie()).isValid) {
+  const cookieCheck = await hasValidOAuthCookie()
+  if (cookieCheck.isValid) {
     console.log('Geofabrik OAuth: OAuth is ready with existing cookie')
-    return true
+    return cookieCheck
   }
 
   await createOAuthCookie()
-  if ((await hasValidOAuthCookie()).isValid) {
+  const newCookieCheck = await hasValidOAuthCookie()
+  if (newCookieCheck.isValid) {
     console.log('Geofabrik OAuth: OAuth is ready with fresh cookie')
-    return true
+    return newCookieCheck
   }
 
   console.log(
@@ -35,7 +37,7 @@ export async function ensureOAuthReady() {
     .replaceAll('-internal', '')
   params.osmUsername = undefined
   params.osmPassword = undefined
-  return false
+  return null
 }
 
 /**
