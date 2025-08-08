@@ -43,12 +43,13 @@ export const SourcesLayersStaticDatasets = () => {
             : { type: 'vector' as const, url: createPmtilesUrl(url) }
 
         return (
-          <Source
-            id={datasetSourceId}
-            key={datasetSourceId}
-            attribution={attributionHtml}
-            {...sourceProps} // type inference fails here - maybe a typescript bug?
-          >
+          <Fragment key={datasetSourceId}>
+            <Source
+              id={datasetSourceId}
+              key={datasetSourceId}
+              attribution={attributionHtml}
+              {...sourceProps} // type inference fails here - maybe a typescript bug?
+            />
             {layers.map((layer) => {
               const layout =
                 layer.layout === undefined ? visibility : { ...visibility, ...layer.layout }
@@ -95,7 +96,7 @@ export const SourcesLayersStaticDatasets = () => {
                 </Fragment>
               )
             })}
-          </Source>
+          </Fragment>
         )
       })}
     </>

@@ -1,0 +1,5 @@
+---
+globs: **/*.sql,**/*.prisma
+alwaysApply: false
+---
+Read [`.github/instructions/sql.instructions.md`](../../.github/instructions/sql.instructions.md)

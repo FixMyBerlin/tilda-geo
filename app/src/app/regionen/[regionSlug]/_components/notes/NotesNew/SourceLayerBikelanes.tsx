@@ -15,13 +15,14 @@ export const SourceLayerBikelanes = () => {
   }
 
   return (
-    <Source
-      id={bikelanesSource.id}
-      type="vector"
-      tiles={[bikelanesSource.tiles]}
-      maxzoom={bikelanesSource.maxzoom}
-      minzoom={bikelanesSource.minzoom}
-    >
+    <>
+      <Source
+        id={bikelanesSource.id}
+        type="vector"
+        tiles={[bikelanesSource.tiles]}
+        maxzoom={bikelanesSource.maxzoom}
+        minzoom={bikelanesSource.minzoom}
+      />
       {bikelanesDefaultStyle?.layers?.map((layer) => {
         return (
           <Layer
@@ -36,6 +37,6 @@ export const SourceLayerBikelanes = () => {
           />
         )
       })}
-    </Source>
+    </>
   )
 }

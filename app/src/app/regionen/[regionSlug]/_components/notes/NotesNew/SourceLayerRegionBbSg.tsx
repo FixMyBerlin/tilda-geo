@@ -14,7 +14,8 @@ export const SourceLayerRegionBbSg = () => {
   }
 
   return (
-    <Source id={dataset.id} type="vector" url={createPmtilesUrl(dataset.url)}>
+    <>
+      <Source id={dataset.id} type="vector" url={createPmtilesUrl(dataset.url)} />
       {dataset.layers?.map((layer) => {
         const layerId = createDatasetSourceLayerKey(dataset.id, dataset.subId, layer.id)
         return (
@@ -30,6 +31,6 @@ export const SourceLayerRegionBbSg = () => {
           />
         )
       })}
-    </Source>
+    </>
   )
 }

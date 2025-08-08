@@ -30,7 +30,7 @@ import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyU
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
 import { Search } from './Search/Search'
-import { SourceGeojson } from './SourcesAndLayers/SourceGeojson/SourceGeojson'
+
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
@@ -271,7 +271,6 @@ export const Map = () => {
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
-      {isDev ? <SourceGeojson /> : null}
       <AttributionControl compact={true} position="bottom-left" />
 
       <Search />

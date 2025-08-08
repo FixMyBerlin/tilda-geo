@@ -1,8 +1,12 @@
+import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { OsmUserLink } from '../OsmUserLink'
 import { evaluatorTypeConfig } from './qaConfigs'
 
 type Props = {
-  evaluation: any // QaEvaluation from Prisma
+  evaluation: Pick<
+    Awaited<ReturnType<typeof getQaEvaluationsForArea>>[number],
+    'evaluatorType' | 'author'
+  >
   className?: string
 }
 

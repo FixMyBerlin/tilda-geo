@@ -13,6 +13,7 @@ local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local sanitize_cleaner = require('sanitize_cleaner')
+local classify_parking_conditions = require('classify_parking_conditions')
 
 -- EXAMPLE
 -- INPUT
@@ -39,16 +40,11 @@ local sanitize_cleaner = require('sanitize_cleaner')
 -- ["restriction:conditional"] = "loading_only @ (Mo-Fr 08:00-18:00)",
 -- side = "right"
 
+
 function result_tags_parkings(object)
   local id = DefaultId(object) .. "/" .. object.tags.side
 
-  -- REMINDER: Wenever we add tags, we need to consider updating processing/topics/parking/3_merge_parkings.sql
-  -- Otherwise we risk to data loss due to the mergin of lines.
-  local result_tags = {}
-  MergeTable(result_tags, object.tags) -- tags specified in transform_parkings()
-
   local width, width_confidence, width_source = road_width(object.tags)
-
   local capacity = parse_length(object.tags.capacity)
   local capacity_source = nil
   local capacity_confidence = nil
@@ -57,15 +53,30 @@ function result_tags_parkings(object)
     capacity_confidence = "high"
   end
 
-  local specific_tags = {
-    -- ROAD
-    name = road_name(object.tags),
+  local result_tags_surface = this_or_that(
+    "surface",
+    { value = SANITIZE_TAGS.surface(object.tags), confidence = "high", source = "tag" },
+    { value = SANITIZE_TAGS.surface(object._parent_tags), confidence = "medium", source = "parent_highway" }
+  )
+
+  -- Classify parking conditions into merged categories
+  local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags)
+
+  -- CRITICAL: This tags list must be kept in sync with processing/topics/parking/4_merge_parkings.sql (all tags used for clustering)
+  -- 1. Add to this explicit list below
+  -- 2. Add to the SQL clustering columns and jsonb_build_object
+  local result_tags = {
+    side = object.tags.side, -- see transform_parkings()
+
+    -- Road properties
+    road_name = road_name(object.tags),
     road_width = width,
     road_width_confidence = width_confidence,
     road_width_source = width_source,
     road = RoadClassificationRoadValue(object._parent_tags),
     operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
-    -- PARKING
+
+    -- Parking properties
     parking = parking_value(object),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
     capacity = capacity,
@@ -75,56 +86,53 @@ function result_tags_parkings(object)
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
+
+    -- Restrictions
     restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
-    ["restriction:conditional"] = object.tags["restriction:conditional"],
-    ["restriction:bus"] = object.tags["restriction:bus"],
-    ["restriction:hgv"] = object.tags["restriction:hgv"],
-    ["restriction:reason"] = SANITIZE_PARKING_TAGS.reason(object.tags["restriction:reason"]),
-    ["restriction:reason:conditional"] = object.tags["restriction:reason:conditional"],
-    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
-    ["fee:conditional"] = object.tags["fee:conditional"],
-    charge = object.tags.charge,
-    ["charge:conditional"] = object.tags["charge:conditional"],
-    maxstay = object.tags.maxstay,
-    ["maxstay:conditional"] = object.tags["maxstay:conditional"],
-    ["maxstay:motorhome"] = object.tags["maxstay:motorhome"],
-    -- ZONE
+    restriction_bus = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:bus']),
+    restriction_hgv = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:hgv']),
+    restriction_reason = SANITIZE_PARKING_TAGS.reason(object.tags['restriction:reason']),
+
+    -- Fees and time limits
     zone = object.tags.zone,
-    ["authentication:disc"] = SANITIZE_PARKING_TAGS.authentication_disc(object.tags["authentication:disc"]),
-    ["authentication:disc:conditional"] = object.tags["authentication:disc:conditional"],
-    -- ACCESS
+    authentication_disc = SANITIZE_PARKING_TAGS.authentication_disc(object.tags['authentication:disc']),
+    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
+    maxstay = SANITIZE_PARKING_TAGS.maxstay(object.tags.maxstay),
+    maxstay_motorhome = SANITIZE_PARKING_TAGS.maxstay(object.tags['maxstay:motorhome']),
+    -- charge = SANITIZE_PARKING_TAGS.charge(object.tags.charge), -- not needed ATM
+
+    -- Access and permissions
     access = SANITIZE_TAGS.access(object.tags.access),
-    ["access:conditional"] = object.tags["access:conditional"],
-    private = object.tags.private,
-    ["private:conditional"] = object.tags["private:conditional"],
+    private = SANITIZE_TAGS.access(object.tags.private),
     disabled = SANITIZE_PARKING_TAGS.disabled(object.tags.disabled),
-    ["disabled:conditional"] = object.tags["disabled:conditional"],
+
+    -- Vehicle types
     taxi = SANITIZE_PARKING_TAGS.taxi(object.tags.taxi),
-    ["taxi:conditional"] = object.tags["taxi:conditional"],
     motorcar = SANITIZE_PARKING_TAGS.motorcar(object.tags.motorcar),
-    ["motorcar:conditional"] = object.tags["motorcar:conditional"],
     hgv = SANITIZE_PARKING_TAGS.hgv(object.tags.hgv),
-    ["hgv:conditional"] = object.tags["hgv:conditional"],
-  }
-  MergeTable(result_tags, specific_tags)
 
-  local result_tags_surface = this_or_that(
-    "surface",
-    { value = SANITIZE_TAGS.surface(object.tags), confidence = "high", source = "tag" },
-    { value = SANITIZE_TAGS.surface(object._parent_tags), confidence = "medium", source = "parent_highway" }
-  )
-  MergeTable(result_tags, result_tags_surface)
+    -- Surface (from helper)
+    surface = result_tags_surface and result_tags_surface.value,
+    surface_confidence = result_tags_surface and result_tags_surface.confidence,
+    surface_source = result_tags_surface and result_tags_surface.source,
 
-  local tags_cc = {
-    "mapillary",
-    "panoramax",
-    "panoramax:0",
-    "panoramax:1",
-    "panoramax:2",
-    "panoramax:3",
+    -- Conditional categories (from helper)
+    condition_category = conditional_categories.condition_category,
+    condition_vehicles = conditional_categories.condition_vehicles,
+    mapillary = object.tags.mapillary or object._parent_tags.mapillary,
   }
-  CopyTags(result_tags, object._parent_tags, tags_cc, "osm_")
-  CopyTags(result_tags, object.tags, tags_cc, "osm_")
+
+  -- Copy OSM tags with prefix
+  -- local tags_cc = {
+  --   "mapillary",
+  --   "panoramax",
+  --   "panoramax:0",
+  --   "panoramax:1",
+  --   "panoramax:2",
+  --   "panoramax:3",
+  -- }
+  -- CopyTags(result_tags, object._parent_tags, tags_cc, "osm_")
+  -- CopyTags(result_tags, object.tags, tags_cc, "osm_")
 
   local result_meta = Metadata(object)
 

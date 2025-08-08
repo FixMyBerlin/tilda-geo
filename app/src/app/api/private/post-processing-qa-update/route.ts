@@ -45,34 +45,37 @@ function shouldCreateNewEvaluation(
   }
 
   // If user decision exists, only create new evaluation if we need to reset it
-  return shouldResetUserDecision(previousSystemStatus, newSystemStatus, true)
+  return shouldResetUserDecision(
+    previousSystemStatus,
+    newSystemStatus,
+    previousEvaluation.userStatus,
+  )
 }
 
 // Helper function to determine if user decision should be reset
 function shouldResetUserDecision(
   previousSystemStatus: QaSystemStatus,
   newSystemStatus: QaSystemStatus,
-  hasUserDecision: boolean,
+  previousUserStatus: string | null,
 ): boolean {
-  if (!hasUserDecision) return false
+  if (!previousUserStatus) return false
 
-  // Reset if system got worse
-  if (isSystemWorse(previousSystemStatus, newSystemStatus)) return true
+  // Check if previous user decision was NOT_OK
+  const isNotOkDecision =
+    previousUserStatus === 'NOT_OK_DATA_ERROR' || previousUserStatus === 'NOT_OK_PROCESSING_ERROR'
 
-  // Reset if system improved significantly (user should re-evaluate)
-  if (isSystemBetter(previousSystemStatus, newSystemStatus)) return true
+  if (isNotOkDecision) {
+    // User Decision Protection Rule: Only GOOD system evaluations can overwrite NOT_OK user decisions
+    // This prevents the system from overriding user-identified problems with new problematic evaluations
+    return newSystemStatus === 'GOOD'
+  }
 
-  return false
-}
-
-function isSystemWorse(previous: QaSystemStatus, current: QaSystemStatus): boolean {
+  // For OK user decisions, reset if system got worse or improved significantly
   const severity = { GOOD: 1, NEEDS_REVIEW: 2, PROBLEMATIC: 3 }
-  return severity[current] > severity[previous]
-}
+  const isSystemWorse = severity[newSystemStatus] > severity[previousSystemStatus]
+  const isSystemBetter = severity[newSystemStatus] < severity[previousSystemStatus]
 
-function isSystemBetter(previous: QaSystemStatus, current: QaSystemStatus): boolean {
-  const severity = { GOOD: 1, NEEDS_REVIEW: 2, PROBLEMATIC: 3 }
-  return severity[current] < severity[previous]
+  return isSystemWorse || isSystemBetter
 }
 
 async function upsertQaEvaluationWithRules(

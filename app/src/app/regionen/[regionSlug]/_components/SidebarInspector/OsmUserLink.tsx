@@ -5,7 +5,7 @@ import { useHasPermissions } from '@/src/app/_hooks/useHasPermissions'
 import { CheckBadgeIcon } from '@heroicons/react/24/solid'
 
 type Props = {
-  osmName?: string
+  osmName?: string | null // By definition  this is never null; but our types don't know that
   firstName?: string | null
   lastName?: string | null
   showMembership?: boolean

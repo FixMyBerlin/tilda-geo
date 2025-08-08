@@ -15,7 +15,7 @@ import { LayerHighlight } from './LayerHighlight'
 
 export const qaLayerId = 'qa-layer'
 export const qaSourceId = 'qa-source'
-export const qaMinZoom = 13
+export const qaMinZoom = 12
 
 export const SourcesLayersQa = () => {
   const { qaParamData } = useQaParam()

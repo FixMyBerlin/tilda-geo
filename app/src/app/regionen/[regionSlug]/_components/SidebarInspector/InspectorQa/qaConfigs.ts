@@ -82,22 +82,22 @@ export const systemStatusConfig = {
 // User Status Configuration
 export const userStatusConfig = {
   OK_STRUCTURAL_CHANGE: {
-    label: 'OK - Strukturelle Änderung',
+    label: 'OK (Strukturelle Änderung)',
     color: 'text-green-600',
     hexColor: QA_USER_STATUS_COLORS.OK_STRUCTURAL_CHANGE,
   },
   OK_REFERENCE_ERROR: {
-    label: 'OK - Referenzfehler',
+    label: 'OK (Fehler Referenzdaten)',
     color: 'text-green-600',
     hexColor: QA_USER_STATUS_COLORS.OK_REFERENCE_ERROR,
   },
   NOT_OK_DATA_ERROR: {
-    label: 'Nicht OK - Datenfehler',
+    label: 'Nicht OK (OSM)',
     color: 'text-red-600',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_DATA_ERROR,
   },
   NOT_OK_PROCESSING_ERROR: {
-    label: 'Nicht OK - Verarbeitungsfehler',
+    label: 'Nicht OK (Prozessierung)',
     color: 'text-red-600',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_PROCESSING_ERROR,
   },
@@ -121,25 +121,25 @@ export const evaluatorTypeConfig = {
 export const userStatusOptions = [
   {
     value: 'OK_STRUCTURAL_CHANGE' as const,
-    label: 'OK - Strukturelle Änderung',
+    label: 'OK (Strukturelle Änderung)',
     description: 'Differenz OK, verursacht durch bspw. Bauarbeiten im Gebiet',
     hexColor: QA_USER_STATUS_COLORS.OK_STRUCTURAL_CHANGE,
   },
   {
     value: 'OK_REFERENCE_ERROR' as const,
-    label: 'OK - Referenzfehler',
+    label: 'OK (Fehler Referenzdaten)',
     description: 'Differenz OK, verursacht durch falsche Vergangenheits-/Referenzdaten',
     hexColor: QA_USER_STATUS_COLORS.OK_REFERENCE_ERROR,
   },
   {
     value: 'NOT_OK_DATA_ERROR' as const,
-    label: 'Nicht OK - Datenfehler',
+    label: 'Nicht OK (OSM)',
     description: 'Differenz nicht OK, aktuelle Daten müssen korrigiert werden',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_DATA_ERROR,
   },
   {
     value: 'NOT_OK_PROCESSING_ERROR' as const,
-    label: 'Nicht OK - Verarbeitungsfehler',
+    label: 'Nicht OK (Verarbeitungsfehler)',
     description: 'Differenz nicht OK, Verarbeitung muss korrigiert werden',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_PROCESSING_ERROR,
   },

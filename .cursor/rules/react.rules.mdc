@@ -1,0 +1,5 @@
+---
+globs: **/*.tsx,**/*.ts
+alwaysApply: false
+---
+Read [`.github/instructions/react.instructions.md`](../../.github/instructions/react.instructions.md)

@@ -45,8 +45,8 @@ export default function AdminNewQaConfigPage() {
           isActive: 'true',
           mapTable: '',
           mapAttribution: '',
-          goodThreshold: '0.2',
-          needsReviewThreshold: '0.5',
+          goodThreshold: '0.1',
+          needsReviewThreshold: '0.2',
 
           regionId: '',
         }}

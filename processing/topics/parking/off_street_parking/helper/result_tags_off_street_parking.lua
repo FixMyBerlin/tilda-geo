@@ -5,6 +5,7 @@ require("DefaultId")
 require("Metadata")
 require("Log")
 local sanitize_cleaner = require('sanitize_cleaner')
+local classify_parking_conditions = require('classify_parking_conditions')
 
 local function result_tags_off_street_parking(result, area)
   local result_tags = {
@@ -20,6 +21,10 @@ local function result_tags_off_street_parking(result, area)
   if area ~= nil then
     MergeTable(result_tags, result.category:get_capacity(result.object.tags, area))
   end
+
+  -- Classify parking conditions into merged categories
+  local conditional_categories = classify_parking_conditions.classify_parking_conditions(result.object.tags)
+  MergeTable(result_tags, conditional_categories)
 
   local result_meta = Metadata(result)
 

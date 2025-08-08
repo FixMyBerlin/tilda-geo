@@ -31,15 +31,42 @@ export const sourcesParkingTilda: MapDataSource<
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        'capacity',
-        'length',
+        // New condition fields
+
+        // Road fields
+        'name',
+        'road',
+        'operator_type',
+        'condition_category',
+        'condition_vehicles',
+        'parking',
         'orientation',
         'position',
-        'side',
-        'surface',
-        'operator_type',
-        'parking',
-        'capacity_status',
+        'direction',
+        'capacity',
+        'capacity_source',
+        'capacity_confidence',
+        'markings__if_present',
+        'reason__if_present',
+        'staggered__if_present',
+        'restriction__if_present',
+        'restriction_bus__if_present',
+        'restriction_hgv__if_present',
+        'restriction_reason__if_present',
+        'fee__if_present',
+        'maxstay__if_present',
+        'maxstay_motorhome__if_present',
+        'access__if_present',
+        'private__if_present',
+        'disabled__if_present',
+        'charge__if_present',
+        'taxi__if_present',
+        'motorcar__if_present',
+        'hgv__if_present',
+        'zone__if_present',
+        'authentication_disc__if_present',
+        'composit_road_width',
+        'composit_surface_smoothness',
       ],
     },
     calculator: { enabled: false },
@@ -63,7 +90,13 @@ export const sourcesParkingTilda: MapDataSource<
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['source', 'capacity', 'surface', 'operator_type'],
+      documentedKeys: [
+        'category',
+        'source',
+        'buffer_radius',
+        'condition_category',
+        'condition_vehicles',
+      ],
     },
     calculator: { enabled: false },
     export: {
@@ -87,7 +120,7 @@ export const sourcesParkingTilda: MapDataSource<
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['capacity', 'operator_type'],
+      documentedKeys: ['capacity', 'operator_type', 'condition_category', 'condition_vehicles'],
     },
     calculator: {
       enabled: true,
@@ -119,6 +152,11 @@ export const sourcesParkingTilda: MapDataSource<
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
+        // New condition fields
+        'condition_category',
+        'condition_vehicles',
+
+        // Parking fields
         'parking',
         'access',
         'operator_type',
@@ -152,7 +190,13 @@ export const sourcesParkingTilda: MapDataSource<
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['parking', 'capacity', 'operator_type'],
+      documentedKeys: [
+        'parking',
+        'capacity',
+        'operator_type',
+        'condition_category',
+        'condition_vehicles',
+      ],
     },
     calculator: { enabled: false },
     export: {

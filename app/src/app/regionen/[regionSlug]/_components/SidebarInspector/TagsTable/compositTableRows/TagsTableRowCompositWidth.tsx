@@ -6,9 +6,15 @@ import { translations } from '../translations/translations.const'
 import { NodataFallback } from './NodataFallback'
 import { CompositTableRow } from './types'
 
-export const tableKeyWidth = 'composit_width'
+export const tableKeyWidths = ['composit_width', 'composit_road_width']
+
 export const TagsTableRowCompositWidth = ({ sourceId, tagKey, properties }: CompositTableRow) => {
-  if (!properties['width']) {
+  const widthKey = tagKey.replace('composit_', '')
+  const width = widthKey
+  const widthSource = `${widthKey}_source`
+  const widthConfidence = `${widthKey}_confidence`
+
+  if (!width) {
     return (
       <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
         <NodataFallback />
@@ -16,9 +22,9 @@ export const TagsTableRowCompositWidth = ({ sourceId, tagKey, properties }: Comp
     )
   }
 
-  const secureWidthSource = dompurify.sanitize(properties['width_source'])
+  const secureWidthSource = dompurify.sanitize(properties[widthSource])
   const sourceHasTranslation = Object.keys(translations).some((k) =>
-    k.includes(`width_source=${secureWidthSource}`),
+    k.includes(`${widthSource}=${secureWidthSource}`),
   )
 
   return (
@@ -37,21 +43,23 @@ export const TagsTableRowCompositWidth = ({ sourceId, tagKey, properties }: Comp
             {sourceHasTranslation ? (
               <ConditionalFormattedValue
                 sourceId={sourceId}
-                tagKey={'width_source'}
+                tagKey={widthSource}
                 tagValue={secureWidthSource}
               />
             ) : (
               <code>{secureWidthSource}</code>
             )}
           </p>
-          {/* <p>
-            <em>Genauigkeit der Quelle:</em>{' '}
-            <ConditionalFormattedValue
-              sourceId={sourceId}
-              tagKey={'confidence'}
-              tagValue={properties['width_confidence']}
-            />
-          </p> */}
+          {properties[widthConfidence] && (
+            <p>
+              <em>Genauigkeit der Quelle:</em>{' '}
+              <ConditionalFormattedValue
+                sourceId={sourceId}
+                tagKey={widthConfidence}
+                tagValue={properties[widthConfidence]}
+              />
+            </p>
+          )}
         </ValueDisclosurePanel>
       </ValueDisclosure>
     </TagsTableRow>

@@ -36,7 +36,7 @@ import {
 } from './compositTableRows/TagsTableRowCompositTrassencoutSurveyResponse'
 import {
   TagsTableRowCompositWidth,
-  tableKeyWidth,
+  tableKeyWidths,
 } from './compositTableRows/TagsTableRowCompositWidth'
 import { TagsTableRowlifecycle } from './compositTableRows/TagsTableRowLifecycle'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
@@ -186,17 +186,17 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                 />
               )
             }
-            case tableKeyWidth: {
-              return (
-                <TagsTableRowCompositWidth
-                  key={cleanedKey}
-                  sourceId={sourceId}
-                  tagKey={key}
-                  properties={properties}
-                />
-              )
-            }
             default: {
+              if (tableKeyWidths.includes(cleanedKey)) {
+                return (
+                  <TagsTableRowCompositWidth
+                    key={cleanedKey}
+                    sourceId={sourceId}
+                    tagKey={key}
+                    properties={properties}
+                  />
+                )
+              }
               if (tableKeysColor.includes(cleanedKey)) {
                 return (
                   <TagsTableRowColor

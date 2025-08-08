@@ -291,6 +291,7 @@ export const staticRegion: StaticRegion[] = [
     },
     logoPath: svgParking,
     logoWhiteBackgroundRequired: false,
+    showSearch: true,
     categories: [
       // Sort
       'parkingTilda',

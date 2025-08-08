@@ -1,0 +1,5 @@
+---
+globs: **/*.lua
+alwaysApply: false
+---
+Read [`.github/instructions/lua.instructions.md`](../../.github/instructions/lua.instructions.md)
