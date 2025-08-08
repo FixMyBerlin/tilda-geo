@@ -5,6 +5,7 @@ require('DefaultId')
 require('Metadata')
 require('Log')
 local sanitize_cleaner = require('sanitize_cleaner')
+local classify_parking_conditions = require('classify_parking_conditions')
 
 local function result_tags_separate_parking(result, area)
   local id = DefaultId(result.object)
@@ -22,6 +23,10 @@ local function result_tags_separate_parking(result, area)
   CopyTags(result_tags, result.object.tags, result.category.tags_cc, 'osm_')
   MergeTable(result_tags, result.category:get_tags(result.object.tags)) -- those are sanitized already
   MergeTable(result_tags, result.category:get_capacity(result.object.type, result.object.tags, area))
+
+  -- Classify parking conditions into merged categories
+  local conditional_categories = classify_parking_conditions.classify_parking_conditions(result.object.tags)
+  MergeTable(result_tags, conditional_categories)
 
   local result_meta = Metadata(result)
 

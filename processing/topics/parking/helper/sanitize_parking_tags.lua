@@ -12,7 +12,7 @@ local SANITIZE_PARKING_TAGS = {
     return sanitize_for_logging(value, { 'public', 'private' })
   end,
   taxi = function (value)
-    return sanitize_for_logging(value, { 'yes', 'designated' })
+    return sanitize_for_logging(value, { 'yes', 'no', 'designated' })
   end,
   motorcar = function (value)
     -- TOOD: How to handle… { 'unknown', 'private', 'customers', 'delivery', 'permissive', 'permit', 'residents' }
@@ -55,6 +55,9 @@ local SANITIZE_PARKING_TAGS = {
   end,
   parking_entrance = function(value)
     return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey' })
+  end,
+  maxstay = function (value)
+    return sanitize_for_logging(value, { '1h', '2h', '3h', '4h', '5h', '6h', '8h', '12h', '24h' })
   end,
 }
 

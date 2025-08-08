@@ -13,6 +13,7 @@ local this_or_that = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local sanitize_cleaner = require('sanitize_cleaner')
+local classify_parking_conditions = require('classify_parking_conditions')
 
 -- EXAMPLE
 -- INPUT
@@ -47,6 +48,10 @@ function result_tags_parkings(object)
   local result_tags = {}
   MergeTable(result_tags, object.tags) -- tags specified in transform_parkings()
 
+  -- Classify parking conditions into merged categories
+  local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags)
+  MergeTable(result_tags, conditional_categories)
+
   local width, width_confidence, width_source = road_width(object.tags)
 
   local capacity = parse_length(object.tags.capacity)
@@ -76,35 +81,20 @@ function result_tags_parkings(object)
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
     restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
-    ["restriction:conditional"] = object.tags["restriction:conditional"],
-    ["restriction:bus"] = object.tags["restriction:bus"],
-    ["restriction:hgv"] = object.tags["restriction:hgv"],
-    ["restriction:reason"] = SANITIZE_PARKING_TAGS.reason(object.tags["restriction:reason"]),
-    ["restriction:reason:conditional"] = object.tags["restriction:reason:conditional"],
+    ['restriction:bus'] = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:bus']),
+    ['restriction:hgv'] = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:hgv']),
+    ['restriction:reason'] = SANITIZE_PARKING_TAGS.reason(object.tags['restriction:reason']),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
-    ["fee:conditional"] = object.tags["fee:conditional"],
-    charge = object.tags.charge,
-    ["charge:conditional"] = object.tags["charge:conditional"],
-    maxstay = object.tags.maxstay,
-    ["maxstay:conditional"] = object.tags["maxstay:conditional"],
-    ["maxstay:motorhome"] = object.tags["maxstay:motorhome"],
-    -- ZONE
-    zone = object.tags.zone,
-    ["authentication:disc"] = SANITIZE_PARKING_TAGS.authentication_disc(object.tags["authentication:disc"]),
-    ["authentication:disc:conditional"] = object.tags["authentication:disc:conditional"],
-    -- ACCESS
+    maxstay = SANITIZE_PARKING_TAGS.maxstay(object.tags.maxstay),
+    ['maxstay:motorhome'] = SANITIZE_PARKING_TAGS.maxstay(object.tags['maxstay:motorhome']),
     access = SANITIZE_TAGS.access(object.tags.access),
-    ["access:conditional"] = object.tags["access:conditional"],
-    private = object.tags.private,
-    ["private:conditional"] = object.tags["private:conditional"],
+    private = SANITIZE_TAGS.access(object.tags.private),
     disabled = SANITIZE_PARKING_TAGS.disabled(object.tags.disabled),
-    ["disabled:conditional"] = object.tags["disabled:conditional"],
     taxi = SANITIZE_PARKING_TAGS.taxi(object.tags.taxi),
-    ["taxi:conditional"] = object.tags["taxi:conditional"],
     motorcar = SANITIZE_PARKING_TAGS.motorcar(object.tags.motorcar),
-    ["motorcar:conditional"] = object.tags["motorcar:conditional"],
     hgv = SANITIZE_PARKING_TAGS.hgv(object.tags.hgv),
-    ["hgv:conditional"] = object.tags["hgv:conditional"],
+    zone = object.tags.zone,
+    ['authentication:disc'] = SANITIZE_PARKING_TAGS.authentication_disc(object.tags['authentication:disc']),
   }
   MergeTable(result_tags, specific_tags)
 

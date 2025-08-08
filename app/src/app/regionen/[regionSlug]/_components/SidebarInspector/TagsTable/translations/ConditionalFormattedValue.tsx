@@ -121,6 +121,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'atlas_roadsPathClasses--road': 'highway',
     'atlas_bikelanesPresence--road': 'highway',
     'atlas_bikeSuitability--road': 'highway',
+    'atlas_parking--road': 'highway',
   }
   const lookThereForKeyEntry = Object.keys(lookThereForKey).find(
     (k) => k === `${sourceId}--${tagKey}`,
