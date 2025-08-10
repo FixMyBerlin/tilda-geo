@@ -27,7 +27,7 @@ INSERT INTO
 SELECT
   'c',
   osm_id,
-  id,
+  ROW_NUMBER() OVER (),
   tags,
   meta,
   ST_Transform (geom, 3857),
