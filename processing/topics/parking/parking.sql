@@ -63,6 +63,8 @@
 \i '/processing/topics/parking/6_filter_parkings.sql'
 \i '/processing/topics/parking/7_finalize_parkings.sql'
 \i '/processing/topics/parking/8_voronoi.sql'
+\i '/processing/topics/parking/9_create_labels.sql'
+
 
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;
