@@ -124,12 +124,7 @@ DROP TABLE IF EXISTS _parking_parkings_merged;
 SELECT
   ROW_NUMBER() OVER () AS id,
   cluster_id,
-  tags || jsonb_build_object(
-    'capacity',
-    SUM(capacity),
-    'cluster_id',
-    cluster_id
-  ) AS tags,
+  tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
   array_agg(osm_id) AS original_osm_ids,
   (ST_Dump (ST_LineMerge (ST_Union (geom)))).geom::geometry (LINESTRING) AS geom
   --
