@@ -5,9 +5,7 @@ DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
 --
 -- CRITICAL: This SQL file must be kept in sync with processing/topics/parking/parkings/helper/result_tags_parkings.lua (all tags in explicit list)
 --
--- When adding new tags:
--- 1. Add to the Lua file's explicit tags list
--- 2. Add to this SQL clustering columns and jsonb_build_object
+-- When adding new tags in lua, make sure to also add them in the query below to `jsonb_build_object()`
 --
 -- 1. Create a TEMP table and  that we use for clustering
 -- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
@@ -93,7 +91,7 @@ CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (tags);
 
 CREATE INDEX cluster_candidates_geom_idx ON cluster_candidates USING GIST (geom);
 
--- We assing a unique cluster_id to each group of parkings that shares the above tags and is spatially connected
+-- We assign a cluster_id to each spatially connected group of parkings that share the same tags
 WITH
   clustered AS (
     SELECT
@@ -118,19 +116,23 @@ WHERE
 CREATE INDEX cluster_candidates_full_idx ON cluster_candidates USING BTREE (cluster_id, tags);
 
 -- 2. Create the result table.
--- Create one table where connected linestrings are merged which is later used to snap to
+-- aggreagate the groups by merging each cluster
 DROP TABLE IF EXISTS _parking_parkings_merged;
 
+WITH
+  merged AS (
+    SELECT
+      tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
+      array_agg(osm_id) AS original_osm_ids,
+      (ST_Dump (ST_LineMerge (ST_Union (geom)))).geom::geometry (LINESTRING) AS geom
+    FROM
+      cluster_candidates
+    GROUP BY
+      tags,
+      cluster_id
+  )
 SELECT
   ROW_NUMBER() OVER () AS id,
-  cluster_id,
-  tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
-  array_agg(osm_id) AS original_osm_ids,
-  (ST_Dump (ST_LineMerge (ST_Union (geom)))).geom::geometry (LINESTRING) AS geom
-  --
-  INTO _parking_parkings_merged
+  merged.* INTO _parking_parkings_merged
 FROM
-  cluster_candidates
-GROUP BY
-  cluster_id,
-  tags;
+  merged;
