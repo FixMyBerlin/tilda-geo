@@ -1,11 +1,13 @@
 import { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
+import { mapboxStyleGroupLayers_tilda_area_labels } from './mapboxStyles/groups/tilda_area_labels'
 import { mapboxStyleGroupLayers_tilda_areas } from './mapboxStyles/groups/tilda_areas'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaSeparate'
 const source = 'tilda_parkings_separate'
 const sourceLayer = 'parkings_separate'
+const sourceLayerLabel = 'parkings_separate_labels'
 export type SubcatParkingTildaSeparateId = typeof subcatId
 export type SubcatParkingTildaSeparateStyleIds = 'default'
 
@@ -21,11 +23,20 @@ export const subcat_parkingTildaSeparate: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       desc: null,
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_tilda_areas,
-        source,
-        sourceLayer,
-      }),
+      layers: [
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_tilda_areas,
+          // additionalFilter: ['==', '$type', 'Polygon'], // break patterns
+          source,
+          sourceLayer,
+        }),
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_tilda_area_labels,
+          additionalFilter: ['==', '$type', 'Point'],
+          source,
+          sourceLayer: sourceLayerLabel,
+        }),
+      ],
       legends: [
         {
           id: 'multi-storey',

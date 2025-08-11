@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkinglines_labels: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_labels: MapboxStyleLayer[] = [
   {
     id: 'parking labels',
     type: 'symbol',
@@ -12,7 +12,6 @@ export const mapboxStyleGroupLayers_tilda_parkinglines_labels: MapboxStyleLayer[
       'text-allow-overlap': true,
       'text-ignore-placement': true,
       'text-size': ['interpolate', ['linear'], ['zoom'], 14.99, 0, 15, 9, 20, 20],
-      'text-field': ['to-string', ['get', 'capacity']],
       'text-rotate': [
         'case',
         ['>', ['get', 'angle'], 90],
@@ -20,6 +19,7 @@ export const mapboxStyleGroupLayers_tilda_parkinglines_labels: MapboxStyleLayer[
         ['get', 'angle'],
       ],
       'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+      'text-field': ['to-string', ['get', 'capacity']],
     },
     paint: {
       'text-color': [
@@ -29,6 +29,7 @@ export const mapboxStyleGroupLayers_tilda_parkinglines_labels: MapboxStyleLayer[
         'rgba(61, 61, 61, 0.5)',
         'rgb(60, 60, 60)',
       ],
+      'text-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0, 14, 0, 15, 1],
       'text-halo-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 18, 2.5],
       'text-halo-color': 'rgb(255, 255, 255)',
       'icon-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0, 14, 0, 15, 1],

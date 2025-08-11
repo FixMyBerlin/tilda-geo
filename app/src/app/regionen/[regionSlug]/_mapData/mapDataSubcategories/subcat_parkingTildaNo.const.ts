@@ -1,6 +1,6 @@
 import { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_tilda_parkinglines_missing } from './mapboxStyles/groups/tilda_parkinglines_missing'
+import { mapboxStyleGroupLayers_tilda_parkings_missing } from './mapboxStyles/groups/tilda_parkings_missing'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaNo'
@@ -22,7 +22,7 @@ export const subcat_parkingTildaNo: FileMapDataSubcategory = {
       name: 'Standard',
       desc: null,
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_tilda_parkinglines_missing,
+        layers: mapboxStyleGroupLayers_tilda_parkings_missing,
         source,
         sourceLayer,
       }),

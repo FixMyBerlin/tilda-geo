@@ -5,7 +5,7 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_tilda_areas: MapboxStyleLayer[] = [
   {
-    id: 'background colour',
+    id: 'areas-color',
     type: 'fill',
     paint: {
       'fill-color': [
@@ -23,7 +23,7 @@ export const mapboxStyleGroupLayers_tilda_areas: MapboxStyleLayer[] = [
     },
   },
   {
-    id: 'stripe pattern',
+    id: 'areas-pattern',
     type: 'fill',
     filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
     paint: {

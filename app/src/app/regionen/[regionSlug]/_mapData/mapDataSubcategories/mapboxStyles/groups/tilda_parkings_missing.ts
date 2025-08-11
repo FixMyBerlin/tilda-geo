@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkinglines_missing: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_missing: MapboxStyleLayer[] = [
   {
     id: 'not expected',
     type: 'line',

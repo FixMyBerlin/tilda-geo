@@ -1,11 +1,13 @@
 import { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_tilda_parkinglines } from './mapboxStyles/groups/tilda_parkinglines'
+import { mapboxStyleGroupLayers_tilda_parkings } from './mapboxStyles/groups/tilda_parkings'
+import { mapboxStyleGroupLayers_tilda_parkings_labels } from './mapboxStyles/groups/tilda_parkings_labels'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTilda'
 const source = 'tilda_parkings'
 const sourceLayer = 'parkings'
+const sourceLayerLabel = 'parkings_labels'
 export type SubcatParkingTildaId = typeof subcatId
 export type SubcatParkingTildaStyleIds = 'default'
 
@@ -21,11 +23,20 @@ export const subcat_parkingTilda: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       desc: null,
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_tilda_parkinglines,
-        source,
-        sourceLayer,
-      }),
+      layers: [
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_tilda_parkings,
+          // additionalFilter: ['==', '$type', 'LineString'], // break patterns
+          source,
+          sourceLayer,
+        }),
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_tilda_parkings_labels,
+          additionalFilter: ['==', '$type', 'Point'],
+          source,
+          sourceLayer: sourceLayerLabel,
+        }),
+      ],
       // legends: [
       //   {
       //     id: 'capacity_status--present',

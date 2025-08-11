@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkinglines_completeness: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_completeness: MapboxStyleLayer[] = [
   {
     id: 'capacity_status-segment_too_small',
     type: 'line',
