@@ -109,6 +109,10 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: [],
     minzoom: 0,
   },
+  parkings_labels: {
+    stylingKeys: [],
+    minzoom: 0,
+  },
   parkings_cutouts: {
     stylingKeys: [],
     minzoom: 11,
@@ -118,6 +122,10 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     minzoom: 11,
   },
   parkings_separate: {
+    stylingKeys: [],
+    minzoom: 0,
+  },
+  parkings_separate_labels: {
     stylingKeys: [],
     minzoom: 0,
   },

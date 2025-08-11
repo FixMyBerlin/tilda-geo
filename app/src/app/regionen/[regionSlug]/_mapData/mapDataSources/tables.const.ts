@@ -1,4 +1,4 @@
-// This is a list of all the tables we generate in atlas-geo. We might auto generate this list in the future.
+// This is a list of all the tables we generate in tilda-geo. We might auto generate this list in the future.
 export type TableId =
   | 'barrierLines'
   | 'barrierAreas'
@@ -20,9 +20,11 @@ export type TableId =
   // | 'aggregated_lengths' // Statistik; Does not work, see https://github.com/FixMyBerlin/private-issues/issues/2240
   | 'todos_lines'
   | 'parkings'
+  | 'parkings_labels'
   | 'parkings_cutouts'
   | 'parkings_quantized'
   | 'parkings_separate'
+  | 'parkings_separate_labels'
   | 'parkings_no'
 
 export type UnionTiles<T extends string> = T | `${T},${T}`

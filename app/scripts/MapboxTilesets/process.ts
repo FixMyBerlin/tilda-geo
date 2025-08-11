@@ -5,6 +5,8 @@ import chalk from 'chalk'
 import fs from 'node:fs'
 import { tilesetConfigs } from './datasets'
 
+const ENV_SOURCE: typeof process.env.NEXT_PUBLIC_APP_ENV = 'staging'
+
 async function main() {
   console.log(chalk.inverse.bold('START'), __filename)
 
@@ -41,7 +43,7 @@ async function main() {
       // Fetch Export API with GDAL (better quality data)
       const apiKey = process.env.ATLAS_API_KEY
       // The `apiKey` will skip the region check (hence the `noRegion`)
-      const url = getExportOgrApiBboxUrl('noRegion', datasetKey, bbox, 'fgb', 'staging', apiKey)
+      const url = getExportOgrApiBboxUrl('noRegion', datasetKey, bbox, 'fgb', ENV_SOURCE, apiKey)
       console.log(chalk.inverse.bold(chalk.yellow('  FETCH')), url)
       const fetchExportFgb = await fetch(url)
 

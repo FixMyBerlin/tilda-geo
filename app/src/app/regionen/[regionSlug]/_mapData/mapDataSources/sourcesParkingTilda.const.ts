@@ -19,7 +19,7 @@ export const sourcesParkingTilda: MapDataSource<
 >[] = [
   {
     id: 'tilda_parkings',
-    tiles: getTilesUrl('/atlas_generalized_parkings/{z}/{x}/{y}'),
+    tiles: getTilesUrl('/atlas_generalized_parkings,atlas_generalized_parkings_labels/{z}/{x}/{y}'),
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -138,7 +138,9 @@ export const sourcesParkingTilda: MapDataSource<
   },
   {
     id: 'tilda_parkings_separate',
-    tiles: getTilesUrl('/atlas_generalized_parkings_separate/{z}/{x}/{y}'),
+    tiles: getTilesUrl(
+      '/atlas_generalized_parkings_separate,atlas_generalized_parkings_separate_labels/{z}/{x}/{y}',
+    ),
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:

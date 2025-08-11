@@ -130,6 +130,11 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.3fc178dr/#14/52.51622/13.37036',
     bbox: bboxBrandenburg,
   },
+  parkings_labels: {
+    sourceLayer: 'parkings_labels',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.7xxxj3s3/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
   parkings_cutouts: {
     sourceLayer: 'parkings_cutouts',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.ackli54b/#14/52.51622/13.37036',
@@ -143,6 +148,11 @@ export const tilesetConfigs: Record<
   parkings_separate: {
     sourceLayer: 'parkings_separate',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.aizmu2ft/#14/52.51622/13.37036',
+    bbox: bboxNeukoelln,
+  },
+  parkings_separate_labels: {
+    sourceLayer: 'parkings_separate_labels',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.21talabz/#14/52.51622/13.37036',
     bbox: bboxNeukoelln,
   },
   parkings_no: {
