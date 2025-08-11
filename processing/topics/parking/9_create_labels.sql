@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS _parking_separate_labels;
 
 SELECT
   id,
-  ST_Centroid (geom) AS geom,
+  ST_PointOnSurface (geom) AS geom,
   tags ->> 'capacity' AS capacity,
   tags ->> 'area' AS area INTO _parking_separate_labels
 FROM
