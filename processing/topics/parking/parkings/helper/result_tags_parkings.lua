@@ -52,9 +52,17 @@ function result_tags_parkings(object)
   end
 
   local result_tags_surface = this_or_that(
-    "surface",
-    { value = SANITIZE_TAGS.surface(object.tags), confidence = "high", source = "tag" },
-    { value = SANITIZE_TAGS.surface(object._parent_tags), confidence = "medium", source = "parent_highway" }
+    'surface',
+    {
+      value = SANITIZE_TAGS.surface(object.tags),
+      confidence = 'high',
+      source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed'
+    },
+    {
+      value = SANITIZE_TAGS.surface(object._parent_tags),
+      confidence = 'medium',
+      source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed'
+    }
   )
 
   -- Classify parking conditions into merged categories
