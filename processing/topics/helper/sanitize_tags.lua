@@ -4,6 +4,25 @@ local sanitize_for_logging = require('sanitize_for_logging')
 local parse_length = require('parse_length')
 
 local SANITIZE_TAGS = {
+  -- Generic string sanitizer to remove potentially harmful characters
+  -- Allows: A-Z, a-z, 0-9, space, minus, underscore, and common German characters (Ä, Ö, Ü, ä, ö, ü, ß), `;`, `,`, [], (), @
+  safe_string = function (value)
+    if value == nil then return nil end
+    if type(value) ~= 'string' then return value end
+    return (value:gsub('[^%w %-%_ÄÖÜäöüß;,:()%[%]@]', ''))
+  end,
+  oneway_road = function (tags)
+    if tags.oneway == 'yes' and tags.dual_carriageway == 'yes' then
+      return 'yes_dual_carriageway'
+    end
+    return sanitize_for_logging(tags.oneway, { 'yes' }, { 'no' })
+  end,
+  oneway_bicycle = function (value)
+    return sanitize_for_logging(value, { 'yes', 'no' })
+  end,
+  boolean_yes = function (value)
+    return sanitize_for_logging(value, { 'yes' })
+  end,
   access = function (value)
     -- TOOD: How to handle… { 'unknown' }
     return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents' }, { 'yes' })

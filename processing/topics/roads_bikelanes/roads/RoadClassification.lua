@@ -1,31 +1,26 @@
 require('init')
-require("Set")
-require("Sanitize")
-require("DeriveTrafficSigns")
+require('Set')
+require('Sanitize')
+require('DeriveTrafficSigns')
+local sanitize_cleaner = require('sanitize_cleaner')
+local SANITIZE_TAGS = require('sanitize_tags')
 local parse_length = require('parse_length')
-require("MergeTable")
-require("RoadClassificationRoadValue")
+require('MergeTable')
+require('RoadClassificationRoadValue')
 
 function RoadClassification(object_tags)
   local result_tags = {
-    road = RoadClassificationRoadValue(object_tags)
+    road = RoadClassificationRoadValue(object_tags),
+    oneway = SANITIZE_TAGS.oneway_road(object_tags),
+    oneway_bicycle = SANITIZE_TAGS.oneway_bicycle(object_tags['oneway:bicycle']),
+    width = parse_length(object_tags.width),
+    width_source = SANITIZE_TAGS.safe_string(object_tags['source:width']),
+    bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
+    tunnel = SANITIZE_TAGS.boolean_yes(object_tags.tunnel),
   }
 
-  -- Note: We do not pass 'oneway=no' to the 'oneway' key
-  -- because it is the default which we do not want to show in the UI.
-  result_tags.oneway = Sanitize(object_tags.oneway, { "yes" })
-  if object_tags.oneway == 'yes' and object_tags.dual_carriageway == 'yes' then
-    result_tags.oneway = 'yes_dual_carriageway'
-  end
-  if object_tags['oneway:bicycle'] then
-    result_tags['oneway_bicycle'] = Sanitize(object_tags['oneway:bicycle'], { 'yes', 'no' })
-  end
-
-  result_tags.width = parse_length(object_tags.width)
-  result_tags.width_source = object_tags['source:width']
-  result_tags.bridge = Sanitize(object_tags.bridge, { "yes" })
-  result_tags.tunnel = Sanitize(object_tags.tunnel, { "yes" })
   MergeTable(result_tags, DeriveTrafficSigns(object_tags))
 
-  return result_tags
+  local cleaned_tags = sanitize_cleaner(result_tags, object_tags)
+  return cleaned_tags
 end
