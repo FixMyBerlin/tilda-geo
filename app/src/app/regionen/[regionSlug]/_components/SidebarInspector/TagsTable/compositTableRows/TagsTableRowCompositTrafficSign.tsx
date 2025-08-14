@@ -51,12 +51,12 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
   '242': {
     title: 'Zeichen 242.1: Beginn einer Fußgängerzone',
     signUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Zeichen_242.1_-_Beginn_einer_Fu%C3%9Fg%C3%A4ngerzone%2C_StVO_2009.svg,
+      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Zeichen_242.1_-_Beginn_einer_Fu%C3%9Fg%C3%A4ngerzone%2C_StVO_2009.svg',
   },
   '242.1': {
     title: 'Zeichen 242.1: Beginn einer Fußgängerzone',
     signUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Zeichen_242.1_-_Beginn_einer_Fu%C3%9Fg%C3%A4ngerzone%2C_StVO_2009.svg,
+      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Zeichen_242.1_-_Beginn_einer_Fu%C3%9Fg%C3%A4ngerzone%2C_StVO_2009.svg',
   },
   '245': {
     title: 'Bussonderfahrstreifen',
