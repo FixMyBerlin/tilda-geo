@@ -17,7 +17,7 @@ export default function AdminUploadPage() {
 
   const publicUrlForPreview = new URL(getStaticDatasetUrl(upload.slug))
   publicUrlForPreview.searchParams.set('apiKey', '_API_KEY_')
-  const previewUrl = new URL('https://protomaps.github.io/PMTiles/')
+  const previewUrl = new URL('https://pmtiles.io/')
   previewUrl.searchParams.set('url', publicUrlForPreview.toString())
 
   // Overwrite TS
