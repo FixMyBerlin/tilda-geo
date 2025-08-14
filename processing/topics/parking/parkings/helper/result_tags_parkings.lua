@@ -56,12 +56,12 @@ function result_tags_parkings(object)
     {
       value = SANITIZE_TAGS.surface(object.tags),
       confidence = 'high',
-      source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed'
+      source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
     },
     {
       value = SANITIZE_TAGS.surface(object._parent_tags),
       confidence = 'medium',
-      source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed'
+      source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
     }
   )
 
