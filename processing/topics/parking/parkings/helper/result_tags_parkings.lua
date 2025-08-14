@@ -1,12 +1,10 @@
 require('init')
-require("CopyTags")
-require("MergeTable")
 require("DefaultId")
 require("Metadata")
 require("RoadClassificationRoadValue")
 require("road_name")
-require("Log")
 require("road_width")
+require("Log")
 local parse_length = require('parse_length')
 require('result_tags_value_helpers')
 local this_or_that = require('this_or_that')
@@ -69,11 +67,12 @@ function result_tags_parkings(object)
     side = object.tags.side, -- see transform_parkings()
 
     -- Road properties
-    road_name = road_name(object.tags),
+    road = RoadClassificationRoadValue(object._parent_tags),
+    road_name = SANITIZE_TAGS.safe_string(road_name(object.tags)),
     road_width = width,
     road_width_confidence = width_confidence,
     road_width_source = width_source,
-    road = RoadClassificationRoadValue(object._parent_tags),
+    road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
     operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
 
     -- Parking properties
@@ -83,33 +82,12 @@ function result_tags_parkings(object)
     capacity_source = capacity_source,
     capacity_confidence = capacity_confidence,
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
-    direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
-    reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
+    direction = SANITIZE_PARKING_TAGS.direction(SANITIZE_TAGS.safe_string(object.tags.direction)),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
-
-    -- Restrictions
-    restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
-    restriction_bus = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:bus']),
-    restriction_hgv = SANITIZE_PARKING_TAGS.restriction(object.tags['restriction:hgv']),
-    restriction_reason = SANITIZE_PARKING_TAGS.reason(object.tags['restriction:reason']),
-
-    -- Fees and time limits
-    zone = object.tags.zone,
-    authentication_disc = SANITIZE_PARKING_TAGS.authentication_disc(object.tags['authentication:disc']),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
-    maxstay = SANITIZE_PARKING_TAGS.maxstay(object.tags.maxstay),
-    maxstay_motorhome = SANITIZE_PARKING_TAGS.maxstay(object.tags['maxstay:motorhome']),
-    -- charge = SANITIZE_PARKING_TAGS.charge(object.tags.charge), -- not needed ATM
-
-    -- Access and permissions
-    access = SANITIZE_TAGS.access(object.tags.access),
-    private = SANITIZE_TAGS.access(object.tags.private),
-    disabled = SANITIZE_PARKING_TAGS.disabled(object.tags.disabled),
-
-    -- Vehicle types
-    taxi = SANITIZE_PARKING_TAGS.taxi(object.tags.taxi),
-    motorcar = SANITIZE_PARKING_TAGS.motorcar(object.tags.motorcar),
-    hgv = SANITIZE_PARKING_TAGS.hgv(object.tags.hgv),
+    -- maxstay = SANITIZE_PARKING_TAGS.maxstay(SANITIZE_TAGS.safe_string(object.tags.maxstay)),
+    informal = SANITIZE_PARKING_TAGS.informal(object.tags.informal),
+    location = SANITIZE_PARKING_TAGS.location(SANITIZE_TAGS.safe_string(object.tags.location)),
 
     -- Surface (from helper)
     surface = result_tags_surface and result_tags_surface.value,
@@ -121,18 +99,6 @@ function result_tags_parkings(object)
     condition_vehicles = conditional_categories.condition_vehicles,
     mapillary = object.tags.mapillary or object._parent_tags.mapillary,
   }
-
-  -- Copy OSM tags with prefix
-  -- local tags_cc = {
-  --   "mapillary",
-  --   "panoramax",
-  --   "panoramax:0",
-  --   "panoramax:1",
-  --   "panoramax:2",
-  --   "panoramax:3",
-  -- }
-  -- CopyTags(result_tags, object._parent_tags, tags_cc, "osm_")
-  -- CopyTags(result_tags, object.tags, tags_cc, "osm_")
 
   local result_meta = Metadata(object)
 

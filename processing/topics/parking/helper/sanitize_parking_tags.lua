@@ -5,6 +5,9 @@ local SANITIZE_PARKING_TAGS = {
   parking = function(value)
     return sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
   end,
+  location = function (value)
+    return sanitize_for_logging(value, { 'median' })
+  end,
   orientation = function (value)
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })
   end,
