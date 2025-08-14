@@ -70,7 +70,8 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
   },
   '1026-30': {
     title: 'Zusatzzeichen 1024-30: Taxi frei',
-    signUrl: 'https://de.wikipedia.org/wiki/Datei:Zusatzzeichen_1026-30_-_Taxi_frei,_StVO_1992.svg',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/4/43/Zusatzzeichen_1026-30_-_Taxi_frei%2C_StVO_1992.svg',
   },
   '1020-30': {
     title: 'Zusatzzeichen 1020-30, Anlieger frei',
