@@ -43,10 +43,37 @@ export const TagsTableRow = ({ sourceId, tagKey, tagValue, children }: TagsTable
         {tagValue === null && <NodataFallback />}
         {tagValue === undefined && !children && <NodataFallback />}
         {tagValue && (
-          <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
+          <TagsTableRowMaybeList sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
         )}
         {children && <>{children}</>}
       </td>
     </tr>
+  )
+}
+
+// Some tags are in fact lists of values, eg. `parking.condition_category`. We translate those only once and list them as list.
+const TagsTableRowMaybeList = ({ sourceId, tagKey, tagValue }: TagsTableRowProps) => {
+  if (!tagValue) return null
+  // List of tags that should never be considered lists
+  const disallowList = ['description', 'note']
+  if (disallowList.includes(tagKey)) {
+    return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
+  }
+
+  const listValues = tagValue.split(';').map((e) => e.trim())
+  if (!listValues.length) {
+    return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
+  }
+
+  return (
+    <ul>
+      {listValues.map((value) => {
+        return (
+          <li key={value}>
+            <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={value} />
+          </li>
+        )
+      })}
+    </ul>
   )
 }
