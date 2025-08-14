@@ -100,14 +100,12 @@ function result_tags_parkings(object)
     mapillary = object.tags.mapillary or object._parent_tags.mapillary,
   }
 
-  local result_meta = Metadata(object)
-
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
 
   return {
     id = id,
     side = object.tags.side,
     tags = cleaned_tags,
-    meta = result_meta,
+    meta = Metadata(object),
   }, replaced_tags
 end

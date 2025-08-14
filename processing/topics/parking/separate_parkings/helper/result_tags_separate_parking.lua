@@ -28,14 +28,13 @@ local function result_tags_separate_parking(result, area)
   local conditional_categories = classify_parking_conditions.classify_parking_conditions(result.object.tags)
   MergeTable(result_tags, conditional_categories)
 
-  local result_meta = Metadata(result)
 
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, result.object.tags)
 
   return {
     id = id,
     tags = cleaned_tags,
-    meta = result_meta,
+    meta = Metadata(result),
   }, replaced_tags
 end
 
