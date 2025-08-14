@@ -11,14 +11,6 @@ function RoadClassification(object_tags)
     road = RoadClassificationRoadValue(object_tags)
   }
 
-  -- Mischverkehr
-  -- INFO: Deactivated for now. Not needed during styling and buggy ATM.
-  -- if tags.bicycle ~= 'no' and tags.bicycle ~= 'use_sidepath' then
-  --   if MinorRoadClasses[tags.highway] or MajorRoadClasses[tags.highway] then
-  --     roadClassification.road_implicit_shared_lane = true
-  --   end
-  -- end
-
   -- Note: We do not pass 'oneway=no' to the 'oneway' key
   -- because it is the default which we do not want to show in the UI.
   result_tags.oneway = Sanitize(object_tags.oneway, { "yes" })
