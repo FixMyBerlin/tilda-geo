@@ -1,10 +1,10 @@
 require('init')
-require("DefaultId")
-require("Metadata")
-require("RoadClassificationRoadValue")
-require("road_name")
-require("road_width")
-require("Log")
+require('DefaultId')
+require('Metadata')
+require('RoadClassificationRoadValue')
+require('road_name')
+require('road_width')
+require('Log')
 local parse_length = require('parse_length')
 require('result_tags_value_helpers')
 local this_or_that = require('this_or_that')
@@ -15,40 +15,40 @@ local classify_parking_conditions = require('classify_parking_conditions')
 
 -- EXAMPLE
 -- INPUT
--- ["parking:left"] = "no",
--- ["parking:left:restriction"] = "no_stopping",
--- ["parking:right"] = "lane",
--- ["parking:right:fee"] = "no",
--- ["parking:right:markings"] = "yes",
--- ["parking:right:orientation"] = "parallel",
--- ["parking:right:restriction:conditional"] = "loading_only @ (Mo-Fr 08:00-18:00)",
+-- ['parking:left'] = 'no',
+-- ['parking:left:restriction'] = 'no_stopping',
+-- ['parking:right'] = 'lane',
+-- ['parking:right:fee'] = 'no',
+-- ['parking:right:markings'] = 'yes',
+-- ['parking:right:orientation'] = 'parallel',
+-- ['parking:right:restriction:conditional'] = 'loading_only @ (Mo-Fr 08:00-18:00)',
 --
 -- LEFT
--- parent_highway = "residential",
--- parking = "no",
--- restriction = "no_stopping",
--- side = "left"
+-- parent_highway = 'residential',
+-- parking = 'no',
+-- restriction = 'no_stopping',
+-- side = 'left'
 --
 -- RIGHT
--- fee = "no",
--- markings = "yes",
--- orientation = "parallel",
--- parent_highway = "residential",
--- parking = "lane",
--- ["restriction:conditional"] = "loading_only @ (Mo-Fr 08:00-18:00)",
--- side = "right"
+-- fee = 'no',
+-- markings = 'yes',
+-- orientation = 'parallel',
+-- parent_highway = 'residential',
+-- parking = 'lane',
+-- ['restriction:conditional'] = 'loading_only @ (Mo-Fr 08:00-18:00)',
+-- side = 'right'
 
 
 function result_tags_parkings(object)
-  local id = DefaultId(object) .. "/" .. object.tags.side
+  local id = DefaultId(object) .. '/' .. object.tags.side
 
   local width, width_confidence, width_source = road_width(object.tags)
   local capacity = parse_length(object.tags.capacity)
   local capacity_source = nil
   local capacity_confidence = nil
   if capacity ~= nil then
-    capacity_source = "tag"
-    capacity_confidence = "high"
+    capacity_source = 'tag'
+    capacity_confidence = 'high'
   end
 
   local result_tags_surface = this_or_that(
