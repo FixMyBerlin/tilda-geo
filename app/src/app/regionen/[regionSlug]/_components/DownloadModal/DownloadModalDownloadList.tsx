@@ -1,9 +1,9 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
-import { ogrFormats } from '@/src/app/api/export-ogr/[regionSlug]/[tableName]/_utils/ogrFormats.const'
 import {
-  getExportApiBboxUrl,
-  getExportOgrApiBboxUrl,
-} from '../../../../_components/utils/getExportApiUrl'
+  Formats,
+  ogrFormats,
+} from '@/src/app/api/export-ogr/[regionSlug]/[tableName]/_utils/ogrFormats.const'
+import { getExportOgrApiBboxUrl } from '../../../../_components/utils/getExportApiUrl'
 import { sources } from '../../_mapData/mapDataSources/sources.const'
 import { useRegion } from '../regionUtils/useRegion'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
@@ -51,61 +51,45 @@ export const DownloadModalDownloadList = () => {
               </tbody>
             </table>
 
-            <div className="flex gap-2">
-              <LinkExternal
-                href={getExportApiBboxUrl(regionSlug!, sourceData.export.apiIdentifier, bbox)}
-                classNameOverwrite="w-28 flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
-                download
-                blank
-              >
-                <strong className="mb-0.5 block text-xs font-medium text-gray-900">
-                  Download:
-                </strong>
-                <span className="block w-full border-0 p-0 font-mono text-gray-500 placeholder-gray-500 focus:ring-0 sm:text-sm">
-                  FlatGeoBuf
-                </span>
-              </LinkExternal>
-
-              <div className="grow rounded-md border border-gray-300 px-3 py-2 shadow-sm focus-within:border-yellow-500 focus-within:ring-1 focus-within:ring-yellow-500">
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(ogrFormats).map(([param, name]) => {
+                return (
+                  <LinkExternal
+                    key={param}
+                    href={getExportOgrApiBboxUrl(
+                      regionSlug!,
+                      sourceData.export.apiIdentifier!,
+                      bbox,
+                      param as Formats,
+                    )}
+                    className="text-xs"
+                    download
+                    blank
+                  >
+                    {name}
+                  </LinkExternal>
+                )
+              })}
+            </div>
+            <div className="mt-2">
+              <div className="rounded-md border border-gray-200 px-3 py-2 shadow-sm">
                 <label
                   htmlFor={sourceData.id}
-                  className="mb-0.5 block text-xs font-medium text-gray-900"
+                  className="mb-0.5 block text-[10px] font-medium text-gray-700"
                 >
-                  Vector Tile URL:
+                  Vector Tile URL
                 </label>
                 <input
                   type="text"
                   name={sourceData.id}
                   id={sourceData.id}
-                  className="block w-full border-0 p-0 font-mono text-gray-500 placeholder-gray-500 focus:ring-0 sm:text-sm"
+                  className="block w-full border-0 p-0 font-mono text-xs text-gray-500 placeholder-gray-400 focus:ring-0"
                   placeholder="Vector Tile URL"
                   defaultValue={sourceData.tiles}
                   onFocus={(event) => event.target.select()}
+                  readOnly
                 />
               </div>
-            </div>
-            <div className="mt-1 space-x-3 text-xs">
-              <>
-                Beta:{' '}
-                {Object.entries(ogrFormats).map(([param, name]) => {
-                  return (
-                    <LinkExternal
-                      key={param}
-                      href={getExportOgrApiBboxUrl(
-                        regionSlug!,
-                        sourceData.export.apiIdentifier!,
-                        bbox,
-                        param as 'geojson' | 'gpkg' | 'fgb',
-                      )}
-                      className="text-xs"
-                      download
-                      blank
-                    >
-                      {name}
-                    </LinkExternal>
-                  )
-                })}
-              </>
             </div>
           </li>
         )
