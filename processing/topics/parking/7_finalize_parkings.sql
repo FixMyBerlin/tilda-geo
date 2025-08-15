@@ -2,10 +2,8 @@ DO $$ BEGIN RAISE NOTICE 'START finalize parkings at %', clock_timestamp(); END 
 
 -- insert remaining parkings into the final 'parkings' table
 INSERT INTO
-  parkings (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings (id, tags, meta, geom, minzoom)
 SELECT
-  'c',
-  0,
   id,
   jsonb_strip_nulls(
     tags || jsonb_build_object(
@@ -34,10 +32,8 @@ WHERE
 
 -- insert all cutouts except "roads" into the final 'parkings_cutouts' table
 INSERT INTO
-  parkings_cutouts (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings_cutouts (id, tags, meta, geom, minzoom)
 SELECT
-  'c',
-  osm_id,
   ROW_NUMBER() OVER (
     ORDER BY
       id
@@ -84,10 +80,8 @@ ORDER BY
   ST_X (ST_StartPoint (geom));
 
 INSERT INTO
-  parkings_separate (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings_separate (id, tags, meta, geom, minzoom)
 SELECT
-  osm_type,
-  osm_id,
   id,
   tags,
   meta,

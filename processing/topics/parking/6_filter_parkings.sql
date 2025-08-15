@@ -17,10 +17,8 @@ WHERE
 CREATE INDEX parking_prohibited_id_idx ON parking_prohibited USING btree (id);
 
 INSERT INTO
-  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings_no (id, tags, meta, geom, minzoom)
 SELECT
-  'c',
-  0,
   id,
   tags || '{"reason": "parking_tag"}'::JSONB,
   '{}'::JSONB,
@@ -56,10 +54,8 @@ WHERE
 CREATE INDEX parking_discarded_idx ON capacity_too_low USING BTREE (id);
 
 INSERT INTO
-  parkings_no (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings_no (id, tags, meta, geom, minzoom)
 SELECT
-  'c',
-  0,
   id,
   tags || '{"reason": "capacity < 1"}'::JSONB,
   '{}'::JSONB,

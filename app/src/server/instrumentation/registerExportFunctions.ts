@@ -56,8 +56,6 @@ export async function registerExportFunctions(tables: typeof exportApiIdentifier
           SELECT ST_AsFlatGeobuf(q, false, 'geom') INTO fgb FROM (
             SELECT st_transform(geom, 4326) AS geom,
               id,
-              osm_id,
-              osm_type::text,
               ${tagKeys},
               ${metaKeys}
             FROM "${tableName}"
