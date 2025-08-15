@@ -19,7 +19,6 @@ SELECT
     /* sql-formatter-disable */
     'side', side,
     'source', source,
-    'parking_source', source,
     'road', tags ->> 'road',
     'road_name', COALESCE(tags ->> 'road_name', street_name),
     'road_width', tags ->> 'road_width',

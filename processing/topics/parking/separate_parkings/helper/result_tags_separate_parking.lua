@@ -22,7 +22,6 @@ local function result_tags_separate_parking(result, area)
     -- Align common tag names with kerb-line parkings where applicable
     category = result.category.id,
     source = result.category.source,
-    parking_source = result.category.source,
     buffer_radius = result.category:get_buffer_radius(result.object.tags),
 
     -- Surface (from helper)
