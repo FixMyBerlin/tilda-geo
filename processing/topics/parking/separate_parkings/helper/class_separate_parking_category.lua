@@ -10,7 +10,6 @@ class_separate_parking_category.__index = class_separate_parking_category
 
 ---@param args {
 --- id: string,
---- buffer_radius: fun(tags: table):(number|nil), -- Radius in meters for adding a buffer or 0.
 --- conditions: fun(tags: table): (boolean),
 --- }
 function class_separate_parking_category.new(args)
@@ -18,7 +17,6 @@ function class_separate_parking_category.new(args)
   local self = setmetatable({}, class_separate_parking_category)
   self.id = args.id
 
-  self._buffer_radius = args.buffer_radius -- use category:get_buffer_radius(tags)
   self._conditions = args.conditions -- use category:is_active(tags)
 
   return self
@@ -28,12 +26,6 @@ end
 ---@return boolean
 function class_separate_parking_category:is_active(tags)
   return self._conditions(tags)
-end
-
----@param tags table
----@return number|nil
-function class_separate_parking_category:get_buffer_radius(tags)
-  return self._buffer_radius(tags)
 end
 
 -- NOTE: Match SQL constants and formulas from

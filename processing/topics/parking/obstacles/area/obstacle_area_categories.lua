@@ -1,7 +1,6 @@
 require('init')
 require('class_obstacle_category')
 require('two_wheel_parking_helper')
-require('amenity_parking_helper')
 
 local function is_obstacle_parking(tags)
   return tags['obstacle:parking'] == 'yes'

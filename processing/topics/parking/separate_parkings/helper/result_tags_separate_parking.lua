@@ -7,13 +7,14 @@ local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local parking_point_radius = require('parking_point_radius')
 
 local function result_tags_separate_parking(result, area)
   local id = DefaultId(result.object)
 
   local result_tags = {
-    buffer_radius = result.category:get_buffer_radius(result.object.tags),
-    }
+    buffer_radius = parking_point_radius(result.object),
+  }
 
   local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(result.object.tags)
   local surface_tags = {
