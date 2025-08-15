@@ -90,6 +90,8 @@ function result_tags_parkings(object)
     capacity_source = capacity_source,
     capacity_confidence = capacity_confidence,
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
+    reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
+    covered = SANITIZE_PARKING_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(SANITIZE_TAGS.safe_string(object.tags.direction)),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),

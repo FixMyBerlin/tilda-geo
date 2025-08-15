@@ -32,6 +32,8 @@ SELECT
     'capacity_confidence', tags ->> 'capacity_confidence',
     'markings', tags ->> 'markings',
     'direction', tags ->> 'direction',
+    'reason', tags ->> 'reason',
+    'covered', tags ->> 'covered',
     'staggered', tags ->> 'staggered',
     'zone', tags ->> 'zone',
     'fee', tags ->> 'fee',

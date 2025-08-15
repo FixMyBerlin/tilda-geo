@@ -14,6 +14,9 @@ local SANITIZE_PARKING_TAGS = {
   operator_type = function(value)
     return sanitize_for_logging(value, { 'public', 'private' })
   end,
+  covered = function (value)
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+  end,
   informal = function (value)
     return sanitize_for_logging(value, { 'yes' })
   end,
