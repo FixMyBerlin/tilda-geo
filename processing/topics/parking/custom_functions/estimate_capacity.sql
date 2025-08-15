@@ -7,6 +7,7 @@ CREATE TABLE _parking_orientation_constants (
   padding NUMERIC NOT NULL
 );
 
+-- REMINDER: Changes here need to be reflected in: `processing/topics/parking/separate_parkings/helper/class_separate_parking_category.lua`
 INSERT INTO
   _parking_orientation_constants (orientation, car_space_x, car_space_y, padding)
 VALUES
@@ -41,8 +42,8 @@ BEGIN
     RAISE EXCEPTION 'Invalid orientation: "%", must be one of the defined types in parking_orientation_constants', orientation;
   END IF;
 
--- The total length need to account for: n * car_length + (n - 1) * padding
--- We solve for n:
+  -- The total length need to account for: n * car_length + (n - 1) * padding
+  -- We solve for n:
   n_cars := (length + const.padding) / (const.car_space_x + const.padding);
 
   RETURN n_cars;

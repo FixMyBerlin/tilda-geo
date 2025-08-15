@@ -36,6 +36,49 @@ function class_separate_parking_category:get_buffer_radius(tags)
   return self._buffer_radius(tags)
 end
 
+-- NOTE: Match SQL constants and formulas from
+-- `processing/topics/parking/custom_functions/estimate_capacity.sql`.
+-- SQL defines `_parking_orientation_constants` and uses:
+--   length → capacity: (length + padding) / (car_space_x + padding)
+--   length → area:     length * (car_space_y + 0.25)
+-- Invert for area → capacity to match SQL closely:
+--   length = area / (car_space_y + 0.25)
+--   capacity_raw = (length + padding) / (car_space_x + padding)
+--                = area / ((car_space_y + 0.25) * (car_space_x + padding)) + padding/(car_space_x + padding)
+local function compute_area_to_capacity_constants(orientation)
+  if orientation == 'perpendicular' then
+    return 2.0, 4.4, 0.5
+  elseif orientation == 'diagonal' then
+    local deg = 60
+    local s = math.sin(math.rad(deg))
+    local c = math.cos(math.rad(deg))
+    local car_space_x = s * 4.4 + c * 2.0
+    local car_space_y = c * 4.4 + s * 2.0
+    local padding = c * 0.5
+    return car_space_x, car_space_y, padding
+  else -- 'parallel' and fallback
+    return 4.4, 2.0, 0.8
+  end
+end
+
+local function capacity_from_area(area, orientation)
+  local car_space_x, car_space_y, padding = compute_area_to_capacity_constants(orientation)
+  local denom = (car_space_y + 0.25) * (car_space_x + padding)
+  local offset = padding / (car_space_x + padding)
+  return (area / denom) + offset
+end
+
+-- Match SQL rounding behavior from `5_estimate_parking_capacities.sql`:
+-- if capacity + 0.1 < 10 → floor; else → round to nearest integer
+local function normalize_capacity(capacity_raw)
+  if capacity_raw == nil then return nil end
+  if (capacity_raw + 0.1) < 10 then
+    return math.floor(capacity_raw)
+  else
+    return round(capacity_raw, 0)
+  end
+end
+
 ---Create capacity taga from tags or fallback.
 ---Handles area and point datas.
 ---@param type string<'way'|'node'|'relation'> -- object.type, see https://osm2pgsql.org/doc/manual-v1.html#processing-callbacks
@@ -43,8 +86,6 @@ end
 ---@param area number|nil
 ---@return table<{ area: number, capacity: number, capacity_confidence: "high"|"medium"|"low", capacity_source: string }>
 function class_separate_parking_category:get_capacity(type, tags, area)
-  local factor = 14.5 -- TODO: Improve factor based on orientation
-
   -- For areas, we expect to have a `area` value passed in.
   -- Based on that we either either return confidenc=high from tags.capacity
   -- or confidence=medium from area.
@@ -56,9 +97,9 @@ function class_separate_parking_category:get_capacity(type, tags, area)
 
     return {
       area = round(area, 2),
-      capacity = round(area / factor, 0),
-      capacity_confidence = 'medium',
-      capacity_source = 'area',
+      capacity = normalize_capacity(capacity_from_area(area, tags.orientation)),
+      capacity_confidence = tags.orientation and 'medium' or 'low',
+      capacity_source = 'area_and_orientation_' .. (tags.orientation or 'parallel'),
     }
   end
 
@@ -67,7 +108,9 @@ function class_separate_parking_category:get_capacity(type, tags, area)
   -- or confidence=medium from area.
   if type == 'node' then
     if area then error ('class_separate_parking_category:get_capacity does not expect area=<Number> value for point data.') end
-    local area = (tags.capacity or 1) * factor  -- TODO LATER: Add error when capacity is nil
+    local car_space_x, car_space_y, padding = compute_area_to_capacity_constants(tags.orientation)
+    local denom = (car_space_y + 0.25) * (car_space_x + padding)
+    area = (tags.capacity or 1) * denom
 
     if tags.capacity then
       local result_from_capacity_tag = capacity_from_tag(tags, area)
