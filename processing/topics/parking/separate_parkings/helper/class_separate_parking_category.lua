@@ -72,11 +72,14 @@ end
 -- if capacity + 0.1 < 10 → floor; else → round to nearest integer
 local function normalize_capacity(capacity_raw)
   if capacity_raw == nil then return nil end
-  if (capacity_raw + 0.1) < 10 then
-    return math.floor(capacity_raw)
-  else
-    return round(capacity_raw, 0)
-  end
+  return round(capacity_raw, 0)
+
+  -- NOTE: We get closer to the numbers from Python by always rounding…
+  -- if (capacity_raw + 0.1) < 10 then
+  --   return math.floor(capacity_raw)
+  -- else
+  --   return round(capacity_raw, 0)
+  -- end
 end
 
 ---Create capacity taga from tags or fallback.
