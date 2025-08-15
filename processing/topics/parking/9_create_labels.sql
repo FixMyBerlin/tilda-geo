@@ -9,7 +9,7 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
-    'area', tags ->> 'area'
+    'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta,
@@ -35,7 +35,7 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
-    'area', tags ->> 'area'
+    'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta,

@@ -7,7 +7,14 @@ SELECT
   'c',
   0,
   id,
-  tags || jsonb_build_object('length', length),
+  jsonb_strip_nulls(
+    tags || jsonb_build_object(
+      'area',
+      ROUND(NULLIF(tags ->> 'area', '')::numeric, 2),
+      'length',
+      ROUND(length::numeric, 2)
+    )
+  ),
   '{}'::jsonb,
   ST_Transform (geom, 3857),
   0
