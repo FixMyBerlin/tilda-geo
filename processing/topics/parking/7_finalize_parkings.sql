@@ -12,7 +12,11 @@ SELECT
   ST_Transform (geom, 3857),
   0
 FROM
-  _parking_parkings_merged pm;
+  _parking_parkings_merged pm
+ORDER BY
+  tags::text,
+  ST_Y (ST_StartPoint (geom)),
+  ST_X (ST_StartPoint (geom));
 
 -- reverse direction of left hand side kerbs
 UPDATE parkings
@@ -27,7 +31,10 @@ INSERT INTO
 SELECT
   'c',
   osm_id,
-  ROW_NUMBER() OVER (),
+  ROW_NUMBER() OVER (
+    ORDER BY
+      id
+  ),
   tags,
   meta,
   ST_Transform (geom, 3857),
@@ -35,7 +42,9 @@ SELECT
 FROM
   _parking_cutouts pc
 WHERE
-  tags ->> 'source' <> 'parking_roads';
+  tags ->> 'source' <> 'parking_roads'
+ORDER BY
+  id;
 
 -- explode parkings into quantized points
 DROP TABLE IF EXISTS parkings_quantized;
@@ -50,7 +59,11 @@ WITH
       parkings
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  ROW_NUMBER() OVER (
+    ORDER BY
+      ST_Y (ST_StartPoint (geom)),
+      ST_X (ST_StartPoint (geom))
+  ) AS id,
   tags,
   meta,
   ST_Transform (geom, 3857) as geom,
@@ -58,7 +71,10 @@ SELECT
   --
   INTO parkings_quantized
 FROM
-  sum_points;
+  sum_points
+ORDER BY
+  ST_Y (ST_StartPoint (geom)),
+  ST_X (ST_StartPoint (geom));
 
 INSERT INTO
   parkings_separate (osm_type, osm_id, id, tags, meta, geom, minzoom)

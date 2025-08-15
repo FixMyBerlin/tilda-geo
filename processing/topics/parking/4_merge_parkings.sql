@@ -74,6 +74,8 @@ WITH
         PARTITION BY
           tags
         ORDER BY
+          ST_Y (ST_StartPoint (geom)),
+          ST_X (ST_StartPoint (geom)),
           id
       ) AS cluster_id
     FROM
@@ -96,17 +98,53 @@ DROP TABLE IF EXISTS _parking_parkings_merged;
 WITH
   merged AS (
     SELECT
-      tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
-      array_agg(osm_id) AS original_osm_ids,
-      (ST_Dump (ST_LineMerge (ST_Union (geom)))).geom::geometry (LINESTRING) AS geom
+      tags || jsonb_build_object('capacity', s.capacity) AS tags,
+      s.original_osm_ids,
+      (
+        ST_Dump (
+          CASE
+            WHEN ST_Y (ST_StartPoint (lm)) > ST_Y (ST_EndPoint (lm))
+            OR (
+              ST_Y (ST_StartPoint (lm)) = ST_Y (ST_EndPoint (lm))
+              AND ST_X (ST_StartPoint (lm)) > ST_X (ST_EndPoint (lm))
+            ) THEN ST_Reverse (lm)
+            ELSE lm
+          END
+        )
+      ).geom::geometry (LINESTRING) AS geom
     FROM
-      cluster_candidates
-    GROUP BY
-      tags,
-      cluster_id
+      (
+        SELECT
+          tags,
+          cluster_id,
+          array_agg(
+            osm_id
+            ORDER BY
+              osm_id
+          ) AS original_osm_ids,
+          SUM(capacity) AS capacity,
+          ST_LineMerge (
+            ST_UnaryUnion (ST_Union (ST_SnapToGrid (geom, 0.01)))
+          ) AS lm
+        FROM
+          cluster_candidates
+        GROUP BY
+          tags,
+          cluster_id
+      ) s
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  ROW_NUMBER() OVER (
+    ORDER BY
+      tags::text,
+      -- cluster_id is not carried out of CTE; recompute a stable geometry-based sort for determinism
+      ST_Y (ST_StartPoint (geom)),
+      ST_X (ST_StartPoint (geom))
+  ) AS id,
   merged.* INTO _parking_parkings_merged
 FROM
-  merged;
+  merged
+ORDER BY
+  tags::text,
+  ST_Y (ST_StartPoint (geom)),
+  ST_X (ST_StartPoint (geom));
