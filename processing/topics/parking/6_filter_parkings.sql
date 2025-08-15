@@ -2,7 +2,9 @@ DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp(); END $$;
 
 -- filter parkings that don't allow parking
 SELECT
-  id INTO TEMP TABLE parking_prohibited
+  id
+  --
+  INTO TEMP TABLE parking_prohibited
 FROM
   _parking_parkings_merged p
 WHERE
@@ -45,7 +47,9 @@ WHERE
 
 -- filter parkings with capacity < 1
 SELECT
-  id INTO TEMP capacity_too_low
+  id
+  --
+  INTO TEMP capacity_too_low
 FROM
   _parking_parkings_merged
 WHERE
@@ -57,7 +61,7 @@ INSERT INTO
   parkings_no (id, tags, meta, geom, minzoom)
 SELECT
   id,
-  tags || '{"reason": "capacity < 1"}'::JSONB,
+  tags || '{"reason": "capacity_below_zero"}'::JSONB,
   '{}'::JSONB,
   ST_Transform (geom, 3857),
   0
