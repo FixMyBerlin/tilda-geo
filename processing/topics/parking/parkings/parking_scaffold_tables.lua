@@ -45,3 +45,27 @@ osm2pgsql.define_table({
     { column = 'minzoom', type = 'integer' },
   },
 })
+
+-- Labels (filled by SQL in 9_create_labels.sql)
+osm2pgsql.define_table({
+  name = 'parkings_labels',
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'point', projection = 3857 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
+
+-- Labels (filled by SQL in 9_create_labels.sql)
+osm2pgsql.define_table({
+  name = 'parkings_separate_labels',
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'point', projection = 3857 },
+    { column = 'minzoom', type = 'integer' },
+  },
+})
