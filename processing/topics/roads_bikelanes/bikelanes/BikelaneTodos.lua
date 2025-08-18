@@ -115,8 +115,9 @@ local malformed_traffic_sign = BikelaneTodo.new({
   conditions = function(objectTags, resultTags)
     if (resultTags.category == nil) then return false end
 
-    -- Compare raw with sanatized tag and create 'todo' if different
+    -- Compare raw with sanitized tag and create 'todo' if different
     if objectTags['traffic_sign'] ~= SanitizeTrafficSign(objectTags['traffic_sign']) then return true end
+    if objectTags['traffic_sign:both'] ~= SanitizeTrafficSign(objectTags['traffic_sign:both']) then return true end
     if objectTags['traffic_sign:forward'] ~= SanitizeTrafficSign(objectTags['traffic_sign:forward']) then return true end
     if objectTags['traffic_sign:backward'] ~= SanitizeTrafficSign(objectTags['traffic_sign:backward']) then return true end
     return false
