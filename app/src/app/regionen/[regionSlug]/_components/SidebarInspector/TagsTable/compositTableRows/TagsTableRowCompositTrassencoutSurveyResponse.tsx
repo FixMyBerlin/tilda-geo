@@ -39,6 +39,12 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
         </p>
         <hr />
         <Markdown markdown={properties.text} />
+
+        {properties.answer ? (
+          <div className="-ml-4 -mr-3 -mt-2 bg-gray-800 px-4 py-3">
+            <Markdown className="prose-invert" markdown={properties.answer} />
+          </div>
+        ) : null}
       </td>
     </tr>
   )
