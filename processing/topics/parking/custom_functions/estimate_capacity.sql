@@ -13,11 +13,14 @@ INSERT INTO
 VALUES
   ('parallel', 4.4, 2.0, 0.8),
   ('perpendicular', 2.0, 4.4, 0.5),
+  -- diagonal parking is a bit more complex.
+  -- We calulate the required space by rotating the perpendicular parking by 30 degrees.
+  -- Additionally, we scale car_space_x by 2/3 to account for the overlap of the cars.
   (
     'diagonal',
-    SIN(RADIANS(60)) * 4.4 + COS(RADIANS(60)) * 2.0,
-    COS(RADIANS(60)) * 4.4 + SIN(RADIANS(60)) * 2.0,
-    COS(RADIANS(60)) * 0.5
+    (COS(RADIANS(30)) * 2.0 + SIN(RADIANS(30)) * 4.4) * 0.66,
+    COS(RADIANS(30)) * 4.4 + SIN(RADIANS(30)) * 2.0,
+    COS(RADIANS(30)) * 0.5
   );
 
 DROP FUNCTION IF EXISTS estimate_capacity;
