@@ -2,12 +2,10 @@ require('init')
 require('DefaultId')
 require('Metadata')
 require('RoadClassificationRoadValue')
-require('road_name')
 require('road_width')
 require('Log')
 local parse_length = require('parse_length')
-require('result_tags_value_helpers')
-local this_or_that = require('this_or_that')
+local THIS_OR_THAT = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local sanitize_cleaner = require('sanitize_cleaner')
@@ -51,63 +49,68 @@ function result_tags_parkings(object)
     capacity_confidence = 'high'
   end
 
-  local result_tags_surface = this_or_that(
-    'surface',
+  local result_tags_surface = THIS_OR_THAT.value_confidence_source(
     {
-      value = SANITIZE_TAGS.surface(object.tags),
-      confidence = 'high',
-      source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
+      surface = SANITIZE_TAGS.surface(object.tags),
+      surface_confidence = 'high',
+      surface_source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
     },
     {
-      value = SANITIZE_TAGS.surface(object._parent_tags),
-      confidence = 'medium',
-      source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
+      surface = SANITIZE_TAGS.surface(object._parent_tags),
+      surface_confidence = 'medium',
+      surface_source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
     }
   )
 
   -- Classify parking conditions into merged categories
   local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags)
 
-  -- CRITICAL: This tags list must be kept in sync with processing/topics/parking/4_merge_parkings.sql (all tags used for clustering)
-  -- 1. Add to this explicit list below
-  -- 2. Add to the SQL clustering columns and jsonb_build_object
+  -- CRITICAL: Keep these lists in sync:
+  -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
+  -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+  -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
   local result_tags = {
     side = object.tags.side, -- see transform_parkings()
+    source = 'parent_highway',
 
     -- Road properties
     road = RoadClassificationRoadValue(object._parent_tags),
-    road_name = SANITIZE_TAGS.safe_string(road_name(object.tags)),
+    road_name = THIS_OR_THAT.value(SANITIZE_TAGS.road_name(object.tags), SANITIZE_TAGS.road_name(object._parent_tags)),
     road_width = width,
     road_width_confidence = width_confidence,
     road_width_source = width_source,
     road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
-    operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
+    operator_type = THIS_OR_THAT.value(SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']), SANITIZE_PARKING_TAGS.operator_type(object._parent_tags['operator:type'])),
+    mapillary = object.tags.mapillary or object._parent_tags.mapillary,
 
-    -- Parking properties
-    parking = parking_value(object),
-    orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
+    -- Capacity & Area
     capacity = capacity,
     capacity_source = capacity_source,
     capacity_confidence = capacity_confidence,
-    markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
-    reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
-    covered = SANITIZE_PARKING_TAGS.covered(object.tags.covered),
-    direction = SANITIZE_PARKING_TAGS.direction(SANITIZE_TAGS.safe_string(object.tags.direction)),
-    staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
-    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
-    -- maxstay = SANITIZE_PARKING_TAGS.maxstay(SANITIZE_TAGS.safe_string(object.tags.maxstay)),
-    informal = SANITIZE_PARKING_TAGS.informal(object.tags.informal),
-    location = SANITIZE_PARKING_TAGS.location(SANITIZE_TAGS.safe_string(object.tags.location)),
+    area = nil,
+    area_confidence = nil,
+    area_source = nil,
 
-    -- Surface (from helper)
-    surface = result_tags_surface and result_tags_surface.value,
-    surface_confidence = result_tags_surface and result_tags_surface.confidence,
-    surface_source = result_tags_surface and result_tags_surface.source,
-
-    -- Conditional categories (from helper)
+    -- Parking properties
     condition_category = conditional_categories.condition_category,
     condition_vehicles = conditional_categories.condition_vehicles,
-    mapillary = object.tags.mapillary or object._parent_tags.mapillary,
+    covered = SANITIZE_PARKING_TAGS.covered(object.tags.covered),
+    direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
+    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
+    informal = SANITIZE_PARKING_TAGS.informal(object.tags.informal),
+    location = SANITIZE_PARKING_TAGS.location(object.tags.location),
+    markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
+    orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
+    parking = SANITIZE_PARKING_TAGS.parking_extended(object.tags.parking, object._parent_tags.dual_carriageway),
+    reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
+    staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
+    traffic_sign = SANITIZE_TAGS.traffic_sign(object.tags.traffic_sign),
+    zone = SANITIZE_TAGS.safe_string(object.tags.zone),
+
+    -- Surface
+    surface = result_tags_surface.value,
+    surface_confidence = result_tags_surface.confidence,
+    surface_source = result_tags_surface.source,
   }
 
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)

@@ -13,7 +13,7 @@ osm2pgsql.define_table({
 })
 
 osm2pgsql.define_table({
-  name = 'parkings_no22',
+  name = 'parkings_no',
   columns = {
     { column = 'id',   type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },

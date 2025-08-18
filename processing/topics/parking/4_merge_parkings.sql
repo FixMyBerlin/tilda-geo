@@ -1,12 +1,5 @@
 DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
 
--- Merge lines that have the same (explisitldy defined) properties.
--- ==========
---
--- CRITICAL: This SQL file must be kept in sync with processing/topics/parking/parkings/helper/result_tags_parkings.lua (all tags in explicit list)
---
--- When adding new tags in lua, make sure to also add them in the query below to `jsonb_build_object()`
---
 -- 1. Create a TEMP table and  that we use for clustering
 -- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
 -- The temp table is dropped automatically once our db connection is closed.
@@ -16,9 +9,15 @@ SELECT
   geom,
   (tags ->> 'capacity')::NUMERIC AS capacity,
   jsonb_build_object(
+    -- CRITICAL: Keep these lists in sync:
+    -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
+    -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+    -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
     /* sql-formatter-disable */
     'side', side,
     'source', source,
+    --
+    -- Road properties
     'road', tags ->> 'road',
     'road_name', COALESCE(tags ->> 'road_name', street_name),
     'road_width', tags ->> 'road_width',
@@ -26,26 +25,36 @@ SELECT
     'road_width_source', tags ->> 'road_width_source',
     'road_oneway', tags ->> 'road_oneway',
     'operator_type', tags ->> 'operator_type',
-    'parking', tags ->> 'parking',
-    'orientation', tags ->> 'orientation',
+    'mapillary', tags ->> 'mapillary',
+    --
+    -- Capacity & Area
+    -- capacity - separate column
     'capacity_source', tags ->> 'capacity_source',
     'capacity_confidence', tags ->> 'capacity_confidence',
-    'markings', tags ->> 'markings',
-    'direction', tags ->> 'direction',
-    'reason', tags ->> 'reason',
-    'covered', tags ->> 'covered',
-    'staggered', tags ->> 'staggered',
-    'zone', tags ->> 'zone',
-    'fee', tags ->> 'fee',
-    -- 'maxstay', tags ->> 'maxstay',
-    'informal', tags ->> 'informal',
-    'location', tags ->> 'location',
-    'surface', tags ->> 'surface',
-    'surface_confidence', tags ->> 'surface_confidence',
-    'surface_source', tags ->> 'surface_source',
+    -- 'area', tags ->> 'area',
+    -- 'area_confidence', tags ->> 'area_confidence',
+    -- 'area_source', tags ->> 'area_source',
+    --
+    -- Parking properties
     'condition_category', tags ->> 'condition_category',
     'condition_vehicles', tags ->> 'condition_vehicles',
-    'mapillary', tags ->> 'mapillary'
+    'covered', tags ->> 'covered',
+    'direction', tags ->> 'direction',
+    'fee', tags ->> 'fee',
+    'informal', tags ->> 'informal',
+    'location', tags ->> 'location',
+    'markings', tags ->> 'markings',
+    'orientation', tags ->> 'orientation',
+    'parking', tags ->> 'parking',
+    'reason', tags ->> 'reason',
+    'staggered', tags ->> 'staggered',
+    'traffic_sign', tags ->> 'traffic_sign',
+    'zone', tags ->> 'zone',
+    --
+    -- Surface
+    'surface', tags ->> 'surface',
+    'surface_confidence', tags ->> 'surface_confidence',
+    'surface_source', tags ->> 'surface_source'
     /* sql-formatter-enable*/
   ) as tags,
   0 as cluster_id INTO TEMP cluster_candidates

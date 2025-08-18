@@ -5,6 +5,18 @@ local SANITIZE_PARKING_TAGS = {
   parking = function(value)
     return sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
   end,
+  -- `parking` is our main tag.
+  -- for is_driveway this is alway some precise value (because everything else is excluded)
+  -- for is_road this with either 'missing' or some precise value.
+  -- except for dual_carriageway|s when we fall back to 'not_expected' instead of 'missing'
+  parking_extended = function(value, dual_carriageway)
+    local result = sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
+    if dual_carriageway and dual_carriageway == 'yes' then
+      result = result or 'not_expected'
+    end
+    result = result or 'missing'
+    return result
+  end,
   location = function (value)
     return sanitize_for_logging(value, { 'median' })
   end,

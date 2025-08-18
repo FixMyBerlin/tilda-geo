@@ -25,7 +25,7 @@ local function parking_separate_parking_areas(object)
 
   local result = categorize_separate_parking(object, separate_parking_area_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags_separate_parking(result, area_sqm(result.object))
+    local row_data, replaced_tags = result_tags_separate_parking(result.category, result.object, area_sqm(result.object))
     local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_areas')

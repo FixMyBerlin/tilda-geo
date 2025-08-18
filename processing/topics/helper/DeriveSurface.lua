@@ -1,3 +1,4 @@
+require('init')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_VALUES = require('sanitize_values')
 

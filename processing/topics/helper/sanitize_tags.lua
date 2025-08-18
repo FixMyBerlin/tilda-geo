@@ -2,14 +2,15 @@ require('init')
 require('SanitizeTrafficSign')
 local sanitize_for_logging = require('sanitize_for_logging')
 local parse_length = require('parse_length')
+local sanitize_string = require('sanitize_string')
 
 local SANITIZE_TAGS = {
-  -- Generic string sanitizer to remove potentially harmful characters
-  -- Allows: A-Z, a-z, 0-9, space, minus, underscore, and common German characters (Ä, Ö, Ü, ä, ö, ü, ß), `;`, `,`, [], (), @
   safe_string = function (value)
-    if value == nil then return nil end
-    if type(value) ~= 'string' then return value end
-    return (value:gsub('[^%w %-%_ÄÖÜäöüß;,:()%[%]@]', ''))
+    return sanitize_string(value)
+  end,
+  road_name = function (tags)
+    local name = tags.name or tags.ref or tags['is_sidepath:of:name'] or tags['street:name']
+    return sanitize_string(name)
   end,
   oneway_road = function (tags)
     if tags.oneway == 'yes' and tags.dual_carriageway == 'yes' then
