@@ -56,17 +56,18 @@ const TagsTableRowMaybeList = ({ sourceId, tagKey, tagValue }: TagsTableRowProps
   if (!tagValue) return null
   // List of tags that should never be considered lists
   const disallowList = ['description', 'note']
-  if (disallowList.includes(tagKey)) {
+  if (disallowList.includes(tagKey) || typeof tagValue !== 'string') {
     return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
   }
 
+  console.log('tagValue', tagValue)
   const listValues = tagValue.split(';').map((e) => e.trim())
-  if (!listValues.length) {
+  if (listValues.length === 1) {
     return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
   }
 
   return (
-    <ul>
+    <ul className="list-disc pl-4">
       {listValues.map((value) => {
         return (
           <li key={value}>
