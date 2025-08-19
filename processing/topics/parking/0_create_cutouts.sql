@@ -204,6 +204,9 @@ CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'str
 
 CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
 
+-- Discard cutouts of bus stops (Bushaltestelle) and turning circles (Kreisverkehr) where explicit no parking is tagged.
+-- In those cases, the explicit rules overwrite our coutouts.
+-- We store the removed cutouts separately for debugging but do not show them in the final parking_cutouts table.
 -- get all ids for cutouts that need to be discarded
 SELECT
   c.* INTO _parking_discarded_cutouts
