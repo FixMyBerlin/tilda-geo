@@ -41,6 +41,7 @@ async function main() {
     await updateCache()
 
     // Frontend: Trigger QA evaluation updates for all regions
+    console.log('Finishing up: Trigger qa update')
     await triggerPrivateApi('post-processing-qa-update')
 
     logTileInfo()
