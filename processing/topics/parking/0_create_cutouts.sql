@@ -75,13 +75,13 @@ SELECT
     (tags ->> 'buffer_radius')::float,
     'endcap=flat'
   ),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
     'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_crossings;
@@ -93,13 +93,13 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_points',
     'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_points_projected;
@@ -111,12 +111,12 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_areas'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_areas_projected;
@@ -128,12 +128,12 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_lines'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_lines_projected;
@@ -145,12 +145,12 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_areas_projected;
@@ -162,12 +162,12 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'separate_parking_points'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_points_projected;
@@ -186,12 +186,12 @@ SELECT
     ) * 0.9,
     'endcap=flat'
   ),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'parking_roads'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_roads;
