@@ -110,8 +110,8 @@ export async function downloadFile() {
   const downloadMethod = cookieCheck?.isValid ? 'internal (OAuth)' : 'public'
   console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
   try {
-    if (cookieCheck?.isValid && cookieCheck.cookiePath) {
-      await $`wget --quiet --load-cookies ${cookieCheck.cookiePath} --max-redirect 0 --output-document ${filePath} ${params.pbfDownloadUrl}`
+    if (cookieCheck?.isValid && cookieCheck.httpCookie) {
+      await $`wget --quiet --header ${'Cookie: ' + cookieCheck.httpCookie} --max-redirect 0 --output-document ${filePath} ${params.pbfDownloadUrl}`
     } else {
       // Public download
       await $`wget --quiet --output-document ${filePath} ${params.pbfDownloadUrl}`
