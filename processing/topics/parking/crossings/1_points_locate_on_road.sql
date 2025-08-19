@@ -3,11 +3,12 @@ DO $$ BEGIN RAISE NOTICE 'START locating obstacle points on kerb at %', clock_ti
 DROP TABLE IF EXISTS _parking_crossing_points_located;
 
 SELECT
+  p.id || nrm.way_id AS id,
+  p.tags ->> 'side' AS side,
   nrm.idx,
   nrm.way_id,
   p.osm_id,
   p.osm_type,
-  p.id,
   p.tags,
   p.meta,
   p.geom

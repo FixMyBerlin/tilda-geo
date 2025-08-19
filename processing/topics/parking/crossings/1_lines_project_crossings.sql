@@ -1,3 +1,4 @@
+-- we project our generated crossing geometries on to the original crossing lines
 SELECT
   c.id,
   c.osm_id,

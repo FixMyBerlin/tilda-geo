@@ -30,7 +30,7 @@ WHERE
 INSERT INTO
   parkings_cutouts (id, tags, meta, geom, minzoom)
 SELECT
-  ROW_NUMBER() OVER (),
+  id,
   tags,
   meta,
   ST_Transform (geom, 3857),
@@ -53,7 +53,10 @@ WITH
       parkings
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  ROW_NUMBER() OVER (
+    ORDER BY
+      tags
+  ) AS id,
   tags,
   meta,
   ST_Transform (geom, 3857) as geom,
@@ -79,13 +82,25 @@ DROP INDEX IF EXISTS parkings_geom_idx;
 
 CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
 
+DROP INDEX IF EXISTS parkings_id_idx;
+
+CREATE UNIQUE INDEX parkings_id_idx ON parkings (id);
+
 DROP INDEX IF EXISTS parkings_no_geom_idx;
 
 CREATE INDEX parkings_no_geom_idx ON parkings_no USING GIST (geom);
 
+DROP INDEX IF EXISTS parkings_no_id_idx;
+
+CREATE UNIQUE INDEX parkings_no_id_idx ON parkings_no (id);
+
 DROP INDEX IF EXISTS parkings_separate_geom_idx;
 
 CREATE INDEX parkings_separate_geom_idx ON parkings_separate USING GIST (geom);
+
+DROP INDEX IF EXISTS parkings_separate_id_idx;
+
+CREATE UNIQUE INDEX parkings_separate_id_idx ON parkings_separate (id);
 
 ALTER TABLE parkings_quantized
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
@@ -93,3 +108,7 @@ ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
 DROP INDEX IF EXISTS parkings_quantized_geom_idx;
 
 CREATE INDEX parkings_quantized_geom_idx ON parkings_quantized USING GIST (geom);
+
+DROP INDEX IF EXISTS parkings_quantized_id_idx;
+
+CREATE UNIQUE INDEX parkings_quantized_id_idx ON parkings_quantized (id);

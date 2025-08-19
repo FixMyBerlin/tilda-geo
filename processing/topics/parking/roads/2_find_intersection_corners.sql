@@ -5,7 +5,12 @@ DROP TABLE IF EXISTS _parking_intersection_corners;
 -- for each road intersection where the roads incide with an angle smaller than 140 degrees
 -- find the intersection points of the kerbs
 SELECT
-  ROW_NUMBER() OVER () as id,
+  ROW_NUMBER() OVER (
+    ORDER BY
+      i.node_id,
+      corner.kerb1_id,
+      corner.kerb2_id
+  ) as id,
   i.node_id as intersection_id,
   i.road_degree,
   i.driveway_degree,

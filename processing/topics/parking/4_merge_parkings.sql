@@ -74,7 +74,7 @@ WITH
         PARTITION BY
           tags
         ORDER BY
-          osm_id
+          id
       ) AS cluster_id
     FROM
       cluster_candidates
