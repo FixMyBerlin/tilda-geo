@@ -9,7 +9,7 @@ export const mapboxStyleGroupLayers_parking_debug_parking_poly: MapboxStyleLayer
     type: 'fill',
     id: 'parking-poly-area',
     paint: {
-      'fill-color': 'rgba(80, 139, 134, 0.7)',
+      'fill-color': 'hsla(208, 47%, 38%, 0.7)',
     },
   },
   {

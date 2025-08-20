@@ -8,7 +8,7 @@ export const mapboxStyleGroupLayers_parking_parkinglines: MapboxStyleLayer[] = [
     id: 'street parking lines',
     type: 'line',
     paint: {
-      'line-color': 'rgb(22, 163, 74)',
+      'line-color': 'hsl(211, 91%, 39%)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
       'line-opacity': ['match', ['get', 'operator_type'], ['private'], 0.33, 1],
     },
