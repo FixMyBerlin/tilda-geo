@@ -171,6 +171,15 @@ WHERE
       id
   );
 
+SELECT
+  original_ids INTO TEMP failed_merges
+FROM
+  _parking_parkings_merged
+GROUP BY
+  original_ids
+HAVING
+  count(*) > 1;
+
 -- if we still have clusters that failed to merge we remove the capcaity so it will get estimated later on
 UPDATE _parking_parkings_merged
 SET
@@ -180,9 +189,14 @@ WHERE
     SELECT
       original_ids
     FROM
-      _parking_parkings_merged
-    GROUP BY
-      original_ids
-    HAVING
-      count(*) > 1
+      failed_merges
   );
+
+DO $$
+  DECLARE
+    failed_count INTEGER;
+  BEGIN
+    SELECT COUNT(*) INTO failed_count
+    FROM failed_merges;
+    RAISE NOTICE 'Failed to merge % clusters. Their capacity will be estimated.', failed_count;
+  END $$;
