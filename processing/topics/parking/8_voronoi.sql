@@ -1,5 +1,19 @@
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp(); END $$;
 
+DROP TABLE IF EXISTS _parking_parkings_quantized;
+
+SELECT
+  id,
+  tags,
+  meta,
+  ST_Transform (geom, 5243) as geom
+  --
+  INTO _parking_parkings_quantized
+FROM
+  parkings_quantized;
+
+CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized USING GIST (geom);
+
 CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
   id SERIAL PRIMARY KEY,
   geom geometry (POINT, 4326),
@@ -40,7 +54,7 @@ WITH
       COUNT(p.*) AS count_current
     FROM
       public.qa_parkings_euvm v
-      LEFT JOIN parkings_quantized p ON ST_Contains (v.geom, p.geom)
+      LEFT JOIN _parking_parkings_quantized p ON ST_Contains (ST_Transform (v.geom, 5243), p.geom)
       AND (
         p.tags ->> 'operator_type' IS NULL
         OR p.tags ->> 'operator_type' != 'private'
@@ -85,3 +99,5 @@ WHERE
   public.qa_parkings_euvm.id = old.id;
 
 DROP TABLE IF EXISTS public.qa_parkings_euvm_old;
+
+CREATE INDEX qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);
