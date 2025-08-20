@@ -98,7 +98,7 @@ WITH
     SELECT
       tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
       string_agg(
-        id::TEXT,
+        'way/' || id::TEXT,
         '-'
         ORDER BY
           id

@@ -37,6 +37,7 @@ WITH
       COUNT(nrm.way_id) > 1
   )
 SELECT
+  'node/' || i.node_id::TEXT as id,
   i.node_id,
   i.road_degree,
   i.driveway_degree,
