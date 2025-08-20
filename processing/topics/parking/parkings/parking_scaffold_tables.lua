@@ -8,7 +8,7 @@ osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'linestring', projection = 3857 },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
 })
 
@@ -19,7 +19,7 @@ osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'multilinestring', projection = 3857 },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
 })
 
@@ -30,7 +30,7 @@ osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'polygon', projection = 3857 },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
 })
 
@@ -42,7 +42,7 @@ osm2pgsql.define_table({
     { column = 'meta', type = 'jsonb' },
     -- 'geometry' means 'polygon' and 'multipolygon'
     { column = 'geom', type = 'geometry', projection = 3857 },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
 })
 
@@ -54,7 +54,7 @@ osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'point', projection = 3857 },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
 })
 
@@ -66,6 +66,6 @@ osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'point', projection = 3857 },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
 })

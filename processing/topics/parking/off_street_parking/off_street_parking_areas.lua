@@ -13,7 +13,7 @@ local db_table_area = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'polygon' }, -- default projection for vector tiles
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },
@@ -29,7 +29,7 @@ local db_table_label = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'point' }, -- default projection for vector tiles
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },

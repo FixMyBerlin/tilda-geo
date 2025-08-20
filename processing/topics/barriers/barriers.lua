@@ -13,7 +13,7 @@ local lineBarriers = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'linestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },
@@ -29,7 +29,7 @@ local areaBarriers = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'multipolygon' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },
