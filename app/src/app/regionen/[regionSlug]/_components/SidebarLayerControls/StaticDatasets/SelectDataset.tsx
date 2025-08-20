@@ -26,6 +26,7 @@ export const SelectDataset = ({
     licenceOsmCompatible,
     legends,
     isPublic,
+    url,
     githubUrl,
   } = dataset
   const key = createSourceKeyStaticDatasets(id, subId)
@@ -114,7 +115,13 @@ export const SelectDataset = ({
                 title='Öffne den Datensatz im "tilda-static-data" Repository auf GitHub; Link nur in Dev und Staging sichtbar.'
               >
                 Github Statische Daten
-              </LinkExternal>
+              </LinkExternal>{' '}
+              <input
+                type="text"
+                value={url}
+                readOnly
+                className="rounded-xs inline-block w-16 border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+              />
             </p>
           )}
         </div>
