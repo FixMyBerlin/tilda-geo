@@ -1,7 +1,3 @@
-UPDATE _parking_parkings_cutted
-SET
-  geom = ST_SnapToGrid (geom, 0.01);
-
 -- first we delete all parking lots where the length of the geometry is zero.
 DELETE FROM _parking_parkings_cutted
 WHERE

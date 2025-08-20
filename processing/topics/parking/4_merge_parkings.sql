@@ -70,7 +70,7 @@ WITH
   clustered AS (
     SELECT
       id,
-      ST_ClusterDBSCAN (geom, eps := 0.1, minpoints := 1) OVER (
+      ST_ClusterDBSCAN (geom, eps := 0.0, minpoints := 1) OVER (
         PARTITION BY
           tags
         ORDER BY
@@ -97,8 +97,21 @@ WITH
   merged AS (
     SELECT
       tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
-      array_agg(osm_id) AS original_osm_ids,
-      (ST_Dump (ST_LineMerge (ST_Union (geom)))).geom::geometry (LINESTRING) AS geom
+      string_agg(
+        id::TEXT,
+        '-'
+        ORDER BY
+          id
+      ) AS original_ids,
+      string_agg(
+        osm_id::TEXT,
+        '-'
+        ORDER BY
+          osm_id
+      ) AS original_osm_ids,
+      (
+        ST_Dump (ST_LineMerge (ST_Node (ST_Collect (geom))))
+      ).*
     FROM
       cluster_candidates
     GROUP BY
@@ -106,7 +119,70 @@ WITH
       cluster_id
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  md5(ST_AsEWKB (geom)::text) AS id,
   merged.* INTO _parking_parkings_merged
 FROM
   merged;
+
+-- Sometimes ST_LineMerge fails because the geomtries are not perfectly connected in those cases we use the following more aggresive way to merge the geometries
+CREATE INDEX _parking_parkings_merged_id_idx ON _parking_parkings_merged USING BTREE (original_ids);
+
+WITH
+  cutted_geoms AS (
+    SELECT
+      original_ids,
+      (ST_Dump (ST_Node (ST_Union (geom)))).geom AS geom
+    FROM
+      _parking_parkings_merged
+    GROUP BY
+      original_ids
+    HAVING
+      count(*) > 1
+  ),
+  filtered_geoms AS (
+    SELECT
+      original_ids,
+      (ST_Dump (ST_LineMerge (ST_Collect (geom)))).geom AS geom
+    FROM
+      cutted_geoms
+    WHERE
+      ST_Length (geom) > 0.5
+    GROUP BY
+      original_ids
+  )
+UPDATE _parking_parkings_merged pm
+SET
+  geom = fg.geom,
+  id = md5(ST_AsEWKB (fg.geom)::text)
+FROM
+  filtered_geoms fg
+WHERE
+  pm.original_ids = fg.original_ids;
+
+-- now we have the same entry multiple times so we remove duplicates
+DELETE FROM _parking_parkings_merged
+WHERE
+  ctid NOT IN (
+    SELECT
+      min(ctid)
+    FROM
+      _parking_parkings_merged
+    GROUP BY
+      id
+  );
+
+-- if we still have clusters that failed to merge we remove the capcaity so it will get estimated later on
+UPDATE _parking_parkings_merged
+SET
+  tags = tags - 'capacity'
+WHERE
+  original_ids IN (
+    SELECT
+      original_ids
+    FROM
+      _parking_parkings_merged
+    GROUP BY
+      original_ids
+    HAVING
+      count(*) > 1
+  );

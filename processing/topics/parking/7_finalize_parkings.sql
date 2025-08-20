@@ -10,7 +10,9 @@ SELECT
       'area',
       ROUND(NULLIF(tags ->> 'area', '')::numeric, 2),
       'length',
-      ROUND(length::numeric, 2)
+      ROUND(length::numeric, 2),
+      'original_osm_ids',
+      original_osm_ids
     )
   ),
   '{}'::jsonb,
