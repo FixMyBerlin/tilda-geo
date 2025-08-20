@@ -28,7 +28,7 @@ export const Disclosure = ({
     <HeadlessUiDisclosure
       defaultOpen={defaultOpen}
       as="section"
-      className="group overflow-clip rounded-lg border border-gray-300"
+      className="overflow-clip rounded-lg border border-gray-300"
     >
       {({ open }) => (
         <>
