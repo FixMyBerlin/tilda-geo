@@ -200,3 +200,5 @@ DO $$
     FROM failed_merges;
     RAISE NOTICE 'Failed to merge % clusters. Their capacity will be estimated.', failed_count;
   END $$;
+
+CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);

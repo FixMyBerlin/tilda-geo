@@ -49,6 +49,3 @@ SET
 -- MISC
 ALTER TABLE _parking_parkings_merged
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
--- create an index on the merged table
-CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
