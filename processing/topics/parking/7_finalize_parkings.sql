@@ -8,9 +8,11 @@ SELECT
   jsonb_strip_nulls(
     tags || jsonb_build_object(
       'area',
-      ROUND(NULLIF(tags ->> 'area', '')::numeric, 2),
+      ROUND(NULLIF(tags ->> 'area', '')::NUMERIC, 2),
       'length',
-      ROUND(length::numeric, 2),
+      ROUND(length::NUMERIC, 2),
+      'capacity',
+      round_capacity ((tags ->> 'capacity')::NUMERIC),
       'original_osm_ids',
       original_osm_ids
     )
