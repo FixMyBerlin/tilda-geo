@@ -34,6 +34,7 @@ local function result_tags_off_street_parking(result, area)
     id = DefaultId(result.object),
     tags = cleaned_tags,
     meta = result_meta,
+    minzoom = 0,
   }, replaced_tags
 end
 

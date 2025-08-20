@@ -52,11 +52,13 @@ local function off_street_parking_areas(object)
     if row.geom:num_geometries() == 1 then
       db_table_area:insert(row)
 
-      local label_row_tags = {
+      local label_row = {
         id = row_data.id,
-        tags = { capacity = row_data.tags.capacity }
+        tags = { capacity = row_data.tags.capacity },
+        meta = {},
+        geom = row.geom:pole_of_inaccessibility(),
+        minzoom = 0,
       }
-      local label_row = MergeTable({ geom = row.geom:pole_of_inaccessibility() }, label_row_tags)
       db_table_label:insert(label_row)
     else
       LOG_ERROR.RELATION(result.object, row.geom, 'off_street_parking_areas')
