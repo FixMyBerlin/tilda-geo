@@ -4,18 +4,16 @@ DROP TABLE IF EXISTS _parking_obstacle_lines_projected CASCADE;
 
 -- CREATE "lines projected"
 SELECT
-  osm_type,
-  osm_id,
-  id,
-  tags,
-  meta,
-  -- @var "2": Max distance (radius) (Meter) for snapping
-  -- @var "6": Max number of kerbs that gets snapped to
-  (project_to_k_closest_kerbs (geom, 2, 6)).*
-  --
-  INTO _parking_obstacle_lines_projected
+  pol.id || '-' || pk.kerb_id AS id,
+  pol.osm_type,
+  pol.osm_id,
+  pol.id as source_id,
+  pol.tags,
+  pol.meta,
+  pk.* INTO _parking_obstacle_lines_projected
 FROM
-  _parking_obstacle_lines;
+  _parking_obstacle_lines pol
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (pol.geom, 2, 6) AS pk;
 
 DELETE FROM _parking_obstacle_lines_projected
 WHERE

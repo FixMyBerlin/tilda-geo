@@ -4,16 +4,16 @@ DROP TABLE IF EXISTS _parking_obstacle_points_projected CASCADE;
 
 -- INSERT
 SELECT
-  osm_type,
-  osm_id,
-  id,
-  tags,
-  meta,
-  (project_to_k_closest_kerbs (geom, 5, 1)).*
-  -- TODO: the tollerance here is too large, we need to decrease it once we have better offset values for the kerbs
-  INTO _parking_obstacle_points_projected
+  p.id || '-' || pk.kerb_id AS id,
+  p.osm_type,
+  p.osm_id,
+  p.id as source_id,
+  p.tags,
+  p.meta,
+  pk.* INTO _parking_obstacle_points_projected
 FROM
-  _parking_obstacle_points;
+  _parking_obstacle_points p
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (p.geom, 5, 1) AS pk;
 
 -- CLEANUP
 DELETE FROM _parking_obstacle_points_projected

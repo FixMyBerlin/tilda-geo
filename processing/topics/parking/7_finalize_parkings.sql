@@ -106,6 +106,17 @@ DROP INDEX IF EXISTS parkings_separate_id_idx;
 
 CREATE UNIQUE INDEX parkings_separate_id_idx ON parkings_separate (id);
 
+ALTER TABLE parkings_cutouts
+ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
+
+DROP INDEX IF EXISTS parkings_cutouts_geom_idx;
+
+CREATE INDEX parkings_cutouts_geom_idx ON parkings_cutouts USING GIST (geom);
+
+DROP INDEX IF EXISTS parkings_cutouts_id_idx;
+
+CREATE UNIQUE INDEX parkings_cutouts_id_idx ON parkings_cutouts (id);
+
 ALTER TABLE parkings_quantized
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
 
