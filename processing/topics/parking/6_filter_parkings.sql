@@ -83,3 +83,10 @@ WHERE
     FROM
       capacity_too_low
   );
+
+UPDATE parkings_no
+SET
+  tags = tags || jsonb_build_object(
+    'capacity',
+    ROUND((tags ->> 'capacity')::NUMERIC, 3)
+  );
