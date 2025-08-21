@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_area_labels: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_area_labels: MapboxStyleLayer[] = [
   {
     layout: {
       'text-field': ['to-string', ['get', 'capacity']],

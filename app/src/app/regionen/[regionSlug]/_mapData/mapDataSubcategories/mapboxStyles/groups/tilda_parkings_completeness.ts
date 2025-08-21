@@ -5,41 +5,38 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_tilda_parkings_completeness: MapboxStyleLayer[] = [
   {
-    id: 'capacity_status-segment_too_small',
+    id: 'missing-or-not-expected',
     type: 'line',
+    paint: {
+      'line-color': [
+        'match',
+        ['get', 'parking'],
+        ['missing'],
+        'rgb(187, 17, 133)',
+        ['not_expected'],
+        'rgb(116, 88, 107)',
+        'rgb(0, 0, 0)',
+      ],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
+      'line-opacity': [
+        'match',
+        ['get', 'highway'],
+        ['secondary', 'construction', 'pedestrian'],
+        0.25,
+        1,
+      ],
+    },
     filter: [
       'all',
-      ['match', ['get', 'parking'], ['no'], true, false],
-      ['match', ['get', 'capacity'], ['0'], true, false],
+      ['match', ['get', 'parking'], ['missing', 'not_expected'], true, false],
+      ['match', ['get', 'reason'], ['capacity_below_zero'], false, true],
     ],
-    paint: {
-      'line-color': 'rgb(99, 53, 50)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
-      'line-dasharray': [0.5, 0.5],
-      'line-opacity': [
-        'match',
-        ['get', 'highway'],
-        ['secondary', 'construction', 'pedestrian'],
-        0.25,
-        1,
-      ],
-    },
   },
   {
-    id: 'capacity_status-no_parking',
+    id: 'too-small',
     type: 'line',
-    filter: ['match', ['get', 'parking'], ['no'], true, false],
     paint: {
-      'line-color': 'hsl(273, 78%, 37%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
-    },
-  },
-  {
-    id: 'capacity_status-data_missing',
-    type: 'line',
-    filter: ['match', ['get', 'parking'], ['missing'], true, false],
-    paint: {
-      'line-color': 'rgb(187, 17, 133)',
+      'line-color': 'rgb(182, 164, 164)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
       'line-opacity': [
         'match',
@@ -49,5 +46,6 @@ export const mapboxStyleGroupLayers_tilda_parkings_completeness: MapboxStyleLaye
         1,
       ],
     },
+    filter: ['match', ['get', 'reason'], ['capacity_below_zero'], true, false],
   },
 ]

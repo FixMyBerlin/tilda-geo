@@ -26,7 +26,7 @@ local function result_tags_separate_parking(category, object, area)
   -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
   local merge_tags = {
     side = nil,
-    source = object.type == 'node' and 'separate_parking_node' or 'separate_parking_area',
+    source = object.type == 'node' and 'separate_parking_points' or 'separate_parking_areas',
 
     -- Road properties
     road = nil,

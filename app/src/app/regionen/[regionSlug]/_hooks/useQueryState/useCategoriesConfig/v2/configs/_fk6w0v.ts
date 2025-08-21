@@ -218,13 +218,6 @@ export const _fk6w0v: MapDataCategoryParam[] = [
         ],
       },
       {
-        id: 'parkingTildaSeparate',
-        styles: [
-          { id: 'hidden', active: false },
-          { id: 'default', active: true },
-        ],
-      },
-      {
         id: 'parkingTildaNo',
         styles: [
           { id: 'hidden', active: true },

@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_cutouts: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_cutouts: MapboxStyleLayer[] = [
   {
     id: 'cutout-base',
     type: 'fill',

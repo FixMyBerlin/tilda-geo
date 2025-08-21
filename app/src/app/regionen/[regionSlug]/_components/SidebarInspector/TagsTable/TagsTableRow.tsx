@@ -1,3 +1,4 @@
+import { isDev } from '@/src/app/_components/utils/isEnv'
 import React from 'react'
 import { twJoin } from 'tailwind-merge'
 import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
@@ -25,7 +26,7 @@ export const TagsTableRow = ({ sourceId, tagKey, tagValue, children }: TagsTable
   const isSecodaryRow = secondaryRowPrefixes.some((e) => tagKey.startsWith(e))
 
   return (
-    <tr className="group">
+    <tr className="group" title={isDev ? `${sourceId}--${tagKey}=${tagValue}` : undefined}>
       <td
         className={twJoin(
           'w-2/5 py-2 pl-4 pr-3 text-sm font-medium',

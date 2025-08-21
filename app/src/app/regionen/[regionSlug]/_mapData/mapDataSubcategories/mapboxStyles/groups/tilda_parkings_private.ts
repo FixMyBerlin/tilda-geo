@@ -3,17 +3,17 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_private: MapboxStyleLayer[] = [
   {
-    id: 'street parking lines',
+    id: 'street parking lines private',
     type: 'line',
     filter: [
       'all',
       ['has', 'capacity'],
-      ['match', ['get', 'operator_type'], ['private'], false, true],
+      ['match', ['get', 'operator_type'], ['private'], true, false],
     ],
     paint: {
-      'line-color': 'rgb(22, 163, 74)',
+      'line-color': 'rgb(91, 230, 144)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
       'line-opacity': ['match', ['get', 'operator_type'], ['private'], 0.33, 1],
     },

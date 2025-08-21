@@ -8,6 +8,7 @@ export type Props = {
   source: SourcesId
   sourceLayer: string
   idPrefix?: string
+  interactive?: false
   additionalFilter?:
     | ['match', ['get', string], string[], boolean, boolean]
     | ['has', string]
@@ -20,6 +21,7 @@ export const mapboxStyleLayers = ({
   source,
   sourceLayer,
   idPrefix,
+  interactive,
   additionalFilter,
 }: Props) => {
   return layers.map((layer) => {
@@ -28,6 +30,7 @@ export const mapboxStyleLayers = ({
       source,
       'source-layer': sourceLayer,
       id: [idPrefix, layer.id].filter(Boolean).join('--'),
+      interactive,
       filter: additionalFilter
         ? wrapFilterWithAll(flattenFilterArrays(layer.filter, additionalFilter))
         : layer.filter,

@@ -126,7 +126,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'atlas_roadsPathClasses--road': 'highway',
     'atlas_bikelanesPresence--road': 'highway',
     'atlas_bikeSuitability--road': 'highway',
-    'atlas_parking--road': 'highway',
+    'tilda_parkings--road': 'highway',
   }
   const lookThereForKeyEntry = Object.keys(lookThereForKey).find(
     (k) => k === `${sourceId}--${tagKey}`,
@@ -153,6 +153,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'width_source',
     'length',
     'lifecycle',
+    'parking',
   ]
   if (!translations[translationKey] && nonCategorizedTagKeys.includes(tagKey)) {
     translationKey = `ALL--${tagKey}=${tagValue}`

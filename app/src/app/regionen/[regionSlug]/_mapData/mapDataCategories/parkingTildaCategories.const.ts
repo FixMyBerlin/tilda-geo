@@ -1,8 +1,10 @@
-import { subcat_parkingTilda } from '../mapDataSubcategories/subcat_parkingTilda.const'
-import { subcat_parkingTildaCutouts } from '../mapDataSubcategories/subcat_parkingTildaCutouts.const'
-import { subcat_parkingTildaNo } from '../mapDataSubcategories/subcat_parkingTildaNo.const'
-import { subcat_parkingTildaQuantized } from '../mapDataSubcategories/subcat_parkingTildaQuantized.const'
-import { subcat_parkingTildaSeparate } from '../mapDataSubcategories/subcat_parkingTildaSeparate.const'
+import { subcat_parkingTilda_completeness } from '../mapDataSubcategories/subcat_parkingTilda_completeness.const'
+import { subcat_parkingTilda_cutout } from '../mapDataSubcategories/subcat_parkingTilda_cutout.const'
+import { subcat_parkingTilda_line } from '../mapDataSubcategories/subcat_parkingTilda_line.const'
+import { subcat_parkingTilda_no } from '../mapDataSubcategories/subcat_parkingTilda_no.const'
+import { subcat_parkingTilda_off_street } from '../mapDataSubcategories/subcat_parkingTilda_off_street'
+import { subcat_parkingTilda_private } from '../mapDataSubcategories/subcat_parkingTilda_private.const'
+import { subcat_parkingTilda_quantized } from '../mapDataSubcategories/subcat_parkingTilda_quantized.const'
 import { StaticMapDataCategory } from '../types'
 
 export const parkingTildaCategories: StaticMapDataCategory[] = [
@@ -11,11 +13,13 @@ export const parkingTildaCategories: StaticMapDataCategory[] = [
     name: 'Parkraum',
     desc: 'TILDA Parkraum Prozessierung',
     subcategories: [
-      { ...subcat_parkingTilda, defaultStyle: 'default' },
-      { ...subcat_parkingTildaCutouts, defaultStyle: 'hidden' },
-      { ...subcat_parkingTildaQuantized, defaultStyle: 'hidden' },
-      { ...subcat_parkingTildaSeparate, defaultStyle: 'default' },
-      { ...subcat_parkingTildaNo, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_line, defaultStyle: 'default' },
+      { ...subcat_parkingTilda_private, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_off_street, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_no, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_cutout, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_completeness, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_quantized, defaultStyle: 'hidden' },
     ],
   },
 ]

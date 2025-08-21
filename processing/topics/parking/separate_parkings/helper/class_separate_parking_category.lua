@@ -2,6 +2,8 @@ require('init')
 require("Log")
 local capacity_from_tag = require('capacity_from_tag')
 local round = require('round')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local SANITIZE_VALUES = require('sanitize_values')
 
 ---@meta
 ---@class SeparateParkingCategory
@@ -81,6 +83,9 @@ end
 ---@param area number|nil
 ---@return table<{ area: number, capacity: number, capacity_confidence: "high"|"medium"|"low", capacity_source: string }>
 function class_separate_parking_category:get_capacity(type, tags, area)
+  local sanitized_orientation = SANITIZE_PARKING_TAGS.orientation(tags.orientation)
+  if sanitized_orientation == SANITIZE_VALUES.disallowed then sanitized_orientation = nil end
+
   -- For areas, we expect to have a `area` value passed in.
   -- Based on that we either either return confidenc=high from tags.capacity
   -- or confidence=medium from area.
@@ -92,9 +97,9 @@ function class_separate_parking_category:get_capacity(type, tags, area)
 
     return {
       area = round(area, 2),
-      capacity = normalize_capacity(capacity_from_area(area, tags.orientation)),
-      capacity_confidence = tags.orientation and 'medium' or 'low',
-      capacity_source = 'area_and_orientation_' .. (tags.orientation or 'parallel'),
+      capacity = normalize_capacity(capacity_from_area(area, sanitized_orientation)),
+      capacity_confidence = sanitized_orientation and 'medium' or 'low',
+      capacity_source = 'area_and_orientation_' .. (sanitized_orientation or 'fallback_parallel'),
     }
   end
 
@@ -103,7 +108,7 @@ function class_separate_parking_category:get_capacity(type, tags, area)
   -- or confidence=medium from area.
   if type == 'node' then
     if area then error ('class_separate_parking_category:get_capacity does not expect area=<Number> value for point data.') end
-    local car_space_x, car_space_y, padding = compute_area_to_capacity_constants(tags.orientation)
+    local car_space_x, car_space_y, padding = compute_area_to_capacity_constants(sanitized_orientation)
     local denom = (car_space_y + 0.25) * (car_space_x + padding)
     area = (tags.capacity or 1) * denom
 

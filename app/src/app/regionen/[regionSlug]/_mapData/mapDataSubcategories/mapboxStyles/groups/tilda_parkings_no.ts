@@ -3,13 +3,12 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_missing: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_tilda_parkings_no: MapboxStyleLayer[] = [
   {
-    id: 'not expected',
+    id: 'no',
     type: 'line',
-    filter: ['match', ['get', 'parking'], ['missing'], true, false],
     paint: {
-      'line-color': 'rgb(187, 17, 133)',
+      'line-color': 'rgb(0, 0, 0)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
       'line-opacity': [
         'match',
@@ -19,5 +18,10 @@ export const mapboxStyleGroupLayers_tilda_parkings_missing: MapboxStyleLayer[] =
         1,
       ],
     },
+    filter: [
+      'all',
+      ['match', ['get', 'reason'], ['capacity_below_zero'], false, true],
+      ['match', ['get', 'parking'], ['no'], true, false],
+    ],
   },
 ]
