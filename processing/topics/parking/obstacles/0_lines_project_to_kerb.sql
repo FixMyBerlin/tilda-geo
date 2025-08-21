@@ -13,7 +13,7 @@ SELECT
   pk.* INTO _parking_obstacle_lines_projected
 FROM
   _parking_obstacle_lines pol
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (pol.geom, 2, 6) AS pk;
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (pol.geom, tolerance := 2, k := 6) AS pk;
 
 DELETE FROM _parking_obstacle_lines_projected
 WHERE

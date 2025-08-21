@@ -10,7 +10,7 @@ SELECT
   INTO _parking_driveway_corner_kerbs
 FROM
   _parking_intersection_corners c
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (ST_Buffer (c.geom, 4), 0, 4) AS pk
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (ST_Buffer (c.geom, 4), tolerance := 0, k := 4) AS pk
 WHERE
   c.has_driveway
   AND c.has_road

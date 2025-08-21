@@ -14,7 +14,7 @@ SELECT
   pk.* INTO _parking_separate_parking_areas_projected
 FROM
   _parking_separate_parking_areas a
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (a.geom, 3, 6) AS pk;
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (a.geom, tolerance := 3, k := 6) AS pk;
 
 DELETE FROM _parking_separate_parking_areas_projected
 WHERE

@@ -30,7 +30,7 @@ FROM
     SELECT
       *
     FROM
-      project_to_k_closest_kerbs (pp.geom, 5, 1)
+      project_to_k_closest_kerbs (pp.geom, tolerance := 5, k := 1)
   ) pk;
 
 -- CLEANUP
@@ -49,7 +49,7 @@ SELECT
   pk.* INTO _parking_separate_parking_points_projected
 FROM
   _parking_separate_parking_points_snapped
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (buffered_geom, 5, 1) pk;
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (buffered_geom, tolerance := 5, k := 1) pk;
 
 DELETE FROM _parking_separate_parking_points_projected
 WHERE

@@ -52,7 +52,7 @@ WITH
     SELECT
       tags || '{"capacity": 1}'::JSONB as tags,
       meta,
-      explode_parkings (geom, (tags ->> 'capacity')::INTEGER) as geom
+      explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
     FROM
       parkings
   )
