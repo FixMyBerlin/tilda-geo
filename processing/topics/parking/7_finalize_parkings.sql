@@ -77,7 +77,7 @@ SELECT
   tags,
   meta,
   ST_Transform (geom, 3857),
-  0
+  17 -- parking_separate is only visible from zoom level 17 (inclusive) onwards
 FROM
   _parking_separate_parking_areas;
 
