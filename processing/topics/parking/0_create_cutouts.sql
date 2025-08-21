@@ -201,6 +201,8 @@ FROM
 
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
+CREATE UNIQUE INDEX parking_cutouts_id_idx ON _parking_cutouts (id);
+
 -- NOTE TODO: Test those new indexes for performance improvements
 -- CREATE INDEX parking_cutouts_geom_highway_busstop_idx ON _parking_cutouts USING GIST (geom) INCLUDE ((tags ->> 'highway'), (tags ->> 'bus_stop'));
 CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));

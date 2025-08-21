@@ -19,7 +19,7 @@ WHERE
 
 DROP INDEX IF EXISTS _parking_driveway_corner_kerbs_id_idx;
 
-CREATE INDEX ON _parking_driveway_corner_kerbs (id);
+CREATE UNIQUE INDEX ON _parking_driveway_corner_kerbs (id);
 
 ALTER TABLE _parking_driveway_corner_kerbs
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);

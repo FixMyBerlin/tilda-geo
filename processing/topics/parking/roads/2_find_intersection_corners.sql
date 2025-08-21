@@ -26,3 +26,7 @@ WHERE
 -- CLEANUP
 ALTER TABLE _parking_intersection_corners
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+DROP INDEX IF EXISTS parking_intersection_corners_id_idx;
+
+CREATE UNIQUE INDEX parking_intersection_corners_id_idx ON _parking_intersection_corners (id);
