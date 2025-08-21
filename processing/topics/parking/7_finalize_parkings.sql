@@ -86,37 +86,33 @@ DROP INDEX IF EXISTS parkings_geom_idx;
 
 CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
 
-DROP INDEX IF EXISTS parkings_id_idx;
-
+-- DROP INDEX IF EXISTS parkings_id_idx;
 CREATE UNIQUE INDEX parkings_id_idx ON parkings (id);
 
 DROP INDEX IF EXISTS parkings_no_geom_idx;
 
 CREATE INDEX parkings_no_geom_idx ON parkings_no USING GIST (geom);
 
-DROP INDEX IF EXISTS parkings_no_id_idx;
-
+-- DROP INDEX IF EXISTS parkings_no_id_idx;
 CREATE UNIQUE INDEX parkings_no_id_idx ON parkings_no (id);
 
 DROP INDEX IF EXISTS parkings_separate_geom_idx;
 
 CREATE INDEX parkings_separate_geom_idx ON parkings_separate USING GIST (geom);
 
-DROP INDEX IF EXISTS parkings_separate_id_idx;
-
+-- DROP INDEX IF EXISTS parkings_separate_id_idx;
 CREATE UNIQUE INDEX parkings_separate_id_idx ON parkings_separate (id);
 
-ALTER TABLE parkings_cutouts
-ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
-
+-- ALTER TABLE parkings_cutouts
+-- ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
 DROP INDEX IF EXISTS parkings_cutouts_geom_idx;
 
 CREATE INDEX parkings_cutouts_geom_idx ON parkings_cutouts USING GIST (geom);
 
-DROP INDEX IF EXISTS parkings_cutouts_id_idx;
-
+-- DROP INDEX IF EXISTS parkings_cutouts_id_idx;
 CREATE UNIQUE INDEX parkings_cutouts_id_idx ON parkings_cutouts (id);
 
+-- NOTE: We should move the table scaffolding to LUA and then we can remove this part here, same as all the other tables
 ALTER TABLE parkings_quantized
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
 
@@ -124,6 +120,5 @@ DROP INDEX IF EXISTS parkings_quantized_geom_idx;
 
 CREATE INDEX parkings_quantized_geom_idx ON parkings_quantized USING GIST (geom);
 
-DROP INDEX IF EXISTS parkings_quantized_id_idx;
-
+-- DROP INDEX IF EXISTS parkings_quantized_id_idx;
 CREATE UNIQUE INDEX parkings_quantized_id_idx ON parkings_quantized (id);
