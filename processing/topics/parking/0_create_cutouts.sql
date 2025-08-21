@@ -216,8 +216,7 @@ FROM
 WHERE
   ST_Intersects (c.geom, p.geom)
   AND (
-    c.tags ->> 'highway' = 'turning_circle'
-    OR c.tags ->> 'highway' = 'bus_stop'
+    c.tags ->> 'category' IN ('turning_circle', 'bus_stop')
   )
   AND p.tags ->> 'parking' = 'no';
 
