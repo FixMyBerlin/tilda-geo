@@ -97,7 +97,8 @@ SELECT
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_points',
-    'radius', (tags ->> 'buffer_radius')::float
+    'radius', (tags ->> 'buffer_radius')::float,
+    'side', kerb_side
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -114,7 +115,8 @@ SELECT
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
-    'source', 'obstacle_areas'
+    'source', 'obstacle_areas',
+    'side', kerb_side
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -131,7 +133,8 @@ SELECT
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
-    'source', 'obstacle_lines'
+    'source', 'obstacle_lines',
+    'side', kerb_side
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')

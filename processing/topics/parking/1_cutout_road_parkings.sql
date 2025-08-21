@@ -31,6 +31,10 @@ FROM
               NOT c.tags ? 'street:name'
               OR c.tags ->> 'street:name' = p.street_name
             )
+            AND (
+              c.tags ->> 'category' <> 'bus_stop'
+              OR c.tags ->> 'side' = p.side
+            )
         )
       ),
       p.geom
