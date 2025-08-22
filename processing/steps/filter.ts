@@ -9,6 +9,7 @@ import {
 } from '../constants/directories.const'
 import type { TopicConfigBbox } from '../constants/topics.const'
 import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
+import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 import { originalFilePath } from './download'
 
@@ -113,6 +114,7 @@ export async function bboxesFilter(
     console.log(
       '⏩ Skipping osmium extract for bboxFilter. The directory that stores the bbox filter geojson did not change.',
       JSON.stringify({ filteredPbfExists, OSMIUM_FILTER_BBOX_FILE, fileChanged }),
+      isDev ? JSON.stringify(mergedBboxPolygonFeatures) : '',
     )
     return
   }
@@ -121,6 +123,7 @@ export async function bboxesFilter(
   console.log(
     'ℹ️ Filtering the OSM file with bboxes...',
     JSON.stringify({ OSMIUM_FILTER_BBOX_FILE, fileChanged }),
+    isDev ? JSON.stringify(mergedBboxPolygonFeatures) : '',
   )
   try {
     await $`osmium extract \
