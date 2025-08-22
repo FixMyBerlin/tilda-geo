@@ -119,45 +119,44 @@ WITH
       cluster_id
   )
 SELECT
-  md5(ST_AsEWKB (geom)::text) AS id,
+  md5(original_ids) AS id,
   merged.* INTO _parking_parkings_merged
 FROM
   merged;
 
 -- Sometimes ST_LineMerge fails because the geomtries are not perfectly connected in those cases we use the following more aggresive way to merge the geometries
-CREATE INDEX _parking_parkings_merged_id_idx ON _parking_parkings_merged USING BTREE (original_ids);
+CREATE INDEX _parking_parkings_merged_id_idx ON _parking_parkings_merged USING BTREE (id);
 
 WITH
   cutted_geoms AS (
     SELECT
-      original_ids,
+      id,
       (ST_Dump (ST_Node (ST_Union (geom)))).geom AS geom
     FROM
       _parking_parkings_merged
     GROUP BY
-      original_ids
+      id
     HAVING
       count(*) > 1
   ),
   filtered_geoms AS (
     SELECT
-      original_ids,
+      id,
       (ST_Dump (ST_LineMerge (ST_Collect (geom)))).geom AS geom
     FROM
       cutted_geoms
     WHERE
       ST_Length (geom) > 0.5
     GROUP BY
-      original_ids
+      id
   )
 UPDATE _parking_parkings_merged pm
 SET
-  geom = fg.geom,
-  id = md5(ST_AsEWKB (fg.geom)::text)
+  geom = fg.geom
 FROM
   filtered_geoms fg
 WHERE
-  pm.original_ids = fg.original_ids;
+  pm.id = fg.id;
 
 -- now we have the same entry multiple times so we remove duplicates
 DELETE FROM _parking_parkings_merged
@@ -172,25 +171,27 @@ WHERE
   );
 
 SELECT
-  original_ids INTO TEMP failed_merges
+  id,
+  ROW_NUMBER() OVER (
+    PARTITION BY
+      id
+  ) AS idx INTO TEMP failed_merges
 FROM
   _parking_parkings_merged
 GROUP BY
-  original_ids
+  id
 HAVING
   count(*) > 1;
 
 -- if we still have clusters that failed to merge we remove the capcaity so it will get estimated later on
 UPDATE _parking_parkings_merged
 SET
-  tags = tags - 'capacity'
+  tags = tags - 'capacity',
+  id = failed_merges.id || idx::TEXT
+FROM
+  failed_merges
 WHERE
-  original_ids IN (
-    SELECT
-      original_ids
-    FROM
-      failed_merges
-  );
+  _parking_parkings_merged.id = failed_merges.id;
 
 DO $$
   DECLARE
