@@ -40,6 +40,7 @@ FROM
           WHERE
             c.geom && p.geom
             AND c.tags ->> 'source' <> 'separate_parking_areas'
+            AND c.tags ->> 'category' <> 'kerb_lowered'
         )
       ),
       p.geom
@@ -86,6 +87,7 @@ FROM
           WHERE
             c.geom && p.geom
             AND c.tags ->> 'source' <> 'separate_parking_points'
+            AND c.tags ->> 'category' <> 'kerb_lowered'
         )
       ),
       p.geom
