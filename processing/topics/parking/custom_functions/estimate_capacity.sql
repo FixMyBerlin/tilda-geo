@@ -78,3 +78,42 @@ BEGIN
   RETURN area;
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
+
+DROP FUNCTION IF EXISTS estimate_capacity_from_area;
+
+CREATE FUNCTION estimate_capacity_from_area (area NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
+DECLARE
+  const RECORD;
+  capacity NUMERIC;
+  car_area NUMERIC;
+  padding_area NUMERIC;
+  effective_orientation TEXT;
+BEGIN
+  effective_orientation := COALESCE(orientation, 'parallel');
+  IF orientation = 'diagonal' THEN
+    effective_orientation := 'perpendicular';
+  END IF;
+
+  -- Fetch constants for the given orientation
+  SELECT
+    padding,
+    car_space_x,
+    car_space_y
+  INTO const
+  FROM
+    _parking_orientation_constants
+  WHERE
+    _parking_orientation_constants.orientation = effective_orientation;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Invalid orientation: "%", must be one of the defined types in parking_orientation_constants', orientation;
+  END IF;
+
+  car_area := const.car_space_x * const.car_space_y;
+  padding_area := const.padding * const.car_space_y;
+
+  capacity := (area + padding_area) / (car_area + padding_area);
+
+  RETURN capacity;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;

@@ -18,7 +18,6 @@ local function result_tags_separate_parking(category, object, area)
     confidence = 'high',
     source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
   }
-  local capacity_tags = category:get_capacity(object.type, object.tags, area)
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
@@ -38,11 +37,8 @@ local function result_tags_separate_parking(category, object, area)
     operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
     mapillary = object.tags.mapillary,
 
-    -- Capacity & Area
-    capacity = capacity_tags.capacity,
-    capacity_confidence = capacity_tags.capacity_confidence,
-    capacity_source = capacity_tags.capacity_source,
-    area = capacity_tags.area,
+    -- Area
+    area = area,
     area_confidence = 'high',
     area_source = 'geometry',
 
@@ -69,9 +65,7 @@ local function result_tags_separate_parking(category, object, area)
   }
 
   -- Tags that are only relevant for separate parking data
-  local result_tags = {
-    buffer_radius = parking_point_radius(object),
-  }
+  local result_tags = {}
 
   MergeTable(result_tags, merge_tags)
 
