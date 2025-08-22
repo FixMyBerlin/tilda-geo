@@ -28,8 +28,22 @@ WITH
           AND is_driveway
         )::INT
       ) AS driveway_degree,
-      MIN(nrm.way_id) AS way_id,
-      MIN(nrm.idx) AS idx
+      (
+        array_agg(
+          nrm.way_id
+          ORDER BY
+            nrm.way_id,
+            nrm.idx
+        )
+      ) [1] AS way_id,
+      (
+        array_agg(
+          nrm.idx
+          ORDER BY
+            nrm.way_id,
+            nrm.idx
+        )
+      ) [1] AS idx
     FROM
       _parking_node_road_mapping nrm
     GROUP BY
