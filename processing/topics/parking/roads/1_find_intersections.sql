@@ -28,7 +28,8 @@ WITH
           AND is_driveway
         )::INT
       ) AS driveway_degree,
-      MIN(nrm.way_id) AS way_id
+      MIN(nrm.way_id) AS way_id,
+      MIN(nrm.idx) AS idx
     FROM
       _parking_node_road_mapping nrm
     GROUP BY
@@ -49,6 +50,7 @@ FROM
   intersections i
   JOIN _parking_node_road_mapping nrm ON i.way_id = nrm.way_id
   AND i.node_id = nrm.node_id
+  AND i.idx = nrm.idx
   JOIN _parking_roads road ON road.osm_id = nrm.way_id
 WHERE
   i.road_degree + i.driveway_degree > 2;

@@ -11,7 +11,7 @@ BEGIN
   RETURN QUERY
   -- get the ways that are connected to the intersection
   WITH intersection_roads AS (
-    SELECT way_id
+    SELECT DISTINCT way_id
     FROM _parking_node_road_mapping
     WHERE node_id = intersection_id
   ),
