@@ -51,7 +51,6 @@
 \i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/1_separate_parking_areas_qa.sql'
-\i '/processing/topics/parking/separate_parkings/2_filter_mismatches.sql'
 
 
 -- HANDLE PARKINGS
