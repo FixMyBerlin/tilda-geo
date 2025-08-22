@@ -9,6 +9,7 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
+    'operator_type', tags ->> 'operator_type',
     'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
@@ -30,6 +31,7 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
+    'operator_type', tags ->> 'operator_type',
     'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
