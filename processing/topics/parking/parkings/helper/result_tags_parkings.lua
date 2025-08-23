@@ -48,16 +48,16 @@ local function result_tags_parkings(object)
     capacity_confidence = 'high'
   end
 
-  local result_tags_surface = THIS_OR_THAT.value_confidence_source('surface',
+  local result_tags_surface = THIS_OR_THAT.value_confidence_source(
     {
-      surface = SANITIZE_TAGS.surface(object.tags),
-      surface_confidence = 'high',
-      surface_source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
+      value = SANITIZE_TAGS.surface(object.tags),
+      confidence = 'high',
+      source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
     },
     {
-      surface = SANITIZE_TAGS.surface(object._parent_tags),
-      surface_confidence = 'medium',
-      surface_source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
+      value = SANITIZE_TAGS.surface(object._parent_tags),
+      confidence = 'medium',
+      source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
     }
   )
 

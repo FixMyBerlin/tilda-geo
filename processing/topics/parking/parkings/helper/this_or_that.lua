@@ -1,30 +1,17 @@
 local SANITIZE_VALUES = require('sanitize_values')
 
----@param check_key string The key to check in both tables
 ---@param this_table table<string, any> The primary table to check first
 ---@param that_table table<string, any> The fallback table to check if primary is invalid
 ---@return table<string, any> The selected table or a nilTable with same keys as this_table
-local function value_confidence_source(check_key, this_table, that_table)
-  if not check_key or type(check_key) ~= 'string' then
-    error("`value_confidence_source` requires a string check_key as first parameter")
-  end
-
-  if not this_table or type(this_table) ~= 'table' then
-    error("`value_confidence_source` requires a valid this_table as second parameter")
-  end
-
-  if not that_table or type(that_table) ~= 'table' then
-    error("`value_confidence_source` requires a valid that_table as third parameter")
-  end
-
-  if this_table[check_key] and
-    this_table[check_key] ~= nil and
-    this_table[check_key] ~= SANITIZE_VALUES.disallowed
+local function value_confidence_source(this_table, that_table)
+  if this_table.value and
+    this_table.value ~= nil and
+    this_table.value ~= SANITIZE_VALUES.disallowed
   then
     return this_table
-  elseif that_table[check_key] and
-    that_table[check_key] ~= nil and
-    that_table[check_key] ~= SANITIZE_VALUES.disallowed
+  elseif that_table.value and
+    that_table.value ~= nil and
+    that_table.value ~= SANITIZE_VALUES.disallowed
   then
     return that_table
   else

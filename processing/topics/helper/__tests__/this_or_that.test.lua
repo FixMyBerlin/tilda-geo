@@ -52,7 +52,7 @@ describe('THIS_OR_THAT', function()
         confidence = 'medium',
         source = 'parent'
       }
-      local result = THIS_OR_THAT.value_confidence_source('value', thisTable, thatTable)
+      local result = THIS_OR_THAT.value_confidence_source(thisTable, thatTable)
       assert.are.same(result, thisTable)
     end)
 
@@ -67,7 +67,7 @@ describe('THIS_OR_THAT', function()
         confidence = 'medium',
         source = 'parent'
       }
-      local result = THIS_OR_THAT.value_confidence_source('value', thisTable, thatTable)
+      local result = THIS_OR_THAT.value_confidence_source(thisTable, thatTable)
       assert.are.same(result, thatTable)
     end)
 
@@ -82,7 +82,7 @@ describe('THIS_OR_THAT', function()
         confidence = 'medium',
         source = 'parent'
       }
-      local result = THIS_OR_THAT.value_confidence_source('value', thisTable, thatTable)
+      local result = THIS_OR_THAT.value_confidence_source(thisTable, thatTable)
       assert.are.same(result, thatTable)
     end)
 
@@ -97,7 +97,7 @@ describe('THIS_OR_THAT', function()
         confidence = 'medium',
         source = 'parent'
       }
-      local result = THIS_OR_THAT.value_confidence_source('value', thisTable, thatTable)
+      local result = THIS_OR_THAT.value_confidence_source(thisTable, thatTable)
       -- In Lua, setting table keys to nil removes them, so we get an empty table
       assert.are.same(result, {})
     end)
@@ -113,7 +113,7 @@ describe('THIS_OR_THAT', function()
         confidence = 'medium',
         source = 'parent'
       }
-      local result = THIS_OR_THAT.value_confidence_source('value', thisTable, thatTable)
+      local result = THIS_OR_THAT.value_confidence_source(thisTable, thatTable)
       -- In Lua, setting table keys to nil removes them, so we get an empty table
       assert.are.same(result, {})
     end)
@@ -129,106 +129,11 @@ describe('THIS_OR_THAT', function()
         confidence = 'medium',
         source = 'parent'
       }
-      local result = THIS_OR_THAT.value_confidence_source('value', thisTable, thatTable)
+      local result = THIS_OR_THAT.value_confidence_source(thisTable, thatTable)
       -- In Lua, setting table keys to nil removes them, so we get an empty table
       assert.are.same(result, {})
     end)
 
-    -- Test case based on the selected code pattern from result_tags_parkings.lua
-    -- Now the function works with any key structure, including 'surface'
-    it('handles surface tags with confidence and source like in result_tags_parkings', function()
-      local thisTable = {
-        surface = 'asphalt',
-        surface_confidence = 'high',
-        surface_source = 'tag'
-      }
-      local thatTable = {
-        surface = 'concrete',
-        surface_confidence = 'medium',
-        surface_source = 'parent_highway_tag'
-      }
-      local result = THIS_OR_THAT.value_confidence_source('surface', thisTable, thatTable)
-      assert.are.same(result, thisTable)
-    end)
 
-    it('works with different key structures', function()
-      local thisTable = {
-        width = '5',
-        width_confidence = 'high',
-        width_source = 'tag'
-      }
-      local thatTable = {
-        width = '3',
-        width_confidence = 'medium',
-        width_source = 'parent'
-      }
-      local result = THIS_OR_THAT.value_confidence_source('width', thisTable, thatTable)
-      assert.are.same(result, thisTable)
-    end)
-
-    it('works with different value types', function()
-      local thisTable = {
-        width = 5,
-        width_confidence = 'high',
-        width_source = 'tag'
-      }
-      local thatTable = {
-        width = 3,
-        width_confidence = 'medium',
-        width_source = 'parent'
-      }
-      local result = THIS_OR_THAT.value_confidence_source('width', thisTable, thatTable)
-      assert.are.same(result, thisTable)
-    end)
-
-    it('handles empty thisTable', function()
-      local thisTable = {}
-      local thatTable = {
-        surface = 'concrete',
-        surface_confidence = 'medium',
-        surface_source = 'parent_highway_tag'
-      }
-      local result = THIS_OR_THAT.value_confidence_source('surface', thisTable, thatTable)
-      -- When thisTable is empty, the key doesn't exist, so it should return thatTable
-      assert.are.same(result, thatTable)
-    end)
-
-    it('handles invalid check_key parameter', function()
-      local thisTable = {
-        value = 'valid_value',
-        confidence = 'high',
-        source = 'tag'
-      }
-      local thatTable = {
-        value = 'fallback_value',
-        confidence = 'medium',
-        source = 'parent'
-      }
-      local success, error = pcall(function()
-        THIS_OR_THAT.value_confidence_source(nil, thisTable, thatTable)
-      end)
-      assert.is_false(success)
-      assert.is_string(error)
-      assert.is_not_nil(string.find(error, "requires a string check_key as first parameter"))
-    end)
-
-    it('handles non-string check_key parameter', function()
-      local thisTable = {
-        value = 'valid_value',
-        confidence = 'high',
-        source = 'tag'
-      }
-      local thatTable = {
-        value = 'fallback_value',
-        confidence = 'medium',
-        source = 'parent'
-      }
-      local success, error = pcall(function()
-        THIS_OR_THAT.value_confidence_source(123, thisTable, thatTable)
-      end)
-      assert.is_false(success)
-      assert.is_string(error)
-      assert.is_not_nil(string.find(error, "requires a string check_key as first parameter"))
-    end)
   end)
 end)
