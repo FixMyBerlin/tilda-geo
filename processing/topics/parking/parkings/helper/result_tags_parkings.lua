@@ -36,8 +36,7 @@ local classify_parking_conditions = require('classify_parking_conditions')
 -- ['restriction:conditional'] = 'loading_only @ (Mo-Fr 08:00-18:00)',
 -- side = 'right'
 
-
-function result_tags_parkings(object)
+local function result_tags_parkings(object)
   local id = DefaultId(object) .. '/' .. object.tags.side
 
   local width, width_confidence, width_source = road_width(object.tags)
@@ -122,3 +121,5 @@ function result_tags_parkings(object)
     meta = Metadata(object),
   }, replaced_tags
 end
+
+return result_tags_parkings

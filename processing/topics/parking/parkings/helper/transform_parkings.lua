@@ -15,7 +15,7 @@ require("unnest_parking_tags")
 --- Transform Centerline data into left|right data
 ---@param object table
 ---@return TransformationResults
-function transform_parkings(object)
+local function transform_parkings(object)
   local result_objects = { left = nil, right = nil}
 
   for _, side in ipairs({ "left", "right" }) do
@@ -37,3 +37,5 @@ function transform_parkings(object)
 
   return result_objects
 end
+
+return transform_parkings
