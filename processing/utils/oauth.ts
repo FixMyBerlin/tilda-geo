@@ -12,86 +12,41 @@ const OAUTH_SETTINGS_FILE = join(OSM_DOWNLOAD_DIR, 'oauth_settings.json')
 
 /**
  * Ensure we have a valid OAuth cookie, getting a new one if needed
- * Returns true if OAuth is ready, false if OAuth is disabled
+ * Returns cookie information if OAuth is ready, null if OAuth is disabled or failed
  * If OAuth fails, falls back to public download by modifying params
  */
 export async function ensureOAuthReady() {
-  if ((await hasValidOAuthCookie()).isValid) {
-    console.log('Geofabrik OAuth: OAuth is ready with existing cookie')
-    return true
+  // If no credentials, fall back immediately
+  if (!(params.osmUsername && params.osmPassword)) {
+    console.log('Geofabrik OAuth: ⏩ OAuth disabled (no credentials); using public data')
+    fallbackToPublicDownload()
+    return null
   }
 
+  // Always create a fresh cookie and use it directly
   await createOAuthCookie()
-  if ((await hasValidOAuthCookie()).isValid) {
+  // Retrieve cookie written by the Python client
+  const { httpCookie } = await getCookieFile()
+  if (httpCookie) {
     console.log('Geofabrik OAuth: OAuth is ready with fresh cookie')
-    return true
+    return {
+      isValid: true,
+      httpCookie,
+    } as const
   }
 
   console.log(
     chalk.red('Geofabrik OAuth: OAuth initialization failed; falling back to public data'),
   )
-  params.pbfDownloadUrl = params.pbfDownloadUrl
-    .replaceAll('osm-internal.download.geofabrik.de', 'download.geofabrik.de')
-    .replaceAll('-internal', '')
-  params.osmUsername = undefined
-  params.osmPassword = undefined
-  return false
+  fallbackToPublicDownload()
+  return null
 }
 
 /**
  * Check if we have a valid OAuth cookie and return cookie information
- * Returns { isValid: boolean, cookiePath?: string, cookieContent?: string, httpCookie?: string }
+ * Returns { isValid: boolean, httpCookie?: string }
  */
-export async function hasValidOAuthCookie() {
-  if (!(params.osmUsername && params.osmPassword)) {
-    return { isValid: false } as const
-  }
-
-  try {
-    const cookieContent = await getCookieFile()
-    if (!cookieContent) {
-      console.log('[ERROR] Geofabrik OAuth: getCookieFile failed')
-      return { isValid: false } as const
-    }
-
-    // Parse the Netscape cookie format
-    const httpCookie = parseNetscapeCookie(cookieContent)
-    if (!httpCookie) {
-      console.log('[ERROR] Geofabrik OAuth: parseNetscapeCookie failed')
-      return { isValid: false } as const
-    }
-
-    // Check if cookie is valid using the cookie status API
-    const statusUrl = `${GEOFABRIK_OAUTH_BASE_URL}/cookie_status`
-    const response = await fetch(statusUrl, {
-      headers: {
-        Cookie: httpCookie,
-      },
-    })
-
-    if (response.ok) {
-      const status = await response.json()
-      const isValid = status.cookie_status === 'valid'
-      if (isValid) {
-        console.log('Geofabrik OAuth: Valid cookie present')
-        return {
-          isValid: true,
-          cookiePath: COOKIE_FILE,
-          cookieContent,
-          httpCookie,
-        } as const
-      } else {
-        console.log('[ERROR] Geofabrik OAuth: Cookie validation failed.', JSON.stringify(status))
-      }
-    } else {
-      console.log('[ERROR] Geofabrik OAuth: Cookie status API request failed.', response)
-    }
-    return { isValid: false } as const
-  } catch (error) {
-    console.error('[ERROR] Geofabrik OAuth: Could not verify cookie status:', error)
-    return { isValid: false } as const
-  }
-}
+// Note: Cookie reuse and validation helpers removed. We always create and use a fresh cookie.
 
 /**
  * Create and store OAuth cookie using the Geofabrik client
@@ -101,15 +56,16 @@ async function createOAuthCookie() {
   if (params.osmUsername && params.osmPassword) {
     console.log('Geofabrik OAuth: Create new cookie…')
   } else {
-    console.log('Geofabrik OAuth: ⏩ Skipping cookie creation – usename, passwort missing')
     return
   }
 
   try {
-    // Create settings file
+    // Create settings file to pass to python via `OAUTH_SETTINGS_FILE`
     await createOAuthSettings()
 
     // Run the OAuth client to get the cookie
+    // The Python script writes a Netscape-format cookie file to `COOKIE_FILE`.
+    // We retrieve it immediately afterwards using `getCookieFile()`.
     const result =
       await $`python3 /usr/local/bin/oauth_cookie_client.py -o ${COOKIE_FILE} -s ${OAUTH_SETTINGS_FILE} -f netscape`.quiet()
 
@@ -166,14 +122,28 @@ function parseNetscapeCookie(cookieContent: string) {
 }
 
 /**
- * Get the cookie file if it exists, otherwise return null
+ * Switch to public Geofabrik downloads and disable OAuth credentials
+ */
+function fallbackToPublicDownload() {
+  params.pbfDownloadUrl = params.pbfDownloadUrl
+    .replaceAll('osm-internal.download.geofabrik.de', 'download.geofabrik.de')
+    .replaceAll('-internal', '')
+  params.osmUsername = undefined
+  params.osmPassword = undefined
+}
+
+/**
+ * Read the cookie file generated by the Python client, parse to HTTP header value, then delete the file.
+ * The Python client stores the OAuth cookie in Netscape format; we retrieve it here for immediate use.
  */
 async function getCookieFile() {
   const cookieFile = Bun.file(COOKIE_FILE)
   if (await cookieFile.exists()) {
-    return await cookieFile.text()
+    const cookieContent = await cookieFile.text()
+    const httpCookie = cookieContent ? parseNetscapeCookie(cookieContent) : null
+    return { cookieContent, httpCookie }
   }
-  return null
+  return { cookieContent: null, httpCookie: null }
 }
 
 /**

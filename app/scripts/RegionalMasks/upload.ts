@@ -41,9 +41,6 @@ for (const file of pmtilesFiles) {
       return
     }
     const previewUrl = `https://atlas-tiles.s3.eu-central-1.amazonaws.com/${file}`
-    console.log(
-      chalk.inverse.bold('INFO'),
-      `Test-URL: https://protomaps.github.io/PMTiles/?url=${previewUrl}`,
-    )
+    console.log(chalk.inverse.bold('INFO'), `Test-URL: https://pmtiles.io/?url=${previewUrl}`)
   })
 }

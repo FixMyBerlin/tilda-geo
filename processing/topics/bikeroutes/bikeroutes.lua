@@ -13,7 +13,7 @@ local bikeroutesTable = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'multilinestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },

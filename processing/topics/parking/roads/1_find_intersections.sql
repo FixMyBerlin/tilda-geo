@@ -28,7 +28,22 @@ WITH
           AND is_driveway
         )::INT
       ) AS driveway_degree,
-      MIN(nrm.way_id) AS way_id
+      (
+        array_agg(
+          nrm.way_id
+          ORDER BY
+            nrm.way_id,
+            nrm.idx
+        )
+      ) [1] AS way_id,
+      (
+        array_agg(
+          nrm.idx
+          ORDER BY
+            nrm.way_id,
+            nrm.idx
+        )
+      ) [1] AS idx
     FROM
       _parking_node_road_mapping nrm
     GROUP BY
@@ -37,6 +52,7 @@ WITH
       COUNT(nrm.way_id) > 1
   )
 SELECT
+  'node/' || i.node_id::TEXT as id,
   i.node_id,
   i.road_degree,
   i.driveway_degree,
@@ -48,6 +64,7 @@ FROM
   intersections i
   JOIN _parking_node_road_mapping nrm ON i.way_id = nrm.way_id
   AND i.node_id = nrm.node_id
+  AND i.idx = nrm.idx
   JOIN _parking_roads road ON road.osm_id = nrm.way_id
 WHERE
   i.road_degree + i.driveway_degree > 2;

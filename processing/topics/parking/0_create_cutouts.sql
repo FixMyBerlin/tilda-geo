@@ -75,13 +75,13 @@ SELECT
     (tags ->> 'buffer_radius')::float,
     'endcap=flat'
   ),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
     'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_crossings;
@@ -93,13 +93,14 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_points',
-    'radius', (tags ->> 'buffer_radius')::float
+    'radius', (tags ->> 'buffer_radius')::float,
+    'side', kerb_side
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_points_projected;
@@ -111,12 +112,13 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
-    'source', 'obstacle_areas'
+    'source', 'obstacle_areas',
+    'side', kerb_side
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_areas_projected;
@@ -128,12 +130,13 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
-    'source', 'obstacle_lines'
+    'source', 'obstacle_lines',
+    'side', kerb_side
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_lines_projected;
@@ -145,12 +148,12 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_areas_projected;
@@ -162,12 +165,12 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'separate_parking_points'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_points_projected;
@@ -186,17 +189,19 @@ SELECT
     ) * 0.9,
     'endcap=flat'
   ),
-  jsonb_build_object(
+  tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'parking_roads'
     /* sql-formatter-enable */
-  ) || tags,
+  ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_roads;
 
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
+
+CREATE UNIQUE INDEX parking_cutouts_id_idx ON _parking_cutouts (id);
 
 -- NOTE TODO: Test those new indexes for performance improvements
 -- CREATE INDEX parking_cutouts_geom_highway_busstop_idx ON _parking_cutouts USING GIST (geom) INCLUDE ((tags ->> 'highway'), (tags ->> 'bus_stop'));
@@ -204,6 +209,9 @@ CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'str
 
 CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
 
+-- Discard cutouts of bus stops (Bushaltestelle) and turning circles (Kreisverkehr) where explicit no parking is tagged.
+-- In those cases, the explicit rules overwrite our coutouts.
+-- We store the removed cutouts separately for debugging but do not show them in the final parking_cutouts table.
 -- get all ids for cutouts that need to be discarded
 SELECT
   c.* INTO _parking_discarded_cutouts
@@ -213,8 +221,7 @@ FROM
 WHERE
   ST_Intersects (c.geom, p.geom)
   AND (
-    c.tags ->> 'highway' = 'turning_circle'
-    OR c.tags ->> 'highway' = 'bus_stop'
+    c.tags ->> 'category' IN ('turning_circle', 'bus_stop')
   )
   AND p.tags ->> 'parking' = 'no';
 

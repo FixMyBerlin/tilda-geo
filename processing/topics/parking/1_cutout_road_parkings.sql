@@ -31,18 +31,12 @@ FROM
               NOT c.tags ? 'street:name'
               OR c.tags ->> 'street:name' = p.street_name
             )
+            AND (
+              c.tags ->> 'category' <> 'bus_stop'
+              OR c.tags ->> 'side' = p.side
+            )
         )
       ),
       p.geom
     )
   ) AS d;
-
--- MISC
-ALTER TABLE _parking_parkings_cutted
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-CREATE INDEX parking_parkings_cut_geom_idx ON _parking_parkings_cutted USING GIST (geom);
-
-CREATE INDEX parking_parkings_cut_osm_id_side_idx ON _parking_parkings_cutted (osm_id, side);
-
-CREATE INDEX parking_parkings_cut_street_name_idx ON _parking_parkings_cutted (street_name);

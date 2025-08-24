@@ -3,23 +3,21 @@ require("CopyTags")
 require("DefaultId")
 require("Metadata")
 require("RoadClassificationRoadValue")
-require("road_name")
-local is_driveway = require('is_driveway')
+local is_driveway_helper = require('is_driveway')
 local has_parking = require('has_parking')
+local SANITIZE_TAGS = require('sanitize_tags')
 require("road_width")
 
 function result_tags_roads(object)
   local id = DefaultId(object)
   local width, width_confidence, width_source = road_width(object.tags)
-  local is_driveway = is_driveway(object.tags)
-  local category = "road"
-  if(is_driveway) then category = "driveway" end
+  local is_driveway = is_driveway_helper(object.tags)
 
   local result_tags = {
     highway = object.tags.highway,
     road = RoadClassificationRoadValue(object.tags),
-    name = road_name(object.tags),
-    category = category,
+    name = SANITIZE_TAGS.road_name(object.tags),
+    category = is_driveway and "driveway" or "road",
     is_driveway = is_driveway,
     has_parking = has_parking(object.tags),
     width = width,

@@ -18,6 +18,7 @@ CREATE FUNCTION project_to_k_closest_kerbs (
 DECLARE
   kerb RECORD;
   projected_geom geometry;
+  closest_kerb_side text := NULL;
 BEGIN
   FOR kerb IN
     SELECT  pk.id, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags
@@ -26,14 +27,20 @@ BEGIN
     ORDER BY ST_Distance(input_geom, pk.geom)
     LIMIT k
   LOOP
-    kerb_id := kerb.id;
-    kerb_osm_id := kerb.osm_id; -- Assuming osm_id is the same as id in this context
-    kerb_side := kerb.side;
-    kerb_tags := kerb.tags;
-    kerb_has_parking := kerb.has_parking;
-    kerb_is_driveway := kerb.is_driveway;
-    geom := project_to_line(input_geom, kerb.geom);
-    RETURN NEXT;
+    IF closest_kerb_side IS NULL THEN
+      closest_kerb_side := kerb.side;
+    END IF;
+
+    IF kerb.side = closest_kerb_side THEN
+      kerb_id := kerb.id;
+      kerb_osm_id := kerb.osm_id;
+      kerb_side := kerb.side;
+      kerb_tags := kerb.tags;
+      kerb_has_parking := kerb.has_parking;
+      kerb_is_driveway := kerb.is_driveway;
+      geom := project_to_line(input_geom, kerb.geom);
+      RETURN NEXT;
+    END IF;
   END LOOP;
 
   RETURN;

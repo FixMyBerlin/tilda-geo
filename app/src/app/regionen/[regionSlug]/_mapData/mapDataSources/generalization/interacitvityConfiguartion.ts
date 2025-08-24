@@ -57,18 +57,12 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['category', 'name', 'formalEducation', 'amenity'],
     minzoom: 13,
   },
-  barrierAreas: {
-    stylingKeys: [],
-    minzoom: 9,
-  },
+  barrierAreas: { stylingKeys: [], minzoom: 9 },
   barrierLines: {
     stylingKeys: ['birdge', 'tunnel', 'railway', 'highway'],
     minzoom: 9,
   },
-  bicycleParking_areas: {
-    stylingKeys: [],
-    minzoom: 9,
-  },
+  bicycleParking_areas: { stylingKeys: [], minzoom: 9 },
   bicycleParking_points: {
     stylingKeys: ['covered'],
     minzoom: 9,
@@ -93,36 +87,20 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['category'],
     minzoom: 11,
   },
-  trafficSigns: {
-    stylingKeys: [],
-    minzoom: 0,
-  },
+  trafficSigns: { stylingKeys: [], minzoom: 0 },
   // aggregated_lengths: { // Does not work, see https://github.com/FixMyBerlin/private-issues/issues/2240
   //   stylingKeys: [],
   //   minzoom: 0,
   // },
-  todos_lines: {
-    stylingKeys: [],
-    minzoom: 0,
-  },
-  parkings: {
-    stylingKeys: [],
-    minzoom: 0,
-  },
-  parkings_cutouts: {
-    stylingKeys: [],
-    minzoom: 11,
-  },
-  parkings_quantized: {
-    stylingKeys: [],
-    minzoom: 11,
-  },
-  parkings_separate: {
-    stylingKeys: [],
-    minzoom: 0,
-  },
-  parkings_no: {
-    stylingKeys: [],
-    minzoom: 0,
-  },
+  todos_lines: { stylingKeys: [], minzoom: 0 },
+  parkings: { stylingKeys: [], minzoom: 0 },
+  parkings_labels: { stylingKeys: [], minzoom: 11 },
+  parkings_cutouts: { stylingKeys: [], minzoom: 11 },
+  parkings_quantized: { stylingKeys: [], minzoom: 11 },
+  parkings_separate: { stylingKeys: [], minzoom: 0 },
+  parkings_separate_labels: { stylingKeys: [], minzoom: 0 },
+  parkings_no: { stylingKeys: [], minzoom: 0 },
+  off_street_parking_areas: { stylingKeys: [], minzoom: 0 },
+  off_street_parking_area_labels: { stylingKeys: [], minzoom: 11 },
+  off_street_parking_points: { stylingKeys: [], minzoom: 0 },
 }

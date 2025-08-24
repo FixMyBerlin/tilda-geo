@@ -1,6 +1,6 @@
 describe("`transform_parkings`", function()
   require('init')
-  require("transform_parkings")
+  local transform_parkings = require('transform_parkings')
   require("Log")
   require('osm2pgsql')
 

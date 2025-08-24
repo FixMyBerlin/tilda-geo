@@ -33,10 +33,45 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/0/04/Zusatzzeichen_1022-10_-_Radfahrer_frei%2C_StVO_1992.svg',
   },
+  '1022-11': {
+    title: 'Zusatzzeichen 1022-11: Mofas frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/5/55/Zusatzzeichen_1022-11_-_Mofas_frei_%28600x450%29%2C_StVO_1992.svg',
+  },
+  '244': {
+    title: 'Zeichen 244.1, Fahrradstraße (Beginn)',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/b/bf/Zeichen_244_-_Beginn_der_Fahrradstra%C3%9Fe%2C_StVO_1997.svg',
+  },
   '244.1': {
     title: 'Zeichen 244.1, Fahrradstraße (Beginn)',
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/b/bf/Zeichen_244_-_Beginn_der_Fahrradstra%C3%9Fe%2C_StVO_1997.svg',
+  },
+  '242': {
+    title: 'Zeichen 242.1: Beginn einer Fußgängerzone',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Zeichen_242.1_-_Beginn_einer_Fu%C3%9Fg%C3%A4ngerzone%2C_StVO_2009.svg',
+  },
+  '242.1': {
+    title: 'Zeichen 242.1: Beginn einer Fußgängerzone',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/8/8b/Zeichen_242.1_-_Beginn_einer_Fu%C3%9Fg%C3%A4ngerzone%2C_StVO_2009.svg',
+  },
+  '245': {
+    title: 'Bussonderfahrstreifen',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/0/05/Zeichen_245_-_Bussonderfahrstreifen%2C_StVO_2013.svg',
+  },
+  '1020-10': {
+    title: 'Zusatzschild 1020-11: Schwerbehinderte mit Parkausweis Nr. ... frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d1/Zusatzzeichen_1020-11_-_Schwerbehinderte_mit_Parkausweis_Nr._..._frei%2C_StVO_1992.svg',
+  },
+  '1026-30': {
+    title: 'Zusatzzeichen 1024-30: Taxi frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/4/43/Zusatzzeichen_1026-30_-_Taxi_frei%2C_StVO_1992.svg',
   },
   '1020-30': {
     title: 'Zusatzzeichen 1020-30, Anlieger frei',
@@ -92,16 +127,37 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/a/a5/Zeichen_350.2_-_Ende_des_Radschnellwegs%3B_StVO_2020.svg',
   },
+  '1022-12': {
+    title: 'Krafträder auch mit Beiwagen, Kleinkraft­räder und Mofas frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/e/ec/Zusatzzeichen_1022-12_-_Kraftr%C3%A4der_auch_mit_Beiwagen%2C_Kleinkraftr%C3%A4der_und_Mofas_frei_%28600x450%29%2C_StVO_1992.svg',
+  },
   '1024-14': {
     title: 'Kraftomnibusse frei',
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/9/96/Zusatzzeichen_1024-14_-_Kraftomnibusse_frei%2C_StVO_1992.svg',
+  },
+  '1024-10': {
+    title: 'Personenkraftwagen frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/a/ae/Zusatzzeichen_1024-10_-_Personenkraftwagen_frei%2C_StVO_1992.svg',
   },
   '1026-36': {
     title: 'Landwirtschaftlicher Verkehr frei',
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/4/41/Zusatzzeichen_1026-36_-_Landwirtschaftlicher_Verkehr_frei_%28450x600%29%2C_StVO_1992.svg',
   },
+  '1026-37': {
+    title: 'Forstwirtschaftlicher Verkehr frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d6/Zusatzzeichen_1026-37_-_Forstwirtschaftlicher_Verkehr_frei%2C_StVO_1992.svg',
+  },
+  '1026-38': {
+    title: 'Land- und Forstwirtschaftlicher Verkehr frei',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/6/6b/Zusatzzeichen_1026-38_-_Land-_und_forstwirtschaftlicher_Verkehr_frei_%28450x600%29%2C_StVO_1992.svg',
+  },
+
   // "Kfz frei" hat wohl keine ID https://de.wikipedia.org/wiki/Datei:Zusatzzeichen_KFZ_frei.svg
 }
 

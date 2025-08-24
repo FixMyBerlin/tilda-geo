@@ -1,3 +1,5 @@
+import { getIssues } from '@placemarkio/check-geojson'
+import chalk from 'chalk'
 import path from 'node:path'
 import { import_ } from '../utils/import_'
 import { addUniqueIds } from './addUniqueIds'
@@ -15,8 +17,16 @@ export const transformFile = async (
     outputFilename: datasetFolderName,
     outputFolder,
   })
-
   let data = await Bun.file(filenameToRead).json()
+
+  // INTERMEZZO: Do some checks on the file
+  const issues = getIssues(JSON.stringify(data))
+  if (issues.length > 0) {
+    console.log(chalk.red(`  ERROR checking the GeoJSON file`), {
+      file: filenameToRead,
+      issues,
+    })
+  }
 
   type TransformFunc = (data: any) => string
   const transform = await import_<TransformFunc>(datasetFolderPath, 'transform', 'transform')
@@ -29,6 +39,5 @@ export const transformFile = async (
 
   const outputFullFilename = path.join(outputFolder, `${datasetFolderName}.transformed.geojson`)
   await Bun.write(outputFullFilename, JSON.stringify(data, null, 2))
-
   return outputFullFilename
 }

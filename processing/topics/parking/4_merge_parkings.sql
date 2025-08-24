@@ -1,307 +1,204 @@
 DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
 
--- Merge lines that have the same (explisitldy defined) properties.
--- ==========
---
--- CRITICAL: This SQL file must be kept in sync with processing/topics/parking/parkings/helper/result_tags_parkings.lua (all tags in explicit list)
---
--- When adding new tags:
--- 1. Add to the Lua file's explicit tags list
--- 2. Add to this SQL clustering columns and jsonb_build_object
---
 -- 1. Create a TEMP table and  that we use for clustering
 -- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
 -- The temp table is dropped automatically once our db connection is closed.
 SELECT
-  p.*,
-  -- EXPLICIT TAGS LIST - ALL TAGS MUST BE LISTED HERE
-  -- This list must be kept in sync with result_tags_parkings.lua
-  -- Road properties
-  tags ->> 'road_name' as road_name,
-  tags ->> 'road_width' as road_width,
-  tags ->> 'road_width_confidence' as road_width_confidence,
-  tags ->> 'road_width_source' as road_width_source,
-  tags ->> 'road' as road,
-  tags ->> 'operator_type' as operator_type,
-  tags ->> 'parking' as parking,
-  tags ->> 'orientation' as orientation,
-  tags ->> 'capacity' as capacity,
-  tags ->> 'capacity_source' as capacity_source,
-  tags ->> 'capacity_confidence' as capacity_confidence,
-  tags ->> 'markings' as markings,
-  tags ->> 'direction' as direction,
-  tags ->> 'reason' as reason,
-  tags ->> 'staggered' as staggered,
-  tags ->> 'restriction' as restriction,
-  -- tags ->> 'restriction_bus' as restriction_bus,
-  -- tags ->> 'restriction_hgv' as restriction_hgv,
-  -- tags ->> 'restriction_reason' as restriction_reason,
-  tags ->> 'zone' as zone,
-  tags ->> 'authentication_disc' as authentication_disc,
-  tags ->> 'fee' as fee,
-  tags ->> 'maxstay' as maxstay,
-  -- tags ->> 'maxstay_motorhome' as maxstay_motorhome,
-  -- tags ->> 'access' as access,
-  -- tags ->> 'private' as private,
-  -- tags ->> 'disabled' as disabled,
-  -- tags ->> 'taxi' as taxi,
-  -- tags ->> 'motorcar' as motorcar,
-  -- tags ->> 'hgv' as hgv,
-  tags ->> 'surface' as surface,
-  tags ->> 'surface_confidence' as surface_confidence,
-  tags ->> 'surface_source' as surface_source,
-  tags ->> 'condition_category' as condition_category,
-  tags ->> 'condition_vehicles' as condition_vehicles,
-  tags ->> 'mapillary' as mapillary
-  --
-  INTO TEMP cluster_candidates
+  id,
+  osm_id,
+  geom,
+  (tags ->> 'capacity')::NUMERIC AS capacity,
+  jsonb_build_object(
+    -- CRITICAL: Keep these lists in sync:
+    -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
+    -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+    -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
+    /* sql-formatter-disable */
+    'side', side,
+    'source', source,
+    --
+    -- Road properties
+    'road', tags ->> 'road',
+    'road_name', COALESCE(tags ->> 'road_name', street_name),
+    'road_width', tags ->> 'road_width',
+    'road_width_confidence', tags ->> 'road_width_confidence',
+    'road_width_source', tags ->> 'road_width_source',
+    'road_oneway', tags ->> 'road_oneway',
+    'operator_type', tags ->> 'operator_type',
+    'mapillary', tags ->> 'mapillary',
+    --
+    -- Capacity & Area
+    -- capacity - separate column
+    'capacity_source', tags ->> 'capacity_source',
+    'capacity_confidence', tags ->> 'capacity_confidence',
+    -- 'area', tags ->> 'area',
+    -- 'area_confidence', tags ->> 'area_confidence',
+    -- 'area_source', tags ->> 'area_source',
+    --
+    -- Parking properties
+    'condition_category', tags ->> 'condition_category',
+    'condition_vehicles', tags ->> 'condition_vehicles',
+    'covered', tags ->> 'covered',
+    'direction', tags ->> 'direction',
+    'fee', tags ->> 'fee',
+    'informal', tags ->> 'informal',
+    'location', tags ->> 'location',
+    'markings', tags ->> 'markings',
+    'orientation', tags ->> 'orientation',
+    'parking', tags ->> 'parking',
+    'reason', tags ->> 'reason',
+    'staggered', tags ->> 'staggered',
+    'traffic_sign', tags ->> 'traffic_sign',
+    'zone', tags ->> 'zone',
+    --
+    -- Surface
+    'surface', tags ->> 'surface',
+    'surface_confidence', tags ->> 'surface_confidence',
+    'surface_source', tags ->> 'surface_source'
+    /* sql-formatter-enable*/
+  ) as tags,
+  0 as cluster_id INTO TEMP cluster_candidates
 FROM
   _parking_parkings_cutted p;
 
-CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (
-  -- EXPLICIT TAGS LIST - ALL TAGS MUST BE LISTED HERE
-  -- This list must be kept in sync with result_tags_parkings.lua
-  street_name,
-  side,
-  road_name,
-  road_width,
-  road_width_confidence,
-  road_width_source,
-  road,
-  operator_type,
-  parking,
-  orientation,
-  capacity,
-  capacity_source,
-  capacity_confidence,
-  markings,
-  direction,
-  reason,
-  staggered,
-  restriction,
-  -- restriction_bus,
-  -- restriction_hgv,
-  -- restriction_reason,
-  zone,
-  authentication_disc,
-  fee,
-  maxstay,
-  -- maxstay_motorhome,
-  -- access,
-  -- private,
-  -- disabled,
-  -- taxi,
-  -- motorcar,
-  -- hgv,
-  surface,
-  surface_confidence,
-  surface_source,
-  condition_category,
-  condition_vehicles,
-  mapillary,
-  source
-);
+CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (tags);
 
 CREATE INDEX cluster_candidates_geom_idx ON cluster_candidates USING GIST (geom);
 
--- 2. Create the result table.
--- Create one table where connected linestrings are merged which is later used to snap to
-DROP TABLE IF EXISTS _parking_parkings_merged;
-
--- We merge after grouping by street name and side, so that the merged kerbs should correspond to the street kerbs
+-- We assign a cluster_id to each spatially connected group of parkings that share the same tags
 WITH
   clustered AS (
     SELECT
       id,
-      osm_id,
-      geom,
-      -- EXPLICIT TAGS LIST - ALL TAGS MUST BE LISTED HERE
-      -- This list must be kept in sync with result_tags_parkings.lua
-      street_name,
-      side,
-      road_name,
-      road_width,
-      road_width_confidence,
-      road_width_source,
-      road,
-      operator_type,
-      parking,
-      orientation,
-      capacity,
-      capacity_source,
-      capacity_confidence,
-      markings,
-      direction,
-      reason,
-      staggered,
-      restriction,
-      -- restriction_bus,
-      -- restriction_hgv,
-      -- restriction_reason,
-      zone,
-      authentication_disc,
-      fee,
-      maxstay,
-      -- maxstay_motorhome,
-      -- access,
-      -- private,
-      -- disabled,
-      -- taxi,
-      -- motorcar,
-      -- hgv,
-      surface,
-      surface_confidence,
-      surface_source,
-      condition_category,
-      condition_vehicles,
-      source,
-      mapillary,
-      ST_ClusterDBSCAN (geom, eps := 0.01, minpoints := 1) OVER (
+      ST_ClusterDBSCAN (geom, eps := 0.0, minpoints := 1) OVER (
         PARTITION BY
-          -- EXPLICIT TAGS LIST - ALL TAGS MUST BE LISTED HERE
-          -- This list must be kept in sync with result_tags_parkings.lua
-          street_name,
-          side,
-          road_name,
-          road_width,
-          road_width_confidence,
-          road_width_source,
-          road,
-          operator_type,
-          parking,
-          orientation,
-          capacity,
-          capacity_source,
-          capacity_confidence,
-          markings,
-          direction,
-          reason,
-          staggered,
-          restriction,
-          -- restriction_bus,
-          -- restriction_hgv,
-          -- restriction_reason,
-          zone,
-          authentication_disc,
-          fee,
-          maxstay,
-          -- maxstay_motorhome,
-          -- access,
-          -- private,
-          -- disabled,
-          -- taxi,
-          -- motorcar,
-          -- hgv,
-          surface,
-          surface_confidence,
-          surface_source,
-          condition_category,
-          condition_vehicles,
-          source,
-          mapillary
+          tags
         ORDER BY
           id
       ) AS cluster_id
     FROM
       cluster_candidates
   )
-SELECT
-  string_agg(
-    id,
-    '-'
-    ORDER BY
-      id
-  ) AS id,
-  cluster_id,
-  -- EXPLICIT TAGS LIST - ALL TAGS MUST BE LISTED HERE
-  -- This list must be kept in sync with result_tags_parkings.lua
-  jsonb_build_object(
-    /* sql-formatter-disable */
-    'side', side,
-    'road_name', COALESCE(street_name, road_name),
-    'road_width', road_width,
-    'road_width_confidence', road_width_confidence,
-    'road_width_source', road_width_source,
-    'road', road,
-    'operator_type', operator_type,
-    'parking', parking,
-    'orientation', orientation,
-    'capacity', SUM(capacity::NUMERIC),
-    'capacity_source', capacity_source,
-    'capacity_confidence', capacity_confidence,
-    'markings', markings,
-    'direction', direction,
-    'reason', reason,
-    'staggered', staggered,
-    'restriction', restriction,
-    -- 'restriction_bus', restriction_bus,
-    -- 'restriction_hgv', restriction_hgv,
-    -- 'restriction_reason', restriction_reason,
-    'zone', zone,
-    'authentication_disc', authentication_disc,
-    'fee', fee,
-    'maxstay', maxstay,
-    -- 'maxstay_motorhome', maxstay_motorhome,
-    -- 'access', access,
-    -- 'private', private,
-    -- 'disabled', disabled,
-    -- 'taxi', taxi,
-    -- 'motorcar', motorcar,
-    -- 'hgv', hgv,
-    'surface', surface,
-    'surface_confidence', surface_confidence,
-    'surface_source', surface_source,
-    'condition_category', condition_category,
-    'condition_vehicles', condition_vehicles,
-    'source', source,
-    'mapillary', mapillary
-    /* sql-formatter-enable */
-  ) as tags,
-  array_agg(osm_id) AS original_osm_ids,
-  (ST_Dump (ST_LineMerge (ST_Union (geom, 0.005)))).geom::geometry (LINESTRING) AS geom
-  --
-  INTO _parking_parkings_merged
+UPDATE cluster_candidates cc
+SET
+  cluster_id = clustered.cluster_id
 FROM
   clustered
+WHERE
+  cc.id = clustered.id;
+
+CREATE INDEX cluster_candidates_full_idx ON cluster_candidates USING BTREE (cluster_id, tags);
+
+-- 2. Create the result table.
+-- aggreagate the groups by merging each cluster
+DROP TABLE IF EXISTS _parking_parkings_merged;
+
+WITH
+  merged AS (
+    SELECT
+      tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
+      string_agg(
+        'way/' || id::TEXT,
+        '-'
+        ORDER BY
+          id
+      ) AS original_ids,
+      string_agg(
+        osm_id::TEXT,
+        '-'
+        ORDER BY
+          osm_id
+      ) AS original_osm_ids,
+      (
+        ST_Dump (ST_LineMerge (ST_Node (ST_Collect (geom))))
+      ).*
+    FROM
+      cluster_candidates
+    GROUP BY
+      tags,
+      cluster_id
+  )
+SELECT
+  md5(ST_AsEWKB (geom)::text) AS id,
+  merged.* INTO _parking_parkings_merged
+FROM
+  merged;
+
+-- Sometimes ST_LineMerge fails because the geomtries are not perfectly connected in those cases we use the following more aggresive way to merge the geometries
+CREATE INDEX _parking_parkings_merged_id_idx ON _parking_parkings_merged USING BTREE (original_ids);
+
+WITH
+  cutted_geoms AS (
+    SELECT
+      original_ids,
+      (ST_Dump (ST_Node (ST_Union (geom)))).geom AS geom
+    FROM
+      _parking_parkings_merged
+    GROUP BY
+      original_ids
+    HAVING
+      count(*) > 1
+  ),
+  filtered_geoms AS (
+    SELECT
+      original_ids,
+      (ST_Dump (ST_LineMerge (ST_Collect (geom)))).geom AS geom
+    FROM
+      cutted_geoms
+    WHERE
+      ST_Length (geom) > 0.5
+    GROUP BY
+      original_ids
+  )
+UPDATE _parking_parkings_merged pm
+SET
+  geom = fg.geom,
+  id = md5(ST_AsEWKB (fg.geom)::text)
+FROM
+  filtered_geoms fg
+WHERE
+  pm.original_ids = fg.original_ids;
+
+-- now we have the same entry multiple times so we remove duplicates
+DELETE FROM _parking_parkings_merged
+WHERE
+  ctid NOT IN (
+    SELECT
+      min(ctid)
+    FROM
+      _parking_parkings_merged
+    GROUP BY
+      id
+  );
+
+SELECT
+  original_ids INTO TEMP failed_merges
+FROM
+  _parking_parkings_merged
 GROUP BY
-  -- EXPLICIT TAGS LIST - ALL TAGS MUST BE LISTED HERE
-  -- This list must be kept in sync with result_tags_parkings.lua
-  street_name,
-  side,
-  road_name,
-  road_width,
-  road_width_confidence,
-  road_width_source,
-  road,
-  operator_type,
-  parking,
-  orientation,
-  capacity_source,
-  capacity_confidence,
-  markings,
-  direction,
-  reason,
-  staggered,
-  restriction,
-  -- restriction_bus,
-  -- restriction_hgv,
-  -- restriction_reason,
-  zone,
-  authentication_disc,
-  fee,
-  maxstay,
-  -- maxstay_motorhome,
-  -- access,
-  -- private,
-  -- disabled,
-  -- taxi,
-  -- motorcar,
-  -- hgv,
-  surface,
-  surface_confidence,
-  surface_source,
-  condition_category,
-  condition_vehicles,
-  source,
-  mapillary,
-  cluster_id;
+  original_ids
+HAVING
+  count(*) > 1;
+
+-- if we still have clusters that failed to merge we remove the capcaity so it will get estimated later on
+UPDATE _parking_parkings_merged
+SET
+  tags = tags - 'capacity'
+WHERE
+  original_ids IN (
+    SELECT
+      original_ids
+    FROM
+      failed_merges
+  );
+
+DO $$
+  DECLARE
+    failed_count INTEGER;
+  BEGIN
+    SELECT COUNT(*) INTO failed_count
+    FROM failed_merges;
+    RAISE NOTICE 'Failed to merge % clusters. Their capacity will be estimated.', failed_count;
+  END $$;
+
+CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);

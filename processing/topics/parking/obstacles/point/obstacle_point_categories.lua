@@ -2,7 +2,6 @@ require('init')
 local sanitize_for_logging = require('sanitize_for_logging')
 require('class_obstacle_category')
 require('two_wheel_parking_helper')
-require('amenity_parking_helper')
 local TAG_HELPER = require('tag_helper')
 
 

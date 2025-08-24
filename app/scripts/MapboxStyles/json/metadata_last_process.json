@@ -2,7 +2,7 @@
   "tilda-style-package-1": {
     "key": "tilda-style-package-1",
     "about": "Metadata on the last processing of the tilda-style-package-1 styles api response",
-    "processed_at": "6.8.2025, 07:23:37",
+    "processed_at": "21.8.2025, 18:16:45",
     "style_last_published": {
       "published_at": "6.8.2025, 07:21:12",
       "version": 8
@@ -18,7 +18,7 @@
   "tilda-style-package-2": {
     "key": "tilda-style-package-2",
     "about": "Metadata on the last processing of the tilda-style-package-2 styles api response",
-    "processed_at": "6.8.2025, 07:23:37",
+    "processed_at": "21.8.2025, 18:16:45",
     "style_last_published": {
       "published_at": "4.8.2025, 16:33:07",
       "version": 8
@@ -34,7 +34,7 @@
   "tilda-style-package-3-radinfra": {
     "key": "tilda-style-package-3-radinfra",
     "about": "Metadata on the last processing of the tilda-style-package-3-radinfra styles api response",
-    "processed_at": "6.8.2025, 07:23:37",
+    "processed_at": "21.8.2025, 18:16:45",
     "style_last_published": {
       "published_at": "6.8.2025, 07:23:31",
       "version": 8
@@ -50,9 +50,9 @@
   "tilda-style-package-4-parkraum": {
     "key": "tilda-style-package-4-parkraum",
     "about": "Metadata on the last processing of the tilda-style-package-4-parkraum styles api response",
-    "processed_at": "6.8.2025, 07:23:36",
+    "processed_at": "21.8.2025, 18:16:45",
     "style_last_published": {
-      "published_at": "6.8.2025, 07:11:18",
+      "published_at": "21.8.2025, 18:16:39",
       "version": 8
     },
     "style_id": "cmbf4ffqq000701qxe5oedq4v",
@@ -66,9 +66,9 @@
   "parking": {
     "key": "parking",
     "about": "Metadata on the last processing of the parking styles api response",
-    "processed_at": "6.8.2025, 07:23:36",
+    "processed_at": "21.8.2025, 18:16:44",
     "style_last_published": {
-      "published_at": "11.8.2024, 06:42:30",
+      "published_at": "20.8.2025, 09:02:20",
       "version": 8
     },
     "style_id": "clev6ho1i00hd01o9bfo80n9q",

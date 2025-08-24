@@ -7,16 +7,20 @@ CREATE TABLE _parking_orientation_constants (
   padding NUMERIC NOT NULL
 );
 
+-- REMINDER: Changes here need to be reflected in: `processing/topics/parking/separate_parkings/helper/class_separate_parking_category.lua`
 INSERT INTO
   _parking_orientation_constants (orientation, car_space_x, car_space_y, padding)
 VALUES
   ('parallel', 4.4, 2.0, 0.8),
   ('perpendicular', 2.0, 4.4, 0.5),
+  -- diagonal parking is a bit more complex.
+  -- We calulate the required space by rotating the perpendicular parking by 30 degrees.
+  -- Additionally, we scale car_space_x by 2/3 to account for the overlap of the cars.
   (
     'diagonal',
-    SIN(RADIANS(60)) * 4.4 + COS(RADIANS(60)) * 2.0,
-    COS(RADIANS(60)) * 4.4 + SIN(RADIANS(60)) * 2.0,
-    COS(RADIANS(60)) * 0.5
+    (COS(RADIANS(30)) * 2.0 + SIN(RADIANS(30)) * 4.4) * 0.66,
+    COS(RADIANS(30)) * 4.4 + SIN(RADIANS(30)) * 2.0,
+    COS(RADIANS(30)) * 0.5
   );
 
 DROP FUNCTION IF EXISTS estimate_capacity;
@@ -41,8 +45,8 @@ BEGIN
     RAISE EXCEPTION 'Invalid orientation: "%", must be one of the defined types in parking_orientation_constants', orientation;
   END IF;
 
--- The total length need to account for: n * car_length + (n - 1) * padding
--- We solve for n:
+  -- The total length need to account for: n * car_length + (n - 1) * padding
+  -- We solve for n:
   n_cars := (length + const.padding) / (const.car_space_x + const.padding);
 
   RETURN n_cars;

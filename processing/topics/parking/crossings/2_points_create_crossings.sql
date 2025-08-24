@@ -22,20 +22,21 @@ DROP TABLE IF EXISTS _parking_crossings;
 
 -- INSERT "parking_crossings" from located crossing points
 SELECT
-  opl.id,
-  opl.osm_id,
+  cpl.id,
+  cpl.osm_id,
+  cpl.side,
   Null as way_id,
-  opl.tags || '{"geometry_source": "generated"}'::jsonb AS tags,
-  opl.meta,
+  cpl.tags || '{"geometry_source": "generated"}'::jsonb AS tags,
+  cpl.meta,
   -- we increase this length to be safe when we project on to the real crossing geometry
   ABS(k.offset) + 1 as length,
-  estimate_road_crossing (opl.way_id, opl.idx, k.offset * 3) as geom
+  estimate_road_crossing (cpl.way_id, cpl.idx, k.offset * 3) as geom
   --
   INTO _parking_crossings
 FROM
-  _parking_crossing_points_located opl
+  _parking_crossing_points_located cpl
   JOIN _parking_kerbs k ON way_id = k.osm_id
-  AND opl.tags ->> 'side' = k.side;
+  AND cpl.side = k.side;
 
 -- MISC
 ALTER TABLE _parking_crossings

@@ -1,13 +1,22 @@
-DO $$ BEGIN RAISE NOTICE 'START finlize parkings at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START finalize parkings at %', clock_timestamp(); END $$;
 
 -- insert remaining parkings into the final 'parkings' table
 INSERT INTO
-  parkings (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings (id, tags, meta, geom, minzoom)
 SELECT
-  'c',
-  0,
   id,
-  tags || jsonb_build_object('length', length),
+  jsonb_strip_nulls(
+    tags || jsonb_build_object(
+      'area',
+      ROUND(NULLIF(tags ->> 'area', '')::NUMERIC, 2),
+      'length',
+      ROUND(length::NUMERIC, 2),
+      'capacity',
+      round_capacity ((tags ->> 'capacity')::NUMERIC),
+      'original_osm_ids',
+      original_osm_ids
+    )
+  ),
   '{}'::jsonb,
   ST_Transform (geom, 3857),
   0
@@ -23,10 +32,8 @@ WHERE
 
 -- insert all cutouts except "roads" into the final 'parkings_cutouts' table
 INSERT INTO
-  parkings_cutouts (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings_cutouts (id, tags, meta, geom, minzoom)
 SELECT
-  'c',
-  osm_id,
   id,
   tags,
   meta,
@@ -45,12 +52,15 @@ WITH
     SELECT
       tags || '{"capacity": 1}'::JSONB as tags,
       meta,
-      explode_parkings (geom, (tags ->> 'capacity')::INTEGER) as geom
+      explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
     FROM
       parkings
   )
 SELECT
-  ROW_NUMBER() OVER () AS id,
+  ROW_NUMBER() OVER (
+    ORDER BY
+      tags
+  ) AS id,
   tags,
   meta,
   ST_Transform (geom, 3857) as geom,
@@ -61,15 +71,13 @@ FROM
   sum_points;
 
 INSERT INTO
-  parkings_separate (osm_type, osm_id, id, tags, meta, geom, minzoom)
+  parkings_separate (id, tags, meta, geom, minzoom)
 SELECT
-  osm_type,
-  osm_id,
   id,
   tags,
   meta,
   ST_Transform (geom, 3857),
-  0
+  17 -- parking_separate is only visible from zoom level 17 (inclusive) onwards
 FROM
   _parking_separate_parking_areas;
 
@@ -78,17 +86,39 @@ DROP INDEX IF EXISTS parkings_geom_idx;
 
 CREATE INDEX parkings_geom_idx ON parkings USING GIST (geom);
 
+-- DROP INDEX IF EXISTS parkings_id_idx;
+CREATE UNIQUE INDEX parkings_id_idx ON parkings (id);
+
 DROP INDEX IF EXISTS parkings_no_geom_idx;
 
 CREATE INDEX parkings_no_geom_idx ON parkings_no USING GIST (geom);
+
+-- DROP INDEX IF EXISTS parkings_no_id_idx;
+CREATE UNIQUE INDEX parkings_no_id_idx ON parkings_no (id);
 
 DROP INDEX IF EXISTS parkings_separate_geom_idx;
 
 CREATE INDEX parkings_separate_geom_idx ON parkings_separate USING GIST (geom);
 
+-- DROP INDEX IF EXISTS parkings_separate_id_idx;
+CREATE UNIQUE INDEX parkings_separate_id_idx ON parkings_separate (id);
+
+-- ALTER TABLE parkings_cutouts
+-- ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
+DROP INDEX IF EXISTS parkings_cutouts_geom_idx;
+
+CREATE INDEX parkings_cutouts_geom_idx ON parkings_cutouts USING GIST (geom);
+
+-- DROP INDEX IF EXISTS parkings_cutouts_id_idx;
+CREATE UNIQUE INDEX parkings_cutouts_id_idx ON parkings_cutouts (id);
+
+-- NOTE: We should move the table scaffolding to LUA and then we can remove this part here, same as all the other tables
 ALTER TABLE parkings_quantized
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
 
 DROP INDEX IF EXISTS parkings_quantized_geom_idx;
 
 CREATE INDEX parkings_quantized_geom_idx ON parkings_quantized USING GIST (geom);
+
+-- DROP INDEX IF EXISTS parkings_quantized_id_idx;
+CREATE UNIQUE INDEX parkings_quantized_id_idx ON parkings_quantized (id);

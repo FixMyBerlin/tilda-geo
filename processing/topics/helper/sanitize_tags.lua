@@ -2,8 +2,28 @@ require('init')
 require('SanitizeTrafficSign')
 local sanitize_for_logging = require('sanitize_for_logging')
 local parse_length = require('parse_length')
+local sanitize_string = require('sanitize_string')
 
 local SANITIZE_TAGS = {
+  safe_string = function (value)
+    return sanitize_string(value)
+  end,
+  road_name = function (tags)
+    local name = tags.name or tags.ref or tags['is_sidepath:of:name'] or tags['street:name']
+    return sanitize_string(name)
+  end,
+  oneway_road = function (tags)
+    if tags.oneway == 'yes' and tags.dual_carriageway == 'yes' then
+      return 'yes_dual_carriageway'
+    end
+    return sanitize_for_logging(tags.oneway, { 'yes' }, { 'no' })
+  end,
+  oneway_bicycle = function (value)
+    return sanitize_for_logging(value, { 'yes', 'no' })
+  end,
+  boolean_yes = function (value)
+    return sanitize_for_logging(value, { 'yes' })
+  end,
   access = function (value)
     -- TOOD: How to handle… { 'unknown' }
     return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents' }, { 'yes' })

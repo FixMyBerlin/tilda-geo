@@ -1,8 +1,15 @@
+require('init')
+local sanitize_string = require('sanitize_string')
+
 -- Remove all whitespaces after delimeters
 local function stripWhitespaces(traffic_sign)
   local stripped = string.gsub(traffic_sign, ', ', ',')
   stripped = string.gsub(stripped, '; ', ';')
   return stripped
+end
+
+local function sanitize_value(value)
+  return sanitize_string(stripWhitespaces(value))
 end
 
 --- Cleanup the `traffic_sign=*` tag
@@ -19,7 +26,7 @@ function SanitizeTrafficSign(traffic_sign)
   -- This is the correct tagging, all traffic signs should start with DE:
   -- DOCS: patterns with "^" target beginning of string
   if string.find(traffic_sign, '^DE:%S') then
-    return stripWhitespaces(traffic_sign)
+    return sanitize_value(traffic_sign)
   end
 
   local substitutions = {
@@ -41,7 +48,7 @@ function SanitizeTrafficSign(traffic_sign)
   for pattern, substitude in pairs(substitutions) do
     local val, n = string.gsub(traffic_sign, pattern, substitude)
     if n > 0 then
-      return stripWhitespaces(val)
+      return sanitize_value(val)
     end
   end
 

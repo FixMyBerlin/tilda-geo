@@ -28,13 +28,13 @@ export const TagsTableRowCompositWidth = ({ sourceId, tagKey, properties }: Comp
   )
 
   return (
-    <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
+    <TagsTableRow key={widthKey} sourceId={sourceId} tagKey={widthKey}>
       <ValueDisclosure>
         <ValueDisclosureButton>
           <ConditionalFormattedValue
             sourceId={sourceId}
-            tagKey={'width'}
-            tagValue={properties['width']}
+            tagKey={width}
+            tagValue={properties[width]}
           />
         </ValueDisclosureButton>
         <ValueDisclosurePanel>

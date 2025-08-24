@@ -1,27 +1,38 @@
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp(); END $$;
 
--- Add our calculated columns
-ALTER TABLE public.qa_parkings_euvm
-ADD COLUMN IF NOT EXISTS previous_relative NUMERIC,
-ADD COLUMN IF NOT EXISTS relative NUMERIC;
+DROP TABLE IF EXISTS _parking_parkings_quantized;
 
--- Preserve current relative values as previous_relative before recreating data
-CREATE TEMP TABLE temp_previous_values AS
 SELECT
   id,
-  relative as previous_relative
-FROM
-  public.qa_parkings_euvm
-WHERE
-  relative IS NOT NULL;
-
--- Drop and recreate the main table
-DROP TABLE IF EXISTS public.qa_parkings_euvm;
-
-SELECT
-  *
+  tags,
+  meta,
+  ST_Transform (geom, 5243) as geom
   --
-  INTO public.qa_parkings_euvm
+  INTO _parking_parkings_quantized
+FROM
+  parkings_quantized;
+
+CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized USING GIST (geom);
+
+CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
+  id SERIAL PRIMARY KEY,
+  geom geometry (POINT, 4326),
+  count_reference INTEGER,
+  count_current INTEGER,
+  difference INTEGER,
+  previous_relative NUMERIC,
+  relative NUMERIC
+);
+
+-- Backup the old values by renaming the table
+DROP TABLE IF EXISTS qa_parkings_euvm_old;
+
+ALTER TABLE public.qa_parkings_euvm
+RENAME TO qa_parkings_euvm_old;
+
+-- Recreate the table by copying the euvm voronoi data
+SELECT
+  * INTO public.qa_parkings_euvm
 FROM
   data.euvm_qa_voronoi;
 
@@ -29,23 +40,13 @@ FROM
 ALTER TABLE public.qa_parkings_euvm
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
 
--- Add our calculated columns
 ALTER TABLE public.qa_parkings_euvm
-ADD COLUMN IF NOT EXISTS count_current INTEGER,
-ADD COLUMN IF NOT EXISTS relative NUMERIC,
-ADD COLUMN IF NOT EXISTS previous_relative NUMERIC,
-ADD COLUMN IF NOT EXISTS difference INTEGER;
+ADD COLUMN count_current INTEGER,
+ADD COLUMN difference INTEGER,
+ADD COLUMN relative NUMERIC,
+ADD COLUMN previous_relative NUMERIC;
 
--- Restore previous values where we have them
-UPDATE public.qa_parkings_euvm pv
-SET
-  previous_relative = tpv.previous_relative
-FROM
-  temp_previous_values tpv
-WHERE
-  pv.id = tpv.id;
-
--- Calculate current counts
+-- Count our parkings for each voronoi polygon
 WITH
   counts AS (
     SELECT
@@ -53,7 +54,7 @@ WITH
       COUNT(p.*) AS count_current
     FROM
       public.qa_parkings_euvm v
-      LEFT JOIN parkings_quantized p ON ST_Contains (v.geom, p.geom)
+      LEFT JOIN _parking_parkings_quantized p ON ST_Contains (ST_Transform (v.geom, 5243), p.geom)
       AND (
         p.tags ->> 'operator_type' IS NULL
         OR p.tags ->> 'operator_type' != 'private'
@@ -69,7 +70,7 @@ FROM
 WHERE
   pv.id = c.id;
 
--- Calculate difference and relative
+-- Calculate the difference and relative columns
 UPDATE public.qa_parkings_euvm
 SET
   difference = count_reference - count_current;
@@ -87,3 +88,16 @@ SET
     AND count_current > 0 THEN 99.0 -- will always trigger a "PROBLEMATIC" evaluation
     ELSE NULL
   END;
+
+-- Update the previous_relative column with the old values
+UPDATE public.qa_parkings_euvm
+SET
+  previous_relative = old.relative
+FROM
+  public.qa_parkings_euvm_old old
+WHERE
+  public.qa_parkings_euvm.id = old.id;
+
+DROP TABLE IF EXISTS public.qa_parkings_euvm_old;
+
+CREATE INDEX qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);

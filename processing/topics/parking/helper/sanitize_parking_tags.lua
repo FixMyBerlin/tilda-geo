@@ -5,22 +5,29 @@ local SANITIZE_PARKING_TAGS = {
   parking = function(value)
     return sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
   end,
+  -- `parking` is our main tag.
+  -- for is_driveway this is alway some precise value (because everything else is excluded)
+  -- for is_road this with either 'missing' or some precise value.
+  -- except for dual_carriageway|s when we fall back to 'not_expected' instead of 'missing'
+  parking_extended = function(value, dual_carriageway)
+    local result = sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
+    if dual_carriageway and dual_carriageway == 'yes' then
+      result = result or 'not_expected'
+    end
+    result = result or 'missing'
+    return result
+  end,
+  location = function (value)
+    return sanitize_for_logging(value, { 'median' })
+  end,
   orientation = function (value)
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })
   end,
   operator_type = function(value)
     return sanitize_for_logging(value, { 'public', 'private' })
   end,
-  taxi = function (value)
-    return sanitize_for_logging(value, { 'yes', 'no', 'designated' })
-  end,
-  motorcar = function (value)
-    -- TOOD: How to handle… { 'unknown', 'private', 'customers', 'delivery', 'permissive', 'permit', 'residents' }
-    return sanitize_for_logging(value, { 'yes', 'no', 'designated' })
-  end,
-  hgv = function (value)
-    -- TOOD: How to handle… { 'unknown', 'private', 'customers', 'delivery', 'permissive', 'permit', 'residents' }
-    return sanitize_for_logging(value, { 'yes', 'no', 'designated' })
+  covered = function (value)
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
   end,
   informal = function (value)
     return sanitize_for_logging(value, { 'yes' })
@@ -50,14 +57,8 @@ local SANITIZE_PARKING_TAGS = {
   fee = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
-  authentication_disc = function (value)
-    return sanitize_for_logging(value, { 'yes', 'no' })
-  end,
   parking_entrance = function(value)
     return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey' })
-  end,
-  maxstay = function (value)
-    return sanitize_for_logging(value, { '1h', '2h', '3h', '4h', '5h', '6h', '8h', '12h', '24h' })
   end,
 }
 

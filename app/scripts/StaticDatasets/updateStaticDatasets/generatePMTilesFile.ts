@@ -1,7 +1,6 @@
 import chalk from 'chalk'
 import path from 'node:path'
 import type { MetaData } from '../types'
-import { red } from '../utils/log'
 
 /** @returns pmtiles outputFullFile */
 export const generatePMTilesFile = async (
@@ -47,59 +46,58 @@ export const generatePMTilesFile = async (
   // BUT, the docs suggest it does not work for linestrings… https://github.com/felt/tippecanoe#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
   // --coalesce-smallest-as-needed
 
-  Bun.spawnSync(
-    [
-      'tippecanoe',
-      `--output=${outputFullFile}`,
-      '--force',
-      '--layer=default',
-      // CONFIG:
-      // Lowest zoom level for which tiles are generated (default `0`) (`6` is all of Germany on a Laptop, `8` is a litte smaller than a State in Germany)
-      '--minimum-zoom=7',
-      // https://github.com/felt/tippecanoe#zoom-levels
-      // The automatic --maximum-zoom didn't have the required precision.
-      // Instead, we force a maximum-zoom of at least 15 (https://github.com/felt/tippecanoe#zoom-levels) … or higher.
-      `--smallest-maximum-zoom-guess=${maxZoom}`,
-      // Increase precision for overzooming https://github.com/felt/tippecanoe#tile-resolution
-      // Note that `--full-detail` does not work for high facotrs like 20 and did not increase the precision enough for lower max zoom
-      '--extra-detail=20', // the value is a factor (not a zoom-value)
-      // Don't simplify lines and polygons at maxzoom (but do simplify at lower zooms)
-      '--simplify-only-low-zooms',
-      // Combine the area of very small polygons into small squares that represent their combined area only at zoom levels below the maximum.
-      '--no-tiny-polygon-reduction-at-maximum-zoom',
-      // Preserve typology when possible https://github.com/felt/tippecanoe#line-and-polygon-simplification
-      '--no-simplification-of-shared-nodes',
-      // https://github.com/felt/tippecanoe#zoom-levels
-      // Increases precision but causes tile drops. => We cannot use this for everything
-      // '--generate-variable-depth-tile-pyramid',
-      //
-      // Specify some level of detail indicator for max zoom. The number is not a zoom value but
-      // https://github.com/felt/tippecanoe#tile-resolution
-      // https://github.com/felt/tippecanoe/issues/89
-      // ARCHIVE: we use those settings for eUVM: lines: 2, areas: 12
-      // '--full-detail=23',
-      //
-      // If you use -rg, it will guess a drop rate that will keep at most 50,000 features in the densest tile https://github.com/felt/tippecanoe#dropping-a-fixed-fraction-of-features-by-zoom-level
-      '-rg',
-      // https://github.com/felt/tippecanoe#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
-      '--drop-densest-as-needed',
-      // https://github.com/felt/tippecanoe#zoom-levels
-      '--extend-zooms-if-still-dropping',
-      inputFullFile,
-    ],
-    {
-      onExit(_proc, exitCode, _signalCode, error) {
-        if (exitCode) {
-          red(`  exitCode: ${exitCode}`)
-          process.exit(1)
-        }
-        if (error) {
-          red(`  error: ${error.message}`)
-          process.exit(1)
-        }
-      },
-    },
-  )
+  const parameters = [
+    `--output=${outputFullFile}`,
+    '--force',
+    '--layer=default',
+    // CONFIG:
+    // Lowest zoom level for which tiles are generated (default `0`) (`6` is all of Germany on a Laptop, `8` is a litte smaller than a State in Germany)
+    '--minimum-zoom=7',
+    // https://github.com/felt/tippecanoe#zoom-levels
+    // The automatic --maximum-zoom didn't have the required precision.
+    // Instead, we force a maximum-zoom of at least 15 (https://github.com/felt/tippecanoe#zoom-levels) … or higher.
+    `--smallest-maximum-zoom-guess=${maxZoom}`,
+    // Increase precision for overzooming https://github.com/felt/tippecanoe#tile-resolution
+    // Note that `--full-detail` does not work for high facotrs like 20 and did not increase the precision enough for lower max zoom
+    '--extra-detail=20', // the value is a factor (not a zoom-value)
+    // Don't simplify lines and polygons at maxzoom (but do simplify at lower zooms)
+    '--simplify-only-low-zooms',
+    // Combine the area of very small polygons into small squares that represent their combined area only at zoom levels below the maximum.
+    '--no-tiny-polygon-reduction-at-maximum-zoom',
+    // Preserve typology when possible https://github.com/felt/tippecanoe#line-and-polygon-simplification
+    '--no-simplification-of-shared-nodes',
+    // https://github.com/felt/tippecanoe#zoom-levels
+    // Increases precision but causes tile drops. => We cannot use this for everything
+    // '--generate-variable-depth-tile-pyramid',
+    //
+    // Specify some level of detail indicator for max zoom. The number is not a zoom value but
+    // https://github.com/felt/tippecanoe#tile-resolution
+    // https://github.com/felt/tippecanoe/issues/89
+    // ARCHIVE: we use those settings for eUVM: lines: 2, areas: 12
+    // '--full-detail=23',
+    //
+    // If you use -rg, it will guess a drop rate that will keep at most 50,000 features in the densest tile https://github.com/felt/tippecanoe#dropping-a-fixed-fraction-of-features-by-zoom-level
+    '-rg',
+    // https://github.com/felt/tippecanoe#dropping-a-fraction-of-features-to-keep-under-tile-size-limits
+    '--drop-densest-as-needed',
+    // https://github.com/felt/tippecanoe#zoom-levels
+    '--extend-zooms-if-still-dropping',
+    inputFullFile,
+  ]
+
+  const { success, exitCode, stdout, stderr } = Bun.spawnSync(['tippecanoe', ...parameters], {
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
+  if (!success) {
+    console.error(chalk.red('  ERROR: tippecanoe failed. This needs to be fixed manually!'), {
+      success,
+      exitCode,
+      stdout: stdout.toString(),
+      stderr: stderr.toString(),
+      command: `tippecanoe ${parameters.join(' ')}`,
+    })
+  }
 
   return outputFullFile
 }

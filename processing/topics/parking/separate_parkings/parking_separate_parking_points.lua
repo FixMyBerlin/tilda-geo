@@ -22,7 +22,7 @@ local function parking_separate_parking_points(object)
 
   local result = categorize_separate_parking(object, separate_parking_point_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags_separate_parking(result, nil)
+    local row_data, replaced_tags = result_tags_separate_parking(result.category, result.object, nil)
     local row = MergeTable({ geom = result.object:as_point() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_points')

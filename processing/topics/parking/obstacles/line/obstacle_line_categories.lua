@@ -1,7 +1,6 @@
 require('init')
 require('class_obstacle_category')
 require('two_wheel_parking_helper')
-require('amenity_parking_helper')
 require('Log')
 local TAG_HELPER = require('tag_helper')
 

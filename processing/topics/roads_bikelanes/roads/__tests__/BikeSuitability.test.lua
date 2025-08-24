@@ -65,6 +65,7 @@ describe('BikeSuitability', function()
   describe('noOvertaking', function ()
     it('`traffic_sign = DE:277.1`', function()
       local input_tags = {
+          highway = 'secondary',
           traffic_sign = 'DE:277.1'
         }
       local result = CategorizeBikeSuitability(input_tags)

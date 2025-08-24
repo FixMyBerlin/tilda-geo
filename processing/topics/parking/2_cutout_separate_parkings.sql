@@ -40,6 +40,7 @@ FROM
           WHERE
             c.geom && p.geom
             AND c.tags ->> 'source' <> 'separate_parking_areas'
+            AND c.tags ->> 'category' <> 'kerb_lowered'
         )
       ),
       p.geom
@@ -86,8 +87,21 @@ FROM
           WHERE
             c.geom && p.geom
             AND c.tags ->> 'source' <> 'separate_parking_points'
+            AND c.tags ->> 'category' <> 'kerb_lowered'
         )
       ),
       p.geom
     )
   ) AS d;
+
+-- MISC
+ALTER TABLE _parking_parkings_cutted
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+CREATE INDEX parking_parkings_cut_geom_idx ON _parking_parkings_cutted USING GIST (geom);
+
+CREATE INDEX parking_parkings_cut_osm_id_idx ON _parking_parkings_cutted (osm_id);
+
+CREATE INDEX parking_parkings_cut_osm_id_side_idx ON _parking_parkings_cutted (osm_id, side);
+
+CREATE INDEX parking_parkings_cut_street_name_idx ON _parking_parkings_cutted (street_name);

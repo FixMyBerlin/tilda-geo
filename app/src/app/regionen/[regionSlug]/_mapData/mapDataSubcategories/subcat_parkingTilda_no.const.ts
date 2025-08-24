@@ -1,6 +1,5 @@
 import { FileMapDataSubcategory } from '../types'
-import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_tilda_parkinglines_missing } from './mapboxStyles/groups/tilda_parkinglines_missing'
+import { mapboxStyleGroupLayers_tilda_parkings_no } from './mapboxStyles/groups/tilda_parkings_no'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaNo'
@@ -9,20 +8,19 @@ const sourceLayer = 'parkings_no'
 export type SubcatParkingTildaNoId = typeof subcatId
 export type SubcatParkingTildaNoStyleIds = 'default'
 
-export const subcat_parkingTildaNo: FileMapDataSubcategory = {
+export const subcat_parkingTilda_no: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Parkverbote',
-  ui: 'dropdown',
+  name: 'Parkverbote (TODO)',
+  ui: 'checkbox',
   sourceId: source,
   beforeId: undefined,
   styles: [
-    defaultStyleHidden,
     {
       id: 'default',
       name: 'Standard',
       desc: null,
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_tilda_parkinglines_missing,
+        layers: mapboxStyleGroupLayers_tilda_parkings_no,
         source,
         sourceLayer,
       }),
@@ -30,7 +28,12 @@ export const subcat_parkingTildaNo: FileMapDataSubcategory = {
         {
           id: 'no_parking',
           name: 'Parkverbot',
-          style: { type: 'fill', color: 'rgb(102, 21, 168)' },
+          style: { type: 'fill', color: 'rgb(151, 17, 17)' },
+        },
+        {
+          id: 'small',
+          name: 'Zu wenig Platz',
+          style: { type: 'fill', color: 'rgb(107, 41, 41)' },
         },
       ],
     },

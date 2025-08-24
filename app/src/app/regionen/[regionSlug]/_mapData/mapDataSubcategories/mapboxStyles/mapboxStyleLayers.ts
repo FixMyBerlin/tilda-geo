@@ -8,7 +8,11 @@ export type Props = {
   source: SourcesId
   sourceLayer: string
   idPrefix?: string
-  additionalFilter?: ['match', ['get', string], string[], boolean, boolean] | ['has', string]
+  interactive?: false
+  additionalFilter?:
+    | ['match', ['get', string], string[], boolean, boolean]
+    | ['has', string]
+    | ['==', '$type', 'Polygon' | 'Point' | 'LineString']
 }
 
 /** @desc Takes the layers we extract from Mapbox with `npm run updateStyles` (which are stripped down to just the style information) and adds the source-information that is only present in our app. It also allows to use the same layers with differend `additionalFilter`.  */
@@ -17,6 +21,7 @@ export const mapboxStyleLayers = ({
   source,
   sourceLayer,
   idPrefix,
+  interactive,
   additionalFilter,
 }: Props) => {
   return layers.map((layer) => {
@@ -25,6 +30,7 @@ export const mapboxStyleLayers = ({
       source,
       'source-layer': sourceLayer,
       id: [idPrefix, layer.id].filter(Boolean).join('--'),
+      interactive,
       filter: additionalFilter
         ? wrapFilterWithAll(flattenFilterArrays(layer.filter, additionalFilter))
         : layer.filter,

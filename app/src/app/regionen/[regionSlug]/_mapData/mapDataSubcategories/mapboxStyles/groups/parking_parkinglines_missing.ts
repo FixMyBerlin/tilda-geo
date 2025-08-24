@@ -8,7 +8,7 @@ export const mapboxStyleGroupLayers_parking_parkinglines_missing: MapboxStyleLay
     id: 'not expected',
     type: 'line',
     paint: {
-      'line-color': 'rgb(187, 17, 133)',
+      'line-color': 'hsl(297, 100%, 25%)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
       'line-opacity': [
         'match',

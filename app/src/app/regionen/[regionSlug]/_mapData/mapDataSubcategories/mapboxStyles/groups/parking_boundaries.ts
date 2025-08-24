@@ -25,14 +25,14 @@ export const mapboxStyleGroupLayers_parking_boundaries: MapboxStyleLayer[] = [
   },
   {
     layout: {
-      'text-field': ['to-string', ['get', 'name']],
-      'symbol-placement': 'line-center',
       'text-size': 14,
-      'text-offset': [0, 0.7],
-      'text-justify': 'auto',
       'text-allow-overlap': true,
       'symbol-avoid-edges': true,
+      'symbol-placement': 'line-center',
+      'text-justify': 'auto',
       'text-padding': 0,
+      'text-offset': [0, 0.7],
+      'text-field': ['to-string', ['get', 'name']],
     },
     type: 'symbol',
     id: 'label copy 1',

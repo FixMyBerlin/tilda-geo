@@ -4,7 +4,15 @@ DROP TABLE IF EXISTS _parking_driveways;
 
 -- CREATE driveway table based on roads with `is_driveway=true`
 SELECT
-  r.*,
+  r.id || '-' || nrm.idx AS id,
+  r.id AS source_id,
+  r.osm_id,
+  r.osm_type,
+  r.tags,
+  r.meta,
+  r.geom,
+  r.is_driveway,
+  r.has_parking,
   nrm.idx
   --
   INTO _parking_driveways

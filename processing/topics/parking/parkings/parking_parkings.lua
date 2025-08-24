@@ -1,9 +1,9 @@
 require('init')
 require('Log')
 require('MergeTable')
-require('result_tags_parkings')
+local result_tags_parkings = require('result_tags_parkings')
 local has_parking = require('has_parking')
-require('transform_parkings')
+local transform_parkings = require('transform_parkings')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_road_parkings',

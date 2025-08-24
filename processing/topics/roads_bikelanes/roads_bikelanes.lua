@@ -42,7 +42,7 @@ local roadsTable = osm2pgsql.define_table({
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
     { column = 'geom',    type = 'linestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
@@ -58,7 +58,7 @@ local roadsPathClassesTable = osm2pgsql.define_table({
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
     { column = 'geom',    type = 'linestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
@@ -75,7 +75,7 @@ local bikelanesTable = osm2pgsql.define_table({
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
     { column = 'geom',    type = 'linestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
@@ -91,7 +91,7 @@ local bikelanesPresenceTable = osm2pgsql.define_table({
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
     { column = 'geom',    type = 'linestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
@@ -107,7 +107,7 @@ local bikeSuitabilityTable = osm2pgsql.define_table({
     { column = 'tags',    type = 'jsonb' },
     { column = 'meta',    type = 'jsonb' },
     { column = 'geom',    type = 'linestring' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
@@ -125,7 +125,7 @@ local todoLiniesTable = osm2pgsql.define_table({
     { column = 'meta',    type = 'jsonb' },
     { column = 'geom',    type = 'linestring' },
     { column = 'length',  type = 'integer' },
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },

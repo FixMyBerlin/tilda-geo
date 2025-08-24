@@ -7,6 +7,8 @@ export const formats = [
   // 'geoparket'
 ] as const
 
+export type Formats = keyof typeof ogrFormats
+
 export const ogrFormats: Record<(typeof formats)[number], string> = {
   geojson: 'GeoJSON',
   gpkg: 'GPKG',

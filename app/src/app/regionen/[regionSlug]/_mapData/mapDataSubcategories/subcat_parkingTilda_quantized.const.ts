@@ -1,5 +1,4 @@
 import { FileMapDataSubcategory } from '../types'
-import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaQuantized'
@@ -8,27 +7,38 @@ const sourceLayer = 'parkings_quantized'
 export type SubcatParkingTildaQuantizedId = typeof subcatId
 export type SubcatParkingTildaQuantizedStyleIds = 'default'
 
-export const subcat_parkingTildaQuantized: FileMapDataSubcategory = {
+export const subcat_parkingTilda_quantized: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Parkraum Quantisiert',
-  ui: 'dropdown',
+  name: 'Parkstände summieren',
+  ui: 'checkbox',
   sourceId: source,
   beforeId: undefined,
   styles: [
-    defaultStyleHidden,
     {
       id: 'default',
       name: 'Standard',
       desc: null,
+      legends: [
+        {
+          id: 'calc',
+          name: 'Parkstand (berechnet)',
+          style: {
+            type: 'circle',
+            color: '#6d28d9',
+          },
+        },
+      ],
       layers: mapboxStyleLayers({
         layers: [
           {
             id: 'parking-points',
             type: 'circle',
             paint: {
-              'circle-color': 'rgb(22, 163, 74)',
-              'circle-radius': 3,
-              'circle-opacity': 0.8,
+              'circle-color': '#6d28d9',
+              'circle-stroke-color': '#fdf4ff',
+              'circle-stroke-opacity': 0.9,
+              'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 16, 0, 20, 2],
+              'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 0, 17, 3],
             },
             filter: ['==', '$type', 'Point'],
           },

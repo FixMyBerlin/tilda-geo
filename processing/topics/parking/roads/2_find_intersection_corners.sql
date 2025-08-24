@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS _parking_intersection_corners;
 -- for each road intersection where the roads incide with an angle smaller than 140 degrees
 -- find the intersection points of the kerbs
 SELECT
-  ROW_NUMBER() OVER () as id,
+  i.id || '-' || corner.kerb1_id || '-' || corner.kerb2_id AS id,
   i.node_id as intersection_id,
   i.road_degree,
   i.driveway_degree,
@@ -26,3 +26,7 @@ WHERE
 -- CLEANUP
 ALTER TABLE _parking_intersection_corners
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+DROP INDEX IF EXISTS parking_intersection_corners_id_idx;
+
+CREATE UNIQUE INDEX parking_intersection_corners_id_idx ON _parking_intersection_corners (id);

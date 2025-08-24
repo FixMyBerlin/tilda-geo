@@ -1,5 +1,4 @@
 import { FileMapDataSubcategory } from '../types'
-import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_parking_debug_bus_tram } from './mapboxStyles/groups/parking_debug_bus_tram'
 import { mapboxStyleGroupLayers_parking_debug_crossings } from './mapboxStyles/groups/parking_debug_crossings'
 import { mapboxStyleGroupLayers_parking_debug_driveways } from './mapboxStyles/groups/parking_debug_driveways'
@@ -18,11 +17,10 @@ export type SubcatParkingLarsDebugStyleIds = 'default' | 'presence' | 'debugLeng
 export const subcat_parkingLarsDebug: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Parkraum Debug',
-  ui: 'dropdown',
+  ui: 'checkbox',
   sourceId: 'lars_parking_debug',
   beforeId: undefined,
   styles: [
-    defaultStyleHidden,
     {
       id: 'default',
       name: 'Standard',

@@ -105,6 +105,11 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     atlas_roadsPathClasses: 'atlas_roads',
     atlas_bikelanesPresence: 'atlas_roads',
     atlas_bikeSuitability: 'atlas_roads',
+    tilda_parkings: 'tilda_parkings',
+    tilda_parkings_cutouts: 'tilda_parkings',
+    tilda_parkings_no: 'tilda_parkings',
+    tilda_parkings_separate: 'tilda_parkings',
+    off_street_parking: 'tilda_parkings',
   }
   const lookAtThisSourceFirst = Object.keys(lookAtFirstSources).find((s) => s === sourceId)
   if (lookAtThisSourceFirst) {
@@ -121,7 +126,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'atlas_roadsPathClasses--road': 'highway',
     'atlas_bikelanesPresence--road': 'highway',
     'atlas_bikeSuitability--road': 'highway',
-    'atlas_parking--road': 'highway',
+    'tilda_parkings--road': 'highway',
   }
   const lookThereForKeyEntry = Object.keys(lookThereForKey).find(
     (k) => k === `${sourceId}--${tagKey}`,
@@ -148,6 +153,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'width_source',
     'length',
     'lifecycle',
+    'parking',
   ]
   if (!translations[translationKey] && nonCategorizedTagKeys.includes(tagKey)) {
     translationKey = `ALL--${tagKey}=${tagValue}`

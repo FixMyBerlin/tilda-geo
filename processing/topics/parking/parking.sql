@@ -24,6 +24,8 @@
 \i '/processing/topics/parking/custom_functions/segmentize_way_to_edges.sql'
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/explode_parkings.sql'
+\i '/processing/topics/parking/custom_functions/round_capacity.sql'
+
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
@@ -50,6 +52,7 @@
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/1_separate_parking_areas_qa.sql'
 
+
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
 
@@ -63,6 +66,8 @@
 \i '/processing/topics/parking/6_filter_parkings.sql'
 \i '/processing/topics/parking/7_finalize_parkings.sql'
 \i '/processing/topics/parking/8_voronoi.sql'
+\i '/processing/topics/parking/9_create_labels.sql'
+
 
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;

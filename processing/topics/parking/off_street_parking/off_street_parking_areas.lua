@@ -13,7 +13,7 @@ local db_table_area = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'polygon' }, -- default projection for vector tiles
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },
@@ -29,7 +29,7 @@ local db_table_label = osm2pgsql.define_table({
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'point' }, -- default projection for vector tiles
-    { column = 'minzoom', type = 'integer' },
+    { column = 'minzoom', type = 'integer', not_null = true },
   },
   indexes = {
     { column = {'minzoom', 'geom'}, method = 'gist' },
@@ -52,11 +52,13 @@ local function off_street_parking_areas(object)
     if row.geom:num_geometries() == 1 then
       db_table_area:insert(row)
 
-      local label_row_tags = {
+      local label_row = {
         id = row_data.id,
-        tags = { capacity = row_data.tags.capacity }
+        tags = { capacity = row_data.tags.capacity },
+        meta = {},
+        geom = row.geom:pole_of_inaccessibility(),
+        minzoom = 0,
       }
-      local label_row = MergeTable({ geom = row.geom:pole_of_inaccessibility() }, label_row_tags)
       db_table_label:insert(label_row)
     else
       LOG_ERROR.RELATION(result.object, row.geom, 'off_street_parking_areas')
