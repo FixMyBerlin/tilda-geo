@@ -36,6 +36,22 @@ SELECT
 FROM
   data.euvm_qa_voronoi;
 
+-- Clip geometries to Berlin boundary
+UPDATE public.qa_parkings_euvm
+SET
+  geom = ST_Intersection (
+    public.qa_parkings_euvm.geom,
+    ST_Transform (berlin.geom, 4326)
+  )
+FROM
+  public.boundaries berlin
+WHERE
+  berlin.osm_id = 62422
+  AND NOT ST_Within (
+    public.qa_parkings_euvm.geom,
+    ST_Transform (berlin.geom, 4326)
+  );
+
 -- Transform geometry to Web Mercator and set SRID
 ALTER TABLE public.qa_parkings_euvm
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
