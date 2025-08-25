@@ -52,6 +52,25 @@ WHERE
     ST_Transform (berlin.geom, 4326)
   );
 
+-- TEMPORARY: Filter to only include polygons that intersect with specific Ortsteile
+DELETE FROM public.qa_parkings_euvm
+WHERE
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      public.boundaries ortsteil
+    WHERE
+      ortsteil.osm_id IN (
+        55764, -- Friedrichshain-Kreuzberg https://www.openstreetmap.org/relation/55764
+        409213 -- OT Neukölln https://www.openstreetmap.org/relation/409213
+      )
+      AND ST_Intersects (
+        public.qa_parkings_euvm.geom,
+        ST_Transform (ortsteil.geom, 4326)
+      )
+  );
+
 -- Transform geometry to Web Mercator and set SRID
 ALTER TABLE public.qa_parkings_euvm
 ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
