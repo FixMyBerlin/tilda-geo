@@ -16,7 +16,7 @@ CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized
 
 CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
   id SERIAL PRIMARY KEY,
-  geom geometry (POINT, 4326),
+  geom geometry (Geometry, 4326), -- Polygon or MultiPolygon
   count_reference INTEGER,
   count_current INTEGER,
   difference INTEGER,
@@ -35,6 +35,41 @@ SELECT
   * INTO public.qa_parkings_euvm
 FROM
   data.euvm_qa_voronoi;
+
+-- Clip geometries to Berlin boundary
+UPDATE public.qa_parkings_euvm
+SET
+  geom = ST_Intersection (
+    public.qa_parkings_euvm.geom,
+    ST_Transform (berlin.geom, 4326)
+  )
+FROM
+  public.boundaries berlin
+WHERE
+  berlin.osm_id = 62422
+  AND NOT ST_Within (
+    public.qa_parkings_euvm.geom,
+    ST_Transform (berlin.geom, 4326)
+  );
+
+-- TEMPORARY: Filter to only include polygons that intersect with specific Ortsteile
+DELETE FROM public.qa_parkings_euvm
+WHERE
+  NOT EXISTS (
+    SELECT
+      1
+    FROM
+      public.boundaries ortsteil
+    WHERE
+      ortsteil.osm_id IN (
+        55764, -- Friedrichshain-Kreuzberg https://www.openstreetmap.org/relation/55764
+        409213 -- OT Neukölln https://www.openstreetmap.org/relation/409213
+      )
+      AND ST_Intersects (
+        public.qa_parkings_euvm.geom,
+        ST_Transform (ortsteil.geom, 4326)
+      )
+  );
 
 -- Transform geometry to Web Mercator and set SRID
 ALTER TABLE public.qa_parkings_euvm
