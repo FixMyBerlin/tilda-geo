@@ -16,7 +16,7 @@ CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized
 
 CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
   id SERIAL PRIMARY KEY,
-  geom geometry (POINT, 4326),
+  geom geometry (Geometry, 4326), -- Polygon or MultiPolygon
   count_reference INTEGER,
   count_current INTEGER,
   difference INTEGER,
