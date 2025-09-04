@@ -27,13 +27,21 @@ FROM
             _parking_cutouts c
           WHERE
             c.geom && p.geom
-            AND (
-              NOT c.tags ? 'street:name'
-              OR c.tags ->> 'street:name' = p.street_name
+            AND
+            -- when both cutout and parking have a street name, they must match
+            (
+              c.tags ->> 'street:name' = p.street_name
+              OR c.tags ->> 'street:name' IS NULL
+              OR p.street_name IS NULL
             )
-            AND (
-              c.tags ->> 'category' <> 'bus_stop'
-              OR c.tags ->> 'side' = p.side
+            AND
+            -- only apply bus_stop cutouts to the correct side of the street
+            (
+              (
+                c.tags ->> 'category' <> 'bus_stop'
+                OR c.tags ->> 'side' = p.side
+              )
+              OR c.tags ->> 'category' IS NULL
             )
         )
       ),
