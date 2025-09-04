@@ -96,6 +96,7 @@ DROP TABLE IF EXISTS _parking_parkings_merged;
 WITH
   merged AS (
     SELECT
+      cluster_id,
       tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
       string_agg(
         'way/' || id::TEXT,
@@ -171,11 +172,7 @@ WHERE
   );
 
 SELECT
-  id,
-  ROW_NUMBER() OVER (
-    PARTITION BY
-      id
-  ) AS idx INTO TEMP failed_merges
+  id INTO TEMP failed_merges
 FROM
   _parking_parkings_merged
 GROUP BY
@@ -183,11 +180,25 @@ GROUP BY
 HAVING
   count(*) > 1;
 
--- if we still have clusters that failed to merge we remove the capcaity so it will get estimated later on
+-- if we still have clusters that failed to merge we save them in a separate table and remove their capacity so it will get estimated later on
+DROP TABLE IF EXISTS _parking_failed_merges;
+
+SELECT
+  * INTO _parking_failed_merges
+FROM
+  _parking_parkings_merged
+WHERE
+  id IN (
+    SELECT
+      id
+    FROM
+      failed_merges
+  );
+
 UPDATE _parking_parkings_merged
 SET
   tags = tags - 'capacity',
-  id = failed_merges.id || idx::TEXT
+  id = _parking_parkings_merged.id || (_parking_parkings_merged.path[1])::TEXT
 FROM
   failed_merges
 WHERE
@@ -203,3 +214,8 @@ DO $$
   END $$;
 
 CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
+
+CREATE INDEX parking_parkings_failed_merges_idx ON _parking_failed_merges USING GIST (geom);
+
+ALTER TABLE _parking_failed_merges
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
