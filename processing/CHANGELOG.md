@@ -6,6 +6,7 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `bikelanes`
 
+- Include bikelanes that are `access=destination` in the data
 - Categorize bicycle roads with "Kfz frei" as `bicycleRoad_vehicleDestination`
 
 ## 2025-07-29
