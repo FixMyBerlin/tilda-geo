@@ -4,7 +4,7 @@ require('Metadata')
 require('RoadClassificationRoadValue')
 require('road_width')
 require('Log')
-local parse_length = require('parse_length')
+local parse_capacity = require('parse_capacity')
 local THIS_OR_THAT = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
@@ -40,14 +40,7 @@ local function result_tags_parkings(object)
   local id = DefaultId(object) .. '/' .. object.tags.side
 
   local width, width_confidence, width_source = road_width(object.tags)
-  local capacity = parse_length(object.tags.capacity)
-  local capacity_source = nil
-  local capacity_confidence = nil
-  if capacity ~= nil then
-    capacity_source = 'tag'
-    capacity_confidence = 'high'
-  end
-
+  local capacity, capacity_source, capacity_confidence = parse_capacity(object.tags)
   local surface_tags = THIS_OR_THAT.value_confidence_source(
     {
       value = SANITIZE_TAGS.surface(object.tags),
@@ -60,7 +53,6 @@ local function result_tags_parkings(object)
       source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
     }
   )
-
   -- Classify parking conditions into merged categories
   local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags)
 

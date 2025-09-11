@@ -3,6 +3,7 @@ require('MergeTable')
 require('DefaultId')
 require('Metadata')
 require('Log')
+local parse_capacity = require('parse_capacity')
 local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
@@ -13,6 +14,7 @@ local function result_tags_separate_parking(category, object, area)
   local id = DefaultId(object)
 
   local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(object.tags)
+  local capacity, capacity_source, capacity_confidence = parse_capacity(object.tags)
   local surface_tags = {
     value = SANITIZE_TAGS.surface(object.tags),
     confidence = 'high',
@@ -38,6 +40,9 @@ local function result_tags_separate_parking(category, object, area)
     mapillary = object.tags.mapillary,
 
     -- Area
+    capacity = capacity,
+    capacity_source = capacity_source,
+    capacity_confidence = capacity_confidence,
     area = area,
     area_confidence = 'high',
     area_source = 'geometry',
