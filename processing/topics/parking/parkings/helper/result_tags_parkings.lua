@@ -48,7 +48,7 @@ local function result_tags_parkings(object)
     capacity_confidence = 'high'
   end
 
-  local result_tags_surface = THIS_OR_THAT.value_confidence_source(
+  local surface_tags = THIS_OR_THAT.value_confidence_source(
     {
       value = SANITIZE_TAGS.surface(object.tags),
       confidence = 'high',
@@ -107,9 +107,9 @@ local function result_tags_parkings(object)
     zone = SANITIZE_TAGS.safe_string(object.tags.zone),
 
     -- Surface
-    surface = result_tags_surface.value,
-    surface_confidence = result_tags_surface.confidence,
-    surface_source = result_tags_surface.source,
+    surface = surface_tags.value,
+    surface_confidence = surface_tags.confidence,
+    surface_source = surface_tags.source,
   }
 
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
