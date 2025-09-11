@@ -1,6 +1,6 @@
 UPDATE _parking_parkings_cutted
 SET
-  geom = ST_SnapToGrid (geom, 0.01);
+  geom = ST_SnapToGrid (geom, 0.1);
 
 -- first we delete all parking lots where the length of the geometry is zero.
 DELETE FROM _parking_parkings_cutted
@@ -9,9 +9,6 @@ WHERE
 
 -- then we redistribute the parking capacities based on the length of the geometry and the original capacity.
 -- this is done by calculating the total length of all geometries with the same id and then redistributing the capacity proportionally for each geometry.
-ALTER TABLE _parking_parkings_cutted
-ADD COLUMN fraction numeric;
-
 WITH
   total_lengths AS (
     SELECT
@@ -27,7 +24,7 @@ WITH
   )
 UPDATE _parking_parkings_cutted pc
 SET
-  tags = tags - 'area' || jsonb_build_object(
+  tags = tags - 'area' - 'area_source' - 'area_confidence' || jsonb_build_object(
     'capacity',
     (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
     'capacity_source',

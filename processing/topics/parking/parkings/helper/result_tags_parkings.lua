@@ -4,7 +4,7 @@ require('Metadata')
 require('RoadClassificationRoadValue')
 require('road_width')
 require('Log')
-local parse_length = require('parse_length')
+local parse_capacity = require('parse_capacity')
 local THIS_OR_THAT = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
@@ -40,15 +40,8 @@ local function result_tags_parkings(object)
   local id = DefaultId(object) .. '/' .. object.tags.side
 
   local width, width_confidence, width_source = road_width(object.tags)
-  local capacity = parse_length(object.tags.capacity)
-  local capacity_source = nil
-  local capacity_confidence = nil
-  if capacity ~= nil then
-    capacity_source = 'tag'
-    capacity_confidence = 'high'
-  end
-
-  local result_tags_surface = THIS_OR_THAT.value_confidence_source(
+  local capacity, capacity_source, capacity_confidence = parse_capacity(object.tags)
+  local surface_tags = THIS_OR_THAT.value_confidence_source(
     {
       value = SANITIZE_TAGS.surface(object.tags),
       confidence = 'high',
@@ -60,13 +53,12 @@ local function result_tags_parkings(object)
       source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
     }
   )
-
   -- Classify parking conditions into merged categories
   local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags)
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
-  -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+  -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
   -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
   local result_tags = {
     side = object.tags.side, -- see transform_parkings()
@@ -107,9 +99,9 @@ local function result_tags_parkings(object)
     zone = SANITIZE_TAGS.safe_string(object.tags.zone),
 
     -- Surface
-    surface = result_tags_surface.value,
-    surface_confidence = result_tags_surface.confidence,
-    surface_source = result_tags_surface.source,
+    surface = surface_tags.value,
+    surface_confidence = surface_tags.confidence,
+    surface_source = surface_tags.source,
   }
 
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)

@@ -28,11 +28,28 @@ ADD COLUMN estimated_capacity numeric;
 
 UPDATE _parking_parkings_merged
 SET
+  estimated_capacity = estimate_capacity_from_area (
+    (tags ->> 'area')::NUMERIC,
+    tags ->> 'orientation'
+  )
+WHERE
+  tags ->> 'source' = 'separate_parking_areas'
+  AND tags ->> 'area_source' = 'geometry';
+
+UPDATE _parking_parkings_merged pm
+SET
+  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated (from area)", "capacity_confidence": "medium"}'::JSONB
+WHERE
+  tags ->> 'capacity' IS NULL
+  AND estimated_capacity IS NOT NULL;
+
+UPDATE _parking_parkings_merged
+SET
   estimated_capacity = estimate_capacity (length, tags ->> 'orientation');
 
 UPDATE _parking_parkings_merged pm
 SET
-  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated", "capacity_confidence": "medium"}'::JSONB
+  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated (from length)", "capacity_confidence": "medium"}'::JSONB
 WHERE
   tags ->> 'capacity' IS NULL;
 

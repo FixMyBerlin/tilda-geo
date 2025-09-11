@@ -1,23 +1,6 @@
 DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp(); END $$;
 
--- filter parkings that don't allow parking
-SELECT
-  id
-  --
-  INTO TEMP TABLE parking_prohibited
-FROM
-  _parking_parkings_merged p
-WHERE
-  p.tags ->> 'parking' IN (
-    'no',
-    'separate',
-    'not_expected',
-    'missing',
-    'separate'
-  );
-
-CREATE INDEX parking_prohibited_id_idx ON parking_prohibited USING btree (id);
-
+-- filter parkings that don't allow parking (except missing)
 INSERT INTO
   parkings_no (id, tags, meta, geom, minzoom)
 SELECT
@@ -29,34 +12,25 @@ SELECT
 FROM
   _parking_parkings_merged p
 WHERE
-  id IN (
-    SELECT
-      id
-    FROM
-      parking_prohibited
-  );
+  p.tags ->> 'parking' IN ('no', 'separate', 'not_expected');
 
-DELETE FROM _parking_parkings_merged
+-- filter parkings with missing data
+INSERT INTO
+  parkings_no (id, tags, meta, geom, minzoom)
+SELECT
+  id,
+  tags || '{"reason": "missing_data"}'::JSONB,
+  '{}'::JSONB,
+  ST_Transform (geom, 3857),
+  0
+FROM
+  _parking_parkings_merged p
 WHERE
-  id IN (
-    SELECT
-      id
-    FROM
-      parking_prohibited
-  );
+  p.tags ->> 'parking' = 'missing';
+
+CREATE UNIQUE INDEX parkings_no_id_idx ON parkings_no USING BTREE (id);
 
 -- filter parkings with capacity < 1
-SELECT
-  id
-  --
-  INTO TEMP capacity_too_low
-FROM
-  _parking_parkings_merged
-WHERE
-  (tags ->> 'capacity')::NUMERIC < 1;
-
-CREATE INDEX parking_discarded_idx ON capacity_too_low USING BTREE (id);
-
 INSERT INTO
   parkings_no (id, tags, meta, geom, minzoom)
 SELECT
@@ -68,21 +42,8 @@ SELECT
 FROM
   _parking_parkings_merged
 WHERE
-  id IN (
-    SELECT
-      id
-    FROM
-      capacity_too_low
-  );
-
-DELETE FROM _parking_parkings_merged
-WHERE
-  id IN (
-    SELECT
-      id
-    FROM
-      capacity_too_low
-  );
+  (tags ->> 'capacity')::NUMERIC < 1
+ON CONFLICT (id) DO NOTHING;
 
 UPDATE parkings_no
 SET

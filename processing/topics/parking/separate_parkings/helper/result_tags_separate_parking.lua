@@ -3,28 +3,28 @@ require('MergeTable')
 require('DefaultId')
 require('Metadata')
 require('Log')
+local parse_capacity = require('parse_capacity')
 local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
-local parking_point_radius = require('parking_point_radius')
 
 local function result_tags_separate_parking(category, object, area)
   local id = DefaultId(object)
 
-  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(object.tags)
+  local capacity, capacity_source, capacity_confidence = parse_capacity(object.tags)
   local surface_tags = {
     value = SANITIZE_TAGS.surface(object.tags),
     confidence = 'high',
     source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
   }
-  local capacity_tags = category:get_capacity(object.type, object.tags, area)
+  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(object.tags)
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
-  -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+  -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
   -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
-  local merge_tags = {
+  local result_tags = {
     side = nil,
     source = object.type == 'node' and 'separate_parking_points' or 'separate_parking_areas',
 
@@ -38,11 +38,11 @@ local function result_tags_separate_parking(category, object, area)
     operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
     mapillary = object.tags.mapillary,
 
-    -- Capacity & Area
-    capacity = capacity_tags.capacity,
-    capacity_confidence = capacity_tags.capacity_confidence,
-    capacity_source = capacity_tags.capacity_source,
-    area = capacity_tags.area,
+    -- Area
+    capacity = capacity,
+    capacity_source = capacity_source,
+    capacity_confidence = capacity_confidence,
+    area = area,
     area_confidence = 'high',
     area_source = 'geometry',
 
@@ -68,12 +68,7 @@ local function result_tags_separate_parking(category, object, area)
     surface_source = surface_tags.source,
   }
 
-  -- Tags that are only relevant for separate parking data
-  local result_tags = {
-    buffer_radius = parking_point_radius(object),
-  }
-
-  MergeTable(result_tags, merge_tags)
+  MergeTable(result_tags, result_tags)
 
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
 
