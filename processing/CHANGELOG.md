@@ -2,9 +2,15 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-09-11
+
+### `bikelanes`
+
+- Categorize bicycle roads with "Kfz frei" as `bicycleRoad_vehicleDestination`
+
 ## 2025-07-29
 
-### `raods`, `roadsPathClasses`, `bikelanes``
+### `roads`, `roadsPathClasses`, `bikelanes`
 
 - Ways in `construction` are now transformed into their provided infrastructure, including prefixed data `construction:*`
 - With `lifecycle=construction` to indicate this transformation

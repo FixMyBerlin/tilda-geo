@@ -114,6 +114,7 @@ local bicycleRoad = BikelaneCategory.new({
 
 -- https://wiki.openstreetmap.org/wiki/DE:Key:bicycle%20road
 -- traffic_sign=DE:244,1020-30, https://wiki.openstreetmap.org/wiki/DE:Tag:traffic_sign=DE:244
+-- Also "Kfz frei", https://commons.wikimedia.org/wiki/File:Zusatzzeichen_KFZ_frei.svg
 local bicycleRoad_vehicleDestination = BikelaneCategory.new({
   id = 'bicycleRoad_vehicleDestination',
   desc = 'Bicycle road (DE: "Fahrradstraße mit Anlieger frei")' ..
@@ -126,6 +127,13 @@ local bicycleRoad_vehicleDestination = BikelaneCategory.new({
     if bicycleRoad(tags) then
       local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
       if ContainsSubstring(trafficSign, "1020-30") then
+        return true
+      end
+      -- https://github.com/osmberlin/osm-traffic-sign-tool/issues/51#issuecomment-2969387929
+      if ContainsSubstring(trafficSign, "Kraftfahrzeuge-frei") or
+        ContainsSubstring(trafficSign, "Kfz-Verkehr frei") or
+        ContainsSubstring(trafficSign, "KFZ frei")
+      then
         return true
       end
       if tags.vehicle == 'destination' or tags.motor_vehicle == 'destination' then
