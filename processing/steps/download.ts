@@ -2,7 +2,7 @@ import { $ } from 'bun'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
-import { ensureOAuthReady, getAuthHeaders } from '../utils/oauth'
+import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
 
@@ -109,9 +109,24 @@ export async function downloadFile() {
   // Download file and write to disc
   const downloadMethod = cookieCheck?.isValid ? 'internal (OAuth)' : 'public'
   console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
+
   try {
     if (cookieCheck?.isValid && cookieCheck.httpCookie) {
-      await $`wget --quiet --header ${'Cookie: ' + cookieCheck.httpCookie} --max-redirect 0 --output-document ${filePath} ${params.pbfDownloadUrl}`
+      // Try OAuth download first
+      const result =
+        await $`wget --quiet --header ${'Cookie: ' + cookieCheck.httpCookie} --output-document ${filePath} ${params.pbfDownloadUrl}`
+
+      // Check if wget succeeded (exit code 0)
+      if (result.exitCode !== 0) {
+        console.warn(
+          `[WARN] Download: OAuth download failed with exit code ${result.exitCode}, falling back to public download`,
+        )
+
+        // Fall back to public download
+        fallbackToPublicDownload()
+        console.log(`Download: Falling back to public download: ${params.pbfDownloadUrl}`)
+        await $`wget --quiet --output-document ${filePath} ${params.pbfDownloadUrl}`
+      }
     } else {
       // Public download
       await $`wget --quiet --output-document ${filePath} ${params.pbfDownloadUrl}`

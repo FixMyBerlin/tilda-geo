@@ -23,16 +23,20 @@ export async function ensureOAuthReady() {
     return null
   }
 
-  // Always create a fresh cookie and use it directly
-  await createOAuthCookie()
-  // Retrieve cookie written by the Python client
-  const { httpCookie } = await getCookieFile()
-  if (httpCookie) {
-    console.log('Geofabrik OAuth: OAuth is ready with fresh cookie')
-    return {
-      isValid: true,
-      httpCookie,
-    } as const
+  try {
+    // Always create a fresh cookie and use it directly
+    await createOAuthCookie()
+    // Retrieve cookie written by the Python client
+    const { httpCookie } = await getCookieFile()
+    if (httpCookie) {
+      console.log('Geofabrik OAuth: OAuth is ready with fresh cookie')
+      return {
+        isValid: true,
+        httpCookie,
+      } as const
+    }
+  } catch (error) {
+    console.error('[ERROR] Geofabrik OAuth: Failed to create or retrieve cookie:', error)
   }
 
   console.log(
@@ -124,7 +128,7 @@ function parseNetscapeCookie(cookieContent: string) {
 /**
  * Switch to public Geofabrik downloads and disable OAuth credentials
  */
-function fallbackToPublicDownload() {
+export function fallbackToPublicDownload() {
   params.pbfDownloadUrl = params.pbfDownloadUrl
     .replaceAll('osm-internal.download.geofabrik.de', 'download.geofabrik.de')
     .replaceAll('-internal', '')
@@ -157,4 +161,20 @@ export function getAuthHeaders(httpCookie: string | undefined) {
   }
 
   return headers
+}
+
+/**
+ * Validate that the OAuth cookie works by making a test request
+ */
+export async function validateOAuthCookie(httpCookie: string, testUrl: string): Promise<boolean> {
+  try {
+    const response = await fetch(testUrl, {
+      method: 'HEAD',
+      headers: getAuthHeaders(httpCookie),
+    })
+    return response.ok
+  } catch (error) {
+    console.error('[ERROR] Geofabrik OAuth: Cookie validation failed:', error)
+    return false
+  }
 }
