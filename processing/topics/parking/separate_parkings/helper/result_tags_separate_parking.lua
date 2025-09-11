@@ -21,9 +21,9 @@ local function result_tags_separate_parking(category, object, area)
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
-  -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+  -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
   -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
-  local merge_tags = {
+  local result_tags = {
     side = nil,
     source = object.type == 'node' and 'separate_parking_points' or 'separate_parking_areas',
 
@@ -64,10 +64,7 @@ local function result_tags_separate_parking(category, object, area)
     surface_source = surface_tags.source,
   }
 
-  -- Tags that are only relevant for separate parking data
-  local result_tags = {}
-
-  MergeTable(result_tags, merge_tags)
+  MergeTable(result_tags, result_tags)
 
   local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
 

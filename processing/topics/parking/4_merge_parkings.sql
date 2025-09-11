@@ -11,7 +11,7 @@ SELECT
   jsonb_build_object(
     -- CRITICAL: Keep these lists in sync:
     -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
-    -- 2. `merge_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+    -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
     -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
     /* sql-formatter-disable */
     'side', side,
