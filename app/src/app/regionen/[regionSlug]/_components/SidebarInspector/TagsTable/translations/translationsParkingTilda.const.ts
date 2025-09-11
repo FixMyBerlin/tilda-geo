@@ -58,6 +58,7 @@ export const translationsParkingTilda = {
     'tilda_parkings--condition_category=no_standing': 'Eingeschränktes Halteverbot',
     'tilda_parkings--condition_category=no_stopping': 'Halteverbot / Absolutes Haltverbot',
     'tilda_parkings--reason=parking_tag': 'Explizite Angabe in den Daten',
+    'tilda_parkings--reason=missing_data': 'Keine Parkraum-Daten in OpenStreetMap erfasst',
     'tilda_parkings_cutouts--category--key': 'Stanzungen',
     'tilda_parkings_cutouts--buffer_radius--key': 'Radius der Stanzung',
     'tilda_parkings_cutouts--source--key': 'Datenquelle',

@@ -1,6 +1,6 @@
 DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp(); END $$;
 
--- filter parkings that don't allow parking
+-- filter parkings that don't allow parking (except missing)
 INSERT INTO
   parkings_no (id, tags, meta, geom, minzoom)
 SELECT
@@ -12,13 +12,21 @@ SELECT
 FROM
   _parking_parkings_merged p
 WHERE
-  p.tags ->> 'parking' IN (
-    'no',
-    'separate',
-    'not_expected',
-    'missing',
-    'separate'
-  );
+  p.tags ->> 'parking' IN ('no', 'separate', 'not_expected');
+
+-- filter parkings with missing data
+INSERT INTO
+  parkings_no (id, tags, meta, geom, minzoom)
+SELECT
+  id,
+  tags || '{"reason": "missing_data"}'::JSONB,
+  '{}'::JSONB,
+  ST_Transform (geom, 3857),
+  0
+FROM
+  _parking_parkings_merged p
+WHERE
+  p.tags ->> 'parking' = 'missing';
 
 CREATE UNIQUE INDEX parkings_no_id_idx ON parkings_no USING BTREE (id);
 
