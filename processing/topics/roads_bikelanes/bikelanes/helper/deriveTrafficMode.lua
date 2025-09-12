@@ -39,7 +39,7 @@ local function deriveTrafficMode(bikelaneTags, centerlineTags, categoryId, side)
   local infered_traffic_mode_right = inferTrafficModeFromParking(centerlineTags, 'right')
 
   -- CASE bicycle roads: use both sides
-  if categoryId == 'bicycleRoad' then
+  if categoryId == 'bicycleRoad' or categoryId == 'bicycleRoad_vehicleDestination' then
     return { traffic_mode_left = infered_traffic_mode_left, traffic_mode_right = infered_traffic_mode_right }
   end
 
