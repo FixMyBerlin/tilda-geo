@@ -35,7 +35,7 @@ local function result_tags_separate_parking(category, object, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']),
+    operator_type = SANITIZE_TAGS.operator_type(object.tags['operator:type']),
     mapillary = object.tags.mapillary,
 
     -- Area
@@ -49,10 +49,10 @@ local function result_tags_separate_parking(category, object, area)
     -- Parking properties
     condition_category = conditional_categories_tags.condition_category,
     condition_vehicles = conditional_categories_tags.condition_vehicles,
-    covered = SANITIZE_PARKING_TAGS.covered(object.tags.covered),
+    covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
-    informal = SANITIZE_PARKING_TAGS.informal(object.tags.informal),
+    informal = SANITIZE_TAGS.informal(object.tags.informal),
     location = SANITIZE_PARKING_TAGS.location(object.tags.location),
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
@@ -70,7 +70,7 @@ local function result_tags_separate_parking(category, object, area)
 
   MergeTable(result_tags, result_tags)
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
+  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
 
   return {
     id = id,

@@ -23,15 +23,6 @@ local SANITIZE_PARKING_TAGS = {
   orientation = function (value)
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })
   end,
-  operator_type = function(value)
-    return sanitize_for_logging(value, { 'public', 'private' })
-  end,
-  covered = function (value)
-    return sanitize_for_logging(value, { 'yes' }, { 'no' })
-  end,
-  informal = function (value)
-    return sanitize_for_logging(value, { 'yes' })
-  end,
   markings = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,

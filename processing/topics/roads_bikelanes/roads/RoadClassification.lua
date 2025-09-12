@@ -21,6 +21,6 @@ function RoadClassification(object_tags)
 
   MergeTable(result_tags, DeriveTrafficSigns(object_tags))
 
-  local cleaned_tags = sanitize_cleaner(result_tags, object_tags)
+  local cleaned_tags = sanitize_cleaner.remove_disallowed_values(result_tags)
   return cleaned_tags
 end

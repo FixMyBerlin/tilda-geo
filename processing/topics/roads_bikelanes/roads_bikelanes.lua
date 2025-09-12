@@ -157,14 +157,9 @@ function osm2pgsql.process_way(object)
   end
   if not allowed_highways[object_tags.highway] then return end
 
-  -- Apply other exclusions (area, pier, operator, indoor, informal)
-  if exclude.by_other(object_tags) then return end
-
-  -- Apply access filtering for bikelanes (forbids private, no, delivery, permit)
+  if exclude.exclude_area_water(object_tags) then return end
   local forbidden_accesses_bikelanes = Set({ 'private', 'no', 'delivery', 'permit' })
   if exclude.by_access(object_tags, forbidden_accesses_bikelanes) then return end
-
-  -- Apply service filtering
   if exclude.by_service(object_tags) then return end
 
   -- ====== (B.1) Initialize and apply pseudo tags ======
@@ -211,7 +206,7 @@ function osm2pgsql.process_way(object)
         mapillary_backward = cycleway.mapillary_backward or road_result_tags.mapillary_backward,
         mapillary_traffic_sign = cycleway.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
         description = cycleway.description or road_result_tags.description,
-        _parent_highway = cycleway._parent_highway
+        _parent_highway = cycleway._parent_highway -- duplicated because we `ExtractPublicTags` on the other data below
       }
       local meta = Metadata(object)
 
@@ -271,6 +266,7 @@ function osm2pgsql.process_way(object)
   -- Apply access filtering for roads (forbids private, no, delivery, permit, destination)
   local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination' }) })
   if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
+  if exclude.by_operator_indoor_informal(object_tags) then return end
 
   -- (C.3) WRITE `bikeSuitability` table
   local bikeSuitability = CategorizeBikeSuitability(object_tags)

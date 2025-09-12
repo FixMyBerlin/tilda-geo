@@ -31,7 +31,7 @@ local function exclude_by_service(tags)
   return false
 end
 
-local function exclude_by_other(tags)
+local function exclude_area_water(tags)
   -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
   if tags.area == 'yes' then
     return true
@@ -42,7 +42,12 @@ local function exclude_by_other(tags)
     return true
   end
 
-  if tags.operator == 'private' then
+  return false
+end
+
+local function exclude_operator_indoor_informal(tags)
+  -- https://wiki.openstreetmap.org/wiki/Key:operator:type
+  if tags['operator:type'] == 'private' or tags.operator == 'private' then
     return true
   end
 
@@ -60,5 +65,6 @@ end
 return {
   by_access = exclude_by_access,
   by_service = exclude_by_service,
-  by_other = exclude_by_other
+  by_operator_indoor_informal = exclude_operator_indoor_informal,
+  exclude_area_water = exclude_area_water
 }

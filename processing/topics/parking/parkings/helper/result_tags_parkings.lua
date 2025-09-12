@@ -71,7 +71,7 @@ local function result_tags_parkings(object)
     road_width_confidence = width_confidence,
     road_width_source = width_source,
     road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
-    operator_type = THIS_OR_THAT.value(SANITIZE_PARKING_TAGS.operator_type(object.tags['operator:type']), SANITIZE_PARKING_TAGS.operator_type(object._parent_tags['operator:type'])),
+    operator_type = THIS_OR_THAT.value(SANITIZE_TAGS.operator_type(object.tags['operator:type']), SANITIZE_TAGS.operator_type(object._parent_tags['operator:type'])),
     mapillary = object.tags.mapillary or object._parent_tags.mapillary,
 
     -- Capacity & Area
@@ -85,10 +85,10 @@ local function result_tags_parkings(object)
     -- Parking properties
     condition_category = conditional_categories.condition_category,
     condition_vehicles = conditional_categories.condition_vehicles,
-    covered = SANITIZE_PARKING_TAGS.covered(object.tags.covered),
+    covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
-    informal = SANITIZE_PARKING_TAGS.informal(object.tags.informal),
+    informal = SANITIZE_TAGS.informal(object.tags.informal),
     location = SANITIZE_PARKING_TAGS.location(object.tags.location),
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
@@ -104,7 +104,7 @@ local function result_tags_parkings(object)
     surface_source = surface_tags.source,
   }
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, object.tags)
+  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
 
   return {
     id = id,

@@ -15,8 +15,10 @@ require("DeriveTrafficSigns")
 require("CollectTodos")
 require("ToMarkdownList")
 require("ToTodoTags")
+local sanitize_cleaner = require('sanitize_cleaner')
 local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
+local SANITIZE_TAGS = require('sanitize_tags')
 local deriveTrafficMode = require('deriveTrafficMode')
 local deriveBikelaneSurface = require('deriveBikelaneSurface')
 local deriveBikelaneSmoothness = require('deriveBikelaneSmoothness')
@@ -83,6 +85,10 @@ function Bikelanes(object_tags, object)
           buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
           marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
+          -- There is some miss-tagging to of operator=private which we also allow
+          operator_type = SANITIZE_TAGS.operator_type(object_tags['operator:type'] or (object_tags.operator == 'private' and object_tags.operator)),
+          informal = SANITIZE_TAGS.informal(object_tags.informal),
+          covered = object_tags.covered == 'yes' and 'covered' or (object_tags.indoor == 'yes' and 'indoor' or nil),
           mapillary = transformed_tags.mapillary
             or object_tags.mapillary
             or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary']
@@ -120,7 +126,10 @@ function Bikelanes(object_tags, object)
         result_tags._todo_list = ToTodoTags(todos)
         result_tags.todos = ToMarkdownList(todos)
       end
-      table.insert(result_bikelanes, result_tags)
+
+      local cleaned_tags = sanitize_cleaner.remove_disallowed_values(result_tags)
+
+      table.insert(result_bikelanes, cleaned_tags)
     end
   end
 
