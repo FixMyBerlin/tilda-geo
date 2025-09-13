@@ -11,7 +11,7 @@ local function normalize_separated_values(value, separator)
   local seen = {}
   for part in value:gmatch('[^' .. separator .. ']+') do
     local trimmed = part:match('^%s*(.-)%s*$') -- trim whitespace
-    if trimmed ~= '' and not seen[trimmed] then
+    if trimmed ~= '' and trimmed ~= nil and not seen[trimmed] then
       table.insert(parts, trimmed)
       seen[trimmed] = true
     end

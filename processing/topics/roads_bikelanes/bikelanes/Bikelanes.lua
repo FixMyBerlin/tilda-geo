@@ -19,6 +19,7 @@ local sanitize_cleaner = require('sanitize_cleaner')
 local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local SANITIZE_TAGS = require('sanitize_tags')
+local to_semicolon_list = require('to_semicolon_list')
 local deriveTrafficMode = require('deriveTrafficMode')
 local deriveBikelaneSurface = require('deriveBikelaneSurface')
 local deriveBikelaneSmoothness = require('deriveBikelaneSmoothness')
@@ -89,22 +90,39 @@ function Bikelanes(object_tags, object)
           operator_type = SANITIZE_TAGS.operator_type(object_tags['operator:type'] or (object_tags.operator == 'private' and object_tags.operator)),
           informal = SANITIZE_TAGS.informal(object_tags.informal),
           covered = object_tags.covered == 'yes' and 'covered' or (object_tags.indoor == 'yes' and 'indoor' or nil),
-          mapillary = transformed_tags.mapillary
-            or object_tags.mapillary
-            or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary']
-            or object_tags['source:cycleway:both:mapillary']
-            or object_tags['source:cycleway:mapillary'],
-          mapillary_forward = transformed_tags['mapillary:forward'] or object_tags['source:cycleway:mapillary:forward'],
-          mapillary_backward = transformed_tags['mapillary:backward'] or object_tags['source:cycleway:mapillary:backward'],
-          mapillary_traffic_sign = transformed_tags['traffic_sign:mapillary']
-            or object_tags['source:traffic_sign:mapillary']
-            or object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary']
-            or object_tags['source:cycleway:both:traffic_sign:mapillary']
-            or object_tags['source:cycleway:traffic_sign:mapillary'],
-          description = transformed_tags.description or transformed_tags.note
-            or object_tags['note:cycleway:' .. transformed_tags._side]
-            or object_tags['note:cycleway:both']
-            or object_tags['note:cycleway'],
+          mapillary = to_semicolon_list({
+            transformed_tags.mapillary,
+            object_tags.mapillary,
+            object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'],
+            object_tags['source:cycleway:both:mapillary'],
+            object_tags['source:cycleway:mapillary'],
+          }),
+          mapillary_forward = to_semicolon_list({
+            transformed_tags['mapillary:forward'],
+            object_tags['source:cycleway:mapillary:forward'],
+          }),
+          mapillary_backward = to_semicolon_list({
+            transformed_tags['mapillary:backward'],
+            object_tags['source:cycleway:mapillary:backward'],
+          }),
+          mapillary_traffic_sign = to_semicolon_list({
+            transformed_tags['traffic_sign:mapillary'],
+            object_tags['source:traffic_sign:mapillary'],
+            object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'],
+            object_tags['source:cycleway:both:traffic_sign:mapillary'],
+            object_tags['source:cycleway:traffic_sign:mapillary'],
+            object_tags['source:cycleway:traffic_sign:forward:mapillary'],
+            object_tags['source:cycleway:traffic_sign:backward:mapillary'],
+            object_tags['source:traffic_sign:forward:mapillary'],
+            object_tags['source:traffic_sign:backward:mapillary'],
+          }),
+          description = to_semicolon_list({
+            transformed_tags.description,
+            transformed_tags.note,
+            object_tags['note:cycleway:' .. transformed_tags._side],
+            object_tags['note:cycleway:both'],
+            object_tags['note:cycleway'],
+          }),
         })
 
         MergeTable(result_tags, deriveTrafficMode(transformed_tags, object_tags, category.id, transformed_tags._side))
