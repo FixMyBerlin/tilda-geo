@@ -19,6 +19,7 @@ applyTo: '**/*.lua'
 - Each file has to start with a `require('init')` which will make all `package.path` avaiable so we don't have to require those manually.
 - To require a function, used to put everything in the global namespace like `require("function_name")` the file and then use `function_name`. But for new helper methods, we return from the helper file and require via  `local function_name = require("function_name")`.
 - Preserve code comments that are still relevant.
+- Add typescript like code comments for VS Code intellisense for each function that is created or updated.
 
 ## Software tests
 - To run the test, to go to the root folder and run `./processing/run-tests.sh`. Do this to evaluate the test result yourself. You cannot run single files, you always have to run the whole suite.
@@ -40,4 +41,13 @@ applyTo: '**/*.lua'
 
 ## Formatting
 - Use 2 spaces for indentation.
-- Use single quotes in lua files whenever possible
+- Use single quotes in lua files whenever possible.
+- Update code to use single quotes whenever a line of code is touched.
+- In tables, always have a comma at the last entry.
+  **Example:**
+  ```lua
+  table_foo = {
+    'foo',
+    'bar',
+  }
+  ```
