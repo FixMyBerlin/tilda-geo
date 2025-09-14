@@ -25,6 +25,7 @@
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/explode_parkings.sql'
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
+\i '/processing/topics/parking/custom_functions/osm_ref.sql'
 
 
 -- HANDLE ROADS

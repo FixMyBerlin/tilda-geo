@@ -12,9 +12,7 @@ SELECT
       'length',
       ROUND(length::NUMERIC, 2),
       'capacity',
-      round_capacity ((tags ->> 'capacity')::NUMERIC),
-      'original_osm_ids',
-      original_osm_ids
+      round_capacity ((tags ->> 'capacity')::NUMERIC)
     )
   ),
   '{}'::jsonb,

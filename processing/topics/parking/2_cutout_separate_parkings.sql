@@ -4,16 +4,7 @@ DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_times
 --
 -- PROCESS
 INSERT INTO
-  _parking_parkings_cutted (
-    id,
-    osm_type,
-    osm_id,
-    tags,
-    side,
-    source,
-    meta,
-    geom
-  )
+  _parking_parkings_cutted (id, osm_type, osm_id, tags, side, meta, geom)
 SELECT
   COALESCE(
     p.kerb_id || '/' || p.id || '/' || d.path[1],
@@ -21,9 +12,8 @@ SELECT
   ),
   p.osm_type,
   osm_id,
-  p.tags,
+  p.tags || '{"source": "separate_parking_areas"}'::JSONB as tags,
   p.kerb_side,
-  'separate_parking_areas' as source,
   p.meta,
   d.geom
 FROM
@@ -40,7 +30,10 @@ FROM
           WHERE
             c.geom && p.geom
             AND c.tags ->> 'source' <> 'separate_parking_areas'
-            AND c.tags ->> 'category' <> 'kerb_lowered'
+            AND (
+              c.tags ->> 'category' <> 'kerb_lowered'
+              OR c.tags ->> 'category' IS NULL
+            )
         )
       ),
       p.geom
@@ -51,16 +44,7 @@ FROM
 --
 -- PROCESS
 INSERT INTO
-  _parking_parkings_cutted (
-    id,
-    osm_type,
-    osm_id,
-    tags,
-    side,
-    source,
-    meta,
-    geom
-  )
+  _parking_parkings_cutted (id, osm_type, osm_id, tags, side, meta, geom)
 SELECT
   COALESCE(
     p.kerb_id || '/' || p.id || '/' || d.path[1],
@@ -68,9 +52,8 @@ SELECT
   ),
   p.osm_type,
   osm_id,
-  p.tags,
+  p.tags || '{"source": "separate_parking_points"}'::JSONB as tags,
   p.kerb_side,
-  'separate_parking_points' as source,
   p.meta,
   d.geom
 FROM
@@ -87,7 +70,10 @@ FROM
           WHERE
             c.geom && p.geom
             AND c.tags ->> 'source' <> 'separate_parking_points'
-            AND c.tags ->> 'category' <> 'kerb_lowered'
+            AND (
+              c.tags ->> 'category' <> 'kerb_lowered'
+              OR c.tags ->> 'category' IS NULL
+            )
         )
       ),
       p.geom

@@ -7,8 +7,7 @@ SELECT
   p.osm_type,
   p.osm_id,
   p.side,
-  p.tags,
-  'parkings' as source,
+  p.tags || '{"source": "parkings"}'::JSONB as tags,
   p.meta,
   p.street_name,
   d.geom

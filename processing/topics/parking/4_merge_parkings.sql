@@ -5,6 +5,7 @@ DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
 -- The temp table is dropped automatically once our db connection is closed.
 SELECT
   id,
+  osm_type,
   osm_id,
   geom,
   (tags ->> 'capacity')::NUMERIC AS capacity,
@@ -15,11 +16,11 @@ SELECT
     -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
     /* sql-formatter-disable */
     'side', side,
-    'source', source,
+    'source', tags->>'source',
     --
     -- Road properties
     'road', tags ->> 'road',
-    'road_name', COALESCE(tags ->> 'road_name', street_name),
+    'road_name', COALESCE(tags ->> 'road_name', street_name), -- this fallback should probably be implemented earlier
     'road_width', tags ->> 'road_width',
     'road_width_confidence', tags ->> 'road_width_confidence',
     'road_width_source', tags ->> 'road_width_source',
@@ -97,19 +98,23 @@ WITH
   merged AS (
     SELECT
       cluster_id,
-      tags || jsonb_build_object('capacity', SUM(capacity)) AS tags,
+      tags || jsonb_build_object(
+        'capacity',
+        SUM(capacity),
+        'original_osm_ids',
+        string_agg(
+          osm_ref (osm_type, osm_id),
+          '-'
+          ORDER BY
+            osm_id
+        )
+      ) AS tags,
       string_agg(
-        'way/' || id::TEXT,
+        id::TEXT,
         '-'
         ORDER BY
           id
       ) AS original_ids,
-      string_agg(
-        osm_id::TEXT,
-        '-'
-        ORDER BY
-          osm_id
-      ) AS original_osm_ids,
       (
         ST_Dump (ST_LineMerge (ST_Node (ST_Collect (geom))))
       ).*
