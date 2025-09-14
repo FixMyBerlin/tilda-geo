@@ -8,6 +8,7 @@ CREATE FUNCTION project_to_k_closest_kerbs (
   k integer
 ) RETURNS TABLE (
   kerb_id text,
+  kerb_osm_type text,
   kerb_osm_id bigint,
   kerb_side text,
   kerb_tags jsonb,
@@ -21,7 +22,7 @@ DECLARE
   closest_kerb_side text := NULL;
 BEGIN
   FOR kerb IN
-    SELECT  pk.id, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags
+    SELECT  pk.id, pk.osm_type, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
     ORDER BY ST_Distance(input_geom, pk.geom)
@@ -33,6 +34,7 @@ BEGIN
 
     IF kerb.side = closest_kerb_side THEN
       kerb_id := kerb.id;
+      kerb_osm_type := kerb.osm_type;
       kerb_osm_id := kerb.osm_id;
       kerb_side := kerb.side;
       kerb_tags := kerb.tags;

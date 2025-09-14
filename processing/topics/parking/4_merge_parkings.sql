@@ -5,9 +5,9 @@ DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
 -- The temp table is dropped automatically once our db connection is closed.
 SELECT
   id,
-  osm_type,
-  osm_id,
   geom,
+  tag_source,
+  geom_source,
   (tags ->> 'capacity')::NUMERIC AS capacity,
   jsonb_build_object(
     -- CRITICAL: Keep these lists in sync:
@@ -101,12 +101,19 @@ WITH
       tags || jsonb_build_object(
         'capacity',
         SUM(capacity),
-        'original_osm_ids',
+        'tag_sources',
         string_agg(
-          osm_ref (osm_type, osm_id),
+          tag_source,
           '-'
           ORDER BY
-            osm_id
+            tag_source
+        ),
+        'geom_sources',
+        string_agg(
+          geom_source,
+          '-'
+          ORDER BY
+            geom_source
         )
       ) AS tags,
       string_agg(

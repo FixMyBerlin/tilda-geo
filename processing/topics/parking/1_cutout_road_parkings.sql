@@ -4,8 +4,9 @@ DROP TABLE IF EXISTS _parking_parkings_cutted;
 
 SELECT
   COALESCE(p.id || '/' || d.path[1], p.id) AS id,
-  p.osm_type,
-  p.osm_id,
+  osm_id,
+  osm_ref (p.osm_type, p.osm_id) AS tag_source,
+  osm_ref (p.osm_type, p.osm_id) AS geom_source,
   p.side,
   p.tags || '{"source": "parkings"}'::JSONB as tags,
   p.meta,

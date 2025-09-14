@@ -4,15 +4,25 @@ DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_times
 --
 -- PROCESS
 INSERT INTO
-  _parking_parkings_cutted (id, osm_type, osm_id, tags, side, meta, geom)
+  _parking_parkings_cutted (
+    id,
+    osm_id,
+    tag_source,
+    geom_source,
+    tags,
+    side,
+    meta,
+    geom
+  )
 SELECT
   COALESCE(
     p.kerb_id || '/' || p.id || '/' || d.path[1],
     p.kerb_id || '/' || p.id
   ),
-  p.osm_type,
-  osm_id,
-  p.tags || '{"source": "separate_parking_areas"}'::JSONB as tags,
+  p.osm_id,
+  osm_ref (p.osm_type, p.osm_id) AS tag_source,
+  osm_ref (p.kerb_osm_type, p.kerb_osm_id) AS geom_source,
+  p.tags || '{"source": "separate_parking_areas"}'::JSONB,
   p.kerb_side,
   p.meta,
   d.geom
@@ -44,15 +54,25 @@ FROM
 --
 -- PROCESS
 INSERT INTO
-  _parking_parkings_cutted (id, osm_type, osm_id, tags, side, meta, geom)
+  _parking_parkings_cutted (
+    id,
+    osm_id,
+    tag_source,
+    geom_source,
+    tags,
+    side,
+    meta,
+    geom
+  )
 SELECT
   COALESCE(
     p.kerb_id || '/' || p.id || '/' || d.path[1],
     p.kerb_id || '/' || p.id
   ),
-  p.osm_type,
   osm_id,
-  p.tags || '{"source": "separate_parking_points"}'::JSONB as tags,
+  osm_ref (p.osm_type, p.osm_id) AS tag_source,
+  osm_ref (p.kerb_osm_type, p.kerb_osm_id) AS geom_source,
+  p.tags || '{"source": "separate_parking_points"}'::JSONB,
   p.kerb_side,
   p.meta,
   d.geom
@@ -86,8 +106,6 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_parkings_cut_geom_idx ON _parking_parkings_cutted USING GIST (geom);
 
-CREATE INDEX parking_parkings_cut_osm_id_idx ON _parking_parkings_cutted (osm_id);
-
-CREATE INDEX parking_parkings_cut_osm_id_side_idx ON _parking_parkings_cutted (osm_id, side);
+CREATE INDEX parking_parkings_cut_osm_id_idx ON _parking_parkings_cutted (id);
 
 CREATE INDEX parking_parkings_cut_street_name_idx ON _parking_parkings_cutted (street_name);
