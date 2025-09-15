@@ -79,10 +79,10 @@ services:
   tiles:
     image: ghcr.io/maplibre/martin:v0.18.1
     container_name: tiles
-    command: "--config /config.yaml"
+    command: ["--config", "/config.yaml"]
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}
       # https://maplibre.org/martin/troubleshooting.html?highlight=log#troubleshooting
       # RUST_LOG: actix_web=info,martin=debug,tokio_postgres=debug
       RUST_LOG: actix_web=info,martin=info,tokio_postgres=info
