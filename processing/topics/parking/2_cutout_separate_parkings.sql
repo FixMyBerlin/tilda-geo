@@ -1,5 +1,21 @@
 DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_timestamp(); END $$;
 
+SELECT
+  * INTO TEMP separate_parking_cutouts
+FROM
+  _parking_cutouts
+WHERE
+  tags ->> 'source' IN (
+    'crossing',
+    'driveways',
+    'obstacle_points',
+    'obstacle_areas',
+    'obstacle_lines'
+  )
+  AND tags ->> 'category' IS DISTINCT FROM 'kerb_lowered';
+
+CREATE INDEX separate_parking_cutouts_geom_idx ON separate_parking_cutouts USING GIST (geom);
+
 -- INFO: Drop table happesn in cutout_parkings.sql
 --
 -- PROCESS
@@ -36,14 +52,9 @@ FROM
           SELECT
             ST_Union (c.geom)
           FROM
-            _parking_cutouts c
+            separate_parking_cutouts c
           WHERE
             c.geom && p.geom
-            AND c.tags ->> 'source' <> 'separate_parking_areas'
-            AND (
-              c.tags ->> 'category' <> 'kerb_lowered'
-              OR c.tags ->> 'category' IS NULL
-            )
         )
       ),
       p.geom
@@ -86,14 +97,9 @@ FROM
           SELECT
             ST_Union (c.geom)
           FROM
-            _parking_cutouts c
+            separate_parking_cutouts c
           WHERE
             c.geom && p.geom
-            AND c.tags ->> 'source' <> 'separate_parking_points'
-            AND (
-              c.tags ->> 'category' <> 'kerb_lowered'
-              OR c.tags ->> 'category' IS NULL
-            )
         )
       ),
       p.geom
