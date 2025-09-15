@@ -27,6 +27,8 @@
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
 \i '/processing/topics/parking/custom_functions/osm_ref.sql'
 
+-- * … FOR SEPARATE PARKINGS
+\i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
