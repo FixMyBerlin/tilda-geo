@@ -22,6 +22,35 @@ WHERE
   OR ST_GeometryType (geom) <> 'ST_LineString'
   OR ST_Length (geom) < 0.3;
 
+-- now we need to redistribute the capacity of our projected areas to avoid double counting
+-- we do this by assigning the capacity to each piece proportionally to it's length / length of all projected pieces
+CREATE INDEX parking_separate_parking_areas_osm_id_idx ON _parking_separate_parking_areas_projected (osm_id);
+
+WITH
+  total_lengths AS (
+    SELECT
+      osm_id,
+      SUM(ST_Length (geom)) AS length,
+      COUNT(*) AS count
+    FROM
+      _parking_separate_parking_areas_projected
+    WHERE
+      tags ? 'capacity'
+    GROUP BY
+      osm_id
+  )
+UPDATE _parking_separate_parking_areas_projected pc
+SET
+  tags = tags || jsonb_build_object(
+    'capacity',
+    (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length
+  )
+FROM
+  total_lengths tl
+WHERE
+  tl.count > 1
+  AND pc.osm_id = tl.osm_id;
+
 -- MISC
 ALTER TABLE _parking_separate_parking_areas_projected
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);

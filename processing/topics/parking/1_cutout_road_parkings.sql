@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS _parking_parkings_cutted;
 
 SELECT
   COALESCE(p.id || '/' || d.path[1], p.id) AS id,
+  id as original_id,
   osm_id,
   osm_ref (p.osm_type, p.osm_id) AS tag_source,
   osm_ref (p.osm_type, p.osm_id) AS geom_source,
