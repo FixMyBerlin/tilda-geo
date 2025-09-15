@@ -38,10 +38,9 @@ FROM
             -- only apply bus_stop cutouts to the correct side of the street
             (
               (
-                c.tags ->> 'category' <> 'bus_stop'
+                c.tags ->> 'category' IS DISTINCT FROM 'bus_stop'
                 OR c.tags ->> 'side' = p.side
               )
-              OR c.tags ->> 'category' IS NULL
             )
         )
       ),
