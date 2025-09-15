@@ -40,7 +40,7 @@ BEGIN
       kerb_tags := kerb.tags;
       kerb_has_parking := kerb.has_parking;
       kerb_is_driveway := kerb.is_driveway;
-      geom := project_to_line(input_geom, kerb.geom);
+      geom := project_to_line(project_from:=input_geom, project_onto:=kerb.geom);
       RETURN NEXT;
     END IF;
   END LOOP;
