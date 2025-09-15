@@ -47,7 +47,11 @@ SELECT
 FROM
   _parking_cutouts pc
 WHERE
-  tags ->> 'source' <> 'parking_roads';
+  tags ->> 'source' NOT IN (
+    'parking_roads',
+    'separate_parking_areas',
+    'separate_parking_points'
+  );
 
 -- explode parkings into quantized points
 DROP TABLE IF EXISTS parkings_quantized;
