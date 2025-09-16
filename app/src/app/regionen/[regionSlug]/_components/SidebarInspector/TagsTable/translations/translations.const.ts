@@ -68,6 +68,7 @@ export const translations: { [key: string]: string } = {
   'ALL--highway=secondary': 'Landesstraße/Wichtige Durchgangsstraße',
   'ALL--highway=service_alley': 'Gasse', // roads--category
   'ALL--highway=service_driveway': 'Grundstückszufahrt', // roads--category
+  'ALL--highway=service_emergency_access': 'Rettungsweg', // roads--category
   'ALL--highway=service_parking_aisle': 'Parkplatzweg', // roads--category
   'ALL--highway=service_road': 'Zufahrtsweg', // roads--category
   'ALL--highway=service_uncategorized': 'Zufahrtsweg (unbekannte Klassifisierung)',
