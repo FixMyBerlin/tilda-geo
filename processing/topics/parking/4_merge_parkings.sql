@@ -104,14 +104,14 @@ WITH
         'tag_sources',
         string_agg(
           tag_source,
-          '-'
+          ';'
           ORDER BY
             tag_source
         ),
         'geom_sources',
         string_agg(
           geom_source,
-          '-'
+          ';'
           ORDER BY
             geom_source
         )
