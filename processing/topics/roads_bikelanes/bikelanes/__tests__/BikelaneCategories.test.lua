@@ -28,6 +28,21 @@ describe("`BikelaneCategories`", function()
     end)
   end)
 
+  describe('`footAndCyclewayShared` with highway=service:', function()
+    it('should get the category for service road with bicycle=designated, foot=designated, segregated=no', function()
+      local tags = {
+        ["bicycle"] = 'designated',
+        ["foot"] = 'designated',
+        ["highway"] = 'service',
+        ["motor_vehicle"] = 'no',
+        ["segregated"] = 'no',
+        ["service"] = 'emergency_access',
+      }
+      local category = CategorizeBikelane(tags).id
+      assert.are.equal(category, 'footAndCyclewayShared_adjoiningOrIsolated')
+    end)
+  end)
+
   describe('`cyclewaySeparated`:', function()
     it('cycleway with sign', function()
       local tags = {

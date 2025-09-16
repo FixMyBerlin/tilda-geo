@@ -165,7 +165,8 @@ local footAndCyclewayShared = BikelaneCategory.new({
 
     -- Only apply the following conditions on cycleway-like highways.
     -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
-    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway') then
+    -- `highway=service` includes ways like https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
+    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' or tags.highway == 'service') then
       -- https://www.openstreetmap.org/way/440072364 highway=service
       if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
         return true
