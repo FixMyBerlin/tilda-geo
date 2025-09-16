@@ -86,10 +86,6 @@ function Bikelanes(object_tags, object)
           buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
           marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
-          -- There is some miss-tagging to of operator=private which we also allow
-          operator_type = SANITIZE_TAGS.operator_type(object_tags),
-          informal = SANITIZE_TAGS.informal(object_tags.informal),
-          covered = object_tags.covered == 'yes' and 'covered' or (object_tags.indoor == 'yes' and 'indoor' or nil),
           mapillary = to_semicolon_list({
             transformed_tags.mapillary,
             object_tags.mapillary,

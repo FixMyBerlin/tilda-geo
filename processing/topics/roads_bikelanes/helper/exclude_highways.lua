@@ -45,17 +45,8 @@ local function exclude_area_water(tags)
   return false
 end
 
-local function exclude_operator_indoor_informal(tags)
-  -- https://wiki.openstreetmap.org/wiki/Key:operator:type
-  if tags['operator:type'] == 'private' or tags.operator == 'private' then
-    return true
-  end
-
+local function exclude_indoor(tags)
   if tags.indoor == 'yes' then
-    return true
-  end
-
-  if tags.informal == 'yes' then
     return true
   end
 
@@ -65,6 +56,6 @@ end
 return {
   by_access = exclude_by_access,
   by_service = exclude_by_service,
-  by_operator_indoor_informal = exclude_operator_indoor_informal,
+  by_indoor = exclude_indoor,
   exclude_area_water = exclude_area_water
 }

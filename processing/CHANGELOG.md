@@ -7,9 +7,14 @@ This is an manual and incomplete list of change to the data structure.
 ### `bikelanes`
 
 - Add attributes `operator_type`, `informal`, `covered`
-- Include bikelanes for ways that are privately operated, indoor or informal
-- Include bikelanes that are `access=destination` in the data
+- Include ways that are privately operated, indoor or informal
+- Include ways that are `access=destination` in the data
 - Categorize bicycle roads with "Kfz frei" as `bicycleRoad_vehicleDestination`
+
+### `roads`, `roadsPathClasses`,
+
+- Add attributes `operator_type`, `informal`, `covered`
+- Include ways that are privately operated, informal
 
 ## 2025-07-29
 

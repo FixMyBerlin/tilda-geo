@@ -32,6 +32,7 @@ local transform_cycleway_both_postfix = require('transform_cycleway_both_postfix
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
+local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
 local roadsTable = osm2pgsql.define_table({
@@ -186,6 +187,9 @@ function osm2pgsql.process_way(object)
     mapillary_backward = object_tags['mapillary:backward'],
     mapillary_traffic_sign = object_tags['source:traffic_sign:mapillary'],
     description = object_tags.description or object_tags.note,
+    operator_type = SANITIZE_TAGS.operator_type(object_tags),
+    informal = SANITIZE_TAGS.informal(object_tags.informal),
+    covered = SANITIZE_TAGS.covered_or_indoor(object_tags),
   }
   MergeTable(road_result_tags, RoadClassification(object_tags))
   MergeTable(road_result_tags, Lit(object_tags))
@@ -206,6 +210,9 @@ function osm2pgsql.process_way(object)
         mapillary_backward = cycleway.mapillary_backward or road_result_tags.mapillary_backward,
         mapillary_traffic_sign = cycleway.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
         description = cycleway.description or road_result_tags.description,
+        operator_type = road_result_tags.operator_type,
+        informal = road_result_tags.informal,
+        covered = road_result_tags.covered,
         _parent_highway = cycleway._parent_highway -- duplicated because we `ExtractPublicTags` on the other data below
       }
       local meta = Metadata(object)
@@ -266,7 +273,7 @@ function osm2pgsql.process_way(object)
   -- Apply access filtering for roads (forbids private, no, delivery, permit, destination)
   local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination' }) })
   if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
-  if exclude.by_operator_indoor_informal(object_tags) then return end
+  if exclude.by_indoor(object_tags) then return end
 
   -- (C.3) WRITE `bikeSuitability` table
   local bikeSuitability = CategorizeBikeSuitability(object_tags)
