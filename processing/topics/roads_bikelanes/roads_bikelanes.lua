@@ -158,7 +158,7 @@ function osm2pgsql.process_way(object)
   end
   if not allowed_highways[object_tags.highway] then return end
 
-  if exclude.exclude_area_water(object_tags) then return end
+  if exclude.by_area_water(object_tags) then return end
   local forbidden_accesses_bikelanes = Set({ 'private', 'no', 'delivery', 'permit' })
   if exclude.by_access(object_tags, forbidden_accesses_bikelanes) then return end
   if exclude.by_service(object_tags) then return end
@@ -274,6 +274,7 @@ function osm2pgsql.process_way(object)
   local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination' }) })
   if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
   if exclude.by_indoor(object_tags) then return end
+  if exclude.by_informal(object_tags) then return end
 
   -- (C.3) WRITE `bikeSuitability` table
   local bikeSuitability = CategorizeBikeSuitability(object_tags)

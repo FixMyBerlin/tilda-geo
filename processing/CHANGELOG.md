@@ -6,7 +6,7 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `bikelanes`
 
-- Add attributes `operator_type`, `informal`, `covered`
+- Add attributes `operator_type`, `covered`, `informal`
 - Include ways that are privately operated, indoor or informal
 - Include ways that are `access=destination` in the data
 - Include ways on `highway=service` when also bike tagging present
@@ -14,8 +14,8 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `roads`, `roadsPathClasses`,
 
-- Add attributes `operator_type`, `informal`, `covered`
-- Include ways that are privately operated, informal
+- Add attributes `operator_type`, `covered`
+- Include ways that are privately operated (still excluding indoor, informal)
 - Include ways on `highway=service` when also bike tagging present
 
 ## 2025-07-29
