@@ -21,6 +21,15 @@ export async function updateCache() {
  */
 export async function clearCache() {
   try {
+    // Check if the cache directory exists first
+    const dirCheck = await $`test -d /cache_nginx_proxy`.nothrow()
+    if (dirCheck.exitCode !== 0) {
+      console.log(
+        'Finishing up: ⏩ Cache directory /cache_nginx_proxy does not exist, skipping cache clearing',
+      )
+      return
+    }
+
     const sizeBeforeStr = await $`du -sh /cache_nginx_proxy`.text()
     // Corresponts to `docker-compose.yml` processing.volumes
     await $`rm -rf /cache_nginx_proxy/*`
@@ -30,7 +39,7 @@ export async function clearCache() {
       `(before ${sizeBeforeStr.trim()} – after ${sizeAfterStr.trim()})`,
     )
   } catch (error) {
-    console.warn('[ERROR] Finishing up: ⚠️ Clearing the cache failed:', error)
+    console.warn('[WARNING] Finishing up: ⚠️ Clearing the cache failed:', error)
   }
 }
 
