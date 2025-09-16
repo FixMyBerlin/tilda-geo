@@ -22,6 +22,24 @@ local function exclude_by_service(tags)
   -- - 'emergency_access' which we consider a special kind of driveway
   -- - 'drive-through' which we do not consider part of the road network; and which results in false positives for our oneway-plus layer
   --
+  -- Exception: Include service highways with explicit bicycle access
+  -- - bicycle=designated
+  -- - bicycle:left|right|both=* where * is not "no"
+  --
+  if tags.bicycle == 'designated' then
+    return false
+  end
+
+  if tags['bicycle:left'] and tags['bicycle:left'] ~= 'no' then
+    return false
+  end
+  if tags['bicycle:right'] and tags['bicycle:right'] ~= 'no' then
+    return false
+  end
+  if tags['bicycle:both'] and tags['bicycle:both'] ~= 'no' then
+    return false
+  end
+
   -- REMINDER: Keep this in sync with processing/topics/roads_bikelanes/roads/RoadClassificationRoadValue.lua
   local allowed_service = Set({ 'alley' })
   if tags.service and not allowed_service[tags.service] then
