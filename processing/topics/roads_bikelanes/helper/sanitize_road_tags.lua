@@ -19,13 +19,14 @@ local SANITIZE_ROAD_TAGS = {
       ['dimgray'] = 'no',
       ['#b5565a'] = 'red',
       ['orange'] = 'red',
+      ['green;red'] = 'red;green',
     }
     if transformations[tags['surface:colour']] then
       tags['surface:colour'] = transformations[tags['surface:colour']]
     end
     -- Sanitize values:
     -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-    return Sanitize(tags['surface:colour'], { 'red', 'green', 'no' })
+    return Sanitize(tags['surface:colour'], { 'red', 'green', 'red;green', 'no' })
     -- return sanitize_for_logging(
     --   tags['surface:colour'],
     --   { 'red', 'green', 'no' },
