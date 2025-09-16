@@ -102,21 +102,32 @@ function osm2pgsql.process_way(object)
   local result_tags = processTags(object.tags)
   local meta = Metadata(object)
 
-  -- convert bicycle parking mapped as lines or areas to points by taking the centroid
-  nodeTable:insert({
-    tags = ExtractPublicTags(result_tags),
-    meta = meta,
-    geom = object:as_polygon():centroid(),
-    minzoom = 0,
-    id = DefaultId(object)
-  })
+  if object.is_closed then
+    -- Closed lines: add as polygon to area table and point to node table
+    areaTable:insert({
+      tags = ExtractPublicTags(result_tags),
+      meta = meta,
+      geom = object:as_polygon(),
+      minzoom = 0,
+      id = DefaultId(object)
+    })
 
-  if not object.is_closed then return end
-  areaTable:insert({
-    tags = ExtractPublicTags(result_tags),
-    meta = meta,
-    geom = object:as_polygon(),
-    minzoom = 0,
-    id = DefaultId(object)
-  })
+    -- Also add centroid point to node table
+    nodeTable:insert({
+      tags = ExtractPublicTags(result_tags),
+      meta = meta,
+      geom = object:as_polygon():centroid(),
+      minzoom = 0,
+      id = DefaultId(object)
+    })
+  else
+    -- Open lines: convert to point using linestring centroid
+    nodeTable:insert({
+      tags = ExtractPublicTags(result_tags),
+      meta = meta,
+      geom = object:as_linestring():centroid(),
+      minzoom = 0,
+      id = DefaultId(object)
+    })
+  end
 end
