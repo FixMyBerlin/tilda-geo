@@ -35,7 +35,7 @@ local function result_tags_separate_parking(category, object, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = SANITIZE_TAGS.operator_type(object.tags['operator:type']),
+    operator_type = SANITIZE_TAGS.operator_type(object.tags),
     mapillary = object.tags.mapillary,
 
     -- Area

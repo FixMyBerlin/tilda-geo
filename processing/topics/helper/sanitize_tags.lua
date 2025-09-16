@@ -80,7 +80,13 @@ local SANITIZE_TAGS = {
       { 'ice', 'snow', 'salt', }
     )
   end,
-  operator_type = function(value)
+  operator_type = function(tags)
+    local value = tags['operator:type']
+    if value == nil then
+      if tags.operator == 'private' then value = 'private'
+      elseif tags.operator == 'public' then value = 'public'
+      end
+    end
     if value == nil then return nil end
 
     -- DOCs: to revalidate this query, use…
