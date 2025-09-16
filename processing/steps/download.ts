@@ -37,7 +37,8 @@ export async function waitForFreshData() {
     })
     const lastModified = response.headers.get('Last-Modified')
     if (!lastModified) {
-      throw new Error('No Last-Modified header found')
+      console.log('[WARN] Download: No Last-Modified header found, continuing with existing file')
+      return false
     }
 
     // Check if last modified date is today
