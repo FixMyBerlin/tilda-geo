@@ -14,6 +14,7 @@ CREATE FUNCTION project_to_k_closest_kerbs (
   kerb_tags jsonb,
   kerb_has_parking boolean,
   kerb_is_driveway boolean,
+  kerb_distance double precision,
   geom geometry
 ) AS $$
 DECLARE
@@ -44,6 +45,7 @@ BEGIN
       kerb_has_parking := kerb.has_parking;
       kerb_is_driveway := kerb.is_driveway;
       geom := project_to_line(project_from:=input_geom, project_onto:=kerb.geom);
+      kerb_distance := kerb.projected_distance;
       RETURN NEXT;
     END IF;
   END LOOP;
