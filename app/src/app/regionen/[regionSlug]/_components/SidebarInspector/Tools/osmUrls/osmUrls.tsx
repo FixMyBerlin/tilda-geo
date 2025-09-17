@@ -130,3 +130,17 @@ export const googleMapsUrlViewport = (zoom?: number, lat?: number, lng?: number)
     zoom,
   })
 }
+
+export const tildaViewerUrl = (zoom?: number, lat?: number, lng?: number) => {
+  if (!zoom || !lat || !lng) return
+
+  const url = new URL('https://viewer.tilda-geo.de/')
+  url.searchParams.set('map', `${zoom}/${lat}/${lng}`)
+  url.searchParams.set(
+    'source',
+    process.env.NEXT_PUBLIC_APP_ENV?.charAt(0).toUpperCase() +
+      process.env.NEXT_PUBLIC_APP_ENV?.slice(1).toLowerCase(),
+  )
+
+  return url.toString()
+}
