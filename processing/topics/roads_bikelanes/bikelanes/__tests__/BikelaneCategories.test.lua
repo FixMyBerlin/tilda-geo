@@ -39,7 +39,7 @@ describe("`BikelaneCategories`", function()
         ["service"] = 'emergency_access',
       }
       local category = CategorizeBikelane(tags).id
-      assert.are.equal(category, 'footAndCyclewayShared_adjoiningOrIsolated')
+      assert.are.equal(category, 'footAndCyclewayShared_isolated')
     end)
   end)
 

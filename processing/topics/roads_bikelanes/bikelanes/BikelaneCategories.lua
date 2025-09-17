@@ -7,6 +7,7 @@ require("DeriveSmoothness")
 require("HighwayClasses")
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
+local to_semicolon_list = require('to_semicolon_list')
 BikelaneCategory = {}
 BikelaneCategory.__index = BikelaneCategory
 
@@ -166,6 +167,9 @@ local footAndCyclewayShared = BikelaneCategory.new({
     -- Only apply the following conditions on cycleway-like highways.
     -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
     -- `highway=service` includes ways like https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
+    if tags.highway == 'service' then
+      tags.description = to_semicolon_list({ tags.description, 'TILDA: Radinfrastruktur auf einem Zufahrtsweg.' })
+    end
     if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' or tags.highway == 'service') then
       -- https://www.openstreetmap.org/way/440072364 highway=service
       if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
