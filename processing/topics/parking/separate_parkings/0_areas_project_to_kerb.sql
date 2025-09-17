@@ -57,14 +57,17 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_separate_parking_areas_projected_geom_idx ON _parking_separate_parking_areas_projected USING GIST (geom);
 
--- DROP TABLE IF EXISTS "EXPERIMENT_backprojection";
--- SELECT
---   id,
---   kerb_side,
---   osm_id,
---   project_to_separate_parking_area (osm_id) as geom INTO "EXPERIMENT_backprojection"
--- from
---   _parking_separate_parking_areas_projected;
--- ALTER TABLE "EXPERIMENT_backprojection"
--- ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
--- CREATE INDEX experiment_backprojection_geom_idx ON "EXPERIMENT_backprojection" USING gist (geom);
+DROP TABLE IF EXISTS "EXPERIMENT_parking_edges";
+
+SELECT
+  id,
+  tags,
+  edges.* INTO "EXPERIMENT_parking_edges"
+FROM
+  _parking_separate_parking_areas_projected
+  CROSS JOIN LATERAL get_parking_edges (geom, 160.) edges;
+
+ALTER TABLE "EXPERIMENT_parking_edges"
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (geom);
