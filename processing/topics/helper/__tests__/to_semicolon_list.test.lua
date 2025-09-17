@@ -50,6 +50,16 @@ describe('to_semicolon_list', function()
       assert.are.equal('Banana;Zebra;apple', result)
     end)
 
+    it('should handle semicolon-separated strings within array elements', function()
+      local result = to_semicolon_list({'some text;TILDA: Radinfrastruktur auf einem Zufahrtsweg.', 'TILDA: Radinfrastruktur auf einem Zufahrtsweg.'})
+      assert.are.equal('TILDA: Radinfrastruktur auf einem Zufahrtsweg.;some text', result)
+    end)
+
+    it('should handle duplicate values across semicolon-separated strings', function()
+      local result = to_semicolon_list({'TILDA: Radinfrastruktur auf einem Zufahrtsweg.;TILDA: Radinfrastruktur auf einem Zufahrtsweg.'})
+      assert.are.equal('TILDA: Radinfrastruktur auf einem Zufahrtsweg.', result)
+    end)
+
     it('should handle numbers and letters mixed', function()
       local result = to_semicolon_list({'3', '1', '2', 'a', 'c', 'b'})
       assert.are.equal('1;2;3;a;b;c', result)
