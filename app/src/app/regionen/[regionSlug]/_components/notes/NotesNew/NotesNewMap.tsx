@@ -72,7 +72,6 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
         onMove={handleMove}
         doubleClickZoom={true}
         dragRotate={false}
-        RTLTextPlugin={false}
         minZoom={3}
         attributionControl={false}
       >

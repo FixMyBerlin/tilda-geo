@@ -6,7 +6,7 @@ import {
   MapDataSourceInspectorEditor,
 } from '@/src/app/regionen/[regionSlug]/_mapData/types'
 import { RegionSlug } from '@/src/data/regions.const'
-import { CircleLayer, FillLayer, HeatmapLayer, LineLayer, SymbolLayer } from 'react-map-gl/maplibre'
+import { CircleLayerSpecification, FillLayerSpecification, HeatmapLayerSpecification, LineLayerSpecification, SymbolLayerSpecification } from 'maplibre-gl'
 
 // a modified version of MapDataDatasetsSource from '../../src/app/regionen/[regionSlug]/_mapData/types'
 type MapDataDatasetsSource = {
@@ -50,14 +50,14 @@ type MapDataDatasetsSource = {
       }
   legends?: null | FileMapDataSubcategoryStyleLegend[]
   layers: (
-    | Omit<CircleLayer & Required<Pick<CircleLayer, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<FillLayer & Required<Pick<FillLayer, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<LineLayer & Required<Pick<LineLayer, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<CircleLayerSpecification & Required<Pick<CircleLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<FillLayerSpecification & Required<Pick<FillLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<LineLayerSpecification & Required<Pick<LineLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
     | Omit<
-        SymbolLayer & Required<Pick<SymbolLayer, 'paint' | 'layout'>> & { beforeId?: string },
+        SymbolLayerSpecification & Required<Pick<SymbolLayerSpecification, 'paint' | 'layout'>> & { beforeId?: string },
         'source'
       >
-    | Omit<HeatmapLayer & Required<Pick<HeatmapLayer, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<HeatmapLayerSpecification & Required<Pick<HeatmapLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
   )[]
 }
 
