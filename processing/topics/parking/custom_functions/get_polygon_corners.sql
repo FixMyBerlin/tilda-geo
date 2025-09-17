@@ -9,6 +9,7 @@ DECLARE
   ring geometry := ST_ExteriorRing(ST_ForceRHR(poly));
   n INT := ST_NumPoints(ring);
   i INT;
+  effective_angle double precision;
   a geometry;
   b geometry;
   c geometry;
@@ -27,13 +28,16 @@ BEGIN
 
     angle := ST_Angle(a, b, c);
 
-    IF angle > pi() THEN
-      angle := 2 * pi() - angle;
+
+    IF angle < pi() THEN
+      effective_angle := degrees(angle);
+    ELSE
+      effective_angle := degrees(2 * pi() - angle);
     END IF;
 
     angle := degrees(angle);
 
-    IF angle < max_angle_degrees THEN
+    IF effective_angle < max_angle_degrees THEN
       geom := b;
       RETURN NEXT;
       corner_idx := corner_idx + 1;
