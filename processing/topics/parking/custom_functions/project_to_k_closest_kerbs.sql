@@ -21,17 +21,20 @@ DECLARE
   projected_geom geometry;
   closest_kerb_side text := NULL;
 BEGIN
-  FOR kerb IN
-    SELECT  pk.id, pk.osm_type, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags
+  SELECT  pk.side INTO closest_kerb_side
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
     ORDER BY ST_Distance(input_geom, pk.geom)
+  LIMIT 1;
+
+  FOR kerb IN
+    SELECT  pk.id, pk.osm_type, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags, ST_Distance(input_geom, pk.geom) AS projected_distance
+    FROM _parking_kerbs pk
+    WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
+    AND pk.side = closest_kerb_side
+    ORDER BY ST_Distance(input_geom, pk.geom)
     LIMIT k
   LOOP
-    IF closest_kerb_side IS NULL THEN
-      closest_kerb_side := kerb.side;
-    END IF;
-
     IF kerb.side = closest_kerb_side THEN
       kerb_id := kerb.id;
       kerb_osm_type := kerb.osm_type;
