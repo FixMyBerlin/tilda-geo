@@ -514,7 +514,9 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
     local has_separation_right = allowed_separation_values[separation_right] ~= nil
     local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
-    if has_separation_left or (traffic_mode_right == 'motor_vehicle' and has_separation_right) then
+    -- Treat parking on the left as an effective buffer (counts as protected in our classification)
+    local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
+    if has_separation_left or traffic_mode_left == 'parking' or (traffic_mode_right == 'motor_vehicle' and has_separation_right) then
       return true
     end
   end
