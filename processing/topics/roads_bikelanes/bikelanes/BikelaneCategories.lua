@@ -8,16 +8,23 @@ require("HighwayClasses")
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
 local to_semicolon_list = require('to_semicolon_list')
+
+---@meta
+---@class BikelaneCategory
 BikelaneCategory = {}
 BikelaneCategory.__index = BikelaneCategory
 
--- @param args table
--- @param args.desc string
--- @param args.insfrastructureExists boolean
--- @param args.implicitOneWay boolean
--- @param args.implicitOneWayConfidence 'high' | 'medium' | 'low' | 'not_applicable'
--- @param args.condition function
+---@param args {
+--- id: string,
+--- desc: string,
+--- infrastructureExists: boolean,
+--- implicitOneWay: boolean,
+--- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
+--- condition: fun(tags: table): boolean|nil,
+--- }
+---@return BikelaneCategory
 function BikelaneCategory.new(args)
+  ---@class BikelaneCategory
   local self = setmetatable({}, BikelaneCategory)
   self.id = args.id
   self.desc = args.desc
@@ -28,6 +35,8 @@ function BikelaneCategory.new(args)
   return self
 end
 
+---@param tags table
+---@return boolean|nil
 function BikelaneCategory:__call(tags)
   return self.condition(tags)
 end
