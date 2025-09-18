@@ -12,7 +12,7 @@ import { Breadcrumb } from '../_components/Breadcrumb'
 import { HeaderWrapper } from '../_components/HeaderWrapper'
 import { getFullname } from './_components/utils/getFullname'
 
-const MAX_TAKE = 250
+const MAX_TAKE = 1000
 
 export default function AdminMembershipsPage() {
   const [{ users: userAndMemberships }] = useQuery(getUsersAndMemberships, { take: MAX_TAKE })
