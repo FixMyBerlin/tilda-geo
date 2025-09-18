@@ -29,6 +29,7 @@ export type SourcesRasterIds =
   | 'trto-radwege'
   | 'brandenburg-dop20'
   | 'brandenburg-aktualitaet'
+  | 'nrw-ortho'
 
 // https://account.mapbox.com/access-tokens
 // https://account.mapbox.com/access-tokens/clileup4r0b1r3gmp4hxqhou8/
@@ -360,5 +361,16 @@ export const sourcesBackgroundsRaster: MapDataBackgroundSource<SourcesRasterIds>
       'GeoBasis-DE/LGB / BB-BE DOP20c, dl-de/by-2-0; Geoportal Berlin / DOP20, dl-de/by-2-0',
     legendUrl:
       'https://data.geobasis-bb.de/geobasis/information/aktualitaeten/bb_dop_aktualitaet.pdf',
+  },
+  {
+    // https://github.com/osmlab/editor-layer-index/blob/gh-pages/sources/europe/de/NRW_ortho_wms.geojson?short_path=3887584
+    id: 'nrw-ortho',
+    name: 'NRW Luftbilder',
+    tiles:
+      'https://www.wms.nrw.de/geobasis/wms_nw_dop?LAYERS=nw_dop_rgb&STYLES=default&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=256&HEIGHT=256&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    maxzoom: 20,
+    minzoom: 0,
+    tileSize: 512,
+    attributionHtml: 'NRW Orthophoto (RGB) dl-de/zero-2-0',
   },
 ]
