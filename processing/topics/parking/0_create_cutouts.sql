@@ -105,6 +105,24 @@ SELECT
 FROM
   _parking_obstacle_points_projected;
 
+-- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta)
+SELECT
+  id::TEXT,
+  osm_id,
+  ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
+  tags || jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', tags ->> 'category', -- see processing/topics/parking/obstacles_unprojected/point/obstacle_point_categories.lua
+    'source', 'turnaround_points',
+    'radius', (tags ->> 'buffer_radius')::float
+    /* sql-formatter-enable */
+  ),
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
+FROM
+  _parking_turnaround_points;
+
 -- INSERT "obstacle_area" buffers (buffered lines)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
@@ -219,7 +237,12 @@ FROM
   _parking_obstacle_points_projected op
   JOIN _parking_road_parkings p ON ST_Buffer (op.geom, 5) && p.geom
 WHERE
-  op.tags ->> 'category' = 'bus_stop'
+  op.tags ->> 'category' IN (
+    'bus_stop',
+    'bus_stop_conditional',
+    'turning_circle',
+    'turning_loop'
+  )
   AND p.tags ->> 'parking' IS DISTINCT FROM 'no';
 
 CREATE INDEX busstops_w_explicit_parking_idx ON busstops_w_explicit_parking USING BTREE (id);

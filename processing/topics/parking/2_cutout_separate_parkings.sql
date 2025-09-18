@@ -10,7 +10,8 @@ WHERE
     'driveways',
     'obstacle_points',
     'obstacle_areas',
-    'obstacle_lines'
+    'obstacle_lines',
+    'turnaround_points'
   )
   AND tags ->> 'category' IS DISTINCT FROM 'kerb_lowered';
 
