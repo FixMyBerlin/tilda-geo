@@ -123,8 +123,8 @@ function Bikelanes(object_tags, object)
 
         MergeTable(result_tags, deriveTrafficMode(transformed_tags, object_tags, category.id, transformed_tags._side))
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
-        MergeTable(result_tags, deriveBikelaneSurface(transformed_tags, category.id))
-        MergeTable(result_tags, deriveBikelaneSmoothness(transformed_tags, category.id))
+        MergeTable(result_tags, deriveBikelaneSurface(transformed_tags, category))
+        MergeTable(result_tags, deriveBikelaneSmoothness(transformed_tags, category))
         CopyTags(result_tags, transformed_tags, tags_prefixed, 'osm_')
         -- copy original tags
         CopyTags(result_tags, object_tags, tags_copied)
