@@ -542,12 +542,20 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     -- Has to have physical separation left
     -- All separation values are physical separations except for 'no'
     local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
-    local has_separation_left = allowed_separation_values[separation_left] ~= nil
-    -- OR, for counter flow bikelanes with motorized traffic on the right, has to have physical separation right
-    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
-    local has_separation_right = allowed_separation_values[separation_right] ~= nil
+    if allowed_separation_values[separation_left] then
+        return true
+    end
+
+    -- Parked cars are treated as physical separation when left of the bikelane
+    local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
+    if traffic_mode_left == 'parking' then
+      return true
+    end
+
+    -- For counter flow bikelanes with motorized traffic on the right, has to have physical separation right
     local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
-    if has_separation_left or (traffic_mode_right == 'motor_vehicle' and has_separation_right) then
+    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
+    if traffic_mode_right == 'motor_vehicle' and allowed_separation_values[separation_right] then
       return true
     end
   end
