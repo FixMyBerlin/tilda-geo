@@ -1,6 +1,6 @@
 require('init')
 require('DeriveSurface')
-local has_prefix = require('has_prefix')
+require('Set')
 
 local function deriveBikelaneSurface(tags, categoryId)
   local surfaceResult = DeriveSurface(tags)
@@ -8,8 +8,19 @@ local function deriveBikelaneSurface(tags, categoryId)
   local surface_source = surfaceResult.surface_source
   local surface_confidence = surfaceResult.surface_confidence
 
-  local copyValueFromParent = has_prefix(categoryId, 'cyclewayOnHighway') -- for lane like categories
-  if copyValueFromParent and surface == nil and tags._parent and tags._parent.surface then
+  -- Categories that should copy surface values from parent highway
+  local categoriesThatCopyFromParent = Set({
+    'cyclewayOnHighway_advisory',
+    'cyclewayOnHighway_exclusive',
+    'cyclewayOnHighway_advisoryOrExclusive',
+    'cyclewayOnHighwayBetweenLanes',
+    'cyclewayOnHighwayProtected',
+    'sharedBusLaneBikeWithBus',
+    'sharedBusLaneBusWithBike',
+    'bicycleRoad',
+    'bicycleRoad_vehicleDestination',
+  })
+  if categoriesThatCopyFromParent[categoryId] and surface == nil and tags._parent and tags._parent.surface then
     local parentSurfaceResult = DeriveSurface(tags._parent)
     surface = parentSurfaceResult.surface
     surface_source = parentSurfaceResult.surface_source and 'parent_highway_' .. parentSurfaceResult.surface_source
