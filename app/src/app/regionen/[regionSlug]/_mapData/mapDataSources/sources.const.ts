@@ -458,7 +458,7 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     export: {
       enabled: true,
       apiIdentifier: 'bicycleParking_points',
-      title: 'Fahrradstellplätze',
+      title: 'Fahrradstellplätze (Beta)',
       desc: 'Alle Fahrradstellplätze. Flächen werden als Punkt ausgegeben.',
     },
   },
