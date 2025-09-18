@@ -1,0 +1,8 @@
+cache_size_mb: 0
+web_ui: enable-for-all
+postgres:
+  connection_string: $DATABASE_URL
+  auto_bounds: calc
+  auto_publish:
+    from_schemas:
+      - public

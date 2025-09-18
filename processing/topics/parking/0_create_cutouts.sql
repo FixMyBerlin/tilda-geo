@@ -214,28 +214,48 @@ CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source')
 -- We store the removed cutouts separately for debugging but do not show them in the final parking_cutouts table.
 -- get all ids for cutouts that need to be discarded
 SELECT
-  c.* INTO _parking_discarded_cutouts
+  op.id INTO TEMP busstops_w_explicit_parking
+FROM
+  _parking_obstacle_points_projected op
+  JOIN _parking_road_parkings p ON ST_Buffer (op.geom, 5) && p.geom
+WHERE
+  op.tags ->> 'category' = 'bus_stop'
+  AND p.tags ->> 'parking' IS DISTINCT FROM 'no';
+
+CREATE INDEX busstops_w_explicit_parking_idx ON busstops_w_explicit_parking USING BTREE (id);
+
+SELECT
+  * INTO _parking_discarded_cutouts
 FROM
   _parking_cutouts c
-  JOIN _parking_road_parkings p ON c.geom && p.geom
 WHERE
-  ST_Intersects (c.geom, p.geom)
-  AND (
-    c.tags ->> 'category' IN ('turning_circle', 'bus_stop')
-  )
-  AND p.tags ->> 'parking' = 'no';
-
-CREATE INDEX parking_discared_cutouts_idx ON _parking_discarded_cutouts USING BTREE (id);
-
-DELETE FROM _parking_cutouts
-WHERE
-  id IN (
+  c.id NOT IN (
     SELECT
-      id
+      bs.id
     FROM
-      _parking_discarded_cutouts
+      busstops_w_explicit_parking bs
   );
 
+DELETE FROM _parking_cutouts c
+WHERE
+  c.id IN (
+    SELECT
+      bs.id
+    FROM
+      busstops_w_explicit_parking bs
+  );
+
+-- SELECT
+--   c.* INTO _parking_discarded_cutouts
+-- FROM
+--   _parking_cutouts c
+--   JOIN _parking_road_parkings p ON c.geom && p.geom
+-- WHERE
+--   ST_Intersects (c.geom, p.geom)
+--   AND (
+--     c.tags ->> 'category' IN ('turning_circle', 'bus_stop')
+--   )
+--   AND p.tags ->> 'parking' = 'no';
 -- MISC
 ALTER TABLE _parking_cutouts
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);

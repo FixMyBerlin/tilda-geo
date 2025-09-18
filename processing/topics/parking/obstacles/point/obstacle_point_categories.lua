@@ -70,15 +70,17 @@ obstacle_point_categories = {
     tags = function(tags) return {} end,
     tags_cc = { 'ref' },
   }),
-  class_obstacle_category.new({
-    id = 'bus_stop_conditional', -- https://overpass-turbo.eu/s/25Z1
-    buffer_radius = function(tags) return 15 end,
-    conditions = function(tags)
-      return tags['highway'] == 'bus_stop' and tags.opening_hours ~= nil
-    end,
-    tags = function(tags) return { } end,
-    tags_cc = { 'name', 'note', 'ref', 'opening_hours' },
-  }),
+  -- TEMPORARY DISABLED
+  --
+  -- class_obstacle_category.new({
+  --   id = 'bus_stop_conditional', -- https://overpass-turbo.eu/s/25Z1
+  --   buffer_radius = function(tags) return 15 end,
+  --   conditions = function(tags)
+  --     return tags['highway'] == 'bus_stop' and tags.opening_hours ~= nil
+  --   end,
+  --   tags = function(tags) return { } end,
+  --   tags_cc = { 'name', 'note', 'ref', 'opening_hours' },
+  -- }),
   class_obstacle_category.new({
     id = 'bus_stop', -- https://wiki.openstreetmap.org/wiki/DE:Tag:highway%3Dbus_stop
     buffer_radius = function(tags) return 15 end,

@@ -19,6 +19,7 @@ applyTo: '**/*.lua'
 - Each file has to start with a `require('init')` which will make all `package.path` avaiable so we don't have to require those manually.
 - To require a function, used to put everything in the global namespace like `require("function_name")` the file and then use `function_name`. But for new helper methods, we return from the helper file and require via  `local function_name = require("function_name")`.
 - Preserve code comments that are still relevant.
+- Add typescript like code comments for VS Code intellisense for each function that is created or updated.
 
 ## Software tests
 - To run the test, to go to the root folder and run `./processing/run-tests.sh`. Do this to evaluate the test result yourself. You cannot run single files, you always have to run the whole suite.
@@ -29,8 +30,24 @@ applyTo: '**/*.lua'
 - Always add `require('Log')` and `require('init')`
 - To run the test, to got `./` and run `./processing/run-tests.sh`
 - Usually use `assert.are.same()` which is a deep compare (Docs: https://lunarmodules.github.io/busted/#assert-same)
-- In assertions, follow this pattern: `assert.are.same(actual_result, expected_result)`. Busted will show the first argument as "Passed in" which is the `actual_result` of the tested function. The second argument will be shown as "Expected" in the console output which is what we define as "right".
+- In assertions, follow this pattern: `assert.are.same(actual_result, expected_result)`. Busted will show the first argument as "Passed In" which is what we define as "right". The second argument will be shown as "Expected" in the console output which is the `expected_result` of the tested function.
+  **Example:**
+  ```lua
+  assert.are.equal(result.category.id, 'parking_lane')
+  -- If this fails, Busted shows:
+  -- Expected: (string) 'parking_street_side'
+  -- Passed in: (string) 'parking_lane'
+  ```
 
 ## Formatting
 - Use 2 spaces for indentation.
-- Use single quotes in lua files whenever possible
+- Use single quotes in lua files whenever possible.
+- Update code to use single quotes whenever a line of code is touched.
+- In tables, always have a comma at the last entry.
+  **Example:**
+  ```lua
+  table_foo = {
+    'foo',
+    'bar',
+  }
+  ```

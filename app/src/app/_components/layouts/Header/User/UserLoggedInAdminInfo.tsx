@@ -6,6 +6,7 @@ import {
   googleMapsUrlViewport,
   mapillaryUrlViewport,
   osmUrlViewport,
+  tildaViewerUrl,
 } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
 import { useMapDebugActions } from '@/src/app/regionen/[regionSlug]/_hooks/mapState/useMapDebugState'
 import { useMapParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useMapParam'
@@ -21,6 +22,7 @@ export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
     mapParam && mapillaryUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
   const googleMapsViewportUrl =
     mapParam && googleMapsUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
+  const tildaViewerUrlHref = tildaViewerUrl(mapParam.zoom, mapParam.lat, mapParam.lng)
 
   const devUrl = getAdminInfoEnvUrl('development')
   const stagingUrl = getAdminInfoEnvUrl('staging')
@@ -63,6 +65,13 @@ export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
           {prodUrl && (
             <LinkExternal blank href={prodUrl}>
               Open Production
+            </LinkExternal>
+          )}
+        </li>
+        <li>
+          {tildaViewerUrlHref && (
+            <LinkExternal blank href={tildaViewerUrlHref}>
+              Open Viewer
             </LinkExternal>
           )}
         </li>

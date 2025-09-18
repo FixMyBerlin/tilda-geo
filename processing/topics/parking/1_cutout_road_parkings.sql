@@ -4,11 +4,12 @@ DROP TABLE IF EXISTS _parking_parkings_cutted;
 
 SELECT
   COALESCE(p.id || '/' || d.path[1], p.id) AS id,
-  p.osm_type,
-  p.osm_id,
+  id as original_id,
+  osm_id,
+  osm_ref (p.osm_type, p.osm_id) AS tag_source,
+  osm_ref (p.osm_type, p.osm_id) AS geom_source,
   p.side,
-  p.tags,
-  'parkings' as source,
+  p.tags || '{"source": "parkings"}'::JSONB as tags,
   p.meta,
   p.street_name,
   d.geom
@@ -38,10 +39,9 @@ FROM
             -- only apply bus_stop cutouts to the correct side of the street
             (
               (
-                c.tags ->> 'category' <> 'bus_stop'
+                c.tags ->> 'category' IS DISTINCT FROM 'bus_stop'
                 OR c.tags ->> 'side' = p.side
               )
-              OR c.tags ->> 'category' IS NULL
             )
         )
       ),

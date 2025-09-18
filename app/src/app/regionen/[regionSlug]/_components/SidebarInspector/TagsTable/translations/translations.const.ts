@@ -49,6 +49,9 @@ export const translations: { [key: string]: string } = {
   'ALL--composit_surface_smoothness--key': 'Oberflächenqualität',
   'ALL--confidence=high': 'Hoch',
   'ALL--confidence=medium': 'Mittel',
+  'ALL--covered--key': 'Überdacht',
+  'ALL--covered=covered': 'Überdacht',
+  'ALL--covered=indoor': 'In einem Gebäude',
   'ALL--description--key': 'Hinweis aus OSM',
   'ALL--highway--key': 'Straßentyp',
   'ALL--highway=bicycle_road': 'Fahrradstraße', // roads--category
@@ -65,6 +68,7 @@ export const translations: { [key: string]: string } = {
   'ALL--highway=secondary': 'Landesstraße/Wichtige Durchgangsstraße',
   'ALL--highway=service_alley': 'Gasse', // roads--category
   'ALL--highway=service_driveway': 'Grundstückszufahrt', // roads--category
+  'ALL--highway=service_emergency_access': 'Rettungsweg', // roads--category
   'ALL--highway=service_parking_aisle': 'Parkplatzweg', // roads--category
   'ALL--highway=service_road': 'Zufahrtsweg', // roads--category
   'ALL--highway=service_uncategorized': 'Zufahrtsweg (unbekannte Klassifisierung)',
@@ -74,6 +78,8 @@ export const translations: { [key: string]: string } = {
   'ALL--highway=track': 'Wald- / Feldweg',
   'ALL--highway=unclassified': 'Nebenstraße mit Verbindungscharakter',
   'ALL--highway=unspecified_road_category': 'Unkategorisierte Straße', // roads--category
+  'ALL--informal--key': 'Trampelpfad',
+  'ALL--informal=yes': 'Weg als "informeller Weg" erfasst.',
   'ALL--length--key': 'Länge',
   'ALL--length--tooltip': 'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
   'ALL--lifecycle--key': 'Status',
@@ -81,6 +87,9 @@ export const translations: { [key: string]: string } = {
   'ALL--lifecycle=temporary': 'Temporärer Weg',
   'ALL--maxspeed--key': 'Höchstgeschwindigkeit',
   'ALL--name--key': 'Name',
+  'ALL--operator_type--key': 'Betreibertyp',
+  'ALL--operator_type=private': 'Privatweg',
+  'ALL--operator_type=public': 'Öffentlicher Weg',
   'ALL--smoothness=bad': 'Schlecht',
   'ALL--smoothness=excellent': 'Sehr gut',
   'ALL--smoothness=good': 'Gut',

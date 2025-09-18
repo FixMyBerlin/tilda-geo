@@ -42,3 +42,5 @@ services:
 configs:
   postgres_conf:
     file: ./configs/postgres.development.conf
+  martin_conf:
+    file: ./configs/martin.development.yaml

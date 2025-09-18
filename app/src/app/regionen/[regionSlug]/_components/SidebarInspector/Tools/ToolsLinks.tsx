@@ -114,6 +114,46 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
           )
         })}
       </div>
+
+      <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap (Geometry)" />
+      <OsmSources idString={feature.properties.tag_sources} title="OpenStreetMap (Tags)" />
     </section>
+  )
+}
+
+type OsmSourcesProps = {
+  idString: string | undefined
+  title: string
+}
+
+const OsmSources = ({ idString, title }: OsmSourcesProps) => {
+  if (!idString) return null
+
+  const sourceIds = idString
+    .split(';')
+    .map((id) => id.trim())
+    .filter(Boolean)
+
+  if (sourceIds.length === 0) return null
+
+  return (
+    <div className="mt-3">
+      <span className="text-gray-600">{title}: </span>
+      {sourceIds.map((id, index) => {
+        const osmTypeId = extractOsmTypeIdByConfig({ id }, { osmTypeId: 'id' })
+        const osmUrlHref = osmOrgUrl(osmTypeId)
+
+        if (!osmUrlHref) return null
+
+        return (
+          <Fragment key={id}>
+            <LinkExternal blank href={osmUrlHref}>
+              {id}
+            </LinkExternal>
+            {index < sourceIds.length - 1 && ', '}
+          </Fragment>
+        )
+      })}
+    </div>
   )
 }

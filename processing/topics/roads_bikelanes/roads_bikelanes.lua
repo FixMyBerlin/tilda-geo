@@ -2,7 +2,7 @@ require('init')
 require("Set")
 require("JoinSets")
 require("Metadata")
-require("ExcludeHighways")
+local exclude = require("exclude_highways")
 require("ExcludeByWidth")
 require("ConvertCyclewayOppositeSchema")
 require("Maxspeed")
@@ -32,6 +32,7 @@ local transform_cycleway_both_postfix = require('transform_cycleway_both_postfix
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
+local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
 local roadsTable = osm2pgsql.define_table({
@@ -157,11 +158,10 @@ function osm2pgsql.process_way(object)
   end
   if not allowed_highways[object_tags.highway] then return end
 
-  local excludeHighway = ExcludeHighways(object_tags)
-  if excludeHighway then return end
-
-  -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
-  if object_tags.area == 'yes' then return end
+  if exclude.by_area_water(object_tags) then return end
+  local forbidden_accesses_bikelanes = Set({ 'private', 'no', 'delivery', 'permit' })
+  if exclude.by_access(object_tags, forbidden_accesses_bikelanes) then return end
+  if exclude.by_service(object_tags) then return end
 
   -- ====== (B.1) Initialize and apply pseudo tags ======
   local mapillary_coverage_lines = mapillary_coverage_data:get()
@@ -187,6 +187,9 @@ function osm2pgsql.process_way(object)
     mapillary_backward = object_tags['mapillary:backward'],
     mapillary_traffic_sign = object_tags['source:traffic_sign:mapillary'],
     description = object_tags.description or object_tags.note,
+    operator_type = SANITIZE_TAGS.operator_type(object_tags),
+    informal = SANITIZE_TAGS.informal(object_tags.informal),
+    covered = SANITIZE_TAGS.covered_or_indoor(object_tags),
   }
   MergeTable(road_result_tags, RoadClassification(object_tags))
   MergeTable(road_result_tags, Lit(object_tags))
@@ -207,7 +210,10 @@ function osm2pgsql.process_way(object)
         mapillary_backward = cycleway.mapillary_backward or road_result_tags.mapillary_backward,
         mapillary_traffic_sign = cycleway.mapillary_traffic_sign or road_result_tags.mapillary_traffic_sign,
         description = cycleway.description or road_result_tags.description,
-        _parent_highway = cycleway._parent_highway
+        operator_type = road_result_tags.operator_type,
+        informal = road_result_tags.informal,
+        covered = road_result_tags.covered,
+        _parent_highway = cycleway._parent_highway -- duplicated because we `ExtractPublicTags` on the other data below
       }
       local meta = Metadata(object)
 
@@ -261,64 +267,68 @@ function osm2pgsql.process_way(object)
   road_result_tags._todo_list = ToTodoTags(todos)
   road_result_tags.todos = ToMarkdownList(todos)
 
-  -- We need sidewalk for Biklanes(), but not for `roads`
-  if not IsSidepath(object_tags) then
-    local meta = Metadata(object)
+  -- Exit processing for roads, roadsPathClasses
+  -- We need sidewalks for `bikelanes`, but not for `roads*`
+  if IsSidepath(object_tags) then return end
+  -- Apply access filtering for roads (forbids private, no, delivery, permit, destination)
+  local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination' }) })
+  if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
+  if exclude.by_indoor(object_tags) then return end
+  if exclude.by_informal(object_tags) then return end
 
-    -- (C.3) WRITE `bikeSuitability` table
-    local bikeSuitability = CategorizeBikeSuitability(object_tags)
-    if bikeSuitability then
-      local bike_suitability_tags = {
-        bikeSuitability = bikeSuitability.id,
-      }
-      MergeTable(bike_suitability_tags, road_result_tags)
+  -- (C.3) WRITE `bikeSuitability` table
+  local bikeSuitability = CategorizeBikeSuitability(object_tags)
+  if bikeSuitability then
+    local bike_suitability_tags = {
+      bikeSuitability = bikeSuitability.id,
+    }
+    MergeTable(bike_suitability_tags, road_result_tags)
 
-      bikeSuitabilityTable:insert({
-        id = DefaultId(object),
-        tags = ExtractPublicTags(bike_suitability_tags),
-        meta = meta,
-        geom = object:as_linestring(),
-        minzoom = 0
-      })
-    end
+    bikeSuitabilityTable:insert({
+      id = DefaultId(object),
+      tags = ExtractPublicTags(bike_suitability_tags),
+      meta = Metadata(object),
+      geom = object:as_linestring(),
+      minzoom = 0
+    })
+  end
 
-    -- (C.4a) WRITE `roads` table
-    if PathClasses[object_tags.highway] then
-      roadsPathClassesTable:insert({
-        id = DefaultId(object),
-        tags = ExtractPublicTags(road_result_tags),
-        meta = meta,
-        geom = object:as_linestring(),
-        minzoom = PathsGeneralization(object_tags, road_result_tags)
-      })
-    else
-      -- The `ref` (e.g. "B 264") is used in your map style and only relevant for higher road classes.
-      road_result_tags.name_ref = object_tags.ref
-      roadsTable:insert({
-        id = DefaultId(object),
-        tags = ExtractPublicTags(road_result_tags),
-        meta = meta,
-        geom = object:as_linestring(),
-        minzoom = RoadGeneralization(object_tags, road_result_tags)
-      })
-    end
+  -- (C.4a) WRITE `roads` table
+  if PathClasses[object_tags.highway] then
+    roadsPathClassesTable:insert({
+      id = DefaultId(object),
+      tags = ExtractPublicTags(road_result_tags),
+      meta = Metadata(object),
+      geom = object:as_linestring(),
+      minzoom = PathsGeneralization(object_tags, road_result_tags)
+    })
+  else
+    -- The `ref` (e.g. "B 264") is used in your map style and only relevant for higher road classes.
+    road_result_tags.name_ref = object_tags.ref
+    roadsTable:insert({
+      id = DefaultId(object),
+      tags = ExtractPublicTags(road_result_tags),
+      meta = Metadata(object),
+      geom = object:as_linestring(),
+      minzoom = RoadGeneralization(object_tags, road_result_tags)
+    })
+  end
 
-    -- (C.4b) WRITE `todoLiniesTable` table for roads
-    if next(road_result_tags._todo_list) ~= nil then
-      local todo_meta = {
-        todos = road_result_tags.todos,
-        category = road_result_tags.category,
-        mapillary_coverage = mapillary_coverage_value,
-      }
-      todoLiniesTable:insert({
-        id = DefaultId(object),
-        table = "roads",
-        tags = road_result_tags._todo_list,
-        meta = MergeTable(todo_meta, meta),
-        length = math.floor(road_result_tags.length),
-        geom = object:as_linestring(),
-        minzoom = 0
-      })
-    end
+  -- (C.4b) WRITE `todoLiniesTable` table for roads
+  if next(road_result_tags._todo_list) ~= nil then
+    local todo_meta = {
+      todos = road_result_tags.todos,
+      category = road_result_tags.category,
+      mapillary_coverage = mapillary_coverage_value,
+    }
+    todoLiniesTable:insert({
+      id = DefaultId(object),
+      table = "roads",
+      tags = road_result_tags._todo_list,
+      meta = MergeTable(todo_meta, Metadata(object)),
+      length = math.floor(road_result_tags.length),
+      geom = object:as_linestring(),
+      minzoom = 0
+    })
   end
 end

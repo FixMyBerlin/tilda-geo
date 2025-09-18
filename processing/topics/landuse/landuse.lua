@@ -73,11 +73,11 @@ function osm2pgsql.process_way(object)
 end
 
 function osm2pgsql.process_relation(object)
-  if ExitProcessing(object) or not object.tags.type == 'multipolygon' then
+  -- Only process multipolygon relations to avoid inserting relations with NULL geometry (like `type=site`)
+  -- The original condition "not object.tags.type == 'multipolygon'" was always false due to operator precedence
+  if ExitProcessing(object) or object.tags.type ~= 'multipolygon' then
     return
   end
-
-
 
   table:insert({
     tags = processTags(object.tags),

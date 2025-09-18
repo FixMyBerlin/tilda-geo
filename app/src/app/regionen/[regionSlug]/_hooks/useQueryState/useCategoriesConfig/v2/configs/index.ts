@@ -51,6 +51,7 @@ import { _qver32 } from './_qver32'
 import { _r6m1yq } from './_r6m1yq'
 import { _r8e83n } from './_r8e83n'
 import { _rcqwse } from './_rcqwse'
+import { _sdn94m } from './_sdn94m'
 import { _st5qyw } from './_st5qyw'
 import { _tztqka } from './_tztqka'
 import { _up0vgv } from './_up0vgv'
@@ -111,6 +112,7 @@ export const configs = {
   r6m1yq: _r6m1yq,
   r8e83n: _r8e83n,
   rcqwse: _rcqwse,
+  sdn94m: _sdn94m,
   st5qyw: _st5qyw,
   tztqka: _tztqka,
   up0vgv: _up0vgv,

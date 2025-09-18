@@ -2,6 +2,7 @@ import { $ } from 'bun'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
+import { debugWgetCommand } from '../utils/debugWget'
 import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
@@ -31,13 +32,17 @@ export async function waitForFreshData() {
     // Ensure OAuth is ready before each iteration
     const cookieCheck = await ensureOAuthReady()
 
+    // Debug logging for waitForFreshData wget command with redirect parameters
+    debugWgetCommand(cookieCheck as any, 'waitForFreshData')
+
     const response = await fetch(params.pbfDownloadUrl, {
       method: 'HEAD',
       headers: getAuthHeaders(cookieCheck?.httpCookie),
     })
     const lastModified = response.headers.get('Last-Modified')
     if (!lastModified) {
-      throw new Error('No Last-Modified header found')
+      console.log('[WARN] Download: No Last-Modified header found, continuing with existing file')
+      return false
     }
 
     // Check if last modified date is today
@@ -109,6 +114,9 @@ export async function downloadFile() {
   // Download file and write to disc
   const downloadMethod = cookieCheck?.isValid ? 'internal (OAuth)' : 'public'
   console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
+
+  // Debug logging for wget command with redirect parameters
+  debugWgetCommand(cookieCheck as any, 'Download')
 
   try {
     if (cookieCheck?.isValid && cookieCheck.httpCookie) {

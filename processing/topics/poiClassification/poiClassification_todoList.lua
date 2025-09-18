@@ -203,7 +203,8 @@ end
 
 function osm2pgsql.process_relation(object)
   if ExitProcessing(object) then return end
-  if not object.tags.type == 'multipolygon' then return end
+  -- Only process multipolygon relations to avoid inserting relations with NULL geometry
+  if object.tags.type ~= 'multipolygon' then return end
 
   table:insert({
     value_to_check = object.tags.amenity or object.tags.shop or object.tags.tourism,

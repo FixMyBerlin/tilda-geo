@@ -50,10 +50,16 @@ function RoadClassificationRoadValue(tags)
     local service_mapping = {
       -- REMINDER: Keep this in sync with `processing/topics/helper/ExcludeHighways.lua`
       alley = 'service_alley',
-      driveway = 'service_driveway', -- UNUSED, see ExcludeHighways.lua
-      parking_isle = 'service_parking_aisle', -- UNUSED, see ExcludeHighways.lua
+      driveway = 'service_driveway',
+      emergency_access = 'service_emergency_access',
+      parking_isle = 'service_parking_aisle',
     }
     road_value = service_mapping[tags.service]
+
+    -- Retag driveways to emergeny_access
+    if (tags.emergency == 'yes' or tags.emergency == 'designated') and road_value == 'service_driveway' then
+      road_value = 'service_emergency_access'
+    end
 
     if tags.service == nil then
       road_value = "service_road"

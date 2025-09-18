@@ -80,6 +80,52 @@ local SANITIZE_TAGS = {
       { 'ice', 'snow', 'salt', }
     )
   end,
+  operator_type = function(tags)
+    local value = tags['operator:type']
+    if value == nil then
+      if tags.operator == 'private' then value = 'private'
+      elseif tags.operator == 'public' then value = 'public'
+      end
+    end
+    if value == nil then return nil end
+
+    -- DOCs: to revalidate this query, use…
+    -- curl -g https://postpass.geofabrik.de/api/0.2/interpreter --data-urlencode "options[geojson]=false" --data-urlencode "data=
+    --   SELECT line.tags->>'operator:type' AS operator_type, COUNT(*) AS way_count
+    --   FROM postpass_line AS line WHERE line.tags ? 'highway' GROUP BY line.tags->>'operator:type' ORDER BY way_count DESC"
+    -- Transform known but unsupported values to values that we support:
+    local transformations = {
+      ['government'] = 'public',
+      ['council'] = 'public',
+      ['university'] = 'public',
+      ['business'] = 'private',
+      ['private_non_profit'] = 'private',
+      ['military'] = 'private',
+    }
+    if transformations[value] then
+      value = transformations[value]
+    end
+
+    return sanitize_for_logging(value, { 'public', 'private' })
+  end,
+  indoor = function(value)
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+  end,
+  informal = function(value)
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+  end,
+  covered = function(value)
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+  end,
+  covered_or_indoor = function(tags)
+    if tags.covered == 'yes' then
+      return 'covered'
+    elseif tags.indoor == 'yes' then
+      return 'indoor'
+    else
+      return nil
+    end
+  end,
 }
 
 return SANITIZE_TAGS

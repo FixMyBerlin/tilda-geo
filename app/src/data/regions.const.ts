@@ -82,17 +82,18 @@ export type RegionSlug =
   | 'bb-pg' // Land Brandenburg Projektgruppe
   | 'bb-sg' // Land Brandenburg Steuerungsgruppe
   | 'bb' // Öffentlich, Land Brandenburg
-  | 'infravelo'
   | 'berlin'
   | 'bibi'
   | 'deutschland'
   | 'fahrradstellplaetze'
   | 'herrenberg'
+  | 'infravelo'
   | 'langerwehe'
   | 'lueneburg'
   | 'magdeburg'
   | 'mainz'
   | 'muenchen'
+  | 'nrw'
   | 'nudafa'
   | 'ostalbkreis'
   | 'pankow'
@@ -780,6 +781,20 @@ export const staticRegion: StaticRegion[] = [
     logoWhiteBackgroundRequired: false,
     categories: ['bikelanes', 'lit', 'poi', 'roads', 'surface', 'bicycleParking', 'mapillary'],
     backgroundSources: defaultBackgroundSources,
+    notes: 'osmNotes',
+  },
+  {
+    slug: 'nrw',
+    name: 'NRW',
+    fullName: 'NRW',
+    product: 'radverkehr',
+    osmRelationIds: [62761],
+    map: { lat: 51.588, lng: 7.567, zoom: 9 },
+    bbox: null,
+    logoPath: null,
+    logoWhiteBackgroundRequired: false,
+    categories: ['bikelanes', 'poi', 'roads', 'surface', 'bicycleParking', 'mapillary'],
+    backgroundSources: [...defaultBackgroundSources, 'nrw-ortho'],
     notes: 'osmNotes',
   },
   {

@@ -12,8 +12,10 @@ import { Breadcrumb } from '../_components/Breadcrumb'
 import { HeaderWrapper } from '../_components/HeaderWrapper'
 import { getFullname } from './_components/utils/getFullname'
 
+const MAX_TAKE = 250
+
 export default function AdminMembershipsPage() {
-  const [{ users: userAndMemberships }] = useQuery(getUsersAndMemberships, { take: 250 })
+  const [{ users: userAndMemberships }] = useQuery(getUsersAndMemberships, { take: MAX_TAKE })
 
   const router = useRouter()
   const [deleteMembershipMutation] = useMutation(deleteMembership)
@@ -36,10 +38,10 @@ export default function AdminMembershipsPage() {
         <Breadcrumb pages={[{ href: '/admin/memberships', name: 'Nutzer & Mitgliedschaften' }]} />
       </HeaderWrapper>
 
-      {userAndMemberships.length >= 250 && (
+      {userAndMemberships.length >= MAX_TAKE && (
         <p className="my-12 text-red-500">
-          Achtung, die Liste zeigt maximal 250 Einträge. Wir müssen eine Paginierung bauen oder
-          `maxTake` erhöhen.
+          Achtung, die Liste zeigt maximal {MAX_TAKE} Einträge. Wir müssen eine Paginierung bauen
+          oder `maxTake` erhöhen.
         </p>
       )}
 

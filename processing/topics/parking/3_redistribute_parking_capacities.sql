@@ -12,7 +12,7 @@ WHERE
 WITH
   total_lengths AS (
     SELECT
-      osm_id,
+      original_id,
       SUM(ST_Length (geom)) AS length,
       COUNT(*) AS count
     FROM
@@ -20,11 +20,11 @@ WITH
     WHERE
       tags ? 'capacity'
     GROUP BY
-      osm_id
+      original_id
   )
 UPDATE _parking_parkings_cutted pc
 SET
-  tags = tags - 'area' - 'area_source' - 'area_confidence' || jsonb_build_object(
+  tags = tags - ARRAY['area', 'area_source', 'area_confidence'] || jsonb_build_object(
     'capacity',
     (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
     'capacity_source',
@@ -34,4 +34,4 @@ FROM
   total_lengths tl
 WHERE
   tl.count > 1
-  AND pc.osm_id = tl.osm_id;
+  AND pc.original_id = tl.original_id;

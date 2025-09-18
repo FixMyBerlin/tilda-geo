@@ -21,6 +21,11 @@ function DeriveOneway(tags, category)
     return tags.oneway
   end
 
+  -- Special treatment for `category=footAndCyclewayShared_isolated`
+  if tags.highway == 'service' then
+    return 'assumed_no'
+  end
+
   if category.implicitOneWay then
     return 'implicit_yes'
   end

@@ -59,21 +59,22 @@ describe("Bikelanes", function()
       local input_object = {
         tags = {
           highway = 'cycleway',
+          bicycle_road = 'yes',
           mapillary = 'm123',
           ['mapillary:forward'] = 'mf123',
           ['mapillary:backward'] = 'mb123',
-          ['source:traffic_sign:mapillary'] = 'scm123',
-          bicycle_road = 'yes',
+          ['source:traffic_sign:forward:mapillary'] = 'stmf123',
+          ['source:traffic_sign:backward:mapillary'] = 'stmf123',
         },
         id = 1,
         type = 'way'
       }
       local result = Bikelanes(input_object.tags, input_object)
-      assert.are.equal(result[1].category, "bicycleRoad")
-      assert.are.equal(result[1].mapillary, 'm123')
-      assert.are.equal(result[1]['mapillary_forward'], 'mf123')
-      assert.are.equal(result[1]['mapillary_backward'], 'mb123')
-      assert.are.equal(result[1]['mapillary_traffic_sign'], 'scm123')
+      assert.are.equal('bicycleRoad', result[1].category)
+      assert.are.equal('m123', result[1].mapillary)
+      assert.are.equal('mf123', result[1]['mapillary_forward'])
+      assert.are.equal('mb123', result[1]['mapillary_backward'])
+      assert.are.equal('stmf123', result[1]['mapillary_traffic_sign'])
     end)
 
     it('left right mapillary', function()
@@ -91,7 +92,7 @@ describe("Bikelanes", function()
       local result = Bikelanes(input_object.tags, input_object)
 
       assert.are.equal("cyclewayOnHighway_advisory", result[1].category)
-      assert.are.equal('crm345', result[1].mapillary)
+      assert.are.equal('crm345;m123', result[1].mapillary)
     end)
 
   end)

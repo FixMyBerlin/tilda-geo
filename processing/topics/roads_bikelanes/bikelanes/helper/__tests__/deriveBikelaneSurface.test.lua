@@ -6,12 +6,13 @@ describe('deriveBikelaneSurface', function()
   require('osm2pgsql')
   local deriveBikelaneSurface = require('deriveBikelaneSurface')
 
-  it('takes direct data if possible', function()
-    local cyclewayTransformation = CenterLineTransformation.new({
-      highway = 'cycleway',
-      prefix = 'cycleway',
-      direction_reference = 'self'
+  local cyclewayTransformation = CenterLineTransformation.new({
+    highway = 'cycleway',
+    prefix = 'cycleway',
+    direction_reference = 'self'
     })
+
+  it('takes direct data if possible', function()
     local object_tags = {
       highway = 'primary',
       ['cycleway:right'] = 'lane',
@@ -22,7 +23,7 @@ describe('deriveBikelaneSurface', function()
     local transformedObjects = GetTransformedObjects(object_tags, { cyclewayTransformation })
     local transformed_tags = transformedObjects[2]
     local category = CategorizeBikelane(transformed_tags)
-    local result = category and deriveBikelaneSurface(transformed_tags, category.id)
+    local result = category and deriveBikelaneSurface(transformed_tags, category)
     assert.are.same(
       { surface = 'asphalt', surface_source = 'tag', surface_confidence = 'high' },
       result
@@ -44,7 +45,7 @@ describe('deriveBikelaneSurface', function()
     local transformedObjects = GetTransformedObjects(object_tags, { cyclewayTransformation })
     local transformed_tags = transformedObjects[2]
     local category = CategorizeBikelane(transformed_tags)
-    local result = category and deriveBikelaneSurface(transformed_tags, category.id)
+    local result = category and deriveBikelaneSurface(transformed_tags, category)
     assert.are.same(
       { surface = 'asphalt', surface_source = 'parent_highway_tag', surface_confidence = 'high' },
       result
@@ -66,10 +67,10 @@ describe('deriveBikelaneSurface', function()
     local transformedObjects = GetTransformedObjects(object_tags, { cyclewayTransformation })
     local transformed_tags = transformedObjects[2]
     local category = CategorizeBikelane(transformed_tags)
-    local result = category and deriveBikelaneSurface(transformed_tags, category.id)
+    local result = category and deriveBikelaneSurface(transformed_tags, category)
     assert.are.same(
-      { surface = nil, surface_source = nil, surface_confidence = nil },
-      result
+      result,
+      { surface = nil, surface_source = nil, surface_confidence = nil }
     )
   end)
 end)

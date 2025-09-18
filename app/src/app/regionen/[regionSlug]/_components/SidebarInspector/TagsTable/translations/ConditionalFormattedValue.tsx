@@ -154,6 +154,9 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'length',
     'lifecycle',
     'parking',
+    'covered',
+    'informal',
+    'operator_type',
   ]
   if (!translations[translationKey] && nonCategorizedTagKeys.includes(tagKey)) {
     translationKey = `ALL--${tagKey}=${tagValue}`

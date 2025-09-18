@@ -15,8 +15,11 @@ require("DeriveTrafficSigns")
 require("CollectTodos")
 require("ToMarkdownList")
 require("ToTodoTags")
+local sanitize_cleaner = require('sanitize_cleaner')
 local parse_length = require('parse_length')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
+local SANITIZE_TAGS = require('sanitize_tags')
+local to_semicolon_list = require('to_semicolon_list')
 local deriveTrafficMode = require('deriveTrafficMode')
 local deriveBikelaneSurface = require('deriveBikelaneSurface')
 local deriveBikelaneSmoothness = require('deriveBikelaneSmoothness')
@@ -83,28 +86,45 @@ function Bikelanes(object_tags, object)
           buffer_right = SANITIZE_ROAD_TAGS.buffer(transformed_tags, 'right'),
           marking_left = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'left'),
           marking_right = SANITIZE_ROAD_TAGS.marking(transformed_tags, 'right'),
-          mapillary = transformed_tags.mapillary
-            or object_tags.mapillary
-            or object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary']
-            or object_tags['source:cycleway:both:mapillary']
-            or object_tags['source:cycleway:mapillary'],
-          mapillary_forward = transformed_tags['mapillary:forward'] or object_tags['source:cycleway:mapillary:forward'],
-          mapillary_backward = transformed_tags['mapillary:backward'] or object_tags['source:cycleway:mapillary:backward'],
-          mapillary_traffic_sign = transformed_tags['traffic_sign:mapillary']
-            or object_tags['source:traffic_sign:mapillary']
-            or object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary']
-            or object_tags['source:cycleway:both:traffic_sign:mapillary']
-            or object_tags['source:cycleway:traffic_sign:mapillary'],
-          description = transformed_tags.description or transformed_tags.note
-            or object_tags['note:cycleway:' .. transformed_tags._side]
-            or object_tags['note:cycleway:both']
-            or object_tags['note:cycleway'],
+          mapillary = to_semicolon_list({
+            transformed_tags.mapillary,
+            object_tags.mapillary,
+            object_tags['source:cycleway:' .. transformed_tags._side .. ':mapillary'],
+            object_tags['source:cycleway:both:mapillary'],
+            object_tags['source:cycleway:mapillary'],
+          }),
+          mapillary_forward = to_semicolon_list({
+            transformed_tags['mapillary:forward'],
+            object_tags['source:cycleway:mapillary:forward'],
+          }),
+          mapillary_backward = to_semicolon_list({
+            transformed_tags['mapillary:backward'],
+            object_tags['source:cycleway:mapillary:backward'],
+          }),
+          mapillary_traffic_sign = to_semicolon_list({
+            transformed_tags['traffic_sign:mapillary'],
+            object_tags['source:traffic_sign:mapillary'],
+            object_tags['source:cycleway:' .. transformed_tags._side .. ':traffic_sign:mapillary'],
+            object_tags['source:cycleway:both:traffic_sign:mapillary'],
+            object_tags['source:cycleway:traffic_sign:mapillary'],
+            object_tags['source:cycleway:traffic_sign:forward:mapillary'],
+            object_tags['source:cycleway:traffic_sign:backward:mapillary'],
+            object_tags['source:traffic_sign:forward:mapillary'],
+            object_tags['source:traffic_sign:backward:mapillary'],
+          }),
+          description = to_semicolon_list({
+            transformed_tags.description,
+            transformed_tags.note,
+            object_tags['note:cycleway:' .. transformed_tags._side],
+            object_tags['note:cycleway:both'],
+            object_tags['note:cycleway'],
+          }),
         })
 
         MergeTable(result_tags, deriveTrafficMode(transformed_tags, object_tags, category.id, transformed_tags._side))
         MergeTable(result_tags, DeriveTrafficSigns(transformed_tags))
-        MergeTable(result_tags, deriveBikelaneSurface(transformed_tags, category.id))
-        MergeTable(result_tags, deriveBikelaneSmoothness(transformed_tags, category.id))
+        MergeTable(result_tags, deriveBikelaneSurface(transformed_tags, category))
+        MergeTable(result_tags, deriveBikelaneSmoothness(transformed_tags, category))
         CopyTags(result_tags, transformed_tags, tags_prefixed, 'osm_')
         -- copy original tags
         CopyTags(result_tags, object_tags, tags_copied)
@@ -120,7 +140,10 @@ function Bikelanes(object_tags, object)
         result_tags._todo_list = ToTodoTags(todos)
         result_tags.todos = ToMarkdownList(todos)
       end
-      table.insert(result_bikelanes, result_tags)
+
+      local cleaned_tags = sanitize_cleaner.remove_disallowed_values(result_tags)
+
+      table.insert(result_bikelanes, cleaned_tags)
     end
   end
 

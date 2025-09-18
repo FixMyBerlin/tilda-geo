@@ -25,7 +25,7 @@ local function result_tags_crossings(result)
 
   local result_meta = Metadata(result)
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner(result_tags, result.object.tags)
+  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, result.object.tags)
 
   return {
     id = id,

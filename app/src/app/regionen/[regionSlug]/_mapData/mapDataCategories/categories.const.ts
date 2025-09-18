@@ -140,7 +140,7 @@ export const categories: StaticMapDataCategory[] = [
   },
   {
     id: 'bicycleParking',
-    name: 'Fahrradstellplätze',
+    name: 'Fahrradstellplätze (Beta)',
     desc: '',
     subcategories: [{ ...subcat_bicycleParking, defaultStyle: 'default' }],
   },

@@ -11,7 +11,7 @@ import { getUserSelectOptions } from './utils/getUserSelectOptions'
 export { FORM_ERROR } from '@/src/app/_components/forms/Form'
 
 export function MembershipForm<S extends z.ZodType<any, any>>(props: FormProps<S>) {
-  const [{ users }] = useQuery(getUsers, {})
+  const [users] = useQuery(getUsers, {})
   const [regions] = useQuery(getRegionsWithAdditionalData, {})
 
   return (

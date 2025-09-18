@@ -2,9 +2,25 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-09-11, -16
+
+### `bikelanes`
+
+- Add attributes `operator_type`, `covered`, `informal`
+- Include ways that are privately operated, indoor or informal
+- Include ways that are `access=destination` in the data
+- Include ways on `highway=service` when also bike tagging present
+- Categorize bicycle roads with "Kfz frei" as `bicycleRoad_vehicleDestination`
+
+### `roads`, `roadsPathClasses`,
+
+- Add attributes `operator_type`, `covered`
+- Include ways that are privately operated (still excluding indoor, informal)
+- Include ways on `highway=service` when also bike tagging present
+
 ## 2025-07-29
 
-### `raods`, `roadsPathClasses`, `bikelanes``
+### `roads`, `roadsPathClasses`, `bikelanes`
 
 - Ways in `construction` are now transformed into their provided infrastructure, including prefixed data `construction:*`
 - With `lifecycle=construction` to indicate this transformation

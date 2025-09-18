@@ -2,7 +2,7 @@
 -- Docs: https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway%3Dopposite
 -- This doesn't handle opposite tagging on nested tags.
 function ConvertCyclewayOppositeSchema(tags)
-  if not tags.oneway == 'yes' then return end
+  if tags.oneway ~= 'yes' then return end
 
   if tags.cycleway == 'opposite' then
     tags["cycleway"] = "no"
