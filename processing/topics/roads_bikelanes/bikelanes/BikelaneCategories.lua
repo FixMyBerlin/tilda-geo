@@ -154,7 +154,9 @@ local bicycleRoad_vehicleDestination = BikelaneCategory.new({
       then
         return true
       end
-      if tags.vehicle == 'destination' or tags.motor_vehicle == 'destination' then
+      if tags.vehicle == 'destination' or tags.motor_vehicle == 'destination' or
+        tags.vehicle == 'yes' or tags.motor_vehicle == 'yes'
+      then
         return true
       end
     end
