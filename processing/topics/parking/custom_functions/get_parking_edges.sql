@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS get_parking_edges (geometry, float);
+DROP FUNCTION IF EXISTS get_parking_edges (geometry);
 
-CREATE FUNCTION get_parking_edges (parking_geom geometry, max_angle_degrees float) RETURNS TABLE (
+CREATE FUNCTION get_parking_edges (parking_geom geometry) RETURNS TABLE (
   geom geometry,
   length double precision,
   hull geometry
@@ -11,7 +11,7 @@ BEGIN
   RETURN QUERY
   -- get all corners of the convex hull that are sharper than max_angle_degrees
   WITH corners AS (
-    SELECT * FROM get_polygon_corners(hull_geom, max_angle_degrees)
+    SELECT * FROM get_polygon_corners(poly := hull_geom, n_corners := 4)
   ),
   edges AS (
     -- create lines by connecting each corner to the next
