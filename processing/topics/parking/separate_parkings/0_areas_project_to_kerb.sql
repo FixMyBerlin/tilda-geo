@@ -62,10 +62,14 @@ DROP TABLE IF EXISTS "EXPERIMENT_parking_edges";
 SELECT
   id,
   tags,
-  edges.* INTO "EXPERIMENT_parking_edges"
+  connect_on_polygon (
+    ST_StartPoint (edges.geom),
+    ST_EndPoint (edges.geom),
+    _parking_separate_parking_areas.geom
+  ) as geom INTO "EXPERIMENT_parking_edges"
 FROM
-  _parking_separate_parking_areas_projected
-  CROSS JOIN LATERAL get_parking_edges (geom, 160.) edges;
+  _parking_separate_parking_areas
+  CROSS JOIN LATERAL get_parking_edges (geom) edges;
 
 ALTER TABLE "EXPERIMENT_parking_edges"
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
