@@ -3,7 +3,6 @@ import { join } from 'path'
 import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { topicsConfig, type Topic } from '../constants/topics.const'
 import {
-  cleanupAdapterViews,
   createReferenceTable,
   diffTables,
   getSchemaTables,
@@ -30,20 +29,6 @@ async function runSQL(topic: Topic) {
 
   if (exists) {
     try {
-      // Clean up any adapter views before running SQL to avoid dependency conflicts
-      await cleanupAdapterViews()
-
-      // Additional cleanup: specifically drop any _parking_intersections_diffing_adapter view
-      // This is a workaround for the specific issue we're seeing
-      try {
-        await $`psql -c "DROP VIEW IF EXISTS public._parking_intersections_diffing_adapter CASCADE"`
-      } catch (cleanupError) {
-        // Ignore cleanup errors, just log them
-        if (isDev) {
-          console.warn('Additional cleanup failed:', cleanupError)
-        }
-      }
-
       console.time(`Running SQL ${psqlFile}`)
       await $`psql -v ON_ERROR_STOP=1 -q -f ${psqlFile}`
       console.timeEnd(`Running SQL ${psqlFile}`)
@@ -93,9 +78,6 @@ export async function runTopic(fileName: string, topic: Topic) {
  */
 export async function processTopics(fileName: string, fileChanged: boolean) {
   logStart('Processing: Topics')
-
-  // Clean up any existing adapter views to avoid dependency conflicts
-  await cleanupAdapterViews()
 
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
