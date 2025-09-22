@@ -62,7 +62,7 @@ DROP TABLE IF EXISTS "EXPERIMENT_parking_edges";
 SELECT
   id,
   tags,
-  (parking_area_to_line (geom, tags, 10.0)).* INTO "EXPERIMENT_parking_edges"
+  (parking_area_to_line (geom, tags, 15.)).* INTO "EXPERIMENT_parking_edges"
 FROM
   _parking_separate_parking_areas;
 
@@ -71,7 +71,6 @@ ALTER COLUMN parking_kerb TYPE geometry (Geometry, 5243) USING ST_SetSRID (parki
 
 CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (parking_kerb);
 
-ALTER TABLE "EXPERIMENT_parking_edges"
-ALTER COLUMN rest TYPE geometry (Geometry, 5243) USING ST_SetSRID (rest, 5243);
-
-CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (rest);
+-- ALTER TABLE "EXPERIMENT_parking_edges"
+-- ALTER COLUMN rest TYPE geometry (Geometry, 5243) USING ST_SetSRID (rest, 5243);
+-- CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges_rest" USING gist (rest);

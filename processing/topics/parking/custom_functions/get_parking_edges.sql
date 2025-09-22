@@ -32,15 +32,36 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE FUNCTION projected_alignment (g1 geometry, g2 geometry) RETURNS double precision AS $$
+DECLARE
+    proj geometry;
+    theta double precision;
+    alignment double precision;
+BEGIN
+    proj := project_to_line(project_from := g1, project_onto := g2);
+    theta := ST_Azimuth(ST_StartPoint(g1), ST_EndPoint(g1))
+           - ST_Azimuth(ST_StartPoint(proj), ST_EndPoint(proj));
+
+    -- Normalize angle to [0, pi/2] because we don't care about the direction
+    theta := abs(theta);
+    IF theta > pi()/2 THEN
+        theta := pi() - theta;
+    END IF;
+
+    -- 3. Compute alignment: max(|cosθ|, |sinθ|) for desired behavior
+    alignment := abs(cos(theta));
+
+    RETURN alignment * ST_length(proj);
+END;
+$$ LANGUAGE plpgsql STABLE;
+
 DROP TYPE edge_info;
 
 -- Define a composite type for edges
 CREATE TYPE edge_info AS (
   geom geometry,
-  distance double precision,
-  driveway_distance double precision,
-  edge_idx bigint,
-  length double precision
+  road_score double precision,
+  edge_idx bigint
 );
 
 -- Function
@@ -48,75 +69,63 @@ CREATE OR REPLACE FUNCTION parking_area_to_line (
   parking_geom geometry,
   parking_tags JSONB,
   tolerance double precision
-) RETURNS TABLE (parking_kerb geometry, rest geometry) LANGUAGE plpgsql AS $$
+) RETURNS TABLE (
+  parking_kerb geometry,
+  rest geometry,
+  score double precision
+) LANGUAGE plpgsql AS $$
 DECLARE
   edges_arr edge_info[];
-  closest_edge_idx bigint;
+  parking_kerb_idx bigint;
   n_edges int;
 BEGIN
   -- Materialize edges and distances into a typed array
   SELECT array_agg(
            ROW(e.geom,
-               d.distance,
-               dd.driveway_distance,
-               e.edge_idx,
-               ST_Length(e.geom))::edge_info
+               ra.road_score,
+               e.edge_idx)::edge_info
          )
   INTO edges_arr
   FROM get_parking_edges(parking_geom) e
+  -- calculate road scores
   LEFT JOIN (
-    SELECT edge_idx, MIN(distance) AS distance
+    SELECT edge_idx, SUM(alignment / (distance + 1) ) AS road_score
     FROM (
       SELECT e.edge_idx,
-             ST_Distance(e.mid_point, r.geom) AS distance,
-             r.is_driveway
+             COALESCE(projected_alignment(e.geom, r.geom), 0) as alignment,
+             ST_Distance(e.geom, r.geom) as distance
       FROM get_parking_edges(parking_geom) e
       LEFT JOIN _parking_roads r
         ON ST_DWithin(e.mid_point, r.geom, tolerance)
        AND (parking_tags->>'road_name' IS NULL
          OR r.tags->>'street_name' IS NULL
          OR parking_tags->>'road_name' != r.tags->>'street_name')
-      WHERE r.is_driveway = FALSE
     ) sub
     GROUP BY edge_idx
-  ) d ON d.edge_idx = e.edge_idx
-  LEFT JOIN (
-    SELECT edge_idx, MIN(distance) AS driveway_distance
-    FROM (
-      SELECT e.edge_idx,
-             ST_Distance(e.mid_point, r.geom) AS distance,
-             r.is_driveway
-      FROM get_parking_edges(parking_geom) e
-      LEFT JOIN _parking_roads r
-        ON ST_DWithin(e.mid_point, r.geom, tolerance)
-      WHERE r.is_driveway = TRUE
-    ) sub
-    GROUP BY edge_idx
-  ) dd ON dd.edge_idx = e.edge_idx;
+  ) ra ON ra.edge_idx = e.edge_idx;
 
   n_edges := array_length(edges_arr, 1);
 
-  -- Compute closest edge index using SQL
-  SELECT edge_idx
-  INTO closest_edge_idx
-  FROM unnest(edges_arr) AS t(geom, distance, driveway_distance, edge_idx, length)
-  ORDER BY COALESCE(distance, driveway_distance)
+  SELECT edge_idx, road_score
+  INTO parking_kerb_idx, score
+  FROM unnest(edges_arr) AS t(geom, road_score, edge_idx)
+  ORDER BY road_score DESC
   LIMIT 1;
 
   -- Return the closest edge as parking_kerb
   SELECT geom
   INTO parking_kerb
-  FROM unnest(edges_arr) AS t(geom, distance, driveway_distance, edge_idx, length)
-  WHERE edge_idx = closest_edge_idx;
+  FROM unnest(edges_arr) AS t(geom, road_score, edge_idx)
+  WHERE edge_idx = parking_kerb_idx;
 
   -- Return the union of the remaining edges as rest
   SELECT ST_LineMerge(ST_Union(geom))
   INTO rest
-  FROM unnest(edges_arr) AS t(geom, distance, driveway_distance, edge_idx, length)
+  FROM unnest(edges_arr) AS t(geom, road_score, edge_idx)
   WHERE edge_idx NOT IN (
-    closest_edge_idx,
-    (closest_edge_idx % n_edges) + 1,                 -- next edge (wrap around)
-    CASE WHEN closest_edge_idx = 1 THEN n_edges ELSE closest_edge_idx - 1 END  -- previous edge
+    CASE WHEN parking_kerb_idx = 1 THEN n_edges ELSE parking_kerb_idx - 1 END,  -- previous edge
+    parking_kerb_idx,
+    (parking_kerb_idx % n_edges) + 1                                            -- next edge (wrap around)
   );
   RETURN NEXT;
 END;
