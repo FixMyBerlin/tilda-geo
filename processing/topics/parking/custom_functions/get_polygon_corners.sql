@@ -1,18 +1,18 @@
 DROP FUNCTION IF EXISTS get_polygon_corners;
 
-DROP FUNCTION IF EXISTS get_angle_on_line;
+DROP FUNCTION IF EXISTS tangent_on_ring;
 
-CREATE FUNCTION get_angle_on_line (geom geometry, idx integer) RETURNS double precision AS $$
+CREATE FUNCTION tangent_on_ring (ring geometry, idx integer) RETURNS double precision AS $$
 DECLARE
-  n INT := ST_NumPoints(geom);
+  n INT := ST_NumPoints(ring);
   a geometry;
   b geometry;
   c geometry;
   angle double precision;
 BEGIN
-  a := ST_PointN(geom, CASE WHEN idx > 1 THEN idx - 1 ELSE n - 1 END);
-  b := ST_PointN(geom, idx);
-  c := ST_PointN(geom, idx % n + 1);
+  a := ST_PointN(ring, CASE WHEN idx > 1 THEN idx - 1 ELSE n - 1 END);
+  b := ST_PointN(ring, idx);
+  c := ST_PointN(ring, idx % n + 1);
 
   angle := ST_Angle(a, b, c);
   IF angle > pi() THEN
@@ -29,21 +29,21 @@ CREATE FUNCTION get_polygon_corners (poly geometry, n_corners integer) RETURNS T
   angle double precision
 ) AS $$
 DECLARE
-  ring geometry := ST_ExteriorRing(ST_ForceRHR(poly));
+  ring geometry := ST_ExteriorRing(poly);
   n INT := ST_NumPoints(ring);
 BEGIN
   IF n IS NULL THEN
     RETURN;
   END IF;
-  -- Single query to get the sharpest corners using get_angle_on_line, no loop
   RETURN QUERY
   WITH corners AS (
     SELECT
       ST_PointN(ring, idx) AS geom,
-      get_angle_on_line(ring, idx) AS angle,
+      tangent_on_ring(ring, idx) AS angle,
       idx
-    FROM generate_series(1, n) AS idx
-    ORDER BY get_angle_on_line(ring, idx) ASC
+    -- last and first point are the same, so we can ignore the last one
+    FROM generate_series(1, n-1) AS idx
+    ORDER BY tangent_on_ring(ring, idx) ASC
     LIMIT n_corners )
   SELECT ROW_NUMBER() OVER (ORDER BY c.idx) AS corner_idx, c.geom, c.angle
   FROM corners c;
