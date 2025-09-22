@@ -57,19 +57,23 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_separate_parking_areas_projected_geom_idx ON _parking_separate_parking_areas_projected USING GIST (geom);
 
-DROP TABLE IF EXISTS "EXPERIMENT_parking_edges";
+DROP TABLE IF EXISTS _parking_separate_parking_kerbs;
 
 SELECT
+  osm_type,
+  osm_id,
   id,
   tags,
-  (parking_area_to_line (geom, tags, 15.)).* INTO "EXPERIMENT_parking_edges"
+  meta,
+  parking_kerb AS geom INTO _parking_separate_parking_kerbs
 FROM
-  _parking_separate_parking_areas;
+  _parking_separate_parking_areas pa
+  CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.);
 
-ALTER TABLE "EXPERIMENT_parking_edges"
-ALTER COLUMN parking_kerb TYPE geometry (Geometry, 5243) USING ST_SetSRID (parking_kerb, 5243);
+ALTER TABLE _parking_separate_parking_kerbs
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
-CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (parking_kerb);
+CREATE INDEX _parking_separate_parking_kerbs_geom_idx ON _parking_separate_parking_kerbs USING gist (geom);
 
 -- ALTER TABLE "EXPERIMENT_parking_edges"
 -- ALTER COLUMN rest TYPE geometry (Geometry, 5243) USING ST_SetSRID (rest, 5243);
