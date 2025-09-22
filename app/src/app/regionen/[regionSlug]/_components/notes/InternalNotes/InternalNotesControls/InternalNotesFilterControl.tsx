@@ -62,7 +62,7 @@ export const InternalNotesFilterControl = () => {
       <MenuItems
         transition
         anchor="top start"
-        className="absolute right-0 z-10 mt-2 w-64 rounded-md bg-white text-sm shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+        className="absolute right-0 z-10 mt-2 w-72 rounded-md bg-white text-sm shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
       >
         <MenuSection className="m-1 overflow-clip rounded-md border">
           <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
@@ -147,6 +147,35 @@ export const InternalNotesFilterControl = () => {
             onClick={(e) => handleMenuClick(e, { commented: undefined })}
           >
             Kommentiert & unkommentiert
+          </MenuItem>
+        </MenuSection>
+
+        <MenuSection className="m-1 overflow-clip rounded-md border">
+          <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
+            Reaktion
+          </MenuHeading>
+          <MenuItem
+            as="button"
+            className={menuItemClasses(internalNotesFilterParam?.notReacted === true)}
+            onClick={(e) => handleMenuClick(e, { notReacted: true })}
+          >
+            Nicht von mir reagiert{' '}
+            {noFilterActive && <span className="text-gray-500">({stats?.notReacted})</span>}
+          </MenuItem>
+          <MenuItem
+            as="button"
+            className={menuItemClasses(internalNotesFilterParam?.notReacted === false)}
+            onClick={(e) => handleMenuClick(e, { notReacted: false })}
+          >
+            Von mir reagiert{' '}
+            {noFilterActive && <span className="text-gray-500">({stats?.reacted})</span>}
+          </MenuItem>
+          <MenuItem
+            as="button"
+            className={menuItemClasses(internalNotesFilterParam?.notReacted === undefined)}
+            onClick={(e) => handleMenuClick(e, { notReacted: undefined })}
+          >
+            Alle Hinweise
           </MenuItem>
         </MenuSection>
 

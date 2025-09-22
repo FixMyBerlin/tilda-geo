@@ -37,7 +37,14 @@ export default resolver.pipe(
         subject: true,
         body: true,
         author: { select: { id: true, osmName: true, firstName: true, lastName: true } },
-        noteComments: { select: { id: true, body: true } },
+        noteComments: {
+          select: {
+            id: true,
+            body: true,
+            userId: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
       },
       orderBy: { id: 'asc' },
     })
@@ -51,6 +58,9 @@ export default resolver.pipe(
         regionId: note.regionId,
         authorId: note.author.id,
         hasComments: note.noteComments.length > 0,
+        lastCommentFromUser:
+          note.noteComments.length > 0 && note.noteComments[0]?.userId === session?.userId,
+        isAuthor: note.author.id === session?.userId,
       }
 
       return point(coordinates, properties, { id: note.id })
@@ -89,6 +99,22 @@ export default resolver.pipe(
         if (filter.commented === Boolean(fullNote?.noteComments?.length)) return true
         return false
       })
+      // Filter by `notReacted` - notes where user is not the author and last comment is not from user
+      filteredNotes = filteredNotes.filter((note) => {
+        if (typeof filter.notReacted !== 'boolean') return true
+        if (!session?.userId) return false
+
+        // Skip if user is the author of the note
+        if (note.properties.isAuthor) return false
+
+        // If no comments, user hasn't reacted
+        if (!note.properties.hasComments) {
+          return filter.notReacted === true
+        }
+
+        // Include if user hasn't reacted (last comment is not from user)
+        return filter.notReacted === !note.properties.lastCommentFromUser
+      })
     }
 
     // A list of all authors that have written notes (only notes, not comments)
@@ -114,6 +140,16 @@ export default resolver.pipe(
       uncommented: notePoints.filter((n) => n.properties.hasComments === false).length,
       completed: notePoints.filter((n) => n.properties.status === 'closed').length,
       uncompleted: notePoints.filter((n) => n.properties.status === 'open').length,
+      notReacted: notePoints.filter((n) => {
+        return (
+          !n.properties.isAuthor && (!n.properties.hasComments || !n.properties.lastCommentFromUser)
+        )
+      }).length,
+      reacted: notePoints.filter((n) => {
+        return (
+          !n.properties.isAuthor && n.properties.hasComments && n.properties.lastCommentFromUser
+        )
+      }).length,
       filteredTotal: filteredNotes.length,
     }
 

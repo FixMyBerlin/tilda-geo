@@ -38,6 +38,7 @@ export const zodInternalNotesFilterParam = z.object({
   completed: z.boolean().optional().nullable(),
   user: z.coerce.number().optional().nullable(),
   commented: z.boolean().optional().nullable(),
+  notReacted: z.boolean().optional().nullable(),
 })
 
 export const useInternalNotesFilterParam = () => {
