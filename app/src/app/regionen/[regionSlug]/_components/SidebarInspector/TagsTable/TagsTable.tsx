@@ -2,10 +2,6 @@ import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
 import { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
 import {
-  TagsTableRowCompositCapacity,
-  tableKeyCapacity,
-} from './compositTableRows/TagsTableRowCompositCapacity'
-import {
   TagsTableRowCompositHighway,
   tableKeyHighway,
 } from './compositTableRows/TagsTableRowCompositHighway'
@@ -43,6 +39,7 @@ import {
   tableKeyWidths,
 } from './compositTableRows/TagsTableRowCompositWidth'
 import { TagsTableRowlifecycle } from './compositTableRows/TagsTableRowLifecycle'
+import { TagsTableRowValueSourceConfidence } from './compositTableRows/TagsTableRowValueSourceConfidence'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
 import { TagsTableRowWikipedia, tableKeyWikipedia } from './compositTableRows/TagsTableRowWikipedia'
 import { TagsTableRow } from './TagsTableRow'
@@ -190,16 +187,6 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                 />
               )
             }
-            case tableKeyCapacity: {
-              return (
-                <TagsTableRowCompositCapacity
-                  key={cleanedKey}
-                  sourceId={sourceId}
-                  tagKey={key}
-                  properties={properties}
-                />
-              )
-            }
             default: {
               if (tableKeyWidths.includes(cleanedKey)) {
                 return (
@@ -214,6 +201,21 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
               if (tableKeysColor.includes(cleanedKey)) {
                 return (
                   <TagsTableRowColor
+                    key={cleanedKey}
+                    sourceId={sourceId}
+                    tagKey={key}
+                    properties={properties}
+                  />
+                )
+              }
+
+              // Whenever we have a `foo_source` or `foo_confidence` (or both) in addition to `foo`, we render this variation
+              if (
+                properties[cleanedKey] &&
+                (properties[`${cleanedKey}_source`] || properties[`${cleanedKey}_confidence`])
+              ) {
+                return (
+                  <TagsTableRowValueSourceConfidence
                     key={cleanedKey}
                     sourceId={sourceId}
                     tagKey={key}
