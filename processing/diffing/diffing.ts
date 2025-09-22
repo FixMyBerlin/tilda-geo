@@ -23,6 +23,58 @@ export async function getTopicTables(topic: Topic) {
             .filter((tName) => !ignoreTableNames.includes(tName)),
         ),
     )
+
+    // HACK: Add all tables that start with _parking for diffing
+    // This is a temporary solution to include parking-related tables that are normally excluded
+    // because they start with underscore (which are filtered out in TableNames.lua)
+    if (topic === 'parking') {
+      const allTables = await getSchemaTables('public')
+      const parkingTableNames = [...allTables].filter((tableName) =>
+        tableName.startsWith('_parking'),
+      )
+
+      // Process tables: either use directly if they conform, or create adapter views
+      const validParkingTables = new Set<string>()
+      const adapterViews = new Set<string>()
+
+      for (const tableName of parkingTableNames) {
+        if (await hasRequiredColumnsForDiffing(tableName)) {
+          // Table has all required columns, use directly
+          validParkingTables.add(tableName)
+        } else {
+          // Table is missing some columns, create an adapter view
+          const existingColumns = await getExistingColumns(tableName)
+          if (existingColumns.length > 0) {
+            try {
+              const adapterViewName = await createSchemaAdapterView(tableName, existingColumns)
+              validParkingTables.add(adapterViewName)
+              adapterViews.add(adapterViewName)
+
+              if (isDev) {
+                console.log(`Diffing: Created adapter for ${tableName} -> ${adapterViewName}`)
+              }
+            } catch (error) {
+              if (isDev) {
+                console.warn(`Diffing: Failed to create adapter for ${tableName}:`, error)
+              }
+            }
+          } else if (isDev) {
+            console.warn(`Diffing: Skipping _parking table ${tableName} - no compatible columns`)
+          }
+        }
+      }
+
+      // Merge the valid parking tables with the existing tables
+      validParkingTables.forEach((table) => tables.add(table))
+
+      if (isDev && validParkingTables.size > 0) {
+        console.log('Diffing: Added _parking tables to diffing', Array.from(validParkingTables))
+        if (adapterViews.size > 0) {
+          console.log('Diffing: Created adapter views', Array.from(adapterViews))
+        }
+      }
+    }
+
     return tables
   } catch (error) {
     // @ts-expect-error error is unkown but we know it's likely a bun error here https://bun.sh/docs/runtime/shell#error-handling
@@ -35,6 +87,44 @@ export async function getTopicTables(topic: Topic) {
 
 export async function initializeDiffingReferenceSchema() {
   return sql`CREATE SCHEMA IF NOT EXISTS diffing_reference`
+}
+
+/**
+ * Clean up any existing adapter views that might interfere with processing.
+ * This should be called before processing starts to avoid dependency conflicts.
+ */
+export async function cleanupAdapterViews() {
+  try {
+    // Find all adapter views that might exist
+    const rows: { table_name: string }[] = await sql`
+      SELECT table_name
+      FROM information_schema.views
+      WHERE table_schema = 'public'
+      AND table_name LIKE '%_diffing_adapter'
+    `
+
+    if (rows.length > 0) {
+      const viewNames = rows.map((row) => row.table_name)
+      if (isDev) {
+        console.log('Diffing: Cleaning up existing adapter views', viewNames)
+      }
+
+      // Drop all adapter views with CASCADE to handle any dependencies
+      for (const viewName of viewNames) {
+        try {
+          await sql.unsafe(`DROP VIEW IF EXISTS public."${viewName}" CASCADE`)
+        } catch (error) {
+          if (isDev) {
+            console.warn(`Diffing: Failed to drop view ${viewName}:`, error)
+          }
+        }
+      }
+    }
+  } catch (error) {
+    if (isDev) {
+      console.warn('Diffing: Failed to cleanup adapter views:', error)
+    }
+  }
 }
 
 export async function initializeCustomFunctionDiffing() {
@@ -53,6 +143,127 @@ export async function getSchemaTables(schema: string) {
     WHERE table_schema = ${schema}
     AND table_type = 'BASE TABLE'`
   return new Set(rows.map(({ table_name }) => table_name))
+}
+
+/**
+ * Check if a table has the required columns for diffing.
+ * @param tableName
+ * @returns true if the table has all required columns
+ */
+async function hasRequiredColumnsForDiffing(tableName: string): Promise<boolean> {
+  try {
+    const rows: { column_name: string }[] = await sql`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+      AND table_name = ${tableName}
+      AND column_name IN ('id', 'tags', 'meta', 'geom')
+    `
+    return rows.length === 4
+  } catch (error) {
+    if (isDev) {
+      console.warn(`Diffing: Failed to check columns for table ${tableName}:`, error)
+    }
+    return false
+  }
+}
+
+/**
+ * Get the columns that a table has from the required set.
+ * @param tableName
+ * @returns array of column names that exist
+ */
+async function getExistingColumns(tableName: string): Promise<string[]> {
+  try {
+    const rows: { column_name: string }[] = await sql`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+      AND table_name = ${tableName}
+      AND column_name IN ('id', 'tags', 'meta', 'geom')
+      ORDER BY column_name
+    `
+    return rows.map((row) => row.column_name)
+  } catch (error) {
+    if (isDev) {
+      console.warn(`Diffing: Failed to get columns for table ${tableName}:`, error)
+    }
+    return []
+  }
+}
+
+/**
+ * Create a temporary view that adapts a table to the diffing schema.
+ * @param tableName
+ * @param existingColumns
+ * @returns the name of the created view
+ */
+async function createSchemaAdapterView(
+  tableName: string,
+  existingColumns: string[],
+): Promise<string> {
+  const viewName = `${tableName}_diffing_adapter`
+
+  // Build the SELECT clause with defaults for missing columns
+  const selectParts: string[] = []
+
+  if (existingColumns.includes('id')) {
+    selectParts.push('id')
+  } else {
+    selectParts.push(`'${tableName}_' || row_number() OVER() AS id`)
+  }
+
+  if (existingColumns.includes('tags')) {
+    selectParts.push('tags')
+  } else {
+    selectParts.push("'{}'::jsonb AS tags")
+  }
+
+  if (existingColumns.includes('meta')) {
+    selectParts.push('meta')
+  } else {
+    selectParts.push("'{}'::jsonb AS meta")
+  }
+
+  if (existingColumns.includes('geom')) {
+    selectParts.push('geom')
+  } else {
+    selectParts.push('NULL::geometry AS geom')
+  }
+
+  const createViewSQL = `
+    CREATE OR REPLACE VIEW public."${viewName}" AS
+    SELECT ${selectParts.join(', ')}
+    FROM public."${tableName}"
+  `
+
+  await sql.unsafe(createViewSQL)
+
+  if (isDev) {
+    console.log(`Diffing: Created schema adapter view ${viewName} for table ${tableName}`)
+  }
+
+  return viewName
+}
+
+/**
+ * Drop a temporary view created for schema adaptation.
+ * @param viewName
+ */
+async function dropSchemaAdapterView(viewName: string): Promise<void> {
+  try {
+    // Try normal drop first
+    await sql.unsafe(`DROP VIEW IF EXISTS public."${viewName}"`)
+  } catch (error) {
+    try {
+      // If that fails, try with CASCADE to handle dependencies
+      await sql.unsafe(`DROP VIEW IF EXISTS public."${viewName}" CASCADE`)
+    } catch (cascadeError) {
+      if (isDev) {
+        console.warn(`Diffing: Failed to drop view ${viewName} even with CASCADE:`, cascadeError)
+      }
+    }
+  }
 }
 
 /**
@@ -251,4 +462,13 @@ export async function diffTables(tables: string[]) {
 
   // print the results for each table that changed
   diffResults.filter(({ nTotal }) => nTotal > 0).map(printDiffInfo)
+
+  // Clean up any adapter views that were created
+  const adapterViews = tables.filter((table) => table.includes('_diffing_adapter'))
+  if (adapterViews.length > 0) {
+    if (isDev) {
+      console.log('Diffing: Cleaning up adapter views', adapterViews)
+    }
+    await Promise.all(adapterViews.map(dropSchemaAdapterView))
+  }
 }
