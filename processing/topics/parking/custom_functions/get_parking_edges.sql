@@ -6,7 +6,7 @@ CREATE FUNCTION get_parking_edges (parking_geom geometry) RETURNS TABLE (
   hull geometry
 ) LANGUAGE plpgsql AS $$
 DECLARE
-  hull_geom geometry := ST_ConvexHull(parking_geom);
+  hull_geom geometry := ST_ConvexHull(ST_ForceRHR(parking_geom));
 BEGIN
   RETURN QUERY
   -- get all corners of the convex hull that are sharper than max_angle_degrees
