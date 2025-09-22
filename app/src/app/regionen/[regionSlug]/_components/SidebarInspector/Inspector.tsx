@@ -5,11 +5,11 @@ import { osmNotesSourceId } from '../Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaSourceId } from '../Map/SourcesAndLayers/SourcesLayersQa'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
-import { InspectorFeatureAtlasGeo } from './InspectorFeatureAtlasGeo'
 import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
 import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
 import { InspectorFeatureQa } from './InspectorFeatureQa'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
+import { InspectorFeatureTilda } from './InspectorFeatureTilda'
 
 export type InspectorFeatureProperty = NonNullable<GeoJSON.GeoJsonProperties>
 
@@ -72,7 +72,7 @@ export const Inspector = ({ features }: Props) => {
 
         // Inspector-Block for Features
         return (
-          <InspectorFeatureAtlasGeo
+          <InspectorFeatureTilda
             key={createInspectorFeatureKey(inspectObject)}
             sourceKey={sourceKey}
             feature={inspectObject}
