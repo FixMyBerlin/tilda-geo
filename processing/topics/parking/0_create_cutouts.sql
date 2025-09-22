@@ -215,7 +215,12 @@ SELECT
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
-  _parking_roads;
+  _parking_roads
+WHERE
+  NOT (
+    is_driveway = true
+    AND has_parking = false
+  );
 
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
