@@ -28,7 +28,7 @@ export const sourcesParkingTilda: MapDataSource<
     // We could add the "separate" from 14 (our default) and only hide it visually.
     // But I assume that this approach has smaller data (and higher geometric accuracy).
     // maxzoom: SIMPLIFY_MAX_ZOOM,
-    maxzoom: 17, // See processing/topics/parking/7_finalize_parkings.sql:80
+    maxzoom: 17, // See processing/topics/parking/7_finalize_parkings.sql:89
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
@@ -79,7 +79,7 @@ export const sourcesParkingTilda: MapDataSource<
     id: 'tilda_parkings_cutouts',
     tiles: getTilesUrl('/atlas_generalized_parkings_cutouts/{z}/{x}/{y}'),
     minzoom: SIMPLIFY_MIN_ZOOM,
-    maxzoom: SIMPLIFY_MAX_ZOOM,
+    maxzoom: 17, // higher than default to fix geometric precision for circles and such
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
@@ -174,7 +174,7 @@ export const sourcesParkingTilda: MapDataSource<
       '/atlas_generalized_off_street_parking_areas,atlas_generalized_off_street_parking_area_labels,atlas_generalized_off_street_parking_points/{z}/{x}/{y}',
     ),
     minzoom: SIMPLIFY_MIN_ZOOM,
-    maxzoom: SIMPLIFY_MAX_ZOOM,
+    maxzoom: 17, // higher than default to fix geometric precision for circles and such
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
