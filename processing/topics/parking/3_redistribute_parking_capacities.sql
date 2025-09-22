@@ -25,10 +25,10 @@ WITH
 UPDATE _parking_parkings_cutted pc
 SET
   tags = tags - ARRAY['area', 'area_source', 'area_confidence'] || jsonb_build_object(
-    'capacity',
-    (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
-    'capacity_source',
-    tags ->> 'capacity_source' || '_redistributed'
+    /* sql-formatter-disable */
+    'capacity', (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length,
+    'capacity_source', tags ->> 'capacity_source' || '_redistributed'
+    /* sql-formatter-enable */
   )
 FROM
   total_lengths tl
