@@ -38,7 +38,7 @@ WHERE
 
 UPDATE _parking_parkings_merged pm
 SET
-  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated (from area)", "capacity_confidence": "medium"}'::JSONB
+  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated_from_area", "capacity_confidence": "medium"}'::JSONB
 WHERE
   tags ->> 'capacity' IS NULL
   AND estimated_capacity IS NOT NULL;
@@ -49,7 +49,7 @@ SET
 
 UPDATE _parking_parkings_merged pm
 SET
-  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated (from length)", "capacity_confidence": "medium"}'::JSONB
+  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated_from_length", "capacity_confidence": "medium"}'::JSONB
 WHERE
   tags ->> 'capacity' IS NULL;
 
