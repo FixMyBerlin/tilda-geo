@@ -208,11 +208,6 @@ export const sourcesParkingTilda: MapDataSource<
       ],
     },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'parkings_no',
-      title: 'Parkverbote',
-      desc: 'Bereiche mit Parkverboten',
-    },
+    export: { enabled: false }, // We need a way to list exports for merged tiles. In this case area and point data.
   },
 ]
