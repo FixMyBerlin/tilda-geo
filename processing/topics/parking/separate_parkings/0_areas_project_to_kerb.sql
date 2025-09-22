@@ -62,16 +62,16 @@ DROP TABLE IF EXISTS "EXPERIMENT_parking_edges";
 SELECT
   id,
   tags,
-  connect_on_polygon (
-    ST_StartPoint (edges.geom),
-    ST_EndPoint (edges.geom),
-    _parking_separate_parking_areas.geom
-  ) as geom INTO "EXPERIMENT_parking_edges"
+  (parking_area_to_line (geom, tags, 10.0)).* INTO "EXPERIMENT_parking_edges"
 FROM
-  _parking_separate_parking_areas
-  CROSS JOIN LATERAL get_parking_edges (geom) edges;
+  _parking_separate_parking_areas;
 
 ALTER TABLE "EXPERIMENT_parking_edges"
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+ALTER COLUMN parking_kerb TYPE geometry (Geometry, 5243) USING ST_SetSRID (parking_kerb, 5243);
 
-CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (geom);
+CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (parking_kerb);
+
+ALTER TABLE "EXPERIMENT_parking_edges"
+ALTER COLUMN rest TYPE geometry (Geometry, 5243) USING ST_SetSRID (rest, 5243);
+
+CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (rest);

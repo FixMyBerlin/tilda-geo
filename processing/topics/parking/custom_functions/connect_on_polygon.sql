@@ -16,10 +16,10 @@ BEGIN
   IF substring_start < substring_end THEN
     RETURN ST_LineSubstring(boundary_geom, substring_start, substring_end);
   ELSE
-      RETURN ST_LineMerge(ST_Union(ARRAY[
-        ST_LineSubstring(boundary_geom, substring_start, 1),
-        ST_LineSubstring(boundary_geom, 0, substring_end)
-      ]));
+    RETURN ST_LineMerge(ST_Union(ARRAY[
+      ST_LineSubstring(boundary_geom, substring_start, 1),
+      ST_LineSubstring(boundary_geom, 0, substring_end)
+    ]));
   END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;

@@ -23,7 +23,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
-CREATE FUNCTION get_polygon_corners (poly geometry, n_corners integer) RETURNS TABLE (
+CREATE FUNCTION get_polygon_corners (
+  poly geometry,
+  n_corners integer,
+  max_angle_degrees double precision
+) RETURNS TABLE (
   corner_idx BIGINT,
   geom geometry,
   angle double precision
@@ -43,6 +47,7 @@ BEGIN
       idx
     -- last and first point are the same, so we can ignore the last one
     FROM generate_series(1, n-1) AS idx
+    WHERE max_angle_degrees IS NULL OR degrees(tangent_on_ring(ring, idx)) < max_angle_degrees
     ORDER BY tangent_on_ring(ring, idx) ASC
     LIMIT n_corners )
   SELECT ROW_NUMBER() OVER (ORDER BY c.idx) AS corner_idx, c.geom, c.angle
