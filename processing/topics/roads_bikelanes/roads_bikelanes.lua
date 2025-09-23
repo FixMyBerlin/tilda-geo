@@ -275,6 +275,7 @@ function osm2pgsql.process_way(object)
   if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
   if exclude.by_indoor(object_tags) then return end
   if exclude.by_informal(object_tags) then return end
+  if exclude.by_highway_type(object_tags) then return end
 
   -- (C.3) WRITE `bikeSuitability` table
   local bikeSuitability = CategorizeBikeSuitability(object_tags)
