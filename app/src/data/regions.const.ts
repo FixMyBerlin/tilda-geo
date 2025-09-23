@@ -26,7 +26,7 @@ export type StaticRegion = {
   slug: RegionSlug
   name: string
   fullName: string
-  product: 'radverkehr' | 'parkraum' | 'fußverkehr'
+  product: 'radverkehr' | 'parkraum' | 'fussverkehr'
   /** @desc 1-n relation IDs, used for the mask and export bbox — @href use https://hanshack.com/geotools/gimmegeodata/ to get the ids */
   osmRelationIds: number[] | []
   map: StaticRegionInitialMapPositionZoom
@@ -905,7 +905,7 @@ export const staticRegion: StaticRegion[] = [
     slug: 'pankow',
     name: 'Pankow',
     fullName: 'Pankow',
-    product: 'fußverkehr',
+    product: 'fussverkehr',
     osmRelationIds: [164723],
     map: { lat: 52.5482, lng: 13.4016, zoom: 16 },
     bbox: null,
