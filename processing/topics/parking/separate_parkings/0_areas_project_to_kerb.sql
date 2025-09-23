@@ -64,6 +64,7 @@ SELECT
   osm_id,
   id,
   tags,
+  side,
   meta,
   parking_kerb AS geom INTO _parking_separate_parking_kerbs
 FROM

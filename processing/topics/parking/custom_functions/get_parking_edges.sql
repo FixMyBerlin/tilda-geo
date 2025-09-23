@@ -32,26 +32,37 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION projected_alignment (g1 geometry, g2 geometry) RETURNS double precision AS $$
+DROP FUNCTION IF EXISTS projected_info (geometry, geometry);
+
+CREATE FUNCTION projected_info (from_geom geometry, to_geom geometry) RETURNS TABLE (
+  alignment double precision,
+  length double precision,
+  half_space int
+) AS $$
 DECLARE
-    proj geometry;
-    theta double precision;
-    alignment double precision;
+  proj geometry;
+  theta double precision;
+  alignment_val double precision;
+  centroid geometry := ST_Centroid(from_geom);
+  p1 geometry;
+  p2 geometry;
 BEGIN
-    proj := project_to_line(project_from := g1, project_onto := g2);
-    theta := ST_Azimuth(ST_StartPoint(g1), ST_EndPoint(g1))
-           - ST_Azimuth(ST_StartPoint(proj), ST_EndPoint(proj));
+  proj := project_to_line(project_from := from_geom, project_onto := to_geom);
+  theta := ST_Azimuth(ST_StartPoint(from_geom), ST_EndPoint(from_geom))
+    - ST_Azimuth(ST_StartPoint(proj), ST_EndPoint(proj));
+  alignment_val := abs(cos(theta));
 
-    -- Normalize angle to [0, pi/2] because we don't care about the direction
-    theta := abs(theta);
-    IF theta > pi()/2 THEN
-        theta := pi() - theta;
-    END IF;
+  p1 := ST_StartPoint(proj);
+  p2 := ST_EndPoint(proj);
 
-    -- 3. Compute alignment: max(|cosθ|, |sinθ|) for desired behavior
-    alignment := abs(cos(theta));
+  -- Determine which half-space the centroid of from_geom is in with respect to proj
+  half_space := CASE
+    WHEN ((ST_X(p2) - ST_X(p1)) * (ST_Y(centroid) - ST_Y(p1)) - (ST_Y(p2) - ST_Y(p1)) * (ST_X(centroid) - ST_X(p1))) > 0 THEN 1
+    WHEN ((ST_X(p2) - ST_X(p1)) * (ST_Y(centroid) - ST_Y(p1)) - (ST_Y(p2) - ST_Y(p1)) * (ST_X(centroid) - ST_X(p1))) < 0 THEN -1
+    ELSE 0
+  END;
 
-    RETURN alignment * ST_length(proj);
+  RETURN QUERY SELECT alignment_val, ST_Length(proj), half_space;
 END;
 $$ LANGUAGE plpgsql STABLE;
 
@@ -61,18 +72,21 @@ DROP TYPE edge_info;
 CREATE TYPE edge_info AS (
   geom geometry,
   road_score double precision,
+  half_space double precision,
   edge_idx bigint
 );
 
--- Function
-CREATE OR REPLACE FUNCTION parking_area_to_line (
+DROP FUNCTION IF EXISTS parking_area_to_line (geometry, jsonb, double precision);
+
+CREATE FUNCTION parking_area_to_line (
   parking_geom geometry,
   parking_tags JSONB,
   tolerance double precision
 ) RETURNS TABLE (
   parking_kerb geometry,
   rest geometry,
-  score double precision
+  score double precision,
+  side TEXT
 ) LANGUAGE plpgsql AS $$
 DECLARE
   edges_arr edge_info[];
@@ -83,45 +97,53 @@ BEGIN
   SELECT array_agg(
            ROW(e.geom,
                ra.road_score,
+               ra.half_space,
                e.edge_idx)::edge_info
          )
   INTO edges_arr
   FROM get_parking_edges(parking_geom) e
   -- calculate road scores
   LEFT JOIN (
-    SELECT edge_idx, SUM(alignment / (distance + 1) ) AS road_score
+    SELECT
+      edge_idx,
+      SUM(road_score) AS road_score,
+      SUM(half_space * road_score) AS half_space
     FROM (
       SELECT e.edge_idx,
-             COALESCE(projected_alignment(e.geom, r.geom), 0) as alignment,
-             ST_Distance(e.geom, r.geom) as distance
+             COALESCE(proj_info.alignment * proj_info.length, 0) / (ST_Distance(e.geom, r.geom) + 1 + (r.is_driveway)::int) AS road_score,
+             half_space
       FROM get_parking_edges(parking_geom) e
       LEFT JOIN _parking_roads r
         ON ST_DWithin(e.mid_point, r.geom, tolerance)
        AND (parking_tags->>'road_name' IS NULL
          OR r.tags->>'street_name' IS NULL
          OR parking_tags->>'road_name' != r.tags->>'street_name')
+      CROSS JOIN LATERAL projected_info(e.geom, r.geom) proj_info
     ) sub
     GROUP BY edge_idx
   ) ra ON ra.edge_idx = e.edge_idx;
 
   n_edges := array_length(edges_arr, 1);
 
-  SELECT edge_idx, road_score
-  INTO parking_kerb_idx, score
-  FROM unnest(edges_arr) AS t(geom, road_score, edge_idx)
+  SELECT
+    edge_idx,
+    road_score,
+    CASE WHEN half_space > 1 THEN 'left' ELSE 'right' END as side
+  INTO parking_kerb_idx, score, side
+  FROM unnest(edges_arr) AS t(geom, road_score, half_space, edge_idx)
   ORDER BY road_score DESC
   LIMIT 1;
 
   -- Return the closest edge as parking_kerb
   SELECT geom
   INTO parking_kerb
-  FROM unnest(edges_arr) AS t(geom, road_score, edge_idx)
+  FROM unnest(edges_arr) AS t(geom, road_score, half_space, edge_idx)
   WHERE edge_idx = parking_kerb_idx;
 
   -- Return the union of the remaining edges as rest
   SELECT ST_LineMerge(ST_Union(geom))
   INTO rest
-  FROM unnest(edges_arr) AS t(geom, road_score, edge_idx)
+  FROM unnest(edges_arr) AS t(geom, road_score, half_space, edge_idx)
   WHERE edge_idx NOT IN (
     CASE WHEN parking_kerb_idx = 1 THEN n_edges ELSE parking_kerb_idx - 1 END,  -- previous edge
     parking_kerb_idx,
