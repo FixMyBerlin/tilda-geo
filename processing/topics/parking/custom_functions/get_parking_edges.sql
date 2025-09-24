@@ -34,6 +34,8 @@ $$;
 
 DROP FUNCTION IF EXISTS projected_info (geometry, geometry);
 
+-- checks how well from_geom aligns with to_geom
+-- returns alignment (0..1), length of the projected substring, and which half-space the
 CREATE FUNCTION projected_info (from_geom geometry, to_geom geometry) RETURNS TABLE (
   alignment double precision,
   length double precision,
@@ -81,11 +83,11 @@ DROP FUNCTION IF EXISTS parking_area_to_line (geometry, jsonb, double precision)
 CREATE FUNCTION parking_area_to_line (
   parking_geom geometry,
   parking_tags JSONB,
-  tolerance double precision
+  radius double precision
 ) RETURNS TABLE (
   parking_kerb geometry,
-  rest geometry,
   score double precision,
+  is_front_kerb boolean,
   side TEXT
 ) LANGUAGE plpgsql AS $$
 DECLARE
@@ -110,11 +112,11 @@ BEGIN
       SUM(half_space * road_score) AS half_space
     FROM (
       SELECT e.edge_idx,
-             COALESCE(proj_info.alignment * proj_info.length, 0) / (ST_Distance(e.geom, r.geom) + 1 + (r.is_driveway)::int) AS road_score,
+             COALESCE(proj_info.alignment * proj_info.length, 0) / (ST_Distance(e.geom, r.geom) + 1 + 2 * (r.is_driveway)::int) AS road_score,
              half_space
       FROM get_parking_edges(parking_geom) e
       LEFT JOIN _parking_roads r
-        ON ST_DWithin(e.mid_point, r.geom, tolerance)
+        ON ST_DWithin(e.mid_point, r.geom, radius)
        AND (parking_tags->>'road_name' IS NULL
          OR r.tags->>'street_name' IS NULL
          OR parking_tags->>'road_name' != r.tags->>'street_name')
@@ -125,14 +127,18 @@ BEGIN
 
   n_edges := array_length(edges_arr, 1);
 
+
+  is_front_kerb := TRUE;
+
   SELECT
     edge_idx,
     road_score,
-    CASE WHEN half_space > 1 THEN 'left' ELSE 'right' END as side
+    CASE WHEN half_space > 0 THEN 'left' ELSE 'right' END
   INTO parking_kerb_idx, score, side
   FROM unnest(edges_arr) AS t(geom, road_score, half_space, edge_idx)
   ORDER BY road_score DESC
   LIMIT 1;
+
 
   -- Return the closest edge as parking_kerb
   SELECT geom
@@ -140,9 +146,18 @@ BEGIN
   FROM unnest(edges_arr) AS t(geom, road_score, half_space, edge_idx)
   WHERE edge_idx = parking_kerb_idx;
 
-  -- Return the union of the remaining edges as rest
-  SELECT ST_LineMerge(ST_Union(geom))
-  INTO rest
+  RETURN NEXT;
+
+    IF COALESCE(parking_tags ->> 'location', '') != 'median' THEN
+      RETURN;
+    END IF;
+
+  is_front_kerb := FALSE;
+    -- Return the union of the remaining edges as rest
+  SELECT
+    ST_LineMerge(ST_Union(geom)),
+    MIN(road_score), CASE WHEN SUM(half_space) > 0 THEN 'left' ELSE 'right' END
+  INTO parking_kerb, score, side
   FROM unnest(edges_arr) AS t(geom, road_score, half_space, edge_idx)
   WHERE edge_idx NOT IN (
     CASE WHEN parking_kerb_idx = 1 THEN n_edges ELSE parking_kerb_idx - 1 END,  -- previous edge
