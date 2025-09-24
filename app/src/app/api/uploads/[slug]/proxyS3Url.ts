@@ -1,6 +1,6 @@
 import { GetObjectCommand, GetObjectCommandOutput, S3Client } from '@aws-sdk/client-s3'
 import { GetObjectCommandInput } from '@aws-sdk/client-s3/dist-types/commands/GetObjectCommand'
-import pako from 'pako'
+import { gzipSync } from 'node:zlib'
 
 export async function proxyS3Url(request: Request, url: string, downloadFilename?: string) {
   const { hostname, pathname } = new URL(url)
@@ -39,7 +39,7 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
     ContentType = 'application/geo+json'
     if (request.headers.get('accept-encoding')?.includes('gzip')) {
       const jsonString = await response.Body!.transformToString()
-      const compressedArray = new Uint8Array(pako.gzip(jsonString))
+      const compressedArray = gzipSync(jsonString)
       Body = compressedArray
       ContentLength = compressedArray.length
       ContentEncoding = 'gzip'

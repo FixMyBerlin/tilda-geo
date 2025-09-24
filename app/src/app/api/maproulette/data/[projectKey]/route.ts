@@ -8,7 +8,7 @@ import { LineString } from 'geojson'
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'node:fs'
 import path from 'node:path'
-import pako from 'pako'
+import { gzipSync } from 'node:zlib'
 import { z } from 'zod'
 import { buildTaskInstructions } from '../../../../../data/radinfra-de/utils/buildTaskInstructions'
 
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
         : undefined
 
     if (request.headers.get('accept-encoding')?.includes('gzip')) {
-      const compressed = new Uint8Array(pako.gzip(fileBuffer))
+      const compressed = gzipSync(fileBuffer)
       return new Response(compressed, {
         headers: {
           'Content-Type': 'application/json',
