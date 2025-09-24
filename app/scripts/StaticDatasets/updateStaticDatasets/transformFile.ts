@@ -4,6 +4,7 @@ import path from 'node:path'
 import { import_ } from '../utils/import_'
 import { addUniqueIds } from './addUniqueIds'
 import { getDecompressedFilename } from './getDecompressedFilename'
+import { validateProjection } from './validateProjection'
 
 /** @returns geojson outputFullFilename which is either the initial geojson or the transformed geojson  */
 export const transformFile = async (
@@ -20,6 +21,7 @@ export const transformFile = async (
   let data = await Bun.file(filenameToRead).json()
 
   // INTERMEZZO: Do some checks on the file
+  // Validate with placemarkio/check-geojson
   const issues = getIssues(JSON.stringify(data))
   if (issues.length > 0) {
     console.log(chalk.red(`  ERROR checking the GeoJSON file`), {
@@ -27,6 +29,8 @@ export const transformFile = async (
       issues,
     })
   }
+  // Validate projection
+  validateProjection(data, filenameToRead)
 
   type TransformFunc = (data: any) => string
   const transform = await import_<TransformFunc>(datasetFolderPath, 'transform', 'transform')
