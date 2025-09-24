@@ -25,7 +25,7 @@ const config = [
   ['poiClassification', null],
   ['barriers', null],
   ['landuse', null], // requires roads_bikelanes, places
-  // ['parking', [bboxBerlin, bboxBiBi]],
+  ['parking', [bboxBerlin, bboxBiBi]],
 ] as const
 
 export const topicsConfig = new Map(config)
