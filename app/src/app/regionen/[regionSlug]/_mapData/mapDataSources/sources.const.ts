@@ -128,7 +128,7 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
       highlightingKey: 'id',
       documentedKeys: [
         'name',
-        'composit_highway',
+        'composit_parent_highway',
         'category',
         'informal__if_present',
         'operator_type__if_present',

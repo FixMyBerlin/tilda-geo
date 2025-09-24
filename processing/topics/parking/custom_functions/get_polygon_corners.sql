@@ -1,48 +1,57 @@
 DROP FUNCTION IF EXISTS get_polygon_corners;
 
-CREATE FUNCTION get_polygon_corners (poly geometry, max_angle_degrees float) RETURNS TABLE (
-  corner_idx integer,
+DROP FUNCTION IF EXISTS tangent_on_ring (geometry, integer);
+
+CREATE FUNCTION tangent_on_ring (ring geometry, idx integer) RETURNS double precision AS $$
+DECLARE
+  n INT := ST_NumPoints(ring);
+  a geometry;
+  b geometry;
+  c geometry;
+  angle double precision;
+BEGIN
+  a := ST_PointN(ring, CASE WHEN idx > 1 THEN idx - 1 ELSE n - 1 END);
+  b := ST_PointN(ring, idx);
+  c := ST_PointN(ring, idx % n + 1);
+
+  angle := ST_Angle(a, b, c);
+  IF angle > pi() THEN
+    angle := 2 * pi() - angle;
+  END IF;
+
+  RETURN angle;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE FUNCTION get_polygon_corners (
+  poly geometry,
+  n_corners integer,
+  max_angle_degrees double precision
+) RETURNS TABLE (
+  corner_idx BIGINT,
   geom geometry,
   angle double precision
 ) AS $$
 DECLARE
-  ring geometry := ST_ExteriorRing(ST_ForceRHR(poly));
+  ring geometry := ST_ExteriorRing(poly);
   n INT := ST_NumPoints(ring);
-  i INT;
-  effective_angle double precision;
-  a geometry;
-  b geometry;
-  c geometry;
 BEGIN
-  -- If the polygon is not a valid polygon, return nothing
   IF n IS NULL THEN
     RETURN;
   END IF;
-
-  corner_idx := 1;
-  FOR i IN 1..n LOOP
-    -- 1 and n are the same point so we have to skip them at the boundary cases
-    a := ST_PointN(ring, CASE WHEN i > 1 THEN i - 1 ELSE n - 1 END);
-    b := ST_PointN(ring, i);
-    c := ST_PointN(ring, CASE WHEN i < n THEN i + 1 ELSE 2 END);
-
-    angle := ST_Angle(a, b, c);
-
-
-    IF angle < pi() THEN
-      effective_angle := degrees(angle);
-    ELSE
-      effective_angle := degrees(2 * pi() - angle);
-    END IF;
-
-    angle := degrees(angle);
-
-    IF effective_angle < max_angle_degrees THEN
-      geom := b;
-      RETURN NEXT;
-      corner_idx := corner_idx + 1;
-    END IF;
-  END LOOP;
+  RETURN QUERY
+  WITH corners AS (
+    SELECT
+      ST_PointN(ring, idx) AS geom,
+      tangent_on_ring(ring, idx) AS angle,
+      idx
+    -- last and first point are the same, so we can ignore the last one
+    FROM generate_series(1, n-1) AS idx
+    WHERE max_angle_degrees IS NULL OR degrees(tangent_on_ring(ring, idx)) < max_angle_degrees
+    ORDER BY tangent_on_ring(ring, idx) ASC
+    LIMIT n_corners )
+  SELECT ROW_NUMBER() OVER (ORDER BY c.idx) AS corner_idx, c.geom, c.angle
+  FROM corners c;
 
   RETURN;
 END;

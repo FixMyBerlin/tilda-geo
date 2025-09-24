@@ -3,10 +3,10 @@ name: Regenerate Staging Tiles
 on:
   workflow_dispatch:
   schedule:
-    # Every Monday at 2:00 AM UTC
-    # - cron: "0 2 * * 1"
-    # Every day at 2:00 AM UTC
-    - cron: '0 2 * * *'
+    # Every Monday at 1:00 AM UTC
+    # - cron: "0 1 * * 1"
+    # Every day at 1:00 AM UTC
+    - cron: '0 1 * * *'
 jobs:
   generate-tiles:
     uses: ./.github/workflows/generate-tiles.yml

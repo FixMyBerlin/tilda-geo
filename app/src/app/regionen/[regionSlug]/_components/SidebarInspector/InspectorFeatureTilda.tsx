@@ -14,7 +14,7 @@ import { ToolsWrapper } from './Tools/ToolsWrapper'
 import { extractOsmTypeIdByConfig } from './Tools/osmUrls/extractOsmTypeIdByConfig'
 import { osmTypeIdString } from './Tools/osmUrls/osmUrls'
 
-export const InspectorFeatureAtlasGeo = ({ sourceKey, feature }: InspectorFeature) => {
+export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) => {
   const { geometry, properties } = feature
   if (!sourceKey || !properties) return null
 

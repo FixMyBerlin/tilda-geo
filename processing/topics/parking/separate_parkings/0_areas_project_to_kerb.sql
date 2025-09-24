@@ -3,24 +3,23 @@ DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp
 -- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
--- CREATE "areas projected"
 SELECT
-  a.id || '-' || pk.kerb_id AS id,
-  a.osm_type,
-  a.osm_id,
-  a.id AS source_id,
-  a.tags,
-  a.meta,
-  pk.* INTO _parking_separate_parking_areas_projected
+  id || '-' || (
+    CASE
+      WHEN is_front_kerb THEN 'front'
+      ELSE 'back'
+    END
+  ) AS id,
+  osm_type,
+  osm_id,
+  id AS source_id,
+  tags,
+  side,
+  meta,
+  parking_kerb AS geom INTO _parking_separate_parking_areas_projected
 FROM
-  _parking_separate_parking_areas a
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (a.geom, tolerance := 3, k := 6) AS pk;
-
-DELETE FROM _parking_separate_parking_areas_projected
-WHERE
-  geom IS NULL
-  OR ST_GeometryType (geom) <> 'ST_LineString'
-  OR ST_Length (geom) < 0.3;
+  _parking_separate_parking_areas pa
+  CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.);
 
 -- now we need to redistribute the capacity of our projected areas to avoid double counting
 -- we do this by assigning the capacity to each piece proportionally to it's length / length of all projected pieces
@@ -35,7 +34,7 @@ WITH
     FROM
       _parking_separate_parking_areas_projected
     WHERE
-      tags ? 'capacity'
+      tags ->> 'location' = 'median'
     GROUP BY
       osm_id
   )
@@ -56,18 +55,3 @@ ALTER TABLE _parking_separate_parking_areas_projected
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_separate_parking_areas_projected_geom_idx ON _parking_separate_parking_areas_projected USING GIST (geom);
-
-DROP TABLE IF EXISTS "EXPERIMENT_parking_edges";
-
-SELECT
-  id,
-  tags,
-  edges.* INTO "EXPERIMENT_parking_edges"
-FROM
-  _parking_separate_parking_areas_projected
-  CROSS JOIN LATERAL get_parking_edges (geom, 160.) edges;
-
-ALTER TABLE "EXPERIMENT_parking_edges"
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-CREATE INDEX experiment_parking_edges_geom_idx ON "EXPERIMENT_parking_edges" USING gist (geom);

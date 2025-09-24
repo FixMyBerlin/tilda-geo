@@ -25,7 +25,7 @@ BEGIN
   SELECT  pk.side INTO closest_kerb_side
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
-    ORDER BY ST_Distance(input_geom, pk.geom)
+    ORDER BY ST_Distance(input_geom, pk.geom), pk.id
   LIMIT 1;
 
   FOR kerb IN
@@ -33,7 +33,7 @@ BEGIN
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
     AND pk.side = closest_kerb_side
-    ORDER BY ST_Distance(input_geom, pk.geom)
+    ORDER BY ST_Distance(input_geom, pk.geom), pk.id
     LIMIT k
   LOOP
     IF kerb.side = closest_kerb_side THEN

@@ -46,6 +46,7 @@ export const SourcesLayersQa = () => {
         promoteId={'id'}
         attribution={activeQaConfig.mapAttribution || ''}
         minzoom={qaMinZoom}
+        maxzoom={16} // higher than default to fix geometric precision for circles and such
       />
       <Fragment key={qaLayerId}>
         <Layer

@@ -79,10 +79,19 @@ local function exclude_by_informal(tags)
   return false
 end
 
+local function exclude_by_highway_type(tags)
+  if tags.highway == 'bridleway' then
+    return true
+  end
+
+  return false
+end
+
 return {
   by_access = exclude_by_access,
   by_service = exclude_by_service,
   by_indoor = exclude_by_indoor,
   by_informal = exclude_by_informal,
-  by_area_water = exclude_by_area_water
+  by_area_water = exclude_by_area_water,
+  by_highway_type = exclude_by_highway_type,
 }

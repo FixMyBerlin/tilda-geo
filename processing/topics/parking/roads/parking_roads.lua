@@ -21,6 +21,7 @@ local db_table = osm2pgsql.define_table({
   indexes = {
     { column = { 'osm_id' }, method = 'btree' },
     { column = { 'geom' }, method = 'gist' },
+    { column = { 'is_driveway', 'has_parking' }, method = 'btree' },
   }
 })
 

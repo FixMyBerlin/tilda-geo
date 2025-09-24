@@ -1,3 +1,4 @@
+import { isDev } from '@/src/app/_components/utils/isEnv'
 import { TagsTableRow } from '../TagsTableRow'
 import { ValueDisclosure, ValueDisclosureButton, ValueDisclosurePanel } from '../ValueDisclosure'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
@@ -22,14 +23,24 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
               <NodataFallbackWrapper fallback={!Boolean(properties['surface'])}>
                 <ValueDisclosure>
                   <ValueDisclosureButton>
-                    <ConditionalFormattedValue
-                      sourceId={sourceId}
-                      tagKey={'surface'}
-                      tagValue={properties['surface']}
-                    />
+                    <span
+                      title={isDev ? `${sourceId}--surface=${properties['surface']}` : undefined}
+                    >
+                      <ConditionalFormattedValue
+                        sourceId={sourceId}
+                        tagKey={'surface'}
+                        tagValue={properties['surface']}
+                      />
+                    </span>
                   </ValueDisclosureButton>
                   <ValueDisclosurePanel>
-                    <p>
+                    <p
+                      title={
+                        isDev
+                          ? `${sourceId}--surface_source=${properties['surface_source']}`
+                          : undefined
+                      }
+                    >
                       <em>Quelle:</em>{' '}
                       <ConditionalFormattedValue
                         sourceId={sourceId}
@@ -37,9 +48,15 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
                         tagValue={properties['surface_source']}
                       />
                     </p>
-                    <p>
+                    <p
+                      title={
+                        isDev
+                          ? `${sourceId}--surface_confidence=${properties['surface_confidence']}`
+                          : undefined
+                      }
+                    >
                       <em>Genauigkeit der Quelle:</em>{' '}
-                      <NodataFallbackWrapper fallback={!Boolean(properties['surface_source'])}>
+                      <NodataFallbackWrapper fallback={!Boolean(properties['surface_confidence'])}>
                         Hoch
                       </NodataFallbackWrapper>
                     </p>
@@ -54,14 +71,26 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
               <NodataFallbackWrapper fallback={!Boolean(properties['smoothness'])}>
                 <ValueDisclosure>
                   <ValueDisclosureButton>
-                    <ConditionalFormattedValue
-                      sourceId={sourceId}
-                      tagKey={'smoothness'}
-                      tagValue={properties['smoothness']}
-                    />
+                    <span
+                      title={
+                        isDev ? `${sourceId}--smoothness=${properties['smoothness']}` : undefined
+                      }
+                    >
+                      <ConditionalFormattedValue
+                        sourceId={sourceId}
+                        tagKey={'smoothness'}
+                        tagValue={properties['smoothness']}
+                      />
+                    </span>
                   </ValueDisclosureButton>
                   <ValueDisclosurePanel>
-                    <p>
+                    <p
+                      title={
+                        isDev
+                          ? `${sourceId}--smoothness_source=${properties['smoothness_source']}`
+                          : undefined
+                      }
+                    >
                       <em>Quelle:</em>{' '}
                       <ConditionalFormattedValue
                         sourceId={sourceId}
@@ -69,7 +98,13 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
                         tagValue={properties['smoothness_source']}
                       />
                     </p>
-                    <p>
+                    <p
+                      title={
+                        isDev
+                          ? `${sourceId}--smoothness_confidence=${properties['smoothness_confidence']}`
+                          : undefined
+                      }
+                    >
                       <em>Genauigkeit der Quelle:</em>{' '}
                       <ConditionalFormattedValue
                         sourceId={sourceId}

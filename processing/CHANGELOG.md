@@ -2,6 +2,12 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-09-24
+
+### `bikelanes`
+
+- Fix duplicated geometries for some `sharedBusLaneBusWithBike`, `sharedBusLaneBikeWithBus` cases
+
 ## 2025-09-11, -16
 
 ### `bikelanes`

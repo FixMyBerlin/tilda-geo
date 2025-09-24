@@ -99,22 +99,11 @@ WITH
     SELECT
       cluster_id,
       tags || jsonb_build_object(
-        'capacity',
-        SUM(capacity),
-        'tag_sources',
-        string_agg(
-          tag_source,
-          ';'
-          ORDER BY
-            tag_source
-        ),
-        'geom_sources',
-        string_agg(
-          geom_source,
-          ';'
-          ORDER BY
-            geom_source
-        )
+        /* sql-formatter-disable */
+        'capacity', SUM(capacity),
+        'tag_sources', string_agg(tag_source, ';' ORDER BY tag_source),
+        'geom_sources', string_agg(geom_source, ';' ORDER BY geom_source)
+        /* sql-formatter-enable */
       ) AS tags,
       string_agg(
         id::TEXT,

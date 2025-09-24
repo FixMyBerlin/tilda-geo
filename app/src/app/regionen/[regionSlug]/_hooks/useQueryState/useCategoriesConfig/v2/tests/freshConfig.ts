@@ -266,7 +266,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 name: 'Führung mit Kfz (explizit)',
                 desc: [
                   'Anteilig genutzten Fahrstreifen',
-                  'Fahrradstraße mit Anlieger frei',
+                  'Fahrradstraße mit Anlieger/Kfz frei',
                   'Bussonderfahrstreifen mit Fahrrad frei',
                   'Radfahrstreifen mit Freigabe Busverkehr',
                 ],

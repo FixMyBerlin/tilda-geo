@@ -10,7 +10,8 @@ WHERE
     'driveways',
     'obstacle_points',
     'obstacle_areas',
-    'obstacle_lines'
+    'obstacle_lines',
+    'turnaround_points'
   )
   AND tags ->> 'category' IS DISTINCT FROM 'kerb_lowered';
 
@@ -36,9 +37,9 @@ SELECT
   p.id,
   p.osm_id,
   osm_ref (p.osm_type, p.osm_id) AS tag_source,
-  osm_ref (p.kerb_osm_type, p.kerb_osm_id) AS geom_source,
+  osm_ref (p.osm_type, p.osm_id) AS geom_source,
   p.tags || '{"source": "separate_parking_areas"}'::JSONB,
-  p.kerb_side,
+  p.side,
   p.meta,
   d.geom
 FROM

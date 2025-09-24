@@ -134,7 +134,7 @@ local bicycleRoad = BikelaneCategory.new({
 -- Also "Kfz frei", https://commons.wikimedia.org/wiki/File:Zusatzzeichen_KFZ_frei.svg
 local bicycleRoad_vehicleDestination = BikelaneCategory.new({
   id = 'bicycleRoad_vehicleDestination',
-  desc = 'Bicycle road (DE: "Fahrradstraße mit Anlieger frei")' ..
+  desc = 'Bicycle road (DE: "Fahrradstraße mit Anlieger/Kfz frei")' ..
       ' with vehicle access `destination`.',
   infrastructureExists = true,
   implicitOneWay = false, -- 'oneway=assumed_no' because road is shared
@@ -154,7 +154,9 @@ local bicycleRoad_vehicleDestination = BikelaneCategory.new({
       then
         return true
       end
-      if tags.vehicle == 'destination' or tags.motor_vehicle == 'destination' then
+      if tags.vehicle == 'destination' or tags.motor_vehicle == 'destination' or
+        tags.vehicle == 'yes' or tags.motor_vehicle == 'yes'
+      then
         return true
       end
     end
@@ -567,9 +569,10 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
 -- "Fahrrad frei, Taxi frei" traffic_sign=DE:245,1022-10,1026-30
 --   - https://trafficsigns.osm-verkehrswende.org/?signs=DE%3A245%7CDE%3A1022-10%7CDE%3A1026-30
 -- "Fahrrad & Mofa frei" traffic_sign=DE:245,1022-14
--- (History: Until 2023-03-2: cyclewayAlone)
+-- HISTORY:
+-- - Until 2023-03-2: This was `cyclewayAlone`
+-- - Until 2024-05-02: This was `sharedBusLane` until we introduced `sharedBusLaneBikeWithBus`
 local sharedBusLaneBusWithBike = BikelaneCategory.new({
-  -- Note: Was `sharedBusLane` until 2024-05-02 when we introduced `sharedBusLaneBikeWithBus`
   id = 'sharedBusLaneBusWithBike',
   desc = 'Bus lane with explicit allowance for bicycles (`cycleway=share_busway`).' ..
       ' (DE: "Bussonderfahrstreifen mit Fahrrad frei")',
@@ -578,13 +581,18 @@ local sharedBusLaneBusWithBike = BikelaneCategory.new({
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
-    if tags.highway == "cycleway" and
-        (tags.cycleway == "share_busway" or tags.cycleway == "opposite_share_busway") then
-      return true
-    end
+    -- We only apply this category on the transformed geometries, not on `_side=self`
+    if tags.highway ~= 'cycleway' then return end
+
     local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
-    if osm2pgsql.has_prefix(trafficSign, "DE:245") and
-        (ContainsSubstring(trafficSign, "1022-10") or ContainsSubstring(trafficSign, "1022-14")) then
+    local parentTrafficSign = tags._parent and SanitizeTrafficSign(tags._parent.traffic_sign)
+    if tags.cycleway == 'share_busway' or
+      tags.cycleway == 'opposite_share_busway' or
+      osm2pgsql.has_prefix(trafficSign, "DE:245") and (ContainsSubstring(trafficSign, "1022-10") or ContainsSubstring(trafficSign, "1022-14")) or
+      osm2pgsql.has_prefix(parentTrafficSign, "DE:245") and (ContainsSubstring(parentTrafficSign, "1022-10") or ContainsSubstring(parentTrafficSign, "1022-14"))
+    then
+      -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
+      tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
       return true
     end
   end
@@ -606,14 +614,18 @@ local sharedBusLaneBikeWithBus = BikelaneCategory.new({
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
-    if tags.highway == "cycleway" and tags.lane == "share_busway" then
-      return true
-    end
+    -- We only apply this category on the transformed geometries, not on `_side=self`
+    if tags.highway ~= 'cycleway' then return end
+
+    -- We check for the traffic sign "1024-14 Bus frei" or "1026-32 Linienverkehr frei"
     local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
-    if osm2pgsql.has_prefix(trafficSign, "DE:237") and (
-        ContainsSubstring(trafficSign, "1024-14") or  -- Bus frei
-        ContainsSubstring(trafficSign, '1026-32') -- Linienverkehr frei
-      ) then
+    local parentTrafficSign = tags._parent and SanitizeTrafficSign(tags._parent.traffic_sign)
+    if tags.lane == "share_busway" or
+      osm2pgsql.has_prefix(trafficSign, "DE:237") and (ContainsSubstring(trafficSign, "1024-14") or ContainsSubstring(trafficSign, "1026-32")) or
+      osm2pgsql.has_prefix(parentTrafficSign, "DE:237") and (ContainsSubstring(parentTrafficSign, "1024-14") or ContainsSubstring(parentTrafficSign, "1026-32"))
+    then
+      -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
+      tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
       return true
     end
   end

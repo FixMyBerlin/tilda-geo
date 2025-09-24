@@ -16,6 +16,7 @@ export default resolver.pipe(
     } = await paginate({
       skip,
       take,
+      maxTake: 1000, // See `MAX_TAKE` in `app/src/app/admin/memberships/page.tsx`
       count: () => db.user.count({ where }),
       query: (paginateArgs) =>
         db.user.findMany({

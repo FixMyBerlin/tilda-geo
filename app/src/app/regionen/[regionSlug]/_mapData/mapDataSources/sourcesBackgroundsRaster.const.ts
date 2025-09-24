@@ -67,9 +67,9 @@ export const sourcesBackgroundsRaster: MapDataBackgroundSource<SourcesRasterIds>
     name: 'OpenStreetMap Carto',
     tiles: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     tileSize: 256,
-    maxzoom: 21,
+    maxzoom: 19,
     minzoom: 10,
-    attributionHtml: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>',
+    attributionHtml: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
   {
     id: 'esri',
