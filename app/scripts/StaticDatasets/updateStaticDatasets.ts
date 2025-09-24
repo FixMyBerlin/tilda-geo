@@ -24,9 +24,6 @@ if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
 const regions = await getRegions()
 const existingRegionSlugs = regions.map((region) => region.slug)
 
-// If a file is smaller than maxCompressedSize it will be uploaded as geojson
-const maxCompressedSize = 50000
-
 // use --dry-run to run all checks and transformation (but no pmtiles created, no upload to S3, no DB modifications)
 // use --keep-tmp to keep temporary generated files
 // use --folder-filter to run only folders that include this filter string (check the full path, so `region-bb` (group folder) and `bb-` (dataset folder) will both work)
@@ -149,7 +146,8 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
   const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
   let renderFormat: 'geojson' | 'pmtiles'
   if (mapRenderFormat === 'auto') {
-    const isSmall = await isCompressedSmallerThan(transformedFilepath, maxCompressedSize)
+    const maxCompressedSizeBites = 50000 // 50,000 bytes ≈ 48.8 KB or ≈ 0.049 MB
+    const isSmall = await isCompressedSmallerThan(transformedFilepath, maxCompressedSizeBites)
     renderFormat = isSmall ? 'geojson' : 'pmtiles'
   } else {
     renderFormat = mapRenderFormat
