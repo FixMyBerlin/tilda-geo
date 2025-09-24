@@ -1,6 +1,6 @@
 DROP FUNCTION IF EXISTS get_polygon_corners;
 
-DROP FUNCTION IF EXISTS tangent_on_ring;
+DROP FUNCTION IF EXISTS tangent_on_ring (geometry, integer);
 
 CREATE FUNCTION tangent_on_ring (ring geometry, idx integer) RETURNS double precision AS $$
 DECLARE

@@ -29,8 +29,8 @@
 
 -- * … FOR SEPARATE PARKINGS
 \i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
-\i '/processing/topics/parking/custom_functions/get_parking_edges.sql'
 \i '/processing/topics/parking/custom_functions/connect_on_polygon.sql'
+\i '/processing/topics/parking/custom_functions/get_parking_edges.sql'
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'

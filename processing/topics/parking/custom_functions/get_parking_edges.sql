@@ -68,7 +68,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
-DROP TYPE edge_info;
+DROP TYPE IF EXISTS edge_info;
 
 -- Define a composite type for edges
 CREATE TYPE edge_info AS (
