@@ -1,10 +1,6 @@
 import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
 import { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
-import {
-  TagsTableRowCompositHighway,
-  tableKeyHighway,
-} from './compositTableRows/TagsTableRowCompositHighway'
 import { TagsTableRowCompositLit, tableKeyLit } from './compositTableRows/TagsTableRowCompositLit'
 import {
   TagsTableRowCompositMapillary,
@@ -14,6 +10,10 @@ import {
   TagsTableRowCompositMaxspeed,
   tableKeyMaxspeed,
 } from './compositTableRows/TagsTableRowCompositMaxspeed'
+import {
+  TagsTableRowCompositParentHighway,
+  tableKeyHighway,
+} from './compositTableRows/TagsTableRowCompositParentHighway'
 import {
   TagsTableRowCompositRadinfraDeStatistics,
   tableKeyRadinfraDeStatistics,
@@ -89,7 +89,7 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
           switch (cleanedKey) {
             case tableKeyHighway: {
               return (
-                <TagsTableRowCompositHighway
+                <TagsTableRowCompositParentHighway
                   key={cleanedKey}
                   sourceId={sourceId}
                   tagKey={cleanedKey}
