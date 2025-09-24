@@ -23,7 +23,7 @@ export const addUniqueIds = (data: { features: { id: any }[] }) => {
   //   console.log(`  All features have a unique id, using those...`)
   // } else {
   // }
-  console.log(`  (Ignoring unique feature.id|s for now, see Note in addUniqueIds)`)
+
   console.log(`  Adding unique id|s of type number...`)
   data.features.forEach((f) => (f.id = new Uint32Array([adler32.str(JSON.stringify(f))])[0]!))
 

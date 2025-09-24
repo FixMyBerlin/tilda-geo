@@ -27,78 +27,80 @@ export const SourcesLayersStaticDatasets = () => {
     <>
       {/* TODO: Rework as part of https://github.com/FixMyBerlin/private-issues/issues/1775 */}
       {/* eslint-disable-next-line react-compiler/react-compiler */}
-      {regionDatasets.map(({ id: sourceId, subId, type, url, attributionHtml, layers }) => {
-        const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
-        const visible = selectedDatasetIds.includes(datasetSourceId)
-        const visibility = layerVisibility(visible)
+      {regionDatasets.map(
+        ({ id: sourceId, subId, mapRenderFormat, mapRenderUrl, attributionHtml, layers }) => {
+          const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
+          const visible = selectedDatasetIds.includes(datasetSourceId)
+          const visibility = layerVisibility(visible)
 
-        // don't render Source (and load data) before it was not visible at least once
-        const datasetWasVisible = !!datasetsPreviouslyVisible.current[datasetSourceId]
-        if (!datasetWasVisible && !visible) return null
-        datasetsPreviouslyVisible.current[datasetSourceId] = true
+          // don't render Source (and load data) before it was not visible at least once
+          const datasetWasVisible = !!datasetsPreviouslyVisible.current[datasetSourceId]
+          if (!datasetWasVisible && !visible) return null
+          datasetsPreviouslyVisible.current[datasetSourceId] = true
 
-        const sourceProps =
-          type === 'GEOJSON'
-            ? { type: 'geojson' as const, data: url }
-            : { type: 'vector' as const, url: createPmtilesUrl(url) }
+          const sourceProps =
+            mapRenderFormat === 'geojson'
+              ? { type: 'geojson' as const, data: mapRenderUrl }
+              : { type: 'vector' as const, url: createPmtilesUrl(mapRenderUrl) }
 
-        return (
-          <Fragment key={datasetSourceId}>
-            <Source
-              id={datasetSourceId}
-              key={datasetSourceId}
-              attribution={attributionHtml}
-              {...sourceProps} // type inference fails here - maybe a typescript bug?
-            />
-            {layers.map((layer) => {
-              const layout =
-                layer.layout === undefined ? visibility : { ...visibility, ...layer.layout }
+          return (
+            <Fragment key={datasetSourceId}>
+              <Source
+                id={datasetSourceId}
+                key={datasetSourceId}
+                attribution={attributionHtml}
+                {...sourceProps} // type inference fails here - maybe a typescript bug?
+              />
+              {layers.map((layer) => {
+                const layout =
+                  layer.layout === undefined ? visibility : { ...visibility, ...layer.layout }
 
-              const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
+                const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
 
-              // Use ?debugMap=true and <DebugMap> to setUseDebugLayerStyles
-              const layerFilter = (
-                useDebugLayerStyles ? ['all'] : wrapFilterWithAll(layer.filter)
-              ) as FilterSpecification
+                // Use ?debugMap=true and <DebugMap> to setUseDebugLayerStyles
+                const layerFilter = (
+                  useDebugLayerStyles ? ['all'] : wrapFilterWithAll(layer.filter)
+                ) as FilterSpecification
 
-              // Use ?debugMap=true and <DebugMap> to setUseDebugLayerStyles
-              const layerPaint = useDebugLayerStyles
-                ? debugLayerStyles({
-                    source: sourceId,
-                    sourceLayer: 'default',
-                  }).find((l) => l.type === layer.type)?.paint
-                : layer.paint
+                // Use ?debugMap=true and <DebugMap> to setUseDebugLayerStyles
+                const layerPaint = useDebugLayerStyles
+                  ? debugLayerStyles({
+                      source: sourceId,
+                      sourceLayer: 'default',
+                    }).find((l) => l.type === layer.type)?.paint
+                  : layer.paint
 
-              const layerProps: LayerProps = {
-                id: layerId,
-                source: datasetSourceId,
-                type: layer.type,
-                layout,
-                // There is something very weird with TS here. We cannot use @ts-expect-errors because the build will fail. But without the `any` we get an error in `npm run type-check`.
-                filter: layerFilter as any,
-                paint: layerPaint as any,
-                beforeId:
-                  'beforeId' in layer
-                    ? (layer.beforeId as string) || 'atlas-app-beforeid-fallback'
-                    : 'atlas-app-beforeid-fallback',
-              }
+                const layerProps: LayerProps = {
+                  id: layerId,
+                  source: datasetSourceId,
+                  type: layer.type,
+                  layout,
+                  // There is something very weird with TS here. We cannot use @ts-expect-errors because the build will fail. But without the `any` we get an error in `npm run type-check`.
+                  filter: layerFilter as any,
+                  paint: layerPaint as any,
+                  beforeId:
+                    'beforeId' in layer
+                      ? (layer.beforeId as string) || 'atlas-app-beforeid-fallback'
+                      : 'atlas-app-beforeid-fallback',
+                }
 
-              if (type === 'PMTILES') {
-                layerProps['source-layer'] = 'default'
-              }
+                if (mapRenderFormat === 'pmtiles') {
+                  layerProps['source-layer'] = 'default'
+                }
 
-              const layerHighlightId = getLayerHighlightId(layerId)
+                const layerHighlightId = getLayerHighlightId(layerId)
 
-              return (
-                <Fragment key={layerId}>
-                  <Layer key={layerId} {...layerProps} />
-                  <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
-                </Fragment>
-              )
-            })}
-          </Fragment>
-        )
-      })}
+                return (
+                  <Fragment key={layerId}>
+                    <Layer key={layerId} {...layerProps} />
+                    <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
+                  </Fragment>
+                )
+              })}
+            </Fragment>
+          )
+        },
+      )}
     </>
   )
 }

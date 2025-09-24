@@ -1,7 +1,10 @@
+import { Link } from '@/src/app/_components/links/Link'
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { Markdown } from '@/src/app/_components/text/Markdown'
-import { isProd } from '@/src/app/_components/utils/isEnv'
-import { CheckIcon, LockClosedIcon } from '@heroicons/react/20/solid'
+import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
+import { useCurrentUser } from '@/src/app/_hooks/useCurrentUser'
+import { isAdmin } from '@/src/app/_hooks/usersUtils'
+import { ArrowDownTrayIcon, CheckIcon, LockClosedIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useDataParam } from '../../../_hooks/useQueryState/useDataParam'
 import { useRegionDatasets } from '../../../_hooks/useRegionDatasets/useRegionDatasets'
@@ -26,9 +29,12 @@ export const SelectDataset = ({
     licenceOsmCompatible,
     legends,
     isPublic,
-    url,
+    mapRenderUrl,
     githubUrl,
+    downloadUrl,
   } = dataset
+  const currentUser = useCurrentUser()
+  const userIsAdmin = isAdmin(currentUser)
   const key = createSourceKeyStaticDatasets(id, subId)
   const { dataParam, setDataParam } = useDataParam()
   const selected = dataParam.includes(key)
@@ -106,23 +112,48 @@ export const SelectDataset = ({
               })}
             </ul>
           )}
-          {!isProd && githubUrl && (
-            <p>
-              <LinkExternal
-                blank
-                href={githubUrl}
-                className="text-pink-500 hover:text-pink-800"
-                title='Öffne den Datensatz im "tilda-static-data" Repository auf GitHub; Link nur in Dev und Staging sichtbar.'
-              >
+          <p className="mt-1">
+            <a
+              href={downloadUrl}
+              download={`${name}.geojson`}
+              className="inline-flex items-center gap-1"
+              title="GeoJSON-Datei herunterladen"
+            >
+              <ArrowDownTrayIcon className="size-3" />
+              GeoJSON herunterladen
+            </a>
+          </p>
+          {userIsAdmin && (
+            <details className="mt-1 bg-pink-300 p-0.5">
+              <summary className="cursor-pointer underline">Admin Upload Details</summary>
+
+              <Link blank href={`/admin/uploads/${id}`}>
+                Admin Upload Details
+              </Link>
+              <br />
+              <LinkExternal blank href={githubUrl}>
                 Github Statische Daten
-              </LinkExternal>{' '}
-              <input
-                type="text"
-                value={url}
-                readOnly
-                className="rounded-xs inline-block w-16 border-pink-500 px-0.5 py-0 text-xs text-pink-500"
-              />
-            </p>
+              </LinkExternal>
+              <br />
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-pink-700">GeoJSON URL:</label>
+                <input
+                  type="text"
+                  value={getStaticDatasetUrl(id, 'geojson')}
+                  readOnly
+                  className="rounded-xs inline-block w-full border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-pink-700">PMTiles URL:</label>
+                <input
+                  type="text"
+                  value={getStaticDatasetUrl(id, 'pmtiles')}
+                  readOnly
+                  className="rounded-xs inline-block w-full border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                />
+              </div>
+            </details>
           )}
         </div>
       )}

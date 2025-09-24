@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import invariant from 'tiny-invariant'
 import { red } from './utils/log'
 
@@ -31,16 +32,15 @@ export const getRegions = async (): Promise<{ id: number; slug: string }[]> => {
   }))
 }
 
-export type UploadType = 'GEOJSON' | 'PMTILES'
-
 type UploadData = {
   uploadSlug: string
-  url: string
-  type: UploadType
   regionSlugs: string[]
   isPublic: boolean
   configs: Record<string, any>[]
-}
+} & Pick<
+  Prisma.UploadCreateInput,
+  'pmtilesUrl' | 'geojsonUrl' | 'githubUrl' | 'mapRenderFormat' | 'mapRenderUrl'
+>
 
 export const createUpload = async (data: UploadData) => {
   const request = new Request(createUploadUrl, {

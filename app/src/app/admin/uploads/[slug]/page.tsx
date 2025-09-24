@@ -3,6 +3,7 @@ import { MetaData } from '@/scripts/StaticDatasets/types'
 import { Link } from '@/src/app/_components/links/Link'
 import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
 import { useSlug } from '@/src/app/_hooks/useSlug'
+import { MapRenderFormatEnum } from '@prisma/client'
 import { Breadcrumb } from '@/src/app/admin/_components/Breadcrumb'
 import { HeaderWrapper } from '@/src/app/admin/_components/HeaderWrapper'
 import { ObjectDump } from '@/src/app/admin/_components/ObjectDump'
@@ -15,7 +16,9 @@ export default function AdminUploadPage() {
   const slug = useSlug()
   const [upload] = useQuery(getUploadWithRegions, { slug: slug! }, { staleTime: Infinity })!
 
-  const publicUrlForPreview = new URL(getStaticDatasetUrl(upload.slug))
+  const publicUrlForPreview = new URL(
+    getStaticDatasetUrl(upload.slug, upload.mapRenderFormat || 'pmtiles'),
+  )
   publicUrlForPreview.searchParams.set('apiKey', '_API_KEY_')
   const previewUrl = new URL('https://pmtiles.io/')
   previewUrl.searchParams.set('url', publicUrlForPreview.toString())
@@ -56,10 +59,10 @@ export default function AdminUploadPage() {
       </p>
 
       <p>
-        Datentyp: <code>{upload.type}</code>
+        Render-Format: <code>{upload.mapRenderFormat}</code>
       </p>
 
-      {upload.type === 'GEOJSON' ? (
+      {upload.mapRenderFormat === MapRenderFormatEnum.geojson ? (
         <p>
           <b>TODO: add link to geojson viewer</b>
         </p>
@@ -72,10 +75,14 @@ export default function AdminUploadPage() {
       )}
 
       <p>
-        Öffentliche URL: <code>{getStaticDatasetUrl(upload.slug)}</code>
+        Öffentliche URL:{' '}
+        <code>{getStaticDatasetUrl(upload.slug, upload.mapRenderFormat || 'pmtiles')}</code>
       </p>
       <p>
-        Interne URL: <code>{upload.url}</code>
+        PMTiles URL: <code>{upload.pmtilesUrl}</code>
+      </p>
+      <p>
+        GeoJSON URL: <code>{upload.geojsonUrl}</code>
       </p>
 
       {configs.map((config) => {

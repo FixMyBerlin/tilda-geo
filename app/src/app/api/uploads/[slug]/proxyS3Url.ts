@@ -2,7 +2,7 @@ import { GetObjectCommand, GetObjectCommandOutput, S3Client } from '@aws-sdk/cli
 import { GetObjectCommandInput } from '@aws-sdk/client-s3/dist-types/commands/GetObjectCommand'
 import pako from 'pako'
 
-export async function proxyS3Url(request: Request, url: string) {
+export async function proxyS3Url(request: Request, url: string, downloadFilename?: string) {
   const { hostname, pathname } = new URL(url)
   const accessKeyId = process.env.S3_KEY!
   const secretAccessKey = process.env.S3_SECRET!
@@ -46,18 +46,23 @@ export async function proxyS3Url(request: Request, url: string) {
     }
   }
 
-  return new Response(Body || response.Body, {
-    status: statusCode,
-    // @ts-ignore
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Length': ContentLength,
-      'Content-Type': ContentType,
-      'Content-Encoding': ContentEncoding,
-      ETag,
-      Pragma: 'no-cache',
-      'Cache-Control': 'no-cache',
-      Expires: '0',
-    },
-  })
+  const headers: Record<string, any> = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
+    'Content-Length': ContentLength,
+    'Content-Type': ContentType,
+    'Content-Encoding': ContentEncoding,
+    ETag,
+    Pragma: 'no-cache',
+    'Cache-Control': 'no-cache',
+    Expires: '0',
+  }
+
+  // Add download header if filename is provided
+  if (downloadFilename) {
+    headers['Content-Disposition'] = `attachment; filename="${downloadFilename}"`
+  }
+
+  return new Response(Body || response.Body, { status: statusCode, headers })
 }

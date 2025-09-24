@@ -1,46 +1,52 @@
 import { MetaData } from '@/scripts/StaticDatasets/types'
 import { Prettify } from '@/src/app/_components/types/types'
+import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
 import getUploadsForRegion from '@/src/server/uploads/queries/getUploadsForRegion'
 import { useQuery } from '@blitzjs/rpc'
-import memoize from 'lodash/memoize'
-import { getStaticDatasetUrl } from '../../../../_components/utils/getStaticDatasetUrl'
+import { MapRenderFormatEnum } from '@prisma/client'
 import { useRegionSlug } from '../../_components/regionUtils/useRegionSlug'
 
 type RegionDataset = Prettify<
   MetaData['configs'][number] & {
     isPublic: boolean
     id: string
-    url: string
-    type: 'PMTILES' | 'GEOJSON'
-    githubUrl: string // an addition to MetaData['configs'] in updateStaticDatasets.ts
+    mapRenderFormat: MapRenderFormatEnum // from upload
+    mapRenderUrl: string // URL for map rendering (PMTiles or GeoJSON based on mapRenderFormat)
+    githubUrl: string // from upload
+    downloadUrl: string // URL for GeoJSON download
   }
 >
-
-const getDatasets = memoize(
-  (uploads) => {
-    const regionDatasets: RegionDataset[] = []
-    uploads.forEach((upload) => {
-      upload.configs.forEach((config) => {
-        regionDatasets.push({
-          ...config,
-          isPublic: upload.public,
-          id: upload.slug,
-          type: upload.type,
-          url: getStaticDatasetUrl(upload.slug),
-        })
-      })
-    })
-    return regionDatasets
-  },
-  (uploads) => uploads.map((upload) => upload.id).join(),
-)
 
 export const useRegionDatasets = () => {
   const regionSlug = useRegionSlug()
   const [uploads] = useQuery(
     getUploadsForRegion,
     { regionSlug: regionSlug! },
-    { cacheTime: Infinity },
+    {
+      cacheTime: Infinity,
+      select: (uploads) => {
+        const regionDatasets: RegionDataset[] = []
+
+        uploads.forEach((upload) => {
+          const configs = upload.configs as MetaData['configs']
+
+          configs.forEach((config) => {
+            regionDatasets.push({
+              ...config,
+              isPublic: upload.public,
+              id: upload.slug,
+              mapRenderFormat: upload.mapRenderFormat,
+              mapRenderUrl: upload.mapRenderUrl,
+              downloadUrl: getStaticDatasetUrl(upload.slug, 'geojson'),
+              githubUrl: upload.githubUrl,
+            })
+          })
+        })
+
+        return regionDatasets
+      },
+    },
   )
-  return getDatasets(uploads)
+
+  return uploads
 }
