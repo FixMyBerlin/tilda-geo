@@ -17,7 +17,7 @@ export const translations: { [key: string]: string } = {
   ...translationsWdith,
   'ALL--_parent_highway--key': 'Straßentyp Fahrbahn',
   'ALL--category--key': 'Führungsform',
-  'ALL--category=bicycleRoad_vehicleDestination': 'Fahrradstraße mit Anlieger frei',
+  'ALL--category=bicycleRoad_vehicleDestination': 'Fahrradstraße mit Anlieger/Kfz frei',
   'ALL--category=bicycleRoad': 'Fahrradstraße',
   'ALL--category=crossing': 'Straßenquerung',
   'ALL--category=cycleway_adjoining': 'Radweg (baulich von der Fahrbahn abgesetzt aber straßenbegleitend)',
