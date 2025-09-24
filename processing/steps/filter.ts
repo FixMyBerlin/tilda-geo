@@ -62,7 +62,7 @@ export async function tagFilter(fileName: string, fileChanged: boolean) {
 /**
  * Filter the OSM file with osmium and the given ids.
  * @param fileName the file to filter
- * @param ids the ids to filter
+ * @param ids the ids to filter, use format `w123 w234`
  * @returns the resulting file's name
  */
 export async function idFilter(fileName: string, ids: typeof params.idFilter) {
