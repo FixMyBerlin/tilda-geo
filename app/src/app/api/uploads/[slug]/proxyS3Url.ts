@@ -1,6 +1,6 @@
+import { getOptimalCompression } from '@/scripts/StaticDatasets/updateStaticDatasets/getOptimalCompression'
 import { GetObjectCommand, GetObjectCommandOutput, S3Client } from '@aws-sdk/client-s3'
 import { GetObjectCommandInput } from '@aws-sdk/client-s3/dist-types/commands/GetObjectCommand'
-import { gzipSync } from 'node:zlib'
 
 export async function proxyS3Url(request: Request, url: string, downloadFilename?: string) {
   const { hostname, pathname } = new URL(url)
@@ -37,12 +37,13 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
   let { ContentLength, ContentType, ContentEncoding, ETag } = response
   if (url.endsWith('.geojson')) {
     ContentType = 'application/geo+json'
-    if (request.headers.get('accept-encoding')?.includes('gzip')) {
+    const acceptEncoding = request.headers.get('accept-encoding')
+    if (acceptEncoding && (acceptEncoding.includes('gzip') || acceptEncoding.includes('br'))) {
       const jsonString = await response.Body!.transformToString()
-      const compressedArray = gzipSync(jsonString)
-      Body = compressedArray
-      ContentLength = compressedArray.length
-      ContentEncoding = 'gzip'
+      const { compressed, contentEncoding } = getOptimalCompression(jsonString, acceptEncoding)
+      Body = compressed
+      ContentLength = compressed.length
+      ContentEncoding = contentEncoding
     }
   }
 
