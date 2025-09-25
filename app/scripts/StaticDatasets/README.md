@@ -4,7 +4,7 @@ These scripts manage geodata files, which are made public or semi-public in tild
 
 ## Setup
 
-- Setup `./.env.development` based on [`./.env.development.example`](/./.env.development.example)
+- Setup `./.env.development` based on [`./.env.development.example`](/./.env.development.example) and the same for staging and production.
 - [Install Bun](https://bun.sh/docs/installation)
   - macOS `brew tap oven-sh/bun && brew install bun`
   - Archlinux `yay -S bun-bin`
@@ -15,15 +15,15 @@ These scripts manage geodata files, which are made public or semi-public in tild
 
 ## Update and add data
 
-1. `S3_UPLOAD_FOLDER` and `API_ROOT_URL`
-   in [`/.env`](/.env)
-   to be set to the right environment
+1. See `npm run` for the command per environment.
 2. Add file to `./geojson/region-<mainRegionSlug>`
    - Region-Subfolders are `region-<mainRegionSlug>` where the shorthand is usually the region slug. Whenever we have multiple regions like with `bb`, we use the "main slug" as folder name.
    - Dataset-Folders follow the pattern `<mainRegionSlug>-<customDatasetSlug>-<optionalDatasetSharedIdentiefier>`
    - GeoJson-Files can have any unique name (without spaces).
-3. Run `npm run updateStaticDatasets`
-   - Run `bun ./scripts/StaticDatasets/updateStaticDatasets.ts --keep-tmp --folder-filter bb-` to run all files where the Dataset-Folder includes "bb-".
+3. Run the update script `npm run updateStaticDatasets` with optional filters:
+   - `--keep-tmp` to keep temporary files for debugging
+   - `--folder-filter berlin-` to run only files where the Dataset-Folder includes "berlin-"
+   - Example: `bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.staging ./scripts/StaticDatasets/updateStaticDatasets.ts --keep-tmp --folder-filter berlin-`
 
 ### Temporary files
 
