@@ -8,22 +8,24 @@ export async function GET(request: Request, { params }: { params: { slug: string
 
   // Extract file extension and base name
   const lastDotIndex = slug.lastIndexOf('.')
+  let baseName: string
+  let extension: string
+
   if (lastDotIndex === -1) {
-    return Response.json(
-      { statusText: 'Bad Request', message: 'File extension required. Use .pmtiles or .geojson' },
-      { status: 400, headers: corsHeaders },
-    )
-  }
+    // No file extension found - fallback to pmtiles for old URLs
+    baseName = slug
+    extension = 'pmtiles'
+  } else {
+    baseName = slug.substring(0, lastDotIndex)
+    extension = slug.substring(lastDotIndex + 1).toLowerCase()
 
-  const baseName = slug.substring(0, lastDotIndex)
-  const extension = slug.substring(lastDotIndex + 1).toLowerCase()
-
-  // Validate file extension
-  if (!['pmtiles', 'geojson'].includes(extension)) {
-    return Response.json(
-      { statusText: 'Bad Request', message: 'Unsupported file type. Use .pmtiles or .geojson' },
-      { status: 400, headers: corsHeaders },
-    )
+    // Validate file extension when provided
+    if (!['pmtiles', 'geojson'].includes(extension)) {
+      return Response.json(
+        { statusText: 'Bad Request', message: 'Unsupported file type. Use .pmtiles or .geojson' },
+        { status: 400, headers: corsHeaders },
+      )
+    }
   }
 
   // Find the upload by base name (without extension)
