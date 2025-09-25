@@ -1,7 +1,5 @@
 DROP FUNCTION IF EXISTS get_parking_edges (geometry);
 
-DROP FUNCTION IF EXISTS parking_area_to_line (geometry, jsonb, double precision);
-
 -- TODO: use custom type from below as return type
 CREATE FUNCTION get_parking_edges (parking_geom geometry) RETURNS TABLE (edge_idx BIGINT, geom geometry) LANGUAGE plpgsql AS $$
 DECLARE
