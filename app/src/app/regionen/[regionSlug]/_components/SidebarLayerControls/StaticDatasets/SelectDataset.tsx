@@ -117,7 +117,6 @@ export const SelectDataset = ({
               href={downloadUrl}
               download={`${name}.geojson`}
               className="inline-flex items-center gap-1"
-              title="GeoJSON-Datei herunterladen"
             >
               <ArrowDownTrayIcon className="size-3" />
               GeoJSON herunterladen
@@ -133,6 +132,15 @@ export const SelectDataset = ({
               <br />
               <LinkExternal blank href={githubUrl}>
                 Github Statische Daten
+              </LinkExternal>
+              <br />
+              <LinkExternal
+                href={getStaticDatasetUrl(id, 'csv')}
+                download={`${name}.csv`}
+                className="inline-flex items-center gap-1"
+              >
+                <ArrowDownTrayIcon className="size-3" />
+                CSV herunterladen (Beta)
               </LinkExternal>
               <br />
               <div className="flex flex-col gap-1">
