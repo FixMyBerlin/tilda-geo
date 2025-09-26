@@ -27,6 +27,7 @@ type RegionCsvRow = {
   data_source: string
   csv_download_url: string
   region_url: string
+  public: string
 }
 
 export async function convertRegionUploadsToCsv(uploads: UploadWithRegions[], regionSlug: string) {
@@ -63,6 +64,7 @@ export async function convertRegionUploadsToCsv(uploads: UploadWithRegions[], re
         data_source: config.dataSourceMarkdown || '',
         csv_download_url: getStaticDatasetUrl(upload.slug, 'csv'),
         region_url: regionUrl,
+        public: upload.public ? 'public' : 'private',
       }
 
       csvRows.push(row)

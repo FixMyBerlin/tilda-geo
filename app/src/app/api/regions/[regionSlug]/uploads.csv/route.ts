@@ -1,5 +1,5 @@
 /**
- * API route for region data export
+ * API route for region CSV data export
  *
  * ACCESS CONTROL:
  * This route is ONLY accessible to users who have membership in the specified region.
@@ -7,28 +7,17 @@
  * Admins have access to all regions.
  *
  * Endpoints:
- * - GET /api/regions/{regionSlug}.csv - Returns CSV with all uploads metadata for the region
- * - GET /api/regions/{regionSlug}.json - Returns JSON with all uploads metadata for the region (future)
+ * - GET /api/regions/{regionSlug}/uploads.csv - Returns CSV with all uploads metadata for the region
  */
 
 import db from '@/db'
 import { getBlitzContext } from '@/src/blitz-server'
 import { corsHeaders } from '../../../_util/cors'
-import { parseSlugAndFormat } from '../../../uploads/[slug]/utils/parseSlugAndFormat'
 import { convertRegionUploadsToCsv } from './utils/convertRegionUploadsToCsv'
 
 export async function GET(request: Request, { params }: { params: { regionSlug: string } }) {
   const { regionSlug } = params
-
-  // Parse slug and format
-  const parseResult = parseSlugAndFormat({
-    slug: regionSlug,
-    allowedFormats: ['csv', 'json'],
-  })
-  if (!parseResult.success) {
-    return parseResult.response
-  }
-  const { baseName, extension: format } = parseResult.result!
+  const baseName = regionSlug
 
   // Check if region exists
   const region = await db.region.findFirst({
@@ -70,38 +59,23 @@ export async function GET(request: Request, { params }: { params: { regionSlug: 
     include: { regions: { select: { id: true, slug: true } } },
   })
 
-  // Handle CSV export
-  if (format === 'csv') {
-    try {
-      const csvData = await convertRegionUploadsToCsv(uploads, baseName)
+  // Generate and return CSV export
+  try {
+    const csvData = await convertRegionUploadsToCsv(uploads, baseName)
 
-      return new Response(csvData, {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="${baseName}-datasets.csv"`,
-        },
-      })
-    } catch (error) {
-      console.error('Region CSV export error:', error)
-      return Response.json(
-        { statusText: 'Internal Server Error', message: 'Failed to generate CSV' },
-        { status: 500, headers: corsHeaders },
-      )
-    }
-  }
-
-  // Handle JSON export (future implementation)
-  if (format === 'json') {
+    return new Response(csvData, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename="${baseName}-datasets.csv"`,
+      },
+    })
+  } catch (error) {
+    console.error('Region CSV export error:', error)
     return Response.json(
-      { statusText: 'Not Implemented', message: 'JSON export not yet implemented' },
-      { status: 501, headers: corsHeaders },
+      { statusText: 'Internal Server Error', message: 'Failed to generate CSV' },
+      { status: 500, headers: corsHeaders },
     )
   }
-
-  return Response.json(
-    { statusText: 'Bad Request', message: 'Invalid request' },
-    { status: 400, headers: corsHeaders },
-  )
 }

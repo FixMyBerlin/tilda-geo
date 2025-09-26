@@ -31,7 +31,7 @@ export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
   const prodUrl = getAdminInfoEnvUrl('production')
 
   // CSV export URL for region uploads (static datasets)
-  const regionCsvUrl = regionSlug ? `/api/regions/${regionSlug}.csv` : null
+  const regionCsvUrl = regionSlug ? `/api/regions/${regionSlug}/uploads.csv` : null
 
   if (!isAdmin(user)) return null
 
