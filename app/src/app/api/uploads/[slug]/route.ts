@@ -19,35 +19,22 @@ import db from '@/db'
 import { getBlitzContext } from '@/src/blitz-server'
 import { corsHeaders } from '../../_util/cors'
 import { handleCsvExport } from './utils/handleCsvExport'
+import { parseSlugAndFormat } from './utils/parseSlugAndFormat'
 import { proxyS3Url } from './utils/proxyS3Url'
 
 export async function GET(request: Request, { params }: { params: { slug: string } }) {
   const { slug } = params
 
-  // Extract file extension and base name
-  const lastDotIndex = slug.lastIndexOf('.')
-  let baseName: string
-  let extension: string
-
-  if (lastDotIndex === -1) {
-    // No file extension found - fallback to pmtiles for old URLs
-    baseName = slug
-    extension = 'pmtiles'
-  } else {
-    baseName = slug.substring(0, lastDotIndex)
-    extension = slug.substring(lastDotIndex + 1).toLowerCase()
-
-    // Validate file extension when provided
-    if (!['pmtiles', 'geojson', 'csv'].includes(extension)) {
-      return Response.json(
-        {
-          statusText: 'Bad Request',
-          message: 'Unsupported file type. Use .pmtiles, .geojson, or .csv',
-        },
-        { status: 400, headers: corsHeaders },
-      )
-    }
+  // Parse slug and format
+  const parseResult = parseSlugAndFormat({
+    slug,
+    allowedFormats: ['pmtiles', 'geojson', 'csv'],
+    fallbackFormat: 'pmtiles',
+  })
+  if (!parseResult.success) {
+    return parseResult.response
   }
+  const { baseName, extension } = parseResult.result!
 
   // Find the upload by base name (without extension)
   const upload = await db.upload.findFirst({
@@ -65,7 +52,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
       { statusText: 'Forbidden' },
       { status: 403, headers: corsHeaders },
     )
-    const session = (await getBlitzContext()).session
+    const { session } = await getBlitzContext()
     if (!session.userId) {
       return forbidden
     }
@@ -92,8 +79,7 @@ export async function GET(request: Request, { params }: { params: { slug: string
   }
 
   // Handle CSV export by first getting GeoJSON data, then converting
-  const isCsvRequest = extension === 'csv'
-  if (isCsvRequest) {
+  if (extension === 'csv') {
     return handleCsvExport(upload.geojsonUrl, baseName)
   }
 

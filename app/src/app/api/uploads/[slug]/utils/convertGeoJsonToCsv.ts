@@ -13,7 +13,7 @@ interface CsvRow {
   [key: string]: any
 }
 
-export async function convertGeoJsonToCsv(geojsonData: any): Promise<string> {
+export async function convertGeoJsonToCsv(geojsonData: any) {
   if (!geojsonData || geojsonData.type !== 'FeatureCollection') {
     throw new Error('Invalid GeoJSON: Expected FeatureCollection')
   }
