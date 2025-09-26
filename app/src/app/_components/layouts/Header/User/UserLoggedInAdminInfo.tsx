@@ -8,6 +8,7 @@ import {
   osmUrlViewport,
   tildaViewerUrl,
 } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
+import { useRegionSlug } from '@/src/app/regionen/[regionSlug]/_components/regionUtils/useRegionSlug'
 import { useMapDebugActions } from '@/src/app/regionen/[regionSlug]/_hooks/mapState/useMapDebugState'
 import { useMapParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useMapParam'
 import { UserLoggedInProp } from './UserLoggedIn'
@@ -15,6 +16,7 @@ import { getAdminInfoEnvUrl } from './utils/getAdminInfoEnvUrl'
 
 export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
   const { toggleShowDebugInfo } = useMapDebugActions()
+  const regionSlug = useRegionSlug()
 
   const { mapParam } = useMapParam()
   const osmUrlViewportUrl = mapParam && osmUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
@@ -28,6 +30,9 @@ export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
   const stagingUrl = getAdminInfoEnvUrl('staging')
   const prodUrl = getAdminInfoEnvUrl('production')
 
+  // CSV export URL for region uploads (static datasets)
+  const regionCsvUrl = regionSlug ? `/api/regions/${regionSlug}.csv` : null
+
   if (!isAdmin(user)) return null
 
   return (
@@ -40,6 +45,13 @@ export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
         <li>
           <Link href="/admin">Admin Bereich</Link>
         </li>
+        {regionCsvUrl && (
+          <li>
+            <LinkExternal blank href={regionCsvUrl}>
+              Export Static Data CSV
+            </LinkExternal>
+          </li>
+        )}
         {mapParam && (
           <li>
             <button type="button" onClick={() => toggleShowDebugInfo()} className={linkStyles}>
