@@ -1,14 +1,14 @@
 import { Prettify } from '@/src/app/_components/types/types'
 import { RegionSlug } from '@/src/data/regions.const'
 import {
-  CircleLayer,
-  FillLayer,
-  HeatmapLayer,
-  LineLayer,
-  RasterSource,
-  SymbolLayer,
-  VectorTileSource,
-} from 'react-map-gl/maplibre'
+  CircleLayerSpecification,
+  FillLayerSpecification,
+  HeatmapLayerSpecification,
+  LineLayerSpecification,
+  RasterSourceSpecification,
+  SymbolLayerSpecification,
+  VectorSourceSpecification,
+} from 'maplibre-gl'
 import { translations } from '../_components/SidebarInspector/TagsTable/translations/translations.const'
 import { LegendIconTypes } from '../_components/SidebarLayerControls/Legend/LegendIcons/types'
 import { MapDataCategoryId } from './mapDataCategories/MapDataCategoryId'
@@ -24,9 +24,9 @@ export type MapDataBackgroundSource<TIds> = {
   attributionHtml: string
   /** @desc Show link to the external legend of that map layer. Will replace {z}/{x}/{y} if present  */
   legendUrl?: string
-  maxzoom?: RasterSource['maxzoom']
-  minzoom?: RasterSource['minzoom']
-  tileSize?: RasterSource['tileSize']
+  maxzoom?: RasterSourceSpecification['maxzoom']
+  minzoom?: RasterSourceSpecification['minzoom']
+  tileSize?: RasterSourceSpecification['tileSize']
 }
 
 /** @desc: The data sources, configured in 'sourcesDatasets.const.ts' */
@@ -132,13 +132,13 @@ export type MapDataSource<TIds, TExpIds> = {
   tiles: string
   /** @desc minzoom:4 (default, see `SIMPLIFY_MIN_ZOOM`) means no data is loaded for 0-4, only from 5+ (zoomed in) data is present
    * @desc `0---4=minzoom->-----maxzoom=14=overzoom->---22` */
-  minzoom: VectorTileSource['minzoom']
+  minzoom: VectorSourceSpecification['minzoom']
   /** @desc maxzoom:14 (default, see `SIMPLIFY_MAX_ZOOM`) means data is still visible for 14+ but it uses the data from z=14 (overzoom)
    * @desc `0---4=minzoom->-----maxzoom=14=overzoom->---22` */
-  maxzoom: VectorTileSource['maxzoom']
+  maxzoom: VectorSourceSpecification['maxzoom']
   attributionHtml: string
   licence: 'ODbL' | undefined
-  promoteId: VectorTileSource['promoteId'] | undefined
+  promoteId: VectorSourceSpecification['promoteId'] | undefined
   osmIdConfig: MapDataOsmIdConfig
   /** @desc Inspector: Enable and configure Inspector */
   inspector: MapDataSourceInspector
@@ -221,7 +221,7 @@ export type FileMapDataSubcategoryHiddenStyle = {
 
 /** @desc: The technical glue between sources and styles. The name "layers" is defined by the library we use. */
 export type FileMapDataSubcategoryStyleLayer = Prettify<
-  (CircleLayer | FillLayer | HeatmapLayer | LineLayer | SymbolLayer) & {
+  (CircleLayerSpecification | FillLayerSpecification | HeatmapLayerSpecification | LineLayerSpecification | SymbolLayerSpecification) & {
     'source-layer': string
     /**
      * @default `true`

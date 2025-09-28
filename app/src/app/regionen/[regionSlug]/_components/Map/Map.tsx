@@ -258,7 +258,6 @@ export const Map = () => {
       onIdle={() => setMapDataLoading(false)}
       doubleClickZoom={true}
       dragRotate={false}
-      RTLTextPlugin={false}
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
     >
