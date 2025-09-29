@@ -9,6 +9,7 @@ SELECT
   tag_source,
   geom_source,
   (tags ->> 'capacity')::NUMERIC AS capacity,
+  (tags ->> 'area')::NUMERIC AS area,
   jsonb_build_object(
     -- CRITICAL: Keep these lists in sync:
     -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
@@ -32,9 +33,8 @@ SELECT
     -- capacity - separate column
     'capacity_source', tags ->> 'capacity_source',
     'capacity_confidence', tags ->> 'capacity_confidence',
-    -- 'area', tags ->> 'area',
-    -- 'area_confidence', tags ->> 'area_confidence',
-    -- 'area_source', tags ->> 'area_source',
+    'area_confidence', tags ->> 'area_confidence',
+    'area_source', tags ->> 'area_source',
     --
     -- Parking properties
     'condition_category', tags ->> 'condition_category',
@@ -101,6 +101,7 @@ WITH
       tags || jsonb_build_object(
         /* sql-formatter-disable */
         'capacity', SUM(capacity),
+        'area', SUM(area),
         'tag_sources', string_agg(tag_source, ';' ORDER BY tag_source),
         'geom_sources', string_agg(geom_source, ';' ORDER BY geom_source)
         /* sql-formatter-enable */
@@ -214,7 +215,11 @@ DO $$
     RAISE NOTICE 'Failed to merge % clusters. Their capacity will be estimated.', failed_count;
   END $$;
 
+-- MISC
 CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
+
+ALTER TABLE _parking_parkings_merged
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
 
 CREATE INDEX parking_parkings_failed_merges_idx ON _parking_failed_merges USING GIST (geom);
 
