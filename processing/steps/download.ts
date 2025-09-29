@@ -27,8 +27,12 @@ export async function waitForFreshData() {
   const maxTries = 25 // ~8 hours (at 20 Min per try)
   const timeoutMinutes = 20
   const now = new Date()
-  const todaysDate = now.toDateString()
-  const yesterdaysDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString()
+
+  // Use German timezone (Europe/Berlin) for all date comparisons
+  const nowDE = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }))
+  const todaysDateDE = nowDE.toISOString().split('T')[0] // YYYY-MM-DD format
+  const yesterdayDE = new Date(nowDE.getTime() - 24 * 60 * 60 * 1000)
+  const yesterdaysDateDE = yesterdayDE.toISOString().split('T')[0]
 
   let tries = 0
 
@@ -50,20 +54,27 @@ export async function waitForFreshData() {
     }
 
     const lastModifiedDate = new Date(lastModified)
-    const lastModifiedDateString = lastModifiedDate.toDateString()
+    // Convert last modified time to German timezone
+    const lastModifiedDE = new Date(
+      lastModifiedDate.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }),
+    )
+    const lastModifiedDateDE = lastModifiedDE.toISOString().split('T')[0] // YYYY-MM-DD format
 
-    // Check if data is fresh enough:
+    // Check if data is fresh enough (all times in German timezone):
     // 1. Data from today is always accepted
-    // 2. Data from yesterday is accepted only if created after 20:00
-    const isFromToday = todaysDate === lastModifiedDateString
+    // 2. Data from yesterday is accepted only if created after 20:00 German time
+    const isFromToday = todaysDateDE === lastModifiedDateDE
     const isFromYesterdayAfter8PM =
-      yesterdaysDate === lastModifiedDateString && lastModifiedDate.getHours() >= 20
+      yesterdaysDateDE === lastModifiedDateDE && lastModifiedDE.getHours() >= 20
     const isFreshData = isFromToday || isFromYesterdayAfter8PM
 
     // Enhanced logging to show the new logic
     const log = {
-      today: now.toISOString(),
-      newFileLastModified: lastModifiedDate.toISOString(),
+      todayDE: todaysDateDE,
+      yesterdayDE: yesterdaysDateDE,
+      newFileLastModifiedDE: lastModifiedDateDE,
+      newFileLastModifiedTimeDE: lastModifiedDE.toISOString(),
+      newFileLastModifiedTimeUTC: lastModifiedDate.toISOString(),
       isFromToday,
       isFromYesterdayAfter8PM,
       next: isFreshData ? 'process' : 'wait',
