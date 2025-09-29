@@ -646,7 +646,7 @@ local needsClarification = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
-    -- hack: because `cyclewayBetweenLanes` is now detected on the `self` object we need to filter out the right side here
+    -- hack: because `cyclewayOnHighwayBetweenLanes` is now detected on the `self` object we need to filter out the right side here
     -- to fix this we would need to double classify objects
     if tags._side == 'right' then
       if (ContainsSubstring(tags['cycleway:lanes'], "|lane|") or
