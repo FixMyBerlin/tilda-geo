@@ -230,7 +230,7 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
 
     -- Only apply the following conditions on cycleway-like highways.
     -- This makes sure direct tagging on other highways classes does not match this category.
-    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway') then
+    if tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' then
       if tags.segregated == "yes" and tags.bicycle == "designated" and tags.foot == "designated" then
           return true
       end
@@ -332,7 +332,7 @@ local cyclewaySeparated = BikelaneCategory.new({
   condition = function(tags)
     -- CASE: GUARD Centerline "lane"
     -- Needed for places like https://www.openstreetmap.org/way/964589554 which have the traffic sign but are not separated.
-    if (tags.cycleway == "lane") then return false end
+    if tags.cycleway == "lane" then return false end
 
     -- CASE: Centerline
     -- traffic_sign=DE:237, "Radweg", https://wiki.openstreetmap.org/wiki/DE:Tag:traffic%20sign=DE:237
@@ -442,6 +442,8 @@ local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
           end
         end
       end
+
+      -- Regular case
       if tags.cycleway == "lane" or tags.cycleway == "opposite_lane" then
         return true
       end
@@ -503,12 +505,12 @@ local sharedMotorVehicleLane = BikelaneCategory.new({
   end
 })
 
+-- There are edge cases to be treated here, but the are related to cycleway:SIDE=lane, so the are documented at `cyclewayOnHighway_advisoryOrExclusive`
 -- https://wiki.openstreetmap.org/wiki/Forward_&_backward,_left_&_right
 -- https://wiki.openstreetmap.org/wiki/Lanes#Crossing_with_a_designated_lane_for_bicycles
 local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
   id = 'cyclewayOnHighwayBetweenLanes',
-  desc = 'Bike lane between motor vehicle lanes,' ..
-      ' mostly on the left of a right turn lane. (DE: "Radweg in Mittellage")',
+  desc = 'Bike lane between motor vehicle lanes, mostly on the left of a right turn lane. (DE: "Radweg in Mittellage")',
   infrastructureExists = true,
   implicitOneWay = true, -- 'oneway=implicit_yes', its "lane"-like
   implicitOneWayConfidence = 'high',
@@ -660,8 +662,11 @@ local needsClarification = BikelaneCategory.new({
       return false
     end
 
-    if tags.highway == "cycleway"
-        or (tags.highway == "path" and tags.bicycle == "designated") then
+    if tags.highway == "cycleway" then
+      return true
+    end
+
+    if tags.highway == "path" and tags.bicycle == "designated" then
       return true
     end
 
