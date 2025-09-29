@@ -411,9 +411,11 @@ local cyclewayLink = BikelaneCategory.new({
 })
 
 -- Case: Unkown 'lane' – "Radfahrstreifen" OR "Schutzstreifen"
+-- We use this category below to make it more precise checking `advisory` or `exclusive`.
 -- https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=lane
 -- https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=opposite_lane
 -- https://wiki.openstreetmap.org/wiki/Key:cycleway:lane
+-- https://wiki.openstreetmap.org/wiki/Lanes#Crossing_with_a_designated_lane_for_bicycles
 local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
   id = 'cyclewayOnHighway_advisoryOrExclusive',
   desc = 'Bicycle infrastrucute on the highway, right next to motor vehicle traffic.' ..
@@ -425,13 +427,13 @@ local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
     if tags.highway == 'cycleway' then
-      if tags._side ~= 'self' then
-        -- "Angstweichen" are a special case where the cycleway is part of the road which is tagged using one of their `*:lanes` schema.
-        -- Those get usually dual tagged as `cycleway:right=lane` to make the "Angstweiche" "visible" to routing.
-        -- For this category, we skip the dual tagging but still want to capture cases where there is an actual `lane` ("Schutzstreifen") as well as a "Angstweiche".
-        -- The actual double infra is present when the lanes have both "|lane|" (the "Angstweiche") as well a a suffix "|lane" (the "Schutzstreifen").
-        -- Note: `tags.lanes` is `cycleway:lanes` but unnested whereas `bicycle:lanes` does not get unnested.
-        if ContainsSubstring(tags.lanes,'|lane|') then
+      -- "Angstweichen" (`cyclewayOnHighwayBetweenLanes`) are a special case where the cycleway is part of the road which is tagged using one of their `*:lanes` schema.
+      -- Those get usually dual tagged as `cycleway:right=lane` to make the "Angstweiche" "visible" to routing.
+      -- For this category, we skip the dual tagging but still want to capture cases where there is an actual `lane` ("Schutzstreifen") as well as a "Angstweiche".
+      -- The actual double infra is present when the lanes have both "|lane|" (the "Angstweiche") as well a a suffix "|lane" (the "Schutzstreifen").
+      -- Note: `tags.lanes` is `cycleway:lanes` but unnested whereas `bicycle:lanes` does not get unnested.
+      if tags._side == 'left' or tags._side == 'right' then
+        if ContainsSubstring(tags.lanes, '|lane|') then
           if not osm2pgsql.has_suffix(tags.lanes, '|lane') then
             return false
           end
@@ -648,11 +650,12 @@ local needsClarification = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
-    -- hack: because `cyclewayOnHighwayBetweenLanes` is now detected on the `self` object we need to filter out the right side here
-    -- to fix this we would need to double classify objects
-    if tags._side == 'right' then
-      if (ContainsSubstring(tags['cycleway:lanes'], "|lane|") or
-        ContainsSubstring(tags['bicycle:lanes'], "|designated|")) then
+    -- HACK: because `cyclewayOnHighwayBetweenLanes` is now detected on the `self` object we need to filter out the sides here
+    -- The fix this properly we would need to double classify objects
+    if tags._side == 'left' or tags._side == 'right' then
+      if ContainsSubstring(tags['cycleway:lanes'], "|lane|") or
+        ContainsSubstring(tags['bicycle:lanes'], "|designated|")
+      then
         return false
       end
     end
