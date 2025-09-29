@@ -9,6 +9,21 @@ local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
 local to_semicolon_list = require('to_semicolon_list')
 
+---Helper function to check this object is also a `cyclewayOnHighwayBetweenLanes`
+---@param tags table The tags to check
+local function hasCyclewayOnHighwayBetweenLanesConditions(tags)
+  if tags._side == 'left' or tags._side == 'right' then
+    -- Check Untransformed tags
+    if ContainsSubstring(tags['cycleway:lanes'], "|lane|") then return true end
+    if ContainsSubstring(tags['bicycle:lanes'], "|designated|") then return true end
+    -- `cycleway:lanes=*|lane|*` gets unnested to `tags.lanes`
+    if ContainsSubstring(tags.lanes, '|lane|') then return true end
+    -- `bicycle:lanes=*|designated|*` does not get copied during transformation, so we need to look at the `_parent`
+    if tags.parent and ContainsSubstring(tags.parent['bicycle:lanes'], "|designated|") then return true end
+  end
+  return false
+end
+
 ---@meta
 ---@class BikelaneCategory
 BikelaneCategory = {}
@@ -428,20 +443,16 @@ local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
   condition = function(tags)
     if tags.highway == 'cycleway' then
       -- "Angstweichen" (`cyclewayOnHighwayBetweenLanes`) are a special case where the cycleway is part of the road which is tagged using one of their `*:lanes` schema.
-      -- Those get usually dual tagged as `cycleway:right=lane` to make the "Angstweiche" "visible" to routing.
-      -- For this category, we skip the dual tagging but still want to capture cases where there is an actual `lane` ("Schutzstreifen") as well as a "Angstweiche".
-      -- The actual double infra is present when the lanes have both "|lane|" (the "Angstweiche") as well a a suffix "|lane" (the "Schutzstreifen").
+      -- Those get usually dual(!) tagged as `cycleway:right=lane` to make the "Angstweiche" "visible" to routing.
+      -- For this category, we skip the dual tagging BUT still want to capture cases where there is BOTH, an actual `lane` ("Schutzstreifen") as well as a "Angstweiche".
+      -- We only acccept double infra when we have both, "|lane|" (the "Angstweiche") as well a a suffix "|lane" (the "Schutzstreifen").
       -- Note: `tags.lanes` is `cycleway:lanes` but unnested whereas `bicycle:lanes` does not get unnested.
-      if tags._side == 'left' or tags._side == 'right' then
-        if ContainsSubstring(tags.lanes, '|lane|') then
-          if not osm2pgsql.has_suffix(tags.lanes, '|lane') then
-            return false
-          end
+      if hasCyclewayOnHighwayBetweenLanesConditions(tags) then
+        if ContainsSubstring(tags.lanes, '|lane|') and not osm2pgsql.has_suffix(tags.lanes, '|lane') then
+          return false
         end
-        if tags._parent ~= nil and ContainsSubstring(tags._parent['bicycle:lanes'], '|designated|') then
-          if not osm2pgsql.has_suffix(tags._parent['bicycle:lanes'], '|designated') then
-            return false
-          end
+        if tags._parent ~= nil and ContainsSubstring(tags._parent['bicycle:lanes'], '|designated|') and not osm2pgsql.has_suffix(tags._parent['bicycle:lanes'], '|designated') then
+          return false
         end
       end
 
@@ -652,12 +663,8 @@ local needsClarification = BikelaneCategory.new({
   condition = function(tags)
     -- HACK: because `cyclewayOnHighwayBetweenLanes` is now detected on the `self` object we need to filter out the sides here
     -- The fix this properly we would need to double classify objects
-    if tags._side == 'left' or tags._side == 'right' then
-      if ContainsSubstring(tags['cycleway:lanes'], "|lane|") or
-        ContainsSubstring(tags['bicycle:lanes'], "|designated|")
-      then
-        return false
-      end
+    if hasCyclewayOnHighwayBetweenLanesConditions(tags) then
+      return false
     end
 
     if tags.cycleway == "shared" then
