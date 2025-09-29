@@ -33,6 +33,7 @@ SELECT
     -- capacity - separate column
     'capacity_source', tags ->> 'capacity_source',
     'capacity_confidence', tags ->> 'capacity_confidence',
+    -- 'area', tags ->> 'area',
     'area_confidence', tags ->> 'area_confidence',
     'area_source', tags ->> 'area_source',
     --
