@@ -94,7 +94,8 @@ BEGIN
             half_space
     FROM unnest(edges_arr) AS t(geom, edge_idx)
     LEFT JOIN _parking_roads r
-      ON ST_DWithin(ST_Centroid(t.geom), r.geom, radius)
+      ON ST_Expand(ST_Centroid(t.geom), radius) && r.geom
+      AND ST_DWithin(ST_Centroid(t.geom), r.geom, radius)
       AND (parking_tags->>'road_name' IS NULL
         OR r.tags->>'street_name' IS NULL
         OR parking_tags->>'road_name' != r.tags->>'street_name')
