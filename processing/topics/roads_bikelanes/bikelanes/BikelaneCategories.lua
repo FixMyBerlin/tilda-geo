@@ -36,7 +36,8 @@ BikelaneCategory.__index = BikelaneCategory
 --- implicitOneWay: boolean,
 --- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
 --- copySurfaceSmoothnessFromParent: boolean, -- Whether this category should copy surface/smoothness values from parent highway
---- condition: fun(tags: table): boolean|nil,
+--- condition: fun(tags: table): (boolean|nil),
+--- process: fun(tags: table): (table|nil)|nil, -- Optional function to process tags after categorization
 --- }
 ---@return BikelaneCategory
 function BikelaneCategory.new(args)
@@ -49,6 +50,7 @@ function BikelaneCategory.new(args)
   self.implicitOneWayConfidence = args.implicitOneWayConfidence
   self.copySurfaceSmoothnessFromParent = args.copySurfaceSmoothnessFromParent
   self.condition = args.condition
+  self.process = args.process
   return self
 end
 
@@ -606,10 +608,13 @@ local sharedBusLaneBusWithBike = BikelaneCategory.new({
       osm2pgsql.has_prefix(trafficSign, "DE:245") and (ContainsSubstring(trafficSign, "1022-10") or ContainsSubstring(trafficSign, "1022-14")) or
       osm2pgsql.has_prefix(parentTrafficSign, "DE:245") and (ContainsSubstring(parentTrafficSign, "1022-10") or ContainsSubstring(parentTrafficSign, "1022-14"))
     then
-      -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
-      tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
       return true
     end
+  end,
+  process = function(tags)
+    -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
+    tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
+    return tags
   end
 })
 
@@ -639,10 +644,13 @@ local sharedBusLaneBikeWithBus = BikelaneCategory.new({
       osm2pgsql.has_prefix(trafficSign, "DE:237") and (ContainsSubstring(trafficSign, "1024-14") or ContainsSubstring(trafficSign, "1026-32")) or
       osm2pgsql.has_prefix(parentTrafficSign, "DE:237") and (ContainsSubstring(parentTrafficSign, "1024-14") or ContainsSubstring(parentTrafficSign, "1026-32"))
     then
-      -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
-      tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
       return true
     end
+  end,
+  process = function(tags)
+    -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
+    tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
+    return tags
   end
 })
 
@@ -726,6 +734,9 @@ local categoryDefinitions = {
 function CategorizeBikelane(tags)
   for _, category in pairs(categoryDefinitions) do
     if category(tags) then
+      if category.process then
+        category.process(tags)
+      end
       return category
     end
   end
