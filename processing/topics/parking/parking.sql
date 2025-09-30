@@ -14,6 +14,7 @@
 -- CREATE CUSTOM FUNCTIONS
 -- * … TO PROJECT
 \i '/processing/topics/parking/custom_functions/project_to_k_closest_kerbs.sql'
+\i '/processing/topics/parking/custom_functions/project_to_closest_platform.sql'
 \i '/processing/topics/parking/custom_functions/project_to_line.sql'
 -- * … FOR KERBS
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
@@ -59,6 +60,9 @@
 
 -- HANDLE UNPROJECTED OBSTACLES
 \i '/processing/topics/parking/obstacles_unprojected/0_filter_turning_circles.sql'
+
+-- HANDLE PUBLIC TRANSPORT
+\i '/processing/topics/parking/public_transport/0_points_project_to_kerb_and_platform.sql'
 
 -- HANDLE SEPARATE PARKINGS
 \i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
