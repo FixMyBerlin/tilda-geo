@@ -351,4 +351,79 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(categories.right.tags._parent.traffic_sign, 'DE:245,1022-10')
     end)
   end)
+
+  describe('`cyclewayOnHighway*`', function()
+    it('Take with `cycleway:right:width` when given', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:lanes'] = 'no|lane|no|lane',
+          ['width:lanes'] = '|11||99',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'advisory',
+          ['cycleway:right:width'] = '55',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      assert.are.equal(categorized.self.tags.width, '11')
+
+      assert.are.equal(categorized.left.category.id, 'data_no')
+
+      assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_advisory')
+      assert.are.equal(categorized.right.tags.width, '55')
+    end)
+
+    it('Take with `width:lanes` when none given', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:lanes'] = 'no|lane|no|lane',
+          ['width:lanes'] = '|11||44',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'advisory',
+          -- ['cycleway:right:width'] = '55',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      assert.are.equal(categorized.self.tags.width, '11')
+
+      assert.are.equal(categorized.left.category.id, 'data_no')
+
+      assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_advisory')
+      assert.are.equal(categorized.right.tags.width, '44')
+    end)
+
+    it('But only take `width:lane` when actual Schutzstreifen', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:lanes'] = 'no|lane|no',
+          ['width:lanes'] = '11|12|13',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      assert.are.equal(categorized.self.tags.width, '12')
+
+      assert.are.equal(categorized.left.category.id, 'data_no')
+
+      assert.are.equal(categorized.right.category, nil)
+      assert.are.equal(categorized.right.tags.width, nil)
+    end)
+  end)
 end)

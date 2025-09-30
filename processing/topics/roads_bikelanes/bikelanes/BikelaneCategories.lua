@@ -466,6 +466,11 @@ local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
         if tags._parent ~= nil and ContainsSubstring(tags._parent['bicycle:lanes'], '|designated|') and not osm2pgsql.has_suffix(tags._parent['bicycle:lanes'], '|designated') then
           return false
         end
+
+        -- When both infra are given ("Radfahrstreifen in Mittellage" (RiM)) as well as "Schutzstreifen", we take the `cyclway:SIDE:width` for the "Schutzstreifen".
+        -- But if that is missing, we look into the `width:lanes` and take the value from there if present.
+        local source_width = tags._parent and extractFromLanes.extractLastValueFromLanes(tags._parent['width:lanes'])
+        tags.width = tags.width or source_width
       end
 
       -- Regular case

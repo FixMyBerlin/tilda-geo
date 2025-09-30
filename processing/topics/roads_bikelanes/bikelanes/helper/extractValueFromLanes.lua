@@ -59,11 +59,28 @@ local function extractValueFromLanes(lanes_tag, tags)
   return nil
 end
 
+---Helper function to extract the last value from a lanes schema string
+---@param lanes_value string The lanes value (e.g., "1|2|3")
+---@return string|nil The last value in the lanes schema
+local function extractLastValueFromLanes(lanes_value)
+  if not lanes_value then
+    return nil
+  end
+
+  local lanes = _parseLanesValue(lanes_value)
+  if #lanes > 0 then
+    return lanes[#lanes]
+  end
+
+  return nil
+end
+
 local helper = {
   -- internal functions exposed for testing
   _parseLanesValue = _parseLanesValue,
   _findLaneIndex = _findLaneIndex,
-  extractValueFromLanes = extractValueFromLanes
+  extractValueFromLanes = extractValueFromLanes,
+  extractLastValueFromLanes = extractLastValueFromLanes,
 }
 
 return helper
