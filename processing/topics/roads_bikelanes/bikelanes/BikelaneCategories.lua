@@ -202,12 +202,6 @@ local footAndCyclewayShared = BikelaneCategory.new({
       return true
     end
 
-    -- Only apply the following conditions on cycleway-like highways.
-    -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
-    -- `highway=service` includes ways like https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
-    if tags.highway == 'service' then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA: Radinfrastruktur auf einem Zufahrtsweg.' })
-    end
     if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' or tags.highway == 'service') then
       -- https://www.openstreetmap.org/way/440072364 highway=service
       if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
@@ -220,6 +214,15 @@ local footAndCyclewayShared = BikelaneCategory.new({
         return true
       end
     end
+  end,
+  process = function(tags)
+    -- Only apply the following conditions on cycleway-like highways.
+    -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
+    -- `highway=service` includes ways like https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
+    if tags.highway == 'service' then
+      tags.description = to_semicolon_list({ tags.description, 'TILDA: Radinfrastruktur auf einem Zufahrtsweg.' })
+    end
+    return tags
   end
 })
 local footAndCyclewayShared_adjoining, footAndCyclewayShared_isolated, footAndCyclewayShared_adjoiningOrIsolated = CreateSubcategoriesAdjoiningOrIsolated(footAndCyclewayShared)
