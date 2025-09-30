@@ -253,7 +253,8 @@ describe("Bikelanes", function()
         assert.are.equal(categorized.left.category, nil)
       end)
 
-      -- TODO: We dont support the forward/backward logic for this kind of data, yet
+      -- TBD: We dont support the forward/backward logic for this kind of data, yet.
+      -- TBD: See https://github.com/FixMyBerlin/private-issues/issues/2791
       -- it('Handle forward/backward values', function()
       --   local input_object = {
       --     tags = {
