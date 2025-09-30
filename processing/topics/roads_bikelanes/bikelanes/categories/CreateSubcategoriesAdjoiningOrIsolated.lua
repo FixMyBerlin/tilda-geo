@@ -19,8 +19,8 @@ function CreateSubcategoriesAdjoiningOrIsolated(category)
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
-      -- `hw=service` handles `footAndCyclewayShared` on emergency access ways or driveways
-      return category(tags) and (tags.is_sidepath == "no" or tags.highway == 'service')
+      -- `hw=service` handles `footAndCyclewayShared` on emergency access ways or driveways (same for `track`)
+      return category(tags) and (tags.is_sidepath == "no" or tags.highway == 'service' or tags.highway == 'track')
     end,
     process = category.process,
   })
@@ -32,8 +32,8 @@ function CreateSubcategoriesAdjoiningOrIsolated(category)
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
       -- Trigger on every value other than yes or no (not is_sidepath == yes and not is_sidepath == no)
-      -- Also exclude highway=service as it's treated as isolated
-      return category(tags) and not IsSidepath(tags) and tags.is_sidepath ~= "no" and tags.highway ~= 'service'
+      -- Also exclude highway=service|track as it's treated as isolated
+      return category(tags) and not IsSidepath(tags) and tags.is_sidepath ~= "no" and tags.highway ~= 'service' and tags.highway ~= 'track'
     end,
     process = category.process,
   })

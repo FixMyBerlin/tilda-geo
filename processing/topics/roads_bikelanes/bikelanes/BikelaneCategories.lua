@@ -202,9 +202,14 @@ local footAndCyclewayShared = BikelaneCategory.new({
       return true
     end
 
-    -- Example highway=service https://www.openstreetmap.org/way/440072364
-    local allowedHighways = Set({ 'cycleway', 'path', 'footway', 'service' })
+    -- Only apply the following conditions on cycleway-like highways.
+    -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
+    -- Example highway=service https://www.openstreetmap.org/way/440072364, https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
+    -- Example highway=track https://github.com/FixMyBerlin/radinfra.de/issues/13#issuecomment-3347262698
+    local allowedHighways = Set({ 'cycleway', 'path', 'footway', 'service', 'track' })
     if allowedHighways[tags.highway] then
+    -- REMINDER: Also check `CreateSubcategoriesAdjoiningOrIsolated`; `service|track` required special treatment
+    -- REMINDER: Also check `DeriveOneway`; `service|track` required special treatment
       if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
         return true
       end
@@ -217,11 +222,11 @@ local footAndCyclewayShared = BikelaneCategory.new({
     end
   end,
   process = function(tags)
-    -- Only apply the following conditions on cycleway-like highways.
-    -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
-    -- `highway=service` includes ways like https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
     if tags.highway == 'service' then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA: Radinfrastruktur auf einem Zufahrtsweg.' })
+      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur auf einem Zufahrtsweg.' })
+    end
+    if tags.highway == 'track' or tags.access == 'agricultural' or ContainsSubstring(tags.traffic_sign, '1026-36') then
+      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit landwirtschaftlichem Verkehr.' })
     end
     return tags
   end
