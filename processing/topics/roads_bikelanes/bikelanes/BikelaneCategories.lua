@@ -202,8 +202,9 @@ local footAndCyclewayShared = BikelaneCategory.new({
       return true
     end
 
-    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' or tags.highway == 'service') then
-      -- https://www.openstreetmap.org/way/440072364 highway=service
+    -- Example highway=service https://www.openstreetmap.org/way/440072364
+    local allowedHighways = Set({ 'cycleway', 'path', 'footway', 'service' })
+    if allowedHighways[tags.highway] then
       if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
         return true
       end
