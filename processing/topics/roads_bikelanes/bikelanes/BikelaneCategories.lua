@@ -8,6 +8,7 @@ require("HighwayClasses")
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
 local to_semicolon_list = require('to_semicolon_list')
+local extractFromLanes = require('extractValueFromLanes')
 
 ---Helper function to check this object is also a `cyclewayOnHighwayBetweenLanes`
 ---@param tags table The tags to check
@@ -539,6 +540,34 @@ local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
         return true
       end
     end
+  end,
+  process = function(tags)
+    local width = extractFromLanes.extractValueFromLanes('width:lanes', tags)
+    if width then
+      tags.width = width
+    end
+
+    local surface = extractFromLanes.extractValueFromLanes('surface:lanes', tags)
+    if surface then
+      tags.surface = surface
+    end
+
+    local surface_colour = extractFromLanes.extractValueFromLanes('surface:colour:lanes', tags)
+    if surface_colour then
+      tags['surface:colour'] = surface_colour
+    end
+
+    local smoothness = extractFromLanes.extractValueFromLanes('smoothness:lanes', tags)
+    if smoothness then
+      tags.smoothness = smoothness
+    end
+
+    local source_width = extractFromLanes.extractValueFromLanes('source:width:lanes', tags)
+    if source_width then
+      tags['source:width'] = source_width
+    end
+
+    return tags
   end
 })
 

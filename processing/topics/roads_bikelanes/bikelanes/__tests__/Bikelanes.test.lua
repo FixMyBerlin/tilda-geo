@@ -204,7 +204,7 @@ describe("Bikelanes", function()
         assert.are.equal(categorized.left.category, nil)
       end)
 
-      it('Only "Angstweiche" based on cycleway:lanes', function()
+      it('Only "Angstweiche" based on cycleway:lanes; also test extracting values from lanes', function()
         local input_object = {
           tags = {
             highway = 'tertiary',
@@ -213,12 +213,23 @@ describe("Bikelanes", function()
             -- The first `|lane|` is `cyclewayOnHighwayBetweenLanes`
             -- There is no second `|lane` which would be `cyclewayOnHighway_exclusive`
             ['cycleway:lanes'] = 'no|no|no|lane|no',
+            -- Extract values from *:lanes, specified in `BikelaneCategories`=>`cyclewayOnHighwayBetweenLanes`=>process
+            ['width:lanes'] = '|||1.5|',
+            ['surface:lanes'] = '|||foo|',
+            ['surface:colour:lanes'] = '|||pink|',
+            ['smoothness:lanes'] = 'a|b|c|great|d',
+            ['source:width:lanes'] = 'a|b|c|Lorem Ipsum|d',
           },
           id = 1,
           type = 'way'
         }
         local categorized = extractCategoriesBySide(input_object)
         assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.self.tags.width, '1.5')
+        assert.are.equal(categorized.self.tags.surface, 'foo')
+        assert.are.equal(categorized.self.tags['surface:colour'], 'pink')
+        assert.are.equal(categorized.self.tags.smoothness, 'great')
+        assert.are.equal(categorized.self.tags['source:width'], 'Lorem Ipsum')
         assert.are.equal(categorized.right.category, nil)
         assert.are.equal(categorized.left.category, nil)
       end)
@@ -241,6 +252,29 @@ describe("Bikelanes", function()
         assert.are.equal(categorized.right.category, nil)
         assert.are.equal(categorized.left.category, nil)
       end)
+
+      -- TODO: We dont support the forward/backward logic for this kind of data, yet
+      -- it('Handle forward/backward values', function()
+      --   local input_object = {
+      --     tags = {
+      --       highway = 'tertiary',
+      --       ['cycleway:right'] = 'lane',
+      --       ['bicycle:lanes:forward'] = 'no|designated|no', -- index 2
+      --       ['bicycle:lanes:backward'] = 'no|no|designated|no', -- index 3
+      --       -- Extract values from *:lanes, specified in `BikelaneCategories`=>`cyclewayOnHighwayBetweenLanes`=>process
+      --       ['width:lanes:forward'] = '|11|',
+      --       ['width:lanes:backward'] = '||22|',
+      --       ['surface:lanes'] = '|||foo|',
+      --     },
+      --     id = 1,
+      --     type = 'way'
+      --   }
+      --   local categorized = extractCategoriesBySide(input_object)
+      --   assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      --   assert.are.equal(categorized.self.tags.width, '11')
+      --   assert.are.equal(categorized.right.category, nil)
+      --   assert.are.equal(categorized.left.category, nil)
+      -- end)
 
       it('https://www.openstreetmap.org/way/1133761836 creates two categories', function()
         local input_object = {
