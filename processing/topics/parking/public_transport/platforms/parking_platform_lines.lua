@@ -29,6 +29,8 @@ local function parking_platform_lines(object, db_table)
       id = DefaultId(object),
       tags = cleaned_tags,
       meta = {},
+      -- Reminder: This are mostly lines, but some of them are areas which we store as closed lines.
+      -- Both work fine for our snapping purposes.
       geom = object:as_linestring(),
     }
 

@@ -18,7 +18,12 @@ public_transport_stop_categories = {
     end,
   }),
   class_public_transport_category.new({
-    id = 'bus_stop_v3', -- https://wiki.openstreetmap.org/wiki/Proposal:Refined_Public_Transport#Main_Object
+    -- There are two ways to map bus stops (in Berlin) AMT.
+    -- This one has the representation of the bus stop sign on the centerline.
+    -- We later snap this to the platform line to move it to the right _side_ where we then create the cutout.
+    -- The platform is mostly right next to the kerb to we can use this location for the cutout as is.
+    -- This schema is similar to https://wiki.openstreetmap.org/wiki/Proposal:Refined_Public_Transport#Main_Object
+    id = 'bus_stop_centerline',
     buffer_radius = 15,
     conditions = function(tags)
       return tags.highway == 'bus_stop' and tags.public_transport == 'stop_position' and tags.bus == 'yes' and tags.opening_hours == nil
@@ -31,7 +36,10 @@ public_transport_stop_categories = {
     end,
   }),
   class_public_transport_category.new({
-    id = 'bus_stop_v2', -- https://wiki.openstreetmap.org/wiki/DE:Tag:highway%3Dbus_stop
+    -- This one has the representation of the bus stop sign as a node on the platform.
+    -- As such it's geometry already represents the right side and we snap it to the kerb.
+    -- https://wiki.openstreetmap.org/wiki/DE:Tag:highway%3Dbus_stop
+    id = 'bus_stop_kerb',
     buffer_radius = 15,
     conditions = function(tags)
       return tags.highway == 'bus_stop' and tags.opening_hours == nil
