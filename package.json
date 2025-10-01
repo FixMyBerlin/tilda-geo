@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@date-fns/tz": "^1.4.1",
+    "date-fns": "^4.0.0"
+  }
+}

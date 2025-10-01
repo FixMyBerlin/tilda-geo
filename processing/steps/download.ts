@@ -1,4 +1,6 @@
+import { TZDate } from '@date-fns/tz'
 import { $ } from 'bun'
+import { format, getHours } from 'date-fns'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
@@ -54,18 +56,17 @@ export async function waitForFreshData() {
     }
 
     const lastModifiedDate = new Date(lastModified)
-    // Convert last modified time to German timezone
-    const lastModifiedDE = new Date(
-      lastModifiedDate.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }),
-    )
-    const lastModifiedDateDE = lastModifiedDE.toISOString().split('T')[0] // YYYY-MM-DD format
+    // Convert to Berlin timezone
+    const lastModifiedDE = new TZDate(lastModifiedDate, 'Europe/Berlin')
+    const lastModifiedDateDE = format(lastModifiedDE, 'yyyy-MM-dd')
+    const lastModifiedHourDE = getHours(lastModifiedDE)
 
     // Check if data is fresh enough (all times in German timezone):
     // 1. Data from today is always accepted
     // 2. Data from yesterday is accepted only if created after 20:00 German time
     const isFromToday = todaysDateDE === lastModifiedDateDE
     const isFromYesterdayAfter8PM =
-      yesterdaysDateDE === lastModifiedDateDE && lastModifiedDE.getHours() >= 20
+      yesterdaysDateDE === lastModifiedDateDE && lastModifiedHourDE >= 20
     const isFreshData = isFromToday || isFromYesterdayAfter8PM
 
     // Enhanced logging to show the new logic
@@ -73,8 +74,8 @@ export async function waitForFreshData() {
       todayDE: todaysDateDE,
       yesterdayDE: yesterdaysDateDE,
       newFileLastModifiedDE: lastModifiedDateDE,
-      newFileLastModifiedTimeDE: lastModifiedDE.toISOString(),
-      newFileLastModifiedTimeUTC: lastModifiedDate.toISOString(),
+      newFileLastModifiedHourDE: lastModifiedHourDE,
+      newFileLastModifiedUTC: lastModifiedDate.toISOString(),
       isFromToday,
       isFromYesterdayAfter8PM,
       next: isFreshData ? 'process' : 'wait',
