@@ -2,7 +2,7 @@ DO $$ BEGIN RAISE NOTICE 'START projecting public transport stop points at %', c
 
 DROP TABLE IF EXISTS _parking_public_transport_points_projected CASCADE;
 
--- Project bus_stop_v2 to kerbs
+-- Project bus_stop_kerb to kerbs
 SELECT
   p.id || '-' || pk.kerb_id AS id,
   p.osm_type,
@@ -31,9 +31,9 @@ FROM
   CROSS JOIN LATERAL project_to_k_closest_kerbs (p.geom, tolerance := 5, k := 1) AS pk
 WHERE
   ST_GeometryType (p.geom) = 'ST_Point'
-  AND p.tags ->> 'category' = 'bus_stop_v2';
+  AND p.tags ->> 'category' = 'bus_stop_kerb';
 
--- Project bus_stop_v3 to platform lines
+-- Project bus_stop_centerline to platform lines
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
@@ -59,7 +59,7 @@ FROM
   CROSS JOIN LATERAL project_to_closest_platform (p.geom, tolerance := 10) AS pp
 WHERE
   ST_GeometryType (p.geom) = 'ST_Point'
-  AND p.tags ->> 'category' = 'bus_stop_v3';
+  AND p.tags ->> 'category' = 'bus_stop_centerline';
 
 -- CLEANUP
 DELETE FROM _parking_public_transport_points_projected
