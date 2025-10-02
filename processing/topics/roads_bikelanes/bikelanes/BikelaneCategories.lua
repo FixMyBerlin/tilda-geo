@@ -232,7 +232,7 @@ local footAndCyclewayShared = BikelaneCategory.new({
       ContainsSubstring(tags.access, 'agricultural') or ContainsSubstring(tags.motor_vehicle, 'agricultural') or ContainsSubstring(tags.vehicle, 'agricultural') or
       ContainsSubstring(tags.access, 'forestry') or ContainsSubstring(tags.motor_vehicle, 'forestry') or ContainsSubstring(tags.vehicle, 'forestry')
     then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit land- und/oder forstwirtschafltichem Verkehr.' })
+      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.' })
     end
     return tags
   end
