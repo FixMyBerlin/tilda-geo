@@ -1,6 +1,7 @@
 require('init')
 require('class_public_transport_category')
 local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 
 public_transport_stop_categories = {
   class_public_transport_category.new({
@@ -14,6 +15,7 @@ public_transport_stop_categories = {
         name = SANITIZE_TAGS.safe_string(tags.name),
         ref = SANITIZE_TAGS.safe_string(tags.ref),
         opening_hours = SANITIZE_TAGS.safe_string(tags.opening_hours),
+        side = SANITIZE_PARKING_TAGS.direction_to_side(tags.direction),
       }
     end,
   }),
@@ -32,6 +34,7 @@ public_transport_stop_categories = {
       return {
         name = SANITIZE_TAGS.safe_string(tags.name),
         ref = SANITIZE_TAGS.safe_string(tags.ref),
+        side = SANITIZE_PARKING_TAGS.direction_to_side(tags.direction),
       }
     end,
   }),
@@ -48,6 +51,7 @@ public_transport_stop_categories = {
       return {
         name = SANITIZE_TAGS.safe_string(tags.name),
         ref = SANITIZE_TAGS.safe_string(tags.ref),
+        side = SANITIZE_PARKING_TAGS.direction_to_side(tags.direction),
       }
     end,
   }),
