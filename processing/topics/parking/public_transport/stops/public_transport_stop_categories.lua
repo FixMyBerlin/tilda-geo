@@ -56,10 +56,11 @@ public_transport_stop_categories = {
     end,
   }),
   class_public_transport_category.new({
-    id = 'tram_stop_v2', -- https://wiki.openstreetmap.org/wiki/DE:Tag:railway%3Dtram_stop
+    -- https://wiki.openstreetmap.org/wiki/DE:Tag:railway%3Dtram_stop
+    id = 'tram_stop',
     buffer_radius = 15,
     conditions = function(tags)
-      return tags['railway'] == 'tram_stop' and tags.opening_hours == nil
+      return tags['railway'] == 'tram_stop'
     end,
     tags = function(tags)
       return {
