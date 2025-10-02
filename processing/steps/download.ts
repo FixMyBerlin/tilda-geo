@@ -1,6 +1,6 @@
 import { TZDate } from '@date-fns/tz'
 import { $ } from 'bun'
-import { format, getHours } from 'date-fns'
+import { format, getHours, subDays } from 'date-fns'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
@@ -28,13 +28,11 @@ export async function waitForFreshData() {
 
   const maxTries = 25 // ~8 hours (at 20 Min per try)
   const timeoutMinutes = 20
-  const now = new Date()
 
   // Use German timezone (Europe/Berlin) for all date comparisons
-  const nowDE = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }))
-  const todaysDateDE = nowDE.toISOString().split('T')[0] // YYYY-MM-DD format
-  const yesterdayDE = new Date(nowDE.getTime() - 24 * 60 * 60 * 1000)
-  const yesterdaysDateDE = yesterdayDE.toISOString().split('T')[0]
+  const now = new Date()
+  const todaysDateDE = format(new TZDate(now, 'Europe/Berlin'), 'yyyy-MM-dd')
+  const yesterdaysDateDE = format(new TZDate(subDays(now, 1), 'Europe/Berlin'), 'yyyy-MM-dd')
 
   let tries = 0
 
@@ -57,9 +55,8 @@ export async function waitForFreshData() {
 
     const lastModifiedDate = new Date(lastModified)
     // Convert to Berlin timezone
-    const lastModifiedDE = new TZDate(lastModifiedDate, 'Europe/Berlin')
-    const lastModifiedDateDE = format(lastModifiedDE, 'yyyy-MM-dd')
-    const lastModifiedHourDE = getHours(lastModifiedDE)
+    const lastModifiedDateDE = format(new TZDate(lastModifiedDate, 'Europe/Berlin'), 'yyyy-MM-dd')
+    const lastModifiedHourDE = getHours(new TZDate(lastModifiedDate, 'Europe/Berlin'))
 
     // Check if data is fresh enough (all times in German timezone):
     // 1. Data from today is always accepted
