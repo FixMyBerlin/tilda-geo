@@ -2,7 +2,7 @@ import { isProd } from '@/src/app/_components/utils/isEnv'
 import { osmTypeIdString } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
 import { todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { geoDataClient } from '@/src/server/prisma-client'
-import { ProcessingDates } from '@/src/server/regions/schemas'
+import { ProcessingMetaDate, ProcessingMetaDates } from '@/src/server/regions/schemas'
 import { feature, featureCollection } from '@turf/turf'
 import { LineString } from 'geojson'
 import { NextRequest, NextResponse } from 'next/server'
@@ -40,11 +40,10 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
 
   try {
     // SELECT `osm_data_from`
-    type DateQuery = { processed_at: string; osm_data_from: string }[]
-    const result = await geoDataClient.$queryRaw<DateQuery>`
-      SELECT processed_at, osm_data_from FROM public.meta ORDER BY id DESC LIMIT 1
+    const [result] = await geoDataClient.$queryRaw<ProcessingMetaDate[]>`
+      SELECT status, processed_at, osm_data_from, processing_started_at FROM public.meta ORDER BY id DESC LIMIT 1
     `
-    const { osm_data_from } = ProcessingDates.parse(result[0])
+    const { osm_data_from } = ProcessingMetaDates.parse(result)
 
     // SELECT DATA FROM `bikelanes` or `roads`
     type QueryType = {
@@ -128,7 +127,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
         // For use as Mustache Tag. MR will show `way/123` but Rapid will make this a link to hover/select the object.
         // However, Rapid will use some `name` property for that, see https://osmus.slack.com/archives/C1QN12RS7/p1739525039984349?thread_ts=1739524180.359629&cid=C1QN12RS7
         osmIdentifier: osmTypeId,
-        data_updated_at: osm_data_from.toLocaleString('de-DE'),
+        data_updated_at: osm_data_from?.toLocaleString('de-DE') || 'Unknown',
         task_updated_at: new Date().toLocaleString('de-DE'), // Used in MapRoulette to see when data was fetched lasted
         task_markdown: (text || 'TASK DESCRIPTION MISSING').replaceAll('\n', ' \n'),
         blank: '',

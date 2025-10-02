@@ -12,8 +12,34 @@ export async function initializeMetadataTable() {
       id SERIAL PRIMARY KEY,
       processed_at TIMESTAMP,
       processing_duration TIME,
-      osm_data_from TIMESTAMP
+      osm_data_from TIMESTAMP,
+      processing_started_at TIMESTAMP,
+      status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'processed'))
     )`
+
+  // Migration: Add processing_started_at column if it doesn't exist
+  // This is a temporary migration that can be removed after deployment
+  try {
+    await sql`ALTER TABLE public.meta ADD COLUMN IF NOT EXISTS processing_started_at TIMESTAMP`
+    console.log('Processing: Migration - Added processing_started_at column if it was missing')
+  } catch (error) {
+    // Column might already exist, which is fine
+    console.log(
+      'Processing: Migration - processing_started_at column already exists or migration failed:',
+      error,
+    )
+  }
+
+  // Migration: Add status column if it doesn't exist
+  // This is a temporary migration that can be removed after deployment
+  try {
+    await sql`ALTER TABLE public.meta ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'processed'))`
+    console.log('Processing: Migration - Added status column if it was missing')
+  } catch (error) {
+    // Column might already exist, which is fine
+    console.log('Processing: Migration - status column already exists or migration failed:', error)
+  }
+
   return true
 }
 
@@ -33,24 +59,62 @@ export async function getFileTimestamp(fileName: string) {
 }
 
 /**
- * Write the runs metadata to the database.
+ * Create a new processing entry at the start of processing.
+ * @returns the ID of the created entry
+ */
+export async function createProcessingEntry() {
+  const data = {
+    processing_started_at: new Date(),
+    status: 'processing',
+  }
+
+  console.log(
+    'Processing:',
+    'Creating processing entry',
+    JSON.stringify({
+      ...data,
+      processing_started_at_localtime: berlinTimeString(data.processing_started_at),
+    }),
+  )
+
+  const result = await sql`INSERT INTO public.meta ${sql(data)} RETURNING id`
+  return result[0].id
+}
+
+/**
+ * Update an existing processing entry with completion data.
+ * @param processingId the ID of the processing entry to update
  * @param fileName the file that was used in this run
  * @param processingDurationMS the time the processing took in milliseconds
  * @returns the Promise of the query
  */
-export async function writeMetadata(fileName: string, processingDurationMS: number) {
+export async function updateProcessingEntry(
+  processingId: number | null,
+  fileName: string,
+  processingDurationMS: number,
+) {
+  if (!processingId) {
+    console.error('[ERROR] Processing: Cannot update processing entry - no processingId available')
+    return
+  }
   const processingDuration = new Date(processingDurationMS).toISOString().slice(11, 19) // Extract HH:MM:SS from the ISO string
 
   const data = {
     processed_at: new Date(),
     processing_duration: processingDuration,
     osm_data_from: new Date(await getFileTimestamp(fileName)),
+    status: 'processed',
   }
 
   console.log(
     'Processing:',
-    'Writing meta data',
-    JSON.stringify({ ...data, osm_data_from_localtime: berlinTimeString(data.osm_data_from) }),
+    'Updating processing entry',
+    JSON.stringify({
+      id: processingId,
+      ...data,
+      osm_data_from_localtime: berlinTimeString(data.osm_data_from),
+    }),
   )
-  return sql`INSERT INTO public.meta ${sql(data)}`
+
+  return sql`UPDATE public.meta SET ${sql(data)} WHERE id = ${processingId}`
 }
