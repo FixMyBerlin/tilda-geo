@@ -225,8 +225,14 @@ local footAndCyclewayShared = BikelaneCategory.new({
     if tags.highway == 'service' then
       tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur auf einem Zufahrtsweg.' })
     end
-    if tags.highway == 'track' or tags.access == 'agricultural' or ContainsSubstring(tags.traffic_sign, '1026-36') then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit landwirtschaftlichem Verkehr.' })
+    -- https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:1026-38 "Land- und forstwirtschaftlicher Verkehr frei"
+    -- See also https://github.com/FixMyBerlin/radinfra.de/issues/13#issuecomment-3352120626
+    if tags.highway == 'track' or
+      ContainsSubstring(tags.traffic_sign, '1026-36') or ContainsSubstring(tags.traffic_sign, '1026-37') or ContainsSubstring(tags.traffic_sign, '1026-38') or
+      ContainsSubstring(tags.access, 'agricultural') or ContainsSubstring(tags.motor_vehicle, 'agricultural') or ContainsSubstring(tags.vehicle, 'agricultural') or
+      ContainsSubstring(tags.access, 'forestry') or ContainsSubstring(tags.motor_vehicle, 'forestry') or ContainsSubstring(tags.vehicle, 'forestry')
+    then
+      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit land- und/oder forstwirtschafltichem Verkehr.' })
     end
     return tags
   end
