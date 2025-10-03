@@ -7,7 +7,7 @@ import getAtlasGeoMetadata from '@/src/server/regions/queries/getAtlasGeoMetadat
 import { useSession } from '@blitzjs/auth'
 import { useQuery } from '@blitzjs/rpc'
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
-import { isToday } from 'date-fns'
+import { isBefore, subDays } from 'date-fns'
 import { Suspense } from 'react'
 import { useRegion } from '../regionUtils/useRegion'
 import { DownloadModalDownloadList } from './DownloadModalDownloadList'
@@ -21,13 +21,15 @@ const DownloadModalTriggerIcon = () => {
   }
 
   const osmDataDate = metadata.osm_data_from ? new Date(metadata.osm_data_from) : null
-  const isDataFromToday = osmDataDate ? isToday(osmDataDate) : false
+  const isDataOlderThanYesterday = osmDataDate
+    ? isBefore(osmDataDate, subDays(new Date(), 1))
+    : false
   const isProcessing = metadata.status === 'processing'
 
   return (
     <div className="relative">
       <ArrowDownTrayIcon className="size-5" />
-      {(isProcessing || !isDataFromToday) && (
+      {(isProcessing || isDataOlderThanYesterday) && (
         <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-orange-500" />
       )}
     </div>
