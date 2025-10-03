@@ -58,8 +58,14 @@ end
 local directedTags = {
   -- these are tags that get copied from the parent
   parent = {
-    'cycleway:lanes',
-    'bicycle:lanes'
+    'cycleway:lanes', -- becomes tags.lanes after transformation
+    'bicycle:lanes',
+    -- TBD: See https://github.com/FixMyBerlin/private-issues/issues/2791
+    -- 'width:lanes',
+    -- 'surface:lanes',
+    -- 'surface:colour:lanes',
+    -- 'smoothness:lanes',
+    -- 'source:width:lanes',
   },
   -- these are tags that get copied from the cycleway itself
   self = {

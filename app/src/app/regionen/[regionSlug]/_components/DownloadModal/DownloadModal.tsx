@@ -1,14 +1,38 @@
 import { IconModal } from '@/src/app/_components/Modal/IconModal'
 import { Link } from '@/src/app/_components/links/Link'
-import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { linkStyles } from '@/src/app/_components/links/styles'
 import { useHasPermissions } from '@/src/app/_hooks/useHasPermissions'
 import { useStartUserLogin } from '@/src/app/_hooks/useStartUserLogin'
+import getAtlasGeoMetadata from '@/src/server/regions/queries/getAtlasGeoMetadata'
 import { useSession } from '@blitzjs/auth'
+import { useQuery } from '@blitzjs/rpc'
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { isToday } from 'date-fns'
+import { Suspense } from 'react'
 import { useRegion } from '../regionUtils/useRegion'
 import { DownloadModalDownloadList } from './DownloadModalDownloadList'
 import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
+
+const DownloadModalTriggerIcon = () => {
+  const [metadata] = useQuery(getAtlasGeoMetadata, {})
+
+  if (!metadata?.osm_data_from && metadata?.status !== 'processing') {
+    return <ArrowDownTrayIcon className="size-5" />
+  }
+
+  const osmDataDate = metadata.osm_data_from ? new Date(metadata.osm_data_from) : null
+  const isDataFromToday = osmDataDate ? isToday(osmDataDate) : false
+  const isProcessing = metadata.status === 'processing'
+
+  return (
+    <div className="relative">
+      <ArrowDownTrayIcon className="size-5" />
+      {(isProcessing || !isDataFromToday) && (
+        <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-orange-500" />
+      )}
+    </div>
+  )
+}
 
 export const DownloadModal = () => {
   const region = useRegion()
@@ -28,19 +52,13 @@ export const DownloadModal = () => {
         title="Daten downloaden"
         titleIcon="download"
         triggerStyle="button"
-        triggerIcon={<ArrowDownTrayIcon className="h-5 w-5" />}
+        triggerIcon={
+          <Suspense fallback={<ArrowDownTrayIcon className="h-5 w-5" />}>
+            <DownloadModalTriggerIcon />
+          </Suspense>
+        }
       >
-        {canDownload ? (
-          <p className="pb-2.5 pt-5 text-sm">
-            Alle Daten stehen als <strong>FlatGeobuf</strong> zum Download sowie als{' '}
-            <strong>Vector Tiles</strong> zur Darstellung zur Verfügung. Die FlatGeobuf Dateien
-            können über den{' '}
-            <LinkExternal blank href="https://play.placemark.io/">
-              kostenlosen Dienst Placemark
-            </LinkExternal>{' '}
-            in GeoJSON umgewandelt werden.
-          </p>
-        ) : (
+        {!canDownload && (
           <>
             <p className="pb-2.5 pt-5 text-sm">
               Die Daten stehen nur für Rechte-Inhaber zur Verfügung.

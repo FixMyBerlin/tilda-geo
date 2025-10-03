@@ -66,5 +66,7 @@ export type MetaData = {
   public: boolean
   /** @desc Change the tippecanoe settings  */
   geometricPrecision?: 'mask' | 'regular' | 'high' | null
+  /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
+  mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
   configs: MapDataDatasetsSource[]
 }

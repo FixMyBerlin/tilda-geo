@@ -25,7 +25,7 @@ export const SourceLayerInfravelo = () => {
       {datasets.map((dataset) => {
         return (
           <Fragment key={dataset.id}>
-            <Source id={dataset.id} type="vector" url={createPmtilesUrl(dataset.url)} />
+            <Source id={dataset.id} type="vector" url={createPmtilesUrl(dataset.mapRenderUrl)} />
             {dataset.layers?.map((layer) => {
               const layerId = createDatasetSourceLayerKey(dataset.id, dataset.subId, layer.id)
               return (

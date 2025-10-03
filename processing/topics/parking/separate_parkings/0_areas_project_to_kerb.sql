@@ -21,7 +21,7 @@ FROM
   _parking_separate_parking_areas pa
   CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.);
 
--- now we need to redistribute the capacity of our projected areas to avoid double counting
+-- now we need to redistribute the capacity of all parking areas that were split into multiple pieces e.g. the ones with `location=median`
 -- we do this by assigning the capacity to each piece proportionally to it's length / length of all projected pieces
 CREATE INDEX parking_separate_parking_areas_osm_id_idx ON _parking_separate_parking_areas_projected (osm_id);
 

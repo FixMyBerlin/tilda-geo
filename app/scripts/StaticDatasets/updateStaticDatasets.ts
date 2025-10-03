@@ -5,7 +5,8 @@ import { parse } from 'parse-gitignore'
 import pluralize from 'pluralize'
 import slugify from 'slugify'
 import { parseArgs } from 'util'
-import { createUpload, getRegions, type UploadType } from './api'
+import { getStaticDatasetUrl } from '../../src/app/_components/utils/getStaticDatasetUrl'
+import { createUpload, getRegions } from './api'
 import { MetaData } from './types'
 import { findGeojson } from './updateStaticDatasets/findGeojson'
 import { generatePMTilesFile } from './updateStaticDatasets/generatePMTilesFile'
@@ -22,9 +23,6 @@ if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
 
 const regions = await getRegions()
 const existingRegionSlugs = regions.map((region) => region.slug)
-
-// If a file is smaller than maxCompressedSize it will be uploaded as geojson
-const maxCompressedSize = 1 // TODO: Revert back to 50000
 
 // use --dry-run to run all checks and transformation (but no pmtiles created, no upload to S3, no DB modifications)
 // use --keep-tmp to keep temporary generated files
@@ -130,30 +128,37 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
     tempFolder,
   )
 
-  console.log('  Checking compressed file size...')
-  const isSmall = await isCompressedSmallerThan(transformedFilepath, maxCompressedSize)
+  logInfo(`Uploading GeoJSON file to S3...`, dryRun)
+  const geojsonUrl = dryRun
+    ? 'http://example.com/does-not-exist.geojson'
+    : await uploadFileToS3(transformedFilepath, datasetFolder)
 
-  let uploadFilepath: string
-  let uploadType: UploadType
-  if (!isSmall) {
-    console.log('  File is big and will be converted to pmtiles.')
-    logInfo(`Generating pmtiles file......`, dryRun)
-    uploadFilepath = dryRun
-      ? '/tmp/does-not-exist.pmtiles'
-      : await generatePMTilesFile(transformedFilepath, tempFolder, metaData.geometricPrecision)
-    uploadType = 'PMTILES'
+  const pmtilesFilepath = dryRun
+    ? '/tmp/does-not-exist.pmtiles'
+    : await generatePMTilesFile(transformedFilepath, tempFolder, metaData.geometricPrecision)
+
+  logInfo(`Uploading PMTiles file to S3...`, dryRun)
+  const pmtilesUrl = dryRun
+    ? 'http://example.com/does-not-exist.pmtiles'
+    : await uploadFileToS3(pmtilesFilepath, datasetFolder)
+
+  // Determine which format to use for map rendering
+  const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
+  let renderFormat: 'geojson' | 'pmtiles'
+  if (mapRenderFormat === 'auto') {
+    const maxCompressedSizeBites = 50000 // 50,000 bytes ≈ 48.8 KB or ≈ 0.049 MB
+    const isSmall = await isCompressedSmallerThan(transformedFilepath, maxCompressedSizeBites)
+    renderFormat = isSmall ? 'geojson' : 'pmtiles'
   } else {
-    console.log('  File is small and will be uploaded as geojson.')
-    uploadFilepath = transformedFilepath
-    uploadType = 'GEOJSON'
+    renderFormat = mapRenderFormat
   }
 
-  // Upload file to S3
-  const ext = uploadType.toLowerCase()
-  logInfo(`Uploading generated ${ext} file to S3...`, dryRun)
-  const uploadUrl = dryRun
-    ? 'http://example.com/does-not-exist.${ext}'
-    : await uploadFileToS3(uploadFilepath, datasetFolder)
+  console.log(
+    `  Map will render a ${renderFormat.toUpperCase()} file`,
+    metaData.mapRenderFormat
+      ? 'based on the Format specified in the config.'
+      : 'based on the optimal format for this file size.',
+  )
 
   // Create database entries dataset per region (from meta.ts)
   const regionSlugs: string[] = []
@@ -181,21 +186,19 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
       ? 'will not be assigned to any region'
       : `will be assigned to ${pluralize('region', regionSlugs.length)} ${regionSlugs.join(', ')}`
 
-  logInfo(`Saving upload to DB (${info})...`, dryRun)
+  logInfo(`Saving uploads to DB (${info})...`, dryRun)
   if (!dryRun) {
-    const mergedConfigs = metaData.configs.map((config) => {
-      return {
-        githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
-        ...config,
-      }
-    })
+    // Create single upload entry with both URLs
     await createUpload({
       uploadSlug,
-      url: uploadUrl,
-      type: uploadType,
       regionSlugs,
       isPublic: metaData.public,
-      configs: mergedConfigs,
+      configs: metaData.configs,
+      mapRenderFormat: renderFormat,
+      mapRenderUrl: getStaticDatasetUrl(uploadSlug, renderFormat),
+      pmtilesUrl,
+      geojsonUrl,
+      githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
     })
   }
 

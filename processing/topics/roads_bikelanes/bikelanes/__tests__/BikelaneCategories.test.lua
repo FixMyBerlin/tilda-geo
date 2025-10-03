@@ -4,12 +4,7 @@ describe("`BikelaneCategories`", function()
   require("BikelaneCategories")
   require('Log')
   require('transformations')
-
-  local cyclewayTransformation = CenterLineTransformation.new({
-    highway = 'cycleway',
-    prefix = 'cycleway',
-    direction_reference = 'self'
-  })
+  local extractCategoriesBySide = require('extractCategoriesBySide')
 
   describe('`footAndCyclewaySegregated`:', function()
     it('`hw=cycleway` should get the category', function()
@@ -302,73 +297,133 @@ describe("`BikelaneCategories`", function()
   describe('`sharedBus*` categories', function()
     it('Create one shared bus category when both `share_busway` and traffic_sign are given', function()
       -- https://www.openstreetmap.org/way/461840225
-      local tags = {
-        ['cycleway:left'] = 'no',
-        ['cycleway:right'] = 'share_busway',
-        ['dual_carriageway'] = 'yes',
-        -- ['foot'] = 'use_sidepath',
-        ['highway'] = 'primary_link',
-        ['lanes'] = '3',
-        ['lanes:psv'] = '1',
-        -- ['lit'] = 'yes',
-        -- ['mapillary'] = '2168167686701777',
-        -- ['maxspeed'] = '50',
-        -- ['name'] = 'Friedenstraße',
-        -- ['name:etymology:wikidata'] = 'Q39614',
-        -- ['oneway'] = 'yes',
-        -- ['parking:both'] = 'no',
-        -- ['postal_code'] = '12107',
-        ['psv:lanes'] = 'yes|yes|designated',
-        -- ['ref'] = 'B 101',
-        ['sidewalk:left'] = 'no',
-        ['sidewalk:right'] = 'separate',
-        -- ['smoothness'] = 'good',
-        -- ['surface'] = 'asphalt',
-        ['traffic_sign'] = 'DE:245,1022-10',
-        ['turn:lanes'] = 'right|right|right',
-        -- ['width'] = '10',
+      -- Create input object for the helper
+      local input_object = {
+        tags = {
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'share_busway',
+          ['dual_carriageway'] = 'yes',
+          -- ['foot'] = 'use_sidepath',
+          ['highway'] = 'primary_link',
+          ['lanes'] = '3',
+          ['lanes:psv'] = '1',
+          -- ['lit'] = 'yes',
+          -- ['mapillary'] = '2168167686701777',
+          -- ['maxspeed'] = '50',
+          -- ['name'] = 'Friedenstraße',
+          -- ['name:etymology:wikidata'] = 'Q39614',
+          -- ['oneway'] = 'yes',
+          -- ['parking:both'] = 'no',
+          -- ['postal_code'] = '12107',
+          ['psv:lanes'] = 'yes|yes|designated',
+          -- ['ref'] = 'B 101',
+          ['sidewalk:left'] = 'no',
+          ['sidewalk:right'] = 'separate',
+          -- ['smoothness'] = 'good',
+          -- ['surface'] = 'asphalt',
+          ['traffic_sign'] = 'DE:245,1022-10',
+          ['turn:lanes'] = 'right|right|right',
+          -- ['width'] = '10',
+        },
+        id = 1,
+        type = 'way'
       }
 
-      -- Apply cycleway transformation
-      local transformedObjects = GetTransformedObjects(tags, { cyclewayTransformation })
-      -- Log(transformedObjects, 'transformedObjects')
+      local categories = extractCategoriesBySide(input_object)
 
-      -- Extract specific objects by side
-      local self_tags = nil
-      local left_tags = nil
-      local right_tags = nil
+      -- Test self category
+      assert.are.equal(categories.self.category, nil)
+      assert.are.equal(categories.self.tags.highway, 'primary_link')
+      assert.are.equal(categories.self.tags.traffic_sign, 'DE:245,1022-10')
 
-      for _, transformed_tags in ipairs(transformedObjects) do
-        if transformed_tags._side == 'self' then self_tags = transformed_tags
-        elseif transformed_tags._side == 'left' then left_tags = transformed_tags
-        elseif transformed_tags._side == 'right' then right_tags = transformed_tags
-        end
-      end
+      -- Test left category
+      assert.are.equal(categories.left.category.id, 'data_no')
+      assert.are.equal(categories.left.tags.highway, 'cycleway')
+      assert.are.equal(categories.left.tags.cycleway, 'no')
+      assert.are.equal(categories.left.tags.traffic_sign, nil)
+      assert.are.equal(categories.left.tags._parent.traffic_sign, 'DE:245,1022-10')
 
-      local self_category = self_tags and CategorizeBikelane(self_tags)
-      -- Log(self_tags, 'self_tags')
-      -- Log(self_category, 'self_category')
-      assert.are.equal(self_category, nil)
-      assert.are.equal(self_tags.highway, 'primary_link')
-      assert.are.equal(self_tags.traffic_sign, 'DE:245,1022-10')
+      -- Test right category
+      assert.are.equal(categories.right.category.id, 'sharedBusLaneBusWithBike')
+      assert.are.equal(categories.right.tags.highway, 'cycleway')
+      assert.are.equal(categories.right.tags.cycleway, 'share_busway')
+      assert.are.equal(categories.right.tags.traffic_sign, 'DE:245,1022-10')
+      assert.are.equal(categories.right.tags._parent.traffic_sign, 'DE:245,1022-10')
+    end)
+  end)
 
-      local left_category = left_tags and CategorizeBikelane(left_tags)
-      -- Log(left_tags, 'left_tags')
-      -- Log(left_category, 'left_category')
-      assert.are.equal(left_category.id, 'data_no')
-      assert.are.equal(left_tags.highway, 'cycleway')
-      assert.are.equal(left_tags.cycleway, 'no')
-      assert.are.equal(left_tags.traffic_sign, nil)
-      assert.are.equal(left_tags._parent.traffic_sign, 'DE:245,1022-10')
+  describe('`cyclewayOnHighway*`', function()
+    it('Take with `cycleway:right:width` when given', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:lanes'] = 'no|lane|no|lane',
+          ['width:lanes'] = '|11||99',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'advisory',
+          ['cycleway:right:width'] = '55',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
 
-      local right_category = right_tags and CategorizeBikelane(right_tags)
-      -- Log(right_tags, 'right_tags')
-      -- Log(right_category, 'right_category')
-      assert.are.equal(right_category.id, 'sharedBusLaneBusWithBike')
-      assert.are.equal(right_tags.highway, 'cycleway')
-      assert.are.equal(right_tags.cycleway, 'share_busway')
-      assert.are.equal(right_tags.traffic_sign, 'DE:245,1022-10')
-      assert.are.equal(right_tags._parent.traffic_sign, 'DE:245,1022-10')
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      assert.are.equal(categorized.self.tags.width, '11')
+
+      assert.are.equal(categorized.left.category.id, 'data_no')
+
+      assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_advisory')
+      assert.are.equal(categorized.right.tags.width, '55')
+    end)
+
+    it('Take with `width:lanes` when none given', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:lanes'] = 'no|lane|no|lane',
+          ['width:lanes'] = '|11||44',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'advisory',
+          -- ['cycleway:right:width'] = '55',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      assert.are.equal(categorized.self.tags.width, '11')
+
+      assert.are.equal(categorized.left.category.id, 'data_no')
+
+      assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_advisory')
+      assert.are.equal(categorized.right.tags.width, '44')
+    end)
+
+    it('But only take `width:lane` when actual Schutzstreifen', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:lanes'] = 'no|lane|no',
+          ['width:lanes'] = '11|12|13',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      assert.are.equal(categorized.self.tags.width, '12')
+
+      assert.are.equal(categorized.left.category.id, 'data_no')
+
+      assert.are.equal(categorized.right.category, nil)
+      assert.are.equal(categorized.right.tags.width, nil)
     end)
   end)
 end)

@@ -9,7 +9,8 @@ function CreateSubcategoriesAdjoiningOrIsolated(category)
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
       return category(tags) and IsSidepath(tags) and tags.is_sidepath ~= "no"
-    end
+    end,
+    process = category.process,
   })
   local isolated = BikelaneCategory.new({
     id = category.id .. '_isolated',
@@ -18,9 +19,10 @@ function CreateSubcategoriesAdjoiningOrIsolated(category)
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
-      -- `hw=service` handles `footAndCyclewayShared` on emergency access ways or driveways
-      return category(tags) and (tags.is_sidepath == "no" or tags.highway == 'service')
-    end
+      -- `hw=service` handles `footAndCyclewayShared` on emergency access ways or driveways (same for `track`)
+      return category(tags) and (tags.is_sidepath == "no" or tags.highway == 'service' or tags.highway == 'track')
+    end,
+    process = category.process,
   })
   local adjoiningOrIsolated = BikelaneCategory.new({
     id = category.id .. '_adjoiningOrIsolated',
@@ -30,9 +32,10 @@ function CreateSubcategoriesAdjoiningOrIsolated(category)
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
       -- Trigger on every value other than yes or no (not is_sidepath == yes and not is_sidepath == no)
-      -- Also exclude highway=service as it's treated as isolated
-      return category(tags) and not IsSidepath(tags) and tags.is_sidepath ~= "no" and tags.highway ~= 'service'
-    end
+      -- Also exclude highway=service|track as it's treated as isolated
+      return category(tags) and not IsSidepath(tags) and tags.is_sidepath ~= "no" and tags.highway ~= 'service' and tags.highway ~= 'track'
+    end,
+    process = category.process,
   })
   return adjoining, isolated, adjoiningOrIsolated
 end

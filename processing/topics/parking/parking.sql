@@ -30,7 +30,7 @@
 -- * … FOR SEPARATE PARKINGS
 \i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'
 \i '/processing/topics/parking/custom_functions/connect_on_polygon.sql'
-\i '/processing/topics/parking/custom_functions/get_parking_edges.sql'
+\i '/processing/topics/parking/custom_functions/parking_area_to_line.sql'
 
 -- HANDLE ROADS
 \i '/processing/topics/parking/roads/0_create_kerbs.sql'
@@ -42,6 +42,10 @@
 \i '/processing/topics/parking/roads/6_driveway_corners_kerbs.sql'
 
 
+
+-- HANDLE PARKINGS
+\i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
+
 -- HANDLE CROSSING (and similar structures)
 \i '/processing/topics/parking/crossings/1_points_locate_on_road.sql'
 \i '/processing/topics/parking/crossings/2_points_create_crossings.sql'
@@ -51,15 +55,15 @@
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/0_lines_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/0_points_project_to_kerb.sql'
+\i '/processing/topics/parking/obstacles/1_filter_points.sql'
+
+-- HANDLE UNPROJECTED OBSTACLES
+\i '/processing/topics/parking/obstacles_unprojected/0_filter_turning_circles.sql'
 
 -- HANDLE SEPARATE PARKINGS
 \i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/1_separate_parking_areas_qa.sql'
-
-
--- HANDLE PARKINGS
-\i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
 
 -- CREATE CUTOUT AREAS
 \i '/processing/topics/parking/0_create_cutouts.sql'

@@ -31,7 +31,7 @@ export const generatePMTilesFile = async (
   })()
 
   console.log(
-    `  Generating pmtiles file "${outputFullFile}"...`,
+    `  Generating PMTiles file "${outputFullFile}"...`,
     precision ? chalk.yellow(JSON.stringify({ maxZoom })) : '',
   )
 

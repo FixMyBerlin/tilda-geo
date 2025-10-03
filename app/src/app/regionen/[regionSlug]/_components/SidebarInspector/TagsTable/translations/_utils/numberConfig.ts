@@ -1,5 +1,5 @@
 // https://formatjs.io/docs/react-intl/components/#formattednumber
-export const numberConfigs: { key: string; suffix?: string }[] = [
+export const numberConfigs: { key: string; suffix?: string | undefined }[] = [
   { key: 'capacity', suffix: undefined },
   { key: 'capacity:cargo_bike', suffix: undefined },
   { key: 'capacity:disabled', suffix: undefined },
@@ -26,6 +26,8 @@ export const numberConfigs: { key: string; suffix?: string }[] = [
   { key: 'buffer_right', suffix: 'm' }, // bikelanes
   { key: 'tilda_osm_id', suffix: undefined }, // infravelo
   { key: 'tilda_width', suffix: 'm' }, // infravelo
+  { key: 'Länge', suffix: 'm' }, // infravelo
+  { key: 'sfid', suffix: undefined }, // infravelo
   { key: 'radius', suffix: 'm' }, // parkings_cutouts
   { key: 'area', suffix: 'm²' }, // area values
   { key: 'circumference', suffix: 'm' }, // circumference values

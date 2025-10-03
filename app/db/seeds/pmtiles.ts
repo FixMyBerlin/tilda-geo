@@ -16,7 +16,14 @@ const seedUploads = async () => {
   const seedUploadsNudafa: Prisma.UploadUncheckedCreateInput[] = [
     {
       slug: 'nudafa-combined',
-      url:
+      pmtilesUrl:
+        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.pmtiles',
+      geojsonUrl:
+        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.geojson',
+      githubUrl:
+        'https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/region-nudafa/nudafa-combined',
+      mapRenderFormat: 'pmtiles',
+      mapRenderUrl:
         'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.pmtiles',
       configs: [
         {
@@ -38,8 +45,15 @@ const seedUploads = async () => {
   const seedUploadsBibi: Prisma.UploadUncheckedCreateInput[] = [
     {
       slug: 'two-configs',
-      url:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.pmtiles',
+      pmtilesUrl:
+        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/two-configs.pmtiles',
+      geojsonUrl:
+        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/two-configs.geojson',
+      githubUrl:
+        'https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/region-bibi/two-configs',
+      mapRenderFormat: 'pmtiles',
+      mapRenderUrl:
+        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/two-configs.pmtiles',
       configs: [
         {
           name: 'two-configs config 1',

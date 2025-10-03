@@ -2,6 +2,7 @@ describe("Bikelanes", function()
   require('init')
   require("osm2pgsql")
   require("Bikelanes")
+  local extractCategoriesBySide = require('extractCategoriesBySide')
 
   describe('Handle `width`:', function()
     it('handels width on centerline', function()
@@ -159,94 +160,192 @@ describe("Bikelanes", function()
     end)
   end)
 
-  describe("explicit category tests", function()
+  describe('explicit category tests', function()
+    describe('Test cyclewayOnHighwayBetweenLanes (Angstweiche)', function()
+      it('Both, "Angstweiche" (based on cycleway:lanes) AND "Schutzstreifen"', function()
+        local input_object = {
+          tags = {
+            highway = 'tertiary',
+            ['cycleway:right'] = 'lane',
+            ['cycleway:right:lane'] = 'exclusive',
+            -- The first `|lane|` is `cyclewayOnHighwayBetweenLanes`
+            -- The second `|lane` is `cyclewayOnHighway_exclusive`
+            ['cycleway:lanes'] = 'no|no|no|lane|no|lane',
+            ['cycleway:right:traffic_sign'] = 'DE:237'
+          },
+          id = 1,
+          type = 'way'
+        }
+        local categorized = extractCategoriesBySide(input_object)
+        assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_exclusive')
+        assert.are.equal(categorized.right.tags.traffic_sign, 'DE:237')
+        assert.are.equal(categorized.left.category, nil)
+      end)
 
-    it('Categories for "Angstweiche" and "Schutzstreifen" using cycleway:lanes', function()
-      local input_object = {
-        tags = {
-          highway = 'tertiary',
-          ['cycleway:right'] = 'lane',
-          ['cycleway:right:lane'] = 'exclusive',
-          ['cycleway:lanes'] = 'no|no|no|lane|no|lane',
-          ['cycleway:right:traffic_sign'] = 'DE:237'
-        },
-        id = 1,
-        type = 'way'
-      }
-      local result = Bikelanes(input_object.tags, input_object)
-      for _, v in pairs(result) do
-        if v._side == 'self' then
-          assert.are.equal(v.category, "cyclewayOnHighwayBetweenLanes")
-        end
-        if v._side == 'right' and v.prefix == 'cycleway' then
-          assert.are.equal(v.category, "cyclewayOnHighway_exclusive")
-        end
-      end
-    end)
+      it('Both, "Angstweiche" (based on bicycle:lanes) AND "Schutzstreifen"', function()
+        local input_object = {
+          tags = {
+            highway = 'tertiary',
+            ['cycleway:right'] = 'lane',
+            ['cycleway:right:lane'] = 'exclusive',
+            -- The first `|designated|` is `cyclewayOnHighwayBetweenLanes`
+            -- The second `|designated` is `cyclewayOnHighway_exclusive`
+            ['bicycle:lanes'] = 'no|no|no|designated|no|designated',
+            ['cycleway:right:traffic_sign'] = 'DE:237'
+          },
+          id = 1,
+          type = 'way'
+        }
+        local categorized = extractCategoriesBySide(input_object)
+        assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_exclusive')
+        assert.are.equal(categorized.right.tags.traffic_sign, 'DE:237')
+        assert.are.equal(categorized.left.category, nil)
+      end)
 
-    it('Categories for "Angstweiche" and "Schutzstreifen" using bicycle:lanes', function()
-      local input_object = {
-        tags = {
-          highway = 'tertiary',
-          ['cycleway:right'] = 'lane',
-          ['cycleway:right:lane'] = 'exclusive',
-          ['bicycle:lanes'] = 'no|no|no|designated|no|designated',
-          ['cycleway:right:traffic_sign'] = 'DE:237'
-        },
-        id = 1,
-        type = 'way'
-      }
-      local result = Bikelanes(input_object.tags, input_object)
-      for _, v in pairs(result) do
-        if v._side == 'self' then
-          assert.are.equal(v.category, "cyclewayOnHighwayBetweenLanes")
-        end
-        if v._side == 'right' and v.prefix == 'cycleway' then
-          assert.are.equal(v.category, "cyclewayOnHighway_exclusive")
-        end
-      end
-    end)
+      it('Only "Angstweiche" based on cycleway:lanes; also test extracting values from lanes', function()
+        local input_object = {
+          tags = {
+            highway = 'tertiary',
+            ['cycleway:right'] = 'lane',
+            ['cycleway:right:lane'] = 'exclusive', -- No effect
+            -- The first `|lane|` is `cyclewayOnHighwayBetweenLanes`
+            -- There is no second `|lane` which would be `cyclewayOnHighway_exclusive`
+            ['cycleway:lanes'] = 'no|no|no|lane|no',
+            -- Extract values from *:lanes, specified in `BikelaneCategories`=>`cyclewayOnHighwayBetweenLanes`=>process
+            ['width:lanes'] = '|||1.5|',
+            ['surface:lanes'] = '|||foo|',
+            ['surface:colour:lanes'] = '|||pink|',
+            ['smoothness:lanes'] = 'a|b|c|great|d',
+            ['source:width:lanes'] = 'a|b|c|Lorem Ipsum|d',
+          },
+          id = 1,
+          type = 'way'
+        }
+        local categorized = extractCategoriesBySide(input_object)
+        assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.self.tags.width, '1.5')
+        assert.are.equal(categorized.self.tags.surface, 'foo')
+        assert.are.equal(categorized.self.tags['surface:colour'], 'pink')
+        assert.are.equal(categorized.self.tags.smoothness, 'great')
+        assert.are.equal(categorized.self.tags['source:width'], 'Lorem Ipsum')
+        assert.are.equal(categorized.right.category, nil)
+        assert.are.equal(categorized.left.category, nil)
+      end)
 
-    it('Categories for "Angstweiche" (only) using cycleway:lanes', function()
-      local input_object = {
-        tags = {
-          highway = 'tertiary',
-          ['cycleway:right'] = 'lane',
-          ['cycleway:lanes'] = 'no|no|no|lane|no',
-        },
-        id = 1,
-        type = 'way'
-      }
-      local result = Bikelanes(input_object.tags, input_object)
-      for _, v in pairs(result) do
-        if v._side == 'self' then
-          assert.are.equal(v.category, "cyclewayOnHighwayBetweenLanes")
-        end
-        if v._side == 'right' and v.prefix == 'cycleway' then
-          assert.are.equal(v.category, "cyclewayOnHighway_exclusive")
-        end
-      end
-    end)
+      it('Only "Angstweiche" based on cycleway:lanes', function()
+        local input_object = {
+          tags = {
+            highway = 'tertiary',
+            ['cycleway:right'] = 'lane',
+            ['cycleway:right:lane'] = 'exclusive', -- No effect
+            -- The first `|designated|` is `cyclewayOnHighwayBetweenLanes`
+            -- There is no second `|designated` which would be `cyclewayOnHighway_exclusive`
+            ['bicycle:lanes'] = 'no|no|no|designated|no',
+          },
+          id = 1,
+          type = 'way'
+        }
+        local categorized = extractCategoriesBySide(input_object)
+        assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.right.category, nil)
+        assert.are.equal(categorized.left.category, nil)
+      end)
 
-    it('Categories for "Angstweiche" (only) using bicycle:lanes', function()
-      local input_object = {
-        tags = {
-          highway = 'tertiary',
-          ['cycleway:right'] = 'lane',
-          ['bicycle:lanes'] = 'no|no|no|designated|no',
-        },
-        id = 1,
-        type = 'way'
-      }
-      local result = Bikelanes(input_object.tags, input_object)
-      for _, v in pairs(result) do
-        if v._side == 'self' then
-          assert.are.equal(v.category, "cyclewayOnHighwayBetweenLanes")
-        end
-        if v._side == 'right' and v.prefix == 'cycleway' then
-          assert.are.equal(v.category, "cyclewayOnHighway_exclusive")
-        end
-      end
+      -- TBD: We dont support the forward/backward logic for this kind of data, yet.
+      -- TBD: See https://github.com/FixMyBerlin/private-issues/issues/2791
+      -- it('Handle forward/backward values', function()
+      --   local input_object = {
+      --     tags = {
+      --       highway = 'tertiary',
+      --       ['cycleway:right'] = 'lane',
+      --       ['bicycle:lanes:forward'] = 'no|designated|no', -- index 2
+      --       ['bicycle:lanes:backward'] = 'no|no|designated|no', -- index 3
+      --       -- Extract values from *:lanes, specified in `BikelaneCategories`=>`cyclewayOnHighwayBetweenLanes`=>process
+      --       ['width:lanes:forward'] = '|11|',
+      --       ['width:lanes:backward'] = '||22|',
+      --       ['surface:lanes'] = '|||foo|',
+      --     },
+      --     id = 1,
+      --     type = 'way'
+      --   }
+      --   local categorized = extractCategoriesBySide(input_object)
+      --   assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+      --   assert.are.equal(categorized.self.tags.width, '11')
+      --   assert.are.equal(categorized.right.category, nil)
+      --   assert.are.equal(categorized.left.category, nil)
+      -- end)
+
+      it('https://www.openstreetmap.org/way/1133761836 creates two categories', function()
+        local input_object = {
+          tags = {
+            highway = 'secondary',
+            dual_carriageway = 'yes',
+            foot = 'use_sidepath',
+            lanes = 4,
+            lit = 'yes',
+            maxspeed = 50,
+            name = 'Holzmarktstraße',
+            oneway = 'yes',
+            sidewalk_left = 'no',
+            sidewalk_right = 'separate',
+            smoothness = 'good',
+            surface = 'asphalt',
+            ['turn:lanes'] = 'left|through|through|through|right|right',
+            ['vehicle:lanes'] = 'yes|yes|yes|no|yes|no',
+            ['bicycle:lanes'] = 'no|no|no|designated|yes|designated', -- IMPORTANT
+            ['cycleway:lanes'] = 'no|no|no|lane|no|lane', -- IMPORTANT
+            ['cycleway:left'] = 'no',
+            ['cycleway:right'] = 'lane', -- IMPORTANT
+            ['cycleway:right:lane'] = 'exclusive', -- Applied to "right"
+            ['cycleway:right:width'] = '1.8' -- Applied to "right"
+          },
+          id = 1,
+          type = 'way'
+        }
+        local categorized = extractCategoriesBySide(input_object)
+        assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.self.tags.width, nil)
+        assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_exclusive')
+        assert.are.equal(categorized.right.tags.width, '1.8')
+        assert.are.equal(categorized.left.category.id, 'data_no')
+      end)
+
+      it('https://www.openstreetmap.org/way/1138392687/history/5 creates one category', function()
+        local input_object = {
+          tags = {
+            highway = 'tertiary',
+            foot = 'use_sidepath',
+            lanes = 3,
+            lit = 'yes',
+            maxspeed = 50,
+            oneway = 'yes',
+            surface = 'asphalt',
+            ['sidewalk:left'] = 'no',
+            ['sidewalk:right'] = 'separate',
+            ['turn:lanes'] = 'left|through|through|right',
+            ['vehicle:lanes'] = 'yes|yes|no|yes',
+            ['bicycle:lanes'] = 'yes|no|designated|yes', -- IMPORTANT
+            ['cycleway:lanes'] = 'no|no|lane|no', -- IMPORTANT
+            ['cycleway:left'] = 'no',
+            ['cycleway:right'] = 'lane', -- INGORED (no |lane or |designated at the end of the *:lanes tags)
+            ['cycleway:right:lane'] = 'advisory',
+            ['cycleway:right:oneway'] = 'yes', -- IGNORED
+            ['cycleway:right:separation:left'] = 'no',
+            ['cycleway:right:surface'] = 'asphalt',
+            ['cycleway:right:surface:colour'] = 'red',
+            ['cycleway:right:traffic:sign'] = 'none',
+            ['cycleway:right:width'] = '1.25'
+          },
+          id = 1,
+          type = 'way'
+        }
+        local categorized = extractCategoriesBySide(input_object)
+        assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+        assert.are.equal(categorized.right.category, nil)
+        assert.are.equal(categorized.left.category.id, 'data_no')
+      end)
     end)
 
     it('Categories for protected bikelanes', function()
@@ -364,4 +463,5 @@ describe("Bikelanes", function()
       assert.are.equal(result[1].traffic_mode_right, 'parking')
     end)
   end)
+
 end)

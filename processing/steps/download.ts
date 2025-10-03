@@ -1,4 +1,6 @@
+import { TZDate } from '@date-fns/tz'
 import { $ } from 'bun'
+import { format, getHours, subDays } from 'date-fns'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
@@ -14,8 +16,9 @@ import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
 export const originalFilePath = (fileName: string) => join(OSM_DOWNLOAD_DIR, fileName)
 
 /**
- * Wait for the givien url to have todays date as last modified.
- * @returns true if the file has been updated today, false otherwise
+ * Wait for the given url to have fresh data as last modified.
+ * Accepts data from today or data from yesterday if created after 20:00.
+ * @returns true if the file has been updated with fresh data, false otherwise
  */
 export async function waitForFreshData() {
   if (!params.waitForFreshData) {
@@ -23,9 +26,14 @@ export async function waitForFreshData() {
     return
   }
 
-  const maxTries = 50 // ~10 hours (at 15 Min per try)
-  const timeoutMinutes = 15
-  const todaysDate = new Date().toDateString()
+  const maxTries = 25 // ~8 hours (at 20 Min per try)
+  const timeoutMinutes = 20
+
+  // Use German timezone (Europe/Berlin) for all date comparisons
+  const now = new Date()
+  const todaysDateDE = format(new TZDate(now, 'Europe/Berlin'), 'yyyy-MM-dd')
+  const yesterdaysDateDE = format(new TZDate(subDays(now, 1), 'Europe/Berlin'), 'yyyy-MM-dd')
+
   let tries = 0
 
   while (true) {
@@ -45,17 +53,33 @@ export async function waitForFreshData() {
       return false
     }
 
-    // Check if last modified date is today
+    const lastModifiedDate = new Date(lastModified)
+    // Convert to Berlin timezone
+    const lastModifiedDateDE = format(new TZDate(lastModifiedDate, 'Europe/Berlin'), 'yyyy-MM-dd')
+    const lastModifiedHourDE = getHours(new TZDate(lastModifiedDate, 'Europe/Berlin'))
+
+    // Check if data is fresh enough (all times in German timezone):
+    // 1. Data from today is always accepted
+    // 2. Data from yesterday is accepted only if created after 20:00 German time
+    const isFromToday = todaysDateDE === lastModifiedDateDE
+    const isFromYesterdayAfter8PM =
+      yesterdaysDateDE === lastModifiedDateDE && lastModifiedHourDE >= 20
+    const isFreshData = isFromToday || isFromYesterdayAfter8PM
+
+    // Enhanced logging to show the new logic
     const log = {
-      today: new Date().toISOString(),
-      newFileLastModified: new Date(lastModified).toISOString(),
-      next: todaysDate === new Date(lastModified).toDateString() ? 'process' : 'wait',
+      todayDE: todaysDateDE,
+      yesterdayDE: yesterdaysDateDE,
+      newFileLastModifiedDE: lastModifiedDateDE,
+      newFileLastModifiedHourDE: lastModifiedHourDE,
+      newFileLastModifiedUTC: lastModifiedDate.toISOString(),
+      isFromToday,
+      isFromYesterdayAfter8PM,
+      next: isFreshData ? 'process' : 'wait',
     }
     console.log(`Download: \`waitForFreshData\` try ${tries}: ${JSON.stringify(log, undefined, 0)}`)
 
-    // Check if last modified date is today
-    const lastModifiedDate = new Date(lastModified).toDateString()
-    if (todaysDate === lastModifiedDate) {
+    if (isFreshData) {
       return true
     }
 
@@ -64,7 +88,7 @@ export async function waitForFreshData() {
     if (tries >= maxTries) {
       console.log(
         '[ERROR] Download: Timeout exceeded while waiting for fresh data.',
-        `Now using file from ${new Date(lastModified).toISOString()}`,
+        `Now using file from ${lastModifiedDate.toISOString()}`,
       )
       return false
     }

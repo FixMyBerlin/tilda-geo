@@ -20,7 +20,6 @@ export function logEnd(id: string) {
   const timeFormatted = formatTimestamp(timeElapsed)
 
   console.log(`${id} finished in ${timeFormatted}`)
-  return timeElapsed
 }
 
 export function logTileInfo() {

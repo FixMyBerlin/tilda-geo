@@ -22,6 +22,7 @@ export const translations: { [key: string]: string } = {
   'ALL--category=crossing': 'Straßenquerung',
   'ALL--category=cycleway_adjoining': 'Radweg (baulich von der Fahrbahn abgesetzt aber straßenbegleitend)',
   'ALL--category=cycleway_adjoiningOrIsolated': 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
+  'ALL--category=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'ALL--category=cycleway_isolated': 'Radweg, selbstständig geführt',
   'ALL--category=cyclewayLink': 'Radweg-Verbindungsstück. Häufig in OpenStreetMap verwendet um Routenfähiges Netz zu erzeugen; repräsentiert nur selten physische Infrastruktur.',
   'ALL--category=cyclewayOnHighway_advisory': 'Schutzstreifen',

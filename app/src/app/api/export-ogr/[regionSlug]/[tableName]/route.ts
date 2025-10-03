@@ -8,7 +8,7 @@ import fs from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
 import { exec } from 'node:child_process'
 import path from 'node:path'
-import pako from 'pako'
+import { gzipSync } from 'node:zlib'
 import { z } from 'zod'
 import { formats, ogrFormats } from './_utils/ogrFormats.const'
 
@@ -173,7 +173,7 @@ export async function GET(
 
     if (format === 'geojson') {
       if (request.headers.get('accept-encoding')?.includes('gzip')) {
-        const compressed = new Uint8Array(pako.gzip(fileBuffer))
+        const compressed = gzipSync(fileBuffer)
         return new Response(compressed, {
           headers: {
             'Content-Type': 'application/json',

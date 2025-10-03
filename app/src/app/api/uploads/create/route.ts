@@ -1,15 +1,19 @@
 import db from '@/db'
+import { MapRenderFormatEnum } from '@prisma/client'
 import { z } from 'zod'
 import { checkApiKey, parseData } from '../../_util/checkApiKey'
 
 const Schema = z.object({
   apiKey: z.string().nullish(),
   uploadSlug: z.string(),
-  url: z.string(),
-  type: z.enum(['GEOJSON', 'PMTILES']),
   regionSlugs: z.array(z.string()),
   isPublic: z.boolean(),
   configs: z.array(z.record(z.string(), z.any())),
+  mapRenderFormat: z.nativeEnum(MapRenderFormatEnum),
+  mapRenderUrl: z.string(),
+  pmtilesUrl: z.string(),
+  geojsonUrl: z.string(),
+  githubUrl: z.string(),
 })
 
 export async function POST(request: Request) {
@@ -20,7 +24,17 @@ export async function POST(request: Request) {
   const check = checkApiKey(data)
   if (!check.ok) return check.errorResponse
 
-  const { uploadSlug, url, type, regionSlugs, isPublic, configs } = data
+  const {
+    uploadSlug,
+    regionSlugs,
+    isPublic,
+    configs,
+    mapRenderFormat,
+    mapRenderUrl,
+    pmtilesUrl,
+    geojsonUrl,
+    githubUrl,
+  } = data
 
   await db.upload.deleteMany({ where: { slug: uploadSlug } })
 
@@ -28,11 +42,14 @@ export async function POST(request: Request) {
     await db.upload.create({
       data: {
         slug: uploadSlug,
-        url,
-        type,
         regions: { connect: regionSlugs.map((slug) => ({ slug })) },
         public: isPublic,
         configs,
+        mapRenderFormat,
+        mapRenderUrl,
+        pmtilesUrl,
+        geojsonUrl,
+        githubUrl,
       },
     })
   } catch (e) {

@@ -8,6 +8,22 @@ require("HighwayClasses")
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
 local to_semicolon_list = require('to_semicolon_list')
+local extractFromLanes = require('extractValueFromLanes')
+
+---Helper function to check this object is also a `cyclewayOnHighwayBetweenLanes`
+---@param tags table The tags to check
+local function hasCyclewayOnHighwayBetweenLanesConditions(tags)
+  if tags._side == 'left' or tags._side == 'right' then
+    -- Check Untransformed tags
+    if ContainsSubstring(tags['cycleway:lanes'], "|lane|") then return true end
+    if ContainsSubstring(tags['bicycle:lanes'], "|designated|") then return true end
+    -- `cycleway:lanes=*|lane|*` gets unnested to `tags.lanes`
+    if ContainsSubstring(tags.lanes, '|lane|') then return true end
+    -- `bicycle:lanes=*|designated|*` does not get copied during transformation, so we need to look at the `_parent`
+    if tags.parent and ContainsSubstring(tags.parent['bicycle:lanes'], "|designated|") then return true end
+  end
+  return false
+end
 
 ---@meta
 ---@class BikelaneCategory
@@ -21,7 +37,8 @@ BikelaneCategory.__index = BikelaneCategory
 --- implicitOneWay: boolean,
 --- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
 --- copySurfaceSmoothnessFromParent: boolean, -- Whether this category should copy surface/smoothness values from parent highway
---- condition: fun(tags: table): boolean|nil,
+--- condition: fun(tags: table): (boolean|nil),
+--- process: fun(tags: table): (table|nil)|nil, -- Optional function to process tags after categorization
 --- }
 ---@return BikelaneCategory
 function BikelaneCategory.new(args)
@@ -34,6 +51,7 @@ function BikelaneCategory.new(args)
   self.implicitOneWayConfidence = args.implicitOneWayConfidence
   self.copySurfaceSmoothnessFromParent = args.copySurfaceSmoothnessFromParent
   self.condition = args.condition
+  self.process = args.process
   return self
 end
 
@@ -186,12 +204,12 @@ local footAndCyclewayShared = BikelaneCategory.new({
 
     -- Only apply the following conditions on cycleway-like highways.
     -- This makes sure 'living_street' is not included in this category https://www.openstreetmap.org/way/25219816
-    -- `highway=service` includes ways like https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
-    if tags.highway == 'service' then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA: Radinfrastruktur auf einem Zufahrtsweg.' })
-    end
-    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' or tags.highway == 'service') then
-      -- https://www.openstreetmap.org/way/440072364 highway=service
+    -- Example highway=service https://www.openstreetmap.org/way/440072364, https://www.openstreetmap.org/way/1154311563, https://www.openstreetmap.org/way/37760785, https://www.openstreetmap.org/way/201687946
+    -- Example highway=track https://github.com/FixMyBerlin/radinfra.de/issues/13#issuecomment-3347262698
+    -- REMINDER: Also check `CreateSubcategoriesAdjoiningOrIsolated`; `service|track` required special treatment
+    -- REMINDER: Also check `DeriveOneway`; `service|track` required special treatment
+    local allowed_highways = Set({ 'cycleway', 'path', 'footway', 'service', 'track' })
+    if allowed_highways[tags.highway] then
       if tags.segregated == "no" and tags.bicycle == "designated" and tags.foot == "designated"  then
         return true
       end
@@ -202,6 +220,21 @@ local footAndCyclewayShared = BikelaneCategory.new({
         return true
       end
     end
+  end,
+  process = function(tags)
+    if tags.highway == 'service' then
+      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur auf einem Zufahrtsweg.' })
+    end
+    -- https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:1026-38 "Land- und forstwirtschaftlicher Verkehr frei"
+    -- See also https://github.com/FixMyBerlin/radinfra.de/issues/13#issuecomment-3352120626
+    if tags.highway == 'track' or
+      ContainsSubstring(tags.traffic_sign, '1026-36') or ContainsSubstring(tags.traffic_sign, '1026-37') or ContainsSubstring(tags.traffic_sign, '1026-38') or
+      ContainsSubstring(tags.access, 'agricultural') or ContainsSubstring(tags.motor_vehicle, 'agricultural') or ContainsSubstring(tags.vehicle, 'agricultural') or
+      ContainsSubstring(tags.access, 'forestry') or ContainsSubstring(tags.motor_vehicle, 'forestry') or ContainsSubstring(tags.vehicle, 'forestry')
+    then
+      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.' })
+    end
+    return tags
   end
 })
 local footAndCyclewayShared_adjoining, footAndCyclewayShared_isolated, footAndCyclewayShared_adjoiningOrIsolated = CreateSubcategoriesAdjoiningOrIsolated(footAndCyclewayShared)
@@ -230,7 +263,7 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
 
     -- Only apply the following conditions on cycleway-like highways.
     -- This makes sure direct tagging on other highways classes does not match this category.
-    if (tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway') then
+    if tags.highway == 'cycleway' or tags.highway == 'path' or tags.highway == 'footway' then
       if tags.segregated == "yes" and tags.bicycle == "designated" and tags.foot == "designated" then
           return true
       end
@@ -332,13 +365,13 @@ local cyclewaySeparated = BikelaneCategory.new({
   condition = function(tags)
     -- CASE: GUARD Centerline "lane"
     -- Needed for places like https://www.openstreetmap.org/way/964589554 which have the traffic sign but are not separated.
-    if (tags.cycleway == "lane") then return false end
+    if tags.cycleway == 'lane' then return false end
 
     -- CASE: Centerline
     -- traffic_sign=DE:237, "Radweg", https://wiki.openstreetmap.org/wiki/DE:Tag:traffic%20sign=DE:237
     -- cycleway=track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=track
     -- cycleway=opposite_track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=opposite_track
-    if tags.highway == "cycleway" and (tags.cycleway == "track" or tags.cycleway == "opposite_track" or tags.is_sidepath) then
+    if tags.highway == 'cycleway' and (tags.cycleway == 'track' or tags.cycleway == 'opposite_track' or tags.is_sidepath) then
       return true
     end
 
@@ -346,15 +379,15 @@ local cyclewaySeparated = BikelaneCategory.new({
     -- Sometimes users add a `traffic_sign=DE:237` right on the `highway=secondard` but it should be `cycleway:right:traffic_sign`
     -- We only allow the follow highway tags. This will still produce false positives but less so.
     -- And looking at the _parent_highway and left|right|nil|both tags for this is way to complex.
-    local allowedHighways = Set({
-      "living_street",
-      "pedestrian",
-      "service",
-      "track",
-      "bridleway",
-      "path",
-      "footway",
-      "cycleway",
+    local allowed_highways = Set({
+      'living_street',
+      'pedestrian',
+      'service',
+      'track',
+      'bridleway',
+      'path',
+      'footway',
+      'cycleway',
     })
     -- adjoining:
     -- This could be PBLs "Protected Bike Lanes"
@@ -364,7 +397,7 @@ local cyclewaySeparated = BikelaneCategory.new({
     -- Case: "frei geführte Radwege", dedicated cycleways that are not next to a road
     -- Eg https://www.openstreetmap.org/way/27701956
     local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
-    if allowedHighways[tags.highway] and ContainsSubstring(trafficSign, "237") then
+    if allowed_highways[tags.highway] and ContainsSubstring(trafficSign, '237') then
       return true
     end
   end
@@ -411,9 +444,11 @@ local cyclewayLink = BikelaneCategory.new({
 })
 
 -- Case: Unkown 'lane' – "Radfahrstreifen" OR "Schutzstreifen"
+-- We use this category below to make it more precise checking `advisory` or `exclusive`.
 -- https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=lane
 -- https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=opposite_lane
 -- https://wiki.openstreetmap.org/wiki/Key:cycleway:lane
+-- https://wiki.openstreetmap.org/wiki/Lanes#Crossing_with_a_designated_lane_for_bicycles
 local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
   id = 'cyclewayOnHighway_advisoryOrExclusive',
   desc = 'Bicycle infrastrucute on the highway, right next to motor vehicle traffic.' ..
@@ -425,23 +460,26 @@ local cyclewayOnHighway_advisoryOrExclusive = BikelaneCategory.new({
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
     if tags.highway == 'cycleway' then
-      if tags._side ~= 'self' then
-        -- "Angstweichen" are a special case where the cycleway is part of the road which is tagged using one of their `*:lanes` schema.
-        -- Those get usually dual tagged as `cycleway:right=lane` to make the "Angstweiche" "visible" to routing.
-        -- For this category, we skip the dual tagging but still want to capture cases where there is an actual `lane` ("Schutzstreifen") as well as a "Angstweiche".
-        -- The actual double infra is present when the lanes have both "|lane|" (the "Angstweiche") as well a a suffix "|lane" (the "Schutzstreifen").
-        -- Note: `tags.lanes` is `cycleway:lanes` but unnested whereas `bicycle:lanes` does not get unnested.
-        if ContainsSubstring(tags.lanes,'|lane|') then
-          if not osm2pgsql.has_suffix(tags.lanes, '|lane') then
-            return false
-          end
+      -- "Angstweichen" (`cyclewayOnHighwayBetweenLanes`) are a special case where the cycleway is part of the road which is tagged using one of their `*:lanes` schema.
+      -- Those get usually dual(!) tagged as `cycleway:right=lane` to make the "Angstweiche" "visible" to routing.
+      -- For this category, we skip the dual tagging BUT still want to capture cases where there is BOTH, an actual `lane` ("Schutzstreifen") as well as a "Angstweiche".
+      -- We only acccept double infra when we have both, "|lane|" (the "Angstweiche") as well a a suffix "|lane" (the "Schutzstreifen").
+      -- Note: `tags.lanes` is `cycleway:lanes` but unnested whereas `bicycle:lanes` does not get unnested.
+      if hasCyclewayOnHighwayBetweenLanesConditions(tags) then
+        if ContainsSubstring(tags.lanes, '|lane|') and not osm2pgsql.has_suffix(tags.lanes, '|lane') then
+          return false
         end
-        if tags._parent ~= nil and ContainsSubstring(tags._parent['bicycle:lanes'], '|designated|') then
-          if not osm2pgsql.has_suffix(tags._parent['bicycle:lanes'], '|designated') then
-            return false
-          end
+        if tags._parent ~= nil and ContainsSubstring(tags._parent['bicycle:lanes'], '|designated|') and not osm2pgsql.has_suffix(tags._parent['bicycle:lanes'], '|designated') then
+          return false
         end
+
+        -- When both infra are given ("Radfahrstreifen in Mittellage" (RiM)) as well as "Schutzstreifen", we take the `cyclway:SIDE:width` for the "Schutzstreifen".
+        -- But if that is missing, we look into the `width:lanes` and take the value from there if present.
+        local source_width = tags._parent and extractFromLanes.extractLastValueFromLanes(tags._parent['width:lanes'])
+        tags.width = tags.width or source_width
       end
+
+      -- Regular case
       if tags.cycleway == "lane" or tags.cycleway == "opposite_lane" then
         return true
       end
@@ -503,12 +541,12 @@ local sharedMotorVehicleLane = BikelaneCategory.new({
   end
 })
 
+-- There are edge cases to be treated here, but the are related to cycleway:SIDE=lane, so the are documented at `cyclewayOnHighway_advisoryOrExclusive`
 -- https://wiki.openstreetmap.org/wiki/Forward_&_backward,_left_&_right
 -- https://wiki.openstreetmap.org/wiki/Lanes#Crossing_with_a_designated_lane_for_bicycles
 local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
   id = 'cyclewayOnHighwayBetweenLanes',
-  desc = 'Bike lane between motor vehicle lanes,' ..
-      ' mostly on the left of a right turn lane. (DE: "Radweg in Mittellage")',
+  desc = 'Bike lane between motor vehicle lanes, mostly on the left of a right turn lane. (DE: "Radweg in Mittellage")',
   infrastructureExists = true,
   implicitOneWay = true, -- 'oneway=implicit_yes', its "lane"-like
   implicitOneWayConfidence = 'high',
@@ -522,6 +560,34 @@ local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
         return true
       end
     end
+  end,
+  process = function(tags)
+    local width = extractFromLanes.extractValueFromLanes('width:lanes', tags)
+    if width then
+      tags.width = width
+    end
+
+    local surface = extractFromLanes.extractValueFromLanes('surface:lanes', tags)
+    if surface then
+      tags.surface = surface
+    end
+
+    local surface_colour = extractFromLanes.extractValueFromLanes('surface:colour:lanes', tags)
+    if surface_colour then
+      tags['surface:colour'] = surface_colour
+    end
+
+    local smoothness = extractFromLanes.extractValueFromLanes('smoothness:lanes', tags)
+    if smoothness then
+      tags.smoothness = smoothness
+    end
+
+    local source_width = extractFromLanes.extractValueFromLanes('source:width:lanes', tags)
+    if source_width then
+      tags['source:width'] = source_width
+    end
+
+    return tags
   end
 })
 
@@ -591,10 +657,13 @@ local sharedBusLaneBusWithBike = BikelaneCategory.new({
       osm2pgsql.has_prefix(trafficSign, "DE:245") and (ContainsSubstring(trafficSign, "1022-10") or ContainsSubstring(trafficSign, "1022-14")) or
       osm2pgsql.has_prefix(parentTrafficSign, "DE:245") and (ContainsSubstring(parentTrafficSign, "1022-10") or ContainsSubstring(parentTrafficSign, "1022-14"))
     then
-      -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
-      tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
       return true
     end
+  end,
+  process = function(tags)
+    -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
+    tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
+    return tags
   end
 })
 
@@ -624,10 +693,13 @@ local sharedBusLaneBikeWithBus = BikelaneCategory.new({
       osm2pgsql.has_prefix(trafficSign, "DE:237") and (ContainsSubstring(trafficSign, "1024-14") or ContainsSubstring(trafficSign, "1026-32")) or
       osm2pgsql.has_prefix(parentTrafficSign, "DE:237") and (ContainsSubstring(parentTrafficSign, "1024-14") or ContainsSubstring(parentTrafficSign, "1026-32"))
     then
-      -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
-      tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
       return true
     end
+  end,
+  process = function(tags)
+    -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
+    tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
+    return tags
   end
 })
 
@@ -646,13 +718,10 @@ local needsClarification = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
-    -- hack: because `cyclewayBetweenLanes` is now detected on the `self` object we need to filter out the right side here
-    -- to fix this we would need to double classify objects
-    if tags._side == 'right' then
-      if (ContainsSubstring(tags['cycleway:lanes'], "|lane|") or
-        ContainsSubstring(tags['bicycle:lanes'], "|designated|")) then
-        return false
-      end
+    -- HACK: because `cyclewayOnHighwayBetweenLanes` is now detected on the `self` object we need to filter out the sides here
+    -- The fix this properly we would need to double classify objects
+    if hasCyclewayOnHighwayBetweenLanesConditions(tags) then
+      return false
     end
 
     if tags.cycleway == "shared" then
@@ -660,8 +729,11 @@ local needsClarification = BikelaneCategory.new({
       return false
     end
 
-    if tags.highway == "cycleway"
-        or (tags.highway == "path" and tags.bicycle == "designated") then
+    if tags.highway == "cycleway" then
+      return true
+    end
+
+    if tags.highway == "path" and tags.bicycle == "designated" then
       return true
     end
 
@@ -711,6 +783,9 @@ local categoryDefinitions = {
 function CategorizeBikelane(tags)
   for _, category in pairs(categoryDefinitions) do
     if category(tags) then
+      if category.process then
+        category.process(tags)
+      end
       return category
     end
   end
