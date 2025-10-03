@@ -2,6 +2,14 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-10-03
+
+### `bikelanes`
+
+- Include ways on `highway=track` when also bike tagging present; those get a TILDA `description` notice when shared with other traffic modes.
+- Use the `width:lanes`,`surface:colour:lanes`, `surface:lanes`, `source:width:lanes`, `smoothness:lanes` data for `cyclewayOnHighwayBetweenLanes`.
+- If no `cyclway:right:width` is given for `cyclewayOnHighway*`, look at the last value of `width:lanes`.
+
 ## 2025-09-24
 
 ### `bikelanes`
@@ -15,7 +23,7 @@ This is an manual and incomplete list of change to the data structure.
 - Add attributes `operator_type`, `covered`, `informal`
 - Include ways that are privately operated, indoor or informal
 - Include ways that are `access=destination` in the data
-- Include ways on `highway=service` when also bike tagging present
+- Include ways on `highway=service` when also bike tagging present; those get a TILDA `description` notice when shared with other traffic modes.
 - Categorize bicycle roads with "Kfz frei" as `bicycleRoad_vehicleDestination`
 
 ### `roads`, `roadsPathClasses`,
