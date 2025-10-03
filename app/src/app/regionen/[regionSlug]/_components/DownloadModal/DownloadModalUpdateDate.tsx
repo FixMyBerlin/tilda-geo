@@ -1,7 +1,7 @@
 import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
 import getAtlasGeoMetadata from '@/src/server/regions/queries/getAtlasGeoMetadata'
 import { useQuery } from '@blitzjs/rpc'
-import { format, isToday } from 'date-fns'
+import { format, isBefore, subDays } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { Suspense } from 'react'
 
@@ -32,12 +32,12 @@ const DownloadModalUpdateDateContent = () => {
   }
 
   const osmDataDate = new Date(metadata.osm_data_from)
-  const isDataFromToday = isToday(osmDataDate)
+  const isDataOlderThanYesterday = isBefore(osmDataDate, subDays(new Date(), 1))
 
   return (
     <details className="mt-4">
       <summary className="cursor-pointer text-sm hover:underline">
-        <span className={!isDataFromToday ? 'text-orange-600' : ''}>
+        <span className={isDataOlderThanYesterday ? 'text-orange-600' : ''}>
           Letzte Aktualisierung der Daten: {format(osmDataDate, 'dd.MM.yyyy', { locale: de })}{' '}
           <span className="text-gray-400">{format(osmDataDate, 'HH:mm', { locale: de })}</span>
         </span>
