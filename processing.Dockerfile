@@ -1,7 +1,7 @@
-FROM ubuntu:noble AS testing
+FROM debian:bookworm AS testing
 WORKDIR /processing
 
-# Install Lua and "luarocks" (Lua package manager) – https://luarocks.org/, https://packages.ubuntu.com/luarocks
+# Install Lua and "luarocks" (Lua package manager) – https://luarocks.org/
 RUN apt update && apt install -y lua5.3 liblua5.3-dev luarocks
 
 # `busted` is our testing framework https://lunarmodules.github.io/busted/
@@ -25,6 +25,9 @@ FROM testing AS processing
 # reset the entrypoint
 ENTRYPOINT []
 
+# Configure Debian backports for latest osm2pgsql and osmium-tool
+RUN echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
+
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 LABEL maintainer="FixMyCity - https://fixmycity.de"
@@ -36,7 +39,8 @@ LABEL maintainer="FixMyCity - https://fixmycity.de"
 COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
 
 RUN apt update && \
-  apt install -y osm2pgsql osmium-tool wget curl python3 python3-requests && \
+  apt install -y -t bookworm-backports osm2pgsql osmium-tool curl && \
+  apt install -y wget python3 python3-requests && \
   apt upgrade -y
 
 # 'data' folder is root
@@ -48,7 +52,8 @@ ENV PATH=/root/.bun/bin:$PATH
 # copy the source code
 COPY processing /processing/
 
-# Download and setup Geofabrik OAuth client to /usr/local/bin (outside the mounted volume)
+# Download and setup Geofabrik OAuth client to /usr/local/bin (outside the mounted volume).
+# Note: This is where (the only place) `python3-requests` is used.
 RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.com/geofabrik/sendfile_osm_oauth_protector/master/oauth_cookie_client.py && \
     chmod +x /usr/local/bin/oauth_cookie_client.py
 
