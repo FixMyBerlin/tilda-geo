@@ -29,9 +29,7 @@ export const SelectDataset = ({
     licenceOsmCompatible,
     legends,
     isPublic,
-    mapRenderUrl,
     githubUrl,
-    downloadUrl,
   } = dataset
   const currentUser = useCurrentUser()
   const userIsAdmin = isAdmin(currentUser)
@@ -112,16 +110,6 @@ export const SelectDataset = ({
               })}
             </ul>
           )}
-          <p className="mt-1">
-            <a
-              href={downloadUrl}
-              download={`${name}.geojson`}
-              className="inline-flex items-center gap-1"
-            >
-              <ArrowDownTrayIcon className="size-3" />
-              GeoJSON herunterladen
-            </a>
-          </p>
           {userIsAdmin && (
             <details className="mt-1 bg-pink-300 p-0.5">
               <summary className="cursor-pointer underline">Admin Upload Details</summary>
@@ -132,6 +120,15 @@ export const SelectDataset = ({
               <br />
               <LinkExternal blank href={githubUrl}>
                 Github Statische Daten
+              </LinkExternal>
+              <br />
+              <LinkExternal
+                href={getStaticDatasetUrl(id, 'geojson')}
+                download={`${name}.geojson`}
+                className="inline-flex items-center gap-1"
+              >
+                <ArrowDownTrayIcon className="size-3" />
+                GeoJSON herunterladen
               </LinkExternal>
               <br />
               <LinkExternal
