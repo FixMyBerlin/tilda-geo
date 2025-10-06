@@ -1,6 +1,5 @@
 import { MetaData } from '@/scripts/StaticDatasets/types'
 import { Prettify } from '@/src/app/_components/types/types'
-import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
 import getUploadsForRegion from '@/src/server/uploads/queries/getUploadsForRegion'
 import { useQuery } from '@blitzjs/rpc'
 import { MapRenderFormatEnum } from '@prisma/client'
@@ -13,7 +12,6 @@ type RegionDataset = Prettify<
     mapRenderFormat: MapRenderFormatEnum // from upload
     mapRenderUrl: string // URL for map rendering (PMTiles or GeoJSON based on mapRenderFormat)
     githubUrl: string // from upload
-    downloadUrl: string // URL for GeoJSON download
   }
 >
 
@@ -37,7 +35,6 @@ export const useRegionDatasets = () => {
               id: upload.slug,
               mapRenderFormat: upload.mapRenderFormat,
               mapRenderUrl: upload.mapRenderUrl,
-              downloadUrl: getStaticDatasetUrl(upload.slug, 'geojson'),
               githubUrl: upload.githubUrl,
             })
           })
