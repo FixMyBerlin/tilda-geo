@@ -316,7 +316,8 @@ local footwayBicycleYes = BikelaneCategory.new({
     end
 
     -- 2. Check bicycle access: has to have bicycle=yes or the right traffic sign
-    if tags.bicycle ~= "yes" and not ContainsSubstring(SanitizeTrafficSign(tags.traffic_sign), "1022-10") then
+    local has_bicycle_access = tags.bicycle == 'yes' or ContainsSubstring(SanitizeTrafficSign(tags.traffic_sign), '1022-10')
+    if not has_bicycle_access then
       return
     end
 
