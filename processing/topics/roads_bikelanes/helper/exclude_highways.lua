@@ -51,7 +51,7 @@ local function exclude_by_service(tags)
   return false
 end
 
-local function exclude_by_area_water(tags)
+local function exclude_by_other_tags(tags)
   -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
   if tags.area == 'yes' then
     return true
@@ -59,6 +59,11 @@ local function exclude_by_area_water(tags)
 
   -- Skip piers
   if tags.man_made == 'pier' then
+    return true
+  end
+
+  -- https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dtrack needed to filter some MTB `path`
+  if tags.leisure == 'track' then
     return true
   end
 
@@ -114,7 +119,7 @@ return {
   by_service = exclude_by_service,
   by_indoor = exclude_by_indoor,
   by_informal = exclude_by_informal,
-  by_area_water = exclude_by_area_water,
+  by_other_tags = exclude_by_other_tags,
   by_highway_type = exclude_by_highway_type,
   by_highway_class_and_transform_livecycle_tags = exclude_by_highway_class_and_transform_livecycle_tags,
 }

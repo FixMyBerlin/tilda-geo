@@ -146,8 +146,8 @@ function osm2pgsql.process_way(object)
   local object_tags = StructuredClone(raw_tags)
 
   -- ====== (A) Filter-Guards ======
-  if exclude.by_area_water(object_tags) then return end
   if exclude.by_highway_class_and_transform_livecycle_tags(object_tags) then return end
+  if exclude.by_other_tags(object_tags) then return end
   local forbidden_accesses_bikelanes = Set({ 'private', 'no', 'delivery', 'permit' })
   if exclude.by_access(object_tags, forbidden_accesses_bikelanes) then return end
   if exclude.by_service(object_tags) then return end
