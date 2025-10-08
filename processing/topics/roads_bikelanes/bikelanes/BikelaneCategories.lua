@@ -5,6 +5,7 @@ require("CreateSubcategoriesAdjoiningOrIsolated")
 require("SanitizeTrafficSign")
 require("DeriveSmoothness")
 require("HighwayClasses")
+local has_tag_with_prefix = require('has_tag_with_prefix')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local inspect = require("inspect")
 local to_semicolon_list = require('to_semicolon_list')
@@ -735,6 +736,23 @@ local needsClarification = BikelaneCategory.new({
     end
 
     if tags.highway == "path" and tags.bicycle == "designated" then
+      -- Handle exclusive cycleways that are misstagged as path.
+      -- But exclude those MTB path that are not relevant for a everyday cycle network.
+      -- NOTE: We could allow some cases later (if needed) when certain traffic_sigsn are present.
+      -- See https://github.com/FixMyBerlin/radinfra.de/issues/14
+      --
+      -- REMINDER: Also update `BikelaneTodos.lua` > `unexpected_highway_path`
+      if tags.foot == 'no' then
+        local excluded_surfaces = Set({ 'ground', 'dirt', 'fine_gravel', 'gravel', 'pebblestone', 'earth' })
+        if has_tag_with_prefix(tags, 'mtb:') or
+          tags.mtb == 'yes' or
+          excluded_surfaces[tags.surface]
+        then
+          return false
+        end
+
+        return true
+      end
       return true
     end
 

@@ -1,6 +1,8 @@
 require('init')
 require('ContainsSubstring')
 require('SanitizeTrafficSign')
+require('Set')
+local has_tag_with_prefix = require('has_tag_with_prefix')
 -- local inspect = require('inspect')
 BikelaneTodo = {}
 BikelaneTodo.__index = BikelaneTodo
@@ -221,7 +223,7 @@ local unexpected_bicycle_access_on_footway = BikelaneTodo.new({
   desc = "Expected `highway=path+bicycle=designated` (unsigned/explicit DE:240)" ..
     "or `highway=footway+bicycle=yes` (unsigned/explicit DE:239,1022-10);"..
     " Add traffic_sign=none to specify unsigned path.",
-  todoTableOnly = false,
+  todoTableOnly = true,
   priority = function(objectTags, resultTags)
     if objectTags.mapillary_coverage then return '1' end
     return '2'
@@ -241,6 +243,37 @@ local unexpected_bicycle_access_on_footway__mapillary = BikelaneTodo.new({
   priority = function(_, _) return "1" end,
   conditions = function(objectTags, resultTags)
     return objectTags.mapillary_coverage and unexpected_bicycle_access_on_footway(objectTags, resultTags)
+  end
+})
+
+local unexpected_highway_path = BikelaneTodo.new({
+  id = 'unexpected_highway_path',
+  desc = 'Expected `highway=cyclway` (unsigned/explicit DE:237)',
+  todoTableOnly = true,
+  priority = function(objectTags, resultTags)
+    if objectTags.mapillary_coverage then return '1' end
+    return '2'
+  end,
+  conditions = function(objectTags, resultTags)
+    local excluded_surfaces = Set({ 'ground', 'dirt', 'fine_gravel', 'gravel', 'pebblestone', 'earth' })
+    return objectTags.highway == 'path'
+      and objectTags.bicycle == 'designated'
+      and objectTags.foot == 'no'
+      -- REFERENCE: See conditions in `needsClarification` category
+      and not (
+        has_tag_with_prefix(objectTags, 'mtb:') or
+        objectTags.mtb == 'yes' or
+        excluded_surfaces[objectTags.surface]
+      )
+  end
+})
+local unexpected_highway_path__mapillary = BikelaneTodo.new({
+  id = 'unexpected_highway_path__mapillary',
+  desc = 'Expected `highway=cyclway` (unsigned/explicit DE:237)',
+  todoTableOnly = true,
+  priority = function(_, _) return '1' end,
+  conditions = function(objectTags, resultTags)
+    return objectTags.mapillary_coverage and unexpected_highway_path(objectTags, resultTags)
   end
 })
 
@@ -503,6 +536,7 @@ BikelaneTodos = {
   advisory_or_exclusive,
   needs_clarification_track,
   mixed_cycleway_both,
+  unexpected_highway_path,
   -- Bicycle Roads
   missing_traffic_sign_vehicle_destination,
   missing_traffic_sign_244,
@@ -531,6 +565,7 @@ BikelaneTodos = {
   advisory_or_exclusive__mapillary,
   needs_clarification_track__mapillary,
   mixed_cycleway_both__mapillary,
+  unexpected_highway_path__mapillary,
   currentness_too_old__mapillary,
   missing_width_surface_sett__mapillary,
   missing_surface__mapillary,

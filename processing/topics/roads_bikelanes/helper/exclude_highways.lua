@@ -6,7 +6,7 @@ local function exclude_by_access(tags, forbidden_accesses)
   if tags.access and forbidden_accesses[tags.access] then
     return true
   end
-  if (tags.highway == 'footway' or tags.highway == 'path') and tags.foot and forbidden_accesses[tags.foot] then
+  if tags.highway == 'footway' and tags.foot and forbidden_accesses[tags.foot] then
     return true
   end
   if tags.highway == 'cycleway' and tags.bicycle and forbidden_accesses[tags.bicycle] then
