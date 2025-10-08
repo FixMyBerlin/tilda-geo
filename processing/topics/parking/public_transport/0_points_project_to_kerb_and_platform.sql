@@ -56,7 +56,13 @@ SELECT
   pp.geom
 FROM
   _parking_public_transport p
-  CROSS JOIN LATERAL project_to_closest_platform (p.geom, tolerance := 10) AS pp
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (
+    p.geom,
+    tolerance := 20,
+    k := 1,
+    side := tags ->> 'side'
+  ) AS pk
+  CROSS JOIN LATERAL project_to_closest_platform (pk.geom, tolerance := 20) AS pp
 WHERE
   ST_GeometryType (p.geom) = 'ST_Point'
   AND p.tags ->> 'category' = 'bus_stop_centerline';
