@@ -1,4 +1,6 @@
 require('Set')
+require('JoinSets')
+require('HighwayClasses')
 
 local function exclude_by_access(tags, forbidden_accesses)
   if tags.access and forbidden_accesses[tags.access] then
@@ -87,6 +89,26 @@ local function exclude_by_highway_type(tags)
   return false
 end
 
+local function exclude_by_highway_class_and_transform_livecycle_tags(tags)
+  if not tags.highway then return true end
+
+  -- Skip stuff like 'construction' (some), 'proposed', 'platform' (Haltestellen), 'rest_area' (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
+  local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
+
+  if allowed_highways[tags.construction] then
+    -- Transform `highway=construction + construction=ALLOW_LIST`. Only data with missing `construction=*` is skipped.
+    tags.highway = tags.construction
+    tags.lifecycle = 'construction'
+    tags.construction = nil
+  end
+
+  if not allowed_highways[tags.highway] then
+    return true
+  end
+
+  return false
+end
+
 return {
   by_access = exclude_by_access,
   by_service = exclude_by_service,
@@ -94,4 +116,5 @@ return {
   by_informal = exclude_by_informal,
   by_area_water = exclude_by_area_water,
   by_highway_type = exclude_by_highway_type,
+  by_highway_class_and_transform_livecycle_tags = exclude_by_highway_class_and_transform_livecycle_tags,
 }

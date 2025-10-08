@@ -146,19 +146,8 @@ function osm2pgsql.process_way(object)
   local object_tags = StructuredClone(raw_tags)
 
   -- ====== (A) Filter-Guards ======
-  if not object_tags.highway then return end
-
-  -- Skip stuff like "construction" (some), "proposed", "platform" (Haltestellen), "rest_area" (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
-  local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
-  if allowed_highways[object_tags.construction] then
-    -- Transform `highway=construction + construction=ALLOW_LIST`. Only data with missing `construction=*` is skipped.
-    object_tags.highway = object_tags.construction
-    object_tags.lifecycle = 'construction'
-    object_tags.construction = nil
-  end
-  if not allowed_highways[object_tags.highway] then return end
-
   if exclude.by_area_water(object_tags) then return end
+  if exclude.by_highway_class_and_transform_livecycle_tags(object_tags) then return end
   local forbidden_accesses_bikelanes = Set({ 'private', 'no', 'delivery', 'permit' })
   if exclude.by_access(object_tags, forbidden_accesses_bikelanes) then return end
   if exclude.by_service(object_tags) then return end
