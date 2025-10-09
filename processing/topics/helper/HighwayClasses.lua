@@ -28,7 +28,7 @@ MinorRoadClasses = Set({
 
 PathClasses = Set({
   "track",     -- "Wirtschaftswege", "Wald- und Feldwege"
-  "bridleway", -- Reitweg
+  -- "bridleway", -- "Reitweg" -- We always filter bridleways
   "path",
   "footway",
   "cycleway",
