@@ -122,7 +122,7 @@ FROM
 WHERE
   ST_GeometryType (pt.geom) = 'ST_Point'
   AND pt.tags ->> 'category' = 'tram_stop'
-  AND r.tags ->> 'railway' = 'embedded';
+  AND r.tags ->> 'has_embedded_rails' = 'true';
 
 -- CLEANUP
 DELETE FROM _parking_public_transport_points_projected
