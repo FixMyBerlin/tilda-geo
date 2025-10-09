@@ -2,7 +2,7 @@ require('Set')
 require('JoinSets')
 require('HighwayClasses')
 
-local function exclude_by_access(tags, forbidden_accesses)
+local function by_access(tags, forbidden_accesses)
   if tags.access and forbidden_accesses[tags.access] then
     return true
   end
@@ -16,7 +16,7 @@ local function exclude_by_access(tags, forbidden_accesses)
   return false
 end
 
-local function exclude_by_service(tags)
+local function by_service(tags)
   -- Skip all unwanted `highway=service + service=<value>` values
   -- The key can have random values, we mainly want to skip
   -- - 'driveway' which we consider implicitly private
@@ -51,7 +51,7 @@ local function exclude_by_service(tags)
   return false
 end
 
-local function exclude_by_other_tags(tags)
+local function by_other_tags(tags)
   -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
   if tags.area == 'yes' then
     return true
@@ -70,7 +70,7 @@ local function exclude_by_other_tags(tags)
   return false
 end
 
-local function exclude_by_indoor(tags)
+local function by_indoor(tags)
   if tags.indoor == 'yes' then
     return true
   end
@@ -78,7 +78,7 @@ local function exclude_by_indoor(tags)
   return false
 end
 
-local function exclude_by_informal(tags)
+local function by_informal(tags)
   if tags.informal == 'yes' then
     return true
   end
@@ -86,40 +86,24 @@ local function exclude_by_informal(tags)
   return false
 end
 
-local function exclude_by_highway_type(tags)
-  if tags.highway == 'bridleway' then
-    return true
-  end
-
-  return false
-end
-
-local function exclude_by_highway_class_and_transform_livecycle_tags(tags)
+local function by_highway_class(tags)
   if not tags.highway then return true end
 
   -- Skip stuff like 'construction' (some), 'proposed', 'platform' (Haltestellen), 'rest_area' (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
+  -- REMINDER: Keep in sync with `processing/topics/roads_bikelanes/helper/transform_tags/transform_lifecycle_tags.lua`
   local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
-
-  if allowed_highways[tags.construction] then
-    -- Transform `highway=construction + construction=ALLOW_LIST`. Only data with missing `construction=*` is skipped.
-    tags.highway = tags.construction
-    tags.lifecycle = 'construction'
-    tags.construction = nil
+  if allowed_highways[tags.highway] then
+    return false
   end
 
-  if not allowed_highways[tags.highway] then
-    return true
-  end
-
-  return false
+  return true
 end
 
 return {
-  by_access = exclude_by_access,
-  by_service = exclude_by_service,
-  by_indoor = exclude_by_indoor,
-  by_informal = exclude_by_informal,
-  by_other_tags = exclude_by_other_tags,
-  by_highway_type = exclude_by_highway_type,
-  by_highway_class_and_transform_livecycle_tags = exclude_by_highway_class_and_transform_livecycle_tags,
+  by_access = by_access,
+  by_service = by_service,
+  by_indoor = by_indoor,
+  by_informal = by_informal,
+  by_other_tags = by_other_tags,
+  by_highway_class = by_highway_class
 }

@@ -1,8 +1,8 @@
 require('init')
 local has_prefix = require('has_prefix')
 
--- Mutate the input to transform `construction:bicycle_road=yes` to the bicycle_road=yes.
--- - Function return the old tags `<oldKey>=<oldValue>` for debugging … but we don't use that ATM
+-- Mutate the input to transform `construction:bicycle_road=yes` to be `bicycle_road=yes`.
+-- - Function returns the old tags `<oldKey>=<oldValue>` for debugging … but we don't use that ATM
 -- - Deletes the original `construction:*` values because they are now obsolete
 -- Docs: https://wiki.openstreetmap.org/wiki/Lifecycle_prefix#Common_prefixes
 ---@param destTags table<string, string> The input table of OSM tags to mutate in-place
@@ -24,9 +24,7 @@ local function transform_construction_prefix(destTags)
     local base_tag = key:sub(14)
 
     -- Store the original value as `osm_*` tag should it exist
-    if destTags[base_tag] then
-      unmodified_tags[base_tag] = destTags[base_tag]
-    end
+    unmodified_tags[base_tag] = destTags[base_tag]
 
     -- Add the tag without the construction prefix
     destTags[base_tag] = value

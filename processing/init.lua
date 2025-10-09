@@ -48,6 +48,7 @@ package.path = package.path .. ";/processing/topics/roads_bikelanes/bikelanes/?.
 package.path = package.path .. ";/processing/topics/roads_bikelanes/bikelanes/categories/?.lua"
 package.path = package.path .. ";/processing/topics/roads_bikelanes/bikelanes/helper/?.lua"
 package.path = package.path .. ";/processing/topics/roads_bikelanes/helper/?.lua"
+package.path = package.path .. ";/processing/topics/roads_bikelanes/helper/transform_tags/?.lua"
 package.path = package.path .. ";/processing/topics/roads_bikelanes/lit/?.lua"
 package.path = package.path .. ";/processing/topics/roads_bikelanes/maxspeed/?.lua"
 package.path = package.path .. ";/processing/topics/roads_bikelanes/paths/?.lua"
