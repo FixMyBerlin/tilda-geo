@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START calculating intersection corners at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START calculating intersection corners at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_intersection_corners;
 

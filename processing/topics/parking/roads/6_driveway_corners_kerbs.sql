@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START finding driveway corner kerbs at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START finding driveway corner kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_driveway_corner_kerbs;
 

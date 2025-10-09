@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START adding kerb geometries at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START adding kerb geometries at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 ALTER TABLE _parking_road_parkings
 ADD COLUMN geom geometry (Geometry, 5243);

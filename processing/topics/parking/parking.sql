@@ -83,4 +83,4 @@
 
 
 
-DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

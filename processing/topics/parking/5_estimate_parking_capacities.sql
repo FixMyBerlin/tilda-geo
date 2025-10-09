@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START estimating parking capacity at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START estimating parking capacity at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- add length and delete short parkings
 ALTER TABLE _parking_parkings_merged
