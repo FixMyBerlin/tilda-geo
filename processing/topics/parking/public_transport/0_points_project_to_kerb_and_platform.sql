@@ -119,12 +119,19 @@ SELECT
   pk.geom
 FROM
   _parking_public_transport pt
-  JOIN _parking_roads r ON ST_DWithin (pt.geom, r.geom, 10)
   CROSS JOIN LATERAL project_to_k_closest_kerbs (pt.geom, tolerance := 20, k := 1) AS pk
 WHERE
   ST_GeometryType (pt.geom) = 'ST_Point'
   AND pt.tags ->> 'category' = 'tram_stop'
-  AND r.tags ->> 'has_embedded_rails' = 'true';
+  AND EXISTS (
+    SELECT
+      1
+    FROM
+      _parking_roads r
+    WHERE
+      ST_DWithin (pt.geom, r.geom, 10)
+      AND r.tags ->> 'has_embedded_rails' = 'true'
+  );
 
 -- CLEANUP
 DELETE FROM _parking_public_transport_points_projected
