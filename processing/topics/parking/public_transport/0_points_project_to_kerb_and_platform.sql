@@ -97,6 +97,8 @@ WHERE
   AND pt.tags ->> 'side' IS NOT NULL;
 
 -- project tram_stop to kerbs for all embedded rails
+INSERT INTO
+  _parking_public_transport_points_projected
 SELECT
   pt.id || '-' || pk.kerb_id AS id,
   pt.osm_type,
