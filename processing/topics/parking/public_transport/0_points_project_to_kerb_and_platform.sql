@@ -37,12 +37,12 @@ WHERE
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
-  p.id || '-' || pp.platform_id AS id,
-  p.osm_type,
-  p.osm_id,
-  p.id as source_id,
-  p.tags,
-  p.meta,
+  pt.id || '-' || pp.platform_id AS id,
+  pt.osm_type,
+  pt.osm_id,
+  pt.id as source_id,
+  pt.tags,
+  pt.meta,
   jsonb_build_object(
     /* sql-formatter-disable */
     'source', 'platform',
@@ -55,17 +55,46 @@ SELECT
   ) as source,
   pp.geom
 FROM
-  _parking_public_transport p
+  _parking_public_transport pt
+  CROSS JOIN LATERAL project_to_closest_platform (pt.geom, tolerance := 20) AS pp
+WHERE
+  ST_GeometryType (pt.geom) = 'ST_Point'
+  AND pt.tags ->> 'category' = 'bus_stop_centerline'
+  AND pt.tags ->> 'side' IS NULL;
+
+-- Project bus_stop_centerline to platform lines
+INSERT INTO
+  _parking_public_transport_points_projected
+SELECT
+  pt.id || '-' || pk.kerb_id AS id,
+  pt.osm_type,
+  pt.osm_id,
+  pt.id as source_id,
+  pt.tags,
+  pt.meta,
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'source', 'kerb',
+    'kerb_id', pk.kerb_id,
+    'kerb_osm_type', pk.kerb_osm_type,
+    'kerb_osm_id', pk.kerb_osm_id,
+    'kerb_tags', pk.kerb_tags,
+    'kerb_distance', pk.kerb_distance
+    /* sql-formatter-enable */
+  ) as source,
+  pk.geom
+FROM
+  _parking_public_transport pt
   CROSS JOIN LATERAL project_to_k_closest_kerbs (
-    p.geom,
+    pt.geom,
     tolerance := 20,
     k := 1,
-    side := tags ->> 'side'
+    side := pt.tags ->> 'side'
   ) AS pk
-  CROSS JOIN LATERAL project_to_closest_platform (pk.geom, tolerance := 20) AS pp
 WHERE
-  ST_GeometryType (p.geom) = 'ST_Point'
-  AND p.tags ->> 'category' = 'bus_stop_centerline';
+  ST_GeometryType (pt.geom) = 'ST_Point'
+  AND pt.tags ->> 'category' = 'bus_stop_centerline'
+  AND pt.tags ->> 'side' IS NOT NULL;
 
 -- CLEANUP
 DELETE FROM _parking_public_transport_points_projected
