@@ -96,6 +96,34 @@ WHERE
   AND pt.tags ->> 'category' = 'bus_stop_centerline'
   AND pt.tags ->> 'side' IS NOT NULL;
 
+-- project tram_stop to kerbs for all embedded rails
+SELECT
+  pt.id || '-' || pk.kerb_id AS id,
+  pt.osm_type,
+  pt.osm_id,
+  pt.id as source_id,
+  pt.tags,
+  pt.meta,
+  jsonb_build_object(
+    /* sql-formatter-disable */
+    'source', 'kerb',
+    'kerb_id', pk.kerb_id,
+    'kerb_osm_type', pk.kerb_osm_type,
+    'kerb_osm_id', pk.kerb_osm_id,
+    'kerb_tags', pk.kerb_tags,
+    'kerb_distance', pk.kerb_distance
+    /* sql-formatter-enable */
+  ) as source,
+  pk.geom
+FROM
+  _parking_public_transport pt
+  JOIN _parking_roads r ON ST_DWithin (pt.geom, r.geom, 10)
+  CROSS JOIN LATERAL project_to_k_closest_kerbs (pt.geom, tolerance := 20, k := 1) AS pk
+WHERE
+  ST_GeometryType (pt.geom) = 'ST_Point'
+  AND pt.tags ->> 'category' = 'tram_stop'
+  AND r.tags ->> 'railway' = 'embedded';
+
 -- CLEANUP
 DELETE FROM _parking_public_transport_points_projected
 WHERE
