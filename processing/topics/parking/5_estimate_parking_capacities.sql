@@ -53,12 +53,6 @@ SET
     orientation := tags ->> 'orientation'
   );
 
-UPDATE _parking_parkings_merged pm
-SET
-  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated_from_length", "capacity_confidence": "medium"}'::JSONB
-WHERE
-  tags ->> 'capacity' IS NULL;
-
 -- Special treatment for `staggered=yes` and `parking=parallel`
 -- (We only support parallel parking for now.)
 -- Docs: https://wiki.openstreetmap.org/wiki/Key:parking:both:staggered
@@ -74,9 +68,9 @@ WHERE
 -- - Staggered capacity: (20 * 0.5) - 3.8 = 10 - 3.8 = 6.2 cars
 UPDATE _parking_parkings_merged
 SET
+  estimated_capacity = (estimated_capacity * 0.5) - (FLOOR(length / 60.0) * 10.0 / 5.2),
   tags = tags || jsonb_build_object(
     /* sql-formatter-disable */
-    'capacity', (estimated_capacity * 0.5) - (FLOOR(length / 60.0) * 10.0 / 5.2),
     -- 'capacity_source', 'estimated_from_length_staggered',
     -- 'capacity_confidence', 'medium',
     '_staggered_original_capacity', estimated_capacity,
@@ -85,8 +79,13 @@ SET
   )
 WHERE
   tags ->> 'staggered' = 'yes'
-  AND tags ->> 'orientation' = 'parallel'
-  AND estimated_capacity IS NOT NULL;
+  AND tags ->> 'orientation' = 'parallel';
+
+UPDATE _parking_parkings_merged pm
+SET
+  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated_from_length", "capacity_confidence": "medium"}'::JSONB
+WHERE
+  tags ->> 'capacity' IS NULL;
 
 -- MISC
 ALTER TABLE _parking_parkings_merged
