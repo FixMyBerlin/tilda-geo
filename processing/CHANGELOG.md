@@ -2,6 +2,11 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-10-09
+
+### `roads`, `roadsPathClasses`
+
+- Exclude ways with `access=customers` (all access keys).
 ## 2025-10-03
 
 ### `bikelanes`

@@ -260,7 +260,7 @@ function osm2pgsql.process_way(object)
   -- We need sidewalks for `bikelanes`, but not for `roads*`
   if IsSidepath(object_tags) then return end
   -- Apply access filtering for roads (forbids private, no, delivery, permit, destination)
-  local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination' }) })
+  local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination', 'customers' }) })
   if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
   if exclude.by_indoor(object_tags) then return end
   if exclude.by_informal(object_tags) then return end
