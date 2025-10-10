@@ -140,14 +140,14 @@ export const NoticeMaprouletteTask = ({
       <div className="mb-5 mt-0 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
         {showMaproulette && (
           <>
-            {/* <LinkExternal href={rapidCampaignLink} blank button>
+            <LinkExternal href={rapidCampaignLink} blank button>
               Kampagne im Rapid Editor bearbeiten
-            </LinkExternal> */}
-            {osmEditIdUrlHref && (
+            </LinkExternal>
+            {/* {osmEditIdUrlHref && (
               <LinkExternal href={osmEditIdUrlHref} blank button>
                 Kampagne bearbeiten
               </LinkExternal>
-            )}
+            )} */}
             {isLoading ? (
               <span className="flex items-center gap-2 text-gray-400">
                 <SmallSpinner /> Lade MapRoulette-Link…
