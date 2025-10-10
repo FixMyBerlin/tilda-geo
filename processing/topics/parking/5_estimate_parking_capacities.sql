@@ -73,8 +73,8 @@ SET
     /* sql-formatter-disable */
     -- 'capacity_source', 'estimated_from_length_staggered',
     -- 'capacity_confidence', 'medium',
-    '_staggered_original_capacity', estimated_capacity,
-    '_staggered_maneuvering_loss', FLOOR(length / 60.0) * 10.0 / 5.2
+    '_staggered_original_capacity', ROUND(estimated_capacity, 2),
+    '_staggered_maneuvering_loss', ROUND(FLOOR(length / 60.0) * 10.0 / 5.2, 2)
     /* sql-formatter-enable */
   )
 WHERE

@@ -39,8 +39,9 @@ export const sourcesParkingTilda: MapDataSource<
       highlightingKey: 'id',
       documentedKeys: [
         'parking',
-        'capacity',
         'informal__if_present',
+        'capacity',
+        'staggered__if_present',
         'orientation',
         'direction__if_present',
         'condition_category',
