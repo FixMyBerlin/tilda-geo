@@ -2,9 +2,13 @@ import { getOsmOrgUrl, getOsmUrl } from '@/src/app/_components/utils/getOsmUrl'
 import { format, subYears } from 'date-fns'
 import { Point } from 'geojson'
 import { EditorUrlGeometry, editorUrl } from './editorUrl'
-import { OsmTypeId } from './extractOsmTypeIdByConfig'
 import { pointFromGeometry } from './pointFromGeometry'
 import { longOsmType, shortOsmType } from './shortLongOsmType'
+
+type OsmTypeId = {
+  osmType: 'way' | 'node' | 'relation' | null
+  osmId: number | string | null
+}
 
 export const osmTypeIdString = (type: string, id: string | number) => {
   return `${longOsmType[type]}/${id}`
@@ -16,13 +20,12 @@ export const osmOrgUrl = ({ osmType, osmId }: OsmTypeId) => {
   return getOsmOrgUrl(`/${osmType}/${osmId}`)
 }
 
-export const osmEditIdUrl = ({
-  osmType,
-  osmId,
-  comment,
-  hashtags,
-  source,
-}: OsmTypeId & { comment?: string; hashtags?: string; source?: string }) => {
+type OsmEditIdUrlProps = OsmTypeId & {
+  comment?: string
+  hashtags?: string
+  source?: string
+}
+export const osmEditIdUrl = ({ osmType, osmId, comment, hashtags, source }: OsmEditIdUrlProps) => {
   if (!osmType || !osmId) return undefined
   const url = new URL('https://www.openstreetmap.org/edit')
   url.searchParams.append(osmType, String(osmId))

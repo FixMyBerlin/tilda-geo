@@ -48,7 +48,9 @@ const fetchMapRouletteTask = async (
   return maprouletteTaskSchema.parse(json)
 }
 
-type Props = { projectKey: TodoId } & Omit<NoticeMaproulette, 'sourceId'>
+type Props = { projectKey: TodoId } & Omit<NoticeMaproulette, 'sourceId'> & {
+    osmTypeIdString: string
+  }
 
 export const NoticeMaprouletteTask = ({
   projectKey,
@@ -77,7 +79,6 @@ export const NoticeMaprouletteTask = ({
     enabled: !!mapRouletteId,
   })
 
-  if (!osmTypeIdString) return null
   if (geometry?.type !== 'LineString') return null
 
   const text = buildTaskInstructions({
@@ -103,11 +104,9 @@ export const NoticeMaprouletteTask = ({
 
   const maprouletteCampaignLink = `https://maproulette.org/browse/challenges/${mapRouletteId}`
 
-  const [osmType, osmId] = osmTypeIdString.split('/')
+  const [osmType, osmId] = osmTypeIdString.split('/') as ['way' | 'node' | 'relation', string] // we know this is true
   const osmEditIdUrlHref = osmEditIdUrl({
-    // @ts-expect-error we could clean this up…
     osmType,
-    // @ts-expect-error we could clean this up…
     osmId,
     comment:
       radinfraCampaign?.maprouletteChallenge.enabled == true
