@@ -8,7 +8,7 @@ SELECT
   p.osm_type,
   p.osm_id,
   p.id as source_id,
-  p.tags,
+  p.tags || jsonb_build_object('tag_sources', p.id, 'geom_sources', pk.kerb_id) as tags,
   p.meta,
   pk.* INTO _parking_obstacle_points_projected
 FROM
