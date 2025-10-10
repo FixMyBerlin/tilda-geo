@@ -44,6 +44,13 @@ export const osmEditRapidUrl = ({ osmType, osmId }: OsmTypeId) => {
   return `https://rapideditor.org/edit#id=${shortOsmType[osmType]}${osmId}&disable_features=boundaries&locale=de&hashtags=TILDA`
 }
 
+export const osmEditJosmUrl = ({ osmType, osmId }: OsmTypeId) => {
+  if (!osmType || !osmId) return undefined
+
+  // Docs at https://josm.openstreetmap.de/wiki/Help/RemoteControlCommands
+  return `http://127.0.0.1:8111/load_object?objects=${shortOsmType[osmType]}${osmId}&changeset_hashtags=TILDA`
+}
+
 export const historyUrl = ({ osmType, osmId }: OsmTypeId) => {
   if (!osmType || !osmId) return undefined
 

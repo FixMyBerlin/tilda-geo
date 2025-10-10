@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { LineString } from 'geojson'
 import { Fragment } from 'react'
 import { z } from 'zod'
-import { osmEditIdUrl } from '../Tools/osmUrls/osmUrls'
+import { osmEditIdUrl, osmEditJosmUrl } from '../Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 import { NoticeMaproulette } from './NoticeMaproulette'
 
@@ -119,6 +119,7 @@ export const NoticeMaprouletteTask = ({
     )?.join(','),
     source: 'radinfra_de',
   })
+  const osmEditJosmUrlHref = osmEditJosmUrl({ osmType, osmId })
   const completed = data?.status && maprouletteStatusCompleted.includes(data.status)
 
   return (
@@ -168,21 +169,31 @@ export const NoticeMaprouletteTask = ({
             Tipp: Nutze StreetComplete für diese Daten
           </LinkExternal>
         )}
-        {!!osmEditIdUrlHref && (
-          <LinkExternal
-            href={osmEditIdUrlHref}
-            blank
-            button={
-              showMaproulette
-                ? false
-                : showStreetcomplete
+        <div className="space-x-2">
+          {osmEditIdUrlHref && (
+            <LinkExternal
+              href={osmEditIdUrlHref}
+              blank
+              button={
+                showMaproulette
                   ? false
-                  : isLoading === false && !maprouletteTaskLink
-            }
-          >
-            Bearbeiten im iD Editor
+                  : showStreetcomplete
+                    ? false
+                    : isLoading === false && !maprouletteTaskLink
+              }
+            >
+              Bearbeiten im iD Editor
+            </LinkExternal>
+          )}
+          <LinkExternal href={rapidCampaignLink} blank>
+            Rapid
           </LinkExternal>
-        )}
+          {osmEditJosmUrlHref && (
+            <LinkExternal href={osmEditJosmUrlHref} blank>
+              JOSM
+            </LinkExternal>
+          )}
+        </div>
       </div>
       <Markdown
         markdown={text}

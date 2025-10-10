@@ -12,6 +12,7 @@ import {
   historyUrl,
   mapillaryUrl,
   osmEditIdUrl,
+  osmEditJosmUrl,
   osmEditRapidUrl,
   osmOrgUrl,
 } from './osmUrls/osmUrls'
@@ -29,6 +30,7 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
 
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
+  const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
   const mapillaryUrlHref = mapillaryUrl(feature.geometry)
 
@@ -76,6 +78,11 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         {osmEditIdUrlHref && (
           <LinkExternal blank button href={osmEditIdUrlHref}>
             Bearbeiten (iD)
+          </LinkExternal>
+        )}
+        {osmEditJosmUrlHref && (
+          <LinkExternal blank button href={osmEditJosmUrlHref}>
+            JOSM
           </LinkExternal>
         )}
         {/* Just for testing for now… */}
