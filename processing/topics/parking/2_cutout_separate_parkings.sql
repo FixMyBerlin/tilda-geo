@@ -1,7 +1,9 @@
 DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 SELECT
-  * INTO TEMP separate_parking_cutouts
+  *
+  --
+  INTO TEMP separate_parking_cutouts
 FROM
   _parking_cutouts
 WHERE
@@ -12,11 +14,12 @@ WHERE
     'obstacle_areas',
     'obstacle_lines'
   )
+  -- DISTINCT FROM is needed to handle "null DISTING FROM 'foo'" als FALSE instead of NULL
   AND tags ->> 'category' IS DISTINCT FROM 'kerb_lowered';
 
 CREATE INDEX separate_parking_cutouts_geom_idx ON separate_parking_cutouts USING GIST (geom);
 
--- INFO: Drop table happesn in cutout_parkings.sql
+-- INFO: Drop table happens in cutout_parkings.sql
 --
 -- PROCESS
 INSERT INTO
@@ -60,7 +63,7 @@ FROM
     )
   ) AS d;
 
--- INFO: Drop table happesn in cutout_parkings.sql
+-- INFO: Drop table happens in cutout_parkings.sql
 --
 -- PROCESS
 INSERT INTO
