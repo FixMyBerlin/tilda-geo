@@ -33,7 +33,7 @@ export const osmEditIdUrl = ({ osmType, osmId, comment, hashtags, source }: OsmE
   const hashParams = new URLSearchParams()
   comment && hashParams.append('comment', comment)
   source && hashParams.append('source', source)
-  hashParams.append('hashtags', hashtags || '#radverkehrsatlas')
+  hashParams.append('hashtags', hashtags || '#TILDA')
 
   return `${url.toString()}#${hashParams.toString()}`
 }
@@ -41,7 +41,7 @@ export const osmEditIdUrl = ({ osmType, osmId, comment, hashtags, source }: OsmE
 export const osmEditRapidUrl = ({ osmType, osmId }: OsmTypeId) => {
   if (!osmType || !osmId) return undefined
 
-  return `https://rapideditor.org/edit#id=${shortOsmType[osmType]}${osmId}&disable_features=boundaries&locale=de&hashtags=radverkehrsatlas`
+  return `https://rapideditor.org/edit#id=${shortOsmType[osmType]}${osmId}&disable_features=boundaries&locale=de&hashtags=TILDA`
 }
 
 export const historyUrl = ({ osmType, osmId }: OsmTypeId) => {
