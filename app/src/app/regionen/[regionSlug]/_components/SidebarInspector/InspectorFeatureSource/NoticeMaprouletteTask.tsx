@@ -13,15 +13,15 @@ import { osmEditIdUrl } from '../Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 import { NoticeMaproulette } from './NoticeMaproulette'
 
-const maprouletteStatus = new Map([
-  [0, 'Offen'],
-  [1, 'Erledigt'],
-  [2, 'Erledigt (war kein Problem)'],
-  [3, 'Offen (übersprungen)'],
-  [4, 'Gelöscht'],
-  [5, 'Erledigt (war bereits erledigt)'],
-  [6, 'Offen (zu schwer?)'],
-])
+// const maprouletteStatus = new Map([
+//   [0, 'Offen'],
+//   [1, 'Erledigt'],
+//   [2, 'Erledigt (war kein Problem)'],
+//   [3, 'Offen (übersprungen)'],
+//   [4, 'Gelöscht'],
+//   [5, 'Erledigt (war bereits erledigt)'],
+//   [6, 'Offen (zu schwer?)'],
+// ])
 const maprouletteStatusCompleted = [1, 2, 4, 5]
 
 const maprouletteTaskSchema = z.object({
@@ -69,7 +69,7 @@ export const NoticeMaprouletteTask = ({
     radinfraCampaign?.recommendedAction === 'maproulette' &&
     radinfraCampaign?.maprouletteChallenge.enabled === true
   const showStreetcomplete = radinfraCampaign?.recommendedAction === 'streetcomplete'
-  const showEditor = radinfraCampaign?.recommendedAction === 'map'
+  // const showEditor = radinfraCampaign?.recommendedAction === 'map'
 
   const { data, isLoading } = useQuery({
     queryKey: ['mapRouletteTask', mapRouletteId, properties.id],
