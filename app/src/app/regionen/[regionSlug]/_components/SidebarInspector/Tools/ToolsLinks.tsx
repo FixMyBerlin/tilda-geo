@@ -124,8 +124,14 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         })}
       </div>
 
-      <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap (Geometry)" />
-      <OsmSources idString={feature.properties.tag_sources} title="OpenStreetMap (Tags)" />
+      {feature.properties.geom_sources === feature.properties.tag_sources ? (
+        <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap" />
+      ) : (
+        <>
+          <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap (Geometry)" />
+          <OsmSources idString={feature.properties.tag_sources} title="OpenStreetMap (Tags)" />
+        </>
+      )}
     </section>
   )
 }
