@@ -1,5 +1,6 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { isProd } from '@/src/app/_components/utils/isEnv'
+import { useMapParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useMapParam'
 import {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
@@ -26,13 +27,14 @@ type Props = {
 }
 
 export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
+  const { mapParam } = useMapParam()
   const osmTypeId = extractOsmTypeIdByConfig(feature.properties, osmIdConfig)
 
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
   const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
-  const mapillaryUrlHref = mapillaryUrl(feature.geometry)
+  const mapillaryUrlHref = mapillaryUrl(feature.geometry, { zoom: mapParam.zoom })
 
   const changesetLinks = [
     {

@@ -67,9 +67,9 @@ export const mapillaryUrl = (
   },
 ) => {
   const opt = {
-    yearsAgo: 3,
-    zoom: 15,
     ...options,
+    yearsAgo: options?.yearsAgo ?? 3,
+    zoom: options?.zoom ?? 15,
   }
   const url = new URL('https://www.mapillary.com/app/')
 
