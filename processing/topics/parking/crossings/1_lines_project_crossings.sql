@@ -1,8 +1,19 @@
--- Extend crossing lines by 2 meters to ensure intersection with kerbs
+-- Extend crossing lines by smart length to ensure intersection with kerbs
 -- This handles cases where crossings are cut near centerlines and don't intersect with moved kerbs
+-- Use adaptive extension length based on crossing length:
+-- - Short crossings (< 3m): extend by 4m (likely cut near centerline)
+-- - Medium crossings (3-8m): extend by 3m
+-- - Long crossings (> 8m): extend by 2m (likely already spans full width)
 UPDATE _parking_crossing_lines
 SET
-  geom = extend_crossing_for_kerb_intersection (geom, extension_length := 2.0)
+  geom = extend_crossing_for_kerb_intersection (
+    geom,
+    extension_length := CASE
+      WHEN ST_Length (geom) < 3.0 THEN 4.0 -- Short crossings need more extension
+      WHEN ST_Length (geom) < 8.0 THEN 3.0 -- Medium crossings need moderate extension
+      ELSE 2.0 -- Long crossings need minimal extension
+    END
+  )
 WHERE
   ST_GeometryType (geom) = 'ST_LineString';
 
