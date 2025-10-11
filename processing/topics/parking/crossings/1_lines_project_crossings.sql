@@ -1,4 +1,12 @@
--- we project our generated crossing geometries on to the original crossing lines
+-- Extend crossing lines by 2 meters to ensure intersection with kerbs
+-- This handles cases where crossings are cut near centerlines and don't intersect with moved kerbs
+UPDATE _parking_crossing_lines
+SET
+  geom = extend_crossing_for_kerb_intersection (geom, extension_length := 2.0)
+WHERE
+  ST_GeometryType (geom) = 'ST_LineString';
+
+-- we project our generated crossing geometries on to the extended crossing lines
 SELECT
   c.id,
   c.osm_id,
