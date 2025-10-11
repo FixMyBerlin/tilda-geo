@@ -16,6 +16,7 @@
 \i '/processing/topics/parking/custom_functions/project_to_k_closest_kerbs.sql'
 \i '/processing/topics/parking/custom_functions/project_to_closest_platform.sql'
 \i '/processing/topics/parking/custom_functions/project_to_line.sql'
+\i '/processing/topics/parking/custom_functions/extend_crossing_for_kerb_intersection.sql'
 -- * … FOR KERBS
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
 \i '/processing/topics/parking/custom_functions/trim_kerb_at_corner.sql'
