@@ -47,10 +47,13 @@ export const LayerHighlight = (props: LayerProps) => {
   const mapLoaded = useMapLoaded()
   if (!mapLoaded) return null
 
+  // Type guard to check if layer has paint property
+  if (!('paint' in props)) return null
+
   let layerProps = {
     ...props,
-    paint: structuredClone(props.paint),
-  } as LayerProps
+    paint: props.paint ? structuredClone(props.paint) : {},
+  }
 
   if (layerProps.type === 'line') {
     if (!layerProps.paint) layerProps.paint = {}
@@ -111,5 +114,5 @@ export const LayerHighlight = (props: LayerProps) => {
     return null
   }
 
-  return <Layer {...layerProps} />
+  return <Layer {...(layerProps as any)} />
 }
