@@ -99,7 +99,7 @@ export const staticDatasetCategories = {
     subtitle: 'Statische Geodaten zu aktuellen Planungen.',
   },
   'woldegk/archive': {
-    order: 1,
+    order: 2,
     title: 'Archivierte Planungen',
     subtitle: 'Statische Geodaten zu vergangenen Planungsständen.',
   },
