@@ -1,7 +1,5 @@
 import { WfsUrl } from './createWfsUrl'
 
-export type FetchGeojsonFromWfs = Awaited<ReturnType<typeof fetchAndStoreGeopackage>>
-
 export const fetchAndStoreGeopackage = async (wfsUrl: WfsUrl, geoPackageFilename: string) => {
   const response = await fetch(wfsUrl, {
     mode: 'cors',
