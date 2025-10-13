@@ -414,7 +414,7 @@ local crossing = BikelaneCategory.new({
   infrastructureExists = true,
   implicitOneWay = true, -- 'oneway=implicit_yet' but actually unknown so lets be cautions
   implicitOneWayConfidence = 'low',
-  copySurfaceSmoothnessFromParent = false,
+  copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
     if tags.highway == "cycleway" and tags.cycleway == "crossing" then
       return true

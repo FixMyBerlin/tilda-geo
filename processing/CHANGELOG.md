@@ -2,6 +2,10 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+### `bikelanes`
+
+- For `category=crossing`, use the `surface` from the parent highway if none is given and data is derived from the centerline (tagged as `cyclway:SIDE=crossing`)
+
 ## 2025-10-09
 
 ### `bikelanes`, `roads`, `roadsPathClasses`
