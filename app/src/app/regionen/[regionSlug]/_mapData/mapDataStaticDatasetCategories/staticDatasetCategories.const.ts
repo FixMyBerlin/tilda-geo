@@ -128,4 +128,9 @@ export const staticDatasetCategories = {
     title: 'Sonstige Geodaten',
     subtitle: 'Sonstige statische Geodaten.',
   },
+  'radinfra/data': {
+    order: 1,
+    title: 'Externe Referenzdaten',
+    subtitle: 'Statische Referenzdaten zur Datenverbesserung.',
+  },
 } as const
