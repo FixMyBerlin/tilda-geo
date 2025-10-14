@@ -1,6 +1,6 @@
 import { GeocodingControl } from '@maptiler/geocoding-control/maplibregl'
 import '@maptiler/geocoding-control/style.css'
-import { ControlPosition, useControl } from 'react-map-gl'
+import { ControlPosition, useControl } from 'react-map-gl/maplibre'
 import { useStaticRegion } from '../../regionUtils/useStaticRegion'
 import { MAPTILER_API_KEY } from '../utils/maptilerApiKey.const'
 

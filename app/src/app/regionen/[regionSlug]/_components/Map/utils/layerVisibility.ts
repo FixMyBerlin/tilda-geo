@@ -1,5 +1,3 @@
-import { TypedStyleLayer } from 'maplibre-gl'
-
 export const layerVisibility = (visibile: boolean) => {
-  return { visibility: visibile ? 'visible' : 'none' } satisfies Pick<TypedStyleLayer, 'visibility'>
+  return { visibility: visibile ? ('visible' as const) : ('none' as const) }
 }
