@@ -39,19 +39,14 @@ WHERE
   tags ->> 'source' = 'separate_parking_areas'
   AND tags ->> 'area_source' = 'geometry';
 
-UPDATE _parking_parkings_merged pm
-SET
-  tags = tags || jsonb_build_object('capacity', estimated_capacity) || '{"capacity_source": "estimated_from_area", "capacity_confidence": "medium"}'::JSONB
-WHERE
-  tags ->> 'capacity' IS NULL
-  AND estimated_capacity IS NOT NULL;
-
 UPDATE _parking_parkings_merged
 SET
   estimated_capacity = estimate_capacity (
     length := length,
     orientation := tags ->> 'orientation'
-  );
+  )
+WHERE
+  estimated_capacity IS NULL;
 
 -- Special treatment for `staggered=yes` and `parking=parallel`
 -- (We only support parallel parking for now.)
