@@ -107,6 +107,13 @@ FROM
     )
   ) AS d;
 
+-- remove area related tags from all parkings that've been cutted
+UPDATE _parking_parkings_cutted
+SET
+  tags = tags - ARRAY['area', 'area_source', 'area_confidence']
+WHERE
+  id <> original_id;
+
 -- MISC
 ALTER TABLE _parking_parkings_cutted
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
