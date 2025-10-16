@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START projecting obstacle points at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START projecting obstacle points at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_points_projected CASCADE;

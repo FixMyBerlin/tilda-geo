@@ -26,6 +26,7 @@ import { _1r6doko } from './_1r6doko'
 import { _1r88sri } from './_1r88sri'
 import { _1swjsz2 } from './_1swjsz2'
 import { _1tdocms } from './_1tdocms'
+import { _1v92rco } from './_1v92rco'
 import { _1x5utcr } from './_1x5utcr'
 import { _1xgd8y8 } from './_1xgd8y8'
 import { _1ye9tgd } from './_1ye9tgd'
@@ -52,6 +53,7 @@ import { _r6m1yq } from './_r6m1yq'
 import { _r8e83n } from './_r8e83n'
 import { _rcqwse } from './_rcqwse'
 import { _sdn94m } from './_sdn94m'
+import { _sphbyz } from './_sphbyz'
 import { _st5qyw } from './_st5qyw'
 import { _tztqka } from './_tztqka'
 import { _up0vgv } from './_up0vgv'
@@ -87,6 +89,7 @@ export const configs = {
   '1r88sri': _1r88sri,
   '1swjsz2': _1swjsz2,
   '1tdocms': _1tdocms,
+  '1v92rco': _1v92rco,
   '1x5utcr': _1x5utcr,
   '1xgd8y8': _1xgd8y8,
   '1ye9tgd': _1ye9tgd,
@@ -113,6 +116,7 @@ export const configs = {
   r8e83n: _r8e83n,
   rcqwse: _rcqwse,
   sdn94m: _sdn94m,
+  sphbyz: _sphbyz,
   st5qyw: _st5qyw,
   tztqka: _tztqka,
   up0vgv: _up0vgv,

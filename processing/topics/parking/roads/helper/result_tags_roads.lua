@@ -20,6 +20,7 @@ function result_tags_roads(object)
     category = is_driveway and "driveway" or "road",
     is_driveway = is_driveway,
     has_parking = has_parking_check(object.tags),
+    has_embedded_rails = object.tags.embedded_rails == 'tram',
     width = width,
     width_confidence = width_confidence,
     width_source = width_source,

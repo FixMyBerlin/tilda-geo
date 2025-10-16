@@ -1,3 +1,8 @@
+-- Mark any turnaround point (turning circles and turning loops)
+-- where ALL connected roads have explicit parking=no
+-- as discarded.
+-- The actual discarding happens later in 0_create_cutouts.sql.
+-- TOOD DOCU: Why discard them later?
 WITH
   tp_w_explicit_parking AS (
     SELECT

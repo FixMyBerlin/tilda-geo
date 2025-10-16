@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- 1. Create a TEMP table and  that we use for clustering
 -- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.

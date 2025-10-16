@@ -9,6 +9,7 @@ local parking_crossing_points = require('parking_crossing_points')
 local parking_crossing_lines = require('parking_crossing_lines')
 local off_street_parking_points = require('off_street_parking_points')
 local off_street_parking_areas = require('off_street_parking_areas')
+local public_transport = require('public_transport')
 require('parking_parkings')
 require('parking_node_road_mapping')
 require('parking_roads')
@@ -25,6 +26,7 @@ function osm2pgsql.process_node(object)
   parking_separate_parking_points(object)
   parking_obstacle_points(object)
   parking_unprojected_points(object)
+  public_transport.parking_public_transport_stops(object)
 
   off_street_parking_points(object)
 end
@@ -36,6 +38,7 @@ function osm2pgsql.process_way(object)
 
   parking_crossing_lines(object)
   parking_obstacle_lines(object)
+  public_transport.parking_platform_lines(object)
 
   parking_node_road_mapping(object)
   parking_roads(object)

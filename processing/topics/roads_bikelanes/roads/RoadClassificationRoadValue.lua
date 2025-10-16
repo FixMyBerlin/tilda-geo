@@ -13,8 +13,9 @@ function RoadClassificationRoadValue(tags)
   end
 
   -- Sidewalks
+  -- NOTE: Categorizing the `path`s as sidewalk is not ideal. But this category does not really show up in the data, so no need to work on this ATM.
   if (tags.highway == 'footway' and tags.footway == 'sidewalk')
-      or (tags.highway == 'path' and (tags.is_sidepath == 'yes' or tags.path == 'sidewalk')) then
+      or (tags.highway == 'path' and (tags.is_sidepath == 'yes' or tags.path == 'sidewalk' or tags.path == 'sidepath')) then
     road_value = "footway_sidewalk"
   end
 

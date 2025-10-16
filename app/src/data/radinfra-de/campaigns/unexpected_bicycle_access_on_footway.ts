@@ -26,10 +26,6 @@ Dieser Weg verwendet eine unerwarte Kombination an Tags: Er ist als Gehweg attri
 **Bitte prüfe und korrigieren die Tags.**
 
 Prüfe mit Mapillary (s.u.) oder vor Ort, welches Verkehrszeichen vorliegt.
-Ideal ist, wenn du über den \`mapillary=*\` Tag den Mapillary-Key von einem Foto hinterlegst, auf dem das Verkehrszeichen zu sehen ist:
-
-* [Mapillary-Link vom Anfang der Straße](%%MAPILLARY_URL_START%%)
-* [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 
 Tagging-Empfehlungen:
 
@@ -41,6 +37,8 @@ Tagging-Empfehlungen:
 
 ## Hilfsmittel
 
+* [Mapillary-Link vom Anfang der Straße](%%MAPILLARY_URL_START%%)
+* [Mapillary-Link vom Ende der Straße](%%MAPILLARY_URL_END%%)
 * [TILDA Radverkehr an dieser Stelle](%%ATLAS_URL%%)
 * [OpenStreetMap](%%OSM_URL%%)
 `,

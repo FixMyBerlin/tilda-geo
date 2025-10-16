@@ -1,17 +1,8 @@
-export type WfsConfig = {
-  endpoint: string
-  layer: string
-  opt?: {
-    bbox?: number[]
-    crs?: `urn:ogc:def:crs:EPSG::${number}`
-    results?: number
-    sortBy?: string
-    props?: any[]
-  }
-}
+import { DownloadConfigWfs } from './types'
+
 export type WfsUrl = ReturnType<typeof createWfsUrl>
 
-export const createWfsUrl = ({ endpoint, layer, opt }: WfsConfig) => {
+export const createWfsUrl = ({ endpoint, layer, opt }: DownloadConfigWfs) => {
   const url = new URL(endpoint)
   url.searchParams.append('service', 'WFS')
   url.searchParams.append('version', '2.0.0')

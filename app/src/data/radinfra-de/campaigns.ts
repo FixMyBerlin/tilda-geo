@@ -30,6 +30,8 @@ import { needs_clarification_track } from './campaigns/needs_clarification_track
 import { needs_clarification_track__mapillary } from './campaigns/needs_clarification_track__mapillary'
 import { unexpected_bicycle_access_on_footway } from './campaigns/unexpected_bicycle_access_on_footway'
 import { unexpected_bicycle_access_on_footway__mapillary } from './campaigns/unexpected_bicycle_access_on_footway__mapillary'
+import { unexpected_highway_path } from './campaigns/unexpected_highway_path'
+import { unexpected_highway_path__mapillary } from './campaigns/unexpected_highway_path__mapillary'
 import { CampaignSchema } from './schema/campaignsSchema'
 
 const rawCampaigns = [
@@ -65,6 +67,8 @@ const rawCampaigns = [
   needs_clarification,
   unexpected_bicycle_access_on_footway__mapillary,
   unexpected_bicycle_access_on_footway,
+  unexpected_highway_path,
+  unexpected_highway_path__mapillary,
 ]
 
 const collectCampaigns = (rawCampaigns) => {

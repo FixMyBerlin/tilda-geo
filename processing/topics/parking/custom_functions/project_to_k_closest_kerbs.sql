@@ -5,7 +5,8 @@ DROP FUNCTION IF EXISTS project_to_k_closest_kerbs;
 CREATE FUNCTION project_to_k_closest_kerbs (
   input_geom geometry,
   tolerance double precision,
-  k integer
+  k integer,
+  side text DEFAULT NULL
 ) RETURNS TABLE (
   kerb_id text,
   kerb_osm_type text,
@@ -20,34 +21,33 @@ CREATE FUNCTION project_to_k_closest_kerbs (
 DECLARE
   kerb RECORD;
   projected_geom geometry;
-  closest_kerb_side text := NULL;
 BEGIN
-  SELECT  pk.side INTO closest_kerb_side
-    FROM _parking_kerbs pk
-    WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
-    ORDER BY ST_Distance(input_geom, pk.geom), pk.id
-  LIMIT 1;
+  IF side IS NULL THEN
+    SELECT  pk.side INTO project_to_k_closest_kerbs.side
+      FROM _parking_kerbs pk
+      WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
+      ORDER BY ST_Distance(input_geom, pk.geom), pk.id
+    LIMIT 1;
+  END IF;
 
   FOR kerb IN
     SELECT  pk.id, pk.osm_type, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags, ST_Distance(input_geom, pk.geom) AS projected_distance
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
-    AND pk.side = closest_kerb_side
+    AND pk.side = project_to_k_closest_kerbs.side
     ORDER BY ST_Distance(input_geom, pk.geom), pk.id
     LIMIT k
   LOOP
-    IF kerb.side = closest_kerb_side THEN
-      kerb_id := kerb.id;
-      kerb_osm_type := kerb.osm_type;
-      kerb_osm_id := kerb.osm_id;
-      kerb_side := kerb.side;
-      kerb_tags := kerb.tags;
-      kerb_has_parking := kerb.has_parking;
-      kerb_is_driveway := kerb.is_driveway;
-      geom := project_to_line(project_from:=input_geom, project_onto:=kerb.geom);
-      kerb_distance := kerb.projected_distance;
-      RETURN NEXT;
-    END IF;
+    kerb_id := kerb.id;
+    kerb_osm_type := kerb.osm_type;
+    kerb_osm_id := kerb.osm_id;
+    kerb_side := kerb.side;
+    kerb_tags := kerb.tags;
+    kerb_has_parking := kerb.has_parking;
+    kerb_is_driveway := kerb.is_driveway;
+    geom := project_to_line(project_from:=input_geom, project_onto:=kerb.geom);
+    kerb_distance := kerb.projected_distance;
+    RETURN NEXT;
   END LOOP;
 
   RETURN;

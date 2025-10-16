@@ -51,6 +51,13 @@ local SANITIZE_PARKING_TAGS = {
   parking_entrance = function(value)
     return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey' })
   end,
+  direction_to_side = function(value)
+    local transformations = {
+      forward = 'right',
+      backward = 'left',
+    }
+    return transformations[value]
+  end,
 }
 
 return SANITIZE_PARKING_TAGS

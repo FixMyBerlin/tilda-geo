@@ -4,7 +4,6 @@ require("JoinSets")
 require("Metadata")
 local exclude = require("exclude_highways")
 require("ExcludeByWidth")
-require("ConvertCyclewayOppositeSchema")
 require("Maxspeed")
 require("Lit")
 require("RoadClassification")
@@ -27,8 +26,12 @@ require("ToMarkdownList")
 require("ToTodoTags")
 require("BikeSuitability")
 require("Log")
+require('RoadClassificationRoadValue')
 local transform_construction_prefix = require('transform_construction_prefix')
 local transform_cycleway_both_postfix = require('transform_cycleway_both_postfix')
+local transform_cycleway_opposite_schema = require('transform_cycleway_opposite_schema')
+local transform_highway_path_with_foot_or_bicycle_no = require('transform_highway_path_with_foot_or_bicycle_no')
+local transform_lifecycle_tags = require('transform_lifecycle_tags')
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
@@ -146,19 +149,9 @@ function osm2pgsql.process_way(object)
   local object_tags = StructuredClone(raw_tags)
 
   -- ====== (A) Filter-Guards ======
-  if not object_tags.highway then return end
-
-  -- Skip stuff like "construction" (some), "proposed", "platform" (Haltestellen), "rest_area" (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
-  local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
-  if allowed_highways[object_tags.construction] then
-    -- Transform `highway=construction + construction=ALLOW_LIST`. Only data with missing `construction=*` is skipped.
-    object_tags.highway = object_tags.construction
-    object_tags.lifecycle = 'construction'
-    object_tags.construction = nil
-  end
-  if not allowed_highways[object_tags.highway] then return end
-
-  if exclude.by_area_water(object_tags) then return end
+  transform_lifecycle_tags(object_tags) -- needs to happen before the `exclude.by_highway_class`
+  if exclude.by_highway_class(object_tags) then return end
+  if exclude.by_other_tags(object_tags) then return end
   local forbidden_accesses_bikelanes = Set({ 'private', 'no', 'delivery', 'permit' })
   if exclude.by_access(object_tags, forbidden_accesses_bikelanes) then return end
   if exclude.by_service(object_tags) then return end
@@ -167,8 +160,8 @@ function osm2pgsql.process_way(object)
   local mapillary_coverage_lines = mapillary_coverage_data:get()
   local mapillary_coverage_value = mapillary_coverage(mapillary_coverage_lines, object.id)
 
-  -- ====== (B.2) General conversions ======
-  ConvertCyclewayOppositeSchema(object_tags)
+  -- ====== (B.2) General mutation to our `object_tags` ======
+  transform_cycleway_opposite_schema(object_tags)
   transform_construction_prefix(object_tags)
   transform_cycleway_both_postfix(object_tags)
 
@@ -259,6 +252,9 @@ function osm2pgsql.process_way(object)
     })
   end
 
+
+  -- == Start working on roads, roadsPathClasses Data ==
+  -- === Expand the result tags ===
   if not (PathClasses[object_tags.highway] or object_tags.highway == 'pedestrian') then
     MergeTable(road_result_tags, Maxspeed(object))
   end
@@ -267,17 +263,22 @@ function osm2pgsql.process_way(object)
   road_result_tags._todo_list = ToTodoTags(todos)
   road_result_tags.todos = ToMarkdownList(todos)
 
-  -- Exit processing for roads, roadsPathClasses
+  -- ====== Road specific mutations to our `object_tags` ======
+  transform_highway_path_with_foot_or_bicycle_no(object_tags)
+  -- Now we have to re-apply the road classification based on the transformed object_tags; we should refactor this…
+  road_result_tags.road = RoadClassificationRoadValue(object_tags)
+
+
+  -- === Exit processing ===
   -- We need sidewalks for `bikelanes`, but not for `roads*`
   if IsSidepath(object_tags) then return end
   -- Apply access filtering for roads (forbids private, no, delivery, permit, destination)
-  local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination' }) })
+  local forbidden_accesses_roads = JoinSets({ forbidden_accesses_bikelanes, Set({ 'destination', 'customers' }) })
   if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
   if exclude.by_indoor(object_tags) then return end
   if exclude.by_informal(object_tags) then return end
-  if exclude.by_highway_type(object_tags) then return end
 
-  -- (C.3) WRITE `bikeSuitability` table
+  -- === (C.3) WRITE `bikeSuitability` table ===
   local bikeSuitability = CategorizeBikeSuitability(object_tags)
   if bikeSuitability then
     local bike_suitability_tags = {
@@ -294,7 +295,7 @@ function osm2pgsql.process_way(object)
     })
   end
 
-  -- (C.4a) WRITE `roads` table
+  -- === (C.4a) WRITE `roads` table ===
   if PathClasses[object_tags.highway] then
     roadsPathClassesTable:insert({
       id = DefaultId(object),

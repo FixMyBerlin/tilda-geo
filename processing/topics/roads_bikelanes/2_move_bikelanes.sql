@@ -7,7 +7,7 @@
 --    - Additionally we check wether the geometry is `simple` because otherwise we might get a MLString for the same reason we simplify the geometries
 -- 3. Reverse direction of geometry for all ways that we touched before (see "Bad" above)
 --
-DO $$ BEGIN RAISE NOTICE 'START move bikelanes by offset %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START move bikelanes by offset %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 UPDATE bikelanes
 SET

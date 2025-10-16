@@ -26,7 +26,7 @@ export async function waitForFreshData() {
     return
   }
 
-  const maxTries = 25 // ~8 hours (at 20 Min per try)
+  const maxTries = 20 // ~7 hours (at 20 Min per try)
   const timeoutMinutes = 20
 
   // Use German timezone (Europe/Berlin) for all date comparisons

@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START locating obstacle points on kerb at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START locating obstacle points on kerb at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_crossing_points_located;
 

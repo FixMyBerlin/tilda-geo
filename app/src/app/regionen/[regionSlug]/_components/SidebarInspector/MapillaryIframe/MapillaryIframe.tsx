@@ -20,9 +20,11 @@ export const MapillaryIframe = ({ visible, pKey }: Props) => {
         src={`https://www.mapillary.com/embed?image_key=${pKey}&style=photo`}
         className="aspect-square w-full"
       ></iframe>
-      <LinkExternal href={link} className="text-xs">
-        In neuem Fenster öffnen…
-      </LinkExternal>
+      <div className="mt-2 flex justify-center">
+        <LinkExternal href={link} button blank className="text-sm">
+          In neuem Fenster öffnen
+        </LinkExternal>
+      </div>
     </section>
   )
 }

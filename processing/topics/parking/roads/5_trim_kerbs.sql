@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START trimming kerbs at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START trimming kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 WITH
   flat_kerbs AS (

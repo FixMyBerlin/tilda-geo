@@ -98,6 +98,11 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/5/5e/Zusatzzeichen_1000-31_-_beide_Richtungen%2C_zwei_gegengerichtete_senkrechte_Pfeile%2C_StVO_1992.svg',
   },
+  '1000-33': {
+    title: 'Zusatzzeichen 1000-33, Radverkehr im Gegenverkehr',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/0/06/Zusatzzeichen_1000-33_-_Radverkehr_im_Gegenverkehr%2C_StVO_1997.svg',
+  },
   '1026-35': {
     title: 'Zusatzzeichen 1026-35, Lieferverkehr frei',
     signUrl:

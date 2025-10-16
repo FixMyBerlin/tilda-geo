@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_parkings_quantized;
 

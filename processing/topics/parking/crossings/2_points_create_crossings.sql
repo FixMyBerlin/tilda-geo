@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START creating kerb tangents %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START creating kerb tangents %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 --
 CREATE OR REPLACE FUNCTION estimate_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$

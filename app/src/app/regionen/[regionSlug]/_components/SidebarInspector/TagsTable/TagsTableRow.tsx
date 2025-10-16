@@ -64,7 +64,6 @@ const TagsTableRowMaybeList = ({ sourceId, tagKey, tagValue }: TagsTableRowProps
     return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
   }
 
-  console.log('tagValue', tagValue)
   const listValues = tagValue.split(';').map((e) => e.trim())
   if (listValues.length === 1) {
     return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
