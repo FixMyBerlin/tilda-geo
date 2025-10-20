@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START finalize parkings at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START finalize parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- insert remaining parkings into the final 'parkings' table
 INSERT INTO

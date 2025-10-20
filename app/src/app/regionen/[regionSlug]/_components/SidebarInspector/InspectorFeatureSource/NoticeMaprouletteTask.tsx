@@ -9,19 +9,19 @@ import { useQuery } from '@tanstack/react-query'
 import { LineString } from 'geojson'
 import { Fragment } from 'react'
 import { z } from 'zod'
-import { osmEditIdUrl } from '../Tools/osmUrls/osmUrls'
+import { osmEditIdUrl, osmEditJosmUrl } from '../Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 import { NoticeMaproulette } from './NoticeMaproulette'
 
-const maprouletteStatus = new Map([
-  [0, 'Offen'],
-  [1, 'Erledigt'],
-  [2, 'Erledigt (war kein Problem)'],
-  [3, 'Offen (übersprungen)'],
-  [4, 'Gelöscht'],
-  [5, 'Erledigt (war bereits erledigt)'],
-  [6, 'Offen (zu schwer?)'],
-])
+// const maprouletteStatus = new Map([
+//   [0, 'Offen'],
+//   [1, 'Erledigt'],
+//   [2, 'Erledigt (war kein Problem)'],
+//   [3, 'Offen (übersprungen)'],
+//   [4, 'Gelöscht'],
+//   [5, 'Erledigt (war bereits erledigt)'],
+//   [6, 'Offen (zu schwer?)'],
+// ])
 const maprouletteStatusCompleted = [1, 2, 4, 5]
 
 const maprouletteTaskSchema = z.object({
@@ -48,7 +48,9 @@ const fetchMapRouletteTask = async (
   return maprouletteTaskSchema.parse(json)
 }
 
-type Props = { projectKey: TodoId } & Omit<NoticeMaproulette, 'sourceId'>
+type Props = { projectKey: TodoId } & Omit<NoticeMaproulette, 'sourceId'> & {
+    osmTypeIdString: string
+  }
 
 export const NoticeMaprouletteTask = ({
   projectKey,
@@ -69,7 +71,7 @@ export const NoticeMaprouletteTask = ({
     radinfraCampaign?.recommendedAction === 'maproulette' &&
     radinfraCampaign?.maprouletteChallenge.enabled === true
   const showStreetcomplete = radinfraCampaign?.recommendedAction === 'streetcomplete'
-  const showEditor = radinfraCampaign?.recommendedAction === 'map'
+  // const showEditor = radinfraCampaign?.recommendedAction === 'map'
 
   const { data, isLoading } = useQuery({
     queryKey: ['mapRouletteTask', mapRouletteId, properties.id],
@@ -77,7 +79,6 @@ export const NoticeMaprouletteTask = ({
     enabled: !!mapRouletteId,
   })
 
-  if (!osmTypeIdString) return null
   if (geometry?.type !== 'LineString') return null
 
   const text = buildTaskInstructions({
@@ -103,11 +104,9 @@ export const NoticeMaprouletteTask = ({
 
   const maprouletteCampaignLink = `https://maproulette.org/browse/challenges/${mapRouletteId}`
 
-  const [osmType, osmId] = osmTypeIdString.split('/')
+  const [osmType, osmId] = osmTypeIdString.split('/') as ['way' | 'node' | 'relation', string] // we know this is true
   const osmEditIdUrlHref = osmEditIdUrl({
-    // @ts-expect-error we could clean this up…
     osmType,
-    // @ts-expect-error we could clean this up…
     osmId,
     comment:
       radinfraCampaign?.maprouletteChallenge.enabled == true
@@ -120,6 +119,7 @@ export const NoticeMaprouletteTask = ({
     )?.join(','),
     source: 'radinfra_de',
   })
+  const osmEditJosmUrlHref = osmEditJosmUrl({ osmType, osmId })
   const completed = data?.status && maprouletteStatusCompleted.includes(data.status)
 
   return (
@@ -140,14 +140,14 @@ export const NoticeMaprouletteTask = ({
       <div className="mb-5 mt-0 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
         {showMaproulette && (
           <>
-            {/* <LinkExternal href={rapidCampaignLink} blank button>
+            <LinkExternal href={rapidCampaignLink} blank button>
               Kampagne im Rapid Editor bearbeiten
-            </LinkExternal> */}
-            {osmEditIdUrlHref && (
+            </LinkExternal>
+            {/* {osmEditIdUrlHref && (
               <LinkExternal href={osmEditIdUrlHref} blank button>
                 Kampagne bearbeiten
               </LinkExternal>
-            )}
+            )} */}
             {isLoading ? (
               <span className="flex items-center gap-2 text-gray-400">
                 <SmallSpinner /> Lade MapRoulette-Link…
@@ -169,21 +169,31 @@ export const NoticeMaprouletteTask = ({
             Tipp: Nutze StreetComplete für diese Daten
           </LinkExternal>
         )}
-        {!!osmEditIdUrlHref && (
-          <LinkExternal
-            href={osmEditIdUrlHref}
-            blank
-            button={
-              showMaproulette
-                ? false
-                : showStreetcomplete
+        <div className="space-x-2">
+          {osmEditIdUrlHref && (
+            <LinkExternal
+              href={osmEditIdUrlHref}
+              blank
+              button={
+                showMaproulette
                   ? false
-                  : isLoading === false && !maprouletteTaskLink
-            }
-          >
-            Bearbeiten im iD Editor
+                  : showStreetcomplete
+                    ? false
+                    : isLoading === false && !maprouletteTaskLink
+              }
+            >
+              Bearbeiten im iD Editor
+            </LinkExternal>
+          )}
+          <LinkExternal href={rapidCampaignLink} blank>
+            Rapid
           </LinkExternal>
-        )}
+          {osmEditJosmUrlHref && (
+            <LinkExternal href={osmEditJosmUrlHref} blank>
+              JOSM
+            </LinkExternal>
+          )}
+        </div>
       </div>
       <Markdown
         markdown={text}

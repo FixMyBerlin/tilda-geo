@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- filter parkings that don't allow parking (except missing)
 INSERT INTO

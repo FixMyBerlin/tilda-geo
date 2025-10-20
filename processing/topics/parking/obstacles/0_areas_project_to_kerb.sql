@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_obstacle_areas_projected CASCADE;
 
@@ -8,7 +8,7 @@ SELECT
   a.osm_type,
   a.osm_id,
   a.id as source_id,
-  a.tags,
+  a.tags || jsonb_build_object('tag_sources', a.id, 'geom_sources', pk.kerb_id) as tags,
   a.meta,
   pk.* INTO _parking_obstacle_areas_projected
 FROM

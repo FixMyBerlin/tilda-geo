@@ -29,6 +29,7 @@ type MapDataDatasetsSource = {
     | 'CC BY 2.0'
     | 'CC BY 3.0'
     | 'CC BY 4.0'
+    | 'CC BY-SA 4.0'
     | 'CC BY-NC-SA 4.0'
     | 'DL-DE/ZERO-2.0' // https://www.govdata.de/dl-de/zero-2-0
     | 'DL-DE/BY-2.0' // https://www.govdata.de/dl-de/by-2-0

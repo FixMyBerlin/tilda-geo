@@ -99,8 +99,38 @@ export const staticDatasetCategories = {
     subtitle: 'Statische Geodaten zu aktuellen Planungen.',
   },
   'woldegk/archive': {
-    order: 1,
+    order: 2,
     title: 'Archivierte Planungen',
     subtitle: 'Statische Geodaten zu vergangenen Planungsständen.',
+  },
+  'pankow/analyse': {
+    order: 1,
+    title: 'Analysen',
+    subtitle: 'Häufig genutzte Wege und Querungen mit hoher Unfallbelastung oder ohne Tempolimit.',
+  },
+  'pankow/haeufigkeiten': {
+    order: 1,
+    title: 'Nutzungshäufigkeiten',
+    subtitle: 'Fußverkehrsfrequenzen für verschiedene Zielgruppen und Zielorte.',
+  },
+  'pankow/grundschulen': {
+    order: 1,
+    title: 'Grundschulen',
+    subtitle: 'Standorte öffentlicher Grundschulen und deren Schuleinzugsgebiete.',
+  },
+  'pankow/unfall': {
+    order: 2,
+    title: 'Unfälle',
+    subtitle: 'Standorte von Unfällen mit Fußverkehrsbeteiligung der Jahre 2020-2024.',
+  },
+  'pankow/sonstiges': {
+    order: 3,
+    title: 'Sonstige Geodaten',
+    subtitle: 'Sonstige statische Geodaten.',
+  },
+  'radinfra/data': {
+    order: 1,
+    title: 'Externe Referenzdaten',
+    subtitle: 'Statische Referenzdaten zur Datenverbesserung.',
   },
 } as const

@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START creating labels at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START creating labels at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- parkings_labels
 INSERT INTO

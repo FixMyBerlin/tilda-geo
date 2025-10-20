@@ -2,6 +2,25 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+### `bikelanes`
+
+- For `category=crossing`, use the `surface` from the parent highway if none is given and data is derived from the centerline (tagged as `cyclway:SIDE=crossing`)
+
+## 2025-10-09
+
+### `bikelanes`, `roads`, `roadsPathClasses`
+
+- Exclude ways that are tagged [`leisure=track`](https://wiki.openstreetmap.org/wiki/Tag:leisure%3Dtrack). Sometimes they have a double use, bust generally they are private and not part of the every day road network.
+
+### `bikelanes`
+
+- Include ways tagged with `highway=path + foot=no + bicycle=designated`. They become `category=needsClarification` and havea todo campaign on radinfra.de to resolve the unexpected tagging. Usually those can be retagged as `highway=cycleway`.
+
+### `roads`, `roadsPathClasses`
+
+- Transform `highway=path + foot=yes|designated|nil + bicycle=no` into a `highway=footway` and `highway=path + foot=no + bicycle=yes|designated|nil` into a `highway=cycleway`.
+- Exclude ways with `access=customers` (all access keys).
+
 ## 2025-10-03
 
 ### `bikelanes`

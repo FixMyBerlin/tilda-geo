@@ -1,4 +1,4 @@
-DO $$ BEGIN RAISE NOTICE 'START creating cutout areas at %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START creating cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_cutouts;
 
@@ -104,6 +104,25 @@ SELECT
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_points_projected;
+
+-- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta)
+SELECT
+  id::TEXT,
+  osm_id,
+  ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
+  tags || jsonb_build_object(
+    /* sql-formatter-disable */
+    'category', tags ->> 'category',
+    'source', 'public_transport_stops',
+    'radius', (tags ->> 'buffer_radius')::float,
+    'side', COALESCE(source ->> 'kerb_side', 'platform')
+    /* sql-formatter-enable */
+  ),
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
+FROM
+  _parking_public_transport_points_projected;
 
 -- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
 INSERT INTO

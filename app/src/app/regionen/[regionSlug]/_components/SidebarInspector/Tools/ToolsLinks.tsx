@@ -1,5 +1,6 @@
 import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { isProd } from '@/src/app/_components/utils/isEnv'
+import { useMapParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useMapParam'
 import {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
@@ -12,6 +13,7 @@ import {
   historyUrl,
   mapillaryUrl,
   osmEditIdUrl,
+  osmEditJosmUrl,
   osmEditRapidUrl,
   osmOrgUrl,
 } from './osmUrls/osmUrls'
@@ -25,12 +27,14 @@ type Props = {
 }
 
 export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
+  const { mapParam } = useMapParam()
   const osmTypeId = extractOsmTypeIdByConfig(feature.properties, osmIdConfig)
 
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
+  const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
-  const mapillaryUrlHref = mapillaryUrl(feature.geometry)
+  const mapillaryUrlHref = mapillaryUrl(feature.geometry, { zoom: mapParam.zoom })
 
   const changesetLinks = [
     {
@@ -78,6 +82,11 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
             Bearbeiten (iD)
           </LinkExternal>
         )}
+        {osmEditJosmUrlHref && (
+          <LinkExternal blank button href={osmEditJosmUrlHref}>
+            JOSM
+          </LinkExternal>
+        )}
         {/* Just for testing for now… */}
         {!isProd && osmEditRapidUrlHref && (
           <LinkExternal blank button href={osmEditRapidUrlHref}>
@@ -115,8 +124,14 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         })}
       </div>
 
-      <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap (Geometry)" />
-      <OsmSources idString={feature.properties.tag_sources} title="OpenStreetMap (Tags)" />
+      {feature.properties.geom_sources === feature.properties.tag_sources ? (
+        <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap" />
+      ) : (
+        <>
+          <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap (Geometry)" />
+          <OsmSources idString={feature.properties.tag_sources} title="OpenStreetMap (Tags)" />
+        </>
+      )}
     </section>
   )
 }

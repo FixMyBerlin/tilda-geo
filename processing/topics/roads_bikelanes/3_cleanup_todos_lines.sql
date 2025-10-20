@@ -5,7 +5,7 @@
 -- It's very complex to skip those duplications during line-by-line processing, due to the complexity of `cycleway`|`cycleway:SIDE`
 -- Our workaround is, to remove all identical lines except for one, which is what this script does.
 --
-DO $$ BEGIN RAISE NOTICE 'START cleanup todos_lines %', clock_timestamp(); END $$;
+DO $$ BEGIN RAISE NOTICE 'START cleanup todos_lines %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 WITH
   duplicates AS (
