@@ -1,11 +1,9 @@
-DO $$ BEGIN RAISE NOTICE 'START creating cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
-
-DROP TABLE IF EXISTS _parking_cutouts;
-
-DROP TABLE IF EXISTS _parking_discarded_cutouts;
+DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- INSERT "intersection_corner" buffers (circle)
 -- @var: "5" is the buffer in meter where no parking is allowed legally
+INSERT INTO
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   intersection_id AS osm_id,
@@ -17,7 +15,7 @@ SELECT
     'radius', 5
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta INTO _parking_cutouts
+  '{}'::jsonb AS meta
 FROM
   _parking_intersection_corners
 WHERE
@@ -240,33 +238,3 @@ WHERE
     is_driveway = true
     AND has_parking = false
   );
-
-CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
-
-CREATE UNIQUE INDEX parking_cutouts_id_idx ON _parking_cutouts (id);
-
--- NOTE TODO: Test those new indexes for performance improvements
--- CREATE INDEX parking_cutouts_geom_highway_busstop_idx ON _parking_cutouts USING GIST (geom) INCLUDE ((tags ->> 'highway'), (tags ->> 'bus_stop'));
-CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));
-
-CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
-
--- Discard cutouts that have tags->>'discard' = true
-CREATE INDEX parking_cutouts_discard_idx ON _parking_cutouts (((tags ->> 'discard')::BOOLEAN));
-
-SELECT
-  * INTO _parking_discarded_cutouts
-FROM
-  _parking_cutouts c
-WHERE
-  (tags ->> 'discard')::BOOLEAN;
-
-DELETE FROM _parking_cutouts c
-WHERE
-  (tags ->> 'discard')::BOOLEAN;
-
-ALTER TABLE _parking_cutouts
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-ALTER TABLE _parking_discarded_cutouts
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);

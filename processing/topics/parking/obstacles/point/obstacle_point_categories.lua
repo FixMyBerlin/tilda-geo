@@ -43,7 +43,7 @@ obstacle_point_categories = {
     tags_cc = { 'street_cabinet' },
   }),
   class_obstacle_category.new({
-    id = 'advertising', -- https://wiki.openstreetmap.org/wiki/Key:traffic_sign
+    id = 'traffic_sign', -- https://wiki.openstreetmap.org/wiki/Key:traffic_sign
     buffer_radius = function(tags) return 0.3 end,
     conditions = function(tags)
       -- highway=traffic_sign is not used a lot but a way to describe a unspecified sign
@@ -123,5 +123,14 @@ obstacle_point_categories = {
     end,
     tags = function(tags) return { emergency = tags.emergency } end,
     tags_cc = { 'ref', 'fire_hydrant:type', 'fire_hydrant:position' },
+  }),
+  class_obstacle_category.new({
+    id = 'water_well',
+    buffer_radius = function(tags) return 1.5 end,
+    conditions = function(tags)
+      return TAG_HELPER.is_obstacle_parking(tags) and tags.man_made == 'water_well'
+    end,
+    tags = function(tags) return { man_made = tags.man_made } end,
+    tags_cc = { 'network', 'ref' },
   }),
 }

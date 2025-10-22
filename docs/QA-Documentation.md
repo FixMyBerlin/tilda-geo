@@ -76,7 +76,7 @@ The QA system uses a dual-status approach:
 2. During processing, this data is copied and the actual reference dataset is created `public.qa_parkings_euvm`
     - This dataset can be recreated at any time (with some limitations, see "previous data")
     - All data here is public or OK to be publicly visible
-    - We create manual files for each QA process (for now), for example [`parking/8_voronoi.sql`](processing/topics/parking/8_voronoi.sql)
+    - We create manual files for each QA process (for now), for example [`parking/8_qa_parkings_euvm_voronoi.sql`](processing/topics/parking/8_qa_parkings_euvm_voronoi.sql)
     - This script preserves the previous data (from the previous run) which we use to make decisions, see "Status Override Table"
     - This script also joins our TILDA data and compares it to the reference data
 3. The processing triggers an API route (`/api/private/post-processing-qa-update`) which evaluates the new data (see also "Status Override Table")
