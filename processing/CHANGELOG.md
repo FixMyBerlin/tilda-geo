@@ -2,6 +2,14 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-10-23
+
+### `bikelanes`, `roads`, `roadsPathClasses`
+
+- Treat the combination of `access=no` with an indication that the road is blocked due to construction as a `lifecycle=construction` case. This allows adding temporarily blocked ways to the data by using either `access:reason=construction` (recommended) or `description|note=Baustelle` (checking for both terms in their lowercase variants). This will check for `access=no` but also `highway=cycleway+bicycle=no` and same for footway.
+
+## 2025-10-13
+
 ### `bikelanes`
 
 - For `category=crossing`, use the `surface` from the parent highway if none is given and data is derived from the centerline (tagged as `cyclway:SIDE=crossing`)
