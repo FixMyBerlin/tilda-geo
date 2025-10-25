@@ -56,6 +56,7 @@ WHERE
 -- explode parkings into quantized points
 DROP TABLE IF EXISTS parkings_quantized;
 
+CREATE TABLE parkings_quantized AS
 WITH
   sum_points AS (
     SELECT
@@ -74,8 +75,6 @@ SELECT
   meta,
   ST_Transform (geom, 3857) as geom,
   0 as minzoom
-  --
-  INTO parkings_quantized
 FROM
   sum_points;
 

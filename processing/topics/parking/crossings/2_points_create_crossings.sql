@@ -21,6 +21,7 @@ $$ LANGUAGE plpgsql STABLE;
 DROP TABLE IF EXISTS _parking_crossings;
 
 -- INSERT "parking_crossings" from located crossing points
+CREATE TABLE _parking_crossings AS
 SELECT
   cpl.id,
   cpl.osm_id,
@@ -31,8 +32,6 @@ SELECT
   -- we increase this length to be safe when we project on to the real crossing geometry
   ABS(k.offset) + 1 as length,
   estimate_road_crossing (cpl.way_id, cpl.idx, k.offset * 3) as geom
-  --
-  INTO _parking_crossings
 FROM
   _parking_crossing_points_located cpl
   JOIN _parking_kerbs k ON way_id = k.osm_id

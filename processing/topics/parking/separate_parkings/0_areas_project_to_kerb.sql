@@ -3,6 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp
 -- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
+CREATE TABLE _parking_separate_parking_areas_projected AS
 SELECT
   id || '-' || (
     CASE
@@ -16,7 +17,7 @@ SELECT
   tags,
   side,
   meta,
-  parking_kerb AS geom INTO _parking_separate_parking_areas_projected
+  parking_kerb AS geom
 FROM
   _parking_separate_parking_areas pa
   CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.);

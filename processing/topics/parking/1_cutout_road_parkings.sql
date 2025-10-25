@@ -2,6 +2,7 @@ DO $$ BEGIN RAISE NOTICE 'START cutting out _parking_parkings_cutted at %', cloc
 
 DROP TABLE IF EXISTS _parking_parkings_cutted;
 
+CREATE TABLE _parking_parkings_cutted AS
 SELECT
   COALESCE(p.id || '/' || d.path[1], p.id) AS id,
   id as original_id,
@@ -13,8 +14,6 @@ SELECT
   p.meta,
   p.street_name,
   d.geom
-  --
-  INTO _parking_parkings_cutted
 FROM
   _parking_road_parkings p,
   LATERAL ST_Dump (

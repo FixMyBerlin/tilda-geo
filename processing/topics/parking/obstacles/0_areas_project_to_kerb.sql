@@ -3,6 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp
 DROP TABLE IF EXISTS _parking_obstacle_areas_projected CASCADE;
 
 -- CREATE "areas projected"
+CREATE TABLE _parking_obstacle_areas_projected AS
 SELECT
   a.id || '-' || pk.kerb_id AS id,
   a.osm_type,
@@ -10,7 +11,7 @@ SELECT
   a.id as source_id,
   a.tags || jsonb_build_object('tag_sources', a.id, 'geom_sources', pk.kerb_id) as tags,
   a.meta,
-  pk.* INTO _parking_obstacle_areas_projected
+  pk.*
 FROM
   _parking_obstacle_areas a
   CROSS JOIN LATERAL project_to_k_closest_kerbs (a.geom, tolerance := 2, k := 6) AS pk;
