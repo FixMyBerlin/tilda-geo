@@ -1,22 +1,14 @@
 DO $$ BEGIN RAISE NOTICE 'START creating cutout indexes at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- Create spatial index for geometry operations
+-- Based on EXPLAIN ANALYZE analysis:
+-- Only the spatial index is used in the main cutout query
+-- Individual column indexes and composite index are NOT used
+-- The spatial index efficiently handles geometry intersection, then filtering is applied
 CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
 
 -- Create unique index on id
 CREATE UNIQUE INDEX parking_cutouts_id_idx ON _parking_cutouts (id);
-
--- NOTE TODO: Test those new indexes for performance improvements
--- CREATE INDEX parking_cutouts_geom_highway_busstop_idx ON _parking_cutouts USING GIST (geom) INCLUDE ((tags ->> 'highway'), (tags ->> 'bus_stop'));
---
--- Create index on street name for filtering
-CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));
-
--- Create index on source for filtering
-CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
-
--- Create index on discard flag for filtering
-CREATE INDEX parking_cutouts_discard_idx ON _parking_cutouts (((tags ->> 'discard')::BOOLEAN));
 
 -- Set SRID for geometry columns
 ALTER TABLE _parking_cutouts

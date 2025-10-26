@@ -38,7 +38,16 @@ FROM
 -- INSERT external point cutouts with type-specific buffering
 -- Process each geometry in MULTIPOINT collections using generate_series
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   'external-point-' || id || '-' || n AS id,
   id::BIGINT AS osm_id,
@@ -72,7 +81,10 @@ SELECT
     END
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta
+  '{}'::jsonb AS meta,
+  NULL AS street_name,
+  type AS category,
+  NULL AS side
 FROM
   _euvm_cutouts_point_transformed,
   generate_series(1, ST_NumGeometries (geom)) AS n
@@ -90,7 +102,16 @@ WHERE
 -- INSERT external polygon cutouts directly
 -- Process each geometry in MULTIPOLYGON collections using generate_series
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   'external-polygon-' || id || '-' || n AS id,
   id::BIGINT AS osm_id,
@@ -101,7 +122,10 @@ SELECT
     'source', 'external_cutouts_euvm'
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta
+  '{}'::jsonb AS meta,
+  NULL AS street_name,
+  type AS category,
+  NULL AS side
 FROM
   _euvm_cutouts_polygon_transformed,
   generate_series(1, ST_NumGeometries (geom)) AS n;
