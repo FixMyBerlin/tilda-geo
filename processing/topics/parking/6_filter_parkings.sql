@@ -1,6 +1,8 @@
 DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- filter parkings that don't allow parking (except missing)
+CREATE INDEX IF NOT EXISTS parking_parkings_merged_parking_tag_idx ON _parking_parkings_merged ((tags ->> 'parking'));
+
 INSERT INTO
   parkings_no (id, tags, meta, geom, minzoom)
 SELECT
