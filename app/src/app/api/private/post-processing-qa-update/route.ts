@@ -65,17 +65,12 @@ function shouldResetUserDecision(
     previousUserStatus === 'NOT_OK_DATA_ERROR' || previousUserStatus === 'NOT_OK_PROCESSING_ERROR'
 
   if (isNotOkDecision) {
-    // User Decision Protection Rule: Only GOOD system evaluations can overwrite NOT_OK user decisions
-    // This prevents the system from overriding user-identified problems with new problematic evaluations
+    // For NOT_OK decisions: Only reset when system becomes GOOD (problem resolved)
     return newSystemStatus === 'GOOD'
   }
 
-  // For OK user decisions, reset if system got worse or improved significantly
-  const severity = { GOOD: 1, NEEDS_REVIEW: 2, PROBLEMATIC: 3 }
-  const isSystemWorse = severity[newSystemStatus] > severity[previousSystemStatus]
-  const isSystemBetter = severity[newSystemStatus] < severity[previousSystemStatus]
-
-  return isSystemWorse || isSystemBetter
+  // For OK decisions: Never reset (user decision is permanent)
+  return false
 }
 
 async function upsertQaEvaluationWithRules(
