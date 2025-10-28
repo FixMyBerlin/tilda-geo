@@ -6,7 +6,8 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `bikelanes`
 
-- For `category=cyclewayOnHighwayBetweenLanes` (Radweg in Mittellage), set `traffic_sign=never` unless a traffic sign is specified by the `traffic_sign:lanes` schema (which we never expect to happen).
+- `traffic_sign`: For `category=cyclewayOnHighwayBetweenLanes` (Radweg in Mittellage), set `traffic_sign=never` unless a traffic sign is specified by the `traffic_sign:lanes` schema (which we never expect to happen).
+- `traffic_sign`: Allow free text traffic sign values. Before, only values prefixed with `DE:` (and error cases) where allowed.
 
 ## 2025-10-23
 
