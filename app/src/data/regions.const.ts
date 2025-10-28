@@ -848,7 +848,7 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     slug: 'ueberlingen',
     osmRelationIds: [2784807],
-    map: { lat: 52.42, lng: 13.51, zoom: 18 },
+    map: { lat: 47.77, lng: 9.17, zoom: 12 },
     bbox: {
       min: [9.0654381, 47.7454374],
       max: [9.2562242, 47.8592311],
