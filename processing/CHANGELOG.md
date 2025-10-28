@@ -12,7 +12,7 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `bikelanes`, `roads`, `roadsPathClasses`
 
-- Treat the combination of `access=no` with an indication that the road is blocked due to construction as a `lifecycle=construction` case. This allows adding temporarily blocked ways to the data by using either `access:reason=construction` (recommended) or `description|note=Baustelle` (checking for both terms in their lowercase variants). This will check for `access=no` but also `highway=cycleway+bicycle=no` and same for footway.
+- Treat the combination of `access=no` with an indication that the road is blocked due to construction as a `lifecycle="construction_no_access"` case. This allows adding temporarily blocked ways to the data by checking for construction-related terms in `access:reason`, `description`, or `note` fields (case-insensitive matching for "construction" and "baustelle"). This will check for `access=no` but also `highway=cycleway+bicycle=no` / `highway=footway+foot=no`.
 
 ## 2025-10-13
 

@@ -47,8 +47,8 @@ local function transform_lifecycle_tags(destTags)
       end
       unmodified_tags.lifecycle = destTags.lifecycle
 
-      -- Set lifecycle to construction and remove ALL restricted tags
-      destTags.lifecycle = 'construction'
+      -- Set lifecycle to construction_no_access and remove ALL restricted tags
+      destTags.lifecycle = 'construction_no_access'
       destTags.description = to_semicolon_list({ destTags.description, 'TILDA-Hinweis: Weg gesperrt aufgrund einer Baustelle.' })
       for _, tag in ipairs(restrictedTags) do
         destTags[tag] = nil

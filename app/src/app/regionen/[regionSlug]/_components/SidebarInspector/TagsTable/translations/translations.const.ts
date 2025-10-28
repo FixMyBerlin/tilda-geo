@@ -89,6 +89,7 @@ export const translations: { [key: string]: string } = {
   'ALL--length--tooltip': 'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
   'ALL--lifecycle--key': 'Status',
   'ALL--lifecycle=construction': 'In Bau',
+  'ALL--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
   'ALL--lifecycle=temporary': 'Temporärer Weg',
   'ALL--maxspeed--key': 'Höchstgeschwindigkeit',
   'ALL--name--key': 'Name',
