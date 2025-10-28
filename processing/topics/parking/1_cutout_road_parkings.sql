@@ -2,10 +2,11 @@ DO $$ BEGIN RAISE NOTICE 'START cutting out _parking_parkings_cutted at %', cloc
 
 DROP TABLE IF EXISTS _parking_parkings_cutted;
 
+CREATE TABLE _parking_parkings_cutted AS
 SELECT
   COALESCE(p.id || '/' || d.path[1], p.id) AS id,
-  id as original_id,
-  osm_id,
+  p.id as original_id,
+  p.osm_id,
   osm_ref (p.osm_type, p.osm_id) AS tag_source,
   osm_ref (p.osm_type, p.osm_id) AS geom_source,
   p.side,
@@ -13,8 +14,6 @@ SELECT
   p.meta,
   p.street_name,
   d.geom
-  --
-  INTO _parking_parkings_cutted
 FROM
   _parking_road_parkings p,
   LATERAL ST_Dump (
@@ -29,18 +28,24 @@ FROM
           WHERE
             c.geom && p.geom
             AND
-            -- when both cutout and parking have a street name, they must match
+            -- When both cutout and parking have a street name, they must match
             (
-              c.tags ->> 'street:name' = p.street_name
-              OR c.tags ->> 'street:name' IS NULL
+              c.street_name = p.street_name
+              OR c.street_name IS NULL
               OR p.street_name IS NULL
             )
             AND
-            -- only apply bus_stop cutouts to the correct side of the street
+            -- Only apply bus_stop cutouts to the correct side of the street
+            -- This condition handles two cases:
+            -- 1. Non-bus stop cutouts: Apply to both sides of the street
+            --    e.g. A driveway cutout (category='driveway') will cut out parking on both sides
+            -- 2. Bus stop cutouts: Only apply to matching street side
+            --    e.g. A bus stop cutout with side='right' will only cut out parking where side='right'
+            -- Using the new column instead of JSONB expression for better performance
             (
               (
-                c.tags ->> 'category' IS DISTINCT FROM 'bus_stop'
-                OR c.tags ->> 'side' = p.side
+                c.category IS DISTINCT FROM 'bus_stop'
+                OR c.side = p.side
               )
             )
         )

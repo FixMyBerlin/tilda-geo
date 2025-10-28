@@ -2,6 +2,7 @@ DO $$ BEGIN RAISE NOTICE 'START creating kerbs %', clock_timestamp() AT TIME ZON
 
 DROP TABLE IF EXISTS _parking_kerbs;
 
+CREATE TABLE _parking_kerbs AS
 SELECT
   id || '/' || kerb_sides.side AS id,
   ST_OffsetCurve (geom, kerb_sides.offset) AS geom,
@@ -14,8 +15,6 @@ SELECT
   is_driveway,
   tags,
   meta
-  --
-  INTO _parking_kerbs
 FROM
   _parking_roads
   CROSS JOIN LATERAL (

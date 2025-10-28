@@ -3,6 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START finding driveways at %', clock_timestamp() AT TI
 DROP TABLE IF EXISTS _parking_driveways;
 
 -- CREATE driveway table based on roads with `is_driveway=true`
+CREATE TABLE _parking_driveways AS
 SELECT
   r.id || '-' || nrm.idx AS id,
   r.id AS source_id,
@@ -14,8 +15,6 @@ SELECT
   r.is_driveway,
   r.has_parking,
   nrm.idx
-  --
-  INTO _parking_driveways
 FROM
   _parking_roads r
   JOIN _parking_node_road_mapping nrm ON r.osm_id = nrm.way_id

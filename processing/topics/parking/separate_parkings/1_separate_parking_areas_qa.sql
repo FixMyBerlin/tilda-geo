@@ -1,11 +1,12 @@
 DROP TABLE IF EXISTS _parking_separate_parking_areas_qa;
 
+CREATE TABLE _parking_separate_parking_areas_qa AS
 SELECT
   p.osm_id,
   p.tags,
   l.total_length as projected_length,
   ST_Area (p.geom) as area,
-  ST_Centroid (p.geom) as geom INTO _parking_separate_parking_areas_qa
+  ST_Centroid (p.geom) as geom
 FROM
   _parking_separate_parking_areas p
   JOIN (

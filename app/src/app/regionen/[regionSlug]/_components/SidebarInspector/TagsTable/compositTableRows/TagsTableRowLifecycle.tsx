@@ -13,6 +13,12 @@ const lifecycleStyle = {
     description:
       'Dieser Weg ist in OSM als Baustelle angegeben. In TILDA zeigen wir ihn aber mit den angegebenen Infrastruktur-Attributen an. Diese können entweder den Zustand vor der Baustelle oder den Ziel-Zustand beschreiben; je nach Erfassungs-Stand.',
   },
+  construction_no_access: {
+    icon: <SvgFaPersonDigging className="size-5 text-amber-600" />,
+    colorClass: 'text-amber-600',
+    description:
+      'Dieser Weg ist in OSM als gesperrt angegeben aufgrund einer angrenzenden Baustelle.',
+  },
   temporary: {
     icon: <SvgFaPersonDigging className="size-5 text-amber-600" />,
     colorClass: 'text-amber-600',

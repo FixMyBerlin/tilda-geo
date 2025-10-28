@@ -3,6 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp() AT TIME Z
 -- 1. Create a TEMP table and  that we use for clustering
 -- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
 -- The temp table is dropped automatically once our db connection is closed.
+CREATE TEMP TABLE cluster_candidates AS
 SELECT
   id,
   geom,
@@ -59,7 +60,7 @@ SELECT
     'surface_source', tags ->> 'surface_source'
     /* sql-formatter-enable*/
   ) as tags,
-  0 as cluster_id INTO TEMP cluster_candidates
+  0 as cluster_id
 FROM
   _parking_parkings_cutted p;
 
@@ -95,6 +96,7 @@ CREATE INDEX cluster_candidates_full_idx ON cluster_candidates USING BTREE (clus
 -- aggreagate the groups by merging each cluster
 DROP TABLE IF EXISTS _parking_parkings_merged;
 
+CREATE TABLE _parking_parkings_merged AS
 WITH
   merged AS (
     SELECT
@@ -124,7 +126,7 @@ WITH
   )
 SELECT
   md5(original_ids) AS id,
-  merged.* INTO _parking_parkings_merged
+  merged.*
 FROM
   merged;
 
@@ -174,8 +176,9 @@ WHERE
       id
   );
 
+CREATE TEMP TABLE failed_merges AS
 SELECT
-  id INTO TEMP failed_merges
+  id
 FROM
   _parking_parkings_merged
 GROUP BY
@@ -186,8 +189,9 @@ HAVING
 -- if we still have clusters that failed to merge we save them in a separate table and remove their capacity so it will get estimated later on
 DROP TABLE IF EXISTS _parking_failed_merges;
 
+CREATE TABLE _parking_failed_merges AS
 SELECT
-  * INTO _parking_failed_merges
+  *
 FROM
   _parking_parkings_merged
 WHERE

@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS _parking_intersection_corners;
 
 -- for each road intersection where the roads incide with an angle smaller than 140 degrees
 -- find the intersection points of the kerbs
+CREATE TABLE _parking_intersection_corners AS
 SELECT
   i.id || '-' || corner.kerb1_id || '-' || corner.kerb2_id AS id,
   i.node_id as intersection_id,
@@ -15,8 +16,6 @@ SELECT
   corner.has_driveway,
   corner.has_road,
   corner.intersection as geom
-  --
-  INTO _parking_intersection_corners
 FROM
   _parking_intersections as i
   CROSS JOIN LATERAL get_intersection_corners (i.node_id, 140) AS corner

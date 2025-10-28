@@ -235,8 +235,8 @@ function Signs({ titleTag, signKeys }: { titleTag?: string; signKeys: string[] |
       )}
       {signKeys === undefined ? (
         <NodataFallback />
-      ) : signKeys.at(0) === 'none' ? (
-        <ConditionalFormattedValue sourceId="" tagKey="traffic_sign" tagValue="none" />
+      ) : signKeys.at(0) === 'none' || signKeys.at(0) === 'never' ? (
+        <ConditionalFormattedValue sourceId="" tagKey="traffic_sign" tagValue={signKeys.at(0)!} />
       ) : (
         <div className="flex divide-x">
           {signKeys.map((signKey) => {

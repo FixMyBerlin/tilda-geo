@@ -52,6 +52,6 @@ function SanitizeTrafficSign(traffic_sign)
     end
   end
 
-  -- Discard everything else
-  return nil
+  -- Allow free text traffic sign but cleaned up.
+  return sanitize_string(traffic_sign)
 end

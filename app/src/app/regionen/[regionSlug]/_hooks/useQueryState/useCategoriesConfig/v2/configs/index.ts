@@ -26,6 +26,7 @@ import { _1r6doko } from './_1r6doko'
 import { _1r88sri } from './_1r88sri'
 import { _1swjsz2 } from './_1swjsz2'
 import { _1tdocms } from './_1tdocms'
+import { _1u35jrm } from './_1u35jrm'
 import { _1v92rco } from './_1v92rco'
 import { _1x5utcr } from './_1x5utcr'
 import { _1xgd8y8 } from './_1xgd8y8'
@@ -89,6 +90,7 @@ export const configs = {
   '1r88sri': _1r88sri,
   '1swjsz2': _1swjsz2,
   '1tdocms': _1tdocms,
+  '1u35jrm': _1u35jrm,
   '1v92rco': _1v92rco,
   '1x5utcr': _1x5utcr,
   '1xgd8y8': _1xgd8y8,

@@ -2,6 +2,20 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-10-27
+
+### `bikelanes`
+
+- For `category=cyclewayOnHighwayBetweenLanes` (Radweg in Mittellage), set `traffic_sign=never` unless a traffic sign is specified by the `traffic_sign:lanes` schema (which we never expect to happen).
+
+## 2025-10-23
+
+### `bikelanes`, `roads`, `roadsPathClasses`
+
+- Treat the combination of `access=no` with an indication that the road is blocked due to construction as a `lifecycle="construction_no_access"` case. This allows adding temporarily blocked ways to the data by checking for construction-related terms in `access:reason`, `description`, or `note` fields (case-insensitive matching for "construction" and "baustelle"). This will check for `access=no` but also `highway=cycleway+bicycle=no` / `highway=footway+foot=no`.
+
+## 2025-10-13
+
 ### `bikelanes`
 
 - For `category=crossing`, use the `surface` from the parent highway if none is given and data is derived from the centerline (tagged as `cyclway:SIDE=crossing`)

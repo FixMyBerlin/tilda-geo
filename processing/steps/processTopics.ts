@@ -182,6 +182,9 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
         'Diffing:',
         'Skip diffing',
         JSON.stringify({ diffChanges, diffingMode: params.diffingMode, fileChanged }),
+        diffChanges === false
+          ? '`diffChanges` is false when `fileChanged==true` (new download) or `diffingMode==off`'
+          : '',
       )
     }
 

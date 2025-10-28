@@ -589,6 +589,9 @@ local cyclewayOnHighwayBetweenLanes = BikelaneCategory.new({
       tags['source:width'] = source_width
     end
 
+    local traffic_sign = extractFromLanes.extractValueFromLanes('traffic_sign:lanes', tags)
+    tags.traffic_sign = traffic_sign or 'never'
+
     return tags
   end
 })

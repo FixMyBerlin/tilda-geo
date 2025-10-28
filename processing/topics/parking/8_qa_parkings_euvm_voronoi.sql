@@ -2,13 +2,12 @@ DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp()
 
 DROP TABLE IF EXISTS _parking_parkings_quantized;
 
+CREATE TABLE _parking_parkings_quantized AS
 SELECT
   id,
   tags,
   meta,
   ST_Transform (geom, 5243) as geom
-  --
-  INTO _parking_parkings_quantized
 FROM
   parkings_quantized;
 
@@ -31,8 +30,9 @@ ALTER TABLE public.qa_parkings_euvm
 RENAME TO qa_parkings_euvm_old;
 
 -- Recreate the table by copying the euvm voronoi data
+CREATE TABLE public.qa_parkings_euvm AS
 SELECT
-  * INTO public.qa_parkings_euvm
+  *
 FROM
   data.euvm_qa_voronoi;
 

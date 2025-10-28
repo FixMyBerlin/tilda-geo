@@ -2,6 +2,7 @@ DO $$ BEGIN RAISE NOTICE 'START locating obstacle points on kerb at %', clock_ti
 
 DROP TABLE IF EXISTS _parking_crossing_points_located;
 
+CREATE TABLE _parking_crossing_points_located AS
 SELECT
   p.id || nrm.way_id AS id,
   p.tags ->> 'side' AS side,
@@ -12,8 +13,6 @@ SELECT
   p.tags,
   p.meta,
   p.geom
-  --
-  INTO _parking_crossing_points_located
 FROM
   _parking_crossing_points p
   JOIN _parking_node_road_mapping nrm ON p.osm_id = nrm.node_id;

@@ -4,6 +4,24 @@ describe("Bikelanes", function()
   require("Bikelanes")
   local extractCategoriesBySide = require('extractCategoriesBySide')
 
+  describe('Handle `traffic_sign`:', function()
+    it('processes descriptive German traffic signs', function()
+      local input_object = {
+        tags = {
+          highway = 'cycleway',
+          bicycle_road = 'yes',
+          traffic_sign = 'Rad/Fuß: Fußgänger haben Vorrang.',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+
+      assert.are.equal(result[1].category, "bicycleRoad")
+      assert.are.equal(result[1].traffic_sign, "Rad/Fuß: Fußgänger haben Vorrang.")
+    end)
+  end)
+
   describe('Handle `width`:', function()
     it('handels width on centerline', function()
       local input_object = {

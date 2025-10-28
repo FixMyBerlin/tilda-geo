@@ -4,6 +4,7 @@ import svgNudafa from '@/src/app/_components/assets/nudafa-logo.svg'
 import svgParking from '@/src/app/_components/assets/osm-parkraum-logo-2025.svg'
 import svgRadinfra from '@/src/app/_components/assets/radinfra-logo.svg'
 import imageTrTo from '@/src/app/_components/assets/trto-logo.png'
+import imageUeberlingen from '@/src/app/_components/assets/ueberlingen-logo.jpeg'
 import { categories } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataCategories/categories.const'
 import {
   SourcesRasterIds,
@@ -104,9 +105,10 @@ export type RegionSlug =
   | 'radplus'
   | 'rs8'
   | 'testing'
-  | 'trto'
-  | 'woldegk'
   | 'trassenscout-umfragen'
+  | 'trto'
+  | 'ueberlingen'
+  | 'woldegk'
 
 export const staticRegion: StaticRegion[] = [
   {
@@ -835,6 +837,30 @@ export const staticRegion: StaticRegion[] = [
       'poi',
       'bikelanes',
       'roads',
+      'mapillary',
+    ],
+    backgroundSources: defaultBackgroundSources,
+    notes: 'osmNotes',
+  },
+  {
+    name: 'Stadt Überlingen',
+    fullName: 'Stadt Überlingen – Radinfrastruktur',
+    product: 'radverkehr',
+    slug: 'ueberlingen',
+    osmRelationIds: [2784807],
+    map: { lat: 47.77, lng: 9.17, zoom: 12 },
+    bbox: {
+      min: [9.0654381, 47.7454374],
+      max: [9.2562242, 47.8592311],
+    },
+    logoPath: imageUeberlingen,
+    logoWhiteBackgroundRequired: false,
+    categories: [
+      // The order here specifies the order in the UI
+      'bikelanes',
+      'roads',
+      'boundaries',
+      'surface',
       'mapillary',
     ],
     backgroundSources: defaultBackgroundSources,

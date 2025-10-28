@@ -1,11 +1,18 @@
-DO $$ BEGIN RAISE NOTICE 'START creating cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
-
-DROP TABLE IF EXISTS _parking_cutouts;
-
-DROP TABLE IF EXISTS _parking_discarded_cutouts;
+DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- INSERT "intersection_corner" buffers (circle)
 -- @var: "5" is the buffer in meter where no parking is allowed legally
+INSERT INTO
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   intersection_id AS osm_id,
@@ -17,7 +24,10 @@ SELECT
     'radius', 5
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta INTO _parking_cutouts
+  '{}'::jsonb AS meta,
+  NULL AS street_name,
+  'intersection_corner' AS category,
+  NULL AS side
 FROM
   _parking_intersection_corners
 WHERE
@@ -25,7 +35,16 @@ WHERE
   AND has_road;
 
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   kerb_osm_id,
@@ -36,13 +55,25 @@ SELECT
     'source', 'driveway_corner_kerbs'
     /* sql-formatter-enable */
   ),
-  '{}'::jsonb
+  '{}'::jsonb,
+  NULL AS street_name,
+  'driveway_corner_kerb' AS category,
+  NULL AS side
 FROM
   _parking_driveway_corner_kerbs;
 
 -- INSERT "driveway" buffers (rectangles)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -60,13 +91,25 @@ SELECT
     'road', tags ->> 'road'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  'driveway' AS category,
+  NULL AS side
 FROM
   _parking_driveways;
 
 -- INSERT "crossing" buffers (rectangles)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -82,13 +125,25 @@ SELECT
     'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  NULL AS side
 FROM
   _parking_crossings;
 
 -- INSERT "obstacle_point" buffers (circle)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -101,13 +156,25 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  kerb_side AS side
 FROM
   _parking_obstacle_points_projected;
 
 -- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -120,13 +187,25 @@ SELECT
     'side', COALESCE(source ->> 'kerb_side', 'platform')
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  COALESCE(source ->> 'kerb_side', 'platform') AS side
 FROM
   _parking_public_transport_points_projected;
 
 -- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -138,13 +217,25 @@ SELECT
     'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  NULL AS side
 FROM
   _parking_turnaround_points;
 
 -- INSERT "obstacle_area" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -156,13 +247,25 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  kerb_side AS side
 FROM
   _parking_obstacle_areas_projected;
 
 -- INSERT "obstacle_line" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -174,13 +277,25 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  kerb_side AS side
 FROM
   _parking_obstacle_lines_projected;
 
 -- INSERT "parking area" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -191,13 +306,25 @@ SELECT
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  NULL AS side
 FROM
   _parking_separate_parking_areas_projected;
 
 -- INSERT "parking area" buffers (buffered lines)
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -208,13 +335,25 @@ SELECT
     'source', 'separate_parking_points'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  NULL AS side
 FROM
   _parking_separate_parking_points_projected;
 
 -- INSERT roads
 INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
+  _parking_cutouts (
+    id,
+    osm_id,
+    geom,
+    tags,
+    meta,
+    street_name,
+    category,
+    side
+  )
 SELECT
   id::TEXT,
   osm_id,
@@ -232,7 +371,10 @@ SELECT
     'source', 'parking_roads'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  jsonb_build_object('updated_at', meta ->> 'updated_at'),
+  tags ->> 'street:name' AS street_name,
+  tags ->> 'category' AS category,
+  NULL AS side
 FROM
   _parking_roads
 WHERE
@@ -240,33 +382,3 @@ WHERE
     is_driveway = true
     AND has_parking = false
   );
-
-CREATE INDEX parking_cutout_areas_geom_idx ON _parking_cutouts USING GIST (geom);
-
-CREATE UNIQUE INDEX parking_cutouts_id_idx ON _parking_cutouts (id);
-
--- NOTE TODO: Test those new indexes for performance improvements
--- CREATE INDEX parking_cutouts_geom_highway_busstop_idx ON _parking_cutouts USING GIST (geom) INCLUDE ((tags ->> 'highway'), (tags ->> 'bus_stop'));
-CREATE INDEX parking_cutouts_street_name_idx ON _parking_cutouts ((tags ->> 'street:name'));
-
-CREATE INDEX parking_cutouts_source_idx ON _parking_cutouts ((tags ->> 'source'));
-
--- Discard cutouts that have tags->>'discard' = true
-CREATE INDEX parking_cutouts_discard_idx ON _parking_cutouts (((tags ->> 'discard')::BOOLEAN));
-
-SELECT
-  * INTO _parking_discarded_cutouts
-FROM
-  _parking_cutouts c
-WHERE
-  (tags ->> 'discard')::BOOLEAN;
-
-DELETE FROM _parking_cutouts c
-WHERE
-  (tags ->> 'discard')::BOOLEAN;
-
-ALTER TABLE _parking_cutouts
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-ALTER TABLE _parking_discarded_cutouts
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);

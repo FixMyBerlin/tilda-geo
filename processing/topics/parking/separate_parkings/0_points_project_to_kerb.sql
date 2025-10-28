@@ -4,6 +4,7 @@ DO $$ BEGIN RAISE NOTICE 'START projecting obstacle points at %', clock_timestam
 DROP TABLE IF EXISTS _parking_separate_parking_points_projected CASCADE;
 
 -- INSERT
+CREATE TEMP TABLE _parking_separate_parking_points_snapped AS
 SELECT
   pp.id || '-' || pk.kerb_id AS id,
   pp.osm_type,
@@ -21,8 +22,6 @@ SELECT
       (car_space_x + padding) * (pp.tags ->> 'capacity')::NUMERIC - padding
     ) / 2
   ) AS buffered_geom
-  --
-  INTO TEMP _parking_separate_parking_points_snapped
 FROM
   _parking_separate_parking_points pp
   JOIN _parking_orientation_constants oc ON oc.orientation = COALESCE(pp.tags ->> 'orientation', 'parallel')
@@ -38,6 +37,7 @@ DELETE FROM _parking_separate_parking_points_snapped
 WHERE
   geom IS NULL;
 
+CREATE TABLE _parking_separate_parking_points_projected AS
 SELECT
   id || '-' || pk.kerb_id AS id,
   osm_type,
@@ -46,7 +46,7 @@ SELECT
   tags,
   meta,
   id AS source_id,
-  pk.* INTO _parking_separate_parking_points_projected
+  pk.*
 FROM
   _parking_separate_parking_points_snapped
   CROSS JOIN LATERAL project_to_k_closest_kerbs (buffered_geom, tolerance := 5, k := 1) pk;

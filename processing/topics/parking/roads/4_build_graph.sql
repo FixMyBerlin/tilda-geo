@@ -2,10 +2,9 @@ DO $$ BEGIN RAISE NOTICE 'START building graph at %', clock_timestamp() AT TIME 
 
 DROP TABLE IF EXISTS _parking_edges;
 
+CREATE TABLE _parking_edges AS
 SELECT
   (segmentize_way_to_edges (osm_id)).*
-  --
-  INTO _parking_edges
 FROM
   _parking_roads
 WHERE

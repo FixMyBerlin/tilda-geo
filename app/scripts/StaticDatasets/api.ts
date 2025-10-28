@@ -36,6 +36,7 @@ type UploadData = {
   uploadSlug: string
   regionSlugs: string[]
   isPublic: boolean
+  hideDownloadLink: boolean
   configs: Record<string, any>[]
 } & Pick<
   Prisma.UploadCreateInput,

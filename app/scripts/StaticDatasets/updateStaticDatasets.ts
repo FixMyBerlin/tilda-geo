@@ -193,6 +193,7 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
       uploadSlug,
       regionSlugs,
       isPublic: metaData.public,
+      hideDownloadLink: metaData.hideDownloadLink ?? false,
       configs: metaData.configs,
       mapRenderFormat: renderFormat,
       mapRenderUrl: getStaticDatasetUrl(uploadSlug, renderFormat),

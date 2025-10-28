@@ -42,8 +42,6 @@
 \i '/processing/topics/parking/roads/5_trim_kerbs.sql'
 \i '/processing/topics/parking/roads/6_driveway_corners_kerbs.sql'
 
-
-
 -- HANDLE PARKINGS
 \i '/processing/topics/parking/parkings/0_add_kerb_geoms.sql'
 
@@ -69,16 +67,28 @@
 \i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
 \i '/processing/topics/parking/separate_parkings/1_separate_parking_areas_qa.sql'
 
--- CREATE CUTOUT AREAS
-\i '/processing/topics/parking/0_create_cutouts.sql'
+-- CREATE CUTOUTS
+\i '/processing/topics/parking/cutouts/0_create_table.sql'
+\i '/processing/topics/parking/cutouts/1_insert_cutouts.sql'
+\i '/processing/topics/parking/cutouts/2_external_cutouts_euvm.sql'
+\i '/processing/topics/parking/cutouts/3_handle_discarded.sql'
+\i '/processing/topics/parking/cutouts/4_create_indexes.sql'
+
+-- APPLY CUTOUTS
 \i '/processing/topics/parking/1_cutout_road_parkings.sql'
 \i '/processing/topics/parking/2_cutout_separate_parkings.sql'
+
+-- ESTIMATIONS
 \i '/processing/topics/parking/3_redistribute_parking_capacities.sql'
 \i '/processing/topics/parking/4_merge_parkings.sql'
 \i '/processing/topics/parking/5_estimate_parking_capacities.sql'
+
+-- CLEANUP, FINALIZE
 \i '/processing/topics/parking/6_filter_parkings.sql'
 \i '/processing/topics/parking/7_finalize_parkings.sql'
-\i '/processing/topics/parking/8_qa_parkings_euvm_voronoi.sql'
 \i '/processing/topics/parking/9_create_labels.sql'
+
+-- QA
+\i '/processing/topics/parking/8_qa_parkings_euvm_voronoi.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

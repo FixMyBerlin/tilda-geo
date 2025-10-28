@@ -69,5 +69,7 @@ export type MetaData = {
   geometricPrecision?: 'mask' | 'regular' | 'high' | null
   /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
   mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
+  /** @desc Hide download links from non-admin users. When true, only admins can see download links */
+  hideDownloadLink?: boolean
   configs: MapDataDatasetsSource[]
 }

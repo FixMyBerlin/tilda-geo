@@ -110,6 +110,16 @@ export const SelectDataset = ({
               })}
             </ul>
           )}
+          {dataset.hideDownloadLink === false && (
+            <LinkExternal
+              href={getStaticDatasetUrl(id, 'geojson')}
+              download={`${name}.geojson`}
+              className="mt-1 inline-flex items-center gap-1"
+            >
+              <ArrowDownTrayIcon className="size-3" />
+              GeoJSON herunterladen
+            </LinkExternal>
+          )}
           {userIsAdmin && (
             <details className="mt-1 bg-pink-300 p-0.5">
               <summary className="cursor-pointer underline">Admin Upload Details</summary>
@@ -122,15 +132,19 @@ export const SelectDataset = ({
                 Github Statische Daten
               </LinkExternal>
               <br />
-              <LinkExternal
-                href={getStaticDatasetUrl(id, 'geojson')}
-                download={`${name}.geojson`}
-                className="inline-flex items-center gap-1"
-              >
-                <ArrowDownTrayIcon className="size-3" />
-                GeoJSON herunterladen
-              </LinkExternal>
-              <br />
+              {dataset.hideDownloadLink === true && (
+                <>
+                  <LinkExternal
+                    href={getStaticDatasetUrl(id, 'geojson')}
+                    download={`${name}.geojson`}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <ArrowDownTrayIcon className="size-3" />
+                    GeoJSON herunterladen
+                  </LinkExternal>
+                  <br />
+                </>
+              )}
               <LinkExternal
                 href={getStaticDatasetUrl(id, 'csv')}
                 download={`${name}.csv`}

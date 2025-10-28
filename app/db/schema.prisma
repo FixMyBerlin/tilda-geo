@@ -125,21 +125,22 @@ model Membership {
 }
 
 model Upload {
-  id              Int                 @id @default(autoincrement())
-  createdAt       DateTime            @default(now())
-  createdBy       UploadCreatedByEnum @default(SCRIPT)
-  updatedAt       DateTime            @updatedAt
+  id               Int                 @id @default(autoincrement())
+  createdAt        DateTime            @default(now())
+  createdBy        UploadCreatedByEnum @default(SCRIPT)
+  updatedAt        DateTime            @updatedAt
   //
-  slug            String              @unique
-  configs         Json
-  public          Boolean             @default(false)
-  mapRenderFormat MapRenderFormatEnum
-  mapRenderUrl    String
-  pmtilesUrl      String
-  geojsonUrl      String
-  githubUrl       String
+  slug             String              @unique
+  configs          Json
+  public           Boolean             @default(false)
+  hideDownloadLink Boolean             @default(false)
+  mapRenderFormat  MapRenderFormatEnum
+  mapRenderUrl     String
+  pmtilesUrl       String
+  geojsonUrl       String
+  githubUrl        String
   //
-  regions         Region[]
+  regions          Region[]
 }
 
 enum UploadCreatedByEnum {

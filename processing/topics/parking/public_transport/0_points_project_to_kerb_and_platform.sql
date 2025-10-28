@@ -3,6 +3,7 @@ DO $$ BEGIN RAISE NOTICE 'START projecting public transport stop points at %', c
 DROP TABLE IF EXISTS _parking_public_transport_points_projected CASCADE;
 
 -- Project bus_stop_kerb to kerbs
+CREATE TABLE _parking_public_transport_points_projected AS
 SELECT
   p.id || '-' || pk.kerb_id AS id,
   p.osm_type,
@@ -24,8 +25,6 @@ SELECT
     /* sql-formatter-enable */
   ) as source,
   pk.geom
-  --
-  INTO _parking_public_transport_points_projected
 FROM
   _parking_public_transport p
   CROSS JOIN LATERAL project_to_k_closest_kerbs (p.geom, tolerance := 5, k := 1) AS pk

@@ -29,6 +29,10 @@ WHERE
 ALTER TABLE _parking_parkings_merged
 ADD COLUMN estimated_capacity numeric;
 
+CREATE INDEX IF NOT EXISTS parking_parkings_merged_estimated_capacity_idx ON _parking_parkings_merged (estimated_capacity)
+WHERE
+  estimated_capacity IS NULL;
+
 UPDATE _parking_parkings_merged
 SET
   estimated_capacity = estimate_capacity_from_area (

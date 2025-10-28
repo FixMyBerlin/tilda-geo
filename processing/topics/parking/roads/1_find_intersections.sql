@@ -11,7 +11,8 @@ DROP TABLE IF EXISTS _parking_intersections;
 -- We can select these nodes from the _parking_node_road_mapping table.
 --
 -- `degree` – the number of ways that start/end at a node
--- `driveway_degree` – the number of driveway-ways that start/end at a node
+-- `driveway_degree` – the number of driveway-ways that start/end at a node
+CREATE TABLE _parking_intersections AS
 WITH
   intersections AS (
     SELECT
@@ -58,8 +59,6 @@ SELECT
   i.driveway_degree,
   i.road_degree + i.driveway_degree AS total_degree,
   ST_PointN (road.geom, nrm.idx) AS geom
-  --
-  INTO _parking_intersections
 FROM
   intersections i
   JOIN _parking_node_road_mapping nrm ON i.way_id = nrm.way_id
