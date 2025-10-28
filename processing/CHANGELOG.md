@@ -2,6 +2,12 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-10-27
+
+### `bikelanes`
+
+- For `category=cyclewayOnHighwayBetweenLanes` (Radweg in Mittellage), set `traffic_sign=never` unless a traffic sign is specified by the `traffic_sign:lanes` schema (which we never expect to happen).
+
 ## 2025-10-23
 
 ### `bikelanes`, `roads`, `roadsPathClasses`
