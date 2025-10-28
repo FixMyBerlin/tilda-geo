@@ -139,6 +139,7 @@ export const translations: { [key: string]: string } = {
   'ALL--traffic_sign:forward--key': 'Beschilderung in Verkehrsrichtung',
   'ALL--traffic_sign:forward=none': 'Unbeschildert',
   'ALL--traffic_sign=none': 'Unbeschildert',
+  'ALL--traffic_sign=never': 'Kein Verkehrszeichen erwartet',
   'atlas_aggregated_lengths--title': 'Statistik für radinfra.de',
   'atlas_bicycleParking--capacity--key': 'Anzahl Fahrrad-Stellplätze',
   'atlas_bicycleParking--capacity:cargo_bike--key': 'Anzahl Lastenfahrrad-Stellplätze',
