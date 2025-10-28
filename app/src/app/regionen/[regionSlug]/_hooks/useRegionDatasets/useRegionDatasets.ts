@@ -8,6 +8,7 @@ import { useRegionSlug } from '../../_components/regionUtils/useRegionSlug'
 type RegionDataset = Prettify<
   MetaData['configs'][number] & {
     isPublic: boolean
+    hideDownloadLink: boolean
     id: string
     mapRenderFormat: MapRenderFormatEnum // from upload
     mapRenderUrl: string // URL for map rendering (PMTiles or GeoJSON based on mapRenderFormat)
@@ -32,6 +33,7 @@ export const useRegionDatasets = () => {
             regionDatasets.push({
               ...config,
               isPublic: upload.public,
+              hideDownloadLink: upload.hideDownloadLink,
               id: upload.slug,
               mapRenderFormat: upload.mapRenderFormat,
               mapRenderUrl: upload.mapRenderUrl,
