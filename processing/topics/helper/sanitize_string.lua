@@ -22,7 +22,7 @@ local function sanitize_string(value)
   end
 
   -- Remove everything not in the ASCII whitelist (no dot to match previous behavior)
-  value = value:gsub('[^%w %-%_;.,:()%[%]@]', '')
+  value = value:gsub('[^%w %-%_;.,:()%[%]@/]', '')
 
   -- Restore placeholders back to their original characters
   for char, token in pairs(placeholders) do
