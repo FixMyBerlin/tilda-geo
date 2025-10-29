@@ -45,15 +45,15 @@ The QA system uses a dual-status approach:
 | **PROBLEMATIC**        | None     | GOOD         | Create new evaluation, no user decision |
 | **PROBLEMATIC**        | None     | NEEDS_REVIEW | Create new evaluation, no user decision |
 | **PROBLEMATIC**        | None     | PROBLEMATIC  | No change needed                        |
-| **GOOD**               | OK_*     | GOOD         | No change needed                        |
-| **GOOD**               | OK_*     | NEEDS_REVIEW | Reset user decision (system got worse)  |
-| **GOOD**               | OK_*     | PROBLEMATIC  | Reset user decision (system got worse)  |
-| **NEEDS_REVIEW**       | OK_*     | GOOD         | No change needed (system improved)      |
-| **NEEDS_REVIEW**       | OK_*     | NEEDS_REVIEW | No change needed                        |
-| **NEEDS_REVIEW**       | OK_*     | PROBLEMATIC  | Reset user decision (system got worse)  |
-| **PROBLEMATIC**        | OK_*     | GOOD         | No change needed (system improved)      |
-| **PROBLEMATIC**        | OK_*     | NEEDS_REVIEW | No change needed (system improved)      |
-| **PROBLEMATIC**        | OK_*     | PROBLEMATIC  | No change needed                        |
+| **GOOD**               | OK_*     | GOOD         | **NO CHANGE** (protect user decision)  |
+| **GOOD**               | OK_*     | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
+| **GOOD**               | OK_*     | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
+| **NEEDS_REVIEW**       | OK_*     | GOOD         | **NO CHANGE** (protect user decision)  |
+| **NEEDS_REVIEW**       | OK_*     | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
+| **NEEDS_REVIEW**       | OK_*     | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
+| **PROBLEMATIC**        | OK_*     | GOOD         | **NO CHANGE** (protect user decision)  |
+| **PROBLEMATIC**        | OK_*     | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
+| **PROBLEMATIC**        | OK_*     | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
 | **GOOD**               | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
 | **GOOD**               | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
 | **GOOD**               | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
@@ -69,6 +69,8 @@ The QA system uses a dual-status approach:
 - **NOT_OK_*** = `NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`
 - **Reset user decision** = Create new evaluation with userStatus, body, userId set to null
 - **NO CHANGE** = Keep existing evaluation unchanged (user decision protection)
+- **OK decisions are permanent** = Once a user marks an area as OK, that decision never changes automatically
+- **NOT_OK decisions reset only when system becomes GOOD** = When system detects the problem is resolved
 
 ## Data Flow
 
