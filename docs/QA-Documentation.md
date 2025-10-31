@@ -32,45 +32,53 @@ The QA system uses a dual-status approach:
 
 **Rationale**: If a user has identified a problem and marked it as NOT_OK, the system should not override this decision with new problematic evaluations. The user's assessment takes precedence until the system detects that the issue has been resolved (GOOD status).
 
-### 3. Status Override Table
+### 3. System Status Update Rules
 
-| Previous System Status | Previous User Status | New System Status | Action |
-|---|---|---|---|
-| **GOOD**               | None     | GOOD         | No change needed                        |
-| **GOOD**               | None     | NEEDS_REVIEW | Create new evaluation, no user decision |
-| **GOOD**               | None     | PROBLEMATIC  | Create new evaluation, no user decision |
-| **NEEDS_REVIEW**       | None     | GOOD         | Create new evaluation, no user decision |
-| **NEEDS_REVIEW**       | None     | NEEDS_REVIEW | No change needed                        |
-| **NEEDS_REVIEW**       | None     | PROBLEMATIC  | Create new evaluation, no user decision |
-| **PROBLEMATIC**        | None     | GOOD         | Create new evaluation, no user decision |
-| **PROBLEMATIC**        | None     | NEEDS_REVIEW | Create new evaluation, no user decision |
-| **PROBLEMATIC**        | None     | PROBLEMATIC  | No change needed                        |
-| **GOOD**               | OK_*     | GOOD         | **NO CHANGE** (protect user decision)  |
-| **GOOD**               | OK_*     | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
-| **GOOD**               | OK_*     | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
-| **NEEDS_REVIEW**       | OK_*     | GOOD         | **NO CHANGE** (protect user decision)  |
-| **NEEDS_REVIEW**       | OK_*     | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
-| **NEEDS_REVIEW**       | OK_*     | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
-| **PROBLEMATIC**        | OK_*     | GOOD         | **NO CHANGE** (protect user decision)  |
-| **PROBLEMATIC**        | OK_*     | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
-| **PROBLEMATIC**        | OK_*     | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
-| **GOOD**               | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
-| **GOOD**               | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
-| **GOOD**               | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
-| **NEEDS_REVIEW**       | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
-| **NEEDS_REVIEW**       | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
-| **NEEDS_REVIEW**       | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
-| **PROBLEMATIC**        | NOT_OK_* | GOOD         | Reset user decision (system improved)   |
-| **PROBLEMATIC**        | NOT_OK_* | NEEDS_REVIEW | **NO CHANGE** (protect user decision)  |
-| **PROBLEMATIC**        | NOT_OK_* | PROBLEMATIC  | **NO CHANGE** (protect user decision)  |
+The system evaluates when to create a new evaluation based on two scenarios:
 
-**Legend:**
-- **OK_*** = `OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`
-- **NOT_OK_*** = `NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`
-- **Reset user decision** = Create new evaluation with userStatus, body, userId set to null
-- **NO CHANGE** = Keep existing evaluation unchanged (user decision protection)
-- **OK decisions are permanent** = Once a user marks an area as OK, that decision never changes automatically
-- **NOT_OK decisions reset only when system becomes GOOD** = When system detects the problem is resolved
+#### 3.1. System Overwrites System (No User Decision)
+
+When there is **no user decision** (`userStatus === null`), the system will create a new evaluation whenever the system status changes. This allows the system to keep its evaluation up-to-date as data changes.
+
+| Previous System Status | New System Status | Action |
+|---|---|---|
+| **GOOD**               | GOOD         | **No change** - Keep existing evaluation |
+| **GOOD**               | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself |
+| **GOOD**               | PROBLEMATIC  | **Create new evaluation** - System overwrites itself |
+| **NEEDS_REVIEW**       | GOOD         | **Create new evaluation** - System overwrites itself |
+| **NEEDS_REVIEW**       | NEEDS_REVIEW | **No change** - Keep existing evaluation |
+| **NEEDS_REVIEW**       | PROBLEMATIC  | **Create new evaluation** - System overwrites itself |
+| **PROBLEMATIC**        | GOOD         | **Create new evaluation** - System overwrites itself |
+| **PROBLEMATIC**        | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself |
+| **PROBLEMATIC**        | PROBLEMATIC  | **No change** - Keep existing evaluation |
+
+**Rule**: New evaluation is created when `previousSystemStatus !== newSystemStatus` AND `previousRelative !== currentRelative` (data has changed).
+
+#### 3.2. System Overwrites User Decision
+
+When there is **a user decision** (`userStatus !== null`), the system respects user decisions with specific rules:
+
+| Previous User Status | New System Status | Action |
+|---|---|---|
+| **OK_STRUCTURAL_CHANGE** | GOOD         | **No change** - User decision is permanent |
+| **OK_STRUCTURAL_CHANGE** | NEEDS_REVIEW | **No change** - User decision is permanent |
+| **OK_STRUCTURAL_CHANGE** | PROBLEMATIC  | **No change** - User decision is permanent |
+| **OK_REFERENCE_ERROR**  | GOOD         | **No change** - User decision is permanent |
+| **OK_REFERENCE_ERROR**  | NEEDS_REVIEW | **No change** - User decision is permanent |
+| **OK_REFERENCE_ERROR**  | PROBLEMATIC  | **No change** - User decision is permanent |
+| **NOT_OK_DATA_ERROR**    | GOOD         | **Reset user decision** - System detects problem resolved |
+| **NOT_OK_DATA_ERROR**    | NEEDS_REVIEW | **No change** - Protect user's NOT_OK decision |
+| **NOT_OK_DATA_ERROR**    | PROBLEMATIC  | **No change** - Protect user's NOT_OK decision |
+| **NOT_OK_PROCESSING_ERROR** | GOOD         | **Reset user decision** - System detects problem resolved |
+| **NOT_OK_PROCESSING_ERROR** | NEEDS_REVIEW | **No change** - Protect user's NOT_OK decision |
+| **NOT_OK_PROCESSING_ERROR** | PROBLEMATIC  | **No change** - Protect user's NOT_OK decision |
+
+**Rules**:
+- **OK decisions (`OK_*`)**: Never reset - user decision is permanent regardless of system status
+- **NOT_OK decisions (`NOT_OK_*`)**: Only reset when `newSystemStatus === 'GOOD'` (problem resolved)
+- **Reset user decision**: Creates new evaluation with `userStatus = null`, `body = null`, `userId = null`
+
+**Important Note**: All updates only occur when data has changed (`previousRelative !== currentRelative`). If the relative value hasn't changed, no new evaluation is created regardless of status changes.
 
 ## Data Flow
 
