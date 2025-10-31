@@ -23,6 +23,7 @@ export const qaAreasStatusMap: Record<QaStyleKey, QaEvaluationStatus | null> = {
   'user-not-ok-osm': 'NOT_OK_DATA_ERROR',
   'user-ok-construction': 'OK_STRUCTURAL_CHANGE',
   'user-ok-reference-error': 'OK_REFERENCE_ERROR',
+  'user-other': 'OTHER',
   none: null,
   all: null,
   'user-pending': null,

@@ -20,6 +20,7 @@ The QA system uses a dual-status approach:
 - `OK_REFERENCE_ERROR` - User confirmed OK, caused by wrong reference data
 - `NOT_OK_DATA_ERROR` - User confirmed problem, current data needs fixing
 - `NOT_OK_PROCESSING_ERROR` - User confirmed problem, processing needs fixing
+- `OTHER` - Other reason, user decision that should not be overwritten (Purple)
 
 **Priority Rules**:
 - User status **always overrides** system status when present
@@ -66,6 +67,9 @@ When there is **a user decision** (`userStatus !== null`), the system respects u
 | **OK_REFERENCE_ERROR**  | GOOD         | **No change** - User decision is permanent |
 | **OK_REFERENCE_ERROR**  | NEEDS_REVIEW | **No change** - User decision is permanent |
 | **OK_REFERENCE_ERROR**  | PROBLEMATIC  | **No change** - User decision is permanent |
+| **OTHER**                | GOOD         | **No change** - User decision is permanent |
+| **OTHER**                | NEEDS_REVIEW | **No change** - User decision is permanent |
+| **OTHER**                | PROBLEMATIC  | **No change** - User decision is permanent |
 | **NOT_OK_DATA_ERROR**    | GOOD         | **Reset user decision** - System detects problem resolved |
 | **NOT_OK_DATA_ERROR**    | NEEDS_REVIEW | **No change** - Protect user's NOT_OK decision |
 | **NOT_OK_DATA_ERROR**    | PROBLEMATIC  | **No change** - Protect user's NOT_OK decision |
@@ -75,6 +79,7 @@ When there is **a user decision** (`userStatus !== null`), the system respects u
 
 **Rules**:
 - **OK decisions (`OK_*`)**: Never reset - user decision is permanent regardless of system status
+- **OTHER**: Never reset - user decision is permanent regardless of system status (behaves like OK decisions)
 - **NOT_OK decisions (`NOT_OK_*`)**: Only reset when `newSystemStatus === 'GOOD'` (problem resolved)
 - **Reset user decision**: Creates new evaluation with `userStatus = null`, `body = null`, `userId = null`
 

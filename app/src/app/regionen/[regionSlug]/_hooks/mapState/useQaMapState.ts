@@ -33,6 +33,10 @@ const filterQaDataByStyle = (data: QaMapData[], style: string) => {
       return data.filter((item) => {
         return item.userStatus === USER_STATUS_TO_LETTER.OK_REFERENCE_ERROR
       })
+    case 'user-other':
+      return data.filter((item) => {
+        return item.userStatus === USER_STATUS_TO_LETTER.OTHER
+      })
     case 'user-pending':
       return data.filter((item) => {
         return item.userStatus === null && item.systemStatus !== null && item.systemStatus !== 'G'

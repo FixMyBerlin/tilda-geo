@@ -257,6 +257,7 @@ enum QaEvaluationStatus {
   OK_REFERENCE_ERROR // "Diff OK, caused by wrong past/reference data"
   NOT_OK_DATA_ERROR // "Diff not OK, current data needs to be fixed"
   NOT_OK_PROCESSING_ERROR // "Diff not OK, processing needs to be fixed"
+  OTHER // "Other reason - user decision that should not be overwritten"
 }
 
 enum QaEvaluatorType {

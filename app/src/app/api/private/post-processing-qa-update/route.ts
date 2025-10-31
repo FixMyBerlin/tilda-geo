@@ -69,7 +69,8 @@ function shouldResetUserDecision(
     return newSystemStatus === 'GOOD'
   }
 
-  // For OK decisions: Never reset (user decision is permanent)
+  // For OK and OTHER decisions: Never reset (user decision is permanent)
+  // This includes OK_STRUCTURAL_CHANGE, OK_REFERENCE_ERROR, and OTHER
   return false
 }
 
