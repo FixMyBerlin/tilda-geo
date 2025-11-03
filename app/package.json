@@ -25,6 +25,7 @@
     "migrate:check": "npx blitz@2.2.2 prisma migrate status",
     "migrate:compare": "git diff origin/main... -- db/migrations",
     "seed": "npm run predev && npm run migrate && npx blitz@2.2.2 prisma migrate reset && npx blitz@2.2.2 db seed",
+    "seed:full": "npm run seed && npm run StaticDatasets:update:dev",
     "type-check": "tsc --noEmit",
     "lint": "next lint",
     "format": "prettier --experimental-cli --write --ignore-path .gitignore \"src/**/*.{ts,js,tsx,md}\" \"mailers/**/*.{ts,js,tsx,md}\"",
