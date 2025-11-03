@@ -33,16 +33,15 @@ CREATE INDEX IF NOT EXISTS parking_parkings_merged_estimated_capacity_idx ON _pa
 WHERE
   estimated_capacity IS NULL;
 
-UPDATE _parking_parkings_merged
-SET
-  estimated_capacity = estimate_capacity_from_area (
-    area := (tags ->> 'area')::NUMERIC,
-    orientation := tags ->> 'orientation'
-  )
-WHERE
-  tags ->> 'source' = 'separate_parking_areas'
-  AND tags ->> 'area_source' = 'geometry';
-
+-- UPDATE _parking_parkings_merged
+-- SET
+--   estimated_capacity = estimate_capacity_from_area (
+--     area := (tags ->> 'area')::NUMERIC,
+--     orientation := tags ->> 'orientation'
+--   )
+-- WHERE
+--   tags ->> 'source' = 'separate_parking_areas'
+--   AND tags ->> 'area_source' = 'geometry';
 UPDATE _parking_parkings_merged
 SET
   estimated_capacity = estimate_capacity (

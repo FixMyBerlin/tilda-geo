@@ -26,11 +26,24 @@ FROM
 -- we do this by assigning the capacity to each piece proportionally to it's length / length of all projected pieces
 CREATE INDEX parking_separate_parking_areas_osm_id_idx ON _parking_separate_parking_areas_projected (osm_id);
 
+UPDATE _parking_separate_parking_areas_projected
+SET
+  tags = tags || jsonb_build_object(
+    'capacity',
+    estimate_capacity (
+      length := ST_Length (geom)::NUMERIC,
+      orientation := tags ->> 'orientation'
+    )
+  ) || '{"capacity_source": "estimated", "capacity_confidence": "medium"}'::JSONB
+WHERE
+  tags ->> 'capacity' IS NULL;
+
 WITH
   total_lengths AS (
     SELECT
       osm_id,
       SUM(ST_Length (geom)) AS length,
+      SUM((tags ->> 'capacity')::NUMERIC) / 2.0 AS capacity,
       COUNT(*) AS count
     FROM
       _parking_separate_parking_areas_projected
@@ -43,7 +56,7 @@ UPDATE _parking_separate_parking_areas_projected pc
 SET
   tags = tags || jsonb_build_object(
     'capacity',
-    (tags ->> 'capacity')::NUMERIC * ST_Length (pc.geom) / tl.length
+    tl.capacity * ST_Length (pc.geom) / tl.length
   )
 FROM
   total_lengths tl
