@@ -1,5 +1,6 @@
 DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
+-- TODO: only use the obstacles that are inside in a separate parking area
 SELECT
   *
   --
@@ -7,12 +8,14 @@ SELECT
 FROM
   _parking_cutouts
 WHERE
-  tags ->> 'source' IN (
-    'crossing',
-    'driveways',
-    'obstacle_points',
-    'obstacle_areas',
-    'obstacle_lines'
+  tags ->> 'source' IN ('crossing', 'driveways')
+  OR (
+    tags ->> 'source' IN (
+      'obstacle_points',
+      'obstacle_areas',
+      'obstacle_lines'
+    )
+    AND (tags ->> 'separate_parking')::BOOLEAN
   )
   -- DISTINCT FROM is needed to handle "null DISTING FROM 'foo'" als FALSE instead of NULL
   AND tags ->> 'category' IS DISTINCT FROM 'kerb_lowered';

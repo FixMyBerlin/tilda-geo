@@ -50,6 +50,11 @@
 \i '/processing/topics/parking/crossings/2_points_create_crossings.sql'
 \i '/processing/topics/parking/crossings/1_lines_project_crossings.sql'
 
+-- HANDLE SEPARATE PARKINGS
+\i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
+\i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
+\i '/processing/topics/parking/separate_parkings/1_separate_parking_areas_qa.sql'
+
 -- HANDLE OBSTACLES
 \i '/processing/topics/parking/obstacles/0_areas_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/0_lines_project_to_kerb.sql'
@@ -61,11 +66,6 @@
 
 -- HANDLE PUBLIC TRANSPORT
 \i '/processing/topics/parking/public_transport/0_points_project_to_kerb_and_platform.sql'
-
--- HANDLE SEPARATE PARKINGS
-\i '/processing/topics/parking/separate_parkings/0_areas_project_to_kerb.sql'
-\i '/processing/topics/parking/separate_parkings/0_points_project_to_kerb.sql'
-\i '/processing/topics/parking/separate_parkings/1_separate_parking_areas_qa.sql'
 
 -- CREATE CUTOUTS
 \i '/processing/topics/parking/cutouts/0_create_table.sql'
