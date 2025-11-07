@@ -1,6 +1,7 @@
 import { invoke } from '@/src/blitz-server'
 import { productName } from '@/src/data/tildaProductNames.const'
 import getRegion from '@/src/server/regions/queries/getRegion'
+import { trackRegionAccess } from '@/src/server/users/trackRegionAccess'
 import { DevMiddlewareHostnameWorkaround } from './_components/DevMiddlewareHostnameWorkaround'
 import { MapInterface } from './_components/MapInterface'
 
@@ -14,7 +15,10 @@ export async function generateMetadata({ params }) {
 }
 
 // This page will always initialize with a `map` an `config` param, courtesy of ./middleware.ts
-export default function RegionPage() {
+export default async function RegionPage({ params }: { params: { regionSlug: string } }) {
+  // Track region access
+  await trackRegionAccess(params.regionSlug)
+
   return (
     <>
       <DevMiddlewareHostnameWorkaround />
