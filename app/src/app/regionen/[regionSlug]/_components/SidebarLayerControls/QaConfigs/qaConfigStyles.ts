@@ -11,7 +11,10 @@ export const QA_STYLE_OPTIONS = [
   { key: 'user-not-ok-osm', label: `Nutzer: ${userStatusConfig.NOT_OK_DATA_ERROR.label}` },
   { key: 'user-ok-construction', label: `Nutzer: ${userStatusConfig.OK_STRUCTURAL_CHANGE.label}` },
   { key: 'user-ok-reference-error', label: `Nutzer: ${userStatusConfig.OK_REFERENCE_ERROR.label}` },
-  { key: 'user-other', label: `Nutzer: ${userStatusConfig.OTHER.label}` },
+  {
+    key: 'user-ok-qa-tooling-error',
+    label: `Nutzer: ${userStatusConfig.OK_QA_TOOLING_ERROR.label}`,
+  },
   { key: 'user-pending', label: 'Nuzter-Entscheidung steht aus' },
 ] as const
 

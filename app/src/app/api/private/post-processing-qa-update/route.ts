@@ -69,8 +69,12 @@ function shouldResetUserDecision(
     return newSystemStatus === 'GOOD'
   }
 
-  // For OK and OTHER decisions: Never reset (user decision is permanent)
-  // This includes OK_STRUCTURAL_CHANGE, OK_REFERENCE_ERROR, and OTHER
+  // For OK_QA_TOOLING_ERROR: Reset when system becomes GOOD (QA tooling error resolved)
+  if (previousUserStatus === 'OK_QA_TOOLING_ERROR') {
+    return newSystemStatus === 'GOOD'
+  }
+
+  // For OK decisions (OK_STRUCTURAL_CHANGE, OK_REFERENCE_ERROR): Never reset (user decision is permanent)
   return false
 }
 

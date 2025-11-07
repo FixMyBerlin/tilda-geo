@@ -19,7 +19,7 @@ export const QA_USER_STATUS_COLORS = {
   OK_REFERENCE_ERROR: '#009E73', // Green - user confirmed OK
   NOT_OK_DATA_ERROR: '#D55E00', // Red - user confirmed problem
   NOT_OK_PROCESSING_ERROR: '#D55E00', // Red - user confirmed problem
-  OTHER: '#9333EA', // Purple - other reason, user decision that should not be overwritten
+  OK_QA_TOOLING_ERROR: '#9333EA', // Purple - methodical error in QA tooling (geometries/definitions)
 } as const satisfies Record<QaEvaluationStatus, `#${string}`>
 
 // System status to letter mapping for optimization
@@ -42,7 +42,7 @@ export const USER_STATUS_TO_LETTER = {
   OK_REFERENCE_ERROR: 'R', // Reference
   NOT_OK_DATA_ERROR: 'D', // Data
   NOT_OK_PROCESSING_ERROR: 'P', // Processing
-  OTHER: 'O', // Other
+  OK_QA_TOOLING_ERROR: 'QA', // QA Tooling Error
 } as const satisfies Record<QaEvaluationStatus, string>
 
 // Letter to user status mapping for translation back
@@ -51,7 +51,7 @@ export const LETTER_TO_USER_STATUS: Record<string, QaEvaluationStatus> = {
   R: 'OK_REFERENCE_ERROR',
   D: 'NOT_OK_DATA_ERROR',
   P: 'NOT_OK_PROCESSING_ERROR',
-  O: 'OTHER',
+  QA: 'OK_QA_TOOLING_ERROR',
 } as const satisfies Record<string, QaEvaluationStatus>
 
 // System Status Configuration
@@ -104,10 +104,10 @@ export const userStatusConfig = {
     color: 'text-red-600',
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_PROCESSING_ERROR,
   },
-  OTHER: {
-    label: 'Sonstiges',
+  OK_QA_TOOLING_ERROR: {
+    label: 'OK (QA-Tooling-Fehler)',
     color: 'text-purple-600',
-    hexColor: QA_USER_STATUS_COLORS.OTHER,
+    hexColor: QA_USER_STATUS_COLORS.OK_QA_TOOLING_ERROR,
   },
 } as const satisfies Record<QaEvaluationStatus, Object>
 
@@ -152,10 +152,11 @@ export const userStatusOptions = [
     hexColor: QA_USER_STATUS_COLORS.NOT_OK_PROCESSING_ERROR,
   },
   {
-    value: 'OTHER' as const,
-    label: 'Sonstiges',
-    description: 'Anderer Grund - Nutzerentscheidung die nicht überschrieben werden soll',
-    hexColor: QA_USER_STATUS_COLORS.OTHER,
+    value: 'OK_QA_TOOLING_ERROR' as const,
+    label: 'OK (QA-Tooling-Fehler)',
+    description:
+      'Differenz OK, verursacht durch methodischen Fehler im QA-Tooling (z.B. Geometrien oder Definitionen)',
+    hexColor: QA_USER_STATUS_COLORS.OK_QA_TOOLING_ERROR,
   },
 ] as const satisfies Array<{
   value: QaEvaluationStatus
