@@ -36,7 +36,9 @@ export default function AdminMembershipsPage() {
   return (
     <>
       <HeaderWrapper>
-        <Breadcrumb pages={[{ href: '/admin/memberships', name: 'Nutzer & Mitgliedschaften' }]} />
+        <Breadcrumb
+          pages={[{ href: '/admin/memberships', name: 'Nutzer:innen & Mitgliedschaften' }]}
+        />
       </HeaderWrapper>
 
       {userAndMemberships.length >= MAX_TAKE && (
