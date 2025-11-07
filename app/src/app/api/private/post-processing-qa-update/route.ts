@@ -4,6 +4,9 @@ import { QaSystemStatus } from '@prisma/client'
 import { NextRequest } from 'next/server'
 import { guardEnpoint, GuardEnpointSchema } from '../_utils/guardEndpoint'
 
+// Threshold for absolute difference - changes <= this value are not considered significant
+const ABSOLUTE_DIFFERENCE_THRESHOLD = 4
+
 // Helper function to calculate system status based on relative value and thresholds
 function calculateSystemStatus(relative: number | null, config: any): QaSystemStatus {
   if (relative === null) {
@@ -85,12 +88,20 @@ async function upsertQaEvaluationWithRules(
     systemStatus: QaSystemStatus
     previousRelative: number | null
     currentRelative: number | null
+    absoluteDifference: number
   },
 ) {
   const previousEvaluation = await getCurrentEvaluation(configId, areaId)
 
   // Check if data changed significantly
-  const dataChanged = evaluation.previousRelative !== evaluation.currentRelative
+  // If absolute difference is <= threshold, it's not considered a change
+  const absoluteDifferenceWithinThreshold =
+    Math.abs(evaluation.absoluteDifference) <= ABSOLUTE_DIFFERENCE_THRESHOLD
+
+  const relativeChanged = evaluation.previousRelative !== evaluation.currentRelative
+
+  // Data is considered changed only if relative changed AND absolute difference exceeds threshold
+  const dataChanged = relativeChanged && !absoluteDifferenceWithinThreshold
 
   if (!dataChanged) {
     // No significant change - no new evaluation needed
@@ -141,7 +152,8 @@ export async function GET(request: NextRequest) {
         SELECT
           id,
           relative,
-          previous_relative
+          previous_relative,
+          difference as "absoluteDifference"
         FROM ${tableName}
       `)
 
@@ -152,6 +164,7 @@ export async function GET(request: NextRequest) {
           systemStatus,
           previousRelative: area.previous_relative,
           currentRelative: area.relative,
+          absoluteDifference: area.absoluteDifference,
         })
 
         totalEvaluations++
