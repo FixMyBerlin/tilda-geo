@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { MapGeoJSONFeature, useMap } from 'react-map-gl/maplibre'
 import { qaLayerId, qaSourceId } from '../../_components/Map/SourcesAndLayers/SourcesLayersQa'
 import { useRegionSlug } from '../../_components/regionUtils/useRegionSlug'
+import { useQaFilterParam } from '../useQueryState/useQaFilterParam'
 import { useQaParam } from '../useQueryState/useQaParam'
 import { useMapActions, useMapLoaded } from './useMapState'
 
@@ -41,6 +42,9 @@ const filterQaDataByStyle = (data: QaMapData[], style: string) => {
       return data.filter((item) => {
         return item.userStatus === null && item.systemStatus !== null && item.systemStatus !== 'G'
       })
+    case 'user-selected':
+      // Filtering by users happens server-side, so just return all data
+      return data
     default:
       return data
   }
@@ -51,6 +55,7 @@ export const useQaMapState = () => {
   const mapLoaded = useMapLoaded()
   const { setSetFeatureStateLoading } = useMapActions()
   const { qaParamData } = useQaParam()
+  const { qaFilterParam } = useQaFilterParam()
   const regionSlug = useRegionSlug()
 
   // Get QA configs to find the active config
@@ -68,9 +73,17 @@ export const useQaMapState = () => {
 
   const shouldFetch = qaParamData.configSlug && qaParamData.style !== 'none' && activeQaConfig
 
+  // Get user IDs from filter param when user-selected style is active
+  const userIds =
+    qaParamData.style === 'user-selected' && qaFilterParam?.users ? qaFilterParam.users : []
+
   const [currentQaData, { isLoading }] = useQuery(
     getQaDataForMap,
-    { configId: activeQaConfig?.id || 0, regionSlug: regionSlug || 'none' },
+    {
+      configId: activeQaConfig?.id || 0,
+      regionSlug: regionSlug || 'none',
+      userIds,
+    },
     {
       enabled: !!shouldFetch,
       refetchOnWindowFocus: false,

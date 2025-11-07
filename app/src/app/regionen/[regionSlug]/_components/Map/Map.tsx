@@ -6,7 +6,7 @@ import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'lodash'
 import { type MapLibreEvent, type MapStyleImageMissingEvent } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import {
   AttributionControl,
   MapGeoJSONFeature,
@@ -268,9 +268,11 @@ export const Map = () => {
       <SourcesLayersRegionMask />
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
-      <SourcesLayersOsmNotes />
-      <SourcesLayersInternalNotes />
-      <SourcesLayersQa />
+      <Suspense>
+        <SourcesLayersOsmNotes />
+        <SourcesLayersInternalNotes />
+        <SourcesLayersQa />
+      </Suspense>
       <AttributionControl compact={true} position="bottom-left" />
 
       <Search />

@@ -27,6 +27,7 @@ export const qaAreasStatusMap: Record<QaStyleKey, QaEvaluationStatus | null> = {
   none: null,
   all: null,
   'user-pending': null,
+  'user-selected': null,
 }
 
 export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed }: Props) => {
