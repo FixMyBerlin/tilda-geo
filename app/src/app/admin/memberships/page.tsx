@@ -1,5 +1,6 @@
 'use client'
 import { formatDate } from '@/src/app/_components/date/formatDate'
+import { formatDateTimeBerlin } from '@/src/app/_components/date/formatDateBerlin'
 import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { Link } from '@/src/app/_components/links/Link'
 import { linkStyles } from '@/src/app/_components/links/styles'
@@ -134,14 +135,7 @@ export default function AdminMembershipsPage() {
                                   </Link>
                                   <span
                                     className="text-gray-400"
-                                    title={accessedRegion.lastAccessedDay.toLocaleString('de-DE', {
-                                      timeZone: 'Europe/Berlin',
-                                      year: 'numeric',
-                                      month: '2-digit',
-                                      day: '2-digit',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
+                                    title={formatDateTimeBerlin(accessedRegion.lastAccessedDay)}
                                   >
                                     zuletzt {relativeTime}
                                   </span>

@@ -1,6 +1,8 @@
+import { formatDateTimeBerlin } from '@/src/app/_components/date/formatDateBerlin'
 import { isProd } from '@/src/app/_components/utils/isEnv'
 import { osmTypeIdString } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
 import { todoIds } from '@/src/data/processingTypes/todoId.generated.const'
+import { buildTaskInstructions } from '@/src/data/radinfra-de/utils/buildTaskInstructions'
 import { geoDataClient } from '@/src/server/prisma-client'
 import { ProcessingMetaDate, ProcessingMetaDates } from '@/src/server/regions/schemas'
 import { feature, featureCollection } from '@turf/turf'
@@ -10,7 +12,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { z } from 'zod'
-import { buildTaskInstructions } from '../../../../../data/radinfra-de/utils/buildTaskInstructions'
 
 const MaprouletteSchema = z
   .object({
@@ -127,8 +128,8 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
         // For use as Mustache Tag. MR will show `way/123` but Rapid will make this a link to hover/select the object.
         // However, Rapid will use some `name` property for that, see https://osmus.slack.com/archives/C1QN12RS7/p1739525039984349?thread_ts=1739524180.359629&cid=C1QN12RS7
         osmIdentifier: osmTypeId,
-        data_updated_at: osm_data_from?.toLocaleString('de-DE') || 'Unknown',
-        task_updated_at: new Date().toLocaleString('de-DE'), // Used in MapRoulette to see when data was fetched lasted
+        data_updated_at: osm_data_from ? formatDateTimeBerlin(osm_data_from) : 'Unknown',
+        task_updated_at: formatDateTimeBerlin(new Date()), // Used in MapRoulette to see when data was fetched lasted
         task_markdown: (text || 'TASK DESCRIPTION MISSING').replaceAll('\n', ' \n'),
         blank: '',
       }
