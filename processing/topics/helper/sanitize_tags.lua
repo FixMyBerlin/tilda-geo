@@ -51,7 +51,7 @@ local SANITIZE_TAGS = {
       tartan = 'rubber',
     }
     if transformations[tags.surface] then
-      tags.surface = transformations[tags.surface]
+      return transformations[tags.surface]
     end
     -- Treat special cases:
     -- https://wiki.openstreetmap.org/wiki/Tag:surface%3Dsett#Size
@@ -103,7 +103,7 @@ local SANITIZE_TAGS = {
       ['military'] = 'private',
     }
     if transformations[value] then
-      value = transformations[value]
+      return transformations[value]
     end
 
     return sanitize_for_logging(value, { 'public', 'private' })
