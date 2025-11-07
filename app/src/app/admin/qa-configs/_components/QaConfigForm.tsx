@@ -17,7 +17,7 @@ const QaConfigFormInputSchema = z.object({
   mapAttribution: z.string().optional(),
   goodThreshold: z.string(),
   needsReviewThreshold: z.string(),
-
+  absoluteDifferenceThreshold: z.string(),
   regionId: z.string(),
 })
 
@@ -70,6 +70,14 @@ export function QaConfigForm<S extends z.ZodType<any, any>>(props: FormProps<S>)
         min={0}
         max={1}
         step={0.1}
+      />
+      <LabeledTextField
+        name="absoluteDifferenceThreshold"
+        label="Absolute Difference Threshold"
+        type="number"
+        help="Maximale absolute Differenz, die nicht als Änderung betrachtet wird. Wenn die absolute Differenz ≤ diesem Wert ist, wird keine neue Evaluation erstellt."
+        min={0}
+        step={1}
       />
 
       <LabeledRadiobuttonGroup

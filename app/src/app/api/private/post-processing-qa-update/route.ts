@@ -4,9 +4,6 @@ import { QaSystemStatus } from '@prisma/client'
 import { NextRequest } from 'next/server'
 import { guardEnpoint, GuardEnpointSchema } from '../_utils/guardEndpoint'
 
-// Threshold for absolute difference - changes <= this value are not considered significant
-const ABSOLUTE_DIFFERENCE_THRESHOLD = 4
-
 // Helper function to calculate system status based on relative value and thresholds
 function calculateSystemStatus(relative: number | null, config: any): QaSystemStatus {
   if (relative === null) {
@@ -88,15 +85,18 @@ async function upsertQaEvaluationWithRules(
     systemStatus: QaSystemStatus
     previousRelative: number | null
     currentRelative: number | null
-    absoluteDifference: number
+    absoluteDifference: number | null
+    absoluteDifferenceThreshold: number
   },
 ) {
   const previousEvaluation = await getCurrentEvaluation(configId, areaId)
 
   // Check if data changed significantly
   // If absolute difference is <= threshold, it's not considered a change
+  // If absoluteDifference is NULL, treat it as a change (needs evaluation)
   const absoluteDifferenceWithinThreshold =
-    Math.abs(evaluation.absoluteDifference) <= ABSOLUTE_DIFFERENCE_THRESHOLD
+    evaluation.absoluteDifference !== null &&
+    Math.abs(evaluation.absoluteDifference) <= evaluation.absoluteDifferenceThreshold
 
   const relativeChanged = evaluation.previousRelative !== evaluation.currentRelative
 
@@ -148,7 +148,13 @@ export async function GET(request: NextRequest) {
 
       // Query the map table to get areas with their relative values
       // Include areas with null relative values (they need review)
-      const areas = await db.$queryRawUnsafe(`
+      type QaAreaRow = {
+        id: number
+        relative: number | null
+        previous_relative: number | null
+        absoluteDifference: number | null
+      }
+      const areas = await db.$queryRawUnsafe<QaAreaRow[]>(`
         SELECT
           id,
           relative,
@@ -157,7 +163,7 @@ export async function GET(request: NextRequest) {
         FROM ${tableName}
       `)
 
-      for (const area of areas as any[]) {
+      for (const area of areas) {
         const systemStatus = calculateSystemStatus(area.relative, config)
 
         const evaluation = await upsertQaEvaluationWithRules(config.id, area.id.toString(), {
@@ -165,6 +171,7 @@ export async function GET(request: NextRequest) {
           previousRelative: area.previous_relative,
           currentRelative: area.relative,
           absoluteDifference: area.absoluteDifference,
+          absoluteDifferenceThreshold: config.absoluteDifferenceThreshold ?? 4,
         })
 
         totalEvaluations++

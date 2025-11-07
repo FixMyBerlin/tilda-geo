@@ -206,8 +206,9 @@ model QaConfig {
   mapAttribution String? // e.g., "QA Data: tilda-geo.de"
 
   // Thresholds for automatic system evaluation
-  goodThreshold        Float @default(0.1) // relative <= 0.1 difference = GOOD
-  needsReviewThreshold Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
+  goodThreshold               Float @default(0.1) // relative <= 0.1 difference = GOOD
+  needsReviewThreshold        Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
+  absoluteDifferenceThreshold Int   @default(4) // absolute difference <= this value is not considered a change
 
   region   Region @relation(fields: [regionId], references: [id])
   regionId Int
