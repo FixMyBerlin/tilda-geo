@@ -91,6 +91,21 @@ async function upsertQaEvaluationWithRules(
 ) {
   const previousEvaluation = await getCurrentEvaluation(configId, areaId)
 
+  // If there's no previous evaluation, always create an initial evaluation
+  if (!previousEvaluation) {
+    return db.qaEvaluation.create({
+      data: {
+        configId,
+        areaId,
+        systemStatus: evaluation.systemStatus,
+        evaluatorType: 'SYSTEM',
+        userStatus: null,
+        body: null,
+        userId: null,
+      },
+    })
+  }
+
   // Check if data changed significantly
   // If absolute difference is <= threshold, it's not considered a change
   // If absoluteDifference is NULL, treat it as a change (needs evaluation)
@@ -171,7 +186,7 @@ export async function GET(request: NextRequest) {
           previousRelative: area.previous_relative,
           currentRelative: area.relative,
           absoluteDifference: area.absoluteDifference,
-          absoluteDifferenceThreshold: config.absoluteDifferenceThreshold ?? 4,
+          absoluteDifferenceThreshold: config.absoluteDifferenceThreshold,
         })
 
         totalEvaluations++
