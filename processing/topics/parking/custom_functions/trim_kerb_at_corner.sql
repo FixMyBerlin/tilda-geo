@@ -1,3 +1,9 @@
+-- WHAT IT DOES:
+-- Trim (shorten) driveway kerb at intersection corner point.
+-- * Finds corner point position along kerb line
+-- * Cuts kerb from start to corner (if idx=1) or from corner to end (if idx>1)
+-- * Returns trimmed kerb linestring segment
+-- USED IN: `roads/5_trim_kerbs.sql` (trim driveway kerbs at intersection corners)
 DROP FUNCTION IF EXISTS trim_kerb_at_corner;
 
 CREATE FUNCTION trim_kerb_at_corner (

@@ -1,8 +1,19 @@
+-- WHAT IT DOES:
+-- Project separate parking areas to kerb lines.
+-- * Convert polygon to linestring, split median areas into front/back kerbs
+-- * Estimate capacity for areas without capacity tag (based on length and orientation)
+-- * Redistribute capacity for median areas proportionally by length
+-- INPUT: `_parking_separate_parking_areas` (polygon)
+-- OUTPUT: `_parking_separate_parking_areas_projected` (linestring)
+--
 DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
+-- Project polygon areas to kerb lines using `parking_area_to_line`
+-- * Converts polygon to linestring by finding edge closest to roads
+-- * Splits areas with `location=median` into front/back kerbs (handled by `parking_area_to_line`)
 CREATE TABLE _parking_separate_parking_areas_projected AS
 SELECT
   pa.id || '-' || (
@@ -22,8 +33,8 @@ FROM
   _parking_separate_parking_areas pa
   CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.) AS pal;
 
--- now we need to redistribute the capacity of all parking areas that were split into multiple pieces e.g. the ones with `location=median`
--- we do this by assigning the capacity to each piece proportionally to it's length / length of all projected pieces
+-- Estimate capacity for areas without capacity tag
+-- * Based on length and orientation using `estimate_capacity`
 CREATE INDEX parking_separate_parking_areas_osm_id_idx ON _parking_separate_parking_areas_projected (osm_id);
 
 UPDATE _parking_separate_parking_areas_projected
@@ -38,6 +49,9 @@ SET
 WHERE
   tags ->> 'capacity' IS NULL;
 
+-- Redistribute capacity for median areas proportionally by length
+-- * Areas with `location=median` are split into front/back kerbs
+-- * Assign capacity to each piece proportionally: capacity * (piece_length / total_length)
 WITH
   total_lengths AS (
     SELECT

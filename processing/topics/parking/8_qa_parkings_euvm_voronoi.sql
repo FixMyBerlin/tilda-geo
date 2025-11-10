@@ -1,5 +1,17 @@
+-- WHAT IT DOES:
+-- QA comparison: count parkings in voronoi polygons vs reference data.
+-- * Copy reference voronoi from data.euvm_qa_voronoi
+-- * Clip to Berlin boundary, filter to specific Ortsteile (temp)
+-- * Count current parkings (excl private) per polygon
+-- * Calculate difference and relative values
+-- * Preserve previous relative from old run
+-- INPUT: data.euvm_qa_voronoi (polygon), public.parkings_quantized (point)
+-- OUTPUT: public.qa_parkings_euvm (polygon with counts)
+--
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
+-- Transform parkings to SRID 5243 for accurate spatial operations
+-- (5243 optimized for Germany, uses meters; needed for ST_Contains on line 105)
 DROP TABLE IF EXISTS _parking_parkings_quantized;
 
 CREATE TABLE _parking_parkings_quantized AS

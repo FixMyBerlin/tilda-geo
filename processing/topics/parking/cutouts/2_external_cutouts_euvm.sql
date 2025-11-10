@@ -1,3 +1,13 @@
+-- WHAT IT DOES:
+-- Insert external eUVM cutout data (obstacles from external source, not OSM) into `_parking_cutouts` table.
+-- * Transform geometries to SRID 5243
+-- * Project points/polygons to kerb lines using `project_to_k_closest_kerbs`
+-- * Insert point cutouts with type-specific buffers (street_lamp, tree, traffic_sign, etc.)
+--   (!) Those are managed manually in this file.
+-- * Insert polygon cutouts with 0.6m buffer
+-- INPUT: `data.euvm_cutouts_point`, `data.euvm_cutouts_polygon` (external data)
+-- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
+--
 DO $$ BEGIN RAISE NOTICE 'START external cutouts eUVM at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- STATS:

@@ -1,5 +1,14 @@
+-- WHAT IT DOES:
+-- QA check: compare estimated area (from linestring lengths and orientation) vs actual area for separate parking areas.
+-- * Calculate projected length, estimate area, compare with actual area, filter small errors
+-- INPUT: `_parking_separate_parking_areas` (polygon), `_parking_separate_parking_areas_projected` (linestring)
+-- OUTPUT: `_parking_separate_parking_areas_qa` (point with area comparison)
+--
 DROP TABLE IF EXISTS _parking_separate_parking_areas_qa;
 
+-- Calculate projected length and actual area
+-- * Sum all projected kerb line lengths per osm_id (total_length)
+-- * Get actual area from original polygon geometry
 CREATE TABLE _parking_separate_parking_areas_qa AS
 SELECT
   p.osm_id,
@@ -19,6 +28,8 @@ FROM
       osm_id
   ) l ON p.osm_id = l.osm_id;
 
+-- Estimate area from projected length and orientation
+-- * Use `estimate_area` function to calculate expected area based on length and orientation
 ALTER TABLE _parking_separate_parking_areas_qa
 ADD COLUMN area_estimated NUMERIC;
 
@@ -26,6 +37,9 @@ UPDATE _parking_separate_parking_areas_qa
 SET
   area_estimated = estimate_area (projected_length::NUMERIC, tags ->> 'orientation');
 
+-- Calculate area difference and relative difference
+-- * area_difference = actual_area - estimated_area (positive = underestimated, negative = overestimated)
+-- * area_difference_relative = area_difference / actual_area (percentage difference)
 ALTER TABLE _parking_separate_parking_areas_qa
 ADD COLUMN area_difference NUMERIC;
 
@@ -40,13 +54,14 @@ UPDATE _parking_separate_parking_areas_qa
 SET
   area_difference_relative = area_difference / area;
 
--- delete every entry where we overestimated the area by less than 30%
+-- Filter: remove entries where estimation error is small
+-- * Remove overestimates < 30% (area_difference_relative < -0.3)
+-- * Remove underestimates < 20% (area_difference_relative < 0.2)
 DELETE FROM _parking_separate_parking_areas_qa
 WHERE
   area_difference_relative < 0
   AND ABS(area_difference_relative) < 0.3;
 
--- delete every entry where underestimated the area by less than 20%
 DELETE FROM _parking_separate_parking_areas_qa
 WHERE
   area_difference_relative > 0

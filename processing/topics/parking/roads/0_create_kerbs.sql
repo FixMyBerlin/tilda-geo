@@ -1,3 +1,11 @@
+-- WHAT IT DOES:
+-- Create kerb lines from road centerlines by offsetting to left and right sides.
+-- * Offset road centerlines using `ST_OffsetCurve` and split each road into two kerbs (left: positive offset, right: negative offset)
+-- * Reverse right side kerbs for consistent direction
+-- * Filter: remove MultiLineString geometries (potential issue: we lose data when ST_OffsetCurve creates discontinuous offset curves)
+-- INPUT: `_parking_roads` (linestring)
+-- OUTPUT: `_parking_kerbs` (linestring)
+--
 DO $$ BEGIN RAISE NOTICE 'START creating kerbs %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_kerbs;

@@ -1,6 +1,11 @@
+-- WHAT IT DOES:
+-- Calculate the smallest angle between two roads at an intersection point.
+-- * Gets road segments at intersection, calculates azimuths, finds smallest angle between them
+-- * Returns angle in radians (0 to pi)
+-- * TODO: sometimes we miss intersection corners because the roads are splitted close to the intersection, see: https://viewer.tilda-geo.de/?map=19.2/52.47141/13.34039&search=parking&source=Staging&layers=parking_intersection_corners,parking_intersections,_parking_roads
+-- USED IN: `get_intersection_corners.sql` (filter road pairs by angle to find sharp corners)
 DROP FUNCTION IF EXISTS intersection_angle;
 
--- TODO: sometimes we miss intersection corners because the roads are splitted close to the intersection, see: https://viewer.tilda-geo.de/?map=19.2/52.47141/13.34039&search=parking&source=Staging&layers=parking_intersection_corners,parking_intersections,_parking_roads
 CREATE FUNCTION intersection_angle (
   intersection_id BIGINT,
   road_id1 BIGINT,
@@ -9,8 +14,8 @@ CREATE FUNCTION intersection_angle (
 DECLARE
   smallest_angle double precision;
 BEGIN
-  -- for each pair of intersction_id and way_id, get the index of the node in the way
-  -- and the index of the next node in the way. For n > 1 this is n - 1 for n = 1 this is n + 1
+  -- For each pair of `intersection_id` and `way_id`, get the index of the node in the way
+  -- And the index of the next node in the way. For `n > 1` this is `n - 1`, for `n = 1` this is `n + 1`
   WITH end_segments AS (
     SELECT
       way_id,
@@ -23,8 +28,8 @@ BEGIN
     WHERE node_id = intersection_id
       AND way_id IN (road_id1, road_id2)
   ),
-  -- calculate the azimuths of the two roads at the intersection point
-  -- for loops we have more than one pair of intersection_id and way_id
+  -- Calculate the azimuths of the two roads at the intersection point
+  -- For loops we have more than one pair of `intersection_id` and `way_id`
   azimuths AS (
     SELECT
       es.way_id,
@@ -42,7 +47,7 @@ BEGIN
     JOIN azimuths a2
       ON a1.way_id < a2.way_id
   )
-  -- Get the smallest angle (adjust for angles greater than pi)
+  -- Get the smallest angle (adjust for angles greater than `pi`)
   SELECT
     MIN(CASE
           WHEN angle > pi() THEN 2 * pi() - angle
