@@ -109,12 +109,9 @@ WITH
         'geom_sources', string_agg(geom_source, ';' ORDER BY geom_source)
         /* sql-formatter-enable */
       ) AS tags,
-      string_agg(
-        id::TEXT,
-        '-'
-        ORDER BY
-          id
-      ) AS original_ids,
+      /* sql-formatter-disable */
+      string_agg(id::TEXT, '-' ORDER BY id) AS original_ids,
+      /* sql-formatter-enable */
       (
         ST_Dump (ST_LineMerge (ST_Node (ST_Collect (geom))))
       ).*
