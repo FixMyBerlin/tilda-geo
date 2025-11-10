@@ -22,7 +22,6 @@
 -- * … FOR INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/intersection_angle.sql'
 \i '/processing/topics/parking/custom_functions/get_intersection_corners.sql'
-\i '/processing/topics/parking/custom_functions/segmentize_way_to_edges.sql'
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/explode_parkings.sql'
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
@@ -38,7 +37,6 @@
 \i '/processing/topics/parking/roads/1_find_intersections.sql'
 \i '/processing/topics/parking/roads/2_find_intersection_corners.sql'
 \i '/processing/topics/parking/roads/3_find_driveways.sql'
-\i '/processing/topics/parking/roads/4_build_graph.sql'
 \i '/processing/topics/parking/roads/5_trim_kerbs.sql'
 \i '/processing/topics/parking/roads/6_driveway_corners_kerbs.sql'
 
