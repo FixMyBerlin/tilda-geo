@@ -1,10 +1,9 @@
 DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- TODO: only use the obstacles that are inside in a separate parking area
+CREATE TEMP TABLE separate_parking_cutouts AS
 SELECT
   *
-  --
-  INTO TEMP separate_parking_cutouts
 FROM
   _parking_cutouts
 WHERE
