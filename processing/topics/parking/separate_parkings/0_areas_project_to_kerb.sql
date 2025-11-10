@@ -5,22 +5,22 @@ DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
 CREATE TABLE _parking_separate_parking_areas_projected AS
 SELECT
-  id || '-' || (
+  pa.id || '-' || (
     CASE
-      WHEN is_front_kerb THEN 'front'
+      WHEN pal.is_front_kerb THEN 'front'
       ELSE 'back'
     END
   ) AS id,
-  osm_type,
-  osm_id,
-  id AS source_id,
-  tags,
-  side,
-  meta,
-  parking_kerb AS geom
+  pa.osm_type,
+  pa.osm_id,
+  pa.id AS source_id,
+  pa.tags || jsonb_build_object('road_width', pal.road_width) AS tags,
+  pal.side,
+  pa.meta,
+  pal.parking_kerb AS geom
 FROM
   _parking_separate_parking_areas pa
-  CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.);
+  CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.) AS pal;
 
 -- now we need to redistribute the capacity of all parking areas that were split into multiple pieces e.g. the ones with `location=median`
 -- we do this by assigning the capacity to each piece proportionally to it's length / length of all projected pieces

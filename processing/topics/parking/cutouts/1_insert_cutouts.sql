@@ -299,7 +299,11 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 2, 'endcap=flat'),
+  ST_Buffer (
+    geom,
+    COALESCE((tags ->> 'road_width')::NUMERIC * 0.7, 3),
+    'endcap=flat'
+  ),
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
