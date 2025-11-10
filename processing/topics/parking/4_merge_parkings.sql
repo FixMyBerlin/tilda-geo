@@ -210,11 +210,14 @@ WHERE
 
 DO $$
   DECLARE
-    failed_count INTEGER;
+    failed_clusters_count INTEGER;
+    failed_rows_count INTEGER;
   BEGIN
-    SELECT COUNT(*) INTO failed_count
-    FROM failed_merges;
-    RAISE NOTICE 'Failed to merge % clusters. Their capacity will be estimated.', failed_count;
+    SELECT COUNT(*) INTO failed_clusters_count FROM failed_merges;
+    SELECT COUNT(*) INTO failed_rows_count FROM _parking_failed_merges;
+    IF failed_clusters_count > 0 THEN
+      RAISE WARNING '[WARNING] Failed to merge % cluster(s) (% rows total). After initial `ST_LineMerge` and fallback attempts, these parkings still have disconnected linestring geometries (gaps between segments or non-touching endpoints) that cannot be merged. Action taken: saved to `_parking_failed_merges`, removed capacity tag (will be estimated in `5_estimate_parking_capacities.sql`), and modified IDs to make them unique.', failed_clusters_count, failed_rows_count;
+    END IF;
   END $$;
 
 -- MISC
