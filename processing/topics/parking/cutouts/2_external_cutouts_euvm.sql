@@ -133,7 +133,7 @@ FROM
 WHERE
   type IN (
     -- Keep in sync with the CASE above
-    -- 'bollard', -- skipped for performance reasons
+    'bollard',
     'street_lamp',
     'tree',
     'street_cabinet',
