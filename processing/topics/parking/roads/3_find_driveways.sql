@@ -11,7 +11,20 @@ SELECT
   r.osm_type,
   r.tags,
   r.meta,
-  r.geom,
+  ST_MakeLine (
+    ST_PointN (r.geom, nrm.idx),
+    ST_Project (
+      ST_PointN (r.geom, nrm.idx),
+      10,
+      ST_Azimuth (
+        ST_PointN (r.geom, nrm.idx),
+        COALESCE(
+          ST_PointN (r.geom, nrm.idx + 1),
+          ST_PointN (r.geom, nrm.idx - 1)
+        )
+      )
+    )
+  ) AS geom,
   r.is_driveway,
   r.has_parking,
   nrm.idx
@@ -24,26 +37,6 @@ WHERE
   -- TODO: maybe the line below should be > 0
   AND i.road_degree > 1
   AND r.is_driveway;
-
--- SHORTEN the driveway
--- @var: "10" specifies the new line to be 10 meters long
--- (Actually, this creates a new line starting from the road in the direction of the previous line.)
-UPDATE _parking_driveways
-SET
-  geom = ST_MakeLine (
-    ST_PointN (geom, idx),
-    ST_Project (
-      ST_PointN (geom, idx),
-      10,
-      ST_Azimuth (
-        ST_PointN (geom, idx),
-        COALESCE(
-          ST_PointN (geom, idx + 1),
-          ST_PointN (geom, idx - 1)
-        )
-      )
-    )
-  );
 
 -- MISC
 ALTER TABLE _parking_driveways
