@@ -23,6 +23,22 @@ FROM
       ('right', - (tags ->> 'offset_right')::numeric)
   ) AS kerb_sides ("side", "offset");
 
+-- Filter: remove MultiLineString geometries
+-- `ST_OffsetCurve` can create MultiLineString when offset curve becomes discontinuous (e.g., sharp turns, complex geometry, large offset relative to curvature).
+-- We can only handle LineString geometries for kerbs, so remove MultiLineString cases (we lose data when this happens).
+DO $$
+DECLARE
+  multiline_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO multiline_count
+  FROM _parking_kerbs
+  WHERE ST_GeometryType (geom) = 'ST_MultiLineString';
+
+  IF multiline_count > 0 THEN
+    RAISE NOTICE '[WARNING] Removing % MultiLineString kerb geometries (created by ST_OffsetCurve due to discontinuous offset curves). We cannot handle those, so we just remove them. When this comes up, we are likely loosing data.', multiline_count;
+  END IF;
+END $$;
+
 DELETE FROM _parking_kerbs
 WHERE
   ST_GeometryType (geom) = 'ST_MultiLineString';
