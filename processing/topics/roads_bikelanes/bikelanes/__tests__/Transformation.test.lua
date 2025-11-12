@@ -53,12 +53,12 @@ describe("Bikelanes", function()
         oneway = 'yes',
         ['traffic_sign:forward'] = traffic_sign,
       }
-      local results = get_transformed_objects_table(input_tags, {})
-      assert.are.equal(traffic_sign, results.self.traffic_sign)
+      local results = GetTransformedObjects(input_tags, {})
+      assert.are.equal(traffic_sign, results[1].traffic_sign)
       input_tags['oneway:bicycle'] = 'no'
 
-      results = get_transformed_objects_table(input_tags, {})
-      assert.are.equal(nil, results.self.traffic_sign)
+      results = GetTransformedObjects(input_tags, {})
+      assert.are.equal(nil, results[1].traffic_sign)
     end)
 
     it('traffic_sign on sidewalks', function()
@@ -67,9 +67,11 @@ describe("Bikelanes", function()
           highway = 'primary',
           ['sidewalk:left:traffic_sign:backward'] = traffic_sign,
       }
-      local results = get_transformed_objects_table(input_tags, {footwayTransformation})
-      assert.are.equal(results.left.traffic_sign, traffic_sign)
-      assert.are.equal(results.self.traffic_sign, nil)
+      local results = GetTransformedObjects(input_tags, {footwayTransformation})
+      local result_self = results[1]
+      local result_left = results[2]
+      assert.are.equal(result_left.traffic_sign, traffic_sign)
+      assert.are.equal(result_self.traffic_sign, nil)
     end)
 
     it('traffic_sign on bikelanes', function()
@@ -78,9 +80,11 @@ describe("Bikelanes", function()
           highway = 'primary',
           ['cycleway:left:traffic_sign:forward'] = traffic_sign,
       }
-      local results = get_transformed_objects_table(input_tags, {cyclewayTransformation})
-      assert.are.equal(results.left.traffic_sign, traffic_sign)
-      assert.are.equal(results.self.traffic_sign, nil)
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_self = results[1]
+      local result_left = results[2]
+      assert.are.equal(result_left.traffic_sign, traffic_sign)
+      assert.are.equal(result_self.traffic_sign, nil)
     end)
   end)
 
@@ -93,9 +97,10 @@ describe("Bikelanes", function()
         ['source:cycleway:both:width'] = 'both',
         ['source:cycleway:left:width'] = 'side',
       }
-      local results = get_transformed_objects_table(input_tags, {cyclewayTransformation})
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
       -- side-specific should win (hierarchy: side > both > general)
-      assert.are.equal(results.left['source:width'], 'side')
+      assert.are.equal(result_left['source:width'], 'side')
     end)
 
     it('unnests source:sidewalk:*:width to source:width for sidewalk transformation', function()
@@ -106,9 +111,10 @@ describe("Bikelanes", function()
         ['source:sidewalk:both:width'] = 'both',
         ['source:sidewalk:left:width'] = 'side',
       }
-      local results = get_transformed_objects_table(input_tags, {footwayTransformation})
+      local results = GetTransformedObjects(input_tags, {footwayTransformation})
+      local result_left = results[2]
       -- side-specific should win (hierarchy: side > both > general)
-      assert.are.equal(results.left['source:width'], 'side')
+      assert.are.equal(result_left['source:width'], 'side')
     end)
 
     it('unnests note:cycleway:* to note with hierarchy', function()
@@ -119,9 +125,10 @@ describe("Bikelanes", function()
         ['note:cycleway:both'] = 'both',
         ['note:cycleway:left'] = 'side',
       }
-      local results = get_transformed_objects_table(input_tags, {cyclewayTransformation})
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
       -- side-specific should win (hierarchy: side > both > general)
-      assert.are.equal(results.left.note, 'side')
+      assert.are.equal(result_left.note, 'side')
     end)
 
     it('meta-prefixed tags overwrite regular tags (no priority preservation)', function()
@@ -131,9 +138,10 @@ describe("Bikelanes", function()
         ['cycleway:left:source:width'] = 'direct_value',
         ['source:cycleway:left:width'] = 'meta_prefixed_value',
       }
-      local results = get_transformed_objects_table(input_tags, {cyclewayTransformation})
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
       -- meta-prefixed tags are processed after and overwrite regular tags
-      assert.are.equal(results.left['source:width'], 'meta_prefixed_value')
+      assert.are.equal(result_left['source:width'], 'meta_prefixed_value')
     end)
 
     it('unnests source:cycleway:width (general, no side) to source:width', function()
@@ -142,9 +150,10 @@ describe("Bikelanes", function()
         ['cycleway:left'] = 'lane',
         ['source:cycleway:width'] = 'infra3D',
       }
-      local results = get_transformed_objects_table(input_tags, {cyclewayTransformation})
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
       -- general source:cycleway:width should be transformed to source:width
-      assert.are.equal(results.left['source:width'], 'infra3D')
+      assert.are.equal(result_left['source:width'], 'infra3D')
     end)
 
     it('unnests source:sidewalk:width (general, no side) to source:width', function()
@@ -153,9 +162,10 @@ describe("Bikelanes", function()
         ['sidewalk:left'] = 'yes',
         ['source:sidewalk:width'] = 'infra3D',
       }
-      local results = get_transformed_objects_table(input_tags, {footwayTransformation})
+      local results = GetTransformedObjects(input_tags, {footwayTransformation})
+      local result_left = results[2]
       -- general source:sidewalk:width should be transformed to source:width
-      assert.are.equal(results.left['source:width'], 'infra3D')
+      assert.are.equal(result_left['source:width'], 'infra3D')
     end)
   end)
 end)

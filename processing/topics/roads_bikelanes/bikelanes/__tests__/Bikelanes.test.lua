@@ -164,6 +164,31 @@ describe("Bikelanes", function()
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
+
+    it('handle sidewalk bike infra', function()
+      local input_object = {
+        tags = {
+          highway = 'tertiary',
+          ['cycleway:both'] = 'no',
+          ['sidewalk'] = 'both',
+          ['sidewalk:left:bicycle'] = 'yes',
+          ['sidewalk:left:width'] = '2.3',
+          ['source:sidewalk:left:width'] = 'infra3D',
+          ['sidewalk:left:surface'] = 'asphalt',
+          ['sidewalk:left:traffic_sign'] = 'DE:239,1022-10',
+          ['sidewalk:right:surface'] = 'paving_stones',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[3]
+      assert.are.equal(result_left.category, 'footwayBicycleYes_adjoining')
+      assert.are.equal(result_left.width, 2.3)
+      assert.are.equal(result_left.width_source, 'infra3D')
+      assert.are.equal(result_left.surface, 'asphalt')
+      assert.are.equal(result_left.traffic_sign, 'DE:239,1022-10')
+    end)
   end)
 
   describe('Handle `mapillary*` cases', function()

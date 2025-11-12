@@ -128,34 +128,10 @@ local function convertDirectedTags(cycleway, direction_reference)
   return cycleway
 end
 
----@class TransformedObject
----@field _side "self" | "left" | "right"
----@field _prefix string? prefix of the transformation (e.g., "cycleway", "sidewalk")
----@field _parent table? original tags from the parent object
----@field _parent_highway string? highway value from the parent object
----@field _infix string? infix that was matched (e.g., ":left", ":both", "")
----@field highway string highway value for the transformed object
---- Additional tags from unnesting (e.g., width, source:width, note, traffic_sign, etc.) are also present
-
----@class TransformedObjectsTable
----@field self TransformedObject the center/self object (always present)
----@field left TransformedObject | nil the left side object (nil if not present)
----@field right TransformedObject | nil the right side object (nil if not present)
-
--- Returns transformed objects in a structured format: { self = {...}, left = nil, right = nil }
----@param tags table input tags to transform
----@param transformations table array of CenterLineTransformation objects
----@return TransformedObjectsTable structured table with self, left, and right keys (left/right may be nil if not present)
-function get_transformed_objects_table(tags, transformations)
+-- these tags get transformed from the forward backward schema
+function GetTransformedObjects(tags, transformations)
   local center = MergeTable({}, tags)
   center._side = "self"
-
-  ---@type TransformedObjectsTable
-  local structured = {
-    self = center,
-    left = nil,
-    right = nil
-  }
 
   -- Meta-prefixes that get transformed along with the main prefix (e.g., source:cycleway:width -> source:width)
   local metaPrefixes = { 'source:', 'note:' }
@@ -171,9 +147,10 @@ function get_transformed_objects_table(tags, transformations)
       center.traffic_sign = center.traffic_sign or center['traffic_sign:forward']
     end
 
-    return structured
+    return { center }
   end
 
+  local results = { center }
   for _, transformation in ipairs(transformations) do
     for _, side in ipairs({ "left", "right" }) do
       if tags.highway ~= transformation.highway then
@@ -207,36 +184,11 @@ function get_transformed_objects_table(tags, transformations)
         if newObj._infix ~= nil then
           if transformation.filter(newObj) then
             convertDirectedTags(newObj, transformation.direction_reference)
-
-            -- Assign to structured result (first left/right transformation wins)
-            if side == 'left' and structured.left == nil then
-              structured.left = newObj
-            elseif side == 'right' and structured.right == nil then
-              structured.right = newObj
-            end
+            table.insert(results, newObj)
           end
         end
       end
     end
-  end
-
-  return structured
-end
-
--- @deprecated Use get_transformed_objects_table instead.
--- Returns an array of transformed objects in order: [self, left, right, ...]
----@param tags table input tags to transform
----@param transformations table array of CenterLineTransformation objects
----@return table array of transformed objects in order: [self, left, right, ...]
-function GetTransformedObjects(tags, transformations)
-  local structured = get_transformed_objects_table(tags, transformations)
-  local results = { structured.self }
-
-  if structured.left ~= nil then
-    table.insert(results, structured.left)
-  end
-  if structured.right ~= nil then
-    table.insert(results, structured.right)
   end
 
   return results
