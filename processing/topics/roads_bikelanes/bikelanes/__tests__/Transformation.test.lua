@@ -135,5 +135,27 @@ describe("Bikelanes", function()
       -- meta-prefixed tags are processed after and overwrite regular tags
       assert.are.equal(results.left['source:width'], 'meta_prefixed_value')
     end)
+
+    it('unnests source:cycleway:width (general, no side) to source:width', function()
+      local input_tags = {
+        highway = 'primary',
+        ['cycleway:left'] = 'lane',
+        ['source:cycleway:width'] = 'infra3D',
+      }
+      local results = get_transformed_objects_table(input_tags, {cyclewayTransformation})
+      -- general source:cycleway:width should be transformed to source:width
+      assert.are.equal(results.left['source:width'], 'infra3D')
+    end)
+
+    it('unnests source:sidewalk:width (general, no side) to source:width', function()
+      local input_tags = {
+        highway = 'primary',
+        ['sidewalk:left'] = 'yes',
+        ['source:sidewalk:width'] = 'infra3D',
+      }
+      local results = get_transformed_objects_table(input_tags, {footwayTransformation})
+      -- general source:sidewalk:width should be transformed to source:width
+      assert.are.equal(results.left['source:width'], 'infra3D')
+    end)
   end)
 end)

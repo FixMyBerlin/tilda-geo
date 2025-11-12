@@ -102,6 +102,68 @@ describe("Bikelanes", function()
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
+
+    it('handles source:cycleway:width for lane (general, no side) for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          ['cycleway:left'] = 'lane',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for path (general, no side) for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for centerline footway+bicycle=yes for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          ['sidewalk:left'] = 'yes',
+          ['sidewalk:left:bicycle'] = 'yes',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for footway+bicycle=yes for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'footway',
+          ['bicycle'] = 'yes',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
   end)
 
   describe('Handle `mapillary*` cases', function()

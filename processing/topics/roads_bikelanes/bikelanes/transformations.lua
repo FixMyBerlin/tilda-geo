@@ -157,12 +157,20 @@ function get_transformed_objects_table(tags, transformations)
     right = nil
   }
 
-  -- don't transform paths only unnest tags prefixed with `cycleway`
+  -- Meta-prefixes that get transformed along with the main prefix (e.g., source:cycleway:width -> source:width)
+  local metaPrefixes = { 'source:', 'note:' }
+
+  -- Don't transform paths only unnest tags prefixed with `cycleway`
   if PathClasses[tags.highway] or tags.highway == 'pedestrian' then
     unnestPrefixedTags(tags, 'cycleway', '', center)
+    for _, metaPrefix in ipairs(metaPrefixes) do
+      unnestPrefixedTags(tags, 'cycleway', '', center, metaPrefix)
+    end
+
     if center.oneway == 'yes' and tags['oneway:bicycle'] ~= 'no' then
       center.traffic_sign = center.traffic_sign or center['traffic_sign:forward']
     end
+
     return structured
   end
 
@@ -189,7 +197,6 @@ function get_transformed_objects_table(tags, transformations)
         -- Meta-prefixed tags are processed after regular tags and will overwrite them.
         -- Example: `cycleway:left:source:width=foo` -> `source:width=foo`, then
         --          `source:cycleway:left:width=bar` -> `source:width=bar` (overwrites foo)
-        local metaPrefixes = { 'source:', 'note:' }
         for _, metaPrefix in ipairs(metaPrefixes) do
           unnestPrefixedTags(tags, prefix, '', newObj, metaPrefix)
           unnestPrefixedTags(tags, prefix, ':both', newObj, metaPrefix)
@@ -200,6 +207,7 @@ function get_transformed_objects_table(tags, transformations)
         if newObj._infix ~= nil then
           if transformation.filter(newObj) then
             convertDirectedTags(newObj, transformation.direction_reference)
+
             -- Assign to structured result (first left/right transformation wins)
             if side == 'left' and structured.left == nil then
               structured.left = newObj
