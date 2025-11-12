@@ -2,15 +2,21 @@ require('init')
 require('MergeTable')
 require('HighwayClasses')
 
+---@class CenterLineTransformation
+---@field highway string
+---@field prefix string
+---@field direction_reference 'self' | 'parent'
+---@field filter function
+
 CenterLineTransformation = {}
 CenterLineTransformation.__index = CenterLineTransformation
 
 ---@param args table
---@param args.highway string
---@param args.prefix string
---@param args.direction_reference 'self' | 'parent'
---@param args.filter function?
---@return table
+---@param args.highway string
+---@param args.prefix string
+---@param args.direction_reference 'self' | 'parent'
+---@param args.filter function?
+---@return CenterLineTransformation
 function CenterLineTransformation.new(args)
   local self = setmetatable({}, CenterLineTransformation)
   local mandatory = { 'highway', 'prefix', 'direction_reference' }
@@ -128,7 +134,19 @@ local function convertDirectedTags(cycleway, direction_reference)
   return cycleway
 end
 
--- these tags get transformed from the forward backward schema
+---@class TransformedObject
+---@field _side "self" | "left" | "right"
+---@field _prefix string? prefix of the transformation (e.g., "cycleway", "sidewalk")
+---@field _parent table? original tags from the parent object
+---@field _parent_highway string? highway value from the parent object
+---@field _infix string? infix that was matched (e.g., ":left", ":both", "")
+---@field highway string highway value for the transformed object
+--- Additional tags from unnesting (e.g., width, source:width, note, traffic_sign, etc.) are also present
+
+-- Returns an array of transformed objects in order: [self, left, right, ...]
+---@param tags table input tags to transform
+---@param transformations table array of CenterLineTransformation objects
+---@return TransformedObject[] array of transformed objects in order: [self, left, right, ...]
 function GetTransformedObjects(tags, transformations)
   local center = MergeTable({}, tags)
   center._side = "self"
