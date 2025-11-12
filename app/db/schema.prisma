@@ -236,6 +236,9 @@ model QaEvaluation {
   // Optional evaluation text/reasoning (only for user evaluations)
   body String?
 
+  // Snapshot of data used for this evaluation
+  decisionData Json?
+
   config   QaConfig @relation(fields: [configId], references: [id])
   configId Int
 

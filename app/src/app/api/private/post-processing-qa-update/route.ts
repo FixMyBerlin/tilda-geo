@@ -1,4 +1,9 @@
 import db from '@/db'
+import {
+  qaDecisionDataSchema,
+  QaDecisionDataStored,
+  transformEvaluationWithDecisionData,
+} from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { getQaTableName } from '@/src/server/qa-configs/utils/getQaTableName'
 import { QaSystemStatus } from '@prisma/client'
 import { NextRequest } from 'next/server'
@@ -23,10 +28,13 @@ function calculateSystemStatus(relative: number | null, config: any): QaSystemSt
 
 // Helper function to get current evaluation for an area
 async function getCurrentEvaluation(configId: number, areaId: string) {
-  return db.qaEvaluation.findFirst({
+  const evaluation = await db.qaEvaluation.findFirst({
     where: { configId, areaId },
     orderBy: { createdAt: 'desc' },
   })
+
+  if (!evaluation) return null
+  return transformEvaluationWithDecisionData(evaluation)
 }
 
 // Helper function to determine if we need to create a new evaluation
@@ -87,13 +95,14 @@ async function upsertQaEvaluationWithRules(
     currentRelative: number | null
     absoluteDifference: number | null
     absoluteDifferenceThreshold: number
+    decisionData: QaDecisionDataStored
   },
 ) {
   const previousEvaluation = await getCurrentEvaluation(configId, areaId)
 
   // If there's no previous evaluation, always create an initial evaluation
   if (!previousEvaluation) {
-    return db.qaEvaluation.create({
+    const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
@@ -102,8 +111,11 @@ async function upsertQaEvaluationWithRules(
         userStatus: null,
         body: null,
         userId: null,
+        decisionData: evaluation.decisionData,
       },
     })
+
+    return transformEvaluationWithDecisionData(newEvaluation)
   }
 
   // Check if data changed significantly
@@ -125,7 +137,7 @@ async function upsertQaEvaluationWithRules(
 
   // Check if we need to create a new evaluation or keep existing
   if (shouldCreateNewEvaluation(previousEvaluation, evaluation.systemStatus)) {
-    return db.qaEvaluation.create({
+    const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
@@ -135,8 +147,12 @@ async function upsertQaEvaluationWithRules(
         userStatus: null,
         body: null,
         userId: null,
+        // Store decision data snapshot
+        decisionData: evaluation.decisionData,
       },
     })
+
+    return transformEvaluationWithDecisionData(newEvaluation)
   } else {
     // No change needed - keep existing evaluation
     return previousEvaluation
@@ -161,19 +177,23 @@ export async function GET(request: NextRequest) {
       // Get areas from the map table
       const tableName = getQaTableName(config.mapTable)
 
-      // Query the map table to get areas with their relative values
+      // Query the map table to get areas with their relative values and counts
       // Include areas with null relative values (they need review)
       type QaAreaRow = {
         id: number
         relative: number | null
         previous_relative: number | null
+        count_reference: number | null
+        count_current: number | null
         absoluteDifference: number | null
       }
       const areas = await db.$queryRawUnsafe<QaAreaRow[]>(`
         SELECT
           id,
-          relative,
-          previous_relative,
+          relative::float,
+          previous_relative::float,
+          count_reference,
+          count_current,
           difference as "absoluteDifference"
         FROM ${tableName}
       `)
@@ -181,12 +201,23 @@ export async function GET(request: NextRequest) {
       for (const area of areas) {
         const systemStatus = calculateSystemStatus(area.relative, config)
 
+        // Prepare decision data for storage
+        const decisionData = qaDecisionDataSchema.parse({
+          relative: area.relative,
+          currentCount: area.count_current,
+          referenceCount: area.count_reference,
+          absoluteChange: area.absoluteDifference,
+          goodThreshold: config.goodThreshold,
+          needsReviewThreshold: config.needsReviewThreshold,
+        })
+
         const evaluation = await upsertQaEvaluationWithRules(config.id, area.id.toString(), {
           systemStatus,
           previousRelative: area.previous_relative,
           currentRelative: area.relative,
           absoluteDifference: area.absoluteDifference,
           absoluteDifferenceThreshold: config.absoluteDifferenceThreshold,
+          decisionData,
         })
 
         totalEvaluations++
