@@ -24,28 +24,51 @@ function CenterLineTransformation.new(args)
   return self
 end
 
--- unnest all tags from `["prefix .. side:subtag"]=val` -> `["subtag"]=val`
+-- Unnest the sides from tags for a given transformation. Examples:
+-- Case 1 (Main key):
+-- - `cycleway:both` -> `cycleway`
+--   `<prefix>:<infix>` -> `<prefix>`
+-- - `source:cycleway:both` -> `source`
+--   `<metaPrefix>:<prefix>:<infix>` -> `<metaPrefix>`
+-- Case 2 (Sub-key):
+-- - `cycleway:left:width` -> `width`
+--   `<prefix>:<infix>:SUFFIX` -> `SUFFIX`
+-- - `source:cycleway:left:width` -> `source:width`
+--   `<metaPrefix>:<prefix>:<infix>:SUFFIX` -> `<metaPrefix>:SUFFIX`
 ---@param tags table
 ---@param prefix string prefix to look for e.g. `cycleway`
 ---@param infix string? infix to look for either a side e.g. `:left`, `:right`, `:both` or `''`
 ---@param dest table? destination table to write to
+---@param metaPrefix string? optional meta-prefix to look for e.g. `source:` or `note:`
 ---@return table
-local function unnestPrefixedTags(tags, prefix, infix, dest)
+local function unnestPrefixedTags(tags, prefix, infix, dest, metaPrefix)
   dest = dest or {}
-  local fullPrefix = prefix .. infix
+  local metaPrefixString = metaPrefix or ''
+  local fullPrefix = metaPrefixString .. prefix .. infix
   local prefixLen = string.len(fullPrefix)
+
   for key, val in pairs(tags) do
     if osm2pgsql.has_prefix(key, fullPrefix) then
-      if key == fullPrefix then -- self projection
-        dest[prefix] = val
+      if key == fullPrefix then
+        -- Case 1: Main key - the primary key itself with its side
+        -- Examples:
+        --   fullPrefix = 'cycleway:both', key = 'cycleway:both' -> dest['cycleway'] = val
+        --   fullPrefix = 'source:cycleway:both', key = 'source:cycleway:both' -> dest['source'] = val
+        local destinationKey = metaPrefix and metaPrefixString:sub(1, -2) or prefix
+        dest[destinationKey] = val
         dest._infix = infix
       else
-        -- offset of 2 due to 1-indexing and for removing the ':'
-        local prefixlessKey = string.sub(key, prefixLen + 2)
-        local subkey = string.match(prefixlessKey, '[^:]*')
-        -- make sure that `subkey` is not an infix
-        if infix ~= '' or not Set({ 'left', 'right', 'both' })[subkey] then
-          dest[prefixlessKey] = val
+        -- Case 2: Sub-key - a property/sub-key of the main key
+        -- Examples:
+        --   fullPrefix = 'cycleway:left', key = 'cycleway:left:width' -> extractedSuffix = 'width' -> dest['width'] = val
+        --   fullPrefix = 'source:cycleway:left', key = 'source:cycleway:left:width' -> extractedSuffix = 'width' -> dest['source:width'] = val
+        -- Offset of 2 due to 1-indexing and for removing the ':'
+        local extractedSuffix = string.sub(key, prefixLen + 2)
+        local suffixKey = string.match(extractedSuffix, '[^:]*')
+        -- Validate: make sure that the first part of the suffix (`suffixKey`) is not an `infix`
+        if infix ~= '' or not Set({ 'left', 'right', 'both' })[suffixKey] then
+          local destinationKey = metaPrefix and (metaPrefixString .. extractedSuffix) or extractedSuffix
+          dest[destinationKey] = val
           dest._infix = infix
         end
       end
@@ -138,6 +161,17 @@ function GetTransformedObjects(tags, transformations)
         unnestPrefixedTags(tags, prefix, '', newObj)
         unnestPrefixedTags(tags, prefix, ':both', newObj)
         unnestPrefixedTags(tags, prefix, ':' .. side, newObj)
+
+        -- Also unnest meta-prefixed tags like `source:cycleway:left:width` -> `source:width`
+        -- Meta-prefixed tags are processed after regular tags and will overwrite them.
+        -- Example: `cycleway:left:source:width=foo` -> `source:width=foo`, then
+        --          `source:cycleway:left:width=bar` -> `source:width=bar` (overwrites foo)
+        local metaPrefixes = { 'source:', 'note:' }
+        for _, metaPrefix in ipairs(metaPrefixes) do
+          unnestPrefixedTags(tags, prefix, '', newObj, metaPrefix)
+          unnestPrefixedTags(tags, prefix, ':both', newObj, metaPrefix)
+          unnestPrefixedTags(tags, prefix, ':' .. side, newObj, metaPrefix)
+        end
 
         -- This condition checks if we actually projected something
         if newObj._infix ~= nil then

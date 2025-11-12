@@ -68,13 +68,10 @@ describe("Bikelanes", function()
           ['sidewalk:left:traffic_sign:backward'] = traffic_sign,
       }
       local results = GetTransformedObjects(input_tags, {footwayTransformation})
-      for _, v in pairs(results) do
-        if v._side == 'left' then
-          assert.are.equal(traffic_sign, v.traffic_sign)
-        else
-          assert.are.equal(nil, v.traffic_sign)
-        end
-      end
+      local result_self = results[1]
+      local result_left = results[2]
+      assert.are.equal(result_left.traffic_sign, traffic_sign)
+      assert.are.equal(result_self.traffic_sign, nil)
     end)
 
     it('traffic_sign on bikelanes', function()
@@ -84,13 +81,67 @@ describe("Bikelanes", function()
           ['cycleway:left:traffic_sign:forward'] = traffic_sign,
       }
       local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
-      for _, v in pairs(results) do
-        if v._side == 'left' then
-          assert.are.equal(traffic_sign, v.traffic_sign)
-        else
-          assert.are.equal(nil, v.traffic_sign)
-        end
-      end
+      local result_self = results[1]
+      local result_left = results[2]
+      assert.are.equal(result_left.traffic_sign, traffic_sign)
+      assert.are.equal(result_self.traffic_sign, nil)
+    end)
+  end)
+
+  describe('Handle meta-prefixed tags (`source:` and `note:`)', function()
+    it('unnests source:cycleway:*:width to source:width with hierarchy (side > both > general)', function()
+      local input_tags = {
+        highway = 'primary',
+        ['cycleway:left'] = 'lane',
+        ['source:cycleway:width'] = 'general',
+        ['source:cycleway:both:width'] = 'both',
+        ['source:cycleway:left:width'] = 'side',
+      }
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
+      -- side-specific should win (hierarchy: side > both > general)
+      assert.are.equal(result_left['source:width'], 'side')
+    end)
+
+    it('unnests source:sidewalk:*:width to source:width for sidewalk transformation', function()
+      local input_tags = {
+        highway = 'primary',
+        ['sidewalk:left'] = 'yes',
+        ['source:sidewalk:width'] = 'general',
+        ['source:sidewalk:both:width'] = 'both',
+        ['source:sidewalk:left:width'] = 'side',
+      }
+      local results = GetTransformedObjects(input_tags, {footwayTransformation})
+      local result_left = results[2]
+      -- side-specific should win (hierarchy: side > both > general)
+      assert.are.equal(result_left['source:width'], 'side')
+    end)
+
+    it('unnests note:cycleway:* to note with hierarchy', function()
+      local input_tags = {
+        highway = 'primary',
+        ['cycleway:left'] = 'lane',
+        ['note:cycleway'] = 'general',
+        ['note:cycleway:both'] = 'both',
+        ['note:cycleway:left'] = 'side',
+      }
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
+      -- side-specific should win (hierarchy: side > both > general)
+      assert.are.equal(result_left.note, 'side')
+    end)
+
+    it('meta-prefixed tags overwrite regular tags (no priority preservation)', function()
+      local input_tags = {
+        highway = 'primary',
+        ['cycleway:left'] = 'lane',
+        ['cycleway:left:source:width'] = 'direct_value',
+        ['source:cycleway:left:width'] = 'meta_prefixed_value',
+      }
+      local results = GetTransformedObjects(input_tags, {cyclewayTransformation})
+      local result_left = results[2]
+      -- meta-prefixed tags are processed after and overwrite regular tags
+      assert.are.equal(result_left['source:width'], 'meta_prefixed_value')
     end)
   end)
 end)
