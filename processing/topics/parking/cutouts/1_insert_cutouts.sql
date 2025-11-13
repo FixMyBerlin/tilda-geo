@@ -306,7 +306,7 @@ FROM
   _parking_obstacle_lines_projected;
 
 -- INSERT "parking area" buffers (buffered lines)
--- Buffer: COALESCE(tags->>'road_width' * 0.7, 3)
+-- Buffer: COALESCE(tags->>'road_width' * 0.7, 3) - but only when road_width_source is 'tag'
 -- Just enough to not overlap with the other side of the road
 -- But needs to be big enough to intersect road parking lines, so they get cut out and replaced by separate parking
 INSERT INTO
@@ -325,7 +325,10 @@ SELECT
   osm_id,
   ST_Buffer (
     geom,
-    COALESCE((tags ->> 'road_width')::NUMERIC * 0.7, 3),
+    CASE
+      WHEN tags ->> 'road_width_source' = 'tag' THEN COALESCE((tags ->> 'road_width')::NUMERIC * 0.7, 3)
+      ELSE 3
+    END,
     'endcap=flat'
   ),
   tags || jsonb_build_object(
