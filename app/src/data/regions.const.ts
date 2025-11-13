@@ -817,7 +817,7 @@ export const staticRegion: StaticRegion[] = [
       'surface',
       'mapillary',
     ],
-    backgroundSources: defaultBackgroundSources,
+    backgroundSources: [...defaultBackgroundSources, 'ELI_baden-w-rttemberg-dop20'],
     notes: 'osmNotes',
   },
   {
