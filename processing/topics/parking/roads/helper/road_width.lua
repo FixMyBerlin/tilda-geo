@@ -1,5 +1,6 @@
 require('init')
 local parse_length = require('parse_length')
+local round = require('round')
 
 local highway_width_fallbacks = {
   ["primary"] = 17,
@@ -32,7 +33,7 @@ function road_width(tags)
 
   local base_width = highway_width_fallbacks[tags.highway] or 10
   if tags.oneway == "yes" then
-    return base_width * 2 / 3, 'medium', 'highway_default_and_oneway'
+    return round(base_width * 2 / 3, 2), 'medium', 'highway_default_and_oneway'
   end
   return base_width, 'medium', 'highway_default'
 end
