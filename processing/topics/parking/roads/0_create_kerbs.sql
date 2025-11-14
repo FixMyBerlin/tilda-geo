@@ -31,6 +31,19 @@ FROM
       ('right', - (tags ->> 'offset_right')::numeric)
   ) AS kerb_sides ("side", "offset");
 
+ALTER TABLE _parking_kerbs
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+CREATE INDEX _parking_kerbs_osm_id_idx ON _parking_kerbs USING BTREE (osm_id);
+
+CREATE INDEX _parking_kerbs_id_idx ON _parking_kerbs USING BTREE (id);
+
+CREATE INDEX _parking_kerbs_osm_id_side_idx ON _parking_kerbs USING BTREE (osm_id, side);
+
+CREATE INDEX _parking_kerbs_street_name_side_idx ON _parking_kerbs USING BTREE (street_name, side);
+
+CREATE INDEX _parking_kerbs_geom_idx ON _parking_kerbs USING GIST (geom);
+
 -- Filter: remove MultiLineString geometries
 -- `ST_OffsetCurve` can create MultiLineString when offset curve becomes discontinuous (e.g., sharp turns, complex geometry, large offset relative to curvature).
 -- We can only handle LineString geometries for kerbs, so remove MultiLineString cases (we lose data when this happens).
@@ -56,16 +69,3 @@ SET
   geom = ST_Reverse (geom)
 WHERE
   side = 'right';
-
-ALTER TABLE _parking_kerbs
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
-
-CREATE INDEX parking_kerbs_moved_idx ON _parking_kerbs USING BTREE (osm_id);
-
-CREATE INDEX parking_kerbs_moved_id_idx ON _parking_kerbs USING BTREE (id);
-
-CREATE INDEX parking_kerbs_moved_osm_id_side_idx ON _parking_kerbs USING BTREE (osm_id, side);
-
-CREATE INDEX parking_kerbs_moved_name_side_idx ON _parking_kerbs USING BTREE (street_name, side);
-
-CREATE INDEX parking_kerbs_moved_geom_idx ON _parking_kerbs USING GIST (geom);
