@@ -7,4 +7,3 @@ Oberlandstraße 26-35 ・ 12099 Berlin ・ [www.fixmycity.de]( https://www.fixmy
 
 Geschäftsführer: Boris Hekele und Heiko Rintelen
 `
-

@@ -1,7 +1,7 @@
 import { formatDateTimeBerlin } from '@/src/app/_components/date/formatDateBerlin'
+import { MarkdownMail } from './templates/MarkdownMail'
 import { getDomain } from './utils/getDomain'
 import { sendMail } from './utils/sendMail'
-import { MarkdownMail } from './templates/MarkdownMail'
 
 const NOTIFICATION_EMAIL = 'tilda@fixmycity.de'
 
