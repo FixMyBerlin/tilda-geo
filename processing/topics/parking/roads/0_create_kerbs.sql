@@ -2,9 +2,9 @@
 -- Create kerb lines from road centerlines by offsetting to left and right sides.
 -- * Offset road centerlines using `ST_OffsetCurve` and split each road into two kerbs (left: positive offset, right: negative offset)
 -- * Reverse right side kerbs for consistent direction
--- * Filter: remove MultiLineString geometries (potential issue: we lose data when ST_OffsetCurve creates discontinuous offset curves)
+-- * Filter: remove MultiLineString geometries (moved to `_parking_kerbs_errors` table for debugging when ST_OffsetCurve creates discontinuous offset curves)
 -- INPUT: `_parking_roads` (linestring)
--- OUTPUT: `_parking_kerbs` (linestring)
+-- OUTPUT: `_parking_kerbs` (linestring), `_parking_kerbs_errors` (MultiLineString geometries that cannot be processed)
 --
 DO $$ BEGIN RAISE NOTICE 'START creating kerbs %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
@@ -46,7 +46,7 @@ CREATE INDEX _parking_kerbs_geom_idx ON _parking_kerbs USING GIST (geom);
 
 -- Filter: remove MultiLineString geometries
 -- `ST_OffsetCurve` can create MultiLineString when offset curve becomes discontinuous (e.g., sharp turns, complex geometry, large offset relative to curvature).
--- We can only handle LineString geometries for kerbs, so remove MultiLineString cases (we lose data when this happens).
+-- We can only handle LineString geometries for kerbs, so move MultiLineString cases to `_parking_kerbs_errors` table for debugging.
 DO $$
 DECLARE
   multiline_count INTEGER;
@@ -56,9 +56,20 @@ BEGIN
   WHERE ST_GeometryType (geom) = 'ST_MultiLineString';
 
   IF multiline_count > 0 THEN
-    RAISE NOTICE '[WARNING] Removing % MultiLineString kerb geometries (created by ST_OffsetCurve due to discontinuous offset curves). We cannot handle those, so we just remove them. When this comes up, we are likely loosing data.', multiline_count;
+    RAISE NOTICE '[WARNING] Removing % MultiLineString kerb geometries (created by ST_OffsetCurve due to discontinuous offset curves). We cannot handle those, so we move them to `_parking_kerbs_errors` table for debugging.', multiline_count;
   END IF;
 END $$;
+
+-- Create error table for MultiLineString geometries that cannot be processed
+DROP TABLE IF EXISTS _parking_kerbs_errors;
+
+CREATE TABLE _parking_kerbs_errors AS
+SELECT
+  *
+FROM
+  _parking_kerbs
+WHERE
+  ST_GeometryType (geom) = 'ST_MultiLineString';
 
 DELETE FROM _parking_kerbs
 WHERE
