@@ -1,10 +1,11 @@
 -- WHAT IT DOES:
 -- QA comparison: count parkings in voronoi polygons vs reference data.
--- * Copy reference voronoi from data.euvm_qa_voronoi
--- * Clip to Berlin boundary, filter to specific Ortsteile (temp)
--- * Count current parkings (excl private) per polygon
--- * Calculate difference and relative values
--- * Preserve previous relative from old run
+-- 1. Preserve values in *_previous table
+-- 2. Load reference voronoi from data.euvm_qa_voronoi
+-- 3. Clip geometries to Berlin boundary
+-- 4. Count current parkings (excl private) per polygon
+-- 5. Calculate difference and relative values
+-- 6. Update previous_relative from previous run
 -- INPUT: data.euvm_qa_voronoi (polygon), public.parkings_quantized (point)
 -- OUTPUT: public.qa_parkings_euvm (polygon with counts)
 --
@@ -14,7 +15,7 @@ DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp()
 -- (5243 optimized for Germany, uses meters; needed for ST_Contains on line 105)
 DROP TABLE IF EXISTS _parking_parkings_quantized;
 
-CREATE TABLE _parking_parkings_quantized AS
+CREATE TEMP TABLE _parking_parkings_quantized AS
 SELECT
   id,
   tags,
@@ -26,8 +27,8 @@ FROM
 CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized USING GIST (geom);
 
 CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
-  id SERIAL PRIMARY KEY,
-  geom geometry (Geometry, 4326), -- Polygon or MultiPolygon
+  id TEXT PRIMARY KEY,
+  geom geometry (Geometry, 3857), -- Polygon or MultiPolygon (3857 for Martin vector tiles)
   count_reference INTEGER,
   count_current INTEGER,
   difference INTEGER,
@@ -35,25 +36,63 @@ CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
   relative NUMERIC
 );
 
--- Backup the old values by renaming the table
-DROP TABLE IF EXISTS qa_parkings_euvm_old;
+-- Create previous table if it doesn't exist (same structure as main table)
+CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm_previous (
+  id TEXT PRIMARY KEY,
+  geom geometry (Geometry, 3857), -- Polygon or MultiPolygon (3857 for Martin vector tiles)
+  count_reference INTEGER,
+  count_current INTEGER,
+  difference INTEGER,
+  previous_relative NUMERIC,
+  relative NUMERIC
+);
 
-ALTER TABLE public.qa_parkings_euvm
-RENAME TO qa_parkings_euvm_old;
+-- 1. Preserve values in *_previous table
+TRUNCATE TABLE public.qa_parkings_euvm_previous;
 
--- Recreate the table by copying the euvm voronoi data
-CREATE TABLE public.qa_parkings_euvm AS
+INSERT INTO
+  public.qa_parkings_euvm_previous (
+    id,
+    geom,
+    count_reference,
+    count_current,
+    difference,
+    previous_relative,
+    relative
+  )
 SELECT
-  *
+  id::TEXT,
+  geom, -- Already 3857, no transformation needed
+  count_reference,
+  count_current,
+  difference,
+  previous_relative,
+  relative
+FROM
+  public.qa_parkings_euvm;
+
+-- Clear the main table for new data
+TRUNCATE TABLE public.qa_parkings_euvm;
+
+-- 2. Load reference voronoi from data.euvm_qa_voronoi and transform to 3857
+-- Cast geom to Geometry type to accept both Polygon and MultiPolygon
+-- (ST_Intersection can produce MultiPolygon when clipping)
+-- Transform from 4326 (source) to 3857 (Martin format) immediately
+INSERT INTO
+  public.qa_parkings_euvm (id, count_reference, geom)
+SELECT
+  id::TEXT,
+  count_reference,
+  ST_Transform (geom::geometry, 3857) as geom
 FROM
   data.euvm_qa_voronoi;
 
--- Clip geometries to Berlin boundary
+-- 3. Clip geometries to Berlin boundary (transform boundary to 3857 for intersection)
 UPDATE public.qa_parkings_euvm
 SET
   geom = ST_Intersection (
     public.qa_parkings_euvm.geom,
-    ST_Transform (berlin.geom, 4326)
+    ST_Transform (berlin.geom, 3857)
   )
 FROM
   public.boundaries berlin
@@ -61,20 +100,10 @@ WHERE
   berlin.osm_id = 62422
   AND NOT ST_Within (
     public.qa_parkings_euvm.geom,
-    ST_Transform (berlin.geom, 4326)
+    ST_Transform (berlin.geom, 3857)
   );
 
--- Transform geometry to Web Mercator and set SRID
-ALTER TABLE public.qa_parkings_euvm
-ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_Transform (geom, 3857);
-
-ALTER TABLE public.qa_parkings_euvm
-ADD COLUMN count_current INTEGER,
-ADD COLUMN difference INTEGER,
-ADD COLUMN relative NUMERIC,
-ADD COLUMN previous_relative NUMERIC;
-
--- Count our parkings for each voronoi polygon
+-- 4. Count current parkings (excl private) for each voronoi polygon
 WITH
   counts AS (
     SELECT
@@ -98,7 +127,7 @@ FROM
 WHERE
   pv.id = c.id;
 
--- Calculate the difference and relative columns
+-- 5. Calculate the difference and relative columns
 UPDATE public.qa_parkings_euvm
 SET
   difference = count_reference - count_current;
@@ -117,15 +146,13 @@ SET
     ELSE NULL
   END;
 
--- Update the previous_relative column with the old values
+-- 6. Update previous_relative from previous run
 UPDATE public.qa_parkings_euvm
 SET
-  previous_relative = old.relative
+  previous_relative = previous.relative
 FROM
-  public.qa_parkings_euvm_old old
+  public.qa_parkings_euvm_previous previous
 WHERE
-  public.qa_parkings_euvm.id = old.id;
-
-DROP TABLE IF EXISTS public.qa_parkings_euvm_old;
+  public.qa_parkings_euvm.id = previous.id;
 
 CREATE INDEX qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);

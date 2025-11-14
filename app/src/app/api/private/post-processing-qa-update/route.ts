@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
       // Query the map table to get areas with their relative values and counts
       // Include areas with null relative values (they need review)
       type QaAreaRow = {
-        id: number
+        id: string
         relative: number | null
         previous_relative: number | null
         count_reference: number | null
