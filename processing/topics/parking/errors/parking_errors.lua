@@ -25,6 +25,12 @@ local db_table = osm2pgsql.define_table({
 -- Handles point, line and area data but stores them as points (centroid)
 -- `tags` are based on sanitize_for_logging.lua and sanitize_cleaner.lua
 local function parking_errors(object, geom, tags, caller_name, error_type, instruction)
+  -- For SANITIZED_VALUE errors, only log if there are actual tags that were sanitized
+  -- RELATION errors are always logged (they're about geometry type, not tags)
+  if error_type == 'SANITIZED_VALUE' and (not tags or next(tags) == nil) then
+    return
+  end
+
   local point_geom = nil
   if(object.type == 'node') then point_geom = geom end
   if(object.type == 'way') then point_geom = geom:centroid() end
