@@ -26,6 +26,131 @@ FROM
 
 CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized USING GIST (geom);
 
+-- ============================================================================
+-- MIGRATION BLOCK: Remove this entire section after deployment is complete
+-- ============================================================================
+-- This migration handles tables created with old schema (4326 SRID) before
+-- commit 591ae3d057bb0734c55f0b05cfa975f975045c29
+-- Diagnostics: All geometries are SRID 4326, need migration to 3857
+-- Also migrates qa_parkings_euvm_old -> qa_parkings_euvm_previous
+-- ============================================================================
+DO $$
+DECLARE
+  row_count INTEGER;
+  old_table_row_count INTEGER;
+  old_table_has_wrong_srid BOOLEAN := FALSE;
+  old_table_has_wrong_id_type BOOLEAN := FALSE;
+BEGIN
+  -- 1. Migrate qa_parkings_euvm table (SRID 4326 -> 3857, ensure all columns exist)
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'qa_parkings_euvm'
+  ) THEN
+    -- Ensure all required columns exist (add if missing)
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'qa_parkings_euvm' AND column_name = 'count_current'
+    ) THEN
+      RAISE NOTICE 'Adding missing columns to qa_parkings_euvm...';
+      ALTER TABLE public.qa_parkings_euvm
+      ADD COLUMN IF NOT EXISTS count_current INTEGER,
+      ADD COLUMN IF NOT EXISTS difference INTEGER,
+      ADD COLUMN IF NOT EXISTS previous_relative NUMERIC,
+      ADD COLUMN IF NOT EXISTS relative NUMERIC;
+    END IF;
+
+    -- Count rows that need migration (SRID != 3857)
+    SELECT COUNT(*) INTO row_count
+    FROM public.qa_parkings_euvm
+    WHERE geom IS NOT NULL AND ST_SRID(geom) != 3857;
+
+    IF row_count > 0 THEN
+      RAISE NOTICE 'Migrating % rows from SRID 4326 to 3857 in qa_parkings_euvm...', row_count;
+
+      ALTER TABLE public.qa_parkings_euvm
+      ALTER COLUMN geom TYPE geometry(Geometry, 3857)
+      USING CASE
+        WHEN ST_SRID(geom) = 3857 THEN geom
+        ELSE ST_Transform(geom, 3857)
+      END;
+
+      RAISE NOTICE 'Migration completed: % rows transformed to SRID 3857.', row_count;
+    ELSE
+      RAISE NOTICE 'No migration needed for qa_parkings_euvm (all geometries already SRID 3857).';
+    END IF;
+  END IF;
+
+  -- 2. Migrate qa_parkings_euvm_old -> qa_parkings_euvm_previous
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'qa_parkings_euvm_old'
+  ) THEN
+    RAISE NOTICE 'Found qa_parkings_euvm_old table, migrating to qa_parkings_euvm_previous...';
+
+    -- Check if old table has data
+    SELECT COUNT(*) INTO old_table_row_count
+    FROM public.qa_parkings_euvm_old;
+
+    -- Check if geometry needs migration
+    IF old_table_row_count > 0 THEN
+      SELECT EXISTS(
+        SELECT 1 FROM public.qa_parkings_euvm_old
+        WHERE geom IS NOT NULL AND ST_SRID(geom) != 3857
+        LIMIT 1
+      ) INTO old_table_has_wrong_srid;
+    END IF;
+
+    -- Check if id column type needs migration
+    SELECT EXISTS(
+      SELECT 1 FROM information_schema.columns
+      WHERE table_schema = 'public'
+      AND table_name = 'qa_parkings_euvm_old'
+      AND column_name = 'id'
+      AND data_type IN ('integer', 'bigint')
+    ) INTO old_table_has_wrong_id_type;
+
+    -- Migrate schema if needed
+    IF old_table_has_wrong_srid THEN
+      RAISE NOTICE 'Migrating qa_parkings_euvm_old.geom from SRID 4326 to 3857...';
+      ALTER TABLE public.qa_parkings_euvm_old
+      ALTER COLUMN geom TYPE geometry(Geometry, 3857)
+      USING CASE
+        WHEN ST_SRID(geom) = 3857 THEN geom
+        ELSE ST_Transform(geom, 3857)
+      END;
+    END IF;
+
+    IF old_table_has_wrong_id_type THEN
+      RAISE NOTICE 'Migrating qa_parkings_euvm_old.id from INTEGER to TEXT...';
+      ALTER TABLE public.qa_parkings_euvm_old
+      ALTER COLUMN id TYPE TEXT USING id::TEXT;
+    END IF;
+
+    -- Drop qa_parkings_euvm_previous if it exists (staging case)
+    IF EXISTS (
+      SELECT 1 FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'qa_parkings_euvm_previous'
+    ) THEN
+      RAISE NOTICE 'Dropping existing qa_parkings_euvm_previous table...';
+      DROP TABLE public.qa_parkings_euvm_previous;
+    END IF;
+
+    -- Rename old table to previous
+    ALTER TABLE public.qa_parkings_euvm_old
+    RENAME TO qa_parkings_euvm_previous;
+
+    RAISE NOTICE 'Renamed qa_parkings_euvm_old to qa_parkings_euvm_previous (with % rows).', old_table_row_count;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE WARNING 'Migration encountered an error: %', SQLERRM;
+    -- Continue execution - the INSERT statement below will handle transformation
+END $$;
+
+-- ============================================================================
+-- END MIGRATION BLOCK - Remove after deployment
+-- ============================================================================
+-- Create table if it doesn't exist
 CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
   id TEXT PRIMARY KEY,
   geom geometry (Geometry, 3857), -- Polygon or MultiPolygon (3857 for Martin vector tiles)
@@ -62,7 +187,7 @@ INSERT INTO
   )
 SELECT
   id::TEXT,
-  geom, -- Already 3857, no transformation needed
+  geom,
   count_reference,
   count_current,
   difference,
@@ -155,4 +280,4 @@ FROM
 WHERE
   public.qa_parkings_euvm.id = previous.id;
 
-CREATE INDEX qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);
+CREATE INDEX IF NOT EXISTS qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);
