@@ -95,7 +95,7 @@ export const InternalNotesFilterControl = () => {
 
         <MenuSection className="m-1 overflow-clip rounded-md border">
           <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
-            Nutzer {isLoading && <SmallSpinner />}
+            Nutzer:innen {isLoading && <SmallSpinner />}
           </MenuHeading>
           {authors?.map((author) => {
             return (
@@ -117,7 +117,7 @@ export const InternalNotesFilterControl = () => {
             className={menuItemClasses(internalNotesFilterParam?.user === undefined)}
             onClick={(e) => handleMenuClick(e, { user: undefined })}
           >
-            Alle Nutzer
+            Alle Nutzer:innen
           </MenuItem>
         </MenuSection>
 

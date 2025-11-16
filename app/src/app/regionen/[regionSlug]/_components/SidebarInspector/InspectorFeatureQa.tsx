@@ -15,6 +15,7 @@ import { useQaParam } from '../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
 import { Disclosure } from './Disclosure/Disclosure'
 import { USER_STATUS_TO_LETTER, userStatusConfig } from './InspectorQa/qaConfigs'
+import { QaDecisionData as QaDecisionDataComponent } from './InspectorQa/QaDecisionData'
 import { QaEvaluationCard } from './InspectorQa/QaEvaluationCard'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
@@ -126,6 +127,7 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
         regionSlug: regionSlug!,
         userStatus: userStatus as any,
         body,
+        decisionData: decisionData || undefined,
       })
 
       // Revalidate the evaluations data to refresh the inspector
@@ -165,14 +167,16 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
         showLockIcon={true}
       >
         <div className="bg-violet-50 px-3 py-5">
-          {/* Header Section - Full Latest Evaluation */}
-          {latestEvaluation && (
-            <QaEvaluationCard
-              evaluation={latestEvaluation}
-              decisionData={decisionData}
-              variant="header"
-            />
+          {/* Current State Data - Shown above evaluation */}
+          {decisionData && (
+            <div className="mb-5">
+              <h4 className="mb-2 text-sm font-medium text-gray-900">Aktueller Zustand</h4>
+              <QaDecisionDataComponent decisionData={decisionData} />
+            </div>
           )}
+
+          {/* Header Section - Full Latest Evaluation */}
+          {latestEvaluation && <QaEvaluationCard evaluation={latestEvaluation} variant="header" />}
 
           {/* User Evaluation Form */}
           <section className="mt-5">

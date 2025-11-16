@@ -1,44 +1,28 @@
 import db from '@/db'
 import {
-  QA_SYSTEM_STATUS_COLORS,
-  QA_USER_STATUS_COLORS,
   SYSTEM_STATUS_TO_LETTER,
   USER_STATUS_TO_LETTER,
 } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/InspectorQa/qaConfigs'
 import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
 import { resolver } from '@blitzjs/rpc'
-import { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
 import { Ctx } from 'blitz'
 import { z } from 'zod'
 
 const Schema = z.object({
   configId: z.number(),
   regionSlug: z.string(),
+  userIds: z.array(z.number()).optional(),
 })
 
 export type QaMapData = {
   areaId: string
   systemStatus: string | null // Letter representing system status (G, N, P)
-  userStatus: string | null // Letter representing user status (S, R, D, P)
-}
-
-// Helper function to determine display color based on evaluation status
-function getDisplayColor(
-  systemStatus: QaSystemStatus,
-  userStatus: QaEvaluationStatus | null,
-): string {
-  // If user has made a decision, use user status color
-  if (userStatus) {
-    return QA_USER_STATUS_COLORS[userStatus]
-  }
-
-  // Otherwise use system status color
-  return QA_SYSTEM_STATUS_COLORS[systemStatus]
+  userStatus: string | null // Letter representing user status (S, R, D, P, QA)
 }
 
 export default resolver.pipe(
   resolver.zod(Schema),
-  async ({ configId, regionSlug }, { session }: Ctx) => {
+  async ({ configId, regionSlug, userIds }, { session }: Ctx) => {
     // Check authorization for the region
     const authResult = await checkRegionAuthorization(session, regionSlug)
     if (!authResult.isAuthorized) {
@@ -49,8 +33,12 @@ export default resolver.pipe(
     // If someone want to work around this, she can see some color values… nothing too special.
 
     // Get latest evaluations for each area
+    // If userIds is provided, only include evaluations from those users
     const evaluations = await db.qaEvaluation.findMany({
-      where: { configId },
+      where: {
+        configId,
+        ...(userIds && userIds.length > 0 ? { userId: { in: userIds } } : {}),
+      },
       orderBy: { createdAt: 'desc' },
       distinct: ['areaId'],
     })
@@ -69,7 +57,6 @@ export default resolver.pipe(
       }
     })
 
-    console.log(`✅ getQaDataForMap: returning ${qaData.length} map data entries`)
     return qaData
   },
 )

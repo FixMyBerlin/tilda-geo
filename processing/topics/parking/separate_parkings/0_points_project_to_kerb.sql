@@ -1,9 +1,22 @@
+-- WHAT IT DOES:
+-- Project separate parking points to kerb lines (convert point to linestring).
+-- * Project point to closest kerb, buffer based on capacity, re-project to get final kerb segment
+-- INPUT: `_parking_separate_parking_points` (point), `_parking_kerbs` (linestring), `_parking_orientation_constants`
+-- OUTPUT: `_parking_separate_parking_points_projected` (linestring)
+--
 DO $$ BEGIN RAISE NOTICE 'START projecting obstacle points at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
--- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_points_projected CASCADE;
 
--- INSERT
+-- Project point to closest kerb and buffer based on capacity
+-- * Project point to closest kerb using `project_to_k_closest_kerbs` (within 5m tolerance)
+-- * Buffer projected point based on capacity and orientation (parallel/perpendicular/diagonal)
+--   - Orientation determines constants from `_parking_orientation_constants` table (defined in `estimate_capacity.sql`):
+--     * `car_space_x`: space per car along kerb (parallel=4.4m, perpendicular=2.0m, diagonal=calculated)
+--     * `padding`: space between cars (parallel=0.8m, perpendicular=0.5m, diagonal=calculated)
+--   - Buffer radius = ((car_space_x + padding) * capacity - padding) / 2
+--     Formula calculates total length needed for N cars, then divides by 2 to get radius from center
+--   - Defaults to 'parallel' if orientation tag is missing
 CREATE TEMP TABLE _parking_separate_parking_points_snapped AS
 SELECT
   pp.id || '-' || pk.kerb_id AS id,
@@ -32,11 +45,12 @@ FROM
       project_to_k_closest_kerbs (pp.geom, tolerance := 5, k := 1)
   ) pk;
 
--- CLEANUP
+-- Cleanup invalid geometries that sometimes happen during projection
 DELETE FROM _parking_separate_parking_points_snapped
 WHERE
   geom IS NULL;
 
+-- Re-project buffered geometry to kerb to create final linestring segment (using `project_to_k_closest_kerbs`)
 CREATE TABLE _parking_separate_parking_points_projected AS
 SELECT
   id || '-' || pk.kerb_id AS id,
@@ -51,11 +65,11 @@ FROM
   _parking_separate_parking_points_snapped
   CROSS JOIN LATERAL project_to_k_closest_kerbs (buffered_geom, tolerance := 5, k := 1) pk;
 
+-- Filter: Remove cases where kerb_side doesn't match the original side tag for some reason
 DELETE FROM _parking_separate_parking_points_projected
 WHERE
   kerb_side <> side;
 
--- MISC
 ALTER TABLE _parking_separate_parking_points_projected
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

@@ -1,7 +1,12 @@
--- Discard cutouts of bus stops (Bushaltestelle) and turning circles (Kreisverkehr) where explicit no parking is tagged.
--- In those cases, the explicit rules overwrite our coutouts.
--- We store the removed cutouts separately for debugging but do not show them in the final parking_cutouts table.
--- get all ids for cutouts that need to be discarded
+-- WHAT IT DOES:
+-- Mark bus stop obstacle points as discarded when explicit parking is allowed.
+-- * Check if bus stop has explicit parking tag (parking != 'no')
+-- * Set `discard: true` tag on obstacle points
+-- * Discarded cutouts moved to `_parking_discarded_cutouts` in `cutouts/3_handle_discarded.sql` (stored for debugging, not shown in final cutouts)
+-- * When explicit parking rules exist, they overwrite our cutouts
+-- INPUT: `_parking_obstacle_points_projected` (linestring), `_parking_road_parkings` (linestring)
+-- OUTPUT: `_parking_obstacle_points_projected` (updated with discard tag)
+--
 UPDATE _parking_obstacle_points_projected op
 SET
   tags = op.tags || '{"discard": true, "reason": "explicit_parking_at_busstop"}'::JSONB

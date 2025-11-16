@@ -6,6 +6,7 @@ require("RoadClassificationRoadValue")
 local is_driveway_check = require('is_driveway')
 local has_parking_check = require('has_parking')
 local SANITIZE_TAGS = require('sanitize_tags')
+local sanitize_cleaner = require('sanitize_cleaner')
 require("road_width")
 
 function result_tags_roads(object)
@@ -38,9 +39,11 @@ function result_tags_roads(object)
 
   local result_meta = Metadata(object)
 
+  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
+
   return {
     id = id,
-    tags = result_tags,
+    tags = cleaned_tags,
     meta = result_meta,
-  }
+  }, replaced_tags
 end

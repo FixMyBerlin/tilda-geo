@@ -1,8 +1,20 @@
+-- WHAT IT DOES:
+-- Project public transport stop points to kerb lines or platform lines (convert point to linestring).
+-- Three branches based on stop type and side:
+-- * `bus_stop_kerb`: project to kerbs using `project_to_k_closest_kerbs` (finds closest kerb within 5m)
+-- * `bus_stop_centerline` (side IS NULL): project to platform lines using `project_to_closest_platform` (within 20m)
+-- * `bus_stop_centerline` (side IS NOT NULL): project to kerbs using `project_to_k_closest_kerbs` (finds closest kerb on specified side within 20m)
+-- * `tram_stop` (with embedded rails): project to kerbs using `project_to_k_closest_kerbs` (within 20m)
+-- - Cleanup: remove invalid geometries
+-- INPUT: `_parking_public_transport` (point), `_parking_kerbs` (linestring), platforms
+-- OUTPUT: `_parking_public_transport_points_projected` (linestring)
+--
 DO $$ BEGIN RAISE NOTICE 'START projecting public transport stop points at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_public_transport_points_projected CASCADE;
 
--- Project bus_stop_kerb to kerbs
+-- Branch 1: bus_stop_kerb - project to kerbs
+-- Those bus stop geometry already represents the right side, snap directly to kerb
 CREATE TABLE _parking_public_transport_points_projected AS
 SELECT
   p.id || '-' || pk.kerb_id AS id,
@@ -32,7 +44,8 @@ WHERE
   ST_GeometryType (p.geom) = 'ST_Point'
   AND p.tags ->> 'category' = 'bus_stop_kerb';
 
--- Project bus_stop_centerline to platform lines
+-- Branch 2: bus_stop_centerline (side IS NULL) - project to platform lines
+-- Bus stop on centerline without side info, snap to platform line
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
@@ -61,7 +74,8 @@ WHERE
   AND pt.tags ->> 'category' = 'bus_stop_centerline'
   AND pt.tags ->> 'side' IS NULL;
 
--- Project bus_stop_centerline to platform lines
+-- Branch 3: bus_stop_centerline (side IS NOT NULL) - project to kerbs
+-- Bus stop on centerline with side info, snap to kerb on specified side
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
@@ -95,7 +109,8 @@ WHERE
   AND pt.tags ->> 'category' = 'bus_stop_centerline'
   AND pt.tags ->> 'side' IS NOT NULL;
 
--- project tram_stop to kerbs for all embedded rails
+-- Branch 4: tram_stop (with embedded rails) - project to kerbs
+-- Tram stop with embedded rails in road, snap to kerb
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
@@ -132,7 +147,8 @@ WHERE
       AND r.tags ->> 'has_embedded_rails' = 'true'
   );
 
--- CLEANUP
+-- Cleanup: remove invalid geometries
+-- Remove NULL geometries that are likely projection errors.
 DELETE FROM _parking_public_transport_points_projected
 WHERE
   geom IS NULL;

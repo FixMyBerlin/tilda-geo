@@ -1,7 +1,19 @@
+-- WHAT IT DOES:
+-- Insert cutout areas from various sources into `_parking_cutouts` table.
+-- * Intersection corners (5m buffer) - conditionally
+-- * Driveway corner kerbs, driveways, crossings (buffered)
+-- * Obstacle points/lines/areas (buffered)
+-- * Public transport stops, turnaround points (buffered)
+-- * Separate parking areas/points (buffered)
+-- * Roads (buffered) - cleanup leftover parking pieces on roads
+-- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_turnaround_points`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`
+-- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
+--
 DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- INSERT "intersection_corner" buffers (circle)
--- @var: "5" is the buffer in meter where no parking is allowed legally
+-- Conditions: only where NOT `has_driveway` AND `has_road`.
+-- Buffer: static value 5m (legal requirement where no parking is allowed)
 INSERT INTO
   _parking_cutouts (
     id,
@@ -34,6 +46,8 @@ WHERE
   NOT has_driveway
   AND has_road;
 
+-- INSERT "driveway_corner_kerb" buffers (rectangles)
+-- Buffer: static value 0.01m
 INSERT INTO
   _parking_cutouts (
     id,
@@ -63,6 +77,7 @@ FROM
   _parking_driveway_corner_kerbs;
 
 -- INSERT "driveway" buffers (rectangles)
+-- Buffer: tags->>'width' / 2
 INSERT INTO
   _parking_cutouts (
     id,
@@ -99,6 +114,7 @@ FROM
   _parking_driveways;
 
 -- INSERT "crossing" buffers (rectangles)
+-- Buffer: tags->>'buffer_radius'
 INSERT INTO
   _parking_cutouts (
     id,
@@ -133,6 +149,7 @@ FROM
   _parking_crossings;
 
 -- INSERT "obstacle_point" buffers (circle)
+-- Buffer: tags->>'buffer_radius'
 INSERT INTO
   _parking_cutouts (
     id,
@@ -164,6 +181,7 @@ FROM
   _parking_obstacle_points_projected;
 
 -- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
+-- Buffer: tags->>'buffer_radius'
 INSERT INTO
   _parking_cutouts (
     id,
@@ -195,6 +213,7 @@ FROM
   _parking_public_transport_points_projected;
 
 -- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
+-- Buffer: tags->>'buffer_radius'
 INSERT INTO
   _parking_cutouts (
     id,
@@ -225,6 +244,7 @@ FROM
   _parking_turnaround_points;
 
 -- INSERT "obstacle_area" buffers (buffered lines)
+-- Buffer: static value 0.6m
 INSERT INTO
   _parking_cutouts (
     id,
@@ -255,6 +275,7 @@ FROM
   _parking_obstacle_areas_projected;
 
 -- INSERT "obstacle_line" buffers (buffered lines)
+-- Buffer: static value 0.6m
 INSERT INTO
   _parking_cutouts (
     id,
@@ -285,6 +306,9 @@ FROM
   _parking_obstacle_lines_projected;
 
 -- INSERT "parking area" buffers (buffered lines)
+-- Buffer: COALESCE(tags->>'road_width' * 0.7, 3) - but only when road_width_source is 'tag'
+-- Just enough to not overlap with the other side of the road
+-- But needs to be big enough to intersect road parking lines, so they get cut out and replaced by separate parking
 INSERT INTO
   _parking_cutouts (
     id,
@@ -299,7 +323,14 @@ INSERT INTO
 SELECT
   id::TEXT,
   osm_id,
-  ST_Buffer (geom, 0.6, 'endcap=flat'),
+  ST_Buffer (
+    geom,
+    CASE
+      WHEN tags ->> 'road_width_source' = 'tag' THEN COALESCE((tags ->> 'road_width')::NUMERIC * 0.7, 3)
+      ELSE 3
+    END,
+    'endcap=flat'
+  ),
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
@@ -313,7 +344,8 @@ SELECT
 FROM
   _parking_separate_parking_areas_projected;
 
--- INSERT "parking area" buffers (buffered lines)
+-- INSERT "parking point" buffers (buffered lines)
+-- Buffer: static value 0.6m
 INSERT INTO
   _parking_cutouts (
     id,
@@ -343,6 +375,8 @@ FROM
   _parking_separate_parking_points_projected;
 
 -- INSERT roads
+-- Cleanup: removes leftover parking pieces on roads
+-- Uses LEAST(offset_right, offset_left) * 0.9 for buffer, excludes driveways without parking
 INSERT INTO
   _parking_cutouts (
     id,

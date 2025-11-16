@@ -1,5 +1,6 @@
 'use client'
 import { formatDate } from '@/src/app/_components/date/formatDate'
+import { formatDateTimeBerlin } from '@/src/app/_components/date/formatDateBerlin'
 import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { Link } from '@/src/app/_components/links/Link'
 import { linkStyles } from '@/src/app/_components/links/styles'
@@ -35,7 +36,9 @@ export default function AdminMembershipsPage() {
   return (
     <>
       <HeaderWrapper>
-        <Breadcrumb pages={[{ href: '/admin/memberships', name: 'Nutzer & Mitgliedschaften' }]} />
+        <Breadcrumb
+          pages={[{ href: '/admin/memberships', name: 'Nutzer:innen & Mitgliedschaften' }]}
+        />
       </HeaderWrapper>
 
       {userAndMemberships.length >= MAX_TAKE && (
@@ -107,9 +110,58 @@ export default function AdminMembershipsPage() {
                         userId: String(user.id),
                       })}`}
                     >
-                      Rechte
+                      Rechte vergeben
                     </Link>
                   </div>
+                  {/* Accessed Regions */}
+                  {user.accessedRegions && user.accessedRegions.length > 0 && (
+                    <div className="mt-4 border-t pt-2">
+                      <div className="mb-1 font-semibold text-gray-600">Zugriffene Regionen:</div>
+                      <ul className="space-y-1">
+                        {user.accessedRegions.map((accessedRegion) => {
+                          const hasAccess = user.Membership?.some(
+                            (m) => m.region.slug === accessedRegion.slug,
+                          )
+                          const relativeTime = formatRelativeTime(accessedRegion.lastAccessedDay)
+
+                          return (
+                            <li key={accessedRegion.slug} className="text-xs">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <Link
+                                    blank
+                                    href={`/regionen/${accessedRegion.slug}`}
+                                    className="font-medium"
+                                  >
+                                    {accessedRegion.slug}
+                                  </Link>
+                                  <span
+                                    className="text-gray-400"
+                                    title={formatDateTimeBerlin(accessedRegion.lastAccessedDay)}
+                                  >
+                                    zuletzt {relativeTime}
+                                  </span>
+                                </div>
+                                {hasAccess ? (
+                                  <span className="text-xs text-green-600">Has access</span>
+                                ) : (
+                                  <Link
+                                    href={`/admin/memberships/new?${new URLSearchParams({
+                                      userId: String(user.id),
+                                      regionSlug: accessedRegion.slug,
+                                    })}`}
+                                    className={'text-xs'}
+                                  >
+                                    Give access
+                                  </Link>
+                                )}
+                              </div>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  )}
                 </td>
               </tr>
             )

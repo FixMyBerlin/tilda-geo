@@ -1,3 +1,10 @@
+-- WHAT IT DOES:
+-- Create label points for parking visualization.
+-- * parkings (lines): point at 50% along line
+-- * parkings_separate (areas): point on surface
+-- INPUT: parkings (linestring), parkings_separate (polygon)
+-- OUTPUT: parkings_labels (point), parkings_separate_labels (point)
+--
 DO $$ BEGIN RAISE NOTICE 'START creating labels at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- parkings_labels

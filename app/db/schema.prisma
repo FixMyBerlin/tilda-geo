@@ -34,26 +34,27 @@ generator client {
 // --------------------------------------
 
 model User {
-  id             Int            @id @default(autoincrement())
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id              Int            @id @default(autoincrement())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
   //
-  osmId          Int            @unique
-  osmName        String?
-  osmDescription String?
-  osmAvatar      String?
-  hashedPassword String?
-  role           UserRoleEnum   @default(USER)
-  email          String?        @unique
-  firstName      String?
-  lastName       String?
+  osmId           Int            @unique
+  osmName         String?
+  osmDescription  String?
+  osmAvatar       String?
+  hashedPassword  String?
+  role            UserRoleEnum   @default(USER)
+  email           String?        @unique
+  firstName       String?
+  lastName        String?
+  accessedRegions Json?          @default("[]")
   //
-  tokens         Token[]
-  sessions       Session[]
-  Membership     Membership[]
-  Note           Note[]
-  NoteComment    NoteComment[]
-  qaEvaluations  QaEvaluation[]
+  tokens          Token[]
+  sessions        Session[]
+  Membership      Membership[]
+  Note            Note[]
+  NoteComment     NoteComment[]
+  qaEvaluations   QaEvaluation[]
 }
 
 enum UserRoleEnum {
@@ -206,8 +207,9 @@ model QaConfig {
   mapAttribution String? // e.g., "QA Data: tilda-geo.de"
 
   // Thresholds for automatic system evaluation
-  goodThreshold        Float @default(0.1) // relative <= 0.1 difference = GOOD
-  needsReviewThreshold Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
+  goodThreshold               Float @default(0.1) // relative <= 0.1 difference = GOOD
+  needsReviewThreshold        Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
+  absoluteDifferenceThreshold Int   @default(4) // absolute difference <= this value is not considered a change
 
   region   Region @relation(fields: [regionId], references: [id])
   regionId Int
@@ -234,6 +236,9 @@ model QaEvaluation {
   // Optional evaluation text/reasoning (only for user evaluations)
   body String?
 
+  // Snapshot of data used for this evaluation
+  decisionData Json?
+
   config   QaConfig @relation(fields: [configId], references: [id])
   configId Int
 
@@ -257,6 +262,7 @@ enum QaEvaluationStatus {
   OK_REFERENCE_ERROR // "Diff OK, caused by wrong past/reference data"
   NOT_OK_DATA_ERROR // "Diff not OK, current data needs to be fixed"
   NOT_OK_PROCESSING_ERROR // "Diff not OK, processing needs to be fixed"
+  OK_QA_TOOLING_ERROR // "Diff OK, caused by methodical error in QA tooling (geometries/definitions)"
 }
 
 enum QaEvaluatorType {

@@ -1,4 +1,8 @@
--- this function projects back to separate_parkings
+-- WHAT IT DOES:
+-- Project kerb geometry back to original separate parking area polygon.
+-- * Gets projected kerb line, offsets it, projects back to original polygon boundary
+-- * Returns geometry projected onto separate parking area polygon
+-- USED IN: (currently unused - may be legacy code)
 DROP FUNCTION IF EXISTS project_to_separate_parking_area;
 
 CREATE FUNCTION project_to_separate_parking_area (parking_osm_id bigint) RETURNS geometry AS $$

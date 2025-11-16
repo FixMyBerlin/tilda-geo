@@ -1,3 +1,13 @@
+-- WHAT IT DOES:
+-- Merge spatially connected parkings with same tags into single parkings.
+-- * Cluster parkings by tags using ST_ClusterDBSCAN
+-- * Merge clustered parkings: sum capacity/area, merge geometries (ST_LineMerge)
+--   (Two merging strategies are used.)
+-- * Handle failed merges: remove capacity tags (will be estimated in `5_estimate_parking_capacities.sql`)
+--   (…and Log warnings if needed.)
+-- INPUT: `_parking_parkings_cutted` (linestring) - parkings after cutouts
+-- OUTPUT: `_parking_parkings_merged` (linestring, 5243), `_parking_parkings_failed_merges` (failed cases)
+--
 DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- 1. Create a TEMP table and  that we use for clustering
@@ -69,6 +79,10 @@ CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (tags);
 CREATE INDEX cluster_candidates_geom_idx ON cluster_candidates USING GIST (geom);
 
 -- We assign a cluster_id to each spatially connected group of parkings that share the same tags
+-- ST_ClusterDBSCAN parameters:
+--   geom: geometry column to cluster
+--   eps := 0.0: distance threshold (0.0 means only touching/intersecting geometries are clustered together)
+--   minpoints := 1: minimum number of geometries to form a cluster (1 means any single geometry can be its own cluster)
 WITH
   clustered AS (
     SELECT
@@ -109,12 +123,15 @@ WITH
         'geom_sources', string_agg(geom_source, ';' ORDER BY geom_source)
         /* sql-formatter-enable */
       ) AS tags,
-      string_agg(
-        id::TEXT,
-        '-'
-        ORDER BY
-          id
-      ) AS original_ids,
+      /* sql-formatter-disable */
+      string_agg(id::TEXT, '-' ORDER BY id) AS original_ids,
+      /* sql-formatter-enable */
+      -- Merge geometries chain:
+      -- 1. ST_Collect(geom): Groups all linestring geometries in the cluster into a MultiLineString
+      -- 2. ST_Node(...): Adds nodes at all intersection points between linestrings. This ensures that linestrings that touch or cross each other share common nodes, which is required for ST_LineMerge to work correctly.
+      -- 3. ST_LineMerge(...): Merges connected linestrings (those that share endpoints) into single continuous linestrings. If some segments are disconnected, the result remains a MultiLineString.
+      -- 4. ST_Dump(...): If the result is a MultiLineString with disconnected parts, ST_Dump returns a set of (path, geom) tuples - one row per disconnected linestring segment. If it's a single LineString, it returns one row.
+      -- 5. .*: Expands the (path, geom) tuple into separate path and geom columns. The path column indicates which part of the MultiLineString this row represents (e.g., {1} for first part, {2} for second part).
       (
         ST_Dump (ST_LineMerge (ST_Node (ST_Collect (geom))))
       ).*
@@ -130,10 +147,19 @@ SELECT
 FROM
   merged;
 
--- Sometimes ST_LineMerge fails because the geomtries are not perfectly connected in those cases we use the following more aggresive way to merge the geometries
+ALTER TABLE _parking_parkings_merged
+ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
+
 CREATE INDEX _parking_parkings_merged_id_idx ON _parking_parkings_merged USING BTREE (id);
 
+CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
+
+-- Sometimes ST_LineMerge fails because the geomtries are not perfectly connected in those cases we use the following more aggresive way to merge the geometries
 WITH
+  -- Fallback merge step 1: More aggressive geometry union and node creation
+  -- This handles cases where the initial merge (`ST_Collect` + `ST_LineMerge`) failed because geometries weren't perfectly connected.
+  -- `ST_Union(geom)` unions all geometries for the same `id` (see `GROUP BY`). Key difference: `ST_Union` merges (dissolves) geometries that touch or overlap, whereas `ST_LineMerge` requires exact endpoint connections. This allows merging geometries with small gaps or overlaps that the initial method could not merge.
+  -- HAVING count(*) > 1: Only process IDs that have multiple rows (failed merges from the initial attempt above (`ST_Collect` + `ST_LineMerge`))
   cutted_geoms AS (
     SELECT
       id,
@@ -145,6 +171,8 @@ WITH
     HAVING
       count(*) > 1
   ),
+  -- Fallback merge step 2: Attempt to merge the processed geometries using `ST_Collect` + `ST_LineMerge` again
+  -- But this time on the geometries that failed to merge in the initial attempt above and were then merged more aggressively with `ST_Union`.
   filtered_geoms AS (
     SELECT
       id,
@@ -186,10 +214,10 @@ GROUP BY
 HAVING
   count(*) > 1;
 
--- if we still have clusters that failed to merge we save them in a separate table and remove their capacity so it will get estimated later on
-DROP TABLE IF EXISTS _parking_failed_merges;
+-- If we still have clusters that failed to merge we save them in a separate table and remove their capacity so it will get estimated in `5_estimate_parking_capacities.sql`
+DROP TABLE IF EXISTS _parking_parkings_failed_merges;
 
-CREATE TABLE _parking_failed_merges AS
+CREATE TABLE _parking_parkings_failed_merges AS
 SELECT
   *
 FROM
@@ -211,22 +239,22 @@ FROM
 WHERE
   _parking_parkings_merged.id = failed_merges.id;
 
+-- WARNING: Check failed merges table
 DO $$
   DECLARE
-    failed_count INTEGER;
+    failed_clusters_count INTEGER;
+    failed_rows_count INTEGER;
   BEGIN
-    SELECT COUNT(*) INTO failed_count
-    FROM failed_merges;
-    RAISE NOTICE 'Failed to merge % clusters. Their capacity will be estimated.', failed_count;
+    SELECT COUNT(*) INTO failed_clusters_count FROM failed_merges;
+    SELECT COUNT(*) INTO failed_rows_count FROM _parking_parkings_failed_merges;
+    IF failed_clusters_count > 0 THEN
+      RAISE WARNING '[WARNING] Failed to merge % cluster(s) (% rows total). After initial `ST_LineMerge` and fallback attempts, these parkings still have disconnected linestring geometries (gaps between segments or non-touching endpoints) that cannot be merged. Action taken: saved to `_parking_parkings_failed_merges`, removed capacity tag (will be estimated in `5_estimate_parking_capacities.sql`), and modified IDs to make them unique.', failed_clusters_count, failed_rows_count;
+    END IF;
   END $$;
 
--- MISC
-CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
-
-ALTER TABLE _parking_parkings_merged
+ALTER TABLE _parking_parkings_failed_merges
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
 
-CREATE INDEX parking_parkings_failed_merges_idx ON _parking_failed_merges USING GIST (geom);
+DROP INDEX IF EXISTS parking_parkings_failed_merges_idx;
 
-ALTER TABLE _parking_failed_merges
-ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243);
+CREATE INDEX parking_parkings_failed_merges_idx ON _parking_parkings_failed_merges USING GIST (geom);

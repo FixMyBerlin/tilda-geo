@@ -1,3 +1,9 @@
+-- WHAT IT DOES:
+-- Calculate azimuth (direction angle) at a specific point index along a linestring.
+-- * Returns angle in radians from point at idx to next/previous point (based on direction)
+-- * Direction: 1 = forward (idx to idx+1), -1 = backward (idx-1 to idx)
+-- * Handles edge cases (start/end of line)
+-- USED IN: `crossings/2_points_create_crossings.sql` (calculate crossing direction perpendicular to road)
 DROP FUNCTION IF EXISTS line_azimuth_at_index;
 
 CREATE FUNCTION line_azimuth_at_index (geom geometry, idx integer, direction integer) RETURNS double precision AS $$

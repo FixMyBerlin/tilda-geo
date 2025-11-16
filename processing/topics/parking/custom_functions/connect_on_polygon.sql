@@ -1,6 +1,11 @@
+-- WHAT IT DOES:
+-- Return the shortest line on the polygon boundary connecting two input points.
+-- * Input points can be anywhere (inside/outside/on polygon) - they are snapped to closest point on boundary
+-- * Returns linestring segment along polygon boundary between the two snapped points
+-- * Handles wrapping: if start position > end position, takes path through polygon start/end (wraps around)
+-- USED IN: `parking_area_to_line.sql` (for creating edges from polygon corners)
 DROP FUNCTION IF EXISTS connect_on_polygon;
 
--- this function returns the shortest line on the polygon boundary connecting the two input points
 CREATE FUNCTION connect_on_polygon (
   start_point geometry,
   end_point geometry,

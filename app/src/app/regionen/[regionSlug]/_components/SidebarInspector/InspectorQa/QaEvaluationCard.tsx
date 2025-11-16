@@ -1,7 +1,6 @@
 import { formatDateTime } from '@/src/app/_components/date/formatDate'
 import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { Markdown } from '@/src/app/_components/text/Markdown'
-import { QaDecisionData } from '@/src/server/qa-configs/queries/getQaDecisionDataForArea'
 import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { systemStatusConfig, userStatusConfig } from './qaConfigs'
 import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
@@ -10,13 +9,18 @@ import { QaEvaluatorDisplay } from './QaEvaluatorDisplay'
 type Props = {
   evaluation: Pick<
     Awaited<ReturnType<typeof getQaEvaluationsForArea>>[number],
-    'createdAt' | 'systemStatus' | 'userStatus' | 'body' | 'evaluatorType' | 'author'
+    | 'createdAt'
+    | 'systemStatus'
+    | 'userStatus'
+    | 'body'
+    | 'evaluatorType'
+    | 'author'
+    | 'decisionData'
   >
-  decisionData?: QaDecisionData | null
   variant?: 'header' | 'history'
 }
 
-export const QaEvaluationCard = ({ evaluation, decisionData, variant = 'history' }: Props) => {
+export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => {
   const date = new Date(evaluation.createdAt)
   const systemConfig = systemStatusConfig[evaluation.systemStatus]
   const userConfig = evaluation.userStatus ? userStatusConfig[evaluation.userStatus] : null
@@ -51,8 +55,17 @@ export const QaEvaluationCard = ({ evaluation, decisionData, variant = 'history'
         <QaEvaluatorDisplay evaluation={evaluation} />
       </div>
 
-      {/* 2. Decision Data (only for header variant) */}
-      {variant === 'header' && <QaDecisionDataComponent decisionData={decisionData || null} />}
+      {/* 2. Stored Decision Data (for both header and history variants) */}
+      {evaluation.decisionData && (
+        <details className="text-sm">
+          <summary className="cursor-pointer text-gray-600 hover:text-gray-800">
+            Details anzeigen…
+          </summary>
+          <div className="mt-2">
+            <QaDecisionDataComponent decisionData={evaluation.decisionData} />
+          </div>
+        </details>
+      )}
 
       {/* 3. Comment */}
       {evaluation.body && (
@@ -64,7 +77,7 @@ export const QaEvaluationCard = ({ evaluation, decisionData, variant = 'history'
         </div>
       )}
 
-      {/* 3. Date */}
+      {/* 4. Date */}
       <div className="text-xs text-gray-500">
         <time title={formatRelativeTime(date)}>{formatDateTime(date)}</time>
       </div>

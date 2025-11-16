@@ -1,4 +1,5 @@
 import db, { Prisma } from '@/db'
+import { AccessedRegionsSchema } from '@/src/server/users/schema'
 import { resolver } from '@blitzjs/rpc'
 import { paginate } from 'blitz'
 
@@ -32,14 +33,21 @@ export default resolver.pipe(
             email: true,
             role: true,
             createdAt: true,
+            accessedRegions: true,
             // We cannot pass this part via select in the page component since TS will not be able to infer the types then
             Membership: { select: { id: true, region: { select: { slug: true } } } },
           },
         }),
     })
 
+    // Parse and validate accessedRegions with zod schema to ensure clean data
+    const usersWithValidatedRegions = users.map((user) => ({
+      ...user,
+      accessedRegions: AccessedRegionsSchema.parse(user.accessedRegions ?? []),
+    }))
+
     return {
-      users,
+      users: usersWithValidatedRegions,
       nextPage,
       hasMore,
       count,

@@ -32,6 +32,14 @@ export default async function seed() {
       body: null,
       evaluatorType: QaEvaluatorType.SYSTEM,
       userId: null,
+      decisionData: {
+        relative: 0.85, // 15% difference = NEEDS_REVIEW
+        currentCount: 85,
+        referenceCount: 100,
+        absoluteChange: -15,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-15T10:00:00Z'),
     },
     {
@@ -42,6 +50,14 @@ export default async function seed() {
       body: 'Bauarbeiten im Gange, temporäre Änderungen erwartet',
       evaluatorType: QaEvaluatorType.USER,
       userId: user1.id,
+      decisionData: {
+        relative: 0.85,
+        currentCount: 85,
+        referenceCount: 100,
+        absoluteChange: -15,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-15T14:30:00Z'),
     },
     {
@@ -52,6 +68,14 @@ export default async function seed() {
       body: null,
       evaluatorType: QaEvaluatorType.SYSTEM,
       userId: null,
+      decisionData: {
+        relative: 0.7, // 30% difference = PROBLEMATIC
+        currentCount: 70,
+        referenceCount: 100,
+        absoluteChange: -30,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-16T09:15:00Z'),
     },
     {
@@ -62,6 +86,14 @@ export default async function seed() {
       body: 'Datenqualitätsprobleme erkannt, manuelle Überprüfung erforderlich',
       evaluatorType: QaEvaluatorType.USER,
       userId: user2.id,
+      decisionData: {
+        relative: 0.7,
+        currentCount: 70,
+        referenceCount: 100,
+        absoluteChange: -30,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-16T16:45:00Z'),
     },
   ]
@@ -76,6 +108,14 @@ export default async function seed() {
       body: null,
       evaluatorType: QaEvaluatorType.SYSTEM,
       userId: null,
+      decisionData: {
+        relative: 0.65, // 35% difference = PROBLEMATIC
+        currentCount: 65,
+        referenceCount: 100,
+        absoluteChange: -35,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-14T08:00:00Z'),
     },
     {
@@ -86,6 +126,14 @@ export default async function seed() {
       body: 'OK Bauarbeiten. Umfangreiche Straßenarbeiten beeinflussen die Parkkapazität in diesem Bereich.',
       evaluatorType: QaEvaluatorType.USER,
       userId: user1.id,
+      decisionData: {
+        relative: 0.65,
+        currentCount: 65,
+        referenceCount: 100,
+        absoluteChange: -35,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-14T11:20:00Z'),
     },
     {
@@ -96,6 +144,14 @@ export default async function seed() {
       body: 'Aber was ist mit dem Norden? Der nördliche Abschnitt zeigt Inkonsistenzen, die untersucht werden müssen.',
       evaluatorType: QaEvaluatorType.USER,
       userId: user2.id,
+      decisionData: {
+        relative: 0.65,
+        currentCount: 65,
+        referenceCount: 100,
+        absoluteChange: -35,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-14T15:45:00Z'),
     },
     {
@@ -106,6 +162,14 @@ export default async function seed() {
       body: 'Gute Daten korrigiert. Danke, Daten aktualisiert; jetzt gut.',
       evaluatorType: QaEvaluatorType.USER,
       userId: user1.id,
+      decisionData: {
+        relative: 0.65,
+        currentCount: 65,
+        referenceCount: 100,
+        absoluteChange: -35,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-15T13:30:00Z'),
     },
   ]
@@ -120,6 +184,14 @@ export default async function seed() {
       body: 'Verarbeitungsfehler erkannt - Algorithmus muss korrigiert werden',
       evaluatorType: QaEvaluatorType.USER,
       userId: user1.id,
+      decisionData: {
+        relative: 1.5, // 50% difference = PROBLEMATIC (increase instead of decrease)
+        currentCount: 150,
+        referenceCount: 100,
+        absoluteChange: 50,
+        goodThreshold: qaConfig.goodThreshold,
+        needsReviewThreshold: qaConfig.needsReviewThreshold,
+      },
       createdAt: new Date('2024-01-17T10:00:00Z'),
     },
   ]

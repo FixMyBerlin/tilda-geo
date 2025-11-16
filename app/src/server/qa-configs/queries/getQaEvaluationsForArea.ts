@@ -1,5 +1,6 @@
 import db from '@/db'
 import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
+import { transformEvaluationWithDecisionData } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { resolver } from '@blitzjs/rpc'
 import { Ctx } from 'blitz'
 import { z } from 'zod'
@@ -42,6 +43,7 @@ export default resolver.pipe(
       orderBy: { createdAt: 'desc' },
     })
 
-    return evaluations
+    const data = evaluations.map((evaluation) => transformEvaluationWithDecisionData(evaluation))
+    return data
   },
 )

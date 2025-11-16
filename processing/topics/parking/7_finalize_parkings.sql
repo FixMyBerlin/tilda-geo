@@ -1,3 +1,13 @@
+-- WHAT IT DOES:
+-- Finalize parking data: transform to 3857, create final tables, indexes.
+-- * Insert `parkings` table (excl `parkings_no`), reverse left side kerbs
+-- * Insert `parkings_cutouts` table (excl roads, separate_parking)
+-- * Explode parkings to quantized points (1 per capacity)
+-- * Insert `parkings_separate` table (minzoom 17)
+-- * Create indexes for all tables
+-- INPUT: `_parking_parkings_merged` (linestring), `_parking_cutouts` (polygon - buffered obstacles), `_parking_separate_parking_areas` (polygon)
+-- OUTPUT: `parkings` (linestring, 3857), `parkings_cutouts` (polygon/multipolygon, 3857), `parkings_quantized` (point, 3857), `parkings_separate` (polygon, 3857)
+--
 DO $$ BEGIN RAISE NOTICE 'START finalize parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- insert remaining parkings into the final 'parkings' table

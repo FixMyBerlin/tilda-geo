@@ -1,9 +1,16 @@
+-- WHAT IT DOES:
+-- Find intersection corners where kerbs meet (for roads with angle < 140 degrees).
+-- * Use `get_intersection_corners` to find kerb intersection points
+-- * Filter: only intersections with total_degree > 2 (same as `1_find_intersections.sql`)
+-- INPUT: `_parking_intersections` (point), kerbs from `_parking_kerbs`
+-- OUTPUT: `_parking_intersection_corners` (point)
+--
 DO $$ BEGIN RAISE NOTICE 'START calculating intersection corners at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_intersection_corners;
 
--- for each road intersection where the roads incide with an angle smaller than 140 degrees
--- find the intersection points of the kerbs
+-- Find kerb intersection points for each road intersection.
+-- But only for roads that meet at angle < 140 degrees (sharp corners where kerbs actually intersect).
 CREATE TABLE _parking_intersection_corners AS
 SELECT
   i.id || '-' || corner.kerb1_id || '-' || corner.kerb2_id AS id,
@@ -22,7 +29,6 @@ FROM
 WHERE
   i.total_degree > 2;
 
--- CLEANUP
 ALTER TABLE _parking_intersection_corners
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

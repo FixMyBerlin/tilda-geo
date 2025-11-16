@@ -1,3 +1,9 @@
+-- WHAT IT DOES:
+-- Find intersection corner points where kerbs from different roads meet.
+-- * Gets all roads at intersection, calculates angles between road pairs using `intersection_angle`
+-- * Filters to sharp corners (angle < max_angle_degrees), finds kerb intersection points
+-- * Returns corner point geometry and metadata (has_driveway, has_road, kerb IDs)
+-- USED IN: `roads/2_find_intersection_corners.sql` (find corners where kerbs intersect at intersections)
 DROP FUNCTION IF EXISTS get_intersection_corners;
 
 CREATE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
@@ -9,14 +15,13 @@ CREATE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degr
 ) AS $$
 BEGIN
   RETURN QUERY
-  -- get the ways that are connected to the intersection
+  -- Get all ways that are connected to the intersection.
   WITH intersection_roads AS (
     SELECT DISTINCT way_id
     FROM _parking_node_road_mapping
     WHERE node_id = intersection_id
   ),
-  -- for each pair of roads, calculate the angle between them
-  -- and filter out the pairs that have too shallow angles
+  -- For each pair of roads, calculate the angle between them.
   road_pairs AS (
     SELECT
       intersection_angle (intersection_id, r1.way_id, r2.way_id) as angle,
@@ -24,9 +29,10 @@ BEGIN
       r2.way_id AS road_id2
     FROM intersection_roads r1
     JOIN intersection_roads r2
-      ON r1.way_id < r2.way_id -- prevent duplicates and self-joins
+      ON r1.way_id < r2.way_id -- Prevents duplicates and self-joins: ensures ordered pairs (A,B) where A < B, excludes (A,A) and (B,A).
   ),
-  -- for each pair of roads get the moved kerbs and look for intersections
+  -- For each pair of roads, get the kerbs and find their intersection points.
+  -- Filter out pairs with too shallow angles (angle >= max_angle_degrees).
   kerb_pairs AS (
     SELECT
       ST_Intersection(kerb1.geom, kerb2.geom) AS geom,

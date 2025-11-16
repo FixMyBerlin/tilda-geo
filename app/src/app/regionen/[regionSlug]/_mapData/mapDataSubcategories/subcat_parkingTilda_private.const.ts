@@ -27,12 +27,13 @@ export const subcat_parkingTilda_private: FileMapDataSubcategory = {
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_private,
+          additionalFilter: ['match', ['get', 'operator_type'], ['private'], true, false],
           source,
           sourceLayer,
         }),
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_pattern,
-          // additionalFilter: ['==', '$type', 'LineString'], // break patterns
+          additionalFilter: ['match', ['get', 'operator_type'], ['private'], true, false],
           source,
           sourceLayer,
         }),

@@ -13,4 +13,5 @@ export const searchParamsRegistry = {
   osmNotesFilter: 'osmNotesFilter',
   debugMap: 'debugMap',
   qa: 'qa', // QA layer selection
+  qaFilter: 'qaFilter', // QA filter params
 } as const

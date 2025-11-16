@@ -1,5 +1,8 @@
 cache_size_mb: 0
 web_ui: enable-for-all
+cors:
+  origin:
+    - "*"
 postgres:
   connection_string: $DATABASE_URL
   auto_bounds: calc

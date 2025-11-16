@@ -10,10 +10,10 @@ export const unexpected_highway_path: CampaignType = {
   description:
     'Diese Kampagne enthält Wege wo Fußverkehr ausgeschlossen aber Radverkehr vorgesehen sind.',
   task: '**Bitte prüfe das Tagging. Eventuell ist eine andere Straßenklasse angebracht.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.50y84.f6&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4nyc.4qfklc&v=2',
   maprouletteChallenge: {
     enabled: true,
-    id: undefined,
+    id: 53637,
     checkinComment: 'Straßenklasse Pfad in Kombination mit Radinfrastruktur verbessert.',
     checkinSource: 'radinfra_de',
     resultsLimited: false,
