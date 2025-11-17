@@ -10,6 +10,7 @@ export type SourcesRasterIdsTILDA =
   | 'maptiler-satellite'
   | 'mapbox-satellite'
   | 'areal2025'
+  | 'areal2025-summer'
   | 'areal2024'
   | 'areal2023'
   | 'areal2022'
@@ -137,7 +138,17 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     tileSize: 256,
     maxzoom: 21,
     minzoom: 10,
-    attributionHtml: 'Geoportal Berlin / Digitale farbige Orthophotos 2025 (DOP20RGB)',
+    attributionHtml:
+      '<a target="_blank" href="https://gdi.berlin.de/geonetwork/srv/ger/catalog.search#/metadata/6529de5a-ca53-3eee-9d0d-aaae376ad483">Geoportal Berlin / Digitale farbige Orthophotos 2025 (DOP20RGBI)</a>',
+  },
+  {
+    id: 'areal2025-summer',
+    name: 'Berlin: Luftbilder 2025 Summer',
+    tiles: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-truedop20rgb/{z}/{x}/{y}.png',
+    tileSize: 256,
+    maxzoom: 21,
+    minzoom: 10,
+    attributionHtml: 'Geoportal Berlin / Digitale farbige TrueOrthophotos 2025 (DOP20RGB)',
   },
   {
     id: 'areal2024',

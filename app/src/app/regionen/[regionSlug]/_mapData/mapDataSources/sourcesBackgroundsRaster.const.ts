@@ -10,6 +10,7 @@ import {
 
 export type SourcesRasterIds = SourcesRasterIdsTILDA | SourcesRasterIdsELI
 
-export const sourcesBackgroundsRaster: MapDataBackgroundSource<
-  SourcesRasterIds | SourcesRasterIdsELI
->[] = [...sourcesBackgroundsRasterTilda, ...sourcesBackgroundsRasterELI]
+export const sourcesBackgroundsRaster: MapDataBackgroundSource<SourcesRasterIds>[] = [
+  ...sourcesBackgroundsRasterTilda,
+  ...sourcesBackgroundsRasterELI,
+]

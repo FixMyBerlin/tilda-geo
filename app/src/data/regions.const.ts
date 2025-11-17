@@ -83,6 +83,7 @@ const berlinBackgroundSources: SourcesRasterIds[] = [
   'alkis',
   'brandenburg-dop20',
   'brandenburg-aktualitaet',
+  'areal2025-summer',
   'areal2025',
   'areal2024',
   'areal2023',
