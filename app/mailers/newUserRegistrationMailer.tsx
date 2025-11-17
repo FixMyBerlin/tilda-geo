@@ -5,18 +5,20 @@ import { sendMail } from './utils/sendMail'
 
 const NOTIFICATION_EMAIL = 'tilda@fixmycity.de'
 
-type NewUserRegistrationMailer = {
-  user: {
-    id: number
-    osmId: number
-    osmName: string | null
-    osmDescription: string | null
-    email: string | null
-    createdAt: Date
-  }
+type User = {
+  id: number
+  osmId: number
+  osmName: string | null
+  osmDescription: string | null
+  email: string | null
+  createdAt: Date
 }
 
-export function newUserRegistrationMailer({ user }: NewUserRegistrationMailer) {
+type NewUserRegistrationMailer = {
+  user: User
+}
+
+function buildMailContent(user: User) {
   const baseUrl = getDomain()
   const adminMembershipsUrl = `${baseUrl}/admin/memberships`
   const createMembershipUrl = `${baseUrl}/admin/memberships/new?userId=${user.id}`
@@ -40,6 +42,17 @@ export function newUserRegistrationMailer({ user }: NewUserRegistrationMailer) {
 * **Region:** Zum Zeitpunkt der Registrierung nicht verfügbar
 `
 
+  return {
+    introMarkdown,
+    ctaLink: createMembershipUrl,
+    ctaText: 'Mitgliedschaft für diesen Benutzer erstellen',
+    outroMarkdown: `[Alle Mitgliedschaften anzeigen](${adminMembershipsUrl})`,
+  }
+}
+
+export function newUserRegistrationMailer({ user }: NewUserRegistrationMailer) {
+  const content = buildMailContent(user)
+
   const message = {
     From: {
       Email: 'noreply@tilda-geo.de',
@@ -51,10 +64,7 @@ export function newUserRegistrationMailer({ user }: NewUserRegistrationMailer) {
       },
     ],
     Subject: `Neue Benutzerregistrierung: ${user.osmName || 'Unbekannt'}`,
-    introMarkdown,
-    ctaLink: createMembershipUrl,
-    ctaText: 'Mitgliedschaft für diesen Benutzer erstellen',
-    outroMarkdown: `[Alle Mitgliedschaften anzeigen](${adminMembershipsUrl})`,
+    ...content,
   }
 
   return {
@@ -65,7 +75,7 @@ export function newUserRegistrationMailer({ user }: NewUserRegistrationMailer) {
 }
 
 // React component for preview in react-email dev server
-const demoUser = {
+const demoUser: User = {
   id: 123,
   osmId: 456789,
   osmName: 'Max Mustermann',
@@ -75,34 +85,7 @@ const demoUser = {
 }
 
 export default function NewUserRegistrationMailer() {
-  const baseUrl = getDomain()
-  const adminMembershipsUrl = `${baseUrl}/admin/memberships`
-  const createMembershipUrl = `${baseUrl}/admin/memberships/new?userId=${demoUser.id}`
-  const registrationDate = formatDateTimeBerlin(demoUser.createdAt)
+  const content = buildMailContent(demoUser)
 
-  const introMarkdown = `
-# Neue Benutzerregistrierung
-
-## Benutzerinformationen
-
-* **Benutzer-ID:** ${demoUser.id}
-* **OSM-ID:** ${demoUser.osmId}
-* **OSM-Name:** ${demoUser.osmName}
-* **OSM-Beschreibung:** ${demoUser.osmDescription}
-* **E-Mail:** ${demoUser.email}
-* **Registrierungsdatum:** ${registrationDate}
-
-## Registrierungsdetails
-
-* **Region:** Zum Zeitpunkt der Registrierung nicht verfügbar
-`
-
-  return (
-    <MarkdownMail
-      introMarkdown={introMarkdown}
-      ctaLink={createMembershipUrl}
-      ctaText="Mitgliedschaft für diesen Benutzer erstellen"
-      outroMarkdown={`[Alle Mitgliedschaften anzeigen](${adminMembershipsUrl})`}
-    />
-  )
+  return <MarkdownMail {...content} />
 }
