@@ -16,6 +16,7 @@ type UploadWithRegions = Upload & {
  * Contains metadata about datasets
  */
 type RegionCsvRow = {
+  id: string
   name: string
   description: string
   category: string
@@ -25,6 +26,7 @@ type RegionCsvRow = {
   updated_at: string
   licence_osm_compatible: string
   data_source: string
+  geojson_download_url: string
   csv_download_url: string
   region_url: string
   public: string
@@ -53,15 +55,17 @@ export async function convertRegionUploadsToCsv(uploads: UploadWithRegions[], re
         : undefined
 
       const row: RegionCsvRow = {
+        id: upload.slug,
         name: config.name || '',
         description: config.description || '',
+        updated_at: config.updatedAt || '',
         category: categoryTitle || '',
         category_subtitle: categorySubtitle || '',
         attribution: config.attributionHtml || '',
         licence: config.licence || '',
-        updated_at: config.updatedAt || upload.updatedAt?.toISOString() || '',
         licence_osm_compatible: config.licenceOsmCompatible || '',
         data_source: config.dataSourceMarkdown || '',
+        geojson_download_url: getStaticDatasetUrl(upload.slug, 'geojson'),
         csv_download_url: getStaticDatasetUrl(upload.slug, 'csv'),
         region_url: regionUrl,
         public: upload.public ? 'public' : 'private',

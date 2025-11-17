@@ -1,8 +1,14 @@
--- Mark any turnaround point (turning circles and turning loops)
--- where ALL connected roads have explicit parking=no
--- as discarded.
--- The actual discarding happens later in 0_create_cutouts.sql.
--- TOOD DOCU: Why discard them later?
+-- WHAT IT DOES:
+-- Mark turnaround points (turning circles and turning loops) as discarded when ALL connected roads have explicit parking=no.
+-- * Check if all connected roads have parking='no' tag
+-- * Set `discard: true` tag on turnaround points
+-- * Discarded cutouts moved to `_parking_discarded_cutouts` in `cutouts/3_handle_discarded.sql`
+-- * When explicit parking rules exist, they overwrite our cutouts
+-- INPUT: `_parking_turnaround_points` (point), `_parking_node_road_mapping`, `_parking_road_parkings` (linestring)
+-- OUTPUT: `_parking_turnaround_points` (updated with discard tag)
+--
+DO $$ BEGIN RAISE NOTICE 'START filtering turning circles at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
 WITH
   tp_w_explicit_parking AS (
     SELECT

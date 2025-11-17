@@ -1,4 +1,12 @@
-DO $$ BEGIN RAISE NOTICE 'START cutting out _parking_parkings_cutted at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+-- WHAT IT DOES:
+-- Applies cutouts to parking lines derived from roads (centerline data).
+-- Some cutouts are conditional:
+-- - Street name matching: When both cutout and parking have a street name, they must match
+-- - Bus stop side matching: Bus stop cutouts only apply to matching street side, other cutouts apply to both sides
+-- INPUT: `_parking_road_parkings` (linestring), `_parking_cutouts` (polygon)
+-- OUTPUT: `_parking_parkings_cutted` (linestring - cut road parkings)
+--
+DO $$ BEGIN RAISE NOTICE 'START cutting out road parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP TABLE IF EXISTS _parking_parkings_cutted;
 
@@ -43,10 +51,8 @@ FROM
             --    e.g. A bus stop cutout with side='right' will only cut out parking where side='right'
             -- Using the new column instead of JSONB expression for better performance
             (
-              (
-                c.category IS DISTINCT FROM 'bus_stop'
-                OR c.side = p.side
-              )
+              c.category IS DISTINCT FROM 'bus_stop'
+              OR c.side = p.side
             )
         )
       ),

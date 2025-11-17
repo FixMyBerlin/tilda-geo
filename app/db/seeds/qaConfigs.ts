@@ -14,6 +14,7 @@ const seedQaConfigs = async () => {
       mapAttribution: 'QA Data: tilda-geo.de',
       goodThreshold: 0.1,
       needsReviewThreshold: 0.2,
+      absoluteDifferenceThreshold: 4,
       regionId: parkraumRegion.id,
     },
   })

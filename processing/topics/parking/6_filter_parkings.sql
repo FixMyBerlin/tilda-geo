@@ -1,3 +1,12 @@
+-- WHAT IT DOES:
+-- Filter invalid parkings into `parkings_no` table.
+-- * Filter parking='no'/'separate'/'not_expected'
+-- * Filter parking='missing'
+-- * Filter capacity < 1
+-- * Round capacity values
+-- INPUT: `_parking_parkings_merged` (linestring)
+-- OUTPUT: `parkings_no` (multilinestring, 3857)
+--
 DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- filter parkings that don't allow parking (except missing)

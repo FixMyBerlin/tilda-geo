@@ -17,7 +17,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql STABLE;
 
--- CLEANUP
 DROP TABLE IF EXISTS _parking_crossings;
 
 -- INSERT "parking_crossings" from located crossing points

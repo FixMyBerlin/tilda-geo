@@ -1,8 +1,9 @@
 import { formatNumber, formatPercentage } from '@/src/app/_components/utils/formatNumber'
 import { QaDecisionData as QaDecisionDataType } from '@/src/server/qa-configs/queries/getQaDecisionDataForArea'
+import { QaDecisionDataStored } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 
 type Props = {
-  decisionData: QaDecisionDataType | null
+  decisionData: QaDecisionDataType | QaDecisionDataStored | null
 }
 
 export const QaDecisionData = ({ decisionData }: Props) => {

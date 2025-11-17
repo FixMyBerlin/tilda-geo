@@ -10,7 +10,7 @@ local SANITIZE_PARKING_TAGS = {
   -- for is_road this with either 'missing' or some precise value.
   -- except for dual_carriageway|s when we fall back to 'not_expected' instead of 'missing'
   parking_extended = function(value, dual_carriageway)
-    local result = sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate' })
+    local result = sanitize_for_logging(value, { 'no', 'yes', 'lane', 'street_side', 'on_kerb', 'half_on_kerb', 'shoulder', 'separate', 'surface' })
     if dual_carriageway and dual_carriageway == 'yes' then
       result = result or 'not_expected'
     end
@@ -49,7 +49,7 @@ local SANITIZE_PARKING_TAGS = {
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
   parking_entrance = function(value)
-    return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey' })
+    return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey', 'rooftop' })
   end,
   direction_to_side = function(value)
     local transformations = {

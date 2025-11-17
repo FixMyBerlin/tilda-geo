@@ -1,5 +1,9 @@
-DROP FUNCTION IF EXISTS get_polygon_corners;
-
+-- WHAT IT DOES:
+-- Helper function to calculate the angle at a specific point index on a polygon ring.
+-- * Gets three consecutive points (previous, current, next) and calculates angle at middle point
+-- * Handles wrapping: if idx=1, uses last point as previous; if idx=last, wraps to first point
+-- * Returns angle in radians (0 to pi), adjusts if angle > pi
+-- USED IN: Only used in this file.
 DROP FUNCTION IF EXISTS tangent_on_ring (geometry, integer);
 
 CREATE FUNCTION tangent_on_ring (ring geometry, idx integer) RETURNS double precision AS $$
@@ -23,6 +27,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
+-- WHAT IT DOES:
+-- Find corner points of a polygon based on angle sharpness.
+-- * Calculates angle at each point on polygon boundary using the `tangent_on_ring` helper from above
+-- * Returns corners sorted by angle (sharpest first), optionally filtered by max_angle_degrees
+-- * Can limit to n_corners (or NULL for all corners)
+-- * Excludes last point (same as first point in closed polygon)
+-- USED IN: `parking_area_to_line.sql` (find corners of parking area convex hull to create edges)
+DROP FUNCTION IF EXISTS get_polygon_corners;
+
 CREATE FUNCTION get_polygon_corners (
   poly geometry,
   n_corners integer,
@@ -40,16 +53,18 @@ BEGIN
     RETURN;
   END IF;
   RETURN QUERY
+  -- Calculate angle at each point and filter/sort corners.
   WITH corners AS (
     SELECT
       ST_PointN(ring, idx) AS geom,
       tangent_on_ring(ring, idx) AS angle,
       idx
-    -- last and first point are the same, so we can ignore the last one
+    -- Last and first point are the same, so we can ignore the last one.
     FROM generate_series(1, n-1) AS idx
     WHERE max_angle_degrees IS NULL OR degrees(tangent_on_ring(ring, idx)) < max_angle_degrees
     ORDER BY tangent_on_ring(ring, idx) ASC
     LIMIT n_corners )
+  -- Return corners with sequential index based on original polygon order.
   SELECT ROW_NUMBER() OVER (ORDER BY c.idx) AS corner_idx, c.geom, c.angle
   FROM corners c;
 

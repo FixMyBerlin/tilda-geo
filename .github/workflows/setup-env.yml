@@ -56,8 +56,6 @@ jobs:
             rm .env.example
             sed -i \
               -e "s|^ENVIRONMENT=.*$|ENVIRONMENT='${{ inputs.ENVIRONMENT }}'|" \
-              -e "s|^SYNOLOGY_LOG_TOKEN=.*$|SYNOLOGY_LOG_TOKEN='${{ secrets.SYNOLOGY_LOG_TOKEN }}'|" \
-              -e "s|^SYNOLOGY_ERROR_LOG_TOKEN=.*$|SYNOLOGY_ERROR_LOG_TOKEN='${{ secrets.SYNOLOGY_ERROR_LOG_TOKEN }}'|" \
               -e "s|^DATABASE_HOST=.*$|DATABASE_HOST='${{ vars.DATABASE_HOST }}'|" \
               -e "s|^DATABASE_USER=.*$|DATABASE_USER='${{ secrets.DATABASE_USER }}'|" \
               -e "s|^DATABASE_PASSWORD=.*$|DATABASE_PASSWORD='${{ secrets.DATABASE_PASSWORD }}'|" \
@@ -80,7 +78,6 @@ jobs:
               -e "s|^S3_BUCKET=.*$|S3_BUCKET='${{ secrets.S3_BUCKET }}'|" \
               -e "s|^ATLAS_API_KEY=.*$|ATLAS_API_KEY='${{ secrets.ATLAS_API_KEY }}'|" \
               -e "s|^MAPROULETTE_API_KEY=.*$|MAPROULETTE_API_KEY='${{ secrets.MAPROULETTE_API_KEY }}'|" \
-              -e "s|^SYNOLOGY_URL=.*$|SYNOLOGY_URL='${{ secrets.SYNOLOGY_URL }}'|" \
               -e "s|^SKIP_DOWNLOAD=.*$|SKIP_DOWNLOAD='${{ vars.SKIP_DOWNLOAD }}'|" \
               -e "s|^SKIP_UNCHANGED=.*$|SKIP_UNCHANGED='${{ vars.SKIP_UNCHANGED }}'|" \
               -e "s|^PROCESSING_DIFFING_MODE=.*$|PROCESSING_DIFFING_MODE='${{ vars.PROCESSING_DIFFING_MODE }}'|" \

@@ -1,4 +1,7 @@
 cache_size_mb: 0
+cors:
+  origin:
+    - "*"
 postgres:
   connection_string: $DATABASE_URL
   auto_bounds: calc

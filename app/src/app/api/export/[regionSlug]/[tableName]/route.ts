@@ -96,14 +96,17 @@ export async function GET(
       ) AS data`, // `AS data` corresponts to <{ data: Buffer }>
     )
 
-    return new Response(binaryResponse?.data, {
-      status: 200,
-      headers: {
-        'Content-Disposition': `attachment; filename="${tableName}.fgb"`,
-        'Content-Type': 'application/octet-stream',
-        'Content-Length': String(binaryResponse?.data?.byteLength),
+    return new Response(
+      binaryResponse?.data ? (binaryResponse.data as unknown as BodyInit) : null,
+      {
+        status: 200,
+        headers: {
+          'Content-Disposition': `attachment; filename="${tableName}.fgb"`,
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': String(binaryResponse?.data?.byteLength),
+        },
       },
-    })
+    )
   } catch (error) {
     console.error(error) // Log files
     return Response.json(

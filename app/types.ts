@@ -13,6 +13,7 @@ declare module '@blitzjs/auth' {
       // osmAvatar: string | null
       osmToken: string
       role: Role // User['role']
+      accessedRegions?: Array<{ slug: string; lastAccessedDay: string }>
     }
   }
 }

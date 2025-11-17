@@ -1,5 +1,8 @@
--- this function projects a given point to the closest platform line
--- the parameter tolerance define the maximum distance to the closest platform
+-- WHAT IT DOES:
+-- Project input geometry to the closest public transport platform line within tolerance distance.
+-- * Finds closest platform linestring within tolerance from `_parking_public_transport` table
+-- * Projects geometry to platform line using `project_to_line`, returns platform metadata and projected geometry
+-- USED IN: `public_transport/0_points_project_to_kerb_and_platform.sql` (project bus stop centerlines to platform lines)
 DROP FUNCTION IF EXISTS project_to_closest_platform;
 
 CREATE FUNCTION project_to_closest_platform (input_geom geometry, tolerance double precision) RETURNS TABLE (

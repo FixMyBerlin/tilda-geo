@@ -3,6 +3,7 @@ require("ContainsSubstring")
 require("IsSidepath")
 require("CreateSubcategoriesAdjoiningOrIsolated")
 require("SanitizeTrafficSign")
+require("DeriveTrafficSigns")
 require("DeriveSmoothness")
 require("HighwayClasses")
 local has_tag_with_prefix = require('has_tag_with_prefix')
@@ -667,7 +668,10 @@ local sharedBusLaneBusWithBike = BikelaneCategory.new({
   end,
   process = function(tags)
     -- The transformation does not copy the traffic sign but in this case, we want the road traffic sign as part of the bike infra
-    tags.traffic_sign = tags.traffic_sign or (tags._parent and tags._parent.traffic_sign)
+    local traffic_sign_results = DeriveTrafficSigns(tags._parent)
+    tags.traffic_sign = tags.traffic_sign or traffic_sign_results.traffic_sign
+    tags['traffic_sign:forward'] = tags['traffic_sign:forward'] or traffic_sign_results['traffic_sign:forward']
+    tags['traffic_sign:backward'] = tags['traffic_sign:backward'] or traffic_sign_results['traffic_sign:backward']
     return tags
   end
 })

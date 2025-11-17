@@ -1,7 +1,9 @@
 require('init')
 
--- Generic string sanitizer to remove potentially harmful characters
--- Allows: A-Z, a-z, 0-9, space, minus, underscore, and common German characters (Ä, Ö, Ü, ä, ö, ü, ß), `;`, `,`, [], (), @
+--- Generic string sanitizer to remove potentially harmful characters
+--- Allows: A-Z, a-z, 0-9, space, minus, underscore, and common German characters (Ä, Ö, Ü, ä, ö, ü, ß), `;`, `,`, [], (), @
+--- @param value string|nil
+--- @return string|nil
 local function sanitize_string(value)
   if value == nil then return nil end
 

@@ -1,7 +1,8 @@
+import getQaEvaluationsForArea from '@/src/server/qa-configs/queries/getQaEvaluationsForArea'
 import { QaEvaluationCard } from './QaEvaluationCard'
 
 type Props = {
-  evaluations: any[] // QaEvaluation[] from Prisma
+  evaluations: Awaited<ReturnType<typeof getQaEvaluationsForArea>>
 }
 
 export const QaEvaluationHistory = ({ evaluations }: Props) => {

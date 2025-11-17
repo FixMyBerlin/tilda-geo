@@ -71,6 +71,124 @@ describe("Bikelanes", function()
       assert.are.equal(result[1].category, "footAndCyclewaySegregated_adjoining")
       assert.are.equal(result[1].width, 5)
     end)
+
+    it('handles source:cycleway:left:width for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          ['cycleway:left'] = 'lane',
+          ['source:cycleway:left:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:sidewalk:both:width for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          ['sidewalk:left'] = 'yes',
+          ['sidewalk:left:bicycle'] = 'yes',
+          ['source:sidewalk:both:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for lane (general, no side) for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          ['cycleway:left'] = 'lane',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for path (general, no side) for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for centerline footway+bicycle=yes for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          ['sidewalk:left'] = 'yes',
+          ['sidewalk:left:bicycle'] = 'yes',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handles source:cycleway:width for footway+bicycle=yes for width_source', function()
+      local input_object = {
+        tags = {
+          highway = 'footway',
+          ['bicycle'] = 'yes',
+          ['source:cycleway:width'] = 'infra3D',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[1]
+      assert.are.equal(result_left.width_source, 'infra3D')
+    end)
+
+    it('handle sidewalk bike infra', function()
+      local input_object = {
+        tags = {
+          highway = 'tertiary',
+          ['cycleway:both'] = 'no',
+          ['sidewalk'] = 'both',
+          ['sidewalk:left:bicycle'] = 'yes',
+          ['sidewalk:left:width'] = '2.3',
+          ['source:sidewalk:left:width'] = 'infra3D',
+          ['sidewalk:left:surface'] = 'asphalt',
+          ['sidewalk:left:traffic_sign'] = 'DE:239,1022-10',
+          ['sidewalk:right:surface'] = 'paving_stones',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = Bikelanes(input_object.tags, input_object)
+      local result_left = result[3]
+      assert.are.equal(result_left.category, 'footwayBicycleYes_adjoining')
+      assert.are.equal(result_left.width, 2.3)
+      assert.are.equal(result_left.width_source, 'infra3D')
+      assert.are.equal(result_left.surface, 'asphalt')
+      assert.are.equal(result_left.traffic_sign, 'DE:239,1022-10')
+    end)
   end)
 
   describe('Handle `mapillary*` cases', function()

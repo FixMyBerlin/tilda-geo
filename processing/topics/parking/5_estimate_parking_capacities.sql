@@ -1,3 +1,16 @@
+-- WHAT IT DOES:
+-- Estimate parking capacity and area from length and orientation (in-place update).
+-- * Estimate area from length + orientation (only if area tag missing)
+--   - Missing for: regular parkings (source='parent_highway'), separate parking areas/points after split/redistribution
+--   - Already set for: separate parking areas with geometry (area_source='geometry')
+--   - Note: area tags removed when split in 2_cutout_separate_parkings.sql and 3_redistribute_parking_capacities.sql
+-- * Estimate capacity from length + orientation (only if capacity tag missing)
+--   - Missing for: regular parkings (source='parent_highway') without OSM capacity tag, separate parking areas/points without OSM capacity tag
+--   - Already set for: parkings with OSM `capacity` tag (capacity_source='tag'), separate parking areas estimated in 0_areas_project_to_kerb.sql
+--   - Note: capacity redistributed (not removed) when split in 3_redistribute_parking_capacities.sql
+-- * Adjust capacity for staggered parking (50% reduction + maneuvering loss)
+-- INPUT/OUTPUT: `_parking_parkings_merged` (linestring) - updates same table
+--
 DO $$ BEGIN RAISE NOTICE 'START estimating parking capacity at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- add length and delete short parkings
@@ -33,16 +46,15 @@ CREATE INDEX IF NOT EXISTS parking_parkings_merged_estimated_capacity_idx ON _pa
 WHERE
   estimated_capacity IS NULL;
 
-UPDATE _parking_parkings_merged
-SET
-  estimated_capacity = estimate_capacity_from_area (
-    area := (tags ->> 'area')::NUMERIC,
-    orientation := tags ->> 'orientation'
-  )
-WHERE
-  tags ->> 'source' = 'separate_parking_areas'
-  AND tags ->> 'area_source' = 'geometry';
-
+-- UPDATE _parking_parkings_merged
+-- SET
+--   estimated_capacity = estimate_capacity_from_area (
+--     area := (tags ->> 'area')::NUMERIC,
+--     orientation := tags ->> 'orientation'
+--   )
+-- WHERE
+--   tags ->> 'source' = 'separate_parking_areas'
+--   AND tags ->> 'area_source' = 'geometry';
 UPDATE _parking_parkings_merged
 SET
   estimated_capacity = estimate_capacity (

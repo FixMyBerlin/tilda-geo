@@ -41,9 +41,6 @@ function parseParameters() {
     diffingBbox: parseBbox(process.env.PROCESSING_DIFFING_BBOX),
     skipUnchanged: process.env.SKIP_UNCHANGED === '1',
     environment: process.env.ENVIRONMENT || '',
-    synologyLogToken: process.env.SYNOLOGY_LOG_TOKEN,
-    synologyErrorLogToken: process.env.SYNOLOGY_ERROR_LOG_TOKEN,
-    synologyURL: process.env.SYNOLOGY_URL,
     processOnlyTopics: process.env.PROCESS_ONLY_TOPICS
       ? process.env.PROCESS_ONLY_TOPICS.split(',').map((t) => t.trim())
       : [],

@@ -1,4 +1,5 @@
 import db, { User } from '@/db'
+import { newUserRegistrationMailer } from '@/mailers/newUserRegistrationMailer'
 import { getOsmApiUrl, getOsmUrl } from '@/src/app/_components/utils/getOsmUrl'
 import { api } from '@/src/blitz-server'
 import { Role } from '@/types'
@@ -86,6 +87,18 @@ export default api(
             role: 'USER',
           },
         })
+
+        // Send email notification for new user registration
+        await newUserRegistrationMailer({
+          user: {
+            id: newUser.id,
+            osmId: newUser.osmId,
+            osmName: newUser.osmName,
+            osmDescription: newUser.osmDescription,
+            email: newUser.email,
+            createdAt: newUser.createdAt,
+          },
+        }).send()
       }
 
       const publicData = {

@@ -9,6 +9,7 @@ import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 import { QaIcon } from '../../SidebarInspector/InspectorQa/QaIcon'
 import { QaAreasListDialog, qaAreasStatusMap } from './QaAreasListDialog'
 import { QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
+import { QaUserDropdown } from './QaUserDropdown'
 
 export const QaConfigCategory = ({
   qaConfig,
@@ -27,6 +28,7 @@ export const QaConfigCategory = ({
 
   const isSelected = qaParamData.configSlug === qaConfig.slug
   const currentStyle = isSelected ? qaParamData.style : 'none'
+  const showUserDropdown = currentStyle === 'user-selected' && isSelected
 
   const handleStyleChange = (newStyle: QaStyleKey) => {
     if (newStyle === 'none') {
@@ -124,6 +126,9 @@ export const QaConfigCategory = ({
                     </label>
                   ))}
                 </div>
+                {showUserDropdown && (
+                  <QaUserDropdown configId={qaConfig.id} regionSlug={regionSlug!} />
+                )}
               </DisclosurePanel>
             </Transition>
           </>

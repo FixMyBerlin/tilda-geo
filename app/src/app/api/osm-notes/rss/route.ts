@@ -1,3 +1,4 @@
+import { formatDateTimeBerlin } from '@/src/app/_components/date/formatDateBerlin'
 import { bboxPolygon, booleanPointInPolygon } from '@turf/turf'
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
@@ -126,7 +127,7 @@ export async function GET(request: NextRequest) {
               ) {
                 lastStatus = 'open'
               }
-              return `<p><strong>${user} – ${new Date(date).toLocaleString('de-DE')}:</strong></p>${statusChange}<blockquote>${text}</blockquote>`
+              return `<p><strong>${user} – ${formatDateTimeBerlin(date)}:</strong></p>${statusChange}<blockquote>${text}</blockquote>`
             })
             .join('<hr>')
 

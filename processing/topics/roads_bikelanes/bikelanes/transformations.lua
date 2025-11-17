@@ -2,15 +2,21 @@ require('init')
 require('MergeTable')
 require('HighwayClasses')
 
+---@class CenterLineTransformation
+---@field highway string
+---@field prefix string
+---@field direction_reference 'self' | 'parent'
+---@field filter function
+
 CenterLineTransformation = {}
 CenterLineTransformation.__index = CenterLineTransformation
 
 ---@param args table
---@param args.highway string
---@param args.prefix string
---@param args.direction_reference 'self' | 'parent'
---@param args.filter function?
---@return table
+---@param args.highway string
+---@param args.prefix string
+---@param args.direction_reference 'self' | 'parent'
+---@param args.filter function?
+---@return CenterLineTransformation
 function CenterLineTransformation.new(args)
   local self = setmetatable({}, CenterLineTransformation)
   local mandatory = { 'highway', 'prefix', 'direction_reference' }
@@ -24,28 +30,51 @@ function CenterLineTransformation.new(args)
   return self
 end
 
--- unnest all tags from `["prefix .. side:subtag"]=val` -> `["subtag"]=val`
+-- Unnest the sides from tags for a given transformation. Examples:
+-- Case 1 (Main key):
+-- - `cycleway:both` -> `cycleway`
+--   `<prefix>:<infix>` -> `<prefix>`
+-- - `source:cycleway:both` -> `source`
+--   `<metaPrefix>:<prefix>:<infix>` -> `<metaPrefix>`
+-- Case 2 (Sub-key):
+-- - `cycleway:left:width` -> `width`
+--   `<prefix>:<infix>:SUFFIX` -> `SUFFIX`
+-- - `source:cycleway:left:width` -> `source:width`
+--   `<metaPrefix>:<prefix>:<infix>:SUFFIX` -> `<metaPrefix>:SUFFIX`
 ---@param tags table
 ---@param prefix string prefix to look for e.g. `cycleway`
 ---@param infix string? infix to look for either a side e.g. `:left`, `:right`, `:both` or `''`
 ---@param dest table? destination table to write to
+---@param metaPrefix string? optional meta-prefix to look for e.g. `source:` or `note:`
 ---@return table
-local function unnestPrefixedTags(tags, prefix, infix, dest)
+local function unnestPrefixedTags(tags, prefix, infix, dest, metaPrefix)
   dest = dest or {}
-  local fullPrefix = prefix .. infix
+  local metaPrefixString = metaPrefix or ''
+  local fullPrefix = metaPrefixString .. prefix .. infix
   local prefixLen = string.len(fullPrefix)
+
   for key, val in pairs(tags) do
     if osm2pgsql.has_prefix(key, fullPrefix) then
-      if key == fullPrefix then -- self projection
-        dest[prefix] = val
+      if key == fullPrefix then
+        -- Case 1: Main key - the primary key itself with its side
+        -- Examples:
+        --   fullPrefix = 'cycleway:both', key = 'cycleway:both' -> dest['cycleway'] = val
+        --   fullPrefix = 'source:cycleway:both', key = 'source:cycleway:both' -> dest['source'] = val
+        local destinationKey = metaPrefix and metaPrefixString:sub(1, -2) or prefix
+        dest[destinationKey] = val
         dest._infix = infix
       else
-        -- offset of 2 due to 1-indexing and for removing the ':'
-        local prefixlessKey = string.sub(key, prefixLen + 2)
-        local subkey = string.match(prefixlessKey, '[^:]*')
-        -- make sure that `subkey` is not an infix
-        if infix ~= '' or not Set({ 'left', 'right', 'both' })[subkey] then
-          dest[prefixlessKey] = val
+        -- Case 2: Sub-key - a property/sub-key of the main key
+        -- Examples:
+        --   fullPrefix = 'cycleway:left', key = 'cycleway:left:width' -> extractedSuffix = 'width' -> dest['width'] = val
+        --   fullPrefix = 'source:cycleway:left', key = 'source:cycleway:left:width' -> extractedSuffix = 'width' -> dest['source:width'] = val
+        -- Offset of 2 due to 1-indexing and for removing the ':'
+        local extractedSuffix = string.sub(key, prefixLen + 2)
+        local suffixKey = string.match(extractedSuffix, '[^:]*')
+        -- Validate: make sure that the first part of the suffix (`suffixKey`) is not an `infix`
+        if infix ~= '' or not Set({ 'left', 'right', 'both' })[suffixKey] then
+          local destinationKey = metaPrefix and (metaPrefixString .. extractedSuffix) or extractedSuffix
+          dest[destinationKey] = val
           dest._infix = infix
         end
       end
@@ -105,17 +134,37 @@ local function convertDirectedTags(cycleway, direction_reference)
   return cycleway
 end
 
--- these tags get transformed from the forward backward schema
+---@class TransformedObject
+---@field _side "self" | "left" | "right"
+---@field _prefix string? prefix of the transformation (e.g., "cycleway", "sidewalk")
+---@field _parent table? original tags from the parent object
+---@field _parent_highway string? highway value from the parent object
+---@field _infix string? infix that was matched (e.g., ":left", ":both", "")
+---@field highway string highway value for the transformed object
+--- Additional tags from unnesting (e.g., width, source:width, note, traffic_sign, etc.) are also present
+
+-- Returns an array of transformed objects in order: [self, left, right, ...]
+---@param tags table input tags to transform
+---@param transformations table array of CenterLineTransformation objects
+---@return TransformedObject[] array of transformed objects in order: [self, left, right, ...]
 function GetTransformedObjects(tags, transformations)
   local center = MergeTable({}, tags)
   center._side = "self"
 
-  -- don't transform paths only unnest tags prefixed with `cycleway`
+  -- Meta-prefixes that get transformed along with the main prefix (e.g., source:cycleway:width -> source:width)
+  local metaPrefixes = { 'source:', 'note:' }
+
+  -- Don't transform paths only unnest tags prefixed with `cycleway`
   if PathClasses[tags.highway] or tags.highway == 'pedestrian' then
     unnestPrefixedTags(tags, 'cycleway', '', center)
+    for _, metaPrefix in ipairs(metaPrefixes) do
+      unnestPrefixedTags(tags, 'cycleway', '', center, metaPrefix)
+    end
+
     if center.oneway == 'yes' and tags['oneway:bicycle'] ~= 'no' then
       center.traffic_sign = center.traffic_sign or center['traffic_sign:forward']
     end
+
     return { center }
   end
 
@@ -138,6 +187,16 @@ function GetTransformedObjects(tags, transformations)
         unnestPrefixedTags(tags, prefix, '', newObj)
         unnestPrefixedTags(tags, prefix, ':both', newObj)
         unnestPrefixedTags(tags, prefix, ':' .. side, newObj)
+
+        -- Also unnest meta-prefixed tags like `source:cycleway:left:width` -> `source:width`
+        -- Meta-prefixed tags are processed after regular tags and will overwrite them.
+        -- Example: `cycleway:left:source:width=foo` -> `source:width=foo`, then
+        --          `source:cycleway:left:width=bar` -> `source:width=bar` (overwrites foo)
+        for _, metaPrefix in ipairs(metaPrefixes) do
+          unnestPrefixedTags(tags, prefix, '', newObj, metaPrefix)
+          unnestPrefixedTags(tags, prefix, ':both', newObj, metaPrefix)
+          unnestPrefixedTags(tags, prefix, ':' .. side, newObj, metaPrefix)
+        end
 
         -- This condition checks if we actually projected something
         if newObj._infix ~= nil then

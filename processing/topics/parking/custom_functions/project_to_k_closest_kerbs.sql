@@ -1,5 +1,9 @@
--- this function projects a given geometry to the k closest kerbs
--- the parameter tolerance define the maximum distance to the closest kerb
+-- WHAT IT DOES:
+-- Project input geometry to the k closest kerb lines within tolerance distance.
+-- * Finds k closest kerbs with parking within tolerance, optionally filtered by side
+-- * Auto-selects side from closest kerb if side not specified
+-- * Projects geometry to each kerb line using `project_to_line`, returns kerb metadata and projected geometry
+-- USED IN: separate_parkings (points), obstacles (points/lines/areas), public_transport, roads (driveway corners), cutouts
 DROP FUNCTION IF EXISTS project_to_k_closest_kerbs;
 
 CREATE FUNCTION project_to_k_closest_kerbs (

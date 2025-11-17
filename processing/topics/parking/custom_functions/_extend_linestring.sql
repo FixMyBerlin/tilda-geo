@@ -1,3 +1,8 @@
+-- WHAT IT DOES:
+-- Extend a linestring by a specified length at start (negative) or end (positive).
+-- * Calculates azimuth from endpoint, projects new point, adds to linestring
+-- * Positive length extends from end, negative length extends from start
+-- USED IN: (currently unused - may be legacy code)
 CREATE OR REPLACE FUNCTION extend_linestring (line geometry, length double precision) RETURNS geometry LANGUAGE plpgsql AS $$
 DECLARE
     start_point geometry;

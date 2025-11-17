@@ -1,5 +1,6 @@
 import db from '@/db'
 import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
+import { transformEvaluationWithDecisionData } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { resolver } from '@blitzjs/rpc'
 import { QaEvaluationStatus } from '@prisma/client'
 import { Ctx } from 'blitz'
@@ -90,18 +91,11 @@ export default resolver.pipe(
     // Transform to the expected format
     const result = areasWithEvaluations.map((evaluation) => {
       const bbox = bboxMap.get(evaluation.areaId)
+      const transformedEvaluation = transformEvaluationWithDecisionData(evaluation)
       return {
         areaId: evaluation.areaId,
         bbox: bbox || null,
-        latestEvaluation: {
-          id: evaluation.id,
-          createdAt: evaluation.createdAt,
-          userStatus: evaluation.userStatus,
-          systemStatus: evaluation.systemStatus,
-          body: evaluation.body,
-          evaluatorType: evaluation.evaluatorType,
-          author: evaluation.author,
-        },
+        latestEvaluation: transformedEvaluation,
       }
     })
 

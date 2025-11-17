@@ -94,7 +94,7 @@ export const OsmNotesFilterControl = () => {
 
         <MenuSection className="m-1 overflow-clip rounded-md border">
           <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
-            Nutzer
+            Nutzer:innen
           </MenuHeading>
           {Array.from(authors).map(([displayName, count]) => {
             return (
