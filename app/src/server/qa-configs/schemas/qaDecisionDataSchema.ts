@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
 export const qaDecisionDataSchema = z.object({
-  relative: z.number().nullable(),
-  currentCount: z.number().nullable(),
-  referenceCount: z.number().nullable(),
-  absoluteChange: z.number().nullable(),
+  relative: z.coerce.number().nullable(),
+  currentCount: z.coerce.number().nullable(),
+  referenceCount: z.coerce.number().nullable(),
+  absoluteChange: z.coerce.number().nullable(),
   goodThreshold: z.number(),
   needsReviewThreshold: z.number(),
 })
