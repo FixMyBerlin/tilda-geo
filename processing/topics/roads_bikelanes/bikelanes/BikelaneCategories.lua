@@ -22,7 +22,7 @@ local function hasCyclewayOnHighwayBetweenLanesConditions(tags)
     -- `cycleway:lanes=*|lane|*` gets unnested to `tags.lanes`
     if ContainsSubstring(tags.lanes, '|lane|') then return true end
     -- `bicycle:lanes=*|designated|*` does not get copied during transformation, so we need to look at the `_parent`
-    if tags.parent and ContainsSubstring(tags.parent['bicycle:lanes'], "|designated|") then return true end
+    if tags._parent and ContainsSubstring(tags._parent['bicycle:lanes'], "|designated|") then return true end
   end
   return false
 end
