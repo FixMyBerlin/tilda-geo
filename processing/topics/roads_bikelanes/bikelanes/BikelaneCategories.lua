@@ -607,6 +607,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
   condition = function(tags)
     -- Only target sidepath like ways
     if not IsSidepath(tags) then return false end
+    -- "Schutzstreifen" cannot be PBLs
+    if tags['lane'] == 'advisory' then return false end
 
     -- We exclude separation that signals that the cycleway is not on the street but on the sidewalk
     local allowed_separation_values = Set({
@@ -617,13 +619,17 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     -- All separation values are physical separations except for 'no'
     local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
     if allowed_separation_values[separation_left] then
-        return true
+      return true
     end
 
     -- Parked cars are treated as physical separation when left of the bikelane
+    -- However, when `segregated` is present, it indicates infrastructure that is
+    -- not on the road ("Seitenraum") in which case the `parking` condition does not apply
     local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
     if traffic_mode_left == 'parking' then
-      return true
+      if tags.segregated == nil then
+        return true
+      end
     end
 
     -- For counter flow bikelanes with motorized traffic on the right, has to have physical separation right

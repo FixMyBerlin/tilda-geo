@@ -8,6 +8,9 @@ This is an manual and incomplete list of change to the data structure.
 
 - Sometimes ways are marked `access=no` due to road closures. We use our `lifecycle` system to show those in TILDA as `lifecycle=blocked`.
   We check `note` and `description` for a fixed set of terms.
+- The conditions for protected bike lanes `category=cyclewayOnHighwayProtected` are now stricter:
+  - `cycleway:SIDE:lane=advisory` means the category is never applied
+  - `cycleway:SIDE:traffic_mode:left=parking` only applies when also `segregated` is missing; this helps to separate infra on the highway from infra off highway ("Seitenraum")
 
 ## 2025-10-27
 
