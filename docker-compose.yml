@@ -74,7 +74,7 @@ services:
     logging:
       driver: journald
   tiles:
-    image: ghcr.io/maplibre/martin:martin-v1.0.0
+    image: ghcr.io/maplibre/martin:1.0.0
     container_name: tiles
     command: ["--config", "/config.yaml"]
     restart: unless-stopped
