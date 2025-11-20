@@ -56,6 +56,54 @@ local function transform_lifecycle_tags(destTags)
     end
   end
 
+  -- HANDLE BLOCKED/CLOSURE ACCESS RESTRICTIONS
+  -- Check for blocked/closure terms in note or description (case-insensitive)
+  local blockedTerms = {
+    -- German terms
+    'sperrung',
+    'gesperrt',
+    'blockiert',
+    -- English terms
+    'blocked',
+    'closure',
+    'closed',
+    'blocked off',
+  }
+
+  local restrictedTagsBlocked = {}
+  if destTags.access == 'no' then table.insert(restrictedTagsBlocked, 'access') end
+  if destTags.highway == 'cycleway' and destTags.bicycle == 'no' then table.insert(restrictedTagsBlocked, 'bicycle') end
+  if destTags.highway == 'footway' and destTags.foot == 'no' then table.insert(restrictedTagsBlocked, 'foot') end
+
+  if #restrictedTagsBlocked > 0 then
+    -- Check description or note for blocked/closure terms
+    local combinedTextBlocked = (destTags.description or '') .. ' ' .. (destTags.note or '')
+    local combinedTextBlockedLower = string.lower(combinedTextBlocked)
+
+    local foundBlockedTerm = false
+    for _, term in ipairs(blockedTerms) do
+      if ContainsSubstring(combinedTextBlockedLower, term) then
+        foundBlockedTerm = true
+        break
+      end
+    end
+
+    if foundBlockedTerm then
+      -- Store the original values for debugging
+      for _, tag in ipairs(restrictedTagsBlocked) do
+        unmodified_tags[tag] = destTags[tag]
+      end
+      unmodified_tags.lifecycle = destTags.lifecycle
+
+      -- Set lifecycle to blocked and remove ALL restricted tags
+      destTags.lifecycle = 'blocked'
+      destTags.description = to_semicolon_list({ destTags.description, 'TILDA-Hinweis: Weg gesperrt (Sperrung).' })
+      for _, tag in ipairs(restrictedTagsBlocked) do
+        destTags[tag] = nil
+      end
+    end
+  end
+
   return unmodified_tags
 end
 

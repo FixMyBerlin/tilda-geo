@@ -2,6 +2,13 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-10-20
+
+### `bikelanes`
+
+- Sometimes ways are marked `access=no` due to road closures. We use our `lifecycle` system to show those in TILDA as `lifecycle=blocked`.
+  We check `note` and `description` for a fixed set of terms.
+
 ## 2025-10-27
 
 ### `bikelanes`

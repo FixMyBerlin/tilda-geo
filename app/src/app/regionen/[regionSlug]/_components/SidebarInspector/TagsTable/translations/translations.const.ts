@@ -90,6 +90,7 @@ export const translations: { [key: string]: string } = {
   'ALL--lifecycle--key': 'Status',
   'ALL--lifecycle=construction': 'In Bau',
   'ALL--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
+  'ALL--lifecycle=blocked': 'Gesperrt (Sperrung)',
   'ALL--lifecycle=temporary': 'Temporärer Weg',
   'ALL--maxspeed--key': 'Höchstgeschwindigkeit',
   'ALL--name--key': 'Name',
