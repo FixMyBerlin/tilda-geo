@@ -5,7 +5,9 @@ require('Sanitize')
 
 local SANITIZE_ROAD_TAGS = {
   surface_color = function (tags)
-    if tags['surface:colour'] == nil then return nil end
+    -- Check for both British and American spelling
+    local surface_color_value = tags['surface:colour'] or tags['surface:color']
+    if surface_color_value == nil then return nil end
 
     -- Transform known but unsupported values to values that we support:
     local transformations = {
@@ -21,12 +23,12 @@ local SANITIZE_ROAD_TAGS = {
       ['orange'] = 'red',
       ['green;red'] = 'red;green',
     }
-    if transformations[tags['surface:colour']] then
-      tags['surface:colour'] = transformations[tags['surface:colour']]
+    if transformations[surface_color_value] then
+      surface_color_value = transformations[surface_color_value]
     end
     -- Sanitize values:
     -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-    return Sanitize(tags['surface:colour'], { 'red', 'green', 'red;green', 'no' })
+    return Sanitize(surface_color_value, { 'red', 'green', 'red;green', 'no' })
     -- return sanitize_for_logging(
     --   tags['surface:colour'],
     --   { 'red', 'green', 'no' },
