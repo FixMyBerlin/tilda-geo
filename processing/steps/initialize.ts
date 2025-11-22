@@ -23,6 +23,7 @@ export async function initialize() {
 
   await sql`CREATE EXTENSION IF NOT EXISTS postgis`
   await sql`CREATE EXTENSION IF NOT EXISTS pgRouting`
+  await sql`CREATE EXTENSION IF NOT EXISTS btree_gist`
 
   // Check lua packages:
   if (isDev) {
