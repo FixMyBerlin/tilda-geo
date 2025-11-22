@@ -48,17 +48,18 @@ local mapillary_coverage_data = load_csv_mapillary_coverage()
 **Lookup During Processing:**
 ```lua
 local mapillary_coverage_lines = mapillary_coverage_data:get()
-local mapillary_coverage_value = mapillary_coverage(mapillary_coverage_lines, object.id)
+object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
 ```
 
 - Returns: `'pano' | 'regular' | nil`
 - `nil` means no Mapillary coverage found for that OSM way
+- The value is stored directly in `object_tags.mapillary_coverage` for easier access.
 
 ### 3. Store Mapillary Data in Database Tables
 
 **Location:** `processing/topics/roads_bikelanes/roads_bikelanes.lua`
 
-The `mapillary_coverage_value` is stored in multiple places:
+The `mapillary_coverage` value (from `object_tags.mapillary_coverage`) is stored in multiple places:
 
 #### A. `bikelanes` and `roads` Tables
 - Stored in `tags` column as `mapillary_coverage = 'regular' | 'pano'`

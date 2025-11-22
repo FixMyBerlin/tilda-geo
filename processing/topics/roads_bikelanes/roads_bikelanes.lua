@@ -157,8 +157,9 @@ function osm2pgsql.process_way(object)
   if exclude.by_service(object_tags) then return end
 
   -- ====== (B.1) Initialize and apply pseudo tags ======
+  -- We add mapillary_coverage to object_tags so to make user it is available in `CollectTodos` down below
   local mapillary_coverage_lines = mapillary_coverage_data:get()
-  local mapillary_coverage_value = mapillary_coverage(mapillary_coverage_lines, object.id)
+  object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
 
   -- ====== (B.2) General mutation to our `object_tags` ======
   transform_cycleway_opposite_schema(object_tags)
@@ -174,7 +175,7 @@ function osm2pgsql.process_way(object)
     name = object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name'],
     length = length,
     lifecycle = object_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(object_tags),
-    mapillary_coverage = mapillary_coverage_value,
+    mapillary_coverage = object_tags.mapillary_coverage,
     mapillary = object_tags.mapillary,
     mapillary_forward = object_tags['mapillary:forward'],
     mapillary_backward = object_tags['mapillary:backward'],
@@ -197,7 +198,7 @@ function osm2pgsql.process_way(object)
         name = road_result_tags.name,
         road = road_result_tags.road,
         length = length,
-        mapillary_coverage = mapillary_coverage_value,
+        mapillary_coverage = object_tags.mapillary_coverage,
         mapillary = cycleway.mapillary or road_result_tags.mapillary,
         mapillary_forward = cycleway.mapillary_forward or road_result_tags.mapillary_forward,
         mapillary_backward = cycleway.mapillary_backward or road_result_tags.mapillary_backward,
@@ -222,7 +223,7 @@ function osm2pgsql.process_way(object)
         local todo_meta = {
           todos = cycleway.todos,
           category = cycleway.category,
-          mapillary_coverage = mapillary_coverage_value,
+          mapillary_coverage = object_tags.mapillary_coverage,
         }
         todoLiniesTable:insert({
           id = cycleway._id,
@@ -321,7 +322,7 @@ function osm2pgsql.process_way(object)
     local todo_meta = {
       todos = road_result_tags.todos,
       category = road_result_tags.category,
-      mapillary_coverage = mapillary_coverage_value,
+      mapillary_coverage = object_tags.mapillary_coverage,
     }
     todoLiniesTable:insert({
       id = DefaultId(object),
