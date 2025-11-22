@@ -9,7 +9,7 @@
 # to disable them from regular development use by adding a `profiles: - network` to them.
 services:
   traefik:
-    image: traefik:v3.5
+    image: traefik:v3.6
     container_name: traefik
     # Networking: See https://techoverflow.net/2021/06/11/how-to-fix-traefik-gateway-timeout-for-docker-services/ for network_mode
     restart: unless-stopped

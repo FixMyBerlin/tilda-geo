@@ -22,7 +22,7 @@ local function hasCyclewayOnHighwayBetweenLanesConditions(tags)
     -- `cycleway:lanes=*|lane|*` gets unnested to `tags.lanes`
     if ContainsSubstring(tags.lanes, '|lane|') then return true end
     -- `bicycle:lanes=*|designated|*` does not get copied during transformation, so we need to look at the `_parent`
-    if tags.parent and ContainsSubstring(tags.parent['bicycle:lanes'], "|designated|") then return true end
+    if tags._parent and ContainsSubstring(tags._parent['bicycle:lanes'], "|designated|") then return true end
   end
   return false
 end
@@ -607,6 +607,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
   condition = function(tags)
     -- Only target sidepath like ways
     if not IsSidepath(tags) then return false end
+    -- "Schutzstreifen" cannot be PBLs
+    if tags['lane'] == 'advisory' then return false end
 
     -- We exclude separation that signals that the cycleway is not on the street but on the sidewalk
     local allowed_separation_values = Set({
@@ -614,20 +616,33 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     })
 
     -- Has to have physical separation left
-    -- All separation values are physical separations except for 'no'
+    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
     local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
     if allowed_separation_values[separation_left] then
-        return true
+      -- But not in edge cases, when the separation protects a cyclewayOnHighwayBetweenLanes, see https://www.openstreetmap.org/way/80706109/history
+      if traffic_mode_right == 'motor_vehicle' then
+        return false
+      end
+      -- But not when `segregated` is present, as it indicates infrastructure that is
+      -- not on the road ("Seitenraum"), in which case the separation condition does not apply
+      if tags.segregated ~= nil then
+        return false
+      end
+      return true
     end
 
     -- Parked cars are treated as physical separation when left of the bikelane
     local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
     if traffic_mode_left == 'parking' then
+      -- But not when `segregated` is present, as it indicates infrastructure that is
+      -- not on the road ("Seitenraum"), in which case the parking condition does not apply
+      if tags.segregated ~= nil then
+        return false
+      end
       return true
     end
 
     -- For counter flow bikelanes with motorized traffic on the right, has to have physical separation right
-    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
     local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
     if traffic_mode_right == 'motor_vehicle' and allowed_separation_values[separation_right] then
       return true

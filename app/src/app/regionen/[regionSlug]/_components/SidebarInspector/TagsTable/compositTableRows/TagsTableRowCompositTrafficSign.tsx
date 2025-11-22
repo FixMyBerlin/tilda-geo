@@ -23,6 +23,17 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/8/86/Zeichen_241-30_-_getrennter_Rad-_und_Fu%C3%9Fweg%2C_StVO_1992.svg',
   },
+  '250': {
+    title: 'Zeichen 250: Verbot für Fahrzeuge aller Art.',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/d/d2/Zeichen_250_-_Verbot_f%C3%BCr_Fahrzeuge_aller_Art%2C_StVO_1992.svg',
+  },
+  '260': {
+    title:
+      ' Zeichen 260 – Verbot für Krafträder, auch mit Beiwagen, Kleinräder und Mofas sowie für Kraftwagen und sonstige mehrspurige Fahrzeuge.',
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/b/bf/Zeichen_260_-_Verbot_f%C3%BCr_Kraftr%C3%A4der_und_Mofas_und_sonstige_mehrspurige_Kraftfahrzeuge%2C_StVO_1992.svg',
+  },
   '241-31': {
     title: 'Zeichen 241-31, Getrennter Rad- und Gehweg (Radweg rechts)',
     signUrl:

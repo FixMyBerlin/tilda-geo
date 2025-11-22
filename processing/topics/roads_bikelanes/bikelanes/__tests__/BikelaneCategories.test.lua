@@ -135,6 +135,86 @@ describe("`BikelaneCategories`", function()
       local category = CategorizeBikelane(tags).id
       assert.are.equal(category, 'cycleway_adjoining')
     end)
+
+    -- Test case based on https://www.openstreetmap.org/way/80706109
+    -- This has cycleway:left:lane=advisory, so it should NOT be PBL (excluded by advisory check)
+    it('should not be PBL when lane=advisory even with physical separation', function()
+      local input_object = {
+        tags = {
+          highway = 'tertiary',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:lane'] = 'advisory',
+          ['cycleway:left:separation:left'] = 'vertical_panel',
+          ['bicycle:lanes:backward'] = 'designated|no|yes', -- does nothing
+          ['cycleway:lanes:backward'] = 'lane|no|no', -- does nothing
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+      assert.are.equal(categorized.left.category.id, 'cyclewayOnHighway_advisory')
+    end)
+
+    -- Test case with exclusive lane and physical separation, without :backward on lanes
+    -- This should be PBL if traffic_mode:right is not motor_vehicle
+    it('should be PBL with exclusive lane and physical separation when traffic_mode:right is not motor_vehicle', function()
+      local input_object = {
+        tags = {
+          highway = 'tertiary',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'exclusive',
+          ['cycleway:right:separation:left'] = 'vertical_panel',
+          ['bicycle:lanes'] = 'no|designated|no|yes',
+          ['cycleway:lanes'] = 'no|lane|no|no',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+      -- Should be PBL because separation:left exists and traffic_mode:right is nil (not motor_vehicle)
+      assert.are.equal(categorized.right.category.id, 'cyclewayOnHighwayProtected')
+      -- And this is not rendered (?)
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+    end)
+
+    it('should be only(!) cyclewayOnHighwayBetweenLanes when separation:left=<protection> but traffic_mode:right=motor_vehicle', function()
+      local input_object = {
+        tags = {
+          highway = 'tertiary',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'exclusive',
+          ['cycleway:right:separation:left'] = 'vertical_panel',
+          ['cycleway:right:traffic_mode:right'] = 'motor_vehicle',
+          ['bicycle:lanes'] = 'no|designated|no|yes',
+          ['cycleway:lanes'] = 'no|lane|no|no',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extractCategoriesBySide(input_object)
+      -- Log(categorized)
+      assert.are.equal(categorized.left.category, nil)
+      assert.are.equal(categorized.right.category, nil)
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+    end)
+
+    it('should not be PBL when segregated=yes is present even with separation:left=bollard', function()
+      -- Test case: path with segregated=yes and separation:left=bollard
+      -- The separation:left condition should NOT trigger because segregated=yes indicates
+      -- infrastructure not on the road ("Seitenraum")
+      local tags = {
+        ['bicycle'] = 'designated',
+        ['foot'] = 'designated',
+        ['highway'] = 'path',
+        ['is_sidepath'] = 'yes',
+        ['segregated'] = 'yes',
+        ['separation:left'] = 'bollard',
+      }
+      local category = CategorizeBikelane(tags)
+      -- When segregated=yes is present, separation:left should not trigger PBL
+      -- With segregated=yes, it should match footAndCyclewaySegregated instead
+      assert.are.equal(category.id, 'footAndCyclewaySegregated_adjoining')
+    end)
   end)
 
   describe('`footwayBicycleYes` with mtb:scale conditions:', function()

@@ -1,4 +1,4 @@
-import { QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
+import { NoSymbolIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { TagsTableRow } from '../TagsTableRow'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
@@ -18,6 +18,11 @@ const lifecycleStyle = {
     colorClass: 'text-amber-600',
     description:
       'Dieser Weg ist in OSM als gesperrt angegeben aufgrund einer angrenzenden Baustelle.',
+  },
+  blocked: {
+    icon: <NoSymbolIcon className="size-5 text-amber-600" />,
+    colorClass: 'text-amber-600',
+    description: 'Dieser Weg ist in OSM als gesperrt angegeben (Sperrung).',
   },
   temporary: {
     icon: <SvgFaPersonDigging className="size-5 text-amber-600" />,
