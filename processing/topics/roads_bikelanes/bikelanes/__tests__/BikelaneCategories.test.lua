@@ -177,7 +177,7 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
     end)
 
-    it('should be ??? when traffic_mode=motor_vehicle', function()
+    it('should be only(!) cyclewayOnHighwayBetweenLanes when separation:left=<protection> but traffic_mode:right=motor_vehicle', function()
       local input_object = {
         tags = {
           highway = 'tertiary',
@@ -196,6 +196,24 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(categorized.left.category, nil)
       assert.are.equal(categorized.right.category, nil)
       assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+    end)
+
+    it('should not be PBL when segregated=yes is present even with separation:left=bollard', function()
+      -- Test case: path with segregated=yes and separation:left=bollard
+      -- The separation:left condition should NOT trigger because segregated=yes indicates
+      -- infrastructure not on the road ("Seitenraum")
+      local tags = {
+        ['bicycle'] = 'designated',
+        ['foot'] = 'designated',
+        ['highway'] = 'path',
+        ['is_sidepath'] = 'yes',
+        ['segregated'] = 'yes',
+        ['separation:left'] = 'bollard',
+      }
+      local category = CategorizeBikelane(tags)
+      -- When segregated=yes is present, separation:left should not trigger PBL
+      -- With segregated=yes, it should match footAndCyclewaySegregated instead
+      assert.are.equal(category.id, 'footAndCyclewaySegregated_adjoining')
     end)
   end)
 
