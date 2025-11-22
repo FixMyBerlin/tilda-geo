@@ -1,7 +1,7 @@
 DO $$ BEGIN RAISE NOTICE 'START creating kerb tangents %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 --
-CREATE OR REPLACE FUNCTION estimate_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$
+CREATE OR REPLACE FUNCTION tilda_estimate_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$
 DECLARE
   road_geom geometry;
   point_geom geometry;
@@ -11,7 +11,7 @@ BEGIN
 
   point_geom := ST_PointN(road_geom, idx);
 
-  azimuth := line_azimuth_at_index(road_geom, idx, 1) - pi() / 2 ;
+  azimuth := tilda_line_azimuth_at_index(road_geom, idx, 1) - pi() / 2 ;
 
   RETURN ST_MakeLine(point_geom, ST_Project(point_geom, length, azimuth));
 END;
@@ -30,7 +30,7 @@ SELECT
   cpl.meta,
   -- we increase this length to be safe when we project on to the real crossing geometry
   ABS(k.offset) + 1 as length,
-  estimate_road_crossing (cpl.way_id, cpl.idx, k.offset * 3) as geom
+  tilda_estimate_road_crossing (cpl.way_id, cpl.idx, k.offset * 3) as geom
 FROM
   _parking_crossing_points_located cpl
   JOIN _parking_kerbs k ON way_id = k.osm_id

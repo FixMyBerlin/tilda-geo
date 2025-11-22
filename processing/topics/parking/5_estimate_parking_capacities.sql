@@ -27,7 +27,7 @@ ADD COLUMN estimated_area numeric;
 
 UPDATE _parking_parkings_merged
 SET
-  estimated_area = estimate_area (
+  estimated_area = tilda_estimate_area (
     length := length,
     orientation := tags ->> 'orientation'
   );
@@ -48,7 +48,7 @@ WHERE
 
 -- UPDATE _parking_parkings_merged
 -- SET
---   estimated_capacity = estimate_capacity_from_area (
+--   estimated_capacity = tilda_estimate_capacity_from_area (
 --     area := (tags ->> 'area')::NUMERIC,
 --     orientation := tags ->> 'orientation'
 --   )
@@ -57,7 +57,7 @@ WHERE
 --   AND tags ->> 'area_source' = 'geometry';
 UPDATE _parking_parkings_merged
 SET
-  estimated_capacity = estimate_capacity (
+  estimated_capacity = tilda_estimate_capacity (
     length := length,
     orientation := tags ->> 'orientation'
   )

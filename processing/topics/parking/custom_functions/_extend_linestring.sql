@@ -3,7 +3,7 @@
 -- * Calculates azimuth from endpoint, projects new point, adds to linestring
 -- * Positive length extends from end, negative length extends from start
 -- USED IN: (currently unused - may be legacy code)
-CREATE OR REPLACE FUNCTION extend_linestring (line geometry, length double precision) RETURNS geometry LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION tilda_extend_linestring (line geometry, length double precision) RETURNS geometry LANGUAGE plpgsql AS $$
 DECLARE
     start_point geometry;
     end_point geometry;

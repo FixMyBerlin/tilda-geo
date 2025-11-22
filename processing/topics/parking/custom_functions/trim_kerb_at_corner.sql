@@ -4,9 +4,9 @@
 -- * Cuts kerb from start to corner (if idx=1) or from corner to end (if idx>1)
 -- * Returns trimmed kerb linestring segment
 -- USED IN: `roads/5_trim_kerbs.sql` (trim driveway kerbs at intersection corners)
-DROP FUNCTION IF EXISTS trim_kerb_at_corner;
+DROP FUNCTION IF EXISTS tilda_trim_kerb_at_corner;
 
-CREATE FUNCTION trim_kerb_at_corner (
+CREATE FUNCTION tilda_trim_kerb_at_corner (
   intersection_id BIGINT,
   corner_geom GEOMETRY,
   kerb_id TEXT

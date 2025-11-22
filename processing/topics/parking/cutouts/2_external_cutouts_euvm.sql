@@ -1,7 +1,7 @@
 -- WHAT IT DOES:
 -- Insert external eUVM cutout data (obstacles from external source, not OSM) into `_parking_cutouts` table.
 -- * Transform geometries to SRID 5243
--- * Project points/polygons to kerb lines using `project_to_k_closest_kerbs`
+-- * Project points/polygons to kerb lines using `tilda_project_to_k_closest_kerbs`
 -- * Insert point cutouts with type-specific buffers (street_lamp, tree, traffic_sign, etc.)
 --   (!) Those are managed manually in this file.
 -- * Insert polygon cutouts with 0.6m buffer
@@ -56,7 +56,7 @@ SELECT
   pk.*
 FROM
   _euvm_cutouts_point_transformed p
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (p.geom, tolerance := 5, k := 1) AS pk;
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (p.geom, tolerance := 5, k := 1) AS pk;
 
 -- Cleanup projected points
 DELETE FROM _euvm_cutouts_point_projected
@@ -74,7 +74,7 @@ SELECT
   pk.*
 FROM
   _euvm_cutouts_polygon_transformed p
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (p.geom, tolerance := 2, k := 6) AS pk;
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (p.geom, tolerance := 2, k := 6) AS pk;
 
 -- Cleanup projected polygons
 DELETE FROM _euvm_cutouts_polygon_projected

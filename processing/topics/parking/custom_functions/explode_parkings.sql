@@ -3,9 +3,9 @@
 -- * Divides linestring into capacity number of segments, returns point at center of each segment
 -- * Used for visualization/labeling individual parking spaces
 -- USED IN: `7_finalize_parkings.sql` (create point geometries for individual parking spaces)
-DROP FUNCTION IF EXISTS explode_parkings;
+DROP FUNCTION IF EXISTS tilda_explode_parkings;
 
-CREATE FUNCTION explode_parkings (geom geometry, capacity integer) RETURNS SETOF geometry AS $$
+CREATE FUNCTION tilda_explode_parkings (geom geometry, capacity integer) RETURNS SETOF geometry AS $$
 DECLARE
   i integer;
   spacing float;

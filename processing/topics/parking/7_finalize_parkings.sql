@@ -22,7 +22,7 @@ SELECT
       'length',
       ROUND(length::NUMERIC, 2),
       'capacity',
-      round_capacity ((tags ->> 'capacity')::NUMERIC)
+      tilda_round_capacity ((tags ->> 'capacity')::NUMERIC)
     )
   ),
   '{}'::jsonb,
@@ -72,7 +72,7 @@ WITH
     SELECT
       tags || '{"capacity": 1}'::JSONB as tags,
       meta,
-      explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
+      tilda_explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
     FROM
       parkings
   )

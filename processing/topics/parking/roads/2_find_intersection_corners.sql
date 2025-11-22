@@ -1,6 +1,6 @@
 -- WHAT IT DOES:
 -- Find intersection corners where kerbs meet (for roads with angle < 140 degrees).
--- * Use `get_intersection_corners` to find kerb intersection points
+-- * Use `tilda_get_intersection_corners` to find kerb intersection points
 -- * Filter: only intersections with total_degree > 2 (same as `1_find_intersections.sql`)
 -- INPUT: `_parking_intersections` (point), kerbs from `_parking_kerbs`
 -- OUTPUT: `_parking_intersection_corners` (point)
@@ -25,7 +25,7 @@ SELECT
   corner.intersection as geom
 FROM
   _parking_intersections as i
-  CROSS JOIN LATERAL get_intersection_corners (i.node_id, 140) AS corner
+  CROSS JOIN LATERAL tilda_get_intersection_corners (i.node_id, 140) AS corner
 WHERE
   i.total_degree > 2;
 

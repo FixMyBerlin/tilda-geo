@@ -3,7 +3,7 @@
 -- * Problem: Even after 5_trim_kerbs.sql, driveways still need a intersection corner cutout.
 --   Otherwise we would place parking spaces on the sidewalk and right at the corner of the driveway.
 -- * Solution: Project intersection corners to nearby driveway kerbs to get kerb segments that will be buffered into rectangles
---   - Projects corner point (4m buffer) onto driveway kerb line using `project_to_k_closest_kerbs`
+--   - Projects corner point (4m buffer) onto driveway kerb line using `tilda_project_to_k_closest_kerbs`
 --   - Returns kerb segment (linestring) parallel to driveway (not road) - follows driveway kerb direction
 --   - Used in `cutouts/1_insert_cutouts.sql`: buffered with 0.01m and 'endcap=flat' to create rectangle cutouts
 -- * Filter: only corners with both driveway and road, only driveway kerbs with parking
@@ -22,7 +22,7 @@ SELECT
   pk.*
 FROM
   _parking_intersection_corners c
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (ST_Buffer (c.geom, 4), tolerance := 0, k := 4) AS pk
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (ST_Buffer (c.geom, 4), tolerance := 0, k := 4) AS pk
 WHERE
   c.has_driveway
   AND c.has_road

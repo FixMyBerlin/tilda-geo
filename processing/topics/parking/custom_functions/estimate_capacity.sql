@@ -54,13 +54,13 @@ VALUES
     COS(RADIANS(30)) * 0.5
   );
 
-DROP FUNCTION IF EXISTS estimate_capacity;
+DROP FUNCTION IF EXISTS tilda_estimate_capacity;
 
 -- WHAT IT DOES:
 -- Estimate number of parking spaces from linestring length and orientation.
 -- * Formula: (length + padding) / (car_space_x + padding)
 -- USED IN: `separate_parkings/0_areas_project_to_kerb.sql`, `5_estimate_parking_capacities.sql`
-CREATE FUNCTION estimate_capacity (length NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
+CREATE FUNCTION tilda_estimate_capacity (length NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
 DECLARE
   const RECORD;
   n_cars NUMERIC;
@@ -74,7 +74,7 @@ BEGIN
   FROM
     _parking_orientation_constants
   WHERE
-    _parking_orientation_constants.orientation = COALESCE(estimate_capacity.orientation, 'parallel');
+    _parking_orientation_constants.orientation = COALESCE(tilda_estimate_capacity.orientation, 'parallel');
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Invalid orientation: "%", must be one of the defined types in parking_orientation_constants', orientation;
@@ -88,14 +88,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
-DROP FUNCTION IF EXISTS estimate_area;
+DROP FUNCTION IF EXISTS tilda_estimate_area;
 
 -- WHAT IT DOES:
 -- Estimate parking area from linestring length and orientation.
 -- * Formula: length * (car_space_y + 0.25)
 -- * Uses car_space_y (perpendicular dimension) to calculate rectangular area
 -- USED IN: `separate_parkings/1_separate_parking_areas_qa.sql`, `5_estimate_parking_capacities.sql`
-CREATE FUNCTION estimate_area (length NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
+CREATE FUNCTION tilda_estimate_area (length NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
 DECLARE
   const RECORD;
   area NUMERIC;
@@ -107,7 +107,7 @@ BEGIN
   FROM
     _parking_orientation_constants
   WHERE
-    _parking_orientation_constants.orientation = COALESCE(estimate_area.orientation, 'parallel');
+    _parking_orientation_constants.orientation = COALESCE(tilda_estimate_area.orientation, 'parallel');
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Invalid orientation: "%", must be one of the defined types in parking_orientation_constants', orientation;
@@ -119,7 +119,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
 
-DROP FUNCTION IF EXISTS estimate_capacity_from_area;
+DROP FUNCTION IF EXISTS tilda_estimate_capacity_from_area;
 
 -- WHAT IT DOES:
 -- Estimate number of parking spaces from polygon area and orientation.
@@ -127,7 +127,7 @@ DROP FUNCTION IF EXISTS estimate_capacity_from_area;
 -- * Formula: (area + padding_area) / (car_area + padding_area)
 -- * Special handling: diagonal orientation uses perpendicular constants
 -- USED IN: `5_estimate_parking_capacities.sql` <-- CURRENTLY COMMENTED OUT
-CREATE FUNCTION estimate_capacity_from_area (area NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
+CREATE FUNCTION tilda_estimate_capacity_from_area (area NUMERIC, orientation TEXT) RETURNS NUMERIC AS $$
 DECLARE
   const RECORD;
   capacity NUMERIC;

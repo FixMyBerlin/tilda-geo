@@ -1,24 +1,24 @@
 -- WHAT IT DOES:
 -- Find corners of convex hull and create edges connecting corners along polygon boundary.
--- * Gets corners using `get_polygon_corners` (max angle 150 degrees)
--- * Connects each corner to next using `connect_on_polygon` to follow polygon boundary
+-- * Gets corners using `tilda_get_polygon_corners` (max angle 150 degrees)
+-- * Connects each corner to next using `tilda_connect_on_polygon` to follow polygon boundary
 -- * Returns edges as linestrings with sequential `edge_idx`
 -- USED IN: Only used in this file.
-DROP FUNCTION IF EXISTS get_parking_edges (geometry);
+DROP FUNCTION IF EXISTS tilda_get_parking_edges (geometry);
 
 -- TODO: use custom type from below as return type
-CREATE FUNCTION get_parking_edges (parking_geom geometry) RETURNS TABLE (edge_idx BIGINT, geom geometry) LANGUAGE plpgsql AS $$
+CREATE FUNCTION tilda_get_parking_edges (parking_geom geometry) RETURNS TABLE (edge_idx BIGINT, geom geometry) LANGUAGE plpgsql AS $$
 DECLARE
   hull_geom geometry := ST_ConvexHull(ST_ForceRHR(parking_geom));
 BEGIN
   RETURN QUERY
   -- Get all corners of the convex hull that are sharper than `max_angle_degrees`
   WITH corners AS (
-    SELECT * FROM get_polygon_corners(poly := hull_geom, n_corners := NULL, max_angle_degrees := 150)
+    SELECT * FROM tilda_get_polygon_corners(poly := hull_geom, n_corners := NULL, max_angle_degrees := 150)
   )
     -- Create edges by connecting each corner to the next
   SELECT ROW_NUMBER() OVER (ORDER BY c1.corner_idx) AS edge_idx,
-          connect_on_polygon(
+          tilda_connect_on_polygon(
               start_point  := c1.geom,
               end_point    := COALESCE(c2.geom, first.geom),
               project_onto := parking_geom
@@ -34,13 +34,13 @@ $$;
 
 -- WHAT IT DOES:
 -- Check how well `from_geom` aligns with `to_geom`.
--- * Projects `from_geom` onto `to_geom` using `project_to_line`
+-- * Projects `from_geom` onto `to_geom` using `tilda_project_to_line`
 -- * Calculates alignment (0..1) based on angle difference
 -- * Returns alignment, length of projected substring, and which half-space the centroid is in
 -- USED IN: Only used in this file.
-DROP FUNCTION IF EXISTS projected_info (geometry, geometry);
+DROP FUNCTION IF EXISTS tilda_projected_info (geometry, geometry);
 
-CREATE FUNCTION projected_info (from_geom geometry, to_geom geometry) RETURNS TABLE (
+CREATE FUNCTION tilda_projected_info (from_geom geometry, to_geom geometry) RETURNS TABLE (
   alignment double precision,
   length double precision,
   half_space int
@@ -53,7 +53,7 @@ DECLARE
   p1 geometry;
   p2 geometry;
 BEGIN
-  proj := project_to_line(project_from := from_geom, project_onto := to_geom);
+  proj := tilda_project_to_line(project_from := from_geom, project_onto := to_geom);
   theta := ST_Azimuth(ST_StartPoint(from_geom), ST_EndPoint(from_geom))
     - ST_Azimuth(ST_StartPoint(proj), ST_EndPoint(proj));
   alignment_val := abs(cos(theta));
@@ -79,13 +79,13 @@ CREATE TYPE edge_info AS (geom geometry, edge_idx bigint);
 
 -- WHAT IT DOES:
 -- Main function: find edge closest to roads and convert to kerb linestring(s).
--- * Gets edges from `get_parking_edges`, scores each edge by proximity/alignment to nearby roads
+-- * Gets edges from `tilda_get_parking_edges`, scores each edge by proximity/alignment to nearby roads
 -- * Returns best matching edge as front kerb with `side` (left/right) and `road_width`
 -- * For median areas (`location='median'`): also returns back kerb (union of remaining edges)
 -- USED IN: `separate_parkings/0_areas_project_to_kerb.sql` (convert polygon parking areas to kerb linestrings)
-DROP FUNCTION IF EXISTS parking_area_to_line (geometry, jsonb, double precision);
+DROP FUNCTION IF EXISTS tilda_parking_area_to_line (geometry, jsonb, double precision);
 
-CREATE FUNCTION parking_area_to_line (
+CREATE FUNCTION tilda_parking_area_to_line (
   parking_geom geometry,
   parking_tags JSONB,
   radius double precision
@@ -106,7 +106,7 @@ DECLARE
 BEGIN
   SELECT ARRAY(
     SELECT ROW(geom, edge_idx)::edge_info
-    FROM get_parking_edges(parking_geom)
+    FROM tilda_get_parking_edges(parking_geom)
   ) INTO edges_arr;
   WITH closeby_roads  AS (
     SELECT t.edge_idx,
@@ -121,7 +121,7 @@ BEGIN
       AND (parking_tags->>'road_name' IS NULL
         OR r.tags->>'street_name' IS NULL
         OR parking_tags->>'road_name' != r.tags->>'street_name')
-    CROSS JOIN LATERAL projected_info(t.geom, r.geom) proj_info
+    CROSS JOIN LATERAL tilda_projected_info(t.geom, r.geom) proj_info
     ),
     max_width_rows AS (
       SELECT DISTINCT ON (cwr.edge_idx)

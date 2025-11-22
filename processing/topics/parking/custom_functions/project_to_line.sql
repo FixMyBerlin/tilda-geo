@@ -2,10 +2,10 @@
 -- Project all points of input geometry to a line and return the substring spanned by projected points.
 -- * Projects each point of `project_from` to closest point on `project_onto` line
 -- * Returns linestring segment from min to max relative position along the line
--- USED IN: obstacles projection (points/lines/areas), crossings, `project_to_k_closest_kerbs`, `project_to_closest_platform`, `parking_area_to_line`
-DROP FUNCTION IF EXISTS project_to_line;
+-- USED IN: obstacles projection (points/lines/areas), crossings, `tilda_project_to_k_closest_kerbs`, `tilda_project_to_closest_platform`, `tilda_parking_area_to_line`
+DROP FUNCTION IF EXISTS tilda_project_to_line;
 
-CREATE FUNCTION project_to_line (project_from geometry, project_onto geometry) RETURNS geometry AS $$
+CREATE FUNCTION tilda_project_to_line (project_from geometry, project_onto geometry) RETURNS geometry AS $$
 DECLARE
   rec RECORD;
   point_on_line geometry;
