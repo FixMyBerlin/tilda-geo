@@ -1,7 +1,10 @@
+import { isProd } from '@/src/app/_components/utils/isEnv'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { buildHashtags } from '@/src/data/radinfra-de/utils/buildHashtags'
 import { geoDataClient } from '@/src/server/prisma-client'
 import { CAMPAIGN_API_BASE_URL } from '../maproulette/data/[projectKey]/_utils/campaignApiBaseUrl.const'
+
+export const dynamic = 'force-dynamic'
 
 async function getCampaignCountsByBundesland(campaignId: string) {
   type BundeslandCountResult = Array<{
@@ -59,23 +62,34 @@ async function getCampaignCounts(campaignIds: string[]) {
 }
 
 export async function GET() {
-  const countMap = await getCampaignCounts(campaigns.map((c) => c.id))
+  try {
+    const countMap = await getCampaignCounts(campaigns.map((c) => c.id))
 
-  const result = campaigns.map((campaign) => {
-    return {
-      ...campaign,
-      remoteGeoJson: `${CAMPAIGN_API_BASE_URL}${campaign.id}`,
-      hashtags: buildHashtags(
-        campaign?.id,
-        campaign?.category,
-        campaign?.maprouletteChallenge.enabled === true,
-      ),
-      count: countMap.get(campaign.id)!,
-    }
-  })
-  return Response.json(result, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-    },
-  })
+    const result = campaigns.map((campaign) => {
+      return {
+        ...campaign,
+        remoteGeoJson: `${CAMPAIGN_API_BASE_URL}${campaign.id}`,
+        hashtags: buildHashtags(
+          campaign?.id,
+          campaign?.category,
+          campaign?.maprouletteChallenge.enabled === true,
+        ),
+        count: countMap.get(campaign.id)!,
+      }
+    })
+    return Response.json(result, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    })
+  } catch (error) {
+    console.error(error) // Logfile
+    return Response.json(
+      {
+        error: 'Internal Server Error',
+        info: isProd ? undefined : error,
+      },
+      { status: 500 },
+    )
+  }
 }
