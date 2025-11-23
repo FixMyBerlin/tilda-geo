@@ -4,6 +4,8 @@ import { feature, featureCollection } from '@turf/turf'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const position = z.tuple([z.number(), z.number()])
 const linearRing = z.array(position)
 const polygon = z.array(linearRing)

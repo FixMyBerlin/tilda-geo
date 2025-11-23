@@ -3,9 +3,9 @@
 -- * Gets projected kerb line, offsets it, projects back to original polygon boundary
 -- * Returns geometry projected onto separate parking area polygon
 -- USED IN: (currently unused - may be legacy code)
-DROP FUNCTION IF EXISTS project_to_separate_parking_area;
+DROP FUNCTION IF EXISTS tilda_project_to_separate_parking_area;
 
-CREATE FUNCTION project_to_separate_parking_area (parking_osm_id bigint) RETURNS geometry AS $$
+CREATE FUNCTION tilda_project_to_separate_parking_area (parking_osm_id bigint) RETURNS geometry AS $$
 DECLARE
   projected_rec RECORD;
   kerb_geom geometry;

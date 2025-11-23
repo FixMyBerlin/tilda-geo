@@ -3,7 +3,7 @@ SELECT
   c.id,
   c.osm_id,
   ncm.way_id as way_id,
-  project_to_line (c.geom, cl.geom) AS geom INTO TEMP crossings_projected
+  tilda_project_to_line (c.geom, cl.geom) AS geom INTO TEMP crossings_projected
 FROM
   _parking_crossings c
   JOIN _parking_node_crossing_mapping ncm ON c.osm_id = ncm.node_id

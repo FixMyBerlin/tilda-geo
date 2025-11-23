@@ -1,10 +1,10 @@
 -- WHAT IT DOES:
 -- Project public transport stop points to kerb lines or platform lines (convert point to linestring).
 -- Three branches based on stop type and side:
--- * `bus_stop_kerb`: project to kerbs using `project_to_k_closest_kerbs` (finds closest kerb within 5m)
--- * `bus_stop_centerline` (side IS NULL): project to platform lines using `project_to_closest_platform` (within 20m)
--- * `bus_stop_centerline` (side IS NOT NULL): project to kerbs using `project_to_k_closest_kerbs` (finds closest kerb on specified side within 20m)
--- * `tram_stop` (with embedded rails): project to kerbs using `project_to_k_closest_kerbs` (within 20m)
+-- * `bus_stop_kerb`: project to kerbs using `tilda_project_to_k_closest_kerbs` (finds closest kerb within 5m)
+-- * `bus_stop_centerline` (side IS NULL): project to platform lines using `tilda_project_to_closest_platform` (within 20m)
+-- * `bus_stop_centerline` (side IS NOT NULL): project to kerbs using `tilda_project_to_k_closest_kerbs` (finds closest kerb on specified side within 20m)
+-- * `tram_stop` (with embedded rails): project to kerbs using `tilda_project_to_k_closest_kerbs` (within 20m)
 -- - Cleanup: remove invalid geometries
 -- INPUT: `_parking_public_transport` (point), `_parking_kerbs` (linestring), platforms
 -- OUTPUT: `_parking_public_transport_points_projected` (linestring)
@@ -39,7 +39,7 @@ SELECT
   pk.geom
 FROM
   _parking_public_transport p
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (p.geom, tolerance := 5, k := 1) AS pk
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (p.geom, tolerance := 5, k := 1) AS pk
 WHERE
   ST_GeometryType (p.geom) = 'ST_Point'
   AND p.tags ->> 'category' = 'bus_stop_kerb';
@@ -68,7 +68,7 @@ SELECT
   pp.geom
 FROM
   _parking_public_transport pt
-  CROSS JOIN LATERAL project_to_closest_platform (pt.geom, tolerance := 20) AS pp
+  CROSS JOIN LATERAL tilda_project_to_closest_platform (pt.geom, tolerance := 20) AS pp
 WHERE
   ST_GeometryType (pt.geom) = 'ST_Point'
   AND pt.tags ->> 'category' = 'bus_stop_centerline'
@@ -98,7 +98,7 @@ SELECT
   pk.geom
 FROM
   _parking_public_transport pt
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (
     pt.geom,
     tolerance := 20,
     k := 1,
@@ -133,7 +133,7 @@ SELECT
   pk.geom
 FROM
   _parking_public_transport pt
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (pt.geom, tolerance := 20, k := 1) AS pk
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (pt.geom, tolerance := 20, k := 1) AS pk
 WHERE
   ST_GeometryType (pt.geom) = 'ST_Point'
   AND pt.tags ->> 'category' = 'tram_stop'

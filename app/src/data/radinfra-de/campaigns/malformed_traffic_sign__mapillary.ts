@@ -10,7 +10,7 @@ export const malformed_traffic_sign__mapillary: CampaignType = {
   visibility: 'secondary',
   description: 'Diese Kampagne enthält Wege mit einem Fehler im Wert des `traffic_sign*`-Tags',
   task: '**Bitte prüfe und korrigiere den Wert der Tags `traffic_sign`, `traffic_sign:forward`, `traffic_sign:backward`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.1431hh.16g9vk&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.1431hg.4pt3i8&v=2',
   maprouletteChallenge: {
     enabled: true,
     id: 52422,

@@ -1,11 +1,11 @@
 -- WHAT IT DOES:
 -- Project input geometry to the closest public transport platform line within tolerance distance.
 -- * Finds closest platform linestring within tolerance from `_parking_public_transport` table
--- * Projects geometry to platform line using `project_to_line`, returns platform metadata and projected geometry
+-- * Projects geometry to platform line using `tilda_project_to_line`, returns platform metadata and projected geometry
 -- USED IN: `public_transport/0_points_project_to_kerb_and_platform.sql` (project bus stop centerlines to platform lines)
-DROP FUNCTION IF EXISTS project_to_closest_platform;
+DROP FUNCTION IF EXISTS tilda_project_to_closest_platform;
 
-CREATE FUNCTION project_to_closest_platform (input_geom geometry, tolerance double precision) RETURNS TABLE (
+CREATE FUNCTION tilda_project_to_closest_platform (input_geom geometry, tolerance double precision) RETURNS TABLE (
   platform_id text,
   platform_osm_type text,
   platform_osm_id bigint,
@@ -29,7 +29,7 @@ BEGIN
     platform_osm_type := platform.osm_type;
     platform_osm_id := platform.osm_id;
     platform_tags := platform.tags;
-    geom := project_to_line(project_from:=input_geom, project_onto:=platform.geom);
+    geom := tilda_project_to_line(project_from:=input_geom, project_onto:=platform.geom);
     platform_distance := platform.projected_distance;
     RETURN NEXT;
   END IF;

@@ -3,10 +3,10 @@
 -- * Gets road segments at intersection, calculates azimuths, finds smallest angle between them
 -- * Returns angle in radians (0 to pi)
 -- * TODO: sometimes we miss intersection corners because the roads are splitted close to the intersection, see: https://viewer.tilda-geo.de/?map=19.2/52.47141/13.34039&search=parking&source=Staging&layers=parking_intersection_corners,parking_intersections,_parking_roads
--- USED IN: `get_intersection_corners.sql` (filter road pairs by angle to find sharp corners)
-DROP FUNCTION IF EXISTS intersection_angle;
+-- USED IN: `get_intersection_corners.sql` (filter road pairs by angle to find sharp corners - uses `tilda_intersection_angle`)
+DROP FUNCTION IF EXISTS tilda_intersection_angle;
 
-CREATE FUNCTION intersection_angle (
+CREATE FUNCTION tilda_intersection_angle (
   intersection_id BIGINT,
   road_id1 BIGINT,
   road_id2 BIGINT

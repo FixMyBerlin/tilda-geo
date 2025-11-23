@@ -11,9 +11,9 @@ DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp
 -- PREPARE
 DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
--- Project polygon areas to kerb lines using `parking_area_to_line`
+-- Project polygon areas to kerb lines using `tilda_parking_area_to_line`
 -- * Converts polygon to linestring by finding edge closest to roads
--- * Splits areas with `location=median` into front/back kerbs (handled by `parking_area_to_line`)
+-- * Splits areas with `location=median` into front/back kerbs (handled by `tilda_parking_area_to_line`)
 CREATE TABLE _parking_separate_parking_areas_projected AS
 SELECT
   pa.id || '-' || (
@@ -36,17 +36,17 @@ SELECT
   pal.parking_kerb AS geom
 FROM
   _parking_separate_parking_areas pa
-  CROSS JOIN LATERAL parking_area_to_line (pa.geom, pa.tags, 15.) AS pal;
+  CROSS JOIN LATERAL tilda_parking_area_to_line (pa.geom, pa.tags, 15.) AS pal;
 
 -- Estimate capacity for areas without capacity tag
--- * Based on length and orientation using `estimate_capacity`
+-- * Based on length and orientation using `tilda_estimate_capacity`
 CREATE INDEX parking_separate_parking_areas_osm_id_idx ON _parking_separate_parking_areas_projected (osm_id);
 
 UPDATE _parking_separate_parking_areas_projected
 SET
   tags = tags || jsonb_build_object(
     'capacity',
-    estimate_capacity (
+    tilda_estimate_capacity (
       length := ST_Length (geom)::NUMERIC,
       orientation := tags ->> 'orientation'
     )

@@ -11,7 +11,7 @@ export const missing_traffic_sign_vehicle_destination__mapillary: CampaignType =
   description:
     'Diese Kampagne enthält Fahrradstraßen mit der Freigabe »Anlieger frei« für Kfz. Es fehlt jedoch das zugehörige Zusatzzeichen.',
   task: '**Bitte ergänze fehlende Verkehrszeichen oder korrigiere den Zugangs-Tag`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16ga9s&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4nyc.4pt3wg&v=2',
   maprouletteChallenge: {
     enabled: true,
     id: 52428,

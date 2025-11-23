@@ -2,9 +2,9 @@
 -- Applies cutouts (some conditional) to parking lines derived from separate parking areas and points.
 -- * Processes two types of parking lines (both are linestrings representing the kerb line where parking is allowed):
 --   - Parking lines from separate areas: `_parking_separate_parking_areas_projected`
---     (polygon areas converted to kerb linestrings via `parking_area_to_line` in `separate_parkings/0_areas_project_to_kerb.sql`)
+--     (polygon areas converted to kerb linestrings via `tilda_parking_area_to_line` in `separate_parkings/0_areas_project_to_kerb.sql`)
 --   - Parking lines from separate points: `_parking_separate_parking_points_projected`
---     (points projected onto kerb linestrings via `project_to_k_closest_kerbs` in `separate_parkings/0_points_project_to_kerb.sql`)
+--     (points projected onto kerb linestrings via `tilda_project_to_k_closest_kerbs` in `separate_parkings/0_points_project_to_kerb.sql`)
 -- * Filters cutouts by source:
 --   - Crossings and driveways: Always apply
 --     (inserted directly from `_parking_crossings` and `_parking_driveways` in `cutouts/1_insert_cutouts.sql`, no spatial check needed)
@@ -58,8 +58,8 @@ SELECT
   COALESCE(p.id || '/' || d.path[1], p.id),
   p.id,
   p.osm_id,
-  osm_ref (p.osm_type, p.osm_id) AS tag_source,
-  osm_ref (p.osm_type, p.osm_id) AS geom_source,
+  tilda_osm_ref (p.osm_type, p.osm_id) AS tag_source,
+  tilda_osm_ref (p.osm_type, p.osm_id) AS geom_source,
   p.tags || '{"source": "separate_parking_areas"}'::JSONB,
   p.side,
   p.meta,
@@ -102,8 +102,8 @@ SELECT
   COALESCE(p.id || '/' || d.path[1], p.id),
   p.id,
   osm_id,
-  osm_ref (p.osm_type, p.osm_id) AS tag_source,
-  osm_ref (p.kerb_osm_type, p.kerb_osm_id) AS geom_source,
+  tilda_osm_ref (p.osm_type, p.osm_id) AS tag_source,
+  tilda_osm_ref (p.kerb_osm_type, p.kerb_osm_id) AS geom_source,
   p.tags || '{"source": "separate_parking_points"}'::JSONB,
   p.kerb_side,
   p.meta,

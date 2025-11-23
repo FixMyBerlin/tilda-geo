@@ -29,13 +29,13 @@ FROM
   ) l ON p.osm_id = l.osm_id;
 
 -- Estimate area from projected length and orientation
--- * Use `estimate_area` function to calculate expected area based on length and orientation
+-- * Use `tilda_estimate_area` function to calculate expected area based on length and orientation
 ALTER TABLE _parking_separate_parking_areas_qa
 ADD COLUMN area_estimated NUMERIC;
 
 UPDATE _parking_separate_parking_areas_qa
 SET
-  area_estimated = estimate_area (projected_length::NUMERIC, tags ->> 'orientation');
+  area_estimated = tilda_estimate_area (projected_length::NUMERIC, tags ->> 'orientation');
 
 -- Calculate area difference and relative difference
 -- * area_difference = actual_area - estimated_area (positive = underestimated, negative = overestimated)

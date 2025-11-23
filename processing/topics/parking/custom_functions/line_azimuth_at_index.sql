@@ -4,9 +4,9 @@
 -- * Direction: 1 = forward (idx to idx+1), -1 = backward (idx-1 to idx)
 -- * Handles edge cases (start/end of line)
 -- USED IN: `crossings/2_points_create_crossings.sql` (calculate crossing direction perpendicular to road)
-DROP FUNCTION IF EXISTS line_azimuth_at_index;
+DROP FUNCTION IF EXISTS tilda_line_azimuth_at_index;
 
-CREATE FUNCTION line_azimuth_at_index (geom geometry, idx integer, direction integer) RETURNS double precision AS $$
+CREATE FUNCTION tilda_line_azimuth_at_index (geom geometry, idx integer, direction integer) RETURNS double precision AS $$
 DECLARE
   npoints integer := ST_NPoints(geom);
   pt1 geometry;

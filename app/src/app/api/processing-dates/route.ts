@@ -4,6 +4,8 @@ import { ProcessingMetaDate, ProcessingMetaDates } from '@/src/server/regions/sc
 import { NextResponse } from 'next/server'
 import { corsHeaders } from '../_util/cors'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const [result] = await geoDataClient.$queryRaw<ProcessingMetaDate[]>`

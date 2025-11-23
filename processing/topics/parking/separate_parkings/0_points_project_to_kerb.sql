@@ -9,7 +9,7 @@ DO $$ BEGIN RAISE NOTICE 'START projecting obstacle points at %', clock_timestam
 DROP TABLE IF EXISTS _parking_separate_parking_points_projected CASCADE;
 
 -- Project point to closest kerb and buffer based on capacity
--- * Project point to closest kerb using `project_to_k_closest_kerbs` (within 5m tolerance)
+-- * Project point to closest kerb using `tilda_project_to_k_closest_kerbs` (within 5m tolerance)
 -- * Buffer projected point based on capacity and orientation (parallel/perpendicular/diagonal)
 --   - Orientation determines constants from `_parking_orientation_constants` table (defined in `estimate_capacity.sql`):
 --     * `car_space_x`: space per car along kerb (parallel=4.4m, perpendicular=2.0m, diagonal=calculated)
@@ -42,7 +42,7 @@ FROM
     SELECT
       *
     FROM
-      project_to_k_closest_kerbs (pp.geom, tolerance := 5, k := 1)
+      tilda_project_to_k_closest_kerbs (pp.geom, tolerance := 5, k := 1)
   ) pk;
 
 -- Cleanup invalid geometries that sometimes happen during projection
@@ -50,7 +50,7 @@ DELETE FROM _parking_separate_parking_points_snapped
 WHERE
   geom IS NULL;
 
--- Re-project buffered geometry to kerb to create final linestring segment (using `project_to_k_closest_kerbs`)
+-- Re-project buffered geometry to kerb to create final linestring segment (using `tilda_project_to_k_closest_kerbs`)
 CREATE TABLE _parking_separate_parking_points_projected AS
 SELECT
   id || '-' || pk.kerb_id AS id,
@@ -63,7 +63,7 @@ SELECT
   pk.*
 FROM
   _parking_separate_parking_points_snapped
-  CROSS JOIN LATERAL project_to_k_closest_kerbs (buffered_geom, tolerance := 5, k := 1) pk;
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (buffered_geom, tolerance := 5, k := 1) pk;
 
 -- Filter: Remove cases where kerb_side doesn't match the original side tag for some reason
 DELETE FROM _parking_separate_parking_points_projected

@@ -2,11 +2,11 @@
 -- Project input geometry to the k closest kerb lines within tolerance distance.
 -- * Finds k closest kerbs with parking within tolerance, optionally filtered by side
 -- * Auto-selects side from closest kerb if side not specified
--- * Projects geometry to each kerb line using `project_to_line`, returns kerb metadata and projected geometry
+-- * Projects geometry to each kerb line using `tilda_project_to_line`, returns kerb metadata and projected geometry
 -- USED IN: separate_parkings (points), obstacles (points/lines/areas), public_transport, roads (driveway corners), cutouts
-DROP FUNCTION IF EXISTS project_to_k_closest_kerbs;
+DROP FUNCTION IF EXISTS tilda_project_to_k_closest_kerbs;
 
-CREATE FUNCTION project_to_k_closest_kerbs (
+CREATE FUNCTION tilda_project_to_k_closest_kerbs (
   input_geom geometry,
   tolerance double precision,
   k integer,
@@ -27,7 +27,7 @@ DECLARE
   projected_geom geometry;
 BEGIN
   IF side IS NULL THEN
-    SELECT  pk.side INTO project_to_k_closest_kerbs.side
+    SELECT  pk.side INTO tilda_project_to_k_closest_kerbs.side
       FROM _parking_kerbs pk
       WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
       ORDER BY ST_Distance(input_geom, pk.geom), pk.id
@@ -38,7 +38,7 @@ BEGIN
     SELECT  pk.id, pk.osm_type, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags, ST_Distance(input_geom, pk.geom) AS projected_distance
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
-    AND pk.side = project_to_k_closest_kerbs.side
+    AND pk.side = tilda_project_to_k_closest_kerbs.side
     ORDER BY ST_Distance(input_geom, pk.geom), pk.id
     LIMIT k
   LOOP
@@ -49,7 +49,7 @@ BEGIN
     kerb_tags := kerb.tags;
     kerb_has_parking := kerb.has_parking;
     kerb_is_driveway := kerb.is_driveway;
-    geom := project_to_line(project_from:=input_geom, project_onto:=kerb.geom);
+    geom := tilda_project_to_line(project_from:=input_geom, project_onto:=kerb.geom);
     kerb_distance := kerb.projected_distance;
     RETURN NEXT;
   END LOOP;

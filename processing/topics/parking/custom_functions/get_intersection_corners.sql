@@ -1,12 +1,12 @@
 -- WHAT IT DOES:
 -- Find intersection corner points where kerbs from different roads meet.
--- * Gets all roads at intersection, calculates angles between road pairs using `intersection_angle`
+-- * Gets all roads at intersection, calculates angles between road pairs using `tilda_intersection_angle`
 -- * Filters to sharp corners (angle < max_angle_degrees), finds kerb intersection points
 -- * Returns corner point geometry and metadata (has_driveway, has_road, kerb IDs)
 -- USED IN: `roads/2_find_intersection_corners.sql` (find corners where kerbs intersect at intersections)
-DROP FUNCTION IF EXISTS get_intersection_corners;
+DROP FUNCTION IF EXISTS tilda_get_intersection_corners;
 
-CREATE FUNCTION get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
+CREATE FUNCTION tilda_get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
   intersection GEOMETRY,
   has_driveway BOOLEAN,
   has_road BOOLEAN,
@@ -24,7 +24,7 @@ BEGIN
   -- For each pair of roads, calculate the angle between them.
   road_pairs AS (
     SELECT
-      intersection_angle (intersection_id, r1.way_id, r2.way_id) as angle,
+      tilda_intersection_angle (intersection_id, r1.way_id, r2.way_id) as angle,
       r1.way_id AS road_id1,
       r2.way_id AS road_id2
     FROM intersection_roads r1

@@ -10,7 +10,7 @@ export const missing_width: CampaignType = {
   description:
     'Diese Karte zeigt Wege, bei denen die Angabe zur Breite der Radinfrastruktur fehlt.',
   task: '**Bitte ergänze die Breite der Radinfrastruktur `width`.**',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.8vo5z8.f6&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4o5g.4pt4ao&v=2',
   maprouletteChallenge: {
     enabled: false,
   },
