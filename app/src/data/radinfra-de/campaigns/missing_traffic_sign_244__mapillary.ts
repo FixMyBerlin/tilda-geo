@@ -10,7 +10,7 @@ export const missing_traffic_sign_244__mapillary: CampaignType = {
   visibility: 'promote',
   description: 'Diese Kampagne enthält Fahrradstraße ohne zugehörigen Verkehrszeichen-Tag.',
   task: '**Bitte ergänze fehlende Verkehrszeichen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16g9z4&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4nyc.4pt3ls&v=2',
   maprouletteChallenge: {
     enabled: true,
     id: 52427,

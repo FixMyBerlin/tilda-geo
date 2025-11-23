@@ -11,7 +11,7 @@ export const unexpected_bicycle_access_on_footway__mapillary: CampaignType = {
   description:
     'Diese Kampagne enthält Fußwege, die gleichzeitig Angaben zur Radinfrastruktur haben.',
   task: '**Bitte prüfe das Tagging. Eventuell ist eine andere Straßenklasse angebracht.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16rif4&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4nyc.4q4c1s&v=2',
   maprouletteChallenge: {
     enabled: true,
     id: 52434,

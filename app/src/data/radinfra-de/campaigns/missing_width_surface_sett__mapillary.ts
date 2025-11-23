@@ -10,7 +10,7 @@ export const missing_width_surface_sett__mapillary: CampaignType = {
   description:
     'Diese Karte zeigt Wege, bei denen die Angabe zur Breite der Radinfrastruktur fehlt und die Oberfläche Pflastersteine sind.',
   task: '**Bitte ergänze die Breite der Radinfrastruktur `width`.** Häufig kann man dafür die Pflastersteine zählen um die Breite zu ermitteln.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.4nyd.16gbgg&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4nyc.4pt534&v=2',
   maprouletteChallenge: {
     enabled: true,
     id: 52429,

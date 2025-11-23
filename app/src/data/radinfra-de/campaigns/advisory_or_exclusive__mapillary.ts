@@ -11,7 +11,7 @@ export const advisory_or_exclusive__mapillary: CampaignType = {
   description:
     'Diese Kampagne enthält Radinfrastruktur auf der Fahrbahn bei der die Angabe fehlt, ob es sich um einen Schutzstreifen oder Angebotsstreifen handelt.',
   task: '**Bitte prüfe die Radinfrastruktur und ergänze die nötigen Attribute.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
-  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=pdqyyt.1dm4l.16g9vk&v=2',
+  mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.1dm4k.4pt3i8&v=2',
   maprouletteChallenge: {
     enabled: true,
     id: 52420,
