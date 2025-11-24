@@ -2,9 +2,15 @@ import { isProd } from '@/src/app/_components/utils/isEnv'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { buildHashtags } from '@/src/data/radinfra-de/utils/buildHashtags'
 import { geoDataClient } from '@/src/server/prisma-client'
+import { getProcessingMeta } from '../_util/getProcessingMeta'
 import { CAMPAIGN_API_BASE_URL } from '../maproulette/data/[projectKey]/_utils/campaignApiBaseUrl.const'
 
 export const dynamic = 'force-dynamic'
+
+async function getOsmDataFrom() {
+  const parsed = await getProcessingMeta()
+  return parsed.osm_data_from?.toISOString() ?? new Date().toISOString()
+}
 
 async function getCampaignCountsByBundesland(campaignId: string) {
   type BundeslandCountResult = Array<{
@@ -48,7 +54,7 @@ async function getCampaignCounts(campaignIds: string[]) {
     }
   })
   const counts = await Promise.all(countPromises)
-  const countedAt = new Date().toISOString()
+  const countedAt = await getOsmDataFrom()
   return new Map(
     counts.map((c) => [
       c.campaignId,
