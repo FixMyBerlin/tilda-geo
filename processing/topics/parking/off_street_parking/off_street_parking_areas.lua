@@ -54,7 +54,10 @@ local function off_street_parking_areas(object)
 
       local label_row = {
         id = row_data.id,
-        tags = { capacity = row_data.tags.capacity },
+        tags = {
+          capacity = row_data.tags.capacity,
+          operator_type = row_data.tags.operator_type,
+        },
         meta = {},
         geom = row.geom:pole_of_inaccessibility(),
         minzoom = 0,
