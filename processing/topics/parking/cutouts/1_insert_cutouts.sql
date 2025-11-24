@@ -20,10 +20,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -36,10 +33,7 @@ SELECT
     'radius', 5
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta,
-  NULL AS street_name,
-  'intersection_corner' AS category,
-  NULL AS side
+  '{}'::jsonb AS meta
 FROM
   _parking_intersection_corners
 WHERE
@@ -54,10 +48,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -69,10 +60,7 @@ SELECT
     'source', 'driveway_corner_kerbs'
     /* sql-formatter-enable */
   ),
-  '{}'::jsonb,
-  NULL AS street_name,
-  'driveway_corner_kerb' AS category,
-  NULL AS side
+  '{}'::jsonb
 FROM
   _parking_driveway_corner_kerbs;
 
@@ -84,10 +72,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -101,15 +86,13 @@ SELECT
     /* sql-formatter-disable */
     'category', 'driveway',
     'source', 'driveways',
+    'street:name', tags ->> 'street:name',
     'width', tags ->> 'width',
     -- 'highway', tags ->> 'highway',
     'road', tags ->> 'road'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  'driveway' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_driveways;
 
@@ -121,10 +104,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -141,10 +121,7 @@ SELECT
     'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_crossings;
 
@@ -156,10 +133,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -173,10 +147,7 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  kerb_side AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_points_projected;
 
@@ -188,10 +159,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -205,10 +173,7 @@ SELECT
     'side', COALESCE(source ->> 'kerb_side', 'platform')
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  COALESCE(source ->> 'kerb_side', 'platform') AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_public_transport_points_projected;
 
@@ -220,10 +185,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -236,10 +198,7 @@ SELECT
     'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_turnaround_points;
 
@@ -251,10 +210,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -267,10 +223,7 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  kerb_side AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_areas_projected;
 
@@ -282,10 +235,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -298,10 +248,7 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  kerb_side AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_lines_projected;
 
@@ -315,10 +262,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -337,10 +281,7 @@ SELECT
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_areas_projected;
 
@@ -352,10 +293,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -367,10 +305,7 @@ SELECT
     'source', 'separate_parking_points'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_points_projected;
 
@@ -383,10 +318,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   id::TEXT,
@@ -405,10 +337,7 @@ SELECT
     'source', 'parking_roads'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_roads
 WHERE

@@ -38,8 +38,8 @@ FROM
             AND
             -- When both cutout and parking have a street name, they must match
             (
-              c.street_name = p.street_name
-              OR c.street_name IS NULL
+              c.tags ->> 'street:name' = p.street_name
+              OR c.tags ->> 'street:name' IS NULL
               OR p.street_name IS NULL
             )
             AND
@@ -48,7 +48,7 @@ FROM
             -- 2. Public transport cutouts: Only apply when sides match
             (
               c.tags ->> 'source' != 'public_transport_stops'
-              OR c.side = p.side
+              OR c.tags ->> 'side' = p.side
             )
         )
       ),
