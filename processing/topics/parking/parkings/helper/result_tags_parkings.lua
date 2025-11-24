@@ -93,6 +93,7 @@ local function result_tags_parkings(object)
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
     parking = SANITIZE_PARKING_TAGS.parking_extended(object.tags.parking, object._parent_tags.dual_carriageway),
+    restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
     traffic_sign = SANITIZE_TAGS.traffic_sign(object.tags.traffic_sign),

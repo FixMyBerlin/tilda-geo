@@ -59,6 +59,7 @@ SELECT
     'markings', tags ->> 'markings',
     'orientation', tags ->> 'orientation',
     'parking', tags ->> 'parking',
+    'restriction', tags ->> 'restriction',
     'reason', tags ->> 'reason',
     'staggered', tags ->> 'staggered',
     'traffic_sign', tags ->> 'traffic_sign',
