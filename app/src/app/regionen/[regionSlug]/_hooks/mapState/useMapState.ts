@@ -9,6 +9,7 @@ export type Store = StoreMapLoadedState &
   StoreFeaturesInspector &
   StoreCalculator &
   StoreSizes &
+  StoreInspectorUI &
   Actions
 
 type StoreMapLoadedState = {
@@ -38,6 +39,10 @@ export type StoreCalculator = {
   }[]
 }
 
+type StoreInspectorUI = {
+  inspectorOtherPropertiesOpen: boolean
+}
+
 type Actions = {
   actions: {
     setMapLoaded: (mapLoaded: Store['mapLoaded']) => void
@@ -51,6 +56,7 @@ type Actions = {
     setCalculatorAreasWithFeatures: (
       calculatorAreasWithFeatures: Store['calculatorAreasWithFeatures'],
     ) => void
+    setInspectorOtherPropertiesOpen: (open: Store['inspectorOtherPropertiesOpen']) => void
   }
 }
 
@@ -74,6 +80,7 @@ export const useMapState = create<Store>((set, get) => {
     mapBounds: null,
     inspectorSize: { width: 0, height: 0 },
     sidebarSize: { width: 0, height: 0 },
+    inspectorOtherPropertiesOpen: false,
     actions: {
       setMapLoaded: (mapLoaded) => set({ mapLoaded }),
       setMapDataLoading: (mapDataLoading) => set({ mapDataLoading }),
@@ -87,6 +94,7 @@ export const useMapState = create<Store>((set, get) => {
       setSidebarSize: (size) => {
         setIfChanged(get, set, 'sidebarSize', size)
       },
+      setInspectorOtherPropertiesOpen: (open) => set({ inspectorOtherPropertiesOpen: open }),
     },
   }
 })

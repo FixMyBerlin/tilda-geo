@@ -3,6 +3,7 @@ import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
 import { isProd } from '@/src/app/_components/utils/isEnv'
 import { format, formatDistanceToNow, fromUnixTime } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { useMapState } from '../../../_hooks/mapState/useMapState'
 import { InspectorFeature } from '../Inspector'
 import { tilesInspectorWithGeomUrl } from './osmUrls/osmUrls'
 
@@ -12,6 +13,11 @@ type Props = {
 }
 
 export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
+  const inspectorOtherPropertiesOpen = useMapState((state) => state.inspectorOtherPropertiesOpen)
+  const setInspectorOtherPropertiesOpen = useMapState(
+    (state) => state.actions.setInspectorOtherPropertiesOpen,
+  )
+
   const systemKeys = [
     '_todos',
     'fresh',
@@ -52,7 +58,11 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
       : undefined
 
   return (
-    <details className="mt-3">
+    <details
+      className="mt-3"
+      open={inspectorOtherPropertiesOpen}
+      onToggle={(e) => setInspectorOtherPropertiesOpen(e.currentTarget.open)}
+    >
       <summary className="ml-1.5 cursor-pointer font-semibold text-gray-600">
         <span className="ml-1.5">Weitere Daten an diesem Element</span>
       </summary>
