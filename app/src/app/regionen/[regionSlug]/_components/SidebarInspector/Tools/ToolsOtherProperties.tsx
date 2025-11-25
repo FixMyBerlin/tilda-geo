@@ -1,7 +1,10 @@
 import { Link } from '@/src/app/_components/links/Link'
+import { LinkExternal } from '@/src/app/_components/links/LinkExternal'
+import { isProd } from '@/src/app/_components/utils/isEnv'
 import { format, formatDistanceToNow, fromUnixTime } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { InspectorFeature } from '../Inspector'
+import { tilesInspectorWithGeomUrl } from './osmUrls/osmUrls'
 
 type Props = {
   feature: InspectorFeature['feature']
@@ -39,6 +42,14 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
     .filter(
       ([key, _v]) => systemKeys.includes(key) && documentedKeys && !documentedKeys?.includes(key),
     )
+
+  const viewerUrl =
+    !isProd && feature.sourceLayer && feature.geometry
+      ? tilesInspectorWithGeomUrl({
+          geometry: feature.geometry,
+          sourceLayer: feature.sourceLayer,
+        })
+      : undefined
 
   return (
     <details className="mt-3">
@@ -79,6 +90,20 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
               <code>feature.id</code>
             </strong>
             : {feature.id || 'MISSING'}
+          </p>
+          <p className="mb-0.5 border-b border-gray-200 pb-0.5">
+            <strong>
+              <code>sourceLayer</code>
+            </strong>
+            : {feature.sourceLayer || 'UNBEKANNT'}
+            {viewerUrl && (
+              <>
+                {' '}
+                <LinkExternal blank href={viewerUrl} className="scale-75">
+                  Viewer
+                </LinkExternal>
+              </>
+            )}
           </p>
           {systemProperties.length ? (
             systemProperties.map(([key, value]) => {

@@ -6,7 +6,7 @@ import {
   googleMapsUrlViewport,
   mapillaryUrlViewport,
   osmUrlViewport,
-  tildaViewerUrl,
+  tildaInsectorUrl,
 } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
 import { useRegionSlug } from '@/src/app/regionen/[regionSlug]/_components/regionUtils/useRegionSlug'
 import { useMapDebugActions } from '@/src/app/regionen/[regionSlug]/_hooks/mapState/useMapDebugState'
@@ -24,7 +24,7 @@ export const UserLoggedInAdminInfo = ({ user }: UserLoggedInProp) => {
     mapParam && mapillaryUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
   const googleMapsViewportUrl =
     mapParam && googleMapsUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
-  const tildaViewerUrlHref = tildaViewerUrl(mapParam.zoom, mapParam.lat, mapParam.lng)
+  const tildaViewerUrlHref = tildaInsectorUrl(mapParam.zoom, mapParam.lat, mapParam.lng)
 
   const devUrl = getAdminInfoEnvUrl('development')
   const stagingUrl = getAdminInfoEnvUrl('staging')

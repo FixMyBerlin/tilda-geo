@@ -141,8 +141,13 @@ export const googleMapsUrlViewport = (zoom?: number, lat?: number, lng?: number)
   })
 }
 
-export const tildaViewerUrl = (zoom?: number, lat?: number, lng?: number) => {
-  if (!zoom || !lat || !lng) return
+const generateTildaViewerUrl = (
+  zoom: number,
+  lat: number,
+  lng: number,
+  layers?: string,
+): string | undefined => {
+  if (!zoom || !lat || !lng) return undefined
 
   const url = new URL('https://viewer.tilda-geo.de/')
   url.searchParams.set('map', `${zoom}/${lat}/${lng}`)
@@ -151,6 +156,33 @@ export const tildaViewerUrl = (zoom?: number, lat?: number, lng?: number) => {
     process.env.NEXT_PUBLIC_APP_ENV?.charAt(0).toUpperCase() +
       process.env.NEXT_PUBLIC_APP_ENV?.slice(1).toLowerCase(),
   )
+  if (layers) {
+    url.searchParams.set('layers', layers)
+  }
 
   return url.toString()
+}
+
+export const tildaInsectorUrl = (zoom?: number, lat?: number, lng?: number) => {
+  if (!zoom || !lat || !lng) return
+  return generateTildaViewerUrl(zoom, lat, lng)
+}
+
+type TilesInspectorWithGeomUrlProps = {
+  geometry: GeoJSON.Feature['geometry']
+  sourceLayer: string | undefined
+  zoom?: number
+}
+
+export const tilesInspectorWithGeomUrl = ({
+  geometry,
+  sourceLayer,
+  zoom = 20,
+}: TilesInspectorWithGeomUrlProps) => {
+  if (!sourceLayer || !geometry) return undefined
+
+  const [lng, lat] = pointFromGeometry(geometry)
+  if (!lat || !lng) return undefined
+
+  return generateTildaViewerUrl(zoom, lat, lng, sourceLayer)
 }
