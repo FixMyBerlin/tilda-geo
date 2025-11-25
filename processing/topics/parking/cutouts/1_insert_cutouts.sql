@@ -15,13 +15,7 @@ DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() 
 -- Conditions: only where NOT `has_driveway` AND `has_road`.
 -- Buffer: static value 5m (legal requirement where no parking is allowed)
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   intersection_id AS osm_id,
@@ -43,13 +37,7 @@ WHERE
 -- INSERT "driveway_corner_kerb" buffers (rectangles)
 -- Buffer: static value 0.01m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   kerb_osm_id,
@@ -67,13 +55,7 @@ FROM
 -- INSERT "driveway" buffers (rectangles)
 -- Buffer: tags->>'width' / 2
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -99,13 +81,7 @@ FROM
 -- INSERT "crossing" buffers (rectangles)
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -128,13 +104,7 @@ FROM
 -- INSERT "obstacle_point" buffers (circle)
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -154,13 +124,7 @@ FROM
 -- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -180,13 +144,7 @@ FROM
 -- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -205,13 +163,7 @@ FROM
 -- INSERT "obstacle_area" buffers (buffered lines)
 -- Buffer: static value 0.6m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -230,13 +182,7 @@ FROM
 -- INSERT "obstacle_line" buffers (buffered lines)
 -- Buffer: static value 0.6m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -252,42 +198,48 @@ SELECT
 FROM
   _parking_obstacle_lines_projected;
 
--- INSERT "parking area" buffers (buffered lines)
--- Buffer: COALESCE(tags->>'road_width' * 0.7, 3)
--- Just enough to not overlap with the other side of the road
--- But needs to be big enough to intersect road parking lines, so they get cut out and replaced by separate parking
+-- INSERT "parking area" buffers (intersection of line buffer and area buffer)
+-- Approach: Buffer the kerb line generously (6m) and the original area polygon with a buffer (3m),
+-- then intersect them. This keeps only the part of the line buffer toward the curb (away from centerline).
+-- This ensures cutouts only affect road parking toward the curb, not toward the centerline.
+-- Increased buffers ensure cutouts are large enough to intersect with road parking lines.
+-- The line buffer can be increased safely since the intersection constrains it to the curb side.
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
-  id::TEXT,
-  osm_id,
-  ST_Buffer (geom, 2, 'endcap=flat'),
-  tags || jsonb_build_object(
+  pap.id::TEXT,
+  pap.osm_id,
+  ST_Intersection (
+    ST_Buffer (pap.geom, 6, 'endcap=flat'), -- Line buffer (generous, 6m)
+    ST_Buffer (pa.geom, 3) -- Area buffer (3m outward)
+  ) AS geom,
+  pap.tags || jsonb_build_object(
     /* sql-formatter-disable */
-    'category', tags ->> 'category',
+    'category', pap.tags ->> 'category',
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
+  pap.meta || jsonb_build_object('updated_at', pa.meta ->> 'updated_at')
 FROM
-  _parking_separate_parking_areas_projected;
+  _parking_separate_parking_areas_projected pap
+  JOIN _parking_separate_parking_areas pa ON pap.source_id = pa.id
+WHERE
+  -- Only create cutout if intersection is not empty and valid
+  ST_Intersects (
+    ST_Buffer (pap.geom, 6, 'endcap=flat'),
+    ST_Buffer (pa.geom, 3)
+  )
+  AND NOT ST_IsEmpty (
+    ST_Intersection (
+      ST_Buffer (pap.geom, 6, 'endcap=flat'),
+      ST_Buffer (pa.geom, 3)
+    )
+  );
 
 -- INSERT "parking point" buffers (buffered lines)
 -- Buffer: static value 0.6m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -306,13 +258,7 @@ FROM
 -- Cleanup: removes leftover parking pieces on roads
 -- Uses LEAST(offset_right, offset_left) * 0.9 for buffer, excludes driveways without parking
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
