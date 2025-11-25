@@ -81,7 +81,7 @@ CREATE TYPE edge_info AS (geom geometry, edge_idx bigint);
 -- Main function: find edge closest to roads and convert to kerb linestring(s).
 -- * Gets edges from `tilda_get_parking_edges`, scores each edge by proximity/alignment to nearby roads
 -- * Returns best matching edge as front kerb with `side` (left/right)
--- * For median areas (`location='median'`): also returns back kerb (union of remaining edges)
+-- * For areas with location tag (median/lane_centre): also returns back kerb (union of remaining edges)
 -- USED IN: `separate_parkings/0_areas_project_to_kerb.sql` (convert polygon parking areas to kerb linestrings)
 DROP FUNCTION IF EXISTS tilda_parking_area_to_line (geometry, jsonb, double precision);
 
@@ -146,7 +146,9 @@ BEGIN
   is_front_kerb := TRUE;
   RETURN NEXT;
 
-  IF COALESCE(parking_tags ->> 'location', '') != 'median' THEN
+  -- If location is not present, only return front kerb
+  -- LUA sanitization only allows 'median' and 'lane_centre', so any present location value is valid
+  IF COALESCE(parking_tags ->> 'location', '') = '' THEN
     RETURN;
   END IF;
 

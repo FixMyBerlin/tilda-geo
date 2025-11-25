@@ -1,8 +1,8 @@
 -- WHAT IT DOES:
 -- Project separate parking areas to kerb lines.
--- * Convert polygon to linestring, split median areas into front/back kerbs
+-- * Convert polygon to linestring, split areas with location tag into front/back kerbs
 -- * Estimate capacity for areas without capacity tag (based on length and orientation)
--- * Redistribute capacity for median areas proportionally by length
+-- * Redistribute capacity for areas with location tag proportionally by length
 -- INPUT: `_parking_separate_parking_areas` (polygon)
 -- OUTPUT: `_parking_separate_parking_areas_projected` (linestring)
 --
@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS _parking_separate_parking_areas_projected CASCADE;
 
 -- Project polygon areas to kerb lines using `tilda_parking_area_to_line`
 -- * Converts polygon to linestring by finding edge closest to roads
--- * Splits areas with `location=median` into front/back kerbs (handled by `tilda_parking_area_to_line`)
+-- * Splits areas with location tag (median/lane_centre) into front/back kerbs (handled by `tilda_parking_area_to_line`)
 CREATE TABLE _parking_separate_parking_areas_projected AS
 SELECT
   pa.id || '-' || (
@@ -49,16 +49,17 @@ SET
 WHERE
   tags ->> 'capacity' IS NULL;
 
--- Redistribute capacity for median areas proportionally by length
--- * Areas with `location=median` are split into front/back kerbs by `tilda_parking_area_to_line`
+-- Redistribute capacity for areas with location tag proportionally by length
+-- * Areas with location tag (median/lane_centre) are split into front/back kerbs by `tilda_parking_area_to_line`
 -- * Both segments initially get the same capacity value (duplicated from the original)
 -- * We join back to the source table to get the original capacity and check capacity_source
 -- * Distribution: round down smaller segment(s), add remainder to longest segment
 -- * This preserves the exact total capacity and minimizes rounding errors
 WITH
-  -- STEP 1: Collect all `location=median` parking segments with their lengths and capacity information
-  -- Why: When a `location=median` area is split, both front/back kerbs get the same capacity value (duplicated).
+  -- STEP 1: Collect all parking segments with location tag with their lengths and capacity information
+  -- Why: When an area with location tag is split, both front/back kerbs get the same capacity value (duplicated).
   -- We check the source table's capacity_source to determine if capacity is from an OSM tag or estimated.
+  -- LUA sanitization only allows 'median' and 'lane_centre', so any present location value is valid.
   median_segments AS (
     SELECT
       pc.osm_id,
@@ -80,7 +81,7 @@ WITH
       _parking_separate_parking_areas_projected pc
       LEFT JOIN _parking_separate_parking_areas pa ON pc.source_id = pa.id
     WHERE
-      pc.tags ->> 'location' = 'median'
+      COALESCE(pc.tags ->> 'location', '') != ''
   ),
   -- STEP 2: Calculate total length and determine the correct total capacity per OSM area
   -- Why: When a median area is split, we get 2 rows (front/back kerbs) with the same `osm_id`.
