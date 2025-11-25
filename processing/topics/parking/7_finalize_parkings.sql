@@ -2,11 +2,10 @@
 -- Finalize parking data: transform to 3857, create final tables, indexes.
 -- * Insert `parkings` table (excl `parkings_no`), reverse left side kerbs
 -- * Insert `parkings_cutouts` table (excl roads, separate_parking)
--- * Explode parkings to quantized points (1 per capacity)
 -- * Insert `parkings_separate` table (minzoom 17)
 -- * Create indexes for all tables
 -- INPUT: `_parking_parkings_merged` (linestring), `_parking_cutouts` (polygon - buffered obstacles), `_parking_separate_parking_areas` (polygon)
--- OUTPUT: `parkings` (linestring, 3857), `parkings_cutouts` (polygon/multipolygon, 3857), `parkings_quantized` (point, 3857), `parkings_separate` (polygon, 3857)
+-- OUTPUT: `parkings` (linestring, 3857), `parkings_cutouts` (polygon/multipolygon, 3857), `parkings_separate` (polygon, 3857)
 --
 DO $$ BEGIN RAISE NOTICE 'START finalize parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
@@ -63,31 +62,6 @@ WHERE
     'separate_parking_points'
   );
 
--- explode parkings into quantized points
-DROP TABLE IF EXISTS parkings_quantized;
-
-CREATE TABLE parkings_quantized AS
-WITH
-  sum_points AS (
-    SELECT
-      tags || '{"capacity": 1}'::JSONB as tags,
-      meta,
-      tilda_explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
-    FROM
-      parkings
-  )
-SELECT
-  ROW_NUMBER() OVER (
-    ORDER BY
-      tags
-  ) AS id,
-  tags,
-  meta,
-  ST_Transform (geom, 3857) as geom,
-  0 as minzoom
-FROM
-  sum_points;
-
 INSERT INTO
   parkings_separate (id, tags, meta, geom, minzoom)
 SELECT
@@ -129,14 +103,3 @@ CREATE INDEX parkings_cutouts_geom_idx ON parkings_cutouts USING GIST (geom);
 
 -- DROP INDEX IF EXISTS parkings_cutouts_id_idx;
 CREATE UNIQUE INDEX unique_parkings_cutouts_id_idx ON parkings_cutouts (id);
-
--- NOTE: We should move the table scaffolding to LUA and then we can remove this part here, same as all the other tables
-ALTER TABLE parkings_quantized
-ALTER COLUMN geom TYPE geometry (Geometry, 3857) USING ST_SetSRID (geom, 3857);
-
-DROP INDEX IF EXISTS parkings_quantized_geom_idx;
-
-CREATE INDEX parkings_quantized_geom_idx ON parkings_quantized USING GIST (geom);
-
--- DROP INDEX IF EXISTS parkings_quantized_id_idx;
-CREATE UNIQUE INDEX unique_parkings_quantized_id_idx ON parkings_quantized (id);
