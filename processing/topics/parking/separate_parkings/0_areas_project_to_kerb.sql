@@ -25,12 +25,7 @@ SELECT
   pa.osm_type,
   pa.osm_id,
   pa.id AS source_id,
-  pa.tags || jsonb_build_object(
-    /* sql-formatter-disable */
-    'road_width', pal.road_width,
-    'road_width_source', pal.road_width_source
-    /* sql-formatter-enable */
-  ) AS tags,
+  pa.tags,
   pal.side,
   pa.meta,
   pal.parking_kerb AS geom

@@ -80,7 +80,7 @@ CREATE TYPE edge_info AS (geom geometry, edge_idx bigint);
 -- WHAT IT DOES:
 -- Main function: find edge closest to roads and convert to kerb linestring(s).
 -- * Gets edges from `tilda_get_parking_edges`, scores each edge by proximity/alignment to nearby roads
--- * Returns best matching edge as front kerb with `side` (left/right) and `road_width`
+-- * Returns best matching edge as front kerb with `side` (left/right)
 -- * For median areas (`location='median'`): also returns back kerb (union of remaining edges)
 -- USED IN: `separate_parkings/0_areas_project_to_kerb.sql` (convert polygon parking areas to kerb linestrings)
 DROP FUNCTION IF EXISTS tilda_parking_area_to_line (geometry, jsonb, double precision);
@@ -93,16 +93,12 @@ CREATE FUNCTION tilda_parking_area_to_line (
   parking_kerb geometry,
   score double precision,
   is_front_kerb boolean,
-  side TEXT,
-  road_width NUMERIC,
-  road_width_source TEXT
+  side TEXT
 ) LANGUAGE plpgsql AS $$
 DECLARE
   edges_arr edge_info[];
   parking_kerb_idx bigint;
   n_edges int;
-  road_width_val NUMERIC;
-  road_width_source_val TEXT;
 BEGIN
   SELECT ARRAY(
     SELECT ROW(geom, edge_idx)::edge_info
@@ -111,9 +107,7 @@ BEGIN
   WITH closeby_roads  AS (
     SELECT t.edge_idx,
             COALESCE(proj_info.alignment * proj_info.length, 0) / (ST_Distance(t.geom, r.geom) + 1 + 2 * (r.is_driveway)::int) AS road_score,
-            half_space,
-            (r.tags ->> 'width')::NUMERIC AS road_width,
-            r.tags ->> 'width_source' AS road_width_source
+            half_space
     FROM unnest(edges_arr) AS t(geom, edge_idx)
     LEFT JOIN _parking_roads r
       ON ST_Expand(ST_Centroid(t.geom), radius) && r.geom
@@ -123,41 +117,25 @@ BEGIN
         OR parking_tags->>'road_name' != r.tags->>'street_name')
     CROSS JOIN LATERAL tilda_projected_info(t.geom, r.geom) proj_info
     ),
-    max_width_rows AS (
-      SELECT DISTINCT ON (cwr.edge_idx)
-        cwr.edge_idx,
-        cwr.road_width,
-        cwr.road_width_source
-      FROM
-        closeby_roads cwr
-      WHERE
-        cwr.road_score IS NOT NULL
-      ORDER BY cwr.edge_idx, cwr.road_width DESC NULLS LAST
-    ),
     aggregated AS (
       SELECT
-        cr.edge_idx,
-        SUM(cr.road_score) AS road_score,
-        SUM(cr.half_space) AS half_space,
-        mw.road_width,
-        mw.road_width_source
+        edge_idx,
+        SUM(road_score) AS road_score,
+        SUM(half_space) AS half_space
       FROM
-        closeby_roads cr
-      INNER JOIN max_width_rows mw ON cr.edge_idx = mw.edge_idx
+        closeby_roads
       WHERE
-        cr.road_score IS NOT NULL
-      GROUP BY cr.edge_idx, mw.road_width, mw.road_width_source
+        road_score IS NOT NULL
+      GROUP BY edge_idx
     )
   SELECT
-    agg.edge_idx,
-    agg.road_score,
-    CASE WHEN agg.half_space > 0 THEN 'left' ELSE 'right' END,
-    agg.road_width,
-    agg.road_width_source
-  INTO parking_kerb_idx, score, side, road_width_val, road_width_source_val
-  FROM aggregated agg
-  WHERE agg.road_score IS NOT NULL
-  ORDER BY agg.road_score DESC
+    edge_idx,
+    road_score,
+    CASE WHEN half_space > 0 THEN 'left' ELSE 'right' END
+  INTO parking_kerb_idx, score, side
+  FROM aggregated
+  WHERE road_score IS NOT NULL
+  ORDER BY road_score DESC
   LIMIT 1;
 
   -- Return the closest edge as `parking_kerb`
@@ -166,8 +144,6 @@ BEGIN
   FROM unnest(edges_arr) AS t(geom, edge_idx)
   WHERE edge_idx = parking_kerb_idx;
   is_front_kerb := TRUE;
-  road_width := road_width_val;
-  road_width_source := road_width_source_val;
   RETURN NEXT;
 
   IF COALESCE(parking_tags ->> 'location', '') != 'median' THEN
@@ -186,8 +162,6 @@ BEGIN
     (parking_kerb_idx % n_edges) + 1                                            -- Next edge (wrap around)
   );
   is_front_kerb := FALSE;
-  road_width := road_width_val;
-  road_width_source := road_width_source_val;
   RETURN NEXT;
 END;
 $$;
