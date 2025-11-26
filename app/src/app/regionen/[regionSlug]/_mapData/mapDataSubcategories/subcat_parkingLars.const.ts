@@ -60,7 +60,7 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
       legends: [
         {
           id: 'capacity_status--present',
-          name: 'Parkstände',
+          name: 'Stellplätze',
           style: {
             type: 'line',
             color: 'rgb(22, 163, 74)',
@@ -68,7 +68,7 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
         },
         {
           id: 'capacity_status--presetn--operator_type-private',
-          name: 'Parkstände an Privatwegen',
+          name: 'Stellplätze an Privatwegen',
           style: {
             type: 'line',
             color: 'rgba(22, 163, 74, 0.33)',

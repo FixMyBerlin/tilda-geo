@@ -17,7 +17,7 @@ const defaultLegend = [
   },
   {
     id: 'underground',
-    name: 'Tiefgaragen',
+    name: 'Tiefgarage',
     style: { type: 'fill', color: 'rgb(142, 192, 169)' },
   },
   {

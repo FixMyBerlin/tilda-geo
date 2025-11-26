@@ -19,7 +19,8 @@ export type SubcatParkingTildaStyleIds = 'default' | 'conditional' | 'surface'
 
 export const subcat_parkingTilda_line: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Öffentl. Straßenparken',
+  name: 'Öffentliches Straßenparken',
+  // desc: 'Parken auf öffentlich gewidmeten Flächen im Straßenraum',
   ui: 'dropdown',
   sourceId: source,
   beforeId: undefined,
@@ -58,7 +59,7 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
       legends: [
         {
           id: 'capacity_status--present',
-          name: 'Parkstände',
+          name: 'Stellplätze',
           style: {
             type: 'line',
             color: 'rgb(22, 163, 74)',

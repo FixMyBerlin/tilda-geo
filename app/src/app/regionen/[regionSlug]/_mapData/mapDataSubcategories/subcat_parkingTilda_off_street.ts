@@ -15,7 +15,8 @@ export type SubcatParkingTildaOffStreetStyleIds = 'default' | 'public_access' | 
 
 export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Abseits Straßenland',
+  name: 'Öffentliches Parken abseits des Straßenraums',
+  // desc: 'Parken auf öffentlich gewidmeten Flächen abseits des Straßenraums',
   ui: 'dropdown',
   sourceId: source,
   beforeId: undefined,

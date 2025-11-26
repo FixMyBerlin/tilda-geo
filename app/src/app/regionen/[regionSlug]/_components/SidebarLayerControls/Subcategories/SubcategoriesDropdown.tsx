@@ -18,15 +18,15 @@ export const SubcategoriesDropdown = ({ categoryId, subcategories, disabled }: P
 
         return (
           <div key={subcatConfig.id} className="px-2">
-            <span
+            <div
               className={twJoin(
-                'text-sm font-semibold leading-[17px]',
+                'mb-1 text-sm font-semibold leading-tight',
                 disabled ? 'text-gray-400' : 'text-gray-900',
                 showSubheadline ? '' : 'sr-only',
               )}
             >
               {subcatConfig.name}
-            </span>
+            </div>
 
             <StylesDropdown
               categoryId={categoryId}
