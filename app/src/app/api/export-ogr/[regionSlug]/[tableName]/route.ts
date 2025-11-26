@@ -162,7 +162,12 @@ export async function GET(
     // LATER: Add something like -lco WRITE_NULL_VALUES=NO to cleanup the NULL properties from GeoJSON
     // See https://github.com/OSGeo/gdal/issues/1187
     // -nln assigns an alternate name to the new layer (works for GPKG/FGB, safely ignored for GeoJSON)
-    const ogrCommand = `ogr2ogr -f "${ogrFormats[format]}" ${outputFilePath} ${dbConnection} -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 -sql "${sqlQuery}" -nln tilda-geo.de`
+    // Include region parameter in layer name only if it's a real region (not 'noRegion' placeholder)
+    const layerName =
+      regionSlug === 'noRegion'
+        ? `tilda-geo.de/docs/${tableName}`
+        : `tilda-geo.de/docs/${tableName}?r=${regionSlug}`
+    const ogrCommand = `ogr2ogr -f "${ogrFormats[format]}" ${outputFilePath} ${dbConnection} -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 -sql "${sqlQuery}" -nln ${layerName}`
 
     console.log('[EXPORT] Running ogr2ogr', isDev ? ogrCommand : undefined)
     await new Promise((resolve, reject) => {
