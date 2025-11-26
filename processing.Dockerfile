@@ -60,4 +60,4 @@ RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.
 # install bun packages
 RUN bun install
 
-CMD bun run /processing/index.ts
+CMD ["bun", "run", "/processing/index.ts"]

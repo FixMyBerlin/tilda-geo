@@ -27,14 +27,12 @@ ARG NEXT_PUBLIC_OSM_API_URL
 RUN npx blitz@2.2.2 prisma generate
 RUN npx blitz@2.2.2 build
 
-CMD ["npx", "blitz@2.2.2", "prisma", "migrate", "deploy", "&&", "npx", "blitz@2.2.2", "start", "-p", "4000"]
+CMD ["/bin/sh", "-c", "npx blitz@2.2.2 prisma migrate deploy && npx blitz@2.2.2 start -p 4000"]
 
 # From here on we are building the production image
 FROM base AS production
 
 RUN npm install --global pm2
 
-# TODO: Is addding `SHELL ["/bin/bash", "-c"]` here a good way to work around this Github action warning?
-# - https://docs.docker.com/reference/build-checks/json-args-recommended/
-# - "JSON arguments recommended for ENTRYPOINT/CMD to prevent unintended behavior related to OS signals: app.Dockerfile#L30 | JSONArgsRecommended: JSON arguments recommended for CMD to prevent unintended behavior related to OS signals"
-CMD npx blitz@2.2.2 prisma migrate deploy && exec pm2-runtime node -- ./node_modules/next/dist/bin/next start -p 4000
+# Docs: https://docs.docker.com/reference/build-checks/json-args-recommended/
+CMD ["/bin/sh", "-c", "npx blitz@2.2.2 prisma migrate deploy && exec pm2-runtime node -- ./node_modules/next/dist/bin/next start -p 4000"]
