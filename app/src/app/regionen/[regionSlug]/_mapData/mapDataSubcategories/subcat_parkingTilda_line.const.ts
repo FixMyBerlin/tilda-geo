@@ -28,7 +28,6 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings,
@@ -78,7 +77,6 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
     {
       id: 'conditional',
       name: 'Parkeinschränkungen',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parking_condition,
@@ -216,7 +214,6 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
     {
       id: 'surface',
       name: 'Oberfläche',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_surface,

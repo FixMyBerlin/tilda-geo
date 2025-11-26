@@ -24,7 +24,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines,
@@ -41,7 +40,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'presence',
       name: 'Vollständigkeit',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
@@ -114,7 +112,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'missing',
       name: 'Fehlende Daten',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_missing,
@@ -145,7 +142,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'surface',
       name: 'Oberflächen',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,

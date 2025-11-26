@@ -16,7 +16,6 @@ export const subcat_parkingLarsPoints: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_calculator,
         source: 'lars_parking_points',

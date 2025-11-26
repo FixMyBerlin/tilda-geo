@@ -62,7 +62,6 @@ export const subcat_radinfra_width: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'RVA Breite', // field hidden
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_radinfra_width,
         source,

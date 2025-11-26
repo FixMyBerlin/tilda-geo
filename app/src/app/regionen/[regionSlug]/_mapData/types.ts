@@ -188,7 +188,6 @@ export type FileMapDataSubcategoryStyle = {
   id: StyleId
   name: string
   category?: string
-  desc: null | string // TODO REMOVE
   layers: FileMapDataSubcategoryStyleLayer[]
   legends?: null | FileMapDataSubcategoryStyleLegend[]
 }
@@ -197,7 +196,6 @@ export type FileMapDataSubcategoryHiddenStyle = {
   id: 'hidden'
   name: string
   category?: never
-  desc: null // TODO REMOVE
   layers?: never
   legends?: never
 }

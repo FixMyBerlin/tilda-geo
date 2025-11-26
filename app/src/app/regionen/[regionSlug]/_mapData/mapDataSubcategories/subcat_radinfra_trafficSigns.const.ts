@@ -52,7 +52,6 @@ export const subcat_radinfra_trafficSigns: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Beschilderung', // field hidden
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_radinfra_traffic_signs,
         source,

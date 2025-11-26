@@ -42,7 +42,6 @@ export const subcat_radinfra_campaigns: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Alle Kampagnen',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_radinfra_campaign,
         source,
@@ -63,7 +62,6 @@ export const subcat_radinfra_campaigns: FileMapDataSubcategory = {
         id: todoId,
         name: campaign?.title || `${todoId} (in Arbeit)`,
         category: category || 'In Vorbereitung',
-        desc: null,
         layers: mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_radinfra_campaign,
           source,

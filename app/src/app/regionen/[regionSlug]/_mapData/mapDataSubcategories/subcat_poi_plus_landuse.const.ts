@@ -15,7 +15,6 @@ export const subcat_poi_plus_landuse: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_ziele_plus_landuse,
         source: 'atlas_landuse',

@@ -16,7 +16,6 @@ export const subcat_roads_plus_footways: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Fußweg, Pfad, Sonderweg, u.a.',
-      desc: '',
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_plus_fusswege,
         source,

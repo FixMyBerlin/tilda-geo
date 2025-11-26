@@ -20,7 +20,6 @@ export const subcat_bikelanesStatistics: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Landkreise & Kreisfreie Städte',
-      desc: null,
       layers: debugLayerStyles({
         source,
         sourceLayer,
@@ -30,7 +29,6 @@ export const subcat_bikelanesStatistics: FileMapDataSubcategory = {
     {
       id: 'category_municipality',
       name: 'Gemeinden',
-      desc: null,
       layers: debugLayerStyles({
         source,
         sourceLayer,

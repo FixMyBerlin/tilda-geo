@@ -17,7 +17,6 @@ export const subcat_parkingTilda_quantized: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       legends: [
         {
           id: 'calc',

@@ -16,7 +16,6 @@ export const subcat_roads_plus_oneway: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Einbahnstraßen',
-      desc: '',
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_plus_oneway,
         source,

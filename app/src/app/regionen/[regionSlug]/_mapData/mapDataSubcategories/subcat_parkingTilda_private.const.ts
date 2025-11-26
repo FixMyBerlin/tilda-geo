@@ -23,7 +23,6 @@ export const subcat_parkingTilda_private: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_private,

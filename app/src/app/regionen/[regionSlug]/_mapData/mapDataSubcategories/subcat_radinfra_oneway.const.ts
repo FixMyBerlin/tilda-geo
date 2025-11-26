@@ -73,7 +73,6 @@ export const subcat_radinfra_oneway: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Verkehrsrichtung', // field hidden
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_radinfra_oneway,
         source,

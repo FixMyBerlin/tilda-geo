@@ -24,7 +24,6 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,
@@ -72,7 +71,6 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
     {
       id: 'public_access',
       name: 'Öffentlich zugänglich (TODO)',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,
@@ -99,7 +97,6 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
     {
       id: 'operator_type',
       name: 'Betreiber öffentlich/privat (TODO)',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,
