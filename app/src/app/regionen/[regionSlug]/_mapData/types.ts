@@ -105,28 +105,13 @@ export type MapDataSourceCalculator =
       highlightingKey?: undefined
     }
 
-type MapDataSourceExport<TExpIds> =
-  | {
-      enabled: true
-      /** @desc Identifier for the export API URL; export is only allowed when present */
-      apiIdentifier: TExpIds
-      title: string
-      desc: string
-    }
-  | {
-      enabled: false
-      apiIdentifier?: undefined
-      title?: undefined
-      desc?: undefined
-    }
-
 export type MapDataOsmIdConfig =
   | undefined
   | { osmType: string; osmId: string }
   | { osmTypeId: string }
 
 /** @desc: Our own vector tile layers configured in 'sources.const.ts' */
-export type MapDataSource<TIds, TExpIds> = {
+export type MapDataSource<TIds> = {
   id: TIds
   /** @desc URL of the vector tiles */
   tiles: string
@@ -148,8 +133,6 @@ export type MapDataSource<TIds, TExpIds> = {
   // }
   /** @desc Calculator: Enable and configure calculator feature */
   calculator: MapDataSourceCalculator
-  /** @desc Export: Enable and configure data export */
-  export: MapDataSourceExport<TExpIds>
 }
 
 export type StaticMapDataCategory = {

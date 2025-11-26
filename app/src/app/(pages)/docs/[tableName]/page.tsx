@@ -1,7 +1,7 @@
 import { Link } from '@/src/app/_components/links/Link'
 import { LinkMail } from '@/src/app/_components/links/LinkMail'
 import { exportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
-import { sources } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/sources.const'
+import { exports } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/exports/exports.const'
 import { Metadata, Route } from 'next'
 import { notFound } from 'next/navigation'
 import { z } from 'zod'
@@ -21,12 +21,12 @@ export async function generateMetadata({
     }
   }
 
-  const source = sources.find((s) => s.export?.enabled && s.export?.apiIdentifier === parsed.data)
+  const exportData = exports.find((e) => e.id === parsed.data)
 
   return {
     robots: 'noindex',
-    title: source?.export?.title
-      ? `Dokumentation für ${source.export.title}`
+    title: exportData?.title
+      ? `Dokumentation für ${exportData.title}`
       : `Dokumentation für Datensatz ${parsed.data}`,
   }
 }
@@ -46,8 +46,8 @@ export default async function DocsPage({ params, searchParams }: Props) {
   }
 
   const tableName = parsed.data
-  // Find source data by export.apiIdentifier
-  const source = sources.find((s) => s.export?.enabled && s.export?.apiIdentifier === tableName)
+  // Find export data by id
+  const exportData = exports.find((e) => e.id === tableName)
 
   return (
     <>
@@ -55,32 +55,32 @@ export default async function DocsPage({ params, searchParams }: Props) {
         Dokumentation für Datensatz <code>{tableName}</code>
       </h1>
 
-      {source?.export?.title && <h2>{source.export.title}</h2>}
+      {exportData?.title && <h2>{exportData.title}</h2>}
 
-      {source && (
+      {exportData && (
         <table className="my-2 text-sm text-gray-500">
           <tbody>
-            {source.export.desc && (
+            {exportData.desc && (
               <tr>
                 <th className="w-24 align-top text-xs font-medium text-gray-900">Beschreibung:</th>
-                <td className="pl-2">{source.export.desc}</td>
+                <td className="pl-2">{exportData.desc}</td>
               </tr>
             )}
-            {source.attributionHtml && source.attributionHtml !== 'todo' && (
+            {exportData.attributionHtml && exportData.attributionHtml !== 'todo' && (
               <tr>
                 <th className="w-24 align-top text-xs font-medium text-gray-900">Attribution:</th>
                 <td
                   className="pl-2"
                   dangerouslySetInnerHTML={{
-                    __html: source.attributionHtml,
+                    __html: exportData.attributionHtml,
                   }}
                 />
               </tr>
             )}
-            {source.licence && (
+            {exportData.licence && (
               <tr>
                 <th className="w-24 align-top text-xs font-medium text-gray-900">Lizenz:</th>
-                <td className="pl-2">{source.licence}</td>
+                <td className="pl-2">{exportData.licence}</td>
               </tr>
             )}
           </tbody>

@@ -6,6 +6,7 @@ import svgRadinfra from '@/src/app/_components/assets/radinfra-logo.svg'
 import imageTrTo from '@/src/app/_components/assets/trto-logo.png'
 import imageUeberlingen from '@/src/app/_components/assets/ueberlingen-logo.jpeg'
 import { categories } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataCategories/categories.const'
+import { ExportId } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/exports/exports.const'
 import {
   SourcesRasterIds,
   sourcesBackgroundsRaster,
@@ -31,8 +32,6 @@ export type StaticRegion = {
   /** @desc 1-n relation IDs, used for the mask and export bbox — @href use https://hanshack.com/geotools/gimmegeodata/ to get the ids */
   osmRelationIds: number[] | []
   map: StaticRegionInitialMapPositionZoom
-  /** @desc Used by the download panel to pass to the api endpoint */
-  bbox: { min: readonly [number, number]; max: readonly [number, number] } | null
 } & (
   | {
       logoPath: string | StaticImport | null
@@ -48,10 +47,21 @@ export type StaticRegion = {
     categories: MapDataCategoryId[]
     backgroundSources: SourcesRasterIds[]
     notes: 'osmNotes' | 'atlasNotes' | 'disabled'
-    hideDownload?: boolean
     showSearch?: boolean
     cacheWarming?: { minZoom: number; maxZoom: number; tables: UnionTiles<TableId>[] }
-  }
+  } & (
+    | {
+        /** @desc Hide the download buttons. */
+        exports: null
+        bbox: null
+      }
+    | {
+        /** @desc List of export IDs available for this region. When non-null, bbox must be set. */
+        exports: [ExportId, ...ExportId[]]
+        /** @desc Used by the download panel to pass to the api endpoint. */
+        bbox: { min: readonly [number, number]; max: readonly [number, number] }
+      }
+  )
 
 const bboxToMinMax = (bbox: [number, number, number, number]) => {
   return {
@@ -127,6 +137,28 @@ export type RegionSlug =
   | 'ueberlingen'
   | 'woldegk'
 
+export const defaultTildaRadverkehrSources = [
+  // DEFAULT
+  // The order here specifies the order in the UI
+  'poi',
+  'bikelanes',
+  'roads',
+  'surface',
+  'lit',
+  'mapillary',
+] satisfies MapDataCategoryId[]
+export const defaultTildaRadverkehrExports = [
+  // DEFAULT
+  // The order here specifies the order in the UI
+  'bikelanes',
+  'bikeroutes',
+  'roads',
+  'roadsPathClasses',
+  'poiClassification',
+  'places',
+  'publicTransport',
+] satisfies [ExportId, ...ExportId[]]
+
 export const staticRegion: StaticRegion[] = [
   {
     slug: 'bibi',
@@ -154,6 +186,20 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: [
+      'bikelanes',
+      'bikeroutes',
+      'roads',
+      'roadsPathClasses',
+      'poiClassification',
+      'places',
+      'publicTransport',
+      'parkings',
+      'parkings_no',
+      'parkings_separate',
+      'off_street_parking_areas',
+      'off_street_parking_points',
+    ],
   },
   {
     slug: 'trto',
@@ -168,17 +214,10 @@ export const staticRegion: StaticRegion[] = [
     },
     logoPath: imageTrTo,
     logoWhiteBackgroundRequired: true,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: [...defaultBackgroundSources, 'trto-radwege'],
     notes: 'osmNotes',
+    exports: defaultTildaRadverkehrExports,
   },
   {
     slug: 'berlin',
@@ -209,6 +248,21 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: berlinBackgroundSources,
     notes: 'osmNotes',
+    exports: [
+      'bikelanes',
+      'bikeroutes',
+      'roads',
+      'roadsPathClasses',
+      'parkings',
+      'parkings_no',
+      'parkings_separate',
+      'off_street_parking_areas',
+      'off_street_parking_points',
+      'bicycleParking_points',
+      'poiClassification',
+      'places',
+      'publicTransport',
+    ],
   },
   {
     slug: 'infravelo',
@@ -241,6 +295,7 @@ export const staticRegion: StaticRegion[] = [
       maxZoom: 13,
       tables: ['bikelanes', 'roads', 'roadsPathClasses'],
     },
+    exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
   },
   {
     slug: 'parkraum-berlin',
@@ -259,7 +314,7 @@ export const staticRegion: StaticRegion[] = [
       'mapillary',
     ],
     backgroundSources: berlinBackgroundSources,
-    hideDownload: true,
+    exports: null,
     notes: 'osmNotes',
   },
   {
@@ -279,13 +334,19 @@ export const staticRegion: StaticRegion[] = [
     categories: [
       // Sort
       'parkingTilda',
-      'parkingLars',
+      'parkingLars', // TODO: Remove next time we update the URL store
       'roads',
       'mapillary',
     ],
     backgroundSources: berlinBackgroundSources,
-    hideDownload: false,
     notes: 'atlasNotes',
+    exports: [
+      'parkings',
+      'off_street_parking_areas',
+      'off_street_parking_points',
+      'parkings_no',
+      'parkings_separate',
+    ],
   },
   {
     slug: 'parkraum',
@@ -303,7 +364,7 @@ export const staticRegion: StaticRegion[] = [
       'mapillary',
     ],
     backgroundSources: berlinBackgroundSources,
-    hideDownload: true,
+    exports: null,
     notes: 'osmNotes',
   },
   {
@@ -342,6 +403,16 @@ export const staticRegion: StaticRegion[] = [
       ...defaultBackgroundSources,
     ],
     notes: 'osmNotes',
+    exports: [
+      'bikelanes',
+      'bikeroutes',
+      'roads',
+      'roadsPathClasses',
+      'poiClassification',
+      'places',
+      'publicTransport',
+      'bicycleParking_points',
+    ],
   },
   {
     slug: 'rs8',
@@ -354,23 +425,17 @@ export const staticRegion: StaticRegion[] = [
       401697, // Stadt Waiblingen (inkl. Exklave, die wir eigentlich nicht brauchen)
     ],
     map: { lat: 48.8769, lng: 9.2425, zoom: 12 },
-    bbox: {
-      min: [9.13736562, 48.81051166],
-      max: [9.36731192, 48.93255599],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [9.13736562, 48.81051166],
+    //   max: [9.36731192, 48.93255599],
+    // },
     externalLogoPath: 'https://trassenscout.de/favicon.svg',
     logoWhiteBackgroundRequired: false,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'mainz',
@@ -379,23 +444,17 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     osmRelationIds: [62630],
     map: { lat: 49.9876, lng: 8.2506, zoom: 14 },
-    bbox: {
-      min: [8.1435156, 49.8955342],
-      max: [8.3422611, 50.0353045],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [8.1435156, 49.8955342],
+    //   max: [8.3422611, 50.0353045],
+    // },
     externalLogoPath: 'https://radnetz-mainz.de/favicon.ico',
     logoWhiteBackgroundRequired: false,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'lueneburg',
@@ -404,24 +463,18 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     osmRelationIds: [2084746],
     map: { lat: 53.2493, lng: 10.4142, zoom: 11.5 },
-    bbox: {
-      min: [10.041308, 53.0468526],
-      max: [11.1957671, 53.385876],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [10.041308, 53.0468526],
+    //   max: [11.1957671, 53.385876],
+    // },
     externalLogoPath:
       'https://www.landkreis-lueneburg.de/_Resources/Static/Packages/Marktplatz.LKLG/Images/Logos/logo.png',
     logoWhiteBackgroundRequired: true,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'woldegk',
@@ -430,23 +483,17 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     osmRelationIds: [1419902],
     map: { lat: 53.4613672, lng: 13.5808433, zoom: 11.5 },
-    bbox: {
-      min: [13.378969848860086, 53.37938986368977],
-      max: [13.74006560910362, 53.613911346911244],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [13.378969848860086, 53.37938986368977],
+    //   max: [13.74006560910362, 53.613911346911244],
+    // },
     externalLogoPath: 'https://upload.wikimedia.org/wikipedia/commons/c/c4/Amt_Woldegk_in_MBS.svg', // There is no better image apparently https://de.wikipedia.org/wiki/Amt_Woldegk
     logoWhiteBackgroundRequired: true,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'atlasNotes',
+    exports: null,
   },
   {
     slug: 'trassenscout-umfragen',
@@ -465,6 +512,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: defaultBackgroundSources,
     notes: 'disabled',
+    exports: null,
   },
   {
     slug: 'ostalbkreis',
@@ -473,20 +521,13 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     osmRelationIds: [62708],
     map: { lat: 48.8364862, lng: 10.092577, zoom: 10 },
-    bbox: bboxToMinMax([9.6189511, 48.7145541, 10.4569049, 49.0608132]),
+    bbox: null, //bboxToMinMax([9.6189511, 48.7145541, 10.4569049, 49.0608132]),
     externalLogoPath: 'https://www.ostalbkreis.de/sixcms/media.php/18/OAK-Logo.svg',
     logoWhiteBackgroundRequired: true,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     name: 'Langerwehe',
@@ -495,23 +536,17 @@ export const staticRegion: StaticRegion[] = [
     slug: 'langerwehe',
     osmRelationIds: [162550],
     map: { lat: 50.8176382, lng: 6.3580711, zoom: 12 },
-    bbox: {
-      min: [6.298514, 50.7564788],
-      max: [6.4182952, 50.8355042],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [6.298514, 50.7564788],
+    //   max: [6.4182952, 50.8355042],
+    // },
     externalLogoPath: 'https://upload.wikimedia.org/wikipedia/commons/1/12/DEU_Langerwehe_COA.jpg',
     logoWhiteBackgroundRequired: false,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     name: 'Herrenberg',
@@ -520,23 +555,17 @@ export const staticRegion: StaticRegion[] = [
     slug: 'herrenberg',
     osmRelationIds: [722073],
     map: { lat: 48.5959, lng: 8.8675, zoom: 11 },
-    bbox: {
-      min: [8.7898756, 48.5602164],
-      max: [8.9819058, 48.6392506],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [8.7898756, 48.5602164],
+    //   max: [8.9819058, 48.6392506],
+    // },
     externalLogoPath: 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Wappen_Herrenberg.svg',
     logoWhiteBackgroundRequired: false,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     name: 'Magdeburg',
@@ -545,23 +574,17 @@ export const staticRegion: StaticRegion[] = [
     slug: 'magdeburg',
     osmRelationIds: [62481],
     map: { lat: 52.1257, lng: 11.6423, zoom: 11 },
-    bbox: {
-      min: [11.5172379, 52.0237486],
-      max: [11.7639936, 52.2283566],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [11.5172379, 52.0237486],
+    //   max: [11.7639936, 52.2283566],
+    // },
     externalLogoPath: 'https://upload.wikimedia.org/wikipedia/commons/7/73/Wappen_Magdeburg.svg',
     logoWhiteBackgroundRequired: false,
-    categories: [
-      // The order here specifies the order in the UI
-      'poi',
-      'bikelanes',
-      'roads',
-      'surface',
-      'lit',
-      'mapillary',
-    ],
+    categories: defaultTildaRadverkehrSources,
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     name: 'Brandenburg',
@@ -604,6 +627,7 @@ export const staticRegion: StaticRegion[] = [
         'barrierAreas,barrierLines',
       ],
     },
+    exports: defaultTildaRadverkehrExports,
   },
   {
     name: 'Brandenburg Beteiligung',
@@ -612,10 +636,7 @@ export const staticRegion: StaticRegion[] = [
     slug: 'bb-beteiligung',
     osmRelationIds: [62504],
     map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
-    bbox: {
-      min: [11.2662278, 51.359064],
-      max: [14.7658159, 53.5590907],
-    },
+    bbox: null,
     externalLogoPath: 'https://brandenburg.de/media_fast/bb1.a.3795.de/logo-brb@2.png',
     logoWhiteBackgroundRequired: true,
     showSearch: true,
@@ -632,6 +653,7 @@ export const staticRegion: StaticRegion[] = [
       ...defaultBackgroundSources,
     ],
     notes: 'disabled',
+    exports: null,
   },
   {
     slug: 'bb-pg',
@@ -663,6 +685,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     notes: 'disabled',
     // notes: 'atlasNotes',
+    exports: defaultTildaRadverkehrExports,
   },
   {
     slug: 'bb-sg',
@@ -693,6 +716,7 @@ export const staticRegion: StaticRegion[] = [
       ...defaultBackgroundSources,
     ],
     notes: 'atlasNotes',
+    exports: defaultTildaRadverkehrExports,
   },
   {
     name: 'Brandenburg Kampagne',
@@ -701,10 +725,7 @@ export const staticRegion: StaticRegion[] = [
     slug: 'bb-kampagne',
     osmRelationIds: [62504],
     map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
-    bbox: {
-      min: [11.2662278, 51.359064],
-      max: [14.7658159, 53.5590907],
-    },
+    bbox: null,
     externalLogoPath: 'https://brandenburg.de/media_fast/bb1.a.3795.de/logo-brb@2.png',
     logoWhiteBackgroundRequired: true,
     showSearch: true,
@@ -722,6 +743,7 @@ export const staticRegion: StaticRegion[] = [
       ...defaultBackgroundSources,
     ],
     notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'muenchen',
@@ -730,15 +752,17 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     osmRelationIds: [62428],
     map: { lat: 48.1566, lng: 11.5492, zoom: 12 },
-    bbox: {
-      min: [11.360777, 48.0616244],
-      max: [11.7229099, 48.2481162],
-    },
+    bbox: null,
+    // bbox: {
+    //   min: [11.360777, 48.0616244],
+    //   max: [11.7229099, 48.2481162],
+    // },
     logoPath: null,
     logoWhiteBackgroundRequired: false,
     categories: ['bikelanes', 'lit', 'poi', 'roads', 'surface', 'bicycleParking', 'mapillary'],
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'nrw',
@@ -753,6 +777,7 @@ export const staticRegion: StaticRegion[] = [
     categories: ['bikelanes', 'poi', 'roads', 'surface', 'bicycleParking', 'mapillary'],
     backgroundSources: [...defaultBackgroundSources, 'nrw-ortho'],
     notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'radplus',
@@ -771,6 +796,7 @@ export const staticRegion: StaticRegion[] = [
       ...defaultBackgroundSources,
     ],
     notes: 'atlasNotes',
+    exports: null,
   },
   {
     name: 'Fahrradstellplätze',
@@ -779,10 +805,7 @@ export const staticRegion: StaticRegion[] = [
     slug: 'fahrradstellplaetze',
     osmRelationIds: [],
     map: { lat: 51.07, lng: 13.35, zoom: 5 },
-    bbox: {
-      min: [5.8663153, 47.2701114],
-      max: [15.0419309, 55.099161],
-    },
+    bbox: null,
     externalLogoPath:
       'https://raw.githubusercontent.com/rapideditor/temaki/main/icons/bicycle_parked.svg',
     logoWhiteBackgroundRequired: true,
@@ -796,6 +819,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: null,
   },
   {
     name: 'Stadt Überlingen',
@@ -820,6 +844,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: [...defaultBackgroundSources, 'ELI_baden-w-rttemberg-dop20'],
     notes: 'osmNotes',
+    exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
   },
   {
     slug: 'deutschland',
@@ -845,6 +870,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: defaultBackgroundSources,
     notes: 'osmNotes',
+    exports: defaultTildaRadverkehrExports,
   },
   {
     slug: 'radinfra',
@@ -861,7 +887,6 @@ export const staticRegion: StaticRegion[] = [
       { name: 'Mithelfen', href: 'https://radinfra.de/mitmachen/' },
     ],
     showSearch: true,
-    hideDownload: false,
     categories: [
       // The order here specifies the order in the UI
       'radinfra_bikelanes',
@@ -881,6 +906,7 @@ export const staticRegion: StaticRegion[] = [
       maxZoom: 8,
       tables: ['bikelanes', 'todos_lines'],
     },
+    exports: null,
   },
   {
     slug: 'pankow',
@@ -900,6 +926,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: berlinBackgroundSources,
     notes: 'atlasNotes',
+    exports: null,
   },
   {
     slug: 'testing',
@@ -908,14 +935,12 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     osmRelationIds: [],
     map: { lat: 51.07, lng: 13.35, zoom: 5 },
-    bbox: {
-      min: [5.8663153, 47.2701114],
-      max: [15.0419309, 55.099161],
-    },
+    bbox: null,
     logoPath: null,
     logoWhiteBackgroundRequired: false,
     categories: categories.map((t) => t.id),
     backgroundSources: sourcesBackgroundsRaster.map((s) => s.id),
     notes: 'osmNotes',
+    exports: null,
   },
 ]

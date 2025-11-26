@@ -1,5 +1,4 @@
 import { MapDataSource } from '../types'
-import { SourceExportApiIdentifier } from './export/exportIdentifier'
 
 export type SourcesParkingLarsId =
   | 'lars_parking'
@@ -8,8 +7,7 @@ export type SourcesParkingLarsId =
   | 'lars_parking_points'
   | 'lars_parking_stats'
 
-export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId, SourceExportApiIdentifier>[] =
-  [
+export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     {
       id: 'lars_parking',
       tiles:
@@ -47,7 +45,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId, SourceExpor
       },
       // presence: { enabled: false },
       calculator: { enabled: false },
-      export: { enabled: false },
     },
     {
       id: 'lars_parking_debug',
@@ -74,7 +71,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId, SourceExpor
       inspector: { enabled: false }, // Those layers have no properties anyways
       // presence: { enabled: false },
       calculator: { enabled: false },
-      export: { enabled: false },
     },
     {
       id: 'lars_parking_points',
@@ -96,7 +92,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId, SourceExpor
         ],
         highlightingKey: 'id',
       },
-      export: { enabled: false },
     },
     {
       id: 'lars_parking_areas',
@@ -133,7 +128,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId, SourceExpor
       },
       // presence: { enabled: false },
       calculator: { enabled: false },
-      export: { enabled: false },
     },
     {
       id: 'lars_parking_stats',
@@ -164,6 +158,5 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId, SourceExpor
       },
       // presence: { enabled: false },
       calculator: { enabled: false },
-      export: { enabled: false },
     },
   ]

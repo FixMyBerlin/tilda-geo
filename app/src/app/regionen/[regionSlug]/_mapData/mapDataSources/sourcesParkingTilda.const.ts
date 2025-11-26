@@ -4,7 +4,6 @@ import {
   SIMPLIFY_MIN_ZOOM,
 } from '@/src/server/instrumentation/registerGeneralizationFunctions'
 import { MapDataSource } from '../types'
-import { SourceExportApiIdentifier } from './export/exportIdentifier'
 
 export type SourcesParkingTildaId =
   | 'tilda_parkings'
@@ -13,10 +12,7 @@ export type SourcesParkingTildaId =
   | 'tilda_parkings_no'
   | 'tilda_parkings_off_street'
 
-export const sourcesParkingTilda: MapDataSource<
-  SourcesParkingTildaId,
-  SourceExportApiIdentifier
->[] = [
+export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   {
     id: 'tilda_parkings',
     tiles: getTilesUrl(
@@ -68,12 +64,6 @@ export const sourcesParkingTilda: MapDataSource<
       ],
     },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'parkings',
-      title: 'Parkraum',
-      desc: 'Prozessierte Parkraumdaten aus OpenStreetMap',
-    },
   },
   {
     id: 'tilda_parkings_cutouts',
@@ -96,13 +86,6 @@ export const sourcesParkingTilda: MapDataSource<
       ],
     },
     calculator: { enabled: false },
-    export: {
-      enabled: false,
-      // enabled: true,
-      // apiIdentifier: 'parkings_cutouts',
-      // title: 'Parkraum Aussparungen',
-      // desc: 'Aussparungen im Parkraum (z.B. Einfahrten, Kreuzungen)',
-    },
   },
   {
     id: 'tilda_parkings_quantized',
@@ -132,13 +115,6 @@ export const sourcesParkingTilda: MapDataSource<
       ],
       highlightingKey: 'id',
     },
-    export: {
-      enabled: false,
-      // enabled: true,
-      // apiIdentifier: 'parkings_quantized',
-      // title: 'Parkraum Quantisiert',
-      // desc: 'Quantisierte Parkraumdaten für Zählungen',
-    },
   },
   {
     id: 'tilda_parkings_no',
@@ -161,12 +137,6 @@ export const sourcesParkingTilda: MapDataSource<
       ],
     },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'parkings_no',
-      title: 'Parkverbote',
-      desc: 'Bereiche mit Parkverboten',
-    },
   },
   {
     id: 'tilda_parkings_off_street',
@@ -208,6 +178,5 @@ export const sourcesParkingTilda: MapDataSource<
       ],
     },
     calculator: { enabled: false },
-    export: { enabled: false }, // We need a way to list exports for merged tiles. In this case area and point data.
   },
 ]
