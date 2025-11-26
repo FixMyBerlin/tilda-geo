@@ -12,6 +12,12 @@ import { gzipSync } from 'node:zlib'
 import { z } from 'zod'
 import { formats, ogrFormats } from './_utils/ogrFormats.const'
 
+const exportMetadata = {
+  licence: 'ODbL',
+  attribution: '(c) OpenStreetMap; tilda-geo.de',
+  owner: 'FixMyCity GmbH / TILDA Geo',
+}
+
 const ExportSchema = z.object({
   regionSlug: z.string(),
   tableName: z.enum(exportApiIdentifier),
@@ -155,9 +161,10 @@ export async function GET(
     const dbConnection = `PG:"${process.env.GEO_DATABASE_URL.replace('?pool_timeout=0', '')}"`
     // LATER: Add something like -lco WRITE_NULL_VALUES=NO to cleanup the NULL properties from GeoJSON
     // See https://github.com/OSGeo/gdal/issues/1187
-    const ogrCommand = `ogr2ogr -f "${ogrFormats[format]}" ${outputFilePath} ${dbConnection} -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 -sql "${sqlQuery}"`
+    // -nln assigns an alternate name to the new layer (works for GPKG/FGB, safely ignored for GeoJSON)
+    const ogrCommand = `ogr2ogr -f "${ogrFormats[format]}" ${outputFilePath} ${dbConnection} -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 -sql "${sqlQuery}" -nln tilda-geo.de`
 
-    console.log('Running ogr2ogr', isDev ? ogrCommand : undefined)
+    console.log('[EXPORT] Running ogr2ogr', isDev ? ogrCommand : undefined)
     await new Promise((resolve, reject) => {
       exec(ogrCommand, (error, stdout, stderr) => {
         if (error) {
@@ -168,8 +175,32 @@ export async function GET(
       })
     })
 
+    // Add metadata for formats that support it (skip GeoJSON)
+    if (format !== 'geojson') {
+      const escapeForShell = (str: string) => str.replace(/"/g, '\\"')
+      // Use same extension so GDAL can detect the format (e.g., .gpkg.meta -> .meta.gpkg)
+      const pathParts = path.parse(outputFilePath)
+      const metadataFilePath = path.join(pathParts.dir, `${pathParts.name}.meta${pathParts.ext}`)
+      const metadataCommand = `gdal vector edit --metadata LICENSE="${escapeForShell(exportMetadata.licence)}" --metadata OWNER="${escapeForShell(exportMetadata.owner)}" --metadata ATTRIBUTION="${escapeForShell(exportMetadata.attribution)}" ${outputFilePath} ${metadataFilePath}`
+
+      console.log('[EXPORT] Adding metadata', isDev ? metadataCommand : undefined)
+      await new Promise((resolve, reject) => {
+        exec(metadataCommand, async (error, stdout, stderr) => {
+          if (error) {
+            await fs.rm(metadataFilePath, { force: true })
+            await fs.rm(outputFilePath, { force: true })
+            reject(new Error(`Failed to add metadata: ${stderr || error.message}`))
+          } else {
+            // Replace original with metadata-enhanced file
+            await fs.rename(metadataFilePath, outputFilePath)
+            resolve(stdout)
+          }
+        })
+      })
+    }
+
     const fileBuffer = await fs.readFile(outputFilePath)
-    await fs.unlink(outputFilePath) // delete file
+    await fs.rm(outputFilePath, { force: true })
 
     if (format === 'geojson') {
       if (request.headers.get('accept-encoding')?.includes('gzip')) {
