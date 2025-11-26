@@ -173,18 +173,15 @@ export async function GET(
 
     if (format === 'geojson') {
       if (request.headers.get('accept-encoding')?.includes('gzip')) {
-        // NOTE: macOS and Windows both can unzip gzip via Terminal.
-        // Unfortunatelly node:zlip does not have zip support.
-        // We could use a different packages or the system zip package (after adding it to Docker)
-        // But all that would conflict with the accept-encoding here and is not worth the trouble.
-        // For macOS Terminal: `gunzip filename.geojson.gzip`
-        // For Windows: Multiple ways; maybe `Expand-Archive -Path filename.geojson.gzip -DestinationPath .` in PowerShell
+        // Compress the response for transfer efficiency
+        // The browser will automatically decompress it due to Content-Encoding: gzip
+        // and save it as a .geojson file
         const compressed = gzipSync(fileBuffer)
         return new Response(compressed, {
           headers: {
             'Content-Type': 'application/json',
             'Content-Encoding': 'gzip',
-            'Content-Disposition': `attachment; filename="${tableName}.${format}.gzip"`,
+            'Content-Disposition': `attachment; filename="${tableName}.${format}"`,
             'Content-Length': compressed.length.toString(),
           },
         })
