@@ -19,8 +19,9 @@ const exportMetadata = {
 }
 
 /**
- * Check if GDAL 3.8+ is available (required for gdal vector edit command)
- * @returns Promise that resolves to true if GDAL 3.8+ is available, false otherwise
+ * Check if GDAL 3.11+ is available (required for gdal vector edit command)
+ * The `gdal` command was introduced in GDAL 3.11.0
+ * @returns Promise that resolves to true if GDAL 3.11+ is available, false otherwise
  */
 async function checkGdalVersion(): Promise<boolean> {
   try {
@@ -33,7 +34,7 @@ async function checkGdalVersion(): Promise<boolean> {
           return
         }
 
-        // Parse version from output like "GDAL 3.8.4, released 2024/01/15"
+        // Parse version from output like "GDAL 3.10.3, released 2025/04/01"
         const versionMatch = stdout.match(/GDAL (\d+)\.(\d+)\.(\d+)/)
         if (!versionMatch) {
           console.warn('[EXPORT] Could not parse GDAL version from:', stdout)
@@ -44,11 +45,13 @@ async function checkGdalVersion(): Promise<boolean> {
         const major = parseInt(versionMatch[1] || '0', 10)
         const minor = parseInt(versionMatch[2] || '0', 10)
 
-        // GDAL 3.8+ required for gdal vector edit
-        const hasRequiredVersion = major > 3 || (major === 3 && minor >= 8)
+        // GDAL 3.11+ required for gdal vector edit (gdal command introduced in 3.11.0)
+        const hasRequiredVersion = major > 3 || (major === 3 && minor >= 11)
 
         if (!hasRequiredVersion) {
-          console.warn(`[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.8+`)
+          console.warn(
+            `[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.11+ (gdal command introduced in 3.11.0)`
+          )
         }
 
         resolve(hasRequiredVersion)
@@ -223,7 +226,7 @@ export async function GET(
     })
 
     // Add metadata for formats that support it (skip GeoJSON)
-    // HOTFIX: Only add metadata if GDAL 3.8+ is available (gdal vector edit requires 3.8+)
+    // HOTFIX: Only add metadata if GDAL 3.11+ is available (gdal vector edit requires 3.11+)
     if (format !== 'geojson' && (await checkGdalVersion())) {
       const escapeForShell = (str: string) => str.replace(/"/g, '\\"')
       // Use same extension so GDAL can detect the format (e.g., .gpkg.meta -> .meta.gpkg)
