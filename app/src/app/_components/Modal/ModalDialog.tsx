@@ -33,23 +33,23 @@ export const ModalDialog = ({
   const iconComponent: IconComponent = {
     info: {
       bgClass: 'bg-green-100',
-      icon: <InformationCircleIcon className="h-6 w-6 text-green-600" aria-hidden="true" />,
+      icon: <InformationCircleIcon className="size-6 text-green-600" aria-hidden="true" />,
     },
     error: {
       bgClass: 'bg-red-100',
-      icon: <ExclamationTriangleIcon className="h-6 w-6 text-red-600" aria-hidden="true" />,
+      icon: <ExclamationTriangleIcon className="size-6 text-red-600" aria-hidden="true" />,
     },
     copyright: {
       bgClass: 'bg-blue-100',
-      icon: <BookOpenIcon className="h-6 w-6 text-blue-600" aria-hidden="true" />,
+      icon: <BookOpenIcon className="size-6 text-blue-600" aria-hidden="true" />,
     },
     download: {
       bgClass: 'bg-purple-100',
-      icon: <ArrowDownTrayIcon className="h-6 w-6 text-purple-600" aria-hidden="true" />,
+      icon: <ArrowDownTrayIcon className="size-6 text-purple-600" aria-hidden="true" />,
     },
     edit: {
       bgClass: 'bg-gray-100',
-      icon: <PencilIcon className="h-6 w-6 text-gray-600" aria-hidden="true" />,
+      icon: <PencilIcon className="size-6 text-gray-600" aria-hidden="true" />,
     },
   }
 

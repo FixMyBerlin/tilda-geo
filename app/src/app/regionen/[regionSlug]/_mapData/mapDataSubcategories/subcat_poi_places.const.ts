@@ -18,7 +18,6 @@ export const subcat_poi_places: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Siedlungszentren Name',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_places,
         source: 'atlas_places',
@@ -35,7 +34,6 @@ export const subcat_poi_places: FileMapDataSubcategory = {
     {
       id: 'circle',
       name: 'Siedlungszentren EW-Zahl',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_placescircle,
         source: 'atlas_places',

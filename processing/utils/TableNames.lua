@@ -28,7 +28,7 @@ local function validate_columns(columnList)
     -- validate the column type if defined
     if columnType ~= nil then
       if columnTable[columnName] ~= columnType then
-        error('Invalid column type for ' .. columnName .. ': ' .. columnList[columnName])
+        error('Invalid column type for ' .. columnName .. ': ' .. columnTable[columnName])
       end
     end
   end

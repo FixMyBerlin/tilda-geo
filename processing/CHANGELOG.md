@@ -2,7 +2,13 @@
 
 This is an manual and incomplete list of change to the data structure.
 
-## 2025-10-20
+## 2025-11-26
+
+### `bikelanes`
+
+- Categorize `cycleway:SIDE=lane` + `cycleway:SIDE:lane=crossing` as `category=crossing`.
+
+## 2025-11-20
 
 ### `bikelanes`
 

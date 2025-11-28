@@ -16,10 +16,12 @@ export const parkingTildaCategories: StaticMapDataCategory[] = [
       { ...subcat_parkingTilda_line, defaultStyle: 'default' },
       { ...subcat_parkingTilda_private, defaultStyle: 'hidden' },
       { ...subcat_parkingTilda_off_street, defaultStyle: 'hidden' },
+      // { ...subcat_parkingTilda_private, defaultStyle: 'hidden' }, // Privates Parken abseits des Straßenraums
       { ...subcat_parkingTilda_no, defaultStyle: 'hidden' },
       { ...subcat_parkingTilda_cutout, defaultStyle: 'hidden' },
       { ...subcat_parkingTilda_completeness, defaultStyle: 'hidden' },
       { ...subcat_parkingTilda_quantized, defaultStyle: 'hidden' },
+      // { ...subcat_parkingTilda_off_street_quantized, defaultStyle: 'hidden' },
     ],
   },
 ]

@@ -27,7 +27,6 @@ export const subcat_radinfra_stats: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Bundesländer',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: layers(),
         source,
@@ -39,7 +38,6 @@ export const subcat_radinfra_stats: FileMapDataSubcategory = {
     {
       id: 'level6',
       name: 'Landkreise',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: layers(),
         source,

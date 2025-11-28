@@ -17,7 +17,6 @@ export const subcat_bikelanes_plus_bikesuitability: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Radeignung (Beta)',
-      desc: '',
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_bikelanes_plus_bikesuitability,
         source,

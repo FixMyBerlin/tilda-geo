@@ -27,7 +27,6 @@ export const subcat_parkingLarsStats: FileMapDataSubcategory = {
     {
       id: 'stats-admin-level-4',
       name: 'Stadt: % Erfassung',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_stats,
         source,
@@ -38,7 +37,6 @@ export const subcat_parkingLarsStats: FileMapDataSubcategory = {
     {
       id: 'default', // 'stats-admin-level-9',
       name: 'Bezirk: % Erfassung',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_stats,
         source,
@@ -49,7 +47,6 @@ export const subcat_parkingLarsStats: FileMapDataSubcategory = {
     {
       id: 'stats-admin-level-10',
       name: 'Stadtteil: % Erfassung',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_stats,
         source,
@@ -60,7 +57,6 @@ export const subcat_parkingLarsStats: FileMapDataSubcategory = {
     {
       id: 'length-admin-level-4',
       name: 'Stadt: Länge in km',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_stats_length,
         source,
@@ -71,7 +67,6 @@ export const subcat_parkingLarsStats: FileMapDataSubcategory = {
     {
       id: 'length-admin-level-9',
       name: 'Bezirk: Länge in km',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_stats_length,
         source,
@@ -82,7 +77,6 @@ export const subcat_parkingLarsStats: FileMapDataSubcategory = {
     {
       id: 'length-admin-level-10',
       name: 'Stadtteil: Länge in km',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_stats_length,
         source,

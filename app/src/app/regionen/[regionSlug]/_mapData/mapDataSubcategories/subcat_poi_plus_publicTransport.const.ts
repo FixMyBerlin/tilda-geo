@@ -17,7 +17,6 @@ export const subcat_poi_plus_publicTransport: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_ziele_plus_publictransport,
         source,

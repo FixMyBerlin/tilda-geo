@@ -374,6 +374,29 @@ describe("`BikelaneCategories`", function()
     end)
   end)
 
+  describe('`crossing` category:', function()
+    it('should categorize cycleway:right=lane + cycleway:right:lane=crossing as crossing', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'crossing',
+        },
+        id = 1,
+        type = 'way'
+      }
+
+      local categories = extractCategoriesBySide(input_object)
+
+      -- Test right category - should be crossing, not cyclewayOnHighway_advisoryOrExclusive
+      assert.are.equal(categories.right.category.id, 'crossing')
+      assert.are.equal(categories.right.tags.highway, 'cycleway')
+      assert.are.equal(categories.right.tags.cycleway, 'lane')
+      assert.are.equal(categories.right.tags.lane, 'crossing')
+    end)
+  end)
+
   describe('`sharedBus*` categories', function()
     it('Create one shared bus category when both `share_busway` and traffic_sign are given', function()
       -- https://www.openstreetmap.org/way/461840225

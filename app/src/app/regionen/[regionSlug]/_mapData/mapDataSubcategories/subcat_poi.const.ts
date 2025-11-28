@@ -22,7 +22,6 @@ export const subcat_poi: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Einfach',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_pois_default,
         source,
@@ -62,7 +61,6 @@ export const subcat_poi: FileMapDataSubcategory = {
     {
       id: 'education',
       name: 'Bildung und Kitas',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_pois_education,
         source,

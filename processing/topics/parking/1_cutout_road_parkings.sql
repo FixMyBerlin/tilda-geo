@@ -38,21 +38,17 @@ FROM
             AND
             -- When both cutout and parking have a street name, they must match
             (
-              c.street_name = p.street_name
-              OR c.street_name IS NULL
+              c.tags ->> 'street:name' = p.street_name
+              OR c.tags ->> 'street:name' IS NULL
               OR p.street_name IS NULL
             )
             AND
-            -- Only apply bus_stop cutouts to the correct side of the street
-            -- This condition handles two cases:
-            -- 1. Non-bus stop cutouts: Apply to both sides of the street
-            --    e.g. A driveway cutout (category='driveway') will cut out parking on both sides
-            -- 2. Bus stop cutouts: Only apply to matching street side
-            --    e.g. A bus stop cutout with side='right' will only cut out parking where side='right'
-            -- Using the new column instead of JSONB expression for better performance
+            -- Only apply public_transport_stops cutouts to the correct side of the street
+            -- 1. Non-public-transport cutouts: Apply to both sides
+            -- 2. Public transport cutouts: Only apply when sides match
             (
-              c.category IS DISTINCT FROM 'bus_stop'
-              OR c.side = p.side
+              c.tags ->> 'source' != 'public_transport_stops'
+              OR c.tags ->> 'side' = p.side
             )
         )
       ),

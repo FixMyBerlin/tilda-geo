@@ -28,7 +28,6 @@ export const subcat_radinfra_smoothness: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'RVA Oberflächenqualität', // field hidden
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_radinfra_smoothness,
         source,

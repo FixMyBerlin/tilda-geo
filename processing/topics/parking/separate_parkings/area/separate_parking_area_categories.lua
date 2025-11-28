@@ -1,6 +1,7 @@
 require('init')
 require('class_separate_parking_category')
 require('two_wheel_parking_helper')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 
 local separate_parking_point_categories = {
   class_separate_parking_category.new({
@@ -34,7 +35,7 @@ local separate_parking_point_categories = {
     -- See https://github.com/FixMyBerlin/private-issues/issues/2604
     id = 'parking_median',
     conditions = function(tags)
-      return tags.amenity == 'parking' and tags.parking == 'surface' and tags.location == 'median'
+      return tags.amenity == 'parking' and tags.parking == 'surface' and SANITIZE_PARKING_TAGS.location(tags.location) ~= nil
     end,
   }),
 }

@@ -21,7 +21,6 @@ export type SubcatBikelanesStyleIds =
 export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
   id: 'default',
   name: 'Führungsform einfach',
-  desc: null,
   layers: mapboxStyleLayers({
     layers: mapboxStyleGroupLayers_atlas_bikelanes_default,
     source,
@@ -92,7 +91,6 @@ export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
 export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
   id: 'details',
   name: 'Führungsform details',
-  desc: null,
   layers: mapboxStyleLayers({
     layers: mapboxStyleGroupLayers_atlas_bikelanes_details,
     source,
@@ -215,7 +213,6 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
 export const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
   id: 'width',
   name: 'Breite RVA',
-  desc: null,
   layers: mapboxStyleLayers({
     layers: mapboxStyleGroupLayers_atlas_bikelanes_widths,
     source,

@@ -18,7 +18,6 @@ export const subcat_parkingTilda_cutout: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_tilda_parkings_cutouts,
         source,

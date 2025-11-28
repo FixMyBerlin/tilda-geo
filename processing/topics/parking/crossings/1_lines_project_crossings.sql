@@ -1,4 +1,30 @@
--- we project our generated crossing geometries on to the original crossing lines
+-- WHAT IT DOES:
+-- Extend crossing lines by adaptive length to ensure intersection with kerbs, then project crossing geometries.
+-- * Extends crossing lines using adaptive extension length based on crossing length:
+--   - Short crossings (< 3m): extend by 4m (likely cut near centerline)
+--   - Medium crossings (3-8m): extend by 3m
+--   - Long crossings (> 8m): extend by 2m (likely already spans full width)
+-- * Projects generated crossing geometries onto the extended crossing lines
+-- * Updates crossing geometries and tags when projection is successful
+-- * Truncates crossing geometries to their specified length if needed
+-- USED IN: `parking.sql` (as part of crossing processing pipeline)
+
+-- Extend crossing lines by adaptive length to ensure intersection with kerbs
+-- This handles cases where crossings are cut near centerlines and don't intersect with moved kerbs
+UPDATE _parking_crossing_lines
+SET
+  geom = tilda_extend_crossing_for_kerb_intersection (
+    geom,
+    extension_length := CASE
+      WHEN ST_Length (geom) < 3.0 THEN 4.0 -- Short crossings need more extension
+      WHEN ST_Length (geom) < 8.0 THEN 3.0 -- Medium crossings need moderate extension
+      ELSE 2.0 -- Long crossings need minimal extension
+    END
+  )
+WHERE
+  ST_GeometryType (geom) = 'ST_LineString';
+
+-- Project our generated crossing geometries onto the extended crossing lines
 SELECT
   c.id,
   c.osm_id,

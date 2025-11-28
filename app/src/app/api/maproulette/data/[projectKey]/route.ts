@@ -4,7 +4,6 @@ import { osmTypeIdString } from '@/src/app/regionen/[regionSlug]/_components/Sid
 import { todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { buildTaskInstructions } from '@/src/data/radinfra-de/utils/buildTaskInstructions'
 import { geoDataClient } from '@/src/server/prisma-client'
-import { ProcessingMetaDate, ProcessingMetaDates } from '@/src/server/regions/schemas'
 import { feature, featureCollection } from '@turf/turf'
 import { LineString } from 'geojson'
 import { NextRequest, NextResponse } from 'next/server'
@@ -12,6 +11,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { z } from 'zod'
+import { getProcessingMeta } from '../../../_util/getProcessingMeta'
 
 const MaprouletteSchema = z
   .object({
@@ -41,10 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: { projectK
 
   try {
     // SELECT `osm_data_from`
-    const [result] = await geoDataClient.$queryRaw<ProcessingMetaDate[]>`
-      SELECT status, processed_at, osm_data_from, processing_started_at FROM public.meta ORDER BY id DESC LIMIT 1
-    `
-    const { osm_data_from } = ProcessingMetaDates.parse(result)
+    const { osm_data_from } = await getProcessingMeta()
 
     // SELECT DATA FROM `bikelanes` or `roads`
     type QueryType = {

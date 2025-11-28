@@ -103,4 +103,5 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   off_street_parking_areas: { stylingKeys: [], minzoom: 0 },
   off_street_parking_area_labels: { stylingKeys: [], minzoom: 11 },
   off_street_parking_points: { stylingKeys: [], minzoom: 0 },
+  off_street_parking_quantized: { stylingKeys: [], minzoom: 11 },
 }
