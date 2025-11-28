@@ -1,10 +1,8 @@
-FROM node:22-bookworm-slim AS base
+FROM node:22-trixie-slim AS base
 
-# Configure Debian backports for latest GDAL
-RUN echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
-
+# Debian 13 Trixie (stable) includes GDAL 3.10.3+ (supports gdal vector edit)
 RUN apt-get update && \
-    apt-get install -y -t bookworm-backports gdal-bin && \
+    apt-get install -y gdal-bin && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

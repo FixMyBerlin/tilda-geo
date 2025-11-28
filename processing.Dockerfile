@@ -1,4 +1,4 @@
-FROM debian:bookworm AS testing
+FROM debian:trixie AS testing
 WORKDIR /processing
 
 # Install Lua and "luarocks" (Lua package manager) – https://luarocks.org/
@@ -25,9 +25,6 @@ FROM testing AS processing
 # reset the entrypoint
 ENTRYPOINT []
 
-# Configure Debian backports for latest osm2pgsql and osmium-tool
-RUN echo "deb http://deb.debian.org/debian bookworm-backports main" > /etc/apt/sources.list.d/backports.list
-
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 LABEL maintainer="FixMyCity - https://fixmycity.de"
@@ -38,8 +35,13 @@ LABEL maintainer="FixMyCity - https://fixmycity.de"
 #   - /var/run/docker.sock:/var/run/docker.sock
 COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
 
+# Debian 13 Trixie (stable) includes newer versions of osm2pgsql and osmium-tool
+# If backports are needed in the future, uncomment the following:
+# RUN echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
+# … and below:
+# apt install -y -t trixie-backports osm2pgsql osmium-tool curl && \
 RUN apt update && \
-  apt install -y -t bookworm-backports osm2pgsql osmium-tool curl && \
+  apt install -y osm2pgsql osmium-tool curl && \
   apt install -y wget python3 python3-requests && \
   apt upgrade -y
 
