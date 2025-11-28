@@ -1,4 +1,6 @@
 import db from '@/db'
+import { formatDateBerlin } from '@/src/app/_components/date/formatDateBerlin'
+import { getProcessingMeta } from '@/src/app/api/_util/getProcessingMeta'
 import { isProd } from '@/src/app/_components/utils/isEnv'
 import {
   exportApiIdentifier,
@@ -96,12 +98,18 @@ export async function GET(
       ) AS data`, // `AS data` corresponts to <{ data: Buffer }>
     )
 
+    // Include OSM data date in filename for versioning (using Berlin timezone)
+    const metadata = await getProcessingMeta()
+    const filename = metadata.osm_data_from
+      ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.fgb`
+      : `${tableName}.fgb`
+
     return new Response(
       binaryResponse?.data ? (binaryResponse.data as unknown as BodyInit) : null,
       {
         status: 200,
         headers: {
-          'Content-Disposition': `attachment; filename="${tableName}.fgb"`,
+          'Content-Disposition': `attachment; filename="${filename}"`,
           'Content-Type': 'application/octet-stream',
           'Content-Length': String(binaryResponse?.data?.byteLength),
         },

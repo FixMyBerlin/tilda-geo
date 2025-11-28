@@ -1,5 +1,7 @@
 import db from '@/db'
+import { formatDateBerlin } from '@/src/app/_components/date/formatDateBerlin'
 import { isDev, isProd } from '@/src/app/_components/utils/isEnv'
+import { getProcessingMeta } from '@/src/app/api/_util/getProcessingMeta'
 import { numberConfigs } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/_utils/numberConfig'
 import { exportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
 import { getBlitzContext } from '@/src/blitz-server'
@@ -50,7 +52,7 @@ async function checkGdalVersion(): Promise<boolean> {
 
         if (!hasRequiredVersion) {
           console.warn(
-            `[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.11+ (gdal command introduced in 3.11.0)`
+            `[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.11+ (gdal command introduced in 3.11.0)`,
           )
         }
 
@@ -253,6 +255,12 @@ export async function GET(
     const fileBuffer = await fs.readFile(outputFilePath)
     await fs.rm(outputFilePath, { force: true })
 
+    // Include OSM data date in filename for versioning (using Berlin timezone)
+    const metadata = await getProcessingMeta()
+    const filename = metadata.osm_data_from
+      ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
+      : `${tableName}.${format}`
+
     if (format === 'geojson') {
       if (request.headers.get('accept-encoding')?.includes('gzip')) {
         // Compress the response for transfer efficiency
@@ -263,7 +271,7 @@ export async function GET(
           headers: {
             'Content-Type': 'application/json',
             'Content-Encoding': 'gzip',
-            'Content-Disposition': `attachment; filename="${tableName}.${format}"`,
+            'Content-Disposition': `attachment; filename="${filename}"`,
             'Content-Length': compressed.length.toString(),
           },
         })
@@ -271,7 +279,7 @@ export async function GET(
       return new Response(fileBuffer, {
         headers: {
           'Content-Type': 'application/json',
-          'Content-Disposition': `attachment; filename="${tableName}.${format}"`,
+          'Content-Disposition': `attachment; filename="${filename}"`,
           'Content-Length': fileBuffer.length.toString(),
         },
       })
@@ -279,7 +287,7 @@ export async function GET(
 
     return new Response(fileBuffer, {
       headers: {
-        'Content-Disposition': `attachment; filename="${tableName}.${format}"`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': fileBuffer.length.toString(),
       },
     })
