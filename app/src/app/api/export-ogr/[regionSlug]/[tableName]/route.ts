@@ -18,6 +18,48 @@ const exportMetadata = {
   owner: 'FixMyCity GmbH / TILDA Geo',
 }
 
+/**
+ * Check if GDAL 3.8+ is available (required for gdal vector edit command)
+ * @returns Promise that resolves to true if GDAL 3.8+ is available, false otherwise
+ */
+async function checkGdalVersion(): Promise<boolean> {
+  try {
+    return new Promise<boolean>((resolve) => {
+      // Try to get GDAL version using gdalinfo (more reliable than gdal command)
+      exec('gdalinfo --version', { timeout: 5000 }, (error, stdout) => {
+        if (error) {
+          console.warn('[EXPORT] GDAL version check failed:', error.message)
+          resolve(false)
+          return
+        }
+
+        // Parse version from output like "GDAL 3.8.4, released 2024/01/15"
+        const versionMatch = stdout.match(/GDAL (\d+)\.(\d+)\.(\d+)/)
+        if (!versionMatch) {
+          console.warn('[EXPORT] Could not parse GDAL version from:', stdout)
+          resolve(false)
+          return
+        }
+
+        const major = parseInt(versionMatch[1] || '0', 10)
+        const minor = parseInt(versionMatch[2] || '0', 10)
+
+        // GDAL 3.8+ required for gdal vector edit
+        const hasRequiredVersion = major > 3 || (major === 3 && minor >= 8)
+
+        if (!hasRequiredVersion) {
+          console.warn(`[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.8+`)
+        }
+
+        resolve(hasRequiredVersion)
+      })
+    })
+  } catch (error) {
+    console.warn('[EXPORT] GDAL version check error:', error)
+    return false
+  }
+}
+
 const ExportSchema = z.object({
   regionSlug: z.string(),
   tableName: z.enum(exportApiIdentifier),
@@ -181,7 +223,8 @@ export async function GET(
     })
 
     // Add metadata for formats that support it (skip GeoJSON)
-    if (format !== 'geojson') {
+    // HOTFIX: Only add metadata if GDAL 3.8+ is available (gdal vector edit requires 3.8+)
+    if (format !== 'geojson' && (await checkGdalVersion())) {
       const escapeForShell = (str: string) => str.replace(/"/g, '\\"')
       // Use same extension so GDAL can detect the format (e.g., .gpkg.meta -> .meta.gpkg)
       const pathParts = path.parse(outputFilePath)
