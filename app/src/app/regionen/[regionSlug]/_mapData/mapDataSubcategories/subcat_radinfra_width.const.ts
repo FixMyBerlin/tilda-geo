@@ -11,7 +11,7 @@ export type SubcatRadinfraWidthStyleIds = 'default'
 export const bikelanesWidthLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'below1m',
-    name: '≤ 1,0 m',
+    name: '< 1,0 m',
     style: {
       type: 'line',
       color: '#ef9043',
@@ -19,7 +19,7 @@ export const bikelanesWidthLegend: FileMapDataSubcategoryStyleLegend[] = [
   },
   {
     id: '1to16m',
-    name: '1,05–1.6 m',
+    name: '1,0–1.6 m',
     style: {
       type: 'line',
       color: '#f6de09',
@@ -27,7 +27,7 @@ export const bikelanesWidthLegend: FileMapDataSubcategoryStyleLegend[] = [
   },
   {
     id: '165-24m',
-    name: '1,65–2.4 m',
+    name: '1,6–2.2 m',
     style: {
       type: 'line',
       color: '#a1e217',
@@ -35,7 +35,7 @@ export const bikelanesWidthLegend: FileMapDataSubcategoryStyleLegend[] = [
   },
   {
     id: 'above24',
-    name: '> 2.4 m',
+    name: '≥ 2.2 m',
     style: {
       type: 'line',
       color: '#15c65c',
