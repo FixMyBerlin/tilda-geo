@@ -69,7 +69,20 @@ async function getCampaignCounts(campaignIds: string[]) {
 
 export async function GET() {
   try {
-    const countMap = await getCampaignCounts(campaigns.map((c) => c.id))
+    let countMap: Awaited<ReturnType<typeof getCampaignCounts>>
+    try {
+      countMap = await getCampaignCounts(campaigns.map((c) => c.id))
+    } catch (error) {
+      // Fallback: Return zero values when table doesn't exist
+      // This happens during nightly processing when the todos_lines table is recreated.
+      // Instead of breaking the endpoint, we return zero counts so the API remains available.
+      countMap = new Map(
+        campaigns.map((c) => [
+          c.id,
+          { total: 0, byState: [], countedAt: new Date().toISOString() },
+        ]),
+      )
+    }
 
     const result = campaigns.map((campaign) => {
       return {
