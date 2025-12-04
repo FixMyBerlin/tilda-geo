@@ -612,6 +612,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     if not IsSidepath(tags) then return false end
     -- "Schutzstreifen" cannot be PBLs
     if tags['lane'] == 'advisory' then return false end
+    -- Share busways should not be PBLs
+    if tags.cycleway == 'share_busway' or tags.cycleway == 'opposite_share_busway' then return false end
 
     -- We exclude separation that signals that the cycleway is not on the street but on the sidewalk
     local allowed_separation_values = Set({

@@ -453,6 +453,32 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(categories.right.tags.traffic_sign, 'DE:245,1022-10')
       assert.are.equal(categories.right.tags._parent.traffic_sign, 'DE:245,1022-10')
     end)
+
+    it('should be sharedBusLaneBusWithBike and NOT cyclewayOnHighwayProtected when share_busway has physical separation', function()
+      local input_object = {
+        tags = {
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'share_busway',
+          ['cycleway:right:buffer'] = 'no',
+          ['cycleway:right:oneway'] = 'yes',
+          ['cycleway:right:separation:left'] = 'vertical_panel',
+          ['dual_carriageway'] = 'yes',
+          ['highway'] = 'primary',
+          ['name'] = 'Spittelmarkt',
+          ['oneway'] = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+
+      local categories = extractCategoriesBySide(input_object)
+
+      -- Right category should be sharedBusLaneBusWithBike, NOT cyclewayOnHighwayProtected
+      assert.are.equal(categories.right.category.id, 'sharedBusLaneBusWithBike')
+      assert.are.equal(categories.right.tags.highway, 'cycleway')
+      assert.are.equal(categories.right.tags.cycleway, 'share_busway')
+      assert.are.equal(categories.right.tags['separation:left'], 'vertical_panel')
+    end)
   end)
 
   describe('`cyclewayOnHighway*`', function()
