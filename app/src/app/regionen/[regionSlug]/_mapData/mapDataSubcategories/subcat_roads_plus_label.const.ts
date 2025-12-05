@@ -17,7 +17,6 @@ export const subcat_roads_plus_label: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Label Hauptstraßen',
-      desc: '',
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_plus_label,
         source,

@@ -21,7 +21,6 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Alle',
-      desc: 'Straßenklassifieriung auf Basis von OpenStreetMap Straßentypen.',
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_all,
         source,
@@ -63,7 +62,6 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'sidestreets',
       name: 'Nur Nebenstraßen',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_sidestreets,
         source,
@@ -95,7 +93,6 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'mainstreets',
       name: 'Nur Hauptstraßen',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_mainstreets,
         source,
@@ -117,7 +114,6 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'classified',
       name: 'Klassifizierung',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_mainstreets_classified,
         source,

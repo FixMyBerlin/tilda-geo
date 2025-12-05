@@ -17,7 +17,6 @@ export const subcat_lit_plus_completeness: FileMapDataSubcategory = {
     {
       id: 'completeness',
       name: 'Vollständigkeit',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_lit_complete,
         source,

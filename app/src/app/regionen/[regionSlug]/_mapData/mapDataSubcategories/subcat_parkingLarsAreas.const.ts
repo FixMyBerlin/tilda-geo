@@ -17,7 +17,7 @@ const defaultLegend = [
   },
   {
     id: 'underground',
-    name: 'Tiefgaragen',
+    name: 'Tiefgarage',
     style: { type: 'fill', color: 'rgb(142, 192, 169)' },
   },
   {
@@ -43,7 +43,6 @@ export const subcat_parkingLarsAreas: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_areas,
         source,
@@ -55,7 +54,6 @@ export const subcat_parkingLarsAreas: FileMapDataSubcategory = {
     {
       id: 'street_side',
       name: 'Parkbuchten',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_areas,
         source,

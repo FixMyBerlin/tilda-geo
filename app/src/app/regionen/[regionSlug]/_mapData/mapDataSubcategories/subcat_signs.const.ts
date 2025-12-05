@@ -18,7 +18,6 @@ export const subcat_signs: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: debugLayerStyles({
         source,
         sourceLayer: sourceLayer,

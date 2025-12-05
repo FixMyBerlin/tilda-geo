@@ -110,7 +110,6 @@ export const subcat_radinfra_currentness: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'RVA Aktualität', // field hidden
-      desc: null,
       layers: mapboxStyleLayers({
         layers: bikelanesCurrentLayers,
         source,

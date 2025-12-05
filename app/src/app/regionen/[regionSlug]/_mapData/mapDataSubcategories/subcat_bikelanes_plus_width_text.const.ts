@@ -17,7 +17,6 @@ export const subcat_bikelanes_plus_width_text: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Breite (Text)',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_bikelanes_plus_widths,
         source,

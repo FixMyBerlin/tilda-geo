@@ -16,7 +16,21 @@ INSERT INTO
   parkings_no (id, tags, meta, geom, minzoom)
 SELECT
   id,
-  tags || '{"reason": "parking_tag"}'::JSONB,
+  CASE
+    WHEN p.tags ->> 'restriction' = 'no_parking' THEN tags || jsonb_build_object(
+      /* sql-formatter-disable */
+      'parking', 'no_parking',
+      'reason', 'restriction_no_parking'
+      /* sql-formatter-enable */
+    )
+    WHEN p.tags ->> 'restriction' = 'no_stopping' THEN tags || jsonb_build_object(
+      /* sql-formatter-disable */
+      'parking', 'no_stopping',
+      'reason', 'restriction_no_stopping'
+      /* sql-formatter-enable */
+    )
+    ELSE tags || '{"reason": "parking_tag"}'::JSONB
+  END,
   '{}'::JSONB,
   ST_Transform (geom, 3857),
   0

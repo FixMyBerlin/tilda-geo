@@ -374,6 +374,29 @@ describe("`BikelaneCategories`", function()
     end)
   end)
 
+  describe('`crossing` category:', function()
+    it('should categorize cycleway:right=lane + cycleway:right:lane=crossing as crossing', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'crossing',
+        },
+        id = 1,
+        type = 'way'
+      }
+
+      local categories = extractCategoriesBySide(input_object)
+
+      -- Test right category - should be crossing, not cyclewayOnHighway_advisoryOrExclusive
+      assert.are.equal(categories.right.category.id, 'crossing')
+      assert.are.equal(categories.right.tags.highway, 'cycleway')
+      assert.are.equal(categories.right.tags.cycleway, 'lane')
+      assert.are.equal(categories.right.tags.lane, 'crossing')
+    end)
+  end)
+
   describe('`sharedBus*` categories', function()
     it('Create one shared bus category when both `share_busway` and traffic_sign are given', function()
       -- https://www.openstreetmap.org/way/461840225
@@ -429,6 +452,32 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(categories.right.tags.cycleway, 'share_busway')
       assert.are.equal(categories.right.tags.traffic_sign, 'DE:245,1022-10')
       assert.are.equal(categories.right.tags._parent.traffic_sign, 'DE:245,1022-10')
+    end)
+
+    it('should be sharedBusLaneBusWithBike and NOT cyclewayOnHighwayProtected when share_busway has physical separation', function()
+      local input_object = {
+        tags = {
+          ['cycleway:left'] = 'no',
+          ['cycleway:right'] = 'share_busway',
+          ['cycleway:right:buffer'] = 'no',
+          ['cycleway:right:oneway'] = 'yes',
+          ['cycleway:right:separation:left'] = 'vertical_panel',
+          ['dual_carriageway'] = 'yes',
+          ['highway'] = 'primary',
+          ['name'] = 'Spittelmarkt',
+          ['oneway'] = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+
+      local categories = extractCategoriesBySide(input_object)
+
+      -- Right category should be sharedBusLaneBusWithBike, NOT cyclewayOnHighwayProtected
+      assert.are.equal(categories.right.category.id, 'sharedBusLaneBusWithBike')
+      assert.are.equal(categories.right.tags.highway, 'cycleway')
+      assert.are.equal(categories.right.tags.cycleway, 'share_busway')
+      assert.are.equal(categories.right.tags['separation:left'], 'vertical_panel')
     end)
   end)
 
@@ -504,6 +553,43 @@ describe("`BikelaneCategories`", function()
 
       assert.are.equal(categorized.right.category, nil)
       assert.are.equal(categorized.right.tags.width, nil)
+    end)
+  end)
+
+  describe('Richard-von-Weizsäcker-Platz test case:', function()
+    it('should categorize left as crossing (even with physical separation) and right as cyclewayOnHighwayProtected, self should have no category', function()
+      local input_object = {
+        tags = {
+          ['cycleway:both'] = 'lane',
+          ['cycleway:left:buffer'] = 'no',
+          ['cycleway:left:lane'] = 'crossing',
+          ['cycleway:left:marking:left'] = 'dashed_line',
+          ['cycleway:left:traffic_sign'] = 'DE:237',
+          ['cycleway:right:buffer'] = 'no',
+          ['cycleway:right:lane'] = 'exclusive',
+          ['cycleway:right:marking:left'] = 'dashed_line',
+          ['cycleway:right:separation:right'] = 'kerb;bollard',
+          ['highway'] = 'secondary',
+        },
+        id = 1,
+        type = 'way'
+      }
+
+      local categorized = extractCategoriesBySide(input_object)
+      assert.are.equal(categorized.self.category, nil)
+
+      -- Left should be categorized as crossing (excluded from PBL even with physical separation)
+      assert.are.equal(categorized.left.category.id, 'crossing')
+      assert.are.equal(categorized.left.tags.highway, 'cycleway')
+      assert.are.equal(categorized.left.tags.cycleway, 'lane')
+      assert.are.equal(categorized.left.tags.lane, 'crossing')
+      assert.are.equal(categorized.left.tags.traffic_sign, 'DE:237')
+
+      assert.are.equal(categorized.right.category.id, 'cyclewayOnHighway_exclusive')
+      assert.are.equal(categorized.right.tags.highway, 'cycleway')
+      assert.are.equal(categorized.right.tags.cycleway, 'lane')
+      assert.are.equal(categorized.right.tags.lane, 'exclusive')
+      assert.are.equal(categorized.right.tags['separation:right'], 'kerb;bollard')
     end)
   end)
 end)

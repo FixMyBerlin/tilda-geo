@@ -32,7 +32,7 @@ const callouts: Callout[] = [
     description: 'Parkraumdaten Berlin',
     image: screenshotParkraum,
     imageAlt: '',
-    href: '/regionen/parkraum?map=13.5%2F52.4918%2F13.4261&config=1r6doko.4qfsxx.0&v=2',
+    href: '/regionen/parkraum?map=13.5%2F52.4918%2F13.4261',
   },
 ]
 

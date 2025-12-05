@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { searchParamsRegistry } from './app/regionen/[regionSlug]/_hooks/useQueryState/searchParamsRegistry'
 import { createFreshCategoriesConfig } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
 import { migrateUrl } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/migrateUrl'
+import { MapDataCategoryParam } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/type'
 import { mergeCategoriesConfig } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/utils/mergeCategoriesConfig'
 import { configs } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { parse as parseConfig } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/parse'
@@ -45,6 +46,37 @@ function renameRegionIfNecessary(url: string, slug: string) {
   } else {
     return url
   }
+}
+
+/**
+ * Migrates old config category/subcategory IDs to new ones.
+ * This handles the case where category names were renamed (e.g., 'parking' -> 'parkingLars').
+ * Done in https://github.com/FixMyBerlin/tilda-geo/commit/6df2b6b0e40896a37d05ff8616a2f5221c18ea7d
+ */
+function migrateConfigCategoryIds(
+  urlConfig: ReturnType<typeof parseConfig>,
+): MapDataCategoryParam[] {
+  const categoryMigrations: Record<string, string> = {
+    parking: 'parkingLars',
+  }
+  const subcategoryMigrations: Record<string, string> = {
+    parking: 'parkingLars',
+  }
+
+  return urlConfig.map((category) => {
+    const newCategoryId = categoryMigrations[category.id] || category.id
+    return {
+      ...category,
+      id: newCategoryId as MapDataCategoryParam['id'],
+      subcategories: category.subcategories.map((subcategory) => {
+        const newSubcategoryId = subcategoryMigrations[subcategory.id] || subcategory.id
+        return {
+          ...subcategory,
+          id: newSubcategoryId,
+        }
+      }),
+    }
+  }) as MapDataCategoryParam[]
 }
 
 export function middleware(request: NextRequest) {
@@ -94,10 +126,12 @@ export function middleware(request: NextRequest) {
     const simplifiedConfig = configs[checksum]
     // console.log("simplifiedConfig: ", simplifiedConfig)
     if (simplifiedConfig) {
+      const parsedConfig = parseConfig(configParam, simplifiedConfig)
+      const migratedConfig = migrateConfigCategoryIds(parsedConfig)
       const newConfigParam = serializeConfig(
         mergeCategoriesConfig({
           freshConfig,
-          urlConfig: parseConfig(configParam, simplifiedConfig),
+          urlConfig: migratedConfig,
         }),
       )
       u.searchParams.set('config', newConfigParam)

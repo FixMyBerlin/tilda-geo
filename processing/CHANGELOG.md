@@ -2,7 +2,14 @@
 
 This is an manual and incomplete list of change to the data structure.
 
-## 2025-10-20
+## 2025-11-26
+
+### `bikelanes`
+
+- Categorize `cycleway:SIDE=lane` + `cycleway:SIDE:lane=crossing` as `category=crossing`.
+- The conditions for protected bike lanes `category=cyclewayOnHighwayProtected` exclude `cycleway:SIDE=share_busway` cases; those are correctly categorized as `sharedBusLaneBusWithBike` even when physical separation is present.
+
+## 2025-11-20
 
 ### `bikelanes`
 

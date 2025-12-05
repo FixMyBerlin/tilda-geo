@@ -1,20 +1,13 @@
 import { isProd } from '@/src/app/_components/utils/isEnv'
-import { geoDataClient } from '@/src/server/prisma-client'
-import { ProcessingMetaDate, ProcessingMetaDates } from '@/src/server/regions/schemas'
 import { NextResponse } from 'next/server'
 import { corsHeaders } from '../_util/cors'
+import { getProcessingMeta } from '../_util/getProcessingMeta'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const [result] = await geoDataClient.$queryRaw<ProcessingMetaDate[]>`
-      SELECT status, processed_at, osm_data_from, processing_started_at
-      FROM public.meta
-      ORDER BY id DESC
-      LIMIT 1
-    `
-    const parsed = ProcessingMetaDates.parse(result)
+    const parsed = await getProcessingMeta()
 
     return NextResponse.json(parsed, { headers: corsHeaders })
   } catch (error) {

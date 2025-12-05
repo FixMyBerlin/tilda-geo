@@ -95,10 +95,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   'external-point-' || id AS id,
@@ -134,10 +131,7 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta,
-  NULL AS street_name,
-  type AS category,
-  kerb_side AS side
+  '{}'::jsonb AS meta
 FROM
   _euvm_cutouts_point_projected
 WHERE
@@ -158,10 +152,7 @@ INSERT INTO
     osm_id,
     geom,
     tags,
-    meta,
-    street_name,
-    category,
-    side
+    meta
   )
 SELECT
   'external-polygon-' || id AS id,
@@ -174,10 +165,7 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta,
-  NULL AS street_name,
-  type AS category,
-  kerb_side AS side
+  '{}'::jsonb AS meta
 FROM
   _euvm_cutouts_polygon_projected;
 

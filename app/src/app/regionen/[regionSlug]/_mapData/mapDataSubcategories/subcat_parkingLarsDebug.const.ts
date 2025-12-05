@@ -24,7 +24,6 @@ export const subcat_parkingLarsDebug: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_debug_parking_points,

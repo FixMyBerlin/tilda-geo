@@ -21,7 +21,7 @@ export const mapboxStyleGroupLayers_tilda_parkings_no: MapboxStyleLayer[] = [
     filter: [
       'all',
       ['match', ['get', 'reason'], ['capacity_below_zero'], false, true],
-      ['match', ['get', 'parking'], ['no'], true, false],
+      ['match', ['get', 'parking'], ['no', 'no_parking', 'no_stopping'], true, false],
     ],
   },
 ]

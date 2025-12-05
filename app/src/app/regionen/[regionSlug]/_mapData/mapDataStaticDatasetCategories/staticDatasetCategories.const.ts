@@ -133,4 +133,14 @@ export const staticDatasetCategories = {
     title: 'Externe Referenzdaten',
     subtitle: 'Statische Referenzdaten zur Datenverbesserung.',
   },
+  'ueberlingen/netz': {
+    order: 1,
+    title: 'Befahrungsnetz',
+    subtitle: 'Zu befahrende Straßennetz',
+  },
+  'ueberlingen/ergebnisse': {
+    order: 2,
+    title: 'Befahrungsergebnisse',
+    subtitle: 'Ergebnisse aus den Befahrungen',
+  },
 } as const

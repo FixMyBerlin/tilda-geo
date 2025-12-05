@@ -33,6 +33,7 @@ type MapDataDatasetsSource = {
     | 'CC BY-NC-SA 4.0'
     | 'DL-DE/ZERO-2.0' // https://www.govdata.de/dl-de/zero-2-0
     | 'DL-DE/BY-2.0' // https://www.govdata.de/dl-de/by-2-0
+    | 'Alle Rechte vorbehalten' // Explicit proprietary licence
   /** @desc Are the data OSM compatible due to the licence itself or an explicit waiver */
   licenceOsmCompatible?: undefined | 'licence' | 'waiver' | 'no'
   osmIdConfig?: MapDataOsmIdConfig

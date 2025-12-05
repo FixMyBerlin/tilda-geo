@@ -22,7 +22,6 @@ export const subcat_accidents: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         {
           id: 'circle',

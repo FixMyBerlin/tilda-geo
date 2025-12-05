@@ -115,7 +115,7 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes' }, { 'no' })
   end,
   covered = function(value)
-    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+    return sanitize_for_logging(value, { 'yes', 'partial' }, { 'no' })
   end,
   covered_or_indoor = function(tags)
     if tags.covered == 'yes' then

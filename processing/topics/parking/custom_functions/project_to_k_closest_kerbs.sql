@@ -1,7 +1,8 @@
 -- WHAT IT DOES:
 -- Project input geometry to the k closest kerb lines within tolerance distance.
 -- * Finds k closest kerbs with parking within tolerance, optionally filtered by side
--- * Auto-selects side from closest kerb if side not specified
+-- * Auto-selects side from closest kerb if side not specified and k = 1
+-- * When side is NULL and k > 1, finds k closest kerbs regardless of side (for intersection restricted areas)
 -- * Projects geometry to each kerb line using `tilda_project_to_line`, returns kerb metadata and projected geometry
 -- USED IN: separate_parkings (points), obstacles (points/lines/areas), public_transport, roads (driveway corners), cutouts
 DROP FUNCTION IF EXISTS tilda_project_to_k_closest_kerbs;
@@ -26,7 +27,9 @@ DECLARE
   kerb RECORD;
   projected_geom geometry;
 BEGIN
-  IF side IS NULL THEN
+  -- Auto-select side from closest kerb only if side is NULL and k = 1
+  -- When k > 1 and side is NULL, we want to find kerbs from all sides (for intersection restricted areas)
+  IF side IS NULL AND k = 1 THEN
     SELECT  pk.side INTO tilda_project_to_k_closest_kerbs.side
       FROM _parking_kerbs pk
       WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
@@ -38,7 +41,7 @@ BEGIN
     SELECT  pk.id, pk.osm_type, pk.osm_id, pk.side, pk.has_parking, pk.is_driveway, pk.geom, pk.tags, ST_Distance(input_geom, pk.geom) AS projected_distance
     FROM _parking_kerbs pk
     WHERE has_parking AND ST_DWithin(input_geom, pk.geom, tolerance)
-    AND pk.side = tilda_project_to_k_closest_kerbs.side
+    AND (tilda_project_to_k_closest_kerbs.side IS NULL OR pk.side = tilda_project_to_k_closest_kerbs.side)
     ORDER BY ST_Distance(input_geom, pk.geom), pk.id
     LIMIT k
   LOOP

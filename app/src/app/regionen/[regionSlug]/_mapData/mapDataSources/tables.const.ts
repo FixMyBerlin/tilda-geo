@@ -29,5 +29,6 @@ export type TableId =
   | 'off_street_parking_areas'
   | 'off_street_parking_area_labels'
   | 'off_street_parking_points'
+  | 'off_street_parking_quantized'
 
 export type UnionTiles<T extends string> = T | `${T},${T}`

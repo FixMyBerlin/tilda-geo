@@ -24,7 +24,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines,
@@ -41,7 +40,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'presence',
       name: 'Vollständigkeit',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
@@ -62,7 +60,7 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
       legends: [
         {
           id: 'capacity_status--present',
-          name: 'Parkstände',
+          name: 'Stellplätze',
           style: {
             type: 'line',
             color: 'rgb(22, 163, 74)',
@@ -70,7 +68,7 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
         },
         {
           id: 'capacity_status--presetn--operator_type-private',
-          name: 'Parkstände an Privatwegen',
+          name: 'Stellplätze an Privatwegen',
           style: {
             type: 'line',
             color: 'rgba(22, 163, 74, 0.33)',
@@ -114,7 +112,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'missing',
       name: 'Fehlende Daten',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_missing,
@@ -145,7 +142,6 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
     {
       id: 'surface',
       name: 'Oberflächen',
-      desc: null,
       layers: [
         mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_parking_parkinglines_labels,

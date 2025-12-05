@@ -21,7 +21,6 @@ export const subcat_maxspeed: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Alle Höchstgeschwindigkeiten',
-      desc: '', // todo
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_maxspeed_all,
         source,
@@ -63,7 +62,6 @@ export const subcat_maxspeed: FileMapDataSubcategory = {
     {
       id: 'below30',
       name: 'Nur Höchstgeschwindigkeit ≤30 km/h',
-      desc: '', // todo
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_maxspeed_below30,
         source,
@@ -85,7 +83,6 @@ export const subcat_maxspeed: FileMapDataSubcategory = {
     {
       id: 'above40',
       name: 'Nur Höchstgeschwindigkeiten ≥40 km/h',
-      desc: '', // todo
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_maxspeed_above40,
         source,
