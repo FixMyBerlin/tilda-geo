@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { LineString } from 'geojson'
 import { Fragment } from 'react'
 import { z } from 'zod'
-import { osmEditIdUrl, osmEditJosmUrl } from '../Tools/osmUrls/osmUrls'
+import { osmEditIdUrl, osmEditJosmUrl, osmEditKyleKiwiIdUrl } from '../Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 import { NoticeMaproulette } from './NoticeMaproulette'
 
@@ -120,6 +120,7 @@ export const NoticeMaprouletteTask = ({
     source: 'radinfra_de',
   })
   const osmEditJosmUrlHref = osmEditJosmUrl({ osmType, osmId })
+  const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl({ osmType, osmId })
   const completed = data?.status && maprouletteStatusCompleted.includes(data.status)
 
   return (
@@ -191,6 +192,11 @@ export const NoticeMaprouletteTask = ({
           {osmEditJosmUrlHref && (
             <LinkExternal href={osmEditJosmUrlHref} blank>
               JOSM
+            </LinkExternal>
+          )}
+          {osmEditKyleKiwiIdUrlHref && (
+            <LinkExternal href={osmEditKyleKiwiIdUrlHref} blank>
+              kiwiD
             </LinkExternal>
           )}
         </div>

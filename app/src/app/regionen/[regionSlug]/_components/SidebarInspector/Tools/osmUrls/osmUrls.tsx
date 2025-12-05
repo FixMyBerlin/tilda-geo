@@ -51,6 +51,17 @@ export const osmEditJosmUrl = ({ osmType, osmId }: OsmTypeId) => {
   return `http://127.0.0.1:8111/load_object?objects=${shortOsmType[osmType]}${osmId}&changeset_hashtags=TILDA`
 }
 
+export const osmEditKyleKiwiIdUrl = ({ osmType, osmId }: OsmTypeId) => {
+  if (!osmType || !osmId) return undefined
+  const url = new URL('https://kyle.kiwi/iD/')
+  url.searchParams.append('locale', 'en')
+  url.searchParams.append('disable_features', 'boundaries')
+  url.searchParams.append('hashtags', 'TILDA')
+  url.searchParams.append(osmType, String(osmId))
+
+  return url.toString()
+}
+
 export const historyUrl = ({ osmType, osmId }: OsmTypeId) => {
   if (!osmType || !osmId) return undefined
 
