@@ -11,40 +11,40 @@ export type MapDataExport = {
 export const exportsTildaParking: MapDataExport[] = [
   {
     id: 'parkings',
-    title: 'Parkraum',
-    desc: 'Prozessierte Parkraumdaten aus OpenStreetMap',
+    title: 'Straßenparken',
+    desc: 'Prozessierte Parkraumdaten aus OpenStreetMap.',
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
   },
   {
     id: 'parkings_no',
-    title: 'Parkverbote',
-    desc: 'Bereiche mit Parkverboten',
+    title: 'Park- und Halteverbote',
+    desc: 'Bereiche mit Park- und Halteverboten sowie Angaben zur Vollständigkeit und Qualitätssicherung.',
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
   },
   {
     id: 'parkings_separate',
-    title: 'Parkraum Separate',
-    desc: 'Separate Parkraumflächen (nicht an Straßen)',
+    title: 'Straßenparken (separat erfasste Flächen)',
+    desc: 'Separat erfasste Parkraumflächen im Straßenraum aus OpenStreetMap (u.a. Parkbuchten und markierte Einzelstellplätze).',
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
   },
   {
     id: 'off_street_parking_areas',
-    title: 'Off-Street Parkraum Flächen',
-    desc: 'Parkraumflächen abseits der Straße',
+    title: 'Parken abseits des Straßenraums',
+    desc: 'Parkraumflächen abseits der Straße.',
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
   },
   {
     id: 'off_street_parking_points',
-    title: 'Off-Street Parkraum Punkte',
-    desc: 'Parkraumpunkte abseits der Straße',
+    title: 'Zugangspunkte zu (Tief-)Garagen und Parkhäusern',
+    desc: 'Zugangspunkte zu Parkmöglichkeiten abseits des Straßenraums, wie (Tief-)Garagen und Parkhäusern.',
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
