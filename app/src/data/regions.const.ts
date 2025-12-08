@@ -28,7 +28,7 @@ export type StaticRegion = {
   slug: RegionSlug
   name: string
   fullName: string
-  product: 'radverkehr' | 'parkraum' | 'fussverkehr'
+  product: 'radverkehr' | 'parkraum' | 'fussverkehr' | 'analysis'
   /** @desc 1-n relation IDs, used for the mask and export bbox — @href use https://hanshack.com/geotools/gimmegeodata/ to get the ids */
   osmRelationIds: number[] | []
   map: StaticRegionInitialMapPositionZoom
@@ -353,7 +353,7 @@ export const staticRegion: StaticRegion[] = [
     slug: 'berlin-baumanalyse',
     name: 'Straßenbaumanalyse',
     fullName: 'Straßenbaumanalyse Klimaanpassungsgesetz Berlin',
-    product: 'parkraum',
+    product: 'analysis',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
     logoPath: null,
