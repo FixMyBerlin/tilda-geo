@@ -15,7 +15,8 @@ export type SubcatParkingTildaOffStreetStyleIds = 'default' | 'public_access' | 
 
 export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Abseits Straßenland',
+  name: 'Öffentliches Parken abseits des Straßenraums',
+  // desc: 'Parken auf öffentlich gewidmeten Flächen abseits des Straßenraums',
   ui: 'dropdown',
   sourceId: source,
   beforeId: undefined,
@@ -24,7 +25,6 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,
@@ -72,7 +72,6 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
     {
       id: 'public_access',
       name: 'Öffentlich zugänglich (TODO)',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,
@@ -99,7 +98,6 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
     {
       id: 'operator_type',
       name: 'Betreiber öffentlich/privat (TODO)',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,

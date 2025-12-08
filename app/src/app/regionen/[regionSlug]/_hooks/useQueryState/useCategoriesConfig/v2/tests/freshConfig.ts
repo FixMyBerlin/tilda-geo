@@ -13,11 +13,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         sourceId: 'atlas_bikelanes',
         beforeId: 'atlas-app-beforeid-top',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: false },
+          { id: 'hidden', name: 'Kein Stil', active: false },
           {
             id: 'default',
             name: 'Führungsform einfach',
-            desc: null,
             layers: [
               {
                 id: 'needsClarification',
@@ -283,7 +282,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'details',
             name: 'Führungsform details',
-            desc: null,
             layers: [
               {
                 id: 'needsClarification-details',
@@ -639,7 +637,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'width',
             name: 'Breite RVA',
-            desc: null,
             layers: [
               {
                 id: 'widths-lines-incomplete',
@@ -709,11 +706,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         ui: 'dropdown',
         sourceId: 'atlas_poiClassification',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: false },
+          { id: 'hidden', name: 'Kein Stil', active: false },
           {
             id: 'default',
             name: 'Einfach',
-            desc: null,
             layers: [
               {
                 filter: ['has', 'category'],
@@ -830,7 +826,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'education',
             name: 'Bildung und Kitas',
-            desc: null,
             layers: [
               {
                 minzoom: 11,
@@ -965,11 +960,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         ui: 'dropdown',
         sourceId: 'atlas_places',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: false },
+          { id: 'hidden', name: 'Kein Stil', active: false },
           {
             id: 'default',
             name: 'Siedlungszentren Name',
-            desc: null,
             layers: [
               {
                 minzoom: 9,
@@ -1036,7 +1030,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'circle',
             name: 'Siedlungszentren EW-Zahl',
-            desc: null,
             layers: [
               {
                 filter: ['match', ['get', 'place'], ['village', 'city', 'town'], true, false],
@@ -1146,11 +1139,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         sourceId: 'atlas_boundaries',
         beforeId: 'boundary_country',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: true },
+          { id: 'hidden', name: 'Kein Stil', active: true },
           {
             id: 'default',
             name: 'Landkreise & Kreisfreie Städte',
-            desc: null,
             layers: [
               {
                 type: 'line',
@@ -1184,7 +1176,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'category_district_label',
             name: 'Landkreise & Kreisfreie Städte mit Namen',
-            desc: null,
             layers: [
               {
                 type: 'line',
@@ -1260,7 +1251,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'category_municipality',
             name: 'Gemeinden',
-            desc: null,
             layers: [
               {
                 type: 'line',
@@ -1294,7 +1284,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'category_municipality_label',
             name: 'Gemeinden mit Namen',
-            desc: null,
             layers: [
               {
                 type: 'line',
@@ -1379,7 +1368,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'default',
             name: 'Standard',
-            desc: null,
             layers: [
               {
                 id: 'barriers_water_aerodrome2',
@@ -1488,7 +1476,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'default',
             name: 'Standard',
-            desc: null,
             layers: [
               {
                 filter: ['has', 'landuse'],
@@ -1526,7 +1513,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'default',
             name: 'Standard',
-            desc: null,
             layers: [
               {
                 layout: {
@@ -1636,11 +1622,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         ui: 'dropdown',
         sourceId: 'atlas_roads',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: false },
+          { id: 'hidden', name: 'Kein Stil', active: false },
           {
             id: 'default',
             name: 'Alle',
-            desc: 'Straßenklassifieriung auf Basis von OpenStreetMap Straßentypen.',
             layers: [
               {
                 minzoom: 7.7,
@@ -1982,7 +1967,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'sidestreets',
             name: 'Nur Nebenstraßen',
-            desc: null,
             layers: [
               {
                 filter: [
@@ -2246,7 +2230,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'mainstreets',
             name: 'Nur Hauptstraßen',
-            desc: null,
             layers: [
               {
                 minzoom: 7.7,
@@ -2436,11 +2419,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         ui: 'dropdown',
         sourceId: 'atlas_roads',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: true },
+          { id: 'hidden', name: 'Kein Stil', active: true },
           {
             id: 'default',
             name: 'Alle Höchstgeschwindigkeiten',
-            desc: '',
             layers: [
               {
                 layout: { 'line-cap': 'round' },
@@ -2522,7 +2504,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'below30',
             name: 'Nur Höchstgeschwindigkeit ≤30 km/h',
-            desc: '',
             layers: [
               {
                 layout: { 'line-cap': 'round' },
@@ -2578,7 +2559,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'above40',
             name: 'Nur Höchstgeschwindigkeiten ≥40 km/h',
-            desc: '',
             layers: [
               {
                 layout: { 'line-cap': 'round' },
@@ -2655,7 +2635,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'default',
             name: 'Einbahnstraßen',
-            desc: '',
             layers: [
               {
                 minzoom: 11,
@@ -2842,7 +2821,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'default',
             name: 'Fußweg, Pfad, Sonderweg, u.a.',
-            desc: '',
             layers: [
               {
                 filter: [
@@ -2974,11 +2952,10 @@ export const freshConfig: MapDataCategoryConfig[] = [
         ui: 'dropdown',
         sourceId: 'mapillary_coverage',
         styles: [
-          { id: 'hidden', name: 'Kein Stil', desc: null, active: false },
+          { id: 'hidden', name: 'Kein Stil', active: false },
           {
             id: 'default',
             name: 'Aktuelle Fotos (2 Jahre)',
-            desc: null,
             legends: [
               {
                 id: 'action-cam',
@@ -3071,7 +3048,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'all',
             name: 'Alle Fotos',
-            desc: null,
             legends: [
               {
                 id: 'action-cam',
@@ -3141,7 +3117,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'age',
             name: 'Alter',
-            desc: null,
             legends: [
               {
                 id: 'current',
@@ -3236,7 +3211,6 @@ export const freshConfig: MapDataCategoryConfig[] = [
           {
             id: 'pano',
             name: 'Panorama-Fotos',
-            desc: null,
             legends: [
               {
                 id: 'current',

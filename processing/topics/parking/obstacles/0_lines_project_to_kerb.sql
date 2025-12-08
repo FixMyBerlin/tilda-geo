@@ -99,19 +99,22 @@ FROM
   _parking_obstacle_lines pol
   JOIN _parking_separate_parking_areas_projected spap ON pol.separate_parking_area_id = spap.source_id;
 
--- Filter: remove furthest projection if multiple
+-- Filter: remove duplicate projections to the same kerb
 -- `tilda_project_to_k_closest_kerbs` can return up to 6 projections (k := 6) for each obstacle line.
--- When an obstacle line has multiple projections, keep only the closest ones (remove furthest).
+-- When an obstacle line has multiple projections to the same kerb, keep only the closest one (remove furthest).
+-- For intersection restricted areas, we want to keep projections to different kerbs (different streets).
 DELETE FROM _parking_obstacle_lines_projected
 WHERE
-  (source_id, kerb_distance) IN (
+  (source_id, kerb_id, kerb_distance) IN (
     SELECT
       source_id,
+      kerb_id,
       MAX(kerb_distance)
     FROM
       _parking_obstacle_lines_projected
     GROUP BY
-      source_id
+      source_id,
+      kerb_id
     HAVING
       count(*) > 1
   );

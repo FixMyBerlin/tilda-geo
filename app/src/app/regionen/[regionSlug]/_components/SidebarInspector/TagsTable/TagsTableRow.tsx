@@ -22,7 +22,7 @@ export type TagsTableRowProps =
     }
 
 export const TagsTableRow = ({ sourceId, tagKey, tagValue, children }: TagsTableRowProps) => {
-  const secondaryRowPrefixes = ['tilda_', 'prio_']
+  const secondaryRowPrefixes = ['tilda_', 'prio_', 'value_']
   const isSecodaryRow = secondaryRowPrefixes.some((e) => tagKey.startsWith(e))
 
   return (

@@ -26,7 +26,6 @@ export const subcat_bikelanes_plus_presence: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Vollständigkeit',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_bikelane_presence,
         source,

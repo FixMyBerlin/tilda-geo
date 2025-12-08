@@ -57,6 +57,7 @@ local function result_tags_separate_parking(category, object, area)
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
     parking = SANITIZE_PARKING_TAGS.parking_extended(object.tags.parking, nil),
+    restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = nil,
     traffic_sign = SANITIZE_TAGS.traffic_sign(object.tags.traffic_sign),

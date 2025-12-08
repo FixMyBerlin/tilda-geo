@@ -19,7 +19,8 @@ export type SubcatParkingTildaStyleIds = 'default' | 'conditional' | 'surface'
 
 export const subcat_parkingTilda_line: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Öffentl. Straßenparken',
+  name: 'Öffentliches Straßenparken',
+  // desc: 'Parken auf öffentlich gewidmeten Flächen im Straßenraum',
   ui: 'dropdown',
   sourceId: source,
   beforeId: undefined,
@@ -28,7 +29,6 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings,
@@ -59,7 +59,7 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
       legends: [
         {
           id: 'capacity_status--present',
-          name: 'Parkstände',
+          name: 'Stellplätze',
           style: {
             type: 'line',
             color: 'rgb(22, 163, 74)',
@@ -78,7 +78,6 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
     {
       id: 'conditional',
       name: 'Parkeinschränkungen',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parking_condition,
@@ -216,7 +215,6 @@ export const subcat_parkingTilda_line: FileMapDataSubcategory = {
     {
       id: 'surface',
       name: 'Oberfläche',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_surface,

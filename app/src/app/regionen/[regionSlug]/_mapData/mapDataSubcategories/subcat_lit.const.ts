@@ -19,7 +19,6 @@ export const subcat_lit: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Beleuchtung',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_lit,
         source,
@@ -55,7 +54,6 @@ export const subcat_lit: FileMapDataSubcategory = {
     {
       id: 'lit',
       name: 'Beleuchtet',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_lit,
         source,

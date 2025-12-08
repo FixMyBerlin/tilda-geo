@@ -175,4 +175,9 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.8w7zl0bm/#14/52.51622/13.37036',
     bbox: bboxBrandenburg,
   },
+  off_street_parking_quantized: {
+    sourceLayer: 'off_street_parking_quantized',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036', // TODO: Replace with actual tileset URL
+    bbox: bboxPartOfNorthGermany,
+  },
 }

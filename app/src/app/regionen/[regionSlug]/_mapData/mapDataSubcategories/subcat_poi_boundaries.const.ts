@@ -23,7 +23,6 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Landkreise & Kreisfreie Städte',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_atlas_boundaries,
@@ -36,7 +35,6 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
     {
       id: 'category_district_label',
       name: 'Landkreise & Kreisfreie Städte mit Namen',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_atlas_boundaries,
@@ -55,7 +53,6 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
     {
       id: 'category_municipality',
       name: 'Gemeinden',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_atlas_boundaries,
@@ -68,7 +65,6 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
     {
       id: 'category_municipality_label',
       name: 'Gemeinden mit Namen',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_atlas_boundaries,

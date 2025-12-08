@@ -17,8 +17,11 @@ local SANITIZE_PARKING_TAGS = {
     result = result or 'missing'
     return result
   end,
-  location = function (value)
-    return sanitize_for_logging(value, { 'median' })
+  -- When location is given (not nil), we apply special category processing and SQL logic
+  -- (e.g., splitting areas into front/back kerbs in `tilda_parking_area_to_line`)
+  location = function(value)
+    if value == 'lane_center' then return 'lane_centre' end
+    return sanitize_for_logging(value, { 'median', 'lane_centre' })
   end,
   orientation = function (value)
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })

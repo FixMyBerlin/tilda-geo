@@ -19,7 +19,6 @@ export const subcat_bicycleParking: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_atlas_bicycleparking_areas,

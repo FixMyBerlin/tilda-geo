@@ -42,7 +42,6 @@ export const subcat_mapillaryCoverage: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Aktuelle Fotos (2 Jahre)',
-      desc: null,
       legends: [
         {
           id: 'action-cam',
@@ -143,7 +142,6 @@ export const subcat_mapillaryCoverage: FileMapDataSubcategory = {
     {
       id: 'all',
       name: 'Alle Fotos',
-      desc: null,
       legends: [
         {
           id: 'action-cam',
@@ -209,7 +207,6 @@ export const subcat_mapillaryCoverage: FileMapDataSubcategory = {
     {
       id: 'age',
       name: 'Alter',
-      desc: null,
       legends: [
         {
           id: 'current',
@@ -307,7 +304,6 @@ export const subcat_mapillaryCoverage: FileMapDataSubcategory = {
     {
       id: 'pano',
       name: 'Panorama-Fotos',
-      desc: null,
       legends: [
         {
           id: 'current',

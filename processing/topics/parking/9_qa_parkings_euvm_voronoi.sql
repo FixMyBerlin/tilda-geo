@@ -3,16 +3,17 @@
 -- 1. Preserve values in *_previous table
 -- 2. Load reference voronoi from data.euvm_qa_voronoi
 -- 3. Clip geometries to Berlin boundary
--- 4. Count current parkings (excl private) per polygon
+-- 4. Count current parkings (excl private from parkings_quantized, public only from off_street_parking_quantized) per polygon
 -- 5. Calculate difference and relative values
 -- 6. Update previous_relative from previous run
--- INPUT: data.euvm_qa_voronoi (polygon), public.parkings_quantized (point)
+-- INPUT: data.euvm_qa_voronoi (polygon), public.parkings_quantized (point), public.off_street_parking_quantized (point)
 -- OUTPUT: public.qa_parkings_euvm (polygon with counts)
 --
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- Transform parkings to SRID 5243 for accurate spatial operations
 -- (5243 optimized for Germany, uses meters; needed for ST_Contains on line 105)
+-- Combine parkings_quantized (excl private) and off_street_parking_quantized (public only)
 DROP TABLE IF EXISTS _parking_parkings_quantized;
 
 CREATE TEMP TABLE _parking_parkings_quantized AS
@@ -22,7 +23,20 @@ SELECT
   meta,
   ST_Transform (geom, 5243) as geom
 FROM
-  parkings_quantized;
+  parkings_quantized
+WHERE
+  tags ->> 'operator_type' IS NULL
+  OR tags ->> 'operator_type' != 'private'
+UNION ALL
+SELECT
+  id,
+  tags,
+  meta,
+  ST_Transform (geom, 5243) as geom
+FROM
+  off_street_parking_quantized
+WHERE
+  tags ->> 'operator_type' = 'public';
 
 CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized USING GIST (geom);
 
@@ -228,7 +242,7 @@ WHERE
     ST_Transform (berlin.geom, 3857)
   );
 
--- 4. Count current parkings (excl private) for each voronoi polygon
+-- 4. Count current parkings (excl private from parkings_quantized, public only from off_street_parking_quantized) for each voronoi polygon
 WITH
   counts AS (
     SELECT
@@ -237,10 +251,6 @@ WITH
     FROM
       public.qa_parkings_euvm v
       LEFT JOIN _parking_parkings_quantized p ON ST_Contains (ST_Transform (v.geom, 5243), p.geom)
-      AND (
-        p.tags ->> 'operator_type' IS NULL
-        OR p.tags ->> 'operator_type' != 'private'
-      )
     GROUP BY
       v.id
   )

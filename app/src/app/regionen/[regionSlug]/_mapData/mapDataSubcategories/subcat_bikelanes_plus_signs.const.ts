@@ -17,7 +17,6 @@ export const subcat_bikelanes_plus_signs: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Verkehrszeichen',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_bikelanes_plus_signs,
         source,

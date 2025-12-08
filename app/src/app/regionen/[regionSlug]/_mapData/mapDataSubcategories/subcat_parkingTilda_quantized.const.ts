@@ -9,7 +9,7 @@ export type SubcatParkingTildaQuantizedStyleIds = 'default'
 
 export const subcat_parkingTilda_quantized: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Parkstände summieren',
+  name: 'Stellplätze summieren',
   ui: 'checkbox',
   sourceId: source,
   beforeId: undefined,
@@ -17,7 +17,6 @@ export const subcat_parkingTilda_quantized: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       legends: [
         {
           id: 'calc',

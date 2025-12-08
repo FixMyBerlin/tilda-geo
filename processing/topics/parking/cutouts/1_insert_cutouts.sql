@@ -15,16 +15,7 @@ DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() 
 -- Conditions: only where NOT `has_driveway` AND `has_road`.
 -- Buffer: static value 5m (legal requirement where no parking is allowed)
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   intersection_id AS osm_id,
@@ -36,10 +27,7 @@ SELECT
     'radius', 5
     /* sql-formatter-enable */
   ) AS tags,
-  '{}'::jsonb AS meta,
-  NULL AS street_name,
-  'intersection_corner' AS category,
-  NULL AS side
+  '{}'::jsonb AS meta
 FROM
   _parking_intersection_corners
 WHERE
@@ -49,16 +37,7 @@ WHERE
 -- INSERT "driveway_corner_kerb" buffers (rectangles)
 -- Buffer: static value 0.01m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   kerb_osm_id,
@@ -69,26 +48,14 @@ SELECT
     'source', 'driveway_corner_kerbs'
     /* sql-formatter-enable */
   ),
-  '{}'::jsonb,
-  NULL AS street_name,
-  'driveway_corner_kerb' AS category,
-  NULL AS side
+  '{}'::jsonb
 FROM
   _parking_driveway_corner_kerbs;
 
 -- INSERT "driveway" buffers (rectangles)
 -- Buffer: tags->>'width' / 2
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -101,31 +68,20 @@ SELECT
     /* sql-formatter-disable */
     'category', 'driveway',
     'source', 'driveways',
+    'street:name', tags ->> 'street:name',
     'width', tags ->> 'width',
     -- 'highway', tags ->> 'highway',
     'road', tags ->> 'road'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  'driveway' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_driveways;
 
 -- INSERT "crossing" buffers (rectangles)
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -141,26 +97,14 @@ SELECT
     'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_crossings;
 
 -- INSERT "obstacle_point" buffers (circle)
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -173,26 +117,14 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  kerb_side AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_points_projected;
 
 -- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -205,26 +137,14 @@ SELECT
     'side', COALESCE(source ->> 'kerb_side', 'platform')
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  COALESCE(source ->> 'kerb_side', 'platform') AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_public_transport_points_projected;
 
 -- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
 -- Buffer: tags->>'buffer_radius'
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -236,26 +156,14 @@ SELECT
     'radius', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_turnaround_points;
 
 -- INSERT "obstacle_area" buffers (buffered lines)
 -- Buffer: static value 0.6m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -267,26 +175,14 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  kerb_side AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_areas_projected;
 
 -- INSERT "obstacle_line" buffers (buffered lines)
 -- Buffer: static value 0.6m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -298,65 +194,52 @@ SELECT
     'side', kerb_side
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  kerb_side AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_obstacle_lines_projected;
 
--- INSERT "parking area" buffers (buffered lines)
--- Buffer: COALESCE(tags->>'road_width' * 0.7, 3) - but only when road_width_source is 'tag'
--- Just enough to not overlap with the other side of the road
--- But needs to be big enough to intersect road parking lines, so they get cut out and replaced by separate parking
+-- INSERT "parking area" buffers (intersection of line buffer and area buffer)
+-- Approach: Buffer the kerb line generously (6m) and the original area polygon with a buffer (3m),
+-- then intersect them. This keeps only the part of the line buffer toward the curb (away from centerline).
+-- This ensures cutouts only affect road parking toward the curb, not toward the centerline.
+-- Increased buffers ensure cutouts are large enough to intersect with road parking lines.
+-- The line buffer can be increased safely since the intersection constrains it to the curb side.
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
-  id::TEXT,
-  osm_id,
-  ST_Buffer (
-    geom,
-    CASE
-      WHEN tags ->> 'road_width_source' = 'tag' THEN COALESCE((tags ->> 'road_width')::NUMERIC * 0.7, 3)
-      ELSE 3
-    END,
-    'endcap=flat'
-  ),
-  tags || jsonb_build_object(
+  pap.id::TEXT,
+  pap.osm_id,
+  ST_Intersection (
+    ST_Buffer (pap.geom, 6, 'endcap=flat'), -- Line buffer (generous, 6m)
+    ST_Buffer (pa.geom, 3) -- Area buffer (3m outward)
+  ) AS geom,
+  pap.tags || jsonb_build_object(
     /* sql-formatter-disable */
-    'category', tags ->> 'category',
+    'category', pap.tags ->> 'category',
     'source', 'separate_parking_areas'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  pap.meta || jsonb_build_object('updated_at', pa.meta ->> 'updated_at')
 FROM
-  _parking_separate_parking_areas_projected;
+  _parking_separate_parking_areas_projected pap
+  JOIN _parking_separate_parking_areas pa ON pap.source_id = pa.id
+WHERE
+  -- Only create cutout if intersection is not empty and valid
+  ST_Intersects (
+    ST_Buffer (pap.geom, 6, 'endcap=flat'),
+    ST_Buffer (pa.geom, 3)
+  )
+  AND NOT ST_IsEmpty (
+    ST_Intersection (
+      ST_Buffer (pap.geom, 6, 'endcap=flat'),
+      ST_Buffer (pa.geom, 3)
+    )
+  );
 
 -- INSERT "parking point" buffers (buffered lines)
 -- Buffer: static value 0.6m
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -367,10 +250,7 @@ SELECT
     'source', 'separate_parking_points'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_separate_parking_points_projected;
 
@@ -378,16 +258,7 @@ FROM
 -- Cleanup: removes leftover parking pieces on roads
 -- Uses LEAST(offset_right, offset_left) * 0.9 for buffer, excludes driveways without parking
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta,
-    street_name,
-    category,
-    side
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   id::TEXT,
   osm_id,
@@ -405,10 +276,7 @@ SELECT
     'source', 'parking_roads'
     /* sql-formatter-enable */
   ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at'),
-  tags ->> 'street:name' AS street_name,
-  tags ->> 'category' AS category,
-  NULL AS side
+  jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_roads
 WHERE

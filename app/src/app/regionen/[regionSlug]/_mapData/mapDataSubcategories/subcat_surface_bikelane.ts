@@ -21,7 +21,6 @@ export const subcat_surface_bikelane: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_bikelanes_smooth_default,
         source,
@@ -32,7 +31,6 @@ export const subcat_surface_bikelane: FileMapDataSubcategory = {
     {
       id: 'bad',
       name: 'Schlechte Oberflächenqualität',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad,
         source,

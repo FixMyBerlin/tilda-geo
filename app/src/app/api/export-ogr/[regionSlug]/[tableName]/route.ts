@@ -1,5 +1,7 @@
 import db from '@/db'
+import { formatDateBerlin } from '@/src/app/_components/date/formatDateBerlin'
 import { isDev, isProd } from '@/src/app/_components/utils/isEnv'
+import { getProcessingMeta } from '@/src/app/api/_util/getProcessingMeta'
 import { numberConfigs } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/_utils/numberConfig'
 import { exportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
 import { getBlitzContext } from '@/src/blitz-server'
@@ -11,6 +13,57 @@ import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 import { z } from 'zod'
 import { formats, ogrFormats } from './_utils/ogrFormats.const'
+
+const exportMetadata = {
+  licence: 'ODbL',
+  attribution: '(c) OpenStreetMap; tilda-geo.de',
+  owner: 'FixMyCity GmbH / TILDA Geo',
+}
+
+/**
+ * Check if GDAL 3.11+ is available (required for gdal vector edit command)
+ * The `gdal` command was introduced in GDAL 3.11.0
+ * @returns Promise that resolves to true if GDAL 3.11+ is available, false otherwise
+ */
+async function checkGdalVersion(): Promise<boolean> {
+  try {
+    return new Promise<boolean>((resolve) => {
+      // Try to get GDAL version using gdalinfo (more reliable than gdal command)
+      exec('gdalinfo --version', { timeout: 5000 }, (error, stdout) => {
+        if (error) {
+          console.warn('[EXPORT] GDAL version check failed:', error.message)
+          resolve(false)
+          return
+        }
+
+        // Parse version from output like "GDAL 3.10.3, released 2025/04/01"
+        const versionMatch = stdout.match(/GDAL (\d+)\.(\d+)\.(\d+)/)
+        if (!versionMatch) {
+          console.warn('[EXPORT] Could not parse GDAL version from:', stdout)
+          resolve(false)
+          return
+        }
+
+        const major = parseInt(versionMatch[1] || '0', 10)
+        const minor = parseInt(versionMatch[2] || '0', 10)
+
+        // GDAL 3.11+ required for gdal vector edit (gdal command introduced in 3.11.0)
+        const hasRequiredVersion = major > 3 || (major === 3 && minor >= 11)
+
+        if (!hasRequiredVersion) {
+          console.warn(
+            `[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.11+ (gdal command introduced in 3.11.0)`,
+          )
+        }
+
+        resolve(hasRequiredVersion)
+      })
+    })
+  } catch (error) {
+    console.warn('[EXPORT] GDAL version check error:', error)
+    return false
+  }
+}
 
 const ExportSchema = z.object({
   regionSlug: z.string(),
@@ -155,9 +208,15 @@ export async function GET(
     const dbConnection = `PG:"${process.env.GEO_DATABASE_URL.replace('?pool_timeout=0', '')}"`
     // LATER: Add something like -lco WRITE_NULL_VALUES=NO to cleanup the NULL properties from GeoJSON
     // See https://github.com/OSGeo/gdal/issues/1187
-    const ogrCommand = `ogr2ogr -f "${ogrFormats[format]}" ${outputFilePath} ${dbConnection} -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 -sql "${sqlQuery}"`
+    // -nln assigns an alternate name to the new layer (works for GPKG/FGB, safely ignored for GeoJSON)
+    // Include region parameter in layer name only if it's a real region (not 'noRegion' placeholder)
+    const layerName =
+      regionSlug === 'noRegion'
+        ? `tilda-geo.de/docs/${tableName}`
+        : `tilda-geo.de/docs/${tableName}?r=${regionSlug}`
+    const ogrCommand = `ogr2ogr -f "${ogrFormats[format]}" ${outputFilePath} ${dbConnection} -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 -sql "${sqlQuery}" -nln ${layerName}`
 
-    console.log('Running ogr2ogr', isDev ? ogrCommand : undefined)
+    console.log('[EXPORT] Running ogr2ogr', isDev ? ogrCommand : undefined)
     await new Promise((resolve, reject) => {
       exec(ogrCommand, (error, stdout, stderr) => {
         if (error) {
@@ -168,23 +227,51 @@ export async function GET(
       })
     })
 
+    // Add metadata for formats that support it (skip GeoJSON)
+    // HOTFIX: Only add metadata if GDAL 3.11+ is available (gdal vector edit requires 3.11+)
+    if (format !== 'geojson' && (await checkGdalVersion())) {
+      const escapeForShell = (str: string) => str.replace(/"/g, '\\"')
+      // Use same extension so GDAL can detect the format (e.g., .gpkg.meta -> .meta.gpkg)
+      const pathParts = path.parse(outputFilePath)
+      const metadataFilePath = path.join(pathParts.dir, `${pathParts.name}.meta${pathParts.ext}`)
+      const metadataCommand = `gdal vector edit --metadata LICENSE="${escapeForShell(exportMetadata.licence)}" --metadata OWNER="${escapeForShell(exportMetadata.owner)}" --metadata ATTRIBUTION="${escapeForShell(exportMetadata.attribution)}" ${outputFilePath} ${metadataFilePath}`
+
+      console.log('[EXPORT] Adding metadata', isDev ? metadataCommand : undefined)
+      await new Promise((resolve, reject) => {
+        exec(metadataCommand, async (error, stdout, stderr) => {
+          if (error) {
+            await fs.rm(metadataFilePath, { force: true })
+            await fs.rm(outputFilePath, { force: true })
+            reject(new Error(`Failed to add metadata: ${stderr || error.message}`))
+          } else {
+            // Replace original with metadata-enhanced file
+            await fs.rename(metadataFilePath, outputFilePath)
+            resolve(stdout)
+          }
+        })
+      })
+    }
+
     const fileBuffer = await fs.readFile(outputFilePath)
-    await fs.unlink(outputFilePath) // delete file
+    await fs.rm(outputFilePath, { force: true })
+
+    // Include OSM data date in filename for versioning (using Berlin timezone)
+    const metadata = await getProcessingMeta()
+    const filename = metadata.osm_data_from
+      ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
+      : `${tableName}.${format}`
 
     if (format === 'geojson') {
       if (request.headers.get('accept-encoding')?.includes('gzip')) {
-        // NOTE: macOS and Windows both can unzip gzip via Terminal.
-        // Unfortunatelly node:zlip does not have zip support.
-        // We could use a different packages or the system zip package (after adding it to Docker)
-        // But all that would conflict with the accept-encoding here and is not worth the trouble.
-        // For macOS Terminal: `gunzip filename.geojson.gzip`
-        // For Windows: Multiple ways; maybe `Expand-Archive -Path filename.geojson.gzip -DestinationPath .` in PowerShell
+        // Compress the response for transfer efficiency
+        // The browser will automatically decompress it due to Content-Encoding: gzip
+        // and save it as a .geojson file
         const compressed = gzipSync(fileBuffer)
         return new Response(compressed, {
           headers: {
             'Content-Type': 'application/json',
             'Content-Encoding': 'gzip',
-            'Content-Disposition': `attachment; filename="${tableName}.${format}.gzip"`,
+            'Content-Disposition': `attachment; filename="${filename}"`,
             'Content-Length': compressed.length.toString(),
           },
         })
@@ -192,7 +279,7 @@ export async function GET(
       return new Response(fileBuffer, {
         headers: {
           'Content-Type': 'application/json',
-          'Content-Disposition': `attachment; filename="${tableName}.${format}"`,
+          'Content-Disposition': `attachment; filename="${filename}"`,
           'Content-Length': fileBuffer.length.toString(),
         },
       })
@@ -200,7 +287,7 @@ export async function GET(
 
     return new Response(fileBuffer, {
       headers: {
-        'Content-Disposition': `attachment; filename="${tableName}.${format}"`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': fileBuffer.length.toString(),
       },
     })

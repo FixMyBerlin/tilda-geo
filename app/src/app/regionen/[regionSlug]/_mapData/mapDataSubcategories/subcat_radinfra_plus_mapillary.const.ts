@@ -14,7 +14,6 @@ export const subcat_radinfraPlusMapillary: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Verfügbarkeit hervorheben',
-      desc: null,
       legends: [
         {
           id: 'highlight-cam',

@@ -23,7 +23,6 @@ export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
     {
       id: 'boundaries-admin-level-4',
       name: 'Stadt',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_boundaries,
         source,
@@ -34,7 +33,6 @@ export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
     {
       id: 'boundaries-admin-level-9',
       name: 'Bezirke',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_boundaries,
         source,
@@ -45,7 +43,6 @@ export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
     {
       id: 'default', // 'boundaries-admin-level-10',
       name: 'Stadtteile',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_parking_boundaries,
         source,

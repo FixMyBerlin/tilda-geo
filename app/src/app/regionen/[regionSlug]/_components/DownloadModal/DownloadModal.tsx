@@ -6,11 +6,11 @@ import { useStartUserLogin } from '@/src/app/_hooks/useStartUserLogin'
 import getAtlasGeoMetadata from '@/src/server/regions/queries/getAtlasGeoMetadata'
 import { useSession } from '@blitzjs/auth'
 import { useQuery } from '@blitzjs/rpc'
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 import { isBefore, subDays } from 'date-fns'
 import { Suspense } from 'react'
 import { useRegion } from '../regionUtils/useRegion'
-import { DownloadModalDownloadList } from './DownloadModalDownloadList'
+import { DownloadModalDownloadListWithVectorTiles } from './DownloadModalDownloadList'
 import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
 
 const DownloadModalTriggerIcon = () => {
@@ -38,15 +38,33 @@ const DownloadModalTriggerIcon = () => {
 
 export const DownloadModal = () => {
   const region = useRegion()
-  const bboxDefined = region?.bbox ? true : false
-
   const hasPermissions = useHasPermissions()
   const canDownload = region.exportPublic ? true : hasPermissions
   const isLoggedIn = Boolean(useSession()?.role)
-
   const handleLogin = useStartUserLogin()
 
-  if (region.hideDownload === true) return null
+  // If exports is null, show as info button with only processing info
+  if (region.exports === null) {
+    return (
+      <section>
+        <IconModal
+          title="Daten-Informationen"
+          titleIcon="info"
+          triggerStyle="button"
+          triggerIcon={
+            <Suspense fallback={<InformationCircleIcon className="size-5" />}>
+              <DownloadModalTriggerIcon />
+            </Suspense>
+          }
+        >
+          <DownloadModalUpdateDate />
+          <p className="mb-2.5 rounded bg-orange-100 p-2 text-sm">
+            Hinweis: Der Export ist für diese Region {region.fullName} nicht eingerichtet.
+          </p>
+        </IconModal>
+      </section>
+    )
+  }
 
   return (
     <section>
@@ -55,7 +73,7 @@ export const DownloadModal = () => {
         titleIcon="download"
         triggerStyle="button"
         triggerIcon={
-          <Suspense fallback={<ArrowDownTrayIcon className="h-5 w-5" />}>
+          <Suspense fallback={<ArrowDownTrayIcon className="size-5" />}>
             <DownloadModalTriggerIcon />
           </Suspense>
         }
@@ -84,13 +102,7 @@ export const DownloadModal = () => {
 
         <DownloadModalUpdateDate />
 
-        {canDownload && bboxDefined && <DownloadModalDownloadList />}
-
-        {canDownload && !bboxDefined && (
-          <p className="mb-2.5 rounded bg-orange-100 p-2 text-sm">
-            Hinweis: Der Export ist für diese Region {region.fullName} nicht eingerichtet.
-          </p>
-        )}
+        {canDownload && <DownloadModalDownloadListWithVectorTiles />}
       </IconModal>
     </section>
   )

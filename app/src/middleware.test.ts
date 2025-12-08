@@ -188,5 +188,30 @@ describe('middleware()', () => {
       expect(url.searchParams.get('v')).toBe('2')
       expect(url.searchParams.get('config')).toBe('166cmie.ivb7ah.2r53k')
     })
+
+    test('MIGRATION: Migrate old parking category to parkingLars', () => {
+      // This test verifies the SOLUTION: what happens WITH migration in the middleware.
+      // This test verifies that URLs with the old config hash `1r6doko` (which uses category ID 'parking')
+      // are properly migrated to use the new category ID 'parkingLars'.
+      // The category was renamed in commit 6df2b6b0e40896a37d05ff8616a2f5221c18ea7d
+      // The middleware calls migrateConfigCategoryIds() BEFORE mergeCategoriesConfig(),
+      // which maps 'parking' -> 'parkingLars' so the merge succeeds.
+      // See mergeCategoriesConfig.test.ts "Renamed category IDs are ignored..." for the PROBLEM (without migration).
+      const request = new NextRequest(
+        'http://127.0.0.1:5173/regionen/parkraum?map=13.5%2F52.4918%2F13.4261&config=1r6doko.4qfsxx.0&v=2',
+      )
+      const response = middleware(request)
+      const url = getUrl(response)
+
+      const configParam = url.searchParams.get('config')
+      expect(configParam).toBeTruthy()
+
+      // The migrated config should use the new checksum for parkraum (12nl2cs) which uses parkingLars
+      // The config should be successfully transformed, _not_ reset to defaults
+      expect(configParam?.startsWith('12nl2cs')).toBe(true)
+
+      // Verify the config is valid (not empty or error state)
+      expect(configParam?.length).toBeGreaterThan(10)
+    })
   })
 })

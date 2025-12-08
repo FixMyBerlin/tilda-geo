@@ -18,7 +18,6 @@ export const subcat_maxspeed_plus_presence: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Vollständigkeit',
-      desc: null,
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_maxspeed_presence,
         source,

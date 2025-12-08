@@ -5,7 +5,6 @@ import {
 } from '@/src/server/instrumentation/registerGeneralizationFunctions'
 import { MapDataSource } from '../types'
 import { apiKeyMapbox, apiKeyMapillary } from './apiKeys.const'
-import { SourceExportApiIdentifier } from './export/exportIdentifier'
 import { SourcesParkingLarsId, sourcesParkingLars } from './sourcesParkingLars.const'
 import { SourcesParkingTildaId, sourcesParkingTilda } from './sourcesParkingTilda.const'
 
@@ -38,7 +37,7 @@ export type SourcesId =
   | MapillarySourceId
   | 'accidents_unfallatlas'
 
-export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
+export const sources: MapDataSource<SourcesId>[] = [
   ...sourcesParkingLars,
   ...sourcesParkingTilda,
   {
@@ -59,7 +58,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: { enabled: false },
   },
   {
     id: 'atlas_presenceStats',
@@ -93,7 +91,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: { enabled: false },
   },
   {
     id: 'accidents_unfallatlas',
@@ -111,7 +108,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: { enabled: false },
   },
   {
     id: 'atlas_bikelanes',
@@ -154,12 +150,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: true },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'bikelanes',
-      title: 'Fahrradinfrastruktur',
-      desc: 'Prozessierte Infrastrukturdaten (ohne Mischverkehr)',
-    },
   },
   {
     id: 'atlas_bikeroutes',
@@ -194,12 +184,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'bikeroutes',
-      title: 'Fahrradrouten',
-      desc: 'Ausgeschilderte Fahrradrouten aus OpenStreetMap',
-    },
   },
   {
     id: 'atlas_roads',
@@ -233,12 +217,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'roads',
-      title: 'Straßennetz',
-      desc: 'Haupt- und Nebenstraßen, Beleuchtung, Oberfläche, Höchstgeschwindigkeit, Vollständigkeit RVA',
-    },
   },
   {
     id: 'atlas_roadsPathClasses',
@@ -272,12 +250,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'roadsPathClasses',
-      title: 'Straßennetz Wege',
-      desc: 'Fuß-, Wald-, Feld-, Reit-, Fahrradwege, Treppen',
-    },
   },
   {
     id: 'atlas_bikelanesPresence',
@@ -296,7 +268,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
-    export: { enabled: false }, // can be exported as part of `roads`, `roadsPathClasses`
   },
   {
     id: 'atlas_bikeSuitability',
@@ -321,7 +292,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
-    export: { enabled: false }, // can be exported as part of `roads`, `roadsPathClasses`
   },
   {
     id: 'atlas_publicTransport',
@@ -340,12 +310,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'publicTransport',
-      title: 'ÖPNV-Haltepunkte und Fähranleger',
-      desc: 'Punktdaten von Haltestellen',
-    },
   },
   {
     id: 'atlas_poiClassification',
@@ -364,12 +328,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'poiClassification',
-      title: 'POI Einkauf, Freizeit, Bildung',
-      desc: 'Kategorisiert Punktdaten. Bildungsdaten können über `formalEducation` gefiltert werden.',
-    },
   },
   {
     id: 'atlas_places',
@@ -388,12 +346,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: {
-      enabled: true,
-      apiIdentifier: 'places',
-      title: 'Orte',
-      desc: 'Punktdaten zu Städten und Dörfern',
-    },
   },
   {
     id: 'atlas_barriers',
@@ -410,7 +362,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     inspector: { enabled: false },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: { enabled: false },
   },
   {
     id: 'atlas_landuse',
@@ -429,7 +380,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: { enabled: false },
   },
   {
     id: 'atlas_bicycleParking',
@@ -455,12 +405,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
-    export: {
-      enabled: true,
-      apiIdentifier: 'bicycleParking_points',
-      title: 'Fahrradstellplätze (Beta)',
-      desc: 'Alle Fahrradstellplätze. Flächen werden als Punkt ausgegeben.',
-    },
   },
   {
     id: 'atlas_trafficSigns',
@@ -479,12 +423,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
-    export: {
-      enabled: true,
-      apiIdentifier: 'trafficSigns',
-      title: 'Verkehrszeichen',
-      desc: 'Verkehrszeichen und Routen-Beschilderungen',
-    },
   },
   {
     id: 'atlas_aggregated_lengths',
@@ -503,7 +441,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
-    export: { enabled: false },
   },
   {
     id: 'atlas_todos_lines',
@@ -522,12 +459,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
-    export: {
-      enabled: true,
-      apiIdentifier: 'todos_lines',
-      title: 'Aufgaben',
-      desc: 'Hinweise zu Aufgaben in den Fahrrad und Straßendaten.',
-    },
   },
   {
     // https://www.mapillary.com/developer/api-documentation/#coverage-tiles
@@ -561,7 +492,6 @@ export const sources: MapDataSource<SourcesId, SourceExportApiIdentifier>[] = [
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
-    export: { enabled: false },
   },
   // UNUSED ATM:
   // {

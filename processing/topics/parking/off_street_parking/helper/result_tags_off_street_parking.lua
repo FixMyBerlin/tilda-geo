@@ -6,10 +6,12 @@ require("Metadata")
 require("Log")
 local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
+local SANITIZE_TAGS = require('sanitize_tags')
 
 local function result_tags_off_street_parking(result, area)
   local result_tags = {
     category = result.category.id,
+    operator_type = SANITIZE_TAGS.operator_type(result.object.tags),
   }
 
   local global_tags_cc = {

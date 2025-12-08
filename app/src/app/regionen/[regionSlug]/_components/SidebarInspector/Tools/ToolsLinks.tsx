@@ -14,6 +14,7 @@ import {
   mapillaryUrl,
   osmEditIdUrl,
   osmEditJosmUrl,
+  osmEditKyleKiwiIdUrl,
   osmEditRapidUrl,
   osmOrgUrl,
 } from './osmUrls/osmUrls'
@@ -33,6 +34,7 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
   const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
+  const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
   const mapillaryUrlHref = mapillaryUrl(feature.geometry, { zoom: mapParam.zoom })
 
@@ -85,6 +87,11 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
         {osmEditJosmUrlHref && (
           <LinkExternal blank button href={osmEditJosmUrlHref}>
             JOSM
+          </LinkExternal>
+        )}
+        {osmEditKyleKiwiIdUrlHref && (
+          <LinkExternal blank href={osmEditKyleKiwiIdUrlHref}>
+            kiwiD
           </LinkExternal>
         )}
         {/* Just for testing for now… */}
