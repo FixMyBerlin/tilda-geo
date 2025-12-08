@@ -72,6 +72,7 @@ function Bikelanes(object_tags, object)
           lifecycle = transformed_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.lifecycle,
           width = parse_length(transformed_tags.width),
           width_source = transformed_tags['source:width'],
+          _width_effective = parse_length(transformed_tags['width:effective']),
           oneway = DeriveOneway(transformed_tags, category),
           bridge = Sanitize(object_tags.bridge, { "yes" }),
           tunnel = Sanitize(object_tags.tunnel, { "yes" }),
