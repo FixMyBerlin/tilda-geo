@@ -111,6 +111,7 @@ export type RegionSlug =
   | 'bb-sg' // Land Brandenburg Steuerungsgruppe
   | 'bb' // Öffentlich, Land Brandenburg
   | 'berlin'
+  | 'berlin-baumanalyse'
   | 'bibi'
   | 'deutschland'
   | 'fahrradstellplaetze'
@@ -347,6 +348,26 @@ export const staticRegion: StaticRegion[] = [
       'parkings_no',
       'parkings_separate',
     ],
+  },
+  {
+    slug: 'berlin-baumanalyse',
+    name: 'Straßenbaumanalyse',
+    fullName: 'Straßenbaumanalyse Klimaanpassungsgesetz Berlin',
+    product: 'parkraum',
+    osmRelationIds: [62422],
+    map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
+    logoPath: null,
+    logoWhiteBackgroundRequired: false,
+    showSearch: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'roads',
+      'mapillary',
+    ],
+    backgroundSources: berlinBackgroundSources,
+    notes: 'atlasNotes',
+    bbox: null,
+    exports: null,
   },
   {
     slug: 'parkraum',
