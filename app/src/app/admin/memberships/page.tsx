@@ -5,6 +5,7 @@ import { formatRelativeTime } from '@/src/app/_components/date/relativeTime'
 import { Link } from '@/src/app/_components/links/Link'
 import { linkStyles } from '@/src/app/_components/links/styles'
 import { Pill } from '@/src/app/_components/text/Pill'
+import { RegionStatusPill } from '@/src/app/admin/_components/RegionStatusPill'
 import deleteMembership from '@/src/server/memberships/mutations/deleteMembership'
 import getUsersAndMemberships from '@/src/server/users/queries/getUsersAndMemberships'
 import { useMutation, useQuery } from '@blitzjs/rpc'
@@ -88,10 +89,16 @@ export default function AdminMembershipsPage() {
                       {user?.Membership?.map((membership) => {
                         return (
                           <li key={membership.id} className="list-item list-disc">
-                            <div className="flex justify-between">
-                              <Link blank href={`/regionen/${membership.region.slug}`}>
-                                {membership.region.slug}
-                              </Link>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <Link blank href={`/regionen/${membership.region.slug}`}>
+                                  {membership.region.slug}
+                                </Link>
+                                <RegionStatusPill
+                                  status={membership.region.status}
+                                  className="text-xs"
+                                />
+                              </div>
                               <button
                                 onClick={() => handleDelete(membership)}
                                 className={linkStyles}

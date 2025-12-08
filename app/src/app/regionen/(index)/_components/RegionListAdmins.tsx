@@ -9,7 +9,9 @@ export const RegionListAdmins = async () => {
   if (user?.role !== 'ADMIN') return null
 
   // Has to be below the role check.
-  const nonPublicRegions = await invoke(getRegionsWithAdditionalData, { where: { public: false } })
+  const nonPublicRegions = await invoke(getRegionsWithAdditionalData, {
+    where: { promoted: false },
+  })
 
   return (
     <div className="bg-pink-200">

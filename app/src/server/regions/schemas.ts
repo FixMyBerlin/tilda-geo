@@ -1,16 +1,20 @@
+import { RegionStatus } from '@prisma/client'
 import { z } from 'zod'
 
 export const RegionSchema = z.object({
   slug: z.string(),
-  public: z.boolean(),
-  exportPublic: z.boolean(),
+  promoted: z.boolean(),
+  status: z.nativeEnum(RegionStatus),
 })
 
 const trueOrFalse = z.enum(['true', 'false']).transform((v) => v === 'true')
-export const RegionFormSchema = RegionSchema.omit({ public: true, exportPublic: true }).merge(
+export const RegionFormSchema = RegionSchema.omit({
+  promoted: true,
+  status: true,
+}).merge(
   z.object({
-    public: trueOrFalse,
-    exportPublic: trueOrFalse,
+    promoted: trueOrFalse,
+    status: z.nativeEnum(RegionStatus),
   }),
 )
 
