@@ -78,6 +78,8 @@ jobs:
               -e "s|^S3_BUCKET=.*$|S3_BUCKET='${{ secrets.S3_BUCKET }}'|" \
               -e "s|^ATLAS_API_KEY=.*$|ATLAS_API_KEY='${{ secrets.ATLAS_API_KEY }}'|" \
               -e "s|^MAPROULETTE_API_KEY=.*$|MAPROULETTE_API_KEY='${{ secrets.MAPROULETTE_API_KEY }}'|" \
+              -e "s|^MAILJET_APIKEY_PUBLIC=.*$|MAILJET_APIKEY_PUBLIC='${{ secrets.MAILJET_APIKEY_PUBLIC }}'|" \
+              -e "s|^MAILJET_APIKEY_PRIVATE=.*$|MAILJET_APIKEY_PRIVATE='${{ secrets.MAILJET_APIKEY_PRIVATE }}'|" \
               -e "s|^SKIP_DOWNLOAD=.*$|SKIP_DOWNLOAD='${{ vars.SKIP_DOWNLOAD }}'|" \
               -e "s|^SKIP_UNCHANGED=.*$|SKIP_UNCHANGED='${{ vars.SKIP_UNCHANGED }}'|" \
               -e "s|^PROCESSING_DIFFING_MODE=.*$|PROCESSING_DIFFING_MODE='${{ vars.PROCESSING_DIFFING_MODE }}'|" \
