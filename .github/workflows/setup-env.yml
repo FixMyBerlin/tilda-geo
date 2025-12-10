@@ -17,9 +17,6 @@ on:
       NEXT_PUBLIC_APP_ENV:
         required: true
         type: string
-      NEXT_PUBLIC_OSM_API_URL:
-        required: true
-        type: string
       APP_URL:
         required: true
         type: string
@@ -71,7 +68,6 @@ jobs:
               -e "s|^SESSION_SECRET_KEY=.*$|SESSION_SECRET_KEY='${{ secrets.SESSION_SECRET_KEY }}'|" \
               -e "s|^OSM_CLIENT_ID=.*$|OSM_CLIENT_ID='${{ secrets.OSM_CLIENT_ID }}'|" \
               -e "s|^OSM_CLIENT_SECRET=.*$|OSM_CLIENT_SECRET='${{ secrets.OSM_CLIENT_SECRET }}'|" \
-              -e "s|^NEXT_PUBLIC_OSM_API_URL=.*$|NEXT_PUBLIC_OSM_API_URL='${{ inputs.NEXT_PUBLIC_OSM_API_URL }}'|" \
               -e "s|^S3_KEY=.*$|S3_KEY='${{ secrets.S3_KEY }}'|" \
               -e "s|^S3_SECRET=.*$|S3_SECRET='${{ secrets.S3_SECRET }}'|" \
               -e "s|^S3_REGION=.*$|S3_REGION='${{ secrets.S3_REGION }}'|" \

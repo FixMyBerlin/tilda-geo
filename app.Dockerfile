@@ -23,7 +23,6 @@ ENV TZ=Europe/Berlin
 
 ARG NEXT_PUBLIC_APP_ORIGIN
 ARG NEXT_PUBLIC_APP_ENV
-ARG NEXT_PUBLIC_OSM_API_URL
 
 RUN npx blitz@2.2.2 prisma generate
 RUN npx blitz@2.2.2 build
