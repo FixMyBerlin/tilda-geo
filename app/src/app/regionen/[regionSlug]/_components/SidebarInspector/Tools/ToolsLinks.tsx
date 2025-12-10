@@ -90,7 +90,7 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: Props) => {
           </LinkExternal>
         )}
         {osmEditKyleKiwiIdUrlHref && (
-          <LinkExternal blank href={osmEditKyleKiwiIdUrlHref}>
+          <LinkExternal blank button href={osmEditKyleKiwiIdUrlHref}>
             kiwiD
           </LinkExternal>
         )}
