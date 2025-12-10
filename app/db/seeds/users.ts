@@ -1,5 +1,5 @@
-import db from '../index'
 import { Prisma } from '@prisma/client'
+import db from '../index'
 
 type Users = Prisma.UserUncheckedCreateInput[]
 
@@ -79,16 +79,6 @@ const seedUsers = async () => {
       email: 'tobias+osmdev@fixmycity.de',
       firstName: 'Tobias',
       lastName: 'Jordans',
-      hashedPassword,
-    },
-    {
-      osmId: 20561,
-      osmName: 'the-sven',
-      osmDescription: undefined,
-      role: 'ADMIN',
-      email: 'sven@fixmycity.de',
-      firstName: 'Sven',
-      lastName: 'König',
       hashedPassword,
     },
   ]
