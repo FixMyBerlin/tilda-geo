@@ -16,7 +16,7 @@ const CompositRoadBikelanesTableValue = ({
   // which are translated in `ALL-category=*`. To access them, we overwrite the `tagKey`.
   const hasPresenceValue = ['not_expected', 'data_no', 'missing', 'assumed_no'].includes(tagValue)
   const hasSpecificInfrastructureValue = !hasPresenceValue
-  const tagKeyWithoutSide = tagKey.replace(/_left|_self|_right/, '_ALL')
+  const tagKeyWithoutSide = tagKey.replace(/_left|_self|_right/, '_SIDE')
   const hasTooltip = Boolean(translations[`${sourceId}--${tagKeyWithoutSide}=${tagValue}--tooltip`])
 
   return (
