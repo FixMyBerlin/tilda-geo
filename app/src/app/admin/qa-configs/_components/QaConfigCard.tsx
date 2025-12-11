@@ -1,17 +1,11 @@
 import { Link } from '@/src/app/_components/links/Link'
-import { QaConfig } from '@prisma/client'
+import getQaConfigsForAdmin from '@/src/server/qa-configs/queries/getQaConfigsForAdmin'
+import 'server-only'
+import { QaConfigStatsTable } from './QaConfigStatsTable'
 
-type QaConfigWithRelations = QaConfig & {
-  region: {
-    slug: string
-    name?: string
-  }
-  _count: {
-    qaEvaluations: number
-  }
-}
+type QaConfigWithRelations = Awaited<ReturnType<typeof getQaConfigsForAdmin>>[number]
 
-export function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
+export async function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
   return (
     <div className="mb-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between">
@@ -56,6 +50,8 @@ export function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
               <span className="ml-2 text-gray-900">{config.needsReviewThreshold}</span>
             </div>
           </div>
+
+          <QaConfigStatsTable configId={config.id} />
         </div>
 
         <div className="ml-4">
