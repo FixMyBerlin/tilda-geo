@@ -1,4 +1,3 @@
-import { mapillaryCoverageDateString } from '../../mapillaryCoverage.const'
 import { CampaignType } from '../schema/campaignsSchema'
 
 export const missing_traffic_sign_vehicle_destination__mapillary: CampaignType = {
@@ -43,5 +42,5 @@ Ergänze gerne auch einen \`mapillary=*\` Tag auf dem das Verkehrszeichen zu seh
 
 Wenn keine Änderung nötig ist, ergänze gerne einen \`check_date=*\` Tag um zu signalisieren, dass alle Tags geprüft wurden und aktuell sind. Das hilft bei der Auswertung.
 
-Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Es werden Mapillary-Bilder bis ${mapillaryCoverageDateString} berücksichtigt. Diese Daten werden nur alle paar Monate aktualisiert.`,
+Hinweis Mapillary: Diese Kampagne enthält nur Wege, für die Mapillary-Bilder erkannt wurden. Der Abgleich mit Mapillary findet nur alle paar Wochen statt. [Datum der letzten Aktualisierung anzeigen](https://tilda-geo.de/docs/mapillary-coverage).`,
 }

@@ -1,4 +1,3 @@
-import { mapillaryCoverageDateString } from '@/src/data/mapillaryCoverage.const'
 import { TodoId, todoIds } from '@/src/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { campaignCategorySelect } from '@/src/data/radinfra-de/schema/utils/campaignCategorySelect'
@@ -24,7 +23,9 @@ export const campaignLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'mapillary',
     name: 'Mapillary Fotos vorhanden',
-    desc: [`Prozessierte Mapillary Sequenzen von ${mapillaryCoverageDateString}.`],
+    desc: [
+      'Prozessierte Mapillary Sequenzen. Der Abgleich mit Mapillary findet nur alle paar Wochen statt. [Datum der letzten Aktualisierung anzeigen](/docs/mapillary-coverage).',
+    ],
     style: {
       type: 'line',
       color: '#050dff',
