@@ -298,6 +298,13 @@ function osm2pgsql.process_way(object)
 
   -- === (C.4a) WRITE `roads` table ===
   if PathClasses[object_tags.highway] then
+    -- For path classes, only set bikelane_self when infrastructure exists
+    for _, cycleway in ipairs(cycleways) do
+      if cycleway._side == 'self' then road_result_tags['bikelane_self'] = cycleway.category end
+      if cycleway._side == 'left' then road_result_tags['bikelane_left'] = cycleway.category end
+      if cycleway._side == 'right' then road_result_tags['bikelane_right'] = cycleway.category end
+    end
+
     roadsPathClassesTable:insert({
       id = DefaultId(object),
       tags = ExtractPublicTags(road_result_tags),

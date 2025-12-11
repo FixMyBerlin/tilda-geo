@@ -2,6 +2,12 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2025-12-11
+
+### `roadsPathClasses`
+
+- When a way (esp. `path`, `track`) in `roadsPathClasses` is also present in `bikelanes`, we now add `bicycle_self` (mostly), `bicycle_left`, `bicycle_right`. Those fields are only present when a `bikelanes.category` is present. The keys follow what we have for `roads` and `bikelanesPresence` but behave a bit differently to keep the data slim.
+
 ## 2025-11-26
 
 ### `bikelanes`
