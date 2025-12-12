@@ -11,9 +11,9 @@ export const RegionAccessDenied = ({ status }: Props) => {
       return (
         <div className="flex min-h-screen flex-col items-center justify-center px-4">
           <div className="max-w-md text-center">
-            <h1 className="mb-4 text-2xl font-bold">404 - Region nicht gefunden</h1>
+            <h1 className="mb-4 text-2xl font-bold">Diese Region ist deaktiviert</h1>
             <p className="mb-6 text-gray-600">
-              Diese Region wurde abgeschaltet, bitte kontaktieren sie uns.
+              Die Lizenz ist ausgelaufen und die Region wurde archiviert. Nehmen Sie mit uns Kontakt auf um die Region wieder zu aktivieren.
             </p>
             <Link href="/kontakt" button>
               Kontakt aufnehmen
