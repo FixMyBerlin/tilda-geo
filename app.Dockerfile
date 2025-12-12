@@ -24,10 +24,10 @@ ENV TZ=Europe/Berlin
 ARG NEXT_PUBLIC_APP_ORIGIN
 ARG NEXT_PUBLIC_APP_ENV
 
-RUN npx blitz@2.2.2 prisma generate
-RUN npx blitz@2.2.2 build
+RUN npx blitz@2.2.4 prisma generate
+RUN npx blitz@2.2.4 build
 
-CMD ["/bin/sh", "-c", "npx blitz@2.2.2 prisma migrate deploy && npx blitz@2.2.2 start -p 4000"]
+CMD ["/bin/sh", "-c", "npx blitz@2.2.4 prisma migrate deploy && npx blitz@2.2.4 start -p 4000"]
 
 # From here on we are building the production image
 FROM base AS production
@@ -35,4 +35,4 @@ FROM base AS production
 RUN npm install --global pm2
 
 # Docs: https://docs.docker.com/reference/build-checks/json-args-recommended/
-CMD ["/bin/sh", "-c", "npx blitz@2.2.2 prisma migrate deploy && exec pm2-runtime node -- ./node_modules/next/dist/bin/next start -p 4000"]
+CMD ["/bin/sh", "-c", "npx blitz@2.2.4 prisma migrate deploy && exec pm2-runtime node -- ./node_modules/next/dist/bin/next start -p 4000"]
