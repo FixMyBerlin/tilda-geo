@@ -12,6 +12,8 @@ import { logPadded } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { initializeMetadataTable } from './metadata'
 
+const DEBUG_LUA = false
+
 /** Initialize Folder, Schema, Custom SQL Functions, Tables */
 export async function initialize() {
   logPadded('Processing: Initialize')
@@ -26,7 +28,7 @@ export async function initialize() {
   await sql`CREATE EXTENSION IF NOT EXISTS btree_gist`
 
   // Check lua packages:
-  if (isDev) {
+  if (DEBUG_LUA) {
     console.log('[DEV] Initialize: Installed Lua Packages:')
     await $`luarocks list`
   }
