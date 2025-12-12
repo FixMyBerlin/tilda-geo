@@ -92,6 +92,21 @@ export async function dropDiffTable(table: string) {
 }
 
 /**
+ * Drop all diff tables in the public schema.
+ * Used by reference mode to create a clean slate.
+ */
+export async function dropAllDiffTables() {
+  const rows: { table_name: string }[] = await sql`
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_schema = 'public'
+    AND table_type = 'BASE TABLE'
+    AND table_name LIKE '%_diff'
+  `
+  await Promise.all(rows.map(({ table_name }) => dropDiffTable(table_name)))
+}
+
+/**
  * Create a spatial index on the given table's `geom` column.
  * @returns the Promise of the query
  */

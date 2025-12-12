@@ -74,7 +74,7 @@ Whenever we talk about `hash`es in this code, this feature is referenced.
 
 ### Processing: Inspect changes
 
-With `PROCESSING_DIFFING_MODE=previous` or `PROCESSING_DIFFING_MODE=fixed` the system will create `public.<tablename>_diff` tables that contain only changed entries.
+With `PROCESSING_DIFFING_MODE=previous`, `PROCESSING_DIFFING_MODE=fixed`, or `PROCESSING_DIFFING_MODE=reference` the system will create `public.<tablename>_diff` tables that contain only changed entries (except `reference` mode which creates a clean baseline).
 
 It will compare the `tags` column to the previous run.
 
@@ -86,8 +86,11 @@ The `PROCESSING_DIFFING_BBOX` bbox (required when diffing is on) specifies which
 
 - With `PROCESSING_DIFFING_MODE=previous` you see the changes to the last run on every run
 - With `PROCESSING_DIFFING_MODE=fixed` you see the changes to the last reference-run, allowing you to compare your changes to a certain version of your data.
-  The reference will be the last time you ran with `PROCESSING_DIFFING_MODE=previous`.
+  The reference will be the last time you ran with `PROCESSING_DIFFING_MODE=previous` or `PROCESSING_DIFFING_MODE=reference`.
   With `fixed` the system will **not** update the `diffing_reference.<tablename>` tables.
+- With `PROCESSING_DIFFING_MODE=reference` you create a clean baseline reference for subsequent comparisons.
+  This mode always creates/updates reference tables (ignoring file change status) and removes all diff tables for a clean slate.
+  Use this before starting test iterations, then run with `fixed` mode for consistent comparisons against the same reference.
 
 To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `PROCESSING_DIFFING_MODE=off`.
 

@@ -7,7 +7,8 @@ import { endTimer, startTimer } from './timeTracking'
 const lineLength = process.stdout.columns || 120
 
 export function logPadded(left: string, right: string = '') {
-  console.log(chalk.inverse(left.padEnd(lineLength - right.length) + right))
+  const leftWithEquals = `=== ${left} ===`
+  console.log(chalk.inverse(leftWithEquals.padEnd(lineLength - right.length) + right))
 }
 
 export function logStart(id: string) {

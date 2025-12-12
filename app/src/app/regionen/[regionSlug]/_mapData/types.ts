@@ -215,6 +215,7 @@ export type FileMapDataSubcategoryStyleLayer = Prettify<
 export type FileMapDataSubcategoryStyleLegend = {
   id: string
   name: string
+  /** @description Strings can be Markdown */
   desc?: string[]
   style:
     | {

@@ -4,6 +4,8 @@ import { isDev } from './isDev'
 
 const packagePathPrefix = { runProcessing: './', runTests: './processing' }
 
+const DEBUG_LUA = false
+
 export const initializeLuaPackagePath = async (
   directoryContext: keyof typeof packagePathPrefix,
 ) => {
@@ -45,8 +47,10 @@ ${pathLines}
 `
 
   await Bun.write(resultFile, luaCode)
-  console.log(
-    'Initialize: `init.lua`s `package.path` was updated',
-    isDev ? JSON.stringify({ pathEntries: pathLines, resultFile }) : '',
-  )
+  if (DEBUG_LUA) {
+    console.log(
+      'Initialize: `init.lua`s `package.path` was updated',
+      isDev ? JSON.stringify({ pathEntries: pathLines, resultFile }) : '',
+    )
+  }
 }
