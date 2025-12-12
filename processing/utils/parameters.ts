@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { z } from 'zod'
 import type { TopicConfigBbox } from '../constants/topics.const'
 
-export type DiffingMode = 'off' | 'previous' | 'fixed'
+export type DiffingMode = 'off' | 'previous' | 'fixed' | 'reference'
 
 function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
   const result = envVar ? (envVar.split(',').map((t) => Number(t.trim())) as TopicConfigBbox) : null
@@ -17,7 +17,7 @@ function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
   return result
 }
 
-const diffingModeSchema = z.enum(['off', 'previous', 'fixed'])
+const diffingModeSchema = z.enum(['off', 'previous', 'fixed', 'reference'])
 
 const oauthCredentialSchema = z
   .string()

@@ -5,6 +5,7 @@ import { topicsConfig, type Topic } from '../constants/topics.const'
 import {
   createReferenceTable,
   diffTables,
+  dropAllDiffTables,
   getSchemaTables,
   getTopicTables,
 } from '../diffing/diffing'
@@ -110,7 +111,18 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     !dataTablesDirChanged &&
     !fileChanged &&
     params.processOnlyBbox === null
-  const diffChanges = params.diffingMode !== 'off' && !fileChanged
+
+  // Reference mode: Always create reference, never diff (clean baseline)
+  // Previous/Fixed modes: Only diff when file hasn't changed
+  const isReferenceMode = params.diffingMode === 'reference'
+  const diffChanges =
+    params.diffingMode !== 'off' && params.diffingMode !== 'reference' && !fileChanged
+
+  // Reference mode: Drop all diff tables once at the start for a clean slate
+  if (isReferenceMode) {
+    console.log('Diffing:', 'Drop all diff tables (reference mode - clean slate)')
+    await dropAllDiffTables()
+  }
 
   for (const [topic, bboxes] of Array.from(topicsConfig)) {
     let innerBboxes = bboxes
@@ -154,8 +166,15 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     logStart(`Topics: ${topic}`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
 
-    // Create reference tables for diffing
-    if (diffChanges) {
+    // ============================================
+    // Reference Creation Phase
+    // ============================================
+    if (isReferenceMode) {
+      // Reference mode: Always create/update reference tables unconditionally
+      console.log('Diffing:', 'Create reference tables (reference mode)')
+      await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
+    } else if (diffChanges) {
+      // Previous/Fixed modes: Create reference tables conditionally
       console.log('Diffing:', 'Create reference tables')
       // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
       // Which means existing reference tables don't change (are frozen).
@@ -173,8 +192,14 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // Update the code hashes
     updateDirectoryHash(topicPath(topic))
 
-    // Update the diff tables
-    if (diffChanges) {
+    // ============================================
+    // Diffing Phase
+    // ============================================
+    if (isReferenceMode) {
+      // Reference mode: Skip diff computation (already cleaned up at start)
+      console.log('Diffing:', 'Skip diff computation (reference mode)')
+    } else if (diffChanges) {
+      // Previous/Fixed modes: Compute diffs
       console.log('Diffing:', 'Update diffs', `Strategy: ${params.diffingMode}`)
       await diffTables(Array.from(processedTopicTables))
     } else {
