@@ -5,6 +5,8 @@ import { getMapillaryCoverageMetadata } from '@/src/app/api/_util/getMapillaryCo
 import { Metadata } from 'next'
 import 'server-only'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Mapillary Abdeckung',
   robots: 'noindex',
