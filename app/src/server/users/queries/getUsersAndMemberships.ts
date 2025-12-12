@@ -35,7 +35,7 @@ export default resolver.pipe(
             createdAt: true,
             accessedRegions: true,
             // We cannot pass this part via select in the page component since TS will not be able to infer the types then
-            Membership: { select: { id: true, region: { select: { slug: true } } } },
+            Membership: { select: { id: true, region: { select: { slug: true, status: true } } } },
           },
         }),
     })

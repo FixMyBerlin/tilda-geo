@@ -70,7 +70,7 @@ export const translations: { [key: string]: string } = {
   'ALL--highway=residential': 'Anwohnerstraße',
   'ALL--highway=secondary': 'Landesstraße/Wichtige Durchgangsstraße',
   'ALL--highway=secondary_link': 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
-  'ALL--highway=service_alley': 'Gasse', // roads--category
+  'ALL--highway=service_SIDEey': 'Gasse', // roads--category
   'ALL--highway=service_driveway': 'Grundstückszufahrt', // roads--category
   'ALL--highway=service_emergency_access': 'Rettungsweg', // roads--category
   'ALL--highway=service_parking_aisle': 'Parkplatzweg', // roads--category
@@ -238,14 +238,16 @@ export const translations: { [key: string]: string } = {
   'atlas_publicTransport--category=subway_station': 'U-Bahn-Station',
   'atlas_publicTransport--category=tram_station': 'Tramstation',
   'atlas_publicTransport--title': 'ÖPNV-Haltepunkte und Fähranleger',
-  'atlas_roads--bikelane_ALL=assumed_no--tooltip': 'Wir erwarten hier keine Infrastruktur. Sollte es eine geben, kann diese natürlich eingetragen werden. Hintergrund: Bei Hauptstraßen wo eine Seite angegeben aber die andere fehlt, treffen wir die Annahme, dass die andere Seite keinen Radweg hat.',
-  'atlas_roads--bikelane_ALL=assumed_no': 'Vermutlich vollständig',
-  'atlas_roads--bikelane_ALL=data_no': 'Vollständig (explizit "keine")',
-  'atlas_roads--bikelane_ALL=data_present': 'Vollständig (explizit)',
-  'atlas_roads--bikelane_ALL=missing--tooltip': 'Wir konnten keine Infrastruktur erkennen.',
-  'atlas_roads--bikelane_ALL=missing': 'Unvollständig',
-  'atlas_roads--bikelane_ALL=not_expected--tooltip': 'Wir erwarten hier keine Infrastruktur.',
-  'atlas_roads--bikelane_ALL=not_expected': 'Vermutlich vollständig',
+  'atlas_roads--bikelane_SIDE=assumed_no--tooltip': 'Wir erwarten hier keine Infrastruktur. Sollte es eine geben, kann diese natürlich eingetragen werden. Hintergrund: Bei Hauptstraßen wo eine Seite angegeben aber die andere fehlt, treffen wir die Annahme, dass die andere Seite keinen Radweg hat.',
+  'atlas_roads--bikelane_SIDE=assumed_no': 'Vermutlich vollständig',
+  'atlas_roads--bikelane_SIDE=data_no--tooltip': 'In OSM wurde angegeben, dass keine Radinfrastruktur vorliegt.',
+  'atlas_roads--bikelane_SIDE=data_no': 'Vollständig (explizit "keine")',
+  'atlas_roads--bikelane_SIDE=data_present--tooltip': 'In OSM wurde wurde Radinfrastruktur angegeben:',
+  'atlas_roads--bikelane_SIDE=data_present': 'Vollständig (explizit)',
+  'atlas_roads--bikelane_SIDE=missing--tooltip': 'Wir konnten keine Infrastruktur erkennen.',
+  'atlas_roads--bikelane_SIDE=missing': 'Unvollständig',
+  'atlas_roads--bikelane_SIDE=not_expected--tooltip': 'Wir erwarten hier keine Infrastruktur, zum Beispiel an der innenseite einer Straße die in zwei Geometrien erfasst ist oder bei bestimmten Straßentypen wenn explizite Angaben zur Radinfrastruktur pro Seite vorliegen.',
+  'atlas_roads--bikelane_SIDE=not_expected': 'Keine Infrastruktur erwartet',
   'atlas_roads--bikelane_title': 'Daten zu Radfinfrastruktur Vollständigkeit der Führungsform',
   'atlas_roads--composit_lit--key': 'Beleuchtung',
   'atlas_roads--composit_maxspeed--key': 'Höchstgeschwindigkeit',

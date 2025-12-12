@@ -39,7 +39,6 @@ const DownloadModalTriggerIcon = () => {
 export const DownloadModal = () => {
   const region = useRegion()
   const hasPermissions = useHasPermissions()
-  const canDownload = region.exportPublic ? true : hasPermissions
   const isLoggedIn = Boolean(useSession()?.role)
   const handleLogin = useStartUserLogin()
 
@@ -78,7 +77,7 @@ export const DownloadModal = () => {
           </Suspense>
         }
       >
-        {!canDownload && (
+        {!hasPermissions && (
           <>
             <p className="pb-2.5 pt-5 text-sm">
               Die Daten stehen nur für Rechte-Inhaber zur Verfügung.
@@ -102,7 +101,7 @@ export const DownloadModal = () => {
 
         <DownloadModalUpdateDate />
 
-        {canDownload && <DownloadModalDownloadListWithVectorTiles />}
+        {hasPermissions && <DownloadModalDownloadListWithVectorTiles />}
       </IconModal>
     </section>
   )

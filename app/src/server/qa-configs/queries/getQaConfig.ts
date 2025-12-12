@@ -11,11 +11,6 @@ export default resolver.pipe(
       where: { id },
       include: {
         region: true,
-        _count: {
-          select: {
-            qaEvaluations: true,
-          },
-        },
       },
     })
 

@@ -17,9 +17,6 @@ on:
       NEXT_PUBLIC_APP_ENV:
         required: true
         type: string
-      NEXT_PUBLIC_OSM_API_URL:
-        required: true
-        type: string
       APP_URL:
         required: true
         type: string
@@ -71,13 +68,14 @@ jobs:
               -e "s|^SESSION_SECRET_KEY=.*$|SESSION_SECRET_KEY='${{ secrets.SESSION_SECRET_KEY }}'|" \
               -e "s|^OSM_CLIENT_ID=.*$|OSM_CLIENT_ID='${{ secrets.OSM_CLIENT_ID }}'|" \
               -e "s|^OSM_CLIENT_SECRET=.*$|OSM_CLIENT_SECRET='${{ secrets.OSM_CLIENT_SECRET }}'|" \
-              -e "s|^NEXT_PUBLIC_OSM_API_URL=.*$|NEXT_PUBLIC_OSM_API_URL='${{ inputs.NEXT_PUBLIC_OSM_API_URL }}'|" \
               -e "s|^S3_KEY=.*$|S3_KEY='${{ secrets.S3_KEY }}'|" \
               -e "s|^S3_SECRET=.*$|S3_SECRET='${{ secrets.S3_SECRET }}'|" \
               -e "s|^S3_REGION=.*$|S3_REGION='${{ secrets.S3_REGION }}'|" \
               -e "s|^S3_BUCKET=.*$|S3_BUCKET='${{ secrets.S3_BUCKET }}'|" \
               -e "s|^ATLAS_API_KEY=.*$|ATLAS_API_KEY='${{ secrets.ATLAS_API_KEY }}'|" \
               -e "s|^MAPROULETTE_API_KEY=.*$|MAPROULETTE_API_KEY='${{ secrets.MAPROULETTE_API_KEY }}'|" \
+              -e "s|^MAILJET_APIKEY_PUBLIC=.*$|MAILJET_APIKEY_PUBLIC='${{ secrets.MAILJET_APIKEY_PUBLIC }}'|" \
+              -e "s|^MAILJET_APIKEY_PRIVATE=.*$|MAILJET_APIKEY_PRIVATE='${{ secrets.MAILJET_APIKEY_PRIVATE }}'|" \
               -e "s|^SKIP_DOWNLOAD=.*$|SKIP_DOWNLOAD='${{ vars.SKIP_DOWNLOAD }}'|" \
               -e "s|^SKIP_UNCHANGED=.*$|SKIP_UNCHANGED='${{ vars.SKIP_UNCHANGED }}'|" \
               -e "s|^PROCESSING_DIFFING_MODE=.*$|PROCESSING_DIFFING_MODE='${{ vars.PROCESSING_DIFFING_MODE }}'|" \

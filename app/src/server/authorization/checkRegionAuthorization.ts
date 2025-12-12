@@ -11,11 +11,26 @@ export async function checkRegionAuthorization(session: Ctx['session'], regionSl
     return { isAuthorized: false }
   }
 
+  // Admins always have access
   if (session?.role === 'ADMIN') {
     return { isAuthorized: true, regionId: region.id }
   }
 
-  if (session?.userId) {
+  // DEACTIVATED: Only admins (already checked above)
+  if (region.status === 'DEACTIVATED') {
+    return { isAuthorized: false }
+  }
+
+  // PUBLIC: Anyone can access
+  if (region.status === 'PUBLIC') {
+    return { isAuthorized: true, regionId: region.id }
+  }
+
+  // PRIVATE: Only members can access
+  if (region.status === 'PRIVATE') {
+    if (!session?.userId) {
+      return { isAuthorized: false }
+    }
     const membership = await db.membership.findFirst({
       where: {
         userId: session.userId,

@@ -28,7 +28,7 @@ export type StaticRegion = {
   slug: RegionSlug
   name: string
   fullName: string
-  product: 'radverkehr' | 'parkraum' | 'fussverkehr'
+  product: 'radverkehr' | 'parkraum' | 'fussverkehr' | 'analysis'
   /** @desc 1-n relation IDs, used for the mask and export bbox — @href use https://hanshack.com/geotools/gimmegeodata/ to get the ids */
   osmRelationIds: number[] | []
   map: StaticRegionInitialMapPositionZoom
@@ -111,6 +111,7 @@ export type RegionSlug =
   | 'bb-sg' // Land Brandenburg Steuerungsgruppe
   | 'bb' // Öffentlich, Land Brandenburg
   | 'berlin'
+  | 'berlin-baumanalyse'
   | 'bibi'
   | 'deutschland'
   | 'fahrradstellplaetze'
@@ -347,6 +348,26 @@ export const staticRegion: StaticRegion[] = [
       'parkings_no',
       'parkings_separate',
     ],
+  },
+  {
+    slug: 'berlin-baumanalyse',
+    name: 'Straßenbaumanalyse',
+    fullName: 'Straßenbaumanalyse Klimaanpassungsgesetz Berlin',
+    product: 'analysis',
+    osmRelationIds: [62422],
+    map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
+    logoPath: null,
+    logoWhiteBackgroundRequired: false,
+    showSearch: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'roads',
+      'mapillary',
+    ],
+    backgroundSources: berlinBackgroundSources,
+    notes: 'atlasNotes',
+    bbox: null,
+    exports: null,
   },
   {
     slug: 'parkraum',

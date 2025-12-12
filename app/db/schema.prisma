@@ -98,14 +98,20 @@ enum TokenType {
   RESET_PASSWORD
 }
 
+enum RegionStatus {
+  PUBLIC
+  PRIVATE
+  DEACTIVATED
+}
+
 model Region {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        Int          @id @default(autoincrement())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   //
-  slug         String   @unique
-  public       Boolean  @default(false)
-  exportPublic Boolean  @default(false)
+  slug      String       @unique
+  promoted  Boolean      @default(false)
+  status    RegionStatus @default(PUBLIC)
 
   Membership Membership[]
   uploads    Upload[]

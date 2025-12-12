@@ -143,4 +143,19 @@ export const staticDatasetCategories = {
     title: 'Befahrungsergebnisse',
     subtitle: 'Ergebnisse aus den Befahrungen',
   },
+  'berlin-baumanalyse/results': {
+    order: 1,
+    title: 'Analyseergebnisse',
+    subtitle: 'Ergebnisse der Straßenbaumanalyse',
+  },
+  'berlin-baumanalyse/boundaries': {
+    order: 2,
+    title: 'Bezugsräume',
+    subtitle: 'Bezirke, LOR, u.ä.',
+  },
+  'berlin-baumanalyse/misc': {
+    order: 3,
+    title: 'Weitere Referenzdaten',
+    subtitle: 'Weitere statische Referenzdatenz',
+  },
 } as const

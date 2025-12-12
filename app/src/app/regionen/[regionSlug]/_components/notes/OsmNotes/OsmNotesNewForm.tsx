@@ -58,17 +58,18 @@ export const OsmNotesNewForm = () => {
     // Text snippes for regular comment
     const footerMemberHashtag = hasPermissions ? `#${region.slug}-member` : '#visitor'
 
-    const footerUrl = region.public
-      ? (() => {
-          // Recreate the current URL with all params except the osmNotes(=true)
-          const params = new URLSearchParams(searchParams?.toString())
-          params.delete('osmNote')
-          const paramString = params.toString()
-          return paramString
-            ? `${appBaseUrl.production}/regionen/${region.slug}?${paramString}`
-            : `${appBaseUrl.production}/regionen/${region.slug}`
-        })()
-      : appBaseUrl.production
+    const footerUrl =
+      region.status === 'PUBLIC'
+        ? (() => {
+            // Recreate the current URL with all params except the osmNotes(=true)
+            const params = new URLSearchParams(searchParams?.toString())
+            params.delete('osmNote')
+            const paramString = params.toString()
+            return paramString
+              ? `${appBaseUrl.production}/regionen/${region.slug}?${paramString}`
+              : `${appBaseUrl.production}/regionen/${region.slug}`
+          })()
+        : appBaseUrl.production
     const footerWiki = 'https://osm.wiki/FixMyCity_GmbH/TILDA'
     const footer = `\n--\n#TILDA ${footerMemberHashtag} ${footerUrl} ${footerWiki}`
 

@@ -2,6 +2,7 @@
 import { Link } from '@/src/app/_components/links/Link'
 import { linkStyles } from '@/src/app/_components/links/styles'
 import { Pill } from '@/src/app/_components/text/Pill'
+import { RegionStatusPill } from '@/src/app/admin/_components/RegionStatusPill'
 import deleteRegion from '@/src/server/regions/mutations/deleteRegion'
 import { TRegion } from '@/src/server/regions/queries/getRegion'
 import { useMutation } from '@blitzjs/rpc'
@@ -14,23 +15,19 @@ export const RegionsTable = ({ regions }: { regions: TRegion[] }) => {
   const [deleteRegionMutation] = useMutation(deleteRegion)
 
   return (
-    <AdminTable header={['Name', 'Sichtbarkeit', 'Export', 'Atlas', 'Rohdaten', '', '']}>
+    <AdminTable header={['Name', 'Status', 'Gelistet', 'Atlas', 'Rohdaten', '', '']}>
       {regions.map((region) => {
         return (
           <tr key={region.slug}>
             <th>{region.name}</th>
             <td>
-              {region.public ? (
-                <Pill color="green">Öffentlich</Pill>
-              ) : (
-                <Pill color="purple">Versteckt</Pill>
-              )}
+              <RegionStatusPill status={region.status} />
             </td>
             <td>
-              {region.exportPublic ? (
-                <Pill color="red">Jeder</Pill>
+              {region.promoted ? (
+                <Pill color="green">Gelistet</Pill>
               ) : (
-                <Pill color="green">Mitglieder</Pill>
+                <Pill color="gray">Nicht gelistet</Pill>
               )}
             </td>
             <td>

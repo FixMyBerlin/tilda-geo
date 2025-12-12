@@ -23,7 +23,6 @@ services:
       args:
         NEXT_PUBLIC_APP_ORIGIN: localhost
         NEXT_PUBLIC_APP_ENV: ${NEXT_PUBLIC_APP_ENV}
-        NEXT_PUBLIC_OSM_API_URL: ${NEXT_PUBLIC_OSM_API_URL}
     environment:
       NEXT_PUBLIC_APP_ORIGIN: localhost
     logging:

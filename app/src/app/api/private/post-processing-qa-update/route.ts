@@ -118,6 +118,30 @@ async function upsertQaEvaluationWithRules(
     return transformEvaluationWithDecisionData(newEvaluation)
   }
 
+  // Check if we need to reset a user decision (before checking dataChanged)
+  // This ensures NOT_OK decisions get reset to GOOD even when absolute difference is within threshold
+  const shouldReset = shouldResetUserDecision(
+    previousEvaluation.systemStatus,
+    evaluation.systemStatus,
+    previousEvaluation.userStatus,
+  )
+  if (shouldReset) {
+    const newEvaluation = await db.qaEvaluation.create({
+      data: {
+        configId,
+        areaId,
+        systemStatus: evaluation.systemStatus,
+        evaluatorType: 'SYSTEM',
+        userStatus: null,
+        body: null,
+        userId: null,
+        decisionData: evaluation.decisionData,
+      },
+    })
+
+    return transformEvaluationWithDecisionData(newEvaluation)
+  }
+
   // Check if data changed significantly
   // If absolute difference is <= threshold, it's not considered a change
   // If absoluteDifference is NULL, treat it as a change (needs evaluation)

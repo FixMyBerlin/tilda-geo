@@ -15,6 +15,7 @@ function RoadClassification(object_tags)
     oneway_bicycle = SANITIZE_TAGS.oneway_bicycle(object_tags['oneway:bicycle']),
     width = parse_length(object_tags.width),
     width_source = SANITIZE_TAGS.safe_string(object_tags['source:width']),
+    _width_effective = parse_length(object_tags['width:effective']),
     bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
     tunnel = SANITIZE_TAGS.boolean_yes(object_tags.tunnel),
   }

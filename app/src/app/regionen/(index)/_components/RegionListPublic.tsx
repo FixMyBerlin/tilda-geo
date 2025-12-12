@@ -4,7 +4,9 @@ import 'server-only'
 import { RegionTeaser } from './RegionTeaser'
 
 export const RegionListPublic = async () => {
-  const publicRegions = await invoke(getRegionsWithAdditionalData, { where: { public: true } })
+  const publicRegions = await invoke(getRegionsWithAdditionalData, {
+    where: { promoted: true, status: 'PUBLIC' },
+  })
 
   return (
     <div className="mx-auto max-w-7xl overflow-hidden sm:px-6 lg:px-8">

@@ -19,9 +19,6 @@ namespace NodeJS {
     // LOGIN
     readonly OSM_CLIENT_ID: string
     readonly OSM_CLIENT_SECRET: string
-    readonly NEXT_PUBLIC_OSM_API_URL:
-      | 'https://api.openstreetmap.org/api/0.6'
-      | 'https://master.apis.dev.openstreetmap.org/api/0.6'
     // StaticDatasets
     readonly S3_KEY: string
     readonly S3_SECRET: string

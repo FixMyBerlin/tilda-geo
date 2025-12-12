@@ -57,19 +57,23 @@ export async function GET(
       return 404 // <==========
     }
 
-    if (region.exportPublic === true) {
-      return 200 // <==========
-    }
+    const {
+      session: { userId, role },
+    } = await getBlitzContext()
 
-    const { session } = await getBlitzContext()
-    const { userId, role } = session
-
-    if (!userId) {
-      return 403 // <==========
-    }
-
+    // Admins can always export
     if (role === 'ADMIN') {
       return 200 // <==========
+    }
+
+    // DEACTIVATED: Only admins (already checked above)
+    if (region.status === 'DEACTIVATED') {
+      return 404 // <==========
+    }
+
+    // PUBLIC and PRIVATE: Require membership for exports
+    if (!userId) {
+      return 403 // <==========
     }
 
     const membershipExists = !!(await db.membership.count({

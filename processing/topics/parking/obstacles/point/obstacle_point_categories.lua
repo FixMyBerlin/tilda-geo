@@ -133,4 +133,13 @@ obstacle_point_categories = {
     tags = function(tags) return { man_made = tags.man_made } end,
     tags_cc = { 'network', 'ref' },
   }),
+  class_obstacle_category.new({
+    id = 'collision_protection',
+    buffer_radius = function(tags) return 0.4 end,
+    conditions = function(tags)
+      return TAG_HELPER.is_obstacle_parking(tags) and tags.barrier == 'collision_protection'
+    end,
+    tags = function(tags) return { barrier = tags.barrier } end,
+    tags_cc = {},
+  }),
 }

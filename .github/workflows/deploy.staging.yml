@@ -13,7 +13,6 @@ jobs:
       CACHELESS_URL: staging-cacheless.tilda-geo.de
       NEXT_PUBLIC_APP_ORIGIN: https://staging.tilda-geo.de
       NEXT_PUBLIC_APP_ENV: staging
-      NEXT_PUBLIC_OSM_API_URL: https://master.apis.dev.openstreetmap.org/api/0.6
       APP_URL: staging.tilda-geo.de
     secrets: inherit
   restart_services:
@@ -37,7 +36,6 @@ jobs:
       ENVIRONMENT: staging
       NEXT_PUBLIC_APP_ORIGIN: https://staging.tilda-geo.de
       NEXT_PUBLIC_APP_ENV: staging
-      NEXT_PUBLIC_OSM_API_URL: https://master.apis.dev.openstreetmap.org/api/0.6
       APP_URL: staging.tilda-geo.de
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
     secrets: inherit

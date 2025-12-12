@@ -1,31 +1,37 @@
+import { Pill } from '@/src/app/_components/text/Pill'
+import { useRegion } from '@/src/app/regionen/[regionSlug]/_components/regionUtils/useRegion'
 import { useStaticRegion } from '@/src/app/regionen/[regionSlug]/_components/regionUtils/useStaticRegion'
 import { productName } from '@/src/data/tildaProductNames.const'
-import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
+import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { twJoin } from 'tailwind-merge'
 
 export const HeaderRegionenLogo = () => {
-  const region = useStaticRegion()
+  const staticRegion = useStaticRegion()
+  const region = useRegion()
 
-  if (!region) return null
+  if (!staticRegion) return null
 
-  const customLogo = region.logoPath || region.externalLogoPath
+  const isPrivate = region.status === 'PRIVATE'
+  const isDeactivated = region.status === 'DEACTIVATED'
+
+  const customLogo = staticRegion.logoPath || staticRegion.externalLogoPath
 
   return (
     <>
       {customLogo && (
         <div
           className={twJoin(
-            region.logoWhiteBackgroundRequired ? 'rounded-sm bg-white px-1 py-1' : '',
+            staticRegion.logoWhiteBackgroundRequired ? 'rounded-sm bg-white px-1 py-1' : '',
           )}
         >
-          {region.externalLogoPath && (
+          {staticRegion.externalLogoPath && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={region.externalLogoPath} className="h-8 w-auto" alt="" />
+            <img src={staticRegion.externalLogoPath} className="h-8 w-auto" alt="" />
           )}
-          {region.logoPath && (
+          {staticRegion.logoPath && (
             // local files
-            <Image src={region.logoPath} className="h-8 w-auto" alt="" />
+            <Image src={staticRegion.logoPath} className="h-8 w-auto" alt="" />
           )}
         </div>
       )}
@@ -38,11 +44,24 @@ export const HeaderRegionenLogo = () => {
       )}
 
       <div className="ml-3 truncate leading-tight">
-        <div className={twJoin('truncate', customLogo ? 'text-gray-200' : 'text-yellow-400')}>
-          <span className="md:hidden">{region.name}</span>
-          <span className="hidden md:inline">{region.fullName}</span>
+        <div
+          className={twJoin(
+            'flex items-center gap-1 truncate',
+            customLogo ? 'text-gray-200' : 'text-yellow-400',
+          )}
+        >
+          {isPrivate && (
+            <LockClosedIcon className="size-4 flex-shrink-0 text-gray-300" aria-hidden="true" />
+          )}
+          <span className="md:hidden">{staticRegion.name}</span>
+          <span className="hidden md:inline">{staticRegion.fullName}</span>
+          {isDeactivated && (
+            <Pill color="red" className="text-[9px] uppercase tracking-wide">
+              Deaktiviert
+            </Pill>
+          )}
         </div>
-        <div className="text-xs text-gray-400">{productName.get(region.product)}</div>
+        <div className="text-xs text-gray-400">{productName.get(staticRegion.product)}</div>
       </div>
     </>
   )

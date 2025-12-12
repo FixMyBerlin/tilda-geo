@@ -29,9 +29,8 @@ export default function AdminRegionNewPage() {
         initialValues={{
           slug: searchParamSlug,
           // @ts-expect-error the Form (and RegionFormSchema) require a string
-          public: 'false',
-          // @ts-expect-error
-          exportPublic: 'false',
+          promoted: 'false',
+          status: 'PUBLIC',
         }}
         onSubmit={async (values) => {
           try {
