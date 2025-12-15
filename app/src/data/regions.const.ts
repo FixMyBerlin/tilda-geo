@@ -866,7 +866,6 @@ export const staticRegion: StaticRegion[] = [
       'mapillary',
     ],
     backgroundSources: [...defaultBackgroundSources, 'ELI_baden-w-rttemberg-dop20'],
-    notes: 'osmNotes',
     exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
   },
   {

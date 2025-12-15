@@ -13,7 +13,8 @@ export const RegionAccessDenied = ({ status }: Props) => {
           <div className="max-w-md text-center">
             <h1 className="mb-4 text-2xl font-bold">Diese Region ist deaktiviert</h1>
             <p className="mb-6 text-gray-600">
-              Die Lizenz ist ausgelaufen und die Region wurde archiviert. Nehmen Sie mit uns Kontakt auf um die Region wieder zu aktivieren.
+              Die Lizenz ist ausgelaufen und die Region wurde archiviert. Nehmen Sie mit uns Kontakt
+              auf um die Region wieder zu aktivieren.
             </p>
             <Link href="/kontakt" button>
               Kontakt aufnehmen
