@@ -855,6 +855,8 @@ export const staticRegion: StaticRegion[] = [
     },
     logoPath: imageUeberlingen,
     logoWhiteBackgroundRequired: false,
+    showSearch: true,
+    notes: 'atlasNotes',
     categories: [
       // The order here specifies the order in the UI
       'bikelanes',
