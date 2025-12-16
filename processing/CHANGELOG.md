@@ -8,6 +8,10 @@ This is an manual and incomplete list of change to the data structure.
 
 - When a way (esp. `path`, `track`) in `roadsPathClasses` is also present in `bikelanes`, we now add `bicycle_self` (mostly), `bicycle_left`, `bicycle_right`. Those fields are only present when a `bikelanes.category` is present. The keys follow what we have for `roads` and `bikelanesPresence` but behave a bit differently to keep the data slim.
 
+### `bikelanes`
+
+- (Beta) Add `width_effective` to `bikelanes`. This value is considered experimental for now and will likely change later when we rework how we process `width`.
+
 ## 2025-11-26
 
 ### `bikelanes`

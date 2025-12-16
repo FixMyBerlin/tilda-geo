@@ -8,7 +8,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
     filter: [
       'match',
       ['get', 'road'],
-      ['path', 'track', 'bridleway', 'footway', 'cycleway'],
+      ['path', 'track', 'bridleway', 'footway', 'cycleway', 'footway_steps'],
       true,
       false,
     ],
@@ -33,7 +33,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
     filter: [
       'match',
       ['get', 'road'],
-      ['path', 'track', 'bridleway', 'footway', 'cycleway'],
+      ['path', 'track', 'bridleway', 'footway', 'cycleway', 'footway_steps'],
       true,
       false,
     ],

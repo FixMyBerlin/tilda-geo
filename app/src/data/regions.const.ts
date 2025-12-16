@@ -855,6 +855,8 @@ export const staticRegion: StaticRegion[] = [
     },
     logoPath: imageUeberlingen,
     logoWhiteBackgroundRequired: false,
+    showSearch: true,
+    notes: 'atlasNotes',
     categories: [
       // The order here specifies the order in the UI
       'bikelanes',
@@ -864,7 +866,6 @@ export const staticRegion: StaticRegion[] = [
       'mapillary',
     ],
     backgroundSources: [...defaultBackgroundSources, 'ELI_baden-w-rttemberg-dop20'],
-    notes: 'osmNotes',
     exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
   },
   {
