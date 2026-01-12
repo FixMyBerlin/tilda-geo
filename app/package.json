@@ -5,7 +5,7 @@
   "license": "AGPL-3.0",
   "private": true,
   "engines": {
-    "node": ">=22.0.0 <23.0.0"
+    "node": ">=24.0.0 <25.0.0"
   },
   "scripts": {
     "start": "npx blitz@2.2.4 start --hostname 127.0.0.1 --port 4000",
@@ -140,6 +140,7 @@
     "@types/lodash": "4.17.20",
     "@types/mapbox__mapbox-gl-draw": "^1.4.9",
     "@types/node": "22.19.0",
+    "@types/node": "^24.0.0",
     "@types/preview-email": "3.1.0",
     "@types/react": "18.3.23",
     "@types/react-dom": "^18.3.7",
