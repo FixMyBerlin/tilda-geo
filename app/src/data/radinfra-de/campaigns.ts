@@ -71,7 +71,7 @@ const rawCampaigns = [
   unexpected_highway_path__mapillary,
 ]
 
-const collectCampaigns = (rawCampaigns) => {
+const collectCampaigns = () => {
   return rawCampaigns
     .map((campaign) => {
       const parsed = CampaignSchema.safeParse(campaign)
@@ -84,4 +84,4 @@ const collectCampaigns = (rawCampaigns) => {
     .filter(Boolean)
 }
 
-export const campaigns = collectCampaigns(rawCampaigns)
+export const campaigns = collectCampaigns()
