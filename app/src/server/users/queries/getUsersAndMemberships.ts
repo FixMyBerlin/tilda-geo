@@ -3,10 +3,8 @@ import { AccessedRegionsSchema } from '@/src/server/users/schema'
 import { resolver } from '@blitzjs/rpc'
 import { paginate } from 'blitz'
 
-interface GetUsersInput extends Pick<
-  Prisma.UserFindManyArgs,
-  'where' | 'orderBy' | 'skip' | 'take'
-> {}
+interface GetUsersInput
+  extends Pick<Prisma.UserFindManyArgs, 'where' | 'orderBy' | 'skip' | 'take'> {}
 
 export default resolver.pipe(
   resolver.authorize('ADMIN'),

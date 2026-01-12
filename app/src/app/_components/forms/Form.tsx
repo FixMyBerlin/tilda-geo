@@ -9,10 +9,8 @@ import { buttonStyles } from '../links/styles'
 import { FormError } from './FormError'
 import { errorMessageTranslations } from './errorMessageTranslations'
 
-export interface FormProps<S extends z.ZodType<any, any>> extends Omit<
-  PropsWithoutRef<JSX.IntrinsicElements['form']>,
-  'onSubmit'
-> {
+export interface FormProps<S extends z.ZodType<any, any>>
+  extends Omit<PropsWithoutRef<JSX.IntrinsicElements['form']>, 'onSubmit'> {
   /** All your form fields */
   children?: ReactNode
   /** Text to display in the submit button */
