@@ -55,8 +55,12 @@ jobs:
           context: ./
           push: false
           load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/app:${{ inputs.ENVIRONMENT }}-latest
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/app:cache,mode=max
           tags: |
             public.ecr.aws/n0p8j4k5/tilda/app:${{ github.sha }}
             public.ecr.aws/n0p8j4k5/tilda/app:${{ inputs.ENVIRONMENT }}-latest
