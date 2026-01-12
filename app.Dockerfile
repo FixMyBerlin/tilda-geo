@@ -1,4 +1,4 @@
-FROM node:22-trixie-slim AS base
+FROM node:24-trixie-slim AS base
 
 # Debian 13 Trixie (stable) includes GDAL 3.10.3+ (supports gdal vector edit)
 RUN apt-get update && \

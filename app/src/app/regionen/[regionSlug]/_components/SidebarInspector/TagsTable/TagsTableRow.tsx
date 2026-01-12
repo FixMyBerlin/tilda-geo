@@ -5,6 +5,7 @@ import { SourcesId } from '../../../_mapData/mapDataSources/sources.const'
 import { TagsTableRowValueWithTooltip } from './TagsTableRowValueWithTooltip'
 import { NodataFallback } from './compositTableRows/NodataFallback'
 import { ConditionalFormattedKey } from './translations/ConditionalFormattedKey'
+import { splitSemicolonRespectingBrackets } from './utils/splitSemicolonRespectingBrackets'
 
 export type TagsTableRowProps =
   | {
@@ -64,7 +65,7 @@ const TagsTableRowMaybeList = ({ sourceId, tagKey, tagValue }: TagsTableRowProps
     return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
   }
 
-  const listValues = tagValue.split(';').map((e) => e.trim())
+  const listValues = splitSemicolonRespectingBrackets(tagValue)
   if (listValues.length === 1) {
     return <TagsTableRowValueWithTooltip sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
   }

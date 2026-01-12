@@ -26,7 +26,7 @@ jobs:
       name: ${{ inputs.ENVIRONMENT }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup AWS CLI
         run: |
@@ -38,32 +38,34 @@ jobs:
           aws --version
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n0p8j4k5/
+
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build processing image
-        uses: docker/build-push-action@v5
+      - name: Build and push processing image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./processing.Dockerfile
-          push: false
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          push: true
+          cache-from: |
+            type=gha
+            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
+          cache-to: |
+            type=gha,mode=max
+            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:cache,mode=max
           tags: |
             public.ecr.aws/n0p8j4k5/tilda/processing:${{ github.sha }}
             public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
-
-      - name: Push the processing image
-        run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n0p8j4k5/
-          docker push --all-tags public.ecr.aws/n0p8j4k5/tilda/processing
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
