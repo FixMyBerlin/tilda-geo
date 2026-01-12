@@ -1,8 +1,10 @@
 import db, { Prisma } from '@/db'
 import { resolver } from '@blitzjs/rpc'
 
-interface GetRegionsInput
-  extends Pick<Prisma.RegionFindManyArgs, 'where' | 'orderBy' | 'skip' | 'take'> {}
+interface GetRegionsInput extends Pick<
+  Prisma.RegionFindManyArgs,
+  'where' | 'orderBy' | 'skip' | 'take'
+> {}
 
 export default resolver.pipe(
   resolver.authorize('ADMIN'),
