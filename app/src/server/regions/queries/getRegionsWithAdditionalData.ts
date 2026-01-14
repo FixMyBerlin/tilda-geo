@@ -4,8 +4,10 @@ import { resolver } from '@blitzjs/rpc'
 import { NotFoundError } from 'blitz'
 import { TRegion } from './getRegion'
 
-interface GetRegionsInput
-  extends Pick<Prisma.RegionFindManyArgs, 'where' | 'orderBy' | 'skip' | 'take'> {}
+interface GetRegionsInput extends Pick<
+  Prisma.RegionFindManyArgs,
+  'where' | 'orderBy' | 'skip' | 'take'
+> {}
 
 export default resolver.pipe(async ({ where, orderBy = { slug: 'asc' } }: GetRegionsInput) => {
   const regions = await db.region.findMany({ where, orderBy })
