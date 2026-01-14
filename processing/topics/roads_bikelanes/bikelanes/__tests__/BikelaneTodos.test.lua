@@ -353,4 +353,42 @@ describe("BikelaneTodos", function()
       assert.are.equal(TableIncludes(left._todo_list, "missing_oneway"), false)
     end)
   end)
+
+  describe('`crossing_too_long`:', function()
+    it('creates todo for long crossing (> 100m) with cycleway=crossing', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['cycleway'] = 'crossing',
+          ['_length'] = 150,
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = Bikelanes(input_object.tags, input_object)
+      assert.are.equal(TableSize(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(data.category, 'needsClarification')
+      assert.are.equal(TableIncludes(data._todo_list, "crossing_too_long"), true)
+    end)
+
+    it('does not create todo for short crossing (< 100m)', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['cycleway'] = 'crossing',
+          ['_length'] = 50,
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = Bikelanes(input_object.tags, input_object)
+      assert.are.equal(TableSize(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(data.category, 'crossing')
+      assert.are.equal(TableIncludes(data._todo_list, "crossing_too_long"), false)
+    end)
+  end)
 end)

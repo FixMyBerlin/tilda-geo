@@ -169,6 +169,7 @@ function osm2pgsql.process_way(object)
   -- Calculate and format length, see also https://github.com/osm2pgsql-dev/osm2pgsql/discussions/1756#discussioncomment-3614364
   -- Use https://epsg.io/5243 (same as `presenceStats.sql`); update `atlas_roads--length--tooltip` if changed.
   local length = round(object:as_linestring():transform(5243):length(), 2)
+  object_tags._length = length -- quick-n-dirty way make the values available in BikelaneCategory
 
   -- ====== (C) Compute results and insert ======
   local road_result_tags = {

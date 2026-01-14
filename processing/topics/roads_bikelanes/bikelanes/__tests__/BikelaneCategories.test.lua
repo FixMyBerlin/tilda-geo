@@ -395,6 +395,72 @@ describe("`BikelaneCategories`", function()
       assert.are.equal(categories.right.tags.cycleway, 'lane')
       assert.are.equal(categories.right.tags.lane, 'crossing')
     end)
+
+    it('should categorize short crossing (< 100m) as crossing', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['cycleway'] = 'crossing',
+        ['_length'] = 50,
+      }
+      local category = CategorizeBikelane(tags)
+      assert.are.equal(category.id, 'crossing')
+    end)
+
+    it('should categorize short shared crossing (< 100m) as crossing', function()
+      local tags = {
+        ['highway'] = 'path',
+        ['path'] = 'crossing',
+        ['bicycle'] = 'designated',
+        ['foot'] = 'designated',
+        ['_length'] = 50,
+      }
+      local category = CategorizeBikelane(tags)
+      assert.are.equal(category.id, 'crossing')
+    end)
+
+    it('should categorize long crossing (> 100m) as needsClarification', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['cycleway'] = 'crossing',
+        ['_length'] = 150,
+      }
+      local category = CategorizeBikelane(tags)
+      assert.are.equal(category.id, 'needsClarification')
+    end)
+
+    it('should categorize long shared crossing (> 100m) as needsClarification', function()
+      local tags = {
+        ['highway'] = 'path',
+        ['path'] = 'crossing',
+        ['bicycle'] = 'designated',
+        ['foot'] = 'designated',
+        ['_length'] = 200,
+      }
+      local category = CategorizeBikelane(tags)
+      assert.are.equal(category.id, 'needsClarification')
+    end)
+
+    it('should categorize crossing with is_sidepath as needsClarification (not cycleway_adjoining)', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['cycleway'] = 'crossing',
+        ['is_sidepath'] = 'yes',
+        ['_length'] = 150,
+      }
+      local category = CategorizeBikelane(tags)
+      assert.are.equal(category.id, 'needsClarification')
+    end)
+
+    it('should categorize short crossing with is_sidepath as crossing (not cycleway_adjoining)', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['cycleway'] = 'crossing',
+        ['is_sidepath'] = 'yes',
+        ['_length'] = 50,
+      }
+      local category = CategorizeBikelane(tags)
+      assert.are.equal(category.id, 'crossing')
+    end)
   end)
 
   describe('`sharedBus*` categories', function()

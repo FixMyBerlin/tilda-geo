@@ -54,6 +54,7 @@ function Bikelanes(object_tags, object)
   local transformedObjects = GetTransformedObjects(object_tags, transformations)
 
   for _, transformed_tags in ipairs(transformedObjects) do
+    transformed_tags._length = object_tags._length
     local category = CategorizeBikelane(transformed_tags)
     if category ~= nil then
       local result_tags = {

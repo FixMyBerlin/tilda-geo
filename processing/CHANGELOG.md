@@ -2,6 +2,12 @@
 
 This is an manual and incomplete list of change to the data structure.
 
+## 2026-01-14
+
+### `bikelanes`
+
+- Categorize bike infrastructure of `category=crossing` only when way is below 100 meters length. Otherwise it becomes `needClarification` and a todo-note given that those are most likely miss-taggings.
+
 ## 2025-12-11
 
 ### `roadsPathClasses`
