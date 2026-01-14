@@ -21,13 +21,11 @@ if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
 const regions = await getRegions()
 const existingRegionSlugs = regions.map((region) => region.slug)
 
-// use --dry-run to run all checks and transformation (but no pmtiles created, no upload to S3, no DB modifications)
 // use --keep-tmp to keep temporary generated files
 // use --folder-filter to run only folders that include this filter string (check the full path, so `region-bb` (group folder) and `bb-` (dataset folder) will both work)
 const { values, positionals } = parseArgs({
   args: Bun.argv,
   options: {
-    'dry-run': { type: 'boolean' },
     'keep-tmp': { type: 'boolean' },
     'folder-filter': { type: 'string' },
   },
@@ -35,7 +33,6 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
 })
 
-const dryRun = !!values['dry-run']
 const keepTemporaryFiles = !!values['keep-tmp']
 const folderFilterTerm = values['folder-filter']
 
@@ -132,7 +129,7 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
   switch (metaData.dataSourceType) {
     case 'external':
       // TypeScript narrows metaData to the external variant here
-      await processExternalSource(metaData, uploadSlug, regionSlugs, dryRun, regionAndDatasetFolder)
+      await processExternalSource(metaData, uploadSlug, regionSlugs, regionAndDatasetFolder)
       break
     case 'local':
       // Get the one `.geojson` file that we will handle ready
@@ -155,7 +152,6 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
         regionSlugs,
         transformedFilepath,
         tempFolder,
-        dryRun,
         regionAndDatasetFolder,
       )
       break

@@ -1,7 +1,6 @@
 import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
 import { createUpload } from '../api'
 import { MetaData } from '../types'
-import { logInfo } from '../utils/log'
 import { generatePMTilesFile } from './generatePMTilesFile'
 import { isCompressedSmallerThan } from './isCompressedSmallerThan'
 import { uploadFileToS3 } from './uploadFileToS3'
@@ -12,22 +11,19 @@ export async function processLocalSource(
   regionSlugs: string[],
   transformedFilepath: string,
   tempFolder: string,
-  dryRun: boolean,
   regionAndDatasetFolder: string,
 ) {
-  logInfo(`Uploading GeoJSON file to S3...`, dryRun)
-  const geojsonUrl = dryRun
-    ? 'http://example.com/does-not-exist.geojson'
-    : await uploadFileToS3(transformedFilepath, uploadSlug)
+  console.log(`  Uploading GeoJSON file to S3...`)
+  const geojsonUrl = await uploadFileToS3(transformedFilepath, uploadSlug)
 
-  const pmtilesFilepath = dryRun
-    ? '/tmp/does-not-exist.pmtiles'
-    : await generatePMTilesFile(transformedFilepath, tempFolder, metaData.geometricPrecision)
+  const pmtilesFilepath = await generatePMTilesFile(
+    transformedFilepath,
+    tempFolder,
+    metaData.geometricPrecision,
+  )
 
-  logInfo(`Uploading PMTiles file to S3...`, dryRun)
-  const pmtilesUrl = dryRun
-    ? 'http://example.com/does-not-exist.pmtiles'
-    : await uploadFileToS3(pmtilesFilepath, uploadSlug)
+  console.log(`  Uploading PMTiles file to S3...`)
+  const pmtilesUrl = await uploadFileToS3(pmtilesFilepath, uploadSlug)
 
   // Determine which format to use for map rendering
   const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
@@ -47,20 +43,18 @@ export async function processLocalSource(
       : 'based on the optimal format for this file size.',
   )
 
-  logInfo(`Saving uploads to DB...`, dryRun)
-  if (!dryRun) {
-    // Create single upload entry with both URLs
-    await createUpload({
-      uploadSlug,
-      regionSlugs,
-      isPublic: metaData.public,
-      hideDownloadLink: metaData.hideDownloadLink ?? false,
-      configs: metaData.configs,
-      mapRenderFormat: renderFormat,
-      mapRenderUrl: getStaticDatasetUrl(uploadSlug, renderFormat),
-      pmtilesUrl,
-      geojsonUrl,
-      githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
-    })
-  }
+  console.log(`  Saving uploads to DB...`)
+  // Create single upload entry with both URLs
+  await createUpload({
+    uploadSlug,
+    regionSlugs,
+    isPublic: metaData.public,
+    hideDownloadLink: metaData.hideDownloadLink ?? false,
+    configs: metaData.configs,
+    mapRenderFormat: renderFormat,
+    mapRenderUrl: getStaticDatasetUrl(uploadSlug, renderFormat),
+    pmtilesUrl,
+    geojsonUrl,
+    githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
+  })
 }
