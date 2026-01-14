@@ -167,13 +167,9 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     const processedTopicTables = topicTables.intersection(tableListPublic)
 
     // ============================================
-    // Reference Creation Phase
+    // Reference Creation Phase (for non-reference modes)
     // ============================================
-    if (isReferenceMode) {
-      // Reference mode: Always create/update reference tables unconditionally
-      console.log('Diffing:', 'Create reference tables (reference mode)')
-      await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
-    } else if (diffChanges) {
+    if (!isReferenceMode && diffChanges) {
       // Previous/Fixed modes: Create reference tables conditionally
       console.log('Diffing:', 'Create reference tables')
       // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
@@ -193,10 +189,19 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     updateDirectoryHash(topicPath(topic))
 
     // ============================================
+    // Reference Creation Phase (for reference mode - AFTER topic runs)
+    // ============================================
+    if (isReferenceMode) {
+      // Reference mode: Create reference tables AFTER processing to capture final state
+      console.log('Diffing:', 'Create reference tables (reference mode)')
+      await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
+    }
+
+    // ============================================
     // Diffing Phase
     // ============================================
     if (isReferenceMode) {
-      // Reference mode: Skip diff computation (already cleaned up at start)
+      // Reference mode: Skip diff computation (already cleaned up)
       console.log('Diffing:', 'Skip diff computation (reference mode)')
     } else if (diffChanges) {
       // Previous/Fixed modes: Compute diffs

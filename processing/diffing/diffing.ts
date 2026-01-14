@@ -74,7 +74,10 @@ export async function createReferenceTable(table: string) {
     SELECT * FROM ${tableId}
     WHERE ST_Intersects(
       geom,
-      ST_Transform(ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, 4326), ST_SRID(geom))
+      ST_Transform(
+        ST_MakeEnvelope(${minLon}, ${minLat}, ${maxLon}, ${maxLat}, 4326),
+        ST_SRID(geom)
+      )
     )
   `)
 
@@ -87,7 +90,8 @@ export async function createReferenceTable(table: string) {
 }
 
 export async function dropDiffTable(table: string) {
-  const diffTableId = diffTableIdentifier(table)
+  // Handle edge case where the input already has the `_diff` suffix
+  const diffTableId = diffTableIdentifier(table).replace('_diff_diff', '_diff')
   return sql.unsafe(`DROP TABLE IF EXISTS ${diffTableId}`)
 }
 
