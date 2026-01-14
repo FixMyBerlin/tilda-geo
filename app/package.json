@@ -42,8 +42,6 @@
     "StaticDatasets:update:dev": "bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.development ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=",
     "StaticDatasets:update:staging": "bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.staging ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=",
     "StaticDatasets:update:production": "bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.production ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=",
-    "StaticDatasets:updateWfsSources": "bun --env-file=.env ./scripts/StaticDatasets/downloadSources/updateWfsSources.ts --folder-filter=",
-    "StaticDatasets:updateUrlSources": "bun --env-file=.env ./scripts/StaticDatasets/downloadSources/updateUrlSources.ts --folder-filter=",
     "StaticDatasets:updateDownloadSources": "bun --env-file=.env ./scripts/StaticDatasets/updateDownloadSources.ts --folder-filter=",
     "StaticDatasets:deleteAll:dev": "echo \"Reminder: We cannot use this on staging, production, see https://github.com/FixMyBerlin/private-issues/issues/2283\" && bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.development ./scripts/StaticDatasets/deleteAllStaticDatasets.ts",
     "RegionalMasks:update": "npm run RegionalMasks:update:createGeojson && npm run RegionalMasks:update:createPmtiles && npm run RegionalMasks:update:upload && github",

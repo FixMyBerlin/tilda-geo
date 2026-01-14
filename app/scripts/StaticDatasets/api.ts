@@ -40,7 +40,14 @@ type UploadData = {
   configs: Record<string, any>[]
 } & Pick<
   Prisma.UploadCreateInput,
-  'pmtilesUrl' | 'geojsonUrl' | 'githubUrl' | 'mapRenderFormat' | 'mapRenderUrl'
+  // Types could be narrowed more. See schema.prisma and app/scripts/StaticDatasets/types.ts
+  | 'pmtilesUrl'
+  | 'geojsonUrl'
+  | 'githubUrl'
+  | 'mapRenderFormat'
+  | 'mapRenderUrl'
+  | 'externalSourceUrl'
+  | 'cacheTtlSeconds'
 >
 
 export const createUpload = async (data: UploadData) => {

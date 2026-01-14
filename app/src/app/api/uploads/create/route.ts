@@ -12,9 +12,11 @@ const Schema = z.object({
   configs: z.array(z.record(z.string(), z.any())),
   mapRenderFormat: z.nativeEnum(MapRenderFormatEnum),
   mapRenderUrl: z.string(),
-  pmtilesUrl: z.string(),
-  geojsonUrl: z.string(),
+  pmtilesUrl: z.string().nullish(),
+  geojsonUrl: z.string().nullish(),
   githubUrl: z.string(),
+  externalSourceUrl: z.string().nullish(),
+  cacheTtlSeconds: z.number().nullish(),
 })
 
 export async function POST(request: Request) {
@@ -36,6 +38,8 @@ export async function POST(request: Request) {
     pmtilesUrl,
     geojsonUrl,
     githubUrl,
+    externalSourceUrl,
+    cacheTtlSeconds,
   } = data
 
   await db.upload.deleteMany({ where: { slug: uploadSlug } })
@@ -50,9 +54,11 @@ export async function POST(request: Request) {
         configs,
         mapRenderFormat,
         mapRenderUrl,
-        pmtilesUrl,
-        geojsonUrl,
+        pmtilesUrl: pmtilesUrl ?? null,
+        geojsonUrl: geojsonUrl ?? null,
         githubUrl,
+        externalSourceUrl: externalSourceUrl ?? null,
+        cacheTtlSeconds: cacheTtlSeconds ?? null,
       },
     })
   } catch (e) {

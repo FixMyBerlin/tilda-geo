@@ -30,6 +30,8 @@ export const SelectDataset = ({
     legends,
     isPublic,
     githubUrl,
+    geojsonUrl,
+    pmtilesUrl,
   } = dataset
   const currentUser = useCurrentUser()
   const userIsAdmin = isAdmin(currentUser)
@@ -110,7 +112,8 @@ export const SelectDataset = ({
               })}
             </ul>
           )}
-          {dataset.hideDownloadLink === false && (
+
+          {dataset.hideDownloadLink === false && geojsonUrl && (
             <LinkExternal
               href={getStaticDatasetUrl(id, 'geojson')}
               download={`${name}.geojson`}
@@ -120,20 +123,21 @@ export const SelectDataset = ({
               GeoJSON herunterladen
             </LinkExternal>
           )}
+
           {userIsAdmin && (
             <details className="mt-1 bg-pink-300 p-0.5">
               <summary className="cursor-pointer underline">Admin Upload Details</summary>
 
-              <Link blank href={`/admin/uploads/${id}`}>
-                Admin Upload Details
-              </Link>
-              <br />
-              <LinkExternal blank href={githubUrl}>
-                Github Statische Daten
-              </LinkExternal>
-              <br />
-              {dataset.hideDownloadLink === true && (
-                <>
+              <div className="flex flex-col gap-1">
+                <Link blank href={`/admin/uploads/${id}`}>
+                  DB-Config
+                </Link>
+
+                <LinkExternal blank href={githubUrl}>
+                  Datensatz in Github
+                </LinkExternal>
+
+                {dataset.hideDownloadLink === true && geojsonUrl && (
                   <LinkExternal
                     href={getStaticDatasetUrl(id, 'geojson')}
                     download={`${name}.geojson`}
@@ -142,35 +146,42 @@ export const SelectDataset = ({
                     <ArrowDownTrayIcon className="size-3" />
                     GeoJSON herunterladen
                   </LinkExternal>
-                  <br />
-                </>
-              )}
-              <LinkExternal
-                href={getStaticDatasetUrl(id, 'csv')}
-                download={`${name}.csv`}
-                className="inline-flex items-center gap-1"
-              >
-                <ArrowDownTrayIcon className="size-3" />
-                CSV herunterladen (Beta)
-              </LinkExternal>
-              <br />
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-pink-700">GeoJSON URL:</label>
-                <input
-                  type="text"
-                  value={getStaticDatasetUrl(id, 'geojson')}
-                  readOnly
-                  className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-pink-700">PMTiles URL:</label>
-                <input
-                  type="text"
-                  value={getStaticDatasetUrl(id, 'pmtiles')}
-                  readOnly
-                  className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
-                />
+                )}
+
+                {geojsonUrl && (
+                  <LinkExternal
+                    href={getStaticDatasetUrl(id, 'csv')}
+                    download={`${name}.csv`}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <ArrowDownTrayIcon className="size-3" />
+                    CSV herunterladen (Beta)
+                  </LinkExternal>
+                )}
+
+                {geojsonUrl && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-pink-700">GeoJSON URL:</label>
+                    <input
+                      type="text"
+                      value={getStaticDatasetUrl(id, 'geojson')}
+                      readOnly
+                      className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                    />
+                  </div>
+                )}
+
+                {pmtilesUrl && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-pink-700">PMTiles URL:</label>
+                    <input
+                      type="text"
+                      value={getStaticDatasetUrl(id, 'pmtiles')}
+                      readOnly
+                      className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                    />
+                  </div>
+                )}
               </div>
             </details>
           )}

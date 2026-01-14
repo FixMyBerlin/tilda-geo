@@ -2,18 +2,15 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { parse } from 'parse-gitignore'
-import pluralize from 'pluralize'
 import slugify from 'slugify'
 import { parseArgs } from 'util'
-import { getStaticDatasetUrl } from '../../src/app/_components/utils/getStaticDatasetUrl'
-import { createUpload, getRegions } from './api'
+import { getRegions } from './api'
 import { MetaData } from './types'
 import { findGeojson } from './updateStaticDatasets/findGeojson'
-import { generatePMTilesFile } from './updateStaticDatasets/generatePMTilesFile'
 import { ignoreFolder } from './updateStaticDatasets/ignoreFolder'
-import { isCompressedSmallerThan } from './updateStaticDatasets/isCompressedSmallerThan'
+import { processExternalSource } from './updateStaticDatasets/processExternalSource'
+import { processLocalSource } from './updateStaticDatasets/processLocalSource'
 import { transformFile } from './updateStaticDatasets/transformFile'
-import { uploadFileToS3 } from './updateStaticDatasets/uploadFileToS3'
 import { import_ } from './utils/import_'
 import { green, inverse, red, yellow } from './utils/log'
 
@@ -41,10 +38,6 @@ const { values, positionals } = parseArgs({
 const dryRun = !!values['dry-run']
 const keepTemporaryFiles = !!values['keep-tmp']
 const folderFilterTerm = values['folder-filter']
-
-function logInfo(info, dryRun: boolean) {
-  console.log(dryRun ? `  DRY RUN: SKIPPING ${info}` : `  ${info}`)
-}
 
 inverse('Starting update with settings', [
   {
@@ -114,93 +107,58 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
     continue
   }
 
-  // Get the one `.geojson` file that we will handle ready
-  const geojsonFullFilename = findGeojson(datasetFolderPath)
-  if (!geojsonFullFilename) {
-    // Logging is part of findGeojson()
-    continue
-  }
-
-  // Create the transformed data (or duplicate existing geojson)
-  const transformedFilepath = await transformFile(
-    datasetFolderPath,
-    geojsonFullFilename,
-    tempFolder,
-  )
-
-  logInfo(`Uploading GeoJSON file to S3...`, dryRun)
-  const geojsonUrl = dryRun
-    ? 'http://example.com/does-not-exist.geojson'
-    : await uploadFileToS3(transformedFilepath, datasetFolder)
-
-  const pmtilesFilepath = dryRun
-    ? '/tmp/does-not-exist.pmtiles'
-    : await generatePMTilesFile(transformedFilepath, tempFolder, metaData.geometricPrecision)
-
-  logInfo(`Uploading PMTiles file to S3...`, dryRun)
-  const pmtilesUrl = dryRun
-    ? 'http://example.com/does-not-exist.pmtiles'
-    : await uploadFileToS3(pmtilesFilepath, datasetFolder)
-
-  // Determine which format to use for map rendering
-  const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
-  let renderFormat: 'geojson' | 'pmtiles'
-  if (mapRenderFormat === 'auto') {
-    const maxCompressedSizeBites = 50000 // 50,000 bytes ≈ 48.8 KB or ≈ 0.049 MB
-    const isSmall = await isCompressedSmallerThan(transformedFilepath, maxCompressedSizeBites)
-    renderFormat = isSmall ? 'geojson' : 'pmtiles'
-  } else {
-    renderFormat = mapRenderFormat
-  }
-
-  console.log(
-    `  Map will render a ${renderFormat.toUpperCase()} file`,
-    metaData.mapRenderFormat
-      ? 'based on the Format specified in the config.'
-      : 'based on the optimal format for this file size.',
-  )
-
   // Create database entries dataset per region (from meta.ts)
   const regionSlugs: string[] = []
-  metaData.regions.forEach((regionSlug) => {
+  for (const regionSlug of metaData.regions) {
     if (existingRegionSlugs.includes(regionSlug)) {
       regionSlugs.push(regionSlug)
     } else {
       yellow(`  region "${regionSlug}" (defined in meta.regions) does not exist.`)
     }
-  })
+  }
 
   // Check if any layer has layout.visibility property
-  metaData.configs.forEach((config) =>
-    config.layers.forEach((layer) => {
+  for (const config of metaData.configs) {
+    for (const layer of config.layers) {
       if (layer?.layout?.visibility) {
         red(
           `  layer "${layer.id}" has layout.visibility specified which is an error. Remove this property from the layer definition. Otherwise bugs come up like the layer does not show due to a hidden visibility.`,
         )
       }
-    }),
-  )
+    }
+  }
 
-  const info =
-    regionSlugs.length === 0
-      ? 'will not be assigned to any region'
-      : `will be assigned to ${pluralize('region', regionSlugs.length)} ${regionSlugs.join(', ')}`
+  // Route to appropriate processor based on data source type
+  switch (metaData.dataSourceType) {
+    case 'external':
+      // TypeScript narrows metaData to the external variant here
+      await processExternalSource(metaData, uploadSlug, regionSlugs, dryRun, regionAndDatasetFolder)
+      break
+    case 'local':
+      // Get the one `.geojson` file that we will handle ready
+      const geojsonFullFilename = findGeojson(datasetFolderPath)
+      if (!geojsonFullFilename) {
+        // Logging is part of findGeojson()
+        continue
+      }
 
-  logInfo(`Saving uploads to DB (${info})...`, dryRun)
-  if (!dryRun) {
-    // Create single upload entry with both URLs
-    await createUpload({
-      uploadSlug,
-      regionSlugs,
-      isPublic: metaData.public,
-      hideDownloadLink: metaData.hideDownloadLink ?? false,
-      configs: metaData.configs,
-      mapRenderFormat: renderFormat,
-      mapRenderUrl: getStaticDatasetUrl(uploadSlug, renderFormat),
-      pmtilesUrl,
-      geojsonUrl,
-      githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
-    })
+      // Create the transformed data (or duplicate existing geojson)
+      const transformedFilepath = await transformFile(
+        datasetFolderPath,
+        geojsonFullFilename,
+        tempFolder,
+      )
+
+      await processLocalSource(
+        metaData,
+        uploadSlug,
+        regionSlugs,
+        transformedFilepath,
+        tempFolder,
+        dryRun,
+        regionAndDatasetFolder,
+      )
+      break
   }
 
   green('  OK')

@@ -1,8 +1,8 @@
-import { DownloadConfigWfs } from './types'
+import { DownloadConfig } from './types'
 
 export type WfsUrl = ReturnType<typeof createWfsUrl>
 
-export const createWfsUrl = ({ endpoint, layer, opt }: DownloadConfigWfs) => {
+export const createWfsUrl = ({ endpoint, layer, opt }: DownloadConfig) => {
   const url = new URL(endpoint)
   url.searchParams.append('service', 'WFS')
   url.searchParams.append('version', '2.0.0')

@@ -1,6 +1,11 @@
+import { z } from 'zod'
 import { isDev, isStaging } from '../../_components/utils/isEnv'
 
-export const parseData = (body, Schema) => {
+type ParseDataResult<T extends z.ZodTypeAny> =
+  | { ok: true; data: z.infer<T>; errorResponse: null }
+  | { ok: false; data: null; errorResponse: Response }
+
+export const parseData = <T extends z.ZodTypeAny>(body: unknown, Schema: T): ParseDataResult<T> => {
   try {
     const data = Schema.parse(body)
     return { ok: true, data, errorResponse: null }

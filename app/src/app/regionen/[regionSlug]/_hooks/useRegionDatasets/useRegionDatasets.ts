@@ -13,6 +13,8 @@ type RegionDataset = Prettify<
     mapRenderFormat: MapRenderFormatEnum // from upload
     mapRenderUrl: string // URL for map rendering (PMTiles or GeoJSON based on mapRenderFormat)
     githubUrl: string // from upload
+    geojsonUrl: string | null // from upload
+    pmtilesUrl: string | null // from upload
   }
 >
 
@@ -38,6 +40,8 @@ export const useRegionDatasets = () => {
               mapRenderFormat: upload.mapRenderFormat,
               mapRenderUrl: upload.mapRenderUrl,
               githubUrl: upload.githubUrl,
+              geojsonUrl: upload.geojsonUrl,
+              pmtilesUrl: upload.pmtilesUrl,
             })
           })
         })

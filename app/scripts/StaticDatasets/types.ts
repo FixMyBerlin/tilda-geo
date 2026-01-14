@@ -63,14 +63,31 @@ type MapDataDatasetsSource = {
   )[]
 }
 
-export type MetaData = {
+type MetaDataBase = {
   regions: RegionSlug[]
   public: boolean
-  /** @desc Change the tippecanoe settings  */
-  geometricPrecision?: 'mask' | 'regular' | 'high' | null
-  /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
-  mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
   /** @desc Hide download links from non-admin users. When true, only admins can see download links */
   hideDownloadLink?: boolean
   configs: MapDataDatasetsSource[]
 }
+
+export type MapDataSourceExternalRenderFormat = 'pmtiles' | 'geojson'
+export type MetaData =
+  | (MetaDataBase & {
+      /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
+      dataSourceType: 'local'
+      /** @desc Change the tippecanoe settings  */
+      geometricPrecision?: 'mask' | 'regular' | 'high' | null
+      /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
+      mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
+    })
+  | (MetaDataBase & {
+      /** @desc Data source type: external URL and cached in Docker (file cache) */
+      dataSourceType: 'external'
+      /** @desc URL of the external data source */
+      externalSourceUrl: string
+      /** @desc Cache TTL in seconds (e.g., 86400 for daily, 3600 for hourly, 60 for minutely) */
+      cacheTtlSeconds: number
+      /** @desc File format of the external source. Must match the format available at externalSourceUrl. Cannot be 'auto' since format is fixed by external source. */
+      mapRenderFormat: MapDataSourceExternalRenderFormat
+    })

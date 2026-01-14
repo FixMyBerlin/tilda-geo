@@ -7,13 +7,13 @@ import { geoJSONToWkt } from 'betterknown'
  * Uses betterknown library for modern, TypeScript-native WKT conversion
  */
 
-interface CsvRow {
+type CsvRow = {
   geometry_type: string
   geometry_wkt: string
   [key: string]: any
 }
 
-export async function convertGeoJsonToCsv(geojsonData: any) {
+export async function convertGeoJsonToCsv(geojsonData: FeatureCollection) {
   if (!geojsonData || geojsonData.type !== 'FeatureCollection') {
     throw new Error('Invalid GeoJSON: Expected FeatureCollection')
   }
