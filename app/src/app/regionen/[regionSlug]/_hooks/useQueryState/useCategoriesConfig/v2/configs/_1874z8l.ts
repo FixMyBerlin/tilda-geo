@@ -3,7 +3,7 @@
 
 import { MapDataCategoryParam } from '../../type'
 
-// For regions pankow, trassenscout-umfragen
+// For regions berlin-baumanalyse, ohv, pankow, trassenscout-umfragen
 export const _1874z8l: MapDataCategoryParam[] = [
   {
     id: 'roads',
