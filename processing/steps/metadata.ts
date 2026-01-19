@@ -10,34 +10,49 @@ export async function initializeMetadataTable() {
   await sql`
     CREATE TABLE IF NOT EXISTS public.meta (
       id SERIAL PRIMARY KEY,
-      processed_at TIMESTAMP,
       processing_duration TIME,
       osm_data_from TIMESTAMP,
       processing_started_at TIMESTAMP,
-      status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'processed'))
+      processing_completed_at TIMESTAMP,
+      qa_update_started_at TIMESTAMP,
+      qa_update_completed_at TIMESTAMP,
+      statistics_started_at TIMESTAMP,
+      statistics_completed_at TIMESTAMP,
+      status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'postprocessing', 'processed'))
     )`
 
-  // Migration: Add processing_started_at column if it doesn't exist
+  // Migration: Add async operation tracking columns, update status constraint, and remove unused processed_at column
   // This is a temporary migration that can be removed after deployment
+  // !! We will remove this section after 2026-04-01
   try {
-    await sql`ALTER TABLE public.meta ADD COLUMN IF NOT EXISTS processing_started_at TIMESTAMP`
-    console.log('Processing: Migration - Added processing_started_at column if it was missing')
+    await sql`
+      ALTER TABLE public.meta
+        ADD COLUMN IF NOT EXISTS processing_completed_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS qa_update_started_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS qa_update_completed_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS statistics_started_at TIMESTAMP,
+        ADD COLUMN IF NOT EXISTS statistics_completed_at TIMESTAMP
+    `
+    console.log('Processing: Migration - Added async operation tracking columns if they were missing')
+
+    // Update status CHECK constraint to include 'postprocessing'
+    await sql`ALTER TABLE public.meta DROP CONSTRAINT IF EXISTS meta_status_check`
+    await sql`
+      ALTER TABLE public.meta
+        ADD CONSTRAINT meta_status_check
+        CHECK (status IN ('processing', 'postprocessing', 'processed'))
+    `
+    console.log('Processing: Migration - Updated status constraint to include postprocessing')
+
+    // Remove unused processed_at column (replaced by individual completion timestamps)
+    await sql`ALTER TABLE public.meta DROP COLUMN IF EXISTS processed_at`
+    console.log('Processing: Migration - Removed unused processed_at column')
   } catch (error) {
-    // Column might already exist, which is fine
+    // Columns or constraint might already exist, which is fine
     console.log(
-      'Processing: Migration - processing_started_at column already exists or migration failed:',
+      'Processing: Migration - Async operation columns or constraint already exists or migration failed:',
       error,
     )
-  }
-
-  // Migration: Add status column if it doesn't exist
-  // This is a temporary migration that can be removed after deployment
-  try {
-    await sql`ALTER TABLE public.meta ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'processed'))`
-    console.log('Processing: Migration - Added status column if it was missing')
-  } catch (error) {
-    // Column might already exist, which is fine
-    console.log('Processing: Migration - status column already exists or migration failed:', error)
   }
 
   return true
@@ -100,19 +115,20 @@ export async function updateProcessingEntry(
   const processingDuration = new Date(processingDurationMS).toISOString().slice(11, 19) // Extract HH:MM:SS from the ISO string
 
   const data = {
-    processed_at: new Date(),
     processing_duration: processingDuration,
     osm_data_from: new Date(await getFileTimestamp(fileName)),
-    status: 'processed',
+    processing_completed_at: new Date(),
+    status: 'postprocessing', // Main processing done, async operations (QA + stats) still running
   }
 
   console.log(
     'Processing:',
-    'Updating processing entry',
+    'Updating processing entry - main processing complete, async operations starting',
     JSON.stringify({
       id: processingId,
       ...data,
       osm_data_from_localtime: berlinTimeString(data.osm_data_from),
+      processing_completed_at_localtime: berlinTimeString(data.processing_completed_at),
     }),
   )
 

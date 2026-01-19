@@ -15,12 +15,26 @@ export async function triggerPrivateApi(endpoint: string) {
     return
   }
 
-  const response = await fetch(url)
-  if (!response.ok) {
-    console.warn(
-      `[ERROR] Finishing up: ⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
-      response.status,
-    )
+  // Set a 15 minute timeout for long-running operations like cache warming and QA updates
+  const timeoutMs = 15 * 60 * 1000 // 15 minutes
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const response = await fetch(url, { signal: controller.signal })
+    clearTimeout(timeoutId)
+    if (!response.ok) {
+      console.warn(
+        `[ERROR] Finishing up: ⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
+        response.status,
+      )
+    }
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Request to ${endpoint} timed out after ${timeoutMs / 1000 / 60} minutes`)
+    }
+    throw error
   }
 }
 

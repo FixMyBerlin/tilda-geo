@@ -38,21 +38,20 @@ async function main() {
 
     logPadded('Processing: Finishing up', berlinTimeString(new Date()))
 
-    // Frontend: Registers sql functions and starts the analysis run
-    await triggerPrivateApi('post-processing-hook')
+    // Update processing entry: mark main processing as complete, set status to 'postprocessing'
+    await updateProcessingEntry(processingId, fileName, timeElapsed)
+
+    // Frontend: Registers sql functions and starts the analysis run (async, fire-and-forget)
+    // Frontend: Trigger QA evaluation updates for all regions (async, fire-and-forget)
+    console.log('Finishing up: Trigger async app init (sql functions, analysis) and qa update')
+    triggerPrivateApi('post-processing-hook')
+    triggerPrivateApi('post-processing-qa-update')
 
     // Restart `tiles` container to refresh `/catalog`
     await restartTileServer()
 
     // Delete cache and (frontend) trigger cache warming
     await updateCache()
-
-    // Frontend: Trigger QA evaluation updates for all regions
-    console.log('Finishing up: Trigger qa update')
-    await triggerPrivateApi('post-processing-qa-update')
-
-    // Update processing entry with completion data
-    await updateProcessingEntry(processingId, fileName, timeElapsed)
 
     logTileInfo()
   } catch (error) {

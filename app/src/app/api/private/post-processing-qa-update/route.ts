@@ -5,8 +5,9 @@ import {
   transformEvaluationWithDecisionData,
 } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { getQaTableName } from '@/src/server/qa-configs/utils/getQaTableName'
+import { updateProcessingMetaAsync } from '@/src/server/statistics/analysis/updateProcessingStatus'
 import { QaSystemStatus } from '@prisma/client'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { guardEnpoint, GuardEnpointSchema } from '../_utils/guardEndpoint'
 
 // Helper function to calculate system status based on relative value and thresholds
@@ -183,11 +184,14 @@ async function upsertQaEvaluationWithRules(
   }
 }
 
-export async function GET(request: NextRequest) {
-  const { access, response } = guardEnpoint(request, GuardEnpointSchema)
-  if (!access) return response
+async function qaUpdate() {
+  const startTime = Date.now()
+  console.log('QA update: Started processing')
 
   try {
+    // Record start time in database
+    await updateProcessingMetaAsync('qa_update_started_at')
+
     // Get all active QA configs from database
     const qaConfigs = await db.qaConfig.findMany({
       where: { isActive: true },
@@ -255,20 +259,33 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return Response.json({
+    // Record completion time in database
+    await updateProcessingMetaAsync('qa_update_completed_at')
+
+    const secondsElapsed = Math.round((Date.now() - startTime) / 100) / 10
+    console.log(`QA update: Completed in ${secondsElapsed} s`)
+
+    return {
       success: true,
       totalEvaluations,
       newEvaluations,
       configsProcessed: qaConfigs.length,
-    })
+    }
   } catch (error) {
-    console.error('QA update error:', error)
-    return Response.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 },
-    )
+    console.error('QA update: Error', error)
+    // Don't record completion on error - it's fine if it stays undefined
+    throw error
   }
+}
+
+export async function GET(request: NextRequest) {
+  const { access, response } = guardEnpoint(request, GuardEnpointSchema)
+  if (!access) return response
+
+  // Fire and forget - don't await
+  qaUpdate().catch((error) => {
+    console.error('QA update: Unhandled error in background task', error)
+  })
+
+  return NextResponse.json({ message: 'TRIGGERED' }, { status: 200 })
 }

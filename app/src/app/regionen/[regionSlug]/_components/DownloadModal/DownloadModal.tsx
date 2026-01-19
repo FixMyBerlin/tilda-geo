@@ -16,10 +16,12 @@ import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
 const DownloadModalTriggerIcon = () => {
   const [metadata] = useQuery(getAtlasGeoMetadata, {})
 
+  // Show icon without indicator if no data yet and not processing
   if (!metadata?.osm_data_from && metadata?.status !== 'processing') {
     return <ArrowDownTrayIcon className="size-5" />
   }
 
+  // For postprocessing and processed, osm_data_from should be available
   const osmDataDate = metadata.osm_data_from ? new Date(metadata.osm_data_from) : null
   const isDataOlderThanYesterday = osmDataDate
     ? isBefore(osmDataDate, subDays(new Date(), 1))
