@@ -62,13 +62,17 @@ const DownloadModalUpdateDateContent = () => {
             <p>
               QA-Auswertung abgeschlossen:{' '}
               {metadata.qa_update_completed_at
-                ? format(new Date(metadata.qa_update_completed_at), 'dd.MM.yyyy HH:mm', { locale: de })
+                ? format(new Date(metadata.qa_update_completed_at), 'dd.MM.yyyy HH:mm', {
+                    locale: de,
+                  })
                 : '(Fehler)'}
             </p>
             <p>
               Statistiken abgeschlossen:{' '}
               {metadata.statistics_completed_at
-                ? format(new Date(metadata.statistics_completed_at), 'dd.MM.yyyy HH:mm', { locale: de })
+                ? format(new Date(metadata.statistics_completed_at), 'dd.MM.yyyy HH:mm', {
+                    locale: de,
+                  })
                 : '(Fehler)'}
             </p>
           </>

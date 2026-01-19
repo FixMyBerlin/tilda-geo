@@ -2,9 +2,11 @@ import { $ } from 'bun'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 
-export async function triggerPrivateApi(endpoint: string) {
+export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
   const domain = isDev ? 'http://127.0.0.1:5173' : 'http://app:4000'
   const url = `${domain}/api/private/${endpoint}?apiKey=${params.apiKey}`
+  const maxRetries = 10 // Retry for up to 10 minutes (10 retries × 1 minute)
+  const retryDelayMs = 60 * 1000 // 1 minute between retries
 
   if (isDev) {
     console.info(
@@ -28,13 +30,46 @@ export async function triggerPrivateApi(endpoint: string) {
         `[ERROR] Finishing up: ⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
         response.status,
       )
+    } else {
+      if (retryCount > 0) {
+        console.log(
+          `Finishing up: ✓ Successfully triggered ${endpoint} after ${retryCount} retry${retryCount > 1 ? 's' : ''}`,
+        )
+      }
     }
   } catch (error) {
     clearTimeout(timeoutId)
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error(`Request to ${endpoint} timed out after ${timeoutMs / 1000 / 60} minutes`)
+
+    // Retry on connection errors (likely app container restarting)
+    const isConnectionError =
+      error instanceof Error &&
+      (error.name === 'AbortError' ||
+        error.message.includes('ECONNRESET') ||
+        error.message.includes('socket') ||
+        error.message.includes('connection'))
+
+    if (isConnectionError && retryCount < maxRetries) {
+      console.warn(
+        `[ERROR] Finishing up: ⚠️ Failed to trigger ${endpoint} (attempt ${retryCount + 1}/${maxRetries + 1}). Retrying in ${retryDelayMs / 1000} seconds...`,
+        error instanceof Error ? error.message : String(error),
+      )
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
+      return triggerPrivateApi(endpoint, retryCount + 1)
     }
-    throw error
+
+    // Log the error but don't crash the processing pipeline (no throw)
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn(
+        `[ERROR] Finishing up: ⚠️ Request to ${endpoint} timed out after ${timeoutMs / 1000 / 60} minutes`,
+      )
+    } else {
+      console.warn(
+        `[ERROR] Finishing up: ⚠️ Failed to trigger ${endpoint} after ${retryCount + 1} attempts. Operation was not triggered and will not run.`,
+        'Try callig it manually:',
+        `curl "${url}"`,
+        error instanceof Error ? error.message : String(error),
+      )
+    }
   }
 }
 

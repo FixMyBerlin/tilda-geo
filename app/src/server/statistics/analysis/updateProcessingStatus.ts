@@ -37,7 +37,9 @@ export async function updateProcessingMetaAsync(
     `)
 
     if (!updatedEntry) {
-      console.warn(`[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``)
+      console.warn(
+        `[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``,
+      )
     } else {
       if (isDev) {
         console.log(`[Meta] \`${columnName}\` recorded`)
@@ -68,7 +70,9 @@ export async function updateProcessingMetaAsync(
             `[Meta] Processing status updated to 'processed' for entry ${updatedEntry.id} (timeout - operations started but not completed)`,
           )
         } else {
-          console.log(`[Meta] Processing status updated to 'processed' for entry ${updatedEntry.id}`)
+          console.log(
+            `[Meta] Processing status updated to 'processed' for entry ${updatedEntry.id}`,
+          )
         }
       }
     }
