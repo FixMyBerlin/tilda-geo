@@ -86,7 +86,7 @@ export const MarkdownMail = ({
               ) : null}
             </Section>
             <Hr />
-            <Section className="px-9 pb-6 pt-4">
+            <Section className="px-9 pt-4 pb-6">
               <Markdown
                 markdownCustomStyles={{
                   h1,

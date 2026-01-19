@@ -65,7 +65,7 @@ export const Faqs = () => {
     >
       <Image
         src={backgroundImage}
-        className="absolute left-1/2 top-0 max-w-none -translate-y-1/4 translate-x-[-30%]"
+        className="absolute top-0 left-1/2 max-w-none translate-x-[-30%] -translate-y-1/4"
         alt=""
         width={1558}
         height={946}

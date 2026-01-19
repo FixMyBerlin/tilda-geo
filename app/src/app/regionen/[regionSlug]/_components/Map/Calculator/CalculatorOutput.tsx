@@ -32,7 +32,7 @@ export const CalculatorOutput = ({ keys: _unused, drawControlRef }: Props) => {
   return (
     <section
       className={twJoin(
-        'z-1000 absolute flex items-center rounded-md bg-fuchsia-800/90 px-2 py-0.5 text-xl leading-tight text-white shadow-xl',
+        'absolute z-1000 flex items-center rounded-md bg-fuchsia-800/90 px-2 py-0.5 text-xl leading-tight text-white shadow-xl',
         sums.length ? 'items-center' : 'items-start',
       )}
       style={{

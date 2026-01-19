@@ -15,7 +15,7 @@ export const InternalNotesDownloadModal = () => {
         triggerStyle="z-0 -ml-px inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:text-gray-800 focus:relative focus:z-10 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white hover:bg-yellow-50"
         triggerIcon={<ArrowDownTrayIcon className="h-5 w-5" />}
       >
-        <p className="pb-2.5 pt-5 text-sm">
+        <p className="pt-5 pb-2.5 text-sm">
           Die internen Hinweise stehen alle Nutzer:innen mit Rechten auf der Region zum Download zur
           Verfügung.
         </p>

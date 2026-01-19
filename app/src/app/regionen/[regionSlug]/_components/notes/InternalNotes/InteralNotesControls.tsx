@@ -33,7 +33,7 @@ export const InternalNotesControls = ({ totalNotes, isLoading, isError }: Props)
         <button
           onClick={() => setShowInternalNotesParam(!showInternalNotesParam)}
           className={twJoin(
-            'relative z-0 inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium shadow-md focus:relative focus:z-10 focus:outline-none focus:ring-2 focus:ring-yellow-500',
+            'relative z-0 inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium shadow-md focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
             showInternalNotesParam ? 'rounded-l-md' : 'rounded-md',
             showInternalNotesParam ? 'text-gray-700' : 'text-gray-500 hover:text-gray-700',
             showInternalNotesParam
@@ -73,7 +73,7 @@ export const InternalNotesControls = ({ totalNotes, isLoading, isError }: Props)
             <button
               // Default zoom since Note pins on osm.org are only visible when zoomed in…
               onClick={() => setNewInternalNoteMapParam(mapParam)}
-              className="z-0 -ml-px inline-flex justify-center rounded-r-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 hover:text-gray-800 focus:relative focus:z-10 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="z-0 -ml-px inline-flex justify-center rounded-r-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 hover:text-gray-800 focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
             >
               <PlusIcon className="size-5" aria-hidden="true" />
               <span className="sr-only">Neuen Interne Hinweis erstellen</span>

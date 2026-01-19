@@ -17,7 +17,7 @@ export const InspectorHeader = ({ count, handleClose }: Props) => {
       >
         {count} Elemente:
       </h2>
-      <CloseButton onClick={handleClose} positionClasses="right-3 top-3" />
+      <CloseButton onClick={handleClose} positionClasses="top-3 right-3" />
     </>
   )
 }

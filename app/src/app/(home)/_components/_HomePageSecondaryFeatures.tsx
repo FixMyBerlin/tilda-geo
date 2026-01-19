@@ -79,8 +79,8 @@ const FeaturesMobile = () => {
         <div key={featureIndex}>
           <Feature feature={feature} className="mx-auto max-w-2xl" isActive />
           <div className="relative mt-10 pb-10">
-            <div className="absolute -inset-x-4 bottom-0 top-8 bg-gray-200 sm:-inset-x-6" />
-            <div className="relative mx-auto w-[52.75rem] overflow-hidden rounded-xl bg-white shadow-lg shadow-gray-900/5 ring-1 ring-gray-500/10">
+            <div className="absolute -inset-x-4 top-8 bottom-0 bg-gray-200 sm:-inset-x-6" />
+            <div className="relative mx-auto w-[52.75rem] overflow-hidden rounded-xl bg-white shadow-lg ring-1 shadow-gray-900/5 ring-gray-500/10">
               <Image
                 src={feature.image}
                 className="w-full"
@@ -134,7 +134,7 @@ const FeaturesDesktop = () => {
                   style={{ transform: `translateX(-${selectedIndex * 100}%)` }}
                   aria-hidden={featureIndex !== selectedIndex}
                 >
-                  <div className="w-[52.75rem] overflow-hidden rounded-xl bg-white shadow-lg shadow-gray-900/5 ring-1 ring-gray-500/10">
+                  <div className="w-[52.75rem] overflow-hidden rounded-xl bg-white shadow-lg ring-1 shadow-gray-900/5 ring-gray-500/10">
                     <Image
                       src={feature.image}
                       className="w-full"
@@ -148,7 +148,7 @@ const FeaturesDesktop = () => {
                 </TabPanel>
               ))}
             </div>
-            <div className="pointer-events-none absolute inset-0 rounded-4xl ring-1 ring-inset ring-gray-900/10" />
+            <div className="pointer-events-none absolute inset-0 rounded-4xl ring-1 ring-gray-900/10 ring-inset" />
           </TabPanels>
         </>
       )}
@@ -158,7 +158,7 @@ const FeaturesDesktop = () => {
 
 export const HomePageSecondaryFeatures = () => {
   return (
-    <section id="secondary-features" className="pb-14 pt-20 sm:pb-20 sm:pt-32 lg:pb-32">
+    <section id="secondary-features" className="pt-20 pb-14 sm:pt-32 sm:pb-20 lg:pb-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl md:text-center">
           <h2 className="font-display text-3xl tracking-tight text-gray-900 sm:text-4xl">

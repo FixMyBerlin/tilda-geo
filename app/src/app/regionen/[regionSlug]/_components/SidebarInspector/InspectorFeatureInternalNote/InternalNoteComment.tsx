@@ -19,7 +19,7 @@ export const InternalNoteComment = ({ comment }: Props) => {
         markdown={dompurify.sanitize(comment.body)}
         className={twJoin(
           proseClasses,
-          'prose-sm border-l-4 border-white pl-3 prose-a:underline hover:prose-a:text-teal-700 hover:prose-a:decoration-teal-700',
+          'prose-sm prose-a:underline hover:prose-a:text-teal-700 hover:prose-a:decoration-teal-700 border-l-4 border-white pl-3',
         )}
       />
 

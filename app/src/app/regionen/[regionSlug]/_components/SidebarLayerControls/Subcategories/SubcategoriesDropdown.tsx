@@ -20,7 +20,7 @@ export const SubcategoriesDropdown = ({ categoryId, subcategories, disabled }: P
           <div key={subcatConfig.id} className="px-2">
             <div
               className={twJoin(
-                'mb-1 text-sm font-semibold leading-tight',
+                'mb-1 text-sm leading-tight font-semibold',
                 disabled ? 'text-gray-400' : 'text-gray-900',
                 showSubheadline ? '' : 'sr-only',
               )}

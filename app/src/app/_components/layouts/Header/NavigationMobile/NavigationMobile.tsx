@@ -22,7 +22,7 @@ export const NavigationMobile = ({ primaryNavigation, secondaryNavigation, logo:
             </div>
             <div className="flex items-center space-x-2">
               <User />
-              <DisclosureButton className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+              <DisclosureButton className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-none focus:ring-inset">
                 <span className="sr-only">Hauptmenü öffnen</span>
                 {open ? (
                   <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
@@ -34,7 +34,7 @@ export const NavigationMobile = ({ primaryNavigation, secondaryNavigation, logo:
           </div>
 
           <DisclosurePanel className="divide-y-2 divide-gray-900">
-            <div className="space-y-1 pb-3 pt-2">
+            <div className="space-y-1 pt-2 pb-3">
               {primaryNavigation.map((item) => {
                 const current = item.href === pathname
                 return (
@@ -58,7 +58,7 @@ export const NavigationMobile = ({ primaryNavigation, secondaryNavigation, logo:
 
             {secondaryNavigation.map((group, i) => {
               return (
-                <div key={i} className="space-y-1 pb-3 pt-2">
+                <div key={i} className="space-y-1 pt-2 pb-3">
                   {group.map((item) => {
                     const current = item.href === pathname
                     return (

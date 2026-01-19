@@ -56,7 +56,7 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
   return (
     <section className="relative min-h-80">
       <div className="absolute inset-x-1 top-4 z-10 flex justify-center">
-        <h2 className="rounded-lg bg-teal-700 px-2 py-1 font-semibold leading-tight text-teal-50">
+        <h2 className="rounded-lg bg-teal-700 px-2 py-1 leading-tight font-semibold text-teal-50">
           1. Position bestimmen
         </h2>
       </div>

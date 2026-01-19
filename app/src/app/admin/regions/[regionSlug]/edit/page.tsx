@@ -66,7 +66,7 @@ export default function AdminEditRegionPage() {
               <tr>
                 <th
                   scope="col"
-                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6"
+                  className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold sm:pl-6"
                 >
                   Benutzer
                 </th>
@@ -81,7 +81,7 @@ export default function AdminEditRegionPage() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {users.map((user) => (
                 <tr key={user.id}>
-                  <td className="py-4 pl-4 pr-3 text-sm sm:pl-6">
+                  <td className="py-4 pr-3 pl-4 text-sm sm:pl-6">
                     <strong>OSM: {user.osmName}</strong> ({user.osmId})
                     <br />
                     {user.firstName || user.lastName

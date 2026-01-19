@@ -22,7 +22,7 @@ export const DownloadModalDownloadList = () => {
     <ul className="mb-2 divide-y divide-gray-200 border-y border-gray-200">
       {availableExports.map((exportData) => {
         return (
-          <li key={exportData.id} className="pb-4 pt-5">
+          <li key={exportData.id} className="pt-5 pb-4">
             <h3 className="mb-1 text-sm font-bold text-purple-800">{exportData.title}:</h3>
 
             <table className="my-2 text-sm text-gray-500">
@@ -132,7 +132,7 @@ const VectorTileUrlsSection = () => {
           {vectorTileSources.map((source) => (
             <li key={source.id} className="rounded-md bg-gray-50 p-3">
               <div className="mb-1 text-xs font-medium text-gray-900">{source.id}</div>
-              <div className="break-all font-mono text-xs text-gray-600">{source.tiles}</div>
+              <div className="font-mono text-xs break-all text-gray-600">{source.tiles}</div>
             </li>
           ))}
         </ul>

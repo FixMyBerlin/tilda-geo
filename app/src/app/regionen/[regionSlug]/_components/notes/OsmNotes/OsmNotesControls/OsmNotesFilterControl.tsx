@@ -47,7 +47,7 @@ export const OsmNotesFilterControl = () => {
         {({ active }) => (
           <button
             className={twJoin(
-              'z-0 -ml-px inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:text-gray-800 focus:relative focus:z-10 focus:outline-none focus:ring-2 focus:ring-yellow-500',
+              'z-0 -ml-px inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:text-gray-800 focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
               active ? 'bg-yellow-100' : 'bg-white hover:bg-yellow-50',
               noFilterActive ? '' : 'bg-yellow-400',
             )}
@@ -61,10 +61,10 @@ export const OsmNotesFilterControl = () => {
       <MenuItems
         transition
         anchor="top start"
-        className="absolute right-0 z-10 mt-2 w-64 rounded-md bg-white text-sm shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+        className="ring-opacity-5 absolute right-0 z-10 mt-2 w-64 rounded-md bg-white text-sm shadow-lg ring-1 ring-black transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[enter]:ease-out data-[leave]:duration-75 data-[leave]:ease-in"
       >
         <MenuSection className="m-1 overflow-clip rounded-md border">
-          <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
+          <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold text-gray-600 uppercase">
             Status
           </MenuHeading>
           <MenuItem
@@ -93,7 +93,7 @@ export const OsmNotesFilterControl = () => {
         </MenuSection>
 
         <MenuSection className="m-1 overflow-clip rounded-md border">
-          <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
+          <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold text-gray-600 uppercase">
             Nutzer:innen
           </MenuHeading>
           {Array.from(authors).map(([displayName, count]) => {
@@ -121,7 +121,7 @@ export const OsmNotesFilterControl = () => {
         </MenuSection>
 
         <MenuSection className="m-1 overflow-clip rounded-md border">
-          <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
+          <MenuHeading className="flex items-center gap-2 bg-gray-100 px-4 py-1 text-xs font-semibold text-gray-600 uppercase">
             Kommentiert
           </MenuHeading>
           <MenuItem
@@ -150,7 +150,7 @@ export const OsmNotesFilterControl = () => {
         </MenuSection>
 
         <MenuSection className="m-1 overflow-clip rounded-md border">
-          <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold uppercase text-gray-600">
+          <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold text-gray-600 uppercase">
             Suchwort
           </MenuHeading>
           <MenuItem
@@ -168,7 +168,7 @@ export const OsmNotesFilterControl = () => {
               id="query"
               type="text" // type "search" shows an `x` but that does not do anything in chrome, maybe due to the preventDefault…
               placeholder="Suchwort"
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600 sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:leading-6"
               onClick={(e) => {
                 // Required so the flyout does not close when I click in the input field
                 e.preventDefault()

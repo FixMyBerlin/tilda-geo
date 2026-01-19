@@ -30,7 +30,7 @@ export const QaEvaluationForm = ({ onSubmit, isLoading }: Props) => {
           {userStatusOptions.map((option) => (
             <label
               key={option.value}
-              className="group flex cursor-pointer select-none items-start rounded-md border border-gray-300 bg-gray-100 p-3 shadow-sm hover:bg-gray-50"
+              className="group flex cursor-pointer items-start rounded-md border border-gray-300 bg-gray-100 p-3 shadow-sm select-none hover:bg-gray-50"
             >
               <div className="flex h-5 items-center">
                 <input
@@ -71,7 +71,7 @@ export const QaEvaluationForm = ({ onSubmit, isLoading }: Props) => {
           onChange={(e) => setComment(e.target.value)}
           placeholder="Zusätzliche Anmerkungen..."
           rows={3}
-          className="block w-full rounded-md border-0 bg-gray-50 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:py-1.5 sm:text-sm sm:leading-6"
+          className="block w-full rounded-md border-0 bg-gray-50 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600 focus:ring-inset sm:py-1.5 sm:text-sm sm:leading-6"
           disabled={isLoading}
         />
       </div>

@@ -957,7 +957,7 @@ export const staticRegion: StaticRegion[] = [
     fullName: 'Stadt Oranienburg',
     product: 'fussverkehr',
     osmRelationIds: [1310102],
-    map: { lat: 52.75650, lng: 13.26282, zoom: 13 },
+    map: { lat: 52.7565, lng: 13.26282, zoom: 13 },
     bbox: null,
     externalLogoPath:
       'https://oranienburg.de/layout/oranienburg/assets/img/stadt-oranienburg-logo.png',

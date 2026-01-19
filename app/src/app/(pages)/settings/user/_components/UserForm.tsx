@@ -119,7 +119,7 @@ export const UserForm = () => {
                 <td className="py-1 pr-1 text-sm">
                   <Markdown
                     markdown={user.osmDescription}
-                    className="prose-xs font-normal leading-snug text-gray-600"
+                    className="prose-xs leading-snug font-normal text-gray-600"
                   />
                 </td>
               </tr>

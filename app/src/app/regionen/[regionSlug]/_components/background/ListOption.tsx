@@ -13,7 +13,7 @@ export const ListOption: React.FC<Props> = ({ value, name }) => {
       value={value}
       className={({ focus, selected }) =>
         twJoin(
-          'relative select-none py-2 pl-10 pr-4 text-gray-900',
+          'relative py-2 pr-4 pl-10 text-gray-900 select-none',
           focus && !selected ? 'cursor-pointer bg-yellow-50 text-yellow-900' : '',
           selected ? 'bg-yellow-400' : '',
         )

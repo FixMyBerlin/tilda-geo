@@ -84,7 +84,7 @@ export const SelectDatasets = ({
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <DisclosurePanel static as="section" className="mb-2 mt-1">
+            <DisclosurePanel static as="section" className="mt-1 mb-2">
               <div className="mx-1 mt-1 flex items-center justify-end gap-1">
                 {!allActive && (
                   <button

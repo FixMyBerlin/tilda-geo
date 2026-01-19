@@ -75,7 +75,7 @@ export const EditNoteForm = ({ note }: Props) => {
             <input
               type="text"
               name="subject"
-              className="my-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600"
+              className="my-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
               placeholder="Betreff"
               data-1p-ignore
               data-lpignore
@@ -88,7 +88,7 @@ export const EditNoteForm = ({ note }: Props) => {
             <span className="sr-only">Kommentar bearbeiten (Markdown)</span>
             <textarea
               name="body"
-              className="my-3 block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600"
+              className="my-3 block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
               placeholder="Kommentar"
               data-1p-ignore
               data-lpignore
@@ -103,7 +103,7 @@ export const EditNoteForm = ({ note }: Props) => {
               onChange={setFormResolved}
               className={twJoin(
                 formResolved ? 'bg-yellow-600' : 'bg-gray-200',
-                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2',
+                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 focus:outline-none',
               )}
             >
               <span className="sr-only">Erledigt</span>

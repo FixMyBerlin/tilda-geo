@@ -14,11 +14,11 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
   return (
     <tr className="group">
       <td
-        className="space-y-3 border-l-2 py-2 pl-4 pr-3 text-sm font-medium text-gray-900"
+        className="space-y-3 border-l-2 py-2 pr-3 pl-4 text-sm font-medium text-gray-900"
         colSpan={2}
         style={{ borderColor: color }}
       >
-        <div style={{ backgroundColor: dimColor }} className="-ml-4 -mr-3 -mt-2 px-4 py-3">
+        <div style={{ backgroundColor: dimColor }} className="-mt-2 -mr-3 -ml-4 px-4 py-3">
           {properties.precision === 'point'
             ? 'Dieser Hinweis ist an einer konkreten Stelle verortet'
             : 'Dieser Hinweis bezieht sich auf die gesamte Verbindung'}
@@ -41,7 +41,7 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
         <Markdown markdown={properties.text} />
 
         {properties.answer ? (
-          <div className="-ml-4 -mr-3 -mt-2 bg-gray-800 px-4 py-3">
+          <div className="-mt-2 -mr-3 -ml-4 bg-gray-800 px-4 py-3">
             <Markdown className="prose-invert" markdown={properties.answer} />
           </div>
         ) : null}

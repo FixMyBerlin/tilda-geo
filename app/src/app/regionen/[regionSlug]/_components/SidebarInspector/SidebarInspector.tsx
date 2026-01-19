@@ -79,7 +79,7 @@ export const SidebarInspector = () => {
     <div
       ref={ref}
       className={twJoin(
-        'absolute bottom-0 right-0 top-0 z-20 w-[35rem] max-w-full overflow-y-scroll bg-white p-5 pr-3 shadow-md',
+        'absolute top-0 right-0 bottom-0 z-20 w-[35rem] max-w-full overflow-y-scroll bg-white p-5 pr-3 shadow-md',
         !renderFeatures && 'pointer-events-none opacity-0',
       )}
     >

@@ -33,7 +33,7 @@ export const TagsTableRow = ({ sourceId, tagKey, tagValue, children }: TagsTable
     >
       <td
         className={twJoin(
-          'w-2/5 py-2 pl-4 pr-3 text-sm font-medium',
+          'w-2/5 py-2 pr-3 pl-4 text-sm font-medium',
           isSecodaryRow ? 'text-gray-400 group-hover:text-gray-900' : 'text-gray-900',
         )}
       >
