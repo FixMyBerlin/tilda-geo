@@ -336,7 +336,6 @@ export const staticRegion: StaticRegion[] = [
     categories: [
       // Sort
       'parkingTilda',
-      'parkingLars', // TODO: Remove next time we update the URL store
       'roads',
       'mapillary',
     ],
