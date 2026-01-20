@@ -143,6 +143,9 @@ async function upsertQaEvaluationWithRules(
     return transformEvaluationWithDecisionData(newEvaluation)
   }
 
+  // Check if system status changed - if it did, we should update regardless of absolute difference threshold
+  const systemStatusChanged = previousEvaluation.systemStatus !== evaluation.systemStatus
+
   // Check if data changed significantly
   // If absolute difference is <= threshold, it's not considered a change
   // If absoluteDifference is NULL, treat it as a change (needs evaluation)
@@ -152,8 +155,10 @@ async function upsertQaEvaluationWithRules(
 
   const relativeChanged = evaluation.previousRelative !== evaluation.currentRelative
 
-  // Data is considered changed only if relative changed AND absolute difference exceeds threshold
-  const dataChanged = relativeChanged && !absoluteDifferenceWithinThreshold
+  // Data is considered changed if:
+  // 1. System status changed (always update when status changes), OR
+  // 2. Relative changed AND absolute difference exceeds threshold
+  const dataChanged = systemStatusChanged || (relativeChanged && !absoluteDifferenceWithinThreshold)
 
   if (!dataChanged) {
     // No significant change - no new evaluation needed
