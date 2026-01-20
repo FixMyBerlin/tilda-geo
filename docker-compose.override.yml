@@ -14,6 +14,11 @@ services:
     # INFO: The overwrite of `journald` is needed for mac systems which did not work with `journald`
     logging:
       driver: json-file
+    # Performance: Allocate resources for processing container
+    # Docker Desktop has 8GB total, so we allocate 4GB max for processing
+    mem_limit: 4g
+    mem_reservation: 2g
+    cpus: '4'
   app:
     image: app:latest
     build:
@@ -37,6 +42,14 @@ services:
     # command: ["-c", "config_file=/postgresql/postgresql.conf", "-c", "log_statement=all", "-c", "log_min_duration_statement=100"]
     logging:
       driver: json-file
+    # Performance: Increase shared memory for PostgreSQL (needed for large queries and parallel workers)
+    shm_size: 2g
+    # Performance: Allocate resources for database container
+    # Docker Desktop has 8GB total, allocating 5GB for DB (leaving room for processing/tiles)
+    # PostgreSQL benefits significantly from dedicated CPU and memory
+    mem_limit: 5g
+    mem_reservation: 4g
+    cpus: '4'
 
 configs:
   postgres_conf:

@@ -18,6 +18,7 @@ services:
       PROCESS_ONLY_TOPICS:
       PROCESS_ONLY_BBOX:
       OSM2PGSQL_LOG_LEVEL:
+      OSM2PGSQL_NUMBER_PROCESSES:
       TILES_URL:
       ID_FILTER:
       ENVIRONMENT:
@@ -104,7 +105,7 @@ services:
   db:
     image: pgrouting/pgrouting:17-3.5-3.8
     container_name: ${DATABASE_HOST}
-    shm_size: 1g
+    shm_size: 2g
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DATABASE_USER}
