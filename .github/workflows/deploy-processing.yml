@@ -12,6 +12,9 @@ on:
       CONFIG_CHANGED:
         type: boolean
         required: true
+      PROCESSING_DIFFING_MODE:
+        type: string
+        required: true
 
 jobs:
   diff_processing:
@@ -88,7 +91,9 @@ jobs:
             echo "Pulling latest 'processing' image"
             docker compose pull processing
             echo "Restarting 'processing' container"
+            export PROCESSING_DIFFING_MODE="${{ inputs.PROCESSING_DIFFING_MODE }}"
             docker compose up processing -d
+            unset PROCESSING_DIFFING_MODE
             echo "Cleanup docker (containers and images) that are older than 72h"
             docker container prune -f --filter "until=72h"
             docker image prune -fa --filter "until=72h"

@@ -13,6 +13,7 @@ jobs:
     with:
       ENVIRONMENT: staging
       url: https://staging-tiles.tilda-geo.de
+      PROCESSING_DIFFING_MODE: reference
     secrets:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
