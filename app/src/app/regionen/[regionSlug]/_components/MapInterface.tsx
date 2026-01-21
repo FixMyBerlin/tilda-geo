@@ -42,8 +42,8 @@ export const MapInterface = () => {
           <OsmNotes />
           <InternalNotes />
           <DownloadModal />
-          <SelectBackground />
           <BackgroundLegend />
+          <SelectBackground />
         </div>
         <DebugMap />
         <DebugStateInteraction />
