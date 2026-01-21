@@ -49,7 +49,7 @@ export const SelectDataset = ({
     <li key={key}>
       <button
         className={twJoin(
-          'relative w-full cursor-pointer select-none py-2 pl-1.5 pr-2 text-left leading-tight text-gray-900',
+          'relative w-full cursor-pointer py-2 pr-2 pl-1.5 text-left leading-tight text-gray-900 select-none',
           selected ? 'bg-yellow-400' : 'hover:bg-yellow-50',
         )}
         onClick={handleClick}
@@ -76,7 +76,7 @@ export const SelectDataset = ({
         )}
       </button>
       {selected && (
-        <div className="border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pb-1.5 pt-1 text-xs leading-4 prose-a:underline-offset-1">
+        <div className="prose-a:underline-offset-1 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4">
           {updatedAt && <p>{updatedAt}</p>}
           {dataSourceMarkdown && (
             <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
@@ -100,7 +100,7 @@ export const SelectDataset = ({
               {legends.map((legend) => {
                 return (
                   <li
-                    className="group relative mt-1 flex items-center font-normal leading-tight"
+                    className="group relative mt-1 flex items-center leading-tight font-normal"
                     key={legend.id}
                   >
                     <div className="h-5 w-5 flex-none">{iconFromLegend(legend)}</div>
@@ -160,7 +160,7 @@ export const SelectDataset = ({
                   type="text"
                   value={getStaticDatasetUrl(id, 'geojson')}
                   readOnly
-                  className="rounded-xs inline-block w-full border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                  className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -169,7 +169,7 @@ export const SelectDataset = ({
                   type="text"
                   value={getStaticDatasetUrl(id, 'pmtiles')}
                   readOnly
-                  className="rounded-xs inline-block w-full border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                  className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
                 />
               </div>
             </details>
