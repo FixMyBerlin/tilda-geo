@@ -38,7 +38,6 @@ r/route
 # Topic: parking
 nw/amenity
 nw/area:highway
-nw/road_marking
 nw/barrier
 nw/bicycle_parking:position
 nw/bicycle_rental:position
@@ -55,10 +54,12 @@ nw/motorcycle_parking:position
 nw/natural
 nw/outdoor_seating
 nw/position
+nw/road_marking
+nw/small_electric_vehicle_parking:position
 w/amenity=parking
 w/building=carport
 w/building=garage
 w/building=garages
 w/kerb
 w/parking
-nw/small_electric_vehicle_parking:position
+w/traffic_calming
