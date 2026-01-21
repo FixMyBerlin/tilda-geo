@@ -6,7 +6,7 @@ import type { MetaData } from '../types'
 export const generatePMTilesFile = async (
   inputFullFile: string,
   outputFolder: string,
-  precision: MetaData['geometricPrecision'],
+  precision: Extract<MetaData, { dataSourceType: 'local' }>['geometricPrecision'],
 ) => {
   const outputFilename = path.parse(inputFullFile).name
   // This line is only used for `app/scripts/StaticDatasets/geojson/region-bb/bb-ramboll-netzentwurf-2/README.md`

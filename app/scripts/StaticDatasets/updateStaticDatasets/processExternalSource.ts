@@ -25,6 +25,7 @@ export async function processExternalSource(
     githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
     externalSourceUrl,
     cacheTtlSeconds,
+    systemLayer: false,
   })
 
   green('  OK')

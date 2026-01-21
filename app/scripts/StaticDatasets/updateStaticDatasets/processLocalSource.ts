@@ -6,7 +6,7 @@ import { isCompressedSmallerThan } from './isCompressedSmallerThan'
 import { uploadFileToS3 } from './uploadFileToS3'
 
 export async function processLocalSource(
-  metaData: MetaData,
+  metaData: Extract<MetaData, { dataSourceType: 'local' }>,
   uploadSlug: string,
   regionSlugs: string[],
   transformedFilepath: string,
@@ -15,15 +15,6 @@ export async function processLocalSource(
 ) {
   console.log(`  Uploading GeoJSON file to S3...`)
   const geojsonUrl = await uploadFileToS3(transformedFilepath, uploadSlug)
-
-  const pmtilesFilepath = await generatePMTilesFile(
-    transformedFilepath,
-    tempFolder,
-    metaData.geometricPrecision,
-  )
-
-  console.log(`  Uploading PMTiles file to S3...`)
-  const pmtilesUrl = await uploadFileToS3(pmtilesFilepath, uploadSlug)
 
   // Determine which format to use for map rendering
   const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
@@ -36,12 +27,28 @@ export async function processLocalSource(
     renderFormat = mapRenderFormat
   }
 
+  // Only generate PMTiles if needed (not for GeoJSON-only datasets like masks)
+  let pmtilesUrl: string | null = null
+  if (renderFormat === 'pmtiles') {
+    const pmtilesFilepath = await generatePMTilesFile(
+      transformedFilepath,
+      tempFolder,
+      metaData.geometricPrecision,
+    )
+
+    console.log(`  Uploading PMTiles file to S3...`)
+    pmtilesUrl = await uploadFileToS3(pmtilesFilepath, uploadSlug)
+  }
+
   console.log(
     `  Map will render a ${renderFormat.toUpperCase()} file`,
     metaData.mapRenderFormat
       ? 'based on the Format specified in the config.'
       : 'based on the optimal format for this file size.',
   )
+  if (renderFormat === 'geojson' && mapRenderFormat === 'geojson') {
+    console.log(`  Skipping PMTiles generation (GeoJSON-only dataset)`)
+  }
 
   console.log(`  Saving uploads to DB...`)
   // Create single upload entry with both URLs
@@ -56,5 +63,6 @@ export async function processLocalSource(
     pmtilesUrl,
     geojsonUrl,
     githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
+    systemLayer: metaData.systemLayer ?? false,
   })
 }

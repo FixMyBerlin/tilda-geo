@@ -1,6 +1,7 @@
 import { Parser } from '@json2csv/plainjs'
 import { truncate } from '@turf/truncate'
 import { geoJSONToWkt } from 'betterknown'
+import { FeatureCollection } from 'geojson'
 
 /**
  * Converts GeoJSON FeatureCollection to CSV format

@@ -151,6 +151,8 @@ model Upload {
   externalSourceUrl String?
   cacheTtlSeconds   Int?                @default(86400)
   //
+  systemLayer       Boolean             @default(false)
+  //
   regions           Region[]
 }
 

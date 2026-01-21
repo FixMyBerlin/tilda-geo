@@ -1,3 +1,4 @@
+import { MASK_INTERACTIVE_LAYER_IDS } from '@/scripts/StaticDatasets/geojson/_sharedMasks/config'
 import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { useDataParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useDataParam'
 import { useRegionDatasets } from '@/src/app/regionen/[regionSlug]/_hooks/useRegionDatasets/useRegionDatasets'
@@ -79,6 +80,10 @@ export const useInteractiveLayers = () => {
   if (qaParamData.configSlug && qaParamData.style !== 'none') {
     activeCategoryLayerIds.push(qaLayerId)
   }
+
+  // Mask layers are systemLayer datasets with inspector.enabled: false, so they won't be included
+  // via the normal dataset filtering. We need to manually add them so they're interactive.
+  activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
 
   // active layer from datasets
   const { dataParam: selectedDatasetIds } = useDataParam()

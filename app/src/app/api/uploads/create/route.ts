@@ -17,6 +17,7 @@ const Schema = z.object({
   githubUrl: z.string(),
   externalSourceUrl: z.string().nullish(),
   cacheTtlSeconds: z.number().nullish(),
+  systemLayer: z.boolean(),
 })
 
 export async function POST(request: Request) {
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
     githubUrl,
     externalSourceUrl,
     cacheTtlSeconds,
+    systemLayer,
   } = data
 
   await db.upload.deleteMany({ where: { slug: uploadSlug } })
@@ -59,6 +61,7 @@ export async function POST(request: Request) {
         githubUrl,
         externalSourceUrl: externalSourceUrl ?? null,
         cacheTtlSeconds: cacheTtlSeconds ?? null,
+        systemLayer,
       },
     })
   } catch (e) {

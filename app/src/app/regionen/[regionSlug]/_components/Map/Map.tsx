@@ -1,3 +1,4 @@
+import { MASK_INTERACTIVE_LAYER_IDS } from '@/scripts/StaticDatasets/geojson/_sharedMasks/config'
 import { isDev, isProd } from '@/src/app/_components/utils/isEnv'
 import { MAP_STYLE_URL } from '@/src/app/api/map-style/_utils/mapStyleUrl.const'
 import { useMapParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useMapParam'
@@ -36,8 +37,8 @@ import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
-import { SourcesLayersRegionMask } from './SourcesAndLayers/SourcesLayersRegionMask'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
+import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { useInteractiveLayers } from './utils/useInteractiveLayers'
 
@@ -79,7 +80,7 @@ export const Map = () => {
 
   const containMaskFeature = (features: MapLayerMouseEvent['features']) => {
     if (!features) return false
-    return features.some((f) => f.source === 'mask')
+    return features.some((f) => MASK_INTERACTIVE_LAYER_IDS.includes(f.layer.id))
   }
 
   const inspectorFeatures = useMapInspectorFeatures()
@@ -197,12 +198,7 @@ export const Map = () => {
     setMapBounds(mainMap?.getBounds() || null)
   }
 
-  const interactiveLayerIds = [
-    ...useInteractiveLayers(),
-    'mask-buffer',
-    'mask-boundary',
-    'mask-boundary-bg',
-  ]
+  const interactiveLayerIds = useInteractiveLayers()
 
   if (!mapParam) {
     return null
@@ -217,7 +213,6 @@ export const Map = () => {
       region.bbox.max[1],
     ] satisfies ReturnType<typeof bbox>
     mapMaxBoundsSettings = {
-      // Buffer is in km to add the mask buffer and some more
       maxBounds: bbox(buffer(bboxPolygon(maxBounds), 60, { units: 'kilometers' })!),
       // Padding is in pixel to make sure the map controls are visible
       padding: {
@@ -265,7 +260,7 @@ export const Map = () => {
       {/* Order: First Background Sources, then Vector Tile Sources */}
       <UpdateFeatureState />
       <SourcesLayerRasterBackgrounds />
-      <SourcesLayersRegionMask />
+      <SourcesLayersSystemDatasets />
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
       <Suspense>

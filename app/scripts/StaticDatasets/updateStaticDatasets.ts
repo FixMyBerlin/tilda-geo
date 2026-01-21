@@ -1,4 +1,6 @@
 // We use bun.sh to run this file
+import { select } from '@clack/prompts'
+import dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
 import { parse } from 'parse-gitignore'
@@ -14,24 +16,78 @@ import { transformFile } from './updateStaticDatasets/transformFile'
 import { import_ } from './utils/import_'
 import { green, inverse, red, yellow } from './utils/log'
 
-const geoJsonFolder = 'scripts/StaticDatasets/geojson'
-export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
-if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
+function loadEnvFiles(environment: string) {
+  const scriptDir = path.dirname(__filename)
+  const appRoot = path.resolve(scriptDir, '../..')
 
-const regions = await getRegions()
-const existingRegionSlugs = regions.map((region) => region.slug)
+  // Map 'dev' to 'development' for file naming
+  const envFileSuffix = environment === 'dev' ? 'development' : environment
 
+  // Load base .env from app root
+  const baseEnvPath = path.join(appRoot, '.env')
+  if (fs.existsSync(baseEnvPath)) {
+    dotenv.config({ path: baseEnvPath })
+  }
+
+  // Load environment-specific .env file from scripts/StaticDatasets directory
+  const envFilePath = path.join(scriptDir, `.env.${envFileSuffix}`)
+  if (!fs.existsSync(envFilePath)) {
+    red(`Environment file not found: ${envFilePath}`)
+    process.exit(1)
+  }
+  dotenv.config({ path: envFilePath, override: true })
+}
+
+// Parse command line arguments
+// use --env to specify environment (dev/staging/production), otherwise will prompt
 // use --keep-tmp to keep temporary generated files
 // use --folder-filter to run only folders that include this filter string (check the full path, so `region-bb` (group folder) and `bb-` (dataset folder) will both work)
 const { values, positionals } = parseArgs({
   args: Bun.argv,
   options: {
+    env: { type: 'string' },
     'keep-tmp': { type: 'boolean' },
     'folder-filter': { type: 'string' },
   },
   strict: true,
   allowPositionals: true,
 })
+
+// Determine environment: use --env flag or prompt user
+let environment: string
+if (values.env) {
+  const validEnvs = ['dev', 'staging', 'production']
+  if (!validEnvs.includes(values.env)) {
+    red(`Invalid environment: ${values.env}. Must be one of: ${validEnvs.join(', ')}`)
+    process.exit(1)
+  }
+  environment = values.env
+} else {
+  const selected = await select({
+    message: 'Select environment:',
+    options: [
+      { value: 'dev', label: 'Development' },
+      { value: 'staging', label: 'Staging' },
+      { value: 'production', label: 'Production' },
+    ],
+  })
+
+  if (!selected || typeof selected !== 'string') {
+    red('No environment selected. Aborting.')
+    process.exit(1)
+  }
+  environment = selected
+}
+
+// Load environment files before accessing process.env
+loadEnvFiles(environment)
+
+const geoJsonFolder = 'scripts/StaticDatasets/geojson'
+export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
+if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
+
+const regions = await getRegions()
+const existingRegionSlugs = regions.map((region) => region.slug)
 
 const keepTemporaryFiles = !!values['keep-tmp']
 const folderFilterTerm = values['folder-filter']
