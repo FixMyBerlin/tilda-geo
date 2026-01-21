@@ -34,7 +34,7 @@ export const MapInterface = () => {
         <SidebarInspector />
         <div
           // The pointer-events classes make sure we can click though the empty div on the map but still use the buttons/dropdown
-          className="pointer-events-none fixed bottom-4 right-2.5 z-10 mt-2.5 flex max-w-full flex-wrap items-end justify-end gap-1.5 [&>*]:pointer-events-auto"
+          className="pointer-events-none fixed right-2.5 bottom-4 z-10 mt-2.5 flex max-w-full flex-wrap items-end justify-end gap-1.5 [&>*]:pointer-events-auto"
           // The data attribute moves the UI with custom css in `SidebarInspector.tsx`
           data-map-controls="true"
         >
@@ -42,8 +42,8 @@ export const MapInterface = () => {
           <OsmNotes />
           <InternalNotes />
           <DownloadModal />
-          <SelectBackground />
           <BackgroundLegend />
+          <SelectBackground />
         </div>
         <DebugMap />
         <DebugStateInteraction />

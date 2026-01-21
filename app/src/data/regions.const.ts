@@ -110,8 +110,8 @@ export type RegionSlug =
   | 'bb-pg' // Land Brandenburg Projektgruppe
   | 'bb-sg' // Land Brandenburg Steuerungsgruppe
   | 'bb' // Öffentlich, Land Brandenburg
-  | 'berlin'
   | 'berlin-baumanalyse'
+  | 'berlin'
   | 'bibi'
   | 'deutschland'
   | 'fahrradstellplaetze'
@@ -124,6 +124,7 @@ export type RegionSlug =
   | 'muenchen'
   | 'nrw'
   | 'nudafa'
+  | 'ohv'
   | 'ostalbkreis'
   | 'pankow'
   | 'parkraum-berlin-euvm'
@@ -335,7 +336,6 @@ export const staticRegion: StaticRegion[] = [
     categories: [
       // Sort
       'parkingTilda',
-      'parkingLars', // TODO: Remove next time we update the URL store
       'roads',
       'mapillary',
     ],
@@ -947,6 +947,30 @@ export const staticRegion: StaticRegion[] = [
       'mapillary',
     ],
     backgroundSources: berlinBackgroundSources,
+    notes: 'atlasNotes',
+    exports: null,
+  },
+  {
+    slug: 'ohv',
+    name: 'OHV',
+    fullName: 'Stadt Oranienburg',
+    product: 'fussverkehr',
+    osmRelationIds: [1310102],
+    map: { lat: 52.7565, lng: 13.26282, zoom: 13 },
+    bbox: null,
+    externalLogoPath:
+      'https://oranienburg.de/layout/oranienburg/assets/img/stadt-oranienburg-logo.png',
+    logoWhiteBackgroundRequired: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'roads',
+      'mapillary',
+    ],
+    backgroundSources: [
+      'brandenburg-dop20',
+      'brandenburg-aktualitaet',
+      ...defaultBackgroundSources,
+    ],
     notes: 'atlasNotes',
     exports: null,
   },

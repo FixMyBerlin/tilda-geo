@@ -17,13 +17,13 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 EvaluatorType
               </th>
-              <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                 EvaluationType
               </th>
-              <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th className="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Anzahl
               </th>
             </tr>
@@ -31,7 +31,7 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
           <tbody className="divide-y divide-gray-200 bg-white">
             {/* System evaluations */}
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.SYSTEM.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -45,12 +45,12 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.SYSTEM.GOOD}
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.SYSTEM.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -65,12 +65,12 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.SYSTEM.NEEDS_REVIEW}
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.SYSTEM.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -85,13 +85,13 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.SYSTEM.PROBLEMATIC}
               </td>
             </tr>
             {/* User evaluations */}
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.USER.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -108,12 +108,12 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.USER.OK_STRUCTURAL_CHANGE}
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.USER.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -128,12 +128,12 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.USER.OK_REFERENCE_ERROR}
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.USER.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -148,12 +148,12 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.USER.NOT_OK_DATA_ERROR}
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.USER.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -170,12 +170,12 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.USER.NOT_OK_PROCESSING_ERROR}
               </td>
             </tr>
             <tr>
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
                 {evaluatorTypeConfig.USER.label}
               </td>
               <td className="px-4 py-2 text-sm text-gray-900">
@@ -190,15 +190,15 @@ export async function QaConfigStatsTable({ configId }: { configId: number }) {
                   </span>
                 </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.evaluationStats.USER.OK_QA_TOOLING_ERROR}
               </td>
             </tr>
             {/* Total row */}
             <tr className="bg-gray-50 font-semibold">
-              <td className="whitespace-nowrap px-4 py-2 text-sm text-gray-900">Total</td>
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">Total</td>
               <td className="px-4 py-2 text-sm text-gray-900"></td>
-              <td className="whitespace-nowrap px-4 py-2 text-right text-sm text-gray-900">
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
                 {stats.totalAreas}
               </td>
             </tr>

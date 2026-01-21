@@ -46,9 +46,12 @@ async function runLua(fileName: string, topic: Topic) {
   const luaFile = `${mainFilePath(topic)}.lua`
   console.log('runTopic: runLua', topic, JSON.stringify({ luaFile, filePath }))
   try {
+    // Number of processes: Use env var if set, otherwise default to 4 (better for Docker Desktop)
+    // For production with more CPU cores, set OSM2PGSQL_NUMBER_PROCESSES=8 or higher
+    const numProcesses = params.osm2pgsqlNumberProcesses ?? 4
     // Did not find an easy way to use $(Shell) and make the `--bbox` optional
     await $`osm2pgsql \
-              --number-processes=8 \
+              --number-processes=${numProcesses} \
               --create \
               --output=flex \
               --extra-attributes \
@@ -167,13 +170,9 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     const processedTopicTables = topicTables.intersection(tableListPublic)
 
     // ============================================
-    // Reference Creation Phase
+    // Reference Creation Phase (for non-reference modes)
     // ============================================
-    if (isReferenceMode) {
-      // Reference mode: Always create/update reference tables unconditionally
-      console.log('Diffing:', 'Create reference tables (reference mode)')
-      await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
-    } else if (diffChanges) {
+    if (!isReferenceMode && diffChanges) {
       // Previous/Fixed modes: Create reference tables conditionally
       console.log('Diffing:', 'Create reference tables')
       // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
@@ -193,10 +192,19 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     updateDirectoryHash(topicPath(topic))
 
     // ============================================
+    // Reference Creation Phase (for reference mode - AFTER topic runs)
+    // ============================================
+    if (isReferenceMode) {
+      // Reference mode: Create reference tables AFTER processing to capture final state
+      console.log('Diffing:', 'Create reference tables (reference mode)')
+      await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
+    }
+
+    // ============================================
     // Diffing Phase
     // ============================================
     if (isReferenceMode) {
-      // Reference mode: Skip diff computation (already cleaned up at start)
+      // Reference mode: Skip diff computation (already cleaned up)
       console.log('Diffing:', 'Skip diff computation (reference mode)')
     } else if (diffChanges) {
       // Previous/Fixed modes: Compute diffs

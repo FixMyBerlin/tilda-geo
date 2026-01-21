@@ -76,7 +76,7 @@ export const HomePageTestimonials = () => {
                 {column.map((testimonial, testimonialIndex) => (
                   <li key={testimonialIndex}>
                     <figure className="relative rounded-2xl bg-white p-6 shadow-xl shadow-gray-900/10">
-                      <QuoteIcon className="absolute left-6 top-6 fill-gray-100" />
+                      <QuoteIcon className="absolute top-6 left-6 fill-gray-100" />
                       <blockquote className="relative">
                         <p className="text-lg tracking-tight text-gray-900">
                           {testimonial.content}

@@ -32,7 +32,7 @@ export const UserLoggedIn = ({ user }: UserLoggedInProp) => {
 
   return (
     <Menu as="div" className="relative z-50 ml-3 sm:ml-6">
-      <MenuButton className="flex rounded-full bg-gray-800 text-sm hover:ring-1 hover:ring-gray-500 hover:ring-offset-2 hover:ring-offset-gray-800 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
+      <MenuButton className="flex rounded-full bg-gray-800 text-sm hover:ring-1 hover:ring-gray-500 hover:ring-offset-2 hover:ring-offset-gray-800 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none">
         <span className="sr-only">User-Menü</span>
         {user.osmAvatar ? (
           <Image
@@ -61,7 +61,7 @@ export const UserLoggedIn = ({ user }: UserLoggedInProp) => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <MenuItems className="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <MenuItems className="ring-opacity-5 absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black focus:outline-none">
           <div className="border-b border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-700">
             <p className="mb-1">
               <strong>Angemeldet als {user.osmName}</strong>

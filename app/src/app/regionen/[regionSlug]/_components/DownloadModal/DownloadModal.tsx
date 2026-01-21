@@ -16,10 +16,12 @@ import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
 const DownloadModalTriggerIcon = () => {
   const [metadata] = useQuery(getAtlasGeoMetadata, {})
 
+  // Show icon without indicator if no data yet and not processing
   if (!metadata?.osm_data_from && metadata?.status !== 'processing') {
     return <ArrowDownTrayIcon className="size-5" />
   }
 
+  // For postprocessing and processed, osm_data_from should be available
   const osmDataDate = metadata.osm_data_from ? new Date(metadata.osm_data_from) : null
   const isDataOlderThanYesterday = osmDataDate
     ? isBefore(osmDataDate, subDays(new Date(), 1))
@@ -30,7 +32,7 @@ const DownloadModalTriggerIcon = () => {
     <div className="relative">
       <ArrowDownTrayIcon className="size-5" />
       {(isProcessing || isDataOlderThanYesterday) && (
-        <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-orange-500" />
+        <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-orange-500" />
       )}
     </div>
   )
@@ -79,16 +81,16 @@ export const DownloadModal = () => {
       >
         {!hasPermissions && (
           <>
-            <p className="pb-2.5 pt-5 text-sm">
+            <p className="pt-5 pb-2.5 text-sm">
               Die Daten stehen nur für Rechte-Inhaber zur Verfügung.
             </p>
             {isLoggedIn ? (
-              <p className="pb-2.5 pt-5 text-sm">
+              <p className="pt-5 pb-2.5 text-sm">
                 Bitte <Link href="/kontakt">kontaktieren Sie uns</Link> um Zugriff zur Region und
                 zum Download zu erhalten.
               </p>
             ) : (
-              <p className="pb-2.5 pt-5 text-sm">
+              <p className="pt-5 pb-2.5 text-sm">
                 Bitte{' '}
                 <button className={linkStyles} onClick={handleLogin}>
                   loggen Sie sich ein

@@ -33,14 +33,14 @@ export const SelectBackground: React.FC = () => {
 
   return (
     <Listbox as="section" className="" value={backgroundParam} onChange={onChange}>
-      <ListboxButton className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+      <ListboxButton className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none">
         Hintergrundkarten
         <ChevronUpDownIcon className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
       </ListboxButton>
       <ListboxOptions
         transition
         anchor="top end"
-        className="absolute right-0 z-10 mt-2 max-h-[calc(100%_-_2.5rem)] w-60 overflow-auto rounded-md bg-white text-sm shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+        className="ring-opacity-5 absolute right-0 z-10 mt-2 max-h-[calc(100%_-_2.5rem)] w-60 overflow-auto rounded-md bg-white text-sm shadow-lg ring-1 ring-black transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[enter]:ease-out data-[leave]:duration-75 data-[leave]:ease-in"
       >
         {backgrounds.map(({ name, id }) => {
           return <ListOption key={id} value={id} name={name} />

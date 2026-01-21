@@ -43,7 +43,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             >
               <h2 className="font-semibold">{currCategoryConfig.name}</h2>
               <p
-                className="mt-0.5 w-44 min-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xs leading-3 text-gray-400"
+                className="mt-0.5 w-44 min-w-full overflow-hidden text-xs leading-3 overflow-ellipsis whitespace-nowrap text-gray-400"
                 title={currCategoryConfig.desc}
               >
                 {currCategoryConfig.desc}
@@ -67,7 +67,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <DisclosurePanel static as="nav" className="mb-2 mt-3">
+            <DisclosurePanel static as="nav" className="mt-3 mb-2">
               {Boolean(dropdownSubcategories.length) && (
                 <SubcategoriesDropdown
                   categoryId={currCategoryConfig.id}
@@ -77,7 +77,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
               )}
               {Boolean(checkboxSubcategories.length) && (
                 <>
-                  {Boolean(dropdownSubcategories.length) && <hr className="mx-1.5 mb-2 mt-3 h-1" />}
+                  {Boolean(dropdownSubcategories.length) && <hr className="mx-1.5 mt-3 mb-2 h-1" />}
                   <SubcategoriesCheckbox
                     categoryId={currCategoryConfig.id}
                     subcategories={checkboxSubcategories}

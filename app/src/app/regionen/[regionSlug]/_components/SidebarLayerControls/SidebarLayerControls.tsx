@@ -38,7 +38,7 @@ export const SidebarLayerControls = () => {
   return (
     <section
       ref={ref}
-      className="absolute left-0 top-0 z-20 max-h-full max-w-72 overflow-y-auto overflow-x-visible bg-white py-px shadow-md"
+      className="absolute top-0 left-0 z-20 max-h-full max-w-72 overflow-x-visible overflow-y-auto bg-white py-px shadow-md"
     >
       {isSmBreakpointOrAbove ? (
         <SidebarLayerControlsChildren />
@@ -46,7 +46,7 @@ export const SidebarLayerControls = () => {
         <Disclosure as={Fragment} defaultOpen={false}>
           {({ open }) => (
             <>
-              <DisclosureButton className="flex w-full items-center gap-0.5 pr-3 text-sm font-semibold leading-none hover:bg-yellow-50">
+              <DisclosureButton className="flex w-full items-center gap-0.5 pr-3 text-sm leading-none font-semibold hover:bg-yellow-50">
                 <ChevronDownIcon
                   className={twJoin(
                     open ? '' : '-rotate-90 transform',

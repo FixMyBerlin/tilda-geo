@@ -22,7 +22,7 @@ export const NavigationDesktopLinks = ({ menuItems }: Props) => {
               current
                 ? 'cursor-default bg-gray-900 text-white'
                 : 'bg-gray-700 text-gray-100 hover:bg-gray-600 hover:text-white',
-              'flex items-center rounded-md px-3 py-2 text-sm font-medium leading-none',
+              'flex items-center rounded-md px-3 py-2 text-sm leading-none font-medium',
             )}
             aria-current={current ? 'page' : undefined}
           >

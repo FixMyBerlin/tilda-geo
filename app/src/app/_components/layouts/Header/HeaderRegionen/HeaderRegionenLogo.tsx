@@ -56,7 +56,7 @@ export const HeaderRegionenLogo = () => {
           <span className="md:hidden">{staticRegion.name}</span>
           <span className="hidden md:inline">{staticRegion.fullName}</span>
           {isDeactivated && (
-            <Pill color="red" className="text-[9px] uppercase tracking-wide">
+            <Pill color="red" className="text-[9px] tracking-wide uppercase">
               Deaktiviert
             </Pill>
           )}

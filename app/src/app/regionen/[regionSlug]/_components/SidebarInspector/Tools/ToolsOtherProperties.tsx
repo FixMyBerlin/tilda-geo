@@ -66,7 +66,7 @@ export const ToolsOtherProperties = ({ feature, documentedKeys }: Props) => {
       <summary className="ml-1.5 cursor-pointer font-semibold text-gray-600">
         <span className="ml-1.5">Weitere Daten an diesem Element</span>
       </summary>
-      <div className="mt-3 grid grid-cols-2 gap-4 break-all text-xs">
+      <div className="mt-3 grid grid-cols-2 gap-4 text-xs break-all">
         <div>
           <h5 className="mb-2 font-semibold">Inhaltliche Daten</h5>
           {otherOsmProperties.length ? (

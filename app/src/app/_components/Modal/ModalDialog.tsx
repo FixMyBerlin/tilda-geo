@@ -83,8 +83,8 @@ export const ModalDialog = ({
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <div className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:w-full sm:max-w-lg sm:p-6">
-                <CloseButton onClick={() => setOpen(false)} positionClasses="right-6 top-6" />
+              <div className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:w-full sm:max-w-lg sm:p-6">
+                <CloseButton onClick={() => setOpen(false)} positionClasses="top-6 right-6" />
 
                 <div className="sm:flex sm:items-start">
                   <div
@@ -96,14 +96,14 @@ export const ModalDialog = ({
                     {iconComponent[icon].icon}
                   </div>
 
-                  <div className="mt-3 w-full text-center sm:ml-4 sm:mt-2 sm:text-left">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
+                  <div className="mt-3 w-full text-center sm:mt-2 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">{title}</h3>
                     <div className="mt-2">{children}</div>
                   </div>
                 </div>
 
                 {buttonCloseName && (
-                  <div className="mt-5 sm:ml-10 sm:mt-4 sm:flex sm:gap-3 sm:pl-4">
+                  <div className="mt-5 sm:mt-4 sm:ml-10 sm:flex sm:gap-3 sm:pl-4">
                     {/* Once we need a close action or OK/Cancel pattern, we neecd to extend this component */}
                     {/* <button
                       type="button"
@@ -114,7 +114,7 @@ export const ModalDialog = ({
                     </button> */}
                     <button
                       type="button"
-                      className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+                      className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
                       onClick={() => setOpen(false)}
                       ref={cancelButtonRef}
                     >

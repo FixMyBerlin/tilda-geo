@@ -21,7 +21,7 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
 
   return (
     <div className="mx-2 mt-2 space-y-1 border-t border-gray-200 pt-2">
-      <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase text-gray-600">
+      <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase">
         Nutzer:innen-Bewertungen {isLoadingUsers && <SmallSpinner />}
       </div>
       {qaUsers?.map((user) => {

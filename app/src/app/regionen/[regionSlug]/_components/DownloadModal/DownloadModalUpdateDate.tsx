@@ -31,7 +31,9 @@ const DownloadModalUpdateDateContent = () => {
     )
   }
 
-  const osmDataDate = new Date(metadata.osm_data_from)
+  // Show OK when status is 'postprocessing' or 'processed' (app is ready to use)
+  // osm_data_from is available for both postprocessing and processed status
+  const osmDataDate = new Date(metadata.osm_data_from!)
   const isDataOlderThanYesterday = isBefore(osmDataDate, subDays(new Date(), 1))
 
   return (
@@ -50,11 +52,31 @@ const DownloadModalUpdateDateContent = () => {
             : 'Unbekannt'}
         </p>
         <p>
-          Verarbeitung abgeschlossen:{' '}
-          {metadata.processed_at
-            ? format(new Date(metadata.processed_at), 'dd.MM.yyyy HH:mm', { locale: de })
+          Hauptverarbeitung abgeschlossen:{' '}
+          {metadata.processing_completed_at
+            ? format(new Date(metadata.processing_completed_at), 'dd.MM.yyyy HH:mm', { locale: de })
             : 'Noch nicht abgeschlossen'}
         </p>
+        {metadata.status === 'processed' && (
+          <>
+            <p>
+              QA-Auswertung abgeschlossen:{' '}
+              {metadata.qa_update_completed_at
+                ? format(new Date(metadata.qa_update_completed_at), 'dd.MM.yyyy HH:mm', {
+                    locale: de,
+                  })
+                : '(Fehler)'}
+            </p>
+            <p>
+              Statistiken abgeschlossen:{' '}
+              {metadata.statistics_completed_at
+                ? format(new Date(metadata.statistics_completed_at), 'dd.MM.yyyy HH:mm', {
+                    locale: de,
+                  })
+                : '(Fehler)'}
+            </p>
+          </>
+        )}
       </div>
     </details>
   )

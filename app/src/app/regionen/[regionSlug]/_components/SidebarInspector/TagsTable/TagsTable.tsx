@@ -65,7 +65,7 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
         <tr>
           <th
             scope="col"
-            className="py-1.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900"
+            className="py-1.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
           >
             Schlüssel
           </th>

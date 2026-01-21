@@ -35,7 +35,7 @@ const features: Feature[] = [
 
 export const HomePageSecondaryFeaturesJustText = () => {
   return (
-    <section id="secondary-features" className="pb-14 pt-20 sm:pb-20 sm:pt-32 lg:pb-32">
+    <section id="secondary-features" className="pt-20 pb-14 sm:pt-32 sm:pb-20 lg:pb-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl md:text-center">
           <h2 className="font-display text-3xl tracking-tight text-gray-900 sm:text-4xl">

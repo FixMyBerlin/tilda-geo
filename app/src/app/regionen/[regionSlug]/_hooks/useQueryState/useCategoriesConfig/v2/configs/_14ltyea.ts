@@ -3,8 +3,37 @@
 
 import { MapDataCategoryParam } from '../../type'
 
-// For regions berlin-baumanalyse, ohv, pankow, trassenscout-umfragen
-export const _1874z8l: MapDataCategoryParam[] = [
+// For regions parkraum-berlin-euvm
+export const _14ltyea: MapDataCategoryParam[] = [
+  {
+    id: 'parkingTilda',
+    active: false,
+    subcategories: [
+      {
+        id: 'parkingTilda',
+        styles: [
+          { id: 'hidden', active: false },
+          { id: 'default', active: true },
+          { id: 'conditional', active: false },
+          { id: 'surface', active: false },
+        ],
+      },
+      { id: 'parkingTildaPrivate', styles: [{ id: 'default', active: false }] },
+      {
+        id: 'parkingTildaOffStreet',
+        styles: [
+          { id: 'hidden', active: true },
+          { id: 'default', active: false },
+          { id: 'public_access', active: false },
+          { id: 'operator_type', active: false },
+        ],
+      },
+      { id: 'parkingTildaNo', styles: [{ id: 'default', active: false }] },
+      { id: 'parkingTildaCutouts', styles: [{ id: 'default', active: false }] },
+      { id: 'parkingTildaMissing', styles: [{ id: 'default', active: false }] },
+      { id: 'parkingTildaQuantized', styles: [{ id: 'default', active: false }] },
+    ],
+  },
   {
     id: 'roads',
     active: false,

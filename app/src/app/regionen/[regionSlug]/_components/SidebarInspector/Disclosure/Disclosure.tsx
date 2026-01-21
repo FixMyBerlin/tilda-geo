@@ -34,7 +34,7 @@ export const Disclosure = ({
         <>
           <DisclosureButton
             className={twJoin(
-              'flex w-full justify-between bg-gray-50 py-2 pl-2.5 pr-2 text-left text-sm font-semibold text-gray-900 hover:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-opacity-75',
+              'focus-visible:ring-opacity-75 flex w-full justify-between bg-gray-50 py-2 pr-2 pl-2.5 text-left text-sm font-semibold text-gray-900 hover:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500',
               open ? 'rounded-b-none border-b border-b-gray-200 bg-gray-100' : '',
             )}
           >

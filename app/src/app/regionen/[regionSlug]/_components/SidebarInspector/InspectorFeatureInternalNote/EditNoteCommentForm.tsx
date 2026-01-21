@@ -66,7 +66,7 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
             <span className="sr-only">Antwort bearbeiten (Markdown)</span>
             <textarea
               name="body"
-              className="my-3 block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600"
+              className="my-3 block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
               data-1p-ignore
               data-lpignore
               defaultValue={comment.body}

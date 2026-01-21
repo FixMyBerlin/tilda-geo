@@ -92,6 +92,15 @@ The `PROCESSING_DIFFING_BBOX` bbox (required when diffing is on) specifies which
   This mode always creates/updates reference tables (ignoring file change status) and removes all diff tables for a clean slate.
   Use this before starting test iterations, then run with `fixed` mode for consistent comparisons against the same reference.
 
+#### Deployment Configuration
+
+The diffing mode is configured differently depending on the deployment context:
+
+- **Staging nightly runs** (scheduled daily): `PROCESSING_DIFFING_MODE=reference` - Creates/updates the baseline reference
+- **Production nightly runs** (scheduled daily): `PROCESSING_DIFFING_MODE=off` - No diffing
+- **Staging deploys**: `PROCESSING_DIFFING_MODE=fixed` - Compares against the frozen, previous day's reference without updating it
+- **Production deploys**: `PROCESSING_DIFFING_MODE=off` - No diffing
+
 To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `PROCESSING_DIFFING_MODE=off`.
 
 ### Process only a single object

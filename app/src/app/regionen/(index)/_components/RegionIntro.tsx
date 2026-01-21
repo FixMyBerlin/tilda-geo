@@ -5,7 +5,7 @@ type Props = { regions: TRegion[] | undefined }
 
 export const RegionIntro: React.FC<Props> = ({ regions }) => {
   return (
-    <div className="bg-blue-gray-800 relative pb-36 pt-10 md:pt-10">
+    <div className="bg-blue-gray-800 relative pt-10 pb-36 md:pt-10">
       <div className="absolute inset-0">
         <Image
           className="h-full w-full object-cover"

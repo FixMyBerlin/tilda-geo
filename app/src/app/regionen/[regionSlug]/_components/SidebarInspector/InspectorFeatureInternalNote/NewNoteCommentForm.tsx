@@ -49,7 +49,7 @@ export const NewNoteCommentForm = ({ noteId }: Props) => {
         <textarea
           ref={textareaRef}
           name="body"
-          className="block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600"
+          className="block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
           data-1p-ignore
           data-lpignore
         />

@@ -46,6 +46,9 @@ function parseParameters() {
       : [],
     processOnlyBbox: parseBbox(process.env.PROCESS_ONLY_BBOX),
     osm2pgsqlLogLevel: process.env.OSM2PGSQL_LOG_LEVEL || 'info',
+    osm2pgsqlNumberProcesses: process.env.OSM2PGSQL_NUMBER_PROCESSES
+      ? (Number(process.env.OSM2PGSQL_NUMBER_PROCESSES) || undefined)
+      : undefined,
   }
 }
 

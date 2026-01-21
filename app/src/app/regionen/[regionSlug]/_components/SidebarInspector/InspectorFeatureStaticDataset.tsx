@@ -33,7 +33,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
       >
         <p
           dangerouslySetInnerHTML={{ __html: sourceData.attributionHtml }}
-          className="border-b py-1.5 pl-4 pr-3 text-gray-400"
+          className="border-b py-1.5 pr-3 pl-4 text-gray-400"
         />
         <TagsTable
           properties={feature.properties}

@@ -27,6 +27,7 @@ jobs:
       ENVIRONMENT: production
       TILES_URL: tiles.tilda-geo.de
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
+      PROCESSING_DIFFING_MODE: off
     secrets: inherit
   deploy_app:
     uses: ./.github/workflows/deploy-app.yml

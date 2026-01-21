@@ -138,7 +138,7 @@ export const NoticeMaprouletteTask = ({
           </LinkExternal>
         </p>
       )}
-      <div className="mb-5 mt-0 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
+      <div className="mt-0 mb-5 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
         {showMaproulette && (
           <>
             <LinkExternal href={rapidCampaignLink} blank button>

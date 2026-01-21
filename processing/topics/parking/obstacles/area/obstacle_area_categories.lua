@@ -70,4 +70,13 @@ obstacle_area_categories = {
     tags = function(tags) return { landuse = tags.landuse } end,
     tags_cc = {},
   }),
+  class_obstacle_category.new({
+    id = 'kerb_extension',
+    buffer_radius = function(tags) return nil end,
+    conditions = function(tags)
+      return tags.traffic_calming == 'kerb_extension'
+    end,
+    tags = function(tags) return { traffic_calming = tags.traffic_calming } end,
+    tags_cc = { 'traffic_calming' },
+  }),
 }

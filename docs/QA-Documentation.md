@@ -41,19 +41,24 @@ The system evaluates when to create a new evaluation based on two scenarios:
 
 When there is **no user decision** (`userStatus === null`), the system will create a new evaluation whenever the system status changes. This allows the system to keep its evaluation up-to-date as data changes.
 
-| Previous System Status | New System Status | Action |
-|---|---|---|
-| **GOOD**               | GOOD         | **No change** - Keep existing evaluation |
-| **GOOD**               | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself |
-| **GOOD**               | PROBLEMATIC  | **Create new evaluation** - System overwrites itself |
-| **NEEDS_REVIEW**       | GOOD         | **Create new evaluation** - System overwrites itself |
-| **NEEDS_REVIEW**       | NEEDS_REVIEW | **No change** - Keep existing evaluation |
-| **NEEDS_REVIEW**       | PROBLEMATIC  | **Create new evaluation** - System overwrites itself |
-| **PROBLEMATIC**        | GOOD         | **Create new evaluation** - System overwrites itself |
-| **PROBLEMATIC**        | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself |
-| **PROBLEMATIC**        | PROBLEMATIC  | **No change** - Keep existing evaluation |
+| Previous System Status | New System Status | Action | Threshold |
+|---|---|---|---|
+| **GOOD**               | GOOD         | **No change** - Keep existing evaluation | **Applied**[^1] |
+| **GOOD**               | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
+| **GOOD**               | PROBLEMATIC  | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
+| **NEEDS_REVIEW**       | GOOD         | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
+| **NEEDS_REVIEW**       | NEEDS_REVIEW | **No change** - Keep existing evaluation | **Applied**[^1] |
+| **NEEDS_REVIEW**       | PROBLEMATIC  | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
+| **PROBLEMATIC**        | GOOD         | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
+| **PROBLEMATIC**        | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
+| **PROBLEMATIC**        | PROBLEMATIC  | **No change** - Keep existing evaluation | **Applied**[^1] |
 
-**Rule**: New evaluation is created when `previousSystemStatus !== newSystemStatus` AND `previousRelative !== currentRelative` (data has changed).
+**Rule**:
+- If `previousSystemStatus !== newSystemStatus`: New evaluation created.[^2] The threshold is always bypassed when the status changed.
+- If `previousSystemStatus === newSystemStatus`: New evaluation created only if `previousRelative !== currentRelative` AND[^1] `|absoluteDifference| > absoluteDifferenceThreshold` (where `absoluteDifferenceThreshold` comes from `QaConfig.absoluteDifferenceThreshold`)
+
+[^1]: Threshold is applied: New evaluation created only if `|absoluteDifference| > absoluteDifferenceThreshold` (from `QaConfig.absoluteDifferenceThreshold`)
+[^2]: Threshold is bypassed: Status changed, so threshold check is skipped
 
 #### 3.2. System Overwrites User Decision
 
@@ -82,6 +87,7 @@ When there is **a user decision** (`userStatus !== null`), the system respects u
 - **OK_QA_TOOLING_ERROR**: Reset when `newSystemStatus === 'GOOD'` (QA tooling error resolved), otherwise permanent
 - **NOT_OK decisions (`NOT_OK_*`)**: Only reset when `newSystemStatus === 'GOOD'` (problem resolved)
 - **Reset user decision**: Creates new evaluation with `userStatus = null`, `body = null`, `userId = null`
+- **Threshold behavior**: When a user decision exists, the absolute difference threshold (`QaConfig.absoluteDifferenceThreshold`) is either bypassed (for resets, which happen before threshold check) or not relevant (for permanent decisions, which prevent new evaluations regardless)
 
 **Important Note**: All updates only occur when data has changed (`previousRelative !== currentRelative`). If the relative value hasn't changed, no new evaluation is created regardless of status changes.
 

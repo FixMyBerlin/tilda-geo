@@ -6,6 +6,7 @@ export const bikelaneTodoIds = [
   'adjoining_or_isolated',
   'advisory_or_exclusive',
   'advisory_or_exclusive__mapillary',
+  'crossing_too_long',
   'currentness_too_old',
   'currentness_too_old__mapillary',
   'malformed_traffic_sign',
@@ -43,6 +44,7 @@ export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
 export const bikelaneTodoIdsTableAndField = [
   'adjoining_or_isolated',
   'advisory_or_exclusive',
+  'crossing_too_long',
   'missing_access_tag_240',
   'missing_access_tag_bicycle_road',
   'missing_oneway',
@@ -104,6 +106,7 @@ export const todoIds = [
   'adjoining_or_isolated',
   'advisory_or_exclusive',
   'advisory_or_exclusive__mapillary',
+  'crossing_too_long',
   'currentness_too_old',
   'currentness_too_old__mapillary',
   'deprecated_cycleway_shared',

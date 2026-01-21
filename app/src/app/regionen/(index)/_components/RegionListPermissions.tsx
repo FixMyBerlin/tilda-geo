@@ -28,7 +28,7 @@ export const RegionListPermissions = async () => {
             <h2>Ihre Regionen</h2>
           </div>
 
-          <div className="my-10 grid grid-cols-2 border-l border-t border-gray-200 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
+          <div className="my-10 grid grid-cols-2 border-t border-l border-gray-200 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
             {activeRegions.map((region) => (
               <RegionTeaser key={region.slug} region={region} />
             ))}
@@ -45,7 +45,7 @@ export const RegionListPermissions = async () => {
             </p>
           </div>
 
-          <div className="my-10 grid grid-cols-2 border-l border-t border-gray-200 opacity-60 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
+          <div className="my-10 grid grid-cols-2 border-t border-l border-gray-200 opacity-60 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
             {deactivatedRegions.map((region) => (
               <RegionTeaser key={region.slug} region={region} />
             ))}

@@ -5,7 +5,7 @@ export const linkStyles = twJoin(
 )
 
 export const buttonStyles = twJoin(
-  'inline-flex select-none items-center rounded-md border border-transparent bg-yellow-100 px-4 py-2 font-semibold leading-4 text-gray-800 shadow-sm hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-50 focus:ring-offset-2 group-hover:bg-yellow-400',
+  'inline-flex items-center rounded-md border border-transparent bg-yellow-100 px-4 py-2 leading-4 font-semibold text-gray-800 shadow-sm select-none group-hover:bg-yellow-400 hover:bg-yellow-400 focus:ring-2 focus:ring-yellow-50 focus:ring-offset-2 focus:outline-none',
 )
 
 export const buttonStylesOnYellow = twMerge(buttonStyles, 'bg-yellow-400/80 shadow')

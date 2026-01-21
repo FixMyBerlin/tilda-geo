@@ -67,7 +67,7 @@ export const InternalNotesNewForm = () => {
   return (
     <section className="">
       <div className="mt-4 flex justify-center">
-        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 font-semibold leading-tight text-teal-50">
+        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 leading-tight font-semibold text-teal-50">
           2. Internen Hinweis verfassen
         </h2>
       </div>
@@ -86,7 +86,7 @@ export const InternalNotesNewForm = () => {
           <input
             type="text"
             name="subject"
-            className="my-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600"
+            className="my-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
             placeholder="Betreff"
             data-1p-ignore
             data-lpignore
@@ -97,7 +97,7 @@ export const InternalNotesNewForm = () => {
           <span className="sr-only">Hinweistext (Markdown)</span>
           <textarea
             name="body"
-            className="my-3 block min-h-48 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-yellow-600"
+            className="my-3 block min-h-48 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
             placeholder="Hinweis"
             data-1p-ignore
             data-lpignore

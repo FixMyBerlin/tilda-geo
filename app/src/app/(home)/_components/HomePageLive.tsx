@@ -47,7 +47,7 @@ export const HomePageLive = () => {
           Hier können Sie Projekte von bestehenden Kunden live erleben:
         </p>
 
-        <div className="mt-6 justify-center space-y-10 lg:flex lg:gap-x-6 lg:space-y-0">
+        <div className="mt-6 justify-center space-y-10 lg:flex lg:space-y-0 lg:gap-x-6">
           {callouts.map((callout) => (
             <LinkExternal
               href={callout.href}

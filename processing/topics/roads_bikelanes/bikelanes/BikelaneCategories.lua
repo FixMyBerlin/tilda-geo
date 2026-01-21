@@ -197,6 +197,9 @@ local footAndCyclewayShared = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
+    -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
 
     -- Handle cycleway:SIDE=track (which becomes highway=cycleway)
@@ -256,6 +259,9 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
+    -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     local trafficSign = SanitizeTrafficSign(tags.traffic_sign)
 
     -- Handle cycleway:SIDE=track (which becomes highway=cycleway)
@@ -312,6 +318,9 @@ local footwayBicycleYes = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
+    -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     -- 1. Check highway type: has to be footway or path
     if tags.highway ~= "footway" and tags.highway ~= "path" then
       return
@@ -370,6 +379,10 @@ local cyclewaySeparated = BikelaneCategory.new({
     -- Needed for places like https://www.openstreetmap.org/way/964589554 which have the traffic sign but are not separated.
     if tags.cycleway == 'lane' then return false end
 
+    -- CASE: GUARD Crossing
+    -- Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     -- CASE: Centerline
     -- traffic_sign=DE:237, "Radweg", https://wiki.openstreetmap.org/wiki/DE:Tag:traffic%20sign=DE:237
     -- cycleway=track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=track
@@ -407,6 +420,27 @@ local cyclewaySeparated = BikelaneCategory.new({
 })
 local cyclewaySeparated_adjoining, cyclewaySeparated_isolated, cyclewaySeparated_adjoiningOrIsolated = CreateSubcategoriesAdjoiningOrIsolated(cyclewaySeparated)
 
+-- Helper function to detect crossing pattern (reused in category, guard, and todo)
+-- @param tags table The tags to check
+-- @return boolean
+function is_crossing_pattern(tags)
+  if tags.highway == 'cycleway' and tags.cycleway == 'lane' and tags.lane == 'crossing' then
+    return true
+  end
+  if tags.highway == 'cycleway' and tags.cycleway == 'crossing' then
+    return true
+  end
+  if tags.highway == 'path' and tags.path == 'crossing'
+      and (tags.bicycle == 'yes' or tags.bicycle == 'designated') then
+    return true
+  end
+  if tags.highway == 'footway' and tags.footway == 'crossing'
+      and (tags.bicycle == 'yes' or tags.bicycle == 'designated') then
+    return true
+  end
+  return false
+end
+
 -- Examples https://github.com/FixMyBerlin/tilda-geo/issues/23
 local crossing = BikelaneCategory.new({
   id = 'crossing',
@@ -417,20 +451,11 @@ local crossing = BikelaneCategory.new({
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
-    if tags.highway == "cycleway" and tags.cycleway == "lane" and tags.lane == "crossing" then
-      return true
+    -- Filter out crossings longer than 100m (they should be needsClarification)
+    if tags._length ~= nil and tags._length > 100 then
+      return false
     end
-    if tags.highway == "cycleway" and tags.cycleway == "crossing" then
-      return true
-    end
-    if tags.highway == "path" and tags.path == "crossing"
-        and (tags.bicycle == "yes" or tags.bicycle == "designated") then
-      return true
-    end
-    if tags.highway == "footway" and tags.footway == "crossing"
-        and (tags.bicycle == "yes" or tags.bicycle == "designated") then
-      return true
-    end
+    return is_crossing_pattern(tags)
   end
 })
 
@@ -608,6 +633,9 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
   implicitOneWayConfidence = 'medium',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
+    -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     -- Only target sidepath like ways
     if not IsSidepath(tags) then return false end
     -- "Schutzstreifen" cannot be PBLs
@@ -673,6 +701,9 @@ local sharedBusLaneBusWithBike = BikelaneCategory.new({
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
+    -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     -- We only apply this category on the transformed geometries, not on `_side=self`
     if tags.highway ~= 'cycleway' then return end
 
@@ -712,6 +743,9 @@ local sharedBusLaneBikeWithBus = BikelaneCategory.new({
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
+    -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
+    if is_crossing_pattern(tags) then return false end
+
     -- We only apply this category on the transformed geometries, not on `_side=self`
     if tags.highway ~= 'cycleway' then return end
 

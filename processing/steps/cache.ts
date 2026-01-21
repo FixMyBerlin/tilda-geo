@@ -47,7 +47,7 @@ export async function triggerCacheWarming() {
   if (params.skipWarmCache) {
     console.log('Finishing up: ⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
   } else {
-    console.log('Finishing up: Trigger cache warming…')
+    console.log('Finishing up: Trigger async cache warming…')
     return triggerPrivateApi('warm-cache')
   }
 }

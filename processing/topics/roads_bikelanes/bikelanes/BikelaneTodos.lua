@@ -2,6 +2,7 @@ require('init')
 require('ContainsSubstring')
 require('SanitizeTrafficSign')
 require('Set')
+require('BikelaneCategories')
 local has_tag_with_prefix = require('has_tag_with_prefix')
 -- local inspect = require('inspect')
 BikelaneTodo = {}
@@ -278,6 +279,22 @@ local unexpected_highway_path__mapillary = BikelaneTodo.new({
 })
 
 -- === Infrastructure ===
+local crossing_too_long = BikelaneTodo.new({
+  id = "crossing_too_long",
+  desc = "Crossing longer than 100 m, guidance form unclear. Please review and correct.",
+  todoTableOnly = false,
+  priority = function(objectTags, resultTags)
+    if objectTags.mapillary_coverage then return '1' end
+    return '2'
+  end,
+  conditions = function(objectTags, resultTags)
+    return resultTags.category == 'needsClarification'
+      and is_crossing_pattern(objectTags)
+      and objectTags._length ~= nil
+      and objectTags._length > 100
+  end
+})
+
 local needs_clarification = BikelaneTodo.new({
   id = "needs_clarification",
   desc = "Tagging insufficient to categorize the bike infrastructure.",
@@ -289,8 +306,9 @@ local needs_clarification = BikelaneTodo.new({
   conditions = function(objectTags, resultTags)
     return resultTags.category == "needsClarification"
       and not (
-        objectTags.cycleway == "shared" or -- Handled by RoadTodos.lua `deprecated_cycleway_shared`
-        unexpected_bicycle_access_on_footway(objectTags, resultTags)
+        objectTags.cycleway == "shared" -- Handled by RoadTodos.lua `deprecated_cycleway_shared`
+        or unexpected_bicycle_access_on_footway(objectTags, resultTags)
+        or crossing_too_long(objectTags, resultTags)
       )
   end
 })
@@ -531,6 +549,7 @@ local missing_oneway__mapillary = BikelaneTodo.new({
 BikelaneTodos = {
   -- REMINDER: Always use snake_case, never camelCase
   -- Infrastructure
+  crossing_too_long,
   needs_clarification,
   adjoining_or_isolated,
   advisory_or_exclusive,

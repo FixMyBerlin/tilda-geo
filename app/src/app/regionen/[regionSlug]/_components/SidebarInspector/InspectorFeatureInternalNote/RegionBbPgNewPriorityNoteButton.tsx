@@ -73,7 +73,7 @@ ID: ${feature.properties.id}
   return (
     <section className="bg-teal-100 p-3">
       <div className="mt-4 flex justify-center">
-        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 font-semibold leading-tight text-teal-50">
+        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 leading-tight font-semibold text-teal-50">
           Einen Prioritäten-Hinweis hinterlassen
         </h2>
       </div>

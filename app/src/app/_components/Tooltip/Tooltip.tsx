@@ -20,7 +20,7 @@ export const Tooltip = ({ text, children, className }: Props) => {
   return (
     <div className={twJoin('group/tooltip', className)} ref={parentWrapperRef}>
       <div
-        className="absolute hidden select-none rounded bg-gray-900/90 p-2 text-xs text-white shadow-md group-hover/tooltip:z-50 group-hover/tooltip:block"
+        className="absolute hidden rounded bg-gray-900/90 p-2 text-xs text-white shadow-md select-none group-hover/tooltip:z-50 group-hover/tooltip:block"
         style={{ top: -positionTop, width: '20.5rem' }}
       >
         {text}

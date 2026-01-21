@@ -52,7 +52,7 @@ export default function AdminMembershipsPage() {
       <table className="min-w-full divide-y divide-gray-300">
         <thead className="bg-gray-50">
           <tr>
-            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6">
+            <th scope="col" className="py-3.5 pr-3 pl-4 text-left text-sm font-semibold sm:pl-6">
               User ({userAndMemberships.length})
             </th>
             <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold sm:pr-6">
@@ -65,7 +65,7 @@ export default function AdminMembershipsPage() {
           {userAndMemberships.map((user) => {
             return (
               <tr key={user.id}>
-                <td className="h-20 py-4 pl-4 pr-3 text-sm sm:pl-6">
+                <td className="h-20 py-4 pr-3 pl-4 text-sm sm:pl-6">
                   <strong>OSM: {user.osmName}</strong>{' '}
                   <span className="text-gray-400">({user.osmId})</span>
                   {user.role === 'ADMIN' && (
@@ -81,7 +81,7 @@ export default function AdminMembershipsPage() {
                   {formatDate(user.createdAt)}{' '}
                   <span className="text-gray-400">({formatRelativeTime(user.createdAt)})</span>
                 </td>
-                <td className="h-20 py-4 pl-4 pr-3 text-sm sm:pr-6">
+                <td className="h-20 py-4 pr-3 pl-4 text-sm sm:pr-6">
                   {user?.Membership?.length === 0 ? (
                     <>Bisher keine Rechte</>
                   ) : (

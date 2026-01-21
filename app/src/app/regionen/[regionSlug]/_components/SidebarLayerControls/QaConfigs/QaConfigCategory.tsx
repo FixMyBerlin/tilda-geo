@@ -86,7 +86,7 @@ export const QaConfigCategory = ({
               leaveFrom="transform scale-100 opacity-100"
               leaveTo="transform scale-95 opacity-0"
             >
-              <DisclosurePanel static as="section" className="mb-2 mt-1">
+              <DisclosurePanel static as="section" className="mt-1 mb-2">
                 <div className="mx-2 space-y-1">
                   {QA_STYLE_OPTIONS.map((option) => (
                     <label key={option.key} className="flex items-center gap-2 text-xs">
