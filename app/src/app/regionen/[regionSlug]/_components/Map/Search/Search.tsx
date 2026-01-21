@@ -5,7 +5,20 @@ import { useStaticRegion } from '../../regionUtils/useStaticRegion'
 import { MAPTILER_API_KEY } from '../utils/maptilerApiKey.const'
 
 function SearchControl({ position }: { position: ControlPosition }) {
-  useControl(() => new GeocodingControl({ apiKey: MAPTILER_API_KEY }), { position })
+  useControl(
+    () =>
+      new GeocodingControl({
+        apiKey: MAPTILER_API_KEY,
+        placeholder: 'Suche',
+        proximity: [
+          {
+            type: 'map-center',
+          },
+        ],
+        country: 'DE',
+      }),
+    { position },
+  )
   return null
 }
 
