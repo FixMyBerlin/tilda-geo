@@ -1,13 +1,13 @@
 // We use bun.sh to run this file
 import { MapDataBackgroundSource } from '@/src/app/regionen/[regionSlug]/_mapData/types'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import fs from 'node:fs'
 import path from 'node:path'
 import { z } from 'zod'
 import { convertTileUrl } from './convertTileUrl'
 import { log, warn } from './util'
 
-console.log(chalk.inverse.bold('START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
 const ELI_BASE_URL = 'https://raw.githubusercontent.com/osmlab/editor-layer-index/gh-pages'
 const ELI_DE_DIR = 'sources/europe/de'
@@ -249,6 +249,6 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
 }
 
 main().catch((error) => {
-  console.error(chalk.red('Error:'), error)
+  console.error(styleText('red', 'Error:'), error)
   process.exit(1)
 })

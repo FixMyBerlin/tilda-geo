@@ -1,5 +1,5 @@
 import { $, sql } from 'bun'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import type { Topic } from '../constants/topics.const'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
@@ -241,14 +241,14 @@ function printDiffInfo(diffInfo: Awaited<ReturnType<typeof computeDiff>>) {
   const { table } = diffInfo
   console.log(`🔍 Diffing table "${table}":`)
   const loggingStyle = [
-    { name: 'total:', color: chalk.yellow, key: 'nTotal' as const },
-    { name: 'added:', color: chalk.green, key: 'nAdded' as const },
-    { name: 'removed:', color: chalk.red, key: 'nRemoved' as const },
-    { name: 'modified:', color: chalk.blue, key: 'nModified' as const },
+    { name: 'total:', color: 'yellow' as const, key: 'nTotal' as const },
+    { name: 'added:', color: 'green' as const, key: 'nAdded' as const },
+    { name: 'removed:', color: 'red' as const, key: 'nRemoved' as const },
+    { name: 'modified:', color: 'blue' as const, key: 'nModified' as const },
   ]
   const indent = ' '.repeat(5)
   loggingStyle.forEach(({ name, color, key }) => {
-    console.log(`${indent}${name.padEnd(10)}${color(diffInfo[key])}`)
+    console.log(`${indent}${name.padEnd(10)}${styleText(color, String(diffInfo[key]))}`)
   })
 }
 

@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import { z } from 'zod'
 import type { TopicConfigBbox } from '../constants/topics.const'
 
@@ -8,7 +8,7 @@ function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
   const result = envVar ? (envVar.split(',').map((t) => Number(t.trim())) as TopicConfigBbox) : null
   if (result !== null && result.length !== 4) {
     console.error(
-      chalk.red('ERROR: BBOX value was parsed but did not result in a valid bbox', {
+      styleText('red', 'ERROR: BBOX value was parsed but did not result in a valid bbox', {
         input: envVar,
         result,
       }),

@@ -1,7 +1,7 @@
 import { isProd } from '@/src/app/_components/utils/isEnv'
 import { StaticRegion, staticRegion } from '@/src/data/regions.const'
-import chalk from 'chalk'
 import { NextRequest, NextResponse } from 'next/server'
+import { styleText } from 'node:util'
 import { z } from 'zod'
 import { guardEnpoint } from '../_utils/guardEndpoint'
 import { warmCache } from './warmCache'
@@ -11,8 +11,8 @@ const Schema = z.object({
 })
 
 export async function warmRegions(staticRegion: StaticRegion[]) {
-  const greenCheckmark = chalk.bold(chalk.green(' ✓'))
-  const whiteCircle = chalk.bold(chalk.white(' ○'))
+  const greenCheckmark = styleText(['bold', 'green'], ' ✓')
+  const whiteCircle = styleText(['bold', 'white'], ' ○')
   for (const region of staticRegion) {
     if (region.cacheWarming != undefined && region.bbox != null) {
       const { minZoom, maxZoom, tables } = region.cacheWarming

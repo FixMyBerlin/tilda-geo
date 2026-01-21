@@ -1,8 +1,8 @@
 // We use bun.sh to run this file
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import path from 'node:path'
 
-console.log(chalk.inverse.bold('START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
 // Take the file from 'createGeojson' and create a pmtiles for it in `/datasets/pmtiles`
 const inputFile = path.resolve(__dirname, './geojson/atlas-regional-masks.geojson')

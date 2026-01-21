@@ -1,21 +1,21 @@
 // We use bun.sh to run this file
 import { getExportOgrApiBboxUrl } from '@/src/app/_components/utils/getExportApiUrl'
 import { SourceExportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import fs from 'node:fs'
 import { tilesetConfigs } from './datasets'
 
 const ENV_SOURCE: typeof process.env.NEXT_PUBLIC_APP_ENV = 'staging'
 
 async function main() {
-  console.log(chalk.inverse.bold('START'), __filename)
+  console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
   // Folder
   const folderFgb = 'scripts/MapboxTilesets/flatgeobuf'
   const folderMbtiles = 'scripts/MapboxTilesets/mbtiles'
 
   console.log(
-    chalk.inverse.bold('INFO'),
+    styleText(['inverse', 'bold'], 'INFO'),
     'Opening mbtiles folder so you may "replace" the Mapbox tilesets in the browser.',
   )
   Bun.spawnSync(['open', folderMbtiles])
@@ -32,7 +32,7 @@ async function main() {
 
     if (fs.existsSync(fgbFile) && fs.existsSync(mbtilesFile)) {
       console.log(
-        chalk.inverse.bold(chalk.yellow('  SKIP')),
+        styleText(['inverse', 'bold', 'yellow'], '  SKIP'),
         `${datasetKey} - files already exist`,
         { uploadUrl },
       )
@@ -44,7 +44,7 @@ async function main() {
       const apiKey = process.env.ATLAS_API_KEY
       // The `apiKey` will skip the region check (hence the `noRegion`)
       const url = getExportOgrApiBboxUrl('noRegion', datasetKey, bbox, 'fgb', ENV_SOURCE, apiKey)
-      console.log(chalk.inverse.bold(chalk.yellow('  FETCH')), url)
+      console.log(styleText(['inverse', 'bold', 'yellow'], '  FETCH'), url)
       const fetchExportFgb = await fetch(url)
 
       if (!fetchExportFgb.ok) {
@@ -53,12 +53,12 @@ async function main() {
       }
 
       // For debugging: Write FGB Response
-      console.log(chalk.inverse.bold(chalk.yellow('  WRITE')), fgbFile)
+      console.log(styleText(['inverse', 'bold', 'yellow'], '  WRITE'), fgbFile)
       const fgbBuffer = await fetchExportFgb.arrayBuffer()
       fs.writeFileSync(fgbFile, Buffer.from(fgbBuffer))
 
       // Create mbTiles with Tippecanoe
-      console.log(chalk.inverse.bold('  RUN'), 'tippecanoe', mbtilesFile)
+      console.log(styleText(['inverse', 'bold'], '  RUN'), 'tippecanoe', mbtilesFile)
       Bun.spawnSync(
         [
           'tippecanoe',
@@ -81,10 +81,10 @@ async function main() {
 
       // Hint on how to upload
       if (uploadUrl) {
-        console.log(chalk.inverse.bold('  NOW…'), 'upload', mbtilesFile, 'on', uploadUrl)
+        console.log(styleText(['inverse', 'bold'], '  NOW…'), 'upload', mbtilesFile, 'on', uploadUrl)
       } else {
         console.log(
-          chalk.inverse.bold('  NOW…'),
+          styleText(['inverse', 'bold'], '  NOW…'),
           'upload',
           mbtilesFile,
           'to',
@@ -97,7 +97,7 @@ async function main() {
     }
   }
 
-  console.log('\n', chalk.inverse.bold('DONE'))
+  console.log('\n', styleText(['inverse', 'bold'], 'DONE'))
 }
 
 main()

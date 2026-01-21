@@ -3,16 +3,17 @@
   "workspaces": {
     "": {
       "name": "processing",
-      "devDependencies": {
+      "dependencies": {
         "@date-fns/tz": "^1.4.1",
         "@turf/turf": "^7.2.0",
-        "@types/bun": "^1.2.18",
-        "chalk": "^5.4.1",
         "date-fns": "^4.1.0",
         "geojson": "^0.5.0",
+        "zod": "^3.25.76",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.2.18",
         "prettier": "^3.6.2",
         "prettier-plugin-organize-imports": "^4.1.0",
-        "zod": "^3.25.76",
       },
       "peerDependencies": {
         "typescript": "^5.8.3",
@@ -265,8 +266,6 @@
     "bignumber.js": ["bignumber.js@9.3.0", "", {}, "sha512-EM7aMFTXbptt/wZdMlBv2t8IViwQL+h6SLHosp8Yf0dqJMTnY6iL32opnAB6kAdL0SZPuvcAzFr31o0c/R3/RA=="],
 
     "bun-types": ["bun-types@1.2.18", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-04+Eha5NP7Z0A9YgDAzMk5PHR16ZuLVa83b26kH5+cp1qZW4F6FmAURngE7INf4tKOvCE69vYvDEwoNl1tGiWw=="],
-
-    "chalk": ["chalk@5.4.1", "", {}, "sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w=="],
 
     "commander": ["commander@2.20.3", "", {}, "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="],
 

@@ -12,12 +12,12 @@ import {
   polygon,
   simplify,
 } from '@turf/turf'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import { Feature, MultiPolygon, Polygon } from 'geojson'
 import path from 'node:path'
 import { z } from 'zod'
 
-console.log(chalk.inverse.bold('START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
 const geojsonPolygon = z.object({
   type: z.literal('Polygon'),
@@ -42,7 +42,8 @@ const errorLog: any[] = []
 
 const handleError = (error: (string | Record<string, string | number>)[]) => {
   errorLog.push(Date.now().toString(), error)
-  console.error(chalk.bgYellow.black(...error))
+  const errorMessage = error.map((e) => typeof e === 'string' ? e : JSON.stringify(e)).join(' ')
+  console.error(styleText(['bgYellow', 'black'], errorMessage))
 }
 
 const saveErrors = async () => {
@@ -62,7 +63,7 @@ const downloadGeoJson = async (idsString: string) => {
       url.searchParams.append('ids', String(id))
     })
 
-  console.info(chalk.inverse.bold('DOWNLOAD'), url.href)
+  console.info(styleText(['inverse', 'bold'], 'DOWNLOAD'), url.href)
   const response = await fetch(url.href)
 
   try {
@@ -131,7 +132,7 @@ const collectedFeatures: ReturnType<typeof createBufferFeature>[] = []
 for (const region of staticRegion) {
   const { slug: regionName, osmRelationIds } = region
   if (!osmRelationIds.length) continue
-  console.info(chalk.inverse.bold('INFO: Now working on region', regionName))
+  console.info(styleText(['inverse', 'bold'], `INFO: Now working on region ${regionName}`))
 
   const geojson = await downloadGeoJson(osmRelationIds.map(String).join(','))
   if (geojson) {
@@ -175,4 +176,4 @@ const boundariesAndMaskGeojson = path.resolve(__dirname, './geojson/atlas-region
 await Bun.write(boundariesAndMaskGeojson, JSON.stringify(collectedFeatureCollection))
 
 await saveErrors()
-console.info(chalk.inverse.bold('FINISHED createGeojson'))
+console.info(styleText(['inverse', 'bold'], 'FINISHED createGeojson'))

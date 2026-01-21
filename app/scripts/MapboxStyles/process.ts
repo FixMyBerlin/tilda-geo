@@ -1,12 +1,12 @@
 // We use bun.sh to run this file
 import { MAPTILER_API_KEY } from '@/src/app/regionen/[regionSlug]/_components/Map/utils/maptilerApiKey.const'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import fs from 'node:fs'
 import path from 'node:path'
 import { mergeSprites } from './mergeSprites'
 import { fetchStyle, log, saveJson } from './util'
 
-console.log(chalk.inverse.bold('START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
 // Configuration
 const baseMapStyle = `https://api.maptiler.com/maps/08357855-50d4-44e1-ac9f-ea099d9de4a5/style.json?key=${MAPTILER_API_KEY}`
