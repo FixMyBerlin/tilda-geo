@@ -27,7 +27,9 @@ export const RegionsTable = ({ regions }: { regions: TRegion[] }) => {
               {region.promoted ? (
                 <Pill color="green">Gelistet</Pill>
               ) : (
-                <Pill color="red" inverted>Nicht gelistet</Pill>
+                <Pill color="red" inverted>
+                  Nicht gelistet
+                </Pill>
               )}
             </td>
             <td>

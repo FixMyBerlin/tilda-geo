@@ -1,4 +1,3 @@
-import { MASK_INTERACTIVE_LAYER_IDS } from '@/scripts/StaticDatasets/geojson/_sharedMasks/config'
 import { isDev, isProd } from '@/src/app/_components/utils/isEnv'
 import { MAP_STYLE_URL } from '@/src/app/api/map-style/_utils/mapStyleUrl.const'
 import { useMapParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useMapParam'
@@ -31,6 +30,7 @@ import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyU
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
 import { Search } from './Search/Search'
+import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
 
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'

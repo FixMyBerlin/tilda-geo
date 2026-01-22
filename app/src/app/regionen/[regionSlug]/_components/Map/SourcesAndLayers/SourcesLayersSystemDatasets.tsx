@@ -1,4 +1,3 @@
-import { isMaskLayer } from '@/scripts/StaticDatasets/geojson/_sharedMasks/config'
 import { useMapDebugUseDebugLayerStyles } from '@/src/app/regionen/[regionSlug]/_hooks/mapState/useMapDebugState'
 import { FilterSpecification } from 'maplibre-gl'
 import { Fragment } from 'react'
@@ -9,6 +8,7 @@ import {
   createDatasetSourceLayerKey,
   createSourceKeyStaticDatasets,
 } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { isMaskLayer } from '../utils/maskLayerUtils'
 import { createPmtilesUrl } from './utils/createPmtilesUrl'
 import { wrapFilterWithAll } from './utils/filterUtils/wrapFilterWithAll'
 
@@ -45,7 +45,7 @@ export const SourcesLayersSystemDatasets = () => {
 
                 // Mask layers use hardcoded IDs (without prefix) so they can be added to interactive layers.
                 // This follows the pattern from SourcesLayersRegionMask which used hardcoded IDs: mask-buffer, mask-boundary, mask-boundary-bg
-                // See useInteractiveLayers.ts for the list of mask layer IDs and explanation.
+                // See maskLayerUtils.ts for mask layer utilities and MASK_INTERACTIVE_LAYER_IDS.
                 const isMask = isMaskLayer(layer.id)
                 const layerId = isMask
                   ? layer.id
