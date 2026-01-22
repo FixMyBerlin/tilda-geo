@@ -5,6 +5,7 @@ import { _12nl2cs } from './_12nl2cs'
 import { _14ltyea } from './_14ltyea'
 import { _14zbfci } from './_14zbfci'
 import { _166cmie } from './_166cmie'
+import { _16y2hau } from './_16y2hau'
 import { _17dmq3y } from './_17dmq3y'
 import { _1874z8l } from './_1874z8l'
 import { _18xypp8 } from './_18xypp8'
@@ -72,6 +73,7 @@ export const configs = {
   '14ltyea': _14ltyea,
   '14zbfci': _14zbfci,
   '166cmie': _166cmie,
+  '16y2hau': _16y2hau,
   '17dmq3y': _17dmq3y,
   '1874z8l': _1874z8l,
   '18xypp8': _18xypp8,
