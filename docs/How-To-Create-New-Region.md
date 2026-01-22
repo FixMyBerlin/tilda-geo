@@ -111,8 +111,12 @@ Wenn die Region automatisch beim Seeding erstellt werden soll:
   status: 'PUBLIC', // 'PUBLIC', 'PRIVATE' oder 'DRAFT'
 },
 ```
+## 6. Region generieren
 
-## 6. Anwendung starten und Region in Datenbank anlegen
+Führe `npm run regions:configs`  aus, um die erstellte Region nutzbar zu machen in TILDA.
+Commite erst danach deine Änderungen in Git. Andernfalls werden die Tests failen.
+
+## 7. Anwendung starten und Region in Datenbank anlegen
 
 1. **Tilda starten:**
    ```bash
