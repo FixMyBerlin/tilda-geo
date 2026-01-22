@@ -5,8 +5,8 @@ import { staticRegion, type RegionSlug } from '@/src/data/regions.const'
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
-import { createMaskConfig } from './geojson/_sharedMasks/config'
-import { downloadGeoJson } from './geojson/_sharedMasks/download'
+import { createMaskConfig } from './createMasks/config'
+import { downloadGeoJson } from './createMasks/download'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
@@ -105,7 +105,7 @@ export const data: MetaData = {
   // Generate transform.ts if it doesn't exist
   const transformPath = path.join(relationMaskFolder, 'transform.ts')
   if (!fs.existsSync(transformPath)) {
-    const transformContent = `import { transformRegionToMask } from '../../_sharedMasks/transform'
+    const transformContent = `import { transformRegionToMask } from '../../../createMasks/transform'
 import { Polygon, MultiPolygon } from 'geojson'
 
 export const transform = (

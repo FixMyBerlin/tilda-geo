@@ -31,7 +31,7 @@ The mask is created using [Turf.js](https://turfjs.org/):
 - **INNER**: Region polygon (from API, buffered by configurable amount, default: 10km)
 - **MASK**: `turf.difference(world, bufferedRegion)`
 
-The transform helper is located at [`app/scripts/StaticDatasets/geojson/_sharedMasks/transform.ts`](../app/scripts/StaticDatasets/geojson/_sharedMasks/transform.ts).
+The transform helper is located at [`app/scripts/StaticDatasets/createMasks/transform.ts`](../app/scripts/StaticDatasets/createMasks/transform.ts).
 
 ## Configuration
 
@@ -44,7 +44,7 @@ Regions are configured in [`regions.const.ts`](../app/src/data/regions.const.ts)
 
 ### Mask Configuration
 
-Mask-specific configuration is generated from the shared helper at [`app/scripts/StaticDatasets/geojson/_sharedMasks/config.ts`](../app/scripts/StaticDatasets/geojson/_sharedMasks/config.ts), which sets:
+Mask-specific configuration is generated from the shared helper at [`app/scripts/StaticDatasets/createMasks/config.ts`](../app/scripts/StaticDatasets/createMasks/config.ts), which sets:
 
 - `systemLayer: true` - Marks the dataset as a system layer
 - Map styles (fill and line layers similar to MapTiler)
