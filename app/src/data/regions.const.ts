@@ -269,8 +269,8 @@ export const staticRegion: StaticRegion[] = [
   },
   {
     slug: 'infravelo',
-    name: 'infraVelo',
-    fullName: 'infraVelo / Berlin',
+    name: 'infraVelo Intern',
+    fullName: 'infraVelo / Berlin Intern',
     product: 'radverkehr',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
@@ -302,15 +302,12 @@ export const staticRegion: StaticRegion[] = [
   },
   {
     slug: 'infravelo-rvn',
-    name: 'infraVelo Öffentlich',
-    fullName: 'infraVelo RVN Öffentlich',
+    name: 'infraVelo',
+    fullName: 'infraVelo Radvorrangnetz',
     product: 'radverkehr',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
-    bbox: {
-      min: [13.0883, 52.3382],
-      max: [13.7611, 52.6755],
-    },
+    bbox: null,
     logoPath: svgInfravelo,
     logoWhiteBackgroundRequired: true,
     showSearch: true,
@@ -326,7 +323,7 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: berlinBackgroundSources,
     notes: 'disabled',
-    exports: ['bikeroutes'],
+    exports: null,
   },
   {
     slug: 'parkraum-berlin',
