@@ -1,0 +1,50 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-trafficSigns.json",
+  "data_updated": "20260123T113419Z",
+  "project": {
+    "name": "TILDA - Traffic Signs (Beta)",
+    "description": "TILDA processes traffic signs for cycling network planning and as an open traffic sign cadastre. This feature is currently in beta.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "traffic_sign",
+      "object_types": ["node"],
+      "description": "Identify traffic signs (point data) for cycling network planning and open traffic sign cadastre."
+    },
+    {
+      "key": "traffic_sign:forward",
+      "object_types": ["node"],
+      "description": "Identify traffic signs oriented in forward direction (point data) for cycling network planning and open traffic sign cadastre."
+    },
+    {
+      "key": "traffic_sign:backward",
+      "object_types": ["node"],
+      "description": "Identify traffic signs oriented in backward direction (point data) for cycling network planning and open traffic sign cadastre."
+    },
+    {
+      "key": "traffic_sign:both",
+      "object_types": ["node"],
+      "description": "Identify traffic signs oriented in both directions (point data) for cycling network planning and open traffic sign cadastre."
+    },
+    {
+      "key": "direction",
+      "object_types": ["node"],
+      "description": "Specify traffic sign orientation using degrees or cardinal directions (on point data) for cycling network planning and open traffic sign cadastre."
+    },
+    {
+      "key": "traffic_sign:direction",
+      "object_types": ["node"],
+      "description": "Specify traffic sign orientation using degrees or cardinal directions (on point data) for cycling network planning and open traffic sign cadastre."
+    },
+    {
+      "key": "highway",
+      "object_types": ["way"],
+      "description": "Used on ways to orient traffic signs (nodes) that lack direction tags. Ways themselves are not traffic sign data."
+    }
+  ]
+}
