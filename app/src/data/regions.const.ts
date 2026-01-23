@@ -117,6 +117,7 @@ export type RegionSlug =
   | 'fahrradstellplaetze'
   | 'herrenberg'
   | 'infravelo'
+  | 'infravelo-rvn'
   | 'langerwehe'
   | 'lueneburg'
   | 'magdeburg'
@@ -268,8 +269,8 @@ export const staticRegion: StaticRegion[] = [
   },
   {
     slug: 'infravelo',
-    name: 'infraVelo',
-    fullName: 'infraVelo / Berlin',
+    name: 'infraVelo Intern',
+    fullName: 'infraVelo / Berlin Intern',
     product: 'radverkehr',
     osmRelationIds: [62422],
     map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
@@ -298,6 +299,31 @@ export const staticRegion: StaticRegion[] = [
       tables: ['bikelanes', 'roads', 'roadsPathClasses'],
     },
     exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
+  },
+  {
+    slug: 'infravelo-rvn',
+    name: 'infraVelo',
+    fullName: 'infraVelo Radvorrangnetz',
+    product: 'radverkehr',
+    osmRelationIds: [62422],
+    map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
+    bbox: null,
+    logoPath: svgInfravelo,
+    logoWhiteBackgroundRequired: true,
+    showSearch: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'bikelanes',
+      'roads',
+      // 'surface',
+      // 'parkingLars',
+      // 'bicycleParking',
+      // 'poi',
+      'mapillary',
+    ],
+    backgroundSources: berlinBackgroundSources,
+    notes: 'disabled',
+    exports: null,
   },
   {
     slug: 'parkraum-berlin',
