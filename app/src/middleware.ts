@@ -26,9 +26,10 @@ function splitPathname(url: string) {
 function redirectIfChanged(oldUrl: string, newUrl: string) {
   if (oldUrl === newUrl) {
     return NextResponse.next()
-  } else {
-    return NextResponse.redirect(newUrl, 301)
   }
+  // Note: NextRequest normalizes 127.0.0.1 to localhost, so redirects will use localhost.
+  // The client-side DevMiddlewareHostnameWorkaround fixes this after the redirect.
+  return NextResponse.redirect(newUrl, 301)
 }
 
 function renameRegionIfNecessary(url: string, slug: string) {

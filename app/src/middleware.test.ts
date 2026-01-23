@@ -13,12 +13,16 @@ function getUrl(response: ReturnType<typeof middleware>) {
 }
 
 describe('middleware()', () => {
-  test('NextJS middleware Bug that changes local IP URL ot localhost', () => {
-    // Ideally this test will fail soon so we can cleanup the workaround in <DevMiddlewareHostnameWorkaround> and in the auth config.
-    // More in src/app/regionen/[regionSlug]/_components/DevMiddlewareHostnameWorkaround.tsx
+  test('NextJS middleware redirect behavior with hostname normalization', () => {
+    // NOTE: NextRequest normalizes 127.0.0.1 to localhost when created
+    // This is a Next.js limitation that cannot be fixed in middleware
+    // The client-side workaround (DevMiddlewareHostnameWorkaround) handles this
+    // This test documents the current behavior - NextRequest.url is already normalized
     const mockRequest = new NextRequest('http://127.0.0.1:5173/regionen/berlin')
     const response = middleware(mockRequest)!
     const url = getUrl(response)
+    // This tests confirms / documents the NextJS Bug/Limitation…
+    // This should be 127.0.0.1:5173
     expect(url.host).toBe('localhost:5173')
   })
 
