@@ -34,7 +34,7 @@
     "regions:masks": "npm run regions:masks:prepare && npm run regions:masks:format && npm run regions:masks:upload",
     "regions:masks:prepare": "bun ./scripts/StaticDatasets/createMasks.ts",
     "regions:masks:format": "prettier --config .prettierrc.mjs --write \"scripts/StaticDatasets/geojson/masks/**\"",
-    "regions:masks:upload": "bun ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=relation-",
+    "regions:masks:upload": "bun ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=masks/",
     "regions:configs": "bun \"src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/saveConfigs.ts\" && prettier --experimental-cli --write \"src/**/v2/configs/index.ts\" \"src/**/v2/configs/*.ts\"",
     "test": "vitest watch",
     "test:run": "vitest run --passWithNoTests",

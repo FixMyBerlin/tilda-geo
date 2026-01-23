@@ -130,20 +130,20 @@ const createMaskFeature = (featureToCutOut: ReturnType<typeof createBufferFeatur
 // 1. Collect the boundary and mask per region
 const collectedFeatures: ReturnType<typeof createBufferFeature>[] = []
 for (const region of staticRegion) {
-  const { slug: regionName, osmRelationIds } = region
-  if (!osmRelationIds.length) continue
+  const { slug: regionName, mask } = region
+  if (!mask || !mask.osmRelationIds.length) continue
   console.info(styleText(['inverse', 'bold'], `INFO: Now working on region ${regionName}`))
 
-  const geojson = await downloadGeoJson(osmRelationIds.map(String).join(','))
+  const geojson = await downloadGeoJson(mask.osmRelationIds.map(String).join(','))
   if (geojson) {
-    const ids = osmRelationIds.join(',')
+    const ids = mask.osmRelationIds.join(',')
 
     const boundaryFeature = createBoundaryFeature(geojson, ids, regionName)
     const bufferFeature = createBufferFeature(boundaryFeature, ids, regionName)
-    const mask = createMaskFeature(bufferFeature)
+    const maskFeature = createMaskFeature(bufferFeature)
 
     collectedFeatures.push(boundaryFeature)
-    collectedFeatures.push(mask)
+    collectedFeatures.push(maskFeature)
 
     // Store separate files for debugging
     await Bun.write(

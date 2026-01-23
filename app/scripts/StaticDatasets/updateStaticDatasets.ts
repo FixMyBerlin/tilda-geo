@@ -122,8 +122,10 @@ const datasetFileFolderData = regionGroupFolderPaths
     const subFolders = fs.readdirSync(path.join(geoJsonFolder, regionGroupFolder))
     return subFolders.map((datasetFolder) => {
       const targetFolder = path.join(geoJsonFolder, regionGroupFolder, datasetFolder)
+      const regionAndDatasetFolder = `${regionGroupFolder}/${datasetFolder}`
       // If a `folder-filter` is given, we only look at folder that include this term
-      if (folderFilterTerm && !targetFolder.includes(folderFilterTerm)) return
+      // Filter uses GROUPFOLDER/SUBFOLDER format (e.g., "masks/" to match all mask folders)
+      if (folderFilterTerm && !regionAndDatasetFolder.includes(folderFilterTerm)) return
       // Make sure we only select folders, no files
       if (!fs.statSync(targetFolder).isDirectory()) return
       return { datasetFolderPath: targetFolder, regionFolder: regionGroupFolder, datasetFolder }
