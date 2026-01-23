@@ -2,6 +2,7 @@
 
 // We use bun.sh to run this file
 import { staticRegion, type RegionSlug } from '@/src/data/regions.const'
+import { feature, featureCollection } from '@turf/turf'
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
@@ -105,11 +106,11 @@ export const data: MetaData = {
   // Generate transform.ts if it doesn't exist
   const transformPath = path.join(relationMaskFolder, 'transform.ts')
   if (!fs.existsSync(transformPath)) {
-    const transformContent = `import { transformRegionToMask } from '../../../createMasks/transform'
-import { Polygon, MultiPolygon } from 'geojson'
+    const transformContent = `import { transformRegionToMask } from '../../_sharedMasks/transform'
+import { FeatureCollection } from 'geojson'
 
 export const transform = (
-  data: Polygon | MultiPolygon,
+  data: FeatureCollection,
 ) => {
   const bufferDistanceKm = 10
   return transformRegionToMask(data, bufferDistanceKm)
@@ -123,15 +124,20 @@ export const transform = (
   const geojsonFilename = path.join(relationMaskFolder, `${relationIdsKey}.geojson`)
   if (!fs.existsSync(geojsonFilename)) {
     const idsString = relationIds.map(String).join(',')
-    const geojson = await downloadGeoJson(idsString)
+    const geometry = await downloadGeoJson(idsString)
 
-    if (!geojson) {
+    if (!geometry) {
       console.error(styleText('red', `Failed to download geojson for relation ${relationIdsKey}`))
       continue
     }
 
+    // Wrap geometry in FeatureCollection for proper GeoJSON format
+    const regionFeature = feature(geometry, {})
+    const featureCollectionData = featureCollection([regionFeature])
+
     // Save raw geojson file (transformation will happen via transform.ts during static dataset processing)
-    await Bun.write(geojsonFilename, JSON.stringify(geojson, null, 2))
+    // Prettier formatting is handled by the npm script chain (regions:masks:format)
+    await Bun.write(geojsonFilename, JSON.stringify(featureCollectionData, null, 2))
     console.info(styleText('green', `✓ Updated ${geojsonFilename}`))
   } else {
     console.info(styleText('blue', `✓ GeoJSON already exists for relation ${relationIdsKey}`))
