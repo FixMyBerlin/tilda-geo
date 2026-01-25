@@ -28,19 +28,27 @@ export const subcat_parkingTilda_off_street: FileMapDataSubcategory = {
       layers: [
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street,
-          // additionalFilter: ['==', '$type', 'Polygon'], // break patterns
+          additionalFilter: ['match', ['get', 'operator_type'], ['private'], false, true],
           source,
           sourceLayer,
         }),
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_off_street_point,
-          additionalFilter: ['==', '$type', 'Point'],
+          additionalFilter: [
+            'all',
+            ['match', ['get', 'operator_type'], ['private'], true, false],
+            ['==', '$type', 'Point'],
+          ],
           source,
           sourceLayer: sourceLayerPoint,
         }),
         ...mapboxStyleLayers({
           layers: mapboxStyleGroupLayers_tilda_parkings_area_labels,
-          additionalFilter: ['==', '$type', 'Point'],
+          additionalFilter: [
+            'all',
+            ['match', ['get', 'operator_type'], ['private'], true, false],
+            ['==', '$type', 'Point'],
+          ],
           source,
           sourceLayer: sourceLayerLabel,
           interactive: false,
