@@ -56,6 +56,7 @@ nw/outdoor_seating
 nw/position
 nw/road_marking
 nw/small_electric_vehicle_parking:position
+nwr/obstacle:parking=yes
 w/amenity=parking
 w/building=carport
 w/building=garage
