@@ -169,6 +169,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'location__if_present',
         'markings__if_present',
         'reason__if_present',
+        'surface',
         'composit_surface_smoothness',
         'area',
         'source',
