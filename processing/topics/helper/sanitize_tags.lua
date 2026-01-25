@@ -129,6 +129,14 @@ local SANITIZE_TAGS = {
       return nil
     end
   end,
+  -- CRITICAL: Keep building values in sync with sanitize_parking_tags.lua (parking_off_street) and off_street_parking_area_categories.lua
+  building = function(value)
+    return sanitize_for_logging(value, { 'garage', 'garages', 'carport', 'parking' })
+  end,
+  amenity_off_street_parking = function(value)
+    -- Only used to log the sometimes weird values we get. The two allowed values are what we expect and already have stored in other properties.
+    return sanitize_for_logging(value, {}, { 'parking', 'parking_entrance' })
+  end,
 }
 
 return SANITIZE_TAGS

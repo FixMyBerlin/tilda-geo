@@ -23,7 +23,8 @@ local function result_tags_separate_parking(category, object, area)
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
   -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
-  -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
+  -- 3. `result_tags` in `processing/topics/parking/off_street_parking/helper/result_tags_off_street_parking.lua`
+  -- 4. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
   local result_tags = {
     side = nil,
     source = object.type == 'node' and 'separate_parking_points' or 'separate_parking_areas',
@@ -36,7 +37,7 @@ local function result_tags_separate_parking(category, object, area)
     road_width_source = nil,
     road_oneway = nil,
     operator_type = SANITIZE_TAGS.operator_type(object.tags),
-    mapillary = object.tags.mapillary,
+    mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary),
 
     -- Area
     capacity = capacity,

@@ -2,6 +2,7 @@
 describe("off_street_parking_area_categories", function()
   require('init')
   require('Log')
+  require("osm2pgsql")
   local off_street_parking_area_categories = require("off_street_parking_area_categories")
   local categorize_off_street_parking = require('categorize_off_street_parking')
   local result_tags_off_street_parking = require('result_tags_off_street_parking')

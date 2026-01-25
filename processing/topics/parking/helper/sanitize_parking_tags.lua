@@ -1,4 +1,5 @@
 require('init')
+require('Set')
 local sanitize_for_logging = require('sanitize_for_logging')
 
 local SANITIZE_PARKING_TAGS = {
@@ -51,8 +52,23 @@ local SANITIZE_PARKING_TAGS = {
   fee = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
-  parking_entrance = function(value)
-    return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey', 'rooftop' })
+  parking_off_street = function(tags)
+    if tags.parking then
+      return sanitize_for_logging(tags.parking, { 'surface', 'depot', 'rooftop', 'layby', 'multi-storey', 'underground', 'garage_boxes', 'carport', 'sheds' })
+    end
+
+    if tags.building then
+      -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and filter-expressions.txt
+      local known_building_types = Set({ 'garage', 'garages', 'carport', 'parking' })
+      if known_building_types[tags.building] then
+        return 'building'
+      end
+      -- Unknown building type - log it for debugging
+      return sanitize_for_logging('OFF_STREET_PARKING_UNKNOWN_BUILDING_TYPE', {})
+    end
+
+    -- No parking and no building - log it for debugging
+    return sanitize_for_logging('OFF_STREET_PARKING_WITHOUT_PARKING_OR_BUILDING_TAG', {})
   end,
   direction_to_side = function(value)
     local transformations = {

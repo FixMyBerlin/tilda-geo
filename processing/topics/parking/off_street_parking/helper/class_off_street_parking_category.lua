@@ -11,8 +11,6 @@ class_off_street_parking_category.__index = class_off_street_parking_category
 ---@param args {
 --- id: string,
 --- conditions: fun(tags: table): (boolean),
---- tags: fun(tags: table):(table), -- Tags which have to be sanitized in the category.
---- tags_cc: table, -- Tags which will be prefixed with "osm_" and copied as is.
 --- capacity_from_area: fun(tags: table, area: number):(table)|nil }
 function class_off_street_parking_category.new(args)
   ---@class OffStreetParkingCategory
@@ -20,8 +18,6 @@ function class_off_street_parking_category.new(args)
   self.id = args.id
 
   self._conditions = args.conditions -- use category:is_active(tags)
-  self._tags = args.tags -- use category:get_tags(tags)
-  self.tags_cc = args.tags_cc
   self._capacity_from_area = args.capacity_from_area -- use category:get_capacity(tags)
 
   return self
@@ -31,11 +27,6 @@ end
 ---@return boolean
 function class_off_street_parking_category:is_active(tags)
   return self._conditions(tags)
-end
-
----@return table
-function class_off_street_parking_category:get_tags(tags)
-  return self._tags(tags)
 end
 
 ---Returns a table representing an off-street parking category.

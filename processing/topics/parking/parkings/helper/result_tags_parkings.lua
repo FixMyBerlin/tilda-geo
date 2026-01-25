@@ -59,7 +59,8 @@ local function result_tags_parkings(object)
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
   -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
-  -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
+  -- 3. `result_tags` in `processing/topics/parking/off_street_parking/helper/result_tags_off_street_parking.lua`
+  -- 4. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
   local result_tags = {
     side = object.tags.side, -- see transform_parkings()
     source = 'parent_highway',
@@ -72,7 +73,7 @@ local function result_tags_parkings(object)
     road_width_source = width_source,
     road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
     operator_type = THIS_OR_THAT.value(SANITIZE_TAGS.operator_type(object.tags), SANITIZE_TAGS.operator_type(object._parent_tags)),
-    mapillary = object.tags.mapillary or object._parent_tags.mapillary,
+    mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary) or SANITIZE_TAGS.safe_string(object._parent_tags.mapillary),
 
     -- Capacity & Area
     capacity = capacity,
