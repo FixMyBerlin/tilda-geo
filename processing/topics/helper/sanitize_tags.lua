@@ -120,6 +120,9 @@ local SANITIZE_TAGS = {
   covered_or_indoor = function(tags)
     if tags.covered == 'yes' then
       return 'covered'
+    elseif tags.covered == 'partial' then
+      return 'partial'
+      -- Note: indoor=partial used <10 times
     elseif tags.indoor == 'yes' then
       return 'indoor'
     else
