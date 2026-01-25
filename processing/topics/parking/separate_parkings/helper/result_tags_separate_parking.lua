@@ -18,7 +18,7 @@ local function result_tags_separate_parking(category, object, area)
     confidence = 'high',
     source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
   }
-  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(object.tags)
+  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`

@@ -54,7 +54,7 @@ local function result_tags_parkings(object)
     }
   )
   -- Classify parking conditions into merged categories
-  local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags)
+  local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`

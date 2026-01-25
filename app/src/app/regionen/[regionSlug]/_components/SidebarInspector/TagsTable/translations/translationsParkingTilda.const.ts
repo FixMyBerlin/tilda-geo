@@ -105,6 +105,7 @@ export const translationsParkingTilda = {
     'tilda_parkings--condition_category=no_standing': 'Eingeschränktes Halteverbot',
     'tilda_parkings--condition_category=no_stopping': 'Halteverbot / Absolutes Haltverbot',
     'tilda_parkings--condition_category=paid': 'Nur mit Parkschein',
+    'tilda_parkings--condition_category=private': 'Privat',
     'tilda_parkings--condition_category=residents': 'Nur mit Bewohnerparkausweis',
     'tilda_parkings--condition_category=taxi': 'Taxenstand',
     'tilda_parkings--condition_category=time_limited': 'zeitliche Beschränkung (Parkscheibe)',

@@ -17,7 +17,7 @@ local function result_tags_off_street_parking(result, area)
     confidence = 'high',
     source = result.object.tags.surface == SANITIZE_TAGS.surface(result.object.tags) and 'tag' or 'tag_transformed',
   }
-  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(result.object.tags)
+  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(result.object.tags, 'private')
 
   -- Get capacity from category (handles both tag-based and area-based capacity)
   local capacity_from_category = nil

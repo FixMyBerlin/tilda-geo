@@ -48,8 +48,9 @@ end
 -- Classify parking conditions into merged categories
 -- Based on [street_parking.py](https://github.com/SupaplexOSM/street_parking.py/blob/main/street_parking.py) vehicle restrictions processing
 ---@param tags table<string, string|nil> Object containing OSM tags with parking-related information
----@return {condition_category?: 'assumed_free'|'residents'|'free'|'paid'|'loading'|'charging'|'disabled_private'|'time_limited'|'vehicle_restriction'|'access_restriction'|'no_parking'|'no_standing'|'no_stopping', condition_vehicles?: string}
-function classify_parking_conditions(tags)
+---@param default_category 'assumed_free'|'private' Default category to use when no condition is found
+---@return {condition_category?: 'assumed_free'|'residents'|'free'|'paid'|'loading'|'charging'|'disabled_private'|'time_limited'|'vehicle_restriction'|'access_restriction'|'no_parking'|'no_standing'|'no_stopping'|'private', condition_vehicles?: string}
+function classify_parking_conditions(tags, default_category)
   -- Initialize categories
   local condition_class = nil
   local vehicle_designated = nil
@@ -288,7 +289,7 @@ function classify_parking_conditions(tags)
   local vehicle_restrictions = normalize_separated_values((vehicle_designated or '') .. SEPARATOR .. (vehicle_excluded or ''), SEPARATOR)
 
   return {
-    condition_category = condition_class or 'assumed_free',
+    condition_category = condition_class or default_category,
     condition_vehicles = vehicle_restrictions,
   }
 end
