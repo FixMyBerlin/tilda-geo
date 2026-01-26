@@ -124,7 +124,7 @@ export const translationsParkingTilda = {
     'tilda_parkings--fee=yes': 'Kostenpflichtig',
     'tilda_parkings--hgv--key': 'Lkw',
     'tilda_parkings--informal--key': 'Duldung',
-    'tilda_parkings--informal=yes': 'Parken wird hier gedultet bzw. ist etabliert.',
+    'tilda_parkings--informal=yes': 'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
     'tilda_parkings--location--key': 'Lage im Straßenraum',
     'tilda_parkings--location=lane_centre': 'Fahrbahnmitte',
     'tilda_parkings--location=median': 'Mittelstreifen',
