@@ -142,9 +142,10 @@ WITH
       cc.capacity,
       cc.tags,
       cc.meta,
-      -- Apply offset only to duplicates (target_point > cluster_count for this cluster)
+      -- Apply offset only to duplicates (not the first instance for this cluster)
+      -- First instance: target_point = cluster_id + 1
       CASE
-        WHEN target_point > cc.cluster_count THEN
+        WHEN target_point > (cc.cluster_id + 1) THEN
         -- Offset by 0.5m in circular pattern, using target_point for unique angle
         ST_Translate (
           cc.centroid_geom,
