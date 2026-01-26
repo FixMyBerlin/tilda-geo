@@ -101,7 +101,7 @@ WITH
             PARTITION BY
               dg.id
           )
-        )
+        )::INTEGER
       ) OVER (
         PARTITION BY
           dg.id
