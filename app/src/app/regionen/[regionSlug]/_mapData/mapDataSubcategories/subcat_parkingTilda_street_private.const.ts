@@ -13,7 +13,7 @@ const sourceLayerArea = 'parkings_separate'
 export type SubcatParkingTildaPrivateId = typeof subcatId
 export type SubcatParkingTildaPrivateStyleIds = 'default'
 
-export const subcat_parkingTilda_private: FileMapDataSubcategory = {
+export const subcat_parkingTilda_street_private: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Privates Straßenparken',
   ui: 'checkbox',
@@ -54,7 +54,7 @@ export const subcat_parkingTilda_private: FileMapDataSubcategory = {
       legends: [
         {
           id: 'private',
-          name: 'Parken im privatem Straßenland',
+          name: 'Parken im privaten Straßenland',
           style: { type: 'fill', color: 'rgb(91, 230, 144)' },
         },
       ],

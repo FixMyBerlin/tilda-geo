@@ -32,8 +32,9 @@ import { subcat_signs } from '../mapDataSubcategories/subcat_signs.const'
 import { subcat_surface_bikelane } from '../mapDataSubcategories/subcat_surface_bikelane'
 import { subcat_surface_roads } from '../mapDataSubcategories/subcat_surface_roads.const'
 import { StaticMapDataCategory } from '../types'
-import { parkingTildaCategories } from './parkingTildaCategories.const'
-import { radinfraCategories } from './radinfraCategories.const'
+import { categoriesParkingLars } from './categoriesParkingLars.const'
+import { categoriesParkingTilda } from './categoriesParkingTilda.const'
+import { categoriesRadinfra } from './categoriesRadinfra.const'
 
 export const categories: StaticMapDataCategory[] = [
   {
@@ -165,6 +166,7 @@ export const categories: StaticMapDataCategory[] = [
     desc: 'Unfalldaten',
     subcategories: [{ ...subcat_accidents, defaultStyle: 'default' }],
   },
-  ...radinfraCategories,
-  ...parkingTildaCategories,
+  ...categoriesRadinfra,
+  ...categoriesParkingTilda,
+  ...categoriesParkingLars,
 ]

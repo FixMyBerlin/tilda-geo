@@ -13,7 +13,7 @@ import { subcat_radinfra_trafficSigns } from '../mapDataSubcategories/subcat_rad
 import { subcat_radinfra_width } from '../mapDataSubcategories/subcat_radinfra_width.const'
 import { StaticMapDataCategory } from '../types'
 
-export const radinfraCategories: StaticMapDataCategory[] = [
+export const categoriesRadinfra: StaticMapDataCategory[] = [
   {
     id: 'radinfra_bikelanes',
     name: 'Radinfrastruktur',

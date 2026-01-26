@@ -1,15 +1,15 @@
 import { FileMapDataSubcategory } from '../types'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
-const subcatId = 'parkingTildaQuantized'
-const source = 'tilda_parkings_quantized'
-const sourceLayer = 'parkings_quantized'
-export type SubcatParkingTildaQuantizedId = typeof subcatId
-export type SubcatParkingTildaQuantizedStyleIds = 'default'
+const subcatId = 'parkingTildaQuantizedOffStreet'
+const source = 'tilda_parkings_off_street_quantized'
+const sourceLayer = 'parkings_off_street_quantized'
+export type SubcatParkingTildaQuantizedOffStreetId = typeof subcatId
+export type SubcatParkingTildaQuantizedOffStreetStyleIds = 'default'
 
-export const subcat_parkingTilda_quantized: FileMapDataSubcategory = {
+export const subcat_parkingTilda_offStreet_quantized: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Stellplätze summieren',
+  name: 'Summieren: Parken abseits des Straßenraumes (TODO)',
   ui: 'checkbox',
   sourceId: source,
   beforeId: undefined,

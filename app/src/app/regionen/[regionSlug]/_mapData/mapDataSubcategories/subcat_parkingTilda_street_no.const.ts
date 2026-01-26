@@ -8,7 +8,7 @@ const sourceLayer = 'parkings_no'
 export type SubcatParkingTildaNoId = typeof subcatId
 export type SubcatParkingTildaNoStyleIds = 'default'
 
-export const subcat_parkingTilda_no: FileMapDataSubcategory = {
+export const subcat_parkingTilda_street_no: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Parkverbote (TODO)',
   ui: 'checkbox',

@@ -8,7 +8,7 @@ const sourceLayer = 'parkings_cutouts'
 export type SubcatParkingTildaCutoutsId = typeof subcatId
 export type SubcatParkingTildaCutoutsStyleIds = 'default'
 
-export const subcat_parkingTilda_cutout: FileMapDataSubcategory = {
+export const subcat_parkingTilda_street_cutout: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Parkraum Stanzungen',
   ui: 'checkbox',
