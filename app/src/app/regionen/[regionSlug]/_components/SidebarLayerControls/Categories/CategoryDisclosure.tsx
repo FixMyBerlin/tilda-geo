@@ -63,6 +63,8 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
           >
             <DisclosurePanel static as="nav" className="mt-3 mb-2 space-y-2.5">
               {currCategoryConfig.subcategories?.map((subcat) => {
+                const showSpacer = currCategoryConfig.spacerAfter?.has(subcat.id)
+
                 return (
                   <Fragment key={subcat.id}>
                     {subcat.ui === 'dropdown' ? (
@@ -78,6 +80,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
                         disabled={!active}
                       />
                     )}
+                    {showSpacer && <hr className="mx-2 my-2.5 border-gray-100" />}
                   </Fragment>
                 )
               })}

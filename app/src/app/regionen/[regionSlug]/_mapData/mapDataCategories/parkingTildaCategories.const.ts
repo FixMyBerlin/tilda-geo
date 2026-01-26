@@ -23,5 +23,10 @@ export const parkingTildaCategories: StaticMapDataCategory[] = [
       { ...subcat_parkingTilda_quantized, defaultStyle: 'hidden' },
       // { ...subcat_parkingTilda_off_street_quantized, defaultStyle: 'hidden' },
     ],
+    spacerAfter: new Set([
+      subcat_parkingTilda_private.id,
+      subcat_parkingTilda_off_street.id,
+      subcat_parkingTilda_completeness.id,
+    ]),
   },
 ]

@@ -140,6 +140,8 @@ export type StaticMapDataCategory = {
   name: string
   desc?: string
   subcategories: StaticMapDataSubcategory[]
+  /** @desc Set of subcategory IDs after which a visual spacer should be rendered */
+  spacerAfter?: Set<SubcategoryId>
 }
 
 type StaticMapDataSubcategory = FileMapDataSubcategory & {
