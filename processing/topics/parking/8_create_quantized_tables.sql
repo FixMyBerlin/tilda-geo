@@ -15,7 +15,18 @@ INSERT INTO
 WITH
   sum_points AS (
     SELECT
-      tags || '{"capacity": 1}'::JSONB as tags,
+      (
+        tags - ARRAY[
+          'road_width_confidence',
+          'road_width_source',
+          'capacity_confidence',
+          'capacity_source',
+          'area_confidence',
+          'area_source',
+          'surface_confidence',
+          'surface_source'
+        ]
+      ) || '{"capacity": 1}'::JSONB as tags,
       meta,
       tilda_explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
     FROM
@@ -176,7 +187,18 @@ SELECT
       ST_Y (centroid_geom),
       ST_X (centroid_geom)
   )::TEXT AS id,
-  tags || '{"capacity": 1}'::JSONB as tags,
+  (
+    tags - ARRAY[
+      'road_width_confidence',
+      'road_width_source',
+      'capacity_confidence',
+      'capacity_source',
+      'area_confidence',
+      'area_source',
+      'surface_confidence',
+      'surface_source'
+    ]
+  ) || '{"capacity": 1}'::JSONB as tags,
   meta,
   ST_Transform (centroid_geom, 3857) as geom,
   0 as minzoom
