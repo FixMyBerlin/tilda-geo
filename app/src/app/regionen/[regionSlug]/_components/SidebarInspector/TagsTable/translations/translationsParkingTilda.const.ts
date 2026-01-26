@@ -95,6 +95,7 @@ export const translationsParkingTilda = {
     'tilda_parkings--condition_category--key': 'Parkbeschränkung',
     'tilda_parkings--condition_category=access_restriction': 'Zugangsbeschränkung',
     'tilda_parkings--condition_category=assumed_free': 'Wahrscheinlich keine Parkbeschränkungen',
+    'tilda_parkings--condition_category=assumed_private': 'Sehr wahrscheinlich privat',
     'tilda_parkings--condition_category=car_sharing': 'Nur für Carsharing-Fahrzeuge',
     'tilda_parkings--condition_category=charging': 'Laden von Elektrofahrzeugen',
     'tilda_parkings--condition_category=disabled_private': 'Behindertenparkplatz mit Parkausweis',
