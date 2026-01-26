@@ -84,6 +84,16 @@ WITH
       ST_Centroid (gc.geom) && a.geom
       AND ST_Within (ST_Centroid (gc.geom), a.geom)
   ),
+  -- STEP 2.5: Calculate point count per area (needed for clustering)
+  grid_counts AS (
+    SELECT
+      id,
+      COUNT(*) as point_count
+    FROM
+      dense_grid
+    GROUP BY
+      id
+  ),
   -- STEP 3: Cluster candidate points into exactly `capacity` clusters
   -- Use LEAST to prevent error when capacity exceeds grid points
   clustered AS (
@@ -95,13 +105,7 @@ WITH
       dg.point_geom,
       ST_ClusterKMeans (
         dg.point_geom,
-        LEAST(
-          dg.capacity,
-          COUNT(*) OVER (
-            PARTITION BY
-              dg.id
-          )
-        )::INTEGER
+        LEAST(dg.capacity, gc.point_count)::INTEGER
       ) OVER (
         PARTITION BY
           dg.id
@@ -111,6 +115,7 @@ WITH
       ) as cluster_id
     FROM
       dense_grid dg
+      JOIN grid_counts gc ON dg.id = gc.id
   ),
   -- STEP 4: Get centroid of each cluster
   cluster_centroids AS (
