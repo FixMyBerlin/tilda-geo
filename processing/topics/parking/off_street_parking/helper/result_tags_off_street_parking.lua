@@ -7,6 +7,7 @@ local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local round = require('round')
 
 local function result_tags_off_street_parking(result, area)
   local id = DefaultId(result.object)
@@ -60,7 +61,7 @@ local function result_tags_off_street_parking(result, area)
     capacity = capacity,
     capacity_source = capacity_source,
     capacity_confidence = capacity_confidence,
-    area = area,
+    area = round(area, 2),
     area_confidence = area ~= nil and 'high' or nil,
     area_source = area ~= nil and 'geometry' or nil,
 
