@@ -2,10 +2,11 @@ import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQ
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
 import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { produce } from 'immer'
+import { Fragment } from 'react'
 import { useMapActions } from '../../../_hooks/mapState/useMapState'
 import { MapDataCategoryConfig } from '../../../_hooks/useQueryState/useCategoriesConfig/type'
-import { SubcategoriesCheckbox } from '../Subcategories/SubcategoriesCheckbox'
-import { SubcategoriesDropdown } from '../Subcategories/SubcategoriesDropdown'
+import { SubcategoryCheckbox } from '../Subcategories/SubcategoryCheckbox'
+import { SubcategoryDropdown } from '../Subcategories/SubcategoryDropdown'
 import { CategoryHeadlineToggle } from './CategoryHeadlineToggle'
 
 type Props = { categoryConfig: MapDataCategoryConfig; active: boolean }
@@ -25,18 +26,11 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
     resetInspectorFeatures()
   }
 
-  const dropdownSubcategories = currCategoryConfig.subcategories?.filter(
-    (subcat) => subcat.ui === 'dropdown',
-  )
-  const checkboxSubcategories = currCategoryConfig.subcategories?.filter(
-    (subcat) => subcat.ui === 'checkbox',
-  )
-
   return (
     <Disclosure key={currCategoryConfig.name}>
       {({ open }) => (
         <>
-          <div className="flex justify-between border-t border-t-gray-200 first:border-t-transparent">
+          <header className="flex justify-between border-t border-t-gray-200 first:border-t-transparent">
             <CategoryHeadlineToggle
               active={active}
               handleChange={() => selectCategory(currCategoryConfig.id)}
@@ -49,14 +43,14 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
                 {currCategoryConfig.desc}
               </p>
             </CategoryHeadlineToggle>
-            <DisclosureButton className="flex flex-none items-center justify-center border-l border-gray-200 px-1 text-yellow-500 hover:bg-yellow-50">
+            <DisclosureButton className="flex flex-none cursor-pointer items-center justify-center border-l border-gray-200 px-1 text-yellow-500 hover:bg-yellow-50">
               {open ? (
-                <ChevronDownIcon className="h-7 w-7" />
+                <ChevronDownIcon className="size-7" />
               ) : (
-                <ChevronLeftIcon className="h-7 w-7" />
+                <ChevronLeftIcon className="size-7" />
               )}
             </DisclosureButton>
-          </div>
+          </header>
 
           <Transition
             show={open}
@@ -67,24 +61,26 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             leaveFrom="transform scale-100 opacity-100"
             leaveTo="transform scale-95 opacity-0"
           >
-            <DisclosurePanel static as="nav" className="mt-3 mb-2">
-              {Boolean(dropdownSubcategories.length) && (
-                <SubcategoriesDropdown
-                  categoryId={currCategoryConfig.id}
-                  subcategories={dropdownSubcategories}
-                  disabled={!active}
-                />
-              )}
-              {Boolean(checkboxSubcategories.length) && (
-                <>
-                  {Boolean(dropdownSubcategories.length) && <hr className="mx-1.5 mt-3 mb-2 h-1" />}
-                  <SubcategoriesCheckbox
-                    categoryId={currCategoryConfig.id}
-                    subcategories={checkboxSubcategories}
-                    disabled={!active}
-                  />
-                </>
-              )}
+            <DisclosurePanel static as="nav" className="mt-3 mb-2 space-y-2.5">
+              {currCategoryConfig.subcategories?.map((subcat) => {
+                return (
+                  <Fragment key={subcat.id}>
+                    {subcat.ui === 'dropdown' ? (
+                      <SubcategoryDropdown
+                        categoryId={currCategoryConfig.id}
+                        subcategory={subcat}
+                        disabled={!active}
+                      />
+                    ) : (
+                      <SubcategoryCheckbox
+                        categoryId={currCategoryConfig.id}
+                        subcategory={subcat}
+                        disabled={!active}
+                      />
+                    )}
+                  </Fragment>
+                )
+              })}
             </DisclosurePanel>
           </Transition>
         </>

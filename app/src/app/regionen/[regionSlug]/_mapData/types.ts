@@ -179,7 +179,7 @@ export type FileMapDataSubcategory = {
     }
   | {
       ui: 'checkbox'
-      styles: FileMapDataSubcategoryStyle[]
+      styles: [FileMapDataSubcategoryStyle]
     }
 )
 

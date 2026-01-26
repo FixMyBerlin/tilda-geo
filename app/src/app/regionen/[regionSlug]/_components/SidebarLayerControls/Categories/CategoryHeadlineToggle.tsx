@@ -32,7 +32,7 @@ export const CategoryHeadlineToggle = ({
       <Switch
         checked={active}
         onChange={handleChange}
-        className="relative inline-flex h-5 w-10 flex-shrink-0 rotate-90 items-center justify-center rounded-full focus:outline-none"
+        className="relative inline-flex h-5 w-10 flex-shrink-0 rotate-90 cursor-pointer items-center justify-center rounded-full focus:outline-none"
       >
         <span
           aria-hidden="true"

@@ -1,8 +1,8 @@
 // We use bun.sh to run this file
 import { MAPTILER_API_KEY } from '@/src/app/regionen/[regionSlug]/_components/Map/utils/maptilerApiKey.const'
-import { styleText } from 'node:util'
 import fs from 'node:fs'
 import path from 'node:path'
+import { styleText } from 'node:util'
 import { mergeSprites } from './mergeSprites'
 import { fetchStyle, log, saveJson } from './util'
 
