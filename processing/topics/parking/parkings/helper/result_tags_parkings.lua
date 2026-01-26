@@ -2,14 +2,15 @@ require('init')
 require('DefaultId')
 require('Metadata')
 require('RoadClassificationRoadValue')
-require('road_width')
 require('Log')
-local parse_capacity = require('parse_capacity')
+local road_width_tags = require('road_width_tags')
+local capacity_tags = require('capacity_tags')
 local THIS_OR_THAT = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
+local SURFACE_TAGS = require('surface_tags')
 
 -- EXAMPLE
 -- INPUT
@@ -39,22 +40,10 @@ local classify_parking_conditions = require('classify_parking_conditions')
 local function result_tags_parkings(object)
   local id = DefaultId(object) .. '/' .. object.tags.side
 
-  local width, width_confidence, width_source = road_width(object.tags)
-  local capacity, capacity_source, capacity_confidence = parse_capacity(object.tags)
-  local surface_tags = THIS_OR_THAT.value_confidence_source(
-    {
-      value = SANITIZE_TAGS.surface(object.tags),
-      confidence = 'high',
-      source = object.tags.surface == SANITIZE_TAGS.surface(object.tags) and 'tag' or 'tag_transformed',
-    },
-    {
-      value = SANITIZE_TAGS.surface(object._parent_tags),
-      confidence = 'medium',
-      source = object._parent_tags.surface == SANITIZE_TAGS.surface(object._parent_tags) and 'parent_highway_tag' or 'parent_highway_tag_transformed',
-    }
-  )
-  -- Classify parking conditions into merged categories
-  local conditional_categories = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
+  local road_width_tags_result = road_width_tags(object.tags)
+  local capacity_tags_result = capacity_tags(object.tags)
+  local surface_tags_result = SURFACE_TAGS.surface_tags_with_parent(object.tags, object._parent_tags)
+  local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
@@ -68,24 +57,24 @@ local function result_tags_parkings(object)
     -- Road properties
     road = RoadClassificationRoadValue(object._parent_tags),
     road_name = THIS_OR_THAT.value(SANITIZE_TAGS.road_name(object.tags), SANITIZE_TAGS.road_name(object._parent_tags)),
-    road_width = width,
-    road_width_confidence = width_confidence,
-    road_width_source = width_source,
+    road_width = road_width_tags_result.value,
+    road_width_confidence = road_width_tags_result.confidence,
+    road_width_source = road_width_tags_result.source,
     road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
     operator_type = THIS_OR_THAT.value(SANITIZE_TAGS.operator_type(object.tags), SANITIZE_TAGS.operator_type(object._parent_tags)),
     mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary) or SANITIZE_TAGS.safe_string(object._parent_tags.mapillary),
 
     -- Capacity & Area
-    capacity = capacity,
-    capacity_source = capacity_source,
-    capacity_confidence = capacity_confidence,
+    capacity = capacity_tags_result.value,
+    capacity_source = capacity_tags_result.source,
+    capacity_confidence = capacity_tags_result.confidence,
     area = nil,
     area_confidence = nil,
     area_source = nil,
 
     -- Parking properties
-    condition_category = conditional_categories.condition_category,
-    condition_vehicles = conditional_categories.condition_vehicles,
+    condition_category = conditional_categories_result.condition_category,
+    condition_vehicles = conditional_categories_result.condition_vehicles,
     covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
@@ -101,9 +90,9 @@ local function result_tags_parkings(object)
     zone = SANITIZE_TAGS.safe_string(object.tags.zone),
 
     -- Surface
-    surface = surface_tags.value,
-    surface_confidence = surface_tags.confidence,
-    surface_source = surface_tags.source,
+    surface = surface_tags_result.value,
+    surface_confidence = surface_tags_result.confidence,
+    surface_source = surface_tags_result.source,
   }
 
   local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)

@@ -4,10 +4,9 @@ local round = require('round')
 
 local function area_tags(area, factor)
   return {
-    area = round(area, 2),
-    capacity = round(area / factor, 0),
-    capacity_confidence = 'medium',
-    capacity_source = 'area',
+    value = round(area / factor, 0),
+    confidence = 'medium',
+    source = 'area',
   }
 end
 

@@ -2,41 +2,20 @@ require('init')
 require("DefaultId")
 require("Metadata")
 require("Log")
-local parse_capacity = require('parse_capacity')
 local sanitize_cleaner = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local round = require('round')
+local SURFACE_TAGS = require('surface_tags')
 
 local function result_tags_off_street_parking(result, area)
   local id = DefaultId(result.object)
 
-  local capacity_from_tag, capacity_source_from_tag, capacity_confidence_from_tag = parse_capacity(result.object.tags)
-  local surface_tags = {
-    value = SANITIZE_TAGS.surface(result.object.tags),
-    confidence = 'high',
-    source = result.object.tags.surface == SANITIZE_TAGS.surface(result.object.tags) and 'tag' or 'tag_transformed',
-  }
-  local conditional_categories_tags = classify_parking_conditions.classify_parking_conditions(result.object.tags, 'assumed_private')
-
+  local surface_tags_result = SURFACE_TAGS.surface_tags(result.object.tags)
+  local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(result.object.tags, 'assumed_private')
   -- Get capacity from category (handles both tag-based and area-based capacity)
-  local capacity_from_category = nil
-  local capacity_source_from_category = nil
-  local capacity_confidence_from_category = nil
-  if area ~= nil then
-    local category_capacity = result.category:get_capacity(result.object.tags, area)
-    if category_capacity then
-      capacity_from_category = category_capacity.capacity
-      capacity_source_from_category = category_capacity.capacity_source
-      capacity_confidence_from_category = category_capacity.capacity_confidence
-    end
-  end
-
-  -- Use tag-based capacity if available, otherwise use category capacity
-  local capacity = capacity_from_tag or capacity_from_category
-  local capacity_source = capacity_source_from_tag or capacity_source_from_category
-  local capacity_confidence = capacity_confidence_from_tag or capacity_confidence_from_category
+  local capacity_tags_result = result.category:get_capacity(result.object.tags, area)
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
@@ -58,16 +37,16 @@ local function result_tags_off_street_parking(result, area)
     mapillary = SANITIZE_TAGS.safe_string(result.object.tags.mapillary),
 
     -- Capacity & Area
-    capacity = capacity,
-    capacity_source = capacity_source,
-    capacity_confidence = capacity_confidence,
+    capacity = capacity_tags_result.value,
+    capacity_source = capacity_tags_result.source,
+    capacity_confidence = capacity_tags_result.confidence,
     area = round(area, 2),
     area_confidence = area ~= nil and 'high' or nil,
     area_source = area ~= nil and 'geometry' or nil,
 
     -- Parking properties
-    condition_category = conditional_categories_tags.condition_category,
-    condition_vehicles = conditional_categories_tags.condition_vehicles,
+    condition_category = conditional_categories_result.condition_category,
+    condition_vehicles = conditional_categories_result.condition_vehicles,
     covered = SANITIZE_TAGS.covered(result.object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(result.object.tags.direction),
     fee = SANITIZE_PARKING_TAGS.fee(result.object.tags.fee),
@@ -83,9 +62,9 @@ local function result_tags_off_street_parking(result, area)
     zone = SANITIZE_TAGS.safe_string(result.object.tags.zone),
 
     -- Surface
-    surface = surface_tags.value,
-    surface_confidence = surface_tags.confidence,
-    surface_source = surface_tags.source,
+    surface = surface_tags_result.value,
+    surface_confidence = surface_tags_result.confidence,
+    surface_source = surface_tags_result.source,
 
     -- Off street parking attributes:
     category = result.category.id,
