@@ -5,13 +5,19 @@ import { ControlPosition, MapRef, useControl } from 'react-map-gl/maplibre'
 import { drawControlStyle } from './drawControlStyle'
 
 // Work around styling issues until MapboxDraw is updated
+// Required for MapLibre GL compatibility (MapLibre uses 'maplibregl-*' instead of 'mapboxgl-*' CSS classes)
 // https://github.com/maplibre/maplibre-gl-js/issues/2601#issuecomment-1599769714
-// @ts-expect-errors
+// https://maplibre.org/maplibre-gl-js/docs/examples/mapbox-gl-draw/
+// @ts-expect-error - MapboxDraw constants are not fully typed
+MapboxDraw.constants.classes.CANVAS = 'maplibregl-canvas'
+// @ts-expect-error
 MapboxDraw.constants.classes.CONTROL_BASE = 'maplibregl-ctrl'
-// @ts-expect-errors
+// @ts-expect-error
 MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-'
-// @ts-expect-errors
+// @ts-expect-error
 MapboxDraw.constants.classes.CONTROL_GROUP = 'maplibregl-ctrl-group'
+// @ts-expect-error
+MapboxDraw.constants.classes.ATTRIBUTION = 'maplibregl-ctrl-attrib'
 
 export type DrawArea = Omit<GeoJSON.Feature<GeoJSON.Polygon, []>, 'id'> & {
   id: string

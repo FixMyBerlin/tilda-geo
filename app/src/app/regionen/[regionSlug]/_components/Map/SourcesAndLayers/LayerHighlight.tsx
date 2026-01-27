@@ -47,9 +47,14 @@ export const LayerHighlight = (props: LayerProps) => {
   const mapLoaded = useMapLoaded()
   if (!mapLoaded) return null
 
+  // Type guard: check if this is a standard layer (not custom layer)
+  if (!('type' in props) || props.type === 'custom') {
+    return null
+  }
+
   let layerProps = {
     ...props,
-    paint: structuredClone(props.paint),
+    paint: 'paint' in props && props.paint ? structuredClone(props.paint) : undefined,
   } as LayerProps
 
   if (layerProps.type === 'line') {
