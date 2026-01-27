@@ -1,5 +1,5 @@
 import { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_tilda_parkings_completeness } from './mapboxStyles/groups/tilda_parkings_completeness'
+import { mapboxStyleGroupLayers_park_street_completeness } from './mapboxStyles/groups/park_street_completeness'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaMissing'
@@ -19,7 +19,7 @@ export const subcat_parkingTilda_street_completeness: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_tilda_parkings_completeness,
+        layers: mapboxStyleGroupLayers_park_street_completeness,
         source,
         sourceLayer,
       }),
@@ -36,7 +36,7 @@ export const subcat_parkingTilda_street_completeness: FileMapDataSubcategory = {
           desc: [
             'Für diesen Abschnitt sind zwar noch keine Daten in OpenStreetMap hinterlegt, aber wir gehen davon aus, dass hier nicht geparkt werden darf.',
           ],
-          style: { type: 'line', color: 'rgb(116, 88, 107)', width: 5 },
+          style: { type: 'line', color: 'rgb(102, 21, 168)', width: 5 },
         },
         {
           id: 'too-small',
@@ -44,7 +44,7 @@ export const subcat_parkingTilda_street_completeness: FileMapDataSubcategory = {
           desc: [
             'Dieser Abschnitt ist zu klein als das ein Fahrzeug in Referenzgröße hier parken könnte. Dieser Abschnitt wurde daher nicht als Parkstand bewertet.',
           ],
-          style: { type: 'line', color: 'rgb(182, 164, 164)', width: 5 },
+          style: { type: 'line', color: 'rgb(99, 53, 50)', width: 5 },
         },
       ],
     },

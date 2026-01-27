@@ -3,12 +3,12 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_off_street_point: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_park_off_default_area: MapboxStyleLayer[] = [
   {
-    type: 'circle',
-    id: 'off-street-point',
+    id: 'off_type_bg',
+    type: 'fill',
     paint: {
-      'circle-color': [
+      'fill-color': [
         'case',
         ['match', ['get', 'parking'], ['multi-storey'], true, false],
         'rgb(233, 91, 84)',
@@ -20,7 +20,27 @@ export const mapboxStyleGroupLayers_tilda_parkings_off_street_point: MapboxStyle
         'rgb(251, 206, 74)',
         'rgb(48, 159, 219)',
       ],
-      'circle-stroke-color': 'rgb(0, 0, 0)',
+    },
+  },
+  {
+    id: 'off_type_outline',
+    type: 'line',
+    paint: {
+      'line-dasharray': [
+        'case',
+        ['==', ['get', 'parking'], 'underground'],
+        ['literal', [3, 2]],
+        ['literal', []],
+      ],
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        15,
+        ['match', ['get', 'parking'], ['surface'], 0, 0.5],
+        19,
+        ['match', ['get', 'parking'], ['surface'], 0, 4],
+      ],
     },
   },
 ]

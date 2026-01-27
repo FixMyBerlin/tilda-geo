@@ -1,5 +1,5 @@
 import { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_tilda_parkings_no } from './mapboxStyles/groups/tilda_parkings_no'
+import { mapboxStyleGroupLayers_park_street_no } from './mapboxStyles/groups/park_street_no'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaNo'
@@ -10,7 +10,7 @@ export type SubcatParkingTildaNoStyleIds = 'default'
 
 export const subcat_parkingTilda_street_no: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Parkverbote (TODO)',
+  name: 'Parkverbote',
   ui: 'checkbox',
   sourceId: source,
   beforeId: undefined,
@@ -19,7 +19,7 @@ export const subcat_parkingTilda_street_no: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_tilda_parkings_no,
+        layers: mapboxStyleGroupLayers_park_street_no,
         source,
         sourceLayer,
       }),
@@ -27,12 +27,12 @@ export const subcat_parkingTilda_street_no: FileMapDataSubcategory = {
         {
           id: 'no_parking',
           name: 'Parkverbot',
-          style: { type: 'fill', color: 'rgb(151, 17, 17)' },
+          style: { type: 'line', color: 'rgb(255, 168, 8)', dasharray: [1, 0.5] },
         },
         {
-          id: 'small',
-          name: 'Zu wenig Platz',
-          style: { type: 'fill', color: 'rgb(107, 41, 41)' },
+          id: 'no_stopping',
+          name: 'Halteverbot',
+          style: { type: 'line', color: 'rgb(255, 0, 0)', dasharray: [1, 0.5] },
         },
       ],
     },

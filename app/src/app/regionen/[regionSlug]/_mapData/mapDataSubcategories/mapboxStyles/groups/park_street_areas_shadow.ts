@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_areas_shadow: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_park_street_areas_shadow: MapboxStyleLayer[] = [
   {
     id: 'area-color',
     type: 'fill',
@@ -17,8 +17,8 @@ export const mapboxStyleGroupLayers_tilda_parkings_areas_shadow: MapboxStyleLaye
     type: 'line',
     paint: {
       'line-color': 'rgb(107, 114, 118)',
-      'line-opacity': 0.9,
       'line-dasharray': [1, 1],
+      'line-opacity': 0.9,
     },
   },
 ]

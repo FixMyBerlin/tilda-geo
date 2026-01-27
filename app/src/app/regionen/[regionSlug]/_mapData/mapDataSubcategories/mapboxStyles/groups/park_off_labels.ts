@@ -3,14 +3,14 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_area_labels: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_park_off_labels: MapboxStyleLayer[] = [
   {
+    id: 'areas-labels',
+    type: 'symbol',
     layout: {
       'text-field': ['to-string', ['get', 'capacity']],
       'text-size': ['interpolate', ['linear'], ['zoom'], 14.99, 0, 15, 9, 20, 20],
     },
-    type: 'symbol',
-    id: 'areas-labels',
     paint: {
       'text-color': 'rgb(255, 255, 255)',
       'text-halo-color': 'rgba(0, 0, 0, 0.33)',

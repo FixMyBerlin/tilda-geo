@@ -80,9 +80,17 @@ import {
   SubcatParkingLarsStatsStyleIds,
 } from './mapDataSubcategories/subcat_parkingLarsStats.const'
 import {
+  SubcatParkingTildaOffStreetPrivateId,
+  SubcatParkingTildaOffStreetPrivateStyleIds,
+} from './mapDataSubcategories/subcat_parkingTilda_offStreet_private.const'
+import {
   SubcatParkingTildaOffStreetId,
   SubcatParkingTildaOffStreetStyleIds,
 } from './mapDataSubcategories/subcat_parkingTilda_offStreet_public.const'
+import {
+  SubcatParkingTildaQuantizedOffStreetId,
+  SubcatParkingTildaQuantizedOffStreetStyleIds,
+} from './mapDataSubcategories/subcat_parkingTilda_offStreet_quantized.const'
 import {
   SubcatParkingTildaCompletenessId,
   SubcatParkingTildaCompletenessStyleIds,
@@ -107,10 +115,6 @@ import {
   SubcatParkingTildaQuantizedId,
   SubcatParkingTildaQuantizedStyleIds,
 } from './mapDataSubcategories/subcat_parkingTilda_street_quantized.const'
-import {
-  SubcatParkingTildaQuantizedOffStreetId,
-  SubcatParkingTildaQuantizedOffStreetStyleIds,
-} from './mapDataSubcategories/subcat_parkingTilda_offStreet_quantized.const'
 import { SubcatPoiId, SubcatPoiStyleIds } from './mapDataSubcategories/subcat_poi.const'
 import {
   SubcatPoiBoundariesId,
@@ -195,6 +199,7 @@ export type SubcategoryId =
   | SubcatParkingTildaCompletenessId
   | SubcatParkingTildaNoId
   | SubcatParkingTildaOffStreetId
+  | SubcatParkingTildaOffStreetPrivateId
   | SubcatParkingTildaPrivateId
   | SubcatParkingTildaQuantizedId
   | SubcatParkingTildaQuantizedOffStreetId
@@ -246,6 +251,7 @@ export type StyleId =
   | SubcatParkingTildaCompletenessStyleIds
   | SubcatParkingTildaNoStyleIds
   | SubcatParkingTildaOffStreetStyleIds
+  | SubcatParkingTildaOffStreetPrivateStyleIds
   | SubcatParkingTildaPrivateStyleIds
   | SubcatParkingTildaQuantizedStyleIds
   | SubcatParkingTildaQuantizedOffStreetStyleIds

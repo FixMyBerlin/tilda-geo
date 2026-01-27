@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_pattern: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_park_street_pattern: MapboxStyleLayer[] = [
   {
     id: 'parallel pattern',
     type: 'line',
@@ -14,41 +14,47 @@ export const mapboxStyleGroupLayers_tilda_parkings_pattern: MapboxStyleLayer[] =
     ],
     paint: {
       'line-color': 'rgb(237, 237, 237)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 0.7, 20, 5],
-      'line-dasharray': [4, 2],
+      'line-dasharray': [
+        'match',
+        ['get', 'staggered'],
+        ['yes'],
+        ['literal', [4, 2, 4, 2, 0, 12]],
+        ['literal', [4, 2]],
+      ],
       'line-opacity': 0.67,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 0.7, 20, 5],
     },
   },
   {
-    minzoom: 16,
+    id: 'diagonal pattern',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'orientation'], ['diagonal'], true, false],
       ['has', 'capacity'],
     ],
-    type: 'line',
-    id: 'diagonal pattern',
+    minzoom: 16,
     paint: {
       'line-color': 'rgb(237, 237, 237)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
       'line-opacity': 0.67,
       'line-pattern': 'parking_diagonal',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
     },
   },
   {
-    minzoom: 16,
+    id: 'perpendicular pattern',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'orientation'], ['perpendicular'], true, false],
       ['has', 'capacity'],
     ],
-    type: 'line',
-    id: 'perpendicular pattern',
+    minzoom: 16,
     paint: {
       'line-color': 'rgb(237, 237, 237)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
       'line-opacity': 0.67,
       'line-pattern': 'parking_perpendicular',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
     },
   },
 ]

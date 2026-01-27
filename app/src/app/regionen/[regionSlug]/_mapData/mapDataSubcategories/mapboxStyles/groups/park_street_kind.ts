@@ -3,10 +3,11 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_surface: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_park_street_kind: MapboxStyleLayer[] = [
   {
-    id: 'street parking line surface',
+    id: 'street_kind',
     type: 'line',
+    filter: ['has', 'capacity'],
     paint: {
       'line-color': [
         'case',
@@ -68,13 +69,8 @@ export const mapboxStyleGroupLayers_tilda_parkings_surface: MapboxStyleLayer[] =
         'hsl(280, 94%, 63%)',
         'hsl(280, 67%, 26%)',
       ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
       'line-opacity': ['match', ['get', 'operator_type'], ['private'], 0.33, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
     },
-    filter: [
-      'all',
-      ['has', 'capacity'],
-      ['match', ['get', 'operator_type'], ['private'], false, true],
-    ],
   },
 ]

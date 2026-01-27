@@ -3,7 +3,7 @@
 
 import { MapboxStyleLayer } from '../types'
 
-export const mapboxStyleGroupLayers_tilda_parkings_cutouts: MapboxStyleLayer[] = [
+export const mapboxStyleGroupLayers_park_street_cutouts: MapboxStyleLayer[] = [
   {
     id: 'cutout-base',
     type: 'fill',
@@ -16,6 +16,9 @@ export const mapboxStyleGroupLayers_tilda_parkings_cutouts: MapboxStyleLayer[] =
     id: 'cutout-category-ring',
     type: 'line',
     minzoom: 16.5,
+    layout: {
+      'line-join': 'round',
+    },
     paint: {
       'line-color': [
         'match',
@@ -50,7 +53,7 @@ export const mapboxStyleGroupLayers_tilda_parkings_cutouts: MapboxStyleLayer[] =
           'crossing_kerb_extension',
         ],
         'hsla(133, 65%, 35%, 0.73)',
-        ['driveway', 'loading_ramp'],
+        ['driveway', 'driveway_corner_kerb', 'loading_ramp'],
         'hsla(270, 29%, 38%, 0.61)',
         [
           'road_marking_restricted_area',
@@ -63,23 +66,20 @@ export const mapboxStyleGroupLayers_tilda_parkings_cutouts: MapboxStyleLayer[] =
         'hsla(206, 62%, 31%, 0.6)',
         'hsla(0, 71%, 0%, 0)',
       ],
-      'line-width': 5,
       'line-offset': 2.5,
-    },
-    layout: {
-      'line-join': 'round',
+      'line-width': 5,
     },
   },
   {
     id: 'cutout-border',
     type: 'line',
     minzoom: 16.5,
-    paint: {
-      'line-dasharray': [2, 2],
-      'line-color': 'hsl(175, 27%, 43%)',
-    },
     layout: {
       'line-join': 'round',
+    },
+    paint: {
+      'line-color': 'hsl(175, 27%, 43%)',
+      'line-dasharray': [2, 2],
     },
   },
 ]
