@@ -5,7 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_bikelanes_unspecified: MapboxStyleLayer[] = [
   {
-    minzoom: 7,
+    id: 'unspecified',
+    type: 'line',
     filter: [
       'match',
       ['get', 'category'],
@@ -20,12 +21,11 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_unspecified: MapboxStyleLaye
       true,
       false,
     ],
-    type: 'line',
-    id: 'unspecified',
+    minzoom: 7,
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 5, 13, 8, 18, 20],
       'line-color': '#b50382',
       'line-opacity': 0.3,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 5, 13, 8, 18, 20],
     },
   },
 ]

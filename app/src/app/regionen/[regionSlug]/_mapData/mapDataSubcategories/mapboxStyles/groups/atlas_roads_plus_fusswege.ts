@@ -5,6 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[] = [
   {
+    id: 'roadclassification-nokfz',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -12,8 +14,6 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
       true,
       false,
     ],
-    type: 'line',
-    id: 'roadclassification-nokfz',
     paint: {
       'line-color': [
         'case',
@@ -27,9 +27,8 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
     },
   },
   {
-    layout: {
-      'line-cap': 'round',
-    },
+    id: 'hitarea-roadclassification_plus_fusswege',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -37,11 +36,10 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
       true,
       false,
     ],
-    type: 'line',
-    id: 'hitarea-roadclassification_plus_fusswege',
+    layout: {
+      'line-cap': 'round',
+    },
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
       'line-color': [
         'case',
         ['match', ['get', 'road'], ['track', 'bridleway'], true, false],
@@ -50,14 +48,13 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
         '#c8aad5',
         'rgba(192, 191, 191, 0.75)',
       ],
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
   {
-    minzoom: 13,
-    layout: {
-      'line-cap': 'square',
-      'line-miter-limit': 0,
-    },
+    id: 'roads-onewaybikeyes-pattern fusswege',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
@@ -69,19 +66,20 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
         false,
       ],
     ],
-    type: 'line',
-    id: 'roads-onewaybikeyes-pattern fusswege',
-    paint: {
-      'line-pattern': 'arrow-blue-dots-gap(1)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
-      'line-opacity': 0.8,
-    },
-  },
-  {
     minzoom: 13,
     layout: {
       'line-cap': 'square',
+      'line-miter-limit': 0,
     },
+    paint: {
+      'line-opacity': 0.8,
+      'line-pattern': 'arrow-blue-dots-gap(1)',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
+    },
+  },
+  {
+    id: 'roads-oneway-pattern',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
@@ -93,12 +91,14 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_fusswege: MapboxStyleLayer[
         false,
       ],
     ],
-    type: 'line',
-    id: 'roads-oneway-pattern',
+    minzoom: 13,
+    layout: {
+      'line-cap': 'square',
+    },
     paint: {
+      'line-opacity': 0.7,
       'line-pattern': 'arrow-grey-gap(1)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
-      'line-opacity': 0.7,
     },
   },
 ]

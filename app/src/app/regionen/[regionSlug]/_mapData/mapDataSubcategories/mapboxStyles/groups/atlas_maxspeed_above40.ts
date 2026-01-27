@@ -5,14 +5,13 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_maxspeed_above40: MapboxStyleLayer[] = [
   {
+    id: 'maxspeed-groessergleich40',
+    type: 'line',
+    filter: ['>=', ['get', 'maxspeed'], 40],
     layout: {
       'line-cap': 'round',
     },
-    filter: ['>=', ['get', 'maxspeed'], 40],
-    type: 'line',
-    id: 'maxspeed-groessergleich40',
     paint: {
-      'line-opacity': 0.98,
       'line-color': [
         'interpolate',
         ['linear'],
@@ -26,20 +25,21 @@ export const mapboxStyleGroupLayers_atlas_maxspeed_above40: MapboxStyleLayer[] =
         80,
         '#b80505',
       ],
+      'line-opacity': 0.98,
       'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 15, 1],
     },
   },
   {
+    id: 'hitarea-maxspeed40',
+    type: 'line',
+    filter: ['>=', ['get', 'maxspeed'], 40],
     layout: {
       'line-cap': 'round',
     },
-    filter: ['>=', ['get', 'maxspeed'], 40],
-    type: 'line',
-    id: 'hitarea-maxspeed40',
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
       'line-color': 'rgb(216, 20, 255)',
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
 ]

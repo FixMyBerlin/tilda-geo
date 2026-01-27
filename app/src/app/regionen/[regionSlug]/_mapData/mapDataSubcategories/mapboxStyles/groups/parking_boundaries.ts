@@ -5,8 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_boundaries: MapboxStyleLayer[] = [
   {
-    type: 'line',
     id: 'line-border-1',
+    type: 'line',
     paint: {
       'line-color': '#664100',
       'line-opacity': 0.63,
@@ -14,33 +14,33 @@ export const mapboxStyleGroupLayers_parking_boundaries: MapboxStyleLayer[] = [
     },
   },
   {
-    type: 'line',
     id: 'line-border-1 copy',
+    type: 'line',
     paint: {
       'line-color': '#664100',
+      'line-offset': 4,
       'line-opacity': 0.3,
       'line-width': 4,
-      'line-offset': 4,
     },
   },
   {
+    id: 'label copy 1',
+    type: 'symbol',
     layout: {
-      'text-size': 14,
-      'text-allow-overlap': true,
       'symbol-avoid-edges': true,
       'symbol-placement': 'line-center',
-      'text-justify': 'auto',
-      'text-padding': 0,
-      'text-offset': [0, 0.7],
+      'text-allow-overlap': true,
       'text-field': ['to-string', ['get', 'name']],
+      'text-justify': 'auto',
+      'text-offset': [0, 0.7],
+      'text-padding': 0,
+      'text-size': 14,
     },
-    type: 'symbol',
-    id: 'label copy 1',
     paint: {
       'text-color': '#fffbeb',
-      'text-halo-width': 3,
-      'text-halo-color': 'rgba(102, 65, 0, 0.65)',
       'text-halo-blur': 1,
+      'text-halo-color': 'rgba(102, 65, 0, 0.65)',
+      'text-halo-width': 3,
     },
   },
 ]

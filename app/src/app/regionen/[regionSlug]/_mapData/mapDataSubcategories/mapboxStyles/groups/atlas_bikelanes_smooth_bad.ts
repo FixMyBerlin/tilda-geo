@@ -5,9 +5,9 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad: MapboxStyleLayer[] = [
   {
-    filter: ['has', 'smoothness'],
-    type: 'line',
     id: 'smoothness-badonly',
+    type: 'line',
+    filter: ['has', 'smoothness'],
     paint: {
       'line-color': [
         'match',
@@ -18,10 +18,10 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad: MapboxStyleLayer
         '#d8035c',
         'rgba(0, 0, 0, 0)',
       ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 14, 2.5, 16, 3],
+      'line-dasharray': [1, 1],
       'line-offset': 1,
       'line-opacity': ['interpolate', ['linear'], ['zoom'], 8, 0, 8.1, 0.1, 8.5, 0.9],
-      'line-dasharray': [1, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 14, 2.5, 16, 3],
     },
   },
 ]

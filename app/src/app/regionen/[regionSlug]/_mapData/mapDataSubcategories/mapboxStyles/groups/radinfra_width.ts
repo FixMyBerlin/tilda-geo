@@ -5,42 +5,41 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_radinfra_width: MapboxStyleLayer[] = [
   {
-    type: 'line',
     id: 'width-missing',
+    type: 'line',
+    filter: ['any', ['!', ['has', 'width']], ['match', ['get', 'width'], [''], true, false]],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-color': '#fda5e4',
       'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
     },
+  },
+  {
+    id: 'hitarea-missing-width',
+    type: 'line',
     filter: ['any', ['!', ['has', 'width']], ['match', ['get', 'width'], [''], true, false]],
     layout: {
       'line-cap': 'round',
       'line-join': 'round',
     },
-  },
-  {
-    type: 'line',
-    id: 'hitarea-missing-width',
     paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
       'line-color': 'rgb(216, 20, 255)',
       'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['any', ['!', ['has', 'width']], ['match', ['get', 'width'], [''], true, false]],
   },
   {
-    type: 'line',
     id: 'width-colors',
+    type: 'line',
+    filter: ['has', 'width'],
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-color': [
         'interpolate',
         ['linear'],
@@ -54,7 +53,8 @@ export const mapboxStyleGroupLayers_radinfra_width: MapboxStyleLayer[] = [
         2.2,
         '#15c65c',
       ],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
     },
-    filter: ['has', 'width'],
   },
 ]

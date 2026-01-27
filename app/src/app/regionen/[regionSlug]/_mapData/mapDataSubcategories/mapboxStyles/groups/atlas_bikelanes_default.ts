@@ -7,22 +7,16 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
   {
     id: 'needsClarification',
     type: 'line',
+    filter: ['match', ['get', 'category'], ['needsClarification'], true, false],
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
       'line-color': '#a97bea',
       'line-dasharray': [2.5, 0.5],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
     },
-    filter: ['match', ['get', 'category'], ['needsClarification'], true, false],
   },
   {
     id: 'Gehweg Rad frei',
     type: 'line',
-    paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
-      'line-dasharray': [2, 2],
-      'line-color': '#9fb9f9',
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-    },
     filter: [
       'match',
       ['get', 'category'],
@@ -35,16 +29,16 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
       true,
       false,
     ],
+    paint: {
+      'line-color': '#9fb9f9',
+      'line-dasharray': [2, 2],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
+    },
   },
   {
     id: 'Fuehrung mit Kfz-explizit',
     type: 'line',
-    paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
-      'line-dasharray': [3, 1],
-      'line-color': '#0098f0',
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-    },
     filter: [
       'match',
       ['get', 'category'],
@@ -57,16 +51,16 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
       true,
       false,
     ],
+    paint: {
+      'line-color': '#0098f0',
+      'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
+    },
   },
   {
     id: 'Fuehrung mit Fussverkehr',
     type: 'line',
-    paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
-      'line-dasharray': [3, 1],
-      'line-color': '#174ed9',
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-    },
     filter: [
       'match',
       ['get', 'category'],
@@ -78,15 +72,16 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
       true,
       false,
     ],
+    paint: {
+      'line-color': '#174ed9',
+      'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
+    },
   },
   {
     id: 'Fuehrung eigenstaendig auf Fahrbahn',
     type: 'line',
-    paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
-      'line-color': '#0098f0',
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-    },
     filter: [
       'match',
       ['get', 'category'],
@@ -101,15 +96,15 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
       true,
       false,
     ],
+    paint: {
+      'line-color': '#0098f0',
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
+    },
   },
   {
     id: 'fuehrung baul. abgesetzt von Kfz',
     type: 'line',
-    paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
-      'line-color': '#174ed9',
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-    },
     filter: [
       'match',
       ['get', 'category'],
@@ -126,18 +121,23 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_default: MapboxStyleLayer[] 
       true,
       false,
     ],
+    paint: {
+      'line-color': '#174ed9',
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.5, 10, 1.5, 14, 2, 16, 3],
+    },
   },
   {
     id: 'hitarea-bikelanes',
     type: 'line',
-    paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
-      'line-color': 'hsl(290, 100%, 54%)',
-    },
     filter: ['has', 'category'],
     layout: {
       'line-cap': 'round',
+    },
+    paint: {
+      'line-color': 'hsl(290, 100%, 54%)',
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
 ]

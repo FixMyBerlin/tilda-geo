@@ -7,20 +7,19 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_widths: MapboxStyleLayer[] =
   {
     id: 'widths-lines-incomplete',
     type: 'line',
-    paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-color': '#fda5e4',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
-      'line-dasharray': [3, 1],
-    },
     filter: ['!', ['has', 'width']],
+    paint: {
+      'line-color': '#fda5e4',
+      'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
+    },
   },
   {
     id: 'widths-lines',
     type: 'line',
+    filter: ['has', 'width'],
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 14, 3, 16, 4],
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-color': [
         'interpolate',
         ['linear'],
@@ -34,7 +33,8 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_widths: MapboxStyleLayer[] =
         2.2,
         '#15c65c',
       ],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 14, 3, 16, 4],
     },
-    filter: ['has', 'width'],
   },
 ]

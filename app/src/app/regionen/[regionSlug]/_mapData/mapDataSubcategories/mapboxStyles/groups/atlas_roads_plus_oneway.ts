@@ -5,7 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] = [
   {
-    minzoom: 11,
+    id: 'oneway-road',
+    type: 'line',
     filter: [
       'all',
       ['has', 'oneway'],
@@ -27,8 +28,7 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
         true,
       ],
     ],
-    type: 'line',
-    id: 'oneway-road',
+    minzoom: 11,
     paint: {
       'line-color': [
         'match',
@@ -43,10 +43,10 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
     },
   },
   {
-    minzoom: 11,
-    filter: ['has', 'oneway_bicycle'],
-    type: 'line',
     id: 'oneway-road-bicycle',
+    type: 'line',
+    filter: ['has', 'oneway_bicycle'],
+    minzoom: 11,
     paint: {
       'line-color': [
         'match',
@@ -61,11 +61,8 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
     },
   },
   {
-    minzoom: 13,
-    layout: {
-      'line-cap': 'square',
-      'line-miter-limit': 0,
-    },
+    id: 'roads-onewaybikeyes-pattern plus',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'oneway_bicycle'], ['no'], true, false],
@@ -86,19 +83,20 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
         true,
       ],
     ],
-    type: 'line',
-    id: 'roads-onewaybikeyes-pattern plus',
-    paint: {
-      'line-pattern': 'arrow-blue-dots-gap(1)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
-      'line-opacity': 0.8,
-    },
-  },
-  {
     minzoom: 13,
     layout: {
       'line-cap': 'square',
+      'line-miter-limit': 0,
     },
+    paint: {
+      'line-opacity': 0.8,
+      'line-pattern': 'arrow-blue-dots-gap(1)',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
+    },
+  },
+  {
+    id: 'roads-oneway-pattern plus',
+    type: 'line',
     filter: [
       'all',
       ['has', 'oneway'],
@@ -120,12 +118,14 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_oneway: MapboxStyleLayer[] 
         true,
       ],
     ],
-    type: 'line',
-    id: 'roads-oneway-pattern plus',
+    minzoom: 13,
+    layout: {
+      'line-cap': 'square',
+    },
     paint: {
+      'line-opacity': 0.7,
       'line-pattern': 'arrow-grey-gap(1)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
-      'line-opacity': 0.7,
     },
   },
 ]

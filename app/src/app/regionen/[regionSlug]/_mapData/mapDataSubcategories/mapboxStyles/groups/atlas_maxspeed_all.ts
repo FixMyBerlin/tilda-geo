@@ -5,14 +5,13 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_maxspeed_all: MapboxStyleLayer[] = [
   {
+    id: 'maxspeed-50-80',
+    type: 'line',
+    filter: ['has', 'maxspeed'],
     layout: {
       'line-cap': 'round',
     },
-    filter: ['has', 'maxspeed'],
-    type: 'line',
-    id: 'maxspeed-50-80',
     paint: {
-      'line-opacity': 0.98,
       'line-color': [
         'interpolate',
         ['linear'],
@@ -30,20 +29,21 @@ export const mapboxStyleGroupLayers_atlas_maxspeed_all: MapboxStyleLayer[] = [
         80,
         '#b80505',
       ],
+      'line-opacity': 0.98,
       'line-width': ['interpolate', ['linear'], ['zoom'], 11, 0.5, 15, 1],
     },
   },
   {
+    id: 'hitarea-maxspeed-all',
+    type: 'line',
+    filter: ['has', 'maxspeed'],
     layout: {
       'line-cap': 'round',
     },
-    filter: ['has', 'maxspeed'],
-    type: 'line',
-    id: 'hitarea-maxspeed-all',
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
       'line-color': 'rgb(216, 20, 255)',
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
 ]

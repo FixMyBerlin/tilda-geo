@@ -5,20 +5,20 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_obstacles: MapboxStyleLayer[] = [
   {
-    type: 'fill',
     id: 'area',
+    type: 'fill',
+    minzoom: 15,
     paint: {
       'fill-color': 'rgb(219, 39, 119)',
     },
-    minzoom: 15,
   },
   {
-    minzoom: 16.5,
-    type: 'line',
     id: 'border',
+    type: 'line',
+    minzoom: 16.5,
     paint: {
-      'line-dasharray': [2, 2],
       'line-color': 'rgb(0, 0, 0)',
+      'line-dasharray': [2, 2],
     },
   },
 ]

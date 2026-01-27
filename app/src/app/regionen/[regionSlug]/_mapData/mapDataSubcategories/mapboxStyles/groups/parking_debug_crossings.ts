@@ -5,16 +5,16 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_debug_crossings: MapboxStyleLayer[] = [
   {
-    type: 'fill',
     id: 'buffer-pedestrian-crossings-area',
+    type: 'fill',
     paint: {
       'fill-color': 'rgba(33, 196, 93, 0.7)',
     },
   },
   {
-    minzoom: 16.5,
-    type: 'line',
     id: 'buffer-pedestrian-crossings-border',
+    type: 'line',
+    minzoom: 16.5,
     paint: {
       'line-color': 'rgb(0, 0, 0)',
       'line-dasharray': [2, 2],
