@@ -61,7 +61,7 @@ local function result_tags_parkings(object)
     road_width_confidence = road_width_tags_result.confidence,
     road_width_source = road_width_tags_result.source,
     road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
-    operator_type = THIS_OR_THAT.value(SANITIZE_TAGS.operator_type(object.tags), SANITIZE_TAGS.operator_type(object._parent_tags)),
+    operator_type = THIS_OR_THAT.value(SANITIZE_TAGS.operator_type(object.tags), SANITIZE_TAGS.operator_type(object._parent_tags)) or 'assumed_public',
     mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary) or SANITIZE_TAGS.safe_string(object._parent_tags.mapillary),
 
     -- Capacity & Area

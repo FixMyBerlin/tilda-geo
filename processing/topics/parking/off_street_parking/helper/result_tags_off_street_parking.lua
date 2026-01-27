@@ -33,7 +33,7 @@ local function result_tags_off_street_parking(result, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = SANITIZE_TAGS.operator_type(result.object.tags),
+    operator_type = SANITIZE_TAGS.operator_type(result.object.tags) or 'assumed_private',
     mapillary = SANITIZE_TAGS.safe_string(result.object.tags.mapillary),
 
     -- Capacity & Area

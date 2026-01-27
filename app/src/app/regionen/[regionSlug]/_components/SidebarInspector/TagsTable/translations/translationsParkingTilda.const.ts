@@ -138,6 +138,8 @@ export const translationsParkingTilda = {
     'tilda_parkings--operator_type--key': 'Betreibertyp',
     'tilda_parkings--operator_type=private': 'Privat',
     'tilda_parkings--operator_type=public': 'Öffentlich',
+    'tilda_parkings--operator_type=assumed_private': 'Wahrscheinlich privat',
+    'tilda_parkings--operator_type=assumed_public': 'Sehr wahrscheinlich öffentlich',
     'tilda_parkings--orientation--key': 'Ausrichtung',
     'tilda_parkings--orientation=diagonal': 'Schrägparken',
     'tilda_parkings--orientation=parallel': 'Parallelparken',

@@ -33,7 +33,7 @@ local function result_tags_separate_parking(category, object, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = SANITIZE_TAGS.operator_type(object.tags),
+    operator_type = SANITIZE_TAGS.operator_type(object.tags) or 'assumed_public',
     mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary),
 
     -- Area
