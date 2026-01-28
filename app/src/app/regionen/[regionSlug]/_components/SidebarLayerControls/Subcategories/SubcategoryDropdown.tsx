@@ -50,17 +50,17 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
   })
 
   return (
-    <fieldset className="w-full overflow-hidden px-2">
+    <fieldset className="overflow-hidden px-2">
       <legend
         className={twJoin(
-          'mb-1 text-sm leading-4 font-semibold',
+          'mb-1 text-sm leading-4 font-medium',
           disabled ? 'text-gray-500' : 'text-gray-900',
         )}
       >
         {subcategory.name}
       </legend>
 
-      <Menu as="div" className="relative inline-block w-full text-left">
+      <Menu as="div" className="relative inline-block text-left">
         {({ open }) => (
           <>
             <MenuButton
@@ -82,7 +82,7 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
 
             <MenuItems
               anchor="bottom start"
-              className="z-40 max-w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 [--anchor-gap:8px] focus:outline-none"
+              className="z-40 rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 [--anchor-gap:8px] focus:outline-none"
             >
               {Array.from(groupedStyles.entries()).map(([group, styles]) => {
                 const showHeadline = group !== 'fallback'

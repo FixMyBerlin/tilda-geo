@@ -17,12 +17,12 @@ export const CategoryHeadlineToggle = ({
   return (
     <SwitchGroup
       as="div"
-      className="group flex min-h-[3rem] w-full cursor-pointer items-center justify-between"
+      className="group flex min-h-[3rem] cursor-pointer items-center justify-between"
     >
       <Label
         as="div"
         className={twJoin(
-          'ml-2 w-full text-sm leading-[17px]',
+          'ml-2 text-sm leading-[17px]',
           active ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-900',
         )}
         title={titleAttribute ? titleAttribute : undefined}

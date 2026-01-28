@@ -50,7 +50,9 @@ export const CalculatorOutput = ({ keys: _unused, drawControlRef, subcategoryNam
           <div className={twJoin('min-w-0', sums.length > 0 && 'text-white/50')}>
             SUMME
             {displayName && (
-              <p className="min-w-0 w-full truncate text-[0.6rem] leading-tight text-white/40">{displayName}</p>
+              <p className="w-full min-w-0 truncate text-[0.6rem] leading-tight text-white/40">
+                {displayName}
+              </p>
             )}
           </div>
           {sums.map(([key, sum]) => (
@@ -74,7 +76,9 @@ export const CalculatorOutput = ({ keys: _unused, drawControlRef, subcategoryNam
             <strong>SUMME</strong>
           </div>
           {displayName && (
-            <div className="min-w-0 w-full truncate text-[0.6rem] leading-tight text-white/40">{displayName}</div>
+            <div className="w-full min-w-0 truncate text-[0.6rem] leading-tight text-white/40">
+              {displayName}
+            </div>
           )}
           <div className="mt-1.5 text-white">Flächen zeichnen</div>
         </div>

@@ -80,7 +80,7 @@ export const Legend = ({ subcategoryId, styleConfig }: Props) => {
   }
 
   return (
-    <section className="relative mt-2 mb-1 w-full overflow-hidden">
+    <section className="relative mt-2 mb-1 overflow-hidden">
       <header className="sr-only">Legende</header>
       <div className="space-y-1">
         {legends.map((legendData) => {
@@ -89,11 +89,9 @@ export const Legend = ({ subcategoryId, styleConfig }: Props) => {
           const key = createSubcatStyleLegendKey(subcategoryId, styleConfig.id, legendDataId)
 
           return (
-            <div className="group relative flex min-w-0 items-start gap-2" key={key}>
+            <div className="group relative flex items-start gap-2" key={key}>
               <div className="size-4 flex-none">{iconFromLegend(legendData)}</div>
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <LegendNameDesc name={legendData.name} desc={legendData.desc} />
-              </div>
+              <LegendNameDesc name={legendData.name} desc={legendData.desc} />
             </div>
           )
         })}

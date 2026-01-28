@@ -46,7 +46,7 @@ export const SelectDatasets = ({
           <DisclosureButton className="group flex justify-between border-t border-t-gray-200 text-left hover:bg-yellow-50">
             <div
               className={twJoin(
-                'ml-2 flex min-h-[3rem] w-full flex-col items-start text-sm leading-[17px]',
+                'ml-2 flex min-h-[3rem] flex-col items-start text-sm leading-[17px]',
                 active ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-900',
                 hasFallbackTitle ? 'justify-center' : 'justify-start pt-2',
               )}

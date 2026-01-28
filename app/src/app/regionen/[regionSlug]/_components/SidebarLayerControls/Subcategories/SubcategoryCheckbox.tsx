@@ -47,7 +47,7 @@ export const SubcategoryCheckbox = ({ categoryId, subcategory, disabled }: Props
   if (!styleConfig) return null
 
   return (
-    <fieldset className="relative flex w-full items-start gap-2 px-2">
+    <fieldset className="relative flex items-start gap-2 px-2">
       <input
         id={subcategory.id}
         name={subcategory.id}
