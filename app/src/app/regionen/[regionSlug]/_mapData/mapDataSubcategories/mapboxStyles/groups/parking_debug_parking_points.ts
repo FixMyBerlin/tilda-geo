@@ -5,19 +5,19 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_debug_parking_points: MapboxStyleLayer[] = [
   {
-    type: 'fill',
     id: 'parking-point-area',
+    type: 'fill',
     paint: {
       'fill-color': 'rgba(80, 139, 134, 0.7)',
     },
   },
   {
-    minzoom: 16.5,
-    type: 'line',
     id: 'parking-point-border',
+    type: 'line',
+    minzoom: 16.5,
     paint: {
-      'line-dasharray': [2, 2],
       'line-color': 'rgb(0, 0, 0)',
+      'line-dasharray': [2, 2],
     },
   },
 ]

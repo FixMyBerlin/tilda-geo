@@ -5,18 +5,18 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_debug_driveways: MapboxStyleLayer[] = [
   {
-    type: 'fill',
     id: 'buffer-driveways-area',
-    paint: {
-      'fill-color': 'rgba(8, 142, 175, 0.7)',
-      'fill-antialias': false,
-    },
+    type: 'fill',
     minzoom: 15,
+    paint: {
+      'fill-antialias': false,
+      'fill-color': 'rgba(8, 142, 175, 0.7)',
+    },
   },
   {
-    minzoom: 16.5,
-    type: 'line',
     id: 'buffer-driveways-border',
+    type: 'line',
+    minzoom: 16.5,
     paint: {
       'line-color': 'hsl(0, 0%, 0%)',
       'line-dasharray': [2, 2],

@@ -16,8 +16,8 @@ export const mapboxStyleGroupLayers_atlas_barriers__area: MapboxStyleLayer[] = [
     type: 'fill',
     paint: {
       'fill-opacity': 0.5,
-      'fill-translate': [0, 0],
       'fill-pattern': 'cross-hatch-barriers',
+      'fill-translate': [0, 0],
     },
   },
 ]

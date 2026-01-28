@@ -5,23 +5,24 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_parkinglines_labels: MapboxStyleLayer[] = [
   {
+    id: 'parking labels',
+    type: 'symbol',
     minzoom: 15,
     layout: {
       'text-allow-overlap': true,
-      'text-ignore-placement': true,
-      'text-size': ['interpolate', ['linear'], ['zoom'], 14.99, 0, 15, 9, 20, 20],
       'text-field': ['to-string', ['get', 'capacity']],
+      'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+      'text-ignore-placement': true,
       'text-rotate': [
         'case',
         ['>', ['get', 'angle'], 90],
         ['-', ['get', 'angle'], 180],
         ['get', 'angle'],
       ],
-      'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 14.99, 0, 15, 9, 20, 20],
     },
-    type: 'symbol',
-    id: 'parking labels',
     paint: {
+      'icon-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0, 14, 0, 15, 1],
       'text-color': [
         'match',
         ['get', 'operator_type'],
@@ -29,9 +30,8 @@ export const mapboxStyleGroupLayers_parking_parkinglines_labels: MapboxStyleLaye
         'rgba(61, 61, 61, 0.5)',
         'rgb(60, 60, 60)',
       ],
-      'text-halo-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 18, 2.5],
       'text-halo-color': 'rgb(255, 255, 255)',
-      'icon-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0, 14, 0, 15, 1],
+      'text-halo-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 18, 2.5],
     },
   },
 ]

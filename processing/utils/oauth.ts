@@ -1,5 +1,5 @@
 import { $ } from 'bun'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
@@ -40,7 +40,7 @@ export async function ensureOAuthReady() {
   }
 
   console.log(
-    chalk.red('Geofabrik OAuth: OAuth initialization failed; falling back to public data'),
+    styleText('red', 'Geofabrik OAuth: OAuth initialization failed; falling back to public data'),
   )
   fallbackToPublicDownload()
   return null

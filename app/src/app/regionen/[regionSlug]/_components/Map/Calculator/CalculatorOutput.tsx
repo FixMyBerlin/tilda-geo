@@ -1,4 +1,4 @@
-import { ArrowRightIcon, TrashIcon } from '@heroicons/react/20/solid'
+import { ArrowUpIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useMapCalculatorAreasWithFeatures } from '../../../_hooks/mapState/useMapState'
 import { MapDataSourceCalculator } from '../../../_mapData/types'
@@ -9,15 +9,18 @@ import { useDelete } from './hooks/useDelete'
 type Props = {
   keys: MapDataSourceCalculator['keys']
   drawControlRef: DrawControlProps['ref']
+  subcategoryName?: string
 }
 
-export const CalculatorOutput = ({ keys: _unused, drawControlRef }: Props) => {
+export const CalculatorOutput = ({ keys: _unused, drawControlRef, subcategoryName }: Props) => {
   // <PointCalculator> only sums Point feature. Each point is considere `capacity=1`
   const calculatorAreasWithFeatures = useMapCalculatorAreasWithFeatures()
   const sums = calculatorAreasWithFeatures.map(({ key, features }) => {
     const onlyTypePoint = features.filter((f) => f.geometry.type === 'Point')
     return [key, onlyTypePoint.length] as const
   })
+
+  const displayName = subcategoryName?.replace(/^Summieren: /, '')
 
   const { deleteDrawFeatures } = useDelete()
   const handleDelete = (key: string) => {
@@ -32,25 +35,31 @@ export const CalculatorOutput = ({ keys: _unused, drawControlRef }: Props) => {
   return (
     <section
       className={twJoin(
-        'absolute z-1000 flex items-center rounded-md bg-fuchsia-800/90 px-2 py-0.5 text-xl leading-tight text-white shadow-xl',
+        'absolute z-1000 flex min-w-0 items-center rounded-md bg-fuchsia-800/90 px-2 py-0.5 text-xl leading-tight text-white shadow-xl',
         sums.length ? 'items-center' : 'items-start',
       )}
       style={{
-        right: '7px',
+        left: '270px',
         top: '75px',
         minHeight: '65px',
-        paddingRight: '40px',
         maxWidth: '125px',
       }}
     >
       {sums.length ? (
-        <div className={twJoin(sums.length === 0 && 'text-white/60')}>
-          <div className={twJoin(sums.length > 0 && 'text-white/50')}>Summe</div>
+        <div className={twJoin('min-w-0', sums.length === 0 && 'text-white/60')}>
+          <div className={twJoin('min-w-0', sums.length > 0 && 'text-white/50')}>
+            SUMME
+            {displayName && (
+              <p className="w-full min-w-0 truncate text-[0.6rem] leading-tight text-white/40">
+                {displayName}
+              </p>
+            )}
+          </div>
           {sums.map(([key, sum]) => (
             <strong key={key} className="block">
               {sum}
               <button type="button" onClick={() => handleDelete(key)}>
-                <TrashIcon className="ml-1 h-4 w-4 text-white/30 hover:text-white/90" />
+                <TrashIcon className="ml-1 size-4 text-white/30 hover:text-white/90" />
               </button>
             </strong>
           ))}
@@ -61,12 +70,17 @@ export const CalculatorOutput = ({ keys: _unused, drawControlRef }: Props) => {
           )}
         </div>
       ) : (
-        <div className="text-xs leading-tight">
-          <div className="flex items-center text-right">
-            <strong>Summe</strong>
-            <ArrowRightIcon className="ml-1 h-4 w-4" />
+        <div className="min-w-0 text-xs leading-tight">
+          <div className="flex items-center gap-1 text-right">
+            <ArrowUpIcon className="size-4" />
+            <strong>SUMME</strong>
           </div>
-          <div className="text-white/60">Flächen zeichnen</div>
+          {displayName && (
+            <div className="w-full min-w-0 truncate text-[0.6rem] leading-tight text-white/40">
+              {displayName}
+            </div>
+          )}
+          <div className="mt-1.5 text-white">Flächen zeichnen</div>
         </div>
       )}
     </section>

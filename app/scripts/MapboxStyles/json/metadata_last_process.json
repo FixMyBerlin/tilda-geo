@@ -2,9 +2,9 @@
   "tilda-style-package-1": {
     "key": "tilda-style-package-1",
     "about": "Metadata on the last processing of the tilda-style-package-1 styles api response",
-    "processed_at": "21.8.2025, 18:16:45",
+    "processed_at": "27.1.2026, 07:14:51",
     "style_last_published": {
-      "published_at": "6.8.2025, 07:21:12",
+      "published_at": "27.1.2026, 07:06:53",
       "version": 8
     },
     "style_id": "cl706a84j003v14o23n2r81w7",
@@ -18,7 +18,7 @@
   "tilda-style-package-2": {
     "key": "tilda-style-package-2",
     "about": "Metadata on the last processing of the tilda-style-package-2 styles api response",
-    "processed_at": "21.8.2025, 18:16:45",
+    "processed_at": "27.1.2026, 07:14:51",
     "style_last_published": {
       "published_at": "4.8.2025, 16:33:07",
       "version": 8
@@ -34,7 +34,7 @@
   "tilda-style-package-3-radinfra": {
     "key": "tilda-style-package-3-radinfra",
     "about": "Metadata on the last processing of the tilda-style-package-3-radinfra styles api response",
-    "processed_at": "21.8.2025, 18:16:45",
+    "processed_at": "27.1.2026, 07:14:51",
     "style_last_published": {
       "published_at": "6.8.2025, 07:23:31",
       "version": 8
@@ -50,23 +50,23 @@
   "tilda-style-package-4-parkraum": {
     "key": "tilda-style-package-4-parkraum",
     "about": "Metadata on the last processing of the tilda-style-package-4-parkraum styles api response",
-    "processed_at": "21.8.2025, 18:16:45",
+    "processed_at": "27.1.2026, 07:14:51",
     "style_last_published": {
-      "published_at": "21.8.2025, 18:16:39",
+      "published_at": "27.1.2026, 07:14:45",
       "version": 8
     },
     "style_id": "cmbf4ffqq000701qxe5oedq4v",
     "style_owner": "hejco",
     "style_name": "TILDA-style-package-4-parkraum",
     "debug_changed_names": {
-      "about": "The folder names in Mapbox need to follow a pattern of `tilda_[DataIdentifier]_[OptionalStyleIdentifier]`, otherwise the script will create unexpected results. During processing, we cleanup the names. If any names show up below, those need to be fixed in Mapbox to prevent errors.",
+      "about": "The folder names in Mapbox need to follow a pattern of `park_[DataIdentifier]_[OptionalStyleIdentifier]`, otherwise the script will create unexpected results. During processing, we cleanup the names. If any names show up below, those need to be fixed in Mapbox to prevent errors.",
       "changedNamesForDebugging": []
     }
   },
   "parking": {
     "key": "parking",
     "about": "Metadata on the last processing of the parking styles api response",
-    "processed_at": "21.8.2025, 18:16:44",
+    "processed_at": "27.1.2026, 07:14:51",
     "style_last_published": {
       "published_at": "20.8.2025, 09:02:20",
       "version": 8

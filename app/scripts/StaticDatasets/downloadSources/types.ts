@@ -1,11 +1,4 @@
-export type DownloadConfig = DownloadConfigWfs | DownloadConfigUrl
-
-export type DownloadConfigUrl = {
-  format: 'URL'
-  url: string
-}
-
-export type DownloadConfigWfs = {
+export type DownloadConfig = {
   format: 'WFS'
   endpoint: string
   layer: string

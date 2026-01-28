@@ -6,19 +6,8 @@ import { brotliCompressSync, constants, gzipSync } from 'node:zlib'
  *
  * Brotli typically achieves 5-15% better compression than gzip for text/JSON data,
  * and is supported by ~96% of modern browsers.
- *
- * @param data - The data to compress (string or Buffer)
- * @param acceptEncoding - The Accept-Encoding header from the request
- * @returns Object with compressed data and headers
  */
-export function getOptimalCompression(
-  data: string | Buffer,
-  acceptEncoding: string | null = null,
-): {
-  compressed: Buffer
-  contentEncoding: string
-  compressionRatio: number
-} {
+export function getOptimalCompression(data: string | Buffer, acceptEncoding: string | null = null) {
   const inputData = typeof data === 'string' ? Buffer.from(data) : data
   const originalSize = inputData.length
 
@@ -37,25 +26,22 @@ export function getOptimalCompression(
     })
 
     return {
-      compressed,
-      contentEncoding: 'br',
-      compressionRatio: originalSize / compressed.length,
+      compressed: new Uint8Array(compressed),
+      contentEncoding: 'br' as const,
     }
   } else if (supportsGzip) {
     // Fallback to Gzip
     const compressed = gzipSync(inputData)
 
     return {
-      compressed,
-      contentEncoding: 'gzip',
-      compressionRatio: originalSize / compressed.length,
+      compressed: new Uint8Array(compressed),
+      contentEncoding: 'gzip' as const,
     }
   } else {
     // No compression support
     return {
-      compressed: inputData,
-      contentEncoding: 'identity',
-      compressionRatio: 1,
+      compressed: new Uint8Array(inputData),
+      contentEncoding: 'identity' as const,
     }
   }
 }

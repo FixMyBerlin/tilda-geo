@@ -1,5 +1,5 @@
 import { getIssues } from '@placemarkio/check-geojson'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import path from 'node:path'
 import { import_ } from '../utils/import_'
 import { addUniqueIds } from './addUniqueIds'
@@ -24,7 +24,7 @@ export const transformFile = async (
   // Validate with placemarkio/check-geojson
   const issues = getIssues(JSON.stringify(data))
   if (issues.length > 0) {
-    console.log(chalk.red(`  ERROR checking the GeoJSON file`), {
+    console.log(styleText('red', `  ERROR checking the GeoJSON file`), {
       file: filenameToRead,
       issues,
     })

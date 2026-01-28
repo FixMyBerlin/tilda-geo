@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import { berlinTimeString } from './berlinTime'
 import { formatTimestamp } from './formatTimestamp'
 import { params } from './parameters'
@@ -8,7 +8,7 @@ const lineLength = process.stdout.columns || 120
 
 export function logPadded(left: string, right: string = '') {
   const leftWithEquals = `=== ${left} ===`
-  console.log(chalk.inverse(leftWithEquals.padEnd(lineLength - right.length) + right))
+  console.log(styleText('inverse', leftWithEquals.padEnd(lineLength - right.length) + right))
 }
 
 export function logStart(id: string) {

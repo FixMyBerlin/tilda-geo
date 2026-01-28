@@ -5,34 +5,34 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_debug_kerb: MapboxStyleLayer[] = [
   {
-    type: 'fill',
     id: 'buffer-kerb-intersection-area',
-    paint: {
-      'fill-color': 'rgba(233, 89, 12, 0.7)',
-      'fill-antialias': false,
-    },
+    type: 'fill',
     minzoom: 15,
+    paint: {
+      'fill-antialias': false,
+      'fill-color': 'rgba(233, 89, 12, 0.7)',
+    },
   },
   {
-    minzoom: 16.5,
-    type: 'symbol',
     id: 'buffer-kerb-intersection-icon',
-    paint: {},
+    type: 'symbol',
+    minzoom: 16.5,
     layout: {
-      'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0, 15, 0, 20, 1],
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
       'icon-image': 'cross',
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0, 15, 0, 20, 1],
     },
+    paint: {},
   },
   {
-    minzoom: 16.5,
-    type: 'line',
     id: 'buffer-kerb-intersection-border',
+    type: 'line',
+    minzoom: 16.5,
     paint: {
       'line-color': 'rgb(0, 0, 0)',
-      'line-opacity': 0.7,
       'line-dasharray': [2, 2],
+      'line-opacity': 0.7,
     },
   },
 ]

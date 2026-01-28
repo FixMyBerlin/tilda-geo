@@ -4,12 +4,7 @@ import { GetObjectCommandInput } from '@aws-sdk/client-s3/dist-types/commands/Ge
 
 /**
  * Proxies S3 URLs with optimal compression and caching headers.
- *
- * Caching Strategy:
- * - Uses S3 ETags and Last-Modified for cache validation
- * - 1 hour cache with must-revalidate (browser checks after 1 hour)
- * - PMTiles range requests are typically not cached by browsers
- * - S3 handles conditional requests (If-None-Match/304 responses)
+ * See docs/Uploads.md for details.
  */
 export async function proxyS3Url(request: Request, url: string, downloadFilename?: string) {
   const { hostname, pathname } = new URL(url)
@@ -59,10 +54,12 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
     )
   }
 
-  let Body: any = null
-  // @ts-ignore
+  // @ts-expect-error
+  let Body: Uint8Array<ArrayBuffer> = response.Body
+  // @ts-expect-error
   const statusCode = response.Body.statusCode
   let { ContentLength, ContentType, ContentEncoding, ETag } = response
+
   if (url.endsWith('.geojson')) {
     ContentType = 'application/geo+json'
     const acceptEncoding = request.headers.get('accept-encoding')
@@ -75,15 +72,15 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
     }
   }
 
-  const headers: Record<string, any> = {
+  const headers: HeadersInit = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
-    'Content-Length': ContentLength,
-    'Content-Type': ContentType,
-    ETag: ETag, // S3 ETag for cache validation
+    'Content-Length': String(ContentLength!),
+    'Content-Type': ContentType!,
+    ETag: ETag!, // S3 ETag for cache validation
     'Cache-Control': 'public, max-age=3600, must-revalidate', // 1 hour cache for both file types
-    'Last-Modified': response.LastModified?.toUTCString(),
+    'Last-Modified': response.LastModified!.toUTCString(),
   }
 
   // Only add Content-Encoding if we actually compressed the content
@@ -96,5 +93,5 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
     headers['Content-Disposition'] = `attachment; filename="${downloadFilename}"`
   }
 
-  return new Response(Body || response.Body, { status: statusCode, headers })
+  return new Response(Body, { status: statusCode, headers })
 }

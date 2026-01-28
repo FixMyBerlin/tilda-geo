@@ -5,13 +5,9 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_boundaries_names: MapboxStyleLayer[] = [
   {
-    type: 'symbol',
     id: 'name_category_municipality',
-    paint: {
-      'text-color': '#bc6a2f',
-      'text-halo-width': 1,
-      'text-halo-color': '#ffffff',
-    },
+    type: 'symbol',
+    filter: ['has', 'category_municipality'],
     layout: {
       'text-field': [
         'concat',
@@ -21,16 +17,16 @@ export const mapboxStyleGroupLayers_atlas_boundaries_names: MapboxStyleLayer[] =
       ],
       'text-size': 12,
     },
-    filter: ['has', 'category_municipality'],
-  },
-  {
-    type: 'symbol',
-    id: 'name_category_district',
     paint: {
       'text-color': '#bc6a2f',
       'text-halo-color': '#ffffff',
-      'text-halo-width': 2,
+      'text-halo-width': 1,
     },
+  },
+  {
+    id: 'name_category_district',
+    type: 'symbol',
+    filter: ['has', 'category_district'],
     layout: {
       'text-field': [
         'concat',
@@ -40,6 +36,10 @@ export const mapboxStyleGroupLayers_atlas_boundaries_names: MapboxStyleLayer[] =
       ],
       'text-size': 14,
     },
-    filter: ['has', 'category_district'],
+    paint: {
+      'text-color': '#bc6a2f',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 2,
+    },
   },
 ]

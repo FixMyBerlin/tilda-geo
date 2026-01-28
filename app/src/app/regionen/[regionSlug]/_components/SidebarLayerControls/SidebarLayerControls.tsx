@@ -38,7 +38,7 @@ export const SidebarLayerControls = () => {
   return (
     <section
       ref={ref}
-      className="absolute top-0 left-0 z-20 max-h-full max-w-72 overflow-x-visible overflow-y-auto bg-white py-px shadow-md"
+      className="absolute top-0 left-0 z-20 max-h-full w-65 overflow-x-visible overflow-y-auto bg-white py-px text-pretty shadow-md"
     >
       {isSmBreakpointOrAbove ? (
         <SidebarLayerControlsChildren />
@@ -50,7 +50,7 @@ export const SidebarLayerControls = () => {
                 <ChevronDownIcon
                   className={twJoin(
                     open ? '' : '-rotate-90 transform',
-                    'h-5 w-5 text-gray-700 hover:text-gray-900',
+                    'size-5 text-gray-700 hover:text-gray-900',
                   )}
                 />
                 <span>Kategorien</span>

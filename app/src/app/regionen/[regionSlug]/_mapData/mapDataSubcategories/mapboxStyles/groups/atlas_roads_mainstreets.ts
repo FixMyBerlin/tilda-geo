@@ -5,7 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_roads_mainstreets: MapboxStyleLayer[] = [
   {
-    minzoom: 7.7,
+    id: 'roadclassification_motortrunk copy',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -13,15 +14,15 @@ export const mapboxStyleGroupLayers_atlas_roads_mainstreets: MapboxStyleLayer[] 
       true,
       false,
     ],
-    type: 'line',
-    id: 'roadclassification_motortrunk copy',
+    minzoom: 7.7,
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 11, 1, 14, 1.5, 16, 2],
       'line-color': '#828282',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 11, 1, 14, 1.5, 16, 2],
     },
   },
   {
-    minzoom: 7.7,
+    id: 'roadclassification_mainstreets copy',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -29,9 +30,9 @@ export const mapboxStyleGroupLayers_atlas_roads_mainstreets: MapboxStyleLayer[] 
       true,
       false,
     ],
-    type: 'line',
-    id: 'roadclassification_mainstreets copy',
+    minzoom: 7.7,
     paint: {
+      'line-color': '#f6e7ac',
       'line-width': [
         'interpolate',
         ['linear'],
@@ -67,13 +68,11 @@ export const mapboxStyleGroupLayers_atlas_roads_mainstreets: MapboxStyleLayer[] 
           0.8,
         ],
       ],
-      'line-color': '#f6e7ac',
     },
   },
   {
-    layout: {
-      'line-cap': 'round',
-    },
+    id: 'hitarea-roadclassification copy 1',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -92,12 +91,13 @@ export const mapboxStyleGroupLayers_atlas_roads_mainstreets: MapboxStyleLayer[] 
       true,
       false,
     ],
-    type: 'line',
-    id: 'hitarea-roadclassification copy 1',
+    layout: {
+      'line-cap': 'round',
+    },
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
       'line-color': 'rgb(216, 20, 255)',
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
 ]

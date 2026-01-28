@@ -16,7 +16,7 @@ export const RegionStatusPill = ({ status, className }: Props) => {
       )
     case 'PRIVATE':
       return (
-        <Pill color="purple" className={className}>
+        <Pill color="purple" className={className} inverted>
           Privat
         </Pill>
       )

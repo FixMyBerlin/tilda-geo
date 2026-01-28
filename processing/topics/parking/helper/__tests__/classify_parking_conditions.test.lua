@@ -52,7 +52,7 @@ describe('`classify_parking_conditions`', function()
         zone = 'residential'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'paid')
       assert.are.equal(result.condition_vehicles, nil)
@@ -64,7 +64,7 @@ describe('`classify_parking_conditions`', function()
         zone = 'residential'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'residents')
       assert.are.equal(result.condition_vehicles, nil)
@@ -77,7 +77,7 @@ describe('`classify_parking_conditions`', function()
         zone = 'no'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'paid')
       assert.are.equal(result.condition_vehicles, nil)
@@ -90,7 +90,7 @@ describe('`classify_parking_conditions`', function()
         zone = 'no'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'free')
       assert.are.equal(result.condition_vehicles, nil)
@@ -101,7 +101,7 @@ describe('`classify_parking_conditions`', function()
         restriction = 'loading_only'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'loading')
       assert.are.equal(result.condition_vehicles, nil)
@@ -112,7 +112,7 @@ describe('`classify_parking_conditions`', function()
         maxstay = '2 hours'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'time_limited')
       assert.are.equal(result.condition_vehicles, nil)
@@ -123,7 +123,7 @@ describe('`classify_parking_conditions`', function()
         taxi = 'yes'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'assumed_free')
       assert.are.equal(result.condition_vehicles, 'taxi')
@@ -134,7 +134,7 @@ describe('`classify_parking_conditions`', function()
         taxi = 'no'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'assumed_free')
       assert.are.equal(result.condition_vehicles, 'taxi')
@@ -147,7 +147,7 @@ describe('`classify_parking_conditions`', function()
         hgv = 'yes'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'assumed_free')
       assert.are.equal(result.condition_vehicles, 'bus;hgv;taxi')
@@ -160,7 +160,7 @@ describe('`classify_parking_conditions`', function()
         motorcar = 'no'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'assumed_free')
       assert.are.equal(result.condition_vehicles, 'bus;motorcar;taxi')
@@ -172,7 +172,7 @@ describe('`classify_parking_conditions`', function()
         ['bus:conditional'] = 'no @ (Mo-Fr 09:00-18:00)'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'assumed_free')
       assert.are.equal(result.condition_vehicles, 'bus;taxi')
@@ -183,7 +183,7 @@ describe('`classify_parking_conditions`', function()
         ['restriction:taxi'] = 'none'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'taxi')
       assert.are.equal(result.condition_vehicles, 'taxi')
@@ -198,7 +198,7 @@ describe('`classify_parking_conditions`', function()
         restriction = 'loading_only'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'paid;loading')
       assert.are.equal(result.condition_vehicles, 'bus;taxi')
@@ -211,7 +211,7 @@ describe('`classify_parking_conditions`', function()
         zone = 'residential'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'paid') -- from fee and zone
       assert.are.equal(result.condition_vehicles, nil)
@@ -222,7 +222,7 @@ describe('`classify_parking_conditions`', function()
         restriction = 'no_parking'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'no_parking')
       assert.are.equal(result.condition_vehicles, nil)
@@ -234,7 +234,7 @@ describe('`classify_parking_conditions`', function()
         disabled = 'private'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'disabled_private')
       assert.are.equal(result.condition_vehicles, nil)
@@ -245,7 +245,7 @@ describe('`classify_parking_conditions`', function()
         restriction = 'charging_only'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'charging')
       assert.are.equal(result.condition_vehicles, nil)
@@ -256,7 +256,7 @@ describe('`classify_parking_conditions`', function()
         ['restriction:conditional'] = 'loading_only @ (Mo-Sa 11:00-21:00)'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'loading (Mo-Sa 11:00-21:00)')
       assert.are.equal(result.condition_vehicles, nil)
@@ -269,7 +269,7 @@ describe('`classify_parking_conditions`', function()
         ['restriction:conditional'] = 'loading_only @ (Mo-Sa 11:00-21:00)'
       }
 
-      local result = classify_parking_conditions.classify_parking_conditions(tags)
+      local result = classify_parking_conditions.classify_parking_conditions(tags, 'assumed_free')
 
       assert.are.equal(result.condition_category, 'paid (Mo-Fr 08:00-18:00);loading (Mo-Sa 11:00-21:00)')
       assert.are.equal(result.condition_vehicles, nil)

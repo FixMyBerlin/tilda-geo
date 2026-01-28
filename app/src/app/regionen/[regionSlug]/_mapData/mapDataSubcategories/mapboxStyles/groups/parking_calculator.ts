@@ -9,10 +9,10 @@ export const mapboxStyleGroupLayers_parking_calculator: MapboxStyleLayer[] = [
     type: 'circle',
     paint: {
       'circle-color': '#6d28d9',
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 0, 17, 3],
       'circle-stroke-color': '#fdf4ff',
       'circle-stroke-opacity': 0.9,
       'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 16, 0, 20, 2],
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 0, 17, 3],
     },
   },
 ]

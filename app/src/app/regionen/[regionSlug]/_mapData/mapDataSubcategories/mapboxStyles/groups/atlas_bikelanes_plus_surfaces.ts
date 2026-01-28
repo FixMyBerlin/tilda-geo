@@ -5,16 +5,16 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_bikelanes_plus_surfaces: MapboxStyleLayer[] = [
   {
+    id: 'surfaces',
+    type: 'symbol',
     layout: {
       'symbol-placement': 'line-center',
-      'text-size': ['interpolate', ['linear'], ['zoom'], 12, 8, 22, 18],
-      'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Regular'],
-      'text-padding': 4,
       'text-field': ['to-string', ['get', 'surface']],
+      'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Regular'],
       'text-offset': [0, 0.5],
+      'text-padding': 4,
+      'text-size': ['interpolate', ['linear'], ['zoom'], 12, 8, 22, 18],
     },
-    type: 'symbol',
-    id: 'surfaces',
     paint: {
       'text-color': ['interpolate', ['linear'], ['zoom'], 12, '#8c8c8c', 16, '#1051ad'],
       'text-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0, 13, 1],

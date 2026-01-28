@@ -5,26 +5,26 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_mask_boundary: MapboxStyleLayer[] = [
   {
-    minzoom: 2,
-    type: 'line',
     id: 'region-boundary',
+    type: 'line',
+    minzoom: 2,
     paint: {
-      'line-dasharray': ['step', ['zoom'], ['literal', [2, 0]], 7, ['literal', [2, 2, 6, 2]]],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 12, 1.5],
-      'line-opacity': ['interpolate', ['linear'], ['zoom'], 2, 0, 3, 1, 9, 1, 10, 0.1],
       'line-color': '#dfa762',
+      'line-dasharray': ['step', ['zoom'], ['literal', [2, 0]], 7, ['literal', [2, 2, 6, 2]]],
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 2, 0, 3, 1, 9, 1, 10, 0.1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 0.7, 12, 1.5],
     },
   },
   {
-    minzoom: 7,
-    type: 'line',
     id: 'region-boundary-bg',
+    type: 'line',
+    minzoom: 7,
     paint: {
-      'line-color': 'hsl(45, 2%, 80%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 3, 12, 6],
-      'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0, 8, 0.5, 9, 0.5, 10, 0.1],
-      'line-dasharray': [1, 0],
       'line-blur': ['interpolate', ['linear'], ['zoom'], 3, 0, 12, 3],
+      'line-color': 'hsl(45, 2%, 80%)',
+      'line-dasharray': [1, 0],
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0, 8, 0.5, 9, 0.5, 10, 0.1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 3, 3, 12, 6],
     },
   },
 ]

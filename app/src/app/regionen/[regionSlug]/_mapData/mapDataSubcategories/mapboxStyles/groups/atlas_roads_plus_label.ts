@@ -5,22 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_roads_plus_label: MapboxStyleLayer[] = [
   {
-    minzoom: 8,
-    layout: {
-      'text-size': ['interpolate', ['linear'], ['zoom'], 7, 4, 9, 9],
-      'icon-text-fit': 'width',
-      'icon-image': 'rectangle-yellow-3',
-      'icon-rotation-alignment': 'viewport',
-      'text-transform': 'uppercase',
-      'symbol-spacing': 700,
-      'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
-      'symbol-placement': 'line',
-      'text-rotation-alignment': 'viewport',
-      'icon-size': 1.2,
-      'text-field': ['to-string', ['get', 'name_ref']],
-      'text-letter-spacing': -0.02,
-      'icon-padding': 6,
-    },
+    id: 'sign_label-roads',
+    type: 'symbol',
     filter: [
       'all',
       [
@@ -32,8 +18,22 @@ export const mapboxStyleGroupLayers_atlas_roads_plus_label: MapboxStyleLayer[] =
       ],
       ['has', 'name_ref'],
     ],
-    type: 'symbol',
-    id: 'sign_label-roads',
+    minzoom: 8,
+    layout: {
+      'icon-image': 'rectangle-yellow-3',
+      'icon-padding': 6,
+      'icon-rotation-alignment': 'viewport',
+      'icon-size': 1.2,
+      'icon-text-fit': 'width',
+      'symbol-placement': 'line',
+      'symbol-spacing': 700,
+      'text-field': ['to-string', ['get', 'name_ref']],
+      'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+      'text-letter-spacing': -0.02,
+      'text-rotation-alignment': 'viewport',
+      'text-size': ['interpolate', ['linear'], ['zoom'], 7, 4, 9, 9],
+      'text-transform': 'uppercase',
+    },
     paint: {
       'text-color': '#595959',
     },

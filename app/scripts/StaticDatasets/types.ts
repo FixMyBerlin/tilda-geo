@@ -6,13 +6,32 @@ import {
   MapDataSourceInspectorEditor,
 } from '@/src/app/regionen/[regionSlug]/_mapData/types'
 import { RegionSlug } from '@/src/data/regions.const'
-import { CircleLayer, FillLayer, HeatmapLayer, LineLayer, SymbolLayer } from 'react-map-gl/maplibre'
+import type {
+  CircleLayerSpecification,
+  FillLayerSpecification,
+  HeatmapLayerSpecification,
+  LineLayerSpecification,
+  SymbolLayerSpecification,
+} from 'maplibre-gl'
 
 // a modified version of MapDataDatasetsSource from '../../src/app/regionen/[regionSlug]/_mapData/types'
-type MapDataDatasetsSource = {
+type MapDataDatasetsSourceBase = {
   /** @desc Whenever we have one dataset multiple time, we need a subid to make them unique */
   subId?: string
   name: string
+  layers: (
+    | Omit<CircleLayerSpecification & Required<Pick<CircleLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<FillLayerSpecification & Required<Pick<FillLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<LineLayerSpecification & Required<Pick<LineLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<
+        SymbolLayerSpecification & Required<Pick<SymbolLayerSpecification, 'paint' | 'layout'>> & { beforeId?: string },
+        'source'
+      >
+    | Omit<HeatmapLayerSpecification & Required<Pick<HeatmapLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+  )[]
+}
+
+type MapDataDatasetsSource = MapDataDatasetsSourceBase & {
   /** @desc A quick-n-dirty way to get type safety for categories. The prefix is just to make type safety per region (or cluster of regions) possible. */
   category: StaticDatasetCategoryKey | null
   updatedAt?: string
@@ -51,26 +70,70 @@ type MapDataDatasetsSource = {
         enabled: false
       }
   legends?: null | FileMapDataSubcategoryStyleLegend[]
-  layers: (
-    | Omit<CircleLayer & Required<Pick<CircleLayer, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<FillLayer & Required<Pick<FillLayer, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<LineLayer & Required<Pick<LineLayer, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<
-        SymbolLayer & Required<Pick<SymbolLayer, 'paint' | 'layout'>> & { beforeId?: string },
-        'source'
-      >
-    | Omit<HeatmapLayer & Required<Pick<HeatmapLayer, 'paint'>> & { beforeId?: string }, 'source'>
-  )[]
 }
 
-export type MetaData = {
-  regions: RegionSlug[]
-  public: boolean
-  /** @desc Change the tippecanoe settings  */
-  geometricPrecision?: 'mask' | 'regular' | 'high' | null
-  /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
-  mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
-  /** @desc Hide download links from non-admin users. When true, only admins can see download links */
-  hideDownloadLink?: boolean
-  configs: MapDataDatasetsSource[]
+// System layer variant - minimal properties, hidden from UI, always active
+type MapDataDatasetsSourceSystemLayer = MapDataDatasetsSourceBase & {
+  attributionHtml: string
+  inspector: { enabled: false }
+  category: undefined
+  updatedAt: undefined
+  description: undefined
+  dataSourceMarkdown: undefined
+  licence: undefined
+  licenceOsmCompatible: undefined
+  osmIdConfig: undefined
+  legends: undefined
 }
+
+export type MapDataSourceExternalRenderFormat = 'pmtiles' | 'geojson'
+export type MetaData =
+  | {
+      regions: RegionSlug[]
+      public: boolean
+      /** @desc Hide download links from non-admin users. When true, only admins can see download links */
+      hideDownloadLink?: boolean
+      /** @desc System layers are hidden from UI but always active on the map. When false or undefined, configs must be user-selectable datasets. */
+      systemLayer?: false | undefined
+      /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
+      dataSourceType: 'local'
+      /** @desc Change the tippecanoe settings  */
+      geometricPrecision?: 'mask' | 'regular' | 'high' | null
+      /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
+      mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
+      /** @desc Configuration for user-selectable datasets */
+      configs: MapDataDatasetsSource[]
+    }
+  | {
+      regions: RegionSlug[]
+      public: true
+      hideDownloadLink: true
+      /** @desc System layers are hidden from UI but always active on the map. When true, configs must be system layer configs. */
+      systemLayer: true
+      /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
+      dataSourceType: 'local'
+      /** @desc Change the tippecanoe settings  */
+      geometricPrecision?: 'mask' | 'regular' | 'high' | null
+      /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
+      mapRenderFormat?: 'pmtiles' | 'geojson'
+      /** @desc Configuration for system layers (masks, etc.) - minimal properties, always active */
+      configs: MapDataDatasetsSourceSystemLayer[]
+    }
+  | {
+      regions: RegionSlug[]
+      public: boolean
+      /** @desc Hide download links from non-admin users. When true, only admins can see download links */
+      hideDownloadLink?: boolean
+      /** @desc System layers are hidden from UI but always active on the map. When false or undefined, configs must be user-selectable datasets. */
+      systemLayer?: false | undefined
+      /** @desc Data source type: external URL and cached in Docker (file cache) */
+      dataSourceType: 'external'
+      /** @desc URL of the external data source */
+      externalSourceUrl: string
+      /** @desc Cache TTL in seconds (e.g., 86400 for daily, 3600 for hourly, 60 for minutely) */
+      cacheTtlSeconds: number
+      /** @desc File format of the external source. Must match the format available at externalSourceUrl. Cannot be 'auto' since format is fixed by external source. */
+      mapRenderFormat: MapDataSourceExternalRenderFormat
+      /** @desc Configuration for user-selectable datasets. External sources cannot be system layers. */
+      configs: MapDataDatasetsSource[]
+    }

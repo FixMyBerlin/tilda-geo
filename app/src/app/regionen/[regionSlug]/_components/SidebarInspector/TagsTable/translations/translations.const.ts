@@ -52,6 +52,7 @@ export const translations: { [key: string]: string } = {
   'ALL--confidence=medium': 'Mittel',
   'ALL--covered--key': 'Überdacht',
   'ALL--covered=covered': 'Überdacht',
+  'ALL--covered=partial': 'Teilweise überdacht',
   'ALL--covered=indoor': 'In einem Gebäude',
   'ALL--description--key': 'Hinweis aus OSM',
   'ALL--highway--key': 'Straßentyp',

@@ -5,13 +5,13 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_bikelanes_plus_bikesuitability: MapboxStyleLayer[] = [
   {
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['has', 'bikeSuitability'],
-    type: 'line',
     id: 'bikeSuitability',
+    type: 'line',
+    filter: ['has', 'bikeSuitability'],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
       'line-color': [
         'match',
@@ -26,8 +26,8 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_plus_bikesuitability: Mapbox
         '#0bbce0',
         'rgba(240, 0, 0, 0)',
       ],
-      'line-opacity': 0.3,
       'line-dasharray': [0.1, 1.5],
+      'line-opacity': 0.3,
       'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 11, 3, 12, 5, 16, 10],
     },
   },

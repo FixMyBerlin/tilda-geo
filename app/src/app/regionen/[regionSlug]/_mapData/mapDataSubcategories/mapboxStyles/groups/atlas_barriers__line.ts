@@ -5,7 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
   {
-    minzoom: 7,
+    id: 'barriers-motorway',
+    type: 'line',
     filter: [
       'match',
       ['get', 'highway'],
@@ -13,8 +14,7 @@ export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
       true,
       false,
     ],
-    type: 'line',
-    id: 'barriers-motorway',
+    minzoom: 7,
     paint: {
       'line-color': [
         'case',
@@ -24,8 +24,8 @@ export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
         'rgba(172, 109, 176, 0.59)',
         '#000000',
       ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 18, 4],
       'line-opacity': 0.8,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 18, 4],
     },
   },
   {
@@ -43,8 +43,8 @@ export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
     filter: ['match', ['get', 'railway'], ['rail'], true, false],
     paint: {
       'line-color': 'hsl(300, 4%, 97%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.7, 18, 3],
       'line-dasharray': [1, 1.2],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.7, 18, 3],
     },
   },
   {
@@ -62,8 +62,8 @@ export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
     filter: ['match', ['get', 'railway'], ['light_rail'], true, false],
     paint: {
       'line-color': 'hsl(300, 4%, 97%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.7, 18, 1.5],
       'line-dasharray': [2, 2],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.7, 18, 1.5],
     },
   },
 ]

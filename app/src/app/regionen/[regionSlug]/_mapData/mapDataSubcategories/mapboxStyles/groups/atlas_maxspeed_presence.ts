@@ -5,6 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_maxspeed_presence: MapboxStyleLayer[] = [
   {
+    id: 'maxspeed_presence',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -12,19 +14,8 @@ export const mapboxStyleGroupLayers_atlas_maxspeed_presence: MapboxStyleLayer[] 
       false,
       true,
     ],
-    type: 'line',
-    id: 'maxspeed_presence',
     paint: {
       'line-color': ['case', ['has', 'maxspeed'], '#8eb1f0', '#fa80f4'],
-      'line-width': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        8,
-        1,
-        16,
-        ['case', ['has', 'maxspeed'], 4, 6],
-      ],
       'line-opacity': [
         'interpolate',
         ['linear'],
@@ -34,12 +25,20 @@ export const mapboxStyleGroupLayers_atlas_maxspeed_presence: MapboxStyleLayer[] 
         12,
         ['case', ['has', 'maxspeed'], 0.7, 0.5],
       ],
+      'line-width': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        8,
+        1,
+        16,
+        ['case', ['has', 'maxspeed'], 4, 6],
+      ],
     },
   },
   {
-    layout: {
-      'line-cap': 'round',
-    },
+    id: 'hitarea-maxspeed-presence',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -47,12 +46,13 @@ export const mapboxStyleGroupLayers_atlas_maxspeed_presence: MapboxStyleLayer[] 
       false,
       true,
     ],
-    type: 'line',
-    id: 'hitarea-maxspeed-presence',
+    layout: {
+      'line-cap': 'round',
+    },
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
       'line-color': 'rgb(216, 20, 255)',
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
 ]

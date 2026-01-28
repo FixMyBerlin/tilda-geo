@@ -1,14 +1,10 @@
-import { twJoin } from 'tailwind-merge'
-import { LegendId, StyleId, SubcategoryId } from '../../../_mapData/typeId'
+import { LegendId, SubcategoryId } from '../../../_mapData/typeId'
 import {
   FileMapDataSubcategoryHiddenStyle,
   FileMapDataSubcategoryStyle,
   FileMapDataSubcategoryStyleLegend,
 } from '../../../_mapData/types'
-import {
-  createSubcatStyleKey,
-  createSubcatStyleLegendKey,
-} from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createSubcatStyleLegendKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { LegendIconArea } from './LegendIcons/LegendIconArea'
 import { LegendIconCircle } from './LegendIcons/LegendIconCircle'
 import { LegendIconHeatmap } from './LegendIcons/LegendIconHeatmap'
@@ -83,56 +79,23 @@ export const Legend = ({ subcategoryId, styleConfig }: Props) => {
     return null
   }
 
-  const handleClick = (subcategoryId: SubcategoryId, styleId: StyleId, legendId: LegendId) => {
-    console.log('not implemented,yet', { subcategoryId, styleId, legendId })
-  }
-
   return (
-    <section className="relative mt-2">
-      <fieldset>
-        <legend className="sr-only">Legende</legend>
-        <div className="space-y-1">
-          {legends.map((legendData) => {
-            // TODO: TS: This should be specified at the source…
-            const legendDataId = legendData.id as LegendId
+    <section className="relative mt-2 mb-1 overflow-hidden">
+      <header className="sr-only">Legende</header>
+      <div className="space-y-1">
+        {legends.map((legendData) => {
+          // TODO: TS: This should be specified at the source…
+          const legendDataId = legendData.id as LegendId
+          const key = createSubcatStyleLegendKey(subcategoryId, styleConfig.id, legendDataId)
 
-            const scope = createSubcatStyleKey(subcategoryId, styleConfig.id)
-            const key = createSubcatStyleLegendKey(subcategoryId, styleConfig.id, legendDataId)
-
-            const active = true // TODO
-            const disabled = false // TODO
-            const interactive = false // TODO legendData.layers !== null
-
-            return (
-              <label
-                htmlFor={key}
-                className={twJoin(
-                  'group relative flex items-center',
-                  interactive ? 'cursor-pointer' : '',
-                )}
-                key={key}
-              >
-                <div className="h-5 w-5 flex-none">{iconFromLegend(legendData)}</div>
-                <div className="flex h-5 items-center">
-                  <input
-                    id={key}
-                    name={scope}
-                    type="checkbox"
-                    className="sr-only"
-                    defaultChecked={active}
-                    disabled={disabled}
-                    onChange={() =>
-                      interactive && handleClick(subcategoryId, styleConfig.id, legendDataId)
-                    }
-                    value={key}
-                  />
-                </div>
-                <LegendNameDesc name={legendData.name} desc={legendData.desc} />
-              </label>
-            )
-          })}
-        </div>
-      </fieldset>
+          return (
+            <div className="group relative flex items-start gap-2" key={key}>
+              <div className="size-4 flex-none">{iconFromLegend(legendData)}</div>
+              <LegendNameDesc name={legendData.name} desc={legendData.desc} />
+            </div>
+          )
+        })}
+      </div>
     </section>
   )
 }

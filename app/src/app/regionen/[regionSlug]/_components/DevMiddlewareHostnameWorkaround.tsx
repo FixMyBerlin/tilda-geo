@@ -1,26 +1,31 @@
 'use client'
-import { isBrowser, isDev } from '@/src/app/_components/utils/isEnv'
-import { Route } from 'next'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { isDev } from '@/src/app/_components/utils/isEnv'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 
-// NOTICE:
-// This is a workaround for a bug in NextJS in dev mode in the middleware.
-// In `/src/middleware.ts` we rewrite the URL so the region page always has a map and config param.
-// However, in dev mode this also change the hostname from 127.0.0.1 to localhost.
-// (It does not respect the `--hostname 127.0.0.1` flag that `npm run dev` uses.)
-// It was not possible to rewrite this right in the middleware, so we have to do it in the client here.
-// This is likely solved in a future NextJS version, but we are stuck with the 13.* tree for now, see https://github.com/blitz-js/blitz/issues/4253
-// I was not able to find a ticket on this specific but in NextJS but but comments suggest that current NextJS versions will hot have the issue.
+// Workaround for Next.js middleware hostname normalization bug (issues #48230, #37536).
+// NextRequest normalizes 127.0.0.1 to localhost, so middleware redirects can't preserve hostname.
+// This client-side fix redirects from localhost back to 127.0.0.1 to prevent CORS errors.
 export const DevMiddlewareHostnameWorkaround = () => {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const hasRedirected = useRef(false)
 
-  if (isDev && isBrowser && window.location.hostname === 'localhost' && pathname) {
-    const url = new URL(pathname, process.env.NEXT_PUBLIC_APP_ORIGIN)
-    router.push(`${url}?${searchParams?.toString()}` as Route)
-    return null
-  }
+  useEffect(() => {
+    // Only redirect once per mount to avoid loops
+    if (hasRedirected.current) return
+
+    if (isDev && window.location.hostname === 'localhost' && pathname) {
+      const targetOrigin = process.env.NEXT_PUBLIC_APP_ORIGIN!
+      const url = new URL(pathname, targetOrigin)
+      const searchString = searchParams?.toString()
+      const targetUrl = searchString ? `${url.pathname}?${searchString}` : url.pathname
+      // Use window.location.replace() to change hostname (router.replace() only changes path)
+      const fullTargetUrl = `${new URL(targetOrigin).origin}${targetUrl}`
+      hasRedirected.current = true
+      window.location.replace(fullTargetUrl)
+    }
+  }, [pathname, searchParams])
 
   return null
 }

@@ -5,6 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_roads_smooth_bad: MapboxStyleLayer[] = [
   {
+    id: 'smoothness-roads-bad',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'smoothness'], ['bad', 'very_bad'], true, false],
@@ -23,9 +25,6 @@ export const mapboxStyleGroupLayers_atlas_roads_smooth_bad: MapboxStyleLayer[] =
           'unspecified_road',
           'service_road',
           'service_alley',
-          'service_driveway',
-          'service_emergency_access',
-          'service_parking_aisle',
           'unclassified',
           'tertiary',
           'secondary',
@@ -35,13 +34,14 @@ export const mapboxStyleGroupLayers_atlas_roads_smooth_bad: MapboxStyleLayer[] =
           'living_street',
           'footway_crossing',
           'footway_sidewalk',
+          'service_driveway',
+          'service_emergency_access',
+          'service_parking_aisle',
         ],
         true,
         false,
       ],
     ],
-    type: 'line',
-    id: 'smoothness-roads-bad',
     paint: {
       'line-color': [
         'match',
@@ -58,9 +58,9 @@ export const mapboxStyleGroupLayers_atlas_roads_smooth_bad: MapboxStyleLayer[] =
         '#37f644',
         '#000000',
       ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 14, 2, 16, 3],
-      'line-opacity': ['interpolate', ['linear'], ['zoom'], 9.9, 0, 10, 0.1, 10.3, 0.9],
       'line-dasharray': [1, 1],
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 9.9, 0, 10, 0.1, 10.3, 0.9],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 14, 2, 16, 3],
     },
   },
 ]

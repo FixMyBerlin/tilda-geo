@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 
 // Germany's bounding box in WGS84 coordinates
 const GERMANY_BBOX = {
@@ -53,7 +53,7 @@ export function validateProjection(geojson: any, filename: string): boolean {
     geojson.features.length === 0
   ) {
     console.log(
-      chalk.yellow(`  WARNING: Cannot validate projection - no features found in ${filename}`),
+      styleText('yellow', `  WARNING: Cannot validate projection - no features found in ${filename}`),
     )
     return true // Don't fail validation for empty/invalid structure - let other validators handle this
   }
@@ -74,9 +74,7 @@ export function validateProjection(geojson: any, filename: string): boolean {
 
   if (!firstValidCoords) {
     console.log(
-      chalk.yellow(
-        `  WARNING: Cannot validate projection - no valid coordinates found in ${filename}`,
-      ),
+      styleText('yellow', `  WARNING: Cannot validate projection - no valid coordinates found in ${filename}`),
     )
     return true // Don't fail validation if we can't extract coordinates
   }
@@ -91,19 +89,15 @@ export function validateProjection(geojson: any, filename: string): boolean {
     latitude <= GERMANY_BBOX.maxLat
 
   if (!isWithinBounds) {
-    console.log(chalk.red(`  ERROR: Projection validation failed for ${filename}`))
+    console.log(styleText('red', `  ERROR: Projection validation failed for ${filename}`))
     console.log(
-      chalk.red(
-        `    First feature (index ${featureIndex}) coordinates: [${longitude}, ${latitude}]`,
-      ),
+      styleText('red', `    First feature (index ${featureIndex}) coordinates: [${longitude}, ${latitude}]`),
     )
-    console.log(chalk.red(`    Expected coordinates within Germany's bounding box:`))
-    console.log(chalk.red(`    Longitude: ${GERMANY_BBOX.minLon} to ${GERMANY_BBOX.maxLon}`))
-    console.log(chalk.red(`    Latitude: ${GERMANY_BBOX.minLat} to ${GERMANY_BBOX.maxLat}`))
+    console.log(styleText('red', `    Expected coordinates within Germany's bounding box:`))
+    console.log(styleText('red', `    Longitude: ${GERMANY_BBOX.minLon} to ${GERMANY_BBOX.maxLon}`))
+    console.log(styleText('red', `    Latitude: ${GERMANY_BBOX.minLat} to ${GERMANY_BBOX.maxLat}`))
     console.log(
-      chalk.red(
-        `    This suggests the data might be in a projected coordinate system (e.g., UTM) instead of WGS84.`,
-      ),
+      styleText('red', `    This suggests the data might be in a projected coordinate system (e.g., UTM) instead of WGS84.`),
     )
     return false
   }

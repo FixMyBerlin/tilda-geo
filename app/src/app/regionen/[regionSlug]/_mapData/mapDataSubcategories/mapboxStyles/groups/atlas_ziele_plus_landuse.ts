@@ -5,9 +5,9 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_ziele_plus_landuse: MapboxStyleLayer[] = [
   {
-    filter: ['has', 'landuse'],
-    type: 'fill',
     id: 'tarmac-landuse-test-datensatz-0r36t3',
+    type: 'fill',
+    filter: ['has', 'landuse'],
     paint: {
       'fill-color': [
         'case',

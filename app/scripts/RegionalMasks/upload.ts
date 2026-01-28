@@ -11,7 +11,7 @@
 
 // We use bun.sh to run this file
 import { S3 } from '@aws-sdk/client-s3'
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -20,7 +20,7 @@ const s3 = new S3({
 })
 
 console.log(
-  chalk.inverse.bold('START'),
+  styleText(['inverse', 'bold'], 'START'),
   __filename,
   'Uploading all files from ./pmtiles to S3 bucket atlas-tiles',
 )
@@ -41,6 +41,6 @@ for (const file of pmtilesFiles) {
       return
     }
     const previewUrl = `https://atlas-tiles.s3.eu-central-1.amazonaws.com/${file}`
-    console.log(chalk.inverse.bold('INFO'), `Test-URL: https://pmtiles.io/?url=${previewUrl}`)
+    console.log(styleText(['inverse', 'bold'], 'INFO'), `Test-URL: https://pmtiles.io/?url=${previewUrl}`)
   })
 }

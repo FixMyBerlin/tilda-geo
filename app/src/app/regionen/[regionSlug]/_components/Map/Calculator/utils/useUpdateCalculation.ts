@@ -1,5 +1,6 @@
 import bbox from '@turf/bbox'
 import booleanIntersects from '@turf/boolean-intersects'
+import type { LngLatLike } from 'maplibre-gl'
 import { useMap } from 'react-map-gl/maplibre'
 import { StoreCalculator, useMapActions } from '../../../../_hooks/mapState/useMapState'
 import { MapDataSourceCalculator } from '../../../../_mapData/types'
@@ -23,8 +24,8 @@ export const useUpdateCalculation = () => {
 
     drawParam?.forEach((selectArea) => {
       const polygonBbox = bbox(selectArea)
-      const southWest: mapboxgl.LngLatLike = [polygonBbox[0], polygonBbox[1]]
-      const northEast: mapboxgl.LngLatLike = [polygonBbox[2], polygonBbox[3]]
+      const southWest: LngLatLike = [polygonBbox[0], polygonBbox[1]]
+      const northEast: LngLatLike = [polygonBbox[2], polygonBbox[3]]
       const northEastPointPixel = mainMap.project(northEast)
       const southWestPointPixel = mainMap.project(southWest)
 

@@ -15,6 +15,8 @@ import { LayerHighlight } from './LayerHighlight'
 import { createPmtilesUrl } from './utils/createPmtilesUrl'
 import { wrapFilterWithAll } from './utils/filterUtils/wrapFilterWithAll'
 
+// Renders user-selectable static datasets controlled by URL parameters.
+// SystemLayer datasets are handled separately by SourcesLayersSystemDatasets.
 export const SourcesLayersStaticDatasets = () => {
   const datasetsPreviouslyVisible = useRef({})
   const { dataParam: selectedDatasetIds } = useDataParam()

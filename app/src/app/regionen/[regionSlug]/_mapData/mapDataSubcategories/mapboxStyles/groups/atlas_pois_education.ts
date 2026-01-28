@@ -5,23 +5,18 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_pois_education: MapboxStyleLayer[] = [
   {
+    id: 'education-classification-edu-names',
+    type: 'symbol',
+    filter: ['has', 'formalEducation'],
     minzoom: 11,
     layout: {
+      'text-anchor': 'top',
       'text-field': ['to-string', ['get', 'name']],
       'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 13, 9, 15, 11],
-      'text-anchor': 'top',
       'text-offset': [0, 0.5],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 13, 9, 15, 11],
     },
-    filter: ['has', 'formalEducation'],
-    type: 'symbol',
-    id: 'education-classification-edu-names',
     paint: {
-      'text-halo-color': 'hsla(0, 6%, 97%, 0.91)',
-      'text-halo-width': 1,
-      'text-translate': [0, 8],
-      'text-translate-anchor': 'viewport',
-      'text-opacity': ['interpolate', ['linear'], ['zoom'], 13.9, 0, 14, 0.7],
       'text-color': [
         'match',
         ['get', 'formalEducation'],
@@ -33,20 +28,19 @@ export const mapboxStyleGroupLayers_atlas_pois_education: MapboxStyleLayer[] = [
         '#7c18f7',
         '#000000',
       ],
+      'text-halo-color': 'hsla(0, 6%, 97%, 0.91)',
+      'text-halo-width': 1,
+      'text-opacity': ['interpolate', ['linear'], ['zoom'], 13.9, 0, 14, 0.7],
+      'text-translate': [0, 8],
+      'text-translate-anchor': 'viewport',
     },
   },
   {
-    minzoom: 11,
-    filter: ['has', 'formalEducation'],
-    type: 'circle',
     id: 'education-classification-edu',
+    type: 'circle',
+    filter: ['has', 'formalEducation'],
+    minzoom: 11,
     paint: {
-      'circle-stroke-color': '#ffffff',
-      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0, 9.2, 1],
-      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 12, 1.5],
-      'circle-translate': [0, 0],
-      'circle-translate-anchor': 'viewport',
-      'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0, 11, 1],
       'circle-color': [
         'match',
         ['get', 'formalEducation'],
@@ -58,6 +52,7 @@ export const mapboxStyleGroupLayers_atlas_pois_education: MapboxStyleLayer[] = [
         '#b070ff',
         '#000000',
       ],
+      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 9, 0, 9.2, 1],
       'circle-radius': [
         'interpolate',
         ['linear'],
@@ -67,13 +62,18 @@ export const mapboxStyleGroupLayers_atlas_pois_education: MapboxStyleLayer[] = [
         15,
         ['match', ['get', 'amenity'], ['kindergarten', 'childcare'], 5, 7],
       ],
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 10, 0, 11, 1],
+      'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 10, 0.8, 12, 1.5],
+      'circle-translate': [0, 0],
+      'circle-translate-anchor': 'viewport',
     },
   },
   {
-    maxzoom: 11.1,
-    filter: ['has', 'formalEducation'],
-    type: 'heatmap',
     id: 'pois-heat copy',
+    type: 'heatmap',
+    filter: ['has', 'formalEducation'],
+    maxzoom: 11.1,
     paint: {
       'heatmap-color': [
         'interpolate',
@@ -93,8 +93,8 @@ export const mapboxStyleGroupLayers_atlas_pois_education: MapboxStyleLayer[] = [
         '#1269e2',
       ],
       'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7.5, 0, 7.7, 1, 11, 1, 11.1, 0],
-      'heatmap-weight': 3,
       'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 3, 12, 7],
+      'heatmap-weight': 3,
     },
   },
 ]

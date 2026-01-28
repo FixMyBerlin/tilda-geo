@@ -5,7 +5,11 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_ziele_plus_publictransport: MapboxStyleLayer[] = [
   {
+    id: 'publictransport',
+    type: 'symbol',
+    filter: ['has', 'category'],
     layout: {
+      'icon-allow-overlap': true,
       'icon-image': [
         'match',
         ['get', 'category'],
@@ -22,7 +26,6 @@ export const mapboxStyleGroupLayers_atlas_ziele_plus_publictransport: MapboxStyl
         '',
       ],
       'icon-padding': 1,
-      'icon-allow-overlap': true,
       'icon-size': [
         'interpolate',
         ['linear'],
@@ -57,9 +60,6 @@ export const mapboxStyleGroupLayers_atlas_ziele_plus_publictransport: MapboxStyl
       'text-offset': [5, 0],
       'text-size': 12,
     },
-    filter: ['has', 'category'],
-    type: 'symbol',
-    id: 'publictransport',
     paint: {
       'icon-opacity': [
         'step',

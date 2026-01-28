@@ -2,6 +2,8 @@
 
 These scripts manage geodata files, which are made public or semi-public in tilda-geo.de as static datasets.
 
+**See also:** [Uploads Documentation](../../../docs/Uploads.md) for how these datasets are served via the API and details on the how how `dataSourceType: 'local' | 'external'` are handled.
+
 ## Setup
 
 - Setup `./.env.development` based on [`./.env.development.example`](/./.env.development.example) and the same for staging and production.
@@ -43,15 +45,6 @@ Use `--keep-tmp` to keep the files for debugging.
   gzip -f -9 …speeds.geojson
   ```
 - The files are uncompressed and stored in the temp folder, then transformed, then processed (tippacanoe)
-
-## How it works
-
-This is what the script does…
-
-1. Read the input GeoJSON (uncompress if needed) and run the transform.ts if present
-2. Run tippecanoe and create the PMTiles file
-3. Upload the PMTile to a protected folder on S3 inside the Dataset-Folder (no region subfolders)
-4. Delete and create the database relation to connect this file to the region(s)
 
 ## Delete existing database entries
 

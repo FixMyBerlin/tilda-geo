@@ -11,8 +11,11 @@ export const Calculator = () => {
   // This blob ist just to check if the Calculator should be enabled
   // by checking the sourceData.
   const { categoriesConfig } = useCategoriesConfig()
-  const { queryLayers, calculatorSourceKeys } = useMemo(() => {
+  const { queryLayers, calculatorSourceKeys, subcategoryName } = useMemo(() => {
     let calculatorSource: ReturnType<typeof getSourceData> | undefined = undefined
+    let activeSubcategoryWithCalculator:
+      | ReturnType<typeof flattenSubcategories>[number]
+      | undefined = undefined
     if (categoriesConfig) {
       const activeSubcategories = flattenSubcategories(categoriesConfig)
         // a subcategory is active, when any style is active that is not "hidden"
@@ -20,6 +23,13 @@ export const Calculator = () => {
       const sourceDataOfActiveSubcats = activeSubcategories.map((t) => getSourceData(t.sourceId))
       const calculatorSources = sourceDataOfActiveSubcats.filter((s) => s.calculator.enabled)
       calculatorSource = calculatorSources?.at(0)
+
+      // Find the active subcategory that has calculator enabled
+      if (calculatorSource) {
+        activeSubcategoryWithCalculator = activeSubcategories.find(
+          (subcat) => getSourceData(subcat.sourceId).id === calculatorSource?.id,
+        )
+      }
 
       if (calculatorSources.length > 1) {
         console.log(
@@ -33,6 +43,7 @@ export const Calculator = () => {
     return {
       queryLayers: calculatorSource?.calculator?.queryLayers,
       calculatorSourceKeys: calculatorSource?.calculator?.keys,
+      subcategoryName: activeSubcategoryWithCalculator?.name,
     }
   }, [categoriesConfig])
 
@@ -40,8 +51,17 @@ export const Calculator = () => {
 
   return (
     <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: '.maplibregl-ctrl-top-left { left: 270px; }',
+        }}
+      />
       <CalculatorControls queryLayers={queryLayers} drawControlRef={drawControlRef} />
-      <CalculatorOutput keys={calculatorSourceKeys} drawControlRef={drawControlRef} />
+      <CalculatorOutput
+        keys={calculatorSourceKeys}
+        drawControlRef={drawControlRef}
+        subcategoryName={subcategoryName}
+      />
     </>
   )
 }

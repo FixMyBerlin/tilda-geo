@@ -11,20 +11,33 @@ const colors = {
   pink: 'bg-pink-50 text-pink-700 ring-pink-700/10',
 }
 
+const invertedColors = {
+  gray: 'bg-gray-600 text-white ring-gray-400/30',
+  red: 'bg-red-600 text-white ring-red-400/30',
+  yellow: 'bg-yellow-600 text-white ring-yellow-400/30',
+  green: 'bg-green-600 text-white ring-green-400/30',
+  blue: 'bg-blue-600 text-white ring-blue-400/30',
+  indigo: 'bg-indigo-600 text-white ring-indigo-400/30',
+  purple: 'bg-purple-600 text-white ring-purple-400/30',
+  pink: 'bg-pink-600 text-white ring-pink-400/30',
+}
+
 export const Pill = ({
   color,
   className,
   children,
+  inverted = false,
 }: {
   color: keyof typeof colors
   className?: string
   children: React.ReactNode
+  inverted?: boolean
 }) => {
   return (
     <span
       className={twMerge(
         className,
-        colors[color],
+        inverted ? invertedColors[color] : colors[color],
         'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset',
       )}
     >

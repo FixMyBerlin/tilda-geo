@@ -5,12 +5,13 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_bikelanes_plus_routes: MapboxStyleLayer[] = [
   {
+    id: 'route',
+    type: 'line',
     layout: {
       'line-join': 'round',
     },
-    type: 'line',
-    id: 'route',
     paint: {
+      'line-blur': 1,
       'line-color': [
         'case',
         ['match', ['get', 'network'], ['lcn'], true, false],
@@ -21,7 +22,6 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_plus_routes: MapboxStyleLaye
         'rgba(51, 117, 240, 0.54)',
         '#858585',
       ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 3, 18, 20],
       'line-opacity': [
         'interpolate',
         ['linear'],
@@ -35,27 +35,29 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_plus_routes: MapboxStyleLaye
         10,
         0.4,
       ],
-      'line-blur': 1,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 3, 18, 20],
     },
   },
   {
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    type: 'line',
     id: 'RSV',
+    type: 'line',
+    filter: ['match', ['get', 'cycle_highway'], ['yes'], true, false],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 4, 8, 5, 18, 25],
-      'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 1, 12, 0.4],
       'line-blur': 1,
       'line-color': '#fabd05',
+      'line-opacity': ['interpolate', ['linear'], ['zoom'], 9, 1, 12, 0.4],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 4, 8, 5, 18, 25],
     },
-    filter: ['match', ['get', 'cycle_highway'], ['yes'], true, false],
   },
   {
+    id: 'sign_label',
+    type: 'symbol',
+    filter: ['has', 'ref'],
     layout: {
-      'text-size': 10,
       'icon-image': [
         'match',
         ['get', 'network'],
@@ -65,20 +67,17 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_plus_routes: MapboxStyleLaye
         'rectangle-blue-2',
         '',
       ],
-      'text-transform': 'uppercase',
-      'symbol-spacing': 700,
-      'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
-      'symbol-placement': 'line',
-      'icon-size': 1.5,
-      'text-field': ['to-string', ['get', 'ref']],
-      'text-letter-spacing': -0.02,
       'icon-padding': 6,
+      'icon-size': 1.5,
+      'symbol-placement': 'line',
+      'symbol-spacing': 700,
+      'text-field': ['to-string', ['get', 'ref']],
+      'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+      'text-letter-spacing': -0.02,
+      'text-size': 10,
+      'text-transform': 'uppercase',
     },
-    filter: ['has', 'ref'],
-    type: 'symbol',
-    id: 'sign_label',
     paint: {
-      'text-color': '#c7efff',
       'icon-opacity': [
         'interpolate',
         ['linear'],
@@ -90,6 +89,7 @@ export const mapboxStyleGroupLayers_atlas_bikelanes_plus_routes: MapboxStyleLaye
         9.5,
         1,
       ],
+      'text-color': '#c7efff',
       'text-opacity': [
         'interpolate',
         ['linear'],

@@ -5,9 +5,9 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_pois_default: MapboxStyleLayer[] = [
   {
-    filter: ['has', 'category'],
-    type: 'circle',
     id: 'pois-classification',
+    type: 'circle',
+    filter: ['has', 'category'],
     paint: {
       'circle-color': [
         'match',
@@ -22,23 +22,23 @@ export const mapboxStyleGroupLayers_atlas_pois_default: MapboxStyleLayer[] = [
         '#f18241',
         '#000000',
       ],
+      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 12.6, 0, 12.9, 1],
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 2, 16, 6],
       'circle-stroke-color': '#ffffff',
       'circle-stroke-opacity': ['interpolate', ['linear'], ['zoom'], 12.6, 0, 12.9, 1],
       'circle-stroke-width': 1,
-      'circle-opacity': ['interpolate', ['linear'], ['zoom'], 12.6, 0, 12.9, 1],
     },
   },
   {
+    id: 'pois-names',
+    type: 'symbol',
+    filter: ['has', 'category'],
     minzoom: 17,
     layout: {
       'text-field': ['to-string', ['get', 'name']],
-      'text-size': 11,
       'text-offset': [0, 1.5],
+      'text-size': 11,
     },
-    filter: ['has', 'category'],
-    type: 'symbol',
-    id: 'pois-names',
     paint: {
       'text-color': [
         'match',
@@ -57,10 +57,10 @@ export const mapboxStyleGroupLayers_atlas_pois_default: MapboxStyleLayer[] = [
     },
   },
   {
-    maxzoom: 12.9,
-    filter: ['has', 'category'],
-    type: 'heatmap',
     id: 'pois-heat',
+    type: 'heatmap',
+    filter: ['has', 'category'],
+    maxzoom: 12.9,
     paint: {
       'heatmap-color': [
         'interpolate',
@@ -92,8 +92,8 @@ export const mapboxStyleGroupLayers_atlas_pois_default: MapboxStyleLayer[] = [
         12.9,
         0,
       ],
-      'heatmap-weight': 1.5,
       'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 3, 12, 7],
+      'heatmap-weight': 1.5,
     },
   },
 ]

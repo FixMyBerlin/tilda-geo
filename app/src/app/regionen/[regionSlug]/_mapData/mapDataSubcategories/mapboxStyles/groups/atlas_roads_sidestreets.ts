@@ -5,6 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] = [
   {
+    id: 'roadclassification-nomainstreet',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -21,13 +23,32 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
         'service_driveway',
         'service_emergency_access',
         'service_parking_aisle',
+        'service_uncategorized',
       ],
       true,
       false,
     ],
-    type: 'line',
-    id: 'roadclassification-nomainstreet',
     paint: {
+      'line-color': [
+        'match',
+        ['get', 'road'],
+        ['residential'],
+        '#a2c9f6',
+        ['living_street', 'bicycle_road', 'pedestrian'],
+        '#447be9',
+        ['unclassified', 'residential_priority_road', 'unspecified_road'],
+        '#ffdb70',
+        [
+          'service_road',
+          'service_uncategorized',
+          'service_alley',
+          'service_driveway',
+          'service_emergency_access',
+          'service_parking_aisle',
+        ],
+        '#96e4b4',
+        'rgba(213, 26, 26, 0.75)',
+      ],
       'line-width': [
         'interpolate',
         ['linear'],
@@ -55,6 +76,7 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
               'bicycle_road',
               'service_uncategorized',
               'unspecified_road',
+              'service_road',
               'service_alley',
               'service_driveway',
               'service_emergency_access',
@@ -135,31 +157,11 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
           0.8,
         ],
       ],
-      'line-color': [
-        'match',
-        ['get', 'road'],
-        ['residential'],
-        '#a2c9f6',
-        ['living_street', 'bicycle_road', 'pedestrian'],
-        '#447be9',
-        ['unclassified', 'residential_priority_road', 'unspecified_road'],
-        '#ffdb70',
-        [
-          'service_alley',
-          'service_road',
-          'service_driveway',
-          'service_emergency_access',
-          'service_parking_aisle',
-        ],
-        '#96e4b4',
-        'rgba(213, 26, 26, 0.75)',
-      ],
     },
   },
   {
-    layout: {
-      'line-cap': 'round',
-    },
+    id: 'hitarea-roadclassification-sidepath copy 1',
+    type: 'line',
     filter: [
       'match',
       ['get', 'road'],
@@ -180,20 +182,18 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
       true,
       false,
     ],
-    type: 'line',
-    id: 'hitarea-roadclassification-sidepath copy 1',
+    layout: {
+      'line-cap': 'round',
+    },
     paint: {
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
-      'line-opacity': 0,
       'line-color': 'rgb(216, 20, 255)',
+      'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
   },
   {
-    minzoom: 13,
-    layout: {
-      'line-cap': 'square',
-      'line-miter-limit': 0,
-    },
+    id: 'roads-onewaybikeyes-pattern sidestreets',
+    type: 'line',
     filter: [
       'all',
       ['has', 'oneway'],
@@ -213,25 +213,27 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
           'service_alley',
           'service_driveway',
           'service_emergency_access',
+          'service_uncategorized',
           'service_parking_aisle',
         ],
         true,
         false,
       ],
     ],
-    type: 'line',
-    id: 'roads-onewaybikeyes-pattern sidestreets',
-    paint: {
-      'line-pattern': 'arrow-blue-dots-gap(1)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
-      'line-opacity': 0.8,
-    },
-  },
-  {
     minzoom: 13,
     layout: {
       'line-cap': 'square',
+      'line-miter-limit': 0,
     },
+    paint: {
+      'line-opacity': 0.8,
+      'line-pattern': 'arrow-blue-dots-gap(1)',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
+    },
+  },
+  {
+    id: 'roads-oneway-pattern sidestreets',
+    type: 'line',
     filter: [
       'all',
       ['match', ['get', 'oneway'], ['yes', 'implicit_yes'], true, false],
@@ -248,6 +250,7 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
           'unspecified_road',
           'service_road',
           'service_alley',
+          'service_uncategorized',
           'service_driveway',
           'service_emergency_access',
           'service_parking_aisle',
@@ -256,12 +259,14 @@ export const mapboxStyleGroupLayers_atlas_roads_sidestreets: MapboxStyleLayer[] 
         false,
       ],
     ],
-    type: 'line',
-    id: 'roads-oneway-pattern sidestreets',
+    minzoom: 13,
+    layout: {
+      'line-cap': 'square',
+    },
     paint: {
+      'line-opacity': 0.7,
       'line-pattern': 'arrow-grey-gap(1)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
-      'line-opacity': 0.7,
     },
   },
 ]

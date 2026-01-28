@@ -30,6 +30,8 @@ export const SelectDataset = ({
     legends,
     isPublic,
     githubUrl,
+    geojsonUrl,
+    pmtilesUrl,
   } = dataset
   const currentUser = useCurrentUser()
   const userIsAdmin = isAdmin(currentUser)
@@ -49,7 +51,7 @@ export const SelectDataset = ({
     <li key={key}>
       <button
         className={twJoin(
-          'relative w-full cursor-pointer select-none py-2 pl-1.5 pr-2 text-left leading-tight text-gray-900',
+          'relative w-full cursor-pointer py-2 pr-2 pl-1.5 text-left leading-tight text-gray-900 select-none',
           selected ? 'bg-yellow-400' : 'hover:bg-yellow-50',
         )}
         onClick={handleClick}
@@ -76,7 +78,7 @@ export const SelectDataset = ({
         )}
       </button>
       {selected && (
-        <div className="border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pb-1.5 pt-1 text-xs leading-4 prose-a:underline-offset-1">
+        <div className="prose-a:underline-offset-1 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4">
           {updatedAt && <p>{updatedAt}</p>}
           {dataSourceMarkdown && (
             <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
@@ -100,7 +102,7 @@ export const SelectDataset = ({
               {legends.map((legend) => {
                 return (
                   <li
-                    className="group relative mt-1 flex items-center font-normal leading-tight"
+                    className="group relative mt-1 flex items-center leading-tight font-normal"
                     key={legend.id}
                   >
                     <div className="h-5 w-5 flex-none">{iconFromLegend(legend)}</div>
@@ -110,7 +112,8 @@ export const SelectDataset = ({
               })}
             </ul>
           )}
-          {dataset.hideDownloadLink === false && (
+
+          {dataset.hideDownloadLink === false && geojsonUrl && (
             <LinkExternal
               href={getStaticDatasetUrl(id, 'geojson')}
               download={`${name}.geojson`}
@@ -120,20 +123,21 @@ export const SelectDataset = ({
               GeoJSON herunterladen
             </LinkExternal>
           )}
+
           {userIsAdmin && (
             <details className="mt-1 bg-pink-300 p-0.5">
               <summary className="cursor-pointer underline">Admin Upload Details</summary>
 
-              <Link blank href={`/admin/uploads/${id}`}>
-                Admin Upload Details
-              </Link>
-              <br />
-              <LinkExternal blank href={githubUrl}>
-                Github Statische Daten
-              </LinkExternal>
-              <br />
-              {dataset.hideDownloadLink === true && (
-                <>
+              <div className="flex flex-col gap-1">
+                <Link blank href={`/admin/uploads/${id}`}>
+                  DB-Config
+                </Link>
+
+                <LinkExternal blank href={githubUrl}>
+                  Datensatz in Github
+                </LinkExternal>
+
+                {dataset.hideDownloadLink === true && geojsonUrl && (
                   <LinkExternal
                     href={getStaticDatasetUrl(id, 'geojson')}
                     download={`${name}.geojson`}
@@ -142,35 +146,42 @@ export const SelectDataset = ({
                     <ArrowDownTrayIcon className="size-3" />
                     GeoJSON herunterladen
                   </LinkExternal>
-                  <br />
-                </>
-              )}
-              <LinkExternal
-                href={getStaticDatasetUrl(id, 'csv')}
-                download={`${name}.csv`}
-                className="inline-flex items-center gap-1"
-              >
-                <ArrowDownTrayIcon className="size-3" />
-                CSV herunterladen (Beta)
-              </LinkExternal>
-              <br />
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-pink-700">GeoJSON URL:</label>
-                <input
-                  type="text"
-                  value={getStaticDatasetUrl(id, 'geojson')}
-                  readOnly
-                  className="rounded-xs inline-block w-full border-pink-500 px-0.5 py-0 text-xs text-pink-500"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-pink-700">PMTiles URL:</label>
-                <input
-                  type="text"
-                  value={getStaticDatasetUrl(id, 'pmtiles')}
-                  readOnly
-                  className="rounded-xs inline-block w-full border-pink-500 px-0.5 py-0 text-xs text-pink-500"
-                />
+                )}
+
+                {geojsonUrl && (
+                  <LinkExternal
+                    href={getStaticDatasetUrl(id, 'csv')}
+                    download={`${name}.csv`}
+                    className="inline-flex items-center gap-1"
+                  >
+                    <ArrowDownTrayIcon className="size-3" />
+                    CSV herunterladen (Beta)
+                  </LinkExternal>
+                )}
+
+                {geojsonUrl && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-pink-700">GeoJSON URL:</label>
+                    <input
+                      type="text"
+                      value={getStaticDatasetUrl(id, 'geojson')}
+                      readOnly
+                      className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                    />
+                  </div>
+                )}
+
+                {pmtilesUrl && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-pink-700">PMTiles URL:</label>
+                    <input
+                      type="text"
+                      value={getStaticDatasetUrl(id, 'pmtiles')}
+                      readOnly
+                      className="inline-block w-full rounded-xs border-pink-500 px-0.5 py-0 text-xs text-pink-500"
+                    />
+                  </div>
+                )}
               </div>
             </details>
           )}

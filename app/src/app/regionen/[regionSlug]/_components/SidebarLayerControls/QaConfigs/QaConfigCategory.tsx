@@ -55,7 +55,7 @@ export const QaConfigCategory = ({
             >
               <div
                 className={twJoin(
-                  'ml-1.5 flex min-h-[3rem] w-full flex-col items-start text-sm leading-[17px]',
+                  'ml-1.5 flex min-h-[3rem] flex-col items-start text-sm leading-[17px]',
                   isSelected ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-900',
                   'justify-center',
                 )}
@@ -98,7 +98,7 @@ export const QaConfigCategory = ({
                         onChange={() => handleStyleChange(option.key)}
                         className="h-3 w-3 text-violet-600 focus:ring-violet-500"
                       />
-                      <div className="flex w-full justify-between">
+                      <div className="flex justify-between">
                         <span>{option.label}</span>
                         {qaAreasStatusMap[option.key] !== null && (
                           <span>

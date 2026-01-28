@@ -14,6 +14,7 @@ import {
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
+import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
 
@@ -79,6 +80,10 @@ export const useInteractiveLayers = () => {
   if (qaParamData.configSlug && qaParamData.style !== 'none') {
     activeCategoryLayerIds.push(qaLayerId)
   }
+
+  // Mask layers are systemLayer datasets with inspector.enabled: false, so they won't be included
+  // via the normal dataset filtering. We need to manually add them so they're interactive.
+  activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
 
   // active layer from datasets
   const { dataParam: selectedDatasetIds } = useDataParam()

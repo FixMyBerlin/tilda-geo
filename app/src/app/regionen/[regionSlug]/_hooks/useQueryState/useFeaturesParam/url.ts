@@ -43,4 +43,5 @@ export const numericSourceIds: Record<number, SourceNames> = {
   // 29: 'tilda_parkings_separate',
   30: 'tilda_parkings_no',
   31: 'tilda_parkings_off_street',
+  32: 'tilda_parkings_off_street_quantized',
 }

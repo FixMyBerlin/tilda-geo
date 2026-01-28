@@ -1,7 +1,6 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import { ChallengeStatus } from './challengeStatus'
 import { logPrefix } from './maprouletteRebuildTasks'
-const { blue, green, red } = chalk
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -19,7 +18,7 @@ export const checkChallengeStatus = async (campaignId: number, retries = 0) => {
     if (!response.ok) {
       console.log(
         tabPrefix,
-        red('❌'),
+        styleText('red', '❌'),
         'Failed to fetch challenge status',
         response.status,
         response.statusText,
@@ -31,7 +30,7 @@ export const checkChallengeStatus = async (campaignId: number, retries = 0) => {
     const challengeStatus = challenge.status
 
     if (retries >= MAX_RETRIES) {
-      console.log(tabPrefix, red(`Challenge build failed after ${MAX_RETRIES} retries.`))
+      console.log(tabPrefix, styleText('red', `Challenge build failed after ${MAX_RETRIES} retries.`))
       return 'failed'
     }
 
@@ -39,34 +38,34 @@ export const checkChallengeStatus = async (campaignId: number, retries = 0) => {
     const msgRetry = `${retries} / ${MAX_RETRIES}`
     switch (challengeStatus) {
       case ChallengeStatus.building:
-        console.log(tabPrefix, blue('Challenge is rebuilding tasks.'), msgWaiting, msgRetry)
+        console.log(tabPrefix, styleText('blue', 'Challenge is rebuilding tasks.'), msgWaiting, msgRetry)
         await sleep(RETRY_TIME_MS)
         return checkChallengeStatus(campaignId, retries + 1)
       case ChallengeStatus.failed:
-        console.log(tabPrefix, red('Challenge build failed.'))
+        console.log(tabPrefix, styleText('red', 'Challenge build failed.'))
         return 'failed'
       case ChallengeStatus.ready:
-        console.log(tabPrefix, green('Challenge is ready.'))
+        console.log(tabPrefix, styleText('green', 'Challenge is ready.'))
         return 'ready'
       case ChallengeStatus.partiallyLoaded:
-        console.log(tabPrefix, blue('Challenge is partially loaded.'), msgWaiting, msgRetry)
+        console.log(tabPrefix, styleText('blue', 'Challenge is partially loaded.'), msgWaiting, msgRetry)
         await sleep(RETRY_TIME_MS)
         return checkChallengeStatus(campaignId, retries + 1)
       case ChallengeStatus.finished:
-        console.log(tabPrefix, green('Challenge is finished.'))
+        console.log(tabPrefix, styleText('green', 'Challenge is finished.'))
         return 'finished'
       case ChallengeStatus.deletingTasks:
-        console.log(tabPrefix, blue('Challenge is deleting tasks.'), msgWaiting, msgRetry)
+        console.log(tabPrefix, styleText('blue', 'Challenge is deleting tasks.'), msgWaiting, msgRetry)
         await sleep(RETRY_TIME_MS)
         return checkChallengeStatus(campaignId, retries + 1)
       case ChallengeStatus.none:
       case ChallengeStatus.empty:
       default:
-        console.log(tabPrefix, red('ℹ️'), 'Challenge has no status or unknown status.')
+        console.log(tabPrefix, styleText('red', 'ℹ️'), 'Challenge has no status or unknown status.')
         return 'failed'
     }
   } catch (error) {
-    console.log(tabPrefix, red('Error fetching challenge status:'), error)
+    console.log(tabPrefix, styleText('red', 'Error fetching challenge status:'), error)
     return 'failed'
   }
 }

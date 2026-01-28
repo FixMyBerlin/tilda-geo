@@ -24,10 +24,14 @@ async function main() {
     let { fileName, fileChanged } = await downloadFile()
 
     logPadded('Processing: Filter', berlinTimeString(new Date()))
+    // tagFilter regenerates filtered file if needed, but only returns sourceFileChanged
+    // (filter regeneration doesn't affect diffing logic)
     const tagFilterResponse = await tagFilter(fileName, fileChanged)
     if (tagFilterResponse) ({ fileName, fileChanged } = tagFilterResponse)
 
-    const idFilterResponse = await idFilter(fileName, params.idFilter)
+    // idFilter regenerates filtered file when active, but only returns sourceFileChanged
+    // (filter regeneration doesn't affect diffing logic - filtered data can still be diffed)
+    const idFilterResponse = await idFilter(fileName, fileChanged, params.idFilter)
     if (idFilterResponse) ({ fileName, fileChanged } = idFilterResponse)
 
     // Start timing for the actual data processing (matches old behavior)
