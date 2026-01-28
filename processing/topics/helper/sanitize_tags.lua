@@ -25,8 +25,10 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes' })
   end,
   access = function (value)
-    -- TOOD: How to handle… { 'unknown' }
-    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents' }, { 'yes' })
+    if value == 'yes' then
+      return 'public'
+    end
+    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents', 'public' })
   end,
   traffic_sign = function (value)
     return SanitizeTrafficSign(value)

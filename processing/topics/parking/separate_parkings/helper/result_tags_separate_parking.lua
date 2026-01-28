@@ -61,6 +61,9 @@ local function result_tags_separate_parking(category, object, area)
     traffic_sign = SANITIZE_TAGS.traffic_sign(object.tags.traffic_sign),
     zone = SANITIZE_TAGS.safe_string(object.tags.zone),
 
+    -- Access
+    access = SANITIZE_TAGS.access(object.tags.access),
+
     -- Surface
     surface = surface_tags_result.value,
     surface_confidence = surface_tags_result.confidence,

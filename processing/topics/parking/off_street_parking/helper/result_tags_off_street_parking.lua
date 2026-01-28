@@ -61,6 +61,9 @@ local function result_tags_off_street_parking(result, area)
     traffic_sign = SANITIZE_TAGS.traffic_sign(result.object.tags.traffic_sign),
     zone = SANITIZE_TAGS.safe_string(result.object.tags.zone),
 
+    -- Access
+    access = SANITIZE_TAGS.access(result.object.tags.access),
+
     -- Surface
     surface = surface_tags_result.value,
     surface_confidence = surface_tags_result.confidence,
@@ -68,7 +71,6 @@ local function result_tags_off_street_parking(result, area)
 
     -- Off street parking attributes:
     category = result.category.id,
-    access = SANITIZE_TAGS.access(result.object.tags.access),
     _log_unexpected_amenity_values = SANITIZE_TAGS.amenity_off_street_parking(result.object.tags.amenity),
   }
 

@@ -65,6 +65,9 @@ SELECT
     'traffic_sign', tags ->> 'traffic_sign',
     'zone', tags ->> 'zone',
     --
+    -- Access
+    'access', tags ->> 'access',
+    --
     -- Surface
     'surface', tags ->> 'surface',
     'surface_confidence', tags ->> 'surface_confidence',

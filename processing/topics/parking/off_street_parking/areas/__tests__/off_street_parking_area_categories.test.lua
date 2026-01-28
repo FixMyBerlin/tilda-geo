@@ -91,7 +91,7 @@ describe("off_street_parking_area_categories", function()
     end)
 
     it("matches multi-storey", function()
-      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "multi-storey", capacity = "50", access = "public" } }
+      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "multi-storey", capacity = "50", access = "yes" } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
       local tags_result = result_tags_off_street_parking(category_result)
 
