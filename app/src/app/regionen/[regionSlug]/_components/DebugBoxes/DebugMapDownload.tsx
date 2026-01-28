@@ -1,27 +1,26 @@
 import { useMapLoaded } from '@/src/app/regionen/[regionSlug]/_hooks/mapState/useMapState'
 import { featureCollection } from '@turf/helpers'
 import { LayerSpecification } from 'maplibre-gl'
-import React from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 
 type Props = { layers: LayerSpecification[] }
 
-export const DebugMapDownload: React.FC<Props> = ({ layers }) => {
+export const DebugMapDownload = ({ layers }: Props) => {
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
-  if (!mapLoaded || !mainMap) return null
+
+  if (!mapLoaded || !mainMap || !layers || layers.length === 0) return null
 
   const dateTody = new Date().toISOString().split('T')[0]
 
   const downloadLayers = layers.filter(
     (layer) =>
+      layer?.id &&
       mainMap.getMap().getLayer(layer.id) &&
-      // @ts-ignore this weird AnyLayer issue that I don't get worked around…
       layer?.layout?.visibility === 'visible' &&
-      // @ts-ignore this weird AnyLayer issue that I don't get worked around…
-      !layer?.id.includes('-highlight') &&
-      !layer?.id.includes('-hitarea') &&
-      layer?.id.includes('default'),
+      !layer.id.includes('-highlight') &&
+      !layer.id.includes('-hitarea') &&
+      layer.id.includes('default'),
   )
 
   // TODO: Figure out why `querySourceFeatures` does not work.
@@ -48,7 +47,7 @@ export const DebugMapDownload: React.FC<Props> = ({ layers }) => {
       <table>
         <tbody>
           {downloadLayers.map((layer) => {
-            const features = mainMap.getMap().queryRenderedFeatures(undefined, {
+            const features = mainMap.queryRenderedFeatures(undefined, {
               layers: [layer.id],
             })
             const featureColl = featureCollection(features)
