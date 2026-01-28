@@ -64,7 +64,7 @@ describe("off_street_parking_area_categories", function()
 
       assert.are.equal(category_result.category.id, "garage")
       assert.are.equal(tags_result.tags.category, "garage")
-      assert.are.equal(tags_result.tags.building, "garages")
+      assert.are.equal(tags_result.tags.parking, "garage")
       assert.are.equal(tags_result.tags.access, "private")
     end)
 
@@ -75,7 +75,7 @@ describe("off_street_parking_area_categories", function()
 
       assert.are.equal(category_result.category.id, "garage")
       assert.are.equal(tags_result.tags.category, "garage")
-      assert.are.equal(tags_result.tags.building, "garage")
+      assert.are.equal(tags_result.tags.parking, "garage")
       assert.are.equal(tags_result.tags.access, "customers")
     end)
 
@@ -86,8 +86,30 @@ describe("off_street_parking_area_categories", function()
 
       assert.are.equal(category_result.category.id, "carport")
       assert.are.equal(tags_result.tags.category, "carport")
-      assert.are.equal(tags_result.tags.building, "carport")
+      assert.are.equal(tags_result.tags.parking, "carport")
       assert.are.equal(tags_result.tags.access, "permissive")
+    end)
+
+    it("matches multi-storey", function()
+      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "multi-storey", capacity = "50", access = "public" } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local tags_result = result_tags_off_street_parking(category_result)
+
+      assert.are.equal(category_result.category.id, "multi-storey")
+      assert.are.equal(tags_result.tags.category, "multi-storey")
+      assert.are.equal(tags_result.tags.parking, "multi-storey")
+      assert.are.equal(tags_result.tags.access, "public")
+    end)
+
+    it("matches building=parking", function()
+      local object = { id = 1, type = 'way', tags = { building = "parking", capacity = "30", access = "private" } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local tags_result = result_tags_off_street_parking(category_result)
+
+      assert.are.equal(category_result.category.id, "multi-storey")
+      assert.are.equal(tags_result.tags.category, "multi-storey")
+      assert.are.equal(tags_result.tags.parking, "multi-storey")
+      assert.are.equal(tags_result.tags.access, "private")
     end)
 
     it("does not match unrelated building", function()

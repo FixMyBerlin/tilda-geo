@@ -22,7 +22,7 @@ local SANITIZE_PARKING_TAGS = {
   -- (e.g., splitting areas into front/back kerbs in `tilda_parking_area_to_line`)
   location = function(value)
     if value == 'lane_center' then return 'lane_centre' end
-    return sanitize_for_logging(value, { 'median', 'lane_centre' })
+    return sanitize_for_logging(value, { 'median', 'lane_centre' }, { 'underground' })
   end,
   orientation = function (value)
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })
@@ -59,9 +59,15 @@ local SANITIZE_PARKING_TAGS = {
 
     if tags.building then
       -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and filter-expressions.txt
-      local known_building_types = Set({ 'garage', 'garages', 'carport', 'parking' })
-      if known_building_types[tags.building] then
-        return 'building'
+      local building_to_parking = {
+        parking = 'multi-storey',
+        garage = 'garage',
+        garages = 'garage',
+        carport = 'carport',
+      }
+      local parking_value = building_to_parking[tags.building]
+      if parking_value then
+        return parking_value
       end
       -- Unknown building type - log it for debugging
       return sanitize_for_logging('OFF_STREET_PARKING_UNKNOWN_BUILDING_TYPE', {})

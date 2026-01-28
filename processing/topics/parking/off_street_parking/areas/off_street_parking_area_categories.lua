@@ -32,7 +32,8 @@ local off_street_parking_area_categories = {
   }),
   class_off_street_parking_category.new({
     -- Wiki https://wiki.openstreetmap.org/wiki/DE:Tag:amenity%3Dparking
-    id = 'building',
+    -- Wiki https://wiki.openstreetmap.org/wiki/DE:Tag:parking%3Dmulti-storey
+    id = 'multi-storey',
     conditions = function(tags)
       if tags.amenity == 'parking' and tags.parking == 'multi-storey' then
         return true

@@ -68,9 +68,8 @@ local function result_tags_off_street_parking(result, area)
 
     -- Off street parking attributes:
     category = result.category.id,
-    amenity = SANITIZE_TAGS.amenity_off_street_parking(result.object.tags.amenity),
-    building = SANITIZE_TAGS.building(result.object.tags.building),
     access = SANITIZE_TAGS.access(result.object.tags.access),
+    _log_unexpected_amenity_values = SANITIZE_TAGS.amenity_off_street_parking(result.object.tags.amenity),
   }
 
   local result_meta = Metadata(result)
