@@ -2,7 +2,7 @@ import { FileMapDataSubcategoryHiddenStyle } from '../../types'
 
 export const defaultStyleHidden: FileMapDataSubcategoryHiddenStyle = {
   id: 'hidden',
-  name: 'Kein Stil',
+  name: 'Ausgeblendet',
   layers: undefined,
   legends: undefined,
 }
