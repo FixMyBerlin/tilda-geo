@@ -27,7 +27,7 @@ function redirectIfChanged(oldUrl: string, newUrl: string) {
   if (oldUrl === newUrl) {
     return NextResponse.next()
   }
-  // Note: NextRequest normalizes 127.0.0.1 to localhost, so redirects will use localhost.
+  // Note for Dev: NextRequest normalizes 127.0.0.1 to localhost, so redirects will use localhost.
   // The client-side DevMiddlewareHostnameWorkaround fixes this after the redirect.
   return NextResponse.redirect(newUrl, 301)
 }
@@ -53,6 +53,10 @@ function renameRegionIfNecessary(url: string, slug: string) {
  * Migrates old config category/subcategory IDs to new ones.
  * This handles the case where category names were renamed (e.g., 'parking' -> 'parkingLars').
  * Done in https://github.com/FixMyBerlin/tilda-geo/commit/6df2b6b0e40896a37d05ff8616a2f5221c18ea7d
+ *
+ * Also handles migration of subcategories that don't have a 'hidden' style in old config formats.
+ * When a subcategory exists in the old config but doesn't have a 'hidden' style, we infer it was visible
+ * and add 'hidden: true' to preserve the user's intent.
  */
 function migrateConfigCategoryIds(
   urlConfig: ReturnType<typeof parseConfig>,
@@ -71,6 +75,21 @@ function migrateConfigCategoryIds(
       id: newCategoryId as MapDataCategoryParam['id'],
       subcategories: category.subcategories.map((subcategory) => {
         const newSubcategoryId = subcategoryMigrations[subcategory.id] || subcategory.id
+
+        // MIGRATION: Preserve visibility for subcategories that changed UI from radiobutton to checkbox.
+        // Background: When UI changed from radiobutton (old format, e.g., 14ltyea) to checkbox (new format, e.g., 1qldklk),
+        // the config format changed: old format had only 'default' style, new format uses 'hidden' style to control visibility.
+        // If subcategory exists in old config without 'hidden', it was visible, so add 'hidden: false' (visible) to preserve state.
+        // The 'default' style state is preserved from the old config.
+        const noHiddenStyle = !subcategory.styles?.some((s) => s.id === 'hidden')
+        if (noHiddenStyle && subcategory.styles?.length) {
+          return {
+            ...subcategory,
+            id: newSubcategoryId,
+            styles: [{ id: 'hidden', active: false }, ...subcategory.styles],
+          }
+        }
+
         return {
           ...subcategory,
           id: newSubcategoryId,
@@ -129,12 +148,11 @@ export function middleware(request: NextRequest) {
     if (simplifiedConfig) {
       const parsedConfig = parseConfig(configParam, simplifiedConfig)
       const migratedConfig = migrateConfigCategoryIds(parsedConfig)
-      const newConfigParam = serializeConfig(
-        mergeCategoriesConfig({
-          freshConfig,
-          urlConfig: migratedConfig,
-        }),
-      )
+      const mergedConfig = mergeCategoriesConfig({
+        freshConfig,
+        urlConfig: migratedConfig,
+      })
+      const newConfigParam = serializeConfig(mergedConfig)
       u.searchParams.set('config', newConfigParam)
     } else {
       resetConfig()
