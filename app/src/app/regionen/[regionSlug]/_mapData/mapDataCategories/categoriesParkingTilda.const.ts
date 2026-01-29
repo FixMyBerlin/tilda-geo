@@ -17,7 +17,7 @@ export const categoriesParkingTilda: StaticMapDataCategory[] = [
     subcategories: [
       { ...subcat_parkingTilda_street_public, defaultStyle: 'default' },
       { ...subcat_parkingTilda_street_private, defaultStyle: 'hidden' },
-      { ...subcat_parkingTilda_offStreet_public, defaultStyle: 'hidden' },
+      { ...subcat_parkingTilda_offStreet_public, defaultStyle: 'default' },
       { ...subcat_parkingTilda_offStreet_private, defaultStyle: 'hidden' },
       { ...subcat_parkingTilda_street_no, defaultStyle: 'hidden' },
       { ...subcat_parkingTilda_street_cutout, defaultStyle: 'hidden' },
