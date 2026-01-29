@@ -185,11 +185,10 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        //
-        // New condition fields
         'parking',
         'informal__if_present',
-        'orientation',
+        'capacity',
+        'orientation__if_present',
         'direction__if_present',
         'condition_category',
         'condition_vehicles__if_present',
@@ -201,12 +200,10 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'markings__if_present',
         'reason__if_present',
         'access__if_present',
-        'surface',
         'composit_surface_smoothness',
         'area',
         'source',
         'operator_type',
-        // OTHER
         'composit_mapillary',
       ],
     },
