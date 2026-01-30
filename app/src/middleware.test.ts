@@ -14,6 +14,25 @@ function getUrl(response: ReturnType<typeof middleware>) {
   return new URL(response.headers.get('location'))
 }
 
+function parseCategoryFromResponse(
+  response: ReturnType<typeof middleware>,
+  expectedChecksum: string,
+  categoryId: string,
+) {
+  const url = getUrl(response)
+  const configParam = url.searchParams.get('config')
+  expect(configParam).toBeTruthy()
+  if (expectedChecksum) {
+    expect(configParam?.startsWith(expectedChecksum)).toBe(true)
+  }
+
+  const checksum = configParam!.split('.')[0]!
+  const simplifiedConfig = configs[checksum]
+  const parsedConfig = parse(configParam!, simplifiedConfig)
+  const category = parsedConfig.find((c) => c.id === categoryId)!
+  return category
+}
+
 describe('middleware()', () => {
   test('NextJS middleware redirect behavior with hostname normalization', () => {
     // NOTE: NextRequest normalizes 127.0.0.1 to localhost when created
@@ -227,17 +246,7 @@ describe('middleware()', () => {
         'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=13.5%2F52.4918%2F13.4261&config=14ltyea.a09bxt.0&v=2',
       )
       const response = middleware(request)
-      const url = getUrl(response)
-
-      const configParam = url.searchParams.get('config')
-      expect(configParam).toBeTruthy()
-      expect(configParam?.startsWith('1qldklk')).toBe(true)
-
-      // Parse migrated config and verify all subcategory states
-      const checksum = configParam!.split('.')[0]!
-      const simplifiedConfig = configs[checksum]
-      const parsedConfig = parse(configParam!, simplifiedConfig)
-      const parkingTildaCategory = parsedConfig.find((c) => c.id === 'parkingTilda')!
+      const parkingTildaCategory = parseCategoryFromResponse(response, '1qldklk', 'parkingTilda')
 
       // Öffentliches Straßenparken => Surface is and stay active
       const parkingTilda = parkingTildaCategory.subcategories.find((s) => s.id === 'parkingTilda')!
@@ -267,6 +276,31 @@ describe('middleware()', () => {
         (s) => s.id === 'parkingTildaCutouts',
       )!
       expect(parkingTildaCutouts.styles.find((s) => s.id === 'default')?.active).toBe(true)
+    })
+
+    test('MIGRATION: Ensure hidden is active when checkbox was off and no style is active after merge (14ltyea.a099j9.0 to 1qldklk)', () => {
+      // Background: When migrating from old format (checkbox) to new format (dropdown),
+      // if a checkbox was OFF (default: false), it should become "hidden" active in the new format.
+      // This test verifies that parkingTildaPrivate, which was a checkbox (off) in production config,
+      // correctly migrates to have "hidden" active instead of showing an empty dropdown.
+      const request = new NextRequest(
+        'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=15/52.4928/13.4088&config=14ltyea.a099j9.0&v=2',
+      )
+      const response = middleware(request)
+      const parkingTildaCategory = parseCategoryFromResponse(response, '1qldklk', 'parkingTilda')
+
+      // Privates Straßenparken => Was checkbox (off), should now have "hidden" active
+      const parkingTildaPrivate = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaPrivate',
+      )!
+      const hiddenStyle = parkingTildaPrivate.styles.find((s) => s.id === 'hidden')
+      expect(hiddenStyle).toBeTruthy()
+      expect(hiddenStyle?.active).toBe(true)
+
+      // Verify no other style is active (all should be false)
+      const activeStyles = parkingTildaPrivate.styles.filter((s) => s.active)
+      expect(activeStyles.length).toBe(1)
+      expect(activeStyles[0]?.id).toBe('hidden')
     })
   })
 })

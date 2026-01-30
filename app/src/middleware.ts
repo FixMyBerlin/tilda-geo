@@ -50,6 +50,35 @@ function renameRegionIfNecessary(url: string, slug: string) {
 }
 
 /**
+ * Ensures that subcategories with dropdown UI always have at least one style active.
+ * If no style is active and a 'hidden' style exists, activates 'hidden'.
+ * This handles the case where migration from checkbox (off) to dropdown results in no active styles.
+ */
+function ensureAtLeastOneStyleActive(
+  config: ReturnType<typeof mergeCategoriesConfig>,
+): ReturnType<typeof mergeCategoriesConfig> {
+  return config.map((category) => ({
+    ...category,
+    subcategories: category.subcategories.map((subcategory) => {
+      const hasActiveStyle = subcategory.styles.some((s) => s.active)
+      const hasHiddenStyle = subcategory.styles.some((s) => s.id === 'hidden')
+
+      // If no style is active and 'hidden' exists, activate 'hidden'
+      if (!hasActiveStyle && hasHiddenStyle) {
+        return {
+          ...subcategory,
+          styles: subcategory.styles.map((style) =>
+            style.id === 'hidden' ? { ...style, active: true } : style,
+          ),
+        }
+      }
+
+      return subcategory
+    }),
+  }))
+}
+
+/**
  * Migrates old config category/subcategory IDs to new ones.
  * This handles the case where category names were renamed (e.g., 'parking' -> 'parkingLars').
  * Done in https://github.com/FixMyBerlin/tilda-geo/commit/6df2b6b0e40896a37d05ff8616a2f5221c18ea7d
@@ -76,13 +105,14 @@ function migrateConfigCategoryIds(
       subcategories: category.subcategories.map((subcategory) => {
         const newSubcategoryId = subcategoryMigrations[subcategory.id] || subcategory.id
 
-        // MIGRATION: Preserve visibility for subcategories that changed UI from radiobutton to checkbox.
-        // Background: When UI changed from radiobutton (old format, e.g., 14ltyea) to checkbox (new format, e.g., 1qldklk),
+        // MIGRATION: Preserve visibility for subcategories that changed UI from checkbox to dropdown.
+        // Background: When UI changed from checkbox (old format, e.g., 14ltyea) to dropdown (new format, e.g., 1qldklk),
         // the config format changed: old format had only 'default' style, new format uses 'hidden' style to control visibility.
-        // If subcategory exists in old config without 'hidden', it was visible, so add 'hidden: false' (visible) to preserve state.
-        // The 'default' style state is preserved from the old config.
+        // If subcategory exists in old config without 'hidden' and has 'default: true', it was visible, so add 'hidden: false'.
+        // If 'default: false' or no styles, let ensureAtLeastOneStyleActive handle it (will activate 'hidden' if nothing is active).
         const noHiddenStyle = !subcategory.styles?.some((s) => s.id === 'hidden')
-        if (noHiddenStyle && subcategory.styles?.length) {
+        const hasDefaultTrue = subcategory.styles?.some((s) => s.id === 'default' && s.active)
+        if (noHiddenStyle && hasDefaultTrue) {
           return {
             ...subcategory,
             id: newSubcategoryId,
@@ -152,7 +182,8 @@ export function middleware(request: NextRequest) {
         freshConfig,
         urlConfig: migratedConfig,
       })
-      const newConfigParam = serializeConfig(mergedConfig)
+      const finalConfig = ensureAtLeastOneStyleActive(mergedConfig)
+      const newConfigParam = serializeConfig(finalConfig)
       u.searchParams.set('config', newConfigParam)
     } else {
       resetConfig()
