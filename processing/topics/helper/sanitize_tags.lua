@@ -25,8 +25,10 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes' })
   end,
   access = function (value)
-    -- TOOD: How to handle… { 'unknown' }
-    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents' }, { 'yes' })
+    if value == 'yes' then
+      return 'public'
+    end
+    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents', 'public' })
   end,
   traffic_sign = function (value)
     return SanitizeTrafficSign(value)
@@ -120,11 +122,18 @@ local SANITIZE_TAGS = {
   covered_or_indoor = function(tags)
     if tags.covered == 'yes' then
       return 'covered'
+    elseif tags.covered == 'partial' then
+      return 'partial'
+      -- Note: indoor=partial used <10 times
     elseif tags.indoor == 'yes' then
       return 'indoor'
     else
       return nil
     end
+  end,
+  amenity_off_street_parking = function(value)
+    -- Only used to log the sometimes weird values we get. The two allowed values are what we expect and already have stored in other properties.
+    return sanitize_for_logging(value, {}, { 'parking', 'parking_entrance' })
   end,
 }
 

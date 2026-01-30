@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 // This script generates the files `./_{checksum}.ts` and `./index.ts`
-// don't run it directly but use `npm run save-configs` which run prettier after code generation
+// don't run it directly but use `npm run regions:configs` which runs prettier after code generation
 
 import fs from 'node:fs'
 import path from 'node:path'

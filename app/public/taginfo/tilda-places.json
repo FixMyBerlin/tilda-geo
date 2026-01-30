@@ -1,0 +1,51 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-places.json",
+  "data_updated": "20260123T090033Z",
+  "project": {
+    "name": "TILDA - POI / Places",
+    "description": "TILDA processes population centers and priority destinations for cycling network planning.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "place",
+      "value": "city",
+      "description": "Identify population centers and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "place",
+      "value": "borough",
+      "description": "Identify population centers and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "place",
+      "value": "suburb",
+      "description": "Identify population centers and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "place",
+      "value": "town",
+      "description": "Identify population centers and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "place",
+      "value": "village",
+      "description": "Identify population centers and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "place",
+      "value": "hamlet",
+      "description": "Identify population centers and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    }
+  ]
+}

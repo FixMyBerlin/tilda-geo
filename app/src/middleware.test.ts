@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server'
 import { describe, expect, test } from 'vitest'
+import { configs } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/configs'
+import { parse } from './app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/parse'
 import { parseMapParam } from './app/regionen/[regionSlug]/_hooks/useQueryState/utils/mapParam'
 import { middleware } from './middleware'
 
@@ -12,13 +14,36 @@ function getUrl(response: ReturnType<typeof middleware>) {
   return new URL(response.headers.get('location'))
 }
 
+function parseCategoryFromResponse(
+  response: ReturnType<typeof middleware>,
+  expectedChecksum: string,
+  categoryId: string,
+) {
+  const url = getUrl(response)
+  const configParam = url.searchParams.get('config')
+  expect(configParam).toBeTruthy()
+  if (expectedChecksum) {
+    expect(configParam?.startsWith(expectedChecksum)).toBe(true)
+  }
+
+  const checksum = configParam!.split('.')[0]!
+  const simplifiedConfig = configs[checksum]
+  const parsedConfig = parse(configParam!, simplifiedConfig)
+  const category = parsedConfig.find((c) => c.id === categoryId)!
+  return category
+}
+
 describe('middleware()', () => {
-  test('NextJS middleware Bug that changes local IP URL ot localhost', () => {
-    // Ideally this test will fail soon so we can cleanup the workaround in <DevMiddlewareHostnameWorkaround> and in the auth config.
-    // More in src/app/regionen/[regionSlug]/_components/DevMiddlewareHostnameWorkaround.tsx
+  test('NextJS middleware redirect behavior with hostname normalization', () => {
+    // NOTE: NextRequest normalizes 127.0.0.1 to localhost when created
+    // This is a Next.js limitation that cannot be fixed in middleware
+    // The client-side workaround (DevMiddlewareHostnameWorkaround) handles this
+    // This test documents the current behavior - NextRequest.url is already normalized
     const mockRequest = new NextRequest('http://127.0.0.1:5173/regionen/berlin')
     const response = middleware(mockRequest)!
     const url = getUrl(response)
+    // This tests confirms / documents the NextJS Bug/Limitation…
+    // This should be 127.0.0.1:5173
     expect(url.host).toBe('localhost:5173')
   })
 
@@ -212,6 +237,70 @@ describe('middleware()', () => {
 
       // Verify the config is valid (not empty or error state)
       expect(configParam?.length).toBeGreaterThan(10)
+    })
+
+    test('MIGRATION: Preserve subcategory visibility when UI changes from radiobutton to checkbox (14ltyea to 1qldklk)', () => {
+      // Background: UI changed from radiobutton (14ltyea) to checkbox (1qldklk), causing config format change.
+      // Verifies that all subcategory states are preserved when migrating between these formats.
+      const request = new NextRequest(
+        'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=13.5%2F52.4918%2F13.4261&config=14ltyea.a09bxt.0&v=2',
+      )
+      const response = middleware(request)
+      const parkingTildaCategory = parseCategoryFromResponse(response, '1qldklk', 'parkingTilda')
+
+      // Öffentliches Straßenparken => Surface is and stay active
+      const parkingTilda = parkingTildaCategory.subcategories.find((s) => s.id === 'parkingTilda')!
+      expect(parkingTilda.styles.find((s) => s.id === 'surface')?.active).toBe(true)
+
+      // Öffentliches Parken abseits des Straßenraums => Default is and stay active
+      const parkingTildaOffStreet = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaOffStreet',
+      )!
+      expect(parkingTildaOffStreet.styles.find((s) => s.id === 'default')?.active).toBe(true)
+
+      // Privates Straßenparken => Active, now default (default style active, hidden style not active)
+      const parkingTildaPrivate = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaPrivate',
+      )!
+      expect(parkingTildaPrivate.styles.find((s) => s.id === 'hidden')?.active).toBe(false)
+      expect(parkingTildaPrivate.styles.find((s) => s.id === 'default')?.active).toBe(true)
+
+      // Parkverbote => active is and stay active
+      const parkingTildaNo = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaNo',
+      )!
+      expect(parkingTildaNo.styles.find((s) => s.id === 'default')?.active).toBe(true)
+
+      // Parkraum Stanzungen => active is and stay active
+      const parkingTildaCutouts = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaCutouts',
+      )!
+      expect(parkingTildaCutouts.styles.find((s) => s.id === 'default')?.active).toBe(true)
+    })
+
+    test('MIGRATION: Ensure hidden is active when checkbox was off and no style is active after merge (14ltyea.a099j9.0 to 1qldklk)', () => {
+      // Background: When migrating from old format (checkbox) to new format (dropdown),
+      // if a checkbox was OFF (default: false), it should become "hidden" active in the new format.
+      // This test verifies that parkingTildaPrivate, which was a checkbox (off) in production config,
+      // correctly migrates to have "hidden" active instead of showing an empty dropdown.
+      const request = new NextRequest(
+        'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=15/52.4928/13.4088&config=14ltyea.a099j9.0&v=2',
+      )
+      const response = middleware(request)
+      const parkingTildaCategory = parseCategoryFromResponse(response, '1qldklk', 'parkingTilda')
+
+      // Privates Straßenparken => Was checkbox (off), should now have "hidden" active
+      const parkingTildaPrivate = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaPrivate',
+      )!
+      const hiddenStyle = parkingTildaPrivate.styles.find((s) => s.id === 'hidden')
+      expect(hiddenStyle).toBeTruthy()
+      expect(hiddenStyle?.active).toBe(true)
+
+      // Verify no other style is active (all should be false)
+      const activeStyles = parkingTildaPrivate.styles.filter((s) => s.active)
+      expect(activeStyles.length).toBe(1)
+      expect(activeStyles[0]?.id).toBe('hidden')
     })
   })
 })

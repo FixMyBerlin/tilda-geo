@@ -32,6 +32,11 @@ SET
     orientation := tags ->> 'orientation'
   );
 
+-- Index to optimize UPDATE query filtering on tags->>'area' IS NULL
+CREATE INDEX IF NOT EXISTS idx_parking_parkings_merged_area_null ON _parking_parkings_merged ((tags ->> 'area'))
+WHERE
+  tags ->> 'area' IS NULL;
+
 UPDATE _parking_parkings_merged pm
 SET
   tags = tags || jsonb_build_object('area', estimated_area) || '{"area_source": "estimated", "area_confidence": "medium"}'::JSONB
@@ -91,6 +96,11 @@ SET
 WHERE
   tags ->> 'staggered' = 'yes'
   AND tags ->> 'orientation' = 'parallel';
+
+-- Index to optimize UPDATE query filtering on tags->>'capacity' IS NULL
+CREATE INDEX IF NOT EXISTS idx_parking_parkings_merged_capacity_null ON _parking_parkings_merged ((tags ->> 'capacity'))
+WHERE
+  tags ->> 'capacity' IS NULL;
 
 UPDATE _parking_parkings_merged pm
 SET

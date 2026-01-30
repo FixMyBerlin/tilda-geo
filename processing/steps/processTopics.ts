@@ -116,7 +116,8 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     params.processOnlyBbox === null
 
   // Reference mode: Always create reference, never diff (clean baseline)
-  // Previous/Fixed modes: Only diff when file hasn't changed
+  // Previous/Fixed modes: Only diff when source PBF file hasn't changed (new download)
+  // Note: Filter regenerations (tag/bbox/ID filters) don't affect diffing - filtered data can still be diffed
   const isReferenceMode = params.diffingMode === 'reference'
   const diffChanges =
     params.diffingMode !== 'off' && params.diffingMode !== 'reference' && !fileChanged

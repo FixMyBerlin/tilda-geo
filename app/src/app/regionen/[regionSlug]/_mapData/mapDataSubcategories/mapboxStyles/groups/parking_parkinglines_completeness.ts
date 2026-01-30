@@ -7,9 +7,9 @@ export const mapboxStyleGroupLayers_parking_parkinglines_completeness: MapboxSty
   {
     id: 'capacity_status-segment_too_small',
     type: 'line',
+    filter: ['match', ['get', 'capacity_status'], ['segment_too_small'], true, false],
     paint: {
       'line-color': 'hsl(4, 59%, 27%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
       'line-dasharray': [0.5, 0.5],
       'line-opacity': [
         'match',
@@ -18,24 +18,24 @@ export const mapboxStyleGroupLayers_parking_parkinglines_completeness: MapboxSty
         0.25,
         1,
       ],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
     },
-    filter: ['match', ['get', 'capacity_status'], ['segment_too_small'], true, false],
   },
   {
     id: 'capacity_status-no_parking',
     type: 'line',
+    filter: ['match', ['get', 'capacity_status'], ['no_parking'], true, false],
     paint: {
       'line-color': 'hsl(273, 100%, 43%)',
       'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
     },
-    filter: ['match', ['get', 'capacity_status'], ['no_parking'], true, false],
   },
   {
     id: 'capacity_status-data_missing',
     type: 'line',
+    filter: ['match', ['get', 'capacity_status'], ['data_missing'], true, false],
     paint: {
       'line-color': 'hsl(319, 100%, 38%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
       'line-opacity': [
         'match',
         ['get', 'highway'],
@@ -43,7 +43,7 @@ export const mapboxStyleGroupLayers_parking_parkinglines_completeness: MapboxSty
         0.25,
         1,
       ],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
     },
-    filter: ['match', ['get', 'capacity_status'], ['data_missing'], true, false],
   },
 ]

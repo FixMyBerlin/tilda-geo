@@ -3,7 +3,7 @@ import { wrapFilterWithAll } from '../../../_components/Map/SourcesAndLayers/uti
 import { SourcesId } from '../../mapDataSources/sources.const'
 import { MapboxStyleLayer } from './types'
 
-export type Props = {
+export type MapboxStyleLayersProps = {
   layers: MapboxStyleLayer[]
   source: SourcesId
   sourceLayer: string
@@ -23,7 +23,7 @@ export const mapboxStyleLayers = ({
   idPrefix,
   interactive,
   additionalFilter,
-}: Props) => {
+}: MapboxStyleLayersProps) => {
   return layers.map((layer) => {
     return {
       ...layer,

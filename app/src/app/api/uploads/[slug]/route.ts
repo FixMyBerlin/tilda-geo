@@ -1,25 +1,20 @@
 /**
- * Upload API Route
- *
- * Handles requests for uploaded files (pmtiles/geojson/csv) with authentication.
- *
- * File Access:
- * - GET /api/uploads/{slug} - Returns pmtiles (fallback for old URLs)
- * - GET /api/uploads/{slug}.pmtiles - Returns pmtiles file
- * - GET /api/uploads/{slug}.geojson - Returns geojson file
- * - GET /api/uploads/{slug}.csv - CSV export of geojson data with semicolon delimiter
- *   CSV format:
- *   - geometry_type: Geometry type (Point, LineString, Polygon, etc.)
- *   - geometry_wkt: WKT representation (QGIS compatible)
- *   - All GeoJSON feature properties as additional columns
- *
+ * Upload API Route - handles requests for uploaded files with authentication.
+ * See docs/Uploads.md for details.
  */
 
+// Disable Next.js caching for this route to avoid 2MB fetch cache limit
+// External sources can be large files (>2MB), so we use file-based caching instead
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+
 import db from '@/db'
+import { MapDataSourceExternalRenderFormat } from '@/scripts/StaticDatasets/types'
 import { getBlitzContext } from '@/src/blitz-server'
 import { corsHeaders } from '../../_util/cors'
 import { handleCsvExport } from './utils/handleCsvExport'
 import { parseSlugAndFormat } from './utils/parseSlugAndFormat'
+import { proxyExternalUrl } from './utils/proxyExternalUrl'
 import { proxyS3Url } from './utils/proxyS3Url'
 
 export async function GET(request: Request, { params }: { params: { slug: string } }) {
@@ -46,6 +41,30 @@ export async function GET(request: Request, { params }: { params: { slug: string
     return Response.json({ statusText: 'Not Found' }, { status: 404, headers: corsHeaders })
   }
 
+  // Determine allowed formats based on which URLs are present
+  // CSV is only available for local sources (not external)
+  const allowedFormats: string[] = []
+  if (upload.geojsonUrl) {
+    allowedFormats.push('geojson')
+    if (!upload.externalSourceUrl) {
+      allowedFormats.push('csv')
+    }
+  }
+  if (upload.pmtilesUrl) {
+    allowedFormats.push('pmtiles')
+  }
+
+  // Validate format is allowed for this upload
+  if (!allowedFormats.includes(extension)) {
+    return Response.json(
+      {
+        statusText: 'Format not available',
+        message: `Requested format "${extension}" is not available. Use ${allowedFormats.map((f) => `.${f}`).join(', ')}`,
+      },
+      { status: 400, headers: corsHeaders },
+    )
+  }
+
   // Security checks
   if (!upload.public) {
     const forbidden = Response.json(
@@ -68,22 +87,32 @@ export async function GET(request: Request, { params }: { params: { slug: string
     }
   }
 
-  // Get the appropriate URL from upload
-  const fileUrl = extension === 'pmtiles' ? upload.pmtilesUrl : upload.geojsonUrl
+  // Handle CSV export (only for local sources)
+  if (extension === 'csv') {
+    return handleCsvExport(upload.geojsonUrl!, baseName)
+  }
 
+  // Handle `dataSourceType: 'external'` which we proxy and cache from an external URL
+  if (upload.externalSourceUrl && upload.cacheTtlSeconds) {
+    return proxyExternalUrl(
+      request,
+      upload.externalSourceUrl,
+      upload.cacheTtlSeconds,
+      extension as MapDataSourceExternalRenderFormat,
+      baseName,
+    )
+  }
+
+  // Handle regular file requests (pmtiles/geojson)
+  // `dataSourceType: 'local'` from S3
+  // First a TS guard since our Types are not perfect…
+  const fileUrl = extension === 'pmtiles' ? upload.pmtilesUrl : upload.geojsonUrl
   if (!fileUrl) {
     return Response.json(
       { statusText: 'File URL not found in upload' },
       { status: 500, headers: corsHeaders },
     )
   }
-
-  // Handle CSV export by first getting GeoJSON data, then converting
-  if (extension === 'csv') {
-    return handleCsvExport(upload.geojsonUrl, baseName)
-  }
-
-  // Handle regular file requests (pmtiles/geojson)
   // Note: The download header does not interfere with Maplibre rendering of this route
   const downloadFilename = extension === 'geojson' ? `${baseName}.geojson` : undefined
   return proxyS3Url(request, fileUrl, downloadFilename)

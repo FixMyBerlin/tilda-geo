@@ -5,19 +5,32 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_radinfra_traffic_signs: MapboxStyleLayer[] = [
   {
-    type: 'line',
     id: 'hitarea-missing-sign',
+    type: 'line',
+    filter: [
+      '!',
+      [
+        'any',
+        ['has', 'traffic_sign'],
+        ['has', 'traffic_sign:forward'],
+        ['has', 'traffic_sign:backward'],
+      ],
+    ],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
       'line-color': 'rgb(216, 20, 255)',
       'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
+  },
+  {
+    id: 'sign-missing',
+    type: 'line',
     filter: [
       '!',
       [
@@ -27,46 +40,33 @@ export const mapboxStyleGroupLayers_radinfra_traffic_signs: MapboxStyleLayer[] =
         ['has', 'traffic_sign:backward'],
       ],
     ],
-  },
-  {
     minzoom: 8,
     layout: {
       'line-cap': 'round',
       'line-join': 'round',
     },
-    filter: [
-      '!',
-      [
-        'any',
-        ['has', 'traffic_sign'],
-        ['has', 'traffic_sign:forward'],
-        ['has', 'traffic_sign:backward'],
-      ],
-    ],
-    type: 'line',
-    id: 'sign-missing',
     paint: {
       'line-color': '#fda5e4',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 20, 4],
-      'line-opacity': 0.6,
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-opacity': 0.6,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 20, 4],
     },
   },
   {
-    minzoom: 8,
-    layout: {
-      'line-cap': 'round',
-      'line-join': 'round',
-    },
+    id: 'sign-colors',
+    type: 'line',
     filter: [
       'any',
       ['has', 'traffic_sign'],
       ['has', 'traffic_sign:forward'],
       ['has', 'traffic_sign:backward'],
     ],
-    type: 'line',
-    id: 'sign-colors',
+    minzoom: 8,
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
       'line-color': [
         'match',
@@ -75,23 +75,23 @@ export const mapboxStyleGroupLayers_radinfra_traffic_signs: MapboxStyleLayer[] =
         '#00c29e',
         ['match', ['get', 'traffic_sign:forward'], ['none'], '#00c29e', '#a1e217'],
       ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
       'line-opacity': 0.6,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
     },
   },
   {
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    maxzoom: 9,
-    filter: ['!', ['has', 'traffic_sign']],
-    type: 'line',
     id: 'current-zoomed-out-traffic-signs',
+    type: 'line',
+    filter: ['!', ['has', 'traffic_sign']],
+    maxzoom: 9,
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
+      'line-color': 'gray',
       'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
-      'line-color': 'gray',
     },
   },
 ]

@@ -1,26 +1,12 @@
 require('init')
 require('class_off_street_parking_category')
-local SANITIZE_TAGS = require('sanitize_tags')
 local round = require('round')
-
-local function category_tags(tags)
-  return {
-    -- NOTE: Sanitization is not ideal; When used as category condition this is implicity sanitized. Otherwise they are raw values.
-    amenity = tags.amenity,
-    building = tags.building,
-    parking = tags.parking,
-    access = SANITIZE_TAGS.access(tags.access)
-  }
-end
-
-local category_tags_cc = { 'fee', 'maxstay' }
 
 local function area_tags(area, factor)
   return {
-    area = round(area, 2),
-    capacity = round(area / factor, 0),
-    capacity_confidence = 'medium',
-    capacity_source = 'area',
+    value = round(area / factor, 0),
+    confidence = 'medium',
+    source = 'area',
   }
 end
 
@@ -36,8 +22,6 @@ local off_street_parking_area_categories = {
         tags.parking == 'layby'
       )
     end,
-    tags = function(tags) return category_tags(tags) end,
-    tags_cc = category_tags_cc,
     capacity_from_area = function(_, area)
       -- For surface like parking we have two values, one for large areas, one for smaller…
       local sqm_small = 14.5
@@ -48,12 +32,15 @@ local off_street_parking_area_categories = {
   }),
   class_off_street_parking_category.new({
     -- Wiki https://wiki.openstreetmap.org/wiki/DE:Tag:amenity%3Dparking
-    id = 'building',
+    -- Wiki https://wiki.openstreetmap.org/wiki/DE:Tag:parking%3Dmulti-storey
+    id = 'multi-storey',
     conditions = function(tags)
-      return tags.amenity == 'parking' and tags.parking == 'multi-storey'
+      if tags.amenity == 'parking' and tags.parking == 'multi-storey' then
+        return true
+      end
+      -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
+      return tags.building == 'parking'
     end,
-    tags = function(tags) return category_tags(tags) end,
-    tags_cc = category_tags_cc,
     capacity_from_area = function(_, area) return area_tags(area, 28.2) end,
   }),
   class_off_street_parking_category.new({
@@ -62,8 +49,6 @@ local off_street_parking_area_categories = {
     conditions = function(tags)
       return tags.amenity == 'parking' and tags.parking == 'underground'
     end,
-    tags = function(tags) return category_tags(tags) end,
-    tags_cc = category_tags_cc,
     capacity_from_area = function(_, area) return area_tags(area, 31.3) end,
   }),
   class_off_street_parking_category.new({
@@ -73,13 +58,11 @@ local off_street_parking_area_categories = {
     id = 'garage',
     conditions = function(tags)
       return (
-        -- (!) Every single(!) building value(!) needs to be allowed in processing/filter/filter-expressions.txt
+        -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
         (tags.building == 'garages' or tags.building == 'garage') or
         (tags.amenity == 'parking' and tags.parking == 'garage_boxes')
       )
     end,
-    tags = function(tags) return category_tags(tags) end,
-    tags_cc = category_tags_cc,
     capacity_from_area = function(_, area) return area_tags(area, 16.8) end,
   }),
   class_off_street_parking_category.new({
@@ -88,14 +71,12 @@ local off_street_parking_area_categories = {
     id = 'carport',
     conditions = function(tags)
       return (
-        -- (!) Every single(!) building value(!) needs to be allowed in processing/filter/filter-expressions.txt
+        -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
         (tags.building == 'carport') or
         (tags.amenity == 'parking' and tags.parking == 'carport') or
         (tags.amenity == 'parking' and tags.parking == 'sheds')
       )
     end,
-    tags = function(tags) return category_tags(tags) end,
-    tags_cc = category_tags_cc,
     capacity_from_area = function(_, area) return area_tags(area, 14.9) end,
   }),
 }

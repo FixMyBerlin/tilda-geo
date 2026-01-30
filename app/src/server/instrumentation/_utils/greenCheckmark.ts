@@ -1,3 +1,3 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 
-export const greenCheckmark = chalk.bold(chalk.green(' ✓'))
+export const greenCheckmark = styleText(['bold', 'green'], ' ✓')

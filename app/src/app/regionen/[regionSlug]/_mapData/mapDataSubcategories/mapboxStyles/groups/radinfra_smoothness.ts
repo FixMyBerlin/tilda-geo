@@ -5,33 +5,33 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_radinfra_smoothness: MapboxStyleLayer[] = [
   {
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    type: 'line',
     id: 'smooth-missing',
-    paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-color': '#fda5e4',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
-      'line-dasharray': [3, 1],
-    },
+    type: 'line',
     filter: [
       'any',
       ['!', ['has', 'smoothness']],
       ['match', ['get', 'smoothness'], [''], true, false],
     ],
-  },
-  {
     layout: {
       'line-cap': 'round',
       'line-join': 'round',
     },
-    type: 'line',
-    id: 'smooth-colors',
     paint: {
+      'line-color': '#fda5e4',
+      'line-dasharray': [3, 1],
       'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
+    },
+  },
+  {
+    id: 'smooth-colors',
+    type: 'line',
+    filter: ['has', 'smoothness'],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
+    paint: {
       'line-color': [
         'match',
         ['get', 'smoothness'],
@@ -47,8 +47,8 @@ export const mapboxStyleGroupLayers_radinfra_smoothness: MapboxStyleLayer[] = [
         '#37f644',
         'rgba(0, 0, 0, 0)',
       ],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
     },
-    filter: ['has', 'smoothness'],
   },
 ]

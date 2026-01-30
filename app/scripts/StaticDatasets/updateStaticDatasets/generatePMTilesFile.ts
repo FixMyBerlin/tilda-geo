@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import path from 'node:path'
 import type { MetaData } from '../types'
 
@@ -6,7 +6,7 @@ import type { MetaData } from '../types'
 export const generatePMTilesFile = async (
   inputFullFile: string,
   outputFolder: string,
-  precision: MetaData['geometricPrecision'],
+  precision: Extract<MetaData, { dataSourceType: 'local' }>['geometricPrecision'],
 ) => {
   const outputFilename = path.parse(inputFullFile).name
   // This line is only used for `app/scripts/StaticDatasets/geojson/region-bb/bb-ramboll-netzentwurf-2/README.md`
@@ -32,7 +32,7 @@ export const generatePMTilesFile = async (
 
   console.log(
     `  Generating PMTiles file "${outputFullFile}"...`,
-    precision ? chalk.yellow(JSON.stringify({ maxZoom })) : '',
+    precision ? styleText('yellow', JSON.stringify({ maxZoom })) : '',
   )
 
   // NOTE IMPROVEMENT: Check out https://github.com/amandasaurus/waterwaymap.org/blob/main/functions.sh#L20-L33
@@ -90,7 +90,7 @@ export const generatePMTilesFile = async (
     stderr: 'pipe',
   })
   if (!success) {
-    console.error(chalk.red('  ERROR: tippecanoe failed. This needs to be fixed manually!'), {
+    console.error(styleText('red', '  ERROR: tippecanoe failed. This needs to be fixed manually!'), {
       success,
       exitCode,
       stdout: stdout.toString(),

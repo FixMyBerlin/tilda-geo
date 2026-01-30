@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 import { aggregateLengths } from './aggregateLengths'
 
 // This function gets called by the `private/post-processing-hook` endpoint
@@ -6,14 +6,14 @@ import { aggregateLengths } from './aggregateLengths'
 export async function analysis() {
   try {
     const startTime = Date.now()
-    console.log(chalk.bold(chalk.white(' ○')), `Running analysis`)
+    console.log(styleText(['bold', 'white'], ' ○'), `Running analysis`)
 
     const aggregateLengthsPromise = aggregateLengths()
 
     // collect promises and add a final log message
     const analysisPromise = Promise.all([aggregateLengthsPromise]).then(() => {
       const secondsElapsed = Math.round((Date.now() - startTime) / 100) / 10
-      console.log(`${chalk.bold(chalk.green(' ✓'))} Analysis completed in ${secondsElapsed} s`)
+      console.log(`${styleText(['bold', 'green'], ' ✓')} Analysis completed in ${secondsElapsed} s`)
     })
     return analysisPromise
   } catch (e) {

@@ -5,8 +5,9 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_areas: MapboxStyleLayer[] = [
   {
-    type: 'fill',
     id: 'background colour',
+    type: 'fill',
+    filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
     paint: {
       'fill-color': [
         'case',
@@ -21,31 +22,30 @@ export const mapboxStyleGroupLayers_parking_areas: MapboxStyleLayer[] = [
         'rgb(48, 159, 219)',
       ],
     },
-    filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
   },
   {
-    type: 'fill',
     id: 'stripe pattern',
+    type: 'fill',
+    filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
     paint: {
       'fill-color': 'rgba(0, 0, 0, 0)',
-      'fill-pattern': ['match', ['get', 'access'], ['customers', 'private'], 'stripe_texture', ''],
       'fill-opacity': 0.5,
+      'fill-pattern': ['match', ['get', 'access'], ['customers', 'private'], 'stripe_texture', ''],
     },
-    filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
   },
   {
+    id: 'capacity label',
+    type: 'symbol',
+    filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
     layout: {
       'text-field': ['to-string', ['get', 'capacity']],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 14.99, 0, 15, 9, 20, 20],
       'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+      'text-size': ['interpolate', ['linear'], ['zoom'], 14.99, 0, 15, 9, 20, 20],
     },
-    type: 'symbol',
-    id: 'capacity label',
     paint: {
       'text-color': 'rgb(255, 255, 255)',
-      'text-halo-width': 0.5,
       'text-halo-color': 'rgba(0, 0, 0, 0.33)',
+      'text-halo-width': 0.5,
     },
-    filter: ['match', ['get', 'amenity'], ['bicycle_parking'], false, true],
   },
 ]

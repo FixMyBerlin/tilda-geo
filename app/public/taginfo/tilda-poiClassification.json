@@ -1,0 +1,2654 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-poiClassification.json",
+  "data_updated": "20260123T112703Z",
+  "project": {
+    "name": "TILDA - POI / POI Classification",
+    "description": "TILDA processes points of interest and priority destinations for cycling network planning.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "shop",
+      "object_types": ["node", "area"],
+      "description": "Identify shopping destinations and retail points of interest for cycling network planning. All shop values are accepted."
+    },
+    {
+      "key": "access",
+      "value": "private",
+      "object_types": ["node", "area"],
+      "description": "POIs with access=private are excluded from processing. Only non-private POIs are included for cycling network planning."
+    },
+    {
+      "key": "amenity",
+      "value": "animal_boarding",
+      "object_types": ["node", "area"],
+      "description": "Identify points of interest and priority destinations for cycling network planning."
+    },
+    {
+      "key": "amenity",
+      "value": "animal_training",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "aquarium",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "arts_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "artwork",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "attraction",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bakery",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bank",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bar",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bathing_place",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bbq",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "beach_resort",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "beauty_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "beverages",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bicycle_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bicycle_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "biergarten",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "boat_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "boat_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "boat_sharing",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "boat_storage",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "boathouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "bookshop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "butcher",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "cafe",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "camp_pitch",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "camp_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "canteen",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "car_dealership",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "car_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "car_wash",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "caravan_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "casino",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "chalet",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "chemist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "childcare",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "cinema",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "clinic",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "clothes",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "college",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "comms_tower",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "community_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "computer_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "conference_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "convenience",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "courthouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "dancing_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "deli",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "dentist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "department_store",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "doctors",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "doityourself",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "dojo",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "driving_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "dryer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "emergency_service",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "events_venue",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "exhibition_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "fast_food",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "festival_grounds",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "fitness_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "florist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "fuel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "furniture_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "gambling",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "garden_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "gift_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "golf_course",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "greengrocer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "guest_house",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "guesthouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "hairdresser",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "horse_riding",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "hospital",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "hostel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "hotel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "ice_cream",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "information",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "internet_cafe",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "jeweller",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "job_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "kindergarten",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "kiosk",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "language_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "laundry",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "library",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "lounge",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "marketplace",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "memorial",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "mobile_phone_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "money_transfer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "motel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "museum",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "music_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "newsagent",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "nightclub",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "optician",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "outdoor_catering",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "outdoor_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "pharmacy",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "picnic_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "pitch",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "place_of_worship",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "playground",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "post_depot",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "post_office",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "prep_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "prison",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "pub",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "public_building",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "research_institute",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "restaurant",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "ruins",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "sailing_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "shoe_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "singing_lessons",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "social_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "social_facility",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "sport_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "sports_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "sports_hall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "sports_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "stables",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "stadium",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "supermarket",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "swimming_area",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "swimming_pool",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "theatre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "theme_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "tourist_info",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "tower",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "town_hall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "townhall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "toy_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "traffic_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "travel_agent",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "university",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "vehicle_inspection",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "veterinary",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "video_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "viewpoint",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "water_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "water_well",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "amenity",
+      "value": "zoo",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "animal_boarding",
+      "object_types": ["node", "area"],
+      "description": "Identify points of interest and priority destinations for cycling network planning."
+    },
+    {
+      "key": "tourism",
+      "value": "animal_training",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "aquarium",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "arts_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "artwork",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "attraction",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bakery",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bank",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bar",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bathing_place",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bbq",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "beach_resort",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "beauty_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "beverages",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bicycle_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bicycle_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "biergarten",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "boat_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "boat_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "boat_sharing",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "boat_storage",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "boathouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "bookshop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "butcher",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "cafe",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "camp_pitch",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "camp_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "canteen",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "car_dealership",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "car_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "car_wash",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "caravan_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "casino",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "chalet",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "chemist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "childcare",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "cinema",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "clinic",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "clothes",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "college",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "comms_tower",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "community_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "computer_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "conference_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "convenience",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "courthouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "dancing_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "deli",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "dentist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "department_store",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "doctors",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "doityourself",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "dojo",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "driving_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "dryer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "emergency_service",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "events_venue",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "exhibition_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "fast_food",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "festival_grounds",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "fitness_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "florist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "fuel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "furniture_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "gambling",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "garden_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "gift_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "golf_course",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "greengrocer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "guest_house",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "guesthouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "hairdresser",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "horse_riding",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "hospital",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "hostel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "hotel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "ice_cream",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "information",
+      "object_types": ["node", "area"],
+      "description": "Identify points of interest and priority destinations for cycling network planning. Only processes information=office and information=visitor_centre subgroups."
+    },
+    {
+      "key": "tourism",
+      "value": "internet_cafe",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "jeweller",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "job_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "kindergarten",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "kiosk",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "language_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "laundry",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "library",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "lounge",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "marketplace",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "memorial",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "mobile_phone_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "money_transfer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "motel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "museum",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "music_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "newsagent",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "nightclub",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "optician",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "outdoor_catering",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "outdoor_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "pharmacy",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "picnic_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "pitch",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "place_of_worship",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "playground",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "post_depot",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "post_office",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "prep_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "prison",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "pub",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "public_building",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "research_institute",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "restaurant",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "ruins",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "sailing_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "shoe_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "singing_lessons",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "social_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "social_facility",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "sport_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "sports_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "sports_hall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "sports_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "stables",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "stadium",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "supermarket",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "swimming_area",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "swimming_pool",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "theatre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "theme_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "tourist_info",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "tower",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "town_hall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "townhall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "toy_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "traffic_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "travel_agent",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "university",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "vehicle_inspection",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "veterinary",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "video_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "viewpoint",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "water_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "water_well",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "zoo",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "tourism",
+      "value": "information",
+      "object_types": ["node", "area"],
+      "description": "Identify points of interest and priority destinations for cycling network planning. Only processes information=office and information=visitor_centre subgroups."
+    },
+    {
+      "key": "information",
+      "value": "office",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "information",
+      "value": "visitor_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "animal_boarding",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "animal_training",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "aquarium",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "arts_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "artwork",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "attraction",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bakery",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bank",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bar",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bathing_place",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bbq",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "beach_resort",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "beauty_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "beverages",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bicycle_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bicycle_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "biergarten",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "boat_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "boat_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "boat_sharing",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "boat_storage",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "boathouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "bookshop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "butcher",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "cafe",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "camp_pitch",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "camp_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "canteen",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "car_dealership",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "car_rental",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "car_wash",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "caravan_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "casino",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "chalet",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "chemist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "childcare",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "cinema",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "clinic",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "clothes",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "college",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "comms_tower",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "community_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "computer_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "conference_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "convenience",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "courthouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "dancing_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "deli",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "dentist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "department_store",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "doctors",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "doityourself",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "dojo",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "driving_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "dryer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "emergency_service",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "events_venue",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "exhibition_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "fast_food",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "festival_grounds",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "fitness_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "florist",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "fuel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "furniture_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "gambling",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "garden_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "gift_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "golf_course",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "greengrocer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "guest_house",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "guesthouse",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "hairdresser",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "horse_riding",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "hospital",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "hostel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "hotel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "ice_cream",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "information",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "internet_cafe",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "jeweller",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "job_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "kindergarten",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "kiosk",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "language_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "laundry",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "library",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "lounge",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "marketplace",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "memorial",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "mobile_phone_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "money_transfer",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "motel",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "museum",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "music_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "newsagent",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "nightclub",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "optician",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "outdoor_catering",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "outdoor_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "pharmacy",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "picnic_site",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "pitch",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "place_of_worship",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "playground",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "post_depot",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "post_office",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "prep_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "prison",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "pub",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "public_building",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "research_institute",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "restaurant",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "ruins",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "sailing_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "shoe_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "singing_lessons",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "social_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "social_facility",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "sport_school",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "sports_centre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "sports_hall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "sports_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "stables",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "stadium",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "supermarket",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "swimming_area",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "swimming_pool",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "theatre",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "theme_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "tourist_info",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "tower",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "town_hall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "townhall",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "toy_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "traffic_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "travel_agent",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "university",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "vehicle_inspection",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "veterinary",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "video_shop",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "viewpoint",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "water_park",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "water_well",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    },
+    {
+      "key": "leisure",
+      "value": "zoo",
+      "description": "Identify points of interest and priority destinations for cycling network planning.",
+      "object_types": ["node", "area"]
+    }
+  ]
+}

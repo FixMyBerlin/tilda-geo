@@ -28,6 +28,7 @@ export const numberConfigs: { key: string; suffix?: string | undefined }[] = [
   { key: 'tilda_width', suffix: 'm' }, // infravelo
   { key: 'Länge', suffix: 'm' }, // infravelo
   { key: 'sfid', suffix: undefined }, // infravelo
+  { key: 'laenge', suffix: 'm' }, // ueberlingen
   { key: 'radius', suffix: 'm' }, // parkings_cutouts
   { key: 'area', suffix: 'm²' }, // area values
   { key: 'circumference', suffix: 'm' }, // circumference values

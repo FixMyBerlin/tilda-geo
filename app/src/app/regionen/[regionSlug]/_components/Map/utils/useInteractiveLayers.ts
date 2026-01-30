@@ -1,3 +1,4 @@
+import { useMapDebugUseDebugLayerStyles } from '@/src/app/regionen/[regionSlug]/_hooks/mapState/useMapDebugState'
 import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { useDataParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useDataParam'
 import { useRegionDatasets } from '@/src/app/regionen/[regionSlug]/_hooks/useRegionDatasets/useRegionDatasets'
@@ -14,6 +15,7 @@ import {
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
+import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
 
@@ -58,31 +60,66 @@ const collectInteractiveLayerIdsFromCategory = ({ categories }: Props) => {
   return duplicatesRemoved
 }
 
+const collectAllLayerIdsFromConfig = ({ categories }: Props) => {
+  const allLayerIds: string[] = []
+
+  categories?.forEach((categoryConfig) => {
+    categoryConfig.subcategories.forEach((subcatConfig) => {
+      subcatConfig.styles.forEach((styleConfig) => {
+        if (styleConfig.id === 'hidden') return
+
+        styleConfig.layers.forEach((layerConfig) => {
+          const layerKey = createLayerKeyAtlasGeo(
+            subcatConfig.sourceId,
+            subcatConfig.id,
+            styleConfig.id,
+            layerConfig.id,
+          )
+          allLayerIds.push(layerKey)
+        })
+      })
+    })
+  })
+
+  return allLayerIds
+}
+
 export const useInteractiveLayers = () => {
-  // active layer from category
+  const useDebugLayerStyles = useMapDebugUseDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
+  const { showOsmNotesParam } = useShowOsmNotesParam()
+  const { showInternalNotesParam } = useShowInternalNotesParam()
+  const { qaParamData } = useQaParam()
+  const { dataParam: selectedDatasetIds } = useDataParam()
+  const regionDatasets = useRegionDatasets()
+
+  // Debug mode: return ALL layers from config
+  if (useDebugLayerStyles && categoriesConfig) {
+    return collectAllLayerIdsFromConfig({ categories: categoriesConfig })
+  }
+
+  // Standard flow: return normal interactive layers
   const activeCategoriesConfig = categoriesConfig?.filter((th) => th.active === true)
 
   const activeCategoryLayerIds = collectInteractiveLayerIdsFromCategory({
     categories: activeCategoriesConfig,
   })
 
-  const { showOsmNotesParam } = useShowOsmNotesParam()
   if (showOsmNotesParam) {
     activeCategoryLayerIds.push(osmNotesLayerId)
   }
-  const { showInternalNotesParam } = useShowInternalNotesParam()
   if (showInternalNotesParam) {
     activeCategoryLayerIds.push(internalNotesLayerId)
   }
-  const { qaParamData } = useQaParam()
   if (qaParamData.configSlug && qaParamData.style !== 'none') {
     activeCategoryLayerIds.push(qaLayerId)
   }
 
+  // Mask layers are systemLayer datasets with inspector.enabled: false, so they won't be included
+  // via the normal dataset filtering. We need to manually add them so they're interactive.
+  activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
+
   // active layer from datasets
-  const { dataParam: selectedDatasetIds } = useDataParam()
-  const regionDatasets = useRegionDatasets()
   const datasetsActiveLayerIds =
     regionDatasets
       .filter((dataset) => dataset.inspector.enabled)

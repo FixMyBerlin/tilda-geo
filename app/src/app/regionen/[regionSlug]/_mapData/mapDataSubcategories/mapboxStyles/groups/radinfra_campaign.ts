@@ -5,14 +5,14 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_radinfra_campaign: MapboxStyleLayer[] = [
   {
+    id: 'mapillary_presence_border',
+    type: 'line',
+    filter: ['has', 'mapillary_coverage'],
     minzoom: 12,
     layout: {
-      'line-join': 'round',
       'line-cap': 'round',
+      'line-join': 'round',
     },
-    filter: ['has', 'mapillary_coverage'],
-    type: 'line',
-    id: 'mapillary_presence_border',
     paint: {
       'line-color': '#050dff',
       'line-opacity': [
@@ -34,12 +34,12 @@ export const mapboxStyleGroupLayers_radinfra_campaign: MapboxStyleLayer[] = [
     },
   },
   {
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    type: 'line',
     id: 'campaign-line',
+    type: 'line',
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
       'line-color': '#fda5e4',
       'line-opacity': [
@@ -61,14 +61,14 @@ export const mapboxStyleGroupLayers_radinfra_campaign: MapboxStyleLayer[] = [
     },
   },
   {
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    maxzoom: 12,
-    filter: ['has', 'mapillary_coverage'],
-    type: 'line',
     id: 'mapillary_presence_line',
+    type: 'line',
+    filter: ['has', 'mapillary_coverage'],
+    maxzoom: 12,
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
       'line-color': '#050dff',
       'line-width': ['interpolate', ['linear'], ['zoom'], 0, 0.5, 6, 0.5, 12, 1],

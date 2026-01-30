@@ -56,10 +56,13 @@ nw/outdoor_seating
 nw/position
 nw/road_marking
 nw/small_electric_vehicle_parking:position
+nwr/obstacle:parking=yes
 w/amenity=parking
+# CRITICAL: Keep `building` values in sync with sanitize_parking_tags.lua (parking_off_street) and off_street_parking_area_categories.lua: garage, garages, carport, parking
 w/building=carport
 w/building=garage
 w/building=garages
+w/building=parking
 w/kerb
 w/parking
 w/traffic_calming

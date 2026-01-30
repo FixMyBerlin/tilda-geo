@@ -5,13 +5,13 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_places: MapboxStyleLayer[] = [
   {
+    id: 'places-names',
+    type: 'symbol',
+    filter: ['match', ['get', 'place'], ['town', 'village', 'city'], true, false],
     minzoom: 9,
     layout: {
-      'text-size': ['interpolate', ['linear'], ['zoom'], 10, 10, 22, 13],
-      'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Regular'],
       'icon-allow-overlap': true,
-      'text-padding': 0,
-      'text-offset': [0, 1],
+      'icon-padding': 0,
       'icon-size': [
         'match',
         ['get', 'population'],
@@ -35,16 +35,16 @@ export const mapboxStyleGroupLayers_atlas_places: MapboxStyleLayer[] = [
         10,
         ['to-string', ['concat', ['get', 'name'], ' \n ', ['get', 'population']]],
       ],
-      'icon-padding': 0,
+      'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Regular'],
       'text-max-width': 20,
+      'text-offset': [0, 1],
+      'text-padding': 0,
+      'text-size': ['interpolate', ['linear'], ['zoom'], 10, 10, 22, 13],
     },
-    filter: ['match', ['get', 'place'], ['town', 'village', 'city'], true, false],
-    type: 'symbol',
-    id: 'places-names',
     paint: {
+      'text-color': '#594f4f',
       'text-halo-color': 'hsla(0, 6%, 97%, 0.91)',
       'text-halo-width': 1,
-      'text-color': '#594f4f',
       'text-opacity': [
         'interpolate',
         ['linear'],

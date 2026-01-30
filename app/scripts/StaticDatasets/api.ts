@@ -2,12 +2,15 @@ import { Prisma } from '@prisma/client'
 import invariant from 'tiny-invariant'
 import { red } from './utils/log'
 
-const apiRootUrl = process.env.API_ROOT_URL
-invariant(apiRootUrl?.startsWith('http'), 'API_ROOT_URL missing.')
+const getApiRootUrl = () => {
+  const apiRootUrl = process.env.API_ROOT_URL
+  invariant(apiRootUrl?.startsWith('http'), 'API_ROOT_URL missing.')
+  return apiRootUrl
+}
 
-export const getRegionsUrl = `${apiRootUrl}/regions`
-export const createUploadUrl = `${apiRootUrl}/uploads/create`
-export const deleteAllUploadsUrl = `${apiRootUrl}/uploads/delete-all`
+export const getRegionsUrl = () => `${getApiRootUrl()}/regions`
+export const createUploadUrl = () => `${getApiRootUrl()}/uploads/create`
+export const deleteAllUploadsUrl = () => `${getApiRootUrl()}/uploads/delete-all`
 
 const addApiKey = (url) =>
   url + '?' + new URLSearchParams({ apiKey: process.env.ATLAS_API_KEY! }).toString()
@@ -22,7 +25,7 @@ async function checkResponse(request: Request, response: Response) {
 }
 
 export const getRegions = async (): Promise<{ id: number; slug: string }[]> => {
-  const url = addApiKey(getRegionsUrl)
+  const url = addApiKey(getRegionsUrl())
   const request = new Request(url)
   const response = await fetch(request)
   await checkResponse(request, response)
@@ -38,13 +41,21 @@ type UploadData = {
   isPublic: boolean
   hideDownloadLink: boolean
   configs: Record<string, any>[]
+  systemLayer: boolean
 } & Pick<
   Prisma.UploadCreateInput,
-  'pmtilesUrl' | 'geojsonUrl' | 'githubUrl' | 'mapRenderFormat' | 'mapRenderUrl'
+  // Types could be narrowed more. See schema.prisma and app/scripts/StaticDatasets/types.ts
+  | 'pmtilesUrl'
+  | 'geojsonUrl'
+  | 'githubUrl'
+  | 'mapRenderFormat'
+  | 'mapRenderUrl'
+  | 'externalSourceUrl'
+  | 'cacheTtlSeconds'
 >
 
 export const createUpload = async (data: UploadData) => {
-  const request = new Request(createUploadUrl, {
+  const request = new Request(createUploadUrl(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -57,7 +68,7 @@ export const createUpload = async (data: UploadData) => {
 }
 
 export const deleteAllUploads = async () => {
-  const request = new Request(deleteAllUploadsUrl, {
+  const request = new Request(deleteAllUploadsUrl(), {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

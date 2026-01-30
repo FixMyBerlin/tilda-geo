@@ -2,6 +2,7 @@
 
 cd ./app
 npm run check
+npm run type-check:deploy
 
 # This runs our unit tests for `Processing`
 

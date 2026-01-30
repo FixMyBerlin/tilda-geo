@@ -5,9 +5,9 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_parking_stats: MapboxStyleLayer[] = [
   {
-    filter: ['has', 'admin_level'],
-    type: 'fill',
     id: 'area-0-to-100',
+    type: 'fill',
+    filter: ['has', 'admin_level'],
     paint: {
       'fill-color': [
         'interpolate',
@@ -18,29 +18,29 @@ export const mapboxStyleGroupLayers_parking_stats: MapboxStyleLayer[] = [
         80,
         'rgb(122, 0, 163)',
       ],
-      'fill-outline-color': 'hsl(0, 100%, 100%)',
       'fill-opacity': 0.35,
+      'fill-outline-color': 'hsl(0, 100%, 100%)',
     },
   },
   {
-    type: 'line',
     id: 'line',
+    type: 'line',
     paint: {
       'line-color': 'hsl(0, 0%, 100%)',
       'line-opacity': 0.63,
     },
   },
   {
+    id: 'label',
+    type: 'symbol',
     layout: {
       'text-field': ['to-string', ['get', 'done_percent']],
     },
-    type: 'symbol',
-    id: 'label',
     paint: {
       'text-color': 'rgba(69, 0, 112, 0.95)',
-      'text-halo-width': 1,
-      'text-halo-color': 'hsl(291, 0%, 100%)',
       'text-halo-blur': 1,
+      'text-halo-color': 'hsl(291, 0%, 100%)',
+      'text-halo-width': 1,
     },
   },
 ]

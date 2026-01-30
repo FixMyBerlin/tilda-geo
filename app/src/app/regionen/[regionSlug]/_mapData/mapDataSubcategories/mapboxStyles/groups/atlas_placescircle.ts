@@ -5,14 +5,13 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_placescircle: MapboxStyleLayer[] = [
   {
-    filter: ['match', ['get', 'place'], ['village', 'city', 'town'], true, false],
-    type: 'circle',
     id: 'circle-place-circle',
+    type: 'circle',
+    filter: ['match', ['get', 'place'], ['village', 'city', 'town'], true, false],
     paint: {
-      'circle-stroke-width': ['match', ['get', 'place'], ['city', 'town'], 2, 1.5],
-      'circle-stroke-color': '#7304cd',
       'circle-color': 'rgba(255, 255, 255, 0.09)',
       'circle-radius': ['match', ['get', 'place'], ['city'], 15, ['town'], 7, ['village'], 3, 5],
+      'circle-stroke-color': '#7304cd',
       'circle-stroke-opacity': [
         'interpolate',
         ['linear'],
@@ -22,16 +21,17 @@ export const mapboxStyleGroupLayers_atlas_placescircle: MapboxStyleLayer[] = [
         10,
         ['match', ['get', 'place'], ['city', 'town', 'village'], 1, 0],
       ],
+      'circle-stroke-width': ['match', ['get', 'place'], ['city', 'town'], 2, 1.5],
     },
   },
   {
+    id: 'circle-place-names',
+    type: 'symbol',
+    filter: ['match', ['get', 'place'], ['town', 'village', 'city'], true, false],
     minzoom: 9,
     layout: {
-      'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 22, 13],
-      'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Regular'],
       'icon-allow-overlap': true,
-      'text-padding': 0,
-      'text-offset': [0, 1],
+      'icon-padding': 0,
       'icon-size': [
         'match',
         ['get', 'population'],
@@ -55,16 +55,16 @@ export const mapboxStyleGroupLayers_atlas_placescircle: MapboxStyleLayer[] = [
         10,
         ['to-string', ['concat', ['get', 'name'], ' \n ', ['get', 'population']]],
       ],
-      'icon-padding': 0,
+      'text-font': ['Open Sans SemiBold', 'Arial Unicode MS Regular'],
       'text-max-width': 20,
+      'text-offset': [0, 1],
+      'text-padding': 0,
+      'text-size': ['interpolate', ['linear'], ['zoom'], 10, 9, 22, 13],
     },
-    filter: ['match', ['get', 'place'], ['town', 'village', 'city'], true, false],
-    type: 'symbol',
-    id: 'circle-place-names',
     paint: {
+      'text-color': '#594f4f',
       'text-halo-color': 'hsla(0, 6%, 97%, 0.91)',
       'text-halo-width': 1,
-      'text-color': '#594f4f',
       'text-opacity': [
         'interpolate',
         ['linear'],

@@ -5,11 +5,14 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_radinfra_oneway: MapboxStyleLayer[] = [
   {
-    type: 'line',
     id: 'oneway-color',
+    type: 'line',
+    filter: ['match', ['get', 'oneway'], ['no', 'yes', 'car_not_bike'], true, false],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
       'line-color': [
         'match',
         ['get', 'oneway'],
@@ -21,35 +24,35 @@ export const mapboxStyleGroupLayers_radinfra_oneway: MapboxStyleLayer[] = [
         '#00c29e',
         'black',
       ],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-opacity': ['match', ['get', 'oneway'], ['car_not_bike'], 0.5, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['match', ['get', 'oneway'], ['no', 'yes', 'car_not_bike'], true, false],
   },
   {
-    type: 'line',
     id: 'oneway-color-dashed',
+    type: 'line',
+    filter: ['match', ['get', 'oneway'], ['car_not_bike'], true, false],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
       'line-color': '#00c29e',
       'line-dasharray': [0.1, 1.5],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['match', ['get', 'oneway'], ['car_not_bike'], true, false],
   },
   {
-    type: 'line',
     id: 'oneway-missing',
+    type: 'line',
+    filter: ['match', ['get', 'oneway'], ['implicit_yes', 'assumed_no'], true, false],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
       'line-color': [
         'match',
         ['get', 'oneway'],
@@ -60,41 +63,38 @@ export const mapboxStyleGroupLayers_radinfra_oneway: MapboxStyleLayer[] = [
         'black',
       ],
       'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4],
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['match', ['get', 'oneway'], ['implicit_yes', 'assumed_no'], true, false],
   },
   {
-    type: 'line',
     id: 'hitarea-missing-oneway',
+    type: 'line',
+    filter: ['match', ['get', 'oneway'], ['implicit_yes', 'assumed_no'], true, false],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
-      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
       'line-color': 'rgb(216, 20, 255)',
       'line-dasharray': [3, 1],
+      'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-opacity': 0,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12],
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['match', ['get', 'oneway'], ['implicit_yes', 'assumed_no'], true, false],
   },
   {
-    type: 'line',
     id: 'oneway-zoomed-out',
+    type: 'line',
+    filter: ['!', ['has', 'oneway']],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
     paint: {
+      'line-color': 'gray',
       'line-offset': ['interpolate', ['linear'], ['zoom'], 12, 0, 15, -1],
       'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.5, 16, 4],
-      'line-color': 'gray',
     },
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round',
-    },
-    filter: ['!', ['has', 'oneway']],
   },
 ]

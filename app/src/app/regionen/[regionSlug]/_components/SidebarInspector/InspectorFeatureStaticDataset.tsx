@@ -13,13 +13,13 @@ import { ToolsWrapper } from './Tools/ToolsWrapper'
 
 export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorFeature) => {
   const regionDatasets = useRegionDatasets()
-  if (!sourceKey || !feature.properties) return null
+  if (!sourceKey || !feature.properties || !regionDatasets) return null
 
   // The documentedKeys info is placed on the source object
   const sourceId = parseSourceKeyStaticDatasets(sourceKey).sourceId as string
   const sourceData = regionDatasets.find((dataset) => dataset.id === sourceId)
 
-  if (typeof sourceData === 'undefined') return null
+  if (!sourceData) return null
   if (!sourceData.inspector.enabled) return null
 
   const datasetTranslations = { ...translations, ...(sourceData.inspector.translations || {}) }

@@ -48,12 +48,10 @@ export const DebugMap = () => {
 
   const vectorSources = Object.entries(allSources).filter(([_, value]) => value.type === 'vector')
   const rasterSources = Object.entries(allSources).filter(([_, value]) => value.type === 'raster')
-  const atlasLayers = allLayers
-    .filter((layer) => {
-      return 'source' in layer && layer.source !== 'openmaptiles' && layer.type !== 'raster'
-    })
-    .flat()
-  if (!vectorSources || !rasterSources || !atlasLayers) return null
+  const atlasLayers = allLayers.filter((layer) => {
+    return 'source' in layer && layer.source !== 'openmaptiles' && layer.type !== 'raster'
+  })
+  if (!vectorSources || !rasterSources || !atlasLayers.length) return null
 
   return (
     <div className="group absolute top-3 right-[8.5rem] z-30 max-h-[95%] max-w-[25rem] space-y-0.5 overflow-y-auto rounded bg-pink-300 px-2 py-2 text-[10px] shadow-xl">
@@ -115,9 +113,9 @@ export const DebugMap = () => {
         </button>
         <input onChange={(e) => setLayerFilter(e.target.value)} placeholder="Filter Layer" />
 
-        {Object.entries(atlasLayers)
-          .filter(([_key, layer]) => (Boolean(layerFilter) ? layer.id.includes(layerFilter) : true))
-          .map(([_key, layer]) => {
+        {atlasLayers
+          .filter((layer) => (Boolean(layerFilter) ? layer.id.includes(layerFilter) : true))
+          .map((layer) => {
             const layerName =
               'source' in layer && layer.source.includes('atlas')
                 ? layer.id?.split('--')

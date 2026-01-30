@@ -11,6 +11,7 @@ export type SourcesParkingTildaId =
   | 'tilda_parkings_quantized'
   | 'tilda_parkings_no'
   | 'tilda_parkings_off_street'
+  | 'tilda_parkings_off_street_quantized'
 
 export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   {
@@ -49,6 +50,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'covered__if_present',
         'location__if_present',
         'markings__if_present',
+        'access__if_present',
         'composit_surface_smoothness',
         'area',
         'source',
@@ -117,6 +119,35 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     },
   },
   {
+    id: 'tilda_parkings_off_street_quantized',
+    tiles: getTilesUrl('/atlas_generalized_off_street_parking_quantized/{z}/{x}/{y}'),
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: SIMPLIFY_MAX_ZOOM,
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+    promoteId: 'id',
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'id',
+      documentedKeys: [
+        'capacity',
+        'operator_type',
+        'condition_category',
+        'condition_vehicles__if_present',
+      ],
+    },
+    calculator: {
+      enabled: true,
+      keys: ['capacity'],
+      queryLayers: [
+        'source:tilda_parkings_off_street_quantized--subcat:parkingTildaQuantizedOffStreet--style:default--layer:parking-points',
+      ],
+      highlightingKey: 'id',
+    },
+  },
+  {
     id: 'tilda_parkings_no',
     tiles: getTilesUrl('/atlas_generalized_parkings_no/{z}/{x}/{y}'),
     minzoom: SIMPLIFY_MIN_ZOOM,
@@ -154,11 +185,10 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        //
-        // New condition fields
         'parking',
         'informal__if_present',
-        'orientation',
+        'capacity',
+        'orientation__if_present',
         'direction__if_present',
         'condition_category',
         'condition_vehicles__if_present',
@@ -169,11 +199,11 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'location__if_present',
         'markings__if_present',
         'reason__if_present',
+        'access__if_present',
         'composit_surface_smoothness',
         'area',
         'source',
         'operator_type',
-        // OTHER
         'composit_mapillary',
       ],
     },

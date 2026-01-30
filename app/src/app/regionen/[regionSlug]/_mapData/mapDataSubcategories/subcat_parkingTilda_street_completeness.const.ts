@@ -1,0 +1,52 @@
+import { FileMapDataSubcategory } from '../types'
+import { mapboxStyleGroupLayers_park_street_completeness } from './mapboxStyles/groups/park_street_completeness'
+import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+
+const subcatId = 'parkingTildaMissing'
+const source = 'tilda_parkings_no'
+const sourceLayer = 'parkings_no'
+export type SubcatParkingTildaCompletenessId = typeof subcatId
+export type SubcatParkingTildaCompletenessStyleIds = 'default'
+
+export const subcat_parkingTilda_street_completeness: FileMapDataSubcategory = {
+  id: subcatId,
+  name: 'Vollständigkeit',
+  ui: 'checkbox',
+  sourceId: source,
+  beforeId: undefined,
+  styles: [
+    {
+      id: 'default',
+      name: 'Standard',
+      layers: mapboxStyleLayers({
+        layers: mapboxStyleGroupLayers_park_street_completeness,
+        source,
+        sourceLayer,
+      }),
+      legends: [
+        {
+          id: 'missing',
+          name: 'Daten in OSM fehlen',
+          desc: ['Für diesen Abschnitt sind noch keine Daten in OpenStreetMap hinterlegt.'],
+          style: { type: 'line', color: 'rgb(187, 17, 133)', width: 5 },
+        },
+        {
+          id: 'not-expected',
+          name: 'Kein Parken zu erwarten',
+          desc: [
+            'Für diesen Abschnitt sind zwar noch keine Daten in OpenStreetMap hinterlegt, aber wir gehen davon aus, dass hier nicht geparkt werden darf.',
+          ],
+          style: { type: 'line', color: 'rgb(102, 21, 168)', width: 5 },
+        },
+        {
+          id: 'too-small',
+          name: 'Kein Parken zu erwarten (Größe)',
+          desc: [
+            'Dieser Abschnitt ist zu klein als das ein Fahrzeug in Referenzgröße hier parken könnte. Dieser Abschnitt wurde daher nicht als Parkstand bewertet.',
+          ],
+          style: { type: 'line', color: 'rgb(99, 53, 50)', width: 5 },
+        },
+      ],
+    },
+  ],
+}

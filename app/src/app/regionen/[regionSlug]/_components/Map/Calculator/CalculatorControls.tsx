@@ -53,7 +53,7 @@ export const CalculatorControls = ({ queryLayers, drawControlRef }: Props) => {
   return (
     <CalculatorControlsDrawControl
       ref={drawControlRef}
-      position="top-right"
+      position="top-left"
       displayControlsDefault={false}
       controls={{
         polygon: true,

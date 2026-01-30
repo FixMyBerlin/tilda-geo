@@ -1,6 +1,7 @@
+import { bbox, bboxPolygon, featureCollection, intersect } from '@turf/turf'
 import { $, sql } from 'bun'
-import chalk from 'chalk'
-import type { Topic } from '../constants/topics.const'
+import { styleText } from 'node:util'
+import type { Topic, TopicConfigBbox } from '../constants/topics.const'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 
@@ -42,6 +43,51 @@ export async function initializeCustomFunctionDiffing() {
 }
 
 /**
+ * Get the effective diffing bbox, which is the intersection of PROCESSING_DIFFING_BBOX
+ * and PROCESS_ONLY_BBOX when both are set, otherwise returns the diffing bbox.
+ */
+function getEffectiveDiffingBbox(): TopicConfigBbox | null {
+  if (!params.diffingBbox) {
+    return null
+  }
+
+  // If PROCESS_ONLY_BBOX is not set, use diffingBbox as-is
+  if (!params.processOnlyBbox) {
+    return params.diffingBbox
+  }
+
+  // Both bboxes are set - compute their intersection
+  const diffingPolygon = bboxPolygon(params.diffingBbox)
+  const processOnlyPolygon = bboxPolygon(params.processOnlyBbox)
+  const intersection = intersect(featureCollection([diffingPolygon, processOnlyPolygon]))
+
+  if (!intersection) {
+    // Bboxes don't intersect - use the smaller one (PROCESS_ONLY_BBOX)
+    console.log(
+      'Diffing: Bboxes do not intersect, using PROCESS_ONLY_BBOX',
+      JSON.stringify({ diffingBbox: params.diffingBbox, processOnlyBbox: params.processOnlyBbox }),
+    )
+    return params.processOnlyBbox
+  }
+
+  // Extract bbox from intersection polygon
+  const intersectionBbox = bbox(intersection) as TopicConfigBbox
+
+  if (isDev) {
+    console.log(
+      'Diffing: Using intersection of PROCESSING_DIFFING_BBOX and PROCESS_ONLY_BBOX',
+      JSON.stringify({
+        diffingBbox: params.diffingBbox,
+        processOnlyBbox: params.processOnlyBbox,
+        effectiveBbox: intersectionBbox,
+      }),
+    )
+  }
+
+  return intersectionBbox
+}
+
+/**
  * Get all table names from the given schema.
  * @param schema
  * @returns a set of table names
@@ -61,13 +107,14 @@ export async function getSchemaTables(schema: string) {
  * @returns the Promise of the query
  */
 export async function createReferenceTable(table: string) {
-  if (!params.diffingBbox) throw new Error('Required param `env.PROCESSING_DIFFING_BBOX` missing')
+  const effectiveBbox = getEffectiveDiffingBbox()
+  if (!effectiveBbox) throw new Error('Required param `env.PROCESSING_DIFFING_BBOX` missing')
 
   const tableId = tableIdentifier(table)
   const referenceTableId = referenceTableIdentifier(table)
   await sql.unsafe(`DROP TABLE IF EXISTS ${referenceTableId}`)
 
-  const [minLon, minLat, maxLon, maxLat] = params.diffingBbox
+  const [minLon, minLat, maxLon, maxLat] = effectiveBbox
 
   await sql.unsafe(`
     CREATE TABLE ${referenceTableId} AS
@@ -84,7 +131,12 @@ export async function createReferenceTable(table: string) {
   if (isDev) {
     console.log(
       'Diffing: Recreated reference table with bbox filter',
-      JSON.stringify({ table, diffingBbox: params.diffingBbox }),
+      JSON.stringify({
+        table,
+        effectiveBbox,
+        diffingBbox: params.diffingBbox,
+        processOnlyBbox: params.processOnlyBbox,
+      }),
     )
   }
 }
@@ -126,7 +178,8 @@ async function createSpatialIndex(table: string) {
  * @returns the number of added, removed and modified entries
  */
 export async function computeDiff(table: string) {
-  if (!params.diffingBbox) throw new Error('Required param `env.PROCESSING_DIFFING_BBOX` missing')
+  const effectiveBbox = getEffectiveDiffingBbox()
+  if (!effectiveBbox) throw new Error('Required param `env.PROCESSING_DIFFING_BBOX` missing')
 
   const tableId = tableIdentifier(table)
   const referenceTableId = referenceTableIdentifier(table)
@@ -141,7 +194,7 @@ export async function computeDiff(table: string) {
   // compute full outer join
   await sql.unsafe(`DROP TABLE IF EXISTS ${joinedTableId}`)
 
-  const [minLon, minLat, maxLon, maxLat] = params.diffingBbox
+  const [minLon, minLat, maxLon, maxLat] = effectiveBbox
 
   await sql.unsafe(`
     CREATE TABLE ${joinedTableId} AS
@@ -241,14 +294,14 @@ function printDiffInfo(diffInfo: Awaited<ReturnType<typeof computeDiff>>) {
   const { table } = diffInfo
   console.log(`🔍 Diffing table "${table}":`)
   const loggingStyle = [
-    { name: 'total:', color: chalk.yellow, key: 'nTotal' as const },
-    { name: 'added:', color: chalk.green, key: 'nAdded' as const },
-    { name: 'removed:', color: chalk.red, key: 'nRemoved' as const },
-    { name: 'modified:', color: chalk.blue, key: 'nModified' as const },
+    { name: 'total:', color: 'yellow' as const, key: 'nTotal' as const },
+    { name: 'added:', color: 'green' as const, key: 'nAdded' as const },
+    { name: 'removed:', color: 'red' as const, key: 'nRemoved' as const },
+    { name: 'modified:', color: 'blue' as const, key: 'nModified' as const },
   ]
   const indent = ' '.repeat(5)
   loggingStyle.forEach(({ name, color, key }) => {
-    console.log(`${indent}${name.padEnd(10)}${color(diffInfo[key])}`)
+    console.log(`${indent}${name.padEnd(10)}${styleText(color, String(diffInfo[key]))}`)
   })
 }
 
@@ -258,12 +311,21 @@ function printDiffInfo(diffInfo: Awaited<ReturnType<typeof computeDiff>>) {
  * @param tables
  */
 export async function diffTables(tables: string[]) {
-  if (!params.diffingBbox) {
+  const effectiveBbox = getEffectiveDiffingBbox()
+  if (!effectiveBbox) {
     console.log('Diffing: Skipping diffTables (no bbox provided)', JSON.stringify({ tables }))
     return
   }
 
-  console.log('Diffing: diffTables', JSON.stringify({ tables, diffingBbox: params.diffingBbox }))
+  console.log(
+    'Diffing: diffTables',
+    JSON.stringify({
+      tables,
+      effectiveBbox,
+      diffingBbox: params.diffingBbox,
+      processOnlyBbox: params.processOnlyBbox,
+    }),
+  )
 
   // compute all diffs in parallel
   const diffResults = await Promise.all(tables.map((table) => computeDiff(table)))

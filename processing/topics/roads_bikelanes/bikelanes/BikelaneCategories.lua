@@ -427,15 +427,21 @@ function is_crossing_pattern(tags)
   if tags.highway == 'cycleway' and tags.cycleway == 'lane' and tags.lane == 'crossing' then
     return true
   end
-  if tags.highway == 'cycleway' and tags.cycleway == 'crossing' then
+  if tags.highway == 'cycleway'
+    and (tags.cycleway == 'crossing' or tags.cycleway == 'traffic_island')
+  then
     return true
   end
-  if tags.highway == 'path' and tags.path == 'crossing'
-      and (tags.bicycle == 'yes' or tags.bicycle == 'designated') then
+  if tags.highway == 'path'
+    and (tags.path == 'crossing' or tags.path == 'traffic_island')
+    and (tags.bicycle == 'yes' or tags.bicycle == 'designated')
+  then
     return true
   end
-  if tags.highway == 'footway' and tags.footway == 'crossing'
-      and (tags.bicycle == 'yes' or tags.bicycle == 'designated') then
+  if tags.highway == 'footway'
+    and (tags.footway == 'crossing' or tags.footway == 'traffic_island')
+    and (tags.bicycle == 'yes' or tags.bicycle == 'designated')
+  then
     return true
   end
   return false

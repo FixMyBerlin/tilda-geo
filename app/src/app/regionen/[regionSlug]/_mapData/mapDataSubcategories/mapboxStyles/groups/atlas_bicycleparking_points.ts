@@ -5,6 +5,8 @@ import { MapboxStyleLayer } from '../types'
 
 export const mapboxStyleGroupLayers_atlas_bicycleparking_points: MapboxStyleLayer[] = [
   {
+    id: 'bicycleparking-points',
+    type: 'symbol',
     layout: {
       'icon-image': [
         'match',
@@ -16,8 +18,6 @@ export const mapboxStyleGroupLayers_atlas_bicycleparking_points: MapboxStyleLaye
         'dot-11',
       ],
     },
-    type: 'symbol',
-    id: 'bicycleparking-points',
     paint: {},
   },
 ]

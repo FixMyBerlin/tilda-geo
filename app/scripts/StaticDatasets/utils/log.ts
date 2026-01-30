@@ -1,6 +1,6 @@
-import chalk from 'chalk'
+import { styleText } from 'node:util'
 
-export const yellow = (s: string, ...rest: any[]) => console.log(chalk.yellow(s), ...rest)
-export const green = (s: string, ...rest: any[]) => console.log(chalk.green(s), ...rest)
-export const red = (s: string, ...rest: any[]) => console.log(chalk.red(s), ...rest)
-export const inverse = (s: string, ...rest: any[]) => console.log(chalk.inverse(s), ...rest)
+export const yellow = (s: string, ...rest: any[]) => console.log(styleText('yellow', s), ...rest)
+export const green = (s: string, ...rest: any[]) => console.log(styleText('green', s), ...rest)
+export const red = (s: string, ...rest: any[]) => console.log(styleText('red', s), ...rest)
+export const inverse = (s: string, ...rest: any[]) => console.log(styleText('inverse', s), ...rest)

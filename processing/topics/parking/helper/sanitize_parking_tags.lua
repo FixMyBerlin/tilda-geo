@@ -1,4 +1,5 @@
 require('init')
+require('Set')
 local sanitize_for_logging = require('sanitize_for_logging')
 
 local SANITIZE_PARKING_TAGS = {
@@ -21,7 +22,7 @@ local SANITIZE_PARKING_TAGS = {
   -- (e.g., splitting areas into front/back kerbs in `tilda_parking_area_to_line`)
   location = function(value)
     if value == 'lane_center' then return 'lane_centre' end
-    return sanitize_for_logging(value, { 'median', 'lane_centre' })
+    return sanitize_for_logging(value, { 'median', 'lane_centre' }, { 'underground' })
   end,
   orientation = function (value)
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })
@@ -51,8 +52,29 @@ local SANITIZE_PARKING_TAGS = {
   fee = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
-  parking_entrance = function(value)
-    return sanitize_for_logging(value, { 'surface', 'depot', 'underground', 'multi-storey', 'rooftop' })
+  parking_off_street = function(tags)
+    if tags.parking then
+      return sanitize_for_logging(tags.parking, { 'surface', 'depot', 'rooftop', 'layby', 'multi-storey', 'underground', 'garage_boxes', 'carport', 'sheds' })
+    end
+
+    if tags.building then
+      -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and filter-expressions.txt
+      local building_to_parking = {
+        parking = 'multi-storey',
+        garage = 'garage',
+        garages = 'garage',
+        carport = 'carport',
+      }
+      local parking_value = building_to_parking[tags.building]
+      if parking_value then
+        return parking_value
+      end
+      -- Unknown building type - log it for debugging
+      return sanitize_for_logging('OFF_STREET_PARKING_UNKNOWN_BUILDING_TYPE', {})
+    end
+
+    -- No parking and no building - log it for debugging
+    return sanitize_for_logging('OFF_STREET_PARKING_WITHOUT_PARKING_OR_BUILDING_TAG', {})
   end,
   direction_to_side = function(value)
     local transformations = {

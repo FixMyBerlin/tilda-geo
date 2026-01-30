@@ -1,20 +1,20 @@
 import { Parser } from '@json2csv/plainjs'
 import { truncate } from '@turf/truncate'
 import { geoJSONToWkt } from 'betterknown'
-import type { FeatureCollection } from 'geojson'
+import { FeatureCollection } from 'geojson'
 
 /**
  * Converts GeoJSON FeatureCollection to CSV format
  * Uses betterknown library for modern, TypeScript-native WKT conversion
  */
 
-interface CsvRow {
+type CsvRow = {
   geometry_type: string
   geometry_wkt: string
   [key: string]: any
 }
 
-export async function convertGeoJsonToCsv(geojsonData: any) {
+export async function convertGeoJsonToCsv(geojsonData: FeatureCollection) {
   if (!geojsonData || geojsonData.type !== 'FeatureCollection') {
     throw new Error('Invalid GeoJSON: Expected FeatureCollection')
   }
