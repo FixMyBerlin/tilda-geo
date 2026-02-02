@@ -38,8 +38,6 @@
     "regions:configs": "bun \"src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/saveConfigs.ts\" && prettier --experimental-cli --write \"src/**/v2/configs/index.ts\" \"src/**/v2/configs/*.ts\"",
     "test": "vitest watch",
     "test:run": "vitest run --passWithNoTests",
-    "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage",
     "mailpreview": "NEXT_PUBLIC_APP_ORIGIN=http://127.0.0.1:5173 email dev --dir mailers",
     "check": "npm run type-check && npm run lint && npm run format && npm run test:run",
     "MapboxStyles:update": "bun ./scripts/MapboxStyles/process.ts && npm run lint -- --fix && prettier --experimental-cli --write \"src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles\" && github",
@@ -147,7 +145,6 @@
     "@types/web": "0.0.172",
     "@typescript-eslint/eslint-plugin": "8.54.0",
     "@vitejs/plugin-react": "4.7.0",
-    "@vitest/ui": "2.1.9",
     "dotenv": "17.2.3",
     "eslint": "8.57.1",
     "eslint-config-next": "14.2.35",
@@ -169,6 +166,6 @@
     "tailwindcss": "^4.1.18",
     "typescript": "5.9.3",
     "use-changed-props": "0.1.0",
-    "vitest": "2.1.9"
+    "vitest": "4.0.18"
   }
 }

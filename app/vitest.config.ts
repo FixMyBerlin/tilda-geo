@@ -13,10 +13,6 @@ export default defineConfig({
     globals: true,
     setupFiles: './test/setup.ts',
     include: ['**/*.test.ts'], // Exclude .spec.ts which are Playwright tests
-    coverage: {
-      reporter: ['text', 'json', 'html'],
-    },
-    minWorkers: 1,
     maxWorkers: 1,
     alias: {
       '@/': new URL('./', import.meta.url).pathname,
