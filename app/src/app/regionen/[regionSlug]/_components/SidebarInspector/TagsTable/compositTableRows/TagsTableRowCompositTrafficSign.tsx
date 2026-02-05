@@ -58,6 +58,11 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
       'https://upload.wikimedia.org/wikipedia/commons/b/bf/Zeichen_244_-_Beginn_der_Fahrradstra%C3%9Fe%2C_StVO_1997.svg',
     title: 'Zeichen 244.1, Fahrradstraße (Beginn)',
   },
+  '244.3': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/4/4e/Zeichen_244.3_-_Beginn_einer_Fahrradzone%2C_StVO_2020.svg',
+    title: 'Zeichen 244.3, Beginn einer Fahrradzone',
+  },
   '245': {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/0/05/Zeichen_245_-_Bussonderfahrstreifen%2C_StVO_2013.svg',
@@ -67,6 +72,11 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/d/d2/Zeichen_250_-_Verbot_f%C3%BCr_Fahrzeuge_aller_Art%2C_StVO_1992.svg',
     title: 'Zeichen 250: Verbot für Fahrzeuge aller Art.',
+  },
+  '254': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/b/b0/Zeichen_254_-_Verbot_f%C3%BCr_Radfahrer%2C_StVO_1992.svg',
+    title: 'Zeichen 254: Verbot für Radfahrer',
   },
   '260': {
     signUrl:
@@ -88,6 +98,21 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
       'https://upload.wikimedia.org/wikipedia/commons/b/bc/Zeichen_274.1-20_-_Beginn_einer_Tempo_20-Zone_in_verkehrsberuhigten_Gesch%C3%A4ftsbereichen_%28einseitig%29%2C_StVO_2013.svg',
     title: 'Beginn einer Tempo 20-Zone',
   },
+  '274.1[30]': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/e/eb/Zeichen_274.1_-_Beginn_einer_Tempo_30-Zone%2C_StVO_2013.svg',
+    title: 'Zeichen 274.1 – Beginn der Tempo-30-Zone',
+  },
+  '325': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/e/e2/Zeichen_325.1_-_Beginn_eines_verkehrsberuhigten_Bereichs%2C_StVO_2009.svg',
+    title: 'Zeichen 325.1 – Beginn eines verkehrsberuhigten Bereichs',
+  },
+  '325.1': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/e/e2/Zeichen_325.1_-_Beginn_eines_verkehrsberuhigten_Bereichs%2C_StVO_2009.svg',
+    title: 'Zeichen 325.1 – Beginn eines verkehrsberuhigten Bereichs',
+  },
   '350.1': {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/a/a1/Zeichen_350.1_-_Radschnellweg%3B_StVO_2020.svg',
@@ -108,15 +133,30 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
       'https://upload.wikimedia.org/wikipedia/commons/5/5e/Zusatzzeichen_1000-31_-_beide_Richtungen%2C_zwei_gegengerichtete_senkrechte_Pfeile%2C_StVO_1992.svg',
     title: 'Zusatzzeichen 1000-31, Beide Richtungen',
   },
+  '1000-32': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/3/3a/Zusatzzeichen_1000-32_-_Radfahrer_kreuzen_von_rechts_und_links%2C_StVO_1997.svg',
+    title: 'Zusatzzeichen 1000-32: Radfahrer kreuzen von rechts und links',
+  },
   '1000-33': {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/0/06/Zusatzzeichen_1000-33_-_Radverkehr_im_Gegenverkehr%2C_StVO_1997.svg',
     title: 'Zusatzzeichen 1000-33, Radverkehr im Gegenverkehr',
   },
+  '1012-32': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/1/18/Zusatzzeichen_1012-32_-_Radfahrer_absteigen_%28420x231%29%2C_StVO_1992.svg',
+    title: 'Zusatzzeichen 1012-32: Radfahrer absteigen',
+  },
   '1020-10': {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/d/d1/Zusatzzeichen_1020-11_-_Schwerbehinderte_mit_Parkausweis_Nr._..._frei%2C_StVO_1992.svg',
     title: 'Zusatzschild 1020-11: Schwerbehinderte mit Parkausweis Nr. ... frei',
+  },
+  '1020-12': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/8/83/Zusatzzeichen_1020-12_-_Radfahrer_und_Anlieger_frei_%28450x600%29%2C_StVO_1992.svg',
+    title: 'Zusatzzeichen 1020-12: Radfahrer und Anlieger frei',
   },
   '1020-30': {
     signUrl:
@@ -152,6 +192,11 @@ const trafficSigns: Record<string, { title: string; signUrl: string }> = {
     signUrl:
       'https://upload.wikimedia.org/wikipedia/commons/4/43/Zusatzzeichen_1026-30_-_Taxi_frei%2C_StVO_1992.svg',
     title: 'Zusatzzeichen 1024-30: Taxi frei',
+  },
+  '1026-32': {
+    signUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/1/14/Zusatzzeichen_1026-32_-_Linienverkehr_frei_%28450x600%29%2C_StVO_1992.svg',
+    title: 'Zusatzzeichen 1026-32: Linienverkehr frei',
   },
   '1026-35': {
     signUrl:
