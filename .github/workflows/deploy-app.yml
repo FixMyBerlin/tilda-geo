@@ -5,15 +5,6 @@ on:
       ENVIRONMENT:
         required: true
         type: string
-      NEXT_PUBLIC_APP_ORIGIN:
-        required: true
-        type: string
-      NEXT_PUBLIC_APP_ENV:
-        required: true
-        type: string
-      APP_URL:
-        required: true
-        type: string
       CONFIG_CHANGED:
         required: true
         type: boolean
@@ -74,15 +65,15 @@ jobs:
             public.ecr.aws/n0p8j4k5/tilda/app:${{ github.sha }}
             public.ecr.aws/n0p8j4k5/tilda/app:${{ inputs.ENVIRONMENT }}-latest
           build-args: |
-            NEXT_PUBLIC_APP_ENV=${{ inputs.NEXT_PUBLIC_APP_ENV }}
-            NEXT_PUBLIC_APP_ORIGIN=${{ inputs.NEXT_PUBLIC_APP_ORIGIN }}
+            NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV }}
+            NEXT_PUBLIC_APP_ORIGIN=${{ vars.NEXT_PUBLIC_APP_ORIGIN }}
   restart_app:
     runs-on: ubuntu-latest
     needs: [diff_app, build_app]
     if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_app.outputs.changes == 'true' || inputs.CONFIG_CHANGED)) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
-      url: https://${{ inputs.APP_URL }}
+      url: https://${{ vars.APP_URL }}
     steps:
       - name: Stop & Start container on Server
         uses: appleboy/ssh-action@master

@@ -8,11 +8,6 @@ jobs:
     uses: ./.github/workflows/setup-env.yml
     with:
       ENVIRONMENT: production
-      TILES_URL: tiles.tilda-geo.de
-      CACHELESS_URL: cacheless.tilda-geo.de
-      NEXT_PUBLIC_APP_ORIGIN: https://tilda-geo.de
-      NEXT_PUBLIC_APP_ENV: production
-      APP_URL: tilda-geo.de
     secrets: inherit
   restart_services:
     uses: ./.github/workflows/restart-services.yml
@@ -25,17 +20,12 @@ jobs:
     uses: ./.github/workflows/deploy-processing.yml
     with:
       ENVIRONMENT: production
-      TILES_URL: tiles.tilda-geo.de
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
-      PROCESSING_DIFFING_MODE: off
     secrets: inherit
   deploy_app:
     uses: ./.github/workflows/deploy-app.yml
     needs: restart_services
     with:
       ENVIRONMENT: production
-      NEXT_PUBLIC_APP_ORIGIN: https://tilda-geo.de
-      NEXT_PUBLIC_APP_ENV: production
-      APP_URL: tilda-geo.de
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
     secrets: inherit

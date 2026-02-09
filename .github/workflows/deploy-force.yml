@@ -15,11 +15,6 @@ jobs:
     uses: ./.github/workflows/setup-env.yml
     with:
       ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
-      TILES_URL: ${{ inputs.ENVIRONMENT == 'production' && 'tiles.tilda-geo.de' || 'staging-tiles.tilda-geo.de' }}
-      CACHELESS_URL: ${{ inputs.ENVIRONMENT == 'production' && 'cacheless.tilda-geo.de' || 'staging-cacheless.tilda-geo.de' }}
-      NEXT_PUBLIC_APP_ORIGIN: ${{ inputs.ENVIRONMENT == 'production' && 'https://tilda-geo.de' || 'https://staging.tilda-geo.de' }}
-      NEXT_PUBLIC_APP_ENV: ${{ inputs.ENVIRONMENT }}
-      APP_URL: ${{ inputs.ENVIRONMENT == 'production' && 'tilda-geo.de' || 'staging.tilda-geo.de' }}
     secrets: inherit
   restart_services:
     uses: ./.github/workflows/restart-services.yml
@@ -32,9 +27,7 @@ jobs:
     needs: restart_services
     with:
       ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
-      TILES_URL: ${{ inputs.ENVIRONMENT == 'production' && 'tiles.tilda-geo.de' || 'staging-tiles.tilda-geo.de' }}
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
-      PROCESSING_DIFFING_MODE: ${{ inputs.ENVIRONMENT == 'production' && 'off' || 'fixed' }}
       DIFF_CHECK_MODE: skip
     secrets: inherit
   deploy_app:
@@ -42,9 +35,6 @@ jobs:
     needs: restart_services
     with:
       ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
-      NEXT_PUBLIC_APP_ORIGIN: ${{ inputs.ENVIRONMENT == 'production' && 'https://tilda-geo.de' || 'https://staging.tilda-geo.de' }}
-      NEXT_PUBLIC_APP_ENV: ${{ inputs.ENVIRONMENT }}
-      APP_URL: ${{ inputs.ENVIRONMENT == 'production' && 'tilda-geo.de' || 'staging.tilda-geo.de' }}
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
       DIFF_CHECK_MODE: skip
     secrets: inherit

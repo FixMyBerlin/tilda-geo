@@ -9,11 +9,6 @@ jobs:
     uses: ./.github/workflows/setup-env.yml
     with:
       ENVIRONMENT: staging
-      TILES_URL: staging-tiles.tilda-geo.de
-      CACHELESS_URL: staging-cacheless.tilda-geo.de
-      NEXT_PUBLIC_APP_ORIGIN: https://staging.tilda-geo.de
-      NEXT_PUBLIC_APP_ENV: staging
-      APP_URL: staging.tilda-geo.de
     secrets: inherit
   restart_services:
     uses: ./.github/workflows/restart-services.yml
@@ -26,17 +21,12 @@ jobs:
     needs: restart_services
     with:
       ENVIRONMENT: staging
-      TILES_URL: staging-tiles.tilda-geo.de
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
-      PROCESSING_DIFFING_MODE: fixed
     secrets: inherit
   deploy_app:
     uses: ./.github/workflows/deploy-app.yml
     needs: restart_services
     with:
       ENVIRONMENT: staging
-      NEXT_PUBLIC_APP_ORIGIN: https://staging.tilda-geo.de
-      NEXT_PUBLIC_APP_ENV: staging
-      APP_URL: staging.tilda-geo.de
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
     secrets: inherit

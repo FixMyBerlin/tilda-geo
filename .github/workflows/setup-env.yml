@@ -5,21 +5,6 @@ on:
       ENVIRONMENT:
         required: true
         type: string
-      TILES_URL:
-        type: string
-        required: true
-      CACHELESS_URL:
-        type: string
-        required: true
-      NEXT_PUBLIC_APP_ORIGIN:
-        required: true
-        type: string
-      NEXT_PUBLIC_APP_ENV:
-        required: true
-        type: string
-      APP_URL:
-        required: true
-        type: string
 
 jobs:
   setup_env:
@@ -60,11 +45,11 @@ jobs:
               -e "s|^PROCESS_GEOFABRIK_DOWNLOAD_URL=.*$|PROCESS_GEOFABRIK_DOWNLOAD_URL='${{ vars.PROCESS_GEOFABRIK_DOWNLOAD_URL }}'|" \
               -e "s|^PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME=.*$|PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME='${{ secrets.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME }}'|" \
               -e "s|^PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD=.*$|PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD='${{ secrets.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD }}'|" \
-              -e "s|^TILES_URL=.*$|TILES_URL='${{ inputs.TILES_URL }}'|" \
-              -e "s|^CACHELESS_URL=.*$|CACHELESS_URL='${{ inputs.CACHELESS_URL }}'|" \
-              -e "s|^NEXT_PUBLIC_APP_ORIGIN=.*$|NEXT_PUBLIC_APP_ORIGIN='${{ inputs.NEXT_PUBLIC_APP_ORIGIN }}'|"\
-              -e "s|^NEXT_PUBLIC_APP_ENV=.*$|NEXT_PUBLIC_APP_ENV='${{ inputs.NEXT_PUBLIC_APP_ENV }}'|" \
-              -e "s|^APP_URL=.*$|APP_URL='${{ inputs.APP_URL }}'|" \
+              -e "s|^TILES_URL=.*$|TILES_URL='${{ vars.TILES_URL }}'|" \
+              -e "s|^CACHELESS_URL=.*$|CACHELESS_URL='${{ vars.CACHELESS_URL }}'|" \
+              -e "s|^NEXT_PUBLIC_APP_ORIGIN=.*$|NEXT_PUBLIC_APP_ORIGIN='${{ vars.NEXT_PUBLIC_APP_ORIGIN }}'|"\
+              -e "s|^NEXT_PUBLIC_APP_ENV=.*$|NEXT_PUBLIC_APP_ENV='${{ vars.NEXT_PUBLIC_APP_ENV }}'|" \
+              -e "s|^APP_URL=.*$|APP_URL='${{ vars.APP_URL }}'|" \
               -e "s|^SESSION_SECRET_KEY=.*$|SESSION_SECRET_KEY='${{ secrets.SESSION_SECRET_KEY }}'|" \
               -e "s|^OSM_CLIENT_ID=.*$|OSM_CLIENT_ID='${{ secrets.OSM_CLIENT_ID }}'|" \
               -e "s|^OSM_CLIENT_SECRET=.*$|OSM_CLIENT_SECRET='${{ secrets.OSM_CLIENT_SECRET }}'|" \

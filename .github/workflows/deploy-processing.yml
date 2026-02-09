@@ -6,14 +6,8 @@ on:
       ENVIRONMENT:
         type: string
         required: true
-      TILES_URL:
-        type: string
-        required: true
       CONFIG_CHANGED:
         type: boolean
-        required: true
-      PROCESSING_DIFFING_MODE:
-        type: string
         required: true
       DIFF_CHECK_MODE:
         required: false
@@ -80,7 +74,7 @@ jobs:
     if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED)) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
-      url: https://${{ inputs.TILES_URL }}
+      url: https://${{ vars.TILES_URL }}
     steps:
       - name: Stop & Start containers on VPS
         uses: appleboy/ssh-action@master
@@ -96,7 +90,7 @@ jobs:
             echo "Pulling latest 'processing' image"
             docker compose pull processing
             echo "Restarting 'processing' container"
-            export PROCESSING_DIFFING_MODE="${{ inputs.PROCESSING_DIFFING_MODE }}"
+            export PROCESSING_DIFFING_MODE="${{ vars.PROCESSING_DIFFING_MODE }}"
             docker compose up processing -d
             unset PROCESSING_DIFFING_MODE
             echo "Cleanup docker (containers and images) that are older than 72h"
