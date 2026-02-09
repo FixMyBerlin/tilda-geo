@@ -15,16 +15,21 @@ on:
       PROCESSING_DIFFING_MODE:
         type: string
         required: true
+      DIFF_CHECK_MODE:
+        required: false
+        type: string
+        default: apply
 
 jobs:
   diff_processing:
     uses: ./.github/workflows/diff-last-run.yml
+    if: ${{ inputs.DIFF_CHECK_MODE == 'apply' }}
     with:
       CHECK_DIFF_LOCATIONS: processing/ warm-cache/ processing.Dockerfile
   build_processing:
     runs-on: ubuntu-latest
     needs: diff_processing
-    if: ${{ needs.diff_processing.outputs.changes == 'true' }}
+    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && needs.diff_processing.outputs.changes == 'true') }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
     steps:
@@ -72,7 +77,7 @@ jobs:
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
-    if: ${{ needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED && always() }}
+    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED)) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
       url: https://${{ inputs.TILES_URL }}

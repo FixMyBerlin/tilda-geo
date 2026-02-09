@@ -17,16 +17,21 @@ on:
       CONFIG_CHANGED:
         required: true
         type: boolean
+      DIFF_CHECK_MODE:
+        required: false
+        type: string
+        default: apply
 
 jobs:
   diff_app:
     uses: ./.github/workflows/diff-last-run.yml
+    if: ${{ inputs.DIFF_CHECK_MODE == 'apply' }}
     with:
       CHECK_DIFF_LOCATIONS: app/ app.Dockerfile
   build_app:
     runs-on: ubuntu-latest
     needs: diff_app
-    if: ${{ needs.diff_app.outputs.changes == 'true' }}
+    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && needs.diff_app.outputs.changes == 'true') }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
     steps:
@@ -74,7 +79,7 @@ jobs:
   restart_app:
     runs-on: ubuntu-latest
     needs: [diff_app, build_app]
-    if: ${{ needs.diff_app.outputs.changes == 'true' || inputs.CONFIG_CHANGED && always() }}
+    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_app.outputs.changes == 'true' || inputs.CONFIG_CHANGED)) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
       url: https://${{ inputs.APP_URL }}
