@@ -51,6 +51,7 @@ jobs:
               -e "s|^NEXT_PUBLIC_APP_ENV=.*$|NEXT_PUBLIC_APP_ENV='${{ vars.NEXT_PUBLIC_APP_ENV }}'|" \
               -e "s|^APP_URL=.*$|APP_URL='${{ vars.APP_URL }}'|" \
               -e "s|^SESSION_SECRET_KEY=.*$|SESSION_SECRET_KEY='${{ secrets.SESSION_SECRET_KEY }}'|" \
+              -e "s|^NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=.*$|NEXT_SERVER_ACTIONS_ENCRYPTION_KEY='${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}'|" \
               -e "s|^OSM_CLIENT_ID=.*$|OSM_CLIENT_ID='${{ secrets.OSM_CLIENT_ID }}'|" \
               -e "s|^OSM_CLIENT_SECRET=.*$|OSM_CLIENT_SECRET='${{ secrets.OSM_CLIENT_SECRET }}'|" \
               -e "s|^S3_KEY=.*$|S3_KEY='${{ secrets.S3_KEY }}'|" \
