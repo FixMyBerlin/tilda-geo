@@ -6,25 +6,24 @@ on:
       ENVIRONMENT:
         type: string
         required: true
-      TILES_URL:
-        type: string
-        required: true
       CONFIG_CHANGED:
         type: boolean
         required: true
-      PROCESSING_DIFFING_MODE:
+      DIFF_CHECK_MODE:
+        required: false
         type: string
-        required: true
+        default: apply
 
 jobs:
   diff_processing:
     uses: ./.github/workflows/diff-last-run.yml
+    if: ${{ inputs.DIFF_CHECK_MODE == 'apply' }}
     with:
       CHECK_DIFF_LOCATIONS: processing/ warm-cache/ processing.Dockerfile
   build_processing:
     runs-on: ubuntu-latest
     needs: diff_processing
-    if: ${{ needs.diff_processing.outputs.changes == 'true' }}
+    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && needs.diff_processing.outputs.changes == 'true') }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
     steps:
@@ -72,10 +71,10 @@ jobs:
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
-    if: ${{ needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED && always() }}
+    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED)) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
-      url: https://${{ inputs.TILES_URL }}
+      url: https://${{ vars.TILES_URL }}
     steps:
       - name: Stop & Start containers on VPS
         uses: appleboy/ssh-action@master
@@ -91,7 +90,7 @@ jobs:
             echo "Pulling latest 'processing' image"
             docker compose pull processing
             echo "Restarting 'processing' container"
-            export PROCESSING_DIFFING_MODE="${{ inputs.PROCESSING_DIFFING_MODE }}"
+            export PROCESSING_DIFFING_MODE="${{ vars.PROCESSING_DIFFING_MODE }}"
             docker compose up processing -d
             unset PROCESSING_DIFFING_MODE
             echo "Cleanup docker (containers and images) that are older than 72h"

@@ -105,6 +105,8 @@ The diffing mode is configured differently depending on the deployment context:
 
 To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `PROCESSING_DIFFING_MODE=off`.
 
+**Diffing timing in logs:** Timed diffing steps use the same style as topic timing: `Diffing: <step> - Start` then `Diffing: <step> – Took HH:MM:SS` (same `formatTimestamp` as "X finished in HH:MM:SS"). Steps: "Create reference tables", "Create reference tables (reference mode)", "Update diffs (previous|fixed)". Grep for `Diffing:` to see all diffing log lines.
+
 ### Process only a single object
 
 For the development process it's often useful to run the processing on a single object.

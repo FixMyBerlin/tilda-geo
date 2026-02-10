@@ -83,6 +83,7 @@ local SANITIZE_TAGS = {
     )
   end,
   operator_type = function(tags)
+    if not tags then return nil end
     local value = tags['operator:type']
     if value == nil then
       if tags.operator == 'private' then value = 'private'

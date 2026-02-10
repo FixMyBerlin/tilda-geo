@@ -12,4 +12,6 @@ Modes:
 - `fixed` - compare to frozen reference (doesn't update reference)
 - `reference` - create/update baseline reference, remove all diffs (clean slate)
 
+**Timing:** Processing logs emit `Diffing: <step> - Start` and `Diffing: <step> – Took HH:MM:SS` for timed steps (same format as "Topics: X finished in HH:MM:SS"). See [processing/README.md](../README.md).
+
 There is more on the diffing in other READMEs in this project.

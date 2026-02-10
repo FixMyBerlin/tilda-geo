@@ -1,32 +1,40 @@
-name: Deploy Staging
+name: Force Full Deploy
 on:
-  push:
-    branches:
-      - develop
-      - tinkering
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+        description: 'Environment to deploy to (staging or production). This workflow bypasses all optimization checks and always performs a full deployment of both app and processing services.'
+
 jobs:
   setup_env:
     uses: ./.github/workflows/setup-env.yml
     with:
-      ENVIRONMENT: staging
+      ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
     secrets: inherit
   restart_services:
     uses: ./.github/workflows/restart-services.yml
     needs: setup_env
     with:
-      ENVIRONMENT: staging
+      ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
     secrets: inherit
   deploy_processing:
     uses: ./.github/workflows/deploy-processing.yml
     needs: restart_services
     with:
-      ENVIRONMENT: staging
+      ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
+      DIFF_CHECK_MODE: skip
     secrets: inherit
   deploy_app:
     uses: ./.github/workflows/deploy-app.yml
     needs: restart_services
     with:
-      ENVIRONMENT: staging
+      ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
+      DIFF_CHECK_MODE: skip
     secrets: inherit

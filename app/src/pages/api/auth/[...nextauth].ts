@@ -4,7 +4,7 @@ import { getOsmApiUrl, getOsmUrl } from '@/src/app/_components/utils/getOsmUrl'
 import { api } from '@/src/blitz-server'
 import { Role } from '@/types'
 import { NextAuthAdapter } from '@blitzjs/auth/next-auth'
-import { Provider } from 'next-auth/providers'
+import type { Provider } from 'next-auth/providers/index'
 
 const providers: Provider[] = [
   {
@@ -17,7 +17,7 @@ const providers: Provider[] = [
     authorization: { params: { scope: 'openid read_prefs write_prefs write_notes' } },
     idToken: true,
     checks: ['pkce', 'state'],
-    // @ts-expect-error
+    // @ts-expect-error next-auth User.id is string; OSM uses numeric id, we use it as number
     profile(profile) {
       const { id, display_name, description, img } = profile
       return {

@@ -1,6 +1,7 @@
 import SocialSharingImage from '@/src/app/_components/layouts/assets/og-image-default.jpg'
 import { BlitzProvider } from '@/src/blitz-client'
 import { Metadata, Viewport } from 'next'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { Suspense } from 'react'
 import './_components/layouts/global.css'
 import { TailwindResponsiveHelper } from './_components/layouts/helper/TailwindResponsiveHelper'
@@ -44,9 +45,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="de" className="h-full">
       <body className="flex min-h-full w-full text-gray-800 antialiased">
         <BlitzProvider>
-          <Suspense>
-            <div className="relative flex-auto">{children}</div>
-          </Suspense>
+          <NuqsAdapter>
+            <Suspense>
+              <div className="relative flex-auto">{children}</div>
+            </Suspense>
+          </NuqsAdapter>
         </BlitzProvider>
         <TailwindResponsiveHelper />
       </body>

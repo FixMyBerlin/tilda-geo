@@ -9,6 +9,7 @@ import {
   getSchemaTables,
   getTopicTables,
 } from '../diffing/diffing'
+import { formatTimestamp } from '../utils/formatTimestamp'
 import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
@@ -124,7 +125,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
 
   // Reference mode: Drop all diff tables once at the start for a clean slate
   if (isReferenceMode) {
-    console.log('Diffing:', 'Drop all diff tables (reference mode - clean slate)')
+    console.log('Diffing: Drop all diff tables (reference mode - clean slate)')
     await dropAllDiffTables()
   }
 
@@ -175,7 +176,9 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // ============================================
     if (!isReferenceMode && diffChanges) {
       // Previous/Fixed modes: Create reference tables conditionally
-      console.log('Diffing:', 'Create reference tables')
+      const createRefLabel = 'Diffing: Create reference tables'
+      console.log(`${createRefLabel} - Start`)
+      const createRefStart = Date.now()
       // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
       // Which means existing reference tables don't change (are frozen).
       // Learn more in [processing/README](../../processing/README.md#reference)
@@ -184,6 +187,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
           ? processedTopicTables.difference(tableListReference)
           : processedTopicTables
       await Promise.all(Array.from(toCreateReference).map(createReferenceTable))
+      console.log(`${createRefLabel} – Took ${formatTimestamp(Date.now() - createRefStart)}`)
     }
 
     // Run the topic with osm2pgsql (LUA) and the sql processing
@@ -197,8 +201,11 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     // ============================================
     if (isReferenceMode) {
       // Reference mode: Create reference tables AFTER processing to capture final state
-      console.log('Diffing:', 'Create reference tables (reference mode)')
+      const createRefLabel = 'Diffing: Create reference tables (reference mode)'
+      console.log(`${createRefLabel} - Start`)
+      const createRefStart = Date.now()
       await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
+      console.log(`${createRefLabel} – Took ${formatTimestamp(Date.now() - createRefStart)}`)
     }
 
     // ============================================
@@ -209,8 +216,11 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       console.log('Diffing:', 'Skip diff computation (reference mode)')
     } else if (diffChanges) {
       // Previous/Fixed modes: Compute diffs
-      console.log('Diffing:', 'Update diffs', `Strategy: ${params.diffingMode}`)
+      const diffLabel = `Diffing: Update diffs (${params.diffingMode})`
+      console.log(`${diffLabel} - Start`)
+      const diffStart = Date.now()
       await diffTables(Array.from(processedTopicTables))
+      console.log(`${diffLabel} – Took ${formatTimestamp(Date.now() - diffStart)}`)
     } else {
       console.log(
         'Diffing:',

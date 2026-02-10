@@ -35,13 +35,13 @@ local function categorize_obstacle_points(object)
   end
 
   -- Step 2: Fallback for unmatched obstacle:parking=yes items
-  -- Uses default buffer radius of 0.5m for unknown obstacles (nodes).
+  -- Uses default buffer radius of 0.5m for unknown obstacles.
   if not best_result.category and TAG_HELPER.is_obstacle_parking(object.tags) then
     best_result.category = class_obstacle_category.new({
       id = 'other',
-      buffer_radius = function(tags) return 0.5 end,
-      conditions = function(tags) return false end, -- Never matches in main loop
-      tags = function(tags) return {} end,
+      buffer_radius = function(_) return 0.5 end,
+      conditions = function(_) return false end, -- Never matches in main loop
+      tags = function(_) return {} end,
       tags_cc = {},
     })
     best_result.object = MetaClone(object)
