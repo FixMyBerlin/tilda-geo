@@ -5,6 +5,7 @@ import { idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
+import { exportSidepathData } from './pseudoTags/sidepathSource/exportSidepathData'
 import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
@@ -36,6 +37,8 @@ async function main() {
 
     // Start timing for the actual data processing (matches old behavior)
     const processingStartTime = Date.now()
+    // Export sidepath CSV from current DB (yesterday's data) before processTopics overwrites it
+    await exportSidepathData()
     await processTopics(fileName, fileChanged)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
