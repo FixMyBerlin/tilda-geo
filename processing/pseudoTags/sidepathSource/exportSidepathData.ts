@@ -10,21 +10,20 @@ import { PSEUDO_TAGS_DATA } from '../../constants/directories.const'
  */
 export async function exportSidepathData() {
   const sqlDir = join(import.meta.dir, 'sql')
-  const runFile = join(sqlDir, 'run_sidepath_estimation.sql')
+  const runFile = join(sqlDir, 'run_is_sidepath_estimation.sql')
   const csvPath = join(PSEUDO_TAGS_DATA, 'is_sidepath_estimation.csv')
 
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
 
   console.log(
-    'Pseudo Tags: Exporting is_sidepath estimation from current DB (roads, roadsPathClasses from previous run)',
+    '[Pseudo Tags][Sidepath] Export is_sidepath estimation from current DB (roads, roadsPathClasses from previous run)',
   )
   try {
-    console.time('Export is_sidepath CSV')
-    await $`psql -v ON_ERROR_STOP=1 -v paths_table=sidepath_paths_input -v roads_table=sidepath_roads_input -v format=is_sidepath_csv -v outfile=${csvPath} -f ${runFile}`
-    console.timeEnd('Export is_sidepath CSV')
+    console.time('[Pseudo Tags][Sidepath] Export-Timer')
+    // -q = supress message, print errors
+    await $`psql -q -v ON_ERROR_STOP=1 -v outfile=${csvPath} -f ${runFile}`
+    console.timeEnd('[Pseudo Tags][Sidepath] Export-Timer')
   } catch (error) {
-    console.warn(
-      `Pseudo Tags: Skipping is_sidepath export (tables roads/roadsPathClasses may not exist yet, e.g. first run). ${error}`,
-    )
+    console.warn('[Pseudo Tags][Sidepath] ERROR: is_sidepath export failed.', error)
   }
 }
