@@ -2,6 +2,7 @@ import { isEqual } from 'lodash'
 import { LngLatBounds } from 'maplibre-gl'
 import { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 // INFO DEBUGGING: We could use a middleware to log state changes https://github.com/pmndrs/zustand#middleware
 export type Store = StoreMapLoadedState &
@@ -110,3 +111,21 @@ export const useMapInspectorSize = () => useMapState((state) => state.inspectorS
 export const useMapSidebarSize = () => useMapState((state) => state.sidebarSize)
 
 export const useMapActions = () => useMapState((state) => state.actions)
+
+// Persistent store for inspector width
+type InspectorWidthStore = {
+  inspectorWidth: number
+  setInspectorWidth: (width: number) => void
+}
+
+export const useInspectorWidthStore = create<InspectorWidthStore>()(
+  persist(
+    (set) => ({
+      inspectorWidth: 560, // 35rem default
+      setInspectorWidth: (width) => set({ inspectorWidth: width }),
+    }),
+    {
+      name: 'tilda-inspector-width',
+    },
+  ),
+)
