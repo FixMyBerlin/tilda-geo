@@ -8,7 +8,7 @@ import { useBackgroundParam } from '@/src/app/regionen/[regionSlug]/_hooks/useQu
 import { useCategoriesConfig } from '@/src/app/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { debugLayerStyles } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/debugLayerStyles'
 import { FilterSpecification } from 'maplibre-gl'
-import { Fragment, memo } from 'react'
+import { Fragment, memo, useRef } from 'react'
 import { Layer, LayerProps, Source } from 'react-map-gl/maplibre'
 import { getSourceData } from '../../../_mapData/utils/getMapDataUtils'
 import {
@@ -25,9 +25,9 @@ import { beforeId } from './utils/beforeId'
 // We also use this visbility to add/remove interactive layers.
 //
 // Performance Note:
-// Maplibre GL JS will only create network request for sources that are used by a visible layer.
-// But, it will create them again, when the source was unmounted.
-// TODO / BUG: But, we still see network requests when we toggle the visibility like we do here. Which is fine for now, due to browser caching.
+// To prevent loading tiles for inactive layers, we only render the Source component
+// after it has been activated at least once. After that, the source stays mounted
+// even when layers are hidden, which allows browser caching to work efficiently.
 
 type Props = Pick<Store, 'useDebugLayerStyles' | 'useDebugCachelessTiles'> & {
   categoriesConfig: any // inferred from useQueryState('config')
@@ -36,6 +36,8 @@ type Props = Pick<Store, 'useDebugLayerStyles' | 'useDebugCachelessTiles'> & {
 
 const SourcesLayersAtlasGeoMemoized = memo(function SourcesLayersAtlasGeoMemoized(props: Props) {
   const { useDebugLayerStyles, useDebugCachelessTiles, categoriesConfig, backgroundParam } = props
+  const sourcesPreviouslyVisible = useRef<Record<string, boolean>>({})
+
   if (!categoriesConfig?.length) return null
 
   return (
@@ -59,6 +61,16 @@ const SourcesLayersAtlasGeoMemoized = memo(function SourcesLayersAtlasGeoMemoize
                 url: sourceData.tiles,
                 cacheless: useDebugCachelessTiles,
               })
+
+              // Check if any style in this subcategory is active
+              const isAnyStyleActive = subcategoryConfig.styles.some(
+                (styleConfig) => categoryConfig.active && styleConfig.active,
+              )
+
+              // Don't render Source (and load data) before it was not visible at least once
+              const sourceWasVisible = !!sourcesPreviouslyVisible.current[sourceKey]
+              if (!sourceWasVisible && !isAnyStyleActive) return null
+              sourcesPreviouslyVisible.current[sourceKey] = true
 
               return (
                 <Fragment key={sourceKey}>
