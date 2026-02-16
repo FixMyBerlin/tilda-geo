@@ -101,13 +101,21 @@ async function upsertQaEvaluationWithRules(
 ) {
   const previousEvaluation = await getCurrentEvaluation(configId, areaId)
 
-  // If there's no previous evaluation, always create an initial evaluation
+  // Absolute diff is checked first: if within threshold, effective status is GOOD (%-based status is ignored for update rules)
+  const absoluteDifferenceWithinThreshold =
+    evaluation.absoluteDifference !== null &&
+    Math.abs(evaluation.absoluteDifference) <= evaluation.absoluteDifferenceThreshold
+  const effectiveSystemStatus: QaSystemStatus = absoluteDifferenceWithinThreshold
+    ? 'GOOD'
+    : evaluation.systemStatus
+
+  // If there's no previous evaluation, always create an initial evaluation (using effective status)
   if (!previousEvaluation) {
     const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
-        systemStatus: evaluation.systemStatus,
+        systemStatus: effectiveSystemStatus,
         evaluatorType: 'SYSTEM',
         userStatus: null,
         body: null,
@@ -120,10 +128,10 @@ async function upsertQaEvaluationWithRules(
   }
 
   // Check if we need to reset a user decision (before checking dataChanged)
-  // This ensures NOT_OK decisions get reset to GOOD even when absolute difference is within threshold
+  // Uses effective system status so NOT_OK can be reset when abs diff is within threshold (treated as GOOD)
   const shouldReset = shouldResetUserDecision(
     previousEvaluation.systemStatus,
-    evaluation.systemStatus,
+    effectiveSystemStatus,
     previousEvaluation.userStatus,
   )
   if (shouldReset) {
@@ -131,7 +139,7 @@ async function upsertQaEvaluationWithRules(
       data: {
         configId,
         areaId,
-        systemStatus: evaluation.systemStatus,
+        systemStatus: effectiveSystemStatus,
         evaluatorType: 'SYSTEM',
         userStatus: null,
         body: null,
@@ -143,21 +151,14 @@ async function upsertQaEvaluationWithRules(
     return transformEvaluationWithDecisionData(newEvaluation)
   }
 
-  // Check if system status changed - if it did, we should update regardless of absolute difference threshold
-  const systemStatusChanged = previousEvaluation.systemStatus !== evaluation.systemStatus
-
-  // Check if data changed significantly
-  // If absolute difference is <= threshold, it's not considered a change
-  // If absoluteDifference is NULL, treat it as a change (needs evaluation)
-  const absoluteDifferenceWithinThreshold =
-    evaluation.absoluteDifference !== null &&
-    Math.abs(evaluation.absoluteDifference) <= evaluation.absoluteDifferenceThreshold
+  // Check if effective system status changed (previous vs effective new status)
+  const systemStatusChanged = previousEvaluation.systemStatus !== effectiveSystemStatus
 
   const relativeChanged = evaluation.previousRelative !== evaluation.currentRelative
 
   // Data is considered changed if:
-  // 1. System status changed (always update when status changes), OR
-  // 2. Relative changed AND absolute difference exceeds threshold
+  // 1. Effective system status changed (e.g. GOOD -> NEEDS_REVIEW), OR
+  // 2. Relative changed AND absolute difference exceeds threshold (so %-based change matters)
   const dataChanged = systemStatusChanged || (relativeChanged && !absoluteDifferenceWithinThreshold)
 
   if (!dataChanged) {
@@ -165,13 +166,13 @@ async function upsertQaEvaluationWithRules(
     return previousEvaluation
   }
 
-  // Check if we need to create a new evaluation or keep existing
-  if (shouldCreateNewEvaluation(previousEvaluation, evaluation.systemStatus)) {
+  // Check if we need to create a new evaluation or keep existing (using effective status)
+  if (shouldCreateNewEvaluation(previousEvaluation, effectiveSystemStatus)) {
     const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
-        systemStatus: evaluation.systemStatus,
+        systemStatus: effectiveSystemStatus,
         evaluatorType: 'SYSTEM',
         // Reset user decision (set to null)
         userStatus: null,
