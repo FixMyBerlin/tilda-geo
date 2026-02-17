@@ -1,5 +1,17 @@
 # QA System Documentation
 
+## Contents
+
+- [Overview](#overview)
+- [Key Components](#key-components)
+  - [1. System vs User Status](#1-system-vs-user-status)
+  - [2. User Decision Protection Rule](#2-user-decision-protection-rule)
+  - [3. System Status Update Rules](#3-system-status-update-rules)
+    - [3.1. System Overwrites System](#31-system-overwrites-system-no-user-decision)
+    - [3.2. System Overwrites User Decision](#32-system-overwrites-user-decision)
+- [Data Flow](#data-flow)
+- [Adding a New QA Config](#adding-a-new-qa-config)
+
 ## Overview
 
 The QA (Quality Assurance) system provides automated and manual evaluation of data quality across different regions and datasets. It combines system-generated evaluations based on thresholds with human expert evaluations to ensure data accuracy and reliability.
@@ -11,11 +23,13 @@ The QA (Quality Assurance) system provides automated and manual evaluation of da
 The QA system uses a dual-status approach:
 
 **System Status** (Automatic):
+
 - `GOOD` - Small difference, likely OK (Green)
 - `NEEDS_REVIEW` - Medium difference, needs review (Yellow)
 - `PROBLEMATIC` - Large difference, likely problem (Red)
 
 **User Status** (Manual):
+
 - `OK_STRUCTURAL_CHANGE` - User confirmed OK, caused by construction/structural changes
 - `OK_REFERENCE_ERROR` - User confirmed OK, caused by wrong reference data
 - `NOT_OK_DATA_ERROR` - User confirmed problem, current data needs fixing
@@ -23,99 +37,93 @@ The QA system uses a dual-status approach:
 - `OK_QA_TOOLING_ERROR` - Diff OK, caused by methodical error in QA tooling (geometries/definitions) (Purple)
 
 **Priority Rules**:
+
 - User status **always overrides** system status when present
 - System status is used as fallback when no user evaluation exists
 - Areas with no evaluations show as gray (neutral)
 
 ### 2. User Decision Protection Rule
 
-**Critical Rule**: When a user has marked an area as NOT_OK (either `NOT_OK_DATA_ERROR` or `NOT_OK_PROCESSING_ERROR`), the system should **NOT** overwrite this decision with new PROBLEMATIC or NEEDS_REVIEW evaluations. Only GOOD system evaluations are allowed to overwrite NOT_OK user decisions, as this indicates the problem has been resolved.
-
-**Rationale**: If a user has identified a problem and marked it as NOT_OK, the system should not override this decision with new problematic evaluations. The user's assessment takes precedence until the system detects that the issue has been resolved (GOOD status).
+When a user has marked an area as NOT_OK (`NOT_OK_DATA_ERROR` or `NOT_OK_PROCESSING_ERROR`), the system must **not** overwrite that with new PROBLEMATIC or NEEDS_REVIEW evaluations. Only a GOOD system evaluation may overwrite a NOT_OK user decision (problem resolved). Full matrix: [§3.2 System Overwrites User Decision](#32-system-overwrites-user-decision).
 
 ### 3. System Status Update Rules
 
-The system evaluates when to create a new evaluation based on two scenarios:
+When to create a new evaluation depends on whether there is a user decision: [§3.1](#31-system-overwrites-system-no-user-decision) (no user decision) or [§3.2](#32-system-overwrites-user-decision) (user decision present).
 
 #### 3.1. System Overwrites System (No User Decision)
 
-When there is **no user decision** (`userStatus === null`), the system will create a new evaluation whenever the system status changes. This allows the system to keep its evaluation up-to-date as data changes.
+When there is **no user decision** (`userStatus === null`), the system uses an **effective system status** to decide. Absolute difference is evaluated **before** percent-based status:
 
-| Previous System Status | New System Status | Action | Threshold |
-|---|---|---|---|
-| **GOOD**               | GOOD         | **No change** - Keep existing evaluation | **Applied**[^1] |
-| **GOOD**               | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
-| **GOOD**               | PROBLEMATIC  | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
-| **NEEDS_REVIEW**       | GOOD         | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
-| **NEEDS_REVIEW**       | NEEDS_REVIEW | **No change** - Keep existing evaluation | **Applied**[^1] |
-| **NEEDS_REVIEW**       | PROBLEMATIC  | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
-| **PROBLEMATIC**        | GOOD         | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
-| **PROBLEMATIC**        | NEEDS_REVIEW | **Create new evaluation** - System overwrites itself | **Bypassed**[^2] |
-| **PROBLEMATIC**        | PROBLEMATIC  | **No change** - Keep existing evaluation | **Applied**[^1] |
+- **\|absoluteDifference\| ≤ threshold** (`QaConfig.absoluteDifferenceThreshold`): effective status = **GOOD**; %-based status is ignored (area stays/becomes green).
+- **\|absoluteDifference\| > threshold**: effective status = %-based (GOOD / NEEDS_REVIEW / PROBLEMATIC from `goodThreshold` / `needsReviewThreshold`).
 
-**Rule**:
-- If `previousSystemStatus !== newSystemStatus`: New evaluation created.[^2] The threshold is always bypassed when the status changed.
-- If `previousSystemStatus === newSystemStatus`: New evaluation created only if `previousRelative !== currentRelative` AND[^1] `|absoluteDifference| > absoluteDifferenceThreshold` (where `absoluteDifferenceThreshold` comes from `QaConfig.absoluteDifferenceThreshold`)
+**When \|absoluteDifference\| ≤ threshold** (effective = GOOD):
 
-[^1]: Threshold is applied: New evaluation created only if `|absoluteDifference| > absoluteDifferenceThreshold` (from `QaConfig.absoluteDifferenceThreshold`)
-[^2]: Threshold is bypassed: Status changed, so threshold check is skipped
+| Previous System Status | Effective New Status | Action                                                         |
+| ---------------------- | -------------------- | -------------------------------------------------------------- |
+| **GOOD**               | GOOD                 | **No change** — keep existing evaluation                       |
+| **NEEDS_REVIEW**       | GOOD                 | **Create new evaluation** — system overwrites itself with GOOD |
+| **PROBLEMATIC**        | GOOD                 | **Create new evaluation** — system overwrites itself with GOOD |
+
+**When \|absoluteDifference\| > threshold** (effective status = %-based: GOOD / NEEDS_REVIEW / PROBLEMATIC):
+
+| Previous System Status | Effective New Status | Action                                                         |
+| ---------------------- | -------------------- | -------------------------------------------------------------- |
+| **GOOD**               | GOOD                 | **No change** — keep existing evaluation                       |
+| **GOOD**               | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself          |
+| **GOOD**               | PROBLEMATIC          | **Create new evaluation** — system overwrites itself          |
+| **NEEDS_REVIEW**       | GOOD                 | **Create new evaluation** — system overwrites itself           |
+| **NEEDS_REVIEW**       | NEEDS_REVIEW         | **No change** — keep existing evaluation                      |
+| **NEEDS_REVIEW**       | PROBLEMATIC          | **Create new evaluation** — system overwrites itself          |
+| **PROBLEMATIC**        | GOOD                 | **Create new evaluation** — system overwrites itself           |
+| **PROBLEMATIC**        | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself          |
+| **PROBLEMATIC**        | PROBLEMATIC          | **No change** — keep existing evaluation                      |
+
+Effective status **unchanged** (e.g. GOOD → GOOD) → never create a new evaluation. Effective status **changed** → create a new evaluation where the tables say “Create new evaluation”. User classifications are not overwritten here; see [§3.2](#32-system-overwrites-user-decision) for when the system may reset a user decision (only when it becomes GOOD).
 
 #### 3.2. System Overwrites User Decision
 
 When there is **a user decision** (`userStatus !== null`), the system respects user decisions with specific rules:
 
-| Previous User Status | New System Status | Action |
-|---|---|---|
-| **OK_STRUCTURAL_CHANGE** | GOOD         | **No change** - User decision is permanent |
-| **OK_STRUCTURAL_CHANGE** | NEEDS_REVIEW | **No change** - User decision is permanent |
-| **OK_STRUCTURAL_CHANGE** | PROBLEMATIC  | **No change** - User decision is permanent |
-| **OK_REFERENCE_ERROR**  | GOOD         | **No change** - User decision is permanent |
-| **OK_REFERENCE_ERROR**  | NEEDS_REVIEW | **No change** - User decision is permanent |
-| **OK_REFERENCE_ERROR**  | PROBLEMATIC  | **No change** - User decision is permanent |
-| **OK_QA_TOOLING_ERROR** | GOOD         | **Reset user decision** - System detects problem resolved |
-| **OK_QA_TOOLING_ERROR** | NEEDS_REVIEW | **No change** - User decision is permanent |
-| **OK_QA_TOOLING_ERROR** | PROBLEMATIC  | **No change** - User decision is permanent |
-| **NOT_OK_DATA_ERROR**    | GOOD         | **Reset user decision** - System detects problem resolved |
-| **NOT_OK_DATA_ERROR**    | NEEDS_REVIEW | **No change** - Protect user's NOT_OK decision |
-| **NOT_OK_DATA_ERROR**    | PROBLEMATIC  | **No change** - Protect user's NOT_OK decision |
-| **NOT_OK_PROCESSING_ERROR** | GOOD         | **Reset user decision** - System detects problem resolved |
-| **NOT_OK_PROCESSING_ERROR** | NEEDS_REVIEW | **No change** - Protect user's NOT_OK decision |
-| **NOT_OK_PROCESSING_ERROR** | PROBLEMATIC  | **No change** - Protect user's NOT_OK decision |
+| Previous User Status        | New System Status | Action                                                    |
+| --------------------------- | ----------------- | --------------------------------------------------------- |
+| **OK_STRUCTURAL_CHANGE**    | GOOD              | **No change** - User decision is permanent                |
+| **OK_STRUCTURAL_CHANGE**    | NEEDS_REVIEW      | **No change** - User decision is permanent                |
+| **OK_STRUCTURAL_CHANGE**    | PROBLEMATIC       | **No change** - User decision is permanent                |
+| **OK_REFERENCE_ERROR**      | GOOD              | **No change** - User decision is permanent                |
+| **OK_REFERENCE_ERROR**      | NEEDS_REVIEW      | **No change** - User decision is permanent                |
+| **OK_REFERENCE_ERROR**      | PROBLEMATIC       | **No change** - User decision is permanent                |
+| **OK_QA_TOOLING_ERROR**     | GOOD              | **Reset user decision** - System detects problem resolved |
+| **OK_QA_TOOLING_ERROR**     | NEEDS_REVIEW      | **No change** - User decision is permanent                |
+| **OK_QA_TOOLING_ERROR**     | PROBLEMATIC       | **No change** - User decision is permanent                |
+| **NOT_OK_DATA_ERROR**       | GOOD              | **Reset user decision** - System detects problem resolved |
+| **NOT_OK_DATA_ERROR**       | NEEDS_REVIEW      | **No change** - Protect user's NOT_OK decision            |
+| **NOT_OK_DATA_ERROR**       | PROBLEMATIC       | **No change** - Protect user's NOT_OK decision            |
+| **NOT_OK_PROCESSING_ERROR** | GOOD              | **Reset user decision** - System detects problem resolved |
+| **NOT_OK_PROCESSING_ERROR** | NEEDS_REVIEW      | **No change** - Protect user's NOT_OK decision            |
+| **NOT_OK_PROCESSING_ERROR** | PROBLEMATIC       | **No change** - Protect user's NOT_OK decision            |
 
-**Rules**:
-- **OK decisions (`OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`)**: Never reset - user decision is permanent regardless of system status
-- **OK_QA_TOOLING_ERROR**: Reset when `newSystemStatus === 'GOOD'` (QA tooling error resolved), otherwise permanent
-- **NOT_OK decisions (`NOT_OK_*`)**: Only reset when `newSystemStatus === 'GOOD'` (problem resolved)
-- **Reset user decision**: Creates new evaluation with `userStatus = null`, `body = null`, `userId = null`
-- **Threshold behavior**: When a user decision exists, the absolute difference threshold (`QaConfig.absoluteDifferenceThreshold`) is either bypassed (for resets, which happen before threshold check) or not relevant (for permanent decisions, which prevent new evaluations regardless)
+**Summary**:
 
-**Important Note**: All updates only occur when data has changed (`previousRelative !== currentRelative`). If the relative value hasn't changed, no new evaluation is created regardless of status changes.
+- **OK decisions** (`OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`): never reset.
+- **OK_QA_TOOLING_ERROR** and **NOT_OK** (`NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`): reset only when system status becomes GOOD.
+- **Reset**: new evaluation with `userStatus = null`, `body = null`, `userId = null`.
+- **Effective system status** (and thus "GOOD") follows [§3.1](#31-system-overwrites-system-no-user-decision) (absolute diff before %).
+
+All updates require data to have changed (`previousRelative !== currentRelative`); otherwise no new evaluation is created.
 
 ## Data Flow
 
-1. The static data that is used as a reference is stored in `data.euvm_qa_voronoi`
-2. During processing, this data is copied and the actual reference dataset is created `public.qa_parkings_euvm`
-    - This dataset can be recreated at any time (with some limitations, see "previous data")
-    - All data here is public or OK to be publicly visible
-    - We create manual files for each QA process (for now), for example [`parking/8_qa_parkings_euvm_voronoi.sql`](processing/topics/parking/8_qa_parkings_euvm_voronoi.sql)
-    - This script preserves the previous data (from the previous run) which we use to make decisions, see "Status Override Table"
-    - This script also joins our TILDA data and compares it to the reference data
-3. The processing triggers an API route (`/api/private/post-processing-qa-update`) which evaluates the new data (see also "Status Override Table")
-    - This is where the "System" evaluations are created
-    - Gets all active QA configs from database
-    - Queries each config's map table for areas with relative values
-    - Calculates system status based on thresholds
-    - Applies update rules to determine if new evaluations needed
-    - Creates new evaluations when data has changed significantly
-4. The app loads the public vector tiles and enriches them with data that only authorized users can see
-    - We use `setFeatureState` for this
-    - The map shows the private data, allows filtering and creating new evaluations, which update the map
+1. **Reference data**: Stored in `data.euvm_qa_voronoi`; during processing copied to `public.qa_parkings_euvm` (recreatable with limitations; all public). Example script: [`parking/8_qa_parkings_euvm_voronoi.sql`](processing/topics/parking/8_qa_parkings_euvm_voronoi.sql). The script keeps previous run data for comparison and joins TILDA data to reference; update rules use it ([§3.1](#31-system-overwrites-system-no-user-decision), [§3.2](#32-system-overwrites-user-decision)).
+2. **QA update API** (`/api/private/post-processing-qa-update`): Runs after processing; loads active configs, queries each config’s map table, computes system status from thresholds, applies [System status update rules](#3-system-status-update-rules), creates new evaluations when warranted.
+3. **App**: Loads public vector tiles, enriches with private evaluation data (`setFeatureState`); map allows filtering and creating evaluations.
 
 ## Adding a New QA Config
 
 ### 1. Database Requirements
 
 **Source Table Requirements**:
+
 - Must have a unique `id` column that is **always a string type**
 - Must contain comparison data (reference vs current values)
 - Must have polygon/area geometry data for map display

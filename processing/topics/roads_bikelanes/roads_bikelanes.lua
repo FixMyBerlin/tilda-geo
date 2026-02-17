@@ -35,6 +35,8 @@ local transform_lifecycle_tags = require('transform_lifecycle_tags')
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
+local load_csv_is_sidepath = require('load_csv_is_sidepath')
+local is_sidepath = require('is_sidepath')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
@@ -143,6 +145,7 @@ local todoLiniesTable = osm2pgsql.define_table({
 
 -- ====== (B.1) Prepare pseudo tags ======
 local mapillary_coverage_data = load_csv_mapillary_coverage()
+local is_sidepath_data = load_csv_is_sidepath()
 
 function osm2pgsql.process_way(object)
   local raw_tags = object.tags
@@ -160,6 +163,8 @@ function osm2pgsql.process_way(object)
   -- We add mapillary_coverage to object_tags so to make user it is available in `CollectTodos` down below
   local mapillary_coverage_lines = mapillary_coverage_data:get()
   object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
+  local is_sidepath_lines = is_sidepath_data:get()
+  object_tags._is_sidepath = is_sidepath(is_sidepath_lines, object.id)
 
   -- ====== (B.2) General mutation to our `object_tags` ======
   transform_cycleway_opposite_schema(object_tags)
@@ -208,7 +213,8 @@ function osm2pgsql.process_way(object)
         operator_type = road_result_tags.operator_type,
         informal = road_result_tags.informal,
         covered = road_result_tags.covered,
-        _parent_highway = cycleway._parent_highway -- duplicated because we `ExtractPublicTags` on the other data below
+        _parent_highway = cycleway._parent_highway, -- duplicated because we `ExtractPublicTags` on the other data below
+        _is_sidepath = object_tags._is_sidepath,
       }
       local meta = Metadata(object)
 
@@ -308,7 +314,7 @@ function osm2pgsql.process_way(object)
 
     roadsPathClassesTable:insert({
       id = DefaultId(object),
-      tags = ExtractPublicTags(road_result_tags),
+      tags = MergeTable(ExtractPublicTags(road_result_tags), { _is_sidepath = object_tags._is_sidepath }),
       meta = Metadata(object),
       geom = object:as_linestring(),
       minzoom = PathsGeneralization(object_tags, road_result_tags)
