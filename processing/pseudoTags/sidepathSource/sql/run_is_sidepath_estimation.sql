@@ -44,6 +44,9 @@ SELECT setval('tilda_sidepath_checkpoint_nr_sequence', 1);
 
 \pset format csv
 \pset tuples_only off
-SELECT * FROM tilda_sidepath_csv(:buffer_distance, :buffer_size);
+-- Only export paths estimated as sidepath (assumed_yes); Lua infers assumed_no for path IDs not in CSV
+SELECT osm_id, is_sidepath_estimation
+FROM tilda_sidepath_csv(:buffer_distance, :buffer_size)
+WHERE is_sidepath_estimation = 't';
 
 \o
