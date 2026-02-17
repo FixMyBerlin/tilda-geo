@@ -17,7 +17,7 @@ local function load_csv(csv_path)
       if cached_lines then return cached_lines end
 
       if not pl_path.exists(csv_path) then
-        Log('ERROR: CSV file not found: ' .. csv_path, 'csv_lookup')
+        Log('ERROR: CSV file not found: ' .. csv_path, 'load_csv')
         cached_lines = {}
         return cached_lines
       end
