@@ -1,6 +1,6 @@
-// import { $ } from 'bun'
-// import { join } from 'node:path'
-// import { PSEUDO_TAGS_DATA } from '../../constants/directories.const'
+import { $ } from 'bun'
+import { join } from 'node:path'
+import { PSEUDO_TAGS_DATA } from '../../constants/directories.const'
 
 /**
  * Export is_sidepath estimation to CSV from the current DB (previous run’s data).
@@ -9,22 +9,21 @@
  * If tables don’t exist yet (first run / empty DB), we skip and continue; Lua will get no data.
  */
 export async function exportSidepathData() {
-  console.log('[Pseudo Tags][Sidepath] Temporary disabled')
-  // const sqlDir = join(import.meta.dir, 'sql')
-  // const runFile = join(sqlDir, 'run_is_sidepath_estimation.sql')
-  // const csvPath = join(PSEUDO_TAGS_DATA, 'is_sidepath_estimation.csv')
+  const sqlDir = join(import.meta.dir, 'sql')
+  const runFile = join(sqlDir, 'run_is_sidepath_estimation.sql')
+  const csvPath = join(PSEUDO_TAGS_DATA, 'is_sidepath_estimation.csv')
 
-  // await $`mkdir -p ${PSEUDO_TAGS_DATA}`
+  await $`mkdir -p ${PSEUDO_TAGS_DATA}`
 
-  // console.log(
-  //   '[Pseudo Tags][Sidepath] Export is_sidepath estimation from current DB (roads, roadsPathClasses from previous run)',
-  // )
-  // try {
-  //   console.time('[Pseudo Tags][Sidepath] Export-Timer')
-  //   // -q = supress message, print errors
-  //   await $`psql -q -v ON_ERROR_STOP=1 -v outfile=${csvPath} -f ${runFile}`
-  //   console.timeEnd('[Pseudo Tags][Sidepath] Export-Timer')
-  // } catch (error) {
-  //   console.warn('[Pseudo Tags][Sidepath] ERROR: is_sidepath export failed.', error)
-  // }
+  console.log(
+    '[Pseudo Tags][Sidepath] Export is_sidepath estimation from current DB (roads, roadsPathClasses from previous run)',
+  )
+  try {
+    console.time('[Pseudo Tags][Sidepath] Export-Timer')
+    // -q = supress message, print errors
+    await $`psql -q -v ON_ERROR_STOP=1 -v outfile=${csvPath} -f ${runFile}`
+    console.timeEnd('[Pseudo Tags][Sidepath] Export-Timer')
+  } catch (error) {
+    console.warn('[Pseudo Tags][Sidepath] ERROR: is_sidepath export failed.', error)
+  }
 }
