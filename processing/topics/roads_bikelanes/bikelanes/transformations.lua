@@ -155,7 +155,7 @@ function GetTransformedObjects(tags, transformations)
   local metaPrefixes = { 'source:', 'note:' }
 
   -- Don't transform paths only unnest tags prefixed with `cycleway`
-  if PathClasses[tags.highway] or tags.highway == 'pedestrian' then
+  if sidepath_highway_classes[tags.highway] then
     unnestPrefixedTags(tags, 'cycleway', '', center)
     for _, metaPrefix in ipairs(metaPrefixes) do
       unnestPrefixedTags(tags, 'cycleway', '', center, metaPrefix)
