@@ -1,5 +1,7 @@
 services:
   processing:
+    env_file:
+      - .env
     image: public.ecr.aws/n0p8j4k5/tilda/processing:${ENVIRONMENT}-latest
     container_name: processing
     environment:
