@@ -47,6 +47,12 @@ CREATE INDEX _parking_kerbs_geom_idx ON _parking_kerbs USING GIST (geom);
 -- Filter: remove MultiLineString geometries
 -- `ST_OffsetCurve` can create MultiLineString when offset curve becomes discontinuous (e.g., sharp turns, complex geometry, large offset relative to curvature).
 -- We can only handle LineString geometries for kerbs, so move MultiLineString cases to `_parking_kerbs_errors` table for debugging.
+--
+-- CONSEQUENCES when kerbs are removed (MultiLineString → _parking_kerbs_errors):
+-- * Road parkings: no kerb geom (JOIN in parkings/0_add_kerb_geoms.sql finds no match). In 1_cutout_road_parkings.sql ST_Dump(NULL) yields no rows → dropped, not in final `parkings`.
+-- * Separate parking points: no match from tilda_project_to_k_closest_kerbs → excluded in separate_parkings/0_points_project_to_kerb.sql, not in final data.
+-- * Separate parking areas: unaffected (geometry from polygon via tilda_parking_area_to_line).
+-- * Other consumers of _parking_kerbs (obstacles, public_transport, crossings, driveway_corner_kerbs, intersection_corners): no geometry for those segments.
 DO $$
 DECLARE
   multiline_count INTEGER;
@@ -56,7 +62,7 @@ BEGIN
   WHERE ST_GeometryType (geom) = 'ST_MultiLineString';
 
   IF multiline_count > 0 THEN
-    RAISE NOTICE '[WARNING] Removing % MultiLineString kerb geometries (created by ST_OffsetCurve due to discontinuous offset curves). We cannot handle those, so we move them to `_parking_kerbs_errors` table for debugging.', multiline_count;
+    RAISE NOTICE '[WARNING] Removing % way segments (MultiLineString kerb geometries created by ST_OffsetCurve due to discontinuous offset curves). We cannot handle those, so we move them to `_parking_kerbs_errors` table for debugging. Consequences: no road parking lines for those segments; separate parking points that would snap to these kerbs are excluded; final data will not include those ways.', multiline_count;
   END IF;
 END $$;
 
