@@ -3,12 +3,13 @@ local parse_length = require('parse_length')
 local round = require('round')
 
 local highway_width_fallbacks = {
+  ["motorway_link"] = 20,
   ["primary"] = 17,
   ["primary_link"] = 6,
   ["secondary"] = 15,
   ["secondary_link"] = 6,
   ["tertiary"] = 13,
-  ["tertiary_link"] = 6,
+  ["tertiary_link"] = 10,
   ["residential"] = 11,
   ["unclassified"] = 11,
   ["living_street"] = 6,
