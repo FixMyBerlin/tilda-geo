@@ -16,10 +16,23 @@ local function load_csv(csv_path)
 
       if cached_lines then return cached_lines end
 
+      -- Guard against missing file
       if not pl_path.exists(csv_path) then
         Log('ERROR: CSV file not found: ' .. csv_path, 'load_csv')
         cached_lines = {}
         return cached_lines
+      end
+
+      -- Guard against empty files (ftcsv cannot parse them)
+      local f = io.open(csv_path, 'r')
+      if f then
+        local size = f:seek('end')
+        f:close()
+        if not size or size == 0 then
+          Log('ERROR: CSV file is empty: ' .. csv_path, 'load_csv')
+          cached_lines = {}
+          return cached_lines
+        end
       end
 
       -- `rows` format: { { osm_id = "123", mapillary_coverage = "value" },… }
