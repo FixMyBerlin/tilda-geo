@@ -77,6 +77,7 @@ FROM
             separate_parking_cutouts c
           WHERE
             c.geom && p.geom
+            AND ST_Intersects (c.geom, p.geom)
         )
       ),
       p.geom
@@ -121,6 +122,7 @@ FROM
             separate_parking_cutouts c
           WHERE
             c.geom && p.geom
+            AND ST_Intersects (c.geom, p.geom)
         )
       ),
       p.geom
