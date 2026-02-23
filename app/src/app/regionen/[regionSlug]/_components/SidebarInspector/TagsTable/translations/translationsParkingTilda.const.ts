@@ -102,6 +102,8 @@ export const translationsParkingTilda = {
     'tilda_parkings--capacity_source=estimated': 'Berechnung',
     'tilda_parkings--capacity_source=tag_redistributed': 'Explizite Angabe aus OSM, dann anteilig aufgeteilt nach Stanzung.',
     'tilda_parkings--capacity_source=tag': 'Explizite Angabe aus OSM.',
+    'tilda_parkings--capacity_source=tag_estimation': 'Explizite Angabe einer Schätzung aus OSM.',
+    'tilda_parkings--capacity_source=tag_estimation_redistributed': 'Explizite Angabe einer Schätzung aus OSM, dann anteilig aufgeteilt nach Stanzung.',
     'tilda_parkings--capacity--key': 'Kapazität',
     'tilda_parkings--charge--key': 'Ladestation',
     'tilda_parkings--condition_category--key': 'Parkbeschränkung',
@@ -202,5 +204,6 @@ export const translationsParkingTilda = {
     'tilda_parkings_off_street--parking=garage_boxes': 'Garagenboxen',
     'tilda_parkings_off_street--parking=garage': 'Garage',
     'tilda_parkings_off_street--capacity_source=area': 'Berechnet auf Basis der Fläche.',
+    'tilda_parkings_off_street--capacity_source=tag_estimation': 'Explizite Angabe einer Schätzung aus OSM.',
   },
 }

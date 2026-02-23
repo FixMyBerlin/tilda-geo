@@ -6,19 +6,27 @@ require('init')
 ---@return {value: number|nil, confidence: string|nil, source: string|nil}
 local function capacity_tags(tags)
   local capacity = tonumber(tags.capacity)
-
-  if capacity == nil then
+  if capacity ~= nil then
     return {
-      value = nil,
-      confidence = nil,
-      source = nil,
+      value = capacity,
+      confidence = 'high',
+      source = 'tag',
+    }
+  end
+
+  local est_capacity = tonumber(tags.est_capacity)
+  if est_capacity ~= nil then
+    return {
+      value = est_capacity,
+      confidence = 'medium',
+      source = 'tag_estimation',
     }
   end
 
   return {
-    value = capacity,
-    confidence = 'high',
-    source = 'tag',
+    value = nil,
+    confidence = nil,
+    source = nil,
   }
 end
 

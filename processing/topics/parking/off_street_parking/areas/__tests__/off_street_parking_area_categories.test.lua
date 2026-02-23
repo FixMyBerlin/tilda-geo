@@ -44,6 +44,15 @@ describe("off_street_parking_area_categories", function()
       assert.are.equal(capacity.confidence, "medium")
       assert.are.equal(capacity.source, "area")
     end)
+    it("case est_capacity without capacity uses tag_estimation and does not use area", function()
+      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "underground", est_capacity = "20" } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local area = 100
+      local capacity = category_result.category:get_capacity(object.tags, area)
+      assert.are.equal(capacity.value, 20)
+      assert.are.equal(capacity.confidence, "medium")
+      assert.are.equal(capacity.source, "tag_estimation")
+    end)
   end)
 
   describe("building case", function()
