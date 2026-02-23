@@ -3,11 +3,11 @@
 -- * Intersection corners (5m buffer) - conditionally
 -- * Driveway corner kerbs, driveways, crossings (buffered)
 -- * Obstacle points/lines/areas (buffered)
--- * Public transport stops, turnaround points (buffered)
+-- * Public transport stops (buffered)
 -- * Separate parking areas/points (buffered)
 -- * Roads (buffered) - cleanup leftover parking pieces on roads
 -- * motorway_link is included only here (via _parking_roads_cutouts_only), not in the main road network
--- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_turnaround_points`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`, `_parking_roads_cutouts_only`
+-- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`, `_parking_roads_cutouts_only`
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --
 DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
@@ -141,25 +141,6 @@ SELECT
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_public_transport_points_projected;
-
--- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
--- Buffer: tags->>'buffer_radius'
-INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
-SELECT
-  id::TEXT,
-  osm_id,
-  ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
-  tags || jsonb_build_object(
-    /* sql-formatter-disable */
-    'category', tags ->> 'category', -- see processing/topics/parking/obstacles_unprojected/point/obstacle_point_categories.lua
-    'source', 'turnaround_points',
-    'radius', (tags ->> 'buffer_radius')::float
-    /* sql-formatter-enable */
-  ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
-FROM
-  _parking_turnaround_points;
 
 -- INSERT "obstacle_area" buffers (buffered lines)
 -- Buffer: static value 0.6m

@@ -52,8 +52,6 @@ export const translationsParkingTilda = {
     'tilda_parkings_cutouts--category=street_lamp': 'Straßenlaterne',
     'tilda_parkings_cutouts--category=traffic_calming_choker': 'Angelegte Fahrbahnverengung',
     'tilda_parkings_cutouts--category=tree': 'Baum',
-    'tilda_parkings_cutouts--category=turning_circle': 'Wendekreis – implizites Halteverbot',
-    'tilda_parkings_cutouts--category=turning_loop': 'Wendeschleife – implizites Halteverbot ',
     'tilda_parkings_cutouts--category=vending_parking_tickets': 'Parkscheinautomat',
     'tilda_parkings_cutouts--source--key': 'Datenquelle',
     'tilda_parkings_cutouts--source=crossing': 'Überwege',

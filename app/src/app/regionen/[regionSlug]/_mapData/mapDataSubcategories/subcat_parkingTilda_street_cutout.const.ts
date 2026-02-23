@@ -81,11 +81,9 @@ export const subcat_parkingTilda_street_cutout: FileMapDataSubcategory = {
           name: 'Markierungen & Barrieren',
           desc: [
             '`road_marking_restricted_area`',
-            '`turning_circle`',
             '`kerb_lowered`',
             '`parking_kerb`',
             '`barrier`',
-            '`turning_loop`',
           ],
           style: { type: 'line', color: 'hsla(206, 62%, 31%, 0.6)', width: 5 },
         },
