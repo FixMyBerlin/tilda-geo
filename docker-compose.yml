@@ -38,8 +38,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    logging:
-      driver: journald
   app:
     image: public.ecr.aws/n0p8j4k5/tilda/app:${ENVIRONMENT}-latest
     container_name: app
@@ -76,8 +74,6 @@ services:
         condition: service_healthy
       tiles:
         condition: service_started
-    logging:
-      driver: journald
   tiles:
     image: ghcr.io/maplibre/martin:1.3.0
     container_name: tiles
@@ -103,8 +99,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    logging:
-      driver: journald
   db:
     image: pgrouting/pgrouting:17-3.5-3.8
     container_name: ${DATABASE_HOST}
@@ -132,8 +126,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    logging:
-      driver: journald
 
 volumes:
   db_postgres_17:

@@ -60,8 +60,6 @@ services:
     configs:
       - source: nginx_conf
         target: /etc/nginx/nginx.conf
-    logging:
-      driver: journald
 
 configs:
   nginx_conf:
