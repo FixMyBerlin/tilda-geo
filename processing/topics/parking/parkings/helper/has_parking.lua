@@ -20,8 +20,10 @@ function has_parking_tags(tags)
 end
 
 local function has_parking(tags)
-  -- We never expect parking information on highway=pedestrian … but at the the same time we still need it in is_roads (and not is_driveway) to create intersection corners.
-  if tags.highway == 'pedestrian' then
+  -- We don't expect parking on those highways.
+  -- We still need them in is_road (not is_driveway) to create intersection corners etc.
+  local highway_is_road_parking_optional = Set({ 'pedestrian', 'motorway_link' })
+  if highway_is_road_parking_optional[tags.highway] then
     return has_parking_tags(tags)
   end
 

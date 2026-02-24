@@ -12,7 +12,6 @@ local public_transport = require('public_transport')
 require('parking_parkings')
 require('parking_node_road_mapping')
 require('parking_roads')
-require('parking_roads_cutouts_only')
 require('Log')
 require('parking_scaffold_tables')
 
@@ -41,7 +40,6 @@ function osm2pgsql.process_way(object)
 
   parking_node_road_mapping(object)
   parking_roads(object)
-  parking_roads_cutouts_only(object)
 
   parking_parkings(object)
 end

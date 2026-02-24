@@ -6,8 +6,7 @@
 -- * Public transport stops (buffered)
 -- * Separate parking areas/points (buffered)
 -- * Roads (buffered) - cleanup leftover parking pieces on roads
--- * motorway_link is included only here (via _parking_roads_cutouts_only), not in the main road network
--- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`, `_parking_roads_cutouts_only`
+-- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --
 DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
@@ -239,7 +238,6 @@ FROM
 -- INSERT roads
 -- Cleanup: removes leftover parking pieces on roads
 -- Uses LEAST(offset_right, offset_left) * 0.9 for buffer, excludes driveways without parking
--- Source: _parking_roads UNION ALL _parking_roads_cutouts_only (motorway_link only in the latter)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
@@ -261,11 +259,7 @@ SELECT
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
-  (
-    SELECT * FROM _parking_roads
-    UNION ALL
-    SELECT * FROM _parking_roads_cutouts_only
-  ) _roads_for_cutouts
+  _parking_roads
 WHERE
   NOT (
     is_driveway = true
