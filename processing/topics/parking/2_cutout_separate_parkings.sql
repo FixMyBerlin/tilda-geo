@@ -9,16 +9,19 @@
 --   - Crossings and driveways: Always apply
 --     (inserted directly from `_parking_crossings` and `_parking_driveways` in `cutouts/1_insert_cutouts.sql`, no spatial check needed)
 --   - Obstacles: Only apply if `separate_parking = TRUE`
---     (this tag is set in `processing/topics/parking/obstacles/0_*_project_to_kerb.sql` using `ST_Intersects` to check if obstacles lie within separate parking areas)
+--     (set in obstacles/0_areas_project_to_kerb.sql when >= 70% of obstacle area lies inside a parking area;
+--      obstacle_points/obstacle_lines use ST_Intersects in 0_points_project_to_kerb.sql, 0_lines_project_to_kerb.sql)
 -- * Cuts out obstacles using `ST_Difference` and `ST_Dump` to split parking lines into segments
+-- * Spatial filter: use `ST_Crosses` (not `ST_Intersects`) so cutouts apply only when the parking line
+--   crosses the cutout interior; boundary-only touch (e.g. shared edges) does not trigger a cutout.
 -- * Removes `area` tags from cut parkings (no longer accurate after splitting)
 -- INPUT: `_parking_separate_parking_areas_projected` (polygon), `_parking_separate_parking_points_projected` (linestring), `_parking_cutouts` (polygon)
 -- OUTPUT: `_parking_parkings_cutted` (updated with cut separate parkings)
 --
 DO $$ BEGIN RAISE NOTICE 'START cutting out separate parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
--- Filter cutouts for separate parkings: crossings and driveways always apply, obstacles only if they're inside a separate parking area
--- The `separate_parking` tag is set in the obstacles processing files (0_*_project_to_kerb.sql) using `ST_Intersects` to check if obstacles lie within separate parking areas
+-- Filter cutouts for separate parkings: crossings and driveways always apply; obstacles only if separate_parking=TRUE
+-- (obstacle_areas: set in obstacles/0_areas_project_to_kerb.sql when >= 70% overlap; points/lines: 0_*_project_to_kerb.sql)
 CREATE TEMP TABLE separate_parking_cutouts AS
 SELECT
   *
@@ -32,7 +35,8 @@ WHERE
       'obstacle_areas',
       'obstacle_lines'
     )
-    AND (tags ->> 'separate_parking')::BOOLEAN
+    -- separate_parking = TRUE is set in obstacles/0_*_project_to_kerb.sql (70% overlap for areas)
+    AND (tags ->> 'separate_parking')::BOOLEAN IS TRUE
   )
   -- DISTINCT FROM is needed to handle "null DISTING FROM 'foo'" als FALSE instead of NULL
   AND tags ->> 'category' IS DISTINCT FROM 'kerb_lowered';
@@ -77,7 +81,7 @@ FROM
             separate_parking_cutouts c
           WHERE
             c.geom && p.geom
-            AND ST_Intersects (c.geom, p.geom)
+            AND ST_Crosses (c.geom, p.geom)
         )
       ),
       p.geom
@@ -122,7 +126,7 @@ FROM
             separate_parking_cutouts c
           WHERE
             c.geom && p.geom
-            AND ST_Intersects (c.geom, p.geom)
+            AND ST_Crosses (c.geom, p.geom)
         )
       ),
       p.geom

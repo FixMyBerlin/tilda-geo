@@ -149,6 +149,7 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
+  -- `tags` passes on the `separate_parking=TRUE|FALSE` from `obstacles/0_areas_project_to_kerb.sql` to `2_cutout_separate_parkings.sql`
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
