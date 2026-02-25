@@ -1,14 +1,34 @@
 require('init')
 local parse_length = require('parse_length')
-local round = require('round')
 
-local highway_width_fallbacks = {
-  ["motorway_link"] = 14,
+-- Main roads (primary/secondary/tertiary): different values for oneway vs non-oneway (2/3 rule for dual carriageways).
+-- Other roads: same value regardless of oneway.
+local highway_width_fallbacks_no_oneway = {
   ["primary"] = 18,
-  ["primary_link"] = 6,
   ["secondary"] = 14,
-  ["secondary_link"] = 6,
   ["tertiary"] = 10,
+  ["motorway_link"] = 9,
+  ["primary_link"] = 6,
+  ["secondary_link"] = 6,
+  ["tertiary_link"] = 6,
+  ["residential"] = 8,
+  ["unclassified"] = 8,
+  ["living_street"] = 5,
+  ["pedestrian"] = 8,
+  ["road"] = 8,
+  ["service"] = 4,
+  ["bus_guideway"] = 3,
+  ["track"] = 2.5,
+  ["footway"] = 2.5,
+}
+
+local highway_width_fallbacks_oneway = {
+  ["primary"] = 12,
+  ["secondary"] = 9,
+  ["tertiary"] = 7,
+  ["motorway_link"] = 9,
+  ["primary_link"] = 6,
+  ["secondary_link"] = 6,
   ["tertiary_link"] = 6,
   ["residential"] = 8,
   ["unclassified"] = 8,
@@ -37,16 +57,20 @@ local function road_width_tags(tags)
     end
   end
 
-  local base_width = highway_width_fallbacks[tags.highway] or 10
-  if tags.oneway == "yes" then
+  local width_oneway = highway_width_fallbacks_oneway[tags.highway]
+  local width_no_oneway = highway_width_fallbacks_no_oneway[tags.highway]
+
+  local is_oneway = tags.oneway == "yes" or tags.oneway == "implicit_yes"
+  if is_oneway then
     return {
-      value = round(base_width * 2 / 3, 2),
+      value = width_oneway or 10,
       confidence = 'medium',
-      source = 'highway_default_and_oneway',
+      source = (width_oneway == width_no_oneway) and 'highway_default' or 'highway_default_and_oneway',
     }
   end
+
   return {
-    value = base_width,
+    value = width_no_oneway or 10,
     confidence = 'medium',
     source = 'highway_default',
   }
