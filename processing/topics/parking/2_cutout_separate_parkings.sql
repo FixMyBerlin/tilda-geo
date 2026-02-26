@@ -11,6 +11,7 @@
 --   - Obstacles: Only apply if `separate_parking = TRUE`
 --     (set in obstacles/0_areas_project_to_kerb.sql when >= 70% of obstacle area lies inside a parking area;
 --      obstacle_points/obstacle_lines use ST_Intersects in 0_points_project_to_kerb.sql, 0_lines_project_to_kerb.sql)
+-- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
 -- * Cuts out obstacles using `ST_Difference` and `ST_Dump` to split parking lines into segments
 -- * Spatial filter: use `ST_Crosses` (not `ST_Intersects`) so cutouts apply only when the parking line
 --   crosses the cutout interior; boundary-only touch (e.g. shared edges) does not trigger a cutout.
@@ -82,6 +83,10 @@ FROM
           WHERE
             c.geom && p.geom
             AND ST_Crosses (c.geom, p.geom)
+            AND NOT (
+              p.tags ->> 'restriction' IN ('no_parking', 'no_stopping')
+              AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
+            )
         )
       ),
       p.geom
@@ -127,6 +132,10 @@ FROM
           WHERE
             c.geom && p.geom
             AND ST_Crosses (c.geom, p.geom)
+            AND NOT (
+              p.tags ->> 'restriction' IN ('no_parking', 'no_stopping')
+              AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
+            )
         )
       ),
       p.geom
