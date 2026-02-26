@@ -23,22 +23,16 @@ local off_street_parking_area_categories = {
       )
     end,
     capacity_from_area = function(_, area)
-      -- Surface parking: three zones by fixed area (no capacity-based thresholds, so no jumps at boundaries).
-      -- Regression is driven by capacities at the boundaries (not m²/space factors).
+      -- Surface parking: three values for small, medium and large areas
       local AREA_SMALL_MAX = 120
       local AREA_LARGE_MIN = 1500
-      local CAPACITY_AT_SMALL = 8   -- capacity at 120 m²
-      local CAPACITY_AT_LARGE = 50  -- capacity at 1500 m²
-      local FACTOR_SMALL_ZONE = 14.8  -- m² per space for area < 120
-
-      if area < AREA_SMALL_MAX then return area_tags(area, FACTOR_SMALL_ZONE) end
-      if area > AREA_LARGE_MIN then return area_tags(area, AREA_LARGE_MIN / CAPACITY_AT_LARGE) end
-
-      -- Medium: factor (m²/space) interpolated from boundary capacities so capacity is continuous.
-      local factor = (AREA_SMALL_MAX / CAPACITY_AT_SMALL)
-        + ((AREA_LARGE_MIN / CAPACITY_AT_LARGE) - (AREA_SMALL_MAX / CAPACITY_AT_SMALL))
-        * (area - AREA_SMALL_MAX) / (AREA_LARGE_MIN - AREA_SMALL_MAX)
-      return area_tags(area, factor)
+      local f_small = 14.8
+      local f_large = 30
+      if area < AREA_SMALL_MAX then return area_tags(area, f_small) end
+      if area > AREA_LARGE_MIN then return area_tags(area, f_large) end
+      -- Medium: factor increases linearly with area (continuous at 120 and 1500).
+      local f_medium = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (area - AREA_SMALL_MAX)
+      return area_tags(area, f_medium)
     end,
   }),
   class_off_street_parking_category.new({
