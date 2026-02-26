@@ -51,7 +51,8 @@ FROM
             )
             -- Do not apply cutouts with no_cutout_for_restrictions to restriction segments
             AND NOT (
-              p.tags ->> 'restriction' IN ('no_parking', 'no_stopping')
+              (p.tags ->> 'restriction') IS NOT NULL
+              AND (p.tags ->> 'restriction') IN ('no_parking', 'no_stopping', 'no_standing')
               AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
             )
         )
