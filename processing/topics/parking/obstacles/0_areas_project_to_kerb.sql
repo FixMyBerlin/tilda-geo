@@ -1,11 +1,20 @@
 -- WHAT IT DOES:
 -- Project obstacle areas to kerb lines (convert polygon to linestring).
--- - Two branches based on whether the obstacle lies within a separate parking area:
---   * If obstacle does NOT lie within separate parking area:
---     project to regular kerbs using `tilda_project_to_k_closest_kerbs` (finds up to 6 closest kerbs)
---   * If obstacle DOES lie within separate parking area:
---     project to separate parking area kerbs using `tilda_project_to_line` (direct projection)
+-- - Two branches based on whether the obstacle has substantial overlap with a separate parking area:
+--   * If obstacle does NOT have >= 70% of its area inside a separate parking area:
+--     project to regular kerbs using `tilda_project_to_k_closest_kerbs` (finds up to 6 closest kerbs);
+--     result gets tag separate_parking=FALSE → cutout is NOT applied to separate parkings (see below).
+--   * If >= 70% of obstacle area lies inside a separate parking area:
+--     project to that parking area's kerb using `tilda_project_to_line` (direct projection);
+--     result gets tag separate_parking=TRUE → cutout IS applied to separate parkings (see below).
 -- - Cleanup: remove furthest projection if multiple, remove invalid/short geometries
+--
+-- IMPLICATION (where this is used):
+-- - This output feeds cutouts/1_insert_cutouts.sql (obstacle_area cutouts get the separate_parking tag).
+-- - 2_cutout_separate_parkings.sql builds separate_parking_cutouts only from cutouts with separate_parking=TRUE,
+--   and uses them to punch separate parking lines. So the 70% rule here directly controls whether an obstacle
+--   area creates a cutout that is applied to separate parkings (TRUE) or not (FALSE).
+--
 -- INPUT: `_parking_obstacle_areas` (polygon), `_parking_separate_parking_areas` (polygon), `_parking_kerbs` (linestring)
 -- OUTPUT: `_parking_obstacle_areas_projected` (linestring)
 --
@@ -16,15 +25,28 @@ DROP TABLE IF EXISTS _parking_obstacle_areas_projected CASCADE;
 ALTER TABLE _parking_obstacle_areas
 ADD COLUMN separate_parking_area_id TEXT;
 
--- For the cutouts in `cutouts/1_insert_cutouts.sql` and `2_cutout_separate_parkings.sql` we need to treat
--- obstacles that lie within separate parking areas and those that don't differently.
+-- Drives whether this obstacle's cutout is applied to separate parkings (see IMPLICATION in header).
+-- Only assign when at least 70% of the obstacle area lies inside a parking area (overlap ratio),
+-- so adjacent/touch-only obstacles (e.g. road_marking_restricted_area next to parking) do not get
+-- separate_parking=TRUE and thus do not punch separate parking lines (cutouts/1_insert_cutouts.sql,
+-- 2_cutout_separate_parkings.sql).
+-- Use a.geom && spa.geom first so a GIST index on spa.geom can be used (then ST_Intersects, then area ratio).
 UPDATE _parking_obstacle_areas AS a
 SET
-  separate_parking_area_id = spa.id
-FROM
-  _parking_separate_parking_areas AS spa
-WHERE
-  ST_Intersects (a.geom, spa.geom);
+  separate_parking_area_id = (
+    SELECT
+      spa.id
+    FROM
+      _parking_separate_parking_areas AS spa
+    WHERE
+      a.geom && spa.geom
+      AND ST_Intersects (a.geom, spa.geom)
+      AND ST_Area (ST_Intersection (a.geom, spa.geom)) / NULLIF(ST_Area (a.geom), 0) >= 0.7
+    ORDER BY
+      ST_Area (ST_Intersection (a.geom, spa.geom)) DESC
+    LIMIT
+      1
+  );
 
 -- If obstacle does NOT lie within separate parking area:
 -- Project to regular kerbs using `tilda_project_to_k_closest_kerbs` (finds up to 6 closest kerbs within 2m)

@@ -1,6 +1,6 @@
 -- WHAT IT DOES:
 -- Move discarded cutouts from `_parking_cutouts` to `_parking_discarded_cutouts` table.
--- * Discard tag set in: `obstacles/1_filter_points.sql` (bus stops with explicit parking), `obstacles_unprojected/0_filter_turning_circles.sql` (turning circles with parking=no)
+-- * Discard tag set in: `obstacles/1_filter_points.sql` (bus stops with explicit parking)
 -- * Move cutouts with `tags->>'discard' = true` to discarded table
 -- * Remove discarded cutouts from main table (kept for debugging)
 -- INPUT: `_parking_cutouts` (with discard tag set in other files)

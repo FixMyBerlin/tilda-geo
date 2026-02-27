@@ -164,7 +164,7 @@ function osm2pgsql.process_way(object)
   local mapillary_coverage_lines = mapillary_coverage_data:get()
   object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
   local is_sidepath_lines = is_sidepath_data:get()
-  object_tags._is_sidepath = is_sidepath(is_sidepath_lines, object.id)
+  object_tags._is_sidepath = is_sidepath(is_sidepath_lines, object.id, object_tags.highway)
 
   -- ====== (B.2) General mutation to our `object_tags` ======
   transform_cycleway_opposite_schema(object_tags)
@@ -263,7 +263,7 @@ function osm2pgsql.process_way(object)
 
   -- == Start working on roads, roadsPathClasses Data ==
   -- === Expand the result tags ===
-  if not (PathClasses[object_tags.highway] or object_tags.highway == 'pedestrian') then
+  if not sidepath_highway_classes[object_tags.highway] then
     MergeTable(road_result_tags, Maxspeed(object))
   end
   MergeTable(road_result_tags, presence)

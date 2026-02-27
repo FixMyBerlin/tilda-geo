@@ -5,6 +5,7 @@
 -- * Insert point cutouts with type-specific buffers (street_lamp, tree, traffic_sign, etc.)
 --   (!) Those are managed manually in this file.
 -- * Insert polygon cutouts with 0.6m buffer
+-- * All external cutouts get `no_cutout_for_restrictions=true` (not applied to `restriction=no_parking|no_stopping` segments).
 -- INPUT: `data.euvm_cutouts_point`, `data.euvm_cutouts_polygon` (external data)
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --
@@ -90,13 +91,7 @@ CREATE INDEX euvm_cutouts_polygon_projected_geom_idx ON _euvm_cutouts_polygon_pr
 
 -- INSERT external point cutouts with type-specific buffering
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   'external-point-' || id AS id,
   source_id::BIGINT AS osm_id,
@@ -128,7 +123,8 @@ SELECT
     WHEN 'water_well' THEN 1.5
     ELSE 0.01 -- This case is never reached due to WHERE clause filtering
     END,
-    'side', kerb_side
+    'side', kerb_side,
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta
@@ -147,13 +143,7 @@ WHERE
 
 -- INSERT external polygon cutouts directly
 INSERT INTO
-  _parking_cutouts (
-    id,
-    osm_id,
-    geom,
-    tags,
-    meta
-  )
+  _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
   'external-polygon-' || id AS id,
   source_id::BIGINT AS osm_id,
@@ -162,7 +152,8 @@ SELECT
     /* sql-formatter-disable */
     'category', type,
     'source', 'external_cutouts_euvm',
-    'side', kerb_side
+    'side', kerb_side,
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta

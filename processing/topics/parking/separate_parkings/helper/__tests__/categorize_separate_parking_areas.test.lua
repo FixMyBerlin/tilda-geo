@@ -54,4 +54,32 @@ describe('`categorize_separate_parking areas`', function()
     assert.are.equal(result_tags.tags.mapillary, object.tags.mapillary)
     assert.are.equal(result_tags.tags.not_copied, nil)
   end)
+
+  it('parking=surface + location=median does not match On-Street (off-street only, #3076)', function()
+    local object = {
+      id = 1, type = 'way',
+      tags = {
+        ['amenity'] = 'parking',
+        ['parking'] = 'surface',
+        ['location'] = 'median',
+      },
+    }
+    local result = categorize_separate_parking(object, separate_parking_area_categories)
+    assert.are.equal(result.category, nil)
+    assert.are.equal(result.object, nil)
+  end)
+
+  it('parking=street_side + location=median stays On-Street (#3076)', function()
+    local object = {
+      id = 1, type = 'way',
+      tags = {
+        ['amenity'] = 'parking',
+        ['parking'] = 'street_side',
+        ['location'] = 'median',
+      },
+    }
+    local result = categorize_separate_parking(object, separate_parking_area_categories)
+    assert.are.equal('parking_street_side', result.category.id)
+    assert.are.equal(object, result.object)
+  end)
 end)

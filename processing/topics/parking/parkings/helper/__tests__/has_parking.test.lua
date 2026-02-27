@@ -45,4 +45,16 @@ describe('`has_parking`', function()
     local result = has_parking(tags)
     assert.are.is_false(result)
   end)
+
+  it('motorway_link is false without parking tags (optional-parking highway)', function()
+    local tags = { ['highway'] = 'motorway_link' }
+    local result = has_parking(tags)
+    assert.are.is_false(result)
+  end)
+
+  it('motorway_link is true when explicit parking tags present (optional-parking highway)', function()
+    local tags = { ['highway'] = 'motorway_link', ['parking:left'] = 'lane' }
+    local result = has_parking(tags)
+    assert.are.is_true(result)
+  end)
 end)

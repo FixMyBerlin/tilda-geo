@@ -1,4 +1,5 @@
 require("Set")
+require("JoinSets")
 
 -- https://wiki.openstreetmap.org/wiki/DE:Key:highway
 -- https://wiki.openstreetmap.org/wiki/Attribuierung_von_Stra%C3%9Fen_in_Deutschland
@@ -34,3 +35,6 @@ PathClasses = Set({
   "cycleway",
   "steps",
 })
+
+-- Path-like for sidepath / presence / maxspeed logic: PathClasses + pedestrian
+sidepath_highway_classes = JoinSets({ PathClasses, Set({ 'pedestrian' }) })

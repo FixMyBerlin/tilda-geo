@@ -4,7 +4,7 @@ require("HighwayClasses")
 
 function BikelanesPresence(object_tags, cycleways)
   -- GUARD: Skip some roads
-  if PathClasses[object_tags.highway] or object_tags.highway == 'pedestrian' then
+  if sidepath_highway_classes[object_tags.highway] then
     return nil
   end
   if HighwayClasses[object_tags.highway] then

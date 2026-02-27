@@ -23,11 +23,16 @@ local off_street_parking_area_categories = {
       )
     end,
     capacity_from_area = function(_, area)
-      -- For surface like parking we have two values, one for large areas, one for smaller…
-      local sqm_small = 14.5
-      local is_small = area < (8  * sqm_small)
-      if is_small then return area_tags(area, sqm_small) end
-      return area_tags(area, 21.7)
+      -- Surface parking: three values for small, medium and large areas
+      local AREA_SMALL_MAX = 120
+      local AREA_LARGE_MIN = 1500
+      local f_small = 14.8
+      local f_large = 30
+      if area < AREA_SMALL_MAX then return area_tags(area, f_small) end
+      if area > AREA_LARGE_MIN then return area_tags(area, f_large) end
+      -- Medium: factor increases linearly with area (continuous at 120 and 1500).
+      local f_medium = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (area - AREA_SMALL_MAX)
+      return area_tags(area, f_medium)
     end,
   }),
   class_off_street_parking_category.new({

@@ -3,10 +3,11 @@
 -- * Intersection corners (5m buffer) - conditionally
 -- * Driveway corner kerbs, driveways, crossings (buffered)
 -- * Obstacle points/lines/areas (buffered)
--- * Public transport stops, turnaround points (buffered)
+-- * Public transport stops (buffered)
 -- * Separate parking areas/points (buffered)
 -- * Roads (buffered) - cleanup leftover parking pieces on roads
--- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_turnaround_points`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`
+-- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
+-- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --
 DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
@@ -45,7 +46,8 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'driveway_corner_kerb',
-    'source', 'driveway_corner_kerbs'
+    'source', 'driveway_corner_kerbs',
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   '{}'::jsonb
@@ -71,7 +73,8 @@ SELECT
     'street:name', tags ->> 'street:name',
     'width', tags ->> 'width',
     -- 'highway', tags ->> 'highway',
-    'road', tags ->> 'road'
+    'road', tags ->> 'road',
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -94,7 +97,8 @@ SELECT
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
-    'width', (tags ->> 'buffer_radius')::float
+    'width', (tags ->> 'buffer_radius')::float,
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -114,7 +118,8 @@ SELECT
     'category', tags ->> 'category',
     'source', 'obstacle_points',
     'radius', (tags ->> 'buffer_radius')::float,
-    'side', kerb_side
+    'side', kerb_side,
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -134,31 +139,13 @@ SELECT
     'category', tags ->> 'category',
     'source', 'public_transport_stops',
     'radius', (tags ->> 'buffer_radius')::float,
-    'side', COALESCE(source ->> 'kerb_side', 'platform')
+    'side', COALESCE(source ->> 'kerb_side', 'platform'),
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
 FROM
   _parking_public_transport_points_projected;
-
--- INSERT "turnaround_point" buffers (circle) - unprojected obstacles
--- Buffer: tags->>'buffer_radius'
-INSERT INTO
-  _parking_cutouts (id, osm_id, geom, tags, meta)
-SELECT
-  id::TEXT,
-  osm_id,
-  ST_Buffer (geom, (tags ->> 'buffer_radius')::float),
-  tags || jsonb_build_object(
-    /* sql-formatter-disable */
-    'category', tags ->> 'category', -- see processing/topics/parking/obstacles_unprojected/point/obstacle_point_categories.lua
-    'source', 'turnaround_points',
-    'radius', (tags ->> 'buffer_radius')::float
-    /* sql-formatter-enable */
-  ),
-  jsonb_build_object('updated_at', meta ->> 'updated_at')
-FROM
-  _parking_turnaround_points;
 
 -- INSERT "obstacle_area" buffers (buffered lines)
 -- Buffer: static value 0.6m
@@ -168,11 +155,13 @@ SELECT
   id::TEXT,
   osm_id,
   ST_Buffer (geom, 0.6, 'endcap=flat'),
+  -- `tags` passes on the `separate_parking=TRUE|FALSE` from `obstacles/0_areas_project_to_kerb.sql` to `2_cutout_separate_parkings.sql`
   tags || jsonb_build_object(
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_areas',
-    'side', kerb_side
+    'side', kerb_side,
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -191,7 +180,8 @@ SELECT
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'obstacle_lines',
-    'side', kerb_side
+    'side', kerb_side,
+    'no_cutout_for_restrictions', true
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')

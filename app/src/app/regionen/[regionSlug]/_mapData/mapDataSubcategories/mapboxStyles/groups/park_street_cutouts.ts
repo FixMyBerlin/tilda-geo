@@ -57,11 +57,9 @@ export const mapboxStyleGroupLayers_park_street_cutouts: MapboxStyleLayer[] = [
         'hsla(270, 29%, 38%, 0.61)',
         [
           'road_marking_restricted_area',
-          'turning_circle',
           'kerb_lowered',
           'parking_kerb',
           'barrier',
-          'turning_loop',
         ],
         'hsla(206, 62%, 31%, 0.6)',
         'hsla(0, 71%, 0%, 0)',

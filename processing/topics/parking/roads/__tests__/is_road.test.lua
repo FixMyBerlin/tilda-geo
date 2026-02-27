@@ -44,4 +44,10 @@ describe("`is_road`", function()
     local result = is_road(tags)
     assert.are.equal(result, false)
   end)
+
+  it('includes motorway_link (cutouts and 5m intersection corners; has_parking is false)', function()
+    local tags = { ["highway"] = 'motorway_link' }
+    local result = is_road(tags)
+    assert.are.equal(result, true)
+  end)
 end)

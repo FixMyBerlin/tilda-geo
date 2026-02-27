@@ -60,9 +60,6 @@
 \i '/processing/topics/parking/obstacles/0_points_project_to_kerb.sql'
 \i '/processing/topics/parking/obstacles/1_filter_points.sql'
 
--- HANDLE UNPROJECTED OBSTACLES
-\i '/processing/topics/parking/obstacles_unprojected/0_filter_turning_circles.sql'
-
 -- HANDLE PUBLIC TRANSPORT
 \i '/processing/topics/parking/public_transport/0_points_project_to_kerb_and_platform.sql'
 

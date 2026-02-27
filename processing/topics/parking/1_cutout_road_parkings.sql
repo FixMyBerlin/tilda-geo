@@ -3,6 +3,7 @@
 -- Some cutouts are conditional:
 -- - Street name matching: When both cutout and parking have a street name, they must match
 -- - Bus stop side matching: Bus stop cutouts only apply to matching street side, other cutouts apply to both sides
+-- - Restriction segments: Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
 -- INPUT: `_parking_road_parkings` (linestring), `_parking_cutouts` (polygon)
 -- OUTPUT: `_parking_parkings_cutted` (linestring - cut road parkings)
 --
@@ -35,20 +36,24 @@ FROM
             _parking_cutouts c
           WHERE
             c.geom && p.geom
-            AND
             -- When both cutout and parking have a street name, they must match
-            (
+            AND (
               c.tags ->> 'street:name' = p.street_name
               OR c.tags ->> 'street:name' IS NULL
               OR p.street_name IS NULL
             )
-            AND
             -- Only apply public_transport_stops cutouts to the correct side of the street
             -- 1. Non-public-transport cutouts: Apply to both sides
             -- 2. Public transport cutouts: Only apply when sides match
-            (
+            AND (
               c.tags ->> 'source' != 'public_transport_stops'
               OR c.tags ->> 'side' = p.side
+            )
+            -- Do not apply cutouts with no_cutout_for_restrictions to restriction segments
+            AND NOT (
+              (p.tags ->> 'restriction') IS NOT NULL
+              AND (p.tags ->> 'restriction') IN ('no_parking', 'no_stopping', 'no_standing')
+              AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
             )
         )
       ),

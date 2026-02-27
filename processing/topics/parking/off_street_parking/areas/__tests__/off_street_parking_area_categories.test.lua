@@ -26,23 +26,65 @@ describe("off_street_parking_area_categories", function()
       assert.are.equal(capacity.confidence, "medium")
       assert.are.equal(capacity.source, "area")
     end)
-    it("case area for surface small", function()
+    it("case area for surface small (area < 120)", function()
       local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "surface" } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
       local area = 100
       local capacity = category_result.category:get_capacity(object.tags, area)
-      assert.are.equal(capacity.value, round(area / 14.5, 0))
+      assert.are.equal(capacity.value, round(area / 14.8, 0))
       assert.are.equal(capacity.confidence, "medium")
       assert.are.equal(capacity.source, "area")
     end)
-    it("case area for surface small", function()
+    it("case area for surface medium (120 <= area <= 1500)", function()
       local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "surface" } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
       local area = 200
       local capacity = category_result.category:get_capacity(object.tags, area)
-      assert.are.equal(capacity.value, round(area / 21.7, 0))
+      local AREA_SMALL_MAX, AREA_LARGE_MIN = 120, 1500
+      local f_small, f_large = 14.8, 30
+      local f_medium = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (area - AREA_SMALL_MAX)
+      assert.are.equal(capacity.value, round(area / f_medium, 0))
       assert.are.equal(capacity.confidence, "medium")
       assert.are.equal(capacity.source, "area")
+    end)
+    it("surface capacity is continuous at boundary 120 m²", function()
+      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "surface" } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local c119 = category_result.category:get_capacity(object.tags, 119)
+      local c120 = category_result.category:get_capacity(object.tags, 120)
+      local c121 = category_result.category:get_capacity(object.tags, 121)
+      local AREA_SMALL_MAX, AREA_LARGE_MIN = 120, 1500
+      local f_small, f_large = 14.8, 30
+      local f_medium_120 = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (120 - AREA_SMALL_MAX)
+      local f_medium_121 = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (121 - AREA_SMALL_MAX)
+      assert.are.equal(c119.value, round(119 / f_small, 0))
+      assert.are.equal(c120.value, round(120 / f_medium_120, 0))
+      assert.are.equal(c121.value, round(121 / f_medium_121, 0))
+      assert.is_true(math.abs(c120.value - c119.value) <= 1 and math.abs(c121.value - c120.value) <= 1)
+    end)
+    it("surface capacity is continuous at boundary 1500 m²", function()
+      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "surface" } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local c1499 = category_result.category:get_capacity(object.tags, 1499)
+      local c1500 = category_result.category:get_capacity(object.tags, 1500)
+      local c1501 = category_result.category:get_capacity(object.tags, 1501)
+      local AREA_SMALL_MAX, AREA_LARGE_MIN = 120, 1500
+      local f_small, f_large = 14.8, 30
+      local f_medium_1499 = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (1499 - AREA_SMALL_MAX)
+      local f_medium_1500 = f_small + ((f_large - f_small)/(AREA_LARGE_MIN - AREA_SMALL_MAX)) * (1500 - AREA_SMALL_MAX)
+      assert.are.equal(c1499.value, round(1499 / f_medium_1499, 0))
+      assert.are.equal(c1500.value, round(1500 / f_medium_1500, 0))
+      assert.are.equal(c1501.value, round(1501 / f_large, 0))
+      assert.is_true(math.abs(c1500.value - c1499.value) <= 1 and math.abs(c1501.value - c1500.value) <= 1)
+    end)
+    it("case est_capacity without capacity uses tag_estimation and does not use area", function()
+      local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "underground", est_capacity = "20" } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local area = 100
+      local capacity = category_result.category:get_capacity(object.tags, area)
+      assert.are.equal(capacity.value, 20)
+      assert.are.equal(capacity.confidence, "medium")
+      assert.are.equal(capacity.source, "tag_estimation")
     end)
   end)
 

@@ -6,6 +6,7 @@ local function is_road(tags)
   if not tags.highway then return false end
 
   local allowed_highways = Set({
+    "motorway_link",
     "primary", "primary_link",
     "secondary", "secondary_link",
     "tertiary", "tertiary_link",

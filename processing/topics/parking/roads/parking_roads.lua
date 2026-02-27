@@ -25,6 +25,13 @@ local db_table = osm2pgsql.define_table({
   }
 })
 
+-- `_parking_roads` flag semantics:
+-- * `is_driveway`: true for `service`/`track`/… (not in `is_road`); false for `is_road` ways (e.g. `residential`, `motorway_link`).
+-- * `has_parking`: true when we create parking lines along this road; false when we only use the road for cutouts/intersections.
+--
+-- Normal streets: (`is_driveway`=false, `has_parking`=true).
+-- Driveways: (`is_driveway`=true, `has_parking`=* from explicit `parking:*` tags).
+-- Exception: `pedestrian` and 'motorway_link` are `is_road` but we don't assume parking — `has_parking` only if explicit `parking:*` tags (see `has_parking.lua` `highway_is_road_parking_optional`). So they are often (`is_driveway`=false, `has_parking`=false) in `_parking_roads` which means the are used as road cutouts and 5m intersection corners but get parking lines only when tagged.
 function parking_roads(object)
   local is_road = is_road_check(object.tags)
   local is_driveway = is_driveway_check(object.tags)
