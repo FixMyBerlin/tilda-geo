@@ -899,6 +899,7 @@ export const staticRegion: StaticRegion[] = [
       'boundaries',
       'surface',
       'mapillary',
+      'bicycleParking',
     ],
     backgroundSources: [...defaultBackgroundSources, 'ELI_baden-w-rttemberg-dop20'],
     exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
