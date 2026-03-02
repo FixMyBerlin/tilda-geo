@@ -5,7 +5,7 @@
 -- * Insert point cutouts with type-specific buffers (street_lamp, tree, traffic_sign, etc.)
 --   (!) Those are managed manually in this file.
 -- * Insert polygon cutouts with 0.6m buffer
--- * All external cutouts get `no_cutout_for_restrictions=true` (not applied to `restriction=no_parking|no_stopping` segments).
+-- * All external cutouts get `no_cutout_for_restrictions=true` (not applied to segments whose condition_category indicates a real no_parking/no_stopping/no_standing prohibition).
 -- INPUT: `data.euvm_cutouts_point`, `data.euvm_cutouts_polygon` (external data)
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --

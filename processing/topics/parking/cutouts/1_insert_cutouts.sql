@@ -6,7 +6,7 @@
 -- * Public transport stops (buffered)
 -- * Separate parking areas/points (buffered)
 -- * Roads (buffered) - cleanup leftover parking pieces on roads
--- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
+-- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments whose condition_category indicates a real prohibition (no_parking, no_stopping, no_standing).
 -- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --
