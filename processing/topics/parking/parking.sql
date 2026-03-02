@@ -62,6 +62,7 @@
 
 -- HANDLE PUBLIC TRANSPORT
 \i '/processing/topics/parking/public_transport/0_points_project_to_kerb_and_platform.sql'
+\i '/processing/topics/parking/public_transport/1_platform_kerb_debug_errors.sql'
 
 -- CREATE CUTOUTS
 \i '/processing/topics/parking/cutouts/0_create_table.sql'
