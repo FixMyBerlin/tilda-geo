@@ -25,8 +25,10 @@ SELECT
 FROM
   parkings_quantized
 WHERE
-  (tags ->> 'operator_type' IS NULL
-   OR tags ->> 'operator_type' NOT IN ('private', 'assumed_private'))
+  (
+    tags ->> 'operator_type' IS NULL
+    OR tags ->> 'operator_type' NOT IN ('private', 'assumed_private')
+  )
 UNION ALL
 SELECT
   id,
@@ -241,6 +243,11 @@ WHERE
     public.qa_parkings_euvm.geom,
     ST_Transform (berlin.geom, 3857)
   );
+
+-- Topological simplification (2 m in 3857) to reduce tile size and rendering load;
+UPDATE public.qa_parkings_euvm
+SET
+  geom = ST_SimplifyPreserveTopology (geom, 2);
 
 -- 4. Count current parkings (excl private and assumed_private from parkings_quantized, public only from off_street_parking_quantized) for each voronoi polygon
 WITH
