@@ -8,6 +8,7 @@ local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local round = require('round')
 local SURFACE_TAGS = require('surface_tags')
+local operator_type = require('operator_type_for_road_parking')
 
 local function result_tags_off_street_parking(result, area)
   local id = DefaultId(result.object)
@@ -33,7 +34,7 @@ local function result_tags_off_street_parking(result, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = SANITIZE_TAGS.operator_type(result.object.tags) or 'assumed_private',
+    operator_type = operator_type.operator_type_for_area(result.object.tags, result.object.type, result.object.id, 'assumed_private'),
     mapillary = SANITIZE_TAGS.safe_string(result.object.tags.mapillary),
 
     -- Capacity & Area

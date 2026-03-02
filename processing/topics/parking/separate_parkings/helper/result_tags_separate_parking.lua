@@ -9,7 +9,7 @@ local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local SURFACE_TAGS = require('surface_tags')
-local operator_type_for_road_parking = require('operator_type_for_road_parking')
+local operator_type = require('operator_type_for_road_parking')
 
 local function result_tags_separate_parking(category, object, area)
   local id = DefaultId(object)
@@ -34,7 +34,7 @@ local function result_tags_separate_parking(category, object, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = operator_type_for_road_parking(object.tags, nil),
+    operator_type = operator_type.operator_type_for_area(object.tags, object.type, object.id, 'assumed_public'),
     mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary),
 
     -- Area

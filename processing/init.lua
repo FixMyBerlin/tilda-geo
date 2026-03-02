@@ -16,6 +16,7 @@ package.path = package.path .. ";/processing/topics/parking/crossings/helper/?.l
 package.path = package.path .. ";/processing/topics/parking/crossings/lines/?.lua"
 package.path = package.path .. ";/processing/topics/parking/crossings/points/?.lua"
 package.path = package.path .. ";/processing/topics/parking/errors/?.lua"
+package.path = package.path .. ";/processing/topics/parking/overwrites/?.lua"
 package.path = package.path .. ";/processing/topics/parking/helper/?.lua"
 package.path = package.path .. ";/processing/topics/parking/obstacles/?.lua"
 package.path = package.path .. ";/processing/topics/parking/obstacles/area/?.lua"
