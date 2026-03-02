@@ -1,8 +1,8 @@
 -- WHAT IT DOES:
 -- Project public transport stop points to kerb lines or platform lines (convert point to linestring).
--- Three branches based on stop type and side:
+-- Four branches based on stop type and side:
 -- * `bus_stop_kerb`: project to kerbs using `tilda_project_to_k_closest_kerbs` (finds closest kerb within 5m)
--- * `bus_stop_centerline` (side IS NULL): project to platform lines using `tilda_project_to_closest_platform` (within 20m)
+-- * `bus_stop_centerline` (side IS NULL): project to nearest platform, then from that to nearest kerb (two-step) so we get kerb_side for cutouts
 -- * `bus_stop_centerline` (side IS NOT NULL): project to kerbs using `tilda_project_to_k_closest_kerbs` (finds closest kerb on specified side within 20m)
 -- * `tram_stop` (with embedded rails): project to kerbs using `tilda_project_to_k_closest_kerbs` (within 20m)
 -- - Cleanup: remove invalid geometries
@@ -44,38 +44,46 @@ WHERE
   ST_GeometryType (p.geom) = 'ST_Point'
   AND p.tags ->> 'category' = 'bus_stop_kerb';
 
--- Branch 2: bus_stop_centerline (side IS NULL) - project to platform lines
--- Bus stop on centerline without side info, snap to platform line
+-- Branch 2: bus_stop_centerline (side IS NULL) - project to platform then to kerb (two-step)
+-- Bus stop on centerline without side info: first snap to nearest platform, then from that geometry to nearest kerb.
+-- This yields kerb_side so cutouts apply to the correct street side (same as Branch 1/3/4).
+-- When there is no `direction` tag (mapped to `side` in Lua), both kerbs are equidistant from the centerline so we cannot choose. We project to the nearest platform first (it lies on one side of the street), then from that to the nearest kerb; that kerb gives us the side for cutouts. `source._via_platform_id` records which platform was used (traceability only).
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
-  pt.id || '-' || pp.platform_id AS id,
+  pt.id || '-' || pk.kerb_id AS id,
   pt.osm_type,
   pt.osm_id,
-  pt.id as source_id,
+  pt.id AS source_id,
   pt.tags,
   pt.meta,
   jsonb_build_object(
     /* sql-formatter-disable */
-    'source', 'platform',
-    'platform_id', pp.platform_id,
+    'source', 'kerb',
+    'kerb_id', pk.kerb_id,
+    'kerb_osm_type', pk.kerb_osm_type,
+    'kerb_osm_id', pk.kerb_osm_id,
+    'kerb_side', pk.kerb_side,
+    'kerb_tags', pk.kerb_tags,
+    'kerb_distance', pk.kerb_distance,
+    '_via_platform_id', pp.platform_id,
     'platform_osm_type', pp.platform_osm_type,
     'platform_osm_id', pp.platform_osm_id,
-    'platform_tags', pp.platform_tags,
     'platform_distance', pp.platform_distance
     /* sql-formatter-enable */
-  ) as source,
-  pp.geom
+  ) AS source,
+  pk.geom
 FROM
   _parking_public_transport pt
   CROSS JOIN LATERAL tilda_project_to_closest_platform (pt.geom, tolerance := 20) AS pp
+  CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (pp.geom, tolerance := 20, k := 1) AS pk
 WHERE
   ST_GeometryType (pt.geom) = 'ST_Point'
   AND pt.tags ->> 'category' = 'bus_stop_centerline'
   AND pt.tags ->> 'side' IS NULL;
 
 -- Branch 3: bus_stop_centerline (side IS NOT NULL) - project to kerbs
--- Bus stop on centerline with side info, snap to kerb on specified side
+-- Bus stop on centerline with side info, snap to kerb on specified side.
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
@@ -91,6 +99,7 @@ SELECT
     'kerb_id', pk.kerb_id,
     'kerb_osm_type', pk.kerb_osm_type,
     'kerb_osm_id', pk.kerb_osm_id,
+    'kerb_side', pk.kerb_side,
     'kerb_tags', pk.kerb_tags,
     'kerb_distance', pk.kerb_distance
     /* sql-formatter-enable */
@@ -110,7 +119,8 @@ WHERE
   AND pt.tags ->> 'side' IS NOT NULL;
 
 -- Branch 4: tram_stop (with embedded rails) - project to kerbs
--- Tram stop with embedded rails in road, snap to kerb
+-- Tram stop with embedded rails in road, snap to kerb.
+-- `kerb_side` is passed so cutouts/1_insert_cutouts.sql can set cutout side for 1_cutout_road_parkings.sql.
 INSERT INTO
   _parking_public_transport_points_projected
 SELECT
@@ -126,6 +136,7 @@ SELECT
     'kerb_id', pk.kerb_id,
     'kerb_osm_type', pk.kerb_osm_type,
     'kerb_osm_id', pk.kerb_osm_id,
+    'kerb_side', pk.kerb_side,
     'kerb_tags', pk.kerb_tags,
     'kerb_distance', pk.kerb_distance
     /* sql-formatter-enable */

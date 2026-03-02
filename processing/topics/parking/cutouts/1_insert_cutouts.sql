@@ -128,6 +128,11 @@ FROM
 
 -- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
 -- Buffer: tags->>'buffer_radius'
+-- Side: When the stop was projected to a kerb, the projection step sets source->>'kerb_side' (left/right).
+--   All branches (bus_stop_kerb, bus_stop_centerline with/without side via platform→kerb, tram_stop) now
+--   project to a kerb and set kerb_side. We use 'platform' only as fallback when source has no kerb_side.
+--   This tag is used in 1_cutout_road_parkings.sql so that public transport cutouts only apply to the
+--   matching street side; 'platform' does not match left/right so those cutouts are not applied to road parkings.
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
