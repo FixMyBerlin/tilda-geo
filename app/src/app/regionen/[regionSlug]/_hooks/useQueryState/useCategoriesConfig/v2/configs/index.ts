@@ -70,6 +70,7 @@ import { _up0vgv } from './_up0vgv'
 import { _v92cax } from './_v92cax'
 import { _vvhkik } from './_vvhkik'
 import { _wvqr4 } from './_wvqr4'
+import { _x9esb4 } from './_x9esb4'
 import { _z6mvi1 } from './_z6mvi1'
 import { _z9tzbb } from './_z9tzbb'
 
@@ -143,6 +144,7 @@ export const configs = {
   v92cax: _v92cax,
   vvhkik: _vvhkik,
   wvqr4: _wvqr4,
+  x9esb4: _x9esb4,
   z6mvi1: _z6mvi1,
   z9tzbb: _z9tzbb,
 }
