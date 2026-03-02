@@ -399,6 +399,8 @@ export const sources: MapDataSource<SourcesId>[] = [
       documentedKeys: [
         'capacity',
         'capacity:cargo_bike__if_present',
+        'access',
+        'covered',
         'composit_mapillary',
         'description__if_present',
       ],
