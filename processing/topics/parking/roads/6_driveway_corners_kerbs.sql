@@ -25,7 +25,7 @@ FROM
   CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (ST_Buffer (c.geom, 4), tolerance := 0, k := 4) AS pk
 WHERE
   c.has_driveway
-  AND c.has_road
+  AND c.has_parking_road
   AND pk.kerb_is_driveway
   AND pk.kerb_has_parking;
 

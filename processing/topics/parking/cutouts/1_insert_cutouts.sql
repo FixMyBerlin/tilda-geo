@@ -13,7 +13,7 @@
 DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- INSERT "intersection_corner" buffers (circle)
--- Conditions: only where NOT `has_driveway` AND `has_road`.
+-- Conditions: only where NOT `has_driveway` AND `has_parking_road`.
 -- Buffer: static value 5m (legal requirement where no parking is allowed)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
@@ -33,7 +33,7 @@ FROM
   _parking_intersection_corners
 WHERE
   NOT has_driveway
-  AND has_road;
+  AND has_parking_road;
 
 -- INSERT "driveway_corner_kerb" buffers (rectangles)
 -- Buffer: static value 0.01m

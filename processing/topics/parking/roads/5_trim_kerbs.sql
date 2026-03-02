@@ -26,7 +26,7 @@ WITH
       ) AS kerbs (kerb_id)
     WHERE
       c.has_driveway
-      AND c.has_road
+      AND c.has_parking_road
   )
 UPDATE _parking_kerbs k
 SET

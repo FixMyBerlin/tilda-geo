@@ -1,6 +1,6 @@
 -- WHAT IT DOES:
 -- Create new 10m segment geometries for driveways that connect to intersections.
--- * Find driveways connected to intersections (where driveway_degree > 0 and road_degree > 1)
+-- * Find driveways connected to intersections (where driveway_degree > 0 and road_degree >= 1). Exclude this way only when it is the parking road and the node has a pure driveway (so this way is the main road, not the driveway leg). Uses i.has_pure_driveway from _parking_intersections.
 -- * Create new 10m segment geometry directly:
 --   * Start point: intersection point
 --   * End point: 10m projected from intersection in driveway direction (ST_Project with azimuth)
@@ -43,8 +43,12 @@ FROM
   JOIN _parking_intersections i ON nrm.node_id = i.node_id
 WHERE
   i.driveway_degree > 0
-  AND i.road_degree > 1
-  AND r.is_driveway;
+  AND i.road_degree >= 1
+  AND r.is_driveway
+  AND (
+    r.is_parking_road = false
+    OR NOT i.has_pure_driveway
+  );
 
 -- MISC
 ALTER TABLE _parking_driveways
