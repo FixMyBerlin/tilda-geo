@@ -38,6 +38,8 @@ SELECT
     'road_width_source', tags ->> 'road_width_source',
     'road_oneway', tags ->> 'road_oneway',
     'operator_type', tags ->> 'operator_type',
+    'operator_type_source', tags ->> 'operator_type_source',
+    'operator_type_confidence', tags ->> 'operator_type_confidence',
     'mapillary', tags ->> 'mapillary',
     --
     -- Capacity & Area

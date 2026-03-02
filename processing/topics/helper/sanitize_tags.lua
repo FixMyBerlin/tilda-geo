@@ -88,9 +88,8 @@ local SANITIZE_TAGS = {
     if value == nil then
       if tags.operator == 'private' then value = 'private'
       elseif tags.operator == 'public' then value = 'public'
-      end
+      else return nil end
     end
-    if value == nil then return nil end
 
     -- DOCs: to revalidate this query, use…
     -- curl -g https://postpass.geofabrik.de/api/0.2/interpreter --data-urlencode "options[geojson]=false" --data-urlencode "data=

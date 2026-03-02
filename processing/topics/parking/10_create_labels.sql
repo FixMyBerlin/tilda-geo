@@ -17,6 +17,8 @@ SELECT
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
     'operator_type', tags ->> 'operator_type',
+    'operator_type_source', tags ->> 'operator_type_source',
+    'operator_type_confidence', tags ->> 'operator_type_confidence',
     'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
@@ -39,6 +41,8 @@ SELECT
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
     'operator_type', tags ->> 'operator_type',
+    'operator_type_source', tags ->> 'operator_type_source',
+    'operator_type_confidence', tags ->> 'operator_type_confidence',
     'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,

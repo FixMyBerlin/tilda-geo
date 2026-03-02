@@ -3,7 +3,7 @@
 -- 1. Preserve values in *_previous table
 -- 2. Load reference voronoi from data.euvm_qa_voronoi
 -- 3. Clip geometries to Berlin boundary
--- 4. Count current parkings (excl private and assumed_private from parkings_quantized, public only from off_street_parking_quantized) per polygon
+-- 4. Count current parkings (excl private from parkings_quantized, public only from off_street_parking_quantized) per polygon
 -- 5. Calculate difference and relative values
 -- 6. Update previous_relative from previous run
 -- INPUT: data.euvm_qa_voronoi (polygon), public.parkings_quantized (point), public.off_street_parking_quantized (point)
@@ -13,7 +13,7 @@ DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp()
 
 -- Transform parkings to SRID 5243 for accurate spatial operations
 -- (5243 optimized for Germany, uses meters; needed for ST_Contains on line 105)
--- Combine parkings_quantized (excl private and assumed_private) and off_street_parking_quantized (public only)
+-- Combine parkings_quantized (excl private) and off_street_parking_quantized (public only)
 DROP TABLE IF EXISTS _parking_parkings_quantized;
 
 CREATE TEMP TABLE _parking_parkings_quantized AS
@@ -27,7 +27,7 @@ FROM
 WHERE
   (
     tags ->> 'operator_type' IS NULL
-    OR tags ->> 'operator_type' NOT IN ('private', 'assumed_private')
+    OR tags ->> 'operator_type' <> 'private'
   )
 UNION ALL
 SELECT
@@ -249,7 +249,7 @@ UPDATE public.qa_parkings_euvm
 SET
   geom = ST_SimplifyPreserveTopology (geom, 2);
 
--- 4. Count current parkings (excl private and assumed_private from parkings_quantized, public only from off_street_parking_quantized) for each voronoi polygon
+-- 4. Count current parkings (excl private from parkings_quantized, public only from off_street_parking_quantized) for each voronoi polygon
 WITH
   counts AS (
     SELECT

@@ -17,6 +17,7 @@ local function result_tags_off_street_parking(result, area)
   local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(result.object.tags, 'assumed_private')
   -- Get capacity from category (handles both tag-based and area-based capacity)
   local capacity_tags_result = result.category:get_capacity(result.object.tags, area)
+  local operator_type_result = operator_type.operator_type_for_area(result.object.tags, result.object.type, result.object.id, 'private')
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
@@ -34,7 +35,9 @@ local function result_tags_off_street_parking(result, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = operator_type.operator_type_for_area(result.object.tags, result.object.type, result.object.id, 'assumed_private'),
+    operator_type = operator_type_result.value,
+    operator_type_source = operator_type_result.source,
+    operator_type_confidence = operator_type_result.confidence,
     mapillary = SANITIZE_TAGS.safe_string(result.object.tags.mapillary),
 
     -- Capacity & Area

@@ -26,7 +26,7 @@ export type SubcatParkingTildaStyleIds =
 const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
   'match',
   ['get', 'operator_type'],
-  ['public', 'assumed_public'],
+  ['public'],
   true,
   false,
 ]

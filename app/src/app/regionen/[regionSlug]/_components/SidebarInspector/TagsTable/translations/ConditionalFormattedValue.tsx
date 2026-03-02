@@ -142,14 +142,15 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     '_parent_highway',
     'highway',
     'smoothness',
+    'smoothness_source',
     'surface',
+    'surface_source',
     'surface_color',
     'category',
     'traffic_sign',
     'traffic_sign:forward',
     'traffic_sign:backward',
     'confidence', // true key is `maxspeed_confidence`, `surface_confidence`, … but we overwrite that when passing props
-    // 'fresh', // true key is `maxspeed_fresh`, `surface_fresh`, … but we overwrite that when passing props
     'width_source',
     'length',
     'lifecycle',
@@ -157,8 +158,8 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     'covered',
     'informal',
     'operator_type',
-    'surface_source',
-    'smoothness_source',
+    'operator_type_source',
+    'operator_type_confidence',
   ]
   if (!translations[translationKey] && nonCategorizedTagKeys.includes(tagKey)) {
     translationKey = `ALL--${tagKey}=${tagValue}`

@@ -10,7 +10,7 @@ export type SubcatParkingTildaPrivateStyleIds = 'default' | 'surface' | 'kind'
 const privateFilter: MapboxStyleLayersProps['additionalFilter'] = [
   'match',
   ['get', 'operator_type'],
-  ['private', 'assumed_private'],
+  ['private'],
   true,
   false,
 ]
