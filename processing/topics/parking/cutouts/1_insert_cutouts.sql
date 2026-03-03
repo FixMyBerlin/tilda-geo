@@ -279,3 +279,5 @@ WHERE
     is_driveway = true
     AND has_parking = false
   );
+
+DO $$ BEGIN RAISE NOTICE 'END inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

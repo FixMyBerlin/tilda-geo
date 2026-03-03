@@ -29,3 +29,5 @@ WHERE
 DELETE FROM _parking_cutouts c
 WHERE
   (tags ->> 'discard')::BOOLEAN;
+
+DO $$ BEGIN RAISE NOTICE 'END handling discarded cutouts at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

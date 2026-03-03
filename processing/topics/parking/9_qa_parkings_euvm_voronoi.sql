@@ -298,3 +298,5 @@ WHERE
   public.qa_parkings_euvm.id = previous.id;
 
 CREATE INDEX IF NOT EXISTS qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

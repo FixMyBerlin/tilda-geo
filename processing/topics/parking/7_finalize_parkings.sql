@@ -103,3 +103,5 @@ CREATE INDEX parkings_cutouts_geom_idx ON parkings_cutouts USING GIST (geom);
 
 -- DROP INDEX IF EXISTS parkings_cutouts_id_idx;
 CREATE UNIQUE INDEX unique_parkings_cutouts_id_idx ON parkings_cutouts (id);
+
+DO $$ BEGIN RAISE NOTICE 'END finalize parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

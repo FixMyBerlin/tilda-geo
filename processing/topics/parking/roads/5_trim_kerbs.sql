@@ -37,3 +37,5 @@ WHERE
   k.id = fk.kerb_id
   AND k.is_driveway
   AND GeometryType (k.geom) = 'LINESTRING';
+
+DO $$ BEGIN RAISE NOTICE 'END trimming kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

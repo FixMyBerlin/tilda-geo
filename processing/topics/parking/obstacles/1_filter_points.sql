@@ -7,6 +7,8 @@
 -- INPUT: `_parking_obstacle_points_projected` (linestring), `_parking_road_parkings` (linestring)
 -- OUTPUT: `_parking_obstacle_points_projected` (updated with discard tag)
 --
+DO $$ BEGIN RAISE NOTICE 'START filter obstacle points at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
 UPDATE _parking_obstacle_points_projected op
 SET
   tags = op.tags || '{"discard": true, "reason": "explicit_parking_at_busstop"}'::JSONB
@@ -16,3 +18,5 @@ WHERE
   ST_Expand (op.geom, 5) && p.geom
   AND op.tags ->> 'category' IN ('bus_stop', 'bus_stop_conditional')
   AND p.tags ->> 'parking' IS DISTINCT FROM 'no';
+
+DO $$ BEGIN RAISE NOTICE 'END filter obstacle points at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

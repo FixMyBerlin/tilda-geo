@@ -1,5 +1,9 @@
 -- WHAT IT DOES:
 -- Extend crossing lines by adaptive length to ensure intersection with kerbs, then project crossing geometries.
+--
+DO $$ BEGIN RAISE NOTICE 'START projecting crossing lines at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
+--
 -- * Extends crossing lines using adaptive extension length based on crossing length:
 --   - Short crossings (< 3m): extend by 4m (likely cut near centerline)
 --   - Medium crossings (3-8m): extend by 3m
@@ -50,3 +54,5 @@ WHERE
 UPDATE _parking_crossings
 SET
   geom = ST_LineSubstring (geom, 0, length / ST_Length (geom));
+
+DO $$ BEGIN RAISE NOTICE 'END projecting crossing lines at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

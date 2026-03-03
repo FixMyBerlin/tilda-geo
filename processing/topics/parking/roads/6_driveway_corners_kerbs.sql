@@ -29,6 +29,8 @@ WHERE
   AND pk.kerb_is_driveway
   AND pk.kerb_has_parking;
 
+DO $$ BEGIN RAISE NOTICE 'END finding driveway corner kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
 DROP INDEX IF EXISTS _parking_driveway_corner_kerbs_id_idx;
 
 CREATE UNIQUE INDEX ON _parking_driveway_corner_kerbs (id);

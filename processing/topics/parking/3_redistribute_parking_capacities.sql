@@ -185,3 +185,5 @@ FROM
 WHERE
   pc.id = a.id
   AND pc.tags ->> 'capacity_source' IS DISTINCT FROM 'tag';
+
+DO $$ BEGIN RAISE NOTICE 'END redistributing parking capacities at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

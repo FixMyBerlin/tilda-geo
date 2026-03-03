@@ -74,3 +74,5 @@ ALTER TABLE _parking_separate_parking_points_projected
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 
 CREATE INDEX parking_separate_parking_points_projected_geom_idx ON _parking_separate_parking_points_projected USING gist (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END projecting obstacle points (separate_parkings) at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

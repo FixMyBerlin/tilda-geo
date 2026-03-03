@@ -264,3 +264,5 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243)
 DROP INDEX IF EXISTS parking_parkings_failed_merges_idx;
 
 CREATE INDEX parking_parkings_failed_merges_idx ON _parking_parkings_failed_merges USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END merging parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

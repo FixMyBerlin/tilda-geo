@@ -183,3 +183,5 @@ BEGIN
     RAISE NOTICE 'NOTICE: External cutouts eUVM that are NOT added - type: %, count: %', rec.type, rec.count;
   END LOOP;
 END $$;
+
+DO $$ BEGIN RAISE NOTICE 'END external cutouts eUVM at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

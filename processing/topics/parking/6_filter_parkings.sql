@@ -76,3 +76,5 @@ SET
     'capacity',
     ROUND((tags ->> 'capacity')::NUMERIC, 2)
   );
+
+DO $$ BEGIN RAISE NOTICE 'END filter parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

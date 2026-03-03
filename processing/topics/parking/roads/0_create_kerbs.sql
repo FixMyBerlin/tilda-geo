@@ -138,3 +138,5 @@ SET
   geom = ST_Reverse (geom)
 WHERE
   side = 'right';
+
+DO $$ BEGIN RAISE NOTICE 'END creating kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

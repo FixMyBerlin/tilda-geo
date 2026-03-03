@@ -54,3 +54,5 @@ FROM
 DROP INDEX IF EXISTS parkings_separate_labels_geom_idx;
 
 CREATE INDEX parkings_separate_labels_geom_idx ON parkings_separate_labels USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END creating labels at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

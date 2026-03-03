@@ -60,3 +60,5 @@ FROM
       p.geom
     )
   ) AS d;
+
+DO $$ BEGIN RAISE NOTICE 'END cutting out road parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

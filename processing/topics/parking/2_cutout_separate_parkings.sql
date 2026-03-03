@@ -160,3 +160,5 @@ CREATE INDEX parking_parkings_cut_geom_idx ON _parking_parkings_cutted USING GIS
 CREATE INDEX parking_parkings_cut_original_id_idx ON _parking_parkings_cutted (original_id);
 
 CREATE INDEX parking_parkings_cut_street_name_idx ON _parking_parkings_cutted (street_name);
+
+DO $$ BEGIN RAISE NOTICE 'END cutting out separate parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

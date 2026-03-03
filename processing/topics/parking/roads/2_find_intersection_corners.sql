@@ -27,6 +27,8 @@ FROM
   _parking_intersections AS i
   CROSS JOIN LATERAL tilda_get_intersection_corners (i.node_id, 140) AS corner;
 
+DO $$ BEGIN RAISE NOTICE 'END calculating intersection corners at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
 ALTER TABLE _parking_intersection_corners
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 

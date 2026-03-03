@@ -22,3 +22,5 @@ CREATE TABLE _parking_discarded_cutouts (
   tags JSONB,
   meta JSONB
 );
+
+DO $$ BEGIN RAISE NOTICE 'END creating cutout tables at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

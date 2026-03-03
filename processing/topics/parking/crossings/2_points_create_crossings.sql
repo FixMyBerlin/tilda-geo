@@ -39,3 +39,5 @@ FROM
 -- MISC
 ALTER TABLE _parking_crossings
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+DO $$ BEGIN RAISE NOTICE 'END creating kerb tangents at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
