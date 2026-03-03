@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS _parking_intersections;
 -- * `total_degree`: raw connection count per segment (1 if terminal, 2 if through)
 -- * `road_degree`: segments where is_parking_road is true (same weight); used so 2-way service+parking / service+driveway nodes get cutouts
 -- * `driveway_degree`: segments where is_driveway is true (same weight)
+-- * `parking_road_as_driveway_leg`: true when the only driveway-type at this node is a single parking_road segment (e.g. service+parking meeting residential), so that segment is the driveway leg and gets a cutout. Used in 3_find_driveways for is_driveway_leg_at_node.
 -- Used for: filtering intersections; identifying driveway intersections (used in `3_find_driveways.sql`)
 --
 -- We filter to exclude cases where a road was just split (not actually an intersection).
@@ -41,7 +42,20 @@ WITH
       SUM(
         (1 + (NOT nrm.is_terminal_node)::INT) * nrm.is_driveway::INT
       ) AS driveway_degree,
-      BOOL_OR(nrm.is_driveway AND (nrm.is_parking_road = false)) AS has_pure_driveway,
+      (
+        SUM(
+          (
+            nrm.is_driveway
+            AND (nrm.is_parking_road = false)
+          )::INT
+        ) = 0
+        AND SUM(
+          (
+            nrm.is_driveway
+            AND nrm.is_parking_road
+          )::INT
+        ) < 2
+      ) AS parking_road_as_driveway_leg,
       (
         array_agg(
           nrm.way_id
@@ -71,7 +85,7 @@ SELECT
   i.road_degree,
   i.driveway_degree,
   i.total_degree,
-  i.has_pure_driveway,
+  i.parking_road_as_driveway_leg,
   ST_PointN (road.geom, nrm.idx) AS geom
 FROM
   intersections i

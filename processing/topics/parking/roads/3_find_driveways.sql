@@ -1,10 +1,7 @@
 -- WHAT IT DOES:
--- Create new 10m segment geometries for driveways that connect to intersections.
--- * Find driveways connected to intersections (where driveway_degree > 0 and road_degree >= 1). Exclude this way only when it is the parking road and the node has a pure driveway (so this way is the main road, not the driveway leg). Uses i.has_pure_driveway from _parking_intersections.
--- * Create new 10m segment geometry directly:
---   * Start point: intersection point
---   * End point: 10m projected from intersection in driveway direction (ST_Project with azimuth)
---   * Direction: calculated from intersection point to next point along driveway (ST_Azimuth)
+-- Create new 10m segment geometries for driveway legs that connect to intersections.
+-- * Candidate segments: driveways at nodes with driveway_degree > 0 and road_degree >= 1. Single predicate is_driveway_leg_at_node (see driveway_legs subquery below) selects which segment gets a cutout: pure driveways always; service+parking only when it is the sole driveway leg at the node (e.g. meeting residential).
+-- * Geometry: 10m segment from intersection point, direction from ST_Azimuth to next vertex.
 -- INPUT: `_parking_roads` (linestring), `_parking_node_road_mapping`, `_parking_intersections` (point)
 -- OUTPUT: `_parking_driveways` (linestring)
 --
@@ -13,42 +10,63 @@ DO $$ BEGIN RAISE NOTICE 'START finding driveways at %', clock_timestamp() AT TI
 DROP TABLE IF EXISTS _parking_driveways;
 
 CREATE TABLE _parking_driveways AS
-SELECT
-  r.id || '-' || nrm.idx AS id,
-  r.id AS source_id,
-  r.osm_id,
-  r.osm_type,
-  r.tags,
-  r.meta,
-  ST_MakeLine (
-    ST_PointN (r.geom, nrm.idx),
-    ST_Project (
-      ST_PointN (r.geom, nrm.idx),
-      10,
-      ST_Azimuth (
+WITH
+  driveway_legs AS (
+    SELECT
+      r.id || '-' || nrm.idx AS id,
+      r.id AS source_id,
+      r.osm_id,
+      r.osm_type,
+      r.tags,
+      r.meta,
+      ST_MakeLine (
         ST_PointN (r.geom, nrm.idx),
-        COALESCE(
-          ST_PointN (r.geom, nrm.idx + 1),
-          ST_PointN (r.geom, nrm.idx - 1)
+        ST_Project (
+          ST_PointN (r.geom, nrm.idx),
+          10,
+          ST_Azimuth (
+            ST_PointN (r.geom, nrm.idx),
+            COALESCE(
+              ST_PointN (r.geom, nrm.idx + 1),
+              ST_PointN (r.geom, nrm.idx - 1)
+            )
+          )
         )
-      )
-    )
-  ) AS geom,
-  r.is_driveway,
-  r.has_parking,
-  nrm.idx
+      ) AS geom,
+      r.is_driveway,
+      r.has_parking,
+      nrm.idx,
+      (
+        r.is_driveway
+        AND (
+          (r.is_parking_road = false)
+          OR i.parking_road_as_driveway_leg
+        )
+      ) AS is_driveway_leg_at_node
+    FROM
+      _parking_roads r
+      JOIN _parking_node_road_mapping nrm ON r.osm_id = nrm.way_id
+      JOIN _parking_intersections i ON nrm.node_id = i.node_id
+    WHERE
+      i.driveway_degree > 0
+      AND i.road_degree >= 1
+      AND r.is_driveway
+  )
+SELECT
+  id,
+  source_id,
+  osm_id,
+  osm_type,
+  tags,
+  meta,
+  geom,
+  is_driveway,
+  has_parking,
+  idx
 FROM
-  _parking_roads r
-  JOIN _parking_node_road_mapping nrm ON r.osm_id = nrm.way_id
-  JOIN _parking_intersections i ON nrm.node_id = i.node_id
+  driveway_legs
 WHERE
-  i.driveway_degree > 0
-  AND i.road_degree >= 1
-  AND r.is_driveway
-  AND (
-    r.is_parking_road = false
-    OR NOT i.has_pure_driveway
-  );
+  is_driveway_leg_at_node;
 
 -- MISC
 ALTER TABLE _parking_driveways
