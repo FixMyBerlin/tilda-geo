@@ -5,7 +5,7 @@ local is_driveway = require('is_driveway')
 local WAY_IDS_OVERRIDE_TO_PRIVATE = require('operator_type_override_public_to_private')
 
 --- Resolves operator_type for parking areas (e.g. off-street, separate parking areas).
---- Uses tags only; when resolved is "public", applies manual way-ID override (see operator_type_override_public_to_private.lua).
+--- Uses tags or default and applies manual way-ID override from see operator_type_override_public_to_private.lua when result is 'public'.
 --- @param tags table OSM tags of the parking
 --- @param osm_type string|nil OSM object type (e.g. 'way'); when 'way' and osm_id present, used for override lookup
 --- @param osm_id number|nil OSM object id (e.g. way id)
@@ -13,14 +13,16 @@ local WAY_IDS_OVERRIDE_TO_PRIVATE = require('operator_type_override_public_to_pr
 --- @return table { value = 'private'|'public', source = string, confidence = string }
 local function operator_type_for_area(tags, osm_type, osm_id, default_value)
   local tag_value = SANITIZE_TAGS.operator_type(tags)
+  local result
   if tag_value then
-    -- Handle overwrite list
-    if tag_value == 'public' and osm_type == 'way' and osm_id and WAY_IDS_OVERRIDE_TO_PRIVATE[osm_id] then
-      return { value = 'private', source = 'manual_overwrite_list', confidence = 'high' }
-    end
-    return { value = tag_value, source = 'tag', confidence = 'high' }
+    result = { value = tag_value, source = 'tag', confidence = 'high' }
+  else
+    result = { value = default_value, source = 'default_fallback', confidence = 'medium' }
   end
-  return { value = default_value, source = 'default_fallback', confidence = 'medium' }
+  if result.value == 'public' and osm_type == 'way' and osm_id and WAY_IDS_OVERRIDE_TO_PRIVATE[osm_id] then
+    return { value = 'private', source = 'manual_overwrite_list', confidence = 'high' }
+  end
+  return result
 end
 
 --- Resolves operator_type for road/line parking (parent_highway).
