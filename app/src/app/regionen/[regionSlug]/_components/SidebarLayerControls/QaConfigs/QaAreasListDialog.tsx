@@ -6,9 +6,28 @@ import { useQuery } from '@blitzjs/rpc'
 import { CursorArrowRippleIcon } from '@heroicons/react/24/outline'
 import { QaEvaluationStatus } from '@prisma/client'
 import { useMap } from 'react-map-gl/maplibre'
-import { userStatusConfig } from '../../SidebarInspector/InspectorQa/qaConfigs'
+import { twJoin } from 'tailwind-merge'
 import { QaEvaluationCard } from '../../SidebarInspector/InspectorQa/QaEvaluationCard'
-import { QaStyleKey } from './qaConfigStyles'
+import { QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
+
+export type QaStyleListConfig =
+  | { showList: true; queryUserStatus: QaEvaluationStatus | null }
+  | { showList: false; queryUserStatus?: never }
+
+export const qaStyleListConfig: Record<QaStyleKey, QaStyleListConfig> = {
+  'user-not-ok-processing': {
+    showList: true,
+    queryUserStatus: 'NOT_OK_PROCESSING_ERROR',
+  },
+  'user-not-ok-osm': { showList: true, queryUserStatus: 'NOT_OK_DATA_ERROR' },
+  'user-ok-construction': { showList: true, queryUserStatus: 'OK_STRUCTURAL_CHANGE' },
+  'user-ok-reference-error': { showList: true, queryUserStatus: 'OK_REFERENCE_ERROR' },
+  'user-ok-qa-tooling-error': { showList: true, queryUserStatus: 'OK_QA_TOOLING_ERROR' },
+  none: { showList: false },
+  all: { showList: false },
+  'user-pending': { showList: true, queryUserStatus: null },
+  'user-selected': { showList: false },
+}
 
 type Props = {
   configSlug: string
@@ -17,40 +36,27 @@ type Props = {
   setClosed: () => void
 }
 
-// Map style keys to QA evaluation statuses
-export const qaAreasStatusMap: Record<QaStyleKey, QaEvaluationStatus | null> = {
-  'user-not-ok-processing': 'NOT_OK_PROCESSING_ERROR',
-  'user-not-ok-osm': 'NOT_OK_DATA_ERROR',
-  'user-ok-construction': 'OK_STRUCTURAL_CHANGE',
-  'user-ok-reference-error': 'OK_REFERENCE_ERROR',
-  'user-ok-qa-tooling-error': 'OK_QA_TOOLING_ERROR',
-  none: null,
-  all: null,
-  'user-pending': null,
-  'user-selected': null,
-}
-
 export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed }: Props) => {
   const { mainMap } = useMap()
 
-  const userStatus = styleKey ? qaAreasStatusMap[styleKey] : null
-  const statusLabel = userStatus ? userStatusConfig[userStatus]?.label || userStatus : 'Unbekannt'
+  const listConfig = styleKey ? qaStyleListConfig[styleKey] : null
+  const queryUserStatus = listConfig?.queryUserStatus ?? null
+  const statusLabel =
+    styleKey ? QA_STYLE_OPTIONS.find((o) => o.key === styleKey)?.label ?? 'Unbekannt' : 'Unbekannt'
 
   const [areas, { isLoading }] = useQuery(
     getQaAreasByStatus,
     {
       configSlug,
       regionSlug,
-      userStatus: userStatus!,
+      userStatus: queryUserStatus,
     },
-    { enabled: userStatus !== null },
+    { enabled: listConfig?.showList ?? false },
   )
 
   const handleFlyToArea = (area: NonNullable<typeof areas>[number]) => {
     if (!mainMap || !area.bbox) return
-
     const [minLng, minLat, maxLng, maxLat] = area.bbox
-
     mainMap.fitBounds(
       [
         [minLng, minLat],
@@ -85,19 +91,29 @@ export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed 
             return (
               <div
                 key={area.areaId}
-                className="flex items-start gap-3 rounded-lg border border-gray-200 p-3"
+                className="flex flex-col gap-2 rounded-lg border border-gray-200 p-3"
               >
-                {/* Evaluation Card Content */}
-                <QaEvaluationCard evaluation={area.latestEvaluation} variant="header" />
-
-                {/* Fly to button */}
-                <button
-                  onClick={() => handleFlyToArea(area)}
-                  className={buttonStyles}
-                  title="Zu diesem Bereich fliegen"
-                >
-                  <CursorArrowRippleIcon className="h-5 w-5" />
-                </button>
+                <div className="flex items-start gap-3">
+                  <QaEvaluationCard evaluation={area.latestEvaluation} variant="header" />
+                  <button
+                    type="button"
+                    onClick={() => handleFlyToArea(area)}
+                    className={twJoin(
+                      buttonStyles,
+                      // NOTE: We will want to move this to teh buttonStyles after our TILDA-Migration
+                      'disabled:pointer-events-none disabled:opacity-60 disabled:cursor-default',
+                    )}
+                    title="Zu diesem Bereich fliegen"
+                    disabled={!area.bbox}
+                  >
+                    <CursorArrowRippleIcon className="size-5" />
+                  </button>
+                </div>
+                {!area.bbox && (
+                  <p className="text-xs text-amber-700">
+                    Bereich nicht mehr in aktuellen Daten (ID entfernt oder geändert).
+                  </p>
+                )}
               </div>
             )
           })

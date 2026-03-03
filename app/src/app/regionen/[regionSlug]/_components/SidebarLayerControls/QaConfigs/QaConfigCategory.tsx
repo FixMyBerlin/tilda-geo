@@ -7,7 +7,7 @@ import { twJoin } from 'tailwind-merge'
 import { useQaParam } from '../../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 import { QaIcon } from '../../SidebarInspector/InspectorQa/QaIcon'
-import { QaAreasListDialog, qaAreasStatusMap } from './QaAreasListDialog'
+import { QaAreasListDialog, qaStyleListConfig } from './QaAreasListDialog'
 import { QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
 import { QaUserDropdown } from './QaUserDropdown'
 
@@ -103,11 +103,21 @@ export const QaConfigCategory = ({
                       />
                       <div className="flex min-w-0 flex-1 items-center justify-between">
                         <span>{option.label}</span>
-                        {qaAreasStatusMap[option.key] !== null && (
+                        {qaStyleListConfig[option.key].showList && (
                           <button
                             type="button"
                             onClick={() => setDialogState(option.key)}
-                            className={twJoin('ml-2 shrink-0 text-xs', linkStyles)}
+                            className={twJoin(
+                              'ml-2 shrink-0 text-xs',
+                              linkStyles,
+                              'disabled:pointer-events-none disabled:opacity-60 disabled:cursor-default disabled:no-underline',
+                            )}
+                            disabled={currentStyle !== option.key}
+                            title={
+                              currentStyle !== option.key
+                                ? 'Kategorie auswählen, um die Liste zu öffnen'
+                                : 'Liste anzeigen'
+                            }
                           >
                             <ListBulletIcon className="size-4" />
                           </button>
