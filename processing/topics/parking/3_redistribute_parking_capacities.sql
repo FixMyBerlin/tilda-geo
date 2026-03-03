@@ -24,10 +24,11 @@ DELETE FROM _parking_parkings_cutted
 WHERE
   ST_Length (geom) = 0;
 
--- Redistribute only where > 1 segment per original_id. Two branches…
--- Branch 1: capacity_source = 'tag' — integer distribution (FLOOR + remainder to longest segment).
+-- Redistribute only where > 1 segment per original_id.
+-- Tag-based capacity: integer (FLOOR + remainder to longest).
+-- Other: proportional decimal.
 WITH
-  -- Per original_id: total length, total capacity; only groups with > 1 segment and capacity_source = 'tag'.
+  -- Per original_id: total length, total capacity, capacity_source; only groups with > 1 segment.
   total_lengths AS (
     SELECT
       original_id,
@@ -43,9 +44,8 @@ WITH
       original_id
     HAVING
       COUNT(*) > 1
-      AND MAX(tags ->> 'capacity_source') = 'tag'
   ),
-  -- Per segment: frac, floor_capacity, length_rank (1 = longest).
+  -- Per segment: length fraction (frac), integer base (floor_capacity), and length_rank (1 = longest). Used for both branches.
   proportional AS (
     SELECT
       pc.id,
@@ -53,6 +53,7 @@ WITH
       seg_len AS segment_length,
       tl.total_length,
       tl.total_capacity,
+      tl.capacity_source,
       seg_len / tl.total_length AS frac,
       FLOOR(tl.total_capacity * seg_len / tl.total_length) AS floor_capacity,
       ROW_NUMBER() OVER (
@@ -71,11 +72,10 @@ WITH
           _parking_parkings_cutted
         WHERE
           tags ? 'capacity'
-          AND tags ->> 'capacity_source' = 'tag'
       ) pc
       JOIN total_lengths tl ON pc.original_id = tl.original_id
   ),
-  -- Remainder per group: total_capacity - sum(floor_capacity); added to longest segment.
+  -- Remainder per group (only used for tag-based branch): total_capacity - sum(floor_capacity).
   remainder_per_orig AS (
     SELECT
       original_id,
@@ -86,16 +86,21 @@ WITH
       original_id,
       total_capacity
   ),
-  -- Final capacity: floor + remainder on longest segment (integer; sum = original).
+  -- Final capacity per segment: tag = integer (floor + remainder on longest); other = proportional decimal.
   assigned AS (
     SELECT
       p.id,
-      (
-        p.floor_capacity + CASE
-          WHEN p.length_rank = 1 THEN r.remainder
-          ELSE 0
-        END
-      )::NUMERIC AS assigned_capacity
+      CASE
+      -- Tag-based (capacity_source='tag'): integer; floor per segment + remainder on longest so sum = original.
+        WHEN p.capacity_source = 'tag' THEN (
+          p.floor_capacity + CASE
+            WHEN p.length_rank = 1 THEN r.remainder
+            ELSE 0
+          END
+        )::NUMERIC
+        -- Other (estimated etc.): proportional decimal; sum = original.
+        ELSE (p.total_capacity * p.frac)::NUMERIC
+      END AS assigned_capacity
     FROM
       proportional p
       JOIN remainder_per_orig r ON p.original_id = r.original_id
@@ -114,76 +119,4 @@ SET
 FROM
   assigned a
 WHERE
-  pc.id = a.id
-  AND pc.tags ->> 'capacity_source' = 'tag';
-
--- Branch 2: other capacity (estimated etc.) — proportional decimal only; no remainder.
-WITH
-  -- Per original_id: total length, total capacity; only groups with > 1 segment and capacity_source != 'tag'.
-  total_lengths AS (
-    SELECT
-      original_id,
-      SUM(ST_Length (geom)) AS total_length,
-      MAX((tags ->> 'capacity')::NUMERIC) AS total_capacity,
-      MAX(tags ->> 'capacity_source') AS capacity_source,
-      COUNT(*) AS count
-    FROM
-      _parking_parkings_cutted
-    WHERE
-      tags ? 'capacity'
-    GROUP BY
-      original_id
-    HAVING
-      COUNT(*) > 1
-      AND MAX(tags ->> 'capacity_source') IS DISTINCT FROM 'tag'
-  ),
-  -- Per segment: frac (segment_length / total_length), total_capacity.
-  proportional AS (
-    SELECT
-      pc.id,
-      pc.original_id,
-      seg_len / tl.total_length AS frac,
-      tl.total_capacity
-    FROM
-      (
-        SELECT
-          id,
-          original_id,
-          ST_Length (geom) AS seg_len
-        FROM
-          _parking_parkings_cutted
-        WHERE
-          tags ? 'capacity'
-          AND (
-            (tags ->> 'capacity_source') IS DISTINCT FROM 'tag'
-            OR (tags ->> 'capacity_source') IS NULL
-          )
-      ) pc
-      JOIN total_lengths tl ON pc.original_id = tl.original_id
-  ),
-  -- Final capacity: proportional decimal (total_capacity * frac); sum = original.
-  assigned AS (
-    SELECT
-      p.id,
-      (p.total_capacity * p.frac)::NUMERIC AS assigned_capacity
-    FROM
-      proportional p
-  )
-UPDATE _parking_parkings_cutted pc
-SET
-  -- Remove area tags since they're no longer accurate after splitting
-  tags = (
-    pc.tags - ARRAY['area', 'area_source', 'area_confidence']
-  ) || jsonb_build_object(
-    /* sql-formatter-disable */
-    'capacity', a.assigned_capacity,
-    'capacity_source', (pc.tags ->> 'capacity_source') || '_redistributed'
-    /* sql-formatter-enable */
-  )
-FROM
-  assigned a
-WHERE
-  pc.id = a.id
-  AND pc.tags ->> 'capacity_source' IS DISTINCT FROM 'tag';
-
-DO $$ BEGIN RAISE NOTICE 'END redistributing parking capacities at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+  pc.id = a.id;
