@@ -49,9 +49,11 @@ FROM
               c.tags ->> 'source' != 'public_transport_stops'
               OR c.tags ->> 'side' = p.side
             )
-            -- Do not apply cutouts with no_cutout_for_restrictions only to real prohibition segments (exact condition_category; NULL = apply cutout)
+            -- Skip cutout only when it has no_cutout_for_restrictions AND segment is a real prohibition.
+            -- KEEP BOTH NULL CHECKS: (1) tag: NULL => treat as not set, do not skip. (2) condition_category: NULL IN (...) yields NULL, so IS NOT NULL required or non-restriction segments wrongly skip. Do not remove or "simplify" (e.g. drop IS NOT NULL or change IN); SQL NULL makes NOT(NULL) exclude cutouts.
             AND NOT (
-              (c.tags ->> 'no_cutout_for_restrictions') = 'true'
+              (c.tags ->> 'no_cutout_for_restrictions') IS NOT NULL
+              AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
               AND (p.tags ->> 'condition_category') IS NOT NULL
               AND (p.tags ->> 'condition_category') IN ('no_parking', 'no_stopping', 'no_standing')
             )
