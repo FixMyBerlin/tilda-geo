@@ -158,8 +158,6 @@ WHERE
 -- P1 and P2 both project to the same platform (same side); one might actually be on the other side.
 -- Flag when multiple Branch 2 stops share via_platform_id.
 -- ---------------------------------------------------------------------------
-DROP TABLE IF EXISTS _branch2_same_platform;
-
 CREATE TEMP TABLE _branch2_same_platform AS
 SELECT
   b.via_platform_id,
