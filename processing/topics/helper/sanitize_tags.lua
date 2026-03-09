@@ -1,3 +1,8 @@
+-- Provides a collection of named sanitizer functions that clean and normalise OSM tag values
+-- before they are written to the database. Each sanitizer enforces a strict, predictable value
+-- range. Unknown values are returned as "DISALLOWED_VALUE" so they surface in monitoring without
+-- being persisted. Values that are known but intentionally irrelevant are silently dropped (nil).
+
 require('init')
 require('SanitizeTrafficSign')
 local sanitize_for_logging = require('sanitize_for_logging')
