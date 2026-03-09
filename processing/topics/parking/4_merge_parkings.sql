@@ -52,16 +52,13 @@ SELECT
     --
     -- Parking properties
     'condition_category', tags ->> 'condition_category',
-    'condition_vehicles', tags ->> 'condition_vehicles',
     'covered', tags ->> 'covered',
     'direction', tags ->> 'direction',
-    'fee', tags ->> 'fee',
     'informal', tags ->> 'informal',
     'location', tags ->> 'location',
     'markings', tags ->> 'markings',
     'orientation', tags ->> 'orientation',
     'parking', tags ->> 'parking',
-    'restriction', tags ->> 'restriction',
     'reason', tags ->> 'reason',
     'staggered', tags ->> 'staggered',
     'traffic_sign', tags ->> 'traffic_sign',

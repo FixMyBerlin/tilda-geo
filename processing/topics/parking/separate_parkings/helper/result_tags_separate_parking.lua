@@ -16,7 +16,7 @@ local function result_tags_separate_parking(category, object, area)
 
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags(object.tags)
-  local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
+  local conditional_categories_result = classify_parking_conditions(object.tags, nil, 'assumed_free')
   local operator_type_result = operator_type.operator_type_for_area(object.tags, object.type, object.id, 'public')
 
   -- CRITICAL: Keep these lists in sync:
@@ -50,16 +50,13 @@ local function result_tags_separate_parking(category, object, area)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
-    condition_vehicles = conditional_categories_result.condition_vehicles,
     covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
-    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
     informal = SANITIZE_TAGS.informal(object.tags.informal),
     location = SANITIZE_PARKING_TAGS.location(object.tags.location),
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
     parking = SANITIZE_PARKING_TAGS.parking_extended(object.tags.parking, nil),
-    restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = nil,
     traffic_sign = SANITIZE_TAGS.traffic_sign(object.tags.traffic_sign),
