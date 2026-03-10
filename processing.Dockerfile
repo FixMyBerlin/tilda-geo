@@ -43,7 +43,6 @@ COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
 RUN apt update && \
   apt install -y osm2pgsql osmium-tool curl && \
   apt install -y wget python3 python3-requests && \
-  apt install -y gosu && \
   apt upgrade -y
 
 # 'data' folder is root
@@ -63,18 +62,4 @@ RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.
 # install bun packages
 RUN bun install
 
-# Create a dedicated non-root user and transfer ownership of required directories.
-# See: https://www.docker.com/blog/understanding-the-docker-user-instruction/
-RUN groupadd -g 1001 processing && \
-    useradd -m -u 1001 -g processing processing && \
-    cp -r /root/.bun /home/processing/.bun && \
-    chown -R processing:processing /home/processing/.bun /data /processing
-ENV PATH=/home/processing/.bun/bin:$PATH
-
-# Copy the entrypoint script. It runs as root, fixes runtime volume ownership,
-# and then exec's the CMD as the processing user via gosu.
-COPY processing/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bun", "run", "/processing/index.ts"]
