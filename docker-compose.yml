@@ -30,7 +30,6 @@ services:
       FORCE_COLOR: 1
     volumes:
       - osmfiles:/data
-      - db_postgres_17:/data/db
       - /var/run/docker.sock:/var/run/docker.sock
       - ./app/src/data/processingTypes:/data/processingTypes
       # See cache_proxy/.README.md
