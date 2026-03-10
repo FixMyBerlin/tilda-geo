@@ -10,7 +10,7 @@ import { getQaTableName } from '../utils/getQaTableName'
 const Schema = z.object({
   configSlug: z.string(),
   regionSlug: z.string(),
-  userStatus: z.nativeEnum(QaEvaluationStatus),
+  userStatus: z.nativeEnum(QaEvaluationStatus).nullable(),
 })
 
 export default resolver.pipe(
@@ -32,8 +32,11 @@ export default resolver.pipe(
     // Get the validated table name
     const tableName = getQaTableName(qaConfig.mapTable)
 
-    // Get areas with the specific user status, ordered by latest evaluation creation date
-    const areasWithEvaluations = await db.qaEvaluation.findMany({
+    // Get latest evaluation per areaId (orderBy must start with distinct field), then take 20 most recent by createdAt
+    const TAKE_RECENT = 20
+    const FETCH_DISTINCT_UP_TO = 500
+
+    const areasWithEvaluationsRaw = await db.qaEvaluation.findMany({
       where: {
         configId: qaConfig.id,
         userStatus: userStatus,
@@ -48,10 +51,14 @@ export default resolver.pipe(
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
-      take: 20,
-      distinct: ['areaId'], // Get only the latest evaluation per area
+      orderBy: [{ areaId: 'asc' }, { createdAt: 'desc' }],
+      take: FETCH_DISTINCT_UP_TO,
+      distinct: ['areaId'],
     })
+
+    const areasWithEvaluations = areasWithEvaluationsRaw
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, TAKE_RECENT)
 
     // Get bbox data for each area from the QA table using PostGIS
     const areaIds = areasWithEvaluations.map((evaluation) => evaluation.areaId)

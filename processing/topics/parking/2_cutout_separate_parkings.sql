@@ -11,7 +11,7 @@
 --   - Obstacles: Only apply if `separate_parking = TRUE`
 --     (set in obstacles/0_areas_project_to_kerb.sql when >= 70% of obstacle area lies inside a parking area;
 --      obstacle_points/obstacle_lines use ST_Intersects in 0_points_project_to_kerb.sql, 0_lines_project_to_kerb.sql)
--- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
+-- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments whose condition_category indicates a real prohibition (no_parking, no_stopping, no_standing).
 -- * Cuts out obstacles using `ST_Difference` and `ST_Dump` to split parking lines into segments
 -- * Spatial filter: use `ST_Crosses` (not `ST_Intersects`) so cutouts apply only when the parking line
 --   crosses the cutout interior; boundary-only touch (e.g. shared edges) does not trigger a cutout.
@@ -83,10 +83,13 @@ FROM
           WHERE
             c.geom && p.geom
             AND ST_Crosses (c.geom, p.geom)
+            -- Skip cutout only when it has no_cutout_for_restrictions AND segment is a real prohibition.
+            -- KEEP BOTH NULL CHECKS: (1) tag: NULL => treat as not set, do not skip. (2) condition_category: NULL IN (...) yields NULL, so IS NOT NULL required or non-restriction segments wrongly skip. Do not remove or "simplify" (e.g. drop IS NOT NULL or change IN); SQL NULL makes NOT(NULL) exclude cutouts.
             AND NOT (
-              (p.tags ->> 'restriction') IS NOT NULL
-              AND (p.tags ->> 'restriction') IN ('no_parking', 'no_stopping', 'no_standing')
+              (c.tags ->> 'no_cutout_for_restrictions') IS NOT NULL
               AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
+              AND (p.tags ->> 'condition_category') IS NOT NULL
+              AND (p.tags ->> 'condition_category') IN ('no_parking', 'no_stopping', 'no_standing')
             )
         )
       ),
@@ -133,10 +136,13 @@ FROM
           WHERE
             c.geom && p.geom
             AND ST_Crosses (c.geom, p.geom)
+            -- Skip cutout only when it has no_cutout_for_restrictions AND segment is a real prohibition.
+            -- KEEP BOTH NULL CHECKS: (1) tag: NULL => treat as not set, do not skip. (2) condition_category: NULL IN (...) yields NULL, so IS NOT NULL required or non-restriction segments wrongly skip. Do not remove or "simplify" (e.g. drop IS NOT NULL or change IN); SQL NULL makes NOT(NULL) exclude cutouts.
             AND NOT (
-              (p.tags ->> 'restriction') IS NOT NULL
-              AND (p.tags ->> 'restriction') IN ('no_parking', 'no_stopping', 'no_standing')
+              (c.tags ->> 'no_cutout_for_restrictions') IS NOT NULL
               AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
+              AND (p.tags ->> 'condition_category') IS NOT NULL
+              AND (p.tags ->> 'condition_category') IN ('no_parking', 'no_stopping', 'no_standing')
             )
         )
       ),
@@ -160,3 +166,5 @@ CREATE INDEX parking_parkings_cut_geom_idx ON _parking_parkings_cutted USING GIS
 CREATE INDEX parking_parkings_cut_original_id_idx ON _parking_parkings_cutted (original_id);
 
 CREATE INDEX parking_parkings_cut_street_name_idx ON _parking_parkings_cutted (street_name);
+
+DO $$ BEGIN RAISE NOTICE 'END cutting out separate parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

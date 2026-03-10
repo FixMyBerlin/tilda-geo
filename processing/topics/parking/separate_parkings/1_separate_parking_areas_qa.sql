@@ -4,6 +4,8 @@
 -- INPUT: `_parking_separate_parking_areas` (polygon), `_parking_separate_parking_areas_projected` (linestring)
 -- OUTPUT: `_parking_separate_parking_areas_qa` (point with area comparison)
 --
+DO $$ BEGIN RAISE NOTICE 'START separate_parking_areas_qa at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
 DROP TABLE IF EXISTS _parking_separate_parking_areas_qa;
 
 -- Calculate projected length and actual area
@@ -73,3 +75,5 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 DROP INDEX IF EXISTS parking_separate_parking_areas_qa_geom_idx;
 
 CREATE INDEX parking_separate_parking_areas_qa_geom_idx ON _parking_separate_parking_areas_qa USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END separate_parking_areas_qa at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

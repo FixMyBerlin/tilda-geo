@@ -17,6 +17,7 @@ local db_table = osm2pgsql.define_table({
     { column = 'geom',    type = 'linestring', projection = 5243 },
     { column = 'is_driveway', type = 'boolean'},
     { column = 'has_parking', type = 'boolean'},
+    { column = 'is_parking_road', type = 'boolean'},
   },
   indexes = {
     { column = { 'osm_id' }, method = 'btree' },
@@ -27,7 +28,8 @@ local db_table = osm2pgsql.define_table({
 
 -- `_parking_roads` flag semantics:
 -- * `is_driveway`: true for `service`/`track`/… (not in `is_road`); false for `is_road` ways (e.g. `residential`, `motorway_link`).
--- * `has_parking`: true when we create parking lines along this road; false when we only use the road for cutouts/intersections.
+-- * `has_parking`: true when we create parking lines along this road; false when we do not (e.g. driveways without parking, pedestrian/motorway_link without explicit tags). Roads with has_parking=false are still used for cutout geometry and intersection logic.
+-- * `is_parking_road`: true when this way is treated as the main parking road at intersections (for driveway corner cutouts and kerb trimming). Set for is_road ways and for is_driveway ways that have has_parking (e.g. highway=service with parking).
 --
 -- Normal streets: (`is_driveway`=false, `has_parking`=true).
 -- Driveways: (`is_driveway`=true, `has_parking`=* from explicit `parking:*` tags).
@@ -39,7 +41,14 @@ function parking_roads(object)
   if object.tags.area == 'yes' then return end -- exclude areas like https://www.openstreetmap.org/way/185835333
 
   local row_data, replaced_tags = result_tags_roads(object)
-  local row = MergeTable({ geom = object:as_linestring(), is_driveway = is_driveway, has_parking = has_parking_check(object.tags) }, row_data)
+  local has_parking = has_parking_check(object.tags)
+  local is_parking_road = is_road or (is_driveway and has_parking)
+  local row = MergeTable({
+    geom = object:as_linestring(),
+    is_driveway = is_driveway,
+    has_parking = has_parking,
+    is_parking_road = is_parking_road,
+  }, row_data)
 
   LOG_ERROR.SANITIZED_VALUE(object, row.geom, replaced_tags, 'parking_roads')
   db_table:insert(row)

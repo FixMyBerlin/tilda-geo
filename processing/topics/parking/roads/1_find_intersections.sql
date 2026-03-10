@@ -1,7 +1,7 @@
 -- WHAT IT DOES:
 -- Find road intersections (nodes where multiple roads meet).
--- * Calculate road_degree (non-driveway roads) and driveway_degree (driveway roads)
--- * Filter: only intersections with total_degree > 2 (excludes simple road splits, keeps real intersections)
+-- * Calculate total_degree (raw connection count), road_degree (segments with is_parking_road true), driveway_degree (driveway segments)
+-- * Filter: total_degree > 2 (real intersections) OR total_degree >= 2 with road_degree >= 1 and driveway_degree >= 1 (2-way parking_road + driveway, e.g. service+parking meets service+driveway)
 -- INPUT: `_parking_node_road_mapping`, `_parking_roads` (linestring)
 -- OUTPUT: `_parking_intersections` (point)
 --
@@ -16,36 +16,46 @@ DROP TABLE IF EXISTS _parking_intersections;
 -- * Through-intersections: roads that go through node (don't end at node) count as multiple connections
 --
 -- Degree calculation:
--- * `road_degree`: number of non-driveway road connections (roads that end at node count as 1, roads that go through count as 2)
--- * `driveway_degree`: number of driveway road connections (same counting logic)
--- Used for:
--- - filtering intersections (total_degree > 2)
--- - identifying driveway intersections (used in `3_find_driveways.sql`)
+-- * `total_degree`: raw connection count per segment (1 if terminal, 2 if through)
+-- * `road_degree`: segments where is_parking_road is true (same weight); used so 2-way service+parking / service+driveway nodes get cutouts
+-- * `driveway_degree`: segments where is_driveway is true (same weight)
+-- * `parking_road_as_driveway_leg`: true when the only driveway-type at this node is a single parking_road segment (e.g. service+parking meeting residential), so that segment is the driveway leg and gets a cutout. Used in 3_find_driveways for is_driveway_leg_at_node.
+-- Used for: filtering intersections; identifying driveway intersections (used in `3_find_driveways.sql`)
 --
--- Filter: total_degree > 2
 -- We filter to exclude cases where a road was just split (not actually an intersection).
 -- * Simple 2-way road endpoints: both roads end at node (degree = 1 + 1 = 2) - excluded (just a road split, not an intersection)
 -- * T-intersections: one road goes through, one ends (degree = 2 + 1 = 3) - included
 -- * X-intersections: >2 roads meet (degree >= 3) - included
 -- * Through-intersections: roads that go through node (degree >= 4 for 2 roads, higher for more) - included
--- We only want real intersections where parking behavior changes (T-intersections, X-intersections, through-intersections).
+-- Additionally: 2-way nodes with total_degree = 2 are included when road_degree >= 1 AND driveway_degree >= 1 (e.g. service+parking meets service+driveway).
+--
+-- Filter: (total_degree > 2) OR (total_degree >= 2 AND road_degree >= 1 AND driveway_degree >= 1)
 CREATE TABLE _parking_intersections AS
 WITH
   intersections AS (
     SELECT
       nrm.node_id,
+      SUM(1 + (NOT nrm.is_terminal_node)::INT) AS total_degree,
       SUM(
-        (NOT is_driveway)::INT + (
-          NOT is_terminal_node
-          AND NOT is_driveway
-        )::INT
+        (1 + (NOT nrm.is_terminal_node)::INT) * nrm.is_parking_road::INT
       ) AS road_degree,
       SUM(
-        is_driveway::INT + (
-          NOT is_terminal_node
-          AND is_driveway
-        )::INT
+        (1 + (NOT nrm.is_terminal_node)::INT) * nrm.is_driveway::INT
       ) AS driveway_degree,
+      (
+        SUM(
+          (
+            nrm.is_driveway
+            AND (nrm.is_parking_road = false)
+          )::INT
+        ) = 0
+        AND SUM(
+          (
+            nrm.is_driveway
+            AND nrm.is_parking_road
+          )::INT
+        ) < 2
+      ) AS parking_road_as_driveway_leg,
       (
         array_agg(
           nrm.way_id
@@ -74,7 +84,8 @@ SELECT
   i.node_id,
   i.road_degree,
   i.driveway_degree,
-  i.road_degree + i.driveway_degree AS total_degree,
+  i.total_degree,
+  i.parking_road_as_driveway_leg,
   ST_PointN (road.geom, nrm.idx) AS geom
 FROM
   intersections i
@@ -83,7 +94,12 @@ FROM
   AND i.idx = nrm.idx
   JOIN _parking_roads road ON road.osm_id = nrm.way_id
 WHERE
-  i.road_degree + i.driveway_degree > 2;
+  (i.total_degree > 2)
+  OR (
+    i.total_degree >= 2
+    AND i.road_degree >= 1
+    AND i.driveway_degree >= 1
+  );
 
 -- MISC
 ALTER TABLE _parking_intersections
@@ -92,3 +108,5 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
 CREATE INDEX parking_intersections_geom_idx ON _parking_intersections USING GIST (geom);
 
 CREATE INDEX parking_intersections_node_id_idx ON _parking_intersections USING BTREE (node_id);
+
+DO $$ BEGIN RAISE NOTICE 'END finding intersections at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

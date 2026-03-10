@@ -2,14 +2,14 @@
 -- Find intersection corner points where kerbs from different roads meet.
 -- * Gets all roads at intersection, calculates angles between road pairs using `tilda_intersection_angle`
 -- * Filters to sharp corners (angle < max_angle_degrees), finds kerb intersection points
--- * Returns corner point geometry and metadata (has_driveway, has_road, kerb IDs)
+-- * Returns corner point geometry and metadata (has_driveway, has_parking_road, kerb IDs)
 -- USED IN: `roads/2_find_intersection_corners.sql` (find corners where kerbs intersect at intersections)
 DROP FUNCTION IF EXISTS tilda_get_intersection_corners;
 
 CREATE FUNCTION tilda_get_intersection_corners (intersection_id BIGINT, max_angle_degrees INT) RETURNS TABLE (
   intersection GEOMETRY,
   has_driveway BOOLEAN,
-  has_road BOOLEAN,
+  has_parking_road BOOLEAN,
   kerb1_id TEXT,
   kerb2_id TEXT
 ) AS $$
@@ -37,7 +37,7 @@ BEGIN
     SELECT
       ST_Intersection(kerb1.geom, kerb2.geom) AS geom,
       kerb1.is_driveway OR kerb2.is_driveway as has_driveway,
-      NOT kerb1.is_driveway OR NOT kerb2.is_driveway as has_road,
+      kerb1.is_parking_road OR kerb2.is_parking_road AS has_parking_road,
       kerb1.id as kerb1_id,
       kerb2.id as kerb2_id
     FROM road_pairs rp

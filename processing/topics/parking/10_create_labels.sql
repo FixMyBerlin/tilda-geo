@@ -17,6 +17,8 @@ SELECT
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
     'operator_type', tags ->> 'operator_type',
+    'operator_type_source', tags ->> 'operator_type_source',
+    'operator_type_confidence', tags ->> 'operator_type_confidence',
     'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
@@ -39,6 +41,8 @@ SELECT
     /* sql-formatter-disable */
     'capacity', tags ->> 'capacity',
     'operator_type', tags ->> 'operator_type',
+    'operator_type_source', tags ->> 'operator_type_source',
+    'operator_type_confidence', tags ->> 'operator_type_confidence',
     'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
     /* sql-formatter-enable */
   ) AS tags,
@@ -50,3 +54,5 @@ FROM
 DROP INDEX IF EXISTS parkings_separate_labels_geom_idx;
 
 CREATE INDEX parkings_separate_labels_geom_idx ON parkings_separate_labels USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END creating labels at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

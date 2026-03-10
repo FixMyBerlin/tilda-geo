@@ -3,7 +3,7 @@
 -- Some cutouts are conditional:
 -- - Street name matching: When both cutout and parking have a street name, they must match
 -- - Bus stop side matching: Bus stop cutouts only apply to matching street side, other cutouts apply to both sides
--- - Restriction segments: Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
+-- - Restriction segments: Cutouts with `no_cutout_for_restrictions=true` are not applied to segments whose condition_category indicates a real prohibition (no_parking, no_stopping, no_standing).
 -- INPUT: `_parking_road_parkings` (linestring), `_parking_cutouts` (polygon)
 -- OUTPUT: `_parking_parkings_cutted` (linestring - cut road parkings)
 --
@@ -49,14 +49,18 @@ FROM
               c.tags ->> 'source' != 'public_transport_stops'
               OR c.tags ->> 'side' = p.side
             )
-            -- Do not apply cutouts with no_cutout_for_restrictions to restriction segments
+            -- Skip cutout only when it has no_cutout_for_restrictions AND segment is a real prohibition.
+            -- KEEP BOTH NULL CHECKS: (1) tag: NULL => treat as not set, do not skip. (2) condition_category: NULL IN (...) yields NULL, so IS NOT NULL required or non-restriction segments wrongly skip. Do not remove or "simplify" (e.g. drop IS NOT NULL or change IN); SQL NULL makes NOT(NULL) exclude cutouts.
             AND NOT (
-              (p.tags ->> 'restriction') IS NOT NULL
-              AND (p.tags ->> 'restriction') IN ('no_parking', 'no_stopping', 'no_standing')
+              (c.tags ->> 'no_cutout_for_restrictions') IS NOT NULL
               AND (c.tags ->> 'no_cutout_for_restrictions') = 'true'
+              AND (p.tags ->> 'condition_category') IS NOT NULL
+              AND (p.tags ->> 'condition_category') IN ('no_parking', 'no_stopping', 'no_standing')
             )
         )
       ),
       p.geom
     )
   ) AS d;
+
+DO $$ BEGIN RAISE NOTICE 'END cutting out road parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

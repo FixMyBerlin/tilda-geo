@@ -21,6 +21,7 @@ SELECT
   tags ->> 'name' AS street_name,
   has_parking,
   is_driveway,
+  is_parking_road,
   tags,
   meta
 FROM
@@ -74,6 +75,7 @@ SELECT
   k.street_name,
   k.has_parking,
   k.is_driveway,
+  k.is_parking_road,
   k.tags || '{"_NOTE": "MultiLineString: kept longest segment in _parking_kerbs; this row has full geom for debugging"}'::jsonb AS tags,
   k.meta,
   k.geom
@@ -93,6 +95,7 @@ INSERT INTO
     street_name,
     has_parking,
     is_driveway,
+    is_parking_road,
     tags,
     meta,
     geom
@@ -106,6 +109,7 @@ SELECT
   k.street_name,
   k.has_parking,
   k.is_driveway,
+  k.is_parking_road,
   k.tags,
   k.meta,
   longest.geom
@@ -134,3 +138,5 @@ SET
   geom = ST_Reverse (geom)
 WHERE
   side = 'right';
+
+DO $$ BEGIN RAISE NOTICE 'END creating kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

@@ -25,3 +25,5 @@ WHERE
   AND p.side = k.side;
 
 CREATE INDEX parking_parkings_road_geom_idx ON _parking_road_parkings USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END adding kerb geometries at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

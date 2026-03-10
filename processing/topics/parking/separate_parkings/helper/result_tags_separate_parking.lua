@@ -9,7 +9,7 @@ local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 local SURFACE_TAGS = require('surface_tags')
-local operator_type_for_road_parking = require('operator_type_for_road_parking')
+local operator_type = require('operator_type_for_road_parking')
 
 local function result_tags_separate_parking(category, object, area)
   local id = DefaultId(object)
@@ -17,6 +17,7 @@ local function result_tags_separate_parking(category, object, area)
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags(object.tags)
   local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
+  local operator_type_result = operator_type.operator_type_for_area(object.tags, object.type, object.id, 'public')
 
   -- CRITICAL: Keep these lists in sync:
   -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
@@ -34,7 +35,9 @@ local function result_tags_separate_parking(category, object, area)
     road_width_confidence = nil,
     road_width_source = nil,
     road_oneway = nil,
-    operator_type = operator_type_for_road_parking(object.tags, nil),
+    operator_type = operator_type_result.value,
+    operator_type_source = operator_type_result.source,
+    operator_type_confidence = operator_type_result.confidence,
     mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary),
 
     -- Area

@@ -16,6 +16,11 @@ RUN npm run postinstall
 
 COPY /app /app
 
+# Transfer ownership to the pre-existing non-root user 'node' (UID 1000) that
+# comes with the node base image. See: https://www.docker.com/blog/understanding-the-docker-user-instruction/
+RUN chown -R node:node /app
+USER node
+
 EXPOSE 4000
 
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -32,7 +37,10 @@ CMD ["/bin/sh", "-c", "npx blitz@2.2.4 prisma migrate deploy && npx blitz@2.2.4 
 # From here on we are building the production image
 FROM base AS production
 
+# Switch back to root to install pm2 globally, then return to non-root user
+USER root
 RUN npm install --global pm2
+USER node
 
 # Docs: https://docs.docker.com/reference/build-checks/json-args-recommended/
 CMD ["/bin/sh", "-c", "npx blitz@2.2.4 prisma migrate deploy && exec pm2-runtime node -- ./node_modules/next/dist/bin/next start -p 4000"]

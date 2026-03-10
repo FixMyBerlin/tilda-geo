@@ -26,6 +26,7 @@ package.path = package.path .. ";/processing/topics/parking/off_street_parking/?
 package.path = package.path .. ";/processing/topics/parking/off_street_parking/areas/?.lua"
 package.path = package.path .. ";/processing/topics/parking/off_street_parking/helper/?.lua"
 package.path = package.path .. ";/processing/topics/parking/off_street_parking/points/?.lua"
+package.path = package.path .. ";/processing/topics/parking/overwrites/?.lua"
 package.path = package.path .. ";/processing/topics/parking/parkings/?.lua"
 package.path = package.path .. ";/processing/topics/parking/parkings/helper/?.lua"
 package.path = package.path .. ";/processing/topics/parking/public_transport/?.lua"

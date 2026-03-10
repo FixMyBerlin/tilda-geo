@@ -20,3 +20,5 @@ FROM
 -- MISC
 ALTER TABLE _parking_crossing_points_located
 ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_SetSRID (geom, 5243);
+
+DO $$ BEGIN RAISE NOTICE 'END locating obstacle points on kerb at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

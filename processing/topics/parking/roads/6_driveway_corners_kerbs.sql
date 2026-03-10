@@ -6,10 +6,10 @@
 --   - Projects corner point (4m buffer) onto driveway kerb line using `tilda_project_to_k_closest_kerbs`
 --   - Returns kerb segment (linestring) parallel to driveway (not road) - follows driveway kerb direction
 --   - Used in `cutouts/1_insert_cutouts.sql`: buffered with 0.01m and 'endcap=flat' to create rectangle cutouts
--- * Filter: only corners with both driveway and road, only driveway kerbs with parking
+-- * Filter: only corners with both driveway and road; only kerbs that are the "driveway leg" at this node (same rule as 3_find_driveways and 5_trim_kerbs): pure driveway kerbs always; parking_road kerbs only when that node has parking_road_as_driveway_leg. Excludes service+parking kerbs when they are the main road at the junction (avoids cutting the main road's parking).
 -- EXAMPLE: https://viewer.tilda-geo.de/?map=21.4/52.4792856/13.443242&source=Staging&search=cut&layers=_parking_intersection_corners,_parking_kerbs,_parking_driveway_corner_kerbs,parkings_cutouts => Click right on the driveway kerb on the sidewalk; its a tiny cutout area `category=driveway_corner_kerb`
--- INPUT: `_parking_intersection_corners` (point), `_parking_kerbs` (linestring)
--- OUTPUT: `_parking_driveway_corner_kerbs` (linestring) - driveway kerb segments used for cutout rectangles
+-- INPUT: `_parking_intersection_corners` (point), `_parking_intersections` (for parking_road_as_driveway_leg), `_parking_kerbs` (linestring)
+-- OUTPUT: `_parking_driveway_corner_kerbs` (linestring) - driveway-leg kerb segments used for cutout rectangles
 --
 DO $$ BEGIN RAISE NOTICE 'START finding driveway corner kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
@@ -22,12 +22,21 @@ SELECT
   pk.*
 FROM
   _parking_intersection_corners c
+  JOIN _parking_intersections i ON i.node_id = c.intersection_id
   CROSS JOIN LATERAL tilda_project_to_k_closest_kerbs (ST_Buffer (c.geom, 4), tolerance := 0, k := 4) AS pk
+  JOIN _parking_kerbs k ON k.id = pk.kerb_id
 WHERE
   c.has_driveway
-  AND c.has_road
+  AND c.has_parking_road
   AND pk.kerb_is_driveway
-  AND pk.kerb_has_parking;
+  AND pk.kerb_has_parking
+  -- Only create corner cutout for the driveway leg at this node (not for the main parking_road kerb)
+  AND (
+    (k.is_parking_road = false)
+    OR i.parking_road_as_driveway_leg
+  );
+
+DO $$ BEGIN RAISE NOTICE 'END finding driveway corner kerbs at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DROP INDEX IF EXISTS _parking_driveway_corner_kerbs_id_idx;
 

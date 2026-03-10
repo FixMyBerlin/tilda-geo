@@ -10,7 +10,7 @@
 --
 DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
--- 1. Create a TEMP table and  that we use for clustering
+-- 1. Create a TEMP table for clustering
 -- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
 -- The temp table is dropped automatically once our db connection is closed.
 CREATE TEMP TABLE cluster_candidates AS
@@ -38,6 +38,8 @@ SELECT
     'road_width_source', tags ->> 'road_width_source',
     'road_oneway', tags ->> 'road_oneway',
     'operator_type', tags ->> 'operator_type',
+    'operator_type_source', tags ->> 'operator_type_source',
+    'operator_type_confidence', tags ->> 'operator_type_confidence',
     'mapillary', tags ->> 'mapillary',
     --
     -- Capacity & Area
@@ -110,8 +112,7 @@ WHERE
 
 CREATE INDEX cluster_candidates_full_idx ON cluster_candidates USING BTREE (cluster_id, tags);
 
--- 2. Create the result table.
--- aggreagate the groups by merging each cluster
+-- 2. Create the result table by merging each cluster
 DROP TABLE IF EXISTS _parking_parkings_merged;
 
 CREATE TABLE _parking_parkings_merged AS
@@ -136,6 +137,8 @@ WITH
       -- 3. ST_LineMerge(...): Merges connected linestrings (those that share endpoints) into single continuous linestrings. If some segments are disconnected, the result remains a MultiLineString.
       -- 4. ST_Dump(...): If the result is a MultiLineString with disconnected parts, ST_Dump returns a set of (path, geom) tuples - one row per disconnected linestring segment. If it's a single LineString, it returns one row.
       -- 5. .*: Expands the (path, geom) tuple into separate path and geom columns. The path column indicates which part of the MultiLineString this row represents (e.g., {1} for first part, {2} for second part).
+      --
+      -- If LineMerge can't merge all parts, the fallback below retries with ST_Union first.
       (
         ST_Dump (ST_LineMerge (ST_Node (ST_Collect (geom))))
       ).*
@@ -158,16 +161,20 @@ CREATE INDEX _parking_parkings_merged_id_idx ON _parking_parkings_merged USING B
 
 CREATE INDEX parking_parkings_merged_geom_idx ON _parking_parkings_merged USING GIST (geom);
 
--- Sometimes ST_LineMerge fails because the geomtries are not perfectly connected in those cases we use the following more aggresive way to merge the geometries
+-- Fallback merge step: more aggressive geometry union when the initial merge left multiple rows per id.
+-- When: Only clusters where the initial merge (ST_Collect + ST_Node + ST_LineMerge) produced more than one row for the same id (HAVING count(*) > 1). That happens when geometries are not perfectly connected—e.g. kerb lines from adjacent ways overlap after offset; ST_Node splits them at intersection points and ST_LineMerge cannot reconnect the fragments into one line.
+-- Why ST_Union: ST_Union(geom) merges (dissolves) geometries that touch or overlap, whereas ST_LineMerge requires exact endpoint connections. Using ST_Union first allows merging segments with small gaps or overlaps that the initial method could not merge.
+-- Fallback geometry chain (per cluster):
+-- 1. Save all rows with that id to a temp table; DELETE those rows from _parking_parkings_merged.
+-- 2. For each cluster: ST_Union(geom) over all saved geoms for that id → ST_Node(...) → ST_Dump(...) to get one geometry per segment.
+-- 3. Filter: keep only segments with ST_Length > 0.5 (drop tiny overlap fragments).
+-- 4. ST_Collect(noded geoms) → ST_LineMerge → ST_Dump; (path, geom) gives one result segment per row.
+-- 5. INSERT every (path, geom) as a separate row with the same id. We do not use UPDATE + dedup—that would non-deterministically keep only one row and drop the rest, losing geometry. Preserving all segments here lets the failed_merges step below assign unique ids (id || path[1]) when the cluster still has multiple disconnected segments.
+-- 6. Clean up overlap artifacts: ST_Node can create short stubs (~2m) at crossing points of offset kerbs. These survive the > 0.5m filter but are much shorter than the real parking segments. We remove segments that are both < 5m AND < 20% of the cluster's longest segment.
 WITH
-  -- Fallback merge step 1: More aggressive geometry union and node creation
-  -- This handles cases where the initial merge (`ST_Collect` + `ST_LineMerge`) failed because geometries weren't perfectly connected.
-  -- `ST_Union(geom)` unions all geometries for the same `id` (see `GROUP BY`). Key difference: `ST_Union` merges (dissolves) geometries that touch or overlap, whereas `ST_LineMerge` requires exact endpoint connections. This allows merging geometries with small gaps or overlaps that the initial method could not merge.
-  -- HAVING count(*) > 1: Only process IDs that have multiple rows (failed merges from the initial attempt above (`ST_Collect` + `ST_LineMerge`))
-  cutted_geoms AS (
+  multi_row_ids AS (
     SELECT
-      id,
-      (ST_Dump (ST_Node (ST_Union (geom)))).geom AS geom
+      id
     FROM
       _parking_parkings_merged
     GROUP BY
@@ -175,37 +182,113 @@ WITH
     HAVING
       count(*) > 1
   ),
-  -- Fallback merge step 2: Attempt to merge the processed geometries using `ST_Collect` + `ST_LineMerge` again
-  -- But this time on the geometries that failed to merge in the initial attempt above and were then merged more aggressively with `ST_Union`.
-  filtered_geoms AS (
+  saved AS (
     SELECT
       id,
-      (ST_Dump (ST_LineMerge (ST_Collect (geom)))).geom AS geom
-    FROM
-      cutted_geoms
-    WHERE
-      ST_Length (geom) > 0.5
-    GROUP BY
-      id
-  )
-UPDATE _parking_parkings_merged pm
-SET
-  geom = fg.geom
-FROM
-  filtered_geoms fg
-WHERE
-  pm.id = fg.id;
-
--- now we have the same entry multiple times so we remove duplicates
-DELETE FROM _parking_parkings_merged
-WHERE
-  ctid NOT IN (
-    SELECT
-      min(ctid)
+      cluster_id,
+      tags,
+      original_ids,
+      geom
     FROM
       _parking_parkings_merged
-    GROUP BY
+    WHERE
+      id IN (
+        SELECT
+          id
+        FROM
+          multi_row_ids
+      )
+  )
+SELECT
+  id,
+  cluster_id,
+  tags,
+  original_ids,
+  geom INTO TEMP TABLE _merge_fallback_input
+FROM
+  saved;
+
+DELETE FROM _parking_parkings_merged
+WHERE
+  id IN (
+    SELECT
       id
+    FROM
+      _merge_fallback_input
+  );
+
+INSERT INTO
+  _parking_parkings_merged (id, cluster_id, tags, original_ids, path, geom)
+SELECT
+  fg.id,
+  fg.cluster_id,
+  fg.tags,
+  fg.original_ids,
+  (fg.d).path,
+  (fg.d).geom
+FROM
+  (
+    SELECT
+      meta.id,
+      meta.cluster_id,
+      meta.tags,
+      meta.original_ids,
+      ST_Dump (ST_LineMerge (ST_Collect (noded.geom))) AS d
+    FROM
+      (
+        SELECT DISTINCT
+          id,
+          cluster_id,
+          tags,
+          original_ids
+        FROM
+          _merge_fallback_input
+      ) meta,
+      LATERAL (
+        SELECT
+          (ST_Dump (ST_Node (ST_Union (i.geom)))).geom AS geom
+        FROM
+          _merge_fallback_input i
+        WHERE
+          i.id = meta.id
+      ) AS noded
+    WHERE
+      ST_Length (noded.geom) > 0.5
+    GROUP BY
+      meta.id,
+      meta.cluster_id,
+      meta.tags,
+      meta.original_ids
+  ) fg;
+
+DROP TABLE IF EXISTS _merge_fallback_input;
+
+-- Remove overlap artifacts from the fallback: when two offset kerbs cross, ST_Node creates short
+-- stubs at the intersection points. These are much shorter than the real parking segments but longer
+-- than 0.5m so they survive the noded-segment filter above. We remove segments that are both
+-- shorter than 5m AND shorter than 20% of the longest segment in the same cluster.
+-- This only affects multi-row fallback clusters, not standalone short parkings.
+DELETE FROM _parking_parkings_merged
+WHERE
+  ctid IN (
+    SELECT
+      m.ctid
+    FROM
+      _parking_parkings_merged m
+      JOIN (
+        SELECT
+          id,
+          MAX(ST_Length (geom)) AS max_len
+        FROM
+          _parking_parkings_merged
+        GROUP BY
+          id
+        HAVING
+          count(*) > 1
+      ) stats ON m.id = stats.id
+    WHERE
+      ST_Length (m.geom) < 5
+      AND ST_Length (m.geom) < stats.max_len * 0.2
   );
 
 CREATE TEMP TABLE failed_merges AS
@@ -262,3 +345,5 @@ ALTER COLUMN geom TYPE geometry (Geometry, 5243) USING ST_Transform (geom, 5243)
 DROP INDEX IF EXISTS parking_parkings_failed_merges_idx;
 
 CREATE INDEX parking_parkings_failed_merges_idx ON _parking_parkings_failed_merges USING GIST (geom);
+
+DO $$ BEGIN RAISE NOTICE 'END merging parkings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

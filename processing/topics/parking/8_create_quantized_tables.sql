@@ -212,3 +212,5 @@ CREATE INDEX off_street_parking_quantized_geom_idx ON off_street_parking_quantiz
 DROP INDEX IF EXISTS off_street_parking_quantized_id_idx;
 
 CREATE UNIQUE INDEX unique_off_street_parking_quantized_id_idx ON off_street_parking_quantized (id);
+
+DO $$ BEGIN RAISE NOTICE 'END creating quantized tables at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

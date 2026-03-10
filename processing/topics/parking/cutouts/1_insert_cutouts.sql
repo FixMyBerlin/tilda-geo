@@ -6,14 +6,14 @@
 -- * Public transport stops (buffered)
 -- * Separate parking areas/points (buffered)
 -- * Roads (buffered) - cleanup leftover parking pieces on roads
--- * Cutouts with `no_cutout_for_restrictions=true` are not applied to segments that have restriction in (`no_parking`, `no_stopping`).
+-- * Cutouts with `no_cutout_for_restrictions=true` are not applied to restriction segments (condition_category in no_parking, no_stopping, no_standing). Only obstacle, public_transport_stops, and external euvm cutouts use this tag; intersection, driveway, and crossing cutouts always apply so restriction lines are punched at intersections and driveways.
 -- INPUT: `_parking_intersection_corners`, `_parking_driveway_corner_kerbs`, `_parking_driveways`, `_parking_crossings`, `_parking_obstacle_points_projected`, `_parking_obstacle_areas_projected`, `_parking_obstacle_lines_projected`, `_parking_public_transport_points_projected`, `_parking_separate_parking_areas_projected`, `_parking_separate_parking_points_projected`, `_parking_roads`
 -- OUTPUT: `_parking_cutouts` (polygon) - areas where parking is not allowed
 --
 DO $$ BEGIN RAISE NOTICE 'START inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- INSERT "intersection_corner" buffers (circle)
--- Conditions: only where NOT `has_driveway` AND `has_road`.
+-- Conditions: only where NOT `has_driveway` AND `has_parking_road`.
 -- Buffer: static value 5m (legal requirement where no parking is allowed)
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
@@ -33,7 +33,7 @@ FROM
   _parking_intersection_corners
 WHERE
   NOT has_driveway
-  AND has_road;
+  AND has_parking_road;
 
 -- INSERT "driveway_corner_kerb" buffers (rectangles)
 -- Buffer: static value 0.01m
@@ -46,8 +46,7 @@ SELECT
   jsonb_build_object(
     /* sql-formatter-disable */
     'category', 'driveway_corner_kerb',
-    'source', 'driveway_corner_kerbs',
-    'no_cutout_for_restrictions', true
+    'source', 'driveway_corner_kerbs'
     /* sql-formatter-enable */
   ),
   '{}'::jsonb
@@ -73,8 +72,7 @@ SELECT
     'street:name', tags ->> 'street:name',
     'width', tags ->> 'width',
     -- 'highway', tags ->> 'highway',
-    'road', tags ->> 'road',
-    'no_cutout_for_restrictions', true
+    'road', tags ->> 'road'
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -97,8 +95,7 @@ SELECT
     /* sql-formatter-disable */
     'category', tags ->> 'category',
     'source', 'crossing',
-    'width', (tags ->> 'buffer_radius')::float,
-    'no_cutout_for_restrictions', true
+    'width', (tags ->> 'buffer_radius')::float
     /* sql-formatter-enable */
   ),
   jsonb_build_object('updated_at', meta ->> 'updated_at')
@@ -128,6 +125,11 @@ FROM
 
 -- INSERT "public_transport_stops" buffers (circle) - both v2 and v3
 -- Buffer: tags->>'buffer_radius'
+-- Side: When the stop was projected to a kerb, the projection step sets source->>'kerb_side' (left/right).
+--   All branches (bus_stop_kerb, bus_stop_centerline with/without side via platform→kerb, tram_stop) now
+--   project to a kerb and set kerb_side. We use 'platform' only as fallback when source has no kerb_side.
+--   This tag is used in 1_cutout_road_parkings.sql so that public transport cutouts only apply to the
+--   matching street side; 'platform' does not match left/right so those cutouts are not applied to road parkings.
 INSERT INTO
   _parking_cutouts (id, osm_id, geom, tags, meta)
 SELECT
@@ -274,3 +276,5 @@ WHERE
     is_driveway = true
     AND has_parking = false
   );
+
+DO $$ BEGIN RAISE NOTICE 'END inserting cutout areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
