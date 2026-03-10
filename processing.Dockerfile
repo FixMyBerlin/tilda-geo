@@ -62,13 +62,4 @@ RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.
 # install bun packages
 RUN bun install
 
-# Create a dedicated non-root user and transfer ownership of required directories.
-# See: https://www.docker.com/blog/understanding-the-docker-user-instruction/
-RUN groupadd -g 1001 processing && \
-    useradd -m -u 1001 -g processing processing && \
-    cp -r /root/.bun /home/processing/.bun && \
-    chown -R processing:processing /home/processing/.bun /data /processing
-ENV PATH=/home/processing/.bun/bin:$PATH
-USER processing
-
 CMD ["bun", "run", "/processing/index.ts"]
