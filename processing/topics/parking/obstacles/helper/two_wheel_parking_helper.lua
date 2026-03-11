@@ -5,13 +5,13 @@ require('MergeTable')
 require('Log')
 
 function two_wheel_parking_buffer(tags)
-  local fallback = 0.5
+  local fallback = 0.25
   if tags == nil then return fallback end
   if not tags.capacity then return fallback end
 
   local full_capacity = tonumber(tags.capacity)
   if full_capacity then
-    return full_capacity / 2 * 1.6
+    return (full_capacity / 2 * 1.6) / 2
   end
   return fallback
 end
