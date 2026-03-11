@@ -8,7 +8,7 @@ local TAG_HELPER = require('tag_helper')
 obstacle_point_categories = {
   class_obstacle_category.new({
     id = 'bollard',
-    buffer_radius = function(tags) return 0.3 end,
+    buffer_radius = function(tags) return 0.15 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.barrier == 'bollard'
     end,
@@ -17,7 +17,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'street_lamp',
-    buffer_radius = function(tags) return 0.4 end,
+    buffer_radius = function(tags) return 0.2 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.highway == 'street_lamp'
     end,
@@ -26,7 +26,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'tree',
-    buffer_radius = function(tags) return 1.5 end,
+    buffer_radius = function(tags) return 0.75 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and (tags.natural == 'tree' or tags.natural == 'tree_stump')
     end,
@@ -35,7 +35,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'street_cabinet', -- https://wiki.openstreetmap.org/wiki/Tag:man_made%3Dstreet_cabinet
-    buffer_radius = function(tags) return 1.5 end,
+    buffer_radius = function(tags) return 0.75 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.man_made == 'street_cabinet'
     end,
@@ -44,7 +44,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'traffic_sign', -- https://wiki.openstreetmap.org/wiki/Key:traffic_sign
-    buffer_radius = function(tags) return 0.3 end,
+    buffer_radius = function(tags) return 0.15 end,
     conditions = function(tags)
       -- highway=traffic_sign is not used a lot but a way to describe a unspecified sign
       return TAG_HELPER.is_obstacle_parking(tags) and (tags.traffic_sign ~= nil or tags.highway == 'traffic_sign')
@@ -54,7 +54,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'loading_ramp',
-    buffer_radius = function(tags) return 2 end,
+    buffer_radius = function(tags) return 1 end,
     conditions = function(tags) return tags.amenity == 'loading_ramp' end,
     tags = function(tags) return { amenity = 'loading_ramp',  operator = tags.operator } end,
     tags_cc = {},
@@ -76,7 +76,7 @@ obstacle_point_categories = {
   class_obstacle_category.new({
     id = 'small_electric_vehicle_parking',
     -- Fixed buffer of 5m because SEV don't hava a capacity so our capacity based width does not work
-    buffer_radius = function(tags) return 5 end,
+    buffer_radius = function(tags) return 2.5 end,
     conditions = function(tags) return two_wheel_parking_conditions(tags, 'small_electric_vehicle_parking') end,
     tags = function(tags) return two_wheel_parking_tags(tags, 'small_electric_vehicle_parking') end,
     tags_cc = two_wheel_parking_tags_cc('small_electric_vehicle_parking'),
@@ -97,7 +97,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'recycling',
-    buffer_radius = function(tags) return tags.width or 5 end,
+    buffer_radius = function(tags) return tags.width or 2.5 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.amenity == 'recycling'
     end,
@@ -106,7 +106,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'vending_parking_tickets',
-    buffer_radius = function(tags) return 1 end,
+    buffer_radius = function(tags) return 0.5 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.amenity == 'vending_machine'
     end,
@@ -117,7 +117,7 @@ obstacle_point_categories = {
     -- https://wiki.openstreetmap.org/wiki/DE:Tag:emergency=fire_hydrant
     -- https://overpass-turbo.eu/s/261C
     id = 'fire_hydrant',
-    buffer_radius = function(tags) return 0.5 end,
+    buffer_radius = function(tags) return 0.25 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.emergency == 'fire_hydrant'
     end,
@@ -126,7 +126,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'water_well',
-    buffer_radius = function(tags) return 1.5 end,
+    buffer_radius = function(tags) return 0.75 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.man_made == 'water_well'
     end,
@@ -135,7 +135,7 @@ obstacle_point_categories = {
   }),
   class_obstacle_category.new({
     id = 'collision_protection',
-    buffer_radius = function(tags) return 0.4 end,
+    buffer_radius = function(tags) return 0.2 end,
     conditions = function(tags)
       return TAG_HELPER.is_obstacle_parking(tags) and tags.barrier == 'collision_protection'
     end,
