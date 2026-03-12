@@ -16,18 +16,10 @@ export const FrenchQuoteSingle = ({ children }: { children: React.ReactNode }) =
   return <>›{children}‹</>
 }
 
-export const quote = (input: string) => {
-  return <>„{input}“</>
-}
+export const quote = (input: string) => `„${input}\u201C`
 
-export const quoteSingle = (input: string) => {
-  return <>‚{input}‘</>
-}
+export const quoteSingle = (input: string) => `\u201A${input}\u2018`
 
-export const frenchQuote = (input: string) => {
-  return <>»{input}«</>
-}
+export const frenchQuote = (input: string) => `»${input}«`
 
-export const frenchQuoteSingle = (input: string) => {
-  return <>›{input}‹</>
-}
+export const frenchQuoteSingle = (input: string) => `›${input}‹`

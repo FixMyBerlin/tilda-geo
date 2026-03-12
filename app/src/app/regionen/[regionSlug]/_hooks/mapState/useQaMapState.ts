@@ -38,9 +38,13 @@ const filterQaDataByStyle = (data: QaMapData[], style: string) => {
       return data.filter((item) => {
         return item.userStatus === USER_STATUS_TO_LETTER.OK_QA_TOOLING_ERROR
       })
-    case 'user-pending':
+    case 'user-pending-needs-review':
       return data.filter((item) => {
-        return item.userStatus === null && item.systemStatus !== null && item.systemStatus !== 'G'
+        return item.userStatus === null && item.systemStatus === 'N'
+      })
+    case 'user-pending-problematic':
+      return data.filter((item) => {
+        return item.userStatus === null && item.systemStatus === 'P'
       })
     case 'user-selected':
       // Filtering by users happens server-side, so just return all data

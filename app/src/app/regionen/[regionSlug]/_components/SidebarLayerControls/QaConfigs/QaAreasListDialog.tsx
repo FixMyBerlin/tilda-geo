@@ -4,54 +4,29 @@ import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
 import getQaAreasByStatus from '@/src/server/qa-configs/queries/getQaAreasByStatus'
 import { useQuery } from '@blitzjs/rpc'
 import { CursorArrowRippleIcon } from '@heroicons/react/24/outline'
-import { QaEvaluationStatus } from '@prisma/client'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { QaEvaluationCard } from '../../SidebarInspector/InspectorQa/QaEvaluationCard'
-import { QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
-
-export type QaStyleListConfig =
-  | { showList: true; queryUserStatus: QaEvaluationStatus | null }
-  | { showList: false; queryUserStatus?: never }
-
-export const qaStyleListConfig: Record<QaStyleKey, QaStyleListConfig> = {
-  'user-not-ok-processing': {
-    showList: true,
-    queryUserStatus: 'NOT_OK_PROCESSING_ERROR',
-  },
-  'user-not-ok-osm': { showList: true, queryUserStatus: 'NOT_OK_DATA_ERROR' },
-  'user-ok-construction': { showList: true, queryUserStatus: 'OK_STRUCTURAL_CHANGE' },
-  'user-ok-reference-error': { showList: true, queryUserStatus: 'OK_REFERENCE_ERROR' },
-  'user-ok-qa-tooling-error': { showList: true, queryUserStatus: 'OK_QA_TOOLING_ERROR' },
-  none: { showList: false },
-  all: { showList: false },
-  'user-pending': { showList: true, queryUserStatus: null },
-  'user-selected': { showList: false },
-}
+import { isListableOption, QA_STYLE_OPTIONS, type QaStyleKey } from './qaConfigStyles'
 
 type Props = {
   configSlug: string
   regionSlug: string
-  styleKey: QaStyleKey | null
+  styleKey: QaStyleKey
   setClosed: () => void
 }
 
 export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed }: Props) => {
   const { mainMap } = useMap()
 
-  const listConfig = styleKey ? qaStyleListConfig[styleKey] : null
-  const queryUserStatus = listConfig?.queryUserStatus ?? null
-  const statusLabel =
-    styleKey ? QA_STYLE_OPTIONS.find((o) => o.key === styleKey)?.label ?? 'Unbekannt' : 'Unbekannt'
+  const option = QA_STYLE_OPTIONS.find((o) => o.key === styleKey)
+  const statusLabel = option?.label ?? 'Unbekannt'
+  const listable = option !== undefined && isListableOption(option)
 
   const [areas, { isLoading }] = useQuery(
     getQaAreasByStatus,
-    {
-      configSlug,
-      regionSlug,
-      userStatus: queryUserStatus,
-    },
-    { enabled: listConfig?.showList ?? false },
+    { configSlug, regionSlug, styleKey },
+    { enabled: listable },
   )
 
   const handleFlyToArea = (area: NonNullable<typeof areas>[number]) => {
@@ -62,17 +37,14 @@ export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed 
         [minLng, minLat],
         [maxLng, maxLat],
       ],
-      {
-        padding: 50,
-        duration: 1000,
-      },
+      { padding: 50, duration: 1000 },
     )
 
     // Close the dialog
     setClosed()
   }
 
-  if (styleKey === null) return null
+  if (styleKey === 'none' || !listable) return null
 
   return (
     <ModalDialog
@@ -101,7 +73,7 @@ export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed 
                     className={twJoin(
                       buttonStyles,
                       // NOTE: We will want to move this to teh buttonStyles after our TILDA-Migration
-                      'disabled:pointer-events-none disabled:opacity-60 disabled:cursor-default',
+                      'disabled:pointer-events-none disabled:cursor-default disabled:opacity-60',
                     )}
                     title="Zu diesem Bereich fliegen"
                     disabled={!area.bbox}

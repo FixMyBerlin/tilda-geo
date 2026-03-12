@@ -1,0 +1,37 @@
+require('init')
+require('Log')
+
+local parse_conditional_value = require('parse_conditional_value')
+
+describe('parse_conditional_value', function()
+  it('parses single conditional value and returns list with one entry', function()
+    local result = parse_conditional_value('loading_only @ (Mo-Fr 08:00-18:00)')
+    assert.are.equal(#result, 1)
+    assert.are.equal(result[1].value, 'loading_only')
+    assert.are.equal(result[1].condition, 'Mo-Fr 08:00-18:00')
+  end)
+
+  it('parses multiple semicolon-separated conditional values', function()
+    local result = parse_conditional_value('no_parking @ (Mo-Fr 06:00-18:00); no_stopping @ (Mo-Fr 09:00-12:00)')
+    assert.are.equal(#result, 2)
+    assert.are.equal(result[1].value, 'no_parking')
+    assert.are.equal(result[2].value, 'no_stopping')
+  end)
+
+  it('handles whitespace variations', function()
+    local result = parse_conditional_value('  loading_only  @  (  Mo-Fr 08:00-18:00  )  ')
+    assert.are.equal(#result, 1)
+    assert.are.equal(result[1].value, 'loading_only')
+    assert.are.equal(result[1].condition, 'Mo-Fr 08:00-18:00')
+  end)
+
+  it('returns nil for invalid format', function()
+    local result = parse_conditional_value('invalid_format')
+    assert.are.equal(result, nil)
+  end)
+
+  it('returns nil for nil or empty input', function()
+    assert.are.equal(parse_conditional_value(nil), nil)
+    assert.are.equal(parse_conditional_value(''), nil)
+  end)
+end)

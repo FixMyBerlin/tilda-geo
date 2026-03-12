@@ -1,21 +1,56 @@
 import db from '@/db'
 import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
+import { isQaListStyleKey, type QaListStyleKey } from '@/src/server/qa-configs/listStyleKeys.const'
+import type { QaDecisionDataStored } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { transformEvaluationWithDecisionData } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { resolver } from '@blitzjs/rpc'
-import { QaEvaluationStatus } from '@prisma/client'
-import { Ctx } from 'blitz'
+import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
+import type { Ctx } from 'blitz'
 import { z } from 'zod'
 import { getQaTableName } from '../utils/getQaTableName'
 
 const Schema = z.object({
   configSlug: z.string(),
   regionSlug: z.string(),
-  userStatus: z.nativeEnum(QaEvaluationStatus).nullable(),
+  styleKey: z.string(),
 })
+
+// Filter by style (same logic as filterQaDataByStyle in useQaMapState, using DB enums)
+function matchesStyle(
+  evaluation: { userStatus: QaEvaluationStatus | null; systemStatus: QaSystemStatus },
+  styleKey: QaListStyleKey,
+) {
+  switch (styleKey) {
+    case 'user-not-ok-processing':
+      return evaluation.userStatus === 'NOT_OK_PROCESSING_ERROR'
+    case 'user-not-ok-osm':
+      return evaluation.userStatus === 'NOT_OK_DATA_ERROR'
+    case 'user-ok-construction':
+      return evaluation.userStatus === 'OK_STRUCTURAL_CHANGE'
+    case 'user-ok-reference-error':
+      return evaluation.userStatus === 'OK_REFERENCE_ERROR'
+    case 'user-ok-qa-tooling-error':
+      return evaluation.userStatus === 'OK_QA_TOOLING_ERROR'
+    case 'user-pending-needs-review':
+      return evaluation.userStatus === null && evaluation.systemStatus === 'NEEDS_REVIEW'
+    case 'user-pending-problematic':
+      return evaluation.userStatus === null && evaluation.systemStatus === 'PROBLEMATIC'
+  }
+}
+
+function sortKeyAbsoluteChange(decisionData: QaDecisionDataStored | null) {
+  if (decisionData?.absoluteChange == null) return 0
+  return Math.abs(decisionData.absoluteChange)
+}
 
 export default resolver.pipe(
   resolver.zod(Schema),
-  async ({ configSlug, regionSlug, userStatus }, { session }: Ctx) => {
+  async ({ configSlug, regionSlug, styleKey: styleKeyInput }, { session }: Ctx) => {
+    if (!isQaListStyleKey(styleKeyInput)) {
+      return []
+    }
+    const styleKey = styleKeyInput as QaListStyleKey
+
     const { isAuthorized } = await checkRegionAuthorization(session, regionSlug)
     if (!isAuthorized) {
       return []
@@ -29,18 +64,14 @@ export default resolver.pipe(
       return []
     }
 
-    // Get the validated table name
     const tableName = getQaTableName(qaConfig.mapTable)
 
-    // Get latest evaluation per areaId (orderBy must start with distinct field), then take 20 most recent by createdAt
     const TAKE_RECENT = 20
     const FETCH_DISTINCT_UP_TO = 500
 
+    // Latest evaluation per area (no userStatus filter). orderBy must start with areaId for distinct.
     const areasWithEvaluationsRaw = await db.qaEvaluation.findMany({
-      where: {
-        configId: qaConfig.id,
-        userStatus: userStatus,
-      },
+      where: { configId: qaConfig.id },
       include: {
         author: {
           select: {
@@ -56,12 +87,25 @@ export default resolver.pipe(
       distinct: ['areaId'],
     })
 
-    const areasWithEvaluations = areasWithEvaluationsRaw
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(0, TAKE_RECENT)
+    // Filter by style (same criteria as map), then sort by largest absolute diff, take 20
+    const parsed = areasWithEvaluationsRaw.map((e) => ({
+      evaluation: e,
+      decisionData: transformEvaluationWithDecisionData(e).decisionData,
+    }))
+    const filtered = parsed.filter(({ evaluation }) =>
+      matchesStyle(
+        { userStatus: evaluation.userStatus, systemStatus: evaluation.systemStatus },
+        styleKey,
+      ),
+    )
+    const sorted = filtered.sort((a, b) => {
+      const diffA = sortKeyAbsoluteChange(a.decisionData)
+      const diffB = sortKeyAbsoluteChange(b.decisionData)
+      return diffB - diffA
+    })
+    const areasWithEvaluations = sorted.slice(0, TAKE_RECENT).map(({ evaluation }) => evaluation)
 
-    // Get bbox data for each area from the QA table using PostGIS
-    const areaIds = areasWithEvaluations.map((evaluation) => evaluation.areaId)
+    const areaIds = areasWithEvaluations.map((e) => e.areaId)
     const bboxes = await db.$queryRawUnsafe<
       Array<{
         id: string
@@ -82,7 +126,6 @@ export default resolver.pipe(
       areaIds,
     )
 
-    // Create a map of areaId to bbox coordinates
     const bboxMap = new Map(
       bboxes.map((bbox) => [
         bbox.id,
@@ -95,7 +138,6 @@ export default resolver.pipe(
       ]),
     )
 
-    // Transform to the expected format
     const result = areasWithEvaluations.map((evaluation) => {
       const bbox = bboxMap.get(evaluation.areaId)
       const transformedEvaluation = transformEvaluationWithDecisionData(evaluation)

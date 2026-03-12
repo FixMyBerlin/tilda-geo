@@ -44,7 +44,7 @@ local function result_tags_parkings(object)
   local road_width_tags_result = road_width_tags(object.tags)
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags_with_parent(object.tags, object._parent_tags)
-  local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(object.tags, 'assumed_free')
+  local conditional_categories_result = classify_parking_conditions(object.tags, object._parent_tags, 'assumed_free')
   local operator_type_result = operator_type.operator_type_for_road_parking(object.tags, object._parent_tags, 'public')
 
   -- CRITICAL: Keep these lists in sync:
@@ -78,16 +78,13 @@ local function result_tags_parkings(object)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
-    condition_vehicles = conditional_categories_result.condition_vehicles,
     covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
-    fee = SANITIZE_PARKING_TAGS.fee(object.tags.fee),
     informal = SANITIZE_TAGS.informal(object.tags.informal),
     location = SANITIZE_PARKING_TAGS.location(object.tags.location),
     markings = SANITIZE_PARKING_TAGS.markings(object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(object.tags.orientation),
     parking = SANITIZE_PARKING_TAGS.parking_extended(object.tags.parking, object._parent_tags.dual_carriageway),
-    restriction = SANITIZE_PARKING_TAGS.restriction(object.tags.restriction),
     reason = SANITIZE_PARKING_TAGS.reason(object.tags.reason),
     staggered = SANITIZE_PARKING_TAGS.staggered(object.tags.staggered),
     traffic_sign = SANITIZE_TAGS.traffic_sign(object.tags.traffic_sign),

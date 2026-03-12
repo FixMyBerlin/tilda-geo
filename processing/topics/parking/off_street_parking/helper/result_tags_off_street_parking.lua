@@ -14,7 +14,7 @@ local function result_tags_off_street_parking(result, area)
   local id = DefaultId(result.object)
 
   local surface_tags_result = SURFACE_TAGS.surface_tags(result.object.tags)
-  local conditional_categories_result = classify_parking_conditions.classify_parking_conditions(result.object.tags, 'assumed_private')
+  local conditional_categories_result = classify_parking_conditions(result.object.tags, nil, 'assumed_private')
   -- Get capacity from category (handles both tag-based and area-based capacity)
   local capacity_tags_result = result.category:get_capacity(result.object.tags, area)
   local operator_type_result = operator_type.operator_type_for_area(result.object.tags, result.object.type, result.object.id, 'private')
@@ -50,16 +50,13 @@ local function result_tags_off_street_parking(result, area)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
-    condition_vehicles = conditional_categories_result.condition_vehicles,
     covered = SANITIZE_TAGS.covered(result.object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(result.object.tags.direction),
-    fee = SANITIZE_PARKING_TAGS.fee(result.object.tags.fee),
     informal = SANITIZE_TAGS.informal(result.object.tags.informal),
     location = SANITIZE_PARKING_TAGS.location(result.object.tags.location),
     markings = SANITIZE_PARKING_TAGS.markings(result.object.tags.markings),
     orientation = SANITIZE_PARKING_TAGS.orientation(result.object.tags.orientation),
     parking = SANITIZE_PARKING_TAGS.parking_off_street(result.object.tags),
-    restriction = SANITIZE_PARKING_TAGS.restriction(result.object.tags.restriction),
     reason = SANITIZE_PARKING_TAGS.reason(result.object.tags.reason),
     staggered = nil,
     traffic_sign = SANITIZE_TAGS.traffic_sign(result.object.tags.traffic_sign),
