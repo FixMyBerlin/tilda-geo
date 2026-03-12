@@ -7,8 +7,8 @@ import { twJoin } from 'tailwind-merge'
 import { useQaParam } from '../../../_hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '../../regionUtils/useRegionSlug'
 import { QaIcon } from '../../SidebarInspector/InspectorQa/QaIcon'
-import { QaAreasListDialog, qaStyleListConfig } from './QaAreasListDialog'
-import { QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
+import { QaAreasListDialog } from './QaAreasListDialog'
+import { isListableOption, QA_STYLE_OPTIONS, QaStyleKey } from './qaConfigStyles'
 import { QaUserDropdown } from './QaUserDropdown'
 
 export const QaConfigCategory = ({
@@ -89,10 +89,7 @@ export const QaConfigCategory = ({
               <DisclosurePanel static as="section" className="mt-1 mb-2">
                 <div className="mx-2 space-y-1">
                   {QA_STYLE_OPTIONS.map((option) => (
-                    <label
-                      key={option.key}
-                      className="flex w-full items-center gap-2 text-xs"
-                    >
+                    <label key={option.key} className="flex w-full items-center gap-2 text-xs">
                       <input
                         type="radio"
                         name={`qa-style-${qaConfig.slug}`}
@@ -103,14 +100,14 @@ export const QaConfigCategory = ({
                       />
                       <div className="flex min-w-0 flex-1 items-center justify-between">
                         <span>{option.label}</span>
-                        {qaStyleListConfig[option.key].showList && (
+                        {isListableOption(option) && (
                           <button
                             type="button"
                             onClick={() => setDialogState(option.key)}
                             className={twJoin(
                               'ml-2 shrink-0 text-xs',
                               linkStyles,
-                              'disabled:pointer-events-none disabled:opacity-60 disabled:cursor-default disabled:no-underline',
+                              'disabled:pointer-events-none disabled:cursor-default disabled:no-underline disabled:opacity-60',
                             )}
                             disabled={currentStyle !== option.key}
                             title={
@@ -126,13 +123,11 @@ export const QaConfigCategory = ({
                     </label>
                   ))}
                 </div>
-                <Suspense
-                  fallback={dialogState !== null ? <SmallSpinner /> : null}
-                >
+                <Suspense fallback={dialogState !== null ? <SmallSpinner /> : null}>
                   <QaAreasListDialog
                     configSlug={qaConfig.slug}
                     regionSlug={regionSlug!}
-                    styleKey={dialogState}
+                    styleKey={dialogState ?? 'none'}
                     setClosed={() => setDialogState(null)}
                   />
                 </Suspense>

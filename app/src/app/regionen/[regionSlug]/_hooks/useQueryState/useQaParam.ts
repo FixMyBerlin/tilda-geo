@@ -9,6 +9,11 @@ type QaParamData = {
   style: string
 }
 
+/** Legacy key: renamed to user-pending-problematic so old URLs/bookmarks still work. */
+const LEGACY_QA_STYLE_MAP: Record<string, string> = {
+  'user-pending': 'user-pending-problematic',
+}
+
 const qaParamParser = createParser({
   parse: (query) => {
     if (!query) return { configSlug: '', style: 'none' }
@@ -19,7 +24,7 @@ const qaParamParser = createParser({
     const style = parts[parts.length - 1] || 'none'
     const configSlug = parts.slice(0, -1).join('--')
 
-    return { configSlug, style }
+    return { configSlug, style: LEGACY_QA_STYLE_MAP[style] ?? style }
   },
   serialize: (data: QaParamData) => {
     if (!data.configSlug || data.style === 'none') return ''
