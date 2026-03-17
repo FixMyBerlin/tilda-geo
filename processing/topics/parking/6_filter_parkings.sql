@@ -10,6 +10,7 @@
 DO $$ BEGIN RAISE NOTICE 'START filter parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- filter parkings that don't allow parking (except missing)
+-- IS NOT NULL before LIKE avoids NULL semantics: (tags ->> 'key') is NULL when key missing; NULL LIKE ... yields NULL.
 CREATE INDEX IF NOT EXISTS parking_parkings_merged_parking_tag_idx ON _parking_parkings_merged ((tags ->> 'parking'));
 
 INSERT INTO
@@ -17,16 +18,25 @@ INSERT INTO
 SELECT
   id,
   CASE
-    WHEN p.tags ->> 'restriction' = 'no_parking' THEN tags || jsonb_build_object(
+    WHEN (p.tags ->> 'condition_category') IS NOT NULL
+    AND (p.tags ->> 'condition_category') LIKE 'no_parking%' THEN tags || jsonb_build_object(
       /* sql-formatter-disable */
       'parking', 'no_parking',
       'reason', 'restriction_no_parking'
       /* sql-formatter-enable */
     )
-    WHEN p.tags ->> 'restriction' = 'no_stopping' THEN tags || jsonb_build_object(
+    WHEN (p.tags ->> 'condition_category') IS NOT NULL
+    AND (p.tags ->> 'condition_category') LIKE 'no_stopping%' THEN tags || jsonb_build_object(
       /* sql-formatter-disable */
       'parking', 'no_stopping',
       'reason', 'restriction_no_stopping'
+      /* sql-formatter-enable */
+    )
+    WHEN (p.tags ->> 'condition_category') IS NOT NULL
+    AND (p.tags ->> 'condition_category') LIKE 'no_standing%' THEN tags || jsonb_build_object(
+      /* sql-formatter-disable */
+      'parking', 'no_standing',
+      'reason', 'restriction_no_standing'
       /* sql-formatter-enable */
     )
     ELSE tags || '{"reason": "parking_tag"}'::JSONB
