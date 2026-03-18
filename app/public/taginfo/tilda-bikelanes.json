@@ -1,0 +1,418 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-bikelanes.json",
+  "data_updated": "20260316T184526Z",
+  "project": {
+    "name": "TILDA - Bikelanes",
+    "description": "TILDA processes bikelanes from OpenStreetMap for bicycle infrastructure planning, including tags used in bike suitability logic.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/roads_bikelanes",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "highway",
+      "object_types": ["way"],
+      "description": "Primary classification used for bikelane derivation and category assignment."
+    },
+    {
+      "key": "access",
+      "object_types": ["way"],
+      "description": "Used to include or exclude ways from bikelane processing."
+    },
+    {
+      "key": "service",
+      "object_types": ["way"],
+      "description": "Used to classify service ways in bikelane categories."
+    },
+    {
+      "key": "area",
+      "value": "yes",
+      "object_types": ["way"],
+      "description": "Area geometries are excluded from bikelane processing."
+    },
+    {
+      "key": "man_made",
+      "value": "pier",
+      "object_types": ["way"],
+      "description": "Piers are excluded from bikelane processing."
+    },
+    {
+      "key": "leisure",
+      "value": "track",
+      "object_types": ["way"],
+      "description": "Leisure tracks are excluded from bikelane processing."
+    },
+    {
+      "key": "bicycle",
+      "object_types": ["way"],
+      "description": "Used for access evaluation, bikelane categories, and bike suitability checks."
+    },
+    {
+      "key": "bicycle:left",
+      "object_types": ["way"],
+      "description": "Used to retain service ways with side specific bicycle access."
+    },
+    {
+      "key": "bicycle:right",
+      "object_types": ["way"],
+      "description": "Used to retain service ways with side specific bicycle access."
+    },
+    {
+      "key": "bicycle:both",
+      "object_types": ["way"],
+      "description": "Used to retain service ways with side specific bicycle access."
+    },
+    {
+      "key": "bicycle_road",
+      "object_types": ["way"],
+      "description": "Used for bicycle road categorization and related todo checks."
+    },
+    {
+      "key": "foot",
+      "object_types": ["way"],
+      "description": "Used for access checks and shared path categorization."
+    },
+    {
+      "key": "footway",
+      "object_types": ["way"],
+      "description": "Used for footway based bikelane transformations and category decisions."
+    },
+    {
+      "key": "path",
+      "object_types": ["way"],
+      "description": "Used for path based bikelane categorization."
+    },
+    {
+      "key": "cycleway",
+      "object_types": ["way"],
+      "description": "Core tag for cycleway and bikelane categorization; interpreted as synonym for `cycleway:both`"
+    },
+    {
+      "key": "cycleway:left",
+      "object_types": ["way"],
+      "description": "Used for side specific bikelane extraction from centerline tags."
+    },
+    {
+      "key": "cycleway:right",
+      "object_types": ["way"],
+      "description": "Used for side specific bikelane extraction from centerline tags."
+    },
+    {
+      "key": "cycleway:both",
+      "object_types": ["way"],
+      "description": "Used for side specific bikelane extraction and normalized no values."
+    },
+    {
+      "key": "cycleway:lanes",
+      "object_types": ["way"],
+      "description": "Used to derive lane based cycleway details, especially category 'Radfahrstreifen in Mittellage'"
+    },
+    {
+      "key": "bicycle:lanes",
+      "object_types": ["way"],
+      "description": "Used to derive lane based bicycle designation, especially category 'Radfahrstreifen in Mittellage'"
+    },
+    {
+      "key": "sidewalk",
+      "object_types": ["way"],
+      "description": "Used to derive side specific bikelane objects from sidewalk tagging; interpreted as synonym for `sidewalk:both`"
+    },
+    {
+      "key": "sidewalk:left",
+      "object_types": ["way"],
+      "description": "Used to derive side specific bikelane objects from sidewalk tagging."
+    },
+    {
+      "key": "sidewalk:right",
+      "object_types": ["way"],
+      "description": "Used to derive side specific bikelane objects from sidewalk tagging."
+    },
+    {
+      "key": "sidewalk:both",
+      "object_types": ["way"],
+      "description": "Used to derive side specific bikelane objects from sidewalk tagging."
+    },
+    {
+      "key": "lane",
+      "object_types": ["way"],
+      "description": "Used to classify lane subtype after side projection."
+    },
+    {
+      "key": "segregated",
+      "object_types": ["way"],
+      "description": "Used to distinguish shared and separated cycleway contexts."
+    },
+    {
+      "key": "oneway",
+      "object_types": ["way"],
+      "description": "Used to derive one way status for bikelanes and bike suitability."
+    },
+    {
+      "key": "oneway:bicycle",
+      "object_types": ["way"],
+      "description": "Used to derive bicycle specific one way status."
+    },
+    {
+      "key": "vehicle",
+      "object_types": ["way"],
+      "description": "Used in bike suitability and mixed traffic categorization."
+    },
+    {
+      "key": "motor_vehicle",
+      "object_types": ["way"],
+      "description": "Used in bike suitability and mixed traffic categorization."
+    },
+    {
+      "key": "motorcar",
+      "object_types": ["way"],
+      "description": "Used in bike suitability checks for motorcar restrictions."
+    },
+    {
+      "key": "traffic_sign",
+      "object_types": ["way"],
+      "description": "Used for legal context, category logic, and bike suitability decisions."
+    },
+    {
+      "key": "traffic_sign:forward",
+      "object_types": ["way"],
+      "description": "Used to project direction specific traffic sign data."
+    },
+    {
+      "key": "traffic_sign:backward",
+      "object_types": ["way"],
+      "description": "Used to project direction specific traffic sign data."
+    },
+    {
+      "key": "width",
+      "object_types": ["way"],
+      "description": "Used to derive bikelane width."
+    },
+    {
+      "key": "source:width",
+      "object_types": ["way"],
+      "description": "Used to keep width source information for bikelanes."
+    },
+    {
+      "key": "width:effective",
+      "object_types": ["way"],
+      "description": "Used to derive effective bikelane width."
+    },
+    {
+      "key": "buffer",
+      "object_types": ["way"],
+      "description": "Used as fallback for side specific buffer width."
+    },
+    {
+      "key": "buffer:left",
+      "object_types": ["way"],
+      "description": "Used to derive left side bikelane buffer width."
+    },
+    {
+      "key": "buffer:right",
+      "object_types": ["way"],
+      "description": "Used to derive right side bikelane buffer width."
+    },
+    {
+      "key": "buffer:both",
+      "object_types": ["way"],
+      "description": "Used to derive shared buffer values for both sides."
+    },
+    {
+      "key": "separation",
+      "object_types": ["way"],
+      "description": "Used as fallback for side specific separation type."
+    },
+    {
+      "key": "separation:left",
+      "object_types": ["way"],
+      "description": "Used to derive left side separation type."
+    },
+    {
+      "key": "separation:right",
+      "object_types": ["way"],
+      "description": "Used to derive right side separation type."
+    },
+    {
+      "key": "separation:both",
+      "object_types": ["way"],
+      "description": "Used to derive shared separation values for both sides."
+    },
+    {
+      "key": "marking",
+      "object_types": ["way"],
+      "description": "Used as fallback for side specific marking type."
+    },
+    {
+      "key": "marking:left",
+      "object_types": ["way"],
+      "description": "Used to derive left side marking type."
+    },
+    {
+      "key": "marking:right",
+      "object_types": ["way"],
+      "description": "Used to derive right side marking type."
+    },
+    {
+      "key": "marking:both",
+      "object_types": ["way"],
+      "description": "Used to derive shared marking values for both sides."
+    },
+    {
+      "key": "traffic_mode",
+      "object_types": ["way"],
+      "description": "Used as fallback for neighboring traffic mode."
+    },
+    {
+      "key": "traffic_mode:left",
+      "object_types": ["way"],
+      "description": "Used to derive left side neighboring traffic mode."
+    },
+    {
+      "key": "traffic_mode:right",
+      "object_types": ["way"],
+      "description": "Used to derive right side neighboring traffic mode."
+    },
+    {
+      "key": "traffic_mode:both",
+      "object_types": ["way"],
+      "description": "Used to derive shared neighboring traffic mode values."
+    },
+    {
+      "key": "surface",
+      "object_types": ["way"],
+      "description": "Used to derive bikelane surface quality."
+    },
+    {
+      "key": "smoothness",
+      "object_types": ["way"],
+      "description": "Used to derive bikelane smoothness quality."
+    },
+    {
+      "key": "surface:colour",
+      "object_types": ["way"],
+      "description": "Used to derive normalized surface color."
+    },
+    {
+      "key": "surface:color",
+      "object_types": ["way"],
+      "description": "Used to derive normalized surface color."
+    },
+    {
+      "key": "bridge",
+      "object_types": ["way"],
+      "description": "Used to mark bikelanes located on bridges."
+    },
+    {
+      "key": "tunnel",
+      "object_types": ["way"],
+      "description": "Used to mark bikelanes located in tunnels."
+    },
+    {
+      "key": "temporary",
+      "object_types": ["way"],
+      "description": "Used to derive temporary lifecycle state."
+    },
+    {
+      "key": "lifecycle",
+      "object_types": ["way"],
+      "description": "Used to preserve or derive lifecycle status."
+    },
+    {
+      "key": "construction",
+      "object_types": ["way"],
+      "description": "Used with highway tagging to interpret under construction ways."
+    },
+    {
+      "key": "access:reason",
+      "object_types": ["way"],
+      "description": "Used with description and note to detect construction related closures."
+    },
+    {
+      "key": "mtb",
+      "object_types": ["way"],
+      "description": "Used in mixed path categorization logic."
+    },
+    {
+      "key": "mtb:scale",
+      "object_types": ["way"],
+      "description": "Used in path difficulty checks."
+    },
+    {
+      "key": "mapillary",
+      "object_types": ["way"],
+      "description": "Used to attach mapillary references."
+    },
+    {
+      "key": "mapillary:forward",
+      "object_types": ["way"],
+      "description": "Used to attach forward direction mapillary references."
+    },
+    {
+      "key": "mapillary:backward",
+      "object_types": ["way"],
+      "description": "Used to attach backward direction mapillary references."
+    },
+    {
+      "key": "source:mapillary",
+      "object_types": ["way"],
+      "description": "Used as source specific mapillary reference."
+    },
+    {
+      "key": "source:mapillary:forward",
+      "object_types": ["way"],
+      "description": "Used as source specific forward mapillary reference."
+    },
+    {
+      "key": "source:mapillary:backward",
+      "object_types": ["way"],
+      "description": "Used as source specific backward mapillary reference."
+    },
+    {
+      "key": "source:traffic_sign:mapillary",
+      "object_types": ["way"],
+      "description": "Used as mapillary traffic sign source reference."
+    },
+    {
+      "key": "source:traffic_sign:forward:mapillary",
+      "object_types": ["way"],
+      "description": "Used as forward mapillary traffic sign source reference."
+    },
+    {
+      "key": "source:traffic_sign:backward:mapillary",
+      "object_types": ["way"],
+      "description": "Used as backward mapillary traffic sign source reference."
+    },
+    {
+      "key": "name",
+      "object_types": ["way"],
+      "description": "Used as display name for bikelanes."
+    },
+    {
+      "key": "ref",
+      "object_types": ["way"],
+      "description": "Used as fallback road reference in bikelane naming."
+    },
+    {
+      "key": "is_sidepath:of:name",
+      "object_types": ["way"],
+      "description": "Used as fallback naming for sidepath related ways."
+    },
+    {
+      "key": "street:name",
+      "object_types": ["way"],
+      "description": "Used as fallback naming for bikelanes."
+    },
+    {
+      "key": "description",
+      "object_types": ["way"],
+      "description": "Used for closure detection and descriptive bikelane output."
+    },
+    {
+      "key": "note",
+      "object_types": ["way"],
+      "description": "Used for closure detection and descriptive bikelane output."
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-roads.json",
+  "data_updated": "20260316T184526Z",
+  "project": {
+    "name": "TILDA - Roads and Pathclasses",
+    "description": "TILDA processes roads and road pathclasses from OpenStreetMap for bicycle infrastructure planning.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/roads_bikelanes",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "highway",
+      "object_types": ["way"],
+      "description": "Primary road and path classification used to include roads and pathclasses."
+    },
+    {
+      "key": "construction",
+      "object_types": ["way"],
+      "description": "Used with highway tagging to interpret under construction roads and paths."
+    },
+    {
+      "key": "access",
+      "object_types": ["way"],
+      "description": "Used to include or exclude roads based on access restrictions."
+    },
+    {
+      "key": "access:reason",
+      "object_types": ["way"],
+      "description": "Used with description and note to detect construction related closures."
+    },
+    {
+      "key": "service",
+      "object_types": ["way"],
+      "description": "Used to classify and filter service roads."
+    },
+    {
+      "key": "area",
+      "value": "yes",
+      "object_types": ["way"],
+      "description": "Area geometries are excluded from roads processing."
+    },
+    {
+      "key": "man_made",
+      "value": "pier",
+      "object_types": ["way"],
+      "description": "Piers are excluded from roads processing."
+    },
+    {
+      "key": "leisure",
+      "value": "track",
+      "object_types": ["way"],
+      "description": "Leisure tracks are excluded from roads processing."
+    },
+    {
+      "key": "indoor",
+      "value": "yes",
+      "object_types": ["way"],
+      "description": "Indoor features are excluded from roads processing."
+    },
+    {
+      "key": "informal",
+      "value": "yes",
+      "object_types": ["way"],
+      "description": "Informal features are excluded from roads processing."
+    },
+    {
+      "key": "bicycle",
+      "object_types": ["way"],
+      "description": "Used in access filtering and path to cycleway or footway interpretation."
+    },
+    {
+      "key": "bicycle:left",
+      "object_types": ["way"],
+      "description": "Used to retain service ways with side specific bicycle access."
+    },
+    {
+      "key": "bicycle:right",
+      "object_types": ["way"],
+      "description": "Used to retain service ways with side specific bicycle access."
+    },
+    {
+      "key": "bicycle:both",
+      "object_types": ["way"],
+      "description": "Used to retain service ways with side specific bicycle access."
+    },
+    {
+      "key": "bicycle_road",
+      "object_types": ["way"],
+      "description": "Used to classify bicycle roads."
+    },
+    {
+      "key": "foot",
+      "object_types": ["way"],
+      "description": "Used for access filtering and path to cycleway or footway interpretation."
+    },
+    {
+      "key": "footway",
+      "object_types": ["way"],
+      "description": "Used to classify sidewalks and crossing related pathclasses."
+    },
+    {
+      "key": "path",
+      "object_types": ["way"],
+      "description": "Used to classify crossing and sidewalk related pathclasses."
+    },
+    {
+      "key": "steps",
+      "object_types": ["way"],
+      "description": "Used in pathclass related road classification."
+    },
+    {
+      "key": "cycleway",
+      "object_types": ["way"],
+      "description": "Used to classify cycleway crossings and to normalize opposite schemas."
+    },
+    {
+      "key": "cycleway:left",
+      "object_types": ["way"],
+      "description": "Used when normalizing cycleway tagging schemas."
+    },
+    {
+      "key": "cycleway:right",
+      "object_types": ["way"],
+      "description": "Used when normalizing cycleway tagging schemas."
+    },
+    {
+      "key": "cycleway:both",
+      "object_types": ["way"],
+      "description": "Used when normalizing cycleway no values and schema variants."
+    },
+    {
+      "key": "oneway",
+      "object_types": ["way"],
+      "description": "Used to derive one way information for road classification."
+    },
+    {
+      "key": "oneway:bicycle",
+      "object_types": ["way"],
+      "description": "Used to derive bicycle specific one way information."
+    },
+    {
+      "key": "priority_road",
+      "object_types": ["way"],
+      "description": "Used to classify residential priority roads."
+    },
+    {
+      "key": "width",
+      "object_types": ["way"],
+      "description": "Used to derive road width metrics."
+    },
+    {
+      "key": "source:width",
+      "object_types": ["way"],
+      "description": "Used to keep width source information for roads."
+    },
+    {
+      "key": "width:effective",
+      "object_types": ["way"],
+      "description": "Used to derive effective road width."
+    },
+    {
+      "key": "surface",
+      "object_types": ["way"],
+      "description": "Used to derive surface quality for roads."
+    },
+    {
+      "key": "smoothness",
+      "object_types": ["way"],
+      "description": "Used to derive smoothness quality for roads."
+    },
+    {
+      "key": "surface:colour",
+      "object_types": ["way"],
+      "description": "Used to derive normalized surface color for roads."
+    },
+    {
+      "key": "surface:color",
+      "object_types": ["way"],
+      "description": "Used to derive normalized surface color for roads."
+    },
+    {
+      "key": "lit",
+      "object_types": ["way"],
+      "description": "Used to classify road lighting."
+    },
+    {
+      "key": "bridge",
+      "object_types": ["way"],
+      "description": "Used to mark roads on bridges."
+    },
+    {
+      "key": "tunnel",
+      "object_types": ["way"],
+      "description": "Used to mark roads in tunnels."
+    },
+    {
+      "key": "temporary",
+      "object_types": ["way"],
+      "description": "Used to derive temporary lifecycle state."
+    },
+    {
+      "key": "lifecycle",
+      "object_types": ["way"],
+      "description": "Used to preserve or derive lifecycle status for roads."
+    },
+    {
+      "key": "emergency",
+      "object_types": ["way"],
+      "description": "Used to refine service road type for emergency access."
+    },
+    {
+      "key": "tracktype",
+      "object_types": ["way"],
+      "description": "Used to generalize pathclass visibility for tracks."
+    },
+    {
+      "key": "mapillary",
+      "object_types": ["way"],
+      "description": "Used to attach mapillary references to roads."
+    },
+    {
+      "key": "mapillary:forward",
+      "object_types": ["way"],
+      "description": "Used to attach forward mapillary references."
+    },
+    {
+      "key": "mapillary:backward",
+      "object_types": ["way"],
+      "description": "Used to attach backward mapillary references."
+    },
+    {
+      "key": "source:traffic_sign:mapillary",
+      "object_types": ["way"],
+      "description": "Used as mapillary traffic sign source reference."
+    },
+    {
+      "key": "name",
+      "object_types": ["way"],
+      "description": "Used as primary road display name."
+    },
+    {
+      "key": "ref",
+      "object_types": ["way"],
+      "description": "Used as fallback road naming and reference label."
+    },
+    {
+      "key": "is_sidepath:of:name",
+      "object_types": ["way"],
+      "description": "Used as fallback naming for sidepath related road features."
+    },
+    {
+      "key": "street:name",
+      "object_types": ["way"],
+      "description": "Used as fallback naming for road features."
+    },
+    {
+      "key": "description",
+      "object_types": ["way"],
+      "description": "Used for closure detection and descriptive road output."
+    },
+    {
+      "key": "note",
+      "object_types": ["way"],
+      "description": "Used for closure detection and descriptive road output."
+    },
+    {
+      "key": "maxspeed",
+      "object_types": ["way"],
+      "description": "Used as direct maxspeed source for roads."
+    },
+    {
+      "key": "maxspeed:forward",
+      "object_types": ["way"],
+      "description": "Used as directional maxspeed source for roads."
+    },
+    {
+      "key": "maxspeed:backward",
+      "object_types": ["way"],
+      "description": "Used as directional maxspeed source for roads."
+    },
+    {
+      "key": "maxspeed:conditional",
+      "object_types": ["way"],
+      "description": "Used to preserve conditional maxspeed information."
+    },
+    {
+      "key": "maxspeed:type",
+      "object_types": ["way"],
+      "description": "Used to derive zone based maxspeed values."
+    },
+    {
+      "key": "zone:maxspeed",
+      "object_types": ["way"],
+      "description": "Used to derive zone based maxspeed values."
+    },
+    {
+      "key": "source:maxspeed",
+      "object_types": ["way"],
+      "description": "Used to derive zone based maxspeed values from source metadata."
+    }
+  ]
+}

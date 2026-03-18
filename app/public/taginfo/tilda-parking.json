@@ -1,0 +1,782 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-parking.json",
+  "data_updated": "20260316T184826Z",
+  "project": {
+    "name": "TILDA - Parking",
+    "description": "TILDA processes on-street, off-street, obstacle, crossing, and public transport context tags from OpenStreetMap to analyze parking space availability and constraints.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/parking",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "highway",
+      "description": "Used to identify roads, driveways, crossing lines, and public transport stops relevant to parking analysis."
+    },
+    {
+      "key": "construction",
+      "description": "Used with highway to classify construction roads in parking-road processing."
+    },
+    {
+      "key": "area",
+      "value": "yes",
+      "description": "Used to exclude area-mapped roads from line-based road parking processing."
+    },
+    {
+      "key": "service",
+      "description": "Used for road context and driveway-related classification."
+    },
+    {
+      "key": "oneway",
+      "description": "Used to derive road width defaults and one-way context for road-side parking."
+    },
+    { "key": "width", "description": "Used as direct width input for road width estimation." },
+    {
+      "key": "embedded_rails",
+      "value": "tram",
+      "description": "Used to mark roads with embedded tram rails in road context."
+    },
+    {
+      "key": "dual_carriageway",
+      "description": "Used when deriving parking defaults and one-way road interpretation."
+    },
+
+    {
+      "key": "parking",
+      "description": "Core parking classification key for on-street and off-street parking objects."
+    },
+    {
+      "key": "parking:left",
+      "description": "Used to derive left-side parking attributes from centerline road tagging."
+    },
+    {
+      "key": "parking:right",
+      "description": "Used to derive right-side parking attributes from centerline road tagging."
+    },
+    {
+      "key": "parking:both",
+      "description": "Used to derive parking attributes that apply to both sides of the road."
+    },
+    {
+      "key": "parking:left:fee",
+      "description": "Used as side-specific fee information for left-side on-street parking."
+    },
+    {
+      "key": "parking:right:fee",
+      "description": "Used as side-specific fee information for right-side on-street parking."
+    },
+    {
+      "key": "parking:both:fee",
+      "description": "Used as side-specific fee information that applies to both parking sides."
+    },
+    {
+      "key": "parking:left:restriction",
+      "description": "Used as side-specific parking restriction information for left-side parking."
+    },
+    {
+      "key": "parking:right:restriction",
+      "description": "Used as side-specific parking restriction information for right-side parking."
+    },
+    {
+      "key": "parking:both:restriction",
+      "description": "Used as side-specific parking restriction information that applies to both sides."
+    },
+    {
+      "key": "parking:left:reason",
+      "description": "Used as side-specific reason metadata for left-side parking restrictions."
+    },
+    {
+      "key": "parking:right:reason",
+      "description": "Used as side-specific reason metadata for right-side parking restrictions."
+    },
+    {
+      "key": "parking:both:reason",
+      "description": "Used as side-specific reason metadata that applies to both parking sides."
+    },
+    {
+      "key": "parking:left:location",
+      "description": "Used as side-specific parking location metadata for left-side parking."
+    },
+    {
+      "key": "parking:right:location",
+      "description": "Used as side-specific parking location metadata for right-side parking."
+    },
+    {
+      "key": "parking:both:location",
+      "description": "Used as side-specific parking location metadata that applies to both sides."
+    },
+    {
+      "key": "parking:left:orientation",
+      "description": "Used as side-specific orientation metadata for left-side parking."
+    },
+    {
+      "key": "parking:right:orientation",
+      "description": "Used as side-specific orientation metadata for right-side parking."
+    },
+    {
+      "key": "parking:both:orientation",
+      "description": "Used as side-specific orientation metadata that applies to both sides."
+    },
+    {
+      "key": "parking:left:markings",
+      "description": "Used as side-specific marking metadata for left-side parking."
+    },
+    {
+      "key": "parking:right:markings",
+      "description": "Used as side-specific marking metadata for right-side parking."
+    },
+    {
+      "key": "parking:both:markings",
+      "description": "Used as side-specific marking metadata that applies to both sides."
+    },
+    {
+      "key": "parking:left:fee:conditional",
+      "description": "Used as side-specific conditional fee information for left-side parking."
+    },
+    {
+      "key": "parking:right:fee:conditional",
+      "description": "Used as side-specific conditional fee information for right-side parking."
+    },
+    {
+      "key": "parking:both:fee:conditional",
+      "description": "Used as side-specific conditional fee information that applies to both sides."
+    },
+    {
+      "key": "parking:left:access",
+      "description": "Used as side-specific access information for left-side parking."
+    },
+    {
+      "key": "parking:right:access",
+      "description": "Used as side-specific access information for right-side parking."
+    },
+    {
+      "key": "parking:both:access",
+      "description": "Used as side-specific access information that applies to both sides."
+    },
+    {
+      "key": "parking:left:access:conditional",
+      "description": "Used as side-specific conditional access information for left-side parking."
+    },
+    {
+      "key": "parking:right:access:conditional",
+      "description": "Used as side-specific conditional access information for right-side parking."
+    },
+    {
+      "key": "parking:both:access:conditional",
+      "description": "Used as side-specific conditional access information that applies to both sides."
+    },
+    {
+      "key": "parking:left:motor_vehicle",
+      "description": "Used as side-specific motor vehicle access information for left-side parking."
+    },
+    {
+      "key": "parking:right:motor_vehicle",
+      "description": "Used as side-specific motor vehicle access information for right-side parking."
+    },
+    {
+      "key": "parking:both:motor_vehicle",
+      "description": "Used as side-specific motor vehicle access information that applies to both sides."
+    },
+    {
+      "key": "parking:left:motor_vehicle:conditional",
+      "description": "Used as side-specific conditional motor vehicle access information for left-side parking."
+    },
+    {
+      "key": "parking:right:motor_vehicle:conditional",
+      "description": "Used as side-specific conditional motor vehicle access information for right-side parking."
+    },
+    {
+      "key": "parking:both:motor_vehicle:conditional",
+      "description": "Used as side-specific conditional motor vehicle access information that applies to both sides."
+    },
+    {
+      "key": "parking:left:maxstay",
+      "description": "Used as side-specific maximum stay information for left-side parking."
+    },
+    {
+      "key": "parking:right:maxstay",
+      "description": "Used as side-specific maximum stay information for right-side parking."
+    },
+    {
+      "key": "parking:both:maxstay",
+      "description": "Used as side-specific maximum stay information that applies to both sides."
+    },
+    {
+      "key": "parking:left:maxstay:conditional",
+      "description": "Used as side-specific conditional maximum stay information for left-side parking."
+    },
+    {
+      "key": "parking:right:maxstay:conditional",
+      "description": "Used as side-specific conditional maximum stay information for right-side parking."
+    },
+    {
+      "key": "parking:both:maxstay:conditional",
+      "description": "Used as side-specific conditional maximum stay information that applies to both sides."
+    },
+    {
+      "key": "parking:left:restriction:conditional",
+      "description": "Used as side-specific conditional parking restriction information for left-side parking."
+    },
+    {
+      "key": "parking:right:restriction:conditional",
+      "description": "Used as side-specific conditional parking restriction information for right-side parking."
+    },
+    {
+      "key": "parking:both:restriction:conditional",
+      "description": "Used as side-specific conditional parking restriction information that applies to both sides."
+    },
+    {
+      "key": "parking:left:restriction:reason",
+      "description": "Used as side-specific restriction reason information for left-side parking."
+    },
+    {
+      "key": "parking:right:restriction:reason",
+      "description": "Used as side-specific restriction reason information for right-side parking."
+    },
+    {
+      "key": "parking:both:restriction:reason",
+      "description": "Used as side-specific restriction reason information that applies to both sides."
+    },
+    {
+      "key": "parking:left:restriction:reason:conditional",
+      "description": "Used as side-specific conditional restriction reason information for left-side parking."
+    },
+    {
+      "key": "parking:right:restriction:reason:conditional",
+      "description": "Used as side-specific conditional restriction reason information for right-side parking."
+    },
+    {
+      "key": "parking:both:restriction:reason:conditional",
+      "description": "Used as side-specific conditional restriction reason information that applies to both sides."
+    },
+    {
+      "key": "parking:left:reason:conditional",
+      "description": "Used as side-specific conditional reason metadata for left-side parking restrictions."
+    },
+    {
+      "key": "parking:right:reason:conditional",
+      "description": "Used as side-specific conditional reason metadata for right-side parking restrictions."
+    },
+    {
+      "key": "parking:both:reason:conditional",
+      "description": "Used as side-specific conditional reason metadata that applies to both parking sides."
+    },
+    {
+      "key": "parking:left:zone",
+      "description": "Used as side-specific parking zone information for left-side parking."
+    },
+    {
+      "key": "parking:right:zone",
+      "description": "Used as side-specific parking zone information for right-side parking."
+    },
+    {
+      "key": "parking:both:zone",
+      "description": "Used as side-specific parking zone information that applies to both sides."
+    },
+
+    {
+      "key": "amenity",
+      "description": "Used to classify separate parking, off-street parking, and parking-related obstacles."
+    },
+    {
+      "key": "building",
+      "description": "Used to classify off-street parking structures such as garages and carports."
+    },
+    {
+      "key": "entrance",
+      "value": "garage",
+      "description": "Used to identify garage entrances as off-street parking points."
+    },
+    {
+      "key": "operator",
+      "description": "Used for operator type derivation and metadata extraction."
+    },
+    {
+      "key": "operator:type",
+      "description": "Used for operator type classification in parking ownership context."
+    },
+    {
+      "key": "name",
+      "description": "Used as display metadata for parking-related features and public transport context."
+    },
+    {
+      "key": "ref",
+      "description": "Used as metadata for parking-related and public transport features."
+    },
+    {
+      "key": "mapillary",
+      "description": "Used as external imagery reference metadata for parking-related features."
+    },
+    { "key": "covered", "description": "Used to classify whether parking is covered." },
+    {
+      "key": "direction",
+      "description": "Used to derive side and directional context for parking and crossing-related processing."
+    },
+    { "key": "informal", "description": "Used to classify informal parking characteristics." },
+    { "key": "location", "description": "Used to classify parking location semantics." },
+    { "key": "markings", "description": "Used to classify parking marking availability." },
+    { "key": "orientation", "description": "Used to classify parking orientation." },
+    { "key": "staggered", "description": "Used to classify staggered parking layout." },
+    {
+      "key": "traffic_sign",
+      "description": "Used to retain traffic sign context for parking and obstacle features."
+    },
+    { "key": "zone", "description": "Used for zone-based parking condition classification." },
+    { "key": "surface", "description": "Used to derive normalized parking surface information." },
+    {
+      "key": "sett:length",
+      "description": "Used to derive normalized surface classes when surface=sett is tagged."
+    },
+    { "key": "capacity", "description": "Used as direct parking capacity input." },
+    {
+      "key": "est_capacity",
+      "description": "Used as estimated parking capacity input when capacity is missing."
+    },
+
+    {
+      "key": "access",
+      "description": "Used in parking condition and operator access classification."
+    },
+    {
+      "key": "access:conditional",
+      "description": "Used for conditional access-based parking condition classification."
+    },
+    {
+      "key": "motor_vehicle",
+      "description": "Used in parking condition classification and driveway-like road detection."
+    },
+    {
+      "key": "motor_vehicle:conditional",
+      "description": "Used for conditional motor vehicle access classification."
+    },
+    {
+      "key": "vehicle",
+      "description": "Used for driveway-like road detection in road parking logic."
+    },
+    { "key": "maxstay", "description": "Used for parking time-limit condition classification." },
+    {
+      "key": "maxstay:conditional",
+      "description": "Used for conditional parking time-limit classification."
+    },
+    { "key": "fee", "description": "Used for paid or mixed parking condition classification." },
+    {
+      "key": "fee:conditional",
+      "description": "Used for conditional paid parking classification."
+    },
+    {
+      "key": "restriction",
+      "description": "Used for no-parking, no-standing, no-stopping, loading, and charging condition classification."
+    },
+    {
+      "key": "restriction:conditional",
+      "description": "Used for conditional restriction-based parking condition classification."
+    },
+    {
+      "key": "restriction:reason",
+      "description": "Used to classify reason-based restriction context such as bus-lane restrictions."
+    },
+    {
+      "key": "restriction:reason:conditional",
+      "description": "Used for conditional reason-based restriction context."
+    },
+    { "key": "reason", "description": "Used for reason-based parking condition classification." },
+    {
+      "key": "reason:conditional",
+      "description": "Used for conditional reason-based parking condition classification."
+    },
+    {
+      "key": "maxweight",
+      "description": "Used for weight-restricted parking condition classification."
+    },
+    {
+      "key": "maxweight:conditional",
+      "description": "Used for conditional weight-restricted parking condition classification."
+    },
+    {
+      "key": "maxweightrating",
+      "description": "Used as alternative weight restriction key for parking condition classification."
+    },
+    {
+      "key": "maxweightrating:conditional",
+      "description": "Used as conditional alternative weight restriction key for parking condition classification."
+    },
+    { "key": "disabled", "description": "Used in disabled parking condition classification." },
+    {
+      "key": "disabled:conditional",
+      "description": "Used in conditional disabled parking condition classification."
+    },
+
+    {
+      "key": "motorcar",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "motorcar:conditional",
+      "description": "Used for conditional motorcar-specific parking condition classification."
+    },
+    {
+      "key": "restriction:motorcar",
+      "description": "Used for motorcar-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:motorcar:conditional",
+      "description": "Used for conditional motorcar-specific restriction exception classification."
+    },
+    {
+      "key": "passenger_car",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "passenger_car:conditional",
+      "description": "Used for conditional passenger-car-specific parking condition classification."
+    },
+    {
+      "key": "restriction:passenger_car",
+      "description": "Used for passenger-car-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:passenger_car:conditional",
+      "description": "Used for conditional passenger-car-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:disabled",
+      "description": "Used for disabled-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:disabled:conditional",
+      "description": "Used for conditional disabled-vehicle restriction exception classification."
+    },
+    {
+      "key": "car_sharing",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "car_sharing:conditional",
+      "description": "Used for conditional car-sharing-specific parking condition classification."
+    },
+    {
+      "key": "restriction:car_sharing",
+      "description": "Used for car-sharing-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:car_sharing:conditional",
+      "description": "Used for conditional car-sharing-specific restriction exception classification."
+    },
+    {
+      "key": "motorcycle",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "motorcycle:conditional",
+      "description": "Used for conditional motorcycle-specific parking condition classification."
+    },
+    {
+      "key": "restriction:motorcycle",
+      "description": "Used for motorcycle-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:motorcycle:conditional",
+      "description": "Used for conditional motorcycle-specific restriction exception classification."
+    },
+    {
+      "key": "goods",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "goods:conditional",
+      "description": "Used for conditional goods-vehicle-specific parking condition classification."
+    },
+    {
+      "key": "restriction:goods",
+      "description": "Used for goods-vehicle-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:goods:conditional",
+      "description": "Used for conditional goods-vehicle-specific restriction exception classification."
+    },
+    { "key": "hgv", "description": "Used for vehicle-specific parking condition classification." },
+    {
+      "key": "hgv:conditional",
+      "description": "Used for conditional heavy-goods-vehicle parking condition classification."
+    },
+    {
+      "key": "restriction:hgv",
+      "description": "Used for heavy-goods-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:hgv:conditional",
+      "description": "Used for conditional heavy-goods-vehicle restriction exception classification."
+    },
+    {
+      "key": "bus",
+      "description": "Used in both public transport stop/platform detection and vehicle-specific parking condition classification."
+    },
+    {
+      "key": "bus:conditional",
+      "description": "Used for conditional bus-specific parking condition classification."
+    },
+    {
+      "key": "restriction:bus",
+      "description": "Used for bus-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:bus:conditional",
+      "description": "Used for conditional bus-specific restriction exception classification."
+    },
+    {
+      "key": "tourist_bus",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "tourist_bus:conditional",
+      "description": "Used for conditional tourist-bus-specific parking condition classification."
+    },
+    {
+      "key": "restriction:tourist_bus",
+      "description": "Used for tourist-bus-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:tourist_bus:conditional",
+      "description": "Used for conditional tourist-bus-specific restriction exception classification."
+    },
+    {
+      "key": "coach",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "coach:conditional",
+      "description": "Used for conditional coach-specific parking condition classification."
+    },
+    {
+      "key": "restriction:coach",
+      "description": "Used for coach-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:coach:conditional",
+      "description": "Used for conditional coach-specific restriction exception classification."
+    },
+    { "key": "psv", "description": "Used for vehicle-specific parking condition classification." },
+    {
+      "key": "psv:conditional",
+      "description": "Used for conditional public-service-vehicle parking condition classification."
+    },
+    {
+      "key": "restriction:psv",
+      "description": "Used for public-service-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:psv:conditional",
+      "description": "Used for conditional public-service-vehicle restriction exception classification."
+    },
+    { "key": "taxi", "description": "Used for vehicle-specific parking condition classification." },
+    {
+      "key": "taxi:conditional",
+      "description": "Used for conditional taxi-specific parking condition classification."
+    },
+    {
+      "key": "restriction:taxi",
+      "description": "Used for taxi-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:taxi:conditional",
+      "description": "Used for conditional taxi-specific restriction exception classification."
+    },
+    {
+      "key": "motorhome",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "motorhome:conditional",
+      "description": "Used for conditional motorhome-specific parking condition classification."
+    },
+    {
+      "key": "restriction:motorhome",
+      "description": "Used for motorhome-specific restriction exception classification."
+    },
+    {
+      "key": "restriction:motorhome:conditional",
+      "description": "Used for conditional motorhome-specific restriction exception classification."
+    },
+    {
+      "key": "emergency",
+      "description": "Used in both vehicle-specific parking condition classification and obstacle detection."
+    },
+    {
+      "key": "emergency:conditional",
+      "description": "Used for conditional emergency-vehicle parking condition classification."
+    },
+    {
+      "key": "restriction:emergency",
+      "description": "Used for emergency-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:emergency:conditional",
+      "description": "Used for conditional emergency-vehicle restriction exception classification."
+    },
+    {
+      "key": "delivery",
+      "description": "Used for vehicle/access-restriction parking condition classification."
+    },
+    {
+      "key": "delivery:conditional",
+      "description": "Used for conditional delivery-vehicle parking condition classification."
+    },
+    {
+      "key": "restriction:delivery",
+      "description": "Used for delivery-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:delivery:conditional",
+      "description": "Used for conditional delivery-vehicle restriction exception classification."
+    },
+    {
+      "key": "agricultural",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "agricultural:conditional",
+      "description": "Used for conditional agricultural-vehicle parking condition classification."
+    },
+    {
+      "key": "restriction:agricultural",
+      "description": "Used for agricultural-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:agricultural:conditional",
+      "description": "Used for conditional agricultural-vehicle restriction exception classification."
+    },
+    {
+      "key": "forestry",
+      "description": "Used for vehicle-specific parking condition classification."
+    },
+    {
+      "key": "forestry:conditional",
+      "description": "Used for conditional forestry-vehicle parking condition classification."
+    },
+    {
+      "key": "restriction:forestry",
+      "description": "Used for forestry-vehicle restriction exception classification."
+    },
+    {
+      "key": "restriction:forestry:conditional",
+      "description": "Used for conditional forestry-vehicle restriction exception classification."
+    },
+
+    {
+      "key": "public_transport",
+      "description": "Used to classify public transport stop and platform geometries affecting parking analysis."
+    },
+    { "key": "opening_hours", "description": "Used to classify conditional bus stop behavior." },
+    {
+      "key": "railway",
+      "value": "tram_stop",
+      "description": "Used to identify tram stops relevant to parking cutout behavior."
+    },
+
+    {
+      "key": "crossing",
+      "description": "Used to classify crossing-related parking cutouts and buffers."
+    },
+    {
+      "key": "crossing:signals",
+      "description": "Used to identify traffic-signal-controlled crossings."
+    },
+    { "key": "crossing_ref", "description": "Used to classify zebra crossing references." },
+    { "key": "crossing:markings", "description": "Used to classify crossing marking types." },
+    {
+      "key": "crossing:buffer_marking",
+      "description": "Used to derive side-specific crossing buffer marking behavior."
+    },
+    {
+      "key": "crossing:kerb_extension",
+      "description": "Used to derive side-specific crossing kerb extension behavior."
+    },
+    {
+      "key": "traffic_calming",
+      "description": "Used to classify crossing chokers, crossing tables, and obstacle kerb extensions."
+    },
+    {
+      "key": "traffic_calming:left",
+      "description": "Used for side-suffix crossing choker detection on the left side."
+    },
+    {
+      "key": "traffic_calming:right",
+      "description": "Used for side-suffix crossing choker detection on the right side."
+    },
+    {
+      "key": "traffic_calming:both",
+      "description": "Used for side-suffix crossing choker detection for both sides."
+    },
+    { "key": "footway", "description": "Used for crossing line classification." },
+    { "key": "cycleway", "description": "Used for crossing line classification." },
+    { "key": "path", "description": "Used for crossing line classification." },
+
+    {
+      "key": "obstacle:parking",
+      "value": "yes",
+      "description": "Primary key used to include obstacle features in parking obstacle processing."
+    },
+    {
+      "key": "barrier",
+      "description": "Used to classify parking obstacles such as bollards, kerbs, fences, and collision protection."
+    },
+    { "key": "kerb", "description": "Used to detect lowered or flush kerb obstacles." },
+    {
+      "key": "natural",
+      "description": "Used to classify natural obstacles such as trees and tree stumps."
+    },
+    {
+      "key": "man_made",
+      "description": "Used to classify built obstacles such as street cabinets and water wells."
+    },
+    {
+      "key": "landuse",
+      "value": "tree_pit",
+      "description": "Used to classify tree pit obstacle areas."
+    },
+    {
+      "key": "leisure",
+      "description": "Used to classify parklet and outdoor-seating related obstacle areas."
+    },
+    {
+      "key": "outdoor_seating",
+      "description": "Used with leisure to classify parklet-style obstacle areas."
+    },
+    {
+      "key": "area:highway",
+      "value": "prohibited",
+      "description": "Used to classify restricted-area road markings as parking obstacles."
+    },
+    {
+      "key": "road_marking",
+      "value": "restriction",
+      "description": "Used to classify restricted-area road markings as parking obstacles."
+    },
+    {
+      "key": "position",
+      "description": "Used for two-wheel parking position context in parking obstacle classification."
+    },
+    {
+      "key": "bicycle_parking:position",
+      "description": "Used for bicycle parking position context in parking obstacle classification."
+    },
+    {
+      "key": "motorcycle_parking:position",
+      "description": "Used for motorcycle parking position context in parking obstacle classification."
+    },
+    {
+      "key": "small_electric_vehicle_parking:position",
+      "description": "Used for small electric vehicle parking position context in parking obstacle classification."
+    },
+    {
+      "key": "bicycle_rental:position",
+      "description": "Used for bicycle rental position context in parking obstacle classification."
+    },
+    {
+      "key": "mobility_hub:position",
+      "description": "Used for mobility hub position context in parking obstacle classification."
+    }
+  ]
+}
