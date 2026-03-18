@@ -1,0 +1,87 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-barriers.json",
+  "data_updated": "20260317T120000Z",
+  "project": {
+    "name": "TILDA - Barriers",
+    "description": "TILDA processes barriers to cycling from OpenStreetMap data including major roads, railways, waterways, and large areas that impede bicycle movement.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/barriers",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "natural",
+      "value": "water",
+      "object_types": ["way", "relation"],
+      "description": "Identifies large water bodies as area barriers to cycling."
+    },
+    {
+      "key": "aeroway",
+      "value": "aerodrome",
+      "object_types": ["way", "relation"],
+      "description": "Identifies airports as area barriers to cycling."
+    },
+    {
+      "key": "highway",
+      "value": "motorway",
+      "object_types": ["way"],
+      "description": "Motorways are treated as linear barriers to cycling."
+    },
+    {
+      "key": "highway",
+      "value": "motorway_link",
+      "object_types": ["way"],
+      "description": "Motorway on and off ramps are treated as linear barriers to cycling."
+    },
+    {
+      "key": "highway",
+      "value": "trunk",
+      "object_types": ["way"],
+      "description": "Trunk roads are treated as linear barriers to cycling."
+    },
+    {
+      "key": "highway",
+      "value": "trunk_link",
+      "object_types": ["way"],
+      "description": "Trunk road links are treated as linear barriers to cycling."
+    },
+    {
+      "key": "waterway",
+      "value": "river",
+      "object_types": ["way"],
+      "description": "Rivers are treated as linear barriers to cycling."
+    },
+    {
+      "key": "waterway",
+      "value": "canal",
+      "object_types": ["way"],
+      "description": "Canals are treated as linear barriers to cycling."
+    },
+    {
+      "key": "railway",
+      "value": "rail",
+      "object_types": ["way"],
+      "description": "Railway lines are treated as linear barriers when usage is main or branch."
+    },
+    {
+      "key": "railway",
+      "value": "light_rail",
+      "object_types": ["way"],
+      "description": "Light rail lines are treated as linear barriers when usage is main or branch."
+    },
+    {
+      "key": "usage",
+      "value": "main",
+      "object_types": ["way"],
+      "description": "Identifies main railway lines used together with railway tag for barrier processing."
+    },
+    {
+      "key": "usage",
+      "value": "branch",
+      "object_types": ["way"],
+      "description": "Identifies branch railway lines used together with railway tag for barrier processing."
+    }
+  ]
+}

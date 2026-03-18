@@ -1,0 +1,136 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-bikeroutes.json",
+  "data_updated": "20260317T120000Z",
+  "project": {
+    "name": "TILDA - Bike Routes",
+    "description": "TILDA processes bicycle route relations from OpenStreetMap data for cycling network planning and visualization.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/bikeroutes",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "type",
+      "value": "route",
+      "object_types": ["relation"],
+      "description": "Entry condition identifying route relations for bicycle route processing."
+    },
+    {
+      "key": "route",
+      "value": "bicycle",
+      "object_types": ["relation"],
+      "description": "Entry condition identifying bicycle routes for cycling network planning."
+    },
+    {
+      "key": "distance",
+      "object_types": ["relation"],
+      "description": "Route distance metadata used for bicycle route planning and display."
+    },
+    {
+      "key": "network",
+      "value": "lcn",
+      "object_types": ["relation"],
+      "description": "Classifies route as local cycle network for network level categorization."
+    },
+    {
+      "key": "network",
+      "value": "rcn",
+      "object_types": ["relation"],
+      "description": "Classifies route as regional cycle network for network level categorization."
+    },
+    {
+      "key": "network",
+      "value": "ncn",
+      "object_types": ["relation"],
+      "description": "Classifies route as national cycle network for network level categorization."
+    },
+    {
+      "key": "network",
+      "value": "icn",
+      "object_types": ["relation"],
+      "description": "Classifies route as international cycle network for network level categorization."
+    },
+    {
+      "key": "cycle_highway",
+      "value": "yes",
+      "object_types": ["relation"],
+      "description": "Identifies Radschnellverbindungen (cycle highways) for high-quality route classification."
+    },
+    {
+      "key": "roundtrip",
+      "value": "yes",
+      "object_types": ["relation"],
+      "description": "Indicates route is a round trip for route geometry and display logic."
+    },
+    {
+      "key": "roundtrip",
+      "value": "no",
+      "object_types": ["relation"],
+      "description": "Indicates route is not a round trip for route geometry and display logic."
+    },
+    {
+      "key": "network:type",
+      "value": "node_network",
+      "object_types": ["relation"],
+      "description": "Classifies route as part of a node-based cycle network."
+    },
+    {
+      "key": "network:type",
+      "value": "basic_network",
+      "object_types": ["relation"],
+      "description": "Classifies route as part of a basic cycle network."
+    },
+    {
+      "key": "cycle_network",
+      "object_types": ["relation"],
+      "description": "Cycle network key for route identification and network attribution."
+    },
+    {
+      "key": "symbol",
+      "object_types": ["relation"],
+      "description": "Route symbol description for map display and route identification."
+    },
+    {
+      "key": "description",
+      "object_types": ["relation"],
+      "description": "Route description used for cycling network planning context."
+    },
+    {
+      "key": "description:de",
+      "object_types": ["relation"],
+      "description": "German route description for localized display and planning."
+    },
+    {
+      "key": "colour",
+      "object_types": ["relation"],
+      "description": "Route colour for map display and route visualization."
+    },
+    {
+      "key": "name",
+      "object_types": ["relation"],
+      "description": "Route name used for display and bicycle route identification."
+    },
+    {
+      "key": "ref",
+      "object_types": ["relation"],
+      "description": "Route reference number for display and route identification."
+    },
+    {
+      "key": "operator",
+      "object_types": ["relation"],
+      "description": "Route operator for attribution and cycling network planning."
+    },
+    {
+      "key": "website",
+      "object_types": ["relation"],
+      "description": "Route website link for reference and planning context."
+    },
+    {
+      "key": "wikipedia",
+      "object_types": ["relation"],
+      "description": "Wikipedia article reference for route context and documentation."
+    }
+  ]
+}

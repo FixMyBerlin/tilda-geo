@@ -1,0 +1,67 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-boundaries.json",
+  "data_updated": "20260317T120000Z",
+  "project": {
+    "name": "TILDA - Administrative Boundaries",
+    "description": "TILDA processes administrative boundary relations from OpenStreetMap data to define planning regions for bicycle infrastructure.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/boundaries",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "type",
+      "value": "boundary",
+      "object_types": ["relation"],
+      "description": "Entry condition: identifies boundary relations for processing."
+    },
+    {
+      "key": "boundary",
+      "value": "administrative",
+      "object_types": ["relation"],
+      "description": "Entry condition: identifies administrative boundaries for processing."
+    },
+    {
+      "key": "admin_level",
+      "value": "4",
+      "object_types": ["relation"],
+      "description": "Determines boundary level for municipality (Kreisfreie Städte, Stadtstaaten)."
+    },
+    {
+      "key": "admin_level",
+      "value": "6",
+      "object_types": ["relation"],
+      "description": "Determines boundary level for district (Kreise, Kreisfreie Städte)."
+    },
+    {
+      "key": "admin_level",
+      "value": "8",
+      "object_types": ["relation"],
+      "description": "Determines boundary level for state (Bundesländer)."
+    },
+    {
+      "key": "population",
+      "object_types": ["relation"],
+      "description": "Population data for the administrative area."
+    },
+    {
+      "key": "place",
+      "value": "city",
+      "object_types": ["relation"],
+      "description": "Used to identify Kreisfreie Städte and Stadtstaaten at admin levels 4 and 6."
+    },
+    {
+      "key": "name:prefix",
+      "value": "Kreisfreie Stadt",
+      "object_types": ["relation"],
+      "description": "Used to identify Kreisfreie Städte at admin level 6."
+    },
+    {
+      "key": "name",
+      "object_types": ["relation"],
+      "description": "Administrative area name copied to output."
+    }
+  ]
+}

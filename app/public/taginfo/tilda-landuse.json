@@ -1,0 +1,105 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-landuse.json",
+  "data_updated": "20260317T120000Z",
+  "project": {
+    "name": "TILDA - Land Use",
+    "description": "TILDA processes land use areas from OpenStreetMap data to provide context for bicycle infrastructure planning.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/landuse",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "landuse",
+      "value": "allotments",
+      "object_types": ["way", "relation"],
+      "description": "Allotment areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "brownfield",
+      "object_types": ["way", "relation"],
+      "description": "Brownfield sites are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "cemetery",
+      "object_types": ["way", "relation"],
+      "description": "Cemeteries are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "civic_admin",
+      "object_types": ["way", "relation"],
+      "description": "Civic administration areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "civic",
+      "object_types": ["way", "relation"],
+      "description": "Civic areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "commercial",
+      "object_types": ["way", "relation"],
+      "description": "Commercial areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "construction",
+      "object_types": ["way", "relation"],
+      "description": "Construction sites are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "farmyard",
+      "object_types": ["way", "relation"],
+      "description": "Farmyard areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "garages",
+      "object_types": ["way", "relation"],
+      "description": "Garage areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "industrial",
+      "object_types": ["way", "relation"],
+      "description": "Industrial areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "religious",
+      "object_types": ["way", "relation"],
+      "description": "Religious areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "residential",
+      "object_types": ["way", "relation"],
+      "description": "Residential areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "landuse",
+      "value": "retail",
+      "object_types": ["way", "relation"],
+      "description": "Retail areas are processed to characterize surrounding land use context for bicycle infrastructure planning."
+    },
+    {
+      "key": "amenity",
+      "value": "school",
+      "object_types": ["way", "relation"],
+      "description": "School grounds are processed as land use areas to characterize surrounding context for bicycle infrastructure planning."
+    },
+    {
+      "key": "amenity",
+      "value": "university",
+      "object_types": ["way", "relation"],
+      "description": "University grounds are processed as land use areas to characterize surrounding context for bicycle infrastructure planning."
+    }
+  ]
+}
