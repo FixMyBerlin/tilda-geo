@@ -49,7 +49,7 @@ async function writeTableIdTypes() {
   await Bun.write(typeFile, content)
 }
 
-async function callLuaForNames(luaFilename: 'ExtractBikelaneTodos' | 'ExtractRoadTodos') {
+async function callLuaForNames(luaFilename: 'extract_bikelane_todos' | 'extract_road_todos') {
   try {
     const rawResult = await $`lua /processing/utils/types/${luaFilename}.lua`.text()
     const lines = rawResult.split('\n').filter(Boolean).sort()
@@ -82,7 +82,7 @@ async function writeTodoIdTypes() {
   const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
   const typeFile = Bun.file(typeFilePath)
 
-  const bikelaneTodoNames = await callLuaForNames('ExtractBikelaneTodos')
+  const bikelaneTodoNames = await callLuaForNames('extract_bikelane_todos')
   const bikelaneTodos = bikelaneTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
   const bikelaneTodoNamesTableAndField = bikelaneTodoNames
     .filter((e) => e.todoTableOnly === false)
@@ -93,7 +93,7 @@ async function writeTodoIdTypes() {
     .map((e) => e.id)
     .sort(sortMapillarySpecial)
 
-  const roadTodoNames = await callLuaForNames('ExtractRoadTodos')
+  const roadTodoNames = await callLuaForNames('extract_road_todos')
   const roadTodos = roadTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
   const roadTodoNamesTableAndField = roadTodoNames
     .filter((e) => e.todoTableOnly === false)
@@ -106,40 +106,31 @@ async function writeTodoIdTypes() {
 
   const todos = [...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id).sort(sortMapillarySpecial)
 
+  const formatStringArray = (values: string[]) => {
+    if (values.length === 0) return '\n  // (biome: one line per entry)\n'
+    return `\n  ${values.map((name) => `'${name}'`).join(',\n  ')}\n  // (biome: one line per entry)\n`
+  }
+
   const fileContent = `
-  export const bikelaneTodoIds = [${bikelaneTodos.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const bikelaneTodoIds = [${formatStringArray(bikelaneTodos)}] as const
   export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
 
-  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const bikelaneTodoIdsTableAndField = [${formatStringArray(bikelaneTodoNamesTableAndField)}] as const
   export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
 
-  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const bikelaneTodoIdsTableOnly = [${formatStringArray(bikelaneTodoNamesTableOnly)}] as const
   export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
-  export const roadTodoIds = [${roadTodos.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const roadTodoIds = [${formatStringArray(roadTodos)}] as const
   export type RoadTodoId = (typeof roadTodoIds)[number]
 
-  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const roadTodoIdsTableAndField = [${formatStringArray(roadTodoNamesTableAndField)}] as const
   export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
 
-  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const roadTodoIdsTableOnly = [${formatStringArray(roadTodoNamesTableOnly)}] as const
   export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
 
-  export const todoIds = [${todos.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
+  export const todoIds = [${formatStringArray(todos)}] as const
   export type TodoId = (typeof todoIds)[number]
   `
 

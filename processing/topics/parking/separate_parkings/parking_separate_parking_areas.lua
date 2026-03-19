@@ -1,6 +1,6 @@
 require('init')
-require('Log')
-require('MergeTable')
+local log = require('log')
+local merge_table = require('merge_table')
 local LOG_ERROR = require('parking_errors')
 local separate_parking_area_categories = require('separate_parking_area_categories')
 local categorize_separate_parking = require('categorize_separate_parking')
@@ -26,7 +26,7 @@ local function parking_separate_parking_areas(object)
   local result = categorize_separate_parking(object, separate_parking_area_categories)
   if result.object then
     local row_data, replaced_tags = result_tags_separate_parking(result.category, result.object, area_sqm(result.object))
-    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
+    local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_areas')
     -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.

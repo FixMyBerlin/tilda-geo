@@ -1,7 +1,7 @@
 require('init')
-require('Log')
-require('MergeTable')
-require('result_tags_roads')
+local log = require('log')
+local merge_table = require('merge_table')
+local result_tags_roads = require('result_tags_roads')
 local is_road_check = require('is_road')
 local is_driveway_check = require('is_driveway')
 local has_parking_check = require('has_parking')
@@ -43,7 +43,7 @@ function parking_roads(object)
   local row_data, replaced_tags = result_tags_roads(object)
   local has_parking = has_parking_check(object.tags)
   local is_parking_road = is_road or (is_driveway and has_parking)
-  local row = MergeTable({
+  local row = merge_table({
     geom = object:as_linestring(),
     is_driveway = is_driveway,
     has_parking = has_parking,
@@ -53,3 +53,5 @@ function parking_roads(object)
   LOG_ERROR.SANITIZED_VALUE(object, row.geom, replaced_tags, 'parking_roads')
   db_table:insert(row)
 end
+
+return parking_roads

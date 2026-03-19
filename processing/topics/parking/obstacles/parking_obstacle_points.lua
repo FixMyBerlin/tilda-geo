@@ -1,6 +1,6 @@
 require('init')
-require('Log')
-require('MergeTable')
+local log = require('log')
+local merge_table = require('merge_table')
 local categorize_obstacle_points = require('categorize_obstacle_points')
 local LOG_ERROR = require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
@@ -22,7 +22,7 @@ local function parking_obstacle_points(object)
   local result = categorize_obstacle_points(object)
   if result.object then
     local row_data, replaced_tags = result_tags_obstacles(result)
-    local row = MergeTable({ geom = result.object:as_point() }, row_data)
+    local row = merge_table({ geom = result.object:as_point() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_obstacle_points')
     db_table:insert(row)

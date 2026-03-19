@@ -1,5 +1,5 @@
 require('init')
-require('Log')
+local log = require('log')
 
 -- Transform misclassified highway=path tags to their correct primary highway type.
 --

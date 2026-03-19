@@ -1,7 +1,7 @@
 describe('`is_driveway`', function()
   require('init')
   local is_driveway = require('is_driveway')
-  require('Log')
+  local log = require('log')
 
   it('ignores non highway', function()
     local tags = {

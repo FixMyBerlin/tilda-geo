@@ -1,3 +1,4 @@
+require('init')
 -- This file mocks the osm2pgsql library.
 -- We use this to extract the table names from *.lua files, which we use to compute diffs.
 -- Additionally, we validate the columns in the tables to ensure they are consistent.
@@ -36,7 +37,7 @@ end
 
 local function define_x_table(name, columns)
   -- REMINDER: `getTopicTables` in `processing/diffing/diffing.ts` has `ignoreTableNames` which is a list of tables that we skip for certain use cases.
-  if not name:match("^_") then -- don't expose tables that start with "_"
+  if not name:match('^_') then -- don't expose tables that start with '_'
     validate_columns(columns)
     print(name)
   end
@@ -52,5 +53,5 @@ osm2pgsql = {
 
 
 local topic = arg[1]
-package.path = package.path .. ";/processing/topics/" .. topic .. "/?.lua"
+package.path = package.path .. ';/processing/topics/' .. topic .. '/?.lua'
 require(topic)

@@ -1,7 +1,7 @@
 require('init')
-require('Log')
-require('MergeTable')
-require('categorize_area')
+local log = require('log')
+local merge_table = require('merge_table')
+local categorize_area = require('categorize_area')
 local LOG_ERROR = require('parking_errors')
 local result_tags_obstacles = require('result_tags_obstacles')
 
@@ -23,7 +23,7 @@ local function parking_obstacle_areas(object)
   local result = categorize_area(object)
   if result.object then
     local row_data, replaced_tags = result_tags_obstacles(result)
-    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
+    local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_obstacle_areas')
     -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.

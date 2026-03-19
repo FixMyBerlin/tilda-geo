@@ -1,3 +1,4 @@
+require('init')
 -- This function sorts condition classes by time. Classes without time conditions are kept at first.
 -- Examples:
 -- { 'mixed (Mo-Fr 18:00-20:00)'; 'no_parking (08:00-14:00)'; 'no_stopping (06:00-08:00,14:00-18:00)' }
@@ -13,8 +14,8 @@ local function parse_entry(s)
     return false, nil
   end
 
-  local has_paren = s:find("%(") ~= nil
-  local h, m = s:match("(%d%d):(%d%d)")
+  local has_paren = s:find('%(') ~= nil
+  local h, m = s:match('(%d%d):(%d%d)')
   local time
   if h and m then
     time = tonumber(h) * 60 + tonumber(m)

@@ -13,7 +13,14 @@ export async function getTopicTables(topic: Topic) {
   try {
     // Some tables don't follow the strict schema that is required for the diffing to work.
     // We need to skip those so nothing breaks.
-    const ignoreTableNames = ['todos_lines', 'parking_errors']
+    const ignoreTableNames = [
+      'todos_lines',
+      'parking_errors',
+      'roads_bikelanes_errors',
+      'bikeroutes_errors',
+      'bicycleParking_errors',
+      'poiClassification_errors',
+    ]
 
     const tables = await $`lua /processing/utils/TableNames.lua ${topic}`.text().then(
       (tables) =>

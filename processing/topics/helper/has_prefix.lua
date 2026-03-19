@@ -1,7 +1,7 @@
 require('init')
 
 local function has_prefix(str, prefix)
-  if type(str) ~= "string" then
+  if type(str) ~= 'string' then
     return nil
   end
   if str == nil then

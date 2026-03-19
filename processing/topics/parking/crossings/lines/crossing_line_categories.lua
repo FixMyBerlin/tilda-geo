@@ -1,8 +1,8 @@
 require('init')
-require('class_crossing_category')
-require('Log')
+local class_crossing_category = require('class_crossing_category')
+local log = require('log')
 
-crossing_line_categories = {
+local crossing_line_categories = {
   class_crossing_category.new({
     -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
     id = 'crossing_zebra_way',

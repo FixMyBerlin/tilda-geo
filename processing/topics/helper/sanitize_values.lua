@@ -1,6 +1,5 @@
 require('init')
-require('Set')
-require('Log')
+local log = require('log')
 
 local SANITIZE_VALUES = { disallowed = 'DISALLOWED_VALUE' }
 

@@ -1,9 +1,9 @@
 require('init')
-require("Log")
+local log = require('log')
 
 ---@meta
 ---@class SeparateParkingCategory
-class_separate_parking_category = {}
+local class_separate_parking_category = {}
 class_separate_parking_category.__index = class_separate_parking_category
 
 ---@param args {
@@ -25,3 +25,5 @@ end
 function class_separate_parking_category:is_active(tags)
   return self._conditions(tags)
 end
+
+return class_separate_parking_category

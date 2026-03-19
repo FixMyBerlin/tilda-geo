@@ -1,5 +1,5 @@
 require('init')
-require('class_crossing_category')
+local class_crossing_category = require('class_crossing_category')
 local helper = require('crossing_point_categories_helper')
 
 local crossing_point_categories = {
@@ -67,7 +67,7 @@ local crossing_point_categories = {
     side_key = '_side_key_traffic_calming', -- see `transform_point_direction_tags.lua`
     buffer_radius = function(tags) return 3 end,
     conditions = function(tags)
-      -- no additional conditions; side_schema=direction_key will transform the tags; a missing `direction=forward|…` key is treated as "both".
+      -- no additional conditions; side_schema=direction_key will transform the tags; a missing `direction=forward|…` key is treated as 'both'.
       return tags['traffic_calming'] == 'choker'
     end,
     tags = function(tags) return { traffic_calming = tags.traffic_calming, direction = tags.direction } end,

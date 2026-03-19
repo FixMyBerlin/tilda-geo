@@ -1,5 +1,4 @@
 require('init')
-require('Set')
 local sanitize_for_logging = require('sanitize_for_logging')
 
 local SANITIZE_PARKING_TAGS = {
@@ -54,6 +53,16 @@ local SANITIZE_PARKING_TAGS = {
   end,
   fee = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
+  end,
+  service = function (value)
+    return sanitize_for_logging(value, {
+      'driveway', 'parking_aisle', 'yard', 'alley', 'spur', 'siding',
+      'emergency_access', 'crossover', 'drive-through',
+    })
+  end,
+  amenity_off_street_parking = function(value)
+    -- Only used to log unexpected amenity values.
+    return sanitize_for_logging(value, {}, { 'parking', 'parking_entrance' })
   end,
   parking_off_street = function(tags)
     if tags.parking then

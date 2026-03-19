@@ -1,16 +1,17 @@
 require('init')
 local SANITIZE_VALUES = require('sanitize_values')
-require('Clone') -- 'StructuredClone'
-require('Log')
+local log = require('log')
 
 -- Returns cleaned_tags, replaced_tags (with _instruction if any replaced)
-local function split_cleaned_and_replaced_tags(tags_to_clean, object_tags)
+-- `log_source_overrides`: optional map result_key -> raw OSM value when it differs from `object_tags[result_key]`
+local function separate_tags(tags_to_clean, object_tags, log_source_overrides)
   local cleaned_tags = {}
   local replaced_tags = {}
 
   for key, _ in pairs(tags_to_clean) do
     if tags_to_clean[key] == SANITIZE_VALUES.disallowed then
-      replaced_tags[key] = object_tags[key]
+      local override = log_source_overrides and log_source_overrides[key]
+      replaced_tags[key] = override ~= nil and override or object_tags[key]
     else
       cleaned_tags[key] = tags_to_clean[key]
     end
@@ -43,7 +44,7 @@ local function remove_disallowed_value(tag_to_clean)
 end
 
 return {
-  split_cleaned_and_replaced_tags = split_cleaned_and_replaced_tags,
+  separate_tags = separate_tags,
   remove_disallowed_values = remove_disallowed_values,
   remove_disallowed_value = remove_disallowed_value,
 }

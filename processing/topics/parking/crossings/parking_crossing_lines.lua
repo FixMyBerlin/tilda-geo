@@ -1,6 +1,6 @@
 require('init')
-require('Log')
-require('MergeTable')
+local log = require('log')
+local merge_table = require('merge_table')
 local categorize_crossing_line = require('categorize_crossing_line')
 local LOG_ERROR = require('parking_errors')
 local result_tags_crossings = require('result_tags_crossings')
@@ -31,7 +31,7 @@ local ncm = osm2pgsql.define_table({
 -- NOTE: This is unused ATM.
 -- See https://github.com/FixMyBerlin/private-issues/issues/2557 for more.
 -- We leave it in because it is fast and it's easier to evaluate the linked issue based on the data.
--- TOOD: Once used, remove the "UNUSED_" from the category ID.
+-- TOOD: Once used, remove the 'UNUSED_' from the category ID.
 --
 local function parking_crossing_lines(object)
   if object.is_closed then return end
@@ -40,7 +40,7 @@ local function parking_crossing_lines(object)
   local result = categorize_crossing_line(object)
   if result.object then
     local row_data, replaced_tags = result_tags_crossings(result)
-    local row = MergeTable({ geom = result.object:as_linestring() }, row_data)
+    local row = merge_table({ geom = result.object:as_linestring() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_crossing_lines')
     db_table:insert(row)

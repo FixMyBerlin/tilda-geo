@@ -1,8 +1,8 @@
 describe('transform_cycleway_opposite_schema', function()
   require('init')
-  require('CompareTables')
+  local compare_tables = require('compare_tables')
   local transform_cycleway_opposite_schema = require('transform_cycleway_opposite_schema')
-  require('osm2pgsql')
+  local osm2pgsql = require('osm2pgsql')
 
   it('do nothing when cycleway is lane', function()
     local input = { ['cycleway'] = 'lane' }

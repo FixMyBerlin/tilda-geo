@@ -1,6 +1,7 @@
+require('init')
 -- Copy of https://github.com/openstreetmap/osm2pgsql/blob/master/src/init.lua
 -- We need to copy and modify this in order to be able to use those helpers in our `*.test.lua` files
--- We can still use the "original" osm2pgsql in our code elswhere, just for tests we need to also `require('osm2pgsql')`.
+-- We can still use the 'original' osm2pgsql in our code elswhere, just for tests we need to also `require('osm2pgsql')`.
 
 osm2pgsql = {}
 
@@ -11,13 +12,7 @@ osm2pgsql = {}
 
 local math = require('math')
 
--- local _define_table_impl = function(_type, _name, _columns, _options)
---   _options = _options or {}
---   _options.name = _name
---   _options.ids = { type = _type, id_column = _type .. '_id' }
---   _options.columns = _columns
---   return osm2pgsql.define_table(_options)
--- end
+-- Archived helper (was define_table_impl wrapping define_table); kept out of active code.
 
 function osm2pgsql.has_prefix(str, prefix)
   if str == nil then
@@ -136,8 +131,8 @@ function osm2pgsql.trim(str)
   if str == nil then
     return nil
   end
-  local from = str:match("^%s*()")
-  return from > #str and "" or str:match(".*%S", from)
+  local from = str:match('^%s*()')
+  return from > #str and '' or str:match('.*%S', from)
 end
 
 function osm2pgsql.split_unit(str, default_unit)
@@ -145,7 +140,7 @@ function osm2pgsql.split_unit(str, default_unit)
     return nil
   end
 
-  local val, unit = string.match(str, "^(-?[0-9.]+) ?(%a*)$")
+  local val, unit = string.match(str, '^(-?[0-9.]+) ?(%a*)$')
   if val == nil then
     return nil
   end
@@ -180,7 +175,7 @@ local inner_metatable = {
         key == 'changeset' or key == 'uid' or key == 'user' then
       return nil
     end
-    error("unknown field '" .. key .. "'", 2)
+    error('unknown field \'' .. key .. '\'', 2)
   end
 }
 
@@ -188,7 +183,7 @@ object_metatable = {
   __index = {
     grab_tag = function(data, tag)
       if not tag then
-        error("Missing tag key", 2)
+        error('Missing tag key', 2)
       end
       local v = data.tags[tag]
       data.tags[tag] = nil

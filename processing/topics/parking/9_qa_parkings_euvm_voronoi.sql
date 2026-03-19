@@ -11,6 +11,22 @@
 --
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
+-- In some dev/test DB setups the reference dataset (`data.euvm_qa_voronoi`) may be missing.
+-- Instead of failing the whole processing run, create an empty placeholder so the QA step becomes a no-op.
+DO $$
+BEGIN
+  IF to_regclass('data.euvm_qa_voronoi') IS NULL THEN
+    RAISE NOTICE 'Missing data.euvm_qa_voronoi - creating empty placeholder table for this run';
+    CREATE SCHEMA IF NOT EXISTS data;
+    CREATE TABLE data.euvm_qa_voronoi (
+      id TEXT,
+      priority BOOLEAN,
+      count_reference INTEGER,
+      geom geometry(Geometry, 3857)
+    );
+  END IF;
+END $$;
+
 -- Transform parkings to SRID 5243 for accurate spatial operations
 -- (5243 optimized for Germany, uses meters; needed for ST_Contains on line 105)
 -- Combine parkings_quantized (excl private) and off_street_parking_quantized (public only)

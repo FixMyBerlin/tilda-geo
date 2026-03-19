@@ -1,8 +1,8 @@
 describe('`result_tags_obstacles`', function()
   require('init')
   local categorize_obstacle_points = require('categorize_obstacle_points')
-  require('osm2pgsql')
-  require('Log')
+  local osm2pgsql = require('osm2pgsql')
+  local log = require('log')
   local result_tags_obstacles = require('result_tags_obstacles')
 
   it('works', function()

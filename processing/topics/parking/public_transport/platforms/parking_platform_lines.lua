@@ -1,9 +1,9 @@
 require('init')
-require('Log')
-require('DefaultId')
+local log = require('log')
+local default_id = require('default_id')
 local LOG_ERROR = require('parking_errors')
 local SANITIZE_TAGS = require('sanitize_tags')
-local sanitize_cleaner = require('sanitize_cleaner')
+local CLEANER = require('sanitize_cleaner')
 
 ---@param tags table<string, string>
 ---@return boolean
@@ -23,10 +23,10 @@ local function parking_platform_lines(object, db_table)
       operator = SANITIZE_TAGS.safe_string(object.tags.operator),
     }
 
-    local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
+    local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
 
     local row = {
-      id = DefaultId(object),
+      id = default_id(object),
       tags = cleaned_tags,
       meta = {},
       -- Reminder: This are mostly lines, but some of them are areas which we store as closed lines.

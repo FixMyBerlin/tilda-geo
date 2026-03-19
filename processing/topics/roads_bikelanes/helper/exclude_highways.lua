@@ -1,6 +1,7 @@
-require('Set')
-require('JoinSets')
-require('HighwayClasses')
+require('init')
+local SET = require('sets')
+local SET = require('sets')
+local highway_classes = require('highway_classes')
 
 local exclude_highways = {
   by_access = function(tags, forbidden_accesses)
@@ -27,7 +28,7 @@ local exclude_highways = {
     --
     -- Exception: Include service highways with explicit bicycle access
     -- - bicycle=designated
-    -- - bicycle:left|right|both=* where * is not "no"
+    -- - bicycle:left|right|both=* where * is not 'no'
     --
     if tags.bicycle == 'designated' then
       return false
@@ -44,7 +45,7 @@ local exclude_highways = {
     end
 
     -- REMINDER: Keep this in sync with processing/topics/roads_bikelanes/roads/RoadClassificationRoadValue.lua
-    local allowed_service = Set({ 'alley' })
+    local allowed_service = SET.set({ 'alley' })
     if tags.service and not allowed_service[tags.service] then
       return true
     end
@@ -92,7 +93,12 @@ local exclude_highways = {
 
     -- Skip stuff like 'construction' (some), 'proposed', 'platform' (Haltestellen), 'rest_area' (https://wiki.openstreetmap.org/wiki/DE:Tag:highway=rest%20area)
     -- REMINDER: Keep in sync with `processing/topics/roads_bikelanes/helper/transform_tags/transform_lifecycle_tags.lua`
-    local allowed_highways = JoinSets({ HighwayClasses, MajorRoadClasses, MinorRoadClasses, PathClasses })
+    local allowed_highways = SET.join_sets({
+      highway_classes.trunk_motorway_classes,
+      highway_classes.major_road_classes,
+      highway_classes.minor_road_classes,
+      highway_classes.path_classes,
+    })
     if allowed_highways[tags.highway] then
       return false
     end

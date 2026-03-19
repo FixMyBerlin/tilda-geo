@@ -1,6 +1,6 @@
 describe('transform_construction_prefix', function()
   require('init')
-  require('Log')
+  local log = require('log')
   local transform_construction_prefix = require('transform_construction_prefix')
 
   describe('basic construction prefix transformation', function()

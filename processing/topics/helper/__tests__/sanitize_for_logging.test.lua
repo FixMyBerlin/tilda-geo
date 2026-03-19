@@ -1,7 +1,6 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
-
 describe('sanitize_for_logging', function()
+  require('init')
+  local sanitize_for_logging = require('sanitize_for_logging')
   it('returns value if allowed', function()
     local value = sanitize_for_logging('value_foo', {'value_foo'})
     assert.are.equal(value, 'value_foo')

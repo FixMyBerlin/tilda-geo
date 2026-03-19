@@ -1,9 +1,7 @@
-require('init')
-require('Log')
-
-local parse_conditional_value = require('parse_conditional_value')
-
 describe('parse_conditional_value', function()
+  require('init')
+  local parse_conditional_value = require('parse_conditional_value')
+  local log = require('log')
   it('parses single conditional value and returns list with one entry', function()
     local result = parse_conditional_value('loading_only @ (Mo-Fr 08:00-18:00)')
     assert.are.equal(#result, 1)

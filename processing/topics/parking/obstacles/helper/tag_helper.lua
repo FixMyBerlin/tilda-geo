@@ -1,3 +1,4 @@
+require('init')
 local TAG_HELPER = {}
 
 function TAG_HELPER.is_obstacle_parking(tags)

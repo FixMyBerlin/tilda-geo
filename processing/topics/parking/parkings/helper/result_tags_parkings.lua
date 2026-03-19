@@ -1,14 +1,14 @@
 require('init')
-require('DefaultId')
-require('Metadata')
-require('RoadClassificationRoadValue')
-require('Log')
+local default_id = require('default_id')
+local metadata = require('metadata')
+local road_classification_road_value = require('road_classification_road_value')
+local log = require('log')
 local road_width_tags = require('road_width_tags')
 local capacity_tags = require('capacity_tags')
 local THIS_OR_THAT = require('this_or_that')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
-local sanitize_cleaner = require('sanitize_cleaner')
+local CLEANER = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local operator_type = require('operator_type_for_road_parking')
 local SURFACE_TAGS = require('surface_tags')
@@ -39,7 +39,7 @@ local SURFACE_TAGS = require('surface_tags')
 -- side = 'right'
 
 local function result_tags_parkings(object)
-  local id = DefaultId(object) .. '/' .. object.tags.side
+  local id = default_id(object) .. '/' .. object.tags.side
 
   local road_width_tags_result = road_width_tags(object.tags)
   local capacity_tags_result = capacity_tags(object.tags)
@@ -57,7 +57,7 @@ local function result_tags_parkings(object)
     source = 'parent_highway',
 
     -- Road properties
-    road = RoadClassificationRoadValue(object._parent_tags),
+    road = road_classification_road_value(object._parent_tags),
     road_name = THIS_OR_THAT.value(SANITIZE_TAGS.road_name(object.tags), SANITIZE_TAGS.road_name(object._parent_tags)),
     road_width = road_width_tags_result.value,
     road_width_confidence = road_width_tags_result.confidence,
@@ -99,13 +99,13 @@ local function result_tags_parkings(object)
     surface_source = surface_tags_result.source,
   }
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
+  local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
 
   return {
     id = id,
     side = object.tags.side,
     tags = cleaned_tags,
-    meta = Metadata(object),
+    meta = metadata(object),
   }, replaced_tags
 end
 

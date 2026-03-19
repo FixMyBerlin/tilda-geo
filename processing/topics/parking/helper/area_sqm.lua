@@ -1,3 +1,4 @@
+require('init')
 local function area_sqm(object)
   if object:as_multipolygon():srid() == 5243 then
     return object:as_multipolygon():area()

@@ -1,5 +1,5 @@
 require('init')
-require('Log')
+local log = require('log')
 
 local invert_time_condition = require('invert_time_condition')
 local parse_conditional_value = require('parse_conditional_value')
@@ -29,7 +29,7 @@ local function get_sub_condition(condition_list, target_value)
   end
 
   if #matched_conditions > 0 then
-    return table.concat(matched_conditions, ", ")
+    return table.concat(matched_conditions, ', ')
   end
 
   return nil
@@ -151,17 +151,17 @@ function classify_parking_conditions(tags, default_category)
   local maxweight = t('maxweight') or t('maxweightrating')
   local maxweight_conditional = parse_conditional_value(t('maxweight:conditional')) or parse_conditional_value(t('maxweightrating:conditional'))
 
-  -- Warning indicator: "@" in non-conditional tags
+  -- Warning indicator: '@' in non-conditional tags
   for _, tag in ipairs({ fee, access, maxstay, restriction, zone }) do
-    if tag and string.find(tag, "@") then
-      table.insert(warnings, string.format("Found '@' in the non-conditional value '%s'. Perhaps '%s:conditional' is meant?", tag, tag))
+    if tag and string.find(tag, '@') then
+      table.insert(warnings, string.format('Found \'@\' in the non-conditional value \'%s\'. Perhaps \'%s:conditional\' is meant?', tag, tag))
     end
   end
 
   -- vehicle access keys
   local vehicle_class_list = {
     'motorcar', -- we understand this synonym to 'passenger_car', see https://wiki.openstreetmap.org/wiki/Key:motorcar#Controversy
-    'passenger_car', -- proposed explicit tagging for "passenger cars only"
+    'passenger_car', -- proposed explicit tagging for 'passenger cars only'
     'disabled',
     'car_sharing',
     'motorcycle',
@@ -182,7 +182,7 @@ function classify_parking_conditions(tags, default_category)
   -- vehicle keys that define their own restriction class
   local access_restriction_class_list = {'disabled', 'taxi', 'car_sharing'}
 
-  -- vehicle restrictions that are still "free" parking (most vehicles are motorcars, so a "motorcar only" restriction should not lead to a restricted status)
+  -- vehicle restrictions that are still 'free' parking (most vehicles are motorcars, so a 'motorcar only' restriction should not lead to a restricted status)
   local free_vehicle_restriction_class_list = {'motorcar', 'passenger_car'}
 
   -- Process vehicle restrictions
@@ -192,17 +192,17 @@ function classify_parking_conditions(tags, default_category)
     local restriction_vehicle = t('restriction:' .. vehicle_class)
     local restriction_vehicle_conditional = parse_conditional_value(t('restriction:' .. vehicle_class .. ':conditional'))
 
-    -- Warning indicator: "@" in non-conditional vehicle tags
-    if vehicle and string.find(vehicle, "@") then
-      table.insert(warnings, string.format("Found '@' in the non-conditional value '%s'. Perhaps '%s:conditional' is meant?", vehicle, vehicle))
+    -- Warning indicator: '@' in non-conditional vehicle tags
+    if vehicle and string.find(vehicle, '@') then
+      table.insert(warnings, string.format('Found \'@\' in the non-conditional value \'%s\'. Perhaps \'%s:conditional\' is meant?', vehicle, vehicle))
     end
-    if restriction_vehicle and string.find(restriction_vehicle, "@") then
-      table.insert(warnings, string.format("Found '@' in the non-conditional value '%s'. Perhaps '%s:conditional' is meant?", restriction_vehicle, restriction_vehicle))
+    if restriction_vehicle and string.find(restriction_vehicle, '@') then
+      table.insert(warnings, string.format('Found \'@\' in the non-conditional value \'%s\'. Perhaps \'%s:conditional\' is meant?', restriction_vehicle, restriction_vehicle))
     end
 
-    -- Check for "none" restrictions (vehicle is allowed)
+    -- Check for 'none' restrictions (vehicle is allowed)
     -- Option 1: restriction:vehicle = none or restriction:vehicle:conditional ~ none @ (...)
-    -- Option 2: restriction:conditional ~ none @ vehicle (e.g. for access modes like "delivery")
+    -- Option 2: restriction:conditional ~ none @ vehicle (e.g. for access modes like 'delivery')
     if restriction_vehicle == 'none'
       or (restriction_vehicle_conditional and get_sub_condition(restriction_vehicle_conditional, 'none'))
       or get_sub_condition(restriction_conditional, 'none') == vehicle_class
@@ -222,11 +222,11 @@ function classify_parking_conditions(tags, default_category)
 
     -- Merge similar vehicle classes into a common value
     local vehicle_normalize_map = {
-      passenger_car = "motorcar",
-      goods = "hgv",
-      tourist_bus = "bus",
-      coach = "bus",
-      forestry = "agricultural"
+      passenger_car = 'motorcar',
+      goods = 'hgv',
+      tourist_bus = 'bus',
+      coach = 'bus',
+      forestry = 'agricultural'
     }
     local function normalize_vehicle_list(list, map)
       local seen = {}
@@ -279,7 +279,7 @@ function classify_parking_conditions(tags, default_category)
   end
 
   -- Helper function to check whether a specific condition class is in the condition class list
-  -- Example: Find condition class "paid" in { "paid (Mo-Fr 09:00-22:00)" }
+  -- Example: Find condition class 'paid' in { 'paid (Mo-Fr 09:00-22:00)' }
   ---@param class string Condition class to match
   ---@param class_list string[]|nil Optional condition class list. If nil or empty, the default conditional class list will be used
   ---@return string|nil Full condition class string, including conditions or exceptions; nil if not found
@@ -291,7 +291,7 @@ function classify_parking_conditions(tags, default_category)
       class_list = condition_class
     end
     for _, value in ipairs(class_list) do
-      if string.match(value, "^" .. class) then
+      if string.match(value, '^' .. class) then
           return value
       end
     end
@@ -310,7 +310,7 @@ function classify_parking_conditions(tags, default_category)
   if fee_cond_yes then
     condition_class = add_condition_class(condition_class, fee_class, fee_cond_yes)
   elseif fee == 'yes' then
-    -- fee=yes + fee:conditional = no @ (time) -> invert "no paying time" and add as paid time
+    -- fee=yes + fee:conditional = no @ (time) -> invert 'no paying time' and add as paid time
     if fee_cond_no then
       local fee_cond_inverted = invert_time_condition(fee_cond_no)
       if fee_cond_inverted then
@@ -318,9 +318,9 @@ function classify_parking_conditions(tags, default_category)
       -- Condition value can't be inverted? -> show as exception
       else
         condition_class = add_condition_class(condition_class, fee_class, 'except ' .. fee_cond_no)
-        table.insert(warnings, string.format("Can not invert fee:conditional expression '%s'.", fee_cond_no))
+        table.insert(warnings, string.format('Can not invert fee:conditional expression \'%s\'.', fee_cond_no))
       end
-    -- fee=yes without conditionals -> just "paid" without condition
+    -- fee=yes without conditionals -> just 'paid' without condition
     else
       condition_class = add_condition_class(condition_class, fee_class)
     end
@@ -348,9 +348,9 @@ function classify_parking_conditions(tags, default_category)
   for _, rtype in ipairs(restriction_types) do
     local cond_key = rtype
     local class_key = 'unspecified'
-    -- use a shot hand for our "*_only" class attributes
-    if string.find(rtype, "_only") then
-      class_key = rtype:gsub("_only$", "")
+    -- use a shot hand for our '*_only' class attributes
+    if string.find(rtype, '_only') then
+      class_key = rtype:gsub('_only$', '')
     end
 
     local cond_val = get_sub_condition(restriction_conditional, cond_key)
@@ -360,9 +360,9 @@ function classify_parking_conditions(tags, default_category)
         -- Exceptions for special vehicles, e.g. loading + emergency free
         local cond = cond_val
         if cond_val then
-          cond = cond_val .. ') (except ' .. table.concat(vehicle_none_restriction, ", ")
+          cond = cond_val .. ') (except ' .. table.concat(vehicle_none_restriction, ', ')
         else
-          cond = 'except ' .. table.concat(vehicle_none_restriction, ", ")
+          cond = 'except ' .. table.concat(vehicle_none_restriction, ', ')
         end
         condition_class = add_condition_class(condition_class, class_key, cond)
       else
@@ -388,14 +388,14 @@ function classify_parking_conditions(tags, default_category)
     if maxweight_cond and not is_empty_or_no(maxweight_cond) then
       local suffix = maxweight_cond
       if tonumber(maxweight_cond) then
-        suffix = maxweight_cond .. " t"
+        suffix = maxweight_cond .. ' t'
       end
       condition_class = add_condition_class(condition_class, 'maxweight', suffix .. ') (' .. maxweight_interval)
     end
   elseif not is_empty_or_no(maxweight) then
     local suffix = maxweight
     if tonumber(maxweight) then
-      suffix = maxweight .. " t"
+      suffix = maxweight .. ' t'
     end
     condition_class = add_condition_class(condition_class, 'maxweight', suffix)
   end
@@ -417,19 +417,19 @@ function classify_parking_conditions(tags, default_category)
       -- other vehicle types can also be allowed; list them as exceptions
       if #other_vehicle > 0 then
         if cond then
-          cond = cond .. ') (except ' .. table.concat(other_vehicle, ", ")
+          cond = cond .. ') (except ' .. table.concat(other_vehicle, ', ')
         else
-          cond = 'except ' .. table.concat(other_vehicle, ", ")
+          cond = 'except ' .. table.concat(other_vehicle, ', ')
         end
       end
       for _, vehicle in ipairs(special_vehicle) do
         condition_class = add_condition_class(condition_class, vehicle, cond)
       end
-    -- at this point, we don't want to add "vehicle_restriction" for passenger cars, because vehicle restrictions for them should still be treated as “free parking”
+    -- at this point, we don't want to add 'vehicle_restriction' for passenger cars, because vehicle restrictions for them should still be treated as “free parking”
     -- vehicle_restriction for passenger cars is added separately at the end
     elseif not has_common(vehicle_designated, free_vehicle_restriction_class_list) then
       -- concat designated vehicles and time conditions if present
-      local condition = 'only ' .. table.concat(vehicle_designated, ", ")
+      local condition = 'only ' .. table.concat(vehicle_designated, ', ')
       local no_access_cond = get_sub_condition(access_conditional, 'no')
       if no_access_cond then
         condition = condition .. ') (' .. no_access_cond
@@ -438,7 +438,7 @@ function classify_parking_conditions(tags, default_category)
     end
   end
   -- Option 2: vehicle exceptions for no_parking/stopping rules are handled below at temporary no parking/stopping
-  -- Option 3: negative access restrictions (vehicle = no) are handled at the end to prevent dropping the "free" class if motorcars aren't forbidden
+  -- Option 3: negative access restrictions (vehicle = no) are handled at the end to prevent dropping the 'free' class if motorcars aren't forbidden
 
   -- Other access restrictions
   local access_cond = get_sub_condition(access_conditional, '')
@@ -478,7 +478,7 @@ function classify_parking_conditions(tags, default_category)
 
   -- Warning indicator: zone tag without paid, residential, mixed or time_limited condition class
   if not is_empty_or_no(zone) and not (has_condition_class('paid') or has_condition_class('mixed') or has_condition_class('residents') or has_condition_class('time_limited')) then
-    table.insert(warnings, "Zone tag without fee, fee:conditional or private/residential access.")
+    table.insert(warnings, 'Zone tag without fee, fee:conditional or private/residential access.')
   end
 
   -- Free parking (no other restrictions and explicitely no fee, maxstay, zone or access restrictions)
@@ -518,7 +518,7 @@ function classify_parking_conditions(tags, default_category)
       end
     else
       -- Warning indicator: no restrictions, but a zone tag
-      table.insert(warnings, "Zone tag without parsed restrictions.")
+      table.insert(warnings, 'Zone tag without parsed restrictions.')
     end
   end
 
@@ -539,7 +539,7 @@ function classify_parking_conditions(tags, default_category)
         elseif not has_condition_class('residents') then
           condition_class = add_condition_class(condition_class, r, cond)
         end
-      elseif not has_condition_class('vehicle_restriction') then -- In case of "double tagging": if there is a vehicle_restriction already, we don’t need to add it again
+      elseif not has_condition_class('vehicle_restriction') then -- In case of 'double tagging': if there is a vehicle_restriction already, we don’t need to add it again
         -- Some vehicles like taxis have their own class
         local has_special_vehicle_access = false
         for _, vehicle in ipairs(access_restriction_class_list) do
@@ -566,7 +566,7 @@ function classify_parking_conditions(tags, default_category)
     condition_class = add_condition_class(condition_class, 'vehicle_restriction', 'only ' .. table.concat(vehicle_designated, ', '))
   end
 
-  -- Add vehicle exceptions (negative access restrictions like vehicle = no) at the end to prevent them from interfering with "free" class
+  -- Add vehicle exceptions (negative access restrictions like vehicle = no) at the end to prevent them from interfering with 'free' class
   if vehicle_excluded and #vehicle_excluded > 0 then
     local no_vehicle = {}
     local no_vehicle_cond = {}
@@ -624,19 +624,17 @@ function classify_parking_conditions(tags, default_category)
 
   -- Replace semicolons/separators in conditions by commas, to ensure separability of classes
   -- and ensure that each comma is followed by a whitespace for consistency and better readability
-  local sep = ","
+  local sep = ','
   if sep == SEPARATOR then
-    sep = ";"
+    sep = ';'
   end
   for i, class in ipairs(condition_class) do
     local s = string.gsub(class, SEPARATOR, sep)
-    condition_class[i] = string.gsub(s, ",%s*", ", ")
+    condition_class[i] = string.gsub(s, ',%s*', ', ')
   end
 
   -- Concat condition classes (transform condition class list to semicolon separated string)
   local condition_category_str = #condition_class > 0 and table.concat(condition_class, SEPARATOR) or default_category
-  -- We are only logging warning indicators, but don't export them by default
-  local _warnings_str = table.concat(warnings, SEPARATOR) -- reserved for future logging
 
   return {
     condition_category = condition_category_str,

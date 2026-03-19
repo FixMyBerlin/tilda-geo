@@ -1,8 +1,8 @@
 describe('`result_tags_roads`', function()
   require('init')
-  require('result_tags_roads')
-  require('Log')
-  require('osm2pgsql')
+  local result_tags_roads = require('result_tags_roads')
+  local log = require('log')
+  local osm2pgsql = require('osm2pgsql')
 
   it('works', function()
     local input_object = {

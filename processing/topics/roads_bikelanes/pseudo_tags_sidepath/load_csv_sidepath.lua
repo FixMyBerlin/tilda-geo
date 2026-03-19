@@ -1,7 +1,6 @@
 require('init')
 local ftcsv = require('ftcsv')
 local pl_path = require('pl.path')
-require('Log')
 local inspect = require('inspect')
 local pl = require('pl.tablex')
 
@@ -35,11 +34,11 @@ local function load_csv_sidepath(csv_path)
         end
       end
 
-      -- `rows` format: { { osm_id = "123", mapillary_coverage = "value" },… }
+      -- `rows` format: { { osm_id = '123', mapillary_coverage = 'value' },… }
       rows = ftcsv.parse(csv_path)
 
       -- Transform the data into a hash map for quick lookup
-      -- `cached_lines` format: { [123] => { mapillary_coverage = "value" },… }
+      -- `cached_lines` format: { [123] => { mapillary_coverage = 'value' },… }
       cached_lines = cached_lines or {}
       for _, row in ipairs(rows) do
         local id = tonumber(row['osm_id'])

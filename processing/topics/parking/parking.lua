@@ -9,11 +9,11 @@ local parking_crossing_lines = require('parking_crossing_lines')
 local off_street_parking_points = require('off_street_parking_points')
 local off_street_parking_areas = require('off_street_parking_areas')
 local public_transport = require('public_transport')
-require('parking_parkings')
-require('parking_node_road_mapping')
-require('parking_roads')
-require('Log')
-require('parking_scaffold_tables')
+local parking_parkings = require('parking_parkings')
+local parking_node_road_mapping = require('parking_node_road_mapping')
+local parking_roads = require('parking_roads')
+local log = require('log')
+local parking_scaffold_tables = require('parking_scaffold_tables')
 
 -- NOTE ON PROJECTIONS:
 -- All `_paring_*` tables use EPSG:5243

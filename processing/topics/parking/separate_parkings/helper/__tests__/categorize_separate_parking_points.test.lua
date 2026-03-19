@@ -1,6 +1,6 @@
 describe('`categorize_separate_parking points`', function()
   require('init')
-  require('Log')
+  local log = require('log')
   local separate_parking_point_categories = require('separate_parking_point_categories')
   local categorize_separate_parking = require('categorize_separate_parking')
 

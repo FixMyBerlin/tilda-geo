@@ -1,9 +1,7 @@
-require('init')
-require('Log')
-
-local time_helper = require('time_helper')
-
 describe('time_helper', function()
+  require('init')
+  local time_helper = require('time_helper')
+  local log = require('log')
   describe('expand_day_expr', function()
     it('expands single day', function()
       local result = time_helper.expand_day_expr('Su')

@@ -1,8 +1,8 @@
 describe('`result_tags_crossings`', function()
   require('init')
   local categorize_and_transform_crossing_points = require('categorize_and_transform_crossing_points')
-  require('osm2pgsql')
-  require('Log')
+  local osm2pgsql = require('osm2pgsql')
+  local log = require('log')
   local result_tags_crossings = require('result_tags_crossings')
 
   it('works with tags, tags_cc', function()

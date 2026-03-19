@@ -1,11 +1,11 @@
 require('init')
-require('Log')
-require('obstacle_line_categories')
-require('class_obstacle_category')
+local log = require('log')
+local class_obstacle_category = require('class_obstacle_category')
+local obstacle_line_categories = require('obstacle_line_categories')
 local TAG_HELPER = require('tag_helper')
 
 ---@return table<string, { category: ObstacleCategory, object: OSMObject} | { category: nil, object: nil}>
-function categorize_line(object)
+local function categorize_line(object)
   for _, category in ipairs(obstacle_line_categories) do
     if category:is_active(object.tags) then
       return {
@@ -35,3 +35,5 @@ function categorize_line(object)
     object = nil
   }
 end
+
+return categorize_line

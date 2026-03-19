@@ -1,24 +1,24 @@
 require('init')
-require("CopyTags")
-require("DefaultId")
-require("Metadata")
-require("RoadClassificationRoadValue")
+local default_id = require('default_id')
+local metadata = require('metadata')
+local road_classification_road_value = require('road_classification_road_value')
 local is_driveway_check = require('is_driveway')
 local has_parking_check = require('has_parking')
 local SANITIZE_TAGS = require('sanitize_tags')
-local sanitize_cleaner = require('sanitize_cleaner')
+local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local CLEANER = require('sanitize_cleaner')
 local road_width_tags = require('road_width_tags')
 
-function result_tags_roads(object)
-  local id = DefaultId(object)
+local function result_tags_roads(object)
+  local id = default_id(object)
   local road_width_tags_result = road_width_tags(object.tags)
   local is_driveway = is_driveway_check(object.tags)
 
   local result_tags = {
     highway = object.tags.highway,
-    road = RoadClassificationRoadValue(object.tags),
+    road = road_classification_road_value(object.tags),
     name = SANITIZE_TAGS.road_name(object.tags),
-    category = is_driveway and "driveway" or "road",
+    category = is_driveway and 'driveway' or 'road',
     is_driveway = is_driveway,
     has_parking = has_parking_check(object.tags),
     has_embedded_rails = object.tags.embedded_rails == 'tram',
@@ -31,15 +31,12 @@ function result_tags_roads(object)
     offset_right = road_width_tags_result.value / 2,
   }
 
-  local tags_cc = {
-    "mapillary",
-    "service",
-  }
-  CopyTags(result_tags, object.tags, tags_cc, "osm_")
+  result_tags.osm_mapillary = SANITIZE_TAGS.safe_string(object.tags.mapillary)
+  result_tags.osm_service = SANITIZE_PARKING_TAGS.service(object.tags.service)
 
-  local result_meta = Metadata(object)
+  local result_meta = metadata(object)
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
+  local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
 
   return {
     id = id,
@@ -47,3 +44,5 @@ function result_tags_roads(object)
     meta = result_meta,
   }, replaced_tags
 end
+
+return result_tags_roads

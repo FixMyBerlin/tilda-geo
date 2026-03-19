@@ -1,5 +1,5 @@
 require('init')
-require('HighwayClasses')
+local HIGHWAY_CLASSES = require('highway_classes')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_CLEANER = require('sanitize_cleaner')
 
@@ -13,16 +13,16 @@ local db_table = osm2pgsql.define_table({
 })
 
 --- Writes minimal sidepath source rows used by sidepath estimation export.
---- @param object table
 --- @param object_tags table
-local function roads_bikelanes_sidepath_source_paths(object, object_tags)
-  if not sidepath_highway_classes[object_tags.highway] then
+--- @param object_geom table
+local function roads_bikelanes_sidepath_source_paths(object_tags, object_geom)
+  if not HIGHWAY_CLASSES.sidepath_highway_classes[object_tags.highway] then
     return
   end
 
   local row = {
     layer = SANITIZE_CLEANER.remove_disallowed_value(SANITIZE_TAGS.safe_string(object_tags.layer)),
-    geom = object:as_linestring(),
+    geom = object_geom,
   }
 
   db_table:insert(row)

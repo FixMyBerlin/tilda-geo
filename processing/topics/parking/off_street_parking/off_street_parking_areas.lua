@@ -1,4 +1,5 @@
 require('init')
+local merge_table = require('merge_table')
 local result_tags_off_street_parking = require('result_tags_off_street_parking')
 local categorize_off_street_parking = require('categorize_off_street_parking')
 local off_street_parking_area_categories = require('off_street_parking_area_categories')
@@ -38,13 +39,13 @@ local db_table_label = osm2pgsql.define_table({
 })
 
 local function off_street_parking_areas(object)
-  if (object.type == "way" and not object.is_closed) then return end
+  if (object.type == 'way' and not object.is_closed) then return end
   if next(object.tags) == nil then return end
 
   local result = categorize_off_street_parking(object, off_street_parking_area_categories)
   if result.object then
     local row_data, replaced_tags = result_tags_off_street_parking(result, area_sqm(result.object))
-    local row = MergeTable({ geom = result.object:as_multipolygon() }, row_data)
+    local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'off_street_parking_areas')
     -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.

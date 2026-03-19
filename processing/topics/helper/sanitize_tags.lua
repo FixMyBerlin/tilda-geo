@@ -1,13 +1,27 @@
 -- Provides a collection of named sanitizer functions that clean and normalise OSM tag values
 -- before they are written to the database. Each sanitizer enforces a strict, predictable value
--- range. Unknown values are returned as "DISALLOWED_VALUE" so they surface in monitoring without
+-- range. Unknown values are returned as 'DISALLOWED_VALUE' so they surface in monitoring without
 -- being persisted. Values that are known but intentionally irrelevant are silently dropped (nil).
 
 require('init')
-require('SanitizeTrafficSign')
+local sanitize_traffic_sign = require('sanitize_traffic_sign')
 local sanitize_for_logging = require('sanitize_for_logging')
 local parse_length = require('parse_length')
 local sanitize_string = require('sanitize_string')
+
+--- Value fed into `operator_type` before transformation / allowlist (for `separate_tags` logging).
+--- @param tags table|nil
+--- @return string|nil
+local function operator_type_input(tags)
+  if not tags then return nil end
+  local value = tags['operator:type']
+  if value == nil then
+    if tags.operator == 'private' then return 'private' end
+    if tags.operator == 'public' then return 'public' end
+    return nil
+  end
+  return value
+end
 
 local SANITIZE_TAGS = {
   safe_string = function (value)
@@ -27,16 +41,19 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
   boolean_yes = function (value)
-    return sanitize_for_logging(value, { 'yes' })
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
   end,
   access = function (value)
     if value == 'yes' then
       return 'public'
     end
+    if value == 'construction' then
+      return 'private'
+    end
     return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'destination', 'residents', 'public' })
   end,
   traffic_sign = function (value)
-    return SanitizeTrafficSign(value)
+    return sanitize_traffic_sign(value)
   end,
   surface = function (tags)
     if tags.surface == nil then return nil end
@@ -68,7 +85,7 @@ local SANITIZE_TAGS = {
       if size and size <= 0.13 then return 'small_sett' end
       if size and size > 0.13 then return 'large_sett' end
     end
-    -- Sanitize values:
+    -- sanitize values:
     return sanitize_for_logging(tags.surface, {
         -- Common
         'asphalt',
@@ -87,25 +104,24 @@ local SANITIZE_TAGS = {
       { 'ice', 'snow', 'salt', }
     )
   end,
+  -- Keep a dedicated API key for `separate_tags` source mapping while reusing
+  -- the exact same input extraction logic as `operator_type`.
+  operator_type_log_source = operator_type_input,
   operator_type = function(tags)
-    if not tags then return nil end
-    local value = tags['operator:type']
-    if value == nil then
-      if tags.operator == 'private' then value = 'private'
-      elseif tags.operator == 'public' then value = 'public'
-      else return nil end
-    end
+    local value = operator_type_input(tags)
+    if value == nil then return nil end
 
     -- DOCs: to revalidate this query, use…
-    -- curl -g https://postpass.geofabrik.de/api/0.2/interpreter --data-urlencode "options[geojson]=false" --data-urlencode "data=
+    -- curl -g https://postpass.geofabrik.de/api/0.2/interpreter --data-urlencode 'options[geojson]=false' --data-urlencode 'data=
     --   SELECT line.tags->>'operator:type' AS operator_type, COUNT(*) AS way_count
-    --   FROM postpass_line AS line WHERE line.tags ? 'highway' GROUP BY line.tags->>'operator:type' ORDER BY way_count DESC"
+    --   FROM postpass_line AS line WHERE line.tags ? 'highway' GROUP BY line.tags->>'operator:type' ORDER BY way_count DESC'
     -- Transform known but unsupported values to values that we support:
     local transformations = {
       ['government'] = 'public',
       ['council'] = 'public',
       ['university'] = 'public',
       ['business'] = 'private',
+      ['privat'] = 'private',
       ['private_non_profit'] = 'private',
       ['military'] = 'private',
     }
@@ -135,10 +151,6 @@ local SANITIZE_TAGS = {
     else
       return nil
     end
-  end,
-  amenity_off_street_parking = function(value)
-    -- Only used to log the sometimes weird values we get. The two allowed values are what we expect and already have stored in other properties.
-    return sanitize_for_logging(value, {}, { 'parking', 'parking_entrance' })
   end,
 }
 

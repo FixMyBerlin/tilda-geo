@@ -1,3 +1,4 @@
+require('init')
 -- Scaffold tables that are filled by SQL later.
 -- We use our default vector tile projection of 3857 here.
 

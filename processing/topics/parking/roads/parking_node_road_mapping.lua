@@ -1,7 +1,5 @@
 require('init')
-require('Log')
-require('MergeTable')
-require('result_tags_roads')
+local log = require('log')
 local is_road_check = require('is_road')
 local is_driveway_check = require('is_driveway')
 local has_parking_check = require('has_parking')
@@ -45,3 +43,5 @@ function parking_node_road_mapping(object)
     db_table:insert(row)
   end
 end
+
+return parking_node_road_mapping

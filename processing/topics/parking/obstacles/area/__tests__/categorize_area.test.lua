@@ -1,8 +1,8 @@
 describe('`categorize_area`', function()
   require('init')
-  require('categorize_area')
-  require('Log')
-  require('osm2pgsql')
+  local categorize_area = require('categorize_area')
+  local log = require('log')
+  local osm2pgsql = require('osm2pgsql')
   local result_tags_obstacles = require('result_tags_obstacles')
 
   it('no category matches', function()

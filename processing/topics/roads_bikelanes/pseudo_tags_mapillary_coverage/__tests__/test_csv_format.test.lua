@@ -1,9 +1,8 @@
-require('init')
-require('Log')
-local test_csv_format = require('test_csv_format')
-local assert = require('luassert')
-
 describe('test_csv_format', function()
+  require('init')
+  local test_csv_format = require('test_csv_format')
+  local assert = require('luassert')
+  local log = require('log')
   local column_name = 'mapillary_coverage'
 
   it('fails when table is nil', function()

@@ -1,9 +1,9 @@
 require('init')
-require('Log')
+local log = require('log')
 
 ---@meta
 ---@class ObstacleCategory
-class_obstacle_category = {}
+local class_obstacle_category = {}
 class_obstacle_category.__index = class_obstacle_category
 
 ---@param args {
@@ -43,3 +43,5 @@ end
 function class_obstacle_category:get_tags(tags)
   return self._tags(tags)
 end
+
+return class_obstacle_category

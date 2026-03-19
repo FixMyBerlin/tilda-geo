@@ -1,18 +1,18 @@
 require('init')
-require("Log")
+local log = require('log')
 
 ---@meta
 ---@class CrossingCategory
-class_crossing_category = {}
+local class_crossing_category = {}
 class_crossing_category.__index = class_crossing_category
 
 ---@param args {
 --- id: string,
 --- side_schema: 'side_suffix'|'side_value'|'direction_key'|'none', -- The tagging schema used to encode the SIDE in the tag(s). Requires `side_key` and `perform_snap=side`. `side_suffix` is not implemented, yet.
---- side_key: string|nil, -- The OSM Key that has the value of "left|right|both"; For `direction_key` a prefixed `side_key` is needed like `_side_key_traffic_calming`. This will receive the SIDE value. For `side_schema=none` use `side_key=nil`.
+--- side_key: string|nil, -- The OSM Key that has the value of 'left|right|both'; For `direction_key` a prefixed `side_key` is needed like `_side_key_traffic_calming`. This will receive the SIDE value. For `side_schema=none` use `side_key=nil`.
 --- buffer_radius: fun(tags: table):(number|nil), -- Radius in meters for adding a buffer or 0.
 --- tags: fun(tags: table):(table), -- Tags which have to be sanitized in the category.
---- tags_cc: table, -- Tags which will be prefixed with "osm_" and copied as is.
+--- tags_cc: table, -- Tags which will be prefixed with 'osm_' and copied as is.
 --- conditions: fun(tags: table): (boolean),
 --- }
 function class_crossing_category.new(args)
@@ -48,3 +48,5 @@ end
 function class_crossing_category:get_tags(tags)
   return self._tags(tags)
 end
+
+return class_crossing_category

@@ -1,10 +1,10 @@
 require('init')
-require('class_obstacle_category')
-require('two_wheel_parking_helper')
-require('Log')
+local class_obstacle_category = require('class_obstacle_category')
+local two_wheel_parking_helper = require('two_wheel_parking_helper')
+local log = require('log')
 local TAG_HELPER = require('tag_helper')
 
-obstacle_line_categories = {
+return {
   class_obstacle_category.new({
     id = 'kerb_lowered', -- https://www.openstreetmap.org/way/814637433
     buffer_radius = function(tags) return nil end,

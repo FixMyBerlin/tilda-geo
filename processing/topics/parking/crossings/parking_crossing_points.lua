@@ -1,6 +1,6 @@
 require('init')
-require('Log')
-require('MergeTable')
+local log = require('log')
+local merge_table = require('merge_table')
 local categorize_and_transform_crossing_points = require('categorize_and_transform_crossing_points')
 local LOG_ERROR = require('parking_errors')
 local result_tags_crossings = require('result_tags_crossings')
@@ -19,13 +19,15 @@ local db_table = osm2pgsql.define_table({
 local function parking_crossing_points(object)
   if next(object.tags) == nil then return end
 
-  local self_left_right = categorize_and_transform_crossing_points(object)
+  local self_left_right, direction_replaced = categorize_and_transform_crossing_points(object)
   for _, result in pairs(self_left_right) do
     if result.object then
       local row_data, replaced_tags = result_tags_crossings(result)
-      local row = MergeTable({ geom = result.object:as_point() }, row_data)
+      local merged_replaced = merge_table({}, direction_replaced)
+      merge_table(merged_replaced, replaced_tags)
+      local row = merge_table({ geom = result.object:as_point() }, row_data)
 
-      LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_crossing_points')
+      LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, merged_replaced, 'parking_crossing_points')
       db_table:insert(row)
     end
   end

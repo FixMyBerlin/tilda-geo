@@ -1,5 +1,5 @@
 require('init')
-require('class_public_transport_category')
+local class_public_transport_category = require('class_public_transport_category')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
 

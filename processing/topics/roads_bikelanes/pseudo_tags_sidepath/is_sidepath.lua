@@ -1,5 +1,5 @@
 require('init')
-require('HighwayClasses')
+local HIGHWAYS = require('highway_classes')
 
 --- Returns _is_sidepath for a way. Only path-like ways (sidepath_highway_classes) get a value.
 --- - Path in CSV (estimation = yes) -> 'assumed_yes'
@@ -13,7 +13,7 @@ local function is_sidepath(rows, osm_id, highway)
   if not highway then
     return nil
   end
-  local is_path = sidepath_highway_classes[highway]
+  local is_path = HIGHWAYS.sidepath_highway_classes[highway]
   if not is_path then
     return nil
   end

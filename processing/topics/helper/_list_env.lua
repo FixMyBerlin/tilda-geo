@@ -1,14 +1,14 @@
 require('init')
-require("Log")
+local log = require('log')
 
 -- List and return all available environment variables.
 -- Thanks to https://stackoverflow.com/a/29716746
 function list_env()
   local osEnv = {}
-  for line in io.popen("set"):lines() do
-    local envName = line:match("^[^=]+")
+  for line in io.popen('set'):lines() do
+    local envName = line:match('^[^=]+')
     osEnv[envName] = os.getenv(envName)
   end
-  Log(osEnv)
+  log(osEnv)
   return osEnv
 end

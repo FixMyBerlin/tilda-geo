@@ -1,7 +1,6 @@
-
 describe('crossing_point_categories_helper', function()
   require('init')
-  require('Log')
+  local log = require('log')
   local helper = require('crossing_point_categories_helper')
 
   describe('has_side_value', function()

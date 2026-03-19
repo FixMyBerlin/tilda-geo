@@ -1,8 +1,8 @@
 describe('`categorize_line`', function()
   require('init')
-  require('categorize_line')
-  require('Log')
-  require('osm2pgsql')
+  local categorize_line = require('categorize_line')
+  local log = require('log')
+  local osm2pgsql = require('osm2pgsql')
   local result_tags_obstacles = require('result_tags_obstacles')
 
   it('obstacle:parking=yes with no matching category returns other fallback', function()

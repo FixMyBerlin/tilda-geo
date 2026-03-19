@@ -1,7 +1,6 @@
-require('init')
-require('Log')
-
 describe('classify_parking_conditions', function()
+  require('init')
+  local log = require('log')
   local classify_parking_conditions = require('classify_parking_conditions')
 
   it('returns condition_category for paid parking', function()

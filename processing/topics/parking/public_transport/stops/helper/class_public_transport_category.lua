@@ -1,5 +1,5 @@
 require('init')
-require('Log')
+local log = require('log')
 
 ---@meta
 ---@class PublicTransportCategory
@@ -30,8 +30,9 @@ function class_public_transport_category:is_active(tags)
   return self._conditions(tags)
 end
 
-
 ---@return table
 function class_public_transport_category:get_tags(tags)
   return self._tags(tags)
 end
+
+return class_public_transport_category

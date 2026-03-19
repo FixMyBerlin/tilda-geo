@@ -1,6 +1,5 @@
 require('init')
-require('Log')
-require('MergeTable')
+local log = require('log')
 local result_tags_parkings = require('result_tags_parkings')
 local has_parking = require('has_parking')
 local transform_parkings = require('transform_parkings')
@@ -30,3 +29,5 @@ function parking_parkings(object)
     db_table:insert(row_data)
   end
 end
+
+return parking_parkings

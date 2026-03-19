@@ -1,3 +1,4 @@
+require('init')
 -- Helper function to convert an array of strings to a semicolon-separated list
 -- Filters out nil and empty values, sorts, and deduplicates
 -- Handles semicolon-separated strings within array elements

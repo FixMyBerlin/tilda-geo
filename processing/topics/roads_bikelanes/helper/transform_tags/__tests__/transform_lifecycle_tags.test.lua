@@ -1,7 +1,8 @@
 describe('transform_lifecycle_tags', function()
   require('init')
-  require('Log')
+  local log = require('log')
   local transform_lifecycle_tags = require('transform_lifecycle_tags')
+  local maxspeed = require('maxspeed')
 
   describe('construction tags transformation', function()
     it('transforms highway=construction with valid construction tag', function()
@@ -46,11 +47,11 @@ describe('transform_lifecycle_tags', function()
   end)
 
   describe('blocked transformation - German terms', function()
-    it('transforms access=no with "Sperrung" in note', function()
+    it('transforms access=no with Sperrung in note', function()
       local tags = {
         highway = 'residential',
         access = 'no',
-        note = 'Sperrung „bis auf Weiteres" an israelischen Botschaft'
+        note = 'Sperrung „bis auf Weiteres” an israelischen Botschaft'
       }
       local unmodified_tags = transform_lifecycle_tags(tags)
 
@@ -58,7 +59,7 @@ describe('transform_lifecycle_tags', function()
         highway = 'residential',
         lifecycle = 'blocked',
         description = 'TILDA-Hinweis: Weg gesperrt (Sperrung).',
-        note = 'Sperrung „bis auf Weiteres" an israelischen Botschaft'
+        note = 'Sperrung „bis auf Weiteres” an israelischen Botschaft'
       })
 
       assert.are.same(unmodified_tags, {
@@ -67,7 +68,7 @@ describe('transform_lifecycle_tags', function()
       })
     end)
 
-    it('transforms access=no with "GESPERRT" in description, case-insensitive', function()
+    it('transforms access=no with GESPERRT in description, case-insensitive', function()
       local tags = {
         highway = 'residential',
         access = 'no',
@@ -139,6 +140,28 @@ describe('transform_lifecycle_tags', function()
         access = 'no',
         lifecycle = nil
       })
+    end)
+  end)
+
+  describe('interaction with maxspeed inference', function()
+    it('treats construction=living_street as living_street for maxspeed fallback after transform', function()
+      local tags = {
+        highway = 'construction',
+        construction = 'living_street',
+      }
+
+      local before_transform = maxspeed(tags)
+      assert.are.same(before_transform.maxspeed_source, 'nothing_found')
+      assert.are.same(before_transform.maxspeed, nil)
+
+      transform_lifecycle_tags(tags)
+
+      local after_transform = maxspeed(tags)
+      assert.are.same(tags.highway, 'living_street')
+      assert.are.same(tags.lifecycle, 'construction')
+      assert.are.same(after_transform.maxspeed_source, 'inferred_from_highway')
+      assert.are.same(after_transform.maxspeed_confidence, 'high')
+      assert.are.same(after_transform.maxspeed, 7)
     end)
   end)
 end)

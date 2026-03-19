@@ -1,5 +1,5 @@
 require('init')
-require("Log")
+local log = require('log')
 
 ---@return table<string, { category: OffStreetParkingCategory, object: OSMObject} | { category: nil, object: nil}>
 local function categorize_off_street_parking(object, categories)

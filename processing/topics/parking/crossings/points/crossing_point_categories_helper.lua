@@ -1,3 +1,4 @@
+require('init')
 local function has_side_value(input)
   return input == 'left' or input == 'right' or input == 'both'
 end
@@ -9,10 +10,10 @@ local function check_tag_with_suffixes(tags, key, value)
 end
 
 local function remove_side_suffix(input)
-  if type(input) ~= "string" then return input end
-  return input:gsub(":left$", "")
-              :gsub(":right$", "")
-              :gsub(":both$", "")
+  if type(input) ~= 'string' then return input end
+  return input:gsub(':left$', '')
+              :gsub(':right$', '')
+              :gsub(':both$', '')
 end
 
 return {

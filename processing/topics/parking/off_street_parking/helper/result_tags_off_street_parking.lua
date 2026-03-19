@@ -1,8 +1,8 @@
 require('init')
-require("DefaultId")
-require("Metadata")
-require("Log")
-local sanitize_cleaner = require('sanitize_cleaner')
+local default_id = require('default_id')
+local metadata = require('metadata')
+local log = require('log')
+local CLEANER = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
@@ -11,7 +11,7 @@ local SURFACE_TAGS = require('surface_tags')
 local operator_type = require('operator_type_for_road_parking')
 
 local function result_tags_off_street_parking(result, area)
-  local id = DefaultId(result.object)
+  local id = default_id(result.object)
 
   local surface_tags_result = SURFACE_TAGS.surface_tags(result.object.tags)
   local conditional_categories_result = classify_parking_conditions(result.object.tags, 'assumed_private')
@@ -72,12 +72,12 @@ local function result_tags_off_street_parking(result, area)
 
     -- Off street parking attributes:
     category = result.category.id,
-    _log_unexpected_amenity_values = SANITIZE_TAGS.amenity_off_street_parking(result.object.tags.amenity),
+    _log_unexpected_amenity_values = SANITIZE_PARKING_TAGS.amenity_off_street_parking(result.object.tags.amenity),
   }
 
-  local result_meta = Metadata(result)
+  local result_meta = metadata(result)
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, result.object.tags)
+  local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
 
   return {
     id = id,

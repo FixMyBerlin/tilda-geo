@@ -400,6 +400,8 @@ export const sources: MapDataSource<SourcesId>[] = [
         'capacity:cargo_bike__if_present',
         'access',
         'covered',
+        'operator_type__if_present',
+        'lit__if_present',
         'composit_mapillary',
         'description__if_present',
       ],

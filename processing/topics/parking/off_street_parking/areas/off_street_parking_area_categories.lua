@@ -1,5 +1,5 @@
 require('init')
-require('class_off_street_parking_category')
+local class_off_street_parking_category = require('class_off_street_parking_category')
 local round = require('round')
 
 local function area_tags(area, factor)

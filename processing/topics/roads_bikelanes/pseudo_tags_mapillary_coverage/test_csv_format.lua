@@ -1,5 +1,5 @@
 require('init')
-require('Log')
+local log = require('log')
 
 --- Check the format of the CSV
 --- @param rows table

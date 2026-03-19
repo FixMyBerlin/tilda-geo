@@ -1,6 +1,7 @@
 require('init')
-require('MergeTable')
-require('HighwayClasses')
+local merge_table = require('merge_table')
+local SET = require('sets')
+local highway_classes = require('highway_classes')
 
 ---@class CenterLineTransformation
 ---@field highway string
@@ -47,7 +48,7 @@ end
 ---@param dest table? destination table to write to
 ---@param metaPrefix string? optional meta-prefix to look for e.g. `source:` or `note:`
 ---@return table
-local function unnestPrefixedTags(tags, prefix, infix, dest, metaPrefix)
+local function unnest_prefixed_tags(tags, prefix, infix, dest, metaPrefix)
   dest = dest or {}
   local metaPrefixString = metaPrefix or ''
   local fullPrefix = metaPrefixString .. prefix .. infix
@@ -72,7 +73,7 @@ local function unnestPrefixedTags(tags, prefix, infix, dest, metaPrefix)
         local extractedSuffix = string.sub(key, prefixLen + 2)
         local suffixKey = string.match(extractedSuffix, '[^:]*')
         -- Validate: make sure that the first part of the suffix (`suffixKey`) is not an `infix`
-        if infix ~= '' or not Set({ 'left', 'right', 'both' })[suffixKey] then
+        if infix ~= '' or not SET.set({ 'left', 'right', 'both' })[suffixKey] then
           local destinationKey = metaPrefix and (metaPrefixString .. extractedSuffix) or extractedSuffix
           dest[destinationKey] = val
           dest._infix = infix
@@ -114,7 +115,7 @@ local sideToDirection = {
 ---@param cycleway table
 ---@param direction_reference 'self' | 'parent' whether directions refer to the cycleway or its parent
 ---@return table
-local function convertDirectedTags(cycleway, direction_reference)
+local function convert_directed_tags(cycleway, direction_reference)
   local parent = cycleway._parent
   local side = cycleway._side
   -- project directed keys from the center line
@@ -135,11 +136,11 @@ local function convertDirectedTags(cycleway, direction_reference)
 end
 
 ---@class TransformedObject
----@field _side "self" | "left" | "right"
----@field _prefix string? prefix of the transformation (e.g., "cycleway", "sidewalk")
+---@field _side 'self' | 'left' | 'right'
+---@field _prefix string? prefix of the transformation (e.g., 'cycleway', 'sidewalk')
 ---@field _parent table? original tags from the parent object
 ---@field _parent_highway string? highway value from the parent object
----@field _infix string? infix that was matched (e.g., ":left", ":both", "")
+---@field _infix string? infix that was matched (e.g., ':left', ':both', '')
 ---@field highway string highway value for the transformed object
 --- Additional tags from unnesting (e.g., width, source:width, note, traffic_sign, etc.) are also present
 
@@ -147,18 +148,18 @@ end
 ---@param tags table input tags to transform
 ---@param transformations table array of CenterLineTransformation objects
 ---@return TransformedObject[] array of transformed objects in order: [self, left, right, ...]
-function GetTransformedObjects(tags, transformations)
-  local center = MergeTable({}, tags)
-  center._side = "self"
+function get_transformed_objects(tags, transformations)
+  local center = merge_table({}, tags)
+  center._side = 'self'
 
   -- Meta-prefixes that get transformed along with the main prefix (e.g., source:cycleway:width -> source:width)
   local metaPrefixes = { 'source:', 'note:' }
 
   -- Don't transform paths only unnest tags prefixed with `cycleway`
-  if sidepath_highway_classes[tags.highway] then
-    unnestPrefixedTags(tags, 'cycleway', '', center)
+  if highway_classes.sidepath_highway_classes[tags.highway] then
+    unnest_prefixed_tags(tags, 'cycleway', '', center)
     for _, metaPrefix in ipairs(metaPrefixes) do
-      unnestPrefixedTags(tags, 'cycleway', '', center, metaPrefix)
+      unnest_prefixed_tags(tags, 'cycleway', '', center, metaPrefix)
     end
 
     if center.oneway == 'yes' and tags['oneway:bicycle'] ~= 'no' then
@@ -170,10 +171,10 @@ function GetTransformedObjects(tags, transformations)
 
   local results = { center }
   for _, transformation in ipairs(transformations) do
-    for _, side in ipairs({ "left", "right" }) do
+    for _, side in ipairs({ 'left', 'right' }) do
       if tags.highway ~= transformation.highway then
         local prefix = transformation.prefix
-        local newObj = {
+        local new_obj = {
           _prefix = prefix,
           _side = side,
           _parent = tags,
@@ -184,25 +185,25 @@ function GetTransformedObjects(tags, transformations)
 
         -- We look for tags with the following hierarchy: `prefix:side` > `prefix:both` > `prefix`
         -- thus a more specific tag will always overwrite a more general one
-        unnestPrefixedTags(tags, prefix, '', newObj)
-        unnestPrefixedTags(tags, prefix, ':both', newObj)
-        unnestPrefixedTags(tags, prefix, ':' .. side, newObj)
+        unnest_prefixed_tags(tags, prefix, '', new_obj)
+        unnest_prefixed_tags(tags, prefix, ':both', new_obj)
+        unnest_prefixed_tags(tags, prefix, ':' .. side, new_obj)
 
         -- Also unnest meta-prefixed tags like `source:cycleway:left:width` -> `source:width`
         -- Meta-prefixed tags are processed after regular tags and will overwrite them.
         -- Example: `cycleway:left:source:width=foo` -> `source:width=foo`, then
         --          `source:cycleway:left:width=bar` -> `source:width=bar` (overwrites foo)
         for _, metaPrefix in ipairs(metaPrefixes) do
-          unnestPrefixedTags(tags, prefix, '', newObj, metaPrefix)
-          unnestPrefixedTags(tags, prefix, ':both', newObj, metaPrefix)
-          unnestPrefixedTags(tags, prefix, ':' .. side, newObj, metaPrefix)
+          unnest_prefixed_tags(tags, prefix, '', new_obj, metaPrefix)
+          unnest_prefixed_tags(tags, prefix, ':both', new_obj, metaPrefix)
+          unnest_prefixed_tags(tags, prefix, ':' .. side, new_obj, metaPrefix)
         end
 
         -- This condition checks if we actually projected something
-        if newObj._infix ~= nil then
-          if transformation.filter(newObj) then
-            convertDirectedTags(newObj, transformation.direction_reference)
-            table.insert(results, newObj)
+        if new_obj._infix ~= nil then
+          if transformation.filter(new_obj) then
+            convert_directed_tags(new_obj, transformation.direction_reference)
+            table.insert(results, new_obj)
           end
         end
       end

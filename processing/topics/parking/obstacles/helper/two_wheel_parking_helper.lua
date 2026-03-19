@@ -1,8 +1,8 @@
 require('init')
-require('capacity_normalization')
+local capacity_normalization = require('capacity_normalization')
 local sanitize_for_logging = require('sanitize_for_logging')
-require('MergeTable')
-require('Log')
+local merge_table = require('merge_table')
+local log = require('log')
 
 function two_wheel_parking_buffer(tags)
   local fallback = 0.25
@@ -17,7 +17,7 @@ function two_wheel_parking_buffer(tags)
 end
 
 function two_wheel_parking_tags(tags, value)
-  return MergeTable({ amenity = sanitize_for_logging(tags.amenity, { value }) }, capacity_normalization(tags))
+  return merge_table({ amenity = sanitize_for_logging(tags.amenity, { value }) }, capacity_normalization(tags))
 end
 
 function two_wheel_parking_tags_cc(value)

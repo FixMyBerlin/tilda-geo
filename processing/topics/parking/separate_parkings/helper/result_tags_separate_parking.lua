@@ -1,10 +1,10 @@
 require('init')
-require('MergeTable')
-require('DefaultId')
-require('Metadata')
-require('Log')
+local merge_table = require('merge_table')
+local default_id = require('default_id')
+local metadata = require('metadata')
+local log = require('log')
 local capacity_tags = require('capacity_tags')
-local sanitize_cleaner = require('sanitize_cleaner')
+local CLEANER = require('sanitize_cleaner')
 local classify_parking_conditions = require('classify_parking_conditions')
 local SANITIZE_TAGS = require('sanitize_tags')
 local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
@@ -12,7 +12,7 @@ local SURFACE_TAGS = require('surface_tags')
 local operator_type = require('operator_type_for_road_parking')
 
 local function result_tags_separate_parking(category, object, area)
-  local id = DefaultId(object)
+  local id = default_id(object)
 
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags(object.tags)
@@ -71,14 +71,12 @@ local function result_tags_separate_parking(category, object, area)
     surface_source = surface_tags_result.source,
   }
 
-  MergeTable(result_tags, result_tags)
-
-  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
+  local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
 
   return {
     id = id,
     tags = cleaned_tags,
-    meta = Metadata(object),
+    meta = metadata(object),
   }, replaced_tags
 end
 

@@ -1,8 +1,8 @@
 require('init')
-require('Log')
-require('DefaultId')
-require('ExtractPublicTags')
-local sanitize_cleaner = require('sanitize_cleaner')
+local log = require('log')
+local default_id = require('default_id')
+local extract_public_tags = require('extract_public_tags')
+local CLEANER = require('sanitize_cleaner')
 
 local function result_tags_public_transport_stops(result)
   local category = result.category
@@ -21,12 +21,12 @@ local function result_tags_public_transport_stops(result)
   end
 
   -- Extract public tags (remove internal tags starting with '_')
-  local public_tags = ExtractPublicTags(result_tags)
+  local public_tags = extract_public_tags(result_tags)
 
-  local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(public_tags, tags)
+  local cleaned_tags, replaced_tags = CLEANER.separate_tags(public_tags, tags)
 
   local row_data = {
-    id = DefaultId(object),
+    id = default_id(object),
     tags = cleaned_tags,
     meta = {},
   }

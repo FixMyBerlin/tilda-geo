@@ -1,9 +1,7 @@
-require('init')
-require('Log')
-
-local sort_condition_class = require('sort_condition_class')
-
 describe('sort_condition_class', function()
+  require('init')
+  local sort_condition_class = require('sort_condition_class')
+  local log = require('log')
   it('sorts entries with time conditions by start time', function()
     local list = {
       'mixed (Mo-Fr 18:00-20:00)',

@@ -1,5 +1,5 @@
 require('init')
-require('Set')
+local SET = require('sets')
 
 --[[
   OPERATOR TYPE OVERRIDE (manual list of way IDs)
@@ -8,11 +8,11 @@ require('Set')
 
   This list contains OSM way IDs of parking areas that are in public ownership
   (operator:type=government/public) but are NOT on dedicated public street space
-  (i.e. not on "straßenrechtlich gewidmeten Flächen" / publicly dedicated street
+  (i.e. not on 'straßenrechtlich gewidmeten Flächen' / publicly dedicated street
   space). Examples: parking on school grounds, other public-institution sites.
 
   In TILDA Parkraum we treat these as an exception: we do NOT count them as
-  public parking. We overwrite their operator_type to "private" so they are
+  public parking. We overwrite their operator_type to 'private' so they are
   excluded from public parking counts and semantics.
 
   Reason: We need to distinguish parking maintained by street authorities
@@ -21,7 +21,7 @@ require('Set')
   legal edge cases (leases, usage rights, etc.) without changing OSM tagging.
 ]]
 
-return Set({
+return SET.set({
   280722511,
   1181107161,
   1436866501,
