@@ -67,10 +67,10 @@ export const mapboxStyleGroupLayers_park_street_surface: MapboxStyleLayer[] = [
         'hsl(164, 92%, 42%)',
         ['has', 'surface'],
         'hsl(280, 94%, 63%)',
-        'hsl(280, 67%, 26%)',
+        'rgb(199, 199, 199)',
       ],
-      'line-opacity': ['match', ['get', 'operator_type'], ['private'], 0.33, 1],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
+      'line-opacity': ['case', ['match', ['get', 'staggered'], ['yes'], true, false], 0.5, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2, 20, 16],
     },
   },
 ]

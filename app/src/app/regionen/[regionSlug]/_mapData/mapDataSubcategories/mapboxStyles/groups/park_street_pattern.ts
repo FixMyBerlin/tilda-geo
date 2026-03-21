@@ -22,7 +22,7 @@ export const mapboxStyleGroupLayers_park_street_pattern: MapboxStyleLayer[] = [
         ['literal', [4, 2]],
       ],
       'line-opacity': 0.67,
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 0.7, 20, 5],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 0.5, 20, 4],
     },
   },
   {
@@ -38,7 +38,7 @@ export const mapboxStyleGroupLayers_park_street_pattern: MapboxStyleLayer[] = [
       'line-color': 'rgb(237, 237, 237)',
       'line-opacity': 0.67,
       'line-pattern': 'parking_diagonal',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2, 20, 16],
     },
   },
   {
@@ -54,7 +54,7 @@ export const mapboxStyleGroupLayers_park_street_pattern: MapboxStyleLayer[] = [
       'line-color': 'rgb(237, 237, 237)',
       'line-opacity': 0.67,
       'line-pattern': 'parking_perpendicular',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 16],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2, 20, 16],
     },
   },
 ]

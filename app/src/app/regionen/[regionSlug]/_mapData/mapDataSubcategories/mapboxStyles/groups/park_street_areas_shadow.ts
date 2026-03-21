@@ -8,7 +8,7 @@ export const mapboxStyleGroupLayers_park_street_areas_shadow: MapboxStyleLayer[]
     id: 'area-color',
     type: 'fill',
     paint: {
-      'fill-color': 'rgb(97, 143, 168)',
+      'fill-color': 'rgba(97, 143, 168, 0.5)',
       'fill-opacity': 0.15,
     },
   },
@@ -16,7 +16,7 @@ export const mapboxStyleGroupLayers_park_street_areas_shadow: MapboxStyleLayer[]
     id: 'area-outline',
     type: 'line',
     paint: {
-      'line-color': 'rgb(107, 114, 118)',
+      'line-color': 'rgba(107, 114, 118, 0.5)',
       'line-dasharray': [1, 1],
       'line-opacity': 0.9,
     },
