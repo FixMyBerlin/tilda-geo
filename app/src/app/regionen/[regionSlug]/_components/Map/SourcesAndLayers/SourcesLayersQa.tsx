@@ -35,11 +35,16 @@ export const SourcesLayersQa = () => {
   const vectorSourceName = activeQaConfig.mapTable.replace('public.', '')
   const dataUrl = getTilesUrl(vectorSourceName)
 
+  // Key by vector tileset so Source + layers remount together when switching QA configs.
+  // Otherwise MapLibre can apply new source-layer ids while the vector source URL is still
+  // the previous tileset, causing "Source layer X does not exist on source qa-source".
+  const qaVectorSetKey = `${qaSourceId}:${vectorSourceName}`
+
   return (
     <>
       <Source
         id={qaSourceId}
-        key={qaSourceId}
+        key={`${qaVectorSetKey}--source`}
         type="vector"
         url={dataUrl}
         // NOTE: We will likely have to make the promoteId part of the config
@@ -48,7 +53,7 @@ export const SourcesLayersQa = () => {
         minzoom={qaMinZoom}
         maxzoom={16} // higher than default to fix geometric precision for circles and such
       />
-      <Fragment key={qaLayerId}>
+      <Fragment key={`${qaVectorSetKey}--layers`}>
         <Layer
           id={qaLayerId}
           source={qaSourceId}

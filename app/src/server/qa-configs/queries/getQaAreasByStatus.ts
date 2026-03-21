@@ -1,10 +1,14 @@
 import db from '@/db'
 import { checkRegionAuthorization } from '@/src/server/authorization/checkRegionAuthorization'
-import { isQaListStyleKey, type QaListStyleKey } from '@/src/server/qa-configs/listStyleKeys.const'
+import {
+  isQaListStyleKey,
+  QA_LIST_TAKE_RECENT,
+  type QaListStyleKey,
+} from '@/src/server/qa-configs/listStyleKeys.const'
+import { matchesListStyle } from '@/src/server/qa-configs/qaStyleFilter.const'
 import type { QaDecisionDataStored } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { transformEvaluationWithDecisionData } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { resolver } from '@blitzjs/rpc'
-import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
 import type { Ctx } from 'blitz'
 import { z } from 'zod'
 import { getQaTableName } from '../utils/getQaTableName'
@@ -14,29 +18,6 @@ const Schema = z.object({
   regionSlug: z.string(),
   styleKey: z.string(),
 })
-
-// Filter by style (same logic as filterQaDataByStyle in useQaMapState, using DB enums)
-function matchesStyle(
-  evaluation: { userStatus: QaEvaluationStatus | null; systemStatus: QaSystemStatus },
-  styleKey: QaListStyleKey,
-) {
-  switch (styleKey) {
-    case 'user-not-ok-processing':
-      return evaluation.userStatus === 'NOT_OK_PROCESSING_ERROR'
-    case 'user-not-ok-osm':
-      return evaluation.userStatus === 'NOT_OK_DATA_ERROR'
-    case 'user-ok-construction':
-      return evaluation.userStatus === 'OK_STRUCTURAL_CHANGE'
-    case 'user-ok-reference-error':
-      return evaluation.userStatus === 'OK_REFERENCE_ERROR'
-    case 'user-ok-qa-tooling-error':
-      return evaluation.userStatus === 'OK_QA_TOOLING_ERROR'
-    case 'user-pending-needs-review':
-      return evaluation.userStatus === null && evaluation.systemStatus === 'NEEDS_REVIEW'
-    case 'user-pending-problematic':
-      return evaluation.userStatus === null && evaluation.systemStatus === 'PROBLEMATIC'
-  }
-}
 
 function sortKeyAbsoluteChange(decisionData: QaDecisionDataStored | null) {
   if (decisionData?.absoluteChange == null) return 0
@@ -66,11 +47,9 @@ export default resolver.pipe(
 
     const tableName = getQaTableName(qaConfig.mapTable)
 
-    const TAKE_RECENT = 20
-    const FETCH_DISTINCT_UP_TO = 500
-
-    // Latest evaluation per area (no userStatus filter). orderBy must start with areaId for distinct.
-    const areasWithEvaluationsRaw = await db.qaEvaluation.findMany({
+    // Latest evaluation per area only — same as getQaDataForMap. Do NOT filter by style in SQL:
+    // older rows (e.g. NEEDS_REVIEW) would still match while the latest row is PROBLEMATIC.
+    const latestPerArea = await db.qaEvaluation.findMany({
       where: { configId: qaConfig.id },
       include: {
         author: {
@@ -82,28 +61,30 @@ export default resolver.pipe(
           },
         },
       },
-      orderBy: [{ areaId: 'asc' }, { createdAt: 'desc' }],
-      take: FETCH_DISTINCT_UP_TO,
+      orderBy: { createdAt: 'desc' },
       distinct: ['areaId'],
     })
 
-    // Filter by style (same criteria as map), then sort by largest absolute diff, take 20
+    const areasWithEvaluationsRaw = latestPerArea.filter((e) =>
+      matchesListStyle(
+        { userStatus: e.userStatus, systemStatus: e.systemStatus },
+        styleKey,
+      ),
+    )
+
+    // Sort by largest absolute diff, take TAKE_RECENT
     const parsed = areasWithEvaluationsRaw.map((e) => ({
       evaluation: e,
       decisionData: transformEvaluationWithDecisionData(e).decisionData,
     }))
-    const filtered = parsed.filter(({ evaluation }) =>
-      matchesStyle(
-        { userStatus: evaluation.userStatus, systemStatus: evaluation.systemStatus },
-        styleKey,
-      ),
-    )
-    const sorted = filtered.sort((a, b) => {
+    const sorted = parsed.sort((a, b) => {
       const diffA = sortKeyAbsoluteChange(a.decisionData)
       const diffB = sortKeyAbsoluteChange(b.decisionData)
       return diffB - diffA
     })
-    const areasWithEvaluations = sorted.slice(0, TAKE_RECENT).map(({ evaluation }) => evaluation)
+    const areasWithEvaluations = sorted
+      .slice(0, QA_LIST_TAKE_RECENT)
+      .map(({ evaluation }) => evaluation)
 
     const areaIds = areasWithEvaluations.map((e) => e.areaId)
     const bboxes = await db.$queryRawUnsafe<

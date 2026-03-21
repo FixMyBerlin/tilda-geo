@@ -1,4 +1,9 @@
 import { FileMapDataSubcategory } from '../types'
+import {
+  parkingTildaStreetDefaultLegends,
+  parkingTildaStreetKindLegends,
+  parkingTildaStreetSurfaceLegends,
+} from './parkingTildaSharedLegends.const'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_park_street_areas_shadow } from './mapboxStyles/groups/park_street_areas_shadow'
 import { mapboxStyleGroupLayers_park_street_default } from './mapboxStyles/groups/park_street_default'
@@ -123,89 +128,6 @@ export const createStreetKindStyleLayers = (filter: MapboxStyleLayersProps['addi
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const sharedStreetStyleDefaultLegends: FileMapDataSubcategory['styles'][number]['legends'] =
-  [
-    {
-      id: 'capacity_status--present',
-      name: 'Stellplätze',
-      style: {
-        type: 'line',
-        color: 'rgb(22, 163, 74)',
-      },
-    },
-    {
-      id: 'shadow',
-      name: 'Separat erfasste Parkflächen',
-      style: {
-        type: 'fill',
-        color: 'rgba(97, 143, 168, 0.15)',
-      },
-    },
-  ]
-
-export const sharedStreetStyleSurfaceLegends: FileMapDataSubcategory['styles'][number]['legends'] =
-  [
-    {
-      id: 'surface-soft',
-      name: 'Durchlässig',
-      style: {
-        type: 'line',
-        color: 'hsl(142, 94%, 40%)',
-      },
-    },
-    {
-      id: 'surface-semi',
-      name: 'Etwas durchlässig',
-      style: {
-        type: 'line',
-        color: 'hsl(164, 92%, 42%)',
-      },
-    },
-    {
-      id: 'surface-hard',
-      name: 'Undurchlässig',
-      style: {
-        type: 'line',
-        color: 'hsl(344, 93%, 35%)',
-      },
-    },
-    {
-      id: 'surface-unknown',
-      name: 'Unkategorisiert',
-      style: {
-        type: 'line',
-        color: 'hsl(280, 94%, 63%)',
-      },
-    },
-    {
-      id: 'surface-missing',
-      name: 'Keine Angabe',
-      style: {
-        type: 'line',
-        color: 'rgb(81, 22, 111)',
-      },
-    },
-    {
-      id: 'shadow',
-      name: 'Separat erfasste Parkflächen',
-      style: {
-        type: 'fill',
-        color: 'rgba(97, 143, 168, 0.15)',
-      },
-    },
-  ]
-
-export const sharedStreetStyleKindLegends: FileMapDataSubcategory['styles'][number]['legends'] = [
-  {
-    id: 'surface-soft',
-    name: 'Durchlässig',
-    style: {
-      type: 'line',
-      color: 'hsl(142, 94%, 40%)',
-    },
-  },
-]
-
 export const createSharedStreetStyles = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     defaultStyleHidden,
@@ -213,19 +135,19 @@ export const createSharedStreetStyles = (filter: MapboxStyleLayersProps['additio
       id: 'default',
       name: 'Parkbeschränkungen',
       layers: createStreetStyleLayers(filter),
-      legends: sharedStreetStyleDefaultLegends,
+      legends: parkingTildaStreetDefaultLegends,
     },
     {
       id: 'surface',
       name: 'Oberfläche',
       layers: createStreetSurfaceStyleLayers(filter),
-      legends: sharedStreetStyleSurfaceLegends,
+      legends: parkingTildaStreetSurfaceLegends,
     },
     {
       id: 'kind',
-      name: 'Typ (TODO)',
+      name: 'Lage',
       layers: createStreetKindStyleLayers(filter),
-      legends: sharedStreetStyleKindLegends,
+      legends: parkingTildaStreetKindLegends,
     },
   ] satisfies FileMapDataSubcategory['styles']
 

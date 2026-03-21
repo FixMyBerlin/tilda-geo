@@ -9,8 +9,9 @@ export const mapboxStyleGroupLayers_park_street_completeness: MapboxStyleLayer[]
     type: 'line',
     filter: ['match', ['get', 'parking'], ['no', 'separate'], true, false],
     paint: {
-      'line-color': 'hsl(273, 78%, 37%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
+      'line-color': '#ff8500',
+      'line-opacity': ['match', ['get', 'highway'], ['construction'], 0.25, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 20, 8],
     },
   },
   {
@@ -18,15 +19,8 @@ export const mapboxStyleGroupLayers_park_street_completeness: MapboxStyleLayer[]
     type: 'line',
     filter: ['match', ['get', 'parking'], ['missing'], true, false],
     paint: {
-      'line-color': 'rgb(187, 17, 133)',
-      'line-opacity': [
-        'match',
-        ['get', 'highway'],
-        ['secondary', 'construction', 'pedestrian'],
-        0.25,
-        1,
-      ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
+      'line-opacity': ['match', ['get', 'highway'], ['construction'], 0.25, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2, 20, 16],
     },
   },
   {
@@ -34,15 +28,9 @@ export const mapboxStyleGroupLayers_park_street_completeness: MapboxStyleLayer[]
     type: 'line',
     filter: ['match', ['get', 'reason'], ['capacity_below_zero'], true, false],
     paint: {
-      'line-color': 'rgb(99, 53, 50)',
-      'line-opacity': [
-        'match',
-        ['get', 'highway'],
-        ['secondary', 'construction', 'pedestrian'],
-        0.25,
-        1,
-      ],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 16, 2, 20, 10],
+      'line-color': '#b0b0b0',
+      'line-opacity': ['match', ['get', 'highway'], ['construction'], 0.25, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 20, 8],
     },
   },
 ]
