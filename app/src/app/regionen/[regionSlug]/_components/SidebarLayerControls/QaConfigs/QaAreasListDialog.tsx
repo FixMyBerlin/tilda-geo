@@ -1,6 +1,7 @@
 import { buttonStyles } from '@/src/app/_components/links/styles'
 import { ModalDialog } from '@/src/app/_components/Modal/ModalDialog'
 import { SmallSpinner } from '@/src/app/_components/Spinner/SmallSpinner'
+import { QA_LIST_TAKE_RECENT } from '@/src/server/qa-configs/listStyleKeys.const'
 import getQaAreasByStatus from '@/src/server/qa-configs/queries/getQaAreasByStatus'
 import { useQuery } from '@blitzjs/rpc'
 import { CursorArrowRippleIcon } from '@heroicons/react/24/outline'
@@ -48,7 +49,7 @@ export const QaAreasListDialog = ({ configSlug, regionSlug, styleKey, setClosed 
 
   return (
     <ModalDialog
-      title={`Liste der letzten 20 Entscheidungen für ${statusLabel}`}
+      title={`Liste der letzten ${QA_LIST_TAKE_RECENT} Entscheidungen für ${statusLabel}`}
       icon="info"
       open={true}
       setOpen={setClosed}
