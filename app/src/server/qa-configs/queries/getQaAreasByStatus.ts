@@ -5,7 +5,7 @@ import {
   QA_LIST_TAKE_RECENT,
   type QaListStyleKey,
 } from '@/src/server/qa-configs/listStyleKeys.const'
-import { QA_LIST_STYLE_WHERE } from '@/src/server/qa-configs/qaStyleFilter.const'
+import { matchesListStyle } from '@/src/server/qa-configs/qaStyleFilter.const'
 import type { QaDecisionDataStored } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { transformEvaluationWithDecisionData } from '@/src/server/qa-configs/schemas/qaDecisionDataSchema'
 import { resolver } from '@blitzjs/rpc'
@@ -18,8 +18,6 @@ const Schema = z.object({
   regionSlug: z.string(),
   styleKey: z.string(),
 })
-
-const FETCH_SAFETY_LIMIT = 2000
 
 function sortKeyAbsoluteChange(decisionData: QaDecisionDataStored | null) {
   if (decisionData?.absoluteChange == null) return 0
@@ -49,9 +47,10 @@ export default resolver.pipe(
 
     const tableName = getQaTableName(qaConfig.mapTable)
 
-    // Filter by style in DB (same criteria as map) so list and map stay in sync. orderBy must start with areaId for distinct.
-    const areasWithEvaluationsRaw = await db.qaEvaluation.findMany({
-      where: { configId: qaConfig.id, ...QA_LIST_STYLE_WHERE[styleKey] },
+    // Latest evaluation per area only — same as getQaDataForMap. Do NOT filter by style in SQL:
+    // older rows (e.g. NEEDS_REVIEW) would still match while the latest row is PROBLEMATIC.
+    const latestPerArea = await db.qaEvaluation.findMany({
+      where: { configId: qaConfig.id },
       include: {
         author: {
           select: {
@@ -62,10 +61,16 @@ export default resolver.pipe(
           },
         },
       },
-      orderBy: [{ areaId: 'asc' }, { createdAt: 'desc' }],
-      take: FETCH_SAFETY_LIMIT,
+      orderBy: { createdAt: 'desc' },
       distinct: ['areaId'],
     })
+
+    const areasWithEvaluationsRaw = latestPerArea.filter((e) =>
+      matchesListStyle(
+        { userStatus: e.userStatus, systemStatus: e.systemStatus },
+        styleKey,
+      ),
+    )
 
     // Sort by largest absolute diff, take TAKE_RECENT
     const parsed = areasWithEvaluationsRaw.map((e) => ({

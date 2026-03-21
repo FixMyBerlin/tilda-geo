@@ -2,15 +2,15 @@ import type { QaListStyleKey } from '@/src/server/qa-configs/listStyleKeys.const
 import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
 
 /**
- * Prisma where fragment for QaEvaluation: filter by list style.
- * - User-status styles: filter by userStatus only.
- * - Pending styles: filter by userStatus null + systemStatus.
+ * Filter shape for a list style (used by matchesListStyle only).
+ * List query loads latest evaluation per areaId first, then applies this — do not use as SQL where
+ * without that, or older rows would match while the latest row differs.
  */
 export type QaListStyleWhereFragment =
   | { userStatus: QaEvaluationStatus; systemStatus?: undefined }
   | { userStatus: null; systemStatus: QaSystemStatus }
 
-/** Single source of truth: styleKey → DB filter for list query and in-memory matching. */
+/** Single source of truth: styleKey → filter (matchesListStyle / map filter semantics). */
 export const QA_LIST_STYLE_WHERE: Record<QaListStyleKey, QaListStyleWhereFragment> = {
   'user-not-ok-processing': { userStatus: 'NOT_OK_PROCESSING_ERROR' },
   'user-not-ok-osm': { userStatus: 'NOT_OK_DATA_ERROR' },
@@ -26,7 +26,7 @@ export type QaEvaluationStatusFields = {
   systemStatus: QaSystemStatus
 }
 
-/** Check if an evaluation matches the given list style (uses same criteria as QA_LIST_STYLE_WHERE). */
+/** Check if an evaluation matches the given list style (must be the latest row for that areaId). */
 export function matchesListStyle(
   evaluation: QaEvaluationStatusFields,
   styleKey: QaListStyleKey,
