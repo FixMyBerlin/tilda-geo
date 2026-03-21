@@ -25,26 +25,28 @@ export const subcat_parkingTilda_street_completeness: FileMapDataSubcategory = {
       }),
       legends: [
         {
-          id: 'missing',
-          name: 'Daten in OSM fehlen',
-          desc: ['Für diesen Abschnitt sind noch keine Daten in OpenStreetMap hinterlegt.'],
-          style: { type: 'line', color: 'rgb(187, 17, 133)', width: 5 },
-        },
-        {
           id: 'not-expected',
           name: 'Kein Parken zu erwarten',
           desc: [
-            'Für diesen Abschnitt sind zwar noch keine Daten in OpenStreetMap hinterlegt, aber wir gehen davon aus, dass hier nicht geparkt werden darf.',
+            'Abschnitte mit `parking=no` oder `parking=separate` — hier wird kein Straßenparken modelliert.',
           ],
-          style: { type: 'line', color: 'rgb(102, 21, 168)', width: 5 },
+          style: { type: 'line', color: '#ff8500', width: 5 },
+        },
+        {
+          id: 'missing',
+          name: 'Daten in OSM fehlen',
+          desc: [
+            'Abschnitte mit `parking=missing` — in OSM ist der Parkstand noch nicht erfasst.',
+          ],
+          style: { type: 'line', color: '#000000', width: 5 },
         },
         {
           id: 'too-small',
           name: 'Kein Parken zu erwarten (Größe)',
           desc: [
-            'Dieser Abschnitt ist zu klein als das ein Fahrzeug in Referenzgröße hier parken könnte. Dieser Abschnitt wurde daher nicht als Parkstand bewertet.',
+            'Abschnitte mit `reason=capacity_below_zero` — zu kurz für die Referenzfahrzeuglänge, daher kein Parkstand.',
           ],
-          style: { type: 'line', color: 'rgb(99, 53, 50)', width: 5 },
+          style: { type: 'line', color: '#b0b0b0', width: 5 },
         },
       ],
     },

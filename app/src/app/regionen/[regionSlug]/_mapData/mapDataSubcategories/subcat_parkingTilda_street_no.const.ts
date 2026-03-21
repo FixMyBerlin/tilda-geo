@@ -27,12 +27,12 @@ export const subcat_parkingTilda_street_no: FileMapDataSubcategory = {
         {
           id: 'no_parking',
           name: 'Parkverbot',
-          style: { type: 'line', color: 'rgb(255, 168, 8)', dasharray: [1, 0.5] },
+          style: { type: 'line', color: 'rgb(249, 115, 22)', dasharray: [1, 0.75] },
         },
         {
           id: 'no_stopping',
           name: 'Halteverbot',
-          style: { type: 'line', color: 'rgb(255, 0, 0)', dasharray: [1, 0.5] },
+          style: { type: 'line', color: 'rgb(235, 0, 0)', dasharray: [1, 0.75] },
         },
       ],
     },

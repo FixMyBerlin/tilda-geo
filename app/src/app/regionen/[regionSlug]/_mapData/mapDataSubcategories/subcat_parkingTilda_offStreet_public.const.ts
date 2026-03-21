@@ -1,4 +1,9 @@
 import { FileMapDataSubcategory } from '../types'
+import {
+  parkingTildaOffStreetDefaultLegends,
+  parkingTildaOffStreetKindLegends,
+  parkingTildaOffStreetSurfaceLegends,
+} from './parkingTildaSharedLegends.const'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_park_off_default_area } from './mapboxStyles/groups/park_off_default_area'
 import { mapboxStyleGroupLayers_park_off_default_points } from './mapboxStyles/groups/park_off_default_points'
@@ -101,36 +106,6 @@ export const createOffStreetKindStyleLayers = (
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const sharedOffStreetStyleDefaultLegends: FileMapDataSubcategory['styles'][number]['legends'] =
-  [
-    {
-      id: 'multi-storey',
-      name: 'Parkhaus',
-      style: { type: 'fill', color: 'rgb(233, 91, 84)' },
-    },
-    {
-      id: 'underground',
-      name: 'Tiefgaragen',
-      style: { type: 'fill', color: 'rgb(142, 192, 169)' },
-    },
-    {
-      id: 'carport_s',
-      name: 'Garage, Carport (einzeln, mehrfach)',
-      style: { type: 'fill', color: 'rgb(251, 206, 74)' },
-    },
-    {
-      id: 'surface',
-      name: 'Flächenparkplätze',
-      style: { type: 'fill', color: 'rgb(48, 159, 219)' },
-    },
-  ]
-
-export const sharedOffStreetStyleSurfaceLegends: FileMapDataSubcategory['styles'][number]['legends'] =
-  []
-
-export const sharedOffStreetStyleKindLegends: FileMapDataSubcategory['styles'][number]['legends'] =
-  []
-
 export const createSharedOffStreetStyles = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     defaultStyleHidden,
@@ -138,19 +113,19 @@ export const createSharedOffStreetStyles = (filter: MapboxStyleLayersProps['addi
       id: 'default',
       name: 'Parkbeschränkungen',
       layers: createOffStreetStyleLayers(filter),
-      legends: sharedOffStreetStyleDefaultLegends,
+      legends: parkingTildaOffStreetDefaultLegends,
     },
     {
       id: 'surface',
-      name: 'Oberfläche (TODO)',
+      name: 'Oberfläche',
       layers: createOffStreetSurfaceStyleLayers(filter),
-      legends: sharedOffStreetStyleSurfaceLegends,
+      legends: parkingTildaOffStreetSurfaceLegends,
     },
     {
       id: 'kind',
-      name: 'Type (TODO)',
+      name: 'Typ',
       layers: createOffStreetKindStyleLayers(filter),
-      legends: sharedOffStreetStyleKindLegends,
+      legends: parkingTildaOffStreetKindLegends,
     },
   ] satisfies FileMapDataSubcategory['styles']
 
