@@ -16,7 +16,8 @@ function calculateSystemStatus(relative: number | null, config: any): QaSystemSt
     return 'NEEDS_REVIEW' // Handle NULL relative values
   }
 
-  const difference = Math.abs(relative - 1.0)
+  const normalizedRelative = relative > 0 && relative < 1 ? 1 / relative : relative
+  const difference = Math.abs(normalizedRelative - 1.0)
 
   if (difference <= config.goodThreshold) {
     return 'GOOD'
