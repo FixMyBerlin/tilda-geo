@@ -1,4 +1,4 @@
-export const transformGeopackageToGeojson = async (input: string, output: string) => {
+export const transformGeopackageToGeojson = (input: string, output: string) => {
   console.log('  Run ogr2ogr')
   Bun.spawnSync(
     [
@@ -17,17 +17,25 @@ export const transformGeopackageToGeojson = async (input: string, output: string
     ],
     {
       onExit(_proc, exitCode, _signalCode, error) {
-        exitCode && console.log('exitCode:', exitCode)
-        error && console.log('error:', error)
+        if (exitCode) {
+          console.log('exitCode:', exitCode)
+        }
+        if (error) {
+          console.log('error:', error)
+        }
       },
     },
   )
 
-  console.log('  Run prettier')
-  Bun.spawnSync(['npx', 'prettier', '--write', output], {
+  console.log('  Run biome format')
+  Bun.spawnSync(['bunx', 'biome', 'format', '--write', output], {
     onExit(_proc, exitCode, _signalCode, error) {
-      exitCode && console.log('exitCode:', exitCode)
-      error && console.log('error:', error)
+      if (exitCode) {
+        console.log('exitCode:', exitCode)
+      }
+      if (error) {
+        console.log('error:', error)
+      }
     },
   })
 }

@@ -1,7 +1,5 @@
 # Editor
 .vscode-test
-.vscode/*
-!.vscode/extensions.json
 .idea
 
 *.osm
@@ -10,14 +8,5 @@
 .env
 *.DS_Store
 
-# IDE
-.idea
-
-# Nginx
-logs/
-
 /node_modules
 processing/node_modules
-
-# run helper
-processing/topics/helper/._trigger-full-run-helper.lua

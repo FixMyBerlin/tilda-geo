@@ -1,5 +1,5 @@
+import { join } from 'node:path'
 import { $ } from 'bun'
-import { join } from 'path'
 import { TYPES_DIR } from '../constants/directories.const'
 import { topicsConfig } from '../constants/topics.const'
 import { getTopicTables } from '../diffing/diffing'
@@ -29,7 +29,9 @@ async function writeTableIdTypes() {
   const processedTables = new Set<string>()
   for (const [topic] of Array.from(topicsConfig)) {
     const topicTables = await getTopicTables(topic)
-    topicTables.forEach((table) => processedTables.add(table))
+    topicTables.forEach((table) => {
+      processedTables.add(table)
+    })
   }
 
   const typeFile = join(TYPES_DIR, 'tableId.generated.const.ts')
@@ -104,37 +106,37 @@ async function writeTodoIdTypes() {
 
   const fileContent = `
   export const bikelaneTodoIds = [${bikelaneTodos.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
 
   export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
 
   export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
   export const roadTodoIds = [${roadTodos.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type RoadTodoId = (typeof roadTodoIds)[number]
 
   export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
 
   export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
 
   export const todoIds = [${todos.map((name) => `'${name}'`).join(',')}
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
   ] as const
   export type TodoId = (typeof todoIds)[number]
   `
@@ -154,8 +156,8 @@ ${content}
 
 async function autoformatTypeFiles() {
   try {
-    await $`bunx prettier -w --config=/processing/.prettierrc ${TYPES_DIR} > /dev/null`
+    await $`bunx biome format --write ${TYPES_DIR}`
   } catch (error) {
-    throw new Error(`Failed to run prettier on auto generated types: ${error}`)
+    throw new Error(`Failed to run biome on auto generated types: ${error}`)
   }
 }

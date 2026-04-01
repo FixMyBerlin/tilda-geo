@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const missing_traffic_sign_244: CampaignType = {
   id: 'missing_traffic_sign_244',

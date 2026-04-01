@@ -1,0 +1,87 @@
+import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * Playwright configuration for Next.js applications
+ * 
+ * Best Practices:
+ * - Tests run against production build (not dev server)
+ * - Uses webServer to automatically build and start Next.js
+ * - Configured for proper test isolation
+ * - Includes trace viewer for debugging failed tests
+ */
+export default defineConfig({
+  // Test files location
+  testDir: './tests',
+  
+  // Run tests in parallel (faster execution)
+  fullyParallel: true,
+  
+  // Fail the build on CI if you accidentally left test.only in the source code
+  forbidOnly: !!process.env.CI,
+  
+  // Retry on CI only (helps with flaky tests)
+  retries: process.env.CI ? 2 : 0,
+  
+  // Opt out of parallel tests on CI (can cause issues with shared resources)
+  workers: process.env.CI ? 1 : undefined,
+  
+  // Reporter to use - 'html' provides nice visual reports
+  reporter: [
+    ['html'],
+    ['list'], // Console output
+    ...(process.env.CI ? [['github']] : []), // GitHub Actions annotations
+  ],
+  
+  // Shared settings for all projects
+  use: {
+    // Base URL to use in actions like `await page.goto('/')`
+    // This allows you to use relative paths instead of full URLs
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+    
+    // Collect trace when retrying the failed test
+    // Traces help debug failures - view with: npx playwright show-trace
+    trace: 'on-first-retry',
+    
+    // Screenshot on failure
+    screenshot: 'only-on-failure',
+    
+    // Video on failure
+    video: 'retain-on-failure',
+  },
+
+  // Configure projects for major browsers
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    
+    // Uncomment to test on multiple browsers
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
+    
+    // Mobile testing
+    // {
+    //   name: 'Mobile Chrome',
+    //   use: { ...devices['Pixel 5'] },
+    // },
+  ],
+
+  // Run your local dev server before starting the tests
+  // CRITICAL: This builds and runs production server, not dev server
+  // This ensures tests run against production code
+  webServer: {
+    command: 'npm run build && npm run start',
+    url: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI, // Reuse if server already running (local dev)
+    timeout: 120 * 1000, // 2 minutes timeout for build + start
+    stdout: 'ignore', // Hide build output (set to 'pipe' to see it)
+    stderr: 'pipe', // Show errors
+  },
+});

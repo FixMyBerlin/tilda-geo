@@ -1,8 +1,8 @@
 // We use bun.sh to run this file
-import { MAPTILER_API_KEY } from '@/src/app/regionen/[regionSlug]/_components/Map/utils/maptilerApiKey.const'
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
+import { MAPTILER_API_KEY } from '@/components/regionen/pageRegionSlug/Map/utils/maptilerApiKey.const'
 import { mergeSprites } from './mergeSprites'
 import { fetchStyle, log, saveJson } from './util'
 
@@ -58,20 +58,26 @@ const apiConfigs = [
 
 // Folder
 const scriptJsonFolder = 'scripts/MapboxStyles/json'
-const groupFolder = 'src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles'
+const groupFolder =
+  'src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles'
 
 // Sprites
-export type SpriteSource = { url: string; searchParams?: { access_token: string | null } }
+export type SpriteSource = {
+  url: string
+  searchParams?: { access_token: string | null }
+}
 const spriteUrls: SpriteSource[] = []
 
 // ============= Collect data per `apiConfig`
 
 type GroupsLayer = { folderName: string; layers: mapboxgl.AnyLayer[] }
 const groupsAndLayers: Record<string, GroupsLayer[]> = Object.fromEntries(keys.map((k) => [k, []]))
+
+// biome-ignore lint/suspicious/noExplicitAny: OK
 const metaFileContent: Record<string, any> = Object.fromEntries(keys.map((k) => [k, undefined]))
 
 for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
-  const rawData: any = await fetchStyle(key, apiUrl, scriptJsonFolder)
+  const rawData = await fetchStyle(key, apiUrl, scriptJsonFolder)
 
   // Script: Remove all non-FMC-groups
   type MapBoxGroupEntry = { name: string; collapsed: boolean }
@@ -79,11 +85,11 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
   // Get Groups from Mapbox-metadata, which is the only place where ID and Name are matched
   const groups = Object.entries(rawData.metadata['mapbox:groups'])
     .map((entry) => {
-      const key = entry[0] as string
+      const groupKey = entry[0]
       const values = entry[1] as MapBoxGroupEntry
       if (mapboxGroupPrefix.some((prefix) => values.name.startsWith(prefix))) {
         return {
-          folderId: key,
+          folderId: groupKey,
           folderName: values.name,
         }
       }
@@ -95,18 +101,19 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
 
   // Script: For each group, collect the layers:
   // Create our own data
+  const layers = rawData.layers as mapboxgl.AnyLayer[]
   groupsAndLayers[key] = groups.map((group) => {
     return {
       folderName: group.folderName,
-      layers: rawData.layers.filter((layer) => {
-        return layer.metadata && layer.metadata['mapbox:group'] == group.folderId
+      layers: layers.filter((layer) => {
+        return layer.metadata && layer.metadata['mapbox:group'] === group.folderId
       }),
     }
   })
 
   // Cleanup keys from layers that we don't need or that we need to add ourselved later:
-  groupsAndLayers[key]?.forEach((g) =>
-    g.layers.forEach((layer: any) => {
+  for (const g of groupsAndLayers[key] ?? []) {
+    g.layers.forEach((layer) => {
       delete layer.metadata
       delete layer.source
       delete layer.slot // Does not exict on maplibre
@@ -115,8 +122,8 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
       if (layer?.layout && Object.keys(layer.layout).length === 0) {
         delete layer.layout
       }
-    }),
-  )
+    })
+  }
 
   // Cleanup layer names & collect debugging info
   const changedNamesForDebugging: {
@@ -168,62 +175,60 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
 // ============= Now, we bring all `apiConfigs` back together
 
 const mergedGroupAndLayers = Object.values(groupsAndLayers)
-  .map((layers) => layers)
   .flat()
   .filter((layers) => layers.layers.length > 0) // Delete empty folders, which are hidden Mapbox so they cannot be deleted in the UI
 
 // Sort layer properties according to spec: id, type, filter, minzoom, maxzoom, layout, paint
 // Inside paint/layout: filter first (if present), then A-Z
-function sortLayerProperties(layer: any) {
+
+function sortLayerProperties(layer: unknown) {
   if (!layer || typeof layer !== 'object' || Array.isArray(layer)) {
     return layer
   }
+  const layerObj = layer as Record<string, unknown>
 
   // Define the order for top-level properties
   const topLevelOrder = ['id', 'type', 'filter', 'minzoom', 'maxzoom', 'layout', 'paint']
 
   // Create sorted object
-  const sorted: any = {}
+  const sorted: Record<string, unknown> = {}
 
   // First, add properties in the specified order
   for (const key of topLevelOrder) {
-    if (key in layer) {
+    if (key in layerObj) {
       if (key === 'layout' || key === 'paint') {
-        // Sort nested paint/layout objects
-        sorted[key] = sortPaintOrLayout(layer[key])
+        sorted[key] = sortPaintOrLayout(layerObj[key])
       } else {
-        sorted[key] = layer[key]
+        sorted[key] = layerObj[key]
       }
     }
   }
 
   // Then add any remaining properties (shouldn't happen, but for safety)
-  for (const key of Object.keys(layer)) {
+  for (const key of Object.keys(layerObj)) {
     if (!topLevelOrder.includes(key)) {
-      sorted[key] = layer[key]
+      sorted[key] = layerObj[key]
     }
   }
 
   return sorted
 }
 
-function sortPaintOrLayout(obj: any) {
+function sortPaintOrLayout(obj: unknown) {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
     return obj
   }
+  const objRecord = obj as Record<string, unknown>
+  const sorted: Record<string, unknown> = {}
+  const objKeys = Object.keys(objRecord)
 
-  const sorted: any = {}
-  const keys = Object.keys(obj)
-
-  // Put 'filter' first if it exists
-  if ('filter' in obj) {
-    sorted.filter = obj.filter
+  if ('filter' in objRecord) {
+    sorted.filter = objRecord.filter
   }
 
-  // Sort remaining keys alphabetically
-  const otherKeys = keys.filter((k) => k !== 'filter').sort((a, b) => a.localeCompare(b))
+  const otherKeys = objKeys.filter((k) => k !== 'filter').sort((a, b) => a.localeCompare(b))
   for (const key of otherKeys) {
-    sorted[key] = obj[key]
+    sorted[key] = objRecord[key]
   }
 
   return sorted
@@ -255,8 +260,8 @@ export const mapboxStyleGroupLayers_${group.folderName}: MapboxStyleLayer[] = ${
 // Script: Generate types file
 // A type that represents all keys of the layers we generate
 // (Don't change the new lines and spaces in this template; the generated output does fit Prettier conventions.)
-const _layers = mergedGroupAndLayers.map((g) => g.layers).flat()
-const _layerKeys = _layers.map((l) => Object.keys(l)).flat()
+const _layers = mergedGroupAndLayers.flatMap((g) => g.layers)
+const _layerKeys = _layers.flatMap((l) => Object.keys(l))
 const deduplicatedLayerKeys = Array.from(new Set(_layerKeys)).sort((a, b) => a.localeCompare(b))
 const typesFileContent = `// DO NOT EDIT MANUALLY
 // This file was automatically generated by \`scripts/MapboxStyles/process.ts\`
@@ -265,9 +270,10 @@ const typesFileContent = `// DO NOT EDIT MANUALLY
 export type MapboxStyleLayer = {${deduplicatedLayerKeys
   .map((key) => {
     const optional = key === 'id' ? '' : '?'
-    return `${key}${optional}: any;\n`
+    return `\n  ${key}${optional}: unknown`
   })
-  .join('')}}`
+  .join('')}
+}`
 
 const typeFileName = path.join(groupFolder, 'types.ts')
 await Bun.write(typeFileName, typesFileContent)
@@ -283,7 +289,7 @@ log(`Store metadata on processing`, metaFileContent)
 
 const originalBaseMapStyle = await fetchStyle('base', baseMapStyle, scriptJsonFolder)
 // Store the original style. See README for more.
-await saveJson('src/app/api/map-style/style.json', originalBaseMapStyle)
+await saveJson('src/server/api/map-style/style.json', originalBaseMapStyle)
 
 // Create a merged sprite for pixelRatio 1 and 2
 spriteUrls.push({ url: originalBaseMapStyle.sprite })

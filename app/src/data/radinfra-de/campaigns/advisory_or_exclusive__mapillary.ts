@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const advisory_or_exclusive__mapillary: CampaignType = {
   id: 'advisory_or_exclusive__mapillary',

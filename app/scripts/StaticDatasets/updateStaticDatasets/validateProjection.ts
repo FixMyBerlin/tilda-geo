@@ -1,4 +1,5 @@
 import { styleText } from 'node:util'
+import type { Geometry } from 'geojson'
 
 // Germany's bounding box in WGS84 coordinates
 const GERMANY_BBOX = {
@@ -8,31 +9,30 @@ const GERMANY_BBOX = {
   maxLat: 55.058,
 } as const
 
-/**
- * Extracts coordinates from a GeoJSON geometry, handling different geometry types
- */
-function extractCoordinates(geometry: any): [number, number] | null {
-  if (!geometry || !geometry.coordinates) return null
+type Position = [number, number]
 
-  const coords = geometry.coordinates
+function toPosition(coords: number[]) {
+  // biome-ignore lint/style/noNonNullAssertion: This is OK
+  return [coords[0]!, coords[1]!] satisfies Position
+}
 
+function extractCoordinates(geometry: Geometry) {
   switch (geometry.type) {
     case 'Point':
-      return coords as [number, number]
-
+      return toPosition(geometry.coordinates)
     case 'LineString':
     case 'MultiPoint':
-      return coords[0] as [number, number]
-
+      // biome-ignore lint/style/noNonNullAssertion: This is OK
+      return toPosition(geometry.coordinates[0]!)
     case 'Polygon':
     case 'MultiLineString':
-      return coords[0][0] as [number, number]
-
+      // biome-ignore lint/style/noNonNullAssertion: This is OK
+      return toPosition(geometry.coordinates[0]![0]!)
     case 'MultiPolygon':
-      return coords[0][0][0] as [number, number]
-
-    default:
-      return null
+      // biome-ignore lint/style/noNonNullAssertion: This is OK
+      return toPosition(geometry.coordinates[0]![0]![0]!)
+    case 'GeometryCollection':
+      throw new Error('GeometryCollection not supported for projection validation')
   }
 }
 
@@ -44,37 +44,51 @@ function extractCoordinates(geometry: any): [number, number] | null {
  * where coordinates are in UTM or other projected coordinate systems
  * (e.g., 50403.212 instead of 12.123).
  */
-export function validateProjection(geojson: any, filename: string): boolean {
-  // Check if we have valid GeoJSON structure
-  if (
-    !geojson ||
-    !geojson.features ||
-    !Array.isArray(geojson.features) ||
-    geojson.features.length === 0
-  ) {
+
+type GeoJsonWithFeatures = {
+  features: Array<{ geometry?: Geometry }>
+}
+
+function hasFeatures(v: unknown): v is GeoJsonWithFeatures {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    'features' in v &&
+    Array.isArray((v as GeoJsonWithFeatures).features)
+  )
+}
+
+export function validateProjection(geojson: unknown, filename: string) {
+  if (!hasFeatures(geojson) || geojson.features.length === 0) {
     console.log(
-      styleText('yellow', `  WARNING: Cannot validate projection - no features found in ${filename}`),
+      styleText(
+        'yellow',
+        `  WARNING: Cannot validate projection - no features found in ${filename}`,
+      ),
     )
     return true // Don't fail validation for empty/invalid structure - let other validators handle this
   }
 
-  // Find the first feature with valid geometry
-  let firstValidCoords: [number, number] | null = null
+  let firstValidCoords: Position | null = null
   let featureIndex = -1
-
-  for (let i = 0; i < geojson.features.length && !firstValidCoords; i++) {
+  let i = 0
+  while (i < geojson.features.length) {
     const feature = geojson.features[i]
-    if (feature && feature.geometry) {
-      firstValidCoords = extractCoordinates(feature.geometry)
-      if (firstValidCoords) {
-        featureIndex = i
-      }
+    const geometry = feature?.geometry
+    if (geometry) {
+      firstValidCoords = extractCoordinates(geometry)
+      featureIndex = i
+      break
     }
+    i++
   }
 
-  if (!firstValidCoords) {
+  if (firstValidCoords === null) {
     console.log(
-      styleText('yellow', `  WARNING: Cannot validate projection - no valid coordinates found in ${filename}`),
+      styleText(
+        'yellow',
+        `  WARNING: Cannot validate projection - no valid coordinates found in ${filename}`,
+      ),
     )
     return true // Don't fail validation if we can't extract coordinates
   }
@@ -91,13 +105,19 @@ export function validateProjection(geojson: any, filename: string): boolean {
   if (!isWithinBounds) {
     console.log(styleText('red', `  ERROR: Projection validation failed for ${filename}`))
     console.log(
-      styleText('red', `    First feature (index ${featureIndex}) coordinates: [${longitude}, ${latitude}]`),
+      styleText(
+        'red',
+        `    First feature (index ${featureIndex}) coordinates: [${longitude}, ${latitude}]`,
+      ),
     )
     console.log(styleText('red', `    Expected coordinates within Germany's bounding box:`))
     console.log(styleText('red', `    Longitude: ${GERMANY_BBOX.minLon} to ${GERMANY_BBOX.maxLon}`))
     console.log(styleText('red', `    Latitude: ${GERMANY_BBOX.minLat} to ${GERMANY_BBOX.maxLat}`))
     console.log(
-      styleText('red', `    This suggests the data might be in a projected coordinate system (e.g., UTM) instead of WGS84.`),
+      styleText(
+        'red',
+        `    This suggests the data might be in a projected coordinate system (e.g., UTM) instead of WGS84.`,
+      ),
     )
     return false
   }

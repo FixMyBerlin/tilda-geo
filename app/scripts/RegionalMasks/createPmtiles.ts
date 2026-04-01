@@ -1,6 +1,7 @@
 // We use bun.sh to run this file
-import { styleText } from 'node:util'
+
 import path from 'node:path'
+import { styleText } from 'node:util'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
@@ -12,7 +13,11 @@ console.log('Tippecanoe for', inputFile)
 
 Bun.spawnSync(['tippecanoe', `--output=${outputFile}`, '--force', '--layer=default', inputFile], {
   onExit(_proc, exitCode, _signalCode, error) {
-    exitCode && console.log('exitCode:', exitCode)
-    error && console.log('error:', error)
+    if (exitCode) {
+      console.log('exitCode:', exitCode)
+    }
+    if (error) {
+      console.log('error:', error)
+    }
   },
 })

@@ -1,9 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { yellow } from './log'
 
-/** @returns Object or Function | null */
-export const import_ = async <ReturnModule extends Function | Object>(
+/** @returns object or callable | null */
+export const import_ = async <TModule extends ((...args: never) => unknown) | object>(
   folderName: string,
   moduleName: string,
   valueName: string,
@@ -15,11 +16,12 @@ export const import_ = async <ReturnModule extends Function | Object>(
     return null
   }
 
-  const module_ = await import(moduleFullFilename)
+  const moduleUrl = pathToFileURL(path.resolve(moduleFullFilename)).href
+  const module_ = await import(moduleUrl)
 
   if (!(valueName in module_)) {
     yellow(`  ${moduleFileName} does not export value "${valueName}".`)
     return null
   }
-  return module_[valueName] as ReturnModule
+  return module_[valueName] as TModule
 }

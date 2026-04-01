@@ -37,7 +37,7 @@ export const bikelaneTodoIds = [
   'unexpected_bicycle_access_on_footway__mapillary',
   'unexpected_highway_path',
   'unexpected_highway_path__mapillary',
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
 
@@ -52,7 +52,7 @@ export const bikelaneTodoIdsTableAndField = [
   'mixed_cycleway_both',
   'needs_clarification',
   'needs_clarification_track',
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
 
@@ -81,24 +81,24 @@ export const bikelaneTodoIdsTableOnly = [
   'unexpected_bicycle_access_on_footway__mapillary',
   'unexpected_highway_path',
   'unexpected_highway_path__mapillary',
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
 
 export const roadTodoIds = [
   'deprecated_cycleway_shared',
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type RoadTodoId = (typeof roadTodoIds)[number]
 
 export const roadTodoIdsTableAndField = [
   'deprecated_cycleway_shared',
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
 
 export const roadTodoIdsTableOnly = [
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
 
@@ -138,6 +138,6 @@ export const todoIds = [
   'unexpected_bicycle_access_on_footway__mapillary',
   'unexpected_highway_path',
   'unexpected_highway_path__mapillary',
-  // (prettier: one line per entry)
+  // (biome: one line per entry)
 ] as const
 export type TodoId = (typeof todoIds)[number]

@@ -5,16 +5,34 @@ However, Mapbox Studio does weird things when processing GeoJson which breaks th
 
 As a work around, we now create mbtiles and import those in Mapbox (manually).
 
-Run
+## Usage
 
-```
-npm run updateTilesets
+```bash
+npm run MapboxTilesets:update
 ```
 
-This command will open the browser tabs needed. Use "replace" and pick the generated mbtiles.
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `--env <dev\|staging\|production>` | Environment to fetch tiles from. If omitted, an interactive prompt is shown. |
+| `--filter <string>` | Only process datasets whose key includes this string (e.g. `--filter parking`). |
+| `--force` | Re-download and rebuild even when output files already exist. |
+
+### Examples
+
+```bash
+# Interactive environment prompt, process all datasets
+npm run MapboxTilesets:update
+
+# Fetch from staging, only parking-related datasets, force rebuild
+npm run MapboxTilesets:update -- --env staging --filter parking --force
+```
+
+After processing, the mbtiles folder opens automatically. Use "replace" in Mapbox Studio and pick the generated mbtiles files.
 
 ## Reminder
 
-The files we create here are likely different that what our own tileserver creates.
-We have to choose some optiones in tippecanoe to generate a file that works well in Mapbox accross zoom levels.
+The files we create here are likely different from what our own tileserver creates.
+We have to choose some options in tippecanoe to generate a file that works well in Mapbox across zoom levels.
 However the tippecanoe options that pick the maxzoom and make the decisions on what to drop per zoom level will likely not match what our tileserver does.

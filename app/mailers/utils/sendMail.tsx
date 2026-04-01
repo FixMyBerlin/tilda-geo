@@ -1,10 +1,11 @@
-import { isDev, isTest } from '@/src/app/_components/utils/isEnv'
 import { render } from '@react-email/components'
-import Mailjet, { LibraryResponse, type SendEmailV3_1 } from 'node-mailjet'
+import type { LibraryResponse, SendEmailV3_1 } from 'node-mailjet'
+import Mailjet from 'node-mailjet'
+import { isDev, isTest } from '@/components/shared/utils/isEnv'
 import { footerTextMarkdown } from '../templates/footerTextMarkdown'
 import { MarkdownMail } from '../templates/MarkdownMail'
 import { signatureTextMarkdown } from '../templates/signatureTextMarkdown'
-import { Mail, MailjetMessage } from './types'
+import type { Mail, MailjetMessage } from './types'
 
 /**
  * Centralized email sending helper
@@ -44,7 +45,7 @@ ${footerTextMarkdown}
 
   const mailjetMessage: MailjetMessage = {
     From: message.From,
-    To: toArray as SendEmailV3_1.Body['Messages'][number]['To'],
+    To: toArray,
     Subject: message.Subject,
     TextPart: textPart,
     HTMLPart: htmlPart,

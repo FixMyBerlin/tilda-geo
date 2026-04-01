@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const adjoining_or_isolated: CampaignType = {
   id: 'adjoining_or_isolated',

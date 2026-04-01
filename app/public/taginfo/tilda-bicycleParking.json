@@ -1,0 +1,143 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-bicycleParking.json",
+  "data_updated": "20260317T120000Z",
+  "project": {
+    "name": "TILDA - Bicycle Parking",
+    "description": "TILDA processes bicycle parking facilities from OpenStreetMap data to analyze parking capacity, type, and accessibility.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/bicycleParking",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "amenity",
+      "value": "bicycle_parking",
+      "object_types": ["node", "way", "area"],
+      "description": "Entry condition that identifies bicycle parking facilities for TILDA processing."
+    },
+    {
+      "key": "capacity",
+      "object_types": ["node", "way", "area"],
+      "description": "Extracted and normalized for capacity analysis."
+    },
+    {
+      "key": "access",
+      "value": "yes",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies access restrictions for bicycle parking."
+    },
+    {
+      "key": "access",
+      "value": "private",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies access restrictions for bicycle parking."
+    },
+    {
+      "key": "access",
+      "value": "permissive",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies access restrictions for bicycle parking."
+    },
+    {
+      "key": "access",
+      "value": "customers",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies access restrictions for bicycle parking."
+    },
+    {
+      "key": "covered",
+      "value": "yes",
+      "object_types": ["node", "way", "area"],
+      "description": "Indicates whether bicycle parking is covered."
+    },
+    {
+      "key": "covered",
+      "value": "no",
+      "object_types": ["node", "way", "area"],
+      "description": "Indicates whether bicycle parking is covered."
+    },
+    {
+      "key": "fee",
+      "value": "yes",
+      "object_types": ["node", "way", "area"],
+      "description": "Indicates whether bicycle parking requires a fee."
+    },
+    {
+      "key": "fee",
+      "value": "no",
+      "object_types": ["node", "way", "area"],
+      "description": "Indicates whether bicycle parking requires a fee."
+    },
+    {
+      "key": "cargo_bike",
+      "value": "yes",
+      "object_types": ["node", "way", "area"],
+      "description": "Indicates whether cargo bikes are accommodated."
+    },
+    {
+      "key": "cargo_bike",
+      "value": "no",
+      "object_types": ["node", "way", "area"],
+      "description": "Indicates whether cargo bikes are accommodated."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "stands",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "wide_stands",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "bollard",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "wall_loops",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "shed",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "two-tier",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "bicycle_parking",
+      "value": "lockers",
+      "object_types": ["node", "way", "area"],
+      "description": "Classifies parking infrastructure type."
+    },
+    {
+      "key": "traffic_sign",
+      "object_types": ["node", "way", "area"],
+      "description": "Sanitized traffic sign information for bicycle parking facilities."
+    },
+    {
+      "key": "name",
+      "object_types": ["node", "way", "area"],
+      "description": "Facility name displayed in TILDA output."
+    },
+    {
+      "key": "operator",
+      "object_types": ["node", "way", "area"],
+      "description": "Facility operator displayed in TILDA output."
+    }
+  ]
+}

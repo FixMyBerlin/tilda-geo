@@ -1,0 +1,86 @@
+import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
+import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
+import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
+import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
+import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
+import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
+import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
+import { InspectorFeatureQa } from './InspectorFeatureQa'
+import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
+import { InspectorFeatureTilda } from './InspectorFeatureTilda'
+
+export type InspectorFeatureProperty = NonNullable<GeoJSON.GeoJsonProperties>
+
+export type InspectorFeature = {
+  sourceKey: string
+  feature: StoreFeaturesInspector['inspectorFeatures'][number]
+}
+
+export type InspectorOsmNoteFeature = Omit<InspectorFeature, 'sourceKey'>
+
+type Props = {
+  features: StoreFeaturesInspector['inspectorFeatures']
+}
+
+export const Inspector = ({ features }: Props) => {
+  const { data: regionDatasets } = useRegionDatasetsQuery()
+
+  return (
+    <div className="space-y-4">
+      {features.map((inspectObject) => {
+        const sourceKey = String(inspectObject.source) // Format: `category:lit--source:atlas_lit--subcategory:lit`
+        if (!sourceKey) return null
+
+        if (inspectObject.source === osmNotesSourceId) {
+          return (
+            <InspectorFeatureOsmNote
+              key={`${osmNotesSourceId}-${inspectObject?.properties?.id}`}
+              feature={inspectObject}
+            />
+          )
+        }
+        if (inspectObject.source === internalNotesSourceId) {
+          return (
+            <InspectorFeatureInternalNote
+              key={`${internalNotesSourceId}-${inspectObject?.properties?.id}`}
+              noteId={inspectObject.properties.id}
+            />
+          )
+        }
+        if (inspectObject.source === qaSourceId) {
+          return (
+            <InspectorFeatureQa
+              key={`${qaSourceId}-${inspectObject?.properties?.id}`}
+              feature={inspectObject}
+            />
+          )
+        }
+
+        // Inspector-Block for Datasets
+        const isDataset = regionDatasets.some(
+          (d) => d.id === parseSourceKeyStaticDatasets(sourceKey).sourceId,
+        )
+        if (isDataset) {
+          return (
+            <InspectorFeatureStaticDataset
+              key={createInspectorFeatureKey(inspectObject)}
+              sourceKey={sourceKey}
+              feature={inspectObject}
+            />
+          )
+        }
+
+        // Inspector-Block for Features
+        return (
+          <InspectorFeatureTilda
+            key={createInspectorFeatureKey(inspectObject)}
+            sourceKey={sourceKey}
+            feature={inspectObject}
+          />
+        )
+      })}
+    </div>
+  )
+}

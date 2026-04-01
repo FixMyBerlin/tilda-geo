@@ -2,7 +2,7 @@
 import { deleteAllUploads } from './api'
 import { inverse, yellow } from './utils/log'
 
-export const deleteUploadFolderOnS3 = async () => {
+export const deleteUploadFolderOnS3 = () => {
   yellow('  Not implemented.')
 }
 

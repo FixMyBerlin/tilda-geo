@@ -1,9 +1,18 @@
-import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
+import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
 import { createUpload } from '../api'
-import { MetaData } from '../types'
+import type { MetaData } from '../types'
 import { generatePMTilesFile } from './generatePMTilesFile'
 import { isCompressedSmallerThan } from './isCompressedSmallerThan'
 import { uploadFileToS3 } from './uploadFileToS3'
+
+type LocalMapRenderFormat = 'pmtiles' | 'geojson' | 'auto'
+
+export function getRenderStrategy(mapRenderFormat: LocalMapRenderFormat, isSmall: boolean) {
+  const renderFormat =
+    mapRenderFormat === 'auto' ? (isSmall ? 'geojson' : 'pmtiles') : mapRenderFormat
+  const shouldGeneratePmtiles = mapRenderFormat === 'auto' || renderFormat === 'pmtiles'
+  return { renderFormat, shouldGeneratePmtiles }
+}
 
 export async function processLocalSource(
   metaData: Extract<MetaData, { dataSourceType: 'local' }>,
@@ -18,19 +27,18 @@ export async function processLocalSource(
 
   // Determine which format to use for map rendering
   const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
-  let renderFormat: 'geojson' | 'pmtiles'
-  if (mapRenderFormat === 'auto') {
-    const maxCompressedSizeBites = 50000 // 50,000 bytes ≈ 48.8 KB or ≈ 0.049 MB
-    const isSmall = await isCompressedSmallerThan(transformedFilepath, maxCompressedSizeBites)
-    renderFormat = isSmall ? 'geojson' : 'pmtiles'
-  } else {
-    renderFormat = mapRenderFormat
-  }
+  const maxCompressedSizeBites = 50000 // 50,000 bytes ≈ 48.8 KB or ≈ 0.049 MB
+  const isSmall =
+    mapRenderFormat === 'auto'
+      ? isCompressedSmallerThan(transformedFilepath, maxCompressedSizeBites)
+      : false
+  const { renderFormat, shouldGeneratePmtiles } = getRenderStrategy(mapRenderFormat, isSmall)
 
-  // Only generate PMTiles if needed (not for GeoJSON-only datasets like masks)
+  // For `auto` we still generate PMTiles for compatibility, even if map rendering uses GeoJSON.
+  // Only explicit `mapRenderFormat: 'geojson'` skips PMTiles generation.
   let pmtilesUrl: string | null = null
-  if (renderFormat === 'pmtiles') {
-    const pmtilesFilepath = await generatePMTilesFile(
+  if (shouldGeneratePmtiles) {
+    const pmtilesFilepath = generatePMTilesFile(
       transformedFilepath,
       tempFolder,
       metaData.geometricPrecision,
@@ -46,7 +54,7 @@ export async function processLocalSource(
       ? 'based on the Format specified in the config.'
       : 'based on the optimal format for this file size.',
   )
-  if (renderFormat === 'geojson' && mapRenderFormat === 'geojson') {
+  if (!shouldGeneratePmtiles) {
     console.log(`  Skipping PMTiles generation (GeoJSON-only dataset)`)
   }
 

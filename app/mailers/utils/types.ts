@@ -1,5 +1,5 @@
 import type { SendEmailV3_1 } from 'node-mailjet'
-import { MarkdownMailProps } from '../templates/MarkdownMail'
+import type { MarkdownMailProps } from '../templates/MarkdownMail'
 
 // Format: https://github.com/mailjet/mailjet-apiv3-nodejs?tab=readme-ov-file#send-email-example
 export type Mail = {

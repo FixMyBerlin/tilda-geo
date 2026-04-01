@@ -30,26 +30,19 @@ const CampaignBaseSchema = z.object({
   visibility: z.enum(visibilityOptions),
   category: z.enum(campaignCategories),
   recommendedAction: z.enum(recommendedActions),
-  mapUrl: z.string().url().optional(), // TILDA URL
+  mapUrl: z.url().optional(), // TILDA URL
   description: z.string(),
   task: z.string(),
   taskTemplate: z.string(),
 })
 
-export const CampaignSchema = CampaignBaseSchema.merge(
-  z.object({
-    maprouletteChallenge: z.discriminatedUnion('enabled', [
-      MaprouletteEnabled,
-      MaprouletteDisabled,
-    ]),
-  }),
-)
+export const CampaignSchema = CampaignBaseSchema.extend({
+  maprouletteChallenge: z.discriminatedUnion('enabled', [MaprouletteEnabled, MaprouletteDisabled]),
+})
 
-export const CampaignMaprouletteSchema = CampaignBaseSchema.merge(
-  z.object({
-    maprouletteChallenge: MaprouletteEnabled,
-  }),
-)
+export const CampaignMaprouletteSchema = CampaignBaseSchema.extend({
+  maprouletteChallenge: MaprouletteEnabled,
+})
 
 export type CampaignType = z.infer<typeof CampaignSchema>
 export type CampaignMaprouletteType = z.infer<typeof CampaignMaprouletteSchema>

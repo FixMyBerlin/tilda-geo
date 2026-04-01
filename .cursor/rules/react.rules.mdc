@@ -2,4 +2,8 @@
 globs: **/*.tsx,**/*.ts
 alwaysApply: false
 ---
-Read [`.github/instructions/react.instructions.md`](../../.github/instructions/react.instructions.md)
+
+# TypeScript
+
+- Never use return types, unless needed for some specific reason
+- Always use `type`, don't use `interface`

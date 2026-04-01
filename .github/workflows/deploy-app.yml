@@ -65,8 +65,8 @@ jobs:
             public.ecr.aws/n0p8j4k5/tilda/app:${{ github.sha }}
             public.ecr.aws/n0p8j4k5/tilda/app:${{ inputs.ENVIRONMENT }}-latest
           build-args: |
-            NEXT_PUBLIC_APP_ENV=${{ vars.NEXT_PUBLIC_APP_ENV }}
-            NEXT_PUBLIC_APP_ORIGIN=${{ vars.NEXT_PUBLIC_APP_ORIGIN }}
+            VITE_APP_ENV=${{ vars.VITE_APP_ENV }}
+            VITE_APP_ORIGIN=${{ vars.VITE_APP_ORIGIN }}
   restart_app:
     runs-on: ubuntu-latest
     needs: [diff_app, build_app]

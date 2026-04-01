@@ -1,55 +1,44 @@
 # dependencies
 node_modules
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
-.npm
-web_modules/
 
-# blitz
-.blitz/
-.next/
-.output/
-*.sqlite
-*.sqlite-journal
-.now
-.blitz**
-blitz-log.log
+# Nitro / TanStack Start
+.nitro
+.output
+.vinxi
+.tanstack
+dist-ssr
 
 # misc
 .DS_Store
 
-# local env files
-# See also https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables#default-environment-variables
-.env.local
-.env.*.local
+# env
+.env
+.env.*
+!.env.example
 .envrc
 
 # Logs
 logs
 *.log
 
-# Runtime data
+# Runtime
 pids
 *.pid
 *.seed
 *.pid.lock
 
+# DB (Prisma)
+*.sqlite
+*.sqlite-journal
+
 # Testing
 .coverage
 *.lcov
 .nyc_output
-lib-cov
+playwright-report*
+test-results/
 
 # Caches
 *.tsbuildinfo
 .eslintcache
 .node_repl_history
-.yarn-integrity
-
-# Serverless directories
-.serverless/

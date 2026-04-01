@@ -14,11 +14,17 @@ services:
     # INFO: The overwrite of `journald` is needed for mac systems which did not work with `journald`
     logging:
       driver: json-file
+    environment:
+      # Override DATABASE_HOST and PGHOST to use Docker service name 'db' instead of 'localhost'
+      # docker-compose.yml sets PGHOST: ${DATABASE_HOST}, but we need to override PGHOST directly
+      # since Docker Compose resolves ${DATABASE_HOST} from .env before override applies
+      DATABASE_HOST: db
+      PGHOST: db
     # Performance: Allocate resources for processing container
     # Docker Desktop has 8GB total, so we allocate 4GB max for processing
     mem_limit: 4g
     mem_reservation: 2g
-    cpus: '4'
+    cpus: "4"
   app:
     image: app:latest
     build:
@@ -26,15 +32,19 @@ services:
       dockerfile: ./app.Dockerfile
       target: base
       args:
-        NEXT_PUBLIC_APP_ORIGIN: localhost
-        NEXT_PUBLIC_APP_ENV: ${NEXT_PUBLIC_APP_ENV}
+        VITE_APP_ORIGIN: localhost
+        VITE_APP_ENV: ${VITE_APP_ENV}
     environment:
-      NEXT_PUBLIC_APP_ORIGIN: localhost
+      DATABASE_HOST: db
+      VITE_APP_ORIGIN: localhost
     logging:
       driver: json-file
     profiles:
       - frontend
   tiles:
+    environment:
+      DATABASE_HOST: db
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db/${DATABASE_NAME}
     logging:
       driver: json-file
   db:
@@ -49,7 +59,7 @@ services:
     # PostgreSQL benefits significantly from dedicated CPU and memory
     mem_limit: 5g
     mem_reservation: 4g
-    cpus: '4'
+    cpus: "4"
 
 configs:
   postgres_conf:

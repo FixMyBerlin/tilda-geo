@@ -1,17 +1,7 @@
 /**
- * Get the base domain URL for the current environment
- * Used for email templates (e.g., logo images)
+ * Base domain URL for the current environment (email templates, etc.).
+ * Vite-only: use VITE_APP_ORIGIN everywhere; mailpreview sets it in package.json.
  */
-export const getDomain = () => {
-  // This is for `npm run mailpreview`
-  // where we set the origin manually to get the logo to show up
-  if (process.env?.npm_lifecycle_event === 'mailpreview') {
-    return process.env.BLITZ_DEV_SERVER_ORIGIN || process.env.NEXT_PUBLIC_APP_ORIGIN
-  }
-
-  if (process.env.NODE_ENV === 'development') {
-    return process.env.BLITZ_DEV_SERVER_ORIGIN || process.env.NEXT_PUBLIC_APP_ORIGIN
-  }
-
-  return process.env.NEXT_PUBLIC_APP_ORIGIN
-}
+export const getDomain = () =>
+  process.env.VITE_APP_ORIGIN ??
+  (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:5173' : '')

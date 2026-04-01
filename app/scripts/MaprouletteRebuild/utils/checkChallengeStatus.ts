@@ -30,7 +30,10 @@ export const checkChallengeStatus = async (campaignId: number, retries = 0) => {
     const challengeStatus = challenge.status
 
     if (retries >= MAX_RETRIES) {
-      console.log(tabPrefix, styleText('red', `Challenge build failed after ${MAX_RETRIES} retries.`))
+      console.log(
+        tabPrefix,
+        styleText('red', `Challenge build failed after ${MAX_RETRIES} retries.`),
+      )
       return 'failed'
     }
 
@@ -38,7 +41,12 @@ export const checkChallengeStatus = async (campaignId: number, retries = 0) => {
     const msgRetry = `${retries} / ${MAX_RETRIES}`
     switch (challengeStatus) {
       case ChallengeStatus.building:
-        console.log(tabPrefix, styleText('blue', 'Challenge is rebuilding tasks.'), msgWaiting, msgRetry)
+        console.log(
+          tabPrefix,
+          styleText('blue', 'Challenge is rebuilding tasks.'),
+          msgWaiting,
+          msgRetry,
+        )
         await sleep(RETRY_TIME_MS)
         return checkChallengeStatus(campaignId, retries + 1)
       case ChallengeStatus.failed:
@@ -48,18 +56,26 @@ export const checkChallengeStatus = async (campaignId: number, retries = 0) => {
         console.log(tabPrefix, styleText('green', 'Challenge is ready.'))
         return 'ready'
       case ChallengeStatus.partiallyLoaded:
-        console.log(tabPrefix, styleText('blue', 'Challenge is partially loaded.'), msgWaiting, msgRetry)
+        console.log(
+          tabPrefix,
+          styleText('blue', 'Challenge is partially loaded.'),
+          msgWaiting,
+          msgRetry,
+        )
         await sleep(RETRY_TIME_MS)
         return checkChallengeStatus(campaignId, retries + 1)
       case ChallengeStatus.finished:
         console.log(tabPrefix, styleText('green', 'Challenge is finished.'))
         return 'finished'
       case ChallengeStatus.deletingTasks:
-        console.log(tabPrefix, styleText('blue', 'Challenge is deleting tasks.'), msgWaiting, msgRetry)
+        console.log(
+          tabPrefix,
+          styleText('blue', 'Challenge is deleting tasks.'),
+          msgWaiting,
+          msgRetry,
+        )
         await sleep(RETRY_TIME_MS)
         return checkChallengeStatus(campaignId, retries + 1)
-      case ChallengeStatus.none:
-      case ChallengeStatus.empty:
       default:
         console.log(tabPrefix, styleText('red', 'ℹ️'), 'Challenge has no status or unknown status.')
         return 'failed'

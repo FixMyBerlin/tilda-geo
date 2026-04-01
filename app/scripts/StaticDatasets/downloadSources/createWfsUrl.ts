@@ -1,4 +1,4 @@
-import { DownloadConfig } from './types'
+import type { DownloadConfig } from './types'
 
 export type WfsUrl = ReturnType<typeof createWfsUrl>
 
@@ -11,10 +11,18 @@ export const createWfsUrl = ({ endpoint, layer, opt }: DownloadConfig) => {
   url.searchParams.append('outputFormat', 'geopackage') // via https://gdi.berlin.de/services/wfs/radverkehrsanlagen?REQUEST=GetCapabilities&SERVICE=wfs
   url.searchParams.append('typeNames', layer)
   url.searchParams.append('srsName', opt?.crs || 'urn:ogc:def:crs:EPSG::4326')
-  opt?.bbox && url.searchParams.append('bbox', opt.bbox.join(','))
-  opt?.results && url.searchParams.append('results', String(opt.results))
-  opt?.sortBy && url.searchParams.append('sortBy', opt.sortBy)
-  opt?.props && url.searchParams.append('props', opt.props.join(','))
+  if (opt?.bbox) {
+    url.searchParams.append('bbox', opt.bbox.join(','))
+  }
+  if (opt?.results) {
+    url.searchParams.append('results', String(opt.results))
+  }
+  if (opt?.sortBy) {
+    url.searchParams.append('sortBy', opt.sortBy)
+  }
+  if (opt?.props) {
+    url.searchParams.append('props', opt.props.join(','))
+  }
 
   return url
 }

@@ -13,23 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: "app/.nvmrc"
-          cache: 'npm'
-          cache-dependency-path: './app/package-lock.json'
+      - uses: oven-sh/setup-bun@v2
 
-      - name: Install dependencies (with cache)
-        run: npm ci
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Check types
-        run: npm run type-check
+        run: bun run type-check
 
       - name: Check linting
-        run: npm run lint
+        run: bun run lint
 
       - name: Run tests
-        run: npm run test:run
+        run: bun run test:run
   # Disabled due to error https://github.com/FixMyBerlin/tilda-geo/actions/runs/15585651343/job/43891057696?pr=209
   # > Run docker run test_img
   # > docker run test_img

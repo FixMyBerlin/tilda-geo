@@ -1,7 +1,7 @@
+import { join } from 'node:path'
 import { $ } from 'bun'
-import { join } from 'path'
 import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
-import { topicsConfig, type Topic } from '../constants/topics.const'
+import { type Topic, topicsConfig } from '../constants/topics.const'
 import {
   createReferenceTable,
   diffTables,

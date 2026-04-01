@@ -1,21 +1,18 @@
-import { styleText } from 'node:util'
 import path from 'node:path'
+import { styleText } from 'node:util'
 import type { MetaData } from '../types'
 
 /** @returns pmtiles outputFullFile */
-export const generatePMTilesFile = async (
+export const generatePMTilesFile = (
   inputFullFile: string,
   outputFolder: string,
   precision: Extract<MetaData, { dataSourceType: 'local' }>['geometricPrecision'],
 ) => {
   const outputFilename = path.parse(inputFullFile).name
-  // This line is only used for `app/scripts/StaticDatasets/geojson/region-bb/bb-ramboll-netzentwurf-2/README.md`
-  // const outputFullFile = path.join(outputFolder, `${outputFilename}.mbtiles`)
   const outputFullFile = path.join(outputFolder, `${outputFilename}.pmtiles`)
 
   const maxZoom = (() => {
     switch (precision) {
-      // NOTE: We might want to change 'mask' to 'auto' and use the Tippecanoe auto discovery instead of a fixed maxzoom
       case 'mask':
         return 10
       case 'regular':
@@ -26,7 +23,7 @@ export const generatePMTilesFile = async (
         //    vs. https://viz.berlin.de/site/_masterportal/parkraumkartierung/index.html?MAPS={%22center%22:[393328.29599940975,5814690.745182172],%22mode%22:%222D%22,%22zoom%22:13}&MENU={%22main%22:{%22currentComponent%22:%22root%22},%22secondary%22:{%22currentComponent%22:%22root%22}}&LAYERS=[{%22id%22:%22basemap_raster_grau%22,%22visibility%22:true,%22transparency%22:40},{%22id%22:%22parkraumdaten_aussen%22,%22visibility%22:true},{%22id%22:%22parkraumdaten%22,%22visibility%22:true},{%22id%22:%22bezirke%22,%22visibility%22:true},{%22id%22:%22parkraumdaten_parkraumbewirtschaftung%22,%22visibility%22:false},{%22id%22:%22parkraumdaten_umweltzone%22,%22visibility%22:true}]&MAINCLOSED=true&lng=de
         return 15
       default:
-        return 14 // fallback to 'regular'
+        return 14
     }
   })()
 
@@ -90,13 +87,16 @@ export const generatePMTilesFile = async (
     stderr: 'pipe',
   })
   if (!success) {
-    console.error(styleText('red', '  ERROR: tippecanoe failed. This needs to be fixed manually!'), {
-      success,
-      exitCode,
-      stdout: stdout.toString(),
-      stderr: stderr.toString(),
-      command: `tippecanoe ${parameters.join(' ')}`,
-    })
+    console.error(
+      styleText('red', '  ERROR: tippecanoe failed. This needs to be fixed manually!'),
+      {
+        success,
+        exitCode,
+        stdout: stdout.toString(),
+        stderr: stderr.toString(),
+        command: `tippecanoe ${parameters.join(' ')}`,
+      },
+    )
   }
 
   return outputFullFile

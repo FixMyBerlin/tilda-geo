@@ -37,8 +37,8 @@ export const CreateMapRouletteChallengeSchema = z.strictObject({
 
 export type CreateMapRouletteChallengeType = z.infer<typeof CreateMapRouletteChallengeSchema>
 
-export const UpdateMapRouletteChallengeSchema = CreateMapRouletteChallengeSchema.merge(
-  z.object({ id: z.number() }),
-)
+export const UpdateMapRouletteChallengeSchema = CreateMapRouletteChallengeSchema.extend({
+  id: z.number(),
+})
 
 export type UpdateMapRouletteChallengeType = z.infer<typeof UpdateMapRouletteChallengeSchema>

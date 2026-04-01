@@ -1,13 +1,14 @@
 // We use bun.sh to run this file
-import { select } from '@clack/prompts'
-import dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
+import { parseArgs } from 'node:util'
+import { select } from '@clack/prompts'
+import dotenv from 'dotenv'
 import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
-import { parseArgs } from 'util'
+import { getValidatedEnv, staticDatasetsEnvSchema } from '../shared/env'
 import { getRegions } from './api'
-import { MetaData } from './types'
+import type { MetaData } from './types'
 import { findGeojson } from './updateStaticDatasets/findGeojson'
 import { ignoreFolder } from './updateStaticDatasets/ignoreFolder'
 import { processExternalSource } from './updateStaticDatasets/processExternalSource'
@@ -42,7 +43,7 @@ function loadEnvFiles(environment: string) {
 // use --env to specify environment (dev/staging/production), otherwise will prompt
 // use --keep-tmp to keep temporary generated files
 // use --folder-filter to run only folders that include this filter string (check the full path, so `region-bb` (group folder) and `bb-` (dataset folder) will both work)
-const { values, positionals } = parseArgs({
+const { values, positionals: _positionals } = parseArgs({
   args: Bun.argv,
   options: {
     env: { type: 'string' },
@@ -81,6 +82,7 @@ if (values.env) {
 
 // Load environment files before accessing process.env
 loadEnvFiles(environment)
+const scriptEnv = getValidatedEnv(staticDatasetsEnvSchema)
 
 const geoJsonFolder = 'scripts/StaticDatasets/geojson'
 export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
@@ -94,8 +96,8 @@ const folderFilterTerm = values['folder-filter']
 
 inverse('Starting update with settings', [
   {
-    API_ROOT_URL: process.env.API_ROOT_URL,
-    S3_UPLOAD_FOLDER: process.env.S3_UPLOAD_FOLDER,
+    API_ROOT_URL: scriptEnv.API_ROOT_URL,
+    S3_UPLOAD_FOLDER: scriptEnv.S3_UPLOAD_FOLDER,
     keepTemporaryFiles,
     folderFilterTerm,
   },
@@ -118,20 +120,16 @@ const regionGroupFolderPaths = fs
   .filter((item) => fs.statSync(path.join(geoJsonFolder, item)).isDirectory())
 
 const datasetFileFolderData = regionGroupFolderPaths
-  .map((regionGroupFolder) => {
+  .flatMap((regionGroupFolder) => {
     const subFolders = fs.readdirSync(path.join(geoJsonFolder, regionGroupFolder))
-    return subFolders.map((datasetFolder) => {
+    return subFolders.flatMap((datasetFolder) => {
       const targetFolder = path.join(geoJsonFolder, regionGroupFolder, datasetFolder)
       const regionAndDatasetFolder = `${regionGroupFolder}/${datasetFolder}`
-      // If a `folder-filter` is given, we only look at folder that include this term
-      // Filter uses GROUPFOLDER/SUBFOLDER format (e.g., "masks/" to match all mask folders)
-      if (folderFilterTerm && !regionAndDatasetFolder.includes(folderFilterTerm)) return
-      // Make sure we only select folders, no files
-      if (!fs.statSync(targetFolder).isDirectory()) return
-      return { datasetFolderPath: targetFolder, regionFolder: regionGroupFolder, datasetFolder }
+      if (folderFilterTerm && !regionAndDatasetFolder.includes(folderFilterTerm)) return []
+      if (!fs.statSync(targetFolder).isDirectory()) return []
+      return [{ datasetFolderPath: targetFolder, regionFolder: regionGroupFolder, datasetFolder }]
     })
   })
-  .flat()
   .filter(Boolean)
   .sort((a, b) => a.datasetFolderPath.localeCompare(b.datasetFolderPath))
 
@@ -185,25 +183,20 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
 
   // Route to appropriate processor based on data source type
   switch (metaData.dataSourceType) {
-    case 'external':
-      // TypeScript narrows metaData to the external variant here
+    case 'external': {
       await processExternalSource(metaData, uploadSlug, regionSlugs, regionAndDatasetFolder)
       break
-    case 'local':
-      // Get the one `.geojson` file that we will handle ready
+    }
+    case 'local': {
       const geojsonFullFilename = findGeojson(datasetFolderPath)
       if (!geojsonFullFilename) {
-        // Logging is part of findGeojson()
         continue
       }
-
-      // Create the transformed data (or duplicate existing geojson)
       const transformedFilepath = await transformFile(
         datasetFolderPath,
         geojsonFullFilename,
         tempFolder,
       )
-
       await processLocalSource(
         metaData,
         uploadSlug,
@@ -213,6 +206,7 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
         regionAndDatasetFolder,
       )
       break
+    }
   }
 
   green('  OK')
@@ -226,9 +220,9 @@ if (keepTemporaryFiles) {
     .filter((file) => file.endsWith('.geojson') || file.endsWith('.geojson.gz'))
     .filter((file) => (folderFilterTerm ? file.includes(folderFilterTerm) : true))
     .sort()
-  tempGeojsonFiles.map((file) => {
+  for (const file of tempGeojsonFiles) {
     console.log(`  ${path.join(tempFolder, file)}`)
-  })
+  }
 }
 
 // Clean up
@@ -240,10 +234,10 @@ if (!keepTemporaryFiles) {
 //   https://github.com/FixMyBerlin/tilda-static-data/tags
 // How to use: Compare with the previous tag at
 //   https://github.com/FixMyBerlin/tilda-static-data/compare/main...publish_2024-05-23_prd
-if (process.env.S3_UPLOAD_FOLDER === 'production') {
+if (scriptEnv.S3_UPLOAD_FOLDER === 'production') {
   const currentDateTime = new Date().toISOString()
-  const tagName = `publish_${currentDateTime}_${process.env.S3_UPLOAD_FOLDER}`
-  const tagMessage = `publish data to ${process.env.S3_UPLOAD_FOLDER}`
+  const tagName = `publish_${currentDateTime}_${scriptEnv.S3_UPLOAD_FOLDER}`
+  const tagMessage = `publish data to ${scriptEnv.S3_UPLOAD_FOLDER}`
 
   try {
     Bun.spawnSync(['git', 'tag', '-a', tagName, '-m', tagMessage], {

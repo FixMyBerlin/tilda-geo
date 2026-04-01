@@ -23,10 +23,10 @@ The reason for that is, that styling the data there has the best editor experien
 
 ## What it does
 
-1. The script generates one style file per Mapbox folder in `src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/groups/`.
+1. The script generates one style file per Mapbox folder in `src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/`.
    - Only Mapbox folders that are prefixed with the term given in `mapboxGroupPrefix` (eg. `atlas_`) are processed.
    - The styles are cleaned up by removing 'source', 'source-layer', 'metadata' which we add back later in our subcategory configuration.
-2. The script generates a merged sprite file in `public/map/`
-3. The script stores the original base style in `src/app/api/map/style.json`.
+2. The script generates merged sprite files in `public/map-style/` (e.g. `sprite`, `sprite@2x`).
+3. The script stores the original base style in `src/server/api/map-style/style.json`.
    The `style.json` represents our `baseMapStyle`.
-   The `style.ts` API is where we replace the sprite reference with our own.
+   The `/api/map-style` route replaces the sprite reference with our own at request time.

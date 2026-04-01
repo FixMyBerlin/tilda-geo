@@ -26,7 +26,7 @@ export function convertTileUrl(
   if (eliType === 'wms') {
     // WMS format: convert {bbox} to {bbox-epsg-3857}
     // Also need to set width/height for proper tile size
-    let converted = eliUrl
+    const converted = eliUrl
       .replace(/\{bbox\}/g, '{bbox-epsg-3857}')
       .replace(/\{proj\}/g, 'EPSG:3857')
       .replace(/\{width\}/g, '512')
@@ -37,7 +37,7 @@ export function convertTileUrl(
     const heightMatch = eliUrl.match(/HEIGHT=(\d+)/i)
     const tileSize =
       widthMatch?.[1] && heightMatch?.[1]
-        ? Math.max(parseInt(widthMatch[1]), parseInt(heightMatch[1]))
+        ? Math.max(parseInt(widthMatch[1], 10), parseInt(heightMatch[1], 10))
         : 512
 
     return { tiles: converted, tileSize }

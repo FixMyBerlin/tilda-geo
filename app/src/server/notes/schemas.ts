@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const Author = z.object({
-  id: z.number(),
+  id: z.string(), // Now String (cuid) instead of number
   osmName: z.string(),
   // osmAvatar: z.string().nullable(), // Not used ATM
   firstName: z.string().nullable(),
@@ -13,7 +13,7 @@ export const NoteAndCommentsSchema = z.object({
   id: z.number(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  userId: z.number(),
+  userId: z.string(), // Now String (cuid) instead of number
   author: Author,
   subject: z.string(),
   body: z.string().nullable(),

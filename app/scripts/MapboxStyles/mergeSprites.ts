@@ -1,8 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import sharp from 'sharp'
-import Spritesmith, { SpritesmithResult } from 'spritesmith'
-import { SpriteSource } from './process'
+import type { SpritesmithResult } from 'spritesmith'
+import Spritesmith from 'spritesmith'
+import type { SpriteSource } from './process'
 import { log, saveJson, sortObject } from './util'
 
 function generateSpriteUrl(sprite: SpriteSource, pixelRatio: 1 | 2, extension: 'png' | 'json') {
@@ -86,12 +87,12 @@ export async function mergeSprites(sprites: SpriteSource[], pixelRatio: 1 | 2) {
   )
 
   // Create a single merged sprite
-  const filename = `public/map-style/sprite${pixelRatio === 1 ? '' : '@2x'}`
-  log('Create merged sprite', filename)
+  const mergedSpritePath = `public/map-style/sprite${pixelRatio === 1 ? '' : '@2x'}`
+  log('Create merged sprite', mergedSpritePath)
 
   const spriteResult: SpritesmithResult = await new Promise((resolve, reject) => {
     const sortedIconFiles = sortObject(iconFiles)
-    Spritesmith.run({ src: Object.values(sortedIconFiles) }, async (err, result) => {
+    Spritesmith.run({ src: Object.values(sortedIconFiles) }, (err, result) => {
       if (err) {
         console.error('ERROR in Spritesmith.run', Object.values(sortedIconFiles))
         reject()
@@ -102,12 +103,12 @@ export async function mergeSprites(sprites: SpriteSource[], pixelRatio: 1 | 2) {
   })
 
   // Create and store the merged sprite PNG
-  await sharp(spriteResult.image).toFile(`${filename}.png`)
+  await sharp(spriteResult.image).toFile(`${mergedSpritePath}.png`)
 
   // Create and store the merged sprite JSON
   const coordinates: SpriteJson = Object.fromEntries(
-    Object.entries(spriteResult.coordinates).map(([filename, coords]) => [
-      iconFilenameToKey[filename],
+    Object.entries(spriteResult.coordinates).map(([spriteFilename, coords]) => [
+      iconFilenameToKey[spriteFilename],
       coords,
     ]),
   )
@@ -115,7 +116,7 @@ export async function mergeSprites(sprites: SpriteSource[], pixelRatio: 1 | 2) {
     coords.pixelRatio = pixelRatio
   })
   const sortedCoordinates = sortObject(coordinates)
-  await saveJson(`${filename}.json`, sortedCoordinates)
+  await saveJson(`${mergedSpritePath}.json`, sortedCoordinates)
 
-  log('END: mergeSprites finished', { filename, pixelRatio })
+  log('END: mergeSprites finished', { mergedSpritePath, pixelRatio })
 }

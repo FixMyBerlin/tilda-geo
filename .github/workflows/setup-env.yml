@@ -47,8 +47,8 @@ jobs:
               -e "s|^PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD=.*$|PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD='${{ secrets.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD }}'|" \
               -e "s|^TILES_URL=.*$|TILES_URL='${{ vars.TILES_URL }}'|" \
               -e "s|^CACHELESS_URL=.*$|CACHELESS_URL='${{ vars.CACHELESS_URL }}'|" \
-              -e "s|^NEXT_PUBLIC_APP_ORIGIN=.*$|NEXT_PUBLIC_APP_ORIGIN='${{ vars.NEXT_PUBLIC_APP_ORIGIN }}'|"\
-              -e "s|^NEXT_PUBLIC_APP_ENV=.*$|NEXT_PUBLIC_APP_ENV='${{ vars.NEXT_PUBLIC_APP_ENV }}'|" \
+              -e "s|^VITE_APP_ORIGIN=.*$|VITE_APP_ORIGIN='${{ vars.VITE_APP_ORIGIN }}'|"\
+              -e "s|^VITE_APP_ENV=.*$|VITE_APP_ENV='${{ vars.VITE_APP_ENV }}'|" \
               -e "s|^APP_URL=.*$|APP_URL='${{ vars.APP_URL }}'|" \
               -e "s|^SESSION_SECRET_KEY=.*$|SESSION_SECRET_KEY='${{ secrets.SESSION_SECRET_KEY }}'|" \
               -e "s|^NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=.*$|NEXT_SERVER_ACTIONS_ENCRYPTION_KEY='${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}'|" \

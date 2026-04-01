@@ -1,4 +1,4 @@
-import { basename } from 'path'
+import { basename } from 'node:path'
 import { originalFilePath } from '../steps/download'
 import { filteredFilePath } from '../steps/filter'
 import { params } from '../utils/parameters'

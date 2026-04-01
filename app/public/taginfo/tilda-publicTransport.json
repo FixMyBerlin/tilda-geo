@@ -1,0 +1,72 @@
+{
+  "data_format": 1,
+  "data_url": "https://tilda-geo.de/taginfo/tilda-publicTransport.json",
+  "data_updated": "20260317T120000Z",
+  "project": {
+    "name": "TILDA - Public Transport",
+    "description": "TILDA processes public transport stops and stations from OpenStreetMap data as key destinations for bicycle infrastructure planning.",
+    "project_url": "https://tilda-geo.de/",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/publicTransport",
+    "contact_name": "FixMyCity",
+    "contact_email": "tilda@fixmycity.de"
+  },
+  "tags": [
+    {
+      "key": "railway",
+      "value": "tram_stop",
+      "object_types": ["node", "way", "relation"],
+      "description": "Identifies tram stops for public transport processing."
+    },
+    {
+      "key": "railway",
+      "value": "station",
+      "object_types": ["node", "way", "relation"],
+      "description": "Identifies railway stations for public transport processing."
+    },
+    {
+      "key": "railway",
+      "value": "halt",
+      "object_types": ["node", "way", "relation"],
+      "description": "Identifies railway halts (smaller stops) for public transport processing."
+    },
+    {
+      "key": "amenity",
+      "value": "ferry_terminal",
+      "object_types": ["node", "way", "relation"],
+      "description": "Identifies ferry terminals for public transport processing."
+    },
+    {
+      "key": "station",
+      "value": "subway",
+      "object_types": ["node", "way", "relation"],
+      "description": "Classifies station as U-Bahn (subway) in public transport processing."
+    },
+    {
+      "key": "station",
+      "value": "light_rail",
+      "object_types": ["node", "way", "relation"],
+      "description": "Classifies station as S-Bahn (light rail) in public transport processing."
+    },
+    {
+      "key": "usage",
+      "object_types": ["node", "way", "relation"],
+      "description": "Used for exclusion filtering of industrial, military, and other non-public transport railway usage."
+    },
+    {
+      "key": "disused",
+      "value": "yes",
+      "object_types": ["node", "way", "relation"],
+      "description": "Excludes disused transport stops from public transport processing."
+    },
+    {
+      "key": "name",
+      "object_types": ["node", "way", "relation"],
+      "description": "Station or stop name used as display metadata."
+    },
+    {
+      "key": "operator",
+      "object_types": ["node", "way", "relation"],
+      "description": "Transport operator used as metadata for public transport stops."
+    }
+  ]
+}
