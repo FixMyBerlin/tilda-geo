@@ -1,6 +1,6 @@
+import { join } from 'node:path'
 import { bboxPolygon, featureCollection, union } from '@turf/turf'
 import { $ } from 'bun'
-import { join } from 'path'
 import {
   ID_FILTERED_FILE,
   OSM_FILTERED_DIR,
@@ -70,7 +70,11 @@ export async function tagFilter(fileName: string, sourceFileChanged: boolean) {
  * @param ids the ids to filter, use format `w123 w234`
  * @returns the resulting file's name and sourceFileChanged flag (not affected by filter regeneration)
  */
-export async function idFilter(fileName: string, sourceFileChanged: boolean, ids: typeof params.idFilter) {
+export async function idFilter(
+  fileName: string,
+  sourceFileChanged: boolean,
+  ids: typeof params.idFilter,
+) {
   if (params.idFilter === false) return
 
   console.log(`Filtering the OSM file with \`ID_FILTER=${ids}\`...`)
@@ -124,7 +128,12 @@ export async function bboxesFilter(
   if (!shouldRegenerate) {
     console.log(
       '⏩ Skipping osmium extract for bboxFilter. The directory that stores the bbox filter geojson did not change.',
-      JSON.stringify({ filteredPbfExists, OSMIUM_FILTER_BBOX_FILE, sourceFileChanged, filterDirChanged }),
+      JSON.stringify({
+        filteredPbfExists,
+        OSMIUM_FILTER_BBOX_FILE,
+        sourceFileChanged,
+        filterDirChanged,
+      }),
       isDev ? JSON.stringify(mergedBboxPolygonFeatures) : '',
     )
     return

@@ -1,4 +1,5 @@
 import { isDev } from './isDev'
+import type { OAuthCookieCheck } from './oauth'
 import { params } from './parameters'
 
 /**
@@ -8,7 +9,7 @@ import { params } from './parameters'
  * @param cookieCheck - OAuth cookie information from ensureOAuthReady()
  * @param context - Optional context string to identify where the debug log comes from
  */
-export function debugWgetCommand(cookieCheck?: any, context?: string) {
+export function debugWgetCommand(cookieCheck?: OAuthCookieCheck, context?: string) {
   if (!isDev) return
 
   const cookieHeader =

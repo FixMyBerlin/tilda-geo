@@ -33,7 +33,9 @@ export async function initializeMetadataTable() {
         ADD COLUMN IF NOT EXISTS statistics_started_at TIMESTAMP,
         ADD COLUMN IF NOT EXISTS statistics_completed_at TIMESTAMP
     `
-    console.log('Processing: Migration - Added async operation tracking columns if they were missing')
+    console.log(
+      'Processing: Migration - Added async operation tracking columns if they were missing',
+    )
 
     // Update status CHECK constraint to include 'postprocessing'
     await sql`ALTER TABLE public.meta DROP CONSTRAINT IF EXISTS meta_status_check`

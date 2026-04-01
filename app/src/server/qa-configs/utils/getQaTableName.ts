@@ -4,7 +4,7 @@
  * @returns The validated table name
  * @throws Error if table name is invalid
  */
-export function getQaTableName(mapTable: string): string {
+export function getQaTableName(mapTable: string) {
   // Get the map table name and validate it's a safe table name
   const tableName = mapTable.startsWith('public.') ? mapTable : `public.${mapTable}`
 

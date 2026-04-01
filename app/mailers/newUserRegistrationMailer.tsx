@@ -1,4 +1,4 @@
-import { formatDateTimeBerlin } from '@/src/app/_components/date/formatDateBerlin'
+import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { MarkdownMail } from './templates/MarkdownMail'
 import { getDomain } from './utils/getDomain'
 import { sendMail } from './utils/sendMail'
@@ -6,11 +6,11 @@ import { sendMail } from './utils/sendMail'
 const NOTIFICATION_EMAIL = 'tilda@fixmycity.de'
 
 type User = {
-  id: number
+  id: string
   osmId: number
   osmName: string | null
   osmDescription: string | null
-  email: string | null
+  email: string
   createdAt: Date
 }
 
@@ -34,7 +34,7 @@ function buildMailContent(user: User) {
 * **OSM-ID:** ${user.osmId}
 * **OSM-Name:** ${user.osmName || 'N/A'}
 * **OSM-Beschreibung:** ${user.osmDescription || 'N/A'}
-* **E-Mail:** ${user.email || 'N/A'}
+* **E-Mail:** ${user.email}
 * **Registrierungsdatum:** ${registrationDate}
 
 ## Registrierungsdetails
@@ -76,7 +76,7 @@ export function newUserRegistrationMailer({ user }: NewUserRegistrationMailer) {
 
 // React component for preview in react-email dev server
 const demoUser: User = {
-  id: 123,
+  id: 'clx1234567890',
   osmId: 456789,
   osmName: 'Max Mustermann',
   osmDescription: 'OpenStreetMap contributor since 2015',

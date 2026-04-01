@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const malformed_traffic_sign: CampaignType = {
   id: 'malformed_traffic_sign',

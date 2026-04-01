@@ -9,7 +9,7 @@ vi.mock('./utils/sendMail', () => ({
 describe('newUserRegistrationMailer', () => {
   test('creates mailer with user data', async () => {
     const user = {
-      id: 123,
+      id: 'clx1234567890',
       osmId: 456789,
       osmName: 'Test User',
       osmDescription: 'Test description',
@@ -31,17 +31,17 @@ describe('newUserRegistrationMailer', () => {
     expect(callArgs?.To[0]?.Email).toBe('tilda@fixmycity.de')
     expect(callArgs?.introMarkdown).toContain('Test User')
     expect(callArgs?.introMarkdown).toContain('Zum Zeitpunkt der Registrierung nicht verfügbar')
-    expect(callArgs?.ctaLink).toContain('userId=123')
+    expect(callArgs?.ctaLink).toContain('userId=clx1234567890')
     expect(callArgs?.ctaLink).not.toContain('regionSlug')
   })
 
   test('creates mailer with user data without optional fields', async () => {
     const user = {
-      id: 456,
+      id: 'clx4567890123',
       osmId: 987654,
       osmName: 'Another User',
       osmDescription: null,
-      email: null,
+      email: 'osm-987654@users.openstreetmap.invalid',
       createdAt: new Date('2024-02-20T14:00:00Z'),
     }
 
@@ -53,16 +53,16 @@ describe('newUserRegistrationMailer', () => {
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Another User')
     expect(callArgs?.introMarkdown).toContain('Zum Zeitpunkt der Registrierung nicht verfügbar')
-    expect(callArgs?.ctaLink).toContain('userId=456')
+    expect(callArgs?.ctaLink).toContain('userId=clx4567890123')
   })
 
   test('handles user with null osmName', async () => {
     const user = {
-      id: 789,
+      id: 'clx7890123456',
       osmId: 111222,
       osmName: null,
       osmDescription: null,
-      email: null,
+      email: 'osm-111222@users.openstreetmap.invalid',
       createdAt: new Date('2024-03-01T08:00:00Z'),
     }
 

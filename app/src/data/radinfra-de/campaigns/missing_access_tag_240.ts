@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const missing_access_tag_240: CampaignType = {
   id: 'missing_access_tag_240',

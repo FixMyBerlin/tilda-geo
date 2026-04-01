@@ -17,7 +17,7 @@ const BBOX_PRESETS = {
 } as const satisfies Record<string, string>
 
 const DEFAULT_DIFF_BBOX = BBOX_PRESETS['berlin-full']
-const DEFAULT_ONLY_BBOX = BBOX_PRESETS['bussonderstreifen']
+const DEFAULT_ONLY_BBOX = BBOX_PRESETS.bussonderstreifen
 
 const DIFFING_MODES = ['off', 'previous', 'fixed', 'reference'] as const
 type DiffingMode = (typeof DIFFING_MODES)[number]
@@ -121,7 +121,7 @@ function printDryRun(overrides: Record<string, string>, detach: boolean) {
   }
   console.log(parts.join(' \\\n  '))
   const tail = detach ? 'docker compose up -d processing' : 'docker compose up processing'
-  console.log('\n' + tail)
+  console.log(`\n${tail}`)
 }
 
 function shellQuote(s: string) {

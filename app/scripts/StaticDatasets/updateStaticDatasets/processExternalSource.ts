@@ -1,6 +1,6 @@
-import { getStaticDatasetUrl } from '@/src/app/_components/utils/getStaticDatasetUrl'
+import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
 import { createUpload } from '../api'
-import { MetaData } from '../types'
+import type { MetaData } from '../types'
 import { green } from '../utils/log'
 
 export async function processExternalSource(

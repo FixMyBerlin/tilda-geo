@@ -1,28 +1,31 @@
-import svgBibi from '@/src/app/_components/assets/bibi-logo.svg'
-import svgInfravelo from '@/src/app/_components/assets/infravelo.svg'
-import svgNudafa from '@/src/app/_components/assets/nudafa-logo.svg'
-import svgParking from '@/src/app/_components/assets/osm-parkraum-logo-2025.svg'
-import svgRadinfra from '@/src/app/_components/assets/radinfra-logo.svg'
-import imageTrTo from '@/src/app/_components/assets/trto-logo.png'
-import imageUeberlingen from '@/src/app/_components/assets/ueberlingen-logo.jpeg'
-import { categories } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataCategories/categories.const'
-import { ExportId } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/exports/exports.const'
-import {
-  SourcesRasterIds,
-  sourcesBackgroundsRaster,
-} from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/sourcesBackgroundsRaster.const'
-import {
+import { categories } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/categories.const'
+import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
+import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
+import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
+import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
+import type {
   TableId,
   UnionTiles,
-} from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/tables.const'
-import { StaticImport } from 'next/dist/shared/lib/get-img-props'
-import { MapDataCategoryId } from '../app/regionen/[regionSlug]/_mapData/mapDataCategories/MapDataCategoryId'
+} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
+import svgBibi from '@/components/shared/assets/bibi-logo.svg'
+import svgInfravelo from '@/components/shared/assets/infravelo.svg'
+import svgNudafa from '@/components/shared/assets/nudafa-logo.svg'
+import svgParking from '@/components/shared/assets/osm-parkraum-logo-2025.svg'
+import svgRadinfra from '@/components/shared/assets/radinfra-logo.svg'
+import imageTrTo from '@/components/shared/assets/trto-logo.png'
+import imageUeberlingen from '@/components/shared/assets/ueberlingen-logo.jpeg'
+import type { InternalPath } from '@/router'
 
 type StaticRegionInitialMapPositionZoom = {
   lat: number
   lng: number
   zoom: number
 }
+
+/** Internal (to) or external (href must be https) nav link. */
+export type RegionNavigationLink =
+  | { name: string; to: InternalPath }
+  | { name: string; href: `https://${string}` }
 
 export type StaticRegion = {
   slug: RegionSlug
@@ -34,7 +37,7 @@ export type StaticRegion = {
   map: StaticRegionInitialMapPositionZoom
 } & (
   | {
-      logoPath: string | StaticImport | null
+      logoPath: string | null
       externalLogoPath?: never
     }
   | {
@@ -43,7 +46,7 @@ export type StaticRegion = {
     }
 ) & {
     logoWhiteBackgroundRequired: boolean
-    navigationLinks?: { name: string; href: string }[]
+    navigationLinks?: RegionNavigationLink[]
     categories: MapDataCategoryId[]
     backgroundSources: SourcesRasterIds[]
     notes: 'osmNotes' | 'atlasNotes' | 'disabled'
@@ -62,13 +65,6 @@ export type StaticRegion = {
         bbox: { min: readonly [number, number]; max: readonly [number, number] }
       }
   )
-
-const bboxToMinMax = (bbox: [number, number, number, number]) => {
-  return {
-    min: [bbox[2], bbox[1]] as const,
-    max: [bbox[0], bbox[3]] as const,
-  }
-}
 
 const defaultBackgroundSources: SourcesRasterIds[] = [
   'mapnik',
@@ -425,7 +421,7 @@ export const staticRegion: StaticRegion[] = [
     mask: {
       osmRelationIds: [
         55775, // Zeuthen
-        55773, //Eichwalde
+        55773, // Eichwalde
         55774, // Schulzendorf
         55776, // Wildau
         5583556, // Königs Wusterhausen
@@ -577,7 +573,7 @@ export const staticRegion: StaticRegion[] = [
     product: 'radverkehr',
     mask: { osmRelationIds: [62708], bufferKm: 5 },
     map: { lat: 48.8364862, lng: 10.092577, zoom: 10 },
-    bbox: null, //bboxToMinMax([9.6189511, 48.7145541, 10.4569049, 49.0608132]),
+    bbox: null, // bboxToMinMax([9.6189511, 48.7145541, 10.4569049, 49.0608132]),
     externalLogoPath: 'https://www.ostalbkreis.de/sixcms/media.php/18/OAK-Logo.svg',
     logoWhiteBackgroundRequired: true,
     categories: defaultTildaRadverkehrSources,

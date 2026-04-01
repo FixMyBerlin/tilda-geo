@@ -1,46 +1,39 @@
-FROM node:24-trixie-slim AS base
+# TanStack Start (Vite + Nitro preset bun)
+FROM oven/bun:1 AS base
 
+# TODO: Validate which distro oven/bun is and which gdal is installed there.
 # Debian 13 Trixie (stable) includes GDAL 3.10.3+ (supports gdal vector edit)
 RUN apt-get update && \
-    apt-get install -y gdal-bin && \
+    apt-get install -y --no-install-recommends gdal-bin curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY /app/package*.json /app/
-COPY /app/patches /app/patches
+# Dependencies (layer cached unless package files change)
+COPY app/package.json app/bun.lock app/
+RUN bun install --frozen-lockfile
+RUN bun run postinstall || true
 
-RUN npm install-clean --legacy-peer-deps
-RUN npm run postinstall
+# App source (needed for prisma.config.ts and Vite build)
+COPY app /app
 
-COPY /app /app
+# Prisma generate (prisma.config.ts needs DATABASE_* at load; dummy values only for generate)
+RUN DATABASE_HOST=build DATABASE_USER=build DATABASE_PASSWORD=build DATABASE_NAME=build bunx prisma generate
 
-# Transfer ownership to the pre-existing non-root user 'node' (UID 1000) that
-# comes with the node base image. See: https://www.docker.com/blog/understanding-the-docker-user-instruction/
-RUN chown -R node:node /app
-USER node
+# Build-time env for Vite client bundle (inlined at build)
+ARG VITE_APP_ENV
+ARG VITE_APP_ORIGIN
+ENV VITE_APP_ENV=${VITE_APP_ENV}
+ENV VITE_APP_ORIGIN=${VITE_APP_ORIGIN}
+RUN bun run build
 
+# Run as non-root (same goal as 3a98065). oven/bun provides a pre-created `bun` user; chown so it can read/write app files.
+RUN chown -R bun:bun /app
+USER bun
+
+ENV TZ=Europe/Berlin
 EXPOSE 4000
 
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV TZ=Europe/Berlin
-
-ARG NEXT_PUBLIC_APP_ORIGIN
-ARG NEXT_PUBLIC_APP_ENV
-
-RUN npx blitz@2.2.4 prisma generate
-RUN npx blitz@2.2.4 build
-
-CMD ["/bin/sh", "-c", "npx blitz@2.2.4 prisma migrate deploy && npx blitz@2.2.4 start -p 4000"]
-
-# From here on we are building the production image
-FROM base AS production
-
-# Switch back to root to install pm2 globally, then return to non-root user
-USER root
-RUN npm install --global pm2
-USER node
-
-# Docs: https://docs.docker.com/reference/build-checks/json-args-recommended/
-CMD ["/bin/sh", "-c", "npx blitz@2.2.4 prisma migrate deploy && exec pm2-runtime node -- ./node_modules/next/dist/bin/next start -p 4000"]
+# Production: run migrations then Nitro server (Bun). Runtime DATABASE_* from compose.
+CMD ["/bin/sh", "-c", "bunx prisma migrate deploy && exec bun run .output/server/index.mjs"]

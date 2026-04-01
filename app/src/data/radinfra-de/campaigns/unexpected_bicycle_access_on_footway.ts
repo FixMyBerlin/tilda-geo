@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const unexpected_bicycle_access_on_footway: CampaignType = {
   id: 'unexpected_bicycle_access_on_footway',

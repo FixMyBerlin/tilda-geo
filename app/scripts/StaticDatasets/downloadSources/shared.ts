@@ -1,8 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { parseArgs } from 'node:util'
 import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
-import { parseArgs } from 'util'
 import { ignoreFolder } from '../updateStaticDatasets/ignoreFolder'
 import { inverse } from '../utils/log'
 
@@ -43,19 +43,22 @@ export const getDatasetFolders = (folderFilterTerm?: string) => {
     .filter((item) => fs.statSync(path.join(geoJsonFolder, item)).isDirectory())
 
   const datasetFileFolderData = regionGroupFolderPaths
-    .map((regionGroupFolder) => {
+    .flatMap((regionGroupFolder) => {
       const subFolders = fs.readdirSync(path.join(geoJsonFolder, regionGroupFolder))
       return subFolders.map((datasetFolder) => {
         const targetFolder = path.join(geoJsonFolder, regionGroupFolder, datasetFolder)
         // If a `folder-filter` is given, we only look at folder that include this term
-        if (folderFilterTerm && !targetFolder.includes(folderFilterTerm)) return
+        if (folderFilterTerm && !targetFolder.includes(folderFilterTerm)) return undefined
         // Make sure we only select folders, no files
-        if (!fs.statSync(targetFolder).isDirectory()) return
+        if (!fs.statSync(targetFolder).isDirectory()) return undefined
 
-        return { datasetFolderPath: targetFolder, regionFolder: regionGroupFolder, datasetFolder }
+        return {
+          datasetFolderPath: targetFolder,
+          regionFolder: regionGroupFolder,
+          datasetFolder,
+        }
       })
     })
-    .flat()
     .filter(Boolean)
     .sort((a, b) => a.datasetFolderPath.localeCompare(b.datasetFolderPath))
 
@@ -70,6 +73,6 @@ export const getDataFilename = (datasetFolder: string) => {
   return slugify(datasetFolder.replaceAll(':', '-'))
 }
 
-export const logStartMessage = (scriptName: string, settings: Record<string, any>) => {
+export const logStartMessage = (scriptName: string, settings: Record<string, unknown>) => {
   inverse(`Starting ${scriptName} with settings`, [settings])
 }

@@ -192,7 +192,7 @@ Each campaign has a TypeScript configuration file that defines:
 
 ### 6. API Route: Query Todos and Generate GeoJSON
 
-**Location:** `app/src/app/api/maproulette/data/[projectKey]/route.ts`
+**Location:** `app/src/routes/api/maproulette/data/$projectKey.ts`
 
 **Endpoint:** `GET /api/maproulette/data/{projectKey}`
 
@@ -303,7 +303,7 @@ This identifier is the main link between:
 
 ### 8. Campaign Listing API (for External Astro Site)
 
-**Location:** `app/src/app/api/campaigns/route.ts`
+**Location:** `app/src/routes/api/campaigns.ts`
 
 **Endpoint:** `GET /api/campaigns`
 

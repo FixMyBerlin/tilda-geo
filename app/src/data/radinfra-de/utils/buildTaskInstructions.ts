@@ -1,10 +1,11 @@
-import { translations } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/translations.const'
-import { mapillaryUrl } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/osmUrls'
-import { pointFromGeometry } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/Tools/osmUrls/pointFromGeometry'
-import { TodoId } from '@/src/data/processingTypes/todoId.generated.const'
-import { campaigns } from '@/src/data/radinfra-de/campaigns'
 import { point } from '@turf/turf'
-import { LineString } from 'geojson'
+import type { LineString } from 'geojson'
+import invariant from 'tiny-invariant'
+import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
+import { mapillaryUrl } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/osmUrls'
+import { pointFromGeometry } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/pointFromGeometry'
+import type { TodoId } from '@/data/processingTypes/todoId.generated.const'
+import { campaigns } from '@/data/radinfra-de/campaigns'
 
 type Props = {
   projectKey: TodoId
@@ -16,8 +17,14 @@ type Props = {
 
 export const buildTaskInstructions = ({ projectKey, osmTypeIdString, kind, geometry }: Props) => {
   const [centerLng, centerLat] = pointFromGeometry(geometry)
-  const startPoint = point(geometry.coordinates[0]!).geometry
-  const endPoint = point(geometry.coordinates.at(-1)!).geometry
+  const first = geometry.coordinates[0]
+  const last = geometry.coordinates.at(-1)
+  invariant(
+    first !== undefined && last !== undefined,
+    'LineString must have at least two coordinates',
+  )
+  const startPoint = point(first).geometry
+  const endPoint = point(last).geometry
 
   const infrastructureName = translations[`ALL--category=${kind}`]
     ?.replace('(Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)', '')

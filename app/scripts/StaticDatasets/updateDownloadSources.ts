@@ -12,7 +12,7 @@ import {
   shouldProcessFolder,
 } from './downloadSources/shared'
 import { transformGeopackageToGeojson } from './downloadSources/transformGeopackageToGeojson'
-import { DownloadConfig } from './downloadSources/types'
+import type { DownloadConfig } from './downloadSources/types'
 import { checkFilesizeAndGzip } from './updateWfsSources/checkFilesizeAndGzip'
 import { import_ } from './utils/import_'
 import { green, inverse, red } from './utils/log'
@@ -64,7 +64,6 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
     green('  Data saved', resultFilename)
   } catch (error) {
     red('   Error', error, downloadConfig, wfsUrl.toString())
-    continue
   }
 }
 

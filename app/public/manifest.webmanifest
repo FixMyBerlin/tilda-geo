@@ -1,0 +1,26 @@
+{
+  "name": "TILDA – Geodaten für die Verkehrsplanung",
+  "short_name": "TILDA",
+  "description": "TILDA bringt Ihnen Geodaten für die Verkehrsplanung – nachhaltig und für die Nutzung im Team.",
+  "dir": "auto",
+  "lang": "de",
+  "display": "standalone",
+  "orientation": "any",
+  "start_url": "/",
+  "background_color": "#27272a",
+  "theme_color": "#27272a",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

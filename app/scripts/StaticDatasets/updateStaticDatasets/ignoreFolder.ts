@@ -1,24 +1,16 @@
-import { minimatch } from 'minimatch'
+import picomatch from 'picomatch'
 
-const DEBUG = false
-
-function log(...args) {
-  if (DEBUG) console.debug(...args)
-}
-
+/**
+ * Returns true if the folder should be ignored.
+ * Patterns are gitignore-style: globs to ignore; leading `!` means exception (do not ignore).
+ * See .updateignore in the geojson folder for the file format.
+ */
 export function ignoreFolder(regionAndDatasetFolder: string, ignorePatterns: string[]) {
-  let ignore = false
-  log('TEST - folder:', regionAndDatasetFolder)
-  for (const pattern of ignorePatterns) {
-    if (pattern.startsWith('!')) {
-      if (minimatch(regionAndDatasetFolder, pattern.slice(1))) {
-        log('  INCLUDE - pattern:', pattern)
-        ignore = false
-      }
-    } else if (minimatch(regionAndDatasetFolder, pattern)) {
-      log('  IGNORE - pattern:', pattern)
-      ignore = true
-    }
-  }
-  return ignore
+  const positivePatterns = ignorePatterns.filter((p) => !p.startsWith('!'))
+  const negationPatterns = ignorePatterns.filter((p) => p.startsWith('!')).map((p) => p.slice(1))
+
+  if (positivePatterns.length === 0) return false
+
+  const isMatch = picomatch(positivePatterns, { ignore: negationPatterns })
+  return isMatch(regionAndDatasetFolder)
 }

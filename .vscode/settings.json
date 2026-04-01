@@ -1,17 +1,27 @@
 // https://www.roboleary.net/vscode/2020/09/17/vscode-workspace-settings.html
 // All settings https://code.visualstudio.com/docs/getstarted/settings#_default-settings
+// Workspace root is always tilda-geo; app/biome.json is the single Biome config.
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.enable": true, // only used for markdown; other languages use biome via defaultFormatter
+  "biome.configurationPath": "app/biome.json",
+  "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.biome": "always",
+    "source.organizeImports.biome": "always"
   },
   "typescript.referencesCodeLens.enabled": true,
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  },
+  "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[javascriptreact]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
+  // NOTE: Biome does not support Markdown yet https://biomejs.dev/internals/language-support/
+  "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
   // Use TS version from node_modules
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "app/node_modules/typescript/lib",
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/
@@ -20,9 +30,11 @@
   "Lua.diagnostics.disable": ["lowercase-global", "duplicate-set-field"],
   // FYI: The addons feature https://luals.github.io/wiki/addons/ does not work for us.
   "Lua.addonManager.enable": false,
-  "[sql]": {
-    // https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc
-    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
-  },
-  "SQL-Formatter-VSCode.dialect": "postgresql" // for ReneSaarsoo.sql-formatter-vsc
+  // https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc
+  "[sql]": { "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc" },
+  "SQL-Formatter-VSCode.dialect": "postgresql", // for ReneSaarsoo.sql-formatter-vsc
+  // From Tanstack Start Scaffolding Recommendations:
+  "search.exclude": { "**/routeTree.gen.ts": true },
+  "files.watcherExclude": { "**/routeTree.gen.ts": true },
+  "files.readonlyInclude": { "**/routeTree.gen.ts": true }
 }

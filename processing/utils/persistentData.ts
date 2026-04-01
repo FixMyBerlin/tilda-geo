@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { join } from 'node:path'
 import { HASH_DIR } from '../constants/directories.const'
 
 const hashPath = (id: string) => join(HASH_DIR, id)

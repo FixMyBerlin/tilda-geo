@@ -1,4 +1,4 @@
-import { parseArgs } from 'util'
+import { parseArgs } from 'node:util'
 import { maprouletteRebuildTasks } from './utils/maprouletteRebuildTasks'
 
 // https://bun.sh/guides/process/argv

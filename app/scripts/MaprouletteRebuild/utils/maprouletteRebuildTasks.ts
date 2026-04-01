@@ -1,13 +1,20 @@
-import { campaigns } from '@/src/data/radinfra-de/campaigns'
-import { CampaignMaprouletteSchema } from '@/src/data/radinfra-de/schema/campaignsSchema'
 import { styleText } from 'node:util'
+import { campaigns } from '@/data/radinfra-de/campaigns'
+import { CampaignMaprouletteSchema } from '@/data/radinfra-de/schema/campaignsSchema'
+import { getValidatedEnv, maprouletteSchema } from '../../shared/env'
 import { maprouletteChallengeUrl } from '../../MaprouletteCreate/utils/maprouletteChallengeUrl'
 import { checkChallengeStatus } from './checkChallengeStatus'
 
 export const logPrefix = '[MaprouletteRebuild]'
 
 export async function maprouletteRebuildTasks(filter?: string | undefined) {
-  console.log(logPrefix, 'START', filter ? `– ${styleText('yellow', `using filter "${filter}"`)}` : '')
+  const env = getValidatedEnv(maprouletteSchema)
+
+  console.log(
+    logPrefix,
+    'START',
+    filter ? `– ${styleText('yellow', `using filter "${filter}"`)}` : '',
+  )
 
   for await (const campaign of campaigns) {
     // SKIP WHEN MR OFF
@@ -27,14 +34,20 @@ export async function maprouletteRebuildTasks(filter?: string | undefined) {
     // SKIP BY FILTER PARAM
     const skip = filter ? !campaign.id.includes(filter) : false
     const msgAction = skip ? styleText('yellow', '↷ SKIP') : styleText('green', '✎ PROCESS')
-    console.log('\t', logPrefix, msgAction, campaign.id, challengeUrl ? styleText('gray', challengeUrl) : '')
+    console.log(
+      '\t',
+      logPrefix,
+      msgAction,
+      campaign.id,
+      challengeUrl ? styleText('gray', challengeUrl) : '',
+    )
     if (skip) continue
 
     // ACTION
     const apiUrl = `https://maproulette.org/api/v2/challenge/${campaignId}/rebuild?removeUnmatched=true&skipSnapshot=true`
     const response = await fetch(apiUrl, {
       method: 'PUT',
-      headers: { apiKey: process.env.MAPROULETTE_API_KEY!, accept: '*/*' },
+      headers: { apiKey: env.MAPROULETTE_API_KEY, accept: '*/*' },
     })
 
     if (!response.ok) {
@@ -45,7 +58,12 @@ export async function maprouletteRebuildTasks(filter?: string | undefined) {
 
         const status = await checkChallengeStatus(campaignId)
         if (status === 'failed') {
-          console.log('\t\t', logPrefix, styleText('red', 'Rebuild failed for campaign'), campaign.id)
+          console.log(
+            '\t\t',
+            logPrefix,
+            styleText('red', 'Rebuild failed for campaign'),
+            campaign.id,
+          )
           continue
         }
       } else {

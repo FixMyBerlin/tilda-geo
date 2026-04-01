@@ -7,6 +7,7 @@ export type DownloadConfig = {
     crs?: `urn:ogc:def:crs:EPSG::${number}`
     results?: number
     sortBy?: string
-    props?: any[]
+
+    props?: unknown[]
   }
 }

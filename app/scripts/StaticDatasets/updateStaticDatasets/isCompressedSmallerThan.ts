@@ -12,7 +12,7 @@ import { gzipSync } from 'node:zlib'
  * @param maxCompressedSizeBites - Maximum compressed size in bytes (e.g., 50000 ≈ 50KB ≈ 0.05MB)
  * @returns Promise<boolean> - True if compressed size <= maxCompressedSizeBites
  */
-export async function isCompressedSmallerThan(filePath: string, maxCompressedSizeBites: number) {
+export function isCompressedSmallerThan(filePath: string, maxCompressedSizeBites: number) {
   const uncompressedSize = fs.statSync(filePath).size
   if (uncompressedSize > 30 * maxCompressedSizeBites) return false
 
