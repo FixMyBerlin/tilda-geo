@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react'
 import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
 
-const env = loadEnv('test', process.cwd(), '')
+const loadedTestEnv = loadEnv('test', process.cwd(), '')
+const env = {
+  ...loadedTestEnv,
+  // CI has no .env; path-only `location.href` in getRegionRedirectUrl needs a valid base URL.
+  VITE_APP_ORIGIN: loadedTestEnv.VITE_APP_ORIGIN ?? 'http://127.0.0.1:5173',
+}
 
 export default defineConfig({
   plugins: [react()],
