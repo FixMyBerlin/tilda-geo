@@ -7,28 +7,12 @@ import {
   qaDecisionDataSchema,
   transformEvaluationWithDecisionData,
 } from '@/server/qa-configs/schemas/qaDecisionDataSchema'
+import {
+  calculateSystemStatus,
+  getQaUpdateDecision,
+} from '@/server/qa-configs/evaluation/qaEvaluationRules'
 import { getQaTableName } from '@/server/qa-configs/utils/getQaTableName'
 import { updateProcessingMetaAsync } from '@/server/statistics/analysis/updateProcessingStatus.server'
-
-function calculateSystemStatus(
-  relative: number | null,
-  config: { goodThreshold: number; needsReviewThreshold: number },
-) {
-  if (relative === null) {
-    return 'NEEDS_REVIEW'
-  }
-
-  const normalizedRelative = relative > 0 && relative < 1 ? 1 / relative : relative
-  const difference = Math.abs(normalizedRelative - 1.0)
-
-  if (difference <= config.goodThreshold) {
-    return 'GOOD'
-  } else if (difference <= config.needsReviewThreshold) {
-    return 'NEEDS_REVIEW'
-  } else {
-    return 'PROBLEMATIC'
-  }
-}
 
 async function getCurrentEvaluation(configId: number, areaId: string) {
   const evaluation = await db.qaEvaluation.findFirst({
@@ -38,47 +22,6 @@ async function getCurrentEvaluation(configId: number, areaId: string) {
 
   if (!evaluation) return null
   return transformEvaluationWithDecisionData(evaluation)
-}
-
-function shouldCreateNewEvaluation(
-  previousEvaluation: { systemStatus: QaSystemStatus; userStatus: string | null } | null,
-  newSystemStatus: QaSystemStatus,
-) {
-  if (!previousEvaluation) return true
-
-  const previousSystemStatus = previousEvaluation.systemStatus
-  const hasUserDecision = previousEvaluation.userStatus !== null
-
-  if (!hasUserDecision) {
-    return previousSystemStatus !== newSystemStatus
-  }
-
-  return shouldResetUserDecision(
-    previousSystemStatus,
-    newSystemStatus,
-    previousEvaluation.userStatus,
-  )
-}
-
-function shouldResetUserDecision(
-  _previousSystemStatus: QaSystemStatus,
-  newSystemStatus: QaSystemStatus,
-  previousUserStatus: string | null,
-) {
-  if (!previousUserStatus) return false
-
-  const isNotOkDecision =
-    previousUserStatus === 'NOT_OK_DATA_ERROR' || previousUserStatus === 'NOT_OK_PROCESSING_ERROR'
-
-  if (isNotOkDecision) {
-    return newSystemStatus === 'GOOD'
-  }
-
-  if (previousUserStatus === 'OK_QA_TOOLING_ERROR') {
-    return newSystemStatus === 'GOOD'
-  }
-
-  return false
 }
 
 async function upsertQaEvaluationWithRules(
@@ -94,21 +37,22 @@ async function upsertQaEvaluationWithRules(
   },
 ) {
   const previousEvaluation = await getCurrentEvaluation(configId, areaId)
-
-  // Absolute diff is checked first: if within threshold, effective status is GOOD (%-based status is ignored for update rules)
-  const absoluteDifferenceWithinThreshold =
-    evaluation.absoluteDifference !== null &&
-    Math.abs(evaluation.absoluteDifference) <= evaluation.absoluteDifferenceThreshold
-  const effectiveSystemStatus: QaSystemStatus = absoluteDifferenceWithinThreshold
-    ? 'GOOD'
-    : evaluation.systemStatus
+  const qaUpdateDecision = getQaUpdateDecision({
+    previousEvaluation: previousEvaluation
+      ? {
+          systemStatus: previousEvaluation.systemStatus,
+          userStatus: previousEvaluation.userStatus,
+        }
+      : null,
+    evaluation,
+  })
 
   if (!previousEvaluation) {
     const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
-        systemStatus: effectiveSystemStatus,
+        systemStatus: qaUpdateDecision.effectiveSystemStatus,
         evaluatorType: 'SYSTEM',
         userStatus: null,
         body: null,
@@ -120,17 +64,12 @@ async function upsertQaEvaluationWithRules(
     return transformEvaluationWithDecisionData(newEvaluation)
   }
 
-  const shouldReset = shouldResetUserDecision(
-    previousEvaluation.systemStatus,
-    effectiveSystemStatus,
-    previousEvaluation.userStatus,
-  )
-  if (shouldReset) {
+  if (qaUpdateDecision.shouldReset) {
     const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
-        systemStatus: effectiveSystemStatus,
+        systemStatus: qaUpdateDecision.effectiveSystemStatus,
         evaluatorType: 'SYSTEM',
         userStatus: null,
         body: null,
@@ -142,26 +81,16 @@ async function upsertQaEvaluationWithRules(
     return transformEvaluationWithDecisionData(newEvaluation)
   }
 
-  // Check if effective system status changed (previous vs effective new status)
-  const systemStatusChanged = previousEvaluation.systemStatus !== effectiveSystemStatus
-
-  const relativeChanged = evaluation.previousRelative !== evaluation.currentRelative
-
-  // Data is considered changed if:
-  // 1. Effective system status changed (e.g. GOOD -> NEEDS_REVIEW), OR
-  // 2. Relative changed AND absolute difference exceeds threshold (so %-based change matters)
-  const dataChanged = systemStatusChanged || (relativeChanged && !absoluteDifferenceWithinThreshold)
-
-  if (!dataChanged) {
+  if (!qaUpdateDecision.dataChanged) {
     return previousEvaluation
   }
 
-  if (shouldCreateNewEvaluation(previousEvaluation, effectiveSystemStatus)) {
+  if (qaUpdateDecision.shouldCreate) {
     const newEvaluation = await db.qaEvaluation.create({
       data: {
         configId,
         areaId,
-        systemStatus: effectiveSystemStatus,
+        systemStatus: qaUpdateDecision.effectiveSystemStatus,
         evaluatorType: 'SYSTEM',
         userStatus: null,
         body: null,
