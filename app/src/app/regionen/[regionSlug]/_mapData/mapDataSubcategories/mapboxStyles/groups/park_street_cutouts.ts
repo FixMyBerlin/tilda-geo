@@ -139,7 +139,7 @@ export const mapboxStyleGroupLayers_park_street_cutouts: MapboxStyleLayer[] = [
       'line-join': 'round',
     },
     paint: {
-      'line-color': 'hsl(175, 27%, 43%)',
+      'line-color': 'hsl(175, 0%, 43%)',
       'line-dasharray': [1.25, 0.75],
       'line-width': ['interpolate', ['linear'], ['zoom'], 15, 0.33, 20, 2.67],
     },
