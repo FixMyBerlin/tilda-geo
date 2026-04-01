@@ -12,14 +12,14 @@ WORKDIR /app
 
 # Dependencies (layer cached unless package files change)
 COPY app/package.json app/bun.lock app/
-RUN bun install --frozen-lockfile
-RUN bun run postinstall || true
+# Install without lifecycle scripts `postinstall`.
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # App source (needed for prisma.config.ts and Vite build)
 COPY app /app
 
-# Prisma generate (prisma.config.ts needs DATABASE_* at load; dummy values only for generate)
-RUN DATABASE_HOST=build DATABASE_USER=build DATABASE_PASSWORD=build DATABASE_NAME=build bunx prisma generate
+# Generate `@prisma/client` explicitly for this image build because `bun run build` imports `@prisma/client`, so the generated client must exist before build.
+RUN bun scripts/prisma-generate-placeholder/index.ts
 
 # Build-time env for Vite client bundle (inlined at build)
 ARG VITE_APP_ENV

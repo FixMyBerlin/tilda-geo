@@ -67,7 +67,7 @@
     "Maproulette:help": "echo -e '\\033[0;32m Help: Use `bun run MaprouletteCreate -- --filter FOOBAR` \\033[0m' && echo -e '\\033[0;32m Rebuild: Use `bun run MaprouletteRebuild -- --filter FOOBAR` \\033[0m'",
     "update": "bun scripts/updatePackages/index.ts",
     "release": "gh pr create --base main --head develop --title \"Release $(date '+%Y-%m-%d')\" --body \"\"",
-    "postinstall": "prisma generate",
+    "postinstall": "bun scripts/prisma-generate-placeholder/index.ts",
     "prepare": "cd .. && husky app/.husky"
   },
   "prisma": {

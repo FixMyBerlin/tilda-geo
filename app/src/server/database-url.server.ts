@@ -6,7 +6,7 @@ function getDatabaseConfig() {
 
   if (!host || !user || !password || !name) {
     throw new Error(
-      'Missing database env. Provide DATABASE_URL or DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME.',
+      'Missing database env. Provide DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME.',
     )
   }
 
