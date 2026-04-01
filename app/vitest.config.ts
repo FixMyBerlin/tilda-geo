@@ -1,6 +1,9 @@
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
+import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
+
+const env = loadEnv('test', process.cwd(), '')
 
 export default defineConfig({
   plugins: [react()],
@@ -13,6 +16,7 @@ export default defineConfig({
   },
   test: {
     dir: './',
+    env,
     globals: true,
     setupFiles: './test/setup.ts',
     include: ['**/*.test.ts'], // Exclude .spec.ts which are Playwright tests
