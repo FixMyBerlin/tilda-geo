@@ -92,6 +92,25 @@ describe('getQaUpdateDecision()', () => {
     expect(result.shouldCreate).toBe(false)
   })
 
+  test('creates a new evaluation when relative changed outside absolute threshold', () => {
+    const result = getQaUpdateDecision({
+      previousEvaluation: { systemStatus: 'NEEDS_REVIEW', userStatus: null },
+      evaluation: {
+        systemStatus: 'NEEDS_REVIEW',
+        previousRelative: 1.3,
+        currentRelative: 0.7,
+        absoluteDifference: 10,
+        absoluteDifferenceThreshold: 4,
+      },
+    })
+
+    expect(result.systemStatusChanged).toBe(false)
+    expect(result.relativeChanged).toBe(true)
+    expect(result.absoluteDifferenceWithinThreshold).toBe(false)
+    expect(result.dataChanged).toBe(true)
+    expect(result.shouldCreate).toBe(false)
+  })
+
   test('keeps NOT_OK user decision unless system becomes GOOD', () => {
     const result = getQaUpdateDecision({
       previousEvaluation: { systemStatus: 'PROBLEMATIC', userStatus: 'NOT_OK_DATA_ERROR' },
@@ -188,5 +207,12 @@ describe('calculateSystemStatus()', () => {
         needsReviewThreshold: 0.2,
       }),
     ).toBe('PROBLEMATIC')
+  })
+
+  test('treats mirrored ratios symmetrically around 1.0', () => {
+    const config = { goodThreshold: 0.1, needsReviewThreshold: 0.2 }
+
+    expect(calculateSystemStatus(1.25, config)).toBe('PROBLEMATIC')
+    expect(calculateSystemStatus(0.8, config)).toBe('PROBLEMATIC')
   })
 })
