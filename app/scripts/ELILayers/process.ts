@@ -223,28 +223,28 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
   await Bun.write(outputFile, typeScriptContent)
   log(`Generated ${outputFile}`)
 
-  // Format with biome
+  // Format with oxfmt
 
-  // Format raw files with biome
-  log('Formatting raw files with biome')
-  Bun.spawnSync(['bunx', 'biome', 'format', '--write', rawDir], {
+  // Format raw files with oxfmt
+  log('Formatting raw files with oxfmt')
+  Bun.spawnSync(['bunx', 'oxfmt', '--write', rawDir], {
     onExit(_proc, exitCode, _signalCode, error) {
       if (exitCode) {
-        warn(`Biome exited with code ${exitCode} for ${rawDir}`)
+        warn(`oxfmt exited with code ${exitCode} for ${rawDir}`)
       }
       if (error) {
-        warn(`Biome error for ${rawDir}: ${error}`)
+        warn(`oxfmt error for ${rawDir}: ${error}`)
       }
     },
   })
-  log('Formatting output file with biome')
-  Bun.spawnSync(['bunx', 'biome', 'format', '--write', outputFile], {
+  log('Formatting output file with oxfmt')
+  Bun.spawnSync(['bunx', 'oxfmt', '--write', outputFile], {
     onExit(_proc, exitCode, _signalCode, error) {
       if (exitCode) {
-        warn(`Biome exited with code ${exitCode}`)
+        warn(`oxfmt exited with code ${exitCode}`)
       }
       if (error) {
-        warn(`Biome error: ${error}`)
+        warn(`oxfmt error: ${error}`)
       }
     },
   })

@@ -6,7 +6,8 @@
     "vitest.explorer",
     "sumneko.lua",
     "ReneSaarsoo.sql-formatter-vsc",
-    "biomejs.biome"
+    "biomejs.biome",
+    "oxc.oxc-vscode"
   ],
   "unwantedRecommendations": []
 }
