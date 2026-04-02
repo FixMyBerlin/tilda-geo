@@ -62,8 +62,8 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "docker-compose.yml, docker-compose.network.yml, configs, psql_shell.sh, .env.deploy.generated"
-          target: "/srv"
+          source: 'docker-compose.yml, docker-compose.network.yml, configs, psql_shell.sh, .env.deploy.generated'
+          target: '/srv'
           overwrite: true
 
       - name: Stop & Start container on Server

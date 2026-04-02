@@ -1,9 +1,10 @@
-import { join } from 'node:path'
-import { $ } from 'bun'
 import { TYPES_DIR } from '../constants/directories.const'
 import { topicsConfig } from '../constants/topics.const'
 import { getTopicTables } from '../diffing/diffing'
 import { params } from '../utils/parameters'
+import { $ } from 'bun'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 /**
  * Generate types based on the processing tables.
@@ -154,10 +155,12 @@ ${content}
 `
 }
 
+const OXFMT_CONFIG = fileURLToPath(new URL('../../app/oxfmt.config.ts', import.meta.url))
+
 async function autoformatTypeFiles() {
   try {
-    await $`bunx biome format --write ${TYPES_DIR}`
+    await $`bunx oxfmt --write -c ${OXFMT_CONFIG} ${TYPES_DIR}`
   } catch (error) {
-    throw new Error(`Failed to run biome on auto generated types: ${error}`)
+    throw new Error(`Failed to run oxfmt on auto generated types: ${error}`)
   }
 }

@@ -1,8 +1,8 @@
 import { useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { Form } from '@/components/shared/form/Form'
 import { TextField } from '@/components/shared/form/fields/TextField'
+import { Form } from '@/components/shared/form/Form'
 import { Img } from '@/components/shared/Img'
 import { Link } from '@/components/shared/links/Link'
 import { buttonStyles } from '@/components/shared/links/styles'
@@ -101,7 +101,7 @@ export const UserForm = ({ user }: Props) => {
       </Form>
 
       <aside
-        className={twJoin(proseClasses, 'prose-sm prose-gray mt-10 border-t border-gray-400 pt-10')}
+        className={twJoin(proseClasses, 'prose-sm mt-10 border-t border-gray-400 pt-10 prose-gray')}
       >
         <h2 className="text-sm">Angaben auf openstreetmap.org:</h2>
         <p className="mt-3 text-sm text-gray-500">

@@ -1,5 +1,5 @@
-import type { QaListStyleKey } from '@/server/qa-configs/listStyleKeys.const'
 import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
+import type { QaListStyleKey } from '@/server/qa-configs/listStyleKeys.const'
 
 /**
  * Filter shape for a list style (used by matchesListStyle only).

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
+import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInitialSizeMeasurement'
 import {
   useMapActions,
   useMapBounds,
@@ -9,7 +10,6 @@ import {
   useMapLoaded,
   useMapSidebarSize,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInitialSizeMeasurement'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
 import { Inspector } from './Inspector'

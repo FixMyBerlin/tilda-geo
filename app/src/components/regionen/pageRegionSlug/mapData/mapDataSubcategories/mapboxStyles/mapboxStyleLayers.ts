@@ -1,7 +1,7 @@
 import { flattenFilterArrays } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/filterUtils/flattenFilterArrays'
 import { wrapFilterWithAll } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/filterUtils/wrapFilterWithAll'
-import type { FileMapDataSubcategoryStyleLayer } from '../../types'
 import type { SourcesId } from '../../mapDataSources/sources.const'
+import type { FileMapDataSubcategoryStyleLayer } from '../../types'
 import type { MapboxStyleLayer } from './types'
 
 export type MapboxStyleLayersProps = {

@@ -1,6 +1,6 @@
+import { UserRoleEnum } from '@prisma/client'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import { UserRoleEnum } from '@prisma/client'
 import { getFreshSession } from '@/server/auth/session.server'
 
 export const getIsAdminFn = createServerFn({ method: 'GET' }).handler(async () => {

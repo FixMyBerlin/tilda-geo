@@ -1,8 +1,8 @@
 import { styleText } from 'node:util'
 import { campaigns } from '@/data/radinfra-de/campaigns'
 import { CampaignMaprouletteSchema } from '@/data/radinfra-de/schema/campaignsSchema'
-import { getValidatedEnv, maprouletteSchema } from '../../shared/env'
 import { maprouletteChallengeUrl } from '../../MaprouletteCreate/utils/maprouletteChallengeUrl'
+import { getValidatedEnv, maprouletteSchema } from '../../shared/env'
 import { checkChallengeStatus } from './checkChallengeStatus'
 
 export const logPrefix = '[MaprouletteRebuild]'

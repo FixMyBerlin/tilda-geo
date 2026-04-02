@@ -1,10 +1,10 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { twMerge } from 'tailwind-merge'
+import { logError } from '@/components/shared/error/logError'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
-import { logError } from '@/components/shared/error/logError'
 import { isDev } from '@/components/shared/utils/isEnv'
-import { twMerge } from 'tailwind-merge'
 
 export default function DefaultError({ error, reset }: ErrorComponentProps) {
   useEffect(
@@ -25,7 +25,7 @@ export default function DefaultError({ error, reset }: ErrorComponentProps) {
         </h1>
         <p className="mt-2 text-base text-gray-600">Leider ist ein Fehler aufgetreten.</p>
         {isDev && error?.message && (
-          <p className="mt-2 wrap-break-word font-mono text-sm text-gray-700">{error.message}</p>
+          <p className="mt-2 font-mono text-sm wrap-break-word text-gray-700">{error.message}</p>
         )}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link button to="/">

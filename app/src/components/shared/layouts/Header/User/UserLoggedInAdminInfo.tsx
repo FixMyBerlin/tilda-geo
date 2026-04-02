@@ -3,13 +3,13 @@ import { useMemo } from 'react'
 import { useMapDebugActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { searchParamsRegistry } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/searchParamsRegistry'
 import { parseMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
-import { useOptionalRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
 import {
   googleMapsUrlViewport,
   mapillaryUrlViewport,
   osmUrlViewport,
   tildaInsectorUrl,
 } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/osmUrls'
+import { useOptionalRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { isAdmin } from '@/components/shared/utils/usersUtils'

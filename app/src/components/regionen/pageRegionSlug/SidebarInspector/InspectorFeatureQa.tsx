@@ -20,12 +20,12 @@ import type { QaMapData } from '@/server/qa-configs/queries/getQaDataForMap.serv
 import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
 import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions'
 import { Disclosure } from './Disclosure/Disclosure'
+import { USER_STATUS_TO_LETTER, userStatusConfig } from './InspectorQa/qaConfigs'
 import { QaDecisionData as QaDecisionDataComponent } from './InspectorQa/QaDecisionData'
 import { QaEvaluationCard } from './InspectorQa/QaEvaluationCard'
 import { QaEvaluationForm } from './InspectorQa/QaEvaluationForm'
 import { QaEvaluationHistory } from './InspectorQa/QaEvaluationHistory'
 import { QaIcon } from './InspectorQa/QaIcon'
-import { USER_STATUS_TO_LETTER, userStatusConfig } from './InspectorQa/qaConfigs'
 import { translations } from './TagsTable/translations/translations.const'
 
 type Props = {

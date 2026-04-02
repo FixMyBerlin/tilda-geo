@@ -1,6 +1,3 @@
-import { join } from 'node:path'
-import { bboxPolygon, featureCollection, union } from '@turf/turf'
-import { $ } from 'bun'
 import {
   ID_FILTERED_FILE,
   OSM_FILTERED_DIR,
@@ -12,6 +9,9 @@ import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 import { originalFilePath } from './download'
+import { bboxPolygon, featureCollection, union } from '@turf/turf'
+import { $ } from 'bun'
+import { join } from 'node:path'
 
 /**
  * Get the full path to the filtered file.
@@ -142,7 +142,11 @@ export async function bboxesFilter(
 
   console.log(
     'ℹ️ Filtering the OSM file with bboxes...',
-    JSON.stringify({ OSMIUM_FILTER_BBOX_FILE, sourceFileChanged, filterDirChanged }),
+    JSON.stringify({
+      OSMIUM_FILTER_BBOX_FILE,
+      sourceFileChanged,
+      filterDirChanged,
+    }),
     isDev ? JSON.stringify(mergedBboxPolygonFeatures) : '',
   )
   try {

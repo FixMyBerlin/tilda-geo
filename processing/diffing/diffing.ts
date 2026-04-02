@@ -1,9 +1,9 @@
-import { styleText } from 'node:util'
-import { bbox, bboxPolygon, featureCollection, intersect } from '@turf/turf'
-import { $, sql } from 'bun'
 import type { Topic, TopicConfigBbox } from '../constants/topics.const'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
+import { bbox, bboxPolygon, featureCollection, intersect } from '@turf/turf'
+import { $, sql } from 'bun'
+import { styleText } from 'node:util'
 
 const referenceTableIdentifier = (table: string) => `diffing_reference."${table}"` as const
 const diffTableIdentifier = (table: string) => `public."${table}_diff"` as const
@@ -65,7 +65,10 @@ function getEffectiveDiffingBbox(): TopicConfigBbox | null {
     // Bboxes don't intersect - use the smaller one (PROCESS_ONLY_BBOX)
     console.log(
       'Diffing: Bboxes do not intersect, using PROCESS_ONLY_BBOX',
-      JSON.stringify({ diffingBbox: params.diffingBbox, processOnlyBbox: params.processOnlyBbox }),
+      JSON.stringify({
+        diffingBbox: params.diffingBbox,
+        processOnlyBbox: params.processOnlyBbox,
+      }),
     )
     return params.processOnlyBbox
   }

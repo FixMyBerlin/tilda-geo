@@ -7,8 +7,8 @@
     "scripts/RegionalMasks/**/*.ts",
     "scripts/StaticDatasets/updateWfsSources/**/*.ts",
     "scripts/worktree-cli/cli.ts",
-    "src/server/instrumentation/nitro-*.plugin.server.ts"
+    "src/server/instrumentation/nitro-*.plugin.server.ts",
   ],
   "ignoreBinaries": ["code", "github", "gh"],
-  "ignoreDependencies": ["@tanstack/router-plugin", "@react-email/preview-server"]
+  "ignoreDependencies": ["@tanstack/router-plugin", "@react-email/preview-server"],
 }

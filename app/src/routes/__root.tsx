@@ -1,8 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, redirect } from '@tanstack/react-router'
-import appCss from '@/components/shared/layouts/global.css?url'
 import { LayoutRoot } from '@/components/shared/layouts/LayoutRoot'
 import { APP_META } from '@/meta.const'
+import appCss from '@/components/shared/layouts/global.css?url'
 
 type MyRouterContext = {
   queryClient: QueryClient

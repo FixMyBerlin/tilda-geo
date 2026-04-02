@@ -39,7 +39,7 @@ export function PageIndex() {
 
       <ul
         className={twMerge(
-          'not-prose overflow-hidden divide-y divide-gray-900/10',
+          'not-prose divide-y divide-gray-900/10 overflow-hidden',
           'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
         )}
       >
@@ -61,7 +61,7 @@ export function PageIndex() {
           </p>
           <ul
             className={twMerge(
-              'not-prose overflow-hidden divide-y divide-gray-900/10',
+              'not-prose divide-y divide-gray-900/10 overflow-hidden',
               'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
             )}
           >

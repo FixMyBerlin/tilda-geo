@@ -1,6 +1,6 @@
+import type { TopicConfigBbox } from '../constants/topics.const'
 import { styleText } from 'node:util'
 import { z } from 'zod'
-import type { TopicConfigBbox } from '../constants/topics.const'
 
 export type DiffingMode = 'off' | 'previous' | 'fixed' | 'reference'
 

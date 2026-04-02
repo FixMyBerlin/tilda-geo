@@ -1,9 +1,9 @@
-import { readdir, rm } from 'node:fs/promises'
-import { join } from 'node:path'
-import { $ } from 'bun'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 import { triggerPrivateApi } from './externalTriggers'
+import { $ } from 'bun'
+import { readdir, rm } from 'node:fs/promises'
+import { join } from 'node:path'
 
 /** Matches `docker-compose.yml` processing.volumes mount for cache clearing. */
 const CACHE_NGINX_PROXY_DIR = '/cache_nginx_proxy'
@@ -45,7 +45,10 @@ export async function clearCache() {
 
     const sizeBeforeStr = await $`du -sh ${CACHE_NGINX_PROXY_DIR}`.text()
     for (const name of entries) {
-      await rm(join(CACHE_NGINX_PROXY_DIR, name), { recursive: true, force: true })
+      await rm(join(CACHE_NGINX_PROXY_DIR, name), {
+        recursive: true,
+        force: true,
+      })
     }
     const sizeAfterStr = await $`du -sh ${CACHE_NGINX_PROXY_DIR}`.text()
     console.log(

@@ -1,5 +1,5 @@
-import type { z } from 'zod'
 import { timingSafeEqual } from 'node:crypto'
+import type { z } from 'zod'
 import { isDev, isStaging } from '@/components/shared/utils/isEnv'
 
 export const parseData = <T extends z.ZodTypeAny>(body: unknown, Schema: T) => {

@@ -1,11 +1,11 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useParams } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { twMerge } from 'tailwind-merge'
+import { logError } from '@/components/shared/error/logError'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
-import { logError } from '@/components/shared/error/logError'
 import { isDev } from '@/components/shared/utils/isEnv'
-import { twMerge } from 'tailwind-merge'
 
 type RegionErrorProps = ErrorComponentProps & {
   /** Used by non-production admin preview routes when `regionSlug` is not in the URL. */

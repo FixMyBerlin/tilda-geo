@@ -6,7 +6,6 @@ CLI to create a Git worktree one level up, copy env files, and open the new fold
 
 The script will prompt for folder name (created as `../folderName`), then branch (last 5 branches or “Other” for a custom name), create the worktree, copy `.env` and `.env.*` from repo root and from `app/`, then run `cursor .` and `github .` from the new folder so it opens in both apps.
 
-
 ---
 
 ## Documentation (from chat)

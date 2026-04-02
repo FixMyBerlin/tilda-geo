@@ -15,7 +15,7 @@ export function FormActionBar({ left, right, className }: Props) {
   return (
     <div
       className={twJoin(
-        'flex items-center justify-between gap-4 rounded-xl bg-white/90 px-4 py-3 shadow-sm ring-1 ring-gray-900/5 dark:bg-gray-800/50 dark:ring-white/10 dark:shadow-none',
+        'flex items-center justify-between gap-4 rounded-xl bg-white/90 px-4 py-3 shadow-sm ring-1 ring-gray-900/5 dark:bg-gray-800/50 dark:shadow-none dark:ring-white/10',
         className,
       )}
     >

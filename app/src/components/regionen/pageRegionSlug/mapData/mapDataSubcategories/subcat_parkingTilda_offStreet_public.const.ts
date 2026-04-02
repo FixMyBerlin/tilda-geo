@@ -1,9 +1,4 @@
 import type { FileMapDataSubcategory } from '../types'
-import {
-  parkingTildaOffStreetDefaultLegends,
-  parkingTildaOffStreetKindLegends,
-  parkingTildaOffStreetSurfaceLegends,
-} from './parkingTildaSharedLegends.const'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_park_off_default_area } from './mapboxStyles/groups/park_off_default_area'
 import { mapboxStyleGroupLayers_park_off_default_points } from './mapboxStyles/groups/park_off_default_points'
@@ -12,6 +7,11 @@ import { mapboxStyleGroupLayers_park_off_labels } from './mapboxStyles/groups/pa
 import { mapboxStyleGroupLayers_park_off_surface_area } from './mapboxStyles/groups/park_off_surface_area'
 import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import {
+  parkingTildaOffStreetDefaultLegends,
+  parkingTildaOffStreetKindLegends,
+  parkingTildaOffStreetSurfaceLegends,
+} from './parkingTildaSharedLegends.const'
 
 const subcatId = 'parkingTildaOffStreet'
 const source = 'tilda_parkings_off_street'

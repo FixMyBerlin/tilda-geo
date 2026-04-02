@@ -8,9 +8,9 @@ import { linkStyles } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { QaIcon } from '../../SidebarInspector/InspectorQa/QaIcon'
 import { QaAreasListDialog } from './QaAreasListDialog'
-import { QaUserDropdown } from './QaUserDropdown'
 import { isListableOption, type QaStyleKey } from './qaConfigStyles'
 import { QA_STYLE_OPTIONS } from './qaConfigStyles'
+import { QaUserDropdown } from './QaUserDropdown'
 
 export const QaConfigCategory = ({
   qaConfig,

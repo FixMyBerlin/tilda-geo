@@ -1,10 +1,10 @@
 import { Layer, Source } from 'react-map-gl/maplibre'
-import { sources } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
-import { subcat_bikelanes } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_bikelanes.const'
 import {
   buildAtlasLayerProps,
   isAtlasStyleLayer,
 } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/buildAtlasLayerProps'
+import { sources } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
+import { subcat_bikelanes } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_bikelanes.const'
 
 export const NotesMapLayerBikelanes = () => {
   const bikelanesSource = sources.find((source) => source.id.includes('bikelanes'))

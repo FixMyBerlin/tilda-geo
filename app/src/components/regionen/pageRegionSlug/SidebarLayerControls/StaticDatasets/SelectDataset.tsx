@@ -72,7 +72,7 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
         )}
       </button>
       {selected && (
-        <div className="prose-a:underline-offset-1 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4">
+        <div className="border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
           {updatedAt && <p>{updatedAt}</p>}
           {dataSourceMarkdown && (
             <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />

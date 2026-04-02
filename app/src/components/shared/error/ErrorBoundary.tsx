@@ -1,10 +1,10 @@
 import type { ErrorInfo, ReactNode } from 'react'
 import { Component } from 'react'
+import { twMerge } from 'tailwind-merge'
 import { logError } from '@/components/shared/error/logError'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { isDev } from '@/components/shared/utils/isEnv'
-import { twMerge } from 'tailwind-merge'
 
 type ErrorBoundaryState = { hasError: boolean; error: Error | null }
 

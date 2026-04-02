@@ -1,5 +1,6 @@
 {
   "name": "processing",
+  "type": "module",
   "module": "index.ts",
   "scripts": {
     "lint": "biome lint --write .",
@@ -20,6 +21,5 @@
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
-  },
-  "type": "module"
+  }
 }

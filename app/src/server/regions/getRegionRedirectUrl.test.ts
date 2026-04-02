@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/style/noNonNullAssertion: We are in a test here, this is OK */
 import { describe, expect, test } from 'vitest'
 import { configs } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { parse } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/parse'

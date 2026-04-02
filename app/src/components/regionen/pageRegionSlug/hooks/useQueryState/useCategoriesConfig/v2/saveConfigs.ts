@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 // This script generates the files `./_{checksum}.ts` and `./index.ts`
-// don't run it directly but use `bun run regions:configs` which runs biome format after code generation
+// don't run it directly but use `bun run regions:configs` which runs oxfmt after code generation
 
 import fs from 'node:fs'
 import path from 'node:path'

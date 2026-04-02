@@ -1,13 +1,13 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { twMerge } from 'tailwind-merge'
 import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
 import { adminTableClasses } from '@/components/admin/AdminTable'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { RegionStatusPill } from '@/components/admin/RegionStatusPill'
-import { twMerge } from 'tailwind-merge'
-import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 import { RegionFormEdit } from './pageRegions/RegionFormEdit'
+import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 
 const routeApi = getRouteApi('/admin/regions/$regionSlug/edit')
 
@@ -54,7 +54,7 @@ export function PageRegionEdit() {
 
                 return (
                   <tr key={user.id}>
-                    <td className={twMerge(adminTableClasses.td, 'align-top py-3')}>
+                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                       <strong>OSM: {user.osmName}</strong> ({user.osmId})
                       <br />
                       {user.firstName || user.lastName
@@ -63,7 +63,7 @@ export function PageRegionEdit() {
                       <br />
                       {user.email || '–'}
                     </td>
-                    <td className={twMerge(adminTableClasses.td, 'align-top py-3')}>
+                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                       <ul className={adminBulletedListClassName}>
                         {user.Membership.map((membership) => (
                           <li key={membership.id}>
@@ -78,7 +78,7 @@ export function PageRegionEdit() {
                         ))}
                       </ul>
                     </td>
-                    <td className={twMerge(adminTableClasses.td, 'align-top py-3')}>
+                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                       {membershipInRegion ? (
                         <RemoveMembershipButton membershipId={membershipInRegion.id} />
                       ) : (

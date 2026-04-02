@@ -1,5 +1,6 @@
 import { TrashIcon } from '@heroicons/react/24/outline'
 import { useRouter } from '@tanstack/react-router'
+import { twMerge } from 'tailwind-merge'
 import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
 import { adminTableClasses } from '@/components/admin/AdminTable'
 import { RegionStatusPill } from '@/components/admin/RegionStatusPill'
@@ -10,7 +11,6 @@ import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
 import { deleteMembershipFn } from '@/server/memberships/memberships.functions'
 import type { UserWithMemberships } from '@/server/users/queries/getUsersAndMemberships.server'
-import { twMerge } from 'tailwind-merge'
 import { getFullname } from './utils/getFullname'
 
 type Props = {
@@ -48,7 +48,7 @@ export const AdminMembershipsTable = ({ users }: Props) => {
         {users.map((user) => {
           return (
             <tr key={user.id}>
-              <td className={twMerge(adminTableClasses.td, 'align-top py-3')}>
+              <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                 <strong>OSM: {user.osmName}</strong>{' '}
                 <span className="text-gray-400">({user.osmId})</span>
                 {user.role === 'ADMIN' && (
@@ -64,7 +64,7 @@ export const AdminMembershipsTable = ({ users }: Props) => {
                 {formatDate(user.createdAt)}{' '}
                 <span className="text-gray-400">({formatRelativeTime(user.createdAt)})</span>
               </td>
-              <td className={twMerge(adminTableClasses.td, 'align-top py-3')}>
+              <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                 {user?.Membership?.length === 0 ? (
                   <>Bisher keine Rechte</>
                 ) : (

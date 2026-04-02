@@ -1,5 +1,3 @@
-import { join } from 'node:path'
-import { $ } from 'bun'
 import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { type Topic, topicsConfig } from '../constants/topics.const'
 import {
@@ -14,6 +12,8 @@ import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { bboxesFilter, filteredFilePath } from './filter'
+import { $ } from 'bun'
+import { join } from 'node:path'
 
 const topicPath = (topic: Topic) => join(TOPIC_DIR, topic)
 const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
@@ -225,7 +225,11 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       console.log(
         'Diffing:',
         'Skip diffing',
-        JSON.stringify({ diffChanges, diffingMode: params.diffingMode, fileChanged }),
+        JSON.stringify({
+          diffChanges,
+          diffingMode: params.diffingMode,
+          fileChanged,
+        }),
         diffChanges === false
           ? '`diffChanges` is false when `fileChanged==true` (new download) or `diffingMode==off`'
           : '',

@@ -1,9 +1,4 @@
 import type { FileMapDataSubcategory } from '../types'
-import {
-  parkingTildaStreetDefaultLegends,
-  parkingTildaStreetKindLegends,
-  parkingTildaStreetSurfaceLegends,
-} from './parkingTildaSharedLegends.const'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_park_street_areas_shadow } from './mapboxStyles/groups/park_street_areas_shadow'
 import { mapboxStyleGroupLayers_park_street_default } from './mapboxStyles/groups/park_street_default'
@@ -13,6 +8,11 @@ import { mapboxStyleGroupLayers_park_street_pattern } from './mapboxStyles/group
 import { mapboxStyleGroupLayers_park_street_surface } from './mapboxStyles/groups/park_street_surface'
 import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import {
+  parkingTildaStreetDefaultLegends,
+  parkingTildaStreetKindLegends,
+  parkingTildaStreetSurfaceLegends,
+} from './parkingTildaSharedLegends.const'
 
 const subcatId = 'parkingTilda'
 const source = 'tilda_parkings'

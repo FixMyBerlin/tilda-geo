@@ -1,6 +1,6 @@
 import type { RegionStatus } from '@prisma/client'
-import { Form } from '@/components/shared/form/Form'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
+import { Form } from '@/components/shared/form/Form'
 import { Link } from '@/components/shared/links/Link'
 import type { StaticRegion } from '@/data/regions.const'
 import { createRegionFn, updateRegionFn } from '@/server/regions/regions.functions'

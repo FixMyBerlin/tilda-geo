@@ -9,9 +9,9 @@ import { proseClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { Disclosure } from './Disclosure/Disclosure'
-import type { InspectorOsmNoteFeature } from './Inspector'
 import { SvgNotesCheckmark } from './icons/SvgNotesCheckmark'
 import { SvgNotesQuestionmark } from './icons/SvgNotesQuestionmark'
+import type { InspectorOsmNoteFeature } from './Inspector'
 import { OsmUserLink } from './OsmUserLink'
 
 type Props = Pick<InspectorOsmNoteFeature, 'feature'>
@@ -60,7 +60,7 @@ export const InspectorFeatureOsmNote = ({ feature }: Props) => {
               dangerouslySetInnerHTML={{ __html: dompurify.sanitize(comment.html) }}
               className={twJoin(
                 proseClasses,
-                'prose-sm prose-a:underline hover:prose-a:text-teal-700 hover:prose-a:decoration-teal-700 my-2 border-l-4 border-white pl-3',
+                'my-2 prose-sm border-l-4 border-white pl-3 prose-a:underline hover:prose-a:text-teal-700 hover:prose-a:decoration-teal-700',
               )}
             />
             {!firstComment && comment.action === 'opened' && (

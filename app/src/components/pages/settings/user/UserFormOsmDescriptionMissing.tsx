@@ -84,7 +84,7 @@ export const UserFormOsmDescriptionMissing = () => {
 
   return (
     <section
-      className="prose prose-sm my-4 rounded border border-amber-300 bg-amber-50 p-4"
+      className="my-4 prose prose-sm rounded border border-amber-300 bg-amber-50 p-4"
       id="description-missing"
     >
       <h3>Bitte vervollständigen Sie Ihr Profil auf OpenStreetMap</h3>

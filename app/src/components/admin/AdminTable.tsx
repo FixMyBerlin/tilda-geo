@@ -18,13 +18,13 @@ export const adminTableClasses = {
   /** `<tbody>` — row dividers + body surface */
   body: 'divide-y divide-gray-200 bg-white/40',
   /** `<th scope="col">` — centered (default list tables). */
-  th: twMerge(cellPad, 'text-center text-sm font-semibold align-middle text-gray-900'),
+  th: twMerge(cellPad, 'text-center align-middle text-sm font-semibold text-gray-900'),
   /** `<th scope="col">` — left-aligned (wide / form-adjacent tables). */
-  thLeft: twMerge(cellPad, 'text-left text-sm font-semibold align-middle text-gray-900'),
+  thLeft: twMerge(cellPad, 'text-left align-middle text-sm font-semibold text-gray-900'),
   /** `<td>` */
   td,
   /** `<th scope="row">` in tbody — row title / first column. */
-  thRow: twMerge(td, 'font-medium text-gray-900 text-left'),
+  thRow: twMerge(td, 'text-left font-medium text-gray-900'),
 } as const
 
 export const AdminTable = ({

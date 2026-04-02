@@ -8,7 +8,7 @@ on:
         required: true
     outputs:
       CHANGES:
-        description: "Whether `configs/` or the `docker-compose` files have changed since the last successfull workflow run."
+        description: 'Whether `configs/` or the `docker-compose` files have changed since the last successfull workflow run.'
         value: ${{ jobs.check_config_changes.outputs.CHANGES }}
 
 jobs:

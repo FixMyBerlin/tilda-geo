@@ -12,7 +12,7 @@ export function PageStats() {
     <div className="flex h-screen flex-col">
       <HeaderApp />
       <main className="z-0 grow">
-        <div className="prose mx-auto my-10 max-w-prose">
+        <div className="mx-auto my-10 prose max-w-prose">
           <div className="pb-8">
             <h1>Download</h1>
             <Link

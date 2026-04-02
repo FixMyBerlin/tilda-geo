@@ -13,11 +13,11 @@ bun run mapbox-tilesets-update
 
 ### Options
 
-| Flag | Description |
-| --- | --- |
-| `--env <dev\|staging\|production>` | Environment to fetch tiles from. If omitted, an interactive prompt is shown. |
-| `--filter <string>` | Only process datasets whose key includes this string (e.g. `--filter parking`). |
-| `--force` | Re-download and rebuild even when output files already exist. |
+| Flag                               | Description                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| `--env <dev\|staging\|production>` | Environment to fetch tiles from. If omitted, an interactive prompt is shown.    |
+| `--filter <string>`                | Only process datasets whose key includes this string (e.g. `--filter parking`). |
+| `--force`                          | Re-download and rebuild even when output files already exist.                   |
 
 ### Examples
 

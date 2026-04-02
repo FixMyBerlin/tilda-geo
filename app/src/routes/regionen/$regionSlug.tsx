@@ -5,8 +5,8 @@ import { searchParamsRegistry } from '@/components/regionen/pageRegionSlug/hooks
 import RegionError from '@/components/regionen/pageRegionSlug/RegionError'
 import RegionPagePending from '@/components/regionen/pageRegionSlug/RegionPagePending'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
-import { DEV_REGION_ERROR_QUERY_KEY } from '@/dev/errorPreviews'
 import { productName } from '@/data/tildaProductNames.const'
+import { DEV_REGION_ERROR_QUERY_KEY } from '@/dev/errorPreviews'
 import { getRegionRedirectUrl } from '@/server/regions/getRegionRedirectUrl'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
 import {
@@ -15,13 +15,13 @@ import {
   regionQaConfigsQueryOptions,
 } from '@/server/regions/regionQueryOptions'
 import {
-  regionUploadsSystemLayerQueryOptions,
-  regionUploadsUserQueryOptions,
-} from '@/server/uploads/uploadsQueryOptions'
-import {
   getRegionPageBeforeLoadFn,
   getRegionPageLoaderFn,
 } from '@/server/regions/regions.functions'
+import {
+  regionUploadsSystemLayerQueryOptions,
+  regionUploadsUserQueryOptions,
+} from '@/server/uploads/uploadsQueryOptions'
 
 /**
  * Region page route. The loader (1) fetches main page data via getRegionPageLoaderFn and (2) preloads

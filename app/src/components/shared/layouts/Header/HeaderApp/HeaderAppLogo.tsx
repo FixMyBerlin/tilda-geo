@@ -1,6 +1,6 @@
 import { Img } from '@/components/shared/Img'
-import svgTildaLogoBlack from '../../assets/tilda-logo.svg'
 import svgTildaLogoWhite from '../../assets/tilda-logo-weiss.svg'
+import svgTildaLogoBlack from '../../assets/tilda-logo.svg'
 
 export const HeaderAppLogoWhite = () => {
   return (

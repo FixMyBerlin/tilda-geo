@@ -2,9 +2,9 @@ import { formatDateTime } from '@/components/shared/date/formatDate'
 import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { Markdown } from '@/components/shared/text/Markdown'
 import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
+import { systemStatusConfig, userStatusConfig } from './qaConfigs'
 import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
 import { QaEvaluatorDisplay } from './QaEvaluatorDisplay'
-import { systemStatusConfig, userStatusConfig } from './qaConfigs'
 
 type Props = {
   evaluation: Pick<
