@@ -8,10 +8,10 @@ Runs `docker compose up processing` from the **git repo root** with command-scop
 Run from `app/`:
 
 ```bash
-bun run test:processing-diff -- --help
-bun run test:processing-diff -- --dry-run
-bun run test:processing-diff -- --preset xhain --diff-mode reference
-bun run test:processing-diff -- --diff-mode fixed --topics trafficSigns,parking
+bun run test-processing-diff -- --help
+bun run test-processing-diff -- --dry-run
+bun run test-processing-diff -- --preset xhain --diff-mode reference
+bun run test-processing-diff -- --diff-mode fixed --topics trafficSigns,parking
 ```
 
 Geofabrik OAuth and other secrets should stay in the root `.env`. This CLI mainly overrides diff/bbox/topic/skip flags; use `--download-url` only if you must override the URL for one run.

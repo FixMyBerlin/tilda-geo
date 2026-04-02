@@ -49,9 +49,9 @@ const { values } = parseArgs({
 })
 
 function printHelp() {
-  console.log(`test:processing-diff — run docker compose processing with env overrides (see README)
+  console.log(`test-processing-diff — run docker compose processing with env overrides (see README)
 
-Usage: bun run test:processing-diff -- [options]
+Usage: bun run test-processing-diff -- [options]
 
 Bbox:
   --preset <slug>           Set PROCESS_ONLY_BBOX (+ PROCESSING_DIFFING_BBOX unless --distinct-diff-bbox)

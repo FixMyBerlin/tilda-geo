@@ -10,7 +10,7 @@ See https://maproulette.org/docs/swagger-ui/index.html#/Challenge/rebuildChallen
 
 ## Params
 
-You can use the `filter` param to only run specific challenges. See [package.json](../../package.json) `npm run Maproulette:help` for more.
+You can use the `filter` param to only run specific challenges. See [package.json](../../package.json) `bun run maproulette-help` for more.
 
 ## Cron job
 

@@ -8,7 +8,7 @@ As a work around, we now create mbtiles and import those in Mapbox (manually).
 ## Usage
 
 ```bash
-npm run MapboxTilesets:update
+bun run mapbox-tilesets-update
 ```
 
 ### Options
@@ -23,10 +23,10 @@ npm run MapboxTilesets:update
 
 ```bash
 # Interactive environment prompt, process all datasets
-npm run MapboxTilesets:update
+bun run mapbox-tilesets-update
 
 # Fetch from staging, only parking-related datasets, force rebuild
-npm run MapboxTilesets:update -- --env staging --filter parking --force
+bun run mapbox-tilesets-update -- --env staging --filter parking --force
 ```
 
 After processing, the mbtiles folder opens automatically. Use "replace" in Mapbox Studio and pick the generated mbtiles files.

@@ -150,7 +150,7 @@ Note: `updateDownloadSources.ts` is for WFS downloads (requires downloadConfig.t
 **Always run this after creating or modifying TypeScript files** (meta.ts, transform.ts, or any imports):
 
 ```bash
-npm run type-check:deploy
+npm run type-check-deploy
 ```
 
 This temporarily removes the `geojson` symlink, runs TypeScript type-checking, and restores the symlink. It simulates the Docker build environment where symlinks aren't available, ensuring your code will compile correctly during builds.
@@ -165,7 +165,7 @@ Before completing:
 4. ✅ meta.ts follows type structure (check with TypeScript)
 5. ✅ Similar datasets in group folder reviewed for patterns
 6. ✅ Command verified and provided as one-click action
-7. ✅ `npm run type-check:deploy` run successfully (see Step 6)
+7. ✅ `npm run type-check-deploy` run successfully (see Step 6)
 
 ## References
 

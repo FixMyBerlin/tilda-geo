@@ -16,9 +16,9 @@ The reason for that is, that styling the data there has the best editor experien
 ## General process
 
 1. Use Mapbox Studio to style our custom data.
-   - See [`npm run updateTilesets`](scripts/MapboxTilesets/README.md) on how to update the Data in Mapbox Studio
+   - See [`bun run mapbox-tilesets-update`](scripts/MapboxTilesets/README.md) on how to update the Data in Mapbox Studio
 2. _Publish_ the style in Mapbox Studio (only then the API output is updated).
-3. Run `npm run updateStyles`.
+3. Run `bun run mapbox-styles-update`.
 4. Check the generated files and update subcategory data as needed
 
 ## What it does

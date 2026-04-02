@@ -109,7 +109,7 @@ const ignorePatterns = fs.existsSync(updateIgnorePath)
   : []
 
 if (!fs.existsSync(geoJsonFolder)) {
-  red(`folder "${geoJsonFolder}" does not exists. Please run "npm run StaticDatasets:link"?`)
+  red(`folder "${geoJsonFolder}" does not exists. Please run "bun run static-datasets-link"?`)
   process.exit(1)
 }
 

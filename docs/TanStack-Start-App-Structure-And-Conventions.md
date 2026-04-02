@@ -63,7 +63,7 @@ For loader vs server Fn, beforeLoad, error handling, and query options, see [Tan
 
 ## 10. Tests — current layout
 
-- **Unit/integration (Vitest)** — `npm run test` / `npm run test:run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
+- **Unit/integration (Vitest)** — `npm run test` / `npm run test-run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
 - **E2E (Playwright)**: **app/tests/** — `*.spec.ts`. See [app/tests/README.md](../app/tests/README.md) for setup, auth, and smoke tests.
 - **Processing**: Lua tests in **`__tests__`** with `*.test.lua` (see [processing/README.md](../processing/README.md)).
 - **Mailers**: [app/mailers/newUserRegistrationMailer.test.ts](../app/mailers/newUserRegistrationMailer.test.ts).
@@ -74,9 +74,9 @@ For loader vs server Fn, beforeLoad, error handling, and query options, see [Tan
 
 ## Related docs
 
-| Topic | Doc |
-|-------|-----|
-| Server/client boundaries, .server, loaders, errors | [TanStack-Start-Client-Server-Boundaries.md](TanStack-Start-Client-Server-Boundaries.md) |
-| Auth and route protection | [TanStack-Start-Auth.md](TanStack-Start-Auth.md) |
-| Zustand patterns | [.cursor/skills/zustand-state-management/SKILL.md](../.cursor/skills/zustand-state-management/SKILL.md) |
-| nuqs (URL state) | [.cursor/skills/nuqs/SKILL.md](../.cursor/skills/nuqs/SKILL.md) |
+| Topic                                              | Doc                                                                                                     |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Server/client boundaries, .server, loaders, errors | [TanStack-Start-Client-Server-Boundaries.md](TanStack-Start-Client-Server-Boundaries.md)                |
+| Auth and route protection                          | [TanStack-Start-Auth.md](TanStack-Start-Auth.md)                                                        |
+| Zustand patterns                                   | [.cursor/skills/zustand-state-management/SKILL.md](../.cursor/skills/zustand-state-management/SKILL.md) |
+| nuqs (URL state)                                   | [.cursor/skills/nuqs/SKILL.md](../.cursor/skills/nuqs/SKILL.md)                                         |

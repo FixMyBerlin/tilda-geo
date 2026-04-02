@@ -14,10 +14,10 @@ The system allows to create uploads `createdBy: USER` that are managed manually.
 The system supports two data source types, configured in `meta.ts` when creating datasets:
 
 1. **Local Sources** (`dataSourceType: 'local'`)
-   * Uploads-DB Entry: Created manually via `npm run StaticDatasets:*`
+   * Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
    * Files: Stored on S3 at the same time.
 2. **External Sources** (`dataSourceType: 'external'`)
-   * Uploads-DB Entry: Created manually via `npm run StaticDatasets:*`
+   * Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
    * Files: Downloaded and cached on the server with TTL to auto-update the files regularly
 
 ## API Endpoints

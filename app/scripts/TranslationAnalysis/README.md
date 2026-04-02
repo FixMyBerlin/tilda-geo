@@ -7,5 +7,5 @@ It helps identify missing translation keys and key-value pairs that need to be a
 
 ```
 # From ./app
-npm run TranslationAnalysis:update
+bun run translation-analysis-update
 ```

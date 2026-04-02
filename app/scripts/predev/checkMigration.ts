@@ -7,7 +7,7 @@ const label = 'check_migration'
 
 export async function checkMigration() {
   try {
-    const result = await $`npm run migrate:check`.quiet()
+    const result = await $`npm run migrate-check`.quiet()
     const output = result.text()
 
     if (!output.includes('Following migration have not yet been applied')) {

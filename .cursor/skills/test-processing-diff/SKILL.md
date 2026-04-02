@@ -1,6 +1,6 @@
 ---
 name: test-processing-diff
-description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. Use bun run test:processing-diff from app/ — run --help first, then --dry-run before compose. Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
+description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. Use bun run test-processing-diff from app/ — run --help first, then --dry-run before compose. Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
 ---
 
 # Test processing with diffing (local Docker)
@@ -9,12 +9,12 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 ## For agents: use the CLI (do not hand-craft `docker compose` env)
 
-**Always** drive this workflow with `test:processing-diff` unless the user explicitly cannot run Bun (then run `bun run test:processing-diff -- --dry-run` once in a normal environment and use the printed `VAR=value … docker compose…` line from repo root as a last resort).
+**Always** drive this workflow with `test-processing-diff` unless the user explicitly cannot run Bun (then run `bun run test-processing-diff -- --dry-run` once in a normal environment and use the printed `VAR=value … docker compose…` line from repo root as a last resort).
 
 **Learn the tool in this order:**
 
-1. From **`app/`**: `bun run test:processing-diff -- --help` — flags, bbox presets, defaults.
-2. Same directory: `bun run test:processing-diff -- --dry-run -- …same flags as a real run…` — see exact env overrides and compose command **without** starting containers.
+1. From **`app/`**: `bun run test-processing-diff -- --help` — flags, bbox presets, defaults.
+2. Same directory: `bun run test-processing-diff -- --dry-run -- …same flags as a real run…` — see exact env overrides and compose command **without** starting containers.
 3. Drop `--dry-run` to run for real.
 
 **What you need to know (not how the script is implemented):**
@@ -23,7 +23,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 - Overrides are **per invocation** — no need to `export` vars in the user’s shell.
 - A **non-fatal** `docker compose up -d db` runs first; if processing still fails, ensure **`db` is healthy** before retrying.
 
-Implementation and edge cases: [`app/scripts/ProcessingDiffRun/run.ts`](../../../app/scripts/ProcessingDiffRun/run.ts). Short human README: [`app/scripts/ProcessingDiffRun/README.md`](../../../app/scripts/ProcessingDiffRun/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`test:processing-diff`).
+Implementation and edge cases: [`app/scripts/ProcessingDiffRun/run.ts`](../../../app/scripts/ProcessingDiffRun/run.ts). Short human README: [`app/scripts/ProcessingDiffRun/README.md`](../../../app/scripts/ProcessingDiffRun/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`test-processing-diff`).
 
 ## Inputs (flags or sensible defaults)
 
@@ -53,12 +53,12 @@ Keep Geofabrik OAuth, DB, and other secrets in **root** `.env`. For diff tests, 
 1. **Save work:** clean tree, temp commit, or stash.
 2. **Baseline:** `git checkout <commit-before-changes>`.
 3. **Reference run** (from `app/`):  
-   `bun run test:processing-diff -- --preset xhain --diff-mode reference`  
+   `bun run test-processing-diff -- --preset xhain --diff-mode reference`  
    Reference refreshes `diffing_reference` and clears diff tables — see `processing/README.md` (*Processing: Inspect changes*).
 4. Fix failures if needed; re-run the same command after fixes.
 5. **Your branch:** `git checkout <branch-with-changes>`.
 6. **Fixed run** — **same** preset/topics/bbox flags, only **`--diff-mode fixed`**:  
-   `bun run test:processing-diff -- --preset xhain --diff-mode fixed`
+   `bun run test-processing-diff -- --preset xhain --diff-mode fixed`
 
 Do **not** change other diff-related flags between reference and fixed unless you mean to invalidate the comparison.
 

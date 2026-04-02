@@ -3,7 +3,7 @@
 We need the `notes_closed`, `notes_open` files for the `InspectorFeatureOsmNotes`.
 The SVGs here are rendered directly, but we also need the files as Sprites for our OSM notes style.
 
-Since we generate the sprites automatically with `npm run updateStyles`, we need a workaround:
+Since we generate the sprites automatically with `bun run mapbox-styles-update`, we need a workaround:
 
 1. There is a dummy folder ("sprites-ohne-category") with dummy layer https://studio.mapbox.com/styles/hejco/cl706a84j003v14o23n2r81w7/edit/#13.47/52.54694/13.53422/-161.6
 2. This adds the sprites which we in turn can pull using our regular process.
