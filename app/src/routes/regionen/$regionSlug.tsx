@@ -25,8 +25,8 @@ import {
 
 /**
  * Region page route. The loader (1) fetches main page data via getRegionPageLoaderFn and (2) preloads
- * the React Query cache with region-specific data (QA configs, internal notes when the region has
- * atlas notes, QA map data when the `qa` URL param is set). That cache is server state: the
+ * the React Query cache with region-specific data (QA configs — server returns [] without access, internal notes when
+ * the region has atlas notes, QA map data when the `qa` URL param is set). That cache is server state: the
  * @tanstack/react-router-ssr-query integration dehydrates it and streams it to the client so
  * components using useQuery with the same query options get hydrated data without a second request.
  * See: https://tanstack.com/router/latest/docs/guide/data-loading

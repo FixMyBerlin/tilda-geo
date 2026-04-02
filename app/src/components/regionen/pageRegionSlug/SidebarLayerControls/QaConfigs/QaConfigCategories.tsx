@@ -1,12 +1,18 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
+import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions'
 import { QaConfigCategory } from './QaConfigCategory'
 
 export const QaConfigCategories = () => {
+  const hasPermissions = useHasPermissions()
   const regionSlug = useRegionSlug()
-  const { data: qaConfigs } = useQuery(regionQaConfigsQueryOptions(regionSlug ?? ''))
+  const { data: qaConfigs } = useQuery({
+    ...regionQaConfigsQueryOptions(regionSlug ?? ''),
+    enabled: hasPermissions && Boolean(regionSlug),
+  })
 
+  if (!hasPermissions) return null
   if (!qaConfigs?.length) return null
 
   return (

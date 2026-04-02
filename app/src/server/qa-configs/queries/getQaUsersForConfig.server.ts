@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { getAppSession } from '@/server/auth/session.server'
-import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import db from '@/server/db.server'
+import { canAccessQaForRegion } from '@/server/qa-configs/authorization/canAccessQaForRegion.server'
 
 const Schema = z.object({
   configId: z.number(),
@@ -14,7 +14,7 @@ export async function getQaUsersForConfig(input: z.infer<typeof Schema>, headers
   const { configId, regionSlug } = Schema.parse(input)
 
   // Check authorization for the region
-  const authResult = await checkRegionAuthorization(appSession, regionSlug)
+  const authResult = await canAccessQaForRegion(appSession, regionSlug)
   if (!authResult.isAuthorized) {
     return []
   }

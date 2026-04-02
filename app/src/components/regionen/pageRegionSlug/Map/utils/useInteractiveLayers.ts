@@ -13,6 +13,7 @@ import {
   createDatasetSourceLayerKey,
   createSourceKeyStaticDatasets,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
@@ -84,6 +85,7 @@ const collectAllLayerIdsFromConfig = ({ categories }: Props) => {
 }
 
 export const useInteractiveLayers = () => {
+  const hasPermissions = useHasPermissions()
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
   const region = useStaticRegion()
@@ -111,7 +113,7 @@ export const useInteractiveLayers = () => {
   if (showInternalNotesParam) {
     activeCategoryLayerIds.push(internalNotesLayerId)
   }
-  if (qaParamData.configSlug && qaParamData.style !== 'none') {
+  if (hasPermissions && qaParamData.configSlug && qaParamData.style !== 'none') {
     activeCategoryLayerIds.push(qaLayerId)
   }
 

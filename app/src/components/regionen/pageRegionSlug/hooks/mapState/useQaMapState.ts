@@ -8,6 +8,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { USER_STATUS_TO_LETTER } from '@/components/regionen/pageRegionSlug/SidebarInspector/InspectorQa/qaConfigs'
+import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { isProd } from '@/components/shared/utils/isEnv'
 import type { QaMapData } from '@/server/qa-configs/queries/getQaDataForMap.server'
 import {
@@ -62,18 +63,23 @@ export const filterQaDataByStyle = (data: QaMapData[], style: string) => {
 }
 
 export const useQaMapState = () => {
+  const hasPermissions = useHasPermissions()
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
   const { startFeatureStateSync, finishFeatureStateSync } = useMapActions()
   const { qaParamData } = useQaParam()
   const { qaFilterParam } = useQaFilterParam()
   const regionSlug = useRegionSlug()
-  const { data: qaConfigs } = useQuery(regionQaConfigsQueryOptions(regionSlug ?? ''))
+  const { data: qaConfigs } = useQuery({
+    ...regionQaConfigsQueryOptions(regionSlug ?? ''),
+    enabled: hasPermissions && Boolean(regionSlug),
+  })
 
   // React Compiler automatically memoizes this computation
   const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.configSlug)
 
-  const shouldFetch = qaParamData.configSlug && qaParamData.style !== 'none' && activeQaConfig
+  const shouldFetch =
+    hasPermissions && qaParamData.configSlug && qaParamData.style !== 'none' && activeQaConfig
 
   // Get user IDs from filter param when user-selected style is active
   const userIds =

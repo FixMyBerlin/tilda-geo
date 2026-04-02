@@ -4,8 +4,8 @@ import {
   USER_STATUS_TO_LETTER,
 } from '@/components/regionen/pageRegionSlug/SidebarInspector/InspectorQa/qaConfigs'
 import { getAppSession } from '@/server/auth/session.server'
-import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import db from '@/server/db.server'
+import { canAccessQaForRegion } from '@/server/qa-configs/authorization/canAccessQaForRegion.server'
 
 const Schema = z.object({
   configId: z.number(),
@@ -25,7 +25,7 @@ export async function getQaDataForMap(input: z.infer<typeof Schema>, headers: He
   const { configId, regionSlug, userIds } = Schema.parse(input)
 
   // Check authorization for the region
-  const authResult = await checkRegionAuthorization(appSession, regionSlug)
+  const authResult = await canAccessQaForRegion(appSession, regionSlug)
   if (!authResult.isAuthorized) {
     return []
   }
