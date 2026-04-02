@@ -35,11 +35,6 @@ export const CONSTANTS_DIR = '/processing/constants'
 export const DATA_TABLE_DIR = '/processing/dataTables'
 
 /**
- * The file name for the id filtered OSM file.
- */
-export const ID_FILTERED_FILE = `id_filtered.osm.pbf`
-
-/**
  * The file name for the globally bbox filtered OSM file.
  */
 export const BBOX_FILTERED_FILE = `bbox_extracted.osm.pbf`

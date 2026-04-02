@@ -1,6 +1,5 @@
 import {
   BBOX_FILTERED_FILE,
-  ID_FILTERED_FILE,
   OSM_FILTERED_DIR,
   OSMIUM_FILTER_BBOX_DIR,
   OSMIUM_FILTER_EXPRESSIONS_DIR,
@@ -63,43 +62,11 @@ export async function tagFilter(fileName: string, sourceFileChanged: boolean) {
 }
 
 /**
- * Filter the OSM file with osmium and the given ids.
- * Regenerates the filtered file when ID filter is active, but doesn't affect
- * the fileChanged flag used for diffing decisions (same as tagFilter/bboxesFilter).
- * @param fileName the file to filter
- * @param sourceFileChanged whether the source OSM file changed since the last run (new download)
- * @param ids the ids to filter, use format `w123 w234`
- * @returns the resulting file's name and sourceFileChanged flag (not affected by filter regeneration)
- */
-export async function idFilter(
-  fileName: string,
-  sourceFileChanged: boolean,
-  ids: typeof params.idFilter,
-) {
-  if (params.idFilter === false) return
-
-  console.log(`Filtering the OSM file with \`ID_FILTER=${ids}\`...`)
-  try {
-    await $`osmium getid \
-              --overwrite \
-              --output=${filteredFilePath(ID_FILTERED_FILE)} \
-              --verbose-ids ${filteredFilePath(fileName)} \
-              ${ids}`
-  } catch (error) {
-    throw new Error(`Failed to filter the OSM file by ids: ${error}`)
-  }
-
-  // Return sourceFileChanged (not true) so that ID filter regeneration doesn't skip diffing
-  // ID filter is used for testing/debugging, but filtered data can still be diffed against previous run
-  return { fileName: ID_FILTERED_FILE, fileChanged: sourceFileChanged }
-}
-
-/**
  * Apply PROCESS_ONLY_BBOX once as a global filter.
- * Returns sourceFileChanged to keep diffing behavior aligned with tag/id filters.
+ * Returns sourceFileChanged to keep diffing behavior aligned with tag filters.
  */
 export async function globalBboxFilter(fileName: string, sourceFileChanged: boolean) {
-  if (params.processOnlyBbox === null || params.idFilter !== false) return
+  if (params.processOnlyBbox === null) return
 
   console.log(
     `Filtering the OSM file globally with \`PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}\`...`,

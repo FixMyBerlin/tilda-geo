@@ -33,7 +33,6 @@ const { values } = parseArgs({
     'only-bbox': { type: 'string' },
     'diff-mode': { type: 'string' },
     topics: { type: 'string' },
-    'id-filter': { type: 'string' },
     'osm2pgsql-log-level': { type: 'string' },
     'skip-download': { type: 'string' },
     'skip-unchanged': { type: 'string' },
@@ -66,7 +65,6 @@ Defaults (no --preset): only-bbox = bussonderstreifen, diff-bbox = berlin-full
 Diff / processing:
   --diff-mode <mode>        off | previous | fixed | reference (default: fixed)
   --topics <list>           PROCESS_ONLY_TOPICS (comma-separated, empty = all)
-  --id-filter <string>      ID_FILTER (e.g. "w123 w456")
   --osm2pgsql-log-level <lvl>  OSM2PGSQL_LOG_LEVEL
   --download-url <url>      PROCESS_GEOFABRIK_DOWNLOAD_URL (optional; else .env)
 
@@ -163,7 +161,6 @@ const overrides: Record<string, string> = {
   PROCESSING_DIFFING_BBOX: diffBbox,
   PROCESS_ONLY_BBOX: onlyBbox,
   PROCESS_ONLY_TOPICS: values.topics ?? '',
-  ID_FILTER: values['id-filter'] ?? '',
   SKIP_DOWNLOAD: parseBin('--skip-download', values['skip-download'], '1'),
   SKIP_UNCHANGED: parseBin('--skip-unchanged', values['skip-unchanged'], '0'),
   SKIP_WARM_CACHE: parseBin('--skip-warm-cache', values['skip-warm-cache'], '0'),

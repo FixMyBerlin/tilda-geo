@@ -67,7 +67,6 @@ const processingEnvSchema = z.object({
   PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME: z.string().optional(),
   PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD: z.string().optional(),
   PROCESS_GEOFABRIK_DOWNLOAD_URL: z.string().optional(),
-  ID_FILTER: z.string().optional(),
   PROCESSING_DIFFING_MODE: z.string().optional(),
   PROCESSING_DIFFING_BBOX: z.string().optional(),
   SKIP_UNCHANGED: z.string().optional(),

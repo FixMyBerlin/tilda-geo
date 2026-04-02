@@ -117,7 +117,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
 
   // Reference mode: Always create reference, never diff (clean baseline)
   // Previous/Fixed modes: Only diff when source PBF file hasn't changed (new download)
-  // Note: Filter regenerations (tag/bbox/ID filters) don't affect diffing - filtered data can still be diffed
+  // Note: Filter regenerations (tag/bbox filters) don't affect diffing - filtered data can still be diffed
   const isReferenceMode = params.diffingMode === 'reference'
   const diffChanges =
     params.diffingMode !== 'off' && params.diffingMode !== 'reference' && !fileChanged
@@ -128,7 +128,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     await dropAllDiffTables()
   }
 
-  const useGlobalBboxFilter = params.processOnlyBbox !== null && params.idFilter === false
+  const useGlobalBboxFilter = params.processOnlyBbox !== null
   if (useGlobalBboxFilter) {
     console.log(
       `Topics: ℹ️ Using global PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}. Topic bbox filters are skipped.`,
@@ -163,7 +163,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     }
 
     // Bboxes: Create filtered source file
-    if (innerBboxes && params.idFilter === false) {
+    if (innerBboxes) {
       innerFileName = `${topic}_extracted.osm.pbf`
       await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
     }
