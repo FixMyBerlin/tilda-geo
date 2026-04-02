@@ -6,6 +6,7 @@
 *.pbf
 *.log
 .env
+.env.deploy.generated
 *.DS_Store
 
 /node_modules

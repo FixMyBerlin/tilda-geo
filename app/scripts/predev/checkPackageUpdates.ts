@@ -51,3 +51,7 @@ export async function checkPackageUpdates() {
     process.exit(1)
   }
 }
+
+if (import.meta.main) {
+  await checkPackageUpdates()
+}

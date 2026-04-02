@@ -15,3 +15,7 @@ export async function copyEnv() {
     process.exit(1)
   }
 }
+
+if (import.meta.main) {
+  await copyEnv()
+}

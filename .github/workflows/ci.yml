@@ -3,6 +3,29 @@ name: Check PR
 on: [pull_request]
 
 jobs:
+  validate-env-contract:
+    name: Validate Env Contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Verify deploy env manifest
+        run: |
+          bun .github/scripts/verify-env-manifest.ts \
+            --manifest .github/env/deploy.manifest.json \
+            --env-example .env.example \
+            --docker-compose docker-compose.yml \
+            --setup-workflow .github/workflows/setup-env.yml
+
+      - name: Verify generated .github README
+        run: |
+          bun .github/scripts/generate-github-readme.ts
+          git diff --exit-code -- .github/README.md
+
   run-app-ci:
     name: Run Type Check & Linters
     runs-on: ubuntu-latest

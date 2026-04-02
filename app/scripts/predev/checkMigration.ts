@@ -43,3 +43,7 @@ export async function checkMigration() {
     process.exit(1)
   }
 }
+
+if (import.meta.main) {
+  await checkMigration()
+}

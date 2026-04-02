@@ -27,3 +27,7 @@ export async function checkDocker() {
     process.exit(1)
   }
 }
+
+if (import.meta.main) {
+  await checkDocker()
+}
