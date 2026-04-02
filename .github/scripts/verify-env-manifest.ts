@@ -3,6 +3,12 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
+const REPO_ROOT = resolve(import.meta.dir, '..', '..')
+const MANIFEST_PATH = resolve(import.meta.dir, '..', 'env', 'deploy.manifest.json')
+const ENV_EXAMPLE_PATH = resolve(REPO_ROOT, '.env.example')
+const DOCKER_COMPOSE_PATH = resolve(REPO_ROOT, 'docker-compose.yml')
+const SETUP_WORKFLOW_PATH = resolve(import.meta.dir, '..', 'workflows', 'setup-env.yml')
+
 type ManifestVariable = {
   name: string
   sourceEnv: string
@@ -12,19 +18,6 @@ type ManifestVariable = {
 
 type Manifest = {
   variables: ManifestVariable[]
-}
-
-function parseArgs(argv: string[]) {
-  const args = new Map<string, string>()
-  for (let i = 2; i < argv.length; i += 1) {
-    const key = argv[i]
-    const value = argv[i + 1]
-    if (!key.startsWith('--')) throw new Error(`Invalid argument: ${key}`)
-    if (!value || value.startsWith('--')) throw new Error(`Missing value for ${key}`)
-    args.set(key.slice(2), value)
-    i += 1
-  }
-  return args
 }
 
 function readManifest(path: string) {
@@ -98,21 +91,10 @@ const ALLOWED_EXTRA_COMPOSE_VARS = new Set([
 ])
 
 function main() {
-  const args = parseArgs(process.argv)
-  const manifestArg = args.get('manifest')
-  const envExampleArg = args.get('env-example')
-  const composeArg = args.get('docker-compose')
-  const setupWorkflowArg = args.get('setup-workflow')
-  if (!manifestArg || !envExampleArg || !composeArg || !setupWorkflowArg) {
-    throw new Error(
-      'Usage: bun .github/scripts/verify-env-manifest.ts --manifest <path> --env-example <path> --docker-compose <path> --setup-workflow <path>',
-    )
-  }
-
-  const manifest = readManifest(resolve(manifestArg))
-  const envExampleKeys = parseEnvExampleKeys(resolve(envExampleArg))
-  const composeRefs = parseComposeRefs(resolve(composeArg))
-  const workflowMappings = parseSetupEnvMappings(resolve(setupWorkflowArg))
+  const manifest = readManifest(MANIFEST_PATH)
+  const envExampleKeys = parseEnvExampleKeys(ENV_EXAMPLE_PATH)
+  const composeRefs = parseComposeRefs(DOCKER_COMPOSE_PATH)
+  const workflowMappings = parseSetupEnvMappings(SETUP_WORKFLOW_PATH)
 
   const names = new Set<string>()
   const missingInEnvExample: string[] = []

@@ -19,12 +19,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Verify env manifest
-        run: |
-          bun .github/scripts/verify-env-manifest.ts \
-            --manifest .github/env/deploy.manifest.json \
-            --env-example .env.example \
-            --docker-compose docker-compose.yml \
-            --setup-workflow .github/workflows/setup-env.yml
+        run: bun .github/scripts/verify-env-manifest.ts
 
       - name: Generate deploy .env from manifest
         env:
