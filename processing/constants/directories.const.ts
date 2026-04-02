@@ -40,6 +40,11 @@ export const DATA_TABLE_DIR = '/processing/dataTables'
 export const ID_FILTERED_FILE = `id_filtered.osm.pbf`
 
 /**
+ * The file name for the globally bbox filtered OSM file.
+ */
+export const BBOX_FILTERED_FILE = `bbox_extracted.osm.pbf`
+
+/**
  * The path to save auto generated types to.
  */
 export const TYPES_DIR = '/data/processingTypes'

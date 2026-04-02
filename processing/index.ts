@@ -2,7 +2,7 @@ import { exportSidepathData } from './pseudoTags/sidepathSource/exportSidepathDa
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
 import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
-import { idFilter, tagFilter } from './steps/filter'
+import { globalBboxFilter, idFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
@@ -34,6 +34,11 @@ async function main() {
     // (filter regeneration doesn't affect diffing logic - filtered data can still be diffed)
     const idFilterResponse = await idFilter(fileName, fileChanged, params.idFilter)
     if (idFilterResponse) ({ fileName, fileChanged } = idFilterResponse)
+
+    // globalBboxFilter regenerates filtered file when active, but only returns sourceFileChanged
+    // (filter regeneration doesn't affect diffing logic - filtered data can still be diffed)
+    const globalBboxFilterResponse = await globalBboxFilter(fileName, fileChanged)
+    if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
 
     // Start timing for the actual data processing (matches old behavior)
     const processingStartTime = Date.now()

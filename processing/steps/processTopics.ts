@@ -113,8 +113,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     !helpersChanged &&
     !constantsDirChanged &&
     !dataTablesDirChanged &&
-    !fileChanged &&
-    params.processOnlyBbox === null
+    !fileChanged
 
   // Reference mode: Always create reference, never diff (clean baseline)
   // Previous/Fixed modes: Only diff when source PBF file hasn't changed (new download)
@@ -127,6 +126,13 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   if (isReferenceMode) {
     console.log('Diffing: Drop all diff tables (reference mode - clean slate)')
     await dropAllDiffTables()
+  }
+
+  const useGlobalBboxFilter = params.processOnlyBbox !== null && params.idFilter === false
+  if (useGlobalBboxFilter) {
+    console.log(
+      `Topics: ℹ️ Using global PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}. Topic bbox filters are skipped.`,
+    )
   }
 
   for (const [topic, bboxes] of Array.from(topicsConfig)) {
@@ -150,13 +156,10 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       )
       continue
     }
-    // Bboxes: Overwrite bboxes based on ENV
-    if (params.processOnlyBbox?.length === 4 && params.idFilter === false) {
-      console.log(
-        `Topics: ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
-      )
-      // @ts-expect-error the readonly part gets in the way here…
-      innerBboxes = [params.processOnlyBbox]
+    // In dev mode with PROCESS_ONLY_BBOX we already applied a global bbox filter in index.ts.
+    // Keep topic bboxes only when no global bbox is active.
+    if (useGlobalBboxFilter) {
+      innerBboxes = null
     }
 
     // Bboxes: Create filtered source file

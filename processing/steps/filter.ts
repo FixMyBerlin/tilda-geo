@@ -1,4 +1,5 @@
 import {
+  BBOX_FILTERED_FILE,
   ID_FILTERED_FILE,
   OSM_FILTERED_DIR,
   OSMIUM_FILTER_BBOX_DIR,
@@ -91,6 +92,21 @@ export async function idFilter(
   // Return sourceFileChanged (not true) so that ID filter regeneration doesn't skip diffing
   // ID filter is used for testing/debugging, but filtered data can still be diffed against previous run
   return { fileName: ID_FILTERED_FILE, fileChanged: sourceFileChanged }
+}
+
+/**
+ * Apply PROCESS_ONLY_BBOX once as a global filter.
+ * Returns sourceFileChanged to keep diffing behavior aligned with tag/id filters.
+ */
+export async function globalBboxFilter(fileName: string, sourceFileChanged: boolean) {
+  if (params.processOnlyBbox === null || params.idFilter !== false) return
+
+  console.log(
+    `Filtering the OSM file globally with \`PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}\`...`,
+  )
+  await bboxesFilter(fileName, BBOX_FILTERED_FILE, [params.processOnlyBbox], sourceFileChanged)
+
+  return { fileName: BBOX_FILTERED_FILE, fileChanged: sourceFileChanged }
 }
 
 /**
