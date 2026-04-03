@@ -32,6 +32,8 @@ This project has two main components:
 
 Please follow the setup instructions in these subfolders to run the project.
 
+For Docker (multiple local checkouts, compose files, deploy vs dev env), see [`docs/docker-local-development.md`](./docs/docker-local-development.md).
+
 ## License
 
 This project is [licensed under the AGPL-3.0](./LICENSE.md).

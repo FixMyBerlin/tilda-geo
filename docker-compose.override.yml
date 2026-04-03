@@ -1,5 +1,10 @@
+# Optional `COMPOSE_DEV_CONTAINER_PREFIX` (e.g. `clone2_`) prefixes container names so multiple
+# repo checkouts can run Docker on one machine. Leave unset for default names (`db`, `app`, …).
+# Do not use `COMPOSE_PROJECT_NAME` here — Compose sets it from the project directory, which would
+# change everyone’s default container names. Dev-only — not part of deploy.manifest.json.
 services:
   processing:
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}processing
     image: processing:latest
     build:
       context: .
@@ -26,6 +31,7 @@ services:
     mem_reservation: 2g
     cpus: "4"
   app:
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}app
     image: app:latest
     build:
       context: .
@@ -42,12 +48,14 @@ services:
     profiles:
       - frontend
   tiles:
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}tiles
     environment:
       DATABASE_HOST: db
       DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db/${DATABASE_NAME}
     logging:
       driver: json-file
   db:
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}db
     # Flags to increase debug levels
     # command: ["-c", "config_file=/postgresql/postgresql.conf", "-c", "log_statement=all", "-c", "log_min_duration_statement=100"]
     logging:
