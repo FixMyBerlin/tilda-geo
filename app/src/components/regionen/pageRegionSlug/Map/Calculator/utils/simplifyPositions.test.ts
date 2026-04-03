@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import type { DrawArea } from '../CalculatorControlsDrawControl'
+import type { DrawArea } from '../drawing/drawAreaTypes'
 import { simplifyPositions } from './simplifyPositions'
 
 describe('simplify()', () => {
@@ -28,11 +28,11 @@ describe('simplify()', () => {
       geometry: {
         coordinates: [
           [
-            [13.3753, 52.5174],
-            [13.3539, 52.5163],
-            [13.3518, 52.5106],
-            [13.3758, 52.5126],
-            [13.3753, 52.5174],
+            [13.37532, 52.51743],
+            [13.35385, 52.51629],
+            [13.35177, 52.51064],
+            [13.3758, 52.51256],
+            [13.37532, 52.51743],
           ],
         ],
         type: 'Polygon',
@@ -67,11 +67,11 @@ describe('simplify()', () => {
       geometry: {
         coordinates: [
           [
-            [184.0246, 1.236],
-            [152.93, 1.236],
-            [152.93, -8.7249],
-            [184.0246, -8.7249],
-            [184.0246, 1.236],
+            [184.02464, 1.23597],
+            [152.92999, 1.23597],
+            [152.92999, -8.72494],
+            [184.02464, -8.72494],
+            [184.02464, 1.23597],
           ],
         ],
         type: 'Polygon',

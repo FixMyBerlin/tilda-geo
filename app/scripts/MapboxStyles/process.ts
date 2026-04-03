@@ -70,7 +70,13 @@ const spriteUrls: SpriteSource[] = []
 
 // ============= Collect data per `apiConfig`
 
-type GroupsLayer = { folderName: string; layers: mapboxgl.AnyLayer[] }
+/** Mapbox style layers are loosely typed in this script (cleanup mutates arbitrary keys). */
+type LooseStyleLayer = Record<string, unknown> & {
+  metadata?: Record<string, unknown>
+  layout?: Record<string, unknown>
+}
+
+type GroupsLayer = { folderName: string; layers: LooseStyleLayer[] }
 const groupsAndLayers: Record<string, GroupsLayer[]> = Object.fromEntries(keys.map((k) => [k, []]))
 
 // biome-ignore lint/suspicious/noExplicitAny: OK
@@ -101,7 +107,7 @@ for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {
 
   // Script: For each group, collect the layers:
   // Create our own data
-  const layers = rawData.layers as mapboxgl.AnyLayer[]
+  const layers = rawData.layers as LooseStyleLayer[]
   groupsAndLayers[key] = groups.map((group) => {
     return {
       folderName: group.folderName,

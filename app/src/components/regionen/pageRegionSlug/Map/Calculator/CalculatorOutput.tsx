@@ -1,19 +1,17 @@
 import { ArrowUpIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useMapCalculatorAreasWithFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
-import type { DrawArea, DrawControlProps } from './CalculatorControlsDrawControl'
-import { useDelete } from './hooks/useDelete'
+import { useUpdateCalculation } from './utils/useUpdateCalculation'
 
-// NOTE: `keys` are unused for now. `capacity` is counted, not summed; lets see what other keys/data we will need …
 type Props = {
   keys: MapDataSourceCalculator['keys']
-  drawControlRef: DrawControlProps['ref']
+  queryLayers: MapDataSourceCalculator['queryLayers']
   subcategoryName?: string
 }
 
-export const CalculatorOutput = ({ keys: _unused, drawControlRef, subcategoryName }: Props) => {
-  // <PointCalculator> only sums Point feature. Each point is considere `capacity=1`
+export const CalculatorOutput = ({ keys: _unused, queryLayers, subcategoryName }: Props) => {
   const calculatorAreasWithFeatures = useMapCalculatorAreasWithFeatures()
   const sums = calculatorAreasWithFeatures.map(({ key, features }) => {
     const onlyTypePoint = features.filter((f) => f.geometry.type === 'Point')
@@ -22,16 +20,13 @@ export const CalculatorOutput = ({ keys: _unused, drawControlRef, subcategoryNam
 
   const displayName = subcategoryName?.replace(/^Summieren: /, '')
 
-  const { deleteDrawFeatures } = useDelete()
+  const { drawAreas, setDrawAreas } = useDrawSession()
+  const { updateCalculation } = useUpdateCalculation()
+
   const handleDelete = (key: string) => {
-    if (!drawControlRef || typeof drawControlRef === 'function' || !('current' in drawControlRef))
-      return
-    if (!drawControlRef.current) return
-    const feature = drawControlRef.current.get(key) as DrawArea | undefined
-    if (!feature) return
-    const features = drawControlRef.current.getAll().features as DrawArea[]
-    deleteDrawFeatures(features, [feature])
-    drawControlRef.current.delete(key)
+    const next = drawAreas.filter((a) => a.id !== key)
+    void setDrawAreas(next)
+    updateCalculation(queryLayers, next)
   }
 
   return (

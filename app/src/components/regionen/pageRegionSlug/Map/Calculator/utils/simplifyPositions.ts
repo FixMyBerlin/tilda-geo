@@ -1,4 +1,4 @@
-import type { DrawArea } from '../CalculatorControlsDrawControl'
+import type { DrawArea } from '../drawing/drawAreaTypes'
 
 // https://github.com/placemark/polyline/blob/main/lib/index.ts#L10-L14
 function py2_round(value: number) {
@@ -6,7 +6,8 @@ function py2_round(value: number) {
 }
 
 const roundPosition = (position: GeoJSON.Position) => {
-  const precision = 4
+  // 5 decimals keeps approx <= 2m precision in Berlin.
+  const precision = 5
   const factor = 10 ** precision
   const a = position[0]
   const b = position[1]
@@ -15,11 +16,15 @@ const roundPosition = (position: GeoJSON.Position) => {
 }
 
 export const simplifyPositions = (drawAreas: DrawArea[]) => {
-  const simplified = drawAreas.map((feature) => {
+  return drawAreas.map((feature) => {
     const ring = feature.geometry.coordinates[0]
     const newCoordinates: GeoJSON.Position[] = ring ? ring.map((c) => roundPosition(c)) : []
-    feature.geometry.coordinates[0] = newCoordinates
-    return feature
+    return {
+      ...feature,
+      geometry: {
+        ...feature.geometry,
+        coordinates: [newCoordinates, ...feature.geometry.coordinates.slice(1)],
+      },
+    } satisfies DrawArea
   })
-  return simplified
 }

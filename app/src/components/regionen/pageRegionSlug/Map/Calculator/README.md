@@ -1,11 +1,13 @@
-# Notes
+# Calculator map drawing
 
-## Docs
+Drawing uses [TerraDraw](https://github.com/JamesLMilner/terra-draw) with the MapLibre adapter (`terra-draw-maplibre-gl-adapter`), mounted via `react-map-gl` `useControl` (see `drawing/CalculatorMapDrawingControl.ts`).
 
-- Mapbox DrawControl API: https://github.com/mapbox/mapbox-gl-draw/blob/main/docs/API.md#api-methods
-- React Map GL: http://visgl.github.io/react-map-gl/docs/api-reference/use-control
-  - Example https://github.com/visgl/react-map-gl/blob/master/examples/draw-polygon/src/app.tsx
+## URL state
 
-## How to customize the buttons
+- `draw` — jsurl-encoded list of `DrawArea` polygons (see `useDrawSession.ts`).
+- Draw mode (`polygon` / `edit`) is local React UI state in `CalculatorControls`.
 
-Start here … https://github.com/mapbox/mapbox-gl-draw/issues/874#issuecomment-470591089
+## References
+
+- React Map GL `useControl`: https://visgl.github.io/react-map-gl/docs/api-reference/use-control
+- TerraDraw styling: https://github.com/JamesLMilner/terra-draw/blob/main/guides/5.STYLING.md

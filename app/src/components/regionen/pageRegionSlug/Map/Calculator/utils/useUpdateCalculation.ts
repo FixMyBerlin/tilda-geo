@@ -5,7 +5,7 @@ import { useMap } from 'react-map-gl/maplibre'
 import type { StoreCalculator } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
-import type { DrawArea } from '../CalculatorControlsDrawControl'
+import type { DrawArea } from '../drawing/drawAreaTypes'
 
 export const useUpdateCalculation = () => {
   const { mainMap } = useMap()

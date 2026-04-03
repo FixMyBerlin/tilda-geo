@@ -43,10 +43,6 @@
   }
 }
 
-.mapbox-gl-draw_ctrl-draw-btn.active {
-  @apply bg-fuchsia-600/10!;
-}
-
 .maplibregl-ctrl-attrib.maplibregl-compact {
   @apply bg-white/20! leading-tight;
 }
