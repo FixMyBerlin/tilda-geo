@@ -14,11 +14,11 @@ The system allows to create uploads `createdBy: USER` that are managed manually.
 The system supports two data source types, configured in `meta.ts` when creating datasets:
 
 1. **Local Sources** (`dataSourceType: 'local'`)
-   * Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
-   * Files: Stored on S3 at the same time.
+   - Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
+   - Files: Stored on S3 at the same time.
 2. **External Sources** (`dataSourceType: 'external'`)
-   * Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
-   * Files: Downloaded and cached on the server with TTL to auto-update the files regularly
+   - Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
+   - Files: Downloaded and cached on the server with TTL to auto-update the files regularly
 
 ## API Endpoints
 
@@ -57,6 +57,7 @@ Files are proxied through the API.
 - Download headers for GeoJSON files
 
 **Caching Strategy:**
+
 - Uses S3 ETags and Last-Modified for cache validation
 - 1 hour cache with must-revalidate (browser checks after 1 hour)
 - PMTiles range requests are typically not cached by browsers
@@ -78,6 +79,7 @@ Handled by: [`proxyExternalUrl`](/app/src/app/api/uploads/[slug]/utils/proxyExte
 Files are proxied from external URLs with file-based caching and configurable TTL.
 
 **Caching Strategy:**
+
 - Uses file-based cache in `public/temp/uploads-cache/`
 - Cache validity checked via TTL (time-to-live) per upload
 - Preserves Last-Modified header from external source
@@ -98,6 +100,7 @@ Files are proxied from external URLs with file-based caching and configurable TT
    - Returns complete file with standard caching headers
 
 **Cache Management:**
+
 - Cache metadata stored in `{slug}-{format}.meta.json` files
 - Cached files stored as `{slug}-{timestamp}.{format}`
 - Old cache files automatically cleaned up when new versions are fetched

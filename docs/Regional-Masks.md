@@ -55,7 +55,7 @@ Mask-specific configuration is generated from the shared helper at [`app/scripts
 The buffer distance (default: 10km) can be adjusted by editing the `transform.ts` file in each region's mask folder:
 
 ```typescript
-const bufferDistanceKm = 10; // Adjust this value
+const bufferDistanceKm = 10 // Adjust this value
 ```
 
 ## How Masks Are Stored
