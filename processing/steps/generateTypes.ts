@@ -3,6 +3,7 @@ import { topicsConfig } from '../constants/topics.const'
 import { getTopicTables } from '../diffing/diffing'
 import { params } from '../utils/parameters'
 import { $ } from 'bun'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -155,11 +156,21 @@ ${content}
 `
 }
 
-const OXFMT_CONFIG = fileURLToPath(new URL('../../app/oxfmt.config.ts', import.meta.url))
+function resolveOxfmtConfigPath() {
+  if (existsSync('/mnt/oxfmt.config.ts')) return '/mnt/oxfmt.config.ts'
+  const besideProcessing = fileURLToPath(new URL('../oxfmt.config.ts', import.meta.url))
+  if (existsSync(besideProcessing)) return besideProcessing
+  const repoApp = fileURLToPath(new URL('../../app/oxfmt.config.ts', import.meta.url))
+  if (existsSync(repoApp)) return repoApp
+  throw new Error(
+    'oxfmt.config.ts not found (expected /mnt/oxfmt.config.ts, processing/oxfmt.config.ts, or app/oxfmt.config.ts)',
+  )
+}
 
 async function autoformatTypeFiles() {
   try {
-    await $`bunx oxfmt --write -c ${OXFMT_CONFIG} ${TYPES_DIR}`
+    const oxfmtConfig = resolveOxfmtConfigPath()
+    await $`bunx oxfmt --write -c ${oxfmtConfig} ${TYPES_DIR}`
   } catch (error) {
     throw new Error(`Failed to run oxfmt on auto generated types: ${error}`)
   }

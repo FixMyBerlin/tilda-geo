@@ -54,6 +54,9 @@ ENV PATH=/root/.bun/bin:$PATH
 # copy the source code
 COPY processing /processing/
 
+# Used by dev `generateTypes` (oxfmt); path must match processing/steps/generateTypes.ts → ../oxfmt.config.ts
+COPY app/oxfmt.config.ts /processing/oxfmt.config.ts
+
 # Download and setup Geofabrik OAuth client to /usr/local/bin (outside the mounted volume).
 # Note: This is where (the only place) `python3-requests` is used.
 RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.com/geofabrik/sendfile_osm_oauth_protector/master/oauth_cookie_client.py && \
