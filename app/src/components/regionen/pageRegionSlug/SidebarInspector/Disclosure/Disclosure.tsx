@@ -41,7 +41,7 @@ export const Disclosure = ({
             <ChevronRightIcon
               className={twJoin('mr-1.5 size-5 text-gray-900', open ? 'rotate-90 transform' : '')}
             />
-            <h3 className="w-full">
+            <h3 className="not-prose w-full">
               <div className="flex w-full justify-between">
                 <span>{title}</span>
                 <div className="flex items-center gap-1.5 text-gray-400">

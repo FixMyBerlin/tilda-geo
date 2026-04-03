@@ -1,6 +1,7 @@
 import { generalizationFunctionIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/generalizationIdentifier'
 import { interactivityConfiguration } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import type { TableId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
+import { geoDataLongRunningTxOptions } from '@/server/geoDataLongRunningTxOptions.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from './generalization.const'
 
@@ -65,8 +66,8 @@ export async function registerGeneralizationFunctions() {
     // Gather meta information for the tile specification
     const tileSpecification = await createTileSpecification(typedTableName)
 
-    await geoDataClient.$transaction([
-      geoDataClient.$executeRawUnsafe(`
+    await geoDataClient.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(`
             CREATE OR REPLACE
             FUNCTION public."${functionName}"(z integer, x integer, y integer)
             RETURNS bytea AS $$
@@ -97,10 +98,10 @@ export async function registerGeneralizationFunctions() {
               RETURN mvt;
             END
             $$ LANGUAGE plpgsql IMMUTABLE STRICT PARALLEL SAFE;
-          `),
-      geoDataClient.$executeRawUnsafe(`
+          `)
+      await tx.$executeRawUnsafe(`
             COMMENT ON FUNCTION ${functionName} IS '${JSON.stringify(tileSpecification)}';
-          `),
-    ])
+          `)
+    }, geoDataLongRunningTxOptions)
   }
 }

@@ -51,6 +51,17 @@ export async function maprouletteRebuildTasks(filter?: string | undefined) {
     })
 
     if (!response.ok) {
+      if (response.status === 401) {
+        console.log(
+          '\t\t',
+          logPrefix,
+          styleText(
+            'yellow',
+            'MapRoulette API unauthorized — stopping rebuild loop (check MAPROULETTE_API_KEY).',
+          ),
+        )
+        break
+      }
       // https://github.com/maproulette/maproulette3/issues/2569
       if (response.status === 502 || response.status === 400) {
         const msgError = styleText('yellow', 'Server responded with "expected" error')

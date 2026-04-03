@@ -1,4 +1,5 @@
 import type { TableId } from '@/data/processingTypes/tableId.generated.const'
+import { geoDataLongRunningTxOptions } from '@/server/geoDataLongRunningTxOptions.server'
 import { geoDataClient } from '../../prisma-client.server'
 
 const lengthCounterIdentifier = (id: TableId) =>
@@ -7,7 +8,8 @@ const segmentizedTableIdentifier = (id: TableId) =>
   `temp_${id.toLowerCase()}_segmentized` as `temp_${Lowercase<TableId>}_segmentized`
 
 async function registerCustomFunctions() {
-  const segmentizeLinestringPromise = geoDataClient.$executeRaw`
+  // Segmentized builds run sequentially so two interactive transactions do not contend on one client.
+  await geoDataClient.$executeRaw`
     CREATE OR REPLACE FUNCTION atlas_segmentize_linestring(input_geom Geometry(LineString), input_length FLOAT, res INT)
     RETURNS TABLE(
       length FLOAT,
@@ -30,8 +32,8 @@ async function registerCustomFunctions() {
     LANGUAGE plpgsql;
   `
 
-  const bikelanesSegmentizedPromise = geoDataClient.$transaction([
-    geoDataClient.$executeRaw`
+  const bikelanesSegmentizedPromise = geoDataClient.$transaction(async (tx) => {
+    await tx.$executeRaw`
     CREATE TABLE IF NOT EXISTS "temp_bikelanes_segmentized" AS
       SELECT
         id,
@@ -43,15 +45,15 @@ async function registerCustomFunctions() {
         END AS factor,
         (atlas_segmentize_linestring(geom, (tags->>'length')::FLOAT, 100)).*
       FROM
-        bikelanes;`,
-    geoDataClient.$executeRaw`
-    CREATE INDEX IF NOT EXISTS "temp_bikelanes_segmentized_geom_idx" ON temp_bikelanes_segmentized USING gist(geom);`,
-    geoDataClient.$executeRaw`
-    CREATE INDEX IF NOT EXISTS "temp_bikelanes_segmentized_aggregator_idx" ON temp_bikelanes_segmentized (aggregator_key);`,
-  ])
+        bikelanes;`
+    await tx.$executeRaw`
+    CREATE INDEX IF NOT EXISTS "temp_bikelanes_segmentized_geom_idx" ON temp_bikelanes_segmentized USING gist(geom);`
+    await tx.$executeRaw`
+    CREATE INDEX IF NOT EXISTS "temp_bikelanes_segmentized_aggregator_idx" ON temp_bikelanes_segmentized (aggregator_key);`
+  }, geoDataLongRunningTxOptions)
 
-  const roadsSegmentizedPromiset = geoDataClient.$transaction([
-    geoDataClient.$executeRaw`
+  const roadsSegmentizedPromiset = geoDataClient.$transaction(async (tx) => {
+    await tx.$executeRaw`
     CREATE TABLE IF NOT EXISTS "temp_roads_segmentized" AS
       SELECT
         id,
@@ -63,12 +65,12 @@ async function registerCustomFunctions() {
         END AS factor,
         (atlas_segmentize_linestring(geom, (tags->>'length')::FLOAT, 100)).*
       FROM
-        roads;`,
-    geoDataClient.$executeRaw`
-    CREATE INDEX IF NOT EXISTS "temp_roads_segmentized_geom_idx" ON temp_roads_segmentized USING gist(geom);`,
-    geoDataClient.$executeRaw`
-    CREATE INDEX IF NOT EXISTS "temp_roads_segmentized_aggregator_idx" ON temp_bikelanes_segmentized (aggregator_key);`,
-  ])
+        roads;`
+    await tx.$executeRaw`
+    CREATE INDEX IF NOT EXISTS "temp_roads_segmentized_geom_idx" ON temp_roads_segmentized USING gist(geom);`
+    await tx.$executeRaw`
+    CREATE INDEX IF NOT EXISTS "temp_roads_segmentized_aggregator_idx" ON temp_roads_segmentized (aggregator_key);`
+  }, geoDataLongRunningTxOptions)
 
   const counterPromises = ['roads', 'bikelanes'].map((id: TableId) => {
     return geoDataClient.$executeRawUnsafe(`
@@ -97,12 +99,9 @@ async function registerCustomFunctions() {
       $$ LANGUAGE plpgsql;
   `)
   })
-  return Promise.all([
-    segmentizeLinestringPromise,
-    bikelanesSegmentizedPromise,
-    roadsSegmentizedPromiset,
-    ...counterPromises,
-  ])
+  await bikelanesSegmentizedPromise
+  await roadsSegmentizedPromiset
+  await Promise.all(counterPromises)
 }
 
 export async function aggregateLengths() {
@@ -119,8 +118,8 @@ export async function aggregateLengths() {
       road_length JSONB
     );
     `
-  return geoDataClient.$transaction([
-    geoDataClient.$executeRaw`
+  return geoDataClient.$transaction(async (tx) => {
+    await tx.$executeRaw`
       INSERT INTO "aggregated_lengths" (id, name, level, geom, bikelane_length, road_length)
       SELECT
         id,
@@ -136,14 +135,12 @@ export async function aggregateLengths() {
         DO UPDATE SET
           bikelane_length = EXCLUDED.bikelane_length,
           road_length = EXCLUDED.road_length;
-  `,
-    // create geometry index to serve the data via martin
-    geoDataClient.$executeRaw`
-    DROP INDEX IF EXISTS "aggregated_lengths_geom_idx";`,
-    geoDataClient.$executeRaw`
-    CREATE INDEX "aggregated_lengths_geom_idx" ON "aggregated_lengths" USING gist(geom);`,
-    // drop the temporary tables
-    geoDataClient.$executeRaw`DROP TABLE temp_roads_segmentized;`,
-    geoDataClient.$executeRaw`DROP TABLE temp_bikelanes_segmentized;`,
-  ])
+  `
+    await tx.$executeRaw`
+    DROP INDEX IF EXISTS "aggregated_lengths_geom_idx";`
+    await tx.$executeRaw`
+    CREATE INDEX "aggregated_lengths_geom_idx" ON "aggregated_lengths" USING gist(geom);`
+    await tx.$executeRaw`DROP TABLE temp_roads_segmentized;`
+    await tx.$executeRaw`DROP TABLE temp_bikelanes_segmentized;`
+  }, geoDataLongRunningTxOptions)
 }
