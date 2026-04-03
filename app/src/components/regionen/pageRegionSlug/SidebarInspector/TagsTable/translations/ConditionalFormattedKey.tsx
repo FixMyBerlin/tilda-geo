@@ -38,6 +38,8 @@ export const ConditionalFormattedKey = ({ sourceId, tagKey }: Props) => {
     tilda_parkings_no: 'tilda_parkings',
     tilda_parkings_separate: 'tilda_parkings',
     tilda_parkings_off_street: 'tilda_parkings',
+    tilda_parkings_quantized: 'tilda_parkings',
+    tilda_parkings_off_street_quantized: 'tilda_parkings',
   }
   const lookAtThisSourceFirst = Object.keys(lookAtFirstSources).find((s) => s === sourceId)
   const replacement = lookAtThisSourceFirst ? lookAtFirstSources[lookAtThisSourceFirst] : undefined
@@ -51,6 +53,7 @@ export const ConditionalFormattedKey = ({ sourceId, tagKey }: Props) => {
   // (Unfortunatelly react-intl. does not support nested FormattedMessage components to handle the fallbacks.)
   const simpleTranslFallbackKeys = [
     '_parent_highway',
+    'composit_condition_category',
     'composit_surface_smoothness',
     'composit_mapillary',
     'surface_color',

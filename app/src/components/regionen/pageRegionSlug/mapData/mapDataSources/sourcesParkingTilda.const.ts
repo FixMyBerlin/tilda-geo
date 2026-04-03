@@ -38,7 +38,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'staggered__if_present',
         'orientation',
         'direction__if_present',
-        'condition_category',
+        'composit_condition_category',
         'reason__if_present',
         'traffic_sign',
         'zone__if_present',
@@ -97,7 +97,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['capacity', 'operator_type', 'condition_category'],
+      documentedKeys: ['capacity', 'operator_type', 'composit_condition_category'],
     },
     calculator: {
       enabled: true,
@@ -121,7 +121,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['capacity', 'operator_type', 'condition_category'],
+      documentedKeys: ['capacity', 'operator_type', 'composit_condition_category'],
     },
     calculator: {
       enabled: true,
@@ -175,7 +175,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'capacity',
         'orientation__if_present',
         'direction__if_present',
-        'condition_category',
+        'composit_condition_category',
         'traffic_sign',
         'zone__if_present',
         'covered__if_present',

@@ -110,6 +110,8 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     tilda_parkings_no: 'tilda_parkings',
     tilda_parkings_separate: 'tilda_parkings',
     tilda_parkings_off_street: 'tilda_parkings',
+    tilda_parkings_quantized: 'tilda_parkings',
+    tilda_parkings_off_street_quantized: 'tilda_parkings',
   }
   const lookAtThisSourceFirst = Object.keys(lookAtFirstSources).find((s) => s === sourceId)
   if (lookAtThisSourceFirst) {

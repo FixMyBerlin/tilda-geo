@@ -1,6 +1,10 @@
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import type { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
+import {
+  TagsTableRowCompositConditionCategory,
+  tableKeyConditionCategory,
+} from './compositTableRows/TagsTableRowCompositConditionCategory'
 import { TagsTableRowCompositLit, tableKeyLit } from './compositTableRows/TagsTableRowCompositLit'
 import {
   TagsTableRowCompositMapillary,
@@ -100,6 +104,16 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
             case tableKeySurfaceSmoothness: {
               return (
                 <TagsTableRowCompositSurfaceSmoothness
+                  key={cleanedKey}
+                  sourceId={sourceId}
+                  tagKey={cleanedKey}
+                  properties={properties}
+                />
+              )
+            }
+            case tableKeyConditionCategory: {
+              return (
+                <TagsTableRowCompositConditionCategory
                   key={cleanedKey}
                   sourceId={sourceId}
                   tagKey={cleanedKey}
