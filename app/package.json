@@ -12,7 +12,7 @@
     "predev:1copy-env": "bun scripts/predev/copyEnv.ts",
     "predev:2env-contract": "bun run env-check",
     "predev:3docker": "bun scripts/predev/checkDocker.ts",
-    "predev:4migration": "bun scripts/predev/checkMigration.ts",
+    "predev:4migration": "bun scripts/predev/checkMigration.ts --non-interactive",
     "predev:5package-updates": "bun scripts/predev/checkPackageUpdates.ts",
     "build": "vite build",
     "preview": "vite preview",
