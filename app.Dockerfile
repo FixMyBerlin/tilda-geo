@@ -11,7 +11,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Dependencies (layer cached unless package files change)
-COPY app/package.json app/bun.lock app/
+COPY app/package.json app/bun.lock ./
 # Install without lifecycle scripts `postinstall`.
 RUN bun install --frozen-lockfile --ignore-scripts
 
