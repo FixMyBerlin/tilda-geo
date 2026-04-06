@@ -63,14 +63,14 @@ For loader vs server Fn, beforeLoad, error handling, and query options, see [Tan
 
 ## 10. Tests — current layout
 
-- **Unit/integration (Vitest)** — `npm run test` / `npm run test-run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
+- **Unit/integration (Vitest)** — `bun run test` / `bun run test-run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
 - **E2E (Playwright)**: **app/tests/** — `*.spec.ts`. See [app/tests/README.md](../app/tests/README.md) for setup, auth, and smoke tests.
 - **Processing**: Lua tests in **`__tests__`** with `*.test.lua` (see [processing/README.md](../processing/README.md)).
 - **Mailers**: [app/mailers/newUserRegistrationMailer.test.ts](../app/mailers/newUserRegistrationMailer.test.ts).
 
 ## 11. Mailers
 
-**app/mailers/** is a separate area (outside **app/src**) so we can run the **mailer preview** (`npm run mailpreview`) and keep email templates and sending logic in one place. React Email templates in **mailers/templates/**; mailer actions and config in **mailers/**. See [app/mailers/README.md](../app/mailers/README.md).
+**app/mailers/** is a separate area (outside **app/src**) so we can run the **mailer preview** (`bun run mailpreview`) and keep email templates and sending logic in one place. React Email templates in **mailers/templates/**; mailer actions and config in **mailers/**. See [app/mailers/README.md](../app/mailers/README.md).
 
 ## Related docs
 

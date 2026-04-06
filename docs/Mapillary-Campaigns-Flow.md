@@ -285,7 +285,7 @@ This identifier is the main link between:
 
 **Location:** `app/scripts/MaprouletteCreate/process.ts`
 
-**Script:** `npm run maproulette:create` (with optional `--filter` param)
+**Script:** `bun run maproulette:create` (with optional `--filter` param)
 
 **Process:**
 
@@ -345,7 +345,7 @@ This identifier is the main link between:
 
 **Location:** `app/scripts/MaprouletteRebuild/process.ts`
 
-**Script:** `npm run maproulette:rebuild` (with optional `--filter` param)
+**Script:** `bun run maproulette:rebuild` (with optional `--filter` param)
 
 **Purpose:** Refreshes task lists when source data changes without recreating the challenge
 

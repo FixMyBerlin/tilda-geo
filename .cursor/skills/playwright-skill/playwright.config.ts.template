@@ -39,7 +39,7 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     
     // Collect trace when retrying the failed test
-    // Traces help debug failures - view with: npx playwright show-trace
+    // Traces help debug failures - view with: bunx playwright show-trace
     trace: 'on-first-retry',
     
     // Screenshot on failure
@@ -77,7 +77,7 @@ export default defineConfig({
   // CRITICAL: This builds and runs production server, not dev server
   // This ensures tests run against production code
   webServer: {
-    command: 'npm run build && npm run start',
+    command: 'bun run build && bun run start',
     url: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     reuseExistingServer: !process.env.CI, // Reuse if server already running (local dev)
     timeout: 120 * 1000, // 2 minutes timeout for build + start

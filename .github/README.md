@@ -11,8 +11,8 @@
 
 ## When checks run
 
-- **Local dev trigger:** `app` `predev` runs `npm run env-check` before starting the app.
-- **Local manual commands:** `npm run env-check:verify-manifest`, `npm run env-check:docs:1sync`, `npm run env-check`.
+- **Local dev trigger:** `app` `predev` runs `bun run env-check` before starting the app.
+- **Local manual commands:** `bun run env-check:verify-manifest`, `bun run env-check:docs:1sync`, `bun run env-check`.
 - **CI trigger:** `.github/workflows/ci.yml` validates manifest consistency and generated docs on every PR.
 - **Deploy trigger:** `.github/workflows/setup-env.yml` validates and generates the deploy `.env` for the selected environment.
 

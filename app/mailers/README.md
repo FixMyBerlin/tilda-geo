@@ -2,7 +2,7 @@
 
 ## Development
 
-- Use `npm run mailpreview` to preview the template
+- Use `bun run mailpreview` to preview the template
 - Template based on https://demo.react.email/preview/magic-links/aws-verify-email?view=desktop&lang=jsx
 
 ## `mailers`

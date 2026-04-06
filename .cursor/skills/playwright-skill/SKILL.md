@@ -21,7 +21,7 @@ General-purpose browser automation skill supporting two use cases:
 
 **IMPORTANT: For Next.js E2E Testing**
 - Use `@playwright/test` framework (not raw Playwright API)
-- Test against **production builds** (`npm run build && npm run start`), not dev server
+- Test against **production builds** (`bun run build && bun run start`), not dev server
 - Use semantic locators (`getByRole`, `getByLabel`) instead of CSS selectors
 - Create `playwright.config.ts` with `webServer` configuration
 - Write tests to `tests/` directory in TypeScript
@@ -64,7 +64,7 @@ General-purpose browser automation skill supporting two use cases:
 1. You describe what you want to test
 2. I create proper test files in `tests/` directory using `@playwright/test` framework
 3. I set up `playwright.config.ts` with Next.js `webServer` configuration
-4. Tests run via `npx playwright test` with proper isolation and retry mechanisms
+4. Tests run via `bunx playwright test` with proper isolation and retry mechanisms
 5. Tests target production build, not dev server
 
 ## Setup (First Time)
@@ -72,7 +72,7 @@ General-purpose browser automation skill supporting two use cases:
 ### For Ad-hoc Automation
 ```bash
 cd $SKILL_DIR
-npm run setup
+bun run setup
 ```
 
 This installs Playwright and Chromium browser. Only needed once.
@@ -80,8 +80,8 @@ This installs Playwright and Chromium browser. Only needed once.
 ### For E2E Testing (Next.js Projects)
 ```bash
 # In your Next.js project root
-npm install -D @playwright/test
-npx playwright install chromium
+bun add -d @playwright/test
+bunx playwright install chromium
 ```
 
 Then create `playwright.config.ts` (see Next.js Configuration section below).
@@ -128,8 +128,8 @@ cd $SKILL_DIR && node run.js /tmp/playwright-test-page.js
 ### 1. Install Dependencies
 
 ```bash
-npm install -D @playwright/test
-npx playwright install chromium
+bun add -d @playwright/test
+bunx playwright install chromium
 ```
 
 ### 2. Create `playwright.config.ts`
@@ -175,7 +175,7 @@ export default defineConfig({
 
   // Run your local dev server before starting the tests
   webServer: {
-    command: 'npm run build && npm run start',
+    command: 'bun run build && bun run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
@@ -239,16 +239,16 @@ test.describe('Home Page', () => {
 
 ```bash
 # Run all tests
-npx playwright test
+bunx playwright test
 
 # Run in UI mode (recommended for development)
-npx playwright test --ui
+bunx playwright test --ui
 
 # Run specific test file
-npx playwright test tests/example.spec.ts
+bunx playwright test tests/example.spec.ts
 
 # Run in debug mode
-npx playwright test --debug
+bunx playwright test --debug
 ```
 
 ## Common Patterns
@@ -655,7 +655,7 @@ For comprehensive Playwright API documentation, see [API_REFERENCE.md](API_REFER
 **Playwright not installed:**
 
 ```bash
-cd $SKILL_DIR && npm run setup
+cd $SKILL_DIR && bun run setup
 ```
 
 **Module not found:**

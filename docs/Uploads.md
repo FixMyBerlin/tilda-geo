@@ -37,7 +37,7 @@ The system supports two data source types, configured in `meta.ts` when creating
 
 ### Internal Sources `dataSourceType: 'local'`
 
-**Creation (via StaticDatasets npm-script):**
+**Creation (via StaticDatasets scripts, from `app/` with `bun run …`):**
 
 When using `dataSourceType: 'local'` in `meta.ts`:
 
@@ -65,7 +65,7 @@ Files are proxied through the API.
 
 ### External Sources `dataSourceType: 'external'`
 
-**Creation (via StaticDatasets npm-script):**
+**Creation (via StaticDatasets scripts, from `app/` with `bun run …`):**
 
 When using `dataSourceType: 'external'` in `meta.ts`:
 

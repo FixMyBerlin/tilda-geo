@@ -11,7 +11,7 @@
 
 ## Params
 
-You can use the `filter` param to only run specific challenges. See [package.json](../../package.json) `npm run maproulette:help` for more.
+You can use the `filter` param to only run specific challenges. See [package.json](../../package.json) `bun run maproulette:help` for more.
 
 ## NOTES
 

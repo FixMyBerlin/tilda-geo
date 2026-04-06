@@ -2,7 +2,7 @@
 
 ## Setup
 
-1. Install browsers: `npx playwright install chromium` (package already installed via npm)
+1. Install browsers: `bunx playwright install chromium` (Playwright is already a project dependency)
 2. Configure: Copy `.env.test.example` to `.env.test`, set `TEST_OSM_USERNAME` and `TEST_OSM_PASSWORD`
 3. Configure app: Set `VITE_PLAYWRIGHT_ENABLED=true` in root `.env` (see `.env.example`)
 4. For smoke tests only: `bun run test-e2e` will start the dev server via `webServer` if not already running (requires `docker compose up db tiles -d` first if the app needs DB). For full suite: start app with `docker compose up db tiles -d && bun run dev`, then run tests.

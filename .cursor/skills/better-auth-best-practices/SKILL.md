@@ -23,9 +23,9 @@ Only define `baseURL`/`secret` in config if env vars are NOT set.
 CLI looks for `auth.ts` in: `./`, `./lib`, `./utils`, or under `./src`. Use `--config` for custom path.
 
 ### CLI Commands
-- `npx @better-auth/cli@latest migrate` - Apply schema (built-in adapter)
-- `npx @better-auth/cli@latest generate` - Generate schema for Prisma/Drizzle
-- `npx @better-auth/cli mcp --cursor` - Add MCP to AI tools
+- `bunx @better-auth/cli@latest migrate` - Apply schema (built-in adapter)
+- `bunx @better-auth/cli@latest generate` - Generate schema for Prisma/Drizzle
+- `bunx @better-auth/cli mcp --cursor` - Add MCP to AI tools
 
 **Re-run after adding/changing plugins.**
 

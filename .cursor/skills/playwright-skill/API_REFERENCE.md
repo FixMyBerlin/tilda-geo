@@ -33,11 +33,11 @@ Before using this skill, ensure Playwright is available:
 
 ```bash
 # Check if Playwright is installed
-npm list playwright 2>/dev/null || echo "Playwright not installed"
+bunx playwright --version 2>/dev/null || echo "Playwright not installed"
 
 # Install (if needed)
 cd ~/.claude/skills/playwright-skill
-npm run setup
+bun run setup
 ```
 
 ### Basic Configuration
@@ -67,7 +67,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run start',
+    command: 'bun run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },
@@ -472,13 +472,13 @@ const context = await browser.newContext({
 
 ```bash
 # Run with inspector
-npx playwright test --debug
+bunx playwright test --debug
 
 # Headed mode
-npx playwright test --headed
+bunx playwright test --headed
 
 # Slow motion
-npx playwright test --headed --slowmo=1000
+bunx playwright test --headed --slowmo=1000
 ```
 
 ### In-Code Debugging
@@ -565,11 +565,11 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: bunx playwright install --with-deps
       - name: Run tests
-        run: npx playwright test
+        run: bunx playwright test
 ```
 
 ## Best Practices
@@ -631,19 +631,19 @@ async function scrollToBottom(page) {
 
 ```bash
 # Run tests
-npx playwright test
+bunx playwright test
 
 # Run in headed mode
-npx playwright test --headed
+bunx playwright test --headed
 
 # Debug tests
-npx playwright test --debug
+bunx playwright test --debug
 
 # Generate code
-npx playwright codegen https://example.com
+bunx playwright codegen https://example.com
 
 # Show report
-npx playwright show-report
+bunx playwright show-report
 ```
 
 ## Additional Resources

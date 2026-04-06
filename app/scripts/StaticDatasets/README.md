@@ -17,12 +17,12 @@ These scripts manage geodata files, which are made public or semi-public in tild
 
 ## Update and add data
 
-1. See `npm run` for the command per environment.
+1. See `bun run` (from `app/`) for the command per environment.
 2. Add file to `./geojson/region-<mainRegionSlug>`
    - Region-Subfolders are `region-<mainRegionSlug>` where the shorthand is usually the region slug. Whenever we have multiple regions like with `bb`, we use the "main slug" as folder name.
    - Dataset-Folders follow the pattern `<mainRegionSlug>-<customDatasetSlug>-<optionalDatasetSharedIdentiefier>`
    - GeoJson-Files can have any unique name (without spaces).
-3. Run the update script `npm run updateStaticDatasets` with optional filters:
+3. Run the update script `bun run static-datasets-update` with optional filters:
    - `--keep-tmp` to keep temporary files for debugging
    - `--folder-filter berlin-` to run only files where the Dataset-Folder includes "berlin-"
    - Example: `bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.staging ./scripts/StaticDatasets/updateStaticDatasets.ts --keep-tmp --folder-filter berlin-`
@@ -50,4 +50,4 @@ Use `--keep-tmp` to keep the files for debugging.
 
 The script will **not remove existing database configs** if the dataset folder was rename or removed.
 
-Use `npm run deleteAllStaticDatasets && npm run updateStaticDatasets` to reset all database entries.
+Use `bun run static-datasets-delete-all-dev && bun run static-datasets-update` to reset all database entries.

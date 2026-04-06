@@ -1,8 +1,8 @@
 # Linting, Formating and Type-Checks for `App`
 
 cd ./app
-npm run check
-npm run type-check-deploy
+bun run check
+bun run type-check-deploy
 
 # This runs our unit tests for `Processing`
 

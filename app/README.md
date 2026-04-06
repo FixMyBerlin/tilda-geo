@@ -22,7 +22,7 @@ The frontend visualizes our processed data it also provides options to annotate 
 
 Run `nvm use` to use the recommended Node version.
 
-Run `npm run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and dependencies start automatically if needed.
+Run `bun run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and dependencies start automatically if needed.
 
 ### Our Tooling
 
@@ -33,9 +33,9 @@ Run `npm run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and de
 
 ### Running the production bundle locally
 
-1. Ensure `npm run dev` works.
+1. Ensure `bun run dev` works.
 2. Check [`.env.production`](./.env.production) if you use it for local preview.
-3. Run `npm run build` and `npm run start` to test the production bundle.
+3. Run `bun run build` and `bun run start` to test the production bundle.
 
 Dockerized frontend:
 

@@ -548,7 +548,7 @@ export const Route = createFileRoute('/users/$userId')({
 });
 
 // Generate route tree with CLI
-// npm run generate-routes
+// bun run generate-routes
 
 // Import generated routes
 import { routeTree } from './routeTree.gen';

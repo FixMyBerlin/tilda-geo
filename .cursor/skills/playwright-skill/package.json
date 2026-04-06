@@ -5,8 +5,8 @@
   "author": "lackeyjb",
   "main": "run.js",
   "scripts": {
-    "setup": "npm install && npx playwright install chromium",
-    "install-all-browsers": "npx playwright install chromium firefox webkit"
+    "setup": "bun install && bunx playwright install chromium",
+    "install-all-browsers": "bunx playwright install chromium firefox webkit"
   },
   "keywords": [
     "playwright",
