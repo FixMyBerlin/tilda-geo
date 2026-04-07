@@ -7,7 +7,7 @@ import { linkStyles } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
-import { pollOsmUserDescriptionFn, updateOsmDescriptionFn } from '@/server/users/users.functions'
+import { persistOsmUserDescriptionIfPresentFn } from '@/server/users/users.functions'
 
 export const UserFormOsmDescriptionMissing = () => {
   // === Polling to refresh the osmDescription ===
@@ -17,6 +17,15 @@ export const UserFormOsmDescriptionMissing = () => {
   const router = useRouter()
   const maxPollCount = 10
   const [pollUpdatedUserdataCount, setPollUpdatedUserdataCount] = useState<number | null>(null)
+
+  useEffect(
+    function syncOsmDescriptionFromApiOnMount() {
+      void persistOsmUserDescriptionIfPresentFn()
+        .then((saved) => (saved ? router.invalidate() : undefined))
+        .catch((error) => console.error('Error syncing OSM user description on load:', error))
+    },
+    [router],
+  )
 
   useEffect(
     function pollUpdatedOsmDescription() {
@@ -35,21 +44,17 @@ export const UserFormOsmDescriptionMissing = () => {
         if (shouldStopPolling) return
 
         try {
-          const description = await pollOsmUserDescriptionFn()
-
-          if (description) {
-            // Found description, update it and stop polling
+          const saved = await persistOsmUserDescriptionIfPresentFn()
+          if (shouldStopPolling) return
+          if (saved) {
             shouldStopPolling = true
-            await updateOsmDescriptionFn({ data: { osmDescription: description } })
-            router.invalidate()
+            await router.invalidate()
             setPollUpdatedUserdataCount(null)
-          } else if (!shouldStopPolling) {
-            // No description yet, continue polling
+          } else {
             setPollUpdatedUserdataCount((count) => (count || 0) + 1)
           }
         } catch (error) {
           console.error('Error polling OSM user description:', error)
-          // Continue polling even on error (might be temporary network issue)
           if (!shouldStopPolling) {
             setPollUpdatedUserdataCount((count) => (count || 0) + 1)
           }

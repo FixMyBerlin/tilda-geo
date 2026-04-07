@@ -80,6 +80,7 @@ export function Form<T extends z.ZodTypeAny>({
       const result = await onSubmit(value)
       if (!result) return
       if (result.success) {
+        form.reset(value)
         setSubmitMessage({ type: 'success', text: result.message ?? 'Gespeichert.' })
         if (result.redirect) {
           navigate({ to: result.redirect })
@@ -100,6 +101,7 @@ export function Form<T extends z.ZodTypeAny>({
 
   return (
     <form
+      method="post"
       className={twMerge('space-y-6', className)}
       onSubmit={(e) => {
         e.preventDefault()

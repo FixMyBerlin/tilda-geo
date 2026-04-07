@@ -3,14 +3,9 @@ import { getOsmApiUrl } from '@/components/shared/utils/getOsmUrl'
 import { auth } from '@/server/auth/auth.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import { requireAuth } from '@/server/auth/session.server'
+import { updateOsmDescription } from '../mutations/updateOsmDescription.server'
 
-/**
- * Polls OSM API to check if user has updated their description.
- * Returns the description if found, null otherwise.
- * This is used for client-side polling after user updates their OSM profile.
- */
-export async function pollOsmUserDescription() {
-  const headers = getRequestHeaders()
+async function fetchTrimmedOsmUserDescription(headers: Headers) {
   const appSession = await requireAuth(headers)
 
   const tokenResponse = await auth.api.getAccessToken({
@@ -41,4 +36,13 @@ export async function pollOsmUserDescription() {
 
   const data = await response.json()
   return data.user?.description?.trim() || null
+}
+
+/** Fetches trimmed OSM profile description; if non-empty, stores it on the user row. */
+export async function persistOsmUserDescriptionIfPresent() {
+  const headers = getRequestHeaders()
+  const description = await fetchTrimmedOsmUserDescription(headers)
+  if (!description) return false
+  await updateOsmDescription({ osmDescription: description }, headers)
+  return true
 }

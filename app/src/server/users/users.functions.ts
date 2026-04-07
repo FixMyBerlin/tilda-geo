@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
-import { pollOsmUserDescription } from './actions/pollOsmUserDescription.server'
+import { persistOsmUserDescriptionIfPresent } from './actions/pollOsmUserDescription.server'
 import { deleteUser } from './mutations/deleteUser.server'
 import { updateOsmDescription } from './mutations/updateOsmDescription.server'
 import { updateUserWithData } from './mutations/updateUser.server'
@@ -27,9 +27,9 @@ export const getUserWithMembershipsFn = createServerFn({ method: 'GET' })
   )
   .handler(async ({ data }) => getUserWithMemberships(data, getRequestHeaders()))
 
-export const pollOsmUserDescriptionFn = createServerFn({ method: 'GET' }).handler(async () => {
-  return pollOsmUserDescription()
-})
+export const persistOsmUserDescriptionIfPresentFn = createServerFn({ method: 'POST' }).handler(
+  async () => persistOsmUserDescriptionIfPresent(),
+)
 
 export const updateOsmDescriptionFn = createServerFn({ method: 'POST' })
   .inputValidator((data: z.infer<typeof UpdateOsmDescription>) => UpdateOsmDescription.parse(data))

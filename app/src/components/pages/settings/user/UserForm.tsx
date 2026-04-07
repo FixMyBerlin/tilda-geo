@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
@@ -10,12 +11,14 @@ import { Markdown } from '@/components/shared/text/Markdown'
 import { proseClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
+import { currentUserQueryKey } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
 import { UpdateUserSchema } from '@/server/users/schema'
 import { updateOsmDescriptionFn, updateUserFn } from '@/server/users/users.functions'
 import { UserFormOsmDescriptionMissing } from './UserFormOsmDescriptionMissing'
 
 function ClearOsmDescriptionButton() {
+  const queryClient = useQueryClient()
   const router = useRouter()
   const [pending, setPending] = useState(false)
   return (
@@ -27,6 +30,7 @@ function ClearOsmDescriptionButton() {
         onClick={async () => {
           setPending(true)
           await updateOsmDescriptionFn({ data: { osmDescription: '' } })
+          await queryClient.invalidateQueries({ queryKey: currentUserQueryKey })
           await router.invalidate()
           setPending(false)
         }}
@@ -42,6 +46,7 @@ type Props = {
 }
 
 export const UserForm = ({ user }: Props) => {
+  const queryClient = useQueryClient()
   const router = useRouter()
   return (
     <>
@@ -63,6 +68,7 @@ export const UserForm = ({ user }: Props) => {
             },
           })
           if (result?.success) {
+            await queryClient.invalidateQueries({ queryKey: currentUserQueryKey })
             await router.invalidate()
           }
           return result

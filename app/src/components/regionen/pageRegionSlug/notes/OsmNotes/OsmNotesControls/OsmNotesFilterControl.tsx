@@ -1,13 +1,14 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { FunnelIcon } from '@heroicons/react/24/outline'
+import { useQuery } from '@tanstack/react-query'
 import { Fragment } from 'react'
 import { twJoin } from 'tailwind-merge'
 import type z from 'zod'
 import { useOsmNotesFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import type { zodOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
 import { useOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
-import { useCurrentUser } from '@/components/shared/hooks/useCurrentUser'
+import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
 import { menuItemClasses } from '../../InternalNotes/InternalNotesControls/InternalNotesFilterControl'
 
 export const OsmNotesFilterControl = () => {
@@ -32,7 +33,8 @@ export const OsmNotesFilterControl = () => {
     uncompleted: osmNotesFeatures.features.filter((n) => n.properties.status === 'open').length,
     filteredTotal: osmNotesFeatures.features.length,
   }
-  const currentUser = useCurrentUser()
+  const { data } = useQuery(currentUserQueryOptions())
+  const currentUser = data?.user ?? null
 
   const handleMenuClick = (
     e:
