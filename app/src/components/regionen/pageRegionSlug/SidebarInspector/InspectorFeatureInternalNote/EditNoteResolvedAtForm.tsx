@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { startTransition, useEffect, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { NativeForm } from '@/components/shared/form/NativeForm'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import type { UpdateNoteResolvedAtInputType } from '@/server/notes/notes.functions'
 import { updateNoteResolvedAtFn } from '@/server/notes/notes.functions'
@@ -57,7 +58,7 @@ export const EditNoteResolvedAtForm = ({ note }: Props) => {
   }
 
   return (
-    <form>
+    <NativeForm>
       <Field
         as="div"
         className="mt-3 flex items-center gap-1.5 text-sm"
@@ -112,6 +113,6 @@ export const EditNoteResolvedAtForm = ({ note }: Props) => {
       </Field>
 
       {error ? <p className="text-red-500">{error.message}</p> : null}
-    </form>
+    </NativeForm>
   )
 }
