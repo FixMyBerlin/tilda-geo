@@ -76,4 +76,4 @@ jobs:
             echo "Updating `.env`"
             cd /srv
             mv .env.deploy.generated .env
-            chmod 600 .env
+            chmod 644 .env
