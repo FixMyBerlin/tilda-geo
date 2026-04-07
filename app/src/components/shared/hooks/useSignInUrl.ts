@@ -5,7 +5,7 @@ export function useSignInUrl() {
   const location = useLocation()
   const { href: signInHref } = router.buildLocation({
     to: '/api/sign-in/osm',
-    search: { callbackURL: location.href },
+    search: { callbackURL: `${location.pathname}${location.searchStr}` },
   })
   return signInHref
 }
