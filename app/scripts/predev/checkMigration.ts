@@ -1,5 +1,5 @@
 import { styleText } from 'node:util'
-import { confirm, isCancel } from '@clack/prompts'
+import { confirm, isCancel, note } from '@clack/prompts'
 import { $ } from 'bun'
 import { logErr, logOk } from './predevLog'
 
@@ -7,8 +7,17 @@ const label = 'check_migration'
 
 const pendingMigrationsBanner = 'Following migrations have not yet been applied'
 
-const fixPendingMigrationsMessage =
-  'Pending database migrations. From the `app` directory run:\n\n  bun run migrate\n\nThen start the dev server again.'
+const pendingMigrationsTipBody = `From the \`app\` directory run:
+
+  bun run migrate
+
+Then start the dev server again.`
+
+const pendingMigrationsError = 'Pending database migrations.'
+
+function showPendingMigrationsTip() {
+  note(pendingMigrationsTipBody, 'Tip')
+}
 
 export async function checkMigration() {
   try {
@@ -29,7 +38,8 @@ export async function checkMigration() {
     console.error(styleText('red', 'There are pending migrations.'))
 
     if (Bun.argv.includes('--non-interactive')) {
-      throw new Error(fixPendingMigrationsMessage)
+      showPendingMigrationsTip()
+      throw new Error(pendingMigrationsError)
     }
 
     const apply = await confirm({
@@ -39,7 +49,8 @@ export async function checkMigration() {
       throw new Error('Cancelled')
     }
     if (!apply) {
-      throw new Error(fixPendingMigrationsMessage)
+      showPendingMigrationsTip()
+      throw new Error(pendingMigrationsError)
     }
 
     const migrateProc = Bun.spawn(['bun', 'run', 'migrate'], {
