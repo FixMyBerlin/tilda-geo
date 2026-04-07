@@ -1,5 +1,4 @@
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
-import { RenderIfNotDoNotNavigate } from '../../RenderIfNotDoNotNavigate'
 import { NavigationDesktop } from '../NavigationDesktop/NavigationDesktop'
 import { NavigationMobile } from '../NavigationMobile/NavigationMobile'
 import { NavigationWrapper } from '../NavigationWrapper/NavigationWrapper'
@@ -11,19 +10,17 @@ export const HeaderRegionen = () => {
   const primaryNavigation = [...defaultPrimaryNavigation, ...(region?.navigationLinks ?? [])]
   return (
     <NavigationWrapper>
-      <RenderIfNotDoNotNavigate>
-        <NavigationMobile
-          logo={<HeaderRegionenLogo />}
-          primaryNavigation={primaryNavigation}
-          secondaryNavigation={defaultSecondaryNavigationGrouped}
-        />
-        <NavigationDesktop
-          logo={<HeaderRegionenLogo />}
-          primaryNavigation={primaryNavigation}
-          secondaryNavigation={defaultSecondaryNavigationGrouped}
-          secondaryNavigationLogo={true}
-        />
-      </RenderIfNotDoNotNavigate>
+      <NavigationMobile
+        logo={<HeaderRegionenLogo />}
+        primaryNavigation={primaryNavigation}
+        secondaryNavigation={defaultSecondaryNavigationGrouped}
+      />
+      <NavigationDesktop
+        logo={<HeaderRegionenLogo />}
+        primaryNavigation={primaryNavigation}
+        secondaryNavigation={defaultSecondaryNavigationGrouped}
+        secondaryNavigationLogo={true}
+      />
     </NavigationWrapper>
   )
 }

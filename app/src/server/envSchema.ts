@@ -13,7 +13,6 @@ export const viteEnvSchema = z.object({
   VITE_APP_ENV: appEnv,
   VITE_APP_ORIGIN: z.string(),
   VITE_TILES_ENV: appEnv.optional(),
-  VITE_DO_NOT_NAVIGATE: z.string().optional(),
   VITE_PLAYWRIGHT_ENABLED: z.string().optional(),
 })
 
