@@ -23,6 +23,7 @@
 - **No stale leftovers:** checks also fail when unmanaged env keys are found in `docker-compose.yml` or setup workflow mappings.
 - **Generated docs:** the variable table in this README is generated from manifest data; if stale, CI fails.
 - **Runtime required checks:** deploy generation fails fast when required GitHub vars/secrets are missing in the selected environment.
+- **Local-only tooling vars are excluded:** some keys in `.env.example` are intentionally local-only (for example `DATABASE_URL_PRODUCTION` / `DATABASE_URL_STAGING` used by `app/scripts/db-pull` scripts) and must not be added to the deploy manifest or setup-env workflow mappings.
 
 ## Security properties
 
