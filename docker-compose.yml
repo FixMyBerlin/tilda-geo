@@ -53,6 +53,9 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       VITE_APP_ENV:
       VITE_APP_ORIGIN:
+      APP_URL:
+      CACHELESS_URL:
+      TILES_URL:
       SESSION_SECRET_KEY:
       OSM_CLIENT_ID:
       OSM_CLIENT_SECRET:
