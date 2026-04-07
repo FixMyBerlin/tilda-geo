@@ -95,6 +95,7 @@ export default defineConfig({
       plugins: [
         'src/server/instrumentation/nitro-env-validation.plugin.server.ts',
         'src/server/instrumentation/nitro-www-redirect.plugin.server.ts',
+        'src/server/instrumentation/nitro-legacy-cookie-sweep.plugin.server.ts',
         'src/server/instrumentation/nitro-sql-registration.plugin.server.ts',
       ],
       sourcemap: true,
