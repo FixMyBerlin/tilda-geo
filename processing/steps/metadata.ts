@@ -1,5 +1,5 @@
 import { berlinTimeString } from '../utils/berlinTime'
-import { filteredFilePath } from './filter'
+import { originalFilePath } from './download'
 import { $, sql } from 'bun'
 
 /**
@@ -66,12 +66,12 @@ export async function initializeMetadataTable() {
  * @returns the time stamp as a string
  */
 export async function getFileTimestamp(fileName: string) {
+  const originalPath = originalFilePath(fileName)
   try {
-    const timestamp =
-      await $`osmium fileinfo ${filteredFilePath(fileName)} -g header.option.timestamp`.text()
+    const timestamp = await $`osmium fileinfo ${originalPath} -g header.option.timestamp`.text()
     return timestamp.trim()
   } catch (error) {
-    throw new Error(`Failed to get timestamp from file "${fileName}": ${error}`)
+    throw new Error(`Failed to get timestamp from file "${originalPath}": ${error}`)
   }
 }
 
@@ -107,7 +107,7 @@ export async function createProcessingEntry() {
  */
 export async function updateProcessingEntry(
   processingId: number | null,
-  fileName: string,
+  sourceFileName: string,
   processingDurationMS: number,
 ) {
   if (!processingId) {
@@ -116,9 +116,17 @@ export async function updateProcessingEntry(
   }
   const processingDuration = new Date(processingDurationMS).toISOString().slice(11, 19) // Extract HH:MM:SS from the ISO string
 
+  const rawOsmTimestamp = await getFileTimestamp(sourceFileName)
+  const osm_data_from = new Date(rawOsmTimestamp)
+  if (Number.isNaN(osm_data_from.getTime())) {
+    throw new Error(
+      `Processing: Invalid OSM timestamp "${rawOsmTimestamp}" from source file "${sourceFileName}"`,
+    )
+  }
+
   const data = {
     processing_duration: processingDuration,
-    osm_data_from: new Date(await getFileTimestamp(fileName)),
+    osm_data_from,
     processing_completed_at: new Date(),
     status: 'postprocessing', // Main processing done, async operations (QA + stats) still running
   }

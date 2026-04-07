@@ -9,7 +9,6 @@ import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
-import { params } from './utils/parameters'
 
 async function main() {
   try {
@@ -23,6 +22,7 @@ async function main() {
     logPadded('Processing: Download', berlinTimeString(new Date()))
     await waitForFreshData()
     let { fileName, fileChanged } = await downloadFile()
+    const sourceFileName = fileName
 
     logPadded('Processing: Filter', berlinTimeString(new Date()))
     // tagFilter regenerates filtered file if needed, but only returns sourceFileChanged
@@ -46,7 +46,7 @@ async function main() {
     logPadded('Processing: Finishing up', berlinTimeString(new Date()))
 
     // Update processing entry: mark main processing as complete, set status to 'postprocessing'
-    await updateProcessingEntry(processingId, fileName, timeElapsed)
+    await updateProcessingEntry(processingId, sourceFileName, timeElapsed)
 
     // Frontend: Registers sql functions and starts the analysis run (async, fire-and-forget)
     // Frontend: Trigger QA evaluation updates for all regions (async, fire-and-forget)
