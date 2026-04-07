@@ -9,7 +9,7 @@ import { Form } from '@/components/shared/form/Form'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
-import { appBaseUrl } from '@/components/shared/utils/appBaseUrl.const'
+import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 import { createOsmNoteFn } from '@/server/osm/osm.functions'
 import { osmOrgUrl, osmTypeIdString } from '../../SidebarInspector/Tools/osmUrls/osmUrls'
 import type { OsmApiNotesThreadType } from './schema'
@@ -38,10 +38,10 @@ function buildFullComment(
           params.delete('osmNote')
           const paramString = params.toString()
           return paramString
-            ? `${appBaseUrl.production}/regionen/${opts.regionSlug}?${paramString}`
-            : `${appBaseUrl.production}/regionen/${opts.regionSlug}`
+            ? getAppBaseUrl(`/regionen/${opts.regionSlug}?${paramString}`, 'production')
+            : getAppBaseUrl(`/regionen/${opts.regionSlug}`, 'production')
         })()
-      : appBaseUrl.production
+      : getAppBaseUrl(undefined, 'production')
   const footerWiki = 'https://osm.wiki/FixMyCity_GmbH/TILDA'
   const footer = `\n--\n#TILDA ${footerMemberHashtag} ${footerUrl} ${footerWiki}`
 

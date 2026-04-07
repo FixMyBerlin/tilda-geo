@@ -4,27 +4,11 @@
  * directly with types from env.d.ts; coercion would give inferred types that don't match runtime.
  */
 import { z } from 'zod'
+import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 
 const environmentValues = z.enum(['development', 'staging', 'production'])
 const mapboxToken = z.string().regex(/^pk\./)
 const requiredString = z.string().min(1)
-const hostnamesByEnv = {
-  development: {
-    APP_URL: 'app.invalid',
-    CACHELESS_URL: 'cacheless.invalid',
-    TILES_URL: 'tiles.invalid',
-  },
-  staging: {
-    APP_URL: 'staging.tilda-geo.de',
-    CACHELESS_URL: 'staging-cacheless.tilda-geo.de',
-    TILES_URL: 'staging-tiles.tilda-geo.de',
-  },
-  production: {
-    APP_URL: 'tilda-geo.de',
-    CACHELESS_URL: 'cacheless.tilda-geo.de',
-    TILES_URL: 'tiles.tilda-geo.de',
-  },
-} as const
 
 export const envViteSchema = z.object({
   VITE_APP_ENV: environmentValues,
@@ -49,56 +33,23 @@ const envServerSchema = z.object({
   MAPROULETTE_API_KEY: requiredString,
   MAILJET_APIKEY_PUBLIC: z.string().optional(),
   MAILJET_APIKEY_PRIVATE: z.string().optional(),
-  APP_URL: z.enum([
-    hostnamesByEnv.development.APP_URL,
-    hostnamesByEnv.staging.APP_URL,
-    hostnamesByEnv.production.APP_URL,
-  ]),
-  CACHELESS_URL: z.enum([
-    hostnamesByEnv.development.CACHELESS_URL,
-    hostnamesByEnv.staging.CACHELESS_URL,
-    hostnamesByEnv.production.CACHELESS_URL,
-  ]),
-  TILES_URL: z.enum([
-    hostnamesByEnv.development.TILES_URL,
-    hostnamesByEnv.staging.TILES_URL,
-    hostnamesByEnv.production.TILES_URL,
-  ]),
 })
 
 const envAppSchemaPart = envViteSchema.extend(envServerSchema.shape)
 
-const envAppSchemaByEnvironment = z.discriminatedUnion('ENVIRONMENT', [
-  envAppSchemaPart.extend({
-    ENVIRONMENT: z.literal('development'),
-    VITE_APP_ENV: z.literal('development'),
-    APP_URL: z.literal(hostnamesByEnv.development.APP_URL),
-    CACHELESS_URL: z.literal(hostnamesByEnv.development.CACHELESS_URL),
-    TILES_URL: z.literal(hostnamesByEnv.development.TILES_URL),
-  }),
-  envAppSchemaPart.extend({
-    ENVIRONMENT: z.literal('staging'),
-    VITE_APP_ENV: z.literal('staging'),
-    APP_URL: z.literal(hostnamesByEnv.staging.APP_URL),
-    CACHELESS_URL: z.literal(hostnamesByEnv.staging.CACHELESS_URL),
-    TILES_URL: z.literal(hostnamesByEnv.staging.TILES_URL),
-  }),
-  envAppSchemaPart.extend({
-    ENVIRONMENT: z.literal('production'),
-    VITE_APP_ENV: z.literal('production'),
-    APP_URL: z.literal(hostnamesByEnv.production.APP_URL),
-    CACHELESS_URL: z.literal(hostnamesByEnv.production.CACHELESS_URL),
-    TILES_URL: z.literal(hostnamesByEnv.production.TILES_URL),
-  }),
-])
+const apiRootUrlByEnvironment = {
+  development: getAppBaseUrl('/api', 'development'),
+  staging: getAppBaseUrl('/api', 'staging'),
+  production: getAppBaseUrl('/api', 'production'),
+}
 
 const envScriptOnlySchemaPart = z.object({
   MAPBOX_STYLE_ACCESS_TOKEN: mapboxToken,
   MAPBOX_PARKING_STYLE_ACCESS_TOKEN: mapboxToken,
-  API_ROOT_URL: z.union([
-    z.literal('http://127.0.0.1:5173/api'),
-    z.literal('https://staging.tilda-geo.de/api'),
-    z.literal('https://tilda-geo.de/api'),
+  API_ROOT_URL: z.enum([
+    apiRootUrlByEnvironment.development,
+    apiRootUrlByEnvironment.staging,
+    apiRootUrlByEnvironment.production,
   ]),
   S3_BUCKET: requiredString,
   S3_UPLOAD_FOLDER: z.enum(['production', 'staging', 'localdev']),
@@ -123,7 +74,7 @@ const envProcessingSchema = z.object({
 })
 
 /** Validated at app startup (Nitro). Unknown keys are allowed; the plugin logs them as FYI. */
-export const envAppStartupValidationSchema = envAppSchemaByEnvironment
+export const envAppStartupValidationSchema = envAppSchemaPart
 
 /** Full server env type (app + script + processing). No .strict() so scripts can run with extra env. */
 export const envFullSchema = envViteSchema

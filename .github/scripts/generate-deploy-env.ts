@@ -2,6 +2,9 @@
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
+import { appHostSchema } from '../../app/src/components/shared/utils/getAppBaseUrl'
+import { cachelessHostSchema } from '../../app/src/components/shared/utils/getCachelessTilesUrl'
+import { tilesHostSchema } from '../../app/src/components/shared/utils/getTilesUrl'
 
 type ManifestVariable = {
   name: string
@@ -51,6 +54,12 @@ function resolveValue(entry: ManifestVariable) {
   return ''
 }
 
+function validateInfraHostEnvValue({ name, value }: { name: string; value: string }) {
+  if (name === 'APP_URL') appHostSchema.parse(value)
+  if (name === 'TILES_URL') tilesHostSchema.parse(value)
+  if (name === 'CACHELESS_URL') cachelessHostSchema.parse(value)
+}
+
 function main() {
   const args = parseArgs(process.argv)
   const manifestArg = args.get('manifest')
@@ -76,7 +85,9 @@ function main() {
     if (seen.has(entry.name)) throw new Error(`Duplicate variable in manifest: ${entry.name}`)
     seen.add(entry.name)
     try {
-      lines.push(`${entry.name}=${shellQuote(resolveValue(entry))}`)
+      const value = resolveValue(entry)
+      validateInfraHostEnvValue({ name: entry.name, value })
+      lines.push(`${entry.name}=${shellQuote(value)}`)
     } catch (error) {
       missing.push(error instanceof Error ? error.message : String(error))
     }

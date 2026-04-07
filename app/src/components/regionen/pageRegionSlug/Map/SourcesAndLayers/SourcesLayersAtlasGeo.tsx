@@ -11,7 +11,7 @@ import {
   createLayerKeyAtlasGeo,
   createSourceKeyAtlasGeo,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
-import { makeTileUrlCacheless } from '@/components/shared/utils/getTilesUrl'
+import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { layerVisibility } from '../utils/layerVisibility'
 import { LayerHighlight } from './LayerHighlight'
@@ -51,7 +51,7 @@ export const SourcesLayersAtlasGeo = () => {
                 subcategoryConfig.id,
               )
 
-              const tileUrl = makeTileUrlCacheless({
+              const tileUrl = getCachelessTilesUrl({
                 url: sourceData.tiles,
                 cacheless: useDebugCachelessTiles,
               })
