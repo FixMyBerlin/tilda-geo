@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 
-import type { ServerEnv, ViteEnv } from './server/envSchema'
+import type { EnvFullSchema, EnvVite } from './server/envSchema'
 
 declare global {
   /** Augment Bun's ImportMetaEnv (index signature) with our required VITE_* keys from schema */
-  interface ImportMetaEnv extends ViteEnv {}
+  interface ImportMetaEnv extends EnvVite {}
 
   interface ImportMeta {
     readonly env: ImportMetaEnv
@@ -16,6 +16,6 @@ declare global {
    * At call sites, guard then use, or use `as string` after a runtime check.
    */
   namespace NodeJS {
-    interface ProcessEnv extends ServerEnv {}
+    interface ProcessEnv extends EnvFullSchema {}
   }
 }

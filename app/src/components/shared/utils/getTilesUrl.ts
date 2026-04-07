@@ -1,7 +1,7 @@
-import type { AppEnv } from '@/server/envSchema'
+import type { EnvironmentValues } from '@/server/envSchema'
 import { envKey } from './isEnv'
 
-const tilesBaseUrl: Record<AppEnv, string> = {
+const tilesBaseUrl: Record<EnvironmentValues, string> = {
   development: 'http://localhost:3000',
   staging: 'https://staging-tiles.tilda-geo.de',
   production: 'https://tiles.tilda-geo.de',

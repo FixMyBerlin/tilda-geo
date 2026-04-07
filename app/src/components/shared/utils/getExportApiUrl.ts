@@ -1,9 +1,9 @@
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import type { StaticRegion } from '@/data/regions.const'
-import type { AppEnv } from '@/server/envSchema'
+import type { EnvironmentValues } from '@/server/envSchema'
 import { appBaseUrl } from './appBaseUrl.const'
 
-export const getBoundaryExportApiBaseUrl = (env?: AppEnv) => {
+export const getBoundaryExportApiBaseUrl = (env?: EnvironmentValues) => {
   const e = env ?? import.meta.env.VITE_APP_ENV
   const url = new URL(`${appBaseUrl[e]}/api/boundary`)
   return url.toString()
@@ -12,7 +12,7 @@ export const getBoundaryExportApiBaseUrl = (env?: AppEnv) => {
 export const getExportApiUrl = (
   regionSlug: string,
   apiIdentifier: SourceExportApiIdentifier,
-  env?: AppEnv,
+  env?: EnvironmentValues,
 ) => {
   const e = env ?? import.meta.env.VITE_APP_ENV
   const url = new URL(`${appBaseUrl[e]}/api/export/${regionSlug}/${apiIdentifier}`)
@@ -23,7 +23,7 @@ export const getExportApiBboxUrl = (
   regionSlug: string,
   apiIdentifier: SourceExportApiIdentifier,
   bbox: NonNullable<StaticRegion['bbox']>,
-  env?: AppEnv,
+  env?: EnvironmentValues,
   apiKey?: string,
 ) => {
   const url = new URL(getExportApiUrl(regionSlug, apiIdentifier, env))
@@ -42,7 +42,7 @@ export const getExportOgrApiBboxUrl = (
   apiIdentifier: SourceExportApiIdentifier,
   bbox: NonNullable<StaticRegion['bbox']>,
   format: 'geojson' | 'gpkg' | 'fgb' = 'fgb',
-  env?: AppEnv,
+  env?: EnvironmentValues,
   apiKey?: string,
 ) => {
   const baseUrl = getExportApiBboxUrl(regionSlug, apiIdentifier, bbox, env, apiKey)

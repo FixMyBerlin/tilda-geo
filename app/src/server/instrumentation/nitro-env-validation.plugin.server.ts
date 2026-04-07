@@ -8,14 +8,14 @@
 import { styleText } from 'node:util'
 import { definePlugin } from 'nitro'
 import { z } from 'zod'
-import { appEnvSchema, serverEnvSchema } from '../envSchema'
+import { envAppStartupValidationSchema, envFullSchema } from '../envSchema'
 import { pluginOk } from './utils/pluginLog'
 
 const DEBUG_UNKNOWN_KEYS = false
 
 function logUnknownEnvKeysIfEnabled() {
   if (!DEBUG_UNKNOWN_KEYS) return
-  const knownEnvKeys = new Set(Object.keys(serverEnvSchema.shape))
+  const knownEnvKeys = new Set(Object.keys(envFullSchema.shape))
   const ignoredEnvPrefixes = [
     'VSCODE_',
     'CURSOR_',
@@ -44,7 +44,7 @@ function logUnknownEnvKeysIfEnabled() {
 }
 
 export default definePlugin(() => {
-  const result = appEnvSchema.safeParse(process.env, { reportInput: true })
+  const result = envAppStartupValidationSchema.safeParse(process.env, { reportInput: true })
   if (!result.success) {
     console.error(styleText(['bold', 'red'], '\n❌ Server env validation failed:\n'))
     console.error(styleText('yellow', z.prettifyError(result.error)))

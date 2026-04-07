@@ -7,7 +7,7 @@ import { select } from '@clack/prompts'
 import dotenv from 'dotenv'
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
-import type { AppEnv } from '@/server/envSchema'
+import type { EnvironmentValues } from '@/server/envSchema'
 import { getValidatedEnv, mapboxTilesetsSchema } from '../shared/env'
 import { tilesetConfigs } from './datasets'
 
@@ -24,7 +24,7 @@ const envMap = {
   dev: 'development',
   staging: 'staging',
   production: 'production',
-} as const satisfies Record<string, AppEnv>
+} as const satisfies Record<string, EnvironmentValues>
 
 type CliEnv = keyof typeof envMap
 
