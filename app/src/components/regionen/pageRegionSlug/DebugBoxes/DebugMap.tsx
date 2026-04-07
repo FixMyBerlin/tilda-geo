@@ -4,12 +4,13 @@ import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import {
   useMapDebugActions,
+  useMapDebugDebugLayerStyles,
   useMapDebugShowDebugInfo,
   useMapDebugUseDebugCachelessTiles,
-  useMapDebugDebugLayerStyles,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { getTilesUrl, isDevTilesUrl } from '@/components/shared/utils/getTilesUrl'
+import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
+import { isDev } from '@/components/shared/utils/isEnv'
 import { useInteractiveLayers } from '../Map/utils/useInteractiveLayers'
 import { DebugMapDownload } from './DebugMapDownload'
 
@@ -73,8 +74,8 @@ export const DebugMap = () => {
         <button
           type="button"
           onClick={() => setUseDebugCachelessTiles(!useDebugCachelessTiles)}
-          className={twJoin('rounded border px-1', isDevTilesUrl ? 'line-through' : '')}
-          disabled={isDevTilesUrl}
+          className={twJoin('rounded border px-1', isDev ? 'line-through' : '')}
+          disabled={isDev}
         >
           Cachless tiles {useDebugCachelessTiles ? 'ON' : 'OFF'}
         </button>

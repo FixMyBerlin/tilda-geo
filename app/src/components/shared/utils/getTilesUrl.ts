@@ -18,5 +18,3 @@ export const getTilesUrl = (path?: string) => {
 export const makeTileUrlCacheless = ({ url, cacheless }: { url: string; cacheless: boolean }) => {
   return cacheless === true ? url.replace('tiles', 'cacheless') : url
 }
-
-export const isDevTilesUrl = envKey === 'development'
