@@ -1,5 +1,5 @@
 import type { AppEnv } from '@/server/envSchema'
-import { envKey, isDev } from './isEnv'
+import { envKey } from './isEnv'
 
 const tilesBaseUrl: Record<AppEnv, string> = {
   development: 'http://localhost:3000',
@@ -8,8 +8,7 @@ const tilesBaseUrl: Record<AppEnv, string> = {
 }
 
 export const getTilesUrl = (path?: string) => {
-  const env: AppEnv = import.meta.env.VITE_TILES_ENV ?? envKey
-  const base = tilesBaseUrl[env]
+  const base = tilesBaseUrl[envKey]
 
   if (!path) return base
   const cleanPath = path.startsWith('/') ? path.slice(1) : path
@@ -20,7 +19,4 @@ export const makeTileUrlCacheless = ({ url, cacheless }: { url: string; cacheles
   return cacheless === true ? url.replace('tiles', 'cacheless') : url
 }
 
-export const isDevTilesUrl =
-  import.meta.env.VITE_TILES_ENV !== undefined
-    ? import.meta.env.VITE_TILES_ENV === 'development'
-    : isDev
+export const isDevTilesUrl = envKey === 'development'

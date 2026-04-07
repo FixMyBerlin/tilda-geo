@@ -12,7 +12,6 @@ const mapboxToken = z.string().regex(/^pk\./)
 export const viteEnvSchema = z.object({
   VITE_APP_ENV: appEnv,
   VITE_APP_ORIGIN: z.string(),
-  VITE_TILES_ENV: appEnv.optional(),
   VITE_PLAYWRIGHT_ENABLED: z.string().optional(),
 })
 
