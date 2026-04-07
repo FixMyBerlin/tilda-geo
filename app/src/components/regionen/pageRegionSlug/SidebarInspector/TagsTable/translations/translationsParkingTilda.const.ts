@@ -67,6 +67,7 @@ export const translationsParkingTilda = {
     'tilda_parkings--access--key': 'Zugang',
     'tilda_parkings--access=private': 'Privat',
     'tilda_parkings--access=customers': 'Kunden',
+    'tilda_parkings--access=destination': 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
     'tilda_parkings--access=employees': 'Mitarbeiter',
     'tilda_parkings--access=permissive': 'Erlaubt',
     'tilda_parkings--access=public': 'Öffentlich (explizit)',

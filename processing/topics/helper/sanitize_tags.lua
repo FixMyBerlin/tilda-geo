@@ -33,7 +33,7 @@ local SANITIZE_TAGS = {
     if value == 'yes' then
       return 'public'
     end
-    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'residents', 'public' })
+    return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'destination', 'residents', 'public' })
   end,
   traffic_sign = function (value)
     return SanitizeTrafficSign(value)
@@ -119,7 +119,7 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes' }, { 'no' })
   end,
   informal = function(value)
-    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+    return sanitize_for_logging(value, { 'yes' }, { 'no', 'unknown' })
   end,
   covered = function(value)
     return sanitize_for_logging(value, { 'yes', 'partial' }, { 'no' })

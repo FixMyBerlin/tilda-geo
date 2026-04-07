@@ -28,6 +28,9 @@ local SANITIZE_PARKING_TAGS = {
     return sanitize_for_logging(value, { 'perpendicular', 'parallel', 'diagonal' })
   end,
   markings = function (value)
+    if value == 'bleached' then
+      return 'yes'
+    end
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
   disabled = function (value)
@@ -54,7 +57,11 @@ local SANITIZE_PARKING_TAGS = {
   end,
   parking_off_street = function(tags)
     if tags.parking then
-      return sanitize_for_logging(tags.parking, { 'surface', 'depot', 'rooftop', 'layby', 'multi-storey', 'underground', 'garage_boxes', 'carport', 'sheds' })
+      local parking_value = tags.parking
+      if parking_value == 'carports' then
+        parking_value = 'carport'
+      end
+      return sanitize_for_logging(parking_value, { 'surface', 'depot', 'rooftop', 'layby', 'multi-storey', 'underground', 'garage_boxes', 'carport', 'sheds' })
     end
 
     if tags.building then
