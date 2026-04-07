@@ -34,7 +34,7 @@ export const StaticDatasetCategories = () => {
   }
 
   return (
-    <nav className="relative z-0 flex flex-col bg-gray-50">
+    <nav className="relative z-0 flex flex-col border-t border-t-gray-200 bg-gray-50">
       {Object.entries(sortedGroupedDatasets).map(([category, datasets]) => {
         return <SelectDatasets key={category} category={category} datasets={datasets} />
       })}
