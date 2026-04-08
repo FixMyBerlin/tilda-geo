@@ -32,7 +32,8 @@
     "enabled": true,
     "actions": {
       "source": {
-        "recommended": true
+        "recommended": true,
+        "organizeImports": "off"
       }
     }
   },
