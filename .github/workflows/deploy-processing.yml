@@ -61,10 +61,10 @@ jobs:
           push: true
           cache-from: |
             type=gha
-            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
+            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-cache
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:cache,mode=max
+            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-cache,mode=max
           tags: |
             public.ecr.aws/n0p8j4k5/tilda/processing:${{ github.sha }}
             public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
