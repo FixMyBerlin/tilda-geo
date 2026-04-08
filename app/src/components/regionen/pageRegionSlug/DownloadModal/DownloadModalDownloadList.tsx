@@ -54,19 +54,31 @@ export const DownloadModalDownloadList = () => {
             </table>
 
             <div className="flex flex-wrap gap-2">
+              <Link
+                to="/docs/$tableName"
+                params={{ tableName: exportData.id }}
+                classNameOverwrite="min-w-28 w-max flex-none rounded-md border border-purple-800 bg-purple-700 px-3 py-2 text-left shadow-md no-underline hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1"
+              >
+                <strong className="mb-0.5 block text-xs font-medium text-purple-200">
+                  Attribute
+                </strong>
+                <span className="block border-0 p-0 font-mono text-white focus:ring-0 sm:text-sm">
+                  Dokumentation
+                </span>
+              </Link>
               {Object.entries(ogrFormats).map(([param, format]) => {
                 return (
                   <Link
                     key={param}
                     href={getExportOgrApiBboxUrl(regionSlug, exportData.id, bbox, param as Formats)}
-                    classNameOverwrite="w-28 flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
+                    classNameOverwrite="min-w-28 w-max flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-left shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
                     download
                     blank
                   >
                     <strong className="mb-0.5 block text-xs font-medium text-gray-500">
                       Download
                     </strong>
-                    <span className="block w-full border-0 p-0 font-mono text-gray-900 focus:ring-0 sm:text-sm">
+                    <span className="block border-0 p-0 font-mono text-gray-900 focus:ring-0 sm:text-sm">
                       {format.driver}
                     </span>
                   </Link>

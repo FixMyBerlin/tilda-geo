@@ -1,0 +1,123 @@
+{
+  "gfiAttributes": {
+    "category": {
+      "name": "Stanzungen",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "advertising": "Werbungtabeln u.ä.",
+        "barrier": "Poller, Zaun, u.ä.",
+        "bicycle_parking": "Fahrradparkplatz",
+        "bicycle_rental": "Fahrradverleih",
+        "bollard": "Poller",
+        "bus_stop": "Bushaltestelle",
+        "bus_stop_conditional": "Bushaltestelle mit zeitlichen Einschränkungen (Nachtbusse, Schulbusse)",
+        "bus_stop_centerline": "Bushaltestelle (Mittellinie)",
+        "bus_stop_kerb": "Bushaltestelle (Bordstein)",
+        "collision_protection": "Baumschutzbügel",
+        "crossing_buffer_marking": "Markierung (Sperrfläche u.ä.) am Überweg",
+        "crossing_kerb_extension": "Gehwegvorstreckung am Überweg",
+        "crossing_marked": "Markierter Überweg",
+        "crossing_traffic_signals": "Ampelübergang",
+        "crossing_zebra": "Zebrastreifen",
+        "driveway": "Einfahrt",
+        "driveway_corner_kerb": "Implizites Halteverbot am Beginn einer Einfahrt",
+        "fire_hydrant": "Hydrant",
+        "intersection_corner": "Implizites Halteverbot an Straßenecke",
+        "kerb_lowered": "Abgesenkter Bordstein",
+        "kerb_extension": "Bordsteinverlängerung",
+        "loading_ramp": "Laderampe",
+        "mobility_hub": "Mobilitätsstation",
+        "motorcycle_parking": "Motorradparkplatz",
+        "other": "Sonstiges Hindernis",
+        "parklet": "Parklet",
+        "recycling": "Recyclingstation",
+        "road_marking_restricted_area": "Sperrfläche (Markierung)",
+        "small_electric_vehicle_parking": "Parkplatz für kleine Elektrofahrzeuge wie E-Scootern",
+        "street_cabinet": "Schaltkasten, Straßenkasten, u.ä.",
+        "street_lamp": "Straßenlaterne",
+        "traffic_calming_choker": "Angelegte Fahrbahnverengung",
+        "traffic_sign": "Verkehrszeichen",
+        "tram_stop": "Straßenbahnhaltestelle",
+        "tree": "Baum",
+        "tree_pit": "Baumscheibe",
+        "vending_parking_tickets": "Parkscheinautomat",
+        "water_well": "Wasserstelle / Brunnen"
+      }
+    },
+    "source": {
+      "name": "Datenquelle",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "crossing": "Überwege",
+        "driveway_corner_kerbs": "Implizites Halteverbot am Beginn einer Einfahrt",
+        "driveways": "Einfahrten",
+        "external_cutouts_euvm": "Externe Hindernisdaten (eUVM)",
+        "intersections": "Kreuzungen",
+        "obstacle_areas": "Flächige Hindernisse",
+        "obstacle_lines": "Linienhafte Hindernisse",
+        "obstacle_points": "Punktuelle Hindernisse",
+        "public_transport_stops": "ÖPNV-Haltestellen",
+        "separate_parking_areas": "Parkplätze die separat als Fläche erfasst sind",
+        "separate_parking_points": "Parkplätze die separat als Punkt erfasst sind"
+      }
+    },
+    "buffer_radius": {
+      "name": "Radius der Stanzung",
+      "type": "number"
+    },
+    "radius": {
+      "name": "Pufferradius (m), u. a. Kreuzungs-Ecken und eUVM-Punkte",
+      "type": "number"
+    },
+    "side": {
+      "name": "Seite relativ zur Fahrbahn",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "left": "Links",
+        "right": "Rechts",
+        "platform": "Bahnsteig / ohne Kerb-Seite"
+      }
+    },
+    "width": {
+      "name": "Breite",
+      "type": "number"
+    },
+    "no_cutout_for_restrictions": {
+      "name": "Gilt nicht bei Park-/Halteverbot entlang der Linie",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "true": "Ja (Stanzung wird bei echten Verbotssegmenten nicht angewendet)"
+      }
+    },
+    "road": "Fahrbahn-Referenz (Einfahrt)",
+    "street:name": "Straßenname (Einfahrt)",
+    "amenity": "OSM amenity",
+    "barrier": "OSM barrier",
+    "capacity": {
+      "name": "Kapazität (OSM / Zwischenwert)",
+      "type": "number"
+    },
+    "capacity:cargo_bike": {
+      "name": "Kapazität Lastenrad (OSM)",
+      "type": "number"
+    },
+    "direction": "Richtung (OSM)",
+    "emergency": "OSM emergency",
+    "geom_sources": "Geometrie-Quellen",
+    "geometry_source": "Geometrieherkunft",
+    "kerb": "Bordstein (OSM kerb)",
+    "landuse": "Flächennutzung (OSM landuse)",
+    "man_made": "Künstliche Objekte (OSM man_made)",
+    "name": "Name (OSM)",
+    "natural": "Natur (OSM natural)",
+    "operator": "Betreiber (OSM)",
+    "ref": "Referenz (OSM ref)",
+    "separate_parking": "Separater Parkplatz (OSM-Bezug)",
+    "tag_sources": "Tag-Quellen",
+    "traffic_calming": "Verkehrsberuhigung (OSM traffic_calming)"
+  }
+}

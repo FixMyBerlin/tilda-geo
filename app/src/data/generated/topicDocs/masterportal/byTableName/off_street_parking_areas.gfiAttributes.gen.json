@@ -1,0 +1,292 @@
+{
+  "gfiAttributes": {
+    "category": {
+      "name": "Kategorie",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "outside": "Außenparkplatz",
+        "garage": "Garage",
+        "underground": "Tiefgarage",
+        "carport": "Carport",
+        "multi-storey": "Parkhaus"
+      }
+    },
+    "parking": {
+      "name": "Parkplatztyp",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "surface": "Oberflächenparkplatz",
+        "underground": "Tiefgarage",
+        "multi-storey": "Parkhaus",
+        "rooftop": "Dachparkplatz",
+        "carport": "Carport",
+        "carports": "Carports",
+        "garage_boxes": "Garagenboxen",
+        "garage": "Garage"
+      }
+    },
+    "amenity": {
+      "name": "Einrichtung",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "parking": "Parkplatz"
+      }
+    },
+    "capacity": {
+      "name": "Anzahl Stellplätze",
+      "type": "number"
+    },
+    "capacity_source": {
+      "name": "Kapazitätsherkunft",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "tag": "Explizite Angabe aus OSM.",
+        "tag_estimation": "Explizite Angabe einer Schätzung aus OSM.",
+        "tag_redistributed": "Explizite Angabe aus OSM, dann anteilig aufgeteilt nach Stanzung.",
+        "tag_estimation_redistributed": "Explizite Angabe einer Schätzung aus OSM, dann anteilig aufgeteilt nach Stanzung.",
+        "area_and_orientation_parallel": "Berechnet auf Basis der Fläche und Parkausrichtung.",
+        "area_and_orientation_perpendicular": "Berechnet auf Basis der Fläche und Parkausrichtung.",
+        "area_and_orientation_diagonal": "Berechnet auf Basis der Fläche und Parkausrichtung.",
+        "area_and_orientation_parallel_redistributed": "Berechnet auf Basis der Fläche und Parkausrichtung, dann anteilig aufgeteilt nach Stanzung.",
+        "area_and_orientation_perpendicular_redistributed": "Berechnet auf Basis der Fläche und Parkausrichtung, dann anteilig aufgeteilt nach Stanzung.",
+        "area_and_orientation_diagonal_redistributed": "Berechnet auf Basis der Fläche und Parkausrichtung, dann anteilig aufgeteilt nach Stanzung.",
+        "area_and_orientation_fallback_parallel": "Berechnet auf Basis der Fläche und Parkausrichtung. Allerdings war die Parkausrichtung unbekannt, so dass Parallelparken angenommen wurde.",
+        "estimated_from_length": "Berechnet auf Basis der Linien-Länge und Ausrichtung.",
+        "estimated_from_area": "Berechnet auf Basis der Fläche und Ausrichtung.",
+        "estimated": "Berechnung",
+        "estimated_redistributed": "Geschätzt, Kapazität umverteilt",
+        "assumed_default": "Keine explizite Angabe vorgefunden; dieser Wert ist eine Annahme.",
+        "area": "Berechnet auf Basis der Fläche."
+      }
+    },
+    "condition_category": {
+      "name": "Parkbeschränkung",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "access_restriction": "Zugangsbeschränkung",
+        "assumed_free": "Wahrscheinlich keine Parkbeschränkungen",
+        "assumed_private": "Sehr wahrscheinlich privat",
+        "bus_lane": "Bussonderfahrstreifen",
+        "car_sharing": "Nur für Carsharing-Fahrzeuge",
+        "charging": "Laden von Elektrofahrzeugen",
+        "disabled": "Behindertenparkplatz",
+        "disabled_private": "Personenbezogener Behindertenparkplatz",
+        "free": "Keine Parkbeschränkungen",
+        "loading": "Ladezone",
+        "maxweight": "Gewichtsbegrenzung",
+        "mixed": "Nur mit Parkschein oder Bewohnerparkausweis",
+        "no_parking": "Parkverbot / Eingeschränktes Haltverbot",
+        "no_standing": "Eingeschränktes Halteverbot",
+        "no_stopping": "Halteverbot / Absolutes Haltverbot",
+        "paid": "Nur mit Parkschein",
+        "private": "Privat",
+        "residents": "Nur mit Bewohnerparkausweis",
+        "taxi": "Taxenstand",
+        "time_limited": "Höchstparkdauer",
+        "unspecified": "Unbestimmt",
+        "vehicle_restriction": "Beschränkung auf Fahrzeugklassen"
+      }
+    },
+    "access": {
+      "name": "Zugang",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "private": "Privat",
+        "customers": "Kunden",
+        "destination": "Anlieger frei (Nicht-Durchgangsverkehr erlaubt)",
+        "employees": "Mitarbeiter",
+        "permissive": "Erlaubt",
+        "public": "Öffentlich (explizit)",
+        "delivery": "Lieferverkehr",
+        "no": "Kein Zugang",
+        "permit": "Mit Genehmigung",
+        "residents": "Nur mit Bewohnerparkausweis"
+      }
+    },
+    "area": {
+      "name": "Fläche",
+      "type": "number"
+    },
+    "area_source": {
+      "name": "Flächenherkunft",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "estimated": "Berechnet auf Basis der Linien-Länge und Ausrichtung.",
+        "geometry": "Basiert auf der Flächen aus OSM."
+      }
+    },
+    "area_confidence": {
+      "name": "Konfidenz Fläche",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "high": "Hoch",
+        "medium": "Mittel",
+        "low": "Niedrig"
+      }
+    },
+    "capacity_confidence": {
+      "name": "Konfidenz Kapazität",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "high": "Hoch",
+        "medium": "Mittel",
+        "low": "Niedrig"
+      }
+    },
+    "surface": {
+      "name": "Oberfläche",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "asphalt": "Asphalt",
+        "paved": "Befestigt (unspezifisch)",
+        "unpaved": "Unbefestigt",
+        "concrete": "Beton",
+        "concrete:plates": "Betonplatten",
+        "concrete:lanes": "Betonstreifen / -bahnen",
+        "paving_stones": "Pflastersteine",
+        "paving_stones:lanes": "Pflastersteinbahnen",
+        "sett": "Kopfsteinpflaster",
+        "mosaic_sett": "Mosaikpflaster",
+        "small_sett": "Feines Kopfsteinpflaster",
+        "large_sett": "Grobes Kopfsteinpflaster",
+        "bricks": "Ziegel",
+        "stone": "Stein",
+        "ground": "Naturboden / Erde",
+        "grass": "Gras",
+        "sand": "Sand",
+        "compacted": "Verdichteter Untergrund",
+        "fine_gravel": "Splitt",
+        "gravel": "Kies",
+        "pebblestone": "Kiesel",
+        "wood": "Holz",
+        "woodchips": "Hackschnitzel",
+        "metal": "Metall",
+        "metal_grid": "Metallgitter",
+        "plastic": "Kunststoff",
+        "rubber": "Gummi",
+        "grass_paver": "Rasengitter / Grasgitter"
+      }
+    },
+    "surface_confidence": {
+      "name": "Konfidenz Oberfläche",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "high": "Hoch",
+        "medium": "Mittel",
+        "low": "Niedrig"
+      }
+    },
+    "surface_source": {
+      "name": "Oberflächenherkunft",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "tag": "Explizite Angabe aus OSM",
+        "tag_transformed": "Aus OSM-Tag normalisiert",
+        "parent_highway_tag": "Von zugeordneter Straße (OSM)",
+        "parent_highway_tag_transformed": "Von zugeordneter Straße, normalisiert"
+      }
+    },
+    "orientation": {
+      "name": "Ausrichtung",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "parallel": "Parallelparken",
+        "perpendicular": "Querparken",
+        "diagonal": "Schrägparken"
+      }
+    },
+    "location": {
+      "name": "Lage im Straßenraum",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "lane_centre": "Fahrbahnmitte",
+        "median": "Mittelstreifen"
+      }
+    },
+    "markings": {
+      "name": "Markierungen",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "no": "Ohne Markierungen",
+        "yes": "Mit Markierungen"
+      }
+    },
+    "covered": {
+      "name": "Überdacht",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "partial": "Teilweise überdacht",
+        "yes": "Überdacht"
+      }
+    },
+    "informal": {
+      "name": "Duldung",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "yes": "Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken."
+      }
+    },
+    "operator_type": {
+      "name": "Betreibertyp",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "private": "Privat",
+        "public": "Öffentlich"
+      }
+    },
+    "operator_type_source": {
+      "name": "Betreibertyp-Herkunft",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "default_fallback": "Annahme bei fehlendem Tag.",
+        "driveway_inference": "Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde.",
+        "manual_overwrite_list": "Anhand einer manuelle Korrektur-Liste in TILDA.",
+        "parent_highway_tag": "Explizite Angabe aus OSM an der zugeordneten Straße.",
+        "tag": "Explizite Angabe aus OSM."
+      }
+    },
+    "operator_type_confidence": {
+      "name": "Konfidenz Betreibertyp",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "high": "Hoch",
+        "medium": "Mittel",
+        "low": "Niedrig"
+      }
+    },
+    "zone": "Zone",
+    "mapillary": {
+      "name": "Mapillary",
+      "type": "html",
+      "html": {
+        "tag": "a",
+        "innerHTML": "Mapillary",
+        "properties": {
+          "href": "https://www.mapillary.com/app/?pKey=%value%&focus=photo&z=15",
+          "target": "_blank"
+        }
+      }
+    },
+    "traffic_sign": "Verkehrszeichen"
+  }
+}

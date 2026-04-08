@@ -9,6 +9,7 @@
  * Use `splitParkingConditionCategoryValue` for the top-level `;` split only (parenthesis-aware, one nesting level).
  *
  * Detail-token copy uses `tilda_parkings--parking_condition_detail_token--<id>` (`--` subcategory: derived in the inspector, not a tile property).
+ * German strings: `../translations/translationsTagsTableRowCompositConditionCategory.const.ts`.
  */
 import { translations } from '../translations/translations.const'
 import { splitSemicolonRespectingBrackets } from '../utils/splitSemicolonRespectingBrackets'

@@ -4,8 +4,8 @@
   "module": "index.ts",
   "scripts": {
     "lint": "biome lint --write .",
-    "format": "oxfmt --write -c ../app/oxfmt.config.ts .",
-    "check": "oxfmt --write -c ../app/oxfmt.config.ts . && biome check --write ."
+    "format": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write -c ../app/oxfmt.config.ts .",
+    "check": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write -c ../app/oxfmt.config.ts . && biome check --write ."
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",

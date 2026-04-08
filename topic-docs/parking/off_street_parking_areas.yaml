@@ -1,0 +1,120 @@
+title: Off-Street-Parkplätze
+summary: Flächige Parkplätze außerhalb des Straßenlandes wie Parkplätze, Garagen und Parkhäuser mit Kapazitätsangaben.
+sourceIds: [tilda_parkings_off_street]
+
+attributes:
+  - key: category
+    label: Kategorie
+    values:
+      - value: outside
+        label: Außenparkplatz
+      - value: garage
+        label: Garage
+      - value: underground
+        label: Tiefgarage
+      - value: carport
+        label: Carport
+      - value: multi-storey
+        label: Parkhaus
+
+  - key: parking
+    label: Parkplatztyp
+    values:
+      - value: surface
+        label: Oberflächenparkplatz
+      - value: underground
+        label: Tiefgarage
+      - value: multi-storey
+        label: Parkhaus
+      - value: rooftop
+        label: Dachparkplatz
+      - value: carport
+        label: Carport
+      - value: carports
+        label: Carports
+      - value: garage_boxes
+        label: Garagenboxen
+      - value: garage
+        label: Garage
+
+  - key: amenity
+    label: Einrichtung
+    values:
+      - value: parking
+        label: Parkplatz
+
+  - key: capacity
+    format: number
+    label: Anzahl Stellplätze
+    chapterRefs:
+      - chapterId: capacity-calculation
+
+  - key: capacity_source
+    ref: parkings.capacity_source
+    valuesAdd:
+      - value: area
+        label: Berechnet auf Basis der Fläche.
+
+  - key: condition_category
+    ref: parkings.condition_category
+
+  - key: access
+    ref: parkings.access
+
+  - key: area
+    format: number
+    label: Fläche
+
+  - key: area_source
+    ref: parkings.area_source
+
+  - key: area_confidence
+    ref: parkings.area_confidence
+
+  - key: capacity_confidence
+    ref: parkings.capacity_confidence
+
+  - key: surface
+    ref: parkings.surface
+
+  - key: surface_confidence
+    ref: parkings.surface_confidence
+
+  - key: surface_source
+    ref: parkings.surface_source
+
+  - key: orientation
+    ref: parkings.orientation
+
+  - key: location
+    ref: parkings.location
+
+  - key: markings
+    ref: parkings.markings
+
+  - key: covered
+    ref: parkings.covered
+
+  - key: informal
+    ref: parkings.informal
+
+  - key: operator_type
+    ref: parkings.operator_type
+
+  - key: operator_type_source
+    ref: parkings.operator_type_source
+
+  - key: operator_type_confidence
+    ref: parkings.operator_type_confidence
+
+  - key: zone
+    format: sanitized_strings
+    label: Zone
+
+  - key: mapillary
+    format: sanitized_strings
+    label: Mapillary
+
+  - key: traffic_sign
+    format: sanitized_strings
+    label: Verkehrszeichen

@@ -1,6 +1,8 @@
 // We use bun.sh to run this file
+
 import fs from 'node:fs'
 import path from 'node:path'
+import { $ } from 'bun'
 import { createWfsUrl } from './downloadSources/createWfsUrl'
 import { fetchAndStoreGeopackage } from './downloadSources/fetchAndStoreGeopackage'
 import {
@@ -66,5 +68,9 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
     red('   Error', error, downloadConfig, wfsUrl.toString())
   }
 }
+
+const appDir = path.resolve(import.meta.dir, '../..')
+console.log('bun run format')
+await $`bun run format`.cwd(appDir)
 
 inverse('DONE')

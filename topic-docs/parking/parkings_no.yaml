@@ -1,0 +1,136 @@
+title: Kein Parken
+summary: Abschnitte ohne reguläres Parken, inklusive Verboten und Bereichen mit fehlenden Parkraumdaten.
+sourceIds: [tilda_parkings_no]
+
+attributes:
+  - key: parking
+    ref: parkings.parking
+
+  - key: reason
+    ref: parkings.reason
+    valuesAdd:
+      - value: capacity_below_zero
+        label: Abschnitt zu klein für ein Fahrzeug
+
+  - key: condition_category
+    ref: parkings.condition_category
+
+  - key: capacity
+    format: number
+    label: Anzahl Stellplätze
+    description: Geschätzte oder explizit erfasste Anzahl von Stellplätzen.
+    chapterRefs:
+      - chapterId: capacity-calculation
+
+  - key: capacity_source
+    ref: parkings.capacity_source
+
+  - key: orientation
+    ref: parkings.orientation
+
+  - key: staggered
+    ref: parkings.staggered
+
+  - key: source
+    ref: parkings.source
+
+  - key: geom_sources
+    label: Geometrie-Quellen
+    description: Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).
+
+  - key: tag_sources
+    label: Tag-Quellen
+    description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).
+
+  - key: road
+    label: Straßentyp
+
+  - key: road_name
+    label: Straßenname
+
+  - key: road_oneway
+    label: Einbahnstraße
+
+  - key: road_width
+    format: number
+    label: Straßenbreite
+
+  - key: road_width_source
+    ref: parkings.road_width_source
+
+  - key: road_width_confidence
+    ref: parkings.road_width_confidence
+
+  - key: side
+    ref: parkings.side
+
+  - key: area
+    format: number
+    label: Fläche
+
+  - key: area_source
+    ref: parkings.area_source
+
+  - key: area_confidence
+    ref: parkings.area_confidence
+
+  - key: capacity_confidence
+    ref: parkings.capacity_confidence
+
+  - key: surface
+    ref: parkings.surface
+
+  - key: surface_confidence
+    ref: parkings.surface_confidence
+
+  - key: surface_source
+    ref: parkings.surface_source
+
+  - key: direction
+    ref: parkings.direction
+
+  - key: location
+    ref: parkings.location
+
+  - key: markings
+    ref: parkings.markings
+
+  - key: covered
+    ref: parkings.covered
+
+  - key: access
+    ref: parkings.access
+
+  - key: operator_type
+    ref: parkings.operator_type
+
+  - key: operator_type_source
+    ref: parkings.operator_type_source
+
+  - key: operator_type_confidence
+    ref: parkings.operator_type_confidence
+
+  - key: informal
+    ref: parkings.informal
+
+  - key: zone
+    format: sanitized_strings
+    label: Zone
+
+  - key: mapillary
+    format: sanitized_strings
+    label: Mapillary
+
+  - key: traffic_sign
+    format: sanitized_strings
+    label: Verkehrszeichen
+
+  - key: _staggered_maneuvering_loss
+    format: number
+    label: (Intern) Manövrierraumverlust (alternierendes Parken)
+    description: Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken
+
+  - key: _staggered_original_capacity
+    format: number
+    label: (Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)
+    description: Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik

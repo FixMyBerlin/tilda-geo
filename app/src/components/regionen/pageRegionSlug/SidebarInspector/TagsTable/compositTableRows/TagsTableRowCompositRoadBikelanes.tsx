@@ -10,12 +10,14 @@ const CompositRoadBikelanesTableValue = ({ tagValue }: { tagValue: string }) => 
   // which are translated in `ALL-category=*`. To access them, we overwrite the `tagKey`.
   const hasPresenceValue = ['not_expected', 'data_no', 'missing', 'assumed_no'].includes(tagValue)
   const hasSpecificInfrastructureValue = !hasPresenceValue
-  const hasTooltip = Boolean(translations[`atlas_roads--bikelane_SIDE=${tagValue}--tooltip`])
-  const showTooltip = hasTooltip || hasSpecificInfrastructureValue
+  const hasDescription = Boolean(
+    translations[`atlas_roads--bikelane_SIDE=${tagValue}--description`],
+  )
+  const hasDisclosureBody = hasDescription || hasSpecificInfrastructureValue
 
   return (
     <ValueDisclosure>
-      <ValueDisclosureButton hasBody={showTooltip}>
+      <ValueDisclosureButton hasBody={hasDisclosureBody}>
         <div className="flex items-center justify-between gap-2">
           <ConditionalFormattedValue
             sourceId="atlas_roads"
@@ -34,11 +36,11 @@ const CompositRoadBikelanesTableValue = ({ tagValue }: { tagValue: string }) => 
         </div>
       </ValueDisclosureButton>
       <ValueDisclosurePanel>
-        {hasTooltip && (
+        {hasDescription && (
           <ConditionalFormattedValue
             sourceId="atlas_roads"
             tagKey="bikelane_SIDE"
-            tagValue={`${tagValue}--tooltip`}
+            tagValue={`${tagValue}--description`}
           />
         )}
         {/* Show the bicycle `category` if the infrastructure is specific */}

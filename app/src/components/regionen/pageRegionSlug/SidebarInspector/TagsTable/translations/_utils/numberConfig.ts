@@ -33,5 +33,7 @@ export const numberConfigs: { key: string; suffix?: string | undefined }[] = [
   { key: 'area', suffix: 'm²' }, // area values
   { key: 'circumference', suffix: 'm' }, // circumference values
   { key: 'buffer_radius', suffix: 'm' }, // buffer radius values
+  { key: '_staggered_maneuvering_loss', suffix: undefined }, // parkings capacity (staggered)
+  { key: '_staggered_original_capacity', suffix: undefined }, // parkings capacity (staggered)
   // { key: 'direction', suffix: '°' }, // direction values in degrees – ERROR: Can be string as well
 ]

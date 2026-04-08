@@ -1,0 +1,47 @@
+{
+  "tilda_parkings_no": {
+    "keys": {
+      "capacity": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
+      "capacity_source": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.",
+      "geom_sources": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
+      "tag_sources": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).",
+      "_staggered_maneuvering_loss": "Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken",
+      "_staggered_original_capacity": "Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik"
+    },
+    "values": {
+      "staggered": {
+        "yes": "Auf diesem Abschnitt gibt es keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickelt sich eine Konvention zwischen den Anwohnenden, in welchen Bereichen auf welcher Seite geparkt wird. In der Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt wird) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten."
+      }
+    }
+  },
+  "tilda_parkings_off_street": {
+    "keys": {
+      "capacity_source": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik."
+    },
+    "values": {}
+  },
+  "tilda_parkings_cutouts": {
+    "keys": {
+      "source": "In der Export-Tabelle `parkings_cutouts` erscheinen nur Stanzungen, deren `source` nicht parking_roads, separate_parking_areas oder separate_parking_points ist.",
+      "geom_sources": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
+      "tag_sources": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON)."
+    },
+    "values": {}
+  },
+  "tilda_parkings": {
+    "keys": {
+      "capacity": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
+      "capacity_source": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.",
+      "length": "Berechnete Segmentlänge des OSM-Straßenabschnitts. Für die Berechnung wird eine für Deutschland geeignete metrische Projektion verwendet.",
+      "geom_sources": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
+      "tag_sources": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).",
+      "_staggered_maneuvering_loss": "Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken",
+      "_staggered_original_capacity": "Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik"
+    },
+    "values": {
+      "staggered": {
+        "yes": "Auf diesem Abschnitt gibt es keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickelt sich eine Konvention zwischen den Anwohnenden, in welchen Bereichen auf welcher Seite geparkt wird. In der Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt wird) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten."
+      }
+    }
+  }
+}

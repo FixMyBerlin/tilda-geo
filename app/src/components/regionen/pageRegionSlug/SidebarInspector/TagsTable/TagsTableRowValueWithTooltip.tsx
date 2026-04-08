@@ -1,4 +1,5 @@
 import { FormattedMessage } from 'react-intl'
+import { getDescriptionForInspectorTag } from '@/data/topicDocs/runtime'
 import type { TagsTableRowProps } from './TagsTableRow'
 import { ConditionalFormattedValue } from './translations/ConditionalFormattedValue'
 import { translations } from './translations/translations.const'
@@ -17,25 +18,29 @@ export const TagsTableRowValueWithTooltip = ({
   // For some key we want to force a tooltip (regardless of it's values).
   const tooltipOverwrites = {
     // [Search key]: [Key of translation]
-    length: 'ALL--length--tooltip',
+    length: 'ALL--length--description',
   }
   const hasTooltipOverwrite = Object.keys(tooltipOverwrites).includes(tagKey)
+  const dataDescription = getDescriptionForInspectorTag(sourceId, tagKey, tagValue ?? undefined)
 
   const hasTooltip =
+    Boolean(dataDescription) ||
     hasTooltipOverwrite ||
-    (tagValue && Boolean(translations[`${sourceId}--${tagKey}=${tagValue}--tooltip`]))
+    (tagValue && Boolean(translations[`${sourceId}--${tagKey}=${tagValue}--description`]))
 
   if (!hasTooltip) {
     return <>{TagValueCell || children}</>
   }
 
-  const TooltipValue = hasTooltipOverwrite ? (
+  const TooltipValue = dataDescription ? (
+    dataDescription
+  ) : hasTooltipOverwrite ? (
     <FormattedMessage id={tooltipOverwrites[tagKey]} />
   ) : (
     <ConditionalFormattedValue
       sourceId={sourceId}
       tagKey={tagKey}
-      tagValue={`${tagValue}--tooltip`}
+      tagValue={`${tagValue}--description`}
     />
   )
 

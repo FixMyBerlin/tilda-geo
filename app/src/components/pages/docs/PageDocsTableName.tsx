@@ -1,55 +1,67 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { Link } from '@/components/shared/links/Link'
 import { LinkMail } from '@/components/shared/links/LinkMail'
+import { Markdown } from '@/components/shared/text/Markdown'
+import { PageDocsAttributesSection } from './pageDocsTableName/PageDocsAttributesSection'
+import { PageDocsChaptersSection } from './pageDocsTableName/PageDocsChaptersSection'
+import { PageDocsMasterportalSection } from './pageDocsTableName/PageDocsMasterportalSection'
+import { PageDocsSummarySection } from './pageDocsTableName/PageDocsSummarySection'
+import { PageDocsTocSection } from './pageDocsTableName/PageDocsTocSection'
 
 const routeApi = getRouteApi('/_pages/docs/$tableName')
 
 export function PageDocsTableName() {
-  const { tableName, exportData, regionSlug } = routeApi.useLoaderData()
+  const { tableName, regionSlug, region, topicDoc, masterportal, groupDocs } =
+    routeApi.useLoaderData()
 
   return (
     <>
       <h1>
-        Dokumentation für Datensatz <code>{tableName}</code>
+        Dokumentation für den Datensatz{' '}
+        {topicDoc?.title ? (
+          <>«{topicDoc.title}»</>
+        ) : (
+          <>
+            «<code>{tableName}</code>»
+          </>
+        )}
       </h1>
 
-      {exportData?.title && <h2>{exportData.title}</h2>}
+      {topicDoc?.summary ? (
+        <Markdown markdown={topicDoc.summary} className="lead mt-2 mb-8 max-w-none text-gray-600" />
+      ) : null}
 
-      {exportData && (
-        <table className="my-2 text-sm text-gray-500">
-          <tbody>
-            {exportData.desc && (
-              <tr>
-                <th className="w-24 align-top text-xs font-medium text-gray-900">Beschreibung:</th>
-                <td className="pl-2">{exportData.desc}</td>
-              </tr>
-            )}
-            {exportData.attributionHtml && exportData.attributionHtml !== 'todo' && (
-              <tr>
-                <th className="w-24 align-top text-xs font-medium text-gray-900">Attribution:</th>
-                <td
-                  className="pl-2"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: attribution HTML from dataset config
-                  dangerouslySetInnerHTML={{
-                    __html: exportData.attributionHtml,
-                  }}
-                />
-              </tr>
-            )}
-            {exportData.licence && (
-              <tr>
-                <th className="w-24 align-top text-xs font-medium text-gray-900">Lizenz:</th>
-                <td className="pl-2">{exportData.licence}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <PageDocsSummarySection
+        tableName={tableName}
+        region={region}
+        groupDocs={groupDocs}
+        regionSlug={regionSlug}
+      />
+
+      {!topicDoc && (
+        <p>
+          Für diese Tabelle liegt noch keine strukturierte Dokumentation vor. Bei Fragen wenden Sie
+          sich bitte an <LinkMail>tilda@fixmycity.de</LinkMail>
+        </p>
       )}
 
-      <p>
-        Zur Zeit gibt es noch keine öffentliche Dokumentation für diesen Datensatz. Bei Fragen
-        wenden Sie sich bitte an <LinkMail>tilda@fixmycity.de</LinkMail>
-      </p>
+      {topicDoc && (
+        <>
+          <PageDocsTocSection
+            topicDoc={topicDoc}
+            tableName={tableName}
+            regionSlug={regionSlug}
+            showDownloads={Boolean(region?.bbox)}
+          />
+          <PageDocsAttributesSection
+            topicDoc={topicDoc}
+            tableName={tableName}
+            regionSlug={regionSlug}
+          />
+          <PageDocsMasterportalSection masterportal={masterportal} />
+          <PageDocsChaptersSection topicDoc={topicDoc} />
+        </>
+      )}
 
       {regionSlug && (
         <p>

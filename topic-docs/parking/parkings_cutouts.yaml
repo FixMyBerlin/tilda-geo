@@ -1,0 +1,300 @@
+title: Parkraum Stanzungen
+summary:
+  Stanzungen sind ein Kernbestandteil der Parkraum prozessierung. Mit ihnen werden die zu Beginn der Prozessierung gröber abgeleiteten Daten präzise Parkraum-Abschnitte abgeleitet. Stanzungen können bzum Beispiel Gehwegübergänge, Kreuzungen und Hindernisse wie Bäume oder Poller sein.
+  Polygon-Stanzungen entlang der Parkraum-Linien (Hindernisse, Kreuzungen, Einfahrten, ÖPNV-Haltestellen, externe eUVM-Daten).
+  Die Attribute beschreiben die Stanzung, nicht die Parklinie (`parkings`).
+sourceIds: [tilda_parkings_cutouts]
+attributes:
+  - key: category
+    label: Stanzungen
+    values:
+      - value: advertising
+        label: Werbungtabeln u.ä.
+      - value: barrier
+        label: Poller, Zaun, u.ä.
+      - value: bicycle_parking
+        label: Fahrradparkplatz
+      - value: bicycle_rental
+        label: Fahrradverleih
+      - value: bollard
+        label: Poller
+      - value: bus_stop
+        label: Bushaltestelle
+      - value: bus_stop_conditional
+        label: Bushaltestelle mit zeitlichen Einschränkungen (Nachtbusse, Schulbusse)
+      - value: bus_stop_centerline
+        label: Bushaltestelle (Mittellinie)
+      - value: bus_stop_kerb
+        label: Bushaltestelle (Bordstein)
+      - value: collision_protection
+        label: Baumschutzbügel
+      - value: crossing_buffer_marking
+        label: Markierung (Sperrfläche u.ä.) am Überweg
+      - value: crossing_kerb_extension
+        label: Gehwegvorstreckung am Überweg
+      - value: crossing_marked
+        label: Markierter Überweg
+      - value: crossing_traffic_signals
+        label: Ampelübergang
+      - value: crossing_zebra
+        label: Zebrastreifen
+      - value: driveway
+        label: Einfahrt
+      - value: driveway_corner_kerb
+        label: Implizites Halteverbot am Beginn einer Einfahrt
+      - value: fire_hydrant
+        label: Hydrant
+      - value: intersection_corner
+        label: Implizites Halteverbot an Straßenecke
+      - value: kerb_lowered
+        label: Abgesenkter Bordstein
+      - value: kerb_extension
+        label: Bordsteinverlängerung
+      - value: loading_ramp
+        label: Laderampe
+      - value: mobility_hub
+        label: Mobilitätsstation
+      - value: motorcycle_parking
+        label: Motorradparkplatz
+      - value: other
+        label: Sonstiges Hindernis
+      - value: parklet
+        label: Parklet
+      - value: recycling
+        label: Recyclingstation
+      - value: road_marking_restricted_area
+        label: Sperrfläche (Markierung)
+      - value: small_electric_vehicle_parking
+        label: Parkplatz für kleine Elektrofahrzeuge wie E-Scootern
+      - value: street_cabinet
+        label: Schaltkasten, Straßenkasten, u.ä.
+      - value: street_lamp
+        label: Straßenlaterne
+      - value: traffic_calming_choker
+        label: Angelegte Fahrbahnverengung
+      - value: traffic_sign
+        label: Verkehrszeichen
+      - value: tram_stop
+        label: Straßenbahnhaltestelle
+      - value: tree
+        label: Baum
+      - value: tree_pit
+        label: Baumscheibe
+      - value: vending_parking_tickets
+        label: Parkscheinautomat
+      - value: water_well
+        label: Wasserstelle / Brunnen
+
+  - key: source
+    label: Datenquelle
+    description: >-
+      In der Export-Tabelle `parkings_cutouts` erscheinen nur Stanzungen, deren `source` nicht parking_roads, separate_parking_areas oder separate_parking_points ist.
+    values:
+      - value: crossing
+        label: Überwege
+      - value: driveway_corner_kerbs
+        label: Implizites Halteverbot am Beginn einer Einfahrt
+      - value: driveways
+        label: Einfahrten
+      - value: external_cutouts_euvm
+        label: Externe Hindernisdaten (eUVM)
+      - value: intersections
+        label: Kreuzungen
+      - value: obstacle_areas
+        label: Flächige Hindernisse
+      - value: obstacle_lines
+        label: Linienhafte Hindernisse
+      - value: obstacle_points
+        label: Punktuelle Hindernisse
+      - value: public_transport_stops
+        label: ÖPNV-Haltestellen
+      - value: separate_parking_areas
+        label: Parkplätze die separat als Fläche erfasst sind
+      - value: separate_parking_points
+        label: Parkplätze die separat als Punkt erfasst sind
+
+  - key: buffer_radius
+    format: number
+    label: Radius der Stanzung
+
+  - key: radius
+    format: number
+    label: Pufferradius (m), u. a. Kreuzungs-Ecken und eUVM-Punkte
+
+  - key: side
+    label: Seite relativ zur Fahrbahn
+    values:
+      - value: left
+        label: Links
+      - value: right
+        label: Rechts
+      - value: platform
+        label: Bahnsteig / ohne Kerb-Seite
+
+  - key: width
+    format: number
+    label: Breite
+
+  - key: no_cutout_for_restrictions
+    label: Gilt nicht bei Park-/Halteverbot entlang der Linie
+    values:
+      - value: 'true'
+        label: 'Ja (Stanzung wird bei echten Verbotssegmenten nicht angewendet)'
+
+  - key: road
+    format: sanitized_strings
+    label: Fahrbahn-Referenz (Einfahrt)
+
+  - key: street:name
+    format: sanitized_strings
+    label: Straßenname (Einfahrt)
+
+  - key: amenity
+    format: sanitized_strings
+    label: OSM amenity
+
+  - key: barrier
+    format: sanitized_strings
+    label: OSM barrier
+
+  - key: capacity
+    format: number
+    label: Kapazität (OSM / Zwischenwert)
+
+  - key: 'capacity:cargo_bike'
+    format: number
+    label: Kapazität Lastenrad (OSM)
+
+  - key: direction
+    format: sanitized_strings
+    label: Richtung (OSM)
+
+  - key: emergency
+    format: sanitized_strings
+    label: OSM emergency
+
+  - key: geom_sources
+    label: Geometrie-Quellen
+    description: Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).
+
+  - key: geometry_source
+    format: sanitized_strings
+    label: Geometrieherkunft
+
+  - key: kerb
+    format: sanitized_strings
+    label: Bordstein (OSM kerb)
+
+  - key: landuse
+    format: sanitized_strings
+    label: Flächennutzung (OSM landuse)
+
+  - key: man_made
+    format: sanitized_strings
+    label: Künstliche Objekte (OSM man_made)
+
+  - key: name
+    format: sanitized_strings
+    label: Name (OSM)
+
+  - key: natural
+    format: sanitized_strings
+    label: Natur (OSM natural)
+
+  - key: operator
+    format: sanitized_strings
+    label: Betreiber (OSM)
+
+  - key: ref
+    format: sanitized_strings
+    label: Referenz (OSM ref)
+
+  - key: separate_parking
+    format: sanitized_strings
+    label: Separater Parkplatz (OSM-Bezug)
+
+  - key: tag_sources
+    label: Tag-Quellen
+    description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).
+
+  - key: traffic_calming
+    format: sanitized_strings
+    label: Verkehrsberuhigung (OSM traffic_calming)
+
+  - key: 'osm_area:highway'
+    format: ignore
+
+  - key: osm_barrier
+    format: ignore
+
+  - key: osm_capacity
+    format: ignore
+
+  - key: osm_crossing
+    format: ignore
+
+  - key: 'osm_crossing:buffer_marking'
+    format: ignore
+
+  - key: 'osm_crossing:kerb_extension'
+    format: ignore
+
+  - key: 'osm_crossing:markings'
+    format: ignore
+
+  - key: 'osm_crossing:signals'
+    format: ignore
+
+  - key: osm_crossing_ref
+    format: ignore
+
+  - key: 'osm_fire_hydrant:position'
+    format: ignore
+
+  - key: 'osm_fire_hydrant:type'
+    format: ignore
+
+  - key: osm_highway
+    format: ignore
+
+  - key: osm_leisure
+    format: ignore
+
+  - key: osm_mapillary
+    format: ignore
+
+  - key: osm_natural
+    format: ignore
+
+  - key: osm_network
+    format: ignore
+
+  - key: osm_outdoor_seating
+    format: ignore
+
+  - key: osm_position
+    format: ignore
+
+  - key: osm_ref
+    format: ignore
+
+  - key: osm_road_marking
+    format: ignore
+
+  - key: 'osm_small_electric_vehicle_parking:position'
+    format: ignore
+
+  - key: osm_street_cabinet
+    format: ignore
+
+  - key: osm_traffic_calming
+    format: ignore
+
+  - key: osm_traffic_sign
+    format: ignore
+
+  - key: osm_vending
+    format: ignore
+
+  - key: osm_zone
+    format: ignore

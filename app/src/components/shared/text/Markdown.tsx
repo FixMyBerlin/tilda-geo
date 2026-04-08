@@ -1,6 +1,8 @@
 import type { LinkOptions } from '@tanstack/react-router'
 import type { ComponentPropsWithoutRef } from 'react'
 import { Remark } from 'react-remark'
+import remarkBreaks from 'remark-breaks'
+import remarkGfm from 'remark-gfm'
 import { twMerge } from 'tailwind-merge'
 import type { Router } from '@/router'
 import { Link } from '../links/Link'
@@ -74,16 +76,14 @@ const components = {
 export const Markdown = ({ markdown, className }: Props) => {
   if (!markdown) return null
 
-  // Process newlines: convert single newlines to line breaks
-  const processedMarkdown = markdown.replace(/\n(?!\n)/g, '  \n')
-
   return (
     <div className={twMerge(proseClasses, className)}>
       <Remark
+        remarkPlugins={[remarkGfm, remarkBreaks]}
         remarkToRehypeOptions={{ allowDangerousHtml: true }}
         rehypeReactOptions={{ components }}
       >
-        {processedMarkdown}
+        {markdown}
       </Remark>
     </div>
   )

@@ -5,9 +5,9 @@ import { gzipSync } from 'node:zlib'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { exportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
-import { numberConfigs } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/_utils/numberConfig'
 import { formatDateBerlin } from '@/components/shared/date/formatDateBerlin'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
+import { getExportAttributeType } from '@/server/api/export/exportAttributeType'
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
 import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
@@ -158,15 +158,10 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
 
           const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
           const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
-            const numberKeywordsEquals = numberConfigs.map(({ key: k }) => k)
-            const numberKeywordsIncludes = []
-            const shouldCastToNumber = key.startsWith('osm_')
-              ? false
-              : numberKeywordsEquals.some((keyword) => key === keyword) ||
-                numberKeywordsIncludes.some((keyword) => key.includes(keyword))
+            const attributeType = getExportAttributeType(key)
             const sanitizedKey = sanitizeKey(key)
 
-            return shouldCastToNumber
+            return attributeType === 'number'
               ? `CAST(${columnType}->>'${key}' AS numeric) AS "${sanitizedKey}"`
               : `${columnType}->>'${key}' AS "${sanitizedKey}"`
           }

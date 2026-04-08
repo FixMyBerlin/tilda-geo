@@ -19,11 +19,15 @@ import type { TocHashLink } from './types'
     all the solutions above just use a querySelector.
     */
 
+/** Shared shell for legal-page and dataset-docs TOCs (left rail; hidden below `lg`). */
+export const TABLE_OF_CONTENTS_NAV_CLASSNAME =
+  'not-prose absolute top-28 z-10 hidden w-40 rounded bg-white px-4 py-3 lg:left-0 lg:block lg:rounded-l-none xl:fixed xl:shadow-lg 2xl:left-8'
+
 type Props = { items: TocHashLink }
 
 export const TableOfContents = ({ items }: Props) => {
   return (
-    <nav className="not-prose absolute top-28 z-10 hidden w-40 rounded bg-white px-4 py-3 lg:left-0 lg:block lg:rounded-l-none xl:fixed xl:shadow-lg 2xl:left-8">
+    <nav className={TABLE_OF_CONTENTS_NAV_CLASSNAME}>
       <ul>
         {items.map(([itemHash, itemlink]) => (
           <li key={itemHash}>

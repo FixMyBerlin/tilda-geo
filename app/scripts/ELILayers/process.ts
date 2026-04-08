@@ -3,6 +3,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
+import { $ } from 'bun'
 import { z } from 'zod'
 import type { MapDataBackgroundSource } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { convertTileUrl } from './convertTileUrl'
@@ -15,6 +16,7 @@ const ELI_DE_DIR = 'sources/europe/de'
 const GITHUB_API_URL =
   'https://api.github.com/repos/osmlab/editor-layer-index/contents/sources/europe/de?ref=gh-pages'
 
+const appDir = path.resolve(import.meta.dir, '../..')
 const rawDir = path.join(import.meta.dir, 'raw')
 const outputFile = path.join(
   import.meta.dir,
@@ -223,31 +225,8 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
   await Bun.write(outputFile, typeScriptContent)
   log(`Generated ${outputFile}`)
 
-  // Format with oxfmt
-
-  // Format raw files with oxfmt
-  log('Formatting raw files with oxfmt')
-  Bun.spawnSync(['bunx', 'oxfmt', '--write', rawDir], {
-    onExit(_proc, exitCode, _signalCode, error) {
-      if (exitCode) {
-        warn(`oxfmt exited with code ${exitCode} for ${rawDir}`)
-      }
-      if (error) {
-        warn(`oxfmt error for ${rawDir}: ${error}`)
-      }
-    },
-  })
-  log('Formatting output file with oxfmt')
-  Bun.spawnSync(['bunx', 'oxfmt', '--write', outputFile], {
-    onExit(_proc, exitCode, _signalCode, error) {
-      if (exitCode) {
-        warn(`oxfmt exited with code ${exitCode}`)
-      }
-      if (error) {
-        warn(`oxfmt error: ${error}`)
-      }
-    },
-  })
+  log('bun run format')
+  await $`bun run format`.cwd(appDir)
 }
 
 main().catch((error) => {

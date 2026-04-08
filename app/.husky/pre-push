@@ -1,6 +1,10 @@
-# Linting, Formating and Type-Checks for `App`
-
 cd ./app
+
+# Topic-docs: regenerate JSON, then fail if committed output is stale (git diff vs HEAD)
+bun run topic-docs-build || exit 1
+git diff --exit-code -- src/data/generated/topicDocs || exit 1
+
+# Linting, Formating and Type-Checks for `App`
 bun run check
 bun run type-check-deploy
 

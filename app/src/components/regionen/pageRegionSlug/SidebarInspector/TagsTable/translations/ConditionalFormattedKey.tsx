@@ -33,13 +33,8 @@ export const ConditionalFormattedKey = ({ sourceId, tagKey }: Props) => {
     atlas_roadsPathClasses: 'atlas_roads',
     atlas_bikelanesPresence: 'atlas_roads',
     atlas_bikeSuitability: 'atlas_roads',
-    tilda_parkings: 'tilda_parkings',
-    tilda_parkings_cutouts: 'tilda_parkings',
-    tilda_parkings_no: 'tilda_parkings',
-    tilda_parkings_separate: 'tilda_parkings',
-    tilda_parkings_off_street: 'tilda_parkings',
     tilda_parkings_quantized: 'tilda_parkings',
-    tilda_parkings_off_street_quantized: 'tilda_parkings',
+    tilda_parkings_off_street_quantized: 'tilda_parkings_off_street',
   }
   const lookAtThisSourceFirst = Object.keys(lookAtFirstSources).find((s) => s === sourceId)
   const replacement = lookAtThisSourceFirst ? lookAtFirstSources[lookAtThisSourceFirst] : undefined
