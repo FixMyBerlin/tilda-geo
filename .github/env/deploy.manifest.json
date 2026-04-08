@@ -210,6 +210,13 @@
       "required": true,
       "githubSource": "vars.PROCESSING_DIFFING_BBOX",
       "description": "Diffing bbox for processing."
+    },
+    {
+      "name": "ECR_REGISTRY",
+      "sourceEnv": "VAR_ECR_REGISTRY",
+      "required": true,
+      "githubSource": "vars.ECR_REGISTRY",
+      "description": "Private ECR registry URL used by docker-compose to pull images."
     }
   ]
 }

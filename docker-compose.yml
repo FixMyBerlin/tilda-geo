@@ -2,7 +2,7 @@ services:
   processing:
     env_file:
       - .env
-    image: public.ecr.aws/n0p8j4k5/tilda/processing:${ENVIRONMENT}-latest
+    image: ${ECR_REGISTRY}/tilda/processing:${ENVIRONMENT}-latest
     container_name: processing
     environment:
       PGHOST: ${DATABASE_HOST}
@@ -36,7 +36,7 @@ services:
       db:
         condition: service_healthy
   app:
-    image: public.ecr.aws/n0p8j4k5/tilda/app:${ENVIRONMENT}-latest
+    image: ${ECR_REGISTRY}/tilda/app:${ENVIRONMENT}-latest
     container_name: app
     restart: unless-stopped
     # TanStack Start (Vite + Nitro, Bun). Port 4000 = Nitro server.

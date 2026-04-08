@@ -51,13 +51,14 @@ jobs:
           VAR_SKIP_UNCHANGED: ${{ vars.SKIP_UNCHANGED }}
           VAR_PROCESSING_DIFFING_MODE: ${{ vars.PROCESSING_DIFFING_MODE }}
           VAR_PROCESSING_DIFFING_BBOX: ${{ vars.PROCESSING_DIFFING_BBOX }}
+          VAR_ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
         run: |
           bun .github/scripts/generate-deploy-env.ts \
             --manifest .github/env/deploy.manifest.json \
             --output .env.deploy.generated
 
       - name: Copy files to server
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
