@@ -92,14 +92,16 @@ type MapDataSourceInspector =
 export type MapDataSourceCalculator =
   | {
       enabled: true
-      keys: string[]
+      sumKeys: Partial<Record<'capacity' | 'area' | 'length', string>>
+      groupByKeys: string[]
       queryLayers: string[]
       /** @desc The key used by the highlighting LayerHighlight component to change the appearance of the selected element */
       highlightingKey: string
     }
   | {
       enabled: false
-      keys?: undefined
+      sumKeys?: undefined
+      groupByKeys?: undefined
       queryLayers?: undefined
       highlightingKey?: undefined
     }

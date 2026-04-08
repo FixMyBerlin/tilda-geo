@@ -23,7 +23,7 @@ export function LayoutRoot() {
       <head>
         <HeadContent />
       </head>
-      <body className="flex min-h-full w-full text-gray-800 antialiased">
+      <body suppressHydrationWarning className="flex min-h-full w-full text-gray-800 antialiased">
         <div className="flex min-h-full w-full flex-col">
           <StrictMode>
             <TanStackQueryProvider queryClient={queryClient}>

@@ -2,7 +2,7 @@ import type { GeoJSONStoreFeatures, HexColor } from 'terra-draw'
 import { TerraDrawPolygonMode, TerraDrawSelectMode } from 'terra-draw'
 
 /** Keep calculator styling in the established purple / fuchsia palette. */
-const COLORS = {
+export const CALCULATOR_TERRA_COLORS = {
   drawing: '#a21caf' as HexColor,
   unselected: '#6d28d9' as HexColor,
   selected: '#a21caf' as HexColor,
@@ -11,7 +11,9 @@ const COLORS = {
 }
 
 const colorByDrawingState = (feature: GeoJSONStoreFeatures) =>
-  feature.properties?.currentlyDrawing ? COLORS.drawing : COLORS.unselected
+  feature.properties?.currentlyDrawing
+    ? CALCULATOR_TERRA_COLORS.drawing
+    : CALCULATOR_TERRA_COLORS.unselected
 
 /**
  * Polygon draw + select/edit only. Extend with more `TerraDraw*Mode`s when adding tools.
@@ -38,18 +40,18 @@ export const createCalculatorTerraDrawModes = () => [
       },
     },
     styles: {
-      selectedPolygonColor: COLORS.selected,
+      selectedPolygonColor: CALCULATOR_TERRA_COLORS.selected,
       selectedPolygonFillOpacity: 0.3,
-      selectedPolygonOutlineColor: COLORS.selected,
-      selectionPointColor: COLORS.selectionPoint,
+      selectedPolygonOutlineColor: CALCULATOR_TERRA_COLORS.selected,
+      selectionPointColor: CALCULATOR_TERRA_COLORS.selectionPoint,
       selectionPointOpacity: 0.95,
-      selectionPointOutlineColor: COLORS.selectionPoint,
+      selectionPointOutlineColor: CALCULATOR_TERRA_COLORS.selectionPoint,
       selectionPointOutlineOpacity: 0.95,
       selectionPointOutlineWidth: 2,
       selectionPointWidth: 7,
-      midPointColor: COLORS.midPoint,
+      midPointColor: CALCULATOR_TERRA_COLORS.midPoint,
       midPointOpacity: 0.95,
-      midPointOutlineColor: COLORS.midPoint,
+      midPointOutlineColor: CALCULATOR_TERRA_COLORS.midPoint,
       midPointOutlineOpacity: 0.95,
       midPointOutlineWidth: 0,
       midPointWidth: 3,

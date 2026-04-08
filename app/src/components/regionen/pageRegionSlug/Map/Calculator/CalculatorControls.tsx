@@ -44,6 +44,7 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
     <CalculatorMapDrawing
       drawAreas={drawAreas}
       drawMode={drawMode}
+      getFeatureLabel={({ index }) => (drawAreas.length > 1 ? `Fläche ${index + 1}` : undefined)}
       onUserGeometryChange={handleUserGeometry}
       onUserDrawModeChange={handleUserDrawModeChange}
     />

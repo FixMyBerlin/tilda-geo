@@ -31,7 +31,9 @@ export const Calculator = () => {
     }
   }
   const queryLayers = calculatorSource?.calculator?.queryLayers
-  const calculatorSourceKeys = calculatorSource?.calculator?.keys
+  const sumKeys = calculatorSource?.calculator?.sumKeys
+  const groupByKeys = calculatorSource?.calculator?.groupByKeys
+  const sourceId = calculatorSource?.id
   const subcategoryName = activeSubcategoryWithCalculator?.name
 
   if (!queryLayers) return null
@@ -46,7 +48,9 @@ export const Calculator = () => {
       />
       <CalculatorControls queryLayers={queryLayers} />
       <CalculatorOutput
-        keys={calculatorSourceKeys}
+        sumKeys={sumKeys}
+        sourceId={sourceId}
+        groupByKeys={groupByKeys}
         queryLayers={queryLayers}
         subcategoryName={subcategoryName}
       />
