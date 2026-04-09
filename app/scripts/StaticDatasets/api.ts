@@ -1,6 +1,10 @@
 import type { Prisma } from '@prisma/client'
-import { getValidatedEnv, staticDatasetsApiSchema } from '../shared/env'
 import { red } from './utils/log'
+
+export type StaticDatasetsApiConfig = {
+  apiRootUrl: string
+  atlasApiKey: string
+}
 
 async function checkResponse(request: Request, response: Response) {
   if (!response.ok) {
@@ -11,9 +15,8 @@ async function checkResponse(request: Request, response: Response) {
   }
 }
 
-export const getRegions = async (): Promise<{ id: number; slug: string }[]> => {
-  const env = getValidatedEnv(staticDatasetsApiSchema)
-  const url = `${env.API_ROOT_URL}/regions?apiKey=${encodeURIComponent(env.ATLAS_API_KEY)}`
+export const getRegions = async (api: StaticDatasetsApiConfig) => {
+  const url = `${api.apiRootUrl}/regions?apiKey=${encodeURIComponent(api.atlasApiKey)}`
   const request = new Request(url)
   const response = await fetch(request)
   await checkResponse(request, response)
@@ -43,13 +46,12 @@ type UploadData = {
   | 'cacheTtlSeconds'
 >
 
-export const createUpload = async (data: UploadData) => {
-  const env = getValidatedEnv(staticDatasetsApiSchema)
-  const request = new Request(`${env.API_ROOT_URL}/uploads/create`, {
+export const createUpload = async (api: StaticDatasetsApiConfig, data: UploadData) => {
+  const request = new Request(`${api.apiRootUrl}/uploads/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      apiKey: env.ATLAS_API_KEY,
+      apiKey: api.atlasApiKey,
       ...data,
     }),
   })
@@ -57,13 +59,12 @@ export const createUpload = async (data: UploadData) => {
   await checkResponse(request, response)
 }
 
-export const deleteAllUploads = async () => {
-  const env = getValidatedEnv(staticDatasetsApiSchema)
-  const request = new Request(`${env.API_ROOT_URL}/uploads/delete-all`, {
+export const deleteAllUploads = async (api: StaticDatasetsApiConfig) => {
+  const request = new Request(`${api.apiRootUrl}/uploads/delete-all`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      apiKey: env.ATLAS_API_KEY,
+      apiKey: api.atlasApiKey,
     }),
   })
   const response = await fetch(request)

@@ -1,5 +1,6 @@
-import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
-import { createUpload } from '../api'
+import { getStaticDatasetUrlForEnvironment } from '@/components/shared/utils/getStaticDatasetUrl'
+import type { EnvironmentValues } from '@/server/envSchema'
+import { createUpload, type StaticDatasetsApiConfig } from '../api'
 import type { MetaData } from '../types'
 import { generatePMTilesFile } from './generatePMTilesFile'
 import { isCompressedSmallerThan } from './isCompressedSmallerThan'
@@ -21,9 +22,11 @@ export async function processLocalSource(
   transformedFilepath: string,
   tempFolder: string,
   regionAndDatasetFolder: string,
+  api: StaticDatasetsApiConfig,
+  appEnv: EnvironmentValues,
 ) {
   console.log(`  Uploading GeoJSON file to S3...`)
-  const geojsonUrl = await uploadFileToS3(transformedFilepath, uploadSlug)
+  const geojsonUrl = await uploadFileToS3(transformedFilepath, uploadSlug, appEnv)
 
   // Determine which format to use for map rendering
   const mapRenderFormat = metaData.mapRenderFormat ?? 'auto'
@@ -45,7 +48,7 @@ export async function processLocalSource(
     )
 
     console.log(`  Uploading PMTiles file to S3...`)
-    pmtilesUrl = await uploadFileToS3(pmtilesFilepath, uploadSlug)
+    pmtilesUrl = await uploadFileToS3(pmtilesFilepath, uploadSlug, appEnv)
   }
 
   console.log(
@@ -60,14 +63,14 @@ export async function processLocalSource(
 
   console.log(`  Saving uploads to DB...`)
   // Create single upload entry with both URLs
-  await createUpload({
+  await createUpload(api, {
     uploadSlug,
     regionSlugs,
     isPublic: metaData.public,
     hideDownloadLink: metaData.hideDownloadLink ?? false,
     configs: metaData.configs,
     mapRenderFormat: renderFormat,
-    mapRenderUrl: getStaticDatasetUrl(uploadSlug, renderFormat),
+    mapRenderUrl: getStaticDatasetUrlForEnvironment(uploadSlug, renderFormat, appEnv),
     pmtilesUrl,
     geojsonUrl,
     githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,

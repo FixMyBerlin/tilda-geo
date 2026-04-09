@@ -53,6 +53,10 @@ const envScriptOnlySchemaPart = z.object({
   ]),
   S3_BUCKET: requiredString,
   S3_UPLOAD_FOLDER: z.enum(['production', 'staging', 'localdev']),
+  /** Local `.env` only: `bun run static-datasets-update -- --env=staging` requires this (no fallback to ATLAS_API_KEY). */
+  ATLAS_API_KEY_STAGING: z.string().optional(),
+  /** Local `.env` only: required when `--env=production` for StaticDatasets script. */
+  ATLAS_API_KEY_PRODUCTION: z.string().optional(),
 })
 
 /** Env keys used by processing pipeline (see processing/utils/parameters.ts). Not validated at app startup, for types/FYI only. */

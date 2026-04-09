@@ -135,12 +135,12 @@ export const data: MetaData = {
 Check `app/scripts/StaticDatasets/updateStaticDatasets.ts` for correct params:
 
 - `--folder-filter=<SUB_FOLDER_NAME>` (matches full path, so sub-folder name works)
-- `--env=dev` (or staging/production, required)
+- `--env=dev` (or staging/production; omit to be prompted)
 
-**One-click command** (replace `<SUB_FOLDER_NAME>` with actual folder name):
+**One-click command** from `app/` (replace `<SUB_FOLDER_NAME>` with actual folder name; Bun loads `app/.env` automatically when the cwd is `app/`):
 
 ```bash
-bun --env-file=.env ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=<SUB_FOLDER_NAME> --env=dev
+bun run static-datasets-update -- --folder-filter=<SUB_FOLDER_NAME> --env=dev
 ```
 
 Note: `updateDownloadSources.ts` is for WFS downloads (requires downloadConfig.ts). Use `updateStaticDatasets.ts` for local GeoJSON files.

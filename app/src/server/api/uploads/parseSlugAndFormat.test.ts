@@ -1,11 +1,12 @@
 import { describe, expect, test } from 'vitest'
+import { staticDatasetUploadFormats } from '@/server/api/uploads/staticDatasetUploadFormats.const'
 import { parseSlugAndFormat } from './parseSlugAndFormat'
 
 describe('parseSlugAndFormat()', () => {
   test('marks fallback usage for extension-less legacy urls', () => {
     const result = parseSlugAndFormat({
       slug: 'nudafa-combined',
-      allowedFormats: ['pmtiles', 'geojson', 'csv'],
+      allowedFormats: [...staticDatasetUploadFormats],
       fallbackFormat: 'pmtiles',
     })
 
@@ -22,7 +23,7 @@ describe('parseSlugAndFormat()', () => {
   test('does not mark fallback when extension is explicit', () => {
     const result = parseSlugAndFormat({
       slug: 'nudafa-combined.geojson',
-      allowedFormats: ['pmtiles', 'geojson', 'csv'],
+      allowedFormats: [...staticDatasetUploadFormats],
       fallbackFormat: 'pmtiles',
     })
 

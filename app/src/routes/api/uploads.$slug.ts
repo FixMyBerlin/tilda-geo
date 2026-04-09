@@ -4,6 +4,7 @@ import { handleCsvExport } from '@/server/api/uploads/handleCsvExport'
 import { parseSlugAndFormat } from '@/server/api/uploads/parseSlugAndFormat'
 import { proxyExternalUrl } from '@/server/api/uploads/proxyExternalUrl'
 import { proxyS3Url } from '@/server/api/uploads/proxyS3Url.server'
+import { staticDatasetUploadFormats } from '@/server/api/uploads/staticDatasetUploadFormats.const'
 import { corsHeaders } from '@/server/api/util/cors'
 import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
@@ -17,7 +18,7 @@ export const Route = createFileRoute('/api/uploads/$slug')({
 
         const parseResult = parseSlugAndFormat({
           slug,
-          allowedFormats: ['pmtiles', 'geojson', 'csv'],
+          allowedFormats: [...staticDatasetUploadFormats],
           fallbackFormat: 'pmtiles',
         })
         if (!parseResult.success) {
