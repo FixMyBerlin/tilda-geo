@@ -58,15 +58,3 @@ export const createUpload = async (api: StaticDatasetsApiConfig, data: UploadDat
   const response = await fetch(request)
   await checkResponse(request, response)
 }
-
-export const deleteAllUploads = async (api: StaticDatasetsApiConfig) => {
-  const request = new Request(`${api.apiRootUrl}/uploads/delete-all`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      apiKey: api.atlasApiKey,
-    }),
-  })
-  const response = await fetch(request)
-  await checkResponse(request, response)
-}

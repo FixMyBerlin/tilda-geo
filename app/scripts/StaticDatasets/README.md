@@ -54,5 +54,3 @@ Use `--keep-tmp` to keep the files for debugging.
 ## Delete existing database entries
 
 The script will **not remove existing database configs** if the dataset folder was rename or removed.
-
-Use `bun run static-datasets-delete-all-dev && bun run static-datasets-update` to reset all database entries.
