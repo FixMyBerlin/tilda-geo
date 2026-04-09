@@ -24,7 +24,6 @@ export async function initialize() {
   await $`mkdir -p ${OSM_DOWNLOAD_DIR} ${OSM_FILTERED_DIR} ${HASH_DIR}`
 
   await sql`CREATE EXTENSION IF NOT EXISTS postgis`
-  await sql`CREATE EXTENSION IF NOT EXISTS pgRouting`
   await sql`CREATE EXTENSION IF NOT EXISTS btree_gist`
 
   // Check lua packages:
