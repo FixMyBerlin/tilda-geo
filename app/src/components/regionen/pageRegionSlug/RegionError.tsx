@@ -1,10 +1,9 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useParams } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { twMerge } from 'tailwind-merge'
 import { logError } from '@/components/shared/error/logError'
 import { Link } from '@/components/shared/links/Link'
-import { linkStyles } from '@/components/shared/links/styles'
+import { buttonStylesSecondary } from '@/components/shared/links/styles'
 import { isDev } from '@/components/shared/utils/isEnv'
 
 type RegionErrorProps = ErrorComponentProps & {
@@ -45,14 +44,7 @@ export default function RegionError({ error, reset, previewRegionSlug }: RegionE
                 </Link>
               )}
               {reset && (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className={twMerge(
-                    linkStyles,
-                    'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-semibold text-gray-800 no-underline shadow-sm hover:bg-gray-50',
-                  )}
-                >
+                <button type="button" onClick={reset} className={buttonStylesSecondary}>
                   Erneut versuchen
                 </button>
               )}

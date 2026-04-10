@@ -9,7 +9,7 @@ export default function DefaultPending() {
         <div className="py-16">
           <div className="text-center">
             <div
-              className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"
+              className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-yellow-400"
               aria-hidden="true"
             />
             <p className="mt-4 text-base text-gray-500">Laden …</p>

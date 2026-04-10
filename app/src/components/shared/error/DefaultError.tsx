@@ -1,9 +1,8 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { twMerge } from 'tailwind-merge'
 import { logError } from '@/components/shared/error/logError'
 import { Link } from '@/components/shared/links/Link'
-import { linkStyles } from '@/components/shared/links/styles'
+import { buttonStylesSecondary } from '@/components/shared/links/styles'
 import { isDev } from '@/components/shared/utils/isEnv'
 
 export default function DefaultError({ error, reset }: ErrorComponentProps) {
@@ -31,17 +30,9 @@ export default function DefaultError({ error, reset }: ErrorComponentProps) {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link button to="/">
                 Zur Startseite
-                <span aria-hidden="true"> &rarr;</span>
               </Link>
               {reset && (
-                <button
-                  type="button"
-                  onClick={reset}
-                  className={twMerge(
-                    linkStyles,
-                    'inline-flex items-center justify-center rounded-md border border-gray-400/80 bg-white/90 px-4 py-2 text-base font-semibold text-gray-800 no-underline shadow-sm hover:bg-white',
-                  )}
-                >
+                <button type="button" onClick={reset} className={buttonStylesSecondary}>
                   Erneut versuchen
                 </button>
               )}

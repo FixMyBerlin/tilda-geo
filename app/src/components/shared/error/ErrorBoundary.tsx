@@ -1,9 +1,8 @@
 import type { ErrorInfo, ReactNode } from 'react'
 import { Component } from 'react'
-import { twMerge } from 'tailwind-merge'
 import { logError } from '@/components/shared/error/logError'
 import { Link } from '@/components/shared/links/Link'
-import { linkStyles } from '@/components/shared/links/styles'
+import { buttonStylesSecondary } from '@/components/shared/links/styles'
 import { isDev } from '@/components/shared/utils/isEnv'
 
 type ErrorBoundaryState = { hasError: boolean; error: Error | null }
@@ -53,16 +52,8 @@ export function RootErrorFallback({ error, reset }: { error: Error; reset: () =>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link button to="/">
                 Zur Startseite
-                <span aria-hidden="true"> &rarr;</span>
               </Link>
-              <button
-                type="button"
-                onClick={reset}
-                className={twMerge(
-                  linkStyles,
-                  'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-semibold text-gray-800 no-underline shadow-sm hover:bg-gray-50',
-                )}
-              >
+              <button type="button" onClick={reset} className={buttonStylesSecondary}>
                 Erneut versuchen
               </button>
             </div>

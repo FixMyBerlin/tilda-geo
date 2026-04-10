@@ -13,10 +13,9 @@ export default function NotFound() {
             <p className="mt-2 text-base text-gray-500">
               Leider konnten wir diese Seite nicht finden.
             </p>
-            <div className="mt-6">
-              <Link to="/">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <Link button to="/">
                 Zur Startseite
-                <span aria-hidden="true"> &rarr;</span>
               </Link>
             </div>
           </div>
