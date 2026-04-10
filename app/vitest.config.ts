@@ -24,7 +24,7 @@ export default defineConfig({
     env,
     globals: true,
     setupFiles: './test/setup.ts',
-    include: ['**/*.test.ts'], // Exclude .spec.ts which are Playwright tests
+    include: ['**/*.test.ts', '**/*.test.tsx'], // Exclude .spec.ts which are Playwright tests
     maxWorkers: 1,
   },
 })
