@@ -43,6 +43,10 @@ jobs:
         run: bun run lint
 
       - name: Run tests
+        env:
+          # Vitest loads repo `/.env` when present; PR runners have none. These match local dev (see `.env.example`).
+          VITE_APP_ENV: development
+          VITE_APP_ORIGIN: http://127.0.0.1:5173
         run: bun run test-run
   # Disabled due to error https://github.com/FixMyBerlin/tilda-geo/actions/runs/15585651343/job/43891057696?pr=209
   # > Run docker run test_img

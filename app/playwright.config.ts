@@ -4,8 +4,11 @@ import { defineConfig, devices } from '@playwright/test'
 import dotenv from 'dotenv'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// Load .env first so webServer (bun run dev) gets DATABASE_* etc.; then .env.test overrides for test-only vars
+// Load repo-level .env first so webServer (bun run dev) gets DATABASE_* etc.
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
+// Optional app-local env can override or extend defaults.
 dotenv.config({ path: path.resolve(__dirname, '.env') })
+// Then .env.test can override for test-only vars.
 dotenv.config({ path: path.resolve(__dirname, '.env.test') })
 
 const baseURL = 'http://127.0.0.1:5173'

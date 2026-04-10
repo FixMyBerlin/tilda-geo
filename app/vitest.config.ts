@@ -1,14 +1,13 @@
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { loadEnv } from 'vite'
 import { defineConfig } from 'vitest/config'
 
-const loadedTestEnv = loadEnv('test', process.cwd(), '')
-const env = {
-  ...loadedTestEnv,
-  // CI has no .env; path-only `location.href` in getRegionRedirectUrl needs a valid base URL.
-  VITE_APP_ORIGIN: loadedTestEnv.VITE_APP_ORIGIN ?? 'http://127.0.0.1:5173',
-}
+// Vitest unit tests use only the repository-root env setup.
+// `loadEnv('test', …, 'VITE_')` keeps browser-facing keys and respects CI `VITE_*` overrides.
+const repoRoot = path.resolve(fileURLToPath(new URL('.', import.meta.url)), '..')
+const env = loadEnv('test', repoRoot, 'VITE_')
 
 export default defineConfig({
   plugins: [react()],
