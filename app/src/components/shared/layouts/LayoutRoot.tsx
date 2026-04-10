@@ -10,28 +10,38 @@ import { TailwindResponsiveHelper } from '@/components/shared/layouts/helper/Tai
 import TanStackQueryDevtools from '@/components/shared/providers/tanstack-query/devtools'
 import { Provider as TanStackQueryProvider } from '@/components/shared/providers/tanstack-query/root-provider'
 
-const REGION_SLUG_ROUTE_ID = '/regionen/$regionSlug'
+const HIDE_APP_CHROME_ROUTE_IDS = new Set([
+  '/regionen/$regionSlug',
+  '/preview/region-pending',
+  '/preview/region-error',
+])
 
 export function LayoutRoot() {
   const { queryClient } = useRouteContext({ from: '__root__' })
   const matches = useMatches()
   // Region slug page uses its own HeaderRegionen; skip app chrome to avoid double primary nav.
-  const isRegionSlugRoute = matches.some((m) => m.routeId === REGION_SLUG_ROUTE_ID)
+  // Region-style preview routes mirror the same full-bleed shell.
+  const hideAppChrome = matches.some((m) => HIDE_APP_CHROME_ROUTE_IDS.has(m.routeId))
 
   return (
     <html lang="de" className="h-full">
       <head>
         <HeadContent />
       </head>
-      <body suppressHydrationWarning className="flex min-h-full w-full text-gray-800 antialiased">
-        <div className="flex min-h-full w-full flex-col">
+      <body
+        suppressHydrationWarning
+        className="flex min-h-dvh w-full bg-white text-gray-800 antialiased"
+      >
+        <div className="flex min-h-dvh w-full flex-col">
           <StrictMode>
             <TanStackQueryProvider queryClient={queryClient}>
-              {!isRegionSlugRoute && <HeaderApp />}
-              <ErrorBoundary fallback={(props) => <RootErrorFallback {...props} />}>
-                <Outlet />
-              </ErrorBoundary>
-              {!isRegionSlugRoute && <Footer />}
+              {!hideAppChrome && <HeaderApp />}
+              <main className="flex grow flex-col">
+                <ErrorBoundary fallback={(props) => <RootErrorFallback {...props} />}>
+                  <Outlet />
+                </ErrorBoundary>
+              </main>
+              {!hideAppChrome && <Footer />}
               <TailwindResponsiveHelper />
               <TanStackDevtools
                 config={{ position: 'bottom-left' }}

@@ -21,10 +21,7 @@ export default function RegionError({ error, reset, previewRegionSlug }: RegionE
   )
 
   const params = useParams({ strict: false })
-  const regionSlugFromParams = Array.isArray(params?.regionSlug)
-    ? params.regionSlug[0]
-    : params?.regionSlug
-  const regionSlug = previewRegionSlug ?? regionSlugFromParams
+  const regionSlug = previewRegionSlug ?? params?.regionSlug
 
   return (
     <div className="not-prose flex min-h-full grow flex-col bg-white">

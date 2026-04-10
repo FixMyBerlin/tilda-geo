@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegionenRouteImport } from './routes/regionen'
+import { Route as PreviewRouteImport } from './routes/preview'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PagesRouteImport } from './routes/_pages'
 import { Route as HomeRouteImport } from './routes/_home'
@@ -18,6 +19,12 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as HomeIndexRouteImport } from './routes/_home/index'
 import { Route as RegionenStatsRouteImport } from './routes/regionen/stats'
 import { Route as RegionenRegionSlugRouteImport } from './routes/regionen/$regionSlug'
+import { Route as PreviewRootFallbackRouteImport } from './routes/preview/root-fallback'
+import { Route as PreviewRegionPendingRouteImport } from './routes/preview/region-pending'
+import { Route as PreviewRegionErrorRouteImport } from './routes/preview/region-error'
+import { Route as PreviewNotFoundRouteImport } from './routes/preview/not-found'
+import { Route as PreviewDefaultPendingRouteImport } from './routes/preview/default-pending'
+import { Route as PreviewDefaultErrorRouteImport } from './routes/preview/default-error'
 import { Route as ApiUploadsRouteImport } from './routes/api/uploads'
 import { Route as ApiStatsRouteImport } from './routes/api/stats'
 import { Route as ApiRegionsRouteImport } from './routes/api/regions'
@@ -55,12 +62,6 @@ import { Route as AdminUploadsSlugRouteImport } from './routes/admin/uploads.$sl
 import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions.new'
 import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs.new'
 import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships.new'
-import { Route as AdminDevPreviewRootFallbackRouteImport } from './routes/admin/dev.preview-root-fallback'
-import { Route as AdminDevPreviewRegionPendingRouteImport } from './routes/admin/dev.preview-region-pending'
-import { Route as AdminDevPreviewRegionErrorRouteImport } from './routes/admin/dev.preview-region-error'
-import { Route as AdminDevPreviewPendingRouteImport } from './routes/admin/dev.preview-pending'
-import { Route as AdminDevNotFoundRouteImport } from './routes/admin/dev.not-found'
-import { Route as AdminDevErrorRouteRouteImport } from './routes/admin/dev.error-route'
 import { Route as PagesSettingsUserRouteImport } from './routes/_pages/settings.user'
 import { Route as PagesDocsMapillaryCoverageRouteImport } from './routes/_pages/docs.mapillary-coverage'
 import { Route as PagesDocsTableNameRouteImport } from './routes/_pages/docs.$tableName'
@@ -79,6 +80,11 @@ import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-conf
 const RegionenRoute = RegionenRouteImport.update({
   id: '/regionen',
   path: '/regionen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewRoute = PreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -118,6 +124,36 @@ const RegionenRegionSlugRoute = RegionenRegionSlugRouteImport.update({
   id: '/$regionSlug',
   path: '/$regionSlug',
   getParentRoute: () => RegionenRoute,
+} as any)
+const PreviewRootFallbackRoute = PreviewRootFallbackRouteImport.update({
+  id: '/root-fallback',
+  path: '/root-fallback',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewRegionPendingRoute = PreviewRegionPendingRouteImport.update({
+  id: '/region-pending',
+  path: '/region-pending',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewRegionErrorRoute = PreviewRegionErrorRouteImport.update({
+  id: '/region-error',
+  path: '/region-error',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewNotFoundRoute = PreviewNotFoundRouteImport.update({
+  id: '/not-found',
+  path: '/not-found',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewDefaultPendingRoute = PreviewDefaultPendingRouteImport.update({
+  id: '/default-pending',
+  path: '/default-pending',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewDefaultErrorRoute = PreviewDefaultErrorRouteImport.update({
+  id: '/default-error',
+  path: '/default-error',
+  getParentRoute: () => PreviewRoute,
 } as any)
 const ApiUploadsRoute = ApiUploadsRouteImport.update({
   id: '/api/uploads',
@@ -310,39 +346,6 @@ const AdminMembershipsNewRoute = AdminMembershipsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AdminMembershipsRoute,
 } as any)
-const AdminDevPreviewRootFallbackRoute =
-  AdminDevPreviewRootFallbackRouteImport.update({
-    id: '/dev/preview-root-fallback',
-    path: '/dev/preview-root-fallback',
-    getParentRoute: () => AdminRoute,
-  } as any)
-const AdminDevPreviewRegionPendingRoute =
-  AdminDevPreviewRegionPendingRouteImport.update({
-    id: '/dev/preview-region-pending',
-    path: '/dev/preview-region-pending',
-    getParentRoute: () => AdminRoute,
-  } as any)
-const AdminDevPreviewRegionErrorRoute =
-  AdminDevPreviewRegionErrorRouteImport.update({
-    id: '/dev/preview-region-error',
-    path: '/dev/preview-region-error',
-    getParentRoute: () => AdminRoute,
-  } as any)
-const AdminDevPreviewPendingRoute = AdminDevPreviewPendingRouteImport.update({
-  id: '/dev/preview-pending',
-  path: '/dev/preview-pending',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDevNotFoundRoute = AdminDevNotFoundRouteImport.update({
-  id: '/dev/not-found',
-  path: '/dev/not-found',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDevErrorRouteRoute = AdminDevErrorRouteRouteImport.update({
-  id: '/dev/error-route',
-  path: '/dev/error-route',
-  getParentRoute: () => AdminRoute,
-} as any)
 const PagesSettingsUserRoute = PagesSettingsUserRouteImport.update({
   id: '/settings/user',
   path: '/settings/user',
@@ -428,6 +431,7 @@ const AdminQaConfigsIdEditRoute = AdminQaConfigsIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof HomeIndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/preview': typeof PreviewRouteWithChildren
   '/regionen': typeof RegionenRouteWithChildren
   '/access-denied': typeof PagesAccessDeniedRoute
   '/datenschutz': typeof PagesDatenschutzRoute
@@ -445,6 +449,12 @@ export interface FileRoutesByFullPath {
   '/api/regions': typeof ApiRegionsRouteWithChildren
   '/api/stats': typeof ApiStatsRoute
   '/api/uploads': typeof ApiUploadsRouteWithChildren
+  '/preview/default-error': typeof PreviewDefaultErrorRoute
+  '/preview/default-pending': typeof PreviewDefaultPendingRoute
+  '/preview/not-found': typeof PreviewNotFoundRoute
+  '/preview/region-error': typeof PreviewRegionErrorRoute
+  '/preview/region-pending': typeof PreviewRegionPendingRoute
+  '/preview/root-fallback': typeof PreviewRootFallbackRoute
   '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
   '/admin/': typeof AdminIndexRoute
@@ -452,12 +462,6 @@ export interface FileRoutesByFullPath {
   '/docs/$tableName': typeof PagesDocsTableNameRoute
   '/docs/mapillary-coverage': typeof PagesDocsMapillaryCoverageRoute
   '/settings/user': typeof PagesSettingsUserRoute
-  '/admin/dev/error-route': typeof AdminDevErrorRouteRoute
-  '/admin/dev/not-found': typeof AdminDevNotFoundRoute
-  '/admin/dev/preview-pending': typeof AdminDevPreviewPendingRoute
-  '/admin/dev/preview-region-error': typeof AdminDevPreviewRegionErrorRoute
-  '/admin/dev/preview-region-pending': typeof AdminDevPreviewRegionPendingRoute
-  '/admin/dev/preview-root-fallback': typeof AdminDevPreviewRootFallbackRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
@@ -493,6 +497,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof HomeIndexRoute
+  '/preview': typeof PreviewRouteWithChildren
   '/access-denied': typeof PagesAccessDeniedRoute
   '/datenschutz': typeof PagesDatenschutzRoute
   '/kontakt': typeof PagesKontaktRoute
@@ -505,6 +510,12 @@ export interface FileRoutesByTo {
   '/api/regions': typeof ApiRegionsRouteWithChildren
   '/api/stats': typeof ApiStatsRoute
   '/api/uploads': typeof ApiUploadsRouteWithChildren
+  '/preview/default-error': typeof PreviewDefaultErrorRoute
+  '/preview/default-pending': typeof PreviewDefaultPendingRoute
+  '/preview/not-found': typeof PreviewNotFoundRoute
+  '/preview/region-error': typeof PreviewRegionErrorRoute
+  '/preview/region-pending': typeof PreviewRegionPendingRoute
+  '/preview/root-fallback': typeof PreviewRootFallbackRoute
   '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
   '/admin': typeof AdminIndexRoute
@@ -512,12 +523,6 @@ export interface FileRoutesByTo {
   '/docs/$tableName': typeof PagesDocsTableNameRoute
   '/docs/mapillary-coverage': typeof PagesDocsMapillaryCoverageRoute
   '/settings/user': typeof PagesSettingsUserRoute
-  '/admin/dev/error-route': typeof AdminDevErrorRouteRoute
-  '/admin/dev/not-found': typeof AdminDevNotFoundRoute
-  '/admin/dev/preview-pending': typeof AdminDevPreviewPendingRoute
-  '/admin/dev/preview-region-error': typeof AdminDevPreviewRegionErrorRoute
-  '/admin/dev/preview-region-pending': typeof AdminDevPreviewRegionPendingRoute
-  '/admin/dev/preview-root-fallback': typeof AdminDevPreviewRootFallbackRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
@@ -556,6 +561,7 @@ export interface FileRoutesById {
   '/_home': typeof HomeRouteWithChildren
   '/_pages': typeof PagesRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
+  '/preview': typeof PreviewRouteWithChildren
   '/regionen': typeof RegionenRouteWithChildren
   '/_pages/access-denied': typeof PagesAccessDeniedRoute
   '/_pages/datenschutz': typeof PagesDatenschutzRoute
@@ -573,6 +579,12 @@ export interface FileRoutesById {
   '/api/regions': typeof ApiRegionsRouteWithChildren
   '/api/stats': typeof ApiStatsRoute
   '/api/uploads': typeof ApiUploadsRouteWithChildren
+  '/preview/default-error': typeof PreviewDefaultErrorRoute
+  '/preview/default-pending': typeof PreviewDefaultPendingRoute
+  '/preview/not-found': typeof PreviewNotFoundRoute
+  '/preview/region-error': typeof PreviewRegionErrorRoute
+  '/preview/region-pending': typeof PreviewRegionPendingRoute
+  '/preview/root-fallback': typeof PreviewRootFallbackRoute
   '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
   '/_home/': typeof HomeIndexRoute
@@ -581,12 +593,6 @@ export interface FileRoutesById {
   '/_pages/docs/$tableName': typeof PagesDocsTableNameRoute
   '/_pages/docs/mapillary-coverage': typeof PagesDocsMapillaryCoverageRoute
   '/_pages/settings/user': typeof PagesSettingsUserRoute
-  '/admin/dev/error-route': typeof AdminDevErrorRouteRoute
-  '/admin/dev/not-found': typeof AdminDevNotFoundRoute
-  '/admin/dev/preview-pending': typeof AdminDevPreviewPendingRoute
-  '/admin/dev/preview-region-error': typeof AdminDevPreviewRegionErrorRoute
-  '/admin/dev/preview-region-pending': typeof AdminDevPreviewRegionPendingRoute
-  '/admin/dev/preview-root-fallback': typeof AdminDevPreviewRootFallbackRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
@@ -625,6 +631,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/preview'
     | '/regionen'
     | '/access-denied'
     | '/datenschutz'
@@ -642,6 +649,12 @@ export interface FileRouteTypes {
     | '/api/regions'
     | '/api/stats'
     | '/api/uploads'
+    | '/preview/default-error'
+    | '/preview/default-pending'
+    | '/preview/not-found'
+    | '/preview/region-error'
+    | '/preview/region-pending'
+    | '/preview/root-fallback'
     | '/regionen/$regionSlug'
     | '/regionen/stats'
     | '/admin/'
@@ -649,12 +662,6 @@ export interface FileRouteTypes {
     | '/docs/$tableName'
     | '/docs/mapillary-coverage'
     | '/settings/user'
-    | '/admin/dev/error-route'
-    | '/admin/dev/not-found'
-    | '/admin/dev/preview-pending'
-    | '/admin/dev/preview-region-error'
-    | '/admin/dev/preview-region-pending'
-    | '/admin/dev/preview-root-fallback'
     | '/admin/memberships/new'
     | '/admin/qa-configs/new'
     | '/admin/regions/new'
@@ -690,6 +697,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/preview'
     | '/access-denied'
     | '/datenschutz'
     | '/kontakt'
@@ -702,6 +710,12 @@ export interface FileRouteTypes {
     | '/api/regions'
     | '/api/stats'
     | '/api/uploads'
+    | '/preview/default-error'
+    | '/preview/default-pending'
+    | '/preview/not-found'
+    | '/preview/region-error'
+    | '/preview/region-pending'
+    | '/preview/root-fallback'
     | '/regionen/$regionSlug'
     | '/regionen/stats'
     | '/admin'
@@ -709,12 +723,6 @@ export interface FileRouteTypes {
     | '/docs/$tableName'
     | '/docs/mapillary-coverage'
     | '/settings/user'
-    | '/admin/dev/error-route'
-    | '/admin/dev/not-found'
-    | '/admin/dev/preview-pending'
-    | '/admin/dev/preview-region-error'
-    | '/admin/dev/preview-region-pending'
-    | '/admin/dev/preview-root-fallback'
     | '/admin/memberships/new'
     | '/admin/qa-configs/new'
     | '/admin/regions/new'
@@ -752,6 +760,7 @@ export interface FileRouteTypes {
     | '/_home'
     | '/_pages'
     | '/admin'
+    | '/preview'
     | '/regionen'
     | '/_pages/access-denied'
     | '/_pages/datenschutz'
@@ -769,6 +778,12 @@ export interface FileRouteTypes {
     | '/api/regions'
     | '/api/stats'
     | '/api/uploads'
+    | '/preview/default-error'
+    | '/preview/default-pending'
+    | '/preview/not-found'
+    | '/preview/region-error'
+    | '/preview/region-pending'
+    | '/preview/root-fallback'
     | '/regionen/$regionSlug'
     | '/regionen/stats'
     | '/_home/'
@@ -777,12 +792,6 @@ export interface FileRouteTypes {
     | '/_pages/docs/$tableName'
     | '/_pages/docs/mapillary-coverage'
     | '/_pages/settings/user'
-    | '/admin/dev/error-route'
-    | '/admin/dev/not-found'
-    | '/admin/dev/preview-pending'
-    | '/admin/dev/preview-region-error'
-    | '/admin/dev/preview-region-pending'
-    | '/admin/dev/preview-root-fallback'
     | '/admin/memberships/new'
     | '/admin/qa-configs/new'
     | '/admin/regions/new'
@@ -821,6 +830,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRouteWithChildren
   PagesRoute: typeof PagesRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
+  PreviewRoute: typeof PreviewRouteWithChildren
   RegionenRoute: typeof RegionenRouteWithChildren
   ApiBoundaryRoute: typeof ApiBoundaryRoute
   ApiCampaignsRoute: typeof ApiCampaignsRoute
@@ -856,6 +866,13 @@ declare module '@tanstack/react-router' {
       path: '/regionen'
       fullPath: '/regionen'
       preLoaderRoute: typeof RegionenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview': {
+      id: '/preview'
+      path: '/preview'
+      fullPath: '/preview'
+      preLoaderRoute: typeof PreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -913,6 +930,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/regionen/$regionSlug'
       preLoaderRoute: typeof RegionenRegionSlugRouteImport
       parentRoute: typeof RegionenRoute
+    }
+    '/preview/root-fallback': {
+      id: '/preview/root-fallback'
+      path: '/root-fallback'
+      fullPath: '/preview/root-fallback'
+      preLoaderRoute: typeof PreviewRootFallbackRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/region-pending': {
+      id: '/preview/region-pending'
+      path: '/region-pending'
+      fullPath: '/preview/region-pending'
+      preLoaderRoute: typeof PreviewRegionPendingRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/region-error': {
+      id: '/preview/region-error'
+      path: '/region-error'
+      fullPath: '/preview/region-error'
+      preLoaderRoute: typeof PreviewRegionErrorRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/not-found': {
+      id: '/preview/not-found'
+      path: '/not-found'
+      fullPath: '/preview/not-found'
+      preLoaderRoute: typeof PreviewNotFoundRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/default-pending': {
+      id: '/preview/default-pending'
+      path: '/default-pending'
+      fullPath: '/preview/default-pending'
+      preLoaderRoute: typeof PreviewDefaultPendingRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/default-error': {
+      id: '/preview/default-error'
+      path: '/default-error'
+      fullPath: '/preview/default-error'
+      preLoaderRoute: typeof PreviewDefaultErrorRouteImport
+      parentRoute: typeof PreviewRoute
     }
     '/api/uploads': {
       id: '/api/uploads'
@@ -1173,48 +1232,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMembershipsNewRouteImport
       parentRoute: typeof AdminMembershipsRoute
     }
-    '/admin/dev/preview-root-fallback': {
-      id: '/admin/dev/preview-root-fallback'
-      path: '/dev/preview-root-fallback'
-      fullPath: '/admin/dev/preview-root-fallback'
-      preLoaderRoute: typeof AdminDevPreviewRootFallbackRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/dev/preview-region-pending': {
-      id: '/admin/dev/preview-region-pending'
-      path: '/dev/preview-region-pending'
-      fullPath: '/admin/dev/preview-region-pending'
-      preLoaderRoute: typeof AdminDevPreviewRegionPendingRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/dev/preview-region-error': {
-      id: '/admin/dev/preview-region-error'
-      path: '/dev/preview-region-error'
-      fullPath: '/admin/dev/preview-region-error'
-      preLoaderRoute: typeof AdminDevPreviewRegionErrorRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/dev/preview-pending': {
-      id: '/admin/dev/preview-pending'
-      path: '/dev/preview-pending'
-      fullPath: '/admin/dev/preview-pending'
-      preLoaderRoute: typeof AdminDevPreviewPendingRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/dev/not-found': {
-      id: '/admin/dev/not-found'
-      path: '/dev/not-found'
-      fullPath: '/admin/dev/not-found'
-      preLoaderRoute: typeof AdminDevNotFoundRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/dev/error-route': {
-      id: '/admin/dev/error-route'
-      path: '/dev/error-route'
-      fullPath: '/admin/dev/error-route'
-      preLoaderRoute: typeof AdminDevErrorRouteRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/_pages/settings/user': {
       id: '/_pages/settings/user'
       path: '/settings/user'
@@ -1413,12 +1430,6 @@ interface AdminRouteChildren {
   AdminRegionsRoute: typeof AdminRegionsRouteWithChildren
   AdminUploadsRoute: typeof AdminUploadsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
-  AdminDevErrorRouteRoute: typeof AdminDevErrorRouteRoute
-  AdminDevNotFoundRoute: typeof AdminDevNotFoundRoute
-  AdminDevPreviewPendingRoute: typeof AdminDevPreviewPendingRoute
-  AdminDevPreviewRegionErrorRoute: typeof AdminDevPreviewRegionErrorRoute
-  AdminDevPreviewRegionPendingRoute: typeof AdminDevPreviewRegionPendingRoute
-  AdminDevPreviewRootFallbackRoute: typeof AdminDevPreviewRootFallbackRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -1427,15 +1438,30 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRegionsRoute: AdminRegionsRouteWithChildren,
   AdminUploadsRoute: AdminUploadsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
-  AdminDevErrorRouteRoute: AdminDevErrorRouteRoute,
-  AdminDevNotFoundRoute: AdminDevNotFoundRoute,
-  AdminDevPreviewPendingRoute: AdminDevPreviewPendingRoute,
-  AdminDevPreviewRegionErrorRoute: AdminDevPreviewRegionErrorRoute,
-  AdminDevPreviewRegionPendingRoute: AdminDevPreviewRegionPendingRoute,
-  AdminDevPreviewRootFallbackRoute: AdminDevPreviewRootFallbackRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface PreviewRouteChildren {
+  PreviewDefaultErrorRoute: typeof PreviewDefaultErrorRoute
+  PreviewDefaultPendingRoute: typeof PreviewDefaultPendingRoute
+  PreviewNotFoundRoute: typeof PreviewNotFoundRoute
+  PreviewRegionErrorRoute: typeof PreviewRegionErrorRoute
+  PreviewRegionPendingRoute: typeof PreviewRegionPendingRoute
+  PreviewRootFallbackRoute: typeof PreviewRootFallbackRoute
+}
+
+const PreviewRouteChildren: PreviewRouteChildren = {
+  PreviewDefaultErrorRoute: PreviewDefaultErrorRoute,
+  PreviewDefaultPendingRoute: PreviewDefaultPendingRoute,
+  PreviewNotFoundRoute: PreviewNotFoundRoute,
+  PreviewRegionErrorRoute: PreviewRegionErrorRoute,
+  PreviewRegionPendingRoute: PreviewRegionPendingRoute,
+  PreviewRootFallbackRoute: PreviewRootFallbackRoute,
+}
+
+const PreviewRouteWithChildren =
+  PreviewRoute._addFileChildren(PreviewRouteChildren)
 
 interface RegionenRouteChildren {
   RegionenRegionSlugRoute: typeof RegionenRegionSlugRoute
@@ -1496,6 +1522,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRouteWithChildren,
   PagesRoute: PagesRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
+  PreviewRoute: PreviewRouteWithChildren,
   RegionenRoute: RegionenRouteWithChildren,
   ApiBoundaryRoute: ApiBoundaryRoute,
   ApiCampaignsRoute: ApiCampaignsRoute,

@@ -1,6 +1,10 @@
 export default function DefaultPending() {
   return (
-    <div className="flex min-h-full grow flex-col bg-white" aria-live="polite" aria-busy="true">
+    <div
+      className="flex min-h-full w-full grow flex-col bg-white"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <main className="mx-auto flex w-full max-w-7xl grow flex-col justify-center px-4 sm:px-6 lg:px-8">
         <div className="py-16">
           <div className="text-center">

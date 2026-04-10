@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge'
 import { AdminPrivateHooksSection } from '@/components/admin/AdminPrivateHooksSection'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { Disclosure } from '@/components/regionen/pageRegionSlug/SidebarInspector/Disclosure/Disclosure'
 import { Link } from '@/components/shared/links/Link'
 import { isProd } from '@/components/shared/utils/isEnv'
 import {
@@ -24,12 +25,12 @@ const items = [
 ] satisfies { to: InternalPath; label: string }[]
 
 const errorPreviewItems = [
-  { to: '/admin/dev/error-route', label: 'Standard Route-Fehler (DefaultError)' },
-  { to: '/admin/dev/not-found', label: 'Nicht gefunden (NotFound)' },
-  { to: '/admin/dev/preview-root-fallback', label: 'Root ErrorBoundary-Fallback' },
-  { to: '/admin/dev/preview-region-error', label: 'Region-Fehler (Komponente)' },
-  { to: '/admin/dev/preview-pending', label: 'Standard Pending' },
-  { to: '/admin/dev/preview-region-pending', label: 'Region-Karte Pending (Skeleton)' },
+  { to: '/preview/default-error', label: 'Standard Route-Fehler (DefaultError)' },
+  { to: '/preview/not-found', label: 'Nicht gefunden (NotFound)' },
+  { to: '/preview/root-fallback', label: 'Root ErrorBoundary-Fallback' },
+  { to: '/preview/region-error', label: 'Region-Fehler (Komponente)' },
+  { to: '/preview/default-pending', label: 'Standard Pending' },
+  { to: '/preview/region-pending', label: 'Region-Karte Pending (Skeleton)' },
 ] satisfies { to: InternalPath; label: string }[]
 
 export function PageIndex() {
@@ -60,35 +61,36 @@ export function PageIndex() {
       {!isProd ? (
         <>
           <hr className={twMerge('not-prose my-10 border-0 border-t border-gray-900/10')} />
-          <p className="not-prose mb-3 text-sm font-semibold text-gray-800">
-            Fehler-UI (nur Dev / Staging)
-          </p>
-          <ul
-            className={twMerge(
-              'not-prose divide-y divide-gray-900/10 overflow-hidden',
-              'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
-            )}
-          >
-            {errorPreviewItems.map((item) => (
-              <li key={item.to}>
-                <Link to={item.to} classNameOverwrite={rowLinkClassName}>
-                  <span className="text-sm/6 font-semibold text-gray-900">{item.label}</span>
-                  <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link
-                href={devRegionErrorPreviewHref(DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG)}
-                classNameOverwrite={rowLinkClassName}
+          <Disclosure title="Fehler-UI (nur Dev / Staging)" defaultOpen={false}>
+            <div className="p-3">
+              <ul
+                className={twMerge(
+                  'not-prose divide-y divide-gray-900/10 overflow-hidden',
+                  'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
+                )}
               >
-                <span className="text-sm/6 font-semibold text-gray-900">
-                  {`Region-Fehler (Route, ${DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG}?__regionError=1)`}
-                </span>
-                <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
-              </Link>
-            </li>
-          </ul>
+                {errorPreviewItems.map((item) => (
+                  <li key={item.to}>
+                    <Link to={item.to} classNameOverwrite={rowLinkClassName}>
+                      <span className="text-sm/6 font-semibold text-gray-900">{item.label}</span>
+                      <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <Link
+                    href={devRegionErrorPreviewHref(DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG)}
+                    classNameOverwrite={rowLinkClassName}
+                  >
+                    <span className="text-sm/6 font-semibold text-gray-900">
+                      {`Region-Fehler (Route, ${DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG}?__regionError=1)`}
+                    </span>
+                    <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </Disclosure>
         </>
       ) : null}
     </>

@@ -1,16 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
-import { assertNonProdErrorPreviewRoute } from '@/dev/errorPreviews'
 
-export const Route = createFileRoute('/admin/dev/preview-root-fallback')({
+export const Route = createFileRoute('/preview/root-fallback')({
   ssr: true,
-  beforeLoad: () => {
-    assertNonProdErrorPreviewRoute()
-  },
-  component: DevPreviewRootFallback,
+  component: PreviewRootFallback,
 })
 
-function DevPreviewRootFallback() {
+function PreviewRootFallback() {
   return (
     <RootErrorFallback
       error={new Error('Root error fallback preview (non-production)')}
