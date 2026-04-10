@@ -12,7 +12,7 @@ import type { StaticMapDataCategory } from '../types'
 export const categoriesParkingTilda: StaticMapDataCategory[] = [
   {
     id: 'parkingTilda',
-    name: 'Parkraum (Beta)',
+    name: 'Parkraum',
     desc: 'TILDA Parkraum Prozessierung',
     subcategories: [
       { ...subcat_parkingTilda_street_public, defaultStyle: 'default' },
