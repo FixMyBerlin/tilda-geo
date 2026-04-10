@@ -53,7 +53,7 @@ export const ValueDisclosureButton = ({
 
 export const ValueDisclosurePanel = ({ children }: { children: React.ReactNode }) => {
   return (
-    <DisclosurePanel className="mt-0.5 text-xs leading-tight text-gray-400 [&>p]:mt-1 [&>p]:first:mt-0">
+    <DisclosurePanel className="mt-0.5 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">
       {children}
     </DisclosurePanel>
   )
