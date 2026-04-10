@@ -125,9 +125,54 @@
     },
     "geom_sources": "Geometrie-Quellen",
     "tag_sources": "Tag-Quellen",
-    "road": "Straßentyp",
+    "road": {
+      "name": "Straßentyp",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "bicycle_road": "Fahrradstraße",
+        "construction": "Straße ist in Bau",
+        "cycleway_crossing": "Straßenquerung (Radverkehr)",
+        "cycleway": "Radweg",
+        "footway_cycleway_crossing": "Straßenquerung (Fußverkehr)",
+        "footway_sidewalk": "Gehweg",
+        "footway": "Fußweg",
+        "living_street": "Verkehrsberuhigter Bereich",
+        "motorway_link": "Zufahrt einer Autobahn",
+        "motorway": "Autobahn",
+        "path": "Weg / Pfad",
+        "pedestrian": "Fußgängerzone",
+        "primary_link": "Zufahrt einer Bundesstraße/Hauptverbindungsstraße",
+        "primary": "Bundesstraße/Hauptverbindungsstraße",
+        "residential": "Anwohnerstraße",
+        "secondary_link": "Zufahrt einer Landesstraße/wichtigen Durchgangsstraße",
+        "secondary": "Landesstraße/Wichtige Durchgangsstraße",
+        "service_alley": "Gasse",
+        "service_driveway": "Grundstückszufahrt",
+        "service_emergency_access": "Rettungsweg",
+        "service_parking_aisle": "Parkplatzweg",
+        "service_road": "Zufahrtsweg",
+        "service_uncategorized": "Zufahrtsweg (unbekannte Klassifisierung)",
+        "service": "Zufahrtsweg",
+        "steps": "Stufen",
+        "tertiary_link": "Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße",
+        "tertiary": "Kreisstraße/Untergeordnete Durchgangsstraße",
+        "track": "Wald- / Feldweg",
+        "unclassified": "Nebenstraße mit Verbindungscharakter",
+        "unspecified_road": "Unkategorisierte Straße"
+      }
+    },
     "road_name": "Straßenname",
-    "road_oneway": "Einbahnstraße",
+    "road_oneway": {
+      "name": "Einbahnstraße",
+      "condition": "contains",
+      "type": "string",
+      "format": {
+        "no": "Beide Richtungen",
+        "yes": "Einbahnstraße",
+        "yes_dual_carriageway": "Einbahnstraße da separate Geometrie pro Seite"
+      }
+    },
     "road_width": {
       "name": "Straßenbreite",
       "type": "number"

@@ -43,13 +43,13 @@ attributes:
     description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).
 
   - key: road
-    label: Straßentyp
+    ref: parkings.road
 
   - key: road_name
     label: Straßenname
 
   - key: road_oneway
-    label: Einbahnstraße
+    ref: parkings.road_oneway
 
   - key: road_width
     format: number

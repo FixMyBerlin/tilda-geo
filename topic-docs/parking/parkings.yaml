@@ -175,21 +175,92 @@ attributes:
         label: Separate erfasste Punktdaten
 
   - key: geom_sources
-    label: Geometrie-Quellen
-    description: Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).
+    format: sanitized_strings
+    label: (Intern) OSM-IDs der Geometiren
+    description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.
 
   - key: tag_sources
+    format: sanitized_strings
     label: Tag-Quellen
-    description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).
+    description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.
 
   - key: road
     label: Straßentyp
+    values:
+      - value: bicycle_road
+        label: Fahrradstraße
+      - value: construction
+        label: Straße ist in Bau
+      - value: cycleway_crossing
+        label: Straßenquerung (Radverkehr)
+      - value: cycleway
+        label: Radweg
+      - value: footway_cycleway_crossing
+        label: Straßenquerung (Fußverkehr)
+      - value: footway_sidewalk
+        label: Gehweg
+      - value: footway
+        label: Fußweg
+      - value: living_street
+        label: Verkehrsberuhigter Bereich
+      - value: motorway_link
+        label: Zufahrt einer Autobahn
+      - value: motorway
+        label: Autobahn
+      - value: path
+        label: Weg / Pfad
+      - value: pedestrian
+        label: Fußgängerzone
+      - value: primary_link
+        label: Zufahrt einer Bundesstraße/Hauptverbindungsstraße
+      - value: primary
+        label: Bundesstraße/Hauptverbindungsstraße
+      - value: residential
+        label: Anwohnerstraße
+      - value: secondary_link
+        label: Zufahrt einer Landesstraße/wichtigen Durchgangsstraße
+      - value: secondary
+        label: Landesstraße/Wichtige Durchgangsstraße
+      - value: service_alley
+        label: Gasse
+      - value: service_driveway
+        label: Grundstückszufahrt
+      - value: service_emergency_access
+        label: Rettungsweg
+      - value: service_parking_aisle
+        label: Parkplatzweg
+      - value: service_road
+        label: Zufahrtsweg
+      - value: service_uncategorized
+        label: Zufahrtsweg (unbekannte Klassifisierung)
+      - value: service
+        label: Zufahrtsweg
+      - value: steps
+        label: Stufen
+      - value: tertiary_link
+        label: Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße
+      - value: tertiary
+        label: Kreisstraße/Untergeordnete Durchgangsstraße
+      - value: track
+        label: Wald- / Feldweg
+      - value: unclassified
+        label: Nebenstraße mit Verbindungscharakter
+      - value: unspecified_road
+        label: Unkategorisierte Straße
 
   - key: road_name
+    format: sanitized_strings
     label: Straßenname
 
   - key: road_oneway
     label: Einbahnstraße
+    values:
+      - value: 'no'
+        label: Beide Richtungen
+      - value: 'yes'
+        label: Einbahnstraße
+      - value: yes_dual_carriageway
+        label: Einbahnstraße da separate Geometrie pro Seite
 
   - key: road_width
     format: number
@@ -224,6 +295,7 @@ attributes:
   - key: area
     format: number
     label: Fläche
+    description: Fläche in Metern
 
   - key: area_source
     label: Flächenherkunft
@@ -420,9 +492,11 @@ attributes:
     values:
       - value: 'yes'
         label: Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.
+
   - key: zone
     format: sanitized_strings
-    label: Zone
+    label: Parkzone
+    description: Entsprechend der lokalen Parkraumbewirtschaftung.
 
   - key: reason
     label: Grund
@@ -458,10 +532,10 @@ attributes:
 
   - key: _staggered_maneuvering_loss
     format: number
-    label: Manövrierraumverlust (alternierendes Parken)
+    label: (Intern) Manövrierraumverlust (alternierendes Parken)
     description: Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken
 
   - key: _staggered_original_capacity
     format: number
-    label: Ursprüngliche Kapazität (vor Staggered-Anpassung)
+    label: (Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)
     description: Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik

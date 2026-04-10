@@ -330,27 +330,148 @@
     },
     {
       "key": "geom_sources",
-      "type": "string",
-      "label": "Geometrie-Quellen",
-      "description": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
+      "type": "sanitized_strings",
+      "label": "(Intern) OSM-IDs der Geometiren",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.",
       "values": []
     },
     {
       "key": "tag_sources",
-      "type": "string",
+      "type": "sanitized_strings",
       "label": "Tag-Quellen",
-      "description": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.",
       "values": []
     },
     {
       "key": "road",
       "type": "string",
       "label": "Straßentyp",
-      "values": []
+      "values": [
+        {
+          "value": "bicycle_road",
+          "label": "Fahrradstraße"
+        },
+        {
+          "value": "construction",
+          "label": "Straße ist in Bau"
+        },
+        {
+          "value": "cycleway_crossing",
+          "label": "Straßenquerung (Radverkehr)"
+        },
+        {
+          "value": "cycleway",
+          "label": "Radweg"
+        },
+        {
+          "value": "footway_cycleway_crossing",
+          "label": "Straßenquerung (Fußverkehr)"
+        },
+        {
+          "value": "footway_sidewalk",
+          "label": "Gehweg"
+        },
+        {
+          "value": "footway",
+          "label": "Fußweg"
+        },
+        {
+          "value": "living_street",
+          "label": "Verkehrsberuhigter Bereich"
+        },
+        {
+          "value": "motorway_link",
+          "label": "Zufahrt einer Autobahn"
+        },
+        {
+          "value": "motorway",
+          "label": "Autobahn"
+        },
+        {
+          "value": "path",
+          "label": "Weg / Pfad"
+        },
+        {
+          "value": "pedestrian",
+          "label": "Fußgängerzone"
+        },
+        {
+          "value": "primary_link",
+          "label": "Zufahrt einer Bundesstraße/Hauptverbindungsstraße"
+        },
+        {
+          "value": "primary",
+          "label": "Bundesstraße/Hauptverbindungsstraße"
+        },
+        {
+          "value": "residential",
+          "label": "Anwohnerstraße"
+        },
+        {
+          "value": "secondary_link",
+          "label": "Zufahrt einer Landesstraße/wichtigen Durchgangsstraße"
+        },
+        {
+          "value": "secondary",
+          "label": "Landesstraße/Wichtige Durchgangsstraße"
+        },
+        {
+          "value": "service_alley",
+          "label": "Gasse"
+        },
+        {
+          "value": "service_driveway",
+          "label": "Grundstückszufahrt"
+        },
+        {
+          "value": "service_emergency_access",
+          "label": "Rettungsweg"
+        },
+        {
+          "value": "service_parking_aisle",
+          "label": "Parkplatzweg"
+        },
+        {
+          "value": "service_road",
+          "label": "Zufahrtsweg"
+        },
+        {
+          "value": "service_uncategorized",
+          "label": "Zufahrtsweg (unbekannte Klassifisierung)"
+        },
+        {
+          "value": "service",
+          "label": "Zufahrtsweg"
+        },
+        {
+          "value": "steps",
+          "label": "Stufen"
+        },
+        {
+          "value": "tertiary_link",
+          "label": "Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße"
+        },
+        {
+          "value": "tertiary",
+          "label": "Kreisstraße/Untergeordnete Durchgangsstraße"
+        },
+        {
+          "value": "track",
+          "label": "Wald- / Feldweg"
+        },
+        {
+          "value": "unclassified",
+          "label": "Nebenstraße mit Verbindungscharakter"
+        },
+        {
+          "value": "unspecified_road",
+          "label": "Unkategorisierte Straße"
+        }
+      ]
     },
     {
       "key": "road_name",
-      "type": "string",
+      "type": "sanitized_strings",
       "label": "Straßenname",
       "values": []
     },
@@ -358,7 +479,20 @@
       "key": "road_oneway",
       "type": "string",
       "label": "Einbahnstraße",
-      "values": []
+      "values": [
+        {
+          "value": "no",
+          "label": "Beide Richtungen"
+        },
+        {
+          "value": "yes",
+          "label": "Einbahnstraße"
+        },
+        {
+          "value": "yes_dual_carriageway",
+          "label": "Einbahnstraße da separate Geometrie pro Seite"
+        }
+      ]
     },
     {
       "key": "road_width",
@@ -423,6 +557,7 @@
       "key": "area",
       "type": "number",
       "label": "Fläche",
+      "description": "Fläche in Metern",
       "values": []
     },
     {
@@ -821,7 +956,8 @@
     {
       "key": "zone",
       "type": "sanitized_strings",
-      "label": "Zone",
+      "label": "Parkzone",
+      "description": "Entsprechend der lokalen Parkraumbewirtschaftung.",
       "values": []
     },
     {
@@ -886,14 +1022,14 @@
     {
       "key": "_staggered_maneuvering_loss",
       "type": "number",
-      "label": "Manövrierraumverlust (alternierendes Parken)",
+      "label": "(Intern) Manövrierraumverlust (alternierendes Parken)",
       "description": "Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken",
       "values": []
     },
     {
       "key": "_staggered_original_capacity",
       "type": "number",
-      "label": "Ursprüngliche Kapazität (vor Staggered-Anpassung)",
+      "label": "(Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)",
       "description": "Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik",
       "values": []
     }

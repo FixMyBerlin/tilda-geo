@@ -76,7 +76,7 @@ export const translationsAtlasAndAll = {
   'ALL--highway=tertiary': 'Kreisstraße/Untergeordnete Durchgangsstraße',
   'ALL--highway=track': 'Wald- / Feldweg',
   'ALL--highway=unclassified': 'Nebenstraße mit Verbindungscharakter',
-  'ALL--highway=unspecified_road_category': 'Unkategorisierte Straße', // roads--category
+  'ALL--highway=unspecified_road': 'Unkategorisierte Straße', // roads--category
   'ALL--informal--key': 'Trampelpfad',
   'ALL--informal=yes': 'Weg als "informeller Weg" erfasst.',
   'ALL--length--key': 'Länge',
