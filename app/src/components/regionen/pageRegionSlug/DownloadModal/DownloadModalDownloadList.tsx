@@ -7,9 +7,16 @@ import {
 } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { Link } from '@/components/shared/links/Link'
 import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
+import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
 import type { Formats } from '@/server/api/export/ogrFormats.const'
 import { ogrFormats } from '@/server/api/export/ogrFormats.const'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
+
+const downloadFormatLinkClasses =
+  'min-w-28 w-max flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-left shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500'
+
+const docsLinkClassesWithStructuredDocs =
+  'min-w-28 w-max flex-none rounded-md border border-purple-800 bg-purple-700 px-3 py-2 text-left shadow-md no-underline hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1'
 
 export const DownloadModalDownloadList = () => {
   const regionSlug = useRegionSlug()
@@ -23,6 +30,8 @@ export const DownloadModalDownloadList = () => {
   return (
     <ul className="mb-2 divide-y divide-gray-200 border-y border-gray-200">
       {availableExports.map((exportData) => {
+        const hasStructuredDocs = getTopicDocByTableName(exportData.id) != null
+
         return (
           <li key={exportData.id} className="pt-5 pb-4">
             <h3 className="mb-1 text-sm font-bold text-purple-800">{exportData.title}:</h3>
@@ -57,12 +66,18 @@ export const DownloadModalDownloadList = () => {
               <Link
                 to="/docs/$tableName"
                 params={{ tableName: exportData.id }}
-                classNameOverwrite="min-w-28 w-max flex-none rounded-md border border-purple-800 bg-purple-700 px-3 py-2 text-left shadow-md no-underline hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1"
+                classNameOverwrite={
+                  hasStructuredDocs ? docsLinkClassesWithStructuredDocs : downloadFormatLinkClasses
+                }
               >
-                <strong className="mb-0.5 block text-xs font-medium text-purple-200">
+                <strong
+                  className={`mb-0.5 block text-xs font-medium ${hasStructuredDocs ? 'text-purple-200' : 'text-gray-500'}`}
+                >
                   Attribute
                 </strong>
-                <span className="block border-0 p-0 font-mono text-white focus:ring-0 sm:text-sm">
+                <span
+                  className={`block border-0 p-0 font-mono focus:ring-0 sm:text-sm ${hasStructuredDocs ? 'text-white' : 'text-gray-900'}`}
+                >
                   Dokumentation
                 </span>
               </Link>
@@ -71,7 +86,7 @@ export const DownloadModalDownloadList = () => {
                   <Link
                     key={param}
                     href={getExportOgrApiBboxUrl(regionSlug, exportData.id, bbox, param as Formats)}
-                    classNameOverwrite="min-w-28 w-max flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-left shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
+                    classNameOverwrite={downloadFormatLinkClasses}
                     download
                     blank
                   >
