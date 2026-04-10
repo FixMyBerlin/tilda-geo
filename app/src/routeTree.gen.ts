@@ -56,6 +56,7 @@ import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions.new'
 import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs.new'
 import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships.new'
 import { Route as AdminDevPreviewRootFallbackRouteImport } from './routes/admin/dev.preview-root-fallback'
+import { Route as AdminDevPreviewRegionPendingRouteImport } from './routes/admin/dev.preview-region-pending'
 import { Route as AdminDevPreviewRegionErrorRouteImport } from './routes/admin/dev.preview-region-error'
 import { Route as AdminDevPreviewPendingRouteImport } from './routes/admin/dev.preview-pending'
 import { Route as AdminDevNotFoundRouteImport } from './routes/admin/dev.not-found'
@@ -315,6 +316,12 @@ const AdminDevPreviewRootFallbackRoute =
     path: '/dev/preview-root-fallback',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminDevPreviewRegionPendingRoute =
+  AdminDevPreviewRegionPendingRouteImport.update({
+    id: '/dev/preview-region-pending',
+    path: '/dev/preview-region-pending',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminDevPreviewRegionErrorRoute =
   AdminDevPreviewRegionErrorRouteImport.update({
     id: '/dev/preview-region-error',
@@ -449,6 +456,7 @@ export interface FileRoutesByFullPath {
   '/admin/dev/not-found': typeof AdminDevNotFoundRoute
   '/admin/dev/preview-pending': typeof AdminDevPreviewPendingRoute
   '/admin/dev/preview-region-error': typeof AdminDevPreviewRegionErrorRoute
+  '/admin/dev/preview-region-pending': typeof AdminDevPreviewRegionPendingRoute
   '/admin/dev/preview-root-fallback': typeof AdminDevPreviewRootFallbackRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
@@ -508,6 +516,7 @@ export interface FileRoutesByTo {
   '/admin/dev/not-found': typeof AdminDevNotFoundRoute
   '/admin/dev/preview-pending': typeof AdminDevPreviewPendingRoute
   '/admin/dev/preview-region-error': typeof AdminDevPreviewRegionErrorRoute
+  '/admin/dev/preview-region-pending': typeof AdminDevPreviewRegionPendingRoute
   '/admin/dev/preview-root-fallback': typeof AdminDevPreviewRootFallbackRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
@@ -576,6 +585,7 @@ export interface FileRoutesById {
   '/admin/dev/not-found': typeof AdminDevNotFoundRoute
   '/admin/dev/preview-pending': typeof AdminDevPreviewPendingRoute
   '/admin/dev/preview-region-error': typeof AdminDevPreviewRegionErrorRoute
+  '/admin/dev/preview-region-pending': typeof AdminDevPreviewRegionPendingRoute
   '/admin/dev/preview-root-fallback': typeof AdminDevPreviewRootFallbackRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
@@ -643,6 +653,7 @@ export interface FileRouteTypes {
     | '/admin/dev/not-found'
     | '/admin/dev/preview-pending'
     | '/admin/dev/preview-region-error'
+    | '/admin/dev/preview-region-pending'
     | '/admin/dev/preview-root-fallback'
     | '/admin/memberships/new'
     | '/admin/qa-configs/new'
@@ -702,6 +713,7 @@ export interface FileRouteTypes {
     | '/admin/dev/not-found'
     | '/admin/dev/preview-pending'
     | '/admin/dev/preview-region-error'
+    | '/admin/dev/preview-region-pending'
     | '/admin/dev/preview-root-fallback'
     | '/admin/memberships/new'
     | '/admin/qa-configs/new'
@@ -769,6 +781,7 @@ export interface FileRouteTypes {
     | '/admin/dev/not-found'
     | '/admin/dev/preview-pending'
     | '/admin/dev/preview-region-error'
+    | '/admin/dev/preview-region-pending'
     | '/admin/dev/preview-root-fallback'
     | '/admin/memberships/new'
     | '/admin/qa-configs/new'
@@ -1167,6 +1180,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDevPreviewRootFallbackRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/dev/preview-region-pending': {
+      id: '/admin/dev/preview-region-pending'
+      path: '/dev/preview-region-pending'
+      fullPath: '/admin/dev/preview-region-pending'
+      preLoaderRoute: typeof AdminDevPreviewRegionPendingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/dev/preview-region-error': {
       id: '/admin/dev/preview-region-error'
       path: '/dev/preview-region-error'
@@ -1397,6 +1417,7 @@ interface AdminRouteChildren {
   AdminDevNotFoundRoute: typeof AdminDevNotFoundRoute
   AdminDevPreviewPendingRoute: typeof AdminDevPreviewPendingRoute
   AdminDevPreviewRegionErrorRoute: typeof AdminDevPreviewRegionErrorRoute
+  AdminDevPreviewRegionPendingRoute: typeof AdminDevPreviewRegionPendingRoute
   AdminDevPreviewRootFallbackRoute: typeof AdminDevPreviewRootFallbackRoute
 }
 
@@ -1410,6 +1431,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDevNotFoundRoute: AdminDevNotFoundRoute,
   AdminDevPreviewPendingRoute: AdminDevPreviewPendingRoute,
   AdminDevPreviewRegionErrorRoute: AdminDevPreviewRegionErrorRoute,
+  AdminDevPreviewRegionPendingRoute: AdminDevPreviewRegionPendingRoute,
   AdminDevPreviewRootFallbackRoute: AdminDevPreviewRootFallbackRoute,
 }
 

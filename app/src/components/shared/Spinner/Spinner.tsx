@@ -15,12 +15,14 @@ const sizeClasses = {
 const colorClasses = {
   blue: 'fill-blue-500',
   teal: 'fill-teal-500',
+  yellow: 'fill-yellow-400',
 }
 
 export const Spinner = ({ className, page = false, size = '12', color = 'blue' }: Props) => {
   return (
     <div className={twJoin('text-center', page ? 'h-screen' : '', className)}>
-      <div role="status" aria-live="polite" className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center" aria-busy="true">
+        <span className="sr-only">Loading</span>
         <svg
           aria-hidden="true"
           className={twJoin(
@@ -42,7 +44,6 @@ export const Spinner = ({ className, page = false, size = '12', color = 'blue' }
             fill="currentFill"
           />
         </svg>
-        <span className="sr-only">Loading...</span>
       </div>
     </div>
   )

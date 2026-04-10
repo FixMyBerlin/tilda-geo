@@ -12,7 +12,7 @@ export function PageIndex() {
   const publicRegions = data?.publicRegions ?? []
 
   return (
-    <main className="flex flex-1 flex-col pt-10">
+    <main className="flex w-full min-w-0 flex-1 flex-col pt-10">
       <RegionListPermissions
         activeRegions={activeRegions}
         deactivatedRegions={deactivatedRegions}

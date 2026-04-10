@@ -29,6 +29,7 @@ const errorPreviewItems = [
   { to: '/admin/dev/preview-root-fallback', label: 'Root ErrorBoundary-Fallback' },
   { to: '/admin/dev/preview-region-error', label: 'Region-Fehler (Komponente)' },
   { to: '/admin/dev/preview-pending', label: 'Standard Pending' },
+  { to: '/admin/dev/preview-region-pending', label: 'Region-Karte Pending (Skeleton)' },
 ] satisfies { to: InternalPath; label: string }[]
 
 export function PageIndex() {

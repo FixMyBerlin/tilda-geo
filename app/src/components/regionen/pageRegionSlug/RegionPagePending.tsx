@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import { isDev } from '@/components/shared/utils/isEnv'
+import { RegionPagePendingHeader } from './RegionPagePendingHeader'
+import { RegionPagePendingMapShell } from './RegionPagePendingMapShell'
 
 export default function RegionPagePending() {
   const logged = useRef(false)
@@ -9,17 +11,14 @@ export default function RegionPagePending() {
   }
 
   return (
-    <div className="flex min-h-full grow flex-col bg-white" aria-live="polite" aria-busy="true">
-      <main className="mx-auto flex w-full max-w-7xl grow flex-col justify-center px-4 sm:px-6 lg:px-8">
-        <div className="py-16">
-          <div className="text-center">
-            <div
-              className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-indigo-600"
-              aria-hidden="true"
-            />
-            <p className="mt-4 text-base text-gray-500">Karte wird geladen …</p>
-          </div>
-        </div>
+    <div
+      className="flex h-screen min-h-0 w-full flex-col bg-white"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <RegionPagePendingHeader />
+      <main className="z-0 min-h-0 grow">
+        <RegionPagePendingMapShell />
       </main>
     </div>
   )

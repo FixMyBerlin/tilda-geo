@@ -10,7 +10,7 @@ export const RegionListPermissions = ({ activeRegions, deactivatedRegions }: Pro
   if (activeRegions.length === 0 && deactivatedRegions.length === 0) return null
 
   return (
-    <div className="mx-auto max-w-7xl overflow-hidden sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl min-w-0 overflow-hidden sm:px-6 lg:px-8">
       {activeRegions.length > 0 && (
         <>
           <div className="prose mt-5 px-4 sm:px-0">

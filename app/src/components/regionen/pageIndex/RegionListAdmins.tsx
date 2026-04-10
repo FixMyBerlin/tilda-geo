@@ -10,7 +10,7 @@ export const RegionListAdmins = ({ nonPublicRegions }: Props) => {
 
   return (
     <div className="bg-pink-200">
-      <div className="mx-auto max-w-7xl overflow-hidden sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl min-w-0 overflow-hidden sm:px-6 lg:px-8">
         <div className="prose mt-5 px-4 sm:px-0">
           <h2>ADMIN: Nicht veröffentlichte Regionen</h2>
         </div>
