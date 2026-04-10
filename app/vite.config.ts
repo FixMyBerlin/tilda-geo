@@ -29,10 +29,18 @@ export default defineConfig({
   // in-flight `import(virtual:tanstack-start-client-entry)` (browser: Failed to fetch).
   environments: {
     client: {
+      build: {
+        sourcemap: true,
+      },
       optimizeDeps: {
         include: ['better-auth/react', 'better-auth/client/plugins'],
         holdUntilCrawlEnd: true,
         ignoreOutdatedRequests: true,
+      },
+    },
+    ssr: {
+      build: {
+        sourcemap: true,
       },
     },
   },
