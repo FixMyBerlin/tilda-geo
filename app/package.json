@@ -20,7 +20,7 @@
     "db-pull:pull": "bun --env-file=../.env scripts/db-pull/pull.ts",
     "db-pull:restore": "bun --env-file=../.env scripts/db-pull/restore-local.ts",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "cd .output && NITRO_PORT=4000 NITRO_HOST=127.0.0.1 bun --env-file=../.env ./server/index.mjs",
     "bleach": "rm -rf node_modules/ && rm -rf .output/ && bun install",
     "bleach-full": "rm bun.lock && bun run bleach",
     "cleanup-docker": "bun scripts/docker-cleanup/index.ts",
