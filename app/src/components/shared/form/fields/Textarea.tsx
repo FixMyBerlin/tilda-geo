@@ -16,6 +16,7 @@ export function Textarea<T extends Record<string, unknown>>({
   label,
   help,
   optional,
+  optionalSuffix,
   classNameOverwrite,
   labelClassNameOverwrite,
   labelSrOnly,
@@ -35,7 +36,7 @@ export function Textarea<T extends Record<string, unknown>>({
           <div>
             <label htmlFor={String(name)} className={resolvedLabelClassName}>
               {label}
-              {optional && <> (optional)</>}
+              {optional && <> ({optionalSuffix ?? 'optional'})</>}
             </label>
             <textarea
               id={String(name)}

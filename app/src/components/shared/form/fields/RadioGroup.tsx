@@ -17,6 +17,7 @@ export function RadioGroup<T extends Record<string, unknown>>({
   label,
   help,
   optional,
+  optionalSuffix,
   items,
 }: Props<T>) {
   return (
@@ -29,7 +30,7 @@ export function RadioGroup<T extends Record<string, unknown>>({
           <div>
             {label && (
               <p className={`mb-4 ${labelClass}`}>
-                {label} {optional && <> (optional)</>}
+                {label} {optional && <> ({optionalSuffix ?? 'optional'})</>}
               </p>
             )}
             <div className="space-y-3">

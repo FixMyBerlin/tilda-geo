@@ -84,6 +84,7 @@ export const UserForm = ({ user }: Props) => {
               placeholder=""
               autoComplete="given-name"
               optional
+              optionalSuffix="optional, empfohlen"
             />
             <TextField
               form={form}
@@ -92,6 +93,7 @@ export const UserForm = ({ user }: Props) => {
               placeholder=""
               autoComplete="family-name"
               optional
+              optionalSuffix="optional, empfohlen"
             />
             <TextField
               form={form}

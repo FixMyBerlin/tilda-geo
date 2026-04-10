@@ -18,6 +18,7 @@ export function Select<T extends Record<string, unknown>>({
   label,
   help,
   optional,
+  optionalSuffix,
   options,
   onValueChange,
 }: Props<T>) {
@@ -31,7 +32,7 @@ export function Select<T extends Record<string, unknown>>({
           <div>
             <label htmlFor={String(name)} className={labelClass}>
               {label}
-              {optional && <> (optional)</>}
+              {optional && <> ({optionalSuffix ?? 'optional'})</>}
             </label>
             <select
               id={String(name)}

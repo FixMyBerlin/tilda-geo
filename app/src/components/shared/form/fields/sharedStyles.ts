@@ -10,6 +10,7 @@ export type FieldProps = {
   label: string
   help?: ReactNode
   optional?: boolean
+  optionalSuffix?: string
   errors?: string[]
   classNameOverwrite?: string
   labelClassNameOverwrite?: string
