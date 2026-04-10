@@ -4,7 +4,7 @@ CLI to create a Git worktree one level up, copy env files, and open the new fold
 
 **Run from the tilda-geo repo root:** `bun ./worktree-cli/cli.ts`
 
-The script will prompt for folder name (created as `../folderName`), then branch (last 5 branches or “Other” for a custom name), create the worktree, copy `.env` and `.env.*` from repo root and from `app/`, then run `cursor .` and `github .` from the new folder so it opens in both apps.
+The script will prompt for folder name (created as `../folderName`), then branch (last 5 branches or “Other” for a custom name), create the worktree, copy `.env` and `.env.*` from the repo root (and any matching files under `app/` if present), then run `cursor .` and `github .` from the new folder. **Local dev uses the repo root `.env` only**; `app/` loads it with `bun --env-file=../.env`, so copying the root `.env` into the new worktree is what matters.
 
 ---
 
@@ -90,6 +90,6 @@ for f in .env .env.local .env.*.local; do
 done
 ```
 
-If your env files live under a subdirectory (e.g. `app/.env`), run the script from that directory or adjust paths (e.g. `TARGET="../tilda-geo-develop/app"`).
+If you still keep extra env files only under `app/` (unusual; prefer root `.env` only), run the copy loop from that directory or set `TARGET` to the worktree’s `app/` path.
 
 This CLI automates worktree creation, env copying, and opening Cursor + GitHub in the new folder.

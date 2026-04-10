@@ -3,18 +3,16 @@
 ## Deployment model
 
 - Deploy env values are defined once in [`env/deploy.manifest.json`](./env/deploy.manifest.json).
-- [`workflows/setup-env.yml`](./workflows/setup-env.yml) validates the manifest and generates `.env.deploy.generated` with [`scripts/generate-deploy-env.ts`](./scripts/generate-deploy-env.ts).
+- [`workflows/setup-env.yml`](./workflows/setup-env.yml) validates the manifest and runs [`scripts/generate-deploy-env.ts`](./scripts/generate-deploy-env.ts) to produce `.env.deploy.generated` (deterministic from the manifest).
 - The generated file is copied to the server and renamed to `/srv/.env` (`chmod 600`).
-- We do not use `sed` replacement for `.env` generation anymore.
 - [`scripts/verify-env-manifest.ts`](./scripts/verify-env-manifest.ts) checks that deploy keys are present where needed and that stale unmanaged keys are not left behind.
 - [`scripts/generate-github-readme.ts`](./scripts/generate-github-readme.ts) regenerates the table below from the manifest.
 
 ## When checks run
 
-- **Local dev trigger:** `app` `predev` runs `bun run env-check` before starting the app.
-- **Local manual commands:** `bun run env-check:verify-manifest`, `bun run env-check:docs:1sync`, `bun run env-check`.
-- **CI trigger:** `.github/workflows/ci.yml` validates manifest consistency and generated docs on every PR.
-- **Deploy trigger:** `.github/workflows/setup-env.yml` validates and generates the deploy `.env` for the selected environment.
+- **CI:** [`.github/workflows/ci.yml`](./workflows/ci.yml) runs manifest verification (and related checks) on every PR.
+- **Deploy:** [`.github/workflows/setup-env.yml`](./workflows/setup-env.yml) validates the manifest and generates the deploy `.env` for the selected environment.
+- **Local (from `app/`):** `bun run env-check` after changing the deploy manifest, `.env.example`, or compose/workflow env wiring—runs manifest verification and README regeneration (see [`app/package.json`](../app/package.json) `env-check:*` scripts).
 
 ## Consistency guarantees
 
@@ -29,7 +27,7 @@
 
 - Secrets stay in GitHub Secrets and are never committed to the repository.
 - Generated deploy env file is temporary and copied to server as `/srv/.env` with restrictive file mode.
-- No shell replacement logic (`sed`) means no silent partial substitution.
+- Manifest-driven generation avoids silent partial substitution of deploy values.
 - `.env.example` only contains placeholders for sensitive values.
 
 ## Failure examples and reporting

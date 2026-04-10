@@ -137,7 +137,7 @@ Check `app/scripts/StaticDatasets/updateStaticDatasets.ts` for correct params:
 - `--folder-filter=<SUB_FOLDER_NAME>` (matches full path, so sub-folder name works)
 - `--env=dev` (or staging/production; omit to be prompted)
 
-**One-click command** from `app/` (replace `<SUB_FOLDER_NAME>` with actual folder name; Bun loads `app/.env` automatically when the cwd is `app/`):
+**One-click command** from `app/` (replace `<SUB_FOLDER_NAME>` with actual folder name; `static-datasets-update` uses the **repository root** `.env` via `bun --env-file=../.env`, same as `bun run dev`):
 
 ```bash
 bun run static-datasets-update -- --folder-filter=<SUB_FOLDER_NAME> --env=dev

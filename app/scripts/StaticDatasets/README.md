@@ -6,12 +6,12 @@ These scripts manage geodata files, which are made public or semi-public in tild
 
 ## Setup
 
-- Configure [`app/.env`](../../.env) (copy from the repo root `.env.example` via `bun run predev`). From `app/`, [Bun loads `.env` automatically](https://bun.sh/docs/runtime/env) for `bun run` and `bun ./scripts/...` (working directory must be `app/` so it finds that file).
+- Configure the **repository root** [`.env`](../../.env) from [`.env.example`](../../.env.example). The app and CLI scripts under `app/` load that file via `bun --env-file=../.env` (see [`package.json`](../../package.json) scripts such as `dev`, `static-datasets-update`).
 - **Atlas API keys (strict):**
   - `ATLAS_API_KEY` — required for `--env=dev` (calls the **local** app API only).
   - `ATLAS_API_KEY_STAGING` — required for `--env=staging` (no fallback to `ATLAS_API_KEY`).
   - `ATLAS_API_KEY_PRODUCTION` — required for `--env=production` (no fallback).
-- S3 credentials (`S3_KEY`, `S3_SECRET`, `S3_REGION`, `S3_BUCKET`) must be set in `app/.env` for uploads. The S3 prefix (`localdev` / `staging` / `production`) is chosen from `--env`, not from env vars.
+- S3 credentials (`S3_KEY`, `S3_SECRET`, `S3_REGION`, `S3_BUCKET`) must be set in the **root** `.env` for uploads. The S3 prefix (`localdev` / `staging` / `production`) is chosen from `--env`, not from env vars.
 - [Install Bun](https://bun.sh/docs/installation)
   - macOS `brew tap oven-sh/bun && brew install bun`
   - Archlinux `yay -S bun-bin`

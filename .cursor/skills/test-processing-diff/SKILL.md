@@ -31,7 +31,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 **What you need to know (not how the script is implemented):**
 
-- The printed command runs **docker compose** at the repository root (via subshell `cd`) so the **root `.env`** applies (not only `app/.env` from dev copy).
+- The printed command runs **docker compose** at the repository root (via subshell `cd`) so the **root `.env`** applies—the same file the app uses via `bun --env-file=../.env` from `app/`.
 - Overrides are **per pasted command** — no need to `export` vars in the user’s shell.
 - Ensure **`db` is healthy** before running the pasted line (`docker compose up -d db` from repo root if needed). The generate script does not start containers.
 
@@ -121,4 +121,4 @@ SELECT * FROM public.mytable_diff LIMIT 50;
 
 - `processing/README.md` — diffing modes, `PROCESS_ONLY_*`, `SKIP_UNCHANGED`
 - `processing/utils/parameters.ts` — env names the container reads
-- `app/scripts/processing-generate-command/README.md` — copy-paste workflow, compose from repo root, `app/.env` vs root `.env`
+- `app/scripts/processing-generate-command/README.md` — copy-paste workflow, compose from repo root, single root `.env`

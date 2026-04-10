@@ -41,4 +41,4 @@ Geofabrik OAuth, default extract URL, and other secrets stay in the root `.env` 
 
 **Reference → fixed:** generate once (or twice) with the same bbox/topics/skips; only change **`PROCESSING_DIFFING_MODE`** at the end of the printed command between reference and fixed. Do not change other diff-related env between those two runs.
 
-**Reminder:** inside the subshell, `docker compose` runs from the **absolute** repo root so the root `.env` is used. The copy under `app/.env` (e.g. from `bun run predev`) is for the app, not for this container.
+**Reminder:** inside the subshell, `docker compose` runs from the **absolute** repo root and loads the **root** `.env`—the same file the Node app uses from `app/` via `bun --env-file=../.env`.
