@@ -45,7 +45,6 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
         >
           {isLoading ? (
             <div className="flex size-5 items-center justify-center overflow-hidden">
-              {/* Wrapper required to cut off some additional space that <Spinner> has */}
               <SmallSpinner />
             </div>
           ) : (

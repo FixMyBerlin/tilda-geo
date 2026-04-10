@@ -8,10 +8,17 @@ export const LoadingIndicator = () => {
   if (showIndicator === false) return null
 
   return (
-    <div className="relative rounded-md bg-teal-700">
-      <Tooltip text="Kartendaten werden geladen…" className="cursor-help p-2">
-        <Spinner size="5" color="teal" />
+    <output
+      className="relative block rounded-md bg-teal-700"
+      aria-busy="true"
+      aria-label="Kartendaten werden geladen"
+    >
+      <Tooltip
+        text="Kartendaten werden geladen…"
+        className="flex size-9 cursor-help items-center justify-center"
+      >
+        <Spinner color="teal" screenReaderLabel={false} size="5" />
       </Tooltip>
-    </div>
+    </output>
   )
 }

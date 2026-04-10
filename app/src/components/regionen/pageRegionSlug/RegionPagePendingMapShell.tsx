@@ -71,8 +71,7 @@ export function RegionPagePendingMapShell() {
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-5 flex flex-col items-center justify-center gap-4">
-        {/* Same Spinner as LoadingIndicator (map controls); relax inner h-full so flex centering works */}
-        <Spinner className="[&>div]:h-auto" color="yellow" size="12" />
+        <Spinner color="yellow" screenReaderLabel={false} size="12" />
         <p className="text-base text-gray-500">Karte wird geladen …</p>
       </div>
     </div>
