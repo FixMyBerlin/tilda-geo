@@ -72,7 +72,7 @@ export const UserLoggedIn = ({ user }: Props) => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <MenuItems className="ring-opacity-5 absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black focus:outline-none">
+        <MenuItems className="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5">
           <div className="border-b border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-700">
             <p className="mb-1">
               <strong>Angemeldet als {user.osmName}</strong>

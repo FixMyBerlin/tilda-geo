@@ -68,7 +68,7 @@ export const OsmNotesFilterControl = () => {
       <MenuItems
         transition
         anchor="top start"
-        className="ring-opacity-5 absolute right-0 z-10 mt-2 w-64 rounded-md bg-white text-sm shadow-lg ring-1 ring-black transition focus:outline-none data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+        className="absolute right-0 z-10 mt-2 w-64 rounded-md bg-white text-sm shadow-lg outline-1 outline-black/5 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
       >
         <MenuSection className="m-1 overflow-clip rounded-md border">
           <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold text-gray-600 uppercase">

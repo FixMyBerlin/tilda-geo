@@ -84,7 +84,7 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
 
             <MenuItems
               anchor="bottom start"
-              className="z-40 rounded-md bg-white py-1 shadow-lg ring-1 ring-gray-300 [--anchor-gap:8px] focus:outline-none"
+              className="z-40 rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5 [--anchor-gap:8px]"
             >
               {Array.from(groupedStyles.entries()).map(([group, styles]) => {
                 const showHeadline = group !== 'fallback'

@@ -28,7 +28,7 @@ export const NavigationDesktopMenu = ({ menuItems, logo }: Props) => {
           <MenuItems
             anchor="bottom end"
             transition
-            className="ring-opacity-5 z-50 mt-1 w-48 origin-top-right divide-y divide-gray-100 rounded-md bg-white py-1 shadow-lg ring-1 ring-black transition duration-100 ease-out focus:outline-none data-closed:scale-95 data-closed:opacity-0"
+            className="z-50 mt-1 w-48 origin-top-right divide-y divide-gray-100 rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5 transition duration-100 ease-out data-closed:scale-95 data-closed:opacity-0"
           >
             {menuItems.map((group, i) => {
               return (
