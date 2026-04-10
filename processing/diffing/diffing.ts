@@ -279,7 +279,7 @@ export async function computeDiff(table: string) {
       if (nTotal === 0) {
         await dropDiffTable(table)
       } else {
-        createSpatialIndex(table)
+        await createSpatialIndex(table)
       }
       await sql.unsafe(`DROP TABLE IF EXISTS ${joinedTableId}`)
       return {
