@@ -111,6 +111,7 @@ services:
         condition: service_healthy
   db:
     image: postgis/postgis:17-3.5
+    platform: linux/amd64
     container_name: db
     shm_size: 2g
     restart: unless-stopped
