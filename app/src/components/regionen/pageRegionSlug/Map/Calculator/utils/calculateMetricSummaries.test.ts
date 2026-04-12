@@ -5,9 +5,11 @@ import {
   getAvailableMetricsForAreas,
 } from './calculateMetricSummaries'
 
+let testFeatureId = 0
 const createFeature = (properties: Record<string, unknown>) =>
   ({
     type: 'Feature',
+    id: `test-feature-${++testFeatureId}`,
     properties,
     geometry: {
       type: 'Point',

@@ -20,6 +20,7 @@ const colorByDrawingState = (feature: GeoJSONStoreFeatures) =>
  */
 export const createCalculatorTerraDrawModes = () => [
   new TerraDrawPolygonMode({
+    pointerDistance: 6,
     styles: {
       fillColor: colorByDrawingState,
       fillOpacity: 0.3,
@@ -27,7 +28,7 @@ export const createCalculatorTerraDrawModes = () => [
     },
   }),
   new TerraDrawSelectMode({
-    pointerDistance: 12,
+    pointerDistance: 6,
     flags: {
       polygon: {
         feature: {

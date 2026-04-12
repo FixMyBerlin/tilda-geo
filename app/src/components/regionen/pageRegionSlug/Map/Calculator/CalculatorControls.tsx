@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   useMapLoaded,
   useShowMapLoadingIndicator,
@@ -14,18 +14,26 @@ type Props = {
   queryLayers: MapDataSourceCalculator['queryLayers']
 }
 
+const buildCalculationSignature = (
+  queryLayers: MapDataSourceCalculator['queryLayers'],
+  drawAreas: DrawArea[],
+) => JSON.stringify({ queryLayers, drawAreas })
+
 export const CalculatorControls = ({ queryLayers }: Props) => {
   const { drawAreas, setDrawAreas } = useDrawSession()
   const { updateCalculation } = useUpdateCalculation()
   const mapLoaded = useMapLoaded()
   const showMapLoadingIndicator = useShowMapLoadingIndicator()
+  const updateCalculationRef = useRef(updateCalculation)
+  const lastCalculationSignatureRef = useRef<string | null>(null)
   const [drawMode, setDrawMode] = useState<CalculatorUrlDrawMode>(() =>
     drawAreas.length > 0 ? 'edit' : 'polygon',
   )
 
   const handleUserGeometry = (next: DrawArea[]) => {
     void setDrawAreas(next)
-    updateCalculation(queryLayers, next)
+    updateCalculationRef.current(queryLayers, next)
+    lastCalculationSignatureRef.current = buildCalculationSignature(queryLayers, next)
   }
 
   const handleUserDrawModeChange = (mode: CalculatorUrlDrawMode) => {
@@ -33,11 +41,23 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
   }
 
   useEffect(
+    function syncUpdateCalculationRef() {
+      updateCalculationRef.current = updateCalculation
+    },
+    [updateCalculation],
+  )
+
+  useEffect(
     function updateCalculatorAfterMapInitialization() {
       if (!mapLoaded || showMapLoadingIndicator) return
-      updateCalculation(queryLayers, drawAreas)
+
+      const calculationSignature = buildCalculationSignature(queryLayers, drawAreas)
+      if (lastCalculationSignatureRef.current === calculationSignature) return
+
+      updateCalculationRef.current(queryLayers, drawAreas)
+      lastCalculationSignatureRef.current = calculationSignature
     },
-    [mapLoaded, showMapLoadingIndicator, updateCalculation, queryLayers, drawAreas],
+    [mapLoaded, showMapLoadingIndicator, queryLayers, drawAreas],
   )
 
   return (

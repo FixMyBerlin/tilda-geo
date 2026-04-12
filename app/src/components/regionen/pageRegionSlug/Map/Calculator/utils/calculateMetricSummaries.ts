@@ -58,8 +58,19 @@ const toGroupValueLabel = (value: unknown) => {
 const sortBySumDesc = <T extends { sum: number }>(items: T[]) =>
   [...items].sort((a, b) => b.sum - a.sum)
 
+const dedupeFeaturesById = (features: MapGeoJSONFeature[]) => {
+  const uniqueFeatures = new Map<string | number, MapGeoJSONFeature>()
+
+  for (const feature of features) {
+    if (feature.id === undefined) continue
+    uniqueFeatures.set(feature.id, feature)
+  }
+
+  return [...uniqueFeatures.values()]
+}
+
 const flattenFeatures = (areas: CalculatorAreaWithFeatures[]) =>
-  areas.flatMap((area) => area.features)
+  dedupeFeaturesById(areas.flatMap((area) => area.features))
 
 const calculateMetricSummary = (
   features: MapGeoJSONFeature[],
@@ -135,7 +146,7 @@ export const calculateMetricSummaryForAreas = ({
 }) => {
   const byArea = areas.map((area) => ({
     key: area.key,
-    summary: calculateMetricSummary(area.features, metric, groupByKeys),
+    summary: calculateMetricSummary(dedupeFeaturesById(area.features), metric, groupByKeys),
   }))
 
   const combined = calculateMetricSummary(flattenFeatures(areas), metric, groupByKeys)
