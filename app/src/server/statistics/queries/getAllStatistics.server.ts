@@ -1,5 +1,6 @@
 import { notFound } from '@tanstack/react-router'
 import { geoDataClient } from '@/server/prisma-client.server'
+import { hasAggregatedLengthsTable } from './guardAggregatedLengths.server'
 
 type StatisticsRow = {
   name: string | null
@@ -9,6 +10,9 @@ type StatisticsRow = {
 }
 
 export async function getAllStatistics() {
+  const tableExists = await hasAggregatedLengthsTable()
+  if (!tableExists) return []
+
   const stats = await geoDataClient.$queryRaw<StatisticsRow[]>`
     SELECT name, level, road_length, bikelane_length from public.aggregated_lengths;`
 
