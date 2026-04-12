@@ -220,7 +220,7 @@
     {
       "key": "capacity",
       "type": "number",
-      "label": "Anzahl Stellplätze",
+      "label": "Kapazität",
       "description": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
       "chapterRefs": ["capacity-calculation"],
       "values": []
@@ -355,16 +355,16 @@
     },
     {
       "key": "geom_sources",
-      "type": "string",
-      "label": "Geometrie-Quellen",
-      "description": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
+      "type": "sanitized_strings",
+      "label": "(Intern) OSM-IDs der Geometiren",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.",
       "values": []
     },
     {
       "key": "tag_sources",
-      "type": "string",
+      "type": "sanitized_strings",
       "label": "Tag-Quellen",
-      "description": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.",
       "values": []
     },
     {
@@ -496,7 +496,7 @@
     },
     {
       "key": "road_name",
-      "type": "string",
+      "type": "sanitized_strings",
       "label": "Straßenname",
       "values": []
     },
@@ -582,6 +582,7 @@
       "key": "area",
       "type": "number",
       "label": "Fläche",
+      "description": "Fläche in Metern",
       "values": []
     },
     {
@@ -980,7 +981,8 @@
     {
       "key": "zone",
       "type": "sanitized_strings",
-      "label": "Zone",
+      "label": "Parkzone",
+      "description": "Entsprechend der lokalen Parkraumbewirtschaftung.",
       "values": []
     },
     {

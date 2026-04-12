@@ -69,7 +69,7 @@
         }
       },
       "capacity": {
-        "name": "Anzahl Stellplätze",
+        "name": "Kapazität",
         "type": "number"
       },
       "capacity_source": {
@@ -124,7 +124,7 @@
           "separate_parking_points": "Separate erfasste Punktdaten"
         }
       },
-      "geom_sources": "Geometrie-Quellen",
+      "geom_sources": "(Intern) OSM-IDs der Geometiren",
       "tag_sources": "Tag-Quellen",
       "road": {
         "name": "Straßentyp",
@@ -388,7 +388,7 @@
           "yes": "Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken."
         }
       },
-      "zone": "Zone",
+      "zone": "Parkzone",
       "mapillary": {
         "name": "Mapillary",
         "type": "html",

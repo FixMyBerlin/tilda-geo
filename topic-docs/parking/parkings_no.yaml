@@ -16,11 +16,7 @@ attributes:
     ref: parkings.condition_category
 
   - key: capacity
-    format: number
-    label: Anzahl Stellplätze
-    description: Geschätzte oder explizit erfasste Anzahl von Stellplätzen.
-    chapterRefs:
-      - chapterId: capacity-calculation
+    ref: parkings.capacity
 
   - key: capacity_source
     ref: parkings.capacity_source
@@ -35,25 +31,22 @@ attributes:
     ref: parkings.source
 
   - key: geom_sources
-    label: Geometrie-Quellen
-    description: Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).
+    ref: parkings.geom_sources
 
   - key: tag_sources
-    label: Tag-Quellen
-    description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).
+    ref: parkings.tag_sources
 
   - key: road
     ref: parkings.road
 
   - key: road_name
-    label: Straßenname
+    ref: parkings.road_name
 
   - key: road_oneway
     ref: parkings.road_oneway
 
   - key: road_width
-    format: number
-    label: Straßenbreite
+    ref: parkings.road_width
 
   - key: road_width_source
     ref: parkings.road_width_source
@@ -65,8 +58,7 @@ attributes:
     ref: parkings.side
 
   - key: area
-    format: number
-    label: Fläche
+    ref: parkings.area
 
   - key: area_source
     ref: parkings.area_source
@@ -114,23 +106,16 @@ attributes:
     ref: parkings.informal
 
   - key: zone
-    format: sanitized_strings
-    label: Zone
+    ref: parkings.zone
 
   - key: mapillary
-    format: sanitized_strings
-    label: Mapillary
+    ref: parkings.mapillary
 
   - key: traffic_sign
-    format: sanitized_strings
-    label: Verkehrszeichen
+    ref: parkings.traffic_sign
 
   - key: _staggered_maneuvering_loss
-    format: number
-    label: (Intern) Manövrierraumverlust (alternierendes Parken)
-    description: Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken
+    ref: parkings._staggered_maneuvering_loss
 
   - key: _staggered_original_capacity
-    format: number
-    label: (Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)
-    description: Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik
+    ref: parkings._staggered_original_capacity

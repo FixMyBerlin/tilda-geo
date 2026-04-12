@@ -3,8 +3,10 @@
     "keys": {
       "capacity": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
       "capacity_source": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.",
-      "geom_sources": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
-      "tag_sources": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).",
+      "geom_sources": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.",
+      "tag_sources": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.",
+      "area": "Fläche in Metern",
+      "zone": "Entsprechend der lokalen Parkraumbewirtschaftung.",
       "_staggered_maneuvering_loss": "Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken",
       "_staggered_original_capacity": "Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik"
     },
