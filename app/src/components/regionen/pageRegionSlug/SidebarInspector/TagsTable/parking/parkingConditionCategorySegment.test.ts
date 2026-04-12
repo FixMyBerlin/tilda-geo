@@ -117,6 +117,26 @@ describe('formatParkingConditionCategorySegment (Lua examples)', () => {
       `${tCat('vehicle_restriction')} (${tTok('only')} ${tTok('delivery')}) (Montag-Samstag 07:00-20:00)`,
     )
   })
+
+  test('no_parking (Mar-Oct 08:00-18:00) — month range', () => {
+    expect(
+      formatParkingConditionCategorySegment(
+        'no_parking (Mar-Oct 08:00-18:00)',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(`${tCat('no_parking')} (März-Okt. 08:00-18:00)`)
+  })
+
+  test('no_standing (Jun 08:00-18:00) — single month', () => {
+    expect(
+      formatParkingConditionCategorySegment(
+        'no_standing (Jun 08:00-18:00)',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(`${tCat('no_standing')} (Juni 08:00-18:00)`)
+  })
 })
 
 describe('formatParkingConditionCategorySegment (edge cases)', () => {

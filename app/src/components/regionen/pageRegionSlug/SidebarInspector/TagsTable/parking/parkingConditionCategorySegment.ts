@@ -9,7 +9,7 @@
  * Use `splitParkingConditionCategoryValue` for the top-level `;` split only (parenthesis-aware, one nesting level).
  *
  * Detail-token copy uses `tilda_parkings--parking_condition_detail_token--<id>` (`--` subcategory: derived in the inspector, not a tile property).
- * German strings: `../translations/translationsTagsTableRowCompositConditionCategory.const.ts`.
+ * Weekday and English month abbreviations in opening_hours-style fragments are translated in this module; other detail-token German strings live in `../translations/translationsTagsTableRowCompositConditionCategory.const.ts`.
  */
 import { translations } from '../translations/translations.const'
 import { splitSemicolonRespectingBrackets } from '../utils/splitSemicolonRespectingBrackets'
@@ -146,6 +146,47 @@ export function translateParkingConditionCategoryWeekdays(detail: string) {
   return out
 }
 
+const MONTH_ABBR_TO_DE: Record<string, string> = {
+  Jan: 'Jan.',
+  Feb: 'Feb.',
+  Mar: 'März',
+  Apr: 'April',
+  May: 'Mai',
+  Jun: 'Juni',
+  Jul: 'Juli',
+  Aug: 'Aug.',
+  Sep: 'Sep.',
+  Oct: 'Okt.',
+  Nov: 'Nov.',
+  Dec: 'Dez.',
+}
+
+const MONTH_ABBRS_ORDERED = Object.keys(MONTH_ABBR_TO_DE)
+
+/** English month abbreviations (opening_hours-style) in condition detail text. */
+export function translateParkingConditionCategoryMonths(detail: string) {
+  const monthAlt = MONTH_ABBRS_ORDERED.join('|')
+  let out = detail.replace(
+    new RegExp(`\\b(${monthAlt})-(${monthAlt})\\b`, 'g'),
+    (_, a: string, b: string) => {
+      const la = MONTH_ABBR_TO_DE[a]
+      const lb = MONTH_ABBR_TO_DE[b]
+      if (!la || !lb) {
+        return `${a}-${b}`
+      }
+      return `${la}-${lb}`
+    },
+  )
+
+  for (const abbr of MONTH_ABBRS_ORDERED) {
+    const label = MONTH_ABBR_TO_DE[abbr]
+    const re = new RegExp(`(^|[^A-Za-z0-9_])${abbr}(?![A-Za-z0-9_])`, 'g')
+    out = out.replace(re, `$1${label}`)
+  }
+
+  return out
+}
+
 /**
  * Ids resolved via `tilda_parkings--parking_condition_detail_token--${id}` (synthetic subcategory, not a tile property).
  * Longer ids first (substring tokens must not steal from longer ones).
@@ -225,7 +266,8 @@ export function formatParkingConditionCategoryDetailGroup(
   resolveToken: (tokenId: string) => string | undefined,
 ) {
   const afterWeekdays = translateParkingConditionCategoryWeekdays(detail)
-  return translateParkingConditionCategoryDetailTokens(afterWeekdays, resolveToken)
+  const afterMonths = translateParkingConditionCategoryMonths(afterWeekdays)
+  return translateParkingConditionCategoryDetailTokens(afterMonths, resolveToken)
 }
 
 export function formatParkingConditionCategorySegment(
