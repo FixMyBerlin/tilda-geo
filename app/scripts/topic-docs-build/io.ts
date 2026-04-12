@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
+import { styleText } from 'node:util'
 import {
   type TopicDocsYaml,
   topicDocsGroupsYamlSchema,
@@ -40,9 +41,19 @@ export const readTopicYamlFiles = async () => {
   return files
 }
 
+const parseYamlWithPath = (raw: string, filePath: string) => {
+  try {
+    return Bun.YAML.parse(raw) as unknown
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    const colored = `${styleText('red', 'YAML parse failed for')} ${styleText(['yellow', 'bold'], filePath)}: ${msg}`
+    throw new Error(colored, { cause: err })
+  }
+}
+
 export const parseTopicYaml = async (filePath: string) => {
   const raw = await readText(filePath)
-  const parsed = Bun.YAML.parse(raw) as unknown
+  const parsed = parseYamlWithPath(raw, filePath)
   if (Array.isArray(parsed)) {
     throw new Error(`Expected single YAML document in ${filePath}`)
   }
@@ -58,7 +69,7 @@ export const readGroupsYaml = async () => {
     return null
   }
   const raw = await readText(groupsPath)
-  const parsed = Bun.YAML.parse(raw) as unknown
+  const parsed = parseYamlWithPath(raw, groupsPath)
   if (Array.isArray(parsed)) {
     throw new Error(`Expected single YAML document in ${groupsPath}`)
   }
