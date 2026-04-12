@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/prisma/generated/client'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { AccessedRegionsSchema } from '@/server/users/schema'

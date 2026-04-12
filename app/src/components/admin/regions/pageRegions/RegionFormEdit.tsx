@@ -1,4 +1,4 @@
-import type { RegionStatus } from '@prisma/client'
+import type { RegionStatus } from '@/prisma/generated/browser'
 import { RegionForm } from './RegionForm'
 
 type Props = {

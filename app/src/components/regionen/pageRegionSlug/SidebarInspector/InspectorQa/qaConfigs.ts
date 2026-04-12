@@ -4,8 +4,8 @@ import {
   ExclamationTriangleIcon,
   UserIcon,
 } from '@heroicons/react/20/solid'
-import type { QaEvaluatorType } from '@prisma/client'
-import { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
+import type { QaEvaluatorType } from '@/prisma/generated/browser'
+import { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/browser'
 
 // QA System Status Colors (from specification)
 export const QA_SYSTEM_STATUS_COLORS = {

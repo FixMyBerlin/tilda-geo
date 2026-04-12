@@ -1,4 +1,4 @@
-import { UserRoleEnum } from '@prisma/client'
+import { UserRoleEnum } from '@/prisma/generated/client'
 import { AuthorizationError } from '@/server/auth/errors'
 import type { AppSession } from '@/server/auth/types'
 import db from '@/server/db.server'

@@ -65,15 +65,6 @@ export default defineConfig({
         find: '@',
         replacement: fileURLToPath(new URL('./src', import.meta.url)),
       },
-      // Prisma browser stub: Vite can't resolve `.prisma/client/index-browser` (bare specifier from
-      // @prisma/client). Alias to the generated file so client bundle uses the stub, not Node/pg.
-      // https://github.com/prisma/prisma/issues/12504
-      {
-        find: '.prisma/client/index-browser',
-        replacement: fileURLToPath(
-          new URL('./node_modules/.prisma/client/index-browser.js', import.meta.url),
-        ),
-      },
     ],
   },
   build: {

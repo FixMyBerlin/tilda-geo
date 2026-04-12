@@ -1,6 +1,6 @@
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
 import { Pool } from 'pg'
+import { PrismaClient } from '@/prisma/generated/client'
 import { getGeoDatabaseUrl } from './database-url.server'
 
 // This is the client for accessing the geo data.

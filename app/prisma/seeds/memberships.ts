@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client'
+import type { Prisma } from '@/prisma/generated/client'
 import db from '../../src/server/db.server'
 import { generateUserEmail } from './users'
 

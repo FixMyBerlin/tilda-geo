@@ -30,6 +30,7 @@ pids
 # DB (Prisma)
 *.sqlite
 *.sqlite-journal
+src/prisma/generated
 
 # Testing
 .coverage

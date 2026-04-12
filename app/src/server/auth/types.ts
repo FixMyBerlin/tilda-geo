@@ -1,4 +1,4 @@
-import type { UserRoleEnum } from '@prisma/client'
+import type { UserRoleEnum } from '@/prisma/generated/client'
 import type { auth } from './auth.server'
 
 // Use Better Auth's inferred Session type which includes customSession role field

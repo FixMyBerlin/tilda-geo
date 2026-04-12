@@ -1,4 +1,3 @@
-import { MapRenderFormatEnum } from '@prisma/client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
@@ -9,6 +8,7 @@ import { createSourceKeyStaticDatasets } from '@/components/regionen/pageRegionS
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
+import { MapRenderFormatEnum } from '@/prisma/generated/browser'
 import type { MetaData } from '@/scripts/StaticDatasets/types'
 import type { getUploadWithRegions } from '@/server/uploads/queries/getUploadWithRegions.server'
 import { deleteUploadFn, deleteUploadRegionFn } from '@/server/uploads/uploads.functions'

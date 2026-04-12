@@ -1,5 +1,4 @@
 import { GeocodingControl } from '@maptiler/geocoding-control/maplibregl'
-import '@maptiler/geocoding-control/style.css'
 import type { ControlPosition } from 'react-map-gl/maplibre'
 import { useControl } from 'react-map-gl/maplibre'
 import { MAPTILER_API_KEY } from '../utils/maptilerApiKey.const'

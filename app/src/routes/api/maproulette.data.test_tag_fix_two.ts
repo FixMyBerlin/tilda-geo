@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { createFileRoute } from '@tanstack/react-router'
 import * as turf from '@turf/turf'
 import type { LineString } from 'geojson'
@@ -9,6 +8,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/pointFromGeometry'
 import { isProd } from '@/components/shared/utils/isEnv'
+import { Prisma } from '@/prisma/generated/client'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 const idType = z.coerce.bigint().positive()

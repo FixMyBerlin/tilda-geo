@@ -1,5 +1,5 @@
-import type { RegionStatus } from '@prisma/client'
 import { Pill } from '@/components/shared/text/Pill'
+import type { RegionStatus } from '@/prisma/generated/browser'
 
 type Props = {
   status: RegionStatus

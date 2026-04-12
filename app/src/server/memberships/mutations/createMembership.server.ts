@@ -1,5 +1,5 @@
-import { Prisma } from '@prisma/client'
 import { z } from 'zod'
+import { Prisma } from '@/prisma/generated/client'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { errorState, validationErrorState } from '@/server/utils/validation'

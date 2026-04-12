@@ -1,7 +1,7 @@
-import { Prisma } from '@prisma/client'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { isProd } from '@/components/shared/utils/isEnv'
+import { Prisma } from '@/prisma/generated/client'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 const idType = z.coerce.bigint().positive()

@@ -1,6 +1,6 @@
-import type { RegionStatus } from '@prisma/client'
 import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Link } from '@/components/shared/links/Link'
+import type { RegionStatus } from '@/prisma/generated/browser'
 
 type Props = {
   status: RegionStatus // but never 'PUBLIC'

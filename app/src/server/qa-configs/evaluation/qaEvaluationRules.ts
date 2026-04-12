@@ -1,4 +1,4 @@
-import type { QaSystemStatus } from '@prisma/client'
+import type { QaSystemStatus } from '@/prisma/generated/client'
 
 export const qaResettableUserStatuses = [
   'NOT_OK_DATA_ERROR',

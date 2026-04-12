@@ -1,6 +1,6 @@
-import { MapRenderFormatEnum } from '@prisma/client'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
+import { MapRenderFormatEnum } from '@/prisma/generated/client'
 import { checkApiKey, parseData } from '@/server/api/util/checkApiKey.server'
 import db from '@/server/db.server'
 

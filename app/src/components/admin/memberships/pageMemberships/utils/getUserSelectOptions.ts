@@ -1,4 +1,4 @@
-import type { User } from '@prisma/client'
+import type { User } from '@/prisma/generated/browser'
 import { getFullname } from './getFullname'
 
 export type UserSelectOptions = (Partial<User> & Required<Pick<User, 'id' | 'email'>>)[]

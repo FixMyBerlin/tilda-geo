@@ -1,8 +1,8 @@
 import { Parser } from '@json2csv/plainjs'
-import type { Region, Upload } from '@prisma/client'
 import invariant from 'tiny-invariant'
 import { staticDatasetCategories } from '@/components/regionen/pageRegionSlug/mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
+import type { Region, Upload } from '@/prisma/generated/client'
 import type { MetaData } from '@/scripts/StaticDatasets/types'
 
 /**

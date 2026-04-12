@@ -1,4 +1,4 @@
-import type { User } from '@prisma/client'
+import type { User } from '@/prisma/generated/browser'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
 
 type Props = (Partial<CurrentUser> | Partial<User>) & {

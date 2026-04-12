@@ -1,5 +1,5 @@
-import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
 import { z } from 'zod'
+import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
 import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { canAccessQaForRegion } from '@/server/qa-configs/authorization/canAccessQaForRegion.server'

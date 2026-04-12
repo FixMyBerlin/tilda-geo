@@ -1,5 +1,5 @@
-import { RegionStatus } from '@prisma/client'
 import type { StaticRegion } from '@/data/regions.const'
+import { RegionStatus } from '@/prisma/generated/browser'
 import { RegionForm } from './RegionForm'
 
 type Props = {

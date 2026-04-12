@@ -1,4 +1,3 @@
-import { UserRoleEnum } from '@prisma/client'
 import type { BetterAuthOptions } from 'better-auth'
 /**
  * tanstackStartCookies is intentionally NOT used - it pulls @tanstack/react-start/server
@@ -10,6 +9,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { customSession } from 'better-auth/plugins'
 import { genericOAuth } from 'better-auth/plugins/generic-oauth'
 import { getOsmApiUrl, getOsmUrl } from '@/components/shared/utils/getOsmUrl'
+import { UserRoleEnum } from '@/prisma/generated/client'
 import db from '@/server/db.server'
 import { sendNewUserRegistration } from '@/server/notifications/sendNewUserRegistration.server'
 

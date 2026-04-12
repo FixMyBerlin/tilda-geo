@@ -1,4 +1,4 @@
-import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
+import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
 import type { QaListStyleKey } from '@/server/qa-configs/listStyleKeys.const'
 
 /**

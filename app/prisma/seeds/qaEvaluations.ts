@@ -1,4 +1,4 @@
-import { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@prisma/client'
+import { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@/prisma/generated/client'
 import db from '../../src/server/db.server'
 
 export default async function seed() {

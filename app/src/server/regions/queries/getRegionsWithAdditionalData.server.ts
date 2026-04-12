@@ -1,7 +1,7 @@
-import type { Prisma, Region } from '@prisma/client'
 import { notFound } from '@tanstack/react-router'
 import type { StaticRegion } from '@/data/regions.const'
 import { staticRegion } from '@/data/regions.const'
+import type { Prisma, Region } from '@/prisma/generated/client'
 import db from '@/server/db.server'
 import type { TRegion } from './getRegion.server'
 

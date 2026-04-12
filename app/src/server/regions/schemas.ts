@@ -1,5 +1,5 @@
-import { RegionStatus } from '@prisma/client'
 import { z } from 'zod'
+import { RegionStatus } from '@/prisma/generated/client'
 
 export const RegionSchema = z.object({
   slug: z.string(),

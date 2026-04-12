@@ -1,5 +1,5 @@
-import type { MapRenderFormatEnum } from '@prisma/client'
 import { z } from 'zod'
+import type { MapRenderFormatEnum } from '@/prisma/generated/client'
 import type { MetaDataSystemLayer, MetaDataUser } from '@/scripts/StaticDatasets/types'
 import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'

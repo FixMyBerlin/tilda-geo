@@ -1,5 +1,5 @@
-import { QaEvaluationStatus } from '@prisma/client'
 import { z } from 'zod'
+import { QaEvaluationStatus } from '@/prisma/generated/client'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'

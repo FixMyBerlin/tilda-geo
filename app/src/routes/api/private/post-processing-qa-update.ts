@@ -1,5 +1,5 @@
-import type { QaSystemStatus } from '@prisma/client'
 import { createFileRoute } from '@tanstack/react-router'
+import type { QaSystemStatus } from '@/prisma/generated/client'
 import { GuardEndpointSchema, guardEndpoint } from '@/server/api/private/guardEndpoint'
 import db from '@/server/db.server'
 import {
