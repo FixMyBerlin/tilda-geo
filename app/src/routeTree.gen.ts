@@ -45,7 +45,6 @@ import { Route as AdminUploadsIndexRouteImport } from './routes/admin/uploads/in
 import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/index'
 import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
 import { Route as AdminMembershipsIndexRouteImport } from './routes/admin/memberships/index'
-import { Route as ApiUploadsDeleteAllRouteImport } from './routes/api/uploads.delete-all'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
 import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
@@ -256,11 +255,6 @@ const AdminMembershipsIndexRoute = AdminMembershipsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminMembershipsRoute,
-} as any)
-const ApiUploadsDeleteAllRoute = ApiUploadsDeleteAllRouteImport.update({
-  id: '/delete-all',
-  path: '/delete-all',
-  getParentRoute: () => ApiUploadsRoute,
 } as any)
 const ApiUploadsCreateRoute = ApiUploadsCreateRouteImport.update({
   id: '/create',
@@ -485,7 +479,6 @@ export interface FileRoutesByFullPath {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
-  '/api/uploads/delete-all': typeof ApiUploadsDeleteAllRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
@@ -547,7 +540,6 @@ export interface FileRoutesByTo {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
-  '/api/uploads/delete-all': typeof ApiUploadsDeleteAllRoute
   '/admin/memberships': typeof AdminMembershipsIndexRoute
   '/admin/qa-configs': typeof AdminQaConfigsIndexRoute
   '/admin/regions': typeof AdminRegionsIndexRoute
@@ -618,7 +610,6 @@ export interface FileRoutesById {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
-  '/api/uploads/delete-all': typeof ApiUploadsDeleteAllRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
@@ -688,7 +679,6 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
-    | '/api/uploads/delete-all'
     | '/admin/memberships/'
     | '/admin/qa-configs/'
     | '/admin/regions/'
@@ -750,7 +740,6 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
-    | '/api/uploads/delete-all'
     | '/admin/memberships'
     | '/admin/qa-configs'
     | '/admin/regions'
@@ -820,7 +809,6 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
-    | '/api/uploads/delete-all'
     | '/admin/memberships/'
     | '/admin/qa-configs/'
     | '/admin/regions/'
@@ -1126,13 +1114,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/memberships/'
       preLoaderRoute: typeof AdminMembershipsIndexRouteImport
       parentRoute: typeof AdminMembershipsRoute
-    }
-    '/api/uploads/delete-all': {
-      id: '/api/uploads/delete-all'
-      path: '/delete-all'
-      fullPath: '/api/uploads/delete-all'
-      preLoaderRoute: typeof ApiUploadsDeleteAllRouteImport
-      parentRoute: typeof ApiUploadsRoute
     }
     '/api/uploads/create': {
       id: '/api/uploads/create'
@@ -1515,13 +1496,11 @@ const ApiRegionsRouteWithChildren = ApiRegionsRoute._addFileChildren(
 interface ApiUploadsRouteChildren {
   ApiUploadsSlugRoute: typeof ApiUploadsSlugRoute
   ApiUploadsCreateRoute: typeof ApiUploadsCreateRoute
-  ApiUploadsDeleteAllRoute: typeof ApiUploadsDeleteAllRoute
 }
 
 const ApiUploadsRouteChildren: ApiUploadsRouteChildren = {
   ApiUploadsSlugRoute: ApiUploadsSlugRoute,
   ApiUploadsCreateRoute: ApiUploadsCreateRoute,
-  ApiUploadsDeleteAllRoute: ApiUploadsDeleteAllRoute,
 }
 
 const ApiUploadsRouteWithChildren = ApiUploadsRoute._addFileChildren(
