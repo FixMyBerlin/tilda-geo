@@ -2,40 +2,36 @@
 
 ## Deployment model
 
-- Deploy env values are defined once in [`env/deploy.manifest.json`](./env/deploy.manifest.json).
-- [`workflows/setup-env.yml`](./workflows/setup-env.yml) validates the manifest and runs [`scripts/generate-deploy-env.ts`](./scripts/generate-deploy-env.ts) to produce `.env.deploy.generated` (deterministic from the manifest).
-- The generated file is copied to the server and renamed to `/srv/.env` (`chmod 600`).
-- [`scripts/verify-env-manifest.ts`](./scripts/verify-env-manifest.ts) checks that deploy keys are present where needed and that stale unmanaged keys are not left behind.
-- [`scripts/generate-github-readme.ts`](./scripts/generate-github-readme.ts) regenerates the table below from the manifest.
+- Canonical deploy definitions: [`env/deploy.manifest.json`](./env/deploy.manifest.json).
+- [`workflows/setup-env.yml`](./workflows/setup-env.yml) runs [`scripts/verify-env-manifest.ts`](./scripts/verify-env-manifest.ts) and [`scripts/generate-deploy-env.ts`](./scripts/generate-deploy-env.ts), producing `.env.deploy.generated` for upload.
+- On the host, that file becomes `/srv/.env` with **`root:docker`** and mode **`640`** (`sudo chown root:docker`, `sudo chmod 640`) so members of `docker` can run `docker compose` (Compose reads `.env` for interpolation). The deploy SSH user needs passwordless sudo for those two commands, or the step must run as root.
+- [`scripts/generate-github-readme.ts`](./scripts/generate-github-readme.ts) refreshes the mapping table below from the manifest.
 
 ## When checks run
 
-- **CI:** [`.github/workflows/ci.yml`](./workflows/ci.yml) runs manifest verification (and related checks) on every PR.
-- **Deploy:** [`.github/workflows/setup-env.yml`](./workflows/setup-env.yml) validates the manifest and generates the deploy `.env` for the selected environment.
-- **Local (from `app/`):** `bun run env-check` after changing the deploy manifest, `.env.example`, or compose/workflow env wiring—runs manifest verification and README regeneration (see [`app/package.json`](../app/package.json) `env-check:*` scripts).
+- **CI:** [`.github/workflows/ci.yml`](./workflows/ci.yml) — manifest verification and related checks on every PR.
+- **Deploy:** [`setup-env.yml`](./workflows/setup-env.yml) — same verification plus generated `.env` for the target environment.
+- **Local (`app/`):** `bun run env-check` after changing the manifest, `.env.example`, or compose / workflow env wiring ([`app/package.json`](../app/package.json) `env-check:*`).
 
-## Consistency guarantees
+## Consistency / drift
 
-- **Single source of truth:** The manifest defines each deploy variable (`name`, source, required/default, description).
-- **Drift checks in CI:** `Check PR` fails if manifest keys are missing from `.env.example` or from `docker-compose.yml`.
-- **No stale leftovers:** checks also fail when unmanaged env keys are found in `docker-compose.yml` or setup workflow mappings.
-- **Generated docs:** the variable table in this README is generated from manifest data; if stale, CI fails.
-- **Runtime required checks:** deploy generation fails fast when required GitHub vars/secrets are missing in the selected environment.
-- **Local-only tooling vars are excluded:** some keys in `.env.example` are intentionally local-only (for example `DATABASE_URL_PRODUCTION` / `DATABASE_URL_STAGING` used by `app/scripts/db-pull` scripts) and must not be added to the deploy manifest or setup-env workflow mappings.
+- Manifest defines deploy variables (`name`, source, required/default, description).
+- CI fails if manifest keys are missing from `.env.example` or `docker-compose.yml`, or if unmanaged keys appear in compose or setup-env mappings.
+- The generated table in this file must match the manifest (regenerate with `bun .github/scripts/generate-github-readme.ts` when needed).
+- Deploy generation fails if a required GitHub var/secret is missing for the selected environment.
+- Some `.env.example` entries are local-only (e.g. `DATABASE_URL_*` for `app/scripts/db-pull`); they stay out of the manifest and setup-env mappings.
 
-## Security properties
+## Security
 
-- Secrets stay in GitHub Secrets and are never committed to the repository.
-- Generated deploy env file is temporary and copied to server as `/srv/.env` with restrictive file mode.
-- Manifest-driven generation avoids silent partial substitution of deploy values.
-- `.env.example` only contains placeholders for sensitive values.
+- Generated deploy env is not committed; production values live in GitHub Environments / Secrets.
+- `/srv/.env`: group-readable for `docker`, not world-readable; see deployment step above.
+- Prefer runtime env over Docker build args for secrets.
+- Prefer AWS OIDC over long-lived access keys where applicable.
 
-## Failure examples and reporting
+## Operations (SSH)
 
-- **If a required variable is removed from `.env.example`:** `verify-env-manifest.ts` fails in CI with a clear “Missing in .env.example” list.
-- **If a manifest variable is removed from `docker-compose.yml` references:** `verify-env-manifest.ts` fails in CI with “Missing in docker-compose.yml” list.
-- **If a stale variable remains in `docker-compose.yml` or workflow source mappings:** `verify-env-manifest.ts` fails with “Unmanaged vars/mappings” output.
-- **If a required GitHub environment variable/secret is absent:** `generate-deploy-env.ts` fails the deployment workflow with the missing source name.
+- `cd /srv && docker compose logs app -f` — needs readable `/srv/.env` (above permissions).
+- `docker logs -f app` — container logs only; does not read `/srv/.env`.
 
 ## Source mapping (generated)
 
@@ -75,10 +71,3 @@
 | `ECR_REGISTRY`                         | `vars.ECR_REGISTRY`                            | yes      | Private ECR registry URL used by docker-compose to pull images. |
 
 <!-- GENERATED_ENV_TABLE_END -->
-
-## Security notes
-
-- Keep secrets in GitHub Environments (`staging`, `production`) or repository secrets where needed.
-- Keep `.env.example` safe: placeholders only, no real secret values.
-- Do not pass secrets as Docker build args. Use runtime env only.
-- Prefer AWS OIDC role assumption over long-lived `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`.
