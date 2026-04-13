@@ -163,27 +163,19 @@ const MONTH_ABBR_TO_DE: Record<string, string> = {
 
 const MONTH_ABBRS_ORDERED = Object.keys(MONTH_ABBR_TO_DE)
 
-/** English month abbreviations (opening_hours-style) in condition detail text. */
+/**
+ * English month tokens from Lua / opening_hours-style fragments: replace each `Jan` or `Jan.` (etc.)
+ * with the canonical German string in `MONTH_ABBR_TO_DE` in one step. Optional `.` is part of the
+ * English token so it is not left behind (e.g. `Apr-Sep.: ` → `April-Sep.: `). Month ranges need no
+ * special case: `Mar-Oct` becomes `März-Okt.` by replacing each side.
+ */
 export function translateParkingConditionCategoryMonths(detail: string) {
-  const monthAlt = MONTH_ABBRS_ORDERED.join('|')
-  let out = detail.replace(
-    new RegExp(`\\b(${monthAlt})-(${monthAlt})\\b`, 'g'),
-    (_, a: string, b: string) => {
-      const la = MONTH_ABBR_TO_DE[a]
-      const lb = MONTH_ABBR_TO_DE[b]
-      if (!la || !lb) {
-        return `${a}-${b}`
-      }
-      return `${la}-${lb}`
-    },
-  )
-
+  let out = detail
   for (const abbr of MONTH_ABBRS_ORDERED) {
     const label = MONTH_ABBR_TO_DE[abbr]
-    const re = new RegExp(`(^|[^A-Za-z0-9_])${abbr}(?![A-Za-z0-9_])`, 'g')
+    const re = new RegExp(`(^|[^A-Za-z0-9_])${abbr}(\\.?)(?![A-Za-z0-9_])`, 'g')
     out = out.replace(re, `$1${label}`)
   }
-
   return out
 }
 

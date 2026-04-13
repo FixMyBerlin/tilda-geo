@@ -137,6 +137,16 @@ describe('formatParkingConditionCategorySegment (Lua examples)', () => {
       ),
     ).toBe(`${tCat('no_standing')} (Juni 08:00-18:00)`)
   })
+
+  test('no_stopping (Apr-Sep.: We 14:00-18:00) — English month abbr already dotted before colon', () => {
+    expect(
+      formatParkingConditionCategorySegment(
+        'no_stopping (Apr-Sep.: We 14:00-18:00)',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(`${tCat('no_stopping')} (April-Sep.: Mittwoch 14:00-18:00)`)
+  })
 })
 
 describe('formatParkingConditionCategorySegment (edge cases)', () => {
