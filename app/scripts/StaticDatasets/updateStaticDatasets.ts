@@ -1,13 +1,20 @@
 // We use bun.sh to run this file
-import { select } from '@clack/prompts'
-import dotenv from 'dotenv'
 import fs from 'node:fs'
 import path from 'node:path'
+import { parseArgs } from 'node:util'
+import { select } from '@clack/prompts'
 import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
-import { parseArgs } from 'util'
+import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
 import { getRegions } from './api'
-import { MetaData } from './types'
+import {
+  buildStaticDatasetsApiConfig,
+  S3_UPLOAD_FOLDER_BY_APP_ENV,
+  STATIC_DATASETS_CLI_ENV_TO_APP,
+  STATIC_DATASETS_CLI_ENVS,
+  type StaticDatasetsCliEnv,
+} from './staticDatasetsAppEnv.const'
+import type { MetaData } from './types'
 import { findGeojson } from './updateStaticDatasets/findGeojson'
 import { ignoreFolder } from './updateStaticDatasets/ignoreFolder'
 import { processExternalSource } from './updateStaticDatasets/processExternalSource'
@@ -16,33 +23,10 @@ import { transformFile } from './updateStaticDatasets/transformFile'
 import { import_ } from './utils/import_'
 import { green, inverse, red, yellow } from './utils/log'
 
-function loadEnvFiles(environment: string) {
-  const scriptDir = path.dirname(__filename)
-  const appRoot = path.resolve(scriptDir, '../..')
+const isStaticDatasetsCliEnv = (value: string | undefined): value is StaticDatasetsCliEnv =>
+  value !== undefined && (STATIC_DATASETS_CLI_ENVS as readonly string[]).includes(value)
 
-  // Map 'dev' to 'development' for file naming
-  const envFileSuffix = environment === 'dev' ? 'development' : environment
-
-  // Load base .env from app root
-  const baseEnvPath = path.join(appRoot, '.env')
-  if (fs.existsSync(baseEnvPath)) {
-    dotenv.config({ path: baseEnvPath })
-  }
-
-  // Load environment-specific .env file from scripts/StaticDatasets directory
-  const envFilePath = path.join(scriptDir, `.env.${envFileSuffix}`)
-  if (!fs.existsSync(envFilePath)) {
-    red(`Environment file not found: ${envFilePath}`)
-    process.exit(1)
-  }
-  dotenv.config({ path: envFilePath, override: true })
-}
-
-// Parse command line arguments
-// use --env to specify environment (dev/staging/production), otherwise will prompt
-// use --keep-tmp to keep temporary generated files
-// use --folder-filter to run only folders that include this filter string (check the full path, so `region-bb` (group folder) and `bb-` (dataset folder) will both work)
-const { values, positionals } = parseArgs({
+const { values, positionals: _positionals } = parseArgs({
   args: Bun.argv,
   options: {
     env: { type: 'string' },
@@ -53,40 +37,41 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
 })
 
-// Determine environment: use --env flag or prompt user
-let environment: string
+let cliEnv: StaticDatasetsCliEnv
 if (values.env) {
-  const validEnvs = ['dev', 'staging', 'production']
-  if (!validEnvs.includes(values.env)) {
-    red(`Invalid environment: ${values.env}. Must be one of: ${validEnvs.join(', ')}`)
+  if (!isStaticDatasetsCliEnv(values.env)) {
+    red(
+      `Invalid environment: ${values.env}. Must be one of: ${STATIC_DATASETS_CLI_ENVS.join(', ')}`,
+    )
     process.exit(1)
   }
-  environment = values.env
+  cliEnv = values.env
 } else {
   const selected = await select({
     message: 'Select environment:',
-    options: [
-      { value: 'dev', label: 'Development' },
-      { value: 'staging', label: 'Staging' },
-      { value: 'production', label: 'Production' },
-    ],
+    options: STATIC_DATASETS_CLI_ENVS.map((value) => ({
+      value,
+      label: STATIC_DATASETS_CLI_ENV_TO_APP[value],
+    })),
   })
 
-  if (!selected || typeof selected !== 'string') {
+  if (typeof selected !== 'string' || !isStaticDatasetsCliEnv(selected)) {
     red('No environment selected. Aborting.')
     process.exit(1)
   }
-  environment = selected
+  cliEnv = selected
 }
 
-// Load environment files before accessing process.env
-loadEnvFiles(environment)
+getValidatedEnv(staticDatasetsS3CredentialsSchema)
+
+const appEnv = STATIC_DATASETS_CLI_ENV_TO_APP[cliEnv]
+const api = buildStaticDatasetsApiConfig(appEnv)
 
 const geoJsonFolder = 'scripts/StaticDatasets/geojson'
 export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
 if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
 
-const regions = await getRegions()
+const regions = await getRegions(api)
 const existingRegionSlugs = regions.map((region) => region.slug)
 
 const keepTemporaryFiles = !!values['keep-tmp']
@@ -94,8 +79,8 @@ const folderFilterTerm = values['folder-filter']
 
 inverse('Starting update with settings', [
   {
-    API_ROOT_URL: process.env.API_ROOT_URL,
-    S3_UPLOAD_FOLDER: process.env.S3_UPLOAD_FOLDER,
+    apiRootUrlFromTarget: api.apiRootUrl,
+    s3UploadFolderFromTarget: S3_UPLOAD_FOLDER_BY_APP_ENV[appEnv],
     keepTemporaryFiles,
     folderFilterTerm,
   },
@@ -107,7 +92,7 @@ const ignorePatterns = fs.existsSync(updateIgnorePath)
   : []
 
 if (!fs.existsSync(geoJsonFolder)) {
-  red(`folder "${geoJsonFolder}" does not exists. Please run "npm run StaticDatasets:link"?`)
+  red(`folder "${geoJsonFolder}" does not exists. Please run "bun run static-datasets-link"?`)
   process.exit(1)
 }
 
@@ -118,20 +103,16 @@ const regionGroupFolderPaths = fs
   .filter((item) => fs.statSync(path.join(geoJsonFolder, item)).isDirectory())
 
 const datasetFileFolderData = regionGroupFolderPaths
-  .map((regionGroupFolder) => {
+  .flatMap((regionGroupFolder) => {
     const subFolders = fs.readdirSync(path.join(geoJsonFolder, regionGroupFolder))
-    return subFolders.map((datasetFolder) => {
+    return subFolders.flatMap((datasetFolder) => {
       const targetFolder = path.join(geoJsonFolder, regionGroupFolder, datasetFolder)
       const regionAndDatasetFolder = `${regionGroupFolder}/${datasetFolder}`
-      // If a `folder-filter` is given, we only look at folder that include this term
-      // Filter uses GROUPFOLDER/SUBFOLDER format (e.g., "masks/" to match all mask folders)
-      if (folderFilterTerm && !regionAndDatasetFolder.includes(folderFilterTerm)) return
-      // Make sure we only select folders, no files
-      if (!fs.statSync(targetFolder).isDirectory()) return
-      return { datasetFolderPath: targetFolder, regionFolder: regionGroupFolder, datasetFolder }
+      if (folderFilterTerm && !regionAndDatasetFolder.includes(folderFilterTerm)) return []
+      if (!fs.statSync(targetFolder).isDirectory()) return []
+      return [{ datasetFolderPath: targetFolder, regionFolder: regionGroupFolder, datasetFolder }]
     })
   })
-  .flat()
   .filter(Boolean)
   .sort((a, b) => a.datasetFolderPath.localeCompare(b.datasetFolderPath))
 
@@ -185,25 +166,27 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
 
   // Route to appropriate processor based on data source type
   switch (metaData.dataSourceType) {
-    case 'external':
-      // TypeScript narrows metaData to the external variant here
-      await processExternalSource(metaData, uploadSlug, regionSlugs, regionAndDatasetFolder)
+    case 'external': {
+      await processExternalSource(
+        metaData,
+        uploadSlug,
+        regionSlugs,
+        regionAndDatasetFolder,
+        api,
+        appEnv,
+      )
       break
-    case 'local':
-      // Get the one `.geojson` file that we will handle ready
+    }
+    case 'local': {
       const geojsonFullFilename = findGeojson(datasetFolderPath)
       if (!geojsonFullFilename) {
-        // Logging is part of findGeojson()
         continue
       }
-
-      // Create the transformed data (or duplicate existing geojson)
       const transformedFilepath = await transformFile(
         datasetFolderPath,
         geojsonFullFilename,
         tempFolder,
       )
-
       await processLocalSource(
         metaData,
         uploadSlug,
@@ -211,8 +194,11 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
         transformedFilepath,
         tempFolder,
         regionAndDatasetFolder,
+        api,
+        appEnv,
       )
       break
+    }
   }
 
   green('  OK')
@@ -226,9 +212,9 @@ if (keepTemporaryFiles) {
     .filter((file) => file.endsWith('.geojson') || file.endsWith('.geojson.gz'))
     .filter((file) => (folderFilterTerm ? file.includes(folderFilterTerm) : true))
     .sort()
-  tempGeojsonFiles.map((file) => {
+  for (const file of tempGeojsonFiles) {
     console.log(`  ${path.join(tempFolder, file)}`)
-  })
+  }
 }
 
 // Clean up
@@ -240,10 +226,11 @@ if (!keepTemporaryFiles) {
 //   https://github.com/FixMyBerlin/tilda-static-data/tags
 // How to use: Compare with the previous tag at
 //   https://github.com/FixMyBerlin/tilda-static-data/compare/main...publish_2024-05-23_prd
-if (process.env.S3_UPLOAD_FOLDER === 'production') {
+if (appEnv === 'production') {
+  const folder = S3_UPLOAD_FOLDER_BY_APP_ENV[appEnv]
   const currentDateTime = new Date().toISOString()
-  const tagName = `publish_${currentDateTime}_${process.env.S3_UPLOAD_FOLDER}`
-  const tagMessage = `publish data to ${process.env.S3_UPLOAD_FOLDER}`
+  const tagName = `publish_${currentDateTime}_${folder}`
+  const tagMessage = `publish data to ${folder}`
 
   try {
     Bun.spawnSync(['git', 'tag', '-a', tagName, '-m', tagMessage], {

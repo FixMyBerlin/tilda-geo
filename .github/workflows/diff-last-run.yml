@@ -7,7 +7,7 @@ on:
         required: true
     outputs:
       CHANGES:
-        description: "Whether the given directories have changed since the last successfull workflow run."
+        description: 'Whether the given directories have changed since the last successfull workflow run.'
         value: ${{ jobs.diff.outputs.CHANGES }}
 
 jobs:

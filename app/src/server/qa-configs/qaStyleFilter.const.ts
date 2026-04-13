@@ -1,5 +1,5 @@
-import type { QaListStyleKey } from '@/src/server/qa-configs/listStyleKeys.const'
-import type { QaEvaluationStatus, QaSystemStatus } from '@prisma/client'
+import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
+import type { QaListStyleKey } from '@/server/qa-configs/listStyleKeys.const'
 
 /**
  * Filter shape for a list style (used by matchesListStyle only).
@@ -27,11 +27,9 @@ export type QaEvaluationStatusFields = {
 }
 
 /** Check if an evaluation matches the given list style (must be the latest row for that areaId). */
-export function matchesListStyle(
-  evaluation: QaEvaluationStatusFields,
-  styleKey: QaListStyleKey,
-) {
+export function matchesListStyle(evaluation: QaEvaluationStatusFields, styleKey: QaListStyleKey) {
   const filter = QA_LIST_STYLE_WHERE[styleKey]
+  if (filter === undefined) return false
   if (evaluation.userStatus !== filter.userStatus) return false
   if (filter.systemStatus != null) {
     return evaluation.systemStatus === filter.systemStatus

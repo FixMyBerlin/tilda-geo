@@ -1,0 +1,1049 @@
+{
+  "topic": "parking",
+  "tableName": "parkings",
+  "sourceIds": ["tilda_parkings"],
+  "title": "Parken",
+  "summary": "Die Haupttabelle für straßenseitiges Parken in Form von Liniengeometrien. Die Geometrien sind von OpenStreetMap Straßenabschnitten sowie separat erfassten Parkflächen abgeleitet.",
+  "groups": [
+    {
+      "id": "parking",
+      "label": "Parkraum-Prozessierung"
+    }
+  ],
+  "attributes": [
+    {
+      "key": "parking",
+      "type": "string",
+      "label": "Parken",
+      "values": [
+        {
+          "value": "lane",
+          "label": "Auf der Fahrbahn"
+        },
+        {
+          "value": "half_on_kerb",
+          "label": "Halb auf dem Bürgersteig"
+        },
+        {
+          "value": "on_kerb",
+          "label": "Auf dem Bürgersteig"
+        },
+        {
+          "value": "no_parking",
+          "label": "Parkverbot"
+        },
+        {
+          "value": "no_stopping",
+          "label": "Halteverbot"
+        },
+        {
+          "value": "separate",
+          "label": "Parkplatz als separate Geometrie erfasst"
+        },
+        {
+          "value": "shoulder",
+          "label": "Seitenstreifen"
+        },
+        {
+          "value": "street_side",
+          "label": "Parkbucht"
+        },
+        {
+          "value": "yes",
+          "label": "Parken (allgemein, OSM yes)"
+        },
+        {
+          "value": "no",
+          "label": "Parken verboten (Sonstiger/Unbekannter Grund)"
+        },
+        {
+          "value": "no_standing",
+          "label": "Stehverbot (OSM)"
+        },
+        {
+          "value": "missing",
+          "label": "Daten in OSM fehlen"
+        },
+        {
+          "value": "not_expected",
+          "label": "Kein Parken zu erwarten"
+        }
+      ]
+    },
+    {
+      "key": "capacity",
+      "type": "number",
+      "label": "Kapazität",
+      "description": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
+      "chapterRefs": ["capacity-calculation"],
+      "values": []
+    },
+    {
+      "key": "capacity_source",
+      "type": "string",
+      "label": "Kapazitätsherkunft",
+      "description": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.",
+      "chapterRefs": ["capacity-calculation"],
+      "values": [
+        {
+          "value": "tag",
+          "label": "Explizite Angabe aus OSM."
+        },
+        {
+          "value": "tag_estimation",
+          "label": "Explizite Angabe einer Schätzung aus OSM."
+        },
+        {
+          "value": "tag_redistributed",
+          "label": "Explizite Angabe aus OSM, dann anteilig aufgeteilt nach Stanzung."
+        },
+        {
+          "value": "tag_estimation_redistributed",
+          "label": "Explizite Angabe einer Schätzung aus OSM, dann anteilig aufgeteilt nach Stanzung."
+        },
+        {
+          "value": "area_and_orientation_parallel",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung."
+        },
+        {
+          "value": "area_and_orientation_perpendicular",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung."
+        },
+        {
+          "value": "area_and_orientation_diagonal",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung."
+        },
+        {
+          "value": "area_and_orientation_parallel_redistributed",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung, dann anteilig aufgeteilt nach Stanzung."
+        },
+        {
+          "value": "area_and_orientation_perpendicular_redistributed",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung, dann anteilig aufgeteilt nach Stanzung."
+        },
+        {
+          "value": "area_and_orientation_diagonal_redistributed",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung, dann anteilig aufgeteilt nach Stanzung."
+        },
+        {
+          "value": "area_and_orientation_fallback_parallel",
+          "label": "Berechnet auf Basis der Fläche und Parkausrichtung. Allerdings war die Parkausrichtung unbekannt, so dass Parallelparken angenommen wurde."
+        },
+        {
+          "value": "estimated_from_length",
+          "label": "Berechnet auf Basis der Linien-Länge und Ausrichtung."
+        },
+        {
+          "value": "estimated_from_area",
+          "label": "Berechnet auf Basis der Fläche und Ausrichtung."
+        },
+        {
+          "value": "estimated",
+          "label": "Berechnung"
+        },
+        {
+          "value": "estimated_redistributed",
+          "label": "Geschätzt, Kapazität umverteilt"
+        },
+        {
+          "value": "assumed_default",
+          "label": "Keine explizite Angabe vorgefunden; dieser Wert ist eine Annahme."
+        }
+      ]
+    },
+    {
+      "key": "orientation",
+      "type": "string",
+      "label": "Ausrichtung",
+      "values": [
+        {
+          "value": "parallel",
+          "label": "Parallelparken"
+        },
+        {
+          "value": "perpendicular",
+          "label": "Querparken"
+        },
+        {
+          "value": "diagonal",
+          "label": "Schrägparken"
+        }
+      ]
+    },
+    {
+      "key": "condition_category",
+      "type": "string",
+      "label": "Parkbeschränkung",
+      "chapterRefs": ["condition-category"],
+      "values": [
+        {
+          "value": "access_restriction",
+          "label": "Zugangsbeschränkung"
+        },
+        {
+          "value": "assumed_free",
+          "label": "Wahrscheinlich keine Parkbeschränkungen"
+        },
+        {
+          "value": "assumed_private",
+          "label": "Sehr wahrscheinlich privat"
+        },
+        {
+          "value": "bus_lane",
+          "label": "Bussonderfahrstreifen"
+        },
+        {
+          "value": "car_sharing",
+          "label": "Nur für Carsharing-Fahrzeuge"
+        },
+        {
+          "value": "charging",
+          "label": "Laden von Elektrofahrzeugen"
+        },
+        {
+          "value": "disabled",
+          "label": "Behindertenparkplatz"
+        },
+        {
+          "value": "disabled_private",
+          "label": "Personenbezogener Behindertenparkplatz"
+        },
+        {
+          "value": "free",
+          "label": "Keine Parkbeschränkungen"
+        },
+        {
+          "value": "loading",
+          "label": "Ladezone"
+        },
+        {
+          "value": "maxweight",
+          "label": "Gewichtsbegrenzung"
+        },
+        {
+          "value": "mixed",
+          "label": "Nur mit Parkschein oder Bewohnerparkausweis"
+        },
+        {
+          "value": "no_parking",
+          "label": "Parkverbot / Eingeschränktes Haltverbot"
+        },
+        {
+          "value": "no_standing",
+          "label": "Eingeschränktes Halteverbot"
+        },
+        {
+          "value": "no_stopping",
+          "label": "Halteverbot / Absolutes Haltverbot"
+        },
+        {
+          "value": "paid",
+          "label": "Nur mit Parkschein"
+        },
+        {
+          "value": "private",
+          "label": "Privat"
+        },
+        {
+          "value": "residents",
+          "label": "Nur mit Bewohnerparkausweis"
+        },
+        {
+          "value": "taxi",
+          "label": "Taxenstand"
+        },
+        {
+          "value": "time_limited",
+          "label": "Höchstparkdauer"
+        },
+        {
+          "value": "unspecified",
+          "label": "Unbestimmt"
+        },
+        {
+          "value": "vehicle_restriction",
+          "label": "Beschränkung auf Fahrzeugklassen"
+        }
+      ]
+    },
+    {
+      "key": "staggered",
+      "type": "string",
+      "label": "Parkweise",
+      "values": [
+        {
+          "value": "yes",
+          "label": "Alternierendes Parken",
+          "description": "Auf diesem Abschnitt gibt es keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickelt sich eine Konvention zwischen den Anwohnenden, in welchen Bereichen auf welcher Seite geparkt wird. In der Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt wird) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten.",
+          "chapterRefs": ["capacity-calculation"]
+        },
+        {
+          "value": "no",
+          "label": "Nicht alternierend"
+        }
+      ]
+    },
+    {
+      "key": "length",
+      "type": "number",
+      "label": "Länge",
+      "description": "Berechnete Segmentlänge des OSM-Straßenabschnitts. Für die Berechnung wird eine für Deutschland geeignete metrische Projektion verwendet.",
+      "values": []
+    },
+    {
+      "key": "category",
+      "type": "string",
+      "label": "Kategorie",
+      "values": [
+        {
+          "value": "bus_stop",
+          "label": "Bushaltestelle"
+        },
+        {
+          "value": "tree",
+          "label": "Baum"
+        },
+        {
+          "value": "crossing_marked",
+          "label": "Markierter Überweg"
+        }
+      ]
+    },
+    {
+      "key": "source",
+      "type": "string",
+      "label": "Datenquelle",
+      "values": [
+        {
+          "value": "parkings",
+          "label": "Angaben an der Straßenlinie"
+        },
+        {
+          "value": "separate_parking_areas",
+          "label": "Separat erfasste Flächedaten"
+        },
+        {
+          "value": "separate_parking_points",
+          "label": "Separate erfasste Punktdaten"
+        }
+      ]
+    },
+    {
+      "key": "geom_sources",
+      "type": "sanitized_strings",
+      "label": "(Intern) OSM-IDs der Geometiren",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.",
+      "values": []
+    },
+    {
+      "key": "tag_sources",
+      "type": "sanitized_strings",
+      "label": "Tag-Quellen",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.",
+      "values": []
+    },
+    {
+      "key": "road",
+      "type": "string",
+      "label": "Straßentyp",
+      "values": [
+        {
+          "value": "bicycle_road",
+          "label": "Fahrradstraße"
+        },
+        {
+          "value": "construction",
+          "label": "Straße ist in Bau"
+        },
+        {
+          "value": "cycleway_crossing",
+          "label": "Straßenquerung (Radverkehr)"
+        },
+        {
+          "value": "cycleway",
+          "label": "Radweg"
+        },
+        {
+          "value": "footway_cycleway_crossing",
+          "label": "Straßenquerung (Fußverkehr)"
+        },
+        {
+          "value": "footway_sidewalk",
+          "label": "Gehweg"
+        },
+        {
+          "value": "footway",
+          "label": "Fußweg"
+        },
+        {
+          "value": "living_street",
+          "label": "Verkehrsberuhigter Bereich"
+        },
+        {
+          "value": "motorway_link",
+          "label": "Zufahrt einer Autobahn"
+        },
+        {
+          "value": "motorway",
+          "label": "Autobahn"
+        },
+        {
+          "value": "path",
+          "label": "Weg / Pfad"
+        },
+        {
+          "value": "pedestrian",
+          "label": "Fußgängerzone"
+        },
+        {
+          "value": "primary_link",
+          "label": "Zufahrt einer Bundesstraße/Hauptverbindungsstraße"
+        },
+        {
+          "value": "primary",
+          "label": "Bundesstraße/Hauptverbindungsstraße"
+        },
+        {
+          "value": "residential",
+          "label": "Anwohnerstraße"
+        },
+        {
+          "value": "secondary_link",
+          "label": "Zufahrt einer Landesstraße/wichtigen Durchgangsstraße"
+        },
+        {
+          "value": "secondary",
+          "label": "Landesstraße/Wichtige Durchgangsstraße"
+        },
+        {
+          "value": "service_alley",
+          "label": "Gasse"
+        },
+        {
+          "value": "service_driveway",
+          "label": "Grundstückszufahrt"
+        },
+        {
+          "value": "service_emergency_access",
+          "label": "Rettungsweg"
+        },
+        {
+          "value": "service_parking_aisle",
+          "label": "Parkplatzweg"
+        },
+        {
+          "value": "service_road",
+          "label": "Zufahrtsweg"
+        },
+        {
+          "value": "service_uncategorized",
+          "label": "Zufahrtsweg (unbekannte Klassifisierung)"
+        },
+        {
+          "value": "service",
+          "label": "Zufahrtsweg"
+        },
+        {
+          "value": "steps",
+          "label": "Stufen"
+        },
+        {
+          "value": "tertiary_link",
+          "label": "Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße"
+        },
+        {
+          "value": "tertiary",
+          "label": "Kreisstraße/Untergeordnete Durchgangsstraße"
+        },
+        {
+          "value": "track",
+          "label": "Wald- / Feldweg"
+        },
+        {
+          "value": "unclassified",
+          "label": "Nebenstraße mit Verbindungscharakter"
+        },
+        {
+          "value": "unspecified_road",
+          "label": "Unkategorisierte Straße"
+        }
+      ]
+    },
+    {
+      "key": "road_name",
+      "type": "sanitized_strings",
+      "label": "Straßenname",
+      "values": []
+    },
+    {
+      "key": "road_oneway",
+      "type": "string",
+      "label": "Einbahnstraße",
+      "values": [
+        {
+          "value": "no",
+          "label": "Beide Richtungen"
+        },
+        {
+          "value": "yes",
+          "label": "Einbahnstraße"
+        },
+        {
+          "value": "yes_dual_carriageway",
+          "label": "Einbahnstraße da separate Geometrie pro Seite"
+        }
+      ]
+    },
+    {
+      "key": "road_width",
+      "type": "number",
+      "label": "Straßenbreite",
+      "values": []
+    },
+    {
+      "key": "road_width_source",
+      "type": "string",
+      "label": "Straßenbreite Quelle",
+      "values": [
+        {
+          "value": "highway_default",
+          "label": "Standard-Wert für diesen Straßentyp."
+        },
+        {
+          "value": "highway_default_and_oneway",
+          "label": "Standard-Wert für diesen Straßentyp als Einbahnstraße."
+        },
+        {
+          "value": "tag",
+          "label": "Dieser Wert ist in OSM hinterlegt."
+        }
+      ]
+    },
+    {
+      "key": "road_width_confidence",
+      "type": "string",
+      "label": "Konfidenz Straßenbreite",
+      "values": [
+        {
+          "value": "high",
+          "label": "Hoch"
+        },
+        {
+          "value": "medium",
+          "label": "Mittel"
+        },
+        {
+          "value": "low",
+          "label": "Niedrig"
+        }
+      ]
+    },
+    {
+      "key": "side",
+      "type": "string",
+      "label": "Seite relativ zur Fahrbahn",
+      "values": [
+        {
+          "value": "left",
+          "label": "Links"
+        },
+        {
+          "value": "right",
+          "label": "Rechts"
+        }
+      ]
+    },
+    {
+      "key": "area",
+      "type": "number",
+      "label": "Fläche",
+      "description": "Fläche in Metern",
+      "values": []
+    },
+    {
+      "key": "area_source",
+      "type": "string",
+      "label": "Flächenherkunft",
+      "values": [
+        {
+          "value": "estimated",
+          "label": "Berechnet auf Basis der Linien-Länge und Ausrichtung."
+        },
+        {
+          "value": "geometry",
+          "label": "Basiert auf der Flächen aus OSM."
+        }
+      ]
+    },
+    {
+      "key": "area_confidence",
+      "type": "string",
+      "label": "Konfidenz Fläche",
+      "values": [
+        {
+          "value": "high",
+          "label": "Hoch"
+        },
+        {
+          "value": "medium",
+          "label": "Mittel"
+        },
+        {
+          "value": "low",
+          "label": "Niedrig"
+        }
+      ]
+    },
+    {
+      "key": "capacity_confidence",
+      "type": "string",
+      "label": "Konfidenz Kapazität",
+      "values": [
+        {
+          "value": "high",
+          "label": "Hoch"
+        },
+        {
+          "value": "medium",
+          "label": "Mittel"
+        },
+        {
+          "value": "low",
+          "label": "Niedrig"
+        }
+      ]
+    },
+    {
+      "key": "surface",
+      "type": "string",
+      "label": "Oberfläche",
+      "values": [
+        {
+          "value": "asphalt",
+          "label": "Asphalt"
+        },
+        {
+          "value": "paved",
+          "label": "Befestigt (unspezifisch)"
+        },
+        {
+          "value": "unpaved",
+          "label": "Unbefestigt"
+        },
+        {
+          "value": "concrete",
+          "label": "Beton"
+        },
+        {
+          "value": "concrete:plates",
+          "label": "Betonplatten"
+        },
+        {
+          "value": "concrete:lanes",
+          "label": "Betonstreifen / -bahnen"
+        },
+        {
+          "value": "paving_stones",
+          "label": "Pflastersteine"
+        },
+        {
+          "value": "paving_stones:lanes",
+          "label": "Pflastersteinbahnen"
+        },
+        {
+          "value": "sett",
+          "label": "Kopfsteinpflaster"
+        },
+        {
+          "value": "mosaic_sett",
+          "label": "Mosaikpflaster"
+        },
+        {
+          "value": "small_sett",
+          "label": "Feines Kopfsteinpflaster"
+        },
+        {
+          "value": "large_sett",
+          "label": "Grobes Kopfsteinpflaster"
+        },
+        {
+          "value": "bricks",
+          "label": "Ziegel"
+        },
+        {
+          "value": "stone",
+          "label": "Stein"
+        },
+        {
+          "value": "ground",
+          "label": "Naturboden / Erde"
+        },
+        {
+          "value": "grass",
+          "label": "Gras"
+        },
+        {
+          "value": "sand",
+          "label": "Sand"
+        },
+        {
+          "value": "compacted",
+          "label": "Verdichteter Untergrund"
+        },
+        {
+          "value": "fine_gravel",
+          "label": "Splitt"
+        },
+        {
+          "value": "gravel",
+          "label": "Kies"
+        },
+        {
+          "value": "pebblestone",
+          "label": "Kiesel"
+        },
+        {
+          "value": "wood",
+          "label": "Holz"
+        },
+        {
+          "value": "woodchips",
+          "label": "Hackschnitzel"
+        },
+        {
+          "value": "metal",
+          "label": "Metall"
+        },
+        {
+          "value": "metal_grid",
+          "label": "Metallgitter"
+        },
+        {
+          "value": "plastic",
+          "label": "Kunststoff"
+        },
+        {
+          "value": "rubber",
+          "label": "Gummi"
+        },
+        {
+          "value": "grass_paver",
+          "label": "Rasengitter / Grasgitter"
+        }
+      ]
+    },
+    {
+      "key": "surface_confidence",
+      "type": "string",
+      "label": "Konfidenz Oberfläche",
+      "values": [
+        {
+          "value": "high",
+          "label": "Hoch"
+        },
+        {
+          "value": "medium",
+          "label": "Mittel"
+        },
+        {
+          "value": "low",
+          "label": "Niedrig"
+        }
+      ]
+    },
+    {
+      "key": "surface_source",
+      "type": "string",
+      "label": "Oberflächenherkunft",
+      "values": [
+        {
+          "value": "tag",
+          "label": "Explizite Angabe aus OSM"
+        },
+        {
+          "value": "tag_transformed",
+          "label": "Aus OSM-Tag normalisiert"
+        },
+        {
+          "value": "parent_highway_tag",
+          "label": "Von zugeordneter Straße (OSM)"
+        },
+        {
+          "value": "parent_highway_tag_transformed",
+          "label": "Von zugeordneter Straße, normalisiert"
+        }
+      ]
+    },
+    {
+      "key": "direction",
+      "type": "string",
+      "label": "Einparkrichtung",
+      "values": [
+        {
+          "value": "back_in",
+          "label": "Rückwärts einparken"
+        },
+        {
+          "value": "head_in",
+          "label": "Vorwärts einparken"
+        }
+      ]
+    },
+    {
+      "key": "location",
+      "type": "string",
+      "label": "Lage im Straßenraum",
+      "values": [
+        {
+          "value": "lane_centre",
+          "label": "Fahrbahnmitte"
+        },
+        {
+          "value": "median",
+          "label": "Mittelstreifen"
+        }
+      ]
+    },
+    {
+      "key": "markings",
+      "type": "string",
+      "label": "Markierungen",
+      "values": [
+        {
+          "value": "no",
+          "label": "Ohne Markierungen"
+        },
+        {
+          "value": "yes",
+          "label": "Mit Markierungen"
+        }
+      ]
+    },
+    {
+      "key": "covered",
+      "type": "string",
+      "label": "Überdacht",
+      "values": [
+        {
+          "value": "partial",
+          "label": "Teilweise überdacht"
+        },
+        {
+          "value": "yes",
+          "label": "Überdacht"
+        }
+      ]
+    },
+    {
+      "key": "access",
+      "type": "string",
+      "label": "Zugang",
+      "values": [
+        {
+          "value": "private",
+          "label": "Privat"
+        },
+        {
+          "value": "customers",
+          "label": "Kunden"
+        },
+        {
+          "value": "destination",
+          "label": "Anlieger frei (Nicht-Durchgangsverkehr erlaubt)"
+        },
+        {
+          "value": "employees",
+          "label": "Mitarbeiter"
+        },
+        {
+          "value": "permissive",
+          "label": "Erlaubt"
+        },
+        {
+          "value": "public",
+          "label": "Öffentlich (explizit)"
+        },
+        {
+          "value": "delivery",
+          "label": "Lieferverkehr"
+        },
+        {
+          "value": "no",
+          "label": "Kein Zugang"
+        },
+        {
+          "value": "permit",
+          "label": "Mit Genehmigung"
+        },
+        {
+          "value": "residents",
+          "label": "Nur mit Bewohnerparkausweis"
+        }
+      ]
+    },
+    {
+      "key": "operator_type",
+      "type": "string",
+      "label": "Betreibertyp",
+      "values": [
+        {
+          "value": "private",
+          "label": "Privat"
+        },
+        {
+          "value": "public",
+          "label": "Öffentlich"
+        }
+      ]
+    },
+    {
+      "key": "operator_type_source",
+      "type": "string",
+      "label": "Betreibertyp-Herkunft",
+      "values": [
+        {
+          "value": "default_fallback",
+          "label": "Annahme bei fehlendem Tag."
+        },
+        {
+          "value": "driveway_inference",
+          "label": "Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde."
+        },
+        {
+          "value": "manual_overwrite_list",
+          "label": "Anhand einer manuelle Korrektur-Liste in TILDA."
+        },
+        {
+          "value": "parent_highway_tag",
+          "label": "Explizite Angabe aus OSM an der zugeordneten Straße."
+        },
+        {
+          "value": "tag",
+          "label": "Explizite Angabe aus OSM."
+        }
+      ]
+    },
+    {
+      "key": "operator_type_confidence",
+      "type": "string",
+      "label": "Konfidenz Betreibertyp",
+      "values": [
+        {
+          "value": "high",
+          "label": "Hoch"
+        },
+        {
+          "value": "medium",
+          "label": "Mittel"
+        },
+        {
+          "value": "low",
+          "label": "Niedrig"
+        }
+      ]
+    },
+    {
+      "key": "informal",
+      "type": "string",
+      "label": "Duldung",
+      "values": [
+        {
+          "value": "yes",
+          "label": "Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken."
+        }
+      ]
+    },
+    {
+      "key": "zone",
+      "type": "sanitized_strings",
+      "label": "Parkzone",
+      "description": "Entsprechend der lokalen Parkraumbewirtschaftung.",
+      "values": []
+    },
+    {
+      "key": "reason",
+      "type": "string",
+      "label": "Grund",
+      "values": [
+        {
+          "value": "missing_data",
+          "label": "Keine Parkraum-Daten in OpenStreetMap erfasst"
+        },
+        {
+          "value": "parking_tag",
+          "label": "Explizite Angabe in den Daten"
+        },
+        {
+          "value": "restriction_no_parking",
+          "label": "Explizites Parkverbot aus OSM"
+        },
+        {
+          "value": "restriction_no_stopping",
+          "label": "Explizites Halteverbot aus OSM"
+        },
+        {
+          "value": "restriction_no_standing",
+          "label": "Eingeschränktes Halteverbot aus OSM"
+        },
+        {
+          "value": "bus_stop",
+          "label": "Bushaltestelle / ÖPNV-Halt"
+        },
+        {
+          "value": "cycleway",
+          "label": "Radverkehrsanlage"
+        },
+        {
+          "value": "dual_carriage",
+          "label": "Zweibahnig geteilte Fahrbahn"
+        },
+        {
+          "value": "junction",
+          "label": "Knotenpunkt / Einmündung"
+        },
+        {
+          "value": "narrow",
+          "label": "Zu schmaler Straßenraum"
+        }
+      ]
+    },
+    {
+      "key": "mapillary",
+      "type": "sanitized_strings",
+      "label": "Mapillary",
+      "values": []
+    },
+    {
+      "key": "traffic_sign",
+      "type": "sanitized_strings",
+      "label": "Verkehrszeichen",
+      "values": []
+    },
+    {
+      "key": "_staggered_maneuvering_loss",
+      "type": "number",
+      "label": "(Intern) Manövrierraumverlust (alternierendes Parken)",
+      "description": "Interner Wert aus der Kapazitätsberechnung bei alternierendem Parken",
+      "values": []
+    },
+    {
+      "key": "_staggered_original_capacity",
+      "type": "number",
+      "label": "(Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)",
+      "description": "Interner Zwischenwert vor Anwendung der alternierenden-Parken-Logik",
+      "values": []
+    }
+  ],
+  "chapters": [
+    {
+      "id": "capacity-calculation",
+      "title": "Berechnung der Kapazität",
+      "markdown": "Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n"
+    },
+    {
+      "id": "condition-category",
+      "title": "Parkbeschränkung",
+      "markdown": "Unter dem Wert \"Parkbeschränkungen\" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n"
+    }
+  ]
+}

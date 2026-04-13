@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  "ignoreFiles": ["scripts/StaticDatasets/geojson/**"],
+  "entry": [
+    "scripts/ELILayers/**/*.ts",
+    "scripts/generate-favicons/process.ts",
+    "scripts/RegionalMasks/**/*.ts",
+    "scripts/StaticDatasets/updateWfsSources/**/*.ts",
+    "scripts/worktree-cli/cli.ts",
+    "src/server/instrumentation/nitro-*.plugin.server.ts",
+  ],
+  "ignoreBinaries": ["code", "github", "gh"],
+  "ignoreDependencies": ["@tanstack/router-plugin", "@react-email/preview-server"],
+}

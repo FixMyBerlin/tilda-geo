@@ -1,6 +1,6 @@
 // We use bun.sh to run this file
-import { getBoundaryExportApiBaseUrl } from '@/src/app/_components/utils/getExportApiUrl'
-import { staticRegion } from '@/src/data/regions.const'
+import path from 'node:path'
+import { styleText } from 'node:util'
 import {
   bbox,
   buffer,
@@ -12,10 +12,10 @@ import {
   polygon,
   simplify,
 } from '@turf/turf'
-import { styleText } from 'node:util'
-import { Feature, MultiPolygon, Polygon } from 'geojson'
-import path from 'node:path'
+import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import { z } from 'zod'
+import { getBoundaryExportApiBaseUrl } from '@/components/shared/utils/getExportApiUrl'
+import { staticRegion } from '@/data/regions.const'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
@@ -38,11 +38,11 @@ const geoJsonResultSchema = z.object({
   }),
 })
 
-const errorLog: any[] = []
+const errorLog: unknown[] = []
 
 const handleError = (error: (string | Record<string, string | number>)[]) => {
   errorLog.push(Date.now().toString(), error)
-  const errorMessage = error.map((e) => typeof e === 'string' ? e : JSON.stringify(e)).join(' ')
+  const errorMessage = error.map((e) => (typeof e === 'string' ? e : JSON.stringify(e))).join(' ')
   console.error(styleText(['bgYellow', 'black'], errorMessage))
 }
 
@@ -70,7 +70,7 @@ const downloadGeoJson = async (idsString: string) => {
     const data = await response.json()
     const geoJson = geojsonInputSchema.parse(data)
     return geoJson
-  } catch (error) {
+  } catch (_error) {
     handleError([
       'ERROR: Download failed for',
       url.href,
@@ -95,9 +95,10 @@ const createBufferFeature = (
   ids: string,
   region: string,
 ) => {
-  const bufferedFeature = buffer(boundaryPoly, 10, { units: 'kilometers' })!
+  const buffered = buffer(boundaryPoly, 10, { units: 'kilometers' })
+  if (!buffered) throw new Error('buffer failed')
   const result = geoJsonResultSchema.parse(
-    feature(bufferedFeature.geometry, { kind: 'buffer', ids, region }),
+    feature(buffered.geometry, { kind: 'buffer', ids, region }),
   )
   return result
 }
@@ -131,7 +132,7 @@ const createMaskFeature = (featureToCutOut: ReturnType<typeof createBufferFeatur
 const collectedFeatures: ReturnType<typeof createBufferFeature>[] = []
 for (const region of staticRegion) {
   const { slug: regionName, mask } = region
-  if (!mask || !mask.osmRelationIds.length) continue
+  if (!mask?.osmRelationIds.length) continue
   console.info(styleText(['inverse', 'bold'], `INFO: Now working on region ${regionName}`))
 
   const geojson = await downloadGeoJson(mask.osmRelationIds.map(String).join(','))

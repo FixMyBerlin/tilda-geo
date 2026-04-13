@@ -1,0 +1,121 @@
+title: Kein Parken
+summary: Abschnitte ohne reguläres Parken, inklusive Verboten und Bereichen mit fehlenden Parkraumdaten.
+sourceIds: [tilda_parkings_no]
+
+attributes:
+  - key: parking
+    ref: parkings.parking
+
+  - key: reason
+    ref: parkings.reason
+    valuesAdd:
+      - value: capacity_below_zero
+        label: Abschnitt zu klein für ein Fahrzeug
+
+  - key: condition_category
+    ref: parkings.condition_category
+
+  - key: capacity
+    ref: parkings.capacity
+
+  - key: capacity_source
+    ref: parkings.capacity_source
+
+  - key: orientation
+    ref: parkings.orientation
+
+  - key: staggered
+    ref: parkings.staggered
+
+  - key: source
+    ref: parkings.source
+
+  - key: geom_sources
+    ref: parkings.geom_sources
+
+  - key: tag_sources
+    ref: parkings.tag_sources
+
+  - key: road
+    ref: parkings.road
+
+  - key: road_name
+    ref: parkings.road_name
+
+  - key: road_oneway
+    ref: parkings.road_oneway
+
+  - key: road_width
+    ref: parkings.road_width
+
+  - key: road_width_source
+    ref: parkings.road_width_source
+
+  - key: road_width_confidence
+    ref: parkings.road_width_confidence
+
+  - key: side
+    ref: parkings.side
+
+  - key: area
+    ref: parkings.area
+
+  - key: area_source
+    ref: parkings.area_source
+
+  - key: area_confidence
+    ref: parkings.area_confidence
+
+  - key: capacity_confidence
+    ref: parkings.capacity_confidence
+
+  - key: surface
+    ref: parkings.surface
+
+  - key: surface_confidence
+    ref: parkings.surface_confidence
+
+  - key: surface_source
+    ref: parkings.surface_source
+
+  - key: direction
+    ref: parkings.direction
+
+  - key: location
+    ref: parkings.location
+
+  - key: markings
+    ref: parkings.markings
+
+  - key: covered
+    ref: parkings.covered
+
+  - key: access
+    ref: parkings.access
+
+  - key: operator_type
+    ref: parkings.operator_type
+
+  - key: operator_type_source
+    ref: parkings.operator_type_source
+
+  - key: operator_type_confidence
+    ref: parkings.operator_type_confidence
+
+  - key: informal
+    ref: parkings.informal
+
+  - key: zone
+    ref: parkings.zone
+
+  - key: mapillary
+    ref: parkings.mapillary
+
+  - key: traffic_sign
+    ref: parkings.traffic_sign
+
+  - key: _staggered_maneuvering_loss
+    ref: parkings._staggered_maneuvering_loss
+
+  - key: _staggered_original_capacity
+    ref: parkings._staggered_original_capacity

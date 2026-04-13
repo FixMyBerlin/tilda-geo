@@ -16,17 +16,17 @@ The reason for that is, that styling the data there has the best editor experien
 ## General process
 
 1. Use Mapbox Studio to style our custom data.
-   - See [`npm run updateTilesets`](scripts/MapboxTilesets/README.md) on how to update the Data in Mapbox Studio
+   - See [`bun run mapbox-tilesets-update`](scripts/MapboxTilesets/README.md) on how to update the Data in Mapbox Studio
 2. _Publish_ the style in Mapbox Studio (only then the API output is updated).
-3. Run `npm run updateStyles`.
+3. Run `bun run mapbox-styles-update`.
 4. Check the generated files and update subcategory data as needed
 
 ## What it does
 
-1. The script generates one style file per Mapbox folder in `src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/groups/`.
+1. The script generates one style file per Mapbox folder in `src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/`.
    - Only Mapbox folders that are prefixed with the term given in `mapboxGroupPrefix` (eg. `atlas_`) are processed.
    - The styles are cleaned up by removing 'source', 'source-layer', 'metadata' which we add back later in our subcategory configuration.
-2. The script generates a merged sprite file in `public/map/`
-3. The script stores the original base style in `src/app/api/map/style.json`.
+2. The script generates merged sprite files in `public/map-style/` (e.g. `sprite`, `sprite@2x`).
+3. The script stores the original base style in `src/server/api/map-style/style.json`.
    The `style.json` represents our `baseMapStyle`.
-   The `style.ts` API is where we replace the sprite reference with our own.
+   The `/api/map-style` route replaces the sprite reference with our own at request time.

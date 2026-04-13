@@ -6,11 +6,11 @@ This document explains how to construct the `f` URL parameter to create deeplink
 
 A working deeplink requires three URL parameters working together:
 
-| Parameter | Purpose |
-|-----------|---------|
-| `map` | Positions the viewport near the feature (`zoom/lat/lon`) |
-| `config` | Ensures the referenced layers are visible |
-| `f` | Selects the feature(s) to highlight and inspect |
+| Parameter | Purpose                                                  |
+| --------- | -------------------------------------------------------- |
+| `map`     | Positions the viewport near the feature (`zoom/lat/lon`) |
+| `config`  | Ensures the referenced layers are visible                |
+| `f`       | Selects the feature(s) to highlight and inspect          |
 
 All three must be set correctly for the deeplink to work. If the `config` doesn't have the layer visible, or the `map` viewport is too far away, the feature won't be shown.
 
@@ -33,12 +33,12 @@ sourceNumericId|featureId|coord1|coord2                       # Point
 sourceNumericId|featureId|coord1|coord2|coord3|coord4         # Line/Polygon
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| sourceNumericId | number | Numeric ID for the data source |
-| featureId | number or string | The feature's ID from the source data |
-| coord1, coord2 | number | For points: `longitude\|latitude`. For other geometries: `minLon\|minLat` |
-| coord3, coord4 | number | For non-point geometries only: `maxLon\|maxLat` (bounding box) |
+| Field           | Type             | Description                                                               |
+| --------------- | ---------------- | ------------------------------------------------------------------------- |
+| sourceNumericId | number           | Numeric ID for the data source                                            |
+| featureId       | number or string | The feature's ID from the source data                                     |
+| coord1, coord2  | number           | For points: `longitude\|latitude`. For other geometries: `minLon\|minLat` |
+| coord3, coord4  | number           | For non-point geometries only: `maxLon\|maxLat` (bounding box)            |
 
 ## `sourceNumericId`
 
@@ -61,6 +61,7 @@ The `featureId` is the feature's unique identifier.
 ### For TILDA data
 
 TILDA sources use OSM-derived IDs:
+
 - **String format**: `way/1010110070`, `node/12345` (OSM type/ID)
 - **Numeric**: Some sources use plain numeric IDs
 
@@ -79,6 +80,7 @@ Note: In the future, we will validate that IDs are unique for a dataset and reus
 - **Precision**: 6 decimal places maximum
 
 The coordinates are used to:
+
 1. Check if the selected features are visible in the current map view (`allUrlFeaturesInBounds`)
 2. Pan/zoom the map to show the selected features (`fitBounds`)
 

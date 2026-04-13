@@ -4,7 +4,7 @@
 
 `category` holds the value of the OSM `highway` tag … with a few exceptions:
 
-- `highway=road` becomes `category=unspecified_road_category`
+- `highway=road` becomes `category=unspecified_road`
 - `highway=service + service=*` becomes `category=service_unspecified`
 - `highway=service + service=alley` becomes `category=service_alley`
 - `highway=service + service=driveway` becomes `category=service_driveway`

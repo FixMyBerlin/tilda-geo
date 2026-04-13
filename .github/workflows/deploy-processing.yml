@@ -26,29 +26,22 @@ jobs:
     if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && needs.diff_processing.outputs.changes == 'true') }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: Setup AWS CLI
-        run: |
-          aws --version
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
-          which aws
-          aws --version
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5
+      - name: 'AWS: Configure credentials'
+        uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/n0p8j4k5/
+          aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REGISTRY }}
 
       - name: Setup buildx
         uses: docker/setup-buildx-action@v3
@@ -61,13 +54,13 @@ jobs:
           push: true
           cache-from: |
             type=gha
-            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
+            type=registry,ref=${{ vars.ECR_REGISTRY }}/tilda/processing:${{ inputs.ENVIRONMENT }}-cache
           cache-to: |
             type=gha,mode=max
-            type=registry,ref=public.ecr.aws/n0p8j4k5/tilda/processing:cache,mode=max
+            type=registry,ref=${{ vars.ECR_REGISTRY }}/tilda/processing:${{ inputs.ENVIRONMENT }}-cache,mode=max
           tags: |
-            public.ecr.aws/n0p8j4k5/tilda/processing:${{ github.sha }}
-            public.ecr.aws/n0p8j4k5/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
+            ${{ vars.ECR_REGISTRY }}/tilda/processing:${{ github.sha }}
+            ${{ vars.ECR_REGISTRY }}/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
@@ -75,17 +68,39 @@ jobs:
     environment:
       name: ${{ inputs.ENVIRONMENT }}
       url: https://${{ vars.TILES_URL }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
+      - name: 'AWS: Configure credentials'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Get ECR login password
+        id: ecr-login
+        run: |
+          ECR_PASSWORD=$(aws ecr get-login-password --region eu-central-1)
+          echo "::add-mask::$ECR_PASSWORD"
+          echo "password=$ECR_PASSWORD" >> $GITHUB_OUTPUT
+
       - name: Stop & Start containers on VPS
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1
+        env:
+          ECR_PASSWORD: ${{ steps.ecr-login.outputs.password }}
+          ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
+          envs: ECR_PASSWORD,ECR_REGISTRY
           # Note on the "Cleanup docker"
           # There might be a race condition with the other github action as we are building app an processing in parallel
           # The 72h grace period should make sure nothing happend during the current build but old things get cleaned up
           script: |
+            set -e
+            echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
             cd /srv
             echo "Pulling latest 'processing' image"
             docker compose pull processing

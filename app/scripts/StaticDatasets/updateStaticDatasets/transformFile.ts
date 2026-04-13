@@ -1,6 +1,6 @@
-import { getIssues } from '@placemarkio/check-geojson'
-import { styleText } from 'node:util'
 import path from 'node:path'
+import { styleText } from 'node:util'
+import { getIssues } from '@placemarkio/check-geojson'
 import { import_ } from '../utils/import_'
 import { addUniqueIds } from './addUniqueIds'
 import { getDecompressedFilename } from './getDecompressedFilename'
@@ -32,7 +32,7 @@ export const transformFile = async (
   // Validate projection
   validateProjection(data, filenameToRead)
 
-  type TransformFunc = (data: any) => string
+  type TransformFunc = (data: unknown) => unknown
   const transform = await import_<TransformFunc>(datasetFolderPath, 'transform', 'transform')
   if (transform !== null) {
     console.log(`  Transforming geojson file...`)

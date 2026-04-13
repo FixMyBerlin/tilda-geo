@@ -142,5 +142,5 @@ Docs:
 
 - `<Map>` has a `minZoom`.
 - Sources all have a `minzoom`/`maxzoom` that is usually based on `SIMPLIFY_MIN_ZOOM` / `SIMPLIFY_MAX_ZOOM`.
-  - Gotcha: `maxzoom` should never be below `SIMPLIFY_MAX_ZOOM` for our Atlas data. If it is, we will _overzoom_ the simplified geometries (see **2**), which can lead to invalid geometries and crashes.
+  - Gotcha: `maxzoom` should never be below `SIMPLIFY_MAX_ZOOM` for our TILDA data. If it is, we will _overzoom_ the simplified geometries (see **2**), which can lead to invalid geometries and crashes.
 - Layers should not have their own `minzoom`/`maxzoom`.

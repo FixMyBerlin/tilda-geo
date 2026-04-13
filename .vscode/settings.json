@@ -1,17 +1,26 @@
 // https://www.roboleary.net/vscode/2020/09/17/vscode-workspace-settings.html
 // All settings https://code.visualstudio.com/docs/getstarted/settings#_default-settings
+// Formatting: app/oxfmt.config.ts (oxfmt) — imports, Tailwind classes, package.json key order. Lint: Biome.
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.enable": false,
+  "biome.configurationPath": "app/biome.json",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.biome": "always"
   },
   "typescript.referencesCodeLens.enabled": true,
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  },
+  "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[javascript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[javascriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
   // Use TS version from node_modules
-  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.tsdk": "app/node_modules/typescript/lib",
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/
@@ -20,9 +29,11 @@
   "Lua.diagnostics.disable": ["lowercase-global", "duplicate-set-field"],
   // FYI: The addons feature https://luals.github.io/wiki/addons/ does not work for us.
   "Lua.addonManager.enable": false,
-  "[sql]": {
-    // https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc
-    "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
-  },
-  "SQL-Formatter-VSCode.dialect": "postgresql" // for ReneSaarsoo.sql-formatter-vsc
+  // https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc
+  "[sql]": { "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc" },
+  "SQL-Formatter-VSCode.dialect": "postgresql", // for ReneSaarsoo.sql-formatter-vsc
+  // From Tanstack Start Scaffolding Recommendations:
+  "search.exclude": { "**/routeTree.gen.ts": true },
+  "files.watcherExclude": { "**/routeTree.gen.ts": true },
+  "files.readonlyInclude": { "**/routeTree.gen.ts": true }
 }

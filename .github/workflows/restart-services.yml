@@ -8,7 +8,7 @@ on:
         required: true
     outputs:
       CHANGES:
-        description: "Whether `configs/` or the `docker-compose` files have changed since the last successfull workflow run."
+        description: 'Whether `configs/` or the `docker-compose` files have changed since the last successfull workflow run.'
         value: ${{ jobs.check_config_changes.outputs.CHANGES }}
 
 jobs:
@@ -22,16 +22,38 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.ENVIRONMENT }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
+      - name: 'AWS: Configure credentials'
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Get ECR login password
+        id: ecr-login
+        run: |
+          ECR_PASSWORD=$(aws ecr get-login-password --region eu-central-1)
+          echo "::add-mask::$ECR_PASSWORD"
+          echo "password=$ECR_PASSWORD" >> $GITHUB_OUTPUT
+
       - name: Restart containers
         uses: appleboy/ssh-action@v1
+        env:
+          ECR_PASSWORD: ${{ steps.ecr-login.outputs.password }}
+          ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
+          envs: ECR_PASSWORD,ECR_REGISTRY
           script: |
+            set -e
+            echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
             cd /srv
             echo "Restarting containers: tiles, db, traefik and proxy"
-            docker compose pull
+            docker compose pull tiles db
             docker compose -f docker-compose.network.yml pull
             docker compose -f docker-compose.yml -f docker-compose.network.yml up tiles db traefik proxy -d

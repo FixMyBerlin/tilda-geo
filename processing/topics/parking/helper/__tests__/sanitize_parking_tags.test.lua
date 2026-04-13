@@ -24,4 +24,17 @@ describe("sanitize_parking_tags", function()
       assert.are.equal(result, "lane")
     end)
   end)
+
+  describe('markings', function()
+    it('maps bleached to yes', function()
+      assert.are.equal(SANITIZE_PARKING_TAGS.markings('bleached'), 'yes')
+    end)
+  end)
+
+  describe('parking_off_street', function()
+    it('maps carports to carport', function()
+      local tags = { parking = 'carports' }
+      assert.are.equal(SANITIZE_PARKING_TAGS.parking_off_street(tags), 'carport')
+    end)
+  end)
 end)

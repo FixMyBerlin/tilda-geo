@@ -20,7 +20,7 @@ The estimation logic and SQL come from **[lu-fennell/OSM-Sidepath-Estimation](ht
 
 ## Files
 
-- **`sql/is_sidepath_estimation.sql`** – Estimation logic (adapted from OSM-Sidepath-Estimation). Default parameters `buffer_distance` and `buffer_size` are defined and documented at the top. Expects views `_sidepath_estimation_paths` and `_sidepath_estimation_roads` with (osm_id, geom, flat tags). Provides `tilda_sidepath_csv(buffer_distance, buffer_size)` only (all custom functions use the `tilda_` prefix).
+- **`sql/is_sidepath_estimation.sql`** – Estimation logic (adapted from OSM-Sidepath-Estimation). Default parameters `buffer_distance` and `buffer_size` are defined and documented at the top. Expects views `_sidepath_estimation_paths` and `_sidepath_estimation_roads` with (osm*id, geom, flat tags). Provides `tilda_sidepath_csv(buffer_distance, buffer_size)` only (all custom functions use the `tilda*` prefix).
 - **`sql/run_is_sidepath_estimation.sql`** – Entry point (same pattern as e.g. `topics/parking/parking.sql`): creates those views from raw `roadsPathClasses` and `roads`, includes the lib via `\i`, then exports CSV. Invoke with `-v outfile=...`; optional `-v buffer_distance=...` and `-v buffer_size=...`.
 - **`sql/debug_is_sidepath.sql`** – Optional debug script: creates three tables in `public` for inspecting probes and decisions. See **Debugging** below.
 - **`exportSidepathData.ts`** – Called at the start of the run (before `processTopics()`); runs the SQL and writes the CSV. If the tables don’t exist yet, it logs a warning and continues.
@@ -29,11 +29,11 @@ The estimation logic and SQL come from **[lu-fennell/OSM-Sidepath-Estimation](ht
 
 To enable debug tables, uncomment the `\i` line for `debug_is_sidepath.sql` in `sql/run_is_sidepath_estimation.sql`. The script creates three tables in `public` (Martin-compatible: `geom` + `tags`), so they show in your viewer like other layers.
 
-| Table | Contents |
-|-------|----------|
+| Table                               | Contents                                                                                                                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **\_debug_is_sidepath_checkpoints** | Buffer circles used to probe for nearby roads (one polygon per checkpoint along each path). Tags: `path_osm_id`, `checkpoint_nr`, `layer`, `path_highway`. |
-| **\_debug_is_sidepath_matches** | Road segments that fell inside a checkpoint buffer. Tags: `path_osm_id`, `checkpoint_nr`, `road_osm_id`, `road_highway`, `road_name`, `road_layer`. |
-| **\_debug_is_sidepath_paths** | Each path with its final decision. Tags: `osm_id`, `is_sidepath_estimation`, `checks`, `entry` (full histograms: id, highway, name). |
+| **\_debug_is_sidepath_matches**     | Road segments that fell inside a checkpoint buffer. Tags: `path_osm_id`, `checkpoint_nr`, `road_osm_id`, `road_highway`, `road_name`, `road_layer`.        |
+| **\_debug_is_sidepath_paths**       | Each path with its final decision. Tags: `osm_id`, `is_sidepath_estimation`, `checks`, `entry` (full histograms: id, highway, name).                       |
 
 **Example: “This way is ‘yes’; how was that decided?”**
 

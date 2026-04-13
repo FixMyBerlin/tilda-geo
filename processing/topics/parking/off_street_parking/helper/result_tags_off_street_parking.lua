@@ -14,7 +14,7 @@ local function result_tags_off_street_parking(result, area)
   local id = DefaultId(result.object)
 
   local surface_tags_result = SURFACE_TAGS.surface_tags(result.object.tags)
-  local conditional_categories_result = classify_parking_conditions(result.object.tags, nil, 'assumed_private')
+  local conditional_categories_result = classify_parking_conditions(result.object.tags, 'assumed_private')
   -- Get capacity from category (handles both tag-based and area-based capacity)
   local capacity_tags_result = result.category:get_capacity(result.object.tags, area)
   local operator_type_result = operator_type.operator_type_for_area(result.object.tags, result.object.type, result.object.id, 'private')

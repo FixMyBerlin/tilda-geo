@@ -1,19 +1,10 @@
-import { Prisma } from '@prisma/client'
-import invariant from 'tiny-invariant'
+import type { Prisma } from '@/prisma/generated/client'
 import { red } from './utils/log'
 
-const getApiRootUrl = () => {
-  const apiRootUrl = process.env.API_ROOT_URL
-  invariant(apiRootUrl?.startsWith('http'), 'API_ROOT_URL missing.')
-  return apiRootUrl
+export type StaticDatasetsApiConfig = {
+  apiRootUrl: string
+  atlasApiKey: string
 }
-
-export const getRegionsUrl = () => `${getApiRootUrl()}/regions`
-export const createUploadUrl = () => `${getApiRootUrl()}/uploads/create`
-export const deleteAllUploadsUrl = () => `${getApiRootUrl()}/uploads/delete-all`
-
-const addApiKey = (url) =>
-  url + '?' + new URLSearchParams({ apiKey: process.env.ATLAS_API_KEY! }).toString()
 
 async function checkResponse(request: Request, response: Response) {
   if (!response.ok) {
@@ -24,8 +15,8 @@ async function checkResponse(request: Request, response: Response) {
   }
 }
 
-export const getRegions = async (): Promise<{ id: number; slug: string }[]> => {
-  const url = addApiKey(getRegionsUrl())
+export const getRegions = async (api: StaticDatasetsApiConfig) => {
+  const url = `${api.apiRootUrl}/regions?apiKey=${encodeURIComponent(api.atlasApiKey)}`
   const request = new Request(url)
   const response = await fetch(request)
   await checkResponse(request, response)
@@ -40,7 +31,8 @@ type UploadData = {
   regionSlugs: string[]
   isPublic: boolean
   hideDownloadLink: boolean
-  configs: Record<string, any>[]
+
+  configs: Record<string, unknown>[]
   systemLayer: boolean
 } & Pick<
   Prisma.UploadCreateInput,
@@ -54,25 +46,13 @@ type UploadData = {
   | 'cacheTtlSeconds'
 >
 
-export const createUpload = async (data: UploadData) => {
-  const request = new Request(createUploadUrl(), {
+export const createUpload = async (api: StaticDatasetsApiConfig, data: UploadData) => {
+  const request = new Request(`${api.apiRootUrl}/uploads/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      apiKey: process.env.ATLAS_API_KEY!,
+      apiKey: api.atlasApiKey,
       ...data,
-    }),
-  })
-  const response = await fetch(request)
-  await checkResponse(request, response)
-}
-
-export const deleteAllUploads = async () => {
-  const request = new Request(deleteAllUploadsUrl(), {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      apiKey: process.env.ATLAS_API_KEY!,
     }),
   })
   const response = await fetch(request)

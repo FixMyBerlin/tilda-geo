@@ -1,0 +1,8 @@
+groups:
+  - id: parking
+    label: Parkraum-Prozessierung
+    tables:
+      - parkings
+      - parkings_no
+      - parkings_cutouts
+      - off_street_parking_areas

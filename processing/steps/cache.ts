@@ -1,7 +1,12 @@
-import { $ } from 'bun'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 import { triggerPrivateApi } from './externalTriggers'
+import { $ } from 'bun'
+import { readdir, rm } from 'node:fs/promises'
+import { join } from 'node:path'
+
+/** Matches `docker-compose.yml` processing.volumes mount for cache clearing. */
+const CACHE_NGINX_PROXY_DIR = '/cache_nginx_proxy'
 
 export async function updateCache() {
   // Cache handling is based on ngnix which we don't run locally.
@@ -22,18 +27,30 @@ export async function updateCache() {
 export async function clearCache() {
   try {
     // Check if the cache directory exists first
-    const dirCheck = await $`test -d /cache_nginx_proxy`.nothrow()
+    const dirCheck = await $`test -d ${CACHE_NGINX_PROXY_DIR}`.nothrow()
     if (dirCheck.exitCode !== 0) {
       console.log(
-        'Finishing up: ⏩ Cache directory /cache_nginx_proxy does not exist, skipping cache clearing',
+        `Finishing up: ⏩ Cache directory ${CACHE_NGINX_PROXY_DIR} does not exist, skipping cache clearing`,
       )
       return
     }
 
-    const sizeBeforeStr = await $`du -sh /cache_nginx_proxy`.text()
-    // Corresponts to `docker-compose.yml` processing.volumes
-    await $`rm -rf /cache_nginx_proxy/*`
-    const sizeAfterStr = await $`du -sh /cache_nginx_proxy`.text()
+    const entries = await readdir(CACHE_NGINX_PROXY_DIR)
+    if (entries.length === 0) {
+      console.log(
+        `Finishing up: ⏩ Cache directory ${CACHE_NGINX_PROXY_DIR} is empty (no cached files yet — e.g. nginx has not served tiles to disk). Nothing to clear; this is OK.`,
+      )
+      return
+    }
+
+    const sizeBeforeStr = await $`du -sh ${CACHE_NGINX_PROXY_DIR}`.text()
+    for (const name of entries) {
+      await rm(join(CACHE_NGINX_PROXY_DIR, name), {
+        recursive: true,
+        force: true,
+      })
+    }
+    const sizeAfterStr = await $`du -sh ${CACHE_NGINX_PROXY_DIR}`.text()
     console.log(
       'Finishing up: Successfully cleared the cache ',
       `(before ${sizeBeforeStr.trim()} – after ${sizeAfterStr.trim()})`,

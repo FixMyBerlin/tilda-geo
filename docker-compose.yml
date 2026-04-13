@@ -2,14 +2,13 @@ services:
   processing:
     env_file:
       - .env
-    image: public.ecr.aws/n0p8j4k5/tilda/processing:${ENVIRONMENT}-latest
+    image: ${ECR_REGISTRY}/tilda/processing:${ENVIRONMENT}-latest
     container_name: processing
     environment:
       PGHOST: ${DATABASE_HOST}
       PGDATABASE: ${DATABASE_NAME}
       PGUSER: ${DATABASE_USER}
       PGPASSWORD: ${DATABASE_PASSWORD}
-      GEO_DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?pool_timeout=0
       PROCESS_GEOFABRIK_DOWNLOAD_URL:
       PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME:
       PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD:
@@ -22,7 +21,6 @@ services:
       OSM2PGSQL_LOG_LEVEL:
       OSM2PGSQL_NUMBER_PROCESSES:
       TILES_URL:
-      ID_FILTER:
       ENVIRONMENT:
       PROCESSING_DIFFING_MODE:
       PROCESSING_DIFFING_BBOX:
@@ -38,16 +36,29 @@ services:
       db:
         condition: service_healthy
   app:
-    image: public.ecr.aws/n0p8j4k5/tilda/app:${ENVIRONMENT}-latest
+    image: ${ECR_REGISTRY}/tilda/app:${ENVIRONMENT}-latest
     container_name: app
     restart: unless-stopped
+    # TanStack Start (Vite + Nitro, Bun). Port 4000 = Nitro server.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:4000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     environment:
-      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?schema=prisma
-      GEO_DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?pool_timeout=0
-      NEXT_PUBLIC_APP_ENV:
-      NEXT_PUBLIC_APP_ORIGIN:
+      PORT: 4000
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      ENVIRONMENT:
+      VITE_APP_ENV:
+      VITE_APP_ORIGIN:
+      APP_URL:
+      CACHELESS_URL:
+      TILES_URL:
       SESSION_SECRET_KEY:
-      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:
       OSM_CLIENT_ID:
       OSM_CLIENT_SECRET:
       S3_KEY:
@@ -74,7 +85,7 @@ services:
       tiles:
         condition: service_started
   tiles:
-    image: ghcr.io/maplibre/martin:1.4.0
+    image: ghcr.io/maplibre/martin:1.5.0
     container_name: tiles
     command: ["--config", "/config.yaml"]
     restart: unless-stopped
@@ -99,8 +110,9 @@ services:
       db:
         condition: service_healthy
   db:
-    image: pgrouting/pgrouting:17-3.5-3.8
-    container_name: ${DATABASE_HOST}
+    image: postgis/postgis:17-3.5
+    platform: linux/amd64
+    container_name: db
     shm_size: 2g
     restart: unless-stopped
     environment:

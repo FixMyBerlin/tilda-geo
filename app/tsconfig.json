@@ -1,50 +1,50 @@
 {
+  "include": ["**/*.ts", "**/*.tsx", "eslint.config.ts", "vite.config.ts"],
   "compilerOptions": {
-    "target": "es2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    // We used to hav only `baseUrl` without `paths` and use the Vitest `vite-tsconfig-paths` plugin
-    // That broke with Vitest 2. Just using the `paths` fixes this.
-    // However, that breaks our bun scripts like updateStaticDatasets.
-    // So now we have both but all imports use the `paths` syntax.
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["./*"]
-    },
-    "allowJs": true,
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client", "bun-types", "web"],
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "noEmit": true,
+
+    /* Linting */
     "skipLibCheck": true,
     "strict": false,
     "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
     "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
-    "noErrorTruncation": true, // https://stackoverflow.com/a/53131824
-    "types": [
-      "bun-types", // We use bun.sh for our scripts
-      "web" // Once we add bun-types, "lib":["dom"] is not enough, see https://github.com/oven-sh/bun/issues/3030#issuecomment-1712671248
-    ],
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "noErrorTruncation": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/scripts/*": ["./scripts/*"],
+      "mailers/*": ["./mailers/*"]
+    }
   },
   "exclude": [
     "node_modules",
     "**/*.e2e.ts",
     "cypress",
     ".next",
+    ".output",
+    "dist",
     "processing",
     "warm-cache",
     "cache",
     "configs"
-  ],
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "types", ".next/types/**/*.ts"]
+  ]
 }

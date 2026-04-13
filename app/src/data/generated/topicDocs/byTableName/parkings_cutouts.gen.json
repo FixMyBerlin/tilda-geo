@@ -1,0 +1,564 @@
+{
+  "topic": "parking",
+  "tableName": "parkings_cutouts",
+  "sourceIds": ["tilda_parkings_cutouts"],
+  "title": "Parkraum Stanzungen",
+  "summary": "Stanzungen sind ein Kernbestandteil der Parkraum prozessierung. Mit ihnen werden die zu Beginn der Prozessierung gröber abgeleiteten Daten präzise Parkraum-Abschnitte abgeleitet. Stanzungen können bzum Beispiel Gehwegübergänge, Kreuzungen und Hindernisse wie Bäume oder Poller sein. Polygon-Stanzungen entlang der Parkraum-Linien (Hindernisse, Kreuzungen, Einfahrten, ÖPNV-Haltestellen, externe eUVM-Daten). Die Attribute beschreiben die Stanzung, nicht die Parklinie (`parkings`).",
+  "groups": [
+    {
+      "id": "parking",
+      "label": "Parkraum-Prozessierung"
+    }
+  ],
+  "attributes": [
+    {
+      "key": "category",
+      "type": "string",
+      "label": "Stanzungen",
+      "values": [
+        {
+          "value": "advertising",
+          "label": "Werbungtabeln u.ä."
+        },
+        {
+          "value": "barrier",
+          "label": "Poller, Zaun, u.ä."
+        },
+        {
+          "value": "bicycle_parking",
+          "label": "Fahrradparkplatz"
+        },
+        {
+          "value": "bicycle_rental",
+          "label": "Fahrradverleih"
+        },
+        {
+          "value": "bollard",
+          "label": "Poller"
+        },
+        {
+          "value": "bus_stop",
+          "label": "Bushaltestelle"
+        },
+        {
+          "value": "bus_stop_conditional",
+          "label": "Bushaltestelle mit zeitlichen Einschränkungen (Nachtbusse, Schulbusse)"
+        },
+        {
+          "value": "bus_stop_centerline",
+          "label": "Bushaltestelle (Mittellinie)"
+        },
+        {
+          "value": "bus_stop_kerb",
+          "label": "Bushaltestelle (Bordstein)"
+        },
+        {
+          "value": "collision_protection",
+          "label": "Baumschutzbügel"
+        },
+        {
+          "value": "crossing_buffer_marking",
+          "label": "Markierung (Sperrfläche u.ä.) am Überweg"
+        },
+        {
+          "value": "crossing_kerb_extension",
+          "label": "Gehwegvorstreckung am Überweg"
+        },
+        {
+          "value": "crossing_marked",
+          "label": "Markierter Überweg"
+        },
+        {
+          "value": "crossing_traffic_signals",
+          "label": "Ampelübergang"
+        },
+        {
+          "value": "crossing_zebra",
+          "label": "Zebrastreifen"
+        },
+        {
+          "value": "driveway",
+          "label": "Einfahrt"
+        },
+        {
+          "value": "driveway_corner_kerb",
+          "label": "Implizites Halteverbot am Beginn einer Einfahrt"
+        },
+        {
+          "value": "fire_hydrant",
+          "label": "Hydrant"
+        },
+        {
+          "value": "intersection_corner",
+          "label": "Implizites Halteverbot an Straßenecke"
+        },
+        {
+          "value": "kerb_lowered",
+          "label": "Abgesenkter Bordstein"
+        },
+        {
+          "value": "kerb_extension",
+          "label": "Bordsteinverlängerung"
+        },
+        {
+          "value": "loading_ramp",
+          "label": "Laderampe"
+        },
+        {
+          "value": "mobility_hub",
+          "label": "Mobilitätsstation"
+        },
+        {
+          "value": "motorcycle_parking",
+          "label": "Motorradparkplatz"
+        },
+        {
+          "value": "other",
+          "label": "Sonstiges Hindernis"
+        },
+        {
+          "value": "parklet",
+          "label": "Parklet"
+        },
+        {
+          "value": "recycling",
+          "label": "Recyclingstation"
+        },
+        {
+          "value": "road_marking_restricted_area",
+          "label": "Sperrfläche (Markierung)"
+        },
+        {
+          "value": "small_electric_vehicle_parking",
+          "label": "Parkplatz für kleine Elektrofahrzeuge wie E-Scootern"
+        },
+        {
+          "value": "street_cabinet",
+          "label": "Schaltkasten, Straßenkasten, u.ä."
+        },
+        {
+          "value": "street_lamp",
+          "label": "Straßenlaterne"
+        },
+        {
+          "value": "traffic_calming_choker",
+          "label": "Angelegte Fahrbahnverengung"
+        },
+        {
+          "value": "traffic_sign",
+          "label": "Verkehrszeichen"
+        },
+        {
+          "value": "tram_stop",
+          "label": "Straßenbahnhaltestelle"
+        },
+        {
+          "value": "tree",
+          "label": "Baum"
+        },
+        {
+          "value": "tree_pit",
+          "label": "Baumscheibe"
+        },
+        {
+          "value": "vending_parking_tickets",
+          "label": "Parkscheinautomat"
+        },
+        {
+          "value": "water_well",
+          "label": "Wasserstelle / Brunnen"
+        }
+      ]
+    },
+    {
+      "key": "source",
+      "type": "string",
+      "label": "Datenquelle",
+      "description": "In der Export-Tabelle `parkings_cutouts` erscheinen nur Stanzungen, deren `source` nicht parking_roads, separate_parking_areas oder separate_parking_points ist.",
+      "values": [
+        {
+          "value": "crossing",
+          "label": "Überwege"
+        },
+        {
+          "value": "driveway_corner_kerbs",
+          "label": "Implizites Halteverbot am Beginn einer Einfahrt"
+        },
+        {
+          "value": "driveways",
+          "label": "Einfahrten"
+        },
+        {
+          "value": "external_cutouts_euvm",
+          "label": "Externe Hindernisdaten (eUVM)"
+        },
+        {
+          "value": "intersections",
+          "label": "Kreuzungen"
+        },
+        {
+          "value": "obstacle_areas",
+          "label": "Flächige Hindernisse"
+        },
+        {
+          "value": "obstacle_lines",
+          "label": "Linienhafte Hindernisse"
+        },
+        {
+          "value": "obstacle_points",
+          "label": "Punktuelle Hindernisse"
+        },
+        {
+          "value": "public_transport_stops",
+          "label": "ÖPNV-Haltestellen"
+        },
+        {
+          "value": "separate_parking_areas",
+          "label": "Parkplätze die separat als Fläche erfasst sind"
+        },
+        {
+          "value": "separate_parking_points",
+          "label": "Parkplätze die separat als Punkt erfasst sind"
+        }
+      ]
+    },
+    {
+      "key": "buffer_radius",
+      "type": "number",
+      "label": "Radius der Stanzung",
+      "values": []
+    },
+    {
+      "key": "radius",
+      "type": "number",
+      "label": "Pufferradius (m), u. a. Kreuzungs-Ecken und eUVM-Punkte",
+      "values": []
+    },
+    {
+      "key": "side",
+      "type": "string",
+      "label": "Seite relativ zur Fahrbahn",
+      "values": [
+        {
+          "value": "left",
+          "label": "Links"
+        },
+        {
+          "value": "right",
+          "label": "Rechts"
+        },
+        {
+          "value": "platform",
+          "label": "Bahnsteig / ohne Kerb-Seite"
+        }
+      ]
+    },
+    {
+      "key": "width",
+      "type": "number",
+      "label": "Breite",
+      "values": []
+    },
+    {
+      "key": "no_cutout_for_restrictions",
+      "type": "string",
+      "label": "Gilt nicht bei Park-/Halteverbot entlang der Linie",
+      "values": [
+        {
+          "value": "true",
+          "label": "Ja (Stanzung wird bei echten Verbotssegmenten nicht angewendet)"
+        }
+      ]
+    },
+    {
+      "key": "road",
+      "type": "sanitized_strings",
+      "label": "Fahrbahn-Referenz (Einfahrt)",
+      "values": []
+    },
+    {
+      "key": "street:name",
+      "type": "sanitized_strings",
+      "label": "Straßenname (Einfahrt)",
+      "values": []
+    },
+    {
+      "key": "amenity",
+      "type": "sanitized_strings",
+      "label": "OSM amenity",
+      "values": []
+    },
+    {
+      "key": "barrier",
+      "type": "sanitized_strings",
+      "label": "OSM barrier",
+      "values": []
+    },
+    {
+      "key": "capacity",
+      "type": "number",
+      "label": "Kapazität (OSM / Zwischenwert)",
+      "values": []
+    },
+    {
+      "key": "capacity:cargo_bike",
+      "type": "number",
+      "label": "Kapazität Lastenrad (OSM)",
+      "values": []
+    },
+    {
+      "key": "direction",
+      "type": "sanitized_strings",
+      "label": "Richtung (OSM)",
+      "values": []
+    },
+    {
+      "key": "emergency",
+      "type": "sanitized_strings",
+      "label": "OSM emergency",
+      "values": []
+    },
+    {
+      "key": "geom_sources",
+      "type": "string",
+      "label": "Geometrie-Quellen",
+      "description": "Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).",
+      "values": []
+    },
+    {
+      "key": "geometry_source",
+      "type": "sanitized_strings",
+      "label": "Geometrieherkunft",
+      "values": []
+    },
+    {
+      "key": "kerb",
+      "type": "sanitized_strings",
+      "label": "Bordstein (OSM kerb)",
+      "values": []
+    },
+    {
+      "key": "landuse",
+      "type": "sanitized_strings",
+      "label": "Flächennutzung (OSM landuse)",
+      "values": []
+    },
+    {
+      "key": "man_made",
+      "type": "sanitized_strings",
+      "label": "Künstliche Objekte (OSM man_made)",
+      "values": []
+    },
+    {
+      "key": "name",
+      "type": "sanitized_strings",
+      "label": "Name (OSM)",
+      "values": []
+    },
+    {
+      "key": "natural",
+      "type": "sanitized_strings",
+      "label": "Natur (OSM natural)",
+      "values": []
+    },
+    {
+      "key": "operator",
+      "type": "sanitized_strings",
+      "label": "Betreiber (OSM)",
+      "values": []
+    },
+    {
+      "key": "ref",
+      "type": "sanitized_strings",
+      "label": "Referenz (OSM ref)",
+      "values": []
+    },
+    {
+      "key": "separate_parking",
+      "type": "sanitized_strings",
+      "label": "Separater Parkplatz (OSM-Bezug)",
+      "values": []
+    },
+    {
+      "key": "tag_sources",
+      "type": "string",
+      "label": "Tag-Quellen",
+      "description": "Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).",
+      "values": []
+    },
+    {
+      "key": "traffic_calming",
+      "type": "sanitized_strings",
+      "label": "Verkehrsberuhigung (OSM traffic_calming)",
+      "values": []
+    },
+    {
+      "key": "osm_area:highway",
+      "type": "ignore",
+      "label": "osm_area:highway",
+      "values": []
+    },
+    {
+      "key": "osm_barrier",
+      "type": "ignore",
+      "label": "osm_barrier",
+      "values": []
+    },
+    {
+      "key": "osm_capacity",
+      "type": "ignore",
+      "label": "osm_capacity",
+      "values": []
+    },
+    {
+      "key": "osm_crossing",
+      "type": "ignore",
+      "label": "osm_crossing",
+      "values": []
+    },
+    {
+      "key": "osm_crossing:buffer_marking",
+      "type": "ignore",
+      "label": "osm_crossing:buffer_marking",
+      "values": []
+    },
+    {
+      "key": "osm_crossing:kerb_extension",
+      "type": "ignore",
+      "label": "osm_crossing:kerb_extension",
+      "values": []
+    },
+    {
+      "key": "osm_crossing:markings",
+      "type": "ignore",
+      "label": "osm_crossing:markings",
+      "values": []
+    },
+    {
+      "key": "osm_crossing:signals",
+      "type": "ignore",
+      "label": "osm_crossing:signals",
+      "values": []
+    },
+    {
+      "key": "osm_crossing_ref",
+      "type": "ignore",
+      "label": "osm_crossing_ref",
+      "values": []
+    },
+    {
+      "key": "osm_fire_hydrant:position",
+      "type": "ignore",
+      "label": "osm_fire_hydrant:position",
+      "values": []
+    },
+    {
+      "key": "osm_fire_hydrant:type",
+      "type": "ignore",
+      "label": "osm_fire_hydrant:type",
+      "values": []
+    },
+    {
+      "key": "osm_highway",
+      "type": "ignore",
+      "label": "osm_highway",
+      "values": []
+    },
+    {
+      "key": "osm_leisure",
+      "type": "ignore",
+      "label": "osm_leisure",
+      "values": []
+    },
+    {
+      "key": "osm_mapillary",
+      "type": "ignore",
+      "label": "osm_mapillary",
+      "values": []
+    },
+    {
+      "key": "osm_natural",
+      "type": "ignore",
+      "label": "osm_natural",
+      "values": []
+    },
+    {
+      "key": "osm_network",
+      "type": "ignore",
+      "label": "osm_network",
+      "values": []
+    },
+    {
+      "key": "osm_outdoor_seating",
+      "type": "ignore",
+      "label": "osm_outdoor_seating",
+      "values": []
+    },
+    {
+      "key": "osm_position",
+      "type": "ignore",
+      "label": "osm_position",
+      "values": []
+    },
+    {
+      "key": "osm_ref",
+      "type": "ignore",
+      "label": "osm_ref",
+      "values": []
+    },
+    {
+      "key": "osm_road_marking",
+      "type": "ignore",
+      "label": "osm_road_marking",
+      "values": []
+    },
+    {
+      "key": "osm_small_electric_vehicle_parking:position",
+      "type": "ignore",
+      "label": "osm_small_electric_vehicle_parking:position",
+      "values": []
+    },
+    {
+      "key": "osm_street_cabinet",
+      "type": "ignore",
+      "label": "osm_street_cabinet",
+      "values": []
+    },
+    {
+      "key": "osm_traffic_calming",
+      "type": "ignore",
+      "label": "osm_traffic_calming",
+      "values": []
+    },
+    {
+      "key": "osm_traffic_sign",
+      "type": "ignore",
+      "label": "osm_traffic_sign",
+      "values": []
+    },
+    {
+      "key": "osm_vending",
+      "type": "ignore",
+      "label": "osm_vending",
+      "values": []
+    },
+    {
+      "key": "osm_zone",
+      "type": "ignore",
+      "label": "osm_zone",
+      "values": []
+    }
+  ],
+  "chapters": [
+    {
+      "id": "capacity-calculation",
+      "title": "Berechnung der Kapazität",
+      "markdown": "Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n"
+    },
+    {
+      "id": "condition-category",
+      "title": "Parkbeschränkung",
+      "markdown": "Unter dem Wert \"Parkbeschränkungen\" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n"
+    }
+  ]
+}

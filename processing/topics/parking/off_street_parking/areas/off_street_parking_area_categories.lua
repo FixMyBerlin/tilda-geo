@@ -79,6 +79,7 @@ local off_street_parking_area_categories = {
         -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
         (tags.building == 'carport') or
         (tags.amenity == 'parking' and tags.parking == 'carport') or
+        (tags.amenity == 'parking' and tags.parking == 'carports') or
         (tags.amenity == 'parking' and tags.parking == 'sheds')
       )
     end,

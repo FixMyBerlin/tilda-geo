@@ -1,0 +1,45 @@
+import dompurify from 'dompurify'
+import { twJoin } from 'tailwind-merge'
+import { formatDateTime } from '@/components/shared/date/formatDate'
+import { Markdown } from '@/components/shared/text/Markdown'
+import { proseClasses } from '@/components/shared/text/prose'
+import type { NoteComment } from '@/server/notes/queries/getNoteAndComments.server'
+import { OsmUserLink } from '../OsmUserLink'
+import { EditNoteCommentForm } from './EditNoteCommentForm'
+import { wasUpdated } from './utils/wasUpdated'
+
+type Props = {
+  comment: NoteComment
+}
+
+export const InternalNoteComment = ({ comment }: Props) => {
+  return (
+    <>
+      <Markdown
+        markdown={dompurify.sanitize(comment.body)}
+        className={twJoin(
+          proseClasses,
+          'prose-sm border-l-4 border-white pl-3 prose-a:underline hover:prose-a:text-teal-700 hover:prose-a:decoration-teal-700',
+        )}
+      />
+
+      <div className="relative mt-3 flex items-center justify-between">
+        <div>
+          <strong>
+            <OsmUserLink
+              firstName={comment.author?.firstName}
+              lastName={comment.author?.lastName}
+              osmName={comment.author.osmName}
+              showMembership={false}
+            />
+          </strong>
+          {wasUpdated(comment) ? <br /> : ', '}
+          {formatDateTime(comment.createdAt)}
+          {wasUpdated(comment) && <>, aktualisiert {formatDateTime(comment.updatedAt)}</>}
+        </div>
+
+        <EditNoteCommentForm comment={comment} />
+      </div>
+    </>
+  )
+}

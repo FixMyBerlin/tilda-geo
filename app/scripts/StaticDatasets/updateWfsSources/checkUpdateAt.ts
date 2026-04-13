@@ -1,4 +1,4 @@
-import { MetaData } from '../types'
+import type { MetaData } from '../types'
 import { import_ } from '../utils/import_'
 import { green, red, yellow } from '../utils/log'
 
@@ -13,7 +13,7 @@ const getMetadatUrl = async (url: string) => {
   const regex = /<MetadataURL[^>]*xlink:href="([^"]+)"/
   const match = xml.match(regex)
 
-  if (!(match && match[1])) {
+  if (!match?.[1]) {
     yellow('  Metadata URL not found', url)
     return undefined
   }

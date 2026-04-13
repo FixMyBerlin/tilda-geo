@@ -1,7 +1,5 @@
-import { $ } from 'bun'
-import { join } from 'path'
 import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
-import { topicsConfig, type Topic } from '../constants/topics.const'
+import { type Topic, topicsConfig } from '../constants/topics.const'
 import {
   createReferenceTable,
   diffTables,
@@ -14,6 +12,8 @@ import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { bboxesFilter, filteredFilePath } from './filter'
+import { $ } from 'bun'
+import { join } from 'node:path'
 
 const topicPath = (topic: Topic) => join(TOPIC_DIR, topic)
 const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
@@ -113,12 +113,11 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     !helpersChanged &&
     !constantsDirChanged &&
     !dataTablesDirChanged &&
-    !fileChanged &&
-    params.processOnlyBbox === null
+    !fileChanged
 
   // Reference mode: Always create reference, never diff (clean baseline)
   // Previous/Fixed modes: Only diff when source PBF file hasn't changed (new download)
-  // Note: Filter regenerations (tag/bbox/ID filters) don't affect diffing - filtered data can still be diffed
+  // Note: Filter regenerations (tag/bbox filters) don't affect diffing - filtered data can still be diffed
   const isReferenceMode = params.diffingMode === 'reference'
   const diffChanges =
     params.diffingMode !== 'off' && params.diffingMode !== 'reference' && !fileChanged
@@ -127,6 +126,13 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   if (isReferenceMode) {
     console.log('Diffing: Drop all diff tables (reference mode - clean slate)')
     await dropAllDiffTables()
+  }
+
+  const useGlobalBboxFilter = params.processOnlyBbox !== null
+  if (useGlobalBboxFilter) {
+    console.log(
+      `Topics: ℹ️ Using global PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}. Topic bbox filters are skipped.`,
+    )
   }
 
   for (const [topic, bboxes] of Array.from(topicsConfig)) {
@@ -150,17 +156,14 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       )
       continue
     }
-    // Bboxes: Overwrite bboxes based on ENV
-    if (params.processOnlyBbox?.length === 4 && params.idFilter === false) {
-      console.log(
-        `Topics: ℹ️ Forcing a bbox filter based on PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}`,
-      )
-      // @ts-expect-error the readonly part gets in the way here…
-      innerBboxes = [params.processOnlyBbox]
+    // In dev mode with PROCESS_ONLY_BBOX we already applied a global bbox filter in index.ts.
+    // Keep topic bboxes only when no global bbox is active.
+    if (useGlobalBboxFilter) {
+      innerBboxes = null
     }
 
     // Bboxes: Create filtered source file
-    if (innerBboxes && params.idFilter === false) {
+    if (innerBboxes) {
       innerFileName = `${topic}_extracted.osm.pbf`
       await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
     }
@@ -225,7 +228,11 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       console.log(
         'Diffing:',
         'Skip diffing',
-        JSON.stringify({ diffChanges, diffingMode: params.diffingMode, fileChanged }),
+        JSON.stringify({
+          diffChanges,
+          diffingMode: params.diffingMode,
+          fileChanged,
+        }),
         diffChanges === false
           ? '`diffChanges` is false when `fileChanged==true` (new download) or `diffingMode==off`'
           : '',

@@ -16,7 +16,7 @@ local function result_tags_separate_parking(category, object, area)
 
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags(object.tags)
-  local conditional_categories_result = classify_parking_conditions(object.tags, nil, 'assumed_free')
+  local conditional_categories_result = classify_parking_conditions(object.tags, 'assumed_free')
   local operator_type_result = operator_type.operator_type_for_area(object.tags, object.type, object.id, 'public')
 
   -- CRITICAL: Keep these lists in sync:

@@ -1,4 +1,4 @@
-import { CampaignType } from '../schema/campaignsSchema'
+import type { CampaignType } from '../schema/campaignsSchema'
 
 export const unexpected_highway_path: CampaignType = {
   id: 'unexpected_highway_path',

@@ -132,6 +132,16 @@ describe("off_street_parking_area_categories", function()
       assert.are.equal(tags_result.tags.access, "permissive")
     end)
 
+    it('matches amenity parking with parking=carports and preserves access=destination', function()
+      local object = { id = 1, type = 'way', tags = { amenity = 'parking', parking = 'carports', capacity = '2', access = 'destination' } }
+      local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
+      local tags_result = result_tags_off_street_parking(category_result, 100)
+
+      assert.are.equal(category_result.category.id, 'carport')
+      assert.are.equal(tags_result.tags.parking, 'carport')
+      assert.are.equal(tags_result.tags.access, 'destination')
+    end)
+
     it("matches multi-storey", function()
       local object = { id = 1, type = 'way', tags = { amenity = "parking", parking = "multi-storey", capacity = "50", access = "yes" } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)

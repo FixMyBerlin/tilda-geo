@@ -1,65 +1,151 @@
 // We use bun.sh to run this file
-import { getExportOgrApiBboxUrl } from '@/src/app/_components/utils/getExportApiUrl'
-import { SourceExportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
-import { styleText } from 'node:util'
+
 import fs from 'node:fs'
+import path from 'node:path'
+import { parseArgs, styleText } from 'node:util'
+import { select } from '@clack/prompts'
+import dotenv from 'dotenv'
+import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
+import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
+import type { EnvironmentValues } from '@/server/envSchema'
+import { getValidatedEnv, mapboxTilesetsSchema } from '../shared/env'
 import { tilesetConfigs } from './datasets'
 
-const ENV_SOURCE: typeof process.env.NEXT_PUBLIC_APP_ENV = 'staging'
+const log = {
+  info: (msg: string, ...rest: unknown[]) =>
+    console.log(styleText(['inverse', 'bold'], msg), ...rest),
+  warn: (msg: string, ...rest: unknown[]) =>
+    console.log(styleText(['inverse', 'bold', 'yellow'], msg), ...rest),
+  error: (msg: string, ...rest: unknown[]) =>
+    console.error(styleText(['inverse', 'bold', 'red'], msg), ...rest),
+}
+
+const envMap = {
+  dev: 'development',
+  staging: 'staging',
+  production: 'production',
+} as const satisfies Record<string, EnvironmentValues>
+
+type CliEnv = keyof typeof envMap
+
+const cliEnvKeys = Object.keys(envMap) as CliEnv[]
+
+const isCliEnv = (v: string): v is CliEnv => v in envMap
+
+const cliEnvSelectOptions: { value: CliEnv; label: string }[] = [
+  { value: 'dev', label: 'Development (localhost)' },
+  { value: 'staging', label: 'Staging' },
+  { value: 'production', label: 'Production' },
+]
+
+const { values } = parseArgs({
+  args: Bun.argv,
+  options: {
+    env: { type: 'string' },
+    filter: { type: 'string' },
+    force: { type: 'boolean' },
+  },
+  strict: true,
+  allowPositionals: true,
+})
+
+let cliEnv: CliEnv
+if (values.env) {
+  if (!isCliEnv(values.env)) {
+    log.error(
+      'ERROR',
+      `Invalid environment: ${values.env}. Must be one of: ${cliEnvKeys.join(', ')}`,
+    )
+    process.exit(1)
+  }
+  cliEnv = values.env
+} else {
+  const selected = await select({
+    message: 'Select environment to fetch tiles from:',
+    options: cliEnvSelectOptions,
+  })
+  if (typeof selected !== 'string' || !isCliEnv(selected)) {
+    log.error('ERROR', 'No environment selected. Aborting.')
+    process.exit(1)
+  }
+  cliEnv = selected
+}
+
+const envSource = envMap[cliEnv]
+
+const scriptDir = path.dirname(__filename)
+const repoRoot = path.resolve(scriptDir, '../../..')
+const repoEnvPath = path.join(repoRoot, '.env')
+if (fs.existsSync(repoEnvPath)) {
+  dotenv.config({ path: repoEnvPath })
+}
 
 async function main() {
-  console.log(styleText(['inverse', 'bold'], 'START'), __filename)
+  const env = getValidatedEnv(mapboxTilesetsSchema)
 
-  // Folder
+  log.info('START', __filename)
+
   const folderFgb = 'scripts/MapboxTilesets/flatgeobuf'
   const folderMbtiles = 'scripts/MapboxTilesets/mbtiles'
+  fs.mkdirSync(folderFgb, { recursive: true })
+  fs.mkdirSync(folderMbtiles, { recursive: true })
 
-  console.log(
-    styleText(['inverse', 'bold'], 'INFO'),
-    'Opening mbtiles folder so you may "replace" the Mapbox tilesets in the browser.',
-  )
-  Bun.spawnSync(['open', folderMbtiles])
+  const filterTerm = values.filter
+  const force = !!values.force
 
-  // Fetch, Write, Transform with GDAL API
-  for (const dataset of Object.entries(tilesetConfigs)) {
+  log.info('CONFIG', { env: cliEnv, envSource, filter: filterTerm ?? '(all)', force })
+
+  const allDatasets = Object.entries(tilesetConfigs)
+  const datasets = filterTerm
+    ? allDatasets.filter(([key]) => key.includes(filterTerm))
+    : allDatasets
+
+  if (datasets.length === 0) {
+    log.warn('SKIP', `No datasets match filter "${filterTerm}"`)
+    process.exit(0)
+  }
+
+  log.info('INFO', `Processing ${datasets.length}/${allDatasets.length} datasets`)
+
+  for (const dataset of datasets) {
     console.log('\n')
     const datasetKey = dataset[0] as SourceExportApiIdentifier
     const { sourceLayer, uploadUrl, bbox } = dataset[1]
 
-    // Check if files already exist
     const fgbFile = `${folderFgb}/atlas_${datasetKey}.fgb`
     const mbtilesFile = `${folderMbtiles}/atlas_${datasetKey}.mbtiles`
 
-    if (fs.existsSync(fgbFile) && fs.existsSync(mbtilesFile)) {
-      console.log(
-        styleText(['inverse', 'bold', 'yellow'], '  SKIP'),
-        `${datasetKey} - files already exist`,
-        { uploadUrl },
-      )
+    if (!force && fs.existsSync(fgbFile) && fs.existsSync(mbtilesFile)) {
+      log.warn('  SKIP', `${datasetKey} — files already exist (use --force to re-download)`)
       continue
     }
 
     try {
-      // Fetch Export API with GDAL (better quality data)
-      const apiKey = process.env.ATLAS_API_KEY
-      // The `apiKey` will skip the region check (hence the `noRegion`)
-      const url = getExportOgrApiBboxUrl('noRegion', datasetKey, bbox, 'fgb', ENV_SOURCE, apiKey)
-      console.log(styleText(['inverse', 'bold', 'yellow'], '  FETCH'), url)
+      const url = getExportOgrApiBboxUrl(
+        'noRegion',
+        datasetKey,
+        bbox,
+        'fgb',
+        envSource,
+        env.ATLAS_API_KEY,
+      )
+      log.warn('  FETCH', url)
       const fetchExportFgb = await fetch(url)
 
       if (!fetchExportFgb.ok) {
-        console.error('  Error failed', datasetKey, ':', fetchExportFgb)
+        log.error(
+          '  ERROR',
+          `Fetch failed for ${datasetKey}: ${fetchExportFgb.status} ${fetchExportFgb.statusText}`,
+        )
         continue
       }
 
-      // For debugging: Write FGB Response
-      console.log(styleText(['inverse', 'bold', 'yellow'], '  WRITE'), fgbFile)
+      log.warn('  WRITE', fgbFile)
       const fgbBuffer = await fetchExportFgb.arrayBuffer()
       fs.writeFileSync(fgbFile, Buffer.from(fgbBuffer))
 
-      // Create mbTiles with Tippecanoe
-      console.log(styleText(['inverse', 'bold'], '  RUN'), 'tippecanoe', mbtilesFile)
-      Bun.spawnSync(
+      log.info('  RUN', `tippecanoe → ${mbtilesFile}`)
+      const tippecanoe = Bun.spawnSync(
         [
           'tippecanoe',
           `--output=${mbtilesFile}`,
@@ -71,33 +157,38 @@ async function main() {
           `--layer=${sourceLayer}`, // We need to specify a specifiy layer name which was initially used by Mapbox when we uploaded the geojson files, otherwise the stiles need to be updated…
           fgbFile,
         ],
-        {
-          onExit(_proc, exitCode, _signalCode, error) {
-            exitCode && console.log('exitCode:', exitCode)
-            error && console.log('error:', error)
-          },
-        },
+        { stderr: 'pipe' },
       )
 
-      // Hint on how to upload
+      if (tippecanoe.exitCode !== 0) {
+        log.error(
+          '  ERROR',
+          `tippecanoe failed for ${datasetKey} (exit ${tippecanoe.exitCode}): ${tippecanoe.stderr.toString()}`,
+        )
+        continue
+      }
+
       if (uploadUrl) {
-        console.log(styleText(['inverse', 'bold'], '  NOW…'), 'upload', mbtilesFile, 'on', uploadUrl)
+        log.info('  NOW…', `upload ${mbtilesFile} on ${uploadUrl}`)
       } else {
-        console.log(
-          styleText(['inverse', 'bold'], '  NOW…'),
-          'upload',
-          mbtilesFile,
-          'to',
-          `https://console.mapbox.com/studio/tilesets/?q=${datasetKey}`,
-          '(and then add the upload URL to the processing file…)',
+        log.info(
+          '  NOW…',
+          `upload ${mbtilesFile} to https://console.mapbox.com/studio/tilesets/?q=${datasetKey} (and then add the upload URL to datasets.ts)`,
         )
       }
     } catch (error) {
-      console.error('  Error handling', datasetKey, ':', error)
+      log.error('  ERROR', `handling ${datasetKey}: ${error}`)
     }
   }
 
-  console.log('\n', styleText(['inverse', 'bold'], 'DONE'))
+  log.info(
+    '\nINFO',
+    'Opening mbtiles folder so you may "replace" the Mapbox tilesets in the browser.',
+  )
+  Bun.spawnSync(['open', folderMbtiles])
+
+  console.log('\n')
+  log.info('DONE', '')
 }
 
-main()
+void main()

@@ -124,6 +124,22 @@ spinner.start('Copying .env files…')
 copyEnvFilesRecursive(REPO_ROOT, targetDir)
 spinner.stop('Env files copied.')
 
+// This repo: husky lives in app/.husky; app/package.json has "prepare": "cd .. && husky app/.husky"
+const HUSKY_HOOKS_PATH = 'app/.husky/_'
+const huskyDir = path.join(targetDir, 'app', '.husky')
+if (fs.existsSync(huskyDir)) {
+  spinner.start('Setting up Husky in worktree…')
+  const configResult = await $`git config core.hooksPath ${HUSKY_HOOKS_PATH}`.cwd(targetDir).quiet()
+  const chmodResult = await $`chmod -R +x app/.husky`.cwd(targetDir).quiet()
+  if (configResult.exitCode === 0 && chmodResult.exitCode === 0) {
+    p.log.step(`Set core.hooksPath to ${HUSKY_HOOKS_PATH}, made hooks executable`)
+  } else {
+    if (configResult.exitCode !== 0) p.log.warn('Could not set core.hooksPath for worktree')
+    if (chmodResult.exitCode !== 0) p.log.warn('Could not chmod app/.husky')
+  }
+  spinner.stop('Husky setup done.')
+}
+
 const LAUNCH_APPS = [
   { value: 'cursor', label: 'Cursor', cmd: 'cursor' },
   { value: 'github', label: 'GitHub', cmd: 'github' },

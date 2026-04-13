@@ -1,10 +1,15 @@
 import { z } from 'zod'
 
+const nullishString = z
+  .string()
+  .transform((v) => (v === '' ? null : v))
+  .nullish()
+
 export const UpdateUserSchema = z.object({
-  email: z.string().email(),
-  firstName: z.string().nullish(),
-  lastName: z.string().nullish(),
-  osmDescription: z.string().nullish(),
+  email: z.email(),
+  firstName: nullishString,
+  lastName: nullishString,
+  osmDescription: nullishString,
 })
 
 export const UpdateOsmDescription = z.object({

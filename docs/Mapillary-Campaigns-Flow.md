@@ -25,6 +25,7 @@ The system uses Mapillary coverage data to create specialized campaigns that onl
   - Saves to: `/data/pseudoTagsData/mapillaryCoverageData/mapillary_coverage.csv`
 
 **External Processing:**
+
 - The source repository (`vizsim/mapillary_coverage`) processes Mapillary tiles for sequences in Germany
 - Matches them to OSM roads data using a fixed buffer
 - Includes ways where ≥60% has Mapillary coverage
@@ -34,11 +35,13 @@ The system uses Mapillary coverage data to create specialized campaigns that onl
 **Location:** `processing/topics/roads_bikelanes/roads_bikelanes.lua`
 
 **Initialization:**
+
 ```lua
 local mapillary_coverage_data = load_csv_mapillary_coverage()
 ```
 
 **CSV Loading Chain:**
+
 1. `load_csv_mapillary_coverage()` → `processing/topics/helper/pseudo_tags/load_csv_mapillary_coverage.lua`
 2. Uses generic `load_csv()` → `processing/topics/helper/pseudo_tags/load_csv.lua`
 3. Parses CSV using `ftcsv` library
@@ -46,6 +49,7 @@ local mapillary_coverage_data = load_csv_mapillary_coverage()
 5. Caches in memory for the entire processing run
 
 **Lookup During Processing:**
+
 ```lua
 local mapillary_coverage_lines = mapillary_coverage_data:get()
 object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
@@ -62,14 +66,17 @@ object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, ob
 The `mapillary_coverage` value (from `object_tags.mapillary_coverage`) is stored in multiple places:
 
 #### A. `bikelanes` and `roads` Tables
+
 - Stored in `tags` column as `mapillary_coverage = 'regular' | 'pano'`
 - Used for visualization and filtering in the map
 
 #### B. `todos_lines` Table
+
 - Stored in `meta` column as JSONB: `{ mapillary_coverage: 'regular' | 'pano' }`
 - This is the critical table for MapRoulette campaigns
 
 **Table Structure:**
+
 ```sql
 todos_lines (
   id TEXT,              -- e.g., "way/123/cycleway/right"
@@ -87,12 +94,14 @@ todos_lines (
 ### 4. Create Todos with Mapillary Variants
 
 **Location:**
+
 - **Bikelane Todos:** `processing/topics/roads_bikelanes/bikelanes/BikelaneTodos.lua`
 - **Road Todos:** `processing/topics/roads_bikelanes/roads/RoadTodos.lua`
 - **Usage:** Both are imported and used in `processing/topics/roads_bikelanes/roads_bikelanes.lua`
 
 **Where Campaigns are Defined:**
 All campaign/todo definitions originate in these LUA files. Each todo object defines:
+
 - `id`: The campaign identifier (e.g., `"needs_clarification__mapillary"`)
 - `conditions`: Function that determines when this todo applies
 - `priority`: Function that returns priority string (`"1"` or `"2"`)
@@ -113,6 +122,7 @@ For each todo type, there are typically two variants:
    - `todoTableOnly: true` (hidden from Inspector, only in campaigns)
 
 **Example:**
+
 ```lua
 local needs_clarification__mapillary = BikelaneTodo.new({
   id = "needs_clarification__mapillary",
@@ -147,6 +157,7 @@ Todos are stored differently in different tables:
    - This is the format used by the MapRoulette API to query and filter tasks
 
 **Todo ID Type Generation:**
+
 - **Location:** `processing/steps/generateTypes.ts`
 - After LUA processing, extracts all todo IDs from LUA code
 - Generates TypeScript types in `app/src/data/processingTypes/todoId.generated.const.ts`
@@ -158,11 +169,13 @@ Todos are stored differently in different tables:
 **Location:** `processing/topics/roads_bikelanes/3_cleanup_todos_lines.sql`
 
 **Problem:**
+
 - LUA processing can create duplicate entries when encountering transformed geometries
 - Duplicates have identical data except `id` may have `/left` or `/right` postfix
 - This happens due to complexity of `cycleway` vs `cycleway:SIDE` processing
 
 **Solution:**
+
 - SQL script removes duplicates after LUA processing completes
 - Uses `ROW_NUMBER()` window function to identify duplicates
 - Partitions by: `osm_type`, `osm_id`, `table`, `tags`, `meta`, `geom`, `length`, `minzoom`
@@ -176,28 +189,32 @@ Todos are stored differently in different tables:
 **Location:** `app/src/data/radinfra-de/campaigns/*.ts`
 
 Each campaign has a TypeScript configuration file that defines:
+
 - Campaign metadata (title, description, task instructions)
 - MapRoulette challenge settings (enabled, checkinComment, etc.)
 - Task template with Mustache-style placeholders (e.g., `%%MAPILLARY_URL_START%%`)
 
 **Example:** `needs_clarification__mapillary.ts`
+
 - `id`: Must match the todo ID from LUA (`needs_clarification__mapillary`)
 - `maprouletteChallenge.enabled`: Whether to create/update in MapRoulette
 - `taskTemplate`: Markdown template for task instructions
 
 **Campaign Collection:**
+
 - All campaigns imported in `app/src/data/radinfra-de/campaigns.ts`
 - Validated against `CampaignSchema`
 - Exported as `campaigns` array
 
 ### 6. API Route: Query Todos and Generate GeoJSON
 
-**Location:** `app/src/app/api/maproulette/data/[projectKey]/route.ts`
+**Location:** `app/src/routes/api/maproulette/data/$projectKey.ts`
 
 **Endpoint:** `GET /api/maproulette/data/{projectKey}`
 
 **Important: Identifier Naming Across the System:**
 The `projectKey` parameter is the same identifier used throughout the system, but it has different names in different contexts:
+
 - **In LUA:** Called `id` (e.g., `"needs_clarification__mapillary"`)
 - **In `todos_lines.tags`:** Used as JSONB key (e.g., `{"needs_clarification__mapillary": "1"}`)
 - **In campaign configs:** Called `id` (e.g., `id: 'needs_clarification__mapillary'`)
@@ -205,6 +222,7 @@ The `projectKey` parameter is the same identifier used throughout the system, bu
 - **In TypeScript types:** Called `TodoId` (in `todoId.generated.const.ts`)
 
 This identifier is the main link between:
+
 - LUA todo definitions → `todos_lines` table → Campaign configs → MapRoulette challenges
 
 **Process:**
@@ -215,6 +233,7 @@ This identifier is the main link between:
    - Maps to campaign ID in TypeScript configs (e.g., `needs_clarification__mapillary`)
 
 2. **Query `todos_lines` table:**
+
    ```sql
    SELECT
      todos_lines.osm_type,
@@ -266,7 +285,7 @@ This identifier is the main link between:
 
 **Location:** `app/scripts/MaprouletteCreate/process.ts`
 
-**Script:** `npm run maproulette:create` (with optional `--filter` param)
+**Script:** `bun run maproulette:create` (with optional `--filter` param)
 
 **Process:**
 
@@ -303,19 +322,21 @@ This identifier is the main link between:
 
 ### 8. Campaign Listing API (for External Astro Site)
 
-**Location:** `app/src/app/api/campaigns/route.ts`
+**Location:** `app/src/routes/api/campaigns.ts`
 
 **Endpoint:** `GET /api/campaigns`
 
 **Purpose:** Provides campaign metadata to external Astro.js site at `radinfra.de`
 
 **Response:**
+
 - Returns all campaigns from `app/src/data/radinfra-de/campaigns.ts`
 - Adds computed fields:
   - `remoteGeoJson`: Full URL to MapRoulette data endpoint
   - `hashtags`: Array of hashtags for OSM changesets
 
 **Usage:**
+
 - External Astro site fetches this endpoint
 - Generates static pages at `https://radinfra.de/kampagnen/{campaignId}/`
 - Displays campaign information, progress, and links to MapRoulette
@@ -324,17 +345,19 @@ This identifier is the main link between:
 
 **Location:** `app/scripts/MaprouletteRebuild/process.ts`
 
-**Script:** `npm run maproulette:rebuild` (with optional `--filter` param)
+**Script:** `bun run maproulette:rebuild` (with optional `--filter` param)
 
 **Purpose:** Refreshes task lists when source data changes without recreating the challenge
 
 **Process:**
+
 1. Calls MapRoulette API: `POST /api/v2/challenge/{id}/rebuild`
 2. Deletes all unfinished tasks
 3. Rebuilds tasks from `remoteGeoJson` URL
 4. Used when OSM data is reprocessed and todos_lines table is updated
 
 **Automation:**
+
 - Triggered by GitHub Actions workflow: `.github/workflows/generate-maproulette-tasks.production.yml`
 - Runs periodically to keep MapRoulette tasks in sync with latest TILDA data
 
@@ -343,6 +366,7 @@ This identifier is the main link between:
 **Location:** `app/src/app/regionen/[regionSlug]/_mapData/mapDataSubcategories/subcat_radinfra_campaigns.const.ts`
 
 **How it Works:**
+
 - `todos_lines` table is exposed as vector tile source: `atlas_todos_lines`
 - Source layer: `todos_lines`
 - Creates map subcategory "Kampagnen" with multiple style options:
@@ -359,6 +383,7 @@ This identifier is the main link between:
    - Category grouping from campaign config
 
 **Map Integration:**
+
 - Users can select campaign from dropdown in map UI
 - Only relevant todos_lines are displayed based on selected campaign
 - Visual distinction between todos with/without Mapillary coverage
@@ -383,6 +408,7 @@ When a user clicks on a feature in the map, the inspector shows campaign informa
    - More limited display
 
 **Display:**
+
 - Shows "Aufgabe(n) zur Datenverbesserung" section
 - Lists all applicable campaigns for the selected feature
 - Each campaign shows task details via `NoticeMaprouletteTask` component

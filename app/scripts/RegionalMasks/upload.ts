@@ -9,11 +9,11 @@
 //    aws_secret_access_key = b123
 // Docs: https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-shared.html
 
-// We use bun.sh to run this file
-import { S3 } from '@aws-sdk/client-s3'
-import { styleText } from 'node:util'
 import fs from 'node:fs'
 import path from 'node:path'
+// We use bun.sh to run this file
+import { styleText } from 'node:util'
+import { S3 } from '@aws-sdk/client-s3'
 
 const s3 = new S3({
   region: 'eu-central-1',
@@ -32,7 +32,8 @@ const pmtilesFiles = fs
 for (const file of pmtilesFiles) {
   const Key = file
   const bunFile = Bun.file(path.resolve(__dirname, './pmtiles', file))
-  const Body = (await bunFile.arrayBuffer()) as any
+
+  const Body = new Uint8Array(await bunFile.arrayBuffer())
   const ContentType = 'application/x-protobuf'
 
   s3.putObject({ Bucket: 'atlas-tiles', Key, Body, ContentType }, (err, _data) => {
@@ -41,6 +42,9 @@ for (const file of pmtilesFiles) {
       return
     }
     const previewUrl = `https://atlas-tiles.s3.eu-central-1.amazonaws.com/${file}`
-    console.log(styleText(['inverse', 'bold'], 'INFO'), `Test-URL: https://pmtiles.io/?url=${previewUrl}`)
+    console.log(
+      styleText(['inverse', 'bold'], 'INFO'),
+      `Test-URL: https://pmtiles.io/?url=${previewUrl}`,
+    )
   })
 }

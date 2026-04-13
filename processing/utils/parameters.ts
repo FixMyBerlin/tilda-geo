@@ -1,6 +1,6 @@
+import type { TopicConfigBbox } from '../constants/topics.const'
 import { styleText } from 'node:util'
 import { z } from 'zod'
-import type { TopicConfigBbox } from '../constants/topics.const'
 
 export type DiffingMode = 'off' | 'previous' | 'fixed' | 'reference'
 
@@ -35,7 +35,6 @@ function parseParameters() {
     osmUsername: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME),
     osmPassword: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD),
     pbfDownloadUrl: urlSchema.parse(process.env.PROCESS_GEOFABRIK_DOWNLOAD_URL),
-    idFilter: process.env.ID_FILTER || (false as const),
     apiKey: process.env.ATLAS_API_KEY || '',
     diffingMode: diffingModeSchema.parse(process.env.PROCESSING_DIFFING_MODE),
     diffingBbox: parseBbox(process.env.PROCESSING_DIFFING_BBOX),
@@ -47,7 +46,7 @@ function parseParameters() {
     processOnlyBbox: parseBbox(process.env.PROCESS_ONLY_BBOX),
     osm2pgsqlLogLevel: process.env.OSM2PGSQL_LOG_LEVEL || 'info',
     osm2pgsqlNumberProcesses: process.env.OSM2PGSQL_NUMBER_PROCESSES
-      ? (Number(process.env.OSM2PGSQL_NUMBER_PROCESSES) || undefined)
+      ? Number(process.env.OSM2PGSQL_NUMBER_PROCESSES) || undefined
       : undefined,
   }
 }

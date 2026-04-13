@@ -1,13 +1,13 @@
-import { TZDate } from '@date-fns/tz'
-import { $ } from 'bun'
-import { format, getHours, subDays } from 'date-fns'
-import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
 import { debugWgetCommand } from '../utils/debugWget'
 import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
+import { TZDate } from '@date-fns/tz'
+import { $ } from 'bun'
+import { format, getHours, subDays } from 'date-fns'
+import { join } from 'node:path'
 
 /**
  * Get the full path to the downloaded file.
@@ -41,7 +41,7 @@ export async function waitForFreshData() {
     const cookieCheck = await ensureOAuthReady()
 
     // Debug logging for waitForFreshData wget command with redirect parameters
-    debugWgetCommand(cookieCheck as any, 'waitForFreshData')
+    debugWgetCommand(cookieCheck, 'waitForFreshData')
 
     const response = await fetch(params.pbfDownloadUrl, {
       method: 'HEAD',
@@ -140,13 +140,13 @@ export async function downloadFile() {
   console.log(`Download: Downloading ${downloadMethod} ${params.pbfDownloadUrl}…`)
 
   // Debug logging for wget command with redirect parameters
-  debugWgetCommand(cookieCheck as any, 'Download')
+  debugWgetCommand(cookieCheck, 'Download')
 
   try {
     if (cookieCheck?.isValid && cookieCheck.httpCookie) {
       // Try OAuth download first
       const result =
-        await $`wget --quiet --header ${'Cookie: ' + cookieCheck.httpCookie} --output-document ${filePath} ${params.pbfDownloadUrl}`
+        await $`wget --quiet --header ${`Cookie: ${cookieCheck.httpCookie}`} --output-document ${filePath} ${params.pbfDownloadUrl}`
 
       // Check if wget succeeded (exit code 0)
       if (result.exitCode !== 0) {

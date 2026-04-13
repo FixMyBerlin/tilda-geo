@@ -7,7 +7,7 @@ export const buildHashtags = (
     '#radinfra_de',
     id ? `#${id}` : undefined,
     // The other categories are less relevant
-    category == 'traffic_signs' ? `#${category}` : undefined,
+    category === 'traffic_signs' ? `#${category}` : undefined,
     hasMaproulette ? '#maproulette' : undefined,
   ]
     .flat()

@@ -44,7 +44,7 @@ local function result_tags_parkings(object)
   local road_width_tags_result = road_width_tags(object.tags)
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags_with_parent(object.tags, object._parent_tags)
-  local conditional_categories_result = classify_parking_conditions(object.tags, object._parent_tags, 'assumed_free')
+  local conditional_categories_result = classify_parking_conditions(object.tags, 'assumed_free')
   local operator_type_result = operator_type.operator_type_for_road_parking(object.tags, object._parent_tags, 'public')
 
   -- CRITICAL: Keep these lists in sync:

@@ -1,29 +1,12 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { sql } from 'bun'
-import fs from 'fs'
-import path from 'path'
-import { translations } from '../../src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/translations.const'
-import { interactivityConfiguration } from '../../src/app/regionen/[regionSlug]/_mapData/mapDataSources/generalization/interacitvityConfiguartion'
-
-// Use GEO_DATABASE_URL instead of DATABASE_URL to avoid Prisma-specific parameters
-// Clean the URL to remove parameters that bun doesn't understand
-const cleanDatabaseUrl = (url: string) => {
-  return url
-    .replace('?schema=prisma', '')
-    .replace('?pool_timeout=0', '')
-    .replace('&pool_timeout=0', '')
-    .replace('&schema=prisma', '')
-}
-
-const DATABASE_URL =
-  cleanDatabaseUrl(process.env.GEO_DATABASE_URL || '') ||
-  cleanDatabaseUrl(process.env.DATABASE_URL || '') ||
-  ''
+import { interactivityConfiguration } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
+import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
+import { getBaseDatabaseUrl } from '@/server/database-url.server'
 
 // Set the database URL for bun's sql template literal
-if (DATABASE_URL) {
-  // @ts-expect-error it seems to work and this script is not that important…
-  process.env.DATABASE_URL = DATABASE_URL
-}
+process.env.DATABASE_URL = getBaseDatabaseUrl()
 
 // Keys that should be skipped (full text, special handling, numbers)
 const SKIP_KEYS = [

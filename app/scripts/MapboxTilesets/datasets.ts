@@ -1,5 +1,5 @@
-import { SourceExportApiIdentifier } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier'
-import { StaticRegion } from '@/src/data/regions.const'
+import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
+import type { StaticRegion } from '@/data/regions.const'
 
 // Configruation:
 // BBox: Brandenburg
@@ -113,7 +113,7 @@ export const tilesetConfigs: Record<
     bbox: bboxPartOfNorthGermany,
   },
   // There is no export function for the statistics table, so we cannot use this script to update the data.
-  // See `app/src/app/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier.ts` for more.
+  // See `app/src/regionen/[regionSlug]/_mapData/mapDataSources/export/exportIdentifier.ts` for more.
   // aggregated_lengths: {
   //   sourceLayer: 'aggregated_lengths',
   //   uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',

@@ -1,14 +1,16 @@
-import { $ } from 'bun'
-import { styleText } from 'node:util'
-import { join } from 'path'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
+import { $ } from 'bun'
+import { join } from 'node:path'
+import { styleText } from 'node:util'
 
 //Geofabrik OAuth base URL, https://github.com/geofabrik/sendfile_osm_oauth_protector/blob/master/doc/client.md
 const GEOFABRIK_OAUTH_BASE_URL = 'https://osm-internal.download.geofabrik.de'
 
 export const COOKIE_FILE = join(OSM_DOWNLOAD_DIR, 'geofabrik_oauth_cookie.txt')
 const OAUTH_SETTINGS_FILE = join(OSM_DOWNLOAD_DIR, 'oauth_settings.json')
+
+export type OAuthCookieCheck = { isValid: true; httpCookie: string } | null
 
 /**
  * Ensure we have a valid OAuth cookie, getting a new one if needed
@@ -157,7 +159,7 @@ export function getAuthHeaders(httpCookie: string | undefined) {
   const headers: HeadersInit = {}
 
   if (httpCookie) {
-    headers['Cookie'] = httpCookie
+    headers.Cookie = httpCookie
   }
 
   return headers

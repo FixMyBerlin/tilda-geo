@@ -1,7 +1,3 @@
-# Symlink `npm run StaticDatasets:link`
+# Symlink `bun run static-datasets-link`
 /geojson
 /_geojson_temp
-
-.env.development
-.env.staging
-.env.production

@@ -1,4 +1,4 @@
-import { StaticRegion } from './regions.const'
+import type { StaticRegion } from './regions.const'
 
 export const productName: Map<StaticRegion['product'], string> = new Map([
   ['radverkehr', 'TILDA Radverkehr'],

@@ -77,7 +77,7 @@ const collectCampaigns = () => {
       const parsed = CampaignSchema.safeParse(campaign)
       if (!parsed.success) {
         console.log(`ERROR collectRadinfraDeCampaigns:`, parsed.error, campaign)
-        return
+        return undefined
       }
       return parsed.data
     })

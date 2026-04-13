@@ -67,17 +67,17 @@ When there is **no user decision** (`userStatus === null`), the system uses an *
 
 **When \|absoluteDifference\| > threshold** (effective status = %-based: GOOD / NEEDS_REVIEW / PROBLEMATIC):
 
-| Previous System Status | Effective New Status | Action                                                         |
-| ---------------------- | -------------------- | -------------------------------------------------------------- |
-| **GOOD**               | GOOD                 | **No change** — keep existing evaluation                       |
-| **GOOD**               | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself          |
-| **GOOD**               | PROBLEMATIC          | **Create new evaluation** — system overwrites itself          |
-| **NEEDS_REVIEW**       | GOOD                 | **Create new evaluation** — system overwrites itself           |
-| **NEEDS_REVIEW**       | NEEDS_REVIEW         | **No change** — keep existing evaluation                      |
-| **NEEDS_REVIEW**       | PROBLEMATIC          | **Create new evaluation** — system overwrites itself          |
-| **PROBLEMATIC**        | GOOD                 | **Create new evaluation** — system overwrites itself           |
-| **PROBLEMATIC**        | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself          |
-| **PROBLEMATIC**        | PROBLEMATIC          | **No change** — keep existing evaluation                      |
+| Previous System Status | Effective New Status | Action                                               |
+| ---------------------- | -------------------- | ---------------------------------------------------- |
+| **GOOD**               | GOOD                 | **No change** — keep existing evaluation             |
+| **GOOD**               | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself |
+| **GOOD**               | PROBLEMATIC          | **Create new evaluation** — system overwrites itself |
+| **NEEDS_REVIEW**       | GOOD                 | **Create new evaluation** — system overwrites itself |
+| **NEEDS_REVIEW**       | NEEDS_REVIEW         | **No change** — keep existing evaluation             |
+| **NEEDS_REVIEW**       | PROBLEMATIC          | **Create new evaluation** — system overwrites itself |
+| **PROBLEMATIC**        | GOOD                 | **Create new evaluation** — system overwrites itself |
+| **PROBLEMATIC**        | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself |
+| **PROBLEMATIC**        | PROBLEMATIC          | **No change** — keep existing evaluation             |
 
 Effective status **unchanged** (e.g. GOOD → GOOD) → never create a new evaluation. Effective status **changed** → create a new evaluation where the tables say “Create new evaluation”. User classifications are not overwritten here; see [§3.2](#32-system-overwrites-user-decision) for when the system may reset a user decision (only when it becomes GOOD).
 

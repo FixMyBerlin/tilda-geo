@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
 
 // We use bun.sh to run this file
-import { staticRegion } from '@/src/data/regions.const'
-import { feature, featureCollection } from '@turf/turf'
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
+import { feature, featureCollection } from '@turf/turf'
+import { staticRegion } from '@/data/regions.const'
 import { downloadGeoJson } from './createMasks/download'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
@@ -96,7 +96,7 @@ export const data: MetaData = maskMeta({
     const featureCollectionData = featureCollection([regionFeature])
 
     // Save raw geojson file (transformation will happen via transform.ts during static dataset processing)
-    // Prettier formatting is handled by the npm script chain (regions:masks:format)
+    // Formatting is handled by the bun script chain (regions:masks:2format)
     await Bun.write(geojsonFilename, JSON.stringify(featureCollectionData, null, 2))
     console.info(styleText('green', `✓ Updated ${geojsonFilename}`))
   } else {

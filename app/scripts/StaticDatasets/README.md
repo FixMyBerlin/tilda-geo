@@ -6,7 +6,12 @@ These scripts manage geodata files, which are made public or semi-public in tild
 
 ## Setup
 
-- Setup `./.env.development` based on [`./.env.development.example`](/./.env.development.example) and the same for staging and production.
+- Configure the **repository root** [`.env`](../../.env) from [`.env.example`](../../.env.example). The app and CLI scripts under `app/` load that file via `bun --env-file=../.env` (see [`package.json`](../../package.json) scripts such as `dev`, `static-datasets-update`).
+- **Atlas API keys (strict):**
+  - `ATLAS_API_KEY` — required for `--env=dev` (calls the **local** app API only).
+  - `ATLAS_API_KEY_STAGING` — required for `--env=staging` (no fallback to `ATLAS_API_KEY`).
+  - `ATLAS_API_KEY_PRODUCTION` — required for `--env=production` (no fallback).
+- S3 credentials (`S3_KEY`, `S3_SECRET`, `S3_REGION`, `S3_BUCKET`) must be set in the **root** `.env` for uploads. The S3 prefix (`localdev` / `staging` / `production`) is chosen from `--env`, not from env vars.
 - [Install Bun](https://bun.sh/docs/installation)
   - macOS `brew tap oven-sh/bun && brew install bun`
   - Archlinux `yay -S bun-bin`
@@ -17,19 +22,19 @@ These scripts manage geodata files, which are made public or semi-public in tild
 
 ## Update and add data
 
-1. See `npm run` for the command per environment.
+1. From `app/`, run `bun run static-datasets-update`. Without `--env`, the CLI prompts for the target environment. Pass `--env=dev`, `--env=staging`, or `--env=production` to skip the prompt.
 2. Add file to `./geojson/region-<mainRegionSlug>`
    - Region-Subfolders are `region-<mainRegionSlug>` where the shorthand is usually the region slug. Whenever we have multiple regions like with `bb`, we use the "main slug" as folder name.
-   - Dataset-Folders follow the pattern `<mainRegionSlug>-<customDatasetSlug>-<optionalDatasetSharedIdentiefier>`
+   - Dataset-Folders follow the pattern `<mainRegionSlug>-<customDatasetSlug>-<optionalDatasetSharedIdentifier>`
    - GeoJson-Files can have any unique name (without spaces).
-3. Run the update script `npm run updateStaticDatasets` with optional filters:
+3. Optional flags:
    - `--keep-tmp` to keep temporary files for debugging
    - `--folder-filter berlin-` to run only files where the Dataset-Folder includes "berlin-"
-   - Example: `bun --env-file=.env --env-file=./scripts/StaticDatasets/.env.staging ./scripts/StaticDatasets/updateStaticDatasets.ts --keep-tmp --folder-filter berlin-`
+   - Example: `bun run static-datasets-update -- --env=staging --keep-tmp --folder-filter=berlin-`
 
 ### Temporary files
 
-Themporary files are stored at `scripts/StaticDatasets/_geojson_temp` and deleted after each run.
+Temporary files are stored at `scripts/StaticDatasets/_geojson_temp` and deleted after each run.
 Use `--keep-tmp` to keep the files for debugging.
 
 ### Skipping files
@@ -49,5 +54,3 @@ Use `--keep-tmp` to keep the files for debugging.
 ## Delete existing database entries
 
 The script will **not remove existing database configs** if the dataset folder was rename or removed.
-
-Use `npm run deleteAllStaticDatasets && npm run updateStaticDatasets` to reset all database entries.

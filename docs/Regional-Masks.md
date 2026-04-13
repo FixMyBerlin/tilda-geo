@@ -8,7 +8,7 @@ The regional masks system integrates with the [Static Datasets system](../app/sc
 
 ## How Masks Are Created
 
-Masks are created using the `npm run regions:masks` script, which:
+Masks are created using the `bun run regions:masks` script, which:
 
 1. Iterates through all regions defined in [`regions.const.ts`](../app/src/data/regions.const.ts)
 2. For each region with `osmRelationIds`:
@@ -55,7 +55,7 @@ Mask-specific configuration is generated from the shared helper at [`app/scripts
 The buffer distance (default: 10km) can be adjusted by editing the `transform.ts` file in each region's mask folder:
 
 ```typescript
-const bufferDistanceKm = 10; // Adjust this value
+const bufferDistanceKm = 10 // Adjust this value
 ```
 
 ## How Masks Are Stored
@@ -89,6 +89,6 @@ See [`app/src/app/regionen/[regionSlug]/_components/Map/SourcesAndLayers/Sources
 
 ## Related Scripts
 
-- `npm run regions` - Runs both `regions:masks` and `regions:configs`
-- `npm run regions:masks` - Creates/updates regional masks
-- `npm run regions:configs` - Updates category configs
+- `bun run regions` - Runs both `regions:masks` and `regions:configs`
+- `bun run regions:masks` - Creates/updates regional masks
+- `bun run regions:configs` - Updates category configs

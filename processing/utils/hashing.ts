@@ -1,5 +1,5 @@
-import { $ } from 'bun'
 import { readHashFromFile, writeHashForFile } from './persistentData'
+import { $ } from 'bun'
 
 /**
  * Compute the hash(es) of a directory. It iterates all files recursively and sorts them before hashing.

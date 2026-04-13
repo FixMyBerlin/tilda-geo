@@ -1,4 +1,4 @@
-import { WfsUrl } from './createWfsUrl'
+import type { WfsUrl } from './createWfsUrl'
 
 export const fetchAndStoreGeopackage = async (wfsUrl: WfsUrl, geoPackageFilename: string) => {
   const response = await fetch(wfsUrl, {

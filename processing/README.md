@@ -107,12 +107,6 @@ To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `P
 
 **Diffing timing in logs:** Timed diffing steps use the same style as topic timing: `Diffing: <step> - Start` then `Diffing: <step> – Took HH:MM:SS` (same `formatTimestamp` as "X finished in HH:MM:SS"). Steps: "Create reference tables", "Create reference tables (reference mode)", "Update diffs (previous|fixed)". Grep for `Diffing:` to see all diffing log lines.
 
-### Process only a single object
-
-For the development process it's often useful to run the processing on a single object.
-For that you can specify an id (list) as `ID_FILTER` in the [`processing/run-3-filter.sh`](/processing/run-3-filter.sh).
-See the [osmium-docs](https://docs.osmcode.org/osmium/latest/osmium-getid.html) for more information.
-
 ### Process only certain topics and certain bbox
 
 - Use `PROCESS_ONLY_TOPICS=parking` to only run the "parking" topic.

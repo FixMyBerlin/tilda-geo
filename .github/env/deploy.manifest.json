@@ -1,0 +1,222 @@
+{
+  "variables": [
+    {
+      "name": "ENVIRONMENT",
+      "sourceEnv": "INPUT_ENVIRONMENT",
+      "required": true,
+      "githubSource": "inputs.ENVIRONMENT",
+      "description": "Deployment target environment (staging|production)."
+    },
+    {
+      "name": "DATABASE_HOST",
+      "sourceEnv": "VAR_DATABASE_HOST",
+      "required": true,
+      "githubSource": "vars.DATABASE_HOST",
+      "description": "Database host used by app/processing and PG client variables."
+    },
+    {
+      "name": "DATABASE_USER",
+      "sourceEnv": "SECRET_DATABASE_USER",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.DATABASE_USER",
+      "description": "Database username."
+    },
+    {
+      "name": "DATABASE_PASSWORD",
+      "sourceEnv": "SECRET_DATABASE_PASSWORD",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.DATABASE_PASSWORD",
+      "description": "Database password."
+    },
+    {
+      "name": "DATABASE_NAME",
+      "sourceEnv": "SECRET_DATABASE_NAME",
+      "required": true,
+      "githubSource": "secrets.DATABASE_NAME",
+      "description": "Database name."
+    },
+    {
+      "name": "PROCESS_GEOFABRIK_DOWNLOAD_URL",
+      "sourceEnv": "VAR_PROCESS_GEOFABRIK_DOWNLOAD_URL",
+      "required": true,
+      "githubSource": "vars.PROCESS_GEOFABRIK_DOWNLOAD_URL",
+      "description": "PBF download URL (internal/public Geofabrik extract)."
+    },
+    {
+      "name": "PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME",
+      "sourceEnv": "SECRET_PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME",
+      "required": false,
+      "sensitive": true,
+      "githubSource": "secrets.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME",
+      "description": "Optional Geofabrik OAuth username."
+    },
+    {
+      "name": "PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD",
+      "sourceEnv": "SECRET_PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD",
+      "required": false,
+      "sensitive": true,
+      "githubSource": "secrets.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD",
+      "description": "Optional Geofabrik OAuth password."
+    },
+    {
+      "name": "TILES_URL",
+      "sourceEnv": "VAR_TILES_URL",
+      "required": true,
+      "githubSource": "vars.TILES_URL",
+      "description": "Public tile endpoint hostname."
+    },
+    {
+      "name": "CACHELESS_URL",
+      "sourceEnv": "VAR_CACHELESS_URL",
+      "required": true,
+      "githubSource": "vars.CACHELESS_URL",
+      "description": "Cacheless tile endpoint hostname."
+    },
+    {
+      "name": "VITE_APP_ORIGIN",
+      "sourceEnv": "VAR_VITE_APP_ORIGIN",
+      "required": true,
+      "githubSource": "vars.VITE_APP_ORIGIN",
+      "description": "Public app origin."
+    },
+    {
+      "name": "VITE_APP_ENV",
+      "sourceEnv": "VAR_VITE_APP_ENV",
+      "required": true,
+      "githubSource": "vars.VITE_APP_ENV",
+      "description": "App environment for client/server behavior."
+    },
+    {
+      "name": "APP_URL",
+      "sourceEnv": "VAR_APP_URL",
+      "required": true,
+      "githubSource": "vars.APP_URL",
+      "description": "Main app hostname used by Traefik labels."
+    },
+    {
+      "name": "SESSION_SECRET_KEY",
+      "sourceEnv": "SECRET_SESSION_SECRET_KEY",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.SESSION_SECRET_KEY",
+      "description": "Session signing secret."
+    },
+    {
+      "name": "OSM_CLIENT_ID",
+      "sourceEnv": "SECRET_OSM_CLIENT_ID",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.OSM_CLIENT_ID",
+      "description": "OSM OAuth client ID."
+    },
+    {
+      "name": "OSM_CLIENT_SECRET",
+      "sourceEnv": "SECRET_OSM_CLIENT_SECRET",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.OSM_CLIENT_SECRET",
+      "description": "OSM OAuth client secret."
+    },
+    {
+      "name": "S3_KEY",
+      "sourceEnv": "SECRET_S3_KEY",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.S3_KEY",
+      "description": "S3 access key."
+    },
+    {
+      "name": "S3_SECRET",
+      "sourceEnv": "SECRET_S3_SECRET",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.S3_SECRET",
+      "description": "S3 secret key."
+    },
+    {
+      "name": "S3_REGION",
+      "sourceEnv": "SECRET_S3_REGION",
+      "required": true,
+      "githubSource": "secrets.S3_REGION",
+      "description": "S3 region."
+    },
+    {
+      "name": "S3_BUCKET",
+      "sourceEnv": "SECRET_S3_BUCKET",
+      "required": true,
+      "githubSource": "secrets.S3_BUCKET",
+      "description": "S3 bucket used by app/scripts."
+    },
+    {
+      "name": "ATLAS_API_KEY",
+      "sourceEnv": "SECRET_ATLAS_API_KEY",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.ATLAS_API_KEY",
+      "description": "Internal atlas API key."
+    },
+    {
+      "name": "MAPROULETTE_API_KEY",
+      "sourceEnv": "SECRET_MAPROULETTE_API_KEY",
+      "required": true,
+      "sensitive": true,
+      "githubSource": "secrets.MAPROULETTE_API_KEY",
+      "description": "MapRoulette API key."
+    },
+    {
+      "name": "MAILJET_APIKEY_PUBLIC",
+      "sourceEnv": "SECRET_MAILJET_APIKEY_PUBLIC",
+      "required": false,
+      "sensitive": true,
+      "githubSource": "secrets.MAILJET_APIKEY_PUBLIC",
+      "description": "Optional Mailjet public key."
+    },
+    {
+      "name": "MAILJET_APIKEY_PRIVATE",
+      "sourceEnv": "SECRET_MAILJET_APIKEY_PRIVATE",
+      "required": false,
+      "sensitive": true,
+      "githubSource": "secrets.MAILJET_APIKEY_PRIVATE",
+      "description": "Optional Mailjet private key."
+    },
+    {
+      "name": "SKIP_DOWNLOAD",
+      "sourceEnv": "VAR_SKIP_DOWNLOAD",
+      "required": false,
+      "defaultValue": "1",
+      "githubSource": "vars.SKIP_DOWNLOAD",
+      "description": "Processing flag (default 1)."
+    },
+    {
+      "name": "SKIP_UNCHANGED",
+      "sourceEnv": "VAR_SKIP_UNCHANGED",
+      "required": false,
+      "defaultValue": "0",
+      "githubSource": "vars.SKIP_UNCHANGED",
+      "description": "Processing flag (default 0)."
+    },
+    {
+      "name": "PROCESSING_DIFFING_MODE",
+      "sourceEnv": "VAR_PROCESSING_DIFFING_MODE",
+      "required": true,
+      "githubSource": "vars.PROCESSING_DIFFING_MODE",
+      "description": "Diffing mode for processing."
+    },
+    {
+      "name": "PROCESSING_DIFFING_BBOX",
+      "sourceEnv": "VAR_PROCESSING_DIFFING_BBOX",
+      "required": true,
+      "githubSource": "vars.PROCESSING_DIFFING_BBOX",
+      "description": "Diffing bbox for processing."
+    },
+    {
+      "name": "ECR_REGISTRY",
+      "sourceEnv": "VAR_ECR_REGISTRY",
+      "required": true,
+      "githubSource": "vars.ECR_REGISTRY",
+      "description": "Private ECR registry URL used by docker-compose to pull images."
+    }
+  ]
+}

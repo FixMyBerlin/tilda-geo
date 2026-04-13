@@ -1,11 +1,3 @@
-import { translations } from '@/src/app/regionen/[regionSlug]/_components/SidebarInspector/TagsTable/translations/translations.const'
-import { StaticDatasetCategoryKey } from '@/src/app/regionen/[regionSlug]/_mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
-import {
-  FileMapDataSubcategoryStyleLegend,
-  MapDataOsmIdConfig,
-  MapDataSourceInspectorEditor,
-} from '@/src/app/regionen/[regionSlug]/_mapData/types'
-import { RegionSlug } from '@/src/data/regions.const'
 import type {
   CircleLayerSpecification,
   FillLayerSpecification,
@@ -13,23 +5,50 @@ import type {
   LineLayerSpecification,
   SymbolLayerSpecification,
 } from 'maplibre-gl'
+import type { StaticDatasetCategoryKey } from '@/components/regionen/pageRegionSlug/mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
+import type {
+  FileMapDataSubcategoryStyleLegend,
+  MapDataOsmIdConfig,
+  MapDataSourceInspectorEditor,
+} from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
+import type { RegionSlug } from '@/data/regions.const'
 
-// a modified version of MapDataDatasetsSource from '../../src/app/regionen/[regionSlug]/_mapData/types'
+// a modified version of MapDataDatasetsSource from '../../src/regionen/[regionSlug]/_mapData/types'
 type MapDataDatasetsSourceBase = {
   /** @desc Whenever we have one dataset multiple time, we need a subid to make them unique */
   subId?: string
   name: string
   layers: (
-    | Omit<CircleLayerSpecification & Required<Pick<CircleLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<FillLayerSpecification & Required<Pick<FillLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
-    | Omit<LineLayerSpecification & Required<Pick<LineLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
     | Omit<
-        SymbolLayerSpecification & Required<Pick<SymbolLayerSpecification, 'paint' | 'layout'>> & { beforeId?: string },
+        CircleLayerSpecification &
+          Required<Pick<CircleLayerSpecification, 'paint'>> & { beforeId?: string },
         'source'
       >
-    | Omit<HeatmapLayerSpecification & Required<Pick<HeatmapLayerSpecification, 'paint'>> & { beforeId?: string }, 'source'>
+    | Omit<
+        FillLayerSpecification &
+          Required<Pick<FillLayerSpecification, 'paint'>> & { beforeId?: string },
+        'source'
+      >
+    | Omit<
+        LineLayerSpecification &
+          Required<Pick<LineLayerSpecification, 'paint'>> & { beforeId?: string },
+        'source'
+      >
+    | Omit<
+        SymbolLayerSpecification &
+          Required<Pick<SymbolLayerSpecification, 'paint' | 'layout'>> & { beforeId?: string },
+        'source'
+      >
+    | Omit<
+        HeatmapLayerSpecification &
+          Required<Pick<HeatmapLayerSpecification, 'paint'>> & { beforeId?: string },
+        'source'
+      >
   )[]
 }
+
+export type StaticDatasetLayer = MapDataDatasetsSourceBase['layers'][number]
 
 type MapDataDatasetsSource = MapDataDatasetsSourceBase & {
   /** @desc A quick-n-dirty way to get type safety for categories. The prefix is just to make type safety per region (or cluster of regions) possible. */
@@ -87,7 +106,8 @@ type MapDataDatasetsSourceSystemLayer = MapDataDatasetsSourceBase & {
 }
 
 export type MapDataSourceExternalRenderFormat = 'pmtiles' | 'geojson'
-export type MetaData =
+
+export type MetaDataUser =
   | {
       regions: RegionSlug[]
       public: boolean
@@ -103,21 +123,6 @@ export type MetaData =
       mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
       /** @desc Configuration for user-selectable datasets */
       configs: MapDataDatasetsSource[]
-    }
-  | {
-      regions: RegionSlug[]
-      public: true
-      hideDownloadLink: true
-      /** @desc System layers are hidden from UI but always active on the map. When true, configs must be system layer configs. */
-      systemLayer: true
-      /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
-      dataSourceType: 'local'
-      /** @desc Change the tippecanoe settings  */
-      geometricPrecision?: 'mask' | 'regular' | 'high' | null
-      /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
-      mapRenderFormat?: 'pmtiles' | 'geojson'
-      /** @desc Configuration for system layers (masks, etc.) - minimal properties, always active */
-      configs: MapDataDatasetsSourceSystemLayer[]
     }
   | {
       regions: RegionSlug[]
@@ -137,3 +142,21 @@ export type MetaData =
       /** @desc Configuration for user-selectable datasets. External sources cannot be system layers. */
       configs: MapDataDatasetsSource[]
     }
+
+export type MetaDataSystemLayer = {
+  regions: RegionSlug[]
+  public: true
+  hideDownloadLink: true
+  /** @desc System layers are hidden from UI but always active on the map. When true, configs must be system layer configs. */
+  systemLayer: true
+  /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
+  dataSourceType: 'local'
+  /** @desc Change the tippecanoe settings  */
+  geometricPrecision?: 'mask' | 'regular' | 'high' | null
+  /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
+  mapRenderFormat?: 'pmtiles' | 'geojson'
+  /** @desc Configuration for system layers (masks, etc.) - minimal properties, always active */
+  configs: MapDataDatasetsSourceSystemLayer[]
+}
+
+export type MetaData = MetaDataUser | MetaDataSystemLayer
