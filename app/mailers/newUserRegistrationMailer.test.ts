@@ -30,6 +30,8 @@ describe('newUserRegistrationMailer', () => {
     expect(callArgs?.From?.Email).toBe('noreply@tilda-geo.de')
     expect(callArgs?.To[0]?.Email).toBe('tilda@fixmycity.de')
     expect(callArgs?.introMarkdown).toContain('Test User')
+    expect(callArgs?.introMarkdown).toContain('**OSM-Beschreibung**')
+    expect(callArgs?.introMarkdown).toContain('> Test description')
     expect(callArgs?.introMarkdown).toContain('Zum Zeitpunkt der Registrierung nicht verfügbar')
     expect(callArgs?.ctaLink).toContain('userId=clx1234567890')
     expect(callArgs?.ctaLink).not.toContain('regionSlug')
@@ -52,6 +54,7 @@ describe('newUserRegistrationMailer', () => {
     const callArgs = vi.mocked(sendMail).mock.calls[1]?.[0]
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Another User')
+    expect(callArgs?.introMarkdown).toContain('> N/A')
     expect(callArgs?.introMarkdown).toContain('Zum Zeitpunkt der Registrierung nicht verfügbar')
     expect(callArgs?.ctaLink).toContain('userId=clx4567890123')
   })
