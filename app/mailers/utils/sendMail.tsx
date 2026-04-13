@@ -62,13 +62,16 @@ ${footerTextMarkdown}
       typeof to === 'string' ? to : to.Email || '',
     ).join(';')
 
-    await previewEmail({
-      from: fromEmail,
-      to: toEmail,
-      subject: mailjetMessage.Subject,
-      text: mailjetMessage.TextPart,
-      html: mailjetMessage.HTMLPart,
-    })
+    await previewEmail(
+      {
+        from: fromEmail,
+        to: toEmail,
+        subject: mailjetMessage.Subject,
+        text: mailjetMessage.TextPart,
+        html: mailjetMessage.HTMLPart,
+      },
+      { openSimulator: false },
+    )
     return
   }
 
