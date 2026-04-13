@@ -71,7 +71,10 @@ const options = {
           clientId: process.env.OSM_CLIENT_ID!,
           // biome-ignore lint/style/noNonNullAssertion: Guarded by nitro plugin
           clientSecret: process.env.OSM_CLIENT_SECRET!,
-          discoveryUrl: getOsmUrl('/.well-known/openid-configuration'),
+          // OSM discovery endpoint occasionally responds with 429 in local/dev.
+          // Set explicit endpoints so OAuth sign-in does not depend on live discovery.
+          authorizationUrl: getOsmUrl('/oauth2/authorize'),
+          tokenUrl: getOsmUrl('/oauth2/token'),
           scopes: ['openid', 'read_prefs', 'write_prefs', 'write_notes'],
           getUserInfo: async ({ accessToken }) => {
             const apiUrl = getOsmApiUrl('/user/details.json')
@@ -225,6 +228,10 @@ const options = {
   },
   advanced: {
     cookiePrefix: 'tilda',
+  },
+  // OAuth failures redirect to `${errorURL}?error=…` (see better-auth oauth2/state). Use our page instead of the built-in HTML at /api/auth/error.
+  onAPIError: {
+    errorURL: `${process.env.VITE_APP_ORIGIN}/oAuthError`,
   },
 } satisfies BetterAuthOptions
 
