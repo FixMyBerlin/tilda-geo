@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { UserRoleEnum } from '@/prisma/generated/client'
-import { getFreshSession } from '@/server/auth/session.server'
+import { internalServerErrorJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
+import { guardAdmin } from '@/server/api/util/authGuards.server'
+import { corsHeaders } from '@/server/api/util/cors'
 import { buildQaConfigExportCsv } from '@/server/qa-configs/export/buildQaConfigExportCsv'
 import { getQaConfigExportFilename } from '@/server/qa-configs/export/getQaConfigExportFilename'
 import { getQaConfigExportRows } from '@/server/qa-configs/queries/getQaConfigExportRows.server'
@@ -20,26 +21,14 @@ export const Route = createFileRoute('/api/admin/qa-configs/$id/export-csv')({
       GET: async ({ request, params }) => {
         const { id } = params
 
-        const session = await getFreshSession(request.headers)
-        if (!session) {
-          return Response.json(
-            { statusText: 'Unauthorized', message: 'Not authenticated' },
-            { status: 401 },
-          )
-        }
-        if (session.role !== UserRoleEnum.ADMIN) {
-          return Response.json(
-            { statusText: 'Forbidden', message: 'Admin access required' },
-            { status: 403 },
-          )
+        const authResponse = await guardAdmin(request.headers, corsHeaders)
+        if (authResponse) {
+          return authResponse
         }
 
         const data = await getQaConfigExportRows({ configId: id })
         if (data === null) {
-          return Response.json(
-            { statusText: 'Not Found', message: 'QA config not found' },
-            { status: 404 },
-          )
+          return notFoundJson({ headers: corsHeaders })
         }
 
         try {
@@ -48,16 +37,14 @@ export const Route = createFileRoute('/api/admin/qa-configs/$id/export-csv')({
           return new Response(`\uFEFF${csv}`, {
             status: 200,
             headers: {
+              ...corsHeaders,
               'Content-Type': 'text/csv; charset=utf-8',
               'Content-Disposition': `attachment; filename="${filename}"`,
             },
           })
         } catch (error) {
           console.error('QA config CSV export error:', error)
-          return Response.json(
-            { statusText: 'Internal Server Error', message: 'Export failed' },
-            { status: 500 },
-          )
+          return internalServerErrorJson({ headers: corsHeaders, message: 'Export failed' })
         }
       },
     },

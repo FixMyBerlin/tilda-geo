@@ -6,14 +6,19 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { exportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { formatDateBerlin } from '@/components/shared/date/formatDateBerlin'
-import { isDev, isProd } from '@/components/shared/utils/isEnv'
+import { isDev } from '@/components/shared/utils/isEnv'
 import { getExportAttributeType } from '@/server/api/export/exportAttributeType'
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
-import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
+import {
+  badRequestJson,
+  forbiddenJson,
+  internalServerErrorJson,
+  notFoundJson,
+} from '@/server/api/util/apiJsonResponses.server'
+import { resolveRegionAccessStatus } from '@/server/api/util/authGuards.server'
+import { corsHeaders } from '@/server/api/util/cors'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
-import { getAppSession } from '@/server/auth/session.server'
 import { getBaseDatabaseUrl } from '@/server/database-url.server'
-import db from '@/server/db.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 const exportMetadata = {
@@ -92,51 +97,25 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         })
 
         if (!parsedSearch.success) {
-          const error = { error: 'Invalid input', ...parsedSearch.error }
-          console.error(error)
-          return Response.json(error, { status: 400 })
+          console.error(parsedSearch.error)
+          return badRequestJson({
+            headers: corsHeaders,
+            info: z.flattenError(parsedSearch.error),
+          })
         }
         const { regionSlug, tableName } = params
         const { apiKey, minlon, minlat, maxlon, maxlat, format } = parsedSearch.data
 
-        const status = await (async () => {
-          if (compareApiKeyTimingSafe(apiKey)) {
-            return 200
-          }
-
-          const region = await db.region.findFirst({ where: { slug: regionSlug } })
-          if (!region) {
-            return 404
-          }
-
-          const appSession = await getAppSession(request.headers)
-          const userId = appSession?.userId
-          const role = appSession?.role
-
-          if (role === 'ADMIN') {
-            return 200
-          }
-
-          if (region.status === 'DEACTIVATED') {
-            return 404
-          }
-
-          if (!userId) {
-            return 403
-          }
-
-          const membershipExists = !!(await db.membership.count({
-            where: { userId, region: { slug: regionSlug } },
-          }))
-          if (!membershipExists) {
-            return 403
-          }
-
-          return 200
-        })()
-
+        const status = await resolveRegionAccessStatus({
+          headers: request.headers,
+          regionSlug,
+          apiKey,
+        })
         if (status !== 200) {
-          return Response.json(status, { status })
+          if (status === 404) {
+            return notFoundJson({ headers: corsHeaders })
+          }
+          return forbiddenJson({ headers: corsHeaders })
         }
 
         try {
@@ -283,6 +262,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             const compressed = gzipSync(fileBuffer)
             return new Response(compressed, {
               headers: {
+                ...corsHeaders,
                 'Content-Type': 'application/json',
                 'Content-Encoding': 'gzip',
                 'Content-Length': compressed.length.toString(),
@@ -293,6 +273,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
 
           return new Response(fileBuffer, {
             headers: {
+              ...corsHeaders,
               'Content-Type': ogrFormat.mimeType,
               'Content-Length': fileBuffer.length.toString(),
               'Content-Disposition': `attachment; filename="${filename}"`,
@@ -300,13 +281,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           })
         } catch (error) {
           console.error(error)
-          return Response.json(
-            {
-              error: 'Internal Server Error',
-              info: isProd ? undefined : error,
-            },
-            { status: 500 },
-          )
+          return internalServerErrorJson({ headers: corsHeaders, cause: error })
         }
       },
     },

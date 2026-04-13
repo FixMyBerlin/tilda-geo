@@ -5,8 +5,9 @@ import { parseSlugAndFormat } from '@/server/api/uploads/parseSlugAndFormat'
 import { proxyExternalUrl } from '@/server/api/uploads/proxyExternalUrl'
 import { proxyS3Url } from '@/server/api/uploads/proxyS3Url.server'
 import { staticDatasetUploadFormats } from '@/server/api/uploads/staticDatasetUploadFormats.const'
+import { notFoundJson } from '@/server/api/util/apiJsonResponses.server'
+import { guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { corsHeaders } from '@/server/api/util/cors'
-import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 
 export const Route = createFileRoute('/api/uploads/$slug')({
@@ -32,7 +33,7 @@ export const Route = createFileRoute('/api/uploads/$slug')({
         })
 
         if (upload === null) {
-          return Response.json({ statusText: 'Not Found' }, { status: 404, headers: corsHeaders })
+          return notFoundJson({ headers: corsHeaders })
         }
 
         const allowedFormats: string[] = []
@@ -65,22 +66,13 @@ export const Route = createFileRoute('/api/uploads/$slug')({
         }
 
         if (!upload.public) {
-          const forbidden = Response.json(
-            { statusText: 'Forbidden' },
-            { status: 403, headers: corsHeaders },
-          )
-          const appSession = await getAppSession(request.headers)
-          if (!appSession?.userId) {
-            return forbidden
-          }
-          if (appSession.role !== 'ADMIN') {
-            const regionIds = upload.regions.map((region) => region.id)
-            const membershipExists = !!(await db.membership.count({
-              where: { userId: appSession.userId, region: { id: { in: regionIds } } },
-            }))
-            if (!membershipExists) {
-              return forbidden
-            }
+          const authResponse = await guardRegionMembership({
+            headers: request.headers,
+            regionIds: upload.regions.map((region) => region.id),
+            responseHeaders: corsHeaders,
+          })
+          if (authResponse) {
+            return authResponse
           }
         }
 

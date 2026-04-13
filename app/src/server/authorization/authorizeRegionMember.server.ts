@@ -1,4 +1,5 @@
 import { UserRoleEnum } from '@/prisma/generated/client'
+import { apiJsonMessages } from '@/server/api/util/apiJsonResponses.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import type { AppSession } from '@/server/auth/types'
 import db from '@/server/db.server'
@@ -19,7 +20,7 @@ async function authorizeRegionMemberByRegionId(session: AppSession, regionId: nu
 
 export async function authorizeRegionMemberByRegionSlug(session: AppSession, slug: string) {
   if (!session.userId || !session.role) {
-    throw new AuthorizationError('Not authenticated')
+    throw new AuthorizationError(apiJsonMessages.notAuthenticated)
   }
   if (session.role === UserRoleEnum.ADMIN) {
     return
@@ -30,7 +31,7 @@ export async function authorizeRegionMemberByRegionSlug(session: AppSession, slu
 
 export async function authorizeRegionMemberByNoteId(session: AppSession, noteId: number) {
   if (!session.userId || !session.role) {
-    throw new AuthorizationError('Not authenticated')
+    throw new AuthorizationError(apiJsonMessages.notAuthenticated)
   }
   if (session.role === UserRoleEnum.ADMIN) {
     return

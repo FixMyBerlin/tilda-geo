@@ -3,8 +3,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { featureCollection, point } from '@turf/turf'
 import { z } from 'zod'
 import type { Prisma } from '@/prisma/generated/client'
+import { badRequestJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
+import { guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
-import { getAppSession } from '@/server/auth/session.server'
+import { corsHeaders } from '@/server/api/util/cors'
 import db from '@/server/db.server'
 
 const notesDownloadSearchSchema = z.object({
@@ -75,16 +77,16 @@ export const Route = createFileRoute('/api/notes/$regionSlug/download')({
         const search = Object.fromEntries(new URL(request.url).searchParams)
         const searchResult = notesDownloadSearchSchema.safeParse(search)
         if (!searchResult.success) {
-          return Response.json(
-            { statusText: 'Bad Request', error: searchResult.error.flatten() },
-            { status: 400 },
-          )
+          return badRequestJson({
+            headers: corsHeaders,
+            info: z.flattenError(searchResult.error),
+          })
         }
         const { format, apiKey } = searchResult.data
 
         const region = await db.region.findFirst({ where: { slug: regionSlug } })
         if (!region) {
-          return Response.json({ statusText: 'Not Found' }, { status: 404 })
+          return notFoundJson({ headers: corsHeaders })
         }
 
         const notes = await db.note.findMany({
@@ -94,18 +96,13 @@ export const Route = createFileRoute('/api/notes/$regionSlug/download')({
         })
 
         if (!compareApiKeyTimingSafe(apiKey)) {
-          const forbidden = Response.json({ statusText: 'Forbidden' }, { status: 403 })
-          const session = await getAppSession(request.headers)
-          if (!session?.userId) {
-            return forbidden
-          }
-          if (session.role !== 'ADMIN') {
-            const membershipExists = !!(await db.membership.count({
-              where: { userId: session.userId, region: { slug: regionSlug } },
-            }))
-            if (!membershipExists) {
-              return forbidden
-            }
+          const authResponse = await guardRegionMembership({
+            headers: request.headers,
+            regionIds: [region.id],
+            responseHeaders: corsHeaders,
+          })
+          if (authResponse) {
+            return authResponse
           }
         }
 
@@ -115,12 +112,13 @@ export const Route = createFileRoute('/api/notes/$regionSlug/download')({
 
         switch (format) {
           case 'raw':
-            return Response.json({ notes })
+            return Response.json({ notes }, { headers: corsHeaders })
           case 'points':
-            return Response.json({ points })
+            return Response.json({ points }, { headers: corsHeaders })
           case 'csv':
             return new Response(new Parser().parse(points), {
               headers: {
+                ...corsHeaders,
                 'Content-type': 'text/csv',
                 'Content-Disposition': `attachment; filename=${regionSlug}-notes.csv`,
               },
@@ -130,7 +128,7 @@ export const Route = createFileRoute('/api/notes/$regionSlug/download')({
               const { latitude, longitude, ...properties } = p
               return point([longitude, latitude], properties)
             })
-            return Response.json(featureCollection(features))
+            return Response.json(featureCollection(features), { headers: corsHeaders })
           }
         }
       },

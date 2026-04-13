@@ -1,4 +1,5 @@
 import { UserRoleEnum } from '@/prisma/generated/client'
+import { apiJsonMessages } from '@/server/api/util/apiJsonResponses.server'
 import { auth } from './auth.server'
 import { AuthorizationError } from './errors'
 
@@ -15,9 +16,7 @@ export async function getSession(headers: Headers) {
 export async function getFreshSession(headers: Headers) {
   const result = await auth.api.getSession({
     headers,
-    query: {
-      disableCookieCache: true,
-    },
+    query: { disableCookieCache: true },
   })
   // Role/authorization checks should not trust stale cookie-cached session data.
   return result as Session | null
@@ -38,7 +37,7 @@ export async function getAppSession(headers: Headers) {
 export async function requireAuth(headers: Headers) {
   const session = await getSession(headers)
   if (!session) {
-    throw new AuthorizationError('Not authenticated')
+    throw new AuthorizationError(apiJsonMessages.notAuthenticated)
   }
   // customSession plugin always returns role (defaults to USER), so it's always present
   return {
@@ -51,10 +50,10 @@ export async function requireAuth(headers: Headers) {
 export async function requireAdmin(headers: Headers) {
   const session = await getFreshSession(headers)
   if (!session) {
-    throw new AuthorizationError('Not authenticated')
+    throw new AuthorizationError(apiJsonMessages.notAuthenticated)
   }
   if (session.role !== UserRoleEnum.ADMIN) {
-    throw new AuthorizationError('Admin access required')
+    throw new AuthorizationError(apiJsonMessages.adminAccessRequired)
   }
   return {
     userId: session.user.id,
