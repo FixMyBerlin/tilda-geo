@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { readFileSync } from 'node:fs'
+import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -271,6 +272,7 @@ const { values } = parseArgs({
   options: {
     table: { type: 'string' },
     'out-json': { type: 'string' },
+    'report-dir': { type: 'string' },
     'database-url': { type: 'string' },
     source: { type: 'string' },
   },
@@ -325,6 +327,50 @@ const loadUniquePairs = async (client: Client, tableName: string) => {
   return result.rows
 }
 
+type DbCoverageRow = {
+  tableName: string
+  extraDbKeysNotInDocs: Array<string>
+  missingDocKeys: Array<string>
+  documentedValuesNotInDb: Array<string>
+  typeMismatches: Array<string>
+  missingDocValues: Array<string>
+  missingInspectorKeys: Array<string>
+  missingInspectorValues: Array<string>
+}
+
+const markdownBullets = (items: Array<string>) =>
+  items.length === 0 ? '_none_\n' : `${items.map((line) => `- ${line}`).join('\n')}\n`
+
+const writeTableMarkdownReport = async (input: { reportDir: string; row: DbCoverageRow }) => {
+  const { reportDir, row } = input
+  const filePath = path.join(reportDir, `${row.tableName}.md`)
+  const body = [
+    `# ${row.tableName}`,
+    '',
+    '## In DB, not in docs',
+    '',
+    '### Keys (tag keys not listed as attributes in topic-docs)',
+    '',
+    markdownBullets(row.extraDbKeysNotInDocs),
+    '',
+    '### Value pairs (documented key, value not in documented enum)',
+    '',
+    markdownBullets(row.missingDocValues),
+    '',
+    '## In docs, not in DB',
+    '',
+    '### Keys (documented attributes never present in tags)',
+    '',
+    markdownBullets(row.missingDocKeys),
+    '',
+    '### Documented enumerated values never observed (key has at least one tag in DB)',
+    '',
+    markdownBullets(row.documentedValuesNotInDb),
+    '',
+  ].join('\n')
+  await Bun.write(filePath, body)
+}
+
 const run = async () => {
   const topicDocsSourceIds = collectTopicDocsSourceIds(docsByTable)
   const expectedFromYaml = buildExpectedFromYaml({
@@ -375,15 +421,7 @@ const run = async () => {
     }
     throw error
   }
-  const report: Array<{
-    tableName: string
-    extraDbKeysNotInDocs: Array<string>
-    missingDocKeys: Array<string>
-    typeMismatches: Array<string>
-    missingDocValues: Array<string>
-    missingInspectorKeys: Array<string>
-    missingInspectorValues: Array<string>
-  }> = []
+  const report: Array<DbCoverageRow> = []
 
   try {
     for (const tableName of selectedTables) {
@@ -417,6 +455,7 @@ const run = async () => {
       extraDbKeysNotInDocs.sort()
 
       const missingDocKeys: Array<string> = []
+      const documentedValuesNotInDb: Array<string> = []
       const typeMismatches: Array<string> = []
       const missingDocValues: Array<string> = []
       const missingInspectorKeys: Array<string> = []
@@ -458,6 +497,14 @@ const run = async () => {
           }
         }
 
+        if (!skipValueChecks && hasExplicitValues && valuesSet.size > 0) {
+          for (const docValue of documentedValues) {
+            if (!valuesSet.has(docValue)) {
+              documentedValuesNotInDb.push(`${key}=${docValue}`)
+            }
+          }
+        }
+
         if (documentedType !== 'ignore') {
           const hasKeyTranslation = compiled.sourceIds.some(
             (sourceId) =>
@@ -488,6 +535,7 @@ const run = async () => {
         tableName,
         extraDbKeysNotInDocs,
         missingDocKeys: [...new Set(missingDocKeys)].sort(),
+        documentedValuesNotInDb: [...new Set(documentedValuesNotInDb)].sort(),
         typeMismatches: [...new Set(typeMismatches)].sort(),
         missingDocValues: [...new Set(missingDocValues)].sort(),
         missingInspectorKeys: [...new Set(missingInspectorKeys)].sort(),
@@ -502,6 +550,7 @@ const run = async () => {
     (acc, row) => {
       acc.extraDbKeysNotInDocs += row.extraDbKeysNotInDocs.length
       acc.missingDocKeys += row.missingDocKeys.length
+      acc.documentedValuesNotInDb += row.documentedValuesNotInDb.length
       acc.typeMismatches += row.typeMismatches.length
       acc.missingDocValues += row.missingDocValues.length
       acc.missingInspectorKeys += row.missingInspectorKeys.length
@@ -511,12 +560,23 @@ const run = async () => {
     {
       extraDbKeysNotInDocs: 0,
       missingDocKeys: 0,
+      documentedValuesNotInDb: 0,
       typeMismatches: 0,
       missingDocValues: 0,
       missingInspectorKeys: 0,
       missingInspectorValues: 0,
     },
   )
+
+  const reportDirRaw = values['report-dir']?.trim()
+  if (reportDirRaw) {
+    const reportDir = path.resolve(reportDirRaw)
+    await mkdir(reportDir, { recursive: true })
+    for (const row of report) {
+      await writeTableMarkdownReport({ reportDir, row })
+    }
+    console.log(`\nWrote per-table markdown reports to: ${reportDir}`)
+  }
 
   if (values['out-json']) {
     await Bun.write(
@@ -541,8 +601,16 @@ const run = async () => {
       indent: '    ',
       subIndent: '      ',
     })
+    console.log(
+      `  documented enum values never observed in DB (info): ${row.documentedValuesNotInDb.length}`,
+    )
+    logIndentedKeySample({
+      items: row.documentedValuesNotInDb,
+      indent: '    ',
+      subIndent: '      ',
+    })
     console.log(`  type mismatches: ${row.typeMismatches.length}`)
-    console.log(`  missing docs values: ${row.missingDocValues.length}`)
+    console.log(`  DB values not in documented enum: ${row.missingDocValues.length}`)
     console.log(`  missing inspector keys: ${row.missingInspectorKeys.length}`)
     console.log(`  missing inspector values: ${row.missingInspectorValues.length}`)
   }

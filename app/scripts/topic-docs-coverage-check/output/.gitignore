@@ -1,2 +1,3 @@
 # Written by `topic-docs-coverage-check --out-json …`. DB-specific snapshots; do not commit.
 *.json
+*.md

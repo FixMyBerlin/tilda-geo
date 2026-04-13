@@ -25,6 +25,22 @@ Es werden nur Keys berücksichtigt, deren Präfix ein `sourceId` aus den topic-d
 
 Schlägt diese Phase fehl, endet das Skript mit Exitcode 1 **bevor** eine Datenbankverbindung aufgebaut wird.
 
+## Topic-docs ↔ DB (`tags`): symmetrischer Abgleich
+
+Für jede Tabelle mit topic-docs-Eintrag in `byTableName/index.gen.json` werden eindeutige `(key, value)`-Paare aus `public.<table>.tags` (`jsonb_each_text`) mit den kompilierten Attributen und (falls vorhanden) aufgezählten Werten aus dem YAML verglichen. Dieselben Ausnahmen wie im Code gelten für beide Richtungen (z. B. `condition_category`, Typen ohne explizite Wertliste).
+
+**In der DB, nicht in den Docs**
+
+- `extraDbKeysNotInDocs`: Tag-Keys, die in der DB vorkommen, aber nicht als Attribut im YAML stehen.
+- `missingDocValues`: `key=value`-Paare aus der DB, deren Wert für dieses dokumentierte Attribut nicht in der aufgezählten Wertemenge liegt.
+
+**In den Docs, nicht in der DB**
+
+- `missingDocKeys`: dokumentierte Attribute, die in keiner Zeile als Tag-Key vorkommen.
+- `documentedValuesNotInDb`: `key=value` für aufgezählte YAML-Werte, die in der DB nie vorkommen, **wenn** der Key mindestens einmal in Tags vorkommt (sonst reicht `missingDocKeys`; keine Auflistung aller Enum-Werte bei fehlendem Key).
+
+`documentedValuesNotInDb` ist **informativ** und löst **keinen** fehlgeschlagenen Exitcode aus (seltene OSM-Werte, vorgehaltene Enums).
+
 ## Nutzung
 
 Aus `app/`:
@@ -46,7 +62,13 @@ JSON-Report schreiben (liegt absichtlich **nicht** in Git — aus deiner DB, wec
 bun run topic-docs-coverage-check -- --table parkings --out-json ./scripts/topic-docs-coverage-check/output/latest.json
 ```
 
-Struktur: `translationConstVsYaml` (Objekt mit `mismatches`, `orphansInManual`, `inconsistentAllKeys`, `yamlOnlyKeys`) und `dbCoverage` (Array wie bisher). Wenn die Translation-Phase fehlschlägt, ist `dbCoverage` `null` und es wird nur `translationConstVsYaml` geschrieben.
+Pro-Tabelle-Markdown (zwei Abschnitte: DB↔Docs wie oben; Dateiname `<tableName>.md`):
+
+```sh
+bun run topic-docs-coverage-check -- --report-dir ./scripts/topic-docs-coverage-check/output/reports
+```
+
+Struktur: `translationConstVsYaml` (Objekt mit `mismatches`, `orphansInManual`, `inconsistentAllKeys`, `yamlOnlyKeys`) und `dbCoverage` (Array pro `tableName` mit u. a. `extraDbKeysNotInDocs`, `missingDocKeys`, `documentedValuesNotInDb`, `missingDocValues`, `typeMismatches`, `missingInspectorKeys`, `missingInspectorValues`). Wenn die Translation-Phase fehlschlägt, ist `dbCoverage` `null` und es wird nur `translationConstVsYaml` geschrieben; `--report-dir` wird in diesem Fall nicht ausgeführt.
 
 Der Ordner `scripts/topic-docs-coverage-check/output/` ist per `.gitignore` ausgeschlossen.
 
