@@ -27,9 +27,9 @@ export const UserLoggedInAdminInfo = ({ user }: Props) => {
   const location = useLocation()
   const mapParam = useMemo(() => {
     if (!regionSlug) return null
-    const mapQuery = new URLSearchParams(location.search).get(searchParamsRegistry.map)
+    const mapQuery = new URLSearchParams(location.searchStr).get(searchParamsRegistry.map)
     return mapQuery ? parseMapParam(mapQuery) : null
-  }, [regionSlug, location.search])
+  }, [regionSlug, location.searchStr])
   const osmUrlViewportUrl = mapParam && osmUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
   const mapillaryUrlViewportUrl =
     mapParam && mapillaryUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
