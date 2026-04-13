@@ -1,6 +1,7 @@
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from '@headlessui/react'
 import { CheckBadgeIcon, UserIcon } from '@heroicons/react/24/solid'
-import { useNavigate } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { Fragment } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { getFullname } from '@/components/admin/memberships/pageMemberships/utils/getFullname'
@@ -12,6 +13,7 @@ import { Img } from '@/components/shared/Img'
 import { Link } from '@/components/shared/links/Link'
 import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
+import { currentUserQueryKey } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
 import { UserLoggedInAdminInfo } from './UserLoggedInAdminInfo'
 
@@ -20,6 +22,8 @@ type Props = {
 }
 
 export const UserLoggedIn = ({ user }: Props) => {
+  const queryClient = useQueryClient()
+  const router = useRouter()
   const navigate = useNavigate()
   const { clearInspectorFeatures } = useMapActions()
   const isRegionsPage = Boolean(useOptionalRegionSlug())
@@ -34,6 +38,8 @@ export const UserLoggedIn = ({ user }: Props) => {
     // We need to reset the inspector because it might hold atlas notes which would throw an authorization error if left open
     clearInspectorFeatures()
     await authClient.signOut()
+    await queryClient.invalidateQueries({ queryKey: currentUserQueryKey })
+    await router.invalidate()
     navigate({ to: '/' })
   }
 
