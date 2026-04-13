@@ -4,7 +4,7 @@
 
 - Canonical deploy definitions: [`env/deploy.manifest.json`](./env/deploy.manifest.json).
 - [`workflows/setup-env.yml`](./workflows/setup-env.yml) runs [`scripts/verify-env-manifest.ts`](./scripts/verify-env-manifest.ts) and [`scripts/generate-deploy-env.ts`](./scripts/generate-deploy-env.ts), producing `.env.deploy.generated` for upload.
-- On the host, that file becomes `/srv/.env` with **`root:docker`** and mode **`640`** (`sudo chown root:docker`, `sudo chmod 640`) so members of `docker` can run `docker compose` (Compose reads `.env` for interpolation). The deploy SSH user needs passwordless sudo for those two commands, or the step must run as root.
+- On the host, that file becomes `/srv/.env` with group **`docker`** and mode **`640`** (`chgrp docker`, `chmod 640`) so members of `docker` can run `docker compose` (Compose reads `.env` for interpolation). The deploy SSH user must be in the **`docker`** group so `chgrp` succeeds without `sudo` (non-interactive SSH cannot prompt for a password).
 - [`scripts/generate-github-readme.ts`](./scripts/generate-github-readme.ts) refreshes the mapping table below from the manifest.
 
 ## When checks run
