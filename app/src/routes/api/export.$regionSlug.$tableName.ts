@@ -59,9 +59,12 @@ async function checkGdalVersion() {
   }
 }
 
-const ExportSchema = z.object({
+const exportParamsSchema = z.object({
   regionSlug: z.string(),
   tableName: z.enum(exportApiIdentifier),
+})
+
+const exportSearchSchema = z.object({
   apiKey: z.string().optional(),
   minlon: z.coerce.number(),
   minlat: z.coerce.number(),
@@ -72,13 +75,14 @@ const ExportSchema = z.object({
 
 export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
   ssr: true,
+  params: {
+    parse: (rawParams) => exportParamsSchema.parse(rawParams),
+  },
   server: {
     handlers: {
       GET: async ({ request, params }) => {
         const rawSearchParams = new URL(request.url).searchParams
-        const parsedParams = ExportSchema.safeParse({
-          regionSlug: params.regionSlug,
-          tableName: params.tableName,
+        const parsedSearch = exportSearchSchema.safeParse({
           apiKey: rawSearchParams.get('apiKey') || '',
           minlon: rawSearchParams.get('minlon'),
           minlat: rawSearchParams.get('minlat'),
@@ -87,13 +91,13 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           format: rawSearchParams.get('format') || 'fgb',
         })
 
-        if (parsedParams.success === false) {
-          const error = { error: 'Invalid input', ...parsedParams.error }
+        if (!parsedSearch.success) {
+          const error = { error: 'Invalid input', ...parsedSearch.error }
           console.error(error)
           return Response.json(error, { status: 400 })
         }
-        const { regionSlug, tableName, apiKey, minlon, minlat, maxlon, maxlat, format } =
-          parsedParams.data
+        const { regionSlug, tableName } = params
+        const { apiKey, minlon, minlat, maxlon, maxlat, format } = parsedSearch.data
 
         const status = await (async () => {
           if (compareApiKeyTimingSafe(apiKey)) {

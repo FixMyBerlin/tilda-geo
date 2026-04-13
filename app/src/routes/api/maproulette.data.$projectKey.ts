@@ -13,8 +13,11 @@ import { buildTaskInstructions } from '@/data/radinfra-de/utils/buildTaskInstruc
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 
-const MaprouletteSchema = z.strictObject({
+const maprouletteParamsSchema = z.strictObject({
   projectKey: z.enum(todoIds),
+})
+
+const maprouletteSearchSchema = z.strictObject({
   download: z
     .string()
     .transform((val) => val === 'true')
@@ -23,19 +26,22 @@ const MaprouletteSchema = z.strictObject({
 
 export const Route = createFileRoute('/api/maproulette/data/$projectKey')({
   ssr: true,
+  params: {
+    parse: (rawParams) => maprouletteParamsSchema.parse(rawParams),
+  },
   server: {
     handlers: {
       GET: async ({ request, params }) => {
         const rawSearchParams = new URL(request.url).searchParams
-        const parsedParams = MaprouletteSchema.safeParse({
-          projectKey: params.projectKey,
+        const parsedSearch = maprouletteSearchSchema.safeParse({
           download: rawSearchParams.get('download'),
         })
 
-        if (parsedParams.success === false) {
-          return Response.json({ error: 'Invalid input', ...parsedParams.error }, { status: 404 })
+        if (!parsedSearch.success) {
+          return Response.json({ error: 'Invalid input', ...parsedSearch.error }, { status: 404 })
         }
-        const { projectKey, download } = parsedParams.data
+        const { projectKey } = params
+        const { download } = parsedSearch.data
 
         try {
           const { osm_data_from } = await getProcessingMeta()

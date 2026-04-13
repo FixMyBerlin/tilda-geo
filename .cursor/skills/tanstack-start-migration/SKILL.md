@@ -81,7 +81,7 @@ function UserPage() {
 
 **Critical:** Loaders run when the route is loaded. For refetch on search/param change, use `loaderDeps` so the loader re-runs when deps change. Avoid side effects that must run only once in a different lifecycle.
 
-**Validation:** Use `validateSearch` (e.g. Zod) for search params; use `beforeLoad` for auth/redirects. See [references/loader-data-patterns.md](references/loader-data-patterns.md).
+**Validation:** Use `params.parse` for path params (`/$id`, `/$slug`) so handlers/loaders receive typed values. Use `validateSearch` for route search schemas (typing/navigation), but note that API `server.handlers.*` contexts may not expose parsed `search`; parse `new URL(request.url).searchParams` in handlers when needed. Use `beforeLoad` for auth/redirects. See [references/loader-data-patterns.md](references/loader-data-patterns.md).
 
 ---
 
@@ -156,7 +156,7 @@ When migrating RSC pages: move `async` page component’s data fetching into the
 - **File-based:** `app/routes/` with `createFileRoute('/path/$param')`; route tree generated.
 - **Code-based:** Define route tree manually with `createRoute` / `createRootRoute` and pass to router.
 
-Params: `path: '/users/$userId'` → `params.userId`. Search: `validateSearch` on route. Use `Link`, `useNavigate`, `useParams`, `useSearch` from `@tanstack/react-router`. See project’s [react-dev/references/tanstack-router.md](../../react-dev/references/tanstack-router.md) for types and patterns.
+Params: `path: '/users/$userId'` → `params.userId`; validate/coerce with route `params.parse`. Search: `validateSearch` on route. Use `Link`, `useNavigate`, `useParams`, `useSearch` from `@tanstack/react-router`. See project’s [react-dev/references/tanstack-router.md](../../react-dev/references/tanstack-router.md) for types and patterns.
 
 ---
 
