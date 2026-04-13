@@ -3,6 +3,7 @@ import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { getQaConfig } from '@/server/qa-configs/queries/getQaConfig.server'
 import { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
+import { getQaConfigStatsForAdmin } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import { getRegions } from '@/server/regions/queries/getRegions.server'
 import { getRegionsWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
@@ -45,11 +46,6 @@ export const getAdminUploadLoaderFn = createServerFn({ method: 'GET' })
     return { upload }
   })
 
-export const getAdminQaConfigsLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
-  const qaConfigs = await getQaConfigsForAdmin(getRequestHeaders())
-  return { qaConfigs }
-})
-
 const AdminQaConfigEditInput = z.object({ id: z.number() })
 
 export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
@@ -68,6 +64,20 @@ export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
 export const getAdminQaConfigNewLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
   const regions = await getRegions({}, getRequestHeaders())
   return { regions }
+})
+
+export const getAdminQaConfigsLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
+  const headers = getRequestHeaders()
+  const qaConfigs = await getQaConfigsForAdmin(headers)
+  const statsByConfigId = Object.fromEntries(
+    await Promise.all(
+      qaConfigs.map(async (qaConfig) => {
+        const stats = await getQaConfigStatsForAdmin({ configId: qaConfig.id }, headers)
+        return [qaConfig.id, stats] as const
+      }),
+    ),
+  )
+  return { qaConfigs, statsByConfigId }
 })
 
 const AdminMembershipsLoaderInput = z.object({ take: z.number().optional() })

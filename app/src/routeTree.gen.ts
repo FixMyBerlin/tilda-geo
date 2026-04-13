@@ -76,6 +76,7 @@ import { Route as ApiExportRegionSlugTableNameRouteImport } from './routes/api/e
 import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/api/export-ogr.$regionSlug.$tableName'
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions.$regionSlug.edit'
 import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs.$id.edit'
+import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
 
 const RegionenRoute = RegionenRouteImport.update({
   id: '/regionen',
@@ -427,6 +428,12 @@ const AdminQaConfigsIdEditRoute = AdminQaConfigsIdEditRouteImport.update({
   path: '/$id/edit',
   getParentRoute: () => AdminQaConfigsRoute,
 } as any)
+const ApiAdminQaConfigsIdExportCsvRoute =
+  ApiAdminQaConfigsIdExportCsvRouteImport.update({
+    id: '/api/admin/qa-configs/$id/export-csv',
+    path: '/api/admin/qa-configs/$id/export-csv',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof HomeIndexRoute
@@ -494,6 +501,7 @@ export interface FileRoutesByFullPath {
   '/api/maproulette/statistic-proxy/$challengeId': typeof ApiMaprouletteStatisticProxyChallengeIdRoute
   '/api/notes/$regionSlug/download': typeof ApiNotesRegionSlugDownloadRoute
   '/api/regions/$regionSlug/uploads-csv': typeof ApiRegionsRegionSlugUploadsCsvRoute
+  '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
 }
 export interface FileRoutesByTo {
   '/': typeof HomeIndexRoute
@@ -555,6 +563,7 @@ export interface FileRoutesByTo {
   '/api/maproulette/statistic-proxy/$challengeId': typeof ApiMaprouletteStatisticProxyChallengeIdRoute
   '/api/notes/$regionSlug/download': typeof ApiNotesRegionSlugDownloadRoute
   '/api/regions/$regionSlug/uploads-csv': typeof ApiRegionsRegionSlugUploadsCsvRoute
+  '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -625,6 +634,7 @@ export interface FileRoutesById {
   '/api/maproulette/statistic-proxy/$challengeId': typeof ApiMaprouletteStatisticProxyChallengeIdRoute
   '/api/notes/$regionSlug/download': typeof ApiNotesRegionSlugDownloadRoute
   '/api/regions/$regionSlug/uploads-csv': typeof ApiRegionsRegionSlugUploadsCsvRoute
+  '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -694,6 +704,7 @@ export interface FileRouteTypes {
     | '/api/maproulette/statistic-proxy/$challengeId'
     | '/api/notes/$regionSlug/download'
     | '/api/regions/$regionSlug/uploads-csv'
+    | '/api/admin/qa-configs/$id/export-csv'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -755,6 +766,7 @@ export interface FileRouteTypes {
     | '/api/maproulette/statistic-proxy/$challengeId'
     | '/api/notes/$regionSlug/download'
     | '/api/regions/$regionSlug/uploads-csv'
+    | '/api/admin/qa-configs/$id/export-csv'
   id:
     | '__root__'
     | '/_home'
@@ -824,6 +836,7 @@ export interface FileRouteTypes {
     | '/api/maproulette/statistic-proxy/$challengeId'
     | '/api/notes/$regionSlug/download'
     | '/api/regions/$regionSlug/uploads-csv'
+    | '/api/admin/qa-configs/$id/export-csv'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -857,6 +870,7 @@ export interface RootRouteChildren {
   ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute: typeof ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute
   ApiMaprouletteDataTest_tag_fix_twoRoute: typeof ApiMaprouletteDataTest_tag_fix_twoRoute
   ApiMaprouletteStatisticProxyChallengeIdRoute: typeof ApiMaprouletteStatisticProxyChallengeIdRoute
+  ApiAdminQaConfigsIdExportCsvRoute: typeof ApiAdminQaConfigsIdExportCsvRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1330,6 +1344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQaConfigsIdEditRouteImport
       parentRoute: typeof AdminQaConfigsRoute
     }
+    '/api/admin/qa-configs/$id/export-csv': {
+      id: '/api/admin/qa-configs/$id/export-csv'
+      path: '/api/admin/qa-configs/$id/export-csv'
+      fullPath: '/api/admin/qa-configs/$id/export-csv'
+      preLoaderRoute: typeof ApiAdminQaConfigsIdExportCsvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1554,6 +1575,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiMaprouletteDataTest_tag_fix_twoRoute,
   ApiMaprouletteStatisticProxyChallengeIdRoute:
     ApiMaprouletteStatisticProxyChallengeIdRoute,
+  ApiAdminQaConfigsIdExportCsvRoute: ApiAdminQaConfigsIdExportCsvRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

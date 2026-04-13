@@ -1,10 +1,17 @@
 import { Link } from '@/components/shared/links/Link'
+import type { QaConfigStats } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
 import type { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { QaConfigStatsTable } from './QaConfigStatsTable'
 
 type QaConfigWithRelations = Awaited<ReturnType<typeof getQaConfigsForAdmin>>[number]
 
-export function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
+export function QaConfigCard({
+  config,
+  stats,
+}: {
+  config: QaConfigWithRelations
+  stats: QaConfigStats | undefined
+}) {
   return (
     <div className="not-prose mb-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
@@ -64,7 +71,7 @@ export function QaConfigCard({ config }: { config: QaConfigWithRelations }) {
         </div>
       </div>
 
-      <QaConfigStatsTable configId={config.id} />
+      <QaConfigStatsTable stats={stats} />
     </div>
   )
 }
