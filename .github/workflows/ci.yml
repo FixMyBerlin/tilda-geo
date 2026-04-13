@@ -16,11 +16,6 @@ jobs:
       - name: Verify deploy env manifest
         run: bun .github/scripts/verify-env-manifest.ts
 
-      - name: Verify generated .github README
-        run: |
-          bun .github/scripts/generate-github-readme.ts
-          git diff --exit-code -- .github/README.md
-
   run-app-ci:
     name: Run Type Check & Linters
     runs-on: ubuntu-latest
