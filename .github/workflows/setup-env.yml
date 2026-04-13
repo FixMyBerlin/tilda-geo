@@ -78,5 +78,5 @@ jobs:
             echo 'Updating .env'
             cd /srv
             mv .env.deploy.generated .env
-            chgrp docker .env
-            chmod 640 .env
+            # chgrp docker .env
+            # chmod 640 .env
