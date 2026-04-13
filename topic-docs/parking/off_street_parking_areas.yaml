@@ -1,10 +1,11 @@
-title: Off-Street-Parkplätze
-summary: Flächige Parkplätze außerhalb des Straßenlandes wie Parkplätze, Garagen und Parkhäuser mit Kapazitätsangaben.
+title: Parken abseits des Straßenraums
+summary: Parkraum abseits des Straßenraums wie Flächenparkplätze, (Tief-)Garagen und Parkhäuser mit Kapazitätsangaben.
 sourceIds: [tilda_parkings_off_street]
 
 attributes:
   - key: category
     label: Kategorie
+    description: Kategorie der Parkmöglichkeit.
     values:
       - value: outside
         label: Außenparkplatz
@@ -19,6 +20,7 @@ attributes:
 
   - key: parking
     label: Parkplatztyp
+    description: Typ der Parkmöglichkeit.
     values:
       - value: surface
         label: Oberflächenparkplatz
@@ -44,10 +46,7 @@ attributes:
         label: Parkplatz
 
   - key: capacity
-    format: number
-    label: Anzahl Stellplätze
-    chapterRefs:
-      - chapterId: capacity-calculation
+    ref: parkings.capacity
 
   - key: capacity_source
     ref: parkings.capacity_source
@@ -64,6 +63,7 @@ attributes:
   - key: area
     format: number
     label: Fläche
+    description: Fläche in Quadratmetern.
 
   - key: area_source
     ref: parkings.area_source
@@ -108,13 +108,10 @@ attributes:
     ref: parkings.operator_type_confidence
 
   - key: zone
-    format: sanitized_strings
-    label: Zone
+    ref: parkings.zone
 
   - key: mapillary
-    format: sanitized_strings
-    label: Mapillary
+    ref: parkings.mapillary
 
   - key: traffic_sign
-    format: sanitized_strings
-    label: Verkehrszeichen
+    ref: parkings.traffic_sign

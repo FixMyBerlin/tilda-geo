@@ -36,11 +36,11 @@
       }
     },
     "capacity": {
-      "name": "Anzahl Stellplätze",
+      "name": "Stellplatzanzahl",
       "type": "number"
     },
     "capacity_source": {
-      "name": "Kapazitätsherkunft",
+      "name": "Herkunft der Stellplatzanzahl",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -80,9 +80,9 @@
         "loading": "Ladezone",
         "maxweight": "Gewichtsbegrenzung",
         "mixed": "Nur mit Parkschein oder Bewohnerparkausweis",
-        "no_parking": "Parkverbot / Eingeschränktes Haltverbot",
-        "no_standing": "Eingeschränktes Halteverbot",
-        "no_stopping": "Halteverbot / Absolutes Haltverbot",
+        "no_parking": "Eingeschränktes Haltverbot",
+        "no_standing": "Nur kurzes Halten erlaubt",
+        "no_stopping": "Absolutes Haltverbot",
         "paid": "Nur mit Parkschein",
         "private": "Privat",
         "residents": "Nur mit Bewohnerparkausweis",
@@ -101,7 +101,7 @@
         "customers": "Kunden",
         "destination": "Anlieger frei (Nicht-Durchgangsverkehr erlaubt)",
         "employees": "Mitarbeiter",
-        "permissive": "Erlaubt",
+        "permissive": "Öffentliche Nutzung geduldet",
         "public": "Öffentlich (explizit)",
         "delivery": "Lieferverkehr",
         "no": "Kein Zugang",
@@ -114,16 +114,16 @@
       "type": "number"
     },
     "area_source": {
-      "name": "Flächenherkunft",
+      "name": "Herkunft der Flächenangabe",
       "condition": "contains",
       "type": "string",
       "format": {
-        "estimated": "Berechnet auf Basis der Linien-Länge und Ausrichtung.",
-        "geometry": "Basiert auf der Flächen aus OSM."
+        "estimated": "Berechnet auf Basis der Länge der Liniengeometrie und Fahrzeugausrichtung.",
+        "geometry": "Basiert auf dem Flächeninhalt der Geometrie aus OSM."
       }
     },
     "area_confidence": {
-      "name": "Konfidenz Fläche",
+      "name": "Konfidenz der Flächenangabe",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -133,7 +133,7 @@
       }
     },
     "capacity_confidence": {
-      "name": "Konfidenz Kapazität",
+      "name": "Konfidenz der Stellplatzanzahl",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -178,7 +178,7 @@
       }
     },
     "surface_confidence": {
-      "name": "Konfidenz Oberfläche",
+      "name": "Konfidenz der Oberfläche",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -188,7 +188,7 @@
       }
     },
     "surface_source": {
-      "name": "Oberflächenherkunft",
+      "name": "Herkunft der Oberfläche",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -253,19 +253,19 @@
       }
     },
     "operator_type_source": {
-      "name": "Betreibertyp-Herkunft",
+      "name": "Herkunft des Betreibertyps",
       "condition": "contains",
       "type": "string",
       "format": {
-        "default_fallback": "Annahme bei fehlendem Tag.",
-        "driveway_inference": "Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde.",
-        "manual_overwrite_list": "Anhand einer manuelle Korrektur-Liste in TILDA.",
+        "default_fallback": "Annahme bei fehlender Angabe.",
+        "driveway_inference": "Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.",
+        "manual_overwrite_list": "Anhand einer manuellen Korrekturliste in TILDA.",
         "parent_highway_tag": "Explizite Angabe aus OSM an der zugeordneten Straße.",
         "tag": "Explizite Angabe aus OSM."
       }
     },
     "operator_type_confidence": {
-      "name": "Konfidenz Betreibertyp",
+      "name": "Konfidenz des Betreibertyps",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -274,7 +274,7 @@
         "low": "Niedrig"
       }
     },
-    "zone": "Zone",
+    "zone": "Parkzone",
     "mapillary": {
       "name": "Mapillary",
       "type": "html",

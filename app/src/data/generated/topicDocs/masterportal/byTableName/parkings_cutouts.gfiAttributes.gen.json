@@ -5,8 +5,8 @@
       "condition": "contains",
       "type": "string",
       "format": {
-        "advertising": "Werbungtabeln u.ä.",
-        "barrier": "Poller, Zaun, u.ä.",
+        "advertising": "Werbeträger",
+        "barrier": "Barriere",
         "bicycle_parking": "Fahrradparkplatz",
         "bicycle_rental": "Fahrradverleih",
         "bollard": "Poller",
@@ -15,25 +15,25 @@
         "bus_stop_centerline": "Bushaltestelle (Mittellinie)",
         "bus_stop_kerb": "Bushaltestelle (Bordstein)",
         "collision_protection": "Baumschutzbügel",
-        "crossing_buffer_marking": "Markierung (Sperrfläche u.ä.) am Überweg",
-        "crossing_kerb_extension": "Gehwegvorstreckung am Überweg",
-        "crossing_marked": "Markierter Überweg",
-        "crossing_traffic_signals": "Ampelübergang",
-        "crossing_zebra": "Zebrastreifen",
+        "crossing_buffer_marking": "Markierung (Sperrfläche u.ä.) an Querungsstelle",
+        "crossing_kerb_extension": "Gehwegvorstreckung an Querungsstelle",
+        "crossing_marked": "Markierte Querungsstelle",
+        "crossing_traffic_signals": "Ampelquerung",
+        "crossing_zebra": "Fußgängerüberweg (Zebrastreifen)",
         "driveway": "Einfahrt",
         "driveway_corner_kerb": "Implizites Halteverbot am Beginn einer Einfahrt",
         "fire_hydrant": "Hydrant",
         "intersection_corner": "Implizites Halteverbot an Straßenecke",
         "kerb_lowered": "Abgesenkter Bordstein",
-        "kerb_extension": "Bordsteinverlängerung",
-        "loading_ramp": "Laderampe",
+        "kerb_extension": "Gehwegvorstreckung",
+        "loading_ramp": "Transportüberweg",
         "mobility_hub": "Mobilitätsstation",
         "motorcycle_parking": "Motorradparkplatz",
         "other": "Sonstiges Hindernis",
         "parklet": "Parklet",
         "recycling": "Recyclingstation",
         "road_marking_restricted_area": "Sperrfläche (Markierung)",
-        "small_electric_vehicle_parking": "Parkplatz für kleine Elektrofahrzeuge wie E-Scootern",
+        "small_electric_vehicle_parking": "Abstellfläche für Elektrokleinstfahrzeuge",
         "street_cabinet": "Schaltkasten, Straßenkasten, u.ä.",
         "street_lamp": "Straßenlaterne",
         "traffic_calming_choker": "Angelegte Fahrbahnverengung",
@@ -42,7 +42,7 @@
         "tree": "Baum",
         "tree_pit": "Baumscheibe",
         "vending_parking_tickets": "Parkscheinautomat",
-        "water_well": "Wasserstelle / Brunnen"
+        "water_well": "Straßenbrunnen / Wasserstelle"
       }
     },
     "source": {
@@ -68,7 +68,7 @@
       "type": "number"
     },
     "radius": {
-      "name": "Pufferradius (m), u. a. Kreuzungs-Ecken und eUVM-Punkte",
+      "name": "Pufferradius",
       "type": "number"
     },
     "side": {
@@ -95,8 +95,8 @@
     },
     "road": "Fahrbahn-Referenz (Einfahrt)",
     "street:name": "Straßenname (Einfahrt)",
-    "amenity": "OSM amenity",
-    "barrier": "OSM barrier",
+    "amenity": "OSM-Kategorie \"amenity\"",
+    "barrier": "OSM-Kategorie \"barrier\"",
     "capacity": {
       "name": "Kapazität (OSM / Zwischenwert)",
       "type": "number"
@@ -106,18 +106,18 @@
       "type": "number"
     },
     "direction": "Richtung (OSM)",
-    "emergency": "OSM emergency",
+    "emergency": "OSM-Kategorie \"emergency\"",
     "geom_sources": "Geometrie-Quellen",
     "geometry_source": "Geometrieherkunft",
-    "kerb": "Bordstein (OSM kerb)",
-    "landuse": "Flächennutzung (OSM landuse)",
-    "man_made": "Künstliche Objekte (OSM man_made)",
+    "kerb": "Bordstein (OSM-Kategorie \"kerb\")",
+    "landuse": "Flächennutzung (OSM-Kategorie \"landuse\")",
+    "man_made": "Künstliche Objekte (OSM-Kategorie \"man_made\")",
     "name": "Name (OSM)",
-    "natural": "Natur (OSM natural)",
+    "natural": "Natur (OSM-Kategorie \"natural\")",
     "operator": "Betreiber (OSM)",
-    "ref": "Referenz (OSM ref)",
+    "ref": "Referenz (OSM-Kategorie \"ref\")",
     "separate_parking": "Separater Parkplatz (OSM-Bezug)",
     "tag_sources": "Tag-Quellen",
-    "traffic_calming": "Verkehrsberuhigung (OSM traffic_calming)"
+    "traffic_calming": "Verkehrsberuhigung (OSM-Kategorie \"traffic_calming\")"
   }
 }

@@ -1,21 +1,21 @@
 {
   "gfiAttributes": {
     "parking": {
-      "name": "Parken",
+      "name": "Parkposition",
       "condition": "contains",
       "type": "string",
       "format": {
         "lane": "Auf der Fahrbahn",
-        "half_on_kerb": "Halb auf dem Bürgersteig",
-        "on_kerb": "Auf dem Bürgersteig",
-        "no_parking": "Parkverbot",
-        "no_stopping": "Halteverbot",
-        "separate": "Parkplatz als separate Geometrie erfasst",
-        "shoulder": "Seitenstreifen",
+        "half_on_kerb": "Halb auf dem Gehweg",
+        "on_kerb": "Ganz auf dem Gehweg",
+        "no_parking": "Eingeschränktes Haltverbot",
+        "no_stopping": "Absolutes Haltverbot",
+        "separate": "Parkraum als separate Geometrie erfasst",
+        "shoulder": "Auf dem Seitenstreifen",
         "street_side": "Parkbucht",
-        "yes": "Parken (allgemein, OSM yes)",
-        "no": "Parken verboten (Sonstiger/Unbekannter Grund)",
-        "no_standing": "Stehverbot (OSM)",
+        "yes": "Nicht näher bestimmtes Straßenparken",
+        "no": "Kein Parken (Sonstiger/Unbekannter Grund)",
+        "no_standing": "Nur kurzes Halten erlaubt",
         "missing": "Daten in OSM fehlen",
         "not_expected": "Kein Parken zu erwarten"
       }
@@ -30,11 +30,11 @@
         "restriction_no_parking": "Explizites Parkverbot aus OSM",
         "restriction_no_stopping": "Explizites Halteverbot aus OSM",
         "restriction_no_standing": "Eingeschränktes Halteverbot aus OSM",
-        "bus_stop": "Bushaltestelle / ÖPNV-Halt",
+        "bus_stop": "Haltestelle",
         "cycleway": "Radverkehrsanlage",
-        "dual_carriage": "Zweibahnig geteilte Fahrbahn",
+        "dual_carriage": "Getrennte Richtungsfahrbahnen",
         "junction": "Knotenpunkt / Einmündung",
-        "narrow": "Zu schmaler Straßenraum",
+        "narrow": "Zu schmale Fahrbahn",
         "capacity_below_zero": "Abschnitt zu klein für ein Fahrzeug"
       }
     },
@@ -55,9 +55,9 @@
         "loading": "Ladezone",
         "maxweight": "Gewichtsbegrenzung",
         "mixed": "Nur mit Parkschein oder Bewohnerparkausweis",
-        "no_parking": "Parkverbot / Eingeschränktes Haltverbot",
-        "no_standing": "Eingeschränktes Halteverbot",
-        "no_stopping": "Halteverbot / Absolutes Haltverbot",
+        "no_parking": "Eingeschränktes Haltverbot",
+        "no_standing": "Nur kurzes Halten erlaubt",
+        "no_stopping": "Absolutes Haltverbot",
         "paid": "Nur mit Parkschein",
         "private": "Privat",
         "residents": "Nur mit Bewohnerparkausweis",
@@ -68,11 +68,11 @@
       }
     },
     "capacity": {
-      "name": "Kapazität",
+      "name": "Stellplatzanzahl",
       "type": "number"
     },
     "capacity_source": {
-      "name": "Kapazitätsherkunft",
+      "name": "Herkunft der Stellplatzanzahl",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -119,7 +119,7 @@
       "type": "string",
       "format": {
         "parkings": "Angaben an der Straßenlinie",
-        "separate_parking_areas": "Separat erfasste Flächedaten",
+        "separate_parking_areas": "Separat erfasste Flächendaten",
         "separate_parking_points": "Separate erfasste Punktdaten"
       }
     },
@@ -152,7 +152,7 @@
         "service_emergency_access": "Rettungsweg",
         "service_parking_aisle": "Parkplatzweg",
         "service_road": "Zufahrtsweg",
-        "service_uncategorized": "Zufahrtsweg (unbekannte Klassifisierung)",
+        "service_uncategorized": "Zufahrtsweg (unbekannte Klassifizierung)",
         "service": "Zufahrtsweg",
         "steps": "Stufen",
         "tertiary_link": "Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße",
@@ -168,17 +168,17 @@
       "condition": "contains",
       "type": "string",
       "format": {
-        "no": "Beide Richtungen",
+        "no": "Nein (in beide Richtungen befahrbar)",
         "yes": "Einbahnstraße",
-        "yes_dual_carriageway": "Einbahnstraße da separate Geometrie pro Seite"
+        "yes_dual_carriageway": "Einbahnstraße (getrennte Richtungsfahrbahnen)"
       }
     },
     "road_width": {
-      "name": "Straßenbreite",
+      "name": "Fahrbahnbreite",
       "type": "number"
     },
     "road_width_source": {
-      "name": "Straßenbreite Quelle",
+      "name": "Herkunft der Fahrbahnbreite",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -188,7 +188,7 @@
       }
     },
     "road_width_confidence": {
-      "name": "Konfidenz Straßenbreite",
+      "name": "Konfidenz der Fahrbahnbreite",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -198,7 +198,7 @@
       }
     },
     "side": {
-      "name": "Seite relativ zur Fahrbahn",
+      "name": "Straßenseite",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -211,16 +211,16 @@
       "type": "number"
     },
     "area_source": {
-      "name": "Flächenherkunft",
+      "name": "Herkunft der Flächenangabe",
       "condition": "contains",
       "type": "string",
       "format": {
-        "estimated": "Berechnet auf Basis der Linien-Länge und Ausrichtung.",
-        "geometry": "Basiert auf der Flächen aus OSM."
+        "estimated": "Berechnet auf Basis der Länge der Liniengeometrie und Fahrzeugausrichtung.",
+        "geometry": "Basiert auf dem Flächeninhalt der Geometrie aus OSM."
       }
     },
     "area_confidence": {
-      "name": "Konfidenz Fläche",
+      "name": "Konfidenz der Flächenangabe",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -230,7 +230,7 @@
       }
     },
     "capacity_confidence": {
-      "name": "Konfidenz Kapazität",
+      "name": "Konfidenz der Stellplatzanzahl",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -275,7 +275,7 @@
       }
     },
     "surface_confidence": {
-      "name": "Konfidenz Oberfläche",
+      "name": "Konfidenz der Oberfläche",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -285,7 +285,7 @@
       }
     },
     "surface_source": {
-      "name": "Oberflächenherkunft",
+      "name": "Herkunft der Oberfläche",
       "condition": "contains",
       "type": "string",
       "format": {
@@ -340,7 +340,7 @@
         "customers": "Kunden",
         "destination": "Anlieger frei (Nicht-Durchgangsverkehr erlaubt)",
         "employees": "Mitarbeiter",
-        "permissive": "Erlaubt",
+        "permissive": "Öffentliche Nutzung geduldet",
         "public": "Öffentlich (explizit)",
         "delivery": "Lieferverkehr",
         "no": "Kein Zugang",
@@ -358,19 +358,19 @@
       }
     },
     "operator_type_source": {
-      "name": "Betreibertyp-Herkunft",
+      "name": "Herkunft des Betreibertyps",
       "condition": "contains",
       "type": "string",
       "format": {
-        "default_fallback": "Annahme bei fehlendem Tag.",
-        "driveway_inference": "Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde.",
-        "manual_overwrite_list": "Anhand einer manuelle Korrektur-Liste in TILDA.",
+        "default_fallback": "Annahme bei fehlender Angabe.",
+        "driveway_inference": "Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.",
+        "manual_overwrite_list": "Anhand einer manuellen Korrekturliste in TILDA.",
         "parent_highway_tag": "Explizite Angabe aus OSM an der zugeordneten Straße.",
         "tag": "Explizite Angabe aus OSM."
       }
     },
     "operator_type_confidence": {
-      "name": "Konfidenz Betreibertyp",
+      "name": "Konfidenz des Betreibertyps",
       "condition": "contains",
       "type": "string",
       "format": {
