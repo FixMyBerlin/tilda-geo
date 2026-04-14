@@ -28,7 +28,9 @@ function toSafeCallbackURL(rawCallbackURL: string | null, requestUrl: string) {
     // Only allow redirects back to this app origin.
     if (normalized.origin !== requestOrigin) return fallback
 
-    return normalized.toString()
+    // Better Auth validates callback targets against configured origins.
+    // Passing a relative app path avoids host/canonical-domain drift between environments.
+    return `${normalized.pathname}${normalized.search}${normalized.hash}`
   } catch {
     return fallback
   }
