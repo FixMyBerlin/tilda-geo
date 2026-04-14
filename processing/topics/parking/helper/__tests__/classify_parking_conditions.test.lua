@@ -97,4 +97,22 @@ describe('classify_parking_conditions', function()
     local result = classify_parking_conditions(tags, 'assumed_free')
     assert.are.equal(result.condition_category, 'no_parking (Mo-Fr 08:00-18:00);loading (Mo-Fr 12:00-14:00)')
   end)
+
+  it('does not add redundant no_parking when residential zone already classifies as residents (none @ residents)', function()
+    local tags = {
+      zone = 'residential',
+      access = 'yes',
+      ['restriction:conditional'] = 'no_parking @ (Mo-Fr 08:00-18:00); none @ residents',
+    }
+    local result = classify_parking_conditions(tags, 'assumed_free')
+    assert.are.equal(result.condition_category, 'residents (Mo-Fr 08:00-18:00)')
+    assert.is_nil(string.match(result.condition_category, ';no_parking'))
+  end)
+
+  it('vehicle_excluded uses except prefix in vehicle_restriction detail (not no)', function()
+    local tags = { hgv = 'no' }
+    local result = classify_parking_conditions(tags, 'assumed_free')
+    assert.are.equal(result.condition_category, 'assumed_free;vehicle_restriction (except hgv)')
+    assert.is_nil(string.match(result.condition_category, 'vehicle_restriction %(no '))
+  end)
 end)
