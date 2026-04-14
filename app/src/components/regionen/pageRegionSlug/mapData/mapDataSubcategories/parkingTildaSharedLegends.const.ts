@@ -18,27 +18,27 @@ const parkingTildaLegendSeparateAreasShadow = {
 export const parkingTildaStreetDefaultLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'no_stopping',
-    name: 'Halteverbot',
+    name: 'Absolutes Haltverbot',
     style: { type: 'line', color: '#EB0000' },
   },
   {
     id: 'bus_lane',
-    name: 'Busspur',
+    name: 'Bussonderfahrstreifen',
     style: { type: 'line', color: '#EB0000' },
   },
   {
     id: 'no_parking',
-    name: 'Parkverbot',
+    name: 'Eingeschränktes Haltverbot',
     style: { type: 'line', color: '#F97316' },
   },
   {
     id: 'disabled_private',
-    name: 'Behindertengerecht (privat)',
+    name: 'Personenbezogener Behindertenparkplatz',
     style: { type: 'line', color: '#5B21B6' },
   },
   {
     id: 'disabled',
-    name: 'Behindertengerecht',
+    name: 'Behindertenparkplatz',
     style: { type: 'line', color: '#8B5CF6' },
   },
   {
@@ -48,17 +48,17 @@ export const parkingTildaStreetDefaultLegends: FileMapDataSubcategoryStyleLegend
   },
   {
     id: 'charging',
-    name: 'Ladeparkplatz',
+    name: 'Laden von Elektrofahrzeugen',
     style: { type: 'line', color: '#5EF20C' },
   },
   {
     id: 'taxi',
-    name: 'Taxi',
+    name: 'Taxenstand',
     style: { type: 'line', color: '#FEE13A' },
   },
   {
     id: 'car_sharing',
-    name: 'Carsharing',
+    name: 'Nur für Carsharing-Fahrzeuge',
     style: { type: 'line', color: '#6B7280' },
   },
   {
@@ -74,42 +74,42 @@ export const parkingTildaStreetDefaultLegends: FileMapDataSubcategoryStyleLegend
     id: 'vehicle_restriction',
     name: 'Fahrzeugbeschränkung',
     desc: [
-      '`vehicle_restriction` — z. B. nur für bestimmte Fahrzeugtypen.',
-      '`maxweight` — Gewichtsbeschränkung.',
+      '`vehicle_restriction` — Beschränkung auf Fahrzeugklassen.',
+      '`maxweight` — Gewichtsbegrenzung.',
     ],
     style: { type: 'line', color: '#6B7280' },
   },
   {
     id: 'access_restriction',
-    name: 'Zufahrt beschränkt',
+    name: 'Zugangsbeschränkung',
     style: { type: 'line', color: '#4B5563' },
   },
   {
     id: 'mixed',
-    name: 'Gemischt',
+    name: 'Nur mit Parkschein oder Bewohnerparkausweis',
     style: { type: 'line', color: '#2EB499' },
   },
   {
     id: 'residents',
-    name: 'Anwohner',
+    name: 'Nur mit Bewohnerparkausweis',
     style: { type: 'line', color: '#BE3C3C' },
   },
   {
     id: 'paid',
-    name: 'Gebührenpflichtig',
+    name: 'Nur mit Parkschein',
     style: { type: 'line', color: '#0E7490' },
   },
   {
     id: 'time_limited',
-    name: 'Zeitbegrenzt',
+    name: 'Höchstparkdauer',
     style: { type: 'line', color: '#60A5FA' },
   },
   {
     id: 'free',
-    name: 'Kostenlos',
+    name: 'Keine Parkbeschränkungen',
     desc: [
-      '`free` — in OSM als kostenlos erfasst.',
-      '`assumed_free` — ohne explizite Angabe als kostenlos geschätzt.',
+      '`free` — in OSM explizit keine Gebühren und keine Beschränkungen erfasst.',
+      '`assumed_free` — keine Angaben in OSM, daher als frei von Beschränkungen angenommen.',
     ],
     style: { type: 'line', color: '#16A34A' },
   },
@@ -129,27 +129,27 @@ export const parkingTildaStreetDefaultLegends: FileMapDataSubcategoryStyleLegend
 export const parkingTildaOffStreetDefaultLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'no_stopping',
-    name: 'Halteverbot',
+    name: 'Absolutes Haltverbot',
     style: { type: 'fill', color: '#EB0000' },
   },
   {
     id: 'bus_lane',
-    name: 'Busspur',
+    name: 'Bussonderfahrstreifen',
     style: { type: 'fill', color: '#EB0000' },
   },
   {
     id: 'no_parking',
-    name: 'Parkverbot',
+    name: 'Eingeschränktes Haltverbot',
     style: { type: 'fill', color: '#F97316' },
   },
   {
     id: 'disabled_private',
-    name: 'Behindertengerecht (privat)',
+    name: 'Personenbezogener Behindertenparkplatz',
     style: { type: 'fill', color: '#5B21B6' },
   },
   {
     id: 'disabled',
-    name: 'Behindertengerecht',
+    name: 'Behindertenparkplatz',
     style: { type: 'fill', color: '#8B5CF6' },
   },
   {
@@ -159,17 +159,17 @@ export const parkingTildaOffStreetDefaultLegends: FileMapDataSubcategoryStyleLeg
   },
   {
     id: 'charging',
-    name: 'Ladeparkplatz',
+    name: 'Laden von Elektrofahrzeugen',
     style: { type: 'fill', color: '#5EF20C' },
   },
   {
     id: 'taxi',
-    name: 'Taxi',
+    name: 'Taxenstand',
     style: { type: 'fill', color: '#FEE13A' },
   },
   {
     id: 'car_sharing',
-    name: 'Carsharing',
+    name: 'Nur für Carsharing-Fahrzeuge',
     style: { type: 'fill', color: '#6B7280' },
   },
   {
@@ -185,53 +185,53 @@ export const parkingTildaOffStreetDefaultLegends: FileMapDataSubcategoryStyleLeg
     id: 'vehicle_restriction',
     name: 'Fahrzeugbeschränkung',
     desc: [
-      '`vehicle_restriction` — z. B. nur für bestimmte Fahrzeugtypen.',
-      '`maxweight` — Gewichtsbeschränkung.',
+      '`vehicle_restriction` — Beschränkung auf Fahrzeugklassen.',
+      '`maxweight` — Gewichtsbegrenzung.',
     ],
     style: { type: 'fill', color: '#6B7280' },
   },
   {
     id: 'access_restriction',
-    name: 'Zufahrt beschränkt',
+    name: 'Zugangsbeschränkung',
     style: { type: 'fill', color: '#4B5563' },
   },
   {
     id: 'mixed',
-    name: 'Gemischt',
+    name: 'Nur mit Parkschein oder Bewohnerparkausweis',
     style: { type: 'fill', color: '#2EB499' },
   },
   {
     id: 'residents',
-    name: 'Anwohner',
+    name: 'Nur mit Bewohnerparkausweis',
     style: { type: 'fill', color: '#BE3C3C' },
   },
   {
     id: 'paid',
-    name: 'Gebührenpflichtig',
+    name: 'Nur mit Parkschein',
     style: { type: 'fill', color: '#0E7490' },
   },
   {
     id: 'time_limited',
-    name: 'Zeitbegrenzt',
+    name: 'Höchstparkdauer',
     style: { type: 'fill', color: '#60A5FA' },
   },
   {
+    id: 'free',
+    name: 'Keine Parkbeschränkungen',
+    desc: [
+      '`free` — in OSM explizit keine Gebühren und keine Beschränkungen erfasst.',
+      '`assumed_free` — keine Angaben in OSM, daher als frei von Beschränkungen angenommen.',
+    ],
+    style: { type: 'fill', color: '#16A34A' },
+  },
+  {
     id: 'unspecified',
-    name: 'Sonstiges',
+    name: 'Unbestimmt / Sonstiges',
     desc: [
       '`unspecified` — Bedingung nicht eindeutig klassifizierbar.',
       '`default` — Fallback, wenn keine andere Kategorie passt.',
     ],
     style: { type: 'fill', color: '#4B5563' },
-  },
-  {
-    id: 'free',
-    name: 'Kostenlos',
-    desc: [
-      '`free` — in OSM als kostenlos erfasst.',
-      '`assumed_free` — ohne explizite Angabe als kostenlos geschätzt.',
-    ],
-    style: { type: 'fill', color: '#16A34A' },
   },
 ]
 
