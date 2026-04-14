@@ -110,8 +110,7 @@ services:
       db:
         condition: service_healthy
   db:
-    image: postgis/postgis:17-3.5
-    platform: linux/amd64
+    image: ghcr.io/baosystems/postgis:17-3.5
     container_name: db
     shm_size: 2g
     restart: unless-stopped
