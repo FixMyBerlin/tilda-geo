@@ -9,12 +9,10 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { customSession } from 'better-auth/plugins'
 import { genericOAuth } from 'better-auth/plugins/generic-oauth'
 import { getOsmApiUrl, getOsmUrl } from '@/components/shared/utils/getOsmUrl'
+import { osmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { UserRoleEnum } from '@/prisma/generated/client'
 import db from '@/server/db.server'
 import { sendNewUserRegistration } from '@/server/notifications/sendNewUserRegistration.server'
-
-/** OSM does not provide email. Better Auth generic-oauth requires a non-empty email (throws email_is_missing) and uses it for findOAuthUser; we use a reserved invalid-domain placeholder (RFC 2606). See: https://github.com/better-auth/better-auth/issues/1479 */
-const osmPlaceholderEmail = (osmId: number) => `osm-${osmId}@users.openstreetmap.invalid`
 
 /**
  * Custom session plugin that adds role field to session

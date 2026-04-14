@@ -57,6 +57,8 @@ describe('newUserRegistrationMailer', () => {
     expect(callArgs?.introMarkdown).toContain('> N/A')
     expect(callArgs?.introMarkdown).toContain('Zum Zeitpunkt der Registrierung nicht verfügbar')
     expect(callArgs?.ctaLink).toContain('userId=clx4567890123')
+    expect(callArgs?.introMarkdown).toContain('noch nicht angegeben (nur OSM-Login-Platzhalter)')
+    expect(callArgs?.introMarkdown).not.toContain('osm-987654@users.openstreetmap.invalid')
   })
 
   test('handles user with null osmName', async () => {
@@ -77,5 +79,6 @@ describe('newUserRegistrationMailer', () => {
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Unbekannt')
     expect(callArgs?.introMarkdown).toContain('OSM-Name:** N/A')
+    expect(callArgs?.introMarkdown).toContain('noch nicht angegeben (nur OSM-Login-Platzhalter)')
   })
 })

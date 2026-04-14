@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { RegionStatusPill } from '@/components/admin/RegionStatusPill'
+import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { RegionFormEdit } from './pageRegions/RegionFormEdit'
 import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 
@@ -61,7 +62,7 @@ export function PageRegionEdit() {
                         ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
                         : '–'}
                       <br />
-                      {user.email || '–'}
+                      {hasContactEmail(user.email) ? user.email : '–'}
                     </td>
                     <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                       <ul className={adminBulletedListClassName}>

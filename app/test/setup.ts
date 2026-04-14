@@ -1,3 +1,4 @@
+import '@/lib/zodDeLocale'
 import '@testing-library/jest-dom'
 
 // Avoid "Missing database env" when test files import code that loads prisma/database-url at module load.

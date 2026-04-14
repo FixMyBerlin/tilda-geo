@@ -10,6 +10,7 @@ import { buttonStyles } from '@/components/shared/links/styles'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { proseClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
+import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import { currentUserQueryKey } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
@@ -52,7 +53,7 @@ export const UserForm = ({ user }: Props) => {
     <>
       <Form
         defaultValues={{
-          email: user.email,
+          email: hasContactEmail(user.email) ? user.email : '',
           firstName: user.firstName ?? '',
           lastName: user.lastName ?? '',
           osmDescription: user.osmDescription ?? '',

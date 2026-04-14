@@ -11,6 +11,10 @@ import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { useOptionalRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
 import { Img } from '@/components/shared/Img'
 import { Link } from '@/components/shared/links/Link'
+import {
+  hasContactEmail,
+  isContactProfileIncomplete,
+} from '@/components/shared/utils/osmPlaceholderEmail'
 import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import { currentUserQueryKey } from '@/server/users/currentUserQueryOptions'
@@ -29,10 +33,11 @@ export const UserLoggedIn = ({ user }: Props) => {
   const isRegionsPage = Boolean(useOptionalRegionSlug())
   const hasPermissions = useHasPermissions()
 
-  const missingEmail = !user.email
+  const missingContactEmail = !hasContactEmail(user.email)
   const missingOsmDescription = !user.osmDescription?.trim()
   const regionButNoPermission = isRegionsPage && hasPermissions === false
-  const hasTodos = missingEmail || missingOsmDescription || regionButNoPermission
+  const hasTodos =
+    isContactProfileIncomplete(user) || missingOsmDescription || regionButNoPermission
 
   const handleLogout = async () => {
     // We need to reset the inspector because it might hold atlas notes which would throw an authorization error if left open
@@ -104,7 +109,7 @@ export const UserLoggedIn = ({ user }: Props) => {
                   </Link>
                 )}
               </p>
-              <p className="truncate">eMail: {user.email ?? '–'}</p>
+              <p className="truncate">eMail: {hasContactEmail(user.email) ? user.email : '–'}</p>
             </div>
             {isRegionsPage && hasPermissions === true && !isAdmin(user) && (
               <div className="flex items-center gap-1 text-xs leading-4">
@@ -122,7 +127,7 @@ export const UserLoggedIn = ({ user }: Props) => {
                 </Link>
               </div>
             )}
-            {missingEmail ? (
+            {missingContactEmail ? (
               <div className="my-2 rounded bg-amber-500 p-1 leading-snug">
                 Für diesen Account ist noch keine E-Mail-Adresse hinterlegt. Diese wird benötigt um
                 Nachrichten schicken zu können.
