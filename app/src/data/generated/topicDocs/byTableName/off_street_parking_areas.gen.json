@@ -2,8 +2,8 @@
   "topic": "parking",
   "tableName": "off_street_parking_areas",
   "sourceIds": ["tilda_parkings_off_street"],
-  "title": "Off-Street-Parkplätze",
-  "summary": "Flächige Parkplätze außerhalb des Straßenlandes wie Parkplätze, Garagen und Parkhäuser mit Kapazitätsangaben.",
+  "title": "Parken abseits des Straßenraums",
+  "summary": "Parkraum abseits des Straßenraums wie Flächenparkplätze, (Tief-)Garagen und Parkhäuser mit Kapazitätsangaben.",
   "groups": [
     {
       "id": "parking",
@@ -15,6 +15,7 @@
       "key": "category",
       "type": "string",
       "label": "Kategorie",
+      "description": "Kategorie der Parkmöglichkeit.",
       "values": [
         {
           "value": "outside",
@@ -42,6 +43,7 @@
       "key": "parking",
       "type": "string",
       "label": "Parkplatztyp",
+      "description": "Typ der Parkmöglichkeit.",
       "values": [
         {
           "value": "surface",
@@ -91,15 +93,16 @@
     {
       "key": "capacity",
       "type": "number",
-      "label": "Anzahl Stellplätze",
+      "label": "Stellplatzanzahl",
+      "description": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
       "chapterRefs": ["capacity-calculation"],
       "values": []
     },
     {
       "key": "capacity_source",
       "type": "string",
-      "label": "Kapazitätsherkunft",
-      "description": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.",
+      "label": "Herkunft der Stellplatzanzahl",
+      "description": "Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.",
       "chapterRefs": ["capacity-calculation"],
       "values": [
         {
@@ -228,15 +231,15 @@
         },
         {
           "value": "no_parking",
-          "label": "Parkverbot / Eingeschränktes Haltverbot"
+          "label": "Eingeschränktes Haltverbot"
         },
         {
           "value": "no_standing",
-          "label": "Eingeschränktes Halteverbot"
+          "label": "Nur kurzes Halten erlaubt"
         },
         {
           "value": "no_stopping",
-          "label": "Halteverbot / Absolutes Haltverbot"
+          "label": "Absolutes Haltverbot"
         },
         {
           "value": "paid",
@@ -291,7 +294,7 @@
         },
         {
           "value": "permissive",
-          "label": "Erlaubt"
+          "label": "Öffentliche Nutzung geduldet"
         },
         {
           "value": "public",
@@ -319,27 +322,28 @@
       "key": "area",
       "type": "number",
       "label": "Fläche",
+      "description": "Fläche in Quadratmetern.",
       "values": []
     },
     {
       "key": "area_source",
       "type": "string",
-      "label": "Flächenherkunft",
+      "label": "Herkunft der Flächenangabe",
       "values": [
         {
           "value": "estimated",
-          "label": "Berechnet auf Basis der Linien-Länge und Ausrichtung."
+          "label": "Berechnet auf Basis der Länge der Liniengeometrie und Fahrzeugausrichtung."
         },
         {
           "value": "geometry",
-          "label": "Basiert auf der Flächen aus OSM."
+          "label": "Basiert auf dem Flächeninhalt der Geometrie aus OSM."
         }
       ]
     },
     {
       "key": "area_confidence",
       "type": "string",
-      "label": "Konfidenz Fläche",
+      "label": "Konfidenz der Flächenangabe",
       "values": [
         {
           "value": "high",
@@ -358,7 +362,7 @@
     {
       "key": "capacity_confidence",
       "type": "string",
-      "label": "Konfidenz Kapazität",
+      "label": "Konfidenz der Stellplatzanzahl",
       "values": [
         {
           "value": "high",
@@ -378,6 +382,7 @@
       "key": "surface",
       "type": "string",
       "label": "Oberfläche",
+      "description": "Oberflächenbelag des Parkraumabschnitts.",
       "values": [
         {
           "value": "asphalt",
@@ -496,7 +501,7 @@
     {
       "key": "surface_confidence",
       "type": "string",
-      "label": "Konfidenz Oberfläche",
+      "label": "Konfidenz der Oberfläche",
       "values": [
         {
           "value": "high",
@@ -515,7 +520,7 @@
     {
       "key": "surface_source",
       "type": "string",
-      "label": "Oberflächenherkunft",
+      "label": "Herkunft der Oberfläche",
       "values": [
         {
           "value": "tag",
@@ -539,6 +544,7 @@
       "key": "orientation",
       "type": "string",
       "label": "Ausrichtung",
+      "description": "Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.",
       "values": [
         {
           "value": "parallel",
@@ -558,6 +564,7 @@
       "key": "location",
       "type": "string",
       "label": "Lage im Straßenraum",
+      "description": "Besondere Lagemerkmale des Parkraums im Straßenland.",
       "values": [
         {
           "value": "lane_centre",
@@ -628,19 +635,19 @@
     {
       "key": "operator_type_source",
       "type": "string",
-      "label": "Betreibertyp-Herkunft",
+      "label": "Herkunft des Betreibertyps",
       "values": [
         {
           "value": "default_fallback",
-          "label": "Annahme bei fehlendem Tag."
+          "label": "Annahme bei fehlender Angabe."
         },
         {
           "value": "driveway_inference",
-          "label": "Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde."
+          "label": "Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde."
         },
         {
           "value": "manual_overwrite_list",
-          "label": "Anhand einer manuelle Korrektur-Liste in TILDA."
+          "label": "Anhand einer manuellen Korrekturliste in TILDA."
         },
         {
           "value": "parent_highway_tag",
@@ -655,7 +662,7 @@
     {
       "key": "operator_type_confidence",
       "type": "string",
-      "label": "Konfidenz Betreibertyp",
+      "label": "Konfidenz des Betreibertyps",
       "values": [
         {
           "value": "high",
@@ -674,19 +681,22 @@
     {
       "key": "zone",
       "type": "sanitized_strings",
-      "label": "Zone",
+      "label": "Parkzone",
+      "description": "Parkzonennummer oder -bezeichnung entsprechend der lokalen Parkraumbewirtschaftung bei Stellplätzen, die nur mit einem entsprechenden Parkrausweis genutzt werden dürfen. Sind (insbesondere an Zonengrenzen) mehrere Parkzonen berechtigt, sind diese üblicherweise als semikolongetrennte Liste aufgeführt.",
       "values": []
     },
     {
       "key": "mapillary",
       "type": "sanitized_strings",
       "label": "Mapillary",
+      "description": "Mapillary-Foto-ID für dieses Feature.",
       "values": []
     },
     {
       "key": "traffic_sign",
       "type": "sanitized_strings",
       "label": "Verkehrszeichen",
+      "description": "Verkehrszeichennummer, mit der dieses Feature ausgeschildert ist.",
       "values": []
     }
   ],

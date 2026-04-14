@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { convertRegionUploadsToCsv } from '@/server/api/regions/convertRegionUploadsToCsv'
+import { internalServerErrorJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
+import { guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { corsHeaders } from '@/server/api/util/cors'
-import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 
 export const Route = createFileRoute('/api/regions/$regionSlug/uploads-csv')({
@@ -17,27 +18,16 @@ export const Route = createFileRoute('/api/regions/$regionSlug/uploads-csv')({
         })
 
         if (!region) {
-          return Response.json(
-            { statusText: 'Not Found', message: 'Region not found' },
-            { status: 404, headers: corsHeaders },
-          )
+          return notFoundJson({ headers: corsHeaders })
         }
 
-        const forbidden = Response.json(
-          { statusText: 'Forbidden', message: 'Access denied to this region' },
-          { status: 403, headers: corsHeaders },
-        )
-        const appSession = await getAppSession(request.headers)
-        if (!appSession?.userId) {
-          return forbidden
-        }
-        if (appSession.role !== 'ADMIN') {
-          const membershipExists = !!(await db.membership.count({
-            where: { userId: appSession.userId, regionId: region.id },
-          }))
-          if (!membershipExists) {
-            return forbidden
-          }
+        const authResponse = await guardRegionMembership({
+          headers: request.headers,
+          regionIds: [region.id],
+          responseHeaders: corsHeaders,
+        })
+        if (authResponse) {
+          return authResponse
         }
 
         const uploads = await db.upload.findMany({
@@ -58,10 +48,10 @@ export const Route = createFileRoute('/api/regions/$regionSlug/uploads-csv')({
           })
         } catch (error) {
           console.error('Region CSV export error:', error)
-          return Response.json(
-            { statusText: 'Internal Server Error', message: 'Failed to generate CSV' },
-            { status: 500, headers: corsHeaders },
-          )
+          return internalServerErrorJson({
+            headers: corsHeaders,
+            message: 'Failed to generate CSV',
+          })
         }
       },
     },

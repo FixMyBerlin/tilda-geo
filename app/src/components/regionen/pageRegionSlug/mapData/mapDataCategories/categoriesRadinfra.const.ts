@@ -88,7 +88,7 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
     desc: 'Straßenlevel Fotos',
     subcategories: [
       { ...subcat_mapillaryCoverage, defaultStyle: 'default' },
-      { ...subcat_radinfraPlusMapillary, defaultStyle: 'default' },
+      { ...subcat_radinfraPlusMapillary, defaultStyle: 'hidden' },
     ],
   },
 ]

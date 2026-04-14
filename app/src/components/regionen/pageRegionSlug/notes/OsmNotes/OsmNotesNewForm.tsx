@@ -63,8 +63,8 @@ export const OsmNotesNewForm = () => {
   const queryKey = useQueryKey()
   const hasPermissions = useHasPermissions()
   const { region } = useRegionLoaderData()
-  const searchString = useRouter().state.location.search
-  const searchParams = searchString ? new URLSearchParams(searchString) : null
+  const searchStr = useRouter().state.location.searchStr
+  const searchParams = searchStr ? new URLSearchParams(searchStr) : null
   const osmNewNoteFeature = useOsmNewNoteFeature()
   const commentedFeatureId =
     osmNewNoteFeature?.osmType && osmNewNoteFeature?.osmId

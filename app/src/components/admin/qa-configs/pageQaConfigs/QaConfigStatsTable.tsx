@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import { twMerge } from 'tailwind-merge'
 import { adminTableClasses } from '@/components/admin/AdminTable'
 import {
@@ -6,13 +5,9 @@ import {
   systemStatusConfig,
   userStatusConfig,
 } from '@/components/regionen/pageRegionSlug/SidebarInspector/InspectorQa/qaConfigs'
-import { getQaConfigStatsForAdminFn } from '@/server/qa-configs/qa-configs.functions'
+import type { QaConfigStats } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
 
-export function QaConfigStatsTable({ configId }: { configId: number }) {
-  const { data: stats } = useQuery({
-    queryKey: ['qaConfigStats', configId],
-    queryFn: () => getQaConfigStatsForAdminFn({ data: { configId } }),
-  })
+export function QaConfigStatsTable({ stats }: { stats: QaConfigStats | undefined }) {
   if (!stats) return null
 
   return (

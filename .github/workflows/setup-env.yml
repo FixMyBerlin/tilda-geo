@@ -74,7 +74,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            echo "Updating `.env`"
+            set -e
+            echo 'Updating .env'
             cd /srv
             mv .env.deploy.generated .env
-            chmod 640 .env
+            # chgrp docker .env
+            # chmod 640 .env

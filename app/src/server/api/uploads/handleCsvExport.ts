@@ -1,5 +1,6 @@
 import type { FeatureCollection } from 'geojson'
 import { z } from 'zod'
+import { internalServerErrorJson } from '../util/apiJsonResponses.server'
 import { corsHeaders } from '../util/cors'
 import { convertGeoJsonToCsv } from './convertGeoJsonToCsv'
 import { fetchS3Json } from './fetchS3Json.server'
@@ -59,9 +60,9 @@ export async function handleCsvExport(geojsonUrl: string, baseName: string) {
     })
   } catch (error) {
     console.error('CSV export error:', error)
-    return Response.json(
-      { statusText: 'Internal Server Error', message: 'Failed to generate CSV' },
-      { status: 500, headers: corsHeaders },
-    )
+    return internalServerErrorJson({
+      headers: corsHeaders,
+      message: 'Failed to generate CSV',
+    })
   }
 }

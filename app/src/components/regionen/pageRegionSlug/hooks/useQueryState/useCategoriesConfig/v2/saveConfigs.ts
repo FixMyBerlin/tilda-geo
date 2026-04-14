@@ -18,7 +18,7 @@ getSimplifiedConfigs().forEach(({ config, regionSlugs }, checksum) => {
   const moduleName = `_${checksum}`
   const modulePath = path.join(configsFolder, `${moduleName}.ts`)
   const result = `${resultIntro}
-import { MapDataCategoryParam } from '../../type'
+import type { MapDataCategoryParam } from '../../type'
 
 // For regions ${regionSlugs.join(', ')}
 export const ${moduleName}: MapDataCategoryParam[] = ${JSON.stringify(config)}

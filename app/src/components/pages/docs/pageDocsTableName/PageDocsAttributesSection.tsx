@@ -36,6 +36,26 @@ export const PageDocsAttributesSection = ({
               </td>
               <td className="align-top">
                 <div className="space-y-2 [&_ul]:my-0! [&>p:first-child]:mt-0!">
+                  {attribute.description?.trim() || attribute.chapterRefs?.[0] ? (
+                    <p className="m-0">
+                      {attribute.description?.trim() ? (
+                        <>
+                          {attribute.description}
+                          {attribute.chapterRefs?.[0] ? ' ' : null}
+                        </>
+                      ) : null}
+                      {attribute.chapterRefs?.[0] ? (
+                        <Link
+                          to="/docs/$tableName"
+                          params={{ tableName }}
+                          search={{ r: regionSlug ?? undefined }}
+                          hash={attribute.chapterRefs[0]}
+                        >
+                          Mehr...
+                        </Link>
+                      ) : null}
+                    </p>
+                  ) : null}
                   {attribute.values?.length ? (
                     <ul className="m-0 list-disc pl-5">
                       {attribute.values.map((value) => (
@@ -58,26 +78,6 @@ export const PageDocsAttributesSection = ({
                       )}
                     </p>
                   )}
-                  {attribute.description?.trim() || attribute.chapterRefs?.[0] ? (
-                    <p className="m-0">
-                      {attribute.description?.trim() ? (
-                        <>
-                          <strong>Beschreibung:</strong> {attribute.description}
-                          {attribute.chapterRefs?.[0] ? ' ' : null}
-                        </>
-                      ) : null}
-                      {attribute.chapterRefs?.[0] ? (
-                        <Link
-                          to="/docs/$tableName"
-                          params={{ tableName }}
-                          search={{ r: regionSlug ?? undefined }}
-                          hash={attribute.chapterRefs[0]}
-                        >
-                          Mehr...
-                        </Link>
-                      ) : null}
-                    </p>
-                  ) : null}
                 </div>
               </td>
             </tr>

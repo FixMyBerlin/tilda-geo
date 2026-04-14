@@ -2,7 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { isProd } from '@/components/shared/utils/isEnv'
 
-const maprouletteChallengeId = z.object({ challengeId: z.coerce.number().positive() })
+const maprouletteChallengeParamsSchema = z.object({
+  challengeId: z.coerce.number().positive(),
+})
 
 const maprouletteChallengeStatistic = z.array(
   z.strictObject({
@@ -28,17 +30,13 @@ const maprouletteChallengeStatistic = z.array(
 
 export const Route = createFileRoute('/api/maproulette/statistic-proxy/$challengeId')({
   ssr: true,
+  params: {
+    parse: (rawParams) => maprouletteChallengeParamsSchema.parse(rawParams),
+  },
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const parsedParams = maprouletteChallengeId.safeParse({
-          challengeId: params.challengeId,
-        })
-
-        if (parsedParams.success === false) {
-          return Response.json({ error: 'Invalid `challengeId`', parsedParams }, { status: 404 })
-        }
-        const { challengeId } = parsedParams.data
+        const { challengeId } = params
 
         // Note: `app/src/env.d.ts` types get overwritten by Bun gobal process.env types which include `undefined`
         const apiKey = process.env.MAPROULETTE_API_KEY

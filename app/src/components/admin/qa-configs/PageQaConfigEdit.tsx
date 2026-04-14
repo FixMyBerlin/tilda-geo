@@ -3,6 +3,7 @@ import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { EditQaConfigFormClient } from './pageQaConfigs/EditQaConfigFormClient'
+import { QaConfigExportSection } from './pageQaConfigs/QaConfigExportSection'
 
 const routeApi = getRouteApi('/admin/qa-configs/$id/edit')
 
@@ -21,6 +22,13 @@ export function PageQaConfigEdit() {
       </HeaderWrapper>
 
       <ObjectDump data={qaConfig} className="my-10" />
+
+      <QaConfigExportSection
+        configId={qaConfig.id}
+        label={qaConfig.label}
+        slug={qaConfig.slug}
+        mapTable={qaConfig.mapTable}
+      />
 
       <EditQaConfigFormClient qaConfig={qaConfig} regions={regions} />
     </>

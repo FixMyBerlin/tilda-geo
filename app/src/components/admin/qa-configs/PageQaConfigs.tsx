@@ -7,7 +7,7 @@ import { QaConfigCard } from './pageQaConfigs/QaConfigCard'
 const routeApi = getRouteApi('/admin/qa-configs/')
 
 export function PageQaConfigs() {
-  const { qaConfigs } = routeApi.useLoaderData()
+  const { qaConfigs, statsByConfigId } = routeApi.useLoaderData()
 
   return (
     <>
@@ -20,7 +20,7 @@ export function PageQaConfigs() {
 
       <div className="space-y-4">
         {qaConfigs.map((config) => (
-          <QaConfigCard key={config.id} config={config} />
+          <QaConfigCard key={config.id} config={config} stats={statsByConfigId[config.id]} />
         ))}
       </div>
     </>

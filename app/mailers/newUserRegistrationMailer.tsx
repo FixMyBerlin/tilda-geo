@@ -18,12 +18,21 @@ type NewUserRegistrationMailer = {
   user: User
 }
 
+function formatOsmDescriptionAsBlockquote(osmDescription: string | null) {
+  const raw = osmDescription != null && osmDescription.trim() !== '' ? osmDescription : 'N/A'
+  return raw
+    .split('\n')
+    .map((line) => `> ${line}`)
+    .join('\n')
+}
+
 function buildMailContent(user: User) {
   const baseUrl = getDomain()
   const adminMembershipsUrl = `${baseUrl}/admin/memberships`
   const createMembershipUrl = `${baseUrl}/admin/memberships/new?userId=${user.id}`
 
   const registrationDate = formatDateTimeBerlin(user.createdAt)
+  const osmDescriptionBlock = formatOsmDescriptionAsBlockquote(user.osmDescription)
 
   const introMarkdown = `
 # Neue Benutzerregistrierung
@@ -33,7 +42,11 @@ function buildMailContent(user: User) {
 * **Benutzer-ID:** ${user.id}
 * **OSM-ID:** ${user.osmId}
 * **OSM-Name:** ${user.osmName || 'N/A'}
-* **OSM-Beschreibung:** ${user.osmDescription || 'N/A'}
+
+**OSM-Beschreibung**
+
+${osmDescriptionBlock}
+
 * **E-Mail:** ${user.email}
 * **Registrierungsdatum:** ${registrationDate}
 
@@ -79,7 +92,11 @@ const demoUser: User = {
   id: 'clx1234567890',
   osmId: 456789,
   osmName: 'Max Mustermann',
-  osmDescription: 'OpenStreetMap contributor since 2015',
+  osmDescription: `Dieser personenbezogene Account wird von FixMyCity verwendet, um Daten in OpenStreetMap zu mappen.
+
+Aktivitäten: Informationen zu den Aktivitäten sind unter [Organised Editing/Activities/Example](https://wiki.openstreetmap.org/wiki/Organised_Editing/Activities/Example) zu finden.
+
+Bei Fragen gerne per OSM-Nachricht kontaktieren.`,
   email: 'max.mustermann@example.com',
   createdAt: new Date('2024-01-15T10:30:00Z'),
 }

@@ -6,10 +6,10 @@ import {
 } from '../fixtures/auth'
 import { ADMIN_REDIRECT_SMOKE_ROUTE, ADMIN_ROUTES } from '../fixtures/routes'
 import {
+  type ConsoleMessage,
   collectConsoleErrors,
   expectNoConsoleErrors,
   filterAcceptableErrors,
-  type ConsoleMessage,
 } from '../utils/console'
 import { collectServerErrors, expectNoServerErrors } from '../utils/server'
 
@@ -89,7 +89,7 @@ test.describe('Admin access (non-admin and unauthenticated)', () => {
     const isSignInPage = pathname === '/api/sign-in/osm' || pathname === '/login'
     expect(isSignInPage, `Expected redirect to sign-in page, got ${pathname}`).toBe(true)
     if (pathname === '/api/sign-in/osm') {
-      expect(redirectedUrl.searchParams.get('callbackURL')).toBe(`${baseURL}/admin`)
+      expect(redirectedUrl.searchParams.get('callbackURL')).toBe('/admin')
     }
     await expectNoConsoleErrors(page)
     await expectNoServerErrors(page, serverErrors)

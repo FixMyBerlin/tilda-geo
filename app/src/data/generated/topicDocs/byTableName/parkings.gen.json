@@ -2,8 +2,8 @@
   "topic": "parking",
   "tableName": "parkings",
   "sourceIds": ["tilda_parkings"],
-  "title": "Parken",
-  "summary": "Die Haupttabelle für straßenseitiges Parken in Form von Liniengeometrien. Die Geometrien sind von OpenStreetMap Straßenabschnitten sowie separat erfassten Parkflächen abgeleitet.",
+  "title": "Straßenparken",
+  "summary": "Die Haupttabelle für straßenseitiges Parken in Form von Liniengeometrien. Die Geometrien sind von Straßenabschnitten sowie separat erfassten Straßenparken-Geometrien aus OpenStreetMap abgeleitet.",
   "groups": [
     {
       "id": "parking",
@@ -14,7 +14,8 @@
     {
       "key": "parking",
       "type": "string",
-      "label": "Parken",
+      "label": "Parkposition",
+      "description": "Lage oder Art des Parkraums im Straßenland.",
       "values": [
         {
           "value": "lane",
@@ -22,27 +23,27 @@
         },
         {
           "value": "half_on_kerb",
-          "label": "Halb auf dem Bürgersteig"
+          "label": "Halb auf dem Gehweg"
         },
         {
           "value": "on_kerb",
-          "label": "Auf dem Bürgersteig"
+          "label": "Ganz auf dem Gehweg"
         },
         {
           "value": "no_parking",
-          "label": "Parkverbot"
+          "label": "Eingeschränktes Haltverbot"
         },
         {
           "value": "no_stopping",
-          "label": "Halteverbot"
+          "label": "Absolutes Haltverbot"
         },
         {
           "value": "separate",
-          "label": "Parkplatz als separate Geometrie erfasst"
+          "label": "Parkraum als separate Geometrie erfasst"
         },
         {
           "value": "shoulder",
-          "label": "Seitenstreifen"
+          "label": "Auf dem Seitenstreifen"
         },
         {
           "value": "street_side",
@@ -50,15 +51,15 @@
         },
         {
           "value": "yes",
-          "label": "Parken (allgemein, OSM yes)"
+          "label": "Nicht näher bestimmtes Straßenparken"
         },
         {
           "value": "no",
-          "label": "Parken verboten (Sonstiger/Unbekannter Grund)"
+          "label": "Kein Parken (Sonstiger/Unbekannter Grund)"
         },
         {
           "value": "no_standing",
-          "label": "Stehverbot (OSM)"
+          "label": "Nur kurzes Halten erlaubt"
         },
         {
           "value": "missing",
@@ -73,7 +74,7 @@
     {
       "key": "capacity",
       "type": "number",
-      "label": "Kapazität",
+      "label": "Stellplatzanzahl",
       "description": "Geschätzte oder explizit erfasste Anzahl von Stellplätzen.",
       "chapterRefs": ["capacity-calculation"],
       "values": []
@@ -81,8 +82,8 @@
     {
       "key": "capacity_source",
       "type": "string",
-      "label": "Kapazitätsherkunft",
-      "description": "Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.",
+      "label": "Herkunft der Stellplatzanzahl",
+      "description": "Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.",
       "chapterRefs": ["capacity-calculation"],
       "values": [
         {
@@ -155,6 +156,7 @@
       "key": "orientation",
       "type": "string",
       "label": "Ausrichtung",
+      "description": "Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.",
       "values": [
         {
           "value": "parallel",
@@ -226,15 +228,15 @@
         },
         {
           "value": "no_parking",
-          "label": "Parkverbot / Eingeschränktes Haltverbot"
+          "label": "Eingeschränktes Haltverbot"
         },
         {
           "value": "no_standing",
-          "label": "Eingeschränktes Halteverbot"
+          "label": "Nur kurzes Halten erlaubt"
         },
         {
           "value": "no_stopping",
-          "label": "Halteverbot / Absolutes Haltverbot"
+          "label": "Absolutes Haltverbot"
         },
         {
           "value": "paid",
@@ -270,11 +272,12 @@
       "key": "staggered",
       "type": "string",
       "label": "Parkweise",
+      "description": "Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.",
       "values": [
         {
           "value": "yes",
           "label": "Alternierendes Parken",
-          "description": "Auf diesem Abschnitt gibt es keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickelt sich eine Konvention zwischen den Anwohnenden, in welchen Bereichen auf welcher Seite geparkt wird. In der Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt wird) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten.",
+          "description": "Auf diesem Abschnitt ist die Fahrbahn zu schmal, um auf beiden Seiten gleichzeitig zu parken. Es gibt keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickeln sich örtliche Konventionen, in welchen Bereichen auf welcher Seite geparkt wird. In die Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt werden kann) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten und können lediglich eine Schätzung des tatsächlichen Parkgeschehens abbilden.",
           "chapterRefs": ["capacity-calculation"]
         },
         {
@@ -287,7 +290,7 @@
       "key": "length",
       "type": "number",
       "label": "Länge",
-      "description": "Berechnete Segmentlänge des OSM-Straßenabschnitts. Für die Berechnung wird eine für Deutschland geeignete metrische Projektion verwendet.",
+      "description": "Berechnete Länge des Parkraumabschnitts in Metern. Für die Berechnung wird eine für Deutschland geeignete metrische Projektion verwendet.",
       "values": []
     },
     {
@@ -313,6 +316,7 @@
       "key": "source",
       "type": "string",
       "label": "Datenquelle",
+      "description": "Datenquelle der Parkraumgeometrie aus OpenStreetMap.",
       "values": [
         {
           "value": "parkings",
@@ -320,7 +324,7 @@
         },
         {
           "value": "separate_parking_areas",
-          "label": "Separat erfasste Flächedaten"
+          "label": "Separat erfasste Flächendaten"
         },
         {
           "value": "separate_parking_points",
@@ -332,7 +336,7 @@
       "key": "geom_sources",
       "type": "sanitized_strings",
       "label": "(Intern) OSM-IDs der Geometiren",
-      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.",
+      "description": "Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.",
       "values": []
     },
     {
@@ -346,6 +350,7 @@
       "key": "road",
       "type": "string",
       "label": "Straßentyp",
+      "description": "Art der Straße, an dem der Parkraum liegt.",
       "values": [
         {
           "value": "bicycle_road",
@@ -437,7 +442,7 @@
         },
         {
           "value": "service_uncategorized",
-          "label": "Zufahrtsweg (unbekannte Klassifisierung)"
+          "label": "Zufahrtsweg (unbekannte Klassifizierung)"
         },
         {
           "value": "service",
@@ -473,16 +478,18 @@
       "key": "road_name",
       "type": "sanitized_strings",
       "label": "Straßenname",
+      "description": "Name der Straße, an dem der Parkraum liegt.",
       "values": []
     },
     {
       "key": "road_oneway",
       "type": "string",
       "label": "Einbahnstraße",
+      "description": "Verkehrsrichtung der Straße, an dem der Parkraum liegt.",
       "values": [
         {
           "value": "no",
-          "label": "Beide Richtungen"
+          "label": "Nein (in beide Richtungen befahrbar)"
         },
         {
           "value": "yes",
@@ -490,20 +497,21 @@
         },
         {
           "value": "yes_dual_carriageway",
-          "label": "Einbahnstraße da separate Geometrie pro Seite"
+          "label": "Einbahnstraße (getrennte Richtungsfahrbahnen)"
         }
       ]
     },
     {
       "key": "road_width",
       "type": "number",
-      "label": "Straßenbreite",
+      "label": "Fahrbahnbreite",
+      "description": "Breite der Fahrbahn, an dem der Parkraum liegt.",
       "values": []
     },
     {
       "key": "road_width_source",
       "type": "string",
-      "label": "Straßenbreite Quelle",
+      "label": "Herkunft der Fahrbahnbreite",
       "values": [
         {
           "value": "highway_default",
@@ -522,7 +530,7 @@
     {
       "key": "road_width_confidence",
       "type": "string",
-      "label": "Konfidenz Straßenbreite",
+      "label": "Konfidenz der Fahrbahnbreite",
       "values": [
         {
           "value": "high",
@@ -541,7 +549,8 @@
     {
       "key": "side",
       "type": "string",
-      "label": "Seite relativ zur Fahrbahn",
+      "label": "Straßenseite",
+      "description": "Seite des Parkraums relativ zur Linienrichtung der OSM-Geometrie.",
       "values": [
         {
           "value": "left",
@@ -557,28 +566,28 @@
       "key": "area",
       "type": "number",
       "label": "Fläche",
-      "description": "Fläche in Metern",
+      "description": "Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.",
       "values": []
     },
     {
       "key": "area_source",
       "type": "string",
-      "label": "Flächenherkunft",
+      "label": "Herkunft der Flächenangabe",
       "values": [
         {
           "value": "estimated",
-          "label": "Berechnet auf Basis der Linien-Länge und Ausrichtung."
+          "label": "Berechnet auf Basis der Länge der Liniengeometrie und Fahrzeugausrichtung."
         },
         {
           "value": "geometry",
-          "label": "Basiert auf der Flächen aus OSM."
+          "label": "Basiert auf dem Flächeninhalt der Geometrie aus OSM."
         }
       ]
     },
     {
       "key": "area_confidence",
       "type": "string",
-      "label": "Konfidenz Fläche",
+      "label": "Konfidenz der Flächenangabe",
       "values": [
         {
           "value": "high",
@@ -597,7 +606,7 @@
     {
       "key": "capacity_confidence",
       "type": "string",
-      "label": "Konfidenz Kapazität",
+      "label": "Konfidenz der Stellplatzanzahl",
       "values": [
         {
           "value": "high",
@@ -617,6 +626,7 @@
       "key": "surface",
       "type": "string",
       "label": "Oberfläche",
+      "description": "Oberflächenbelag des Parkraumabschnitts.",
       "values": [
         {
           "value": "asphalt",
@@ -735,7 +745,7 @@
     {
       "key": "surface_confidence",
       "type": "string",
-      "label": "Konfidenz Oberfläche",
+      "label": "Konfidenz der Oberfläche",
       "values": [
         {
           "value": "high",
@@ -754,7 +764,7 @@
     {
       "key": "surface_source",
       "type": "string",
-      "label": "Oberflächenherkunft",
+      "label": "Herkunft der Oberfläche",
       "values": [
         {
           "value": "tag",
@@ -778,6 +788,7 @@
       "key": "direction",
       "type": "string",
       "label": "Einparkrichtung",
+      "description": "Vorgesehene oder ausgeschilderte Fahrzeugrichtung beim Einparken.",
       "values": [
         {
           "value": "back_in",
@@ -793,6 +804,7 @@
       "key": "location",
       "type": "string",
       "label": "Lage im Straßenraum",
+      "description": "Besondere Lagemerkmale des Parkraums im Straßenland.",
       "values": [
         {
           "value": "lane_centre",
@@ -857,7 +869,7 @@
         },
         {
           "value": "permissive",
-          "label": "Erlaubt"
+          "label": "Öffentliche Nutzung geduldet"
         },
         {
           "value": "public",
@@ -899,19 +911,19 @@
     {
       "key": "operator_type_source",
       "type": "string",
-      "label": "Betreibertyp-Herkunft",
+      "label": "Herkunft des Betreibertyps",
       "values": [
         {
           "value": "default_fallback",
-          "label": "Annahme bei fehlendem Tag."
+          "label": "Annahme bei fehlender Angabe."
         },
         {
           "value": "driveway_inference",
-          "label": "Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde."
+          "label": "Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde."
         },
         {
           "value": "manual_overwrite_list",
-          "label": "Anhand einer manuelle Korrektur-Liste in TILDA."
+          "label": "Anhand einer manuellen Korrekturliste in TILDA."
         },
         {
           "value": "parent_highway_tag",
@@ -926,7 +938,7 @@
     {
       "key": "operator_type_confidence",
       "type": "string",
-      "label": "Konfidenz Betreibertyp",
+      "label": "Konfidenz des Betreibertyps",
       "values": [
         {
           "value": "high",
@@ -957,13 +969,14 @@
       "key": "zone",
       "type": "sanitized_strings",
       "label": "Parkzone",
-      "description": "Entsprechend der lokalen Parkraumbewirtschaftung.",
+      "description": "Parkzonennummer oder -bezeichnung entsprechend der lokalen Parkraumbewirtschaftung bei Stellplätzen, die nur mit einem entsprechenden Parkrausweis genutzt werden dürfen. Sind (insbesondere an Zonengrenzen) mehrere Parkzonen berechtigt, sind diese üblicherweise als semikolongetrennte Liste aufgeführt.",
       "values": []
     },
     {
       "key": "reason",
       "type": "string",
       "label": "Grund",
+      "description": "Angabe eines Grundes bei Nicht-Parken.",
       "values": [
         {
           "value": "missing_data",
@@ -987,7 +1000,7 @@
         },
         {
           "value": "bus_stop",
-          "label": "Bushaltestelle / ÖPNV-Halt"
+          "label": "Haltestelle"
         },
         {
           "value": "cycleway",
@@ -995,7 +1008,7 @@
         },
         {
           "value": "dual_carriage",
-          "label": "Zweibahnig geteilte Fahrbahn"
+          "label": "Getrennte Richtungsfahrbahnen"
         },
         {
           "value": "junction",
@@ -1003,7 +1016,7 @@
         },
         {
           "value": "narrow",
-          "label": "Zu schmaler Straßenraum"
+          "label": "Zu schmale Fahrbahn"
         }
       ]
     },
@@ -1011,12 +1024,14 @@
       "key": "mapillary",
       "type": "sanitized_strings",
       "label": "Mapillary",
+      "description": "Mapillary-Foto-ID für dieses Feature.",
       "values": []
     },
     {
       "key": "traffic_sign",
       "type": "sanitized_strings",
       "label": "Verkehrszeichen",
+      "description": "Verkehrszeichennummer, mit der dieses Feature ausgeschildert ist.",
       "values": []
     },
     {

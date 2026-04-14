@@ -54,7 +54,7 @@
     "regions:masks:2format": "bun run format",
     "regions:masks:3upload": "bun --env-file=../.env ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=masks/",
     "regions:configs": "bun run --sequential regions:configs:*",
-    "regions:configs:1write": "bun src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/saveConfigs.ts",
+    "regions:configs:1write": "bun --env-file=../.env src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/saveConfigs.ts",
     "regions:configs:2format": "bun run format",
     "test": "vitest watch",
     "test-run": "vitest run --passWithNoTests",

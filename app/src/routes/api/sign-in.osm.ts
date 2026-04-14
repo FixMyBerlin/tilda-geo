@@ -6,6 +6,36 @@ const searchSchema = z.object({
   callbackURL: z.string().optional(),
 })
 
+function buildOAuthErrorRedirect(
+  requestUrl: string,
+  params: { error: string; error_description?: string },
+) {
+  const location = new URL('/oAuthError', requestUrl)
+  location.searchParams.set('error', params.error)
+  if (params.error_description) {
+    location.searchParams.set('error_description', params.error_description)
+  }
+  return location.toString()
+}
+
+function toSafeCallbackURL(rawCallbackURL: string | null, requestUrl: string) {
+  const fallback = '/'
+  if (!rawCallbackURL) return fallback
+
+  try {
+    const requestOrigin = new URL(requestUrl).origin
+    const normalized = new URL(rawCallbackURL, requestUrl)
+    // Only allow redirects back to this app origin.
+    if (normalized.origin !== requestOrigin) return fallback
+
+    // Better Auth validates callback targets against configured origins.
+    // Passing a relative app path avoids host/canonical-domain drift between environments.
+    return `${normalized.pathname}${normalized.search}${normalized.hash}`
+  } catch {
+    return fallback
+  }
+}
+
 export const Route = createFileRoute('/api/sign-in/osm')({
   ssr: true,
   validateSearch: (search) => searchSchema.parse(search),
@@ -13,7 +43,7 @@ export const Route = createFileRoute('/api/sign-in/osm')({
     handlers: {
       GET: async ({ request }) => {
         const searchParams = new URL(request.url).searchParams
-        const callbackURL = searchParams.get('callbackURL') || '/'
+        const callbackURL = toSafeCallbackURL(searchParams.get('callbackURL'), request.url)
 
         const authUrl = new URL('/api/auth/sign-in/oauth2', request.url)
         const authRequest = new Request(authUrl.toString(), {
@@ -24,7 +54,24 @@ export const Route = createFileRoute('/api/sign-in/osm')({
 
         try {
           const authResponse = await forwardAuthAndApplyCookies(authRequest)
-          const data = (await authResponse.json()) as { url?: string }
+          const data = (await authResponse.json().catch(() => null)) as {
+            url?: string
+            code?: string
+            message?: string
+          } | null
+
+          if (!authResponse.ok) {
+            return new Response(null, {
+              status: 302,
+              headers: {
+                Location: buildOAuthErrorRedirect(request.url, {
+                  error: data?.code ?? 'oauth_sign_in_failed',
+                  error_description:
+                    data?.message ?? 'Die Anmeldung konnte nicht gestartet werden.',
+                }),
+              },
+            })
+          }
 
           if (data?.url) {
             return new Response(null, {
@@ -35,13 +82,25 @@ export const Route = createFileRoute('/api/sign-in/osm')({
 
           return new Response(null, {
             status: 302,
-            headers: { Location: new URL('/', request.url).toString() },
+            headers: {
+              Location: buildOAuthErrorRedirect(request.url, {
+                error: 'oauth_sign_in_missing_redirect',
+                error_description:
+                  'Die Anmeldung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.',
+              }),
+            },
           })
         } catch (error) {
           console.error('Failed to initiate OAuth sign-in:', error)
           return new Response(null, {
             status: 302,
-            headers: { Location: new URL('/', request.url).toString() },
+            headers: {
+              Location: buildOAuthErrorRedirect(request.url, {
+                error: 'oauth_sign_in_exception',
+                error_description:
+                  'Die Anmeldung konnte wegen eines Serverfehlers nicht gestartet werden.',
+              }),
+            },
           })
         }
       },

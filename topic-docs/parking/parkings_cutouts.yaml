@@ -1,17 +1,16 @@
-title: Parkraum Stanzungen
+title: Parkraumstanzungen
 summary:
-  Stanzungen sind ein Kernbestandteil der Parkraum prozessierung. Mit ihnen werden die zu Beginn der Prozessierung gröber abgeleiteten Daten präzise Parkraum-Abschnitte abgeleitet. Stanzungen können bzum Beispiel Gehwegübergänge, Kreuzungen und Hindernisse wie Bäume oder Poller sein.
-  Polygon-Stanzungen entlang der Parkraum-Linien (Hindernisse, Kreuzungen, Einfahrten, ÖPNV-Haltestellen, externe eUVM-Daten).
-  Die Attribute beschreiben die Stanzung, nicht die Parklinie (`parkings`).
+  Stanzungen sind ein Kernbestandteil der Parkraumprozessierung. Mit ihnen werden aus den zu Beginn der Prozessierung groben Straßengeometrien präzise Parkraum-Abschnitte abgeleitet. Stanzungen können zum Beispiel Kreuzungen, Einfahrten, Bushaltestellen, Gehwegübergänge oder Hindernisse wie Bäume oder Poller sein. Solche Merkmale und Objekte im Straßenraum werden zu Stanzungsgeometrien umgewandelt und auf die Parkraumgeometrien angewendet.
+  Die Attribute beschreiben die Stanzung, nicht den Parkraum.
 sourceIds: [tilda_parkings_cutouts]
 attributes:
   - key: category
     label: Stanzungen
     values:
       - value: advertising
-        label: Werbungtabeln u.ä.
+        label: Werbeträger
       - value: barrier
-        label: Poller, Zaun, u.ä.
+        label: Barriere
       - value: bicycle_parking
         label: Fahrradparkplatz
       - value: bicycle_rental
@@ -29,15 +28,15 @@ attributes:
       - value: collision_protection
         label: Baumschutzbügel
       - value: crossing_buffer_marking
-        label: Markierung (Sperrfläche u.ä.) am Überweg
+        label: Markierung (Sperrfläche u.ä.) an Querungsstelle
       - value: crossing_kerb_extension
-        label: Gehwegvorstreckung am Überweg
+        label: Gehwegvorstreckung an Querungsstelle
       - value: crossing_marked
-        label: Markierter Überweg
+        label: Markierte Querungsstelle
       - value: crossing_traffic_signals
-        label: Ampelübergang
+        label: Ampelquerung
       - value: crossing_zebra
-        label: Zebrastreifen
+        label: Fußgängerüberweg (Zebrastreifen)
       - value: driveway
         label: Einfahrt
       - value: driveway_corner_kerb
@@ -49,9 +48,9 @@ attributes:
       - value: kerb_lowered
         label: Abgesenkter Bordstein
       - value: kerb_extension
-        label: Bordsteinverlängerung
+        label: Gehwegvorstreckung
       - value: loading_ramp
-        label: Laderampe
+        label: Transportüberweg
       - value: mobility_hub
         label: Mobilitätsstation
       - value: motorcycle_parking
@@ -65,7 +64,7 @@ attributes:
       - value: road_marking_restricted_area
         label: Sperrfläche (Markierung)
       - value: small_electric_vehicle_parking
-        label: Parkplatz für kleine Elektrofahrzeuge wie E-Scootern
+        label: Abstellfläche für Elektrokleinstfahrzeuge
       - value: street_cabinet
         label: Schaltkasten, Straßenkasten, u.ä.
       - value: street_lamp
@@ -83,7 +82,7 @@ attributes:
       - value: vending_parking_tickets
         label: Parkscheinautomat
       - value: water_well
-        label: Wasserstelle / Brunnen
+        label: Straßenbrunnen / Wasserstelle
 
   - key: source
     label: Datenquelle
@@ -116,10 +115,12 @@ attributes:
   - key: buffer_radius
     format: number
     label: Radius der Stanzung
+    description: Radius der Stanzung in Metern.
 
   - key: radius
     format: number
-    label: Pufferradius (m), u. a. Kreuzungs-Ecken und eUVM-Punkte
+    label: Pufferradius
+    description: Radius eines Puffers in Metern, u. a. an Kreuzungs-Ecken (Bordsteinschnittpunkte) und eUVM-Punkten.
 
   - key: side
     label: Seite relativ zur Fahrbahn
@@ -151,11 +152,11 @@ attributes:
 
   - key: amenity
     format: sanitized_strings
-    label: OSM amenity
+    label: OSM-Kategorie "amenity"
 
   - key: barrier
     format: sanitized_strings
-    label: OSM barrier
+    label: OSM-Kategorie "barrier"
 
   - key: capacity
     format: number
@@ -171,7 +172,7 @@ attributes:
 
   - key: emergency
     format: sanitized_strings
-    label: OSM emergency
+    label: OSM-Kategorie "emergency"
 
   - key: geom_sources
     label: Geometrie-Quellen
@@ -183,15 +184,15 @@ attributes:
 
   - key: kerb
     format: sanitized_strings
-    label: Bordstein (OSM kerb)
+    label: Bordstein (OSM-Kategorie "kerb")
 
   - key: landuse
     format: sanitized_strings
-    label: Flächennutzung (OSM landuse)
+    label: Flächennutzung (OSM-Kategorie "landuse")
 
   - key: man_made
     format: sanitized_strings
-    label: Künstliche Objekte (OSM man_made)
+    label: Künstliche Objekte (OSM-Kategorie "man_made")
 
   - key: name
     format: sanitized_strings
@@ -199,7 +200,7 @@ attributes:
 
   - key: natural
     format: sanitized_strings
-    label: Natur (OSM natural)
+    label: Natur (OSM-Kategorie "natural")
 
   - key: operator
     format: sanitized_strings
@@ -207,7 +208,7 @@ attributes:
 
   - key: ref
     format: sanitized_strings
-    label: Referenz (OSM ref)
+    label: Referenz (OSM-Kategorie "ref")
 
   - key: separate_parking
     format: sanitized_strings
@@ -219,7 +220,7 @@ attributes:
 
   - key: traffic_calming
     format: sanitized_strings
-    label: Verkehrsberuhigung (OSM traffic_calming)
+    label: Verkehrsberuhigung (OSM-Kategorie "traffic_calming")
 
   - key: 'osm_area:highway'
     format: ignore

@@ -1,33 +1,34 @@
-title: Parken
-summary: Die Haupttabelle für straßenseitiges Parken in Form von Liniengeometrien. Die Geometrien sind von OpenStreetMap Straßenabschnitten sowie separat erfassten Parkflächen abgeleitet.
+title: Straßenparken
+summary: Die Haupttabelle für straßenseitiges Parken in Form von Liniengeometrien. Die Geometrien sind von Straßenabschnitten sowie separat erfassten Straßenparken-Geometrien aus OpenStreetMap abgeleitet.
 sourceIds: [tilda_parkings]
 
 attributes:
   - key: parking
-    label: Parken
+    label: Parkposition
+    description: Lage oder Art des Parkraums im Straßenland.
     values:
       - value: lane
         label: Auf der Fahrbahn
       - value: half_on_kerb
-        label: Halb auf dem Bürgersteig
+        label: Halb auf dem Gehweg
       - value: on_kerb
-        label: Auf dem Bürgersteig
+        label: Ganz auf dem Gehweg
       - value: no_parking
-        label: Parkverbot
+        label: Eingeschränktes Haltverbot
       - value: no_stopping
-        label: Halteverbot
+        label: Absolutes Haltverbot
       - value: separate
-        label: Parkplatz als separate Geometrie erfasst
+        label: Parkraum als separate Geometrie erfasst
       - value: shoulder
-        label: Seitenstreifen
+        label: Auf dem Seitenstreifen
       - value: street_side
         label: Parkbucht
       - value: 'yes'
-        label: Parken (allgemein, OSM yes)
+        label: Nicht näher bestimmtes Straßenparken
       - value: 'no'
-        label: Parken verboten (Sonstiger/Unbekannter Grund)
+        label: Kein Parken (Sonstiger/Unbekannter Grund)
       - value: no_standing
-        label: Stehverbot (OSM)
+        label: Nur kurzes Halten erlaubt
       - value: missing
         label: Daten in OSM fehlen
       - value: not_expected
@@ -35,14 +36,14 @@ attributes:
 
   - key: capacity
     format: number
-    label: Kapazität
+    label: Stellplatzanzahl
     description: Geschätzte oder explizit erfasste Anzahl von Stellplätzen.
     chapterRefs:
       - chapterId: capacity-calculation
 
   - key: capacity_source
-    label: Kapazitätsherkunft
-    description: Herkunft des Kapazitätswerts inklusive Schätz- oder Umverteilungslogik.
+    label: Herkunft der Stellplatzanzahl
+    description: Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.
     chapterRefs:
       - chapterId: capacity-calculation
     values:
@@ -81,6 +82,7 @@ attributes:
 
   - key: orientation
     label: Ausrichtung
+    description: Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.
     values:
       - value: parallel
         label: Parallelparken
@@ -88,6 +90,7 @@ attributes:
         label: Querparken
       - value: diagonal
         label: Schrägparken
+
   - key: condition_category
     label: Parkbeschränkung
     chapterRefs:
@@ -118,11 +121,11 @@ attributes:
       - value: mixed
         label: Nur mit Parkschein oder Bewohnerparkausweis
       - value: no_parking
-        label: Parkverbot / Eingeschränktes Haltverbot
+        label: Eingeschränktes Haltverbot
       - value: no_standing
-        label: Eingeschränktes Halteverbot
+        label: Nur kurzes Halten erlaubt
       - value: no_stopping
-        label: Halteverbot / Absolutes Haltverbot
+        label: Absolutes Haltverbot
       - value: paid
         label: Nur mit Parkschein
       - value: private
@@ -140,19 +143,21 @@ attributes:
 
   - key: staggered
     label: Parkweise
+    description: Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.
     values:
       - value: 'yes'
         label: Alternierendes Parken
         description: >-
-          Auf diesem Abschnitt gibt es keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickelt sich eine Konvention zwischen den Anwohnenden, in welchen Bereichen auf welcher Seite geparkt wird. In der Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt wird) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten.
+          Auf diesem Abschnitt ist die Fahrbahn zu schmal, um auf beiden Seiten gleichzeitig zu parken. Es gibt keine Markierungen oder Schilder, die das Parken regeln. Häufig entwickeln sich örtliche Konventionen, in welchen Bereichen auf welcher Seite geparkt wird. In die Kapazitätsberechnung fließt das ein: Die Kapazität wird um 50% reduziert (da nur eine Seite genutzt werden kann) und zusätzlich wird für jeden 60m-Abschnitt ein Manövrierraumverlust von 10m (≈1,9 Fahrzeugplätze) abgezogen, da beim Seitenwechsel Manövrierraum benötigt wird. Diese Angaben basieren auf Erfahrungswerten und können lediglich eine Schätzung des tatsächlichen Parkgeschehens abbilden.
         chapterRefs:
           - chapterId: capacity-calculation
       - value: 'no'
         label: Nicht alternierend
+
   - key: length
     format: number
     label: Länge
-    description: Berechnete Segmentlänge des OSM-Straßenabschnitts. Für die Berechnung wird eine für Deutschland geeignete metrische Projektion verwendet.
+    description: Berechnete Länge des Parkraumabschnitts in Metern. Für die Berechnung wird eine für Deutschland geeignete metrische Projektion verwendet.
 
   - key: category
     label: Kategorie
@@ -166,18 +171,19 @@ attributes:
 
   - key: source
     label: Datenquelle
+    description: Datenquelle der Parkraumgeometrie aus OpenStreetMap.
     values:
       - value: parkings
         label: Angaben an der Straßenlinie
       - value: separate_parking_areas
-        label: Separat erfasste Flächedaten
+        label: Separat erfasste Flächendaten
       - value: separate_parking_points
         label: Separate erfasste Punktdaten
 
   - key: geom_sources
     format: sanitized_strings
     label: (Intern) OSM-IDs der Geometiren
-    description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die die für die Geometrie verwendeten wurden.
+    description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.
 
   - key: tag_sources
     format: sanitized_strings
@@ -186,6 +192,7 @@ attributes:
 
   - key: road
     label: Straßentyp
+    description: Art der Straße, an dem der Parkraum liegt.
     values:
       - value: bicycle_road
         label: Fahrradstraße
@@ -232,7 +239,7 @@ attributes:
       - value: service_road
         label: Zufahrtsweg
       - value: service_uncategorized
-        label: Zufahrtsweg (unbekannte Klassifisierung)
+        label: Zufahrtsweg (unbekannte Klassifizierung)
       - value: service
         label: Zufahrtsweg
       - value: steps
@@ -251,23 +258,26 @@ attributes:
   - key: road_name
     format: sanitized_strings
     label: Straßenname
+    description: Name der Straße, an dem der Parkraum liegt.
 
   - key: road_oneway
     label: Einbahnstraße
+    description: Verkehrsrichtung der Straße, an dem der Parkraum liegt.
     values:
       - value: 'no'
-        label: Beide Richtungen
+        label: Nein (in beide Richtungen befahrbar)
       - value: 'yes'
         label: Einbahnstraße
       - value: yes_dual_carriageway
-        label: Einbahnstraße da separate Geometrie pro Seite
+        label: Einbahnstraße (getrennte Richtungsfahrbahnen)
 
   - key: road_width
     format: number
-    label: Straßenbreite
+    label: Fahrbahnbreite
+    description: Breite der Fahrbahn, an dem der Parkraum liegt.
 
   - key: road_width_source
-    label: Straßenbreite Quelle
+    label: Herkunft der Fahrbahnbreite
     values:
       - value: highway_default
         label: Standard-Wert für diesen Straßentyp.
@@ -275,8 +285,9 @@ attributes:
         label: Standard-Wert für diesen Straßentyp als Einbahnstraße.
       - value: tag
         label: Dieser Wert ist in OSM hinterlegt.
+
   - key: road_width_confidence
-    label: Konfidenz Straßenbreite
+    label: Konfidenz der Fahrbahnbreite
     values:
       - value: high
         label: Hoch
@@ -284,8 +295,10 @@ attributes:
         label: Mittel
       - value: low
         label: Niedrig
+
   - key: side
-    label: Seite relativ zur Fahrbahn
+    label: Straßenseite
+    description: Seite des Parkraums relativ zur Linienrichtung der OSM-Geometrie.
     values:
       - value: left
         label: Links
@@ -295,18 +308,18 @@ attributes:
   - key: area
     format: number
     label: Fläche
-    description: Fläche in Metern
+    description: Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.
 
   - key: area_source
-    label: Flächenherkunft
+    label: Herkunft der Flächenangabe
     values:
       - value: estimated
-        label: Berechnet auf Basis der Linien-Länge und Ausrichtung.
+        label: Berechnet auf Basis der Länge der Liniengeometrie und Fahrzeugausrichtung.
       - value: geometry
-        label: Basiert auf der Flächen aus OSM.
+        label: Basiert auf dem Flächeninhalt der Geometrie aus OSM.
 
   - key: area_confidence
-    label: Konfidenz Fläche
+    label: Konfidenz der Flächenangabe
     values:
       - value: high
         label: Hoch
@@ -316,7 +329,7 @@ attributes:
         label: Niedrig
 
   - key: capacity_confidence
-    label: Konfidenz Kapazität
+    label: Konfidenz der Stellplatzanzahl
     values:
       - value: high
         label: Hoch
@@ -327,6 +340,7 @@ attributes:
 
   - key: surface
     label: Oberfläche
+    description: Oberflächenbelag des Parkraumabschnitts.
     values:
       - value: asphalt
         label: Asphalt
@@ -384,8 +398,9 @@ attributes:
         label: Gummi
       - value: grass_paver
         label: Rasengitter / Grasgitter
+
   - key: surface_confidence
-    label: Konfidenz Oberfläche
+    label: Konfidenz der Oberfläche
     values:
       - value: high
         label: Hoch
@@ -393,8 +408,9 @@ attributes:
         label: Mittel
       - value: low
         label: Niedrig
+
   - key: surface_source
-    label: Oberflächenherkunft
+    label: Herkunft der Oberfläche
     values:
       - value: tag
         label: Explizite Angabe aus OSM
@@ -404,20 +420,25 @@ attributes:
         label: Von zugeordneter Straße (OSM)
       - value: parent_highway_tag_transformed
         label: Von zugeordneter Straße, normalisiert
+
   - key: direction
     label: Einparkrichtung
+    description: Vorgesehene oder ausgeschilderte Fahrzeugrichtung beim Einparken.
     values:
       - value: back_in
         label: Rückwärts einparken
       - value: head_in
         label: Vorwärts einparken
+
   - key: location
     label: Lage im Straßenraum
+    description: Besondere Lagemerkmale des Parkraums im Straßenland.
     values:
       - value: lane_centre
         label: Fahrbahnmitte
       - value: median
         label: Mittelstreifen
+
   - key: markings
     label: Markierungen
     values:
@@ -425,6 +446,7 @@ attributes:
         label: Ohne Markierungen
       - value: 'yes'
         label: Mit Markierungen
+
   - key: covered
     label: Überdacht
     values:
@@ -432,6 +454,7 @@ attributes:
         label: Teilweise überdacht
       - value: 'yes'
         label: Überdacht
+
   - key: access
     label: Zugang
     values:
@@ -444,7 +467,7 @@ attributes:
       - value: employees
         label: Mitarbeiter
       - value: permissive
-        label: Erlaubt
+        label: Öffentliche Nutzung geduldet
       - value: public
         label: Öffentlich (explizit)
       - value: delivery
@@ -455,6 +478,7 @@ attributes:
         label: Mit Genehmigung
       - value: residents
         label: Nur mit Bewohnerparkausweis
+
   - key: operator_type
     label: Betreibertyp
     values:
@@ -464,21 +488,21 @@ attributes:
         label: Öffentlich
 
   - key: operator_type_source
-    label: Betreibertyp-Herkunft
+    label: Herkunft des Betreibertyps
     values:
       - value: default_fallback
-        label: Annahme bei fehlendem Tag.
+        label: Annahme bei fehlender Angabe.
       - value: driveway_inference
-        label: Annahme bei fehlendem Tag wenn eine Einfahrt erkannt wurde.
+        label: Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.
       - value: manual_overwrite_list
-        label: Anhand einer manuelle Korrektur-Liste in TILDA.
+        label: Anhand einer manuellen Korrekturliste in TILDA.
       - value: parent_highway_tag
         label: Explizite Angabe aus OSM an der zugeordneten Straße.
       - value: tag
         label: Explizite Angabe aus OSM.
 
   - key: operator_type_confidence
-    label: Konfidenz Betreibertyp
+    label: Konfidenz des Betreibertyps
     values:
       - value: high
         label: Hoch
@@ -496,10 +520,11 @@ attributes:
   - key: zone
     format: sanitized_strings
     label: Parkzone
-    description: Entsprechend der lokalen Parkraumbewirtschaftung.
+    description: Parkzonennummer oder -bezeichnung entsprechend der lokalen Parkraumbewirtschaftung bei Stellplätzen, die nur mit einem entsprechenden Parkrausweis genutzt werden dürfen. Sind (insbesondere an Zonengrenzen) mehrere Parkzonen berechtigt, sind diese üblicherweise als semikolongetrennte Liste aufgeführt.
 
   - key: reason
     label: Grund
+    description: Angabe eines Grundes bei Nicht-Parken.
     values:
       - value: missing_data
         label: Keine Parkraum-Daten in OpenStreetMap erfasst
@@ -512,23 +537,25 @@ attributes:
       - value: restriction_no_standing
         label: Eingeschränktes Halteverbot aus OSM
       - value: bus_stop
-        label: Bushaltestelle / ÖPNV-Halt
+        label: Haltestelle
       - value: cycleway
         label: Radverkehrsanlage
       - value: dual_carriage
-        label: Zweibahnig geteilte Fahrbahn
+        label: Getrennte Richtungsfahrbahnen
       - value: junction
         label: Knotenpunkt / Einmündung
       - value: narrow
-        label: Zu schmaler Straßenraum
+        label: Zu schmale Fahrbahn
 
   - key: mapillary
     format: sanitized_strings
     label: Mapillary
+    description: Mapillary-Foto-ID für dieses Feature.
 
   - key: traffic_sign
     format: sanitized_strings
     label: Verkehrszeichen
+    description: Verkehrszeichennummer, mit der dieses Feature ausgeschildert ist.
 
   - key: _staggered_maneuvering_loss
     format: number

@@ -406,7 +406,7 @@ export const _23nlzd: MapDataCategoryParam[] = [
           { id: 'pano', active: false },
         ],
       },
-      { id: 'mapillaryPlus', styles: [{ id: 'default', active: true }] },
+      { id: 'mapillaryPlus', styles: [{ id: 'default', active: false }] },
     ],
   },
   {
