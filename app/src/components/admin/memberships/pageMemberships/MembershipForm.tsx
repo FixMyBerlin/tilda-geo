@@ -89,10 +89,7 @@ export function MembershipForm({
       showFormErrors={false}
       defaultValues={{
         userId: initialValues?.userId ?? '',
-        regionId:
-          initialValues?.regionId != null && initialValues.regionId !== ''
-            ? String(Number(initialValues.regionId))
-            : '',
+        regionId: initialValues?.regionId ?? '',
       }}
       schema={MembershipSchema}
       onSubmit={async (values) => {

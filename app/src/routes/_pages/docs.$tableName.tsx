@@ -3,10 +3,11 @@ import { z } from 'zod'
 import { PageDocsTableName } from '@/components/pages/docs/PageDocsTableName'
 import { exportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { getMasterportalByTableName, getTopicDocByTableName } from '@/data/topicDocs/runtime'
+import { optionalSearchString } from '@/lib/searchParamsSchema'
 import { getRegionForDocsLoaderFn } from '@/server/api/docs.functions'
 
 const docsSearchSchema = z.object({
-  r: z.string().optional(),
+  r: optionalSearchString(),
 })
 
 export const Route = createFileRoute('/_pages/docs/$tableName')({

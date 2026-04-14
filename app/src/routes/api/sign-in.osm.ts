@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
+import { optionalSearchString } from '@/lib/searchParamsSchema'
 import { forwardAuthAndApplyCookies } from '@/server/auth/auth-route-handler.server'
 
 const searchSchema = z.object({
-  callbackURL: z.string().optional(),
+  callbackURL: optionalSearchString(),
 })
 
 function buildOAuthErrorRedirect(
