@@ -5,7 +5,7 @@ alwaysApply: false
 
 ## General
 
-- We use PostgreSQL with PostGIS 3.5 (Version specified in `/docker-compose.yml`, eg. `postgis/postgis:17-3.5`)
+- We use PostgreSQL with PostGIS 3.5 (Version specified in `/docker-compose.yml`, eg. `ghcr.io/baosystems/postgis:17-3.5` — multi-arch builds of upstream [postgis/docker-postgis](https://github.com/postgis/docker-postgis))
 - The schema `prisma` is managed by Prisma, see `app/prisma/schema.prisma`; this holds sensitive data.
   - Use `bun run migrate-create` to create a migration for changes to the schema.prisma.
 - The schema `public` is managed by `/processing` using osm2pgsql and custom .sql files; this data is recreated each night.

@@ -9,6 +9,7 @@ import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
+import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { deleteMembershipFn } from '@/server/memberships/memberships.functions'
 import type { UserWithMemberships } from '@/server/users/queries/getUsersAndMemberships.server'
 import { getFullname } from './utils/getFullname'
@@ -59,7 +60,7 @@ export const AdminMembershipsTable = ({ users }: Props) => {
                 <br />
                 {getFullname(user) || '–'}
                 <br />
-                {user.email || '–'}
+                {hasContactEmail(user.email) ? user.email : '–'}
                 <br />
                 {formatDate(user.createdAt)}{' '}
                 <span className="text-gray-400">({formatRelativeTime(user.createdAt)})</span>

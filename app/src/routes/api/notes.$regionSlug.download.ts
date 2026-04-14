@@ -2,6 +2,7 @@ import { Parser } from '@json2csv/plainjs'
 import { createFileRoute } from '@tanstack/react-router'
 import { featureCollection, point } from '@turf/turf'
 import { z } from 'zod'
+import { optionalSearchString } from '@/lib/searchParamsSchema'
 import type { Prisma } from '@/prisma/generated/client'
 import { badRequestJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
 import { guardRegionMembership } from '@/server/api/util/authGuards.server'
@@ -11,7 +12,7 @@ import db from '@/server/db.server'
 
 const notesDownloadSearchSchema = z.object({
   format: z.enum(['raw', 'points', 'csv', 'geojson']).default('geojson'),
-  apiKey: z.string().optional(),
+  apiKey: optionalSearchString(),
 })
 
 type NoteWithComments = Prisma.NoteGetPayload<{ include: { noteComments: true } }>

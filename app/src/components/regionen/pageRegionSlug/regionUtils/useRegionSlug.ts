@@ -6,5 +6,5 @@ export const useRegionSlug = () => {
   const regionSlug = params?.regionSlug
   invariant(regionSlug)
 
-  return regionSlug
+  return regionSlug as string
 }

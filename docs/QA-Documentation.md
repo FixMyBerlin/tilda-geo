@@ -34,7 +34,7 @@ The QA system uses a dual-status approach:
 - `OK_REFERENCE_ERROR` - User confirmed OK, caused by wrong reference data
 - `NOT_OK_DATA_ERROR` - User confirmed problem, current data needs fixing
 - `NOT_OK_PROCESSING_ERROR` - User confirmed problem, processing needs fixing
-- `OK_QA_TOOLING_ERROR` - Diff OK, caused by methodical error in QA tooling (geometries/definitions) (Purple)
+- `OK_QA_TOOLING_ERROR` - Diff OK, caused by methodical error in QA tooling (geometries/definitions) (Teal / distinct OK green in UI)
 
 **Priority Rules**:
 

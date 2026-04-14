@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  useMapBounds,
   useMapLoaded,
   useShowMapLoadingIndicator,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
@@ -17,14 +18,20 @@ type Props = {
 const buildCalculationSignature = (
   queryLayers: MapDataSourceCalculator['queryLayers'],
   drawAreas: DrawArea[],
-) => JSON.stringify({ queryLayers, drawAreas })
+  mapBounds: ReturnType<typeof useMapBounds>,
+) =>
+  JSON.stringify({
+    queryLayers,
+    drawAreas,
+    mapBounds: mapBounds?.toArray()?.flat(),
+  })
 
 export const CalculatorControls = ({ queryLayers }: Props) => {
   const { drawAreas, setDrawAreas } = useDrawSession()
   const { updateCalculation } = useUpdateCalculation()
+  const mapBounds = useMapBounds()
   const mapLoaded = useMapLoaded()
   const showMapLoadingIndicator = useShowMapLoadingIndicator()
-  const updateCalculationRef = useRef(updateCalculation)
   const lastCalculationSignatureRef = useRef<string | null>(null)
   const [drawMode, setDrawMode] = useState<CalculatorUrlDrawMode>(() =>
     drawAreas.length > 0 ? 'edit' : 'polygon',
@@ -32,8 +39,8 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
 
   const handleUserGeometry = (next: DrawArea[]) => {
     void setDrawAreas(next)
-    updateCalculationRef.current(queryLayers, next)
-    lastCalculationSignatureRef.current = buildCalculationSignature(queryLayers, next)
+    updateCalculation(queryLayers, next)
+    lastCalculationSignatureRef.current = buildCalculationSignature(queryLayers, next, mapBounds)
   }
 
   const handleUserDrawModeChange = (mode: CalculatorUrlDrawMode) => {
@@ -41,23 +48,16 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
   }
 
   useEffect(
-    function syncUpdateCalculationRef() {
-      updateCalculationRef.current = updateCalculation
-    },
-    [updateCalculation],
-  )
-
-  useEffect(
-    function updateCalculatorAfterMapInitialization() {
+    function updateCalculatorAfterMapStateChange() {
       if (!mapLoaded || showMapLoadingIndicator) return
 
-      const calculationSignature = buildCalculationSignature(queryLayers, drawAreas)
+      const calculationSignature = buildCalculationSignature(queryLayers, drawAreas, mapBounds)
       if (lastCalculationSignatureRef.current === calculationSignature) return
 
-      updateCalculationRef.current(queryLayers, drawAreas)
+      updateCalculation(queryLayers, drawAreas)
       lastCalculationSignatureRef.current = calculationSignature
     },
-    [mapLoaded, showMapLoadingIndicator, queryLayers, drawAreas],
+    [mapLoaded, showMapLoadingIndicator, queryLayers, drawAreas, mapBounds, updateCalculation],
   )
 
   return (

@@ -1,5 +1,6 @@
 /** Fragment ids for docs page sections (TOC + scroll targets). Keep in sync with headings/sections. */
 export const DOCS_PAGE_SECTION_IDS = {
+  regionAccess: 'region-access',
   downloads: 'downloads',
   attributtabelle: 'attributtabelle',
   masterportal: 'masterportal',

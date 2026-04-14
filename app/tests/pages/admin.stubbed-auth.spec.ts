@@ -14,20 +14,65 @@ import {
 import { collectServerErrors, expectNoServerErrors } from '../utils/server'
 
 test.describe('Admin Pages (stubbed login)', () => {
+  // Serial: stubbed sessions + Better Auth session updates hit the same DB; parallel runs
+  // occasionally caused P2025 (session row missing) and 500s on session routes.
+  test.describe.configure({ mode: 'serial' })
+
   for (const route of ADMIN_ROUTES) {
-    test(`should render ${route} without console or server errors`, async ({ page }, testInfo) => {
+    // Nested describe so each afterEach only runs for its route; otherwise Playwright runs
+    // every registered afterEach after every test and parallel workers delete each other's DB sessions.
+    test.describe(route, () => {
+      test.afterEach(async () => {
+        await cleanupStubbedSessionData('ADMIN', route)
+      })
+
+      test(`should render ${route} without console or server errors`, async ({
+        page,
+      }, testInfo) => {
+        const baseURL = testInfo.project.use.baseURL
+        if (typeof baseURL !== 'string') {
+          throw new Error('Playwright baseURL must be a string for stubbed login tests')
+        }
+
+        await createStubbedAdminSession(page, baseURL, { identityKey: route })
+
+        const consoleMessages = collectConsoleErrors(page)
+        const serverErrors = collectServerErrors(page, baseURL)
+
+        await page.goto(route)
+        await expect(page).toHaveURL(new RegExp(route.replace(/\//g, '\\/')))
+        await expect(page.locator('main').first()).toBeVisible()
+
+        const blockingConsoleErrors = filterAcceptableErrors(consoleMessages).filter(
+          (message: ConsoleMessage) => message.type === 'error',
+        )
+        if (blockingConsoleErrors.length > 0) {
+          throw new Error(
+            `Console errors found:\n${blockingConsoleErrors.map((message) => message.text).join('\n')}`,
+          )
+        }
+
+        await expectNoServerErrors(page, serverErrors)
+      })
+    })
+  }
+
+  test.describe('regions new (search params)', () => {
+    test('should render with optional slug query', async ({ page }, testInfo) => {
       const baseURL = testInfo.project.use.baseURL
       if (typeof baseURL !== 'string') {
         throw new Error('Playwright baseURL must be a string for stubbed login tests')
       }
 
-      await createStubbedAdminSession(page, baseURL, { identityKey: route })
+      await createStubbedAdminSession(page, baseURL, {
+        identityKey: 'admin-regions-new-slug',
+      })
 
       const consoleMessages = collectConsoleErrors(page)
       const serverErrors = collectServerErrors(page, baseURL)
 
-      await page.goto(route)
-      await expect(page).toHaveURL(new RegExp(route.replace(/\//g, '\\/')))
+      await page.goto('/admin/regions/new?slug=radinfra')
+      await expect(page).toHaveURL(/\/admin\/regions\/new/)
       await expect(page.locator('main').first()).toBeVisible()
 
       const blockingConsoleErrors = filterAcceptableErrors(consoleMessages).filter(
@@ -43,9 +88,44 @@ test.describe('Admin Pages (stubbed login)', () => {
     })
 
     test.afterEach(async () => {
-      await cleanupStubbedSessionData('ADMIN', route)
+      await cleanupStubbedSessionData('ADMIN', 'admin-regions-new-slug')
     })
-  }
+  })
+
+  test.describe('memberships new (search params)', () => {
+    test('should render with numeric userId query', async ({ page }, testInfo) => {
+      const baseURL = testInfo.project.use.baseURL
+      if (typeof baseURL !== 'string') {
+        throw new Error('Playwright baseURL must be a string for stubbed login tests')
+      }
+
+      await createStubbedAdminSession(page, baseURL, {
+        identityKey: 'admin-memberships-new-userid',
+      })
+
+      const consoleMessages = collectConsoleErrors(page)
+      const serverErrors = collectServerErrors(page, baseURL)
+
+      await page.goto('/admin/memberships/new?userId=1')
+      await expect(page).toHaveURL(/\/admin\/memberships\/new/)
+      await expect(page.locator('main').first()).toBeVisible()
+
+      const blockingConsoleErrors = filterAcceptableErrors(consoleMessages).filter(
+        (message: ConsoleMessage) => message.type === 'error',
+      )
+      if (blockingConsoleErrors.length > 0) {
+        throw new Error(
+          `Console errors found:\n${blockingConsoleErrors.map((message) => message.text).join('\n')}`,
+        )
+      }
+
+      await expectNoServerErrors(page, serverErrors)
+    })
+
+    test.afterEach(async () => {
+      await cleanupStubbedSessionData('ADMIN', 'admin-memberships-new-userid')
+    })
+  })
 })
 
 test.describe('Admin access (non-admin and unauthenticated)', () => {

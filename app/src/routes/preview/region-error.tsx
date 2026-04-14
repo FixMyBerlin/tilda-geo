@@ -2,9 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import RegionError from '@/components/regionen/pageRegionSlug/RegionError'
 import { DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG } from '@/dev/errorPreviews'
+import { optionalSearchString } from '@/lib/searchParamsSchema'
 
 const searchSchema = z.object({
-  regionSlug: z.string().optional(),
+  regionSlug: optionalSearchString(),
 })
 
 export const Route = createFileRoute('/preview/region-error')({

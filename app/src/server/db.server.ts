@@ -1,3 +1,4 @@
+import '@/lib/zodDeLocale'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@/prisma/generated/client'
 import { getBaseDatabaseUrl } from './database-url.server'

@@ -25,7 +25,6 @@ export type DocsPageMasterportal = TopicDocMasterportalGfiConfig | null
 
 export type DocsPageSummaryProps = {
   tableName: SourceExportApiIdentifier
-  region: DocsPageRegion
   groupDocs: Array<DocsPageGroupDoc>
   regionSlug: string | null
 }

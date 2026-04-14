@@ -1,4 +1,5 @@
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
+import { isOsmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { MarkdownMail } from './templates/MarkdownMail'
 import { getDomain } from './utils/getDomain'
 import { sendMail } from './utils/sendMail'
@@ -33,6 +34,9 @@ function buildMailContent(user: User) {
 
   const registrationDate = formatDateTimeBerlin(user.createdAt)
   const osmDescriptionBlock = formatOsmDescriptionAsBlockquote(user.osmDescription)
+  const emailLine = isOsmPlaceholderEmail(user.email)
+    ? 'noch nicht angegeben (nur OSM-Login-Platzhalter)'
+    : user.email
 
   const introMarkdown = `
 # Neue Benutzerregistrierung
@@ -47,7 +51,7 @@ function buildMailContent(user: User) {
 
 ${osmDescriptionBlock}
 
-* **E-Mail:** ${user.email}
+* **E-Mail:** ${emailLine}
 * **Registrierungsdatum:** ${registrationDate}
 
 ## Registrierungsdetails

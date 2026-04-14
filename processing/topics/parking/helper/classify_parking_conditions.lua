@@ -535,8 +535,8 @@ function classify_parking_conditions(tags, default_category)
           condition_class = add_condition_class(condition_class, 'bus_lane', cond)
         elseif bus_lane_cond then
           condition_class = add_condition_class(condition_class, 'bus_lane', bus_lane_cond)
-        else
-          -- Regular no_parking/standing/stopping
+        -- Regular no_parking/standing/stopping (except if it's because of a residential zone)
+        elseif not has_condition_class('residents') then
           condition_class = add_condition_class(condition_class, r, cond)
         end
       elseif not has_condition_class('vehicle_restriction') then -- In case of "double tagging": if there is a vehicle_restriction already, we don’t need to add it again
@@ -580,10 +580,10 @@ function classify_parking_conditions(tags, default_category)
       end
     end
     if no_vehicle and #no_vehicle > 0 then
-      condition_class = add_condition_class(condition_class, 'vehicle_restriction', 'no ' .. table.concat(no_vehicle, ', '))
+      condition_class = add_condition_class(condition_class, 'vehicle_restriction', 'except ' .. table.concat(no_vehicle, ', '))
     end
     if no_vehicle_cond and #no_vehicle_cond > 0 and vehicle_conditional then
-      condition_class = add_condition_class(condition_class, 'vehicle_restriction', 'no ' .. table.concat(no_vehicle_cond, ', ') .. ') (' ..  vehicle_conditional)
+      condition_class = add_condition_class(condition_class, 'vehicle_restriction', 'except ' .. table.concat(no_vehicle_cond, ', ') .. ') (' ..  vehicle_conditional)
     end
   end
 
