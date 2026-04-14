@@ -1,10 +1,10 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { Link } from '@/components/shared/links/Link'
 import { LinkMail } from '@/components/shared/links/LinkMail'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { PageDocsAttributesSection } from './pageDocsTableName/PageDocsAttributesSection'
 import { PageDocsChaptersSection } from './pageDocsTableName/PageDocsChaptersSection'
 import { PageDocsMasterportalSection } from './pageDocsTableName/PageDocsMasterportalSection'
+import { PageDocsRegionAccessSection } from './pageDocsTableName/PageDocsRegionAccessSection'
 import { PageDocsSummarySection } from './pageDocsTableName/PageDocsSummarySection'
 import { PageDocsTocSection } from './pageDocsTableName/PageDocsTocSection'
 
@@ -31,12 +31,15 @@ export function PageDocsTableName() {
         <Markdown markdown={topicDoc.summary} className="lead mt-2 mb-8 max-w-none text-gray-600" />
       ) : null}
 
-      <PageDocsSummarySection
-        tableName={tableName}
-        region={region}
-        groupDocs={groupDocs}
-        regionSlug={regionSlug}
-      />
+      <PageDocsSummarySection tableName={tableName} groupDocs={groupDocs} regionSlug={regionSlug} />
+
+      {region && regionSlug ? (
+        <PageDocsRegionAccessSection
+          region={region}
+          regionSlug={regionSlug}
+          tableName={tableName}
+        />
+      ) : null}
 
       {!topicDoc && (
         <p>
@@ -61,14 +64,6 @@ export function PageDocsTableName() {
           <PageDocsMasterportalSection masterportal={masterportal} />
           <PageDocsChaptersSection topicDoc={topicDoc} />
         </>
-      )}
-
-      {regionSlug && (
-        <p>
-          <Link to="/regionen/$regionSlug" params={{ regionSlug }} button>
-            Zur Region
-          </Link>
-        </p>
       )}
     </>
   )

@@ -47,7 +47,7 @@ export const Route = createFileRoute('/_pages/docs/$tableName')({
       masterportal,
       groupDocs,
       region,
-      regionSlug: deps.r ?? null,
+      regionSlug: region ? (deps.r ?? null) : null,
     }
   },
   head: ({ loaderData }) => {

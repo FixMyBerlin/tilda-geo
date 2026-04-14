@@ -6,14 +6,9 @@ import {
   getSourceData,
 } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { Link } from '@/components/shared/links/Link'
-import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
 import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
-import type { Formats } from '@/server/api/export/ogrFormats.const'
-import { ogrFormats } from '@/server/api/export/ogrFormats.const'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
-
-const downloadFormatLinkClasses =
-  'min-w-28 w-max flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-left shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500'
+import { downloadFormatLinkClasses, OgrFormatDownloadLinks } from './OgrFormatDownloadLinks'
 
 const docsLinkClassesWithStructuredDocs =
   'min-w-28 w-max flex-none rounded-md border border-purple-800 bg-purple-700 px-3 py-2 text-left shadow-md no-underline hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1'
@@ -66,6 +61,7 @@ export const DownloadModalDownloadList = () => {
               <Link
                 to="/docs/$tableName"
                 params={{ tableName: exportData.id }}
+                search={{ r: regionSlug }}
                 classNameOverwrite={
                   hasStructuredDocs ? docsLinkClassesWithStructuredDocs : downloadFormatLinkClasses
                 }
@@ -81,24 +77,11 @@ export const DownloadModalDownloadList = () => {
                   Dokumentation
                 </span>
               </Link>
-              {Object.entries(ogrFormats).map(([param, format]) => {
-                return (
-                  <Link
-                    key={param}
-                    href={getExportOgrApiBboxUrl(regionSlug, exportData.id, bbox, param as Formats)}
-                    classNameOverwrite={downloadFormatLinkClasses}
-                    download
-                    blank
-                  >
-                    <strong className="mb-0.5 block text-xs font-medium text-gray-500">
-                      Download
-                    </strong>
-                    <span className="block border-0 p-0 font-mono text-gray-900 focus:ring-0 sm:text-sm">
-                      {format.driver}
-                    </span>
-                  </Link>
-                )
-              })}
+              <OgrFormatDownloadLinks
+                regionSlug={regionSlug}
+                tableName={exportData.id}
+                bbox={bbox}
+              />
             </div>
           </li>
         )

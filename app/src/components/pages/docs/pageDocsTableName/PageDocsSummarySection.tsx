@@ -1,18 +1,13 @@
 import { CopyButton } from '@/components/shared/CopyButton'
 import { Link } from '@/components/shared/links/Link'
-import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
 import {
   TILDA_DATASET_ATTRIBUTION_HTML,
   TILDA_DATASET_LICENSE,
 } from '@/data/topicDocs/topicDocsDatasetAttribution.const'
-import type { Formats } from '@/server/api/export/ogrFormats.const'
-import { ogrFormats } from '@/server/api/export/ogrFormats.const'
-import { DOCS_PAGE_SECTION_H2_CLASSNAME, DOCS_PAGE_SECTION_IDS } from './docsSectionIds.const'
 import type { DocsPageSummaryProps } from './types'
 
 export const PageDocsSummarySection = ({
   tableName,
-  region,
   groupDocs,
   regionSlug,
 }: DocsPageSummaryProps) => {
@@ -92,30 +87,6 @@ export const PageDocsSummarySection = ({
           ) : null}
         </tbody>
       </table>
-
-      {region?.bbox && (
-        <>
-          <h2 className={DOCS_PAGE_SECTION_H2_CLASSNAME} id={DOCS_PAGE_SECTION_IDS.downloads}>
-            Downloads
-          </h2>
-          <div className="not-prose flex flex-wrap gap-2 print:hidden">
-            {Object.entries(ogrFormats).map(([param, format]) => (
-              <Link
-                key={param}
-                href={getExportOgrApiBboxUrl(region.slug, tableName, region.bbox, param as Formats)}
-                classNameOverwrite="w-28 flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
-                download
-                blank
-              >
-                <strong className="mb-0.5 block text-xs font-medium text-gray-500">Download</strong>
-                <span className="block w-full border-0 p-0 font-mono text-gray-900 focus:ring-0 sm:text-sm">
-                  {format.driver}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
     </section>
   )
 }
