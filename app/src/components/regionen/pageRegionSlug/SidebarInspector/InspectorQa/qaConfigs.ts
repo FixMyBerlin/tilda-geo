@@ -20,7 +20,7 @@ export const QA_USER_STATUS_COLORS = {
   OK_REFERENCE_ERROR: '#009E73', // Green - user confirmed OK
   NOT_OK_DATA_ERROR: '#D55E00', // Red - user confirmed problem
   NOT_OK_PROCESSING_ERROR: '#D55E00', // Red - user confirmed problem
-  OK_QA_TOOLING_ERROR: '#9333EA', // Purple - methodical error in QA tooling (geometries/definitions)
+  OK_QA_TOOLING_ERROR: '#0d9488', // Tailwind teal-600 — OK, distinct from other OK greens
 } as const satisfies Record<QaEvaluationStatus, `#${string}`>
 
 // System status to letter mapping for optimization
@@ -107,7 +107,7 @@ export const userStatusConfig = {
   },
   OK_QA_TOOLING_ERROR: {
     label: 'OK (QA-Tooling-Fehler)',
-    color: 'text-purple-600',
+    color: 'text-teal-600',
     hexColor: QA_USER_STATUS_COLORS.OK_QA_TOOLING_ERROR,
   },
 } as const satisfies Record<QaEvaluationStatus, object>
