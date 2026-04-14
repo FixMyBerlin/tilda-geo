@@ -1,8 +1,15 @@
 import { ArrowUpIcon, TrashIcon } from '@heroicons/react/20/solid'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import bbox from '@turf/bbox'
+import { featureCollection } from '@turf/helpers'
 import { useMemo, useState } from 'react'
 import { IntlProvider } from 'react-intl'
+import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
-import { useMapCalculatorAreasWithFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import {
+  useMapBounds,
+  useMapCalculatorAreasWithFeatures,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
@@ -12,6 +19,7 @@ import {
   calculateMetricSummaryForAreas,
   calculatorMetricOrder,
 } from './utils/calculateMetricSummaries'
+import { isDrawAreaFullyInViewport } from './utils/isDrawAreaFullyInViewport'
 import { useUpdateCalculation } from './utils/useUpdateCalculation'
 
 type Props = {
@@ -39,7 +47,9 @@ export const CalculatorOutput = ({
   queryLayers,
   subcategoryName,
 }: Props) => {
+  const { mainMap } = useMap()
   const calculatorAreasWithFeatures = useMapCalculatorAreasWithFeatures()
+  const mapBounds = useMapBounds()
   const displayName = subcategoryName?.replace(/^Summieren: /, '')
 
   const { drawAreas, setDrawAreas } = useDrawSession()
@@ -74,10 +84,29 @@ export const CalculatorOutput = ({
     })
   }, [calculatorAreasWithFeatures, groupByKeys, selectedMetric])
 
+  const showViewportWarning = useMemo(
+    () =>
+      drawAreas.length > 0 && drawAreas.some((area) => !isDrawAreaFullyInViewport(area, mapBounds)),
+    [drawAreas, mapBounds],
+  )
+
   const handleDelete = (key: string) => {
     const next = drawAreas.filter((a) => a.id !== key)
     void setDrawAreas(next)
     updateCalculation(queryLayers, next)
+  }
+
+  const handleShowArea = () => {
+    if (!mainMap || drawAreas.length === 0) return
+
+    const [minLng, minLat, maxLng, maxLat] = bbox(featureCollection(drawAreas))
+    mainMap.fitBounds(
+      [
+        [minLng, minLat],
+        [maxLng, maxLat],
+      ],
+      { duration: 900, padding: { top: 110, right: 40, bottom: 40, left: 320 } },
+    )
   }
 
   return (
@@ -97,6 +126,28 @@ export const CalculatorOutput = ({
                 </p>
               )}
             </div>
+
+            {showViewportWarning && (
+              <div className="rounded border border-fuchsia-200 bg-white px-2 py-1.5 text-[0.66rem] leading-tight text-fuchsia-800">
+                <div className="flex items-start gap-1.5">
+                  <ExclamationTriangleIcon className="mt-0.5 size-3.5 shrink-0 text-fuchsia-700" />
+                  <p>
+                    Die Berechnung basiert auf sichtbaren Kartendaten. Bitte stellen Sie sicher,
+                    dass die gesamte Fläche sichtbar ist, um genaue Ergebnisse zu erhalten.
+                  </p>
+                </div>
+                <div className="mt-1.5 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleShowArea}
+                    aria-label="Gesamte Zeichenfläche in der Karte anzeigen"
+                    className="rounded border border-fuchsia-300 px-1.5 py-0.5 text-[0.62rem] font-semibold text-fuchsia-800 hover:bg-fuchsia-50"
+                  >
+                    Fläche anzeigen
+                  </button>
+                </div>
+              </div>
+            )}
 
             {orderedConfiguredMetrics.length > 0 && (
               <div
