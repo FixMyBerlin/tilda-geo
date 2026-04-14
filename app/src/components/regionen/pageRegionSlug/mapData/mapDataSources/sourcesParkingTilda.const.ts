@@ -102,7 +102,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     calculator: {
       enabled: true,
       sumKeys: { capacity: 'Stellplätze', area: 'Fläche m²' },
-      groupByKeys: ['parking', 'operator_type', 'orientation', 'surface'],
+      groupByKeys: ['parking', 'operator_type', 'orientation', 'surface', 'condition_category'],
       queryLayers: [
         'source:tilda_parkings_quantized--subcat:parkingTildaQuantized--style:default--layer:parking-points',
       ],
@@ -127,7 +127,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     calculator: {
       enabled: true,
       sumKeys: { capacity: 'Stellplätze', area: 'Fläche m²' },
-      groupByKeys: ['parking', 'operator_type', 'access'],
+      groupByKeys: ['parking', 'operator_type', 'access', 'condition_category'],
       queryLayers: [
         'source:tilda_parkings_off_street_quantized--subcat:parkingTildaQuantizedOffStreet--style:default--layer:parking-points',
       ],

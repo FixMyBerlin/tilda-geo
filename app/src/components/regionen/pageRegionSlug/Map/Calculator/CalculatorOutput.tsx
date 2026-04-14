@@ -84,14 +84,8 @@ export const CalculatorOutput = ({
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
       <section
         className={twJoin(
-          'absolute z-1000 flex min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl',
+          'absolute top-[75px] left-[270px] z-1000 flex min-h-[65px] max-w-[min(100%,260px)] min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl',
         )}
-        style={{
-          left: '270px',
-          top: '75px',
-          minHeight: '65px',
-          maxWidth: '360px',
-        }}
       >
         {calculatorAreasWithFeatures.length ? (
           <div className="min-w-0 space-y-2 text-xs leading-tight">
@@ -194,20 +188,24 @@ export const CalculatorOutput = ({
                     {areaSummary.groups.map((group) => (
                       <div key={group.key} className="mb-1 last:mb-0">
                         <div className="text-[0.68rem] font-semibold">
-                          <span>
-                            {sourceId ? (
-                              <ConditionalFormattedKey sourceId={sourceId} tagKey={group.key} />
-                            ) : (
-                              group.key
-                            )}
-                          </span>
+                          {sourceId ? (
+                            <ConditionalFormattedKey sourceId={sourceId} tagKey={group.key} />
+                          ) : (
+                            group.key
+                          )}
                         </div>
                         {group.values.map((groupValue) => (
                           <div
                             key={`${group.key}::${groupValue.value}`}
-                            className="flex justify-between gap-2 pl-2 text-[0.64rem] text-white/90 tabular-nums"
+                            className={twJoin(
+                              '-mr-1 flex min-w-0 justify-between gap-2 rounded-sm py-0.5 pr-1 pl-2 text-[0.64rem] text-white/90 tabular-nums',
+                              'transition-colors hover:bg-white/10',
+                            )}
                           >
-                            <span>
+                            <span
+                              className="min-w-0 flex-1 truncate [&_span]:truncate"
+                              title={groupValue.value.length > 20 ? groupValue.value : undefined}
+                            >
                               {sourceId ? (
                                 <ConditionalFormattedValue
                                   sourceId={sourceId}
