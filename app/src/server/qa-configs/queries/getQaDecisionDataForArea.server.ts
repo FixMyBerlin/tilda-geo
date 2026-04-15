@@ -10,12 +10,14 @@ const Schema = z.object({
   regionSlug: z.string(),
 })
 
-export type QaDecisionData = {
-  relative: number | null
-  referenceCount: number | null
-  currentCount: number | null
-  absoluteChange: number | null
-}
+const QaDecisionDataResultSchema = z.object({
+  relative: z.coerce.number().nullable(),
+  referenceCount: z.coerce.number().nullable(),
+  currentCount: z.coerce.number().nullable(),
+  absoluteChange: z.coerce.number().nullable(),
+})
+
+export type QaDecisionData = z.infer<typeof QaDecisionDataResultSchema>
 
 export async function getQaDecisionDataForArea(input: z.infer<typeof Schema>, headers: Headers) {
   const appSession = await getAppSession(headers)
@@ -68,10 +70,5 @@ export async function getQaDecisionDataForArea(input: z.infer<typeof Schema>, he
     return null
   }
 
-  return {
-    relative: data.relative,
-    referenceCount: data.referenceCount,
-    currentCount: data.currentCount,
-    absoluteChange: data.absoluteChange,
-  } as QaDecisionData
+  return QaDecisionDataResultSchema.parse(data)
 }
