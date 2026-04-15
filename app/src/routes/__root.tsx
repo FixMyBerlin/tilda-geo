@@ -33,6 +33,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { property: 'og:description', content: APP_META.description },
       { property: 'og:type', content: 'website' },
       { property: 'og:locale', content: 'de_DE' },
+      { property: 'og:image', content: `${import.meta.env.VITE_APP_ORIGIN}/og-image.png` },
+      { property: 'og:url', content: import.meta.env.VITE_APP_ORIGIN },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:creator', content: '@fixmyberlin' },
       ...(import.meta.env.VITE_APP_ENV !== 'production'
