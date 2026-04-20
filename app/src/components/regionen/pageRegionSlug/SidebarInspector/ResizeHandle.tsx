@@ -10,14 +10,14 @@ export const ResizeHandle = forwardRef<HTMLDivElement, Props>(
     return (
       <div
         ref={ref}
-        className="fixed top-0 bottom-0 z-30 w-1 cursor-col-resize hover:bg-purple-500 transition-colors duration-150"
+        className="fixed top-0 bottom-0 z-30 w-1 cursor-col-resize transition-colors duration-150 hover:bg-purple-500"
         style={{ right: `${inspectorWidth - 1}px` }}
         onMouseDown={onResizeStart}
         role="separator"
         aria-orientation="vertical"
         aria-label="Größe der Sidebar ändern"
       >
-        <div className="absolute left-0 top-0 bottom-0 w-3 -translate-x-1" />
+        <div className="absolute top-0 bottom-0 left-0 w-3 -translate-x-1" />
       </div>
     )
   },
