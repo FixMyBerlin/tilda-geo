@@ -1,12 +1,12 @@
-describe('load_csv', function()
+describe('load_csv_mapillary', function()
   require('init')
   require('Log')
   require('TableSize')
-  local load_csv = require('load_csv')
+  local load_csv_mapillary = require('load_csv_mapillary')
   local pl = require('pl.tablex')
 
-  local test_csv = '/processing/topics/helper/pseudo_tags/__tests__/test_mapillary_coverage.csv'
-  local data = load_csv(test_csv)
+  local test_csv = '/processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/__tests__/test_mapillary_coverage.csv'
+  local data = load_csv_mapillary(test_csv)
   local lines = data:get()
 
   it('returns the csv as table', function()

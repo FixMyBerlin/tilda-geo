@@ -32,6 +32,7 @@ local transform_cycleway_both_postfix = require('transform_cycleway_both_postfix
 local transform_cycleway_opposite_schema = require('transform_cycleway_opposite_schema')
 local transform_highway_path_with_foot_or_bicycle_no = require('transform_highway_path_with_foot_or_bicycle_no')
 local transform_lifecycle_tags = require('transform_lifecycle_tags')
+local roads_bikelanes_sidepath_source_paths = require('roads_bikelanes_sidepath_source_paths')
 local round = require('round')
 local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
 local mapillary_coverage = require('mapillary_coverage')
@@ -275,6 +276,9 @@ function osm2pgsql.process_way(object)
   transform_highway_path_with_foot_or_bicycle_no(object_tags)
   -- Now we have to re-apply the road classification based on the transformed object_tags; we should refactor this…
   road_result_tags.road = RoadClassificationRoadValue(object_tags)
+
+  -- Keep a dedicated minimal source table for sidepath estimation input.
+  roads_bikelanes_sidepath_source_paths(object, object_tags)
 
 
   -- === Exit processing ===
