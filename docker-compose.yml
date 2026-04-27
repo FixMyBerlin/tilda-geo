@@ -85,7 +85,7 @@ services:
       tiles:
         condition: service_started
   tiles:
-    image: ghcr.io/maplibre/martin:1.6.0
+    image: ghcr.io/maplibre/martin:1.7.0
     container_name: tiles
     command: ["--config", "/config.yaml"]
     restart: unless-stopped
