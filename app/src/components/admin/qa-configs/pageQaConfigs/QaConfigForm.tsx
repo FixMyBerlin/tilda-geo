@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { z } from 'zod'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { Select } from '@/components/shared/form/fields/Select'
@@ -31,6 +32,7 @@ type QaConfigFormBaseValues = {
 }
 
 type QaConfigFormProps<TSchema extends z.ZodTypeAny> = {
+  actionBarRight?: ReactNode
   schema: TSchema
   defaultValues: z.infer<TSchema> extends { id?: number }
     ? QaConfigFormBaseValues & { id?: number }
@@ -41,6 +43,7 @@ type QaConfigFormProps<TSchema extends z.ZodTypeAny> = {
 }
 
 export function QaConfigForm<TSchema extends z.ZodTypeAny>({
+  actionBarRight,
   schema,
   defaultValues,
   onSubmit,
@@ -51,6 +54,7 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
 
   return (
     <Form
+      actionBarRight={actionBarRight}
       defaultValues={defaultValues as z.input<TSchema>}
       schema={schema}
       onSubmit={async (values) => {

@@ -1,7 +1,9 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { QaConfigFormWrapper } from './pageQaConfigs/QaConfigFormWrapper'
+import { createQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
+import { CreateQaConfigFormSchema } from '@/server/qa-configs/schemas'
+import { QaConfigForm, QaConfigFormInputSchema } from './pageQaConfigs/QaConfigForm'
 
 const routeApi = getRouteApi('/admin/qa-configs/new')
 
@@ -19,7 +21,23 @@ export function PageQaConfigsNew() {
         />
       </HeaderWrapper>
 
-      <QaConfigFormWrapper regions={regions} />
+      <QaConfigForm
+        schema={CreateQaConfigFormSchema}
+        defaultValues={{
+          slug: QaConfigFormInputSchema.slug,
+          label: QaConfigFormInputSchema.label,
+          isActive: QaConfigFormInputSchema.isActive,
+          mapTable: QaConfigFormInputSchema.mapTable,
+          mapAttribution: QaConfigFormInputSchema.mapAttribution,
+          goodThreshold: QaConfigFormInputSchema.goodThreshold,
+          needsReviewThreshold: QaConfigFormInputSchema.needsReviewThreshold,
+          absoluteDifferenceThreshold: QaConfigFormInputSchema.absoluteDifferenceThreshold,
+          regionId: QaConfigFormInputSchema.regionId,
+        }}
+        submitLabel="QA Konfiguration erstellen"
+        regions={regions}
+        onSubmit={async (values) => createQaConfigFn({ data: values })}
+      />
     </>
   )
 }
