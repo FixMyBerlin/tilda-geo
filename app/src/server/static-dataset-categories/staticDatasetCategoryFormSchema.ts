@@ -10,7 +10,7 @@ const sortOrderAsString = z
   .min(1, 'Sortierung erforderlich')
   .refine((s) => Number.isFinite(Number.parseFloat(s.replace(',', '.'))), 'Ungültige Sortierung')
 
-export const staticDatasetCategoryCreateFormSchema = z
+const staticDatasetCategoryFormBodySchema = z
   .object({
     groupKey: staticDatasetCategorySegmentSchema,
     categoryKey: staticDatasetCategorySegmentSchema,
@@ -29,17 +29,10 @@ export const staticDatasetCategoryCreateFormSchema = z
     }
   })
 
-export const staticDatasetCategoryEditFormSchema = z.object({
-  groupKey: z.string().min(1),
-  categoryKey: z.string().min(1),
-  sortOrder: sortOrderAsString,
-  title: z.string().min(1).max(STATIC_DATASET_CATEGORY_TITLE_MAX),
-  subtitle: z.string().max(STATIC_DATASET_CATEGORY_SUBTITLE_MAX),
-})
+export const staticDatasetCategoryCreateFormSchema = staticDatasetCategoryFormBodySchema
+export const staticDatasetCategoryEditFormSchema = staticDatasetCategoryFormBodySchema
 
-export type StaticDatasetCategoryCreateFormValues = z.infer<
-  typeof staticDatasetCategoryCreateFormSchema
->
-export type StaticDatasetCategoryEditFormValues = z.infer<
-  typeof staticDatasetCategoryEditFormSchema
->
+type StaticDatasetCategoryFormBodyValues = z.infer<typeof staticDatasetCategoryFormBodySchema>
+
+export type StaticDatasetCategoryCreateFormValues = StaticDatasetCategoryFormBodyValues
+export type StaticDatasetCategoryEditFormValues = StaticDatasetCategoryFormBodyValues

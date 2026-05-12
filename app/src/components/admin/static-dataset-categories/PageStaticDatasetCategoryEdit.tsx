@@ -7,7 +7,10 @@ import {
   updateStaticDatasetCategoryFn,
 } from '@/server/static-dataset-categories/staticDatasetCategories.functions'
 import { staticDatasetCategoryEditFormSchema } from '@/server/static-dataset-categories/staticDatasetCategoryFormSchema'
-import { StaticDatasetCategoryForm } from './StaticDatasetCategoryForm'
+import {
+  StaticDatasetCategoryForm,
+  staticDatasetCategoryEditSubmitResult,
+} from './StaticDatasetCategoryForm'
 
 const routeApi = getRouteApi('/admin/static-dataset-categories/$categoryKey')
 
@@ -69,18 +72,51 @@ export function PageStaticDatasetCategoryEdit() {
           isDeleting={isDeleting}
           onSubmit={async (values) => {
             const sort = Number.parseFloat(values.sortOrder.replace(',', '.'))
+            const newKey = `${values.groupKey}/${values.categoryKey}`
             try {
-              await updateStaticDatasetCategoryFn({
+              const result = await updateStaticDatasetCategoryFn({
                 data: {
                   key: category.key,
+                  groupKey: values.groupKey,
+                  categoryKey: values.categoryKey,
                   sortOrder: sort,
                   title: values.title,
                   subtitle: values.subtitle.trim() === '' ? null : values.subtitle,
                 },
               })
-              return { success: true, message: '', errors: {} }
+              if (!result.ok) {
+                if (result.error === 'duplicate_key') {
+                  return staticDatasetCategoryEditSubmitResult({
+                    success: false,
+                    message: 'Dieser Kategorie-Schlüssel ist bereits vergeben.',
+                    errors: { categoryKey: ['Schlüssel existiert bereits.'] },
+                  })
+                }
+                return staticDatasetCategoryEditSubmitResult({
+                  success: false,
+                  message: 'Speichern fehlgeschlagen.',
+                  errors: {},
+                })
+              }
+              if (newKey !== category.key) {
+                return staticDatasetCategoryEditSubmitResult({
+                  success: true,
+                  message: '',
+                  errors: {},
+                  navigateToCategoryKey: newKey,
+                })
+              }
+              return staticDatasetCategoryEditSubmitResult({
+                success: true,
+                message: '',
+                errors: {},
+              })
             } catch {
-              return { success: false, message: 'Speichern fehlgeschlagen.', errors: {} }
+              return staticDatasetCategoryEditSubmitResult({
+                success: false,
+                message: 'Speichern fehlgeschlagen.',
+                errors: {},
+              })
             }
           }}
         />

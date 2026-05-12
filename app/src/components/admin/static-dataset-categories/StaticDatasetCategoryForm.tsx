@@ -22,6 +22,21 @@ import {
   type StaticDatasetSiblingRow,
 } from './StaticDatasetCategorySiblingsPanel'
 
+export type StaticDatasetCategoryEditSubmitResult =
+  | FormState
+  | {
+      success: true
+      message: string
+      errors: Record<string, never>
+      navigateToCategoryKey: string
+    }
+
+export function staticDatasetCategoryEditSubmitResult(
+  result: StaticDatasetCategoryEditSubmitResult,
+) {
+  return result
+}
+
 export const StaticDatasetCategoryFormInputDefaults = {
   groupKey: '',
   categoryKey: '',
@@ -45,18 +60,19 @@ function mergedCategoryKey(groupKey: string, categoryKey: string) {
   return `${g}/${c}`
 }
 
-function mapFormStateToSubmitResult(
-  result: FormState | undefined,
-): SubmitResult<CategoryFormFieldValues> | undefined {
+function mapFormStateToSubmitResult(result: FormState | undefined) {
   if (result?.success) {
-    return { success: true, redirect: '/admin/static-dataset-categories' }
+    return {
+      success: true,
+      redirect: '/admin/static-dataset-categories',
+    } satisfies SubmitResult<CategoryFormFieldValues>
   }
   if (result && !result.success) {
     return {
       success: false,
       message: result.message,
       errors: result.errors,
-    }
+    } satisfies SubmitResult<CategoryFormFieldValues>
   }
   return undefined
 }
@@ -71,7 +87,6 @@ type CategoryFormLayoutProps =
       form: FormApi<CategoryFormFieldValues>
       variant: 'edit'
       navigate: ReturnType<typeof useNavigate>
-      editGroupKey: string
       relatedCategories: StaticDatasetSiblingRow[]
       onDelete: () => void
       isDeleting: boolean
@@ -94,7 +109,6 @@ function CategoryFormLayout(props: CategoryFormLayoutProps) {
               maxLength={190}
               placeholder="z. B. bb"
               autoComplete="off"
-              readOnly={isEdit}
               disabled={isSubmitting || (isEdit && isDeleting)}
               className="max-w-full"
             />
@@ -105,27 +119,32 @@ function CategoryFormLayout(props: CategoryFormLayoutProps) {
               maxLength={190}
               placeholder="z. B. Netzkonzeption"
               autoComplete="off"
-              readOnly={isEdit}
               disabled={isSubmitting || (isEdit && isDeleting)}
               className="max-w-full"
             />
           </div>
 
-          {!isEdit ? (
-            <form.Subscribe selector={(s) => [s.values.groupKey, s.values.categoryKey] as const}>
-              {([gk, ck]) => {
-                const preview = mergedCategoryKey(gk, ck)
-                return preview ? (
-                  <p className="text-sm text-gray-600">
-                    Vollständiger Schlüssel für Uploads:{' '}
-                    <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-800">
-                      {preview}
-                    </code>
-                  </p>
-                ) : null
-              }}
-            </form.Subscribe>
+          {isEdit ? (
+            <p className="text-sm text-gray-600">
+              Hinweis: Änderungen an Gruppe oder Kategorie setzen einen neuen Kategorie-Schlüssel.
+              Bereits konfigurierte Uploads behalten den bisherigen Schlüssel — passen Sie die
+              Upload-Daten bei Bedarf manuell an.
+            </p>
           ) : null}
+
+          <form.Subscribe selector={(s) => [s.values.groupKey, s.values.categoryKey] as const}>
+            {([gk, ck]) => {
+              const preview = mergedCategoryKey(gk, ck)
+              return preview ? (
+                <p className="text-sm text-gray-600">
+                  Vollständiger Schlüssel für Uploads:{' '}
+                  <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-800">
+                    {preview}
+                  </code>
+                </p>
+              ) : null
+            }}
+          </form.Subscribe>
 
           <TextField
             form={form}
@@ -207,12 +226,16 @@ function CategoryFormLayout(props: CategoryFormLayoutProps) {
     return <div className="max-w-6xl min-w-0">{mainColumn}</div>
   }
 
-  const { editGroupKey, relatedCategories } = props
+  const { relatedCategories } = props
 
   return (
     <div className="grid max-w-6xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] lg:items-start">
       {mainColumn}
-      <StaticDatasetCategorySiblingsPanel groupKey={editGroupKey} rows={relatedCategories} />
+      <form.Subscribe selector={(s) => s.values.groupKey}>
+        {(groupKey) => (
+          <StaticDatasetCategorySiblingsPanel groupKey={groupKey} rows={relatedCategories} />
+        )}
+      </form.Subscribe>
     </div>
   )
 }
@@ -227,7 +250,9 @@ type StaticDatasetCategoryFormProps =
   | {
       schema: typeof staticDatasetCategoryEditFormSchema
       defaultValues: StaticDatasetCategoryEditFormValues
-      onSubmit: (values: StaticDatasetCategoryEditFormValues) => Promise<FormState | undefined>
+      onSubmit: (
+        values: StaticDatasetCategoryEditFormValues,
+      ) => Promise<StaticDatasetCategoryEditSubmitResult | undefined>
       variant: 'edit'
       categoryKey: string
       relatedCategories: StaticDatasetSiblingRow[]
@@ -235,6 +260,12 @@ type StaticDatasetCategoryFormProps =
       isDeleting: boolean
     }
 
+export function StaticDatasetCategoryForm(
+  props: Extract<StaticDatasetCategoryFormProps, { variant: 'create' }>,
+)
+export function StaticDatasetCategoryForm(
+  props: Extract<StaticDatasetCategoryFormProps, { variant: 'edit' }>,
+)
 export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps) {
   const navigate = useNavigate()
 
@@ -271,6 +302,20 @@ export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps)
       className="min-w-0 space-y-4"
       onSubmit={async (values) => {
         const result = await props.onSubmit(values)
+        if (
+          result &&
+          'navigateToCategoryKey' in result &&
+          typeof result.navigateToCategoryKey === 'string'
+        ) {
+          navigate({
+            to: '/admin/static-dataset-categories/$categoryKey',
+            params: { categoryKey: result.navigateToCategoryKey },
+          })
+          return {
+            success: true,
+            message: result.message || 'Gespeichert.',
+          } satisfies SubmitResult<CategoryFormFieldValues>
+        }
         return mapFormStateToSubmitResult(result)
       }}
     >
@@ -279,7 +324,6 @@ export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps)
           form={form as unknown as FormApi<CategoryFormFieldValues>}
           variant="edit"
           navigate={navigate}
-          editGroupKey={props.defaultValues.groupKey}
           relatedCategories={props.relatedCategories}
           onDelete={props.onDelete}
           isDeleting={props.isDeleting}

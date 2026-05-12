@@ -73,25 +73,49 @@ export const createStaticDatasetCategoryFn = createServerFn({ method: 'POST' })
     })
   })
 
-const UpdateCategoryInput = z.object({
-  key: z.string().min(1).max(191),
-  sortOrder: z.number(),
-  title: z.string().min(1).max(STATIC_DATASET_CATEGORY_TITLE_MAX),
-  subtitle: z.string().max(STATIC_DATASET_CATEGORY_SUBTITLE_MAX).nullable().optional(),
-})
+const UpdateCategoryInput = z
+  .object({
+    key: z.string().min(1).max(191),
+    groupKey: staticDatasetCategorySegmentSchema,
+    categoryKey: staticDatasetCategorySegmentSchema,
+    sortOrder: z.number(),
+    title: z.string().min(1).max(STATIC_DATASET_CATEGORY_TITLE_MAX),
+    subtitle: z.string().max(STATIC_DATASET_CATEGORY_SUBTITLE_MAX).nullable().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const merged = `${data.groupKey}/${data.categoryKey}`
+    if (merged.length > 191) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Gesamt-Schlüssel (Gruppe/Kategorie) darf höchstens 191 Zeichen haben.',
+        path: ['categoryKey'],
+      })
+    }
+  })
 
 export const updateStaticDatasetCategoryFn = createServerFn({ method: 'POST' })
   .inputValidator((data: z.infer<typeof UpdateCategoryInput>) => UpdateCategoryInput.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin(getRequestHeaders())
-    return db.staticDatasetCategory.update({
+    const newKey = `${data.groupKey}/${data.categoryKey}`
+    if (newKey !== data.key) {
+      const clash = await db.staticDatasetCategory.findUnique({ where: { key: newKey } })
+      if (clash) {
+        return { ok: false as const, error: 'duplicate_key' as const }
+      }
+    }
+    const category = await db.staticDatasetCategory.update({
       where: { key: data.key },
       data: {
+        key: newKey,
+        groupKey: data.groupKey,
+        categoryKey: data.categoryKey,
         sortOrder: data.sortOrder,
         title: data.title,
         subtitle: data.subtitle ?? null,
       },
     })
+    return { ok: true as const, category }
   })
 
 const DeleteCategoryInput = z.object({ key: z.string().min(1).max(191) })
