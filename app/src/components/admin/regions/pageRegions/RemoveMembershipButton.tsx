@@ -1,5 +1,5 @@
 import { useRouter } from '@tanstack/react-router'
-import { linkStyles } from '@/components/shared/links/styles'
+import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
 import { deleteMembershipFn } from '@/server/memberships/memberships.functions'
 
 type Props = {
@@ -27,8 +27,9 @@ export function RemoveMembershipButton({ membershipId }: Props) {
   }
 
   return (
-    <button type="button" onClick={() => void handleRemove()} className={linkStyles}>
-      Mitgliedschaft entfernen
-    </button>
+    <AdminTrashIconButton
+      ariaLabel="Mitgliedschaft in dieser Region entfernen"
+      onClick={() => void handleRemove()}
+    />
   )
 }
