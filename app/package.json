@@ -36,7 +36,7 @@
     "migrate-create:3open": "code $(find ./prisma/migrations -type f -name 'migration.sql' -cmin -1 | head -n 1)",
     "migrate-check": "bun --env-file=../.env prisma migrate status",
     "migrate-compare": "git diff origin/main... -- prisma/migrations",
-    "seed": "bun run predev && bun run migrate && bun --env-file=../.env prisma migrate reset && bun --env-file=../.env prisma db seed",
+    "seed": "bun run predev && bun --env-file=../.env prisma migrate reset --force && bun --env-file=../.env prisma db seed",
     "seed-full": "bun run seed && bun run static-datasets-update -- --env=dev",
     "type-check": "tsc --noEmit",
     "type-check-deploy": "sh -c 'bun run static-datasets-unlink && bun run type-check; EXIT_CODE=$?; bun run static-datasets-link; exit $EXIT_CODE'",
