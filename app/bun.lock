@@ -83,6 +83,7 @@
         "@total-typescript/ts-reset": "0.6.1",
         "@types/bun": "1.3.12",
         "@types/js-cookie": "3.0.6",
+        "@types/papaparse": "^5.5.2",
         "@types/preview-email": "3.1.0",
         "@types/react": "19.2.14",
         "@types/react-dom": "19.2.3",
@@ -100,6 +101,7 @@
         "jsdom": "29.0.2",
         "knip": "6.4.1",
         "oxfmt": "^0.45.0",
+        "papaparse": "^5.5.3",
         "parse-gitignore": "2.0.0",
         "picomatch": "^4.0.4",
         "preview-email": "3.1.3",
@@ -1402,6 +1404,8 @@
 
     "@types/nodemailer": ["@types/nodemailer@7.0.11", "", { "dependencies": { "@types/node": "*" } }, "sha512-E+U4RzR2dKrx+u3N4DlsmLaDC6mMZOM/TPROxA0UAPiTgI0y4CEFBmZE+coGWTjakDriRsXG368lNk1u9Q0a2g=="],
 
+    "@types/papaparse": ["@types/papaparse@5.5.2", "", { "dependencies": { "@types/node": "*" } }, "sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA=="],
+
     "@types/pg": ["@types/pg@8.20.0", "", { "dependencies": { "@types/node": "*", "pg-protocol": "*", "pg-types": "^2.2.0" } }, "sha512-bEPFOaMAHTEP1EzpvHTbmwR8UsFyHSKsRisLIHVMXnpNefSbGA1bD6CVy+qKjGSqmZqNqBDV2azOBo8TgkcVow=="],
 
     "@types/preview-email": ["@types/preview-email@3.1.0", "", { "dependencies": { "@types/mailparser": "*", "@types/nodemailer": "*" } }, "sha512-ZO2daNWLAcTIA57jx8Uj3YBif0VvuKAMWzWq++MxG7CtXTE++C76Z4EZmAZNktFTKBbETBM8zFnnYSzVr1fpyg=="],
@@ -2423,6 +2427,8 @@
     "p-timeout": ["p-timeout@3.2.0", "", { "dependencies": { "p-finally": "^1.0.0" } }, "sha512-rhIwUycgwwKcP9yTOOFK/AKsAopjjCakVqLHePO3CC6Mir1Z99xT+R63jZxAT5lFZLa2inS5h+ZS2GvR99/FBg=="],
 
     "p-wait-for": ["p-wait-for@3.2.0", "", { "dependencies": { "p-timeout": "^3.0.0" } }, "sha512-wpgERjNkLrBiFmkMEjuZJEWKKDrNfHCKA1OhyN1wg1FrLkULbviEy6py1AyJUgZ72YWFbZ38FIpnqvVqAlDUwA=="],
+
+    "papaparse": ["papaparse@5.5.3", "", {}, "sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A=="],
 
     "parse-data-uri": ["parse-data-uri@0.2.0", "", { "dependencies": { "data-uri-to-buffer": "0.0.3" } }, "sha512-uOtts8NqDcaCt1rIsO3VFDRsAfgE4c6osG4d9z3l4dCBlxYFzni6Di/oNU270SDrjkfZuUvLZx1rxMyqh46Y9w=="],
 
