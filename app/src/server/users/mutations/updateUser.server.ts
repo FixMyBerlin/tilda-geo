@@ -11,18 +11,15 @@ import { UpdateUserSchema } from '../schema'
 const duplicateEmailMessage = 'Diese E-Mail-Adresse ist bereits vergeben.'
 const updateUserErrorMessage = 'Fehler beim Aktualisieren des Accounts'
 
-function isEmailUniqueConstraintError(error: unknown) {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false
-  if (error.code !== 'P2002') return false
-
-  const target = error.meta?.target
-  const targetFields = Array.isArray(target)
-    ? target.filter((value): value is string => typeof value === 'string')
-    : typeof target === 'string'
-      ? [target]
-      : []
-
-  return targetFields.includes('email')
+function isPrismaUniqueConstraintError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === 'P2002'
+  }
+  if (typeof error === 'object' && error !== null && 'code' in error && 'name' in error) {
+    const o = error as { code?: unknown; name?: unknown }
+    return o.code === 'P2002' && o.name === 'PrismaClientKnownRequestError'
+  }
+  return false
 }
 
 function logUpdateUserError(context: 'duplicate-email' | 'unexpected', error: unknown) {
@@ -44,7 +41,8 @@ export async function updateUserWithData(data: z.infer<typeof UpdateUserSchema>,
     if (error instanceof z.ZodError) {
       return validationErrorState(error)
     }
-    if (isEmailUniqueConstraintError(error)) {
+    // P2002 `meta.target` is often the index name (`User_email_key`), not `email`; only `email` is unique here.
+    if (isPrismaUniqueConstraintError(error)) {
       logUpdateUserError('duplicate-email', error)
       return {
         success: false,
