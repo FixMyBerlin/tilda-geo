@@ -3,7 +3,7 @@ import { Outlet } from '@tanstack/react-router'
 export function LayoutAdmin() {
   return (
     <div className="min-h-full bg-pink-300">
-      <main className="mx-auto prose w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-4xl px-4 py-10 text-gray-900 sm:px-6 lg:px-8">
         <Outlet />
       </main>
     </div>

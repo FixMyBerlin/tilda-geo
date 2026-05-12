@@ -13,7 +13,7 @@ export function QaConfigExportSection({ configId, label, slug, mapTable }: Props
 
   return (
     <section
-      className="not-prose mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+      className="mb-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
       aria-labelledby="qa-export-heading"
     >
       <h2 id="qa-export-heading" className="m-0 mb-3 text-lg font-semibold text-gray-900">

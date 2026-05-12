@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
+import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { createSourceKeyStaticDatasets } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { Link } from '@/components/shared/links/Link'
-import { linkStyles } from '@/components/shared/links/styles'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
 import { MapRenderFormatEnum } from '@/prisma/generated/browser'
 import type { MetaData } from '@/scripts/StaticDatasets/types'
@@ -78,7 +78,7 @@ export function AdminUploadClient({ upload }: Props) {
 
       <h1>{upload.slug}</h1>
 
-      <div className="my-4">
+      <section className="my-4">
         <h2>Regionen</h2>
         {upload.regions.length === 0 ? (
           <p>Keine Regionen zugeordnet</p>
@@ -92,19 +92,16 @@ export function AdminUploadClient({ upload }: Props) {
                       {region.slug}
                     </Link>
                   </div>
-                  <button
-                    type="button"
+                  <AdminTrashIconButton
+                    ariaLabel={`Zuordnung zu Region ${region.slug} entfernen`}
                     onClick={() => handleDeleteRegion(region.slug)}
-                    className={linkStyles}
-                  >
-                    Delete
-                  </button>
+                  />
                 </div>
               </li>
             ))}
           </ul>
         )}
-      </div>
+      </section>
 
       <p className="space-y-2">
         {upload.regions.map((region) => {
@@ -165,10 +162,12 @@ export function AdminUploadClient({ upload }: Props) {
       })}
       <ObjectDump data={upload} className="my-10" />
 
-      <div className="mt-8 border-t pt-4">
-        <button type="button" onClick={handleDeleteUpload} className={linkStyles}>
-          Upload löschen
-        </button>
+      <div className="mt-8 flex justify-end border-t pt-4">
+        <AdminTrashIconButton
+          ariaLabel={`Upload ${upload.slug} löschen`}
+          size="comfortable"
+          onClick={handleDeleteUpload}
+        />
       </div>
     </>
   )

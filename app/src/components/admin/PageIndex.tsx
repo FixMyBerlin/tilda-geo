@@ -43,7 +43,7 @@ export function PageIndex() {
 
       <ul
         className={twMerge(
-          'not-prose divide-y divide-gray-900/10 overflow-hidden',
+          'divide-y divide-gray-900/10 overflow-hidden',
           'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
         )}
       >
@@ -61,12 +61,12 @@ export function PageIndex() {
 
       {!isProd ? (
         <>
-          <hr className={twMerge('not-prose my-10 border-0 border-t border-gray-900/10')} />
+          <hr className={twMerge('my-10 border-0 border-t border-gray-900/10')} />
           <Disclosure title="Fehler-UI (nur Dev / Staging)" defaultOpen={false}>
             <div className="p-3">
               <ul
                 className={twMerge(
-                  'not-prose divide-y divide-gray-900/10 overflow-hidden',
+                  'divide-y divide-gray-900/10 overflow-hidden',
                   'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
                 )}
               >
