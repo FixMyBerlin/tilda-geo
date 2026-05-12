@@ -1,18 +1,26 @@
+import { join } from 'node:path'
 import { logErr, logOk } from './predevLog'
 
 const label = 'check_docker'
-const cwd = process.cwd()
 
 export async function checkDocker() {
   try {
+    const repoRoot = join(process.cwd(), '..')
     const proc = Bun.spawn(
       [
-        'sh',
-        '-c',
-        `if [ "$(docker inspect -f '{{.State.Running}}' db)" != "true" ]; then docker compose -f ${cwd}/../docker-compose.yml up db tiles -d; fi`,
+        'docker',
+        'compose',
+        '-f',
+        join(repoRoot, 'docker-compose.yml'),
+        '-f',
+        join(repoRoot, 'docker-compose.override.yml'),
+        'up',
+        'db',
+        'tiles',
+        '-d',
       ],
       {
-        cwd,
+        cwd: repoRoot,
         stdout: 'inherit',
         stderr: 'inherit',
       },
