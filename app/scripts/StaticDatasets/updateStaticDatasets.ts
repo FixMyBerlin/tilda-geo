@@ -116,6 +116,9 @@ const datasetFileFolderData = regionGroupFolderPaths
   .filter(Boolean)
   .sort((a, b) => a.datasetFolderPath.localeCompare(b.datasetFolderPath))
 
+// Track folders that failed so we can summarize at the end without scrolling
+const failedFolders: { folder: string; error: string }[] = []
+
 for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFolderData) {
   const regionAndDatasetFolder = `${regionFolder}/${datasetFolder}`
 
@@ -126,82 +129,91 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
     inverse(`Processing folder "${regionAndDatasetFolder}"...`)
   }
 
-  // Guard invalid folder names (characters)
-  const uploadSlug = slugify(datasetFolder.replaceAll('_', '-'))
-  if (datasetFolder !== uploadSlug) {
-    yellow(
-      `  Folder name "${datasetFolder}" in ${regionAndDatasetFolder} is not a valid slug.
+  try {
+    // Guard invalid folder names (characters)
+    const uploadSlug = slugify(datasetFolder.replaceAll('_', '-'))
+    if (datasetFolder !== uploadSlug) {
+      yellow(
+        `  Folder name "${datasetFolder}" in ${regionAndDatasetFolder} is not a valid slug.
       \n  A valid slug would be "${uploadSlug}"`,
-    )
-    continue
-  }
-
-  // Get the `meta.js` data ready
-  const metaData = await import_<MetaData>(datasetFolderPath, 'meta', 'data')
-  if (metaData === null) {
-    yellow(`  File 'meta.ts' is missing in folder ${datasetFolderPath}`)
-    continue
-  }
-
-  // Create database entries dataset per region (from meta.ts)
-  const regionSlugs: string[] = []
-  for (const regionSlug of metaData.regions) {
-    if (existingRegionSlugs.includes(regionSlug)) {
-      regionSlugs.push(regionSlug)
-    } else {
-      yellow(`  region "${regionSlug}" (defined in meta.regions) does not exist.`)
+      )
+      continue
     }
-  }
 
-  // Check if any layer has layout.visibility property
-  for (const config of metaData.configs) {
-    for (const layer of config.layers) {
-      if (layer?.layout?.visibility) {
-        red(
-          `  layer "${layer.id}" has layout.visibility specified which is an error. Remove this property from the layer definition. Otherwise bugs come up like the layer does not show due to a hidden visibility.`,
+    // Get the `meta.js` data ready
+    const metaData = await import_<MetaData>(datasetFolderPath, 'meta', 'data')
+    if (metaData === null) {
+      yellow(`  File 'meta.ts' is missing in folder ${datasetFolderPath}`)
+      continue
+    }
+
+    // Create database entries dataset per region (from meta.ts)
+    const regionSlugs: string[] = []
+    for (const regionSlug of metaData.regions) {
+      if (existingRegionSlugs.includes(regionSlug)) {
+        regionSlugs.push(regionSlug)
+      } else {
+        yellow(`  region "${regionSlug}" (defined in meta.regions) does not exist.`)
+      }
+    }
+
+    // Check if any layer has layout.visibility property
+    for (const config of metaData.configs) {
+      for (const layer of config.layers) {
+        if (layer?.layout?.visibility) {
+          red(
+            `  layer "${layer.id}" has layout.visibility specified which is an error. Remove this property from the layer definition. Otherwise bugs come up like the layer does not show due to a hidden visibility.`,
+          )
+        }
+      }
+    }
+
+    // Route to appropriate processor based on data source type
+    switch (metaData.dataSourceType) {
+      case 'external': {
+        await processExternalSource(
+          metaData,
+          uploadSlug,
+          regionSlugs,
+          regionAndDatasetFolder,
+          api,
+          appEnv,
         )
+        break
+      }
+      case 'local': {
+        const geojsonFullFilename = findGeojson(datasetFolderPath)
+        if (!geojsonFullFilename) {
+          continue
+        }
+        const transformedFilepath = await transformFile(
+          datasetFolderPath,
+          geojsonFullFilename,
+          tempFolder,
+        )
+        await processLocalSource(
+          metaData,
+          uploadSlug,
+          regionSlugs,
+          transformedFilepath,
+          tempFolder,
+          regionAndDatasetFolder,
+          api,
+          appEnv,
+        )
+        break
       }
     }
-  }
 
-  // Route to appropriate processor based on data source type
-  switch (metaData.dataSourceType) {
-    case 'external': {
-      await processExternalSource(
-        metaData,
-        uploadSlug,
-        regionSlugs,
-        regionAndDatasetFolder,
-        api,
-        appEnv,
-      )
-      break
+    green('  OK')
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    red(`  FAILED to process "${regionAndDatasetFolder}": ${message}`)
+    if (error instanceof Error && error.stack) {
+      console.error(error.stack)
     }
-    case 'local': {
-      const geojsonFullFilename = findGeojson(datasetFolderPath)
-      if (!geojsonFullFilename) {
-        continue
-      }
-      const transformedFilepath = await transformFile(
-        datasetFolderPath,
-        geojsonFullFilename,
-        tempFolder,
-      )
-      await processLocalSource(
-        metaData,
-        uploadSlug,
-        regionSlugs,
-        transformedFilepath,
-        tempFolder,
-        regionAndDatasetFolder,
-        api,
-        appEnv,
-      )
-      break
-    }
+    failedFolders.push({ folder: regionAndDatasetFolder, error: message })
   }
-
-  green('  OK')
 }
 
 // List processed temp geojson files when --keep-tmp present for easy access to check the file
@@ -243,6 +255,15 @@ if (appEnv === 'production') {
   } catch (error) {
     console.error('Failed to create or push git tag:', error)
   }
+}
+
+if (failedFolders.length > 0) {
+  red(`Pipeline finished with ${failedFolders.length} failed folder(s):`)
+  for (const { folder, error } of failedFolders) {
+    red(`  - ${folder}: ${error}`)
+  }
+  inverse('DONE (with errors)')
+  process.exit(1)
 }
 
 inverse('DONE')

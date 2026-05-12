@@ -24,10 +24,21 @@ export const transformFile = async (
   // Validate with placemarkio/check-geojson
   const issues = getIssues(JSON.stringify(data))
   if (issues.length > 0) {
-    console.log(styleText('red', `  ERROR checking the GeoJSON file`), {
-      file: filenameToRead,
-      issues,
-    })
+    console.log(styleText('red', `  ERROR: GeoJSON validation issues in ${filenameToRead}`))
+    for (const issue of issues) {
+      console.log(
+        styleText(
+          issue.severity === 'error' ? 'red' : 'yellow',
+          `    [${issue.severity}] ${issue.message} (bytes ${issue.from}-${issue.to})`,
+        ),
+      )
+    }
+    console.log(
+      styleText(
+        'yellow',
+        `    Continuing — fix the source file upstream; downstream steps may fail or upload bad data.`,
+      ),
+    )
   }
   // Validate projection
   validateProjection(data, filenameToRead)

@@ -11,9 +11,11 @@ const GERMANY_BBOX = {
 
 type Position = [number, number]
 
-function toPosition(coords: number[]) {
-  // biome-ignore lint/style/noNonNullAssertion: This is OK
-  return [coords[0]!, coords[1]!] satisfies Position
+function toPosition(coords: number[] | undefined) {
+  if (!coords) return null
+  const [lon, lat] = coords
+  if (typeof lon !== 'number' || typeof lat !== 'number') return null
+  return [lon, lat] satisfies Position
 }
 
 function extractCoordinates(geometry: Geometry) {
@@ -22,17 +24,14 @@ function extractCoordinates(geometry: Geometry) {
       return toPosition(geometry.coordinates)
     case 'LineString':
     case 'MultiPoint':
-      // biome-ignore lint/style/noNonNullAssertion: This is OK
-      return toPosition(geometry.coordinates[0]!)
+      return toPosition(geometry.coordinates[0])
     case 'Polygon':
     case 'MultiLineString':
-      // biome-ignore lint/style/noNonNullAssertion: This is OK
-      return toPosition(geometry.coordinates[0]![0]!)
+      return toPosition(geometry.coordinates[0]?.[0])
     case 'MultiPolygon':
-      // biome-ignore lint/style/noNonNullAssertion: This is OK
-      return toPosition(geometry.coordinates[0]![0]![0]!)
+      return toPosition(geometry.coordinates[0]?.[0]?.[0])
     case 'GeometryCollection':
-      throw new Error('GeometryCollection not supported for projection validation')
+      return null
   }
 }
 
@@ -71,16 +70,16 @@ export function validateProjection(geojson: unknown, filename: string) {
 
   let firstValidCoords: Position | null = null
   let featureIndex = -1
-  let i = 0
-  while (i < geojson.features.length) {
+  for (let i = 0; i < geojson.features.length; i++) {
     const feature = geojson.features[i]
     const geometry = feature?.geometry
-    if (geometry) {
-      firstValidCoords = extractCoordinates(geometry)
+    if (!geometry) continue
+    const coords = extractCoordinates(geometry)
+    if (coords) {
+      firstValidCoords = coords
       featureIndex = i
       break
     }
-    i++
   }
 
   if (firstValidCoords === null) {
