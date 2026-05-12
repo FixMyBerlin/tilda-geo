@@ -43,6 +43,7 @@ function applyFieldErrors(
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
 type FormProps<T extends z.ZodTypeAny> = {
+  actionBarRight?: ReactNode
   defaultValues: z.input<T>
   schema: T
   onSubmit: (values: z.input<T>) => undefined | Promise<SubmitResult<z.input<T>> | undefined>
@@ -54,6 +55,7 @@ type FormProps<T extends z.ZodTypeAny> = {
 }
 
 export function Form<T extends z.ZodTypeAny>({
+  actionBarRight,
   defaultValues,
   schema,
   onSubmit,
@@ -157,6 +159,7 @@ export function Form<T extends z.ZodTypeAny>({
               )}
             </form.Subscribe>
           }
+          right={actionBarRight}
         />
       )}
     </form>

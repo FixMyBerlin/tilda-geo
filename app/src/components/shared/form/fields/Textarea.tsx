@@ -3,7 +3,7 @@ import { twJoin } from 'tailwind-merge'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import type { FieldProps } from './sharedStyles'
-import { inputBase, inputError, inputNormal, labelClass } from './sharedStyles'
+import { inputBase, inputError, inputNormal, inputReadonly, labelClass } from './sharedStyles'
 
 type Props<T extends Record<string, unknown>> = FieldProps & {
   form: FormApi<T>
@@ -22,7 +22,8 @@ export function Textarea<T extends Record<string, unknown>>({
   labelSrOnly,
   ...textareaProps
 }: Props<T>) {
-  const { className, ...restTextareaProps } = textareaProps
+  const { className, readOnly, ...restTextareaProps } = textareaProps
+  const isReadonly = Boolean(readOnly)
   return (
     <form.Field name={name}>
       {(field) => {
@@ -31,7 +32,12 @@ export function Textarea<T extends Record<string, unknown>>({
         const resolvedLabelClassName =
           labelClassNameOverwrite ?? twJoin(labelClass, labelSrOnly ? 'sr-only' : '')
         const resolvedTextareaClassName =
-          classNameOverwrite ?? twJoin(inputBase, hasError ? inputError : inputNormal, className)
+          classNameOverwrite ??
+          twJoin(
+            inputBase,
+            isReadonly ? inputReadonly : hasError ? inputError : inputNormal,
+            className,
+          )
         return (
           <div>
             <label htmlFor={String(name)} className={resolvedLabelClassName}>
@@ -46,6 +52,7 @@ export function Textarea<T extends Record<string, unknown>>({
               onChange={(e) => field.handleChange((_prev) => e.target.value as typeof _prev)}
               className={resolvedTextareaClassName}
               aria-invalid={hasError}
+              readOnly={readOnly}
               data-1p-ignore
               data-lpignore
               {...restTextareaProps}

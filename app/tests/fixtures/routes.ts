@@ -39,6 +39,7 @@ export const ADMIN_ROUTES = [
   '/admin',
   '/admin/regions',
   '/admin/uploads',
+  '/admin/static-dataset-categories',
   '/admin/qa-configs',
   '/admin/memberships',
 ] as const

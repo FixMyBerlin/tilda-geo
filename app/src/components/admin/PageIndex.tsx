@@ -21,7 +21,8 @@ const items = [
   { to: '/admin/regions', label: 'Regionen' },
   { to: '/admin/qa-configs', label: 'QA Konfigurationen' },
   { to: '/admin/memberships', label: 'Nutzer:innen & Mitgliedschaften' },
-  { to: '/admin/uploads', label: 'Uploads' },
+  { to: '/admin/uploads', label: 'Statische Daten (Uploads)' },
+  { to: '/admin/static-dataset-categories', label: 'Statische Datensatz-Kategorien' },
 ] satisfies { to: InternalPath; label: string }[]
 
 const errorPreviewItems = [
