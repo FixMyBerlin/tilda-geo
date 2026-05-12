@@ -9,7 +9,7 @@ const geojsonMultipolyon = z.object({
   type: z.literal('MultiPolygon'),
   coordinates: z.array(z.array(z.array(z.tuple([z.number(), z.number()])))),
 })
-const geojsonInputSchema = z.union([geojsonPolygon, geojsonMultipolyon])
+const geojsonInputSchema = z.discriminatedUnion('type', [geojsonPolygon, geojsonMultipolyon])
 
 // We always use the production DB since that holds all relevant relations
 // Duplicates `getBoundaryExportApiBaseUrl` because this file is in a symlinked directory and cannot import from the main app
