@@ -12,7 +12,7 @@ const requiredString = z.string().min(1)
 
 export const envViteSchema = z.object({
   VITE_APP_ENV: environmentValues,
-  VITE_APP_ORIGIN: z.string().url(),
+  VITE_APP_ORIGIN: z.url(),
   VITE_PLAYWRIGHT_ENABLED: z.string().optional(),
 })
 

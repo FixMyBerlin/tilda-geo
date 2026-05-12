@@ -25,7 +25,7 @@ const oauthCredentialSchema = z
   .or(z.literal('').transform(() => undefined))
   .or(z.undefined())
 
-const urlSchema = z.string().url('Must be a valid URL')
+const urlSchema = z.url('Must be a valid URL')
 
 function parseParameters() {
   return {

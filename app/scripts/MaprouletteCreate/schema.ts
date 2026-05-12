@@ -26,12 +26,12 @@ export const CreateMapRouletteChallengeSchema = z.strictObject({
   name: z.string(), // "test",
   overpassTargetType: z.null(), // null,
   parent: z.number(), // 57664,
-  remoteGeoJson: z.string().url(), // "https://tilda-geo.de/api/maproulette/missing_traffic_sign_244",
+  remoteGeoJson: z.url(), // "https://tilda-geo.de/api/maproulette/missing_traffic_sign_244",
   tags: z.string(), // "highway",
-  dataOriginDate: z.string().datetime(), // "2024-09-29T22:00:00.000Z",
+  dataOriginDate: z.iso.datetime(), // "2024-09-29T22:00:00.000Z",
   presets: z.array(z.string()), // [],
   taskStyles: z.array(z.string()), // [],
-  infoLink: z.string().url(),
+  infoLink: z.url(),
   taskWidgetLayout: z.any(),
 })
 
