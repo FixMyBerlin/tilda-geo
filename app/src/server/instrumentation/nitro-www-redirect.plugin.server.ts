@@ -9,7 +9,7 @@ export default definePlugin((nitroApp) => {
 
     if (appHost.startsWith('www.')) return
 
-    const requestUrl = getRequestURL(event)
+    const requestUrl = getRequestURL(event, { xForwardedHost: true })
     const requestHost = requestUrl.hostname.toLowerCase()
 
     if (requestHost !== `www.${appHost}`) return
