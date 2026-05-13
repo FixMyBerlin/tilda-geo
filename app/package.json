@@ -46,6 +46,7 @@
     "format:github": "cd .. && NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write .github -c app/oxfmt.config.ts",
     "format:docs": "cd .. && NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write docs -c app/oxfmt.config.ts",
     "format:topic-docs": "cd .. && NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write topic-docs -c app/oxfmt.config.ts",
+    "format:processing": "cd .. && NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write processing -c app/oxfmt.config.ts",
     "format:StaticDatasets": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write scripts/StaticDatasets/geojson",
     "check": "bun run --parallel type-check lint format test-run",
     "regions": "bun run --sequential regions:masks regions:configs",
