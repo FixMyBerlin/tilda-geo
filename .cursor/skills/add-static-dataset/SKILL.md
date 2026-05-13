@@ -107,6 +107,8 @@ export const transform = (data: FeatureCollection) => {
 - For points: circle markers
 - Create appropriate legend entries
 
+**Stripe / Schraffur (`fill-pattern`)**: For diagonal stripes over polygons, reuse the **existing map sprite** image id **`stripe_texture`** (same hatch as private Parkflächen in generated `parking_areas`; listed in `app/public/map-style/sprite.json`). Do not add a new sprite. Stack a **second** `fill` layer **above** the solid fill: `fill-color` `'rgba(0, 0, 0, 0)'`, `fill-opacity` around `0.5` (tune as needed), `fill-pattern` `'stripe_texture'`. Skip `fill-outline-color` on the stripe layer if the base fill already defines an outline. Use a `filter` on the stripe layer when only some features should be hatched; if exports mix boolean `true` and string `'true'`, either use an `any` / `match` filter in `meta.ts` or normalize values in `transform.ts` (step 3) so the filter stays simple.
+
 **Example structure**:
 
 ```typescript
