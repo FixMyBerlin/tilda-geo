@@ -11,8 +11,7 @@ type MyRouterContext = {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   ssr: true,
   // Canonical URLs without a trailing slash (matches `trailingSlash: 'never'` in router).
-  // If we ever need the same rule at the HTTP edge (crawlers, bookmarks before hydration),
-  // add a Nitro plugin alongside nitro-www-redirect.plugin.server.ts.
+  // Non-www host canonicalization is enforced in Traefik (docker-compose app labels), not here.
   beforeLoad: ({ location }) => {
     const { pathname, searchStr, hash } = location
     if (pathname.length <= 1 || !pathname.endsWith('/')) return
