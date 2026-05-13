@@ -71,11 +71,24 @@ export function Form<T extends z.ZodTypeAny>({
     text: string
   } | null>(null)
 
-  const form = useForm({
+  const form = useForm<
+    z.input<T>,
+    undefined,
+    FormValidateOrFn<z.input<T>>,
+    undefined,
+    undefined,
+    undefined,
+    FormValidateOrFn<z.input<T>>,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined
+  >({
     defaultValues,
     validators: {
-      onChange: schema as FormValidateOrFn<z.input<T>>,
-      onSubmit: schema as FormValidateOrFn<z.input<T>>,
+      onChange: schema,
+      onSubmit: schema,
     },
     onSubmit: async ({ value }) => {
       setSubmitMessage(null)
