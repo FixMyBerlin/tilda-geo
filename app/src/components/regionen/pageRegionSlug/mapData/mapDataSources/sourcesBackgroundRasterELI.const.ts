@@ -20,6 +20,7 @@ export type SourcesRasterIdsELI =
   | 'ELI_berlinaerialphotograph2023'
   | 'ELI_berlinaerialphotograph2024'
   | 'ELI_berlinaerialphotograph2025'
+  | 'ELI_berlinaerialphotograph2025-summer'
   | 'ELI_berlinalkis'
   | 'ELI_berlinbaeumealkis'
   | 'ELI_berlinstrassenbefahrungalkis'
@@ -36,6 +37,7 @@ export type SourcesRasterIdsELI =
   | 'ELI_frankfurt-am-main-2017'
   | 'ELI_frankfurt-am-main-2018'
   | 'ELI_frankfurt-am-main-2019'
+  | 'ELI_germany-verwaltungsgrenzen'
   | 'ELI_hamburg-alkis'
   | 'ELI_hamburg-dk5'
   | 'ELI_hamburg-dop20-belaubt'
@@ -237,6 +239,14 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     maxzoom: 20,
   },
   {
+    id: 'ELI_berlinaerialphotograph2025-summer',
+    name: 'Berlin/Geoportal DOP20RGB (2025) Sommer',
+    tiles: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-truedop20rgb/{z}/{x}/{y}.png',
+    attributionHtml:
+      'Geoportal Berlin/Digitale farbige TrueOrthophotos 2025 (DOP20RGB) (codefor.de mirror)',
+    maxzoom: 20,
+  },
+  {
     id: 'ELI_berlinalkis',
     name: 'Berlin/Geoportal ALKIS',
     tiles: 'https://mapproxy.codefor.de/tiles/1.0.0/alkis_30/mercator/{z}/{x}/{y}.png',
@@ -363,6 +373,14 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     tiles:
       'https://geowebdienste.frankfurt.de/OD_Luftbilder_2019?REQUEST=GetMap&VERSION=1.3.0&SERVICE=WMS&CRS=EPSG:3857&FORMAT=image/jpeg&STYLES=&bbox={bbox-epsg-3857}&WIDTH=512&HEIGHT=512&LAYERS=opendata_luftbilder_2019',
     attributionHtml: 'Stadtvermessungsamt Frankfurt am Main',
+    tileSize: 512,
+  },
+  {
+    id: 'ELI_germany-verwaltungsgrenzen',
+    name: 'Verwaltungsgebiete 1:250000',
+    tiles:
+      'https://sgx.geodatenzentrum.de/wms_vg250?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=vg250_li,vg250_gem,vg250_pk&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© BKG <YEAR> dl-de/by-2-0',
     tileSize: 512,
   },
   {
