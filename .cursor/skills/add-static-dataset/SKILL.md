@@ -39,6 +39,11 @@ Create directory if group folder doesn't exist. Ensure sub-folder name follows n
 
 - Move source file to `<SUB_FOLDER>/<FILENAME>.geojson`
 - Run prettier from `app/` directory (prettier config is in app/): `cd app && bunx prettier --write scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson`
+- **Size check (dataset validation / creation)**: Measure the **uncompressed** `.geojson` file size. If it is **greater than 6 MiB** (6 × 1024² bytes), compress it so the folder ships only the archive (same pattern as other large static datasets):
+  - From the dataset folder (or with absolute paths): `gzip -9 -f <FILENAME>.geojson`
+  - `gzip` replaces the file with `<FILENAME>.geojson.gz` and removes the plain `.geojson`. `-9` is maximum compression; `-f` forces overwrite if a `.gz` already exists.
+  - If size is **≤ 6 MiB**, leave the `.geojson` as-is (no gzip required).
+- `findGeojson` in `updateStaticDatasets` accepts either a single `.geojson` or a single `.geojson.gz` per folder—never leave both.
 
 ### 3. Create transform.ts (if needed)
 
@@ -162,7 +167,7 @@ This temporarily removes the `geojson` symlink, runs TypeScript type-checking, a
 Before completing:
 
 1. ✅ Folder structure created
-2. ✅ GeoJSON file moved and prettier run
+2. ✅ GeoJSON file moved; **if uncompressed `.geojson` > 6 MiB then `gzip -9 -f`** (otherwise plain `.geojson` only; never both); `meta.ts` / `transform.ts` formatted with `bun run format`
 3. ✅ transform.ts created only if needed
 4. ✅ meta.ts follows type structure (check with TypeScript)
 5. ✅ Similar datasets in group folder reviewed for patterns
