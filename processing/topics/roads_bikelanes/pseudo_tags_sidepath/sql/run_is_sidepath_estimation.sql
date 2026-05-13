@@ -5,12 +5,16 @@
 --
 
 -- Temp tables in 3857 (meters) so ST_DWithin in the join can use GIST indexes.
--- Paths: ways we want to estimate is_sidepath for (roadsPathClasses = path, footway, cycleway, track, steps).
+-- Paths: dedicated source rows from roads_bikelanes topic.
 DROP TABLE IF EXISTS _sidepath_estimation_paths;
 CREATE TEMP TABLE _sidepath_estimation_paths AS
-SELECT osm_id, ST_Transform(geom::geometry, 3857) AS geom, tags
-FROM "roadsPathClasses";
+SELECT
+  osm_id,
+  geom::geometry AS geom,
+  layer
+FROM "_roads_bikelanes_sidepath_source_paths";
 CREATE INDEX _sidepath_estimation_paths_geom_idx ON _sidepath_estimation_paths USING GIST (geom);
+ANALYZE _sidepath_estimation_paths;
 
 -- Roads: only "main road" types that can have a sidepath (CQI / OSM-Sidepath-Estimation).
 -- We restrict to residential and up (plus pedestrian); excludes service.
@@ -20,8 +24,11 @@ DROP TABLE IF EXISTS _sidepath_estimation_roads;
 CREATE TEMP TABLE _sidepath_estimation_roads AS
 SELECT
   osm_id,
-  ST_Transform(geom::geometry, 3857) AS geom,
-  tags || jsonb_build_object('highway', tags->>'road') AS tags
+  geom::geometry AS geom,
+  tags->>'road' AS highway,
+  tags->>'name' AS name,
+  tags->>'layer' AS layer,
+  tags->>'maxspeed' AS maxspeed
 FROM "roads"
 WHERE (tags->>'road') IN (
   'motorway', 'motorway_link', 'trunk', 'trunk_link',
@@ -30,12 +37,13 @@ WHERE (tags->>'road') IN (
   'living_street', 'pedestrian'
 );
 CREATE INDEX _sidepath_estimation_roads_geom_idx ON _sidepath_estimation_roads USING GIST (geom);
+ANALYZE _sidepath_estimation_roads;
 
 -- Custom functions and default parameters (buffer_distance, buffer_size)
-\i '/processing/pseudoTags/sidepathSource/sql/is_sidepath_estimation.sql'
+\i '/processing/topics/roads_bikelanes/pseudo_tags_sidepath/sql/is_sidepath_estimation.sql'
 
 -- Debug: Create table that help to understand the estimation rules
--- \i '/processing/pseudoTags/sidepathSource/sql/debug_is_sidepath.sql'
+-- \i '/processing/topics/roads_bikelanes/pseudo_tags_sidepath/sql/debug_is_sidepath.sql'
 
 SELECT setval('tilda_sidepath_checkpoint_nr_sequence', 1);
 
@@ -47,6 +55,6 @@ SELECT setval('tilda_sidepath_checkpoint_nr_sequence', 1);
 -- Only export paths estimated as sidepath (assumed_yes); Lua infers assumed_no for path IDs not in CSV
 SELECT osm_id, is_sidepath_estimation
 FROM tilda_sidepath_csv(:buffer_distance, :buffer_size)
-WHERE is_sidepath_estimation = 't';
+WHERE is_sidepath_estimation::boolean IS TRUE;
 
 \o

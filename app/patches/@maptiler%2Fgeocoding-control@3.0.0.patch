@@ -1,0 +1,13 @@
+diff --git a/dist/maplibregl.js b/dist/maplibregl.js
+index d861bd3371011ea5f0eaf7bba2bf8330308c516c..05efc4fbfff31e7c871ba592978c316daeae5f21 100644
+--- a/dist/maplibregl.js
++++ b/dist/maplibregl.js
+@@ -988,7 +988,7 @@ class Ut extends H.Evented {
+   }
+   /** @internal Not to be called directly */
+   onRemove() {
+-    this.#_(), this.#t = void 0, this.#i = void 0;
++    this.#_(), this.#i?.parentElement?.remove(), this.#t = void 0, this.#i = void 0;
+   }
+   getOptions() {
+     return { ...this.#e };

@@ -4,15 +4,21 @@ import { definePlugin } from 'nitro'
 // Ensure that we use the non-www route consistently
 export default definePlugin((nitroApp) => {
   nitroApp.hooks.hook('request', (event) => {
-    const canonicalOrigin = process.env.VITE_APP_ORIGIN as string
-    const canonicalUrl = new URL(canonicalOrigin)
-    if (canonicalUrl.hostname.toLowerCase().startsWith('www.')) return
+    const appOrigin = new URL(process.env.VITE_APP_ORIGIN)
+    const appHost = appOrigin.hostname.toLowerCase()
 
-    const wwwHost = `www.${canonicalUrl.hostname}`
-    const url = getRequestURL(event)
-    if (url.hostname !== wwwHost) return
+    if (appHost.startsWith('www.')) return
 
-    const target = new URL(url.pathname + url.search + url.hash, canonicalOrigin)
-    throw redirect(target.toString(), 301)
+    const requestUrl = getRequestURL(event, { xForwardedHost: true })
+    const requestHost = requestUrl.hostname.toLowerCase()
+
+    if (requestHost !== `www.${appHost}`) return
+
+    const target = new URL(
+      requestUrl.pathname + requestUrl.search + requestUrl.hash,
+      appOrigin.href,
+    ).toString()
+
+    throw redirect(target, 301)
   })
 })

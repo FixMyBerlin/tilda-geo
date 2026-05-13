@@ -1,5 +1,4 @@
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
-import { staticDatasetCategories } from '@/components/regionen/pageRegionSlug/mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
 import { SelectDatasets } from './SelectDatasets'
 
 const fallbackCategory = 'Statische Daten'
@@ -8,8 +7,6 @@ export const StaticDatasetCategories = () => {
   const { data: regionDatasets } = useRegionDatasetsQuery()
   if (!regionDatasets.length) return null
 
-  // The catgory can be null, which is our default Category.
-  // The .category is also used as the named _for_now_ (in a cleaned up version).
   const groupedDatasets: { [category: string]: typeof regionDatasets } = {}
   regionDatasets
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -18,11 +15,13 @@ export const StaticDatasetCategories = () => {
       groupedDatasets[category] = [...(groupedDatasets[category] || []), dataset]
     })
 
-  // We sort the categories by the `order` defined in `staticDatasetCategories`
   const sortedGroupKeys = Object.keys(groupedDatasets).sort((a, b) => {
-    const orderA = staticDatasetCategories[a]?.order || Infinity
-    const orderB = staticDatasetCategories[b]?.order || Infinity
-    return orderA - orderB
+    const da = groupedDatasets[a]?.[0]
+    const db = groupedDatasets[b]?.[0]
+    if (!da || !db) return a.localeCompare(b)
+    const diff = da.categorySortOrder - db.categorySortOrder
+    if (diff !== 0) return diff
+    return a.localeCompare(b)
   })
   const sortedGroupedDatasets: { [category: string]: typeof regionDatasets } = {}
   for (const key of sortedGroupKeys) {

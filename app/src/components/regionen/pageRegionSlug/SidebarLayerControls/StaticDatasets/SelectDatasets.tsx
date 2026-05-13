@@ -2,7 +2,6 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@head
 import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
-import { staticDatasetCategories } from '@/components/regionen/pageRegionSlug/mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { createSourceKeyStaticDatasets } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { SelectDataset } from './SelectDataset'
@@ -15,6 +14,11 @@ export const SelectDatasets = ({
   datasets: RegionDataset[]
 }) => {
   const { dataParam, setDataParam } = useDataParam()
+
+  const first = datasets[0]
+  const categoryTitle = first?.categoryTitle ?? category
+  const categorySubtitle = first?.categorySubtitle ?? undefined
+  const hasFallbackTitle = category === categoryTitle
 
   const allDatasetKeysForThisCategory = datasets.map((d) =>
     createSourceKeyStaticDatasets(d.id, d.subId),
@@ -32,9 +36,6 @@ export const SelectDatasets = ({
     setDataParam(dataParam.filter((param) => !allDatasetKeysForThisCategory.includes(param)))
   }
 
-  const hasFallbackTitle = !staticDatasetCategories[category]?.title
-  const categoryTitle = staticDatasetCategories[category]?.title || category
-  const categorySubtitle: string | undefined = staticDatasetCategories[category]?.subtitle
   const active = dataParam.some((param) => allDatasetKeysForThisCategory.includes(param))
 
   return (

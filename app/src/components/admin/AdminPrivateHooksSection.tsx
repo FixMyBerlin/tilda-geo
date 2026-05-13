@@ -8,7 +8,7 @@ import {
 } from '@/server/admin/adminPrivateHooks.functions'
 
 const cardClassName = twMerge(
-  'not-prose divide-y divide-gray-900/10 overflow-hidden',
+  'divide-y divide-gray-900/10 overflow-hidden',
   'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
 )
 
@@ -40,7 +40,7 @@ export function AdminPrivateHooksSection() {
 
   return (
     <>
-      <hr className={twMerge('not-prose my-10 border-0 border-t border-gray-900/10')} />
+      <hr className={twMerge('my-10 border-0 border-t border-gray-900/10')} />
       <Disclosure title="Interne Pipeline-Hooks" defaultOpen={false}>
         <div className="space-y-3 p-3">
           <p className="text-sm text-gray-600">

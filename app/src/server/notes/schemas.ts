@@ -17,7 +17,7 @@ export const NoteAndCommentsSchema = z.object({
   author: Author,
   subject: z.string(),
   body: z.string().nullable(),
-  resolvedAt: z.union([z.null(), z.coerce.date()]),
+  resolvedAt: z.coerce.date().nullable(),
   latitude: z.number(),
   longitude: z.number(),
   noteComments: z

@@ -17,6 +17,9 @@ export const regionUploadsUserQueryOptions = (regionSlug: string) => {
       return result as RegionDatasetUser[]
     },
     staleTime: STALE_TIME_LONG_CACHE_MS,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
     placeholderData: [],
   })
 }
@@ -26,6 +29,9 @@ export const regionUploadsSystemLayerQueryOptions = (regionSlug: string) => {
     queryKey: ['region', regionSlug, 'uploads', true] as const,
     queryFn: () => getUploadsForRegionSystemLayerFn({ data: { regionSlug } }),
     staleTime: STALE_TIME_LONG_CACHE_MS,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
     placeholderData: [],
   })
 }

@@ -13,7 +13,7 @@ export function QaConfigCard({
   stats: QaConfigStats | undefined
 }) {
   return (
-    <div className="not-prose mb-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="mb-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <h3 className="m-0 p-0 text-lg leading-tight font-semibold text-gray-900">

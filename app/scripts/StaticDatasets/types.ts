@@ -5,7 +5,6 @@ import type {
   LineLayerSpecification,
   SymbolLayerSpecification,
 } from 'maplibre-gl'
-import type { StaticDatasetCategoryKey } from '@/components/regionen/pageRegionSlug/mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
 import type {
   FileMapDataSubcategoryStyleLegend,
   MapDataOsmIdConfig,
@@ -51,8 +50,8 @@ type MapDataDatasetsSourceBase = {
 export type StaticDatasetLayer = MapDataDatasetsSourceBase['layers'][number]
 
 type MapDataDatasetsSource = MapDataDatasetsSourceBase & {
-  /** @desc A quick-n-dirty way to get type safety for categories. The prefix is just to make type safety per region (or cluster of regions) possible. */
-  category: StaticDatasetCategoryKey | null
+  /** @desc Grouping key for the region sidebar; labels and order live in DB (StaticDatasetCategory). */
+  category: string | null
   updatedAt?: string
   description?: string
   /** @desc A link to the source or a description of how the data was created */

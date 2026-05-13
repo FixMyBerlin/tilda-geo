@@ -16,13 +16,14 @@ const geometryPolygon = z.object({
   type: z.literal('Polygon'),
   coordinates: polygon,
 })
+const dbStatGeometrySchema = z.discriminatedUnion('type', [geometryMultiPolygon, geometryPolygon])
 const DbStatSchema = z.object({
   id: z.string(),
   name: z.string(),
   level: z.enum(['4', '6']),
   road_length: z.record(z.string(), z.number()),
   bikelane_length: z.record(z.string(), z.number()).nullable(),
-  geometry: geometryMultiPolygon.or(geometryPolygon),
+  geometry: dbStatGeometrySchema,
 })
 const DbStatsSchema = z.array(DbStatSchema)
 

@@ -1,9 +1,10 @@
 import { Parser } from '@json2csv/plainjs'
 import invariant from 'tiny-invariant'
-import { staticDatasetCategories } from '@/components/regionen/pageRegionSlug/mapData/mapDataStaticDatasetCategories/staticDatasetCategories.const'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
 import type { Region, Upload } from '@/prisma/generated/client'
 import type { MetaData } from '@/scripts/StaticDatasets/types'
+import { categoryPresentationForConfigCategory } from '@/server/static-dataset-categories/queries/loadStaticDatasetCategoryMap.server'
+import { loadStaticDatasetCategoryMap } from '@/server/static-dataset-categories/queries/loadStaticDatasetCategoryMap.server'
 
 /**
  * Upload with regions included (matching our DB queries)
@@ -33,27 +34,25 @@ type RegionCsvRow = {
   public: string
 }
 
-export function convertRegionUploadsToCsv(uploads: UploadWithRegions[], regionSlug: string) {
+export async function convertRegionUploadsToCsv(uploads: UploadWithRegions[], regionSlug: string) {
   if (!uploads || uploads.length === 0) {
     throw new Error('No uploads found for this region')
   }
 
+  const categoryMap = await loadStaticDatasetCategoryMap()
   const csvRows: RegionCsvRow[] = []
 
   console.log(`Processing ${uploads.length} uploads for region ${regionSlug}`)
 
-  // Process each upload
   for (const upload of uploads) {
     const configs = upload.configs as MetaData['configs']
 
-    // Each upload can have multiple configs (datasets)
     for (const config of configs) {
       const regionUrl = `${process.env.VITE_APP_ORIGIN}/regionen/${regionSlug}?data=${upload.slug}`
-      const categoryTitle =
-        (config.category && staticDatasetCategories[config.category]?.title) || config.category
-      const categorySubtitle: string | undefined = config.category
-        ? staticDatasetCategories[config.category]?.subtitle
-        : undefined
+      const { categoryTitle, categorySubtitle } = categoryPresentationForConfigCategory(
+        config.category,
+        categoryMap,
+      )
 
       const row: RegionCsvRow = {
         id: upload.slug,
@@ -80,7 +79,6 @@ export function convertRegionUploadsToCsv(uploads: UploadWithRegions[], regionSl
     throw new Error('No valid datasets found in uploads')
   }
 
-  // Configure CSV parser with semicolon delimiter for QGIS compatibility
   const firstRow = csvRows[0]
   invariant(firstRow, 'No valid datasets found in uploads')
   const parser = new Parser({
@@ -93,8 +91,9 @@ export function convertRegionUploadsToCsv(uploads: UploadWithRegions[], regionSl
   try {
     return parser.parse(csvRows)
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
     console.error('CSV parsing error:', error)
     console.error('Sample row keys:', Object.keys(csvRows[0] || {}))
-    throw new Error(`CSV parsing failed: ${error.message}`)
+    throw new Error(`CSV parsing failed: ${message}`)
   }
 }

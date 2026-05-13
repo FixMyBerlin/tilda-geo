@@ -1,8 +1,8 @@
-import { TrashIcon } from '@heroicons/react/24/outline'
 import { useRouter } from '@tanstack/react-router'
 import { twMerge } from 'tailwind-merge'
 import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
 import { adminTableClasses } from '@/components/admin/AdminTable'
+import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
 import { RegionStatusPill } from '@/components/admin/RegionStatusPill'
 import { formatDate } from '@/components/shared/date/formatDate'
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
@@ -87,19 +87,10 @@ export const AdminMembershipsTable = ({ users }: Props) => {
                                 className="text-xs"
                               />
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(membership)}
-                              className={twMerge(
-                                'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md',
-                                'text-gray-500 transition-colors',
-                                'hover:bg-red-50 hover:text-red-700',
-                                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600',
-                              )}
-                              aria-label={`Mitgliedschaft ${membership.region.slug} löschen`}
-                            >
-                              <TrashIcon className="size-4" aria-hidden />
-                            </button>
+                            <AdminTrashIconButton
+                              ariaLabel={`Mitgliedschaft ${membership.region.slug} löschen`}
+                              onClick={() => void handleDelete(membership)}
+                            />
                           </div>
                         </li>
                       )

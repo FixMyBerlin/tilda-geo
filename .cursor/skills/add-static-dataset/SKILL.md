@@ -91,7 +91,7 @@ export const transform = (data: FeatureCollection) => {
 
 **Config optional fields**:
 
-- `category`: StaticDatasetCategoryKey | null
+- `category`: string | null — grouping key; titles/order are managed in Admin → Statische Datensatz-Kategorien (DB).
 - `updatedAt`: string
 - `description`: string
 - `dataSourceMarkdown`: string

@@ -12,10 +12,7 @@ const ExportInputSchema = z.object({
 
 /** Postgres `numeric` may arrive as string; export uses `number | null`. */
 const qaExportNumericOrNullSchema = z
-  .preprocess(
-    (v: unknown) => (v == null || v === '' ? null : v),
-    z.union([z.null(), z.coerce.number()]),
-  )
+  .preprocess((v: unknown) => (v == null || v === '' ? null : v), z.coerce.number().nullable())
   .catch(null)
 
 export type QaConfigExportRow = {

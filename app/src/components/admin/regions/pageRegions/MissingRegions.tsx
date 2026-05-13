@@ -9,10 +9,12 @@ export const MissingRegions = ({ regions }: { regions: TRegion[] }) => {
   const missingRegions = staticRegion.filter((region) => !existingRegionSlugs.includes(region.slug))
 
   return (
-    <>
-      <h2>Fehlende Regionen</h2>
-      <p>Regionen die in der DB fehlen aber in unserer statischen Datei vorliegen.</p>
-      <table className={adminTableClasses.table}>
+    <section className="mt-10">
+      <h2 className="text-xl font-semibold tracking-tight text-gray-900">Fehlende Regionen</h2>
+      <p className="mt-2 max-w-prose text-base leading-7 text-gray-600">
+        Regionen die in der DB fehlen aber in unserer statischen Datei vorliegen.
+      </p>
+      <table className={`mt-6 ${adminTableClasses.table}`}>
         <thead>
           <tr className={adminTableClasses.headRow}>
             <th scope="col" className={adminTableClasses.th}>
@@ -40,6 +42,6 @@ export const MissingRegions = ({ regions }: { regions: TRegion[] }) => {
           ))}
         </tbody>
       </table>
-    </>
+    </section>
   )
 }

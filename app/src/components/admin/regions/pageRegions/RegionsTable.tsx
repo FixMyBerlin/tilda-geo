@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
+import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { RegionStatusPill } from '@/components/admin/RegionStatusPill'
 import { Link } from '@/components/shared/links/Link'
-import { linkStyles } from '@/components/shared/links/styles'
 import { Pill } from '@/components/shared/text/Pill'
 import type { TRegion } from '@/server/regions/queries/getRegion.server'
 import { deleteRegionFn } from '@/server/regions/regions.functions'
@@ -59,17 +59,14 @@ export const RegionsTable = ({ regions }: Props) => {
               <ObjectDump data={region} />
             </td>
             <td className={adminTableClasses.td}>
-              <button
-                type="button"
+              <AdminTrashIconButton
+                ariaLabel={`Region ${region.slug} löschen`}
                 onClick={() => {
                   if (window.confirm(`»${region.slug}« wirklich unwiderruflich löschen?`)) {
                     deleteRegionMutation({ slug: region.slug })
                   }
                 }}
-                className={linkStyles}
-              >
-                Löschen
-              </button>
+              />
             </td>
             <td className={adminTableClasses.td}>
               <Link to="/admin/regions/$regionSlug/edit" params={{ regionSlug: region.slug }}>

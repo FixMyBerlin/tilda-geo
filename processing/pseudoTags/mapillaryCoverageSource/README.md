@@ -6,7 +6,7 @@ Our current solution works as follows:
 
 ## a. Process the data
 
-https://github.com/vizsim/mapillary_coverage/tree/feature/docker-notebook fetches mapillary tiles for Mapillary sequences in Germany and matches them to OSM roads data.
+https://github.com/vizsim/mapillary_coverage/tree/main fetches mapillary tiles for Mapillary sequences in Germany and matches them to OSM roads data.
 
 The result (will be) a datasource of
 
@@ -17,7 +17,7 @@ The processing is based on a fixed buffer. When 60 % of the way has mapillary co
 
 ## b. Store the data
 
-- We download data from https://github.com/vizsim/mapillary_coverage/tree/feature/docker-notebook/output during initialization.
+- We download data from https://github.com/vizsim/mapillary_coverage/tree/main/output during initialization.
   - The download URLs are defined in `source.const.ts`.
 - The dates of processing (Mapillary and OSM data dates) are stored in the database table `data.mapillary_coverage_metadata`.
   - See `/docs/mapillary-coverage` for display of these dates.

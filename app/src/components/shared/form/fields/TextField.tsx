@@ -3,7 +3,7 @@ import { twJoin } from 'tailwind-merge'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import type { FieldProps } from './sharedStyles'
-import { inputBase, inputError, inputNormal, labelClass } from './sharedStyles'
+import { inputBase, inputError, inputNormal, inputReadonly, labelClass } from './sharedStyles'
 
 type Props<T extends Record<string, unknown>> = FieldProps & {
   form: FormApi<T>
@@ -24,6 +24,8 @@ export function TextField<T extends Record<string, unknown>>({
   type = 'text',
   ...inputProps
 }: Props<T>) {
+  const { readOnly, className, ...restInputProps } = inputProps
+  const isReadonly = Boolean(readOnly)
   return (
     <form.Field name={name}>
       {(field) => {
@@ -35,7 +37,11 @@ export function TextField<T extends Record<string, unknown>>({
           labelClassNameOverwrite ?? twJoin(labelClass, labelSrOnly ? 'sr-only' : '')
         const resolvedInputClassName =
           classNameOverwrite ??
-          twJoin(inputBase, hasError ? inputError : inputNormal, inputProps.className)
+          twJoin(
+            inputBase,
+            isReadonly ? inputReadonly : hasError ? inputError : inputNormal,
+            className,
+          )
         return (
           <div>
             <label htmlFor={String(name)} className={resolvedLabelClassName}>
@@ -51,8 +57,9 @@ export function TextField<T extends Record<string, unknown>>({
               type={type}
               className={resolvedInputClassName}
               aria-invalid={hasError}
+              readOnly={readOnly}
               {...autofillIgnoreProps}
-              {...inputProps}
+              {...restInputProps}
             />
             {help && <p className="mt-2 text-sm text-gray-500">{help}</p>}
             {hasError && (

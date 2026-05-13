@@ -42,8 +42,8 @@ local mapillary_coverage_data = load_csv_mapillary_coverage()
 
 **CSV Loading Chain:**
 
-1. `load_csv_mapillary_coverage()` → `processing/topics/helper/pseudo_tags/load_csv_mapillary_coverage.lua`
-2. Uses generic `load_csv()` → `processing/topics/helper/pseudo_tags/load_csv.lua`
+1. `load_csv_mapillary_coverage()` → `processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/load_csv_mapillary_coverage.lua`
+2. Uses generic `load_csv_mapillary()` → `processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/load_csv_mapillary.lua`
 3. Parses CSV using `ftcsv` library
 4. Transforms into hash map: `{ [osm_id] => { mapillary_coverage = "regular|pano" } }`
 5. Caches in memory for the entire processing run

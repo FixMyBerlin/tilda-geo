@@ -27,10 +27,10 @@ const geojsonMultipolyon = z.object({
   type: z.literal('MultiPolygon'),
   coordinates: z.array(z.array(z.array(z.tuple([z.number(), z.number()])))),
 })
-const geojsonInputSchema = z.union([geojsonPolygon, geojsonMultipolyon])
+const geojsonGeometrySchema = z.discriminatedUnion('type', [geojsonPolygon, geojsonMultipolyon])
 const geoJsonResultSchema = z.object({
   type: z.literal('Feature'),
-  geometry: geojsonMultipolyon.or(geojsonPolygon),
+  geometry: geojsonGeometrySchema,
   properties: z.object({
     kind: z.enum(['boundary', 'buffer']),
     ids: z.string(),
@@ -68,7 +68,7 @@ const downloadGeoJson = async (idsString: string) => {
 
   try {
     const data = await response.json()
-    const geoJson = geojsonInputSchema.parse(data)
+    const geoJson = geojsonGeometrySchema.parse(data)
     return geoJson
   } catch (_error) {
     handleError([

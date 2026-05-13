@@ -204,6 +204,33 @@ model Upload {
   @@schema("prisma")
 }
 
+model StaticDatasetCategory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Same string as Upload.configs[].category (e.g. bb/Netzkonzeption). Globally unique.
+  key         String @unique @db.VarChar(191)
+
+  /// First path segment (before first `/`), e.g. bb from bb/Netzkonzeption.
+  groupKey    String @db.VarChar(191)
+
+  /// Rest after first `/`, e.g. Netzkonzeption.
+  categoryKey String @db.VarChar(191)
+
+  /// Display order in the region sidebar; supports fractional values (e.g. 1.5).
+  sortOrder Float
+
+  /// Max lengths: `staticDatasetCategoryDisplayLimits.ts`.
+  title    String  @db.VarChar(40)
+  subtitle String? @db.VarChar(100)
+
+  @@unique([groupKey, categoryKey])
+  @@index([groupKey, sortOrder, categoryKey])
+  @@map("StaticDatasetCategory")
+  @@schema("prisma")
+}
+
 enum UploadCreatedByEnum {
   USER
   SCRIPT
