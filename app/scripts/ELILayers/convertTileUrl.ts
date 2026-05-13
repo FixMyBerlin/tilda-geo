@@ -7,11 +7,7 @@ export function convertTileUrl(
   if (eliType === 'tms') {
     // TMS format: convert to {z}/{x}/{y} format
     // ELI TMS URLs typically use {zoom}/{x}/{y} or similar
-    let converted = eliUrl
-      .replace(/\{zoom\}/g, '{z}')
-      .replace(/\{z\}/g, '{z}')
-      .replace(/\{x\}/g, '{x}')
-      .replace(/\{y\}/g, '{y}')
+    let converted = eliUrl.replace(/\{zoom\}/g, '{z}')
 
     // Handle TMS Y coordinate inversion if needed
     // TMS uses inverted Y, but MapLibre expects standard Y
