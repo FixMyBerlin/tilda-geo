@@ -1,3 +1,6 @@
+import { join } from 'node:path'
+import { $ } from 'bun'
+import { isSameMinute } from 'date-fns'
 import { PSEUDO_TAGS_DATA } from '../../constants/directories.const'
 import { berlinTimeString } from '../../utils/berlinTime'
 import { humanFileSize } from '../../utils/humanFileSize'
@@ -8,9 +11,6 @@ import {
 } from './metadata'
 import { mapillaryDataDatesSchema, osmDataDatesSchema } from './schema'
 import { mapillaryCoverageSources } from './source.const'
-import { $ } from 'bun'
-import { isSameMinute } from 'date-fns'
-import { join } from 'node:path'
 
 export async function downloadMapillaryCoverage() {
   // Initialize

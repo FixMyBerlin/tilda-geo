@@ -31,8 +31,7 @@
     "noErrorTruncation": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@/scripts/*": ["./scripts/*"],
-      "mailers/*": ["./mailers/*"]
+      "@/scripts/*": ["./scripts/*"]
     }
   },
   "exclude": [

@@ -15,6 +15,8 @@ const oauthErrorMessages = {
     'Die Anmeldung konnte nicht gestartet werden, weil kein Weiterleitungsziel zurückgegeben wurde.',
   oauth_sign_in_exception:
     'Die Anmeldung konnte wegen eines technischen Fehlers nicht gestartet werden.',
+  account_not_linked:
+    'OpenStreetMap konnte nicht mit Ihrem Nutzerkonto verknüpft werden. Bitte melden Sie sich erneut an.',
 } satisfies Record<string, string>
 
 export function PageOAuthError() {

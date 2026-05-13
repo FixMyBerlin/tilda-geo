@@ -221,8 +221,13 @@ CREATE OR REPLACE FUNCTION tilda_sidepath_dict_is_sidepath(entry jsonb) RETURNS 
     OR tilda_sidepath_dict_is_sidepath_by_checks((entry -> 'checks')::int, entry -> 'name')
 $$ LANGUAGE SQL;
 
+-- Postgres rejects CREATE OR REPLACE when the OUT row type of a RETURNS TABLE function changes.
+-- Drop dependents first, then the set-returning function (e.g. after adding columns to the result row).
+DROP FUNCTION IF EXISTS tilda_sidepath_csv(double precision, double precision);
+DROP FUNCTION IF EXISTS tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(double precision, double precision);
+
 -- Single output used: CSV. Reads from _sidepath_estimation_* with osm_id and explicit road/path columns.
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(buffer_distance float, buffer_size float)
+CREATE FUNCTION tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(buffer_distance float, buffer_size float)
   RETURNS TABLE (
     osm_id bigint,
     nr bigint,
@@ -260,7 +265,7 @@ CREATE OR REPLACE FUNCTION tilda_sidepath_dict_checkpoints_and_roads_left_outer_
     points.osm_id
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION tilda_sidepath_csv(buffer_distance float, buffer_size float)
+CREATE FUNCTION tilda_sidepath_csv(buffer_distance float, buffer_size float)
   RETURNS TABLE (osm_id text, is_sidepath_estimation text) AS $$
   SELECT
     j.osm_id::text,

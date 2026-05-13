@@ -1,13 +1,13 @@
+import { join } from 'node:path'
+import { TZDate } from '@date-fns/tz'
+import { $ } from 'bun'
+import { format, getHours, subDays } from 'date-fns'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
 import { debugWgetCommand } from '../utils/debugWget'
 import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
 import { params } from '../utils/parameters'
 import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
-import { TZDate } from '@date-fns/tz'
-import { $ } from 'bun'
-import { format, getHours, subDays } from 'date-fns'
-import { join } from 'node:path'
 
 /**
  * Get the full path to the downloaded file.

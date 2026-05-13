@@ -78,6 +78,9 @@ const exportSearchSchema = z.object({
   format: z.enum(formats),
 })
 
+const createExportRunId = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+
 export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
   ssr: true,
   params: {
@@ -86,6 +89,9 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
+        const exportRunId = createExportRunId()
+        const logPrefix = `[EXPORT:${exportRunId}]`
+        const requestStartedAt = Date.now()
         const rawSearchParams = new URL(request.url).searchParams
         const parsedSearch = exportSearchSchema.safeParse({
           apiKey: rawSearchParams.get('apiKey') || '',
@@ -97,7 +103,10 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         })
 
         if (!parsedSearch.success) {
-          console.error(parsedSearch.error)
+          console.error(logPrefix, 'invalid export query params', {
+            url: request.url,
+            issues: parsedSearch.error.issues,
+          })
           return badRequestJson({
             headers: corsHeaders,
             info: z.flattenError(parsedSearch.error),
@@ -105,6 +114,14 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         }
         const { regionSlug, tableName } = params
         const { apiKey, minlon, minlat, maxlon, maxlat, format } = parsedSearch.data
+        console.info(logPrefix, 'start export', {
+          regionSlug,
+          tableName,
+          format,
+          bbox: { minlon, minlat, maxlon, maxlat },
+          hasApiKey: Boolean(apiKey),
+          requestId: request.headers.get('x-request-id') || undefined,
+        })
 
         const status = await resolveRegionAccessStatus({
           headers: request.headers,
@@ -112,6 +129,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           apiKey,
         })
         if (status !== 200) {
+          console.warn(logPrefix, 'access denied', { status, regionSlug, tableName })
           if (status === 404) {
             return notFoundJson({ headers: corsHeaders })
           }
@@ -119,14 +137,17 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         }
 
         try {
+          const tagKeysStartedAt = Date.now()
           const tagKeyQuery: Array<{ key: string }> = await geoDataClient.$queryRawUnsafe(`
               SELECT DISTINCT jsonb_object_keys(tags) AS key
               FROM "${tableName}"
             `)
+          const metaKeysStartedAt = Date.now()
           const metaKeyQuery: Array<{ key: string }> = await geoDataClient.$queryRawUnsafe(`
               SELECT DISTINCT jsonb_object_keys(meta) AS key
               FROM "${tableName}"
             `)
+          const columnsCheckStartedAt = Date.now()
 
           const columnExistsQuery: Array<{ column_name: string }> =
             await geoDataClient.$queryRawUnsafe(`
@@ -138,6 +159,17 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           const existingColumns = columnExistsQuery.map(({ column_name }) => column_name)
           const hasOsmId = existingColumns.includes('osm_id')
           const hasOsmType = existingColumns.includes('osm_type')
+          console.info(logPrefix, 'loaded export columns metadata', {
+            tagKeysCount: tagKeyQuery.length,
+            metaKeysCount: metaKeyQuery.length,
+            hasOsmId,
+            hasOsmType,
+            timingsMs: {
+              tagKeys: metaKeysStartedAt - tagKeysStartedAt,
+              metaKeys: columnsCheckStartedAt - metaKeysStartedAt,
+              columnsCheck: Date.now() - columnsCheckStartedAt,
+            },
+          })
 
           const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
           const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
@@ -185,13 +217,33 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             ${layerName ? `-nln ${layerName}` : ''} \
             "${outputFilePath}" \
             ${dbConnection}`
+          console.info(logPrefix, 'running ogr2ogr', {
+            outputFilePath,
+            layerName,
+            ogrDriver: ogrFormat.driver,
+            isGdalAvailable,
+            sqlLength: sqlQuery.length,
+          })
 
+          const ogrStartedAt = Date.now()
           await new Promise<void>((resolve, reject) => {
             exec(ogrCommand, { maxBuffer: 1024 * 1024 * 50 }, (error, stdout, stderr) => {
+              const durationMs = Date.now() - ogrStartedAt
               if (error) {
+                console.error(logPrefix, 'ogr2ogr failed', {
+                  durationMs,
+                  errorMessage: error.message,
+                  stderrPreview: stderr ? stderr.slice(0, 4000) : undefined,
+                  stdoutPreview: stdout ? stdout.slice(0, 2000) : undefined,
+                })
                 reject(error)
                 return
               }
+              console.info(logPrefix, 'ogr2ogr finished', {
+                durationMs,
+                stdoutLength: stdout.length,
+                stderrLength: stderr.length,
+              })
               if (stderr && isDev) {
                 console.warn('[EXPORT] ogr2ogr stderr:', stderr)
               }
@@ -213,6 +265,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
               `${key}=${value}`,
             ])
 
+            const gdalMetadataStartedAt = Date.now()
             await new Promise<void>((resolve) => {
               execFile(
                 'gdal',
@@ -232,14 +285,23 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
                   void (async () => {
                     try {
                       if (error) {
-                        console.warn('[EXPORT] gdal metadata update failed:', error.message)
+                        console.warn(logPrefix, 'gdal metadata update failed', {
+                          errorMessage: error.message,
+                          durationMs: Date.now() - gdalMetadataStartedAt,
+                        })
                         await fs.unlink(tempMetadataPath).catch(() => {})
                       } else {
                         await fs.unlink(outputFilePath)
                         await fs.rename(tempMetadataPath, outputFilePath)
+                        console.info(logPrefix, 'gdal metadata update finished', {
+                          durationMs: Date.now() - gdalMetadataStartedAt,
+                        })
                       }
                     } catch (replaceError) {
-                      console.warn('[EXPORT] gdal metadata replace failed:', replaceError)
+                      console.warn(logPrefix, 'gdal metadata replace failed', {
+                        replaceError,
+                        durationMs: Date.now() - gdalMetadataStartedAt,
+                      })
                       await fs.unlink(tempMetadataPath).catch(() => {})
                     } finally {
                       resolve()
@@ -250,8 +312,18 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             })
           }
 
+          const outputStats = await fs.stat(outputFilePath)
+          console.info(logPrefix, 'prepared output file', {
+            outputFilePath,
+            bytes: outputStats.size,
+          })
           const fileBuffer = await fs.readFile(outputFilePath)
-          await fs.unlink(outputFilePath)
+          await fs.unlink(outputFilePath).catch((unlinkError) => {
+            console.warn(logPrefix, 'failed to remove temp export file', {
+              outputFilePath,
+              unlinkError,
+            })
+          })
 
           const metadata = await getProcessingMeta()
           const filename = metadata.osm_data_from
@@ -260,6 +332,12 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
 
           if (format === 'geojson' && request.headers.get('accept-encoding')?.includes('gzip')) {
             const compressed = gzipSync(fileBuffer)
+            console.info(logPrefix, 'sending gzipped geojson response', {
+              filename,
+              uncompressedBytes: fileBuffer.length,
+              compressedBytes: compressed.length,
+              totalDurationMs: Date.now() - requestStartedAt,
+            })
             return new Response(compressed, {
               headers: {
                 ...corsHeaders,
@@ -271,6 +349,12 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             })
           }
 
+          console.info(logPrefix, 'sending response', {
+            filename,
+            bytes: fileBuffer.length,
+            mimeType: ogrFormat.mimeType,
+            totalDurationMs: Date.now() - requestStartedAt,
+          })
           return new Response(fileBuffer, {
             headers: {
               ...corsHeaders,
@@ -280,7 +364,13 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             },
           })
         } catch (error) {
-          console.error(error)
+          console.error(logPrefix, 'export failed', {
+            regionSlug: params.regionSlug,
+            tableName: params.tableName,
+            requestUrl: request.url,
+            totalDurationMs: Date.now() - requestStartedAt,
+            error,
+          })
           return internalServerErrorJson({ headers: corsHeaders, cause: error })
         }
       },

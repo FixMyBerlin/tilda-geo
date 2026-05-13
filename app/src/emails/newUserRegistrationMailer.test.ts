@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest'
 import { newUserRegistrationMailer } from './newUserRegistrationMailer'
 
 // Mock the sendMail function to avoid actually sending emails in tests
-vi.mock('./utils/sendMail', () => ({
+vi.mock('./_utils/sendMail', () => ({
   sendMail: vi.fn().mockResolvedValue(undefined),
 }))
 
@@ -20,13 +20,12 @@ describe('newUserRegistrationMailer', () => {
     const mailer = newUserRegistrationMailer({ user })
     await mailer.send()
 
-    const { sendMail } = await import('./utils/sendMail')
+    const { sendMail } = await import('./_utils/sendMail')
     expect(sendMail).toHaveBeenCalledTimes(1)
 
     const callArgs = vi.mocked(sendMail).mock.calls[0]?.[0]
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Test User')
-    // @ts-expect-error this is not relevant
     expect(callArgs?.From?.Email).toBe('noreply@tilda-geo.de')
     expect(callArgs?.To[0]?.Email).toBe('tilda@fixmycity.de')
     expect(callArgs?.introMarkdown).toContain('Test User')
@@ -50,7 +49,7 @@ describe('newUserRegistrationMailer', () => {
     const mailer = newUserRegistrationMailer({ user })
     await mailer.send()
 
-    const { sendMail } = await import('./utils/sendMail')
+    const { sendMail } = await import('./_utils/sendMail')
     const callArgs = vi.mocked(sendMail).mock.calls[1]?.[0]
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Another User')
@@ -74,7 +73,7 @@ describe('newUserRegistrationMailer', () => {
     const mailer = newUserRegistrationMailer({ user })
     await mailer.send()
 
-    const { sendMail } = await import('./utils/sendMail')
+    const { sendMail } = await import('./_utils/sendMail')
     const callArgs = vi.mocked(sendMail).mock.calls[2]?.[0]
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Unbekannt')

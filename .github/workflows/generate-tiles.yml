@@ -20,6 +20,9 @@ on:
         type: string
         required: false
         default: 'off'
+permissions:
+  contents: read
+
 jobs:
   generate-tiles:
     environment:

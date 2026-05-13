@@ -12,7 +12,6 @@
   "ignoreBinaries": ["code", "github", "gh"],
   "ignoreDependencies": [
     "@tanstack/router-plugin",
-    "@react-email/preview-server",
     // Used in symlinked scripts/StaticDatasets/geojson/** (ignored by knip via ignoreFiles)
     "papaparse",
     "@types/papaparse",

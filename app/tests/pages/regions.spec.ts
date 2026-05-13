@@ -4,6 +4,7 @@ import { TEST_REGION_URL, TEST_REGION_URL_WITH_CONFIG } from '../fixtures/routes
 import { expectNoConsoleErrors } from '../utils/console'
 import { verifyMapRendered, waitForMapLoad } from '../utils/maps'
 import { verifyMapNetworkRequests } from '../utils/network'
+import { escapeRegExp } from '../utils/regex'
 
 const runRealOAuth = process.env.RUN_OAUTH_E2E === '1'
 
@@ -68,7 +69,7 @@ test.describe('Regions Pages', () => {
       }
 
       await page.goto(TEST_REGION_URL_WITH_CONFIG)
-      await expect(page).toHaveURL(new RegExp(TEST_REGION_URL.replace(/\//g, '\\/')))
+      await expect(page).toHaveURL(new RegExp(escapeRegExp(TEST_REGION_URL)))
 
       // Wait for map to load
       await waitForMapLoad(page)
@@ -107,7 +108,7 @@ test.describe('Regions Pages', () => {
       await switchUserToAdmin(session.userId)
 
       await page.goto(TEST_REGION_URL_WITH_CONFIG)
-      await expect(page).toHaveURL(new RegExp(TEST_REGION_URL.replace(/\//g, '\\/')))
+      await expect(page).toHaveURL(new RegExp(escapeRegExp(TEST_REGION_URL)))
 
       // Wait for map to load
       await waitForMapLoad(page)

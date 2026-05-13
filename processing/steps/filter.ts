@@ -1,3 +1,6 @@
+import { join } from 'node:path'
+import { bboxPolygon, featureCollection, union } from '@turf/turf'
+import { $ } from 'bun'
 import {
   BBOX_FILTERED_FILE,
   OSM_FILTERED_DIR,
@@ -9,9 +12,6 @@ import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 import { originalFilePath } from './download'
-import { bboxPolygon, featureCollection, union } from '@turf/turf'
-import { $ } from 'bun'
-import { join } from 'node:path'
 
 /**
  * Get the full path to the filtered file.

@@ -1,8 +1,8 @@
-import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
-import { params } from '../utils/parameters'
-import { $ } from 'bun'
 import { join } from 'node:path'
 import { styleText } from 'node:util'
+import { $ } from 'bun'
+import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
+import { params } from '../utils/parameters'
 
 //Geofabrik OAuth base URL, https://github.com/geofabrik/sendfile_osm_oauth_protector/blob/master/doc/client.md
 const GEOFABRIK_OAUTH_BASE_URL = 'https://osm-internal.download.geofabrik.de'

@@ -193,6 +193,9 @@ const options = {
       enabled: true,
       trustedProviders: ['osm'],
       allowDifferentEmails: true,
+      // OSM uses placeholder emails and never sets emailVerified; default true would block
+      // implicit Account creation after mapProfileToUser creates the User (see link-account.mjs).
+      requireLocalEmailVerified: false,
     },
   },
   user: {

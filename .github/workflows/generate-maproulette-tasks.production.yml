@@ -5,6 +5,9 @@ on:
   schedule:
     # Runs every Friday at 9:00 AM
     - cron: '0 9 * * 5'
+permissions:
+  contents: read
+
 jobs:
   generate-maproulette-tasks:
     runs-on: ubuntu-latest

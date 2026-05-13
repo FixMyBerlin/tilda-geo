@@ -1,6 +1,6 @@
-import { isDev } from './isDev'
 import { readdir } from 'node:fs/promises'
 import { join, relative } from 'node:path'
+import { isDev } from './isDev'
 
 const packagePathPrefix = { runProcessing: './', runTests: './processing' }
 

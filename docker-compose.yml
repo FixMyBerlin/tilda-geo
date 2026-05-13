@@ -67,18 +67,29 @@ services:
       S3_BUCKET:
       ATLAS_API_KEY:
       MAPROULETTE_API_KEY:
-      MAILJET_APIKEY_PUBLIC:
-      MAILJET_APIKEY_PRIVATE:
+      BREVO_API_KEY:
       FORCE_COLOR: 1
     ports:
       - 4000:4000
     labels:
       traefik.enable: true
       traefik.http.services.container.loadbalancer.server.port: 4000
-      traefik.http.routers.container.rule: Host(`${APP_URL}`) || Host(`www.${APP_URL}`)
-      traefik.http.routers.container.entrypoints: websecure
-      traefik.http.routers.container.tls.certresolver: letsencrypt
-      traefik.http.routers.container.tls: true
+      # Apex host only (non-www canonical).
+      traefik.http.routers.app-apex.rule: Host(`${APP_URL}`)
+      traefik.http.routers.app-apex.entrypoints: websecure
+      traefik.http.routers.app-apex.tls.certresolver: letsencrypt
+      traefik.http.routers.app-apex.tls: true
+      traefik.http.routers.app-apex.service: container
+      # www → apex 301 at the edge (no app-side redirect).
+      traefik.http.middlewares.www-to-apex.redirectregex.regex: "^https://www\\.(.+)$"
+      traefik.http.middlewares.www-to-apex.redirectregex.replacement: "https://$$1"
+      traefik.http.middlewares.www-to-apex.redirectregex.permanent: "true"
+      traefik.http.routers.app-www.rule: Host(`www.${APP_URL}`)
+      traefik.http.routers.app-www.entrypoints: websecure
+      traefik.http.routers.app-www.tls.certresolver: letsencrypt
+      traefik.http.routers.app-www.tls: true
+      traefik.http.routers.app-www.middlewares: www-to-apex
+      traefik.http.routers.app-www.service: container
     depends_on:
       db:
         condition: service_healthy

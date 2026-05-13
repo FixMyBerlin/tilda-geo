@@ -1,4 +1,3 @@
-import { exportSidepathData } from './topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
 import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
@@ -7,6 +6,7 @@ import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
+import { exportSidepathData } from './topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
 

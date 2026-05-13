@@ -31,8 +31,7 @@ const envServerSchema = z.object({
   S3_REGION: z.literal('eu-central-1'),
   ATLAS_API_KEY: requiredString,
   MAPROULETTE_API_KEY: requiredString,
-  MAILJET_APIKEY_PUBLIC: z.string().optional(),
-  MAILJET_APIKEY_PRIVATE: z.string().optional(),
+  BREVO_API_KEY: z.string().optional(),
 })
 
 const envAppSchemaPart = envViteSchema.extend(envServerSchema.shape)
@@ -78,7 +77,16 @@ const envProcessingSchema = z.object({
 })
 
 /** Validated at app startup (Nitro). Unknown keys are allowed; the plugin logs them as FYI. */
-export const envAppStartupValidationSchema = envAppSchemaPart
+export const envAppStartupValidationSchema = z.discriminatedUnion('VITE_APP_ENV', [
+  envAppSchemaPart.extend({
+    VITE_APP_ENV: z.literal('development'),
+    BREVO_API_KEY: z.string().optional(),
+  }),
+  envAppSchemaPart.extend({
+    VITE_APP_ENV: z.literal(['staging', 'production']),
+    BREVO_API_KEY: requiredString,
+  }),
+])
 
 /** Full server env type (app + script + processing). No .strict() so scripts can run with extra env. */
 export const envFullSchema = envViteSchema

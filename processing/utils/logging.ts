@@ -1,8 +1,8 @@
+import { styleText } from 'node:util'
 import { berlinTimeString } from './berlinTime'
 import { formatTimestamp } from './formatTimestamp'
 import { params } from './parameters'
 import { endTimer, startTimer } from './timeTracking'
-import { styleText } from 'node:util'
 
 const lineLength = process.stdout.columns || 120
 

@@ -38,7 +38,12 @@ Create directory if group folder doesn't exist. Ensure sub-folder name follows n
 ### 2. Move GeoJSON File
 
 - Move source file to `<SUB_FOLDER>/<FILENAME>.geojson`
-- Run prettier from `app/` directory (prettier config is in app/): `cd app && bunx prettier --write scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson`
+- **Formatting (inactive for now)**: ~~From `app/`, run a formatter on the GeoJSON, e.g. `bunx prettier --write scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson` (Prettier is not in this repo; this mirrors the old workflow.)~~ **Note:** `oxfmt` (behind `bun run format`) does not support JSON/GeoJSON formatting yet, and `.geojson` under `scripts/StaticDatasets/geojson` is in `ignorePatterns` in `app/oxfmt.config.ts` — **leave the `.geojson` file as-is**.
+- **Size check (dataset validation / creation)**: Measure the **uncompressed** `.geojson` file size. If it is **greater than 6 MiB** (6 × 1024² bytes), compress it so the folder ships only the archive (same pattern as other large static datasets):
+  - From the dataset folder (or with absolute paths): `gzip -9 -f <FILENAME>.geojson`
+  - `gzip` replaces the file with `<FILENAME>.geojson.gz` and removes the plain `.geojson`. `-9` is maximum compression; `-f` forces overwrite if a `.gz` already exists.
+  - If size is **≤ 6 MiB**, leave the `.geojson` as-is (no gzip required).
+- `findGeojson` in `updateStaticDatasets` accepts either a single `.geojson` or a single `.geojson.gz` per folder—never leave both.
 
 ### 3. Create transform.ts (if needed)
 
@@ -107,6 +112,8 @@ export const transform = (data: FeatureCollection) => {
 - For points: circle markers
 - Create appropriate legend entries
 
+**Stripe / Schraffur (`fill-pattern`)**: For diagonal stripes over polygons, reuse the **existing map sprite** image id **`stripe_texture`** (same hatch as private Parkflächen in generated `parking_areas`; listed in `app/public/map-style/sprite.json`). Do not add a new sprite. Stack a **second** `fill` layer **above** the solid fill: `fill-color` `'rgba(0, 0, 0, 0)'`, `fill-opacity` around `0.5` (tune as needed), `fill-pattern` `'stripe_texture'`. Skip `fill-outline-color` on the stripe layer if the base fill already defines an outline. Use a `filter` on the stripe layer when only some features should be hatched; if exports mix boolean `true` and string `'true'`, either use an `any` / `match` filter in `meta.ts` or normalize values in `transform.ts` (step 3) so the filter stays simple.
+
 **Example structure**:
 
 ```typescript
@@ -147,7 +154,7 @@ Note: `updateDownloadSources.ts` is for WFS downloads (requires downloadConfig.t
 
 ### 6. Verify TypeScript Compilation
 
-**Always run this after creating or modifying TypeScript files** (meta.ts, transform.ts, or any imports):
+**Always run this after creating or modifying TypeScript files** (meta.ts, transform.ts, or any imports). From `app/` (same as Step 5):
 
 ```bash
 bun run type-check-deploy
@@ -160,7 +167,7 @@ This temporarily removes the `geojson` symlink, runs TypeScript type-checking, a
 Before completing:
 
 1. ✅ Folder structure created
-2. ✅ GeoJSON file moved and prettier run
+2. ✅ GeoJSON file moved; **if uncompressed `.geojson` > 6 MiB then `gzip -9 -f`** (otherwise plain `.geojson` only; never both); `meta.ts` / `transform.ts` formatted with `bun run format`
 3. ✅ transform.ts created only if needed
 4. ✅ meta.ts follows type structure (check with TypeScript)
 5. ✅ Similar datasets in group folder reviewed for patterns

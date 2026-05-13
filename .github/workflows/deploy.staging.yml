@@ -4,6 +4,10 @@ on:
     branches:
       - develop
       - tinkering
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   setup_env:
     uses: ./.github/workflows/setup-env.yml
