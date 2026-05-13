@@ -1,10 +1,10 @@
-import type { LibraryResponse, SendEmailV3_1 } from 'node-mailjet'
-import Mailjet from 'node-mailjet'
+import { BrevoClient } from '@getbrevo/brevo'
 import { render } from 'react-email'
 import { footerTextMarkdown } from '../_templates/footerTextMarkdown'
 import { MarkdownMail } from '../_templates/MarkdownMail'
 import { signatureTextMarkdown } from '../_templates/signatureTextMarkdown'
-import type { Mail, MailjetMessage } from './types'
+import { getBrevoApiKeyForSending } from './getBrevoApiKeyForSending'
+import type { Mail, TransactionalMessage } from './types'
 
 const appEnv = process.env.VITE_APP_ENV
 const isTest = process.env.NODE_ENV === 'test'
@@ -13,7 +13,7 @@ const isDev = process.env.NODE_ENV === 'development' || appEnv === 'development'
 /**
  * Centralized email sending helper
  * - In development: Previews email in browser
- * - In staging/production: Sends email via Mailjet
+ * - In staging/production: Sends email via Brevo
  *
  * Uses markdown format for both text and HTML parts
  */
@@ -41,12 +41,9 @@ ${footerTextMarkdown}
 
   const htmlPart = await render(<MarkdownMail {...message} />)
 
-  // Ensure To is always an array for MailjetMessage
-  // Mail.To can be string | EmailAddressTo | (string | EmailAddressTo)[] | undefined
-  const toValue = message.To ?? []
-  const toArray = Array.isArray(toValue) ? toValue : [toValue]
+  const toArray = Array.isArray(message.To) ? message.To : [message.To]
 
-  const mailjetMessage: MailjetMessage = {
+  const transactionalMessage: TransactionalMessage = {
     From: message.From,
     To: toArray,
     Subject: message.Subject,
@@ -57,21 +54,16 @@ ${footerTextMarkdown}
   if (isTest || isDev) {
     // Preview email in the browser for development and tests
     const previewEmail = (await import('preview-email')).default
-    const fromEmail =
-      typeof mailjetMessage.From === 'string'
-        ? mailjetMessage.From
-        : mailjetMessage.From?.Email || ''
-    const toEmail = mailjetMessage.To.map((to) =>
-      typeof to === 'string' ? to : to.Email || '',
-    ).join(';')
+    const fromEmail = transactionalMessage.From.Email || ''
+    const toEmail = transactionalMessage.To.map((to) => to.Email || '').join(';')
 
     await previewEmail(
       {
         from: fromEmail,
         to: toEmail,
-        subject: mailjetMessage.Subject,
-        text: mailjetMessage.TextPart,
-        html: mailjetMessage.HTMLPart,
+        subject: transactionalMessage.Subject,
+        text: transactionalMessage.TextPart,
+        html: transactionalMessage.HTMLPart,
       },
       { openSimulator: false },
     )
@@ -79,14 +71,19 @@ ${footerTextMarkdown}
   }
 
   // === Only on Staging, Production ===
-  // Send email via Mailjet
-  const data = { Messages: [{ ...mailjetMessage }] }
-  const mailjet = Mailjet.apiConnect(
-    process.env.MAILJET_APIKEY_PUBLIC || '',
-    process.env.MAILJET_APIKEY_PRIVATE || '',
-  )
-  const result: LibraryResponse<SendEmailV3_1.Response> = await mailjet
-    .post('send', { version: 'v3.1' })
-    .request(data)
+  // Send email via Brevo transactional API
+  const brevo = new BrevoClient({
+    apiKey: getBrevoApiKeyForSending(),
+  })
+  const result = await brevo.transactionalEmails.sendTransacEmail({
+    sender: {
+      email: transactionalMessage.From.Email,
+      name: transactionalMessage.From.Name,
+    },
+    to: transactionalMessage.To.map(({ Email, Name }) => ({ email: Email, name: Name })),
+    subject: transactionalMessage.Subject,
+    textContent: transactionalMessage.TextPart,
+    htmlContent: transactionalMessage.HTMLPart,
+  })
   return result
 }

@@ -89,6 +89,7 @@
   "dependencies": {
     "@date-fns/tz": "1.4.1",
     "@date-fns/utc": "2.1.1",
+    "@getbrevo/brevo": "^5.0.4",
     "@headlessui/react": "2.2.10",
     "@json2csv/plainjs": "7.0.6",
     "@maptiler/geocoding-control": "3.0.0",
@@ -124,7 +125,6 @@
     "jsurl2": "2.2.0",
     "maplibre-gl": "5.24.0",
     "nitro": "npm:nitro-nightly@latest",
-    "node-mailjet": "6.0.11",
     "nuqs": "2.8.9",
     "pg": "8.20.0",
     "pmtiles": "4.4.1",

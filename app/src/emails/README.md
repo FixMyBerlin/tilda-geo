@@ -8,7 +8,7 @@
 ## Layout
 
 - **`_templates/`** — shared React Email components (underscore prefix: ignored by the preview scanner per [CLI docs](https://react.email/docs/cli)).
-- **`_utils/`** — `render`, Mailjet wiring, types (`sendMail`, etc.).
+- **`_utils/`** — `render`, Brevo wiring, types (`sendMail`, etc.).
 - **`*Mailer.tsx`** at this level — mailer actions plus optional `export default` for preview.
 
 For preview-only static assets, React Email supports **`static/`** under this directory (served at `/static/...` on the preview host). Production sends still need absolute URLs; we use the app origin and `public/emails/` assets instead.

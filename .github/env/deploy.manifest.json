@@ -166,20 +166,12 @@
       "description": "MapRoulette API key."
     },
     {
-      "name": "MAILJET_APIKEY_PUBLIC",
-      "sourceEnv": "SECRET_MAILJET_APIKEY_PUBLIC",
-      "required": false,
+      "name": "BREVO_API_KEY",
+      "sourceEnv": "SECRET_BREVO_API_KEY",
+      "required": true,
       "sensitive": true,
-      "githubSource": "secrets.MAILJET_APIKEY_PUBLIC",
-      "description": "Optional Mailjet public key."
-    },
-    {
-      "name": "MAILJET_APIKEY_PRIVATE",
-      "sourceEnv": "SECRET_MAILJET_APIKEY_PRIVATE",
-      "required": false,
-      "sensitive": true,
-      "githubSource": "secrets.MAILJET_APIKEY_PRIVATE",
-      "description": "Optional Mailjet private key."
+      "githubSource": "secrets.BREVO_API_KEY",
+      "description": "Brevo API key for transactional email delivery."
     },
     {
       "name": "SKIP_DOWNLOAD",

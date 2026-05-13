@@ -62,8 +62,7 @@
 | `S3_BUCKET`                            | `secrets.S3_BUCKET`                            | yes      | S3 bucket used by app/scripts.                                  |
 | `ATLAS_API_KEY`                        | `secrets.ATLAS_API_KEY`                        | yes      | Internal atlas API key. Sensitive.                              |
 | `MAPROULETTE_API_KEY`                  | `secrets.MAPROULETTE_API_KEY`                  | yes      | MapRoulette API key. Sensitive.                                 |
-| `MAILJET_APIKEY_PUBLIC`                | `secrets.MAILJET_APIKEY_PUBLIC`                | no       | Optional Mailjet public key. Sensitive.                         |
-| `MAILJET_APIKEY_PRIVATE`               | `secrets.MAILJET_APIKEY_PRIVATE`               | no       | Optional Mailjet private key. Sensitive.                        |
+| `BREVO_API_KEY`                        | `secrets.BREVO_API_KEY`                        | yes      | Brevo API key for transactional email delivery. Sensitive.      |
 | `SKIP_DOWNLOAD`                        | `vars.SKIP_DOWNLOAD`                           | no       | Processing flag (default 1). Default: `1`.                      |
 | `SKIP_UNCHANGED`                       | `vars.SKIP_UNCHANGED`                          | no       | Processing flag (default 0). Default: `0`.                      |
 | `PROCESSING_DIFFING_MODE`              | `vars.PROCESSING_DIFFING_MODE`                 | yes      | Diffing mode for processing.                                    |

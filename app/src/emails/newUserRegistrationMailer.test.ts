@@ -26,7 +26,6 @@ describe('newUserRegistrationMailer', () => {
     const callArgs = vi.mocked(sendMail).mock.calls[0]?.[0]
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Test User')
-    // @ts-expect-error this is not relevant
     expect(callArgs?.From?.Email).toBe('noreply@tilda-geo.de')
     expect(callArgs?.To[0]?.Email).toBe('tilda@fixmycity.de')
     expect(callArgs?.introMarkdown).toContain('Test User')

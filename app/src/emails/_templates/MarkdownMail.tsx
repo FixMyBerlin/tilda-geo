@@ -41,12 +41,7 @@ export const MarkdownMail = ({
           <Container className="mx-auto bg-white sm:rounded-lg sm:shadow-md">
             <Section className="mb-4 bg-gray-800 px-4 py-5 text-center sm:rounded-t-lg sm:px-8 dark:bg-gray-800">
               <center>
-                <Img
-                  src={logoSrc}
-                  width="134"
-                  height="45"
-                  alt="TILDA Geo Logo"
-                />
+                <Img src={logoSrc} width="134" height="45" alt="TILDA Geo Logo" />
               </center>
             </Section>
             <Section className="px-4 py-2 sm:px-8">

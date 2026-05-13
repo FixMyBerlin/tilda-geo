@@ -67,8 +67,7 @@ services:
       S3_BUCKET:
       ATLAS_API_KEY:
       MAPROULETTE_API_KEY:
-      MAILJET_APIKEY_PUBLIC:
-      MAILJET_APIKEY_PRIVATE:
+      BREVO_API_KEY:
       FORCE_COLOR: 1
     ports:
       - 4000:4000

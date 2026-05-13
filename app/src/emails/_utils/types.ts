@@ -1,16 +1,19 @@
-import type { SendEmailV3_1 } from 'node-mailjet'
 import type { MarkdownMailProps } from '../_templates/MarkdownMail'
 
-// Format: https://github.com/mailjet/mailjet-apiv3-nodejs?tab=readme-ov-file#send-email-example
+type MailAddress = {
+  Email: string
+  Name?: string
+}
+
 export type Mail = {
-  From: SendEmailV3_1.Body['Messages'][number]['From']
-  To: SendEmailV3_1.Body['Messages'][number]['To']
+  From: MailAddress
+  To: MailAddress | MailAddress[]
   Subject: string
 } & MarkdownMailProps
 
-export type MailjetMessage = {
-  From: SendEmailV3_1.Body['Messages'][number]['From']
-  To: SendEmailV3_1.Body['Messages'][number]['To']
+export type TransactionalMessage = {
+  From: MailAddress
+  To: MailAddress[]
   Subject: string
   TextPart: string
   HTMLPart: string
