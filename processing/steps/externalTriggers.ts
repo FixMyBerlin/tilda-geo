@@ -4,7 +4,9 @@ import { params } from '../utils/parameters'
 
 export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
   const domain = isDev ? 'http://127.0.0.1:5173' : 'http://app:4000'
-  const url = `${domain}/api/private/${endpoint}?apiKey=${params.apiKey}`
+  const privateApiUrl = `${domain}/api/private/${endpoint}`
+  const url = `${privateApiUrl}?apiKey=${params.apiKey}`
+  const redactedCurlCommand = `curl "${privateApiUrl}?apiKey=***"`
   const maxRetries = 10 // Retry for up to 10 minutes (10 retries × 1 minute)
   const retryDelayMs = 60 * 1000 // 1 minute between retries
 
@@ -12,7 +14,7 @@ export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
     console.info(
       'Finishing up: 👉 Action recommended:',
       'In DEV, the processing cannot trigger API calls. You should do this manually:',
-      `curl "${url}"`,
+      redactedCurlCommand,
     )
     return
   }
@@ -66,7 +68,7 @@ export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
       console.warn(
         `[ERROR] Finishing up: ⚠️ Failed to trigger ${endpoint} after ${retryCount + 1} attempts. Operation was not triggered and will not run.`,
         'Try callig it manually:',
-        `curl "${url}"`,
+        redactedCurlCommand,
         error instanceof Error ? error.message : String(error),
       )
     }
