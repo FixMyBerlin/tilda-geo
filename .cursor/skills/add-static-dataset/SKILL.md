@@ -38,7 +38,7 @@ Create directory if group folder doesn't exist. Ensure sub-folder name follows n
 ### 2. Move GeoJSON File
 
 - Move source file to `<SUB_FOLDER>/<FILENAME>.geojson`
-- Run prettier from `app/` directory (prettier config is in app/): `cd app && bunx prettier --write scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson`
+- **Formatting (inactive for now)**: ~~From `app/`, run a formatter on the GeoJSON, e.g. `bunx prettier --write scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson` (Prettier is not in this repo; this mirrors the old workflow.)~~ **Note:** `oxfmt` (behind `bun run format`) does not support JSON/GeoJSON formatting yet, and `.geojson` under `scripts/StaticDatasets/geojson` is in `ignorePatterns` in `app/oxfmt.config.ts` — **leave the `.geojson` file as-is**.
 - **Size check (dataset validation / creation)**: Measure the **uncompressed** `.geojson` file size. If it is **greater than 6 MiB** (6 × 1024² bytes), compress it so the folder ships only the archive (same pattern as other large static datasets):
   - From the dataset folder (or with absolute paths): `gzip -9 -f <FILENAME>.geojson`
   - `gzip` replaces the file with `<FILENAME>.geojson.gz` and removes the plain `.geojson`. `-9` is maximum compression; `-f` forces overwrite if a `.gz` already exists.
@@ -154,7 +154,7 @@ Note: `updateDownloadSources.ts` is for WFS downloads (requires downloadConfig.t
 
 ### 6. Verify TypeScript Compilation
 
-**Always run this after creating or modifying TypeScript files** (meta.ts, transform.ts, or any imports):
+**Always run this after creating or modifying TypeScript files** (meta.ts, transform.ts, or any imports). From `app/` (same as Step 5):
 
 ```bash
 bun run type-check-deploy
