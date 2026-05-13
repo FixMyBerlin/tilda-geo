@@ -69,7 +69,7 @@
     "topic-docs-build:2format": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write src/data/generated/topicDocs",
     "topic-docs-coverage-check": "bun --env-file=../.env ./scripts/topic-docs-coverage-check/index.ts",
     "mapbox-styles-update": "bun run --sequential mapbox-styles-update:*",
-    "mapbox-styles-update:1process": "bun ./scripts/MapboxStyles/process.ts",
+    "mapbox-styles-update:1process": "bun --env-file=../.env ./scripts/MapboxStyles/process.ts",
     "mapbox-styles-update:2lint": "bun run lint",
     "mapbox-styles-update:3format": "bun run format",
     "mapbox-styles-update:4github": "github",
