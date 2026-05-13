@@ -1,11 +1,11 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { $ } from 'bun'
 import { TYPES_DIR } from '../constants/directories.const'
 import { topicsConfig } from '../constants/topics.const'
 import { getTopicTables } from '../diffing/diffing'
 import { params } from '../utils/parameters'
-import { $ } from 'bun'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 /**
  * Generate types based on the processing tables.

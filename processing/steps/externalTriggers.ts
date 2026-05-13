@@ -1,6 +1,6 @@
+import { $ } from 'bun'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
-import { $ } from 'bun'
 
 export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
   const domain = isDev ? 'http://127.0.0.1:5173' : 'http://app:4000'

@@ -1,6 +1,6 @@
+import { $, sql } from 'bun'
 import { berlinTimeString } from '../utils/berlinTime'
 import { originalFilePath } from './download'
-import { $, sql } from 'bun'
 
 /**
  * Create the metadata table in the database. If already exists, does nothing.

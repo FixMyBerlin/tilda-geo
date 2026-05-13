@@ -1,3 +1,4 @@
+import { $, sql } from 'bun'
 import { HASH_DIR, OSM_DOWNLOAD_DIR, OSM_FILTERED_DIR } from '../constants/directories.const'
 import { initializeCustomFunctionsDataTables, initializeSchemaData } from '../dataTables/dataTables'
 import {
@@ -10,7 +11,6 @@ import { isDev } from '../utils/isDev'
 import { logPadded } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { initializeMetadataTable } from './metadata'
-import { $, sql } from 'bun'
 
 const DEBUG_LUA = false
 
