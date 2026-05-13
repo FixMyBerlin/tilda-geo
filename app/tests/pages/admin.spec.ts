@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { getAuthenticatedContext, loadSession } from '../fixtures/auth'
 import { ADMIN_ROUTES } from '../fixtures/routes'
 import { expectNoConsoleErrors } from '../utils/console'
+import { escapeRegExp } from '../utils/regex'
 
 const runRealOAuth = process.env.RUN_OAUTH_E2E === '1'
 
@@ -30,7 +31,7 @@ test.describe('Admin Pages', () => {
   for (const route of ADMIN_ROUTES) {
     test(`should render ${route}`, async ({ page }) => {
       await page.goto(route)
-      await expect(page).toHaveURL(new RegExp(route.replace(/\//g, '\\/')))
+      await expect(page).toHaveURL(new RegExp(escapeRegExp(route)))
 
       // Verify admin layout renders (pink background)
       const adminLayout = page.locator('.bg-pink-300').first()

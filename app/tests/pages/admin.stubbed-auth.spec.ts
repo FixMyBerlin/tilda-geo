@@ -11,6 +11,7 @@ import {
   expectNoConsoleErrors,
   filterAcceptableErrors,
 } from '../utils/console'
+import { escapeRegExp } from '../utils/regex'
 import { collectServerErrors, expectNoServerErrors } from '../utils/server'
 
 test.describe('Admin Pages (stubbed login)', () => {
@@ -40,7 +41,7 @@ test.describe('Admin Pages (stubbed login)', () => {
         const serverErrors = collectServerErrors(page, baseURL)
 
         await page.goto(route)
-        await expect(page).toHaveURL(new RegExp(route.replace(/\//g, '\\/')))
+        await expect(page).toHaveURL(new RegExp(escapeRegExp(route)))
         await expect(page.locator('main').first()).toBeVisible()
 
         const blockingConsoleErrors = filterAcceptableErrors(consoleMessages).filter(
