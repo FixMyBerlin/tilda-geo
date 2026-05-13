@@ -6,6 +6,7 @@ on:
       - tinkering
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   setup_env:
