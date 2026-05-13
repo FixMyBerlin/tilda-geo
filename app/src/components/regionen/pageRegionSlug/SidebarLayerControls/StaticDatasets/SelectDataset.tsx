@@ -72,37 +72,40 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
         )}
       </button>
       {selected && (
-        <div className="border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
-          {updatedAt && <p>{updatedAt}</p>}
-          {dataSourceMarkdown && (
-            <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
-            // <p className="text-xs leading-4">{dataSourceMarkdown}</p>
-          )}
-          {attributionHtml && (
-            <>
-              <p
-                // biome-ignore lint/security/noDangerouslySetInnerHtml: attribution from dataset config
-                dangerouslySetInnerHTML={{ __html: attributionHtml }}
-              />
-              {licence && (
-                <p>
-                  Lizenz: {licence}
-                  {licenceOsmCompatible === 'licence' && ' (OSM-kompatibel)'}
-                  {licenceOsmCompatible === 'waiver' && ' (OSM kompatible Zusatzvereinbarung)'}
-                  {licenceOsmCompatible === 'no' && ' (nicht OSM kompatibel)'}
-                </p>
+        <div className="flex flex-col gap-3 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
+          {(updatedAt || dataSourceMarkdown || attributionHtml) && (
+            <div className="flex flex-col gap-1">
+              {updatedAt && <p>{updatedAt}</p>}
+              {dataSourceMarkdown && (
+                <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
               )}
-            </>
+              {attributionHtml && (
+                <>
+                  <p
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: attribution from dataset config
+                    dangerouslySetInnerHTML={{ __html: attributionHtml }}
+                  />
+                  {licence && (
+                    <p>
+                      Lizenz: {licence}
+                      {licenceOsmCompatible === 'licence' && ' (OSM-kompatibel)'}
+                      {licenceOsmCompatible === 'waiver' && ' (OSM kompatible Zusatzvereinbarung)'}
+                      {licenceOsmCompatible === 'no' && ' (nicht OSM kompatibel)'}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
           )}
           {legends && Boolean(legends?.length) && (
-            <ul>
+            <ul className="space-y-1.5">
               {legends.map((legend) => {
                 return (
                   <li
-                    className="group relative mt-1 flex items-center leading-tight font-normal"
+                    className="group relative flex items-start gap-1.5 leading-tight font-normal"
                     key={legend.id}
                   >
-                    <div className="size-5 flex-none">{iconFromLegend(legend)}</div>
+                    <div className="size-3.5 flex-none shrink-0">{iconFromLegend(legend)}</div>
                     <LegendNameDesc name={legend.name} desc={legend.desc} />
                   </li>
                 )
@@ -114,7 +117,7 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
             <Link
               href={getStaticDatasetUrl(id, 'geojson')}
               download={`${name}.geojson`}
-              className="mt-1 inline-flex items-center gap-1"
+              className="inline-flex items-center gap-1"
             >
               <ArrowDownTrayIcon className="size-3" />
               GeoJSON herunterladen
@@ -122,7 +125,7 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
           )}
 
           {userIsAdmin && (
-            <details className="mt-1 bg-pink-300 p-0.5">
+            <details className="bg-pink-300 p-0.5">
               <summary className="cursor-pointer underline">Admin Upload Details</summary>
 
               <div className="flex flex-col gap-1">
