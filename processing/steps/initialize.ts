@@ -9,7 +9,7 @@ import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
 import { initializeLuaPackagePath } from '../utils/initializeLuaPackagePath'
 import { isDev } from '../utils/isDev'
 import { logPadded } from '../utils/logging'
-import { params } from '../utils/parameters'
+import { paramsFilteredForLogs } from '../utils/parameters'
 import { initializeMetadataTable } from './metadata'
 
 const DEBUG_LUA = false
@@ -18,7 +18,7 @@ const DEBUG_LUA = false
 export async function initialize() {
   logPadded('Processing: Initialize')
   if (isDev) {
-    console.log('Current params:', JSON.stringify(params))
+    console.log('Current params:', JSON.stringify(paramsFilteredForLogs))
   }
 
   await $`mkdir -p ${OSM_DOWNLOAD_DIR} ${OSM_FILTERED_DIR} ${HASH_DIR}`
