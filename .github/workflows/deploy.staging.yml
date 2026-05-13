@@ -4,6 +4,9 @@ on:
     branches:
       - develop
       - tinkering
+permissions:
+  contents: read
+
 jobs:
   setup_env:
     uses: ./.github/workflows/setup-env.yml

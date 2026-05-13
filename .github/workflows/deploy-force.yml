@@ -10,6 +10,9 @@ on:
           - production
         description: 'Environment to deploy to (staging or production). This workflow bypasses all optimization checks and always performs a full deployment of both app and processing services.'
 
+permissions:
+  contents: read
+
 jobs:
   setup_env:
     uses: ./.github/workflows/setup-env.yml

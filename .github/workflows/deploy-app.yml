@@ -13,6 +13,9 @@ on:
         type: string
         default: apply
 
+permissions:
+  contents: read
+
 jobs:
   diff_app:
     uses: ./.github/workflows/diff-last-run.yml

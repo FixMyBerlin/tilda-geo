@@ -11,6 +11,9 @@ on:
         description: 'Whether `configs/` or the `docker-compose` files have changed since the last successfull workflow run.'
         value: ${{ jobs.check_config_changes.outputs.CHANGES }}
 
+permissions:
+  contents: read
+
 jobs:
   check_config_changes:
     uses: ./.github/workflows/diff-last-run.yml
