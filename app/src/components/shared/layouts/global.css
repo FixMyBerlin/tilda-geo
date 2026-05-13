@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 
 @source './src/**/*.{js,jsx,ts,tsx,mdx}';
-@source './mailers/**/*.{ts,tsx}';
 @source './public/**/*.html';
 
 @plugin '@tailwindcss/forms';

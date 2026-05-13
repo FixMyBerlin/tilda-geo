@@ -1,4 +1,4 @@
-import { newUserRegistrationMailer } from 'mailers/newUserRegistrationMailer'
+import { newUserRegistrationMailer } from '@/emails/newUserRegistrationMailer'
 
 type UserForEmail = {
   id: string

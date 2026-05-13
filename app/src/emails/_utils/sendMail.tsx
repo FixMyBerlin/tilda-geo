@@ -1,11 +1,14 @@
-import { render } from '@react-email/components'
 import type { LibraryResponse, SendEmailV3_1 } from 'node-mailjet'
 import Mailjet from 'node-mailjet'
-import { isDev, isTest } from '@/components/shared/utils/isEnv'
-import { footerTextMarkdown } from '../templates/footerTextMarkdown'
-import { MarkdownMail } from '../templates/MarkdownMail'
-import { signatureTextMarkdown } from '../templates/signatureTextMarkdown'
+import { render } from 'react-email'
+import { footerTextMarkdown } from '../_templates/footerTextMarkdown'
+import { MarkdownMail } from '../_templates/MarkdownMail'
+import { signatureTextMarkdown } from '../_templates/signatureTextMarkdown'
 import type { Mail, MailjetMessage } from './types'
+
+const appEnv = process.env.VITE_APP_ENV
+const isTest = process.env.NODE_ENV === 'test'
+const isDev = process.env.NODE_ENV === 'development' || appEnv === 'development'
 
 /**
  * Centralized email sending helper

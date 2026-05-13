@@ -55,7 +55,7 @@
       }
     },
     {
-      "includes": ["src/components/**", "src/routes/**", "mailers/**", "test/**"],
+      "includes": ["src/components/**", "src/routes/**", "src/emails/**", "test/**"],
       "linter": {
         "rules": {
           "correctness": {

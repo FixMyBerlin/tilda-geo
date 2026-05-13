@@ -66,11 +66,11 @@ For loader vs server Fn, beforeLoad, error handling, and query options, see [Tan
 - **Unit/integration (Vitest)** — `bun run test` / `bun run test-run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
 - **E2E (Playwright)**: **app/tests/** — `*.spec.ts`. See [app/tests/README.md](../app/tests/README.md) for setup, auth, and smoke tests.
 - **Processing**: Lua tests in **`__tests__`** with `*.test.lua` (see [processing/README.md](../processing/README.md)).
-- **Mailers**: [app/mailers/newUserRegistrationMailer.test.ts](../app/mailers/newUserRegistrationMailer.test.ts).
+- **Emails**: [app/src/emails/newUserRegistrationMailer.test.ts](../app/src/emails/newUserRegistrationMailer.test.ts).
 
-## 11. Mailers
+## 11. Emails (React Email)
 
-**app/mailers/** is a separate area (outside **app/src**) so we can run the **mailer preview** (`bun run mailpreview`) and keep email templates and sending logic in one place. React Email templates in **mailers/templates/**; mailer actions and config in **mailers/**. See [app/mailers/README.md](../app/mailers/README.md).
+**app/src/emails/** holds React Email templates, shared layout components, and send helpers. It lives under **app/src** like other app code; **`bun run mailpreview`** runs `email dev --dir src/emails` from `app/`. Shared pieces live in **`_templates/`** and **`_utils/`** (leading underscore so the React Email preview server skips them). See [app/src/emails/README.md](../app/src/emails/README.md).
 
 ## Related docs
 

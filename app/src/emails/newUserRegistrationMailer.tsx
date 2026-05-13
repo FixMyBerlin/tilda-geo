@@ -1,8 +1,8 @@
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { isOsmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
-import { MarkdownMail } from './templates/MarkdownMail'
-import { getDomain } from './utils/getDomain'
-import { sendMail } from './utils/sendMail'
+import { MarkdownMail } from './_templates/MarkdownMail'
+import { getDomain } from './_utils/getDomain'
+import { sendMail } from './_utils/sendMail'
 
 const NOTIFICATION_EMAIL = 'tilda@fixmycity.de'
 

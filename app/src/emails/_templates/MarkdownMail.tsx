@@ -9,12 +9,16 @@ import {
   Markdown,
   Section,
   Tailwind,
-} from '@react-email/components'
-import { getDomain } from '../utils/getDomain'
+} from 'react-email'
+import { getDomain } from '../_utils/getDomain'
 import { footerTextMarkdown } from './footerTextMarkdown'
 import { signatureTextMarkdown } from './signatureTextMarkdown'
 
 const baseUrl = getDomain()
+const isReactEmailPreview = process.env.REACT_EMAIL_PREVIEW === '1'
+const logoSrc = isReactEmailPreview
+  ? '/static/tilda-logo-mail-white.svg'
+  : `${baseUrl}/emails/tilda-logo-mail-white.svg`
 
 export type MarkdownMailProps = {
   introMarkdown: string
@@ -38,7 +42,7 @@ export const MarkdownMail = ({
             <Section className="mb-4 bg-gray-800 px-4 py-5 text-center sm:rounded-t-lg sm:px-8 dark:bg-gray-800">
               <center>
                 <Img
-                  src={`${baseUrl}/emails/tilda-logo-mail-white.png`}
+                  src={logoSrc}
                   width="134"
                   height="45"
                   alt="TILDA Geo Logo"
