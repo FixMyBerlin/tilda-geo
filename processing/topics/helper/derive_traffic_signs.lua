@@ -2,8 +2,8 @@ require('init')
 local sanitize_traffic_sign = require('sanitize_traffic_sign')
 
 --- Derives traffic sign values from tags, always returning all three keys
---- @param tags table<string, string|nil>|nil The input tags table
---- @return table<string, string|nil> Table with keys 'traffic_sign', 'traffic_sign:forward', 'traffic_sign:backward' (values can be nil)
+---@param tags OsmTags<string, string|nil>|nil The input tags table
+---@return table<string, string|nil> Table with keys 'traffic_sign', 'traffic_sign:forward', 'traffic_sign:backward' (values can be nil)
 local function derive_traffic_signs(tags)
   if tags == nil then
     return {

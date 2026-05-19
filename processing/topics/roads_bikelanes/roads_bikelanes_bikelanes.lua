@@ -10,12 +10,18 @@ local bikelanes_table = roads_bikelanes_tables.bikelanes_table
 local bikelanes_presence_table = roads_bikelanes_tables.bikelanes_presence_table
 local todo_lines_table = roads_bikelanes_tables.todo_lines_table
 
+---@param context RoadsBikelanesWayContext
 local function roads_bikelanes_bikelanes(context)
+  ---@type ObjectMeta
   local object_meta = context.object_meta
+  ---@type OsmTags
   local object_tags = context.object_tags
   local object_geom = context.object_geom
+  ---@type SharedResultTags
   local shared_result_tags = context.shared_result_tags
+  ---@type table[]
   local cycleways = context.cycleways
+  ---@type CyclewayPresence|nil
   local cycleway_presence = context.cycleway_presence
 
   for _, cycleway in ipairs(cycleways) do

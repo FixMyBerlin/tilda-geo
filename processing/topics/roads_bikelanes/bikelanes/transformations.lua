@@ -7,16 +7,12 @@ local highway_classes = require('highway_classes')
 ---@field highway string
 ---@field prefix string
 ---@field direction_reference 'self' | 'parent'
----@field filter function
+---@field filter fun(tags: OsmTags): boolean
 
 CenterLineTransformation = {}
 CenterLineTransformation.__index = CenterLineTransformation
 
 ---@param args table
----@param args.highway string
----@param args.prefix string
----@param args.direction_reference 'self' | 'parent'
----@param args.filter function?
 ---@return CenterLineTransformation
 function CenterLineTransformation.new(args)
   local self = setmetatable({}, CenterLineTransformation)
@@ -42,12 +38,12 @@ end
 --   `<prefix>:<infix>:SUFFIX` -> `SUFFIX`
 -- - `source:cycleway:left:width` -> `source:width`
 --   `<metaPrefix>:<prefix>:<infix>:SUFFIX` -> `<metaPrefix>:SUFFIX`
----@param tags table
+---@param tags OsmTags
 ---@param prefix string prefix to look for e.g. `cycleway`
 ---@param infix string? infix to look for either a side e.g. `:left`, `:right`, `:both` or `''`
----@param dest table? destination table to write to
+---@param dest OsmTags? destination table to write to
 ---@param metaPrefix string? optional meta-prefix to look for e.g. `source:` or `note:`
----@return table
+---@return OsmTags
 local function unnest_prefixed_tags(tags, prefix, infix, dest, metaPrefix)
   dest = dest or {}
   local metaPrefixString = metaPrefix or ''
@@ -138,15 +134,15 @@ end
 ---@class TransformedObject
 ---@field _side 'self' | 'left' | 'right'
 ---@field _prefix string? prefix of the transformation (e.g., 'cycleway', 'sidewalk')
----@field _parent table? original tags from the parent object
+---@field _parent OsmTags? original tags from the parent object
 ---@field _parent_highway string? highway value from the parent object
 ---@field _infix string? infix that was matched (e.g., ':left', ':both', '')
 ---@field highway string highway value for the transformed object
 --- Additional tags from unnesting (e.g., width, source:width, note, traffic_sign, etc.) are also present
 
 -- Returns an array of transformed objects in order: [self, left, right, ...]
----@param tags table input tags to transform
----@param transformations table array of CenterLineTransformation objects
+---@param tags OsmTags input tags to transform
+---@param transformations CenterLineTransformation[] array of CenterLineTransformation objects
 ---@return TransformedObject[] array of transformed objects in order: [self, left, right, ...]
 function get_transformed_objects(tags, transformations)
   local center = merge_table({}, tags)

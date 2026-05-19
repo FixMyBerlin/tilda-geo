@@ -14,7 +14,9 @@ local roads_bikelanes_roads = require('roads_bikelanes_roads')
 local EXIT = require('exit_processing_roads_bikelanes')
 local result_tags_roads_bikelanes = require('result_tags_roads_bikelanes')
 
+---@param object table
 function osm2pgsql.process_way(object)
+  ---@type OsmTags
   local object_tags = CLONE.structured_clone(object.tags)
 
   transform_lifecycle_tags(object_tags)
@@ -32,8 +34,11 @@ function osm2pgsql.process_way(object)
   transform_construction_prefix(object_tags)
   transform_cycleway_both_postfix(object_tags)
 
+  ---@type SharedResultTags
   local shared_result_tags = result_tags_roads_bikelanes(object_tags)
+  ---@type BikelaneState
   local shared_bikelane_state = prepare_shared_bikelane_state_roads_bikelanes(object_tags, object_geom)
+  ---@type RoadsBikelanesWayContext
   local context = {
     object_meta = metadata(object),
     object_tags = object_tags,

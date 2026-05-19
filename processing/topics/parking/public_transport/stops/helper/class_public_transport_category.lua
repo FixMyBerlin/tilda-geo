@@ -24,7 +24,7 @@ function class_public_transport_category.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 function class_public_transport_category:is_active(tags)
   return self._conditions(tags)

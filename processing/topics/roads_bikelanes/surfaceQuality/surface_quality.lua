@@ -4,7 +4,7 @@ local derive_surface = require('derive_surface')
 local derive_smoothness = require('derive_smoothness')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 
----@param object_tags table
+---@param object_tags OsmTags
 ---@return table
 local function surface_quality(object_tags)
   local result_tags = {}

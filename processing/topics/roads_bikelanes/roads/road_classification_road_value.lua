@@ -1,6 +1,6 @@
 require('init')
 
----@param tags table
+---@param tags OsmTags
 ---@return string|nil
 local function road_classification_road_value(tags)
   if (tags.highway == nil) then return nil end

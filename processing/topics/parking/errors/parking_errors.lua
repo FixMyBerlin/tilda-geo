@@ -38,7 +38,8 @@ return {
   SANITIZED_VALUE = function(object, geom, tags, caller_name)
     insert_topic_error_row(
       db_table,
-      object,
+      object.type,
+      object.id,
       geom,
       tags,
       caller_name,
@@ -49,7 +50,8 @@ return {
   RELATION = function(object, geom, caller_name)
     insert_topic_error_row(
       db_table,
-      object,
+      object.type,
+      object.id,
       geom,
       {},
       caller_name,

@@ -1,0 +1,6 @@
+{
+  "_sync_note": "Keep this file in sync with `.vscode/settings.json` for Lua.runtime.version/Lua.diagnostics.globals/Lua.diagnostics.disable.",
+  "runtime.version": "Lua 5.3",
+  "diagnostics.globals": ["osm2pgsql", "describe", "it"],
+  "diagnostics.disable": ["lowercase-global", "duplicate-set-field"]
+}

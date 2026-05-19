@@ -24,6 +24,10 @@
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/
+  // Keep these in sync with `processing/.luarc.typecheck.json`:
+  // - `Lua.runtime.version` <-> `runtime.version`
+  // - `Lua.diagnostics.globals` <-> `diagnostics.globals`
+  // - `Lua.diagnostics.disable` <-> `diagnostics.disable`
   "Lua.runtime.version": "Lua 5.3",
   "Lua.diagnostics.globals": ["osm2pgsql", "describe", "it"],
   "Lua.diagnostics.disable": ["lowercase-global", "duplicate-set-field"],

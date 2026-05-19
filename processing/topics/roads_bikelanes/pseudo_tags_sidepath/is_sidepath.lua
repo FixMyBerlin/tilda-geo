@@ -5,10 +5,10 @@ local HIGHWAYS = require('highway_classes')
 --- - Path in CSV (estimation = yes) -> 'assumed_yes'
 --- - Path not in CSV -> 'assumed_no'
 --- - Non-path (e.g. road) -> nil
---- @param rows table - From load_csv_is_sidepath:get(); map osm_id -> row
---- @param osm_id number|string - The OSM way ID to look up.
---- @param highway string|nil - The way's highway tag value (e.g. 'path', 'footway', 'residential').
---- @return 'assumed_yes'|'assumed_no'|nil
+---@param rows table - From load_csv_is_sidepath:get(); map osm_id -> row
+---@param osm_id number|string - The OSM way ID to look up.
+---@param highway string|nil - The way's highway tag value (e.g. 'path', 'footway', 'residential').
+---@return 'assumed_yes'|'assumed_no'|nil
 local function is_sidepath(rows, osm_id, highway)
   if not highway then
     return nil

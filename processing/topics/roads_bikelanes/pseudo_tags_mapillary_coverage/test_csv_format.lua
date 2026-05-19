@@ -2,8 +2,8 @@ require('init')
 local log = require('log')
 
 --- Check the format of the CSV
---- @param rows table
---- @param column_name string - The row to return
+---@param rows table
+---@param column_name string - The row to return
 local function test_csv_format(rows, column_name)
   if type(rows) ~= 'table' then
     error('CSV has no content (input type ' .. type(rows) .. ')')

@@ -6,6 +6,8 @@ local merge_table = require('merge_table')
 local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
 local SANITIZE_TAGS = require('sanitize_tags')
 
+---@param object_tags OsmTags
+---@return SharedResultTags
 local function result_tags_roads_bikelanes(object_tags)
   local road_result_tags = {
     name = SANITIZE_TAGS.safe_string(object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name']),

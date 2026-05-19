@@ -5,7 +5,7 @@ local LOG_ERROR = require('parking_errors')
 local SANITIZE_TAGS = require('sanitize_tags')
 local CLEANER = require('sanitize_cleaner')
 
----@param tags table<string, string>
+---@param tags OsmTags<string, string>
 ---@return boolean
 local function is_platform_line(tags)
   return tags.public_transport == 'platform' and tags.bus == 'yes'

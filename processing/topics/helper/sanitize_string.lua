@@ -4,8 +4,8 @@ require('init')
 --- - Removes control characters (including NUL) to avoid parser/log issues.
 --- - Neutralizes `<` and `>` to reduce HTML/script injection risk in downstream renderers.
 --- - Preserves all other characters as-is (including unicode and punctuation).
---- @param value string|nil
---- @return string|nil
+---@param value string|nil
+---@return string|nil
 local function sanitize_string(value)
   if value == nil then return nil end
 

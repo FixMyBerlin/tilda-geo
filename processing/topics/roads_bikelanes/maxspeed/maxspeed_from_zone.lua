@@ -1,6 +1,6 @@
 require('init')
 
----@param tags table
+---@param tags OsmTags
 ---@return number|nil, string, string
 local function maxspeed_from_zone(tags)
   local maxspeed_type = {

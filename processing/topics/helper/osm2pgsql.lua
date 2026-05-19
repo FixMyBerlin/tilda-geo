@@ -3,6 +3,7 @@ require('init')
 -- We need to copy and modify this in order to be able to use those helpers in our `*.test.lua` files
 -- We can still use the 'original' osm2pgsql in our code elswhere, just for tests we need to also `require('osm2pgsql')`.
 
+---@class osm2pgsql
 osm2pgsql = {}
 
 --
@@ -14,6 +15,9 @@ local math = require('math')
 
 -- Archived helper (was define_table_impl wrapping define_table); kept out of active code.
 
+---@param str string|nil
+---@param prefix string
+---@return boolean|nil
 function osm2pgsql.has_prefix(str, prefix)
   if str == nil then
     return nil
@@ -21,6 +25,9 @@ function osm2pgsql.has_prefix(str, prefix)
   return str:sub(1, prefix:len()) == prefix
 end
 
+---@param str string|nil
+---@param suffix string
+---@return boolean|nil
 function osm2pgsql.has_suffix(str, suffix)
   if str == nil then
     return nil
@@ -47,6 +54,8 @@ end
 --   return _define_table_impl('area', _name, _columns, _options)
 -- end
 
+---@param relation { members: table[] }
+---@return table[]
 function osm2pgsql.way_member_ids(relation)
   local ids = {}
   for _, member in ipairs(relation.members) do
@@ -57,6 +66,10 @@ function osm2pgsql.way_member_ids(relation)
   return ids
 end
 
+---@param value number|nil
+---@param low number
+---@param high number
+---@return number|nil
 function osm2pgsql.clamp(value, low, high)
   if value == nil then
     return nil
@@ -64,6 +77,9 @@ function osm2pgsql.clamp(value, low, high)
   return math.min(math.max(value, low), high)
 end
 
+---@param list table[]
+---@param default any
+---@return fun(value: any): any
 function osm2pgsql.make_check_values_func(list, default)
   local valid_values = {}
   if default ~= nil then
@@ -80,6 +96,8 @@ function osm2pgsql.make_check_values_func(list, default)
   end
 end
 
+---@param keys string[]
+---@return fun(tags: OsmTags): boolean
 function osm2pgsql.make_clean_tags_func(keys)
   local keys_to_delete = {}
   local prefixes_to_delete = {}
@@ -127,6 +145,8 @@ function osm2pgsql.make_clean_tags_func(keys)
 end
 
 -- from http://lua-users.org/wiki/StringTrim
+---@param str string|nil
+---@return string|nil
 function osm2pgsql.trim(str)
   if str == nil then
     return nil
@@ -135,6 +155,9 @@ function osm2pgsql.trim(str)
   return from > #str and '' or str:match('.*%S', from)
 end
 
+---@param str string|nil
+---@param default_unit string|nil
+---@return number|nil, string|nil
 function osm2pgsql.split_unit(str, default_unit)
   if str == nil then
     return nil
@@ -154,6 +177,9 @@ function osm2pgsql.split_unit(str, default_unit)
   return val, unit
 end
 
+---@param str string|nil
+---@param separator string|nil
+---@return string[]
 function osm2pgsql.split_string(str, separator)
   local result = {}
 

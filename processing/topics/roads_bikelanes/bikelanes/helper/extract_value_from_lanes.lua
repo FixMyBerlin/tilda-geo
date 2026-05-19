@@ -10,7 +10,7 @@ local function _parse_lanes_value(lanes_value)
   return lanes
 end
 
----@param tags table The tags to check
+---@param tags OsmTags The tags to check
 ---@return number|nil The index where |lane| or |designated| is found
 local function _find_lane_index(tags)
   if tags['cycleway:lanes'] then
@@ -35,7 +35,7 @@ local function _find_lane_index(tags)
 end
 
 ---@param lanes_tag string The lanes tag to extract from (e.g., 'width:lanes', 'surface:lanes')
----@param tags table The tags to check
+---@param tags OsmTags The tags to check
 ---@return string|nil
 local function extract_value_from_lanes(lanes_tag, tags)
   local lane_index = _find_lane_index(tags)

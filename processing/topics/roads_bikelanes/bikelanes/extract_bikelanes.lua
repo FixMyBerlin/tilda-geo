@@ -47,6 +47,10 @@ local transformations = { cycleway_transformation, footway_transformation }
 
 local categorize_bikelane = bikelane_categories.categorize_bikelane
 
+---@param result_tags OsmTags
+---@param object_tags OsmTags
+---@param log_overrides OsmTags
+---@param object_geom table
 local function merge_bikelane_public_tags(result_tags, object_tags, log_overrides, object_geom)
   local public_result_tags = extract_public_tags(result_tags)
   local cleaned_public, replaced_tags =
@@ -57,9 +61,14 @@ local function merge_bikelane_public_tags(result_tags, object_tags, log_override
   LOG_ERROR.SANITIZED_VALUE(object_tags._type, object_tags._id, object_geom, replaced_tags, 'bikelanes')
 end
 
+---@param object_tags OsmTags
+---@param object_geom table
+---@return OsmTags[]
 local function bikelanes(object_tags, object_geom)
+  ---@type OsmTags[]
   local result_bikelanes = {}
 
+  ---@type TransformedObject[]
   local transformed_objects = get_transformed_objects(object_tags, transformations)
 
   for _, transformed_tags in ipairs(transformed_objects) do

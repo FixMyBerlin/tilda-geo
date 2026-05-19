@@ -1,6 +1,6 @@
 require('init')
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 local function category_is_sidepath(tags)
   return tags.is_sidepath == 'yes'

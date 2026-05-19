@@ -25,13 +25,13 @@ alwaysApply: false
 
 ## Software tests
 
-- To run the test, to go to the root folder and run `./processing/run-tests.sh`. Do this to evaluate the test result yourself. You cannot run single files, you always have to run the whole suite.
+- To run tests, use `bun run test` in `processing/` (wrapper around Docker+busted). Do this to evaluate test results yourself. You cannot run single files, you always run the full suite.
 - Are always in a `__tests__` folder in the same directory or one directory up.
 - They need to have a name like `file_name_of_functions.test.lua`. So the same name as the file that is being tested postfixed with ".test".
 - They use busted internally but that is automatically loaded and does not need to be required.
-- Use `require("foo")` to load the function that is being tested.
-- Always add `require('Log')` and `require('init')`
-- To run the test, to got `./` and run `./processing/run-tests.sh`
+- Use dotted requires to load the function that is being tested, for example `require('topics.helper.merge_table')`.
+- If logging is needed in tests, use `local log = require('topics.helper.log')`.
+- To run tests, use `bun run test` from `processing/`.
 - Usually use `assert.are.same()` which is a deep compare (Docs: https://lunarmodules.github.io/busted/#assert-same)
 - In assertions, follow this pattern: `assert.are.same(actual_result, expected_result)`. Busted will show the first argument as "Passed In" which is what we define as "right". The second argument will be shown as "Expected" in the console output which is the `expected_result` of the tested function.
   **Example:**

@@ -3,7 +3,7 @@ local transformations = require('transformations')
 local highway_classes = require('highway_classes')
 local SET = require('sets')
 
----@param object_tags table
+---@param object_tags OsmTags
 ---@param cycleways table
 ---@return table|nil
 local function bikelanes_presence(object_tags, cycleways)

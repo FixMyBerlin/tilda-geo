@@ -4,7 +4,7 @@ local sanitize_traffic_sign = require('sanitize_traffic_sign')
 local SANITIZE_TAGS = require('sanitize_tags')
 local CLEANER = require('sanitize_cleaner')
 
----@param tags table
+---@param tags OsmTags
 ---@param traffic_sign table
 ---@param direction number|nil
 ---@param direction_source string|nil

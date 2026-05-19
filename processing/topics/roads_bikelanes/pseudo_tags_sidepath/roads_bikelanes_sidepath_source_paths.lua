@@ -13,8 +13,8 @@ local db_table = osm2pgsql.define_table({
 })
 
 --- Writes minimal sidepath source rows used by sidepath estimation export.
---- @param object_tags table
---- @param object_geom table
+---@param object_tags OsmTags
+---@param object_geom table
 local function roads_bikelanes_sidepath_source_paths(object_tags, object_geom)
   if not HIGHWAY_CLASSES.sidepath_highway_classes[object_tags.highway] then
     return

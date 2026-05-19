@@ -25,14 +25,14 @@ function class_off_street_parking_category.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 function class_off_street_parking_category:is_active(tags)
   return self._conditions(tags)
 end
 
 ---Returns capacity_tags combining tag-based capacity (if present) with area-based capacity (if applicable).
----@param tags table Object tags
+---@param tags OsmTags Object tags
 ---@param area number|nil Area value (can be nil)
 ---@return table { value: number|nil, confidence: 'high'|'medium'|'low'|nil, source: string|nil }
 function class_off_street_parking_category:get_capacity(tags, area)

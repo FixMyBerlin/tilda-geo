@@ -164,7 +164,7 @@ local function derive_smoothness_from_track_type(type)
   return nil, nil, nil
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return table
 local function derive_smoothness(tags)
   local smoothness, smoothness_source, smoothness_confidence = normalize_smoothness(tags.smoothness)

@@ -1,11 +1,9 @@
 require('init')
 
-local function default_id(object_or_type, object_id)
-  if object_id ~= nil then
-    return string.lower(object_or_type) .. '/' .. object_id
-  end
-
-  return string.lower(object_or_type.type) .. '/' .. object_or_type.id
+---@param object { type: string, id: number|string }
+---@return string
+local function default_id(object)
+  return string.lower(object.type) .. '/' .. tostring(object.id)
 end
 
 return default_id

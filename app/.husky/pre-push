@@ -20,7 +20,7 @@ git -C "$ROOT" diff --exit-code -- .github/README.md || exit 1
 bun run check
 bun run type-check-deploy
 
-# This runs our unit tests for `Processing`
-
-cd "$ROOT"
-./processing/run-tests.sh
+# This runs Lua type checks and tests for `Processing`
+cd "$ROOT/processing"
+bun run typecheck
+bun run test

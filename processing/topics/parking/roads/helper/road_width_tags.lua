@@ -43,7 +43,7 @@ local highway_width_fallbacks_oneway = {
 
 ---Creates road_width_tags table with value, confidence, and source
 ---Always returns a table (with nil values if no width can be determined)
----@param tags table<string, string|nil> Object tags containing width information
+---@param tags OsmTags<string, string|nil> Object tags containing width information
 ---@return {value: number|nil, confidence: string|nil, source: string|nil}
 local function road_width_tags(tags)
   if tags.width then

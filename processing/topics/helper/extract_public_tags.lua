@@ -1,7 +1,7 @@
 require('init')
 --- extract all key, value pairs that are not starting with `_`
----@param tags table
----@return table
+---@param tags OsmTags
+---@return OsmTags
 local function extract_public_tags(tags)
   local public_tags = {}
   for k, v in pairs(tags) do -- remove internal tags starting with '_'

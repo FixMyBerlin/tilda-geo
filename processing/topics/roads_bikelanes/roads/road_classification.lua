@@ -5,7 +5,7 @@ local parse_length = require('parse_length')
 local merge_table = require('merge_table')
 local road_classification_road_value = require('road_classification_road_value')
 
----@param object_tags table
+---@param object_tags OsmTags
 ---@return table
 local function road_classification(object_tags)
   local result_tags = {

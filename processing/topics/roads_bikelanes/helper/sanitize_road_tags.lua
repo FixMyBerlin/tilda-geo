@@ -51,16 +51,16 @@ local SURFACE_COLOR_ALLOWED = {
 }
 
 --- Original `surface:colour` / `surface:color` before normalization (for error logging).
---- @param tags table
---- @return string|nil
+---@param tags OsmTags
+---@return string|nil
 local function surface_color_raw(tags)
   return tags['surface:colour'] or tags['surface:color']
 end
 
 --- Raw separation value for `side` before normalization.
---- @param tags table
---- @param side string
---- @return string|nil
+---@param tags OsmTags
+---@param side SideKey
+---@return string|nil
 local function separation_raw(tags, side)
   local value = tags['separation:' .. side] or tags['separation:both']
   if side == 'left' then
@@ -70,9 +70,9 @@ local function separation_raw(tags, side)
 end
 
 --- Raw marking value for `side` before normalization.
---- @param tags table
---- @param side string
---- @return string|nil
+---@param tags OsmTags
+---@param side SideKey
+---@return string|nil
 local function marking_raw(tags, side)
   local value = tags['marking:' .. side] or tags['marking:both']
   if side == 'left' then
@@ -82,9 +82,9 @@ local function marking_raw(tags, side)
 end
 
 --- Raw traffic_mode value for `side` before normalization.
---- @param tags table
---- @param side string
---- @return string|nil
+---@param tags OsmTags
+---@param side SideKey
+---@return string|nil
 local function traffic_mode_raw(tags, side)
   local value = tags['traffic_mode:' .. side] or tags['traffic_mode:both']
   if side == 'left' then
@@ -94,8 +94,8 @@ local function traffic_mode_raw(tags, side)
 end
 
 --- Map `separate_tags` result keys to OSM strings for `SANITIZED_VALUE` logging when value is disallowed.
---- @param tags table tag bag passed into the road/bikelane sanitizers (e.g. transformed_tags for bikelanes)
---- @return table
+---@param tags OsmTags tag bag passed into the road/bikelane sanitizers (e.g. transformed_tags for bikelanes)
+---@return OsmTags
 local function log_source_overrides(tags)
   return {
     surface_color = surface_color_raw(tags),
@@ -108,6 +108,15 @@ local function log_source_overrides(tags)
   }
 end
 
+---@class SanitizeRoadTags
+---@field log_source_overrides fun(tags: OsmTags): OsmTags
+---@field surface_color fun(tags: OsmTags): string|nil
+---@field separation fun(tags: OsmTags, side: SideKey): string|nil
+---@field marking fun(tags: OsmTags, side: SideKey): string|nil
+---@field traffic_mode fun(tags: OsmTags, side: SideKey): string|nil
+---@field buffer fun(tags: OsmTags, side: SideKey): number|nil
+---@field temporary fun(tags: OsmTags): string|nil
+---@type SanitizeRoadTags
 local SANITIZE_ROAD_TAGS = {
   log_source_overrides = log_source_overrides,
 

@@ -2,8 +2,8 @@ require('init')
 local sanitize_string = require('sanitize_string')
 
 --- Remove all whitespaces after delimeters
---- @param traffic_sign string
---- @return string
+---@param traffic_sign string
+---@return string
 local function strip_whitespaces(traffic_sign)
   local stripped = string.gsub(traffic_sign, ', ', ',')
   stripped = string.gsub(stripped, '; ', ';')
@@ -11,15 +11,15 @@ local function strip_whitespaces(traffic_sign)
 end
 
 --- sanitize a traffic sign value by stripping whitespaces and sanitizing the string
---- @param value string
---- @return string|nil
+---@param value string
+---@return string|nil
 local function sanitize_value(value)
   return sanitize_string(strip_whitespaces(value))
 end
 
 --- Cleanup the `traffic_sign=*` tag
---- @param traffic_sign string|nil
---- @return string|nil
+---@param traffic_sign string|nil
+---@return string|nil
 local function sanitize_traffic_sign(traffic_sign)
   if traffic_sign == nil then
     return nil

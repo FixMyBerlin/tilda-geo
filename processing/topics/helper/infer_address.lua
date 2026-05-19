@@ -5,7 +5,7 @@ require('init')
 --   `dest` if provided with `AddressKeys` added to it.
 --   Otherwise a new object of format `AddressKeys` is returned.
 ---comment
----@param tags table
+---@param tags OsmTags
 ---@param dst? table
 ---@return table
 local function infer_address(tags, dst)

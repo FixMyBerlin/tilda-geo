@@ -2,39 +2,24 @@ require('init')
 local default_id = require('default_id')
 local TOPIC_ERROR_INSTRUCTIONS = require('topic_error_instructions')
 
+---@param db_table table
+---@param object_type string
+---@param object_id number|string
+---@param geom table
+---@param tags OsmTags|nil
+---@param caller_name string
+---@param error_type string
+---@param instruction string|nil
 local function insert_topic_error_row(
   db_table,
-  object_or_type,
-  object_id_or_geom,
-  geom_or_tags,
-  tags_or_caller_name,
-  caller_name_or_error_type,
-  error_type_or_instruction,
+  object_type,
+  object_id,
+  geom,
+  tags,
+  caller_name,
+  error_type,
   instruction
 )
-  local object_type
-  local object_id
-  local geom
-  local tags
-  local caller_name
-  local error_type
-
-  if type(object_or_type) == 'table' then
-    object_type = object_or_type.type
-    object_id = object_or_type.id
-    geom = object_id_or_geom
-    tags = geom_or_tags
-    caller_name = tags_or_caller_name
-    error_type = caller_name_or_error_type
-    instruction = error_type_or_instruction
-  else
-    object_type = object_or_type
-    object_id = object_id_or_geom
-    geom = geom_or_tags
-    tags = tags_or_caller_name
-    caller_name = caller_name_or_error_type
-    error_type = error_type_or_instruction
-  end
 
   if error_type == TOPIC_ERROR_INSTRUCTIONS.SANITIZED_VALUE.key and (not tags or next(tags) == nil) then
     return
@@ -65,7 +50,7 @@ local function insert_topic_error_row(
   error_tags._instruction = instruction
 
   db_table:insert({
-    id = default_id(object_type, object_id),
+    id = default_id({ type = object_type, id = object_id, }),
     geom = point_geom,
     tags = error_tags,
     meta = {},

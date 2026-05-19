@@ -12,6 +12,23 @@ local DIRECTIONAL_PARKING_INFERENCE_CATEGORIES = SET.set({
   'cyclewayOnHighwayProtected',
 })
 
+---@class DeriveTrafficModeResultNone
+---@field traffic_mode_left nil
+---@field traffic_mode_right nil
+---@class DeriveTrafficModeResultLeftOnly
+---@field traffic_mode_left string
+---@field traffic_mode_right nil
+---@class DeriveTrafficModeResultRightOnly
+---@field traffic_mode_left nil
+---@field traffic_mode_right string
+---@class DeriveTrafficModeResultBoth
+---@field traffic_mode_left string
+---@field traffic_mode_right string
+---@alias DeriveTrafficModeResult DeriveTrafficModeResultNone|DeriveTrafficModeResultLeftOnly|DeriveTrafficModeResultRightOnly|DeriveTrafficModeResultBoth
+
+---@param centerlineTags OsmTags
+---@param side SideKey
+---@return 'parking'|nil
 local function infer_traffic_mode_from_parking(centerlineTags, side)
   local raw_value = centerlineTags['parking:' .. side] or centerlineTags['parking:both']
   local value = SANITIZE_PARKING_TAGS.parking(raw_value)
@@ -21,11 +38,11 @@ local function infer_traffic_mode_from_parking(centerlineTags, side)
   return 'parking'
 end
 
----@param bikelaneTags table
----@param centerlineTags table
+---@param bikelaneTags OsmTags
+---@param centerlineTags OsmTags
 ---@param categoryId string
----@param side string
----@return table
+---@param side SideKey
+---@return DeriveTrafficModeResult
 local function derive_traffic_mode(bikelaneTags, centerlineTags, categoryId, side)
   local traffic_mode_left = CLEANER.remove_disallowed_value(SANITIZE_ROAD_TAGS.traffic_mode(bikelaneTags, 'left'))
   local traffic_mode_right = CLEANER.remove_disallowed_value(SANITIZE_ROAD_TAGS.traffic_mode(bikelaneTags, 'right'))

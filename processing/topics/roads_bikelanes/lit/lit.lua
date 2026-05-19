@@ -1,6 +1,6 @@
 require('init')
 
----@param object_tags table
+---@param object_tags OsmTags
 ---@return table
 local function lit(object_tags)
   local result_tags = {}

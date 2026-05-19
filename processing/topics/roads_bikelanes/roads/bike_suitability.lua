@@ -106,7 +106,7 @@ local category_definitions = {
   no_overtaking,
 }
 
----@param tags table
+---@param tags OsmTags
 ---@return table|nil
 local function categorize_bike_suitability(tags)
   for _, category in pairs(category_definitions) do

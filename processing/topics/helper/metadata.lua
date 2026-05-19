@@ -2,8 +2,8 @@ require('init')
 local time_utils = require('time_utils')
 local log = require('log')
 
--- * @desc Metadata of the given osm object
--- * @returns `meta` object
+---@param object table
+---@return ObjectMeta
 local function metadata(object)
   local meta = {
     -- Reminder: Age of last tag modification; just moving the nodes don't touch the timestamp; but adding/removing nodes does

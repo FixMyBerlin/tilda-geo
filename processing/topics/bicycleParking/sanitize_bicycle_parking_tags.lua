@@ -5,8 +5,8 @@ local SANITIZE_TAGS = require('sanitize_tags')
 local YES_NO = { 'yes', 'no' }
 
 --- Map `separate_tags` result keys to OSM strings when the result key differs from `object_tags[key]`.
---- @param tags table
---- @return table
+---@param tags OsmTags
+---@return table
 local function log_source_overrides(tags)
   return {
     access_cargo_bike = tags.cargo_bike,
@@ -19,13 +19,13 @@ local SANITIZE_BICYCLE_PARKING = {
   -- Expose this key explicitly so `separate_tags` can map derived result keys
   -- back to the original OSM source fields for error reporting.
   log_source_overrides = log_source_overrides,
-  --- @param value string|nil
+  ---@param value string|nil
   access = function(value)
     return sanitize_for_logging(value, { 'yes', 'private', 'permissive', 'customers' })
   end,
 
   --- nil preserves implicit-default behaviour (`implicit_no`).
-  --- @param value string|nil
+  ---@param value string|nil
   covered = function(value)
     if value == nil then
       return 'implicit_no'
@@ -33,7 +33,7 @@ local SANITIZE_BICYCLE_PARKING = {
     return sanitize_for_logging(value, { 'yes', 'no', 'partial' })
   end,
 
-  --- @param value string|nil
+  ---@param value string|nil
   fee = function(value)
     if value == nil then
       return 'implicit_no'
@@ -41,17 +41,17 @@ local SANITIZE_BICYCLE_PARKING = {
     return sanitize_for_logging(value, YES_NO)
   end,
 
-  --- @param value string|nil
+  ---@param value string|nil
   cargo_bike = function(value)
     return sanitize_for_logging(value, { 'yes' }, { 'no' })
   end,
 
-  --- @param value string|nil
+  ---@param value string|nil
   lit = function(value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
 
-  --- @param value string|nil
+  ---@param value string|nil
   bicycle_parking = function(value)
     return sanitize_for_logging(value, {
       'stands',
@@ -70,7 +70,7 @@ local SANITIZE_BICYCLE_PARKING = {
       'no',
     })
   end,
-  --- @param tags table
+  ---@param tags OsmTags
   bicycle_parking_position = function(tags)
     local value = tags['bicycle_parking:position'] or tags.position
     return sanitize_for_logging(value, {

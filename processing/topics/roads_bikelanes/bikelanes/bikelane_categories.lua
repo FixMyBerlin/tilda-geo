@@ -19,9 +19,9 @@ local is_crossing_pattern -- forward declaration for use in category conditions 
 --- Resolve `<base>_<left|right>` from raw side tags via matching sanitizer.
 --- Example: `separation_left` -> `SANITIZE_ROAD_TAGS.separation(tags, 'left')`.
 --- Returns `(handled, value)` where handled marks keys resolved by a sanitizer.
---- @param source_tags table
---- @param key string
---- @return boolean, any|nil
+---@param source_tags OsmTags
+---@param key string
+---@return boolean, any|nil
 local function resolve_sided_sanitized_value(source_tags, key)
   local base = key:match('^(.-)_left$')
   local side = 'left'
@@ -45,8 +45,8 @@ end
 
 --- Build a decision-only tag view where `DISALLOWED_VALUE` behaves like missing data.
 --- Writes still go to the original tag table so category conditions can keep mutating fields.
---- @param source_tags table
---- @return table
+---@param source_tags OsmTags
+---@return OsmTags
 local function decision_tags_view(source_tags)
   return setmetatable({}, {
     __index = function(_, key)
@@ -78,7 +78,7 @@ local function decision_tags_view(source_tags)
 end
 
 ---Helper function to check this object is also a `cyclewayOnHighwayBetweenLanes`
----@param tags table The tags to check
+---@param tags OsmTags The tags to check
 local function has_cycleway_on_highway_between_lanes_conditions(tags)
   if tags._side == 'left' or tags._side == 'right' then
     -- Check Untransformed tags
@@ -104,8 +104,8 @@ BikelaneCategory.__index = BikelaneCategory
 --- implicitOneWay: boolean,
 --- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
 --- copySurfaceSmoothnessFromParent: boolean, -- Whether this category should copy surface/smoothness values from parent highway
---- condition: fun(tags: table): (boolean|nil),
---- process: fun(tags: table): (table|nil)|nil, -- Optional function to process tags after categorization
+--- condition: fun(tags: OsmTags): (boolean|nil),
+--- process: fun(tags: OsmTags): (OsmTags|nil)|nil, -- Optional function to process tags after categorization
 --- }
 ---@return BikelaneCategory
 function BikelaneCategory.new(args)
@@ -122,7 +122,7 @@ function BikelaneCategory.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean|nil
 function BikelaneCategory:__call(tags)
   return self.condition(decision_tags_view(tags))
@@ -486,7 +486,7 @@ local cyclewaySeparated = BikelaneCategory.new({
 local cyclewaySeparated_adjoining, cyclewaySeparated_isolated, cyclewaySeparated_adjoiningOrIsolated = create_subcategories_adjoining_or_isolated(cyclewaySeparated)
 
 -- Helper function to detect crossing pattern (reused in category, guard, and todo)
----@param tags table The tags to check
+---@param tags OsmTags The tags to check
 ---@return boolean
 is_crossing_pattern = function(tags)
   if tags.highway == 'cycleway' and tags.cycleway == 'lane' and tags.lane == 'crossing' then
@@ -929,8 +929,8 @@ local categoryDefinitions = {
   needsClarification
 }
 
----@param tags table
----@return table|nil
+---@param tags OsmTags
+---@return BikelaneCategory|nil
 local function categorize_bikelane(tags)
   for _, category in pairs(categoryDefinitions) do
     if category(tags) then

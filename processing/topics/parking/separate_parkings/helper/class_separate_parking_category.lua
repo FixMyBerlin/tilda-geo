@@ -20,7 +20,7 @@ function class_separate_parking_category.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 function class_separate_parking_category:is_active(tags)
   return self._conditions(tags)

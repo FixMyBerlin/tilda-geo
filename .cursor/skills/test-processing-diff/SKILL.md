@@ -115,7 +115,14 @@ SELECT * FROM public.mytable_diff LIMIT 50;
 
 ## Quick sanity: Lua unit tests
 
-`./processing/run-tests.sh`
+Run from `processing/`:
+
+`bun run test`
+
+Notes:
+
+- This wrapper runs Docker+busted for the whole suite.
+- Lua modules are loaded via dotted requires (for example `topics.parking.roads.helper.result_tags`).
 
 ## Related docs
 

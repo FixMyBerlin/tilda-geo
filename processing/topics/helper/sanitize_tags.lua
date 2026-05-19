@@ -10,8 +10,8 @@ local parse_length = require('parse_length')
 local sanitize_string = require('sanitize_string')
 
 --- Value fed into `operator_type` before transformation / allowlist (for `separate_tags` logging).
---- @param tags table|nil
---- @return string|nil
+---@param tags OsmTags|nil
+---@return string|nil
 local function operator_type_input(tags)
   if not tags then return nil end
   local value = tags['operator:type']
@@ -23,6 +23,22 @@ local function operator_type_input(tags)
   return value
 end
 
+---@class SanitizeTags
+---@field safe_string fun(value: string|nil): string|nil
+---@field road_name fun(tags: OsmTags): string|nil
+---@field oneway_road fun(tags: OsmTags): string|nil
+---@field oneway_bicycle fun(value: string|nil): string|nil
+---@field boolean_yes fun(value: string|nil): string|nil
+---@field access fun(value: string|nil): string|nil
+---@field traffic_sign fun(value: string|nil): string|nil
+---@field surface fun(tags: OsmTags): string|nil
+---@field operator_type_log_source fun(tags: OsmTags|nil): string|nil
+---@field operator_type fun(tags: OsmTags): string|nil
+---@field indoor fun(value: string|nil): string|nil
+---@field informal fun(value: string|nil): string|nil
+---@field covered fun(value: string|nil): string|nil
+---@field covered_or_indoor fun(tags: OsmTags): string|nil
+---@type SanitizeTags
 local SANITIZE_TAGS = {
   safe_string = function (value)
     return sanitize_string(value)

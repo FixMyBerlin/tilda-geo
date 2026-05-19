@@ -3,9 +3,14 @@
   "type": "module",
   "module": "index.ts",
   "scripts": {
+    "test": "bun ./scripts/run-tests.ts",
     "lint": "biome lint --write .",
     "format": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write -c ../app/oxfmt.config.ts .",
-    "check": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write -c ../app/oxfmt.config.ts . && biome check --write ."
+    "check": "bun --parallel check:type check:format check:lint",
+    "check:type": "bun run typecheck",
+    "check:format": "bun run format",
+    "check:lint": "biome check --write .",
+    "typecheck": "bun ./scripts/run-typecheck-lua.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",

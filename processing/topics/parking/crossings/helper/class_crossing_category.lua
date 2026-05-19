@@ -32,13 +32,13 @@ function class_crossing_category.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 function class_crossing_category:is_active(tags)
   return self._conditions(tags)
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return number|nil
 function class_crossing_category:get_buffer_radius(tags)
   return self._buffer_radius(tags)

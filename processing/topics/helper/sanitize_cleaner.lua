@@ -4,6 +4,10 @@ local log = require('log')
 
 -- Returns cleaned_tags, replaced_tags (with _instruction if any replaced)
 -- `log_source_overrides`: optional map result_key -> raw OSM value when it differs from `object_tags[result_key]`
+---@param tags_to_clean OsmTags
+---@param object_tags OsmTags
+---@param log_source_overrides OsmTags|nil
+---@return OsmTags, OsmTags
 local function separate_tags(tags_to_clean, object_tags, log_source_overrides)
   local cleaned_tags = {}
   local replaced_tags = {}
@@ -21,6 +25,8 @@ local function separate_tags(tags_to_clean, object_tags, log_source_overrides)
 end
 
 -- Returns cleaned_tags with disallowed values set to nil
+---@param tags_to_clean OsmTags
+---@return OsmTags
 local function remove_disallowed_values(tags_to_clean)
   local cleaned_tags = {}
 
@@ -36,6 +42,8 @@ local function remove_disallowed_values(tags_to_clean)
 end
 
 -- Returns cleaned_tag with disallowed value set to nil
+---@param tag_to_clean OsmTagValue
+---@return OsmTagValue
 local function remove_disallowed_value(tag_to_clean)
   if tag_to_clean == SANITIZE_VALUES.disallowed then
     return nil
@@ -43,6 +51,11 @@ local function remove_disallowed_value(tag_to_clean)
   return tag_to_clean
 end
 
+---@class SanitizeCleaner
+---@field separate_tags fun(tags_to_clean: OsmTags, object_tags: OsmTags, log_source_overrides: OsmTags|nil): OsmTags, OsmTags
+---@field remove_disallowed_values fun(tags_to_clean: OsmTags): OsmTags
+---@field remove_disallowed_value fun(tag_to_clean: OsmTagValue): OsmTagValue
+---@type SanitizeCleaner
 return {
   separate_tags = separate_tags,
   remove_disallowed_values = remove_disallowed_values,

@@ -1,7 +1,7 @@
 require('init')
 local SET = require('sets')
 
----@param tags table
+---@param tags OsmTags
 ---@param category table
 ---@return 'yes'|'no'|'car_not_bike'|'assumed_no'|'implicit_yes'
 local function derive_oneway(tags, category)

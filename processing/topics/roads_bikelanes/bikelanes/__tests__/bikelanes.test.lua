@@ -4,6 +4,14 @@ describe('bikelanes', function()
   local bikelanes = require('extract_bikelanes')
   local extract_categories_by_side = require('extract_categories_by_side')
 
+  ---@param input_object { tags: table, id: number|string, type: string }
+  ---@return table
+  local function run_bikelanes(input_object)
+    input_object.tags._id = input_object.id
+    input_object.tags._type = input_object.type
+    return bikelanes(input_object.tags, input_object)
+  end
+
   describe('Handle `traffic_sign`:', function()
     it('processes descriptive German traffic signs', function()
       local input_object = {
@@ -15,7 +23,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way',
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
 
       assert.are.equal(result[1].category, 'bicycleRoad')
       assert.are.equal(result[1].traffic_sign, 'Rad/Fuß: Fußgänger haben Vorrang.')
@@ -33,7 +41,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'bicycleRoad')
       assert.are.equal(result[1].width, 5)
     end)
@@ -49,7 +57,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'cycleway_adjoining')
       assert.are.equal(result[1].width, 5)
     end)
@@ -67,7 +75,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'footAndCyclewaySegregated_adjoining')
       assert.are.equal(result[1].width, 5)
     end)
@@ -82,7 +90,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
@@ -98,7 +106,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
@@ -113,7 +121,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
@@ -129,7 +137,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
@@ -145,7 +153,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
@@ -160,7 +168,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[1]
       assert.are.equal(result_left.width_source, 'infra3D')
     end)
@@ -181,7 +189,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       local result_left = result[3]
       assert.are.equal(result_left.category, 'footwayBicycleYes_adjoining')
       assert.are.equal(result_left.width, 2.3)
@@ -206,7 +214,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal('bicycleRoad', result[1].category)
       assert.are.equal('m123', result[1].mapillary)
       assert.are.equal('mf123', result[1]['mapillary_forward'])
@@ -226,7 +234,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
 
       assert.are.equal('cyclewayOnHighway_advisory', result[1].category)
       assert.are.equal('crm345;m123', result[1].mapillary)
@@ -247,7 +255,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'footAndCyclewaySegregated_adjoining')
     end)
 
@@ -261,7 +269,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'footAndCyclewaySegregated_adjoining')
     end)
 
@@ -276,7 +284,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'footAndCyclewaySegregated_adjoining')
     end)
 
@@ -291,7 +299,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'cycleway_adjoining')
     end)
   end)
@@ -494,7 +502,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       for _, v in pairs(result) do
         if v._side == 'right' and v.prefix == 'cycleway' then
           assert.are.equal('needsClarification', v.category)
@@ -516,7 +524,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       for _, v in pairs(result) do
         if v._side == 'right' and v.prefix == 'cycleway' then
           -- Any `cycleway:(nil|both|right)` creates a transformed geometry for `right` which will fall back to `needsClarification` if no other tags are given
@@ -538,7 +546,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       for _, v in pairs(result) do
         assert.are.equal('left', v._side) -- no 'right' side
         if v._side == 'left' and v.prefix == 'cycleway' then
@@ -560,7 +568,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'footAndCyclewaySegregated_adjoining')
       assert.are.equal(result[1].traffic_mode_left, nil)
       assert.are.equal(result[1].traffic_mode_right, 'foot')
@@ -576,7 +584,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'bicycleRoad')
       assert.are.equal(result[1].traffic_mode_left, nil)
       assert.are.equal(result[1].traffic_mode_right, 'parking')
@@ -593,7 +601,7 @@ describe('bikelanes', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(result[1].category, 'cyclewayOnHighway_advisory')
       assert.are.equal(result[1].traffic_mode_left, nil)
       assert.are.equal(result[1].traffic_mode_right, 'parking')

@@ -113,7 +113,7 @@ end
 -- Classify parking conditions into merged categories
 -- Based on [street_parking.py](https://github.com/SupaplexOSM/street_parking.py/blob/main/street_parking.py) vehicle restrictions processing
 -- Uses only `tags` (e.g. unnested parking:left/right from the way, or full tags on a parking area). Highway-only tags must not be merged in here for road-derived parkings.
----@param tags table<string, string|nil> Parking-scoped OSM tags (unnested `parking:*` side tags or element tags)
+---@param tags OsmTags<string, string|nil> Parking-scoped OSM tags (unnested `parking:*` side tags or element tags)
 ---@param default_category 'assumed_free'|'assumed_private' Default category to use when no condition is found
 ---@return {condition_category?: string}
 function classify_parking_conditions(tags, default_category)

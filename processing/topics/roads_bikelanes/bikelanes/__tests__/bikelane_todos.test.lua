@@ -5,6 +5,15 @@ describe('bikelane_todos', function()
   local osm2pgsql = require('osm2pgsql')
   local table_size = require('table_size')
   local table_includes = require('table_includes')
+
+  ---@param input_object { tags: table, id: number|string, type: string }
+  ---@return table
+  local function run_bikelanes(input_object)
+    input_object.tags._id = input_object.id
+    input_object.tags._type = input_object.type
+    return bikelanes(input_object.tags, input_object)
+  end
+
   describe('`missing_access_tag_240`:', function()
     it('`cycleway=track` does not show up in category', function()
       local input_object = {
@@ -16,7 +25,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(table_includes(result[1]._todo_list, 'missing_access_tag_240'), false)
     end)
   end)
@@ -33,7 +42,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(table_includes(result[1]._todo_list, 'malformed_traffic_sign'), false)
     end)
     it('create todo', function()
@@ -47,7 +56,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local result = bikelanes(input_object.tags, input_object)
+      local result = run_bikelanes(input_object)
       assert.are.equal(table_includes(result[1]._todo_list, 'malformed_traffic_sign'), true)
     end)
   end)
@@ -83,7 +92,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -104,7 +113,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -126,7 +135,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -147,7 +156,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local left = cycleways[1]
@@ -165,7 +174,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -182,7 +191,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local left = cycleways[1]
@@ -200,7 +209,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[2]
@@ -219,7 +228,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -242,7 +251,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -266,7 +275,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 2)
 
       local left = cycleways[1]
@@ -289,7 +298,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local data = cycleways[1]
@@ -307,7 +316,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local data = cycleways[1]
@@ -325,7 +334,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local data = cycleways[1]
@@ -343,7 +352,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local left = cycleways[1]
@@ -364,7 +373,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local data = cycleways[1]
@@ -382,7 +391,7 @@ describe('bikelane_todos', function()
         id = 1,
         type = 'way'
       }
-      local cycleways = bikelanes(input_object.tags, input_object)
+      local cycleways = run_bikelanes(input_object)
       assert.are.equal(table_size(cycleways), 1)
 
       local data = cycleways[1]

@@ -1,6 +1,6 @@
 require('init')
 
----@param tags table
+---@param tags OsmTags
 ---@return table
 local function split_traffic_sign_directions(tags)
   local direction_offsets = { ['forward'] = 0, ['backward'] = 180, }

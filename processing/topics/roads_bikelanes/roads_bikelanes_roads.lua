@@ -28,8 +28,11 @@ local roads_path_classes_table = roads_bikelanes_tables.roads_path_classes_table
 local bike_suitability_table = roads_bikelanes_tables.bike_suitability_table
 local todo_lines_table = roads_bikelanes_tables.todo_lines_table
 
+---@param context RoadsBikelanesWayContext
 local function roads_bikelanes_roads(context)
+  ---@type ObjectMeta
   local object_meta = context.object_meta
+  ---@type OsmTags
   local object_tags = context.object_tags
   local object_geom = context.object_geom
 
