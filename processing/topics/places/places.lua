@@ -1,7 +1,6 @@
-require('init')
-local places_nodes = require('places_nodes')
-local places_ways = require('places_ways')
-local places_relations = require('places_relations')
+local places_nodes = require('topics.places.places_nodes')
+local places_ways = require('topics.places.places_ways')
+local places_relations = require('topics.places.places_relations')
 
 function osm2pgsql.process_node(object)
   places_nodes(object)

@@ -1,7 +1,6 @@
-require('init')
-local public_transport_nodes = require('public_transport_nodes')
-local public_transport_ways = require('public_transport_ways')
-local public_transport_relations = require('public_transport_relations')
+local public_transport_nodes = require('topics.publicTransport.public_transport_nodes')
+local public_transport_ways = require('topics.publicTransport.public_transport_ways')
+local public_transport_relations = require('topics.publicTransport.public_transport_relations')
 
 function osm2pgsql.process_node(object)
   public_transport_nodes(object)

@@ -1,5 +1,4 @@
-require('init')
-local load_csv_sidepath = require('load_csv_sidepath')
+local load_csv_sidepath = require('topics.roads_bikelanes.pseudo_tags_sidepath.load_csv_sidepath')
 
 local CSV_FILE = '/data/pseudoTagsData/is_sidepath_estimation.csv'
 

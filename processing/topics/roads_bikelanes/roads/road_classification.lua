@@ -1,9 +1,8 @@
-require('init')
-local derive_traffic_signs = require('derive_traffic_signs')
-local SANITIZE_TAGS = require('sanitize_tags')
-local parse_length = require('parse_length')
-local merge_table = require('merge_table')
-local road_classification_road_value = require('road_classification_road_value')
+local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local parse_length = require('topics.helper.parse_length')
+local merge_table = require('topics.helper.merge_table')
+local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 
 ---@param object_tags OsmTags
 ---@return table

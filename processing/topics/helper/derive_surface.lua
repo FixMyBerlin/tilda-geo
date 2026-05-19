@@ -1,6 +1,5 @@
-require('init')
-local SANITIZE_TAGS = require('sanitize_tags')
-local SANITIZE_VALUES = require('sanitize_values')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 
 ---@alias DeriveSurfaceSource 'tag'
 ---@alias DeriveSurfaceConfidence 'high'

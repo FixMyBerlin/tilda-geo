@@ -1,4 +1,3 @@
-require('init')
 --- round `value` to `digits` decimal positions
 ---@param value number|nil
 ---@param digits integer

@@ -1,7 +1,6 @@
 describe('bikelane_category decision view', function()
-  require('init')
-  local bikelane_categories = require('bikelane_categories')
-  local SANITIZE_VALUES = require('sanitize_values')
+  local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
+  local SANITIZE_VALUES = require('topics.helper.sanitize_values')
   local BikelaneCategory = bikelane_categories.bikelane_category
 
   local function make_test_category(condition)

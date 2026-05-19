@@ -1,6 +1,5 @@
-require('init')
-local time_utils = require('time_utils')
-local log = require('log')
+local time_utils = require('topics.helper.time_utils')
+local log = require('topics.helper.log')
 
 ---@param object table
 ---@return ObjectMeta

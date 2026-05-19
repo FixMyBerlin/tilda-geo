@@ -1,4 +1,3 @@
-require('init')
 
 ---@param lanes_value string The lanes value (e.g., '1|2|3')
 ---@return table Array of values

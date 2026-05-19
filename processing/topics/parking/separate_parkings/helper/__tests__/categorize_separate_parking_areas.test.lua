@@ -1,10 +1,9 @@
 describe('`categorize_separate_parking areas`', function()
-  require('init')
-  local osm2pgsql = require('osm2pgsql')
-  local log = require('log')
-  local separate_parking_area_categories = require('separate_parking_area_categories')
-  local categorize_separate_parking = require('categorize_separate_parking')
-  local result_tags_separate_parking = require('result_tags_separate_parking')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local log = require('topics.helper.log')
+  local separate_parking_area_categories = require('topics.parking.separate_parkings.area.separate_parking_area_categories')
+  local categorize_separate_parking = require('topics.parking.separate_parkings.helper.categorize_separate_parking')
+  local result_tags = require('topics.parking.separate_parkings.helper.result_tags')
 
   it('no category matches', function()
     local object = {
@@ -28,7 +27,7 @@ describe('`categorize_separate_parking areas`', function()
     }
     local result = categorize_separate_parking(object, separate_parking_area_categories)
     local area = 100
-    local row_tags = result_tags_separate_parking(result.category, result.object, area)
+    local row_tags = result_tags(result.category, result.object, area)
     assert.are.equal('table', type(result.category))
     assert.are.equal('parking_lane', result.category.id)
     assert.are.equal('table', type(result.object))
@@ -49,7 +48,7 @@ describe('`categorize_separate_parking areas`', function()
     }
     local result = categorize_separate_parking(object, separate_parking_area_categories)
     local area = 100
-    local result_tags = result_tags_separate_parking(result.category, result.object, area)
+    local result_tags = result_tags(result.category, result.object, area)
     assert.are.equal('way/'..object.id, result_tags.id)
     assert.are.equal(result_tags.tags.mapillary, object.tags.mapillary)
     assert.are.equal(result_tags.tags.not_copied, nil)

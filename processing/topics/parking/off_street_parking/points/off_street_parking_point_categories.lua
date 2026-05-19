@@ -1,5 +1,4 @@
-require('init')
-local class_off_street_parking_category = require('class_off_street_parking_category')
+local class_off_street_parking_category = require('topics.parking.off_street_parking.helper.class_off_street_parking_category')
 
 local NIL_CAPACITY_TAGS = {
   value = nil,

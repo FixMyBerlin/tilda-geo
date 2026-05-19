@@ -1,8 +1,7 @@
-require('init')
-local log = require('log')
-local class_obstacle_category = require('class_obstacle_category')
-local obstacle_area_categories = require('obstacle_area_categories')
-local TAG_HELPER = require('tag_helper')
+local log = require('topics.helper.log')
+local class_obstacle_category = require('topics.parking.obstacles.helper.class_obstacle_category')
+local obstacle_area_categories = require('topics.parking.obstacles.area.obstacle_area_categories')
+local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
 ---@return table<string, { category: ObstacleCategory, object: OSMObject} | { category: nil, object: nil}>
 local function categorize_area(object)

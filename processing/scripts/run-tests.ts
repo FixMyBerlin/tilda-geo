@@ -9,8 +9,6 @@ if (!root) {
   process.exit(1)
 }
 
-await $`bun ./processing/scripts/update-lua-package-paths.ts`.cwd(root)
-
 const dockerCheck = await $`command -v docker`.quiet().nothrow()
 if (dockerCheck.exitCode !== 0) {
   console.warn('docker not in PATH - skipping processing Docker tests.')

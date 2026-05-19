@@ -1,4 +1,3 @@
-require('init')
 
 local function structured_clone(original)
   if type(original) ~= 'table' then

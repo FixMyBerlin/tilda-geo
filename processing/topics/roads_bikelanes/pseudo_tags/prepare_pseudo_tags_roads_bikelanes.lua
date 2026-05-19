@@ -1,8 +1,7 @@
-require('init')
-local load_csv_mapillary_coverage = require('load_csv_mapillary_coverage')
-local mapillary_coverage = require('mapillary_coverage')
-local load_csv_is_sidepath = require('load_csv_is_sidepath')
-local is_sidepath = require('is_sidepath')
+local load_csv_mapillary_coverage = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.load_csv_mapillary_coverage')
+local mapillary_coverage = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.mapillary_coverage')
+local load_csv_is_sidepath = require('topics.roads_bikelanes.pseudo_tags_sidepath.load_csv_is_sidepath')
+local is_sidepath = require('topics.roads_bikelanes.pseudo_tags_sidepath.is_sidepath')
 
 local mapillary_coverage_data = load_csv_mapillary_coverage()
 local is_sidepath_data = load_csv_is_sidepath()

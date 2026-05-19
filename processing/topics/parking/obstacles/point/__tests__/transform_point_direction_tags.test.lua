@@ -1,8 +1,7 @@
 describe('transform_point_direction_tags', function()
-  require('init')
   local tablex = require('pl.tablex')
-  local log = require('log')
-  local transform_point_direction_tags = require('transform_point_direction_tags')
+  local log = require('topics.helper.log')
+  local transform_point_direction_tags = require('topics.parking.crossings.points.transform_point_direction_tags')
 
   it('has a key:right and removes direction for forward', function()
     local tags = { direction = 'forward', foo = 'bar', mykey = 'myvalue' }

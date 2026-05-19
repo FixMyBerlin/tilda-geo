@@ -1,7 +1,6 @@
 describe('bike_suitability', function()
-  require('init')
-  local osm2pgsql = require('osm2pgsql')
-  local categorize_bike_suitability = require('bike_suitability')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local categorize_bike_suitability = require('topics.roads_bikelanes.roads.bike_suitability')
 
   describe('goodSurface', function()
     it('only surface', function()

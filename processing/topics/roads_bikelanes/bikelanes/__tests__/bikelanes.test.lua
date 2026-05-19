@@ -1,8 +1,7 @@
 describe('bikelanes', function()
-  require('init')
-  local osm2pgsql = require('osm2pgsql')
-  local bikelanes = require('extract_bikelanes')
-  local extract_categories_by_side = require('extract_categories_by_side')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local bikelanes = require('topics.roads_bikelanes.bikelanes.extract_bikelanes')
+  local extract_categories_by_side = require('topics.roads_bikelanes.bikelanes.helper.extract_categories_by_side')
 
   ---@param input_object { tags: table, id: number|string, type: string }
   ---@return table

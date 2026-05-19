@@ -1,7 +1,6 @@
 describe('road_width_tags', function()
-  require('init')
-  local road_width_tags = require('road_width_tags')
-  local osm2pgsql = require('osm2pgsql')
+  local road_width_tags = require('topics.parking.roads.helper.road_width_tags')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
 
   it('returns fallback width for unknown highway types', function()
     local tags = { highway = 'unknown' }

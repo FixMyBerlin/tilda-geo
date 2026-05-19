@@ -1,5 +1,4 @@
-require('init')
-local HIGHWAYS = require('highway_classes')
+local HIGHWAYS = require('topics.helper.highway_classes')
 
 --- Returns _is_sidepath for a way. Only path-like ways (sidepath_highway_classes) get a value.
 --- - Path in CSV (estimation = yes) -> 'assumed_yes'

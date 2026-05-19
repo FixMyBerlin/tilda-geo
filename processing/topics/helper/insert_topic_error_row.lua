@@ -1,6 +1,5 @@
-require('init')
-local default_id = require('default_id')
-local TOPIC_ERROR_INSTRUCTIONS = require('topic_error_instructions')
+local default_id = require('topics.helper.default_id')
+local TOPIC_ERROR_INSTRUCTIONS = require('topics.helper.topic_error_instructions')
 
 ---@param db_table table
 ---@param object_type string

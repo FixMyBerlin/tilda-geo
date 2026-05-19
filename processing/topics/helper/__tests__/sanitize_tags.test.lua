@@ -1,5 +1,4 @@
-require('init')
-local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 
 describe('sanitize_tags', function()
   describe('safe_string', function()

@@ -1,4 +1,3 @@
-require('init')
 ---@param timestamp? integer
 ---@return integer?
 -- Given a unix timestamp in unix return the age in days that have passed since (>730 is outdated)

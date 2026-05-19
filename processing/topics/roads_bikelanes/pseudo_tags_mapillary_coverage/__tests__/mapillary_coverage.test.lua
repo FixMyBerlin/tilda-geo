@@ -1,6 +1,5 @@
-require('init')
-local load_csv_mapillary = require('load_csv_mapillary')
-local mapillary_coverage = require('mapillary_coverage')
+local load_csv_mapillary = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.load_csv_mapillary')
+local mapillary_coverage = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.mapillary_coverage')
 
 describe('mapillary_coverage', function()
   local test_csv = '/processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/__tests__/test_mapillary_coverage.csv'

@@ -1,8 +1,7 @@
 describe('`categorize_separate_parking points`', function()
-  require('init')
-  local log = require('log')
-  local separate_parking_point_categories = require('separate_parking_point_categories')
-  local categorize_separate_parking = require('categorize_separate_parking')
+  local log = require('topics.helper.log')
+  local separate_parking_point_categories = require('topics.parking.separate_parkings.point.separate_parking_point_categories')
+  local categorize_separate_parking = require('topics.parking.separate_parkings.helper.categorize_separate_parking')
 
   it('works', function()
     local tags = {

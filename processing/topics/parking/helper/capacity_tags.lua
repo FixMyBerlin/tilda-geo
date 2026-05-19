@@ -1,4 +1,3 @@
-require('init')
 
 --- Creates capacity_tags table with value, confidence, and source
 --- Only sets confidence and source when value is present

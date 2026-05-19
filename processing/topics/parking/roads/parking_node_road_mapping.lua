@@ -1,8 +1,7 @@
-require('init')
-local log = require('log')
-local is_road_check = require('is_road')
-local is_driveway_check = require('is_driveway')
-local has_parking_check = require('has_parking')
+local log = require('topics.helper.log')
+local is_road_check = require('topics.parking.roads.helper.is_road')
+local is_driveway_check = require('topics.parking.roads.helper.is_driveway')
+local has_parking_check = require('topics.parking.parkings.helper.has_parking')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_node_road_mapping',

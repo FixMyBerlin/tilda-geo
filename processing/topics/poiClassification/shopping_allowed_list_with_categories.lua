@@ -1,4 +1,3 @@
-require('init')
 -- Any of 'Grundversorgung' | 'Bildung' | 'Einkauf' | 'Freizeit'
 local shopping_allowed_list_with_categories = {
   ['animal_boarding'] = 'Freizeit',

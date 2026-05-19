@@ -1,7 +1,6 @@
-require('init')
-local SET = require('sets')
-local log = require('log')
-local SANITIZE_VALUES = require('sanitize_values')
+local SET = require('topics.helper.sets')
+local log = require('topics.helper.log')
+local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 
 -- sanitize with fallback DISALLOWED_VALUE.
 -- Use together with sanitize_cleanup_and_log()

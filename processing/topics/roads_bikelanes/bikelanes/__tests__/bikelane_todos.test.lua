@@ -1,10 +1,9 @@
 describe('bikelane_todos', function()
-  require('init')
-  local bikelanes = require('extract_bikelanes')
+  local bikelanes = require('topics.roads_bikelanes.bikelanes.extract_bikelanes')
   local inspect = require('inspect')
-  local osm2pgsql = require('osm2pgsql')
-  local table_size = require('table_size')
-  local table_includes = require('table_includes')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local table_size = require('topics.helper.table_size')
+  local table_includes = require('topics.helper.table_includes')
 
   ---@param input_object { tags: table, id: number|string, type: string }
   ---@return table

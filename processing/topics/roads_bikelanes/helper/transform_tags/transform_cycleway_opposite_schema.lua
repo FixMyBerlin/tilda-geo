@@ -1,4 +1,3 @@
-require('init')
 
 -- Mutate `cycleway=opposite` to the oneway-schema.
 -- Docs: https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway%3Dopposite

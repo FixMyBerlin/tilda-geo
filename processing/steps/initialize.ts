@@ -6,7 +6,6 @@ import {
   initializeDiffingReferenceSchema,
 } from '../diffing/diffing'
 import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
-import { initializeLuaPackagePath } from '../utils/initializeLuaPackagePath'
 import { isDev } from '../utils/isDev'
 import { logPadded } from '../utils/logging'
 import { paramsFilteredForLogs } from '../utils/parameters'
@@ -42,9 +41,6 @@ export async function initialize() {
 
   // Meta Data
   await initializeMetadataTable()
-
-  // osm2pgsql LUA
-  await initializeLuaPackagePath('runProcessing')
 
   // See ../pseudoTags
   await downloadPseudoTagsData()

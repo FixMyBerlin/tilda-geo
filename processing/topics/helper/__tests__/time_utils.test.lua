@@ -1,6 +1,5 @@
 describe('time_utils', function()
-  require('init')
-  local time_utils = require('time_utils')
+  local time_utils = require('topics.helper.time_utils')
 
   describe('age_in_days', function()
     it('return nil for nil input', function()

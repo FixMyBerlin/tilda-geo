@@ -1,4 +1,3 @@
-require('init')
 --- extract all key, value pairs that are not starting with `_`
 ---@param tags OsmTags
 ---@return OsmTags

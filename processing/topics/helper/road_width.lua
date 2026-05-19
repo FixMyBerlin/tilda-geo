@@ -1,5 +1,4 @@
-require('init')
-local parse_length = require('parse_length')
+local parse_length = require('topics.helper.parse_length')
 
 -- * @desc TODO
 -- * @returns TODO

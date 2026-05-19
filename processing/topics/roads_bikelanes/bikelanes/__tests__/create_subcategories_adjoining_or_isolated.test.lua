@@ -1,8 +1,7 @@
 describe('create_subcategories_adjoining_or_isolated', function()
-  require('init')
-  local bikelane_categories = require('bikelane_categories')
-  local create_subcategories_adjoining_or_isolated = require('create_subcategories_adjoining_or_isolated')
-  local category_is_sidepath = require('category_is_sidepath')
+  local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
+  local create_subcategories_adjoining_or_isolated = require('topics.roads_bikelanes.bikelanes.categories.create_subcategories_adjoining_or_isolated')
+  local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 
   local bikelane_category = bikelane_categories.bikelane_category
   local testCategory = bikelane_category.new({

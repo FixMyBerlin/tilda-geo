@@ -1,4 +1,3 @@
-require('init')
 -- This function sorts condition classes by time. Classes without time conditions are kept at first.
 -- Examples:
 -- { 'mixed (Mo-Fr 18:00-20:00)'; 'no_parking (08:00-14:00)'; 'no_stopping (06:00-08:00,14:00-18:00)' }

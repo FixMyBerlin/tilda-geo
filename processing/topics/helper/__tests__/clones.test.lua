@@ -1,6 +1,5 @@
 describe('structured_clone', function()
-  require('init')
-  local CLONE = require('clones')
+  local CLONE = require('topics.helper.clones')
 
   it('clones a flat table', function()
     local original = { a = 1, b = 2, c = 3 }

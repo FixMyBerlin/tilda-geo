@@ -1,6 +1,5 @@
 describe('derive_smoothness', function()
-  require('init')
-  local derive_smoothness = require('derive_smoothness')
+  local derive_smoothness = require('topics.helper.derive_smoothness')
 
   it('normalize good to good', function()
     local result = derive_smoothness({ smoothness = 'good' })

@@ -1,8 +1,7 @@
-require('init')
-local merge_table = require('merge_table')
-local derive_surface = require('derive_surface')
-local derive_smoothness = require('derive_smoothness')
-local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
+local merge_table = require('topics.helper.merge_table')
+local derive_surface = require('topics.helper.derive_surface')
+local derive_smoothness = require('topics.helper.derive_smoothness')
+local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 
 ---@param object_tags OsmTags
 ---@return table

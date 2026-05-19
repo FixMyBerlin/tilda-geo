@@ -1,7 +1,6 @@
-require('init')
-local merge_table = require('merge_table')
-local SET = require('sets')
-local highway_classes = require('highway_classes')
+local merge_table = require('topics.helper.merge_table')
+local SET = require('topics.helper.sets')
+local highway_classes = require('topics.helper.highway_classes')
 
 ---@class CenterLineTransformation
 ---@field highway string

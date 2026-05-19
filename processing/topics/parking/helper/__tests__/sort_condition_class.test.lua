@@ -1,7 +1,6 @@
 describe('sort_condition_class', function()
-  require('init')
-  local sort_condition_class = require('sort_condition_class')
-  local log = require('log')
+  local sort_condition_class = require('topics.parking.helper.sort_condition_class')
+  local log = require('topics.helper.log')
   it('sorts entries with time conditions by start time', function()
     local list = {
       'mixed (Mo-Fr 18:00-20:00)',

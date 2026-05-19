@@ -1,8 +1,7 @@
 describe('`unnest_parking_tags`', function()
-  require('init')
-  local unnest_parking_tags = require('unnest_parking_tags')
-  local log = require('log')
-  local osm2pgsql = require('osm2pgsql')
+  local unnest_parking_tags = require('topics.parking.parkings.helper.unnest_parking_tags')
+  local log = require('topics.helper.log')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
   local inspect = require('inspect')
 
   it('does nothing when not postfix given', function()

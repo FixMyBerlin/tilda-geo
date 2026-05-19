@@ -1,4 +1,3 @@
-require('init')
 
 ---@param object_tags OsmTags
 ---@return table

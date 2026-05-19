@@ -1,5 +1,4 @@
-require('init')
-local parse_length = require('parse_length')
+local parse_length = require('topics.helper.parse_length')
 
 -- Main roads (primary/secondary/tertiary): different values for oneway vs non-oneway (2/3 rule for dual carriageways).
 -- Other roads: same value regardless of oneway.

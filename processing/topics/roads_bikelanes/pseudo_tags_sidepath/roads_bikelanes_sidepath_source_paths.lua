@@ -1,7 +1,6 @@
-require('init')
-local HIGHWAY_CLASSES = require('highway_classes')
-local SANITIZE_TAGS = require('sanitize_tags')
-local SANITIZE_CLEANER = require('sanitize_cleaner')
+local HIGHWAY_CLASSES = require('topics.helper.highway_classes')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local SANITIZE_CLEANER = require('topics.helper.sanitize_cleaner')
 
 local db_table = osm2pgsql.define_table({
   name = '_roads_bikelanes_sidepath_source_paths',

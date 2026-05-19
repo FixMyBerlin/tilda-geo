@@ -1,5 +1,4 @@
-require('init')
-local log = require('log')
+local log = require('topics.helper.log')
 
 ---@meta
 ---@class SeparateParkingCategory

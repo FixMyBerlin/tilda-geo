@@ -1,6 +1,5 @@
-require('init')
-local landuse_ways = require('landuse_ways')
-local landuse_relations = require('landuse_relations')
+local landuse_ways = require('topics.landuse.landuse_ways')
+local landuse_relations = require('topics.landuse.landuse_relations')
 
 -- No process_node for landuse: this topic has no point output contract.
 

@@ -1,8 +1,7 @@
-require('init')
-local metadata = require('metadata')
-local default_id = require('default_id')
-local LOG_ERROR = require('bikeroutes_errors')
-local result_tags_bikeroutes = require('result_tags_bikeroutes')
+local metadata = require('topics.helper.metadata')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.bikeroutes.bikeroutes_errors')
+local result_tags = require('topics.bikeroutes.helper.result_tags')
 
 local bikeroutesTable = osm2pgsql.define_table({
   name = 'bikeroutes',
@@ -24,7 +23,7 @@ local function bikeroutes_relations(object)
   local tags = object.tags
   if tags.type ~= 'route' or tags.route ~= 'bicycle' then return end
 
-  local cleaned_tags, replaced_tags = result_tags_bikeroutes(object)
+  local cleaned_tags, replaced_tags = result_tags(object)
   local geom = object:as_multilinestring()
   LOG_ERROR.SANITIZED_VALUE(object, geom, replaced_tags, 'bikeroutes')
 

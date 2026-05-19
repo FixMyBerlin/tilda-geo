@@ -1,6 +1,5 @@
 describe('merge_table', function()
-  require('init')
-  local merge_table = require('merge_table')
+  local merge_table = require('topics.helper.merge_table')
 
   local base = { ['base'] = 'base' }
 

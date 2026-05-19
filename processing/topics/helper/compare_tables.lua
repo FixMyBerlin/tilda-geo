@@ -1,4 +1,3 @@
-require('init')
 -- @desc Determines whether the contents of two tables match or not by concatenating their elements into strings and comparing them.
 -- Thanks at https://stackoverflow.com/a/20326368/729221
 function compare_table_values(a, b)

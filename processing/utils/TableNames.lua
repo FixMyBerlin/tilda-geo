@@ -1,4 +1,3 @@
-require('init')
 -- This file mocks the osm2pgsql library.
 -- We use this to extract the table names from *.lua files, which we use to compute diffs.
 -- Additionally, we validate the columns in the tables to ensure they are consistent.

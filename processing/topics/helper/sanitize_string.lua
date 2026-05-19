@@ -1,4 +1,3 @@
-require('init')
 
 --- Generic string sanitizer with minimal data loss:
 --- - Removes control characters (including NUL) to avoid parser/log issues.

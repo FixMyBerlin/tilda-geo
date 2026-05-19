@@ -1,7 +1,6 @@
 describe('`categorize_crossing_line`', function()
-  require('init')
-  local categorize_crossing_line = require('categorize_crossing_line')
-  local log = require('log')
+  local categorize_crossing_line = require('topics.parking.crossings.lines.categorize_crossing_line')
+  local log = require('topics.helper.log')
 
   it('no category matches', function()
     local tags = {

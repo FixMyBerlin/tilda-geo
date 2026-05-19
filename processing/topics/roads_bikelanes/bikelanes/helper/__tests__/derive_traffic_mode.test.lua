@@ -1,8 +1,7 @@
 describe('derive_traffic_mode', function()
-  require('init')
-  local log = require('log')
-  local osm2pgsql = require('osm2pgsql')
-  local derive_traffic_mode = require('derive_traffic_mode')
+  local log = require('topics.helper.log')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local derive_traffic_mode = require('topics.roads_bikelanes.bikelanes.helper.derive_traffic_mode')
 
   describe('explicit traffic_mode handling', function()
     it('returns explicit traffic_mode when present (right side)', function()

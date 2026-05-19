@@ -1,4 +1,3 @@
-require('init')
 local ftcsv = require('ftcsv')
 local pl_path = require('pl.path')
 local inspect = require('inspect')

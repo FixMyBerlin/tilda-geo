@@ -1,10 +1,9 @@
 describe('bikelane_categories', function()
-  require('init')
-  local osm2pgsql = require('osm2pgsql')
-  local bikelane_categories = require('bikelane_categories')
-  local log = require('log')
-  local transformations = require('transformations')
-  local extract_categories_by_side = require('extract_categories_by_side')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
+  local log = require('topics.helper.log')
+  local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
+  local extract_categories_by_side = require('topics.roads_bikelanes.bikelanes.helper.extract_categories_by_side')
   local categorize_bikelane = bikelane_categories.categorize_bikelane
 
   describe('`footAndCyclewaySegregated`:', function()

@@ -1,10 +1,9 @@
-require('init')
-local bikelane_generalization = require('bikelane_generalization')
-local merge_table = require('merge_table')
-local extract_public_tags = require('extract_public_tags')
-local default_id = require('default_id')
-local roads_bikelanes_tables = require('roads_bikelanes_tables')
-local SANITIZE_TAGS = require('sanitize_tags')
+local bikelane_generalization = require('topics.roads_bikelanes.bikelanes.bikelane_generalization')
+local merge_table = require('topics.helper.merge_table')
+local extract_public_tags = require('topics.helper.extract_public_tags')
+local default_id = require('topics.helper.default_id')
+local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 
 local bikelanes_table = roads_bikelanes_tables.bikelanes_table
 local bikelanes_presence_table = roads_bikelanes_tables.bikelanes_presence_table

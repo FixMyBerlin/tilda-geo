@@ -1,4 +1,3 @@
-require('init')
 --- Define the OSM object type used by osm2pgsql
 
 ---@class OSMObject

@@ -1,6 +1,5 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
-local SANITIZE_VALUES = require('sanitize_values')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 
 -- Helper transform `direction` tags to our left|right|both schema.
 -- If no `direction=*` is found, we assume `both`.

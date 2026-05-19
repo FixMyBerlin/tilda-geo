@@ -1,7 +1,6 @@
-require('init')
-local SET = require('sets')
-local log = require('log')
-local is_road = require('is_road')
+local SET = require('topics.helper.sets')
+local log = require('topics.helper.log')
+local is_road = require('topics.parking.roads.helper.is_road')
 
 -- Emergency roads are sometimes mapped as hw=path|footway but still require a driveway treatment
 -- Therefore all ways that allow any vehicle or emergency access are included.

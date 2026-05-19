@@ -1,4 +1,3 @@
-require('init')
 
 local road_todo_class = {}
 road_todo_class.__index = road_todo_class

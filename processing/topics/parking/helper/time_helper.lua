@@ -1,4 +1,3 @@
-require('init')
 ------------------------------------------------------------
 -- Help functions for handling, inverting and sorting time restrictions
 ------------------------------------------------------------

@@ -1,9 +1,8 @@
 describe('to_markdown_list', function()
-  require('init')
-  local to_markdown_list = require('to_markdown_list')
-  local collect_todos = require('collect_todos')
-  local road_todo_categories = require('road_todo_categories')
-  local bikelane_todo_categories = require('bikelane_todo_categories')
+  local to_markdown_list = require('topics.helper.to_markdown_list')
+  local collect_todos = require('topics.helper.collect_todos')
+  local road_todo_categories = require('topics.roads_bikelanes.roads.road_todo_categories')
+  local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
 
   it('Return id string', function()
     local tags_object = { cycleway = 'shared' }

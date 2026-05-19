@@ -1,4 +1,3 @@
-require('init')
 local inspect = require('inspect')
 
 local function log(input, prefix)

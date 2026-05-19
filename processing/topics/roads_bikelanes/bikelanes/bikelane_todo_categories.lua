@@ -1,9 +1,8 @@
-require('init')
-local contains_substring = require('contains_substring')
-local sanitize_traffic_sign = require('sanitize_traffic_sign')
-local SET = require('sets')
-local bikelane_categories = require('bikelane_categories')
-local has_tag_with_prefix = require('has_tag_with_prefix')
+local contains_substring = require('topics.helper.contains_substring')
+local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
+local SET = require('topics.helper.sets')
+local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
+local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
 -- local inspect = require('inspect')
 local BikelaneTodo = {}
 BikelaneTodo.__index = BikelaneTodo

@@ -1,7 +1,6 @@
-require('init')
-local log = require('log')
-local CLONE = require('clones')
-local unnest_parking_tags = require('unnest_parking_tags')
+local log = require('topics.helper.log')
+local CLONE = require('topics.helper.clones')
+local unnest_parking_tags = require('topics.parking.parkings.helper.unnest_parking_tags')
 
 ---@class TransformedObject
 ---@field side string

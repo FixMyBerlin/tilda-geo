@@ -1,8 +1,7 @@
-require('init')
-local metadata = require('metadata')
-local default_id = require('default_id')
-local LOG_ERROR = require('barriers_errors')
-local result_tags_barriers = require('result_tags_barriers')
+local metadata = require('topics.helper.metadata')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.barriers.barriers_errors')
+local result_tags = require('topics.barriers.helper.result_tags')
 
 local db_table = osm2pgsql.define_table({
   name = 'barrierAreas',
@@ -67,7 +66,7 @@ local function barrier_areas(object)
     return
   end
 
-  local cleaned_tags, replaced_tags = result_tags_barriers(object.tags)
+  local cleaned_tags, replaced_tags = result_tags(object.tags)
   local geom = object:as_multipolygon()
   local caller_name = object.type == 'relation' and 'barrier_areas_relation' or 'barrier_areas_way'
   LOG_ERROR.SANITIZED_VALUE(object, geom, replaced_tags, caller_name)

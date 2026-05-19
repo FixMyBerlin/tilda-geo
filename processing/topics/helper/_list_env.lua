@@ -1,5 +1,4 @@
-require('init')
-local log = require('log')
+local log = require('topics.helper.log')
 
 -- List and return all available environment variables.
 -- Thanks to https://stackoverflow.com/a/29716746

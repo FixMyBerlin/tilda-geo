@@ -1,7 +1,6 @@
 describe('invert_time_condition', function()
-  require('init')
-  local invert_time_condition = require('invert_time_condition')
-  local log = require('log')
+  local invert_time_condition = require('topics.parking.helper.invert_time_condition')
+  local log = require('topics.helper.log')
   it('inverts fee-free times to paid times for weekdays (exact output)', function()
     -- 'no fee' Mo-Fr 00:00-09:00,22:00-24:00 => 'paid' Mo-Fr 09:00-22:00
     local result = invert_time_condition('Mo-Fr 00:00-09:00,22:00-24:00')

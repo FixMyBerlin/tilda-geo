@@ -1,8 +1,7 @@
 describe('transformations', function()
-  require('init')
-  local log = require('log')
-  local osm2pgsql = require('osm2pgsql')
-  local transformations = require('transformations')
+  local log = require('topics.helper.log')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
 
   -- transformations for nested tags:
   local footway_transformation = CenterLineTransformation.new({

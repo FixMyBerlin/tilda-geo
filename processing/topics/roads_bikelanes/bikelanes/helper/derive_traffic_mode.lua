@@ -1,8 +1,7 @@
-require('init')
-local SET = require('sets')
-local SANITIZE_ROAD_TAGS = require('sanitize_road_tags')
-local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
-local CLEANER = require('sanitize_cleaner')
+local SET = require('topics.helper.sets')
+local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
+local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_tags')
+local CLEANER = require('topics.helper.sanitize_cleaner')
 
 local DIRECTIONAL_PARKING_INFERENCE_CATEGORIES = SET.set({
   'cyclewayOnHighway_advisory',

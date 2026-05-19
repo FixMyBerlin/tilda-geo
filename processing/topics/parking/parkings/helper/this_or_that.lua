@@ -1,5 +1,4 @@
-require('init')
-local CLEANER = require('sanitize_cleaner')
+local CLEANER = require('topics.helper.sanitize_cleaner')
 
 ---@param this_table table<string, any> The primary table to check first
 ---@param that_table table<string, any> The fallback table to check if primary is invalid

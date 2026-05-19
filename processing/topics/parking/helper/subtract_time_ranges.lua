@@ -1,5 +1,4 @@
-require('init')
-local time_helper = require('time_helper')
+local time_helper = require('topics.parking.helper.time_helper')
 
 local WEEKDAYS = time_helper.WEEKDAYS
 local ranges_to_string = time_helper.ranges_to_string

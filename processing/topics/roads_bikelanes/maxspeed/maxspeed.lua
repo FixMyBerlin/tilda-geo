@@ -1,7 +1,6 @@
-require('init')
-local maxspeed_direct = require('maxspeed_direct')
-local maxspeed_from_zone = require('maxspeed_from_zone')
-local SANITIZE_TAGS = require('sanitize_tags')
+local maxspeed_direct = require('topics.roads_bikelanes.maxspeed.maxspeed_direct')
+local maxspeed_from_zone = require('topics.roads_bikelanes.maxspeed.maxspeed_from_zone')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 
 -- Try to find maxspeed information in the following order:
 -- 1. `maxspeed` tag (also looking at `maxspeed:forward` and `maxspeed:backward`)

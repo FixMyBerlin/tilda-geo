@@ -1,8 +1,7 @@
 describe('`transform_parkings`', function()
-  require('init')
-  local transform_parkings = require('transform_parkings')
-  local log = require('log')
-  local osm2pgsql = require('osm2pgsql')
+  local transform_parkings = require('topics.parking.parkings.helper.transform_parkings')
+  local log = require('topics.helper.log')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
 
   it('works', function()
     local input_object = {

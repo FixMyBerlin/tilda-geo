@@ -1,4 +1,3 @@
-require('init')
 -- Parse OSM conditional tag values in format: value1 @ (condition1); value2 @ (condition2); ...
 -- Examples: 'no_stopping @ (Mo-Fr 06:00-09:00)', 'loading_only @ (08:00-18:00)'
 

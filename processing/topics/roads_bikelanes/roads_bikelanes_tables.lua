@@ -1,4 +1,3 @@
-require('init')
 
 local roads_table = osm2pgsql.define_table({
   name = 'roads',

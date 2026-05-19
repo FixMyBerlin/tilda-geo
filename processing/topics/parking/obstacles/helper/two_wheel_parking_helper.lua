@@ -1,8 +1,7 @@
-require('init')
-local capacity_normalization = require('capacity_normalization')
-local sanitize_for_logging = require('sanitize_for_logging')
-local merge_table = require('merge_table')
-local log = require('log')
+local capacity_normalization = require('topics.helper.capacity_normalization')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local merge_table = require('topics.helper.merge_table')
+local log = require('topics.helper.log')
 
 function two_wheel_parking_buffer(tags)
   local fallback = 0.25

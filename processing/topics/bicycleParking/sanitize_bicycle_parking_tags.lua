@@ -1,6 +1,5 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
-local SANITIZE_TAGS = require('sanitize_tags')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 
 local YES_NO = { 'yes', 'no' }
 

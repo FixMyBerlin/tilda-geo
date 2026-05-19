@@ -1,4 +1,3 @@
-require('init')
 
 -- https://www.lua.org/pil/11.5.html
 -- * @desc `set({ 'item' })`

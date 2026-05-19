@@ -1,4 +1,3 @@
-require('init')
 
 -- Shared error kinds for all topic `*_errors` tables: each `key` is `_error_type` in stored tags;
 -- `instruction` is `_instruction` (defined once per kind so key and text stay aligned).

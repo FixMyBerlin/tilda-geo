@@ -1,7 +1,6 @@
-require('init')
-local SET = require('sets')
-local log = require('log')
-local derive_smoothness = require('derive_smoothness')
+local SET = require('topics.helper.sets')
+local log = require('topics.helper.log')
+local derive_smoothness = require('topics.helper.derive_smoothness')
 
 ---@alias DeriveBikelaneSmoothnessConfidence 'high'|'medium'
 ---@class DeriveBikelaneSmoothnessResultEmpty

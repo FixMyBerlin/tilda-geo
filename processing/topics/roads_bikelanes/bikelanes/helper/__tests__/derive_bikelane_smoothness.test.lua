@@ -1,10 +1,9 @@
 describe('derive_bikelane_smoothness', function()
-  require('init')
-  local transformations = require('transformations')
-  local bikelane_categories = require('bikelane_categories')
-  local osm2pgsql = require('osm2pgsql')
-  local derive_bikelane_smoothness = require('derive_bikelane_smoothness')
-  local derive_bikelane_surface = require('derive_bikelane_surface')
+  local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
+  local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local derive_bikelane_smoothness = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_smoothness')
+  local derive_bikelane_surface = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_surface')
   local categorize_bikelane = bikelane_categories.categorize_bikelane
 
   local cyclewayTransformation = CenterLineTransformation.new({

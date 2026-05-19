@@ -1,6 +1,5 @@
-require('init')
-local SET = require('sets')
-local log = require('log')
+local SET = require('topics.helper.sets')
+local log = require('topics.helper.log')
 
 local function is_road(tags)
   if not tags.highway then return false end

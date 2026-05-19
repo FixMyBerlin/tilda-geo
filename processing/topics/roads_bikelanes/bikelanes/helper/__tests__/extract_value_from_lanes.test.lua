@@ -1,6 +1,5 @@
 describe('extract_value_from_lanes helper', function()
-  require('init')
-  local extract_value_from_lanes = require('extract_value_from_lanes')
+  local extract_value_from_lanes = require('topics.roads_bikelanes.bikelanes.helper.extract_value_from_lanes')
   describe('_parse_lanes_value', function()
     it('should parse simple lanes value', function()
       local result = extract_value_from_lanes._parse_lanes_value('1|2|3')

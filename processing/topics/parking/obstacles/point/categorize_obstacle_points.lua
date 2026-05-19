@@ -1,9 +1,8 @@
-require('init')
-local CLONE = require('clones')
-local log = require('log')
-local class_obstacle_category = require('class_obstacle_category')
-local obstacle_point_categories = require('obstacle_point_categories')
-local TAG_HELPER = require('tag_helper')
+local CLONE = require('topics.helper.clones')
+local log = require('topics.helper.log')
+local class_obstacle_category = require('topics.parking.obstacles.helper.class_obstacle_category')
+local obstacle_point_categories = require('topics.parking.obstacles.point.obstacle_point_categories')
+local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
 -- Categorize the object and picks the best result (with the largest buffer).
 ---@class ObstacleObject

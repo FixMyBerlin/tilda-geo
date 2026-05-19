@@ -1,6 +1,5 @@
 describe('contains_traffic_sign_id', function()
-  require('init')
-  local contains_traffic_sign_id = require('contains_traffic_sign_id')
+  local contains_traffic_sign_id = require('topics.helper.contains_traffic_sign_id')
 
   it('works for `DE:*`', function()
     local result = contains_traffic_sign_id('DE:123,1010-20;444', '123')

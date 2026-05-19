@@ -1,9 +1,8 @@
-require('init')
-local CLONE = require('clones')
-local log = require('log')
-local merge_table = require('merge_table')
-local transform_point_direction_tags = require('transform_point_direction_tags')
-local crossing_point_categories = require('crossing_point_categories')
+local CLONE = require('topics.helper.clones')
+local log = require('topics.helper.log')
+local merge_table = require('topics.helper.merge_table')
+local transform_point_direction_tags = require('topics.parking.crossings.points.transform_point_direction_tags')
+local crossing_point_categories = require('topics.parking.crossings.points.crossing_point_categories')
 
 -- Categorize the object and transforms it if needed. Picks the best result for self, left, right.
 -- The best result is the one with the largest buffer.

@@ -1,4 +1,3 @@
-require('init')
 -- Helper function to split, sort, deduplicate, and merge separator-separated values
 ---@param value string|nil The separator-separated string to normalize
 ---@param separator string The separator character (default: ';')

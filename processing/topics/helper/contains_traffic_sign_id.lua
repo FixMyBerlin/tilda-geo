@@ -1,6 +1,5 @@
-require('init')
-local contains_substring = require('contains_substring')
-local sanitize_traffic_sign = require('sanitize_traffic_sign')
+local contains_substring = require('topics.helper.contains_substring')
+local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 
 ---@param traffic_sign string
 ---@param traffic_sign_id string

@@ -1,16 +1,15 @@
-require('init')
-local metadata = require('metadata')
-local default_id = require('default_id')
-local LOG_ERROR = require('publicTransport_errors')
-local public_transport_tables = require('public_transport_tables')
-local exit_processing_public_transport = require('exit_processing_public_transport')
-local result_tags_public_transport = require('result_tags_public_transport')
+local metadata = require('topics.helper.metadata')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.publicTransport.publicTransport_errors')
+local public_transport_tables = require('topics.publicTransport.public_transport_tables')
+local exit_processing = require('topics.publicTransport.helper.exit_processing')
+local result_tags = require('topics.publicTransport.helper.result_tags')
 
 local table = public_transport_tables.table
 
 local function public_transport_nodes(object)
-  if exit_processing_public_transport(object) then return end
-  local cleaned_tags, replaced_tags = result_tags_public_transport(object.tags)
+  if exit_processing(object) then return end
+  local cleaned_tags, replaced_tags = result_tags(object.tags)
   local geom = object:as_point()
   LOG_ERROR.SANITIZED_VALUE(object, geom, replaced_tags, 'publicTransport_node')
 

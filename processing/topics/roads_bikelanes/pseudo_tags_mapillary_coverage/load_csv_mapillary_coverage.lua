@@ -1,5 +1,4 @@
-require('init')
-local load_csv_mapillary = require('load_csv_mapillary')
+local load_csv_mapillary = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.load_csv_mapillary')
 
 local CSV_FILE = '/data/pseudoTagsData/mapillary_coverage.csv'
 

@@ -1,0 +1,61 @@
+describe('`result_tags`', function()
+  local categorize_obstacle_points = require('topics.parking.obstacles.point.categorize_obstacle_points')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local log = require('topics.helper.log')
+  local result_tags = require('topics.parking.obstacles.helper.result_tags')
+
+  it('works', function()
+    local input_object = {
+      tags = {
+        barrier = 'bollard',
+        ['obstacle:parking'] = 'yes',
+        mapillary = '123'
+      },
+      id = 1,
+      type = 'node'
+    }
+    local result = categorize_obstacle_points(input_object)
+    local result_tags = result_tags(result)
+
+    assert.are.equal(result_tags.id, 'node/'..input_object.id)
+    assert.are.equal(result_tags.tags.category, 'bollard')
+    assert.are.equal(result_tags.tags.osm_mapillary, input_object.tags.mapillary)
+  end)
+
+  it('check tags, tags_cc', function()
+    local input_object = {
+      tags = {
+        ['obstacle:parking'] = 'yes',
+        natural = 'tree_stump',
+        mapillary = '123',
+        ref = '007',
+      },
+      id = 1,
+      type = 'node'
+    }
+    local result = categorize_obstacle_points(input_object)
+    local result_tags = result_tags(result)
+    assert.are.equal(result_tags.tags.osm_mapillary, '123')
+    assert.are.equal(result_tags.tags.osm_ref, '007')
+    assert.are.equal(result_tags.tags.natural, 'tree_stump')
+  end)
+
+
+  it('handels buffer for two wheel parking', function()
+    local input_object = {
+      tags = {
+        ['amenity'] = 'bicycle_parking',
+        ['position'] = 'lane',
+        ['capacity'] = '10',
+        ['capacity:cargo'] = '5',
+      },
+      id = 1,
+      type = 'node'
+    }
+    local result = categorize_obstacle_points(input_object)
+    local result_tags = result_tags(result)
+    assert.are.equal(result_tags.tags.capacity, 5)
+    assert.are.equal(result_tags.tags['capacity:cargo'], 5)
+    assert.are.equal(result_tags.tags.buffer_radius, (10 / 2 * 1.6) / 2)
+  end)
+end)

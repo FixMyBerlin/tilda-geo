@@ -1,4 +1,3 @@
-require('init')
 -- Count entries in a table treated as a key/value map (same idea as Penlight `pl.tablex.size` for plain tables).
 -- https://lunarmodules.github.io/Penlight/libraries/pl.tablex.html
 

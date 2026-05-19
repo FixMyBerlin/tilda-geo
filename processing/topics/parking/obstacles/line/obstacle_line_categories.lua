@@ -1,8 +1,7 @@
-require('init')
-local class_obstacle_category = require('class_obstacle_category')
-local two_wheel_parking_helper = require('two_wheel_parking_helper')
-local log = require('log')
-local TAG_HELPER = require('tag_helper')
+local class_obstacle_category = require('topics.parking.obstacles.helper.class_obstacle_category')
+local two_wheel_parking_helper = require('topics.parking.obstacles.helper.two_wheel_parking_helper')
+local log = require('topics.helper.log')
+local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
 return {
   class_obstacle_category.new({

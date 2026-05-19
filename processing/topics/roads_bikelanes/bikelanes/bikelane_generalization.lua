@@ -1,4 +1,3 @@
-require('init')
 
 ---@param original_tags table
 ---@param result_tags table

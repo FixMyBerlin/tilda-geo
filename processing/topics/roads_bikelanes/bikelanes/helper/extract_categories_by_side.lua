@@ -1,6 +1,5 @@
-require('init')
-local bikelane_categories = require('bikelane_categories')
-local transformations = require('transformations')
+local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
+local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
 
 ---Helper function to extract categories and tags by side from bikelanes input
 ---@param input_object table The input object with tags, id, type, etc.

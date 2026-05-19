@@ -1,4 +1,3 @@
-require('init')
 
 --- Load the mapillary_coverage.csv and lookup `osm_id` to return nil|'pano'|'regular'
 --- @param rows table - What is returned from load_csv_mapillary_coverage:get()

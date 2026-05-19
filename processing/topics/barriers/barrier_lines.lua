@@ -1,10 +1,9 @@
-require('init')
-local SET = require('sets')
-local metadata = require('metadata')
-local HIGHWAYS = require('highway_classes')
-local default_id = require('default_id')
-local LOG_ERROR = require('barriers_errors')
-local result_tags_barriers = require('result_tags_barriers')
+local SET = require('topics.helper.sets')
+local metadata = require('topics.helper.metadata')
+local HIGHWAYS = require('topics.helper.highway_classes')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.barriers.barriers_errors')
+local result_tags = require('topics.barriers.helper.result_tags')
 
 local db_table = osm2pgsql.define_table({
   name = 'barrierLines',
@@ -46,7 +45,7 @@ local function barrier_lines(object)
     return
   end
 
-  local cleaned_tags, replaced_tags = result_tags_barriers(object.tags)
+  local cleaned_tags, replaced_tags = result_tags(object.tags)
   local geom = object:as_linestring()
   LOG_ERROR.SANITIZED_VALUE(object, geom, replaced_tags, 'barrier_lines')
   db_table:insert({

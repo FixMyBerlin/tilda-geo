@@ -1,6 +1,5 @@
-require('init')
-local bikelanes = require('extract_bikelanes')
-local bikelanes_presence = require('bikelanes_presence')
+local bikelanes = require('topics.roads_bikelanes.bikelanes.extract_bikelanes')
+local bikelanes_presence = require('topics.roads_bikelanes.bikelanes.bikelanes_presence')
 
 ---@param object_tags OsmTags
 ---@param object_geom table

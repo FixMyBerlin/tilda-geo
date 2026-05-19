@@ -1,4 +1,3 @@
-require('init')
 
 ---@param array `Array<{id: string, priority: string, todoTableOnly: boolean}>`
 ---@return string|nil

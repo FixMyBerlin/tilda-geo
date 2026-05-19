@@ -1,5 +1,4 @@
-require('init')
-local log = require('log')
+local log = require('topics.helper.log')
 local inspect = require('inspect')
 
 -- Import as 'local ENV = require(\'env\')' and use as ENV.is_production.

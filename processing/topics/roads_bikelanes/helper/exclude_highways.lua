@@ -1,7 +1,6 @@
-require('init')
-local SET = require('sets')
-local SET = require('sets')
-local highway_classes = require('highway_classes')
+local SET = require('topics.helper.sets')
+local SET = require('topics.helper.sets')
+local highway_classes = require('topics.helper.highway_classes')
 
 local exclude_highways = {
   by_access = function(tags, forbidden_accesses)

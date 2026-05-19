@@ -1,7 +1,6 @@
 describe('`is_road`', function()
-  require('init')
-  local log = require('log')
-  local is_road = require('is_road')
+  local log = require('topics.helper.log')
+  local is_road = require('topics.parking.roads.helper.is_road')
 
   it('ignores non highway', function()
     local tags = {

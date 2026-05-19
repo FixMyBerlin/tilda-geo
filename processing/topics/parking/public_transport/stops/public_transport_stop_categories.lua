@@ -1,7 +1,6 @@
-require('init')
-local class_public_transport_category = require('class_public_transport_category')
-local SANITIZE_TAGS = require('sanitize_tags')
-local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local class_public_transport_category = require('topics.parking.public_transport.stops.helper.class_public_transport_category')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_tags')
 
 public_transport_stop_categories = {
   class_public_transport_category.new({

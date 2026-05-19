@@ -1,7 +1,6 @@
 describe('`has_parking`', function()
-  require('init')
-  local has_parking = require('has_parking')
-  local log = require('log')
+  local has_parking = require('topics.parking.parkings.helper.has_parking')
+  local log = require('topics.helper.log')
 
   it('ignores non highway', function()
     local tags = {

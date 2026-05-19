@@ -1,7 +1,6 @@
-require('init')
-local transformations = require('transformations')
-local highway_classes = require('highway_classes')
-local SET = require('sets')
+local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
+local highway_classes = require('topics.helper.highway_classes')
+local SET = require('topics.helper.sets')
 
 ---@param object_tags OsmTags
 ---@param cycleways table

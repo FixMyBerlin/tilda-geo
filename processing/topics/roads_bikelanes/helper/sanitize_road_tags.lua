@@ -1,6 +1,5 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
-local parse_length = require('parse_length')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local parse_length = require('topics.helper.parse_length')
 
 local SEPARATION_ALLOWED = {
   'no',

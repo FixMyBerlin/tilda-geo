@@ -1,4 +1,3 @@
-require('init')
 function to_date(tags_object, to_number_tags)
   for key, value in pairs(tags_object) do
     if to_number_tags[key] then

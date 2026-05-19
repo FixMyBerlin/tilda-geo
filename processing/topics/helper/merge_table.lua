@@ -1,4 +1,3 @@
-require('init')
 ---@param mutateDst table
 ---@param src table|nil
 ---@return table

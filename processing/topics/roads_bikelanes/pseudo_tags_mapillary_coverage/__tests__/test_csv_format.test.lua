@@ -1,8 +1,7 @@
 describe('test_csv_format', function()
-  require('init')
-  local test_csv_format = require('test_csv_format')
+  local test_csv_format = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.test_csv_format')
   local assert = require('luassert')
-  local log = require('log')
+  local log = require('topics.helper.log')
   local column_name = 'mapillary_coverage'
 
   it('fails when table is nil', function()

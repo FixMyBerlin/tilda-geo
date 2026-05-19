@@ -1,4 +1,3 @@
-require('init')
 -- local inspect = require('inspect')
 
 ---@desc Call every todo function of a given todo list with the given tag objects and collect the results

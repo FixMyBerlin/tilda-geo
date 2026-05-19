@@ -1,4 +1,3 @@
-require('init')
 -- Makes sure our sanitized `width` only holds 'meter' values and only numbers
 local function parse_length(length)
   local val, unit = osm2pgsql.split_unit(length, 'm')

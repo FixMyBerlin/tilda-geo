@@ -1,6 +1,5 @@
 describe('sanitize_traffic_sign', function()
-  require('init')
-  local sanitize_traffic_sign = require('sanitize_traffic_sign')
+  local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 
   -- Cleanup
   it('renames `no` to `none`', function()

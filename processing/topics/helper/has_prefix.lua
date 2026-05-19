@@ -1,4 +1,3 @@
-require('init')
 
 local function has_prefix(str, prefix)
   if type(str) ~= 'string' then

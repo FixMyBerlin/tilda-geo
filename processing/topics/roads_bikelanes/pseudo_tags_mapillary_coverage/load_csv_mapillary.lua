@@ -1,7 +1,6 @@
-require('init')
 local ftcsv = require('ftcsv')
 local pl_path = require('pl.path')
-require('Log')
+local log = require('topics.helper.log')
 local inspect = require('inspect')
 local pl = require('pl.tablex')
 
@@ -17,7 +16,7 @@ local function load_csv_mapillary(csv_path)
       if cached_lines then return cached_lines end
 
       if not pl_path.exists(csv_path) then
-        Log('ERROR: CSV file not found: ' .. csv_path, 'load_csv_mapillary')
+        log('ERROR: CSV file not found: ' .. csv_path, 'load_csv_mapillary')
         cached_lines = {}
         return cached_lines
       end
@@ -27,7 +26,7 @@ local function load_csv_mapillary(csv_path)
         local size = f:seek('end')
         f:close()
         if not size or size == 0 then
-          Log('ERROR: CSV file is empty: ' .. csv_path, 'load_csv_mapillary')
+          log('ERROR: CSV file is empty: ' .. csv_path, 'load_csv_mapillary')
           cached_lines = {}
           return cached_lines
         end

@@ -1,4 +1,3 @@
-require('init')
 -- * @desc If and why a highway object should be excluded based on its width.
 -- * @returns { boolean (shouldFilter), string (reason) }
 function exclude_by_width(tags, min_width)

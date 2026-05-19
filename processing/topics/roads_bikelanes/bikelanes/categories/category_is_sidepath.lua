@@ -1,4 +1,3 @@
-require('init')
 
 ---@param tags OsmTags
 ---@return boolean

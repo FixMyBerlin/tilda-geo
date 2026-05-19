@@ -1,7 +1,6 @@
-require('init')
-local poi_classification_nodes = require('poi_classification_nodes')
-local poi_classification_ways = require('poi_classification_ways')
-local poi_classification_relations = require('poi_classification_relations')
+local poi_classification_nodes = require('topics.poiClassification.poi_classification_nodes')
+local poi_classification_ways = require('topics.poiClassification.poi_classification_ways')
+local poi_classification_relations = require('topics.poiClassification.poi_classification_relations')
 
 function osm2pgsql.process_node(object)
   poi_classification_nodes(object)

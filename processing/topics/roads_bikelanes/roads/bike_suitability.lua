@@ -1,7 +1,6 @@
-require('init')
-local contains_substring = require('contains_substring')
-local derive_smoothness = require('derive_smoothness')
-local contains_traffic_sign_id = require('contains_traffic_sign_id')
+local contains_substring = require('topics.helper.contains_substring')
+local derive_smoothness = require('topics.helper.derive_smoothness')
+local contains_traffic_sign_id = require('topics.helper.contains_traffic_sign_id')
 
 local bike_suitability_category = {}
 bike_suitability_category.__index = bike_suitability_category

@@ -1,6 +1,5 @@
-require('init')
-local log = require('log')
-local SET = require('sets')
+local log = require('topics.helper.log')
+local SET = require('topics.helper.sets')
 
 -- unnest all tags from `['prefix .. side:subtag']=val` -> `['subtag']=val`
 ---@param raw_tags table

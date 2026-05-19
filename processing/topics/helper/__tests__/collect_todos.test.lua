@@ -1,7 +1,6 @@
 describe('collect_todos', function()
-  require('init')
-  local collect_todos = require('collect_todos')
-  local road_todo_categories = require('road_todo_categories')
+  local collect_todos = require('topics.helper.collect_todos')
+  local road_todo_categories = require('topics.roads_bikelanes.roads.road_todo_categories')
   -- local inspect = require('inspect')
 
   it('Return id, priority, todoTableOnly', function()

@@ -1,5 +1,4 @@
-require('init')
-local public_transport_stop_categories = require('public_transport_stop_categories')
+local public_transport_stop_categories = require('topics.parking.public_transport.stops.public_transport_stop_categories')
 
 local function categorize_public_transport_stops(object)
   for _, category in ipairs(public_transport_stop_categories) do

@@ -1,11 +1,10 @@
-require('init')
-local log = require('log')
-local merge_table = require('merge_table')
-local LOG_ERROR = require('parking_errors')
-local separate_parking_area_categories = require('separate_parking_area_categories')
-local categorize_separate_parking = require('categorize_separate_parking')
-local result_tags_separate_parking = require('result_tags_separate_parking')
-local area_sqm = require('area_sqm')
+local log = require('topics.helper.log')
+local merge_table = require('topics.helper.merge_table')
+local LOG_ERROR = require('topics.parking.errors.parking_errors')
+local separate_parking_area_categories = require('topics.parking.separate_parkings.area.separate_parking_area_categories')
+local categorize_separate_parking = require('topics.parking.separate_parkings.helper.categorize_separate_parking')
+local result_tags = require('topics.parking.separate_parkings.helper.result_tags')
+local area_sqm = require('topics.parking.helper.area_sqm')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_separate_parking_areas',
@@ -25,7 +24,7 @@ local function parking_separate_parking_areas(object)
 
   local result = categorize_separate_parking(object, separate_parking_area_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags_separate_parking(result.category, result.object, area_sqm(result.object))
+    local row_data, replaced_tags = result_tags(result.category, result.object, area_sqm(result.object))
     local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_areas')

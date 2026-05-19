@@ -1,4 +1,3 @@
-require('init')
 
 ---@param direction string
 ---@return number|nil

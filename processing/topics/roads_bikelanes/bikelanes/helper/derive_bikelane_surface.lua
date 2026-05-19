@@ -1,5 +1,4 @@
-require('init')
-local derive_surface = require('derive_surface')
+local derive_surface = require('topics.helper.derive_surface')
 
 ---@alias DeriveBikelaneSurfaceSource 'tag'|'parent_highway_tag'
 ---@alias DeriveBikelaneSurfaceConfidence 'high'

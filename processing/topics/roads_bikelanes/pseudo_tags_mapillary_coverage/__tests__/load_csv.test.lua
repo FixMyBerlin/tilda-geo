@@ -1,8 +1,6 @@
 describe('load_csv_mapillary', function()
-  require('init')
-  require('Log')
-  local load_csv_mapillary = require('load_csv_mapillary')
-  local table_size = require('table_size')
+  local load_csv_mapillary = require('topics.roads_bikelanes.pseudo_tags_mapillary_coverage.load_csv_mapillary')
+  local table_size = require('topics.helper.table_size')
 
   local test_csv = '/processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/__tests__/test_mapillary_coverage.csv'
   local data = load_csv_mapillary(test_csv)

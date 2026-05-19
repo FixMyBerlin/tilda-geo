@@ -3,11 +3,10 @@
 -- range. Unknown values are returned as 'DISALLOWED_VALUE' so they surface in monitoring without
 -- being persisted. Values that are known but intentionally irrelevant are silently dropped (nil).
 
-require('init')
-local sanitize_traffic_sign = require('sanitize_traffic_sign')
-local sanitize_for_logging = require('sanitize_for_logging')
-local parse_length = require('parse_length')
-local sanitize_string = require('sanitize_string')
+local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local parse_length = require('topics.helper.parse_length')
+local sanitize_string = require('topics.helper.sanitize_string')
 
 --- Value fed into `operator_type` before transformation / allowlist (for `separate_tags` logging).
 ---@param tags OsmTags|nil

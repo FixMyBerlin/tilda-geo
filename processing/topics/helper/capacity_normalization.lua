@@ -1,4 +1,3 @@
-require('init')
 
 local function capacity_normalization(tags)
   local capacities = { capacity = tonumber(tags.capacity) }

@@ -1,7 +1,6 @@
 describe('parse_length', function()
-  require('init')
-  local osm2pgsql = require('osm2pgsql')
-  local parse_length = require('parse_length')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local parse_length = require('topics.helper.parse_length')
 
   it('parse 1.2 as 1.2', function()
     local result = parse_length('1.2')

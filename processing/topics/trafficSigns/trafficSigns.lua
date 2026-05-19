@@ -1,11 +1,10 @@
-require('init')
-local traffic_signs_nodes = require('traffic_signs_nodes')
-local traffic_signs_ways = require('traffic_signs_ways')
+local nodes = require('topics.trafficSigns.nodes')
+local ways = require('topics.trafficSigns.ways')
 
 function osm2pgsql.process_node(object)
-  traffic_signs_nodes(object)
+  nodes(object)
 end
 
 function osm2pgsql.process_way(object)
-  traffic_signs_ways(object)
+  ways(object)
 end

@@ -1,7 +1,6 @@
 describe('crossing_point_categories_helper', function()
-  require('init')
-  local log = require('log')
-  local helper = require('crossing_point_categories_helper')
+  local log = require('topics.helper.log')
+  local helper = require('topics.parking.crossings.points.crossing_point_categories_helper')
 
   describe('has_side_value', function()
     it('has_side_value returns true for left, right, both', function()

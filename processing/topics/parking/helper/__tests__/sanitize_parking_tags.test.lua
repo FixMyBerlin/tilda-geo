@@ -1,6 +1,5 @@
 describe('sanitize_parking_tags', function()
-  require('init')
-  local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+  local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_tags')
   describe('parking_extended', function()
     it('returns sanitized value if present', function()
       local object = { tags = { parking = 'lane' }, _parent_tags = {} }

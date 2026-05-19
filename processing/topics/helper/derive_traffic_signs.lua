@@ -1,5 +1,4 @@
-require('init')
-local sanitize_traffic_sign = require('sanitize_traffic_sign')
+local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 
 --- Derives traffic sign values from tags, always returning all three keys
 ---@param tags OsmTags<string, string|nil>|nil The input tags table

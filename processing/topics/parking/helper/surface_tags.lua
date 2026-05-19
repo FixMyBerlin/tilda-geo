@@ -1,6 +1,5 @@
-require('init')
-local SANITIZE_TAGS = require('sanitize_tags')
-local THIS_OR_THAT = require('this_or_that')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local THIS_OR_THAT = require('topics.parking.parkings.helper.this_or_that')
 
 --- Creates surface_tags table with value, confidence, and source
 --- Only sets confidence and source when value is present

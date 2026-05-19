@@ -1,11 +1,10 @@
 describe('off_street_parking_area_categories', function()
-  require('init')
-  local log = require('log')
-  local osm2pgsql = require('osm2pgsql')
-  local off_street_parking_area_categories = require('off_street_parking_area_categories')
-  local categorize_off_street_parking = require('categorize_off_street_parking')
-  local result_tags_off_street_parking = require('result_tags_off_street_parking')
-  local round = require('round')
+  local log = require('topics.helper.log')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
+  local off_street_parking_area_categories = require('topics.parking.off_street_parking.areas.off_street_parking_area_categories')
+  local categorize_off_street_parking = require('topics.parking.off_street_parking.helper.categorize_off_street_parking')
+  local result_tags = require('topics.parking.off_street_parking.helper.result_tags')
+  local round = require('topics.helper.round')
 
   describe('capacity', function()
     it('case capacity tag', function()
@@ -91,7 +90,7 @@ describe('off_street_parking_area_categories', function()
     it('matches unterground', function()
       local object = { id = 1, type = 'way', tags = { amenity = 'parking', parking = 'underground', capacity = '10', access = 'private' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result)
+      local tags_result = result_tags(category_result)
 
       assert.are.equal(category_result.category.id, 'underground')
       assert.are.equal(tags_result.tags.category, 'underground')
@@ -101,7 +100,7 @@ describe('off_street_parking_area_categories', function()
     it('matches garages', function()
       local object = { id = 1, type = 'way', tags = { building = 'garages', capacity = '10', access = 'private' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result)
+      local tags_result = result_tags(category_result)
 
       assert.are.equal(category_result.category.id, 'garage')
       assert.are.equal(tags_result.tags.category, 'garage')
@@ -112,7 +111,7 @@ describe('off_street_parking_area_categories', function()
     it('matches garage', function()
       local object = { id = 1, type = 'way', tags = { building = 'garage', capacity = '5', access = 'customers' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result)
+      local tags_result = result_tags(category_result)
 
       assert.are.equal(category_result.category.id, 'garage')
       assert.are.equal(tags_result.tags.category, 'garage')
@@ -123,7 +122,7 @@ describe('off_street_parking_area_categories', function()
     it('matches carport', function()
       local object = { id = 1, type = 'way', tags = { building = 'carport', capacity = '2', access = 'permissive' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result)
+      local tags_result = result_tags(category_result)
 
       assert.are.equal(category_result.category.id, 'carport')
       assert.are.equal(tags_result.tags.category, 'carport')
@@ -134,7 +133,7 @@ describe('off_street_parking_area_categories', function()
     it('matches amenity parking with parking=carports and preserves access=destination', function()
       local object = { id = 1, type = 'way', tags = { amenity = 'parking', parking = 'carports', capacity = '2', access = 'destination' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result, 100)
+      local tags_result = result_tags(category_result, 100)
 
       assert.are.equal(category_result.category.id, 'carport')
       assert.are.equal(tags_result.tags.parking, 'carport')
@@ -144,7 +143,7 @@ describe('off_street_parking_area_categories', function()
     it('matches multi-storey', function()
       local object = { id = 1, type = 'way', tags = { amenity = 'parking', parking = 'multi-storey', capacity = '50', access = 'yes' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result)
+      local tags_result = result_tags(category_result)
 
       assert.are.equal(category_result.category.id, 'multi-storey')
       assert.are.equal(tags_result.tags.category, 'multi-storey')
@@ -155,7 +154,7 @@ describe('off_street_parking_area_categories', function()
     it('matches building=parking', function()
       local object = { id = 1, type = 'way', tags = { building = 'parking', capacity = '30', access = 'private' } }
       local category_result = categorize_off_street_parking(object, off_street_parking_area_categories)
-      local tags_result = result_tags_off_street_parking(category_result)
+      local tags_result = result_tags(category_result)
 
       assert.are.equal(category_result.category.id, 'multi-storey')
       assert.are.equal(tags_result.tags.category, 'multi-storey')

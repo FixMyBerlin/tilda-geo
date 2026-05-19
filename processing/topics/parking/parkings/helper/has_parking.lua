@@ -1,10 +1,9 @@
-require('init')
-local SET = require('sets')
--- local log = require('log')
-local CLEANER = require('sanitize_cleaner')
-local is_road = require('is_road')
-local is_driveway = require('is_driveway')
-local SANITIZE_PARKING_TAGS = require('sanitize_parking_tags')
+local SET = require('topics.helper.sets')
+-- local log = require('topics.helper.log')
+local CLEANER = require('topics.helper.sanitize_cleaner')
+local is_road = require('topics.parking.roads.helper.is_road')
+local is_driveway = require('topics.parking.roads.helper.is_driveway')
+local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_tags')
 
 function has_parking_tags(tags)
   -- TODO @Supaplex030: Include 'yes' because we need to transform it…

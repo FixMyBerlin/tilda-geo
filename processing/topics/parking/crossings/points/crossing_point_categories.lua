@@ -1,6 +1,5 @@
-require('init')
-local class_crossing_category = require('class_crossing_category')
-local helper = require('crossing_point_categories_helper')
+local class_crossing_category = require('topics.parking.crossings.helper.class_crossing_category')
+local helper = require('topics.parking.crossings.points.crossing_point_categories_helper')
 
 local crossing_point_categories = {
   class_crossing_category.new({

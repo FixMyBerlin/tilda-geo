@@ -1,7 +1,6 @@
 describe('sanitize_cleaner', function()
-  require('init')
-  local CLEANER = require('sanitize_cleaner')
-  local SANITIZE_VALUES = require('sanitize_values')
+  local CLEANER = require('topics.helper.sanitize_cleaner')
+  local SANITIZE_VALUES = require('topics.helper.sanitize_values')
   it('returns cleaned tags and no replaced if all allowed', function()
     local tags_to_clean = { foo = 'foo_value', bar = 'bar_value' }
     local object_tags = { foo = 'foo_value', bar = 'bar_value' }

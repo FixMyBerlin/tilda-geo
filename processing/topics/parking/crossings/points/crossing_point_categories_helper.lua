@@ -1,4 +1,3 @@
-require('init')
 local function has_side_value(input)
   return input == 'left' or input == 'right' or input == 'both'
 end

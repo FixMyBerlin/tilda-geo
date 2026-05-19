@@ -1,6 +1,5 @@
-require('init')
-local insert_topic_error_row = require('insert_topic_error_row')
-local INSTRUCTIONS = require('topic_error_instructions')
+local insert_topic_error_row = require('topics.helper.insert_topic_error_row')
+local INSTRUCTIONS = require('topics.helper.topic_error_instructions')
 
 if type(osm2pgsql) ~= 'table' or osm2pgsql.define_table == nil then
   return {

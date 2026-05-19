@@ -1,6 +1,5 @@
-require('init')
-local barrier_lines = require('barrier_lines')
-local barrier_areas = require('barrier_areas')
+local barrier_lines = require('topics.barriers.barrier_lines')
+local barrier_areas = require('topics.barriers.barrier_areas')
 
 -- No process_node for barriers: this topic has no point output contract, so no noop helper file is used.
 

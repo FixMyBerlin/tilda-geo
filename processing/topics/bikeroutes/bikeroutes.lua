@@ -1,5 +1,4 @@
-require('init')
-local bikeroutes_relations = require('bikeroutes_relations')
+local bikeroutes_relations = require('topics.bikeroutes.bikeroutes_relations')
 
 -- No process_node/process_way for bikeroutes: this topic only outputs bicycle route relations.
 

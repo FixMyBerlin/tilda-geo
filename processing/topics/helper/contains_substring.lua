@@ -1,4 +1,3 @@
-require('init')
 ---@param str string | nil
 ---@param subStr string | nil
 ---@return boolean

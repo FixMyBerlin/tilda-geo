@@ -1,5 +1,4 @@
-require('init')
-local category_is_sidepath = require('category_is_sidepath')
+local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 
 ---@param category table BikelaneCategory instance
 ---@return table, table, table

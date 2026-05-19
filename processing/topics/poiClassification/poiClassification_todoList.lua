@@ -1,9 +1,8 @@
-require('init')
-local SET = require('sets')
-local extract_keys = require('extract_keys')
-local infer_address = require('infer_address')
-local metadata = require('metadata')
-local shopping_allowed_list_with_categories = require('shopping_allowed_list_with_categories')
+local SET = require('topics.helper.sets')
+local extract_keys = require('topics.helper.extract_keys')
+local infer_address = require('topics.helper.infer_address')
+local metadata = require('topics.helper.metadata')
+local shopping_allowed_list_with_categories = require('topics.poiClassification.shopping_allowed_list_with_categories')
 
 -- The goal of this TodoList is to make sure we do not miss out on any amenitys.
 -- The amenity key is used for all kind of stuff.

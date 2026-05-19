@@ -1,5 +1,4 @@
-require('init')
-local SET = require('sets')
+local SET = require('topics.helper.sets')
 
 -- Hide those ways with road=*
 local minzoom11_road_classes = SET.set({

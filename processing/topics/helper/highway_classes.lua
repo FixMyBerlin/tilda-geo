@@ -1,6 +1,5 @@
-require('init')
-local SET = require('sets')
-local SET = require('sets')
+local SET = require('topics.helper.sets')
+local SET = require('topics.helper.sets')
 
 -- https://wiki.openstreetmap.org/wiki/DE:Key:highway
 -- https://wiki.openstreetmap.org/wiki/Attribuierung_von_Stra%C3%9Fen_in_Deutschland

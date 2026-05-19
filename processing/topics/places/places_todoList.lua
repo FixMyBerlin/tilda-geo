@@ -1,6 +1,5 @@
-require('init')
-local SET = require('sets')
-local metadata = require('metadata')
+local SET = require('topics.helper.sets')
+local metadata = require('topics.helper.metadata')
 
 local table = osm2pgsql.define_table({
   name = 'places_todoList',

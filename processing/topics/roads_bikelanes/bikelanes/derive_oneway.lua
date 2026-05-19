@@ -1,5 +1,4 @@
-require('init')
-local SET = require('sets')
+local SET = require('topics.helper.sets')
 
 ---@param tags OsmTags
 ---@param category table

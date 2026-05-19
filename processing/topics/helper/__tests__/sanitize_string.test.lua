@@ -1,5 +1,4 @@
-require('init')
-local sanitize_string = require('sanitize_string')
+local sanitize_string = require('topics.helper.sanitize_string')
 
 describe('sanitize_string', function()
   it('preserves common punctuation and quotes', function()

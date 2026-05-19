@@ -1,9 +1,8 @@
-require('init')
-local log = require('log')
-local default_id = require('default_id')
-local LOG_ERROR = require('parking_errors')
-local SANITIZE_TAGS = require('sanitize_tags')
-local CLEANER = require('sanitize_cleaner')
+local log = require('topics.helper.log')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.parking.errors.parking_errors')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local CLEANER = require('topics.helper.sanitize_cleaner')
 
 ---@param tags OsmTags<string, string>
 ---@return boolean

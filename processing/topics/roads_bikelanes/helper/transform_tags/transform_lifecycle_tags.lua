@@ -1,8 +1,7 @@
-require('init')
-local SET = require('sets')
-local highway_classes = require('highway_classes')
-local contains_substring = require('contains_substring')
-local to_semicolon_list = require('to_semicolon_list')
+local SET = require('topics.helper.sets')
+local highway_classes = require('topics.helper.highway_classes')
+local contains_substring = require('topics.helper.contains_substring')
+local to_semicolon_list = require('topics.helper.to_semicolon_list')
 
 -- Mutate the construction tags to become our own `lifecycle` tag.
 ---@param dest_tags table<string, string | nil> The input table of OSM tags to mutate in-place

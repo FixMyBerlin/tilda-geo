@@ -1,6 +1,5 @@
-require('init')
-local SANITIZE_VALUES = require('sanitize_values')
-local log = require('log')
+local SANITIZE_VALUES = require('topics.helper.sanitize_values')
+local log = require('topics.helper.log')
 
 -- Returns cleaned_tags, replaced_tags (with _instruction if any replaced)
 -- `log_source_overrides`: optional map result_key -> raw OSM value when it differs from `object_tags[result_key]`

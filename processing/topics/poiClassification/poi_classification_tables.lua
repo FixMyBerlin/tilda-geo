@@ -1,4 +1,3 @@
-require('init')
 
 local table = osm2pgsql.define_table({
   name = 'poiClassification',

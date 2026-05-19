@@ -1,5 +1,4 @@
-require('init')
-local SET = require('sets')
+local SET = require('topics.helper.sets')
 
 ---@param original_tags table
 ---@param result_tags table

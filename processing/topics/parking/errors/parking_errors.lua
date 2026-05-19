@@ -1,8 +1,7 @@
-require('init')
-local insert_topic_error_row = require('insert_topic_error_row')
-local INSTRUCTIONS = require('topic_error_instructions')
+local insert_topic_error_row = require('topics.helper.insert_topic_error_row')
+local INSTRUCTIONS = require('topics.helper.topic_error_instructions')
 
--- Under busted, `require('osm2pgsql')` is the test mock (no `define_table`). This file is still loaded
+-- Under busted, `require('topics.helper.osm2pgsql')` is the test mock (no `define_table`). This file is still loaded
 -- by parking topics, so we must skip `define_table` and export no-op loggers instead of erroring.
 if type(osm2pgsql) ~= 'table' or osm2pgsql.define_table == nil then
   return {

@@ -3,8 +3,7 @@
 -- 2. `smoothess` extrapolated from `surface` data
 -- 3. `smoothess` extrapolated from `tracktype` tag, mostly on `highway=track`
 -- 4. `smoothess` extrapolated from `mtb:scale` tag, mostly on `highway=path`
-require('init')
-local SET = require('sets')
+local SET = require('topics.helper.sets')
 
 local function normalize_smoothness(smoothness)
   if smoothness ~= nil then

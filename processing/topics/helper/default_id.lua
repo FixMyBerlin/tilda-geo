@@ -1,4 +1,3 @@
-require('init')
 
 ---@param object { type: string, id: number|string }
 ---@return string

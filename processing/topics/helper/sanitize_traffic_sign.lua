@@ -1,5 +1,4 @@
-require('init')
-local sanitize_string = require('sanitize_string')
+local sanitize_string = require('topics.helper.sanitize_string')
 
 --- Remove all whitespaces after delimeters
 ---@param traffic_sign string

@@ -1,7 +1,6 @@
 describe('`categorize_and_transform_crossing_points`', function()
-  require('init')
-  local categorize_and_transform_crossing_points = require('categorize_and_transform_crossing_points')
-  local log = require('log')
+  local categorize_and_transform_crossing_points = require('topics.parking.crossings.points.categorize_and_transform_crossing_points')
+  local log = require('topics.helper.log')
 
   it('no category matches', function()
     local tags = {

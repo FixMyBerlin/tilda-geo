@@ -1,5 +1,4 @@
-require('init')
-local round = require('round')
+local round = require('topics.helper.round')
 
 ---@param object table
 ---@param object_tags OsmTags

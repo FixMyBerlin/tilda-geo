@@ -1,6 +1,5 @@
-require('init')
-local class_separate_parking_category = require('class_separate_parking_category')
-local two_wheel_parking_helper = require('two_wheel_parking_helper')
+local class_separate_parking_category = require('topics.parking.separate_parkings.helper.class_separate_parking_category')
+local two_wheel_parking_helper = require('topics.parking.obstacles.helper.two_wheel_parking_helper')
 
 local separate_parking_point_categories = {
   class_separate_parking_category.new({

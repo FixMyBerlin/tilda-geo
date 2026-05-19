@@ -1,4 +1,3 @@
-require('init')
 -- * @desc Handle different address tagging schema.
 --    Docs <https://wiki.openstreetmap.org/wiki/Key:addr:*>
 -- * @returns

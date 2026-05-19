@@ -1,5 +1,4 @@
-require('init')
-local boundaries_relations = require('boundaries_relations')
+local boundaries_relations = require('topics.boundaries.boundaries_relations')
 
 -- No process_node/process_way for boundaries: this topic only outputs administrative boundary relations.
 

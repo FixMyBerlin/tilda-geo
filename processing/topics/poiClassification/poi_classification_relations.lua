@@ -1,18 +1,17 @@
-require('init')
-local metadata = require('metadata')
-local default_id = require('default_id')
-local LOG_ERROR = require('poiClassification_errors')
-local poi_classification_tables = require('poi_classification_tables')
-local exit_processing_poi_classification = require('exit_processing_poi_classification')
-local result_tags_poi_classification = require('result_tags_poi_classification')
+local metadata = require('topics.helper.metadata')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.poiClassification.poiClassification_errors')
+local poi_classification_tables = require('topics.poiClassification.poi_classification_tables')
+local exit_processing = require('topics.poiClassification.helper.exit_processing')
+local result_tags = require('topics.poiClassification.helper.result_tags')
 
 local table = poi_classification_tables.table
 
 local function poi_classification_relations(object)
-  if exit_processing_poi_classification(object) then return end
+  if exit_processing(object) then return end
   if object.tags.type ~= 'multipolygon' then return end
 
-  local cleaned_tags, replaced_tags = result_tags_poi_classification(object)
+  local cleaned_tags, replaced_tags = result_tags(object)
   local geom = object:as_multipolygon():pole_of_inaccessibility()
   LOG_ERROR.SANITIZED_VALUE(object, geom, replaced_tags, 'poiClassification_relation')
 

@@ -1,5 +1,4 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
 
 local SANITIZE_PARKING_TAGS = {
   parking = function(value)

@@ -1,7 +1,6 @@
-require('init')
-local log = require('log')
-local capacity_tags = require('capacity_tags')
-local THIS_OR_THAT = require('this_or_that')
+local log = require('topics.helper.log')
+local capacity_tags = require('topics.parking.helper.capacity_tags')
+local THIS_OR_THAT = require('topics.parking.parkings.helper.this_or_that')
 
 ---@meta
 ---@class OffStreetParkingCategory

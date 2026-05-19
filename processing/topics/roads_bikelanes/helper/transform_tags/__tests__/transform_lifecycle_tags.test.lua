@@ -1,8 +1,7 @@
 describe('transform_lifecycle_tags', function()
-  require('init')
-  local log = require('log')
-  local transform_lifecycle_tags = require('transform_lifecycle_tags')
-  local maxspeed = require('maxspeed')
+  local log = require('topics.helper.log')
+  local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
+  local maxspeed = require('topics.roads_bikelanes.maxspeed.maxspeed')
 
   describe('construction tags transformation', function()
     it('transforms highway=construction with valid construction tag', function()

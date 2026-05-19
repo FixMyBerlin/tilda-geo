@@ -1,6 +1,5 @@
 describe('normalize_separated_values', function()
-  require('init')
-  local normalize_separated_values = require('normalize_separated_values')
+  local normalize_separated_values = require('topics.parking.helper.normalize_separated_values')
   describe('basic functionality', function()
     it('should return nil for nil input', function()
       local result = normalize_separated_values(nil, ';')

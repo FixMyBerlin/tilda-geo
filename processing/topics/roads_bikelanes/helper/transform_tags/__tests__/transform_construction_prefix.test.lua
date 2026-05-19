@@ -1,7 +1,6 @@
 describe('transform_construction_prefix', function()
-  require('init')
-  local log = require('log')
-  local transform_construction_prefix = require('transform_construction_prefix')
+  local log = require('topics.helper.log')
+  local transform_construction_prefix = require('topics.roads_bikelanes.helper.transform_tags.transform_construction_prefix')
 
   describe('basic construction prefix transformation', function()
     it('converts construction:bicycle_road to bicycle_road with lifecycle', function()
