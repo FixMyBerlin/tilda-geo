@@ -30,6 +30,11 @@ local function exit_processing_barrier_lines(object)
   end
 
   local tags = object.tags
+  -- Exclude amusement rides. Example: https://www.openstreetmap.org/way/244829977
+  if tags.attraction == 'amusement_ride' then
+    return true
+  end
+
   local is_barrier = HIGHWAYS.trunk_motorway_classes[tags.highway]
   -- waterways as lines are used for low zoom levels
   is_barrier = is_barrier or water_barriers[tags.waterway]
