@@ -12,7 +12,6 @@ local function result_tags_barriers(tags)
     natural = SANITIZE_BARRIER_TAGS.natural(tags.natural),
     railway = SANITIZE_BARRIER_TAGS.railway(tags.railway),
     usage = SANITIZE_BARRIER_TAGS.usage(tags.usage),
-    circumference = tags._computed_circumference,
     area = tags._computed_area,
     highway = tags.highway,
     bridge = SANITIZE_BARRIER_TAGS.bridge(tags.bridge),
