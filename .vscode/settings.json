@@ -1,9 +1,12 @@
 // https://www.roboleary.net/vscode/2020/09/17/vscode-workspace-settings.html
 // All settings https://code.visualstudio.com/docs/getstarted/settings#_default-settings
 // Formatting: app/oxfmt.config.ts (oxfmt) — imports, Tailwind classes, package.json key order. Lint: Biome.
+// Repo root has no node_modules/oxfmt; point the Oxc extension at app/ so save matches `bun run format`.
 {
   "prettier.enable": false,
   "biome.configurationPath": "app/biome.json",
+  "oxc.fmt.configPath": "app/oxfmt.config.ts",
+  "oxc.path.oxfmt": "${workspaceFolder}/app/node_modules/.bin/oxfmt",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
