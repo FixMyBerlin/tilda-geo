@@ -4,6 +4,7 @@ import { isSameMinute } from 'date-fns'
 import { PSEUDO_TAGS_DATA } from '../../constants/directories.const'
 import { berlinTimeString } from '../../utils/berlinTime'
 import { humanFileSize } from '../../utils/humanFileSize'
+import { params } from '../../utils/parameters'
 import {
   getLatestMapillaryCoverageMetadata,
   initializeMapillaryCoverageMetadataTable,
@@ -12,12 +13,28 @@ import {
 import { mapillaryDataDatesSchema, osmDataDatesSchema } from './schema'
 import { mapillaryCoverageSources } from './source.const'
 
+/** `fixed` keeps the CSV from the reference run; `reference` always refreshes the baseline. */
 export async function downloadMapillaryCoverage() {
+  const { diffingMode } = params
   // Initialize
   console.log('[Pseudo Tags][Mapillary] Initialize and download Metadata…')
   await initializeMapillaryCoverageMetadataTable()
   const csvDestPath = join(PSEUDO_TAGS_DATA, 'mapillary_coverage.csv')
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
+  const csvExists = await Bun.file(csvDestPath).exists()
+
+  if (diffingMode === 'fixed') {
+    if (!csvExists) {
+      console.warn(
+        '[Pseudo Tags][Mapillary] fixed mode: mapillary_coverage.csv missing — continuing without Mapillary pseudo-tags (run reference mode first for comparable diffs).',
+      )
+      return
+    }
+    console.log(
+      '[Pseudo Tags][Mapillary] fixed mode: reusing baseline CSV from reference run (no download).',
+    )
+    return
+  }
 
   // Fetch JSON metadata files to check if dates have changed
   const mapillaryMetadataRes = await fetch(mapillaryCoverageSources.mapillaryDataDates)
@@ -37,15 +54,16 @@ export async function downloadMapillaryCoverage() {
     !isSameMinute(latestMetadata.ml_data_from, validatedMapillaryDates.ml_data_from) ||
     !isSameMinute(latestMetadata.osm_data_from, validatedOsmDates.osm_data_from)
 
-  // Check if CSV file exists
-  const csvExists = await Bun.file(csvDestPath).exists()
+  const forceDownload = diffingMode === 'reference'
+  const shouldDownload = forceDownload || !csvExists || datesChanged
 
-  if (!csvExists || datesChanged) {
+  if (shouldDownload) {
     console.time('[Pseudo Tags][Mapillary] Download-Timer')
     console.log(
       '[Pseudo Tags][Mapillary] Download Mapillary Coverage…',
+      forceDownload ? 'reference mode: refreshing baseline CSV for fixed-run comparisons.' : '',
       mapillaryCoverageSources.github,
-      JSON.stringify({ csvExists, datesChanged }),
+      JSON.stringify({ csvExists, datesChanged, forceDownload, diffingMode }),
     )
 
     // Download CSV

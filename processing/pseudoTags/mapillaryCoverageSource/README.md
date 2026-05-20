@@ -24,6 +24,10 @@ The processing is based on a fixed buffer. When 60 % of the way has mapillary co
 - Change detection:
   - Dates are compared with the database to detect new data
   - CSV file changes are detected via directory hash
+- Diffing workflow (`PROCESSING_DIFFING_MODE`):
+  - `reference`: always downloads the latest CSV (baseline for comparisons)
+  - `fixed`: never re-downloads; reuses `mapillary_coverage.csv` from the reference run on the same data volume
+  - `off` / `previous`: download when the file is missing or upstream dates changed
 
 ## c. Make the data accessible
 

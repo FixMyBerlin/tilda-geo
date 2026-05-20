@@ -84,6 +84,8 @@ Keep Geofabrik OAuth, default extract URL (e.g. Berlin/Brandenburg), DB, and oth
 
 Do **not** change other diff-related flags between reference and fixed unless you mean to invalidate the comparison.
 
+**Mapillary pseudo-tags:** With `reference`, processing always re-downloads `mapillary_coverage.csv`. With `fixed`, it reuses that file (no re-download) so `mapillary_coverage` diffs reflect Lua changes only. Run reference before fixed on the same Docker volume.
+
 Detached: use `--detach` in the generate invocation; the printed line uses `docker compose up -d processing`; then `docker logs -f processing`.
 
 ## Review `*_diff` tables
