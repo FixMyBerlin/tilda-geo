@@ -27,7 +27,7 @@ export async function checkPackageUpdates() {
       return
     }
 
-    const proc = Bun.spawn(['bunx', 'taze', 'major', '--includeLocked'], {
+    const proc = Bun.spawn(['bunx', 'taze', 'major', '--includeLocked', '--maturity-period', '5'], {
       cwd: process.cwd(),
       stdout: 'pipe',
       stderr: 'pipe',

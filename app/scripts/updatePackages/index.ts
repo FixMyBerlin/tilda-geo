@@ -39,7 +39,7 @@ async function run(cmd: string[], label: string) {
 }
 
 async function taze(mode: 'major' | 'minor', write: boolean) {
-  const args = ['taze', mode, '--includeLocked']
+  const args = ['taze', mode, '--includeLocked', '--maturity-period', '5']
   if (write) args.push('--write')
   await run(['bunx', ...args], `taze ${mode}`)
 }
