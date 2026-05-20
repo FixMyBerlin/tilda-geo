@@ -37,6 +37,22 @@
   "Lua.diagnostics.disable": ["lowercase-global", "duplicate-set-field"],
   // FYI: The addons feature https://luals.github.io/wiki/addons/ does not work for us.
   "Lua.addonManager.enable": false,
+  // Monorepo: Lua only lives in processing/ — ignore the rest so LuaLS does not scan 100k+ files.
+  // https://luals.github.io/wiki/faq#why-is-the-server-scanning-the-wrong-folder
+  "Lua.workspace.useGitIgnore": true,
+  "Lua.workspace.ignoreDir": [
+    ".vscode",
+    "app/**",
+    "docs/**",
+    ".git/**",
+    ".cursor/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "**/.cache/**",
+    "**/coverage/**"
+  ],
   // https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc
   "[sql]": { "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc" },
   "SQL-Formatter-VSCode.dialect": "postgresql", // for ReneSaarsoo.sql-formatter-vsc
