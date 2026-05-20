@@ -72,11 +72,11 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     minzoom: 9,
   },
   boundaries: {
-    stylingKeys: ['category_municipality', 'category_district', 'name', 'name:prefix'],
+    stylingKeys: ['category_municipality', 'category_district', 'name', 'name_prefix'],
     minzoom: 0,
   },
   boundaryLabels: {
-    stylingKeys: ['category_municipality', 'name:prefix', 'category_district'],
+    stylingKeys: ['category_municipality', 'name_prefix', 'category_district'],
     minzoom: 0,
   },
   landuse: {

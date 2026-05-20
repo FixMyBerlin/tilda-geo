@@ -71,7 +71,7 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        'name:prefix',
+        'name_prefix',
         'name',
         'admin_level',
         'category_municipality__if_present',
@@ -341,7 +341,7 @@ export const sources: MapDataSource<SourcesId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['name', 'place', 'population', 'population:date'],
+      documentedKeys: ['name', 'place', 'population', 'population_date'],
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
