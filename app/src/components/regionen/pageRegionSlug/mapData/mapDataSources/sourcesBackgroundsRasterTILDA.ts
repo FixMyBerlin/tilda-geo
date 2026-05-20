@@ -32,11 +32,11 @@ export type SourcesRasterIdsTILDA =
   | 'brandenburg-aktualitaet'
   | 'nrw-ortho'
 
-// https://account.mapbox.com/access-tokens
-// https://account.mapbox.com/access-tokens/clileup4r0b1r3gmp4hxqhou8/
+// https://console.mapbox.com/account/access-tokens/
+// https://console.mapbox.com/account/access-tokens/cmpe4fbj800im2pr3p8jz5qvj
 // Has Domain restrictions
 const tokenMapboxTilesets =
-  'sk.eyJ1IjoiaGVqY28iLCJhIjoiY2xpbGV1cDRyMGIxcjNnbXA0aHhxaG91OCJ9.7ndjc3cZRsoYdoOvCrQ2AA'
+  'pk.eyJ1IjoiaGVqY28iLCJhIjoiY21wZTRmYmo4MDBpbTJwcjNwOGp6NXF2aiJ9.yUfMlkODQ89lis0Zf-rZUA'
 
 // API Key https://cloud.maptiler.com/account/keys/db5f268c-c1ea-4cc4-8414-69ba179d11c0/settings
 // Has Domain restrictions
