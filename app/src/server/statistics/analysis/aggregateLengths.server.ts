@@ -114,18 +114,24 @@ export async function aggregateLengths() {
       name TEXT,
       level TEXT,
       geom Geometry(MultiPolygon, 3857),
+      regionalschluessel TEXT,
       bikelane_length JSONB,
       road_length JSONB
     );
     `
+  // TODO(2026-12): Remove ALTER ADD COLUMN when all deployments are migrated.
+  await geoDataClient.$executeRaw`
+    ALTER TABLE "aggregated_lengths" ADD COLUMN IF NOT EXISTS regionalschluessel TEXT;
+    `
   return geoDataClient.$transaction(async (tx) => {
     await tx.$executeRaw`
-      INSERT INTO "aggregated_lengths" (id, name, level, geom, bikelane_length, road_length)
+      INSERT INTO "aggregated_lengths" (id, name, level, geom, regionalschluessel, bikelane_length, road_length)
       SELECT
         id,
         tags->>'name',
         tags->>'admin_level',
         geom,
+        tags->>'regionalschluessel',
         atlas_aggregate_bikelanes(geom),
         atlas_aggregate_roads(geom)
       FROM "boundaries"
@@ -133,6 +139,7 @@ export async function aggregateLengths() {
         OR (tags->>'admin_level')::TEXT = '6'
       ON CONFLICT (id)
         DO UPDATE SET
+          regionalschluessel = EXCLUDED.regionalschluessel,
           bikelane_length = EXCLUDED.bikelane_length,
           road_length = EXCLUDED.road_length;
   `
