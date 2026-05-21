@@ -11,6 +11,7 @@
         "@headlessui/react": "2.2.10",
         "@json2csv/plainjs": "7.0.6",
         "@maptiler/geocoding-control": "3.0.0",
+        "@osm-traffic-signs/converter": "0.4.0",
         "@prisma/adapter-pg": "7.8.0",
         "@prisma/client": "7.8.0",
         "@tanstack/form-core": "^1.32.1",
@@ -52,7 +53,7 @@
         "react-intl": "10.1.11",
         "react-map-gl": "8.1.1",
         "react-markdown": "^10.1.0",
-        "remark-breaks": "^4",
+        "remark-breaks": "^4.0.0",
         "remark-gfm": "^4.0.1",
         "slugify": "1.6.9",
         "tailwind-merge": "3.6.0",
@@ -531,6 +532,8 @@
     "@opentelemetry/api": ["@opentelemetry/api@1.9.1", "", {}, "sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q=="],
 
     "@opentelemetry/semantic-conventions": ["@opentelemetry/semantic-conventions@1.40.0", "", {}, "sha512-cifvXDhcqMwwTlTK04GBNeIe7yyo28Mfby85QXFe1Yk8nmi36Ab/5UQwptOx84SsoGNRg+EVSjwzfSZMy6pmlw=="],
+
+    "@osm-traffic-signs/converter": ["@osm-traffic-signs/converter@0.4.0", "", {}, "sha512-HtImZm0SK2bPv1ijottOssiyrkFWhKQG5Ri85xO1IjwumS8s49fj6qQ10gIYyk5gic1qxD+4sIzGdMdJ6n4Iqg=="],
 
     "@oxc-parser/binding-android-arm-eabi": ["@oxc-parser/binding-android-arm-eabi@0.120.0", "", { "os": "android", "cpu": "arm" }, "sha512-WU3qtINx802wOl8RxAF1v0VvmC2O4D9M8Sv486nLeQ7iPHVmncYZrtBhB4SYyX+XZxj2PNnCcN+PW21jHgiOxg=="],
 

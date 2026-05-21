@@ -98,6 +98,7 @@
     "@headlessui/react": "2.2.10",
     "@json2csv/plainjs": "7.0.6",
     "@maptiler/geocoding-control": "3.0.0",
+    "@osm-traffic-signs/converter": "0.4.0",
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "@tanstack/form-core": "^1.32.1",
