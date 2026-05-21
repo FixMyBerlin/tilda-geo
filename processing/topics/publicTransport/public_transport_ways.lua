@@ -4,6 +4,7 @@ local LOG_ERROR = require('topics.publicTransport.publicTransport_errors')
 local public_transport_tables = require('topics.publicTransport.public_transport_tables')
 local exit_processing = require('topics.publicTransport.helper.exit_processing')
 local result_tags = require('topics.publicTransport.helper.result_tags')
+local minzoom = require('topics.publicTransport.helper.minzoom')
 
 local table = public_transport_tables.table
 
@@ -18,8 +19,8 @@ local function public_transport_ways(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = 0,
-    id = default_id(object)
+    minzoom = minzoom(cleaned_tags),
+    id = default_id(object),
   })
 end
 

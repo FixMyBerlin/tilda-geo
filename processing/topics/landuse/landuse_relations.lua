@@ -4,6 +4,7 @@ local LOG_ERROR = require('topics.landuse.landuse_errors')
 local landuse_tables = require('topics.landuse.landuse_tables')
 local exit_processing = require('topics.landuse.helper.exit_processing')
 local result_tags = require('topics.landuse.helper.result_tags')
+local minzoom = require('topics.landuse.helper.minzoom')
 
 local table = landuse_tables.table
 
@@ -20,8 +21,8 @@ local function landuse_relations(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = 0,
-    id = default_id(object)
+    minzoom = minzoom(cleaned_tags),
+    id = default_id(object),
   })
 end
 

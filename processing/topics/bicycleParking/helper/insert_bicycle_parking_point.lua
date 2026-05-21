@@ -1,4 +1,6 @@
 
+local minzoom = require('topics.bicycleParking.helper.minzoom')
+
 local point_table = osm2pgsql.define_table({
   name = 'bicycleParking_points',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
@@ -20,7 +22,7 @@ local function insert_bicycle_parking_point(cleaned_tags, meta, geom, id)
     tags = cleaned_tags,
     meta = meta,
     geom = geom,
-    minzoom = 0,
+    minzoom = minzoom(cleaned_tags),
     id = id,
   })
 end

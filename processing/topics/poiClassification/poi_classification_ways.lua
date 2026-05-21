@@ -4,6 +4,7 @@ local LOG_ERROR = require('topics.poiClassification.poiClassification_errors')
 local poi_classification_tables = require('topics.poiClassification.poi_classification_tables')
 local exit_processing = require('topics.poiClassification.helper.exit_processing')
 local result_tags = require('topics.poiClassification.helper.result_tags')
+local minzoom = require('topics.poiClassification.helper.minzoom')
 
 local table = poi_classification_tables.table
 
@@ -19,8 +20,8 @@ local function poi_classification_ways(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = 0,
-    id = default_id(object)
+    minzoom = minzoom(cleaned_tags),
+    id = default_id(object),
   })
 end
 

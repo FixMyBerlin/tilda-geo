@@ -3,6 +3,7 @@ local default_id = require('topics.helper.default_id')
 local LOG_ERROR = require('topics.bicycleParking.bicycleParking_errors')
 local result_tags = require('topics.bicycleParking.helper.result_tags')
 local insert_bicycle_parking_point = require('topics.bicycleParking.helper.insert_bicycle_parking_point')
+local minzoom = require('topics.bicycleParking.helper.minzoom')
 
 local areaTable = osm2pgsql.define_table({
   name = 'bicycleParking_areas',
@@ -34,8 +35,8 @@ local function process_way(object)
       tags = cleaned_tags,
       meta = meta,
       geom = poly,
-      minzoom = 0,
-      id = id
+      minzoom = minzoom(cleaned_tags),
+      id = id,
     })
 
     insert_bicycle_parking_point(cleaned_tags, meta, poly:centroid(), id)

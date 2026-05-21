@@ -4,6 +4,7 @@ local categorize_off_street_parking = require('topics.parking.off_street_parking
 local off_street_parking_area_categories = require('topics.parking.off_street_parking.areas.off_street_parking_area_categories')
 local area_sqm = require('topics.parking.helper.area_sqm')
 local LOG_ERROR = require('topics.parking.errors.parking_errors')
+local label_minzoom = require('topics.parking.off_street_parking.helper.label_minzoom')
 
 local db_table_area = osm2pgsql.define_table({
   name = 'off_street_parking_areas',
@@ -60,7 +61,7 @@ local function off_street_parking_areas(object)
         },
         meta = {},
         geom = row.geom:pole_of_inaccessibility(),
-        minzoom = 0,
+        minzoom = label_minzoom(),
       }
       db_table_label:insert(label_row)
     else

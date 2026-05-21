@@ -4,6 +4,7 @@ local LOG_ERROR = require('topics.places.places_errors')
 local places_tables = require('topics.places.places_tables')
 local exit_processing = require('topics.places.helper.exit_processing')
 local result_tags = require('topics.places.helper.result_tags')
+local minzoom = require('topics.places.helper.minzoom')
 
 local table = places_tables.table
 
@@ -18,8 +19,8 @@ local function places_ways(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = 0,
-    id = default_id(object)
+    minzoom = minzoom(cleaned_tags),
+    id = default_id(object),
   })
 end
 

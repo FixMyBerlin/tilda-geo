@@ -2,6 +2,7 @@ local metadata = require('topics.helper.metadata')
 local default_id = require('topics.helper.default_id')
 local LOG_ERROR = require('topics.barriers.barriers_errors')
 local result_tags = require('topics.barriers.helper.result_tags')
+local minzoom = require('topics.barriers.helper.minzoom')
 
 local db_table = osm2pgsql.define_table({
   name = 'barrierAreas',
@@ -74,8 +75,8 @@ local function barrier_areas(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = 0,
-    id = default_id(object)
+    minzoom = minzoom(cleaned_tags),
+    id = default_id(object),
   })
 end
 
