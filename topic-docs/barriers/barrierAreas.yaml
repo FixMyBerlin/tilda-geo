@@ -1,0 +1,29 @@
+title: Daten zu Flächen-Barrieren
+summary: Große Gewässerflächen und Flugplätze als Barrieren für die Netzplanung.
+sourceIds:
+  - atlas_barriers
+attributes:
+  - key: natural
+    label: Natürliche Barriere
+    values:
+      - value: water
+        label: Gewässer
+  - key: aerodrome
+    label: Flugplatztyp
+    values:
+      - value: international
+        label: Internationaler Flughafen
+      - value: private
+        label: Privater Flugplatz
+      - value: regional
+        label: Regionaler Flugplatz
+      - value: gliding
+        label: Segelflugplatz
+      - value: airsport
+        label: Luftsportgelände
+  - key: area
+    label: Fläche
+    format: number
+  - key: name
+    label: Name
+    format: sanitized_strings

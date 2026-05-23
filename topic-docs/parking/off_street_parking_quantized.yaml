@@ -1,0 +1,43 @@
+title: Parken abseits des Straßenraums (quantisiert)
+summary: Punktförmige, quantisierte Ableitung aus `off_street_parking_areas` für rechnerische Auswertungen. Fachliche Übersetzungen werden über refs geteilt.
+sourceIds:
+  - tilda_parkings_off_street_quantized
+attributes:
+  - key: category
+    ref: off_street_parking_areas.category
+  - key: parking
+    ref: off_street_parking_areas.parking
+  - key: amenity
+    ref: off_street_parking_areas.amenity
+  - key: capacity
+    ref: off_street_parking_areas.capacity
+  - key: condition_category
+    ref: off_street_parking_areas.condition_category
+  - key: access
+    ref: off_street_parking_areas.access
+  - key: area
+    ref: off_street_parking_areas.area
+  - key: surface
+    ref: off_street_parking_areas.surface
+  - key: orientation
+    ref: off_street_parking_areas.orientation
+  - key: location
+    ref: off_street_parking_areas.location
+  - key: markings
+    ref: off_street_parking_areas.markings
+  - key: covered
+    ref: off_street_parking_areas.covered
+  - key: informal
+    ref: off_street_parking_areas.informal
+  - key: operator_type
+    ref: off_street_parking_areas.operator_type
+  - key: operator_type_source
+    ref: off_street_parking_areas.operator_type_source
+  - key: operator_type_confidence
+    ref: off_street_parking_areas.operator_type_confidence
+  - key: zone
+    ref: off_street_parking_areas.zone
+  - key: mapillary
+    ref: off_street_parking_areas.mapillary
+  - key: traffic_sign
+    ref: off_street_parking_areas.traffic_sign

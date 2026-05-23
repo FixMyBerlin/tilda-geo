@@ -53,7 +53,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         // Road
         'road',
         'road_name',
-        'composit_road_width',
+        'road_width__if_present',
         'operator_type',
         'road_oneway__if_present',
         // OTHER

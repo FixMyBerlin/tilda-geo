@@ -1,0 +1,46 @@
+title: Beschilderung
+sourceIds:
+  - atlas_trafficSigns
+attributes:
+  - key: traffic_sign
+    label: Verkehrszeichen
+    format: sanitized_strings
+    description: Im Format der OSM-Verkehrszeichen-Nomenklatur mit offiziellen Verkehrszeichen-IDs, z. B. `DE:240`.
+  - key: offset
+    label: Offset entlang der Linie
+    format: meter
+  - key: direction
+    label: Ausrichtung
+    format: number
+  - key: direction_source
+    label: Herkunft der Ausrichtung
+    values:
+      - value: tag_degrees
+        label: Aus OSM-Tag als Winkel
+      - value: tag_cardinal
+        label: Aus OSM-Tag als Himmelsrichtung
+  - key: description
+    label: Beschreibung
+    format: sanitized_strings
+  - key: mapillary
+    ref: bikelanes.mapillary
+  - key: 'osm_traffic_sign:direction'
+    purpose: experimentation
+    label: OSM `traffic_sign:direction`
+    format: sanitized_strings
+  - key: 'osm_traffic_sign:forward'
+    purpose: experimentation
+    label: OSM `traffic_sign:forward`
+    format: sanitized_strings
+  - key: 'osm_traffic_sign:backward'
+    purpose: experimentation
+    label: OSM `traffic_sign:backward`
+    format: sanitized_strings
+  - key: 'osm_traffic_sign:both'
+    purpose: experimentation
+    label: OSM `traffic_sign:both`
+    format: sanitized_strings
+  - key: osm_direction
+    purpose: experimentation
+    label: OSM `direction`
+    format: sanitized_strings

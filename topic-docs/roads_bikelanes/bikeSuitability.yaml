@@ -1,0 +1,47 @@
+title: Radeignung
+sourceIds:
+  - atlas_bikeSuitability
+attributes:
+  - key: bikeSuitability
+    label: Eignung des Weges für Radverkehr, Radnetze und Radrouten
+    values:
+      - value: goodSurface
+        label: Potentiell geeignet aufgrund einer guten Oberfläche
+      - value: livingStreet
+        label: Geeignet durch verkehrsberuhigten Bereich
+      - value: noMotorizedVehicle
+        label: Potentiell geeignet aufgrund des Verbots von Kfz
+      - value: noOvertaking
+        label: Potentiell geeignet aufgrund Verkehrszeichen 277.1
+  - key: road
+    ref: roads.road
+  - key: name
+    ref: roads.name
+  - key: length
+    ref: roads.length
+  - key: lifecycle
+    ref: roads.lifecycle
+  - key: mapillary_coverage
+    ref: bikelanes.mapillary_coverage
+  - key: mapillary
+    ref: bikelanes.mapillary
+  - key: mapillary_forward
+    ref: bikelanes.mapillary_forward
+  - key: mapillary_backward
+    ref: bikelanes.mapillary_backward
+  - key: mapillary_traffic_sign
+    ref: bikelanes.mapillary_traffic_sign
+  - key: traffic_sign
+    ref: roads.traffic_sign
+  - key: description
+    ref: roads.description
+  - key: operator_type
+    ref: roads.operator_type
+  - key: informal
+    ref: roads.informal
+  - key: covered
+    ref: roads.covered
+  - key: surface
+    ref: roads.surface
+  - key: smoothness
+    ref: roads.smoothness

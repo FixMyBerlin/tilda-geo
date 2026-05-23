@@ -1,0 +1,45 @@
+title: Daten zur Landnutzung
+summary: Eine vereinfachte Darstellung der Landnutzung zur Unterstützung der Radnetzplanung.
+sourceIds:
+  - atlas_landuse
+attributes:
+  - key: landuse
+    label: Landnutzung
+    values:
+      - value: allotments
+        label: Kleingartenanlage
+      - value: cemetery
+        label: Friedhofsgelände
+      - value: commercial
+        label: Gewerbliche Nutzung
+      - value: farmyard
+        label: Landwirtschaftliche Nutzung
+      - value: residential
+        label: Wohngebiet
+      - value: retail
+        label: Gewerbliche Nutzung (Einzelhandel/Geschäfte)
+      - value: school
+        label: Schulgelände
+      - value: university
+        label: Universitätsgelände
+  - key: access
+    label: Zugang
+    values:
+      - value: 'yes'
+        label: Öffentlich
+      - value: customers
+        label: Kunden
+      - value: permissive
+        label: Öffentliche Nutzung geduldet
+      - value: private
+        label: Privat
+      - value: public
+        label: Öffentlich (explizit)
+      - value: no
+        label: Kein Zugang
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: operator
+    label: Betreiber
+    format: sanitized_strings

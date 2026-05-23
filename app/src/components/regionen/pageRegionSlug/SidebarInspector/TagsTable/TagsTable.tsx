@@ -5,7 +5,6 @@ import {
   TagsTableRowCompositConditionCategory,
   tableKeyConditionCategory,
 } from './compositTableRows/TagsTableRowCompositConditionCategory'
-import { TagsTableRowCompositLit, tableKeyLit } from './compositTableRows/TagsTableRowCompositLit'
 import {
   TagsTableRowCompositMapillary,
   tableKeyMapillary,
@@ -38,10 +37,6 @@ import {
   TagsTableRowCompositTrassencoutSurveyResponse,
   tableKeyTrassencoutSurveyResponse,
 } from './compositTableRows/TagsTableRowCompositTrassencoutSurveyResponse'
-import {
-  TagsTableRowCompositWidth,
-  tableKeyWidths,
-} from './compositTableRows/TagsTableRowCompositWidth'
 import { TagsTableRowlifecycle } from './compositTableRows/TagsTableRowLifecycle'
 import { TagsTableRowValueSourceConfidence } from './compositTableRows/TagsTableRowValueSourceConfidence'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
@@ -141,16 +136,6 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                 />
               )
             }
-            case tableKeyLit: {
-              return (
-                <TagsTableRowCompositLit
-                  key={cleanedKey}
-                  sourceId={sourceId}
-                  tagKey={cleanedKey}
-                  properties={properties}
-                />
-              )
-            }
             case tableKeyMapillary: {
               return (
                 <TagsTableRowCompositMapillary
@@ -202,16 +187,6 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
               )
             }
             default: {
-              if (tableKeyWidths.includes(cleanedKey)) {
-                return (
-                  <TagsTableRowCompositWidth
-                    key={cleanedKey}
-                    sourceId={sourceId}
-                    tagKey={key}
-                    properties={properties}
-                  />
-                )
-              }
               if (tableKeysColor.includes(cleanedKey)) {
                 return (
                   <TagsTableRowColor

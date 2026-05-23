@@ -1,0 +1,18 @@
+title: Kampagnen
+summary: Datenbasis für Kampagnen zur Qualitätssicherung. Angaben aus diesen Tabellen werden auf TILDA und auf radinfra.de mit Erklärungen zur Datenverbesserung angezeigt. Beschreibt potenziell fehlende oder falsche Attribute in OpenStreetMap.
+sourceIds:
+  - atlas_todos_lines
+attributes:
+  - key: table
+    label: Quelle
+    values:
+      - value: roads
+        label: Straßen
+      - value: bikelanes
+        label: Radinfrastruktur
+  - key: length
+    format: meter
+    label: Länge
+  - key: todos
+    label: Todo-Liste
+    format: sanitized_strings

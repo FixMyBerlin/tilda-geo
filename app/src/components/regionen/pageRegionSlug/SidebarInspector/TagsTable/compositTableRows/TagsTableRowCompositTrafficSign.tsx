@@ -46,7 +46,7 @@ export const TagsTableRowCompositTrafficSign = ({
   ) {
     return (
       <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
-        <Signs items={receivedSigns.both} />
+        <Signs sourceId={sourceId} items={receivedSigns.both} />
       </TagsTableRow>
     )
   }
@@ -55,11 +55,19 @@ export const TagsTableRowCompositTrafficSign = ({
   return (
     <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
       <div className="flex flex-col gap-3">
-        {receivedSigns.both && <Signs items={receivedSigns.both} />}
+        {receivedSigns.both && <Signs sourceId={sourceId} items={receivedSigns.both} />}
         {(receivedSigns.forward || receivedSigns.backward) && (
           <>
-            <Signs titleTag="traffic_sign:forward" items={receivedSigns.forward} />
-            <Signs titleTag="traffic_sign:backward" items={receivedSigns.backward} />
+            <Signs
+              sourceId={sourceId}
+              titleTag="traffic_sign:forward"
+              items={receivedSigns.forward}
+            />
+            <Signs
+              sourceId={sourceId}
+              titleTag="traffic_sign:backward"
+              items={receivedSigns.backward}
+            />
           </>
         )}
       </div>
@@ -68,9 +76,11 @@ export const TagsTableRowCompositTrafficSign = ({
 }
 
 function Signs({
+  sourceId,
   titleTag,
   items,
 }: {
+  sourceId: string
   titleTag?: string
   items: TrafficSignDisplayItem[] | undefined
 }) {
@@ -80,7 +90,7 @@ function Signs({
     <div>
       {titleTag && (
         <strong className="font-medium">
-          <ConditionalFormattedKey sourceId="" tagKey={titleTag} />:
+          <ConditionalFormattedKey sourceId={sourceId} tagKey={titleTag} />:
         </strong>
       )}
       {items === undefined ? (
@@ -88,7 +98,7 @@ function Signs({
       ) : // `traffic_sign=never` is an internal sentinel used when no sign is expected
       // (for example category=cyclewayOnHighwayBetweenLanes).
       firstKey === 'none' || firstKey === 'never' ? (
-        <ConditionalFormattedValue sourceId="" tagKey="traffic_sign" tagValue={firstKey} />
+        <ConditionalFormattedValue sourceId={sourceId} tagKey="traffic_sign" tagValue={firstKey} />
       ) : (
         <div className="flex divide-x">
           {items.map((item) => (

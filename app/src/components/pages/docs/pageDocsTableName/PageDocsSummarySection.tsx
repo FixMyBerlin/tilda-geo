@@ -62,7 +62,7 @@ export const PageDocsSummarySection = ({
             </th>
             <td className="min-w-0 py-0.5 align-middle wrap-break-word">EPSG:4326 (WGS84)</td>
           </tr>
-          {relatedGroupDocs.length > 0 ? (
+          {relatedGroupDocs.length > 0 && regionSlug === null ? (
             <tr className="print:hidden">
               <th className="py-0.5 pr-2 align-middle font-medium whitespace-normal text-gray-900 lg:whitespace-nowrap">
                 Verwandte Datensätze

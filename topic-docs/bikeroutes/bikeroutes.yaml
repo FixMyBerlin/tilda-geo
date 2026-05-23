@@ -1,0 +1,64 @@
+title: Fahrradrouten
+sourceIds:
+  - atlas_bikeroutes
+attributes:
+  - key: distance
+    format: kilometer
+    label: Angabe Gesamtlänge
+  - key: network
+    label: Netzwerkhierarchie
+    values:
+      - value: lcn
+        label: Lokale Radverkehrsnetze (`lcn`)
+      - value: rcn
+        label: Regionale Radverkehrsnetze (`rcn`)
+      - value: ncn
+        label: Nationales Radverkehrsnetz (`ncn`)
+      - value: icn
+        label: Internationales Radverkehrsnetz (`icn`)
+  - key: cycle_highway
+    label: Radschnellverbindung
+    values:
+      - value: 'yes'
+        label: Diese Route repräsentiert eine RSV.
+  - key: roundtrip
+    label: Rundfahrt
+    values:
+      - value: 'yes'
+        label: Ja
+      - value: 'no'
+        label: Nein
+  - key: network_type
+    label: Netzwerkart
+    values:
+      - value: basic_network
+        label: Start-Ziel Route
+      - value: node_network
+        label: Teil eines Knotennetzwerks
+  - key: cycle_network_key
+    label: Netzwerk-Schlüssel
+    format: sanitized_strings
+  - key: symbol_description
+    label: Symbolbeschreibung
+    format: sanitized_strings
+  - key: route_description
+    label: Freitext zur Route
+    format: sanitized_strings
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: ref
+    label: Referenz
+    format: sanitized_strings
+  - key: operator
+    label: Betreiber/Baulastträger
+    format: sanitized_strings
+  - key: website
+    label: Website
+    format: sanitized_strings
+  - key: wikipedia
+    label: Wikipedia
+    format: sanitized_strings
+  - key: colours
+    label: Farben
+    format: sanitized_strings

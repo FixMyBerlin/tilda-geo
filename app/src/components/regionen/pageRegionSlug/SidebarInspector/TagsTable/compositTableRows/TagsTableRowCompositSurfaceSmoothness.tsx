@@ -1,5 +1,5 @@
 import { isDev } from '@/components/shared/utils/isEnv'
-import { TagsTableRow } from '../TagsTableRow'
+import { TagsTableRowFrame } from '../TagsTableRow'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
 import { ValueDisclosure, ValueDisclosureButton, ValueDisclosurePanel } from '../ValueDisclosure'
 import { NodataFallbackWrapper } from './NodataFallbackWrapper'
@@ -8,13 +8,12 @@ import type { CompositTableRow } from './types'
 export const tableKeySurfaceSmoothness = 'composit_surface_smoothness'
 export const TagsTableRowCompositSurfaceSmoothness = ({
   sourceId,
-  tagKey,
   properties,
 }: CompositTableRow) => {
   if (!(properties.smoothness || properties.surface)) return null
 
   return (
-    <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
+    <TagsTableRowFrame label="Oberfläche und Zustand">
       <table className="w-full leading-4">
         <tbody>
           <tr>
@@ -115,6 +114,6 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
           </tr>
         </tbody>
       </table>
-    </TagsTableRow>
+    </TagsTableRowFrame>
   )
 }

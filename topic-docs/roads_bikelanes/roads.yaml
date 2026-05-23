@@ -1,0 +1,249 @@
+title: Daten zur Straße
+sourceIds:
+  - atlas_roads
+attributes:
+  - key: road
+    label: Straßentyp
+    valuesRef: parkings.road
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: name_ref
+    label: Referenzname
+    format: sanitized_strings
+    description: Enthält Kurznamen wie `A 100` oder `B 96`, übernommen aus dem OSM-Tag `ref`.
+  - key: length
+    format: meter
+    label: Länge
+    description: Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.
+  - key: lifecycle
+    label: Status
+    values:
+      - value: blocked
+        label: Gesperrt (Sperrung)
+      - value: construction
+        label: In Bau
+      - value: construction_no_access
+        label: Gesperrt aufgrund einer Baustelle
+      - value: temporary
+        label: Temporärer Weg
+  - key: width
+    format: meter
+    label: Breite
+  - key: width_effective
+    format: meter
+    label: Effektive Breite
+  - key: width_source
+    label: Quelle Breite
+    values:
+      - value: ALKIS
+        label: Aus ALKIS Daten ausgemessen
+      - value: ARCore
+        label: Mit dem Handy-Metermaß von StreetComplete gemessen
+  - key: oneway
+    label: Verkehrsrichtung
+    values:
+      - value: no
+        label: Beide Richtungen
+      - value: yes
+        label: Einbahnstraße
+      - value: yes_dual_carriageway
+        label: Einbahnstraße da separate Geometrie pro Seite
+  - key: oneway_bicycle
+    label: Verkehrsrichtung Fahrrad
+    values:
+      - value: no
+        label: Beide Richtungen für Radverkehr
+      - value: yes
+        label: Eine Richtung (auch für Radverkehr)
+  - key: bridge
+    label: Brücke
+    values:
+      - value: yes
+        label: Ja
+  - key: tunnel
+    label: Tunnel
+    values:
+      - value: yes
+        label: Ja
+  - key: mapillary_coverage
+    ref: bikelanes.mapillary_coverage
+  - key: mapillary
+    ref: bikelanes.mapillary
+  - key: mapillary_forward
+    ref: bikelanes.mapillary_forward
+  - key: mapillary_backward
+    ref: bikelanes.mapillary_backward
+  - key: mapillary_traffic_sign
+    ref: bikelanes.mapillary_traffic_sign
+  - key: traffic_sign
+    label: Beschilderung
+    format: sanitized_strings
+    values:
+      - value: none
+        label: Unbeschildert
+  - key: 'traffic_sign:forward'
+    label: Beschilderung in Verkehrsrichtung
+    format: sanitized_strings
+    valuesRef: roads.traffic_sign
+  - key: 'traffic_sign:backward'
+    label: Beschilderung in Gegenrichtung
+    format: sanitized_strings
+    valuesRef: roads.traffic_sign
+  - key: description
+    label: Hinweis aus OSM
+    format: sanitized_strings
+  - key: operator_type
+    label: Betreibertyp
+    valuesRef: parkings.operator_type
+  - key: informal
+    label: Trampelpfad
+    values:
+      - value: 'yes'
+        label: Weg als informeller Weg erfasst
+  - key: covered
+    label: Überdacht
+    values:
+      - value: covered
+        label: Überdacht
+      - value: partial
+        label: Teilweise überdacht
+      - value: indoor
+        label: In einem Gebäude
+  - key: bikelane_left
+    label: Radinfrastruktur links
+    valuesRef: bikelanes.category
+    valuesAdd:
+      - value: data_no
+        label: Vollständig (explizit keine)
+      - value: not_expected
+        label: Keine Infrastruktur erwartet
+      - value: assumed_no
+        label: Vermutlich vollständig
+      - value: missing
+        label: Unvollständig
+  - key: bikelane_self
+    label: Radinfrastruktur mittig
+    valuesRef: bikelanes.category
+    valuesAdd:
+      - value: data_no
+        label: Vollständig (explizit keine)
+      - value: not_expected
+        label: Keine Infrastruktur erwartet
+      - value: assumed_no
+        label: Vermutlich vollständig
+      - value: missing
+        label: Unvollständig
+  - key: bikelane_right
+    label: Radinfrastruktur rechts
+    valuesRef: bikelanes.category
+    valuesAdd:
+      - value: data_no
+        label: Vollständig (explizit keine)
+      - value: not_expected
+        label: Keine Infrastruktur erwartet
+      - value: assumed_no
+        label: Vermutlich vollständig
+      - value: missing
+        label: Unvollständig
+  - key: maxspeed
+    label: Höchstgeschwindigkeit
+    format: kilometer_per_hour
+  - key: maxspeed_source
+    label: Höchstgeschwindigkeit Quelle
+    values:
+      - value: maxspeed
+        label: In OSM erfasst als Tag `maxspeed`
+      - value: maxspeed_tag
+        label: In OSM erfasst über einen `maxspeed`-Kategorie-Tag
+      - value: zone
+        label: OSM-Zonen-Tag
+      - value: inferred_from_highway
+        label: Abgeleitet vom `highway`-Tag
+  - key: maxspeed_confidence
+    label: Konfidenz Höchstgeschwindigkeit
+    values:
+      - value: high
+        label: Hoch
+      - value: medium
+        label: Mittel
+      - value: low
+        label: Niedrig
+  - key: 'osm_maxspeed:backward'
+    purpose: qa
+    label: Spezielle Höchstgeschwindigkeit gegen die Linienrichtung
+    format: sanitized_strings
+  - key: 'osm_maxspeed:forward'
+    purpose: qa
+    label: Spezielle Höchstgeschwindigkeit mit der Linienrichtung
+    format: sanitized_strings
+  - key: 'osm_maxspeed:conditional'
+    purpose: qa
+    label: Spezielle Höchstgeschwindigkeit mit Einschränkungen
+    format: sanitized_strings
+  - key: lit
+    label: Beleuchtung
+    values:
+      - value: 'yes'
+        label: Beleuchtet
+      - value: 'no'
+        label: Nicht beleuchtet
+      - value: special
+        label: Spezielle Angaben
+  - key: surface
+    label: Oberfläche
+    valuesRef: parkings.surface
+  - key: surface_source
+    label: Herkunft der Oberfläche
+    values:
+      - value: tag
+        label: OSM-Tag `surface`
+  - key: surface_confidence
+    label: Konfidenz der Oberfläche
+    values:
+      - value: high
+        label: Hoch
+  - key: smoothness
+    label: Oberflächenqualität
+    values:
+      - value: excellent
+        label: Sehr gut
+      - value: good
+        label: Gut
+      - value: intermediate
+        label: Mittel gut
+      - value: bad
+        label: Schlecht
+      - value: very_bad
+        label: Sehr schlecht
+  - key: smoothness_source
+    label: Herkunft der Oberflächenqualität
+    values:
+      - value: tag
+        label: OSM-Tag `smoothness`
+      - value: tag_normalized
+        label: OSM-Tag `smoothness` (normalisiert)
+      - value: surface_to_smoothness
+        label: Abgeleitet von `surface`
+      - value: tracktype_to_smoothness
+        label: Abgeleitet von `tracktype`
+      - value: 'mtb:scale_to_smoothness'
+        label: Abgeleitet von `mtb:scale`
+  - key: smoothness_confidence
+    label: Konfidenz Oberflächenqualität
+    values:
+      - value: high
+        label: Hoch
+      - value: medium
+        label: Mittel
+  - key: surface_color
+    label: Oberflächenfarbe
+    values:
+      - value: red
+        label: Rot
+      - value: green
+        label: Grün
+      - value: red;green
+        label: Rot und Grün
+      - value: no
+        label: Keine besondere Farbe

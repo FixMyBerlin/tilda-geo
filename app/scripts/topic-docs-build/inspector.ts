@@ -77,11 +77,5 @@ const addValueTranslations = (input: {
       input.map[`${input.sourceId}--${input.key}=${valueNode.value}--description`] =
         valueNode.description
     }
-    if (valueNode.children?.length) {
-      addValueTranslations({
-        ...input,
-        values: valueNode.children,
-      })
-    }
   }
 }

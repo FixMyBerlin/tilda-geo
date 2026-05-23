@@ -47,10 +47,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
             editors={sourceData.inspector.editors}
             osmIdConfig={sourceData.osmIdConfig}
           />
-          <ToolsOtherProperties
-            feature={feature}
-            documentedKeys={sourceData.inspector.documentedKeys}
-          />
+          <ToolsOtherProperties feature={feature} sourceId={sourceId} />
         </ToolsWrapper>
       </Disclosure>
     </IntlProvider>

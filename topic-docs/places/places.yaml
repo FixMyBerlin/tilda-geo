@@ -1,0 +1,42 @@
+title: Daten zu Orten
+sourceIds:
+  - atlas_places
+attributes:
+  - key: place
+    label: Ortskategorie
+    values:
+      - value: borough
+        label: Stadtteil/Stadtbezirk
+      - value: city
+        label: Stadt
+      - value: hamlet
+        label: Siedlung
+      - value: suburb
+        label: Stadtteil
+      - value: town
+        label: Stadt oder große Gemeinde
+      - value: village
+        label: Dorf
+  - key: capital
+    label: Hauptstadtstatus
+  - key: population
+    format: population_label
+    label: Einwohner:innen-Anzahl
+  - key: population_date
+    label: Datum der Quelle der Einwohner:innen-Anzahl
+    format: date
+  - key: admin_level
+    format: number
+    label: Admin-Level
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: website
+    label: Website
+    format: sanitized_strings
+  - key: wikidata
+    label: Wikidata
+    format: sanitized_strings
+  - key: wikipedia
+    label: Wikipedia
+    format: sanitized_strings

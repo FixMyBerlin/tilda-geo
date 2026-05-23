@@ -1,0 +1,149 @@
+title: Fahrradstellplätze
+sourceIds:
+  - atlas_bicycleParking
+attributes:
+  - key: capacity
+    label: Anzahl Fahrrad-Stellplätze
+    format: number
+  - key: capacity:cargo_bike
+    label: Anzahl Lastenfahrrad-Stellplätze
+    format: number
+  - key: access
+    label: Zugang
+    values:
+      - value: 'yes'
+        label: Öffentlich
+      - value: customers
+        label: Kunden
+      - value: permissive
+        label: Öffentlich, geduldet
+      - value: private
+        label: Privat
+  - key: covered
+    label: Überdacht
+    valuesRef: parkings.covered
+    valuesAdd:
+      - value: 'no'
+        label: Nicht überdacht
+      - value: implicit_no
+        label: Nicht überdacht (implizit)
+  - key: fee
+    label: Gebühren
+    values:
+      - value: 'yes'
+        label: Gebührenpflichtig
+      - value: 'no'
+        label: Kostenfrei
+      - value: implicit_no
+        label: Kostenfrei (implizit)
+  - key: access_cargo_bike
+    label: Zugang Lastenrad
+    values:
+      - value: 'yes'
+        label: Zugelassen
+  - key: lit
+    label: Beleuchtung
+    values:
+      - value: 'yes'
+        label: Beleuchtet
+      - value: 'no'
+        label: Nicht beleuchtet
+  - key: bicycle_parking
+    label: Fahrradabstellanlage
+    values:
+      - value: stands
+        label: Anlehnbügel
+      - value: wide_stands
+        label: Breite Anlehnbügel
+      - value: bollard
+        label: Poller
+      - value: wall_loops
+        label: Wandhalter
+      - value: shed
+        label: Unterstand
+      - value: two-tier
+        label: Doppelstockparker
+      - value: lockers
+        label: Fahrradboxen
+  - key: operator_type
+    label: Betreibertyp
+    valuesRef: parkings.operator_type
+  - key: position
+    label: Lage
+    values:
+      - value: sidewalk
+        label: Gehweg
+      - value: grass_verge
+        label: Grünstreifen
+      - value: lane
+        label: Fahrbahn
+      - value: kerb_extension
+        label: Gehwegvorstreckung
+      - value: parking_lot
+        label: Parkplatz
+      - value: street_side
+        label: Straßenrand
+      - value: school_ground
+        label: Schulgelände
+      - value: private_property
+        label: Privatgrund
+      - value: pedestrian_area
+        label: Fußgängerbereich
+      - value: park
+        label: Park
+      - value: parking
+        label: Parkfläche
+  - key: indoor
+    label: Innenraum
+    values:
+      - value: 'yes'
+        label: Innen
+  - key: surface
+    label: Oberfläche
+    valuesRef: parkings.surface
+  - key: surveillance
+    label: Überwachung
+    values:
+      - value: outdoor
+        label: Außenüberwachung
+      - value: public
+        label: Öffentlich überwacht
+      - value: indoor
+        label: Innen überwacht
+      - value: 'yes'
+        label: Überwacht
+      - value: webcam
+        label: Webcam
+      - value: traffic
+        label: Verkehrsüberwachung
+      - value: camera
+        label: Kamera
+      - value: private
+        label: Privat überwacht
+  - key: count
+    label: Anzahl Anlagen
+    format: number
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: operator
+    label: Betreiber
+    format: sanitized_strings
+  - key: mapillary
+    ref: parkings.mapillary
+  - key: description
+    label: Beschreibung
+    format: sanitized_strings
+  - key: traffic_sign
+    ref: parkings.traffic_sign
+  - key: maxstay
+    label: Maximaldauer
+    format: sanitized_strings
+  - key: osm_capacity
+    purpose: qa
+    label: OSM Kapazität (roh, Testdaten)
+    format: sanitized_strings
+  - key: osm_capacity:cargo_bike
+    purpose: qa
+    label: OSM Kapazität Lastenrad (roh, Testdaten)
+    format: sanitized_strings

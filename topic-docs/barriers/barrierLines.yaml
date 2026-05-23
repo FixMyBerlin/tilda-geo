@@ -1,0 +1,92 @@
+title: Daten zu Linien-Barrieren
+summary: Große lineare Barrieren wie Hauptverkehrsstraßen, Schienen und Gewässer.
+sourceIds:
+  - atlas_barriers
+attributes:
+  - key: highway
+    label: Straßentyp
+    values:
+      - value: motorway
+        label: Autobahn
+      - value: motorway_link
+        label: Autobahn-Anschluss
+      - value: trunk
+        label: Kraftfahrstraße
+      - value: trunk_link
+        label: Kraftfahrstraßen-Anschluss
+  - key: waterway
+    label: Gewässertyp
+    values:
+      - value: river
+        label: Fluss
+      - value: canal
+        label: Kanal
+      - value: stream
+        label: Bach
+      - value: ditch
+        label: Graben
+      - value: drain
+        label: Entwässerungsgraben
+  - key: railway
+    label: Schienentyp
+    values:
+      - value: rail
+        label: Bahnstrecke
+      - value: light_rail
+        label: Stadtbahn
+      - value: tram
+        label: Straßenbahn
+      - value: subway
+        label: U-Bahn
+  - key: usage
+    label: Schienennutzung
+    values:
+      - value: main
+        label: Hauptstrecke
+      - value: branch
+        label: Nebenstrecke
+      - value: industrial
+        label: Industriegleis
+      - value: military
+        label: Militärisch
+      - value: tourism
+        label: Touristisch
+      - value: test
+        label: Teststrecke
+      - value: leisure
+        label: Freizeitnutzung
+  - key: bridge
+    label: Brücke
+    values:
+      - value: 'yes'
+        label: Brücke
+      - value: boardwalk
+        label: Bohlensteg
+      - value: viaduct
+        label: Viadukt
+      - value: movable
+        label: Bewegliche Brücke
+      - value: aqueduct
+        label: Aquädukt
+      - value: covered
+        label: Überdachte Brücke
+      - value: cantilever
+        label: Kragträgerbrücke
+      - value: low_water_crossing
+        label: Furtenartige Querung
+  - key: tunnel
+    label: Tunnel
+    values:
+      - value: 'yes'
+        label: Tunnel
+      - value: culvert
+        label: Durchlass
+      - value: building_passage
+        label: Gebäudedurchfahrt
+      - value: flooded
+        label: Überflutet
+      - value: avalanche_protector
+        label: Lawinenschutzgalerie
+  - key: name
+    label: Name
+    format: sanitized_strings

@@ -115,7 +115,9 @@ attributes:
     ref: parkings.traffic_sign
 
   - key: _staggered_maneuvering_loss
+    purpose: qa
     ref: parkings._staggered_maneuvering_loss
 
   - key: _staggered_original_capacity
+    purpose: qa
     ref: parkings._staggered_original_capacity

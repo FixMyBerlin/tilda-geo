@@ -1,0 +1,283 @@
+title: Daten zur Radinfrastruktur
+sourceIds:
+  - atlas_bikelanes
+attributes:
+  - key: category
+    label: Bauliche Führung
+    values:
+      - value: bicycleRoad
+        label: Fahrradstraße
+      - value: bicycleRoad_vehicleDestination
+        label: Fahrradstraße mit Anlieger/Kfz frei
+      - value: crossing
+        label: Straßenquerung
+      - value: cycleway_adjoining
+        label: Radweg (straßenbegleitend)
+      - value: cycleway_adjoiningOrIsolated
+        label: Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)
+      - value: cycleway_crossing
+        label: Straßenquerung (Radverkehr)
+      - value: cycleway_isolated
+        label: Radweg, selbstständig geführt
+      - value: cyclewayLink
+        label: Radweg-Verbindungsstück
+      - value: cyclewayOnHighway_advisory
+        label: Schutzstreifen
+      - value: cyclewayOnHighway_advisoryOrExclusive
+        label: Radfahrstreifen oder Schutzstreifen (Kategorisierung unklar)
+      - value: cyclewayOnHighway_exclusive
+        label: Radfahrstreifen
+      - value: cyclewayOnHighwayBetweenLanes
+        label: Radfahrstreifen in Mittellage (Fahrradweiche)
+      - value: cyclewayOnHighwayProtected
+        label: Geschützter Radfahrstreifen (PBL)
+      - value: footAndCyclewaySegregated_adjoining
+        label: Getrennter Rad- und Gehweg, straßenbegleitend
+      - value: footAndCyclewaySegregated_adjoiningOrIsolated
+        label: Getrennter Rad- und Gehweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)
+      - value: footAndCyclewaySegregated_isolated
+        label: Getrennter Rad- und Gehweg, selbstständig geführt
+      - value: footAndCyclewayShared_adjoining
+        label: Gemeinsamer Geh- und Radweg, straßenbegleitend
+      - value: footAndCyclewayShared_adjoiningOrIsolated
+        label: Gemeinsamer Geh- und Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)
+      - value: footAndCyclewayShared_isolated
+        label: Gemeinsamer Geh- und Radweg, selbstständig geführt
+      - value: footwayBicycleYes_adjoining
+        label: Gehweg mit Radfahrer frei, straßenbegleitend
+      - value: footwayBicycleYes_adjoiningOrIsolated
+        label: Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)
+      - value: footwayBicycleYes_isolated
+        label: Gehweg mit Radfahrer frei, selbstständig geführt
+      - value: livingStreet
+        label: Verkehrsberuhigter Bereich (Spielstraße)
+      - value: pedestrianAreaBicycleYes
+        label: Fußgängerzone, Fahrrad frei
+      - value: separate_geometry
+        label: RVA als separate Geometrie erfasst
+      - value: sharedBusLaneBikeWithBus
+        label: Radfahrstreifen mit Freigabe Busverkehr
+      - value: sharedBusLaneBusWithBike
+        label: Bussonderfahrstreifen mit Fahrrad frei
+      - value: sharedMotorVehicleLane
+        label: Gemeinsamer Fahrstreifen
+      - value: needsClarification
+        label: Führungsform unklar
+  - key: road
+    ref: roads.road
+  - key: _parent_highway
+    ref: roads.road
+  - key: highway
+    ref: roads.road
+  - key: name
+    ref: roads.name
+  - key: length
+    ref: roads.length
+  - key: prefix
+    label: Quellpräfix
+    purpose: processing
+    description: Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.
+    values:
+      - value: cycleway
+        label: Aus `cycleway:*`-Tags extrahiert
+      - value: sidewalk
+        label: Aus `sidewalk:*`-Tags extrahiert
+  - key: lifecycle
+    ref: roads.lifecycle
+  - key: width
+    ref: roads.width
+  - key: width_effective
+    ref: roads.width_effective
+  - key: width_source
+    ref: roads.width_source
+  - key: oneway
+    label: Verkehrsrichtung
+    values:
+      - value: yes
+        label: Eine Richtung
+      - value: no
+        label: Beide Richtungen
+      - value: car_not_bike
+        label: Beide Richtungen für Fahrrad; Einbahnstraße für Kfz
+      - value: assumed_no
+        label: Wahrscheinlich beide Richtungen
+        description: Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.
+      - value: implicit_yes
+        label: Wahrscheinlich eine Richtung
+        description: Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.
+  - key: bridge
+    ref: roads.bridge
+  - key: tunnel
+    ref: roads.tunnel
+  - key: surface_color
+    ref: roads.surface_color
+  - key: separation_left
+    label: Abgrenzung (Links)
+    values:
+      - value: no
+        label: Keine physische Abgrenzung
+      - value: bollard
+        label: Poller
+      - value: flex_post
+        label: Flexpfosten
+      - value: vertical_panel
+        label: Vertikales Panel
+      - value: studs
+        label: Bodenmarkierungsnägel
+      - value: bump
+        label: Bodenschwelle
+      - value: planter
+        label: Pflanzkübel
+      - value: kerb
+        label: Bordstein
+      - value: fence
+        label: Zaun
+      - value: jersey_barrier
+        label: Betonleitwand
+      - value: guard_rail
+        label: Leitplanke
+      - value: structure
+        label: Struktur
+      - value: ditch
+        label: Graben
+      - value: greenery
+        label: Begrünung
+      - value: hedge
+        label: Hecke
+      - value: tree_row
+        label: Baumreihe
+      - value: cone
+        label: Kegel
+      - value: kerb;parking_lane
+        label: Bordstein, dann Parkstreifen
+      - value: kerb;bollard
+        label: Bordstein, dann Poller
+      - value: yes
+        label: Unspezifische Abgrenzung
+  - key: separation_right
+    valuesRef: bikelanes.separation_left
+    label: Abgrenzung (Rechts)
+  - key: marking_left
+    label: Markierung (Links)
+    values:
+      - value: solid_line
+        label: Durchgezogene Linie
+      - value: dashed_line
+        label: Gestrichelte Linie
+      - value: double_solid_line
+        label: Doppelte durchgezogene Linie
+      - value: barred_area
+        label: Schraffur
+      - value: pictogram
+        label: Piktogramm
+      - value: surface
+        label: Oberfläche
+  - key: marking_right
+    valuesRef: bikelanes.marking_left
+    label: Markierung (Rechts)
+  - key: buffer_left
+    format: meter
+    label: Schutzraum (Links)
+  - key: buffer_right
+    format: meter
+    label: Schutzraum (Rechts)
+  - key: traffic_mode_left
+    label: Verkehrsform (Links)
+    values:
+      - value: bicycle
+        label: Fahrrad
+      - value: foot
+        label: Fußgänger
+      - value: motor_vehicle
+        label: Kraftfahrzeuge
+      - value: no
+        label: Kein Verkehr
+      - value: parking
+        label: Parken
+      - value: psv
+        label: ÖPNV (Bus/Tram)
+  - key: traffic_mode_right
+    valuesRef: bikelanes.traffic_mode_left
+    label: Verkehrsform (Rechts)
+  - key: mapillary_coverage
+    label: Mapillary-Abdeckung
+    description: Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage
+    values:
+      - value: regular
+        label: Standard-Aufnahmen
+      - value: pano
+        label: Panorama-Aufnahmen
+  - key: mapillary
+    label: Straßenfotos (Mapillary)
+    format: sanitized_strings
+    description: Mapillary-Bild-IDs (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.
+  - key: mapillary_forward
+    label: Mapillary in Linienrichtung
+    format: sanitized_strings
+    description: Mapillary-Bild-IDs in Linienrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.
+  - key: mapillary_backward
+    label: Mapillary gegen Linienrichtung
+    format: sanitized_strings
+    description: Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.
+  - key: mapillary_traffic_sign
+    label: Mapillary für Verkehrszeichen
+    format: sanitized_strings
+    description: Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.
+  - key: description
+    ref: roads.description
+  - key: operator_type
+    ref: roads.operator_type
+  - key: informal
+    ref: roads.informal
+  - key: covered
+    ref: roads.covered
+  - key: offset
+    format: meter
+    purpose: processing
+    label: Linien-Offset
+    description: Seitlicher Versatz der Liniengeometrie in Metern. Der Wert wird im Processing aus der halben Straßenbreite berechnet; positive Werte liegen links der Referenzlinie, negative rechts.
+  - key: surface
+    ref: roads.surface
+  - key: surface_source
+    label: Herkunft der Oberfläche
+    valuesRef: roads.surface_source
+    valuesAdd:
+      - value: parent_highway_tag
+        label: Von zugeordneter Straße (OSM)
+  - key: surface_confidence
+    ref: roads.surface_confidence
+  - key: smoothness
+    ref: roads.smoothness
+  - key: smoothness_source
+    label: Herkunft der Oberflächenqualität
+    valuesRef: roads.smoothness_source
+    valuesAdd:
+      - value: parent_highway_tag
+        label: Von zugeordneter Straße (OSM)
+      - value: parent_highway_tag_normalized
+        label: Von zugeordneter Straße (normalisiert)
+      - value: parent_highway_surface_to_smoothness
+        label: Von Oberfläche der zugeordneten Straße abgeleitet
+      - value: parent_highway_tracktype_to_smoothness
+        label: Von `tracktype` der zugeordneten Straße abgeleitet
+      - value: 'parent_highway_mtb:scale_to_smoothness'
+        label: Von `mtb:scale` der zugeordneten Straße abgeleitet
+  - key: smoothness_confidence
+    ref: roads.smoothness_confidence
+  - key: traffic_sign
+    label: Beschilderung
+    format: sanitized_strings
+    values:
+      - value: never
+        label: Kein Verkehrszeichen erwartet
+        description: Wird aktuell intern für `category=cyclewayOnHighwayBetweenLanes` verwendet um klarzustellen, dass hier nie ein Verkehrszeichen zu erwarten ist.
+      - value: none
+        label: Unbeschildert
+  - key: 'traffic_sign:forward'
+    label: Beschilderung in Verkehrsrichtung
+    format: sanitized_strings
+    valuesRef: bikelanes.traffic_sign
+  - key: 'traffic_sign:backward'
+    label: Beschilderung in Gegenrichtung
+    format: sanitized_strings
+    valuesRef: bikelanes.traffic_sign

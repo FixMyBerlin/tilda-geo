@@ -1,3 +1,8 @@
+import {
+  getTopicDocNumericFormatSuffix,
+  topicDocNumericFormatSet,
+  type TopicDocNumericFormat,
+} from '../../src/data/topicDocs/schema'
 import { mapillaryPKeyUrlGfiHrefTemplate } from '../../src/lib/mapillaryPKeyUrl'
 import type { CompiledAttribute, CompiledValue } from './types'
 
@@ -7,9 +12,6 @@ const isMapillaryAttributeKey = (key: string) => key === 'mapillary' || key.star
 const collectGfiValueFormat = (values: Array<CompiledValue>, acc: Record<string, string>) => {
   for (const node of values) {
     acc[node.value] = node.label
-    if (node.children?.length) {
-      collectGfiValueFormat(node.children, acc)
-    }
   }
 }
 
@@ -45,6 +47,11 @@ export type MasterportalTableOutput = {
 export const buildMasterportalMap = (
   compiledAttributes: Array<CompiledAttribute>,
 ): MasterportalTableOutput => {
+  const isNumericTopicDocFormat = (
+    format: CompiledAttribute['type'],
+  ): format is TopicDocNumericFormat => {
+    return topicDocNumericFormatSet.has(format)
+  }
   const gfiAttributes: Record<string, MasterportalGfiAttributeValue> = {}
 
   for (const attribute of compiledAttributes) {
@@ -68,16 +75,13 @@ export const buildMasterportalMap = (
       continue
     }
 
-    if (attribute.type === 'number') {
+    if (isNumericTopicDocFormat(attribute.type)) {
+      const suffix = getTopicDocNumericFormatSuffix(attribute.type)
       gfiAttributes[attribute.key] = {
         name: attribute.label,
         type: 'number',
+        ...(suffix ? { suffix } : {}),
       }
-      continue
-    }
-
-    if (attribute.type === 'sanitized_strings') {
-      gfiAttributes[attribute.key] = attribute.label
       continue
     }
 
@@ -93,6 +97,11 @@ export const buildMasterportalMap = (
         }
         continue
       }
+    }
+
+    if (attribute.type === 'sanitized_strings') {
+      gfiAttributes[attribute.key] = attribute.label
+      continue
     }
 
     gfiAttributes[attribute.key] = attribute.label

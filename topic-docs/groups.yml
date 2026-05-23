@@ -3,6 +3,27 @@ groups:
     label: Parkraum-Prozessierung
     tables:
       - parkings
+      - parkings_quantized
       - parkings_no
       - parkings_cutouts
       - off_street_parking_areas
+      - off_street_parking_quantized
+  - id: atlas
+    label: Atlas Daten
+    tables:
+      - barrierAreas
+      - barrierLines
+      - roads
+      - roadsPathClasses
+      - bikelanes
+      - bikelanesPresence
+      - bikeSuitability
+      - bikeroutes
+      - boundaries
+      - landuse
+      - places
+      - poiClassification
+      - publicTransport
+      - bicycleParking_points
+      - trafficSigns
+      - todos_lines

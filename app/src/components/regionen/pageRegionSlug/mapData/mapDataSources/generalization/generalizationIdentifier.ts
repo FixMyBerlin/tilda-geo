@@ -3,10 +3,12 @@ import type {
   UnionTiles,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
 
-export type GeneralizedTableId = `atlas_generalized_${Lowercase<TableId>}`
+export const atlasGeneralizedPrefix = 'atlas_generalized_' as const
+
+export type GeneralizedTableId = `${typeof atlasGeneralizedPrefix}${Lowercase<TableId>}`
 export function generalizationFunctionIdentifier<T extends UnionTiles<TableId>>(tileId: T) {
   return tileId
     .split(',')
-    .map((id) => `atlas_generalized_${id.toLowerCase()}`)
+    .map((id) => `${atlasGeneralizedPrefix}${id.toLowerCase()}`)
     .join(',') as UnionTiles<GeneralizedTableId>
 }

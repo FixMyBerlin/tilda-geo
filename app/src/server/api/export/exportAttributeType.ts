@@ -1,15 +1,10 @@
-import { numberConfigs } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/_utils/numberConfig'
+import { getTopicDocFormatsForTagKey, isNumericTopicDocFormat } from '@/data/topicDocs/runtime'
 
 export type ExportAttributeType = 'string' | 'number'
 
 export const getExportAttributeType = (key: string): ExportAttributeType => {
-  const numberKeywordsEquals = numberConfigs.map(({ key: numberKey }) => numberKey)
-  const numberKeywordsIncludes: Array<string> = []
+  const knownFormats = getTopicDocFormatsForTagKey(key)
+  if (!knownFormats || knownFormats.size === 0) return 'string'
 
-  const shouldCastToNumber = key.startsWith('osm_')
-    ? false
-    : numberKeywordsEquals.some((keyword) => key === keyword) ||
-      numberKeywordsIncludes.some((keyword) => key.includes(keyword))
-
-  return shouldCastToNumber ? 'number' : 'string'
+  return [...knownFormats].every(isNumericTopicDocFormat) ? 'number' : 'string'
 }

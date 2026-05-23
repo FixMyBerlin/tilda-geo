@@ -8,7 +8,6 @@ const compileValueNode = (node: ValueDocNode): CompiledValue => ({
   label: node.label,
   description: resolveDescription(node.description),
   chapterRefs: node.chapterRefs?.map((chapter) => chapter.chapterId),
-  children: node.children?.map((child) => compileValueNode(child)),
 })
 
 const mergeValueNodes = (
@@ -167,7 +166,10 @@ export const compileAttributesForDoc = (input: {
         visiting: new Set(),
         errorContext,
       })
-      const label = refEntry.label ?? (refEntry.format === 'ignore' ? attribute.key : undefined)
+      const label =
+        attribute.label ??
+        refEntry.label ??
+        (refEntry.format === 'ignore' ? attribute.key : undefined)
       if (!label) {
         throw new Error(
           `Referenced attribute "${attribute.ref}" resolves to an entry without label (${errorContext})`,
@@ -185,6 +187,7 @@ export const compileAttributesForDoc = (input: {
         key: attribute.key,
         type: refEntry.format,
         label,
+        purpose: attribute.purpose,
         description: resolveDescription(refEntry.description),
         chapterRefs: refEntry.chapterRefs?.map((chapter) => chapter.chapterId),
         values: resolvedValues.map((valueNode) => compileValueNode(valueNode)),
@@ -211,6 +214,7 @@ export const compileAttributesForDoc = (input: {
       key: attribute.key,
       type: attribute.format,
       label,
+      purpose: attribute.purpose,
       description: resolveDescription(attribute.description),
       chapterRefs: attribute.chapterRefs?.map((chapter) => chapter.chapterId),
       values: resolvedValues?.map((valueNode) => compileValueNode(valueNode)),

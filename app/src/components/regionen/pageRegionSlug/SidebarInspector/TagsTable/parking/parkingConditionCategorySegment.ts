@@ -9,17 +9,20 @@
  * Use `splitParkingConditionCategoryValue` for the top-level `;` split only (parenthesis-aware, one nesting level).
  *
  * Detail-token copy uses `tilda_parkings--parking_condition_detail_token--<id>` (`--` subcategory: derived in the inspector, not a tile property).
- * Weekday and English month abbreviations in opening_hours-style fragments are translated in this module; other detail-token German strings live in `../translations/translationsTagsTableRowCompositConditionCategory.const.ts`.
+ * Weekday and English month abbreviations in opening_hours-style fragments are translated in this module; other detail-token German strings come from a dedicated static map.
  */
 import { translations } from '../translations/translations.const'
 import { splitSemicolonRespectingBrackets } from '../utils/splitSemicolonRespectingBrackets'
+import { parkingConditionDetailTokenTranslations } from './parkingConditionDetailTokenTranslations.const'
 
 export function resolveParkingConditionCategoryBase(baseKey: string) {
   return translations[`tilda_parkings--condition_category=${baseKey}`]
 }
 
 export function resolveParkingConditionDetailToken(tokenId: string) {
-  return translations[`tilda_parkings--parking_condition_detail_token--${tokenId}`]
+  return parkingConditionDetailTokenTranslations[
+    tokenId as keyof typeof parkingConditionDetailTokenTranslations
+  ]
 }
 
 /** Split full tile value at Lua’s class separator `;` without splitting `;` inside `( … )`. */

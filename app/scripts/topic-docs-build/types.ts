@@ -1,15 +1,20 @@
+import type {
+  TopicDocAttributeFormat,
+  TopicDocAttributePurpose,
+} from '../../src/data/topicDocs/schema'
+
 export type CompiledValue = {
   value: string
   label: string
   description?: string
   chapterRefs?: Array<string>
-  children?: Array<CompiledValue>
 }
 
 export type CompiledAttribute = {
   key: string
-  type: 'string' | 'number' | 'sanitized_strings' | 'ignore'
+  type: TopicDocAttributeFormat
   label: string
+  purpose?: TopicDocAttributePurpose
   description?: string
   chapterRefs?: Array<string>
   values?: Array<CompiledValue>

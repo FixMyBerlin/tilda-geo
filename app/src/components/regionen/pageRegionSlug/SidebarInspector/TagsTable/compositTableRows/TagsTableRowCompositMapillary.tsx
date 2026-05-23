@@ -25,11 +25,7 @@ const mapillarySchema = z
   .or(z.undefined())
 
 export const tableKeyMapillary = 'composit_mapillary'
-export const TagsTableRowCompositMapillary = ({
-  sourceId,
-  tagKey,
-  properties,
-}: CompositTableRow) => {
+export const TagsTableRowCompositMapillary = ({ sourceId, properties }: CompositTableRow) => {
   const keyDefaults = mapillarySchema.parse(properties.mapillary) || []
   const keyForwards = mapillarySchema.parse(properties.mapillary_forward) || []
   const keyBackwards = mapillarySchema.parse(properties.mapillary_backward) || []
@@ -55,7 +51,7 @@ export const TagsTableRowCompositMapillary = ({
     <>
       <tr className="group">
         <td className="w-2/5 py-2 pr-3 pl-4 text-sm font-medium text-gray-900">
-          <ConditionalFormattedKey sourceId={sourceId} tagKey={tagKey} />
+          <ConditionalFormattedKey sourceId={sourceId} tagKey="mapillary" />
         </td>
         <td className="px-3 py-2 text-sm text-gray-500">
           <ul className="space-y-1">
