@@ -10,6 +10,7 @@ import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
 import { InspectorFeatureQa } from './InspectorFeatureQa'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 import { InspectorFeatureTilda } from './InspectorFeatureTilda'
+import { ToolsMissingTranslations } from './Tools/ToolsMissingTranslations'
 
 export type InspectorFeatureProperty = NonNullable<GeoJSON.GeoJsonProperties>
 
@@ -81,6 +82,8 @@ export const Inspector = ({ features }: Props) => {
           />
         )
       })}
+
+      <ToolsMissingTranslations />
     </div>
   )
 }
