@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-import { readFileSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -37,20 +36,12 @@ type DbPair = {
   value: string
 }
 
-// Static `import x from '…gen.json'` can be cached by Bun across runs, so right after
-// `topic-docs-build` rewrites these files the coverage script could still compare the DB
-// against an older in-memory snapshot. Reading from disk each process start avoids that.
-const loadJson = <T>(relativePath: string) => {
+const loadGeneratedModule = async <T>(relativePath: string) => {
   const absolutePath = path.resolve(import.meta.dir, relativePath)
-  return JSON.parse(readFileSync(absolutePath, 'utf-8')) as T
+  const moduleUrl = `${pathToFileURL(absolutePath).href}?cacheBust=${Date.now()}`
+  const loaded = (await import(moduleUrl)) as { default: T }
+  return loaded.default
 }
-
-const docsByTable = loadJson<Record<string, CompiledTopicDoc>>(
-  '../../src/data/generated/topicDocs/byTableName/index.gen.json',
-)
-const translationMap = loadJson<Record<string, string>>(
-  '../../src/data/generated/topicDocs/inspector/translations.gen.json',
-)
 
 const translationsConstDir = path.resolve(
   import.meta.dir,
@@ -280,12 +271,6 @@ const { values } = parseArgs({
   allowPositionals: true,
 })
 
-const selectedTables =
-  values.table
-    ?.split(',')
-    .map((tableName) => tableName.trim())
-    .filter(Boolean) ?? Object.keys(docsByTable)
-
 const resolveDatabaseUrl = () => {
   const explicit = values['database-url']?.trim()
   if (explicit) return explicit
@@ -372,6 +357,17 @@ const writeTableMarkdownReport = async (input: { reportDir: string; row: DbCover
 }
 
 const run = async () => {
+  const docsByTable = await loadGeneratedModule<Record<string, CompiledTopicDoc>>(
+    '../../src/data/generated/topicDocs/byTableName.gen.ts',
+  )
+  const translationMap = await loadGeneratedModule<Record<string, string>>(
+    '../../src/data/generated/topicDocs/inspectorTranslations.gen.ts',
+  )
+  const selectedTables =
+    values.table
+      ?.split(',')
+      .map((tableName) => tableName.trim())
+      .filter(Boolean) ?? Object.keys(docsByTable)
   const topicDocsSourceIds = collectTopicDocsSourceIds(docsByTable)
   const expectedFromYaml = buildExpectedFromYaml({
     genTranslations: translationMap,

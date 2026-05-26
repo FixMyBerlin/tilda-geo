@@ -1,34 +1,38 @@
-import topicDocsByTableName from '@/data/generated/topicDocs/byTableName/index.gen.json'
-import inspectorDescriptions from '@/data/generated/topicDocs/inspector/descriptions.gen.json'
-import masterportalByTableName from '@/data/generated/topicDocs/masterportal/byTableName/index.gen.json'
+import topicDocsByTableName from '@/data/generated/topicDocs/byTableName.gen'
+import inspectorDescriptions from '@/data/generated/topicDocs/inspectorDescriptions.gen'
+import masterportalByTableName from '@/data/generated/topicDocs/masterportalByTableName.gen'
 import type { TopicDocMasterportalGfiConfig } from '@/data/topicDocs/masterportalGfi.types'
 
 export type TopicDocCompiledValue = {
-  value: string
-  label: string
+  readonly value: string
+  readonly label: string
   description?: string
-  chapterRefs?: Array<string>
-  children?: Array<TopicDocCompiledValue>
+  readonly chapterRefs?: ReadonlyArray<string>
+  readonly children?: ReadonlyArray<TopicDocCompiledValue>
 }
 
 export type TopicDocCompiledAttribute = {
-  key: string
-  type: 'string' | 'number' | 'sanitized_strings' | 'ignore'
-  label: string
+  readonly key: string
+  readonly type: 'string' | 'number' | 'sanitized_strings' | 'ignore'
+  readonly label: string
   description?: string
-  chapterRefs?: Array<string>
-  values?: Array<TopicDocCompiledValue>
+  readonly chapterRefs?: ReadonlyArray<string>
+  readonly values?: ReadonlyArray<TopicDocCompiledValue>
 }
 
 export type TopicDocCompiled = {
-  tableName: string
-  topic: string
-  sourceIds: Array<string>
-  title: string
+  readonly tableName: string
+  readonly topic: string
+  readonly sourceIds: ReadonlyArray<string>
+  readonly title: string
   summary?: string
-  groups?: Array<{ id: string; label?: string }>
-  attributes: Array<TopicDocCompiledAttribute>
-  chapters: Array<{ id: string; title: string; markdown: string }>
+  readonly groups?: ReadonlyArray<{ readonly id: string; readonly label?: string }>
+  readonly attributes: ReadonlyArray<TopicDocCompiledAttribute>
+  readonly chapters: ReadonlyArray<{
+    readonly id: string
+    readonly title: string
+    readonly markdown: string
+  }>
 }
 
 type InspectorDescriptionMap = Record<
@@ -39,20 +43,21 @@ type InspectorDescriptionMap = Record<
   }
 >
 
+const topicDocsByTableNameMap: Partial<Record<string, TopicDocCompiled>> = topicDocsByTableName
+const masterportalByTableNameMap: Partial<Record<string, TopicDocMasterportalGfiConfig>> =
+  masterportalByTableName
+const inspectorDescriptionMap: Partial<InspectorDescriptionMap> = inspectorDescriptions
+
 export const getTopicDocByTableName = (tableName: string) => {
-  const value = (topicDocsByTableName as Record<string, TopicDocCompiled | undefined>)[tableName]
-  return value ?? null
+  return topicDocsByTableNameMap[tableName] ?? null
 }
 
 export const getMasterportalByTableName = (tableName: string) => {
-  const value = (
-    masterportalByTableName as Record<string, TopicDocMasterportalGfiConfig | undefined>
-  )[tableName]
-  return value ?? null
+  return masterportalByTableNameMap[tableName] ?? null
 }
 
 const findValueDescription = (
-  values: Array<TopicDocCompiledValue> | undefined,
+  values: ReadonlyArray<TopicDocCompiledValue> | undefined,
   targetValue: string,
 ): string | undefined => {
   if (!values?.length) return undefined
@@ -69,7 +74,7 @@ export const getDescriptionForInspectorTag = (
   tagKey: string,
   tagValue: string | undefined,
 ) => {
-  const sourceDescriptions = (inspectorDescriptions as InspectorDescriptionMap)[sourceId]
+  const sourceDescriptions = inspectorDescriptionMap[sourceId]
   if (sourceDescriptions) {
     const fromValue = tagValue ? sourceDescriptions.values[tagKey]?.[tagValue] : undefined
     if (fromValue) return fromValue

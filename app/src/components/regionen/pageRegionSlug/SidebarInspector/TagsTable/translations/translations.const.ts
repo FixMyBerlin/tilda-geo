@@ -1,4 +1,4 @@
-import generatedTopicDocsTranslations from '@/data/generated/topicDocs/inspector/translations.gen.json'
+import generatedTopicDocsTranslations from '@/data/generated/topicDocs/inspectorTranslations.gen'
 // Prettier: Overwrite via app/.prettierrc.mjs
 import { translationsAtlasAndAll } from './translationsAtlasAndAll.const'
 import { translationsOneway } from './translationsOneway.const'
