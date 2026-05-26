@@ -10,7 +10,6 @@ import { DEV_REGION_ERROR_QUERY_KEY } from '@/dev/errorPreviews'
 import { getRegionRedirectUrl } from '@/server/regions/getRegionRedirectUrl'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
 import {
-  internalNotesQueryOptions,
   qaDataForMapQueryOptions,
   regionQaConfigsQueryOptions,
 } from '@/server/regions/regionQueryOptions'
@@ -25,8 +24,8 @@ import {
 
 /**
  * Region page route. The loader (1) fetches main page data via getRegionPageLoaderFn and (2) preloads
- * the React Query cache with region-specific data (QA configs — server returns [] without access, internal notes when
- * the region has atlas notes, QA map data when the `qa` URL param is set). That cache is server state: the
+ * the React Query cache with region-specific data (QA configs — server returns [] without access, and QA map data
+ * when the `qa` URL param is set). That cache is server state: the
  * @tanstack/react-router-ssr-query integration dehydrates it and streams it to the client so
  * components using useQuery with the same query options get hydrated data without a second request.
  * See: https://tanstack.com/router/latest/docs/guide/data-loading
@@ -44,7 +43,6 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
   loaderDeps: ({ search }) => {
     return {
       qa: search?.[searchParamsRegistry.qa] ?? '',
-      atlasNotesFilter: search?.[searchParamsRegistry.atlasNotesFilter] ?? '',
       qaFilter: search?.[searchParamsRegistry.qaFilter] ?? '',
     }
   },
@@ -86,17 +84,7 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
       queryClient.ensureQueryData(processingMetadataQueryOptions()),
     ])
 
-    const {
-      qa: qaParam,
-      atlasNotesFilter: notesFilter,
-      qaFilter,
-    } = loadRegionSearchParams(location.search)
-
-    if (context.region?.notes === 'atlasNotes' && loaderData.authorized) {
-      await queryClient.ensureQueryData(
-        internalNotesQueryOptions(regionSlug, notesFilter ?? undefined),
-      )
-    }
+    const { qa: qaParam, qaFilter } = loadRegionSearchParams(location.search)
 
     if (qaParam.configSlug && qaParam.style !== 'none') {
       const qaConfigs = queryClient.getQueryData<{ id: number; slug: string }[]>(

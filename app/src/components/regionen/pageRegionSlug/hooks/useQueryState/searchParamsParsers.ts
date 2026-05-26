@@ -33,7 +33,7 @@ export const searchParamsParsers = {
     shallow: false,
   }),
   atlasNotesFilter: parseAsJson(zodInternalNotesFilterParam.parse).withOptions({
-    shallow: false, // Trigger server re-render when filter changes
+    shallow: true,
   }),
   qaFilter: parseAsJson(zodQaFilterParam.parse).withOptions({
     shallow: false, // Trigger server re-render when filter changes
