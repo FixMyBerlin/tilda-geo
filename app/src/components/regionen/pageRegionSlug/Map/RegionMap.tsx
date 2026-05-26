@@ -39,6 +39,7 @@ import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersSta
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
+import { safeSetFeatureState } from './utils/safeSetFeatureState'
 import { useInteractiveLayers } from './utils/useInteractiveLayers'
 
 // On lower zoom level, our source data is stripped down to only styling data
@@ -143,15 +144,22 @@ export const RegionMap = () => {
 
   const hoveredFeatures = useRef<MapGeoJSONFeature[]>([])
   const key = ({ id, layer }: MapGeoJSONFeature) => `${id}>${layer.id}`
+  const sourceExists = (feature: MapGeoJSONFeature) => {
+    const sourceId = feature.source?.toString()
+    if (!sourceId) return false
+    return mainMap?.getMap().getSource(sourceId) != null
+  }
   const updateHover = (features: MapGeoJSONFeature[] | undefined) => {
     if (containMaskFeature(features)) features = []
-    const previous = hoveredFeatures.current
-    const current = features || []
+    const previous = hoveredFeatures.current.filter(sourceExists)
+    const current = (features || []).filter(sourceExists)
     differenceBy(previous, current, key).forEach((f) => {
-      mainMap?.setFeatureState(f, { hover: false })
+      if (!mainMap) return
+      safeSetFeatureState(mainMap, f, { hover: false })
     })
     differenceBy(current, previous, key).forEach((f) => {
-      mainMap?.setFeatureState(f, { hover: true })
+      if (!mainMap) return
+      safeSetFeatureState(mainMap, f, { hover: true })
     })
     hoveredFeatures.current = current
   }

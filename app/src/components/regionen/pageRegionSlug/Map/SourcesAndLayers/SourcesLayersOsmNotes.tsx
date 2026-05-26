@@ -47,7 +47,11 @@ export const SourcesLayersOsmNotes = () => {
               'circle-radius': 12,
               'circle-color': '#f9a8d4', // pink-300 https://tailwindcss.com/docs/customizing-colors
             }}
-            filter={['in', 'id', ...selectedFeatureIds]}
+            filter={
+              selectedFeatureIds.length > 0
+                ? ['in', 'id', ...selectedFeatureIds]
+                : ['literal', false]
+            }
             // layout={{
             //   'circle-sort-key': [
             //     'case',
