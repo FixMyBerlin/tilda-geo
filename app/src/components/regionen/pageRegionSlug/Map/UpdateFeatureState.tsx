@@ -2,13 +2,39 @@ import { differenceBy } from 'es-toolkit/compat'
 import { useEffect, useRef } from 'react'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMap } from 'react-map-gl/maplibre'
-import { useMapInspectorFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import {
+  useMapInspectorFeatures,
+  useMapLoaded,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
 
 const key = (f: MapGeoJSONFeature) => `${f.id}:::${f.layer.id}`
 
+type FeatureStateMapWriter = {
+  setFeatureState: (feature: MapGeoJSONFeature, state: { selected: boolean }) => void
+}
+
+export const syncSelectedFeatureState = ({
+  map,
+  currentSelectedFeatures,
+  previousSelectedFeatures,
+}: {
+  map: FeatureStateMapWriter
+  currentSelectedFeatures: MapGeoJSONFeature[]
+  previousSelectedFeatures: MapGeoJSONFeature[]
+}) => {
+  differenceBy(previousSelectedFeatures, currentSelectedFeatures, key).forEach((f) => {
+    map.setFeatureState(f, { selected: false })
+  })
+
+  differenceBy(currentSelectedFeatures, previousSelectedFeatures, key).forEach((f) => {
+    map.setFeatureState(f, { selected: true })
+  })
+}
+
 export const UpdateFeatureState = () => {
   const { mainMap } = useMap()
+  const mapLoaded = useMapLoaded()
   const previous = useRef<MapGeoJSONFeature[]>([])
   const inspectorFeatures = useMapInspectorFeatures()
   const selectedFeatures = useSelectedFeatures(!inspectorFeatures.length)
@@ -17,27 +43,22 @@ export const UpdateFeatureState = () => {
     ? inspectorFeatures
     : selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
 
-  const currentSelectedRef = useRef(currentSelectedFeatures)
-  currentSelectedRef.current = currentSelectedFeatures
-
   useEffect(
     function syncSelectedFeatureStateToMap() {
-      if (!mainMap) return
+      if (!mainMap || !mapLoaded) return
 
-      const current = currentSelectedRef.current
+      const current = currentSelectedFeatures
       const previousSelectedFeatures = previous.current
 
-      differenceBy(previousSelectedFeatures, current, key).forEach((f) => {
-        mainMap.setFeatureState(f, { selected: false })
-      })
-
-      differenceBy(current, previousSelectedFeatures, key).forEach((f) => {
-        mainMap.setFeatureState(f, { selected: true })
+      syncSelectedFeatureState({
+        map: mainMap,
+        currentSelectedFeatures: current,
+        previousSelectedFeatures,
       })
 
       previous.current = current
     },
-    [mainMap],
+    [currentSelectedFeatures, mainMap, mapLoaded],
   )
 
   return null
