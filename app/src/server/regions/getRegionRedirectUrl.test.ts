@@ -220,6 +220,32 @@ describe('getRegionRedirectUrl()', () => {
       expect(resultUrl.searchParams.get('config')).toBe('166cmie.ivb7ah.2r53k')
     })
 
+    test('MIGRATION: Preserve already-short config when version is missing', () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=18.5/52.5/13.4&config=gzvfwv.miikl.2tbmq'
+      const redirectUrl = getRegionRedirectUrl(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+
+      expect(resultUrl.searchParams.get('v')).toBe('2')
+
+      const parkingTildaCategory = parseCategoryFromResponse(redirectUrl, '', 'parkingTilda')
+      expect(parkingTildaCategory.active).toBe(true)
+
+      const parkingTilda = parkingTildaCategory.subcategories.find((s) => s.id === 'parkingTilda')!
+      expect(parkingTilda.styles.find((s) => s.id === 'default')?.active).toBe(true)
+
+      const parkingTildaOffStreet = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaOffStreet',
+      )!
+      expect(parkingTildaOffStreet.styles.find((s) => s.id === 'default')?.active).toBe(true)
+
+      const parkingTildaNo = parkingTildaCategory.subcategories.find(
+        (s) => s.id === 'parkingTildaNo',
+      )!
+      expect(parkingTildaNo.styles.find((s) => s.id === 'default')?.active).toBe(true)
+    })
+
     test('MIGRATION: Migrate old parking category to parkingLars', () => {
       // This test verifies the SOLUTION: what happens WITH migration in the redirect logic.
       // This test verifies that URLs with the old config hash `1r6doko` (which uses category ID 'parking')

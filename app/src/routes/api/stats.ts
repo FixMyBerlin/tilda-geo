@@ -21,6 +21,7 @@ const DbStatSchema = z.object({
   id: z.string(),
   name: z.string(),
   level: z.enum(['4', '6']),
+  regionalschluessel: z.string().nullable(),
   road_length: z.record(z.string(), z.number()),
   bikelane_length: z.record(z.string(), z.number()).nullable(),
   geometry: dbStatGeometrySchema,
@@ -43,6 +44,7 @@ export const Route = createFileRoute('/api/stats')({
               id,
               name,
               level,
+              regionalschluessel,
               road_length,
               bikelane_length,
               ST_AsGeoJSON(

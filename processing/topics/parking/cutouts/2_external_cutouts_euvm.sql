@@ -3,7 +3,9 @@
 -- * Transform geometries to SRID 5243
 -- * Project points/polygons to kerb lines using `tilda_project_to_k_closest_kerbs`
 -- * Insert point cutouts with type-specific buffers (street_lamp, tree, traffic_sign, etc.)
---   (!) Those are managed manually in this file.
+--   (!) Values below are buffer **radius** in meters (ST_Buffer distance), same semantics as
+--       `buffer_radius` in processing/topics/parking/obstacles/point/obstacle_point_categories.lua.
+--       Keep both CASE blocks and OSM categories aligned when changing a type.
 -- * Insert polygon cutouts with 0.6m buffer
 -- * All external cutouts get `no_cutout_for_restrictions=true` (not applied to segments whose condition_category indicates a real no_parking/no_stopping/no_standing prohibition).
 -- INPUT: `data.euvm_cutouts_point`, `data.euvm_cutouts_polygon` (external data)
@@ -98,13 +100,13 @@ SELECT
   ST_Buffer (
     geom,
     CASE type
-      -- KEEP IN SYNC - Buffer in meters (geometry already transformed)
-      WHEN 'bollard' THEN 0.3
-      WHEN 'street_lamp' THEN 0.4
-      WHEN 'tree' THEN 1.5
-      WHEN 'street_cabinet' THEN 1.5
-      WHEN 'traffic_sign' THEN 0.3
-      WHEN 'water_well' THEN 1.5
+      -- KEEP IN SYNC (radius m) — match obstacle_point_categories.lua buffer_radius per type
+      WHEN 'bollard' THEN 0.15
+      WHEN 'street_lamp' THEN 0.2
+      WHEN 'tree' THEN 0.75
+      WHEN 'street_cabinet' THEN 0.75
+      WHEN 'traffic_sign' THEN 0.15
+      WHEN 'water_well' THEN 0.75
       ELSE 0.01 -- This case is never reached due to WHERE clause filtering
     END
   ) AS geom,
@@ -114,13 +116,13 @@ SELECT
     'source', 'external_cutouts_euvm',
     'radius',
     CASE type
-    -- KEEP IN SYNC
-    WHEN 'bollard' THEN 0.3
-    WHEN 'street_lamp' THEN 0.4
-    WHEN 'tree' THEN 1.5
-    WHEN 'street_cabinet' THEN 1.5
-    WHEN 'traffic_sign' THEN 0.3
-    WHEN 'water_well' THEN 1.5
+    -- KEEP IN SYNC (radius m) — same values as ST_Buffer CASE above
+    WHEN 'bollard' THEN 0.15
+    WHEN 'street_lamp' THEN 0.2
+    WHEN 'tree' THEN 0.75
+    WHEN 'street_cabinet' THEN 0.75
+    WHEN 'traffic_sign' THEN 0.15
+    WHEN 'water_well' THEN 0.75
     ELSE 0.01 -- This case is never reached due to WHERE clause filtering
     END,
     'side', kerb_side,

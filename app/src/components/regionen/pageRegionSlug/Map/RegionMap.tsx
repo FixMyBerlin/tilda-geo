@@ -71,9 +71,7 @@ export const RegionMap = () => {
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
 
-  // Position the map when URL change is triggered from the outside (eg a Button that changes the URL-state to move the map)
   const { mainMap } = useMap()
-  mainMap?.getMap().touchZoomRotate.disableRotation()
 
   const containMaskFeature = (features: MapLayerMouseEvent['features']) => {
     if (!features) return false
@@ -170,6 +168,9 @@ export const RegionMap = () => {
   }
 
   const handleLoad = (_event: MapLibreEvent<undefined>) => {
+    // We disable rotation once after map startup to keep interactions consistent.
+    mainMap?.getMap().touchZoomRotate.disableRotation()
+
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
     markMapLoaded()
     updateMapBounds(mainMap?.getBounds() || null)
@@ -177,16 +178,22 @@ export const RegionMap = () => {
     firePlaywrightMapLoadedEvent()
   }
 
-  // Warn when a sprite image is missing
   useEffect(
-    function warnAboutMissingDevSprites() {
-      if (!mainMap) return
-      if (!isDev) return
-      mainMap.on('styleimagemissing', (e: MapStyleImageMissingEvent) => {
-        const imageId = e.id
-        if (imageId === 'null') return // Conditional images with Fallback images "Fill pattern: none" result in e.id=NULL
+    function subscribeToMissingStyleImages() {
+      if (!mainMap || !isDev) return
+
+      const handleStyleImageMissing = (event: MapStyleImageMissingEvent) => {
+        const imageId = event.id
+        if (imageId === 'null') return // Conditional images with fallback "none" can emit "null"
+
         console.warn('Missing image', imageId)
-      })
+      }
+
+      mainMap.on('styleimagemissing', handleStyleImageMissing)
+
+      return function unsubscribeFromMissingStyleImages() {
+        mainMap.off('styleimagemissing', handleStyleImageMissing)
+      }
     },
     [mainMap],
   )

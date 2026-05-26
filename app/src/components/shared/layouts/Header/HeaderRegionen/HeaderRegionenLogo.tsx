@@ -1,14 +1,16 @@
 import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline'
+import { getRouteApi } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
-import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
 import { Img } from '@/components/shared/Img'
 import { Pill } from '@/components/shared/text/Pill'
 import { productName } from '@/data/tildaProductNames.const'
 
+const routeApi = getRouteApi('/regionen/$regionSlug')
+
 export const HeaderRegionenLogo = () => {
   const staticRegion = useStaticRegion()
-  const { region } = useRegionLoaderData()
+  const { region } = routeApi.useLoaderData()
 
   if (!staticRegion) return null
 

@@ -68,6 +68,9 @@ services:
       ATLAS_API_KEY:
       MAPROULETTE_API_KEY:
       BREVO_API_KEY:
+      # Bun closes idle HTTP connections after ~10s by default.
+      # Large exports can take >10s before first response bytes are available.
+      NITRO_BUN_IDLE_TIMEOUT: 120
       FORCE_COLOR: 1
     ports:
       - 4000:4000

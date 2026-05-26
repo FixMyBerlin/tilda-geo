@@ -1,7 +1,7 @@
 import { exec, execFile } from 'node:child_process'
+import { createReadStream } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { gzipSync } from 'node:zlib'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { exportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
@@ -27,39 +27,47 @@ const exportMetadata = {
   owner: 'FixMyCity GmbH / TILDA Geo',
 }
 
+let gdalVersionCheckPromise: Promise<boolean> | null = null
+let hasLoggedUnsupportedGdalVersion = false
+
 async function checkGdalVersion() {
-  try {
-    return new Promise<boolean>((resolve) => {
-      exec('gdalinfo --version', { timeout: 5000 }, (error, stdout) => {
-        if (error) {
-          console.warn('[EXPORT] GDAL version check failed:', error.message)
-          resolve(false)
-          return
-        }
+  if (gdalVersionCheckPromise) return gdalVersionCheckPromise
 
-        const versionMatch = stdout.match(/GDAL (\d+)\.(\d+)\.(\d+)/)
-        if (!versionMatch) {
-          console.warn('[EXPORT] Could not parse GDAL version from:', stdout)
-          resolve(false)
-          return
-        }
+  gdalVersionCheckPromise = new Promise<boolean>((resolve) => {
+    exec('gdalinfo --version', { timeout: 5000 }, (error, stdout) => {
+      if (error) {
+        console.warn('[EXPORT] GDAL version check failed:', error.message)
+        resolve(false)
+        return
+      }
 
-        const major = parseInt(versionMatch[1] || '0', 10)
-        const minor = parseInt(versionMatch[2] || '0', 10)
+      const versionMatch = stdout.match(/GDAL (\d+)\.(\d+)\.(\d+)/)
+      if (!versionMatch) {
+        console.warn('[EXPORT] Could not parse GDAL version from:', stdout)
+        resolve(false)
+        return
+      }
 
-        const hasRequiredVersion = major > 3 || (major === 3 && minor >= 11)
+      const major = parseInt(versionMatch[1] || '0', 10)
+      const minor = parseInt(versionMatch[2] || '0', 10)
+      const hasRequiredVersion = major > 3 || (major === 3 && minor >= 11)
 
-        if (!hasRequiredVersion) {
-          console.warn(
-            `[EXPORT] GDAL version ${versionMatch[0]} is too old. Required: 3.11+ (gdal command introduced in 3.11.0)`,
-          )
-        }
+      if (!hasRequiredVersion && !hasLoggedUnsupportedGdalVersion) {
+        console.info(
+          `[EXPORT] GDAL version ${versionMatch[0]} does not support metadata-enrichment step (requires 3.11+). Export generation continues without metadata edits.`,
+        )
+        hasLoggedUnsupportedGdalVersion = true
+      }
 
-        resolve(hasRequiredVersion)
-      })
+      resolve(hasRequiredVersion)
     })
+  })
+
+  try {
+    return await gdalVersionCheckPromise
   } catch (error) {
     console.warn('[EXPORT] GDAL version check error:', error)
+    gdalVersionCheckPromise = null
     return false
   }
 }
@@ -80,6 +88,72 @@ const exportSearchSchema = z.object({
 
 const createExportRunId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+
+const unlinkExportFile = async (outputFilePath: string, logPrefix: string, reason: string) => {
+  try {
+    await fs.unlink(outputFilePath)
+  } catch (unlinkError) {
+    console.warn(logPrefix, 'failed to remove temp export file', {
+      outputFilePath,
+      reason,
+      unlinkError,
+    })
+  }
+}
+
+const createExportFileResponseStream = ({
+  outputFilePath,
+  logPrefix,
+  requestStartedAt,
+}: {
+  outputFilePath: string
+  logPrefix: string
+  requestStartedAt: number
+}) => {
+  const nodeStream = createReadStream(outputFilePath)
+  let bytesStreamed = 0
+  let didCleanup = false
+  const cleanupFile = (reason: string) => {
+    if (didCleanup) return
+    didCleanup = true
+    void unlinkExportFile(outputFilePath, logPrefix, reason)
+  }
+
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      nodeStream.on('data', (chunk: Buffer) => {
+        bytesStreamed += chunk.length
+        controller.enqueue(new Uint8Array(chunk))
+      })
+      nodeStream.on('end', () => {
+        controller.close()
+        console.info(logPrefix, 'stream completed', {
+          bytesStreamed,
+          totalDurationMs: Date.now() - requestStartedAt,
+        })
+        cleanupFile('stream_completed')
+      })
+      nodeStream.on('error', (streamError) => {
+        console.error(logPrefix, 'stream failed', {
+          bytesStreamed,
+          totalDurationMs: Date.now() - requestStartedAt,
+          streamError,
+        })
+        controller.error(streamError)
+        cleanupFile('stream_failed')
+      })
+    },
+    cancel(cancelReason) {
+      nodeStream.destroy()
+      console.warn(logPrefix, 'stream canceled by client', {
+        bytesStreamed,
+        totalDurationMs: Date.now() - requestStartedAt,
+        cancelReason,
+      })
+      cleanupFile('stream_canceled')
+    },
+  })
+}
 
 export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
   ssr: true,
@@ -159,17 +233,11 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           const existingColumns = columnExistsQuery.map(({ column_name }) => column_name)
           const hasOsmId = existingColumns.includes('osm_id')
           const hasOsmType = existingColumns.includes('osm_type')
-          console.info(logPrefix, 'loaded export columns metadata', {
-            tagKeysCount: tagKeyQuery.length,
-            metaKeysCount: metaKeyQuery.length,
-            hasOsmId,
-            hasOsmType,
-            timingsMs: {
-              tagKeys: metaKeysStartedAt - tagKeysStartedAt,
-              metaKeys: columnsCheckStartedAt - metaKeysStartedAt,
-              columnsCheck: Date.now() - columnsCheckStartedAt,
-            },
-          })
+          const columnsMetadataTimingsMs = {
+            tagKeys: metaKeysStartedAt - tagKeysStartedAt,
+            metaKeys: columnsCheckStartedAt - metaKeysStartedAt,
+            columnsCheck: Date.now() - columnsCheckStartedAt,
+          }
 
           const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
           const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
@@ -217,21 +285,15 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             ${layerName ? `-nln ${layerName}` : ''} \
             "${outputFilePath}" \
             ${dbConnection}`
-          console.info(logPrefix, 'running ogr2ogr', {
-            outputFilePath,
-            layerName,
-            ogrDriver: ogrFormat.driver,
-            isGdalAvailable,
-            sqlLength: sqlQuery.length,
-          })
 
           const ogrStartedAt = Date.now()
+          let ogrDurationMs = 0
           await new Promise<void>((resolve, reject) => {
             exec(ogrCommand, { maxBuffer: 1024 * 1024 * 50 }, (error, stdout, stderr) => {
-              const durationMs = Date.now() - ogrStartedAt
+              ogrDurationMs = Date.now() - ogrStartedAt
               if (error) {
                 console.error(logPrefix, 'ogr2ogr failed', {
-                  durationMs,
+                  ogrDurationMs,
                   errorMessage: error.message,
                   stderrPreview: stderr ? stderr.slice(0, 4000) : undefined,
                   stdoutPreview: stdout ? stdout.slice(0, 2000) : undefined,
@@ -239,11 +301,6 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
                 reject(error)
                 return
               }
-              console.info(logPrefix, 'ogr2ogr finished', {
-                durationMs,
-                stdoutLength: stdout.length,
-                stderrLength: stderr.length,
-              })
               if (stderr && isDev) {
                 console.warn('[EXPORT] ogr2ogr stderr:', stderr)
               }
@@ -254,6 +311,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             })
           })
 
+          let metadataEditDurationMs = 0
           if (isGdalAvailable) {
             const exportExt = path.extname(outputFilePath)
             const exportBase = path.basename(outputFilePath, exportExt)
@@ -287,22 +345,24 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
                       if (error) {
                         console.warn(logPrefix, 'gdal metadata update failed', {
                           errorMessage: error.message,
-                          durationMs: Date.now() - gdalMetadataStartedAt,
+                          metadataEditDurationMs: Date.now() - gdalMetadataStartedAt,
                         })
-                        await fs.unlink(tempMetadataPath).catch(() => {})
+                        await unlinkExportFile(tempMetadataPath, logPrefix, 'gdal_metadata_failed')
                       } else {
                         await fs.unlink(outputFilePath)
                         await fs.rename(tempMetadataPath, outputFilePath)
-                        console.info(logPrefix, 'gdal metadata update finished', {
-                          durationMs: Date.now() - gdalMetadataStartedAt,
-                        })
+                        metadataEditDurationMs = Date.now() - gdalMetadataStartedAt
                       }
                     } catch (replaceError) {
                       console.warn(logPrefix, 'gdal metadata replace failed', {
                         replaceError,
-                        durationMs: Date.now() - gdalMetadataStartedAt,
+                        metadataEditDurationMs: Date.now() - gdalMetadataStartedAt,
                       })
-                      await fs.unlink(tempMetadataPath).catch(() => {})
+                      await unlinkExportFile(
+                        tempMetadataPath,
+                        logPrefix,
+                        'gdal_metadata_replace_failed',
+                      )
                     } finally {
                       resolve()
                     }
@@ -313,16 +373,17 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           }
 
           const outputStats = await fs.stat(outputFilePath)
-          console.info(logPrefix, 'prepared output file', {
+          console.info(logPrefix, 'prepared export', {
             outputFilePath,
-            bytes: outputStats.size,
-          })
-          const fileBuffer = await fs.readFile(outputFilePath)
-          await fs.unlink(outputFilePath).catch((unlinkError) => {
-            console.warn(logPrefix, 'failed to remove temp export file', {
-              outputFilePath,
-              unlinkError,
-            })
+            outputBytes: outputStats.size,
+            tagKeysCount: tagKeyQuery.length,
+            metaKeysCount: metaKeyQuery.length,
+            hasOsmId,
+            hasOsmType,
+            columnsMetadataTimingsMs,
+            ogrDurationMs,
+            metadataEditDurationMs,
+            totalDurationMs: Date.now() - requestStartedAt,
           })
 
           const metadata = await getProcessingMeta()
@@ -330,39 +391,28 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
             : `${tableName}.${format}`
 
-          if (format === 'geojson' && request.headers.get('accept-encoding')?.includes('gzip')) {
-            const compressed = gzipSync(fileBuffer)
-            console.info(logPrefix, 'sending gzipped geojson response', {
-              filename,
-              uncompressedBytes: fileBuffer.length,
-              compressedBytes: compressed.length,
-              totalDurationMs: Date.now() - requestStartedAt,
-            })
-            return new Response(compressed, {
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-                'Content-Encoding': 'gzip',
-                'Content-Length': compressed.length.toString(),
-                'Content-Disposition': `attachment; filename="${filename}"`,
-              },
-            })
-          }
-
-          console.info(logPrefix, 'sending response', {
+          console.info(logPrefix, 'starting response stream', {
             filename,
-            bytes: fileBuffer.length,
             mimeType: ogrFormat.mimeType,
+            contentLength: outputStats.size,
             totalDurationMs: Date.now() - requestStartedAt,
           })
-          return new Response(fileBuffer, {
-            headers: {
-              ...corsHeaders,
-              'Content-Type': ogrFormat.mimeType,
-              'Content-Length': fileBuffer.length.toString(),
-              'Content-Disposition': `attachment; filename="${filename}"`,
+
+          return new Response(
+            createExportFileResponseStream({
+              outputFilePath,
+              logPrefix,
+              requestStartedAt,
+            }),
+            {
+              headers: {
+                ...corsHeaders,
+                'Content-Type': ogrFormat.mimeType,
+                'Content-Length': outputStats.size.toString(),
+                'Content-Disposition': `attachment; filename="${filename}"`,
+              },
             },
-          })
+          )
         } catch (error) {
           console.error(logPrefix, 'export failed', {
             regionSlug: params.regionSlug,

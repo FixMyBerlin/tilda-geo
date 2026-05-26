@@ -16,7 +16,7 @@ bun scripts/ELILayers/process.ts
 4. **Converts tile URLs** to MapLibre-compatible format:
    - TMS: Converts `{zoom}` to `{z}` format
    - WMS: Converts `{bbox}` to `{bbox-epsg-3857}` and sets proper parameters
-5. **Generates TypeScript file** at `src/app/regionen/[regionSlug]/_mapData/mapDataSources/sourcesBackgroundRasterELI.const.ts`
+5. **Generates TypeScript file** at `src/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundRasterELI.const.ts`
 
 ## Manual Selection
 

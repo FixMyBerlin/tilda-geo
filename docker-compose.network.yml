@@ -30,7 +30,16 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.letsencrypt.acme.email=dev-team@fixmycity.de"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Long-running exports can take >20s before first byte.
+      # Keep upstream response/header timeouts comfortably above that.
       - "--serversTransport.forwardingTimeouts.dialTimeout=100s"
+      - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s"
+      - "--serversTransport.forwardingTimeouts.idleConnTimeout=300s"
+      # Keep client-facing read/write windows permissive for large downloads.
+      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=300s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=300s"
+      - "--entrypoints.web.transport.respondingTimeouts.readTimeout=300s"
+      - "--entrypoints.web.transport.respondingTimeouts.writeTimeout=300s"
     ports:
       - "80:80"
       - "443:443"

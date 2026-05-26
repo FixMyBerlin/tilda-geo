@@ -53,8 +53,13 @@ export const UserLoggedInAdminInfo = ({ user }: Props) => {
       </p>
 
       <ul>
-        <li>
-          <Link to="/admin">Admin Bereich</Link>
+        <li className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <Link to="/admin">Admin Bereich </Link>
+          {regionSlug ? (
+            <Link to="/admin/regions/$regionSlug/edit" params={{ regionSlug }}>
+              Region bearbeiten
+            </Link>
+          ) : null}
         </li>
         {regionCsvUrl && (
           <li>

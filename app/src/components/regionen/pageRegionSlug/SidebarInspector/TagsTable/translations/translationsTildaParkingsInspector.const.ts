@@ -1,6 +1,6 @@
 /**
  * Inspector labels for `tilda_parkings` tag keys and composite rows that are not generated from
- * topic-docs attributes (see `topic-docs-build` → `inspector/translations.gen.json`).
+ * topic-docs attributes (see `topic-docs-build` → `inspectorTranslations.get.ts`).
  */
 /* prettier-ignore */
 export const translationsTildaParkingsInspector = {
