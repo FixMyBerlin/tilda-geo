@@ -34,7 +34,6 @@ services:
       # Keep upstream response/header timeouts comfortably above that.
       - "--serversTransport.forwardingTimeouts.dialTimeout=100s"
       - "--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s"
-      - "--serversTransport.forwardingTimeouts.readIdleTimeout=300s"
       - "--serversTransport.forwardingTimeouts.idleConnTimeout=300s"
       # Keep client-facing read/write windows permissive for large downloads.
       - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=300s"
