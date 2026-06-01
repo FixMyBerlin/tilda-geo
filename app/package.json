@@ -183,7 +183,7 @@
     "husky": "9.1.7",
     "jsdom": "29.1.1",
     "knip": "6.13.1",
-    "oxfmt": "^0.49.0",
+    "oxfmt": "0.52",
     "papaparse": "^5.5.3",
     "parse-gitignore": "2.0.0",
     "picomatch": "^4.0.4",
