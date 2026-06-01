@@ -46,13 +46,13 @@ The `sourceNumericId` maps a source name to a numeric ID for compact URLs.
 
 ### For TILDA data and Mapillary
 
-The [mapping in `url.ts`](../app/src/app/regionen/[regionSlug]/_hooks/useQueryState/useFeaturesParam/url.ts) provides the `sourceNumericId` for each TILDA source (e.g., `atlas_bikelanes`, `atlas_roads`). Mapillary is treated as a special case and also has an ID in this mapping.
+The [mapping in `url.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/url.ts) provides the `sourceNumericId` for each TILDA source (e.g., `atlas_bikelanes`, `atlas_roads`). Mapillary is treated as a special case and also has an ID in this mapping.
 
 ### For static data
 
 Deep links to static data sources are harder to create manually. The `sourceNumericId` is computed as an **Adler-32 checksum** of the dataset's `sourceId` string.
 
-The `sourceId` is derived from the folder name via [`updateStaticDatasets.ts`](../app/scripts/StaticDatasets/updateStaticDatasets.ts) — see `uploadSlug`. See [`serializeFeaturesParam()` in `useFeaturesParam.ts`](../app/src/app/regionen/[regionSlug]/_hooks/useQueryState/useFeaturesParam/useFeaturesParam.ts) for the checksum fallback logic.
+The `sourceId` is derived from the folder name via [`updateStaticDatasets.ts`](../app/scripts/StaticDatasets/updateStaticDatasets.ts) — see `uploadSlug`. See [`serializeFeaturesParam()` in `useFeaturesParam.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam.ts) for the checksum fallback logic.
 
 ## `featureId`
 
@@ -75,6 +75,8 @@ Note: In the future, we will validate that IDs are unique for a dataset and reus
 
 ## Coordinates (`coord1`, `coord2`, `coord3`, `coord4`)
 
+Use **EPSG:4326** (WGS84, degrees) for latitude and longitude in `map` and `f`.
+
 - **Points**: 2 coordinates → `longitude|latitude`
 - **Lines/Polygons**: 4 coordinates → bounding box `minLon|minLat|maxLon|maxLat`
 - **Precision**: 6 decimal places maximum
@@ -84,7 +86,7 @@ The coordinates are used to:
 1. Check if the selected features are visible in the current map view (`allUrlFeaturesInBounds`)
 2. Pan/zoom the map to show the selected features (`fitBounds`)
 
-See [`util.ts`](../app/src/app/regionen/[regionSlug]/_components/SidebarInspector/util.ts) for these functions.
+See [`util.ts`](../app/src/components/regionen/pageRegionSlug/SidebarInspector/util.ts) for these functions.
 
 ## Examples
 
@@ -96,7 +98,7 @@ f=21|776457396685869|13.64569|52.378193
 
 - `sourceNumericId`: 21 (`mapillary_coverage`)
 - `featureId`: `776457396685869`
-- `coord1|coord2`: Point at lon=13.64569, lat=52.378193
+- `coord1|coord2`: Point at lon=13.64569, lat=52.378193 (EPSG:4326)
 
 ### Line (Bikelanes)
 
@@ -106,7 +108,7 @@ f=10|way/1010110070|13.645427|52.37763|13.646221|52.378219
 
 - `sourceNumericId`: 10 (`atlas_bikelanes`)
 - `featureId`: `way/1010110070`
-- `coord1|coord2|coord3|coord4`: Bounding box
+- `coord1|coord2|coord3|coord4`: Bounding box (EPSG:4326)
 
 ### Polygon (Parking Areas)
 
@@ -116,7 +118,7 @@ f=5|9718|9.118744|48.948085|9.119004|48.948291
 
 - `sourceNumericId`: 5 (`lars_parking_areas`)
 - `featureId`: `9718`
-- `coord1|coord2|coord3|coord4`: Bounding box
+- `coord1|coord2|coord3|coord4`: Bounding box (EPSG:4326)
 
 ### Multiple Features
 
