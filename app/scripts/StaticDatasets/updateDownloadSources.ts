@@ -37,6 +37,7 @@ const datasetFileFolderData = getDatasetFolders(folderFilterTerm)
 const downloadedGeojsonPaths: string[] = []
 
 for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFolderData) {
+  const folderStartedAt = performance.now()
   // Get the `downloadConfig.js` data ready
   const downloadConfig = await import_<DownloadConfig>(
     datasetFolderPath,
@@ -67,9 +68,17 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
       downloadedGeojsonPaths.push(resultFilename)
     }
 
-    green('  Data saved', resultFilename)
+    const elapsedMs = performance.now() - folderStartedAt
+    green('  Data saved', resultFilename, `(${(elapsedMs / 1000).toFixed(1)}s)`)
   } catch (error) {
-    red('   Error', error, downloadConfig, wfsUrl.toString())
+    const elapsedMs = performance.now() - folderStartedAt
+    red(
+      '   Error',
+      `after ${(elapsedMs / 1000).toFixed(1)}s`,
+      error,
+      downloadConfig,
+      wfsUrl.toString(),
+    )
   }
 }
 
