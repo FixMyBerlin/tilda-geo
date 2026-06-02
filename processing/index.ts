@@ -39,7 +39,7 @@ async function main() {
     // Start timing for the actual data processing (matches old behavior)
     const processingStartTime = Date.now()
     // Export sidepath CSV from current DB (yesterday's data) before processTopics overwrites it
-    await exportSidepathData()
+    await exportSidepathData(fileChanged)
     await processTopics(fileName, fileChanged)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime

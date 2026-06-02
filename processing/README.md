@@ -70,6 +70,8 @@ With `SKIP_UNCHANGED=1` we compare the hashes of all `.lua` and `.sql` files to 
 During [`run-5-process.sh`](processing/run-5-process.sh) we only run code if the respective hash has changed.
 If any helper in (`topics/helper`)[processing/topics/helper] or the OSM file has changed, we rerun everything.
 
+The sidepath `is_sidepath_estimation.csv` export (before topics) uses the same skip rules as `roads_bikelanes`: it is skipped when that topic would not run (`SKIP_UNCHANGED`, `PROCESS_ONLY_TOPICS`, or global reruns). When the topic runs but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
+
 Whenever we talk about `hash`es in this code, this feature is referenced.
 
 ### Processing: Inspect changes

@@ -1,6 +1,5 @@
 import { join } from 'node:path'
 import { $ } from 'bun'
-import { CONSTANTS_DIR, DATA_TABLE_DIR, TOPIC_DIR } from '../constants/directories.const'
 import { type Topic, topicsConfig } from '../constants/topics.const'
 import {
   createReferenceTable,
@@ -10,12 +9,12 @@ import {
   getTopicTables,
 } from '../diffing/diffing'
 import { formatTimestamp } from '../utils/formatTimestamp'
-import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
+import { updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
+import { getSkipUnchangedContext, topicPath, willSkipTopic } from '../utils/skipUnchanged'
 import { bboxesFilter, filteredFilePath } from './filter'
 
-const topicPath = (topic: Topic) => join(TOPIC_DIR, topic)
 const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
 
 /**
@@ -86,34 +85,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
 
-  // when the helpers have changed we disable all diffing functionality
-  const helperPath = join(TOPIC_DIR, 'helper')
-  const helpersChanged = await directoryHasChanged(helperPath)
-  updateDirectoryHash(helperPath)
-  if (helpersChanged) {
-    console.log('ℹ️ Helpers have changed. Rerunning all code.')
-  }
-
-  // when the constants have changed we disable all diffing functionality
-  const constantsDirChanged = await directoryHasChanged(CONSTANTS_DIR)
-  updateDirectoryHash(CONSTANTS_DIR)
-  if (constantsDirChanged) {
-    console.log('ℹ️ processing/constants have changed. Rerunning all code.')
-  }
-
-  // when the constants have changed we disable all diffing functionality
-  const dataTablesDirChanged = await directoryHasChanged(DATA_TABLE_DIR)
-  updateDirectoryHash(DATA_TABLE_DIR)
-  if (dataTablesDirChanged) {
-    console.log('ℹ️ processing/dataTables have changed. Rerunning all code.')
-  }
-
-  const skipCode =
-    params.skipUnchanged &&
-    !helpersChanged &&
-    !constantsDirChanged &&
-    !dataTablesDirChanged &&
-    !fileChanged
+  const skipContext = await getSkipUnchangedContext(fileChanged)
 
   // Reference mode: Always create reference, never diff (clean baseline)
   // Previous/Fixed modes: Only diff when source PBF file hasn't changed (new download)
@@ -139,21 +111,17 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     let innerBboxes = bboxes
     let innerFileName = fileName
 
-    // Topic: Skip unchanged topic
-    const topicChanged = await directoryHasChanged(topicPath(topic))
-    if (skipCode && !topicChanged) {
-      console.log(
-        `Topics: ⏩ Skipping "${topic}".`,
-        "The code hasn't changed and `SKIP_UNCHANGED` is active.",
-      )
-      continue
-    }
-
-    // Topic: Skip topic based on ENV
-    if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
-      console.log(
-        `Topics: ⏩ Skipping "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
-      )
+    if (await willSkipTopic(topic, fileChanged, skipContext)) {
+      if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
+        console.log(
+          `Topics: ⏩ Skipping "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
+        )
+      } else {
+        console.log(
+          `Topics: ⏩ Skipping "${topic}".`,
+          "The code hasn't changed and `SKIP_UNCHANGED` is active.",
+        )
+      }
       continue
     }
     // In dev mode with PROCESS_ONLY_BBOX we already applied a global bbox filter in index.ts.
