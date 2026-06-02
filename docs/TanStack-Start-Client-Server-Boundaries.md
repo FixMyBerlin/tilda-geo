@@ -50,7 +50,7 @@ Route files must always import and call server Fns in `loader`/`beforeLoad`; the
 ## Routes: When to use `beforeLoad` vs `loader`
 
 - **`beforeLoad`:** Redirects (URL normalization, auth redirect), auth/authorization, and returning context for the route (e.g. `isAuthorized`, `region`). No heavy data fetch.
-- **`loader`:** Main page data. Can use `context` from `beforeLoad`. Return a serializable object for `routeApi.useLoaderData()` or use `context.queryClient.ensureQueryData(queryOptions())` when the same data should live in React Query for refetch/cache (see `@tanstack/react-router-ssr-query`).
+- **`loader`:** Page data and cache priming. Can use `context` from `beforeLoad`. For React Query–backed data, see [TanStack-Router-And-Query.md](TanStack-Router-And-Query.md); otherwise return serializable data for `useLoaderData()` (e.g. admin pages).
 
 We prefer `beforeLoad` over using a middleware for the use cases described above.
 
@@ -65,21 +65,9 @@ There are two separate concepts:
 
 Our default is explicit `ssr: true` unless a route needs a more restrictive mode. For project conventions and current route decisions, see [TanStack-Start-Selective-SSR.md](TanStack-Start-Selective-SSR.md).
 
-## When to use `useLoaderData` vs `useQuery(serverFn)`
+## Router + React Query
 
-- **`routeApi.useLoaderData()`:** Data from the route’s loader. One-shot per navigation, SSR’d, no built-in refetch. Use for the main page payload (e.g. [PageRegionSlug.tsx](../app/src/components/regionen/PageRegionSlug.tsx)).
-- **`useQuery(fooFn())`:** Client-driven refetch, or data that is not the main page payload (e.g. uploads list, QA configs). Example: [useRegionDataQueries.ts](../app/src/components/regionen/pageRegionSlug/hooks/useRegionDataQueries.ts).
-
-**Loading, error, and defaults:**
-
-- **`useLoaderData`:** Loading is handled at the **route** level (`pendingComponent`); errors at the route’s `errorComponent`. The hook returns the loader value only; there is no `isPending`/`isError`. No built-in placeholder or default.
-- **`useQuery`:** Exposes `isPending`, `isError`, `error`, `data`; the component can show per-query loading/error UI and use `placeholderData` / `initialData`.
-
-**Preload `useQuery` with SSR:**
-
-When you need SSR and React Query cache/refetch for route data: use `ensureQueryData(queryOptions())` in the loader and `useQuery(same queryOptions())` in the component; the SSR Query integration ([router.tsx](../app/src/router.tsx)) handles dehydration, hydration, and streaming.
-
-**Example:** [regionen/index.tsx](../app/src/routes/regionen/index.tsx) (loader) and [PageIndex.tsx](../app/src/components/regionen/PageIndex.tsx) (component) both use [regionenIndexQueryOptions](../app/src/server/regionen/regionenIndexQueryOptions.ts). The region page [regionen/$regionSlug.tsx](../app/src/routes/regionen/$regionSlug.tsx) preloads internal notes (when the region has atlas notes and the user is authorized), QA configs, and QA map data when the `qa` URL param is set; components use [internalNotesQueryOptions](../app/src/server/regionen/regionQueryOptions.ts), [regionQaConfigsQueryOptions](../app/src/server/regionen/regionQueryOptions.ts), and [qaDataForMapQueryOptions](../app/src/server/regionen/regionQueryOptions.ts) via `useQuery`.
+See **[TanStack-Router-And-Query.md](TanStack-Router-And-Query.md)** for loader vs `useLoaderData` vs `useQuery` / `useSuspenseQuery`, shared `*QueryOptions`, and SSR. This file covers server/client boundaries only.
 
 ## Error handling
 

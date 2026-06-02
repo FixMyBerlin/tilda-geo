@@ -44,7 +44,7 @@ Route files define the `Route` (config, `beforeLoad`, `loader`, `head`, `compone
 
 **Per-domain layout** (e.g. [app/src/server/notes/](../app/src/server/notes/)): we use **queries/** and **mutations/** subfolders with `.server.ts` files, plus optional `schemas.ts` and `<domain>.functions.ts` that re-export or compose server functions. Example: `notes` has [queries/getNotesAndCommentsForRegion.server.ts](../app/src/server/notes/queries/getNotesAndCommentsForRegion.server.ts), [mutations/createNote.server.ts](../app/src/server/notes/mutations/createNote.server.ts), and [notes.functions.ts](../app/src/server/notes/notes.functions.ts).
 
-For loader vs server Fn, beforeLoad, error handling, and query options, see [TanStack-Start-Client-Server-Boundaries.md](TanStack-Start-Client-Server-Boundaries.md).
+For server/client boundaries and loaders, see [TanStack-Start-Client-Server-Boundaries.md](TanStack-Start-Client-Server-Boundaries.md). For React Query + loaders, see [TanStack-Router-And-Query.md](TanStack-Router-And-Query.md).
 
 ## 7. SSR and client boundaries (TanStack Start)
 
@@ -76,6 +76,7 @@ For loader vs server Fn, beforeLoad, error handling, and query options, see [Tan
 
 | Topic                                              | Doc                                                                                                     |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Router loaders + React Query                       | [TanStack-Router-And-Query.md](TanStack-Router-And-Query.md)                                            |
 | Server/client boundaries, .server, loaders, errors | [TanStack-Start-Client-Server-Boundaries.md](TanStack-Start-Client-Server-Boundaries.md)                |
 | Auth and route protection                          | [TanStack-Start-Auth.md](TanStack-Start-Auth.md)                                                        |
 | Zustand patterns                                   | [.cursor/skills/zustand-state-management/SKILL.md](../.cursor/skills/zustand-state-management/SKILL.md) |
