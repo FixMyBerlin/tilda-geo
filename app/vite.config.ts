@@ -33,7 +33,24 @@ export default defineConfig({
         sourcemap: true,
       },
       optimizeDeps: {
-        include: ['better-auth/react', 'better-auth/client/plugins'],
+        // Top-level entries plus transitive imports discovered on first paint (header User →
+        // currentUser server fn + auth client). Missing entries trigger a late optimize pass,
+        // full reload, and aborted in-flight server-fn requests (500: reading 'method' of undefined).
+        include: [
+          'better-auth/react',
+          'better-auth/client/plugins',
+          '@better-auth/core/env',
+          '@better-auth/core/error',
+          '@better-auth/core/utils/error-codes',
+          '@better-auth/core/utils/string',
+          '@better-fetch/fetch',
+          '@tanstack/router-core',
+          '@tanstack/router-core/isServer',
+          '@tanstack/router-core/ssr/client',
+          'defu',
+          'nanostores',
+          'seroval',
+        ],
         holdUntilCrawlEnd: true,
         ignoreOutdatedRequests: true,
       },
@@ -45,6 +62,13 @@ export default defineConfig({
     },
   },
   server: {
+    // Pre-transform shell modules that pull server-fn + auth graphs before the browser requests them.
+    warmup: {
+      clientFiles: [
+        './src/components/shared/layouts/Header/User/User.tsx',
+        './src/components/shared/auth/auth-client.ts',
+      ],
+    },
     // Keep HMR pinned to the same host/port as `bun run dev` so websocket reconnects
     // stay stable after config-triggered restarts.
     hmr: {
