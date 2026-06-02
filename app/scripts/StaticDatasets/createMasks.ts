@@ -96,7 +96,7 @@ export const data: MetaData = maskMeta({
     const featureCollectionData = featureCollection([regionFeature])
 
     // Save raw geojson file (transformation will happen via transform.ts during static dataset processing)
-    // Formatting is handled by the bun script chain (regions:masks:2format)
+    // Geojson formatting: format-on-save; regions:masks:2format runs bun run format (StaticDatasets code only)
     await Bun.write(geojsonFilename, JSON.stringify(featureCollectionData, null, 2))
     console.info(styleText('green', `✓ Updated ${geojsonFilename}`))
   } else {

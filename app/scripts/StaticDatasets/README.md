@@ -51,6 +51,12 @@ Use `--keep-tmp` to keep the files for debugging.
   ```
 - The files are uncompressed and stored in the temp folder, then transformed, then processed (tippacanoe)
 
+### Formatting
+
+- `bun run format` (Husky, `check`) runs `format:static-datasets-code` — TypeScript and docs under `scripts/StaticDatasets`, not `geojson/` or `*.geojson` / `*.json` data files.
+- GeoJSON and dataset `meta.ts` under `geojson/`: use editor format-on-save (oxfmt).
+- Agents adding datasets: `bun run format-static-datasets-geojson -- scripts/StaticDatasets/geojson/<group>/<dataset>/*.{geojson,json}` (see [add-static-dataset skill](../../../.cursor/skills/add-static-dataset/SKILL.md)).
+
 ## Delete existing database entries
 
 The script will **not remove existing database configs** if the dataset folder was rename or removed.

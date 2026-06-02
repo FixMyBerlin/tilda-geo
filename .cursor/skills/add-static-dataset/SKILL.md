@@ -75,16 +75,10 @@ Upload runs `validateProjection` again on WGS84 bounds.
 
 #### 2.4 Format (oxfmt)
 
-From `app/`:
+From `app/` (skill / agents only — devs use format-on-save in the editor):
 
 ```bash
-bun run format:StaticDatasets
-```
-
-Or only this dataset’s data files:
-
-```bash
-NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write \
+bun run format-static-datasets-geojson -- \
   scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/*.{json,geojson}
 ```
 
@@ -224,7 +218,7 @@ Before completing:
 
 1. ✅ Folder structure created
 2. ✅ GeoJSON prepared (**Step 2.1–2.5**: moved, EPSG:4326, ≤8 decimals, oxfmt, gzip if >6 MiB)
-3. ✅ `transform.ts` only if needed — **never** for CRS (Step 2); `meta.ts` / `transform.ts` formatted with `bun run format`
+3. ✅ `transform.ts` only if needed — **never** for CRS (Step 2); `meta.ts` / `transform.ts` via format-on-save or `format-static-datasets-geojson`
 4. ✅ meta.ts follows type structure (check with TypeScript)
 5. ✅ Similar datasets in group folder reviewed for patterns
 6. ✅ Command verified and provided as one-click action
