@@ -26,7 +26,7 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
   const { osmType, osmId } = extractOsmTypeIdByConfig(properties, osmIdConfig)
 
   const region = useStaticRegion()
-  if (!region || region.notes !== 'osmNotes') return null
+  if (region?.notes !== 'osmNotes') return null
 
   if (!mainMap || !properties || !geometry || !osmType || !osmId) return null
 
