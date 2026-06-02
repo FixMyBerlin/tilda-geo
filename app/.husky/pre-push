@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 set -e
 
+. "$(dirname -- "$0")/ensure-bun.sh"
+
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT/app"
 
