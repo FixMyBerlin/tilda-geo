@@ -35,6 +35,7 @@ async function main() {
     const globalBboxFilterResponse = await globalBboxFilter(fileName, fileChanged)
     if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
 
+    logPadded('Processing: Pseudo Tags', berlinTimeString(new Date()))
     // Start timing for the actual data processing (matches old behavior)
     const processingStartTime = Date.now()
     // Export sidepath CSV from current DB (yesterday's data) before processTopics overwrites it
