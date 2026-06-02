@@ -36,9 +36,9 @@ export const Pill = ({
   return (
     <span
       className={twMerge(
-        className,
-        inverted ? invertedColors[color] : colors[color],
         'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset',
+        inverted ? invertedColors[color] : colors[color],
+        className,
       )}
     >
       {children}

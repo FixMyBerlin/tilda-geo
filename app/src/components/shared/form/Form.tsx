@@ -12,7 +12,7 @@ import { buttonStyles } from '@/components/shared/links/styles'
 import { isProd } from '@/components/shared/utils/isEnv'
 
 export type SubmitResult<T = Record<string, unknown>> =
-  | { success: true; message?: string; redirect?: string }
+  | { success: true; message?: string; redirect?: string; search?: Record<string, unknown> }
   | {
       success: false
       message: string
@@ -98,7 +98,10 @@ export function Form<T extends z.ZodTypeAny>({
         form.reset(value)
         setSubmitMessage({ type: 'success', text: result.message ?? 'Gespeichert.' })
         if (result.redirect) {
-          navigate({ to: result.redirect })
+          navigate({
+            to: result.redirect,
+            search: result.search,
+          })
         }
         return
       }
