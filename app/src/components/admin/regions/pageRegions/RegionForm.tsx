@@ -1,3 +1,7 @@
+import {
+  regionPromotedFormRadioItems,
+  regionStatusFormRadioItems,
+} from '@/components/regionen/regionMeta/regionFormRadioItems'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { Form } from '@/components/shared/form/Form'
 import { Link } from '@/components/shared/links/Link'
@@ -71,24 +75,12 @@ export function RegionForm(props: Props) {
               }
             />
           )}
-          <RadioGroup
-            form={form}
-            name="status"
-            label="Status"
-            items={[
-              { value: 'PUBLIC', label: 'Öffentlich (Jeder kann ansehen)' },
-              { value: 'PRIVATE', label: 'Privat (Nur Mitglieder)' },
-              { value: 'DEACTIVATED', label: 'Deaktiviert (Nur Admins)' },
-            ]}
-          />
+          <RadioGroup form={form} name="status" label="Status" items={regionStatusFormRadioItems} />
           <RadioGroup
             form={form}
             name="promoted"
             label="Gelistet"
-            items={[
-              { value: 'true', label: 'Auf /regions Seite gelistet' },
-              { value: 'false', label: 'Nicht gelistet / Nur über Deeplink erreichbar' },
-            ]}
+            items={regionPromotedFormRadioItems}
           />
         </>
       )}

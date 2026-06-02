@@ -1,5 +1,6 @@
 import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { Link } from '@tanstack/react-router'
+import { RegionMetaPills } from '@/components/regionen/regionMeta/RegionMetaPills'
 import { Img } from '@/components/shared/Img'
 import type { TRegion } from '@/server/regions/queries/getRegion.server'
 
@@ -14,6 +15,11 @@ export const RegionTeaser = ({ region }: Props) => {
         key={region.slug}
         className="group relative border-r border-b border-gray-200 px-4 pt-4 hover:bg-yellow-50 sm:px-6 sm:pt-6"
       >
+        <RegionMetaPills
+          region={region}
+          className="absolute top-3 right-3 z-10 max-w-[calc(100%-1.5rem)] justify-end sm:top-4 sm:right-4"
+          pillClassName="shadow-sm"
+        />
         <div className="aspect-auto h-20 overflow-hidden rounded-lg border border-gray-200 bg-white group-hover:opacity-75">
           <span className="flex h-full w-full items-center justify-center object-cover object-center py-2">
             {customLogo && region.externalLogoPath && (

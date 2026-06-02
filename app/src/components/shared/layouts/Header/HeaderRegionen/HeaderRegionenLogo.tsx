@@ -2,8 +2,8 @@ import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline
 import { getRouteApi } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
 import { Img } from '@/components/shared/Img'
-import { Pill } from '@/components/shared/text/Pill'
 import { productName } from '@/data/tildaProductNames.const'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
@@ -16,7 +16,6 @@ export const HeaderRegionenLogo = () => {
 
   const isPrivate = region.status === 'PRIVATE'
   const isDeactivated = region.status === 'DEACTIVATED'
-
   const customLogo = staticRegion.logoPath || staticRegion.externalLogoPath
 
   return (
@@ -43,7 +42,7 @@ export const HeaderRegionenLogo = () => {
         </>
       )}
 
-      <div className="ml-3 truncate leading-tight">
+      <div className="ml-3 min-w-0 leading-tight">
         <div
           className={twJoin(
             'flex items-center gap-1 truncate',
@@ -56,9 +55,7 @@ export const HeaderRegionenLogo = () => {
           <span className="md:hidden">{staticRegion.name}</span>
           <span className="hidden md:inline">{staticRegion.fullName}</span>
           {isDeactivated && (
-            <Pill color="red" className="text-[9px] tracking-wide uppercase">
-              Deaktiviert
-            </Pill>
+            <RegionStatusPill status="DEACTIVATED" className="shrink-0 px-1.5 py-0.5" />
           )}
         </div>
         <div className="text-xs text-gray-400">{productName.get(staticRegion.product)}</div>
