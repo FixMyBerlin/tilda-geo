@@ -12,6 +12,7 @@ import {
 import { useOptionalRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
+import { envKey } from '@/components/shared/utils/isEnv'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
 import { getAdminInfoEnvUrl } from './utils/getAdminInfoEnvUrl'
@@ -37,9 +38,10 @@ export const UserLoggedInAdminInfo = ({ user }: Props) => {
     mapParam && googleMapsUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
   const tildaViewerUrlHref = mapParam && tildaInsectorUrl(mapParam.zoom, mapParam.lat, mapParam.lng)
 
-  const devUrl = hydrated ? getAdminInfoEnvUrl('development') : undefined
-  const stagingUrl = hydrated ? getAdminInfoEnvUrl('staging') : undefined
-  const prodUrl = hydrated ? getAdminInfoEnvUrl('production') : undefined
+  const devUrl =
+    hydrated && envKey !== 'development' ? getAdminInfoEnvUrl('development') : undefined
+  const stagingUrl = hydrated && envKey !== 'staging' ? getAdminInfoEnvUrl('staging') : undefined
+  const prodUrl = hydrated && envKey !== 'production' ? getAdminInfoEnvUrl('production') : undefined
 
   // CSV export URL for region uploads (static datasets)
   const regionCsvUrl = regionSlug ? `/api/regions/${regionSlug}/uploads.csv` : null
@@ -75,27 +77,27 @@ export const UserLoggedInAdminInfo = ({ user }: Props) => {
             </button>
           </li>
         )}
-        <li>
-          {devUrl && (
+        {devUrl ? (
+          <li>
             <Link blank href={devUrl}>
               Open DEV
             </Link>
-          )}
-        </li>
-        <li>
-          {stagingUrl && (
+          </li>
+        ) : null}
+        {stagingUrl ? (
+          <li>
             <Link blank href={stagingUrl}>
               Open Staging
             </Link>
-          )}
-        </li>
-        <li>
-          {prodUrl && (
+          </li>
+        ) : null}
+        {prodUrl ? (
+          <li>
             <Link blank href={prodUrl}>
               Open Production
             </Link>
-          )}
-        </li>
+          </li>
+        ) : null}
         <li>
           {tildaViewerUrlHref && (
             <Link blank href={tildaViewerUrlHref}>
