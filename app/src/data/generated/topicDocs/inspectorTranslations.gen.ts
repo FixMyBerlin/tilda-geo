@@ -28,7 +28,7 @@ const data = {
   'atlas_barriers--railway=rail': 'Bahnstrecke',
   'atlas_barriers--railway=subway': 'U-Bahn',
   'atlas_barriers--railway=tram': 'Straßenbahn',
-  'atlas_barriers--title': 'Daten zu Linien-Barrieren',
+  'atlas_barriers--title': 'Daten zu Flächen-Barrieren',
   'atlas_barriers--tunnel--key': 'Tunnel',
   'atlas_barriers--tunnel=avalanche_protector': 'Lawinenschutzgalerie',
   'atlas_barriers--tunnel=building_passage': 'Gebäudedurchfahrt',
