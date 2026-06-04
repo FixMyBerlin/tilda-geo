@@ -25,7 +25,7 @@ export const SearchControlClient = ({ position }: SearchControlClientProps) => {
 
   return (
     <style
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: static CSS for geocoder control
+      // oxlint-disable-next-line react/no-danger -- static CSS for geocoder control
       dangerouslySetInnerHTML={{
         __html: '.maplibregl-ctrl-geocoder .input-group { border: 1px solid rgb(212 212 216) }',
       }}

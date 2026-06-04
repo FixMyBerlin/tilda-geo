@@ -59,7 +59,7 @@ export const convertToUrlFeature = (feature: MapGeoJSONFeature) => {
     feature.geometry.type === 'Point' ? feature.geometry.coordinates : bbox(feature.geometry)
   ).map((v) => Number(v.toFixed(6)))
   return {
-    // biome-ignore lint/style/noNonNullAssertion: All our sources promote a feature id
+    // oxlint-disable-next-line typescript/no-non-null-assertion -- All our sources promote a feature id
     id: feature.id!,
     sourceId,
     coordinates: coords,

@@ -17,7 +17,7 @@ services:
       - ./processing:/processing
       - /processing/node_modules
       # oxfmt config: must not mount under /processing (nested bind breaks Docker Desktop virtiofs)
-      - ./app/oxfmt.config.ts:/mnt/oxfmt.config.ts:ro
+      - ./app/oxfmt.config.mjs:/mnt/oxfmt.config.mjs:ro
     # INFO: The overwrite of `journald` is needed for mac systems which did not work with `journald`
     logging:
       driver: json-file

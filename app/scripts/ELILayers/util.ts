@@ -1,6 +1,6 @@
 import { styleText } from 'node:util'
 
-// biome-ignore lint/suspicious/noExplicitAny: OK
+// oxlint-disable-next-line typescript/no-explicit-any -- OK
 export const log = (title: string | object, object: any = '-') => {
   console.log(styleText(['inverse', 'bold'], ` ${title}${object === '-' ? '' : ':'} `), object)
 }

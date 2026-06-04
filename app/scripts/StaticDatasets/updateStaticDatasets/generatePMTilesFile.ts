@@ -22,6 +22,8 @@ export const generatePMTilesFile = (
         //    https://tilda-geo.de/regionen/parkraum-berlin?map=18.9%2F52.47209%2F13.42965&config=1r6doko.4qfsxw.0&data=berlin-parking-polygons-euvm-phase2%2Cberlin-parking-polygons-euvm&v=2
         //    vs. https://viz.berlin.de/site/_masterportal/parkraumkartierung/index.html?MAPS={%22center%22:[393328.29599940975,5814690.745182172],%22mode%22:%222D%22,%22zoom%22:13}&MENU={%22main%22:{%22currentComponent%22:%22root%22},%22secondary%22:{%22currentComponent%22:%22root%22}}&LAYERS=[{%22id%22:%22basemap_raster_grau%22,%22visibility%22:true,%22transparency%22:40},{%22id%22:%22parkraumdaten_aussen%22,%22visibility%22:true},{%22id%22:%22parkraumdaten%22,%22visibility%22:true},{%22id%22:%22bezirke%22,%22visibility%22:true},{%22id%22:%22parkraumdaten_parkraumbewirtschaftung%22,%22visibility%22:false},{%22id%22:%22parkraumdaten_umweltzone%22,%22visibility%22:true}]&MAINCLOSED=true&lng=de
         return 15
+      case null:
+      case undefined:
       default:
         return 14
     }

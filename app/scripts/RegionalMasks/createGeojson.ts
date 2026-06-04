@@ -70,7 +70,7 @@ const downloadGeoJson = async (idsString: string) => {
     const data = await response.json()
     const geoJson = geojsonGeometrySchema.parse(data)
     return geoJson
-  } catch (_error) {
+  } catch {
     handleError([
       'ERROR: Download failed for',
       url.href,

@@ -8,7 +8,7 @@ export async function registerSQLFunctions() {
       pluginOk('[generalization]', 'Generalization functions registered'),
     )
 
-    await Promise.all([generalizationFunctionPromise])
+    await generalizationFunctionPromise
   } catch (error) {
     console.error(styleText('red', 'INSTRUMENTATION HOOK FAILED'), 'registerSQLFunctions', error)
   }

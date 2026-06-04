@@ -6,7 +6,6 @@
     "vitest.explorer",
     "sumneko.lua",
     "ReneSaarsoo.sql-formatter-vsc",
-    "biomejs.biome",
     "oxc.oxc-vscode",
     "redhat.vscode-yaml"
   ],

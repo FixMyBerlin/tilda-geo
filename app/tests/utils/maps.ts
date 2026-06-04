@@ -3,14 +3,14 @@ import type { Page } from '@playwright/test'
 export async function waitForMapLoad(page: Page, timeout = 30000) {
   const mapLoadedPromise = page.evaluate((timeoutMs) => {
     return new Promise<void>((resolve) => {
-      // biome-ignore lint/suspicious/noExplicitAny: Just for tests…
+      // oxlint-disable-next-line typescript/no-explicit-any -- Just for tests…
       if ((window as any).__mapLoaded) {
         resolve()
         return
       }
 
       const handler = () => {
-        // biome-ignore lint/suspicious/noExplicitAny: Just for tests…
+        // oxlint-disable-next-line typescript/no-explicit-any -- Just for tests…
         ;(window as any).__mapLoaded = true
         resolve()
       }

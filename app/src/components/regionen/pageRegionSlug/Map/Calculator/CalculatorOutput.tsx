@@ -85,8 +85,7 @@ export const CalculatorOutput = ({
   }, [calculatorAreasWithFeatures, groupByKeys, selectedMetric])
 
   const showViewportWarning = useMemo(
-    () =>
-      drawAreas.length > 0 && drawAreas.some((area) => !isDrawAreaFullyInViewport(area, mapBounds)),
+    () => drawAreas.some((area) => !isDrawAreaFullyInViewport(area, mapBounds)),
     [drawAreas, mapBounds],
   )
 

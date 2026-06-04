@@ -17,7 +17,7 @@ import { inputRoot, outputRoot } from './paths'
 import type { CompiledTopicDoc, InspectorDescriptions } from './types'
 
 const sortStringRecordByKey = (map: Record<string, string>) =>
-  Object.fromEntries([...Object.entries(map)].sort(([a], [b]) => a.localeCompare(b, 'en')))
+  Object.fromEntries(Object.entries(map).sort(([a], [b]) => a.localeCompare(b, 'en')))
 
 const writeTsModule = async ({
   filePath,

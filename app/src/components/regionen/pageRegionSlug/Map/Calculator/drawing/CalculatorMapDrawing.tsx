@@ -44,7 +44,8 @@ const getLabelPointForGeometry = (geometry: GeoJSON.Geometry) => {
       const feature = pointOnFeature(turfMultiLineString(geometry.coordinates))
       return feature.geometry.coordinates
     }
-    default:
+    case 'GeometryCollection':
+    case 'MultiPoint':
       return null
   }
 }

@@ -66,7 +66,7 @@ export function buildAtlasLayerProps({
   const debugStyle = debugLayerStyles ? getDebugStyleForLayerType(layer.type) : undefined
   const layout = debugStyle
     ? { ...debugStyle.layout, ...visibility }
-    : { ...visibility, ...(layer.layout ?? {}) }
+    : { ...visibility, ...layer.layout }
   const paint = debugStyle ? debugStyle.paint : layer.paint
 
   switch (layer.type) {

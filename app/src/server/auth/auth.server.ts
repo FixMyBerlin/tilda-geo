@@ -65,9 +65,9 @@ const options = {
       config: [
         {
           providerId: 'osm',
-          // biome-ignore lint/style/noNonNullAssertion: Guarded by nitro plugin
+          // oxlint-disable-next-line typescript/no-non-null-assertion -- Guarded by nitro plugin
           clientId: process.env.OSM_CLIENT_ID!,
-          // biome-ignore lint/style/noNonNullAssertion: Guarded by nitro plugin
+          // oxlint-disable-next-line typescript/no-non-null-assertion -- Guarded by nitro plugin
           clientSecret: process.env.OSM_CLIENT_SECRET!,
           // OSM discovery endpoint occasionally responds with 429 in local/dev.
           // Set explicit endpoints so OAuth sign-in does not depend on live discovery.

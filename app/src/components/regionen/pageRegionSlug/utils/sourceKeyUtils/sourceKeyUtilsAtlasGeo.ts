@@ -24,7 +24,7 @@ function parseKey(key: string, shortToLong: Record<string, string>) {
   return Object.fromEntries(
     key.split(delimiter).map((s) => {
       const [shortKey, value] = s.split(':')
-      // biome-ignore lint/style/noNonNullAssertion: This sometimes fail but the app deals with it
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- This sometimes fail but the app deals with it
       const longKey = shortToLong[shortKey!]
       return [longKey, value]
     }),

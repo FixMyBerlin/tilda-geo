@@ -43,7 +43,7 @@ export const DownloadModalDownloadList = () => {
                   <th className="w-24 align-top text-xs font-medium text-gray-900">Attribution:</th>
                   <td
                     className="pl-2"
-                    // biome-ignore lint/security/noDangerouslySetInnerHtml: attribution HTML from dataset config
+                    // oxlint-disable-next-line react/no-danger -- attribution HTML from dataset config
                     dangerouslySetInnerHTML={{
                       __html:
                         exportData.attributionHtml !== 'todo' ? exportData.attributionHtml : '',
@@ -116,7 +116,7 @@ const VectorTileUrlsSection = () => {
     try {
       const sourceData = getSourceData(sourceId as SourcesId)
       sourceMap.set(sourceId, sourceData)
-    } catch (_error) {
+    } catch {
       // Skip sources that don't exist (e.g., mapillary sources, static datasets)
       // These are not in sources.const but may be referenced in categories
     }

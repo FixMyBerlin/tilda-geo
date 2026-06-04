@@ -12,7 +12,7 @@ export const LegendNameDesc = ({ name, desc }: Props) => {
         <details className="marker:text-gray-300 hover:marker:text-gray-700">
           <summary
             className="cursor-pointer text-sm"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: legend name from layer config
+            // oxlint-disable-next-line react/no-danger -- legend name from layer config
             dangerouslySetInnerHTML={{ __html: name }}
           />
           <ul className="ml-1 border-l border-gray-300 pl-1.5 font-normal">
@@ -36,7 +36,7 @@ export const LegendNameDesc = ({ name, desc }: Props) => {
   return (
     <div
       className={wrapperClass}
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: legend name from layer config
+      // oxlint-disable-next-line react/no-danger -- legend name from layer config
       dangerouslySetInnerHTML={{ __html: name }}
     />
   )

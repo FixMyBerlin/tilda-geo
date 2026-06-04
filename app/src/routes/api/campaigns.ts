@@ -80,7 +80,7 @@ export const Route = createFileRoute('/api/campaigns')({
           )
           try {
             countMap = await getCampaignCounts(campaigns.map((c) => c.id))
-          } catch (_error) {
+          } catch {
             // Fallback: Return zero values when table doesn't exist
             // This happens during nightly processing when the todos_lines table is recreated.
             // Instead of breaking the endpoint, we return zero counts so the API remains available.

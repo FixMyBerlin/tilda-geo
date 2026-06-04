@@ -32,12 +32,12 @@ export const NavigationDesktopMenu = ({ menuItems, logo }: Props) => {
           >
             {menuItems.map((group, i) => {
               return (
-                // biome-ignore lint/suspicious/noArrayIndexKey: OK here
+                // oxlint-disable-next-line react/no-array-index-key -- OK here
                 <div className="p-1" key={i}>
                   {group.map((item, gi) => {
                     const current = pathname === item.to
                     return (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: OK here
+                      // oxlint-disable-next-line react/no-array-index-key -- OK here
                       <MenuItem key={gi}>
                         {({ focus }) => (
                           <Link

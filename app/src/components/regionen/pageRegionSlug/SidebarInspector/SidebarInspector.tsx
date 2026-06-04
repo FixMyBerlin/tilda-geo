@@ -80,7 +80,7 @@ export const SidebarInspector = () => {
           <InspectorHeader count={features.length} handleClose={handleClose} />
           <Inspector features={features} />
           <style
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: static CSS for map controls
+            // oxlint-disable-next-line react/no-danger -- static CSS for map controls
             dangerouslySetInnerHTML={{
               __html:
                 '.maplibregl-ctrl-top-right { right: 35rem } [data-map-controls="true"] { right: calc(35rem + 10px) }',

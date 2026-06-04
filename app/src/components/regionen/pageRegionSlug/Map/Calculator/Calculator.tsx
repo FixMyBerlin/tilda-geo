@@ -41,7 +41,7 @@ export const Calculator = () => {
   return (
     <>
       <style
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: static CSS for map control position
+        // oxlint-disable-next-line react/no-danger -- static CSS for map control position
         dangerouslySetInnerHTML={{
           __html: '.maplibregl-ctrl-top-left { left: 270px; }',
         }}

@@ -82,7 +82,7 @@ export const UserFormOsmDescriptionMissing = () => {
     try {
       await navigator.clipboard.writeText(textToCopy)
       setCopySuccess('✔︎')
-    } catch (_error) {
+    } catch {
       setCopySuccess('❌ Kopieren fehlgeschlagen')
     }
   }

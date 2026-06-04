@@ -56,7 +56,7 @@ export const InspectorFeatureOsmNote = ({ feature }: Props) => {
             </div>
 
             <div
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized with DOMPurify
+              // oxlint-disable-next-line react/no-danger -- sanitized with DOMPurify
               dangerouslySetInnerHTML={{ __html: dompurify.sanitize(comment.html) }}
               className={twJoin(
                 proseClasses,

@@ -182,7 +182,7 @@ function buildResponse(
     if (range) {
       const rangeMatch = range.match(/bytes=(\d+)-(\d*)/)
       if (rangeMatch) {
-        // biome-ignore lint/style/noNonNullAssertion: first capture group (\d+) always matches when rangeMatch is truthy
+        // oxlint-disable-next-line typescript/no-non-null-assertion -- first capture group (\d+) always matches when rangeMatch is truthy
         const start = parseInt(rangeMatch[1]!, 10)
         const end = rangeMatch[2] ? parseInt(rangeMatch[2], 10) : fileBuffer.length - 1
         const bodyArray = new Uint8Array(fileBuffer)

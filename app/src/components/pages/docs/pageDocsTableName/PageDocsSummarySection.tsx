@@ -29,7 +29,7 @@ export const PageDocsSummarySection = ({
               <div className="not-prose flex items-center gap-2">
                 <div
                   className="min-w-0 flex-1 text-sm text-gray-500 [&_a]:underline"
-                  // biome-ignore lint/security/noDangerouslySetInnerHtml: static OSM/TILDA attribution HTML
+                  // oxlint-disable-next-line react/no-danger -- static OSM/TILDA attribution HTML
                   dangerouslySetInnerHTML={{ __html: TILDA_DATASET_ATTRIBUTION_HTML }}
                 />
                 <div className="shrink-0 print:hidden">

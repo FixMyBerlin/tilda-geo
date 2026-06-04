@@ -48,17 +48,17 @@ const useBits = 31 // unsigned
 
 export function encodeBits(booleans: boolean[]) {
   const numIntegers = Math.ceil(booleans.length / useBits)
-  const integers = new Array(numIntegers)
+  const integers = Array.from({ length: numIntegers }, () => 0)
   for (let b = 0; b < booleans.length; b++) {
     const i = Math.floor(b / useBits)
     const bit = b % useBits
-    integers[i] = integers[i] | (Number(booleans[b]) << bit)
+    integers[i] = (integers[i] ?? 0) | (Number(booleans[b]) << bit)
   }
   return integers
 }
 
 export function decodeBits(integers: number[]) {
-  const booleans: boolean[] = new Array(integers.length * useBits)
+  const booleans: boolean[] = Array.from({ length: integers.length * useBits }, () => false)
   for (let i = 0; i < integers.length; i++) {
     let int = integers[i] ?? 0
     for (let bit = 0; bit < useBits; bit++) {

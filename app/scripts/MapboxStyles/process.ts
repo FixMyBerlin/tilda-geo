@@ -79,7 +79,7 @@ type LooseStyleLayer = Record<string, unknown> & {
 type GroupsLayer = { folderName: string; layers: LooseStyleLayer[] }
 const groupsAndLayers: Record<string, GroupsLayer[]> = Object.fromEntries(keys.map((k) => [k, []]))
 
-// biome-ignore lint/suspicious/noExplicitAny: OK
+// oxlint-disable-next-line typescript/no-explicit-any -- OK
 const metaFileContent: Record<string, any> = Object.fromEntries(keys.map((k) => [k, undefined]))
 
 for (const { key, apiUrl, mapboxGroupPrefix } of apiConfigs) {

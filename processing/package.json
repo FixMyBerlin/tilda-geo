@@ -4,12 +4,13 @@
   "module": "index.ts",
   "scripts": {
     "test": "bun ./scripts/run-tests.ts",
-    "lint": "biome lint --write .",
-    "format": "NODE_OPTIONS='--disable-warning=ExperimentalWarning' oxfmt --write -c ../app/oxfmt.config.ts .",
+    "lint": "oxlint --fix .",
+    "lint:check": "oxlint .",
+    "format": "oxfmt --write -c ../app/oxfmt.config.mjs .",
     "check": "bun --parallel check:type check:format check:lint",
     "check:type": "bun run typecheck",
-    "check:format": "bun run format",
-    "check:lint": "biome check --write .",
+    "check:format": "oxfmt --check -c ../app/oxfmt.config.mjs .",
+    "check:lint": "bun run lint:check",
     "typecheck": "bun ./scripts/run-typecheck-lua.ts"
   },
   "dependencies": {
@@ -20,9 +21,9 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.4",
     "@types/bun": "^1.3.6",
-    "oxfmt": "^0.52.0"
+    "oxfmt": "^0.52.0",
+    "oxlint": "^1.66.0"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"

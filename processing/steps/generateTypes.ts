@@ -107,8 +107,8 @@ async function writeTodoIdTypes() {
   const todos = [...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id).sort(sortMapillarySpecial)
 
   const formatStringArray = (values: string[]) => {
-    if (values.length === 0) return '\n  // (biome: one line per entry)\n'
-    return `\n  ${values.map((name) => `'${name}'`).join(',\n  ')}\n  // (biome: one line per entry)\n`
+    if (values.length === 0) return '\n  // (oxlint: one line per entry)\n'
+    return `\n  ${values.map((name) => `'${name}'`).join(',\n  ')}\n  // (oxlint: one line per entry)\n`
   }
 
   const fileContent = `
@@ -148,13 +148,13 @@ ${content}
 }
 
 function resolveOxfmtConfigPath() {
-  if (existsSync('/mnt/oxfmt.config.ts')) return '/mnt/oxfmt.config.ts'
-  const besideProcessing = fileURLToPath(new URL('../oxfmt.config.ts', import.meta.url))
+  if (existsSync('/mnt/oxfmt.config.mjs')) return '/mnt/oxfmt.config.mjs'
+  const besideProcessing = fileURLToPath(new URL('../oxfmt.config.mjs', import.meta.url))
   if (existsSync(besideProcessing)) return besideProcessing
-  const repoApp = fileURLToPath(new URL('../../app/oxfmt.config.ts', import.meta.url))
+  const repoApp = fileURLToPath(new URL('../../app/oxfmt.config.mjs', import.meta.url))
   if (existsSync(repoApp)) return repoApp
   throw new Error(
-    'oxfmt.config.ts not found (expected /mnt/oxfmt.config.ts, processing/oxfmt.config.ts, or app/oxfmt.config.ts)',
+    'oxfmt.config.mjs not found (expected /mnt/oxfmt.config.mjs, processing/oxfmt.config.mjs, or app/oxfmt.config.mjs)',
   )
 }
 
