@@ -48,6 +48,7 @@ import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersSta
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
+import { MAPTILER_API_KEY } from './utils/maptilerApiKey.const'
 import { safeSetFeatureState } from './utils/safeSetFeatureState'
 import { useInteractiveLayers } from './utils/useInteractiveLayers'
 
@@ -191,16 +192,55 @@ export const RegionMap = () => {
   }
 
   const handleLoad = (event: MapLibreEvent) => {
-    // We disable rotation once after map startup to keep interactions consistent.
-    event.target.touchZoomRotate.disableRotation()
+    const map = event.target
 
-    // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
+    // We disable rotation once after map startup to keep interactions consistent.
+    map.touchZoomRotate.disableRotation()
+
+    map.addSource('maptiler-terrain', {
+      type: 'raster-dem',
+      url: `https://api.maptiler.com/tiles/terrain-dem/tiles.json?key=${MAPTILER_API_KEY}`,
+      tileSize: 256,
+    })
+    map.setTerrain({ source: 'maptiler-terrain', exaggeration: 1.5 })
+
+    map.addLayer({
+      id: '3d-buildings',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      type: 'fill-extrusion',
+      minzoom: 15,
+      paint: {
+        'fill-extrusion-color': '#d1d5db',
+        'fill-extrusion-height': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15,
+          0,
+          15.05,
+          ['get', 'render_height'],
+        ],
+        'fill-extrusion-base': [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          15,
+          0,
+          15.05,
+          ['get', 'render_min_height'],
+        ],
+        'fill-extrusion-opacity': 0.6,
+      },
+    })
+
     markMapLoaded()
     updateMapBounds(event.target.getBounds())
 
     exposeMainMapForDebugging(event.target)
     firePlaywrightMapLoadedEvent()
   }
+
 
   useEffect(
     function subscribeToMissingStyleImages() {
@@ -293,7 +333,7 @@ export const RegionMap = () => {
       onData={startMapDataLoading}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
-      dragRotate={false}
+      dragRotate={true}
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
     >
