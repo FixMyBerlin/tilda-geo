@@ -10,6 +10,205 @@ type ElevationPoint = {
   coord: Position
 }
 
+// --- Mapterhorn Client & Bilinear DEM Sampler ---
+const TILE_ZOOM = 13
+const TILE_ENDPOINT = 'https://tiles.mapterhorn.com'
+const TILE_SIZE = 512
+
+let sharedCanvas: OffscreenCanvas | HTMLCanvasElement | null = null
+let sharedCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null
+
+function getSharedContext(width: number, height: number) {
+  if (!sharedCanvas) {
+    if (typeof OffscreenCanvas === 'function') {
+      sharedCanvas = new OffscreenCanvas(width, height)
+    } else {
+      sharedCanvas = document.createElement('canvas')
+      sharedCanvas.width = width
+      sharedCanvas.height = height
+    }
+    sharedCtx = sharedCanvas.getContext('2d', { willReadFrequently: true }) as any
+  } else {
+    if (sharedCanvas.width !== width || sharedCanvas.height !== height) {
+      sharedCanvas.width = width
+      sharedCanvas.height = height
+    }
+  }
+  return sharedCtx
+}
+
+function decodeTerrariumElevation(r: number, g: number, b: number): number {
+  return r * 256 + g + b / 256 - 32768
+}
+
+function lonLatToTileSample(lng: number, lat: number, zoom: number) {
+  const latitudeRadians = (lat * Math.PI) / 180
+  const scale = 2 ** zoom
+  const normalizedX = ((lng + 180) / 360) * scale
+  const normalizedY =
+    ((1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) / 2) * scale
+
+  const tileX = Math.floor(normalizedX)
+  const tileY = Math.floor(normalizedY)
+
+  return { tileX, tileY, normalizedX, normalizedY }
+}
+
+const tileCache = new Map<string, Promise<Float32Array>>()
+const MAX_CACHE_SIZE = 64
+
+function getTileData(tileX: number, tileY: number): Promise<Float32Array> {
+  const key = `${tileX}/${tileY}`
+  let promise = tileCache.get(key)
+  if (!promise) {
+    promise = loadTile(tileX, tileY).catch((err) => {
+      tileCache.delete(key) // Evict on failure so we can retry later
+      throw err
+    })
+    tileCache.set(key, promise)
+
+    // FIFO Eviction
+    if (tileCache.size > MAX_CACHE_SIZE) {
+      const firstKey = tileCache.keys().next().value
+      if (firstKey !== undefined) {
+        tileCache.delete(firstKey)
+      }
+    }
+  }
+  return promise
+}
+
+async function loadTile(tileX: number, tileY: number): Promise<Float32Array> {
+  const response = await fetch(`${TILE_ENDPOINT}/${TILE_ZOOM}/${tileX}/${tileY}.webp`)
+  if (!response.ok) {
+    throw new Error(`Failed to load tile: ${TILE_ZOOM}/${tileX}/${tileY} (Status: ${response.status})`)
+  }
+  const blob = await response.blob()
+
+  let bitmap: ImageBitmap | HTMLImageElement
+  if (typeof createImageBitmap === 'function') {
+    // colorSpaceConversion: 'none' is crucial to prevent browser sRGB adjustments from altering raw pixels
+    bitmap = await createImageBitmap(blob, { colorSpaceConversion: 'none' })
+  } else {
+    bitmap = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error('Failed to decode tile image fallback'))
+      img.src = URL.createObjectURL(blob)
+    })
+  }
+
+  const width = bitmap.width
+  const height = bitmap.height
+  const ctx = getSharedContext(width, height)
+  if (!ctx) {
+    throw new Error('Failed to obtain shared canvas context')
+  }
+
+  // Draw & read are synchronous, executing atomically in the JS event loop
+  ctx.clearRect(0, 0, width, height)
+  ctx.drawImage(bitmap, 0, 0)
+  const imgData = ctx.getImageData(0, 0, width, height).data
+
+  // Release bitmap memory immediately
+  if (typeof (bitmap as any).close === 'function') {
+    ;(bitmap as ImageBitmap).close()
+  } else if ('src' in bitmap) {
+    URL.revokeObjectURL(bitmap.src)
+  }
+
+  // Pre-decode RGB raw bytes into Float32Array elevations to optimize CPU usage on queries/hovers
+  const elevations = new Float32Array(width * height)
+  for (let i = 0; i < elevations.length; i++) {
+    const offset = i * 4
+    const r = imgData[offset] ?? 0
+    const g = imgData[offset + 1] ?? 0
+    const b = imgData[offset + 2] ?? 0
+    elevations[i] = decodeTerrariumElevation(r, g, b)
+  }
+
+  return elevations
+}
+
+function sampleBilinear(
+  elevations: Float32Array,
+  size: number,
+  normalizedX: number,
+  normalizedY: number,
+  tileX: number,
+  tileY: number
+): number {
+  const x = (normalizedX - tileX) * size
+  const y = (normalizedY - tileY) * size
+
+  const x0 = Math.floor(x)
+  const y0 = Math.floor(y)
+
+  const x1 = x0 + 1
+  const y1 = y0 + 1
+
+  // Clamp indices to [0, size - 1] to prevent out-of-bounds access at tile boundaries
+  const cx0 = Math.max(0, Math.min(size - 1, x0))
+  const cy0 = Math.max(0, Math.min(size - 1, y0))
+  const cx1 = Math.max(0, Math.min(size - 1, x1))
+  const cy1 = Math.max(0, Math.min(size - 1, y1))
+
+  const dx = x - x0
+  const dy = y - y0
+
+  const e00 = elevations[cy0 * size + cx0] ?? 0
+  const e10 = elevations[cy0 * size + cx1] ?? 0
+  const e01 = elevations[cy1 * size + cx0] ?? 0
+  const e11 = elevations[cy1 * size + cx1] ?? 0
+
+  const top = e00 * (1 - dx) + e10 * dx
+  const bottom = e01 * (1 - dx) + e11 * dx
+  return top * (1 - dy) + bottom * dy
+}
+
+async function fetchElevationsFromMapterhorn(coords: Position[]): Promise<(number | null)[]> {
+  try {
+    const tileKeys = new Set<string>()
+    const coordTiles = coords.map((c) => {
+      const { tileX, tileY, normalizedX, normalizedY } = lonLatToTileSample(c[0]!, c[1]!, TILE_ZOOM)
+      tileKeys.add(`${tileX}/${tileY}`)
+      return { tileX, tileY, normalizedX, normalizedY }
+    })
+
+    // Load all required tiles concurrently. Any load failure triggers path-wide fallback.
+    const tilePromises = Array.from(tileKeys).map(async (key) => {
+      const [tx, ty] = key.split('/').map(Number)
+      const elevations = await getTileData(tx!, ty!)
+      return { key, elevations }
+    })
+
+    const loadedTiles = await Promise.all(tilePromises)
+    const tileMap = new Map<string, Float32Array>()
+    for (const tile of loadedTiles) {
+      tileMap.set(tile.key, tile.elevations)
+    }
+
+    const results: number[] = []
+    for (const item of coordTiles) {
+      const elevations = tileMap.get(`${item.tileX}/${item.tileY}`)
+      if (!elevations) {
+        throw new Error('Tile elevations not available in map')
+      }
+      const val = sampleBilinear(elevations, TILE_SIZE, item.normalizedX, item.normalizedY, item.tileX, item.tileY)
+      // Void value check
+      if (val <= -500) {
+        throw new Error(`Invalid/extreme elevation value encountered: ${val}`)
+      }
+      results.push(val)
+    }
+
+    return results
+  } catch (err) {
+    console.warn('Mapterhorn sampling failed, falling back to Open-Meteo:', err)
+    throw err
+  }
+}
+
 // Extract and merge coordinates sequentially for LineString and MultiLineString
 function extractCoordinates(geometry: LineString | MultiLineString): Position[] {
   if (geometry.type === 'LineString') {
@@ -152,67 +351,64 @@ export const InspectorFeatureElevationProfile = ({ feature }: { feature: maplibr
       coord: endPoint.geometry.coordinates,
     })
 
-    // Primary: Fetch elevations from Open-Meteo API (always reliable)
+    // Primary: Fetch elevations from Mapterhorn client-side tiles
     const coords = sampled.map((s) => s.coord)
-    fetchElevationsFromApi(coords)
-      .then((apiElevations) => {
+    fetchElevationsFromMapterhorn(coords)
+      .then((maptElevations) => {
         if (!active) return
 
-        // Check if API returned valid (non-null) values
-        const hasValidApiData = apiElevations.some((el) => el !== null)
+        // Apply Gaussian smoothing to round off pixel grid boundaries
+        const smoothed = smoothElevations(maptElevations as number[])
 
-        if (hasValidApiData) {
-          // Apply Gaussian smoothing to reduce DEM artifacts
-          const rawElevations = sampled.map((_, idx) => apiElevations[idx] ?? 0)
-          const smoothed = smoothElevations(rawElevations)
-
-          const finalData = sampled.map((s, idx) => ({
-            ...s,
-            elevation: smoothed[idx] ?? 0,
-          }))
-          setElevationData(finalData)
-          setLoading(false)
-        } else {
-          // Fallback: Try local terrain if API completely failed
-          const mapInstance = mainMap.getMap()
-          const localElevations = sampled.map((s) => {
-            if (mapInstance && typeof mapInstance.queryTerrainElevation === 'function') {
-              const el = mapInstance.queryTerrainElevation(s.coord as [number, number])
-              return el !== null && el !== undefined ? el : 0
-            }
-            return 0
-          })
-
-          const smoothed = smoothElevations(localElevations as number[])
-          const finalData = sampled.map((s, idx) => ({
-            ...s,
-            elevation: smoothed[idx] ?? 0,
-          }))
-          setElevationData(finalData)
-          setLoading(false)
-        }
-      })
-      .catch((err) => {
-        console.error('Elevation API failed, falling back to local terrain:', err)
-        if (!active) return
-
-        // Fallback: Use local terrain
-        const mapInstance = mainMap.getMap()
-        const localElevations = sampled.map((s) => {
-          if (mapInstance && typeof mapInstance.queryTerrainElevation === 'function') {
-            const el = mapInstance.queryTerrainElevation(s.coord as [number, number])
-            return el !== null && el !== undefined ? el : 0
-          }
-          return 0
-        })
-
-        const smoothed = smoothElevations(localElevations as number[])
         const finalData = sampled.map((s, idx) => ({
           ...s,
           elevation: smoothed[idx] ?? 0,
         }))
         setElevationData(finalData)
         setLoading(false)
+      })
+      .catch((err) => {
+        // Fallback: Fetch ALL coordinates from Open-Meteo API for relative path continuity
+        console.warn('Mapterhorn sampling failed, using Open-Meteo fallback:', err)
+        if (!active) return
+
+        fetchElevationsFromApi(coords)
+          .then((apiElevations) => {
+            if (!active) return
+
+            const hasValidApiData = apiElevations.some((el) => el !== null)
+            const rawElevations = sampled.map((_, idx) => apiElevations[idx] ?? 0)
+            const smoothed = smoothElevations(rawElevations)
+
+            const finalData = sampled.map((s, idx) => ({
+              ...s,
+              elevation: smoothed[idx] ?? 0,
+            }))
+            setElevationData(finalData)
+            setLoading(false)
+          })
+          .catch((err2) => {
+            console.error('All elevation sources failed, falling back to local terrain:', err2)
+            if (!active) return
+
+            // Last resort: local terrain
+            const mapInstance = mainMap.getMap()
+            const localElevations = sampled.map((s) => {
+              if (mapInstance && typeof mapInstance.queryTerrainElevation === 'function') {
+                const el = mapInstance.queryTerrainElevation(s.coord as [number, number])
+                return el !== null && el !== undefined ? el : 0
+              }
+              return 0
+            })
+
+            const smoothed = smoothElevations(localElevations as number[])
+            const finalData = sampled.map((s, idx) => ({
+              ...s,
+              elevation: smoothed[idx] ?? 0,
+            }))
+            setElevationData(finalData)
+            setLoading(false)
+          })
       })
 
     return () => {
@@ -435,19 +631,19 @@ export const InspectorFeatureElevationProfile = ({ feature }: { feature: maplibr
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 border-t border-gray-100 pt-2.5 text-[11px] text-gray-500">
         <div className="flex justify-between">
           <span>Min. Höhe:</span>
-          <span className="font-semibold text-gray-700">{Math.round(minElev)} m</span>
+          <span className="font-semibold text-gray-700">{minElev.toFixed(1)} m</span>
         </div>
         <div className="flex justify-between">
           <span>Max. Höhe:</span>
-          <span className="font-semibold text-gray-700">{Math.round(maxElev)} m</span>
+          <span className="font-semibold text-gray-700">{maxElev.toFixed(1)} m</span>
         </div>
         <div className="flex justify-between">
           <span>Steigung (Aufstieg):</span>
-          <span className="font-semibold text-green-600">+{Math.round(climb)} m</span>
+          <span className="font-semibold text-green-600">+{climb.toFixed(1)} m</span>
         </div>
         <div className="flex justify-between">
           <span>Gefälle (Abstieg):</span>
-          <span className="font-semibold text-red-500">-{Math.round(descent)} m</span>
+          <span className="font-semibold text-red-500">-{descent.toFixed(1)} m</span>
         </div>
       </div>
     </div>
