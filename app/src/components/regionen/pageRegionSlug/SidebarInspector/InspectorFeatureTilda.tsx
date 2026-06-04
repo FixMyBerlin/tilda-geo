@@ -13,6 +13,7 @@ import { osmTypeIdString } from './Tools/osmUrls/osmUrls'
 import { ToolsLinks } from './Tools/ToolsLinks'
 import { ToolsOtherProperties } from './Tools/ToolsOtherProperties'
 import { ToolsWrapper } from './Tools/ToolsWrapper'
+import { InspectorFeatureElevationProfile } from './InspectorFeatureElevationProfile'
 
 export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) => {
   const { geometry, properties } = feature
@@ -50,6 +51,12 @@ export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) 
           sourceDocumentedKeys={sourceData.inspector.documentedKeys}
           sourceId={sourceId}
         />
+
+        {geometry && (geometry.type === 'LineString' || geometry.type === 'MultiLineString') && (
+          <Disclosure title="Höhenprofil">
+            <InspectorFeatureElevationProfile feature={feature} />
+          </Disclosure>
+        )}
 
         {/* <Verification properties={properties} sourceId={sourceId} /> */}
 
