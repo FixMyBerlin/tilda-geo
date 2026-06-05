@@ -10,5 +10,8 @@
     "TypeScriptTeam.native-preview",
     "redhat.vscode-yaml"
   ],
-  "unwantedRecommendations": []
+  "unwantedRecommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ]
 }

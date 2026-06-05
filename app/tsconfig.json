@@ -1,5 +1,9 @@
 {
   // Soft-aligned to @total-typescript/tsconfig bundler/dom (no extends): https://github.com/total-typescript/tsconfig
+  // Intentionally NOT adopted
+  //   verbatimModuleSyntax: true  — TanStack Start client/server split: type-only imports can become empty runtime imports and leak server code into client bundles
+  //   module: "preserve"          — total-typescript bundler default; TanStack Start recommends ESNext for this stack
+  //   noUnusedLocals / noUnusedParameters — unused-code checks delegated to oxlint (oxlint.config.mjs); avoid duplicate signal with tsc
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
   "compilerOptions": {
     "target": "ES2022",

@@ -1,9 +1,19 @@
 import { defineConfig } from 'oxlint'
+import reactHooksJs from 'oxlint-config-react-hooks-js/configs/recommended-latest.json' with { type: 'json' }
 
 export default defineConfig({
   plugins: ['eslint', 'typescript', 'unicorn', 'oxc', 'react'],
   options: { typeAware: true },
-  ignorePatterns: ['src/routeTree.gen.ts', '.output/**'],
+  ignorePatterns: [
+    // Agent skills/reference docs — not application source
+    '../.agents/**',
+    // TanStack Router codegen; overwritten by `bun run codegen` (see tilda-geo/app)
+    'src/routeTree.gen.ts',
+    // Vite/Nitro production build output
+    '.output/**',
+    // Playwright HTML report from `test-e2e` (gitignored)
+    // "playwright-report/**",
+  ],
   rules: {
     'typescript/switch-exhaustiveness-check': 'error',
     'typescript/no-floating-promises': 'off',
@@ -34,8 +44,12 @@ export default defineConfig({
     },
     {
       files: ['**/*.tsx'],
-      jsPlugins: [{ name: 'react-compiler-js', specifier: 'eslint-plugin-react-compiler' }],
+      jsPlugins: [
+        { name: 'react-compiler-js', specifier: 'eslint-plugin-react-compiler' },
+        { name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' },
+      ],
       rules: {
+        ...reactHooksJs.rules,
         'react-compiler-js/react-compiler': 'error',
       },
     },
