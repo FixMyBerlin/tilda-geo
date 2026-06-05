@@ -31,7 +31,7 @@ type TObjectInput =
 // TODO TS types could be a lot nicer here…
 const replaceKeyInNestedObject = <TInput>(input: TInput, searchKey: string, newKey: string) => {
   if (Array.isArray(input)) {
-    const output = input.map((innerInput: TInput) => {
+    const output = input.map((innerInput) => {
       const item = replaceKeyInNestedObject<TObjectInput>(
         innerInput as TObjectInput,
         searchKey,

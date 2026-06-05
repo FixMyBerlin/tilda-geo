@@ -86,9 +86,10 @@ export async function proxyExternalUrl(
       headers: fetchHeaders,
       cache: 'no-store', // Prevent Next.js from caching large responses
     })
-  } catch (error) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
     return Response.json(
-      { source: 'external', statusText: `Failed to fetch: ${error.message}` },
+      { source: 'external', statusText: `Failed to fetch: ${message}` },
       { status: 500 },
     )
   }
@@ -126,9 +127,10 @@ export async function proxyExternalUrl(
   if (format === 'geojson' && externalUrl.endsWith('.gz')) {
     try {
       fileBuffer = gunzipSync(fileBuffer)
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error)
       return Response.json(
-        { source: 'external', statusText: `Failed to decompress: ${error.message}` },
+        { source: 'external', statusText: `Failed to decompress: ${message}` },
         { status: 500 },
       )
     }

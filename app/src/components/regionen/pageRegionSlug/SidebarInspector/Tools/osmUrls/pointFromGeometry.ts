@@ -44,20 +44,23 @@ const pointOnMiddleOfLinestring = (geometry: GeoJSON.LineString) => {
   }
 }
 
-// TS Note: For some reason I need to add the return type once I add the recursion at the end.
-export const pointFromGeometry = (geometry: GeoJSON.Feature['geometry']) => {
+export function pointFromGeometry(geometry: GeoJSON.Geometry | null | undefined): ReturnPosition {
+  if (!geometry) {
+    return truncate(fallback[0], fallback[1])
+  }
+
   if (!booleanValid(geometry)) {
     // UseCase: We had a wrong maxzoom setting wich returned an invalid Polygon
     const firstGeometry =
       geometry.type === 'GeometryCollection' ? geometry.geometries[0] : undefined
-    const fallbackFirstPoint =
+    const fallbackFirstPoint: ReturnPosition =
       firstGeometry !== undefined
         ? pointFromGeometry(firstGeometry)
         : geometry.type === 'GeometryCollection'
           ? fallback
-          : geometry.coordinates.flat(2).at(0) || fallback
-    const lng = fallbackFirstPoint[0] || fallback[0]
-    const lat = fallbackFirstPoint[1] || fallback[1]
+          : ((geometry.coordinates.flat(2).at(0) as ReturnPosition | undefined) ?? fallback)
+    const lng = fallbackFirstPoint[0] ?? fallback[0]
+    const lat = fallbackFirstPoint[1] ?? fallback[1]
     console.log('ERROR', 'Geometry invalid, using fallback', {
       geometry,
       fallbackFirstPoint,

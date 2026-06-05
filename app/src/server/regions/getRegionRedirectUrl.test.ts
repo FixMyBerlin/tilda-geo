@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { configs } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { parse } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/parse'
 import { parseMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
@@ -29,8 +30,8 @@ function parseCategoryFromResponse(
 
   const checksum = configParam?.split('.')[0]
   if (!configParam || !checksum) throw new Error('Missing config param or checksum')
-  const simplifiedConfig = configs[checksum]
-  const parsedConfig = parse(configParam, simplifiedConfig)
+  const simplifiedConfig = configs[checksum as keyof typeof configs]
+  const parsedConfig = parse(configParam, simplifiedConfig as MapDataCategoryConfig[])
   const category = parsedConfig.find((c) => c.id === categoryId)
   if (!category) throw new Error('Category not found')
   return category

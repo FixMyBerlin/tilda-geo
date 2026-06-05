@@ -40,7 +40,7 @@ export async function mergeSprites(sprites: SpriteSource[], pixelRatio: 1 | 2) {
 
   // Extract single images from a given sprite and store them in a temporary folder
   const iconFiles: Record<string, string> = {}
-  const extractIcons = async (imageBuffer, coordinates: SpriteJson) => {
+  const extractIcons = async (imageBuffer: Buffer, coordinates: SpriteJson) => {
     // Use the `skipList` to remove alls files from the sprite that start with the given term
     const skipList = [
       'us-',

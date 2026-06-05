@@ -29,8 +29,8 @@ export const uploadFileToS3 = async (
         Body: fs.readFileSync(uploadFullFilename),
       }),
     )
-  } catch (e) {
-    red(`  ${e.message}`)
+  } catch (e: unknown) {
+    red(`  ${e instanceof Error ? e.message : String(e)}`)
     process.exit(1)
   }
 

@@ -13,7 +13,8 @@ type OsmTypeId = {
 }
 
 export const osmTypeIdString = (type: string, id: string | number) => {
-  return `${longOsmType[type]}/${id}`
+  const osmType = longOsmType[type as keyof typeof longOsmType]
+  return `${osmType}/${id}`
 }
 
 export const osmOrgUrl = ({ osmType, osmId }: OsmTypeId) => {

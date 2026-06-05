@@ -33,6 +33,8 @@ export default function useResizeObserver<T extends HTMLElement = HTMLElement>(
         if (!entries.length) return
 
         const entry = entries[0]
+        if (!entry) return
+
         let width: number | undefined
         let height: number | undefined
 

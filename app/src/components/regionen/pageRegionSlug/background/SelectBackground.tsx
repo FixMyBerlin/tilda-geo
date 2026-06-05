@@ -5,6 +5,7 @@ import { useMap } from 'react-map-gl/maplibre'
 import {
   defaultBackgroundParam,
   useBackgroundParam,
+  type BackgroundParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
@@ -22,7 +23,7 @@ export const SelectBackground: React.FC = () => {
     region?.backgroundSources?.includes(s.id),
   )
 
-  const onChange = (value: SourcesRasterIds) => {
+  const onChange = (value: BackgroundParam) => {
     void setBackgroundParam(value)
   }
 
@@ -30,7 +31,12 @@ export const SelectBackground: React.FC = () => {
   if (!backgroundParam) return null
 
   return (
-    <Listbox as="section" className="" value={backgroundParam} onChange={onChange}>
+    <Listbox<'section', BackgroundParam>
+      as="section"
+      className=""
+      value={backgroundParam}
+      onChange={onChange}
+    >
       <ListboxButton className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none">
         Hintergrundkarten
         <ChevronUpDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />

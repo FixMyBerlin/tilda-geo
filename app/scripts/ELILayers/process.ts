@@ -57,7 +57,7 @@ async function fetchFileList() {
   }
   const files = await response.json()
 
-  return files.filter((file) => file.name.endsWith('.geojson'))
+  return files.filter((file: { name: string }) => file.name.endsWith('.geojson'))
 }
 
 async function downloadFile(filename: string) {

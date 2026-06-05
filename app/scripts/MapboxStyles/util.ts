@@ -23,7 +23,7 @@ export const fetchStyle = async (key: string, url: string, folder: string) => {
   return data as MapboxStyleMetadata
 }
 
-export async function saveJson(filename, data) {
+export async function saveJson(filename: string, data: unknown) {
   await Bun.write(filename, JSON.stringify(data, null, 2))
 }
 

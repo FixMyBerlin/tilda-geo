@@ -15,11 +15,9 @@
 
     /* Linting */
     "skipLibCheck": true,
-    "strict": false,
-    "strictNullChecks": true,
+    "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,

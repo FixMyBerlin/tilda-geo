@@ -72,7 +72,7 @@ export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
 if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
 
 const regions = await getRegions(api)
-const existingRegionSlugs = regions.map((region) => region.slug)
+const existingRegionSlugs = regions.map((region: { slug: string }) => region.slug)
 
 const keepTemporaryFiles = !!values['keep-tmp']
 const folderFilterTerm = values['folder-filter']

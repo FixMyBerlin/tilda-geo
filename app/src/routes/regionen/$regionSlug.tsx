@@ -40,10 +40,10 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
   // Avoid full-page pending takeover for short same-route transitions
   // (e.g. search-param updates from map interactions).
   pendingMs: 15_000,
-  loaderDeps: ({ search }) => {
+  loaderDeps: ({ search }: { search: Record<string, string | undefined> }) => {
     return {
-      qa: search?.[searchParamsRegistry.qa] ?? '',
-      qaFilter: search?.[searchParamsRegistry.qaFilter] ?? '',
+      qa: search[searchParamsRegistry.qa] ?? '',
+      qaFilter: search[searchParamsRegistry.qaFilter] ?? '',
     }
   },
   beforeLoad: async ({ params, location }) => {

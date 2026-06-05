@@ -19,8 +19,12 @@ import {
   useFeaturesParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
+import type { MapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
-import { interactivityConfiguration } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
+import {
+  interactivityConfiguration,
+  type InteracitvityConfiguartion,
+} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
 import { firePlaywrightMapLoadedEvent } from '@/components/shared/utils/playwright'
@@ -46,14 +50,15 @@ import { useInteractiveLayers } from './utils/useInteractiveLayers'
 // We do not show those features in our Inspector, which would show wrong data
 // However, we do want to show an interaction (Tooltip) to inform our users,
 // which is why the layers stay in `interactiveLayerIds`
-const extractInteractiveFeatures = (mapParam, features: MapGeoJSONFeature[] | undefined) => {
+const extractInteractiveFeatures = (
+  mapParam: MapParam,
+  features: MapGeoJSONFeature[] | undefined,
+) => {
   if (!features) return []
-  return features?.filter(({ sourceLayer }) => {
-    sourceLayer = String(sourceLayer)
-    return (
-      !(sourceLayer in interactivityConfiguration) ||
-      mapParam.zoom >= interactivityConfiguration[sourceLayer].minzoom
-    )
+  return features.filter(({ sourceLayer }) => {
+    const layer = String(sourceLayer) as keyof InteracitvityConfiguartion
+    const config = interactivityConfiguration[layer]
+    return config === undefined || mapParam.zoom >= config.minzoom
   })
 }
 
@@ -106,8 +111,8 @@ export const RegionMap = () => {
       // Allow multi select with Control (Windows) / Command (Mac)
       if (event.originalEvent.ctrlKey || event.originalEvent.metaKey) {
         // ctrl/command is down - toggle features
-        const featureInArray = (f0, farr) =>
-          !!farr.find((f1) => f0.properties.id === f1.properties.id)
+        const featureInArray = (f0: MapGeoJSONFeature, farr: MapGeoJSONFeature[]) =>
+          !!farr.find((f1) => f0.properties?.id === f1.properties?.id)
         const keepFeatures = inspectorFeatures.filter((f) => !featureInArray(f, uniqueFeatures))
         const addFeatures = uniqueFeatures.filter((f) => !featureInArray(f, inspectorFeatures))
         newInspectorFeatures = [...keepFeatures, ...addFeatures]
@@ -175,7 +180,7 @@ export const RegionMap = () => {
     updateHover([])
   }
 
-  const handleLoad = (_event: MapLibreEvent<undefined>) => {
+  const handleLoad = (_event: MapLibreEvent) => {
     // We disable rotation once after map startup to keep interactions consistent.
     mainMap?.getMap().touchZoomRotate.disableRotation()
 

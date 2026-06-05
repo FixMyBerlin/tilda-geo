@@ -65,7 +65,15 @@ export const Route = createFileRoute('/api/maproulette/data/test_tag_fix')({
               AND ST_intersects(subquery.union_geom, roads.geom);
           `
 
-          const markdown = ({ id, type, geometry }) => {
+          const markdown = ({
+            id,
+            type,
+            geometry,
+          }: {
+            id: number | string
+            type: string
+            geometry: GeoJSON.Geometry
+          }) => {
             const [lng, lat] = pointFromGeometry(geometry)
             return `
 ## Kontext

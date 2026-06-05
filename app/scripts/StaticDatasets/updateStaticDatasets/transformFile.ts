@@ -12,7 +12,7 @@ export const transformFile = async (
   geojsonFullFilename: string,
   outputFolder: string,
 ) => {
-  const datasetFolderName = datasetFolderPath.split('/').at(-1)
+  const datasetFolderName = datasetFolderPath.split('/').at(-1) ?? ''
   const filenameToRead = getDecompressedFilename({
     inputFilename: geojsonFullFilename,
     outputFilename: datasetFolderName,

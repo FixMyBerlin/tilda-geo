@@ -13,7 +13,7 @@ function isObject(value: unknown): value is object {
 // and calls fn(obj, path) for every object with properties 'id' and 'active'
 type Obj = Record<string, unknown> & { id: string; active: boolean }
 type Fn = (obj: Obj, path: (string | number)[]) => void
-export function iterate(obj: unknown, fn: Fn, path?) {
+export function iterate(obj: unknown, fn: Fn, path?: (string | number)[]) {
   if (!path) path = []
   if (Array.isArray(obj)) {
     obj.forEach((v, i) => {

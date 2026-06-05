@@ -277,12 +277,6 @@ type StaticDatasetCategoryFormProps =
       isDeleting: boolean
     }
 
-export function StaticDatasetCategoryForm(
-  props: Extract<StaticDatasetCategoryFormProps, { variant: 'create' }>,
-)
-export function StaticDatasetCategoryForm(
-  props: Extract<StaticDatasetCategoryFormProps, { variant: 'edit' }>,
-)
 export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps) {
   const navigate = useNavigate()
 

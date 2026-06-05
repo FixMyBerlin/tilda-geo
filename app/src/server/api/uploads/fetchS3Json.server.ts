@@ -36,6 +36,8 @@ export async function fetchS3Json<T extends z.ZodTypeAny>(url: string, schema: T
     return schema.parse(rawData)
   } catch (error) {
     console.error('Failed to fetch JSON from S3:', error)
-    throw new Error(`Failed to fetch JSON from S3: ${error.message}`)
+    throw new Error(
+      `Failed to fetch JSON from S3: ${error instanceof Error ? error.message : String(error)}`,
+    )
   }
 }

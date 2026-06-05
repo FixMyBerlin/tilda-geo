@@ -69,8 +69,9 @@ export const Route = createFileRoute('/api/uploads/create')({
               systemLayer,
             },
           })
-        } catch (e) {
-          return Response.json({ statusText: 'Bad Request', message: e.message }, { status: 400 })
+        } catch (e: unknown) {
+          const message = e instanceof Error ? e.message : String(e)
+          return Response.json({ statusText: 'Bad Request', message }, { status: 400 })
         }
 
         return Response.json({ statusText: 'Created' }, { status: 201 })

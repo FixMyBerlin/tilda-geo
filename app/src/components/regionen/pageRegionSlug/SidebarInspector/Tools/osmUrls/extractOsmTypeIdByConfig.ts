@@ -54,7 +54,7 @@ const deserializeId = (id: string | number | undefined) => {
 const makeLongOsmType = (osmType: string | undefined) => {
   if (!osmType) return null
 
-  const checkType = longOsmType[osmType]
+  const checkType = longOsmType[osmType as keyof typeof longOsmType]
   if (checkType === 'way') return 'way' as const
   if (checkType === 'node') return 'node' as const
   if (checkType === 'relation') return 'relation' as const

@@ -83,7 +83,11 @@ const downloadGeoJson = async (idsString: string) => {
   }
 }
 
-const createBoundaryFeature = (geojson, ids: string, region: string) => {
+const createBoundaryFeature = (
+  geojson: GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  ids: string,
+  region: string,
+) => {
   const boundaryPoly = simplify(geojson, { tolerance: 0.0001, highQuality: false })
 
   const result = geoJsonResultSchema.parse(feature(boundaryPoly, { kind: 'boundary', ids, region }))

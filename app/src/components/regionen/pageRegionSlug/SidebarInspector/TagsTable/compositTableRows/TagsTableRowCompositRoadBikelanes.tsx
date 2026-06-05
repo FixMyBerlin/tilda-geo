@@ -35,7 +35,7 @@ const CompositRoadBikelanesTableValue = ({
             style={{
               backgroundColor: hasSpecificInfrastructureValue
                 ? bikelanesPresenceColors.data_present
-                : bikelanesPresenceColors[tagValue],
+                : bikelanesPresenceColors[tagValue as keyof typeof bikelanesPresenceColors],
             }}
           />
         </div>
