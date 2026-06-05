@@ -7,6 +7,7 @@
     "sumneko.lua",
     "ReneSaarsoo.sql-formatter-vsc",
     "oxc.oxc-vscode",
+    "TypeScriptTeam.native-preview",
     "redhat.vscode-yaml"
   ],
   "unwantedRecommendations": []

@@ -23,8 +23,8 @@
   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
-  // Use TS version from node_modules
-  "typescript.tsdk": "app/node_modules/typescript/lib",
+  "js/ts.experimental.useTsgo": true,
+  "typescript.native-preview.tsdk": "app/node_modules/@typescript/native-preview",
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/
