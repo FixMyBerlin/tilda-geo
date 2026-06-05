@@ -11,8 +11,8 @@ if (!root) {
 
 const dockerCheck = await $`command -v docker`.quiet().nothrow()
 if (dockerCheck.exitCode !== 0) {
-  console.warn('docker not in PATH - skipping LuaLS typecheck.')
-  console.log('Run manually: bun run typecheck (in processing/)')
+  console.warn('docker not in PATH - skipping Lua type-check.')
+  console.log('Run manually: bun run type-check-lua (in processing/)')
   process.exit(0)
 }
 

@@ -1,4 +1,5 @@
 {
+  // Soft-aligned to @total-typescript/tsconfig bundler/dom (no extends): https://github.com/total-typescript/tsconfig
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
   "compilerOptions": {
     "target": "ES2022",
@@ -9,13 +10,14 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
     "verbatimModuleSyntax": false,
     "noEmit": true,
 
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
+    "noImplicitOverride": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noUncheckedSideEffectImports": true,
