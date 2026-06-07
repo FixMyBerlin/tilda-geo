@@ -1,0 +1,161 @@
+version: 2
+updates:
+  - package-ecosystem: bun
+    directories:
+      - /app
+      - /processing
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 5
+    open-pull-requests-limit: 5
+    exclude-paths:
+      - .cursor/**
+    commit-message:
+      prefix: chore
+      include: scope
+    ignore:
+      - dependency-name: nitro
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+          - version-update:semver-patch
+    groups:
+      security-dev-tools:
+        applies-to: security-updates
+        patterns:
+          - 'oxlint*'
+          - 'oxfmt*'
+          - 'vitest*'
+          - '@playwright/*'
+          - '@testing-library/*'
+          - 'knip*'
+          - 'husky*'
+          - '@types/*'
+          - 'typescript'
+          - 'eslint*'
+
+      shared-monorepo-tools:
+        applies-to: version-updates
+        group-by: dependency-name
+        patterns:
+          - 'oxlint*'
+          - 'oxfmt*'
+          - '@types/bun'
+
+      app-dev-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - '@aws-sdk/*'
+          - '@clack/*'
+          - '@heroicons/*'
+          - '@playwright/*'
+          - '@testing-library/*'
+          - '@total-typescript/*'
+          - '@vitejs/*'
+          - 'babel-plugin-*'
+          - 'eslint-*'
+          - 'husky'
+          - 'jsdom'
+          - 'knip'
+          - 'oxfmt'
+          - 'oxlint*'
+          - 'papaparse'
+          - 'picomatch'
+          - 'preview-email'
+          - 'react-email'
+          - 'sharp'
+          - 'spritesmith'
+          - 'vitest'
+          - 'vite'
+          - '@types/*'
+          - 'typescript'
+          - 'dotenv'
+          - 'favicons'
+        update-types:
+          - minor
+          - patch
+
+      app-framework-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - '@tanstack/*'
+          - '@tailwindcss/*'
+          - 'tailwindcss'
+          - '@turf/*'
+          - '@prisma/*'
+          - 'prisma'
+          - 'react'
+          - 'react-dom'
+          - '@types/react*'
+          - 'maplibre-gl'
+          - 'react-map-gl'
+          - 'better-auth'
+          - 'zod'
+        update-types:
+          - minor
+          - patch
+
+      app-prod-misc-patch:
+        applies-to: version-updates
+        update-types:
+          - patch
+        patterns:
+          - '*'
+        exclude-patterns:
+          - '@tanstack/*'
+          - '@tailwindcss/*'
+          - '@turf/*'
+          - '@prisma/*'
+          - 'prisma'
+          - 'react'
+          - 'react-dom'
+          - 'maplibre-gl'
+          - 'better-auth'
+          - 'zod'
+          - 'nitro*'
+          - '@maptiler/*'
+
+      processing-deps:
+        applies-to: version-updates
+        patterns:
+          - '@date-fns/*'
+          - '@turf/*'
+          - 'date-fns'
+          - 'geojson'
+          - 'zod'
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '07:00'
+      timezone: Europe/Berlin
+    cooldown:
+      default-days: 5
+    open-pull-requests-limit: 3
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch
+        patterns:
+          - '*'
+
+  - package-ecosystem: docker
+    directories:
+      - /
+    schedule:
+      interval: monthly
+    groups:
+      docker-bases:
+        patterns:
+          - 'debian*'
+          - 'oven/bun*'
