@@ -2,9 +2,9 @@ local SET = require('topics.helper.sets')
 local infer_address = require('topics.helper.infer_address')
 local merge_table = require('topics.helper.merge_table')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
-local shopping_allowed_list_with_categories = require('topics.poiClassification.shopping_allowed_list_with_categories')
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
+local S = require('topics.poiClassification.helper.sanitize_poi_classification_tags')
 
 local formal_education = SET.set({
   'childcare',
@@ -15,6 +15,8 @@ local formal_education = SET.set({
   'university',
 })
 
+---@param object {tags: table}
+---@return table, table
 local function result_tags_poi_classification(object)
   local tags = object.tags
   local result_tags = {
@@ -24,20 +26,20 @@ local function result_tags_poi_classification(object)
   merge_table(result_tags, address_tags)
 
   if tags.shop then
-    result_tags.category = 'Einkauf'
-    result_tags.type = 'shop-' .. tags.shop
+    result_tags.category = S.resolve_category(tags.shop) or 'Einkauf'
+    result_tags.type = 'shop-' .. S.type_suffix('shop', tags.shop)
   end
   if tags.amenity then
-    result_tags.category = shopping_allowed_list_with_categories[tags.amenity]
-    result_tags.type = 'amenity-' .. tags.amenity
+    result_tags.category = S.resolve_category(tags.amenity)
+    result_tags.type = 'amenity-' .. S.type_suffix('amenity', tags.amenity)
   end
   if tags.tourism then
-    result_tags.category = shopping_allowed_list_with_categories[tags.tourism]
-    result_tags.type = 'tourism-' .. tags.tourism
+    result_tags.category = S.resolve_category(tags.tourism)
+    result_tags.type = 'tourism-' .. S.type_suffix('tourism', tags.tourism)
   end
   if tags.leisure then
-    result_tags.category = shopping_allowed_list_with_categories[tags.leisure]
-    result_tags.type = 'leisure-' .. tags.leisure
+    result_tags.category = S.resolve_category(tags.leisure)
+    result_tags.type = 'leisure-' .. S.type_suffix('leisure', tags.leisure)
   end
 
   if tags.amenity and formal_education[tags.amenity] then

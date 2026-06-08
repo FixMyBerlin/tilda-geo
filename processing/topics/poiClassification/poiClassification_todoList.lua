@@ -1,13 +1,12 @@
 local SET = require('topics.helper.sets')
-local extract_keys = require('topics.helper.extract_keys')
 local infer_address = require('topics.helper.infer_address')
 local metadata = require('topics.helper.metadata')
-local shopping_allowed_list_with_categories = require('topics.poiClassification.shopping_allowed_list_with_categories')
+local category_values = require('topics.poiClassification.helper.category_values_with_categories')
 
 -- The goal of this TodoList is to make sure we do not miss out on any amenitys.
 -- The amenity key is used for all kind of stuff.
 -- For our `poiClassification` list, we only include those values
--- that are part of `shopping_allowed_list_with_categories`
+-- that are part of the shared poi classification tag rules
 -- The goal of this TodoList is, see all values that we did not include
 -- … and did not explicitly decide to skip.
 local table = osm2pgsql.define_table({
@@ -30,8 +29,8 @@ local function exit_processing(object)
 
   -- We skip shop=* because we allow the all; we skip values that are on the allow list
   if object.tags.shop
-      or shopping_allowed_list_with_categories[object.tags.amenity]
-      or shopping_allowed_list_with_categories[object.tags.tourism]
+      or category_values[object.tags.amenity]
+      or category_values[object.tags.tourism]
   then
     return true
   end

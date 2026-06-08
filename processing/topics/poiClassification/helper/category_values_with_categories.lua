@@ -1,5 +1,5 @@
 -- Any of 'Grundversorgung' | 'Bildung' | 'Einkauf' | 'Freizeit'
-local shopping_allowed_list_with_categories = {
+local category_values_with_categories = {
   ['animal_boarding'] = 'Freizeit',
   ['animal_training'] = 'Freizeit',
   ['aquarium'] = 'Freizeit',
@@ -148,4 +148,4 @@ local shopping_allowed_list_with_categories = {
   ['zoo'] = 'Freizeit',
 }
 
-return shopping_allowed_list_with_categories
+return category_values_with_categories

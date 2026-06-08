@@ -1,8 +1,4 @@
-local SET = require('topics.helper.sets')
-local extract_keys = require('topics.helper.extract_keys')
-local shopping_allowed_list_with_categories = require('topics.poiClassification.shopping_allowed_list_with_categories')
-
-local allowed_values = SET.set(extract_keys(shopping_allowed_list_with_categories))
+local S = require('topics.poiClassification.helper.sanitize_poi_classification_tags')
 
 local function exit_processing(object)
   if not (object.tags.amenity or object.tags.shop or object.tags.tourism or object.tags.leisure) then
@@ -14,9 +10,9 @@ local function exit_processing(object)
   end
 
   if object.tags.shop
-    or allowed_values[object.tags.amenity]
-    or allowed_values[object.tags.tourism]
-    or allowed_values[object.tags.leisure]
+    or S.is_allowed_import_value(object.tags.amenity)
+    or S.is_allowed_import_value(object.tags.tourism)
+    or S.is_allowed_import_value(object.tags.leisure)
   then
     if object.tags.tourism == 'information' then
       if object.tags.information == 'office' or object.tags.information == 'visitor_centre' then
