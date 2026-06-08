@@ -77,12 +77,18 @@ services:
     labels:
       traefik.enable: true
       traefik.http.services.container.loadbalancer.server.port: 4000
+      # Response compression. Traefik negotiates per the client's `Accept-Encoding`
+      # header; `br` (Brotli) is preferred, `gzip` is the fallback. Upstream responses
+      # that already carry a `Content-Encoding` are left untouched (no double-compression).
+      traefik.http.middlewares.compress.compress: true
+      traefik.http.middlewares.compress.compress.encodings: "br,gzip"
       # Apex host only (non-www canonical).
       traefik.http.routers.app-apex.rule: Host(`${APP_URL}`)
       traefik.http.routers.app-apex.entrypoints: websecure
       traefik.http.routers.app-apex.tls.certresolver: letsencrypt
       traefik.http.routers.app-apex.tls: true
       traefik.http.routers.app-apex.service: container
+      traefik.http.routers.app-apex.middlewares: compress
       # www → apex 301 at the edge (no app-side redirect).
       traefik.http.middlewares.www-to-apex.redirectregex.regex: "^https://www\\.(.+)$"
       traefik.http.middlewares.www-to-apex.redirectregex.replacement: "https://$$1"
