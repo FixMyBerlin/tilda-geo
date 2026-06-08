@@ -54,6 +54,7 @@ Use `--keep-tmp` to keep the files for debugging.
 ### Formatting
 
 - `bun run format` (Husky, `check`) runs `format:static-datasets-code` — TypeScript and docs under `scripts/StaticDatasets`, not `geojson/` or `*.geojson` / `*.json` data files.
+- `format:main` / `format:check` also skip `scripts/StaticDatasets/geojson/**` via `oxfmt.config.mjs` `ignorePatterns` (the folder is a symlink into `tilda-static-data`; `.gitignore` alone does not stop oxfmt from following it).
 - GeoJSON and dataset `meta.ts` under `geojson/`: use editor format-on-save (oxfmt).
 - Agents adding datasets: `bun run format-static-datasets-geojson -- scripts/StaticDatasets/geojson/<group>/<dataset>/*.{geojson,json}` (see [add-static-dataset skill](../../../.cursor/skills/add-static-dataset/SKILL.md)).
 
