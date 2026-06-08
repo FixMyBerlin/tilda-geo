@@ -8,38 +8,25 @@ export const TagsTableRowCompositParentHighway = ({
   tagKey: _, // is `composit_parent_highway` which is not helpful here
   properties,
 }: CompositTableRow) => {
-  if (properties._parent_highway) {
-    return (
-      <TagsTableRow sourceId={sourceId} tagKey={'_parent_highway'}>
-        <ConditionalFormattedValue
-          sourceId={sourceId}
-          tagKey={'highway'}
-          tagValue={properties._parent_highway}
-        />
-      </TagsTableRow>
-    )
-  }
-  if (properties.road) {
-    return (
-      <TagsTableRow sourceId={sourceId} tagKey={'_parent_highway'}>
-        <ConditionalFormattedValue
-          sourceId={sourceId}
-          tagKey={'highway'}
-          tagValue={properties.road}
-        />
-      </TagsTableRow>
-    )
-  }
-  if (properties.highway) {
-    return (
-      <TagsTableRow sourceId={sourceId} tagKey={'_parent_highway'}>
-        <ConditionalFormattedValue
-          sourceId={sourceId}
-          tagKey={'highway'}
-          tagValue={properties.highway}
-        />
-      </TagsTableRow>
-    )
-  }
-  return null
+  const lookupCandidates = [
+    {
+      sourceValue: properties._parent_highway,
+      rowTagKey: '_parent_highway',
+      valueTagKey: 'highway',
+    },
+    { sourceValue: properties.road, rowTagKey: '_parent_highway', valueTagKey: 'highway' },
+    { sourceValue: properties.highway, rowTagKey: '_parent_highway', valueTagKey: 'highway' },
+  ] as const
+  const candidate = lookupCandidates.find((entry) => Boolean(entry.sourceValue))
+  if (!candidate) return null
+
+  return (
+    <TagsTableRow sourceId={sourceId} tagKey={candidate.rowTagKey}>
+      <ConditionalFormattedValue
+        sourceId={sourceId}
+        tagKey={candidate.valueTagKey}
+        tagValue={candidate.sourceValue}
+      />
+    </TagsTableRow>
+  )
 }
