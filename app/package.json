@@ -70,7 +70,7 @@
     "processing-generate-command": "bun ./scripts/processing-generate-command/index.ts -- --skip-download 1 --skip-warm-cache 1 --skip-unchanged 0",
     "topic-docs-build": "bun run --sequential topic-docs-build:*",
     "topic-docs-build:1generate": "bun ./scripts/topic-docs-build/index.ts",
-    "topic-docs-build:2format": "oxfmt --write src/data/generated/topicDocs",
+    "topic-docs-build:2format": "oxfmt --write -c oxfmt.config.mjs src/data/generated/topicDocs",
     "topic-docs-coverage-check": "bun --env-file=../.env ./scripts/topic-docs-coverage-check/index.ts",
     "mapbox-styles-update": "bun run --sequential mapbox-styles-update:*",
     "mapbox-styles-update:1process": "bun --env-file=../.env ./scripts/MapboxStyles/process.ts",
