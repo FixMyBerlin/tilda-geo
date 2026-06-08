@@ -27,7 +27,9 @@ function getSharedContext(width: number, height: number) {
       sharedCanvas.width = width
       sharedCanvas.height = height
     }
-    sharedCtx = sharedCanvas.getContext('2d', { willReadFrequently: true }) as any
+    sharedCtx = sharedCanvas.getContext('2d', {
+      willReadFrequently: true,
+    }) as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null
   } else {
     if (sharedCanvas.width !== width || sharedCanvas.height !== height) {
       sharedCanvas.width = width
@@ -111,8 +113,8 @@ async function loadTile(tileX: number, tileY: number): Promise<Float32Array> {
   const imgData = ctx.getImageData(0, 0, width, height).data
 
   // Release bitmap memory immediately
-  if (typeof (bitmap as any).close === 'function') {
-    ;(bitmap as ImageBitmap).close()
+  if ('close' in bitmap && typeof bitmap.close === 'function') {
+    bitmap.close()
   } else if ('src' in bitmap) {
     URL.revokeObjectURL(bitmap.src)
   }
@@ -170,15 +172,19 @@ async function fetchElevationsFromMapterhorn(coords: Position[]): Promise<(numbe
   try {
     const tileKeys = new Set<string>()
     const coordTiles = coords.map((c) => {
-      const { tileX, tileY, normalizedX, normalizedY } = lonLatToTileSample(c[0]!, c[1]!, TILE_ZOOM)
+      const lng = c[0] ?? 0
+      const lat = c[1] ?? 0
+      const { tileX, tileY, normalizedX, normalizedY } = lonLatToTileSample(lng, lat, TILE_ZOOM)
       tileKeys.add(`${tileX}/${tileY}`)
       return { tileX, tileY, normalizedX, normalizedY }
     })
 
     // Load all required tiles concurrently. Any load failure triggers path-wide fallback.
     const tilePromises = Array.from(tileKeys).map(async (key) => {
-      const [tx, ty] = key.split('/').map(Number)
-      const elevations = await getTileData(tx!, ty!)
+      const parts = key.split('/').map(Number)
+      const tx = parts[0] ?? 0
+      const ty = parts[1] ?? 0
+      const elevations = await getTileData(tx, ty)
       return { key, elevations }
     })
 
@@ -242,9 +248,9 @@ function smoothElevations(elevations: number[], passes: number = 3): number[] {
   for (let pass = 0; pass < passes; pass++) {
     const next = [...smoothed]
     for (let i = 1; i < smoothed.length - 1; i++) {
-      const prev = smoothed[i - 1]!
-      const curr = smoothed[i]!
-      const nxt = smoothed[i + 1]!
+      const prev = smoothed[i - 1] ?? 0
+      const curr = smoothed[i] ?? 0
+      const nxt = smoothed[i + 1] ?? 0
       // Weighted average: 25% prev, 50% current, 25% next
       next[i] = prev * 0.25 + curr * 0.5 + nxt * 0.25
     }
@@ -376,7 +382,7 @@ export const InspectorFeatureElevationProfile = ({ feature }: { feature: maplibr
           .then((apiElevations) => {
             if (!active) return
 
-            const hasValidApiData = apiElevations.some((el) => el !== null)
+            const _hasValidApiData = apiElevations.some((el) => el !== null)
             const rawElevations = sampled.map((_, idx) => apiElevations[idx] ?? 0)
             const smoothed = smoothElevations(rawElevations)
 

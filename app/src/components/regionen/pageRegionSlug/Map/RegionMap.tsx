@@ -191,7 +191,7 @@ export const RegionMap = () => {
     updateHover([])
   }
 
-  const handleLoad = (event: MapLibreEvent) => {
+  const handleLoad = (event: MapLibreEvent<undefined>) => {
     const map = event.target
 
     // We disable rotation once after map startup to keep interactions consistent.
@@ -240,7 +240,6 @@ export const RegionMap = () => {
     exposeMainMapForDebugging(event.target)
     firePlaywrightMapLoadedEvent()
   }
-
 
   useEffect(
     function subscribeToMissingStyleImages() {
