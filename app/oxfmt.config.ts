@@ -21,12 +21,7 @@ export default defineConfig({
     functions: ['twMerge', 'twJoin'],
   },
   sortPackageJson: true,
-  ignorePatterns: [
-    'src/routeTree.gen.ts',
-    'scripts/StaticDatasets/geojson/**/*.geojson',
-    'scripts/StaticDatasets/geojson/**/*.geojson.gz',
-    'scripts/StaticDatasets/geojson/**/*.json',
-  ],
+  ignorePatterns: ['src/routeTree.gen.ts'],
   overrides: [
     {
       files: ['**/translations/*.const.ts'],

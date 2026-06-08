@@ -15,7 +15,7 @@ type CsvRow = {
 }
 
 export function convertGeoJsonToCsv(geojsonData: FeatureCollection) {
-  if (!geojsonData || geojsonData.type !== 'FeatureCollection') {
+  if (geojsonData?.type !== 'FeatureCollection') {
     throw new Error('Invalid GeoJSON: Expected FeatureCollection')
   }
 

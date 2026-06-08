@@ -279,8 +279,11 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           const isGdalAvailable = await checkGdalVersion()
 
           const ogrFormat = ogrFormats[format]
+          // Export output is WGS84 (GeoJSON RFC 7946; public API contract)
           const ogrCommand = `ogr2ogr \
             -f "${ogrFormat.driver}" \
+            -t_srs EPSG:4326 \
+            -lco COORDINATE_PRECISION=8 \
             -sql "${sqlQuery}" \
             ${layerName ? `-nln ${layerName}` : ''} \
             "${outputFilePath}" \

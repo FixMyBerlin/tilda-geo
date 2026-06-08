@@ -35,19 +35,69 @@ app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/
 
 Create directory if group folder doesn't exist. Ensure sub-folder name follows naming convention (see Required Information above).
 
-### 2. Move GeoJSON File
+### 2. Prepare GeoJSON file
 
-- Move source file to `<SUB_FOLDER>/<FILENAME>.geojson`
-- **Formatting (inactive for now)**: ~~From `app/`, run a formatter on the GeoJSON, e.g. `bunx prettier --write scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson` (Prettier is not in this repo; this mirrors the old workflow.)~~ **Note:** `oxfmt` (behind `bun run format`) does not support JSON/GeoJSON formatting yet, and `.geojson` under `scripts/StaticDatasets/geojson` is in `ignorePatterns` in `app/oxfmt.config.ts` — **leave the `.geojson` file as-is**.
-- **Size check (dataset validation / creation)**: Measure the **uncompressed** `.geojson` file size. If it is **greater than 6 MiB** (6 × 1024² bytes), compress it so the folder ships only the archive (same pattern as other large static datasets):
-  - From the dataset folder (or with absolute paths): `gzip -9 -f <FILENAME>.geojson`
-  - `gzip` replaces the file with `<FILENAME>.geojson.gz` and removes the plain `.geojson`. `-9` is maximum compression; `-f` forces overwrite if a `.gz` already exists.
-  - If size is **≤ 6 MiB**, leave the `.geojson` as-is (no gzip required).
-- `findGeojson` in `updateStaticDatasets` accepts either a single `.geojson` or a single `.geojson.gz` per folder—never leave both.
+Run these **in order** on committed data files. **Never** reproject, round, or pretty-print coordinates in `transform.ts` — use ogr2ogr (2.2–2.3) and oxfmt (2.4) on the files instead.
+
+#### 2.1 Move
+
+Move source file to:
+
+`app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson`
+
+#### 2.2 CRS → EPSG:4326
+
+**Check:** Inspect the first coordinate pair after moving. For Germany, expect roughly lon **5–15**, lat **47–55**. Web Mercator (EPSG:3857) uses large meter values (e.g. ~1.5e6).
+
+**Fix (only if not WGS84):** Reproject in place:
+
+```bash
+cd app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>
+ogr2ogr -f GeoJSON -t_srs EPSG:4326 -lco COORDINATE_PRECISION=8 \
+  <FILENAME>.geojson.tmp <FILENAME>.geojson \
+  && mv <FILENAME>.geojson.tmp <FILENAME>.geojson
+```
+
+#### 2.3 Coordinate precision (max 8 decimals)
+
+**Check:** Coordinates should have at most **8** decimal places (matches upload pipeline and API exports).
+
+**Fix (only if more than 8):** Round in place (file must already be EPSG:4326):
+
+```bash
+cd app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>
+ogr2ogr -f GeoJSON -lco COORDINATE_PRECISION=8 \
+  <FILENAME>.geojson.tmp <FILENAME>.geojson \
+  && mv <FILENAME>.geojson.tmp <FILENAME>.geojson
+```
+
+Upload runs `validateProjection` again on WGS84 bounds.
+
+#### 2.4 Format (oxfmt)
+
+From `app/` (skill / agents only — devs use format-on-save in the editor):
+
+```bash
+bun run format-static-datasets-geojson -- \
+  scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/*.{json,geojson}
+```
+
+#### 2.5 Gzip (if large)
+
+**Check:** Uncompressed `.geojson` size **after** formatting.
+
+- **> 6 MiB** (6 × 1024² bytes): compress so the folder ships only the archive:
+
+```bash
+cd app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>
+gzip -9 -f <FILENAME>.geojson
+```
+
+`gzip` replaces the file with `<FILENAME>.geojson.gz` and removes the plain `.geojson` (`-9` max compression, `-f` overwrite).
 
 ### 3. Create transform.ts (if needed)
 
-Only if transformation required. Use helpers from `app/scripts/StaticDatasets/geojson/_utils`:
+Only if transformation required (**not** for CRS or coordinate precision — Step 2 only). Use helpers from `app/scripts/StaticDatasets/geojson/_utils`:
 
 - `transformUtils.ts` - property transformations
 - `defaultLayerStyles.ts` - default styling helpers
@@ -167,8 +217,8 @@ This temporarily removes the `geojson` symlink, runs TypeScript type-checking, a
 Before completing:
 
 1. ✅ Folder structure created
-2. ✅ GeoJSON file moved; **if uncompressed `.geojson` > 6 MiB then `gzip -9 -f`** (otherwise plain `.geojson` only; never both); `meta.ts` / `transform.ts` formatted with `bun run format`
-3. ✅ transform.ts created only if needed
+2. ✅ GeoJSON prepared (**Step 2.1–2.5**: moved, EPSG:4326, ≤8 decimals, oxfmt, gzip if >6 MiB)
+3. ✅ `transform.ts` only if needed — **never** for CRS (Step 2); `meta.ts` / `transform.ts` via format-on-save or `format-static-datasets-geojson`
 4. ✅ meta.ts follows type structure (check with TypeScript)
 5. ✅ Similar datasets in group folder reviewed for patterns
 6. ✅ Command verified and provided as one-click action
