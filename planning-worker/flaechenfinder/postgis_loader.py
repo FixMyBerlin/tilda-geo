@@ -5,12 +5,9 @@ tildas bereits prozessiertem `public`-Schema (EPSG:3857). Damit entfällt das
 Parsen des 4,4 GB großen OSM-PBF und es werden dieselben Daten wie im tilda-Viewer
 genutzt.
 
-Modularer Erweiterungspunkt (statische Datensätze, ÖPNV/POI-Layer): die Registry
-`LAYER_SOURCES` bildet einen logischen Layer-Namen auf eine `public`-Tabelle +
-optionalen SQL-WHERE-Filter ab. Tilda prozessiert (Stand MVP) nur Radwege als
-sinnvoll nutzbaren Layer (`bikelanes`); für Tag-Abfragen, die keiner Tabelle
-zugeordnet sind, wird ein leeres GeoDataFrame zurückgegeben (der Scorer behandelt
-das robust). Weitere Layer werden später durch Einträge hier ergänzt.
+Modularer Erweiterungspunkt: `_TRANSIT_TAG_MAP` bildet OSM-Tag-Dicts auf
+DB-Kategorien in `public."publicTransport"` ab. Für nicht zugeordnete Tags
+wird ein leeres GeoDataFrame zurückgegeben.
 """
 from __future__ import annotations
 
@@ -20,6 +17,42 @@ from shapely.geometry.base import BaseGeometry
 
 def _empty(crs="EPSG:3857") -> gpd.GeoDataFrame:
     return gpd.GeoDataFrame(geometry=[], crs=crs)
+
+
+def _sql_literal(v) -> str:
+    """Escape a string value for SQL (single-quote, no parameterisation needed here)."""
+    return v.replace("'", "''")
+
+
+# Maps OSM tag dicts (as used in scorer.py _TRANSIT_TYPES) to publicTransport categories.
+# Values are lists of category strings stored in tags->>'category' in the DB.
+# Bus stops (highway=bus_stop) are not yet in the publicTransport table.
+_TRANSIT_TAG_MAP: list[tuple[dict, list[str]]] = [
+    ({"railway": "tram_stop"},             ["tram_station"]),
+    ({"railway": "subway_entrance"},        ["subway_station"]),
+    ({"railway": ["station", "halt"]},      ["railway_station", "light_rail_station"]),
+]
+
+
+def _match_transit_tags(tags: dict) -> list[str] | None:
+    """Return DB category list for a given OSM tag dict, or None if unmapped."""
+    for osm_tags, categories in _TRANSIT_TAG_MAP:
+        if set(osm_tags.keys()) != set(tags.keys()):
+            continue
+        match = True
+        for k, v in osm_tags.items():
+            tag_v = tags.get(k)
+            if isinstance(v, list):
+                if tag_v not in v:
+                    match = False
+                    break
+            else:
+                if tag_v != v:
+                    match = False
+                    break
+        if match:
+            return categories
+    return None
 
 
 class PostgisLoader:
@@ -62,9 +95,14 @@ class PostgisLoader:
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 
-        MVP: tildas `public`-Schema exponiert keine beliebigen OSM-Tags, daher
-        wird für nicht zugeordnete Layer ein leeres GeoDataFrame zurückgegeben.
-        Der Scorer interpretiert das als „Layer nicht vorhanden“ (Score 0 bzw.
-        kein Hindernis). Erweiterung später via LAYER_SOURCES-Registry.
+        Mappt OSM-Tag-Dicts auf `public."publicTransport"` (categories via JSONB).
+        Nicht zugeordnete Tags (z. B. highway=bus_stop) geben ein leeres GeoDataFrame zurück.
         """
-        return _empty()
+        categories = _match_transit_tags(tags)
+        if not categories:
+            return _empty("EPSG:4326")
+
+        cats_sql = ", ".join(f"'{_sql_literal(c)}'" for c in categories)
+        where = f"tags->>'category' IN ({cats_sql})"
+        gdf = self._read_table("publicTransport", polygon_4326, where=where)
+        return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
