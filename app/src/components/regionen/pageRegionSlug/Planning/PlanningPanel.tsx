@@ -86,17 +86,9 @@ export const PlanningPanel = () => {
   const [, setRun] = usePlanningRunParam()
   const { regionSlug } = routeApi.useParams()
 
-  if (!planningMode) {
-    return (
-      <button
-        type="button"
-        onClick={() => setPlanningMode(true)}
-        className="pointer-events-auto absolute top-2.5 left-2.5 z-10 rounded bg-white px-3 py-2 text-sm font-medium shadow hover:bg-gray-50"
-      >
-        🗺️ Planungsmodus
-      </button>
-    )
-  }
+  // Entry/exit is driven by the topbar toggle (PlanningModeToggle); the panel only
+  // renders the interactive UI while the mode is active.
+  if (!planningMode) return null
 
   const close = () => {
     setPlanningMode(false)
@@ -105,7 +97,7 @@ export const PlanningPanel = () => {
   }
 
   return (
-    <div className="pointer-events-auto absolute top-2.5 left-2.5 z-10 flex max-h-[calc(100vh-8rem)] w-80 flex-col gap-3 overflow-auto rounded bg-white p-3 shadow-lg">
+    <div className="pointer-events-auto absolute top-2.5 left-[17rem] z-30 flex max-h-[calc(100vh-8rem)] w-80 flex-col gap-3 overflow-auto rounded bg-white p-3 shadow-lg">
       <div className="flex items-center justify-between">
         <h2 className="font-bold">Planungsmodus</h2>
         <button type="button" onClick={close} className="text-gray-500 hover:text-gray-800">

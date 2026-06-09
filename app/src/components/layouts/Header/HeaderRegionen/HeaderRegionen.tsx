@@ -1,3 +1,4 @@
+import { PlanningModeToggle } from '@/components/regionen/pageRegionSlug/Planning/PlanningModeToggle'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
 import { NavigationDesktop } from '../NavigationDesktop/NavigationDesktop'
 import { NavigationMobile } from '../NavigationMobile/NavigationMobile'
@@ -20,6 +21,7 @@ export const HeaderRegionen = () => {
         primaryNavigation={primaryNavigation}
         secondaryNavigation={defaultSecondaryNavigationGrouped}
         secondaryNavigationLogo={true}
+        extra={<PlanningModeToggle />}
       />
     </NavigationWrapper>
   )
