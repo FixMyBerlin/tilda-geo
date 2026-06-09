@@ -8,7 +8,7 @@ import { boundsToPolygon, FAHRRADBOX_TEMPLATE } from './planningDefaults'
 /** Lists the region's scenarios (with parent/child lineage) and creates new ones. */
 export const ScenarioList = ({ regionSlug }: { regionSlug: string }) => {
   const queryClient = useQueryClient()
-  const { current: map } = useMap()
+  const { mainMap: map } = useMap()
   const [activeScenario, setActiveScenario] = usePlanningScenarioParam()
   const { data: scenarios } = useQuery(planningScenariosQueryOptions(regionSlug))
 
