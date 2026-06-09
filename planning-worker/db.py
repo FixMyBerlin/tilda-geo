@@ -42,8 +42,10 @@ def make_engine():
 
 
 def apply_schema(conn: psycopg.Connection) -> None:
-    """Idempotentes Anlegen des `planning`-Schemas + Ergebnis-Tabellen."""
-    schema_sql = (Path(__file__).parent / "sql" / "schema.sql").read_text()
-    with conn.cursor() as cur:
-        cur.execute(schema_sql)
-    print("   ✓ planning-Schema sichergestellt")
+    """Idempotentes Anlegen des `planning`-Schemas + Ergebnis-Tabellen + Martin-Funktionen."""
+    sql_dir = Path(__file__).parent / "sql"
+    for sql_file in ("schema.sql", "martin_functions.sql"):
+        sql = (sql_dir / sql_file).read_text()
+        with conn.cursor() as cur:
+            cur.execute(sql)
+    print("   ✓ planning-Schema + Martin-Funktionen sichergestellt")

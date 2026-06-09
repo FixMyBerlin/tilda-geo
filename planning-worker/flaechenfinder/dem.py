@@ -17,6 +17,13 @@ class DEMAdapter:
         self.dgm1_path = dgm1_path
         self._dgm1_ds = None
 
+    def __del__(self):
+        if self._dgm1_ds is not None:
+            try:
+                self._dgm1_ds.close()
+            except Exception:
+                pass
+
     def get_slopes(self, points: List[Tuple[float, float]]) -> List[float]:
         """Gibt Hangneigungen in Grad für [(lng, lat), ...] zurück."""
         if self.source == "dgm1" and self.dgm1_path:

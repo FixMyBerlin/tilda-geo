@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
+import { staticRegion } from '@/data/regions.const'
 import { Prisma } from '@/prisma/generated/client'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
@@ -57,11 +58,16 @@ export const getPlanningScenariosFn = createServerFn({ method: 'GET' })
         id: true,
         title: true,
         description: true,
-        parentId: true,
         currentRunId: true,
         createdAt: true,
         updatedAt: true,
         creator: { select: { id: true, osmName: true } },
+        // Latest job for status display (loader / green checkmark in list).
+        jobs: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { status: true },
+        },
       },
     })
   })
@@ -116,6 +122,50 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
     }
   })
 
+// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk, 10=Stadtteil) filtered to the
+// given region's geometry (looked up via the region's OSM relation IDs).
+export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
+  .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
+  .handler(async ({ data }) => {
+    const session = await requireAuth(getRequestHeaders())
+    await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
+
+    const staticData = staticRegion.find((r) => r.slug === data.regionSlug)
+    const osmRelationIds = staticData?.mask?.osmRelationIds ?? []
+    const relationKeys = osmRelationIds.map((id) => `relation/${id}`)
+
+    // If no region geometry exists in the DB (e.g. non-Berlin regions), fall back to all boundaries.
+    const regionGeom =
+      relationKeys.length > 0
+        ? await db.$queryRaw<{ geom: object | null }[]>`
+            SELECT ST_Union(geom) AS geom FROM public.boundaries WHERE id = ANY(${relationKeys}::text[])
+          `
+        : [{ geom: null }]
+
+    const hasRegionGeom = regionGeom[0]?.geom != null
+
+    const rows = await db.$queryRaw<
+      { id: string; name: string; admin_level: string; geom: object }[]
+    >`
+      SELECT
+        b.id,
+        COALESCE(b.tags->>'name', b.tags->>'name:de', b.tags->>'official_name', 'Ohne Namen (' || b.id || ')') AS name,
+        b.tags->>'admin_level' AS admin_level,
+        ST_AsGeoJSON(ST_Transform(b.geom, 4326))::json AS geom
+      FROM public.boundaries b
+      WHERE (b.tags->>'admin_level')::int IN (8, 9, 10)
+        AND (
+          NOT ${hasRegionGeom}
+          OR ST_Intersects(
+            b.geom,
+            (SELECT ST_Union(geom) FROM public.boundaries WHERE id = ANY(${relationKeys}::text[]))
+          )
+        )
+      ORDER BY (b.tags->>'admin_level')::int, COALESCE(b.tags->>'name', b.tags->>'name:de', b.tags->>'official_name', 'Ohne Namen (' || b.id || ')')
+    `
+    return rows
+  })
+
 // ── Mutations ───────────────────────────────────────────────────────────────────
 
 const CreateScenarioInput = z.object({
@@ -123,7 +173,6 @@ const CreateScenarioInput = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   factorConfig: FactorConfigSchema,
-  parentId: z.number().int().optional(),
 })
 
 export const createPlanningScenarioFn = createServerFn({ method: 'POST' })
@@ -138,7 +187,6 @@ export const createPlanningScenarioFn = createServerFn({ method: 'POST' })
         creatorId: session.userId,
         title: data.title,
         description: data.description,
-        parentId: data.parentId,
         factorConfig: data.factorConfig as Prisma.InputJsonValue,
       },
       select: { id: true },
@@ -169,29 +217,6 @@ export const updatePlanningScenarioFn = createServerFn({ method: 'POST' })
     })
   })
 
-// "Build upon": create a child scenario seeded from the parent's config.
-const CreateChildInput = z.object({ parentId: z.number().int(), title: z.string().min(1) })
-
-export const createChildPlanningScenarioFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateChildInput>) => CreateChildInput.parse(data))
-  .handler(async ({ data }) => {
-    const session = await authorizeByScenario(getRequestHeaders(), data.parentId)
-    const parent = await db.planningScenario.findFirstOrThrow({
-      where: { id: data.parentId },
-      select: { regionId: true, factorConfig: true },
-    })
-    return db.planningScenario.create({
-      data: {
-        regionId: parent.regionId,
-        creatorId: session.userId,
-        parentId: data.parentId,
-        title: data.title,
-        factorConfig: parent.factorConfig as object,
-      },
-      select: { id: true },
-    })
-  })
-
 // Enqueue a run: insert a QUEUED PlanningJob and wake the worker via NOTIFY.
 export const runPlanningScenarioFn = createServerFn({ method: 'POST' })
   .inputValidator((data: z.infer<typeof ScenarioIdInput>) => ScenarioIdInput.parse(data))
@@ -203,4 +228,22 @@ export const runPlanningScenarioFn = createServerFn({ method: 'POST' })
     })
     await db.$executeRaw`SELECT pg_notify('planning_jobs', ${String(job.id)})`
     return job
+  })
+
+// Delete a scenario and all its results (hexagons/areas in the planning schema).
+export const deletePlanningScenarioFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof ScenarioIdInput>) => ScenarioIdInput.parse(data))
+  .handler(async ({ data }) => {
+    await authorizeByScenario(getRequestHeaders(), data.scenarioId)
+    const runs = await db.planningRun.findMany({
+      where: { scenarioId: data.scenarioId },
+      select: { id: true },
+    })
+    if (runs.length > 0) {
+      const runIds = runs.map((r) => r.id)
+      await db.$executeRaw`DELETE FROM planning.scenario_hexagons WHERE run_id = ANY(${runIds})`
+      await db.$executeRaw`DELETE FROM planning.scenario_areas    WHERE run_id = ANY(${runIds})`
+    }
+    // PlanningJob and PlanningRun cascade-delete via FK.
+    await db.planningScenario.delete({ where: { id: data.scenarioId } })
   })

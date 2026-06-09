@@ -62,7 +62,9 @@ def run_flaechenfinder(
     if len(hex_gdf) == 0:
         return hex_gdf.to_crs("EPSG:25832"), gpd.GeoDataFrame(geometry=[], crs="EPSG:25832")
 
+    latlng_points = list(zip(hex_gdf["zentrum_lng"], hex_gdf["zentrum_lat"]))
     hex_proj = hex_gdf.to_crs("EPSG:25832")
+    del rows, hex_gdf
     centroids = hex_proj.geometry.centroid
 
     # ── 2. Radwege (PostGIS) ──────────────────────────────────────
@@ -70,6 +72,7 @@ def run_flaechenfinder(
     cycleways = tilda_loader.load_cycleways(study_area_geom)
     cycleway_proj = cycleways.to_crs("EPSG:25832") if len(cycleways) else cycleways
     hex_proj["abstand_radweg_m"] = _dist_to_union(centroids, cycleway_proj)
+    del cycleways, cycleway_proj
 
     # ── 3. Hindernisse / Untergrund ───────────────────────────────
     print("\n[3/7] Hindernisse & Untergrund laden...")
@@ -80,16 +83,19 @@ def run_flaechenfinder(
     })
     obstacles_proj = obstacles.to_crs("EPSG:25832") if len(obstacles) else obstacles
     hex_proj["abstand_hindernis_m"] = _dist_to_union(centroids, obstacles_proj)
+    del obstacles, obstacles_proj
 
     try:
         surfaces = osm_loader.features_from_polygon(study_area_geom, {"surface": True})
         if len(surfaces) and "surface" in surfaces.columns:
-            surfaces = surfaces[surfaces.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].to_crs("EPSG:25832")
-            joined = gpd.sjoin(hex_proj[["geometry"]], surfaces[["geometry", "surface"]],
+            surfaces_proj = surfaces[surfaces.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].to_crs("EPSG:25832")
+            joined = gpd.sjoin(hex_proj[["geometry"]], surfaces_proj[["geometry", "surface"]],
                                how="left", predicate="intersects")
             hex_proj["bodenbelag_osm"] = joined.groupby(joined.index)["surface"].first()
+            del surfaces_proj, joined
         else:
             hex_proj["bodenbelag_osm"] = None
+        del surfaces
     except Exception:
         hex_proj["bodenbelag_osm"] = None
 
@@ -118,6 +124,7 @@ def run_flaechenfinder(
             print(f"   ⚠️  {_tname}: {_e}")
             _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
     hex_proj["score_oepnv"] = pd.concat(_transit_scores, axis=1).max(axis=1)
+    del _transit_scores
 
     # ── 5. Zielorte ────────────────────────────────────────────────
     print(f"\n[5/7] Zielorte bewerten ({len(use_case.targets)} Typen)...")
@@ -141,11 +148,12 @@ def run_flaechenfinder(
         hex_proj["score_zielorte"] = pd.concat(target_scores, axis=1).max(axis=1)
     else:
         hex_proj["score_zielorte"] = 0.0
+    del target_scores
 
     # ── 6. DEM / Hangneigung ───────────────────────────────────────
     print(f"\n[6/7] Hangneigung berechnen ({use_case.dem_source})...")
-    points = list(zip(hex_gdf["zentrum_lng"], hex_gdf["zentrum_lat"]))
-    hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(points)
+    hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
+    del latlng_points
 
     # ── 7. MCE-Scoring ─────────────────────────────────────────────
     print("\n[7/7] MCE-Score berechnen (0–100)...")

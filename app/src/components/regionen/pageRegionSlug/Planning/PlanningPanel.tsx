@@ -1,14 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import {
-  createChildPlanningScenarioFn,
-  type FactorConfig,
-} from '@/server/planning/planning.functions'
-import {
-  planningScenarioQueryOptions,
-  planningScenariosQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+import type { FactorConfig } from '@/server/planning/planning.functions'
+import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
 import {
   usePlanningModeParam,
   usePlanningRunParam,
@@ -21,10 +15,7 @@ import { ScenarioList } from './ScenarioList'
 const routeApi = getRouteApi('/regionen/$regionSlug')
 
 const ScenarioDetail = ({ scenarioId }: { scenarioId: number }) => {
-  const queryClient = useQueryClient()
   const [, setRun] = usePlanningRunParam()
-  const [, setActiveScenario] = usePlanningScenarioParam()
-  const { regionSlug } = routeApi.useParams()
   const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
 
   // Show the scenario's latest result on the map when it is opened.
@@ -32,39 +23,26 @@ const ScenarioDetail = ({ scenarioId }: { scenarioId: number }) => {
     if (scenario?.currentRunId != null) setRun(scenario.currentRunId)
   }, [scenario?.currentRunId, setRun])
 
-  const childMutation = useMutation({
-    mutationFn: () =>
-      createChildPlanningScenarioFn({
-        data: { parentId: scenarioId, title: `${scenario?.title ?? 'Szenario'} (Variante)` },
-      }),
-    onSuccess: (created) => {
-      queryClient.invalidateQueries(planningScenariosQueryOptions(regionSlug))
-      setActiveScenario(created.id)
-    },
-  })
-
   if (!scenario) return null
+
+  // Scenario is locked (read-only) once any job has been created.
+  const isLocked = scenario.jobs.length > 0
+  const latestJob = scenario.jobs[0] ?? null
 
   return (
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">{scenario.title}</h3>
-        <button
-          type="button"
-          onClick={() => childMutation.mutate()}
-          disabled={childMutation.isPending}
-          className="rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-100 disabled:opacity-50"
-          title="Neues Szenario auf Basis dieses Datenstands"
-        >
-          Darauf aufbauen
-        </button>
-      </div>
+      <h3 className="font-semibold">
+        <span className="mr-1 text-xs font-normal text-gray-400">#{scenario.id}</span>
+        {scenario.title}
+      </h3>
 
-      <RunButton scenarioId={scenarioId} />
+      {!isLocked && <RunButton scenarioId={scenarioId} latestJob={null} />}
+      {isLocked && <RunButton scenarioId={scenarioId} latestJob={latestJob} />}
 
       <FactorEditorPanel
         scenarioId={scenarioId}
         factorConfig={scenario.factorConfig as FactorConfig}
+        readOnly={isLocked}
       />
 
       {scenario.runs[0] && (
@@ -86,8 +64,6 @@ export const PlanningPanel = () => {
   const [, setRun] = usePlanningRunParam()
   const { regionSlug } = routeApi.useParams()
 
-  // Entry/exit is driven by the topbar toggle (PlanningModeToggle); the panel only
-  // renders the interactive UI while the mode is active.
   if (!planningMode) return null
 
   const close = () => {

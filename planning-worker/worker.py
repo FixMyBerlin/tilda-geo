@@ -11,7 +11,9 @@ Beim Start werden hängengebliebene RUNNING-Jobs requeued.
 """
 from __future__ import annotations
 
+import gc
 import json
+import select as _select
 import sys
 import traceback
 
@@ -119,6 +121,8 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     )
 
     hex_count, area_count = write_results(engine, conn, run_id, hex_proj, areas)
+    del hex_proj, areas
+    gc.collect()
 
     run_status = "COMPLETE" if hex_count > 0 else "EMPTY"
     with conn.cursor() as cur:
@@ -180,10 +184,14 @@ def main():
     drain(conn, engine)  # evtl. bereits wartende Jobs
 
     while True:
-        # Blockiert bis Notify oder Timeout; danach immer drain (Poll-Fallback).
-        gen = conn.notifies(timeout=POLL_SECONDS)
-        for _ in gen:
-            break  # eine Notify reicht als Wakeup; drain holt alle
+        # select() auf dem Connection-Socket: wacht bei pg_notify oder nach
+        # POLL_SECONDS auf. Zuverlässiger als conn.notifies(timeout=…), das in
+        # psycopg3 3.3.x intern in futex_do_wait hängt und weder NOTIFY noch
+        # Timeout korrekt weitergibt.
+        try:
+            _select.select([conn.fileno()], [], [], POLL_SECONDS)
+        except Exception:
+            pass
         drain(conn, engine)
 
 

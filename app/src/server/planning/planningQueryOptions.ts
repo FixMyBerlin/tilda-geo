@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import {
+  getAdminBoundariesFn,
   getPlanningJobFn,
   getPlanningScenarioFn,
   getPlanningScenariosFn,
@@ -23,4 +24,12 @@ export const planningJobQueryOptions = (jobId: number) =>
   queryOptions({
     queryKey: ['planning', 'job', jobId] as const,
     queryFn: () => getPlanningJobFn({ data: { jobId } }),
+  })
+
+// Admin boundaries (levels 8–10) for study_area selection, filtered to the given region.
+export const adminBoundariesQueryOptions = (regionSlug: string) =>
+  queryOptions({
+    queryKey: ['planning', 'adminBoundaries', regionSlug] as const,
+    queryFn: () => getAdminBoundariesFn({ data: { regionSlug } }),
+    staleTime: 1000 * 60 * 60, // 1h
   })

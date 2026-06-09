@@ -33,7 +33,7 @@ def write_results(engine, conn, run_id: int, hex_proj: gpd.GeoDataFrame, areas: 
 
     hex_count = 0
     if len(hex_proj):
-        hx = hex_proj.to_crs("EPSG:3857").copy()
+        hx = hex_proj.to_crs("EPSG:3857")
         hx = hx.rename_geometry("geom")
         hx["run_id"] = run_id
         for col in HEX_COLUMNS:
@@ -42,10 +42,11 @@ def write_results(engine, conn, run_id: int, hex_proj: gpd.GeoDataFrame, areas: 
         hx = hx.set_geometry("geom")[HEX_COLUMNS]
         hx.to_postgis("scenario_hexagons", engine, schema="planning", if_exists="append", index=False)
         hex_count = len(hx)
+        del hx
 
     area_count = 0
     if len(areas):
-        ar = areas.to_crs("EPSG:3857").copy()
+        ar = areas.to_crs("EPSG:3857")
         ar = ar.rename_geometry("geom")
         ar["geom"] = ar["geom"].apply(_to_multipolygon)
         ar = ar[ar["geom"].notna()]
@@ -56,6 +57,7 @@ def write_results(engine, conn, run_id: int, hex_proj: gpd.GeoDataFrame, areas: 
         if len(ar):
             ar.to_postgis("scenario_areas", engine, schema="planning", if_exists="append", index=False)
         area_count = len(ar)
+        del ar
 
     print(f"   ✓ geschrieben: {hex_count} Hexagone, {area_count} Flächen (run_id={run_id})")
     return hex_count, area_count
