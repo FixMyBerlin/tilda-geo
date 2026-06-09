@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
+import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
 
 export const planningHexagonsSourceId = 'planning-hexagons-source'
@@ -70,7 +71,10 @@ export const SourcesLayersPlanning = () => {
     <>
       <Source id={planningHexagonsSourceId} type="vector" tiles={[hexagonsUrl]} promoteId="h3_id" />
       <Layer {...hexagonFillLayerProps} />
-      <LayerHighlight {...hexagonFillLayerProps} />
+      <LayerHighlight
+        {...hexagonFillLayerProps}
+        id={getLayerHighlightId(planningHexagonsLayerId)}
+      />
 
       <Source
         id="planning-bikelanes-ref"
