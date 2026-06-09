@@ -1,18 +1,17 @@
-import { twJoin } from 'tailwind-merge'
 import {
   usePlanningModeParam,
   usePlanningRunParam,
   usePlanningScenarioParam,
 } from '../hooks/useQueryState/usePlanningParams'
 
-/** Topbar toggle that enters/leaves the interactive planning mode (`?planning=1`). */
+/** Topbar mode selector. "Betrachten" = standard viewer; "Flächenfinder" = planning mode. */
 export const PlanningModeToggle = () => {
   const [planningMode, setPlanningMode] = usePlanningModeParam()
   const [, setActiveScenario] = usePlanningScenarioParam()
   const [, setRun] = usePlanningRunParam()
 
-  const toggle = () => {
-    const next = !planningMode
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const next = e.target.value === 'flaechenfinder'
     setPlanningMode(next)
     if (!next) {
       setActiveScenario(null)
@@ -21,18 +20,13 @@ export const PlanningModeToggle = () => {
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-pressed={planningMode}
-      className={twJoin(
-        planningMode
-          ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300'
-          : 'bg-gray-700 text-gray-100 hover:bg-gray-600 hover:text-white',
-        'flex shrink-0 items-center rounded-md px-3 py-2 text-sm leading-none font-medium',
-      )}
+    <select
+      value={planningMode ? 'flaechenfinder' : 'betrachten'}
+      onChange={handleChange}
+      className="cursor-pointer rounded-md bg-gray-700 px-3 py-2 text-sm font-medium text-gray-100 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
     >
-      🗺️ Planung
-    </button>
+      <option value="betrachten">Betrachten</option>
+      <option value="flaechenfinder">Flächenfinder</option>
+    </select>
   )
 }
