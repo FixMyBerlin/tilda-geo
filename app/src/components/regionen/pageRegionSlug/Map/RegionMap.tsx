@@ -43,6 +43,7 @@ import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRa
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
+import { SourcesLayersPlanning } from './SourcesAndLayers/SourcesLayersPlanning'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
@@ -307,6 +308,7 @@ export const RegionMap = () => {
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
       <SearchResultLayers />
+      <SourcesLayersPlanning />
       <AttributionControl compact={true} position="bottom-left" />
 
       {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}

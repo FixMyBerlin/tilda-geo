@@ -46,6 +46,19 @@ services:
       driver: json-file
     profiles:
       - frontend
+  planning-worker:
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}planning-worker
+    image: planning-worker:latest
+    build:
+      context: .
+      dockerfile: ./planning-worker.Dockerfile
+    volumes:
+      # Quellcode mounten für Iteration ohne Rebuild.
+      - ./planning-worker:/planning-worker
+    environment:
+      PGHOST: db
+    logging:
+      driver: json-file
   tiles:
     container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}tiles
     environment:

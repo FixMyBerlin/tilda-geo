@@ -1,0 +1,13 @@
+# Geo-Stack (binäre Wheels, kein System-GDAL nötig)
+geopandas>=1.0
+shapely>=2.0
+h3>=4.1
+pyproj>=3.6
+numpy>=1.26
+pandas>=2.2
+rasterio>=1.3
+
+# DB-Zugriff
+SQLAlchemy>=2.0
+GeoAlchemy2>=0.15      # von geopandas.to_postgis benötigt
+psycopg[binary]>=3.2   # notifies(timeout=...) seit 3.2

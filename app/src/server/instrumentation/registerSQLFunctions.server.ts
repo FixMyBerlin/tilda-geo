@@ -1,5 +1,6 @@
 import { styleText } from 'node:util'
 import { registerGeneralizationFunctions } from './registerGeneralizationFunctions.server'
+import { registerPlanningFunctions } from './registerPlanningFunctions.server'
 import { pluginOk } from './utils/pluginLog'
 
 export async function registerSQLFunctions() {
@@ -8,7 +9,11 @@ export async function registerSQLFunctions() {
       pluginOk('[generalization]', 'Generalization functions registered'),
     )
 
-    await generalizationFunctionPromise
+    const planningFunctionPromise = registerPlanningFunctions().then(() =>
+      pluginOk('[planning]', 'Planning tile functions registered'),
+    )
+
+    await Promise.all([generalizationFunctionPromise, planningFunctionPromise])
   } catch (error) {
     console.error(styleText('red', 'INSTRUMENTATION HOOK FAILED'), 'registerSQLFunctions', error)
   }

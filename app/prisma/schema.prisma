@@ -33,16 +33,19 @@ model User {
   lastName  String? // User's last name (editable via UserForm)
 
   // App-managed fields
-  role            UserRoleEnum   @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
-  accessedRegions Json?          @default("[]") // Region access tracking (JSON array) - managed by app logic
+  role              UserRoleEnum       @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
+  accessedRegions   Json?              @default("[]") // Region access tracking (JSON array) - managed by app logic
   //
-  sessions        Session[]
-  accounts        Account[]
-  verifications   Verification[]
-  Membership      Membership[]
-  Note            Note[]
-  NoteComment     NoteComment[]
-  qaEvaluations   QaEvaluation[]
+  sessions          Session[]
+  accounts          Account[]
+  verifications     Verification[]
+  Membership        Membership[]
+  Note              Note[]
+  NoteComment       NoteComment[]
+  qaEvaluations     QaEvaluation[]
+  //
+  // Planning module: scenarios this user created (any region member may still edit them).
+  planningScenarios PlanningScenario[]
 
   @@map("User")
   @@schema("prisma")
@@ -128,10 +131,11 @@ model Region {
   promoted  Boolean      @default(false)
   status    RegionStatus @default(PUBLIC)
 
-  Membership Membership[]
-  uploads    Upload[]
-  Note       Note[]
-  qaConfigs  QaConfig[]
+  Membership        Membership[]
+  uploads           Upload[]
+  Note              Note[]
+  qaConfigs         QaConfig[]
+  planningScenarios PlanningScenario[]
 
   @@map("Region")
   @@schema("prisma")
@@ -185,10 +189,10 @@ model StaticDatasetCategory {
   updatedAt DateTime @updatedAt
 
   /// Same string as Upload.configs[].category (e.g. bb/Netzkonzeption). Globally unique.
-  key         String @unique @db.VarChar(191)
+  key String @unique @db.VarChar(191)
 
   /// First path segment (before first `/`), e.g. bb from bb/Netzkonzeption.
-  groupKey    String @db.VarChar(191)
+  groupKey String @db.VarChar(191)
 
   /// Rest after first `/`, e.g. Netzkonzeption.
   categoryKey String @db.VarChar(191)
@@ -349,6 +353,113 @@ enum QaEvaluationStatus {
 enum QaEvaluatorType {
   SYSTEM
   USER
+
+  @@schema("prisma")
+}
+
+// ── Planning module (Flächenfinder) ──────────────────────────────────────────
+// New, additive product module. A scenario ("Datenstand") holds an editable
+// factorConfig; running it enqueues a PlanningJob that the Python worker consumes
+// and turns into an immutable PlanningRun whose geometries live in the `planning`
+// PostGIS schema (keyed by run id = PlanningRun.id), served via Martin functions.
+//
+// Permissions: any region member may edit/run any scenario of that region; the
+// creator is tracked for attribution only. Scenarios can build upon each other
+// via `parentId` (lineage).
+
+model PlanningScenario {
+  id           Int                @id @default(autoincrement())
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  //
+  title        String
+  description  String?
+  //
+  region       Region             @relation(fields: [regionId], references: [id])
+  regionId     Int
+  //
+  // Attribution only — editing is open to all region members.
+  creator      User               @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  //
+  // Lineage: "build upon" creates a child scenario seeded from the parent's config.
+  parent       PlanningScenario?  @relation("Lineage", fields: [parentId], references: [id])
+  parentId     Int?
+  children     PlanningScenario[] @relation("Lineage")
+  //
+  // Editable UseCaseConfig: weights, hard thresholds, targets, h3_resolution,
+  // dem_source, and the study-area geometry (GeoJSON).
+  factorConfig Json
+  //
+  // Pointer to the latest successful run used for display. Plain Int (logical FK
+  // to PlanningRun.id) to avoid a relation cycle.
+  currentRunId Int?
+  //
+  runs         PlanningRun[]
+  jobs         PlanningJob[]
+
+  @@index([regionId])
+  @@map("PlanningScenario")
+  @@schema("prisma")
+}
+
+model PlanningRun {
+  id                   Int               @id @default(autoincrement())
+  createdAt            DateTime          @default(now())
+  //
+  scenario             PlanningScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId           Int
+  //
+  // Frozen copy of the config used for THIS run (reproducibility).
+  factorConfigSnapshot Json
+  //
+  status               PlanningRunStatus @default(PENDING)
+  hexCount             Int?
+  areaCount            Int?
+  //
+  job                  PlanningJob?
+
+  @@index([scenarioId])
+  @@map("PlanningRun")
+  @@schema("prisma")
+}
+
+model PlanningJob {
+  id           Int               @id @default(autoincrement())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  //
+  scenario     PlanningScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  scenarioId   Int
+  //
+  status       PlanningJobStatus @default(QUEUED)
+  startedAt    DateTime?
+  finishedAt   DateTime?
+  errorMessage String?
+  //
+  // Set when DONE — links to the immutable run used for tile display.
+  resultRun    PlanningRun?      @relation(fields: [resultRunId], references: [id])
+  resultRunId  Int?              @unique
+
+  @@index([status])
+  @@index([scenarioId])
+  @@map("PlanningJob")
+  @@schema("prisma")
+}
+
+enum PlanningRunStatus {
+  PENDING
+  COMPLETE
+  EMPTY
+
+  @@schema("prisma")
+}
+
+enum PlanningJobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
 
   @@schema("prisma")
 }

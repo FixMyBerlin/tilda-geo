@@ -14,6 +14,7 @@ import { mobileMapBottomControlsClassName } from './mobile/mobileMapChrome.const
 import { MobileMapHeader } from './mobile/MobileMapHeader'
 import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
+import { PlanningPanel } from './Planning/PlanningPanel'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
 import { DesktopOnly } from './utils/Breakpoint'
@@ -50,6 +51,7 @@ export const MapInterface = () => {
         </DesktopOnly>
         <SidebarLayerControls />
         <SidebarInspector />
+        <PlanningPanel />
         <div className={mobileMapBottomControlsClassName} data-map-controls="true">
           <LoadingIndicator />
           <OsmNotes />

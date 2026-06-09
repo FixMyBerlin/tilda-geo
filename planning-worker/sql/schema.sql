@@ -1,0 +1,36 @@
+-- Planning module result schema.
+--
+-- Lives in its own `planning` schema so it is NOT auto-published by Martin
+-- (martin.yaml only publishes `public`) and is untouched by the daily viewer
+-- cache-clear. Result geometries are keyed by run_id (= prisma."PlanningRun".id)
+-- and are immutable once written: a re-run produces a new run_id.
+--
+-- Idempotent: applied on worker startup and safe to run repeatedly.
+
+CREATE SCHEMA IF NOT EXISTS planning;
+
+CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
+  run_id                  bigint NOT NULL,
+  h3_id                   text   NOT NULL,
+  geom                    geometry(Polygon, 3857) NOT NULL,
+  mce_gesamtscore         real,
+  score_radweg            real,
+  score_bodenbelag        real,
+  score_zielorte          real,
+  score_hangneigung       real,
+  score_hindernisfreiheit real,
+  score_oepnv             real,
+  eignungsklasse          text
+);
+
+CREATE TABLE IF NOT EXISTS planning.scenario_areas (
+  run_id          bigint NOT NULL,
+  geom            geometry(MultiPolygon, 3857) NOT NULL,
+  mce_gesamtscore real,
+  flaeche_m2      real
+);
+
+CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);
+CREATE INDEX IF NOT EXISTS scenario_hexagons_geom_idx   ON planning.scenario_hexagons USING gist (geom);
+CREATE INDEX IF NOT EXISTS scenario_areas_run_id_idx    ON planning.scenario_areas (run_id);
+CREATE INDEX IF NOT EXISTS scenario_areas_geom_idx      ON planning.scenario_areas USING gist (geom);
