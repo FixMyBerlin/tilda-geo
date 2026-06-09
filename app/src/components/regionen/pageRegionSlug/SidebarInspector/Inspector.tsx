@@ -3,10 +3,12 @@ import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hoo
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
+import { planningHexagonsSourceId } from '../Map/SourcesAndLayers/SourcesLayersPlanning'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
 import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
+import { InspectorFeaturePlanningHexagon } from './InspectorFeaturePlanningHexagon'
 import { InspectorFeatureQa } from './InspectorFeatureQa'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 import { InspectorFeatureTilda } from './InspectorFeatureTilda'
@@ -54,6 +56,15 @@ export const Inspector = ({ features }: Props) => {
           return (
             <InspectorFeatureQa
               key={`${qaSourceId}-${inspectObject?.properties?.id}`}
+              feature={inspectObject}
+            />
+          )
+        }
+
+        if (inspectObject.source === planningHexagonsSourceId) {
+          return (
+            <InspectorFeaturePlanningHexagon
+              key={createInspectorFeatureKey(inspectObject)}
               feature={inspectObject}
             />
           )

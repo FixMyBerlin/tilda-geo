@@ -4,6 +4,7 @@ import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
 import { useShowInternalNotesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import { useShowOsmNotesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
@@ -16,6 +17,7 @@ import {
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
+import { planningHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersPlanning'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
 import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
@@ -94,6 +96,7 @@ export const useInteractiveLayers = () => {
   const { qaParamData } = useQaParam()
   const { dataParam: selectedDatasetIds } = useDataParam()
   const { data: regionDatasets } = useRegionDatasetsQuery()
+  const [planningRun] = usePlanningRunParam()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -121,6 +124,10 @@ export const useInteractiveLayers = () => {
   // via the normal dataset filtering. We need to manually add them so they're interactive.
   if (region.mask) {
     activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
+  }
+
+  if (planningRun != null) {
+    activeCategoryLayerIds.push(planningHexagonsLayerId)
   }
 
   // active layer from datasets
