@@ -62,6 +62,9 @@ export default defineConfig({
     },
   },
   server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
     // Pre-transform shell modules that pull server-fn + auth graphs before the browser requests them.
     warmup: {
       clientFiles: [

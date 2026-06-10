@@ -6,9 +6,9 @@
   "author": "FixMyCity <hello@fixmycity.de>",
   "type": "module",
   "scripts": {
-    "start": "vite preview --host 127.0.0.1 --port 4000",
+    "start": "vite preview --host 127.0.0.1 --port 4000 --strictPort",
     "dev": "bun --env-file=../.env run --parallel dev:*",
-    "dev:vite": "FORCE_COLOR=1 vite dev --host 127.0.0.1 --port 5173",
+    "dev:vite": "FORCE_COLOR=1 vite dev --host 127.0.0.1 --port 5173 --strictPort",
     "dev:topic-docs-watch": "bun ./scripts/topic-docs-build/watch.ts",
     "predev": "bun --env-file=../.env run --sequential predev:*",
     "predev:1docker": "bun scripts/predev/checkDocker.ts",

@@ -43,7 +43,7 @@ Each window has its own chat/agent context and terminal. Run the dev server in t
 
 - **Same repo, same remotes:** worktrees share the same `.git` (and refs); only the working tree and current branch differ. No need to clone again.
 - **One branch per worktree:** each path has exactly one branch checked out; Git prevents checking out the same branch in two worktrees.
-- **Ports:** if both run the same app (e.g. Vite dev on 5173), run the second server on another port (e.g. `PORT=5174 bun run dev`) to avoid conflicts.
+- **Ports:** the app dev server is fixed to port 4000 (`strictPort`). Only one worktree can run `bun run dev` at a time on the same machine; otherwise, auth will not work.
 
 ### Chat 2: GitHub app and .env
 
