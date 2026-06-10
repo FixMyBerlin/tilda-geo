@@ -968,7 +968,7 @@ export const staticRegion: StaticRegion[] = [
     fullName: 'Pankow',
     product: 'fussverkehr',
     mask: { osmRelationIds: [164723], bufferKm: 0.1 },
-    map: { lat: 52.5482, lng: 13.4016, zoom: 16 },
+    map: { lat: 52.548, lng: 13.422, zoom: 12.8 },
     bbox: null,
     externalLogoPath:
       'https://www.berlin.de/imgscaler/F5uhRQooKmQVGom47pZ-GrE68UX1FF9gh_Tkiv9mFCk/sitelogo/L3N5czExLXByb2QvYmEtcGFua293L19hc3NldHMvZml0dG9zaXplX181MF83NV9lZTI0MDBhYmY5ZmQzZjdiM2FjZThjMDhhNGE5ZjY2NV93YXBwZW5fcGFua293X21pdF9tYXVlcmtyb25lLmpwZw.jpg',
