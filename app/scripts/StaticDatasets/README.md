@@ -51,9 +51,10 @@ Use `--keep-tmp` to keep the files for debugging.
   ```
 - The files are uncompressed and stored in the temp folder, then transformed, then processed (tippacanoe)
 
-### Formatting
+### Formatting & linting
 
-- `bun run format` (Husky, `check`) runs `format:static-datasets-code` — `oxfmt.static-datasets-code.config.mjs` on `scripts/StaticDatasets` and `scripts/StaticDatasets/geojson` (skips `*.geojson`, `*.json`, `_geojson_temp` via config).
+- `bun run format` (Husky pre-commit) runs `format:static-datasets-code` — `oxfmt.static-datasets-code.config.mjs` on `scripts/StaticDatasets` and `scripts/StaticDatasets/geojson` (skips `*.geojson`, `*.json`, `_geojson_temp` via config). Second path is required: `geojson/` is gitignored, so oxfmt would not enter the symlink otherwise.
+- `bun run lint` / `check` runs `lint:static-datasets-code` — same two paths; `lint:main` alone skips gitignored `geojson/` like `oxlint .` does.
 - `format:main` / `format:check` use `oxfmt.config.mjs`, which ignores all of `scripts/StaticDatasets/geojson/**` (symlinked `tilda-static-data` repo).
 - GeoJSON / JSON data files: editor format-on-save or `format-static-datasets-geojson` with explicit paths. Named for geojson, but any passed file under `StaticDatasets` formats (e.g. a stray `.ts` is fine).
 - Agents adding datasets: `bun run format-static-datasets-geojson -- scripts/StaticDatasets/geojson/<group>/<dataset>/*.{geojson,json}` (see [add-static-dataset skill](../../../.cursor/skills/add-static-dataset/SKILL.md)).
