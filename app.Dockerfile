@@ -20,7 +20,7 @@ RUN bun install --frozen-lockfile --ignore-scripts
 COPY app /app
 
 # Generate `@prisma/client` explicitly for this image build because `bun run build` imports `@prisma/client`, so the generated client must exist before build.
-RUN bun scripts/prisma-generate-placeholder/index.ts
+RUN bun run postinstall
 
 # Build-time env for Vite client bundle (inlined at build)
 ARG VITE_APP_ENV
