@@ -35,6 +35,13 @@ const ScenarioDetail = ({ scenarioId }: { scenarioId: number }) => {
         <span className="mr-1 text-xs font-normal text-gray-400">#{scenario.id}</span>
         {scenario.title}
       </h3>
+      <p className="text-xs text-gray-400">
+        Erstellt:{' '}
+        {new Date(scenario.createdAt).toLocaleString('de-DE', {
+          dateStyle: 'short',
+          timeStyle: 'short',
+        })}
+      </p>
 
       {!isLocked && <RunButton scenarioId={scenarioId} latestJob={null} />}
       {isLocked && <RunButton scenarioId={scenarioId} latestJob={latestJob} />}

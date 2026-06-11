@@ -16,7 +16,7 @@ export const BoundaryPicker = ({
   regionSlug,
 }: {
   value: string | null
-  onChange: (boundaryId: string, geom: unknown) => void
+  onChange: (boundaryId: string, geom: unknown, name: string) => void
   regionSlug: string
 }) => {
   const { data: boundaries, isLoading } = useQuery(adminBoundariesQueryOptions(regionSlug))
@@ -38,7 +38,7 @@ export const BoundaryPicker = ({
       value={value ?? ''}
       onChange={(e) => {
         const selected = boundaries.find((b) => b.id === e.target.value)
-        if (selected) onChange(selected.id, selected.geom)
+        if (selected) onChange(selected.id, selected.geom, selected.name)
       }}
       className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
     >

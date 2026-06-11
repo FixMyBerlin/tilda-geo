@@ -89,9 +89,7 @@ const CreateForm = ({
   onCancel: () => void
 }) => {
   const queryClient = useQueryClient()
-  const [title, setTitle] = useState(
-    new Date().toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }),
-  )
+  const [title, setTitle] = useState('')
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
   const [studyArea, setStudyArea] = useState<unknown>(null)
 
@@ -127,9 +125,10 @@ const CreateForm = ({
         Berechnungsgebiet
         <BoundaryPicker
           value={boundaryId}
-          onChange={(id, geom) => {
+          onChange={(id, geom, name) => {
             setBoundaryId(id)
             setStudyArea(geom)
+            setTitle(name)
           }}
           regionSlug={regionSlug}
         />
