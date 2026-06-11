@@ -1,11 +1,15 @@
 describe('poiClassification minzoom', function()
   local minzoom = require('topics.poiClassification.helper.minzoom')
 
-  it('returns 11 for formal education entries', function()
-    assert.are.same(minzoom({ formalEducation = 'school' }), 11)
+  it('returns 7 for formal education entries', function()
+    assert.are.same(minzoom({ formalEducation = 'school', category = 'Bildung' }), 7)
   end)
 
-  it('returns 13 for other poi categories', function()
-    assert.are.same(minzoom({ category = 'Freizeit' }), 13)
+  it('returns 7 for categorized pois', function()
+    assert.are.same(minzoom({ category = 'Freizeit' }), 7)
+  end)
+
+  it('returns 13 for pois without category or formal education', function()
+    assert.are.same(minzoom({}), 13)
   end)
 end)
