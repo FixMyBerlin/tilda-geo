@@ -76,19 +76,6 @@ export const SourcesLayersPlanning = () => {
         id={getLayerHighlightId(planningHexagonsLayerId)}
       />
 
-      <Source
-        id="planning-bikelanes-ref"
-        type="vector"
-        tiles={[getTilesUrl('/atlas_generalized_bikelanes/{z}/{x}/{y}')]}
-      />
-      <Layer
-        id="planning-bikelanes-ref-layer"
-        source="planning-bikelanes-ref"
-        source-layer="bikelanes"
-        type="line"
-        paint={{ 'line-color': '#0066ff', 'line-width': 1.5, 'line-opacity': 0.6 }}
-      />
-
       <Source id="planning-areas-source" type="vector" tiles={[areasUrl]} />
       <Layer
         id="planning-areas-fill"
