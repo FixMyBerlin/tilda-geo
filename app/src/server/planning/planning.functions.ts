@@ -122,7 +122,7 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
     }
   })
 
-// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk, 10=Stadtteil) filtered to the
+// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk) filtered to the
 // given region's geometry (looked up via the region's OSM relation IDs).
 export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
@@ -153,7 +153,7 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
         b.tags->>'admin_level' AS admin_level,
         ST_AsGeoJSON(ST_Transform(b.geom, 4326))::json AS geom
       FROM public.boundaries b
-      WHERE (b.tags->>'admin_level')::int IN (8, 9, 10)
+      WHERE (b.tags->>'admin_level')::int IN (8, 9)
         AND (
           NOT ${hasRegionGeom}
           OR ST_Intersects(

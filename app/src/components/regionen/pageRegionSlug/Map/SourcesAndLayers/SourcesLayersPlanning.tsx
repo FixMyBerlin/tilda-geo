@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
+import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
 import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { getLayerHighlightId } from '../utils/layerHighlight'
@@ -45,6 +46,29 @@ const hexagonFillLayerProps = {
   },
 }
 
+const BoundaryHighlightLayer = () => {
+  const geom = usePlanningBoundaryState((s) => s.boundaryHighlightGeom)
+  if (!geom) return null
+  return (
+    <Source
+      id="planning-boundary-highlight"
+      type="geojson"
+      data={{ type: 'Feature', geometry: geom as any, properties: {} }}
+    >
+      <Layer
+        id="planning-boundary-highlight-fill"
+        type="fill"
+        paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.1 }}
+      />
+      <Layer
+        id="planning-boundary-highlight-outline"
+        type="line"
+        paint={{ 'line-color': '#2563eb', 'line-width': 2, 'line-dasharray': [4, 2] }}
+      />
+    </Source>
+  )
+}
+
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
 
@@ -62,13 +86,15 @@ export const SourcesLayersPlanning = () => {
     }
   }, [runId])
 
-  if (runId == null) return null
+  if (runId == null) return <BoundaryHighlightLayer />
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const areasUrl = getTilesUrl(`/planning_areas/{z}/{x}/{y}?run_id=${runId}`)
 
   return (
     <>
+      <BoundaryHighlightLayer />
+
       <Source id={planningHexagonsSourceId} type="vector" tiles={[hexagonsUrl]} promoteId="h3_id" />
       <Layer {...hexagonFillLayerProps} />
       <LayerHighlight
