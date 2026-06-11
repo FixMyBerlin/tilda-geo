@@ -1,33 +1,39 @@
-import { twMerge } from 'tailwind-merge'
 import type { LinkProps } from '@/components/shared/links/Link'
 import { Link } from '@/components/shared/links/Link'
-import type { FooterMenuItem } from './footerLinks.const'
-
-type Props = {
-  linkList: FooterMenuItem[]
-  className?: string
-}
+import type { FooterLinkGroup } from './footerLinks.const'
 
 type InternalTo = Extract<LinkProps, { to: unknown }>['to']
 
-export const FooterLinkList = ({ linkList, className }: Props) => {
+type Props = {
+  group: FooterLinkGroup
+}
+
+const linkClassName =
+  'block text-sm leading-6 text-gray-400 decoration-gray-600 decoration-1 underline-offset-2 hover:text-white! hover:decoration-white'
+
+export const FooterLinkList = ({ group }: Props) => {
   return (
-    <ul
-      className={twMerge(
-        'flex flex-col space-y-3 text-center sm:flex-row sm:justify-end sm:space-y-0 sm:gap-x-8 sm:text-left',
-        className,
-      )}
-    >
-      {linkList.map((item) => (
-        <li key={item.name}>
-          <Link
-            to={item.to as InternalTo}
-            className="block text-base leading-5 text-gray-50 decoration-gray-400 decoration-1 underline-offset-2 hover:text-white! hover:decoration-white"
-          >
-            {item.name}
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <div>
+      <h3 className="text-sm font-semibold tracking-wider text-gray-300 uppercase">
+        {group.heading}
+      </h3>
+      <ul className="mt-4 space-y-3">
+        {group.links.map((item) =>
+          item.href != null ? (
+            <li key={item.name}>
+              <Link href={item.href} blank className={linkClassName}>
+                {item.name}
+              </Link>
+            </li>
+          ) : (
+            <li key={item.name}>
+              <Link to={item.to as InternalTo} className={linkClassName}>
+                {item.name}
+              </Link>
+            </li>
+          ),
+        )}
+      </ul>
+    </div>
   )
 }
