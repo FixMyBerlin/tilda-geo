@@ -7377,6 +7377,7 @@ const data = {
         key: 'category',
         type: 'string',
         label: 'Bauliche Führung',
+        chapterRefs: ['versetzte-geometrien'],
         values: [
           {
             value: 'bicycleRoad',
@@ -8755,7 +8756,14 @@ const data = {
         ],
       },
     ],
-    chapters: [],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
   todos_lines: {
     topic: 'roads_bikelanes',
@@ -8799,7 +8807,14 @@ const data = {
         values: [],
       },
     ],
-    chapters: [],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
   roadsPathClasses: {
     topic: 'roads_bikelanes',
@@ -9833,7 +9848,14 @@ const data = {
         values: [],
       },
     ],
-    chapters: [],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
   bikelanesPresence: {
     topic: 'roads_bikelanes',
@@ -10274,7 +10296,14 @@ const data = {
         ],
       },
     ],
-    chapters: [],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
   bikeSuitability: {
     topic: 'roads_bikelanes',
@@ -10737,7 +10766,14 @@ const data = {
         ],
       },
     ],
-    chapters: [],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
   roads: {
     topic: 'roads_bikelanes',
@@ -11890,7 +11926,14 @@ const data = {
         ],
       },
     ],
-    chapters: [],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
 } as const satisfies Partial<Record<string, TopicDocCompiled>>
 

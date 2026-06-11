@@ -4,6 +4,8 @@ sourceIds:
 attributes:
   - key: category
     label: Bauliche Führung
+    chapterRefs:
+      - chapterId: versetzte-geometrien
     values:
       - value: bicycleRoad
         label: Fahrradstraße
