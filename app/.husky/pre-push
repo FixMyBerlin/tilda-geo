@@ -16,7 +16,7 @@ bun "$ROOT/.github/scripts/generate-github-readme.ts" || exit 1
 bun run format:github || exit 1
 git -C "$ROOT" diff --exit-code -- .github/README.md || exit 1
 
-# Linting, Formating and Type-Checks for `App`
+# Linting, formatting and type-checks for `App`
 bun run check
 bun run type-check-deploy
 

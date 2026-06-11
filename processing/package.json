@@ -5,12 +5,10 @@
   "scripts": {
     "test": "bun ./scripts/run-tests.ts",
     "lint": "oxlint --fix .",
-    "lint:check": "oxlint .",
     "format": "oxfmt --write -c ../app/oxfmt.config.mjs .",
-    "check": "bun --parallel check:type check:format check:lint",
-    "check:type": "bun run typecheck",
-    "check:format": "oxfmt --check -c ../app/oxfmt.config.mjs .",
-    "check:lint": "bun run lint:check",
+    "check": "bun run --parallel typecheck lint format test",
+    "check-lint": "oxlint .",
+    "check-format": "oxfmt --check -c ../app/oxfmt.config.mjs .",
     "typecheck": "bun ./scripts/run-typecheck-lua.ts"
   },
   "dependencies": {

@@ -38,10 +38,10 @@ jobs:
         run: bun run type-check
 
       - name: Check formatting
-        run: bun run format:check
+        run: bun run check-format
 
       - name: Check linting
-        run: bun run lint:check
+        run: bun run check-lint
 
       - name: Run tests
         env:
