@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { $ } from 'bun'
 import { PSEUDO_TAGS_DATA } from '../../../constants/directories.const'
 import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing'
+import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
 import {
   getSkipUnchangedContext,
@@ -9,11 +10,13 @@ import {
   willSkipTopic,
 } from '../../../utils/skipUnchanged'
 
+const LOG_PREFIX = '[Afterthoughts][Sidepath]'
+
 /**
- * Export is_sidepath estimation to CSV from the current DB (previous run’s data).
- * Called at the beginning of the run, before processTopics overwrites source tables.
- * Writes PSEUDO_TAGS_DATA/is_sidepath_estimation.csv so Lua can use it during this run.
- * If tables don’t exist yet (first run / empty DB), we skip and continue; Lua will get no data.
+ * Afterthought: export is_sidepath estimation to CSV from the current run's DB.
+ * Called at the end of processing (after Processing: Finished).
+ * Writes PSEUDO_TAGS_DATA/is_sidepath_estimation.csv for the next run's roads_bikelanes Lua import.
+ * If tables don't exist yet (first run / empty DB), we warn and continue.
  */
 export async function exportSidepathData(fileChanged: boolean) {
   const sqlDir = join(import.meta.dir, 'sql')
@@ -23,40 +26,50 @@ export async function exportSidepathData(fileChanged: boolean) {
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
 
   const skipContext = await getSkipUnchangedContext(fileChanged)
+  const csvExists = await Bun.file(csvPath).exists()
 
   if (await willSkipTopic('roads_bikelanes', fileChanged, skipContext)) {
-    const excludedByProcessOnlyTopics =
-      params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes('roads_bikelanes')
+    if (csvExists) {
+      const excludedByProcessOnlyTopics =
+        params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes('roads_bikelanes')
+      console.log(
+        `${LOG_PREFIX} ⏩ Skipping — roads_bikelanes did not run; existing CSV will be used next run.`,
+        excludedByProcessOnlyTopics
+          ? `PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`
+          : 'SKIP_UNCHANGED is active and topic code is unchanged.',
+        JSON.stringify({ csvPath }),
+      )
+      return
+    }
+
     console.log(
-      '[Pseudo Tags][Sidepath] ⏩ Skipping export. roads_bikelanes will not run.',
-      excludedByProcessOnlyTopics
+      `${LOG_PREFIX} roads_bikelanes did not run but no CSV exists for next run — exporting from current DB.`,
+      params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes('roads_bikelanes')
         ? `PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`
         : 'SKIP_UNCHANGED is active and topic code is unchanged.',
     )
-    return
   }
 
-  const csvExists = await Bun.file(csvPath).exists()
   const sidepathCodeChanged = await directoryHasChanged(roadsBikelanesSidepathDir)
   if (!fileChanged && !sidepathCodeChanged && csvExists) {
     console.log(
-      '[Pseudo Tags][Sidepath] ⏩ Skipping export.',
-      'OSM file and pseudo_tags_sidepath are unchanged; reusing existing CSV.',
+      `${LOG_PREFIX} ⏩ Skipping — OSM file and pseudo_tags_sidepath are unchanged; reusing existing CSV.`,
       JSON.stringify({ csvPath }),
     )
     return
   }
 
   console.log(
-    '[Pseudo Tags][Sidepath] Export is_sidepath estimation from current DB (roads, _roads_bikelanes_sidepath_source_paths from previous run)',
+    `${LOG_PREFIX} Exporting is_sidepath_estimation.csv for next run`,
+    '(from roads, _roads_bikelanes_sidepath_source_paths in current DB)',
   )
   try {
-    console.time('[Pseudo Tags][Sidepath] Export-Timer')
+    logStart('Afterthoughts: Sidepath export')
     // -q = suppress message, print errors
     await $`psql -q -v ON_ERROR_STOP=1 -v outfile=${csvPath} -f ${runFile}`
-    console.timeEnd('[Pseudo Tags][Sidepath] Export-Timer')
+    logEnd('Afterthoughts: Sidepath export')
     await updateDirectoryHash(roadsBikelanesSidepathDir)
   } catch (error) {
-    console.warn('[Pseudo Tags][Sidepath] ERROR: is_sidepath export failed.', error)
+    console.warn(`${LOG_PREFIX} WARN: is_sidepath export failed — continuing.`, error)
   }
 }

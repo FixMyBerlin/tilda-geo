@@ -1,3 +1,4 @@
+import { runAfterthoughts } from './steps/afterthoughts'
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
 import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
@@ -6,7 +7,6 @@ import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
-import { exportSidepathData } from './topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
 
@@ -35,11 +35,7 @@ async function main() {
     const globalBboxFilterResponse = await globalBboxFilter(fileName, fileChanged)
     if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
 
-    logPadded('Processing: Pseudo Tags', berlinTimeString(new Date()))
-    // Start timing for the actual data processing (matches old behavior)
     const processingStartTime = Date.now()
-    // Export sidepath CSV from current DB (yesterday's data) before processTopics overwrites it
-    await exportSidepathData(fileChanged)
     await processTopics(fileName, fileChanged)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
@@ -62,6 +58,7 @@ async function main() {
     await updateCache()
 
     logTileInfo()
+    await runAfterthoughts(fileChanged)
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
     console.error('[ERROR] Processing failed (catchall)', error)
