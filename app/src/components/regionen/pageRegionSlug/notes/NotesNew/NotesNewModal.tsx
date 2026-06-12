@@ -29,7 +29,7 @@ export const NotesNewModal = ({ children }: { children: React.ReactNode }) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 z-10 flex w-screen justify-center overflow-y-auto bg-gray-950/25 px-2 py-2 backdrop-blur-sm focus:outline-0 sm:px-6 sm:py-8 lg:px-8 lg:py-16 dark:bg-gray-950/50" />
+          <div className="fixed inset-0 z-10 flex w-screen justify-center overflow-y-auto bg-gray-950/25 px-2 py-2 backdrop-blur-sm focus:outline-0 sm:px-6 sm:py-8 lg:px-8 lg:py-16" />
         </TransitionChild>
 
         <TransitionChild
@@ -46,7 +46,7 @@ export const NotesNewModal = ({ children }: { children: React.ReactNode }) => {
           <div className="mx-auto grid min-h-full max-w-7xl grid-rows-[1fr_auto] justify-items-center p-2.5 sm:grid-rows-[1fr_auto_3fr] sm:p-4">
             <TransitionChild
               as={Dialog.Panel}
-              className="relative row-start-2 w-full min-w-0 overflow-clip rounded-lg bg-amber-50 shadow-xl ring-1 ring-gray-950/10 sm:mb-auto dark:bg-gray-900 dark:ring-white/10 forced-colors:outline"
+              className="relative row-start-2 w-full min-w-0 overflow-clip rounded-lg bg-amber-50 shadow-xl ring-1 ring-gray-950/10 sm:mb-auto forced-colors:outline"
               // Transition props
               enter="ease-out duration-100"
               enterFrom="sm:scale-95"

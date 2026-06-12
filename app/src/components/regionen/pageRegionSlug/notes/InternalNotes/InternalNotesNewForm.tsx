@@ -106,7 +106,7 @@ export const InternalNotesNewForm = () => {
       >
         {(form) => (
           <>
-            <p className="leading-snug">
+            <p className="leading-snug text-gray-900">
               Interne Hinweise sind nur für angemeldete Nutzer:innen sichtbar, die für diese Region
               freigeschaltet wurden.{' '}
               {commentedFeatureId ? (

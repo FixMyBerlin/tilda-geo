@@ -121,7 +121,7 @@ export const OsmNotesNewForm = () => {
       >
         {(form) => (
           <>
-            <p className="leading-snug">
+            <p className="leading-snug text-gray-900">
               Bitte beschreiben Sie möglichst genau,{' '}
               {commentedFeatureId ? (
                 <>
