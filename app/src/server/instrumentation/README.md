@@ -16,7 +16,7 @@ Registers custom PostgreSQL functions used by the app and Martin tile layers.
 
 Other deferred post-processing work does **not** go through this folder or the hook. After `Processing: Finished`, the processing container runs [afterthoughts](../../../processing/steps/afterthoughts.ts) directly:
 
-- **Statistics** — populates `public.aggregated_lengths` (read by `/api/stats`)
+- **Statistics** — populates `public.aggregated_lengths` (empty shell at processing initialize; read by `/api/stats`)
 - **Sidepath export** — writes `is_sidepath_estimation.csv` for the next run
 
 That runs in the processing container in dev and prod; no app HTTP call required.

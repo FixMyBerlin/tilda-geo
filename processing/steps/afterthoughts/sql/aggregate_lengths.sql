@@ -1,5 +1,10 @@
 -- Afterthought: populate public.aggregated_lengths from roads, bikelanes, and boundaries.
--- Ported from app/src/server/statistics/analysis/aggregateLengths.server.ts
+-- Table shell is created at processing initialize; this run fills/updates rows.
+
+DO $$ BEGIN
+  RAISE NOTICE '[Afterthoughts][Statistics] Populate aggregated_lengths at %',
+    clock_timestamp() AT TIME ZONE 'Europe/Berlin';
+END $$;
 
 CREATE OR REPLACE FUNCTION atlas_segmentize_linestring(input_geom Geometry(LineString), input_length FLOAT, res INT)
 RETURNS TABLE(
@@ -104,20 +109,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TABLE IF NOT EXISTS aggregated_lengths
-(
-  id TEXT UNIQUE,
-  name TEXT,
-  level TEXT,
-  geom Geometry(MultiPolygon, 3857),
-  regionalschluessel TEXT,
-  bikelane_length JSONB,
-  road_length JSONB
-);
-
--- TODO(2026-12): Remove ALTER ADD COLUMN when all deployments are migrated.
-ALTER TABLE aggregated_lengths ADD COLUMN IF NOT EXISTS regionalschluessel TEXT;
-
 BEGIN;
 
 INSERT INTO aggregated_lengths (id, name, level, geom, regionalschluessel, bikelane_length, road_length)
@@ -145,3 +136,13 @@ DROP TABLE temp_roads_segmentized;
 DROP TABLE temp_bikelanes_segmentized;
 
 COMMIT;
+
+DO $$
+DECLARE
+  row_count INT;
+BEGIN
+  SELECT count(*) INTO row_count FROM public.aggregated_lengths;
+  RAISE NOTICE '[Afterthoughts][Statistics] Populated % rows at %',
+    row_count,
+    clock_timestamp() AT TIME ZONE 'Europe/Berlin';
+END $$;

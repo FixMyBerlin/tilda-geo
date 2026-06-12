@@ -9,6 +9,7 @@ import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
 import { isDev } from '../utils/isDev'
 import { logPadded } from '../utils/logging'
 import { paramsFilteredForLogs } from '../utils/parameters'
+import { initializeAggregatedLengthsTable } from './afterthoughts/initializeAggregatedLengths'
 import { initializeMetadataTable } from './metadata'
 
 const DEBUG_LUA = false
@@ -41,6 +42,7 @@ export async function initialize() {
 
   // Meta Data
   await initializeMetadataTable()
+  await initializeAggregatedLengthsTable()
 
   // See ../pseudoTags
   await downloadPseudoTagsData()

@@ -15,17 +15,15 @@ const LOG_PREFIX = '[Afterthoughts][Statistics]'
 export async function aggregateLengths() {
   const sqlFile = join(import.meta.dir, 'sql', 'aggregate_lengths.sql')
 
-  console.log(`${LOG_PREFIX} Aggregating road and bikelane lengths per boundary`)
-
   try {
     logStart('Afterthoughts: Statistics')
     await updateProcessingMetaStatisticsStarted()
 
-    await $`psql -q -v ON_ERROR_STOP=1 -f ${sqlFile}`
+    await $`psql -v ON_ERROR_STOP=1 -f ${sqlFile}`
 
     await updateProcessingMetaStatisticsCompleted()
     logEnd('Afterthoughts: Statistics')
   } catch (error) {
-    console.warn(`${LOG_PREFIX} WARN: statistics aggregation failed — continuing.`, error)
+    console.warn(`${LOG_PREFIX} WARN: aggregation failed — continuing.`, error)
   }
 }

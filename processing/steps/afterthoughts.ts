@@ -6,7 +6,7 @@ import { aggregateLengths } from './afterthoughts/aggregateLengths'
 export async function runAfterthoughts(fileChanged: boolean) {
   logStart('Processing: Afterthoughts')
   console.log(
-    '[Afterthoughts] Deferred work after Processing: Finished (statistics for current run, sidepath CSV for next run).',
+    '[Afterthoughts] Deferred work (statistics for current run, sidepath CSV for next run).',
   )
 
   await aggregateLengths()

@@ -163,9 +163,7 @@ async function updateProcessingMetaStatistics(columnName: StatisticsMetaColumn) 
   `
 
   if (result.length === 0) {
-    console.warn(
-      `[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``,
-    )
+    console.warn(`[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``)
   }
 }
 
