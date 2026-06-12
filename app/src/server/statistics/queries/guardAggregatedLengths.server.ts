@@ -17,10 +17,8 @@ const logMissingTableHint = () => {
 
   if (process.env.NODE_ENV !== 'production') {
     const tip = [
-      '[dev tip] Open /admin, then click:',
-      '1) "SQL-Funktionen registrieren"',
-      '2) "Statistik / Analysis"',
-      'After both background jobs are done, restart the dev server (`bun run dev`).',
+      '[dev tip] Run processing to completion (afterthoughts populate aggregated_lengths),',
+      'or execute processing/steps/afterthoughts/sql/aggregate_lengths.sql against the geo DB.',
     ].join('\n')
     process.stderr.write(`${styleText(['bold', 'yellow'], tip)}\n`)
   }

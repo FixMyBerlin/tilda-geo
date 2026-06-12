@@ -144,3 +144,35 @@ export async function updateProcessingEntry(
 
   return sql`UPDATE public.meta SET ${sql(data)} WHERE id = ${processingId}`
 }
+
+type StatisticsMetaColumn = 'statistics_started_at' | 'statistics_completed_at'
+
+async function updateProcessingMetaStatistics(columnName: StatisticsMetaColumn) {
+  const result = await sql`
+    UPDATE public.meta
+    SET ${sql({ [columnName]: new Date() })}
+    WHERE id = (
+      SELECT id
+      FROM public.meta
+      WHERE status = 'postprocessing'
+        AND processing_completed_at > NOW() - INTERVAL '2 hours'
+      ORDER BY id DESC
+      LIMIT 1
+    )
+    RETURNING id
+  `
+
+  if (result.length === 0) {
+    console.warn(
+      `[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``,
+    )
+  }
+}
+
+export async function updateProcessingMetaStatisticsStarted() {
+  return updateProcessingMetaStatistics('statistics_started_at')
+}
+
+export async function updateProcessingMetaStatisticsCompleted() {
+  return updateProcessingMetaStatistics('statistics_completed_at')
+}

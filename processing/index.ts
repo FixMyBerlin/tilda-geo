@@ -45,9 +45,9 @@ async function main() {
     // Update processing entry: mark main processing as complete, set status to 'postprocessing'
     await updateProcessingEntry(processingId, sourceFileName, timeElapsed)
 
-    // Frontend: Registers sql functions and starts the analysis run (async, fire-and-forget)
+    // Frontend: Registers sql functions (async, fire-and-forget)
     // Frontend: Trigger QA evaluation updates for all regions (async, fire-and-forget)
-    console.log('Finishing up: Trigger async app init (sql functions, analysis) and qa update')
+    console.log('Finishing up: Trigger async app init (sql functions) and qa update')
     triggerPrivateApi('post-processing-hook')
     triggerPrivateApi('post-processing-qa-update')
 

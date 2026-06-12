@@ -6,7 +6,6 @@ import { requireAdmin } from '@/server/auth/session.server'
 
 export const PRIVATE_HOOK_SLUGS = [
   'register-sql-functions',
-  'post-processing-statistics',
   'post-processing-qa-update',
   'warm-cache',
   'generate-maproulette-tasks',
@@ -16,7 +15,6 @@ export type PrivateHookSlug = (typeof PRIVATE_HOOK_SLUGS)[number]
 
 const PRIVATE_HOOK_PATH_BY_SLUG = {
   'register-sql-functions': '/api/private/register-sql-functions',
-  'post-processing-statistics': '/api/private/post-processing-statistics',
   'post-processing-qa-update': '/api/private/post-processing-qa-update',
   'warm-cache': '/api/private/warm-cache',
   'generate-maproulette-tasks': '/api/private/generate-maproulette-tasks',
@@ -32,14 +30,7 @@ export const adminPrivateHookUiItems = [
   {
     slug: 'register-sql-functions',
     label: 'SQL-Funktionen registrieren',
-    confirmMessage:
-      'SQL-Funktionen in der Datenbank registrieren? Läuft im Hintergrund; zuerst ausführen, bevor die Statistik gestartet wird.',
-  },
-  {
-    slug: 'post-processing-statistics',
-    label: 'Statistik / Analysis',
-    confirmMessage:
-      'Statistik-Pipeline (analysis) starten? Läuft im Hintergrund; setzt voraus, dass die SQL-Funktionen bereits registriert sind.',
+    confirmMessage: 'SQL-Funktionen in der Datenbank registrieren? Läuft im Hintergrund.',
   },
   {
     slug: 'post-processing-qa-update',

@@ -52,7 +52,6 @@ import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
 import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
 import { Route as ApiPrivateWarmCacheRouteImport } from './routes/api/private/warm-cache'
 import { Route as ApiPrivateRegisterSqlFunctionsRouteImport } from './routes/api/private/register-sql-functions'
-import { Route as ApiPrivatePostProcessingStatisticsRouteImport } from './routes/api/private/post-processing-statistics'
 import { Route as ApiPrivatePostProcessingQaUpdateRouteImport } from './routes/api/private/post-processing-qa-update'
 import { Route as ApiPrivatePostProcessingHookRouteImport } from './routes/api/private/post-processing-hook'
 import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes/api/private/generate-maproulette-tasks'
@@ -298,12 +297,6 @@ const ApiPrivateRegisterSqlFunctionsRoute =
     path: '/api/private/register-sql-functions',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPrivatePostProcessingStatisticsRoute =
-  ApiPrivatePostProcessingStatisticsRouteImport.update({
-    id: '/api/private/post-processing-statistics',
-    path: '/api/private/post-processing-statistics',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPrivatePostProcessingQaUpdateRoute =
   ApiPrivatePostProcessingQaUpdateRouteImport.update({
     id: '/api/private/post-processing-qa-update',
@@ -504,7 +497,6 @@ export interface FileRoutesByFullPath {
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
   '/api/private/post-processing-hook': typeof ApiPrivatePostProcessingHookRoute
   '/api/private/post-processing-qa-update': typeof ApiPrivatePostProcessingQaUpdateRoute
-  '/api/private/post-processing-statistics': typeof ApiPrivatePostProcessingStatisticsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
@@ -568,7 +560,6 @@ export interface FileRoutesByTo {
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
   '/api/private/post-processing-hook': typeof ApiPrivatePostProcessingHookRoute
   '/api/private/post-processing-qa-update': typeof ApiPrivatePostProcessingQaUpdateRoute
-  '/api/private/post-processing-statistics': typeof ApiPrivatePostProcessingStatisticsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
@@ -642,7 +633,6 @@ export interface FileRoutesById {
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
   '/api/private/post-processing-hook': typeof ApiPrivatePostProcessingHookRoute
   '/api/private/post-processing-qa-update': typeof ApiPrivatePostProcessingQaUpdateRoute
-  '/api/private/post-processing-statistics': typeof ApiPrivatePostProcessingStatisticsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
@@ -715,7 +705,6 @@ export interface FileRouteTypes {
     | '/api/private/generate-maproulette-tasks'
     | '/api/private/post-processing-hook'
     | '/api/private/post-processing-qa-update'
-    | '/api/private/post-processing-statistics'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
     | '/api/sign-in/osm'
@@ -779,7 +768,6 @@ export interface FileRouteTypes {
     | '/api/private/generate-maproulette-tasks'
     | '/api/private/post-processing-hook'
     | '/api/private/post-processing-qa-update'
-    | '/api/private/post-processing-statistics'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
     | '/api/sign-in/osm'
@@ -852,7 +840,6 @@ export interface FileRouteTypes {
     | '/api/private/generate-maproulette-tasks'
     | '/api/private/post-processing-hook'
     | '/api/private/post-processing-qa-update'
-    | '/api/private/post-processing-statistics'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
     | '/api/sign-in/osm'
@@ -897,7 +884,6 @@ export interface RootRouteChildren {
   ApiPrivateGenerateMaprouletteTasksRoute: typeof ApiPrivateGenerateMaprouletteTasksRoute
   ApiPrivatePostProcessingHookRoute: typeof ApiPrivatePostProcessingHookRoute
   ApiPrivatePostProcessingQaUpdateRoute: typeof ApiPrivatePostProcessingQaUpdateRoute
-  ApiPrivatePostProcessingStatisticsRoute: typeof ApiPrivatePostProcessingStatisticsRoute
   ApiPrivateRegisterSqlFunctionsRoute: typeof ApiPrivateRegisterSqlFunctionsRoute
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
@@ -1212,13 +1198,6 @@ declare module '@tanstack/react-router' {
       path: '/api/private/register-sql-functions'
       fullPath: '/api/private/register-sql-functions'
       preLoaderRoute: typeof ApiPrivateRegisterSqlFunctionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/post-processing-statistics': {
-      id: '/api/private/post-processing-statistics'
-      path: '/api/private/post-processing-statistics'
-      fullPath: '/api/private/post-processing-statistics'
-      preLoaderRoute: typeof ApiPrivatePostProcessingStatisticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/private/post-processing-qa-update': {
@@ -1640,8 +1619,6 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPrivateGenerateMaprouletteTasksRoute,
   ApiPrivatePostProcessingHookRoute: ApiPrivatePostProcessingHookRoute,
   ApiPrivatePostProcessingQaUpdateRoute: ApiPrivatePostProcessingQaUpdateRoute,
-  ApiPrivatePostProcessingStatisticsRoute:
-    ApiPrivatePostProcessingStatisticsRoute,
   ApiPrivateRegisterSqlFunctionsRoute: ApiPrivateRegisterSqlFunctionsRoute,
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,

@@ -70,7 +70,10 @@ With `SKIP_UNCHANGED=1` we compare the hashes of all `.lua` and `.sql` files to 
 During [`run-5-process.sh`](processing/run-5-process.sh) we only run code if the respective hash has changed.
 If any helper in (`topics/helper`)[processing/topics/helper] or the OSM file has changed, we rerun everything.
 
-After `Processing: Finished`, the **afterthoughts** phase runs optional work for the next run (see `processing/steps/afterthoughts.ts`). The sidepath `is_sidepath_estimation.csv` export is skipped when `roads_bikelanes` did not run only if a CSV already exists for the next run; otherwise it exports from the current DB. When the topic ran but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
+After `Processing: Finished`, the **afterthoughts** phase runs deferred work (see `processing/steps/afterthoughts.ts`):
+
+1. **Statistics** — aggregates road and bikelane lengths per boundary into `public.aggregated_lengths` (feeds the app's `/api/stats` and region statistics UI).
+2. **Sidepath export** — writes `is_sidepath_estimation.csv` for the next run's `roads_bikelanes` Lua import. Skipped when `roads_bikelanes` did not run only if a CSV already exists; otherwise exports from the current DB. When the topic ran but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
 
 Whenever we talk about `hash`es in this code, this feature is referenced.
 
