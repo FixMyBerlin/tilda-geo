@@ -53,11 +53,11 @@ async function callLuaForNames(luaFilename: 'extract_bikelane_todos' | 'extract_
   try {
     const rawResult = await $`lua /processing/utils/types/${luaFilename}.lua`.text()
     const lines = rawResult.split('\n').filter(Boolean).sort()
-    const result = lines
-      .map((line) => line.split(';'))
-      .map(([id, todoTableOnly]) => {
-        return { id, todoTableOnly: JSON.parse(todoTableOnly) as boolean }
-      })
+    const result = lines.flatMap((line) => {
+      const [id, todoTableOnly] = line.split(';')
+      if (!id || todoTableOnly === undefined) return []
+      return [{ id, todoTableOnly: JSON.parse(todoTableOnly) as boolean }]
+    })
     return result
   } catch (error) {
     throw new Error(`[DEV] Failed to get names for "${luaFilename}": ${error}`)

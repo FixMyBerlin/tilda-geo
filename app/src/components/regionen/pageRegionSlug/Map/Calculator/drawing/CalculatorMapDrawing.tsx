@@ -61,11 +61,14 @@ export function CalculatorMapDrawing({
   const [controlReady, setControlReady] = useState(false)
   const lastSyncedSerializedRef = useRef('')
   const drawAreasRef = useRef(drawAreas)
-  drawAreasRef.current = drawAreas
   const drawModeRef = useRef(drawMode)
-  drawModeRef.current = drawMode
   const handlersRef = useRef({ onUserGeometryChange })
-  handlersRef.current = { onUserGeometryChange }
+
+  useEffect(function syncCalculatorDrawingRefs() {
+    drawAreasRef.current = drawAreas
+    drawModeRef.current = drawMode
+    handlersRef.current = { onUserGeometryChange }
+  })
 
   const control = useControl(
     () =>

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInitialSizeMeasurement'
@@ -31,29 +31,33 @@ export const SidebarInspector = () => {
   // One-time measurement for initial map-fit visible area (see useInitialSizeMeasurement).
   const ref = useInitialSizeMeasurement<HTMLDivElement>(updateInspectorSize)
 
-  if (inspectorFeatures.length) {
-    // TODO: See https://github.com/FixMyBerlin/private-issues/issues/1775
+  useEffect(
+    function fitSelectedFeaturesOnceOnLoad() {
+      if (inspectorFeatures.length) {
+        // TODO: See https://github.com/FixMyBerlin/private-issues/issues/1775
+        checkBounds.current = false
+        return
+      }
 
-    checkBounds.current = false
-  }
+      if (
+        !map ||
+        !mapLoaded || // before map is not completely loaded we can't queryRenderedFeatures()
+        !checkBounds.current || // run this at most once
+        inspectorSize.width === 0 // size of the inspector needs to be known to check bounding box
+      ) {
+        return
+      }
 
-  if (
-    map &&
-    mapLoaded && // before map is not completely loaded we can't queryRenderedFeatures()
-    // TODO: See https://github.com/FixMyBerlin/private-issues/issues/1775
-
-    checkBounds.current && // run this at most once
-    inspectorSize.width !== 0 // size of the inspector needs to be known to check bounding box
-  ) {
-    const boundingPolygon = createBoundingPolygon(map, sidebarSize, inspectorSize)
-    const urlFeatures = selectedFeatures.map((f) => f.urlFeature)
-    if (!allUrlFeaturesInBounds(urlFeatures, boundingPolygon)) {
-      fitBounds(map, urlFeatures, sidebarSize, inspectorSize)
-    }
-    // TODO: See https://github.com/FixMyBerlin/private-issues/issues/1775
-
-    checkBounds.current = false
-  }
+      const boundingPolygon = createBoundingPolygon(map, sidebarSize, inspectorSize)
+      const urlFeatures = selectedFeatures.map((f) => f.urlFeature)
+      if (!allUrlFeaturesInBounds(urlFeatures, boundingPolygon)) {
+        fitBounds(map, urlFeatures, sidebarSize, inspectorSize)
+      }
+      // TODO: See https://github.com/FixMyBerlin/private-issues/issues/1775
+      checkBounds.current = false
+    },
+    [inspectorFeatures.length, inspectorSize, map, mapLoaded, selectedFeatures, sidebarSize],
+  )
 
   const features = inspectorFeatures.length
     ? inspectorFeatures

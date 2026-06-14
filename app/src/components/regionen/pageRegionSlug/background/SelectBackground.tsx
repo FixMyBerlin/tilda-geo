@@ -8,7 +8,6 @@ import {
   type BackgroundParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
-import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { ListOption } from './ListOption'
 

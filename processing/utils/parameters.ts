@@ -8,10 +8,10 @@ function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
   const result = envVar ? (envVar.split(',').map((t) => Number(t.trim())) as TopicConfigBbox) : null
   if (result !== null && result.length !== 4) {
     console.error(
-      styleText('red', 'ERROR: BBOX value was parsed but did not result in a valid bbox', {
-        input: envVar,
-        result,
-      }),
+      styleText(
+        'red',
+        `ERROR: BBOX value was parsed but did not result in a valid bbox (input: ${envVar}, result: ${JSON.stringify(result)})`,
+      ),
     )
   }
   return result

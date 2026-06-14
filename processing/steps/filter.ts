@@ -93,10 +93,15 @@ export async function bboxesFilter(
 ) {
   // Generate the osmium filter file.
   // We need to merge the bboxes to prevent https://github.com/osmcode/osmium-tool/issues/266
+  const firstBbox = bboxes[0]
+  if (!firstBbox) {
+    throw new Error(`bboxesFilter requires at least one bbox, received ${JSON.stringify(bboxes)}`)
+  }
+
   const mergedBboxPolygonFeatures =
     bboxes.length > 1
       ? union(featureCollection(bboxes.map((bbox) => bboxPolygon(bbox))))
-      : bboxPolygon(bboxes[0])
+      : bboxPolygon(firstBbox)
   if (!mergedBboxPolygonFeatures) {
     throw new Error(`Failed to merge bboxes ${JSON.stringify(bboxes)}`)
   }

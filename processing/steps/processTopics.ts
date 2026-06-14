@@ -101,7 +101,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   }
 
   const useGlobalBboxFilter = params.processOnlyBbox !== null
-  if (useGlobalBboxFilter) {
+  if (params.processOnlyBbox) {
     console.log(
       `Topics: ℹ️ Using global PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}. Topic bbox filters are skipped.`,
     )

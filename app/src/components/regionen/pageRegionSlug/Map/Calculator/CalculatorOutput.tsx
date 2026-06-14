@@ -75,14 +75,13 @@ export const CalculatorOutput = ({
   const formatMetricValue = (sum: number, ratio: number) =>
     displayMode === 'percent' ? percentFormatter.format(ratio) : numberFormatter.format(sum)
 
-  const summary = useMemo(() => {
-    if (!selectedMetric) return null
-    return calculateMetricSummaryForAreas({
-      areas: calculatorAreasWithFeatures,
-      metric: selectedMetric,
-      groupByKeys: groupByKeys ?? [],
-    })
-  }, [calculatorAreasWithFeatures, groupByKeys, selectedMetric])
+  const summary = selectedMetric
+    ? calculateMetricSummaryForAreas({
+        areas: calculatorAreasWithFeatures,
+        metric: selectedMetric,
+        groupByKeys: groupByKeys ?? [],
+      })
+    : null
 
   const showViewportWarning = useMemo(
     () => drawAreas.some((area) => !isDrawAreaFullyInViewport(area, mapBounds)),

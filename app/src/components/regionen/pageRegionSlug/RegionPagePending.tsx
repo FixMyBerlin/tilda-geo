@@ -1,14 +1,12 @@
-import { useRef } from 'react'
+import { useEffect } from 'react'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { RegionPagePendingHeader } from './RegionPagePendingHeader'
 import { RegionPagePendingMapShell } from './RegionPagePendingMapShell'
 
 export default function RegionPagePending() {
-  const logged = useRef(false)
-  if (isDev && !logged.current) {
-    logged.current = true
-    console.debug('[region] route pending UI shown')
-  }
+  useEffect(function logRegionPendingInDev() {
+    if (isDev) console.debug('[region] route pending UI shown')
+  }, [])
 
   return (
     <div
