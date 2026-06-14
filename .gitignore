@@ -1,7 +1,8 @@
 # Agent files
 ## Change this, if you need specific folders inside
 ## Skills should be not commited, but added through npx skills
-.claude
+.claude/*
+!.claude/settings.json
 .agents
 
 # Editor
