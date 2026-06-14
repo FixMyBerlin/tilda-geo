@@ -11,7 +11,7 @@ export default defineConfig({
     'src/routeTree.gen.ts',
     // Vite/Nitro production build output
     '.output/**',
-    // Playwright HTML report from `test-e2e` (gitignored)
+    // Playwright HTML report from `e2e` (gitignored)
     // "playwright-report/**",
   ],
   rules: {
