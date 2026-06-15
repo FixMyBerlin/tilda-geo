@@ -1,7 +1,10 @@
 # Optional `COMPOSE_DEV_CONTAINER_PREFIX` (e.g. `clone2_`) prefixes container names so multiple
-# repo checkouts can run Docker on one machine. Leave unset for default names (`db`, `app`, …).
+# repo checkouts/worktrees can run Docker on one machine. Leave unset for default names (`db`, `app`, …).
 # Do not use `COMPOSE_PROJECT_NAME` here — Compose sets it from the project directory, which would
 # change everyone’s default container names. Dev-only — not part of deploy.manifest.json.
+#
+# Per-worktree ports and prefix are auto-written to `.env.local` by predev (`ensureDevStack`).
+# See `.env.example` and `app/scripts/worktree-cli/README.md`.
 services:
   processing:
     container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}processing

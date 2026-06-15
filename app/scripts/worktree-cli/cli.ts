@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
+import { readRegistry } from '../predev/ensureDevStack'
 
 const REPO_ROOT = (await $`git rev-parse --show-toplevel`.quiet()).text().trim()
 if (!REPO_ROOT) {
@@ -98,7 +99,8 @@ function copyEnvFilesRecursive(srcRoot: string, destRoot: string, relDir = '') {
   if (!fs.existsSync(srcDir)) return
   const entries = fs.readdirSync(srcDir, { withFileTypes: true })
   const envFiles = entries.filter(
-    (d) => d.isFile() && (d.name === '.env' || d.name.startsWith('.env.')),
+    (d) =>
+      d.isFile() && (d.name === '.env' || d.name.startsWith('.env.')) && d.name !== '.env.local',
   )
   for (const e of envFiles) {
     const src = path.join(srcDir, e.name)
@@ -122,7 +124,66 @@ function copyEnvFilesRecursive(srcRoot: string, destRoot: string, relDir = '') {
 
 spinner.start('Copying .env files…')
 copyEnvFilesRecursive(REPO_ROOT, targetDir)
-spinner.stop('Env files copied.')
+spinner.start('Copying .env files…')
+copyEnvFilesRecursive(REPO_ROOT, targetDir)
+spinner.stop('Env files copied (.env.local is not copied — created per worktree).')
+
+const stackMode = await p.select({
+  message: 'Dev database for this worktree',
+  options: [
+    { value: 'isolated', label: 'New isolated Docker stack (default)' },
+    { value: 'attach', label: 'Attach to an existing stack' },
+  ],
+  initialValue: 'isolated',
+})
+if (p.isCancel(stackMode)) {
+  p.cancel('Aborted.')
+  process.exit(0)
+}
+
+let attachStack: string | undefined
+if (stackMode === 'attach') {
+  const registry = readRegistry()
+  const keys = Object.keys(registry)
+  if (keys.length === 0) {
+    p.log.warn('No stacks in registry — run `bun run dev` in the main checkout first.')
+    const custom = await p.text({
+      message: 'Stack id to attach to (DEV_STACK_ID from ~/.cache/tilda-geo/dev-stacks.json)',
+      validate: (v) => (!v?.trim() ? 'Required' : undefined),
+    })
+    if (p.isCancel(custom) || !custom?.trim()) {
+      p.cancel('Aborted.')
+      process.exit(0)
+    }
+    attachStack = custom.trim()
+  } else {
+    const choice = await p.select({
+      message: 'Stack to attach to',
+      options: keys.map((k) => ({
+        value: k,
+        label: `${k} (db ${registry[k]!.databasePort}, tiles ${registry[k]!.tilesPort})`,
+      })),
+    })
+    if (p.isCancel(choice)) {
+      p.cancel('Aborted.')
+      process.exit(0)
+    }
+    attachStack = choice as string
+  }
+}
+
+spinner.start('Writing .env.local (dev stack ports)…')
+const stackResult = await $`bun scripts/predev/ensureDevStack.ts`
+  .cwd(path.join(targetDir, 'app'))
+  .env(attachStack ? { ...process.env, DEV_ATTACH_STACK: attachStack } : process.env)
+  .quiet()
+  .nothrow()
+if (stackResult.exitCode !== 0) {
+  spinner.stop('Failed to initialize dev stack.')
+  console.error(stackResult.stderr.toString() || stackResult.stdout.toString())
+  process.exit(1)
+}
+spinner.stop('Dev stack configured in .env.local.')
 
 // This repo: husky lives in app/.husky; app/package.json has "prepare": "cd .. && husky app/.husky"
 const HUSKY_HOOKS_PATH = 'app/.husky/_'

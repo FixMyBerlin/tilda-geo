@@ -1,5 +1,8 @@
 function getDatabaseConfig() {
   const host = process.env.DATABASE_HOST
+  // Optional: defaults to 5432. Lets an isolated dev worktree connect to a DB
+  // published on a non-default host port (see DATABASE_PORT in docker-compose.yml).
+  const port = process.env.DATABASE_PORT || '5432'
   const user = process.env.DATABASE_USER
   const password = process.env.DATABASE_PASSWORD
   const name = process.env.DATABASE_NAME
@@ -10,7 +13,7 @@ function getDatabaseConfig() {
     )
   }
 
-  return { host, user, password, name }
+  return { host, port, user, password, name }
 }
 
 function encodeCredential(value: string) {
@@ -30,9 +33,9 @@ function warnIfPasswordNeedsUrlEncoding(password: string) {
 }
 
 export function getBaseDatabaseUrl() {
-  const { host, user, password, name } = getDatabaseConfig()
+  const { host, port, user, password, name } = getDatabaseConfig()
   warnIfPasswordNeedsUrlEncoding(password)
-  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:5432/${name}`
+  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
 }
 
 // Note: The ?schema=prisma parameter is used by Prisma CLI (migrations, introspection, studio)

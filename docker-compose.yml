@@ -122,7 +122,7 @@ services:
       traefik.http.routers.tiles.tls.certresolver: letsencrypt
       traefik.http.routers.tiles.tls: true
     ports:
-      - 3000:3000
+      - "${TILES_PORT:-3000}:3000"
     configs:
       - source: martin_conf
         target: /config.yaml
@@ -142,7 +142,7 @@ services:
       LC_ALL: en_US.UTF-8
       TZ: Europe/Berlin
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT:-5432}:5432"
     volumes:
       - db_postgres_17:/var/lib/postgresql/data
     configs:

@@ -12,6 +12,7 @@
 *.pbf
 *.log
 .env
+.env.local
 .env.deploy.generated
 *.DS_Store
 
