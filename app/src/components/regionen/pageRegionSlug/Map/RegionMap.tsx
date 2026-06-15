@@ -34,7 +34,7 @@ import { useStaticRegion } from '../regionUtils/useStaticRegion'
 import { useBreakpoint } from '../utils/useBreakpoint'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
-import { Search } from './Search/Search'
+import { SearchResultLayers } from './Search/SearchResultLayers'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
@@ -290,9 +290,8 @@ export const RegionMap = () => {
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
+      <SearchResultLayers />
       <AttributionControl compact={true} position="bottom-left" />
-
-      <Search />
 
       {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}
       {isSmBreakpointOrAbove && (

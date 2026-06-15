@@ -8,6 +8,7 @@ import { DebugButton } from './DebugBoxes/DebugButton'
 import { DownloadModal } from './DownloadModal/DownloadModal'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
 import { RegionMap } from './Map/RegionMap'
+import { PlaceSearch } from './Map/Search/PlaceSearch'
 import { MobileMapHeader } from './mobile/MobileMapHeader'
 import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
@@ -28,6 +29,8 @@ export const MapInterface = () => {
       <div className="relative flex h-full w-full flex-row gap-4">
         <RegionMap />
         <MobileMapHeader />
+        {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
+        <PlaceSearch className="absolute top-2 right-14 z-20 hidden sm:block" />
         <SidebarLayerControls />
         <SidebarInspector />
         <div

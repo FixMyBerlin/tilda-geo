@@ -1,7 +1,7 @@
 import { DebugButton } from '../DebugBoxes/DebugButton'
+import { PlaceSearch } from '../Map/Search/PlaceSearch'
 import { MobileLayerButton } from './MobileLayerButton'
 import { MobileRegionMenu } from './MobileRegionMenu'
-import { MobileSearchButton } from './MobileSearchButton'
 import { MobileUserMenu } from './MobileUserMenu'
 
 /**
@@ -19,7 +19,7 @@ export const MobileMapHeader = () => {
       </div>
       <div className="flex items-start gap-2">
         <DebugButton />
-        <MobileSearchButton />
+        <PlaceSearch />
         <MobileUserMenu />
       </div>
     </div>
