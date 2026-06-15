@@ -50,13 +50,6 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
-    // Pre-transform shell modules that pull server-fn + auth graphs before the browser requests them.
-    warmup: {
-      clientFiles: [
-        './src/components/shared/layouts/Header/User/User.tsx',
-        './src/components/shared/auth/auth-client.ts',
-      ],
-    },
     // Keep HMR pinned to the same host/port as `bun run dev` so websocket reconnects
     // stay stable after config-triggered restarts.
     hmr: {
