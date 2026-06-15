@@ -14,7 +14,10 @@ export default function RegionPagePending() {
       aria-live="polite"
       aria-busy="true"
     >
-      <RegionPagePendingHeader />
+      {/* Dark header is desktop-only; mobile shows the floating-button skeleton (see RegionPagePendingMapShell). */}
+      <div className="hidden sm:block">
+        <RegionPagePendingHeader />
+      </div>
       <main className="z-0 min-h-0 grow">
         <RegionPagePendingMapShell />
       </main>

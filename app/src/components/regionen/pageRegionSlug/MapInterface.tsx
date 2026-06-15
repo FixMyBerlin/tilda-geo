@@ -4,8 +4,7 @@ import { useEffect } from 'react'
 import { MapProvider } from 'react-map-gl/maplibre'
 import { BackgroundLegend } from './background/BackgroundLegend'
 import { SelectBackground } from './background/SelectBackground'
-import { DebugMap } from './DebugBoxes/DebugMap'
-import { DebugStateInteraction } from './DebugBoxes/DebugStateInteraction'
+import { DebugButton } from './DebugBoxes/DebugButton'
 import { DownloadModal } from './DownloadModal/DownloadModal'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
 import { RegionMap } from './Map/RegionMap'
@@ -41,9 +40,9 @@ export const MapInterface = () => {
           <DownloadModal />
           <BackgroundLegend />
           <SelectBackground />
+          {/* Desktop debug entry point; mobile has its own in MobileMapHeader (left of search). */}
+          <DebugButton className="hidden sm:flex" />
         </div>
-        <DebugMap />
-        <DebugStateInteraction />
       </div>
     </MapProvider>
   )

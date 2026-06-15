@@ -18,7 +18,7 @@ export const DebugMap = () => {
   const showDebugInfo = useMapDebugShowDebugInfo()
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const useDebugCachelessTiles = useMapDebugUseDebugCachelessTiles()
-  const { setShowDebugInfo, setDebugLayerStyles, setUseDebugCachelessTiles } = useMapDebugActions()
+  const { setDebugLayerStyles, setUseDebugCachelessTiles } = useMapDebugActions()
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
   const [_triggerRerender, setTriggerRerender] = useState(0)
@@ -54,15 +54,7 @@ export const DebugMap = () => {
   if (!vectorSources || !rasterSources || !atlasLayers.length) return null
 
   return (
-    <div className="group absolute top-3 right-34 z-30 max-h-[95%] max-w-100 space-y-0.5 overflow-y-auto rounded bg-pink-300 px-2 py-2 text-[10px] shadow-xl">
-      <button
-        type="button"
-        className="absolute top-0 right-0 z-10 flex size-5 items-center justify-center rounded-full border bg-purple-500/90 opacity-0 group-hover:opacity-100 hover:bg-purple-800 hover:text-purple-200"
-        onClick={() => setShowDebugInfo(false)}
-      >
-        &times;
-      </button>
-
+    <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-[10px]">
       <div className="flex flex-col gap-1">
         <button
           type="button"

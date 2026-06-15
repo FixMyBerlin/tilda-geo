@@ -1,8 +1,5 @@
 import { ClientOnly } from '@tanstack/react-router'
-import {
-  useMapDebugActions,
-  useMapDebugShowDebugInfo,
-} from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
+import { useMapDebugShowDebugInfo } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { useMapDebugSnapshot } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { simplifyConfigForParams } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/utils/simplifyConfigForParams'
@@ -33,7 +30,6 @@ export const DebugStateInteraction = () => {
   const regionSlug = useRegionSlug()
   const zustandValues = useMapDebugSnapshot()
   const showDebugInfo = useMapDebugShowDebugInfo()
-  const { setShowDebugInfo } = useMapDebugActions()
   const { categoriesConfig } = useCategoriesConfig()
   const { drawParam } = useDrawParam()
   // const { config: configCategories, draw: drawAreasStore } = useSearch<LocationGenerics>()
@@ -54,14 +50,7 @@ export const DebugStateInteraction = () => {
 
   return (
     <ClientOnly fallback={null}>
-      <div className="group absolute top-3 right-12 z-30 max-h-[95%] max-w-[60%] space-y-0.5 overflow-y-auto rounded bg-pink-300 px-2 py-2 text-[10px] shadow-xl">
-        <button
-          type="button"
-          className="absolute top-0 right-0 z-10 flex size-5 items-center justify-center rounded-full border bg-purple-500/90 opacity-0 group-hover:opacity-100 hover:bg-purple-800 hover:text-purple-200"
-          onClick={() => setShowDebugInfo(false)}
-        >
-          &times;
-        </button>
+      <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-[10px]">
         <details>
           <summary className="cursor-pointer">Helper</summary>
           <div className="flex flex-col gap-1">

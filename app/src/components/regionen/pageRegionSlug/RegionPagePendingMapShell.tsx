@@ -1,7 +1,10 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { twJoin } from 'tailwind-merge'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 
 const bottomCtrlShellClass = 'maplibregl-ctrl pointer-events-none'
+
+const pulseButton = 'animate-pulse rounded-md border border-gray-300 bg-white/80 shadow-md'
 
 export function RegionPagePendingMapShell() {
   return (
@@ -11,13 +14,30 @@ export function RegionPagePendingMapShell() {
         aria-hidden="true"
       />
 
+      {/* Desktop sidebar placeholder (mobile uses the floating buttons below) */}
       <section
-        className="absolute top-0 left-0 z-20 max-h-full w-65 bg-white py-px shadow-md"
+        className="absolute top-0 left-0 z-20 hidden max-h-full w-65 bg-white py-px shadow-md sm:block"
         aria-hidden="true"
       />
 
+      {/* Mobile floating-button skeleton, mirroring MobileMapHeader's layout */}
       <div
-        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2 z-10"
+        className="absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-2 sm:hidden"
+        aria-hidden="true"
+      >
+        <div className="flex items-start gap-2">
+          <div className={twJoin(pulseButton, 'h-10 w-12')} />
+          <div className={twJoin(pulseButton, 'size-10')} />
+        </div>
+        <div className="flex items-start gap-2">
+          <div className={twJoin(pulseButton, 'size-10')} />
+          <div className={twJoin(pulseButton, 'size-10')} />
+        </div>
+      </div>
+
+      {/* Desktop zoom controls placeholder (hidden on mobile, matching the live map) */}
+      <div
+        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2 z-10 hidden sm:block"
         aria-hidden="true"
       >
         <div className="maplibregl-ctrl-group">

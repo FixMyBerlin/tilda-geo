@@ -1,3 +1,4 @@
+import { DebugButton } from '../DebugBoxes/DebugButton'
 import { MobileLayerButton } from './MobileLayerButton'
 import { MobileRegionMenu } from './MobileRegionMenu'
 import { MobileSearchButton } from './MobileSearchButton'
@@ -17,6 +18,7 @@ export const MobileMapHeader = () => {
         <MobileLayerButton />
       </div>
       <div className="flex items-start gap-2">
+        <DebugButton />
         <MobileSearchButton />
         <MobileUserMenu />
       </div>
