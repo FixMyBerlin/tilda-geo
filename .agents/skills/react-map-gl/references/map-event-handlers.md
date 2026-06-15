@@ -193,6 +193,7 @@ Compose domain logic in the handler or a small hook (`useMapHighlight`) — stil
 
 ## Related chapters
 
+- [declarative-source-layer.md](declarative-source-layer.md) — `<Source>` / `<Layer>` only; handlers assume declarative layers
 - [feature-state.md](feature-state.md) — `setFeatureState` vs React filter, reset/diff, inspector sync, limitations
 - [interactive-layer-ids.md](interactive-layer-ids.md) — `event.features`
 - [map-loaded-hook.md](map-loaded-hook.md) — `onLoad`

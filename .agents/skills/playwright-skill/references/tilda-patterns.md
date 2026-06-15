@@ -6,9 +6,9 @@ Canonical repo: **tilda-geo** `app/`. Trassenscout will align with these pattern
 
 From `app/package.json` (typical):
 
-- `test-e2e` → `playwright test`
-- `test-e2e-ui` → `--ui`
-- `test-e2e-debug` → `--debug`
+- `e2e` → `playwright test --project=chromium`
+- `e2e -- --ui` / `e2e -- --debug` → pass Playwright flags after `--`
+- `e2e -- tests/smoke` → run a subset of specs
 
 ## Environment
 

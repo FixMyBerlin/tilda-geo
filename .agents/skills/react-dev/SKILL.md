@@ -168,7 +168,7 @@ Examples: [generic-components.md](examples/generic-components.md)
 | `useTransition`  | Non-urgent updates                      | [useTransition](https://react.dev/reference/react/useTransition.md)   |
 | `useEffectEvent` | Stable callback inside effects          | [useEffectEvent](https://react.dev/reference/react/useEffectEvent.md) |
 
-**FMC mutations:** prefer `createServerFn` + client handlers or React Query — not Next `'use server'` forms. Conceptual RSC background: [Server Components](https://react.dev/reference/rsc/server-components.md) · implementation: `tanstack-start-migration`.
+**FMC mutations:** prefer `createServerFn` + client handlers or React Query — not Next `'use server'` forms. Conceptual RSC background: [react.dev RSC](https://react.dev/reference/rsc/server-components.md) · TanStack Start implementation: `tanstack-start-conventions` → server-components.md.
 
 Short TS notes: [react-19-patterns.md](references/react-19-patterns.md)
 

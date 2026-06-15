@@ -43,6 +43,7 @@ const { tab } = useSearch({ from: userRoute.id })
 ## Search params
 
 - UI routes: Zod `validateSearch` on the route — see `tanstack-start-conventions` / `params-search-ui-vs-api.md`
+- **Router `router.tsx`:** required `parseSearch` / `stringifySearch` (pretty JSON + per-param encodings) — `tanstack-start-conventions` / `router-search-serialization.md`
 - **nuqs:** only when a shared component already requires it — skill `nuqs`
 
 ## Router type registration

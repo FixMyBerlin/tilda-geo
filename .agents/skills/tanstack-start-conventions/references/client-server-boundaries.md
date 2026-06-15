@@ -35,11 +35,21 @@ Files that export `createServerFn` and are imported by route files or components
 
 **Function names:** All `createServerFn` / `createServerOnlyFn` use the pattern **`functionNameFn`** (e.g. `getRegionPageLoaderFn`, `getUploadsForRegionUserFn`).
 
-### Route folder: files that are not routes
+**Public (unauthenticated) server functions:** Use the **`public*.functions.ts`** filename (e.g. `publicSurveys.functions.ts`, `publicInvite.functions.ts`). Do not attach auth middleware or `requireAuth` unless the handler intentionally validates a public token/session pair. Global auth middleware is not the FMC pattern because these exports must stay callable. See `tanstack-start-auth` → [auth.md](../../tanstack-start-auth/references/auth.md) §5.
 
-The TanStack Router file-based plugin ignores files whose name starts with **`-`** (default `routeFileIgnorePrefix: '-'`), so they are not turned into routes. That allows colocating non-route modules (e.g. query options) next to the route that uses them.
+### Route folder: routes only
 
-We prefer **not** using that prefix: put shared query options and other non-route code in a dedicated folder (e.g. `src/server/<domain>/` for query options used by loaders and components) and import from there. Then nothing in `routes/` needs a leading dash, and it’s obvious what is a route vs a helper.
+Keep `routes/` limited to route definitions. TanStack Router supports a **`-`** ignore prefix for colocated non-route files, but we **do not** use it.
+
+Put shared helpers next to their domain under `server/`:
+
+| Kind                        | Location                                                              |
+| --------------------------- | --------------------------------------------------------------------- |
+| Query options               | `server/<domain>/queries/` or `*QueryOptions.ts` in the domain folder |
+| URL search schemas (shared) | `server/<domain>/searchSchemas.ts` or `server/shared/<name>Search.ts` |
+| Route-only search schema    | Inline `const` in the route file                                      |
+
+Routes and components may import `searchSchemas.ts` (not `*.server.ts`). Import paths stay short and `routes/` stays obviously route-only.
 
 ---
 
@@ -52,9 +62,11 @@ Route files must always import and call server Fns in `loader`/`beforeLoad`; the
 - **`beforeLoad`:** Redirects (URL normalization, auth redirect), auth/authorization, and returning context for the route (e.g. `isAuthorized`, `region`). No heavy data fetch.
 - **`loader`:** Page data and cache priming. Can use `context` from `beforeLoad`. For React Query–backed data, see [router-and-query.md](router-and-query.md); otherwise return serializable data for `useLoaderData()` (e.g. admin pages).
 
-We prefer `beforeLoad` over using a middleware for the use cases described above.
+Use **`beforeLoad`, not request middleware**, for route redirects and layout auth. Pathless layout routes make open vs protected URLs obvious, and Trassenscout's lint pattern enforces this shape.
 
-See also: [auth.md](../tanstack-start-auth/references/auth.md) in the `tanstack-start-auth` skill. API route handlers and server modules that need the current user must receive the request’s headers and pass them to session helpers.
+TanStack **function middleware** (`createMiddleware({ type: 'function' })`) is a server-function data-boundary topic only. It is not a replacement for layout `beforeLoad`, and it should not be recommended for FMC route auth. See [auth.md](../../tanstack-start-auth/references/auth.md) §5 and [endpoint-auth-lint.md](../../tanstack-start-auth/references/endpoint-auth-lint.md).
+
+See also: [auth.md](../../tanstack-start-auth/references/auth.md) in the `tanstack-start-auth` skill. API route handlers and server modules that need the current user must receive the request’s headers and pass them to session helpers.
 
 ## Selective SSR (`ssr` option)
 
@@ -63,7 +75,9 @@ There are two separate concepts:
 - **Route `ssr`:** controls route-level server behavior on first request (rendering and `beforeLoad`/`loader` execution).
 - **`@tanstack/react-router-ssr-query`:** controls React Query cache dehydration/hydration/streaming.
 
-Our default is explicit `ssr: true` unless a route needs a more restrictive mode. For project conventions and current route decisions, see [selective-ssr.md](selective-ssr.md).
+Our default is explicit `ssr: true` on UI routes unless a leaf needs a more restrictive mode. **Handler-only API routes** (`server.handlers`, usually `src/routes/api/**` or flat `api/*.ts` in TILDA) use **`ssr: false`**. See [selective-ssr.md](selective-ssr.md).
+
+**Server components (experimental, opt-in):** RSC in `*.functions.ts` + route `loader` — not async route components. Default data path remains loaders + Query above. See [server-components.md](server-components.md).
 
 ## Router + React Query
 

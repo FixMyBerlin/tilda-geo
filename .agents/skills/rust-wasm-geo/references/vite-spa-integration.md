@@ -1,6 +1,6 @@
 # Rust / WASM geo — Vite SPA integration
 
-Plain Vite + React SPA (no TanStack Start). Same Bun/Vite 8+ stack as the [tech stack gist](https://gist.github.com/tordans/97b2a927494fa0be14751d4cbdb561cf).
+Plain Vite + React SPA (no TanStack Start). Same Bun/Vite 8+ stack as the [tech-stack](https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tech-stack) skill.
 
 ---
 

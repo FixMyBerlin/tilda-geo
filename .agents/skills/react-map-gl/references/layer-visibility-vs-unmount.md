@@ -1,6 +1,6 @@
 # layout.visibility vs unmounting layers
 
-Two ways to hide map content: set **`layout: { visibility: 'none' }`** on `<Layer>` (layer stays in the style), or **stop rendering** the `<Source>` / `<Layer>` React components (nodes removed from the tree).
+Two ways to hide map content: set **`layout: { visibility: 'none' }`** on `<Layer>` (layer stays in the style), or **stop rendering** the `<Source>` / `<Layer>` React components (nodes removed from the tree). Both are declarative — do not use `map.addLayer` / `map.setLayoutProperty` instead ([declarative-source-layer.md](declarative-source-layer.md)).
 
 ## Tilda default: visibility toggle (atlas)
 

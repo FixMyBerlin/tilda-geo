@@ -42,6 +42,7 @@ Do **not** duplicate upstream API reference in this skill — use `llms.txt` / `
 **TanStack Start** (preferred URL state):
 
 - Colocate Zod search schemas with the route or feature; wire `validateSearch` on the owning route file.
+- Wire **`parseSearch` / `stringifySearch`** in `router.tsx` (pretty JSON baseline; jsurl only for large objects) — `tanstack-start-conventions` → `router-search-serialization.md`.
 - See `tanstack-start-app-structure` for folder layout; avoid `NuqsAdapter` unless a subtree truly needs nuqs hooks.
 
 **Next.js + nuqs:**

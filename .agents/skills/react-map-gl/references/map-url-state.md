@@ -75,6 +75,8 @@ Always round on **serialize**, not only on parse, so replace-state updates do no
 
 **Do:** update through TanStack Router `search` or nuqs `createParser` — both encode `&`, `#`, etc. while keeping `/` readable in the value.
 
+**Router setup:** FMC apps must wire `parseSearch` / `stringifySearch` in `router.tsx` (pretty JSON baseline) — skill `tanstack-start-conventions` → `router-search-serialization.md`.
+
 ## TanStack Router (preferred)
 
 Validate once on the route; read/write typed search in components. See skill `tanstack-start-conventions`.

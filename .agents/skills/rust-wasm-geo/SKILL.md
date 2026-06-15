@@ -11,7 +11,7 @@ disable-model-invocation: true
 
 # Rust / WASM geo
 
-Default stack context: [LLM Technology Stack gist](https://gist.github.com/tordans/97b2a927494fa0be14751d4cbdb561cf). This skill covers **Rust/WASM geo only**.
+Default stack context: [tech-stack](https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tech-stack) skill. This skill covers **Rust/WASM geo only**.
 
 ## When to apply
 

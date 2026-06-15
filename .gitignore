@@ -3,7 +3,6 @@
 ## Skills should be not commited, but added through npx skills
 .claude/*
 !.claude/settings.json
-.agents
 
 # Editor
 .vscode-test

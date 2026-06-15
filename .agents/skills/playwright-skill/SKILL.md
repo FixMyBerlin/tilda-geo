@@ -162,7 +162,7 @@ After **Next → TanStack Start**, add or run smoke specs:
 3. `expect(page.locator('main').first()).toBeVisible()`
 4. `expectNoConsoleErrors(page)` (see utils)
 
-Route lists live in `tests/fixtures/routes.ts`. Run: `bun run test-e2e -- tests/smoke`.
+Route lists live in `tests/fixtures/routes.ts`. Run: `bun run e2e -- tests/smoke`.
 
 ### Auth
 
@@ -190,14 +190,24 @@ Prefer `getByRole`, `getByLabel`, `getByText`. Use `playwrightTestId('…')` onl
 
 ## Project E2E workflow
 
+**`package.json` script** (TILDA convention):
+
+```json
+"e2e": "playwright test --project=chromium"
+```
+
+- `bun run e2e` → chromium project (default local/CI run)
+- `bun run e2e -- --ui` / `bun run e2e -- --debug` → pass Playwright flags after `--`
+- `bun run e2e -- tests/smoke` → subset of specs
+
 ```bash
 bun add -d @playwright/test dotenv
 bunx playwright install chromium
 # Start DB/tiles if required (see tests/README.md)
-bun run test-e2e              # all
-bun run test-e2e -- tests/smoke
-bunx playwright test --ui
-bunx playwright test --debug
+bun run e2e
+bun run e2e -- tests/smoke
+bun run e2e -- --ui
+bun run e2e -- --debug
 ```
 
 Write tests in `tests/**/*.spec.ts` with TypeScript. Use web-first assertions (`expect(locator).toBeVisible()`).

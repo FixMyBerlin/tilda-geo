@@ -2,6 +2,8 @@
 
 Use **sibling** `<Source>` and `<Layer>` components under `<Map>`, not nested `<Layer>` trees inside `<Source>`. react-map-gl allows nesting, but flat structure matches MapLibre’s mental model (sources and layers are separate registries) and makes refactors easier.
 
+Never use imperative `map.addSource` / `map.addLayer` — see [declarative-source-layer.md](declarative-source-layer.md).
+
 ## Rule
 
 For each logical source:

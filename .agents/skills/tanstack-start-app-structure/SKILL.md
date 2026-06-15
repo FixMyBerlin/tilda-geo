@@ -16,14 +16,15 @@ Portable layout conventions for `app/src` (or equivalent) in TanStack Start proj
 
 Keep a small set of top-level folders:
 
-| Folder        | Purpose                                                                 |
-| ------------- | ----------------------------------------------------------------------- |
-| `components/` | All React/JSX — route files never define components                     |
-| `routes/`     | Route definitions only (thin: `Route` config + single component import) |
-| `server/`     | Server-only modules, `*QueryOptions`, domain helpers                    |
-| `data/`       | Optional static assets (GeoJSON, JSON, etc.)                            |
+| Folder        | Purpose                                                                  |
+| ------------- | ------------------------------------------------------------------------ |
+| `components/` | All React/JSX — route files never define components                      |
+| `routes/`     | Route definitions only (thin: `Route` config + single component import)  |
+| `shared/`     | Isomorphic modules — Zod schemas, URL search, pure utils (no DB/secrets) |
+| `server/`     | Server-only `*.server.ts`, `*.functions.ts`, `*QueryOptions.ts`          |
+| `data/`       | Optional static assets (GeoJSON, JSON, etc.)                             |
 
-Plus root files such as `router.tsx`. Prefer `server/` or `components/shared/` over a vague top-level `lib/`.
+Plus root files such as `router.tsx`. Prefer `shared/` for isomorphic code, `server/` for RPC/DB, or `components/shared/` for React shells — not a vague top-level `lib/`.
 
 ## Routes: thin, no inline UI
 
@@ -33,7 +34,7 @@ Plus root files such as `router.tsx`. Prefer `server/` or `components/shared/` o
 
 ## Components: Layout vs Page
 
-- **Layouts:** `Layout*.tsx` — route shell, providers (e.g. `NuqsAdapter`), outlet for child page.
+- **Layouts:** `Layout*.tsx` — route shell, providers (e.g. `NuqsAdapter`), outlet for child page. Devtools: [devtools.md](../tanstack-start-conventions/references/devtools.md).
 - **Pages:** `Page*.tsx` — actual screen content.
 - **Deliberate asymmetry:** Route segments may use `_segment` for grouping while `components/` uses a readable folder name (e.g. route `_pages` → `components/pages/`).
 
@@ -43,16 +44,20 @@ Under `server/<domain>/`:
 
 - `queries/*.server.ts` — read paths
 - `mutations/*.server.ts` — writes
-- `schemas.ts` — shared Zod/types (optional)
+- `*.inputSchemas.ts` — server-only validation extensions (may import from `shared/<domain>/schemas`)
 - `<domain>.functions.ts` — `createServerFn` exports consumed by routes/components
 
-Details: `tanstack-start-conventions` → client-server-boundaries.
+Domain Zod and URL search schemas live in `shared/<domain>/` (or `shared/<topic>/` for cross-cutting helpers). See `tanstack-start-conventions` → client-server-boundaries.
 
 ## URL state (search params)
 
 - **Default:** route `validateSearch` (Zod) + `Route.useSearch()` — see `tanstack-start-conventions` (`params-search-ui-vs-api.md`).
+- **Router `router.tsx`:** required pretty-JSON `parseSearch` / `stringifySearch` + `trailingSlash: 'never'` — `tanstack-start-conventions` → `router-search-serialization.md`.
 - **nuqs only** for shared/third-party components that already use `useQueryState`; then `NuqsAdapter` from `nuqs/adapters/tanstack-router` on the smallest layout subtree that needs it (experimental; prefer router search for app-owned state).
-- Colocate Zod search schemas with the route or feature; colocate nuqs parsers/hooks only where nuqs is required.
+- **Search schema placement** (keep `routes/` for route files only — no `-` prefixed colocated helpers):
+  - **Route-only:** inline `const …SearchSchema = z.object({ … })` in the route file.
+  - **Shared** (route + `navigate({ search })`, components, or multiple routes): `shared/<domain>/searchSchemas.ts`, or `shared/routing/` for cross-cutting params (e.g. back links). Not `*.server.ts` — routes and components import from `shared/`.
+- Colocate nuqs parsers/hooks only where nuqs is required (under `components/`).
 
 Skill `nuqs` covers Next.js and nuqs interop; do not reach for nuqs on greenfield TanStack routes.
 
