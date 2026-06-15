@@ -10,7 +10,11 @@ export function PageRegionSlug() {
 
   return (
     <div className="flex h-screen flex-col">
-      <HeaderRegionen />
+      {/* Desktop header only — on mobile the map fills the screen and the controls
+          live in the floating MobileMapHeader (see MapInterface). */}
+      <div className="hidden sm:block">
+        <HeaderRegionen />
+      </div>
       <main className="z-0 grow">
         {data.authorized ? <MapInterface /> : <RegionAccessDenied status={data.region.status} />}
       </main>

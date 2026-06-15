@@ -2,7 +2,6 @@ import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useBreakpoint } from '../utils/useBreakpoint'
 import { Categories } from './Categories/Categories'
-import { MobileLayerSheet } from './MobileLayerSheet'
 import { QaConfigCategories } from './QaConfigs/QaConfigCategories'
 import { StaticDatasetCategories } from './StaticDatasets/StaticDatasetCategories'
 
@@ -10,12 +9,13 @@ export const SidebarLayerControls = () => {
   const isSmBreakpointOrAbove = useBreakpoint('sm')
   const { updateSidebarSize } = useMapActions()
   // One-time measurement for initial map-fit visible area (see useInitialSizeMeasurement).
-  // Only attached on desktop: on mobile the controls live in a transient bottom
-  // sheet that overlays the map rather than reserving layout space.
+  // Only attached on desktop: on mobile the controls live in the MobileMapHeader
+  // (layer bottom sheet) which overlays the map rather than reserving layout space.
   const ref = useInitialSizeMeasurement<HTMLDivElement>(updateSidebarSize)
 
+  // On mobile the layer controls are rendered via MobileMapHeader → MobileLayerButton.
   if (!isSmBreakpointOrAbove) {
-    return <MobileLayerSheet />
+    return null
   }
 
   return (

@@ -9,6 +9,7 @@ import { DebugStateInteraction } from './DebugBoxes/DebugStateInteraction'
 import { DownloadModal } from './DownloadModal/DownloadModal'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
 import { RegionMap } from './Map/RegionMap'
+import { MobileMapHeader } from './mobile/MobileMapHeader'
 import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
@@ -27,6 +28,7 @@ export const MapInterface = () => {
     <MapProvider>
       <div className="relative flex h-full w-full flex-row gap-4">
         <RegionMap />
+        <MobileMapHeader />
         <SidebarLayerControls />
         <SidebarInspector />
         <div

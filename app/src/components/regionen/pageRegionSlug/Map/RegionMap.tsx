@@ -31,6 +31,7 @@ import { firePlaywrightMapLoadedEvent } from '@/components/shared/utils/playwrig
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
+import { useBreakpoint } from '../utils/useBreakpoint'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
 import { Search } from './Search/Search'
@@ -74,6 +75,7 @@ export const RegionMap = () => {
     updateMapBounds,
   } = useMapActions()
   const region = useStaticRegion()
+  const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
 
@@ -292,7 +294,10 @@ export const RegionMap = () => {
 
       <Search />
 
-      <NavigationControl showCompass={false /* TODO: See Story */} visualizePitch={true} />
+      {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}
+      {isSmBreakpointOrAbove && (
+        <NavigationControl showCompass={false /* TODO: See Story */} visualizePitch={true} />
+      )}
       <Calculator />
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

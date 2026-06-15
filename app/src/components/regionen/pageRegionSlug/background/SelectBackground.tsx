@@ -1,7 +1,8 @@
 import { Listbox, ListboxButton, ListboxOptions } from '@headlessui/react'
-import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { ChevronUpDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
 import type React from 'react'
 import { useMap } from 'react-map-gl/maplibre'
+import { twJoin } from 'tailwind-merge'
 import {
   defaultBackgroundParam,
   useBackgroundParam,
@@ -9,12 +10,14 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
+import { useBreakpoint } from '../utils/useBreakpoint'
 import { ListOption } from './ListOption'
 
 export const SelectBackground: React.FC = () => {
   const { mainMap } = useMap()
   const { backgroundParam, setBackgroundParam } = useBackgroundParam()
   const { region } = useRegionLoaderData()
+  const isSmBreakpointOrAbove = useBreakpoint('sm')
 
   if (!region?.backgroundSources) return null
 
@@ -36,9 +39,21 @@ export const SelectBackground: React.FC = () => {
       value={backgroundParam}
       onChange={onChange}
     >
-      <ListboxButton className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none">
-        Hintergrundkarten
-        <ChevronUpDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />
+      <ListboxButton
+        aria-label="Hintergrundkarten"
+        className={twJoin(
+          'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
+          isSmBreakpointOrAbove ? 'px-4 py-2' : 'size-10',
+        )}
+      >
+        {isSmBreakpointOrAbove ? (
+          <>
+            Hintergrundkarten
+            <ChevronUpDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />
+          </>
+        ) : (
+          <GlobeAltIcon className="size-6" aria-hidden="true" />
+        )}
       </ListboxButton>
       <ListboxOptions
         transition
