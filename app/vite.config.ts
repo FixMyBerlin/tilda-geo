@@ -33,25 +33,10 @@ export default defineConfig({
         sourcemap: true,
       },
       optimizeDeps: {
-        // Top-level entries plus transitive imports discovered on first paint (header User →
-        // currentUser server fn + auth client). Missing entries trigger a late optimize pass,
-        // full reload, and aborted in-flight server-fn requests (500: reading 'method' of undefined).
-        include: [
-          'better-auth/react',
-          'better-auth/client/plugins',
-          '@better-auth/core/env',
-          '@better-auth/core/error',
-          '@better-auth/core/utils/error-codes',
-          '@better-auth/core/utils/string',
-          '@better-fetch/fetch',
-          '@tanstack/router-core',
-          '@tanstack/router-core/isServer',
-          '@tanstack/router-core/ssr/client',
-          'defu',
-          'nanostores',
-          'seroval',
-        ],
-        holdUntilCrawlEnd: true,
+        // holdUntilCrawlEnd defaults to true in Vite 8 — deps bundle into deps_temp_* but
+        // never commit to deps/ while crawl is active, stalling react.js and all client hydration.
+        include: ['better-auth/react', 'better-auth/client/plugins', 'motion/react'],
+        holdUntilCrawlEnd: false,
         ignoreOutdatedRequests: true,
       },
     },
