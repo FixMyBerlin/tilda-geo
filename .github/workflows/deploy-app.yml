@@ -33,7 +33,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 'AWS: Configure credentials'
         uses: aws-actions/configure-aws-credentials@v6
