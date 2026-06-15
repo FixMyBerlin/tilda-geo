@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import type { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
@@ -30,10 +31,6 @@ import {
   tableKeySurfaceSmoothness,
 } from './compositTableRows/TagsTableRowCompositSurfaceSmoothness'
 import {
-  TagsTableRowCompositTrafficSign,
-  tableKeyTrafficSign,
-} from './compositTableRows/TagsTableRowCompositTrafficSign'
-import {
   TagsTableRowCompositTrassencoutSurveyResponse,
   tableKeyTrassencoutSurveyResponse,
 } from './compositTableRows/TagsTableRowCompositTrassencoutSurveyResponse'
@@ -43,6 +40,14 @@ import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTa
 import { TagsTableRowWikipedia, tableKeyWikipedia } from './compositTableRows/TagsTableRowWikipedia'
 import { TagsTableRow } from './TagsTableRow'
 import { cleanKey, KEY_IF_PRESENCE } from './utils/cleanKey'
+
+const tableKeyTrafficSign = 'traffic_sign'
+
+const TagsTableRowCompositTrafficSign = lazy(() =>
+  import('./compositTableRows/TagsTableRowCompositTrafficSign').then((module) => ({
+    default: module.TagsTableRowCompositTrafficSign,
+  })),
+)
 
 type Props = {
   properties: InspectorFeatureProperty
@@ -168,12 +173,18 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
             }
             case tableKeyTrafficSign: {
               return (
-                <TagsTableRowCompositTrafficSign
+                <Suspense
                   key={cleanedKey}
-                  sourceId={sourceId}
-                  tagKey={key}
-                  properties={properties}
-                />
+                  fallback={
+                    <TagsTableRow sourceId={sourceId} tagKey={key} tagValue={properties[key]} />
+                  }
+                >
+                  <TagsTableRowCompositTrafficSign
+                    sourceId={sourceId}
+                    tagKey={key}
+                    properties={properties}
+                  />
+                </Suspense>
               )
             }
             case tableKeyTrassencoutSurveyResponse: {

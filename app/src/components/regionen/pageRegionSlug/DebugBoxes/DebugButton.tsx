@@ -6,10 +6,7 @@ import {
   useMapDebugShowDebugInfo,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
-import {
-  mobileControlButtonActiveClassName,
-  mobileControlButtonClassName,
-} from '../mobile/mobileControlButton.const'
+import { mobileControlButtonClassName } from '../mobile/mobileControlButton.const'
 import { DebugMap } from './DebugMap'
 import { DebugStateInteraction } from './DebugStateInteraction'
 
@@ -39,8 +36,9 @@ export const DebugButton = ({ className }: Props) => {
         aria-expanded={open}
         className={twMerge(
           mobileControlButtonClassName,
-          'size-10',
-          open && mobileControlButtonActiveClassName,
+          // Admin colors (the debug tools were pink/purple), but shaped like the other buttons.
+          'size-10 border-pink-400 bg-pink-300 text-pink-900 hover:bg-pink-400 focus:ring-pink-500',
+          open && 'border-pink-600 bg-pink-400',
           className,
         )}
       >
