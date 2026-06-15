@@ -1,7 +1,10 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
-import { mobileControlButtonClassName } from './mobileControlButton.const'
+import {
+  mobileControlButtonActiveClassName,
+  mobileControlButtonClassName,
+} from './mobileControlButton.const'
 import { useMobileSearchStore } from './useMobileSearchStore'
 
 /**
@@ -12,6 +15,7 @@ import { useMobileSearchStore } from './useMobileSearchStore'
  */
 export const MobileSearchButton = () => {
   const region = useStaticRegion()
+  const open = useMobileSearchStore((state) => state.open)
   const setOpen = useMobileSearchStore((state) => state.setOpen)
   const control = useMobileSearchStore((state) => state.control)
 
@@ -28,7 +32,12 @@ export const MobileSearchButton = () => {
       type="button"
       onClick={onClick}
       aria-label="Suche"
-      className={twJoin(mobileControlButtonClassName, 'size-10')}
+      aria-expanded={open}
+      className={twMerge(
+        mobileControlButtonClassName,
+        'size-10',
+        open && mobileControlButtonActiveClassName,
+      )}
     >
       <MagnifyingGlassIcon className="size-6" aria-hidden="true" />
     </button>

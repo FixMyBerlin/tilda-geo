@@ -1,11 +1,14 @@
 import { Square3Stack3DIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { Categories } from '../SidebarLayerControls/Categories/Categories'
 import { QaConfigCategories } from '../SidebarLayerControls/QaConfigs/QaConfigCategories'
 import { StaticDatasetCategories } from '../SidebarLayerControls/StaticDatasets/StaticDatasetCategories'
 import { MobileBottomSheet } from './MobileBottomSheet'
-import { mobileControlButtonClassName } from './mobileControlButton.const'
+import {
+  mobileControlButtonActiveClassName,
+  mobileControlButtonClassName,
+} from './mobileControlButton.const'
 
 /**
  * Mobile layer control: an icon button (placed in the MobileMapHeader) that
@@ -20,7 +23,12 @@ export const MobileLayerButton = () => {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Kategorien"
-        className={twJoin(mobileControlButtonClassName, 'size-10')}
+        aria-expanded={open}
+        className={twMerge(
+          mobileControlButtonClassName,
+          'size-10',
+          open && mobileControlButtonActiveClassName,
+        )}
       >
         <Square3Stack3DIcon className="size-6" aria-hidden="true" />
       </button>

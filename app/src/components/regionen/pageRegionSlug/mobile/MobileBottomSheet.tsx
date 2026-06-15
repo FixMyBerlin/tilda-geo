@@ -53,7 +53,7 @@ export const MobileBottomSheet = ({ open, onClose, title, children }: Props) => 
               <DialogPanel className="flex min-h-0 flex-1 flex-col">
                 <header
                   onPointerDown={(event) => dragControls.start(event)}
-                  className="flex shrink-0 cursor-grab touch-none flex-col active:cursor-grabbing"
+                  className="flex shrink-0 cursor-grab touch-none flex-col select-none active:cursor-grabbing"
                 >
                   <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-gray-300" />
                   <div className="flex items-center justify-between px-4 py-2">

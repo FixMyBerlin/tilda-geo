@@ -17,20 +17,31 @@ const mobileSearchCss = `
   .maplibregl-ctrl-top-right .maplibregl-ctrl-geocoder {
     transition: opacity 150ms ease, transform 150ms ease;
   }
+  /* Hidden until the search button opens it */
   html[data-mobile-search='closed'] .maplibregl-ctrl-top-right .maplibregl-ctrl-geocoder {
     opacity: 0;
     transform: translateY(-0.5rem);
     pointer-events: none;
   }
+  /* Open: a full-width bar pinned to the top, above the header buttons, with a
+     gutter that matches the MobileMapHeader padding (p-2 = 0.5rem). */
   html[data-mobile-search='open'] .maplibregl-ctrl-top-right {
     position: absolute;
     inset: 0 0 auto 0;
     z-index: 50;
+    margin: 0;
+    padding: 0.5rem;
   }
+  /* Reset the library's fixed width/margins so the control fills the gutter-padded
+     bar and the inner input aligns edge-to-edge. */
   html[data-mobile-search='open'] .maplibregl-ctrl-top-right .maplibregl-ctrl-geocoder {
-    width: 100%;
+    width: auto;
+    min-width: 0;
     max-width: none;
+    margin: 0;
   }
+  html[data-mobile-search='open'] .maplibregl-ctrl-geocoder .input-group { width: 100%; }
+  html[data-mobile-search='open'] .maplibregl-ctrl-geocoder .input-group input { width: 100%; }
 }
 `
 

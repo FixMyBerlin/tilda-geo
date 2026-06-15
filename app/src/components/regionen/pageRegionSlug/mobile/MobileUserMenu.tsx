@@ -2,7 +2,7 @@ import { ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
 import { UserIcon } from '@heroicons/react/24/solid'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Img } from '@/components/shared/Img'
 import { useLogout } from '@/components/shared/layouts/Header/User/useLogout'
@@ -12,7 +12,10 @@ import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
 import { MobileBottomSheet } from './MobileBottomSheet'
-import { mobileControlButtonClassName } from './mobileControlButton.const'
+import {
+  mobileControlButtonActiveClassName,
+  mobileControlButtonClassName,
+} from './mobileControlButton.const'
 
 const MobileUserLoggedIn = ({ user }: { user: NonNullable<CurrentUser> }) => {
   const [open, setOpen] = useState(false)
@@ -25,8 +28,13 @@ const MobileUserLoggedIn = ({ user }: { user: NonNullable<CurrentUser> }) => {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Benutzerkonto"
+        aria-expanded={open}
         data-testid={playwrightTestId('user-info')}
-        className={twJoin(mobileControlButtonClassName, 'relative size-10')}
+        className={twMerge(
+          mobileControlButtonClassName,
+          'relative size-10',
+          open && mobileControlButtonActiveClassName,
+        )}
       >
         {user.osmAvatar ? (
           <Img

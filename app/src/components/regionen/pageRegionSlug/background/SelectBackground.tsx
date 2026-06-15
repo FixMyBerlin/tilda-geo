@@ -1,8 +1,10 @@
 import { Listbox, ListboxButton, ListboxOptions } from '@headlessui/react'
+import { CheckIcon } from '@heroicons/react/20/solid'
 import { ChevronUpDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
 import type React from 'react'
+import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
-import { twJoin } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import {
   defaultBackgroundParam,
   useBackgroundParam,
@@ -10,6 +12,11 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
+import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
+import {
+  mobileControlButtonActiveClassName,
+  mobileControlButtonClassName,
+} from '../mobile/mobileControlButton.const'
 import { useBreakpoint } from '../utils/useBreakpoint'
 import { ListOption } from './ListOption'
 
@@ -18,6 +25,7 @@ export const SelectBackground: React.FC = () => {
   const { backgroundParam, setBackgroundParam } = useBackgroundParam()
   const { region } = useRegionLoaderData()
   const isSmBreakpointOrAbove = useBreakpoint('sm')
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   if (!region?.backgroundSources) return null
 
@@ -32,6 +40,66 @@ export const SelectBackground: React.FC = () => {
   if (!mainMap) return null
   if (!backgroundParam) return null
 
+  // Mobile: an icon button that opens the same options as a bottom sheet (consistent
+  // with the other mobile controls), instead of the desktop dropdown.
+  if (!isSmBreakpointOrAbove) {
+    const options: { value: BackgroundParam; name: string }[] = [
+      ...backgrounds.map(({ id, name }) => ({ value: id, name })),
+      { value: defaultBackgroundParam, name: 'Standard' },
+    ]
+
+    return (
+      <section>
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          aria-label="Hintergrundkarten"
+          aria-expanded={sheetOpen}
+          className={twMerge(
+            mobileControlButtonClassName,
+            'size-10',
+            sheetOpen && mobileControlButtonActiveClassName,
+          )}
+        >
+          <GlobeAltIcon className="size-6" aria-hidden="true" />
+        </button>
+
+        <MobileBottomSheet
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+          title="Hintergrundkarten"
+        >
+          <div className="py-1">
+            {options.map(({ value, name }) => {
+              const selected = backgroundParam === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    onChange(value)
+                    setSheetOpen(false)
+                  }}
+                  className={twJoin(
+                    'flex w-full items-center gap-2 px-4 py-3 text-left text-sm',
+                    selected
+                      ? 'bg-yellow-100 font-medium text-yellow-900'
+                      : 'text-gray-900 hover:bg-yellow-50',
+                  )}
+                >
+                  <span className="flex w-5 shrink-0 justify-center">
+                    {selected && <CheckIcon className="size-5" aria-hidden="true" />}
+                  </span>
+                  {name}
+                </button>
+              )
+            })}
+          </div>
+        </MobileBottomSheet>
+      </section>
+    )
+  }
+
   return (
     <Listbox<'section', BackgroundParam>
       as="section"
@@ -41,19 +109,10 @@ export const SelectBackground: React.FC = () => {
     >
       <ListboxButton
         aria-label="Hintergrundkarten"
-        className={twJoin(
-          'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
-          isSmBreakpointOrAbove ? 'px-4 py-2' : 'size-10',
-        )}
+        className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
       >
-        {isSmBreakpointOrAbove ? (
-          <>
-            Hintergrundkarten
-            <ChevronUpDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />
-          </>
-        ) : (
-          <GlobeAltIcon className="size-6" aria-hidden="true" />
-        )}
+        Hintergrundkarten
+        <ChevronUpDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />
       </ListboxButton>
       <ListboxOptions
         transition

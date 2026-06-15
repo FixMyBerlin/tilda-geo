@@ -1,7 +1,7 @@
 import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
 import { Img } from '@/components/shared/Img'
@@ -15,7 +15,10 @@ import type {
 } from '@/components/shared/layouts/Header/types'
 import { productName } from '@/data/tildaProductNames.const'
 import { MobileBottomSheet } from './MobileBottomSheet'
-import { mobileControlButtonClassName } from './mobileControlButton.const'
+import {
+  mobileControlButtonActiveClassName,
+  mobileControlButtonClassName,
+} from './mobileControlButton.const'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
 
@@ -70,10 +73,12 @@ export const MobileRegionMenu = () => {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`Menü – ${staticRegion.fullName}`}
-        className={twJoin(
+        aria-expanded={open}
+        className={twMerge(
           mobileControlButtonClassName,
           'h-10 min-w-10 gap-1 px-1.5',
           customLogo && staticRegion.logoWhiteBackgroundRequired ? 'bg-white' : '',
+          open && mobileControlButtonActiveClassName,
         )}
       >
         {customLogo ? (
