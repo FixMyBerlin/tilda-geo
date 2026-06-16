@@ -42,7 +42,9 @@ export const MapInterface = () => {
         <SidebarLayerControls />
         <SidebarInspector />
         <div
-          className="pointer-events-none fixed right-2.5 bottom-4 z-10 mt-2.5 flex max-w-full flex-wrap items-end justify-end gap-1.5 *:pointer-events-auto"
+          // Offsets fold in `env(safe-area-inset-*)` so the controls stay above the iOS home
+          // indicator / landscape notch; insets are 0 elsewhere, leaving the base right-2.5/bottom-4.
+          className="pointer-events-none fixed right-[calc(env(safe-area-inset-right)_+_0.625rem)] bottom-[calc(env(safe-area-inset-bottom)_+_1rem)] z-10 mt-2.5 flex max-w-full flex-wrap items-end justify-end gap-1.5 *:pointer-events-auto"
           data-map-controls="true"
         >
           <LoadingIndicator />

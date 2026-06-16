@@ -5,6 +5,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { StrictMode } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
+import { useVisibleViewportHeightVar } from '@/components/shared/hooks/viewport/useVisibleViewportHeightVar'
 import { Footer } from '@/components/shared/layouts/Footer/Footer'
 import { HeaderApp } from '@/components/shared/layouts/Header/HeaderApp/HeaderApp'
 import { TailwindResponsiveHelper } from '@/components/shared/layouts/helper/TailwindResponsiveHelper'
@@ -24,6 +25,10 @@ export function LayoutRoot() {
   // Region-style preview routes mirror the same full-bleed shell.
   const hideAppChrome = matches.some((m) => HIDE_APP_CHROME_ROUTE_IDS.has(m.routeId))
 
+  // On full-bleed routes, publish the real visible viewport height to `--app-height` so the
+  // wrappers below can lock to it (raw `dvh` is unreliable on Chrome/Firefox iOS — see the hook).
+  useVisibleViewportHeightVar(hideAppChrome)
+
   return (
     <html lang="de" className="h-full">
       <head>
@@ -33,13 +38,21 @@ export function LayoutRoot() {
         suppressHydrationWarning
         className={twMerge(
           'flex w-full bg-white text-gray-800 antialiased',
-          // Full-bleed map/preview routes: pin the document to the dynamic viewport and forbid
-          // scroll/overscroll so iOS leaves no gray strip and Chrome iOS can't scroll the
-          // floating header away. Other routes keep their normal scrollable min-height.
-          hideAppChrome ? 'h-dvh overflow-hidden overscroll-none' : 'min-h-dvh',
+          // Full-bleed map/preview routes: pin the document to the *measured* visible viewport
+          // (`--app-height`, with `100dvh` as the pre-hydration fallback) and forbid scroll/
+          // overscroll so iOS leaves no gray strip and Chrome iOS can't scroll the floating header
+          // away. Other routes keep their normal scrollable min-height.
+          hideAppChrome
+            ? 'h-[var(--app-height,100dvh)] overflow-hidden overscroll-none'
+            : 'min-h-dvh',
         )}
       >
-        <div className={twMerge('flex w-full flex-col', hideAppChrome ? 'h-dvh' : 'min-h-dvh')}>
+        <div
+          className={twMerge(
+            'flex w-full flex-col',
+            hideAppChrome ? 'h-[var(--app-height,100dvh)]' : 'min-h-dvh',
+          )}
+        >
           <StrictMode>
             <TanStackQueryProvider queryClient={queryClient}>
               {!hideAppChrome && <HeaderApp />}

@@ -9,10 +9,11 @@ export function PageRegionSlug() {
   const data = routeApi.useLoaderData()
 
   return (
-    // Full-bleed map page: lock to the *dynamic* viewport (h-dvh, not h-screen/100vh) so iOS
-    // Safari/Chrome don't leave a gray strip below the map and the document stays non-scrollable
-    // (otherwise Chrome iOS lets you scroll the floating header/URL bar out of view).
-    <div className="flex h-dvh flex-col overflow-hidden overscroll-none">
+    // Full-bleed map page: lock to the *measured* visible viewport (`--app-height`, set by
+    // useVisibleViewportHeightVar; `100dvh` is only the pre-hydration fallback because raw dvh is
+    // unreliable on Chrome/Firefox iOS) so Safari/Chrome leave no gray strip and the document stays
+    // non-scrollable (otherwise Chrome iOS lets you scroll the floating header/URL bar out of view).
+    <div className="flex h-[var(--app-height,100dvh)] flex-col overflow-hidden overscroll-none">
       {/* Desktop header only — on mobile the map fills the screen and the controls
           live in the floating MobileMapHeader (see MapInterface). */}
       <div className="hidden sm:block">

@@ -1,6 +1,6 @@
 import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInitialSizeMeasurement'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useBreakpoint } from '../utils/useBreakpoint'
+import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { Categories } from './Categories/Categories'
 import { QaConfigCategories } from './QaConfigs/QaConfigCategories'
 import { StaticDatasetCategories } from './StaticDatasets/StaticDatasetCategories'
