@@ -11,6 +11,7 @@ import type {
 import { AttributionControl, Map as MapGl, NavigationControl, useMap } from 'react-map-gl/maplibre'
 import {
   useMapActions,
+  useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
@@ -63,6 +64,9 @@ const extractInteractiveFeatures = (
   })
 }
 
+// Stable reference so toggling draw mode doesn't churn the <Map> interactiveLayerIds prop.
+const NO_INTERACTIVE_LAYERS: string[] = []
+
 export const RegionMap = () => {
   const { mapParam, setMapParam } = useMapParam()
   const { setFeaturesParam } = useFeaturesParam()
@@ -87,6 +91,7 @@ export const RegionMap = () => {
   }
 
   const inspectorFeatures = useMapInspectorFeatures()
+  const calculatorDrawActive = useMapCalculatorDrawActive()
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (containMaskFeature(features)) {
@@ -220,7 +225,14 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  const interactiveLayerIds = useInteractiveLayers()
+  // While the calculator draw tool is active, no layers are interactive: clicking/hovering
+  // the data does nothing and the inspector can't open (queryRenderedFeatures returns none),
+  // so the draw tool owns all map interaction. This replaces a special-case guard in the
+  // click handler with the map's own interactivity mechanism.
+  const computedInteractiveLayerIds = useInteractiveLayers()
+  const interactiveLayerIds = calculatorDrawActive
+    ? NO_INTERACTIVE_LAYERS
+    : computedInteractiveLayerIds
 
   if (!mapParam) {
     return null
