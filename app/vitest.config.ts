@@ -24,5 +24,12 @@ export default defineConfig({
     setupFiles: './test/setup.ts',
     include: ['**/*.test.ts', '**/*.test.tsx'], // Exclude .spec.ts which are Playwright tests
     maxWorkers: 1,
+    fileParallelism: false,
+    server: {
+      deps: {
+        // Zod 4's re-export graph breaks when Vitest loads it as a native external under Bun.
+        inline: ['zod'],
+      },
+    },
   },
 })
