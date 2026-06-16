@@ -11,11 +11,13 @@ export const LegendNameDesc = ({ name, desc }: Props) => {
       <div className={wrapperClass}>
         <details className="marker:text-gray-300 hover:marker:text-gray-700">
           <summary
-            className="cursor-pointer text-sm"
+            // `leading-none` matches the plain (descriptionless) legend rows above.
+            className="cursor-pointer text-sm leading-none"
             // oxlint-disable-next-line react/no-danger -- legend name from layer config
             dangerouslySetInnerHTML={{ __html: name }}
           />
-          <ul className="ml-1 border-l border-gray-300 pl-1.5 font-normal">
+          {/* Flush-left on mobile (no nesting indent/border); keep the indent on desktop. */}
+          <ul className="font-normal sm:ml-1 sm:border-l sm:border-gray-300 sm:pl-1.5">
             {desc.map((descLine) => (
               <li
                 className="ml-[0.9rem] list-disc py-0.5 marker:text-gray-300 hover:marker:text-gray-300"

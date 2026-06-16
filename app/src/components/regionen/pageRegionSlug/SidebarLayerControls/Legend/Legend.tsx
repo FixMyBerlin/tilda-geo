@@ -82,9 +82,11 @@ export const Legend = ({ subcategoryId, styleConfig }: Props) => {
   }
 
   return (
-    <section className="relative mt-2 mb-1 overflow-hidden">
+    <section className="@container relative mt-2 mb-1 overflow-hidden">
       <header className="sr-only">Legende</header>
-      <div className="space-y-1">
+      {/* Container query: two columns once the legend has room (e.g. the mobile layer
+          sheet); the narrower desktop sidebar stays a single column. */}
+      <div className="grid grid-cols-1 gap-x-4 gap-y-1.5 @[17rem]:grid-cols-2">
         {legends.map((legendData) => {
           // TODO: TS: This should be specified at the source…
           const legendDataId = legendData.id

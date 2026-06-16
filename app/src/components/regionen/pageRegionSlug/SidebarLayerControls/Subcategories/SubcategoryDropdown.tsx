@@ -136,7 +136,8 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
       </Menu>
 
       {!disabled && (
-        <div className="ml-6">
+        // No left indent on mobile (flush with the dropdown above); keep it on the desktop sidebar.
+        <div className="sm:ml-6">
           <Legend subcategoryId={subcategory.id} styleConfig={activeStyleConfig} />
         </div>
       )}
