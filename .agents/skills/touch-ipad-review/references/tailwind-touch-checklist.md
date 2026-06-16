@@ -133,6 +133,40 @@ Prefer Headless UI / Radix for open menus. For custom inline rows, flag hover-on
 
 ---
 
+## 4b. Full-bleed / full-screen map pages (iOS viewport lock)
+
+A full-page map with **floating** navigation (no normal page scroll) has two iOS-specific failure modes that `min-h-dvh` alone does **not** fix. The container must be **exactly** the dynamic viewport **and** the document must be **non-scrollable**.
+
+| Symptom (device)                                                       | Cause                                                                                                              | Fix                                                                                                       |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Gray strip below the map** (iOS Safari)                             | `h-screen` = `100vh` = the **large** viewport (toolbars retracted), which is taller than the *visible* area → the document overflows the visible viewport | Use `h-dvh` (current/dynamic viewport), **not** `h-screen`/`100vh`, on the full-page wrapper              |
+| **Floating header / URL bar scrolls out of view** (Chrome iOS)       | The document is taller than the viewport, so a swipe on empty map chrome scrolls the page and retracts the browser/header | Pin the document to the viewport and forbid scroll: `h-dvh overflow-hidden overscroll-none` on `body`/wrapper |
+
+**Pattern — lock the whole document on the full-bleed route (not just the inner page):**
+
+```tsx
+// Root layout: when the route hides app chrome (full-bleed map), pin body + wrapper to the
+// dynamic viewport and kill scroll/overscroll. Other routes keep normal scrollable min-height.
+<body className={twMerge(
+  'flex w-full …',
+  isFullBleed ? 'h-dvh overflow-hidden overscroll-none' : 'min-h-dvh',
+)}>
+  <div className={twMerge('flex w-full flex-col', isFullBleed ? 'h-dvh' : 'min-h-dvh')}>
+```
+
+```tsx
+// The full-page map component fills the locked parent (h-dvh, never h-screen):
+<div className="flex h-dvh flex-col overflow-hidden overscroll-none">…map…</div>
+```
+
+**Why `h-dvh` and not just `min-h-dvh`:** `min-h-dvh` permits the element to grow past the viewport (fine for scrollable content pages); a non-scrolling map page must be *exactly* the viewport so nothing overflows and nothing can be scrolled away.
+
+**Audit:** grep `h-screen` / `min-h-screen` / `100vh` on any full-page-map / floating-nav route → flag. Confirm the document (not only the inner div) is height-locked and `overflow-hidden`, otherwise Chrome iOS can still scroll the header off-screen.
+
+**Severity:** gray strip or hideable floating header on the primary map page → **Warning** (broken-looking layout / lost navigation on touch).
+
+---
+
 ## 5. Scroll, zoom, keyboard (Safari / iPadOS)
 
 | Check                                     | Tailwind / pattern                                                                                                   |

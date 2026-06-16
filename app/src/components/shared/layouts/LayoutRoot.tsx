@@ -3,6 +3,7 @@ import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
 import { HeadContent, Outlet, Scripts, useMatches, useRouteContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { StrictMode } from 'react'
+import { twMerge } from 'tailwind-merge'
 import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
 import { Footer } from '@/components/shared/layouts/Footer/Footer'
 import { HeaderApp } from '@/components/shared/layouts/Header/HeaderApp/HeaderApp'
@@ -30,9 +31,15 @@ export function LayoutRoot() {
       </head>
       <body
         suppressHydrationWarning
-        className="flex min-h-dvh w-full bg-white text-gray-800 antialiased"
+        className={twMerge(
+          'flex w-full bg-white text-gray-800 antialiased',
+          // Full-bleed map/preview routes: pin the document to the dynamic viewport and forbid
+          // scroll/overscroll so iOS leaves no gray strip and Chrome iOS can't scroll the
+          // floating header away. Other routes keep their normal scrollable min-height.
+          hideAppChrome ? 'h-dvh overflow-hidden overscroll-none' : 'min-h-dvh',
+        )}
       >
-        <div className="flex min-h-dvh w-full flex-col">
+        <div className={twMerge('flex w-full flex-col', hideAppChrome ? 'h-dvh' : 'min-h-dvh')}>
           <StrictMode>
             <TanStackQueryProvider queryClient={queryClient}>
               {!hideAppChrome && <HeaderApp />}

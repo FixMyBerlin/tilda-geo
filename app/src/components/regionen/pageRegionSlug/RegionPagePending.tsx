@@ -10,7 +10,7 @@ export default function RegionPagePending() {
 
   return (
     <div
-      className="flex h-screen min-h-0 w-full flex-col bg-white"
+      className="flex h-dvh min-h-0 w-full flex-col bg-white"
       aria-live="polite"
       aria-busy="true"
     >
