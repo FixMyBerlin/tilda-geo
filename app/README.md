@@ -31,6 +31,12 @@ Run `bun run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and de
 - ORM: [Prisma](https://www.prisma.io/)
 - Styling: [Tailwind CSS](https://tailwindcss.com/), [Tailwind UI](https://tailwindui.com/) and [Headless UI](https://headlessui.com/)
 
+### Supported browsers
+
+Market-share queries in [`package.json`](./package.json) `browserslist`; wired to [`vite.config.ts`](./vite.config.ts) (client build) and [`oxlint.config.mjs`](./oxlint.config.mjs) (client API lint).
+
+**How it works:** [browser-target skill](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/browser-target/SKILL.md)
+
 ### Running the production bundle locally
 
 1. Ensure `bun run dev` works.

@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
+import browserslistToEsbuild from 'browserslist-to-esbuild'
 import { nitro } from 'nitro/vite'
 import { createLogger, defineConfig } from 'vite'
 
@@ -30,6 +31,9 @@ export default defineConfig({
   environments: {
     client: {
       build: {
+        // package.json browserslist (market-share queries) is the single source of truth
+        // for client build target and eslint-plugin-compat. Server/Bun code is unaffected.
+        target: browserslistToEsbuild(),
         sourcemap: true,
       },
       optimizeDeps: {

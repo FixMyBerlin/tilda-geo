@@ -53,5 +53,16 @@ export default defineConfig({
         'react-compiler-js/react-compiler': 'error',
       },
     },
+    // Browser API guard — only for code that ships to the client (components + route UI).
+    // Server code (*.server.ts, *.functions.ts, src/routes/api/**, src/server/**) is excluded:
+    // it runs on Bun/Nitro and may use whatever the server runtime supports (Node/Bun APIs).
+    {
+      files: ['src/components/**', 'src/routes/**'],
+      excludeFiles: ['**/*.server.ts', '**/*.functions.ts', 'src/routes/api/**'],
+      jsPlugins: [{ name: 'compat', specifier: 'eslint-plugin-compat' }],
+      rules: {
+        'compat/compat': 'error',
+      },
+    },
   ],
 })
