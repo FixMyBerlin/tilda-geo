@@ -12,6 +12,8 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
+import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
+import { useBreakpoint } from '../utils/useBreakpoint'
 import { Inspector } from './Inspector'
 import { InspectorHeader } from './InspectorHeader'
 import { allUrlFeaturesInBounds, createBoundingPolygon, fitBounds } from './util'
@@ -19,6 +21,7 @@ import { allUrlFeaturesInBounds, createBoundingPolygon, fitBounds } from './util
 export const SidebarInspector = () => {
   const checkBounds = useRef(true)
 
+  const isDesktop = useBreakpoint('sm')
   const { mainMap: map } = useMap()
   const mapLoaded = useMapLoaded()
   const _mapBounds = useMapBounds() // needed to trigger rerendering
@@ -71,6 +74,23 @@ export const SidebarInspector = () => {
     clearInspectorFeatures()
   }
 
+  // Mobile: the inspector data is shown in the shared bottom sheet (taller than the
+  // default — only ~10% map stays visible) instead of the desktop right-hand sidebar.
+  if (!isDesktop) {
+    return (
+      <MobileBottomSheet
+        open={renderFeatures}
+        onClose={handleClose}
+        title={`${features.length} ${features.length === 1 ? 'Element' : 'Elemente'}`}
+      >
+        <div className="px-4 pb-4">
+          <Inspector features={features} />
+        </div>
+      </MobileBottomSheet>
+    )
+  }
+
+  // Desktop: right-hand sidebar (this branch + its map-control offset run on desktop only).
   return (
     <div
       ref={ref}

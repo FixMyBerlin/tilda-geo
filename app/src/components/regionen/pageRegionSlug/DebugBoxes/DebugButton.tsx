@@ -42,7 +42,7 @@ export const DebugButton = () => {
         <BugAntIcon className="size-6" aria-hidden="true" />
       </button>
 
-      <MobileBottomSheet open={open} onClose={() => setOpen(false)} title="Debug">
+      <MobileBottomSheet open={open} onClose={() => setOpen(false)} title="Debug" tone="debug">
         <div className="space-y-2 p-2">
           <button
             type="button"

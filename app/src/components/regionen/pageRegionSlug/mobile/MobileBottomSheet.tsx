@@ -2,26 +2,60 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/20/solid'
 import { AnimatePresence, motion, useDragControls } from 'motion/react'
 import type { ReactNode } from 'react'
+import { twMerge } from 'tailwind-merge'
+
+/** Sheet color schemes — panel bg + grabber tint per use. */
+export type SheetTone = 'default' | 'calculator' | 'debug'
+
+const toneStyles: Record<SheetTone, { panel: string; grabber: string }> = {
+  default: { panel: 'bg-white', grabber: 'bg-gray-300' },
+  calculator: { panel: 'bg-fuchsia-800 text-white', grabber: 'bg-white/40' },
+  debug: { panel: 'bg-pink-300 text-pink-950', grabber: 'bg-pink-500/50' },
+}
+
+/** How much of the map stays visible above the sheet. */
+export type SheetMapPeek = 'minimal' | '10%' | '20%'
+
+const maxHeightByPeek: Record<SheetMapPeek, string> = {
+  // Just enough room for the close button above the sheet (sheet ≈ full height).
+  minimal: 'max-h-[calc(100dvh-3.5rem)]',
+  '10%': 'max-h-[90dvh]',
+  '20%': 'max-h-[80dvh]',
+}
 
 type Props = {
   open: boolean
   onClose: () => void
   title: ReactNode
   children: ReactNode
+  /** How much map to leave visible above the sheet (default `minimal` ≈ full height). */
+  mapPeek?: SheetMapPeek
+  /** Color scheme of the sheet chrome (default white). Content colors are the child's job. */
+  tone?: SheetTone
 }
 
 /**
- * Reusable mobile bottom sheet: slides up from the bottom, capped at 80vh so
- * ~20% of the map stays visible, and can be dismissed by swiping the header
- * handle down, tapping the close button, tapping the backdrop, or Escape.
+ * Reusable mobile bottom sheet: slides up from the bottom (nearly full height by
+ * default so content gets maximum room), and can be dismissed by swiping the header
+ * handle down, tapping the close button (which sits above the sheet), tapping the
+ * backdrop, or Escape. The title is visually hidden (`sr-only`) but kept for a11y.
  *
  * HeadlessUI `Dialog` provides the a11y plumbing (focus trap, Escape, outside
  * click, scroll lock); Motion provides the slide + drag-to-dismiss gesture.
  * Drag is initiated only from the header handle (via `useDragControls`) so it
  * doesn't fight the scrollable content.
  */
-export const MobileBottomSheet = ({ open, onClose, title, children }: Props) => {
+export const MobileBottomSheet = ({
+  open,
+  onClose,
+  title,
+  children,
+  mapPeek = 'minimal',
+  tone = 'default',
+}: Props) => {
   const dragControls = useDragControls()
+  const toneStyle = toneStyles[tone]
+  const maxHeight = maxHeightByPeek[mapPeek]
 
   return (
     <AnimatePresence>
@@ -34,9 +68,25 @@ export const MobileBottomSheet = ({ open, onClose, title, children }: Props) => 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           />
-          <div className="fixed inset-x-0 bottom-0 flex justify-center">
+          <div className="fixed inset-x-0 bottom-0 flex flex-col items-stretch">
+            {/* Close button above the sheet, on the backdrop. Plain for now (drop-shadow
+                only so the white icon stays legible over light map areas). */}
+            <div className="flex justify-end px-3 pb-1.5">
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Schließen"
+                className="rounded p-2 text-white drop-shadow-md"
+              >
+                <XMarkIcon className="size-7" />
+              </button>
+            </div>
             <motion.div
-              className="flex max-h-[80vh] w-full flex-col overflow-hidden rounded-t-xl bg-white shadow-xl"
+              className={twMerge(
+                'flex w-full flex-col overflow-hidden rounded-t-xl shadow-xl',
+                toneStyle.panel,
+                maxHeight,
+              )}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
@@ -51,25 +101,16 @@ export const MobileBottomSheet = ({ open, onClose, title, children }: Props) => 
               }}
             >
               <DialogPanel className="flex min-h-0 flex-1 flex-col">
+                {/* Drag-to-close handle. `py-2.5` gives the grabber visible, symmetric breathing
+                    room (so content isn't crammed against it); the `after:` pseudo enlarges the
+                    touch area a further ~8px each side WITHOUT affecting layout flow (`z-10` lifts
+                    it above the content so the downward extension still captures the drag). */}
                 <header
                   onPointerDown={(event) => dragControls.start(event)}
-                  className="flex shrink-0 cursor-grab touch-none flex-col select-none active:cursor-grabbing"
+                  className="relative z-10 flex shrink-0 cursor-grab touch-none flex-col py-2.5 select-none after:absolute after:inset-x-0 after:-top-2 after:-bottom-2 after:content-[''] active:cursor-grabbing"
                 >
-                  <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-gray-300" />
-                  <div className="flex items-center justify-between px-4 py-2">
-                    <DialogTitle className="min-w-0 text-sm font-semibold text-gray-900">
-                      {title}
-                    </DialogTitle>
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      onPointerDown={(event) => event.stopPropagation()}
-                      aria-label="Schließen"
-                      className="-mr-1 shrink-0 rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-                    >
-                      <XMarkIcon className="size-5" />
-                    </button>
-                  </div>
+                  <div className={twMerge('mx-auto h-1.5 w-10 rounded-full', toneStyle.grabber)} />
+                  <DialogTitle className="sr-only">{title}</DialogTitle>
                 </header>
 
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
