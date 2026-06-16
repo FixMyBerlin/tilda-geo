@@ -1,5 +1,4 @@
 import { useHydrated, useLocation } from '@tanstack/react-router'
-import { useMemo } from 'react'
 import { useMapDebugActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { searchParamsRegistry } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/searchParamsRegistry'
 import { parseMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
@@ -15,22 +14,23 @@ import { linkStyles } from '@/components/shared/links/styles'
 import { envKey } from '@/components/shared/utils/isEnv'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
+import { AdminRegionSwitch } from './AdminRegionSwitch'
 import { getAdminInfoEnvUrl } from './utils/getAdminInfoEnvUrl'
 
 type Props = {
   user: NonNullable<CurrentUser>
+  inHeadlessMenu?: boolean
 }
 
-export const UserLoggedInAdminInfo = ({ user }: Props) => {
+export const UserLoggedInAdminInfo = ({ user, inHeadlessMenu = false }: Props) => {
   const hydrated = useHydrated()
   const { toggleShowDebugInfo } = useMapDebugActions()
   const regionSlug = useOptionalRegionSlug()
   const location = useLocation()
-  const mapParam = useMemo(() => {
-    if (!regionSlug) return null
-    const mapQuery = new URLSearchParams(location.searchStr).get(searchParamsRegistry.map)
-    return mapQuery ? parseMapParam(mapQuery) : null
-  }, [regionSlug, location.searchStr])
+  const mapQuery = regionSlug
+    ? new URLSearchParams(location.searchStr).get(searchParamsRegistry.map)
+    : null
+  const mapParam = mapQuery ? parseMapParam(mapQuery) : null
   const osmUrlViewportUrl = mapParam && osmUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
   const mapillaryUrlViewportUrl =
     mapParam && mapillaryUrlViewport(mapParam.zoom, mapParam.lat, mapParam.lng)
@@ -53,6 +53,8 @@ export const UserLoggedInAdminInfo = ({ user }: Props) => {
       <p>
         Du bist <strong>Admin</strong>.
       </p>
+
+      <AdminRegionSwitch inHeadlessMenu={inHeadlessMenu} />
 
       <ul>
         <li className="flex flex-wrap items-center gap-x-2 gap-y-1">

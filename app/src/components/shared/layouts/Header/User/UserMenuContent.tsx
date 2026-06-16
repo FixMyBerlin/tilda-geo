@@ -10,6 +10,7 @@ import { UserLoggedInAdminInfo } from './UserLoggedInAdminInfo'
 
 type Props = {
   user: NonNullable<CurrentUser>
+  inHeadlessMenu?: boolean
 }
 
 /**
@@ -17,7 +18,7 @@ type Props = {
  * desktop dropdown (UserLoggedIn) and the mobile user sheet (MobileUserMenu).
  * Callers add their own logout control around it.
  */
-export const UserMenuContent = ({ user }: Props) => {
+export const UserMenuContent = ({ user, inHeadlessMenu = false }: Props) => {
   const isRegionsPage = Boolean(useOptionalRegionSlug())
   const hasPermissions = useHasPermissions()
 
@@ -81,7 +82,7 @@ export const UserMenuContent = ({ user }: Props) => {
           <Link to="/settings/user">Account bearbeiten</Link>
         )}
       </div>
-      <UserLoggedInAdminInfo user={user} />
+      <UserLoggedInAdminInfo user={user} inHeadlessMenu={inHeadlessMenu} />
     </>
   )
 }

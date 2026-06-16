@@ -52,8 +52,11 @@ export const UserLoggedIn = ({ user }: Props) => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <MenuItems className="absolute right-0 z-50 mt-2 w-64 origin-top-right rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5">
-          <UserMenuContent user={user} />
+        <MenuItems
+          modal={false}
+          className="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5"
+        >
+          <UserMenuContent user={user} inHeadlessMenu />
           <MenuItem>
             {({ focus }) => (
               <button
