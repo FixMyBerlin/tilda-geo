@@ -129,6 +129,15 @@ export const PlaceSearch = ({ className }: Props) => {
         <MagnifyingGlassIcon className="size-6" aria-hidden="true" />
       </button>
 
+      {/* Dim the map below the open search (mobile) so the panel + results stand out.
+          `pointer-events-none` keeps the map pannable and outside-tap-to-close working. */}
+      {open && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[55vh] bg-gradient-to-b from-black/45 to-transparent sm:hidden"
+        />
+      )}
+
       {open && (
         <Combobox
           as="div"
