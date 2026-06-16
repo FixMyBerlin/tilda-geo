@@ -1,4 +1,9 @@
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+import {
+  PencilIcon,
+  PlusIcon,
+  QuestionMarkCircleIcon,
+  TrashIcon,
+} from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
@@ -21,7 +26,8 @@ const groupedBtn = ({
   rounded: 'left' | 'middle' | 'right'
 }) =>
   twJoin(
-    'relative -ml-px inline-flex min-h-14 items-center gap-x-2 px-4 py-2 text-sm font-semibold ring-1 ring-inset focus:z-10',
+    // Mobile: 52px square (matches the bottom-right category button). Desktop: labeled buttons.
+    'relative -ml-px inline-flex size-13 items-center justify-center text-sm font-semibold ring-1 ring-inset focus:z-10 sm:size-auto sm:min-h-14 sm:justify-start sm:gap-x-2 sm:px-4 sm:py-2',
     rounded === 'left' && 'rounded-l-md',
     rounded === 'right' && 'rounded-r-md',
     rounded === 'middle' && 'rounded-none',
@@ -37,10 +43,9 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
 
   return (
     <>
-      <div
-        className="pointer-events-auto absolute isolate z-1000 inline-flex rounded-md shadow-xs"
-        style={{ left: 270, top: 10 }}
-      >
+      {/* Below the floating header buttons on mobile (icon-only to fit); next to the
+          desktop sidebar (with labels) on ≥ sm. */}
+      <div className="pointer-events-auto absolute top-14 left-2 isolate z-1000 inline-flex rounded-md shadow-xs sm:top-2.5 sm:left-[270px]">
         <button
           type="button"
           className={groupedBtn({ active: drawMode === 'polygon', rounded: 'left' })}
@@ -48,7 +53,7 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
           onClick={() => onDrawModeChange('polygon')}
         >
           <PlusIcon className="size-7 shrink-0" aria-hidden />
-          Fläche zeichnen
+          <span className="hidden sm:inline">Fläche zeichnen</span>
         </button>
         <button
           type="button"
@@ -66,7 +71,7 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
           disabled={!canEdit}
         >
           <PencilIcon className="size-7 shrink-0" aria-hidden />
-          Verschieben & Ändern
+          <span className="hidden sm:inline">Verschieben & Ändern</span>
         </button>
         <button
           type="button"
@@ -82,7 +87,8 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
           title="Hilfe"
           onClick={() => setHelpModalOpen(true)}
         >
-          Hilfe
+          <QuestionMarkCircleIcon className="size-7 shrink-0 sm:hidden" aria-hidden />
+          <span className="hidden sm:inline">Hilfe</span>
         </button>
       </div>
 
