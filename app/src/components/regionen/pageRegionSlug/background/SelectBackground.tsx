@@ -12,12 +12,12 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
-import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
 import {
   mobileControlButtonActiveClassName,
   mobileControlButtonClassName,
 } from '../mobile/mobileControlButton.const'
+import { useBreakpoint } from '../utils/useBreakpoint'
 import { ListOption } from './ListOption'
 
 export const SelectBackground: React.FC = () => {

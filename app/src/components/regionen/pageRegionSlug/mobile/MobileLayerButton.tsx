@@ -1,10 +1,10 @@
 import { Square3Stack3DIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { Categories } from '../SidebarLayerControls/Categories/Categories'
 import { QaConfigCategories } from '../SidebarLayerControls/QaConfigs/QaConfigCategories'
 import { StaticDatasetCategories } from '../SidebarLayerControls/StaticDatasets/StaticDatasetCategories'
+import { useBreakpoint } from '../utils/useBreakpoint'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
   mobileControlButtonActiveClassName,

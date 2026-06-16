@@ -10,8 +10,8 @@ export default function RegionPagePending() {
 
   return (
     <div
-      // Mirrors PageRegionSlug's full-bleed lock: measured visible height with a 100dvh fallback.
-      className="flex h-[var(--app-height,100dvh)] min-h-0 w-full flex-col bg-white"
+      // Mirrors PageRegionSlug's full-bleed shell: full-screen, non-scrollable.
+      className="flex h-screen min-h-0 w-full flex-col bg-white"
       aria-live="polite"
       aria-busy="true"
     >

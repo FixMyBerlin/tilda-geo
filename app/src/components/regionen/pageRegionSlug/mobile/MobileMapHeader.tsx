@@ -1,7 +1,7 @@
-import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { DebugButton } from '../DebugBoxes/DebugButton'
 import { DownloadModal } from '../DownloadModal/DownloadModal'
 import { PlaceSearch } from '../Map/Search/PlaceSearch'
+import { useBreakpoint } from '../utils/useBreakpoint'
 import { MobileRegionMenu } from './MobileRegionMenu'
 import { MobileUserMenu } from './MobileUserMenu'
 
