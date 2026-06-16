@@ -76,7 +76,7 @@ export const MobileRegionMenu = () => {
         aria-expanded={open}
         className={twMerge(
           mobileControlButtonClassName,
-          'h-10 min-w-10 gap-1 px-1.5',
+          'h-10 min-w-10 gap-1.5 px-2',
           customLogo && staticRegion.logoWhiteBackgroundRequired ? 'bg-white' : '',
           open && mobileControlButtonActiveClassName,
         )}
@@ -88,6 +88,7 @@ export const MobileRegionMenu = () => {
             {regionAbbreviation(staticRegion.name)}
           </span>
         )}
+        <span className="text-sm font-medium text-gray-700">Über</span>
       </button>
 
       <MobileBottomSheet open={open} onClose={() => setOpen(false)} title={staticRegion.name}>

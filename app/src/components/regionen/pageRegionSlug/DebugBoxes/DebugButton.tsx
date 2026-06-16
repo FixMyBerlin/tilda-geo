@@ -10,17 +10,15 @@ import { mobileControlButtonClassName } from '../mobile/mobileControlButton.cons
 import { DebugMap } from './DebugMap'
 import { DebugStateInteraction } from './DebugStateInteraction'
 
-type Props = {
-  /** Extra classes for the trigger button (e.g. `hidden sm:flex` for the desktop placement). */
-  className?: string
-}
-
 /**
  * Single entry point for the (admin) map debug tools. Visible only when debug mode
  * is on (toggled via the user menu). Opens the merged DebugMap +
  * DebugStateInteraction panels in a bottom sheet instead of floating boxes on the map.
+ *
+ * Placed in both the MobileMapHeader (mobile) and the bottom controls cluster
+ * (desktop); each is rendered only on its breakpoint, so no breakpoint class is needed.
  */
-export const DebugButton = ({ className }: Props) => {
+export const DebugButton = () => {
   const showDebugInfo = useMapDebugShowDebugInfo()
   const { setShowDebugInfo } = useMapDebugActions()
   const [open, setOpen] = useState(false)
@@ -39,7 +37,6 @@ export const DebugButton = ({ className }: Props) => {
           // Admin colors (the debug tools were pink/purple), but shaped like the other buttons.
           'size-10 border-pink-400 bg-pink-300 text-pink-900 hover:bg-pink-400 focus:ring-pink-500',
           open && 'border-pink-600 bg-pink-400',
-          className,
         )}
       >
         <BugAntIcon className="size-6" aria-hidden="true" />

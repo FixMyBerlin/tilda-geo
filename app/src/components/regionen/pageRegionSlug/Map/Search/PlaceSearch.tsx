@@ -15,7 +15,7 @@ import { useStaticRegion } from '../../regionUtils/useStaticRegion'
 import { type GeoFeature, type PlaceType, useGeocodingSearch } from './useGeocodingSearch'
 
 type Props = {
-  /** Extra classes for the wrapper (e.g. desktop positioning + `hidden sm:block`). */
+  /** Extra classes for the wrapper (e.g. the desktop overlay positioning). */
   className?: string
 }
 

@@ -9,11 +9,13 @@ import { DownloadModal } from './DownloadModal/DownloadModal'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
 import { RegionMap } from './Map/RegionMap'
 import { PlaceSearch } from './Map/Search/PlaceSearch'
+import { MobileLayerButton } from './mobile/MobileLayerButton'
 import { MobileMapHeader } from './mobile/MobileMapHeader'
 import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
+import { DesktopOnly } from './utils/Breakpoint'
 
 export const MapInterface = () => {
   useEffect(function registerPmtilesProtocolOnMount() {
@@ -24,13 +26,19 @@ export const MapInterface = () => {
     }
   }, [])
 
+  // Breakpoint-specific pieces are rendered (not CSS-hidden) so the unused ones stay out of
+  // the DOM. Generic/shared components that also appear on the other breakpoint use the
+  // <DesktopOnly> helper (it owns the breakpoint check, adds no DOM node). Components that are
+  // inherently mobile-only (MobileMapHeader, MobileLayerButton) gate themselves (return null).
   return (
     <MapProvider>
       <div className="relative flex h-full w-full flex-row gap-4">
         <RegionMap />
         <MobileMapHeader />
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
-        <PlaceSearch className="absolute top-2 right-14 z-20 hidden sm:block" />
+        <DesktopOnly>
+          <PlaceSearch className="absolute top-2 right-14 z-20" />
+        </DesktopOnly>
         <SidebarLayerControls />
         <SidebarInspector />
         <div
@@ -40,11 +48,18 @@ export const MapInterface = () => {
           <LoadingIndicator />
           <OsmNotes />
           <InternalNotes />
-          <DownloadModal />
+          {/* Download lives in the MobileMapHeader (top-left) on mobile; desktop keeps it here. */}
+          <DesktopOnly>
+            <DownloadModal />
+          </DesktopOnly>
           <BackgroundLegend />
           <SelectBackground />
+          {/* Primary mobile control: bigger layer button (desktop uses the sidebar). */}
+          <MobileLayerButton />
           {/* Desktop debug entry point; mobile has its own in MobileMapHeader (left of search). */}
-          <DebugButton className="hidden sm:flex" />
+          <DesktopOnly>
+            <DebugButton />
+          </DesktopOnly>
         </div>
       </div>
     </MapProvider>
