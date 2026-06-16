@@ -69,31 +69,38 @@ export const SelectBackground: React.FC = () => {
           onClose={() => setSheetOpen(false)}
           title="Hintergrundkarten"
         >
-          <div className="py-1">
-            {options.map(({ value, name }) => {
-              const selected = backgroundParam === value
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => {
-                    onChange(value)
-                    setSheetOpen(false)
-                  }}
-                  className={twJoin(
-                    'flex w-full items-center gap-2 px-4 py-3 text-left text-sm',
-                    selected
-                      ? 'bg-yellow-100 font-medium text-yellow-900'
-                      : 'text-gray-900 hover:bg-yellow-50',
-                  )}
-                >
-                  <span className="flex w-5 shrink-0 justify-center">
-                    {selected && <CheckIcon className="size-5" aria-hidden="true" />}
-                  </span>
-                  {name}
-                </button>
-              )
-            })}
+          {/* Container query: two columns once the sheet is wide enough (most phones).
+              Rows are separated by thin divider lines (not full card borders). */}
+          <div className="@container">
+            <div className="grid grid-cols-1 gap-x-3 @xs:grid-cols-2">
+              {options.map(({ value, name }) => {
+                const selected = backgroundParam === value
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      onChange(value)
+                      setSheetOpen(false)
+                    }}
+                    className={twJoin(
+                      'flex min-w-0 items-center gap-2 border-b border-gray-100 px-3 py-2 text-left text-sm',
+                      selected
+                        ? 'bg-yellow-100 font-medium text-yellow-900'
+                        : 'text-gray-900 hover:bg-yellow-50',
+                    )}
+                  >
+                    <span className="flex w-5 shrink-0 justify-center">
+                      {selected && <CheckIcon className="size-5" aria-hidden="true" />}
+                    </span>
+                    {/* Wrap to two lines with hyphenation instead of truncating. */}
+                    <span className="line-clamp-2 leading-tight hyphens-auto" lang="de">
+                      {name}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </MobileBottomSheet>
       </section>
