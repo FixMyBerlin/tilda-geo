@@ -54,7 +54,7 @@ export const DebugMap = () => {
   if (!vectorSources || !rasterSources || !atlasLayers.length) return null
 
   return (
-    <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-[10px]">
+    <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-sm [&_.font-mono]:text-[11px] [&_code]:text-[11px] [&_pre]:text-[11px]">
       <div className="flex flex-col gap-1">
         <button
           type="button"

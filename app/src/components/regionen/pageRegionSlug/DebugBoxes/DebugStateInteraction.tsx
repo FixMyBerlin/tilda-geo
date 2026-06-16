@@ -50,7 +50,7 @@ export const DebugStateInteraction = () => {
 
   return (
     <ClientOnly fallback={null}>
-      <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-[10px]">
+      <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-sm [&_.font-mono]:text-[11px] [&_code]:text-[11px] [&_pre]:text-[11px]">
         <details>
           <summary className="cursor-pointer">Helper</summary>
           <div className="flex flex-col gap-1">
