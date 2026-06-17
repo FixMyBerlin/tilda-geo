@@ -1,15 +1,12 @@
 type Props = {
-  ref?: React.Ref<HTMLDivElement>
   onResizeStart: (e: React.MouseEvent) => void
   inspectorWidth: number
 }
 
-export const ResizeHandle = ({ ref, onResizeStart, inspectorWidth }: Props) => {
+export const ResizeHandle = ({ onResizeStart, inspectorWidth }: Props) => {
   return (
     <div
-      ref={ref}
-      className="fixed top-0 bottom-0 z-30 w-1 cursor-col-resize transition-colors duration-150 hover:bg-purple-500"
-      style={{ right: `${inspectorWidth - 1}px` }}
+      className="absolute top-0 bottom-0 left-0 z-30 w-1 -translate-x-full cursor-col-resize transition-colors duration-150 hover:bg-purple-500"
       onMouseDown={onResizeStart}
       role="slider"
       aria-orientation="vertical"

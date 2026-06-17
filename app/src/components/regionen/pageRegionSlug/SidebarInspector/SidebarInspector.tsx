@@ -38,7 +38,6 @@ export const SidebarInspector = () => {
   const setInspectorWidth = useInspectorWidthStore((state) => state.setInspectorWidth)
   const [isResizing, setIsResizing] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const resizeHandleRef = useRef<HTMLDivElement | null>(null)
   const styleElementRef = useRef<HTMLStyleElement | null>(null)
   const startXRef = useRef(0)
   const startWidthRef = useRef(0)
@@ -48,9 +47,6 @@ export const SidebarInspector = () => {
     lastWidthRef.current = width
     if (containerRef.current) {
       containerRef.current.style.width = `${width}px`
-    }
-    if (resizeHandleRef.current) {
-      resizeHandleRef.current.style.right = `${width - 1}px`
     }
     if (styleElementRef.current) {
       styleElementRef.current.textContent = `.maplibregl-ctrl-top-right { right: ${width}px } [data-map-controls="true"] { right: calc(${width}px + 10px) }`
@@ -163,7 +159,7 @@ export const SidebarInspector = () => {
       ref={ref}
       style={{ width: `${inspectorWidth}px` }}
       className={twJoin(
-        'absolute top-0 right-0 bottom-0 z-20 max-w-full overflow-y-scroll bg-white p-5 pr-3 shadow-md',
+        'absolute top-0 right-0 bottom-0 z-20 flex max-w-full flex-col bg-white shadow-md',
         !renderFeatures && 'pointer-events-none opacity-0',
       )}
     >
@@ -175,20 +171,18 @@ export const SidebarInspector = () => {
       )}
       {renderFeatures ? (
         <>
-          <ResizeHandle
-            ref={resizeHandleRef}
-            onResizeStart={handleResizeStart}
-            inspectorWidth={inspectorWidth}
-          />
-          <InspectorHeader count={features.length} handleClose={handleClose} />
-          <Inspector features={features} />
-          <style
-            ref={styleElementRef}
-            // oxlint-disable-next-line react/no-danger -- static CSS for map controls
-            dangerouslySetInnerHTML={{
-              __html: `.maplibregl-ctrl-top-right { right: ${inspectorWidth}px } [data-map-controls="true"] { right: calc(${inspectorWidth}px + 10px) }`,
-            }}
-          />
+          <ResizeHandle onResizeStart={handleResizeStart} inspectorWidth={inspectorWidth} />
+          <div className="flex-1 overflow-y-scroll p-5 pr-3">
+            <InspectorHeader count={features.length} handleClose={handleClose} />
+            <Inspector features={features} />
+            <style
+              ref={styleElementRef}
+              // oxlint-disable-next-line react/no-danger -- static CSS for map controls
+              dangerouslySetInnerHTML={{
+                __html: `.maplibregl-ctrl-top-right { right: ${inspectorWidth}px } [data-map-controls="true"] { right: calc(${inspectorWidth}px + 10px) }`,
+              }}
+            />
+          </div>
         </>
       ) : null}
     </div>
