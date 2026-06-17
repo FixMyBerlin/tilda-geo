@@ -123,7 +123,7 @@ export const UserForm = ({ user }: Props) => {
           </Link>
           .
         </p>
-        <div className="rounded border">
+        <div className="overflow-x-auto rounded border">
           <table className="my-0 text-sm">
             <tbody>
               <tr>
