@@ -134,7 +134,7 @@ export const PlaceSearch = ({ className }: Props) => {
       {open && (
         <div
           aria-hidden="true"
-          className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[55vh] bg-gradient-to-b from-black/45 to-transparent sm:hidden"
+          className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[55vh] bg-linear-to-b from-black/45 to-transparent sm:hidden"
         />
       )}
 

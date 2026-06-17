@@ -9,7 +9,7 @@ export const Footer = () => {
     <footer className="z-0 bg-gray-800 py-12 print:hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-12 lg:flex-row">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Img src={svgTildaLogo} alt="TILDA Logo" className="h-8 w-auto text-yellow-400" />
             <p className="mt-4 text-sm text-gray-400">Verkehrsplanung neu gedacht</p>
           </div>

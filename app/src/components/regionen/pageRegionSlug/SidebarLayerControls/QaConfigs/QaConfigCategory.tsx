@@ -55,7 +55,7 @@ export const QaConfigCategory = ({
           >
             <div
               className={twJoin(
-                'ml-1.5 flex min-h-12 flex-col items-start text-sm leading-[17px]',
+                'ml-1.5 flex min-h-12 flex-col items-start text-sm leading-4.25',
                 isSelected ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-900',
                 'justify-center',
               )}

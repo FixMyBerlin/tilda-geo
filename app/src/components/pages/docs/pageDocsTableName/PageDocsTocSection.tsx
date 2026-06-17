@@ -10,8 +10,7 @@ type Props = {
   showDownloads: boolean
 }
 
-const tocLinkClassName =
-  'block w-full min-w-0 py-1.5 leading-5 hyphens-auto [overflow-wrap:anywhere]'
+const tocLinkClassName = 'block w-full min-w-0 py-1.5 leading-5 hyphens-auto wrap-anywhere'
 
 export const PageDocsTocSection = ({ topicDoc, tableName, regionSlug, showDownloads }: Props) => {
   if (!topicDoc) return null

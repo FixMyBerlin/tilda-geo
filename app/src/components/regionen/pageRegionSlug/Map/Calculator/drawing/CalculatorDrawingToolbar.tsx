@@ -45,7 +45,7 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
     <>
       {/* Below the floating header buttons on mobile (icon-only to fit); next to the
           desktop sidebar (with labels) on ≥ sm. */}
-      <div className="pointer-events-auto absolute top-14 left-2 isolate z-1000 inline-flex rounded-md shadow-xs sm:top-2.5 sm:left-[270px]">
+      <div className="pointer-events-auto absolute top-14 left-2 isolate z-1000 inline-flex rounded-md shadow-xs sm:top-2.5 sm:left-67.5">
         <button
           type="button"
           className={groupedBtn({ active: drawMode === 'polygon', rounded: 'left' })}

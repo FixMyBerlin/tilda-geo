@@ -148,7 +148,7 @@ export const CalculatorOutput = ({
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
       {isDesktop ? (
         // Desktop: inline panel next to the sidebar.
-        <section className="absolute top-[75px] left-[270px] z-1000 flex min-h-[65px] max-w-[260px] min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl">
+        <section className="absolute top-18.75 left-67.5 z-1000 flex min-h-16.25 max-w-65 min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl">
           {breakdown}
         </section>
       ) : (
