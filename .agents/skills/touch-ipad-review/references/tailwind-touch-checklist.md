@@ -165,17 +165,17 @@ window.visualViewport?.addEventListener('resize', update) // trigger only; still
 ```tsx
 // 3. lock body + wrapper to the measured height (100dvh = pre-hydration fallback):
 <body className={twMerge('flex w-full …',
-  isFullBleed ? 'h-[var(--app-height,100dvh)] overflow-hidden overscroll-none' : 'min-h-dvh')}>
-  <div className={isFullBleed ? 'h-[var(--app-height,100dvh)]' : 'min-h-dvh'}>
+  isFullBleed ? 'h-(--app-height,100dvh) overflow-hidden overscroll-none' : 'min-h-dvh')}>
+  <div className={isFullBleed ? 'h-(--app-height,100dvh)' : 'min-h-dvh'}>
 // …and the map page itself: h-[var(--app-height,100dvh)] overflow-hidden overscroll-none
 ```
 
 ```tsx
 // 4. floating chrome reserves the safe-area insets (collapses to base inset where insets are 0).
 //    NB: in Tailwind arbitrary values, spaces in calc() MUST be written as `_` (calc needs
-//    whitespace around +/-): pt-[calc(env(safe-area-inset-top)_+_0.5rem)]
-<div className="… p-2 pt-[calc(env(safe-area-inset-top)_+_0.5rem)]">…top header…</div>
-<div className="… fixed bottom-[calc(env(safe-area-inset-bottom)_+_1rem)]">…bottom controls…</div>
+//    whitespace around +/-): pt-[calc(env(safe-area-inset-top)+0.5rem)]
+<div className="… p-2 pt-[calc(env(safe-area-inset-top)+0.5rem)]">…top header…</div>
+<div className="… fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)]">…bottom controls…</div>
 ```
 
 **Audit:** grep `h-screen` / `min-h-screen` / `100vh` / `h-dvh` on any full-page-map / floating-nav route → flag. Confirm (1) the meta has `viewport-fit=cover`, (2) height comes from a measured `--app-height` var (not raw `dvh`), (3) the document — not only the inner div — is height-locked + `overflow-hidden`, (4) floating chrome pads `env(safe-area-inset-*)`.

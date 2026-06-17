@@ -3,7 +3,7 @@ import { isBrowser } from '@/components/shared/utils/isEnv'
 
 /**
  * Writes the *visible* viewport height (in px) into the `--app-height` CSS variable on the root
- * element, so full-bleed routes can size to it via `h-[var(--app-height,100dvh)]` instead of a
+ * element, so full-bleed routes can size to it via `h-(--app-height,100dvh)` instead of a
  * raw viewport unit.
  *
  * Why JS instead of `100dvh`/`100svh`: Chrome and Firefox on iOS never implemented the
