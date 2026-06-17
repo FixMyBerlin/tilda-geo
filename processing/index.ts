@@ -1,7 +1,7 @@
 import { runAfterthoughts } from './steps/afterthoughts'
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
-import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
+import { triggerPrivateApi } from './steps/externalTriggers'
 import { globalBboxFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
@@ -50,9 +50,6 @@ async function main() {
     console.log('Finishing up: Trigger async app init (sql functions) and qa update')
     triggerPrivateApi('post-processing-hook')
     triggerPrivateApi('post-processing-qa-update')
-
-    // Restart `tiles` container to refresh `/catalog`
-    await restartTileServer()
 
     // Delete cache and (frontend) trigger cache warming
     await updateCache()

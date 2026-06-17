@@ -74,17 +74,3 @@ export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
     }
   }
 }
-
-/**
- * Restarts the tiles container to refresh the /catalog endpoint.
- * This requires that the docker socket is mounted in this container.
- */
-export async function restartTileServer() {
-  try {
-    await $`docker restart tiles > /dev/null`
-    console.log('Finishing up: Succesfully restarted the tiles container.')
-  } catch (error) {
-    console.warn('[ERROR] Finishing up: ⚠️ Restarting the tiles container failed.', error)
-    throw new Error(`Restarting the tiles container failed: ${error}`)
-  }
-}

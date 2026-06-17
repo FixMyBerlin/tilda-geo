@@ -28,7 +28,6 @@ services:
       FORCE_COLOR: 1
     volumes:
       - osmfiles:/data
-      - /var/run/docker.sock:/var/run/docker.sock
       - ./app/src/data/processingTypes:/data/processingTypes
       # See cache_proxy/.README.md
       - ./cache_proxy:/cache_nginx_proxy
@@ -105,7 +104,7 @@ services:
       tiles:
         condition: service_started
   tiles:
-    image: ghcr.io/maplibre/martin:1.10.1
+    image: ghcr.io/maplibre/martin:1.11.0
     container_name: tiles
     command: ["--config", "/config.yaml"]
     restart: unless-stopped
