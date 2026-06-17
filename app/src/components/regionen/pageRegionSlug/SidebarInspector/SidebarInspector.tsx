@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInitialSizeMeasurement'
@@ -44,7 +44,7 @@ export const SidebarInspector = () => {
   const startWidthRef = useRef(0)
   const lastWidthRef = useRef(0)
 
-  const updateWidth = useCallback((width: number) => {
+  const updateWidth = (width: number) => {
     lastWidthRef.current = width
     if (containerRef.current) {
       containerRef.current.style.width = `${width}px`
@@ -55,17 +55,14 @@ export const SidebarInspector = () => {
     if (styleElementRef.current) {
       styleElementRef.current.textContent = `.maplibregl-ctrl-top-right { right: ${width}px } [data-map-controls="true"] { right: calc(${width}px + 10px) }`
     }
-  }, [])
+  }
 
-  const handleResizeStart = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      setIsResizing(true)
-      startXRef.current = e.clientX
-      startWidthRef.current = inspectorWidth
-    },
-    [inspectorWidth],
-  )
+  const handleResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+    startXRef.current = e.clientX
+    startWidthRef.current = inspectorWidth
+  }
 
   useEffect(() => {
     if (!isResizing) return
@@ -99,13 +96,10 @@ export const SidebarInspector = () => {
   // One-time measurement for initial map-fit visible area (see useInitialSizeMeasurement).
   const initialMeasurementRef = useInitialSizeMeasurement<HTMLDivElement>(updateInspectorSize)
 
-  const ref = useCallback(
-    (node: HTMLDivElement | null) => {
-      containerRef.current = node
-      initialMeasurementRef(node)
-    },
-    [initialMeasurementRef],
-  )
+  const ref = (node: HTMLDivElement | null) => {
+    containerRef.current = node
+    initialMeasurementRef(node)
+  }
 
   useEffect(
     function fitSelectedFeaturesOnceOnLoad() {
