@@ -135,45 +135,52 @@ Prefer Headless UI / Radix for open menus. For custom inline rows, flag hover-on
 
 ## 4b. Full-bleed / full-screen map pages (iOS viewport lock)
 
-A full-page map with **floating** navigation (no normal page scroll) should **bleed edge-to-edge** — *under* the iOS status bar and Safari toolbar — while the floating controls stay inside the safe area. Three things together get this right: a **full-screen** (large-viewport) container, a **non-scrollable** document, and **safe-area insets on the floating chrome only**.
+A full-page map with **floating** navigation (no normal page scroll) has iOS-specific failure modes that viewport units alone do **not** fix. A correct full-bleed map needs **three** things together: an exact, *measured* height; a non-scrollable document; and safe-area-aware floating chrome.
 
 | Symptom (device)                                               | Cause                                                                                                                                                     | Fix                                                                                                              |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **White/gray bands above & below the map** (iOS)               | The container is sized to the *visible* viewport (`dvh`/`svh`/measured `innerHeight`) — the area *between* the chrome — so the map can't reach into it      | Size the container to the **whole screen**: `h-screen` (= `100vh` = large viewport). Do **not** clamp it to the visible/dynamic viewport |
-| **Gray strip below the map** (iOS Safari)                      | `h-screen` on a **scrollable** document overflows the visible area                                                                                         | Keep `h-screen` but **lock** the document: `overflow-hidden overscroll-none` on `body` + wrapper (the strip is from scrollability, not from `h-screen`) |
-| **Floating header / URL bar scrolls out of view** (Chrome iOS) | A scrollable over-tall document lets a swipe retract the browser/header                                                                                    | Same lock: `overflow-hidden overscroll-none`                                                                     |
-| **Controls under the status bar / notch / home indicator**     | Without `viewport-fit=cover` every `env(safe-area-inset-*)` is `0`; with it the map *correctly* bleeds into those zones, so the floating chrome must inset itself | `viewport-fit=cover` in the viewport meta **and** pad the floating chrome (not the map) with `env(safe-area-inset-*)` |
+| **Gray strip below the map** (iOS Safari)                      | `h-screen` = `100vh` = the **large** viewport (toolbars retracted), taller than the *visible* area → the document overflows                                | Don't use `h-screen`/`100vh`. Lock to a **JS-measured** height (see below); `100dvh` only as a fallback          |
+| **Map grows/shrinks, never matches the viewport** (Chrome/FF iOS) | Chrome & Firefox on iOS never implemented the viewport-inset APIs `svh`/`dvh` need ([WebKit bug 242758]) → `dvh` recalcs against the wrong viewport         | Measure `window.innerHeight` in JS, write it to a `--app-height` CSS var, size the wrapper to `var(--app-height,100dvh)` |
+| **Floating header / URL bar scrolls out of view** (Chrome iOS) | The document is taller than the viewport, so a swipe on empty map chrome scrolls the page and retracts the browser/header                                  | Pin + forbid scroll: `overflow-hidden overscroll-none` on `body`/wrapper                                          |
+| **Buttons under the status bar / notch / home indicator**      | Without `viewport-fit=cover` every `env(safe-area-inset-*)` is `0`; floating chrome then sits in the unsafe area                                           | Add `viewport-fit=cover` to the viewport meta **and** pad floating chrome with `env(safe-area-inset-*)`           |
 
 [WebKit bug 242758]: https://bugs.webkit.org/show_bug.cgi?id=242758
 
-**Don't size a full-bleed map to the *visible* viewport.** `dvh` / `svh` / `visualViewport` / `innerHeight` all describe the area *between* the browser chrome — sizing the map to them leaves white bands exactly where you want the map to show *through* the chrome. A full-bleed map wants the **large** viewport (`h-screen` / `100vh`), which is stable across browsers (it predates the `svh`/`dvh` that Chrome/Firefox iOS compute incorrectly, [WebKit bug 242758]). The map deliberately extends *behind* the toolbar; `overflow-hidden` clips it and the floating controls (positioned in the visible area) stay reachable.
+**Why a JS-measured height, not `h-dvh`:** raw `dvh`/`svh` are unreliable on Chrome/Firefox iOS (the engines never wired up the APIs those units depend on), so the map jumps as the toolbar animates. The robust cross-browser fix is to read the visible height in JS and expose it as a CSS variable. Read `window.innerHeight` (not `visualViewport.height` — the latter shrinks when the keyboard opens, making the map jump on input focus); update on `resize`/`orientationchange`.
 
-**Pattern:**
+**Pattern — meta tag + measured height var + locked document:**
 
 ```tsx
-// 1. viewport meta — unlocks env(safe-area-inset-*) (otherwise all 0) AND lets the map bleed:
+// 1. viewport meta — unlocks env(safe-area-inset-*) (otherwise all 0):
 { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' }
 ```
 
-```tsx
-// 2. full-screen, locked document (map bleeds under the chrome; nothing scrolls):
-<body className={isFullBleed ? 'h-screen overflow-hidden overscroll-none' : 'min-h-dvh'}>
-  <div className={isFullBleed ? 'h-screen' : 'min-h-dvh'}>
-// …and the map page itself: h-screen overflow-hidden overscroll-none
+```ts
+// 2. hook: publish the visible height to --app-height (enabled only on full-bleed routes)
+const update = () => root.style.setProperty('--app-height', `${window.innerHeight}px`)
+window.addEventListener('resize', update); window.addEventListener('orientationchange', update)
+window.visualViewport?.addEventListener('resize', update) // trigger only; still read innerHeight
 ```
 
 ```tsx
-// 3. safe-area insets on the FLOATING CHROME ONLY — never the map container.
-//    NB: in Tailwind arbitrary values, spaces in calc() MUST be `_` (calc needs whitespace around +/-):
+// 3. lock body + wrapper to the measured height (100dvh = pre-hydration fallback):
+<body className={twMerge('flex w-full …',
+  isFullBleed ? 'h-[var(--app-height,100dvh)] overflow-hidden overscroll-none' : 'min-h-dvh')}>
+  <div className={isFullBleed ? 'h-[var(--app-height,100dvh)]' : 'min-h-dvh'}>
+// …and the map page itself: h-[var(--app-height,100dvh)] overflow-hidden overscroll-none
+```
+
+```tsx
+// 4. floating chrome reserves the safe-area insets (collapses to base inset where insets are 0).
+//    NB: in Tailwind arbitrary values, spaces in calc() MUST be written as `_` (calc needs
+//    whitespace around +/-): pt-[calc(env(safe-area-inset-top)_+_0.5rem)]
 <div className="… p-2 pt-[calc(env(safe-area-inset-top)_+_0.5rem)]">…top header…</div>
 <div className="… fixed bottom-[calc(env(safe-area-inset-bottom)_+_1rem)]">…bottom controls…</div>
-// MapLibre's own controls render outside React — inset them in CSS:
-// .maplibregl-ctrl-bottom-left { padding-bottom: env(safe-area-inset-bottom); padding-left: env(safe-area-inset-left) }
 ```
 
-**Audit:** on a full-page-map / floating-nav route, confirm (1) the meta has `viewport-fit=cover`; (2) the container is the **full screen** (`h-screen`), **not** clamped to `dvh`/`svh`/a measured visible height (that causes the bands); (3) the document — not only the inner div — is height-locked + `overflow-hidden overscroll-none`; (4) safe-area insets are on the floating chrome (incl. MapLibre `.maplibregl-ctrl-*`), never on the map container.
+**Audit:** grep `h-screen` / `min-h-screen` / `100vh` / `h-dvh` on any full-page-map / floating-nav route → flag. Confirm (1) the meta has `viewport-fit=cover`, (2) height comes from a measured `--app-height` var (not raw `dvh`), (3) the document — not only the inner div — is height-locked + `overflow-hidden`, (4) floating chrome pads `env(safe-area-inset-*)`.
 
-**Severity:** white/gray bands, gray strip, hideable floating header, or controls under the status bar / home indicator on the primary map page → **Warning** (broken-looking layout / lost navigation on touch).
+**Severity:** gray strip, jumping/mismatched map height, hideable floating header, or controls under the status bar / home indicator on the primary map page → **Warning** (broken-looking layout / lost navigation on touch).
 
 ---
 

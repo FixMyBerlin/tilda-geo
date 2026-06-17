@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { isBrowser } from '@/components/shared/utils/isEnv'
 
 // https://tailwindcss.com/docs/screens
 const screens = {
@@ -16,10 +17,7 @@ export const useBreakpoint = (breakpoint: keyof typeof screens) => {
       mediaQuery.addEventListener('change', onStoreChange)
       return () => mediaQuery.removeEventListener('change', onStoreChange)
     },
-    () => {
-      if (typeof window === 'undefined') return false
-      return window.matchMedia(`(min-width: ${screens[breakpoint]})`).matches
-    },
+    () => isBrowser && window.matchMedia(`(min-width: ${screens[breakpoint]})`).matches,
     () => false, // Server fallback
   )
 }

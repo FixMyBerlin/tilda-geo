@@ -46,9 +46,10 @@
   @apply bg-white/20! leading-tight;
 }
 
-/* Keep MapLibre's own corner controls (attribution bottom-left, zoom) out of the iOS safe areas
-   on the full-bleed map — they render outside React, so the env() padding on our floating chrome
-   doesn't reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
+/* Keep MapLibre's own corner controls (attribution bottom-left, zoom) out of the iOS safe areas.
+   The map is a full-screen backdrop now, so without this the attribution sits under the home
+   indicator. These controls render outside React, so env() padding on our floating chrome can't
+   reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
 .maplibregl-ctrl-top-left {
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);

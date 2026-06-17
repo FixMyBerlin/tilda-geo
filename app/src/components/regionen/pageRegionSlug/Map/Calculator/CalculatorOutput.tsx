@@ -10,7 +10,7 @@ import {
 import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
-import { useBreakpoint } from '@/components/regionen/pageRegionSlug/utils/useBreakpoint'
+import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import {
   CalculatorBreakdown,
   type CalculatorBreakdownData,

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useBreakpoint } from './useBreakpoint'
+import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 
 /**
  * Render children only at the desktop breakpoint (≥ sm). Below sm it returns null,
