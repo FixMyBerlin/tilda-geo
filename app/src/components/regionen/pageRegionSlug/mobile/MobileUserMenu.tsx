@@ -11,6 +11,7 @@ import { useUserHasTodos } from '@/components/shared/layouts/Header/User/useUser
 import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
+import { ControlButtonDot } from '../ControlButtonDot'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
   mobileControlButtonActiveClassName,
@@ -49,9 +50,7 @@ const MobileUserLoggedIn = ({ user }: { user: NonNullable<CurrentUser> }) => {
           <UserIcon className="size-6 text-gray-600" aria-hidden="true" />
         )}
         {hasTodos && (
-          <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-amber-500">
-            <span className="sr-only">Es fehlen wichtige Informationen für den Account.</span>
-          </span>
+          <ControlButtonDot srLabel="Es fehlen wichtige Informationen für den Account." />
         )}
       </button>
 

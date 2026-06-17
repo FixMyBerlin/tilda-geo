@@ -1,6 +1,7 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { isBefore, subDays } from 'date-fns'
+import { twMerge } from 'tailwind-merge'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { authClient } from '@/components/shared/auth/auth-client'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
@@ -9,8 +10,14 @@ import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { IconModal } from '@/components/shared/Modal/IconModal'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
+import { ControlButtonDot } from '../ControlButtonDot'
+import { mobileControlButtonClassName } from '../mobile/mobileControlButton.const'
 import { DownloadModalDownloadListWithVectorTiles } from './DownloadModalDownloadList'
 import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
+
+// Square map-control button (matches the other floating controls); `relative` so the
+// ControlButtonDot anchors to the button corner.
+const downloadTriggerClassName = twMerge(mobileControlButtonClassName, 'relative size-10')
 
 const DownloadModalTriggerIcon = () => {
   const { data: metadata } = useQuery(processingMetadataQueryOptions())
@@ -28,12 +35,12 @@ const DownloadModalTriggerIcon = () => {
   const isProcessing = metadata.status === 'processing'
 
   return (
-    <div className="relative">
+    <>
       <ArrowDownTrayIcon className="size-5" />
       {(isProcessing || isDataOlderThanYesterday) && (
-        <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-orange-500" />
+        <ControlButtonDot srLabel="Neue Kartendaten verfügbar oder Daten werden verarbeitet." />
       )}
-    </div>
+    </>
   )
 }
 
@@ -51,7 +58,7 @@ export const DownloadModal = () => {
         <IconModal
           title="Daten-Informationen"
           titleIcon="info"
-          triggerStyle="button"
+          triggerStyle={downloadTriggerClassName}
           triggerIcon={<DownloadModalTriggerIcon />}
         >
           <DownloadModalUpdateDate />
@@ -68,7 +75,7 @@ export const DownloadModal = () => {
       <IconModal
         title="Daten downloaden"
         titleIcon="download"
-        triggerStyle="button"
+        triggerStyle={downloadTriggerClassName}
         triggerIcon={<DownloadModalTriggerIcon />}
       >
         {!hasPermissions && (

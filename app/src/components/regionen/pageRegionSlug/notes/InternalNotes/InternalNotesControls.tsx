@@ -34,7 +34,10 @@ export const InternalNotesControls = ({ totalNotes, isLoading, isError }: Props)
           type="button"
           onClick={() => setShowInternalNotesParam(!showInternalNotesParam)}
           className={twJoin(
-            'relative z-0 inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium shadow-md focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
+            'relative z-0 inline-flex items-center justify-center border border-gray-300 text-sm font-medium shadow-md focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
+            // Square icon button in the normal collapsed state; grow (px-3 py-2) when expanded
+            // (left segment of the split control) or when showing the inline error text.
+            !showInternalNotesParam && !isError ? 'size-10' : 'px-3 py-2',
             showInternalNotesParam ? 'rounded-l-md' : 'rounded-md',
             showInternalNotesParam ? 'text-gray-700' : 'text-gray-500 hover:text-gray-700',
             showInternalNotesParam
