@@ -1,5 +1,5 @@
 import { ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
-import { UserIcon } from '@heroicons/react/24/solid'
+import { UserIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'

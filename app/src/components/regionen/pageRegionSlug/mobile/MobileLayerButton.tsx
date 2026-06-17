@@ -36,7 +36,9 @@ export const MobileLayerButton = () => {
           open && mobileControlButtonActiveClassName,
         )}
       >
-        <Square3Stack3DIcon className="size-8" aria-hidden="true" />
+        {/* Bigger (size-8) to fill the larger button, but strokeWidth thinned to ~match the
+            size-6 control icons' line weight (1.5 × 24/32 ≈ 1.125). */}
+        <Square3Stack3DIcon className="size-8" strokeWidth={1.125} aria-hidden="true" />
       </button>
 
       <MobileBottomSheet open={open} onClose={() => setOpen(false)} title="Kategorien">

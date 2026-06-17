@@ -51,7 +51,7 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
               <SmallSpinner />
             </div>
           ) : (
-            <ChatBubbleLeftRightIcon className="size-5" />
+            <ChatBubbleLeftRightIcon className="size-6" />
           )}
           {isError && <span className="ml-1 text-orange-500">Fehler beim Laden der Hinweise</span>}
         </button>
@@ -67,7 +67,7 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
               onClick={() => setNewOsmNoteMapParam(mapParam)}
               className="z-0 -ml-px justify-center rounded-r-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 hover:text-gray-800 focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
             >
-              <PlusIcon className="size-5" />
+              <PlusIcon className="size-6" />
               <span className="sr-only">Neuen Hinweis auf openstreetmap.org erstellen</span>
             </button>
           </Tooltip>

@@ -24,7 +24,7 @@ const DownloadModalTriggerIcon = () => {
 
   // Show icon without indicator if no data yet and not processing
   if (!metadata?.osm_data_from && metadata?.status !== 'processing') {
-    return <ArrowDownTrayIcon className="size-5" />
+    return <ArrowDownTrayIcon className="size-6" />
   }
 
   // For postprocessing and processed, osm_data_from should be available
@@ -36,7 +36,7 @@ const DownloadModalTriggerIcon = () => {
 
   return (
     <>
-      <ArrowDownTrayIcon className="size-5" />
+      <ArrowDownTrayIcon className="size-6" />
       {(isProcessing || isDataOlderThanYesterday) && (
         <ControlButtonDot srLabel="Neue Kartendaten verfügbar oder Daten werden verarbeitet." />
       )}

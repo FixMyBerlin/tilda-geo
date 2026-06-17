@@ -53,7 +53,7 @@ export const InternalNotesControls = ({ totalNotes, isLoading, isError }: Props)
             </div>
           ) : (
             <>
-              <ChatBubbleLeftRightIcon className="size-5" aria-hidden="true" />
+              <ChatBubbleLeftRightIcon className="size-6" aria-hidden="true" />
               {showInternalNotesParam && Boolean(totalNotes) && (
                 <div
                   className="absolute flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-700 px-1 text-xs tracking-tighter text-yellow-400"
@@ -79,7 +79,7 @@ export const InternalNotesControls = ({ totalNotes, isLoading, isError }: Props)
               onClick={() => setNewInternalNoteMapParam(mapParam)}
               className="z-0 -ml-px inline-flex justify-center rounded-r-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 hover:text-gray-800 focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
             >
-              <PlusIcon className="size-5" aria-hidden="true" />
+              <PlusIcon className="size-6" aria-hidden="true" />
               <span className="sr-only">Neuen Interne Hinweis erstellen</span>
             </button>
           </Tooltip>
