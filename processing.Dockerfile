@@ -29,12 +29,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 LABEL maintainer="FixMyCity - https://fixmycity.de"
 
-# Install the docker-cli inside the processing container to be able to restart the martin container
-# The setting below in docker-compose.yml is required for this to work
-# volumes:
-#   - /var/run/docker.sock:/var/run/docker.sock
-COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
-
 # Debian 13 Trixie (stable) includes newer versions of osm2pgsql and osmium-tool
 # If backports are needed in the future, uncomment the following:
 # RUN echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
