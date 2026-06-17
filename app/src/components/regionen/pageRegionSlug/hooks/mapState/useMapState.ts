@@ -1,7 +1,7 @@
 import type { LngLatBounds } from 'maplibre-gl'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 
 const boundsEqual = (current: LngLatBounds | null, next: LngLatBounds | null) => {
@@ -187,6 +187,15 @@ export const useInspectorWidthStore = create<InspectorWidthStore>()(
     }),
     {
       name: 'tilda-inspector-width',
+      storage: createJSONStorage(() =>
+        typeof window === 'undefined'
+          ? {
+              getItem: (_name) => null,
+              setItem: (_name, _value) => {},
+              removeItem: (_name) => {},
+            }
+          : localStorage,
+      ),
     },
   ),
 )

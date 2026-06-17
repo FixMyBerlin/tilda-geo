@@ -53,13 +53,13 @@ export const SidebarInspector = () => {
     }
   }
 
-  const handleResizeStart = (e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsResizing(true)
-    startXRef.current = e.clientX
-    startWidthRef.current = inspectorWidth
-  }
-
+const handleResizeStart = (e: React.MouseEvent) => {
+  e.preventDefault()
+  setIsResizing(true)
+  startXRef.current = e.clientX
+  startWidthRef.current = inspectorWidth
+  lastWidthRef.current = inspectorWidth
+}
   useEffect(() => {
     if (!isResizing) return
 
