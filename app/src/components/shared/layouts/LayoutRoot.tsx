@@ -3,7 +3,7 @@ import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
 import { HeadContent, Outlet, Scripts, useMatches, useRouteContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { StrictMode } from 'react'
-import { twMerge } from 'tailwind-merge'
+import { twJoin } from 'tailwind-merge'
 import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
 import { useVisibleViewportHeightVar } from '@/components/shared/hooks/viewport/useVisibleViewportHeightVar'
 import { Footer } from '@/components/shared/layouts/Footer/Footer'
@@ -30,27 +30,34 @@ export function LayoutRoot() {
   useVisibleViewportHeightVar(hideAppChrome)
 
   return (
-    <html lang="de" className="h-full">
+    // On full-bleed map routes, tint the document background to the map's base colour
+    // (`#f0f0f0` = the map style's `background` layer at the usual zoom levels, see
+    // server/api/map-style/style.json). iOS 26 Safari samples the root background colour to fill
+    // the area behind the status bar and the floating Liquid-Glass toolbar — it refuses to paint
+    // `position:fixed`/`100vh` content there — so matching that colour blends the chrome bands into
+    // the map instead of showing jarring white strips. Other routes stay white.
+    <html lang="de" className={twJoin('h-full', hideAppChrome && 'bg-[#f0f0f0]')}>
       <head>
         <HeadContent />
       </head>
       <body
         suppressHydrationWarning
-        className={twMerge(
+        className={twJoin(
           'flex w-full bg-white text-gray-800 antialiased',
           // Full-bleed map/preview routes: pin the document to the *measured* visible viewport
           // (`--app-height`, with `100dvh` as the pre-hydration fallback) and forbid scroll/
           // overscroll so iOS leaves no gray strip and Chrome iOS can't scroll the floating header
-          // away. Other routes keep their normal scrollable min-height.
+          // away. The map base colour (matches `html` above) keeps the iOS 26 chrome bands from
+          // flashing white. Other routes keep their normal scrollable min-height.
           hideAppChrome
-            ? 'h-[var(--app-height,100dvh)] overflow-hidden overscroll-none'
+            ? 'h-(--app-height,100dvh) overflow-hidden overscroll-none bg-[#f0f0f0]'
             : 'min-h-dvh',
         )}
       >
         <div
-          className={twMerge(
+          className={twJoin(
             'flex w-full flex-col',
-            hideAppChrome ? 'h-[var(--app-height,100dvh)]' : 'min-h-dvh',
+            hideAppChrome ? 'h-(--app-height,100dvh)' : 'min-h-dvh',
           )}
         >
           <StrictMode>
