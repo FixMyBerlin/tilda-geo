@@ -11,25 +11,27 @@ Diese Datei ist **für Kolleg:innen** gedacht — nicht für KI-Agenten. Die tec
 2. Kopiere den Block unten (**ein Block = ein Datensatz**) in die Issue-Beschreibung.
 3. Fülle alle Abschnitte aus. Lieber zu viel Kontext als zu wenig.
 
-````md
+```md
 # Datensatz 1
 
 ## Regionen
 
-- [ ] LISTE AN URLs
+- [ ] TODO LISTE AN URLs
 
 ## Kategorie
 
-- [ ] Lege die Kategorie an oder aktualisiere sie.
-      Immer auf Staging _und_ Production:
-  - Production: https://tilda-geo.de/admin/static-dataset-categories
-  - Staging: https://staging.tilda-geo.de/admin/static-dataset-categories
+- [ ] Lege die Kategorie an oder aktualisiere sie:
 
-  Hinweis: Änderungen sind sofort live; Änderungen an Gruppe und Teilschlüssel können bestehende Daten falsch kategorisieren.
+Immer auf Staging _und_ Production:
 
-  Unten muss die `category` angegeben werden, die im Interface angezeigt wird:
+- Production: https://tilda-geo.de/admin/static-dataset-categories
+- Staging: https://staging.tilda-geo.de/admin/static-dataset-categories
 
-  > Vollständiger Schlüssel für Uploads: `berlin/netz`
+Hinweis: Änderungen sind sofort live; Änderungen an Gruppe und Teilschlüssel können bestehende Daten falsch kategorisieren.
+
+Unten muss die `category` angegeben werden, die im Interface angezeigt wird:
+
+> Vollständiger Schlüssel für Uploads: `berlin/netz`
 
 ## Datendatei
 
@@ -47,18 +49,18 @@ Diese Datei ist **für Kolleg:innen** gedacht — nicht für KI-Agenten. Die tec
 
 - [ ] Angaben pro Datensatz:
 
-      | Feld                                         | Pflicht   | Angabe                                  |
-      | -------------------------------------------- | --------- | --------------------------------------- |
-      | **Anzeigename** (`name`)                     | ja        | <!-- wie in der Sidebar -->             |
-      | **Kategorie-Schlüssel** (`category`)         | empfohlen | <!-- siehe Abschnitt Kategorie -->      |
-      | **Attribution** (`attributionHtml`)          | ja        | <!-- Quelle / Urheber -->               |
-      | **Lizenz** (`licence`)                       | empfohlen | <!-- siehe Lizenz-Tabelle -->           |
-      | **OSM-kompatibel?** (`licenceOsmCompatible`) | optional  | [ ] `licence` [ ] `waiver` [ ] `no`     |
-      | **Beschreibung** (`description`)             | optional  | <!-- Kurztext für Nutzer:innen -->      |
-      | **Datenherkunft** (`dataSourceMarkdown`)     | optional  | <!-- Link oder Erklärung (Markdown) --> |
-      | **Stand / Aktualität** (`updatedAt`)         | optional  | <!-- z. B. `2026-06-01` -->             |
-      | **Sichtbarkeit** (`public`)                  | ja        | [ ] öffentlich [ ] eingeschränkt        |
-      | **Download-Link verbergen**                  | optional  | [ ] ja (nur Admins)                     |
+| Feld                                         | Pflicht   | Angabe                                  |
+| -------------------------------------------- | --------- | --------------------------------------- |
+| **Anzeigename** (`name`)                     | ja        | <!-- wie in der Sidebar -->             |
+| **Kategorie-Schlüssel** (`category`)         | empfohlen | <!-- siehe Abschnitt Kategorie -->      |
+| **Attribution** (`attributionHtml`)          | ja        | <!-- Quelle / Urheber -->               |
+| **Lizenz** (`licence`)                       | empfohlen | <!-- siehe Lizenz-Tabelle -->           |
+| **OSM-kompatibel?** (`licenceOsmCompatible`) | optional  | [ ] `licence` [ ] `waiver` [ ] `no`     |
+| **Beschreibung** (`description`)             | optional  | <!-- Kurztext für Nutzer:innen -->      |
+| **Datenherkunft** (`dataSourceMarkdown`)     | optional  | <!-- Link oder Erklärung (Markdown) --> |
+| **Stand / Aktualität** (`updatedAt`)         | optional  | <!-- z. B. `2026-06-01` -->             |
+| **Sichtbarkeit** (`public`)                  | ja        | [ ] öffentlich [ ] eingeschränkt        |
+| **Download-Link verbergen**                  | optional  | [ ] ja (nur Admins)                     |
 
 <details>
 <summary>Lizenz — gültige Werte…</summary>
@@ -80,18 +82,20 @@ Diese Datei ist **für Kolleg:innen** gedacht — nicht für KI-Agenten. Die tec
 
 Ein Datensatz kann **mehrere Stile** haben; ein Stil besteht aus **einem oder mehreren Layern** (z. B. Füllung + Umriss).
 
-- [ ] Beschreibung oder JSON des Stils einfügen
+- [ ] Beschreibung oder JSON des Stils einfügen:
 
-      BESCHREIBUNG:
+_BESCHREIBUNG:_
 
-      > TODO
+> TODO
 
-      JSON: (Von Mapbox Studio Kopiert pro Layer)
+_JSON:_ (Von Mapbox Studio Kopiert pro Layer)
+```
 
-      ```
+TODO
 
-      ```
+```
 
 - [ ] Angaben zur Legende - Name und Farbe (Farbe kann in Textform sein)
   - TODO z.B. "Blau – Radinfrastktur"
-````
+
+```
