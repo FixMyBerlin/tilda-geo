@@ -10,7 +10,7 @@
     "check-pre-push": "bun run --parallel type-check type-check-lua check-lint check-format test",
     "check-lint": "oxlint .",
     "check-format": "oxfmt --check -c ../app/oxfmt.config.mjs .",
-    "type-check": "bunx tsc --noEmit -p tsconfig.json",
+    "type-check": "tsc6 --noEmit -p tsconfig.json",
     "type-check-lua": "bun ./scripts/run-typecheck-lua.ts"
   },
   "dependencies": {
