@@ -1,26 +1,29 @@
 import { Link } from '@/components/shared/links/Link'
+import { buttonStylesSecondary } from '@/components/shared/links/styles'
+import { homeCtaPrimary } from './styles'
 
 export const HomePageHero = () => {
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-6 text-center sm:px-6 lg:px-8 lg:pt-32">
-      <p className="text-center">Die TILDA Geodatenprodukte</p>
-      <h1 className="font-display mx-auto max-w-4xl text-2xl font-bold tracking-tight text-gray-900 sm:text-5xl sm:font-medium md:text-6xl">
-        TILDA bringt Ihnen Geodaten für die <span className="text-yellow-500">Verkehrsplanung</span>{' '}
-        – nachhaltig und für die Nutzung im Team.
+    <section className="mx-auto max-w-7xl px-4 pt-12 text-center sm:px-6 lg:px-8 lg:pt-24">
+      <h1 className="font-display mx-auto max-w-4xl text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl sm:font-medium md:text-6xl">
+        Verkehrsplanung neu gedacht: Ihre Daten, Ihr Team, eine Plattform
       </h1>
       <p className="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-gray-700">
-        TILDA bringt Ihnen perfekt auf die Anforderungen der Verkehrsplanung zugeschnittene offene
-        Daten in einer modernen Cloudanwendung. Aktualisieren Sie Daten fortlaufend ohne Befahrungen
-        und nutzen Sie die Daten kollaborativ.
+        Sie erhalten offene, speziell für die Verkehrsplanung aufbereitete Daten in einer modernen
+        Cloudanwendung. Aktualisieren Sie Ihre Daten fortlaufend – ganz ohne Befahrungen – und
+        nutzen Sie sie kollaborativ.
       </p>
-      <div className="text-md mx-auto mt-6 flex max-w-2xl justify-center tracking-tight text-gray-700 sm:text-lg">
+      <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
         <Link
-          href="https://www.fixmycity.de/tilda"
-          className="inline-flex items-center bg-yellow-400 no-underline hover:bg-yellow-500"
+          href="https://www.fixmycity.de/termin-vereinbaren"
           button
+          className={homeCtaPrimary}
           blank
         >
-          Mehr erfahren…
+          Jetzt kostenlose Demo anfragen
+        </Link>
+        <Link to="/regionen" classNameOverwrite={buttonStylesSecondary}>
+          Regionen ansehen
         </Link>
       </div>
     </section>
