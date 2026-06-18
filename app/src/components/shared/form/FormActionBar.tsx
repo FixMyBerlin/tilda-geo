@@ -15,12 +15,12 @@ export function FormActionBar({ left, right, className }: Props) {
   return (
     <div
       className={twJoin(
-        'flex items-center justify-between gap-4 rounded-md bg-pink-100 p-3',
+        'flex flex-wrap items-center justify-between gap-4 rounded-md bg-pink-100 p-3',
         className,
       )}
     >
-      <div className="flex items-center gap-4">{left}</div>
-      {right && <div className="flex items-center gap-4">{right}</div>}
+      <div className="flex min-w-0 items-center gap-4">{left}</div>
+      {right && <div className="flex min-w-0 items-center gap-4">{right}</div>}
     </div>
   )
 }

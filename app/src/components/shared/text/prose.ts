@@ -24,3 +24,6 @@ export const proseLayoutPagesInlineCodeClasses = [
   'prose-code:before:content-none prose-code:after:content-none prose-code:rounded-sm prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:font-normal',
   proseCodePrintClasses,
 ].join(' ')
+
+/** Nested `.prose` inside `LayoutPages` main — use parent width instead of typography default (~65ch). */
+export const proseInLayoutMainClasses = 'max-w-none'

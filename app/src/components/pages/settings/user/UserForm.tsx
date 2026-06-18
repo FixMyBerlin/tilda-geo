@@ -4,14 +4,14 @@ import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
+import { useIsAdmin } from '@/components/shared/hooks/useIsAdmin'
 import { Img } from '@/components/shared/Img'
 import { Link } from '@/components/shared/links/Link'
 import { buttonStyles } from '@/components/shared/links/styles'
 import { Markdown } from '@/components/shared/text/Markdown'
-import { proseClasses } from '@/components/shared/text/prose'
+import { proseClasses, proseInLayoutMainClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
-import { isAdmin } from '@/components/shared/utils/usersUtils'
 import { currentUserQueryKey } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
 import { UpdateUserSchema } from '@/server/users/schema'
@@ -19,9 +19,13 @@ import { updateOsmDescriptionFn, updateUserFn } from '@/server/users/users.funct
 import { UserFormOsmDescriptionMissing } from './UserFormOsmDescriptionMissing'
 
 function ClearOsmDescriptionButton() {
+  const isAdmin = useIsAdmin()
   const queryClient = useQueryClient()
   const router = useRouter()
   const [pending, setPending] = useState(false)
+
+  if (!isAdmin) return null
+
   return (
     <div className="bg-pink-300 px-4 py-2 text-xs leading-5">
       <button
@@ -110,7 +114,11 @@ export const UserForm = ({ user }: Props) => {
       </Form>
 
       <aside
-        className={twJoin(proseClasses, 'prose-sm mt-10 border-t border-gray-400 pt-10 prose-gray')}
+        className={twJoin(
+          proseClasses,
+          proseInLayoutMainClasses,
+          'prose-sm mt-10 border-t border-gray-400 pt-10 prose-gray',
+        )}
       >
         <h2 className="text-sm">Angaben auf openstreetmap.org:</h2>
         <p className="mt-3 text-sm text-gray-500">
@@ -123,18 +131,18 @@ export const UserForm = ({ user }: Props) => {
           </Link>
           .
         </p>
-        <div className="overflow-x-auto rounded border">
-          <table className="my-0 text-sm">
+        <div className="not-prose overflow-x-auto rounded border">
+          <table className="my-0 w-full table-fixed text-sm">
             <tbody>
               <tr>
-                <th className="pl-1 font-normal">Anzeigename</th>
-                <td className="py-1">
+                <th className="w-36 pl-1 font-normal">Anzeigename</th>
+                <td className="min-w-0 py-1 wrap-break-word">
                   <strong>{user.osmName ? user.osmName : '–'}</strong>
                 </td>
               </tr>
               <tr>
-                <th className="pl-1 font-normal">Avatar</th>
-                <td className="py-1">
+                <th className="w-36 pl-1 font-normal">Avatar</th>
+                <td className="min-w-0 py-1">
                   {user.osmAvatar ? (
                     <Img
                       src={user.osmAvatar}
@@ -150,11 +158,11 @@ export const UserForm = ({ user }: Props) => {
                 </td>
               </tr>
               <tr>
-                <th className="pl-1 font-normal">Profilbeschreibung</th>
-                <td className="py-1 pr-1 text-sm">
+                <th className="w-36 pl-1 align-top font-normal">Profilbeschreibung</th>
+                <td className="min-w-0 py-1 pr-1 text-sm wrap-break-word">
                   <Markdown
                     markdown={user.osmDescription}
-                    className="prose-xs leading-snug font-normal text-gray-600"
+                    className="prose-xs max-w-none leading-snug font-normal text-gray-600"
                   />
                 </td>
               </tr>
@@ -167,7 +175,7 @@ export const UserForm = ({ user }: Props) => {
               Hinweis: Diese Angaben werden bei jedem neuen Einloggen aktualisiert. Um die Daten zu
               aktualisieren, bitte ausloggen und erneut einloggen.
             </p>
-            {isAdmin(user) && <ClearOsmDescriptionButton />}
+            <ClearOsmDescriptionButton />
           </>
         ) : (
           <UserFormOsmDescriptionMissing />
