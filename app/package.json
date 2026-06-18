@@ -184,7 +184,7 @@
     "@types/react-dom": "19.2.3",
     "@types/spritesmith": "3.4.5",
     "@types/web": "0.0.350",
-    "@typescript/native-preview": "7.0.0-dev.20260603.1",
+    "@typescript/native-preview": "7.0.0-dev.20260613.1",
     "@vitejs/plugin-react": "6.0.2",
     "babel-plugin-react-compiler": "1.0.0",
     "browserslist": "^4.24.0",
