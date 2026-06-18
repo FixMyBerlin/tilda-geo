@@ -1,9 +1,9 @@
 describe('places minzoom', function()
   local minzoom = require('topics.places.helper.minzoom')
 
-  it('returns 9 for town and city', function()
-    assert.are.same(minzoom({ place = 'town' }), 9)
-    assert.are.same(minzoom({ place = 'city' }), 9)
+  it('returns 6 for town and city', function()
+    assert.are.same(minzoom({ place = 'town' }), 6)
+    assert.are.same(minzoom({ place = 'city' }), 6)
   end)
 
   it('returns 10 for village', function()
