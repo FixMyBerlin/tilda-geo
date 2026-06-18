@@ -94,7 +94,7 @@ export function TanStackAppDevtools() {
 
 ## Root layout mount
 
-Render inside `QueryClientProvider` in `LayoutRoot` (or equivalent root layout component):
+Render inside `QueryClientProvider` in `components/layouts/LayoutRoot.tsx` (or equivalent root layout component):
 
 ```tsx
 <TanStackQueryProvider queryClient={queryClient}>
@@ -117,7 +117,7 @@ Do **not** inline `<TanStackDevtools>` in the layout file — colocate in `compo
 
 ## Migrating from older FMC layouts
 
-Some apps still inline `<TanStackDevtools>` in `LayoutRoot` or use a separate `ReactQueryDevtools` wrapper. Replace with the pattern above:
+Some apps still inline `<TanStackDevtools>` in `components/layouts/LayoutRoot.tsx` or use a separate `ReactQueryDevtools` wrapper. Replace with the pattern above:
 
 1. Extract `TanStackAppDevtools.tsx` as shown.
 2. Switch Query panel to `ReactQueryDevtoolsPanel`.

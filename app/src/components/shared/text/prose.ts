@@ -11,6 +11,13 @@ export const proseClasses = [
   proseCodePrintClasses,
 ].join(' ')
 
+/** German syllable hyphenation for layout `main.prose` (legal, docs, settings, …). Requires `lang="de"` on an ancestor. */
+export const proseLayoutPagesHyphenationClasses = [
+  'prose-headings:hyphens-auto',
+  'prose-p:hyphens-auto',
+  'prose-li:hyphens-auto',
+].join(' ')
+
 /** Inline `code` inside layout `main.prose` (docs, legal, settings, …): no backticks, soft fill, normal weight. */
 export const proseLayoutPagesInlineCodeClasses = [
   'print:prose-sm',

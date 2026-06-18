@@ -1,11 +1,11 @@
-import { isDev } from '../../utils/isEnv'
+import { isDev } from '@/components/shared/utils/isEnv'
 
 export const TailwindResponsiveHelper = () => {
   if (!isDev) return null
 
   return (
     <a
-      className="border-xl fixed bottom-1 left-[50vw] z-10 flex h-5 flex-row items-center space-x-1 rounded border border-white/70 bg-pink-300 px-1 text-xs shadow-xl hover:underline print:hidden"
+      className="border-xl fixed bottom-1 left-1/2 z-10 flex h-5 -translate-x-1/2 flex-row items-center space-x-1 rounded border border-white/70 bg-pink-300 px-1 text-xs shadow-xl hover:underline print:hidden"
       href="https://tailwindcss.com/docs/responsive-design"
     >
       <span className="font-bold underline" title="<640px Mobile">

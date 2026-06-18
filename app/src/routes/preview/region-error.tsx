@@ -11,6 +11,9 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/preview/region-error')({
   ssr: true,
   validateSearch: (search) => searchSchema.parse(search),
+  head: () => ({
+    meta: [{ title: 'Regionsfehler-Vorschau – TILDA' }],
+  }),
   component: PreviewRegionError,
 })
 

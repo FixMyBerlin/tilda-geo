@@ -1,13 +1,12 @@
-import { ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
 import { UserIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
+import { useLogout } from '@/components/layouts/Header/User/useLogout'
+import { UserMenuContent } from '@/components/layouts/Header/User/UserMenuContent'
+import { useUserHasTodos } from '@/components/layouts/Header/User/useUserHasTodos'
 import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Img } from '@/components/shared/Img'
-import { useLogout } from '@/components/shared/layouts/Header/User/useLogout'
-import { UserMenuContent } from '@/components/shared/layouts/Header/User/UserMenuContent'
-import { useUserHasTodos } from '@/components/shared/layouts/Header/User/useUserHasTodos'
 import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
@@ -83,7 +82,7 @@ const MobileUserLoggedOut = () => {
       aria-label="Anmelden"
       className={twJoin(mobileControlButtonClassName, 'size-10')}
     >
-      <ArrowRightEndOnRectangleIcon className="size-6" aria-hidden="true" />
+      <UserIcon className="size-6" aria-hidden="true" />
     </a>
   )
 }

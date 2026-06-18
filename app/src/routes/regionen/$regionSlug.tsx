@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { LayoutRegionSlug } from '@/components/regionen/LayoutRegionSlug'
+import { LayoutRegionSlug } from '@/components/layouts/LayoutRegionSlug'
 import { loadRegionSearchParams } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/regionSearchParamsLoader'
 import { searchParamsRegistry } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/searchParamsRegistry'
 import RegionError from '@/components/regionen/pageRegionSlug/RegionError'

@@ -12,5 +12,8 @@ export const Route = createFileRoute('/admin/regions/new')({
   ssr: true,
   validateSearch: (search) => SearchSchema.parse(search),
   loader: async () => await getAdminRegionsLoaderFn(),
+  head: () => ({
+    meta: [{ title: 'Neue Region – ADMIN TILDA' }],
+  }),
   component: PageRegionsNew,
 })

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { LayoutAdmin } from '@/components/admin/LayoutAdmin'
+import { LayoutAdmin } from '@/components/layouts/LayoutAdmin'
 import { getIsAdminFn } from '@/server/admin/getIsAdminForRoute.functions'
 
 export const Route = createFileRoute('/admin')({

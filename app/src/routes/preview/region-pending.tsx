@@ -3,5 +3,8 @@ import RegionPagePending from '@/components/regionen/pageRegionSlug/RegionPagePe
 
 export const Route = createFileRoute('/preview/region-pending')({
   ssr: true,
+  head: () => ({
+    meta: [{ title: 'Regions-Lade-Vorschau – TILDA' }],
+  }),
   component: RegionPagePending,
 })

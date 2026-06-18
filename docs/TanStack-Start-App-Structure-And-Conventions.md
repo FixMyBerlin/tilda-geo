@@ -24,6 +24,8 @@ Plus root files such as `router.tsx` and `meta.const.ts`. There is no top-level 
 
 All React/JSX lives under **`components/`**. Route files do not define components or component functions; they only import and render components from `@/components/...`.
 
+**`components/layouts/`** — all `Layout*.tsx` route shells plus shared document chrome (Header, Footer, `global.css`). See [layouts/README.md](../app/src/components/layouts/README.md).
+
 ## 4. Routes folder — thin, no components
 
 Route files define the `Route` (config, `beforeLoad`, `loader`, `head`, `component`). The **component** is always a single import from `components/` (e.g. `LayoutRegionSlug`, `PageIndex`, `LayoutPages`). No inline components or heavy UI logic in route files.
@@ -32,9 +34,9 @@ Route files define the `Route` (config, `beforeLoad`, `loader`, `head`, `compone
 
 - **Layout vs page**: The route’s `component` is often a **layout** (e.g. `LayoutRegionSlug`, `LayoutPages`) that then renders the actual **page** component (e.g. `PageRegionSlug`). Layouts can wrap with NuqsAdapter or other providers.
 - **Naming conventions** (aligned with `Page*.tsx`):
-  - **Layouts**: File and export use the **`Layout*.tsx`** pattern (e.g. [LayoutRegionSlug.tsx](../app/src/components/regionen/LayoutRegionSlug.tsx), [LayoutPages.tsx](../app/src/components/pages/LayoutPages.tsx), [LayoutAdmin.tsx](../app/src/components/admin/LayoutAdmin.tsx), [LayoutRoot.tsx](../app/src/components/shared/layouts/LayoutRoot.tsx)).
+  - **Layouts**: File and export use the **`Layout*.tsx`** pattern in **`components/layouts/`** (e.g. [LayoutRoot.tsx](../app/src/components/layouts/LayoutRoot.tsx), [LayoutPages.tsx](../app/src/components/layouts/LayoutPages.tsx), [LayoutRegionSlug.tsx](../app/src/components/layouts/LayoutRegionSlug.tsx)). Shared chrome (Header, Footer, `global.css`) lives in the same folder.
   - **Pages**: File and export use the **`Page*.tsx`** pattern (e.g. `PageRegionSlug`, `PageIndex`, `PageDatenschutz`). We use this consistently for route-level page components.
-- **Deliberate asymmetry**: Route segment `_pages` maps to **components/pages/** (no underscore). We use `pages` in components for readability; the route uses `_pages` for layout grouping. Same idea for `_home` vs **components/home/**.
+- **Deliberate asymmetry**: Route segment `_pages` maps to **components/pages/** for page components and **components/layouts/LayoutPages.tsx** for the layout. We use `pages` in components for readability; the route uses `_pages` for layout grouping. The homepage is a single route at **`routes/index.tsx`** → **components/home/PageIndex.tsx** (no pathless layout group).
 
 ## 6. Server folder — conventions and .server
 

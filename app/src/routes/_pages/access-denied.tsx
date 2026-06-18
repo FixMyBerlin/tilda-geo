@@ -4,8 +4,7 @@ import { PageAccessDenied } from '@/components/pages/accessDenied/PageAccessDeni
 export const Route = createFileRoute('/_pages/access-denied')({
   ssr: true,
   head: () => ({
-    meta: [{ name: 'robots', content: 'noindex' }],
-    title: 'Zugriff verweigert – TILDA',
+    meta: [{ name: 'robots', content: 'noindex' }, { title: 'Zugriff verweigert – tilda-geo.de' }],
   }),
   component: PageAccessDenied,
 })

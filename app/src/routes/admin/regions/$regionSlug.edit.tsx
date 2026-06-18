@@ -7,5 +7,11 @@ export const Route = createFileRoute('/admin/regions/$regionSlug/edit')({
   loader: async ({ params }) => {
     return await getAdminRegionEditLoaderFn({ data: { regionSlug: params.regionSlug } })
   },
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [] }
+    return {
+      meta: [{ title: `${loaderData.region.fullName} bearbeiten – ADMIN TILDA` }],
+    }
+  },
   component: PageRegionEdit,
 })

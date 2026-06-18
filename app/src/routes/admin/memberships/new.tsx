@@ -15,5 +15,8 @@ export const Route = createFileRoute('/admin/memberships/new')({
   loader: async () => {
     return await getAdminMembershipNewLoaderFn()
   },
+  head: () => ({
+    meta: [{ title: 'Neue Mitgliedschaft – ADMIN TILDA' }],
+  }),
   component: PageMembershipsNew,
 })

@@ -13,10 +13,9 @@ import { Route as RegionenRouteImport } from './routes/regionen'
 import { Route as PreviewRouteImport } from './routes/preview'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PagesRouteImport } from './routes/_pages'
-import { Route as HomeRouteImport } from './routes/_home'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegionenIndexRouteImport } from './routes/regionen/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as HomeIndexRouteImport } from './routes/_home/index'
 import { Route as RegionenStatsRouteImport } from './routes/regionen/stats'
 import { Route as RegionenRegionSlugRouteImport } from './routes/regionen/$regionSlug'
 import { Route as PreviewRootFallbackRouteImport } from './routes/preview/root-fallback'
@@ -58,12 +57,12 @@ import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes
 import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
 import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
-import { Route as AdminUploadsSlugRouteImport } from './routes/admin/uploads.$slug'
+import { Route as AdminUploadsSlugRouteImport } from './routes/admin/uploads/$slug'
 import { Route as AdminStaticDatasetCategoriesNewRouteImport } from './routes/admin/static-dataset-categories/new'
 import { Route as AdminStaticDatasetCategoriesCategoryKeyRouteImport } from './routes/admin/static-dataset-categories/$categoryKey'
-import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions.new'
-import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs.new'
-import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships.new'
+import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions/new'
+import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs/new'
+import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships/new'
 import { Route as PagesSettingsUserRouteImport } from './routes/_pages/settings.user'
 import { Route as PagesDocsMapillaryCoverageRouteImport } from './routes/_pages/docs.mapillary-coverage'
 import { Route as PagesDocsTableNameRouteImport } from './routes/_pages/docs.$tableName'
@@ -76,8 +75,8 @@ import { Route as ApiMaprouletteDataTest_tag_fixRouteImport } from './routes/api
 import { Route as ApiMaprouletteDataProjectKeyRouteImport } from './routes/api/maproulette.data.$projectKey'
 import { Route as ApiExportRegionSlugTableNameRouteImport } from './routes/api/export.$regionSlug.$tableName'
 import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/api/export-ogr.$regionSlug.$tableName'
-import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions.$regionSlug.edit'
-import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs.$id.edit'
+import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
+import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
 import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
 
 const RegionenRoute = RegionenRouteImport.update({
@@ -99,8 +98,9 @@ const PagesRoute = PagesRouteImport.update({
   id: '/_pages',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/_home',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegionenIndexRoute = RegionenIndexRouteImport.update({
@@ -112,11 +112,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
-} as any)
-const HomeIndexRoute = HomeIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => HomeRoute,
 } as any)
 const RegionenStatsRoute = RegionenStatsRouteImport.update({
   id: '/stats',
@@ -451,7 +446,7 @@ const ApiAdminQaConfigsIdExportCsvRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof HomeIndexRoute
+  '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/preview': typeof PreviewRouteWithChildren
   '/regionen': typeof RegionenRouteWithChildren
@@ -521,7 +516,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof HomeIndexRoute
+  '/': typeof IndexRoute
   '/preview': typeof PreviewRouteWithChildren
   '/access-denied': typeof PagesAccessDeniedRoute
   '/datenschutz': typeof PagesDatenschutzRoute
@@ -585,7 +580,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_home': typeof HomeRouteWithChildren
+  '/': typeof IndexRoute
   '/_pages': typeof PagesRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/preview': typeof PreviewRouteWithChildren
@@ -615,7 +610,6 @@ export interface FileRoutesById {
   '/preview/root-fallback': typeof PreviewRootFallbackRoute
   '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
-  '/_home/': typeof HomeIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/regionen/': typeof RegionenIndexRoute
   '/_pages/docs/$tableName': typeof PagesDocsTableNameRoute
@@ -792,7 +786,7 @@ export interface FileRouteTypes {
     | '/api/admin/qa-configs/$id/export-csv'
   id:
     | '__root__'
-    | '/_home'
+    | '/'
     | '/_pages'
     | '/admin'
     | '/preview'
@@ -822,7 +816,6 @@ export interface FileRouteTypes {
     | '/preview/root-fallback'
     | '/regionen/$regionSlug'
     | '/regionen/stats'
-    | '/_home/'
     | '/admin/'
     | '/regionen/'
     | '/_pages/docs/$tableName'
@@ -865,7 +858,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  HomeRoute: typeof HomeRouteWithChildren
+  IndexRoute: typeof IndexRoute
   PagesRoute: typeof PagesRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   PreviewRoute: typeof PreviewRouteWithChildren
@@ -927,11 +920,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_home': {
-      id: '/_home'
-      path: ''
+    '/': {
+      id: '/'
+      path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof HomeRouteImport
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/regionen/': {
@@ -947,13 +940,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
-    }
-    '/_home/': {
-      id: '/_home/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof HomeIndexRouteImport
-      parentRoute: typeof HomeRoute
     }
     '/regionen/stats': {
       id: '/regionen/stats'
@@ -1392,16 +1378,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface HomeRouteChildren {
-  HomeIndexRoute: typeof HomeIndexRoute
-}
-
-const HomeRouteChildren: HomeRouteChildren = {
-  HomeIndexRoute: HomeIndexRoute,
-}
-
-const HomeRouteWithChildren = HomeRoute._addFileChildren(HomeRouteChildren)
-
 interface PagesRouteChildren {
   PagesAccessDeniedRoute: typeof PagesAccessDeniedRoute
   PagesDatenschutzRoute: typeof PagesDatenschutzRoute
@@ -1599,7 +1575,7 @@ const ApiNotesRegionSlugRouteWithChildren =
   ApiNotesRegionSlugRoute._addFileChildren(ApiNotesRegionSlugRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  HomeRoute: HomeRouteWithChildren,
+  IndexRoute: IndexRoute,
   PagesRoute: PagesRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   PreviewRoute: PreviewRouteWithChildren,

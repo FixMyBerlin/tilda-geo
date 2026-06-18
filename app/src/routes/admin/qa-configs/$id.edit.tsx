@@ -9,5 +9,11 @@ export const Route = createFileRoute('/admin/qa-configs/$id/edit')({
     const result = await getAdminQaConfigEditLoaderFn({ data: { id } })
     return { ...result, id }
   },
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [] }
+    return {
+      meta: [{ title: `${loaderData.qaConfig.label} bearbeiten – ADMIN TILDA` }],
+    }
+  },
   component: PageQaConfigEdit,
 })

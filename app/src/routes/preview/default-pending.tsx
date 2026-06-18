@@ -3,5 +3,8 @@ import DefaultPending from '@/components/shared/error/DefaultPending'
 
 export const Route = createFileRoute('/preview/default-pending')({
   ssr: true,
+  head: () => ({
+    meta: [{ title: 'Lade-Vorschau – TILDA' }],
+  }),
   component: DefaultPending,
 })

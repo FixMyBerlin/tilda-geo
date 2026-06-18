@@ -48,7 +48,7 @@ Do **not** duplicate upstream API reference in this skill — use `llms.txt` / `
 **Next.js + nuqs:**
 
 - Colocate parsers and hooks under the feature (e.g. `components/.../hooks/useQueryState/`).
-- Place **`NuqsAdapter`** only on layouts that need URL search state — everything below is effectively a client boundary for nuqs.
+- Place **`NuqsAdapter`** only on `components/layouts/Layout*.tsx` shells that need URL search state — everything below is effectively a client boundary for nuqs.
 - Register search params in a central registry if redirects/normalization must preserve them.
 
 **State split:** URL-shareable state → router search or nuqs; ephemeral UI → Zustand (`zustand-state-management`).
