@@ -7,13 +7,7 @@
   //   noUnusedLocals / noUnusedParameters — delegated to oxlint; avoid duplicate signal with tsgo
   // Never install or extend @total-typescript/tsconfig — keep settings inlined with these comments.
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
-  "exclude": [
-    "node_modules",
-    "**/*.e2e.ts",
-    ".output",
-    "dist",
-    "scripts"
-  ],
+  "exclude": ["node_modules", "**/*.e2e.ts", ".output", "dist", "scripts"],
   "compilerOptions": {
     "target": "ES2025",
     "lib": ["ES2025", "DOM", "DOM.Iterable"],

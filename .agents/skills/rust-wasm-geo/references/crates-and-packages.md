@@ -119,7 +119,10 @@ export function ensureWasm() {
   return ready
 }
 
-const geoJsonSchema = z.object({ type: z.literal('FeatureCollection'), features: z.array(z.unknown()) })
+const geoJsonSchema = z.object({
+  type: z.literal('FeatureCollection'),
+  features: z.array(z.unknown()),
+})
 
 export async function bufferPolygon(geojson: GeoJSON.FeatureCollection, distanceM: number) {
   await ensureWasm()

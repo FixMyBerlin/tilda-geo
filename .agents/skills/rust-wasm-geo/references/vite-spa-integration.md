@@ -74,7 +74,8 @@ import { bufferPolygon } from './wasm'
 
 export function useBufferPolygon() {
   return useMutation({
-    mutationFn: ({ fc, meters }: { fc: GeoJSON.FeatureCollection; meters: number }) => bufferPolygon(fc, meters),
+    mutationFn: ({ fc, meters }: { fc: GeoJSON.FeatureCollection; meters: number }) =>
+      bufferPolygon(fc, meters),
   })
 }
 ```

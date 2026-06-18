@@ -131,7 +131,11 @@ map.setFeatureState({ source: 'potential-areas-source', id: area.id }, { selecte
 // tilda-geo: LayerHighlight.tsx — one paint property on the duplicate layer
 ;[
   'case',
-  ['all', ['boolean', ['feature-state', 'hover'], false], ['boolean', ['feature-state', 'selected'], false]],
+  [
+    'all',
+    ['boolean', ['feature-state', 'hover'], false],
+    ['boolean', ['feature-state', 'selected'], false],
+  ],
   '#a855f7', // hover + selected
   ['boolean', ['feature-state', 'hover'], false],
   '#eab308', // hover only
@@ -223,7 +227,9 @@ const handleMapClick = (event: MapLayerMouseEvent) => {
 
   // 1. clear previous — only stored ids, not a feature object (see note below)
   if (previousId && previousSource && mainMap) {
-    mainMap.getMap().setFeatureState({ source: previousSource, id: previousId }, { selected: false })
+    mainMap
+      .getMap()
+      .setFeatureState({ source: previousSource, id: previousId }, { selected: false })
   }
 
   // 2. highlight clicked — pass feature; MapLibre gets sourceLayer from the event

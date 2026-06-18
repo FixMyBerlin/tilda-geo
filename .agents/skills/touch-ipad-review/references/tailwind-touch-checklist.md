@@ -89,7 +89,8 @@ Headless UI v2 tracks pointer movement while open (`onPointerMove` → active it
 Radix sets `data-highlighted` on the row under the finger:
 
 ```html
-class="select-none cursor-pointer data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+class="select-none cursor-pointer data-[highlighted]:bg-accent
+data-[highlighted]:text-accent-foreground"
 ```
 
 Keep `[@media(hover:hover)_and_(pointer:fine)]:hover:…` as desktop-only polish.

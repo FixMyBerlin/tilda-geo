@@ -62,11 +62,11 @@ Paste each printed line to run the container. **Limited topics:** replace `--all
 
 **Common presets (`--preset <slug>`):** same bbox on **both** `PROCESS_ONLY_BBOX` and `PROCESSING_DIFFING_BBOX` unless you use `--distinct-diff-bbox` or separate `--only-bbox` / `--diff-bbox`. See `--help` for the full slug list.
 
-| Slug | Coordinates | Notes |
-|------|-------------|-------|
-| `xhain` | `13.380,52.488,13.418,52.503` | Small |
-| `berlin` / `berlin-full` | `13.0883,52.3382,13.7611,52.6755` | Large |
-| `bussonderstreifen` | `13.38486,52.43778,13.38956,52.43959` | Interactive default for processing bbox |
+| Slug                     | Coordinates                           | Notes                                   |
+| ------------------------ | ------------------------------------- | --------------------------------------- |
+| `xhain`                  | `13.380,52.488,13.418,52.503`         | Small                                   |
+| `berlin` / `berlin-full` | `13.0883,52.3382,13.7611,52.6755`     | Large                                   |
+| `bussonderstreifen`      | `13.38486,52.43778,13.38956,52.43959` | Interactive default for processing bbox |
 
 `PROCESSING_DIFFING_BBOX` is **required** whenever diffing mode is not `off` (`processing/diffing/diffing.ts`). Effective diff area is the intersection of the two bboxes when both are set (`processing/diffing/diffing.ts`).
 

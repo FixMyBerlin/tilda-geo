@@ -106,12 +106,12 @@ Only if transformation required (**not** for CRS or coordinate precision — Ste
 Example:
 
 ```typescript
-import { FeatureCollection } from "geojson";
+import { FeatureCollection } from 'geojson'
 
 export const transform = (data: FeatureCollection) => {
   // Use helper functions from _utils when possible
-  return data;
-};
+  return data
+}
 ```
 
 ### 4. Create meta.ts
@@ -167,24 +167,24 @@ export const transform = (data: FeatureCollection) => {
 **Example structure**:
 
 ```typescript
-import { MetaData } from "../../../types";
-import { defaultLayerStyles } from "../../_utils/defaultLayerStyles";
+import { MetaData } from '../../../types'
+import { defaultLayerStyles } from '../../_utils/defaultLayerStyles'
 
 export const data: MetaData = {
-  regions: ["infravelo"], // From user or infer from group folder
+  regions: ['infravelo'], // From user or infer from group folder
   public: true,
-  dataSourceType: "local",
+  dataSourceType: 'local',
   configs: [
     {
-      name: "Dataset Name",
-      category: "berlin/misc", // Infer from similar datasets
-      attributionHtml: "Source Name", // Ask if unclear
-      licence: "DL-DE/ZERO-2.0", // Infer from similar datasets
+      name: 'Dataset Name',
+      category: 'berlin/misc', // Infer from similar datasets
+      attributionHtml: 'Source Name', // Ask if unclear
+      licence: 'DL-DE/ZERO-2.0', // Infer from similar datasets
       inspector: { enabled: false }, // Default unless specified
       layers: defaultLayerStyles(), // Or custom layers
     },
   ],
-};
+}
 ```
 
 ### 5. Verify Command
@@ -226,6 +226,7 @@ Before completing:
 
 ## References
 
+- User-facing request template (DE, GitHub issue style): [ANFRAGE-STATISCHER-DATENSATZ.md](./ANFRAGE-STATISCHER-DATENSATZ.md)
 - Types: `app/scripts/StaticDatasets/types.ts`
 - Examples: `app/scripts/StaticDatasets/geojson/region-berlin/*/meta.ts`
 - Utils: `app/scripts/StaticDatasets/geojson/_utils/`
