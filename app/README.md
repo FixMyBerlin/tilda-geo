@@ -12,11 +12,13 @@ The frontend visualizes our processed data it also provides options to annotate 
 
 ### Initial setup
 
-1. Create a `/.env` file in the **repository root** based on [`/.env.example`](../.env.example). That is the only env file you need for local app dev; scripts under `app/` load it with `bun --env-file=../.env` (see [`package.json`](./package.json)).
+1. Create a `/.env` file in the **repository root** based on [`/.env.example`](../.env.example). Required for all local dev; `.env.local` is auto-generated on feature branches in worktrees (see below).
 2. Set `VITE_APP_ORIGIN=http://127.0.0.1:5173` (and `VITE_APP_ENV=development`). No `/etc/hosts` or certificates needed.
 3. To test the login, set up your own OSM OAuth 2 application (see [osm-auth](https://github.com/osmlab/osm-auth#registering-an-application)) and add credentials to the root `.env`.
 
 **Why `127.0.0.1` and not `localhost`?** See [Local Development Domain Setup](../docs/Local-Development-Domain-Setup.md).
+
+**Worktrees and Docker:** See [Docker local development](../docs/docker-local-development.md). Feature branches: `bun run setup-worktree -- <branch>` then `bun run dev` in the new folder.
 
 ### Start
 

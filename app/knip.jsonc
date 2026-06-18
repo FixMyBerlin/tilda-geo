@@ -6,7 +6,7 @@
     "scripts/generate-favicons/process.ts",
     "scripts/RegionalMasks/**/*.ts",
     "scripts/StaticDatasets/updateWfsSources/**/*.ts",
-    "scripts/worktree-cli/cli.ts",
+    "scripts/setup-worktree.ts",
     "src/server/instrumentation/nitro-*.plugin.server.ts",
   ],
   "ignoreBinaries": ["code", "github", "gh"],

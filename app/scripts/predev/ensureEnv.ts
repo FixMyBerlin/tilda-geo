@@ -39,10 +39,7 @@ export async function ensureEnv() {
   logWarn(label, `No .env in this worktree (${dest})`)
 
   if (!sourceExists) {
-    note(
-      `Create .env from .env.example, or run:\n\n  bun scripts/worktree-cli/cli.ts\n\nfrom the main checkout.`,
-      'Missing .env',
-    )
+    note('Create .env from .env.example or see docs/docker-local-development.md', 'Missing .env')
     logErr(label, `Primary env not found at ${source}`)
     process.exit(1)
   }

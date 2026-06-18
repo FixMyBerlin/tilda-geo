@@ -1,7 +1,6 @@
 function getDatabaseConfig() {
   const host = process.env.DATABASE_HOST
-  // Optional: defaults to 5432. Lets an isolated dev worktree connect to a DB
-  // published on a non-default host port (see DATABASE_PORT in docker-compose.yml).
+  // Non-default DATABASE_PORT from .env.local — see docs/docker-local-development.md
   const port = process.env.DATABASE_PORT || '5432'
   const user = process.env.DATABASE_USER
   const password = process.env.DATABASE_PASSWORD

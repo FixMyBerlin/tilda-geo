@@ -16,6 +16,7 @@
     "predev:4migration": "bun scripts/predev/checkMigration.ts --non-interactive",
     "predev:5topic-docs": "bun run topic-docs-build",
     "predev:6package-updates": "bun scripts/predev/checkPackageUpdates.ts",
+    "setup-worktree": "bun scripts/setup-worktree.ts",
     "db-pull": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/run.ts",
     "db-pull:pull": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/pull.ts",
     "db-pull:restore": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/restore-local.ts",

@@ -34,6 +34,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 - The printed command runs **docker compose** at the repository root (via subshell `cd`) so the **root `.env`** applies—the same file the app uses via `bun --env-file=../.env` from `app/`.
 - Overrides are **per pasted command** — no need to `export` vars in the user’s shell.
 - Ensure **`db` is healthy** before running the pasted line (`docker compose up -d db` from repo root if needed). The generate script does not start containers.
+- On isolated stacks (feature-branch worktree), see [`docs/docker-local-development.md`](../../../docs/docker-local-development.md) — load `.env.local` or use the printed env from `processing-generate-command`.
 
 Implementation: [`app/scripts/processing-generate-command/index.ts`](../../../app/scripts/processing-generate-command/index.ts). README: [`app/scripts/processing-generate-command/README.md`](../../../app/scripts/processing-generate-command/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`processing-generate-command`).
 

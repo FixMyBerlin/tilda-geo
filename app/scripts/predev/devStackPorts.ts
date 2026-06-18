@@ -53,8 +53,12 @@ export async function allocatePortPair() {
   throw new Error(`No free db (${DB_PORT_MIN}-${DB_PORT_MAX}) + tiles port pair found`)
 }
 
-export function containerPrefixFromRepoRoot(repoRoot: string) {
+export function stackIdFromRepoRoot(repoRoot: string) {
   const base = repoRoot.split('/').pop() ?? 'tilda'
   const sanitized = base.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '')
-  return `wt_${sanitized || 'geo'}_`
+  return `wt_${sanitized || 'geo'}`
+}
+
+export function composeContainerPrefixFromStackId(stackId: string) {
+  return stackId ? `${stackId}_` : ''
 }

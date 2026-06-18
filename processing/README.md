@@ -59,7 +59,7 @@ The workflow is…
 3. Inspect the new results, see "Inspect changes"
 
 > **Note**
-> Our [development docker compose](../docker-compose.override.yml) add two `volumens` which means in most cases, we don't need to run `docker compose build`.
+> Our [development docker compose](../docker-compose.override.yml) add two `volumens` which means in most cases, we don't need to run `docker compose build`. For multiple local checkouts and isolated stacks, see [`docs/docker-local-development.md`](../docs/docker-local-development.md).
 
 > **Note**
 > Learn more about the file/folder-structure and coding patterns in [`processing/topics/README.md`](/processing/topics/README.md)

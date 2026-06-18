@@ -5,7 +5,7 @@
 1. Install browsers: `bunx playwright install chromium` (Playwright is already a project dependency)
 2. Configure: Create `app/.env.test` with `TEST_OSM_USERNAME` and `TEST_OSM_PASSWORD`
 3. Configure app: Set `VITE_PLAYWRIGHT_ENABLED=true` in repo root `.env` (see `.env.example`). Vitest unit tests use the repo root `.env`; `app/.env.test` is Playwright-only.
-4. For smoke tests only: `bun run e2e` will start the dev server via `webServer` if not already running (requires `docker compose up db tiles -d` first if the app needs DB). For full suite: start app with `docker compose up db tiles -d && bun run dev`, then run tests.
+4. For smoke tests only: `bun run e2e` will start the dev server via `webServer` if not already running (requires db+tiles — see [`docs/docker-local-development.md`](../../docs/docker-local-development.md)). For full suite: start app with `bun run dev` (predev starts Docker), then run tests.
 
 ## Usage
 

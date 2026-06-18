@@ -1,6 +1,12 @@
 import { join } from 'node:path'
 import { isHostPortAvailable, publishedHostPorts } from './devStackPorts'
-import { getStackPortsFromEnv, isAttachMode, stackPortsArePublished } from './ensureDevStack'
+import {
+  composeContainerPrefixFromEnv,
+  devStackIdFromEnv,
+  getStackPortsFromEnv,
+  isAttachMode,
+  stackPortsArePublished,
+} from './ensureDevStack'
 import { repoRootFromApp } from './ensureEnv'
 import { logErr, logOk } from './predevLog'
 
@@ -58,10 +64,13 @@ export async function checkDocker() {
     }
 
     const repoRoot = repoRootFromApp()
+    const stackId = devStackIdFromEnv()
+    const containerPrefix = composeContainerPrefixFromEnv()
     const proc = Bun.spawn(
       [
         'docker',
         'compose',
+        ...(stackId ? ['-p', stackId] : []),
         '-f',
         join(repoRoot, 'docker-compose.yml'),
         '-f',
@@ -75,7 +84,10 @@ export async function checkDocker() {
         cwd: repoRoot,
         stdout: 'inherit',
         stderr: 'inherit',
-        env: { ...process.env },
+        env: {
+          ...process.env,
+          COMPOSE_DEV_CONTAINER_PREFIX: containerPrefix,
+        },
       },
     )
     const exitCode = await proc.exited
