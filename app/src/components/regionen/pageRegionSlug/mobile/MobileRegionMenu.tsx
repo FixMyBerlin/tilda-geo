@@ -13,7 +13,6 @@ import type {
   PrimaryNavigation,
   SecondaryNavigation,
 } from '@/components/shared/layouts/Header/types'
-import { productName } from '@/data/tildaProductNames.const'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
   mobileControlButtonActiveClassName,
@@ -105,17 +104,14 @@ export const MobileRegionMenu = () => {
           ) : (
             <BuildingLibraryIcon className="h-10 w-auto shrink-0 text-yellow-400" />
           )}
-          <div className="min-w-0 leading-tight">
-            <div className="flex items-center gap-1">
-              {isPrivate && (
-                <LockClosedIcon className="size-4 shrink-0 text-gray-400" aria-hidden="true" />
-              )}
-              <span className="font-semibold text-gray-900">{staticRegion.fullName}</span>
-              {isDeactivated && (
-                <RegionStatusPill status="DEACTIVATED" className="shrink-0 px-1.5 py-0.5" />
-              )}
-            </div>
-            <div className="text-xs text-gray-500">{productName.get(staticRegion.product)}</div>
+          <div className="flex min-w-0 items-center gap-1">
+            {isPrivate && (
+              <LockClosedIcon className="size-4 shrink-0 text-gray-400" aria-hidden="true" />
+            )}
+            <span className="font-semibold text-gray-900">{staticRegion.fullName}</span>
+            {isDeactivated && (
+              <RegionStatusPill status="DEACTIVATED" className="shrink-0 px-1.5 py-0.5" />
+            )}
           </div>
         </div>
 
