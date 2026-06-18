@@ -7,9 +7,7 @@ import {
   UsersIcon,
 } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
-import { Link } from '@/components/shared/links/Link'
-import { buttonStylesSecondary } from '@/components/shared/links/styles'
-import { homeCtaPrimary } from './styles'
+import { Pill } from '@/components/shared/text/Pill'
 
 type Feature = {
   badge: string
@@ -30,14 +28,14 @@ const features: Feature[] = [
     badge: 'Kollaborativ',
     title: 'Teamplayer',
     description:
-      'Kommentieren, Teilen, Analysieren – alles in einem Browser-Tab. Keine Installation nötig.',
+      'Kommentieren oder Teilen – alles in einem Browser-Tab. Keine Installation nötig.',
     icon: UsersIcon,
   },
   {
     badge: 'Kosteneffizient',
     title: 'Budget-Schonend',
     description:
-      'Reduzieren Sie den Bedarf an externen Gutachten durch eigene, valide Datengrundlagen.',
+      'Reduzieren Sie den Bedarf an teuren, externen Erfassungen durch eigene, valide Datengrundlagen.',
     icon: ArrowTrendingDownIcon,
   },
   {
@@ -58,48 +56,41 @@ const features: Feature[] = [
     badge: 'Kosteneffizient',
     title: 'Open Source',
     description:
-      'Kein Vendor-Lock-in. Die gesamte Software ist quelloffen – Ihre Daten gehören Ihnen.',
+      'Kein Vendor-Lock-in. Die gesamte Software ist quelloffen – Ihre Daten gehören Ihnen. Datensouverenität garantiert.',
     icon: CodeBracketIcon,
   },
 ]
 
 export const HomePageWhy = () => {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <h2 className="font-display text-center text-3xl tracking-tight text-gray-900 sm:text-4xl">
-        Warum TILDA?
-      </h2>
-      <p className="mt-4 text-center text-lg tracking-tight text-gray-700">
-        Nachhaltigkeit und Effizienz im Fokus
-      </p>
+    <section className="bg-white">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        <h2 className="text-center text-3xl font-semibold tracking-tight text-[#1b1c1c] sm:text-4xl">
+          Warum TILDA?
+        </h2>
+        <p className="mt-4 text-center text-base text-[#514532] sm:text-lg">
+          Datenbasiert planen, nachhaltig handeln
+        </p>
 
-      <div className="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((feature) => {
-          const Icon = feature.icon
-          return (
-            <div key={feature.title} className="flex flex-col items-center text-center">
-              <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-700">
-                <Icon className="h-8 w-8" />
-              </span>
-              <span className="mt-4 rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
-                {feature.badge}
-              </span>
-              <h3 className="mt-3 text-lg font-semibold text-gray-900">{feature.title}</h3>
-              <p className="mt-2 max-w-xs text-sm tracking-tight text-gray-600">
-                {feature.description}
-              </p>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-        <Link href="https://www.fixmycity.de/tilda" button className={homeCtaPrimary} blank>
-          Mehr erfahren
-        </Link>
-        <Link to="/regionen" classNameOverwrite={buttonStylesSecondary}>
-          Beispiel Region ansehen
-        </Link>
+        <div className="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((feature) => {
+            const Icon = feature.icon
+            return (
+              <div key={feature.title} className="flex flex-col items-center text-center">
+                <span className="inline-flex size-24 items-center justify-center rounded-full bg-[#7e5700]/8 text-[#6b4900]">
+                  <Icon className="size-12" />
+                </span>
+                <Pill color="amber" className="mt-4 rounded-full px-4 py-1 text-sm font-semibold">
+                  {feature.badge}
+                </Pill>
+                <h3 className="mt-3 text-2xl font-semibold text-[#1b1c1c]">{feature.title}</h3>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#514532]">
+                  {feature.description}
+                </p>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </section>
   )

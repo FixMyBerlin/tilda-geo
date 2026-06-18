@@ -11,18 +11,16 @@ type Faq = {
   answer: string
 }
 
-// Antwort 1 stammt aus dem Mockup. Antworten 2–5 sind Platzhalter und sollten
-// inhaltlich noch finalisiert werden.
 const faqs: Faq[] = [
   {
-    question: 'Wie kann meine Kommune das Radnetz erfassen?',
+    question: 'Wie kann das Radnetz für meine Kommune erfasst werden?',
     answer:
-      'Mit TILDA Radverkehr erhalten Sie sofort einsatzbereite Radinfrastrukturdaten aus OpenStreetMap – ohne eigene Befahrung. Die Daten sind tagesaktuell und können von Ihrem Team direkt in der Browser-Anwendung gepflegt und ergänzt werden. Eine Ersteinrichtung dauert in der Regel nur wenige Tage.',
+      'Die Erfassung kann auf verschiedenen Wegen erfolgen: durch die Nutzung und Aufbereitung bestehender Daten, durch professionelle 360°-Befahrungen oder durch die Ergänzung und Qualitätssicherung von OpenStreetMap-Daten. Gemeinsam wählen wir den für Ihre Kommune passenden Ansatz und schaffen eine belastbare Datengrundlage für die weitere Planung.',
   },
   {
-    question: 'Was kostet TILDA für eine kleine Stadt oder Gemeinde?',
+    question: 'Was kostet TILDA?',
     answer:
-      'TILDA wird als günstige Cloud-Anwendung im Abo angeboten – die Kosten richten sich nach Größe und Umfang Ihrer Kommune. Sprechen Sie uns für ein individuelles Angebot an.',
+      'Die Kosten hängen vom Projektumfang, der Größe des Gebiets, dem gewünschten Funktionsumfang sowie möglichen Zusatzleistungen wie Befahrungen, Datenaufbereitung oder Planungsunterstützung ab. Gerne erstellen wir Ihnen ein individuelles Angebot, das auf Ihre Anforderungen zugeschnitten ist.',
   },
   {
     question: 'Brauche ich eigene Befahrungen, um die Daten aktuell zu halten?',
@@ -30,51 +28,68 @@ const faqs: Faq[] = [
       'Nein. TILDA basiert auf OpenStreetMap und bleibt dadurch fortlaufend tagesaktuell. Sie tragen nur Änderungen ein – teure Wiederholungsbefahrungen entfallen.',
   },
   {
-    question: 'Kann TILDA interkommunal genutzt werden?',
+    question: 'Wie schnell kann TILDA in unserer Kommune eingesetzt werden?',
     answer:
-      'Ja. Mehrere Kommunen und Landkreise können gemeinsam an einem Netz arbeiten – ideal für interkommunale Radnetzplanung wie im Projekt NUDAFA.',
+      'TILDA ist eine cloudbasierte Anwendung und kann in der Regel innerhalb weniger Tage bereitgestellt werden. Der genaue Zeitrahmen hängt davon ab, ob bereits geeignete Daten vorliegen oder zunächst eine Datenerfassung beziehungsweise Datenaufbereitung erfolgen muss. Gemeinsam entwickeln wir einen Einführungsplan, der zu Ihren Anforderungen passt. Gerne weisen wir Sie auch persönlich in die Nutzung von TILDA ein.',
   },
   {
-    question: 'Wie integriere ich TILDA-Daten in mein bestehendes GIS?',
+    question: 'Wie kann ich ein Angebot erhalten?',
     answer:
-      'TILDA-Daten stehen in offenen, standardisierten Formaten zur Verfügung und lassen sich in Ihre bestehenden GIS-Systeme exportieren und einbinden.',
+      'Nehmen Sie Kontakt mit dem TILDA-Team auf und schildern Sie Ihr Vorhaben. Auf Basis Ihrer Anforderungen, der Größe des Untersuchungsgebiets und der gewünschten Leistungen erstellen wir ein individuelles Angebot für Ihre Kommune.',
+  },
+    {
+    question: 'Können wir unsere bestehenden Daten in TILDA integrieren?',
+    answer:
+      'Ja. TILDA ist als zentraler Daten-Hub konzipiert und ermöglicht die Einbindung vorhandener kommunaler Datenbestände. Bestehende Geodaten können übernommen, mit den TILDA-Daten verknüpft und für Analysen, Auswertungen und die weitere Planung genutzt werden. Gleichzeitig bleiben die Daten in offenen Formaten exportierbar und können weiterhin in bestehenden Fachverfahren verwendet werden.',
   },
 ]
 
 export const HomePageFaq = () => {
   return (
-    <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <h2 className="font-display text-center text-3xl tracking-tight text-gray-900 sm:text-4xl">
-        Häufige Fragen von Kommunen
-      </h2>
-      <p className="mt-4 text-center text-lg tracking-tight text-gray-700">
-        Alles, was Sie über TILDA wissen müssen
-      </p>
+    <section className="bg-[#f6f3f2]">
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        <h2 className="text-center text-3xl font-semibold tracking-tight text-[#1b1c1c] sm:text-4xl">
+          Häufige Fragen von Kommunen
+        </h2>
+        <p className="mt-4 text-center text-base text-[#514532] sm:text-lg">
+          Alles, was Sie über TILDA wissen müssen
+        </p>
 
-      <dl className="mt-10 divide-y divide-gray-200 rounded-2xl bg-white ring-1 ring-gray-900/5">
-        {faqs.map((faq, index) => (
-          <HeadlessUiDisclosure as="div" key={faq.question} defaultOpen={index === 0}>
-            {({ open }) => (
-              <>
-                <dt>
-                  <DisclosureButton className="flex w-full items-center justify-between px-6 py-5 text-left hover:bg-gray-50 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
-                    <span className="text-base font-medium text-gray-900">{faq.question}</span>
-                    <ChevronDownIcon
-                      className={twJoin(
-                        'ml-4 size-5 flex-none text-gray-500 transition-transform',
-                        open ? 'rotate-180' : '',
-                      )}
-                    />
-                  </DisclosureButton>
-                </dt>
-                <DisclosurePanel as="dd" className="px-6 pb-5 text-sm tracking-tight text-gray-600">
-                  {faq.answer}
-                </DisclosurePanel>
-              </>
-            )}
-          </HeadlessUiDisclosure>
-        ))}
-      </dl>
+        <dl className="mt-10 flex flex-col gap-4">
+          {faqs.map((faq, index) => (
+            <HeadlessUiDisclosure
+              as="div"
+              key={faq.question}
+              defaultOpen={index === 0}
+              className="overflow-hidden rounded-2xl bg-white"
+            >
+              {({ open }) => (
+                <>
+                  <dt>
+                    <DisclosureButton className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left hover:bg-black/[0.02] focus:outline-none focus-visible:ring focus-visible:ring-yellow-500">
+                      <span className="text-base font-semibold text-[#1b1c1c] sm:text-lg">
+                        {faq.question}
+                      </span>
+                      <ChevronDownIcon
+                        className={twJoin(
+                          'size-6 flex-none text-[#514532] transition-transform',
+                          open && 'rotate-180',
+                        )}
+                      />
+                    </DisclosureButton>
+                  </dt>
+                  <DisclosurePanel
+                    as="dd"
+                    className="px-6 pb-5 text-sm leading-relaxed text-[#514532]"
+                  >
+                    {faq.answer}
+                  </DisclosurePanel>
+                </>
+              )}
+            </HeadlessUiDisclosure>
+          ))}
+        </dl>
+      </div>
     </section>
   )
 }

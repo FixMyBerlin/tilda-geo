@@ -27,6 +27,15 @@
   --radius-4xl: 2rem;
 }
 
+/* Keyframes für das Endlos-Laufband der Startseiten-Trust-Leiste. Die Animation
+   selbst wird per Utility `animate-[home-marquee_…]` angewendet (HomePageTrustBar);
+   nur die Keyframes lassen sich nicht als Tailwind-Klasse abbilden. */
+@keyframes home-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @layer base {
   button {
     @apply cursor-pointer;
