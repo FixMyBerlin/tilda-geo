@@ -1,6 +1,11 @@
 version: 2
+# "npm" + enable-beta-ecosystems is a workaround so Dependabot updates bun.lock.
+# "bun" ecosystem is GA but has a known bug where it skips the lockfile:
+# https://github.com/dependabot/dependabot-core/issues/11602
+# Experiment: https://github.com/openriftapp/openrift/commit/cc724872eac185fde9b567b792691154223e6a4e
+enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: bun
+  - package-ecosystem: npm
     directories:
       - /app
       - /processing
