@@ -12,6 +12,7 @@ Most FMC apps share the same core (plugins, type-aware lint, switch exhaustivene
 - **`ignorePatterns`** — keep oxlint and oxfmt in sync; add generated paths or tool folders for your repo layout.
 - **`sortTailwindcss.stylesheet`** — point at your global CSS entry.
 - **Custom oxlint `jsPlugins`** — e.g. TanStack Start auth-boundary rules; see skill `tanstack-start-auth` → [endpoint-auth-lint.md](../../tanstack-start-auth/references/endpoint-auth-lint.md).
+- **`eslint-plugin-compat`** — `compat/compat` on client-shipped paths; scoped override in [browser-target.md](browser-target.md).
 
 ## Scaffold setup
 
@@ -30,12 +31,12 @@ Most FMC apps share the same core (plugins, type-aware lint, switch exhaustivene
 }
 ```
 
-**scripts:**
+**scripts** — use `--fix --fix-dangerously` on write-mode lint so suggestion/dangerous fixes apply (e.g. removing unused imports). Plain `--fix` only applies safe fixes.
 
 ```json
 {
   "scripts": {
-    "lint": "oxlint --fix --deny-warnings -c oxlint.config.mjs .",
+    "lint": "oxlint --fix --fix-dangerously --deny-warnings -c oxlint.config.mjs .",
     "lint-check": "oxlint --deny-warnings -c oxlint.config.mjs .",
     "format": "oxfmt --write -c oxfmt.config.mjs .",
     "format-check": "oxfmt --check -c oxfmt.config.mjs ."
@@ -43,6 +44,25 @@ Most FMC apps share the same core (plugins, type-aware lint, switch exhaustivene
 }
 ```
 
-**VS Code:** extension `oxc.oxc-vscode`, `oxc.typeAware: true`, point `oxc.fmt.configPath` and `oxc.lint.configPath` at your configs. Optional: `source.format.oxc` on save.
+- **`bun run lint`** — fix and write; fails on remaining issues (`--deny-warnings` where used).
+- **`bun run lint-check`** — read-only; use in CI / `check` pipelines.
+- **`bun run format`** — oxfmt write; does not remove unused imports.
+
+**VS Code** — extension `oxc.oxc-vscode`, `oxc.typeAware: true`:
+
+```json
+{
+  "oxc.fixKind": "dangerous_fix_or_suggestion",
+  "oxc.typeAware": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "always",
+    "source.fixAllDangerous.oxc": "always"
+  }
+}
+```
+
+- **`oxc.fixKind`** — which fix levels appear in quick-fix / LSP (`dangerous_fix_or_suggestion` matches CLI boldness).
+- **`source.fixAll.oxc`** — safe fixes + suggestions on save.
+- **`source.fixAllDangerous.oxc`** — dangerous fixes on save (pairs with `--fix-dangerously` on CLI).
 
 React Compiler and component conventions: skill `react-dev`.

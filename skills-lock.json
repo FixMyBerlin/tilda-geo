@@ -65,13 +65,13 @@
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/tech-stack/SKILL.md",
-      "computedHash": "9294f068843575cd1144cb5e8bbef211f930aae3bfa127def4ed08280a0b3230"
+      "computedHash": "9a2ae3b4b2bc9641d60d96f21ec9c21743d9b157762ec8768e04eed77b10d726"
     },
     "touch-ipad-review": {
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/touch-ipad-review/SKILL.md",
-      "computedHash": "05cccdb99b1eebaf5a00aadcc9df495e0b89d246ab80c9f4d8ec89834070d385"
+      "computedHash": "89d1764e780ae3e1d1a261ce3cbff8399a959b1b93d38e98359e37a5231ab005"
     },
     "zustand-state-management": {
       "source": "FixMyBerlin/fixmyskills",

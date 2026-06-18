@@ -135,14 +135,14 @@ Prefer Headless UI / Radix for open menus. For custom inline rows, flag hover-on
 
 ## 4b. Full-bleed / full-screen map pages (iOS viewport lock)
 
-A full-page map with **floating** navigation (no normal page scroll) has iOS-specific failure modes that viewport units alone do **not** fix. A correct full-bleed map needs **three** things together: an exact, *measured* height; a non-scrollable document; and safe-area-aware floating chrome.
+A full-page map with **floating** navigation (no normal page scroll) has iOS-specific failure modes that viewport units alone do **not** fix. A correct full-bleed map needs **three** things together: an exact, _measured_ height; a non-scrollable document; and safe-area-aware floating chrome.
 
-| Symptom (device)                                               | Cause                                                                                                                                                     | Fix                                                                                                              |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Gray strip below the map** (iOS Safari)                      | `h-screen` = `100vh` = the **large** viewport (toolbars retracted), taller than the *visible* area → the document overflows                                | Don't use `h-screen`/`100vh`. Lock to a **JS-measured** height (see below); `100dvh` only as a fallback          |
-| **Map grows/shrinks, never matches the viewport** (Chrome/FF iOS) | Chrome & Firefox on iOS never implemented the viewport-inset APIs `svh`/`dvh` need ([WebKit bug 242758]) → `dvh` recalcs against the wrong viewport         | Measure `window.innerHeight` in JS, write it to a `--app-height` CSS var, size the wrapper to `var(--app-height,100dvh)` |
-| **Floating header / URL bar scrolls out of view** (Chrome iOS) | The document is taller than the viewport, so a swipe on empty map chrome scrolls the page and retracts the browser/header                                  | Pin + forbid scroll: `overflow-hidden overscroll-none` on `body`/wrapper                                          |
-| **Buttons under the status bar / notch / home indicator**      | Without `viewport-fit=cover` every `env(safe-area-inset-*)` is `0`; floating chrome then sits in the unsafe area                                           | Add `viewport-fit=cover` to the viewport meta **and** pad floating chrome with `env(safe-area-inset-*)`           |
+| Symptom (device)                                                  | Cause                                                                                                                                               | Fix                                                                                                                      |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Gray strip below the map** (iOS Safari)                         | `h-screen` = `100vh` = the **large** viewport (toolbars retracted), taller than the _visible_ area → the document overflows                         | Don't use `h-screen`/`100vh`. Lock to a **JS-measured** height (see below); `100dvh` only as a fallback                  |
+| **Map grows/shrinks, never matches the viewport** (Chrome/FF iOS) | Chrome & Firefox on iOS never implemented the viewport-inset APIs `svh`/`dvh` need ([WebKit bug 242758]) → `dvh` recalcs against the wrong viewport | Measure `window.innerHeight` in JS, write it to a `--app-height` CSS var, size the wrapper to `var(--app-height,100dvh)` |
+| **Floating header / URL bar scrolls out of view** (Chrome iOS)    | The document is taller than the viewport, so a swipe on empty map chrome scrolls the page and retracts the browser/header                           | Pin + forbid scroll: `overflow-hidden overscroll-none` on `body`/wrapper                                                 |
+| **Buttons under the status bar / notch / home indicator**         | Without `viewport-fit=cover` every `env(safe-area-inset-*)` is `0`; floating chrome then sits in the unsafe area                                    | Add `viewport-fit=cover` to the viewport meta **and** pad floating chrome with `env(safe-area-inset-*)`                  |
 
 [WebKit bug 242758]: https://bugs.webkit.org/show_bug.cgi?id=242758
 
@@ -158,7 +158,8 @@ A full-page map with **floating** navigation (no normal page scroll) has iOS-spe
 ```ts
 // 2. hook: publish the visible height to --app-height (enabled only on full-bleed routes)
 const update = () => root.style.setProperty('--app-height', `${window.innerHeight}px`)
-window.addEventListener('resize', update); window.addEventListener('orientationchange', update)
+window.addEventListener('resize', update)
+window.addEventListener('orientationchange', update)
 window.visualViewport?.addEventListener('resize', update) // trigger only; still read innerHeight
 ```
 

@@ -24,6 +24,7 @@ cp path/to/dependabot.yml.template .github/dependabot.yml
 
 ## Commonly tuned per project
 
+- **`browserslist` stack** — keep `browserslist`, `browserslist-to-esbuild`, and `eslint-plugin-compat` as direct `devDependencies` so weekly Bun PRs refresh `caniuse-lite`; Dependabot does not edit query strings — [browser-target.md](browser-target.md).
 - **`directories`** — single-package apps use `/`. Monorepos list each Bun workspace root (tilda-geo: `/app`, `/processing`).
 - **`groups`** — add patterns for project-specific packages; split or merge groups if PRs become too large or too fragmented.
 - **`ignore`** — tilda-geo pins `nitro` (TanStack Start stack); drop or adjust if your deploy target changes.

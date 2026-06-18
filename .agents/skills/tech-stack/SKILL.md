@@ -2,8 +2,9 @@
 name: tech-stack
 description: >-
   Default FMC tech stack for geo-heavy React SPAs: Bun/Vite, React 19, TanStack,
-  maps, styling, tsconfig templates, and when to pick sibling skills. Use when
-  scaffolding a new app, evaluating libraries, or making stack/architecture
+  maps, styling, tsconfig templates, browserslist client targets, and when to
+  pick sibling skills. Use when scaffolding a new app, evaluating libraries,
+  changing supported browsers or compat lint, or making stack/architecture
   decisions on existing apps.
 ---
 
@@ -56,6 +57,7 @@ Prefer installed skill names when present; otherwise fetch from git.
   - `'typescript/switch-exhaustiveness-check': 'error'`
   - Templates: [examples/oxfmt.config.mjs](examples/oxfmt.config.mjs), [examples/oxlint.config.mjs](examples/oxlint.config.mjs)
   - Setup and per-project tuning: [references/oxc-config.md](references/oxc-config.md)
+- **Client browser target:** `browserslist` in `package.json` drives Vite client `build.target` and `eslint-plugin-compat` in oxlint — [references/browser-target.md](references/browser-target.md)
 
 ## React and TypeScript
 
@@ -91,7 +93,7 @@ Single-config repos (e.g. one root `tsconfig.json` covering app + scripts) are a
 
 Optional root `tsconfig.json` with `"references"` to both child configs.
 
-**ES2025:** `target` and `lib` stay in sync. `lib` adds typings only; new ES2025 **runtime** APIs in client bundles are not auto-polyfilled — use deliberately on the client; fine on server/Bun/scripts.
+**ES2025:** `target` and `lib` stay in sync. `lib` adds typings only; new ES2025 **runtime** APIs in client bundles are not auto-polyfilled — use deliberately on the client; fine on server/Bun/scripts. Which browsers get that client bundle: [references/browser-target.md](references/browser-target.md).
 
 Component typing, Compiler, and oxlint React rules: skill `react-dev`.
 
