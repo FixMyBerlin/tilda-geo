@@ -1,4 +1,3 @@
-import { $ } from 'bun'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 
