@@ -9,7 +9,10 @@ export const HomePageHero = () => {
           Verkehrsplanung modernisiert: Ihre Daten, Ihr Team, eine Plattform
         </h1>
         <p className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-[#5a5a5a] sm:text-lg">
-          TILDA unterstützt Kommunen dabei, ihre Verkehrsinfrastruktur digital abzubilden und aktuell zu halten. Die Plattform vereint Daten, Karten und Teamarbeit an einem Ort, ohne komplexe GIS-Systeme. So werden Planungen transparenter, effizienter und nachvollziehbarer.
+          TILDA unterstützt Kommunen dabei, ihre Verkehrsinfrastruktur digital abzubilden und
+          aktuell zu halten. Die Plattform vereint Daten, Karten und Teamarbeit an einem Ort, ohne
+          komplexe GIS-Systeme. So werden Planungen transparenter, effizienter und
+          nachvollziehbarer.
         </p>
         <div className="mt-8 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
           <Link

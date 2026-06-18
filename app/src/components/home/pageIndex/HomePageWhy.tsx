@@ -27,8 +27,7 @@ const features: Feature[] = [
   {
     badge: 'Kollaborativ',
     title: 'Teamplayer',
-    description:
-      'Kommentieren oder Teilen – alles in einem Browser-Tab. Keine Installation nötig.',
+    description: 'Kommentieren oder Teilen – alles in einem Browser-Tab. Keine Installation nötig.',
     icon: UsersIcon,
   },
   {

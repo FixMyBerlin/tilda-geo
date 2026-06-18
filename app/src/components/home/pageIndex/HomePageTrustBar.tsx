@@ -22,7 +22,10 @@ export const HomePageTrustBar = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p className="text-center text-base text-[#514532] sm:text-lg">
           Bereits über{' '}
-          <span className="font-semibold text-[#7e5700]">15+ Kommunen, Landkreise und Bundesländer</span> nutzen bereits TILDA
+          <span className="font-semibold text-[#7e5700]">
+            15+ Kommunen, Landkreise und Bundesländer
+          </span>{' '}
+          nutzen bereits TILDA
         </p>
       </div>
 

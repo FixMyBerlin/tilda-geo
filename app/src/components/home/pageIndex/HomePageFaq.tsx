@@ -37,7 +37,7 @@ const faqs: Faq[] = [
     answer:
       'Nehmen Sie Kontakt mit dem TILDA-Team auf und schildern Sie Ihr Vorhaben. Auf Basis Ihrer Anforderungen, der Größe des Untersuchungsgebiets und der gewünschten Leistungen erstellen wir ein individuelles Angebot für Ihre Kommune.',
   },
-    {
+  {
     question: 'Können wir unsere bestehenden Daten in TILDA integrieren?',
     answer:
       'Ja. TILDA ist als zentraler Daten-Hub konzipiert und ermöglicht die Einbindung vorhandener kommunaler Datenbestände. Bestehende Geodaten können übernommen, mit den TILDA-Daten verknüpft und für Analysen, Auswertungen und die weitere Planung genutzt werden. Gleichzeitig bleiben die Daten in offenen Formaten exportierbar und können weiterhin in bestehenden Fachverfahren verwendet werden.',
