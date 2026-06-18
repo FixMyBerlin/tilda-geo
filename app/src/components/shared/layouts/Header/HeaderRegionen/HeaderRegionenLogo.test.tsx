@@ -44,4 +44,17 @@ describe('HeaderRegionenLogo', () => {
 
     expect(screen.getByText('Berlin Baumanalyse')).toBeVisible()
   })
+
+  test('renders lock and Deaktiviert label for deactivated region', () => {
+    useLoaderData.mockReturnValue({
+      authorized: true,
+      region: { status: 'DEACTIVATED' },
+    })
+
+    const { container } = render(<HeaderRegionenLogo />)
+
+    expect(screen.getByText('Berlin Baumanalyse')).toBeVisible()
+    expect(screen.getByText('Deaktiviert')).toBeVisible()
+    expect(container.querySelector('[aria-hidden="true"]')).toBeTruthy()
+  })
 })

@@ -1,4 +1,4 @@
-import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline'
+import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { getRouteApi } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
@@ -14,8 +14,8 @@ export const HeaderRegionenLogo = () => {
 
   if (!staticRegion) return null
 
-  const isPrivate = region.status === 'PRIVATE'
   const isDeactivated = region.status === 'DEACTIVATED'
+  const isPrivate = region.status === 'PRIVATE'
   const customLogo = staticRegion.logoPath || staticRegion.externalLogoPath
 
   return (
@@ -49,14 +49,11 @@ export const HeaderRegionenLogo = () => {
             customLogo ? 'text-gray-200' : 'text-yellow-400',
           )}
         >
-          {isPrivate && (
-            <LockClosedIcon className="size-4 shrink-0 text-gray-300" aria-hidden="true" />
-          )}
+          {isPrivate && <RegionStatusPill status="PRIVATE" variant="icon" />}
+          {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="icon" />}
           <span className="md:hidden">{staticRegion.name}</span>
           <span className="hidden md:inline">{staticRegion.fullName}</span>
-          {isDeactivated && (
-            <RegionStatusPill status="DEACTIVATED" className="shrink-0 px-1.5 py-0.5" />
-          )}
+          {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="text" />}
         </div>
         <div className="text-xs text-gray-400">{productName.get(staticRegion.product)}</div>
       </div>

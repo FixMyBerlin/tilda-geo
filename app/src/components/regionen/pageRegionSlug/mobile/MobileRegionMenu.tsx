@@ -1,4 +1,4 @@
-import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline'
+import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
@@ -62,8 +62,8 @@ export const MobileRegionMenu = () => {
   if (!staticRegion) return null
 
   const customLogo = staticRegion.logoPath || staticRegion.externalLogoPath
-  const isPrivate = region.status === 'PRIVATE'
   const isDeactivated = region.status === 'DEACTIVATED'
+  const isPrivate = region.status === 'PRIVATE'
   const primaryNavigation = [...defaultPrimaryNavigation, ...(staticRegion.navigationLinks ?? [])]
 
   return (
@@ -105,13 +105,10 @@ export const MobileRegionMenu = () => {
             <BuildingLibraryIcon className="h-10 w-auto shrink-0 text-yellow-400" />
           )}
           <div className="flex min-w-0 items-center gap-1">
-            {isPrivate && (
-              <LockClosedIcon className="size-4 shrink-0 text-gray-400" aria-hidden="true" />
-            )}
+            {isPrivate && <RegionStatusPill status="PRIVATE" variant="icon" />}
+            {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="icon" />}
             <span className="font-semibold text-gray-900">{staticRegion.fullName}</span>
-            {isDeactivated && (
-              <RegionStatusPill status="DEACTIVATED" className="shrink-0 px-1.5 py-0.5" />
-            )}
+            {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="text" />}
           </div>
         </div>
 
