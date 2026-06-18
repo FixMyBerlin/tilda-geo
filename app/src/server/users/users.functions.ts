@@ -18,11 +18,11 @@ const DeleteUserInput = z.object({ userId: z.string() })
 const GetUserWithMembershipsInput = z.object({ userId: z.string() })
 
 export const deleteUserFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof DeleteUserInput>) => DeleteUserInput.parse(data))
+  .validator((data: z.infer<typeof DeleteUserInput>) => DeleteUserInput.parse(data))
   .handler(async ({ data }) => deleteUser(data, getRequestHeaders()))
 
 export const getUserWithMembershipsFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof GetUserWithMembershipsInput>) =>
+  .validator((data: z.infer<typeof GetUserWithMembershipsInput>) =>
     GetUserWithMembershipsInput.parse(data),
   )
   .handler(async ({ data }) => getUserWithMemberships(data, getRequestHeaders()))
@@ -32,9 +32,9 @@ export const persistOsmUserDescriptionIfPresentFn = createServerFn({ method: 'PO
 )
 
 export const updateOsmDescriptionFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateOsmDescription>) => UpdateOsmDescription.parse(data))
+  .validator((data: z.infer<typeof UpdateOsmDescription>) => UpdateOsmDescription.parse(data))
   .handler(async ({ data }) => updateOsmDescription(data, getRequestHeaders()))
 
 export const updateUserFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateUserSchema>) => UpdateUserSchema.parse(data))
+  .validator((data: z.infer<typeof UpdateUserSchema>) => UpdateUserSchema.parse(data))
   .handler(async ({ data }) => updateUserWithData(data, getRequestHeaders()))

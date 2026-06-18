@@ -57,9 +57,7 @@ export const adminPrivateHookUiItems = [
 }[]
 
 export const triggerPrivateHookAdminFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof TriggerPrivateHookInput>) =>
-    TriggerPrivateHookInput.parse(data),
-  )
+  .validator((data: z.infer<typeof TriggerPrivateHookInput>) => TriggerPrivateHookInput.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin(getRequestHeaders())
     const apiKey = process.env.ATLAS_API_KEY

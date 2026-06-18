@@ -19,7 +19,7 @@ const RegionPageBeforeLoadInput = z.object({
 })
 
 export const getRegionPageBeforeLoadFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof RegionPageBeforeLoadInput>) =>
+  .validator((data: z.infer<typeof RegionPageBeforeLoadInput>) =>
     RegionPageBeforeLoadInput.parse(data),
   )
   .handler(async ({ data }) => {
@@ -51,7 +51,7 @@ const RegionPageLoaderInputSchema = z
   )
 
 export const getRegionPageLoaderFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.input<typeof RegionPageLoaderInputSchema>) =>
+  .validator((data: z.input<typeof RegionPageLoaderInputSchema>) =>
     RegionPageLoaderInputSchema.parse(data),
   )
   .handler(async ({ data }) => {
@@ -87,13 +87,13 @@ export const getProcessingMetadataFn = createServerFn({ method: 'GET' }).handler
 )
 
 export const deleteRegionFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: { slug: string }) => DeleteRegionSchema.parse(data))
+  .validator((data: { slug: string }) => DeleteRegionSchema.parse(data))
   .handler(async ({ data }) => deleteRegion(data, getRequestHeaders()))
 
 export const createRegionFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.input<typeof RegionFormSchema>) => RegionFormSchema.parse(data))
+  .validator((data: z.input<typeof RegionFormSchema>) => RegionFormSchema.parse(data))
   .handler(async ({ data }) => createRegionWithData(data, getRequestHeaders()))
 
 export const updateRegionFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.input<typeof RegionFormSchema>) => RegionFormSchema.parse(data))
+  .validator((data: z.input<typeof RegionFormSchema>) => RegionFormSchema.parse(data))
   .handler(async ({ data }) => updateRegionWithData(data, getRequestHeaders()))

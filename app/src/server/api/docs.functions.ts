@@ -15,7 +15,7 @@ const getRegionForDocsInputSchema = z.object({
 })
 
 export const getRegionForDocsLoaderFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.input<typeof getRegionForDocsInputSchema>) =>
+  .validator((data: z.input<typeof getRegionForDocsInputSchema>) =>
     getRegionForDocsInputSchema.parse(data),
   )
   .handler(async ({ data }) => {

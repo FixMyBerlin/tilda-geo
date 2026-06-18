@@ -36,57 +36,55 @@ const QaAreaInput = z.object({
 const GetQaConfigsForRegionInput = z.object({ regionSlug: z.string() })
 
 export const getQaConfigStatsForAdminFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof QaConfigStatsForAdminInput>) =>
+  .validator((data: z.infer<typeof QaConfigStatsForAdminInput>) =>
     QaConfigStatsForAdminInput.parse(data),
   )
   .handler(async ({ data }) => getQaConfigStatsForAdmin(data, getRequestHeaders()))
 
 export const getQaAreasByStatusFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof QaAreasByStatusInput>) => QaAreasByStatusInput.parse(data))
+  .validator((data: z.infer<typeof QaAreasByStatusInput>) => QaAreasByStatusInput.parse(data))
   .handler(async ({ data }) => getQaAreasByStatus(data, getRequestHeaders()))
 
 export const getQaDataForMapFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof QaDataForMapInput>) => QaDataForMapInput.parse(data))
+  .validator((data: z.infer<typeof QaDataForMapInput>) => QaDataForMapInput.parse(data))
   .handler(async ({ data }) => getQaDataForMap(data, getRequestHeaders()))
 
 export const getQaUsersForConfigFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof QaUsersForConfigInput>) =>
-    QaUsersForConfigInput.parse(data),
-  )
+  .validator((data: z.infer<typeof QaUsersForConfigInput>) => QaUsersForConfigInput.parse(data))
   .handler(async ({ data }) => getQaUsersForConfig(data, getRequestHeaders()))
 
 export const getQaEvaluationsForAreaFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof QaAreaInput>) => QaAreaInput.parse(data))
+  .validator((data: z.infer<typeof QaAreaInput>) => QaAreaInput.parse(data))
   .handler(async ({ data }) => getQaEvaluationsForArea(data, getRequestHeaders()))
 
 export const getQaDecisionDataForAreaFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof QaAreaInput>) => QaAreaInput.parse(data))
+  .validator((data: z.infer<typeof QaAreaInput>) => QaAreaInput.parse(data))
   .handler(async ({ data }) => getQaDecisionDataForArea(data, getRequestHeaders()))
 
 export const getQaConfigsForRegionFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof GetQaConfigsForRegionInput>) =>
+  .validator((data: z.infer<typeof GetQaConfigsForRegionInput>) =>
     GetQaConfigsForRegionInput.parse(data),
   )
   .handler(async ({ data }) => getQaConfigsForRegion(data, getRequestHeaders()))
 
 export const createQaEvaluationFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateQaEvaluationSchema>) =>
+  .validator((data: z.infer<typeof CreateQaEvaluationSchema>) =>
     CreateQaEvaluationSchema.parse(data),
   )
   .handler(async ({ data }) => createQaEvaluation(data, getRequestHeaders()))
 
 export const createQaConfigFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateQaConfigFormSchema>) =>
+  .validator((data: z.infer<typeof CreateQaConfigFormSchema>) =>
     CreateQaConfigFormSchema.parse(data),
   )
   .handler(async ({ data }) => createQaConfigWithData(data, getRequestHeaders()))
 
 export const updateQaConfigFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateQaConfigFormSchema>) =>
+  .validator((data: z.infer<typeof UpdateQaConfigFormSchema>) =>
     UpdateQaConfigFormSchema.parse(data),
   )
   .handler(async ({ data }) => updateQaConfigWithData(data, getRequestHeaders()))
 
 export const deleteQaConfigFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof DeleteQaConfigSchema>) => DeleteQaConfigSchema.parse(data))
+  .validator((data: z.infer<typeof DeleteQaConfigSchema>) => DeleteQaConfigSchema.parse(data))
   .handler(async ({ data }) => deleteQaConfig(data, getRequestHeaders()))

@@ -10,7 +10,7 @@ const CreateOsmNoteInput = z.object({
 })
 
 export const createOsmNoteFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateOsmNoteInput>) => CreateOsmNoteInput.parse(data))
+  .validator((data: z.infer<typeof CreateOsmNoteInput>) => CreateOsmNoteInput.parse(data))
   .handler(async ({ data }) => createOsmNote(data))
 
 export const getOsmUserDetailsFn = createServerFn({ method: 'GET' }).handler(async () =>

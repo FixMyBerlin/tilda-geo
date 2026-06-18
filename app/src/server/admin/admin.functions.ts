@@ -21,7 +21,7 @@ export const getAdminRegionsLoaderFn = createServerFn({ method: 'GET' }).handler
 const AdminRegionEditInput = z.object({ regionSlug: z.string() })
 
 export const getAdminRegionEditLoaderFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof AdminRegionEditInput>) => AdminRegionEditInput.parse(data))
+  .validator((data: z.infer<typeof AdminRegionEditInput>) => AdminRegionEditInput.parse(data))
   .handler(async ({ data }) => {
     const [region, users] = await Promise.all([
       getRegion({ slug: data.regionSlug }),
@@ -38,9 +38,7 @@ export const getAdminUploadsLoaderFn = createServerFn({ method: 'GET' }).handler
 const AdminUploadLoaderInput = z.object({ slug: z.string() })
 
 export const getAdminUploadLoaderFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof AdminUploadLoaderInput>) =>
-    AdminUploadLoaderInput.parse(data),
-  )
+  .validator((data: z.infer<typeof AdminUploadLoaderInput>) => AdminUploadLoaderInput.parse(data))
   .handler(async ({ data }) => {
     const upload = await getUploadWithRegions({ slug: data.slug }, getRequestHeaders())
     return { upload }
@@ -49,9 +47,7 @@ export const getAdminUploadLoaderFn = createServerFn({ method: 'GET' })
 const AdminQaConfigEditInput = z.object({ id: z.number() })
 
 export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof AdminQaConfigEditInput>) =>
-    AdminQaConfigEditInput.parse(data),
-  )
+  .validator((data: z.infer<typeof AdminQaConfigEditInput>) => AdminQaConfigEditInput.parse(data))
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     const [qaConfig, regions] = await Promise.all([
@@ -83,7 +79,7 @@ export const getAdminQaConfigsLoaderFn = createServerFn({ method: 'GET' }).handl
 const AdminMembershipsLoaderInput = z.object({ take: z.number().optional() })
 
 export const getAdminMembershipsLoaderFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof AdminMembershipsLoaderInput>) =>
+  .validator((data: z.infer<typeof AdminMembershipsLoaderInput>) =>
     AdminMembershipsLoaderInput.parse(data),
   )
   .handler(async ({ data }) => {
