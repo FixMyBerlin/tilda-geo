@@ -5,6 +5,7 @@
   "prettier.enable": false,
   "oxc.fmt.configPath": "app/oxfmt.config.mjs",
   "oxc.lint.configPath": "app/oxlint.config.mjs",
+  "oxc.fixKind": "dangerous_fix_or_suggestion",
   "oxc.typeAware": true,
   "oxc.path.oxfmt": "${workspaceFolder}/app/node_modules/.bin/oxfmt",
   "oxc.path.oxlint": "${workspaceFolder}/app/node_modules/.bin/oxlint",
@@ -12,7 +13,8 @@
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.format.oxc": "always",
-    "source.fixAll.oxc": "always"
+    "source.fixAll.oxc": "always",
+    "source.fixAllDangerous.oxc": "always"
   },
   "typescript.referencesCodeLens.enabled": true,
   "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
