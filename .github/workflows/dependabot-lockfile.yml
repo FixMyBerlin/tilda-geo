@@ -1,0 +1,49 @@
+name: Sync Dependabot bun.lock
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  sync-bun-lockfile:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Update app bun.lock
+        if: hashFiles('app/package.json') != ''
+        working-directory: app
+        run: bun install
+
+      - name: Update processing bun.lock
+        if: hashFiles('processing/package.json') != ''
+        working-directory: processing
+        run: bun install
+
+      - name: Commit bun.lock changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          [[ -f app/bun.lock ]] && git add app/bun.lock
+          [[ -f processing/bun.lock ]] && git add processing/bun.lock
+
+          if git diff --staged --quiet; then
+            echo "bun.lock already in sync"
+            exit 0
+          fi
+
+          git commit -m "chore(deps): sync bun.lock with package.json"
+          git push
