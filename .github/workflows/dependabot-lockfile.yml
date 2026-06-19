@@ -22,15 +22,17 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
+      # Shorter than app/bunfig.toml (5 days) so lockfile sync can keep up with Dependabot.
+      # We hope Dependabot's own cooldown and review only surface sensible, safe bumps.
       - name: Update app bun.lock
         if: hashFiles('app/package.json') != ''
         working-directory: app
-        run: bun install
+        run: bun install --minimum-release-age 172800
 
       - name: Update processing bun.lock
         if: hashFiles('processing/package.json') != ''
         working-directory: processing
-        run: bun install
+        run: bun install --minimum-release-age 172800
 
       - name: Commit bun.lock changes
         run: |
