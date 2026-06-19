@@ -1,8 +1,11 @@
+import { join } from 'node:path'
+
 export type RunningDevStack = {
   /** `default` = develop stack (`db` / `tiles` on 5432 / 3000). */
   stackId: string
   databasePort: number
   tilesPort: number
+  composeProject?: string
   repoRoot?: string
 }
 
@@ -22,16 +25,24 @@ async function publishedHostPort(container: string, containerPort: string) {
   return match ? Number(match[1]) : undefined
 }
 
-async function composeWorkingDir(container: string) {
+async function composeLabel(container: string, label: string) {
   const { out, exitCode } = await dockerText([
     'docker',
     'inspect',
     '--format',
-    '{{index .Config.Labels "com.docker.compose.project.working_dir"}}',
+    `{{index .Config.Labels "${label}"}}`,
     container,
   ])
   if (exitCode !== 0 || !out) return undefined
   return out
+}
+
+async function composeWorkingDir(container: string) {
+  return composeLabel(container, 'com.docker.compose.project.working_dir')
+}
+
+async function composeProject(container: string) {
+  return composeLabel(container, 'com.docker.compose.project')
 }
 
 async function isPostgisDbContainer(container: string) {
@@ -49,6 +60,10 @@ function stackIdFromDbContainer(name: string) {
   if (name === 'db') return DEVELOP_STACK_ID
   if (name.endsWith('_db')) return name.slice(0, -'_db'.length)
   return undefined
+}
+
+function dbContainerForStack(stackId: string) {
+  return stackId === DEVELOP_STACK_ID ? 'db' : `${stackId}_db`
 }
 
 function tilesContainerForStack(stackId: string) {
@@ -86,6 +101,7 @@ export async function listRunningDevStacks() {
       stackId,
       databasePort,
       tilesPort,
+      composeProject: await composeProject(name),
       repoRoot: await composeWorkingDir(name),
     })
   }
@@ -107,4 +123,46 @@ export async function resolveRunningAttachStack(stackId: string) {
 /** Stack id used for container names / compose -p (`default` → develop defaults). */
 export function attachStackIdForDocker(stackId: string) {
   return stackId === DEVELOP_STACK_ID ? '' : stackId
+}
+
+/** Stop db+tiles for one discovered stack. */
+export async function stopDevStack(stack: RunningDevStack) {
+  if (stack.repoRoot && stack.composeProject) {
+    const proc = Bun.spawn(
+      [
+        'docker',
+        'compose',
+        '-p',
+        stack.composeProject,
+        '-f',
+        join(stack.repoRoot, 'docker-compose.yml'),
+        '-f',
+        join(stack.repoRoot, 'docker-compose.override.yml'),
+        'stop',
+        'db',
+        'tiles',
+      ],
+      { cwd: stack.repoRoot, stdout: 'pipe', stderr: 'pipe' },
+    )
+    await proc.exited
+    if (proc.exitCode === 0) return
+  }
+
+  const dbName = dbContainerForStack(stack.stackId)
+  const tilesName = tilesContainerForStack(stack.stackId)
+  await dockerText(['docker', 'stop', dbName, tilesName])
+}
+
+/** Stop every running dev stack except the one this checkout uses. */
+export async function stopOtherRunningDevStacks(activeStackId: string) {
+  const stacks = await listRunningDevStacks()
+  const stopped: RunningDevStack[] = []
+
+  for (const stack of stacks) {
+    if (stack.stackId === activeStackId) continue
+    await stopDevStack(stack)
+    stopped.push(stack)
+  }
+
+  return stopped
 }

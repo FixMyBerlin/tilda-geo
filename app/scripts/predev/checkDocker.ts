@@ -1,6 +1,8 @@
 import { join } from 'node:path'
+import { stopOtherRunningDevStacks } from './devStackDiscovery'
 import { isHostPortAvailable, publishedHostPorts } from './devStackPorts'
 import {
+  activeStackIdFromEnv,
   composeContainerPrefixFromEnv,
   devStackIdFromEnv,
   getStackPortsFromEnv,
@@ -8,7 +10,7 @@ import {
   stackPortsArePublished,
 } from './ensureDevStack'
 import { repoRootFromApp } from './ensureEnv'
-import { logErr, logOk } from './predevLog'
+import { logErr, logOk, logWarn } from './predevLog'
 
 const label = 'check_docker'
 
@@ -16,6 +18,13 @@ export async function checkDocker() {
   try {
     const { dbPort, tilesPort } = getStackPortsFromEnv()
     const attach = isAttachMode()
+    const activeStackId = activeStackIdFromEnv()
+
+    const stopped = await stopOtherRunningDevStacks(activeStackId)
+    if (stopped.length > 0) {
+      const names = stopped.map((s) => s.stackId).join(', ')
+      logWarn('check_docker', `Stopped other dev stacks: ${names}`)
+    }
 
     if (attach) {
       const ready = await stackPortsArePublished()

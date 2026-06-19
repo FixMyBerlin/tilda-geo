@@ -134,6 +134,13 @@ export function dockerStackIdFromEnv() {
   return devStackIdFromEnv()
 }
 
+/** Stack id for discovery/stop logic (`default` on develop/main). */
+export function activeStackIdFromEnv() {
+  const attach = process.env.DEV_ATTACH_STACK?.trim()
+  if (attach) return attach
+  return devStackIdFromEnv() ?? 'default'
+}
+
 /** Runtime-only prefix for `docker-compose.override.yml` container names. */
 export function composeContainerPrefixFromEnv() {
   return composeContainerPrefixFromStackId(dockerStackIdFromEnv() ?? '')

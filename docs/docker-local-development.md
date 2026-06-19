@@ -42,7 +42,7 @@ Do not hand-craft `docker compose` for db/tiles. For processing, use `bun run pr
 | `.env.local`     | Auto-generated on **non-`develop`/`main`** branches in a **linked worktree**. Gitignored.     |
 | `DEV_STACK_ID`   | `wt_<folder_basename>` — compose project and container prefix (`wt_foo_db`).                  |
 | Container prefix | Runtime-only (`COMPOSE_DEV_CONTAINER_PREFIX`); derived by predev, not stored in `.env.local`. |
-| App server       | One `bun run dev` at a time (port **5173**, OSM OAuth). Multiple Docker stacks OK.            |
+| App server       | One `bun run dev` at a time (port **5173**, OSM OAuth). One Docker db+tiles stack at a time.  |
 | Compose project  | Predev passes `docker compose -p <DEV_STACK_ID>`. Do not set `COMPOSE_PROJECT_NAME` in YAML.  |
 
 Branch switches: `post-checkout` hook + predev remove stale `.env.local`. On `develop`/`main`, `.env.local` is deleted.
@@ -62,15 +62,15 @@ DEV_STACK_ID=wt_tilda_geo_feature
 
 ## Implementation
 
-| File                                      | Role                                   |
-| ----------------------------------------- | -------------------------------------- |
-| `app/scripts/setup-worktree.ts`           | Create worktree + copy `.env`          |
-| `app/scripts/predev/ensureDevStack.ts`    | `.env.local`, attach, worktree warning |
-| `app/scripts/predev/envLocalBranch.ts`    | Branch sync, linked-worktree detection |
-| `app/scripts/predev/devStackDiscovery.ts` | List running stacks from Docker        |
-| `app/scripts/predev/checkDocker.ts`       | `compose -p`, start db+tiles           |
-| `app/scripts/predev/syncEnvLocal.ts`      | post-checkout entry                    |
-| `app/.husky/post-checkout`                | Sync `.env.local` on branch switch     |
+| File                                      | Role                                            |
+| ----------------------------------------- | ----------------------------------------------- |
+| `app/scripts/setup-worktree.ts`           | Create worktree + copy `.env`                   |
+| `app/scripts/predev/ensureDevStack.ts`    | `.env.local`, attach, worktree warning          |
+| `app/scripts/predev/envLocalBranch.ts`    | Branch sync, linked-worktree detection          |
+| `app/scripts/predev/devStackDiscovery.ts` | List running stacks from Docker                 |
+| `app/scripts/predev/checkDocker.ts`       | Stop other stacks, `compose -p`, start db+tiles |
+| `app/scripts/predev/syncEnvLocal.ts`      | post-checkout entry                             |
+| `app/.husky/post-checkout`                | Sync `.env.local` on branch switch              |
 
 Predev chain: `ensureEnv` → `ensureDevStack` → `checkDocker` → …
 
