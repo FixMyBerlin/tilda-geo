@@ -62,7 +62,8 @@ Prefer installed skill names when present; otherwise fetch from git.
 ## React and TypeScript
 
 - **UI:** React 19
-- **TypeScript:** latest **Go** implementation (`@typescript/native-preview` / `tsgo`) — not legacy `tsc`. Typecheck with `tsgo --noEmit`.
+- **TypeScript:** Go-native **7.x** (`typescript@7.0.1-rc`, binary `tsc`). Typecheck with `tsc --noEmit`.
+- **Bun + TS 7:** add `typescript` and `@typescript/typescript-*` platform packages to `minimumReleaseAgeExcludes` while on RC. Bun may not hoist optional platform binaries — list `@typescript/typescript-darwin-arm64` and `@typescript/typescript-linux-x64` under `optionalDependencies` (extend for other CI/dev platforms as needed).
 - **React Compiler:** on by default — see skill `react-dev` for memoization and typing conventions
 - **GeoJSON:** `@types/geojson` for all GeoJSON payloads
 - **Dates / times:** `@date-fns/tz`
@@ -86,7 +87,7 @@ Copy and adapt on scaffold. Adjust `paths` to project layout (`./src/*` vs `./*`
 **Typecheck:**
 
 ```bash
-tsgo --noEmit -p tsconfig.app.json && tsgo --noEmit -p tsconfig.scripts.json
+tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.scripts.json
 ```
 
 Single-config repos (e.g. one root `tsconfig.json` covering app + scripts) are acceptable; greenfield TanStack Start apps should prefer split configs.

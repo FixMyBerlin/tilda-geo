@@ -4,7 +4,7 @@
   //   verbatimModuleSyntax: true  — TanStack Start client/server split: type-only imports can become
   //     empty runtime imports and leak server code into client bundles
   //   module: "preserve"            — total-typescript bundler default; TanStack Start recommends ESNext
-  //   noUnusedLocals / noUnusedParameters — delegated to oxlint; avoid duplicate signal with tsgo
+  //   noUnusedLocals / noUnusedParameters — delegated to oxlint; avoid duplicate signal with tsc
   // Never install or extend @total-typescript/tsconfig — keep settings inlined with these comments.
   "include": ["**/*.ts", "**/*.tsx", "vite.config.ts"],
   "exclude": ["node_modules", "**/*.e2e.ts", ".output", "dist", "scripts"],
