@@ -16,7 +16,10 @@ import { buildMasterportalMap } from './masterportal'
 import { inputRoot, outputRoot } from './paths'
 import type { CompiledTopicDoc, InspectorDescriptions } from './types'
 
-const sortStringRecordByKey = (map: Record<string, string>) =>
+// These outputs are committed to git, so they must be byte-stable. Sort every emitted record by
+// key — `readdir()` order is runtime/filesystem-dependent (e.g. macOS dev vs CI Linux, and it
+// differed between Bun and Node), which would otherwise reorder the generated files spuriously.
+const sortRecordByKey = <T>(map: Record<string, T>): Record<string, T> =>
   Object.fromEntries(Object.entries(map).sort(([a], [b]) => a.localeCompare(b, 'en')))
 
 const writeTsModule = async ({
@@ -105,28 +108,27 @@ export const main = async () => {
   await rm(outputRoot, { recursive: true, force: true })
   await mkdir(outputRoot, { recursive: true })
 
-  const sortedInspectorTranslations = sortStringRecordByKey(inspectorTranslations)
   await writeTsModule({
     filePath: path.resolve(outputRoot, 'byTableName.gen.ts'),
-    data: byTableName,
+    data: sortRecordByKey(byTableName),
     typeImport: "import type { TopicDocCompiled } from '../../topicDocs/runtime'",
     satisfiesType: 'Partial<Record<string, TopicDocCompiled>>',
   })
   await writeTsModule({
     filePath: path.resolve(outputRoot, 'masterportalByTableName.gen.ts'),
-    data: masterportalByTableName,
+    data: sortRecordByKey(masterportalByTableName),
     typeImport:
       "import type { TopicDocMasterportalGfiConfig } from '../../topicDocs/masterportalGfi.types'",
     satisfiesType: 'Partial<Record<string, TopicDocMasterportalGfiConfig>>',
   })
   await writeTsModule({
     filePath: path.resolve(outputRoot, 'inspectorTranslations.gen.ts'),
-    data: sortedInspectorTranslations,
+    data: sortRecordByKey(inspectorTranslations),
     satisfiesType: 'Record<string, string>',
   })
   await writeTsModule({
     filePath: path.resolve(outputRoot, 'inspectorDescriptions.gen.ts'),
-    data: inspectorDescriptions,
+    data: sortRecordByKey(inspectorDescriptions),
     satisfiesType:
       'Record<string, { keys: Record<string, string>; values: Record<string, Record<string, string>> }>',
   })
