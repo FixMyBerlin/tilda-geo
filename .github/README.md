@@ -36,7 +36,7 @@
 ## Source mapping (generated)
 
 <!-- GENERATED_ENV_TABLE_START -->
-<!-- This block is GENERATED. Edit .github/env/deploy.manifest.json and run `bun .github/scripts/generate-github-readme.ts`. -->
+<!-- This block is GENERATED. Edit .github/env/deploy.manifest.json and run `nub .github/scripts/generate-github-readme.ts`. -->
 
 | Name                                   | Source                                         | Required | Description                                                     |
 | -------------------------------------- | ---------------------------------------------- | -------- | --------------------------------------------------------------- |
