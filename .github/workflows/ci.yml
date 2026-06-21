@@ -20,7 +20,7 @@ jobs:
         with:
           fail-on-severity: high
           comment-summary-in-pr: true
-          deny-licenses: AGPL-1.0, GPL-1.0, GPL-2.0
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, 0BSD, Unlicense, CC0-1.0
 
   validate-env-contract:
     name: Validate Env Contract
