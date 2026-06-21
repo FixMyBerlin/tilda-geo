@@ -42,7 +42,7 @@
     "seed": "bun run predev && bun --env-file=../.env --env-file=../.env.local prisma migrate reset --force && bun --env-file=../.env --env-file=../.env.local prisma db seed",
     "seed-full": "bun run seed && bun run static-datasets-update -- --env=dev",
     "check": "bun run --parallel type-check lint format test-run",
-    "type-check": "tsgo --noEmit",
+    "type-check": "tsc --noEmit",
     "type-check-deploy": "sh -c 'bun run static-datasets-unlink && bun run type-check; EXIT_CODE=$?; bun run static-datasets-link; exit $EXIT_CODE'",
     "lint": "bun run --parallel lint:*",
     "lint:main": "oxlint --fix --fix-dangerously --deny-warnings -c oxlint.config.mjs .",
@@ -184,7 +184,6 @@
     "@types/react-dom": "19.2.3",
     "@types/spritesmith": "3.4.5",
     "@types/web": "0.0.350",
-    "@typescript/native-preview": "7.0.0-dev.20260603.1",
     "@vitejs/plugin-react": "6.0.2",
     "babel-plugin-react-compiler": "1.0.0",
     "browserslist": "^4.24.0",
@@ -211,9 +210,13 @@
     "sharp": "0.34.5",
     "spritesmith": "3.5.1",
     "tailwindcss": "4.3.0",
-    "typescript": "npm:@typescript/typescript6@^6.0.0",
+    "typescript": "7.0.1-rc",
     "vite": "^8.0.16",
     "vitest": "4.1.8"
+  },
+  "optionalDependencies": {
+    "@typescript/typescript-darwin-arm64": "7.0.1-rc",
+    "@typescript/typescript-linux-x64": "7.0.1-rc"
   },
   "browserslist": [
     "> 1%",

@@ -38,6 +38,7 @@ updates:
           - 'husky*'
           - '@types/*'
           - 'typescript'
+          - '@typescript/typescript-*'
           - 'eslint*'
 
       shared-monorepo-tools:
@@ -69,6 +70,7 @@ updates:
           - 'vite'
           - '@types/*'
           - 'typescript'
+          - '@typescript/typescript-*'
           - 'dotenv'
         update-types:
           - minor
