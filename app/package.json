@@ -41,7 +41,7 @@
     "migrate-compare": "git diff origin/main... -- prisma/migrations",
     "seed": "nub run predev && dotenv -e ../.env -e ../.env.local -- nubx prisma migrate reset --force && dotenv -e ../.env -e ../.env.local -- nubx prisma db seed",
     "seed-full": "nub run seed && nub run static-datasets-update -- --env=dev",
-    "check": "run-p type-check lint format test-run",
+    "check": "run-p --max-parallel 2 type-check lint format test-run",
     "type-check": "tsc --noEmit",
     "type-check-deploy": "sh -c 'nub run static-datasets-unlink && nub run type-check; EXIT_CODE=$?; nub run static-datasets-link; exit $EXIT_CODE'",
     "lint": "run-p \"lint:*\"",
