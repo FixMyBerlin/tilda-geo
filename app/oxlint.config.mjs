@@ -7,7 +7,7 @@ export default defineConfig({
   ignorePatterns: [
     // Agent skills/reference docs — not application source
     '../.agents/**',
-    // TanStack Router codegen; overwritten by `bun run codegen` (see tilda-geo/app)
+    // TanStack Router codegen; overwritten by `nub run codegen` (see tilda-geo/app)
     'src/routeTree.gen.ts',
     // Vite/Nitro production build output
     '.output/**',

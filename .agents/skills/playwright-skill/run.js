@@ -1,11 +1,11 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Universal Playwright Executor for Claude Code
  *
  * Executes Playwright automation code from:
- * - File path: bun run.js script.js
- * - Inline code: bun run.js 'await page.goto("...")'
- * - Stdin: cat script.js | bun run.js
+ * - File path: node run.js script.js
+ * - Inline code: node run.js 'await page.goto("...")'
+ * - Stdin: cat script.js | node run.js
  *
  * Ensures proper module resolution by running from skill directory.
  */
@@ -74,9 +74,9 @@ function getCodeToExecute() {
   // No input
   console.error('❌ No code to execute')
   console.error('Usage:')
-  console.error('  bun run.js script.js          # Execute file')
-  console.error('  bun run.js "code here"        # Execute inline')
-  console.error('  cat script.js | bun run.js    # Execute from stdin')
+  console.error('  node run.js script.js          # Execute file')
+  console.error('  node run.js "code here"        # Execute inline')
+  console.error('  cat script.js | node run.js    # Execute from stdin')
   process.exit(1)
 }
 

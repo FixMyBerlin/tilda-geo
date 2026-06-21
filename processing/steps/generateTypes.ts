@@ -1,11 +1,12 @@
 import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { $ } from 'bun'
 import { TYPES_DIR } from '../constants/directories.const'
 import { topicsConfig } from '../constants/topics.const'
 import { getTopicTables } from '../diffing/diffing'
 import { params } from '../utils/parameters'
+import { $ } from '../utils/sh'
 
 /**
  * Generate types based on the processing tables.
@@ -46,7 +47,8 @@ async function writeTableIdTypes() {
     }`,
   )
 
-  await Bun.write(typeFile, content)
+  await mkdir(dirname(typeFile), { recursive: true })
+  await writeFile(typeFile, content)
 }
 
 async function callLuaForNames(luaFilename: 'extract_bikelane_todos' | 'extract_road_todos') {
@@ -80,7 +82,6 @@ function sortMapillarySpecial(a: string, b: string) {
 
 async function writeTodoIdTypes() {
   const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
-  const typeFile = Bun.file(typeFilePath)
 
   const bikelaneTodoNames = await callLuaForNames('extract_bikelane_todos')
   const bikelaneTodos = bikelaneTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
@@ -135,7 +136,8 @@ async function writeTodoIdTypes() {
   `
 
   const content = prefixGeneratedFiles(fileContent)
-  await Bun.write(typeFile, content)
+  await mkdir(dirname(typeFilePath), { recursive: true })
+  await writeFile(typeFilePath, content)
 }
 
 function prefixGeneratedFiles(content: string) {
@@ -161,7 +163,7 @@ function resolveOxfmtConfigPath() {
 async function autoformatTypeFiles() {
   try {
     const oxfmtConfig = resolveOxfmtConfigPath()
-    await $`bunx oxfmt --write -c ${oxfmtConfig} ${TYPES_DIR}`
+    await $`nubx oxfmt --write -c ${oxfmtConfig} ${TYPES_DIR}`
   } catch (error) {
     throw new Error(`Failed to run oxfmt on auto generated types: ${error}`)
   }

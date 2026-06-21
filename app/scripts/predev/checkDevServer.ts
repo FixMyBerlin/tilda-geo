@@ -28,10 +28,10 @@ export async function checkDevServer() {
   }
 
   note(
-    `Only one dev server can run at a time (OSM auth requires ${process.env.VITE_APP_ORIGIN ?? `http://${DEV_HOST}:${DEV_PORT}`}).\n\nStop the other \`bun run dev\` — check other Cursor windows or worktrees.`,
+    `Only one dev server can run at a time (OSM auth requires ${process.env.VITE_APP_ORIGIN ?? `http://${DEV_HOST}:${DEV_PORT}`}).\n\nStop the other \`nub run dev\` — check other Cursor windows or worktrees.`,
     'Port already in use',
   )
-  logErr(label, `port ${DEV_PORT} already in use (another bun run dev?). Stop it first.`)
+  logErr(label, `port ${DEV_PORT} already in use (another nub run dev?). Stop it first.`)
   process.exit(1)
 }
 

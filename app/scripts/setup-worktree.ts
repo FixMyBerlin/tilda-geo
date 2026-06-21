@@ -1,7 +1,7 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import { copyFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 
 const DOC = 'docs/docker-local-development.md'
 const SKIP_DIRS = new Set(['.git', 'node_modules'])
@@ -11,10 +11,10 @@ function usage() {
   console.log(`setup-worktree — create a git worktree for feature development
 
 Usage (from app/):
-  bun run setup-worktree -- <branch> [--dir <folder-postfix>]
+  nub run setup-worktree -- <branch> [--dir <folder-postfix>]
 
 Creates ../tilda-geo-<postfix> with the branch, copies .env files, runs husky prepare.
-Then: cd <printed-path>/app && bun run dev
+Then: cd <printed-path>/app && nub run dev
 
 See ${DOC}
 `)
@@ -112,15 +112,15 @@ if (existsSync(huskyDir)) {
   if (chmodResult.exitCode !== 0) console.warn('Could not chmod app/.husky')
 }
 
-const prepareResult = await $`bun run prepare`.cwd(join(targetDir, 'app')).quiet().nothrow()
+const prepareResult = await $`nub run prepare`.cwd(join(targetDir, 'app')).quiet().nothrow()
 if (prepareResult.exitCode !== 0) {
-  console.warn('bun run prepare failed — run it manually in the new worktree if hooks are needed')
+  console.warn('nub run prepare failed — run it manually in the new worktree if hooks are needed')
 }
 
 const appDir = join(targetDir, 'app')
 console.log('')
 console.log('Worktree ready.')
 console.log(`  cd ${appDir}`)
-console.log('  bun run dev')
+console.log('  nub run dev')
 console.log('')
 console.log(`Docs: ${DOC}`)

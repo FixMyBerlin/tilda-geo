@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import { spawn } from '@/scripts/lib/bun'
 import { stopOtherRunningDevStacks } from './devStackDiscovery'
 import { isHostPortAvailable, publishedHostPorts } from './devStackPorts'
 import {
@@ -75,7 +76,7 @@ export async function checkDocker() {
     const repoRoot = repoRootFromApp()
     const stackId = devStackIdFromEnv()
     const containerPrefix = composeContainerPrefixFromEnv()
-    const proc = Bun.spawn(
+    const proc = spawn(
       [
         'docker',
         'compose',

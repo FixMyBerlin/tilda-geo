@@ -3,7 +3,7 @@
 import type { EnvFullSchema, EnvVite } from './server/envSchema'
 
 declare global {
-  /** Augment Bun's ImportMetaEnv (index signature) with our required VITE_* keys from schema */
+  /** Augment Vite's ImportMetaEnv (index signature) with our required VITE_* keys from schema */
   interface ImportMetaEnv extends EnvVite {}
 
   interface ImportMeta {
@@ -11,8 +11,8 @@ declare global {
   }
 
   /**
-   * Server-only env (Node/Bun); VITE_* are also in process.env when running server.
-   * Note: bun-types can still infer process.env.* as string | undefined (Bun #18594).
+   * Server-only env (Node); VITE_* are also in process.env when running server.
+   * Note: @types/node infers process.env.* as string | undefined.
    * At call sites, guard then use, or use `as string` after a runtime check.
    */
   namespace NodeJS {

@@ -1,6 +1,7 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import { mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
+import { write } from '@/scripts/lib/bun'
 import { compileAttributesForDoc } from './attributeResolution'
 import { compileChapters } from './chapters'
 import { addInspectorTranslationsForSource } from './inspector'
@@ -34,7 +35,7 @@ const writeTsModule = async ({
   const satisfiesClause = satisfiesType ? ` satisfies ${satisfiesType}` : ''
   const content = `${importLine}const data = ${JSON.stringify(data, null, 2)} as const${satisfiesClause}\n\nexport default data\n`
   await mkdir(path.dirname(filePath), { recursive: true })
-  await Bun.write(filePath, content)
+  await write(filePath, content)
 }
 
 export const main = async () => {

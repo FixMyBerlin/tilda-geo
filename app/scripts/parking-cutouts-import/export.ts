@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 import { POSTGRES_CLI_IMAGE } from '../db-pull/db-helpers'
 import { SCHEMA } from './args'
 import { getDockerDatabaseUrl } from './db'

@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import { readdir } from 'node:fs/promises'
 import path from 'node:path'
+import { YAML } from '@/scripts/lib/bun'
 import { topicDocsChapterFrontMatterSchema } from '../../src/data/topicDocs/schema'
 import { readText } from './io'
 import type { CompiledChapter } from './types'
@@ -30,7 +31,7 @@ const splitChapterMarkdown = (raw: string, chapterPath: string) => {
   if (yamlBlock === undefined) {
     throw new Error(`Malformed chapter front matter in ${chapterPath}`)
   }
-  const parsed = Bun.YAML.parse(yamlBlock) as unknown
+  const parsed = YAML.parse(yamlBlock) as unknown
   const frontMatter = topicDocsChapterFrontMatterSchema.safeParse(parsed)
   if (!frontMatter.success) {
     throw new Error(`Invalid chapter front matter in ${chapterPath}: ${frontMatter.error.message}`)

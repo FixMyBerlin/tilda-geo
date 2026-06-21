@@ -1,11 +1,11 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import { watch } from 'node:fs'
 import path from 'node:path'
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 import { main } from './index'
 import { inputRoot } from './paths'
 
-const appDir = path.resolve(import.meta.dir, '../..')
+const appDir = path.resolve(import.meta.dirname, '../..')
 const debounceMs = 400
 
 let debounceTimer: ReturnType<typeof setTimeout> | undefined
@@ -13,7 +13,7 @@ let running = false
 let pending = false
 
 const formatGenerated = async () => {
-  const out = await $`bun run topic-docs-build:2format`.cwd(appDir).nothrow()
+  const out = await $`nub run topic-docs-build:2format`.cwd(appDir).nothrow()
   if (out.exitCode !== 0) process.exit(out.exitCode ?? 1)
 }
 

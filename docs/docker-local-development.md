@@ -7,7 +7,7 @@ Single reference for local Postgres, tiles, worktrees, and predev. Humans and ag
 ### Daily work on `develop` or `main` (main checkout)
 
 ```bash
-cd app && bun run dev
+cd app && nub run dev
 ```
 
 No `.env.local`. Default ports `5432` / `3000`, containers `db` / `tiles`.
@@ -17,22 +17,22 @@ No `.env.local`. Default ports `5432` / `3000`, containers `db` / `tiles`.
 From `app/` in any checkout:
 
 ```bash
-bun run setup-worktree -- feature/my-branch
+nub run setup-worktree -- feature/my-branch
 cd ../tilda-geo-feature-my-branch/app   # path printed by script
-bun run dev
+nub run dev
 ```
 
-`setup-worktree` creates `../tilda-geo-<name>`, copies `.env` (not `.env.local`), runs husky prepare. First `bun run dev` creates `.env.local` and starts an isolated Docker stack.
+`setup-worktree` creates `../tilda-geo-<name>`, copies `.env` (not `.env.local`), runs husky prepare. First `nub run dev` creates `.env.local` and starts an isolated Docker stack.
 
-If you run `bun run dev` on a feature branch in the **main checkout**, predev warns you to use a worktree instead (continues anyway).
+If you run `nub run dev` on a feature branch in the **main checkout**, predev warns you to use a worktree instead (continues anyway).
 
 ## Agent steps
 
 1. Read this file.
-2. `bun run setup-worktree -- <branch>` from `app/`.
-3. `bun run dev` in the new worktree — trust predev for `.env`, `.env.local`, Docker, migrations.
+2. `nub run setup-worktree -- <branch>` from `app/`.
+3. `nub run dev` in the new worktree — trust predev for `.env`, `.env.local`, Docker, migrations.
 
-Do not hand-craft `docker compose` for db/tiles. For processing, use `bun run processing-generate-command` (see `test-processing-diff` skill).
+Do not hand-craft `docker compose` for db/tiles. For processing, use `nub run processing-generate-command` (see `test-processing-diff` skill).
 
 ## Rules
 
@@ -42,14 +42,14 @@ Do not hand-craft `docker compose` for db/tiles. For processing, use `bun run pr
 | `.env.local`     | Auto-generated on **non-`develop`/`main`** branches in a **linked worktree**. Gitignored.     |
 | `DEV_STACK_ID`   | `wt_<folder_basename>` — compose project and container prefix (`wt_foo_db`).                  |
 | Container prefix | Runtime-only (`COMPOSE_DEV_CONTAINER_PREFIX`); derived by predev, not stored in `.env.local`. |
-| App server       | One `bun run dev` at a time (port **5173**, OSM OAuth). One Docker db+tiles stack at a time.  |
+| App server       | One `nub run dev` at a time (port **5173**, OSM OAuth). One Docker db+tiles stack at a time.  |
 | Compose project  | Predev passes `docker compose -p <DEV_STACK_ID>`. Do not set `COMPOSE_PROJECT_NAME` in YAML.  |
 
 Branch switches: `post-checkout` hook + predev remove stale `.env.local`. On `develop`/`main`, `.env.local` is deleted.
 
 ## Env files
 
-Scripts under `app/` load: `bun --env-file=../.env --env-file=../.env.local` (see `app/package.json`).
+Scripts under `app/` load: `nub --env-file=../.env --env-file-if-exists=../.env.local` (see `app/package.json`).
 
 Example `.env.local` (auto-generated):
 
@@ -81,7 +81,7 @@ Predev chain: `ensureEnv` → `ensureDevStack` → `checkDocker` → …
 ```bash
 git worktree add ../tilda-geo-my-branch my-branch
 # copy .env from another checkout
-cd ../tilda-geo-my-branch/app && bun run dev
+cd ../tilda-geo-my-branch/app && nub run dev
 ```
 
 ### Attach to another stack

@@ -1,5 +1,5 @@
-import { sql } from 'bun'
 import { z } from 'zod'
+import { sql } from '../../utils/sql'
 
 export async function initializeMapillaryCoverageMetadataTable() {
   await sql`

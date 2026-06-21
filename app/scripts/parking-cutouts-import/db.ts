@@ -1,4 +1,4 @@
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 import {
   POSTGRES_CLI_IMAGE,
   getLocalTargetDatabaseUrl,

@@ -1,5 +1,6 @@
-import { $, sql } from 'bun'
 import { berlinTimeString } from '../utils/berlinTime'
+import { $ } from '../utils/sh'
+import { sql } from '../utils/sql'
 import { originalFilePath } from './download'
 
 /**
@@ -95,7 +96,7 @@ export async function createProcessingEntry() {
   )
 
   const result = await sql`INSERT INTO public.meta ${sql(data)} RETURNING id`
-  return result[0].id
+  return result[0]!.id
 }
 
 /**

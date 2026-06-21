@@ -1,5 +1,5 @@
-#!/usr/bin/env bun
-import { $ } from 'bun'
+#!/usr/bin/env nub
+import { $ } from '../utils/sh'
 
 const lualsVersion = process.env.LUALS_VERSION ?? '3.18.2'
 const lualsDir = '/tmp/lua-language-server'

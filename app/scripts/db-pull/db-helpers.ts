@@ -21,8 +21,8 @@ const cliValuesSchema = z.object({
   help: z.boolean().default(false),
 })
 
-const DATA_DIR = resolve(import.meta.dir, 'data')
-export const PRE_RESTORE_SQL_PATH = resolve(import.meta.dir, 'sql', 'pre-restore.sql')
+const DATA_DIR = resolve(import.meta.dirname, 'data')
+export const PRE_RESTORE_SQL_PATH = resolve(import.meta.dirname, 'sql', 'pre-restore.sql')
 
 export function parseCliArgs(argv: string[]) {
   const { values } = parseArgs({
@@ -66,7 +66,7 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
       `1) Terminal 1: start SSH tunnel for ${source}`,
       `   ${tunnelCommand}`,
       '2) Terminal 2: run db-pull command',
-      `   bun run db-pull:pull -- --source ${source}`,
+      `   nub run db-pull:pull -- --source ${source}`,
       `3) Ensure DATABASE_URL_${source.toUpperCase()} points to localhost:${localPortHint} tunnel endpoint.`,
       '   Setup docs: https://github.com/FixMyBerlin/dev-documentation/blob/main/server-management/ionos-tilda.md#use-the-ssh-tunnel',
     ].join('\n'),

@@ -1,13 +1,13 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-const REPO_ROOT = resolve(import.meta.dir, '..', '..')
-const MANIFEST_PATH = resolve(import.meta.dir, '..', 'env', 'deploy.manifest.json')
+const REPO_ROOT = resolve(import.meta.dirname, '..', '..')
+const MANIFEST_PATH = resolve(import.meta.dirname, '..', 'env', 'deploy.manifest.json')
 const ENV_EXAMPLE_PATH = resolve(REPO_ROOT, '.env.example')
 const DOCKER_COMPOSE_PATH = resolve(REPO_ROOT, 'docker-compose.yml')
-const SETUP_WORKFLOW_PATH = resolve(import.meta.dir, '..', 'workflows', 'setup-env.yml')
+const SETUP_WORKFLOW_PATH = resolve(import.meta.dirname, '..', 'workflows', 'setup-env.yml')
 
 type ManifestVariable = {
   name: string

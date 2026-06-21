@@ -1,26 +1,26 @@
 #!/usr/bin/env sh
 set -e
 
-. "$(dirname -- "$0")/ensure-bun.sh"
+. "$(dirname -- "$0")/ensure-nub.sh"
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT/app"
 
 # Topic-docs: regenerate JSON, then fail if committed output is stale (git diff vs HEAD)
-bun run topic-docs-build || exit 1
+nub run topic-docs-build || exit 1
 git -C "$ROOT" diff --exit-code -- app/src/data/generated/topicDocs || exit 1
 
 # Env contract docs: regenerate .github/README and fail if stale
-bun "$ROOT/.github/scripts/generate-github-readme.ts" || exit 1
+nub "$ROOT/.github/scripts/generate-github-readme.ts" || exit 1
 # Keep generated markdown aligned with repo formatting rules before checking diffs
-bun run format:github || exit 1
+nub run format:github || exit 1
 git -C "$ROOT" diff --exit-code -- .github/README.md || exit 1
 
 # Linting, formatting and type-checks for `App`
-bun run check
-bun run type-check-deploy
+nub run check
+nub run type-check-deploy
 
 # Type checks (Lua + tsc), lint/format, and tests for `Processing`
 cd "$ROOT/processing"
-bun run check
-bun run test
+nub run check
+nub run test

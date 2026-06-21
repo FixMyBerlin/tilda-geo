@@ -1,7 +1,9 @@
-# TanStack Start (Vite + Nitro preset bun)
-FROM oven/bun:1 AS base
+# TanStack Start (Vite + Nitro preset node-server), run on Node + nub (replaces Bun)
+FROM node:26-trixie-slim AS base
 
-# TODO: Validate which distro oven/bun is and which gdal is installed there.
+# nub: the drop-in for Bun (TypeScript runner + package manager) on stock Node.
+RUN npm install -g --ignore-scripts=false @nubjs/nub
+
 # Debian 13 Trixie (stable) includes GDAL 3.10.3+ (supports gdal vector edit)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gdal-bin curl && \
@@ -11,29 +13,29 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Dependencies (layer cached unless package files change)
-COPY app/package.json app/bun.lock app/bunfig.toml ./
+COPY app/package.json app/lock.yaml app/.npmrc ./
 # Install without lifecycle scripts `postinstall`.
-RUN bun install --frozen-lockfile --ignore-scripts
+RUN nub install --frozen-lockfile --ignore-scripts
 
 # App source (needed for prisma.config.ts and Vite build)
 COPY app /app
 
-# Generate `@prisma/client` explicitly for this image build because `bun run build` imports `@prisma/client`, so the generated client must exist before build.
-RUN bun run postinstall
+# Generate `@prisma/client` explicitly for this image build because `nub run build` imports `@prisma/client`, so the generated client must exist before build.
+RUN nub run postinstall
 
 # Build-time env for Vite client bundle (inlined at build)
 ARG VITE_APP_ENV
 ARG VITE_APP_ORIGIN
 ENV VITE_APP_ENV=${VITE_APP_ENV}
 ENV VITE_APP_ORIGIN=${VITE_APP_ORIGIN}
-RUN bun run build
+RUN nub run build
 
-# Run as non-root (same goal as 3a98065). oven/bun provides a pre-created `bun` user; chown so it can read/write app files.
-RUN chown -R bun:bun /app
-USER bun
+# Run as non-root. The official node image provides a pre-created `node` user; chown so it can read/write app files.
+RUN chown -R node:node /app
+USER node
 
 ENV TZ=Europe/Berlin
 EXPOSE 4000
 
-# Production: run migrations then Nitro server (Bun). Runtime DATABASE_* from compose.
-CMD ["/bin/sh", "-c", "bunx prisma migrate deploy && exec bun run .output/server/index.mjs"]
+# Production: run migrations then the Nitro Node server. Runtime DATABASE_* from compose.
+CMD ["/bin/sh", "-c", "nubx prisma migrate deploy && exec node .output/server/index.mjs"]

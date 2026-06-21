@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { basename } from 'node:path'
 import { originalFilePath } from '../steps/download'
 import { filteredFilePath } from '../steps/filter'
@@ -7,8 +8,8 @@ import { isDev } from './isDev'
 export async function checkSkipDownload() {
   const fileName = basename(params.pbfDownloadUrl)
   const filePath = originalFilePath(fileName)
-  const fileExists = await Bun.file(filePath).exists()
-  const filteredFileExists = await Bun.file(filteredFilePath(fileName)).exists()
+  const fileExists = existsSync(filePath)
+  const filteredFileExists = existsSync(filteredFilePath(fileName))
 
   if (isDev) {
     console.log(

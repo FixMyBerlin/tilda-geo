@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import { spawn } from '@/scripts/lib/bun'
 
 export type RunningDevStack = {
   /** `default` = develop stack (`db` / `tiles` on 5432 / 3000). */
@@ -12,7 +13,7 @@ export type RunningDevStack = {
 const DEVELOP_STACK_ID = 'default'
 
 async function dockerText(args: string[]) {
-  const proc = Bun.spawn(args, { stdout: 'pipe', stderr: 'pipe' })
+  const proc = spawn(args, { stdout: 'pipe', stderr: 'pipe' })
   const out = (await new Response(proc.stdout).text()).trim()
   await proc.exited
   return { out, exitCode: proc.exitCode ?? 1 }
@@ -114,7 +115,7 @@ export async function resolveRunningAttachStack(stackId: string) {
   const entry = stacks.find((s) => s.stackId === stackId)
   if (!entry) {
     throw new Error(
-      `DEV_ATTACH_STACK=${stackId} not running — start that stack with bun run dev in its checkout first`,
+      `DEV_ATTACH_STACK=${stackId} not running — start that stack with nub run dev in its checkout first`,
     )
   }
   return entry
@@ -128,7 +129,7 @@ export function attachStackIdForDocker(stackId: string) {
 /** Stop db+tiles for one discovered stack. */
 export async function stopDevStack(stack: RunningDevStack) {
   if (stack.repoRoot && stack.composeProject) {
-    const proc = Bun.spawn(
+    const proc = spawn(
       [
         'docker',
         'compose',

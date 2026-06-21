@@ -1,3 +1,4 @@
+import { file, write } from '@/scripts/lib/bun'
 import type { WfsUrl } from './createWfsUrl'
 
 const REQUEST_TIMEOUT_MS = 10 * 60 * 1000
@@ -48,9 +49,9 @@ export const fetchAndStoreGeopackage = async (wfsUrl: WfsUrl, geoPackageFilename
       }
 
       const arrayBuffer = await response.arrayBuffer()
-      await Bun.write(geoPackageFilename, new Uint8Array(arrayBuffer))
+      await write(geoPackageFilename, new Uint8Array(arrayBuffer))
 
-      const bytes = Bun.file(geoPackageFilename).size
+      const bytes = file(geoPackageFilename).size
       if (bytes > 0) {
         console.log(`  Response size (actual): ${formatMb(bytes)}`)
       } else {

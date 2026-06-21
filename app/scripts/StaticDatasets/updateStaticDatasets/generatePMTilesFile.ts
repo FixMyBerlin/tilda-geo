@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { styleText } from 'node:util'
+import { spawnSync } from '@/scripts/lib/bun'
 import type { MetaData } from '../types'
 
 /** @returns pmtiles outputFullFile */
@@ -84,7 +85,7 @@ export const generatePMTilesFile = (
     inputFullFile,
   ]
 
-  const { success, exitCode, stdout, stderr } = Bun.spawnSync(['tippecanoe', ...parameters], {
+  const { success, exitCode, stdout, stderr } = spawnSync(['tippecanoe', ...parameters], {
     stdout: 'pipe',
     stderr: 'pipe',
   })

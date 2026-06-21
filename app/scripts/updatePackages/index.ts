@@ -1,5 +1,6 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import * as p from '@clack/prompts'
+import { spawn } from '@/scripts/lib/bun'
 
 const OPTIONS = [
   { value: 'major-check-install', label: 'Major – check and install (default)' },
@@ -25,7 +26,7 @@ if (p.isCancel(choice)) {
 const mode = choice as Option
 
 async function run(cmd: string[], label: string) {
-  const proc = Bun.spawn(cmd, {
+  const proc = spawn(cmd, {
     cwd: process.cwd(),
     stdout: 'inherit',
     stderr: 'inherit',
@@ -41,15 +42,15 @@ async function run(cmd: string[], label: string) {
 async function taze(mode: 'major' | 'minor', write: boolean) {
   const args = ['taze', mode, '--includeLocked', '--maturity-period', '5']
   if (write) args.push('--write')
-  await run(['bunx', ...args], `taze ${mode}`)
+  await run(['nubx', ...args], `taze ${mode}`)
 }
 
 switch (mode) {
   case 'major-check-install': {
     await taze('major', true)
     const spinner = p.spinner()
-    spinner.start('Running bun install…')
-    await run(['bun', 'install'], 'bun install')
+    spinner.start('Running nub install…')
+    await run(['nub', 'install'], 'nub install')
     spinner.stop('Done.')
     break
   }
@@ -60,8 +61,8 @@ switch (mode) {
   case 'minor-check-install': {
     await taze('minor', true)
     const spinner = p.spinner()
-    spinner.start('Running bun install…')
-    await run(['bun', 'install'], 'bun install')
+    spinner.start('Running nub install…')
+    await run(['nub', 'install'], 'nub install')
     spinner.stop('Done.')
     break
   }

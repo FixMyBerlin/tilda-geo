@@ -3,7 +3,7 @@
 # Tune directories, groups, and ignore rules for your layout (see references/dependabot.md).
 version: 2
 updates:
-  - package-ecosystem: bun
+  - package-ecosystem: npm
     directories:
       - /
     schedule:
@@ -47,7 +47,7 @@ updates:
         patterns:
           - 'oxlint*'
           - 'oxfmt*'
-          - '@types/bun'
+          - '@types/node'
 
       app-dev-minor-patch:
         applies-to: version-updates
@@ -144,4 +144,4 @@ updates:
       docker-bases:
         patterns:
           - 'debian*'
-          - 'oven/bun*'
+          - 'node*'

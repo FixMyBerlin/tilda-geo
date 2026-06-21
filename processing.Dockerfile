@@ -42,8 +42,10 @@ RUN apt update && \
 # 'data' folder is root
 RUN mkdir /data
 
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH=/root/.bun/bin:$PATH
+# Install Node.js (matches repo .nvmrc = Node 26) and the nub toolkit (drop-in replacement for Bun)
+RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash - && \
+    apt install -y nodejs && \
+    npm install -g --ignore-scripts=false @nubjs/nub
 
 # copy the source code
 COPY processing /processing/
@@ -56,7 +58,7 @@ COPY app/oxfmt.config.mjs /processing/oxfmt.config.mjs
 RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.com/geofabrik/sendfile_osm_oauth_protector/master/oauth_cookie_client.py && \
     chmod +x /usr/local/bin/oauth_cookie_client.py
 
-# install bun packages
-RUN bun install
+# install node packages (via nub)
+RUN nub install
 
-CMD ["bun", "run", "/processing/index.ts"]
+CMD ["nub", "/processing/index.ts"]

@@ -11,9 +11,10 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-// We use bun.sh to run this file
+// We use nub to run this file
 import { styleText } from 'node:util'
 import { S3 } from '@aws-sdk/client-s3'
+import { file as openFile } from '@/scripts/lib/bun'
 
 const s3 = new S3({
   region: 'eu-central-1',
@@ -21,17 +22,17 @@ const s3 = new S3({
 
 console.log(
   styleText(['inverse', 'bold'], 'START'),
-  __filename,
+  import.meta.filename,
   'Uploading all files from ./pmtiles to S3 bucket atlas-tiles',
 )
 
 const pmtilesFiles = fs
-  .readdirSync(path.resolve(__dirname, './pmtiles'))
+  .readdirSync(path.resolve(import.meta.dirname, './pmtiles'))
   .filter((file) => path.extname(file) === '.pmtiles')
 
 for (const file of pmtilesFiles) {
   const Key = file
-  const bunFile = Bun.file(path.resolve(__dirname, './pmtiles', file))
+  const bunFile = openFile(path.resolve(import.meta.dirname, './pmtiles', file))
 
   const Body = new Uint8Array(await bunFile.arrayBuffer())
   const ContentType = 'application/x-protobuf'

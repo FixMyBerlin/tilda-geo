@@ -67,14 +67,14 @@ For server/client boundaries and loaders, see **`tanstack-start-conventions`**. 
 
 ## 10. Tests — current layout
 
-- **Unit/integration (Vitest)** — `bun run test` / `bun run test-run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
+- **Unit/integration (Vitest)** — `nub run test` / `nub run test-run`: Colocated **`*.test.ts`** (and `*.test.tsx`) next to source; Vitest runs from app root with `dir: './'`, so tests can live anywhere. Global setup: [app/test/setup.ts](../app/test/setup.ts). Config: [app/vitest.config.ts](../app/vitest.config.ts) — `include: ['**/*.test.ts']` (excludes `.spec.ts`). Examples: [getRegionRedirectUrl.test.ts](../app/src/server/regions/getRegionRedirectUrl.test.ts), various under `components/…`.
 - **E2E (Playwright)**: **app/tests/** — `*.spec.ts`. See [app/tests/README.md](../app/tests/README.md) for setup, auth, and smoke tests.
 - **Processing**: Lua tests in **`__tests__`** with `*.test.lua` (see [processing/README.md](../processing/README.md)).
 - **Emails**: [app/src/emails/newUserRegistrationMailer.test.ts](../app/src/emails/newUserRegistrationMailer.test.ts).
 
 ## 11. Emails (React Email)
 
-**app/src/emails/** holds React Email templates, shared layout components, and send helpers. It lives under **app/src** like other app code; **`bun run mailpreview`** runs `email dev --dir src/emails` from `app/`. Shared pieces live in **`_templates/`** and **`_utils/`** (leading underscore so the React Email preview server skips them). See [app/src/emails/README.md](../app/src/emails/README.md).
+**app/src/emails/** holds React Email templates, shared layout components, and send helpers. It lives under **app/src** like other app code; **`nub run mailpreview`** runs `email dev --dir src/emails` from `app/`. Shared pieces live in **`_templates/`** and **`_utils/`** (leading underscore so the React Email preview server skips them). See [app/src/emails/README.md](../app/src/emails/README.md).
 
 ## Related docs
 

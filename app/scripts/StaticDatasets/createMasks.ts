@@ -1,16 +1,17 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
-// We use bun.sh to run this file
+// We use nub to run this file
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
 import { feature, featureCollection } from '@turf/turf'
 import { staticRegion } from '@/data/regions.const'
+import { write } from '@/scripts/lib/bun'
 import { downloadGeoJson } from './createMasks/download'
 
-console.log(styleText(['inverse', 'bold'], 'START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), import.meta.filename)
 
-const masksFolder = path.resolve(__dirname, './geojson/masks')
+const masksFolder = path.resolve(import.meta.dirname, './geojson/masks')
 
 // Process each region individually
 for (const region of staticRegion) {
@@ -57,7 +58,7 @@ export const transform = (data: FeatureCollection) => {
   return transformRegionMask({ data, bufferDistanceKm: ${bufferKm} })
 }
 `
-  await Bun.write(transformPath, transformContent)
+  await write(transformPath, transformContent)
   console.info(styleText('green', `✓ Updated transform.ts for region ${regionSlug}`))
 
   // Generate meta.ts - only create if missing
@@ -72,7 +73,7 @@ export const data: MetaData = maskMeta({
   layers: maskLayers,
 })
 `
-    await Bun.write(metaPath, metaContent)
+    await write(metaPath, metaContent)
     console.info(styleText('green', `✓ Created meta.ts for region ${regionSlug}`))
   } else {
     console.info(styleText('blue', `✓ meta.ts already exists for region ${regionSlug} (skipped)`))
@@ -95,8 +96,8 @@ export const data: MetaData = maskMeta({
     const featureCollectionData = featureCollection([regionFeature])
 
     // Save raw geojson file (transformation will happen via transform.ts during static dataset processing)
-    // Geojson formatting: format-on-save; regions:masks:2format runs bun run format (StaticDatasets code only)
-    await Bun.write(geojsonFilename, JSON.stringify(featureCollectionData, null, 2))
+    // Geojson formatting: format-on-save; regions:masks:2format runs nub run format (StaticDatasets code only)
+    await write(geojsonFilename, JSON.stringify(featureCollectionData, null, 2))
     console.info(styleText('green', `✓ Updated ${geojsonFilename}`))
   } else {
     console.info(styleText('blue', `✓ GeoJSON already exists for region ${regionSlug}`))

@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -66,7 +66,7 @@ function main() {
   const outputArg = args.get('output')
   if (!manifestArg || !outputArg) {
     throw new Error(
-      'Usage: bun .github/scripts/generate-deploy-env.ts --manifest <path> --output <path>',
+      'Usage: nub .github/scripts/generate-deploy-env.ts --manifest <path> --output <path>',
     )
   }
 

@@ -14,10 +14,10 @@ The system allows to create uploads `createdBy: USER` that are managed manually.
 The system supports two data source types, configured in `meta.ts` when creating datasets:
 
 1. **Local Sources** (`dataSourceType: 'local'`)
-   - Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
+   - Uploads-DB Entry: Created manually via `nub run static-datasets-update` / related `static-datasets-*` scripts
    - Files: Stored on S3 at the same time.
 2. **External Sources** (`dataSourceType: 'external'`)
-   - Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
+   - Uploads-DB Entry: Created manually via `nub run static-datasets-update` / related `static-datasets-*` scripts
    - Files: Downloaded and cached on the server with TTL to auto-update the files regularly
 
 ## API Endpoints
@@ -37,7 +37,7 @@ The system supports two data source types, configured in `meta.ts` when creating
 
 ### Internal Sources `dataSourceType: 'local'`
 
-**Creation (via StaticDatasets scripts, from `app/` with `bun run …`):**
+**Creation (via StaticDatasets scripts, from `app/` with `nub run …`):**
 
 When using `dataSourceType: 'local'` in `meta.ts`:
 
@@ -65,7 +65,7 @@ Files are proxied through the API.
 
 ### External Sources `dataSourceType: 'external'`
 
-**Creation (via StaticDatasets scripts, from `app/` with `bun run …`):**
+**Creation (via StaticDatasets scripts, from `app/` with `nub run …`):**
 
 When using `dataSourceType: 'external'` in `meta.ts`:
 

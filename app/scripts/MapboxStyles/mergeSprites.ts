@@ -29,7 +29,7 @@ async function fetchResponse(sprite: SpriteSource, pixelRatio: 1 | 2, extension:
 
 export async function mergeSprites(sprites: SpriteSource[], pixelRatio: 1 | 2) {
   // Setup temp folder to store single sprite images in
-  const tmpFolder = path.join(__dirname, 'tmp/icons')
+  const tmpFolder = path.join(import.meta.dirname, 'tmp/icons')
   fs.rmSync(tmpFolder, { recursive: true, force: true })
   fs.mkdirSync(tmpFolder)
 

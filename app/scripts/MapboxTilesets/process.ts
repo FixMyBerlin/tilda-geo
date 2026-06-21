@@ -1,4 +1,4 @@
-// We use bun.sh to run this file
+// We use nub to run this file
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -7,6 +7,7 @@ import { select } from '@clack/prompts'
 import dotenv from 'dotenv'
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
+import { argv, spawnSync } from '@/scripts/lib/bun'
 import type { EnvironmentValues } from '@/server/envSchema'
 import { getValidatedEnv, mapboxTilesetsSchema } from '../shared/env'
 import { tilesetConfigs } from './datasets'
@@ -39,7 +40,7 @@ const cliEnvSelectOptions: { value: CliEnv; label: string }[] = [
 ]
 
 const { values } = parseArgs({
-  args: Bun.argv,
+  args: argv,
   options: {
     env: { type: 'string' },
     filter: { type: 'string' },
@@ -73,7 +74,7 @@ if (values.env) {
 
 const envSource = envMap[cliEnv]
 
-const scriptDir = path.dirname(__filename)
+const scriptDir = path.dirname(import.meta.filename)
 const repoRoot = path.resolve(scriptDir, '../../..')
 const repoEnvPath = path.join(repoRoot, '.env')
 if (fs.existsSync(repoEnvPath)) {
@@ -83,7 +84,7 @@ if (fs.existsSync(repoEnvPath)) {
 async function main() {
   const env = getValidatedEnv(mapboxTilesetsSchema)
 
-  log.info('START', __filename)
+  log.info('START', import.meta.filename)
 
   const folderFgb = 'scripts/MapboxTilesets/flatgeobuf'
   const folderMbtiles = 'scripts/MapboxTilesets/mbtiles'
@@ -145,7 +146,7 @@ async function main() {
       fs.writeFileSync(fgbFile, Buffer.from(fgbBuffer))
 
       log.info('  RUN', `tippecanoe → ${mbtilesFile}`)
-      const tippecanoe = Bun.spawnSync(
+      const tippecanoe = spawnSync(
         [
           'tippecanoe',
           `--output=${mbtilesFile}`,
@@ -185,7 +186,7 @@ async function main() {
     '\nINFO',
     'Opening mbtiles folder so you may "replace" the Mapbox tilesets in the browser.',
   )
-  Bun.spawnSync(['open', folderMbtiles])
+  spawnSync(['open', folderMbtiles])
 
   console.log('\n')
   log.info('DONE', '')

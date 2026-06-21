@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { favicons } from 'favicons'
+import { file, write } from '@/scripts/lib/bun'
 import { APP_META } from '../../src/meta.const'
 
 const source = join(process.cwd(), 'public', 'favicon.svg')
@@ -29,7 +30,7 @@ const config = {
 }
 
 async function main() {
-  const exists = await Bun.file(source).exists()
+  const exists = await file(source).exists()
   if (!exists) {
     console.error('Source not found:', source)
     process.exit(1)
@@ -39,12 +40,12 @@ async function main() {
 
   for (const img of response.images) {
     const outPath = join(dest, img.name)
-    await Bun.write(outPath, img.contents)
+    await write(outPath, img.contents)
     console.log('Wrote', img.name)
   }
   for (const file of response.files) {
     const outPath = join(dest, file.name)
-    await Bun.write(outPath, file.contents)
+    await write(outPath, file.contents)
     console.log('Wrote', file.name)
   }
 
@@ -62,7 +63,7 @@ async function main() {
     theme_color: config.theme_color,
     background_color: config.background,
   }
-  await Bun.write(join(dest, 'manifest.json'), JSON.stringify(manifestJson, null, 2))
+  await write(join(dest, 'manifest.json'), JSON.stringify(manifestJson, null, 2))
   console.log('Wrote manifest.json')
 }
 

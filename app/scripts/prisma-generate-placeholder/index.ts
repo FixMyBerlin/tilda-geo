@@ -1,6 +1,6 @@
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 
-const result = await $`bunx prisma generate`
+const result = await $`nubx prisma generate`
   .env({
     ...process.env,
     DATABASE_HOST: '127.0.0.1',

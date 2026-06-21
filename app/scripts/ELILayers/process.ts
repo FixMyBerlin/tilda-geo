@@ -1,25 +1,25 @@
-// We use bun.sh to run this file
+// We use nub to run this file
 
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
-import { $ } from 'bun'
 import { z } from 'zod'
 import type { MapDataBackgroundSource } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { $, file, write } from '@/scripts/lib/bun'
 import { convertTileUrl } from './convertTileUrl'
 import { log, warn } from './util'
 
-console.log(styleText(['inverse', 'bold'], 'START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), import.meta.filename)
 
 const ELI_BASE_URL = 'https://raw.githubusercontent.com/osmlab/editor-layer-index/gh-pages'
 const ELI_DE_DIR = 'sources/europe/de'
 const GITHUB_API_URL =
   'https://api.github.com/repos/osmlab/editor-layer-index/contents/sources/europe/de?ref=gh-pages'
 
-const appDir = path.resolve(import.meta.dir, '../..')
-const rawDir = path.join(import.meta.dir, 'raw')
+const appDir = path.resolve(import.meta.dirname, '../..')
+const rawDir = path.join(import.meta.dirname, 'raw')
 const outputFile = path.join(
-  import.meta.dir,
+  import.meta.dirname,
   '../../src/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundRasterELI.const.ts',
 )
 
@@ -72,7 +72,7 @@ async function downloadFile(filename: string) {
   }
 
   const content = await response.text()
-  await Bun.write(filePath, content)
+  await write(filePath, content)
   return true
 }
 
@@ -90,8 +90,8 @@ function sanitizeId(filename: string): string {
 
 async function parseELIFile(filePath: string): Promise<ELIFeature | null> {
   try {
-    const file = Bun.file(filePath)
-    const json = await file.json()
+    const eliFile = file(filePath)
+    const json = await eliFile.json()
     const result = ELIFeatureSchema.safeParse(json)
 
     if (!result.success) {
@@ -222,11 +222,11 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
   )}
 `
 
-  await Bun.write(outputFile, typeScriptContent)
+  await write(outputFile, typeScriptContent)
   log(`Generated ${outputFile}`)
 
-  log('bun run format')
-  await $`bun run format`.cwd(appDir)
+  log('nub run format')
+  await $`nub run format`.cwd(appDir)
 }
 
 main().catch((error) => {

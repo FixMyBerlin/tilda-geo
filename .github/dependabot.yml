@@ -1,6 +1,11 @@
 version: 2
 updates:
-  - package-ecosystem: bun
+  # Our lockfile is pnpm-v9 format but named `lock.yaml` (nub's native lockfile), which
+  # Dependabot doesn't recognize. Dependabot has no `pnpm` ecosystem — `npm` is the umbrella
+  # ecosystem for npm/yarn/pnpm — so we use `npm`: Dependabot bumps versions in package.json,
+  # and the `Sync Dependabot lock.yaml` workflow regenerates `lock.yaml` with nub (hosted bots
+  # can't regenerate it themselves).
+  - package-ecosystem: npm
     directories:
       - /app
       - /processing
@@ -45,7 +50,6 @@ updates:
         patterns:
           - 'oxlint*'
           - 'oxfmt*'
-          - '@types/bun'
 
       app-dev-minor-patch:
         applies-to: version-updates
@@ -160,4 +164,4 @@ updates:
       docker-bases:
         patterns:
           - 'debian*'
-          - 'oven/bun*'
+          - 'node*'

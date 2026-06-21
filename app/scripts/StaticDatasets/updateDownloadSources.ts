@@ -1,8 +1,8 @@
-// We use bun.sh to run this file
+// We use nub to run this file
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { $ } from 'bun'
+import { $, argv } from '@/scripts/lib/bun'
 import { createWfsUrl } from './downloadSources/createWfsUrl'
 import { fetchAndStoreGeopackage } from './downloadSources/fetchAndStoreGeopackage'
 import {
@@ -23,7 +23,7 @@ export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
 if (!fs.existsSync(tempFolder)) fs.mkdirSync(tempFolder, { recursive: true })
 
 // use --folder-filter to run only folders that include this filter string (check the full path, so `region-bb` (group folder) and `bb-` (dataset folder) will both work)
-const { values } = parseSharedArgs(Bun.argv)
+const { values } = parseSharedArgs(argv)
 const keepTemporaryFiles = !!values['keep-tmp']
 const folderFilterTerm = values['folder-filter']
 
@@ -82,10 +82,10 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
   }
 }
 
-const appDir = path.resolve(import.meta.dir, '../..')
+const appDir = path.resolve(import.meta.dirname, '../..')
 if (downloadedGeojsonPaths.length > 0) {
-  console.log('bun run format-static-datasets-geojson', downloadedGeojsonPaths.join(' '))
-  await $`bun run format-static-datasets-geojson -- ${downloadedGeojsonPaths}`.cwd(appDir)
+  console.log('nub run format-static-datasets-geojson', downloadedGeojsonPaths.join(' '))
+  await $`nub run format-static-datasets-geojson -- ${downloadedGeojsonPaths}`.cwd(appDir)
 }
 
 inverse('DONE')

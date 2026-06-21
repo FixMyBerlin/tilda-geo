@@ -1,4 +1,4 @@
-name: Sync Dependabot bun.lock
+name: Sync Dependabot lock.yaml
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  sync-bun-lockfile:
+  sync-nub-lockfile:
     if: github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
@@ -19,33 +19,34 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup nub
+        uses: nubjs/setup-nub@v0
 
-      # Shorter than app/bunfig.toml (5 days) so lockfile sync can keep up with Dependabot.
-      # We hope Dependabot's own cooldown and review only surface sensible, safe bumps.
-      - name: Update app bun.lock
+      # nub has no install-time cooldown (Bun's `--minimum-release-age` has no nub equivalent).
+      # The dependency-update cooldown now lives in `.github/dependabot.yml` (`cooldown.default-days`),
+      # so this job only needs to regenerate the lockfile to match the bumped package.json.
+      - name: Update app lock.yaml
         if: hashFiles('app/package.json') != ''
         working-directory: app
-        run: bun install --minimum-release-age 172800
+        run: nub install --no-frozen-lockfile
 
-      - name: Update processing bun.lock
+      - name: Update processing lock.yaml
         if: hashFiles('processing/package.json') != ''
         working-directory: processing
-        run: bun install --minimum-release-age 172800
+        run: nub install --no-frozen-lockfile
 
-      - name: Commit bun.lock changes
+      - name: Commit lock.yaml changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          [[ -f app/bun.lock ]] && git add app/bun.lock
-          [[ -f processing/bun.lock ]] && git add processing/bun.lock
+          [[ -f app/lock.yaml ]] && git add app/lock.yaml
+          [[ -f processing/lock.yaml ]] && git add processing/lock.yaml
 
           if git diff --staged --quiet; then
-            echo "bun.lock already in sync"
+            echo "lock.yaml already in sync"
             exit 0
           fi
 
-          git commit -m "chore(deps): sync bun.lock with package.json"
+          git commit -m "chore(deps): sync lock.yaml with package.json"
           git push

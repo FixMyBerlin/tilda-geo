@@ -1,4 +1,5 @@
 import { connect } from 'node:net'
+import { spawn } from '@/scripts/lib/bun'
 
 const DB_PORT_MIN = 5432
 const DB_PORT_MAX = 5499
@@ -21,7 +22,7 @@ export function isPortFreeOnHost(host: string, port: number) {
 
 /** Host ports published by running Docker containers (`0.0.0.0:5432->5432/tcp`). */
 export async function publishedHostPorts() {
-  const proc = Bun.spawn(['docker', 'ps', '--format', '{{.Ports}}'], {
+  const proc = spawn(['docker', 'ps', '--format', '{{.Ports}}'], {
     stdout: 'pipe',
     stderr: 'pipe',
   })

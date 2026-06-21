@@ -1,4 +1,4 @@
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 import type { DfSummary } from './dockerPreview'
 import {
   formatBytesAsGB,

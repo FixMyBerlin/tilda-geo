@@ -1,9 +1,9 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { basename, dirname } from 'node:path'
 import * as p from '@clack/prompts'
-import { $ } from 'bun'
 import { z } from 'zod'
+import { $, argv } from '@/scripts/lib/bun'
 import {
   ALLOWED_SCHEMAS,
   ALLOWED_SOURCES,
@@ -24,11 +24,11 @@ function printHelp() {
 Pull a schema-scoped SQL dump from a remote source database URL.
 
 Usage:
-  bun scripts/db-pull/pull.ts [--source production|staging] [--schema prisma|data]
+  nub scripts/db-pull/pull.ts [--source production|staging] [--schema prisma|data]
 
 Examples:
-  bun scripts/db-pull/pull.ts --source production
-  bun scripts/db-pull/pull.ts --source staging --schema data
+  nub scripts/db-pull/pull.ts --source production
+  nub scripts/db-pull/pull.ts --source staging --schema data
 
 Notes:
   - Allowed sources: ${ALLOWED_SOURCES.join(', ')}
@@ -45,7 +45,7 @@ Notes:
 }
 
 async function main() {
-  const { help, source: sourceArg, schema: schemaArg } = parseCliArgs(Bun.argv)
+  const { help, source: sourceArg, schema: schemaArg } = parseCliArgs(argv)
   if (help) {
     printHelp()
     return

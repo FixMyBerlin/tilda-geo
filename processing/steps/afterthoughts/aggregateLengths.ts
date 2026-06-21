@@ -1,6 +1,6 @@
 import { join } from 'node:path'
-import { $ } from 'bun'
 import { logEnd, logStart } from '../../utils/logging'
+import { $ } from '../../utils/sh'
 import {
   updateProcessingMetaStatisticsCompleted,
   updateProcessingMetaStatisticsStarted,
@@ -13,7 +13,7 @@ const LOG_PREFIX = '[Afterthoughts][Statistics]'
  * Called after Processing: Finished; feeds the app's /api/stats and region statistics UI.
  */
 export async function aggregateLengths() {
-  const sqlFile = join(import.meta.dir, 'sql', 'aggregate_lengths.sql')
+  const sqlFile = join(import.meta.dirname, 'sql', 'aggregate_lengths.sql')
 
   try {
     logStart('Afterthoughts: Statistics')

@@ -5,9 +5,9 @@
 # $3=1 on branch checkout (not file checkout)
 [ "$3" = "1" ] || exit 0
 
-. "$(dirname -- "$0")/ensure-bun.sh"
+. "$(dirname -- "$0")/ensure-nub.sh"
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT/app" || exit 0
 
-bun scripts/predev/syncEnvLocal.ts
+nub scripts/predev/syncEnvLocal.ts

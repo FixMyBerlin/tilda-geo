@@ -1,4 +1,4 @@
-import { sql } from 'bun'
+import { sql } from '../utils/sql'
 
 export async function initializeSchemaData() {
   await sql`CREATE SCHEMA IF NOT EXISTS data`

@@ -4,6 +4,7 @@ import invariant from 'tiny-invariant'
 import { z } from 'zod'
 import type { CampaignMaprouletteType } from '@/data/radinfra-de/schema/campaignsSchema.js'
 import { CampaignMaprouletteSchema } from '@/data/radinfra-de/schema/campaignsSchema.js'
+import { argv } from '@/scripts/lib/bun'
 import { CAMPAIGN_API_BASE_URL } from '@/server/api/maproulette/campaignApiBaseUrl.const'
 import { campaigns } from '../../src/data/radinfra-de/campaigns'
 import { buildHashtags } from '../../src/data/radinfra-de/utils/buildHashtags'
@@ -17,7 +18,7 @@ const maprouletteEnv = getValidatedEnv(maprouletteSchema)
 
 // https://bun.sh/guides/process/argv
 const { values } = parseArgs({
-  args: Bun.argv,
+  args: argv,
   options: {
     filter: { type: 'string' },
   },

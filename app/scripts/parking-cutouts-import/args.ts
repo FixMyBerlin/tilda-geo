@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util'
 import { z } from 'zod'
 
 export const SCHEMA = 'data'
-export const SCRIPT_DIR = import.meta.dir
+export const SCRIPT_DIR = import.meta.dirname
 export const DEFAULT_OUTPUT_DIR = resolve(SCRIPT_DIR, 'data')
 
 const tableNameSchema = z
@@ -85,15 +85,15 @@ export function printHelp() {
     .write(`parking-cutouts-import — load external cutout GeoJSON into data.* and export SQL for production
 
 Usage (from app/):
-  bun --env-file=../.env ./scripts/parking-cutouts-import/index.ts [options]
+  nub --env-file=../.env ./scripts/parking-cutouts-import/index.ts [options]
 
 Examples:
-  bun --env-file=../.env ./scripts/parking-cutouts-import/index.ts \\
+  nub --env-file=../.env ./scripts/parking-cutouts-import/index.ts \\
     --file ~/Downloads/.../euvm_cutouts_point.geojson \\
     --table euvm_cutouts_point \\
     --replace
 
-  bun --env-file=../.env ./scripts/parking-cutouts-import/index.ts \\
+  nub --env-file=../.env ./scripts/parking-cutouts-import/index.ts \\
     --file ~/Downloads/.../euvm_cutouts_polygon.geojson \\
     --table euvm_cutouts_polygon \\
     --replace

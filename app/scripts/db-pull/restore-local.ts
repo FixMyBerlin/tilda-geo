@@ -1,9 +1,9 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { basename, dirname } from 'node:path'
 import * as p from '@clack/prompts'
-import { $ } from 'bun'
 import { z } from 'zod'
+import { $, argv } from '@/scripts/lib/bun'
 import {
   ALLOWED_SCHEMAS,
   ALLOWED_SOURCES,
@@ -23,11 +23,11 @@ function printHelp() {
 Restore a schema-scoped SQL dump into the local development database only.
 
 Usage:
-  bun scripts/db-pull/restore-local.ts [--schema prisma|data] [--source production|staging]
+  nub scripts/db-pull/restore-local.ts [--schema prisma|data] [--source production|staging]
 
 Examples:
-  bun scripts/db-pull/restore-local.ts
-  bun scripts/db-pull/restore-local.ts --schema data --source staging
+  nub scripts/db-pull/restore-local.ts
+  nub scripts/db-pull/restore-local.ts --schema data --source staging
 
 Notes:
   - Allowed schemas: ${ALLOWED_SCHEMAS.join(', ')}
@@ -39,7 +39,7 @@ Notes:
 }
 
 async function main() {
-  const { help, schema: schemaArg, source: sourceArg } = parseCliArgs(Bun.argv)
+  const { help, schema: schemaArg, source: sourceArg } = parseCliArgs(argv)
   if (help) {
     printHelp()
     return

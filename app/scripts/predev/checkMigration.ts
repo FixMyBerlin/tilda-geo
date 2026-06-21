@@ -1,6 +1,6 @@
 import { styleText } from 'node:util'
 import { confirm, isCancel, note } from '@clack/prompts'
-import { $ } from 'bun'
+import { $, argv, spawn } from '@/scripts/lib/bun'
 import { logErr, logOk } from './predevLog'
 
 const label = 'check_migration'
@@ -9,7 +9,7 @@ const pendingMigrationsBanner = 'Following migrations have not yet been applied'
 
 const pendingMigrationsTipBody = `From the \`app\` directory run:
 
-  bun run migrate
+  nub run migrate
 
 Then start the dev server again.`
 
@@ -22,7 +22,7 @@ function showPendingMigrationsTip() {
 export async function checkMigration() {
   try {
     // `prisma migrate status` exits 1 when migrations are pending; Bun `$` would throw before we can read stdout.
-    const result = await $`bun run migrate-check`.quiet().nothrow()
+    const result = await $`nub run migrate-check`.quiet().nothrow()
     const output = result.text()
 
     if (!output.includes(pendingMigrationsBanner)) {
@@ -37,7 +37,7 @@ export async function checkMigration() {
 
     console.error(styleText('red', 'There are pending migrations.'))
 
-    if (Bun.argv.includes('--non-interactive')) {
+    if (argv.includes('--non-interactive')) {
       showPendingMigrationsTip()
       throw new Error(pendingMigrationsError)
     }
@@ -53,7 +53,7 @@ export async function checkMigration() {
       throw new Error(pendingMigrationsError)
     }
 
-    const migrateProc = Bun.spawn(['bun', 'run', 'migrate'], {
+    const migrateProc = spawn(['nub', 'run', 'migrate'], {
       cwd: process.cwd(),
       stdout: 'inherit',
       stderr: 'inherit',

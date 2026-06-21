@@ -1,8 +1,10 @@
-import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { styleText } from 'node:util'
-import { $ } from 'bun'
 import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
 import { params } from '../utils/parameters'
+import { $ } from './sh'
 
 //Geofabrik OAuth base URL, https://github.com/geofabrik/sendfile_osm_oauth_protector/blob/master/doc/client.md
 const GEOFABRIK_OAUTH_BASE_URL = 'https://osm-internal.download.geofabrik.de'
@@ -106,7 +108,8 @@ async function createOAuthSettings() {
     consumer_url: `${GEOFABRIK_OAUTH_BASE_URL}/get_cookie`,
   }
 
-  await Bun.write(OAUTH_SETTINGS_FILE, JSON.stringify(settings, null, 2))
+  await mkdir(dirname(OAUTH_SETTINGS_FILE), { recursive: true })
+  await writeFile(OAUTH_SETTINGS_FILE, JSON.stringify(settings, null, 2))
 }
 
 /**
@@ -143,9 +146,8 @@ export function fallbackToPublicDownload() {
  * The Python client stores the OAuth cookie in Netscape format; we retrieve it here for immediate use.
  */
 async function getCookieFile() {
-  const cookieFile = Bun.file(COOKIE_FILE)
-  if (await cookieFile.exists()) {
-    const cookieContent = await cookieFile.text()
+  if (existsSync(COOKIE_FILE)) {
+    const cookieContent = await readFile(COOKIE_FILE, 'utf8')
     const httpCookie = cookieContent ? parseNetscapeCookie(cookieContent) : null
     return { cookieContent, httpCookie }
   }

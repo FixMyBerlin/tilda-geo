@@ -1,12 +1,13 @@
-// We use bun.sh to run this file
+// We use nub to run this file
 import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
 import { MAPTILER_API_KEY } from '@/components/regionen/pageRegionSlug/Map/utils/maptilerApiKey.const'
+import { write } from '@/scripts/lib/bun'
 import { mergeSprites } from './mergeSprites'
 import { fetchStyle, log, saveJson } from './util'
 
-console.log(styleText(['inverse', 'bold'], 'START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), import.meta.filename)
 
 // Configuration
 const baseMapStyle = `https://api.maptiler.com/maps/08357855-50d4-44e1-ac9f-ea099d9de4a5/style.json?key=${MAPTILER_API_KEY}`
@@ -259,7 +260,7 @@ export const mapboxStyleGroupLayers_${group.folderName}: MapboxStyleLayer[] = ${
   )}
   `
   const stylesFile = path.join(styleFolder, `${group.folderName}.ts`)
-  await Bun.write(stylesFile, groupFile)
+  await write(stylesFile, groupFile)
   log(`Write stylesFile`, stylesFile)
 }
 
@@ -286,10 +287,10 @@ const typesFileContent = `// DO NOT EDIT MANUALLY
 export type MapboxStyleLayer = ${mapboxStyleLayerTypeRhs}
 `
 const typeFileName = path.join(groupFolder, 'types.ts')
-await Bun.write(typeFileName, typesFileContent)
+await write(typeFileName, typesFileContent)
 log(`Write typesFile`, typeFileName)
 
-await Bun.write(
+await write(
   path.join(scriptJsonFolder, 'metadata_last_process.json'),
   JSON.stringify(metaFileContent, null, 2),
 )

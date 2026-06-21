@@ -1,5 +1,5 @@
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { $ } from 'bun'
 import { type Topic, topicsConfig } from '../constants/topics.const'
 import {
   createReferenceTable,
@@ -12,6 +12,7 @@ import { formatTimestamp } from '../utils/formatTimestamp'
 import { updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
+import { $ } from '../utils/sh'
 import { getSkipUnchangedContext, topicPath, willSkipTopic } from '../utils/skipUnchanged'
 import { bboxesFilter, filteredFilePath } from './filter'
 
@@ -25,7 +26,7 @@ const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
 async function runSQL(topic: Topic) {
   console.log('runTopic: runSQL', topic)
   const psqlFile = `${mainFilePath(topic)}.sql`
-  const exists = await Bun.file(psqlFile).exists()
+  const exists = existsSync(psqlFile)
 
   if (exists) {
     try {

@@ -1,6 +1,7 @@
-import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { bboxPolygon, featureCollection, union } from '@turf/turf'
-import { $ } from 'bun'
 import {
   BBOX_FILTERED_FILE,
   OSM_FILTERED_DIR,
@@ -11,6 +12,7 @@ import type { TopicConfigBbox } from '../constants/topics.const'
 import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
+import { $ } from '../utils/sh'
 import { originalFilePath } from './download'
 
 /**
@@ -31,7 +33,7 @@ const OSMIUM_FILTER_BBOX_FILE = `${OSMIUM_FILTER_BBOX_DIR}/merged-bboxes.geojson
  */
 export async function tagFilter(fileName: string, sourceFileChanged: boolean) {
   const pbfPath = filteredFilePath(fileName)
-  const pbfMissing = !(await Bun.file(pbfPath).exists())
+  const pbfMissing = !existsSync(pbfPath)
 
   // Only run tag filters if the file or the filters have changed
   const filtersChanged = await directoryHasChanged(OSMIUM_FILTER_EXPRESSIONS_DIR)
@@ -106,9 +108,10 @@ export async function bboxesFilter(
     throw new Error(`Failed to merge bboxes ${JSON.stringify(bboxes)}`)
   }
 
-  Bun.write(OSMIUM_FILTER_BBOX_FILE, JSON.stringify(mergedBboxPolygonFeatures))
+  await mkdir(dirname(OSMIUM_FILTER_BBOX_FILE), { recursive: true })
+  await writeFile(OSMIUM_FILTER_BBOX_FILE, JSON.stringify(mergedBboxPolygonFeatures))
 
-  const filteredPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
+  const filteredPbfExists = existsSync(filteredFilePath(outputName))
   const filterDirChanged = await directoryHasChanged(OSMIUM_FILTER_BBOX_DIR)
   // Regenerate if source file changed, bbox filter changed, or file is missing
   // Note: filterDirChanged (PROCESS_ONLY_BBOX changes) triggers regeneration but doesn't affect diffing

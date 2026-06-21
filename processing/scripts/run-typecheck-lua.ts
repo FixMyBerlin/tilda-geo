@@ -1,5 +1,5 @@
-#!/usr/bin/env bun
-import { $ } from 'bun'
+#!/usr/bin/env nub
+import { $ } from '../utils/sh'
 
 process.env.PATH = `/usr/local/bin:/opt/homebrew/bin:${process.env.HOME}/.docker/bin:${process.env.PATH ?? ''}`
 
@@ -12,7 +12,7 @@ if (!root) {
 const dockerCheck = await $`command -v docker`.quiet().nothrow()
 if (dockerCheck.exitCode !== 0) {
   console.warn('docker not in PATH - skipping Lua type-check.')
-  console.log('Run manually: bun run type-check-lua (in processing/)')
+  console.log('Run manually: nub run type-check-lua (in processing/)')
   process.exit(0)
 }
 
@@ -24,4 +24,4 @@ if (pingCheck.exitCode === 0) {
   console.warn('No internet connection - skipping Docker build and using cached image.')
 }
 
-await $`docker run --rm --entrypoint bun -v ${root}/processing:/processing processing_typecheck_img /processing/scripts/typecheck-lua-in-container.ts`
+await $`docker run --rm --entrypoint nub -v ${root}/processing:/processing processing_typecheck_img /processing/scripts/typecheck-lua-in-container.ts`

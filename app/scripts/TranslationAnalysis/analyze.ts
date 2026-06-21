@@ -1,12 +1,13 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { sql } from 'bun'
+import { Pool } from 'pg'
 import { interactivityConfiguration } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import { getBaseDatabaseUrl } from '@/server/database-url.server'
 
-// Set the database URL for bun's sql template literal
-process.env.DATABASE_URL = getBaseDatabaseUrl()
+// node-postgres pool. The app already depends on `pg` (via Prisma's `@prisma/adapter-pg`
+// and scripts/topic-docs-coverage-check), so this raw-SQL script adds no extra DB driver.
+const pool = new Pool({ connectionString: getBaseDatabaseUrl() })
 
 // Keys that should be skipped (full text, special handling, numbers)
 const SKIP_KEYS = [
@@ -117,14 +118,14 @@ async function analyzeTable(tableName: string): Promise<AnalysisResult> {
   // Get all keys from the database
   let allKeys: string[] = []
   try {
-    // Use sql.unsafe for dynamic table names
-    const result = await sql.unsafe(`
+    // Dynamic table name is interpolated as an identifier (not a bound value).
+    const result = await pool.query<{ key: string }>(`
       SELECT DISTINCT jsonb_object_keys(tags) as key
       FROM "${tableName}"
       WHERE tags IS NOT NULL
       AND jsonb_typeof(tags) = 'object'
     `)
-    allKeys = result.map((row: { key: string }) => row.key).filter(Boolean)
+    allKeys = result.rows.map((row) => row.key).filter(Boolean)
   } catch (error) {
     console.warn(`Could not query keys from ${tableName}:`, error)
     // Fallback to styling keys if database query fails
@@ -160,7 +161,7 @@ async function analyzeTable(tableName: string): Promise<AnalysisResult> {
 
     // Get actual values from database
     try {
-      const result = await sql.unsafe(`
+      const result = await pool.query<{ value: string }>(`
         SELECT DISTINCT tags->>'${key}' as value
         FROM "${tableName}"
         WHERE tags->>'${key}' IS NOT NULL
@@ -168,7 +169,7 @@ async function analyzeTable(tableName: string): Promise<AnalysisResult> {
         LIMIT 100
       `)
 
-      const values = result.map((row: { value: string }) => row.value).filter(Boolean)
+      const values = result.rows.map((row) => row.value).filter(Boolean)
       keyValuesFromDb[key] = new Set(values)
     } catch (error) {
       console.warn(`Could not query ${tableName}.${key}:`, error)
@@ -231,7 +232,7 @@ function formatMissingKeyValues(tableName: string, keyValues: Record<string, str
 }
 
 function generateReport(results: AnalysisResult[]): void {
-  const outputDir = path.join(__dirname, 'reports')
+  const outputDir = path.join(import.meta.dirname, 'reports')
 
   // Create output directory if it doesn't exist
   if (!fs.existsSync(outputDir)) {
@@ -290,6 +291,10 @@ async function main() {
   console.log('Analysis complete!')
 }
 
-if (require.main === module) {
-  main().catch(console.error)
+if (import.meta.main) {
+  main()
+    .catch(console.error)
+    .finally(() => {
+      void pool.end()
+    })
 }

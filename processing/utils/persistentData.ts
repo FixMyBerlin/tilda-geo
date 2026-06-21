@@ -1,17 +1,20 @@
-import { join } from 'node:path'
+import { existsSync } from 'node:fs'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { HASH_DIR } from '../constants/directories.const'
 
 const hashPath = (id: string) => join(HASH_DIR, id)
 
 export async function readHashFromFile(pathAsFilename: string) {
-  const file = await Bun.file(hashPath(pathAsFilename))
-  if (await file.exists()) {
-    return file.text()
+  const p = hashPath(pathAsFilename)
+  if (existsSync(p)) {
+    return readFile(p, 'utf8')
   }
   return ''
 }
 
 export async function writeHashForFile(pathAsFilename: string, data: string) {
-  const file = await Bun.file(hashPath(pathAsFilename))
-  return Bun.write(file, data)
+  const p = hashPath(pathAsFilename)
+  await mkdir(dirname(p), { recursive: true })
+  return writeFile(p, data)
 }

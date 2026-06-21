@@ -1,6 +1,7 @@
 import { copyFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { confirm, isCancel, note } from '@clack/prompts'
+import { argv } from '@/scripts/lib/bun'
 import { logErr, logOk, logWarn } from './predevLog'
 
 const label = 'ensure_env'
@@ -44,7 +45,7 @@ export async function ensureEnv() {
     process.exit(1)
   }
 
-  const isInteractive = process.stdin.isTTY && !Bun.argv.includes('--non-interactive')
+  const isInteractive = process.stdin.isTTY && !argv.includes('--non-interactive')
 
   if (isInteractive) {
     const proceed = await confirm({

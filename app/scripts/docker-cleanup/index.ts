@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import * as p from '@clack/prompts'
 import { getDockerDf } from './dockerPreview'
 import { CLEANUP_ACTIONS, type CleanupActionId, getActionsToRun, getPreviewGB } from './options'

@@ -75,7 +75,7 @@ export async function ensureDevStack() {
   if (!attachFromEnv && !(await isLinkedWorktree(repoRoot))) {
     logWarn(
       label,
-      `Feature branches should use a worktree, not the main checkout. Run: bun run setup-worktree -- ${branch} — see docs/docker-local-development.md`,
+      `Feature branches should use a worktree, not the main checkout. Run: nub run setup-worktree -- ${branch} — see docs/docker-local-development.md`,
     )
   }
 

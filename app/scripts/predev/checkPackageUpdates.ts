@@ -1,10 +1,11 @@
 import path from 'node:path'
 import { TZDate } from '@date-fns/tz'
 import { isSameWeek } from 'date-fns'
+import { file, spawn, write } from '@/scripts/lib/bun'
 import { logErr, logOk, logSkip, logWarn } from './predevLog'
 
 const TZ = 'Europe/Berlin'
-const LAST_CHECKED_PATH = path.join(import.meta.dir, '.lastchecked')
+const LAST_CHECKED_PATH = path.join(import.meta.dirname, '.lastchecked')
 
 const label = 'Package updates'
 
@@ -14,7 +15,7 @@ export async function checkPackageUpdates() {
 
     let lastChecked: TZDate | null = null
     try {
-      const content = await Bun.file(LAST_CHECKED_PATH).text()
+      const content = await file(LAST_CHECKED_PATH).text()
       const trimmed = content.trim()
       if (trimmed) lastChecked = new TZDate(new Date(trimmed), TZ)
     } catch {
@@ -27,7 +28,7 @@ export async function checkPackageUpdates() {
       return
     }
 
-    const proc = Bun.spawn(['bunx', 'taze', 'major', '--includeLocked', '--maturity-period', '5'], {
+    const proc = spawn(['nubx', 'taze', 'major', '--includeLocked', '--maturity-period', '5'], {
       cwd: process.cwd(),
       stdout: 'pipe',
       stderr: 'pipe',
@@ -38,11 +39,11 @@ export async function checkPackageUpdates() {
     ])
     await proc.exited
 
-    await Bun.write(LAST_CHECKED_PATH, new Date().toISOString())
+    await write(LAST_CHECKED_PATH, new Date().toISOString())
 
     const hasUpdates = /→|outdated|upgrade/i.test(stdout) || /→|outdated|upgrade/i.test(stderr)
     if (hasUpdates) {
-      logWarn(label, 'updates available — remember to run `bun run update`')
+      logWarn(label, 'updates available — remember to run `nub run update`')
     } else {
       logOk(label)
     }

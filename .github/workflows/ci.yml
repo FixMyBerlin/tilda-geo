@@ -29,11 +29,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup nub
+        uses: nubjs/setup-nub@v0
 
       - name: Verify deploy env manifest
-        run: bun .github/scripts/verify-env-manifest.ts
+        run: nub .github/scripts/verify-env-manifest.ts
 
   run-app-ci:
     name: Run Type Check & Linters
@@ -45,26 +45,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: nubjs/setup-nub@v0
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: nub install --frozen-lockfile
 
       - name: Check types
-        run: bun run type-check
+        run: nub run type-check
 
       - name: Check formatting
-        run: bun run check-format
+        run: nub run check-format
 
       - name: Check linting
-        run: bun run check-lint
+        run: nub run check-lint
 
       - name: Run tests
         env:
           # Vitest loads repo `/.env` when present; PR runners have none. These match local dev (see `.env.example`).
           VITE_APP_ENV: development
           VITE_APP_ORIGIN: http://127.0.0.1:5173
-        run: bun run test-run
+        run: nub run test-run
 
   run-processing-type-check:
     name: Run Processing Type Check
@@ -76,13 +76,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: nubjs/setup-nub@v0
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: nub install --frozen-lockfile
 
       - name: Check types
-        run: bun run type-check
+        run: nub run type-check
 
   # Disabled due to error https://github.com/FixMyBerlin/tilda-geo/actions/runs/15585651343/job/43891057696?pr=209
   # > Run docker run test_img

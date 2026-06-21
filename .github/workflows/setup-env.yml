@@ -18,11 +18,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup nub
+        uses: nubjs/setup-nub@v0
 
       - name: Verify env manifest
-        run: bun .github/scripts/verify-env-manifest.ts
+        run: nub .github/scripts/verify-env-manifest.ts
 
       - name: Generate deploy .env from manifest
         env:
@@ -55,7 +55,7 @@ jobs:
           VAR_PROCESSING_DIFFING_BBOX: ${{ vars.PROCESSING_DIFFING_BBOX }}
           VAR_ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
         run: |
-          bun .github/scripts/generate-deploy-env.ts \
+          nub .github/scripts/generate-deploy-env.ts \
             --manifest .github/env/deploy.manifest.json \
             --output .env.deploy.generated
 

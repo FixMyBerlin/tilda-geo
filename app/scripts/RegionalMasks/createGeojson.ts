@@ -1,4 +1,4 @@
-// We use bun.sh to run this file
+// We use nub to run this file
 import path from 'node:path'
 import { styleText } from 'node:util'
 import {
@@ -16,8 +16,9 @@ import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import { z } from 'zod'
 import { getBoundaryExportApiBaseUrl } from '@/components/shared/utils/getExportApiUrl'
 import { staticRegion } from '@/data/regions.const'
+import { write } from '@/scripts/lib/bun'
 
-console.log(styleText(['inverse', 'bold'], 'START'), __filename)
+console.log(styleText(['inverse', 'bold'], 'START'), import.meta.filename)
 
 const geojsonPolygon = z.object({
   type: z.literal('Polygon'),
@@ -48,8 +49,8 @@ const handleError = (error: (string | Record<string, string | number>)[]) => {
 
 const saveErrors = async () => {
   const fileName = 'error.log'
-  const filePath = path.resolve(__dirname, fileName)
-  await Bun.write(filePath, JSON.stringify(errorLog, undefined, 2))
+  const filePath = path.resolve(import.meta.dirname, fileName)
+  await write(filePath, JSON.stringify(errorLog, undefined, 2))
 }
 
 const downloadGeoJson = async (idsString: string) => {
@@ -151,21 +152,27 @@ for (const region of staticRegion) {
     collectedFeatures.push(maskFeature)
 
     // Store separate files for debugging
-    await Bun.write(
-      path.resolve(__dirname, `./geojson/${regionName}-boundary-for-debugging.geojson`),
+    await write(
+      path.resolve(import.meta.dirname, `./geojson/${regionName}-boundary-for-debugging.geojson`),
       JSON.stringify(boundaryFeature),
     )
-    await Bun.write(
-      path.resolve(__dirname, `./geojson/${regionName}-buffered-boundary-for-debugging.geojson`),
+    await write(
+      path.resolve(
+        import.meta.dirname,
+        `./geojson/${regionName}-buffered-boundary-for-debugging.geojson`,
+      ),
       JSON.stringify(bufferFeature),
     )
-    await Bun.write(
-      path.resolve(__dirname, `./geojson/${regionName}-mask-for-debugging.geojson`),
+    await write(
+      path.resolve(import.meta.dirname, `./geojson/${regionName}-mask-for-debugging.geojson`),
       JSON.stringify(mask),
     )
     // And also store the bbox and centerOfMass for use in regions.const.ts
-    await Bun.write(
-      path.resolve(__dirname, `./geojson/${regionName}-bbox-center-for-reference.geojson`),
+    await write(
+      path.resolve(
+        import.meta.dirname,
+        `./geojson/${regionName}-bbox-center-for-reference.geojson`,
+      ),
       JSON.stringify(
         point(centerOfMass(boundaryFeature).geometry.coordinates, {
           bbox: bbox(boundaryFeature),
@@ -177,8 +184,11 @@ for (const region of staticRegion) {
 
 // 2. Save them locally to be picked up by createMbtiles
 const collectedFeatureCollection = featureCollection(collectedFeatures)
-const boundariesAndMaskGeojson = path.resolve(__dirname, './geojson/atlas-regional-masks.geojson')
-await Bun.write(boundariesAndMaskGeojson, JSON.stringify(collectedFeatureCollection))
+const boundariesAndMaskGeojson = path.resolve(
+  import.meta.dirname,
+  './geojson/atlas-regional-masks.geojson',
+)
+await write(boundariesAndMaskGeojson, JSON.stringify(collectedFeatureCollection))
 
 await saveErrors()
 console.info(styleText(['inverse', 'bold'], 'FINISHED createGeojson'))

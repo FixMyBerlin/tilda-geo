@@ -9,6 +9,7 @@ import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
+import { sql } from './utils/sql'
 
 async function main() {
   try {
@@ -62,4 +63,8 @@ async function main() {
   }
 }
 
-main()
+// postgres.js keeps a connection pool open, which would keep the Node process alive after
+// processing finishes — close it once `main()` settles so the run exits like it did under Bun.
+main().finally(() => {
+  void sql.end()
+})

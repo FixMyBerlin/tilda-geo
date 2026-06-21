@@ -1,8 +1,8 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import path from 'node:path'
 import { parseArgs, styleText } from 'node:util'
 import * as p from '@clack/prompts'
-import { $ } from 'bun'
+import { $, argv } from '@/scripts/lib/bun'
 
 const BBOX_PRESETS = {
   bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
@@ -40,10 +40,10 @@ const ENV_ORDER_BEFORE_DIFF_MODE = [
   'PROCESS_GEOFABRIK_DOWNLOAD_URL',
 ] as const
 
-const userArgs = Bun.argv.slice(2)
+const userArgs = argv.slice(2)
 
 const { values } = parseArgs({
-  args: Bun.argv,
+  args: argv,
   options: {
     preset: { type: 'string' },
     'distinct-diff-bbox': { type: 'boolean' },
@@ -116,7 +116,7 @@ function isFullNonInteractiveBatch() {
 function printHelp() {
   console.log(`processing-generate-command — print a copy-paste shell command for docker compose processing (see README)
 
-Usage: bun run processing-generate-command -- [options]
+Usage: nub run processing-generate-command -- [options]
 
 Does not run Docker. Outputs one line that cds to the absolute repo root in a subshell, sets env vars, then runs docker compose.
 Your shell cwd stays the same (safe to paste from app/). PROCESSING_DIFFING_MODE is last for easy edits.
@@ -135,9 +135,9 @@ Non-interactive (CI, agents): pass **all** of the following (see example):
 
 Optional (CLI only, never prompted): --osm2pgsql-log-level, --download-url (override Geofabrik extract URL; default comes from root .env)
 
-Example (preset, all topics; bun run injects skip defaults):
+Example (preset, all topics; nub run injects skip defaults):
 
-  bun run processing-generate-command -- \\
+  nub run processing-generate-command -- \\
     --preset xhain \\
     --diff-mode fixed \\
     --all-topics \\
@@ -159,7 +159,7 @@ function printBatchRequiredError() {
   console.error(
     'processing-generate-command: stdin is not a TTY. Pass a full non-interactive flag set.',
   )
-  console.error('Run from app/: bun run processing-generate-command -- --help')
+  console.error('Run from app/: nub run processing-generate-command -- --help')
 }
 
 function parseBin(name: string, raw: string | undefined, defaultVal: '0' | '1') {

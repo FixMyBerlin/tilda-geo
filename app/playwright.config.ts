@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test'
 import dotenv from 'dotenv'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// Load repo-level .env first so webServer (bun run dev) gets DATABASE_* etc.
+// Load repo-level .env first so webServer (nub run dev) gets DATABASE_* etc.
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
 // Optional app-local env can override or extend defaults.
 dotenv.config({ path: path.resolve(__dirname, '.env') })
@@ -25,7 +25,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'bun run dev',
+    command: 'nub run dev',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

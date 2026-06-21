@@ -1,4 +1,3 @@
-import { $, sql } from 'bun'
 import { HASH_DIR, OSM_DOWNLOAD_DIR, OSM_FILTERED_DIR } from '../constants/directories.const'
 import { initializeCustomFunctionsDataTables, initializeSchemaData } from '../dataTables/dataTables'
 import {
@@ -9,6 +8,8 @@ import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
 import { isDev } from '../utils/isDev'
 import { logPadded } from '../utils/logging'
 import { paramsFilteredForLogs } from '../utils/parameters'
+import { $ } from '../utils/sh'
+import { sql } from '../utils/sql'
 import { initializeAggregatedLengthsTable } from './afterthoughts/initializeAggregatedLengths'
 import { initializeMetadataTable } from './metadata'
 

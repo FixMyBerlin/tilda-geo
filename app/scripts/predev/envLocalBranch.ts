@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
+import { spawn } from '@/scripts/lib/bun'
 import { repoRootFromApp } from './ensureEnv'
 import { logOk, logWarn } from './predevLog'
 
@@ -20,7 +21,7 @@ export function envLocalPath(repoRoot = repoRootFromApp()) {
 }
 
 export async function currentGitBranch(repoRoot = repoRootFromApp()) {
-  const proc = Bun.spawn(['git', 'branch', '--show-current'], {
+  const proc = spawn(['git', 'branch', '--show-current'], {
     cwd: repoRoot,
     stdout: 'pipe',
     stderr: 'pipe',
@@ -31,7 +32,7 @@ export async function currentGitBranch(repoRoot = repoRootFromApp()) {
 }
 
 export async function isLinkedWorktree(repoRoot = repoRootFromApp()) {
-  const proc = Bun.spawn(['git', 'rev-parse', '--git-dir'], {
+  const proc = spawn(['git', 'rev-parse', '--git-dir'], {
     cwd: repoRoot,
     stdout: 'pipe',
     stderr: 'pipe',
@@ -56,10 +57,10 @@ function removeEnvLocal(repoRoot: string) {
 }
 
 async function restoreEnvExampleIfDirty(repoRoot: string) {
-  const diff = Bun.spawn(['git', 'diff', '--quiet', '.env.example'], { cwd: repoRoot })
+  const diff = spawn(['git', 'diff', '--quiet', '.env.example'], { cwd: repoRoot })
   await diff.exited
   if (diff.exitCode === 0) return false
-  const restore = Bun.spawn(['git', 'restore', '--', '.env.example'], { cwd: repoRoot })
+  const restore = spawn(['git', 'restore', '--', '.env.example'], { cwd: repoRoot })
   await restore.exited
   return restore.exitCode === 0
 }

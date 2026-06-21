@@ -1,5 +1,5 @@
-#!/usr/bin/env bun
-import { $ } from 'bun'
+#!/usr/bin/env nub
+import { $ } from '../utils/sh'
 
 process.env.PATH = `/usr/local/bin:/opt/homebrew/bin:${process.env.HOME}/.docker/bin:${process.env.PATH ?? ''}`
 
@@ -12,7 +12,7 @@ if (!root) {
 const dockerCheck = await $`command -v docker`.quiet().nothrow()
 if (dockerCheck.exitCode !== 0) {
   console.warn('docker not in PATH - skipping processing Docker tests.')
-  console.log('Run manually: bun run test (in processing/)')
+  console.log('Run manually: nub run test (in processing/)')
   process.exit(0)
 }
 

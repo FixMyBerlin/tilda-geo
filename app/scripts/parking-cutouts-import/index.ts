@@ -1,6 +1,7 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import { mkdirSync } from 'node:fs'
 import * as p from '@clack/prompts'
+import { argv } from '@/scripts/lib/bun'
 import {
   DEFAULT_OUTPUT_DIR,
   type CliOptions,
@@ -108,7 +109,7 @@ function resolveNonInteractiveOptions(partial: CliOptions) {
 }
 
 async function main() {
-  const parsed = parseCliArgs(Bun.argv)
+  const parsed = parseCliArgs(argv)
   if (parsed.help) {
     printHelp()
     return

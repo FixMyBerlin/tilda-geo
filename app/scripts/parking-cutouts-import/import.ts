@@ -1,4 +1,4 @@
-import { $ } from 'bun'
+import { $, spawnSync } from '@/scripts/lib/bun'
 
 export function databaseUrlToOgrPg(databaseUrl: string) {
   const url = new URL(databaseUrl)
@@ -94,7 +94,7 @@ export async function runOgr2ogrImport({
     return { command: args.join(' ') }
   }
 
-  const result = Bun.spawnSync(args, { stdout: 'pipe', stderr: 'pipe' })
+  const result = spawnSync(args, { stdout: 'pipe', stderr: 'pipe' })
   if (result.exitCode !== 0) {
     const stderr = result.stderr.toString()
     const stdout = result.stdout.toString()

@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
@@ -18,8 +18,8 @@ type Manifest = {
 
 const START_MARKER = '<!-- GENERATED_ENV_TABLE_START -->'
 const END_MARKER = '<!-- GENERATED_ENV_TABLE_END -->'
-const MANIFEST_PATH = resolve(import.meta.dir, '..', 'env', 'deploy.manifest.json')
-const README_PATH = resolve(import.meta.dir, '..', 'README.md')
+const MANIFEST_PATH = resolve(import.meta.dirname, '..', 'env', 'deploy.manifest.json')
+const README_PATH = resolve(import.meta.dirname, '..', 'README.md')
 
 function readManifest(path: string) {
   const parsed = JSON.parse(readFileSync(path, 'utf8')) as Manifest
@@ -47,7 +47,7 @@ function buildGeneratedBlock(vars: ManifestVariable[]) {
 
   return [
     START_MARKER,
-    '<!-- This block is GENERATED. Edit .github/env/deploy.manifest.json and run `bun .github/scripts/generate-github-readme.ts`. -->',
+    '<!-- This block is GENERATED. Edit .github/env/deploy.manifest.json and run `nub .github/scripts/generate-github-readme.ts`. -->',
     '| Name | Source | Required | Description |',
     '| --- | --- | --- | --- |',
     ...rows,

@@ -1,10 +1,11 @@
-// We use bun.sh to run this file
+// We use nub to run this file
 import fs from 'node:fs'
 import path from 'node:path'
 import { parseArgs } from 'node:util'
 import { select } from '@clack/prompts'
 import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
+import { argv, spawnSync } from '@/scripts/lib/bun'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
 import { getRegions } from './api'
 import {
@@ -27,7 +28,7 @@ const isStaticDatasetsCliEnv = (value: string | undefined): value is StaticDatas
   value !== undefined && (STATIC_DATASETS_CLI_ENVS as readonly string[]).includes(value)
 
 const { values, positionals: _positionals } = parseArgs({
-  args: Bun.argv,
+  args: argv,
   options: {
     env: { type: 'string' },
     'keep-tmp': { type: 'boolean' },
@@ -92,7 +93,7 @@ const ignorePatterns = fs.existsSync(updateIgnorePath)
   : []
 
 if (!fs.existsSync(geoJsonFolder)) {
-  red(`folder "${geoJsonFolder}" does not exists. Please run "bun run static-datasets-link"?`)
+  red(`folder "${geoJsonFolder}" does not exists. Please run "nub run static-datasets-link"?`)
   process.exit(1)
 }
 
@@ -245,10 +246,10 @@ if (appEnv === 'production') {
   const tagMessage = `publish data to ${folder}`
 
   try {
-    Bun.spawnSync(['git', 'tag', '-a', tagName, '-m', tagMessage], {
+    spawnSync(['git', 'tag', '-a', tagName, '-m', tagMessage], {
       cwd: '../../tilda-static-data',
     })
-    Bun.spawnSync(['git', 'push', 'origin', tagName], {
+    spawnSync(['git', 'push', 'origin', tagName], {
       cwd: '../../tilda-static-data',
     })
     console.log(`Tag '${tagName}' has been created and pushed to GitHub.`)

@@ -1,10 +1,13 @@
-import { join } from 'node:path'
-import { $ } from 'bun'
+import { Buffer } from 'node:buffer'
+import { existsSync } from 'node:fs'
+import { mkdir, stat, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { isSameMinute } from 'date-fns'
 import { PSEUDO_TAGS_DATA } from '../../constants/directories.const'
 import { berlinTimeString } from '../../utils/berlinTime'
 import { humanFileSize } from '../../utils/humanFileSize'
 import { params } from '../../utils/parameters'
+import { $ } from '../../utils/sh'
 import {
   getLatestMapillaryCoverageMetadata,
   initializeMapillaryCoverageMetadataTable,
@@ -21,7 +24,7 @@ export async function downloadMapillaryCoverage() {
   await initializeMapillaryCoverageMetadataTable()
   const csvDestPath = join(PSEUDO_TAGS_DATA, 'mapillary_coverage.csv')
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
-  const csvExists = await Bun.file(csvDestPath).exists()
+  const csvExists = existsSync(csvDestPath)
 
   if (diffingMode === 'fixed') {
     if (!csvExists) {
@@ -70,8 +73,9 @@ export async function downloadMapillaryCoverage() {
     const csvRes = await fetch(mapillaryCoverageSources.data)
     if (!csvRes.ok)
       throw new Error('[Pseudo Tags][Mapillary] ERROR: Failed to download Mapillary coverage CSV')
-    await Bun.write(csvDestPath, await csvRes.arrayBuffer())
-    const { size } = await Bun.file(csvDestPath).stat()
+    await mkdir(dirname(csvDestPath), { recursive: true })
+    await writeFile(csvDestPath, Buffer.from(await csvRes.arrayBuffer()))
+    const { size } = await stat(csvDestPath)
 
     // Store metadata in database
     await insertMapillaryCoverageMetadata(

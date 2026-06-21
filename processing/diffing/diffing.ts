@@ -1,9 +1,10 @@
 import { styleText } from 'node:util'
 import { bbox, bboxPolygon, featureCollection, intersect } from '@turf/turf'
-import { $, sql } from 'bun'
 import type { Topic, TopicConfigBbox } from '../constants/topics.const'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
+import { $ } from '../utils/sh'
+import { sql } from '../utils/sql'
 
 const referenceTableIdentifier = (table: string) => `diffing_reference."${table}"` as const
 const diffTableIdentifier = (table: string) => `public."${table}_diff"` as const
@@ -33,7 +34,7 @@ export async function getTopicTables(topic: Topic) {
     )
     return tables
   } catch (error) {
-    // @ts-expect-error error is unkown but we know it's likely a bun error here https://bun.sh/docs/runtime/shell#error-handling
+    // @ts-expect-error error is unknown but we know it's likely a shell ($) execution error with a `.stderr` field
     const msg = 'stderr' in error ? error.stderr.toString() : error
     throw new Error(
       `Failed to get tables for topic "${topic}". This is likely due to some required columns missing: ${msg}`,

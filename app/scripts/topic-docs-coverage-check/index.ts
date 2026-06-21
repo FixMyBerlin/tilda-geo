@@ -1,10 +1,11 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 import { Client } from 'pg'
 import { z } from 'zod'
+import { argv, write } from '@/scripts/lib/bun'
 import { topicDocNumericFormatSet } from '../../src/data/topicDocs/schema'
 import { getExportAttributeType } from '../../src/server/api/export/exportAttributeType'
 import { getBaseDatabaseUrl } from '../../src/server/database-url.server'
@@ -51,7 +52,7 @@ type DbPair = {
 }
 
 const loadGeneratedModule = async <T>(relativePath: string) => {
-  const absolutePath = path.resolve(import.meta.dir, relativePath)
+  const absolutePath = path.resolve(import.meta.dirname, relativePath)
   const moduleUrl = `${pathToFileURL(absolutePath).href}?cacheBust=${Date.now()}`
   const loaded = (await import(moduleUrl)) as { default: T }
   return loaded.default
@@ -161,7 +162,7 @@ const logGeneratedTranslations = (report: GeneratedTranslationsReport) => {
 const SKIP_ENUMERATED_VALUE_COVERAGE_KEYS = new Set(['condition_category'])
 
 const { values } = parseArgs({
-  args: Bun.argv,
+  args: argv,
   options: {
     table: { type: 'string' },
     'out-json': { type: 'string' },
@@ -262,7 +263,7 @@ const writeTableMarkdownReport = async (input: { reportDir: string; row: DbCover
     markdownBullets(row.documentedValuesNotInDb),
     '',
   ].join('\n')
-  await Bun.write(filePath, body)
+  await write(filePath, body)
 }
 
 const run = async () => {
@@ -290,7 +291,7 @@ const run = async () => {
 
   if (translationSync.failed) {
     if (values['out-json']) {
-      await Bun.write(
+      await write(
         values['out-json'],
         `${JSON.stringify(
           {
@@ -486,7 +487,7 @@ const run = async () => {
   }
 
   if (values['out-json']) {
-    await Bun.write(
+    await write(
       values['out-json'],
       `${JSON.stringify(
         {

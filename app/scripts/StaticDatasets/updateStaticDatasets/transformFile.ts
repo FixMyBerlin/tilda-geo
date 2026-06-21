@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { styleText } from 'node:util'
 import { getIssues } from '@placemarkio/check-geojson'
+import { file, write } from '@/scripts/lib/bun'
 import { import_ } from '../utils/import_'
 import { addUniqueIds } from './addUniqueIds'
 import { getDecompressedFilename } from './getDecompressedFilename'
@@ -18,7 +19,7 @@ export const transformFile = async (
     outputFilename: datasetFolderName,
     outputFolder,
   })
-  let data = await Bun.file(filenameToRead).json()
+  let data = await file(filenameToRead).json()
 
   // INTERMEZZO: Do some checks on the file
   // Validate with placemarkio/check-geojson
@@ -53,6 +54,6 @@ export const transformFile = async (
   data = addUniqueIds(data)
 
   const outputFullFilename = path.join(outputFolder, `${datasetFolderName}.transformed.geojson`)
-  await Bun.write(outputFullFilename, JSON.stringify(data, null, 2))
+  await write(outputFullFilename, JSON.stringify(data, null, 2))
   return outputFullFilename
 }

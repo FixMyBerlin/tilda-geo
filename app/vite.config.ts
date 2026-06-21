@@ -32,7 +32,7 @@ export default defineConfig({
     client: {
       build: {
         // package.json browserslist (market-share queries) is the single source of truth
-        // for client build target and eslint-plugin-compat. Server/Bun code is unaffected.
+        // for client build target and eslint-plugin-compat. Server/Node code is unaffected.
         target: browserslistToEsbuild(),
         sourcemap: true,
       },
@@ -54,7 +54,7 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
-    // Keep HMR pinned to the same host/port as `bun run dev` so websocket reconnects
+    // Keep HMR pinned to the same host/port as `nub run dev` so websocket reconnects
     // stay stable after config-triggered restarts.
     hmr: {
       protocol: 'ws',
@@ -99,7 +99,8 @@ export default defineConfig({
       },
     }),
     nitro({
-      preset: 'bun',
+      // Build the production server for Node (was 'bun'); `.output/server/index.mjs` runs via `node`.
+      preset: 'node-server',
       plugins: [
         'src/server/instrumentation/nitro-env-validation.plugin.server.ts',
         'src/server/instrumentation/nitro-legacy-cookie-sweep.plugin.server.ts',

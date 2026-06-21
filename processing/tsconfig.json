@@ -7,7 +7,7 @@
     // ES2025 (not ES2022) so the native Set methods we use (Set.intersection/difference,
     // see steps/processTopics.ts) are typed. Bun supports them at runtime.
     "lib": ["ES2025"],
-    "types": ["bun-types"],
+    "types": ["node"],
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "bundler",

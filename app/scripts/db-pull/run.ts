@@ -1,8 +1,8 @@
-#!/usr/bin/env bun
+#!/usr/bin/env nub
 
 import * as p from '@clack/prompts'
-import { $ } from 'bun'
 import { z } from 'zod'
+import { $, argv } from '@/scripts/lib/bun'
 import { ALLOWED_SCHEMAS, ALLOWED_SOURCES, parseCliArgs } from './db-helpers'
 
 function printHelp() {
@@ -11,23 +11,23 @@ function printHelp() {
 Run remote pull and local restore in sequence.
 
 Usage:
-  bun scripts/db-pull/run.ts [--source production|staging] [--schema prisma|data]
+  nub scripts/db-pull/run.ts [--source production|staging] [--schema prisma|data]
 
 Examples:
-  bun scripts/db-pull/run.ts
-  bun scripts/db-pull/run.ts --source staging --schema prisma
+  nub scripts/db-pull/run.ts
+  nub scripts/db-pull/run.ts --source staging --schema prisma
 
 Notes:
   - In interactive mode (TTY), missing args are prompted once.
   - In non-interactive mode, pass both --source and --schema.
   - This command runs:
-      1) bun run db-pull:pull -- --source <source> --schema <schema>
-      2) bun run db-pull:restore -- --source <source> --schema <schema>
+      1) nub run db-pull:pull -- --source <source> --schema <schema>
+      2) nub run db-pull:restore -- --source <source> --schema <schema>
 `)
 }
 
 async function main() {
-  const { help, source: sourceArg, schema: schemaArg } = parseCliArgs(Bun.argv)
+  const { help, source: sourceArg, schema: schemaArg } = parseCliArgs(argv)
   if (help) {
     printHelp()
     return
@@ -78,12 +78,12 @@ async function main() {
   }
 
   const pullResult =
-    await $`bun run db-pull:pull -- --source ${source} --schema ${schema}`.nothrow()
+    await $`nub run db-pull:pull -- --source ${source} --schema ${schema}`.nothrow()
   if (pullResult.exitCode !== 0) {
     process.exit(pullResult.exitCode || 1)
   }
   const restoreResult =
-    await $`bun run db-pull:restore -- --source ${source} --schema ${schema}`.nothrow()
+    await $`nub run db-pull:restore -- --source ${source} --schema ${schema}`.nothrow()
   if (restoreResult.exitCode !== 0) {
     process.exit(restoreResult.exitCode || 1)
   }

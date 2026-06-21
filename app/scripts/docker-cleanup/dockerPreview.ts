@@ -1,4 +1,4 @@
-import { $ } from 'bun'
+import { $ } from '@/scripts/lib/bun'
 
 const SIZE_UNITS: Record<string, number> = {
   B: 1,

@@ -1,8 +1,8 @@
 import { readdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { $ } from 'bun'
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
+import { $ } from '../utils/sh'
 import { triggerPrivateApi } from './externalTriggers'
 
 /** Matches `docker-compose.yml` processing.volumes mount for cache clearing. */

@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { styleText } from 'node:util'
+import { YAML } from '@/scripts/lib/bun'
 import {
   type TopicDocsYaml,
   topicDocsGroupsYamlSchema,
@@ -43,7 +44,7 @@ export const readTopicYamlFiles = async () => {
 
 const parseYamlWithPath = (raw: string, filePath: string) => {
   try {
-    return Bun.YAML.parse(raw) as unknown
+    return YAML.parse(raw) as unknown
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     const colored = `${styleText('red', 'YAML parse failed for')} ${styleText(['yellow', 'bold'], filePath)}: ${msg}`

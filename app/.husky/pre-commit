@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 set -e
 
-. "$(dirname -- "$0")/ensure-bun.sh"
+. "$(dirname -- "$0")/ensure-nub.sh"
 
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT/app"
 
-bun run format
+nub run format

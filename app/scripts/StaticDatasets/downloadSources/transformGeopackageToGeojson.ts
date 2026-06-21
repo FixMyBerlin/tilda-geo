@@ -1,6 +1,8 @@
+import { spawnSync } from '@/scripts/lib/bun'
+
 export const transformGeopackageToGeojson = (input: string, output: string) => {
   console.log('  Run ogr2ogr')
-  Bun.spawnSync(
+  spawnSync(
     [
       'ogr2ogr',
       '-f',

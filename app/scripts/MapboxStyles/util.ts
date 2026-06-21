@@ -1,4 +1,5 @@
 import { styleText } from 'node:util'
+import { write } from '@/scripts/lib/bun'
 
 export type MapboxStyleMetadata = {
   metadata: { 'mapbox:groups': Record<string, { name: string; collapsed: boolean }> }
@@ -19,12 +20,12 @@ export const fetchStyle = async (key: string, url: string, folder: string) => {
   }
 
   const data = (await response.json()) as unknown
-  await Bun.write(`${folder}/raw-api-response_${key}.json`, JSON.stringify(data, null, 2))
+  await write(`${folder}/raw-api-response_${key}.json`, JSON.stringify(data, null, 2))
   return data as MapboxStyleMetadata
 }
 
 export async function saveJson(filename: string, data: unknown) {
-  await Bun.write(filename, JSON.stringify(data, null, 2))
+  await write(filename, JSON.stringify(data, null, 2))
 }
 
 // We want our data sorted so we have minimal change in our Git history
