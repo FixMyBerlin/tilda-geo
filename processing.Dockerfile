@@ -29,13 +29,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 LABEL maintainer="FixMyCity - https://fixmycity.de"
 
-# Debian 13 Trixie (stable) includes newer versions of osm2pgsql and osmium-tool
-# If backports are needed in the future, uncomment the following:
-# RUN echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
-# … and below:
-# apt install -y -t trixie-backports osm2pgsql osmium-tool curl && \
+# osm2pgsql >= 2.3.0 from trixie-backports (accepted 2026-06-17, 2.3.0+ds-2~bpo13+1).
+# Needed for :as_point(n) and n_points() in flex Lua (downstream error-table work).
+# curl is pinned to backports alongside osm2pgsql to avoid libcurl4 version collision.
+RUN echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
 RUN apt update && \
-  apt install -y osm2pgsql osmium-tool curl && \
+  apt install -y -t trixie-backports osm2pgsql osmium-tool curl && \
   apt install -y wget python3 python3-requests && \
   apt upgrade -y
 
