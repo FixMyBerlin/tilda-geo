@@ -56,10 +56,10 @@ export const HomePageWhy = () => {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <h2 className="text-center text-3xl font-semibold tracking-tight text-[#1b1c1c] sm:text-4xl">
+        <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
           Warum TILDA?
         </h2>
-        <p className="mt-4 text-center text-base text-[#514532] sm:text-lg">
+        <p className="mt-4 text-center text-base text-gray-700 sm:text-lg">
           Datenbasiert planen, nachhaltig handeln
         </p>
 
@@ -68,11 +68,11 @@ export const HomePageWhy = () => {
             const Icon = feature.icon
             return (
               <div key={feature.title} className="flex flex-col items-center text-center">
-                <span className="inline-flex size-24 items-center justify-center rounded-full bg-[#7e5700]/8 text-[#6b4900]">
+                <span className="inline-flex size-24 items-center justify-center rounded-full bg-yellow-800/8 text-yellow-900">
                   <Icon className="size-12" />
                 </span>
-                <h3 className="mt-5 text-2xl font-semibold text-[#1b1c1c]">{feature.title}</h3>
-                <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#514532]">
+                <h3 className="mt-5 text-2xl font-semibold text-gray-900">{feature.title}</h3>
+                <p className="mt-2 max-w-xs text-sm leading-relaxed text-gray-700">
                   {feature.description}
                 </p>
               </div>

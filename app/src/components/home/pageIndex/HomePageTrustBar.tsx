@@ -20,9 +20,9 @@ export const HomePageTrustBar = () => {
   return (
     <section className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <p className="text-center text-base text-[#514532] sm:text-lg">
+        <p className="text-center text-base text-gray-700 sm:text-lg">
           Bereits über{' '}
-          <span className="font-semibold text-[#7e5700]">
+          <span className="font-semibold text-yellow-800">
             15+ Kommunen, Landkreise und Bundesländer
           </span>{' '}
           nutzen TILDA
@@ -42,7 +42,7 @@ export const HomePageTrustBar = () => {
               {regionNames.map((name) => (
                 <li
                   key={name}
-                  className="text-xl font-semibold whitespace-nowrap text-[#fcb900] sm:text-2xl"
+                  className="text-xl font-semibold whitespace-nowrap text-yellow-500 sm:text-2xl"
                 >
                   {name}
                 </li>

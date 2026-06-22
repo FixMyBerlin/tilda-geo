@@ -46,12 +46,12 @@ const faqs: Faq[] = [
 
 export const HomePageFaq = () => {
   return (
-    <section className="bg-[#f6f3f2]">
+    <section className="bg-gray-100">
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <h2 className="text-center text-3xl font-semibold tracking-tight text-[#1b1c1c] sm:text-4xl">
+        <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
           Häufige Fragen von Kommunen
         </h2>
-        <p className="mt-4 text-center text-base text-[#514532] sm:text-lg">
+        <p className="mt-4 text-center text-base text-gray-700 sm:text-lg">
           Alles, was Sie über TILDA wissen müssen
         </p>
 
@@ -67,12 +67,12 @@ export const HomePageFaq = () => {
                 <>
                   <dt>
                     <DisclosureButton className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left hover:bg-black/[0.02] focus:outline-none focus-visible:ring focus-visible:ring-yellow-500">
-                      <span className="text-base font-semibold text-[#1b1c1c] sm:text-lg">
+                      <span className="text-base font-semibold text-gray-900 sm:text-lg">
                         {faq.question}
                       </span>
                       <ChevronDownIcon
                         className={twJoin(
-                          'size-6 flex-none text-[#514532] transition-transform',
+                          'size-6 flex-none text-gray-700 transition-transform',
                           !open && 'rotate-90',
                         )}
                       />
@@ -80,7 +80,7 @@ export const HomePageFaq = () => {
                   </dt>
                   <DisclosurePanel
                     as="dd"
-                    className="px-6 pb-5 text-sm leading-relaxed text-[#514532]"
+                    className="px-6 pb-5 text-sm leading-relaxed text-gray-700"
                   >
                     {faq.answer}
                   </DisclosurePanel>
