@@ -29,10 +29,10 @@ jobs:
         shell: bash
 
       - name: Checkout current version
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Checkout last build
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
         with:
           ref: ${{ env.LAST_RUN_SHA }}
 
