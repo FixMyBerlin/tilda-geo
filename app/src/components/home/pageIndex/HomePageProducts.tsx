@@ -109,18 +109,23 @@ export const HomePageProducts = () => {
                     <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-lg bg-[#fabe48]/10 text-[#7e5700]">
                       <Icon className="size-9" />
                     </span>
-                    <h3 className="flex items-center gap-2 text-xl font-semibold text-[#1b1c1c] sm:text-2xl">
+                    <h3 className="text-xl font-semibold text-[#1b1c1c] sm:text-2xl">
                       {product.name}
                       {product.beta && (
-                        <Pill color="amberSoft" className="rounded py-0.5 font-semibold">
+                        <Pill
+                          color="amberSoft"
+                          className="ml-2 rounded py-0.5 align-middle font-semibold"
+                        >
                           beta
                         </Pill>
                       )}
                     </h3>
                   </div>
 
-                  <p className="mt-6 text-lg font-medium text-[#1b1c1c]">{product.slogan}</p>
-                  <p className="mt-3 text-[15px] leading-relaxed text-[#514532]">
+                  <p className="mt-6 text-lg leading-snug font-medium text-[#1b1c1c]">
+                    {product.slogan}
+                  </p>
+                  <p className="mt-3 text-[15px] leading-normal text-[#514532]">
                     {product.description}
                   </p>
 

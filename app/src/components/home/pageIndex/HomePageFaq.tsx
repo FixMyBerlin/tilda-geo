@@ -73,7 +73,7 @@ export const HomePageFaq = () => {
                       <ChevronDownIcon
                         className={twJoin(
                           'size-6 flex-none text-[#514532] transition-transform',
-                          open && 'rotate-180',
+                          !open && 'rotate-90',
                         )}
                       />
                     </DisclosureButton>

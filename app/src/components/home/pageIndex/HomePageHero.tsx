@@ -21,7 +21,7 @@ export const HomePageHero = () => {
             blank
           >
             Jetzt kostenlose Demo anfragen
-            <ArrowRightIcon className="size-5" aria-hidden />
+            <ArrowUpRightIcon className="size-5" aria-hidden />
           </Link>
           <Link
             href="https://fixmycity.de/referenzen"

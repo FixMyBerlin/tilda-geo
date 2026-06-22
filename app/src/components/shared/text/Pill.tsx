@@ -11,7 +11,7 @@ const colors = {
   pink: 'bg-pink-50 text-pink-700 ring-1 ring-pink-700/10 ring-inset',
   // Solide Marken-Pills (Marketing-Seiten), ohne Ring.
   amber: 'bg-[#ffb400] text-[#6b4900]',
-  amberSoft: 'bg-[#fabe48]/15 text-[#7e5700]',
+  amberSoft: 'bg-brand/15 text-[#7e5700]',
 }
 
 const invertedColors = {
@@ -24,7 +24,7 @@ const invertedColors = {
   purple: 'bg-purple-600 text-white ring-1 ring-purple-400/30 ring-inset',
   pink: 'bg-pink-600 text-white ring-1 ring-pink-400/30 ring-inset',
   amber: 'bg-[#ffb400] text-[#6b4900]',
-  amberSoft: 'bg-[#fabe48]/15 text-[#7e5700]',
+  amberSoft: 'bg-brand/15 text-[#7e5700]',
 }
 
 export const Pill = ({

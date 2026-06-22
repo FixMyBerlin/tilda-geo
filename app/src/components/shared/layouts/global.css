@@ -24,6 +24,10 @@
   --color-neutral-*: initial;
   --color-stone-*: initial;
 
+  /* FixMyCity/TILDA CI-Farbe (Brand) + helle Variante für Flächen/Hintergründe */
+  --color-brand: #fabe48;
+  --color-brand-light: #ffedbf;
+
   --radius-4xl: 2rem;
 }
 
