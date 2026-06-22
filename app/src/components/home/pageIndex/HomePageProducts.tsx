@@ -137,7 +137,7 @@ export const HomePageProducts = () => {
                         to={product.liveDemo.to}
                         params={product.liveDemo.params}
                         search={product.liveDemo.search}
-                        classNameOverwrite="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#ffe6b0] px-6 py-3 text-base font-medium text-[#7e5700] no-underline transition-colors select-none hover:bg-[#ffdb8a] focus-visible:ring-2 focus-visible:ring-[#7e5700]/30 focus-visible:outline-none active:bg-[#f6cf78]"
+                        classNameOverwrite="text-center text-sm font-medium text-[#7e5700] underline underline-offset-4 transition-colors hover:text-[#5c4000] focus-visible:ring-2 focus-visible:ring-[#7e5700]/30 focus-visible:outline-none"
                       >
                         Live Demo ausprobieren
                       </Link>
