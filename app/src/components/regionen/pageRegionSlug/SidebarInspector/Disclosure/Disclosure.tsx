@@ -34,17 +34,20 @@ export const Disclosure = ({
         <>
           <DisclosureButton
             className={twJoin(
-              'focus-visible:ring-opacity-75 flex w-full justify-between bg-gray-50 py-2 pr-2 pl-2.5 text-left text-sm font-semibold text-gray-900 hover:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500',
+              'focus-visible:ring-opacity-75 flex w-full justify-between bg-gray-50 py-2 pr-2 pl-2.5 text-left text-sm leading-tight font-semibold text-gray-900 hover:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500',
               open ? 'rounded-b-none border-b border-b-gray-200 bg-gray-100' : '',
             )}
           >
             <ChevronRightIcon
-              className={twJoin('mr-1.5 size-5 text-gray-900', open ? 'rotate-90 transform' : '')}
+              className={twJoin(
+                'mt-px mr-1.5 size-5 shrink-0 text-gray-900',
+                open ? 'rotate-90 transform' : '',
+              )}
             />
-            <h3 className="not-prose w-full">
-              <div className="flex w-full justify-between">
-                <span>{title}</span>
-                <div className="flex items-center gap-1.5 text-gray-400">
+            <h3 className="not-prose w-full leading-tight">
+              <div className="flex w-full items-start justify-between gap-2">
+                <span className="min-w-0 leading-tight">{title}</span>
+                <div className="flex shrink-0 items-center gap-1.5 text-gray-400">
                   {!!objectId && <span className="font-mono">#{objectId}</span>}
                   {showLockIcon && (
                     <Tooltip text="Diese Daten sehen nur für Nutzer:innen mit Rechten.">

@@ -2,6 +2,11 @@ import type React from 'react'
 import { twJoin } from 'tailwind-merge'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { NodataFallback } from './compositTableRows/NodataFallback'
+import {
+  tagsTableLabelCellClass,
+  tagsTableRowClass,
+  tagsTableValueCellClass,
+} from './tagsTableLayout'
 import { TagsTableRowValueWithTooltip } from './TagsTableRowValueWithTooltip'
 import { ConditionalFormattedKey } from './translations/ConditionalFormattedKey'
 import { splitSemicolonRespectingBrackets } from './utils/splitSemicolonRespectingBrackets'
@@ -36,10 +41,10 @@ export const TagsTableRowFrame = ({
   const isSecondaryRow = tone === 'secondary'
 
   return (
-    <tr className="group">
+    <tr className={tagsTableRowClass}>
       <td
         className={twJoin(
-          'w-2/5 py-2 pr-3 pl-4 text-sm font-medium',
+          tagsTableLabelCellClass,
           isSecondaryRow ? 'text-gray-400 group-hover:text-gray-900' : 'text-gray-900',
         )}
       >
@@ -47,7 +52,7 @@ export const TagsTableRowFrame = ({
       </td>
       <td
         className={twJoin(
-          'px-3 py-2 text-sm',
+          tagsTableValueCellClass,
           isSecondaryRow ? 'text-gray-400 group-hover:text-gray-500' : 'text-gray-500',
         )}
       >

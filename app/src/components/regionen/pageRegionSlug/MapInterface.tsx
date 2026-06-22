@@ -46,7 +46,7 @@ export const MapInterface = () => {
         <MobileMapHeader />
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
         <DesktopOnly>
-          <PlaceSearch className="absolute top-2 right-14 z-20" />
+          <PlaceSearch className="absolute top-2 right-[calc(var(--inspector-width)+3.5rem)] z-20" />
         </DesktopOnly>
         <SidebarLayerControls />
         <SidebarInspector />

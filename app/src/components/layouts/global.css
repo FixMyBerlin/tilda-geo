@@ -50,13 +50,22 @@
    The map is a full-screen backdrop now, so without this the attribution sits under the home
    indicator. These controls render outside React, so env() padding on our floating chrome can't
    reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
+:root {
+  --inspector-width: 0;
+  --map-controls-inset: 10px;
+}
+
 .maplibregl-ctrl-top-left {
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
 }
 .maplibregl-ctrl-top-right {
+  right: calc(var(--inspector-width) + var(--map-controls-inset));
   padding-top: env(safe-area-inset-top);
   padding-right: env(safe-area-inset-right);
+}
+[data-map-controls='true'] {
+  right: calc(var(--inspector-width) + var(--map-controls-inset));
 }
 .maplibregl-ctrl-bottom-left {
   padding-bottom: env(safe-area-inset-bottom);

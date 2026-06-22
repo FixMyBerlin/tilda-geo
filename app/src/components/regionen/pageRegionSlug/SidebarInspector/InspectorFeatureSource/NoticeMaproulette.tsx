@@ -48,7 +48,7 @@ export const NoticeMaproulette = ({
     <QueryClientProvider client={maprouletteQueryClient}>
       <details
         // Color similar to #fda5e4
-        className="prose prose-sm border-t border-white bg-pink-200 p-1 px-4 py-1.5"
+        className="prose prose-sm w-full max-w-none border-t border-white bg-pink-200 px-4 py-1.5"
         open={defaultOpen}
       >
         <summary className="cursor-pointer hover:font-semibold">
