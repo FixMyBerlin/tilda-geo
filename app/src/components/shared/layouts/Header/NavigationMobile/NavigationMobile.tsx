@@ -2,6 +2,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useRouter } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
+import { NavigationContactButton } from '../NavigationContactButton'
 import type { PrimaryNavigationProps } from '../types'
 import { User } from '../User/User'
 
@@ -100,6 +101,10 @@ export const NavigationMobile = ({ primaryNavigation, secondaryNavigation, logo:
                 </div>
               )
             })}
+
+            <div className="pt-2 pb-3">
+              <NavigationContactButton className="w-full" />
+            </div>
           </DisclosurePanel>
         </>
       )}

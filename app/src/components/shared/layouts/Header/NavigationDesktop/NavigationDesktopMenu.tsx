@@ -14,7 +14,7 @@ export const NavigationDesktopMenu = ({ menuItems, logo }: Props) => {
   const { pathname } = useLocation()
 
   return (
-    <Menu as="div" className="relative isolate z-50 ml-3 pr-0">
+    <Menu as="div" className="relative isolate z-50 pr-0">
       {({ open }) => (
         <div className="contents">
           <MenuButton className="inline-flex items-center justify-center rounded-md border border-gray-700 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-none focus:ring-inset">
