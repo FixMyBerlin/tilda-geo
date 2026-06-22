@@ -4,10 +4,10 @@ export const HomePageCtaBanner = () => {
   return (
     <section className="bg-brand">
       <div className="mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8">
-        <h2 className="text-gray-900 text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h2 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
           Bereit für die digitale Verkehrsplanung?
         </h2>
-        <p className="text-gray-900/90 mx-auto mt-5 max-w-2xl text-base sm:text-lg">
+        <p className="mx-auto mt-5 max-w-2xl text-base text-gray-900/90 sm:text-lg">
           Lassen Sie uns gemeinsam schauen, wie TILDA Ihren Arbeitsalltag in der Verwaltung
           erleichtert.
         </p>

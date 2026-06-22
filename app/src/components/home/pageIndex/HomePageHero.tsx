@@ -5,10 +5,10 @@ export const HomePageHero = () => {
   return (
     <section className="bg-gray-50">
       <div className="mx-auto max-w-4xl px-4 pt-12 pb-16 text-center sm:px-6 sm:pt-16 lg:px-8 lg:pt-28 lg:pb-20">
-        <h1 className="text-gray-900 mx-auto max-w-4xl text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl lg:tracking-[-0.02em]">
+        <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight text-balance text-gray-900 sm:text-5xl lg:text-6xl lg:tracking-[-0.02em]">
           Verkehrsplanung modernisiert: Ihre Daten, Ihr Team, eine Plattform
         </h1>
-        <p className="text-gray-600 mx-auto mt-7 max-w-2xl text-base leading-relaxed sm:text-lg">
+        <p className="mx-auto mt-7 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg">
           TILDA unterstützt Kommunen dabei, ihre Verkehrsinfrastruktur digital abzubilden und
           aktuell zu halten. Die Plattform vereint Daten, Karten und Teamarbeit an einem Ort, ohne
           komplexe GIS-Systeme. So werden Planungen transparenter, effizienter und
