@@ -12,7 +12,6 @@ export const SvgPedestrian = (props: SVGProps<SVGSVGElement>) => (
     aria-hidden
     {...props}
   >
-    <title>Fußgänger</title>
     <circle cx="12.5" cy="4" r="2" />
     <path d="M12.5 6 11 12.5M11 12.5 13 15.5 12.5 20M11 12.5 9.5 16.5 8.5 20M12 8l2.5 2.5M12 8 9.8 10" />
   </svg>

@@ -25,7 +25,7 @@ export const HomePageTrustBar = () => {
           <span className="font-semibold text-[#7e5700]">
             15+ Kommunen, Landkreise und Bundesländer
           </span>{' '}
-          nutzen bereits TILDA
+          nutzen TILDA
         </p>
       </div>
 

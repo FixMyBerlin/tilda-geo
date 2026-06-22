@@ -55,7 +55,7 @@ const features: Feature[] = [
     badge: 'Kosteneffizient',
     title: 'Open Source',
     description:
-      'Kein Vendor-Lock-in. Die gesamte Software ist quelloffen – Ihre Daten gehören Ihnen. Datensouverenität garantiert.',
+      'Kein Vendor-Lock-in. Die gesamte Software ist quelloffen – Ihre Daten gehören Ihnen. Datensouveränität garantiert.',
     icon: CodeBracketIcon,
   },
 ]

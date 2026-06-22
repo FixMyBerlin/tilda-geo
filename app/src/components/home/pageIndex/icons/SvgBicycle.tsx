@@ -12,7 +12,6 @@ export const SvgBicycle = (props: SVGProps<SVGSVGElement>) => (
     aria-hidden
     {...props}
   >
-    <title>Fahrrad</title>
     <circle cx="5.5" cy="16.5" r="3.5" />
     <circle cx="18.5" cy="16.5" r="3.5" />
     <path d="M5.5 16.5 9 9l2 7.5L15.5 9l3 7.5M9 9h6.5M14.5 9h2.5" />
