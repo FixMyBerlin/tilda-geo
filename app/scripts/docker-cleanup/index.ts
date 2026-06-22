@@ -12,7 +12,10 @@ const CONCEPTS =
 p.intro('Docker cleanup')
 p.note(CONCEPTS, 'Understand the terms')
 
+const dfSpinner = p.spinner()
+dfSpinner.start('Checking Docker disk usage…')
 const summary = await getDockerDf()
+dfSpinner.stop(summary.ok ? 'Docker is available' : summary.error)
 const optionsWithSizes = CLEANUP_ACTIONS.map((a) => {
   const reclaimableStr = a.reclaimableUnknown
     ? 'reclaimable: unknown'
