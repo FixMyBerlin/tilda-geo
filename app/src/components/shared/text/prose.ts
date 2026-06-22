@@ -7,6 +7,7 @@ const proseCodePrintClasses =
 
 export const proseClasses = [
   'prose prose-code:before:content-none prose-code:after:content-none',
+  'prose-th:leading-snug prose-td:leading-snug',
   'print:prose-sm',
   proseCodePrintClasses,
 ].join(' ')
