@@ -23,6 +23,7 @@ updates:
           - version-update:semver-major
           - version-update:semver-minor
           - version-update:semver-patch
+      - dependency-name: eslint-plugin-react-compiler
     groups:
       security-dev-tools:
         applies-to: security-updates
