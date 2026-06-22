@@ -6,9 +6,13 @@ attributes:
   - key: parking
     label: Parkposition
     description: Lage oder Art des Parkraums im Straßenland.
+    chapterRefs:
+      - chapterId: parking-position
     values:
       - value: lane
         label: Auf der Fahrbahn
+        chapterRefs:
+          - chapterId: parking-position
       - value: half_on_kerb
         label: Halb auf dem Gehweg
       - value: on_kerb
@@ -21,6 +25,8 @@ attributes:
         label: Parkraum als separate Geometrie erfasst
       - value: shoulder
         label: Auf dem Seitenstreifen
+        chapterRefs:
+          - chapterId: parking-position
       - value: street_side
         label: Parkbucht
       - value: yes
@@ -80,6 +86,8 @@ attributes:
   - key: orientation
     label: Ausrichtung
     description: Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.
+    chapterRefs:
+      - chapterId: capacity-calculation
     values:
       - value: parallel
         label: Parallelparken
@@ -139,6 +147,8 @@ attributes:
   - key: staggered
     label: Parkweise
     description: Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.
+    chapterRefs:
+      - chapterId: parking-position
     values:
       - value: yes
         label: Alternierendes Parken
@@ -260,6 +270,8 @@ attributes:
     format: meter
     label: Fahrbahnbreite
     description: Breite der Fahrbahn, an dem der Parkraum liegt.
+    chapterRefs:
+      - chapterId: parking-position
   - key: road_width_source
     label: Herkunft der Fahrbahnbreite
     values:
@@ -290,6 +302,8 @@ attributes:
     format: square_meter
     label: Fläche
     description: Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.
+    chapterRefs:
+      - chapterId: capacity-calculation
   - key: area_source
     label: Herkunft der Flächenangabe
     values:
@@ -479,9 +493,13 @@ attributes:
         label: Niedrig
   - key: informal
     label: Duldung
+    chapterRefs:
+      - chapterId: parking-position
     values:
       - value: yes
         label: Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.
+        chapterRefs:
+          - chapterId: parking-position
   - key: zone
     format: sanitized_strings
     label: Parkzone
@@ -489,6 +507,8 @@ attributes:
   - key: reason
     label: Grund
     description: Angabe eines Grundes bei Nicht-Parken.
+    chapterRefs:
+      - chapterId: parking-position
     values:
       - value: missing_data
         label: Keine Parkraum-Daten in OpenStreetMap erfasst
