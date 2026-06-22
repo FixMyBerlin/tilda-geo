@@ -59,7 +59,7 @@ function useStore<T>(store: {
 }
 ```
 
-Prefer framework patterns (React Query, loaders) over custom `useEffect` + fetch hooks. Effect rules: skill `react-useeffect`.
+Prefer framework patterns (React Query, loaders) over custom `useEffect` + fetch hooks. Effect rules: [anti-patterns.md](anti-patterns.md) in this skill.
 
 ## Custom hook return types
 

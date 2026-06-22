@@ -1,27 +1,30 @@
 ---
 name: react-dev
-version: 2.0.0
+version: 3.0.0
 description: >-
   React 19 + TypeScript for FMC TanStack Start apps: typed components, events,
-  generics, ref-as-prop, Compiler-first memoization. Use when typing React
-  components, hooks, or events — not for routing/server boundaries (see
-  tanstack-start-* skills).
+  generics, ref-as-prop, Compiler-first memoization, and useEffect discipline
+  (naming, when not to use Effect, alternatives). Use when typing React
+  components/hooks/events, or writing/reviewing useEffect, useEffectEvent,
+  derived state, data-fetch effects, or eslint-plugin-react-hooks effect rules.
+  Not for routing/server boundaries (see tanstack-start-* skills).
 ---
 
-**LLM reference:** [react.dev/llms.txt](https://react.dev/llms.txt) · [tanstack.com/llms.txt](https://tanstack.com/llms.txt)
+**LLM reference:** [react.dev/llms.txt](https://react.dev/llms.txt) · [tanstack.com/llms.txt](https://tanstack.com/llms.txt) · Key effect page: [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
 
 # React + TypeScript (FMC)
 
-Type-safe React = compile-time guarantees. This skill covers **TypeScript patterns** agents often get wrong. Behavior, effects, routing, and server I/O live in sibling skills (below).
+Type-safe React = compile-time guarantees. This skill covers **TypeScript patterns** agents often get wrong and **useEffect discipline** (naming, scope, when to skip). Routing and server I/O live in sibling skills (below).
 
 ## When to use
 
 - Typing props, children, refs, event handlers
 - Generic/reusable components (`Table<T>`, discriminated unions)
 - React 19 APIs (`use()`, ref as prop) — **typing** only
-- Reviewing TS in components under `components/`
+- Writing or reviewing `useEffect`, `useEffectEvent`, effect cleanup, derived state
+- Reviewing TS or effects in components under `components/`
 
-**Not here:** route loaders, `createServerFn`, SSR, Zustand, Effect discipline → see [Related skills](#related-skills).
+**Not here:** route loaders, `createServerFn`, SSR, Zustand → see [Related skills](#related-skills).
 
 ## FMC stack (required)
 
@@ -38,14 +41,12 @@ Docs: [React Compiler](https://react.dev/learn/react-compiler.md) · [eslint-plu
 
 ## Related skills
 
-| Topic                                   | Skill                          |
-| --------------------------------------- | ------------------------------ |
-| Effects, naming, when not to use Effect | `react-useeffect`              |
-| Routes, loaders, `validateSearch`, SSR  | `tanstack-start-conventions`   |
-| Folder layout, thin routes              | `tanstack-start-app-structure` |
-| Next → Start, `createServerFn`          | `tanstack-start-migration`     |
-| Client stores                           | `zustand-state-management`     |
-| URL state (prefer router search)        | `nuqs`                         |
+| Topic                            | Skill                        |
+| -------------------------------- | ---------------------------- |
+| Routes, layout, loaders, SSR     | `tanstack-start-conventions` |
+| Next → Start, `createServerFn`   | `tanstack-start-migration`   |
+| Client stores                    | `zustand-state-management`   |
+| URL state (prefer router search) | `nuqs`                       |
 
 ## Component props
 
@@ -132,7 +133,119 @@ Full table + generics: [event-handlers.md](references/event-handlers.md) · [Res
 
 **Do not** document `useCallback`/`useMemo` defaults here — Compiler handles memoization. Imperative handles / external store: [hooks.md](references/hooks.md).
 
-Effect when/when-not: skill `react-useeffect` · [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect.md)
+## useEffect — naming, scope, and when to skip
+
+Effects are an **escape hatch** from React. They synchronize with **external systems**. If there is no external system involved, you usually should not use an Effect.
+
+### Name every useEffect (strong recommendation)
+
+**Always** pass a **named function expression** to `useEffect`, not an anonymous arrow. Treat this as the default style for new and edited code.
+
+```tsx
+// Avoid for useEffect (anonymous — hard to skim and debug)
+useEffect(() => {
+  document.title = `${count} items`
+}, [count])
+
+// Prefer — intent at the call site; named stacks in errors and DevTools
+useEffect(
+  function updateDocumentTitle() {
+    document.title = `${count} items`
+  },
+  [count],
+)
+```
+
+**Cleanup**: When teardown is non-trivial, prefer a named cleanup for symmetry and stack clarity:
+
+```tsx
+useEffect(function pollServerForUpdates() {
+  const intervalId = setInterval(/* ... */, 5000);
+  return function stopPollingServer() {
+    clearInterval(intervalId);
+  };
+}, [serverId]);
+```
+
+The same readability applies to `useCallback`, `useMemo` factories, and reducers — but **useEffect** benefits most because timing, dependencies, and cleanup are the hardest to infer. **Custom hooks**: still name effects inside the hook.
+
+### Indicators from naming (what to do next)
+
+Naming is a **design review at the keyboard**. Use it with [Anti-Patterns](references/anti-patterns.md) (examples and fixes live there).
+
+| Signal                                                                                                                        | Meaning                                     | Where to look                                                                                                                                 |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name needs **“and”** / **“also”**                                                                                             | Unrelated concerns in one effect            | Split into separate effects, each with one name                                                                                               |
+| Name like **`syncDerivedValue`**, **`updateStateFromState`**, **`setXBasedOnY`**                                              | Likely derived state or state-to-state sync | [Anti-Patterns §1](references/anti-patterns.md#1-redundant-state-for-derived-values) — derive during render; `useMemo` if expensive           |
+| Name like **`notifyParentOfChange`**, **`reportStateToParent`**                                                               | Parent updates driven by child state        | [Anti-Patterns §6–7](references/anti-patterns.md#6-notifying-parent-via-effect) — event handler, lift data, or controlled pattern             |
+| Name like **`resetFormOnSubmitFlag`**                                                                                         | User intent expressed via state hop         | [Anti-Patterns §4](references/anti-patterns.md#4-event-specific-logic-in-effect) — handle in the event handler                                |
+| Name like **`persistOnClose`**, **`syncWhenClosed`**, **`saveDraftOnDismiss`**                                                | Side effect on dismiss/open UI state        | [Anti-Patterns §4](references/anti-patterns.md#persist-or-sync-on-gesture--not-on-isopen--transition-flags) — handler, not Effect on `isOpen` |
+| Clear, **external** verbs: `connectTo…`, `subscribeTo…`, `initialize…`, `synchronize…` (with browser, network, map SDK, etc.) | Often legitimate Effect territory           | Still name them; add cleanup when needed                                                                                                      |
+
+If the honest name sounds like **internal React bookkeeping**, the code often belongs in render, an event handler, or a different pattern.
+
+### Quick reference
+
+| Situation                      | DON'T                          | DO                                                                                  |
+| ------------------------------ | ------------------------------ | ----------------------------------------------------------------------------------- |
+| Derived state from props/state | `useState` + `useEffect`       | Calculate during render                                                             |
+| Expensive calculations         | `useEffect` to cache           | Compute in render; `useMemo` only if needed (often unnecessary with React Compiler) |
+| Reset state on prop change     | `useEffect` with `setState`    | `key` prop                                                                          |
+| User event responses           | `useEffect` watching state     | Event handler directly                                                              |
+| Persist/sync on dismiss        | `useEffect` on `isOpen`        | Dismiss handler (or `onCloseComplete`)                                              |
+| Notify parent of changes       | `useEffect` calling `onChange` | Call in event handler                                                               |
+| Fetch data                     | `useEffect` without cleanup    | `useEffect` with cleanup OR framework (loaders/Query)                               |
+
+### When you DO need Effects
+
+- Synchronizing with **external systems** (non-React widgets, browser APIs, map SDKs)
+- **Subscriptions** to external stores (`useSyncExternalStore` when it fits)
+- **Analytics/logging** tied to display
+- **Data fetching** with proper cleanup when framework fetch is not available
+
+**Strict Mode (dev):** Effects run setup twice on mount to surface missing cleanup. Add teardown for subscriptions, timers, and fetches — see [Anti-Patterns §8–9](references/anti-patterns.md#8-fetching-without-cleanup-race-condition).
+
+### Effects and React Compiler / ESLint
+
+- **Render work:** Prefer deriving values during render. With Compiler enabled (FMC default), skip manual `useMemo` unless profiling shows a need.
+- **Effects:** Compiler does not replace Effects for **external** synchronization. Changed memoization can change when effects re-run — fix effect design (deps, splits, `useEffectEvent`) rather than disabling the compiler.
+- **Lint:** Use `eslint-plugin-react-hooks@latest` via oxlint jsPlugin (`react-hooks-js/*`). Rules such as `set-state-in-effect` align with [Anti-Patterns](references/anti-patterns.md).
+
+### Legitimate effects: `useEffectEvent`
+
+When setup must stay subscribed (connection, interval, listener) but part of the callback should read **latest** props/state without re-running setup, extract non-reactive logic with `useEffectEvent`:
+
+- Name like user-visible events: `onConnected`, `onTick` — not `onMount` / `onUpdate`.
+- Call only from Effects (or other Effect Events in the same component); never during render, in event handlers, or as props to children.
+- Omit from the Effect dependency array (enforced by lint).
+
+Do **not** use `useEffectEvent` to hide dependencies that should re-trigger the Effect.
+
+Example: [Alternatives §9](references/use-effect-alternatives.md#9-useeffectevent-for-non-reactive-effect-logic). Docs: [Separating Events from Effects](https://react.dev/learn/separating-events-from-effects) · [`useEffectEvent`](https://react.dev/reference/react/useEffectEvent).
+
+### When you DON'T need Effects
+
+1. Transforming data for rendering — compute during render
+2. User events — event handlers
+3. Deriving state — compute it (`const x = f(a, b)`)
+4. Chaining updates — do it in one event handler where possible
+
+**Details and fixes**: [Anti-Patterns](references/anti-patterns.md). **Alternatives**: [use-effect-alternatives.md](references/use-effect-alternatives.md).
+
+### Decision tree
+
+```
+Need to respond to something?
+├── User interaction (click, submit, drag)?
+│   └── Use EVENT HANDLER
+├── Component appeared on screen?
+│   └── Use EFFECT (external sync, analytics)
+├── Props/state changed and need derived value?
+│   └── CALCULATE DURING RENDER
+│       └── Expensive? useMemo only if needed (Compiler often makes this unnecessary)
+└── Need to reset state when prop changes?
+    └── Use KEY PROP on component
+```
 
 ## Generic components
 
@@ -174,7 +287,7 @@ Short TS notes: [react-19-patterns.md](references/react-19-patterns.md)
 
 ## Routing (TypeScript only)
 
-Route **behavior** (loaders, Query, `ssr`, `validateSearch`) → `tanstack-start-conventions`.
+Route **behavior** and **layout** (loaders, Query, `ssr`, `validateSearch`, thin routes) → `tanstack-start-conventions`.
 
 **Typed route hooks** — pass `from` for inference:
 
@@ -211,5 +324,9 @@ const { tab } = Route.useSearch()
 - [hooks.md](references/hooks.md) — imperative handle, external store typing
 - [event-handlers.md](references/event-handlers.md) — extended event type table
 - [react-19-patterns.md](references/react-19-patterns.md) — ref-as-prop, `use()` typing notes
+- [anti-patterns.md](references/anti-patterns.md) — derived state, fetch races, effect chains, parent sync
+- [use-effect-alternatives.md](references/use-effect-alternatives.md) — `useMemo`, `key`, `useSyncExternalStore`, `useEffectEvent`, fetch patterns
 - [generic-components.md](examples/generic-components.md) — Table, Select patterns
 - [tanstack-router.md](references/tanstack-router.md) — Router TS inference only
+- React — [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect) · [React Compiler](https://react.dev/learn/react-compiler)
+- Neciu Dan — [Start naming your useEffect functions](https://neciudan.dev/name-your-effects)

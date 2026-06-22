@@ -36,7 +36,7 @@ Pass `**{ source, id, sourceLayer? }`\*\* yourself. Use when looping GeoJSON, re
 | React/URL changed **without** a map gesture — reset loop over GeoJSON | `**useEffect`\*\* | Trassenscout `SubsubsectionMap` (page slug); `AcquisitionAreaMap` (selection array)                                         |
 | **Restore** highlight after remount from stored form/URL ids          | `**useEffect`\*\* | Trassenscout `SwitchableMap` (geometryCategorySourceId + featureId on load)                                                 |
 
-**Not an Effect anti-pattern:** the map is an **external system** (MapLibre). Pushing React/Zustand/URL selection into `setFeatureState` is legitimate **external sync** — same category as `connectTo…` / `synchronizeWith…` in the react-useeffect skill. Prefer `**onClick`** when the user gesture already caused the change; use `**useEffect\*\*` when selection updates from store, URL, or mount while the map stays mounted.
+**Not an Effect anti-pattern:** the map is an **external system** (MapLibre). Pushing React/Zustand/URL selection into `setFeatureState` is legitimate **external sync** — same category as `connectTo…` / `synchronizeWith…` in the `react-dev` skill. Prefer `**onClick`** when the user gesture already caused the change; use `**useEffect\*\*` when selection updates from store, URL, or mount while the map stays mounted.
 
 **Map instance:** `**useMap()`** → `mainMap.getMap()` (see map-provider-wrapper.md). On vector/PMTiles include `**sourceLayer\*\*`; GeoJSON sources omit it.
 

@@ -43,7 +43,7 @@ Do **not** duplicate upstream API reference in this skill — use `llms.txt` / `
 
 - Colocate Zod search schemas with the route or feature; wire `validateSearch` on the owning route file.
 - Wire **`parseSearch` / `stringifySearch`** in `router.tsx` (pretty JSON baseline; jsurl only for large objects) — `tanstack-start-conventions` → `router-search-serialization.md`.
-- See `tanstack-start-app-structure` for folder layout; avoid `NuqsAdapter` unless a subtree truly needs nuqs hooks.
+- See `tanstack-start-conventions` for folder layout; avoid `NuqsAdapter` unless a subtree truly needs nuqs hooks.
 
 **Next.js + nuqs:**
 
@@ -121,9 +121,8 @@ These are easy to miss; full behavior is in upstream docs.
 
 ## Related FMC skills
 
-| Skill                          | Role                                                |
-| ------------------------------ | --------------------------------------------------- |
-| `tanstack-start-conventions`   | `validateSearch`, loaders, API vs UI search         |
-| `tanstack-start-app-structure` | Where URL state and adapters live                   |
-| `tanstack-start-migration`     | Next → Start; search params mental model            |
-| `react-dev`                    | TanStack Router patterns including `validateSearch` |
+| Skill                        | Role                                                |
+| ---------------------------- | --------------------------------------------------- |
+| `tanstack-start-conventions` | Layout, `validateSearch`, loaders, API vs UI search |
+| `tanstack-start-migration`   | Next → Start; search params mental model            |
+| `react-dev`                  | TanStack Router patterns including `validateSearch` |

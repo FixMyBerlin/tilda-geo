@@ -30,21 +30,19 @@ Load [references/llm-resources.md](references/llm-resources.md) **only for the a
 
 Prefer installed skill names when present; otherwise fetch from git.
 
-| Area                                      | Skill                          | GitHub                                                                                                                         |
-| ----------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| Rust/WASM geo                             | `rust-wasm-geo`                | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/rust-wasm-geo>                                                    |
-| Maps (react-map-gl)                       | `react-map-gl`                 | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-map-gl>                                                     |
-| React TS patterns                         | `react-dev`                    | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-dev>                                                        |
-| useEffect discipline                      | `react-useeffect`              | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-useeffect>                                                  |
-| TanStack Start (boundaries, SSR, loaders) | `tanstack-start-conventions`   | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-conventions>                                       |
-| Router search params (UI routes)          | —                              | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md> |
-| Router + Query loaders                    | —                              | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md>        |
-| Devtools debug panel                      | —                              | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/devtools.md>                |
-| App folder layout                         | `tanstack-start-app-structure` | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-app-structure>                                     |
-| URL state (Next.js / shared libs)         | `nuqs`                         | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/nuqs>                                                             |
-| Client global state                       | `zustand-state-management`     | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/zustand-state-management>                                         |
-| E2E / Playwright                          | `playwright-skill`             | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/playwright-skill>                                                 |
-| Next → Start migration                    | `tanstack-start-migration`     | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-migration>                                         |
+| Area                                     | Skill                        | GitHub                                                                                                                         |
+| ---------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Rust/WASM geo                            | `rust-wasm-geo`              | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/rust-wasm-geo>                                                    |
+| Maps (react-map-gl)                      | `react-map-gl`               | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-map-gl>                                                     |
+| React TS patterns, useEffect discipline  | `react-dev`                  | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-dev>                                                        |
+| TanStack Start (layout, boundaries, SSR) | `tanstack-start-conventions` | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-conventions>                                       |
+| Router search params (UI routes)         | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md> |
+| Router + Query loaders                   | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md>        |
+| Devtools debug panel                     | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/devtools.md>                |
+| URL state (Next.js / shared libs)        | `nuqs`                       | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/nuqs>                                                             |
+| Client global state                      | `zustand-state-management`   | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/zustand-state-management>                                         |
+| E2E / Playwright                         | `playwright-skill`           | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/playwright-skill>                                                 |
+| Next → Start migration                   | `tanstack-start-migration`   | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-migration>                                         |
 
 ## Runtime and build
 
@@ -96,11 +94,7 @@ Optional root `tsconfig.json` with `"references"` to both child configs.
 
 **ES2025:** `target` and `lib` stay in sync. `lib` adds typings only; new ES2025 **runtime** APIs in client bundles are not auto-polyfilled — use deliberately on the client; fine on server/Bun/scripts. Which browsers get that client bundle: [references/browser-target.md](references/browser-target.md).
 
-Component typing, Compiler, and oxlint React rules: skill `react-dev`.
-
-## useEffect
-
-Load skill `react-useeffect` for when to skip Effect, naming, and alternatives. Map camera, clicks, and layers: skill `react-map-gl` (not `useEffect` + `map.on()`).
+Component typing, Compiler, oxlint React rules, and useEffect discipline: skill `react-dev`. Map camera, clicks, and layers: skill `react-map-gl` (not `useEffect` + `map.on()`).
 
 ## Data and state
 
@@ -144,6 +138,11 @@ Turf vs WASM, crates, Vite wiring: skill `rust-wasm-geo`.
 - Weekly Monday 07:00 Europe/Berlin; **one open PR at a time** per ecosystem (`open-pull-requests-limit: 1`).
 - Template: [examples/dependabot.yml.template](examples/dependabot.yml.template)
 - Grouping, monorepo tuning, and ignores: [references/dependabot.md](references/dependabot.md)
+- **Reviewing and merging PRs:** skill `review-dependabot` (changelog triage, risk tiers, rebase merge)
+
+## CI (GitHub Actions)
+
+- PR dependency review: permissive `allow-licenses` (not deprecated `deny-licenses`) — template: [examples/ci.yml.template](examples/ci.yml.template)
 
 ## Tests and quality
 
