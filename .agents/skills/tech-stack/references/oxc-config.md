@@ -21,7 +21,6 @@ Most FMC apps share the same core (plugins, type-aware lint, switch exhaustivene
 ```json
 {
   "devDependencies": {
-    "eslint-plugin-react-compiler": "19.0.0-beta-ebf51a3-20250411",
     "eslint-plugin-react-hooks": "^7.1.1",
     "oxfmt": "0.52.0",
     "oxlint": "1.67.0",

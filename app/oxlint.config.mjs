@@ -44,13 +44,10 @@ export default defineConfig({
     },
     {
       files: ['**/*.tsx'],
-      jsPlugins: [
-        { name: 'react-compiler-js', specifier: 'eslint-plugin-react-compiler' },
-        { name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' },
-      ],
+      jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }],
       rules: {
         ...reactHooksJs.rules,
-        'react-compiler-js/react-compiler': 'error',
+        'react/react-compiler': 'error',
       },
     },
     // Browser API guard — only for code that ships to the client (components + route UI).
