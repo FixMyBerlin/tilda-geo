@@ -35,6 +35,7 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import { PlanningMapDrawing } from '../Planning/drawing/PlanningMapDrawing'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
@@ -309,6 +310,7 @@ export const RegionMap = () => {
       <SourcesLayersQa />
       <SearchResultLayers />
       <SourcesLayersPlanning />
+      <PlanningMapDrawing />
       <AttributionControl compact={true} position="bottom-left" />
 
       {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}

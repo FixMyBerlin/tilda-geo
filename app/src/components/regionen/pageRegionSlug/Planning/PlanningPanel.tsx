@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
+import { bbox } from '@turf/turf'
 import { useEffect } from 'react'
+import { useMap } from 'react-map-gl/maplibre'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
+import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import {
   usePlanningModeParam,
   usePlanningRunParam,
@@ -14,14 +17,32 @@ import { ScenarioList } from './ScenarioList'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
 
-const ScenarioDetail = ({ scenarioId }: { scenarioId: number }) => {
+const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; regionSlug: string }) => {
   const [, setRun] = usePlanningRunParam()
+  const { mainMap: map } = useMap()
+  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
 
   // Show the scenario's latest result on the map when it is opened.
   useEffect(() => {
     if (scenario?.currentRunId != null) setRun(scenario.currentRunId)
   }, [scenario?.currentRunId, setRun])
+
+  // Outline the scenario's study area (border only, no fill) and fly to it on open.
+  const studyArea = (scenario?.factorConfig as FactorConfig | undefined)?.study_area
+  useEffect(() => {
+    if (!studyArea) return
+    setBoundaryHighlightGeom(studyArea as object, { filled: false })
+    if (map) {
+      const [minLng, minLat, maxLng, maxLat] = bbox({
+        type: 'Feature',
+        geometry: studyArea as any,
+        properties: {},
+      })
+      map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+    }
+    return () => setBoundaryHighlightGeom(null)
+  }, [studyArea, map, setBoundaryHighlightGeom])
 
   if (!scenario) return null
 
@@ -43,8 +64,10 @@ const ScenarioDetail = ({ scenarioId }: { scenarioId: number }) => {
         })}
       </p>
 
-      {!isLocked && <RunButton scenarioId={scenarioId} latestJob={null} />}
-      {isLocked && <RunButton scenarioId={scenarioId} latestJob={latestJob} />}
+      {!isLocked && <RunButton scenarioId={scenarioId} regionSlug={regionSlug} latestJob={null} />}
+      {isLocked && (
+        <RunButton scenarioId={scenarioId} regionSlug={regionSlug} latestJob={latestJob} />
+      )}
 
       <FactorEditorPanel
         scenarioId={scenarioId}
@@ -88,7 +111,9 @@ export const PlanningPanel = () => {
         </button>
       </div>
       <ScenarioList regionSlug={regionSlug} />
-      {activeScenario != null && <ScenarioDetail scenarioId={activeScenario} />}
+      {activeScenario != null && (
+        <ScenarioDetail scenarioId={activeScenario} regionSlug={regionSlug} />
+      )}
     </div>
   )
 }

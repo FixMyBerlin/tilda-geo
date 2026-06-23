@@ -1,5 +1,8 @@
+import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { bbox } from '@turf/turf'
+import { useEffect, useState } from 'react'
+import { useMap } from 'react-map-gl/maplibre'
 import {
   createPlanningScenarioFn,
   deletePlanningScenarioFn,
@@ -8,8 +11,11 @@ import {
   planningScenariosQueryOptions,
   planningScenarioQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import { usePlanningScenarioParam } from '../hooks/useQueryState/usePlanningParams'
 import { BoundaryPicker } from './BoundaryPicker'
+import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
+import { GeoJsonUpload } from './GeoJsonUpload'
 import { FAHRRADBOX_TEMPLATE } from './planningDefaults'
 
 /** Spinner shown while a job is in flight. */
@@ -78,6 +84,8 @@ const DeleteButton = ({ onConfirm }: { onConfirm: () => void }) => {
   )
 }
 
+type AreaTab = 'search' | 'custom'
+
 /** Create-form shown when "Neues Szenario" is clicked. */
 const CreateForm = ({
   regionSlug,
@@ -89,18 +97,81 @@ const CreateForm = ({
   onCancel: () => void
 }) => {
   const queryClient = useQueryClient()
+  const { mainMap: map } = useMap()
+  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setDrawingActive = usePlanningBoundaryState((s) => s.setDrawingActive)
+  const drawingActive = usePlanningBoundaryState((s) => s.drawingActive)
+  const drawnGeometry = usePlanningBoundaryState((s) => s.drawnGeometry)
+  const setDrawnGeometry = usePlanningBoundaryState((s) => s.setDrawnGeometry)
+
   const [title, setTitle] = useState('')
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
   const [studyArea, setStudyArea] = useState<unknown>(null)
+  const [areaTab, setAreaTab] = useState<AreaTab>('search')
+
+  // Fly the map to a freshly chosen/uploaded geometry.
+  const fitToGeometry = (geom: object) => {
+    if (!map) return
+    const [minLng, minLat, maxLng, maxLat] = bbox({
+      type: 'Feature',
+      geometry: geom as GeoJSON.Geometry,
+      properties: {},
+    })
+    map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+  }
+
+  // While drawing, TerraDraw renders the polygon itself and its geometry lives in `drawnGeometry`;
+  // `studyArea` is set by search/upload. The effective area falls back to the live drawing so the
+  // user can submit without first ending the draw (no extra highlight/fit to avoid flicker).
+  const effectiveStudyArea = studyArea ?? drawnGeometry
+
+  // Reset all drawing/highlight state when the form unmounts.
+  useEffect(() => {
+    return () => {
+      setDrawingActive(false)
+      setDrawnGeometry(null)
+      setBoundaryHighlightGeom(null)
+    }
+  }, [setDrawingActive, setDrawnGeometry, setBoundaryHighlightGeom])
+
+  // Clear any previous selection when switching the area-definition method.
+  const switchTab = (tab: AreaTab) => {
+    setAreaTab(tab)
+    setStudyArea(null)
+    setBoundaryId(null)
+    setDrawingActive(false)
+    setDrawnGeometry(null)
+    setBoundaryHighlightGeom(null)
+  }
+
+  const toggleDrawing = () => {
+    if (drawingActive) {
+      setDrawingActive(false)
+      return
+    }
+    // Start a fresh drawing.
+    setStudyArea(null)
+    setDrawnGeometry(null)
+    setBoundaryHighlightGeom(null)
+    setDrawingActive(true)
+  }
+
+  const handleUpload = (geometry: StudyAreaGeometry, fileName: string) => {
+    setDrawingActive(false)
+    setStudyArea(geometry)
+    setBoundaryHighlightGeom(geometry)
+    fitToGeometry(geometry)
+    if (!title) setTitle(fileName.replace(/\.(geo)?json$/i, ''))
+  }
 
   const mutation = useMutation({
     mutationFn: () => {
-      if (!studyArea) throw new Error('Bitte ein Gebiet auswählen')
+      if (!effectiveStudyArea) throw new Error('Bitte ein Gebiet auswählen')
       return createPlanningScenarioFn({
         data: {
           regionSlug,
           title,
-          factorConfig: { ...FAHRRADBOX_TEMPLATE, study_area: studyArea },
+          factorConfig: { ...FAHRRADBOX_TEMPLATE, study_area: effectiveStudyArea },
         },
       })
     },
@@ -109,6 +180,11 @@ const CreateForm = ({
       onCreated(created.id)
     },
   })
+
+  const tabClass = (active: boolean) =>
+    `flex-1 rounded px-2 py-1 text-xs font-medium ${
+      active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+    }`
 
   return (
     <div className="flex flex-col gap-2 rounded border border-gray-200 bg-gray-50 p-2">
@@ -121,8 +197,28 @@ const CreateForm = ({
           className="rounded border border-gray-300 px-2 py-1 text-sm"
         />
       </label>
-      <label className="flex flex-col gap-0.5 text-xs text-gray-600">
+
+      <div className="flex flex-col gap-1 text-xs text-gray-600">
         Berechnungsgebiet
+        <div className="flex gap-1 rounded bg-gray-200 p-0.5">
+          <button
+            type="button"
+            className={tabClass(areaTab === 'search')}
+            onClick={() => switchTab('search')}
+          >
+            Gebiet suchen
+          </button>
+          <button
+            type="button"
+            className={tabClass(areaTab === 'custom')}
+            onClick={() => switchTab('custom')}
+          >
+            Eigenes Gebiet
+          </button>
+        </div>
+      </div>
+
+      {areaTab === 'search' && (
         <BoundaryPicker
           value={boundaryId}
           onChange={(id, geom, name) => {
@@ -132,7 +228,29 @@ const CreateForm = ({
           }}
           regionSlug={regionSlug}
         />
-      </label>
+      )}
+
+      {areaTab === 'custom' && (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={toggleDrawing}
+            className={`flex items-center justify-center gap-1.5 rounded border px-2 py-1.5 text-xs font-medium ${
+              drawingActive
+                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <PencilSquareIcon className="h-4 w-4" />
+            {drawingActive ? 'Zeichnen beenden' : 'Gebiet zeichnen'}
+          </button>
+          {drawingActive && (
+            <p className="text-xs text-gray-500">In der Karte ein Polygon zeichnen.</p>
+          )}
+          <GeoJsonUpload onGeometry={handleUpload} />
+        </div>
+      )}
+
       {mutation.isError && (
         <p className="text-xs text-red-600">{String((mutation.error as Error).message)}</p>
       )}
@@ -140,7 +258,7 @@ const CreateForm = ({
         <button
           type="button"
           onClick={() => mutation.mutate()}
-          disabled={mutation.isPending || !studyArea}
+          disabled={mutation.isPending || !effectiveStudyArea}
           className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {mutation.isPending ? 'Erstellen…' : 'Szenario erstellen'}
@@ -162,7 +280,15 @@ export const ScenarioList = ({ regionSlug }: { regionSlug: string }) => {
   const queryClient = useQueryClient()
   const [activeScenario, setActiveScenario] = usePlanningScenarioParam()
   const [showCreate, setShowCreate] = useState(false)
-  const { data: scenarios } = useQuery(planningScenariosQueryOptions(regionSlug))
+  const { data: scenarios } = useQuery({
+    ...planningScenariosQueryOptions(regionSlug),
+    refetchInterval: (query) => {
+      const hasInFlight = query.state.data?.some(
+        (s) => s.jobs[0]?.status === 'QUEUED' || s.jobs[0]?.status === 'RUNNING',
+      )
+      return hasInFlight ? 2000 : false
+    },
+  })
 
   const deleteMutation = useMutation({
     mutationFn: (scenarioId: number) => deletePlanningScenarioFn({ data: { scenarioId } }),

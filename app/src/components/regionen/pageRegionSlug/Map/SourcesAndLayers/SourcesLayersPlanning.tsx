@@ -48,6 +48,7 @@ const hexagonFillLayerProps = {
 
 const BoundaryHighlightLayer = () => {
   const geom = usePlanningBoundaryState((s) => s.boundaryHighlightGeom)
+  const filled = usePlanningBoundaryState((s) => s.boundaryHighlightFilled)
   if (!geom) return null
   return (
     <Source
@@ -55,11 +56,13 @@ const BoundaryHighlightLayer = () => {
       type="geojson"
       data={{ type: 'Feature', geometry: geom as any, properties: {} }}
     >
-      <Layer
-        id="planning-boundary-highlight-fill"
-        type="fill"
-        paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.1 }}
-      />
+      {filled && (
+        <Layer
+          id="planning-boundary-highlight-fill"
+          type="fill"
+          paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.1 }}
+        />
+      )}
       <Layer
         id="planning-boundary-highlight-outline"
         type="line"

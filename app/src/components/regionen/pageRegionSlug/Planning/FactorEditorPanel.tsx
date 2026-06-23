@@ -1,5 +1,5 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
+import { ChevronRightIcon, InformationCircleIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
@@ -81,25 +81,46 @@ export const FactorEditorPanel = ({
           )}
 
           <div>
-            <div className="mb-1 font-semibold">Gewichte</div>
-            {Object.entries(WEIGHT_LABELS).map(([key, label]) => (
-              <label key={key} className="flex items-center justify-between gap-2 py-0.5">
-                <span>{label}</span>
-                <span className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min={0}
-                    max={1}
-                    step={0.05}
-                    value={weights[key] ?? 0}
-                    disabled={readOnly}
-                    onChange={(e) => setWeight(key, Number(e.target.value))}
-                  />
-                  <span className="w-8 text-right tabular-nums">
-                    {(weights[key] ?? 0).toFixed(2)}
-                  </span>
+            <div className="mb-1 flex items-center gap-1 font-semibold">
+              Gewichte
+              <span className="group relative">
+                <InformationCircleIcon className="size-4 cursor-default text-gray-400" />
+                <span className="pointer-events-none absolute top-0 left-5 z-10 w-56 rounded bg-gray-800 px-2 py-1.5 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                  Bestimmen die relative Bedeutung jedes Faktors bei der Standortbewertung.
                 </span>
-              </label>
+              </span>
+            </div>
+            {Object.entries(WEIGHT_LABELS).map(([key, label]) => (
+              <div
+                key={key}
+                className={
+                  readOnly
+                    ? 'flex items-center justify-between py-0.5'
+                    : 'flex flex-col gap-0.5 py-1'
+                }
+              >
+                <span className="text-xs text-gray-600">{label}</span>
+                {readOnly ? (
+                  <span className="text-xs tabular-nums">
+                    {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
+                  </span>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={weights[key] ?? 0}
+                      onChange={(e) => setWeight(key, Number(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="w-9 shrink-0 text-right tabular-nums">
+                      {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
+                    </span>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
