@@ -307,7 +307,7 @@ export const ScenarioList = ({ regionSlug }: { regionSlug: string }) => {
           onClick={() => setShowCreate(true)}
           className="rounded border border-gray-300 px-2 py-1 text-sm hover:bg-gray-100"
         >
-          + Neues Szenario
+          + Szenario hinzufügen
         </button>
       ) : (
         <CreateForm
@@ -325,7 +325,10 @@ export const ScenarioList = ({ regionSlug }: { regionSlug: string }) => {
           <li key={scenario.id} className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => setActiveScenario(scenario.id)}
+              onClick={() => {
+                setShowCreate(false)
+                setActiveScenario(scenario.id)
+              }}
               className={`flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-gray-100 ${
                 activeScenario === scenario.id ? 'bg-blue-50 font-medium' : ''
               }`}
