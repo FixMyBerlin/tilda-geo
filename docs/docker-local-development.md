@@ -24,7 +24,7 @@ bun run dev
 
 `setup-worktree` creates `../tilda-geo-<name>`, copies `.env` (not `.env.local`), runs husky prepare. First `bun run dev` creates `.env.local` and starts an isolated Docker stack.
 
-If you run `bun run dev` on a feature branch in the **main checkout**, predev warns you to use a worktree instead (continues anyway).
+If you run `bun run dev` on a feature branch in the **main checkout**, predev warns you to use a worktree and continues with the default stack (no `.env.local`).
 
 ## Agent steps
 
