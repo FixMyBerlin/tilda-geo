@@ -33,7 +33,7 @@
         "better-auth": "1.6.19",
         "betterknown": "1.2.0",
         "date-fns": "4.4.0",
-        "dompurify": "3.4.10",
+        "dompurify": "3.4.11",
         "es-toolkit": "^1.47.1",
         "geojson": "0.5.0",
         "h3": "^2.0.1-rc.22",
@@ -57,7 +57,7 @@
         "remark-gfm": "^4.0.1",
         "slugify": "1.6.9",
         "tailwind-merge": "3.6.0",
-        "terra-draw": "1.31.1",
+        "terra-draw": "1.31.2",
         "terra-draw-maplibre-gl-adapter": "1.4.1",
         "tiny-invariant": "1.3.3",
         "zod": "4.4.3",
@@ -1607,7 +1607,7 @@
 
     "domhandler": ["domhandler@5.0.3", "", { "dependencies": { "domelementtype": "^2.3.0" } }, "sha512-cgwlv/1iFQiFnU96XXgROh8xTeetsnJiDsTc7TYCLFd9+/WNkIqPTxiM/8pSd8VIrhXGTf1Ny1q1hquVqDJB5w=="],
 
-    "dompurify": ["dompurify@3.4.10", "", { "optionalDependencies": { "@types/trusted-types": "^2.0.7" } }, "sha512-0xzNv0e7oYC6yyuOGZIABPM4qtg3QxLFniDNPP4ZP90wR8Yq3zgwpRbrNiT4N3IKqDbbYFEJLV+JWEs19aZ//w=="],
+    "dompurify": ["dompurify@3.4.11", "", { "optionalDependencies": { "@types/trusted-types": "^2.0.7" } }, "sha512-zhlUV12GsaRzMsf9q5M254YhA4+VuF0fG+QFqu6aYpoGlKtz+w8//jBcGVYBgQkR5GHjUomejY84AV+/uPbWdw=="],
 
     "domutils": ["domutils@3.2.2", "", { "dependencies": { "dom-serializer": "^2.0.0", "domelementtype": "^2.3.0", "domhandler": "^5.0.3" } }, "sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw=="],
 
@@ -2611,7 +2611,7 @@
 
     "tapable": ["tapable@2.3.3", "", {}, "sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A=="],
 
-    "terra-draw": ["terra-draw@1.31.1", "", {}, "sha512-cZYpFW8G0dHhkZ1yxOoOuCQ7GZJHdN7Za4yZwd6UgQuj3H7qqFxalH2bBPsGLUAtF5gQLslxhp/7r5bpscQ0IA=="],
+    "terra-draw": ["terra-draw@1.31.2", "", {}, "sha512-jyHodIOZVsyqUeZpkZCrsrLrEgcnWxZNlwZH64RUwKWP0o77qhub+iSCpV1XTESXOi2c1LQ87cHe1slk30L1ig=="],
 
     "terra-draw-maplibre-gl-adapter": ["terra-draw-maplibre-gl-adapter@1.4.1", "", { "peerDependencies": { "maplibre-gl": ">=4", "terra-draw": "^1.0.0" } }, "sha512-qZ/bc9bVPnyt0keLVTofV8xiTPkdkbO6RzqrfNLe9zH/edW5PsjvJw97m1EksPZeXNJtFxsVbhi12cPaoNiWfg=="],
 
