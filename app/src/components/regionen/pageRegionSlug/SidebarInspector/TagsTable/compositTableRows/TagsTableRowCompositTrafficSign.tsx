@@ -1,11 +1,14 @@
+import { loadTrafficSignSvg } from '@osm-traffic-signs/converter'
 import { Suspense, use } from 'react'
 import { Img } from '@/components/shared/Img'
 import { TagsTableRow } from '../TagsTableRow'
 import { ConditionalFormattedKey } from '../translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
-import { getTrafficSignSvgPromise } from '../utils/trafficSignBundledSvg'
-import { parseTrafficSignTag } from '../utils/trafficSignFromTag'
-import type { TrafficSignDisplayItem } from '../utils/trafficSignFromTag'
+import {
+  parseTrafficSignTag,
+  trafficSignCountryPrefix,
+  type TrafficSignDisplayItem,
+} from '../utils/trafficSignFromTag'
 import { NodataFallback } from './NodataFallback'
 import type { CompositTableRow } from './types'
 
@@ -110,8 +113,8 @@ function Signs({
   )
 }
 
-function TrafficSignImg({ svgName }: { svgName: string }) {
-  const src = use(getTrafficSignSvgPromise(svgName))
+function TrafficSignImg({ osmValuePart }: { osmValuePart: string }) {
+  const src = use(loadTrafficSignSvg(trafficSignCountryPrefix, osmValuePart))
   if (!src) return null
   return <Img src={src} width={48} height={48} alt="" className="h-12 max-w-12" />
 }
@@ -124,7 +127,7 @@ function Sign({ item }: { item: TrafficSignDisplayItem }) {
       <p className={showImage ? 'mb-1 leading-tight' : 'leading-tight'}>{item.label}</p>
       {item.svgName && (
         <Suspense fallback={null}>
-          <TrafficSignImg svgName={item.svgName} />
+          <TrafficSignImg osmValuePart={item.key} />
         </Suspense>
       )}
     </div>
