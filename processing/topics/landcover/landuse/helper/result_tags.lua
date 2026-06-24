@@ -4,7 +4,7 @@ local CLEANER = require('topics.helper.sanitize_cleaner')
 
 local function result_tags_landuse(tags)
   local result_tags = {
-    landuse = tags.landuse or tags.amenity,
+    landuse = tags.landuse or tags.amenity or tags.leisure,
     access = SANITIZE_TAGS.access(tags.access),
     name = SANITIZE_TAGS.safe_string(tags.name),
     operator = SANITIZE_TAGS.safe_string(tags.operator),

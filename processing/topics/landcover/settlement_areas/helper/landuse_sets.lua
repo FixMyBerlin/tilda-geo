@@ -1,8 +1,9 @@
 local SET = require('topics.helper.sets')
 
--- Settlement-area input definition ("Siedlungsgebiet", per SupaplexOSM / Alex) — the
--- authoritative tag sets for which OSM polygons count as "human land use".
--- Source: "Aufwandsschätzer" definition, https://overpass-turbo.eu/s/2q48
+-- Settlement-area input definition ("Siedlungsgebiet") — the tag sets for which OSM polygons
+-- count as "human land use". Based on the SupaplexOSM / Alex "Aufwandsschätzer" definition
+-- (https://overpass-turbo.eu/s/2q48), with a few civic/rural landuse values added that also sit
+-- inside settlements.
 -- For what these areas mean and the innerorts/außerorts heuristic caveat, see ../README.md.
 
 local landuse_values = SET.set({
@@ -15,6 +16,10 @@ local landuse_values = SET.set({
   'garages',
   'brownfield',
   'construction',
+  -- Added beyond the SupaplexOSM base: civic land + farmyards also sit inside settlements.
+  'civic',
+  'civic_admin',
+  'farmyard',
 })
 
 local leisure_values = SET.set({

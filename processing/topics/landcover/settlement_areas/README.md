@@ -15,10 +15,11 @@ turns them into `public._settlement_areas`.
 
 ## Input definition
 
-Alex/SupaplexOSM's "Siedlungsgebiet" set (the authoritative list lives in
-[helper/landuse_sets.lua](helper/landuse_sets.lua), source: <https://overpass-turbo.eu/s/2q48>):
+Based on Alex/SupaplexOSM's "Siedlungsgebiet" set (source: <https://overpass-turbo.eu/s/2q48>),
+extended with a few civic/rural landuse values. The list lives in
+[helper/landuse_sets.lua](helper/landuse_sets.lua):
 
-- `landuse` ∈ residential, commercial, industrial, retail, education, religious, garages, brownfield, construction
+- `landuse` ∈ residential, commercial, industrial, retail, education, religious, garages, brownfield, construction, civic, civic_admin, farmyard
 - `leisure` ∈ park, garden, dog_park, sports_centre, stadium
 - `amenity` ∈ school, kindergarten, college, university, hospital, clinic, prison
 
