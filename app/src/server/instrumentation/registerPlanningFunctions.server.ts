@@ -177,9 +177,7 @@ async function registerVegetationFunction() {
     END
     $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
   const spec = {
-    vector_layers: [
-      { id: 'planning_vegetation', fields: { ndvi: 'real', flaeche_m2: 'real' } },
-    ],
+    vector_layers: [{ id: 'planning_vegetation', fields: { ndvi: 'real', flaeche_m2: 'real' } }],
   }
   await geoDataClient.$executeRawUnsafe(
     `COMMENT ON FUNCTION public.planning_vegetation IS '${JSON.stringify(spec)}';`,
