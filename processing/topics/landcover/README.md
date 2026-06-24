@@ -21,6 +21,7 @@ dataset lives in its own folder (handler + helpers + SQL + docs):
 |---|---|---|
 | `_settlement_areas` | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README |
 | `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only) |
+| `_buildings` | [`buildings/`](buildings/) | building geometries ≥ 100 m² (geometry-only) |
 
 The `_` prefix marks a table **internal/debug**: still exposed to Martin for inspection, but not a
 curated display layer (no `atlas_*` function). `_settlement_areas` carries the standard shape
