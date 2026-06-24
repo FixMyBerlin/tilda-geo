@@ -4,6 +4,11 @@ on:
     branches:
       - develop
       - tinkering
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
 permissions:
   contents: read
   id-token: write

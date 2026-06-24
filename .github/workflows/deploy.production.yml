@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - main
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 permissions:
   contents: read
   id-token: write
