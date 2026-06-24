@@ -16,10 +16,15 @@ FROM "_roads_bikelanes_sidepath_source_paths";
 CREATE INDEX _sidepath_estimation_paths_geom_idx ON _sidepath_estimation_paths USING GIST (geom);
 ANALYZE _sidepath_estimation_paths;
 
--- Roads: only "main road" types that can have a sidepath (CQI / OSM-Sidepath-Estimation).
--- We restrict to residential and up (plus pedestrian); excludes service.
--- The "roads" table stores class in tags->>'road' (RoadClassificationRoadValue), not "highway". Filter on that.
--- Expose it as tags.highway so estimation (tilda_sidepath_dict_*) sees the road class.
+-- Roads: the road classes a path can be a sidepath of (CQI / OSM-Sidepath-Estimation).
+-- The "roads" table stores class in tags->>'road' (RoadClassificationRoadValue), not "highway".
+-- Filter on that; expose it as tags.highway so estimation (tilda_sidepath_dict_*) sees the class.
+--
+-- Service roads ARE included, so a path alongside a highway=service can be a sidepath. The noisy
+-- service variants (parking_aisle, driveway, emergency_access) are already dropped from `roads` by
+-- exclude_highways.lua unless they carry explicit bicycle access — so what actually matches here is
+-- mostly plain service_road / service_alley. This list is sidepath-specific; the settlement-area
+-- estimation does NOT reuse it (it classifies all roads).
 DROP TABLE IF EXISTS _sidepath_estimation_roads;
 CREATE TEMP TABLE _sidepath_estimation_roads AS
 SELECT
@@ -34,7 +39,8 @@ WHERE (tags->>'road') IN (
   'motorway', 'motorway_link', 'trunk', 'trunk_link',
   'primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link',
   'unclassified', 'residential', 'residential_priority_road', 'unspecified_road',
-  'living_street', 'pedestrian'
+  'living_street', 'pedestrian',
+  'service_road', 'service_alley', 'service_driveway', 'service_emergency_access', 'service_parking_aisle'
 );
 CREATE INDEX _sidepath_estimation_roads_geom_idx ON _sidepath_estimation_roads USING GIST (geom);
 ANALYZE _sidepath_estimation_roads;
