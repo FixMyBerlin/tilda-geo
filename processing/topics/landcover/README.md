@@ -9,7 +9,7 @@ time) instead of every night, and can also be run on demand:
 PROCESS_ONLY_TOPICS=landcover bun run /processing/index.ts
 ```
 
-The extra runtime is fine on a weekend; the daily pipeline only *reads* the output. On non-weekend
+The extra runtime is fine on a weekend; the daily pipeline only _reads_ the output. On non-weekend
 runs the skip is logged so it stays visible.
 
 ## Datasets
@@ -17,11 +17,12 @@ runs the skip is logged so it stays visible.
 `landcover.lua` is one osm2pgsql entrypoint that delegates to per-dataset area handlers; each
 dataset lives in its own folder (handler + helpers + SQL + docs):
 
-| table | folder | notes |
-|---|---|---|
-| `_settlement_areas` | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README |
-| `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only) |
-| `_buildings` | [`buildings/`](buildings/) | building geometries ≥ 100 m² (geometry-only) |
+| table                      | folder                                   | notes                                                 |
+| -------------------------- | ---------------------------------------- | ----------------------------------------------------- |
+| `landuse`                  | [`landuse/`](landuse/)                   | land use display table                                |
+| `_settlement_areas`        | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README |
+| `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only)                       |
+| `_buildings`               | [`buildings/`](buildings/)               | building geometries ≥ 100 m² (geometry-only)          |
 
 The `_` prefix marks a table **internal/debug**: still exposed to Martin for inspection, but not a
 curated display layer (no `atlas_*` function). `_settlement_areas` carries the standard shape
