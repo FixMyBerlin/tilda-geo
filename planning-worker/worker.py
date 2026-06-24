@@ -27,6 +27,7 @@ from flaechenfinder.dem import DEMAdapter
 from flaechenfinder.postgis_loader import PostgisLoader
 from flaechenfinder.scorer import run_flaechenfinder
 from flaechenfinder.tilda import TildaLoader
+from flaechenfinder.vegetation import compute_vegetation_areas
 from results import write_results
 
 CHANNEL = "planning_jobs"
@@ -98,8 +99,24 @@ def _create_run(conn, scenario_id: int, snapshot: dict) -> int:
         return cur.fetchone()[0]
 
 
+def set_progress(conn, job_id: int, pct: int, label: str = ""):
+    """Schreibt den Fortschritt (0–100) des Jobs und loggt ihn. Autocommit →
+    sofort für die App sichtbar. Fehlt die Spalte, wird still ignoriert."""
+    pct = max(0, min(100, int(pct)))
+    print(f"   ⏳ {pct}% – {label}")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'UPDATE prisma."PlanningJob" SET progress=%s, "progressLabel"=%s, "updatedAt"=now() WHERE id=%s',
+                (pct, label or None, job_id),
+            )
+    except Exception as e:
+        print(f"   ⚠️  Fortschritt konnte nicht gespeichert werden: {e}")
+
+
 def process_job(conn, engine, job_id: int, scenario_id: int):
     print(f"\n=== Job {job_id} (Scenario {scenario_id}) ===")
+    set_progress(conn, job_id, 2, "Vorbereitung")
     cfg = _load_scenario_config(conn, scenario_id)
     run_id = _create_run(conn, scenario_id, cfg)
 
@@ -111,6 +128,19 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     tilda_loader = TildaLoader(loader)
     dem_adapter = DEMAdapter(source=use_case.dem_source, dgm1_path=use_case.dgm1_path)
 
+    # Vegetationsflächen on-demand aus CIR-DOP-Kacheln berechnen. Fehlt die
+    # Datengrundlage (keine Kacheln), läuft das restliche Scoring normal weiter.
+    # Fortschritt 5–70 % entfällt auf diese (meist längste) Phase.
+    def _veg_progress(frac, label):
+        set_progress(conn, job_id, 5 + frac * 65, label)
+
+    try:
+        vegetation = compute_vegetation_areas(study_area, progress_cb=_veg_progress)
+    except Exception as e:
+        print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+        vegetation = None
+
+    set_progress(conn, job_id, 72, "Standortbewertung")
     hex_proj, areas = run_flaechenfinder(
         study_area_geom=study_area,
         use_case=use_case,
@@ -118,11 +148,16 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         tilda_loader=tilda_loader,
         h3_resolution=h3_res,
         osm_loader=loader,
+        vegetation_gdf=vegetation,
     )
 
-    hex_count, area_count = write_results(engine, conn, run_id, hex_proj, areas)
-    del hex_proj, areas
+    set_progress(conn, job_id, 92, "Ergebnisse speichern")
+    hex_count, area_count, veg_count = write_results(
+        engine, conn, run_id, hex_proj, areas, vegetation
+    )
+    del hex_proj, areas, vegetation
     gc.collect()
+    set_progress(conn, job_id, 100, "Fertig")
 
     run_status = "COMPLETE" if hex_count > 0 else "EMPTY"
     with conn.cursor() as cur:

@@ -14,7 +14,9 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
     w_slope: 0.2,
     w_clearance: 0.1,
     w_transit: 0.15,
+    w_vegetation: 0,
   },
+  vegetation_direction: 'negative',
   max_cyclepath_dist_m: 150,
   min_clearance_m: 2.0,
   min_surface_score: 30,
@@ -30,6 +32,7 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_slope: 'Hangneigung',
   w_clearance: 'Hindernisfreiheit',
   w_transit: 'ÖPNV',
+  w_vegetation: 'Vegetation',
 }
 
 // Build a GeoJSON Polygon (EPSG:4326) from current map bounds, used as study_area.

@@ -74,6 +74,7 @@ const BoundaryHighlightLayer = () => {
 
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
+  const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
 
   useEffect(() => {
     if (runId != null) {
@@ -93,6 +94,7 @@ export const SourcesLayersPlanning = () => {
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const areasUrl = getTilesUrl(`/planning_areas/{z}/{x}/{y}?run_id=${runId}`)
+  const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
 
   return (
     <>
@@ -120,6 +122,26 @@ export const SourcesLayersPlanning = () => {
         type="line"
         paint={{ 'line-color': '#08522a', 'line-width': 1.5 }}
       />
+
+      {vegetationOn && (
+        <>
+          <Source id="planning-vegetation-source" type="vector" tiles={[vegetationUrl]} />
+          <Layer
+            id="planning-vegetation-fill"
+            source="planning-vegetation-source"
+            source-layer="planning_vegetation"
+            type="fill"
+            paint={{ 'fill-color': '#2d6a4f', 'fill-opacity': 0.45 }}
+          />
+          <Layer
+            id="planning-vegetation-outline"
+            source="planning-vegetation-source"
+            source-layer="planning_vegetation"
+            type="line"
+            paint={{ 'line-color': '#1b4332', 'line-width': 0.5, 'line-opacity': 0.6 }}
+          />
+        </>
+      )}
     </>
   )
 }

@@ -42,9 +42,26 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
 
   if (!data) return null
 
+  const showProgress =
+    (data.status === 'RUNNING' || data.status === 'QUEUED') && data.progress != null
+
   return (
     <div className={`rounded px-2 py-1 text-sm ${COLORS[data.status] ?? ''}`}>
-      {LABELS[data.status] ?? data.status}
+      <div className="flex items-center justify-between gap-2">
+        <span>
+          {LABELS[data.status] ?? data.status}
+          {showProgress && data.progressLabel ? ` – ${data.progressLabel}` : ''}
+        </span>
+        {showProgress ? <span className="tabular-nums">{data.progress} %</span> : null}
+      </div>
+      {showProgress ? (
+        <div className="mt-1 h-1.5 w-full overflow-hidden rounded bg-white/60">
+          <div
+            className="h-full rounded bg-blue-500 transition-all"
+            style={{ width: `${data.progress}%` }}
+          />
+        </div>
+      ) : null}
       {data.status === 'FAILED' && data.errorMessage ? (
         <pre className="mt-1 max-h-24 overflow-auto text-xs whitespace-pre-wrap">
           {data.errorMessage}

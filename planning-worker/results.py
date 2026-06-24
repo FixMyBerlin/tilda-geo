@@ -11,7 +11,8 @@ from shapely.geometry import MultiPolygon
 HEX_COLUMNS = [
     "run_id", "h3_id", "geom",
     "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
-    "score_hangneigung", "score_hindernisfreiheit", "score_oepnv", "eignungsklasse",
+    "score_hangneigung", "score_hindernisfreiheit", "score_oepnv",
+    "score_vegetation", "eignungsklasse",
 ]
 
 
@@ -23,13 +24,24 @@ def _to_multipolygon(geom):
     return geom
 
 
-def write_results(engine, conn, run_id: int, hex_proj: gpd.GeoDataFrame, areas: gpd.GeoDataFrame):
-    """Schreibt Hexagone + Potentialflächen für `run_id`. Gibt (hex_count, area_count) zurück."""
+def write_results(
+    engine,
+    conn,
+    run_id: int,
+    hex_proj: gpd.GeoDataFrame,
+    areas: gpd.GeoDataFrame,
+    vegetation: gpd.GeoDataFrame | None = None,
+):
+    """Schreibt Hexagone + Potentialflächen + Vegetation für `run_id`.
+
+    Gibt (hex_count, area_count, veg_count) zurück.
+    """
 
     # Idempotenz: evtl. vorhandene Zeilen dieses Laufs entfernen.
     with conn.cursor() as cur:
         cur.execute("DELETE FROM planning.scenario_hexagons WHERE run_id = %s", (run_id,))
         cur.execute("DELETE FROM planning.scenario_areas WHERE run_id = %s", (run_id,))
+        cur.execute("DELETE FROM planning.scenario_vegetation WHERE run_id = %s", (run_id,))
 
     hex_count = 0
     if len(hex_proj):
@@ -59,5 +71,24 @@ def write_results(engine, conn, run_id: int, hex_proj: gpd.GeoDataFrame, areas: 
         area_count = len(ar)
         del ar
 
-    print(f"   ✓ geschrieben: {hex_count} Hexagone, {area_count} Flächen (run_id={run_id})")
-    return hex_count, area_count
+    veg_count = 0
+    if vegetation is not None and len(vegetation):
+        vg = vegetation.to_crs("EPSG:3857")
+        vg = vg.rename_geometry("geom")
+        vg["geom"] = vg["geom"].apply(_to_multipolygon)
+        vg = vg[vg["geom"].notna()]
+        vg["run_id"] = run_id
+        for col in ("ndvi", "flaeche_m2"):
+            if col not in vg.columns:
+                vg[col] = None
+        vg = vg.set_geometry("geom")[["run_id", "geom", "ndvi", "flaeche_m2"]]
+        if len(vg):
+            vg.to_postgis("scenario_vegetation", engine, schema="planning", if_exists="append", index=False)
+        veg_count = len(vg)
+        del vg
+
+    print(
+        f"   ✓ geschrieben: {hex_count} Hexagone, {area_count} Flächen, "
+        f"{veg_count} Vegetationsflächen (run_id={run_id})"
+    )
+    return hex_count, area_count, veg_count

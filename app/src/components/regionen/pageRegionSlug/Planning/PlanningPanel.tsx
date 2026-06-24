@@ -1,8 +1,10 @@
+import { Switch } from '@headlessui/react'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
 import { useEffect } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
+import { twJoin } from 'tailwind-merge'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
@@ -16,6 +18,32 @@ import { RunButton } from './RunButton'
 import { ScenarioList } from './ScenarioList'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
+
+/** Quick on/off toggle for the on-demand vegetation (NDVI) result layer. */
+const VegetationToggle = () => {
+  const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
+  const setVegetationOn = usePlanningBoundaryState((s) => s.setVegetationVisible)
+  return (
+    <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+      <span className="font-medium text-gray-800">Vegetationsflächen</span>
+      <Switch
+        checked={vegetationOn}
+        onChange={setVegetationOn}
+        className={twJoin(
+          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
+          vegetationOn ? 'bg-green-700' : 'bg-gray-300',
+        )}
+      >
+        <span
+          className={twJoin(
+            'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
+            vegetationOn ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+          )}
+        />
+      </Switch>
+    </label>
+  )
+}
 
 const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; regionSlug: string }) => {
   const [, setRun] = usePlanningRunParam()
@@ -83,6 +111,8 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
             : scenario.runs[0].status}
         </div>
       )}
+
+      {scenario.runs[0]?.status === 'COMPLETE' && <VegetationToggle />}
     </div>
   )
 }

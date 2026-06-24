@@ -14,6 +14,14 @@ type Store = {
   /** Geometry produced by the map drawing tool; read by the create form as the study_area. */
   drawnGeometry: GeoJsonGeometry | null
   setDrawnGeometry: (geom: GeoJsonGeometry | null) => void
+
+  /**
+   * Whether the on-demand vegetation (NDVI) result layer is shown. Kept in this
+   * store (NOT in the URL) so toggling it doesn't trigger a router navigation –
+   * a transient view switch the user flips frequently while inspecting hexagons.
+   */
+  vegetationVisible: boolean
+  setVegetationVisible: (visible: boolean) => void
 }
 
 export const usePlanningBoundaryState = create<Store>((set) => ({
@@ -26,4 +34,7 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
   setDrawingActive: (active) => set({ drawingActive: active }),
   drawnGeometry: null,
   setDrawnGeometry: (geom) => set({ drawnGeometry: geom }),
+
+  vegetationVisible: false,
+  setVegetationVisible: (visible) => set({ vegetationVisible: visible }),
 }))

@@ -27,14 +27,26 @@ async function ensurePlanningSchema() {
       score_hangneigung       real,
       score_hindernisfreiheit real,
       score_oepnv             real,
+      score_vegetation        real,
       eignungsklasse          text
     );`)
+  // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;`,
+  )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_areas (
       run_id          bigint NOT NULL,
       geom            geometry(MultiPolygon, 3857) NOT NULL,
       mce_gesamtscore real,
       flaeche_m2      real
+    );`)
+  await geoDataClient.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
+      run_id     bigint NOT NULL,
+      geom       geometry(MultiPolygon, 3857) NOT NULL,
+      ndvi       real,
+      flaeche_m2 real
     );`)
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);`,
@@ -47,6 +59,12 @@ async function ensurePlanningSchema() {
   )
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_areas_geom_idx ON planning.scenario_areas USING gist (geom);`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS scenario_vegetation_run_id_idx ON planning.scenario_vegetation (run_id);`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS scenario_vegetation_geom_idx ON planning.scenario_vegetation USING gist (geom);`,
   )
 }
 
@@ -65,6 +83,13 @@ async function registerHexagonsFunction() {
         SELECT
           h3_id,
           mce_gesamtscore,
+          score_radweg,
+          score_bodenbelag,
+          score_hangneigung,
+          score_hindernisfreiheit,
+          score_oepnv,
+          score_zielorte,
+          score_vegetation,
           eignungsklasse,
           ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
         FROM planning.scenario_hexagons
@@ -77,7 +102,18 @@ async function registerHexagonsFunction() {
     vector_layers: [
       {
         id: 'planning_hexagons',
-        fields: { h3_id: 'text', mce_gesamtscore: 'real', eignungsklasse: 'text' },
+        fields: {
+          h3_id: 'text',
+          mce_gesamtscore: 'real',
+          score_radweg: 'real',
+          score_bodenbelag: 'real',
+          score_hangneigung: 'real',
+          score_hindernisfreiheit: 'real',
+          score_oepnv: 'real',
+          score_zielorte: 'real',
+          score_vegetation: 'real',
+          eignungsklasse: 'text',
+        },
       },
     ],
   }
@@ -118,8 +154,41 @@ async function registerAreasFunction() {
   )
 }
 
+async function registerVegetationFunction() {
+  await geoDataClient.$executeRawUnsafe(`
+    CREATE OR REPLACE FUNCTION public.planning_vegetation(z integer, x integer, y integer, query_params json)
+    RETURNS bytea AS $$
+    DECLARE
+      mvt bytea;
+      rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
+    BEGIN
+      IF rid IS NULL THEN
+        RETURN NULL;
+      END IF;
+      SELECT INTO mvt ST_AsMVT(tile, 'planning_vegetation', 4096, 'geom') FROM (
+        SELECT
+          ndvi,
+          flaeche_m2,
+          ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
+        FROM planning.scenario_vegetation
+        WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
+      ) AS tile;
+      RETURN mvt;
+    END
+    $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
+  const spec = {
+    vector_layers: [
+      { id: 'planning_vegetation', fields: { ndvi: 'real', flaeche_m2: 'real' } },
+    ],
+  }
+  await geoDataClient.$executeRawUnsafe(
+    `COMMENT ON FUNCTION public.planning_vegetation IS '${JSON.stringify(spec)}';`,
+  )
+}
+
 export async function registerPlanningFunctions() {
   await ensurePlanningSchema()
   await registerHexagonsFunction()
   await registerAreasFunction()
+  await registerVegetationFunction()
 }

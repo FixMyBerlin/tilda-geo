@@ -26,6 +26,7 @@ BEGIN
                 score_hindernisfreiheit,
                 score_oepnv,
                 score_zielorte,
+                score_vegetation,
                 eignungsklasse,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
             FROM planning.scenario_hexagons
@@ -53,6 +54,30 @@ BEGIN
                 flaeche_m2,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
             FROM planning.scenario_areas
+            WHERE run_id = run_id_val
+              AND geom && bounds
+        ) t
+        WHERE t.geom IS NOT NULL
+    );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.planning_vegetation(
+    z int, x int, y int, query_params json DEFAULT '{}'
+)
+RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
+DECLARE
+    run_id_val bigint := (query_params->>'run_id')::bigint;
+    bounds     geometry := ST_TileEnvelope(z, x, y);
+BEGIN
+    RETURN (
+        SELECT ST_AsMVT(t, 'planning_vegetation', 4096, 'geom')
+        FROM (
+            SELECT
+                ndvi,
+                flaeche_m2,
+                ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
+            FROM planning.scenario_vegetation
             WHERE run_id = run_id_val
               AND geom && bounds
         ) t

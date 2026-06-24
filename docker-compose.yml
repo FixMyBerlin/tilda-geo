@@ -45,9 +45,13 @@ services:
       PGPASSWORD: ${DATABASE_PASSWORD}
       ENVIRONMENT:
       FORCE_COLOR: 1
+      PLANNING_CIR_DIR: /cir
     volumes:
       # DEM-Raster (rasterio-Quelle); MVP läuft auch ohne (SRTM-Fallback).
       - planning_dem:/dem
+      # CIR-DOP-Kacheln für die On-demand-NDVI-Vegetation; ohne Kacheln bleibt
+      # die Vegetation leer und das übrige Scoring läuft normal weiter.
+      - planning_cir:/cir
     depends_on:
       db:
         condition: service_healthy
@@ -174,6 +178,7 @@ volumes:
   db_postgres_17:
   osmfiles:
   planning_dem:
+  planning_cir:
 
 configs:
   martin_conf:

@@ -48,6 +48,10 @@ export const FactorEditorPanel = ({
   const setField = (key: keyof FactorConfig, value: number) =>
     setConfig((c) => ({ ...c, [key]: value }))
 
+  const vegetationDirection = config.vegetation_direction ?? 'negative'
+  const setVegetationDirection = (value: 'positive' | 'negative') =>
+    setConfig((c) => ({ ...c, vegetation_direction: value }))
+
   return (
     <Disclosure as="div" className="rounded border border-gray-200">
       <DisclosureButton
@@ -122,6 +126,37 @@ export const FactorEditorPanel = ({
                 )}
               </div>
             ))}
+          </div>
+
+          <div>
+            <div className="mb-1 font-semibold">Vegetation (NDVI)</div>
+            <p className="mb-1.5 text-xs text-gray-500">
+              Richtung des Vegetations-Scores. Greift nur bei Gewicht „Vegetation“ &gt; 0.
+            </p>
+            <div className="flex gap-1.5">
+              {(
+                [
+                  ['negative', 'Grün schützen'],
+                  ['positive', 'Grün bevorzugen'],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  disabled={readOnly}
+                  onClick={() => setVegetationDirection(value)}
+                  className={twJoin(
+                    'flex-1 rounded border px-2 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed',
+                    vegetationDirection === value
+                      ? 'border-green-700 bg-green-700 text-white'
+                      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+                    readOnly && vegetationDirection !== value && 'opacity-50',
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>

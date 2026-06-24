@@ -6,6 +6,7 @@ pyproj>=3.6
 numpy>=1.26
 pandas>=2.2
 rasterio>=1.3
+scipy>=1.11            # morphologisches Closing (vegetation.py NDVI-Maske)
 
 # DB-Zugriff
 SQLAlchemy>=2.0

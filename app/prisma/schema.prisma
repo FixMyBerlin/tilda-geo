@@ -436,6 +436,9 @@ model PlanningJob {
   startedAt    DateTime?
   finishedAt   DateTime?
   errorMessage String?
+  // Fortschritt 0–100 + Kurzlabel, vom planning-worker während der Berechnung gesetzt.
+  progress      Int?
+  progressLabel String?
   //
   // Set when DONE — links to the immutable run used for tile display.
   resultRun    PlanningRun?      @relation(fields: [resultRunId], references: [id])

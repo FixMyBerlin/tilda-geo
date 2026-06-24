@@ -17,6 +17,7 @@ const FactorConfigSchema = z
     h3_resolution: z.number().int().min(6).max(15).optional(),
     dem_source: z.enum(['srtm', 'dgm1', 'mapterhorn']).optional(),
     weights: z.record(z.string(), z.number()).optional(),
+    vegetation_direction: z.enum(['positive', 'negative']).optional(),
     max_cyclepath_dist_m: z.number().optional(),
     min_clearance_m: z.number().optional(),
     min_surface_score: z.number().optional(),
@@ -108,6 +109,8 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
         errorMessage: true,
         scenarioId: true,
         resultRunId: true,
+        progress: true,
+        progressLabel: true,
         scenario: { select: { region: { select: { slug: true } } } },
       },
     })
@@ -119,6 +122,8 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
       errorMessage: job.errorMessage,
       scenarioId: job.scenarioId,
       resultRunId: job.resultRunId,
+      progress: job.progress,
+      progressLabel: job.progressLabel,
     }
   })
 

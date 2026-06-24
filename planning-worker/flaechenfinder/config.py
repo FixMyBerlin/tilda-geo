@@ -20,6 +20,11 @@ class UseCaseConfig:
     dgm1_path: Optional[str] = None
     tilda_path: Optional[str] = None
 
+    # Vegetations-Faktor (NDVI). Richtung bestimmt das Vorzeichen des Teilscores:
+    #   "negative" → mehr Grün = schlechter (Grünflächen schützen) [Default]
+    #   "positive" → mehr Grün = besser (Bebauung auf Grün erwünscht)
+    vegetation_direction: str = "negative"
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 150.0     # weiter weg → Score 0
     min_clearance_m: float = 2.0            # zu nah an Gebäude → Score 0
@@ -38,6 +43,7 @@ DEFAULT_WEIGHTS = {
     "w_slope":     0.20,
     "w_clearance": 0.10,
     "w_transit":   0.15,
+    "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
 }
 
 
@@ -72,6 +78,7 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         weights=weights,
         dem_source=cfg.get("dem_source", "srtm"),
         dgm1_path=cfg.get("dgm1_path"),
+        vegetation_direction=cfg.get("vegetation_direction", "negative"),
         max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 150.0)),
         min_clearance_m=float(cfg.get("min_clearance_m", 2.0)),
         min_surface_score=float(cfg.get("min_surface_score", 30.0)),

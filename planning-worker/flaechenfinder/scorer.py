@@ -37,11 +37,15 @@ def run_flaechenfinder(
     tilda_loader: TildaLoader,
     h3_resolution: int = 13,
     osm_loader=None,
+    vegetation_gdf=None,
 ):
     """Berechnet das H3-Scoring-Gitter und die abgeleiteten Potentialflächen.
 
     Gibt ein Tupel (hex_gdf, areas_gdf) zurück, beide in EPSG:25832 (metrisch).
     Schreibt KEINE Dateien – die Persistenz übernimmt der Worker (results.py).
+
+    `vegetation_gdf` (optional, EPSG:25832) enthält die on-demand berechneten
+    Vegetationspolygone; daraus wird der Bedeckungsgrad je Hexagon abgeleitet.
     """
 
     print(f"\n🚀 Flächenfinder gestartet: {use_case.name}")
@@ -155,6 +159,38 @@ def run_flaechenfinder(
     hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
     del latlng_points
 
+    # ── 6b. Vegetationsbedeckung (NDVI) ────────────────────────────
+    # Nur berechnen, wenn der Faktor auch gewichtet ist – sonst dient die
+    # Vegetation nur als Anzeige-Layer und die teure Verschneidung entfällt.
+    print("\n[6b/7] Vegetationsbedeckung berechnen...")
+    hex_proj["vegetation_coverage_pct"] = 0.0
+    w_veg = use_case.weights.get("w_vegetation", 0) or 0
+    if w_veg > 0 and vegetation_gdf is not None and len(vegetation_gdf):
+        from shapely import area as _shp_area
+        from shapely import intersection as _shp_intersection
+
+        veg_proj = vegetation_gdf.to_crs("EPSG:25832")[["geometry"]].reset_index(drop=True)
+        veg_proj = veg_proj[veg_proj.geometry.notna() & ~veg_proj.geometry.is_empty]
+        if len(veg_proj):
+            hexes = hex_proj[["geometry"]].copy()
+            hexes["_hid"] = np.arange(len(hexes))
+            hex_area = hex_proj.geometry.area.to_numpy()
+            # Kandidatenpaare via Spatial-Index (STRtree) statt union_all –
+            # nur tatsächlich überlappende Hexagon/Vegetations-Paare verschneiden.
+            pairs = gpd.sjoin(hexes, veg_proj, how="inner", predicate="intersects")
+            if len(pairs):
+                left = pairs.geometry.to_numpy()
+                right = veg_proj.geometry.to_numpy()[pairs["index_right"].to_numpy()]
+                pairs = pairs.assign(_ia=_shp_area(_shp_intersection(left, right)))
+                cov = (
+                    pairs.groupby("_hid")["_ia"].sum()
+                    .reindex(np.arange(len(hexes)), fill_value=0.0)
+                    .to_numpy()
+                )
+                hex_proj["vegetation_coverage_pct"] = np.clip(cov / hex_area * 100.0, 0, 100)
+            del hexes
+        del veg_proj
+
     # ── 7. MCE-Scoring ─────────────────────────────────────────────
     print("\n[7/7] MCE-Score berechnen (0–100)...")
     w = use_case.weights
@@ -174,13 +210,26 @@ def run_flaechenfinder(
         lambda d: min(100.0, d / 10 * 100) if d >= use_case.min_clearance_m else 0.0
     )
 
+    # Vegetations-Teilscore: Vorzeichen über vegetation_direction gesteuert.
+    #   "positive" → mehr Grün = besser; "negative" → mehr Grün = schlechter.
+    # Nur wenn der Faktor gewichtet ist; sonst NaN (→ DB NULL, Sidebar zeigt „–"),
+    # da die Coverage dann gar nicht berechnet wurde.
+    if w.get("w_vegetation", 0):
+        cov = hex_proj["vegetation_coverage_pct"]
+        hex_proj["score_vegetation"] = (
+            cov if use_case.vegetation_direction == "positive" else 100.0 - cov
+        )
+    else:
+        hex_proj["score_vegetation"] = np.nan
+
     hex_proj["mce_gesamtscore"] = (
         hex_proj["score_radweg"]            * w.get("w_cyclepath", 0) +
         hex_proj["score_bodenbelag"]        * w.get("w_surface",   0) +
         hex_proj["score_zielorte"]          * w.get("w_target",    0) +
         hex_proj["score_hangneigung"]       * w.get("w_slope",     0) +
         hex_proj["score_hindernisfreiheit"] * w.get("w_clearance", 0) +
-        hex_proj["score_oepnv"]             * w.get("w_transit",   0)
+        hex_proj["score_oepnv"]             * w.get("w_transit",   0) +
+        hex_proj["score_vegetation"].fillna(0) * w.get("w_vegetation", 0)
     ).round(1)
 
     exclusion = (
