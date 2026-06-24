@@ -12,6 +12,34 @@ PROCESS_ONLY_TOPICS=landcover bun run /processing/index.ts
 The extra runtime is fine on a weekend; the daily pipeline only _reads_ the output. On non-weekend
 runs the skip is logged so it stays visible.
 
+### Manual run on the server
+
+SSH to the host, then run **landcover** and **roads_bikelanes** back-to-back. Settlement-area pseudo
+tags (`_in_settlement_area` on roads/bikelanes) are derived from `public._settlement_areas`, which
+landcover produces; the follow-up `roads_bikelanes` run re-exports and re-attaches those tags.
+
+Reuses the existing OSM extract (`SKIP_DOWNLOAD=1`), skips Martin warm-cache, forces a full topic
+run (`SKIP_UNCHANGED=0`), and turns diffing off — same knobs as a focused production refresh.
+
+```sh
+cd /srv && \
+PROCESS_ONLY_TOPICS=landcover \
+SKIP_DOWNLOAD=1 \
+SKIP_WARM_CACHE=1 \
+SKIP_UNCHANGED=0 \
+PROCESSING_DIFFING_MODE=off \
+docker compose up -d processing && docker logs -f processing && \
+PROCESS_ONLY_TOPICS=roads_bikelanes \
+SKIP_DOWNLOAD=1 \
+SKIP_WARM_CACHE=1 \
+SKIP_UNCHANGED=0 \
+PROCESSING_DIFFING_MODE=off \
+docker compose up -d processing && docker logs -f processing
+```
+
+Each leg starts detached and follows logs until the container exits; `docker logs -f` unblocks the
+`&&` chain so the next leg starts only after the previous run finished.
+
 ## Datasets
 
 `landcover.lua` is one osm2pgsql entrypoint that delegates to per-dataset area handlers; each
