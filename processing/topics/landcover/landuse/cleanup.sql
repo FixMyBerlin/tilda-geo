@@ -1,4 +1,7 @@
--- landuse overlap cleanup. Run from landcover.sql, after osm2pgsql has built the `landuse` table.
+-- WHAT IT DOES:
+-- Remove nested landuse polygons where a smaller polygon is fully inside a larger one.
+-- INPUT: `public.landuse` (polygon)
+-- OUTPUT: `public.landuse` (filtered in place)
 --
 -- Nested polygons — typically an amenity/leisure area (school, park, hospital…) sitting inside a
 -- larger landuse block (residential, education…) — otherwise pile up as overlapping fills. We let
@@ -15,6 +18,8 @@
 -- Notes:
 -- - "larger wins" uses a strict `>` on area, so exact-duplicate polygons (equal area) are kept.
 -- - Full containment is transitive (A⊆B⊆C ⇒ A⊆C), so deleting nested chains never drops coverage.
+--
+DO $$ BEGIN RAISE NOTICE 'START landuse overlap cleanup at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 DELETE FROM landuse AS small
 USING landuse AS big
@@ -24,3 +29,5 @@ WHERE ST_Area(big.geom) > ST_Area(small.geom)   -- larger wins
   -- Percentage-based alternative (more thorough, slower):
   --   AND ST_Contains(big.geom, ST_PointOnSurface(small.geom))
   --   AND ST_Area(ST_Intersection(small.geom, big.geom)) >= 0.9 * ST_Area(small.geom)
+
+DO $$ BEGIN RAISE NOTICE 'END landuse overlap cleanup at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

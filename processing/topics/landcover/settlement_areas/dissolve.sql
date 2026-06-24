@@ -1,5 +1,7 @@
--- Build public._settlement_areas from _settlement_source_areas (settlement_source.lua).
--- Run from landcover.sql.
+-- WHAT IT DOES:
+-- Build `public._settlement_areas` from `_settlement_source_areas` via grid-partitioned dissolve.
+-- INPUT: `_settlement_source_areas` (polygon, from settlement_source.lua)
+-- OUTPUT: `public._settlement_areas` (polygon, 5243, standard topic-table shape)
 --
 -- public._settlement_areas uses the standard topic-table shape (id/tags/meta/geom/minzoom) so it
 -- previews cleanly in Martin. The `_` prefix marks it internal/debug — exposed to Martin for
@@ -8,6 +10,8 @@
 --
 -- Method, CRS (EPSG:5243), the heuristic caveat and measured performance: see README.md +
 -- BENCHMARK_DOCUMENTATION.md in this folder. Tune via the commented constants inline below.
+--
+DO $$ BEGIN RAISE NOTICE 'START dissolving settlement areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- grid_size: cell size (m) for the partitioned dissolve. We never union the whole country at
 -- once — only within a grid cell, then stitch the few per-cell results. Used for both gx and gy,
@@ -110,3 +114,5 @@ CREATE UNIQUE INDEX ON public._settlement_areas (id);
 CREATE INDEX ON public._settlement_areas USING GIST (geom);
 
 ANALYZE public._settlement_areas;
+
+DO $$ BEGIN RAISE NOTICE 'END dissolving settlement areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

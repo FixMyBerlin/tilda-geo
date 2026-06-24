@@ -6,3 +6,5 @@
 \i '/processing/topics/landcover/landuse/cleanup.sql'
 \i '/processing/topics/landcover/settlement_areas/dissolve.sql'
 \i '/processing/topics/landcover/buildings/filter.sql'
+
+DO $$ BEGIN RAISE NOTICE 'FINISH topics/landcover/landcover.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
