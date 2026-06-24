@@ -1,10 +1,11 @@
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
+local allowed = require('topics.landcover.landuse.helper.allowed_values')
 
 local function result_tags_landuse(tags)
   local result_tags = {
-    landuse = tags.landuse or tags.amenity or tags.leisure,
+    landuse = allowed.matched_value(tags),
     access = SANITIZE_TAGS.access(tags.access),
     name = SANITIZE_TAGS.safe_string(tags.name),
     operator = SANITIZE_TAGS.safe_string(tags.operator),

@@ -6,7 +6,7 @@ local result_tags = require('topics.landcover.landuse.helper.result_tags')
 local minzoom = require('topics.landcover.landuse.helper.minzoom')
 
 -- The `landuse` display table: land use polygons (the allowed landuse/amenity/leisure values
--- defined in helper/exit_processing.lua) with the standard topic shape (id/tags/meta/geom/minzoom).
+-- defined in helper/allowed_values.lua) with the standard topic shape (id/tags/meta/geom/minzoom).
 -- Nested overlaps are pruned afterwards by cleanup.sql (the larger polygon wins). See ../README.md.
 local db_table = osm2pgsql.define_table({
   name = 'landuse',

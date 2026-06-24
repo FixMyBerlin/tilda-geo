@@ -63,6 +63,13 @@ const data = {
     },
     values: {},
   },
+  atlas_landuse: {
+    keys: {
+      landuse:
+        'Enthält die zugelassenen `landuse`-Werte sowie ausgewählte `amenity`- und `leisure`-Flächen, die im Processing auf den `landuse`-Schlüssel normalisiert werden.',
+    },
+    values: {},
+  },
   atlas_poiClassification: {
     keys: {},
     values: {

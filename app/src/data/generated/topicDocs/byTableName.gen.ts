@@ -3278,22 +3278,56 @@ const data = {
         key: 'landuse',
         type: 'string',
         label: 'Landnutzung',
+        description:
+          'Enthält die zugelassenen `landuse`-Werte sowie ausgewählte `amenity`- und `leisure`-Flächen, die im Processing auf den `landuse`-Schlüssel normalisiert werden.',
         values: [
           {
             value: 'allotments',
             label: 'Kleingartenanlage',
           },
           {
+            value: 'brownfield',
+            label: 'Brachfläche',
+          },
+          {
             value: 'cemetery',
             label: 'Friedhofsgelände',
+          },
+          {
+            value: 'civic',
+            label: 'Fläche für öffentliche Einrichtungen',
+          },
+          {
+            value: 'civic_admin',
+            label: 'Verwaltungsfläche',
           },
           {
             value: 'commercial',
             label: 'Gewerbliche Nutzung',
           },
           {
+            value: 'construction',
+            label: 'Baufläche (im Bau)',
+          },
+          {
+            value: 'education',
+            label: 'Bildungsfläche',
+          },
+          {
             value: 'farmyard',
             label: 'Landwirtschaftliche Nutzung',
+          },
+          {
+            value: 'garages',
+            label: 'Garagen',
+          },
+          {
+            value: 'industrial',
+            label: 'Industrielle Nutzung',
+          },
+          {
+            value: 'religious',
+            label: 'Religiöse Nutzung',
           },
           {
             value: 'residential',
@@ -3310,6 +3344,46 @@ const data = {
           {
             value: 'university',
             label: 'Universitätsgelände',
+          },
+          {
+            value: 'kindergarten',
+            label: 'Kindertagesstätte',
+          },
+          {
+            value: 'college',
+            label: 'Hochschul-/College-Gelände',
+          },
+          {
+            value: 'hospital',
+            label: 'Krankenhausgelände',
+          },
+          {
+            value: 'clinic',
+            label: 'Klinikgelände',
+          },
+          {
+            value: 'prison',
+            label: 'Justizvollzugsanstalt',
+          },
+          {
+            value: 'park',
+            label: 'Park',
+          },
+          {
+            value: 'garden',
+            label: 'Garten',
+          },
+          {
+            value: 'dog_park',
+            label: 'Hundeauslaufgebiet',
+          },
+          {
+            value: 'sports_centre',
+            label: 'Sportzentrum',
+          },
+          {
+            value: 'stadium',
+            label: 'Stadion',
           },
         ],
       },

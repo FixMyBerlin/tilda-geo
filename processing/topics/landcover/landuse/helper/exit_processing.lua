@@ -1,52 +1,11 @@
-local SET = require('topics.helper.sets')
+local allowed = require('topics.landcover.landuse.helper.allowed_values')
 
-local allowed_values_landuse = SET.set({
-  'allotments',
-  'brownfield',
-  'cemetery',
-  'civic_admin',
-  'civic',
-  'commercial',
-  'construction',
-  'education',
-  'farmyard',
-  'garages',
-  'industrial',
-  'religious',
-  'residential',
-  'retail'
-})
-
-local allowed_values_amenity = SET.set({
-  'school',
-  'university',
-  'kindergarten',
-  'college',
-  'hospital',
-  'clinic',
-  'prison'
-})
-
-local allowed_values_leisure = SET.set({
-  'park',
-  'garden',
-  'dog_park',
-  'sports_centre',
-  'stadium'
-})
-
+-- Convention gate (like the other topics' exit_processing.lua): skip objects that are not an
+-- allowed land-use area. The allowed value sets and the matched-value logic live in
+-- allowed_values.lua, which result_tags.lua also uses, so the filter and the stored value agree.
+---@param object table
 local function exit_processing(object)
-  if not (object.tags.landuse or object.tags.amenity or object.tags.leisure) then
-    return true
-  end
-
-  if not (allowed_values_landuse[object.tags.landuse]
-      or allowed_values_amenity[object.tags.amenity]
-      or allowed_values_leisure[object.tags.leisure]) then
-    return true
-  end
-
-  return false
+  return allowed.matched_value(object.tags) == nil
 end
 
 return exit_processing
