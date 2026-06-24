@@ -283,3 +283,6 @@ attributes:
     label: Beschilderung in Gegenrichtung
     format: sanitized_strings
     valuesRef: bikelanes.traffic_sign
+  - key: _in_settlement_area
+    purpose: processing
+    format: ignore

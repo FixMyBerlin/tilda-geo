@@ -63,3 +63,6 @@ attributes:
   - key: _is_sidepath
     purpose: qa
     format: ignore
+  - key: _in_settlement_area
+    purpose: processing
+    format: ignore

@@ -5,7 +5,7 @@ import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing
 import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
 import {
-  getSkipUnchangedContext,
+  type SkipUnchangedContext,
   roadsBikelanesSidepathDir,
   willSkipTopic,
 } from '../../../utils/skipUnchanged'
@@ -18,14 +18,13 @@ const LOG_PREFIX = '[Afterthoughts][Sidepath]'
  * Writes PSEUDO_TAGS_DATA/is_sidepath_estimation.csv for the next run's roads_bikelanes Lua import.
  * If tables don't exist yet (first run / empty DB), we warn and continue.
  */
-export async function exportSidepathData(fileChanged: boolean) {
+export async function exportSidepathData(fileChanged: boolean, skipContext: SkipUnchangedContext) {
   const sqlDir = join(import.meta.dir, 'sql')
   const runFile = join(sqlDir, 'run_is_sidepath_estimation.sql')
   const csvPath = join(PSEUDO_TAGS_DATA, 'is_sidepath_estimation.csv')
 
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
 
-  const skipContext = await getSkipUnchangedContext(fileChanged)
   const csvExists = await Bun.file(csvPath).exists()
 
   if (await willSkipTopic('roads_bikelanes', fileChanged, skipContext)) {

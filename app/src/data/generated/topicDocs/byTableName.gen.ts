@@ -2103,6 +2103,13 @@ const data = {
           },
         ],
       },
+      {
+        key: '_in_settlement_area',
+        type: 'ignore',
+        label: '_in_settlement_area',
+        purpose: 'processing',
+        values: [],
+      },
     ],
     chapters: [
       {
@@ -10734,6 +10741,13 @@ const data = {
           },
         ],
       },
+      {
+        key: '_in_settlement_area',
+        type: 'ignore',
+        label: '_in_settlement_area',
+        purpose: 'processing',
+        values: [],
+      },
     ],
     chapters: [
       {
@@ -11773,6 +11787,13 @@ const data = {
         type: 'ignore',
         label: '_is_sidepath',
         purpose: 'qa',
+        values: [],
+      },
+      {
+        key: '_in_settlement_area',
+        type: 'ignore',
+        label: '_in_settlement_area',
+        purpose: 'processing',
         values: [],
       },
     ],

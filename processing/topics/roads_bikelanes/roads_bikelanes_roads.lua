@@ -94,7 +94,10 @@ local function roads_bikelanes_roads(context)
 
     roads_path_classes_table:insert({
       id = default_id({ type = object_tags._type, id = object_tags._id }),
-      tags = merge_table(extract_public_tags(result_tags), { _is_sidepath = object_tags._is_sidepath }),
+      tags = merge_table(extract_public_tags(result_tags), {
+        _is_sidepath = object_tags._is_sidepath,
+        _in_settlement_area = object_tags._in_settlement_area,
+      }),
       meta = object_meta,
       geom = object_geom,
       minzoom = paths_generalization(object_tags, result_tags)
@@ -103,7 +106,9 @@ local function roads_bikelanes_roads(context)
     result_tags.name_ref = object_tags.ref
     roads_table:insert({
       id = default_id({ type = object_tags._type, id = object_tags._id }),
-      tags = extract_public_tags(result_tags),
+      tags = merge_table(extract_public_tags(result_tags), {
+        _in_settlement_area = object_tags._in_settlement_area,
+      }),
       meta = object_meta,
       geom = object_geom,
       minzoom = road_generalization(object_tags, result_tags)

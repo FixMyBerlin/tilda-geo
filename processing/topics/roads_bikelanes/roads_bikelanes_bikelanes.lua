@@ -40,6 +40,7 @@ local function roads_bikelanes_bikelanes(context)
         covered = shared_result_tags.covered,
         _parent_highway = cycleway._parent_highway,
         _is_sidepath = object_tags._is_sidepath,
+        _in_settlement_area = object_tags._in_settlement_area,
       }
       local meta = object_meta
 

@@ -247,3 +247,6 @@ attributes:
         label: Rot und Grün
       - value: no
         label: Keine besondere Farbe
+  - key: _in_settlement_area
+    purpose: processing
+    format: ignore
