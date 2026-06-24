@@ -140,7 +140,12 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
         vegetation = None
 
-    set_progress(conn, job_id, 72, "Standortbewertung")
+    # Die 7 fachlichen Schritte des Scorings auf 72–90 % abbilden und ihren
+    # Namen als progressLabel an die App weiterreichen. Format "n/total · Name",
+    # damit das Frontend den aktuellen Schritt in der Schrittliste hervorheben kann.
+    def _scoring_progress(step, total, label):
+        set_progress(conn, job_id, 72 + (step - 1) / total * 18, f"{step}/{total} · {label}")
+
     hex_proj, areas = run_flaechenfinder(
         study_area_geom=study_area,
         use_case=use_case,
@@ -149,6 +154,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         h3_resolution=h3_res,
         osm_loader=loader,
         vegetation_gdf=vegetation,
+        progress_cb=_scoring_progress,
     )
 
     set_progress(conn, job_id, 92, "Ergebnisse speichern")

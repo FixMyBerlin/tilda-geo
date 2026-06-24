@@ -19,6 +19,21 @@ SURFACE_SCORES = {
 # Distanz-Platzhalter, wenn ein Layer leer ist (kein Feature gefunden).
 _FAR = 1e9
 
+# Die 7 fachlichen Schritte des Scorings, in Reihenfolge. Wird sowohl für die
+# Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
+# verwendet. Die Namen müssen mit der Schrittliste im Frontend übereinstimmen
+# (PlanningSteps.tsx).
+SCORING_STEPS = [
+    "H3-Gitter generieren",
+    "Radwege laden",
+    "Hindernisse & Untergrund laden",
+    "ÖPNV-Haltestellen laden",
+    "Zielorte bewerten",
+    "Hangneigung & Vegetation berechnen",
+    "MCE-Score berechnen",
+]
+SCORING_STEP_COUNT = len(SCORING_STEPS)
+
 
 def _dist_to_union(centroids: gpd.GeoSeries, features_proj: gpd.GeoDataFrame) -> pd.Series:
     """Abstand jeder Zelle zum Union der Features. Leerer Layer → _FAR (überall fern)."""
@@ -38,6 +53,7 @@ def run_flaechenfinder(
     h3_resolution: int = 13,
     osm_loader=None,
     vegetation_gdf=None,
+    progress_cb=None,
 ):
     """Berechnet das H3-Scoring-Gitter und die abgeleiteten Potentialflächen.
 
@@ -46,13 +62,24 @@ def run_flaechenfinder(
 
     `vegetation_gdf` (optional, EPSG:25832) enthält die on-demand berechneten
     Vegetationspolygone; daraus wird der Bedeckungsgrad je Hexagon abgeleitet.
+
+    `progress_cb` (optional) wird vor jedem der 7 Schritte mit
+    (step:int 1..7, total:int, label:str) aufgerufen, damit der Worker den
+    aktuellen Schritt an das UI weiterreichen kann.
     """
+
+    def _step(n: int):
+        """Loggt den n-ten Schritt (1-basiert) und meldet ihn via progress_cb."""
+        label = SCORING_STEPS[n - 1]
+        print(f"\n[{n}/{SCORING_STEP_COUNT}] {label}...")
+        if progress_cb is not None:
+            progress_cb(n, SCORING_STEP_COUNT, label)
 
     print(f"\n🚀 Flächenfinder gestartet: {use_case.name}")
     print(f"   H3-Auflösung: {h3_resolution} | DEM: {use_case.dem_source}")
 
     # ── 1. H3-Gitter ──────────────────────────────────────────────
-    print("\n[1/7] H3-Gitter generieren...")
+    _step(1)
     geojson = study_area_geom.__geo_interface__
     hexagons = h3.geo_to_cells(geojson, res=h3_resolution)
     rows = [{
@@ -72,14 +99,14 @@ def run_flaechenfinder(
     centroids = hex_proj.geometry.centroid
 
     # ── 2. Radwege (PostGIS) ──────────────────────────────────────
-    print("\n[2/7] Radwege laden (public.bikelanes)...")
+    _step(2)
     cycleways = tilda_loader.load_cycleways(study_area_geom)
     cycleway_proj = cycleways.to_crs("EPSG:25832") if len(cycleways) else cycleways
     hex_proj["abstand_radweg_m"] = _dist_to_union(centroids, cycleway_proj)
     del cycleways, cycleway_proj
 
     # ── 3. Hindernisse / Untergrund ───────────────────────────────
-    print("\n[3/7] Hindernisse & Untergrund laden...")
+    _step(3)
     obstacles = osm_loader.features_from_polygon(study_area_geom, {
         "building": True,
         "landuse": ["grass", "forest", "meadow"],
@@ -104,7 +131,7 @@ def run_flaechenfinder(
         hex_proj["bodenbelag_osm"] = None
 
     # ── 4. ÖPNV-Haltestellen ──────────────────────────────────────
-    print("\n[4/7] ÖPNV-Haltestellen laden...")
+    _step(4)
     _TRANSIT_TYPES = [
         ("U-Bahn-Eingang", {"railway": "subway_entrance"}, 50),
         ("Straßenbahn",    {"railway": "tram_stop"},       50),
@@ -131,7 +158,7 @@ def run_flaechenfinder(
     del _transit_scores
 
     # ── 5. Zielorte ────────────────────────────────────────────────
-    print(f"\n[5/7] Zielorte bewerten ({len(use_case.targets)} Typen)...")
+    _step(5)
     target_scores = []
     for t in use_case.targets:
         try:
@@ -154,15 +181,14 @@ def run_flaechenfinder(
         hex_proj["score_zielorte"] = 0.0
     del target_scores
 
-    # ── 6. DEM / Hangneigung ───────────────────────────────────────
-    print(f"\n[6/7] Hangneigung berechnen ({use_case.dem_source})...")
+    # ── 6. DEM / Hangneigung + Vegetationsbedeckung ────────────────
+    _step(6)
     hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
     del latlng_points
 
     # ── 6b. Vegetationsbedeckung (NDVI) ────────────────────────────
     # Nur berechnen, wenn der Faktor auch gewichtet ist – sonst dient die
     # Vegetation nur als Anzeige-Layer und die teure Verschneidung entfällt.
-    print("\n[6b/7] Vegetationsbedeckung berechnen...")
     hex_proj["vegetation_coverage_pct"] = 0.0
     w_veg = use_case.weights.get("w_vegetation", 0) or 0
     if w_veg > 0 and vegetation_gdf is not None and len(vegetation_gdf):
@@ -192,7 +218,7 @@ def run_flaechenfinder(
         del veg_proj
 
     # ── 7. MCE-Scoring ─────────────────────────────────────────────
-    print("\n[7/7] MCE-Score berechnen (0–100)...")
+    _step(7)
     w = use_case.weights
 
     def slope_score(deg):
