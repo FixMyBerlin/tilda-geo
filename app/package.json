@@ -20,6 +20,7 @@
     "db-pull": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/run.ts",
     "db-pull:pull": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/pull.ts",
     "db-pull:restore": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/restore-local.ts",
+    "audit-public-schema": "bun --env-file=../.env --env-file=../.env.local scripts/audit-public-schema/index.ts",
     "build": "vite build",
     "preview": "cd .output && NITRO_PORT=4000 NITRO_HOST=127.0.0.1 bun --env-file=../.env --env-file=../.env.local ./server/index.mjs",
     "bleach": "rm -rf node_modules/ && rm -rf .output/ && bun install",
