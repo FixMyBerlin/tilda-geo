@@ -110,16 +110,24 @@ Copy the full template from `playwright.config.ts.template` in this skill direct
 
 Canonical paths in **tilda-geo** (`app/`):
 
-| Concern                 | Location                                          |
-| ----------------------- | ------------------------------------------------- |
-| Config                  | `playwright.config.ts`                            |
-| Setup docs              | `tests/README.md`                                 |
-| Smoke (public routes)   | `tests/smoke/public-routes.spec.ts`               |
-| Stubbed admin auth      | `tests/pages/admin.stubbed-auth.spec.ts`          |
-| Auth fixtures           | `tests/fixtures/auth.ts`                          |
-| Console / server errors | `tests/utils/console.ts`, `tests/utils/server.ts` |
-| Map wait helpers        | `tests/utils/maps.ts`                             |
-| App test hooks          | `src/components/shared/utils/playwright.ts`       |
+| Concern                     | Location                                          |
+| --------------------------- | ------------------------------------------------- |
+| Config                      | `playwright.config.ts`                            |
+| Setup docs                  | `tests/README.md`                                 |
+| Smoke (public routes)       | `tests/smoke/public-routes.spec.ts`               |
+| Smoke (trailing slash)      | `tests/smoke/trailing-slash-redirect.spec.ts`     |
+| Smoke (region `beforeLoad`) | `tests/smoke/region-before-load.spec.ts`          |
+| Stubbed admin / role auth   | `tests/pages/admin.stubbed-auth.spec.ts`          |
+| Regions + map (real OAuth)  | `tests/pages/regions.spec.ts` (`RUN_OAUTH_E2E=1`) |
+| Docs region downloads       | `tests/pages/docs-region-downloads.spec.ts`       |
+| Contact profile modal       | `tests/pages/contact-profile-modal.spec.ts`       |
+| Auth fixtures               | `tests/fixtures/auth.ts`                          |
+| Route lists                 | `tests/fixtures/routes.ts`                        |
+| Console / server errors     | `tests/utils/console.ts`, `tests/utils/server.ts` |
+| Map wait / render helpers   | `tests/utils/maps.ts`                             |
+| Map network verification    | `tests/utils/network.ts`                          |
+| Dynamic URL regex escape    | `tests/utils/regex.ts`                            |
+| App test hooks              | `src/components/shared/utils/playwright.ts`       |
 
 ### `VITE_PLAYWRIGHT_ENABLED`
 
@@ -143,13 +151,15 @@ export function playwrightTestId(testId: string) {
 export const firePlaywrightMapLoadedEvent = createIsomorphicFn()
   .server(() => {})
   .client(() => {
-    if (import.meta.env.VITE_PLAYWRIGHT_ENABLED !== 'true') return
+    const enabled =
+      import.meta.env.VITE_PLAYWRIGHT_ENABLED === 'true' || window.__PLAYWRIGHT_ENABLED === 'true'
+    if (!enabled) return
     window.dispatchEvent(new CustomEvent('mapLoaded'))
     window.__mapLoaded = true
   })
 ```
 
-Call `firePlaywrightMapLoadedEvent()` from the map `onLoad` handler. Tests use `tests/utils/maps.ts` (`waitForMapLoad`, `verifyMapRendered`).
+Call `firePlaywrightMapLoadedEvent()` from the map `onLoad` handler. Tests use `tests/utils/maps.ts` (`waitForMapLoad`, `verifyMapRendered`, `checkMapTilesLoaded`). For tile/API coverage on region pages, use `verifyMapNetworkRequests` from `tests/utils/network.ts` (after `waitForMapLoad`).
 
 For **click/drag on map canvas**, consider [MapGrab](https://mapgrab.github.io/docs/getting-started/stage-two/playwright) (used in legacy Trassenscout surveys; adopt when migrating those flows to Start).
 
@@ -162,16 +172,24 @@ After **Next → TanStack Start**, add or run smoke specs:
 3. `expect(page.locator('main').first()).toBeVisible()`
 4. `expectNoConsoleErrors(page)` (see utils)
 
-Route lists live in `tests/fixtures/routes.ts`. Run: `bun run e2e -- tests/smoke`.
+Route lists live in `tests/fixtures/routes.ts` (`PUBLIC_SMOKE_ROUTES`, `ADMIN_ROUTES`, `ADMIN_REDIRECT_SMOKE_ROUTE`, etc.). Run: `bun run e2e -- tests/smoke`.
+
+Additional smoke specs (no OAuth):
+
+- **Trailing slash:** `trailing-slash-redirect.spec.ts` — `__root` `beforeLoad` strips slashes (`trailingSlash: 'never'`); public routes + stubbed admin for `/admin/`.
+- **Region `beforeLoad`:** `region-before-load.spec.ts` — catch invalid `URL` construction errors on region pages with search params.
 
 ### Auth
 
-| Strategy               | When                    | TILDA                                                                                           |
-| ---------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
-| **Stubbed DB session** | Most admin / role tests | `createStubbedAdminSession(page, baseURL, { identityKey })` — Better Auth cookies + Prisma user |
-| **Real OAuth**         | Rare                    | `auth-setup.spec.ts` only if `RUN_OAUTH_E2E=1` + `TEST_OSM_*` in `.env.test`                    |
+| Strategy          | When                         | TILDA                                                                                           |
+| ----------------- | ---------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Stubbed admin** | Admin pages, search-param UI | `createStubbedAdminSession(page, baseURL, { identityKey })` — Better Auth cookies + Prisma user |
+| **Stubbed user**  | Non-admin / modal flows      | `createStubbedUserSession(page, baseURL, { identityKey })`                                      |
+| **Real OAuth**    | Map + regions regression     | `auth-setup.spec.ts` + `regions.spec.ts` when `RUN_OAUTH_E2E=1` + `TEST_OSM_*` in `.env.test`   |
 
-**Parallel safety:** Stubbed admin suites use `mode: 'serial'` and **nested** `test.describe` per route so `afterEach` cleanup does not delete another worker’s session (`cleanupStubbedSessionData`).
+**Parallel safety:** Stubbed admin suites use `mode: 'serial'` and **nested** `test.describe` per route so `afterEach` cleanup does not delete another worker’s session (`cleanupStubbedSessionData('ADMIN' | 'USER', identityKey)`).
+
+**Dynamic URLs:** Use `escapeRegExp(route)` from `tests/utils/regex.ts` when building `toHaveURL(new RegExp(...))` from fixture paths that may contain `?` or special characters.
 
 ### Quality helpers
 
@@ -254,10 +272,10 @@ Multiple headers: `PW_EXTRA_HEADERS='{"X-Automated-By":"playwright-skill"}'`.
 - [ ] `playwright.config.ts` with layered dotenv and `baseURL` matching Vite port
 - [ ] `tests/README.md` documents compose, `.env.test`, and bun scripts
 - [ ] `VITE_PLAYWRIGHT_ENABLED` + `src/.../playwright.ts` hooks
-- [ ] `tests/smoke/` for public routes after migration
-- [ ] Stubbed auth fixtures if admin routes need login
+- [ ] `tests/smoke/` for public routes (+ trailing-slash / `beforeLoad` edge cases)
+- [ ] Stubbed auth fixtures if admin or role-gated routes need login
 - [ ] `collectConsoleErrors` / `collectServerErrors` on critical suites
-- [ ] Map: `mapLoaded` event + `waitForMapLoad` (MapGrab if clicking the map)
+- [ ] Map: `mapLoaded` event + `waitForMapLoad` + optional `verifyMapNetworkRequests` (MapGrab if clicking the map)
 
 ---
 

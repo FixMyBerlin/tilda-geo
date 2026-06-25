@@ -2,10 +2,10 @@
 name: tech-stack
 description: >-
   Default FMC tech stack for geo-heavy React SPAs: Bun/Vite, React 19, TanStack,
-  maps, styling, tsconfig templates, browserslist client targets, and when to
-  pick sibling skills. Use when scaffolding a new app, evaluating libraries,
-  changing supported browsers or compat lint, or making stack/architecture
-  decisions on existing apps.
+  maps, styling, TypeScript editor/CLI alignment, tsconfig templates,
+  browserslist client targets, and when to pick sibling skills. Use when
+  scaffolding a new app, evaluating libraries, changing supported browsers or
+  compat lint, or making stack/architecture decisions on existing apps.
 ---
 
 # FMC tech stack
@@ -53,6 +53,7 @@ Prefer installed skill names when present; otherwise fetch from git.
   - class sorting, import sorting, `package.json` sorting
   - `printWidth` 100, semicolons `asNeeded`, single quotes
   - `'typescript/switch-exhaustiveness-check': 'error'`
+  - React Compiler: native oxlint rule `'react/react-compiler': 'error'` on `**/*.tsx` (not `eslint-plugin-react-compiler`)
   - Templates: [examples/oxfmt.config.mjs](examples/oxfmt.config.mjs), [examples/oxlint.config.mjs](examples/oxlint.config.mjs)
   - Setup and per-project tuning: [references/oxc-config.md](references/oxc-config.md)
 - **Client browser target:** `browserslist` in `package.json` drives Vite client `build.target` and `eslint-plugin-compat` in oxlint — [references/browser-target.md](references/browser-target.md)
@@ -60,8 +61,26 @@ Prefer installed skill names when present; otherwise fetch from git.
 ## React and TypeScript
 
 - **UI:** React 19
-- **TypeScript:** Go-native **7.x** (`typescript@7.0.1-rc`, binary `tsc`). Typecheck with `tsc --noEmit`.
-- **Bun + TS 7:** add `typescript` and `@typescript/typescript-*` platform packages to `minimumReleaseAgeExcludes` while on RC. Bun may not hoist optional platform binaries — list `@typescript/typescript-darwin-arm64` and `@typescript/typescript-linux-x64` under `optionalDependencies` (extend for other CI/dev platforms as needed).
+- **TypeScript (default):** `typescript@7.0.1-rc` (Go-native 7.x). Typecheck with `tsc --noEmit` via `bun run type-check`. The workspace `typescript` package provides both CLI and editor language service — do not add `@typescript/native-preview` or a separate `tsgo` binary for type-check.
+- **Editor/CLI alignment:** both SDK paths must resolve to the same `devDependencies.typescript` install:
+  - `typescript.tsdk` → `node_modules/typescript/lib`
+  - `typescript.native-preview.tsdk` → `node_modules/typescript` (package root)
+  - Never point `native-preview.tsdk` at `node_modules/@typescript/native-preview` unless that package _is_ the declared TypeScript dependency. Misalignment makes IDE diagnostics disagree with `bun run type-check`.
+- **Scaffold (TS 7):** `package.json` — `devDependencies.typescript` `7.0.1-rc`, script `"type-check": "tsc --noEmit"` (add `-p` when using split tsconfigs); `optionalDependencies` — `@typescript/typescript-darwin-arm64` and `@typescript/typescript-linux-x64` at the same version (extend for other CI/dev platforms). `bunfig.toml` — `minimumReleaseAgeExcludes = ["typescript", "@typescript/typescript-*"]`. Commit `.vscode/settings.json` and recommend `TypeScriptTeam.native-preview` in `.vscode/extensions.json`.
+
+```json
+{
+  "js/ts.experimental.useTsgo": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.native-preview.tsdk": "node_modules/typescript"
+}
+```
+
+**Verify:** `node -e "console.log(require('typescript/package.json').version)"`, `tsc --version`, and `bun run type-check` — all 7.x. After `bun install`, accept **Use Workspace Version** if prompted. Do not add `typescript` to repos that have no TS source (e.g. this skills monorepo).
+
+**Legacy (do not scaffold):** TS 6 Strada — `npm:@typescript/typescript6`, `tsc6 --noEmit`, `useTsgo: false`. Deprecated hybrid (TS 6 + separate `@typescript/native-preview` / `tsgo`) — migrate to TS 7; do not document or add new hybrid setups.
+
 - **React Compiler:** on by default — see skill `react-dev` for memoization and typing conventions
 - **GeoJSON:** `@types/geojson` for all GeoJSON payloads
 - **Dates / times:** `@date-fns/tz`
