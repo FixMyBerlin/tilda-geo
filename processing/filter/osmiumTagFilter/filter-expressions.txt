@@ -12,8 +12,10 @@ nwr/shop
 # Topic: Citycenter
 nwr/place
 
-# Topic: Start-Ziel
+# Topic: landcover
 wr/landuse
+wr/building
+wr/leisure
 
 # Topic: Barriers
 w/railway
