@@ -283,6 +283,7 @@ attributes:
     label: Beschilderung in Gegenrichtung
     format: sanitized_strings
     valuesRef: bikelanes.traffic_sign
+  - key: todos
+    ref: todos_lines.todos
   - key: _in_settlement_area
-    purpose: processing
-    format: ignore
+    ref: roads._in_settlement_area

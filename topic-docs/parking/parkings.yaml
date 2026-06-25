@@ -40,6 +40,7 @@ attributes:
     chapterRefs:
       - chapterId: capacity-calculation
   - key: capacity_source
+    purpose: qa
     label: Herkunft der Stellplatzanzahl
     description: Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.
     chapterRefs:
@@ -169,10 +170,12 @@ attributes:
       - value: separate_parking_points
         label: Separate erfasste Punktdaten
   - key: geom_sources
+    purpose: qa
     format: sanitized_strings
     label: (Intern) OSM-IDs der Geometiren
     description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.
   - key: tag_sources
+    purpose: qa
     format: sanitized_strings
     label: Tag-Quellen
     description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.
@@ -261,6 +264,7 @@ attributes:
     label: Fahrbahnbreite
     description: Breite der Fahrbahn, an dem der Parkraum liegt.
   - key: road_width_source
+    purpose: qa
     label: Herkunft der Fahrbahnbreite
     values:
       - value: highway_default
@@ -270,6 +274,7 @@ attributes:
       - value: tag
         label: Dieser Wert ist in OSM hinterlegt.
   - key: road_width_confidence
+    purpose: qa
     label: Konfidenz der Fahrbahnbreite
     values:
       - value: high
@@ -291,6 +296,7 @@ attributes:
     label: Fläche
     description: Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.
   - key: area_source
+    purpose: qa
     label: Herkunft der Flächenangabe
     values:
       - value: estimated
@@ -298,6 +304,7 @@ attributes:
       - value: geometry
         label: Basiert auf dem Flächeninhalt der Geometrie aus OSM.
   - key: area_confidence
+    purpose: qa
     label: Konfidenz der Flächenangabe
     values:
       - value: high
@@ -307,6 +314,7 @@ attributes:
       - value: low
         label: Niedrig
   - key: capacity_confidence
+    purpose: qa
     label: Konfidenz der Stellplatzanzahl
     values:
       - value: high
@@ -376,6 +384,7 @@ attributes:
       - value: grass_paver
         label: Rasengitter / Grasgitter
   - key: surface_confidence
+    purpose: qa
     label: Konfidenz der Oberfläche
     values:
       - value: high
@@ -385,6 +394,7 @@ attributes:
       - value: low
         label: Niedrig
   - key: surface_source
+    purpose: qa
     label: Herkunft der Oberfläche
     values:
       - value: tag
@@ -456,6 +466,7 @@ attributes:
       - value: public
         label: Öffentlich
   - key: operator_type_source
+    purpose: qa
     label: Herkunft des Betreibertyps
     values:
       - value: default_fallback
@@ -469,6 +480,7 @@ attributes:
       - value: tag
         label: Explizite Angabe aus OSM.
   - key: operator_type_confidence
+    purpose: qa
     label: Konfidenz des Betreibertyps
     values:
       - value: high

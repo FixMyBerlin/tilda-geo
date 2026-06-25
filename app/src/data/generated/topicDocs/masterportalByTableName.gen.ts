@@ -862,6 +862,7 @@ const data = {
           none: 'Unbeschildert',
         },
       },
+      todos: 'Todo-Liste',
     },
   },
   bikelanesPresence: {
@@ -4031,6 +4032,7 @@ const data = {
           no: 'Keine besondere Farbe',
         },
       },
+      todos: 'Todo-Liste',
     },
   },
   roadsPathClasses: {
@@ -4459,6 +4461,7 @@ const data = {
           missing: 'Unvollständig',
         },
       },
+      todos: 'Todo-Liste',
     },
   },
   todos_lines: {

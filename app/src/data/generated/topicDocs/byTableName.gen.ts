@@ -1312,6 +1312,7 @@ const data = {
         key: 'width_source',
         type: 'string',
         label: 'Quelle Breite',
+        purpose: 'qa',
         values: [
           {
             value: 'ALKIS',
@@ -1941,6 +1942,7 @@ const data = {
         key: 'surface_source',
         type: 'string',
         label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -1956,6 +1958,7 @@ const data = {
         key: 'surface_confidence',
         type: 'string',
         label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -1994,6 +1997,7 @@ const data = {
         key: 'smoothness_source',
         type: 'string',
         label: 'Herkunft der Oberflächenqualität',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -2041,6 +2045,7 @@ const data = {
         key: 'smoothness_confidence',
         type: 'string',
         label: 'Konfidenz Oberflächenqualität',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -2102,6 +2107,13 @@ const data = {
             label: 'Unbeschildert',
           },
         ],
+      },
+      {
+        key: 'todos',
+        type: 'sanitized_strings',
+        label: 'Todo-Liste',
+        purpose: 'qa',
+        values: [],
       },
       {
         key: '_in_settlement_area',
@@ -3538,6 +3550,7 @@ const data = {
         key: 'capacity_source',
         type: 'string',
         label: 'Herkunft der Stellplatzanzahl',
+        purpose: 'qa',
         description: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
         chapterRefs: ['capacity-calculation'],
         values: [
@@ -3770,6 +3783,7 @@ const data = {
         key: 'area_source',
         type: 'string',
         label: 'Herkunft der Flächenangabe',
+        purpose: 'qa',
         values: [
           {
             value: 'estimated',
@@ -3785,6 +3799,7 @@ const data = {
         key: 'area_confidence',
         type: 'string',
         label: 'Konfidenz der Flächenangabe',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -3804,6 +3819,7 @@ const data = {
         key: 'capacity_confidence',
         type: 'string',
         label: 'Konfidenz der Stellplatzanzahl',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -3943,6 +3959,7 @@ const data = {
         key: 'surface_confidence',
         type: 'string',
         label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -3962,6 +3979,7 @@ const data = {
         key: 'surface_source',
         type: 'string',
         label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -4077,6 +4095,7 @@ const data = {
         key: 'operator_type_source',
         type: 'string',
         label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'default_fallback',
@@ -4104,6 +4123,7 @@ const data = {
         key: 'operator_type_confidence',
         type: 'string',
         label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -4624,6 +4644,7 @@ const data = {
         key: 'operator_type_source',
         type: 'string',
         label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'default_fallback',
@@ -4651,6 +4672,7 @@ const data = {
         key: 'operator_type_confidence',
         type: 'string',
         label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -4790,6 +4812,7 @@ const data = {
         key: 'capacity_source',
         type: 'string',
         label: 'Herkunft der Stellplatzanzahl',
+        purpose: 'qa',
         description: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
         chapterRefs: ['capacity-calculation'],
         values: [
@@ -5051,6 +5074,7 @@ const data = {
         key: 'geom_sources',
         type: 'sanitized_strings',
         label: '(Intern) OSM-IDs der Geometiren',
+        purpose: 'qa',
         description:
           'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
         values: [],
@@ -5059,6 +5083,7 @@ const data = {
         key: 'tag_sources',
         type: 'sanitized_strings',
         label: 'Tag-Quellen',
+        purpose: 'qa',
         description:
           'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
@@ -5233,6 +5258,7 @@ const data = {
         key: 'road_width_source',
         type: 'string',
         label: 'Herkunft der Fahrbahnbreite',
+        purpose: 'qa',
         values: [
           {
             value: 'highway_default',
@@ -5252,6 +5278,7 @@ const data = {
         key: 'road_width_confidence',
         type: 'string',
         label: 'Konfidenz der Fahrbahnbreite',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -5295,6 +5322,7 @@ const data = {
         key: 'area_source',
         type: 'string',
         label: 'Herkunft der Flächenangabe',
+        purpose: 'qa',
         values: [
           {
             value: 'estimated',
@@ -5310,6 +5338,7 @@ const data = {
         key: 'area_confidence',
         type: 'string',
         label: 'Konfidenz der Flächenangabe',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -5329,6 +5358,7 @@ const data = {
         key: 'capacity_confidence',
         type: 'string',
         label: 'Konfidenz der Stellplatzanzahl',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -5468,6 +5498,7 @@ const data = {
         key: 'surface_confidence',
         type: 'string',
         label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -5487,6 +5518,7 @@ const data = {
         key: 'surface_source',
         type: 'string',
         label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -5634,6 +5666,7 @@ const data = {
         key: 'operator_type_source',
         type: 'string',
         label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'default_fallback',
@@ -5661,6 +5694,7 @@ const data = {
         key: 'operator_type_confidence',
         type: 'string',
         label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -6623,6 +6657,7 @@ const data = {
         key: 'capacity_source',
         type: 'string',
         label: 'Herkunft der Stellplatzanzahl',
+        purpose: 'qa',
         description: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
         chapterRefs: ['capacity-calculation'],
         values: [
@@ -6761,6 +6796,7 @@ const data = {
         key: 'geom_sources',
         type: 'sanitized_strings',
         label: '(Intern) OSM-IDs der Geometiren',
+        purpose: 'qa',
         description:
           'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
         values: [],
@@ -6769,6 +6805,7 @@ const data = {
         key: 'tag_sources',
         type: 'sanitized_strings',
         label: 'Tag-Quellen',
+        purpose: 'qa',
         description:
           'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
@@ -6943,6 +6980,7 @@ const data = {
         key: 'road_width_source',
         type: 'string',
         label: 'Herkunft der Fahrbahnbreite',
+        purpose: 'qa',
         values: [
           {
             value: 'highway_default',
@@ -6962,6 +7000,7 @@ const data = {
         key: 'road_width_confidence',
         type: 'string',
         label: 'Konfidenz der Fahrbahnbreite',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -7005,6 +7044,7 @@ const data = {
         key: 'area_source',
         type: 'string',
         label: 'Herkunft der Flächenangabe',
+        purpose: 'qa',
         values: [
           {
             value: 'estimated',
@@ -7020,6 +7060,7 @@ const data = {
         key: 'area_confidence',
         type: 'string',
         label: 'Konfidenz der Flächenangabe',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -7039,6 +7080,7 @@ const data = {
         key: 'capacity_confidence',
         type: 'string',
         label: 'Konfidenz der Stellplatzanzahl',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -7178,6 +7220,7 @@ const data = {
         key: 'surface_confidence',
         type: 'string',
         label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -7197,6 +7240,7 @@ const data = {
         key: 'surface_source',
         type: 'string',
         label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -7344,6 +7388,7 @@ const data = {
         key: 'operator_type_source',
         type: 'string',
         label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'default_fallback',
@@ -7371,6 +7416,7 @@ const data = {
         key: 'operator_type_confidence',
         type: 'string',
         label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -7720,6 +7766,7 @@ const data = {
         key: 'geom_sources',
         type: 'sanitized_strings',
         label: '(Intern) OSM-IDs der Geometiren',
+        purpose: 'qa',
         description:
           'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
         values: [],
@@ -7728,6 +7775,7 @@ const data = {
         key: 'tag_sources',
         type: 'sanitized_strings',
         label: 'Tag-Quellen',
+        purpose: 'qa',
         description:
           'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
@@ -8170,6 +8218,7 @@ const data = {
         key: 'operator_type_source',
         type: 'string',
         label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'default_fallback',
@@ -8197,6 +8246,7 @@ const data = {
         key: 'operator_type_confidence',
         type: 'string',
         label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -9868,6 +9918,7 @@ const data = {
         key: 'width_source',
         type: 'string',
         label: 'Quelle Breite',
+        purpose: 'qa',
         values: [
           {
             value: 'ALKIS',
@@ -10504,6 +10555,7 @@ const data = {
         key: 'maxspeed_source',
         type: 'string',
         label: 'Höchstgeschwindigkeit Quelle',
+        purpose: 'qa',
         values: [
           {
             value: 'maxspeed',
@@ -10527,6 +10579,7 @@ const data = {
         key: 'maxspeed_confidence',
         type: 'string',
         label: 'Konfidenz Höchstgeschwindigkeit',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -10705,6 +10758,7 @@ const data = {
         key: 'surface_source',
         type: 'string',
         label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -10716,6 +10770,7 @@ const data = {
         key: 'surface_confidence',
         type: 'string',
         label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -10754,6 +10809,7 @@ const data = {
         key: 'smoothness_source',
         type: 'string',
         label: 'Herkunft der Oberflächenqualität',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -10781,6 +10837,7 @@ const data = {
         key: 'smoothness_confidence',
         type: 'string',
         label: 'Konfidenz Oberflächenqualität',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -10814,6 +10871,20 @@ const data = {
             label: 'Keine besondere Farbe',
           },
         ],
+      },
+      {
+        key: 'todos',
+        type: 'sanitized_strings',
+        label: 'Todo-Liste',
+        purpose: 'qa',
+        values: [],
+      },
+      {
+        key: '_is_sidepath',
+        type: 'ignore',
+        label: '_is_sidepath',
+        purpose: 'processing',
+        values: [],
       },
       {
         key: '_in_settlement_area',
@@ -11186,6 +11257,7 @@ const data = {
         key: 'width_source',
         type: 'string',
         label: 'Quelle Breite',
+        purpose: 'qa',
         values: [
           {
             value: 'ALKIS',
@@ -11320,6 +11392,7 @@ const data = {
         key: 'surface_source',
         type: 'string',
         label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -11331,6 +11404,7 @@ const data = {
         key: 'surface_confidence',
         type: 'string',
         label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -11369,6 +11443,7 @@ const data = {
         key: 'smoothness_source',
         type: 'string',
         label: 'Herkunft der Oberflächenqualität',
+        purpose: 'qa',
         values: [
           {
             value: 'tag',
@@ -11396,6 +11471,7 @@ const data = {
         key: 'smoothness_confidence',
         type: 'string',
         label: 'Konfidenz Oberflächenqualität',
+        purpose: 'qa',
         values: [
           {
             value: 'high',
@@ -11857,10 +11933,17 @@ const data = {
         ],
       },
       {
+        key: 'todos',
+        type: 'sanitized_strings',
+        label: 'Todo-Liste',
+        purpose: 'qa',
+        values: [],
+      },
+      {
         key: '_is_sidepath',
         type: 'ignore',
         label: '_is_sidepath',
-        purpose: 'qa',
+        purpose: 'processing',
         values: [],
       },
       {
@@ -11919,6 +12002,7 @@ const data = {
         key: 'todos',
         type: 'sanitized_strings',
         label: 'Todo-Liste',
+        purpose: 'qa',
         values: [],
       },
     ],
@@ -11967,6 +12051,7 @@ const data = {
         key: 'direction_source',
         type: 'string',
         label: 'Herkunft der Ausrichtung',
+        purpose: 'qa',
         values: [
           {
             value: 'tag_degrees',

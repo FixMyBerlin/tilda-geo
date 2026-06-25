@@ -13,6 +13,7 @@ attributes:
     label: Ausrichtung
     format: number
   - key: direction_source
+    purpose: qa
     label: Herkunft der Ausrichtung
     values:
       - value: tag_degrees

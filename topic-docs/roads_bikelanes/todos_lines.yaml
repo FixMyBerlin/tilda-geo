@@ -16,3 +16,4 @@ attributes:
   - key: todos
     label: Todo-Liste
     format: sanitized_strings
+    purpose: qa
