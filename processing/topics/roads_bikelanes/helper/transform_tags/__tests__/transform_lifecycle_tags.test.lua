@@ -150,7 +150,8 @@ describe('transform_lifecycle_tags', function()
       }
 
       local before_transform = maxspeed(tags)
-      assert.are.same(before_transform.maxspeed_source, 'nothing_found')
+      assert.are.same(before_transform.maxspeed_source, nil)
+      assert.are.same(before_transform.maxspeed_confidence, nil)
       assert.are.same(before_transform.maxspeed, nil)
 
       transform_lifecycle_tags(tags)
