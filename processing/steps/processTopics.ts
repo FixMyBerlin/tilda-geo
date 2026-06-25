@@ -83,6 +83,8 @@ export async function runTopic(fileName: string, topic: Topic) {
 export async function processTopics(fileName: string, fileChanged: boolean) {
   logStart('Processing: Topics')
 
+  const ranTopics = new Set<Topic>()
+
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
 
@@ -181,9 +183,10 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
 
     // Run the topic with osm2pgsql (LUA) and the sql processing
     await runTopic(innerFileName, topic)
+    ranTopics.add(topic)
 
     // Update the code hashes
-    updateDirectoryHash(topicPath(topic))
+    await updateDirectoryHash(topicPath(topic))
 
     // ============================================
     // Reference Creation Phase (for reference mode - AFTER topic runs)
@@ -229,4 +232,5 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
   }
 
   logEnd('Processing: Topics')
+  return ranTopics
 }

@@ -36,7 +36,7 @@ async function main() {
     if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
 
     const processingStartTime = Date.now()
-    await processTopics(fileName, fileChanged)
+    const ranTopics = await processTopics(fileName, fileChanged)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
 
@@ -55,7 +55,7 @@ async function main() {
     await updateCache()
 
     logTileInfo()
-    await runAfterthoughts(fileChanged)
+    await runAfterthoughts(fileChanged, ranTopics)
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
     console.error('[ERROR] Processing failed (catchall)', error)

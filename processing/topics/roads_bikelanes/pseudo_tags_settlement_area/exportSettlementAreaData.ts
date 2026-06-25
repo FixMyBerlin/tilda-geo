@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { $, sql } from 'bun'
 import { PSEUDO_TAGS_DATA } from '../../../constants/directories.const'
+import type { Topic } from '../../../constants/topics.const'
 import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing'
 import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
@@ -27,6 +28,7 @@ const LOG_PREFIX = '[Afterthoughts][SettlementArea]'
 export async function exportSettlementAreaData(
   fileChanged: boolean,
   skipContext: SkipUnchangedContext,
+  ranTopics: Set<Topic>,
 ) {
   const runFile = join(import.meta.dir, 'sql', 'run_settlement_area_estimation.sql')
   const csvPath = join(PSEUDO_TAGS_DATA, 'settlement_area_estimation.csv')
@@ -51,8 +53,9 @@ export async function exportSettlementAreaData(
     )
   }
 
+  const landcoverRan = ranTopics.has('landcover')
   const settlementCodeChanged = await directoryHasChanged(roadsBikelanesSettlementAreaDir)
-  if (!fileChanged && !settlementCodeChanged && csvExists) {
+  if (!fileChanged && !settlementCodeChanged && !landcoverRan && csvExists) {
     console.log(
       `${LOG_PREFIX} ⏩ Skipping — OSM file and pseudo_tags_settlement_area are unchanged; reusing existing CSV.`,
       JSON.stringify({ csvPath }),
