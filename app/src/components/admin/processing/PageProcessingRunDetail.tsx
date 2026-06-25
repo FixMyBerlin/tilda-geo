@@ -1,5 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { format } from 'date-fns'
+import { differenceInMilliseconds, format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { twMerge } from 'tailwind-merge'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
@@ -7,12 +7,19 @@ import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { Pill } from '@/components/shared/text/Pill'
+import {
+  afterthoughtIds,
+  afterthoughtLabels,
+  afterthoughtSkipReasonLabels,
+} from '@/data/processingTypes/afterthoughts.const'
 import { topicScheduleById } from '@/data/processingTypes/topicId.generated.const'
 import {
+  formatDurationMs,
   formatProcessingDuration,
   parseOrphanedRunTopics,
   parseRunTopics,
 } from '@/server/processing/parseTopicTimings'
+import { isAfterthoughtSkipped } from '@/server/processing/schemas'
 import { ProcessingOrphanedTopicsTable } from './ProcessingOrphanedTopicsTable'
 import { ProcessingStatusPill } from './ProcessingStatusPill'
 import { TopicTimingMicroBar, formatParsedTopicDurations } from './topicTimingDisplay'
@@ -90,22 +97,6 @@ export function PageProcessingRunDetail() {
                 : '—'}
             </dd>
           </div>
-          <div>
-            <dt className="font-medium text-gray-900">Statistiken gestartet</dt>
-            <dd>
-              {run.statistics_started_at
-                ? format(run.statistics_started_at, 'dd.MM.yyyy HH:mm', { locale: de })
-                : '—'}
-            </dd>
-          </div>
-          <div>
-            <dt className="font-medium text-gray-900">Statistiken abgeschlossen</dt>
-            <dd>
-              {run.statistics_completed_at
-                ? format(run.statistics_completed_at, 'dd.MM.yyyy HH:mm', { locale: de })
-                : '—'}
-            </dd>
-          </div>
         </dl>
       </section>
 
@@ -161,7 +152,47 @@ export function PageProcessingRunDetail() {
       </section>
 
       <section className={twMerge(cardClassName, 'mt-8')}>
-        <ObjectDump title={`Run #${run.id}`} data={run.topics} />
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Afterthoughts</h2>
+        <p className="mb-4 text-sm text-gray-600">
+          Deferred work after main processing — not included in the topic chart.
+        </p>
+        <AdminTable header={['Step', 'Status', 'Dauer']}>
+          {afterthoughtIds.map((id) => {
+            const entry = run.afterthoughts[id]
+            const durationMs =
+              entry && !isAfterthoughtSkipped(entry)
+                ? differenceInMilliseconds(new Date(entry.end), new Date(entry.start))
+                : undefined
+
+            return (
+              <tr key={id}>
+                <th scope="row" className={adminTableClasses.thRow}>
+                  <span className="font-mono text-sm">{afterthoughtLabels[id]}</span>
+                </th>
+                <td className={adminTableClasses.td}>
+                  {!entry ? (
+                    <span className="text-gray-500">Nicht erfasst</span>
+                  ) : isAfterthoughtSkipped(entry) ? (
+                    <span className="text-gray-600">
+                      Übersprungen ({afterthoughtSkipReasonLabels[entry.skipped]})
+                    </span>
+                  ) : (
+                    'Abgeschlossen'
+                  )}
+                </td>
+                <td className={adminTableClasses.td}>{formatDurationMs(durationMs)}</td>
+              </tr>
+            )
+          })}
+        </AdminTable>
+      </section>
+
+      <section className={twMerge(cardClassName, 'mt-8')}>
+        <ObjectDump title={`Run #${run.id} — topics`} data={run.topics} />
+      </section>
+
+      <section className={twMerge(cardClassName, 'mt-8')}>
+        <ObjectDump title={`Run #${run.id} — afterthoughts`} data={run.afterthoughts} />
       </section>
     </div>
   )

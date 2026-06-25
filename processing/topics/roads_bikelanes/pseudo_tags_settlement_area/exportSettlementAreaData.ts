@@ -2,6 +2,8 @@ import { join } from 'node:path'
 import { $, sql } from 'bun'
 import { PSEUDO_TAGS_DATA } from '../../../constants/directories.const'
 import type { Topic } from '../../../constants/topics.const'
+import { afterthoughtSkipped } from '../../../steps/afterthoughts/types'
+import { toIsoWindow } from '../../../steps/metadata'
 import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing'
 import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
@@ -48,7 +50,7 @@ export async function exportSettlementAreaData(
           : 'SKIP_UNCHANGED is active and topic code is unchanged.',
         JSON.stringify({ csvPath }),
       )
-      return
+      return afterthoughtSkipped('roads_bikelanes_skipped')
     }
     if (!csvExists) {
       console.log(
@@ -66,7 +68,7 @@ export async function exportSettlementAreaData(
       `${LOG_PREFIX} ⏩ Skipping — OSM file and pseudo_tags_settlement_area are unchanged; reusing existing CSV.`,
       JSON.stringify({ csvPath }),
     )
-    return
+    return afterthoughtSkipped('unchanged')
   }
 
   const [{ exists } = { exists: false }] = await sql`
@@ -77,18 +79,22 @@ export async function exportSettlementAreaData(
       `${LOG_PREFIX} ⏩ Skipping — public._settlement_areas does not exist yet.`,
       'Run the weekend landcover topic (PROCESS_ONLY_TOPICS=landcover) to create it.',
     )
-    return
+    return afterthoughtSkipped('no_settlement_areas_table')
   }
 
   console.log(
     `${LOG_PREFIX} Exporting settlement_area_estimation.csv for next run (from roads, bikelanes).`,
   )
+
+  const start = new Date()
   try {
     logStart('Afterthoughts: Settlement-area export')
     await $`psql -q -v ON_ERROR_STOP=1 -v outfile=${csvPath} -f ${runFile}`
     logEnd('Afterthoughts: Settlement-area export')
     await updateDirectoryHash(roadsBikelanesSettlementAreaDir)
+    return toIsoWindow(start, new Date())
   } catch (error) {
     console.warn(`${LOG_PREFIX} WARN: settlement-area export failed — continuing.`, error)
+    return afterthoughtSkipped('failed')
   }
 }

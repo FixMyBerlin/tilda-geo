@@ -4,19 +4,38 @@ import { exportSidepathData } from '../topics/roads_bikelanes/pseudo_tags_sidepa
 import { logEnd, logStart } from '../utils/logging'
 import { getSkipUnchangedContext } from '../utils/skipUnchanged'
 import { aggregateLengths } from './afterthoughts/aggregateLengths'
+import { recordAfterthought } from './metadata'
 
-/** Deferred work after Processing: Finished — statistics for current run, pseudo-tag CSVs for next run. */
-export async function runAfterthoughts(fileChanged: boolean, ranTopics: Set<Topic>) {
+/**
+ * Deferred work after Processing: Finished — statistics for current run, pseudo-tag CSVs for next run.
+ *
+ * To add an afterthought: write a function that returns an `AfterthoughtEntry` (a `{start,end}`
+ * window or `afterthoughtSkipped(reason)`), then `recordAfterthought()` it here AND add its id to
+ * processing/constants/afterthoughts.const.ts (+ the app mirror).
+ */
+export async function runAfterthoughts(
+  processingId: number | null,
+  fileChanged: boolean,
+  ranTopics: Set<Topic>,
+) {
   logStart('Processing: Afterthoughts')
   console.log(
     '[Afterthoughts] Deferred work (statistics for current run, pseudo-tag CSVs for next run).',
   )
 
-  await aggregateLengths()
-  // Compute the skip-unchanged context once and share it across the pseudo-tag exports (each
-  // call hashes helper/constants/dataTables, so computing it per export is redundant I/O).
   const skipContext = await getSkipUnchangedContext(fileChanged)
-  await exportSidepathData(fileChanged, skipContext)
-  await exportSettlementAreaData(fileChanged, skipContext, ranTopics)
+
+  await recordAfterthought(processingId, 'statistics', await aggregateLengths())
+  await recordAfterthought(
+    processingId,
+    'sidepath_export',
+    await exportSidepathData(fileChanged, skipContext),
+  )
+  await recordAfterthought(
+    processingId,
+    'settlement_area_export',
+    await exportSettlementAreaData(fileChanged, skipContext, ranTopics),
+  )
+
   logEnd('Processing: Afterthoughts')
 }

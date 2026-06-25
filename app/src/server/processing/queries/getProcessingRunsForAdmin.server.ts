@@ -17,9 +17,8 @@ export async function getProcessingRunsForAdmin(headers: Headers) {
       processing_completed_at,
       qa_update_started_at,
       qa_update_completed_at,
-      statistics_started_at,
-      statistics_completed_at,
-      COALESCE(topics, '{}'::jsonb) AS topics
+      COALESCE(topics, '{}'::jsonb) AS topics,
+      COALESCE(afterthoughts, '{}'::jsonb) AS afterthoughts
     FROM public.meta
     ORDER BY id DESC
     LIMIT ${RUNS_LIMIT}

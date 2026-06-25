@@ -16,9 +16,8 @@ export async function getProcessingRunDetailForAdmin(metaId: number, headers: He
       processing_completed_at,
       qa_update_started_at,
       qa_update_completed_at,
-      statistics_started_at,
-      statistics_completed_at,
-      COALESCE(topics, '{}'::jsonb) AS topics
+      COALESCE(topics, '{}'::jsonb) AS topics,
+      COALESCE(afterthoughts, '{}'::jsonb) AS afterthoughts
     FROM public.meta
     WHERE id = ${metaId}
     LIMIT 1

@@ -1,6 +1,8 @@
 import { join } from 'node:path'
 import { $ } from 'bun'
 import { PSEUDO_TAGS_DATA } from '../../../constants/directories.const'
+import { afterthoughtSkipped } from '../../../steps/afterthoughts/types'
+import { toIsoWindow } from '../../../steps/metadata'
 import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing'
 import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
@@ -38,7 +40,7 @@ export async function exportSidepathData(fileChanged: boolean, skipContext: Skip
           : 'SKIP_UNCHANGED is active and topic code is unchanged.',
         JSON.stringify({ csvPath }),
       )
-      return
+      return afterthoughtSkipped('roads_bikelanes_skipped')
     }
 
     console.log(
@@ -55,20 +57,24 @@ export async function exportSidepathData(fileChanged: boolean, skipContext: Skip
       `${LOG_PREFIX} ⏩ Skipping — OSM file and pseudo_tags_sidepath are unchanged; reusing existing CSV.`,
       JSON.stringify({ csvPath }),
     )
-    return
+    return afterthoughtSkipped('unchanged')
   }
 
   console.log(
     `${LOG_PREFIX} Exporting is_sidepath_estimation.csv for next run`,
     '(from roads, _roads_bikelanes_sidepath_source_paths in current DB)',
   )
+
+  const start = new Date()
   try {
     logStart('Afterthoughts: Sidepath export')
     // -q = suppress message, print errors
     await $`psql -q -v ON_ERROR_STOP=1 -v outfile=${csvPath} -f ${runFile}`
     logEnd('Afterthoughts: Sidepath export')
     await updateDirectoryHash(roadsBikelanesSidepathDir)
+    return toIsoWindow(start, new Date())
   } catch (error) {
     console.warn(`${LOG_PREFIX} WARN: is_sidepath export failed — continuing.`, error)
+    return afterthoughtSkipped('failed')
   }
 }

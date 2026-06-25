@@ -6,6 +6,7 @@ import {
   type TopicId,
 } from '../../src/data/processingTypes/topicId.generated.const'
 import db from '../../src/server/db.server'
+import type { ProcessingAfterthoughtsMeta } from '../../src/server/processing/schemas'
 
 type TopicPhaseWindow = {
   start: string
@@ -113,6 +114,34 @@ const buildTopicsForRun = (runStart: Date, dayIndex: number) => {
   return { topics, processingDurationMs: cursorMs - runStart.getTime() }
 }
 
+const buildAfterthoughtsForRun = (
+  processingCompletedAt: Date,
+  dayIndex: number,
+  saturdayRun: boolean,
+) => {
+  let cursorMs = processingCompletedAt.getTime() + 30_000
+
+  const nextWindow = (baseMs: number) => {
+    const durationMs = durationJitter(baseMs, dayIndex, 'boundaries')
+    const startMs = cursorMs
+    const endMs = startMs + durationMs
+    cursorMs = endMs
+    return toIsoWindow(startMs, endMs)
+  }
+
+  const afterthoughts: ProcessingAfterthoughtsMeta = {
+    statistics: nextWindow(3 * 60_000),
+    sidepath_export: dayIndex % 5 === 3 ? { skipped: 'unchanged' } : nextWindow(90_000),
+    settlement_area_export: saturdayRun
+      ? nextWindow(2 * 60_000)
+      : dayIndex % 6 === 4
+        ? { skipped: 'no_settlement_areas_table' }
+        : nextWindow(75_000),
+  }
+
+  return { afterthoughts }
+}
+
 const ensureMetaTable = async () => {
   await db.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS public.meta (
@@ -123,16 +152,21 @@ const ensureMetaTable = async () => {
       processing_completed_at TIMESTAMP,
       qa_update_started_at TIMESTAMP,
       qa_update_completed_at TIMESTAMP,
-      statistics_started_at TIMESTAMP,
-      statistics_completed_at TIMESTAMP,
       status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'postprocessing', 'processed')),
-      topics JSONB NOT NULL DEFAULT '{}'
+      topics JSONB NOT NULL DEFAULT '{}',
+      afterthoughts JSONB NOT NULL DEFAULT '{}'
     )
   `)
 
+  // Migration for existing local dev DBs: add the JSONB columns and drop the old statistics columns.
+  // Mirrors processing/steps/metadata.ts `initializeMetadataTable` (which runs on staging + production).
+  // !! We will remove this section after 2026-10-01
   await db.$executeRawUnsafe(`
     ALTER TABLE public.meta
-      ADD COLUMN IF NOT EXISTS topics JSONB NOT NULL DEFAULT '{}'
+      ADD COLUMN IF NOT EXISTS topics JSONB NOT NULL DEFAULT '{}',
+      ADD COLUMN IF NOT EXISTS afterthoughts JSONB NOT NULL DEFAULT '{}',
+      DROP COLUMN IF EXISTS statistics_started_at,
+      DROP COLUMN IF EXISTS statistics_completed_at
   `)
 }
 
@@ -143,6 +177,7 @@ const seedProcessingMeta = async () => {
   for (let dayIndex = RUN_DAYS - 1; dayIndex >= 0; dayIndex -= 1) {
     const daysAgo = dayIndex
     const processingStartedAt = berlinNightlyRunStart(daysAgo)
+    const saturdayRun = isBerlinSaturday(processingStartedAt)
     const { topics, processingDurationMs } = buildTopicsForRun(processingStartedAt, dayIndex)
 
     const processingCompletedAt = new Date(processingStartedAt.getTime() + processingDurationMs)
@@ -150,10 +185,7 @@ const seedProcessingMeta = async () => {
     const qaUpdateCompletedAt = new Date(
       qaUpdateStartedAt.getTime() + (5 + (dayIndex % 4)) * 60_000,
     )
-    const statisticsStartedAt = new Date(qaUpdateCompletedAt.getTime() + 30_000)
-    const statisticsCompletedAt = new Date(
-      statisticsStartedAt.getTime() + (3 + (dayIndex % 3)) * 60_000,
-    )
+    const { afterthoughts } = buildAfterthoughtsForRun(processingCompletedAt, dayIndex, saturdayRun)
 
     const osmDataFrom = new TZDate(subDays(processingStartedAt, 2), 'Europe/Berlin')
     osmDataFrom.setHours(12, 0, 0, 0)
@@ -166,10 +198,9 @@ const seedProcessingMeta = async () => {
         processing_completed_at,
         qa_update_started_at,
         qa_update_completed_at,
-        statistics_started_at,
-        statistics_completed_at,
         status,
-        topics
+        topics,
+        afterthoughts
       ) VALUES (
         ${msToTimeString(processingDurationMs)}::time,
         ${new Date(osmDataFrom.getTime())},
@@ -177,10 +208,9 @@ const seedProcessingMeta = async () => {
         ${processingCompletedAt},
         ${qaUpdateStartedAt},
         ${qaUpdateCompletedAt},
-        ${statisticsStartedAt},
-        ${statisticsCompletedAt},
         'processed',
-        ${JSON.stringify(topics)}::jsonb
+        ${JSON.stringify(topics)}::jsonb,
+        ${JSON.stringify(afterthoughts)}::jsonb
       )
     `
   }
