@@ -7,8 +7,8 @@
 // - id:       the topic id (folder name)
 // - bboxes:   optional list of Bbox. If set, a new osm2pgsql run is started on a filtered
 //             osm file for those areas (otherwise the whole dataset is processed).
-// - schedule: 'nightly' runs in every pipeline run; 'weekend' runs only on weekend nightly
-//             runs (Sat/Sun, Berlin time) — i.e. about once a week — or when explicitly
+// - schedule: 'nightly' runs in every pipeline run; 'weekend' runs only on the Saturday nightly
+//             run (Berlin time) — i.e. about once a week — or when explicitly
 //             requested (PROCESS_ONLY_TOPICS=<id>). Use 'weekend' for heavy, rarely-changing
 //             datasets (landcover, buildings, settlement-area source) so they stay out of the
 //             nightly critical path; the extra hours are fine on a weekend.

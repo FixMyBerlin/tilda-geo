@@ -1,7 +1,7 @@
 # `landcover` topic
 
 A **weekend** topic (`schedule: 'weekend'` in `constants/topics.const.ts`) for heavy,
-rarely-changing landcover data. It runs on the Saturday/Sunday nightly runs (≈ once a week, Berlin
+rarely-changing landcover data. It runs on the Saturday nightly run (≈ once a week, Berlin
 time) instead of every night, and can also be run on demand:
 
 ```sh

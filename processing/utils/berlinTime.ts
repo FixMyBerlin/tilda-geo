@@ -10,11 +10,10 @@ export const berlinTimeString = (dateTime: Date) => {
 }
 
 /**
- * True when `dateTime` falls on a Saturday or Sunday in Berlin time.
- * Used to decide whether `schedule: 'weekend'` topics run on this nightly run. We include both
- * weekend days so the run happens regardless of which weekend night the cron actually fires.
+ * True when `dateTime` falls on a Saturday in Berlin time.
+ * Used to decide whether `schedule: 'weekend'` topics run on this nightly run (~once a week).
  */
-export const isBerlinWeekend = (dateTime: Date) => {
+export const isBerlinSaturday = (dateTime: Date) => {
   const day = getDay(new TZDate(dateTime, 'Europe/Berlin')) // 0 = Sunday … 6 = Saturday
-  return day === 0 || day === 6
+  return day === 6
 }

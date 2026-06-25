@@ -8,7 +8,7 @@ import {
   getSchemaTables,
   getTopicTables,
 } from '../diffing/diffing'
-import { isBerlinWeekend } from '../utils/berlinTime'
+import { isBerlinSaturday } from '../utils/berlinTime'
 import { formatTimestamp } from '../utils/formatTimestamp'
 import { updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
@@ -110,23 +110,23 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     )
   }
 
-  // Weekend topics run on Sat/Sun nightly runs (Berlin time). Computed once for this run.
-  const isWeekendRun = isBerlinWeekend(new Date())
+  // Weekend topics run on the Saturday nightly run (Berlin time). Computed once for this run.
+  const isSaturdayRun = isBerlinSaturday(new Date())
 
   for (const [topic, entry] of Array.from(topicsConfig)) {
     let innerBboxes = entry.bboxes
     let innerFileName = fileName
 
-    // Weekend topics (heavy, rarely-changing datasets, e.g. landcover) only run on weekend
-    // nightly runs (~weekly) or when explicitly requested. We still log the skip on the other
-    // (daily) runs so it is visible that the topic is intentionally not running.
+    // Weekend topics (heavy, rarely-changing datasets, e.g. landcover) only run on the Saturday
+    // nightly run (~weekly) or when explicitly requested. We still log the skip on other nights
+    // so it is visible that the topic is intentionally not running.
     if (
       entry.schedule === 'weekend' &&
-      !isWeekendRun &&
+      !isSaturdayRun &&
       !params.processOnlyTopics.includes(topic)
     ) {
       console.log(
-        `Topics: ⏩ Skipping "${topic}" (schedule=weekend; runs on weekend nights or via PROCESS_ONLY_TOPICS=${topic}).`,
+        `Topics: ⏩ Skipping "${topic}" (schedule=weekend; runs on Saturday nights or via PROCESS_ONLY_TOPICS=${topic}).`,
       )
       continue
     }
