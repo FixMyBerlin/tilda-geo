@@ -23,7 +23,8 @@ const LOG_PREFIX = '[Afterthoughts][SettlementArea]'
  * and skip gracefully — the next run simply gets no `_in_settlement_area`.
  *
  * Skip-unchanged (for fast dev/staging reruns): when roads_bikelanes did not run, reuse the
- * existing CSV; and when the OSM file and pseudo_tags_settlement_area/ are unchanged, reuse it too.
+ * existing CSV unless landcover ran (settlement polygons may have changed); and when the OSM
+ * file and pseudo_tags_settlement_area/ are unchanged, reuse it too.
  */
 export async function exportSettlementAreaData(
   fileChanged: boolean,
@@ -36,9 +37,10 @@ export async function exportSettlementAreaData(
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
 
   const csvExists = await Bun.file(csvPath).exists()
+  const landcoverRan = ranTopics.has('landcover')
 
   if (await willSkipTopic('roads_bikelanes', fileChanged, skipContext)) {
-    if (csvExists) {
+    if (csvExists && !landcoverRan) {
       console.log(
         `${LOG_PREFIX} ⏩ Skipping — roads_bikelanes did not run; existing CSV will be used next run.`,
         params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes('roads_bikelanes')
@@ -48,12 +50,16 @@ export async function exportSettlementAreaData(
       )
       return
     }
-    console.log(
-      `${LOG_PREFIX} roads_bikelanes did not run but no CSV exists for next run — exporting from current DB.`,
-    )
+    if (!csvExists) {
+      console.log(
+        `${LOG_PREFIX} roads_bikelanes did not run but no CSV exists for next run — exporting from current DB.`,
+      )
+    } else if (landcoverRan) {
+      console.log(
+        `${LOG_PREFIX} landcover ran — re-exporting settlement_area_estimation.csv from updated _settlement_areas.`,
+      )
+    }
   }
-
-  const landcoverRan = ranTopics.has('landcover')
   const settlementCodeChanged = await directoryHasChanged(roadsBikelanesSettlementAreaDir)
   if (!fileChanged && !settlementCodeChanged && !landcoverRan && csvExists) {
     console.log(
