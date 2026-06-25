@@ -1,7 +1,7 @@
 -- Entry point for is_sidepath estimation (CSV export).
 -- Temp tables for paths and roads in SRID 3857 with GIST indexes so the spatial join uses index lookups.
 -- Invoke with: psql -v outfile=/path/to/is_sidepath_estimation.csv -f run_is_sidepath_estimation.sql (outfile required)
--- Optional: -v buffer_distance=100.0 -v buffer_size=22.0 (defaults set in is_sidepath_estimation.sql).
+-- Optional: -v buffer_distance=190.0 -v buffer_size=22.0 (defaults set in is_sidepath_estimation.sql).
 --
 
 -- Temp tables in 3857 (meters) so ST_DWithin in the join can use GIST indexes.
