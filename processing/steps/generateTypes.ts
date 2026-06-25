@@ -17,6 +17,7 @@ export async function generateTypes() {
   console.log('[DEV] Generating types...')
 
   writeTableIdTypes()
+  writeTopicIdTypes()
   writeTodoIdTypes()
 
   autoformatTypeFiles()
@@ -46,6 +47,33 @@ async function writeTableIdTypes() {
     }`,
   )
 
+  await Bun.write(typeFile, content)
+}
+
+async function writeTopicIdTypes() {
+  const topicIds = Array.from(topicsConfig.keys())
+  const formatStringArray = (values: string[]) => {
+    if (values.length === 0) return '\n  // (oxlint: one line per entry)\n'
+    return `\n  ${values.map((name) => `'${name}'`).join(',\n  ')}\n  // (oxlint: one line per entry)\n`
+  }
+
+  const scheduleEntries = topicIds
+    .map((topicId) => `  ${topicId}: '${topicsConfig.get(topicId)!.schedule}'`)
+    .join(',\n')
+
+  const fileContent = `
+  export const topicIds = [${formatStringArray(topicIds)}] as const
+  export type TopicId = (typeof topicIds)[number]
+
+  export type TopicSchedule = 'nightly' | 'weekend'
+
+  export const topicScheduleById = {
+  ${scheduleEntries},
+  } as const satisfies Record<TopicId, TopicSchedule>
+  `
+
+  const typeFile = join(TYPES_DIR, 'topicId.generated.const.ts')
+  const content = prefixGeneratedFiles(fileContent)
   await Bun.write(typeFile, content)
 }
 

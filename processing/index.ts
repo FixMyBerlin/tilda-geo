@@ -36,7 +36,7 @@ async function main() {
     if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
 
     const processingStartTime = Date.now()
-    const ranTopics = await processTopics(fileName, fileChanged)
+    const ranTopics = await processTopics(fileName, fileChanged, processingId)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
 

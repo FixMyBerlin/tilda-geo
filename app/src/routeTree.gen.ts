@@ -36,6 +36,7 @@ import { Route as AdminUploadsRouteImport } from './routes/admin/uploads'
 import { Route as AdminStaticDatasetCategoriesRouteImport } from './routes/admin/static-dataset-categories'
 import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
 import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
+import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
 import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
 import { Route as PagesKontaktRouteImport } from './routes/_pages/kontakt'
@@ -45,6 +46,7 @@ import { Route as AdminUploadsIndexRouteImport } from './routes/admin/uploads/in
 import { Route as AdminStaticDatasetCategoriesIndexRouteImport } from './routes/admin/static-dataset-categories/index'
 import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/index'
 import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
+import { Route as AdminProcessingIndexRouteImport } from './routes/admin/processing/index'
 import { Route as AdminMembershipsIndexRouteImport } from './routes/admin/memberships/index'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
@@ -62,6 +64,7 @@ import { Route as AdminStaticDatasetCategoriesNewRouteImport } from './routes/ad
 import { Route as AdminStaticDatasetCategoriesCategoryKeyRouteImport } from './routes/admin/static-dataset-categories/$categoryKey'
 import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions/new'
 import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs/new'
+import { Route as AdminProcessingMetaIdRouteImport } from './routes/admin/processing/$metaId'
 import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships/new'
 import { Route as PagesSettingsUserRouteImport } from './routes/_pages/settings.user'
 import { Route as PagesDocsMapillaryCoverageRouteImport } from './routes/_pages/docs.mapillary-coverage'
@@ -215,6 +218,11 @@ const AdminQaConfigsRoute = AdminQaConfigsRouteImport.update({
   path: '/qa-configs',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminProcessingRoute = AdminProcessingRouteImport.update({
+  id: '/processing',
+  path: '/processing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
   id: '/memberships',
   path: '/memberships',
@@ -260,6 +268,11 @@ const AdminQaConfigsIndexRoute = AdminQaConfigsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminQaConfigsRoute,
+} as any)
+const AdminProcessingIndexRoute = AdminProcessingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminProcessingRoute,
 } as any)
 const AdminMembershipsIndexRoute = AdminMembershipsIndexRouteImport.update({
   id: '/',
@@ -351,6 +364,11 @@ const AdminQaConfigsNewRoute = AdminQaConfigsNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => AdminQaConfigsRoute,
+} as any)
+const AdminProcessingMetaIdRoute = AdminProcessingMetaIdRouteImport.update({
+  id: '/$metaId',
+  path: '/$metaId',
+  getParentRoute: () => AdminProcessingRoute,
 } as any)
 const AdminMembershipsNewRoute = AdminMembershipsNewRouteImport.update({
   id: '/new',
@@ -455,6 +473,7 @@ export interface FileRoutesByFullPath {
   '/kontakt': typeof PagesKontaktRoute
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
+  '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/regions': typeof AdminRegionsRouteWithChildren
   '/admin/static-dataset-categories': typeof AdminStaticDatasetCategoriesRouteWithChildren
@@ -481,6 +500,7 @@ export interface FileRoutesByFullPath {
   '/docs/mapillary-coverage': typeof PagesDocsMapillaryCoverageRoute
   '/settings/user': typeof PagesSettingsUserRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
+  '/admin/processing/$metaId': typeof AdminProcessingMetaIdRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
   '/admin/static-dataset-categories/$categoryKey': typeof AdminStaticDatasetCategoriesCategoryKeyRoute
@@ -498,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
+  '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
   '/admin/static-dataset-categories/': typeof AdminStaticDatasetCategoriesIndexRoute
@@ -544,6 +565,7 @@ export interface FileRoutesByTo {
   '/docs/mapillary-coverage': typeof PagesDocsMapillaryCoverageRoute
   '/settings/user': typeof PagesSettingsUserRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
+  '/admin/processing/$metaId': typeof AdminProcessingMetaIdRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
   '/admin/static-dataset-categories/$categoryKey': typeof AdminStaticDatasetCategoriesCategoryKeyRoute
@@ -561,6 +583,7 @@ export interface FileRoutesByTo {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/admin/memberships': typeof AdminMembershipsIndexRoute
+  '/admin/processing': typeof AdminProcessingIndexRoute
   '/admin/qa-configs': typeof AdminQaConfigsIndexRoute
   '/admin/regions': typeof AdminRegionsIndexRoute
   '/admin/static-dataset-categories': typeof AdminStaticDatasetCategoriesIndexRoute
@@ -590,6 +613,7 @@ export interface FileRoutesById {
   '/_pages/kontakt': typeof PagesKontaktRoute
   '/_pages/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
+  '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/regions': typeof AdminRegionsRouteWithChildren
   '/admin/static-dataset-categories': typeof AdminStaticDatasetCategoriesRouteWithChildren
@@ -616,6 +640,7 @@ export interface FileRoutesById {
   '/_pages/docs/mapillary-coverage': typeof PagesDocsMapillaryCoverageRoute
   '/_pages/settings/user': typeof PagesSettingsUserRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
+  '/admin/processing/$metaId': typeof AdminProcessingMetaIdRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
   '/admin/static-dataset-categories/$categoryKey': typeof AdminStaticDatasetCategoriesCategoryKeyRoute
@@ -633,6 +658,7 @@ export interface FileRoutesById {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
+  '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
   '/admin/static-dataset-categories/': typeof AdminStaticDatasetCategoriesIndexRoute
@@ -662,6 +688,7 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/oAuthError'
     | '/admin/memberships'
+    | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/regions'
     | '/admin/static-dataset-categories'
@@ -688,6 +715,7 @@ export interface FileRouteTypes {
     | '/docs/mapillary-coverage'
     | '/settings/user'
     | '/admin/memberships/new'
+    | '/admin/processing/$metaId'
     | '/admin/qa-configs/new'
     | '/admin/regions/new'
     | '/admin/static-dataset-categories/$categoryKey'
@@ -705,6 +733,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/admin/memberships/'
+    | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/regions/'
     | '/admin/static-dataset-categories/'
@@ -751,6 +780,7 @@ export interface FileRouteTypes {
     | '/docs/mapillary-coverage'
     | '/settings/user'
     | '/admin/memberships/new'
+    | '/admin/processing/$metaId'
     | '/admin/qa-configs/new'
     | '/admin/regions/new'
     | '/admin/static-dataset-categories/$categoryKey'
@@ -768,6 +798,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/admin/memberships'
+    | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/regions'
     | '/admin/static-dataset-categories'
@@ -796,6 +827,7 @@ export interface FileRouteTypes {
     | '/_pages/kontakt'
     | '/_pages/oAuthError'
     | '/admin/memberships'
+    | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/regions'
     | '/admin/static-dataset-categories'
@@ -822,6 +854,7 @@ export interface FileRouteTypes {
     | '/_pages/docs/mapillary-coverage'
     | '/_pages/settings/user'
     | '/admin/memberships/new'
+    | '/admin/processing/$metaId'
     | '/admin/qa-configs/new'
     | '/admin/regions/new'
     | '/admin/static-dataset-categories/$categoryKey'
@@ -839,6 +872,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/admin/memberships/'
+    | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/regions/'
     | '/admin/static-dataset-categories/'
@@ -1081,6 +1115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQaConfigsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/processing': {
+      id: '/admin/processing'
+      path: '/processing'
+      fullPath: '/admin/processing'
+      preLoaderRoute: typeof AdminProcessingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/memberships': {
       id: '/admin/memberships'
       path: '/memberships'
@@ -1143,6 +1184,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/qa-configs/'
       preLoaderRoute: typeof AdminQaConfigsIndexRouteImport
       parentRoute: typeof AdminQaConfigsRoute
+    }
+    '/admin/processing/': {
+      id: '/admin/processing/'
+      path: '/'
+      fullPath: '/admin/processing/'
+      preLoaderRoute: typeof AdminProcessingIndexRouteImport
+      parentRoute: typeof AdminProcessingRoute
     }
     '/admin/memberships/': {
       id: '/admin/memberships/'
@@ -1262,6 +1310,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/qa-configs/new'
       preLoaderRoute: typeof AdminQaConfigsNewRouteImport
       parentRoute: typeof AdminQaConfigsRoute
+    }
+    '/admin/processing/$metaId': {
+      id: '/admin/processing/$metaId'
+      path: '/$metaId'
+      fullPath: '/admin/processing/$metaId'
+      preLoaderRoute: typeof AdminProcessingMetaIdRouteImport
+      parentRoute: typeof AdminProcessingRoute
     }
     '/admin/memberships/new': {
       id: '/admin/memberships/new'
@@ -1413,6 +1468,20 @@ const AdminMembershipsRouteChildren: AdminMembershipsRouteChildren = {
 const AdminMembershipsRouteWithChildren =
   AdminMembershipsRoute._addFileChildren(AdminMembershipsRouteChildren)
 
+interface AdminProcessingRouteChildren {
+  AdminProcessingMetaIdRoute: typeof AdminProcessingMetaIdRoute
+  AdminProcessingIndexRoute: typeof AdminProcessingIndexRoute
+}
+
+const AdminProcessingRouteChildren: AdminProcessingRouteChildren = {
+  AdminProcessingMetaIdRoute: AdminProcessingMetaIdRoute,
+  AdminProcessingIndexRoute: AdminProcessingIndexRoute,
+}
+
+const AdminProcessingRouteWithChildren = AdminProcessingRoute._addFileChildren(
+  AdminProcessingRouteChildren,
+)
+
 interface AdminQaConfigsRouteChildren {
   AdminQaConfigsNewRoute: typeof AdminQaConfigsNewRoute
   AdminQaConfigsIndexRoute: typeof AdminQaConfigsIndexRoute
@@ -1481,6 +1550,7 @@ const AdminUploadsRouteWithChildren = AdminUploadsRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminMembershipsRoute: typeof AdminMembershipsRouteWithChildren
+  AdminProcessingRoute: typeof AdminProcessingRouteWithChildren
   AdminQaConfigsRoute: typeof AdminQaConfigsRouteWithChildren
   AdminRegionsRoute: typeof AdminRegionsRouteWithChildren
   AdminStaticDatasetCategoriesRoute: typeof AdminStaticDatasetCategoriesRouteWithChildren
@@ -1490,6 +1560,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminMembershipsRoute: AdminMembershipsRouteWithChildren,
+  AdminProcessingRoute: AdminProcessingRouteWithChildren,
   AdminQaConfigsRoute: AdminQaConfigsRouteWithChildren,
   AdminRegionsRoute: AdminRegionsRouteWithChildren,
   AdminStaticDatasetCategoriesRoute:

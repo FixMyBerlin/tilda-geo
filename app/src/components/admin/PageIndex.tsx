@@ -1,6 +1,5 @@
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { twMerge } from 'tailwind-merge'
-import { AdminPrivateHooksSection } from '@/components/admin/AdminPrivateHooksSection'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { Disclosure } from '@/components/regionen/pageRegionSlug/SidebarInspector/Disclosure/Disclosure'
@@ -23,6 +22,7 @@ const items = [
   { to: '/admin/memberships', label: 'Nutzer:innen & Mitgliedschaften' },
   { to: '/admin/uploads', label: 'Statische Daten (Uploads)' },
   { to: '/admin/static-dataset-categories', label: 'Statische Datensatz-Kategorien' },
+  { to: '/admin/processing', label: 'Processing' },
 ] satisfies { to: InternalPath; label: string }[]
 
 const errorPreviewItems = [
@@ -56,8 +56,6 @@ export function PageIndex() {
           </li>
         ))}
       </ul>
-
-      <AdminPrivateHooksSection />
 
       {!isProd ? (
         <>
