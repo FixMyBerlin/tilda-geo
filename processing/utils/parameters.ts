@@ -56,5 +56,6 @@ export const params = parseParameters()
 export const paramsFilteredForLogs = {
   ...params,
   apiKey: params.apiKey ? '***' : '',
+  osmUsername: params.osmUsername ? '***' : params.osmUsername,
   osmPassword: params.osmPassword ? '***' : params.osmPassword,
 }

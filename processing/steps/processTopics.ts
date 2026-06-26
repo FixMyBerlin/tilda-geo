@@ -14,6 +14,7 @@ import { updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { getSkipUnchangedContext, topicPath, willSkipTopic } from '../utils/skipUnchanged'
+import { getTopicScheduleSkipReason } from '../utils/topicScheduleEligibility'
 import { bboxesFilter, filteredFilePath } from './filter'
 import {
   type ProcessingTopicsMeta,
@@ -151,18 +152,19 @@ export async function processTopics(
     let innerBboxes = entry.bboxes
     let innerFileName = fileName
 
-    // Weekend topics (heavy, rarely-changing datasets, e.g. landcover) only run on the Saturday
-    // nightly run (~weekly) or when explicitly requested. We still log the skip on other nights
-    // so it is visible that the topic is intentionally not running.
-    if (
-      entry.schedule === 'weekend' &&
-      !isSaturdayRun &&
-      !params.processOnlyTopics.includes(topic)
-    ) {
+    const scheduleSkipReason = getTopicScheduleSkipReason(topic, entry, isSaturdayRun)
+    if (scheduleSkipReason === 'weekend') {
       console.log(
         `Topics: ⏩ Skipping "${topic}" (schedule=weekend; runs on Saturday nights or via PROCESS_ONLY_TOPICS=${topic}).`,
       )
       topicTimings[topic] = { skipped: 'weekend' }
+      continue
+    }
+    if (scheduleSkipReason === 'process_only') {
+      console.log(
+        `Topics: ⏩ Skipping "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
+      )
+      topicTimings[topic] = { skipped: 'process_only_topics' }
       continue
     }
 

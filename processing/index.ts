@@ -9,11 +9,13 @@ import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
+import { logProcessingStartupContext } from './utils/logStartupContext'
 
 async function main() {
   try {
     logPadded('Processing', berlinTimeString(new Date()))
 
+    await logProcessingStartupContext()
     await initialize()
 
     // Create processing entry at the start
