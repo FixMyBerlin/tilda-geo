@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { GeoJsonProperties } from 'geojson'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
+import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { Link } from '@/components/shared/links/Link'
 import { todoIds } from '@/data/processingTypes/todoId.generated.const'
 import {
@@ -9,6 +10,8 @@ import {
   useMaprouletteTasksActions,
 } from './maproulette-tasks-store'
 import { NoticeMaprouletteTaskDisclosure } from './NoticeMaprouletteTaskDisclosure'
+import { filterMaprouletteProjectKeys } from './utils/filterMaprouletteProjectKeys'
+import { getActiveRadinfraCampaignStyleId } from './utils/getActiveRadinfraCampaignStyleId'
 import { todoMarkdownToMaprouletteCampaignKey } from './utils/todoMarkdownToMaprouletteCampaignKey'
 
 const maprouletteQueryClient = new QueryClient({
@@ -34,6 +37,7 @@ export const NoticeMaproulette = ({
   properties,
   geometry,
 }: NoticeMaproulette) => {
+  const { categoriesConfig } = useCategoriesConfig()
   const openProjectKey = useMaprouletteOpenProjectKey()
   const { setOpenProjectKey } = useMaprouletteTasksActions()
 
@@ -42,8 +46,12 @@ export const NoticeMaproulette = ({
   // This is how we store todos on `todos_lines`
   const todoKeysFromKeys = todoIds.filter((id) => Object.keys(properties).includes(id))
   // When we are on `bikelanes`, `roads`, we only show some todos
-  const maprouletteProjectKeys =
+  const rawMaprouletteProjectKeys =
     sourceId === 'atlas_todos_lines' ? todoKeysFromKeys : todosKeyFromTodoTag
+  const maprouletteProjectKeys = filterMaprouletteProjectKeys(
+    rawMaprouletteProjectKeys,
+    getActiveRadinfraCampaignStyleId(categoriesConfig),
+  )
 
   if (!maprouletteProjectKeys.length || !osmTypeIdString || geometry?.type !== 'LineString') {
     return null
