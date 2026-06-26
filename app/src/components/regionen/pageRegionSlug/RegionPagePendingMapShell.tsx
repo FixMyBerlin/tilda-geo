@@ -7,8 +7,8 @@ import { isProd } from '@/components/shared/utils/isEnv'
 import { staticRegion } from '@/data/regions.const'
 import { mobileControlButtonClassName } from './mobile/mobileControlButton.const'
 import {
-  mobileMapBottomControlsClassName,
   mobileMapHeaderClassName,
+  pendingMapBottomControlsClassName,
 } from './mobile/mobileMapChrome.const'
 
 const pulseButton = twJoin(
@@ -64,7 +64,7 @@ export function RegionPagePendingMapShell({ previewRegionSlug }: Props = {}) {
 
       {/* Desktop zoom controls placeholder (hidden on mobile, matching the live map) */}
       <div
-        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2 z-10 hidden sm:block"
+        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2.5 z-10 hidden sm:block"
         aria-hidden="true"
       >
         <div className="maplibregl-ctrl-group">
@@ -85,24 +85,16 @@ export function RegionPagePendingMapShell({ previewRegionSlug }: Props = {}) {
         </div>
       </div>
 
-      {/* Mobile bottom controls skeleton (OsmNotes, InternalNotes, SelectBackground, MobileLayerButton) */}
-      <div className={twJoin(mobileMapBottomControlsClassName, 'sm:hidden')} aria-hidden="true">
+      {/* Bottom controls skeleton — one cluster like MapInterface (mobile + desktop) */}
+      <div className={pendingMapBottomControlsClassName} aria-hidden="true">
         <div className={twJoin(pulseButton, 'size-10')} />
         <div className={twJoin(pulseButton, 'size-10')} />
         <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-13')} />
-      </div>
-
-      {/* Desktop bottom controls skeleton */}
-      <div
-        className={twJoin(mobileMapBottomControlsClassName, 'hidden sm:flex')}
-        aria-hidden="true"
-      >
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
+        <div className={twJoin(pulseButton, 'size-10', 'hidden sm:block')} />
+        <div className={twJoin(pulseButton, 'size-13 sm:size-10')} />
+        {showDebugPlaceholder && (
+          <div className={twJoin(pulseButton, 'size-10', 'hidden sm:block')} />
+        )}
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-5 flex flex-col items-center justify-center gap-4">

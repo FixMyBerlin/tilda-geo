@@ -59,7 +59,7 @@
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
 }
-.maplibregl-ctrl-top-right {
+html .maplibregl-ctrl-top-right {
   right: calc(var(--inspector-width) + var(--map-controls-inset));
   padding-top: env(safe-area-inset-top);
   padding-right: env(safe-area-inset-right);
