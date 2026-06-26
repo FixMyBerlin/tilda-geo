@@ -108,9 +108,7 @@ jobs:
             echo "Pulling latest 'processing' image"
             docker compose pull processing
             echo "Restarting 'processing' container"
-            export PROCESSING_DIFFING_MODE="${{ vars.PROCESSING_DIFFING_MODE }}"
-            docker compose up processing -d
-            unset PROCESSING_DIFFING_MODE
+            docker compose up -d processing
             echo "Cleanup docker (containers and images) that are older than 72h"
             docker container prune -f --filter "until=72h"
             docker image prune -fa --filter "until=72h"
