@@ -3,7 +3,11 @@ import { isDev } from '@/components/shared/utils/isEnv'
 import { RegionPagePendingHeader } from './RegionPagePendingHeader'
 import { RegionPagePendingMapShell } from './RegionPagePendingMapShell'
 
-export default function RegionPagePending() {
+type Props = {
+  previewRegionSlug?: string
+}
+
+export default function RegionPagePending({ previewRegionSlug }: Props = {}) {
   useEffect(function logRegionPendingInDev() {
     if (isDev) console.debug('[region] route pending UI shown')
   }, [])
@@ -20,7 +24,7 @@ export default function RegionPagePending() {
         <RegionPagePendingHeader />
       </div>
       <main className="z-0 min-h-0 grow">
-        <RegionPagePendingMapShell />
+        <RegionPagePendingMapShell previewRegionSlug={previewRegionSlug} />
       </main>
     </div>
   )

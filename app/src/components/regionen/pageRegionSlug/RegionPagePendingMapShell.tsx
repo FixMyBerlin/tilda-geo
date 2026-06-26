@@ -1,21 +1,36 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { useParams } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
+import invariant from 'tiny-invariant'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { isProd } from '@/components/shared/utils/isEnv'
+import { staticRegion } from '@/data/regions.const'
 import { mobileControlButtonClassName } from './mobile/mobileControlButton.const'
 import {
   mobileMapBottomControlsClassName,
   mobileMapHeaderClassName,
 } from './mobile/mobileMapChrome.const'
-import { useStaticRegion } from './regionUtils/useStaticRegion'
 
 const pulseButton = twJoin(
   mobileControlButtonClassName,
   'pointer-events-none animate-pulse bg-white/80',
 )
 
-export function RegionPagePendingMapShell() {
-  const staticRegion = useStaticRegion()
+type Props = {
+  previewRegionSlug?: string
+}
+
+function usePendingShellStaticRegion(previewRegionSlug?: string) {
+  const params = useParams({ strict: false })
+  const regionSlug = previewRegionSlug ?? params?.regionSlug
+  invariant(regionSlug, 'RegionPagePendingMapShell requires a region slug')
+  const resultRegion = staticRegion.find((data) => data.slug === regionSlug)
+  invariant(resultRegion, `Static region not found: ${regionSlug}`)
+  return resultRegion
+}
+
+export function RegionPagePendingMapShell({ previewRegionSlug }: Props = {}) {
+  const staticRegion = usePendingShellStaticRegion(previewRegionSlug)
   const showDebugPlaceholder = !isProd
   const showSearchPlaceholder = staticRegion.showSearch === true
 
