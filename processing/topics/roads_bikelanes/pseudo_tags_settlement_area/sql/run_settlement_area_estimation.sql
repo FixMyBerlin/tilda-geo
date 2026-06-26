@@ -4,7 +4,8 @@
 -- public._settlement_areas polygon (method picked by the benchmark — see
 -- ../../landcover/settlement_areas/BENCHMARK_DOCUMENTATION.md: ST_Intersects is ~170s/15.9M ways and robust; the
 -- %-coverage variant was far too expensive). Exports only
--- the MINORITY class — ways OUTSIDE all settlement areas (~30% per the benchmark) — and the
+-- the MINORITY class — ways OUTSIDE all settlement areas (~32% by count on Germany; see
+-- ../../landcover/settlement_areas/CLASSIFICATION_STATS.md) — and the
 -- Lua loader infers inside (assumed_yes) as the default. Mirrors run_is_sidepath_estimation.sql.
 --
 -- Invoke: psql -v outfile=/path/settlement_area_estimation.csv -f run_settlement_area_estimation.sql

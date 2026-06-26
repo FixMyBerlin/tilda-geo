@@ -23,7 +23,7 @@ On full Germany (`germany-latest.osm.pbf`), with `public._settlement_areas` alre
 | Dissolve (`dissolve.sql`)                  | ~7m24s → 158k polygons, ~45,600 km², all valid. **No OOM.** |
 | Method A — `ST_Intersects` over 15.9M ways | **~170 s**, robust                                          |
 | Method B — % coverage over 15.9M ways      | **Exhausted memory / aborted** — far too expensive          |
-| Inside vs outside split (Method A)         | **70.3 % inside / 29.7 % outside**                          |
+| Inside vs outside split (Method A)         | **70.3 % inside / 29.7 % outside** (sidepath-aligned set)   |
 | CRS: 5243 native vs 3857 + cos(lat)        | 5243 was ~2 min faster (no per-row reprojection)            |
 
 ## Takeaways (what we actually do)
@@ -32,9 +32,10 @@ On full Germany (`germany-latest.osm.pbf`), with `public._settlement_areas` alre
   original OOM/crash. ~12 min total on Germany — fine for a `weekend` (≈ weekly) topic.
 - **Per-way method:** use **`ST_Intersects`**. The %-coverage variant is not worth its cost
   (and risks OOM); a way touching a settlement area at all is a good enough innerorts signal.
-- **Export the minority class:** outside (≈30%) is smaller than inside (≈70%), so the CSV holds
+- **Export the minority class:** outside is smaller than inside **by way count**, so the CSV holds
   only the outside ways (`assumed_no`) and the Lua infers inside (`assumed_yes`) as the default —
-  see `roads_bikelanes/pseudo_tags_settlement_area/`.
+  see `roads_bikelanes/pseudo_tags_settlement_area/`. Production numbers on the actual export way set:
+  [CLASSIFICATION_STATS.md](CLASSIFICATION_STATS.md) (~68 % / ~32 % by count; ~52 % / ~48 % by length).
 - **CRS:** do metric work natively in EPSG:5243; don't reproject per row.
 
 ## Re-running (only if the inputs change materially)

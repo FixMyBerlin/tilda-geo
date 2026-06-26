@@ -16,8 +16,11 @@ a way is **innerorts** (inside a settlement area) or **außerorts**. Same round-
    roads + bikelanes by `ST_Intersects` against `public._settlement_areas` (chosen over %-coverage —
    see [BENCHMARK_DOCUMENTATION.md](../../landcover/settlement_areas/BENCHMARK_DOCUMENTATION.md)), and write
    `settlement_area_estimation.csv` for the **next** run. Only
-   the **minority class** (außerorts / outside, ~30%) is exported; inside is the inferred default.
-   If `public._settlement_areas` doesn't exist yet, the export skips gracefully.
+   the **minority class** (außerorts / outside, ~32% by way count on Germany) is exported; inside is
+   the inferred default. See
+   [CLASSIFICATION_STATS.md](../../landcover/settlement_areas/CLASSIFICATION_STATS.md) for production
+   splits (count vs length, per-Bundesland). If `public._settlement_areas` doesn't exist yet, the
+   export skips gracefully.
 2. **Attach (Lua, next run)** — [in_settlement_area.lua](in_settlement_area.lua) +
    [load_csv_in_settlement_area.lua](load_csv_in_settlement_area.lua), wired in
    `../pseudo_tags/prepare_pseudo_tags_roads_bikelanes.lua`, set

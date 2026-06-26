@@ -16,8 +16,9 @@ local way_classes = SET.join_sets({
 })
 
 --- Returns _in_settlement_area for a way (innerorts/außerorts estimation).
---- The CSV holds only the MINORITY class — ways OUTSIDE settlement areas (~30%, per the
---- benchmark) — so we infer the majority (inside) as the default. Same idea as is_sidepath.
+--- The CSV holds only the MINORITY class — ways OUTSIDE settlement areas (~32% by count on
+--- Germany; see landcover/settlement_areas/CLASSIFICATION_STATS.md) — so we infer the majority
+--- (inside) as the default. Same idea as is_sidepath.
 ---  - in scope and IN csv  -> 'assumed_no'  (außerorts / outside)
 ---  - in scope and NOT csv -> 'assumed_yes' (innerorts / inside — the default)
 ---  - out of scope         -> nil

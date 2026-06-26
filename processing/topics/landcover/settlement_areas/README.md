@@ -47,8 +47,15 @@ for the per-way join. The per-settlement `area`/`minzoom` are computed on the wh
 carried through `ST_Subdivide`, so all fragments of one settlement share them. The `_` prefix keeps
 it internal/debug (its only real consumer is the per-way `ST_Intersects` join), not a display layer.
 
+## Classification split (production)
+
+On full Germany (staging, 2026-06-25): **~68 % assumed_yes / ~32 % assumed_no by way count**;
+**~52 % / ~48 % by length** — außerorts ways are fewer but longer. Strong regional variation
+(Berlin ~94 % yes vs Rheinland-Pfalz ~57 %). Details:
+[CLASSIFICATION_STATS.md](CLASSIFICATION_STATS.md).
+
 ## Performance
 
 Measured on Germany: osm2pgsql ~4m15s + dissolve ~7m24s ≈ **12 min** (fine for weekly). The per-way
 classification uses `ST_Intersects`. See [BENCHMARK_DOCUMENTATION.md](BENCHMARK_DOCUMENTATION.md) for
-the full benchmark and why we chose `ST_Intersects` over %-coverage.
+the dev benchmark (method choice, timing) and why we chose `ST_Intersects` over %-coverage.
