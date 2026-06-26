@@ -308,6 +308,7 @@ local needs_clarification = BikelaneTodo.new({
         object_tags.cycleway == 'shared' -- Handled by RoadTodos.lua `deprecated_cycleway_shared`
         or unexpected_bicycle_access_on_footway(object_tags, result_tags)
         or crossing_too_long(object_tags, result_tags)
+        or missing_segregated(object_tags, result_tags)
       )
   end
 })
