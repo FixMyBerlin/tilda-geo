@@ -15,6 +15,10 @@ The data is selected and optimized to make planning of bicycle infrastructure ea
 We use Bun and [Bun Shell](https://bun.sh/docs/runtime/shell) to orchestrate the commands needed to fetch, filter, process and post-process the data and trigger post-processing hooks.
 See [`index.ts`](./index.ts) for more.
 
+### Tag-filter profiles
+
+OSM tag filters are split into profiles in [`constants/topics.tagFilters.const.ts`](./constants/topics.tagFilters.const.ts): `relations` (boundary + bike route relations), `features` (POI/place/public transport/tourism/leisure), `roadsBikelanes`, `barriers`, `landcover` (weekend), `parking` (bbox-limited). Each topic picks a profile in [`constants/topics.const.ts`](./constants/topics.const.ts). Filters run lazily per topic inside [`processTopics`](./steps/processTopics.ts); parking bbox-extracts the original download first, then applies its tag filter.
+
 ## Freshness
 
 ### Freshness of source data

@@ -1,16 +1,17 @@
 import { join } from 'node:path'
 import { bboxPolygon, featureCollection, union } from '@turf/turf'
 import { $ } from 'bun'
-import {
-  BBOX_FILTERED_FILE,
-  OSM_FILTERED_DIR,
-  OSMIUM_FILTER_BBOX_DIR,
-  OSMIUM_FILTER_EXPRESSIONS_DIR,
-} from '../constants/directories.const'
+import { OSM_FILTERED_DIR, OSMIUM_FILTER_BBOX_DIR } from '../constants/directories.const'
 import type { TopicConfigBbox } from '../constants/topics.const'
+import type { TagFilterProfile } from '../constants/topics.tagFilters.const'
+import {
+  profileFilteredFileName,
+  tagFilterProfileHashKey,
+  tagFilterProfiles,
+} from '../constants/topics.tagFilters.const'
 import { directoryHasChanged, updateDirectoryHash } from '../utils/hashing'
 import { isDev } from '../utils/isDev'
-import { params } from '../utils/parameters'
+import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
 import { originalFilePath } from './download'
 
 /**
@@ -19,85 +20,104 @@ import { originalFilePath } from './download'
  * @returns full path to the file
  */
 export const filteredFilePath = (fileName: string) => join(OSM_FILTERED_DIR, fileName)
-const OSMIUM_FILTER_EXPRESSIONS_FILE = `${OSMIUM_FILTER_EXPRESSIONS_DIR}/filter-expressions.txt`
+
 const OSMIUM_FILTER_BBOX_FILE = `${OSMIUM_FILTER_BBOX_DIR}/merged-bboxes.geojson`
 
-/**
- * Filter the OSM file wiht osmiumm and the given filter expressions.
- * The filter expressions are defined in /filter/filter-expressions.txt
- * @param fileName the file to filter
- * @param sourceFileChanged whether the source OSM file changed since the last run (new download)
- * @returns the resulting file's name and whether the source file changed (not whether filters were regenerated)
- */
-export async function tagFilter(fileName: string, sourceFileChanged: boolean) {
-  const pbfPath = filteredFilePath(fileName)
-  const pbfMissing = !(await Bun.file(pbfPath).exists())
+export type TagFilterSource = {
+  fileName: string
+  changed: boolean
+  inputFromDownload?: boolean
+}
 
-  // Only run tag filters if the file or the filters have changed
-  const filtersChanged = await directoryHasChanged(OSMIUM_FILTER_EXPRESSIONS_DIR)
-  const runFilter = sourceFileChanged || filtersChanged || pbfMissing
-  if (runFilter) {
-    console.log('Filter: Filtering the OSM file...')
-    try {
-      await $`osmium tags-filter \
-                  --overwrite \
-                  --expressions ${OSMIUM_FILTER_EXPRESSIONS_FILE} \
-                  --output=${pbfPath} \
-                  ${originalFilePath(fileName)}`
-    } catch (error) {
-      throw new Error(`Failed to filter the OSM file: ${error}`)
-    }
-  } else {
-    console.log(
-      'Filter: ⏩ Skipping tag filter. The file and filters are unchanged.',
-      JSON.stringify({ sourceFileChanged, filtersChanged, pbfMissing }),
-    )
+type TagFilterForProfileParams = {
+  profile: TagFilterProfile
+  source: TagFilterSource
+  outputFileName?: string
+}
+
+type BboxFilterInputOptions = {
+  inputFromDownload?: boolean
+}
+
+function resolveInputPath(fileName: string, inputFromDownload: boolean) {
+  return inputFromDownload ? originalFilePath(fileName) : filteredFilePath(fileName)
+}
+
+async function logPbfFileInfo(label: string, pbfPath: string) {
+  try {
+    const info = await $`osmium fileinfo -e ${pbfPath}`.text()
+    console.log(`Filter: ${label} fileinfo`, info.trim())
+  } catch (error) {
+    console.warn(`Filter: Could not read fileinfo for ${pbfPath}:`, error)
   }
-
-  updateDirectoryHash(OSMIUM_FILTER_EXPRESSIONS_DIR)
-
-  // Return sourceFileChanged (not runFilter) so that filter regeneration doesn't skip diffing
-  // Filter regeneration is needed, but shouldn't affect diffing logic
-  return { fileName, fileChanged: sourceFileChanged }
 }
 
 /**
- * Apply PROCESS_ONLY_BBOX once as a global filter.
- * Returns sourceFileChanged to keep diffing behavior aligned with tag filters.
+ * Apply osmium tags-filter for a named profile. Expressions are passed inline on the command line.
  */
-export async function globalBboxFilter(fileName: string, sourceFileChanged: boolean) {
-  if (params.processOnlyBbox === null) return
+export async function tagFilterForProfile({
+  profile,
+  source,
+  outputFileName = profileFilteredFileName(profile),
+}: TagFilterForProfileParams) {
+  const expressions = tagFilterProfiles[profile]
+  const inputFromDownload = source.inputFromDownload ?? false
+  const pbfPath = filteredFilePath(outputFileName)
+  const pbfMissing = !(await Bun.file(pbfPath).exists())
 
-  console.log(
-    `Filtering the OSM file globally with \`PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}\`...`,
-  )
-  await bboxesFilter(fileName, BBOX_FILTERED_FILE, [params.processOnlyBbox], sourceFileChanged)
+  const expressionsHash = JSON.stringify(expressions)
+  const hashKey = tagFilterProfileHashKey(profile, outputFileName)
+  const storedHash = await readHashFromFile(hashKey)
+  const filtersChanged = storedHash !== expressionsHash
+  // Only run tag filters if the source, expressions, or output PBF changed.
+  const runFilter = source.changed || filtersChanged || pbfMissing
 
-  return { fileName: BBOX_FILTERED_FILE, fileChanged: sourceFileChanged }
+  if (runFilter) {
+    console.log(`Filter: Tag-filtering profile "${profile}"...`, JSON.stringify({ outputFileName }))
+    const inputPath = resolveInputPath(source.fileName, inputFromDownload)
+    try {
+      await $`osmium tags-filter \
+                  --overwrite \
+                  --output=${pbfPath} \
+                  ${inputPath} \
+                  ${expressions}`
+    } catch (error) {
+      throw new Error(`Failed to tag-filter profile "${profile}": ${error}`)
+    }
+    await writeHashForFile(hashKey, expressionsHash)
+    await logPbfFileInfo(`profile ${profile}`, pbfPath)
+  } else {
+    console.log(
+      `Filter: ⏩ Skipping tag filter for profile "${profile}". Expressions and source are unchanged.`,
+      JSON.stringify({ sourceChanged: source.changed, filtersChanged, pbfMissing, outputFileName }),
+    )
+  }
+
+  // Return source.changed (not runFilter) so filter regeneration does not disable diffing.
+  // The separate `regenerated` flag is only for downstream derived-filter cache invalidation.
+  return { fileName: outputFileName, fileChanged: source.changed, regenerated: runFilter }
 }
 
 /**
  * Create filtered pbf files based on bboxes.
+ * Bboxes are TopicConfigBbox tuples from processing/constants/topics.const.ts.
  * Regenerates the filtered file when bbox changes or source file changed, but doesn't affect
- * the fileChanged flag used for diffing decisions (similar to tagFilter).
- * @param filename
- * @param outputName
- * @param bboxes Array of Bboxes as defined in processing/constants/topics.const.ts
- * @param sourceFileChanged whether the source OSM file changed since the last run (new download)
+ * the fileChanged flag used for diffing decisions (similar to tagFilterForProfile).
  */
 export async function bboxesFilter(
-  fileName: string,
+  inputFileName: string,
   outputName: string,
   bboxes: Readonly<Array<TopicConfigBbox>>,
   sourceFileChanged: boolean,
+  options?: BboxFilterInputOptions,
 ) {
-  // Generate the osmium filter file.
-  // We need to merge the bboxes to prevent https://github.com/osmcode/osmium-tool/issues/266
   const firstBbox = bboxes[0]
   if (!firstBbox) {
     throw new Error(`bboxesFilter requires at least one bbox, received ${JSON.stringify(bboxes)}`)
   }
 
+  // Merge bboxes before handing them to osmium to avoid
+  // https://github.com/osmcode/osmium-tool/issues/266.
   const mergedBboxPolygonFeatures =
     bboxes.length > 1
       ? union(featureCollection(bboxes.map((bbox) => bboxPolygon(bbox))))
@@ -110,8 +130,8 @@ export async function bboxesFilter(
 
   const filteredPbfExists = await Bun.file(filteredFilePath(outputName)).exists()
   const filterDirChanged = await directoryHasChanged(OSMIUM_FILTER_BBOX_DIR)
-  // Regenerate if source file changed, bbox filter changed, or file is missing
-  // Note: filterDirChanged (PROCESS_ONLY_BBOX changes) triggers regeneration but doesn't affect diffing
+  // Regenerate if source file changed, bbox filter changed, or file is missing.
+  // Bbox changes trigger regeneration but do not affect diffing by themselves.
   const shouldRegenerate = sourceFileChanged || filterDirChanged || !filteredPbfExists
   if (!shouldRegenerate) {
     console.log(
@@ -121,12 +141,15 @@ export async function bboxesFilter(
         OSMIUM_FILTER_BBOX_FILE,
         sourceFileChanged,
         filterDirChanged,
+        outputName,
       }),
       isDev ? JSON.stringify(mergedBboxPolygonFeatures) : '',
     )
-    return
+    return false
   }
   updateDirectoryHash(OSMIUM_FILTER_BBOX_DIR)
+
+  const inputPath = resolveInputPath(inputFileName, options?.inputFromDownload ?? false)
 
   console.log(
     'ℹ️ Filtering the OSM file with bboxes...',
@@ -134,6 +157,8 @@ export async function bboxesFilter(
       OSMIUM_FILTER_BBOX_FILE,
       sourceFileChanged,
       filterDirChanged,
+      inputFileName,
+      outputName,
     }),
     isDev ? JSON.stringify(mergedBboxPolygonFeatures) : '',
   )
@@ -143,8 +168,9 @@ export async function bboxesFilter(
               --set-bounds \
               --polygon ${OSMIUM_FILTER_BBOX_FILE} \
               --output ${filteredFilePath(outputName)} \
-              ${filteredFilePath(fileName)}`
+              ${inputPath}`
   } catch (error) {
     throw new Error(`Failed to filter the OSM file by polygon: ${error}`)
   }
+  return true
 }

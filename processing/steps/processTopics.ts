@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { $ } from 'bun'
-import { type Topic, topicsConfig } from '../constants/topics.const'
+import { type Topic, type TopicConfigEntry, topicsConfig } from '../constants/topics.const'
+import type { TagFilterProfile } from '../constants/topics.tagFilters.const'
 import {
   createReferenceTable,
   diffTables,
@@ -15,7 +16,7 @@ import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { getSkipUnchangedContext, topicPath, willSkipTopic } from '../utils/skipUnchanged'
 import { getTopicScheduleSkipReason } from '../utils/topicScheduleEligibility'
-import { bboxesFilter, filteredFilePath } from './filter'
+import { bboxesFilter, filteredFilePath, type TagFilterSource, tagFilterForProfile } from './filter'
 import {
   type ProcessingTopicsMeta,
   type TopicRanEntry,
@@ -29,6 +30,128 @@ const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
 type TopicRunTimings = {
   lua: { start: Date; end: Date }
   sql?: { start: Date; end: Date }
+}
+
+type ProfilePbfCacheEntry = {
+  fileName: string
+  regenerated: boolean
+}
+
+type ProfilePbfCache = Map<TagFilterProfile, ProfilePbfCacheEntry>
+
+type ProcessOnlyBboxCache = {
+  source?: TagFilterSource
+}
+
+async function ensureProfileTaggedPbf(
+  profile: TagFilterProfile,
+  source: TagFilterSource,
+  cache: ProfilePbfCache,
+  outputFileName?: string,
+) {
+  const cached = cache.get(profile)
+  if (cached) return cached
+
+  const { fileName, regenerated } = await tagFilterForProfile({
+    profile,
+    source,
+    outputFileName,
+  })
+  const entry: ProfilePbfCacheEntry = { fileName, regenerated }
+  cache.set(profile, entry)
+  return entry
+}
+
+async function ensureProcessOnlyBboxSource(
+  sourceFileName: string,
+  sourceFileChanged: boolean,
+  cache: ProcessOnlyBboxCache,
+) {
+  if (cache.source) return cache.source
+  if (!params.processOnlyBbox) {
+    return {
+      fileName: sourceFileName,
+      changed: sourceFileChanged,
+      inputFromDownload: true,
+    } satisfies TagFilterSource
+  }
+
+  // PROCESS_ONLY_BBOX is a dev shortcut: create one bbox source from the original download,
+  // then build the requested topic profiles from that bounded input.
+  const fileName = 'process_only_bbox.osm.pbf'
+  const regenerated = await bboxesFilter(
+    sourceFileName,
+    fileName,
+    [params.processOnlyBbox],
+    sourceFileChanged,
+    {
+      inputFromDownload: true,
+    },
+  )
+  cache.source = {
+    fileName,
+    changed: sourceFileChanged || regenerated,
+    inputFromDownload: false,
+  }
+  return cache.source
+}
+
+/**
+ * Resolve the osm2pgsql input PBF for a topic (profile tag-filter, optional bbox extract).
+ */
+async function resolveTopicInputFile(
+  topic: Topic,
+  entry: TopicConfigEntry,
+  sourceFileName: string,
+  sourceFileChanged: boolean,
+  profileCache: ProfilePbfCache,
+  processOnlyBboxCache: ProcessOnlyBboxCache,
+  useGlobalBboxFilter: boolean,
+) {
+  if (entry.bboxes && !useGlobalBboxFilter) {
+    // Topic bboxes are applied before tag filters so bbox-limited topics never scan full-DE
+    // profile inputs.
+    const bboxFileName = `${topic}_bbox.osm.pbf`
+    const extractedFileName = `${topic}_extracted.osm.pbf`
+    const bboxRegenerated = await bboxesFilter(
+      sourceFileName,
+      bboxFileName,
+      entry.bboxes,
+      sourceFileChanged,
+      {
+        inputFromDownload: true,
+      },
+    )
+    const { fileName } = await tagFilterForProfile({
+      profile: entry.tagFilterProfile,
+      source: {
+        fileName: bboxFileName,
+        changed: sourceFileChanged || bboxRegenerated,
+        inputFromDownload: false,
+      },
+      outputFileName: extractedFileName,
+    })
+    return fileName
+  }
+
+  const source = useGlobalBboxFilter
+    ? await ensureProcessOnlyBboxSource(sourceFileName, sourceFileChanged, processOnlyBboxCache)
+    : ({
+        fileName: sourceFileName,
+        changed: sourceFileChanged,
+        inputFromDownload: true,
+      } satisfies TagFilterSource)
+  const outputFileName = useGlobalBboxFilter
+    ? `${entry.tagFilterProfile}_bbox_extracted.osm.pbf`
+    : undefined
+  const profilePbf = await ensureProfileTaggedPbf(
+    entry.tagFilterProfile,
+    source,
+    profileCache,
+    outputFileName,
+  )
+
+  return profilePbf.fileName
 }
 
 /**
@@ -102,12 +225,12 @@ async function runTopic(fileName: string, topic: Topic) {
 
 /**
  * Run the given topics with optional diffing and code caching
- * @param fileName an OSM file name to run the topics on
- * @param fileChanged whether the file has changed since the last run
+ * @param sourceFileName original download OSM file name
+ * @param fileChanged whether the source file has changed since the last run
  * @param processingId current meta row id for persisting per-topic timings
  */
 export async function processTopics(
-  fileName: string,
+  sourceFileName: string,
   fileChanged: boolean,
   processingId: number | null,
 ) {
@@ -115,20 +238,22 @@ export async function processTopics(
 
   const ranTopics = new Set<Topic>()
   const topicTimings: ProcessingTopicsMeta = {}
+  const profilePbfCache: ProfilePbfCache = new Map()
+  const processOnlyBboxCache: ProcessOnlyBboxCache = {}
 
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
 
   const skipContext = await getSkipUnchangedContext(fileChanged)
 
-  // Reference mode: Always create reference, never diff (clean baseline)
-  // Previous/Fixed modes: Only diff when source PBF file hasn't changed (new download)
-  // Note: Filter regenerations (tag/bbox filters) don't affect diffing - filtered data can still be diffed
+  // Reference mode: Always create reference, never diff (clean baseline).
+  // Previous/Fixed modes: Only diff when the source PBF file has not changed (new download).
+  // Filter regenerations do not affect diffing; they are still the same source data.
   const isReferenceMode = params.diffingMode === 'reference'
   const diffChanges =
     params.diffingMode !== 'off' && params.diffingMode !== 'reference' && !fileChanged
 
-  // Reference mode: Drop all diff tables once at the start for a clean slate
+  // Reference mode: Drop all diff tables once at the start for a clean slate.
   if (isReferenceMode) {
     console.log('Diffing: Drop all diff tables (reference mode - clean slate)')
     await dropAllDiffTables()
@@ -145,9 +270,6 @@ export async function processTopics(
   const isSaturdayRun = isBerlinSaturday(new Date())
 
   for (const [topic, entry] of Array.from(topicsConfig)) {
-    let innerBboxes = entry.bboxes
-    let innerFileName = fileName
-
     const scheduleSkipReason = getTopicScheduleSkipReason(topic, entry, isSaturdayRun)
     if (scheduleSkipReason === 'weekend') {
       console.log(
@@ -184,40 +306,35 @@ export async function processTopics(
       continue
     }
 
-    // In dev mode with PROCESS_ONLY_BBOX we already applied a global bbox filter in index.ts.
-    // Keep topic bboxes only when no global bbox is active.
-    if (useGlobalBboxFilter) {
-      innerBboxes = null
-    }
+    const innerFileName = await resolveTopicInputFile(
+      topic,
+      entry,
+      sourceFileName,
+      fileChanged,
+      profilePbfCache,
+      processOnlyBboxCache,
+      useGlobalBboxFilter,
+    )
 
-    // Bboxes: Create filtered source file
-    if (innerBboxes) {
-      innerFileName = `${topic}_extracted.osm.pbf`
-      await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
-    }
-
-    // Get all tables related to `topic`
+    // Get all tables related to `topic`.
     const topicTables = await getTopicTables(topic)
 
     logStart(`Topics: ${topic}`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
 
     const ranEntry: TopicRanEntry = {}
-    // Wall-clock window for reference creation + diff computation (stored as meta.topics[].diff)
+    // Wall-clock window for reference creation + diff computation (stored as meta.topics[].diff).
     let diffStart: Date | null = null
 
-    // ============================================
-    // Reference Creation Phase (for non-reference modes)
-    // ============================================
+    // Reference Creation Phase (for non-reference modes).
     if (!isReferenceMode && diffChanges) {
-      // Previous/Fixed modes: Create reference tables conditionally
+      // Previous/Fixed modes: Create reference tables conditionally.
       const createRefLabel = 'Diffing: Create reference tables'
       console.log(`${createRefLabel} - Start`)
       diffStart = new Date()
       const createRefStart = Date.now()
-      // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
-      // Which means existing reference tables don't change (are frozen).
-      // Learn more in [processing/README](../../processing/README.md#reference)
+      // With PROCESSING_DIFFING_MODE=fixed we only create missing reference tables. Existing
+      // reference tables stay frozen so repeated fixed runs compare against the same baseline.
       const toCreateReference =
         params.diffingMode === 'fixed'
           ? processedTopicTables.difference(tableListReference)
@@ -226,7 +343,7 @@ export async function processTopics(
       console.log(`${createRefLabel} – Took ${formatTimestamp(Date.now() - createRefStart)}`)
     }
 
-    // Run the topic with osm2pgsql (LUA) and the sql processing
+    // Run the topic with osm2pgsql (Lua) and optional SQL post-processing.
     const runTimings = await runTopic(innerFileName, topic)
     ranEntry.lua = toIsoWindow(runTimings.lua.start, runTimings.lua.end)
     if (runTimings.sql) {
@@ -234,14 +351,12 @@ export async function processTopics(
     }
     ranTopics.add(topic)
 
-    // Update the code hashes
+    // Update the code hashes after a successful topic run.
     await updateDirectoryHash(topicPath(topic))
 
-    // ============================================
-    // Reference Creation Phase (for reference mode - AFTER topic runs)
-    // ============================================
+    // Reference Creation Phase (for reference mode - AFTER topic runs).
     if (isReferenceMode) {
-      // Reference mode: Create reference tables AFTER processing to capture final state
+      // Reference mode: Create reference tables AFTER processing to capture final state.
       const createRefLabel = 'Diffing: Create reference tables (reference mode)'
       console.log(`${createRefLabel} - Start`)
       if (!diffStart) diffStart = new Date()
@@ -250,14 +365,12 @@ export async function processTopics(
       console.log(`${createRefLabel} – Took ${formatTimestamp(Date.now() - createRefStart)}`)
     }
 
-    // ============================================
-    // Diffing Phase
-    // ============================================
+    // Diffing Phase.
     if (isReferenceMode) {
-      // Reference mode: Skip diff computation (already cleaned up)
+      // Reference mode: Skip diff computation (already cleaned up).
       console.log('Diffing:', 'Skip diff computation (reference mode)')
     } else if (diffChanges) {
-      // Previous/Fixed modes: Compute diffs
+      // Previous/Fixed modes: Compute diffs.
       const diffLabel = `Diffing: Update diffs (${params.diffingMode})`
       console.log(`${diffLabel} - Start`)
       if (!diffStart) diffStart = new Date()
@@ -288,7 +401,7 @@ export async function processTopics(
     logEnd(`Topics: ${topic}`)
   }
 
-  // Persist per-topic lua/sql/diff windows (or skip reasons) on public.meta.topics
+  // Persist per-topic lua/sql/diff windows (or skip reasons) on public.meta.topics.
   await updateProcessingTopics(processingId, topicTimings)
 
   logEnd('Processing: Topics')
