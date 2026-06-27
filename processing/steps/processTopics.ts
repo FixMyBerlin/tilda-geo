@@ -60,12 +60,8 @@ async function runLua(fileName: string, topic: Topic) {
   const luaFile = `${mainFilePath(topic)}.lua`
   console.log('runTopic: runLua', topic, JSON.stringify({ luaFile, filePath }))
   try {
-    // Number of processes: Use env var if set, otherwise default to 4 (better for Docker Desktop)
-    // For production with more CPU cores, set OSM2PGSQL_NUMBER_PROCESSES=8 or higher
-    const numProcesses = params.osm2pgsqlNumberProcesses ?? 4
-    // Did not find an easy way to use $(Shell) and make the `--bbox` optional
     await $`osm2pgsql \
-              --number-processes=${numProcesses} \
+              --number-processes=${params.osm2pgsqlNumberProcesses} \
               --create \
               --output=flex \
               --extra-attributes \

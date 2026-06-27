@@ -27,6 +27,10 @@ const oauthCredentialSchema = z
 
 const urlSchema = z.url('Must be a valid URL')
 
+// Default 4 — benchmark and rationale: processing/docs/osm2pgsql-number-processes.md
+const OSM2PGSQL_DEFAULT_NUMBER_PROCESSES = 4
+const osm2pgsqlNumberProcessesSchema = z.coerce.number().default(OSM2PGSQL_DEFAULT_NUMBER_PROCESSES)
+
 function parseParameters() {
   return {
     waitForFreshData: process.env.WAIT_FOR_FRESH_DATA === '1',
@@ -45,9 +49,11 @@ function parseParameters() {
       : [],
     processOnlyBbox: parseBbox(process.env.PROCESS_ONLY_BBOX),
     osm2pgsqlLogLevel: process.env.OSM2PGSQL_LOG_LEVEL || 'info',
-    osm2pgsqlNumberProcesses: process.env.OSM2PGSQL_NUMBER_PROCESSES
-      ? Number(process.env.OSM2PGSQL_NUMBER_PROCESSES) || undefined
-      : undefined,
+    osm2pgsqlNumberProcesses: osm2pgsqlNumberProcessesSchema.parse(
+      // Missing env → undefined → default 4. Compose may set the var to "" (key present, empty value);
+      // that is not undefined, and z.coerce.number() would parse "" as 0 — || undefined maps both to default.
+      process.env.OSM2PGSQL_NUMBER_PROCESSES || undefined,
+    ),
   }
 }
 
