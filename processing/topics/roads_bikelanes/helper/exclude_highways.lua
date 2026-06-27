@@ -103,7 +103,7 @@ local exclude_highways = {
     end
 
     return true
-  end
+  end,
 }
 
 return exclude_highways

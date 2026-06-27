@@ -1,4 +1,3 @@
-local CLONE = require('topics.helper.clones')
 local transform_construction_prefix = require('topics.roads_bikelanes.helper.transform_tags.transform_construction_prefix')
 local transform_cycleway_both_postfix = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_both_postfix')
 local transform_cycleway_opposite_schema = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_opposite_schema')
@@ -16,7 +15,7 @@ local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 ---@param object table
 function osm2pgsql.process_way(object)
   ---@type OsmTags
-  local object_tags = CLONE.structured_clone(object.tags)
+  local object_tags = object.tags
 
   transform_lifecycle_tags(object_tags)
   if EXIT.exit_processing(object_tags) then return end
