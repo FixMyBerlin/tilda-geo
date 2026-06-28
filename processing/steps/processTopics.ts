@@ -39,10 +39,6 @@ type ProfilePbfCacheEntry = {
 
 type ProfilePbfCache = Map<TagFilterProfile, ProfilePbfCacheEntry>
 
-type ProcessOnlyBboxCache = {
-  source?: TagFilterSource
-}
-
 async function ensureProfileTaggedPbf(
   profile: TagFilterProfile,
   source: TagFilterSource,
@@ -62,42 +58,10 @@ async function ensureProfileTaggedPbf(
   return entry
 }
 
-async function ensureProcessOnlyBboxSource(
-  sourceFileName: string,
-  sourceFileChanged: boolean,
-  cache: ProcessOnlyBboxCache,
-) {
-  if (cache.source) return cache.source
-  if (!params.processOnlyBbox) {
-    return {
-      fileName: sourceFileName,
-      changed: sourceFileChanged,
-      inputFromDownload: true,
-    } satisfies TagFilterSource
-  }
-
-  // PROCESS_ONLY_BBOX is a dev shortcut: create one bbox source from the original download,
-  // then build the requested topic profiles from that bounded input.
-  const fileName = 'process_only_bbox.osm.pbf'
-  const regenerated = await bboxesFilter(
-    sourceFileName,
-    fileName,
-    [params.processOnlyBbox],
-    sourceFileChanged,
-    {
-      inputFromDownload: true,
-    },
-  )
-  cache.source = {
-    fileName,
-    changed: sourceFileChanged || regenerated,
-    inputFromDownload: false,
-  }
-  return cache.source
-}
-
 /**
  * Resolve the osm2pgsql input PBF for a topic (profile tag-filter, optional bbox extract).
+ * Tag-filter runs on the full download first, then bbox extract — same order as the former
+ * monolithic filter → bbox pipeline so topology inside the clip stays equivalent.
  */
 async function resolveTopicInputFile(
   topic: Topic,
@@ -105,51 +69,39 @@ async function resolveTopicInputFile(
   sourceFileName: string,
   sourceFileChanged: boolean,
   profileCache: ProfilePbfCache,
-  processOnlyBboxCache: ProcessOnlyBboxCache,
   useGlobalBboxFilter: boolean,
 ) {
-  if (entry.bboxes && !useGlobalBboxFilter) {
-    // Topic bboxes are applied before tag filters so bbox-limited topics never scan full-DE
-    // profile inputs.
-    const bboxFileName = `${topic}_bbox.osm.pbf`
-    const extractedFileName = `${topic}_extracted.osm.pbf`
-    const bboxRegenerated = await bboxesFilter(
-      sourceFileName,
-      bboxFileName,
-      entry.bboxes,
-      sourceFileChanged,
-      {
-        inputFromDownload: true,
-      },
-    )
-    const { fileName } = await tagFilterForProfile({
-      profile: entry.tagFilterProfile,
-      source: {
-        fileName: bboxFileName,
-        changed: sourceFileChanged || bboxRegenerated,
-        inputFromDownload: false,
-      },
-      outputFileName: extractedFileName,
-    })
-    return fileName
-  }
-
-  const source = useGlobalBboxFilter
-    ? await ensureProcessOnlyBboxSource(sourceFileName, sourceFileChanged, processOnlyBboxCache)
-    : ({
-        fileName: sourceFileName,
-        changed: sourceFileChanged,
-        inputFromDownload: true,
-      } satisfies TagFilterSource)
-  const outputFileName = useGlobalBboxFilter
-    ? `${entry.tagFilterProfile}_bbox_extracted.osm.pbf`
-    : undefined
   const profilePbf = await ensureProfileTaggedPbf(
     entry.tagFilterProfile,
-    source,
+    {
+      fileName: sourceFileName,
+      changed: sourceFileChanged,
+      inputFromDownload: true,
+    },
     profileCache,
-    outputFileName,
   )
+
+  const bboxSourceChanged = sourceFileChanged || profilePbf.regenerated
+
+  if (entry.bboxes && !useGlobalBboxFilter) {
+    const extractedFileName = `${topic}_extracted.osm.pbf`
+    await bboxesFilter(profilePbf.fileName, extractedFileName, entry.bboxes, bboxSourceChanged, {
+      inputFromDownload: false,
+    })
+    return extractedFileName
+  }
+
+  if (useGlobalBboxFilter && params.processOnlyBbox) {
+    const outputFileName = `${entry.tagFilterProfile}_bbox_extracted.osm.pbf`
+    await bboxesFilter(
+      profilePbf.fileName,
+      outputFileName,
+      [params.processOnlyBbox],
+      bboxSourceChanged,
+      { inputFromDownload: false },
+    )
+    return outputFileName
+  }
 
   return profilePbf.fileName
 }
@@ -239,7 +191,6 @@ export async function processTopics(
   const ranTopics = new Set<Topic>()
   const topicTimings: ProcessingTopicsMeta = {}
   const profilePbfCache: ProfilePbfCache = new Map()
-  const processOnlyBboxCache: ProcessOnlyBboxCache = {}
 
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
@@ -312,7 +263,6 @@ export async function processTopics(
       sourceFileName,
       fileChanged,
       profilePbfCache,
-      processOnlyBboxCache,
       useGlobalBboxFilter,
     )
 

@@ -54,7 +54,7 @@ const config = [
     id: 'parking',
     bboxes: [bboxBerlin, bboxBiBi],
     schedule: 'nightly',
-    tagFilterProfile: 'parking',
+    tagFilterProfile: 'monolithicUnion',
   },
 ] as const satisfies readonly TopicConfigEntry[]
 

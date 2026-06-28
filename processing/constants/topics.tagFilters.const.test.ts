@@ -7,10 +7,10 @@ import { tagFilterProfiles } from './topics.tagFilters.const'
 const processingRoot = join(import.meta.dir, '..')
 
 const parkingOffStreetBuildingExpressions = [
-  'w/building=carport',
-  'w/building=garage',
-  'w/building=garages',
-  'w/building=parking',
+  'wr/building=carport',
+  'wr/building=garage',
+  'wr/building=garages',
+  'wr/building=parking',
 ] as const
 
 function expressionObjectScopes(expressions: readonly string[]) {
@@ -90,6 +90,34 @@ describe('topics.tagFilters.const', () => {
     }
   })
 
+  it('monolithicUnion matches the former filter-expressions.txt snapshot', () => {
+    const legacyPath = join(processingRoot, 'filter/osmiumTagFilter/filter-expressions.legacy.txt')
+    const legacySource = readFileSync(legacyPath, 'utf8')
+    const legacyExpressions = legacySource
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0 && !line.startsWith('#'))
+
+    expect([...tagFilterProfiles.monolithicUnion]).toEqual(legacyExpressions)
+  })
+
+  it('parking uses monolithicUnion profile', () => {
+    expect(topicsConfig.get('parking')?.tagFilterProfile).toBe('monolithicUnion')
+  })
+
+  it('parking profile keeps broad obstacle keys and covers public transport imports', () => {
+    expect(tagFilterProfiles.parking).toContain('nwr/amenity')
+    expect(tagFilterProfiles.parking).toContain('nw/barrier')
+    expect(tagFilterProfiles.parking).toContain('nw/leisure')
+    expect(tagFilterProfiles.parking).toContain('nw/man_made')
+    expect(tagFilterProfiles.parking).toContain('nw/natural')
+    expect(tagFilterProfiles.parking).toContain('nw/outdoor_seating')
+    expect(tagFilterProfiles.parking).toContain('nw/landuse')
+    expect(tagFilterProfiles.parking).toContain('nw/public_transport')
+    expect(tagFilterProfiles.parking).toContain('nw/railway')
+    expect(tagFilterProfiles.parking).toContain('n/traffic_sign*')
+  })
+
   it('parking off-street building expressions stay in sync with parking Lua', () => {
     const sanitizePath = join(processingRoot, 'topics/parking/helper/sanitize_parking_tags.lua')
     const categoriesPath = join(
@@ -101,7 +129,7 @@ describe('topics.tagFilters.const', () => {
 
     for (const expression of parkingOffStreetBuildingExpressions) {
       expect(tagFilterProfiles.parking, expression).toContain(expression)
-      const buildingValue = expression.replace('w/building=', '')
+      const buildingValue = expression.replace('wr/building=', '')
       expect(categoriesSource, `categories missing building ${buildingValue}`).toContain(
         `'${buildingValue}'`,
       )

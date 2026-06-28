@@ -2,7 +2,7 @@
 // Keep filters broad by default; use value filters where a topic's Lua only accepts known values.
 // Per-topic osmium tag-filter profiles (see topics.const.ts → tagFilterProfile).
 
-export const tagFilterProfiles = {
+const topicTagFilterProfiles = {
   // roads_bikelanes + trafficSigns (sign nodes need n/traffic_sign*; ways need w/highway).
   roadsBikelanes: ['w/highway', 'n/traffic_sign*'],
   barriers: [
@@ -14,39 +14,41 @@ export const tagFilterProfiles = {
     'wr/aeroway',
   ],
   landcover: ['wr/landuse', 'wr/building', 'wr/leisure'],
+  // Documented parking-minimum expressions (parking topic uses monolithicUnion for identical inputs).
   parking: [
-    // amenity=* used by parking Lua — not all amenities in the bbox (see obstacle_point_categories, two_wheel_parking_helper, off_street_parking_*).
-    'nw/amenity=parking,parking_entrance,bicycle_parking,motorcycle_parking,small_electric_vehicle_parking,bicycle_rental,mobility_hub,loading_ramp,recycling,vending_machine',
+    'nwr/amenity',
     'nw/area:highway',
-    // obstacle_line_categories.lua + obstacle_point_categories.lua
-    'nw/barrier=kerb,bollard,fence,collision_protection',
+    'nw/barrier',
     'nw/bicycle_parking:position',
     'nw/bicycle_rental:position',
-    'nw/small_electric_vehicle_parking:position',
     'nw/crossing',
     'nw/crossing_ref',
     'nw/crossing:buffer_marking',
     'nw/crossing:kerb_extension',
     'nw/crossing:markings',
+    'nw/emergency',
     'nw/highway',
-    // obstacle_area_categories.lua (parklet)
-    'nw/leisure=parklet,outdoor_seating',
-    // obstacle_point_categories.lua
-    'nw/man_made=street_cabinet,water_well',
+    'nw/landuse',
+    'wr/landuse',
+    'nw/leisure',
+    'nw/man_made',
     'nw/mobility_hub:position',
     'nw/motorcycle_parking:position',
-    // obstacle_point_categories.lua (trees as parking obstacles)
-    'nw/natural=tree,tree_stump',
-    'nw/outdoor_seating=parklet',
+    'nw/natural',
+    'nw/outdoor_seating',
     'nw/position',
+    'nw/public_transport',
+    'nw/railway',
     'nw/road_marking',
+    'nw/small_electric_vehicle_parking:position',
+    'n/traffic_sign*',
     'nwr/obstacle:parking=yes',
     // Off-street parking areas from building=* — keep in sync with sanitize_parking_tags.lua
     // (parking_off_street) and off_street_parking_area_categories.lua.
-    'w/building=carport',
-    'w/building=garage',
-    'w/building=garages',
-    'w/building=parking',
+    'wr/building=carport',
+    'wr/building=garage',
+    'wr/building=garages',
+    'wr/building=parking',
     'w/kerb',
     'w/parking',
     'w/traffic_calming',
@@ -68,6 +70,62 @@ export const tagFilterProfiles = {
     'nwr/leisure',
     'nw/tourism',
   ],
+} as const satisfies Record<string, readonly string[]>
+
+// Exact former filter-expressions.txt union (pre per-topic split). Parking still needs this
+// breadth — a computed union of narrower topic profiles is not equivalent.
+export const legacyMonolithicExpressions = [
+  'r/boundary',
+  'nwr/amenity',
+  'nwr/shop',
+  'nwr/place',
+  'wr/landuse',
+  'wr/building',
+  'wr/leisure',
+  'w/railway',
+  'w/waterway',
+  'w/highway',
+  'wr/natural',
+  'wr/aeroway',
+  'w/public_transport',
+  'n/public_transport',
+  'nw/tourism',
+  'n/traffic_sign*',
+  'r/route',
+  'nw/amenity',
+  'nw/area:highway',
+  'nw/barrier',
+  'nw/bicycle_parking:position',
+  'nw/bicycle_rental:position',
+  'nw/crossing',
+  'nw/crossing_ref',
+  'nw/crossing:buffer_marking',
+  'nw/crossing:kerb_extension',
+  'nw/crossing:markings',
+  'nw/highway',
+  'nw/leisure',
+  'nw/man_made',
+  'nw/mobility_hub:position',
+  'nw/motorcycle_parking:position',
+  'nw/natural',
+  'nw/outdoor_seating',
+  'nw/position',
+  'nw/road_marking',
+  'nw/small_electric_vehicle_parking:position',
+  'nwr/obstacle:parking=yes',
+  'w/amenity=parking',
+  'w/building=carport',
+  'w/building=garage',
+  'w/building=garages',
+  'w/building=parking',
+  'w/kerb',
+  'w/parking',
+  'w/traffic_calming',
+] as const
+
+export const tagFilterProfiles = {
+  ...topicTagFilterProfiles,
+  monolithicUnion: legacyMonolithicExpressions,
 } as const satisfies Record<string, readonly string[]>
 
 export type TagFilterProfile = keyof typeof tagFilterProfiles

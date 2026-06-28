@@ -17,7 +17,7 @@ See [`index.ts`](./index.ts) for more.
 
 ### Tag-filter profiles
 
-OSM tag filters are split into profiles in [`constants/topics.tagFilters.const.ts`](./constants/topics.tagFilters.const.ts): `relations` (boundary + bike route relations), `features` (POI/place/public transport/tourism/leisure), `roadsBikelanes`, `barriers`, `landcover` (weekend), `parking` (bbox-limited). Each topic picks a profile in [`constants/topics.const.ts`](./constants/topics.const.ts). Filters run lazily per topic inside [`processTopics`](./steps/processTopics.ts); parking bbox-extracts the original download first, then applies its tag filter.
+OSM tag filters are split into profiles in [`constants/topics.tagFilters.const.ts`](./constants/topics.tagFilters.const.ts): `relations` (boundary + bike route relations), `features` (POI/place/public transport/tourism/leisure), `roadsBikelanes`, `barriers`, `landcover` (weekend), `parking` (bbox-limited). Each topic picks a profile in [`constants/topics.const.ts`](./constants/topics.const.ts). Filters run lazily per topic inside [`processTopics`](./steps/processTopics.ts); each profile tag-filters the full download first, then optional bbox extract (parking: Berlin + BiBi).
 
 ## Freshness
 
