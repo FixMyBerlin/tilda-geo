@@ -2,6 +2,7 @@ import { runAfterthoughts } from './steps/afterthoughts'
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
 import { triggerPrivateApi } from './steps/externalTriggers'
+import { globalBboxFilter, tagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
@@ -22,11 +23,22 @@ async function main() {
 
     logPadded('Processing: Download', berlinTimeString(new Date()))
     await waitForFreshData()
-    const { fileName: sourceFileName, fileChanged } = await downloadFile()
+    let { fileName, fileChanged } = await downloadFile()
+    const sourceFileName = fileName
 
-    logPadded('Processing: Topics', berlinTimeString(new Date()))
+    logPadded('Processing: Filter', berlinTimeString(new Date()))
+    // tagFilter regenerates filtered file if needed, but only returns sourceFileChanged
+    // (filter regeneration doesn't affect diffing logic)
+    const tagFilterResponse = await tagFilter(fileName, fileChanged)
+    if (tagFilterResponse) ({ fileName, fileChanged } = tagFilterResponse)
+
+    // globalBboxFilter regenerates filtered file when active, but only returns sourceFileChanged
+    // (filter regeneration doesn't affect diffing logic - filtered data can still be diffed)
+    const globalBboxFilterResponse = await globalBboxFilter(fileName, fileChanged)
+    if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
+
     const processingStartTime = Date.now()
-    const ranTopics = await processTopics(sourceFileName, fileChanged, processingId)
+    const ranTopics = await processTopics(fileName, fileChanged, processingId)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
 

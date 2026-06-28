@@ -73,7 +73,7 @@ local SANITIZE_PARKING_TAGS = {
     end
 
     if tags.building then
-      -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and topics.tagFilters.const.ts (parking profile)
+      -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and filter-expressions.txt
       local building_to_parking = {
         parking = 'multi-storey',
         garage = 'garage',

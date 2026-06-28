@@ -12,10 +12,6 @@
 //             requested (PROCESS_ONLY_TOPICS=<id>). Use 'weekend' for heavy, rarely-changing
 //             datasets (landcover, buildings, settlement-area source) so they stay out of the
 //             nightly critical path; the extra hours are fine on a weekend.
-// - tagFilterProfile: which osmium tag-filter profile supplies the topic's input PBF
-//             (see topics.tagFilters.const.ts).
-
-import type { TagFilterProfile } from './topics.tagFilters.const'
 
 export type TopicConfigBbox = [number, number, number, number]
 
@@ -25,37 +21,26 @@ export type TopicConfigEntry = {
   id: string
   bboxes: readonly TopicConfigBbox[] | null
   schedule: TopicSchedule
-  tagFilterProfile: TagFilterProfile
 }
 
 const bboxBerlin: TopicConfigBbox = [13.08283, 52.33446, 13.762245, 52.6783]
 const bboxBiBi: TopicConfigBbox = [9.0671, 48.9229, 9.1753, 48.9838]
 
 const config = [
-  { id: 'roads_bikelanes', bboxes: null, schedule: 'nightly', tagFilterProfile: 'roadsBikelanes' },
-  { id: 'bikeroutes', bboxes: null, schedule: 'nightly', tagFilterProfile: 'relations' },
-  { id: 'bicycleParking', bboxes: null, schedule: 'nightly', tagFilterProfile: 'features' },
-  { id: 'trafficSigns', bboxes: null, schedule: 'nightly', tagFilterProfile: 'roadsBikelanes' },
-  { id: 'boundaries', bboxes: null, schedule: 'nightly', tagFilterProfile: 'relations' },
-  { id: 'places', bboxes: null, schedule: 'nightly', tagFilterProfile: 'features' },
-  { id: 'publicTransport', bboxes: null, schedule: 'nightly', tagFilterProfile: 'features' },
-  { id: 'poiClassification', bboxes: null, schedule: 'nightly', tagFilterProfile: 'features' },
-  { id: 'barriers', bboxes: null, schedule: 'nightly', tagFilterProfile: 'barriers' },
+  { id: 'roads_bikelanes', bboxes: null, schedule: 'nightly' },
+  { id: 'bikeroutes', bboxes: null, schedule: 'nightly' },
+  { id: 'bicycleParking', bboxes: null, schedule: 'nightly' },
+  { id: 'trafficSigns', bboxes: null, schedule: 'nightly' },
+  { id: 'boundaries', bboxes: null, schedule: 'nightly' },
+  { id: 'places', bboxes: null, schedule: 'nightly' },
+  { id: 'publicTransport', bboxes: null, schedule: 'nightly' },
+  { id: 'poiClassification', bboxes: null, schedule: 'nightly' },
+  { id: 'barriers', bboxes: null, schedule: 'nightly' },
   // Weekend (~weekly): produces the `landuse` display table, the settlement-area source
   // (dissolved into public._settlement_areas by landcover.sql) and `_buildings`. Also runnable on
   // demand with PROCESS_ONLY_TOPICS=landcover.
-  {
-    id: 'landcover',
-    bboxes: null,
-    schedule: 'weekend',
-    tagFilterProfile: 'landcover',
-  },
-  {
-    id: 'parking',
-    bboxes: [bboxBerlin, bboxBiBi],
-    schedule: 'nightly',
-    tagFilterProfile: 'monolithicUnion',
-  },
+  { id: 'landcover', bboxes: null, schedule: 'weekend' },
+  { id: 'parking', bboxes: [bboxBerlin, bboxBiBi], schedule: 'nightly' },
 ] as const satisfies readonly TopicConfigEntry[]
 
 export type Topic = (typeof config)[number]['id']

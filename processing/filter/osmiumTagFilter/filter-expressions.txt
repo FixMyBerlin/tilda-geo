@@ -1,24 +1,43 @@
-# Snapshot of the monolithic osmium tags-filter list removed in 0f53a2b4d.
-# Kept for tests — parking topic still uses this exact union via monolithicUnion profile.
+# Filter .osm file down to only what we need.
+# Keep those filters broad (keys only); use the LUA file per topic to further filter the data
 # Docs: https://docs.osmcode.org/osmium/latest/osmium-tags-filter.html
 
+# Topic: Boundaries
 r/boundary
+
+# Topic: POI Shops
 nwr/amenity
 nwr/shop
+
+# Topic: Citycenter
 nwr/place
+
+# Topic: landcover
 wr/landuse
 wr/building
 wr/leisure
+
+# Topic: Barriers
 w/railway
 w/waterway
 w/highway
 wr/natural
 wr/aeroway
+
+# Topic: Public transport
 w/public_transport
 n/public_transport
+
+# Topic: poiClassification
 nw/tourism
+
+# Topic: Traffic signs
 n/traffic_sign*
+
+# Topic: Bicycle routes
 r/route
+
+# Topic: parking
 nw/amenity
 nw/area:highway
 nw/barrier
@@ -41,6 +60,7 @@ nw/road_marking
 nw/small_electric_vehicle_parking:position
 nwr/obstacle:parking=yes
 w/amenity=parking
+# CRITICAL: Keep `building` values in sync with sanitize_parking_tags.lua (parking_off_street) and off_street_parking_area_categories.lua: garage, garages, carport, parking
 w/building=carport
 w/building=garage
 w/building=garages

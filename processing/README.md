@@ -15,10 +15,6 @@ The data is selected and optimized to make planning of bicycle infrastructure ea
 We use Bun and [Bun Shell](https://bun.sh/docs/runtime/shell) to orchestrate the commands needed to fetch, filter, process and post-process the data and trigger post-processing hooks.
 See [`index.ts`](./index.ts) for more.
 
-### Tag-filter profiles
-
-OSM tag filters are split into profiles in [`constants/topics.tagFilters.const.ts`](./constants/topics.tagFilters.const.ts): `relations` (boundary + bike route relations), `features` (POI/place/public transport/tourism/leisure), `roadsBikelanes`, `barriers`, `landcover` (weekend), `parking` (bbox-limited). Each topic picks a profile in [`constants/topics.const.ts`](./constants/topics.const.ts). Filters run lazily per topic inside [`processTopics`](./steps/processTopics.ts); each profile tag-filters the full download first, then optional bbox extract (parking: Berlin + BiBi).
-
 ## Freshness
 
 ### Freshness of source data
@@ -121,6 +117,8 @@ To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `P
 Per-run vars (`PROCESS_ONLY_TOPICS`, `PROCESS_ONLY_BBOX`, `OSM2PGSQL_*`, `WAIT_FOR_FRESH_DATA`, `SKIP_WARM_CACHE`) are for **local dev** only — set them via `bun run processing-generate-command` (inline env on the printed one-liner). Server baseline config comes from the deploy manifest ([`.github/env/deploy.manifest.json`](../.github/env/deploy.manifest.json)) which generates `/srv/.env`; per-run overrides are passed inline on the `docker compose up` command (see the CI workflows), not edited into `/srv/.env` by hand.
 
 `OSM2PGSQL_NUMBER_PROCESSES` defaults to **4** on staging and production (benchmarked 2026-06-26). See [`docs/osm2pgsql-number-processes.md`](docs/osm2pgsql-number-processes.md).
+
+Per-topic osmium tag-filter profiles were tried and reverted (2026-06-28) — see [`docs/per-topic-osmium-tag-filter.md`](docs/per-topic-osmium-tag-filter.md) before changing filter architecture.
 
 - Use `PROCESS_ONLY_TOPICS=parking` to only run the "parking" topic.
   Format: "topic1,topic2".

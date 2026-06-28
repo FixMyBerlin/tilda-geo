@@ -37,7 +37,6 @@ local function exit_processing_barrier_lines(object)
   end
 
   local is_barrier = HIGHWAYS.trunk_motorway_classes[tags.highway]
-  -- REMINDER: trunk/motorway filter values — keep in sync with topics.tagFilters.const.ts (barriers profile)
   -- waterways as lines are used for low zoom levels
   is_barrier = is_barrier or water_barriers[tags.waterway]
   if tags.railway == 'rail' or tags.railway == 'light_rail' then

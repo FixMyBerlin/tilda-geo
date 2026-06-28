@@ -14,8 +14,9 @@ export const OSM_FILTERED_DIR = '/data/filtered'
 export const HASH_DIR = '/data/hashes'
 
 /**
- * The path to the directory containing the OSMIUM bbox filter (generated geojson).
+ * The path to the directory containing the OSMIUM filter.
  */
+export const OSMIUM_FILTER_EXPRESSIONS_DIR = '/processing/filter/osmiumTagFilter'
 export const OSMIUM_FILTER_BBOX_DIR = '/processing/filter/osmiumBboxFilter'
 
 /**
@@ -32,6 +33,11 @@ export const CONSTANTS_DIR = '/processing/constants'
  * The path to the directory containing dataTable information.
  */
 export const DATA_TABLE_DIR = '/processing/dataTables'
+
+/**
+ * The file name for the globally bbox filtered OSM file.
+ */
+export const BBOX_FILTERED_FILE = `bbox_extracted.osm.pbf`
 
 /**
  * The path to save auto generated types to.
