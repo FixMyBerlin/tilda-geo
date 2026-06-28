@@ -14,6 +14,8 @@ local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 
 ---@param object table
 function osm2pgsql.process_way(object)
+  if not object.tags.highway then return end
+
   ---@type OsmTags
   local object_tags = object.tags
 
