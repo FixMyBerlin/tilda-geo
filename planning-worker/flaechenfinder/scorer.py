@@ -248,27 +248,43 @@ def run_flaechenfinder(
         lambda d: min(100.0, d / 10 * 100) if d >= use_case.min_clearance_m else 0.0
     )
 
-    # Vegetations-Teilscore: Vorzeichen über vegetation_direction gesteuert.
-    #   "positive" → mehr Grün = besser; "negative" → mehr Grün = schlechter.
-    # Nur wenn der Faktor gewichtet ist; sonst NaN (→ DB NULL, Sidebar zeigt „–"),
-    # da die Coverage dann gar nicht berechnet wurde.
-    if w.get("w_vegetation", 0):
-        cov = hex_proj["vegetation_coverage_pct"]
-        hex_proj["score_vegetation"] = (
-            cov if use_case.vegetation_direction == "positive" else 100.0 - cov
-        )
-    else:
-        hex_proj["score_vegetation"] = np.nan
-
-    hex_proj["mce_gesamtscore"] = (
+    # ── Basis-Score: gewichtete Summe der sechs positiven Faktoren ─────────
+    # Vegetation ist KEIN additiver Faktor mehr, sondern ein separater Abzug
+    # (bzw. Bonus) weiter unten – sonst könnte die Summe der Gewichte 100
+    # übersteigen.
+    base_score = (
         hex_proj["score_radweg"]            * w.get("w_cyclepath", 0) +
         hex_proj["score_bodenbelag"]        * w.get("w_surface",   0) +
         hex_proj["score_zielorte"]          * w.get("w_target",    0) +
         hex_proj["score_hangneigung"]       * w.get("w_slope",     0) +
         hex_proj["score_hindernisfreiheit"] * w.get("w_clearance", 0) +
-        hex_proj["score_oepnv"]             * w.get("w_transit",   0) +
-        hex_proj["score_vegetation"].fillna(0) * w.get("w_vegetation", 0)
-    ).round(1)
+        hex_proj["score_oepnv"]             * w.get("w_transit",   0)
+    )
+
+    # ── Vegetations-Effekt: stufenloser Abzug bzw. Bonus ───────────────────
+    # `w_vegetation` (0–1) ist der maximale Effekt in Punkten (× 100). Unter der
+    # Toleranzschwelle bleibt der Effekt 0, darüber steigt er linear bis zum
+    # Maximum bei 100 % Bedeckung.
+    #   direction "negative" (Grün schützen)   → Abzug
+    #   direction "positive" (Grün bevorzugen) → Bonus
+    # `score_vegetation` hält den tatsächlich angewandten Effekt in Punkten
+    # (0 .. w_vegetation*100); ohne Gewicht NaN (→ DB NULL, Sidebar zeigt „–"),
+    # da die Coverage dann gar nicht berechnet wurde.
+    w_veg = w.get("w_vegetation", 0) or 0
+    if w_veg > 0:
+        thr = use_case.vegetation_penalty_threshold_pct
+        span = max(1.0, 100.0 - thr)
+        ramp = ((hex_proj["vegetation_coverage_pct"] - thr) / span).clip(0.0, 1.0)
+        veg_effect = (w_veg * 100.0) * ramp
+        hex_proj["score_vegetation"] = veg_effect.round(1)
+        sign = 1.0 if use_case.vegetation_direction == "positive" else -1.0
+        total = base_score + sign * veg_effect
+    else:
+        hex_proj["score_vegetation"] = np.nan
+        total = base_score
+
+    # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
+    hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
 
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |

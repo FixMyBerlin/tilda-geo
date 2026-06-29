@@ -131,7 +131,9 @@ export const FactorEditorPanel = ({
           <div>
             <div className="mb-1 font-semibold">Vegetation (NDVI)</div>
             <p className="mb-1.5 text-xs text-gray-500">
-              Richtung des Vegetations-Scores. Greift nur bei Gewicht „Vegetation“ &gt; 0.
+              „Grün schützen“ zieht je nach Bedeckungsgrad Punkte ab (Gesamtscore nie unter 0),
+              „Grün bevorzugen“ vergibt Bonuspunkte. Das Gewicht „Vegetation“ ist der maximale
+              Effekt in Punkten; bei 0 ohne Wirkung.
             </p>
             <div className="flex gap-1.5">
               {(

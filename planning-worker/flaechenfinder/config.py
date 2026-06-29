@@ -20,10 +20,17 @@ class UseCaseConfig:
     dgm1_path: Optional[str] = None
     tilda_path: Optional[str] = None
 
-    # Vegetations-Faktor (NDVI). Richtung bestimmt das Vorzeichen des Teilscores:
-    #   "negative" → mehr Grün = schlechter (Grünflächen schützen) [Default]
-    #   "positive" → mehr Grün = besser (Bebauung auf Grün erwünscht)
+    # Vegetations-Faktor (NDVI). Richtung bestimmt das Vorzeichen des Effekts:
+    #   "negative" → mehr Grün = Punktabzug (Grünflächen schützen) [Default]
+    #   "positive" → mehr Grün = Punktbonus (Bebauung auf Grün erwünscht)
+    # Der Effekt ist kein additiver Teilscore mehr, sondern ein stufenloser
+    # Abzug/Bonus auf den Basis-Score (siehe scorer.py); der Gesamtscore wird
+    # anschließend auf [0, 100] begrenzt.
     vegetation_direction: str = "negative"
+
+    # Toleranzschwelle in % Bedeckung: darunter kein Vegetations-Effekt (kleine
+    # Grünreste/Randpixel ignorieren), darüber linearer Anstieg bis 100 %.
+    vegetation_penalty_threshold_pct: float = 20.0
 
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 150.0     # weiter weg → Score 0
@@ -79,6 +86,9 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         dem_source=cfg.get("dem_source", "srtm"),
         dgm1_path=cfg.get("dgm1_path"),
         vegetation_direction=cfg.get("vegetation_direction", "negative"),
+        vegetation_penalty_threshold_pct=float(
+            cfg.get("vegetation_penalty_threshold_pct", 20.0)
+        ),
         max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 150.0)),
         min_clearance_m=float(cfg.get("min_clearance_m", 2.0)),
         min_surface_score=float(cfg.get("min_surface_score", 30.0)),

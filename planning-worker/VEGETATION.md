@@ -41,12 +41,20 @@ Eine Kachel ist ~90 MB – der erste Lauf eines größeren Gebiets lädt entspre
 
 ## Scoring-Integration
 
-- Gewicht `w_vegetation` und Richtung `vegetation_direction` im `factorConfig` des
-  Szenarios (siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
-- **Richtung** des Teilscores `score_vegetation` (0–100):
-  - `negative` (Default) → mehr Grün = schlechter (`100 − Bedeckungsgrad`), Grünflächen schützen.
-  - `positive` → mehr Grün = besser (`Bedeckungsgrad`).
-- Eingang in den Gesamtscore: `mce_gesamtscore += score_vegetation × w_vegetation`.
+- Gewicht `w_vegetation`, Richtung `vegetation_direction` und Toleranzschwelle
+  `vegetation_penalty_threshold_pct` im `factorConfig` des Szenarios
+  (siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
+- Vegetation ist **kein additiver Teilscore** mehr, sondern ein **stufenloser
+  Abzug/Bonus** auf den Basis-Score (gewichtete Summe der sechs übrigen Faktoren):
+  - **Rampe:** unter `vegetation_penalty_threshold_pct` % Bedeckung (Default 20 %)
+    kein Effekt; darüber linearer Anstieg bis zum Maximum bei 100 % Bedeckung.
+  - **Maximaler Effekt** in Punkten = `w_vegetation × 100` (z. B. `0.3` → bis ±30).
+  - **Richtung:** `negative` (Default) → Abzug (Grünflächen schützen);
+    `positive` → Bonus (Bebauung auf Grün erwünscht).
+  - **Gesamtscore:** `mce_gesamtscore = clamp(base ± Effekt, 0, 100)` – fällt also
+    **nie unter 0** und steigt nie über 100.
+- `score_vegetation` hält den **tatsächlich angewandten Effekt in Punkten**
+  (`0 … w_vegetation × 100`); kein additiver 0–100-Teilscore.
 - **Performance:** Der Bedeckungsgrad je Hexagon (Verschneidung Hexagone × Vegetation
   via Spatial-Join) wird **nur berechnet, wenn `w_vegetation > 0`**. Bei Gewicht 0 dient
   die Vegetation nur als Anzeige-Layer; `score_vegetation` ist dann `NULL`
