@@ -25,6 +25,13 @@ class TildaLoader:
             print(f"   ⚠️  Radweg-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_buildings(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        try:
+            return self._loader.load_buildings(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Gebäude-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     @staticmethod
     def score_cycleway_proximity(dist_m: float, max_dist_m: float) -> float:
         """0–100: < 20 m → 100, linear bis max_dist_m → 0, darüber 0."""

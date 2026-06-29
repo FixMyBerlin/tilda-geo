@@ -116,6 +116,18 @@ def run_flaechenfinder(
     hex_proj["abstand_hindernis_m"] = _dist_to_union(centroids, obstacles_proj)
     del obstacles, obstacles_proj
 
+    # Gebäude aus tilda DB: Hexagone mit Gebäudeüberschneidung werden hart ausgeschlossen.
+    buildings = tilda_loader.load_buildings(study_area_geom)
+    if len(buildings):
+        buildings_proj = buildings.to_crs("EPSG:25832")
+        hexes = hex_proj[["geometry"]].copy()
+        pairs = gpd.sjoin(hexes, buildings_proj[["geometry"]], how="inner", predicate="intersects")
+        hex_proj["gebaeude"] = hex_proj.index.isin(pairs.index)
+        del hexes, pairs, buildings_proj
+    else:
+        hex_proj["gebaeude"] = False
+    del buildings
+
     try:
         surfaces = osm_loader.features_from_polygon(study_area_geom, {"surface": True})
         if len(surfaces) and "surface" in surfaces.columns:
@@ -262,7 +274,8 @@ def run_flaechenfinder(
         (hex_proj["score_hangneigung"]       == 0) |
         (hex_proj["score_hindernisfreiheit"] == 0) |
         (hex_proj["score_bodenbelag"]        < use_case.min_surface_score) |
-        (hex_proj["abstand_radweg_m"]        > use_case.max_cyclepath_dist_m)
+        (hex_proj["abstand_radweg_m"]        > use_case.max_cyclepath_dist_m) |
+        hex_proj["gebaeude"]
     )
     hex_proj.loc[exclusion, "mce_gesamtscore"] = 0.0
 

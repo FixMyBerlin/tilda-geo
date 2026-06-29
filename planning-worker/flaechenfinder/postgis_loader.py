@@ -87,6 +87,24 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage public.{table} fehlgeschlagen: {e}")
             return _empty()
 
+    def load_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Gebäudepolygone aus `public._buildings` (EPSG:5243 → gibt EPSG:4326 zurück)."""
+        wkt = polygon_4326.wkt
+        sql = f"""
+            SELECT ST_Transform(geom, 4326) AS geom
+            FROM public."_buildings"
+            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Gebäude aus public._buildings")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage public._buildings fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """Radwege aus `public.bikelanes` (ersetzt den PBF-Pfad)."""
         gdf = self._read_table("bikelanes", polygon_4326)
