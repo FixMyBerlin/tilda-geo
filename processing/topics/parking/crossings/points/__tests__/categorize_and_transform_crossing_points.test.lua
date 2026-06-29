@@ -47,6 +47,51 @@ describe('`categorize_and_transform_crossing_points`', function()
     assert.are.equal(result.right.object.tags['crossing:kerb_extension'], 'right')
   end)
 
+  it('category matches crossing:continuous=yes on both sides', function()
+    local tags = {
+      ['crossing:continuous'] = 'yes',
+    }
+    local result = categorize_and_transform_crossing_points({ tags = tags })
+    assert.are.equal(result.self.category, nil)
+
+    assert.are.equal(type(result.left), 'table')
+    assert.are.equal(result.left.category.id, 'crossing_continuous')
+    assert.are.equal(result.left.category:get_buffer_radius(tags), 3)
+    assert.are.equal(result.left.object.tags.side, 'left')
+    assert.are.equal(result.left.object.tags['crossing:continuous'], 'yes')
+
+    assert.are.equal(type(result.right), 'table')
+    assert.are.equal(result.right.category.id, 'crossing_continuous')
+    assert.are.equal(result.right.category:get_buffer_radius(tags), 3)
+    assert.are.equal(result.right.object.tags.side, 'right')
+    assert.are.equal(result.right.object.tags['crossing:continuous'], 'yes')
+  end)
+
+  it('crossing:continuous=no does not match', function()
+    local tags = {
+      ['crossing:continuous'] = 'no',
+    }
+    local result = categorize_and_transform_crossing_points({ tags = tags })
+    assert.are.equal(result.self.category, nil)
+    assert.are.equal(result.left.category, nil)
+    assert.are.equal(result.right.category, nil)
+  end)
+
+  it('crossing:kerb_extension=left wins over crossing:continuous=yes on left side', function()
+    local tags = {
+      ['crossing:kerb_extension'] = 'left',
+      ['crossing:continuous'] = 'yes',
+    }
+    local result = categorize_and_transform_crossing_points({ tags = tags })
+    assert.are.equal(result.self.category, nil)
+
+    assert.are.equal(result.left.category.id, 'crossing_kerb_extension')
+    assert.are.equal(result.left.object.tags.side, 'left')
+
+    assert.are.equal(result.right.category.id, 'crossing_continuous')
+    assert.are.equal(result.right.object.tags.side, 'right')
+  end)
+
   it('category only matches for left|right|both values', function()
     local tags = {
       ['crossing:kerb_extension'] = 'unknown',

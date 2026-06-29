@@ -67,6 +67,7 @@ export const subcat_parkingTilda_street_cutout: FileMapDataSubcategory = {
             '`traffic_calming_choker`',
             '`crossing_traffic_signals`',
             '`crossing_kerb_extension`',
+            '`crossing_continuous`',
           ],
           style: { type: 'line', color: 'hsla(133, 65%, 35%, 0.73)', width: 5 },
         },

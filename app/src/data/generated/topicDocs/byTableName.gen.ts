@@ -5891,6 +5891,10 @@ const data = {
             label: 'Gehwegvorstreckung an Querungsstelle',
           },
           {
+            value: 'crossing_continuous',
+            label: 'Durchgängige Querung',
+          },
+          {
             value: 'crossing_marked',
             label: 'Markierte Querungsstelle',
           },
@@ -6264,6 +6268,13 @@ const data = {
         key: 'osm_crossing:kerb_extension',
         type: 'ignore',
         label: 'osm_crossing:kerb_extension',
+        purpose: 'experimentation',
+        values: [],
+      },
+      {
+        key: 'osm_crossing:continuous',
+        type: 'ignore',
+        label: 'osm_crossing:continuous',
         purpose: 'experimentation',
         values: [],
       },

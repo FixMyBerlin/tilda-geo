@@ -2317,6 +2317,7 @@ const data = {
           collision_protection: 'Baumschutzbügel',
           crossing_buffer_marking: 'Markierung (Sperrfläche u.ä.) an Querungsstelle',
           crossing_kerb_extension: 'Gehwegvorstreckung an Querungsstelle',
+          crossing_continuous: 'Durchgängige Querung',
           crossing_marked: 'Markierte Querungsstelle',
           crossing_traffic_signals: 'Ampelquerung',
           crossing_zebra: 'Fußgängerüberweg (Zebrastreifen)',
