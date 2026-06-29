@@ -1,7 +1,7 @@
 # Dev-only overrides. See docs/docker-local-development.md.
 services:
   processing:
-    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}processing
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}processing
     image: processing:latest
     build:
       context: .
@@ -30,7 +30,7 @@ services:
     mem_reservation: 2g
     cpus: "4"
   app:
-    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}app
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}app
     image: app:latest
     build:
       context: .
@@ -47,14 +47,14 @@ services:
     profiles:
       - frontend
   tiles:
-    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}tiles
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}tiles
     environment:
       DATABASE_HOST: db
       DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db/${DATABASE_NAME}
     logging:
       driver: json-file
   db:
-    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX}db
+    container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}db
     # Flags to increase debug levels
     # command: ["-c", "config_file=/postgresql/postgresql.conf", "-c", "log_statement=all", "-c", "log_min_duration_statement=100"]
     logging:
