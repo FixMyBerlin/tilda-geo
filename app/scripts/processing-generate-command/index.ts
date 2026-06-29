@@ -2,7 +2,9 @@
 import path from 'node:path'
 import { parseArgs, styleText } from 'node:util'
 import * as p from '@clack/prompts'
+import { area, bboxPolygon } from '@turf/turf'
 import { $ } from 'bun'
+import { topicsConfig } from '../../../processing/constants/topics.const'
 
 const BBOX_PRESETS = {
   bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
@@ -18,15 +20,64 @@ const BBOX_PRESETS = {
   'berlin-parking-bus-stop': '13.295719,52.49283,13.33790,52.514279',
 } as const satisfies Record<string, string>
 
-const DEFAULT_DIFF_BBOX = BBOX_PRESETS['berlin-full']
-const DEFAULT_ONLY_BBOX = BBOX_PRESETS.bussonderstreifen
-
 const DIFFING_MODES = ['off', 'previous', 'fixed', 'reference'] as const
 type DiffingMode = (typeof DIFFING_MODES)[number]
 
 const PRESET_SLUGS_FOR_HELP = [...new Set(Object.keys(BBOX_PRESETS))].sort() as string[]
 
 const CUSTOM_COORDS = '__custom__'
+const VIEWER_BASE = 'https://viewer.tilda-geo.de'
+
+function parseBboxCsv(csv: string) {
+  const parts = csv.split(',').map((s) => Number(s.trim()))
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return undefined
+  return parts as [number, number, number, number]
+}
+
+function normalizeBboxCsv(csv: string) {
+  const bbox = parseBboxCsv(csv)
+  if (!bbox) return undefined
+  return bbox.map((n) => n.toFixed(6)).join(',')
+}
+
+const DEFAULT_DIFF_BBOX = normalizeBboxCsv(BBOX_PRESETS['berlin-full'])!
+const DEFAULT_ONLY_BBOX = normalizeBboxCsv(BBOX_PRESETS.bussonderstreifen)!
+
+function bboxAreaSqm(csv: string) {
+  const bbox = parseBboxCsv(csv)
+  if (!bbox) return undefined
+  return area(bboxPolygon(bbox))
+}
+
+function formatAreaSqm(sqm: number) {
+  return `${Math.round(sqm).toLocaleString('en-US')} m²`
+}
+
+function viewerBboxUrl(coords: string) {
+  const normalized = normalizeBboxCsv(coords) ?? coords
+  return `${VIEWER_BASE}/?bbox=${normalized}`
+}
+
+function bboxHint(coords: string) {
+  const sqm = bboxAreaSqm(coords)
+  const areaPart = sqm !== undefined ? formatAreaSqm(sqm) : '?'
+  return `${areaPart} · ${viewerBboxUrl(coords)}`
+}
+
+function formatBboxSummaryLine(envKey: string, coords: string) {
+  const sqm = bboxAreaSqm(coords)
+  const areaPart = sqm !== undefined ? formatAreaSqm(sqm) : '?'
+  return `${envKey}: ${areaPart}\n${viewerBboxUrl(coords)}`
+}
+
+function buildBboxSummaryNote(onlyBbox: string, diffBbox: string, commandLine: string) {
+  const lines = [formatBboxSummaryLine('PROCESS_ONLY_BBOX', onlyBbox)]
+  if (diffBbox !== onlyBbox) {
+    lines.push('', formatBboxSummaryLine('PROCESSING_DIFFING_BBOX', diffBbox))
+  }
+  lines.push('', commandLine)
+  return lines.join('\n')
+}
 
 const ENV_ORDER_BEFORE_DIFF_MODE = [
   'PROCESSING_DIFFING_BBOX',
@@ -178,7 +229,16 @@ function resolvePreset(slug: string) {
     console.error(`Unknown --preset "${slug}". Use one of: ${PRESET_SLUGS_FOR_HELP.join(', ')}`)
     process.exit(1)
   }
-  return coords
+  return readBboxCsv(coords)
+}
+
+function readBboxCsv(csv: string) {
+  const normalized = normalizeBboxCsv(csv)
+  if (!normalized) {
+    console.error(`Invalid bbox coordinates: ${csv}`)
+    process.exit(1)
+  }
+  return normalized
 }
 
 function parseDiffMode(raw: string | undefined): DiffingMode {
@@ -262,6 +322,9 @@ async function finishInteractive(
   detach: boolean,
 ) {
   const line = formatShellOneLiner(repoRoot, overrides, detach)
+  const onlyBbox = overrides.PROCESS_ONLY_BBOX ?? ''
+  const diffBbox = overrides.PROCESSING_DIFFING_BBOX ?? ''
+  const noteBody = buildBboxSummaryNote(onlyBbox, diffBbox, line)
   const next = await p.select({
     message: 'What next?',
     options: [
@@ -275,10 +338,7 @@ async function finishInteractive(
     process.exit(0)
   }
   if (next === 'show') {
-    p.log.message(
-      'Copy the line below and press Enter (your cwd can stay in app/; compose runs from repo root):',
-    )
-    printHighlightedCommand(line)
+    p.note(noteBody, 'copy past this')
     p.outro('Done.')
     process.exit(0)
   }
@@ -290,11 +350,14 @@ async function finishInteractive(
 }
 
 function presetOptionsForSelect() {
-  return PRESET_SLUGS_FOR_HELP.map((slug) => ({
-    value: slug,
-    label: slug,
-    hint: BBOX_PRESETS[slug as keyof typeof BBOX_PRESETS],
-  }))
+  return PRESET_SLUGS_FOR_HELP.map((slug) => {
+    const coords = BBOX_PRESETS[slug as keyof typeof BBOX_PRESETS]
+    return {
+      value: slug,
+      label: slug,
+      hint: bboxHint(coords),
+    }
+  })
 }
 
 async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PRESETS) {
@@ -308,10 +371,20 @@ async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PR
   })
   if (p.isCancel(choice)) return undefined
   if (choice === CUSTOM_COORDS) {
+    const seedCoords = BBOX_PRESETS[defaultSlug]
+    p.note(
+      [
+        'Preview/adjust bbox in the viewer:',
+        viewerBboxUrl(seedCoords),
+        '',
+        'Change the bbox on the map, then copy the bbox string from the viewer',
+        '(e.g. 12.5910,52.4017,14.0000,52.4915) and paste it below.',
+      ].join('\n'),
+      'Custom bbox',
+    )
     const raw = await p.text({
       message: 'Coordinates (MINLON,MINLAT,MAXLON,MAXLAT)',
-      initialValue: BBOX_PRESETS[defaultSlug],
-      placeholder: BBOX_PRESETS[defaultSlug],
+      placeholder: '12.5910,52.4017,14.0000,52.4915',
     })
     if (p.isCancel(raw)) return undefined
     const t = raw.trim()
@@ -319,9 +392,18 @@ async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PR
       p.log.error('Coordinates cannot be empty.')
       return undefined
     }
-    return t
+    const normalized = normalizeBboxCsv(t)
+    if (!normalized) {
+      p.log.error('Invalid coordinates. Use MINLON,MINLAT,MAXLON,MAXLAT with four numbers.')
+      return undefined
+    }
+    const sqm = bboxAreaSqm(normalized)
+    if (sqm !== undefined) {
+      p.log.message(`${formatAreaSqm(sqm)} · ${viewerBboxUrl(normalized)}`)
+    }
+    return normalized
   }
-  return BBOX_PRESETS[choice as keyof typeof BBOX_PRESETS]
+  return readBboxCsv(BBOX_PRESETS[choice as keyof typeof BBOX_PRESETS])
 }
 
 async function selectBinaryFlag(message: string, initial: '0' | '1', when1: string, when0: string) {
@@ -389,12 +471,20 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   })
   if (p.isCancel(diffModeRaw)) return undefined
 
-  const topicsRaw = await p.text({
-    message: 'Limit topics (PROCESS_ONLY_TOPICS)',
-    initialValue: '',
-    placeholder: 'empty = all — e.g. trafficSigns,parking',
+  const topicOptions = [...topicsConfig.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([id, entry]) => ({
+      value: id,
+      label: id,
+      hint: entry.schedule,
+    }))
+  const topicsSelected = await p.multiselect({
+    message: 'Limit topics (PROCESS_ONLY_TOPICS) — empty = all',
+    options: topicOptions,
+    required: false,
   })
-  if (p.isCancel(topicsRaw)) return undefined
+  if (p.isCancel(topicsSelected)) return undefined
+  const topicsRaw = Array.isArray(topicsSelected) ? topicsSelected.join(',') : ''
 
   const skipDownload = await binaryFromCliOrPrompt(
     '--skip-download',
@@ -445,7 +535,7 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
       },
       { value: 'detach', label: 'Detached — docker compose up -d processing', hint: 'background' },
     ],
-    initialValue: 'run',
+    initialValue: 'detach',
   })
   if (p.isCancel(action)) return undefined
 
@@ -453,7 +543,7 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
     PROCESSING_DIFFING_MODE: diffModeRaw as DiffingMode,
     PROCESSING_DIFFING_BBOX: diffBbox,
     PROCESS_ONLY_BBOX: onlyBbox,
-    PROCESS_ONLY_TOPICS: topicsRaw.trim(),
+    PROCESS_ONLY_TOPICS: topicsRaw,
     SKIP_DOWNLOAD: skipDownload,
     SKIP_UNCHANGED: skipUnchanged,
     SKIP_WARM_CACHE: skipWarm,
@@ -512,6 +602,8 @@ function buildOverridesFromCliBatch() {
   }
   if (values['only-bbox']) onlyBbox = values['only-bbox']
   if (values['diff-bbox']) diffBbox = values['diff-bbox']
+  onlyBbox = readBboxCsv(onlyBbox)
+  diffBbox = readBboxCsv(diffBbox)
 
   const topicsStr = values['all-topics'] ? '' : (values.topics ?? '')
 
