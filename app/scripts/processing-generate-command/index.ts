@@ -28,6 +28,41 @@ const PRESET_SLUGS_FOR_HELP = [...new Set(Object.keys(BBOX_PRESETS))].sort() as 
 const CUSTOM_COORDS = '__custom__'
 const VIEWER_BASE = 'https://viewer.tilda-geo.de'
 
+type TopicsRunMode = 'all' | 'daily' | 'specific'
+
+function allTopicIds() {
+  return [...topicsConfig.keys()].sort((a, b) => a.localeCompare(b))
+}
+
+function topicMultiselectOptions() {
+  return allTopicIds().map((id) => {
+    const entry = topicsConfig.get(id)
+    return {
+      value: id,
+      label: id,
+      hint: entry?.schedule,
+    }
+  })
+}
+
+function resolveProcessOnlyTopics(mode: TopicsRunMode, selected: string[] = []) {
+  if (mode === 'all') return allTopicIds().join(',')
+  if (mode === 'daily') return ''
+  if (selected.length === 0) {
+    console.error('Select at least one topic for PROCESS_ONLY_TOPICS')
+    process.exit(1)
+  }
+  return selected.join(',')
+}
+
+function topicsCliFlagsPresent() {
+  let n = 0
+  if (argPresent('--all-topics')) n++
+  if (argPresent('--all-daily-topics')) n++
+  if (argPresent('--topics')) n++
+  return n
+}
+
 function parseBboxCsv(csv: string) {
   const parts = csv.split(',').map((s) => Number(s.trim()))
   if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return undefined
@@ -103,6 +138,7 @@ const { values } = parseArgs({
     'diff-mode': { type: 'string' },
     topics: { type: 'string' },
     'all-topics': { type: 'boolean', default: false },
+    'all-daily-topics': { type: 'boolean', default: false },
     'osm2pgsql-log-level': { type: 'string' },
     'skip-download': { type: 'string' },
     'skip-unchanged': { type: 'string' },
@@ -140,10 +176,23 @@ function explicitRunKind(): 'dry' | 'detach' | 'foreground' | 'ambiguous' | 'non
 }
 
 function topicsChoiceSatisfied() {
-  const allT = argPresent('--all-topics')
-  const top = argPresent('--topics')
-  if (allT && top) return false
-  return allT || top
+  return topicsCliFlagsPresent() === 1
+}
+
+function resolveTopicsFromCli() {
+  const flagCount = topicsCliFlagsPresent()
+  if (flagCount > 1) {
+    console.error('Use exactly one of --all-topics, --all-daily-topics, --topics')
+    process.exit(1)
+  }
+  if (argPresent('--all-topics')) return resolveProcessOnlyTopics('all')
+  if (argPresent('--all-daily-topics')) return resolveProcessOnlyTopics('daily')
+  const csv = values.topics?.trim() ?? ''
+  if (!csv) {
+    console.error('--topics requires a non-empty CSV')
+    process.exit(1)
+  }
+  return csv
 }
 
 function bboxChoiceSatisfied() {
@@ -179,7 +228,7 @@ Non-interactive (CI, agents): pass **all** of the following (see example):
   • Bbox: --preset <slug>  OR  (--only-bbox <coords> AND --diff-bbox <coords>)
     Optional with --preset: --distinct-diff-bbox, --diff-bbox (override diff area)
   • --diff-mode <off|previous|fixed|reference>
-  • Topics: --all-topics  OR  --topics <csv>
+  • Topics: exactly one of --all-topics (incl. weekly)  |  --all-daily-topics  |  --topics <csv>
   • --skip-download <0|1>  --skip-unchanged <0|1>  --skip-warm-cache <0|1>
   • If --skip-download 1: --wait-fresh-data <0|1>  (when --skip-download 0, flag optional)
   • Exactly one output mode: --dry-run  |  --detach (-d)  |  --foreground
@@ -187,12 +236,12 @@ Non-interactive (CI, agents): pass **all** of the following (see example):
 
 Optional (CLI only, never prompted): --osm2pgsql-log-level, --download-url (override Geofabrik extract URL; default comes from root .env)
 
-Example (preset, all topics; bun run injects skip defaults):
+Example (preset, all daily topics; bun run injects skip defaults):
 
   bun run processing -- \\
     --preset xhain \\
     --diff-mode fixed \\
-    --all-topics \\
+    --all-daily-topics \\
     --skip-download 1 \\
     --skip-unchanged 0 \\
     --skip-warm-cache 1 \\
@@ -336,7 +385,7 @@ async function finishInteractive(
     process.exit(0)
   }
   if (next === 'show') {
-    p.note(noteBody, 'copy past this')
+    p.note(noteBody, 'copy paste this')
     p.outro('Done.')
     process.exit(0)
   }
@@ -452,6 +501,44 @@ function resolveWaitFreshData(skipDownload: '0' | '1') {
 
 type RunPlan = { overrides: Record<string, string>; detach: boolean }
 
+async function pickProcessOnlyTopics() {
+  const mode = await p.select({
+    message: 'Which topics to run? (PROCESS_ONLY_TOPICS)',
+    options: [
+      {
+        value: 'all',
+        label: 'All (incl. weekly)',
+        hint: 'includes landcover (~weekly)',
+      },
+      {
+        value: 'daily',
+        label: 'All daily',
+        hint: 'default nightly pipeline',
+      },
+      { value: 'specific', label: 'Only specific topics' },
+    ],
+    initialValue: 'all',
+  })
+  if (p.isCancel(mode)) return undefined
+
+  if (mode === 'specific') {
+    const selected = await p.multiselect({
+      message: 'Which specific topics?',
+      options: topicMultiselectOptions(),
+      required: false,
+    })
+    if (p.isCancel(selected)) return undefined
+    const ids = Array.isArray(selected) ? selected : []
+    if (ids.length === 0) {
+      p.log.error('Select at least one topic.')
+      return undefined
+    }
+    return resolveProcessOnlyTopics('specific', ids)
+  }
+
+  return resolveProcessOnlyTopics(mode as TopicsRunMode)
+}
+
 async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   const onlyBbox = await pickBboxCoords('Processing bbox (PROCESS_ONLY_BBOX)', 'bussonderstreifen')
   if (onlyBbox === undefined) return undefined
@@ -469,20 +556,8 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   })
   if (p.isCancel(diffModeRaw)) return undefined
 
-  const topicOptions = [...topicsConfig.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([id, entry]) => ({
-      value: id,
-      label: id,
-      hint: entry.schedule,
-    }))
-  const topicsSelected = await p.multiselect({
-    message: 'Limit topics (PROCESS_ONLY_TOPICS) — empty = all',
-    options: topicOptions,
-    required: false,
-  })
-  if (p.isCancel(topicsSelected)) return undefined
-  const topicsRaw = Array.isArray(topicsSelected) ? topicsSelected.join(',') : ''
+  const topicsRaw = await pickProcessOnlyTopics()
+  if (topicsRaw === undefined) return undefined
 
   const skipDownload = await binaryFromCliOrPrompt(
     '--skip-download',
@@ -570,8 +645,8 @@ function buildOverridesFromCliBatch() {
     process.exit(1)
   }
 
-  if (argPresent('--all-topics') && argPresent('--topics')) {
-    console.error('Use either --all-topics or --topics, not both')
+  if (topicsCliFlagsPresent() > 1) {
+    console.error('Use exactly one of --all-topics, --all-daily-topics, --topics')
     process.exit(1)
   }
 
@@ -603,7 +678,7 @@ function buildOverridesFromCliBatch() {
   onlyBbox = readBboxCsv(onlyBbox)
   diffBbox = readBboxCsv(diffBbox)
 
-  const topicsStr = values['all-topics'] ? '' : (values.topics ?? '')
+  const topicsStr = resolveTopicsFromCli()
 
   const skipDl = parseBin('--skip-download', values['skip-download'], '1')
   const waitFresh =

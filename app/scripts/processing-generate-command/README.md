@@ -10,7 +10,7 @@
 ## Workflow
 
 1. From **`app/`**: `bun run processing` (interactive) **or** pass a full non-interactive flag set (see `--help`).
-2. **Interactive:** choose **Show command** or **Run command**. Show prints the **highlighted one-liner** (green/bold in a TTY; plain text if `NO_COLOR` or non-TTY). Run executes it in the current terminal.
+2. **Interactive:** choose **Show command** or **Run command**. Show prints a note with bbox summary and the compose one-liner. Run executes it in the current terminal.
 3. **Non-interactive:** copy the printed line, paste into your shell, and press Enter.
 4. For **reference → fixed**, reuse shell history: the line ends with `PROCESSING_DIFFING_MODE=…` last so you can change only `reference` / `fixed` (or edit the flag block at the end).
 
@@ -22,13 +22,15 @@ bun run processing -- --help
 
 **Partial flags (interactive):** skip/wait/download-url/osm2pgsql-log-level merge from argv; everything else still comes from prompts unless you pass a **full** non-interactive set.
 
+**Topics (interactive):** choose **All (incl. weekly)** (default; runs `landcover` etc.), **All daily** (nightly pipeline only), or **Only specific topics** (checkbox list, none selected by default).
+
 **Non-interactive (CI, agents, no TTY):** pass every required flag in one invocation. Example:
 
 ```bash
 bun run processing -- \
   --preset xhain \
   --diff-mode fixed \
-  --all-topics \
+  --all-daily-topics \
   --skip-download 1 \
   --skip-unchanged 0 \
   --skip-warm-cache 1 \
@@ -36,7 +38,13 @@ bun run processing -- \
   --foreground
 ```
 
-Use `--topics csv` instead of `--all-topics` when limiting topics. Pass exactly one of `--dry-run`, `--detach` (`-d`), or `--foreground` (`--dry-run` and `--foreground` both yield `docker compose up processing` in the printed line; `--detach` yields `up -d`).
+Topic flags (exactly one):
+
+- `--all-daily-topics` — nightly topics only; weekend topics skipped unless Saturday (usual diff-test default)
+- `--all-topics` — all topic IDs incl. weekly (`landcover`); longer runs
+- `--topics csv` — e.g. `trafficSigns,parking`
+
+Pass exactly one of `--dry-run`, `--detach` (`-d`), or `--foreground` (`--dry-run` and `--foreground` both yield `docker compose up processing` in the printed line; `--detach` yields `up -d`).
 
 Geofabrik OAuth, default extract URL, and other secrets stay in the root `.env` (Berlin/Brandenburg is the usual extract). To override the download URL for one run, pass `--download-url` on the command line only—there is no interactive prompt for it.
 

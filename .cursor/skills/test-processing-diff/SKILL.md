@@ -19,7 +19,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 - **Bbox:** `--preset <slug>` **or** both `--only-bbox` and `--diff-bbox` (optional: `--distinct-diff-bbox`, `--diff-bbox` with `--preset`).
 - **`--diff-mode`** `off` | `previous` | `fixed` | `reference`.
-- **Topics:** `--all-topics` **or** `--topics <csv>` (do not pass both).
+- **Topics:** exactly one of `--all-daily-topics` (nightly only; usual for diff tests) **or** `--all-topics` (incl. weekly) **or** `--topics <csv>`.
 - **Skips:** `--skip-download`, `--skip-unchanged`, `--skip-warm-cache` each with `0` or `1`. With `--skip-download 1`, also pass `--wait-fresh-data` `0` or `1`; with `--skip-download 0`, wait is forced off (flag optional).
 - **Exactly one** of `--dry-run`, `--detach` (`-d`), or `--foreground` (controls the printed `docker compose` line; `--dry-run` and `--foreground` both use attached `up processing`).
 
@@ -48,7 +48,7 @@ Use the **same** bbox, topics, and skip flags for reference and fixed; only chan
 bun run processing -- \
   --preset xhain \
   --diff-mode reference \
-  --all-topics \
+  --all-daily-topics \
   --skip-download 1 \
   --skip-unchanged 0 \
   --skip-warm-cache 1 \
@@ -58,7 +58,7 @@ bun run processing -- \
 
 **Generate fixed line:** same as above with `--diff-mode fixed`.
 
-Paste each printed line to run the container. **Limited topics:** replace `--all-topics` with e.g. `--topics trafficSigns,parking`.
+Paste each printed line to run the container. **Limited topics:** `--topics trafficSigns,parking`. **Include weekly (`landcover`):** `--all-topics` or list `landcover` in `--topics`.
 
 **Common presets (`--preset <slug>`):** same bbox on **both** `PROCESS_ONLY_BBOX` and `PROCESSING_DIFFING_BBOX` unless you use `--distinct-diff-bbox` or separate `--only-bbox` / `--diff-bbox`. See `--help` for the full slug list.
 
