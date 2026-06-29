@@ -118,7 +118,8 @@ function printHelp() {
 
 Usage: bun run processing-generate-command -- [options]
 
-Does not run Docker. Outputs one line that cds to the absolute repo root in a subshell, sets env vars, then runs docker compose.
+Interactive (TTY): prompts end with Show command (copy-paste) or Run command (execute in this terminal).
+Non-interactive: prints one line only (for CI/agents). The line cds to the absolute repo root in a subshell, sets env vars, then runs docker compose.
 Your shell cwd stays the same (safe to paste from app/). PROCESSING_DIFFING_MODE is last for easy edits.
 
 Default: interactive prompts (Clack) when stdin is a TTY.
@@ -244,6 +245,48 @@ function printHighlightedCommand(line: string) {
     }
   }
   console.log(line)
+}
+
+async function runShellOneLiner(line: string) {
+  const proc = Bun.spawn(['sh', '-c', line], {
+    stdio: ['inherit', 'inherit', 'inherit'],
+    cwd: process.cwd(),
+  })
+  const code = await proc.exited
+  process.exit(code === 0 ? 0 : (code ?? 1))
+}
+
+async function finishInteractive(
+  repoRoot: string,
+  overrides: Record<string, string>,
+  detach: boolean,
+) {
+  const line = formatShellOneLiner(repoRoot, overrides, detach)
+  const next = await p.select({
+    message: 'What next?',
+    options: [
+      { value: 'show', label: 'Show command — copy and paste', hint: 'default' },
+      { value: 'run', label: 'Run command — execute in this terminal', hint: 'live logs' },
+    ],
+    initialValue: 'show',
+  })
+  if (p.isCancel(next)) {
+    p.cancel('Cancelled.')
+    process.exit(0)
+  }
+  if (next === 'show') {
+    p.log.message(
+      'Copy the line below and press Enter (your cwd can stay in app/; compose runs from repo root):',
+    )
+    printHighlightedCommand(line)
+    p.outro('Done.')
+    process.exit(0)
+  }
+  p.log.message(
+    'Running in this terminal (your cwd can stay in app/; compose runs from repo root):',
+  )
+  p.log.message(line)
+  await runShellOneLiner(line)
 }
 
 function presetOptionsForSelect() {
@@ -536,14 +579,7 @@ if (!fullBatch) {
     p.cancel('Cancelled.')
     process.exit(0)
   }
-  overrides = plan.overrides
-  detach = plan.detach
-  p.log.message(
-    'Copy the line below and press Enter (your cwd can stay in app/; compose runs from repo root):',
-  )
-  printHighlightedCommand(formatShellOneLiner(repoRoot, overrides, detach))
-  p.outro('Done.')
-  process.exit(0)
+  await finishInteractive(repoRoot, plan.overrides, plan.detach)
 }
 
 const batch = buildOverridesFromCliBatch()

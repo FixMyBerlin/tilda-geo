@@ -1,6 +1,6 @@
 ---
 name: test-processing-diff
-description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing-generate-command` to print a copy-paste shell line (interactive Clack on a TTY); agents/CI pass the full non-interactive flag set (see --help). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
+description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing-generate-command` (interactive Clack on a TTY: show or run the compose line; agents/CI pass the full non-interactive flag set and capture stdout). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
 ---
 
 # Test processing with diffing (local Docker)
@@ -9,7 +9,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 ## For agents: use the CLI (do not hand-craft `docker compose` env)
 
-**Always** use `bun run processing-generate-command` from **`app/`**. It prints **one line** that cds to the repo root in a subshell, sets env, and runs docker compose—your cwd is unchanged. **Paste that line** in a shell to run Docker; the Bun script does **not** execute compose.
+**Always** use `bun run processing-generate-command` from **`app/`**. It builds **one line** that cds to the repo root in a subshell, sets env, and runs docker compose—your cwd is unchanged. **Interactive:** choose **Run command** to execute in this terminal, or **Show command** and paste the line. **Non-interactive / agents:** capture stdout and run that line in an environment with Docker.
 
 **Defaults and flag checklist:** run `bun run processing-generate-command -- --help` from `app/` for the full contract, injected skip defaults, and a copy-paste example.
 
@@ -27,7 +27,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 1. From **`app/`**: `bun run processing-generate-command -- --help`.
 2. **Agents / no TTY:** full flag set → capture stdout (the one-liner) → run that line in an environment with Docker (or instruct the user to paste it).
-3. **Humans:** interactive generate → copy highlighted line → paste → Enter; reuse history and edit **`PROCESSING_DIFFING_MODE`** at the **end** of the env list for reference vs fixed.
+3. **Humans:** interactive generate → **Run command** or copy highlighted line → paste → Enter; reuse history and edit **`PROCESSING_DIFFING_MODE`** at the **end** of the env list for reference vs fixed.
 
 **What you need to know (not how the script is implemented):**
 

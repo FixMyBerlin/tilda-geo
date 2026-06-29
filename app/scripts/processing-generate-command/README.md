@@ -1,16 +1,17 @@
 # Processing generate-command (diff test runs)
 
-[`processing-generate-command`](../../package.json) prints **one copy-paste shell command** that runs `docker compose up … processing` from the **git repo root** with per-run env overrides (same idea as the **test-processing-diff** Cursor skill and [`processing/README.md`](../../../processing/README.md) § diffing).
+[`processing-generate-command`](../../package.json) builds **one shell command** that runs `docker compose up … processing` from the **git repo root** with per-run env overrides (same idea as the **test-processing-diff** Cursor skill and [`processing/README.md`](../../../processing/README.md) § diffing).
 
 - Skill: `.cursor/skills/test-processing-diff/SKILL.md`.
-- The Bun script **does not** run Docker. Paste the printed line from **`app/` or any cwd**: it cds to the absolute repo root inside a subshell, runs compose there, then returns—your shell’s directory does not change.
+- **Interactive (TTY):** after prompts, choose **Show command** (copy-paste) or **Run command** (executes in this terminal with live logs).
+- **Non-interactive:** prints one line to stdout only (CI/agents). Paste from **`app/` or any cwd**: it cds to the absolute repo root inside a subshell, runs compose there, then returns—your shell’s directory does not change.
 - Ensure Postgres is up first, e.g. `docker compose up -d db` from the repo root; `processing` waits on a healthy `db`.
 
 ## Workflow
 
 1. From **`app/`**: `bun run processing-generate-command` (interactive) **or** pass a full non-interactive flag set (see `--help`).
-2. Copy the **highlighted one-liner** (green/bold in a TTY; plain text if `NO_COLOR` is set or stdout is not a TTY).
-3. Paste into your shell and press Enter.
+2. **Interactive:** choose **Show command** or **Run command**. Show prints the **highlighted one-liner** (green/bold in a TTY; plain text if `NO_COLOR` or non-TTY). Run executes it in the current terminal.
+3. **Non-interactive:** copy the printed line, paste into your shell, and press Enter.
 4. For **reference → fixed**, reuse shell history: the line ends with `PROCESSING_DIFFING_MODE=…` last so you can change only `reference` / `fixed` (or edit the flag block at the end).
 
 ```bash
