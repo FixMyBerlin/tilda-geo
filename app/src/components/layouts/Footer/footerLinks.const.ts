@@ -20,6 +20,7 @@ export const footerLinkGroups: FooterLinkGroup[] = [
         name: 'Weitere Dienstleistungen von FixMyCity',
         href: 'https://fixmycity.de/dienstleistungen/',
       },
+      { name: 'Demo Termin vereinbaren', href: 'https://fixmycity.de/termin-vereinbaren/' },
       { name: 'Zum Newsletter anmelden', href: 'https://fixmycity.de/kontakt/' },
     ],
   },
