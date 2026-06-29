@@ -129,7 +129,7 @@
     "betterknown": "1.2.0",
     "date-fns": "4.4.0",
     "dompurify": "3.4.11",
-    "es-toolkit": "^1.47.1",
+    "es-toolkit": "^1.48.1",
     "geojson": "0.5.0",
     "h3": "^2.0.1-rc.22",
     "immer": "11.1.8",
