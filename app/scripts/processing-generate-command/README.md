@@ -1,6 +1,6 @@
-# Processing generate-command (diff test runs)
+# Processing CLI (diff test runs)
 
-[`processing-generate-command`](../../package.json) builds **one shell command** that runs `docker compose up … processing` from the **git repo root** with per-run env overrides (same idea as the **test-processing-diff** Cursor skill and [`processing/README.md`](../../../processing/README.md) § diffing).
+[`processing`](../../package.json) builds **one shell command** that runs `docker compose up … processing` from the **git repo root** with per-run env overrides (same idea as the **test-processing-diff** Cursor skill and [`processing/README.md`](../../../processing/README.md) § diffing).
 
 - Skill: `.cursor/skills/test-processing-diff/SKILL.md`.
 - **Interactive (TTY):** after prompts, choose **Show command** (copy-paste) or **Run command** (executes in this terminal with live logs).
@@ -9,23 +9,23 @@
 
 ## Workflow
 
-1. From **`app/`**: `bun run processing-generate-command` (interactive) **or** pass a full non-interactive flag set (see `--help`).
+1. From **`app/`**: `bun run processing` (interactive) **or** pass a full non-interactive flag set (see `--help`).
 2. **Interactive:** choose **Show command** or **Run command**. Show prints the **highlighted one-liner** (green/bold in a TTY; plain text if `NO_COLOR` or non-TTY). Run executes it in the current terminal.
 3. **Non-interactive:** copy the printed line, paste into your shell, and press Enter.
 4. For **reference → fixed**, reuse shell history: the line ends with `PROCESSING_DIFFING_MODE=…` last so you can change only `reference` / `fixed` (or edit the flag block at the end).
 
 ```bash
-bun run processing-generate-command -- --help
+bun run processing -- --help
 ```
 
-**Defaults:** `bun run processing-generate-command` injects `--skip-download 1 --skip-warm-cache 1 --skip-unchanged 0` so interactive skip prompts are skipped unless you override on the command line.
+**Defaults:** `bun run processing` injects `--skip-download 1 --skip-warm-cache 1 --skip-unchanged 0` so interactive skip prompts are skipped unless you override on the command line.
 
 **Partial flags (interactive):** skip/wait/download-url/osm2pgsql-log-level merge from argv; everything else still comes from prompts unless you pass a **full** non-interactive set.
 
 **Non-interactive (CI, agents, no TTY):** pass every required flag in one invocation. Example:
 
 ```bash
-bun run processing-generate-command -- \
+bun run processing -- \
   --preset xhain \
   --diff-mode fixed \
   --all-topics \

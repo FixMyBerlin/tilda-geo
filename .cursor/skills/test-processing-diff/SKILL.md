@@ -1,6 +1,6 @@
 ---
 name: test-processing-diff
-description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing-generate-command` (interactive Clack on a TTY: show or run the compose line; agents/CI pass the full non-interactive flag set and capture stdout). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
+description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing` (interactive Clack on a TTY: show or run the compose line; agents/CI pass the full non-interactive flag set and capture stdout). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
 ---
 
 # Test processing with diffing (local Docker)
@@ -9,11 +9,11 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 ## For agents: use the CLI (do not hand-craft `docker compose` env)
 
-**Always** use `bun run processing-generate-command` from **`app/`**. It builds **one line** that cds to the repo root in a subshell, sets env, and runs docker compose—your cwd is unchanged. **Interactive:** choose **Run command** to execute in this terminal, or **Show command** and paste the line. **Non-interactive / agents:** capture stdout and run that line in an environment with Docker.
+**Always** use `bun run processing` from **`app/`**. It builds **one line** that cds to the repo root in a subshell, sets env, and runs docker compose—your cwd is unchanged. **Interactive:** choose **Run command** to execute in this terminal, or **Show command** and paste the line. **Non-interactive / agents:** capture stdout and run that line in an environment with Docker.
 
-**Defaults and flag checklist:** run `bun run processing-generate-command -- --help` from `app/` for the full contract, injected skip defaults, and a copy-paste example.
+**Defaults and flag checklist:** run `bun run processing -- --help` from `app/` for the full contract, injected skip defaults, and a copy-paste example.
 
-**Default behavior:** with a TTY and **without** a complete non-interactive flag set, the script opens **interactive** prompts (Clack). `bun run processing-generate-command` injects default skip flags; command-line skip/wait/download-url/osm2pgsql-log-level flags are applied without prompts. **Other** partial flags still require a full non-interactive set (you get a warning).
+**Default behavior:** with a TTY and **without** a complete non-interactive flag set, the script opens **interactive** prompts (Clack). `bun run processing` injects default skip flags; command-line skip/wait/download-url/osm2pgsql-log-level flags are applied without prompts. **Other** partial flags still require a full non-interactive set (you get a warning).
 
 **Non-interactive (required for agents without a TTY, e.g. CI):** pass **every** required flag in one invocation. Required pieces:
 
@@ -25,7 +25,7 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 **Learn the tool in this order:**
 
-1. From **`app/`**: `bun run processing-generate-command -- --help`.
+1. From **`app/`**: `bun run processing -- --help`.
 2. **Agents / no TTY:** full flag set → capture stdout (the one-liner) → run that line in an environment with Docker (or instruct the user to paste it).
 3. **Humans:** interactive generate → **Run command** or copy highlighted line → paste → Enter; reuse history and edit **`PROCESSING_DIFFING_MODE`** at the **end** of the env list for reference vs fixed.
 
@@ -34,9 +34,9 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 - The printed command runs **docker compose** at the repository root (via subshell `cd`) so the **root `.env`** applies—the same file the app uses via `bun --env-file=../.env` from `app/`.
 - Overrides are **per pasted command** — no need to `export` vars in the user’s shell.
 - Ensure **`db` is healthy** before running the pasted line (`docker compose up -d db` from repo root if needed). The generate script does not start containers.
-- On isolated stacks (feature-branch worktree), see [`docs/docker-local-development.md`](../../../docs/docker-local-development.md) — load `.env.local` or use the printed env from `processing-generate-command`.
+- On isolated stacks (feature-branch worktree), see [`docs/docker-local-development.md`](../../../docs/docker-local-development.md) — load `.env.local` or use the printed env from `bun run processing`.
 
-Implementation: [`app/scripts/processing-generate-command/index.ts`](../../../app/scripts/processing-generate-command/index.ts). README: [`app/scripts/processing-generate-command/README.md`](../../../app/scripts/processing-generate-command/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`processing-generate-command`).
+Implementation: [`app/scripts/processing-generate-command/index.ts`](../../../app/scripts/processing-generate-command/index.ts). README: [`app/scripts/processing-generate-command/README.md`](../../../app/scripts/processing-generate-command/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`processing`).
 
 ## Full batch examples (reference → fixed)
 
@@ -45,7 +45,7 @@ Use the **same** bbox, topics, and skip flags for reference and fixed; only chan
 **Generate reference line (inspect stdout):**
 
 ```bash
-bun run processing-generate-command -- \
+bun run processing -- \
   --preset xhain \
   --diff-mode reference \
   --all-topics \

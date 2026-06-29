@@ -32,7 +32,7 @@ If you run `bun run dev` on a feature branch in the **main checkout**, predev wa
 2. `bun run setup-worktree -- <branch>` from `app/`.
 3. `bun run dev` in the new worktree — trust predev for `.env`, `.env.local`, Docker, migrations.
 
-Do not hand-craft `docker compose` for db/tiles. For processing, use `bun run processing-generate-command` (see `test-processing-diff` skill).
+Do not hand-craft `docker compose` for db/tiles. For processing, use `bun run processing` (see `test-processing-diff` skill).
 
 ## Rules
 

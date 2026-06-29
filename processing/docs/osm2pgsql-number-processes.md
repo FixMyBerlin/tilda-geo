@@ -50,7 +50,7 @@ No `FATAL`, connection-slot, or OOM errors at any N. SQL post-processing (~1 min
 
 Per-run only — **not** in `.env` on `/srv`.
 
-**Local:** `bun run processing-generate-command` or prefix the printed `docker compose` one-liner:
+**Local:** `bun run processing` or prefix the printed `docker compose` one-liner:
 
 ```bash
 OSM2PGSQL_NUMBER_PROCESSES=8 docker compose up processing
@@ -74,4 +74,4 @@ OSM2PGSQL_NUMBER_PROCESSES=8 docker compose up processing
 OSM2PGSQL_LOG_LEVEL=debug OSM2PGSQL_NUMBER_PROCESSES=4 docker compose up processing
 ```
 
-Local dev: `bun run processing-generate-command -- --osm2pgsql-log-level debug` (or interactive prompt) for the same troubleshooting use case.
+Local dev: `bun run processing -- --osm2pgsql-log-level debug` (or interactive prompt) for the same troubleshooting use case.

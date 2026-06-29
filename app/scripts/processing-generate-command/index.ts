@@ -165,9 +165,9 @@ function isFullNonInteractiveBatch() {
 }
 
 function printHelp() {
-  console.log(`processing-generate-command — print a copy-paste shell command for docker compose processing (see README)
+  console.log(`processing — print a copy-paste shell command for docker compose processing (see README)
 
-Usage: bun run processing-generate-command -- [options]
+Usage: bun run processing -- [options]
 
 Interactive (TTY): prompts end with Show command (copy-paste) or Run command (execute in this terminal).
 Non-interactive: prints one line only (for CI/agents). The line cds to the absolute repo root in a subshell, sets env vars, then runs docker compose.
@@ -189,7 +189,7 @@ Optional (CLI only, never prompted): --osm2pgsql-log-level, --download-url (over
 
 Example (preset, all topics; bun run injects skip defaults):
 
-  bun run processing-generate-command -- \\
+  bun run processing -- \\
     --preset xhain \\
     --diff-mode fixed \\
     --all-topics \\
@@ -208,10 +208,8 @@ Bbox presets: ${PRESET_SLUGS_FOR_HELP.join(', ')}
 }
 
 function printBatchRequiredError() {
-  console.error(
-    'processing-generate-command: stdin is not a TTY. Pass a full non-interactive flag set.',
-  )
-  console.error('Run from app/: bun run processing-generate-command -- --help')
+  console.error('processing: stdin is not a TTY. Pass a full non-interactive flag set.')
+  console.error('Run from app/: bun run processing -- --help')
 }
 
 function parseBin(name: string, raw: string | undefined, defaultVal: '0' | '1') {
@@ -662,10 +660,10 @@ if (!fullBatch) {
   }
   if (userArgs.length > 0) {
     console.warn(
-      'processing-generate-command: incomplete CLI flag set — opening interactive prompts. Skip/wait/download-url/osm2pgsql-log-level flags on the command line are applied; pass a full non-interactive set (see --help) to avoid prompts.',
+      'processing: incomplete CLI flag set — opening interactive prompts. Skip/wait/download-url/osm2pgsql-log-level flags on the command line are applied; pass a full non-interactive set (see --help) to avoid prompts.',
     )
   }
-  p.intro('processing-generate-command')
+  p.intro('processing')
   const plan = await collectInteractiveConfig()
   if (!plan) {
     p.cancel('Cancelled.')

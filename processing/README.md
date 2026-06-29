@@ -114,7 +114,7 @@ To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `P
 
 ### Process only certain topics and certain bbox
 
-Per-run vars (`PROCESS_ONLY_TOPICS`, `PROCESS_ONLY_BBOX`, `OSM2PGSQL_*`, `WAIT_FOR_FRESH_DATA`, `SKIP_WARM_CACHE`) are for **local dev** only — set them via `bun run processing-generate-command` (inline env on the printed one-liner). Server baseline config comes from the deploy manifest ([`.github/env/deploy.manifest.json`](../.github/env/deploy.manifest.json)) which generates `/srv/.env`; per-run overrides are passed inline on the `docker compose up` command (see the CI workflows), not edited into `/srv/.env` by hand.
+Per-run vars (`PROCESS_ONLY_TOPICS`, `PROCESS_ONLY_BBOX`, `OSM2PGSQL_*`, `WAIT_FOR_FRESH_DATA`, `SKIP_WARM_CACHE`) are for **local dev** only — set them via `bun run processing` (inline env on the printed one-liner). Server baseline config comes from the deploy manifest ([`.github/env/deploy.manifest.json`](../.github/env/deploy.manifest.json)) which generates `/srv/.env`; per-run overrides are passed inline on the `docker compose up` command (see the CI workflows), not edited into `/srv/.env` by hand.
 
 `OSM2PGSQL_NUMBER_PROCESSES` defaults to **4** on staging and production (benchmarked 2026-06-26). See [`docs/osm2pgsql-number-processes.md`](docs/osm2pgsql-number-processes.md).
 

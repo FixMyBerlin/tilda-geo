@@ -75,7 +75,7 @@
     "test-run": "vitest run --passWithNoTests",
     "e2e": "playwright test --project=chromium",
     "mailpreview": "REACT_EMAIL_PREVIEW=1 VITE_APP_ORIGIN=http://127.0.0.1:5173 email dev --dir src/emails",
-    "processing-generate-command": "bun ./scripts/processing-generate-command/index.ts -- --skip-download 1 --skip-warm-cache 1 --skip-unchanged 0",
+    "processing": "bun ./scripts/processing-generate-command/index.ts -- --skip-download 1 --skip-warm-cache 1 --skip-unchanged 0",
     "topic-docs-build": "bun run --sequential topic-docs-build:*",
     "topic-docs-build:1generate": "bun ./scripts/topic-docs-build/index.ts",
     "topic-docs-build:2format": "oxfmt --write -c oxfmt.config.mjs src/data/generated/topicDocs",
