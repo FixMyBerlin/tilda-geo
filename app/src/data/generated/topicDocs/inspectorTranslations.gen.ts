@@ -1755,6 +1755,7 @@ const data = {
   'tilda_parkings_cutouts--category=collision_protection': 'Baumschutzbügel',
   'tilda_parkings_cutouts--category=crossing_buffer_marking':
     'Markierung (Sperrfläche u.ä.) an Querungsstelle',
+  'tilda_parkings_cutouts--category=crossing_continuous': 'Durchgängige Querung',
   'tilda_parkings_cutouts--category=crossing_kerb_extension':
     'Gehwegvorstreckung an Querungsstelle',
   'tilda_parkings_cutouts--category=crossing_marked': 'Markierte Querungsstelle',

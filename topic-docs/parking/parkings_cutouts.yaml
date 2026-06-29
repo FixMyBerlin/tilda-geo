@@ -31,6 +31,8 @@ attributes:
         label: Markierung (Sperrfläche u.ä.) an Querungsstelle
       - value: crossing_kerb_extension
         label: Gehwegvorstreckung an Querungsstelle
+      - value: crossing_continuous
+        label: Durchgängige Querung
       - value: crossing_marked
         label: Markierte Querungsstelle
       - value: crossing_traffic_signals
@@ -246,6 +248,10 @@ attributes:
     format: ignore
 
   - key: 'osm_crossing:kerb_extension'
+    purpose: experimentation
+    format: ignore
+
+  - key: 'osm_crossing:continuous'
     purpose: experimentation
     format: ignore
 

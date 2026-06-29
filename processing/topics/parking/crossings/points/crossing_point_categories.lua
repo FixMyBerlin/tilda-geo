@@ -58,6 +58,17 @@ local crossing_point_categories = {
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
   }),
   class_crossing_category.new({
+    id = 'crossing_continuous',
+    side_schema = 'none',
+    side_key = nil,
+    buffer_radius = function(tags) return 3 end,
+    conditions = function(tags)
+      return tags['crossing:continuous'] == 'yes'
+    end,
+    tags = function(tags) return {} end,
+    tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension', 'crossing:continuous' },
+  }),
+  class_crossing_category.new({
     -- https://overpass-turbo.eu/s/24o4
     -- Examples: https://www.openstreetmap.org/node/7580579485, https://www.openstreetmap.org/node/7580552984
     --
