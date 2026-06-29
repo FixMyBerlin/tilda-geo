@@ -1,6 +1,5 @@
 {
   "recommendations": [
-    "orta.vscode-jest",
     "prisma.prisma",
     // https://vitest.dev/guide/#ide-integrations
     "vitest.explorer",
