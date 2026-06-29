@@ -58,6 +58,8 @@ import { Route as ApiPrivatePostProcessingHookRouteImport } from './routes/api/p
 import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes/api/private/generate-maproulette-tasks'
 import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
 import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
+import { Route as ApiExportStatusJobIdRouteImport } from './routes/api/export-status.$jobId'
+import { Route as ApiExportDownloadJobIdRouteImport } from './routes/api/export-download.$jobId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as AdminUploadsSlugRouteImport } from './routes/admin/uploads/$slug'
 import { Route as AdminStaticDatasetCategoriesNewRouteImport } from './routes/admin/static-dataset-categories/new'
@@ -77,6 +79,7 @@ import { Route as ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport } fro
 import { Route as ApiMaprouletteDataTest_tag_fixRouteImport } from './routes/api/maproulette.data.test_tag_fix'
 import { Route as ApiMaprouletteDataProjectKeyRouteImport } from './routes/api/maproulette.data.$projectKey'
 import { Route as ApiExportRegionSlugTableNameRouteImport } from './routes/api/export.$regionSlug.$tableName'
+import { Route as ApiExportStartRegionSlugTableNameRouteImport } from './routes/api/export-start.$regionSlug.$tableName'
 import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/api/export-ogr.$regionSlug.$tableName'
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
 import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
@@ -333,6 +336,16 @@ const ApiNotesRegionSlugRoute = ApiNotesRegionSlugRouteImport.update({
   path: '/api/notes/$regionSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiExportStatusJobIdRoute = ApiExportStatusJobIdRouteImport.update({
+  id: '/api/export-status/$jobId',
+  path: '/api/export-status/$jobId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiExportDownloadJobIdRoute = ApiExportDownloadJobIdRouteImport.update({
+  id: '/api/export-download/$jobId',
+  path: '/api/export-download/$jobId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -439,6 +452,12 @@ const ApiExportRegionSlugTableNameRoute =
     path: '/api/export/$regionSlug/$tableName',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiExportStartRegionSlugTableNameRoute =
+  ApiExportStartRegionSlugTableNameRouteImport.update({
+    id: '/api/export-start/$regionSlug/$tableName',
+    path: '/api/export-start/$regionSlug/$tableName',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiExportOgrRegionSlugTableNameRoute =
   ApiExportOgrRegionSlugTableNameRouteImport.update({
     id: '/api/export-ogr/$regionSlug/$tableName',
@@ -507,6 +526,8 @@ export interface FileRoutesByFullPath {
   '/admin/static-dataset-categories/new': typeof AdminStaticDatasetCategoriesNewRoute
   '/admin/uploads/$slug': typeof AdminUploadsSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/export-download/$jobId': typeof ApiExportDownloadJobIdRoute
+  '/api/export-status/$jobId': typeof ApiExportStatusJobIdRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -526,6 +547,7 @@ export interface FileRoutesByFullPath {
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/api/export-ogr/$regionSlug/$tableName': typeof ApiExportOgrRegionSlugTableNameRoute
+  '/api/export-start/$regionSlug/$tableName': typeof ApiExportStartRegionSlugTableNameRoute
   '/api/export/$regionSlug/$tableName': typeof ApiExportRegionSlugTableNameRoute
   '/api/maproulette/data/$projectKey': typeof ApiMaprouletteDataProjectKeyRoute
   '/api/maproulette/data/test_tag_fix': typeof ApiMaprouletteDataTest_tag_fixRoute
@@ -572,6 +594,8 @@ export interface FileRoutesByTo {
   '/admin/static-dataset-categories/new': typeof AdminStaticDatasetCategoriesNewRoute
   '/admin/uploads/$slug': typeof AdminUploadsSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/export-download/$jobId': typeof ApiExportDownloadJobIdRoute
+  '/api/export-status/$jobId': typeof ApiExportStatusJobIdRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -591,6 +615,7 @@ export interface FileRoutesByTo {
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/api/export-ogr/$regionSlug/$tableName': typeof ApiExportOgrRegionSlugTableNameRoute
+  '/api/export-start/$regionSlug/$tableName': typeof ApiExportStartRegionSlugTableNameRoute
   '/api/export/$regionSlug/$tableName': typeof ApiExportRegionSlugTableNameRoute
   '/api/maproulette/data/$projectKey': typeof ApiMaprouletteDataProjectKeyRoute
   '/api/maproulette/data/test_tag_fix': typeof ApiMaprouletteDataTest_tag_fixRoute
@@ -647,6 +672,8 @@ export interface FileRoutesById {
   '/admin/static-dataset-categories/new': typeof AdminStaticDatasetCategoriesNewRoute
   '/admin/uploads/$slug': typeof AdminUploadsSlugRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/export-download/$jobId': typeof ApiExportDownloadJobIdRoute
+  '/api/export-status/$jobId': typeof ApiExportStatusJobIdRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -666,6 +693,7 @@ export interface FileRoutesById {
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/api/export-ogr/$regionSlug/$tableName': typeof ApiExportOgrRegionSlugTableNameRoute
+  '/api/export-start/$regionSlug/$tableName': typeof ApiExportStartRegionSlugTableNameRoute
   '/api/export/$regionSlug/$tableName': typeof ApiExportRegionSlugTableNameRoute
   '/api/maproulette/data/$projectKey': typeof ApiMaprouletteDataProjectKeyRoute
   '/api/maproulette/data/test_tag_fix': typeof ApiMaprouletteDataTest_tag_fixRoute
@@ -722,6 +750,8 @@ export interface FileRouteTypes {
     | '/admin/static-dataset-categories/new'
     | '/admin/uploads/$slug'
     | '/api/auth/$'
+    | '/api/export-download/$jobId'
+    | '/api/export-status/$jobId'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -741,6 +771,7 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/$id/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/api/export-ogr/$regionSlug/$tableName'
+    | '/api/export-start/$regionSlug/$tableName'
     | '/api/export/$regionSlug/$tableName'
     | '/api/maproulette/data/$projectKey'
     | '/api/maproulette/data/test_tag_fix'
@@ -787,6 +818,8 @@ export interface FileRouteTypes {
     | '/admin/static-dataset-categories/new'
     | '/admin/uploads/$slug'
     | '/api/auth/$'
+    | '/api/export-download/$jobId'
+    | '/api/export-status/$jobId'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -806,6 +839,7 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/$id/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/api/export-ogr/$regionSlug/$tableName'
+    | '/api/export-start/$regionSlug/$tableName'
     | '/api/export/$regionSlug/$tableName'
     | '/api/maproulette/data/$projectKey'
     | '/api/maproulette/data/test_tag_fix'
@@ -861,6 +895,8 @@ export interface FileRouteTypes {
     | '/admin/static-dataset-categories/new'
     | '/admin/uploads/$slug'
     | '/api/auth/$'
+    | '/api/export-download/$jobId'
+    | '/api/export-status/$jobId'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -880,6 +916,7 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/$id/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/api/export-ogr/$regionSlug/$tableName'
+    | '/api/export-start/$regionSlug/$tableName'
     | '/api/export/$regionSlug/$tableName'
     | '/api/maproulette/data/$projectKey'
     | '/api/maproulette/data/test_tag_fix'
@@ -906,6 +943,8 @@ export interface RootRouteChildren {
   ApiStatsRoute: typeof ApiStatsRoute
   ApiUploadsRoute: typeof ApiUploadsRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiExportDownloadJobIdRoute: typeof ApiExportDownloadJobIdRoute
+  ApiExportStatusJobIdRoute: typeof ApiExportStatusJobIdRoute
   ApiNotesRegionSlugRoute: typeof ApiNotesRegionSlugRouteWithChildren
   ApiOsmNotesRssRoute: typeof ApiOsmNotesRssRoute
   ApiPrivateGenerateMaprouletteTasksRoute: typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -915,6 +954,7 @@ export interface RootRouteChildren {
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
   ApiExportOgrRegionSlugTableNameRoute: typeof ApiExportOgrRegionSlugTableNameRoute
+  ApiExportStartRegionSlugTableNameRoute: typeof ApiExportStartRegionSlugTableNameRoute
   ApiExportRegionSlugTableNameRoute: typeof ApiExportRegionSlugTableNameRoute
   ApiMaprouletteDataProjectKeyRoute: typeof ApiMaprouletteDataProjectKeyRoute
   ApiMaprouletteDataTest_tag_fixRoute: typeof ApiMaprouletteDataTest_tag_fixRoute
@@ -1269,6 +1309,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotesRegionSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/export-status/$jobId': {
+      id: '/api/export-status/$jobId'
+      path: '/api/export-status/$jobId'
+      fullPath: '/api/export-status/$jobId'
+      preLoaderRoute: typeof ApiExportStatusJobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/export-download/$jobId': {
+      id: '/api/export-download/$jobId'
+      path: '/api/export-download/$jobId'
+      fullPath: '/api/export-download/$jobId'
+      preLoaderRoute: typeof ApiExportDownloadJobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -1400,6 +1454,13 @@ declare module '@tanstack/react-router' {
       path: '/api/export/$regionSlug/$tableName'
       fullPath: '/api/export/$regionSlug/$tableName'
       preLoaderRoute: typeof ApiExportRegionSlugTableNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/export-start/$regionSlug/$tableName': {
+      id: '/api/export-start/$regionSlug/$tableName'
+      path: '/api/export-start/$regionSlug/$tableName'
+      fullPath: '/api/export-start/$regionSlug/$tableName'
+      preLoaderRoute: typeof ApiExportStartRegionSlugTableNameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export-ogr/$regionSlug/$tableName': {
@@ -1660,6 +1721,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiStatsRoute: ApiStatsRoute,
   ApiUploadsRoute: ApiUploadsRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiExportDownloadJobIdRoute: ApiExportDownloadJobIdRoute,
+  ApiExportStatusJobIdRoute: ApiExportStatusJobIdRoute,
   ApiNotesRegionSlugRoute: ApiNotesRegionSlugRouteWithChildren,
   ApiOsmNotesRssRoute: ApiOsmNotesRssRoute,
   ApiPrivateGenerateMaprouletteTasksRoute:
@@ -1670,6 +1733,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,
   ApiExportOgrRegionSlugTableNameRoute: ApiExportOgrRegionSlugTableNameRoute,
+  ApiExportStartRegionSlugTableNameRoute:
+    ApiExportStartRegionSlugTableNameRoute,
   ApiExportRegionSlugTableNameRoute: ApiExportRegionSlugTableNameRoute,
   ApiMaprouletteDataProjectKeyRoute: ApiMaprouletteDataProjectKeyRoute,
   ApiMaprouletteDataTest_tag_fixRoute: ApiMaprouletteDataTest_tag_fixRoute,

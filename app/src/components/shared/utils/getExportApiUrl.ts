@@ -36,3 +36,25 @@ export const getExportOgrApiBboxUrl = (
   const baseUrl = getExportApiBboxUrl(regionSlug, apiIdentifier, bbox, env, apiKey)
   return `${baseUrl}&format=${format}`
 }
+
+// Async export: starts a background job (returns a job id) which the UI then polls
+// and finally downloads. Mirrors `getExportOgrApiBboxUrl` but hits `/api/export-start`.
+export const getExportStartApiBboxUrl = (
+  regionSlug: string,
+  apiIdentifier: SourceExportApiIdentifier,
+  bbox: NonNullable<StaticRegion['bbox']>,
+  format: 'geojson' | 'gpkg' | 'fgb' = 'fgb',
+  env?: EnvironmentValues,
+  apiKey?: string,
+) => {
+  const url = new URL(getAppBaseUrl(`/api/export-start/${regionSlug}/${apiIdentifier}`, env))
+  url.searchParams.append('minlon', String(bbox.min[0]))
+  url.searchParams.append('minlat', String(bbox.min[1]))
+  url.searchParams.append('maxlon', String(bbox.max[0]))
+  url.searchParams.append('maxlat', String(bbox.max[1]))
+  url.searchParams.append('format', format)
+  if (apiKey) {
+    url.searchParams.append('apiKey', apiKey)
+  }
+  return url.toString()
+}
