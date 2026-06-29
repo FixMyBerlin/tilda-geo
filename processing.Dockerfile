@@ -58,4 +58,8 @@ RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.
 # install bun packages
 RUN bun install
 
+# Commit SHA for "Processing: Startup" logs (no .git in image; set via CI build-arg).
+ARG GIT_SHA=unknown
+ENV GIT_SHA=$GIT_SHA
+
 CMD ["bun", "run", "/processing/index.ts"]

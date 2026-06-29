@@ -83,18 +83,17 @@ async function getPostgresVersion() {
 }
 
 export async function logProcessingStartupContext() {
-  logPadded('Processing: Startup config')
-  console.log(JSON.stringify(getStartupConfig()))
-  warnPerRunEnvOverrides()
-
   const isSaturdayRun = isBerlinSaturday(new Date())
   const [{ version: osm2pgsqlVersion, error: osm2pgsqlVersionError }, postgres] = await Promise.all(
     [getOsm2pgsqlVersion(), getPostgresVersion()],
   )
 
-  logPadded('Processing: Startup runtime')
+  logPadded('Processing: Startup')
+  console.log(JSON.stringify(getStartupConfig()))
+  warnPerRunEnvOverrides()
   console.log(
     JSON.stringify({
+      gitSha: process.env.GIT_SHA?.trim() || null,
       bunVersion: Bun.version,
       hostname: hostname(),
       cpuCount: cpus().length,

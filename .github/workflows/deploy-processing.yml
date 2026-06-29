@@ -64,6 +64,8 @@ jobs:
           tags: |
             ${{ vars.ECR_REGISTRY }}/tilda/processing:${{ github.sha }}
             ${{ vars.ECR_REGISTRY }}/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
+          build-args: |
+            GIT_SHA=${{ github.sha }}
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
