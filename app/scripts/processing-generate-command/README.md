@@ -18,7 +18,7 @@
 bun run processing -- --help
 ```
 
-**Defaults:** `bun run processing` injects `--skip-download 1 --skip-warm-cache 1 --skip-unchanged 0` so interactive skip prompts are skipped unless you override on the command line.
+**Defaults:** `bun run processing` injects `--skip-download 1 --skip-warm-cache 1 --skip-unchanged 0` so those skip prompts are skipped. In interactive mode, flags already on the command line are shown as auto-answered steps (◇): the question, the chosen label, and the flag that was passed.
 
 **Partial flags (interactive):** skip/wait/download-url/osm2pgsql-log-level merge from argv; everything else still comes from prompts unless you pass a **full** non-interactive set.
 

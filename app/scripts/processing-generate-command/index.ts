@@ -453,6 +453,22 @@ async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PR
   return readBboxCsv(BBOX_PRESETS[choice as keyof typeof BBOX_PRESETS])
 }
 
+function logCliResolvedFlag(message: string, answerLabel: string, cliFlag: string) {
+  p.log.step(
+    `${message}\n│  ● ${answerLabel}\n│  Already set on the command line (\`${cliFlag}\`) — prompt skipped.`,
+  )
+}
+
+function logCliResolvedBinary(
+  message: string,
+  long: string,
+  value: '0' | '1',
+  when1: string,
+  when0: string,
+) {
+  logCliResolvedFlag(message, value === '1' ? when1 : when0, `${long} ${value}`)
+}
+
 async function selectBinaryFlag(message: string, initial: '0' | '1', when1: string, when0: string) {
   const v = await p.select({
     message,
@@ -476,13 +492,17 @@ async function binaryFromCliOrPrompt(
 ) {
   if (argPresent(long)) {
     const v = parseBin(long, values[valueKey], initial)
-    p.log.message(`${long} ${v} (from CLI)`)
+    logCliResolvedBinary(message, long, v, when1, when0)
     return v
   }
   return selectBinaryFlag(message, initial, when1, when0)
 }
 
 function resolveWaitFreshData(skipDownload: '0' | '1') {
+  const message = 'Wait for fresh Geofabrik data? (WAIT_FOR_FRESH_DATA)'
+  const when1 = 'Yes — wait until extract is fresh'
+  const when0 = 'No — not waiting'
+
   if (skipDownload === '0') {
     if (argPresent('--wait-fresh-data') && values['wait-fresh-data'] !== '0') {
       p.log.warn(
@@ -493,7 +513,7 @@ function resolveWaitFreshData(skipDownload: '0' | '1') {
   }
   if (argPresent('--wait-fresh-data')) {
     const v = parseBin('--wait-fresh-data', values['wait-fresh-data'], '0')
-    p.log.message(`--wait-fresh-data ${v} (from CLI)`)
+    logCliResolvedBinary(message, '--wait-fresh-data', v, when1, when0)
     return v
   }
   return '0' as const
@@ -595,7 +615,22 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   if (argPresent('--download-url')) {
     const u = values['download-url']?.trim() ?? ''
     downloadUrl = u || undefined
-    if (downloadUrl) p.log.message(`--download-url set (from CLI)`)
+    if (downloadUrl) {
+      logCliResolvedFlag(
+        'Geofabrik extract URL (PROCESS_GEOFABRIK_DOWNLOAD_URL)',
+        downloadUrl,
+        `--download-url ${downloadUrl}`,
+      )
+    }
+  }
+
+  const logLevel = values['osm2pgsql-log-level']?.trim()
+  if (logLevel) {
+    logCliResolvedFlag(
+      'osm2pgsql log level (OSM2PGSQL_LOG_LEVEL)',
+      logLevel,
+      `--osm2pgsql-log-level ${logLevel}`,
+    )
   }
 
   const action = await p.select({
@@ -622,9 +657,8 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
     SKIP_WARM_CACHE: skipWarm,
     WAIT_FOR_FRESH_DATA: waitFresh,
   }
-  const logLevel = values['osm2pgsql-log-level']?.trim()
-  if (logLevel) overrides.OSM2PGSQL_LOG_LEVEL = logLevel
   if (downloadUrl) overrides.PROCESS_GEOFABRIK_DOWNLOAD_URL = downloadUrl
+  if (logLevel) overrides.OSM2PGSQL_LOG_LEVEL = logLevel
 
   return {
     overrides,
