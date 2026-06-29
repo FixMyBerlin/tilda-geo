@@ -12,7 +12,7 @@ local function create_subcategories_adjoining_or_isolated(category)
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
-      return category(tags) and category_is_sidepath(tags) and tags.is_sidepath ~= 'no'
+      return category:is_active(tags) and category_is_sidepath(tags) and tags.is_sidepath ~= 'no'
     end,
     process = category.process,
   })
@@ -24,7 +24,7 @@ local function create_subcategories_adjoining_or_isolated(category)
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
-      return category(tags) and (tags.is_sidepath == 'no' or tags.highway == 'service' or tags.highway == 'track')
+      return category:is_active(tags) and (tags.is_sidepath == 'no' or tags.highway == 'service' or tags.highway == 'track')
     end,
     process = category.process,
   })
@@ -36,7 +36,7 @@ local function create_subcategories_adjoining_or_isolated(category)
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     condition = function(tags)
-      return category(tags) and not category_is_sidepath(tags) and tags.is_sidepath ~= 'no' and tags.highway ~= 'service' and tags.highway ~= 'track'
+      return category:is_active(tags) and not category_is_sidepath(tags) and tags.is_sidepath ~= 'no' and tags.highway ~= 'service' and tags.highway ~= 'track'
     end,
     process = category.process,
   })

@@ -1,4 +1,3 @@
-local CLONE = require('topics.helper.clones')
 local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
 local exclude = require('topics.roads_bikelanes.helper.exclude_highways')
@@ -35,7 +34,7 @@ local function roads_bikelanes_roads(context)
   local object_tags = context.object_tags
   local object_geom = context.object_geom
 
-  local result_tags = CLONE.structured_clone(context.shared_result_tags)
+  local result_tags = merge_table({}, context.shared_result_tags)
   merge_table(result_tags, context.cycleway_presence)
 
   if not highway_classes.sidepath_highway_classes[object_tags.highway] then

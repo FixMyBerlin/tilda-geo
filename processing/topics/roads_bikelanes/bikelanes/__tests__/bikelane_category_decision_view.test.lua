@@ -1,96 +1,56 @@
-describe('bikelane_category decision view', function()
+describe('categorize_bikelane sanitizer-dependent behavior', function()
+  require('topics.helper.osm2pgsql')
   local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
   local SANITIZE_VALUES = require('topics.helper.sanitize_values')
-  local BikelaneCategory = bikelane_categories.bikelane_category
+  local categorize_bikelane = bikelane_categories.categorize_bikelane
 
-  local function make_test_category(condition)
-    return BikelaneCategory.new({
-      id = 'testDecisionView',
-      desc = '',
-      infrastructureExists = false,
-      implicitOneWay = false,
-      implicitOneWayConfidence = 'not_applicable',
-      copySurfaceSmoothnessFromParent = false,
-      condition = condition,
-    })
-  end
-
-  it('treats direct DISALLOWED_VALUE fields as missing', function()
-    local category = make_test_category(function(tags)
-      return tags.traffic_mode_right == nil
-    end)
-
-    local result = category({
-      traffic_mode_right = SANITIZE_VALUES.disallowed,
-    })
-
-    assert.is_true(result)
-  end)
-
-  it('resolves sided raw tags through sanitizer for decision keys', function()
-    local category = make_test_category(function(tags)
-      return tags.traffic_mode_right == 'motor_vehicle'
-    end)
-
-    local result = category({
-      ['traffic_mode:right'] = 'motorized',
-    })
-
-    assert.is_true(result)
-  end)
-
-  it('keeps resolved sided keys nil when sanitizer disallows value', function()
-    local category = make_test_category(function(tags)
-      return tags.separation_left == nil
-    end)
-
-    local result = category({
-      ['separation:left'] = 'totally_unknown',
-      separation_left = 'should_not_override_sanitizer_result',
-    })
-
-    assert.is_true(result)
-  end)
-
-  it('falls back to direct key reads when no sided sanitizer exists', function()
-    local category = make_test_category(function(tags)
-      return tags.foo_left == 'raw_value'
-    end)
-
-    local result = category({
-      foo_left = 'raw_value',
-    })
-
-    assert.is_true(result)
-  end)
-
-  it('hides DISALLOWED_VALUE entries during pairs iteration', function()
-    local category = make_test_category(function(tags)
-      local key_count = 0
-      for _ in pairs(tags) do
-        key_count = key_count + 1
-      end
-      return key_count == 1
-    end)
-
-    local result = category({
+  it('excludes cyclewayOnHighwayProtected when traffic_mode:right=motorized is sanitized to motor_vehicle', function()
+    local tags = {
       highway = 'cycleway',
-      traffic_mode_right = SANITIZE_VALUES.disallowed,
-    })
+      ['is_sidepath'] = 'yes',
+      ['separation:left'] = 'bollard',
+      ['traffic_mode:right'] = 'motorized',
+    }
 
-    assert.is_true(result)
+    local category = categorize_bikelane(tags)
+    assert.is_not_nil(category)
+    assert.are.not_equal('cyclewayOnHighwayProtected', category.id)
   end)
 
-  it('forwards writes from decision view to original tags', function()
-    local category = make_test_category(function(tags)
-      tags.lifecycle = 'construction'
-      return true
-    end)
+  it('treats disallowed separation as missing for footAndCyclewaySegregated', function()
+    local tags = {
+      highway = 'cycleway',
+      ['traffic_mode:right'] = 'foot',
+      separation_right = SANITIZE_VALUES.disallowed,
+    }
 
-    local source_tags = { highway = 'residential' }
-    local result = category(source_tags)
+    local category = categorize_bikelane(tags)
+    assert.is_not_nil(category)
+    assert.are.equal('footAndCyclewaySegregated_adjoiningOrIsolated', category.id)
+  end)
 
-    assert.is_true(result)
-    assert.are.equal(source_tags.lifecycle, 'construction')
+  it('does not treat marking values on separation keys as physical separation for PBL', function()
+    local tags = {
+      highway = 'cycleway',
+      ['is_sidepath'] = 'yes',
+      ['separation:left'] = 'solid_line',
+    }
+
+    local category = categorize_bikelane(tags)
+    assert.is_not_nil(category)
+    assert.are.not_equal('cyclewayOnHighwayProtected', category.id)
+  end)
+
+  it('still mutates tags through category.process on plain tables', function()
+    local tags = {
+      highway = 'service',
+      segregated = 'no',
+      bicycle = 'designated',
+      foot = 'designated',
+    }
+
+    local category = categorize_bikelane(tags)
+    assert.is_not_nil(category)
+    assert.is_truthy(string.find(category.process and tags.description or '', 'Zufahrtsweg', 1, true))
   end)
 end)

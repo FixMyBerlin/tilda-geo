@@ -97,11 +97,19 @@ Required naming rhythm:
 
 ## What To Avoid
 
+- Hot-path categorize loops that wrap tags in metatable proxies (for example `decision_tags_view` with `__index` per read)
+- Nested category checks via `category(tags)` when `__call` adds overhead — use `category:is_active(tags)` or `category.condition(tags)` on plain tables
 - `*_tables.lua` indirection files for standard topics
   - table definition should live in the geometry module that owns inserts
   - parking remains the known exception where existing pattern may differ
 - root files containing business logic
 - noop `*_points.lua` modules
+
+## Performance (categorization hot paths)
+
+- Categorize loops should read plain tag tables only; call sanitizers explicitly in the few conditions that need sided keys
+- Reference pattern: parking `category:is_active(object.tags)` in `categorize_*` helpers
+- roads_bikelanes subcategories must call `parent:is_active(tags)`, never `parent(tags)`
 
 ## Edge Case: Bicycle Parking Point Writes
 
