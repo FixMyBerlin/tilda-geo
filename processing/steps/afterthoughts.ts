@@ -2,7 +2,6 @@ import type { Topic } from '../constants/topics.const'
 import { exportSettlementAreaData } from '../topics/roads_bikelanes/pseudo_tags_settlement_area/exportSettlementAreaData'
 import { exportSidepathData } from '../topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { logEnd, logStart } from '../utils/logging'
-import { getSkipUnchangedContext } from '../utils/skipUnchanged'
 import { aggregateLengths } from './afterthoughts/aggregateLengths'
 import { recordAfterthought } from './metadata'
 
@@ -23,18 +22,16 @@ export async function runAfterthoughts(
     '[Afterthoughts] Deferred work (statistics for current run, pseudo-tag CSVs for next run).',
   )
 
-  const skipContext = await getSkipUnchangedContext(fileChanged)
-
   await recordAfterthought(processingId, 'statistics', await aggregateLengths())
   await recordAfterthought(
     processingId,
     'sidepath_export',
-    await exportSidepathData(fileChanged, skipContext),
+    await exportSidepathData(fileChanged, ranTopics),
   )
   await recordAfterthought(
     processingId,
     'settlement_area_export',
-    await exportSettlementAreaData(fileChanged, skipContext, ranTopics),
+    await exportSettlementAreaData(fileChanged, ranTopics),
   )
 
   logEnd('Processing: Afterthoughts')

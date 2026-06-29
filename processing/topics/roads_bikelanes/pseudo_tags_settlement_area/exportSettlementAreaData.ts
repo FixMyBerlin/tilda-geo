@@ -7,11 +7,7 @@ import { toIsoWindow } from '../../../steps/metadata'
 import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing'
 import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
-import {
-  type SkipUnchangedContext,
-  roadsBikelanesSettlementAreaDir,
-  willSkipTopic,
-} from '../../../utils/skipUnchanged'
+import { roadsBikelanesSettlementAreaDir } from '../../../utils/skipUnchanged'
 
 const LOG_PREFIX = '[Afterthoughts][SettlementArea]'
 
@@ -28,11 +24,7 @@ const LOG_PREFIX = '[Afterthoughts][SettlementArea]'
  * existing CSV unless landcover ran (settlement polygons may have changed); and when the OSM
  * file and pseudo_tags_settlement_area/ are unchanged, reuse it too.
  */
-export async function exportSettlementAreaData(
-  fileChanged: boolean,
-  skipContext: SkipUnchangedContext,
-  ranTopics: Set<Topic>,
-) {
+export async function exportSettlementAreaData(fileChanged: boolean, ranTopics: Set<Topic>) {
   const runFile = join(import.meta.dir, 'sql', 'run_settlement_area_estimation.sql')
   const csvPath = join(PSEUDO_TAGS_DATA, 'settlement_area_estimation.csv')
 
@@ -40,8 +32,9 @@ export async function exportSettlementAreaData(
 
   const csvExists = await Bun.file(csvPath).exists()
   const landcoverRan = ranTopics.has('landcover')
+  const roadsBikelanesRan = ranTopics.has('roads_bikelanes')
 
-  if (await willSkipTopic('roads_bikelanes', fileChanged, skipContext)) {
+  if (!roadsBikelanesRan) {
     if (csvExists && !landcoverRan) {
       console.log(
         `${LOG_PREFIX} ⏩ Skipping — roads_bikelanes did not run; existing CSV will be used next run.`,
@@ -63,7 +56,7 @@ export async function exportSettlementAreaData(
     }
   }
   const settlementCodeChanged = await directoryHasChanged(roadsBikelanesSettlementAreaDir)
-  if (!fileChanged && !settlementCodeChanged && !landcoverRan && csvExists) {
+  if (!roadsBikelanesRan && !fileChanged && !settlementCodeChanged && !landcoverRan && csvExists) {
     console.log(
       `${LOG_PREFIX} ⏩ Skipping — OSM file and pseudo_tags_settlement_area are unchanged; reusing existing CSV.`,
       JSON.stringify({ csvPath }),

@@ -1,16 +1,13 @@
 import { join } from 'node:path'
 import { $ } from 'bun'
 import { PSEUDO_TAGS_DATA } from '../../../constants/directories.const'
+import type { Topic } from '../../../constants/topics.const'
 import { afterthoughtSkipped } from '../../../steps/afterthoughts/types'
 import { toIsoWindow } from '../../../steps/metadata'
 import { directoryHasChanged, updateDirectoryHash } from '../../../utils/hashing'
 import { logEnd, logStart } from '../../../utils/logging'
 import { params } from '../../../utils/parameters'
-import {
-  type SkipUnchangedContext,
-  roadsBikelanesSidepathDir,
-  willSkipTopic,
-} from '../../../utils/skipUnchanged'
+import { roadsBikelanesSidepathDir } from '../../../utils/skipUnchanged'
 
 const LOG_PREFIX = '[Afterthoughts][Sidepath]'
 
@@ -20,7 +17,7 @@ const LOG_PREFIX = '[Afterthoughts][Sidepath]'
  * Writes PSEUDO_TAGS_DATA/is_sidepath_estimation.csv for the next run's roads_bikelanes Lua import.
  * If tables don't exist yet (first run / empty DB), we warn and continue.
  */
-export async function exportSidepathData(fileChanged: boolean, skipContext: SkipUnchangedContext) {
+export async function exportSidepathData(fileChanged: boolean, ranTopics: Set<Topic>) {
   const sqlDir = join(import.meta.dir, 'sql')
   const runFile = join(sqlDir, 'run_is_sidepath_estimation.sql')
   const csvPath = join(PSEUDO_TAGS_DATA, 'is_sidepath_estimation.csv')
@@ -28,8 +25,9 @@ export async function exportSidepathData(fileChanged: boolean, skipContext: Skip
   await $`mkdir -p ${PSEUDO_TAGS_DATA}`
 
   const csvExists = await Bun.file(csvPath).exists()
+  const roadsBikelanesRan = ranTopics.has('roads_bikelanes')
 
-  if (await willSkipTopic('roads_bikelanes', fileChanged, skipContext)) {
+  if (!roadsBikelanesRan) {
     if (csvExists) {
       const excludedByProcessOnlyTopics =
         params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes('roads_bikelanes')
@@ -52,7 +50,7 @@ export async function exportSidepathData(fileChanged: boolean, skipContext: Skip
   }
 
   const sidepathCodeChanged = await directoryHasChanged(roadsBikelanesSidepathDir)
-  if (!fileChanged && !sidepathCodeChanged && csvExists) {
+  if (!roadsBikelanesRan && !fileChanged && !sidepathCodeChanged && csvExists) {
     console.log(
       `${LOG_PREFIX} ⏩ Skipping — OSM file and pseudo_tags_sidepath are unchanged; reusing existing CSV.`,
       JSON.stringify({ csvPath }),
