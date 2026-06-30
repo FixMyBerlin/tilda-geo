@@ -36,9 +36,11 @@ a way is **innerorts** (inside a settlement area) or **außerorts**. Same round-
 (`processing/topics/landcover/`, runs ~weekly or on demand with `PROCESS_ONLY_TOPICS=landcover`). The
 daily pipeline only reads it.
 
-## Way set — keep in sync with sidepath (FYI)
+## Way set — broader than sidepath (FYI)
 
-The way set (road classes + path classes) mirrors `is_sidepath`. The three places that must stay
-aligned cross-reference each other in comments:
-`in_settlement_area.lua`, `sql/run_settlement_area_estimation.sql`, and
-`../pseudo_tags_sidepath/sql/run_is_sidepath_estimation.sql`.
+Settlement classifies **all** rows in `roads` (every road class, incl. service and motorway) plus
+`roadsPathClasses` and `bikelanes`. The sidepath export uses a **narrower** road filter (primary and
+below only) — see `../pseudo_tags_sidepath/sql/run_is_sidepath_estimation.sql`.
+
+Cross-references for settlement Lua scope vs export: `in_settlement_area.lua` and
+`sql/run_settlement_area_estimation.sql`.
