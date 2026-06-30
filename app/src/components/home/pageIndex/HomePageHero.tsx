@@ -1,5 +1,5 @@
-import { ArrowUpRightIcon } from '@heroicons/react/24/outline'
 import { Link } from '@/components/shared/links/Link'
+import { DemoButton } from './DemoButton'
 
 export const HomePageHero = () => {
   return (
@@ -15,14 +15,7 @@ export const HomePageHero = () => {
           nachvollziehbarer.
         </p>
         <div className="mt-8 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-          <Link
-            href="https://fixmycity.de/termin-vereinbaren"
-            classNameOverwrite="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-gray-900 no-underline shadow-lg transition-colors select-none hover:bg-brand/70 focus-visible:ring-2 focus-visible:ring-yellow-800/40 focus-visible:outline-none active:bg-brand/70"
-            blank
-          >
-            Jetzt kostenlose Demo anfragen
-            <ArrowUpRightIcon className="size-5" aria-hidden />
-          </Link>
+          <DemoButton variant="brand" />
           <Link
             href="https://fixmycity.de/referenzen"
             classNameOverwrite="inline-flex items-center justify-center gap-2 rounded-lg border-[1.5px] border-gray-700/60 bg-transparent px-6 py-3 text-base font-medium text-gray-800 no-underline transition-colors select-none hover:border-gray-700 hover:bg-gray-700/5 focus-visible:ring-2 focus-visible:ring-gray-700/30 focus-visible:outline-none active:bg-gray-700/10"

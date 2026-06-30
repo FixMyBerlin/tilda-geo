@@ -1,4 +1,4 @@
-import { Link } from '@/components/shared/links/Link'
+import { DemoButton } from './DemoButton'
 
 export const HomePageCtaBanner = () => {
   return (
@@ -12,13 +12,7 @@ export const HomePageCtaBanner = () => {
           erleichtert.
         </p>
         <div className="mt-8 flex justify-center">
-          <Link
-            href="https://fixmycity.de/termin-vereinbaren"
-            classNameOverwrite="inline-flex items-center justify-center rounded-lg bg-white px-7 py-4 text-base font-medium text-gray-700 no-underline shadow-lg transition-colors select-none hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-gray-700/30 focus-visible:outline-none active:bg-gray-200"
-            blank
-          >
-            Jetzt kostenlose Demo anfragen
-          </Link>
+          <DemoButton variant="white" />
         </div>
       </div>
     </section>
