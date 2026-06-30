@@ -63,7 +63,7 @@ Each profile scan reads all of Brandenburg (~325 MB download) before Berlin clip
 
 ```
 download (regional PBF)
-  → monolithic osmium tags-filter ONCE   (filter-expressions.txt)
+  → monolithic osmium tags-filter ONCE   (filter-expressions-nightly.txt)
   → optional global bbox ONCE            (PROCESS_ONLY_BBOX / topic bboxes)
   → each topic → osm2pgsql on shared or topic-bbox clip
 ```
@@ -90,6 +90,12 @@ Properties:
 - Topology inside the clip matches the legacy monolithic → bbox order.
 
 Do **not** repeat: per-profile `tags-filter` on the full regional download before bbox.
+
+## Weekend landcover exception (2026-06)
+
+Nightly topics were slowed by `wr/building`/`wr/leisure`/`wr/landuse` in the shared monolithic filter — osm2pgsql parses those ways even though only weekend topics import most of them. `wr/landuse` and `wr/building` were moved to `filter-expressions-weekend.txt` and filtered from the download for topics with `schedule: 'weekend'`. `wr/leisure` stays in the nightly filter for now to avoid changing POI/barrier relation coverage in this performance-only change. This is **not** the abandoned per-topic split above; nightly still uses one shared filter + bbox.
+
+See [`benchmarks/README.md`](../benchmarks/README.md) for measurements.
 
 ## Related docs
 

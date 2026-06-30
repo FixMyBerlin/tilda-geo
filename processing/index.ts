@@ -2,7 +2,7 @@ import { runAfterthoughts } from './steps/afterthoughts'
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
 import { triggerPrivateApi } from './steps/externalTriggers'
-import { globalBboxFilter, tagFilter } from './steps/filter'
+import { globalBboxFilter, nightlyTagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
@@ -27,18 +27,23 @@ async function main() {
     const sourceFileName = fileName
 
     logPadded('Processing: Filter', berlinTimeString(new Date()))
-    // tagFilter regenerates filtered file if needed, but only returns sourceFileChanged
-    // (filter regeneration doesn't affect diffing logic)
-    const tagFilterResponse = await tagFilter(fileName, fileChanged)
-    if (tagFilterResponse) ({ fileName, fileChanged } = tagFilterResponse)
+    // nightlyTagFilter may regenerate the filtered PBF; filterRegenerated triggers bbox clip regen.
+    // fileChanged stays tied to the download — filter regeneration does not affect diffing.
+    const nightlyFilter = await nightlyTagFilter(fileName, fileChanged)
+    fileName = nightlyFilter.fileName
+    const nightlyFilterRegenerated = nightlyFilter.filterRegenerated
 
-    // globalBboxFilter regenerates filtered file when active, but only returns sourceFileChanged
-    // (filter regeneration doesn't affect diffing logic - filtered data can still be diffed)
-    const globalBboxFilterResponse = await globalBboxFilter(fileName, fileChanged)
-    if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
+    // globalBboxFilter may regenerate the bbox clip when active; fileChanged stays tied to the download.
+    // Filter regeneration does not affect diffing logic — filtered data can still be diffed.
+    const globalBboxFilterResponse = await globalBboxFilter(
+      fileName,
+      fileChanged,
+      nightlyFilterRegenerated,
+    )
+    if (globalBboxFilterResponse) fileName = globalBboxFilterResponse.fileName
 
     const processingStartTime = Date.now()
-    const ranTopics = await processTopics(fileName, fileChanged, processingId)
+    const ranTopics = await processTopics(fileName, fileChanged, processingId, sourceFileName)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
 

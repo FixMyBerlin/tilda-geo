@@ -1,5 +1,5 @@
-# Filter .osm file down to only what we need.
-# Keep those filters broad (keys only); use the LUA file per topic to further filter the data
+# Nightly OSM tag filter.
+# Keep filters broad (keys only); use the Lua file per topic to further filter the data.
 # Docs: https://docs.osmcode.org/osmium/latest/osmium-tags-filter.html
 
 # Topic: Boundaries
@@ -11,11 +11,6 @@ nwr/shop
 
 # Topic: Citycenter
 nwr/place
-
-# Topic: landcover
-wr/landuse
-wr/building
-wr/leisure
 
 # Topic: Barriers
 w/railway
@@ -30,6 +25,7 @@ n/public_transport
 
 # Topic: poiClassification
 nw/tourism
+wr/leisure
 
 # Topic: Traffic signs
 n/traffic_sign*

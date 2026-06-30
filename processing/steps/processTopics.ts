@@ -15,7 +15,7 @@ import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { getSkipUnchangedContext, topicPath, willSkipTopic } from '../utils/skipUnchanged'
 import { getTopicScheduleSkipReason } from '../utils/topicScheduleEligibility'
-import { bboxesFilter, filteredFilePath } from './filter'
+import { filteredFilePath, resolveTopicInputFile } from './filter'
 import {
   type ProcessingTopicsMeta,
   type TopicRanEntry,
@@ -110,6 +110,7 @@ export async function processTopics(
   fileName: string,
   fileChanged: boolean,
   processingId: number | null,
+  sourceFileName: string,
 ) {
   logStart('Processing: Topics')
 
@@ -134,7 +135,6 @@ export async function processTopics(
     await dropAllDiffTables()
   }
 
-  const useGlobalBboxFilter = params.processOnlyBbox !== null
   if (params.processOnlyBbox) {
     console.log(
       `Topics: ℹ️ Using global PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}. Topic bbox filters are skipped.`,
@@ -145,7 +145,6 @@ export async function processTopics(
   const isSaturdayRun = isBerlinSaturday(new Date())
 
   for (const [topic, entry] of Array.from(topicsConfig)) {
-    let innerBboxes = entry.bboxes
     let innerFileName = fileName
 
     const scheduleSkipReason = getTopicScheduleSkipReason(topic, entry, isSaturdayRun)
@@ -184,17 +183,15 @@ export async function processTopics(
       continue
     }
 
-    // In dev mode with PROCESS_ONLY_BBOX we already applied a global bbox filter in index.ts.
-    // Keep topic bboxes only when no global bbox is active.
-    if (useGlobalBboxFilter) {
-      innerBboxes = null
-    }
-
-    // Bboxes: Create filtered source file
-    if (innerBboxes) {
-      innerFileName = `${topic}_extracted.osm.pbf`
-      await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
-    }
+    // Resolve schedule PBF (nightly vs weekend) and optional topic bbox extract.
+    innerFileName = await resolveTopicInputFile({
+      schedule: entry.schedule,
+      topic,
+      pipelineFileName: fileName,
+      sourceFileName,
+      fileChanged,
+      topicBboxes: entry.bboxes,
+    })
 
     // Get all tables related to `topic`
     const topicTables = await getTopicTables(topic)
