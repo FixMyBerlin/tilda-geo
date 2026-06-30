@@ -57,8 +57,12 @@ const products: Product[] = [
     imageAlt: 'TILDA Parkraum: Parkraumdaten in Berlin',
     liveDemo: {
       to: '/regionen/$regionSlug',
-      params: { regionSlug: 'parkraum' },
-      search: { map: '13.5/52.4918/13.4261' } as LinkOptions<Router>['search'],
+      params: { regionSlug: 'parkraum-berlin' },
+      search: {
+        map: '14.8/52.4694/13.3311',
+        config: '1p5jpsu.i19t0l.2zus',
+        v: 2,
+      } as LinkOptions<Router>['search'],
     },
   },
   {
