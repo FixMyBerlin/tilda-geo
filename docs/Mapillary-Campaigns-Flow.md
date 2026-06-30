@@ -32,30 +32,21 @@ The system uses Mapillary coverage data to create specialized campaigns that onl
 
 ### 2. Load CSV in LUA Processing
 
-**Location:** `processing/topics/roads_bikelanes/roads_bikelanes.lua`
+**Location:** `processing/topics/roads_bikelanes/roads_bikelanes.lua` → `processing/topics/roads_bikelanes/pseudo_tags/prepare_pseudo_tags_roads_bikelanes.lua`
 
-**Initialization:**
+Mapillary coverage is loaded together with the other roads_bikelanes pseudo-tags (sidepath) in a single merged lookup — see `processing/topics/roads_bikelanes/pseudo_tags/README.md`.
 
-```lua
-local mapillary_coverage_data = load_csv_mapillary_coverage()
-```
+**CSV Loading:**
 
-**CSV Loading Chain:**
+1. `load_merged_pseudo_tags()` → `processing/topics/roads_bikelanes/pseudo_tags/load_merged_pseudo_tags.lua`
+2. Parses `mapillary_coverage.csv` (and the sidepath CSV) with the `ftcsv` library into **one** hash map: `{ [osm_id] => { mapillary_coverage = "regular|pano", … } }`
+3. Caches in memory for the entire processing run — one lookup per way in the hot path.
 
-1. `load_csv_mapillary_coverage()` → `processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/load_csv_mapillary_coverage.lua`
-2. Uses generic `load_csv_mapillary()` → `processing/topics/roads_bikelanes/pseudo_tags_mapillary_coverage/load_csv_mapillary.lua`
-3. Parses CSV using `ftcsv` library
-4. Transforms into hash map: `{ [osm_id] => { mapillary_coverage = "regular|pano" } }`
-5. Caches in memory for the entire processing run
+**Apply During Processing:**
 
-**Lookup During Processing:**
+`apply_pseudo_tags()` (`processing/topics/roads_bikelanes/pseudo_tags/apply_pseudo_tags.lua`) reads the merged row and sets `object_tags.mapillary_coverage`.
 
-```lua
-local mapillary_coverage_lines = mapillary_coverage_data:get()
-object_tags.mapillary_coverage = mapillary_coverage(mapillary_coverage_lines, object.id)
-```
-
-- Returns: `'pano' | 'regular' | nil`
+- Value: `'pano' | 'regular' | nil`
 - `nil` means no Mapillary coverage found for that OSM way
 - The value is stored directly in `object_tags.mapillary_coverage` for easier access.
 

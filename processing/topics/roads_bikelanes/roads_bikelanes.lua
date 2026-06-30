@@ -28,7 +28,7 @@ function osm2pgsql.process_way(object)
   object_tags._id = object.id
   object_tags._timestamp = object.timestamp
 
-  prepare_pseudo_tags_roads_bikelanes(object_tags, object_tags._id)
+  prepare_pseudo_tags_roads_bikelanes(object_tags, object_tags._id, object_geom)
 
   transform_cycleway_opposite_schema(object_tags)
   transform_construction_prefix(object_tags)
