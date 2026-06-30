@@ -53,7 +53,7 @@ const data = {
   'atlas_bicycleParking--access_cargo_bike=yes': 'Zugelassen',
   'atlas_bicycleParking--access--key': 'Zugang',
   'atlas_bicycleParking--access=customers': 'Kunden',
-  'atlas_bicycleParking--access=permissive': 'Öffentlich, geduldet',
+  'atlas_bicycleParking--access=permissive': 'Öffentliche Nutzung geduldet',
   'atlas_bicycleParking--access=private': 'Privat',
   'atlas_bicycleParking--access=yes': 'Öffentlich',
   'atlas_bicycleParking--bicycle_parking--key': 'Fahrradabstellanlage',

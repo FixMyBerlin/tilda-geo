@@ -16,7 +16,7 @@ attributes:
       - value: customers
         label: Kunden
       - value: permissive
-        label: Öffentlich, geduldet
+        label: Öffentliche Nutzung geduldet
       - value: private
         label: Privat
   - key: covered

@@ -62,3 +62,4 @@ attributes:
   - key: colours
     label: Farben
     format: sanitized_strings
+    description: Offizielle Farbe/Farben der Route

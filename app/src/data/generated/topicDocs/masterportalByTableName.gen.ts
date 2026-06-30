@@ -127,7 +127,7 @@ const data = {
         format: {
           yes: 'Öffentlich',
           customers: 'Kunden',
-          permissive: 'Öffentlich, geduldet',
+          permissive: 'Öffentliche Nutzung geduldet',
           private: 'Privat',
         },
       },

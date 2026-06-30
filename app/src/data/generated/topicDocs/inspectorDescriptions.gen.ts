@@ -46,6 +46,12 @@ const data = {
       },
     },
   },
+  atlas_bikeroutes: {
+    keys: {
+      colours: 'Offizielle Farbe/Farben der Route',
+    },
+    values: {},
+  },
   atlas_bikeSuitability: {
     keys: {
       length:

@@ -302,7 +302,7 @@ const data = {
           },
           {
             value: 'permissive',
-            label: 'Öffentlich, geduldet',
+            label: 'Öffentliche Nutzung geduldet',
           },
           {
             value: 'private',
@@ -2714,6 +2714,7 @@ const data = {
         key: 'colours',
         type: 'sanitized_strings',
         label: 'Farben',
+        description: 'Offizielle Farbe/Farben der Route',
         values: [],
       },
     ],
