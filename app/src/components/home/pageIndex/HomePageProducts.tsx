@@ -100,12 +100,22 @@ export const HomePageProducts = () => {
                 className="flex flex-col overflow-hidden rounded-2xl border border-gray-500/15 bg-white"
               >
                 {product.image && (
-                  <Img
-                    src={product.image}
-                    alt={product.imageAlt ?? ''}
-                    loading="lazy"
-                    className="aspect-[16/10] w-full border-b border-gray-500/10 object-cover object-center"
-                  />
+                  <div className="relative">
+                    <Img
+                      src={product.image}
+                      alt={product.imageAlt ?? ''}
+                      loading="lazy"
+                      className="aspect-[16/10] w-full border-b border-gray-500/10 object-cover object-center"
+                    />
+                    {product.beta && (
+                      <Pill
+                        color="amber"
+                        className="absolute top-3 right-3 rounded py-0.5 font-semibold shadow-sm"
+                      >
+                        beta
+                      </Pill>
+                    )}
+                  </div>
                 )}
 
                 <div className="flex flex-1 flex-col p-7 sm:p-8">
@@ -115,14 +125,6 @@ export const HomePageProducts = () => {
                     </span>
                     <h3 className="text-xl font-semibold text-gray-900 sm:text-2xl">
                       {product.name}
-                      {product.beta && (
-                        <Pill
-                          color="amberSoft"
-                          className="ml-2 rounded py-0.5 align-middle font-semibold"
-                        >
-                          beta
-                        </Pill>
-                      )}
                     </h3>
                   </div>
 
