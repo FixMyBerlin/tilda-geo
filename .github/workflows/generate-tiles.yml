@@ -20,11 +20,21 @@ on:
         type: string
         required: false
         default: 'off'
+      PIPELINE:
+        type: string
+        required: false
+        default: 'legacy'
 permissions:
   contents: read
 
 jobs:
   generate-tiles:
+    # Never run two tile-generation jobs against the same environment at once.
+    # The on-host file lock is a backup, not a substitute: a Germany run can exceed
+    # the 3h cron interval, so the next scheduled run must wait rather than overlap.
+    concurrency:
+      group: red-green-${{ inputs.ENVIRONMENT }}
+      cancel-in-progress: false
     environment:
       name: ${{inputs.ENVIRONMENT}}
       url: ${{inputs.url}}
@@ -38,7 +48,12 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            echo "Restarting `processing` container"
             cd /srv/
-            docker compose down processing
-            WAIT_FOR_FRESH_DATA=1 SKIP_DOWNLOAD=0 PROCESSING_DIFFING_MODE="${{ inputs.PROCESSING_DIFFING_MODE || 'off' }}" docker compose up -d processing
+            if [ "${{ inputs.PIPELINE }}" = "red-green" ]; then
+              echo "Running red/green pipeline"
+              docker compose run --rm processing bun run red-green
+            else
+              echo "Restarting legacy in-place processing"
+              docker compose down processing
+              WAIT_FOR_FRESH_DATA=1 SKIP_DOWNLOAD=0 PROCESSING_DIFFING_MODE="${{ inputs.PROCESSING_DIFFING_MODE || 'off' }}" docker compose up -d processing
+            fi

@@ -209,6 +209,148 @@
       "required": true,
       "githubSource": "vars.ECR_REGISTRY",
       "description": "Private ECR registry URL used by docker-compose to pull images."
+    },
+    {
+      "name": "PROCESSING_STAGING_DATABASE_URL",
+      "sourceEnv": "SECRET_PROCESSING_STAGING_DATABASE_URL",
+      "required": false,
+      "sensitive": true,
+      "githubSource": "secrets.PROCESSING_STAGING_DATABASE_URL",
+      "description": "Red/green: writable secondary DB the staging build targets."
+    },
+    {
+      "name": "PROMOTION_PRIMARY_DATABASE_URL",
+      "sourceEnv": "SECRET_PROMOTION_PRIMARY_DATABASE_URL",
+      "required": false,
+      "sensitive": true,
+      "githubSource": "secrets.PROMOTION_PRIMARY_DATABASE_URL",
+      "description": "Red/green: fixed primary DB that receives promoted geo tables via FDW."
+    },
+    {
+      "name": "PROMOTION_TABLES_ALLOWLIST",
+      "sourceEnv": "VAR_PROMOTION_TABLES_ALLOWLIST",
+      "required": false,
+      "githubSource": "vars.PROMOTION_TABLES_ALLOWLIST",
+      "description": "Red/green: optional comma-separated promote allowlist (empty = auto-discover public tables)."
+    },
+    {
+      "name": "PROMOTION_ROW_COUNT_TOLERANCE",
+      "sourceEnv": "VAR_PROMOTION_ROW_COUNT_TOLERANCE",
+      "required": false,
+      "defaultValue": "0.15",
+      "githubSource": "vars.PROMOTION_ROW_COUNT_TOLERANCE",
+      "description": "Red/green: max relative row-count delta vs primary before promotion (0.15 = 15%)."
+    },
+    {
+      "name": "WORKING_PBF_PATH",
+      "sourceEnv": "VAR_WORKING_PBF_PATH",
+      "required": false,
+      "githubSource": "vars.WORKING_PBF_PATH",
+      "description": "Red/green: Geofabrik baseline PBF reseeded nightly and caught up intra-day."
+    },
+    {
+      "name": "RECUT_PBF_PATH",
+      "sourceEnv": "VAR_RECUT_PBF_PATH",
+      "required": false,
+      "githubSource": "vars.RECUT_PBF_PATH",
+      "description": "Red/green: output path for the Germany recut extract."
+    },
+    {
+      "name": "RECUT_POLYGON_PATH",
+      "sourceEnv": "VAR_RECUT_POLYGON_PATH",
+      "required": false,
+      "githubSource": "vars.RECUT_POLYGON_PATH",
+      "description": "Red/green: clip polygon for osmium extract (preferred over RECUT_BBOX in production)."
+    },
+    {
+      "name": "RECUT_POLYGON_DOWNLOAD_URL",
+      "sourceEnv": "VAR_RECUT_POLYGON_DOWNLOAD_URL",
+      "required": false,
+      "githubSource": "vars.RECUT_POLYGON_DOWNLOAD_URL",
+      "description": "Red/green: URL to bootstrap RECUT_POLYGON_PATH from when missing (e.g. germany.poly)."
+    },
+    {
+      "name": "RECUT_BBOX",
+      "sourceEnv": "VAR_RECUT_BBOX",
+      "required": false,
+      "githubSource": "vars.RECUT_BBOX",
+      "description": "Red/green: bbox recut fallback when RECUT_POLYGON_PATH is unset (dev/smoke)."
+    },
+    {
+      "name": "REPLICATION_SERVER_URL",
+      "sourceEnv": "VAR_REPLICATION_SERVER_URL",
+      "required": false,
+      "githubSource": "vars.REPLICATION_SERVER_URL",
+      "description": "Red/green: intra-day replication feed (planet hourly or OSM-fr Germany)."
+    },
+    {
+      "name": "REPLICATION_LOOP_SLEEP_SECONDS",
+      "sourceEnv": "VAR_REPLICATION_LOOP_SLEEP_SECONDS",
+      "required": false,
+      "defaultValue": "60",
+      "githubSource": "vars.REPLICATION_LOOP_SLEEP_SECONDS",
+      "description": "Red/green: sleep between pyosmium catch-up retries."
+    },
+    {
+      "name": "RED_GREEN_VERIFY_ENDPOINTS",
+      "sourceEnv": "VAR_RED_GREEN_VERIFY_ENDPOINTS",
+      "required": false,
+      "githubSource": "vars.RED_GREEN_VERIFY_ENDPOINTS",
+      "description": "Red/green: comma-separated health URLs probed before/after promotion (mandatory at runtime)."
+    },
+    {
+      "name": "RED_GREEN_VERIFY_INTERVAL_MS",
+      "sourceEnv": "VAR_RED_GREEN_VERIFY_INTERVAL_MS",
+      "required": false,
+      "defaultValue": "5000",
+      "githubSource": "vars.RED_GREEN_VERIFY_INTERVAL_MS",
+      "description": "Red/green: verifier polling interval."
+    },
+    {
+      "name": "RED_GREEN_MAX_FAILURE_STREAK",
+      "sourceEnv": "VAR_RED_GREEN_MAX_FAILURE_STREAK",
+      "required": false,
+      "defaultValue": "3",
+      "githubSource": "vars.RED_GREEN_MAX_FAILURE_STREAK",
+      "description": "Red/green: max tolerated consecutive failed probes before the run fails."
+    },
+    {
+      "name": "RED_GREEN_RESEED_UTC_HOUR",
+      "sourceEnv": "VAR_RED_GREEN_RESEED_UTC_HOUR",
+      "required": false,
+      "defaultValue": "0",
+      "githubSource": "vars.RED_GREEN_RESEED_UTC_HOUR",
+      "description": "Red/green: UTC hour for the nightly Geofabrik reseed."
+    },
+    {
+      "name": "RED_GREEN_FORCE_RESEED",
+      "sourceEnv": "VAR_RED_GREEN_FORCE_RESEED",
+      "required": false,
+      "githubSource": "vars.RED_GREEN_FORCE_RESEED",
+      "description": "Red/green: set to 1 to force a Geofabrik reseed on the next run."
+    },
+    {
+      "name": "RED_GREEN_LOCK_TTL_SECONDS",
+      "sourceEnv": "VAR_RED_GREEN_LOCK_TTL_SECONDS",
+      "required": false,
+      "defaultValue": "14400",
+      "githubSource": "vars.RED_GREEN_LOCK_TTL_SECONDS",
+      "description": "Red/green: a lock older than this is treated as stale and broken (crash recovery)."
+    },
+    {
+      "name": "RED_GREEN_DELTA_WARM_ENDPOINT",
+      "sourceEnv": "VAR_RED_GREEN_DELTA_WARM_ENDPOINT",
+      "required": false,
+      "githubSource": "vars.RED_GREEN_DELTA_WARM_ENDPOINT",
+      "description": "Red/green: private endpoint for delta warm-cache when WARM_CACHE_MODE=delta."
+    },
+    {
+      "name": "WARM_CACHE_MODE",
+      "sourceEnv": "VAR_WARM_CACHE_MODE",
+      "required": false,
+      "defaultValue": "full",
+      "githubSource": "vars.WARM_CACHE_MODE",
+      "description": "Red/green: 'full' (default) or 'delta' warm-cache after promotion."
     }
   ]
 }
