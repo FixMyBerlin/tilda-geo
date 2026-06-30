@@ -188,16 +188,6 @@ const CreateForm = ({
 
   return (
     <div className="flex flex-col gap-2 rounded border border-gray-200 bg-gray-50 p-2">
-      <label className="flex flex-col gap-0.5 text-xs text-gray-600">
-        Titel
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
-        />
-      </label>
-
       <div className="flex flex-col gap-1 text-xs text-gray-600">
         Berechnungsgebiet
         <div className="flex gap-1 rounded bg-gray-200 p-0.5">
@@ -229,6 +219,16 @@ const CreateForm = ({
           regionSlug={regionSlug}
         />
       )}
+
+      <label className="flex flex-col gap-0.5 text-xs text-gray-600">
+        Titel
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="rounded border border-gray-300 px-2 py-1 text-sm"
+        />
+      </label>
 
       {areaTab === 'custom' && (
         <div className="flex flex-col gap-2">
