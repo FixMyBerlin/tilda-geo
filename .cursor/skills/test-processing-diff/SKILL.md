@@ -127,6 +127,19 @@ Notes:
 - This wrapper runs Docker+busted for the whole suite.
 - Lua modules are loaded via dotted requires (for example `topics.parking.roads.helper.result_tags`).
 
+## Lua heap profiling (performance / memory investigations)
+
+Use when tuning osm2pgsql Lua (CSV cache size, per-way growth) — not for routine diff tests.
+
+1. **Helper:** [`processing/topics/helper/memory_reporter.lua`](../../../processing/topics/helper/memory_reporter.lua) — copy the usage example at the bottom into the topic under investigation (e.g. `prepare_pseudo_tags_roads_bikelanes.lua`, `load_merged_pseudo_tags.lua`). Remove the wiring after the run.
+2. **Enable for one run:** add to repo root **`.env`** (not `docker-compose.yml`):
+   - `PT_MEMORY_REPORT=1`
+   - optional `PT_MEMORY_REPORT_EVERY=100000`
+3. Run processing as usual (`bun run processing` → paste line). Logs show `MEMORY: …` on stdout / `docker logs processing`.
+4. **Context:** national pseudo-tag performance notes live on branch `processing-performance-csvs-settlements` (`processing/docs/roads-bikelanes-nightly-performance-handoff.md`).
+
+Do not leave `memory_reporter` calls in committed prod topic code.
+
 ## Related docs
 
 - `processing/README.md` — diffing modes, `PROCESS_ONLY_*`, `SKIP_UNCHANGED`
