@@ -6,7 +6,6 @@ local log = require('topics.helper.log')
 
 local MAPILLARY_CSV = '/data/pseudoTagsData/mapillary_coverage.csv'
 local SIDEPATH_CSV = '/data/pseudoTagsData/is_sidepath_estimation.csv'
-local SETTLEMENT_CSV = '/data/pseudoTagsData/settlement_area_estimation.csv'
 
 local function ensure_entry(merged, id)
   local entry = merged[id]
@@ -83,16 +82,6 @@ local function merge_sidepath(merged, rows)
   end
 end
 
-local function merge_settlement(merged, rows)
-  for _, row in ipairs(rows) do
-    local id = tonumber(row['osm_id'])
-    local value = row['in_settlement_area']
-    if id and value and value ~= '' then
-      ensure_entry(merged, id).in_settlement_area = value
-    end
-  end
-end
-
 local function load_merged_pseudo_tags()
   local cached = nil
 
@@ -107,7 +96,6 @@ local function load_merged_pseudo_tags()
 
       merge_mapillary(cached, parse_csv_rows(MAPILLARY_CSV, 'load_merged_pseudo_tags.mapillary'))
       merge_sidepath(cached, parse_csv_rows(SIDEPATH_CSV, 'load_merged_pseudo_tags.sidepath'))
-      merge_settlement(cached, parse_csv_rows(SETTLEMENT_CSV, 'load_merged_pseudo_tags.settlement'))
 
       local sample_id, sample_row = next(cached)
       local sample = {}

@@ -7,12 +7,10 @@ describe('load_merged_pseudo_tags', function()
 
   it('merges mapillary rows into one lookup table', function()
     local original_sidepath = '/data/pseudoTagsData/is_sidepath_estimation.csv'
-    local original_settlement = '/data/pseudoTagsData/settlement_area_estimation.csv'
     local original_mapillary = '/data/pseudoTagsData/mapillary_coverage.csv'
 
     os.execute('mkdir -p /data/pseudoTagsData')
     os.execute('touch /data/pseudoTagsData/is_sidepath_estimation.csv')
-    os.execute('touch /data/pseudoTagsData/settlement_area_estimation.csv')
     os.execute('cp ' .. mapillary_csv .. ' /data/pseudoTagsData/mapillary_coverage.csv')
 
     local data = load_merged_pseudo_tags()
@@ -24,7 +22,6 @@ describe('load_merged_pseudo_tags', function()
 
     os.execute('cp ' .. original_mapillary .. ' /data/pseudoTagsData/mapillary_coverage.csv 2>/dev/null')
     os.execute('cp ' .. original_sidepath .. ' /data/pseudoTagsData/is_sidepath_estimation.csv 2>/dev/null')
-    os.execute('cp ' .. original_settlement .. ' /data/pseudoTagsData/settlement_area_estimation.csv 2>/dev/null')
   end)
 
   it('merges sidepath rows (value + optional CQI columns) into the same lookup table', function()

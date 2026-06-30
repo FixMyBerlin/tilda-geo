@@ -114,11 +114,7 @@ const buildTopicsForRun = (runStart: Date, dayIndex: number) => {
   return { topics, processingDurationMs: cursorMs - runStart.getTime() }
 }
 
-const buildAfterthoughtsForRun = (
-  processingCompletedAt: Date,
-  dayIndex: number,
-  saturdayRun: boolean,
-) => {
+const buildAfterthoughtsForRun = (processingCompletedAt: Date, dayIndex: number) => {
   let cursorMs = processingCompletedAt.getTime() + 30_000
 
   const nextWindow = (baseMs: number) => {
@@ -132,11 +128,6 @@ const buildAfterthoughtsForRun = (
   const afterthoughts: ProcessingAfterthoughtsMeta = {
     statistics: nextWindow(3 * 60_000),
     sidepath_export: dayIndex % 5 === 3 ? { skipped: 'unchanged' } : nextWindow(90_000),
-    settlement_area_export: saturdayRun
-      ? nextWindow(2 * 60_000)
-      : dayIndex % 6 === 4
-        ? { skipped: 'no_settlement_areas_table' }
-        : nextWindow(75_000),
   }
 
   return { afterthoughts }
@@ -177,7 +168,6 @@ const seedProcessingMeta = async () => {
   for (let dayIndex = RUN_DAYS - 1; dayIndex >= 0; dayIndex -= 1) {
     const daysAgo = dayIndex
     const processingStartedAt = berlinNightlyRunStart(daysAgo)
-    const saturdayRun = isBerlinSaturday(processingStartedAt)
     const { topics, processingDurationMs } = buildTopicsForRun(processingStartedAt, dayIndex)
 
     const processingCompletedAt = new Date(processingStartedAt.getTime() + processingDurationMs)
@@ -185,7 +175,7 @@ const seedProcessingMeta = async () => {
     const qaUpdateCompletedAt = new Date(
       qaUpdateStartedAt.getTime() + (5 + (dayIndex % 4)) * 60_000,
     )
-    const { afterthoughts } = buildAfterthoughtsForRun(processingCompletedAt, dayIndex, saturdayRun)
+    const { afterthoughts } = buildAfterthoughtsForRun(processingCompletedAt, dayIndex)
 
     const osmDataFrom = new TZDate(subDays(processingStartedAt, 2), 'Europe/Berlin')
     osmDataFrom.setHours(12, 0, 0, 0)

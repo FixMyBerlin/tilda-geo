@@ -73,7 +73,9 @@ If any helper in (`topics/helper`)[processing/topics/helper] or the OSM file has
 After `Processing: Finished`, the **afterthoughts** phase runs deferred work (see `processing/steps/afterthoughts.ts`):
 
 1. **Statistics** — populates `public.aggregated_lengths` (empty table created at initialize; afterthoughts fill rows; feeds `/api/stats` and region statistics UI).
-2. **Sidepath export** — writes `is_sidepath_estimation.csv` for the next run's `roads_bikelanes` Lua import. Skipped when `roads_bikelanes` did not run only if a CSV already exists; otherwise exports from the current DB. When the topic ran but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
+2. **Sidepath export** — writes `is_sidepath_estimation.csv` for the next run's `roads_bikelanes` Lua import (or afterthoughts when topic schedule moved sidepath post-topics). Skipped when `roads_bikelanes` did not run only if a CSV already exists; otherwise exports from the current DB. When the topic ran but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
+
+Settlement-area export is not run (#3423).
 
 Whenever we talk about `hash`es in this code, this feature is referenced.
 

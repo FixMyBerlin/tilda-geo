@@ -1,5 +1,4 @@
 import type { Topic } from '../constants/topics.const'
-import { exportSettlementAreaData } from '../topics/roads_bikelanes/pseudo_tags_settlement_area/exportSettlementAreaData'
 import { exportSidepathData } from '../topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { logEnd, logStart } from '../utils/logging'
 import { aggregateLengths } from './afterthoughts/aggregateLengths'
@@ -27,11 +26,6 @@ export async function runAfterthoughts(
     processingId,
     'sidepath_export',
     await exportSidepathData(fileChanged, ranTopics),
-  )
-  await recordAfterthought(
-    processingId,
-    'settlement_area_export',
-    await exportSettlementAreaData(fileChanged, ranTopics),
   )
 
   logEnd('Processing: Afterthoughts')

@@ -3,7 +3,7 @@
  * Hand-mirrored in app/src/data/processingTypes/afterthoughts.const.ts (which adds German labels);
  * sync of the KEYS is enforced by app/src/server/processing/afterthoughts.const.sync.test.ts.
  */
-export const afterthoughtIds = ['statistics', 'sidepath_export', 'settlement_area_export'] as const
+export const afterthoughtIds = ['statistics', 'sidepath_export'] as const
 export type AfterthoughtId = (typeof afterthoughtIds)[number]
 
 export const afterthoughtSkipReasons = [

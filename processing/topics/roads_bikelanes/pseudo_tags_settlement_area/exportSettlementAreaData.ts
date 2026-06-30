@@ -13,6 +13,8 @@ const LOG_PREFIX = '[Afterthoughts][SettlementArea]'
 
 /**
  * Afterthought: export the innerorts/außerorts estimation to CSV from the current run's DB.
+ * Not wired in `processing/steps/afterthoughts.ts` until #3423 — kept for re-enable.
+ *
  * Writes PSEUDO_TAGS_DATA/settlement_area_estimation.csv for the next run's roads_bikelanes Lua
  * import (sets `_in_settlement_area`). Mirrors exportSidepathData.
  *

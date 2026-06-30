@@ -6,7 +6,6 @@
 export const afterthoughtLabels = {
   statistics: 'Statistiken',
   sidepath_export: 'Sidepath-Export',
-  settlement_area_export: 'Settlement-area-Export',
 } as const
 
 export type AfterthoughtId = keyof typeof afterthoughtLabels

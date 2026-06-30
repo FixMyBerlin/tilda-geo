@@ -1,5 +1,9 @@
 # Settlement-area pseudo tags (`_in_settlement_area`)
 
+> [!CAUTION]
+> **Not run in processing.** Lua attach and settlement CSV export are off due to national throughput
+> regression (#3423). Code below is retained for re-enable.
+
 Attaches an internal `_in_settlement_area` estimation to roads + bikelanes, indicating whether
 a way is **innerorts** (inside a settlement area) or **außerorts**. Same round-trip pattern as
 `is_sidepath` (see `../pseudo_tags_sidepath/`).
