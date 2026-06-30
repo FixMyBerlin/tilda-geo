@@ -10,6 +10,7 @@ import { processTopics } from './steps/processTopics'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
 import { logProcessingStartupContext } from './utils/logStartupContext'
+import { params } from './utils/parameters'
 
 async function main() {
   try {
@@ -54,9 +55,15 @@ async function main() {
 
     // Frontend: Registers sql functions (async, fire-and-forget)
     // Frontend: Trigger QA evaluation updates for all regions (async, fire-and-forget)
-    console.log('Finishing up: Trigger async app init (sql functions) and qa update')
-    triggerPrivateApi('post-processing-hook')
-    triggerPrivateApi('post-processing-qa-update')
+    if (params.skipPostProcessingHooks) {
+      console.log(
+        'Finishing up: ⏩ Skipping app post-processing hooks due to `SKIP_POST_PROCESSING_HOOKS=1`',
+      )
+    } else {
+      console.log('Finishing up: Trigger async app init (sql functions) and qa update')
+      triggerPrivateApi('post-processing-hook')
+      triggerPrivateApi('post-processing-qa-update')
+    }
 
     // Delete cache and (frontend) trigger cache warming
     await updateCache()

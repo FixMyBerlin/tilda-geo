@@ -17,6 +17,15 @@ function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
   return result
 }
 
+function parseCsv(envVar: string | undefined): string[] {
+  return envVar
+    ? envVar
+        .split(',')
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0)
+    : []
+}
+
 const diffingModeSchema = z.enum(['off', 'previous', 'fixed', 'reference'])
 
 const oauthCredentialSchema = z
@@ -36,6 +45,14 @@ function parseParameters() {
     waitForFreshData: process.env.WAIT_FOR_FRESH_DATA === '1',
     skipDownload: process.env.SKIP_DOWNLOAD === '1',
     skipWarmCache: process.env.SKIP_WARM_CACHE === '1',
+    skipCacheClear: process.env.SKIP_CACHE_CLEAR === '1',
+    skipPostProcessingHooks: process.env.SKIP_POST_PROCESSING_HOOKS === '1',
+    skipTileServerRestart: process.env.SKIP_TILES_RESTART === '1',
+    warmCacheMode: process.env.WARM_CACHE_MODE === 'delta' ? 'delta' : 'full',
+    deltaWarmCacheBbox: parseBbox(process.env.DELTA_WARM_CACHE_BBOX),
+    deltaWarmCacheTables: parseCsv(process.env.DELTA_WARM_CACHE_TABLES),
+    deltaWarmCacheMinZoom: Number(process.env.DELTA_WARM_CACHE_MIN_ZOOM || '0'),
+    deltaWarmCacheMaxZoom: Number(process.env.DELTA_WARM_CACHE_MAX_ZOOM || '0'),
     osmUsername: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME),
     osmPassword: oauthCredentialSchema.parse(process.env.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD),
     pbfDownloadUrl: urlSchema.parse(process.env.PROCESS_GEOFABRIK_DOWNLOAD_URL),

@@ -25,6 +25,11 @@ export async function updateCache() {
  * See `cache_proxy/.README.md` for details.
  */
 export async function clearCache() {
+  if (params.skipCacheClear) {
+    console.log('Finishing up: ⏩ Skipping `clearCache` due to `SKIP_CACHE_CLEAR=1`')
+    return
+  }
+
   try {
     // Check if the cache directory exists first
     const dirCheck = await $`test -d ${CACHE_NGINX_PROXY_DIR}`.nothrow()
@@ -63,8 +68,31 @@ export async function clearCache() {
 export async function triggerCacheWarming() {
   if (params.skipWarmCache) {
     console.log('Finishing up: ⏩ Skipping `triggerCacheWarming` due to `SKIP_WARM_CACHE=1`')
-  } else {
-    console.log('Finishing up: Trigger async cache warming…')
-    return triggerPrivateApi('warm-cache')
+    return
   }
+
+  if (params.warmCacheMode === 'delta') {
+    const bbox = params.deltaWarmCacheBbox
+    const tables = params.deltaWarmCacheTables
+    const minZoom = params.deltaWarmCacheMinZoom
+    const maxZoom = params.deltaWarmCacheMaxZoom
+    if (bbox && tables.length > 0 && minZoom <= maxZoom && minZoom >= 0) {
+      const [minLon, minLat, maxLon, maxLat] = bbox
+      const endpoint = `warm-cache-delta?bbox=${minLon},${minLat},${maxLon},${maxLat}&minZoom=${minZoom}&maxZoom=${maxZoom}&tables=${encodeURIComponent(tables.join(','))}`
+      console.log('Finishing up: Trigger async delta cache warming…')
+      return triggerPrivateApi(endpoint)
+    }
+    console.log(
+      'Finishing up: ⚠️ Delta warm cache mode requested but config is incomplete; falling back to full warm',
+      JSON.stringify({
+        deltaWarmCacheBbox: bbox,
+        deltaWarmCacheTables: tables,
+        deltaWarmCacheMinZoom: minZoom,
+        deltaWarmCacheMaxZoom: maxZoom,
+      }),
+    )
+  }
+
+  console.log('Finishing up: Trigger async cache warming…')
+  return triggerPrivateApi('warm-cache')
 }

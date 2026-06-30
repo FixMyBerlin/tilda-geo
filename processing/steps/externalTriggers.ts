@@ -20,9 +20,10 @@ function isRetryableConnectionError(error: unknown) {
 
 export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
   const domain = isDev ? 'http://127.0.0.1:5173' : 'http://app:4000'
+  const separator = endpoint.includes('?') ? '&' : '?'
   const privateApiUrl = `${domain}/api/private/${endpoint}`
-  const url = `${privateApiUrl}?apiKey=${params.apiKey}`
-  const redactedCurlCommand = `curl "${privateApiUrl}?apiKey=***"`
+  const url = `${privateApiUrl}${separator}apiKey=${params.apiKey}`
+  const redactedCurlCommand = `curl "${privateApiUrl}${separator}apiKey=***"`
   const maxRetries = 10 // Retry for up to 10 minutes (10 retries × 1 minute)
   const retryDelayMs = 60 * 1000 // 1 minute between retries
 

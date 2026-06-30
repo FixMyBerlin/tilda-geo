@@ -29,13 +29,20 @@ ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 LABEL maintainer="FixMyCity - https://fixmycity.de"
 
+# Install the docker-cli inside the processing container to be able to restart the martin container
+# The setting below in docker-compose.yml is required for this to work
+# volumes:
+#   - /var/run/docker.sock:/var/run/docker.sock
+COPY --from=docker:dind /usr/local/bin/docker /usr/local/bin/
+
 # osm2pgsql >= 2.3.0 from trixie-backports (accepted 2026-06-17, 2.3.0+ds-2~bpo13+1).
 # Needed for :as_point(n) and n_points() in flex Lua (downstream error-table work).
 # curl is pinned to backports alongside osm2pgsql to avoid libcurl4 version collision.
 RUN echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
 RUN apt update && \
   apt install -y -t trixie-backports osm2pgsql osmium-tool curl && \
-  apt install -y wget python3 python3-requests && \
+  apt install -y wget python3 python3-requests python3-pyosmium postgresql-client && \
+  ln -sf /usr/lib/python3-pyosmium/pyosmium-up-to-date /usr/local/bin/pyosmium-up-to-date && \
   apt upgrade -y
 
 # 'data' folder is root

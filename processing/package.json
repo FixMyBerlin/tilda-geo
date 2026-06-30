@@ -11,7 +11,8 @@
     "check-lint": "oxlint .",
     "check-format": "oxfmt --check -c ../app/oxfmt.config.mjs .",
     "type-check": "bunx tsc --noEmit -p tsconfig.json",
-    "type-check-lua": "bun ./scripts/run-typecheck-lua.ts"
+    "type-check-lua": "bun ./scripts/run-typecheck-lua.ts",
+    "red-green": "bun ./redGreen/orchestrate.ts"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
