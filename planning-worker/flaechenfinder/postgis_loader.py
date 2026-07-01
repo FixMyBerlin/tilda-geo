@@ -110,6 +110,51 @@ class PostgisLoader:
         gdf = self._read_table("bikelanes", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
+    def load_intersection_corners(
+        self, polygon_4326: BaseGeometry, road_classes: list[str] | None = None
+    ) -> gpd.GeoDataFrame:
+        """Bordstein-Eckpunkte an Straßenkreuzungen (für den Kreuzungs-Bonus).
+
+        Wiederverwendet die vom Parking-Topic berechneten Ecken:
+        `_parking_intersection_corners` ist der Schnittpunkt der beiden Kerbs
+        (= um die halbe – aus OSM `width` bzw. Klassen-Fallback approximierte –
+        Straßenbreite versetzten Mittellinien = Außenkanten) an Kreuzungsknoten.
+        Wir filtern auf die gewünschten Straßenklassen: BEIDE an der Ecke
+        beteiligten Straßen müssen in `road_classes` liegen.
+
+        Abhängigkeit: die `_parking_*`-Tabellen existieren nur, wenn das
+        Parking-Topic für die Region prozessiert wurde. Fehlen sie, wird ein
+        leeres GeoDataFrame zurückgegeben (der Faktor trägt dann 0 bei) – analog
+        zum graceful Fallback bei fehlenden CIR-Kacheln in der Vegetation.
+
+        Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
+        """
+        classes = road_classes or [
+            "primary", "secondary", "tertiary", "residential", "living_street",
+        ]
+        cats_sql = ", ".join(f"'{_sql_literal(c)}'" for c in classes)
+        wkt = polygon_4326.wkt
+        sql = f"""
+            SELECT ST_Transform(c.geom, 4326) AS geom
+            FROM public."_parking_intersection_corners" c
+            JOIN public."_parking_kerbs" k1 ON k1.id = c.kerb1_id
+            JOIN public."_parking_kerbs" k2 ON k2.id = c.kerb2_id
+            JOIN public."_parking_roads" r1 ON r1.osm_id = k1.osm_id
+            JOIN public."_parking_roads" r2 ON r2.osm_id = k2.osm_id
+            WHERE c.geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+              AND r1.tags->>'road' IN ({cats_sql})
+              AND r2.tags->>'road' IN ({cats_sql})
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Kreuzungs-Ecken aus _parking_intersection_corners")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 

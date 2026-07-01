@@ -28,6 +28,10 @@ CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
 -- fügt einer vorhandenen Tabelle keine Spalte hinzu).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;
 
+-- Kreuzungs-Bonus: Zuschlag nahe Bordstein-Ecken (Radabstellanlagen); NULL wenn
+-- der Faktor (w_intersection) im Szenario nicht gewichtet ist.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzung real;
+
 -- H3-Auflösung der Zeile: BASE (13) = feines Scoring-Gitter für hohe
 -- Zoomstufen, AGG (11) = grobes Aggregat für z < 16. Beide Gitter desselben
 -- Laufs liegen in dieser Tabelle; die Martin-Funktion planning_hexagons wählt

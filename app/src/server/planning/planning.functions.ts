@@ -23,6 +23,7 @@ const FactorConfigSchema = z
     min_clearance_m: z.number().optional(),
     min_surface_score: z.number().optional(),
     min_score_threshold: z.number().optional(),
+    intersection_radius_m: z.number().optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
   })

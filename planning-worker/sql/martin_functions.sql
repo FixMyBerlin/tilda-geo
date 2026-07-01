@@ -31,6 +31,7 @@ BEGIN
                 score_oepnv,
                 score_zielorte,
                 score_vegetation,
+                score_kreuzung,
                 eignungsklasse,
                 gebaeude,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom

@@ -32,6 +32,15 @@ class TildaLoader:
             print(f"   ⚠️  Gebäude-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_intersection_corners(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bordstein-Eckpunkte an Straßenkreuzungen (für den Kreuzungs-Bonus)."""
+        try:
+            gdf = self._loader.load_intersection_corners(study_area_geom)
+            return gdf[gdf.geometry.geom_type == "Point"].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Kreuzungs-Ecken-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     @staticmethod
     def score_cycleway_proximity(dist_m: float, max_dist_m: float) -> float:
         """0–100: < 20 m → 100, linear bis max_dist_m → 0, darüber 0."""

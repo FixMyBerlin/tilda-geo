@@ -13,6 +13,7 @@ const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }
   { key: 'min_clearance_m', label: 'Min. Hindernisabstand (m)', step: 0.5 },
   { key: 'min_surface_score', label: 'Min. Untergrund-Score', step: 5 },
   { key: 'min_score_threshold', label: 'MCE-Schwelle Potentialflächen', step: 5 },
+  { key: 'intersection_radius_m', label: 'Kreuzungs-Radius (m)', step: 5 },
 ]
 
 /** Edits a scenario's factorConfig (weights + thresholds). Read-only once a job exists. */
@@ -43,7 +44,7 @@ export const FactorEditorPanel = ({
   const weights = config.weights ?? {}
 
   const setWeight = (key: string, value: number) =>
-    setConfig((c) => ({ ...c, weights: { ...(c.weights ?? {}), [key]: value } }))
+    setConfig((c) => ({ ...c, weights: { ...c.weights, [key]: value } }))
 
   const setField = (key: keyof FactorConfig, value: number) =>
     setConfig((c) => ({ ...c, [key]: value }))

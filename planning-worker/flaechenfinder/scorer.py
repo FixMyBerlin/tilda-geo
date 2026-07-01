@@ -30,6 +30,7 @@ AGG_H3_RES = 11
 _SCORE_COLS = [
     "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_hindernisfreiheit", "score_oepnv", "score_vegetation",
+    "score_kreuzung",
 ]
 
 # Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
@@ -351,6 +352,39 @@ def run_flaechenfinder(
     else:
         hex_proj["score_vegetation"] = np.nan
         total = base_score
+
+    # ── Kreuzungs-Bonus: stufenloser Zuschlag nahe Bordstein-Ecken ─────────
+    # Radabstellanlagen lassen sich an Straßenecken gut platzieren – ideal
+    # ~5–8 m von der Bordsteinecke entfernt (nicht in der Kreuzungsmitte). Der
+    # Bonus ist ein Modifier auf den Basis-Score (wie Vegetation); `w_intersection`
+    # (0–1) ist der maximale Zuschlag in Punkten (× 100). Ohne Gewicht bleibt
+    # `score_kreuzung` NaN (→ DB NULL), da die Ecken dann gar nicht geladen wurden.
+    w_kreuz = w.get("w_intersection", 0) or 0
+    if w_kreuz > 0:
+        corners = tilda_loader.load_intersection_corners(study_area_geom)
+        corners_proj = corners.to_crs("EPSG:25832") if len(corners) else corners
+        abstand_kreuzung = _dist_to_union(centroids, corners_proj)
+        hex_proj["abstand_kreuzung_m"] = abstand_kreuzung
+        _lo = use_case.intersection_ideal_min_m
+        _hi = min(use_case.intersection_ideal_max_m, use_case.intersection_radius_m)
+        _r = use_case.intersection_radius_m
+
+        def _kreuz_faktor(d, lo=_lo, hi=_hi, r=_r):
+            if d <= 0:
+                return 0.0
+            if d < lo:
+                return d / lo if lo > 0 else 1.0
+            if d <= hi:
+                return 1.0
+            if d <= r:
+                return max(0.0, (r - d) / max(1.0, r - hi))
+            return 0.0
+
+        kreuz_bonus = (w_kreuz * 100.0) * abstand_kreuzung.apply(_kreuz_faktor)
+        hex_proj["score_kreuzung"] = kreuz_bonus.round(1)
+        total = total + kreuz_bonus
+    else:
+        hex_proj["score_kreuzung"] = np.nan
 
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)

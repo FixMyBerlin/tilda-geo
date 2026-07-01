@@ -31,6 +31,18 @@ class UseCaseConfig:
     # Grünreste/Randpixel ignorieren), darüber linearer Anstieg bis 100 %.
     vegetation_penalty_threshold_pct: float = 20.0
 
+    # Kreuzungs-Bonus: Radabstellanlagen lassen sich an Straßenecken gut
+    # platzieren – ideal ~5–8 m von der Bordsteinecke entfernt (nicht in der
+    # Kreuzungsmitte). Der Bonus ist ein stufenloser Modifier auf den Basis-Score
+    # (analog Vegetation, siehe scorer.py); Stärke = weights["w_intersection"].
+    #   d < ideal_min                → linearer Anstieg 0 → 1
+    #   ideal_min ≤ d ≤ ideal_max    → voller Bonus (1.0)
+    #   ideal_max < d ≤ radius       → linearer Abfall 1 → 0
+    #   d > radius                   → 0
+    intersection_radius_m: float = 20.0       # äußere Reichweite (UI-einstellbar)
+    intersection_ideal_min_m: float = 5.0
+    intersection_ideal_max_m: float = 8.0
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 150.0     # weiter weg → Score 0
     min_clearance_m: float = 2.0            # zu nah an Gebäude → Score 0
@@ -55,6 +67,7 @@ DEFAULT_WEIGHTS = {
     "w_clearance": 0.10,
     "w_transit":   0.15,
     "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
+    "w_intersection": 0.0, # Kreuzungs-Bonus, neutral per Default (max. Bonus in Punkten × 100)
 }
 
 
@@ -98,4 +111,7 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         min_surface_score=float(cfg.get("min_surface_score", 30.0)),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         cir_source=cfg.get("cir_source", "auto"),
+        intersection_radius_m=float(cfg.get("intersection_radius_m", 20.0)),
+        intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),
+        intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
     )
