@@ -9,11 +9,29 @@ import geopandas as gpd
 from shapely.geometry import MultiPolygon
 
 HEX_COLUMNS = [
-    "run_id", "h3_id", "geom",
+    "run_id", "h3_id", "resolution", "geom",
     "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_hindernisfreiheit", "score_oepnv",
     "score_vegetation", "eignungsklasse",
 ]
+
+
+def _write_hexagons(engine, frame: gpd.GeoDataFrame, run_id: int) -> int:
+    """Schreibt ein Hexagon-Gitter (fein oder aggregiert) nach PostGIS.
+
+    Erwartet eine `resolution`-Spalte im Frame; fehlende Score-Spalten werden
+    als NULL ergänzt.
+    """
+    if frame is None or not len(frame):
+        return 0
+    hx = frame.to_crs("EPSG:3857").rename_geometry("geom")
+    hx["run_id"] = run_id
+    for col in HEX_COLUMNS:
+        if col not in hx.columns and col != "geom":
+            hx[col] = None
+    hx = hx.set_geometry("geom")[HEX_COLUMNS]
+    hx.to_postgis("scenario_hexagons", engine, schema="planning", if_exists="append", index=False)
+    return len(hx)
 
 
 def _to_multipolygon(geom):
@@ -31,10 +49,14 @@ def write_results(
     hex_proj: gpd.GeoDataFrame,
     areas: gpd.GeoDataFrame,
     vegetation: gpd.GeoDataFrame | None = None,
+    hex_agg: gpd.GeoDataFrame | None = None,
 ):
     """Schreibt Hexagone + Potentialflächen + Vegetation für `run_id`.
 
-    Gibt (hex_count, area_count, veg_count) zurück.
+    `hex_proj` ist das feine BASE-Gitter, `hex_agg` das grobe Aggregat für
+    niedrige Zoomstufen; beide landen mit ihrer jeweiligen `resolution` in
+    derselben Tabelle. Gibt (hex_count, area_count, veg_count) zurück, wobei
+    `hex_count` nur die feinen (BASE-)Hexagone zählt.
     """
 
     # Idempotenz: evtl. vorhandene Zeilen dieses Laufs entfernen.
@@ -43,18 +65,8 @@ def write_results(
         cur.execute("DELETE FROM planning.scenario_areas WHERE run_id = %s", (run_id,))
         cur.execute("DELETE FROM planning.scenario_vegetation WHERE run_id = %s", (run_id,))
 
-    hex_count = 0
-    if len(hex_proj):
-        hx = hex_proj.to_crs("EPSG:3857")
-        hx = hx.rename_geometry("geom")
-        hx["run_id"] = run_id
-        for col in HEX_COLUMNS:
-            if col not in hx.columns and col != "geom":
-                hx[col] = None
-        hx = hx.set_geometry("geom")[HEX_COLUMNS]
-        hx.to_postgis("scenario_hexagons", engine, schema="planning", if_exists="append", index=False)
-        hex_count = len(hx)
-        del hx
+    hex_count = _write_hexagons(engine, hex_proj, run_id)
+    _write_hexagons(engine, hex_agg, run_id)
 
     area_count = 0
     if len(areas):

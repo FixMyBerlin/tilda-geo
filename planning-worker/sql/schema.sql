@@ -28,6 +28,12 @@ CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
 -- fügt einer vorhandenen Tabelle keine Spalte hinzu).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;
 
+-- H3-Auflösung der Zeile: BASE (13) = feines Scoring-Gitter für hohe
+-- Zoomstufen, AGG (11) = grobes Aggregat für z < 16. Beide Gitter desselben
+-- Laufs liegen in dieser Tabelle; die Martin-Funktion planning_hexagons wählt
+-- je Zoomstufe. Default 13, damit vorhandene Zeilen als BASE-Gitter gelten.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution smallint NOT NULL DEFAULT 13;
+
 CREATE TABLE IF NOT EXISTS planning.scenario_areas (
   run_id          bigint NOT NULL,
   geom            geometry(MultiPolygon, 3857) NOT NULL,
@@ -44,6 +50,7 @@ CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
 );
 
 CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);
+CREATE INDEX IF NOT EXISTS scenario_hexagons_run_res_idx ON planning.scenario_hexagons (run_id, resolution);
 CREATE INDEX IF NOT EXISTS scenario_hexagons_geom_idx   ON planning.scenario_hexagons USING gist (geom);
 CREATE INDEX IF NOT EXISTS scenario_areas_run_id_idx    ON planning.scenario_areas (run_id);
 CREATE INDEX IF NOT EXISTS scenario_areas_geom_idx      ON planning.scenario_areas USING gist (geom);

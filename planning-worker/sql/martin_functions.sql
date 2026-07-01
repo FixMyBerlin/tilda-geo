@@ -13,6 +13,10 @@ RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
 DECLARE
     run_id_val bigint := (query_params->>'run_id')::bigint;
     bounds     geometry := ST_TileEnvelope(z, x, y);
+    -- Ab z16 das feine BASE-Gitter (Res 13), darunter das grobe Aggregat
+    -- (Res 11, ~49× weniger Features). Muss mit AGG_H3_RES/BASE_H3_RES in
+    -- planning-worker/flaechenfinder/scorer.py übereinstimmen.
+    res_val    smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
 BEGIN
     RETURN (
         SELECT ST_AsMVT(t, 'planning_hexagons', 4096, 'geom')
@@ -31,6 +35,7 @@ BEGIN
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
             FROM planning.scenario_hexagons
             WHERE run_id = run_id_val
+              AND resolution = res_val
               AND geom && bounds
         ) t
         WHERE t.geom IS NOT NULL

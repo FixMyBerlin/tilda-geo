@@ -26,7 +26,12 @@ from flaechenfinder.cir_sources import resolve_source
 from flaechenfinder.config import use_case_from_dict
 from flaechenfinder.dem import DEMAdapter
 from flaechenfinder.postgis_loader import PostgisLoader
-from flaechenfinder.scorer import SCORING_STEP_COUNT, SCORING_STEPS, run_flaechenfinder
+from flaechenfinder.scorer import (
+    SCORING_STEP_COUNT,
+    SCORING_STEPS,
+    aggregate_hexagons,
+    run_flaechenfinder,
+)
 from flaechenfinder.tilda import TildaLoader
 from flaechenfinder.vegetation import compute_vegetation_areas
 from results import write_results
@@ -181,11 +186,15 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         progress_cb=_scoring_progress,
     )
 
+    # Grobes Aggregat-Gitter für niedrige Zoomstufen (z < 16). Reine
+    # Nachverarbeitung der bereits berechneten Scores – keine Spatial-Joins.
+    hex_agg = aggregate_hexagons(hex_proj)
+
     set_progress(conn, job_id, 92, f"{SCORING_STEP_COUNT}/{SCORING_STEP_COUNT} · {SCORING_STEPS[-1]}")
     hex_count, area_count, veg_count = write_results(
-        engine, conn, run_id, hex_proj, areas, vegetation
+        engine, conn, run_id, hex_proj, areas, vegetation, hex_agg=hex_agg
     )
-    del hex_proj, areas, vegetation
+    del hex_proj, hex_agg, areas, vegetation
     gc.collect()
     set_progress(conn, job_id, 100, "Fertig")
 

@@ -19,6 +19,57 @@ SURFACE_SCORES = {
 # Distanz-Platzhalter, wenn ein Layer leer ist (kein Feature gefunden).
 _FAR = 1e9
 
+# H3-Auflösungen: BASE ist das feine Scoring-Gitter (hohe Zoomstufen), AGG das
+# grobe Aggregat für niedrige Zoomstufen (z < 16). AGG_H3_RES muss mit der
+# Zoom-Verzweigung in planning-worker/sql/martin_functions.sql übereinstimmen.
+BASE_H3_RES = 13
+AGG_H3_RES = 11
+
+# Score-Spalten, die beim Aggregieren gemittelt werden (eignungsklasse wird
+# daraus neu abgeleitet, nicht gemittelt).
+_SCORE_COLS = [
+    "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
+    "score_hangneigung", "score_hindernisfreiheit", "score_oepnv", "score_vegetation",
+]
+
+# Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
+# und aggregate_hexagons verwendet).
+_KLASSE_BINS = [-1, 0, 40, 60, 80, 100]
+_KLASSE_LABELS = ["ausgeschlossen", "schlecht", "mittel", "gut", "sehr gut"]
+
+
+def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES) -> gpd.GeoDataFrame:
+    """Aggregiert das feine BASE-Gitter auf eine gröbere H3-Auflösung.
+
+    Für niedrige Zoomstufen: mittelt die Score-Spalten je Elternzelle
+    (`h3.cell_to_parent`) und leitet `eignungsklasse` aus dem gemittelten
+    Gesamtscore neu ab. Reine Nachverarbeitung der bereits berechneten Werte –
+    keine Spatial-Joins, kein I/O.
+
+    Rückgabe: GeoDataFrame in EPSG:25832 mit `h3_id` (= Eltern-Zellindex),
+    `resolution`, den gemittelten Score-Spalten und `eignungsklasse`.
+    """
+    if hex_proj is None or len(hex_proj) == 0:
+        return gpd.GeoDataFrame(geometry=[], crs="EPSG:25832")
+
+    df = pd.DataFrame(hex_proj.drop(columns=hex_proj.geometry.name))
+    df["parent_id"] = df["h3_id"].map(lambda h: h3.cell_to_parent(h, target_res))
+
+    present = [c for c in _SCORE_COLS if c in df.columns]
+    agg = df.groupby("parent_id")[present].mean().round(1).reset_index()
+    agg = agg.rename(columns={"parent_id": "h3_id"})
+    agg["resolution"] = target_res
+    agg["eignungsklasse"] = pd.cut(
+        agg["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
+    ).astype(str)
+    agg["geometry"] = agg["h3_id"].map(
+        lambda h: Polygon([(lng, lat) for lat, lng in h3.cell_to_boundary(h)])
+    )
+
+    agg_gdf = gpd.GeoDataFrame(agg, geometry="geometry", crs="EPSG:4326")
+    print(f"   → {len(agg_gdf)} aggregierte Hexagone (Res {target_res})")
+    return agg_gdf.to_crs("EPSG:25832")
+
 # Die 10 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
 # Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
 # verwendet. Die Namen müssen mit der Schrittliste im Frontend übereinstimmen
@@ -55,7 +106,7 @@ def run_flaechenfinder(
     use_case: UseCaseConfig,
     dem_adapter: DEMAdapter,
     tilda_loader: TildaLoader,
-    h3_resolution: int = 13,
+    h3_resolution: int = BASE_H3_RES,
     osm_loader=None,
     vegetation_gdf=None,
     progress_cb=None,
@@ -102,6 +153,7 @@ def run_flaechenfinder(
 
     latlng_points = list(zip(hex_gdf["zentrum_lng"], hex_gdf["zentrum_lat"]))
     hex_proj = hex_gdf.to_crs("EPSG:25832")
+    hex_proj["resolution"] = h3_resolution
     del rows, hex_gdf
     centroids = hex_proj.geometry.centroid
 
@@ -307,9 +359,7 @@ def run_flaechenfinder(
     hex_proj.loc[exclusion, "mce_gesamtscore"] = 0.0
 
     hex_proj["eignungsklasse"] = pd.cut(
-        hex_proj["mce_gesamtscore"],
-        bins=[-1, 0, 40, 60, 80, 100],
-        labels=["ausgeschlossen", "schlecht", "mittel", "gut", "sehr gut"]
+        hex_proj["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
 
     # ── Potentialflächen ableiten ──────────────────────────────────
