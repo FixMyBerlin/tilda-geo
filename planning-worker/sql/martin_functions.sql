@@ -32,6 +32,7 @@ BEGIN
                 score_zielorte,
                 score_vegetation,
                 eignungsklasse,
+                gebaeude,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
             FROM planning.scenario_hexagons
             WHERE run_id = run_id_val

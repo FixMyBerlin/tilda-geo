@@ -59,6 +59,10 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     agg = df.groupby("parent_id")[present].mean().round(1).reset_index()
     agg = agg.rename(columns={"parent_id": "h3_id"})
     agg["resolution"] = target_res
+    # Gebäude-Flag ist bewusst nur ein Feingitter-Detail (z >= 16). Auf den groben
+    # Aggregat-Zellen wäre „keine Bebauung möglich" irreführend, daher immer False –
+    # die Spalte muss aber existieren (scenario_hexagons.gebaeude ist NOT NULL).
+    agg["gebaeude"] = False
     agg["eignungsklasse"] = pd.cut(
         agg["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
@@ -178,7 +182,9 @@ def run_flaechenfinder(
     # Gebäude aus tilda DB: Hexagone mit Gebäudeüberschneidung werden hart ausgeschlossen.
     buildings = tilda_loader.load_buildings(study_area_geom)
     if len(buildings):
-        buildings_proj = buildings.to_crs("EPSG:25832")
+        # load_buildings() liefert die Geometrie in der Spalte "geom" (SELECT … AS geom);
+        # auf "geometry" normalisieren, damit die Spaltenauswahl unten passt.
+        buildings_proj = buildings.to_crs("EPSG:25832").rename_geometry("geometry")
         hexes = hex_proj[["geometry"]].copy()
         pairs = gpd.sjoin(hexes, buildings_proj[["geometry"]], how="inner", predicate="intersects")
         hex_proj["gebaeude"] = hex_proj.index.isin(pairs.index)

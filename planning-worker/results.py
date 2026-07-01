@@ -12,7 +12,7 @@ HEX_COLUMNS = [
     "run_id", "h3_id", "resolution", "geom",
     "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_hindernisfreiheit", "score_oepnv",
-    "score_vegetation", "eignungsklasse",
+    "score_vegetation", "eignungsklasse", "gebaeude",
 ]
 
 

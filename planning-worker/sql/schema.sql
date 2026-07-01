@@ -34,6 +34,11 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation
 -- je Zoomstufe. Default 13, damit vorhandene Zeilen als BASE-Gitter gelten.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution smallint NOT NULL DEFAULT 13;
 
+-- Liegt das Hexagon auf einem Gebäude (public._buildings)? Solche Zellen sind
+-- hart ausgeschlossen (mce_gesamtscore = 0); das Flag erlaubt der Sidebar, den
+-- Ausschlussgrund „Gebäude" anzuzeigen. Nur im Fein-Gitter (Res 13) gesetzt.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;
+
 CREATE TABLE IF NOT EXISTS planning.scenario_areas (
   run_id          bigint NOT NULL,
   geom            geometry(MultiPolygon, 3857) NOT NULL,

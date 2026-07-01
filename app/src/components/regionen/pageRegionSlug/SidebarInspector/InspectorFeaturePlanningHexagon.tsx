@@ -68,6 +68,13 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           </div>
         </div>
 
+        {props.gebaeude && (
+          <div className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
+            <strong>Hinweis:</strong> Auf dieser Fläche befindet sich ein Gebäude – eine Bebauung
+            ist hier nicht möglich.
+          </div>
+        )}
+
         <div className="h-px bg-gray-200" />
 
         <table className="w-full text-xs">
