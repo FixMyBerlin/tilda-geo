@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { staticRegion } from '@/data/regions.const'
+import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import { Prisma } from '@/prisma/generated/client'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
@@ -29,6 +30,12 @@ const FactorConfigSchema = z
   })
   .passthrough()
   .refine((c) => c.study_area != null, { message: 'study_area (GeoJSON) is required' })
+  .refine(
+    (c) =>
+      c.study_area == null ||
+      studyAreaSizeKm2(c.study_area as GeoJSON.Geometry) <= MAX_STUDY_AREA_KM2,
+    { message: `Das Berechnungsgebiet darf maximal ${MAX_STUDY_AREA_KM2} km² groß sein.` },
+  )
 
 export type FactorConfig = z.infer<typeof FactorConfigSchema>
 

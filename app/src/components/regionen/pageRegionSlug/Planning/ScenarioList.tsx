@@ -1,8 +1,9 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { bbox } from '@turf/turf'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
+import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import {
   createPlanningScenarioFn,
   deletePlanningScenarioFn,
@@ -125,6 +126,12 @@ const CreateForm = ({
   // user can submit without first ending the draw (no extra highlight/fit to avoid flicker).
   const effectiveStudyArea = studyArea ?? drawnGeometry
 
+  const areaKm2 = useMemo(
+    () => (effectiveStudyArea ? studyAreaSizeKm2(effectiveStudyArea as GeoJSON.Geometry) : null),
+    [effectiveStudyArea],
+  )
+  const areaTooLarge = areaKm2 != null && areaKm2 > MAX_STUDY_AREA_KM2
+
   // Reset all drawing/highlight state when the form unmounts.
   useEffect(() => {
     return () => {
@@ -167,6 +174,10 @@ const CreateForm = ({
   const mutation = useMutation({
     mutationFn: () => {
       if (!effectiveStudyArea) throw new Error('Bitte ein Gebiet auswählen')
+      if (areaTooLarge)
+        throw new Error(
+          `Das Berechnungsgebiet ist zu groß (${areaKm2?.toFixed(1)} km²). Maximal ${MAX_STUDY_AREA_KM2} km² sind erlaubt.`,
+        )
       return createPlanningScenarioFn({
         data: {
           regionSlug,
@@ -251,6 +262,12 @@ const CreateForm = ({
         </div>
       )}
 
+      {areaTooLarge && (
+        <p className="text-xs text-red-600">
+          Das Berechnungsgebiet ist zu groß ({areaKm2?.toFixed(1)} km²). Maximal{' '}
+          {MAX_STUDY_AREA_KM2} km² sind erlaubt.
+        </p>
+      )}
       {mutation.isError && (
         <p className="text-xs text-red-600">{String((mutation.error as Error).message)}</p>
       )}
@@ -258,7 +275,7 @@ const CreateForm = ({
         <button
           type="button"
           onClick={() => mutation.mutate()}
-          disabled={mutation.isPending || !effectiveStudyArea}
+          disabled={mutation.isPending || !effectiveStudyArea || areaTooLarge}
           className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {mutation.isPending ? 'Erstellen…' : 'Szenario erstellen'}
