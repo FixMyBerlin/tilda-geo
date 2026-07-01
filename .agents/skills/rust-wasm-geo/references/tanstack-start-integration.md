@@ -2,7 +2,7 @@
 
 TanStack Start apps use the same Vite WASM plugins as SPAs. Extra rules: **client/server boundaries** and **selective SSR** — WASM must never initialize during server render or in server-only modules.
 
-Pair with `tanstack-start-conventions` and `tanstack-start-app-structure`.
+Pair with `tanstack-start-conventions`.
 
 ---
 
@@ -88,7 +88,7 @@ export function useBufferPolygon() {
 
 ## Folder layout (Start)
 
-Align with `tanstack-start-app-structure`:
+Align with `tanstack-start-conventions`:
 
 ```
 app/src/

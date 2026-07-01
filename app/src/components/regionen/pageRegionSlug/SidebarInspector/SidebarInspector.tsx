@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
-import { useInitialSizeMeasurement } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInitialSizeMeasurement'
 import {
   useMapActions,
   useMapBounds,
@@ -16,6 +15,7 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
 import { Inspector } from './Inspector'
 import { InspectorHeader } from './InspectorHeader'
+import { useResizableInspectorWidth } from './useResizableInspectorWidth'
 import { allUrlFeaturesInBounds, createBoundingPolygon, fitBounds } from './util'
 
 export const SidebarInspector = () => {
@@ -30,9 +30,23 @@ export const SidebarInspector = () => {
   const inspectorSize = useMapInspectorSize()
   const sidebarSize = useMapSidebarSize()
 
-  const { clearInspectorFeatures, updateInspectorSize } = useMapActions()
-  // One-time measurement for initial map-fit visible area (see useInitialSizeMeasurement).
-  const ref = useInitialSizeMeasurement<HTMLDivElement>(updateInspectorSize)
+  const features = inspectorFeatures.length
+    ? inspectorFeatures
+    : selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
+
+  const renderFeatures = !!features.length
+
+  const { ref: desktopPanelRef, onResizeHandlePointerDown } = useResizableInspectorWidth({
+    enabled: isDesktop,
+    isOpen: renderFeatures,
+  })
+
+  const { setFeaturesParam } = useFeaturesParam()
+  const { clearInspectorFeatures } = useMapActions()
+  const handleClose = () => {
+    setFeaturesParam(null)
+    clearInspectorFeatures()
+  }
 
   useEffect(
     function fitSelectedFeaturesOnceOnLoad() {
@@ -62,18 +76,6 @@ export const SidebarInspector = () => {
     [inspectorFeatures.length, inspectorSize, map, mapLoaded, selectedFeatures, sidebarSize],
   )
 
-  const features = inspectorFeatures.length
-    ? inspectorFeatures
-    : selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
-
-  const renderFeatures = !!features.length
-
-  const { setFeaturesParam } = useFeaturesParam()
-  const handleClose = () => {
-    setFeaturesParam(null)
-    clearInspectorFeatures()
-  }
-
   // Mobile: the inspector data is shown in the shared bottom sheet (taller than the
   // default — only ~10% map stays visible) instead of the desktop right-hand sidebar.
   if (!isDesktop) {
@@ -93,23 +95,25 @@ export const SidebarInspector = () => {
   // Desktop: right-hand sidebar (this branch + its map-control offset run on desktop only).
   return (
     <div
-      ref={ref}
+      ref={desktopPanelRef}
       className={twJoin(
-        'absolute top-0 right-0 bottom-0 z-20 w-140 max-w-full overflow-y-scroll bg-white p-5 pr-3 shadow-md',
+        'group/panel absolute top-0 right-0 bottom-0 z-20 w-(--inspector-width) max-w-[800px] overflow-hidden bg-white shadow-md',
         !renderFeatures && 'pointer-events-none opacity-0',
       )}
     >
       {renderFeatures ? (
         <>
-          <InspectorHeader count={features.length} handleClose={handleClose} />
-          <Inspector features={features} />
-          <style
-            // oxlint-disable-next-line react/no-danger -- static CSS for map controls
-            dangerouslySetInnerHTML={{
-              __html:
-                '.maplibregl-ctrl-top-right { right: 35rem } [data-map-controls="true"] { right: calc(35rem + 10px) }',
-            }}
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Inspectorbreite ändern"
+            className="absolute top-0 bottom-0 left-0 z-30 w-2 cursor-col-resize touch-none bg-gray-400/70 opacity-0 transition-opacity select-none group-hover/panel:opacity-100 active:opacity-100"
+            onPointerDown={onResizeHandlePointerDown}
           />
+          <div className="relative h-full overflow-y-auto p-5 pr-3">
+            <InspectorHeader count={features.length} handleClose={handleClose} />
+            <Inspector features={features} />
+          </div>
         </>
       ) : null}
     </div>

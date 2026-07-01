@@ -14,13 +14,8 @@ const boundsEqual = (current: LngLatBounds | null, next: LngLatBounds | null) =>
   )
 }
 
-const shouldUpdateSize = (current: Store['inspectorSize'], next: Store['inspectorSize']) => {
-  const SIZE_UPDATE_WIDTH_THRESHOLD = 50 // px
-  const SIZE_UPDATE_HEIGHT_THRESHOLD = 25 // px
-  const widthDiff = Math.abs(current.width - next.width)
-  const heightDiff = Math.abs(current.height - next.height)
-  return widthDiff >= SIZE_UPDATE_WIDTH_THRESHOLD || heightDiff >= SIZE_UPDATE_HEIGHT_THRESHOLD
-}
+const panelSizeEqual = (current: Store['inspectorSize'], next: Store['inspectorSize']) =>
+  current.width === next.width && current.height === next.height
 
 // INFO DEBUGGING: We could use a middleware to log state changes https://github.com/pmndrs/zustand#middleware
 export type Store = StoreMapLoadedState &
@@ -128,10 +123,10 @@ const useMapStore = create<Store>()((set) => {
         set((state) => (boundsEqual(state.mapBounds, bounds) ? state : { mapBounds: bounds })),
       updateInspectorSize: (size) =>
         set((state) =>
-          shouldUpdateSize(state.inspectorSize, size) ? { inspectorSize: size } : state,
+          panelSizeEqual(state.inspectorSize, size) ? state : { inspectorSize: size },
         ),
       updateSidebarSize: (size) =>
-        set((state) => (shouldUpdateSize(state.sidebarSize, size) ? { sidebarSize: size } : state)),
+        set((state) => (panelSizeEqual(state.sidebarSize, size) ? state : { sidebarSize: size })),
       setInspectorOtherPropertiesVisibility: (open) =>
         set((state) =>
           state.inspectorOtherPropertiesOpen === open

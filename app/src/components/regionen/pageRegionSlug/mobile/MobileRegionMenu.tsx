@@ -2,17 +2,14 @@ import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
-import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
-import { Img } from '@/components/shared/Img'
 import {
   defaultPrimaryNavigation,
   defaultSecondaryNavigationGrouped,
-} from '@/components/shared/layouts/Header/HeaderRegionen/navigation.const'
-import type {
-  PrimaryNavigation,
-  SecondaryNavigation,
-} from '@/components/shared/layouts/Header/types'
+} from '@/components/layouts/Header/HeaderRegionen/navigation.const'
+import type { PrimaryNavigation, SecondaryNavigation } from '@/components/layouts/Header/types'
+import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { Img } from '@/components/shared/Img'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
   mobileControlButtonActiveClassName,

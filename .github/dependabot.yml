@@ -1,11 +1,6 @@
 version: 2
-# "npm" + enable-beta-ecosystems is a workaround so Dependabot updates bun.lock.
-# "bun" ecosystem is GA but has a known bug where it skips the lockfile:
-# https://github.com/dependabot/dependabot-core/issues/11602
-# Experiment: https://github.com/openriftapp/openrift/commit/cc724872eac185fde9b567b792691154223e6a4e
-enable-beta-ecosystems: true
 updates:
-  - package-ecosystem: npm
+  - package-ecosystem: bun
     directories:
       - /app
       - /processing
@@ -28,6 +23,7 @@ updates:
           - version-update:semver-major
           - version-update:semver-minor
           - version-update:semver-patch
+      - dependency-name: eslint-plugin-react-compiler
     groups:
       security-dev-tools:
         applies-to: security-updates
@@ -41,6 +37,7 @@ updates:
           - 'husky*'
           - '@types/*'
           - 'typescript'
+          - '@typescript/typescript-*'
           - 'eslint*'
 
       shared-monorepo-tools:
@@ -78,6 +75,7 @@ updates:
           - 'vite'
           - '@types/*'
           - 'typescript'
+          - '@typescript/typescript-*'
           - 'dotenv'
           - 'favicons'
         update-types:

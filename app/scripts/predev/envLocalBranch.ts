@@ -12,6 +12,7 @@ export type EnvLocalSyncAction =
   | 'ok'
   | 'missing'
   | 'removed_on_default_branch'
+  | 'removed_on_main_checkout'
   | 'stale_removed'
   | 'env_example_restored'
 
@@ -64,23 +65,32 @@ async function restoreEnvExampleIfDirty(repoRoot: string) {
   return restore.exitCode === 0
 }
 
-export function usesIsolatedDevStack(branch: string) {
+export function isFeatureBranch(branch: string) {
   return Boolean(branch) && !DEFAULT_BRANCHES.includes(branch)
+}
+
+/** Isolated Docker stack + `.env.local` only in a linked worktree on a feature branch. */
+export function usesIsolatedDevStack(branch: string, linkedWorktree: boolean) {
+  return isFeatureBranch(branch) && linkedWorktree
 }
 
 export async function syncEnvLocalForBranch(repoRoot = repoRootFromApp()) {
   const branch = await currentGitBranch(repoRoot)
+  const linkedWorktree = await isLinkedWorktree(repoRoot)
   const localPath = envLocalPath(repoRoot)
 
   if (!branch) {
     return { branch: '', action: 'none' as const }
   }
 
-  if (!usesIsolatedDevStack(branch)) {
+  if (!usesIsolatedDevStack(branch, linkedWorktree)) {
     const removed = removeEnvLocal(repoRoot)
     const restored = await restoreEnvExampleIfDirty(repoRoot)
     if (removed) {
-      return { branch, action: 'removed_on_default_branch' as const }
+      if (!isFeatureBranch(branch)) {
+        return { branch, action: 'removed_on_default_branch' as const }
+      }
+      return { branch, action: 'removed_on_main_checkout' as const }
     }
     if (restored) {
       return { branch, action: 'env_example_restored' as const }
@@ -108,6 +118,9 @@ export async function runEnvLocalBranchSync(options?: { quiet?: boolean }) {
   switch (result.action) {
     case 'removed_on_default_branch':
       logWarn(label, `Removed .env.local on ${DEFAULT_BRANCHES.join('/')}`)
+      break
+    case 'removed_on_main_checkout':
+      logWarn(label, 'Removed .env.local — main checkout uses the default stack')
       break
     case 'stale_removed':
       logWarn(label, `Removed stale .env.local for branch ${result.branch}`)

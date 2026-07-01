@@ -33,8 +33,10 @@ local function maxspeed(object_tags)
   result_tags['osm_maxspeed:forward'] = SANITIZE_TAGS.safe_string(tags['maxspeed:forward'])
   result_tags['osm_maxspeed:conditional'] = SANITIZE_TAGS.safe_string(tags['maxspeed:conditional'])
   result_tags.maxspeed = speed
-  result_tags.maxspeed_source = source
-  result_tags.maxspeed_confidence = confidence
+  if speed ~= nil then
+    result_tags.maxspeed_source = source
+    result_tags.maxspeed_confidence = confidence
+  end
 
   return result_tags
 end

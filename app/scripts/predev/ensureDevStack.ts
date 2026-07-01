@@ -10,6 +10,7 @@ import { envPath, repoRootFromApp } from './ensureEnv'
 import {
   currentGitBranch,
   envLocalPath,
+  isFeatureBranch,
   isLinkedWorktree,
   syncEnvLocalForBranch,
   usesIsolatedDevStack,
@@ -47,16 +48,25 @@ export async function ensureDevStack() {
   }
 
   const branch = await currentGitBranch(repoRoot)
+  const linkedWorktree = await isLinkedWorktree(repoRoot)
   const sync = await syncEnvLocalForBranch(repoRoot)
   if (sync.action === 'removed_on_default_branch') {
     logWarn(label, 'Removed .env.local on develop/main')
+  } else if (sync.action === 'removed_on_main_checkout') {
+    logWarn(label, 'Removed .env.local — main checkout uses the default stack')
   } else if (sync.action === 'stale_removed') {
     logWarn(label, `Removed stale .env.local for branch ${sync.branch}`)
   } else if (sync.action === 'env_example_restored') {
     logWarn(label, 'Restored .env.example on develop/main')
   }
 
-  if (!usesIsolatedDevStack(branch)) {
+  if (!usesIsolatedDevStack(branch, linkedWorktree)) {
+    if (isFeatureBranch(branch) && !linkedWorktree) {
+      logWarn(
+        label,
+        `Feature branches should use a worktree, not the main checkout. Run: bun run setup-worktree -- ${branch} — see docs/docker-local-development.md`,
+      )
+    }
     logOk(label)
     return
   }
@@ -71,13 +81,6 @@ export async function ensureDevStack() {
   let databasePort: number
   let tilesPort: number
   let attachStack: string | undefined
-
-  if (!attachFromEnv && !(await isLinkedWorktree(repoRoot))) {
-    logWarn(
-      label,
-      `Feature branches should use a worktree, not the main checkout. Run: bun run setup-worktree -- ${branch} — see docs/docker-local-development.md`,
-    )
-  }
 
   if (attachFromEnv) {
     const attached = await resolveRunningAttachStack(attachFromEnv)
@@ -132,6 +135,13 @@ export function dockerStackIdFromEnv() {
   if (attach === 'default') return undefined
   if (attach) return attach
   return devStackIdFromEnv()
+}
+
+/** Stack id for discovery/stop logic (`default` on develop/main). */
+export function activeStackIdFromEnv() {
+  const attach = process.env.DEV_ATTACH_STACK?.trim()
+  if (attach) return attach
+  return devStackIdFromEnv() ?? 'default'
 }
 
 /** Runtime-only prefix for `docker-compose.override.yml` container names. */

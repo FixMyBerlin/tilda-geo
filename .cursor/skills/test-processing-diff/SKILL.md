@@ -1,6 +1,6 @@
 ---
 name: test-processing-diff
-description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing-generate-command` to print a copy-paste shell line (interactive Clack on a TTY); agents/CI pass the full non-interactive flag set (see --help). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
+description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing` (interactive Clack on a TTY: show or run the compose line; agents/CI pass the full non-interactive flag set and capture stdout). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
 ---
 
 # Test processing with diffing (local Docker)
@@ -9,34 +9,34 @@ Use after changing Lua/SQL under `processing/` (especially `processing/topics/`)
 
 ## For agents: use the CLI (do not hand-craft `docker compose` env)
 
-**Always** use `bun run processing-generate-command` from **`app/`**. It prints **one line** that cds to the repo root in a subshell, sets env, and runs docker compose—your cwd is unchanged. **Paste that line** in a shell to run Docker; the Bun script does **not** execute compose.
+**Always** use `bun run processing` from **`app/`**. It builds **one line** that cds to the repo root in a subshell, sets env, and runs docker compose—your cwd is unchanged. **Interactive:** choose **Run command** to execute in this terminal, or **Show command** and paste the line. **Non-interactive / agents:** capture stdout and run that line in an environment with Docker.
 
-**Defaults and flag checklist:** run `bun run processing-generate-command -- --help` from `app/` for the full contract, injected skip defaults, and a copy-paste example.
+**Defaults and flag checklist:** run `bun run processing -- --help` from `app/` for the full contract, injected skip defaults, and a copy-paste example.
 
-**Default behavior:** with a TTY and **without** a complete non-interactive flag set, the script opens **interactive** prompts (Clack). `bun run processing-generate-command` injects default skip flags; command-line skip/wait/download-url/osm2pgsql-log-level flags are applied without prompts. **Other** partial flags still require a full non-interactive set (you get a warning).
+**Default behavior:** with a TTY and **without** a complete non-interactive flag set, the script opens **interactive** prompts (Clack). `bun run processing` injects default skip flags; command-line skip/wait/download-url/osm2pgsql-log-level flags are applied without prompts. **Other** partial flags still require a full non-interactive set (you get a warning).
 
 **Non-interactive (required for agents without a TTY, e.g. CI):** pass **every** required flag in one invocation. Required pieces:
 
 - **Bbox:** `--preset <slug>` **or** both `--only-bbox` and `--diff-bbox` (optional: `--distinct-diff-bbox`, `--diff-bbox` with `--preset`).
 - **`--diff-mode`** `off` | `previous` | `fixed` | `reference`.
-- **Topics:** `--all-topics` **or** `--topics <csv>` (do not pass both).
+- **Topics:** exactly one of `--all-daily-topics` (nightly only; usual for diff tests) **or** `--all-topics` (incl. weekly) **or** `--topics <csv>`.
 - **Skips:** `--skip-download`, `--skip-unchanged`, `--skip-warm-cache` each with `0` or `1`. With `--skip-download 1`, also pass `--wait-fresh-data` `0` or `1`; with `--skip-download 0`, wait is forced off (flag optional).
 - **Exactly one** of `--dry-run`, `--detach` (`-d`), or `--foreground` (controls the printed `docker compose` line; `--dry-run` and `--foreground` both use attached `up processing`).
 
 **Learn the tool in this order:**
 
-1. From **`app/`**: `bun run processing-generate-command -- --help`.
+1. From **`app/`**: `bun run processing -- --help`.
 2. **Agents / no TTY:** full flag set → capture stdout (the one-liner) → run that line in an environment with Docker (or instruct the user to paste it).
-3. **Humans:** interactive generate → copy highlighted line → paste → Enter; reuse history and edit **`PROCESSING_DIFFING_MODE`** at the **end** of the env list for reference vs fixed.
+3. **Humans:** interactive generate → **Run command** or copy highlighted line → paste → Enter; reuse history and edit **`PROCESSING_DIFFING_MODE`** at the **end** of the env list for reference vs fixed.
 
 **What you need to know (not how the script is implemented):**
 
 - The printed command runs **docker compose** at the repository root (via subshell `cd`) so the **root `.env`** applies—the same file the app uses via `bun --env-file=../.env` from `app/`.
 - Overrides are **per pasted command** — no need to `export` vars in the user’s shell.
 - Ensure **`db` is healthy** before running the pasted line (`docker compose up -d db` from repo root if needed). The generate script does not start containers.
-- On isolated stacks (feature-branch worktree), see [`docs/docker-local-development.md`](../../../docs/docker-local-development.md) — load `.env.local` or use the printed env from `processing-generate-command`.
+- On isolated stacks (feature-branch worktree), see [`docs/docker-local-development.md`](../../../docs/docker-local-development.md) — load `.env.local` or use the printed env from `bun run processing`.
 
-Implementation: [`app/scripts/processing-generate-command/index.ts`](../../../app/scripts/processing-generate-command/index.ts). README: [`app/scripts/processing-generate-command/README.md`](../../../app/scripts/processing-generate-command/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`processing-generate-command`).
+Implementation: [`app/scripts/processing-generate-command/index.ts`](../../../app/scripts/processing-generate-command/index.ts). README: [`app/scripts/processing-generate-command/README.md`](../../../app/scripts/processing-generate-command/README.md). Script entry: [`app/package.json`](../../../app/package.json) (`processing`).
 
 ## Full batch examples (reference → fixed)
 
@@ -45,10 +45,10 @@ Use the **same** bbox, topics, and skip flags for reference and fixed; only chan
 **Generate reference line (inspect stdout):**
 
 ```bash
-bun run processing-generate-command -- \
+bun run processing -- \
   --preset xhain \
   --diff-mode reference \
-  --all-topics \
+  --all-daily-topics \
   --skip-download 1 \
   --skip-unchanged 0 \
   --skip-warm-cache 1 \
@@ -58,7 +58,7 @@ bun run processing-generate-command -- \
 
 **Generate fixed line:** same as above with `--diff-mode fixed`.
 
-Paste each printed line to run the container. **Limited topics:** replace `--all-topics` with e.g. `--topics trafficSigns,parking`.
+Paste each printed line to run the container. **Limited topics:** `--topics trafficSigns,parking`. **Include weekly (`landcover`):** `--all-topics` or list `landcover` in `--topics`.
 
 **Common presets (`--preset <slug>`):** same bbox on **both** `PROCESS_ONLY_BBOX` and `PROCESSING_DIFFING_BBOX` unless you use `--distinct-diff-bbox` or separate `--only-bbox` / `--diff-bbox`. See `--help` for the full slug list.
 
@@ -126,6 +126,19 @@ Notes:
 
 - This wrapper runs Docker+busted for the whole suite.
 - Lua modules are loaded via dotted requires (for example `topics.parking.roads.helper.result_tags`).
+
+## Lua heap profiling (performance / memory investigations)
+
+Use when tuning osm2pgsql Lua (CSV cache size, per-way growth) — not for routine diff tests.
+
+1. **Helper:** [`processing/topics/helper/memory_reporter.lua`](../../../processing/topics/helper/memory_reporter.lua) — copy the usage example at the bottom into the topic under investigation (e.g. `prepare_pseudo_tags_roads_bikelanes.lua`, `load_merged_pseudo_tags.lua`). Remove the wiring after the run.
+2. **Enable for one run:** add to repo root **`.env`** (not `docker-compose.yml`):
+   - `PT_MEMORY_REPORT=1`
+   - optional `PT_MEMORY_REPORT_EVERY=100000`
+3. Run processing as usual (`bun run processing` → paste line). Logs show `MEMORY: …` on stdout / `docker logs processing`.
+4. **Context:** national pseudo-tag performance notes live on branch `processing-performance-csvs-settlements` (`processing/docs/roads-bikelanes-nightly-performance-handoff.md`).
+
+Do not leave `memory_reporter` calls in committed prod topic code.
 
 ## Related docs
 

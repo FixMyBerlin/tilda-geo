@@ -1,10 +1,10 @@
 
 ---@param tags OsmTags
----@return number|nil, string, string
+---@return number|nil, string|nil, string|nil
 local function maxspeed_direct(tags)
   local maxspeed = nil
-  local source = 'nothing_found'
-  local confidence = 'nothing_found'
+  local source = nil
+  local confidence = nil
   local speed_tags = { 'maxspeed:forward', 'maxspeed:backward', 'maxspeed' }
 
   for _, tag in pairs(speed_tags) do

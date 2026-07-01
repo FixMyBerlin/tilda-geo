@@ -1,3 +1,4 @@
+import { DocumentHeading } from '@/components/shared/text/DocumentHeading'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { DOCS_PAGE_SECTION_H2_CLASSNAME } from './docsSectionIds.const'
 import type { DocsPageTopicDoc } from './types'
@@ -12,9 +13,16 @@ export const PageDocsChaptersSection = ({ topicDoc }: Props) => {
   return (
     <section>
       {topicDoc.chapters.map((chapter) => (
-        <article id={chapter.id} key={chapter.id}>
-          <h2 className={DOCS_PAGE_SECTION_H2_CLASSNAME}>{chapter.title}</h2>
-          <Markdown markdown={chapter.markdown} />
+        <article key={chapter.id}>
+          <DocumentHeading as="h2" id={chapter.id} className={DOCS_PAGE_SECTION_H2_CLASSNAME}>
+            {chapter.title}
+          </DocumentHeading>
+          <Markdown
+            markdown={chapter.markdown}
+            headingStyle="document"
+            headingLevelOffset={1}
+            headingIdPrefix={chapter.id}
+          />
         </article>
       ))}
     </section>

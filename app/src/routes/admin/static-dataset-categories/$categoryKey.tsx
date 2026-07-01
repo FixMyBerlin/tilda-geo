@@ -9,8 +9,11 @@ export const Route = createFileRoute('/admin/static-dataset-categories/$category
       data: { categoryKey: params.categoryKey },
     })
   },
-  head: () => ({
-    meta: [{ title: 'Kategorie bearbeiten – ADMIN TILDA' }],
-  }),
+  head: ({ loaderData }) => {
+    if (!loaderData) return { meta: [] }
+    return {
+      meta: [{ title: `${loaderData.category.title} bearbeiten – ADMIN TILDA` }],
+    }
+  },
   component: PageStaticDatasetCategoryEdit,
 })

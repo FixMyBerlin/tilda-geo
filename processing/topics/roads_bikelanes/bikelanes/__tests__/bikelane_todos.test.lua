@@ -361,6 +361,46 @@ describe('bikelane_todos', function()
     end)
   end)
 
+  describe('`missing_segregated`:', function()
+    it('creates missing_segregated but not needs_clarification for path with designated bicycle and foot', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(data.category, 'needsClarification')
+      assert.are.equal(table_includes(data._todo_list, 'missing_segregated'), true)
+      assert.are.equal(table_includes(data._todo_list, 'needs_clarification'), false)
+    end)
+
+    it('creates missing_segregated but not needs_clarification for cycleway with designated bicycle and foot', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(data.category, 'needsClarification')
+      assert.are.equal(table_includes(data._todo_list, 'missing_segregated'), true)
+      assert.are.equal(table_includes(data._todo_list, 'needs_clarification'), false)
+    end)
+  end)
+
   describe('`crossing_too_long`:', function()
     it('creates todo for long crossing (> 100m) with cycleway=crossing', function()
       local input_object = {

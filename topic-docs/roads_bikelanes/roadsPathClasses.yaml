@@ -60,6 +60,9 @@ attributes:
     ref: bikelanesPresence.bikelane_self
   - key: bikelane_right
     ref: bikelanesPresence.bikelane_right
+  - key: todos
+    ref: todos_lines.todos
   - key: _is_sidepath
-    purpose: qa
-    format: ignore
+    ref: roads._is_sidepath
+  - key: _in_settlement_area
+    ref: roads._in_settlement_area

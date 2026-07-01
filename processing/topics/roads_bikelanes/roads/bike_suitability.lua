@@ -20,7 +20,7 @@ local function bike_suitability_new(args)
   return self
 end
 
-function bike_suitability_category:__call(tags)
+function bike_suitability_category:is_active(tags)
   return self.condition(tags)
 end
 
@@ -109,7 +109,7 @@ local category_definitions = {
 ---@return table|nil
 local function categorize_bike_suitability(tags)
   for _, category in pairs(category_definitions) do
-    if category(tags) then
+    if category:is_active(tags) then
       return category
     end
   end

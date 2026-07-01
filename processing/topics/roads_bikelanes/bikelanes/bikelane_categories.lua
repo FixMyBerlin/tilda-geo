@@ -15,67 +15,6 @@ local extract_value_from_lanes = require('topics.roads_bikelanes.bikelanes.helpe
 
 local is_crossing_pattern -- forward declaration for use in category conditions below
 
---- Resolve `<base>_<left|right>` from raw side tags via matching sanitizer.
---- Example: `separation_left` -> `SANITIZE_ROAD_TAGS.separation(tags, 'left')`.
---- Returns `(handled, value)` where handled marks keys resolved by a sanitizer.
----@param source_tags OsmTags
----@param key string
----@return boolean, any|nil
-local function resolve_sided_sanitized_value(source_tags, key)
-  local base = key:match('^(.-)_left$')
-  local side = 'left'
-  if base == nil then
-    base = key:match('^(.-)_right$')
-    side = 'right'
-  end
-  if base == nil then return false, nil end
-
-  local sanitizer = SANITIZE_ROAD_TAGS[base]
-  if type(sanitizer) ~= 'function' then
-    return false, nil
-  end
-
-  local value = sanitizer(source_tags, side)
-  if value == SANITIZE_VALUES.disallowed then
-    return true, nil
-  end
-  return true, value
-end
-
---- Build a decision-only tag view where `DISALLOWED_VALUE` behaves like missing data.
---- Writes still go to the original tag table so category conditions can keep mutating fields.
----@param source_tags OsmTags
----@return OsmTags
-local function decision_tags_view(source_tags)
-  return setmetatable({}, {
-    __index = function(_, key)
-      local handled_sided_key, sided_sanitized_value = resolve_sided_sanitized_value(source_tags, key)
-      if handled_sided_key then
-        return sided_sanitized_value
-      end
-
-      local value = source_tags[key]
-      if value == SANITIZE_VALUES.disallowed then
-        return nil
-      end
-      return value
-    end,
-    __newindex = function(_, key, value)
-      source_tags[key] = value
-    end,
-    __pairs = function()
-      local function iter(_, previous_key)
-        local key, value = next(source_tags, previous_key)
-        while key ~= nil and value == SANITIZE_VALUES.disallowed do
-          key, value = next(source_tags, key)
-        end
-        return key, value
-      end
-      return iter, nil, nil
-    end,
-  })
-end
-
 ---Helper function to check this object is also a `cyclewayOnHighwayBetweenLanes`
 ---@param tags OsmTags The tags to check
 local function has_cycleway_on_highway_between_lanes_conditions(tags)
@@ -123,8 +62,8 @@ end
 
 ---@param tags OsmTags
 ---@return boolean|nil
-function BikelaneCategory:__call(tags)
-  return self.condition(decision_tags_view(tags))
+function BikelaneCategory:is_active(tags)
+  return self.condition(tags)
 end
 
 local dataNo = BikelaneCategory.new({
@@ -226,7 +165,7 @@ local bicycleRoad_vehicleDestination = BikelaneCategory.new({
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
     -- Subcategory when bicycle road allows vehicle traffic
-    if bicycleRoad(tags) then
+    if bicycleRoad:is_active(tags) then
       local traffic_sign = sanitize_traffic_sign(tags.traffic_sign)
       if contains_substring(traffic_sign, '1020-30') then
         return true
@@ -354,11 +293,13 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
     -- But in some cases, it is OK to map traffic_mode:right=foot but there is a separation.
     -- Those cases are not `footAndCyclewaySegregated`. So if a separation is given, this has to be 'no'.
     -- Eg. https://www.openstreetmap.org/way/244549219
-    local separation_right = tags.separation_right
+    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
     local separation_condition = true
-    if(separation_right ~= nil) then separation_condition = separation_right == 'no' end
+    if separation_right ~= nil and separation_right ~= SANITIZE_VALUES.disallowed then
+      separation_condition = separation_right == 'no'
+    end
 
-    local traffic_mode_right = tags.traffic_mode_right
+    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
     local traffic_mode_condition = traffic_mode_right == 'foot'
 
     if tags.highway == 'cycleway' and traffic_mode_condition and separation_condition then
@@ -599,7 +540,7 @@ local cyclewayOnHighway_advisory = BikelaneCategory.new({
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
-    if cyclewayOnHighway_advisoryOrExclusive(tags) then
+    if cyclewayOnHighway_advisoryOrExclusive:is_active(tags) then
       if tags['lane'] == 'advisory' then
         return true -- DE: Schutzstreifen
       end
@@ -618,7 +559,7 @@ local cyclewayOnHighway_exclusive = BikelaneCategory.new({
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   condition = function(tags)
-    if cyclewayOnHighway_advisoryOrExclusive(tags) then
+    if cyclewayOnHighway_advisoryOrExclusive:is_active(tags) then
       if tags['lane'] == 'exclusive' then
         return true -- DE: Radfahrstreifen
       end
@@ -719,9 +660,9 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     })
 
     -- Has to have physical separation left
-    local traffic_mode_right = tags.traffic_mode_right
-    local separation_left = tags.separation_left
-    if allowed_separation_values[separation_left] then
+    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
+    local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
+    if separation_left ~= SANITIZE_VALUES.disallowed and allowed_separation_values[separation_left] then
       -- But not in edge cases, when the separation protects a cyclewayOnHighwayBetweenLanes, see https://www.openstreetmap.org/way/80706109/history
       if traffic_mode_right == 'motor_vehicle' then
         return false
@@ -735,7 +676,7 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     end
 
     -- Parked cars are treated as physical separation when left of the bikelane
-    local traffic_mode_left = tags.traffic_mode_left
+    local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
     if traffic_mode_left == 'parking' then
       -- But not when `segregated` is present, as it indicates infrastructure that is
       -- not on the road ('Seitenraum'), in which case the parking condition does not apply
@@ -746,8 +687,11 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     end
 
     -- For counter flow bikelanes with motorized traffic on the right, has to have physical separation right
-    local separation_right = tags.separation_right
-    if traffic_mode_right == 'motor_vehicle' and allowed_separation_values[separation_right] then
+    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
+    if traffic_mode_right == 'motor_vehicle'
+      and separation_right ~= SANITIZE_VALUES.disallowed
+      and allowed_separation_values[separation_right]
+    then
       return true
     end
   end
@@ -932,7 +876,7 @@ local categoryDefinitions = {
 ---@return BikelaneCategory|nil
 local function categorize_bikelane(tags)
   for _, category in pairs(categoryDefinitions) do
-    if category(tags) then
+    if category:is_active(tags) then
       if category.process then
         category.process(tags)
       end

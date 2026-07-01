@@ -1,5 +1,6 @@
 local ftcsv = require('ftcsv')
 local pl_path = require('pl.path')
+local log = require('topics.helper.log')
 local inspect = require('inspect')
 local pl = require('pl.tablex')
 
@@ -16,7 +17,7 @@ local function load_csv_sidepath(csv_path)
 
       -- Guard against missing file
       if not pl_path.exists(csv_path) then
-        Log('ERROR: CSV file not found: ' .. csv_path, 'load_csv_sidepath')
+        log('ERROR: CSV file not found: ' .. csv_path, 'load_csv_sidepath')
         cached_lines = {}
         return cached_lines
       end
@@ -27,7 +28,7 @@ local function load_csv_sidepath(csv_path)
         local size = f:seek('end')
         f:close()
         if not size or size == 0 then
-          Log('ERROR: CSV file is empty: ' .. csv_path, 'load_csv_sidepath')
+          log('ERROR: CSV file is empty: ' .. csv_path, 'load_csv_sidepath')
           cached_lines = {}
           return cached_lines
         end

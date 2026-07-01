@@ -1,0 +1,7 @@
+# Weekend OSM tag filter.
+# Applied from the regional download for topics with schedule=weekend.
+# Docs: https://docs.osmcode.org/osmium/latest/osmium-tags-filter.html
+
+wr/landuse
+wr/building
+wr/leisure

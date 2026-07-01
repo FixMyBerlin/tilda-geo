@@ -34,6 +34,7 @@ attributes:
     format: meter
     label: Effektive Breite
   - key: width_source
+    purpose: qa
     label: Quelle Breite
     values:
       - value: ALKIS
@@ -150,6 +151,7 @@ attributes:
     label: Höchstgeschwindigkeit
     format: kilometer_per_hour
   - key: maxspeed_source
+    purpose: qa
     label: Höchstgeschwindigkeit Quelle
     values:
       - value: maxspeed
@@ -161,6 +163,7 @@ attributes:
       - value: inferred_from_highway
         label: Abgeleitet vom `highway`-Tag
   - key: maxspeed_confidence
+    purpose: qa
     label: Konfidenz Höchstgeschwindigkeit
     values:
       - value: high
@@ -194,11 +197,13 @@ attributes:
     label: Oberfläche
     valuesRef: parkings.surface
   - key: surface_source
+    purpose: qa
     label: Herkunft der Oberfläche
     values:
       - value: tag
         label: OSM-Tag `surface`
   - key: surface_confidence
+    purpose: qa
     label: Konfidenz der Oberfläche
     values:
       - value: high
@@ -217,6 +222,7 @@ attributes:
       - value: very_bad
         label: Sehr schlecht
   - key: smoothness_source
+    purpose: qa
     label: Herkunft der Oberflächenqualität
     values:
       - value: tag
@@ -230,6 +236,7 @@ attributes:
       - value: 'mtb:scale_to_smoothness'
         label: Abgeleitet von `mtb:scale`
   - key: smoothness_confidence
+    purpose: qa
     label: Konfidenz Oberflächenqualität
     values:
       - value: high
@@ -247,3 +254,11 @@ attributes:
         label: Rot und Grün
       - value: no
         label: Keine besondere Farbe
+  - key: todos
+    ref: todos_lines.todos
+  - key: _is_sidepath
+    purpose: processing
+    format: ignore
+  - key: _in_settlement_area
+    purpose: processing
+    format: ignore

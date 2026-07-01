@@ -71,13 +71,13 @@ export const InternalNotesNewForm = () => {
 
   return (
     <section className="">
-      <div className="mt-4 flex justify-center">
-        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 leading-tight font-semibold text-teal-50">
+      <div className="mt-3 flex justify-center sm:mt-4">
+        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 text-sm leading-tight font-semibold text-teal-50 sm:text-base">
           2. Internen Hinweis verfassen
         </h2>
       </div>
       <Form
-        className="p-4"
+        className="space-y-3.5 p-3 sm:space-y-6 sm:p-4"
         showFormErrors={false}
         defaultValues={{ subject: '', body: '' }}
         schema={InternalNoteSchema}
@@ -106,7 +106,7 @@ export const InternalNotesNewForm = () => {
       >
         {(form) => (
           <>
-            <p className="leading-snug text-gray-900">
+            <p className="text-sm leading-snug text-gray-900 sm:text-base">
               Interne Hinweise sind nur für angemeldete Nutzer:innen sichtbar, die für diese Region
               freigeschaltet wurden.{' '}
               {commentedFeatureId ? (
@@ -121,7 +121,7 @@ export const InternalNotesNewForm = () => {
               name="subject"
               label="Betreff"
               labelSrOnly
-              classNameOverwrite="my-3 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
+              classNameOverwrite="my-1.5 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:my-3"
               placeholder="Betreff"
               required
             />
@@ -130,10 +130,10 @@ export const InternalNotesNewForm = () => {
               name="body"
               label="Hinweistext (Markdown)"
               labelSrOnly
-              classNameOverwrite="my-3 block min-h-48 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
+              classNameOverwrite="my-1.5 block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:my-3 sm:min-h-48"
               placeholder="Hinweis"
               required
-              rows={12}
+              rows={7}
             />
             <div className="flex items-center gap-1 leading-tight">
               <form.Subscribe selector={(s) => s.isSubmitting}>

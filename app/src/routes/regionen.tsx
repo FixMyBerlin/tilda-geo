@@ -1,7 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { LayoutRegionen } from '@/components/regionen/LayoutRegionen'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/regionen')({
   ssr: true,
-  component: LayoutRegionen,
+  component: () => <Outlet />,
 })

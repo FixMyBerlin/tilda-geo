@@ -1,5 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { HeaderRegionen } from '@/components/shared/layouts/Header/HeaderRegionen/HeaderRegionen'
+import { HeaderRegionen } from '@/components/layouts/Header/HeaderRegionen/HeaderRegionen'
 import { MapInterface } from './pageRegionSlug/MapInterface'
 import { RegionAccessDenied } from './pageRegionSlug/RegionDeactivated'
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
-# Keeps .env.local in sync when you switch branches (remove on develop/main,
-# drop stale file if # DEV_STACK_BRANCH changed). Same logic as predev; runs
-# earlier so db-pull/migrate etc. see correct ports. See docs/docker-local-development.md
+# Keeps .env.local in sync when you switch branches (remove on develop/main
+# or main checkout, drop stale file if # DEV_STACK_BRANCH changed). Same logic
+# as predev; runs earlier so db-pull/migrate etc. see correct ports.
 # $3=1 on branch checkout (not file checkout)
 [ "$3" = "1" ] || exit 0
 

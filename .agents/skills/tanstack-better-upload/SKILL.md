@@ -62,8 +62,7 @@ file picker / dropzone* onDrop
 
 ## Related skills
 
-- `tanstack-start-conventions` — `.server.ts` / `.functions.ts`, API route boundaries, SSR
-- `tanstack-start-app-structure` — `src/server/uploads/` layout
+- `tanstack-start-conventions` — layout, `.server.ts` / `.functions.ts`, API route boundaries, SSR
 
 ## Usage rules (daily work)
 

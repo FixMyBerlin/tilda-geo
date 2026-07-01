@@ -7,8 +7,8 @@
   "oxc.lint.configPath": "app/oxlint.config.mjs",
   "oxc.fixKind": "dangerous_fix_or_suggestion",
   "oxc.typeAware": true,
-  "oxc.path.oxfmt": "${workspaceFolder}/app/node_modules/.bin/oxfmt",
-  "oxc.path.oxlint": "${workspaceFolder}/app/node_modules/.bin/oxlint",
+  "oxc.path.oxfmt": "./app/node_modules/.bin/oxfmt",
+  "oxc.path.oxlint": "./app/node_modules/.bin/oxlint",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
@@ -26,7 +26,9 @@
   "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
   "js/ts.experimental.useTsgo": true,
-  "typescript.native-preview.tsdk": "app/node_modules/@typescript/native-preview",
+  "typescript.tsdk": "app/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.native-preview.tsdk": "app/node_modules/typescript",
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/

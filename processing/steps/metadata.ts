@@ -1,5 +1,7 @@
 import { $, sql } from 'bun'
+import type { AfterthoughtId } from '../constants/afterthoughts.const'
 import { berlinTimeString } from '../utils/berlinTime'
+import { type AfterthoughtEntry, type ProcessingAfterthoughtsMeta } from './afterthoughts/types'
 import { originalFilePath } from './download'
 
 /**
@@ -16,13 +18,13 @@ export async function initializeMetadataTable() {
       processing_completed_at TIMESTAMP,
       qa_update_started_at TIMESTAMP,
       qa_update_completed_at TIMESTAMP,
-      statistics_started_at TIMESTAMP,
-      statistics_completed_at TIMESTAMP,
-      status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'postprocessing', 'processed'))
+      status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'postprocessing', 'processed')),
+      topics JSONB NOT NULL DEFAULT '{}',
+      afterthoughts JSONB NOT NULL DEFAULT '{}'
     )`
 
-  // Migration: Add async operation tracking columns, update status constraint, and remove unused processed_at column
-  // This is a temporary migration that can be removed after deployment
+  // Migration: Add async operation tracking columns, update status constraint, remove unused processed_at,
+  // and add topics JSONB. This is a temporary migration that can be removed after deployment.
   // !! We will remove this section after 2026-04-01
   try {
     await sql`
@@ -30,12 +32,21 @@ export async function initializeMetadataTable() {
         ADD COLUMN IF NOT EXISTS processing_completed_at TIMESTAMP,
         ADD COLUMN IF NOT EXISTS qa_update_started_at TIMESTAMP,
         ADD COLUMN IF NOT EXISTS qa_update_completed_at TIMESTAMP,
-        ADD COLUMN IF NOT EXISTS statistics_started_at TIMESTAMP,
-        ADD COLUMN IF NOT EXISTS statistics_completed_at TIMESTAMP
+        ADD COLUMN IF NOT EXISTS topics JSONB NOT NULL DEFAULT '{}',
+        ADD COLUMN IF NOT EXISTS afterthoughts JSONB NOT NULL DEFAULT '{}'
     `
     console.log(
-      'Processing: Migration - Added async operation tracking columns if they were missing',
+      'Processing: Migration - Added async operation tracking, topics, and afterthoughts columns if they were missing',
     )
+
+    // Statistics timing moved into the `afterthoughts` JSONB column; drop the old dedicated columns.
+    // !! We will remove this section after 2026-10-01
+    await sql`
+      ALTER TABLE public.meta
+        DROP COLUMN IF EXISTS statistics_started_at,
+        DROP COLUMN IF EXISTS statistics_completed_at
+    `
+    console.log('Processing: Migration - Dropped unused statistics_started_at/completed_at columns')
 
     // Update status CHECK constraint to include 'postprocessing'
     await sql`ALTER TABLE public.meta DROP CONSTRAINT IF EXISTS meta_status_check`
@@ -128,7 +139,7 @@ export async function updateProcessingEntry(
     processing_duration: processingDuration,
     osm_data_from,
     processing_completed_at: new Date(),
-    status: 'postprocessing', // Main processing done, async operations (QA + stats) still running
+    status: 'postprocessing', // Main topics done; QA runs async; afterthoughts are debug-only
   }
 
   console.log(
@@ -145,32 +156,78 @@ export async function updateProcessingEntry(
   return sql`UPDATE public.meta SET ${sql(data)} WHERE id = ${processingId}`
 }
 
-type StatisticsMetaColumn = 'statistics_started_at' | 'statistics_completed_at'
-
-async function updateProcessingMetaStatistics(columnName: StatisticsMetaColumn) {
-  const result = await sql`
-    UPDATE public.meta
-    SET ${sql({ [columnName]: new Date() })}
-    WHERE id = (
-      SELECT id
-      FROM public.meta
-      WHERE status = 'postprocessing'
-        AND processing_completed_at > NOW() - INTERVAL '2 hours'
-      ORDER BY id DESC
-      LIMIT 1
+/**
+ * Record one afterthought result into public.meta.afterthoughts for the current run (merge + log).
+ */
+export async function recordAfterthought(
+  processingId: number | null,
+  afterthoughtId: AfterthoughtId,
+  entry: AfterthoughtEntry,
+) {
+  if (!processingId) {
+    console.error(
+      '[ERROR] Processing: Cannot record afterthought metadata - no processingId available',
     )
-    RETURNING id
-  `
-
-  if (result.length === 0) {
-    console.warn(`[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``)
+    return
   }
+
+  console.log(
+    'Processing:',
+    'Recording afterthought',
+    JSON.stringify({ id: processingId, afterthoughtId, entry }),
+  )
+
+  const patch = { [afterthoughtId]: entry } satisfies ProcessingAfterthoughtsMeta
+  await sql`
+    UPDATE public.meta
+    SET afterthoughts = COALESCE(afterthoughts, '{}'::jsonb) || ${patch}::jsonb
+    WHERE id = ${processingId}
+  `
 }
 
-export async function updateProcessingMetaStatisticsStarted() {
-  return updateProcessingMetaStatistics('statistics_started_at')
+export type TopicPhaseWindow = {
+  start: string
+  end: string
 }
 
-export async function updateProcessingMetaStatisticsCompleted() {
-  return updateProcessingMetaStatistics('statistics_completed_at')
+export type TopicSkipReason = 'weekend' | 'unchanged' | 'process_only_topics'
+
+export type TopicRanEntry = {
+  lua?: TopicPhaseWindow
+  sql?: TopicPhaseWindow
+  diff?: TopicPhaseWindow
+}
+
+export type TopicSkippedEntry = {
+  skipped: TopicSkipReason
+}
+
+export type TopicTimingEntry = TopicRanEntry | TopicSkippedEntry
+
+export type ProcessingTopicsMeta = Record<string, TopicTimingEntry>
+
+export function toIsoWindow(start: Date, end: Date) {
+  return { start: start.toISOString(), end: end.toISOString() } satisfies TopicPhaseWindow
+}
+
+/**
+ * Persist per-topic timing JSON for the current processing run.
+ */
+export async function updateProcessingTopics(
+  processingId: number | null,
+  topics: ProcessingTopicsMeta,
+) {
+  if (!processingId) {
+    console.error('[ERROR] Processing: Cannot update topics metadata - no processingId available')
+    return
+  }
+
+  console.log(
+    'Processing:',
+    'Updating topic timings',
+    JSON.stringify({ id: processingId, topicCount: Object.keys(topics).length }),
+  )
+
+  // Pass the object directly — Bun.SQL serializes it as jsonb. JSON.stringify double-encodes.
+  return sql`UPDATE public.meta SET topics = ${topics} WHERE id = ${processingId}`
 }

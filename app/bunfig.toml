@@ -1,4 +1,9 @@
 # 5 days. @see https://chrispennington.dev/blog/stop-installing-packages-the-second-theyre-published
 [install]
 minimumReleaseAge = 432000
-minimumReleaseAgeExcludes = []
+minimumReleaseAgeExcludes = [
+  "typescript",
+  "@typescript/typescript-darwin-arm64",
+  "@typescript/typescript-linux-x64",
+  "@osm-traffic-signs/converter",
+]

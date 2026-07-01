@@ -42,7 +42,7 @@ local off_street_parking_area_categories = {
       if tags.amenity == 'parking' and tags.parking == 'multi-storey' then
         return true
       end
-      -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
+      -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions-nightly.txt
       return tags.building == 'parking'
     end,
     capacity_from_area = function(_, area) return area_tags(area, 28.2) end,
@@ -62,7 +62,7 @@ local off_street_parking_area_categories = {
     id = 'garage',
     conditions = function(tags)
       return (
-        -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
+        -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions-nightly.txt
         (tags.building == 'garages' or tags.building == 'garage') or
         (tags.amenity == 'parking' and tags.parking == 'garage_boxes')
       )
@@ -75,7 +75,7 @@ local off_street_parking_area_categories = {
     id = 'carport',
     conditions = function(tags)
       return (
-        -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions.txt
+        -- CRITICAL: Keep in sync with sanitize_parking_tags.lua (parking_off_street) and filter-expressions-nightly.txt
         (tags.building == 'carport') or
         (tags.amenity == 'parking' and tags.parking == 'carport') or
         (tags.amenity == 'parking' and tags.parking == 'carports') or

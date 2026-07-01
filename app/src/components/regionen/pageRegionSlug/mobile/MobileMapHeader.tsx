@@ -2,6 +2,7 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { DebugButton } from '../DebugBoxes/DebugButton'
 import { DownloadModal } from '../DownloadModal/DownloadModal'
 import { PlaceSearch } from '../Map/Search/PlaceSearch'
+import { mobileMapHeaderClassName } from './mobileMapChrome.const'
 import { MobileRegionMenu } from './MobileRegionMenu'
 import { MobileUserMenu } from './MobileUserMenu'
 
@@ -20,10 +21,7 @@ export const MobileMapHeader = () => {
   if (isDesktop) return null
 
   return (
-    // `p-2` is the base inset; the per-side `env(safe-area-inset-*)` overrides keep the buttons
-    // clear of the status bar / notch (top) and a landscape notch (left/right). Insets are 0 on
-    // devices without safe areas, so this collapses back to `p-2` there.
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-start justify-between gap-2 p-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] pr-[calc(env(safe-area-inset-right)+0.5rem)] pl-[calc(env(safe-area-inset-left)+0.5rem)] [&_a]:pointer-events-auto [&_button]:pointer-events-auto">
+    <div className={mobileMapHeaderClassName}>
       <div className="flex items-start gap-2">
         <MobileRegionMenu />
         <MobileUserMenu />

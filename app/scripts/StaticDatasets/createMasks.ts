@@ -67,7 +67,6 @@ export const transform = (data: FeatureCollection) => {
 import { maskMeta } from '../../_sharedMasks/maskMeta'
 import { maskLayers } from '../../_sharedMasks/maskLayers'
 
-// @ts-expect-error - See createMasks.ts
 export const data: MetaData = maskMeta({
   regions: ['${regionSlug}'],
   layers: maskLayers,

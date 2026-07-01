@@ -8,14 +8,28 @@ import {
   getSchemaTables,
   getTopicTables,
 } from '../diffing/diffing'
+import { isBerlinSaturday } from '../utils/berlinTime'
 import { formatTimestamp } from '../utils/formatTimestamp'
 import { updateDirectoryHash } from '../utils/hashing'
 import { logEnd, logStart } from '../utils/logging'
 import { params } from '../utils/parameters'
 import { getSkipUnchangedContext, topicPath, willSkipTopic } from '../utils/skipUnchanged'
-import { bboxesFilter, filteredFilePath } from './filter'
+import { getTopicScheduleSkipReason } from '../utils/topicScheduleEligibility'
+import { filteredFilePath, resolveTopicInputFile } from './filter'
+import {
+  type ProcessingTopicsMeta,
+  type TopicRanEntry,
+  type TopicSkipReason,
+  toIsoWindow,
+  updateProcessingTopics,
+} from './metadata'
 
 const mainFilePath = (topic: Topic) => join(topicPath(topic), topic)
+
+type TopicRunTimings = {
+  lua: { start: Date; end: Date }
+  sql?: { start: Date; end: Date }
+}
 
 /**
  * Run the given topic's SQL file
@@ -46,12 +60,8 @@ async function runLua(fileName: string, topic: Topic) {
   const luaFile = `${mainFilePath(topic)}.lua`
   console.log('runTopic: runLua', topic, JSON.stringify({ luaFile, filePath }))
   try {
-    // Number of processes: Use env var if set, otherwise default to 4 (better for Docker Desktop)
-    // For production with more CPU cores, set OSM2PGSQL_NUMBER_PROCESSES=8 or higher
-    const numProcesses = params.osm2pgsqlNumberProcesses ?? 4
-    // Did not find an easy way to use $(Shell) and make the `--bbox` optional
     await $`osm2pgsql \
-              --number-processes=${numProcesses} \
+              --number-processes=${params.osm2pgsqlNumberProcesses} \
               --create \
               --output=flex \
               --extra-attributes \
@@ -68,19 +78,44 @@ async function runLua(fileName: string, topic: Topic) {
  * @param fileName
  * @param topic
  */
-export async function runTopic(fileName: string, topic: Topic) {
+async function runTopic(fileName: string, topic: Topic) {
+  const luaStart = new Date()
   await runLua(fileName, topic)
+  const luaEnd = new Date()
+
+  const psqlFile = `${mainFilePath(topic)}.sql`
+  const hasSql = await Bun.file(psqlFile).exists()
+
+  if (!hasSql) {
+    return { lua: { start: luaStart, end: luaEnd } } satisfies TopicRunTimings
+  }
+
+  const sqlStart = new Date()
   await runSQL(topic)
+  const sqlEnd = new Date()
+
+  return {
+    lua: { start: luaStart, end: luaEnd },
+    sql: { start: sqlStart, end: sqlEnd },
+  } satisfies TopicRunTimings
 }
 
 /**
  * Run the given topics with optional diffing and code caching
- * @param topics a list of topics to run
  * @param fileName an OSM file name to run the topics on
  * @param fileChanged whether the file has changed since the last run
+ * @param processingId current meta row id for persisting per-topic timings
  */
-export async function processTopics(fileName: string, fileChanged: boolean) {
+export async function processTopics(
+  fileName: string,
+  fileChanged: boolean,
+  processingId: number | null,
+  sourceFileName: string,
+) {
   logStart('Processing: Topics')
+
+  const ranTopics = new Set<Topic>()
+  const topicTimings: ProcessingTopicsMeta = {}
 
   const tableListPublic = await getSchemaTables('public')
   const tableListReference = await getSchemaTables('diffing_reference')
@@ -100,19 +135,41 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     await dropAllDiffTables()
   }
 
-  const useGlobalBboxFilter = params.processOnlyBbox !== null
   if (params.processOnlyBbox) {
     console.log(
       `Topics: ℹ️ Using global PROCESS_ONLY_BBOX=${params.processOnlyBbox.join(',')}. Topic bbox filters are skipped.`,
     )
   }
 
-  for (const [topic, bboxes] of Array.from(topicsConfig)) {
-    let innerBboxes = bboxes
+  // Weekend topics run on the Saturday nightly run (Berlin time). Computed once for this run.
+  const isSaturdayRun = isBerlinSaturday(new Date())
+
+  for (const [topic, entry] of Array.from(topicsConfig)) {
     let innerFileName = fileName
 
+    const scheduleSkipReason = getTopicScheduleSkipReason(topic, entry, isSaturdayRun)
+    if (scheduleSkipReason === 'weekend') {
+      console.log(
+        `Topics: ⏩ Skipping "${topic}" (schedule=weekend; runs on Saturday nights or via PROCESS_ONLY_TOPICS=${topic}).`,
+      )
+      topicTimings[topic] = { skipped: 'weekend' }
+      continue
+    }
+    if (scheduleSkipReason === 'process_only') {
+      console.log(
+        `Topics: ⏩ Skipping "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
+      )
+      topicTimings[topic] = { skipped: 'process_only_topics' }
+      continue
+    }
+
     if (await willSkipTopic(topic, fileChanged, skipContext)) {
-      if (params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)) {
+      const skipReason: TopicSkipReason =
+        params.processOnlyTopics.length > 0 && !params.processOnlyTopics.includes(topic)
+          ? 'process_only_topics'
+          : 'unchanged'
+
+      if (skipReason === 'process_only_topics') {
         console.log(
           `Topics: ⏩ Skipping "${topic}" based on PROCESS_ONLY_TOPICS=${params.processOnlyTopics.join(',')}`,
         )
@@ -122,25 +179,29 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
           "The code hasn't changed and `SKIP_UNCHANGED` is active.",
         )
       }
+      topicTimings[topic] = { skipped: skipReason }
       continue
     }
-    // In dev mode with PROCESS_ONLY_BBOX we already applied a global bbox filter in index.ts.
-    // Keep topic bboxes only when no global bbox is active.
-    if (useGlobalBboxFilter) {
-      innerBboxes = null
-    }
 
-    // Bboxes: Create filtered source file
-    if (innerBboxes) {
-      innerFileName = `${topic}_extracted.osm.pbf`
-      await bboxesFilter(fileName, innerFileName, innerBboxes, fileChanged)
-    }
+    // Resolve schedule PBF (nightly vs weekend) and optional topic bbox extract.
+    innerFileName = await resolveTopicInputFile({
+      schedule: entry.schedule,
+      topic,
+      pipelineFileName: fileName,
+      sourceFileName,
+      fileChanged,
+      topicBboxes: entry.bboxes,
+    })
 
     // Get all tables related to `topic`
     const topicTables = await getTopicTables(topic)
 
     logStart(`Topics: ${topic}`)
     const processedTopicTables = topicTables.intersection(tableListPublic)
+
+    const ranEntry: TopicRanEntry = {}
+    // Wall-clock window for reference creation + diff computation (stored as meta.topics[].diff)
+    let diffStart: Date | null = null
 
     // ============================================
     // Reference Creation Phase (for non-reference modes)
@@ -149,6 +210,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       // Previous/Fixed modes: Create reference tables conditionally
       const createRefLabel = 'Diffing: Create reference tables'
       console.log(`${createRefLabel} - Start`)
+      diffStart = new Date()
       const createRefStart = Date.now()
       // With `PROCESSING_DIFFING_MODE=fixed` we only create reference tables that are not already created (making sure the reference is complete).
       // Which means existing reference tables don't change (are frozen).
@@ -162,10 +224,15 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
     }
 
     // Run the topic with osm2pgsql (LUA) and the sql processing
-    await runTopic(innerFileName, topic)
+    const runTimings = await runTopic(innerFileName, topic)
+    ranEntry.lua = toIsoWindow(runTimings.lua.start, runTimings.lua.end)
+    if (runTimings.sql) {
+      ranEntry.sql = toIsoWindow(runTimings.sql.start, runTimings.sql.end)
+    }
+    ranTopics.add(topic)
 
     // Update the code hashes
-    updateDirectoryHash(topicPath(topic))
+    await updateDirectoryHash(topicPath(topic))
 
     // ============================================
     // Reference Creation Phase (for reference mode - AFTER topic runs)
@@ -174,6 +241,7 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       // Reference mode: Create reference tables AFTER processing to capture final state
       const createRefLabel = 'Diffing: Create reference tables (reference mode)'
       console.log(`${createRefLabel} - Start`)
+      if (!diffStart) diffStart = new Date()
       const createRefStart = Date.now()
       await Promise.all(Array.from(processedTopicTables).map(createReferenceTable))
       console.log(`${createRefLabel} – Took ${formatTimestamp(Date.now() - createRefStart)}`)
@@ -189,9 +257,10 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       // Previous/Fixed modes: Compute diffs
       const diffLabel = `Diffing: Update diffs (${params.diffingMode})`
       console.log(`${diffLabel} - Start`)
-      const diffStart = Date.now()
+      if (!diffStart) diffStart = new Date()
+      const diffComputeStart = Date.now()
       await diffTables(Array.from(processedTopicTables))
-      console.log(`${diffLabel} – Took ${formatTimestamp(Date.now() - diffStart)}`)
+      console.log(`${diffLabel} – Took ${formatTimestamp(Date.now() - diffComputeStart)}`)
     } else {
       console.log(
         'Diffing:',
@@ -207,8 +276,18 @@ export async function processTopics(fileName: string, fileChanged: boolean) {
       )
     }
 
+    if (diffStart) {
+      ranEntry.diff = toIsoWindow(diffStart, new Date())
+    }
+
+    topicTimings[topic] = ranEntry
+
     logEnd(`Topics: ${topic}`)
   }
 
+  // Persist per-topic lua/sql/diff windows (or skip reasons) on public.meta.topics
+  await updateProcessingTopics(processingId, topicTimings)
+
   logEnd('Processing: Topics')
+  return ranTopics
 }

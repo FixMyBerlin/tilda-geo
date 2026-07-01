@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+@source './src/**/*.{js,jsx,ts,tsx,mdx}';
+@source './public/**/*.html';
+
+@plugin '@tailwindcss/forms';
+@plugin '@tailwindcss/typography';
+
+@theme inline {
+  --color-gray-50: oklch(0.985 0 0); /* --color-zinc-50 */
+  --color-gray-100: oklch(0.967 0.001 286.375); /* --color-zinc-10 */
+  --color-gray-200: oklch(0.92 0.004 286.32); /* --color-zinc-20 */
+  --color-gray-300: oklch(0.871 0.006 286.286); /* --color-zinc-30 */
+  --color-gray-400: oklch(0.705 0.015 286.067); /* --color-zinc-40 */
+  --color-gray-500: oklch(0.552 0.016 285.938); /* --color-zinc-50 */
+  --color-gray-600: oklch(0.442 0.017 285.786); /* --color-zinc-60 */
+  --color-gray-700: oklch(0.37 0.013 285.805); /* --color-zinc-70 */
+  --color-gray-800: oklch(0.274 0.006 286.033); /* --color-zinc-80 */
+  --color-gray-900: oklch(0.21 0.006 285.885); /* --color-zinc-90 */
+  --color-gray-950: oklch(0.141 0.005 285.823); /* --color-zinc-95 */
+
+  --color-zinc-*: initial;
+  --color-slate-*: initial;
+  --color-neutral-*: initial;
+  --color-stone-*: initial;
+
+  /* FixMyCity/TILDA CI-Farbe (Brand) + helle Variante für Flächen/Hintergründe */
+  --color-brand: #fabe48;
+  --color-brand-light: #ffedbf;
+
+  --radius-4xl: 2rem;
+}
+
+/* Keyframes für das Endlos-Laufband der Startseiten-Trust-Leiste. Die Animation
+   selbst wird per Utility `animate-[home-marquee_…]` angewendet (HomePageTrustBar);
+   nur die Keyframes lassen sich nicht als Tailwind-Klasse abbilden. */
+@keyframes home-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer base {
+  button {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  /* Keep typography links unstyled; Link components handle their own look. */
+  .prose a {
+    color: inherit;
+    text-decoration: inherit;
+    font-weight: inherit;
+  }
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  @apply bg-white/20! leading-tight;
+}
+
+/* Keep MapLibre's own corner controls (attribution bottom-left, zoom) out of the iOS safe areas.
+   The map is a full-screen backdrop now, so without this the attribution sits under the home
+   indicator. These controls render outside React, so env() padding on our floating chrome can't
+   reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
+:root {
+  --inspector-width: 0;
+  --map-controls-inset: 10px;
+}
+
+.maplibregl-ctrl-top-left {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+}
+html .maplibregl-ctrl-top-right {
+  right: calc(var(--inspector-width) + var(--map-controls-inset));
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+}
+[data-map-controls='true'] {
+  right: calc(var(--inspector-width) + var(--map-controls-inset));
+}
+.maplibregl-ctrl-bottom-left {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+.maplibregl-ctrl-bottom-right {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-right: env(safe-area-inset-right);
+}

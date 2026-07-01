@@ -1,5 +1,4 @@
 local SET = require('topics.helper.sets')
-local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
 
 local exclude_highways = {
@@ -103,7 +102,7 @@ local exclude_highways = {
     end
 
     return true
-  end
+  end,
 }
 
 return exclude_highways

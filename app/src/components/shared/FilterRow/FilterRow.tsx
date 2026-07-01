@@ -1,10 +1,12 @@
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
 import type { LinkOptions } from '@tanstack/react-router'
 import { useNavigate } from '@tanstack/react-router'
+import { twMerge } from 'tailwind-merge'
 import { Link } from '@/components/shared/links/Link'
-import { filterChipStyles, filterChipStylesActive } from '@/components/shared/links/styles'
 import { Pill } from '@/components/shared/text/Pill'
 import type { Router } from '@/router'
+import { filterChipClassName } from './FilterChip'
+import { FilterChipDot } from './FilterChipDot'
 import type { FilterRowItem } from './types'
 
 type FilterRowProps<TSearch> = {
@@ -13,10 +15,6 @@ type FilterRowProps<TSearch> = {
   to: LinkOptions<Router>['to']
   buildSearch: (id: string) => TSearch
   ariaLabel: string
-}
-
-function filterChipClassName(current: boolean) {
-  return current ? filterChipStylesActive : filterChipStyles
 }
 
 export function FilterRow<TSearch>({
@@ -63,9 +61,15 @@ export function FilterRow<TSearch>({
               key={item.id || '__all__'}
               to={to}
               search={buildSearch(item.id) as LinkOptions<Router>['search']}
-              classNameOverwrite={filterChipClassName(current)}
+              classNameOverwrite={twMerge(
+                filterChipClassName(current),
+                item.dotFillClassName && 'gap-1.5',
+              )}
               aria-current={current ? 'page' : undefined}
             >
+              {item.dotFillClassName ? (
+                <FilterChipDot fillClassName={item.dotFillClassName} />
+              ) : null}
               {item.label}
               {item.count !== undefined ? (
                 <Pill

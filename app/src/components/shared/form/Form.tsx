@@ -1,6 +1,7 @@
 import type { FormValidateOrFn } from '@tanstack/form-core'
 import { useForm } from '@tanstack/react-form'
 import { useNavigate } from '@tanstack/react-router'
+import type { LinkOptions } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
@@ -10,9 +11,12 @@ import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { buttonStyles } from '@/components/shared/links/styles'
 import { isProd } from '@/components/shared/utils/isEnv'
+import type { Router } from '@/router'
+
+type AppLinkTo = LinkOptions<Router>['to']
 
 export type SubmitResult<T = Record<string, unknown>> =
-  | { success: true; message?: string; redirect?: string; search?: Record<string, unknown> }
+  | { success: true; message?: string; redirect?: AppLinkTo; search?: Record<string, unknown> }
   | {
       success: false
       message: string

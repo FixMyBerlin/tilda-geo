@@ -1,6 +1,6 @@
 
 ---@param tags OsmTags
----@return number|nil, string, string
+---@return number|nil, string|nil, string|nil
 local function maxspeed_from_zone(tags)
   local maxspeed_type = {
     ['DE:rural'] = 100,
@@ -34,8 +34,8 @@ local function maxspeed_from_zone(tags)
   }
 
   local maxspeed = nil
-  local source = 'nothing_found'
-  local confidence = 'nothing_found'
+  local source = nil
+  local confidence = nil
 
   if maxspeed_type[tags['maxspeed:type']] then
     maxspeed = maxspeed_type[tags['maxspeed:type']]

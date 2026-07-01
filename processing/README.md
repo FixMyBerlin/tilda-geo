@@ -73,7 +73,9 @@ If any helper in (`topics/helper`)[processing/topics/helper] or the OSM file has
 After `Processing: Finished`, the **afterthoughts** phase runs deferred work (see `processing/steps/afterthoughts.ts`):
 
 1. **Statistics** — populates `public.aggregated_lengths` (empty table created at initialize; afterthoughts fill rows; feeds `/api/stats` and region statistics UI).
-2. **Sidepath export** — writes `is_sidepath_estimation.csv` for the next run's `roads_bikelanes` Lua import. Skipped when `roads_bikelanes` did not run only if a CSV already exists; otherwise exports from the current DB. When the topic ran but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
+2. **Sidepath export** — writes `is_sidepath_estimation.csv` for the next run's `roads_bikelanes` Lua import (or afterthoughts when topic schedule moved sidepath post-topics). Skipped when `roads_bikelanes` did not run only if a CSV already exists; otherwise exports from the current DB. When the topic ran but the OSM file and `pseudo_tags_sidepath/` are unchanged, an existing CSV is reused.
+
+Settlement-area export is not run (#3423).
 
 Whenever we talk about `hash`es in this code, this feature is referenced.
 
@@ -113,6 +115,12 @@ To run everything without code caching and diffing set `SKIP_UNCHANGED=0` and `P
 **Diffing timing in logs:** Timed diffing steps use the same style as topic timing: `Diffing: <step> - Start` then `Diffing: <step> – Took HH:MM:SS` (same `formatTimestamp` as "X finished in HH:MM:SS"). Steps: "Create reference tables", "Create reference tables (reference mode)", "Update diffs (previous|fixed)". Grep for `Diffing:` to see all diffing log lines.
 
 ### Process only certain topics and certain bbox
+
+Per-run vars (`PROCESS_ONLY_TOPICS`, `PROCESS_ONLY_BBOX`, `OSM2PGSQL_*`, `WAIT_FOR_FRESH_DATA`, `SKIP_WARM_CACHE`) are for **local dev** only — set them via `bun run processing` (inline env on the printed one-liner). Server baseline config comes from the deploy manifest ([`.github/env/deploy.manifest.json`](../.github/env/deploy.manifest.json)) which generates `/srv/.env`; per-run overrides are passed inline on the `docker compose up` command (see the CI workflows), not edited into `/srv/.env` by hand.
+
+`OSM2PGSQL_NUMBER_PROCESSES` defaults to **4** on staging and production (benchmarked 2026-06-26). See [`docs/osm2pgsql-number-processes.md`](docs/osm2pgsql-number-processes.md).
+
+Per-topic osmium tag-filter profiles were tried and reverted (2026-06-28) — see [`docs/per-topic-osmium-tag-filter.md`](docs/per-topic-osmium-tag-filter.md) before changing filter architecture.
 
 - Use `PROCESS_ONLY_TOPICS=parking` to only run the "parking" topic.
   Format: "topic1,topic2".

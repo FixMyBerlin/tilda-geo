@@ -15,6 +15,11 @@ export const topicPath = (topic: Topic) => join(TOPIC_DIR, topic)
 
 export const roadsBikelanesSidepathDir = join(TOPIC_DIR, 'roads_bikelanes/pseudo_tags_sidepath')
 
+export const roadsBikelanesSettlementAreaDir = join(
+  TOPIC_DIR,
+  'roads_bikelanes/pseudo_tags_settlement_area',
+)
+
 export async function getSkipUnchangedContext(fileChanged: boolean) {
   const helperPath = join(TOPIC_DIR, 'helper')
   const helpersChanged = await directoryHasChanged(helperPath)

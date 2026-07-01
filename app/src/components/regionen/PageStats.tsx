@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { HeaderApp } from '@/components/layouts/Header/HeaderApp/HeaderApp'
 import { Link } from '@/components/shared/links/Link'
-import { HeaderApp } from '../shared/layouts/Header/HeaderApp/HeaderApp'
 
 const routeApi = getRouteApi('/regionen/stats')
 const sumLength = (lengthMap: Record<string, number>) =>

@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { Fragment } from 'react'
 import { z } from 'zod'
 import { Link } from '@/components/shared/links/Link'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
@@ -123,16 +122,15 @@ export const NoticeMaprouletteTask = ({
   const completed = data?.status && maprouletteStatusCompleted.includes(data.status)
 
   return (
-    <Fragment key={projectKey}>
-      <h2>{radinfraCampaign?.title || `${projectKey} (in Arbeit)`}</h2>
+    <>
       {!!mapRouletteId && (
-        <p className="-mt-5 text-right text-xs">
+        <p className="mb-2 text-right text-xs">
           <Link href={maprouletteCampaignLink} title="MapRoulette" className="text-xs" blank>
             MR #{mapRouletteId}
           </Link>
         </p>
       )}
-      <div className="mt-0 mb-5 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
+      <div className="mb-4 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
         {showMaproulette && (
           <>
             <Link href={rapidCampaignLink} blank button>
@@ -197,8 +195,8 @@ export const NoticeMaprouletteTask = ({
       </div>
       <Markdown
         markdown={text}
-        className="prose-sm mb-10 border-b-4 border-b-white pb-10 marker:text-purple-700 first:mt-5 last:mb-0 last:border-b-0"
+        className="prose-sm marker:text-purple-700 [&>p:first-child]:mt-0"
       />
-    </Fragment>
+    </>
   )
 }

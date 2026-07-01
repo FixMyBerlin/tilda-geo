@@ -1,4 +1,3 @@
-local CLONE = require('topics.helper.clones')
 local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
 local exclude = require('topics.roads_bikelanes.helper.exclude_highways')
@@ -35,7 +34,7 @@ local function roads_bikelanes_roads(context)
   local object_tags = context.object_tags
   local object_geom = context.object_geom
 
-  local result_tags = CLONE.structured_clone(context.shared_result_tags)
+  local result_tags = merge_table({}, context.shared_result_tags)
   merge_table(result_tags, context.cycleway_presence)
 
   if not highway_classes.sidepath_highway_classes[object_tags.highway] then
@@ -94,7 +93,10 @@ local function roads_bikelanes_roads(context)
 
     roads_path_classes_table:insert({
       id = default_id({ type = object_tags._type, id = object_tags._id }),
-      tags = merge_table(extract_public_tags(result_tags), { _is_sidepath = object_tags._is_sidepath }),
+      tags = merge_table(extract_public_tags(result_tags), {
+        _is_sidepath = object_tags._is_sidepath,
+        _in_settlement_area = object_tags._in_settlement_area,
+      }),
       meta = object_meta,
       geom = object_geom,
       minzoom = paths_generalization(object_tags, result_tags)
@@ -103,7 +105,9 @@ local function roads_bikelanes_roads(context)
     result_tags.name_ref = object_tags.ref
     roads_table:insert({
       id = default_id({ type = object_tags._type, id = object_tags._id }),
-      tags = extract_public_tags(result_tags),
+      tags = merge_table(extract_public_tags(result_tags), {
+        _in_settlement_area = object_tags._in_settlement_area,
+      }),
       meta = object_meta,
       geom = object_geom,
       minzoom = road_generalization(object_tags, result_tags)

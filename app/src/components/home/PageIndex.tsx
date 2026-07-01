@@ -7,13 +7,13 @@ import { HomePageWhy } from './pageIndex/HomePageWhy'
 
 export function PageIndex() {
   return (
-    <>
+    <main className="z-0 grow">
       <HomePageHero />
       <HomePageTrustBar />
       <HomePageProducts />
       <HomePageWhy />
       <HomePageFaq />
       <HomePageCtaBanner />
-    </>
+    </main>
   )
 }

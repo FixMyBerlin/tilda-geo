@@ -1,10 +1,8 @@
 import { join } from 'node:path'
 import { $ } from 'bun'
 import { logEnd, logStart } from '../../utils/logging'
-import {
-  updateProcessingMetaStatisticsCompleted,
-  updateProcessingMetaStatisticsStarted,
-} from '../metadata'
+import { toIsoWindow } from '../metadata'
+import { afterthoughtSkipped } from './types'
 
 const LOG_PREFIX = '[Afterthoughts][Statistics]'
 
@@ -14,16 +12,15 @@ const LOG_PREFIX = '[Afterthoughts][Statistics]'
  */
 export async function aggregateLengths() {
   const sqlFile = join(import.meta.dir, 'sql', 'aggregate_lengths.sql')
+  const start = new Date()
 
   try {
     logStart('Afterthoughts: Statistics')
-    await updateProcessingMetaStatisticsStarted()
-
     await $`psql -v ON_ERROR_STOP=1 -f ${sqlFile}`
-
-    await updateProcessingMetaStatisticsCompleted()
     logEnd('Afterthoughts: Statistics')
+    return toIsoWindow(start, new Date())
   } catch (error) {
     console.warn(`${LOG_PREFIX} WARN: aggregation failed — continuing.`, error)
+    return afterthoughtSkipped('failed')
   }
 }

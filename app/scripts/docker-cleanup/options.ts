@@ -1,12 +1,13 @@
-import { $ } from 'bun'
-import type { DfSummary } from './dockerPreview'
 import {
   formatBytesAsGB,
   getReclaimableForTypes,
   getStoppedContainerNames,
   getDanglingImageRefs,
   getUnusedVolumeNames,
+  dockerCmd,
+  DOCKER_PRUNE_TIMEOUT_MS,
 } from './dockerPreview'
+import type { DfSummary } from './dockerPreview'
 
 export type CleanupActionId =
   | 'stopped_containers'
@@ -63,11 +64,13 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
     previewTypes: ['Containers'],
     getPreviewNames: getStoppedContainerNames,
     run: async () => {
-      const r = await $`docker container prune -f`.quiet().nothrow()
+      const r = await dockerCmd(['container', 'prune', '-f'], {
+        timeoutMs: DOCKER_PRUNE_TIMEOUT_MS,
+      })
       return {
-        stdout: r.stdout.toString(),
-        stderr: r.stderr.toString(),
-        exitCode: r.exitCode ?? -1,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
       }
     },
   },
@@ -81,11 +84,11 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
     previewTypes: ['Images'],
     getPreviewNames: getDanglingImageRefs,
     run: async () => {
-      const r = await $`docker image prune -f`.quiet().nothrow()
+      const r = await dockerCmd(['image', 'prune', '-f'], { timeoutMs: DOCKER_PRUNE_TIMEOUT_MS })
       return {
-        stdout: r.stdout.toString(),
-        stderr: r.stderr.toString(),
-        exitCode: r.exitCode ?? -1,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
       }
     },
   },
@@ -98,11 +101,11 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
     previewTypes: ['Local Volumes'],
     getPreviewNames: getUnusedVolumeNames,
     run: async () => {
-      const r = await $`docker volume prune -f`.quiet().nothrow()
+      const r = await dockerCmd(['volume', 'prune', '-f'], { timeoutMs: DOCKER_PRUNE_TIMEOUT_MS })
       return {
-        stdout: r.stdout.toString(),
-        stderr: r.stderr.toString(),
-        exitCode: r.exitCode ?? -1,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
       }
     },
   },
@@ -114,11 +117,11 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
       'No data loss. Only removes cache not referenced by any image. Next build may be slower.',
     previewTypes: ['Build Cache'],
     run: async () => {
-      const r = await $`docker builder prune -f`.quiet().nothrow()
+      const r = await dockerCmd(['builder', 'prune', '-f'], { timeoutMs: DOCKER_PRUNE_TIMEOUT_MS })
       return {
-        stdout: r.stdout.toString(),
-        stderr: r.stderr.toString(),
-        exitCode: r.exitCode ?? -1,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
       }
     },
   },
@@ -130,11 +133,13 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
       'No data loss. Removes every image not used by a running container (frees the "Images" reclaimable size).',
     previewTypes: ['Images'],
     run: async () => {
-      const r = await $`docker image prune -a -f`.quiet().nothrow()
+      const r = await dockerCmd(['image', 'prune', '-a', '-f'], {
+        timeoutMs: DOCKER_PRUNE_TIMEOUT_MS,
+      })
       return {
-        stdout: r.stdout.toString(),
-        stderr: r.stderr.toString(),
-        exitCode: r.exitCode ?? -1,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
       }
     },
   },
@@ -145,11 +150,13 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
     description: 'No data loss. Clears all build cache; next build will be slower.',
     previewTypes: ['Build Cache'],
     run: async () => {
-      const r = await $`docker builder prune -a -f`.quiet().nothrow()
+      const r = await dockerCmd(['builder', 'prune', '-a', '-f'], {
+        timeoutMs: DOCKER_PRUNE_TIMEOUT_MS,
+      })
       return {
-        stdout: r.stdout.toString(),
-        stderr: r.stderr.toString(),
-        exitCode: r.exitCode ?? -1,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
       }
     },
   },
@@ -171,19 +178,23 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
       return lines
     },
     run: async () => {
-      const r1 = await $`docker system prune -f -a --volumes`.quiet().nothrow()
-      if (r1.exitCode !== 0) {
+      const r1 = await dockerCmd(['system', 'prune', '-f', '-a', '--volumes'], {
+        timeoutMs: DOCKER_PRUNE_TIMEOUT_MS,
+      })
+      if (r1.timedOut || r1.exitCode !== 0) {
         return {
-          stdout: r1.stdout.toString(),
-          stderr: r1.stderr.toString(),
-          exitCode: r1.exitCode ?? -1,
+          stdout: r1.stdout,
+          stderr: r1.stderr,
+          exitCode: r1.timedOut ? -1 : r1.exitCode,
         }
       }
-      const r2 = await $`docker builder prune -a -f`.quiet().nothrow()
+      const r2 = await dockerCmd(['builder', 'prune', '-a', '-f'], {
+        timeoutMs: DOCKER_PRUNE_TIMEOUT_MS,
+      })
       return {
-        stdout: r1.stdout.toString() + r2.stdout.toString(),
-        stderr: r2.stderr.toString(),
-        exitCode: r2.exitCode ?? -1,
+        stdout: r1.stdout + r2.stdout,
+        stderr: r2.stderr,
+        exitCode: r2.timedOut ? -1 : r2.exitCode,
       }
     },
   },

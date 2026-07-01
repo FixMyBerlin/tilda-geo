@@ -1,8 +1,6 @@
 # TanStack Router — TypeScript only
 
-**Routing behavior** (loaders, React Query, `ssr`, `validateSearch`, API routes) → skill `tanstack-start-conventions`.
-
-**File routes & layout** → skill `tanstack-start-app-structure`.
+**Routing behavior and layout** (loaders, React Query, `ssr`, `validateSearch`, thin routes, API routes) → skill `tanstack-start-conventions`.
 
 Docs: [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview) · [llms.txt](https://tanstack.com/llms.txt)
 

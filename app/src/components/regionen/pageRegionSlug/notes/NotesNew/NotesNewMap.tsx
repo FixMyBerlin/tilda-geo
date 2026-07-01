@@ -6,6 +6,7 @@ import { AttributionControl, Map as MapGl, Marker, NavigationControl } from 'rea
 import { useOsmNewNoteFeature } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import type { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import type { useNewOsmNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { NotesMapLayerForRegion } from './NotesMapLayerForRegion'
 import { SourceLayerFeature } from './SourceLayerFeature'
@@ -22,6 +23,7 @@ type Props = {
 
 export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Props) => {
   const [showHint, setShowHint] = useState(true)
+  const isSmBreakpointOrAbove = useBreakpoint('sm')
 
   const handleMove = (event: ViewStateChangeEvent) => {
     setNewNoteMapParam({
@@ -48,9 +50,9 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
   if (!newNoteMapParam) return null
 
   return (
-    <section className="relative min-h-80">
-      <div className="absolute inset-x-1 top-4 z-10 flex justify-center">
-        <h2 className="rounded-lg bg-teal-700 px-2 py-1 leading-tight font-semibold text-teal-50">
+    <section className="relative h-[min(240px,30dvh)] min-h-[220px] w-full sm:h-auto sm:min-h-80">
+      <div className="absolute inset-x-1 top-2 z-10 flex justify-center sm:top-4">
+        <h2 className="rounded-lg bg-teal-700 px-2 py-1 text-sm leading-tight font-semibold text-teal-50 sm:text-base">
           1. Position bestimmen
         </h2>
       </div>
@@ -69,9 +71,6 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
         minZoom={3}
         attributionControl={false}
       >
-        <NavigationControl showCompass={false} position="bottom-left" />
-        <AttributionControl compact={true} position="bottom-right" />
-
         <Marker latitude={newNoteMapParam.lat} longitude={newNoteMapParam.lng} anchor="bottom">
           <MapPinIcon className="h-8 w-8 text-red-700" />
           <PlusIcon className="-mb-4 h-8 w-8 text-red-700" />
@@ -79,10 +78,13 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
 
         <SourceLayerFeature />
         <NotesMapLayerForRegion />
+        <AttributionControl compact={true} position="bottom-left" />
+
+        {isSmBreakpointOrAbove && <NavigationControl showCompass={false} position="bottom-left" />}
       </MapGl>
 
       {showHint && (
-        <div className="pointer-events-none absolute inset-x-20 bottom-20 z-50 rounded-sm bg-white/90 p-2 text-center leading-tight">
+        <div className="pointer-events-none absolute inset-x-4 bottom-2 z-50 rounded-sm bg-white/90 p-1.5 text-center text-sm leading-tight sm:inset-x-20 sm:bottom-20 sm:p-2 sm:text-base">
           Bewegen Sie die Karte, um das rote Kreuz dort zu positionieren, wo Sie Ihren Kommentar
           eintragen möchten.
         </div>

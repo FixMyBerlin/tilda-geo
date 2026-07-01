@@ -42,6 +42,7 @@ export const ADMIN_ROUTES = [
   '/admin/static-dataset-categories',
   '/admin/qa-configs',
   '/admin/memberships',
+  '/admin/processing',
 ] as const
 
 export const DOCS_ROUTES = ['/docs/mapillary-coverage'] as const

@@ -113,7 +113,6 @@ Both: dynamic-import WASM from `wasm.ts` only; never top-level `import` of `.was
 | Topic                            | Skill                                       |
 | -------------------------------- | ------------------------------------------- |
 | Map React API, layers, events    | React Map GL docs (load when touching maps) |
-| Route SSR, loaders, boundaries   | `tanstack-start-conventions`                |
-| Folder layout                    | `tanstack-start-app-structure`              |
+| Route SSR, loaders, layout       | `tanstack-start-conventions`                |
 | Client UI state around map tools | `zustand-state-management`                  |
-| useEffect / map listeners        | `react-useeffect`                           |
+| useEffect / map listeners        | `react-dev`                                 |

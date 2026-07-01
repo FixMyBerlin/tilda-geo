@@ -1,7 +1,7 @@
 import { trafficSignTagToSigns } from '@osm-traffic-signs/converter'
 import type { SignStateType } from '@osm-traffic-signs/converter'
 
-const countryPrefix = 'DE' satisfies 'DE'
+export const trafficSignCountryPrefix = 'DE' satisfies 'DE'
 
 export type TrafficSignDisplayItem = {
   key: string
@@ -14,12 +14,12 @@ function signToDisplayItem(sign: SignStateType) {
   return {
     key: sign.osmValuePart,
     recognized: sign.recodgnizedSign,
-    label: sign.descriptiveName,
+    label: sign.descriptiveName ?? sign.osmValuePart,
     svgName: sign.recodgnizedSign ? sign.svgName : null,
   } satisfies TrafficSignDisplayItem
 }
 
 export function parseTrafficSignTag(raw: string | undefined) {
   if (raw === undefined) return undefined
-  return trafficSignTagToSigns(raw, countryPrefix).map(signToDisplayItem)
+  return trafficSignTagToSigns(raw, trafficSignCountryPrefix).map(signToDisplayItem)
 }

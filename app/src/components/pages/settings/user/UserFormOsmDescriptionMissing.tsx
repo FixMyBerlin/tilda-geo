@@ -6,6 +6,7 @@ import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { Markdown } from '@/components/shared/text/Markdown'
+import { proseInLayoutMainClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { persistOsmUserDescriptionIfPresentFn } from '@/server/users/users.functions'
 
@@ -89,7 +90,10 @@ export const UserFormOsmDescriptionMissing = () => {
 
   return (
     <section
-      className="my-4 prose prose-sm rounded border border-amber-300 bg-amber-50 p-4"
+      className={twJoin(
+        'my-4 prose prose-sm rounded border border-amber-300 bg-amber-50 p-4',
+        proseInLayoutMainClasses,
+      )}
       id="description-missing"
     >
       <h3>Bitte vervollständigen Sie Ihr Profil auf OpenStreetMap</h3>
@@ -101,7 +105,7 @@ export const UserFormOsmDescriptionMissing = () => {
       <p className="my-1">
         Für die Profilbeschreibung können Sie sich an dem Vorschlag unten zu orientieren.
       </p>
-      <p className="my-2 flex items-center gap-2">
+      <p className="my-2 flex flex-wrap items-center gap-2">
         <Link
           button
           blank
@@ -112,7 +116,7 @@ export const UserFormOsmDescriptionMissing = () => {
           Profilbeschreibung ergänzen
         </Link>
         {pollUpdatedUserdataCount !== null && (
-          <span className="flex items-center gap-2">
+          <span className="flex flex-wrap items-center gap-2">
             <SmallSpinner />
             <span className="text-xs">
               Prüfe periodisch auf neue Profildaten ({pollUpdatedUserdataCount} / {maxPollCount})…

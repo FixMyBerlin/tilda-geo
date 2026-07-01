@@ -1,4 +1,9 @@
-import type { KeyDocEntry, TopicDocsYaml, ValueDocNode } from '../../src/data/topicDocs/schema'
+import type {
+  KeyDocEntry,
+  TopicDocAttributePurpose,
+  TopicDocsYaml,
+  ValueDocNode,
+} from '../../src/data/topicDocs/schema'
 import type { CompiledAttribute, CompiledValue } from './types'
 
 const resolveDescription = (value: string | undefined) => value
@@ -119,6 +124,20 @@ const followRefToTerminalEntry = (input: {
   return { tableName: targetTableName, entry: targetAttribute }
 }
 
+const resolveInheritedPurpose = (input: {
+  pointer: string
+  docsByTableName: Map<string, TopicDocsYaml>
+  errorContext: string
+}): TopicDocAttributePurpose | undefined => {
+  const { entry } = followRefToTerminalEntry({
+    pointer: input.pointer,
+    docsByTableName: input.docsByTableName,
+    visiting: new Set(),
+    errorContext: input.errorContext,
+  })
+  return entry.purpose
+}
+
 const resolveValueDocNodesForEntry = (input: {
   attribute: KeyDocEntry
   owningTableName: string
@@ -187,7 +206,7 @@ export const compileAttributesForDoc = (input: {
         key: attribute.key,
         type: refEntry.format,
         label,
-        purpose: attribute.purpose,
+        purpose: attribute.purpose ?? refEntry.purpose,
         description: resolveDescription(refEntry.description),
         chapterRefs: refEntry.chapterRefs?.map((chapter) => chapter.chapterId),
         values: resolvedValues.map((valueNode) => compileValueNode(valueNode)),
@@ -210,11 +229,19 @@ export const compileAttributesForDoc = (input: {
       throw new Error(`Missing label for attribute "${attribute.key}" in table "${tableName}"`)
     }
 
+    const inheritedPurpose = attribute.valuesRef
+      ? resolveInheritedPurpose({
+          pointer: attribute.valuesRef,
+          docsByTableName,
+          errorContext: `${errorContext} via valuesRef "${attribute.valuesRef}"`,
+        })
+      : undefined
+
     return {
       key: attribute.key,
       type: attribute.format,
       label,
-      purpose: attribute.purpose,
+      purpose: attribute.purpose ?? inheritedPurpose,
       description: resolveDescription(attribute.description),
       chapterRefs: attribute.chapterRefs?.map((chapter) => chapter.chapterId),
       values: resolvedValues?.map((valueNode) => compileValueNode(valueNode)),

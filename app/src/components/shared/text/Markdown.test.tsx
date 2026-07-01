@@ -27,13 +27,40 @@ vi.mock('@/components/shared/links/Link', () => ({
     ),
 }))
 
+vi.mock('./MarkdownDocumentHeadingLink', () => ({
+  MarkdownDocumentHeadingLink: () => null,
+}))
+
 describe('Markdown', () => {
-  test('maps markdown headings to paragraph + strong', () => {
+  test('maps markdown headings to paragraph + strong in compact mode', () => {
     const { container } = render(<Markdown markdown={'# Title\n\n## Sub'} />)
     const paragraphs = container.querySelectorAll('p')
     expect(paragraphs.length).toBe(2)
     expect(paragraphs[0]?.querySelector('strong')?.textContent).toBe('Title')
     expect(paragraphs[1]?.querySelector('strong')?.textContent).toBe('Sub')
+  })
+
+  test('renders semantic headings in document mode', () => {
+    const { container } = render(
+      <Markdown markdown={'## Sub'} headingStyle="document" headingLevelOffset={1} />,
+    )
+    expect(container.querySelector('h3')?.textContent).toBe('Sub')
+    expect(container.querySelector('p strong')).toBeNull()
+  })
+
+  test('assigns slug ids to document headings', () => {
+    const { container } = render(
+      <Markdown
+        markdown={'## Subtraktives Modell'}
+        headingStyle="document"
+        headingLevelOffset={1}
+        headingIdPrefix="capacity-calculation"
+      />,
+    )
+    expect(container.querySelector('h3')).toHaveAttribute(
+      'id',
+      'capacity-calculation--subtraktives-modell',
+    )
   })
 
   test('renders GFM table', () => {
