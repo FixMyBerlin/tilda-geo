@@ -3,9 +3,10 @@ name: tech-stack
 description: >-
   Default FMC tech stack for geo-heavy React SPAs: Bun/Vite, React 19, TanStack,
   maps, styling, TypeScript editor/CLI alignment, tsconfig templates,
-  browserslist client targets, and when to pick sibling skills. Use when
-  scaffolding a new app, evaluating libraries, changing supported browsers or
-  compat lint, or making stack/architecture decisions on existing apps.
+  browserslist client targets, Cursor Postgres MCP for schema inspection, and
+  when to pick sibling skills. Use when scaffolding a new app, evaluating
+  libraries, changing supported browsers or compat lint, setting up Cursor MCP
+  for Postgres, or making stack/architecture decisions on existing apps.
 ---
 
 # FMC tech stack
@@ -19,6 +20,7 @@ Install sibling skills separately: `bunx skills add FixMyBerlin/fixmyskills --sk
 - Greenfield app scaffold (dependencies, tooling, folder layout)
 - Library or pattern choice (“should we use X?”)
 - Cross-cutting convention review on an existing app
+- Cursor MCP setup for Postgres schema inspection or agent DB queries
 
 ## LLM resources
 
@@ -65,21 +67,13 @@ Prefer installed skill names when present; otherwise fetch from git.
 - **Editor/CLI alignment:** both SDK paths must resolve to the same `devDependencies.typescript` install:
   - `typescript.tsdk` → `node_modules/typescript/lib`
   - `typescript.native-preview.tsdk` → `node_modules/typescript` (package root)
-  - Never point `native-preview.tsdk` at `node_modules/@typescript/native-preview` unless that package _is_ the declared TypeScript dependency. Misalignment makes IDE diagnostics disagree with `bun run type-check`.
-- **Scaffold (TS 7):** `package.json` — `devDependencies.typescript` `7.0.1-rc`, script `"type-check": "tsc --noEmit"` (add `-p` when using split tsconfigs); `optionalDependencies` — `@typescript/typescript-darwin-arm64` and `@typescript/typescript-linux-x64` at the same version (extend for other CI/dev platforms). `bunfig.toml` — `minimumReleaseAgeExcludes = ["typescript", "@typescript/typescript-*"]`. Commit `.vscode/settings.json` and recommend `TypeScriptTeam.native-preview` in `.vscode/extensions.json`.
-
-```json
-{
-  "js/ts.experimental.useTsgo": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.native-preview.tsdk": "node_modules/typescript"
-}
-```
+  - Misalignment makes IDE diagnostics disagree with `bun run type-check`.
+- **Scaffold (TS 7 RC):** `package.json` — `devDependencies.typescript` `7.0.1-rc`, script `"type-check": "tsc --noEmit"` (add `-p` when using split tsconfigs); `optionalDependencies` — `@typescript/typescript-darwin-arm64` and `@typescript/typescript-linux-x64` at the same version (extend for other CI/dev platforms). `bunfig.toml` — `minimumReleaseAgeExcludes = ["typescript", "@typescript/typescript-*"]`. Commit `.vscode/settings.json` (templates: [examples/vscode.settings.typescript.json.template](examples/vscode.settings.typescript.json.template)) and recommend `TypeScriptTeam.native-preview` in `.vscode/extensions.json` ([examples/vscode.extensions.json.template](examples/vscode.extensions.json.template)).
+- **Monorepos:** when TypeScript lives in a package subfolder, prefix both SDK paths to that package’s `node_modules` (e.g. `app/node_modules/typescript/lib` — [tilda-geo](https://github.com/FixMyBerlin/tilda-geo/blob/develop/.vscode/settings.json)).
+- **Cursor / VS Code:** install **TypeScript (Native Preview)** (`TypeScriptTeam.native-preview`). Copy [examples/vscode.settings.typescript.json.template](examples/vscode.settings.typescript.json.template) into `.vscode/settings.json` (merge with oxc keys from [references/oxc-config.md](references/oxc-config.md)).
+- **Cursor MCP (Postgres):** user-level `~/.cursor/mcp.json` only — [examples/mcp.json.template](examples/mcp.json.template), [references/cursor-mcp.md](references/cursor-mcp.md). Never commit MCP DB config to a repo.
 
 **Verify:** `node -e "console.log(require('typescript/package.json').version)"`, `tsc --version`, and `bun run type-check` — all 7.x. After `bun install`, accept **Use Workspace Version** if prompted. Do not add `typescript` to repos that have no TS source (e.g. this skills monorepo).
-
-**Legacy (do not scaffold):** TS 6 Strada — `npm:@typescript/typescript6`, `tsc6 --noEmit`, `useTsgo: false`. Deprecated hybrid (TS 6 + separate `@typescript/native-preview` / `tsgo`) — migrate to TS 7; do not document or add new hybrid setups.
 
 - **React Compiler:** on by default — see skill `react-dev` for memoization and typing conventions
 - **GeoJSON:** `@types/geojson` for all GeoJSON payloads

@@ -69,7 +69,7 @@ Do **not** add `eslint-plugin-react-compiler` — use native `react/react-compil
 - **`bun run lint-check`** — read-only; use in CI / `check` pipelines.
 - **`bun run format`** — oxfmt write; does not remove unused imports.
 
-**VS Code** — extension `oxc.oxc-vscode`, `oxc.typeAware: true`:
+**VS Code / Cursor** — extension `oxc.oxc-vscode`, `oxc.typeAware: true`. Merge with TypeScript keys from [examples/vscode.settings.typescript.json.template](../examples/vscode.settings.typescript.json.template) (see [SKILL.md](../SKILL.md)).
 
 ```json
 {

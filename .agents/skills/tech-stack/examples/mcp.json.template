@@ -1,0 +1,14 @@
+// Copy into ~/.cursor/mcp.json (user).
+// Merge the "mcpServers" entries into your existing config — do not overwrite other servers.
+// Replace DATABASE_URL placeholders from local .env — never commit real credentials here.
+{
+  "mcpServers": {
+    "postgres-tilda-dev": {
+      "command": "bunx",
+      "args": ["-y", "@yawlabs/postgres-mcp@latest"],
+      "env": {
+        "DATABASE_URL": "postgresql://USER:PASSWORD@localhost:5432/postgres"
+      }
+    }
+  }
+}

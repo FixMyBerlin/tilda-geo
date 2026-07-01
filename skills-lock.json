@@ -5,7 +5,7 @@
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/finish-work/SKILL.md",
-      "computedHash": "50a0d008ddae614ebd8544073d75024ce8dba755e6848d40127e5bb72b826ccf"
+      "computedHash": "abc9725151a80e8c2e854f1f30f7a90a5ee2c264ed2d165cc3f05ede3be9eca3"
     },
     "nuqs": {
       "source": "FixMyBerlin/fixmyskills",
@@ -65,13 +65,19 @@
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/tech-stack/SKILL.md",
-      "computedHash": "93ff4d4eec744a055394e41a39e2bed2d2cf7362a5ad3d93779e7526fd618f22"
+      "computedHash": "1d5ed0f8e89c58b40a7255342e1d5a186ff4cc1138a4ea1427196c2c4ab2a9a1"
     },
     "touch-ipad-review": {
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/touch-ipad-review/SKILL.md",
       "computedHash": "89d1764e780ae3e1d1a261ce3cbff8399a959b1b93d38e98359e37a5231ab005"
+    },
+    "user-changelog": {
+      "source": "FixMyBerlin/fixmyskills",
+      "sourceType": "github",
+      "skillPath": "skills/user-changelog/SKILL.md",
+      "computedHash": "6032af773e7ce75ed5ee483e9391660c9b05e1dad4dd970f3300f4780e7f34d7"
     },
     "zustand-state-management": {
       "source": "FixMyBerlin/fixmyskills",
