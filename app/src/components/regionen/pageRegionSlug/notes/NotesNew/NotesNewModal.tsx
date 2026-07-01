@@ -43,10 +43,10 @@ export const NotesNewModal = ({ children }: { children: React.ReactNode }) => {
           leaveFrom="opacity-100 translate-y-0 sm:scale-100"
           leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
-          <div className="mx-auto grid min-h-full max-w-7xl grid-rows-[1fr_auto] justify-items-center p-2.5 sm:grid-rows-[1fr_auto_3fr] sm:p-4">
+          <div className="mx-auto grid min-h-full max-w-7xl grid-rows-[auto] content-start justify-items-center p-2.5 sm:grid-rows-[1fr_auto_3fr] sm:content-normal sm:p-4">
             <TransitionChild
               as={Dialog.Panel}
-              className="relative row-start-2 w-full min-w-0 overflow-clip rounded-lg bg-amber-50 shadow-xl ring-1 ring-gray-950/10 sm:mb-auto forced-colors:outline"
+              className="relative row-start-1 max-h-[calc(100dvh-1.25rem)] w-full min-w-0 overflow-y-auto rounded-lg bg-amber-50 shadow-xl ring-1 ring-gray-950/10 sm:row-start-2 sm:mb-auto sm:max-h-none sm:overflow-clip forced-colors:outline"
               // Transition props
               enter="ease-out duration-100"
               enterFrom="sm:scale-95"

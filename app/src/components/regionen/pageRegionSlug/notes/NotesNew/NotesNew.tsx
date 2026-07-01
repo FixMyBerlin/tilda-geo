@@ -17,7 +17,7 @@ export const NotesNew = ({ visible, title, children }: Props) => {
       {isAuthenticated && (
         <div>
           <h1 className="sr-only">{title}</h1>
-          <div className="grid h-full sm:grid-cols-2">{children}</div>
+          <div className="grid sm:h-full sm:grid-cols-2">{children}</div>
         </div>
       )}
     </NotesNewModal>
