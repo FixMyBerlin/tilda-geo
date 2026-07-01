@@ -161,12 +161,19 @@ class PostgisLoader:
         Wiederverwendet die vom Parking-Topic berechneten öffentlichen Tabellen:
         `public.parkings` (On-Street-Parkstreifen als Linien) und
         `public.parkings_separate` (Off-Street-Parkflächen als Polygone), als
-        Union. Es zählt nur tatsächlich vorhandenes/erlaubtes Parken:
-        `capacity > 0`; für die Linien zusätzlich kein Halte-/Parkverbot
-        (`condition_category` ≠ no_parking/no_stopping/no_standing).
+        Union. Es zählt nur tatsächlich vorhandenes/erlaubtes Parken: für die
+        Linien `capacity > 0` und kein Halte-/Parkverbot (`condition_category`
+        ≠ no_parking/no_stopping/no_standing); für die Flächen fehlt meist ein
+        `capacity`-Tag, daher zählen sie schon ohne den Tag (nur ein explizit
+        gesetztes `capacity` ≤ 0 schließt aus). Beide Geometrietypen werden
+        zusätzlich nach `access` gefiltert: `no` und `customers` sind
+        ausgeschlossen (nicht öffentlich nutzbar für eine Umwidmung).
 
         Der `capacity`-JSONB-Wert ist nicht garantiert numerisch, daher wird per
         Regex auf eine Zahl geprüft, bevor gecastet wird (sonst würfe der Cast).
+        Wichtig: `NULLIF(...) ~ regex` liefert bei fehlendem Tag SQL-`NULL`
+        (nicht `FALSE`), daher braucht die Fläche-Bedingung eine explizite
+        `IS NULL`-Klausel statt eines simplen `NOT`.
 
         Abhängigkeit: die `parkings*`-Tabellen existieren nur, wenn das
         Parking-Topic für die Region prozessiert wurde. Fehlen sie, wird ein
@@ -179,6 +186,7 @@ class PostgisLoader:
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
         # Nur numerische capacity-Werte casten; sonst als 0 behandeln.
         cap_num = "NULLIF(tags->>'capacity', '') ~ '^[0-9]+(\\.[0-9]+)?$'"
+        access_ok = "COALESCE(tags->>'access', '') NOT IN ('no', 'customers')"
         sql = f"""
             SELECT ST_Transform(geom, 4326) AS geom
             FROM public."parkings"
@@ -186,11 +194,13 @@ class PostgisLoader:
               AND {cap_num} AND (tags->>'capacity')::numeric > 0
               AND COALESCE(tags->>'condition_category', '')
                   NOT IN ('no_parking', 'no_stopping', 'no_standing')
+              AND {access_ok}
             UNION ALL
             SELECT ST_Transform(geom, 4326) AS geom
             FROM public."parkings_separate"
             WHERE geom && {bbox}
-              AND (NOT {cap_num} OR (tags->>'capacity')::numeric > 0)
+              AND ({cap_num} IS NOT TRUE OR (tags->>'capacity')::numeric > 0)
+              AND {access_ok}
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
