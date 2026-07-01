@@ -191,7 +191,7 @@ export const RegionMap = () => {
     updateHover([])
   }
 
-  const handleLoad = (event: MapLibreEvent<undefined>) => {
+  const handleLoad = (event: MapLibreEvent) => {
     const map = event.target
 
     // We disable rotation once after map startup to keep interactions consistent.
