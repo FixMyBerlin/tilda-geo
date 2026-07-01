@@ -19,6 +19,7 @@ import { resolveRegionAccessStatus } from '@/server/api/util/authGuards.server'
 import { corsHeaders } from '@/server/api/util/cors'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
 import { getBaseDatabaseUrl } from '@/server/database-url.server'
+import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 const exportMetadata = {
@@ -163,6 +164,8 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
+        extendBunRequestIdleTimeout(request)
+
         const exportRunId = createExportRunId()
         const logPrefix = `[EXPORT:${exportRunId}]`
         const requestStartedAt = Date.now()
