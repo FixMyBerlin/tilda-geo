@@ -1,6 +1,8 @@
+import { HeartIcon } from '@heroicons/react/20/solid'
 import { Img } from '@/components/shared/Img'
 import { Link } from '@/components/shared/links/Link'
 import svgTildaLogo from '../assets/tilda-logo-weiss.svg'
+import { BerlinBearIcon } from './BerlinBearIcon'
 import { FooterLinkList } from './FooterLinkList'
 import { footerLinkGroups } from './footerLinks.const'
 
@@ -22,14 +24,15 @@ export const Footer = () => {
           </div>
         </div>
         <div className="mt-12 border-t border-gray-700 pt-8">
-          <p className="text-sm text-gray-400">
-            Ein Produkt von{' '}
+          <p className="text-sm text-gray-400 md:mt-0">
+            Gebaut mit <HeartIcon className="inline-block size-5" aria-hidden /> und{' '}
+            <BerlinBearIcon className="inline-block size-7 -scale-x-100" /> von{' '}
             <Link
               href="https://fixmycity.de"
               blank
               className="text-gray-400 underline decoration-gray-600 decoration-1 underline-offset-2 hover:text-white hover:decoration-white"
             >
-              FixMyCity GmbH
+              FixMyCity
             </Link>
           </p>
         </div>

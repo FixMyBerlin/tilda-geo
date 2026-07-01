@@ -1,3 +1,4 @@
+import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
 import type { LinkProps } from '@/components/shared/links/Link'
 import { Link } from '@/components/shared/links/Link'
 import type { FooterLinkGroup } from './footerLinks.const'
@@ -9,7 +10,7 @@ type Props = {
 }
 
 const linkClassName =
-  'block text-sm leading-6 text-gray-400 decoration-gray-600 decoration-1 underline-offset-2 hover:text-white! hover:decoration-white'
+  'inline-flex items-center gap-1.5 text-sm leading-6 text-gray-400 decoration-gray-600 decoration-1 underline-offset-2 hover:text-white! hover:decoration-white'
 
 export const FooterLinkList = ({ group }: Props) => {
   return (
@@ -23,6 +24,7 @@ export const FooterLinkList = ({ group }: Props) => {
             <li key={item.name}>
               <Link href={item.href} blank className={linkClassName}>
                 {item.name}
+                <ArrowTopRightOnSquareIcon className="size-4 shrink-0" aria-hidden />
               </Link>
             </li>
           ) : (

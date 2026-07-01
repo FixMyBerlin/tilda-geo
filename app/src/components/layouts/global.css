@@ -24,7 +24,20 @@
   --color-neutral-*: initial;
   --color-stone-*: initial;
 
+  /* FixMyCity/TILDA brand color + light variant for surfaces/backgrounds */
+  --color-brand: #fabe48;
+  --color-brand-light: #ffedbf;
+
   --radius-4xl: 2rem;
+}
+
+/* Keyframes for the homepage trust bar infinite marquee. The animation itself is applied via the
+   utility `animate-[home-marquee_…]` (HomePageTrustBar); only the keyframes cannot be expressed
+   as a Tailwind class. */
+@keyframes home-marquee {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @layer base {
