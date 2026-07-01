@@ -1,4 +1,3 @@
-import { NavigationContactButton } from '../NavigationContactButton'
 import type { PrimaryNavigationProps } from '../types'
 import { User } from '../User/User'
 import { NavigationDesktopLinks } from './NavigationDesktopLinks'
@@ -21,7 +20,6 @@ export const NavigationDesktop = ({
       <div className="flex min-w-0 shrink-0 items-center gap-3 sm:gap-4">
         <NavigationDesktopLinks menuItems={primaryNavigation} />
         <User />
-        <NavigationContactButton />
         <NavigationDesktopMenu menuItems={secondaryNavigation} logo={secondaryNavigationLogo} />
       </div>
     </div>
