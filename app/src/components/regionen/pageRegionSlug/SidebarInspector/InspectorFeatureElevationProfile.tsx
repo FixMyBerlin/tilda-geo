@@ -1,7 +1,7 @@
 import { along, length, flatten, lineString } from '@turf/turf'
 import type { LineString, MultiLineString, Position } from 'geojson'
 import type maplibregl from 'maplibre-gl'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 
 type ElevationPoint = {
@@ -310,11 +310,17 @@ export const InspectorFeatureElevationProfile = ({
 
   const [dimensions, setDimensions] = useState({ width: 300, height: 140 })
   const [elevationData, setElevationData] = useState<ElevationPoint[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loadedGeometryKey, setLoadedGeometryKey] = useState<string | null>(null)
   const [hoveredPoint, setHoveredPoint] = useState<ElevationPoint | null>(null)
 
   const { geometry } = feature
   const isLine = geometry && (geometry.type === 'LineString' || geometry.type === 'MultiLineString')
+  const geometryKey = useMemo(() => JSON.stringify(geometry), [geometry])
+  const coordinates = useMemo(() => extractCoordinates(geometry), [geometry])
+  const canFetch = Boolean(isLine && coordinates.length >= 2)
+  const loading = canFetch && loadedGeometryKey !== geometryKey
+  const displayElevationData =
+    loadedGeometryKey === geometryKey ? elevationData : []
 
   // 1. Setup ResizeObserver for responsive SVG dimensions
   useEffect(() => {
@@ -333,13 +339,9 @@ export const InspectorFeatureElevationProfile = ({
   // queryTerrainElevation returns 0 (not null) for off-viewport coordinates,
   // making it unreliable for paths that extend beyond the visible map area.
   useEffect(() => {
-    if (!isLine || !mainMap) return
+    if (!canFetch || !mainMap) return
 
     let active = true
-    const coordinates = extractCoordinates(geometry)
-    if (coordinates.length < 2) return
-
-    setLoading(true)
 
     // Build consolidated Turf LineString
     const line = lineString(coordinates)
@@ -385,7 +387,7 @@ export const InspectorFeatureElevationProfile = ({
           elevation: smoothed[idx] ?? 0,
         }))
         setElevationData(finalData)
-        setLoading(false)
+        setLoadedGeometryKey(geometryKey)
       })
       .catch((err) => {
         // Fallback: Fetch ALL coordinates from Open-Meteo API for relative path continuity
@@ -405,7 +407,7 @@ export const InspectorFeatureElevationProfile = ({
               elevation: smoothed[idx] ?? 0,
             }))
             setElevationData(finalData)
-            setLoading(false)
+            setLoadedGeometryKey(geometryKey)
           })
           .catch((err2) => {
             console.error('All elevation sources failed, falling back to local terrain:', err2)
@@ -427,20 +429,20 @@ export const InspectorFeatureElevationProfile = ({
               elevation: smoothed[idx] ?? 0,
             }))
             setElevationData(finalData)
-            setLoading(false)
+            setLoadedGeometryKey(geometryKey)
           })
       })
 
     return () => {
       active = false
     }
-  }, [isLine, mainMap, geometry])
+  }, [canFetch, mainMap, geometry, geometryKey, coordinates])
 
   if (!isLine) {
     return null
   }
 
-  if (elevationData.length === 0) {
+  if (displayElevationData.length === 0) {
     return loading ? (
       <div className="flex h-32 items-center justify-center rounded-lg border border-gray-100 bg-gray-50/50">
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
@@ -461,8 +463,8 @@ export const InspectorFeatureElevationProfile = ({
   const chartW = width - padLeft - padRight
   const chartH = height - padTop - padBottom
 
-  const distances = elevationData.map((d) => d.distanceM)
-  const elevationsList = elevationData.map((d) => d.elevation)
+  const distances = displayElevationData.map((d) => d.distanceM)
+  const elevationsList = displayElevationData.map((d) => d.elevation)
 
   const _minX = 0
   const maxX = Math.max(...distances, 1)
@@ -479,14 +481,14 @@ export const InspectorFeatureElevationProfile = ({
   const scaleY = (val: number) => height - padBottom - ((val - minY) / (maxY - minY)) * chartH
 
   // Build line & area path strings
-  const linePath = elevationData
+  const linePath = displayElevationData
     .map((d, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(d.distanceM)} ${scaleY(d.elevation)}`)
     .join(' ')
 
   const bottomY = height - padBottom
   const areaPath = `
     M ${scaleX(0)} ${bottomY}
-    ${elevationData.map((d) => `L ${scaleX(d.distanceM)} ${scaleY(d.elevation)}`).join(' ')}
+    ${displayElevationData.map((d) => `L ${scaleX(d.distanceM)} ${scaleY(d.elevation)}`).join(' ')}
     L ${scaleX(maxX)} ${bottomY}
     Z
   `
@@ -494,9 +496,9 @@ export const InspectorFeatureElevationProfile = ({
   // Statistics calculation
   let climb = 0
   let descent = 0
-  for (let i = 1; i < elevationData.length; i++) {
-    const current = elevationData[i]
-    const prev = elevationData[i - 1]
+  for (let i = 1; i < displayElevationData.length; i++) {
+    const current = displayElevationData[i]
+    const prev = displayElevationData[i - 1]
     if (current && prev) {
       const diff = current.elevation - prev.elevation
       if (diff > 0) climb += diff
@@ -506,7 +508,7 @@ export const InspectorFeatureElevationProfile = ({
 
   // Mouse & Touch interaction (chart-only, no map marker)
   const handleMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (!containerRef.current || elevationData.length === 0) return
+    if (!containerRef.current || displayElevationData.length === 0) return
 
     const rect = containerRef.current.getBoundingClientRect()
     const clientX = 'touches' in e ? e.touches[0]?.clientX : (e as React.MouseEvent).clientX
@@ -516,13 +518,13 @@ export const InspectorFeatureElevationProfile = ({
     const pct = (xRel - padLeft) / chartW
     const targetDistance = Math.max(0, Math.min(1, pct)) * maxX
 
-    const firstPoint = elevationData[0]
+    const firstPoint = displayElevationData[0]
     if (!firstPoint) return
 
     let closest: ElevationPoint = firstPoint
     let minDiff = Math.abs(firstPoint.distanceM - targetDistance)
 
-    for (const pt of elevationData) {
+    for (const pt of displayElevationData) {
       const diff = Math.abs(pt.distanceM - targetDistance)
       if (diff < minDiff) {
         minDiff = diff
