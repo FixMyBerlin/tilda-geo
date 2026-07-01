@@ -18,10 +18,10 @@ const FactorConfigSchema = z
     dem_source: z.enum(['srtm', 'dgm1', 'mapterhorn']).optional(),
     weights: z.record(z.string(), z.number()).optional(),
     vegetation_direction: z.enum(['positive', 'negative']).optional(),
+    cir_source: z.enum(['auto', 'bayern', 'bb']).optional(),
     max_cyclepath_dist_m: z.number().optional(),
     min_clearance_m: z.number().optional(),
     min_surface_score: z.number().optional(),
-    max_slope_deg: z.number().optional(),
     min_score_threshold: z.number().optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
@@ -85,7 +85,14 @@ export const getPlanningScenarioFn = createServerFn({ method: 'GET' })
         creator: { select: { id: true, osmName: true } },
         runs: {
           orderBy: { createdAt: 'desc' },
-          select: { id: true, status: true, hexCount: true, areaCount: true, createdAt: true },
+          select: {
+            id: true,
+            status: true,
+            hexCount: true,
+            areaCount: true,
+            createdAt: true,
+            cirAttribution: true,
+          },
         },
         jobs: {
           orderBy: { createdAt: 'desc' },

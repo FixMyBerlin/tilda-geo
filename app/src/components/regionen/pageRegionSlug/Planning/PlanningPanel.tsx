@@ -49,12 +49,21 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
   const [, setRun] = usePlanningRunParam()
   const { mainMap: map } = useMap()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setVegetationAttribution = usePlanningBoundaryState((s) => s.setVegetationAttribution)
   const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
 
   // Show the scenario's latest result on the map when it is opened.
   useEffect(() => {
     if (scenario?.currentRunId != null) setRun(scenario.currentRunId)
   }, [scenario?.currentRunId, setRun])
+
+  // Propagate the CIR source attribution to the map store so SourcesLayersPlanning
+  // can pass it to MapLibre's <Source> (shows in AttributionControl when layer is on).
+  useEffect(() => {
+    if (!scenario) return
+    setVegetationAttribution(scenario.runs[0]?.cirAttribution ?? null)
+    return () => setVegetationAttribution(null)
+  }, [scenario, setVegetationAttribution])
 
   // Outline the scenario's study area (border only, no fill) and fly to it on open.
   const studyArea = (scenario?.factorConfig as FactorConfig | undefined)?.study_area

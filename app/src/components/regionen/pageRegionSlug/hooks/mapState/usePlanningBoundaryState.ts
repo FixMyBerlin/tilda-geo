@@ -22,6 +22,16 @@ type Store = {
    */
   vegetationVisible: boolean
   setVegetationVisible: (visible: boolean) => void
+
+  /**
+   * MapLibre attribution string for the active scenario's CIR source.
+   * Set by ScenarioDetail when loading a scenario; null when no vegetation source
+   * applies (w_vegetation = 0 or study area outside known CIR coverage).
+   * Passed to the vegetation <Source> so MapLibre's AttributionControl shows it
+   * automatically whenever the vegetation layer is visible.
+   */
+  vegetationAttribution: string | null
+  setVegetationAttribution: (attribution: string | null) => void
 }
 
 export const usePlanningBoundaryState = create<Store>((set) => ({
@@ -37,4 +47,7 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   vegetationVisible: false,
   setVegetationVisible: (visible) => set({ vegetationVisible: visible }),
+
+  vegetationAttribution: null,
+  setVegetationAttribution: (attribution) => set({ vegetationAttribution: attribution }),
 }))

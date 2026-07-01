@@ -75,6 +75,7 @@ const BoundaryHighlightLayer = () => {
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
+  const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
 
   useEffect(() => {
     if (runId != null) {
@@ -125,7 +126,12 @@ export const SourcesLayersPlanning = () => {
 
       {vegetationOn && (
         <>
-          <Source id="planning-vegetation-source" type="vector" tiles={[vegetationUrl]} />
+          <Source
+            id="planning-vegetation-source"
+            type="vector"
+            tiles={[vegetationUrl]}
+            attribution={vegetationAttribution ?? undefined}
+          />
           <Layer
             id="planning-vegetation-fill"
             source="planning-vegetation-source"

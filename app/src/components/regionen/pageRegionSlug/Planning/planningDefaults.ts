@@ -17,10 +17,10 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
     w_vegetation: 0,
   },
   vegetation_direction: 'negative',
+  cir_source: 'auto' as const,
   max_cyclepath_dist_m: 150,
   min_clearance_m: 2.0,
   min_surface_score: 30,
-  max_slope_deg: 8.0,
   min_score_threshold: 60,
   targets: [],
 }
