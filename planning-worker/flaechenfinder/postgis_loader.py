@@ -155,6 +155,53 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_car_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """KFZ-Parkflächen als Umwidmungs-Kandidaten (für den Parken-Bonus).
+
+        Wiederverwendet die vom Parking-Topic berechneten öffentlichen Tabellen:
+        `public.parkings` (On-Street-Parkstreifen als Linien) und
+        `public.parkings_separate` (Off-Street-Parkflächen als Polygone), als
+        Union. Es zählt nur tatsächlich vorhandenes/erlaubtes Parken:
+        `capacity > 0`; für die Linien zusätzlich kein Halte-/Parkverbot
+        (`condition_category` ≠ no_parking/no_stopping/no_standing).
+
+        Der `capacity`-JSONB-Wert ist nicht garantiert numerisch, daher wird per
+        Regex auf eine Zahl geprüft, bevor gecastet wird (sonst würfe der Cast).
+
+        Abhängigkeit: die `parkings*`-Tabellen existieren nur, wenn das
+        Parking-Topic für die Region prozessiert wurde. Fehlen sie, wird ein
+        leeres GeoDataFrame zurückgegeben (der Faktor trägt dann 0 bei) – analog
+        zum graceful Fallback bei den Kreuzungs-Ecken.
+
+        Geometrie liegt in EPSG:3857; Rückgabe in EPSG:4326.
+        """
+        wkt = polygon_4326.wkt
+        bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
+        # Nur numerische capacity-Werte casten; sonst als 0 behandeln.
+        cap_num = "NULLIF(tags->>'capacity', '') ~ '^[0-9]+(\\.[0-9]+)?$'"
+        sql = f"""
+            SELECT ST_Transform(geom, 4326) AS geom
+            FROM public."parkings"
+            WHERE geom && {bbox}
+              AND {cap_num} AND (tags->>'capacity')::numeric > 0
+              AND COALESCE(tags->>'condition_category', '')
+                  NOT IN ('no_parking', 'no_stopping', 'no_standing')
+            UNION ALL
+            SELECT ST_Transform(geom, 4326) AS geom
+            FROM public."parkings_separate"
+            WHERE geom && {bbox}
+              AND (NOT {cap_num} OR (tags->>'capacity')::numeric > 0)
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} KFZ-Parkflächen aus parkings/parkings_separate")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage parkings/parkings_separate fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 

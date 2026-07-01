@@ -167,7 +167,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
                 vegetation = None
             set_progress(conn, job_id, 70, step1_label)
 
-    # Schritte 2–9 (Scoring in run_flaechenfinder) auf 72–90 % abbilden und
+    # Schritte 2–11 (Scoring in run_flaechenfinder) auf 72–90 % abbilden und
     # ihren Namen als progressLabel an die App weiterreichen. Format
     # "n/total · Name", damit das Frontend den aktuellen Schritt in der
     # Schrittliste hervorheben kann.

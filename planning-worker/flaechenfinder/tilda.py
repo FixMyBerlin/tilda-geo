@@ -41,6 +41,14 @@ class TildaLoader:
             print(f"   ⚠️  Kreuzungs-Ecken-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_car_parking(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """KFZ-Parkflächen (Linien + Polygone) als Umwidmungs-Kandidaten."""
+        try:
+            return self._loader.load_car_parking(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  KFZ-Parkflächen-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     @staticmethod
     def score_cycleway_proximity(dist_m: float, max_dist_m: float) -> float:
         """0–100: < 20 m → 100, linear bis max_dist_m → 0, darüber 0."""

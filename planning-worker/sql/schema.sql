@@ -32,6 +32,11 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation
 -- der Faktor (w_intersection) im Szenario nicht gewichtet ist.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzung real;
 
+-- Parken-Bonus: Zuschlag auf/nahe bestehenden KFZ-Parkflächen (Umwidmung zu
+-- Radabstellanlagen); NULL wenn der Faktor (w_parken) im Szenario nicht
+-- gewichtet ist.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;
+
 -- H3-Auflösung der Zeile: BASE (13) = feines Scoring-Gitter für hohe
 -- Zoomstufen, AGG (11) = grobes Aggregat für z < 16. Beide Gitter desselben
 -- Laufs liegen in dieser Tabelle; die Martin-Funktion planning_hexagons wählt

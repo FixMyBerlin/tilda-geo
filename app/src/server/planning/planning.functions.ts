@@ -24,6 +24,7 @@ const FactorConfigSchema = z
     min_surface_score: z.number().optional(),
     min_score_threshold: z.number().optional(),
     intersection_radius_m: z.number().optional(),
+    parken_radius_m: z.number().optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
   })
@@ -136,9 +137,10 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
       resultRunId: job.resultRunId,
       progress: job.progress,
       progressLabel: job.progressLabel,
-      // Der Worker überspringt die Vegetationsberechnung (Schritt 1), wenn
-      // dieses Gewicht 0 ist – das UI zeigt den Schritt dann als übersprungen an.
-      vegetationSkipped: !(weights?.w_vegetation ?? 0),
+      // Die Faktor-Gewichte des Szenarios: Das UI leitet daraus pro Schritt ab,
+      // ob er übersprungen wird (Gewicht 0) bzw. – bei ausschluss-gekoppelten
+      // Faktoren – nur noch dem harten Ausschluss dient (siehe PlanningSteps).
+      weights: (weights ?? {}) as Record<string, number>,
     }
   })
 

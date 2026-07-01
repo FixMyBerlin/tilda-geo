@@ -14,6 +14,7 @@ const SCORE_LABELS: Record<string, string> = {
   score_zielorte: 'Zielorte',
   score_vegetation: 'Vegetation',
   score_kreuzung: 'Kreuzungen',
+  score_parken: 'Parken',
 }
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {

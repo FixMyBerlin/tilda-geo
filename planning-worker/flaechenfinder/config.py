@@ -43,6 +43,16 @@ class UseCaseConfig:
     intersection_ideal_min_m: float = 5.0
     intersection_ideal_max_m: float = 8.0
 
+    # Parken-Bonus: bestehende KFZ-Parkflächen (public.parkings/parkings_separate)
+    # lassen sich gut in Radabstellanlagen umwidmen. Der Bonus ist ein stufenloser
+    # Modifier auf den Basis-Score (analog Kreuzung, siehe scorer.py); Stärke =
+    # weights["w_parken"]. Anders als bei der Kreuzung ist es ideal, DIREKT auf der
+    # Parkfläche zu liegen:
+    #   d = 0 (auf der Fläche)   → voller Bonus (1.0)
+    #   0 < d ≤ radius           → linearer Abfall 1 → 0
+    #   d > radius               → 0
+    parken_radius_m: float = 15.0             # Reichweite des Bonus (UI-einstellbar)
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 150.0     # weiter weg → Score 0
     min_clearance_m: float = 2.0            # zu nah an Gebäude → Score 0
@@ -67,7 +77,8 @@ DEFAULT_WEIGHTS = {
     "w_clearance": 0.10,
     "w_transit":   0.15,
     "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
-    "w_intersection": 0.0, # Kreuzungs-Bonus, neutral per Default (max. Bonus in Punkten × 100)
+    "w_intersection": 0.1, # Kreuzungs-Bonus (max. Bonus in Punkten × 100)
+    "w_parken": 0.1,       # Parken-Bonus (KFZ→Rad Umwidmung)
 }
 
 
@@ -114,4 +125,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         intersection_radius_m=float(cfg.get("intersection_radius_m", 20.0)),
         intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),
         intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
+        parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
     )

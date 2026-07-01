@@ -68,9 +68,7 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
           />
         </div>
       ) : null}
-      {showProgress ? (
-        <PlanningSteps currentStep={currentStep} vegetationSkipped={data.vegetationSkipped} />
-      ) : null}
+      {showProgress ? <PlanningSteps currentStep={currentStep} weights={data.weights} /> : null}
       {data.status === 'FAILED' && data.errorMessage ? (
         <pre className="mt-1 max-h-24 overflow-auto text-xs whitespace-pre-wrap">
           {data.errorMessage}

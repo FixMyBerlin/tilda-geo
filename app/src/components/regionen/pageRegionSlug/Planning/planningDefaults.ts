@@ -15,7 +15,8 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
     w_clearance: 0.1,
     w_transit: 0.15,
     w_vegetation: 0,
-    w_intersection: 0,
+    w_intersection: 0.1,
+    w_parken: 0.1,
   },
   vegetation_direction: 'negative',
   cir_source: 'auto' as const,
@@ -24,6 +25,7 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   min_surface_score: 30,
   min_score_threshold: 60,
   intersection_radius_m: 20,
+  parken_radius_m: 15,
   targets: [],
 }
 
@@ -36,6 +38,7 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_transit: 'ÖPNV',
   w_vegetation: 'Vegetation',
   w_intersection: 'Kreuzungen',
+  w_parken: 'Parken (Umwidmung)',
 }
 
 // Build a GeoJSON Polygon (EPSG:4326) from current map bounds, used as study_area.

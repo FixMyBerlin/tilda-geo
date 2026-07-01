@@ -30,7 +30,7 @@ AGG_H3_RES = 11
 _SCORE_COLS = [
     "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_hindernisfreiheit", "score_oepnv", "score_vegetation",
-    "score_kreuzung",
+    "score_kreuzung", "score_parken",
 ]
 
 # Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
@@ -75,18 +75,22 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     print(f"   → {len(agg_gdf)} aggregierte Hexagone (Res {target_res})")
     return agg_gdf.to_crs("EPSG:25832")
 
-# Die 10 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
+# Die 12 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
 # Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
 # verwendet. Die Namen müssen mit der Schrittliste im Frontend übereinstimmen
-# (PlanningSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 10
+# (PlanningSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 12
 # (Ergebnisse speichern) laufen außerhalb von run_flaechenfinder() im Worker
 # (worker.py); die Nummerierung hier beginnt daher bei 2.
+# Kreuzungen (6) und KFZ-Parkflächen (7) sind eigene, sichtbare Ladeschritte –
+# nur die reine Bonus-Ableitung passiert später im MCE-Schritt (11).
 SCORING_STEPS = [
     "Vegetationsflächen berechnen",
     "H3-Gitter generieren",
     "Radwege laden",
     "Hindernisse & Untergrund laden",
     "ÖPNV-Haltestellen laden",
+    "Kreuzungen laden",
+    "KFZ-Parkflächen laden",
     "Zielorte bewerten",
     "Hangneigung berechnen",
     "Vegetationsabdeckung verschneiden",
@@ -125,9 +129,9 @@ def run_flaechenfinder(
     Vegetationspolygone; daraus wird der Bedeckungsgrad je Hexagon abgeleitet.
 
     `progress_cb` (optional) wird vor jedem der hier ausgeführten Schritte
-    (step:int 2..9, total:int, label:str) aufgerufen, damit der Worker den
+    (step:int 2..11, total:int, label:str) aufgerufen, damit der Worker den
     aktuellen Schritt an das UI weiterreichen kann. Schritt 1 (Vegetations-
-    flächen berechnen) und Schritt 10 (Ergebnisse speichern) meldet der
+    flächen berechnen) und Schritt 12 (Ergebnisse speichern) meldet der
     Worker selbst, außerhalb dieser Funktion.
     """
 
@@ -209,68 +213,103 @@ def run_flaechenfinder(
         hex_proj["bodenbelag_osm"] = None
 
     # ── 5. ÖPNV-Haltestellen ──────────────────────────────────────
+    # Nur bei Gewicht > 0 laden – sonst die vier Transit-Queries sparen und
+    # score_oepnv als NaN (→ DB NULL, Sidebar „–") markieren.
     _step(5)
-    _TRANSIT_TYPES = [
-        ("U-Bahn-Eingang", {"railway": "subway_entrance"}, 50),
-        ("Straßenbahn",    {"railway": "tram_stop"},       50),
-        # Bus bleibt vorerst wirkungslos: highway=bus_stop wird in
-        # public."publicTransport" nicht abgelegt (siehe postgis_loader.py),
-        # daher liefert features_from_polygon() hier immer 0 Treffer.
-        ("Bus",            {"highway": "bus_stop"},         30),
-        ("Bahnhof",        {"railway": ["station", "halt"]}, 100),
-    ]
-    _transit_scores = []
-    for _tname, _ttags, _tradius in _TRANSIT_TYPES:
-        try:
-            _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
-            if not len(_stops):
+    if (use_case.weights.get("w_transit", 0) or 0) > 0:
+        _TRANSIT_TYPES = [
+            ("U-Bahn-Eingang", {"railway": "subway_entrance"}, 50),
+            ("Straßenbahn",    {"railway": "tram_stop"},       50),
+            # Bus bleibt vorerst wirkungslos: highway=bus_stop wird in
+            # public."publicTransport" nicht abgelegt (siehe postgis_loader.py),
+            # daher liefert features_from_polygon() hier immer 0 Treffer.
+            ("Bus",            {"highway": "bus_stop"},         30),
+            ("Bahnhof",        {"railway": ["station", "halt"]}, 100),
+        ]
+        _transit_scores = []
+        for _tname, _ttags, _tradius in _TRANSIT_TYPES:
+            try:
+                _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
+                if not len(_stops):
+                    _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
+                    continue
+                _stops_p = _stops.to_crs("EPSG:25832")
+                if _tname == "Bahnhof" and "station" in _stops_p.columns:
+                    _stops_p = _stops_p[_stops_p["station"] != "subway"]
+                _dist = _dist_to_union(centroids, _stops_p)
+                _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
+                _transit_scores.append(_score)
+            except Exception as _e:
+                print(f"   ⚠️  {_tname}: {_e}")
                 _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
-                continue
-            _stops_p = _stops.to_crs("EPSG:25832")
-            if _tname == "Bahnhof" and "station" in _stops_p.columns:
-                _stops_p = _stops_p[_stops_p["station"] != "subway"]
-            _dist = _dist_to_union(centroids, _stops_p)
-            _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
-            _transit_scores.append(_score)
-        except Exception as _e:
-            print(f"   ⚠️  {_tname}: {_e}")
-            _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
-    hex_proj["score_oepnv"] = pd.concat(_transit_scores, axis=1).max(axis=1)
-    del _transit_scores
-
-    # ── 6. Zielorte ────────────────────────────────────────────────
-    _step(6)
-    target_scores = []
-    for t in use_case.targets:
-        try:
-            features = osm_loader.features_from_polygon(study_area_geom, t.osm_tags)
-        except Exception:
-            features = gpd.GeoDataFrame()
-        if not len(features):
-            target_scores.append(pd.Series(0.0, index=hex_proj.index))
-            continue
-        feat_proj = features.to_crs("EPSG:25832")
-        dist = _dist_to_union(centroids, feat_proj)
-        raw_score = dist.apply(lambda d: max(0.0,
-            100.0 - max(0.0, d - t.optimal_dist_m) / max(1.0, t.max_dist_m - t.optimal_dist_m) * 100.0
-        ))
-        target_scores.append(raw_score * t.weight_in_target)
-
-    if target_scores:
-        hex_proj["score_zielorte"] = pd.concat(target_scores, axis=1).max(axis=1)
+        hex_proj["score_oepnv"] = pd.concat(_transit_scores, axis=1).max(axis=1)
+        del _transit_scores
     else:
-        hex_proj["score_zielorte"] = 0.0
-    del target_scores
+        hex_proj["score_oepnv"] = np.nan
 
-    # ── 7. DEM / Hangneigung ─────────────────────────────────────────
+    # ── 6. Kreuzungen laden ───────────────────────────────────────
+    # Bordstein-Ecken für den Kreuzungs-Bonus. Nur bei Gewicht > 0 den (teuren)
+    # PostGIS-Query fahren; sonst abstand_kreuzung_m als NaN markieren. Die
+    # Bonus-Ableitung selbst passiert im MCE-Schritt (11) aus dieser Distanz.
+    _step(6)
+    if (use_case.weights.get("w_intersection", 0) or 0) > 0:
+        corners = tilda_loader.load_intersection_corners(study_area_geom)
+        corners_proj = corners.to_crs("EPSG:25832") if len(corners) else corners
+        hex_proj["abstand_kreuzung_m"] = _dist_to_union(centroids, corners_proj)
+        del corners, corners_proj
+    else:
+        hex_proj["abstand_kreuzung_m"] = np.nan
+
+    # ── 7. KFZ-Parkflächen laden ──────────────────────────────────
+    # KFZ-Parkflächen für den Umwidmungs-Bonus. Nur bei Gewicht > 0 laden; sonst
+    # abstand_parken_m als NaN markieren. Bonus-Ableitung im MCE-Schritt (11).
     _step(7)
+    if (use_case.weights.get("w_parken", 0) or 0) > 0:
+        parken = tilda_loader.load_car_parking(study_area_geom)
+        parken_proj = parken.to_crs("EPSG:25832") if len(parken) else parken
+        hex_proj["abstand_parken_m"] = _dist_to_union(centroids, parken_proj)
+        del parken, parken_proj
+    else:
+        hex_proj["abstand_parken_m"] = np.nan
+
+    # ── 8. Zielorte ────────────────────────────────────────────────
+    # Nur bei Gewicht > 0 laden – sonst die OSM-Zielort-Queries sparen und
+    # score_zielorte als NaN (→ DB NULL, Sidebar „–") markieren.
+    _step(8)
+    if (use_case.weights.get("w_target", 0) or 0) > 0:
+        target_scores = []
+        for t in use_case.targets:
+            try:
+                features = osm_loader.features_from_polygon(study_area_geom, t.osm_tags)
+            except Exception:
+                features = gpd.GeoDataFrame()
+            if not len(features):
+                target_scores.append(pd.Series(0.0, index=hex_proj.index))
+                continue
+            feat_proj = features.to_crs("EPSG:25832")
+            dist = _dist_to_union(centroids, feat_proj)
+            raw_score = dist.apply(lambda d: max(0.0,
+                100.0 - max(0.0, d - t.optimal_dist_m) / max(1.0, t.max_dist_m - t.optimal_dist_m) * 100.0
+            ))
+            target_scores.append(raw_score * t.weight_in_target)
+
+        if target_scores:
+            hex_proj["score_zielorte"] = pd.concat(target_scores, axis=1).max(axis=1)
+        else:
+            hex_proj["score_zielorte"] = 0.0
+        del target_scores
+    else:
+        hex_proj["score_zielorte"] = np.nan
+
+    # ── 9. DEM / Hangneigung ─────────────────────────────────────────
+    _step(9)
     hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
     del latlng_points
 
-    # ── 8. Vegetationsabdeckung verschneiden ────────────────────────
+    # ── 10. Vegetationsabdeckung verschneiden ───────────────────────
     # Nur berechnen, wenn der Faktor auch gewichtet ist – sonst dient die
     # Vegetation nur als Anzeige-Layer und die teure Verschneidung entfällt.
-    _step(8)
+    _step(10)
     hex_proj["vegetation_coverage_pct"] = 0.0
     w_veg = use_case.weights.get("w_vegetation", 0) or 0
     if w_veg > 0 and vegetation_gdf is not None and len(vegetation_gdf):
@@ -299,8 +338,8 @@ def run_flaechenfinder(
             del hexes
         del veg_proj
 
-    # ── 9. MCE-Scoring ─────────────────────────────────────────────
-    _step(9)
+    # ── 11. MCE-Scoring ────────────────────────────────────────────
+    _step(11)
     w = use_case.weights
 
     def slope_score(deg):
@@ -321,14 +360,20 @@ def run_flaechenfinder(
     # ── Basis-Score: gewichtete Summe der sechs positiven Faktoren ─────────
     # Vegetation ist KEIN additiver Faktor mehr, sondern ein separater Abzug
     # (bzw. Bonus) weiter unten – sonst könnte die Summe der Gewichte 100
-    # übersteigen.
+    # übersteigen. Übersprungene Faktoren (ÖPNV/Zielorte bei Gewicht 0) haben
+    # eine NaN-Score-Spalte; `_term` überspringt sie als Skalar 0.0, damit die
+    # Summe nicht durch `NaN * 0 = NaN` vergiftet wird.
+    def _term(col, wkey):
+        wv = w.get(wkey, 0) or 0
+        return hex_proj[col] * wv if wv else 0.0
+
     base_score = (
-        hex_proj["score_radweg"]            * w.get("w_cyclepath", 0) +
-        hex_proj["score_bodenbelag"]        * w.get("w_surface",   0) +
-        hex_proj["score_zielorte"]          * w.get("w_target",    0) +
-        hex_proj["score_hangneigung"]       * w.get("w_slope",     0) +
-        hex_proj["score_hindernisfreiheit"] * w.get("w_clearance", 0) +
-        hex_proj["score_oepnv"]             * w.get("w_transit",   0)
+        _term("score_radweg",            "w_cyclepath") +
+        _term("score_bodenbelag",        "w_surface")   +
+        _term("score_zielorte",          "w_target")    +
+        _term("score_hangneigung",       "w_slope")     +
+        _term("score_hindernisfreiheit", "w_clearance") +
+        _term("score_oepnv",             "w_transit")
     )
 
     # ── Vegetations-Effekt: stufenloser Abzug bzw. Bonus ───────────────────
@@ -357,14 +402,12 @@ def run_flaechenfinder(
     # Radabstellanlagen lassen sich an Straßenecken gut platzieren – ideal
     # ~5–8 m von der Bordsteinecke entfernt (nicht in der Kreuzungsmitte). Der
     # Bonus ist ein Modifier auf den Basis-Score (wie Vegetation); `w_intersection`
-    # (0–1) ist der maximale Zuschlag in Punkten (× 100). Ohne Gewicht bleibt
-    # `score_kreuzung` NaN (→ DB NULL), da die Ecken dann gar nicht geladen wurden.
+    # (0–1) ist der maximale Zuschlag in Punkten (× 100). Die Ecken-Distanz
+    # `abstand_kreuzung_m` wurde bereits in Schritt 6 geladen (NaN ohne Gewicht);
+    # ohne Gewicht bleibt auch `score_kreuzung` NaN (→ DB NULL).
     w_kreuz = w.get("w_intersection", 0) or 0
     if w_kreuz > 0:
-        corners = tilda_loader.load_intersection_corners(study_area_geom)
-        corners_proj = corners.to_crs("EPSG:25832") if len(corners) else corners
-        abstand_kreuzung = _dist_to_union(centroids, corners_proj)
-        hex_proj["abstand_kreuzung_m"] = abstand_kreuzung
+        abstand_kreuzung = hex_proj["abstand_kreuzung_m"]
         _lo = use_case.intersection_ideal_min_m
         _hi = min(use_case.intersection_ideal_max_m, use_case.intersection_radius_m)
         _r = use_case.intersection_radius_m
@@ -385,6 +428,33 @@ def run_flaechenfinder(
         total = total + kreuz_bonus
     else:
         hex_proj["score_kreuzung"] = np.nan
+
+    # ── Parken-Bonus: Zuschlag auf/nahe KFZ-Parkflächen ────────────────────
+    # Bestehende KFZ-Parkflächen (public.parkings / parkings_separate) lassen
+    # sich gut in Radabstellanlagen umwidmen. Der Bonus ist ein Modifier auf den
+    # Basis-Score (wie Kreuzung); `w_parken` (0–1) ist der maximale Zuschlag in
+    # Punkten (× 100). Anders als bei der Kreuzung ist der Bonus maximal, wenn das
+    # Hexagon direkt auf der Parkfläche liegt (Distanz 0), und fällt linear bis
+    # `parken_radius_m` auf 0 ab. Die Flächen-Distanz `abstand_parken_m` wurde
+    # bereits in Schritt 7 geladen (NaN ohne Gewicht); ohne Gewicht bleibt auch
+    # `score_parken` NaN (→ DB NULL).
+    w_parken = w.get("w_parken", 0) or 0
+    if w_parken > 0:
+        abstand_parken = hex_proj["abstand_parken_m"]
+        _pr = use_case.parken_radius_m
+
+        def _parken_faktor(d, r=_pr):
+            if d <= 0:      # Hexagon liegt auf der Parkfläche → voller Bonus
+                return 1.0
+            if d <= r:
+                return max(0.0, (r - d) / max(1.0, r))
+            return 0.0
+
+        parken_bonus = (w_parken * 100.0) * abstand_parken.apply(_parken_faktor)
+        hex_proj["score_parken"] = parken_bonus.round(1)
+        total = total + parken_bonus
+    else:
+        hex_proj["score_parken"] = np.nan
 
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)

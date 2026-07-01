@@ -14,6 +14,7 @@ const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }
   { key: 'min_surface_score', label: 'Min. Untergrund-Score', step: 5 },
   { key: 'min_score_threshold', label: 'MCE-Schwelle Potentialflächen', step: 5 },
   { key: 'intersection_radius_m', label: 'Kreuzungs-Radius (m)', step: 5 },
+  { key: 'parken_radius_m', label: 'Parken-Radius (m)', step: 5 },
 ]
 
 /** Edits a scenario's factorConfig (weights + thresholds). Read-only once a job exists. */
