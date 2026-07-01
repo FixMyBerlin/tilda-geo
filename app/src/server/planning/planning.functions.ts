@@ -90,6 +90,7 @@ export const getPlanningScenarioFn = createServerFn({ method: 'GET' })
             status: true,
             hexCount: true,
             areaCount: true,
+            vegCount: true,
             createdAt: true,
             cirAttribution: true,
           },
@@ -118,11 +119,14 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
         resultRunId: true,
         progress: true,
         progressLabel: true,
-        scenario: { select: { region: { select: { slug: true } } } },
+        scenario: {
+          select: { factorConfig: true, region: { select: { slug: true } } },
+        },
       },
     })
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, job.scenario.region.slug)
+    const weights = (job.scenario.factorConfig as FactorConfig | null)?.weights
     return {
       id: job.id,
       status: job.status,
@@ -131,6 +135,9 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
       resultRunId: job.resultRunId,
       progress: job.progress,
       progressLabel: job.progressLabel,
+      // Der Worker überspringt die Vegetationsberechnung (Schritt 1), wenn
+      // dieses Gewicht 0 ist – das UI zeigt den Schritt dann als übersprungen an.
+      vegetationSkipped: !(weights?.w_vegetation ?? 0),
     }
   })
 

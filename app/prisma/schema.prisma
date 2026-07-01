@@ -416,6 +416,7 @@ model PlanningRun {
   status               PlanningRunStatus @default(PENDING)
   hexCount             Int?
   areaCount            Int?
+  vegCount             Int?
   cirAttribution       String?
   //
   job                  PlanningJob?

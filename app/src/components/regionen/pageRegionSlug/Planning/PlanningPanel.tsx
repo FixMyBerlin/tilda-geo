@@ -121,7 +121,9 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
         </div>
       )}
 
-      {scenario.runs[0]?.status === 'COMPLETE' && <VegetationToggle />}
+      {scenario.runs[0]?.status === 'COMPLETE' && (scenario.runs[0].vegCount ?? 0) > 0 && (
+        <VegetationToggle />
+      )}
     </div>
   )
 }

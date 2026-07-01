@@ -19,18 +19,23 @@ SURFACE_SCORES = {
 # Distanz-Platzhalter, wenn ein Layer leer ist (kein Feature gefunden).
 _FAR = 1e9
 
-# Die 7 fachlichen Schritte des Scorings, in Reihenfolge. Wird sowohl für die
+# Die 10 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
 # Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
 # verwendet. Die Namen müssen mit der Schrittliste im Frontend übereinstimmen
-# (PlanningSteps.tsx).
+# (PlanningSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 10
+# (Ergebnisse speichern) laufen außerhalb von run_flaechenfinder() im Worker
+# (worker.py); die Nummerierung hier beginnt daher bei 2.
 SCORING_STEPS = [
+    "Vegetationsflächen berechnen",
     "H3-Gitter generieren",
     "Radwege laden",
     "Hindernisse & Untergrund laden",
     "ÖPNV-Haltestellen laden",
     "Zielorte bewerten",
-    "Hangneigung & Vegetation berechnen",
+    "Hangneigung berechnen",
+    "Vegetationsabdeckung verschneiden",
     "MCE-Score berechnen",
+    "Ergebnisse speichern",
 ]
 SCORING_STEP_COUNT = len(SCORING_STEPS)
 
@@ -63,9 +68,11 @@ def run_flaechenfinder(
     `vegetation_gdf` (optional, EPSG:25832) enthält die on-demand berechneten
     Vegetationspolygone; daraus wird der Bedeckungsgrad je Hexagon abgeleitet.
 
-    `progress_cb` (optional) wird vor jedem der 7 Schritte mit
-    (step:int 1..7, total:int, label:str) aufgerufen, damit der Worker den
-    aktuellen Schritt an das UI weiterreichen kann.
+    `progress_cb` (optional) wird vor jedem der hier ausgeführten Schritte
+    (step:int 2..9, total:int, label:str) aufgerufen, damit der Worker den
+    aktuellen Schritt an das UI weiterreichen kann. Schritt 1 (Vegetations-
+    flächen berechnen) und Schritt 10 (Ergebnisse speichern) meldet der
+    Worker selbst, außerhalb dieser Funktion.
     """
 
     def _step(n: int):
@@ -78,8 +85,8 @@ def run_flaechenfinder(
     print(f"\n🚀 Flächenfinder gestartet: {use_case.name}")
     print(f"   H3-Auflösung: {h3_resolution} | DEM: {use_case.dem_source}")
 
-    # ── 1. H3-Gitter ──────────────────────────────────────────────
-    _step(1)
+    # ── 2. H3-Gitter ──────────────────────────────────────────────
+    _step(2)
     geojson = study_area_geom.__geo_interface__
     hexagons = h3.geo_to_cells(geojson, res=h3_resolution)
     rows = [{
@@ -98,15 +105,15 @@ def run_flaechenfinder(
     del rows, hex_gdf
     centroids = hex_proj.geometry.centroid
 
-    # ── 2. Radwege (PostGIS) ──────────────────────────────────────
-    _step(2)
+    # ── 3. Radwege (PostGIS) ──────────────────────────────────────
+    _step(3)
     cycleways = tilda_loader.load_cycleways(study_area_geom)
     cycleway_proj = cycleways.to_crs("EPSG:25832") if len(cycleways) else cycleways
     hex_proj["abstand_radweg_m"] = _dist_to_union(centroids, cycleway_proj)
     del cycleways, cycleway_proj
 
-    # ── 3. Hindernisse / Untergrund ───────────────────────────────
-    _step(3)
+    # ── 4. Hindernisse / Untergrund ───────────────────────────────
+    _step(4)
     obstacles = osm_loader.features_from_polygon(study_area_geom, {
         "building": True,
         "landuse": ["grass", "forest", "meadow"],
@@ -142,11 +149,14 @@ def run_flaechenfinder(
     except Exception:
         hex_proj["bodenbelag_osm"] = None
 
-    # ── 4. ÖPNV-Haltestellen ──────────────────────────────────────
-    _step(4)
+    # ── 5. ÖPNV-Haltestellen ──────────────────────────────────────
+    _step(5)
     _TRANSIT_TYPES = [
         ("U-Bahn-Eingang", {"railway": "subway_entrance"}, 50),
         ("Straßenbahn",    {"railway": "tram_stop"},       50),
+        # Bus bleibt vorerst wirkungslos: highway=bus_stop wird in
+        # public."publicTransport" nicht abgelegt (siehe postgis_loader.py),
+        # daher liefert features_from_polygon() hier immer 0 Treffer.
         ("Bus",            {"highway": "bus_stop"},         30),
         ("Bahnhof",        {"railway": ["station", "halt"]}, 100),
     ]
@@ -169,8 +179,8 @@ def run_flaechenfinder(
     hex_proj["score_oepnv"] = pd.concat(_transit_scores, axis=1).max(axis=1)
     del _transit_scores
 
-    # ── 5. Zielorte ────────────────────────────────────────────────
-    _step(5)
+    # ── 6. Zielorte ────────────────────────────────────────────────
+    _step(6)
     target_scores = []
     for t in use_case.targets:
         try:
@@ -193,14 +203,15 @@ def run_flaechenfinder(
         hex_proj["score_zielorte"] = 0.0
     del target_scores
 
-    # ── 6. DEM / Hangneigung + Vegetationsbedeckung ────────────────
-    _step(6)
+    # ── 7. DEM / Hangneigung ─────────────────────────────────────────
+    _step(7)
     hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
     del latlng_points
 
-    # ── 6b. Vegetationsbedeckung (NDVI) ────────────────────────────
+    # ── 8. Vegetationsabdeckung verschneiden ────────────────────────
     # Nur berechnen, wenn der Faktor auch gewichtet ist – sonst dient die
     # Vegetation nur als Anzeige-Layer und die teure Verschneidung entfällt.
+    _step(8)
     hex_proj["vegetation_coverage_pct"] = 0.0
     w_veg = use_case.weights.get("w_vegetation", 0) or 0
     if w_veg > 0 and vegetation_gdf is not None and len(vegetation_gdf):
@@ -229,8 +240,8 @@ def run_flaechenfinder(
             del hexes
         del veg_proj
 
-    # ── 7. MCE-Scoring ─────────────────────────────────────────────
-    _step(7)
+    # ── 9. MCE-Scoring ─────────────────────────────────────────────
+    _step(9)
     w = use_case.weights
 
     def slope_score(deg):

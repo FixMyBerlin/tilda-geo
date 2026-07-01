@@ -26,7 +26,7 @@ from flaechenfinder.cir_sources import resolve_source
 from flaechenfinder.config import use_case_from_dict
 from flaechenfinder.dem import DEMAdapter
 from flaechenfinder.postgis_loader import PostgisLoader
-from flaechenfinder.scorer import run_flaechenfinder
+from flaechenfinder.scorer import SCORING_STEP_COUNT, SCORING_STEPS, run_flaechenfinder
 from flaechenfinder.tilda import TildaLoader
 from flaechenfinder.vegetation import compute_vegetation_areas
 from results import write_results
@@ -129,32 +129,46 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     tilda_loader = TildaLoader(loader)
     dem_adapter = DEMAdapter(source=use_case.dem_source, dgm1_path=use_case.dgm1_path)
 
-    # Vegetationsflächen on-demand aus CIR/RGBI-Kacheln berechnen.
+    # Schritt 1: Vegetationsflächen on-demand aus CIR/RGBI-Kacheln berechnen.
     # Die Quelle (Bayern WMS / BB ZIP-Download) wird aus use_case.cir_source aufgelöst.
     # Fehlt die Datengrundlage oder liegt das Gebiet außerhalb bekannter Quellen,
-    # läuft das restliche Scoring normal ohne Vegetationsdaten weiter.
-    # Fortschritt 5–70 % entfällt auf diese (meist längste) Phase.
+    # läuft das restliche Scoring normal ohne Vegetationsdaten weiter – das
+    # Frontend erkennt diesen Fall selbst (Gewicht w_vegetation=0) und zeigt
+    # den Schritt dort als übersprungen an, statt sich auf den Fortschrittstext
+    # zu verlassen. Fortschritt 5–70 % entfällt auf diese (meist längste) Phase.
+    step1_label = f"1/{SCORING_STEP_COUNT} · {SCORING_STEPS[0]}"
+
     def _veg_progress(frac, label):
-        set_progress(conn, job_id, 5 + frac * 65, label)
+        set_progress(conn, job_id, 5 + frac * 65, f"{step1_label} – {label}")
 
-    cir_source = resolve_source(use_case.cir_source, study_area)
-    if cir_source is None:
-        print("   ℹ️  Keine CIR-Quelle für dieses Gebiet – Vegetation übersprungen")
+    cir_source = None
+    if not (use_case.weights.get("w_vegetation", 0) or 0):
+        print("   ℹ️  w_vegetation=0 – Vegetationsberechnung übersprungen")
         vegetation = None
+        set_progress(conn, job_id, 70, step1_label)
     else:
-        try:
-            vegetation = compute_vegetation_areas(
-                study_area, source=cir_source, progress_cb=_veg_progress
-            )
-        except Exception as e:
-            print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+        cir_source = resolve_source(use_case.cir_source, study_area)
+        if cir_source is None:
+            print("   ℹ️  Keine CIR-Quelle für dieses Gebiet – Vegetation übersprungen")
             vegetation = None
+            set_progress(conn, job_id, 70, step1_label)
+        else:
+            try:
+                vegetation = compute_vegetation_areas(
+                    study_area, source=cir_source, progress_cb=_veg_progress
+                )
+            except Exception as e:
+                print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+                vegetation = None
+            set_progress(conn, job_id, 70, step1_label)
 
-    # Die 7 fachlichen Schritte des Scorings auf 72–90 % abbilden und ihren
-    # Namen als progressLabel an die App weiterreichen. Format "n/total · Name",
-    # damit das Frontend den aktuellen Schritt in der Schrittliste hervorheben kann.
+    # Schritte 2–9 (Scoring in run_flaechenfinder) auf 72–90 % abbilden und
+    # ihren Namen als progressLabel an die App weiterreichen. Format
+    # "n/total · Name", damit das Frontend den aktuellen Schritt in der
+    # Schrittliste hervorheben kann.
     def _scoring_progress(step, total, label):
-        set_progress(conn, job_id, 72 + (step - 1) / total * 18, f"{step}/{total} · {label}")
+        first, last = 2, total - 1  # Schritt 1 (Vegetation) und total (Speichern) laufen hier nicht
+        set_progress(conn, job_id, 72 + (step - first) / (last - first) * 18, f"{step}/{total} · {label}")
 
     hex_proj, areas = run_flaechenfinder(
         study_area_geom=study_area,
@@ -167,7 +181,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         progress_cb=_scoring_progress,
     )
 
-    set_progress(conn, job_id, 92, "Ergebnisse speichern")
+    set_progress(conn, job_id, 92, f"{SCORING_STEP_COUNT}/{SCORING_STEP_COUNT} · {SCORING_STEPS[-1]}")
     hex_count, area_count, veg_count = write_results(
         engine, conn, run_id, hex_proj, areas, vegetation
     )
@@ -178,8 +192,8 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     run_status = "COMPLETE" if hex_count > 0 else "EMPTY"
     with conn.cursor() as cur:
         cur.execute(
-            'UPDATE prisma."PlanningRun" SET status=%s, "hexCount"=%s, "areaCount"=%s, "cirAttribution"=%s WHERE id=%s',
-            (run_status, hex_count, area_count, cir_source.attribution if cir_source else None, run_id),
+            'UPDATE prisma."PlanningRun" SET status=%s, "hexCount"=%s, "areaCount"=%s, "vegCount"=%s, "cirAttribution"=%s WHERE id=%s',
+            (run_status, hex_count, area_count, veg_count, cir_source.attribution if cir_source else None, run_id),
         )
         cur.execute(
             'UPDATE prisma."PlanningScenario" SET "currentRunId"=%s, "updatedAt"=now() WHERE id=%s',
