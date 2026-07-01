@@ -113,8 +113,7 @@ export const PlaceSearch = ({ className }: Props) => {
 
   // Don't show the results list for the already-selected label (it's acting as the value, not a search).
   const showResults = !activeFeature || query !== activeFeature.place_name
-  const searchIconViolet =
-    !!activeFeature || (showResults && results.length > 0)
+  const searchIconViolet = !!activeFeature || (showResults && results.length > 0)
 
   return (
     <div ref={wrapperRef} className={twMerge('relative', className)}>
