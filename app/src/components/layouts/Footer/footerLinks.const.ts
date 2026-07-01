@@ -14,14 +14,14 @@ export const footerLinkGroups: FooterLinkGroup[] = [
     heading: 'FixMyCity',
     links: [
       { name: 'Über TILDA', href: 'https://fixmycity.de/tilda/' },
-      { name: 'Referenzen', href: 'https://fixmycity.de/referenzen/' },
-      { name: 'Mehr zu unserem Produkt Trassenscout', href: 'https://trassenscout.de' },
+      { name: 'TILDA in der Praxis', href: 'https://fixmycity.de/referenzen/' },
+      { name: 'Der Trassenscout - für komplexe Projekte', href: 'https://trassenscout.de' },
       {
-        name: 'Weitere Dienstleistungen von FixMyCity',
+        name: 'Weitere Dienstleistungen',
         href: 'https://fixmycity.de/dienstleistungen/',
       },
-      { name: 'Demo Termin vereinbaren', href: 'https://fixmycity.de/termin-vereinbaren/' },
-      { name: 'Zum Newsletter anmelden', href: 'https://fixmycity.de/kontakt/' },
+      { name: 'Demo-Termin vereinbaren', href: 'https://fixmycity.de/termin-vereinbaren/' },
+      { name: 'Newsletter abonnieren', href: 'https://fixmycity.de/kontakt/' },
     ],
   },
   {
