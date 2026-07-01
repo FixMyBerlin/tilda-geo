@@ -22,6 +22,7 @@ from psycopg.types.json import Jsonb
 from shapely.geometry import shape
 
 import db
+from flaechenfinder.cir_sources import resolve_source
 from flaechenfinder.config import use_case_from_dict
 from flaechenfinder.dem import DEMAdapter
 from flaechenfinder.postgis_loader import PostgisLoader
@@ -128,17 +129,26 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     tilda_loader = TildaLoader(loader)
     dem_adapter = DEMAdapter(source=use_case.dem_source, dgm1_path=use_case.dgm1_path)
 
-    # Vegetationsflächen on-demand aus CIR-DOP-Kacheln berechnen. Fehlt die
-    # Datengrundlage (keine Kacheln), läuft das restliche Scoring normal weiter.
+    # Vegetationsflächen on-demand aus CIR/RGBI-Kacheln berechnen.
+    # Die Quelle (Bayern WMS / BB ZIP-Download) wird aus use_case.cir_source aufgelöst.
+    # Fehlt die Datengrundlage oder liegt das Gebiet außerhalb bekannter Quellen,
+    # läuft das restliche Scoring normal ohne Vegetationsdaten weiter.
     # Fortschritt 5–70 % entfällt auf diese (meist längste) Phase.
     def _veg_progress(frac, label):
         set_progress(conn, job_id, 5 + frac * 65, label)
 
-    try:
-        vegetation = compute_vegetation_areas(study_area, progress_cb=_veg_progress)
-    except Exception as e:
-        print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+    cir_source = resolve_source(use_case.cir_source, study_area)
+    if cir_source is None:
+        print("   ℹ️  Keine CIR-Quelle für dieses Gebiet – Vegetation übersprungen")
         vegetation = None
+    else:
+        try:
+            vegetation = compute_vegetation_areas(
+                study_area, source=cir_source, progress_cb=_veg_progress
+            )
+        except Exception as e:
+            print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+            vegetation = None
 
     # Die 7 fachlichen Schritte des Scorings auf 72–90 % abbilden und ihren
     # Namen als progressLabel an die App weiterreichen. Format "n/total · Name",
@@ -168,8 +178,8 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     run_status = "COMPLETE" if hex_count > 0 else "EMPTY"
     with conn.cursor() as cur:
         cur.execute(
-            'UPDATE prisma."PlanningRun" SET status=%s, "hexCount"=%s, "areaCount"=%s WHERE id=%s',
-            (run_status, hex_count, area_count, run_id),
+            'UPDATE prisma."PlanningRun" SET status=%s, "hexCount"=%s, "areaCount"=%s, "cirAttribution"=%s WHERE id=%s',
+            (run_status, hex_count, area_count, cir_source.attribution if cir_source else None, run_id),
         )
         cur.execute(
             'UPDATE prisma."PlanningScenario" SET "currentRunId"=%s, "updatedAt"=now() WHERE id=%s',
