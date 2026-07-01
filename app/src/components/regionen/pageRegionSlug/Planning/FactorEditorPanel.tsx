@@ -177,18 +177,6 @@ export const FactorEditorPanel = ({
                 />
               </label>
             ))}
-            <label className="flex items-center justify-between gap-2 py-0.5">
-              <span>H3-Auflösung</span>
-              <input
-                type="number"
-                min={6}
-                max={15}
-                value={Number(config.h3_resolution ?? 13)}
-                disabled={readOnly}
-                onChange={(e) => setField('h3_resolution', Number(e.target.value))}
-                className="w-24 rounded border border-gray-300 px-1 py-0.5 text-right disabled:bg-gray-50 disabled:text-gray-500"
-              />
-            </label>
           </div>
 
           {!readOnly && (
