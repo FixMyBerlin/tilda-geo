@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { useMap } from 'react-map-gl/maplibre'
-import type maplibregl from 'maplibre-gl'
 import { along, length, flatten, lineString } from '@turf/turf'
 import type { LineString, MultiLineString, Position } from 'geojson'
+import type maplibregl from 'maplibre-gl'
+import { useEffect, useRef, useState } from 'react'
+import { useMap } from 'react-map-gl/maplibre'
 
 type ElevationPoint = {
   distanceM: number
@@ -48,7 +48,8 @@ function lonLatToTileSample(lng: number, lat: number, zoom: number) {
   const scale = 2 ** zoom
   const normalizedX = ((lng + 180) / 360) * scale
   const normalizedY =
-    ((1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) / 2) * scale
+    ((1 - Math.log(Math.tan(latitudeRadians) + 1 / Math.cos(latitudeRadians)) / Math.PI) / 2) *
+    scale
 
   const tileX = Math.floor(normalizedX)
   const tileY = Math.floor(normalizedY)
@@ -83,7 +84,9 @@ function getTileData(tileX: number, tileY: number): Promise<Float32Array> {
 async function loadTile(tileX: number, tileY: number): Promise<Float32Array> {
   const response = await fetch(`${TILE_ENDPOINT}/${TILE_ZOOM}/${tileX}/${tileY}.webp`)
   if (!response.ok) {
-    throw new Error(`Failed to load tile: ${TILE_ZOOM}/${tileX}/${tileY} (Status: ${response.status})`)
+    throw new Error(
+      `Failed to load tile: ${TILE_ZOOM}/${tileX}/${tileY} (Status: ${response.status})`,
+    )
   }
   const blob = await response.blob()
 
@@ -138,7 +141,7 @@ function sampleBilinear(
   normalizedX: number,
   normalizedY: number,
   tileX: number,
-  tileY: number
+  tileY: number,
 ): number {
   const x = (normalizedX - tileX) * size
   const y = (normalizedY - tileY) * size
@@ -200,7 +203,14 @@ async function fetchElevationsFromMapterhorn(coords: Position[]): Promise<(numbe
       if (!elevations) {
         throw new Error('Tile elevations not available in map')
       }
-      const val = sampleBilinear(elevations, TILE_SIZE, item.normalizedX, item.normalizedY, item.tileX, item.tileY)
+      const val = sampleBilinear(
+        elevations,
+        TILE_SIZE,
+        item.normalizedX,
+        item.normalizedY,
+        item.tileX,
+        item.tileY,
+      )
       // Void value check
       if (val <= -500) {
         throw new Error(`Invalid/extreme elevation value encountered: ${val}`)
@@ -290,7 +300,11 @@ async function fetchElevationsFromApi(coords: Position[]): Promise<(number | nul
   }
 }
 
-export const InspectorFeatureElevationProfile = ({ feature }: { feature: maplibregl.MapGeoJSONFeature }) => {
+export const InspectorFeatureElevationProfile = ({
+  feature,
+}: {
+  feature: maplibregl.MapGeoJSONFeature
+}) => {
   const { mainMap } = useMap()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -534,7 +548,13 @@ export const InspectorFeatureElevationProfile = ({ feature }: { feature: maplibr
         onMouseLeave={handleLeave}
         onTouchEnd={handleLeave}
       >
-        <svg width={width} height={height} className="overflow-visible" role="img" aria-label="Höhenprofil Grafik">
+        <svg
+          width={width}
+          height={height}
+          className="overflow-visible"
+          role="img"
+          aria-label="Höhenprofil Grafik"
+        >
           <title>Höhenprofil des ausgewählten Weges</title>
           <defs>
             <linearGradient id="elevation-area-gradient" x1="0" y1="0" x2="0" y2="1">

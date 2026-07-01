@@ -3,6 +3,7 @@ import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/util
 import { parseSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { Disclosure } from './Disclosure/Disclosure'
 import type { InspectorFeature } from './Inspector'
+import { InspectorFeatureElevationProfile } from './InspectorFeatureElevationProfile'
 import { NoticeMaproulette } from './InspectorFeatureSource/NoticeMaproulette'
 import { NoticeTransformedGeometry } from './InspectorFeatureSource/NoticeTransformedGeometry'
 import { MapillaryIframe } from './MapillaryIframe/MapillaryIframe'
@@ -13,7 +14,6 @@ import { osmTypeIdString } from './Tools/osmUrls/osmUrls'
 import { ToolsLinks } from './Tools/ToolsLinks'
 import { ToolsOtherProperties } from './Tools/ToolsOtherProperties'
 import { ToolsWrapper } from './Tools/ToolsWrapper'
-import { InspectorFeatureElevationProfile } from './InspectorFeatureElevationProfile'
 
 export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) => {
   const { geometry, properties } = feature
