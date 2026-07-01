@@ -6,6 +6,7 @@ import { AttributionControl, Map as MapGl, Marker, NavigationControl } from 'rea
 import { useOsmNewNoteFeature } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import type { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import type { useNewOsmNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { NotesMapLayerForRegion } from './NotesMapLayerForRegion'
 import { SourceLayerFeature } from './SourceLayerFeature'
@@ -22,6 +23,7 @@ type Props = {
 
 export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Props) => {
   const [showHint, setShowHint] = useState(true)
+  const isSmBreakpointOrAbove = useBreakpoint('sm')
 
   const handleMove = (event: ViewStateChangeEvent) => {
     setNewNoteMapParam({
@@ -69,9 +71,6 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
         minZoom={3}
         attributionControl={false}
       >
-        <NavigationControl showCompass={false} position="bottom-left" />
-        <AttributionControl compact={true} position="bottom-right" />
-
         <Marker latitude={newNoteMapParam.lat} longitude={newNoteMapParam.lng} anchor="bottom">
           <MapPinIcon className="h-8 w-8 text-red-700" />
           <PlusIcon className="-mb-4 h-8 w-8 text-red-700" />
@@ -79,6 +78,9 @@ export const NotesNewMap = ({ mapId, newNoteMapParam, setNewNoteMapParam }: Prop
 
         <SourceLayerFeature />
         <NotesMapLayerForRegion />
+        <AttributionControl compact={true} position="bottom-left" />
+
+        {isSmBreakpointOrAbove && <NavigationControl showCompass={false} position="bottom-left" />}
       </MapGl>
 
       {showHint && (
