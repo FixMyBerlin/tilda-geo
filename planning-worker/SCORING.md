@@ -1,0 +1,57 @@
+# MCE-Scoring & Potentialflächen-Auswahl
+
+Wie aus dem H3-Hexagon-Gitter der Gesamtscore und daraus die "Potentialflächen"
+abgeleitet werden. Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
+(`run_flaechenfinder()`).
+
+## Ablauf
+
+1. **H3-Gitter generieren** – das Studiengebiet wird mit H3-Hexagonen in Res. 13
+   (`BASE_H3_RES`) überdeckt (`h3.geo_to_cells`).
+2. **Teilscores je Hexagon** (0–100, aus Distanz zu Layern bzw. Attributen):
+   - `score_radweg` – Nähe zu `public.bikelanes`
+   - `score_bodenbelag` – Untergrund-Bewertung (`SURFACE_SCORES`, OSM `surface`-Tag)
+   - `score_zielorte` – Nähe zu den im Szenario konfigurierten `targets`
+   - `score_hangneigung` – DEM-Hangneigung (`slope_score`)
+   - `score_hindernisfreiheit` – Abstand zu Hindernissen (Gebäude/Wald/Wasser/Wiese)
+   - `score_oepnv` – Nähe zu ÖPNV-Haltestellen (max. über 4 Typen, Bus derzeit immer 0
+     — siehe [`README.md`](README.md))
+3. **Basis-Score** – gewichtete Summe der sechs Teilscores (`weights` im
+   `factorConfig`, siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
+4. **Vegetations-Effekt** – kein additiver Teilscore, sondern stufenloser
+   Abzug/Bonus auf den Basis-Score (Details: [`VEGETATION.md`](VEGETATION.md)).
+   `mce_gesamtscore = clamp(base ± Effekt, 0, 100)`.
+5. **Harte Ausschlüsse** – unabhängig vom gewichteten Score wird `mce_gesamtscore`
+   auf 0 gesetzt, wenn eines zutrifft:
+   - Hangneigung zu steil (`score_hangneigung == 0`)
+   - zu nah an einem Hindernis (`score_hindernisfreiheit == 0`, Default < `min_clearance_m` = 2 m)
+   - Bodenbelag unter `min_surface_score` (Default 30)
+   - Radweg weiter als `max_cyclepath_dist_m` entfernt (Default 150 m)
+   - Gebäudeüberschneidung (`gebaeude`)
+6. **Klassifikation** – `eignungsklasse` wird aus `mce_gesamtscore` gebinnt
+   (`_KLASSE_BINS`/`_KLASSE_LABELS`):
+
+   | Score | Klasse |
+   |---|---|
+   | 0 | ausgeschlossen |
+   | 0–40 | schlecht |
+   | 40–60 | mittel |
+   | 60–80 | gut |
+   | 80–100 | sehr gut |
+
+7. **Potentialflächen ableiten** – aus den Hexagonen mit
+   `mce_gesamtscore >= min_score_threshold` (Default 60) werden benachbarte
+   Hexagone per `dissolve()` zu zusammenhängenden Flächen verschmolzen, per
+   `explode()` in Einzelpolygone zerlegt und auf eine Flächengröße von
+   12–50 m² gefiltert (`flaeche_m2`). Score wird als Mittelwert übernommen,
+   Hangneigung als Maximum.
+
+## Zoom-Aggregation (Darstellung)
+
+Für niedrige Zoomstufen (z < 16) werden die feinen Res-13-Hexagone zusätzlich
+per `aggregate_hexagons()` auf H3-Res. 11 (`AGG_H3_RES`) zusammengefasst – reine
+Mittelwertbildung der Score-Spalten je `h3.cell_to_parent`, `eignungsklasse` wird
+daraus neu abgeleitet. Kein Re-Scoring, keine Spatial-Joins. Die Zoom-Verzweigung
+(`z >= 16 → Res 13, sonst Res 11`) muss mit der Martin-Funktion
+`planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql)
+übereinstimmen.
