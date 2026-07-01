@@ -198,7 +198,7 @@ export const InternalNotesFilterControl = () => {
               id="query"
               type="text" // type "search" shows an `x` but that does not do anything in chrome, maybe due to the preventDefault…
               placeholder="Suchwort"
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:leading-6"
+              className="block w-full rounded-md border-0 py-1.5 text-base text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:leading-6"
               onClick={(e) => {
                 // Required so the flyout does not close when I click in the input field
                 e.preventDefault()

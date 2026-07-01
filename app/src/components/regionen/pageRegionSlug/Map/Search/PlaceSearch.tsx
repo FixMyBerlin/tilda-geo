@@ -113,6 +113,8 @@ export const PlaceSearch = ({ className }: Props) => {
 
   // Don't show the results list for the already-selected label (it's acting as the value, not a search).
   const showResults = !activeFeature || query !== activeFeature.place_name
+  const searchIconViolet =
+    !!activeFeature || (showResults && results.length > 0)
 
   return (
     <div ref={wrapperRef} className={twMerge('relative', className)}>
@@ -124,7 +126,7 @@ export const PlaceSearch = ({ className }: Props) => {
         aria-expanded={open}
         aria-hidden={open}
         tabIndex={open ? -1 : undefined}
-        className={twMerge(mobileControlButtonClassName, 'size-10')}
+        className={twMerge(mobileControlButtonClassName, 'size-10', open && 'pointer-events-none')}
       >
         <MagnifyingGlassIcon className="size-6" aria-hidden="true" />
       </button>
@@ -155,7 +157,10 @@ export const PlaceSearch = ({ className }: Props) => {
         >
           <div className="flex h-10 items-stretch overflow-hidden rounded-md border border-gray-300 bg-white shadow-md">
             <MagnifyingGlassIcon
-              className="ml-2 size-5 shrink-0 self-center text-violet-600"
+              className={twMerge(
+                'ml-2 size-5 shrink-0 self-center',
+                searchIconViolet ? 'text-violet-600' : 'text-gray-400',
+              )}
               aria-hidden="true"
             />
             <ComboboxInput
@@ -174,17 +179,15 @@ export const PlaceSearch = ({ className }: Props) => {
               aria-label="Suche"
               // @tailwindcss/forms adds a border + a focus box-shadow ring to inputs; clear both
               // (border-0 + focus:ring-0) so the field blends into the surrounding panel.
-              className="min-w-0 flex-1 border-0 bg-transparent px-2 text-sm text-gray-900 outline-none placeholder:text-gray-500 focus:border-0 focus:ring-0 focus:outline-none"
+              className="min-w-0 flex-1 border-0 bg-transparent px-2 text-base text-gray-900 outline-none placeholder:text-gray-500 focus:border-0 focus:ring-0 focus:outline-none sm:text-sm"
             />
-            {/* Full-height clickable zone. Close on pointerdown (with preventDefault) so the very
-                first press works: clicking it would otherwise just blur the input, and the
-                blur-driven re-render would eat the click. onClick keeps it keyboard-operable. */}
+            {/* preventDefault on mousedown keeps the focused input from blurring (a blur would
+                swallow the first click); it does not affect :hover. Closing on click (not
+                pointerdown) keeps the panel mounted through the whole press/tap, so the magnifier
+                underneath never receives a ghost click that would reopen the search. */}
             <button
               type="button"
-              onPointerDown={(event) => {
-                event.preventDefault()
-                clearAndClose()
-              }}
+              onMouseDown={(event) => event.preventDefault()}
               onClick={clearAndClose}
               aria-label="Suche schließen"
               className="flex w-10 shrink-0 cursor-pointer items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900"
@@ -193,7 +196,12 @@ export const PlaceSearch = ({ className }: Props) => {
             </button>
           </div>
 
-          <ComboboxOptions className="mt-1 max-h-80 overflow-y-auto rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg empty:invisible">
+          {/* modal={false}: the default (true) marks everything outside the input/options `inert`
+              while open — which disabled our trailing X button (no hover, clicks ignored). */}
+          <ComboboxOptions
+            modal={false}
+            className="mt-1 max-h-80 overflow-y-auto rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg empty:invisible"
+          >
             {showResults &&
               results.map((feature) => {
                 const Icon = resultIcon(feature)

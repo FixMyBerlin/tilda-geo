@@ -241,7 +241,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
               aria-autocomplete="list"
               role="combobox"
               aria-expanded={open}
-              className="w-full rounded border-0 bg-transparent px-1 py-1 text-xs text-gray-900 outline-none placeholder:text-gray-500"
+              className="w-full rounded border-0 bg-transparent px-1 py-1 text-base text-gray-900 outline-none placeholder:text-gray-500 sm:text-xs"
             />
           </div>
           <ul
