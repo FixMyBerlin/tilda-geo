@@ -44,3 +44,10 @@ SELECT count(*) FROM planning.scenario_hexagons WHERE run_id = <runId>;
 
 MVP nutzt den SRTM-Fallback (konstante Neigung). Echte DGM1-GeoTIFFs werden über das
 `planning_dem`-Volume (`/dem`) gemountet und via `dem_source: "dgm1"` aktiviert.
+
+## Weitere Doku
+
+- [`SCORING.md`](SCORING.md) – MCE-Scoring je Hexagon, harte Ausschlüsse, Ableitung
+  der Potentialflächen und Zoom-Aggregation.
+- [`VEGETATION.md`](VEGETATION.md) – NDVI-Vegetationserkennung und deren
+  Einbindung ins Scoring.
