@@ -50,15 +50,18 @@ export function buildAtlasLayerProps({
   const layerFilter: FilterSpecification | undefined = debugLayerStyles
     ? (['all'] as const)
     : layer.filter
+  const styleBeforeId = backgroundId === 'default' && layer.beforeId ? layer.beforeId : undefined
   const base = {
     id: layerId,
     source: sourceKey,
     'source-layer': layer['source-layer'],
-    beforeId: beforeId({
-      backgroundId,
-      subcategoryBeforeId,
-      layerType: layer.type,
-    }),
+    beforeId:
+      styleBeforeId ??
+      beforeId({
+        backgroundId,
+        subcategoryBeforeId,
+        layerType: layer.type,
+      }),
     ...(layerFilter ? { filter: layerFilter } : {}),
     ...(layer.maxzoom ? { maxzoom: layer.maxzoom } : {}),
     ...(layer.minzoom ? { minzoom: layer.minzoom } : {}),

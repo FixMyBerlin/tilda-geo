@@ -268,7 +268,11 @@ export const mapboxStyleGroupLayers_${group.folderName}: MapboxStyleLayer[] = ${
 // (Don't change the new lines and spaces in this template; the generated output does fit Prettier conventions.)
 const _layers = mergedGroupAndLayers.flatMap((g) => g.layers)
 const _layerKeys = _layers.flatMap((l) => Object.keys(l))
-const deduplicatedLayerKeys = Array.from(new Set(_layerKeys)).sort((a, b) => a.localeCompare(b))
+// App-only keys may be added manually to generated group files (e.g. layer stacking).
+const APP_LAYER_KEYS = ['beforeId'] as const
+const deduplicatedLayerKeys = Array.from(new Set([..._layerKeys, ...APP_LAYER_KEYS])).sort((a, b) =>
+  a.localeCompare(b),
+)
 const mapboxStyleLayerTypeRhs =
   deduplicatedLayerKeys.length === 0
     ? 'Record<string, never>'

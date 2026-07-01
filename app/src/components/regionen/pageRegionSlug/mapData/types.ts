@@ -215,6 +215,8 @@ export type FileMapDataSubcategoryStyleLayer = (
   | SymbolLayerSpecification
 ) & {
   'source-layer': string
+  /** @desc Override default layer stacking when using the default background map. */
+  beforeId?: TBeforeIds
   /**
    * @default `true`
    * @desc optional `false` will hide the layer from `interactiveLayerIds` */

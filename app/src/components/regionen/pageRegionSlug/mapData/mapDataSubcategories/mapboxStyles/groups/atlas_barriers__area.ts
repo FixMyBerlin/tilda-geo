@@ -7,6 +7,7 @@ export const mapboxStyleGroupLayers_atlas_barriers__area: MapboxStyleLayer[] = [
   {
     id: 'barriers_water_aerodrome2',
     type: 'fill',
+    beforeId: 'atlas-app-beforeid-below-road',
     paint: {
       'fill-opacity': 0.42,
     },
@@ -14,6 +15,7 @@ export const mapboxStyleGroupLayers_atlas_barriers__area: MapboxStyleLayer[] = [
   {
     id: 'barriers_water_aerodrome',
     type: 'fill',
+    beforeId: 'atlas-app-beforeid-below-road',
     paint: {
       'fill-opacity': 0.5,
       'fill-pattern': 'cross-hatch-barriers',
