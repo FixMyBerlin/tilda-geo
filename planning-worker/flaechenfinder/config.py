@@ -58,8 +58,6 @@ class UseCaseConfig:
     min_clearance_m: float = 2.0            # zu nah an Gebäude → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
 
-    min_score_threshold: float = 60.0       # MCE-Schwelle für Potentialflächen
-
     # CIR/RGBI-Kachelquelle für die Vegetationsberechnung.
     # "auto" erkennt anhand des Studiengebiet-Zentroiden (12°E = UTM32/33-Grenze):
     #   Bayern → EPSG:25832 (WMS), Brandenburg/Berlin → EPSG:25833 (WMS).
@@ -91,7 +89,6 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         "weights": {w_cyclepath, w_surface, w_target, w_slope, w_clearance, w_transit},
         "dem_source": "srtm" | "dgm1" | "mapterhorn",
         "max_cyclepath_dist_m", "min_clearance_m", "min_surface_score",
-        "min_score_threshold": float,
         "targets": [ {name, osm_tags, max_dist_m, optimal_dist_m, weight_in_target} ],
       }
     `study_area` und `h3_resolution` werden vom Worker separat aus dem factorConfig gelesen.
@@ -120,7 +117,6 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 150.0)),
         min_clearance_m=float(cfg.get("min_clearance_m", 2.0)),
         min_surface_score=float(cfg.get("min_surface_score", 30.0)),
-        min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         cir_source=cfg.get("cir_source", "auto"),
         intersection_radius_m=float(cfg.get("intersection_radius_m", 20.0)),
         intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),

@@ -47,41 +47,24 @@ def write_results(
     conn,
     run_id: int,
     hex_proj: gpd.GeoDataFrame,
-    areas: gpd.GeoDataFrame,
     vegetation: gpd.GeoDataFrame | None = None,
     hex_agg: gpd.GeoDataFrame | None = None,
 ):
-    """Schreibt Hexagone + Potentialflächen + Vegetation für `run_id`.
+    """Schreibt Hexagone + Vegetation für `run_id`.
 
     `hex_proj` ist das feine BASE-Gitter, `hex_agg` das grobe Aggregat für
     niedrige Zoomstufen; beide landen mit ihrer jeweiligen `resolution` in
-    derselben Tabelle. Gibt (hex_count, area_count, veg_count) zurück, wobei
-    `hex_count` nur die feinen (BASE-)Hexagone zählt.
+    derselben Tabelle. Gibt (hex_count, veg_count) zurück, wobei `hex_count`
+    nur die feinen (BASE-)Hexagone zählt.
     """
 
     # Idempotenz: evtl. vorhandene Zeilen dieses Laufs entfernen.
     with conn.cursor() as cur:
         cur.execute("DELETE FROM planning.scenario_hexagons WHERE run_id = %s", (run_id,))
-        cur.execute("DELETE FROM planning.scenario_areas WHERE run_id = %s", (run_id,))
         cur.execute("DELETE FROM planning.scenario_vegetation WHERE run_id = %s", (run_id,))
 
     hex_count = _write_hexagons(engine, hex_proj, run_id)
     _write_hexagons(engine, hex_agg, run_id)
-
-    area_count = 0
-    if len(areas):
-        ar = areas.to_crs("EPSG:3857")
-        ar = ar.rename_geometry("geom")
-        ar["geom"] = ar["geom"].apply(_to_multipolygon)
-        ar = ar[ar["geom"].notna()]
-        ar["run_id"] = run_id
-        if "flaeche_m2" not in ar.columns:
-            ar["flaeche_m2"] = None
-        ar = ar.set_geometry("geom")[["run_id", "geom", "mce_gesamtscore", "flaeche_m2"]]
-        if len(ar):
-            ar.to_postgis("scenario_areas", engine, schema="planning", if_exists="append", index=False)
-        area_count = len(ar)
-        del ar
 
     veg_count = 0
     if vegetation is not None and len(vegetation):
@@ -100,7 +83,7 @@ def write_results(
         del vg
 
     print(
-        f"   ✓ geschrieben: {hex_count} Hexagone, {area_count} Flächen, "
+        f"   ✓ geschrieben: {hex_count} Hexagone, "
         f"{veg_count} Vegetationsflächen (run_id={run_id})"
     )
-    return hex_count, area_count, veg_count
+    return hex_count, veg_count

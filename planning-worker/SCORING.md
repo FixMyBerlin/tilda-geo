@@ -1,7 +1,7 @@
-# MCE-Scoring & Potentialflächen-Auswahl
+# MCE-Scoring
 
-Wie aus dem H3-Hexagon-Gitter der Gesamtscore und daraus die "Potentialflächen"
-abgeleitet werden. Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
+Wie aus dem H3-Hexagon-Gitter der Gesamtscore je Hexagon berechnet wird.
+Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
 (`run_flaechenfinder()`).
 
 ## Ablauf
@@ -38,13 +38,6 @@ abgeleitet werden. Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.
    | 40–60 | mittel |
    | 60–80 | gut |
    | 80–100 | sehr gut |
-
-7. **Potentialflächen ableiten** – aus den Hexagonen mit
-   `mce_gesamtscore >= min_score_threshold` (Default 60) werden benachbarte
-   Hexagone per `dissolve()` zu zusammenhängenden Flächen verschmolzen, per
-   `explode()` in Einzelpolygone zerlegt und auf eine Flächengröße von
-   12–50 m² gefiltert (`flaeche_m2`). Score wird als Mittelwert übernommen,
-   Hangneigung als Maximum.
 
 ## Zoom-Aggregation (Darstellung)
 

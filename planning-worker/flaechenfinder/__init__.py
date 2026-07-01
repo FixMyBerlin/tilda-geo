@@ -1,4 +1,4 @@
-"""Flächenfinder – Multi-Criteria-Evaluation für Potentialflächen.
+"""Flächenfinder – Multi-Criteria-Evaluation zur Standortbewertung.
 
 Integriert als Modul in tilda-geo. Gegenüber dem ursprünglichen, eigenständigen
 flaechenfinder-Repo wurden die I/O-Enden getauscht:

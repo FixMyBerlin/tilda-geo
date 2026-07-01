@@ -116,7 +116,7 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
         <div className="text-xs text-gray-600">
           Letzter Lauf:{' '}
           {scenario.runs[0].status === 'COMPLETE'
-            ? `${scenario.runs[0].areaCount ?? 0} Potentialflächen, ${scenario.runs[0].hexCount ?? 0} Hexagone`
+            ? `${scenario.runs[0].hexCount ?? 0} Hexagone`
             : scenario.runs[0].status}
         </div>
       )}

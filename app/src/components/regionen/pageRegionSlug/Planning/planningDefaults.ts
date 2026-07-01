@@ -23,7 +23,6 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   max_cyclepath_dist_m: 150,
   min_clearance_m: 2.0,
   min_surface_score: 30,
-  min_score_threshold: 60,
   intersection_radius_m: 20,
   parken_radius_m: 15,
   targets: [],

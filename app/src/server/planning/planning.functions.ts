@@ -22,7 +22,6 @@ const FactorConfigSchema = z
     max_cyclepath_dist_m: z.number().optional(),
     min_clearance_m: z.number().optional(),
     min_surface_score: z.number().optional(),
-    min_score_threshold: z.number().optional(),
     intersection_radius_m: z.number().optional(),
     parken_radius_m: z.number().optional(),
     targets: z.array(z.any()).optional(),
@@ -91,7 +90,6 @@ export const getPlanningScenarioFn = createServerFn({ method: 'GET' })
             id: true,
             status: true,
             hexCount: true,
-            areaCount: true,
             vegCount: true,
             createdAt: true,
             cirAttribution: true,
@@ -252,7 +250,7 @@ export const runPlanningScenarioFn = createServerFn({ method: 'POST' })
     return job
   })
 
-// Delete a scenario and all its results (hexagons/areas in the planning schema).
+// Delete a scenario and all its results (hexagons in the planning schema).
 export const deletePlanningScenarioFn = createServerFn({ method: 'POST' })
   .inputValidator((data: z.infer<typeof ScenarioIdInput>) => ScenarioIdInput.parse(data))
   .handler(async ({ data }) => {
@@ -264,7 +262,6 @@ export const deletePlanningScenarioFn = createServerFn({ method: 'POST' })
     if (runs.length > 0) {
       const runIds = runs.map((r) => r.id)
       await db.$executeRaw`DELETE FROM planning.scenario_hexagons WHERE run_id = ANY(${runIds})`
-      await db.$executeRaw`DELETE FROM planning.scenario_areas    WHERE run_id = ANY(${runIds})`
     }
     // PlanningJob and PlanningRun cascade-delete via FK.
     await db.planningScenario.delete({ where: { id: data.scenarioId } })

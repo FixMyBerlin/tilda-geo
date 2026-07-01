@@ -120,10 +120,10 @@ def run_flaechenfinder(
     vegetation_gdf=None,
     progress_cb=None,
 ):
-    """Berechnet das H3-Scoring-Gitter und die abgeleiteten Potentialflächen.
+    """Berechnet das H3-Scoring-Gitter mit MCE-Score je Hexagon.
 
-    Gibt ein Tupel (hex_gdf, areas_gdf) zurück, beide in EPSG:25832 (metrisch).
-    Schreibt KEINE Dateien – die Persistenz übernimmt der Worker (results.py).
+    Gibt das Hexagon-GeoDataFrame in EPSG:25832 (metrisch) zurück. Schreibt
+    KEINE Dateien – die Persistenz übernimmt der Worker (results.py).
 
     `vegetation_gdf` (optional, EPSG:25832) enthält die on-demand berechneten
     Vegetationspolygone; daraus wird der Bedeckungsgrad je Hexagon abgeleitet.
@@ -158,7 +158,7 @@ def run_flaechenfinder(
     hex_gdf = gpd.GeoDataFrame(rows, crs="EPSG:4326")
     print(f"   → {len(hex_gdf)} Hexagone (Res {h3_resolution})")
     if len(hex_gdf) == 0:
-        return hex_gdf.to_crs("EPSG:25832"), gpd.GeoDataFrame(geometry=[], crs="EPSG:25832")
+        return hex_gdf.to_crs("EPSG:25832")
 
     latlng_points = list(zip(hex_gdf["zentrum_lng"], hex_gdf["zentrum_lat"]))
     hex_proj = hex_gdf.to_crs("EPSG:25832")
@@ -472,17 +472,5 @@ def run_flaechenfinder(
         hex_proj["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
 
-    # ── Potentialflächen ableiten ──────────────────────────────────
-    good = hex_proj[hex_proj["mce_gesamtscore"] >= use_case.min_score_threshold]
-    if good.empty:
-        print("\n⚠️  Keine Hexagone über Schwellenwert – keine Potentialflächen.")
-        areas = gpd.GeoDataFrame(geometry=[], crs="EPSG:25832")
-    else:
-        areas = good.dissolve(
-            aggfunc={"mce_gesamtscore": "mean", "hangneigung_grad": "max"}
-        ).explode(index_parts=False)
-        areas["flaeche_m2"] = areas.geometry.area
-        areas = areas[(areas["flaeche_m2"] >= 12) & (areas["flaeche_m2"] <= 50)]
-
-    print(f"\n✅ Fertig: {len(hex_proj)} Hexagone, {len(areas)} Potentialflächen")
-    return hex_proj, areas
+    print(f"\n✅ Fertig: {len(hex_proj)} Hexagone")
+    return hex_proj

@@ -48,12 +48,9 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution small
 -- Ausschlussgrund „Gebäude" anzuzeigen. Nur im Fein-Gitter (Res 13) gesetzt.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;
 
-CREATE TABLE IF NOT EXISTS planning.scenario_areas (
-  run_id          bigint NOT NULL,
-  geom            geometry(MultiPolygon, 3857) NOT NULL,
-  mce_gesamtscore real,
-  flaeche_m2      real
-);
+-- Potentialflächen (aus Hexagonen abgeleitete Polygone) werden nicht mehr
+-- berechnet; Altbestand aus früheren Läufen aufräumen.
+DROP TABLE IF EXISTS planning.scenario_areas;
 
 -- On-demand berechnete Vegetationsflächen (NDVI), pro Lauf gespeichert.
 CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
@@ -66,7 +63,5 @@ CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
 CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);
 CREATE INDEX IF NOT EXISTS scenario_hexagons_run_res_idx ON planning.scenario_hexagons (run_id, resolution);
 CREATE INDEX IF NOT EXISTS scenario_hexagons_geom_idx   ON planning.scenario_hexagons USING gist (geom);
-CREATE INDEX IF NOT EXISTS scenario_areas_run_id_idx    ON planning.scenario_areas (run_id);
-CREATE INDEX IF NOT EXISTS scenario_areas_geom_idx      ON planning.scenario_areas USING gist (geom);
 CREATE INDEX IF NOT EXISTS scenario_vegetation_run_id_idx ON planning.scenario_vegetation (run_id);
 CREATE INDEX IF NOT EXISTS scenario_vegetation_geom_idx   ON planning.scenario_vegetation USING gist (geom);

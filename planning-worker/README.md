@@ -9,7 +9,7 @@ Flächenfinder-MCE-Scoring und schreibt die Ergebnisse nach PostGIS `planning.*`
 - **Inputs aus tildas `public`-Schema** statt OSM-PBF: Radwege aus `public.bikelanes`
   (siehe `flaechenfinder/postgis_loader.py`). Weitere Layer (ÖPNV/POI/Untergrund) sind
   der Erweiterungspunkt und liefern im MVP leere Mengen (der Scorer ist robust dagegen).
-- **Outputs nach `planning.scenario_hexagons` / `planning.scenario_areas`**, getaggt mit
+- **Outputs nach `planning.scenario_hexagons`**, getaggt mit
   `run_id` (= `PlanningRun.id`). Ein abgeschlossener Lauf ist unveränderlich.
 - **Job-Loop** (`worker.py`): `LISTEN planning_jobs` + 15s-Poll-Fallback, Claiming via
   `FOR UPDATE SKIP LOCKED`. Lifecycle QUEUED → RUNNING → DONE/FAILED.
@@ -47,7 +47,7 @@ MVP nutzt den SRTM-Fallback (konstante Neigung). Echte DGM1-GeoTIFFs werden übe
 
 ## Weitere Doku
 
-- [`SCORING.md`](SCORING.md) – MCE-Scoring je Hexagon, harte Ausschlüsse, Ableitung
-  der Potentialflächen und Zoom-Aggregation.
+- [`SCORING.md`](SCORING.md) – MCE-Scoring je Hexagon, harte Ausschlüsse und
+  Zoom-Aggregation.
 - [`VEGETATION.md`](VEGETATION.md) – NDVI-Vegetationserkennung und deren
   Einbindung ins Scoring.

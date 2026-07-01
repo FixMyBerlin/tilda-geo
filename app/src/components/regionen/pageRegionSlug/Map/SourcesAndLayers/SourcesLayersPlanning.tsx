@@ -11,10 +11,10 @@ export const planningHexagonsLayerId = 'planning-hexagons'
 
 // Planning module result layers (Flächenfinder).
 //
-// Renders the immutable result of one PlanningRun via the Martin function sources
-// `planning_hexagons` / `planning_areas`, keyed by `?run_id=N`. Because a run is
-// immutable, the run_id-keyed tile URL is cached effectively forever (separate
-// nginx `planning_cache` zone, see configs/nginx.conf).
+// Renders the immutable result of one PlanningRun via the Martin function source
+// `planning_hexagons`, keyed by `?run_id=N`. Because a run is immutable, the
+// run_id-keyed tile URL is cached effectively forever (separate nginx
+// `planning_cache` zone, see configs/nginx.conf).
 //
 // When `planningRun` is absent (the normal viewer), this renders nothing — so the
 // existing viewer is untouched.
@@ -84,17 +84,12 @@ export const SourcesLayersPlanning = () => {
         '[Planning] hexagons URL:',
         getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`),
       )
-      console.debug(
-        '[Planning] areas URL:    ',
-        getTilesUrl(`/planning_areas/{z}/{x}/{y}?run_id=${runId}`),
-      )
     }
   }, [runId])
 
   if (runId == null) return <BoundaryHighlightLayer />
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
-  const areasUrl = getTilesUrl(`/planning_areas/{z}/{x}/{y}?run_id=${runId}`)
   const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
 
   return (
@@ -106,22 +101,6 @@ export const SourcesLayersPlanning = () => {
       <LayerHighlight
         {...hexagonFillLayerProps}
         id={getLayerHighlightId(planningHexagonsLayerId)}
-      />
-
-      <Source id="planning-areas-source" type="vector" tiles={[areasUrl]} />
-      <Layer
-        id="planning-areas-fill"
-        source="planning-areas-source"
-        source-layer="planning_areas"
-        type="fill"
-        paint={{ 'fill-color': '#1a9850', 'fill-opacity': 0.8 }}
-      />
-      <Layer
-        id="planning-areas-outline"
-        source="planning-areas-source"
-        source-layer="planning_areas"
-        type="line"
-        paint={{ 'line-color': '#08522a', 'line-width': 1.5 }}
       />
 
       {vegetationOn && (

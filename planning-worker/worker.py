@@ -175,7 +175,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         first, last = 2, total - 1  # Schritt 1 (Vegetation) und total (Speichern) laufen hier nicht
         set_progress(conn, job_id, 72 + (step - first) / (last - first) * 18, f"{step}/{total} · {label}")
 
-    hex_proj, areas = run_flaechenfinder(
+    hex_proj = run_flaechenfinder(
         study_area_geom=study_area,
         use_case=use_case,
         dem_adapter=dem_adapter,
@@ -191,18 +191,18 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     hex_agg = aggregate_hexagons(hex_proj)
 
     set_progress(conn, job_id, 92, f"{SCORING_STEP_COUNT}/{SCORING_STEP_COUNT} · {SCORING_STEPS[-1]}")
-    hex_count, area_count, veg_count = write_results(
-        engine, conn, run_id, hex_proj, areas, vegetation, hex_agg=hex_agg
+    hex_count, veg_count = write_results(
+        engine, conn, run_id, hex_proj, vegetation, hex_agg=hex_agg
     )
-    del hex_proj, hex_agg, areas, vegetation
+    del hex_proj, hex_agg, vegetation
     gc.collect()
     set_progress(conn, job_id, 100, "Fertig")
 
     run_status = "COMPLETE" if hex_count > 0 else "EMPTY"
     with conn.cursor() as cur:
         cur.execute(
-            'UPDATE prisma."PlanningRun" SET status=%s, "hexCount"=%s, "areaCount"=%s, "vegCount"=%s, "cirAttribution"=%s WHERE id=%s',
-            (run_status, hex_count, area_count, veg_count, cir_source.attribution if cir_source else None, run_id),
+            'UPDATE prisma."PlanningRun" SET status=%s, "hexCount"=%s, "vegCount"=%s, "cirAttribution"=%s WHERE id=%s',
+            (run_status, hex_count, veg_count, cir_source.attribution if cir_source else None, run_id),
         )
         cur.execute(
             'UPDATE prisma."PlanningScenario" SET "currentRunId"=%s, "updatedAt"=now() WHERE id=%s',

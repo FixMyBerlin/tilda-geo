@@ -3,7 +3,7 @@ import { geoDataClient } from '@/server/prisma-client.server'
 // Planning module tile sources.
 //
 // Martin auto-publishes functions from the `public` schema (configs/martin.yaml),
-// so these two MVT functions live in `public` but READ from the `planning` schema.
+// so these MVT functions live in `public` but READ from the `planning` schema.
 // They take a `query_params json` 4th argument — Martin passes URL query params
 // as JSON, e.g. `…/planning_hexagons/{z}/{x}/{y}?run_id=42`.
 //
@@ -43,13 +43,6 @@ async function ensurePlanningSchema() {
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;`,
   )
   await geoDataClient.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS planning.scenario_areas (
-      run_id          bigint NOT NULL,
-      geom            geometry(MultiPolygon, 3857) NOT NULL,
-      mce_gesamtscore real,
-      flaeche_m2      real
-    );`)
-  await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
       run_id     bigint NOT NULL,
       geom       geometry(MultiPolygon, 3857) NOT NULL,
@@ -63,16 +56,15 @@ async function ensurePlanningSchema() {
     `CREATE INDEX IF NOT EXISTS scenario_hexagons_geom_idx ON planning.scenario_hexagons USING gist (geom);`,
   )
   await geoDataClient.$executeRawUnsafe(
-    `CREATE INDEX IF NOT EXISTS scenario_areas_run_id_idx ON planning.scenario_areas (run_id);`,
-  )
-  await geoDataClient.$executeRawUnsafe(
-    `CREATE INDEX IF NOT EXISTS scenario_areas_geom_idx ON planning.scenario_areas USING gist (geom);`,
-  )
-  await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_vegetation_run_id_idx ON planning.scenario_vegetation (run_id);`,
   )
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_vegetation_geom_idx ON planning.scenario_vegetation USING gist (geom);`,
+  )
+  // Potentialflächen werden nicht mehr berechnet; Altbestand aufräumen.
+  await geoDataClient.$executeRawUnsafe(`DROP TABLE IF EXISTS planning.scenario_areas;`)
+  await geoDataClient.$executeRawUnsafe(
+    `DROP FUNCTION IF EXISTS public.planning_areas(int, int, int, json);`,
   )
 }
 
@@ -134,38 +126,6 @@ async function registerHexagonsFunction() {
   )
 }
 
-async function registerAreasFunction() {
-  await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_areas(z integer, x integer, y integer, query_params json)
-    RETURNS bytea AS $$
-    DECLARE
-      mvt bytea;
-      rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
-    BEGIN
-      IF rid IS NULL THEN
-        RETURN NULL;
-      END IF;
-      SELECT INTO mvt ST_AsMVT(tile, 'planning_areas', 4096, 'geom') FROM (
-        SELECT
-          mce_gesamtscore,
-          flaeche_m2,
-          ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
-        FROM planning.scenario_areas
-        WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
-      ) AS tile;
-      RETURN mvt;
-    END
-    $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
-  const spec = {
-    vector_layers: [
-      { id: 'planning_areas', fields: { mce_gesamtscore: 'real', flaeche_m2: 'real' } },
-    ],
-  }
-  await geoDataClient.$executeRawUnsafe(
-    `COMMENT ON FUNCTION public.planning_areas IS '${JSON.stringify(spec)}';`,
-  )
-}
-
 async function registerVegetationFunction() {
   await geoDataClient.$executeRawUnsafe(`
     CREATE OR REPLACE FUNCTION public.planning_vegetation(z integer, x integer, y integer, query_params json)
@@ -199,6 +159,5 @@ async function registerVegetationFunction() {
 export async function registerPlanningFunctions() {
   await ensurePlanningSchema()
   await registerHexagonsFunction()
-  await registerAreasFunction()
   await registerVegetationFunction()
 }
