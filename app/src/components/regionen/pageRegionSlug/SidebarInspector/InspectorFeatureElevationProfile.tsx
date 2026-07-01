@@ -316,18 +316,23 @@ export const InspectorFeatureElevationProfile = ({
   const { geometry } = feature
   const isLine = geometry && (geometry.type === 'LineString' || geometry.type === 'MultiLineString')
   const geometryKey = useMemo(() => JSON.stringify(geometry), [geometry])
-  const coordinates = useMemo(() => extractCoordinates(geometry), [geometry])
+  const coordinates = useMemo(() => {
+    if (!geometry || (geometry.type !== 'LineString' && geometry.type !== 'MultiLineString')) {
+      return []
+    }
+    return extractCoordinates(geometry)
+  }, [geometry])
   const canFetch = Boolean(isLine && coordinates.length >= 2)
   const loading = canFetch && loadedGeometryKey !== geometryKey
-  const displayElevationData =
-    loadedGeometryKey === geometryKey ? elevationData : []
+  const displayElevationData = loadedGeometryKey === geometryKey ? elevationData : []
 
   // 1. Setup ResizeObserver for responsive SVG dimensions
   useEffect(() => {
     if (!isLine || !containerRef.current) return
     const resizeObserver = new ResizeObserver((entries) => {
-      if (!entries || entries.length === 0) return
-      const { width, height } = entries[0].contentRect
+      const entry = entries[0]
+      if (!entry) return
+      const { width, height } = entry.contentRect
       setDimensions({ width: width || 300, height: height || 140 })
     })
     resizeObserver.observe(containerRef.current)
