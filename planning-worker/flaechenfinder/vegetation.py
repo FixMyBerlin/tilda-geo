@@ -102,6 +102,11 @@ def _verarbeite_kachel(
     from rasterio.features import shapes
 
     ergebnisse = []
+    # rasterio.open() gibt für PNG-Kacheln (Berlin/Brandenburg-WMS) eine
+    # NotGeoreferencedWarning aus, weil PNG – anders als das Bayern-GeoTIFF –
+    # keinen eingebetteten Geotransform trägt. Das ist harmlos: der Geotransform
+    # wird aus den Kachel-Rasterkoordinaten als `tile_transform` rekonstruiert
+    # (siehe compute_vegetation_areas) und unten explizit verwendet.
     with rasterio.open(pfad) as src:
         nir = src.read(band_nir).astype(np.float32)
         rot = src.read(band_red).astype(np.float32)
