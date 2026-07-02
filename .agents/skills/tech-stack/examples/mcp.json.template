@@ -1,6 +1,7 @@
 // Copy into ~/.cursor/mcp.json (user).
 // Merge the "mcpServers" entries into your existing config — do not overwrite other servers.
 // Replace DATABASE_URL placeholders from local .env — never commit real credentials here.
+// Browser MCP: agent-browser — see references/agent-browser-mcp.md
 {
   "mcpServers": {
     "postgres-tilda-dev": {

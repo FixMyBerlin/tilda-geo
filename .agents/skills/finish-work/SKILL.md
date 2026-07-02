@@ -32,7 +32,7 @@ Runs the aggregate `check` script from `package.json` (usually `bun run --parall
 
 Commonly includes `type-check`, `lint`, `format`, `test` / `test-run` — `lint` and `format` apply fixes in write mode where wired (`--fix`, `--write`).
 
-**E2E:** `e2e` is not part of `check` in these repos. If the change touches UI, routes, or auth, also run `bun run e2e` (or `bun run check-full` on trassenscout). See [playwright-skill](../playwright-skill/SKILL.md).
+**E2E / browser:** `e2e` is not part of `check` in these repos. If the change touches UI, routes, or auth, also run `bun run e2e` (or `bun run check-full` on trassenscout). See [playwright-skill](../playwright-skill/SKILL.md). Interactive agent debugging (hydration, React tree, UI flows): [agent-browser-mcp.md](../tech-stack/references/agent-browser-mcp.md) in skill `tech-stack`.
 
 On failure: fix the root cause, then re-run `bun run check`. Do not skip failing steps.
 
@@ -113,5 +113,6 @@ Run `check` in each package you changed (`app/`, `processing/`, etc.) when scrip
 - [tech-stack](../tech-stack/SKILL.md) — TypeScript 7 RC + editor alignment
 - [tech-stack](../tech-stack/SKILL.md) — Oxlint/oxfmt setup → [oxc-config.md](../tech-stack/references/oxc-config.md)
 - [playwright-skill](../playwright-skill/SKILL.md) — E2E
+- [tech-stack/references/agent-browser-mcp.md](../tech-stack/references/agent-browser-mcp.md) — agent browser MCP
 - Dependabot merge follow-up: skill `babysit` · [review-dependabot](../review-dependabot/SKILL.md)
 - [user-changelog](../user-changelog/SKILL.md) — Weekly end-user changelog (reads commit bodies)

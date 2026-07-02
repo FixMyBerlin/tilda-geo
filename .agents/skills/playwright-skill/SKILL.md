@@ -1,6 +1,6 @@
 ---
 name: playwright-skill
-description: E2E testing and ad-hoc browser automation for TanStack Start apps (FMC/TILDA). Use @playwright/test in the project for suites; this skill for smoke tests, stubbed auth, map hooks, console/server error checks, and quick /tmp scripts. Not for Next.js.
+description: E2E testing and browser automation for TanStack Start apps (FMC/TILDA). Use @playwright/test for committed suites/CI; agent-browser MCP (skill tech-stack) for agent exploration; this skill for smoke tests, stubbed auth, map hooks, and quick /tmp scripts. Not for Next.js.
 ---
 
 **Path resolution:** Discover `$SKILL_DIR` from where this file was loaded (plugin, global `~/.claude/skills/`, or project `.agents/skills/`).
@@ -23,23 +23,31 @@ Playwright has **no** official `llms.txt` ([request closed](https://github.com/m
 | Best practices               | https://playwright.dev/docs/best-practices                          |
 | CI                           | https://playwright.dev/docs/ci                                      |
 | Agents (CLI)                 | https://playwright.dev/docs/getting-started-cli                     |
-| Agents (MCP)                 | https://playwright.dev/docs/getting-started-mcp                     |
 | TanStack doc index           | https://tanstack.com/llms.txt                                       |
 | TanStack Start e2e examples  | https://github.com/TanStack/router/tree/main/e2e/react-start        |
 | Map interactions (optional)  | https://mapgrab.github.io/docs/getting-started/stage-two/playwright |
 
 ---
 
-## Two modes
+## Three layers (pick the right tool)
 
-| Mode                    | When                                      | Where                                                                |
-| ----------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
-| **Project E2E**         | Suites, CI, regression                    | `@playwright/test` in `tests/*.spec.ts`, repo `playwright.config.ts` |
-| **Ad-hoc** (this skill) | Screenshots, quick checks, external sites | `/tmp/playwright-test-*.js` via `run.js`                             |
+| Layer                   | When                                                          | Where                                                                                                             |
+| ----------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Project E2E**         | Suites, CI, regression                                        | `@playwright/test` in `tests/*.spec.ts`, repo `playwright.config.ts`                                              |
+| **Agent exploration**   | Interactive debugging, hydration, React tree, quick UI checks | **agent-browser MCP** — skill `tech-stack`, [agent-browser-mcp.md](../tech-stack/references/agent-browser-mcp.md) |
+| **Ad-hoc** (this skill) | One-off scripts, external sites, no MCP                       | `/tmp/playwright-test-*.js` via `run.js`                                                                          |
 
-For in-repo work, **prefer project E2E**. Use ad-hoc only when the user wants a one-off script without committing tests.
+For in-repo work, **prefer project E2E** for anything that should regress. Use **agent-browser MCP** for interactive debugging — setup and usage in skill `tech-stack` ([agent-browser-mcp.md](../tech-stack/references/agent-browser-mcp.md)). Use ad-hoc scripts for one-off work outside MCP or without committing tests.
 
-**Exploration:** Prefer **agent-browser MCP** (`agent-browser mcp --tools core,react,debug` in `~/.cursor/mcp.json`) for ad-hoc UI debugging — React tree, vitals/hydration, snapshots. Use `@playwright/test` for committed E2E. See [agent-browser README](https://github.com/vercel-labs/agent-browser#mcp-server).
+### Boundaries (Playwright vs agent-browser)
+
+| Concern                                      | `@playwright/test` (this skill)                 | agent-browser (tech-stack)    |
+| -------------------------------------------- | ----------------------------------------------- | ----------------------------- |
+| Regression, CI, stubbed auth, map test hooks | ✓                                               | —                             |
+| Hydration, React tree, quick UI debugging    | —                                               | ✓                             |
+| Maps (WebGL)                                 | `waitForMapLoad`, tile/network helpers, MapGrab | Annotated screenshots, `eval` |
+
+Exploration findings that should stick → add `tests/*.spec.ts` and run `bun run e2e`.
 
 ---
 
@@ -281,9 +289,10 @@ Multiple headers: `PW_EXTRA_HEADERS='{"X-Automated-By":"playwright-skill"}'`.
 
 ## When to use what
 
-| Need                                | Tool                        |
-| ----------------------------------- | --------------------------- |
-| Committed regression / CI           | `@playwright/test` in repo  |
-| Post–TanStack Start migration smoke | `tests/smoke/` + this skill |
-| Quick screenshot / external site    | Ad-hoc `run.js`             |
-| Interactive exploration             | Playwright MCP              |
+| Need                             | Tool                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| Committed regression / CI        | `@playwright/test` in repo                                                      |
+| Post–TanStack Start smoke        | `tests/smoke/` + this skill                                                     |
+| Agent debugging (SSR, React, UI) | agent-browser MCP — [tech-stack](../tech-stack/references/agent-browser-mcp.md) |
+| Quick screenshot / external site | Ad-hoc `run.js` or agent-browser                                                |
+| DB schema / queries              | Postgres MCP — [tech-stack](../tech-stack/references/cursor-mcp.md)             |

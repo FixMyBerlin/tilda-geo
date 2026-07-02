@@ -175,7 +175,7 @@ Prefer client SDK for browser sign-in; server `auth.api.*` when you control head
 3. `secondaryStorage` → sessions not in DB by default
 4. Cookie cache does not include custom session fields — re-fetched on read
 5. Change-email sends to current address first, then new address
-6. Official TanStack plugin `tanstackStartCookies()` can leak server code into the client bundle — FMC uses manual cookie forwarding ([auth.md](auth.md))
+6. `tanstackStartCookies()` must be the **last** plugin (Better Auth warns via `warnIfCookiePluginNotLast`). Bundle-safe on `1.6.x` (dynamic import); older versions leaked — re-verify after upgrades ([auth.md](auth.md))
 
 ---
 
