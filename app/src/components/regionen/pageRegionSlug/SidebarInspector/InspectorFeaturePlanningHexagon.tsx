@@ -21,12 +21,15 @@ const SCORE_LABELS: Record<string, string> = {
 // `scoreKey` is the persisted sub-score for the whole group; `factors` are the
 // individual factor columns that feed it. Mirrors scorer.py::_group_score.
 const SCORE_GROUPS: { label: string; scoreKey: string; factors: string[] }[] = [
-  { label: 'Bedarf', scoreKey: 'score_bedarf', factors: ['score_oepnv', 'score_zielorte'] },
+  {
+    label: 'Bedarf',
+    scoreKey: 'score_bedarf',
+    factors: ['score_radweg', 'score_oepnv', 'score_zielorte'],
+  },
   {
     label: 'Bebauung',
     scoreKey: 'score_bebauung',
     factors: [
-      'score_radweg',
       'score_bodenbelag',
       'score_hangneigung',
       'score_hindernisfreiheit',

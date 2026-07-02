@@ -40,7 +40,7 @@ const STEP_WEIGHT_KEYS: string[][] = [
 // Schritte, deren Ausgabe zusätzlich den harten Ausschluss steuert
 // (scorer.py::exclusion). Diese laufen auch bei Gewicht 0 weiter – sie werden
 // dann nicht „übersprungen", sondern „nur Ausschluss" markiert.
-const EXCLUSION_STEP_INDICES = new Set([2, 3, 8]) // Radwege, Hindernisse, Hangneigung
+const EXCLUSION_STEP_INDICES = new Set([3, 8]) // Hindernisse, Hangneigung
 
 // Der ausklappbare Block fasst alle Faktor-Schritte zusammen (1-basierte
 // Schrittnummern 3–10). Schritt 1/2 (Vegetationsvorphase, H3) und 11/12

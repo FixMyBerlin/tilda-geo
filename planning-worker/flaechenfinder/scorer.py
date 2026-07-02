@@ -168,11 +168,16 @@ def run_flaechenfinder(
     centroids = hex_proj.geometry.centroid
 
     # ── 3. Radwege (PostGIS) ──────────────────────────────────────
+    # Radwegnähe ist ein Bedarfsfaktor (kein Ausschluss mehr). Nur bei Gewicht > 0
+    # laden; sonst abstand_radweg_m als NaN markieren (→ score_radweg NaN → DB NULL).
     _step(3)
-    cycleways = tilda_loader.load_cycleways(study_area_geom)
-    cycleway_proj = cycleways.to_crs("EPSG:25832") if len(cycleways) else cycleways
-    hex_proj["abstand_radweg_m"] = _dist_to_union(centroids, cycleway_proj)
-    del cycleways, cycleway_proj
+    if (use_case.weights.get("w_cyclepath", 0) or 0) > 0:
+        cycleways = tilda_loader.load_cycleways(study_area_geom)
+        cycleway_proj = cycleways.to_crs("EPSG:25832") if len(cycleways) else cycleways
+        hex_proj["abstand_radweg_m"] = _dist_to_union(centroids, cycleway_proj)
+        del cycleways, cycleway_proj
+    else:
+        hex_proj["abstand_radweg_m"] = np.nan
 
     # ── 4. Hindernisse / Untergrund ───────────────────────────────
     _step(4)
@@ -349,9 +354,14 @@ def run_flaechenfinder(
         elif deg <= 8: return 60.0 - (deg - 5) / 3 * 60
         else:          return 0.0
 
-    hex_proj["score_radweg"] = hex_proj["abstand_radweg_m"].apply(
-        lambda d: TildaLoader.score_cycleway_proximity(d, use_case.max_cyclepath_dist_m)
-    )
+    # Radwegnähe: Bedarfsfaktor, nur bei Gewicht > 0 berechnet (abstand_radweg_m
+    # ist sonst NaN, da Schritt 3 übersprungen wurde) → score_radweg NaN → DB NULL.
+    if (w.get("w_cyclepath", 0) or 0) > 0:
+        hex_proj["score_radweg"] = hex_proj["abstand_radweg_m"].apply(
+            lambda d: TildaLoader.score_cycleway_proximity(d, use_case.max_cyclepath_dist_m)
+        )
+    else:
+        hex_proj["score_radweg"] = np.nan
     hex_proj["score_bodenbelag"] = hex_proj["bodenbelag_osm"].apply(lambda t: SURFACE_SCORES.get(t, 40))
     hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
     hex_proj["score_hindernisfreiheit"] = hex_proj["abstand_hindernis_m"].apply(
@@ -471,9 +481,10 @@ def run_flaechenfinder(
     # Die Hexagon-Scores vermischen zwei fachlich getrennte Fragen. Sie werden
     # hier zusätzlich als zwei getrennt normalisierte 0–100-Ansichten berechnet
     # (die Kombination `mce_gesamtscore` oben bleibt davon unberührt):
-    #   Bedarf  („will hier parken")  → ÖPNV (w_transit), Zielorte (w_target)
-    #   Bebauung („kann hier bauen") → Radweg (w_cyclepath), Untergrund
-    #       (w_surface), Hangneigung (w_slope), Hindernisfreiheit (w_clearance)
+    #   Bedarf  („will hier parken")  → Radweg (w_cyclepath), ÖPNV (w_transit),
+    #       Zielorte (w_target)
+    #   Bebauung („kann hier bauen") → Untergrund (w_surface), Hangneigung
+    #       (w_slope), Hindernisfreiheit (w_clearance)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
     # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt, damit der
     # Teil-Score unabhängig von der Gewichtsverteilung 0–100 bleibt. Ist eine
@@ -486,11 +497,12 @@ def run_flaechenfinder(
         return raw / wsum
 
     score_bedarf = _group_score(
-        [("score_oepnv", "w_transit"), ("score_zielorte", "w_target")]
+        [("score_radweg", "w_cyclepath"), ("score_oepnv", "w_transit"),
+         ("score_zielorte", "w_target")]
     ).clip(lower=0.0, upper=100.0)
 
     base_bebauung = _group_score(
-        [("score_radweg", "w_cyclepath"), ("score_bodenbelag", "w_surface"),
+        [("score_bodenbelag", "w_surface"),
          ("score_hangneigung", "w_slope"), ("score_hindernisfreiheit", "w_clearance")]
     )
     score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(
@@ -502,12 +514,12 @@ def run_flaechenfinder(
 
     # Harte Ausschlusskriterien sind ausschließlich Bebauungs-Kriterien: sie
     # nullen Bebauung UND Kombination, aber NICHT den Bedarf (der Bedarf besteht
-    # auch dort, wo nicht gebaut werden kann).
+    # auch dort, wo nicht gebaut werden kann). Die Radwegdistanz zählt bewusst
+    # NICHT mehr dazu – Radwegnähe ist ein Bedarfs-, kein Bebauungskriterium.
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
         (hex_proj["score_hindernisfreiheit"] == 0) |
         (hex_proj["score_bodenbelag"]        < use_case.min_surface_score) |
-        (hex_proj["abstand_radweg_m"]        > use_case.max_cyclepath_dist_m) |
         hex_proj["gebaeude"]
     )
     hex_proj.loc[exclusion, "mce_gesamtscore"] = 0.0
