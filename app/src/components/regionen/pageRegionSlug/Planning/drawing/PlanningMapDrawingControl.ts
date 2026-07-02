@@ -6,6 +6,12 @@ import { PLANNING_TERRA_MODE, createPlanningTerraDrawModes } from './planningTer
 type Handlers = {
   /** Called with the single drawn study-area geometry, or null when cleared. */
   onGeometryChange: (geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon | null) => void
+  /**
+   * Called with `true` while the user is actively placing polygon points (polygon mode)
+   * and `false` once the polygon is finished (select/edit mode). Lets the map suppress
+   * data-layer clicks only during the point-placing phase.
+   */
+  onDrawingStateChange: (isDrawing: boolean) => void
 }
 
 type PlanningMapDrawingControlOptions = {
@@ -73,6 +79,7 @@ export class PlanningMapDrawingControl {
     this.attachListeners()
     // Fresh draw on each activation → drawing again replaces any previous study area.
     this.draw.setMode(PLANNING_TERRA_MODE.polygon)
+    this.options.getHandlers().onDrawingStateChange(true)
     this.map.off('load', this.initHandler)
     this.map.off('idle', this.initHandler)
     this.map.off('styledata', this.initHandler)
@@ -106,6 +113,7 @@ export class PlanningMapDrawingControl {
         .filter((fid): fid is string | number => fid !== undefined && fid !== id)
       if (others.length > 0) this.draw.removeFeatures(others)
       this.draw.setMode(PLANNING_TERRA_MODE.select)
+      this.options.getHandlers().onDrawingStateChange(false)
       this.options.getHandlers().onGeometryChange(this.currentGeometry())
     })
 
@@ -129,6 +137,7 @@ export class PlanningMapDrawingControl {
     this.attachListeners()
     if (snapshot.length > 0) this.draw.addFeatures(snapshot)
     this.draw.setMode(mode)
+    this.options.getHandlers().onDrawingStateChange(mode === PLANNING_TERRA_MODE.polygon)
     this.restorePending = false
   }
 }

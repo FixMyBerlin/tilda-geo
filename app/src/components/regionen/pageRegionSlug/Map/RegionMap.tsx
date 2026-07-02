@@ -14,6 +14,7 @@ import {
   useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
 import {
   convertToUrlFeature,
   isPersistableFeature,
@@ -97,6 +98,7 @@ export const RegionMap = () => {
 
   const inspectorFeatures = useMapInspectorFeatures()
   const calculatorDrawActive = useMapCalculatorDrawActive()
+  const planningPolygonDrawing = usePlanningBoundaryState((s) => s.polygonDrawInProgress)
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (containMaskFeature(features)) {
@@ -231,14 +233,17 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // While the calculator draw tool is active, no layers are interactive: clicking/hovering
-  // the data does nothing and the inspector can't open (queryRenderedFeatures returns none),
-  // so the draw tool owns all map interaction. This replaces a special-case guard in the
-  // click handler with the map's own interactivity mechanism.
+  // While the calculator draw tool is active — or while the planning study-area polygon is
+  // actively being drawn (point-placing phase only, not edit/select) — no layers are
+  // interactive: clicking/hovering the data does nothing and the inspector can't open
+  // (queryRenderedFeatures returns none), so the draw tool owns all map interaction. This
+  // replaces a special-case guard in the click handler with the map's own interactivity
+  // mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
-  const interactiveLayerIds = calculatorDrawActive
-    ? NO_INTERACTIVE_LAYERS
-    : computedInteractiveLayerIds
+  const interactiveLayerIds =
+    calculatorDrawActive || planningPolygonDrawing
+      ? NO_INTERACTIVE_LAYERS
+      : computedInteractiveLayerIds
 
   if (!mapParam) {
     return null

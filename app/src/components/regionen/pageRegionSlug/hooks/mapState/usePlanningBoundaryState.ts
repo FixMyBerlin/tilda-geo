@@ -11,6 +11,14 @@ type Store = {
   /** Whether the user is currently drawing a study area on the map (TerraDraw active). */
   drawingActive: boolean
   setDrawingActive: (active: boolean) => void
+  /**
+   * True ONLY while the user is actively placing polygon points (TerraDraw polygon mode),
+   * NOT during the edit/select mode after the polygon is finished. Distinct from
+   * `drawingActive` (whole session): used by RegionMap to suppress data-layer clicks so
+   * placing points can't accidentally open the feature inspector.
+   */
+  polygonDrawInProgress: boolean
+  setPolygonDrawInProgress: (active: boolean) => void
   /** Geometry produced by the map drawing tool; read by the create form as the study_area. */
   drawnGeometry: GeoJsonGeometry | null
   setDrawnGeometry: (geom: GeoJsonGeometry | null) => void
@@ -42,6 +50,11 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   drawingActive: false,
   setDrawingActive: (active) => set({ drawingActive: active }),
+  polygonDrawInProgress: false,
+  setPolygonDrawInProgress: (active) =>
+    set((state) =>
+      state.polygonDrawInProgress === active ? state : { polygonDrawInProgress: active },
+    ),
   drawnGeometry: null,
   setDrawnGeometry: (geom) => set({ drawnGeometry: geom }),
 

@@ -10,10 +10,19 @@ import { PlanningMapDrawingControl } from './PlanningMapDrawingControl'
  */
 function PlanningMapDrawingControlMount() {
   const setDrawnGeometry = usePlanningBoundaryState((s) => s.setDrawnGeometry)
-  const handlersRef = useRef({ onGeometryChange: setDrawnGeometry })
+  const setPolygonDrawInProgress = usePlanningBoundaryState((s) => s.setPolygonDrawInProgress)
+  const handlersRef = useRef({
+    onGeometryChange: setDrawnGeometry,
+    onDrawingStateChange: setPolygonDrawInProgress,
+  })
   useEffect(() => {
     handlersRef.current.onGeometryChange = setDrawnGeometry
+    handlersRef.current.onDrawingStateChange = setPolygonDrawInProgress
   })
+
+  // Reset the flag when the control unmounts (e.g. "Zeichnen beenden" pressed before the
+  // polygon was ever finished), so data-layer clicks are re-enabled.
+  useEffect(() => () => setPolygonDrawInProgress(false), [setPolygonDrawInProgress])
 
   useControl(
     () =>
