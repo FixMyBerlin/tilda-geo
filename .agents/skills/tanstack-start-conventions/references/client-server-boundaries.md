@@ -59,8 +59,18 @@ Route files must always import and call server Fns in `loader`/`beforeLoad`; the
 
 ## Routes: When to use `beforeLoad` vs `loader`
 
-- **`beforeLoad`:** Redirects (URL normalization, auth redirect), auth/authorization, and returning context for the route (e.g. `isAuthorized`, `region`). No heavy data fetch.
+- **`beforeLoad`:** Redirects (URL normalization, auth redirect), auth/authorization, and returning context for the route (e.g. `isAuthorized`, `region`). **Cheap/synchronous context only — no server round-trip** (see the caveat below; resolving a `region` from the DB _is_ a data fetch and, on hot routes, belongs in the `loader`).
 - **`loader`:** Page data and cache priming. Can use `context` from `beforeLoad`. For React Query–backed data, see [router-and-query.md](router-and-query.md); otherwise return serializable data for `useLoaderData()` (e.g. admin pages).
+
+### `beforeLoad` runs on **every** navigation — gate server work with `loaderDeps`
+
+`beforeLoad` is **not** gated by `loaderDeps`: it re-runs on **every** navigation to the route, **including search-param-only changes on the same route** (a map pan writing `?map=`, a layer toggle, a feature selection). The `loader` is different — it only re-runs when `loaderDeps` or path params change.
+
+Consequence: **any server round-trip in `beforeLoad` runs on every search-param change.** For a route whose search params are high-frequency and client-only (map viewport, feature selection, layer toggles), a redirect resolver or auth check that hits the DB in `beforeLoad` turns every client-side interaction into a server request — and can flash the `pendingComponent` / remount the map on a spurious redirect.
+
+**Rule for hot routes (map pages, anything with client-only search state):** put the redirect + auth + region resolution in the **`loader`** and keep those client-only params **out of `loaderDeps`**. The loader then runs on entry / path change / the params you _did_ list (e.g. `qa`), but **not** on map pans or layer toggles — so client-only params stay client-only (no round-trip, no pending). If you do this, decouple the `pendingComponent` (and any `useRouterState` / `useRouteContext` reader) from `beforeLoad` context — read `region` from `loaderData`, not route context. Reference: `routes/regionen/$regionSlug.tsx` in tilda-geo.
+
+Keep the `beforeLoad` default (light redirect/auth) for ordinary routes where navigations are path changes, not high-frequency search-param writes.
 
 Use **`beforeLoad`, not request middleware**, for route redirects and layout auth. Pathless layout routes make open vs protected URLs obvious, and Trassenscout's lint pattern enforces this shape.
 

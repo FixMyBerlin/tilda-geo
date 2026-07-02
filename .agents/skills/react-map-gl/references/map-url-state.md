@@ -130,7 +130,7 @@ const navigate = useNavigate({ from: Route.fullPath })
 
 Use **`replace: true`** on viewport drags; use default push semantics when the user navigates to a new place explicitly.
 
-**Server redirects:** reuse `parseMapParam` / `serializeMapParam` in `beforeLoad` or redirect builders (tilda: `getRegionRedirectUrl`).
+**Server redirects:** reuse `parseMapParam` / `serializeMapParam` in the route's redirect step and redirect builders (tilda: `getRegionRedirectUrl`). Note: on a hot map route, run the redirect/region resolution in the **`loader`** (gated by `loaderDeps`), not `beforeLoad`, so map pans stay client-only — see `tanstack-start-conventions` → `client-server-boundaries.md`.
 
 ## nuqs (when TanStack Router search is not used)
 

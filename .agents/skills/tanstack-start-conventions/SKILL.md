@@ -139,7 +139,7 @@ Auth-specific flows: skill `tanstack-start-auth`.
 
 ## Quick decisions
 
-**`beforeLoad` vs `loader`:** Redirects, auth, light context → `beforeLoad` (not middleware). Data fetch / Query priming → `loader`.
+**`beforeLoad` vs `loader`:** Redirects, auth, light context → `beforeLoad` (not middleware). Data fetch / Query priming → `loader`. **Caveat:** `beforeLoad` is not gated by `loaderDeps` — it re-runs on **every** navigation, search-param changes included. On hot routes with client-only search params (map viewport, layer toggles), move the redirect/auth/region round-trip into the `loader` and keep those params out of `loaderDeps` so they stay client-only (no round-trip, no pending). See [client-server-boundaries.md](references/client-server-boundaries.md).
 
 **Loader vs Query:** Shared, invalidatable, multi-route data → `*QueryOptions` + `ensureQueryData` in loader + `useSuspenseQuery` in UI. One-off admin page data → loader return value + `useLoaderData`.
 

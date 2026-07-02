@@ -162,6 +162,18 @@ See `react-map-gl` → `map-url-state.md`.
 
 ---
 
+## Writing search params — history, defaults, throttle (nuqs → router parity)
+
+Encoding is only half the story. `navigate({ search })` does **not** carry the implicit behaviors nuqs bundled into `useQueryState` parser options. When you write a param (or migrate a route off nuqs), decide three things **per setter** — missing them is a silent regression:
+
+- **History mode.** TanStack `navigate` defaults to **push** (a new history entry). nuqs defaulted to **replace**. For toggles / filters / viewport (anything that isn't "the user went somewhere new"), pass **`replace: true`** so Back leaves the page instead of stepping through every toggle. Reserve push for genuine navigations (selecting a feature, jumping to a location).
+- **Clear on default.** nuqs stripped a param whose value equalled its default (`clearOnDefault`). `navigate({ search })` only drops keys set to **`undefined`**. To keep share URLs clean, either set the key to `undefined` when it equals the default, or add the **`stripSearchParams`** search-middleware (from `@tanstack/react-router`) to the route with a defaults map. (`.default()`/`.catch()` in the Zod schema only affect _reading_ — they don't strip the param on write.)
+- **Throttle high-frequency writes.** Map pans and drags fire many times; throttle with **`@tanstack/react-pacer`** — `useThrottledCallback` for fire-and-forget, or `useThrottler` when you need `.cancel()` (e.g. cancel a pending trailing position write when a dialog closes). See `react-map-gl` → `map-url-state.md`.
+
+Prefer a thin shared `updateSearch(partial, { replace })` wrapper over `navigate` (functional-updater form: `navigate({ search: (prev) => … })`) so setters compose from fresh `prev` state instead of a stale render snapshot. Reference: `useRegionSearchNavigation` + the `useQueryState/*` hooks in tilda-geo.
+
+---
+
 ## Rules (non-negotiable)
 
 1. **`router.tsx` always** exports `parseSearch` / `stringifySearch` — at minimum the Layer 1 pretty-JSON wrapper.
