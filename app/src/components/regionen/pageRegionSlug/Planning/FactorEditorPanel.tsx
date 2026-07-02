@@ -32,7 +32,10 @@ export const FactorEditorPanel = ({
   const prevReadOnly = useRef(readOnly)
 
   useEffect(() => {
+    // Collapse when a run starts (locks factors); re-open when it finishes and
+    // factors become editable again, so recomputing with new factors is discoverable.
     if (!prevReadOnly.current && readOnly) setOpen(false)
+    else if (prevReadOnly.current && !readOnly) setOpen(true)
     prevReadOnly.current = readOnly
   }, [readOnly])
 

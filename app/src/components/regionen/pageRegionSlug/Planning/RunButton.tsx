@@ -33,18 +33,26 @@ export const RunButton = ({
   })
 
   const isInFlight = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
-  const isDone = latestJob?.status === 'DONE'
+  // A previous run finished (DONE/FAILED): allow re-running the same study area
+  // with (potentially) changed factors. Only hide the button while in flight.
+  const hasFinishedRun = latestJob?.status === 'DONE' || latestJob?.status === 'FAILED'
+
+  const label = mutation.isPending
+    ? 'Wird gestartet…'
+    : hasFinishedRun
+      ? 'Neu berechnen'
+      : 'Berechnung starten'
 
   return (
     <div className="flex flex-col gap-2">
-      {!isDone && (
+      {!isInFlight && (
         <button
           type="button"
           onClick={() => mutation.mutate()}
-          disabled={mutation.isPending || isInFlight}
+          disabled={mutation.isPending}
           className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {mutation.isPending ? 'Wird gestartet…' : 'Berechnung starten'}
+          {label}
         </button>
       )}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} scenarioId={scenarioId} />}

@@ -84,9 +84,11 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
 
   if (!scenario) return null
 
-  // Scenario is locked (read-only) once any job has been created.
-  const isLocked = scenario.jobs.length > 0
+  // Scenario is locked (read-only) only while a run is in flight. Once the latest
+  // job is DONE/FAILED, factors become editable again so the same study area can
+  // be recomputed with different factors via the run button ("Neu berechnen").
   const latestJob = scenario.jobs[0] ?? null
+  const isLocked = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
 
   return (
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-3">
@@ -102,10 +104,7 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
         })}
       </p>
 
-      {!isLocked && <RunButton scenarioId={scenarioId} regionSlug={regionSlug} latestJob={null} />}
-      {isLocked && (
-        <RunButton scenarioId={scenarioId} regionSlug={regionSlug} latestJob={latestJob} />
-      )}
+      <RunButton scenarioId={scenarioId} regionSlug={regionSlug} latestJob={latestJob} />
 
       <FactorEditorPanel
         scenarioId={scenarioId}
