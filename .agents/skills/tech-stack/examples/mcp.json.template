@@ -9,6 +9,14 @@
       "env": {
         "DATABASE_URL": "postgresql://USER:PASSWORD@localhost:5432/postgres"
       }
+    },
+    "agent-browser": {
+      "command": "/opt/homebrew/bin/agent-browser",
+      "args": ["mcp", "--tools", "core,react,debug"],
+      "env": {
+        "AGENT_BROWSER_ENABLE": "react-devtools",
+        "AGENT_BROWSER_HEADED": "true"
+      }
     }
   }
 }

@@ -39,7 +39,7 @@ Playwright has **no** official `llms.txt` ([request closed](https://github.com/m
 
 For in-repo work, **prefer project E2E**. Use ad-hoc only when the user wants a one-off script without committing tests.
 
-**Exploration:** Prefer [Playwright MCP](https://playwright.dev/docs/getting-started-mcp) over pasting large API snippets into the skill.
+**Exploration:** Prefer **agent-browser MCP** (`agent-browser mcp --tools core,react,debug` in `~/.cursor/mcp.json`) for ad-hoc UI debugging — React tree, vitals/hydration, snapshots. Use `@playwright/test` for committed E2E. See [agent-browser README](https://github.com/vercel-labs/agent-browser#mcp-server).
 
 ---
 
