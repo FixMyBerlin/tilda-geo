@@ -9,6 +9,7 @@ import {
 import type { PrimaryNavigation, SecondaryNavigation } from '@/components/layouts/Header/types'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { RegionTitleStatusIcon } from '@/components/regionen/regionMeta/RegionTitleStatusIcon'
 import { Img } from '@/components/shared/Img'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
@@ -60,7 +61,6 @@ export const MobileRegionMenu = () => {
 
   const customLogo = staticRegion.logoPath || staticRegion.externalLogoPath
   const isDeactivated = region.status === 'DEACTIVATED'
-  const isPrivate = region.status === 'PRIVATE'
   const primaryNavigation = [...defaultPrimaryNavigation, ...(staticRegion.navigationLinks ?? [])]
 
   return (
@@ -102,8 +102,7 @@ export const MobileRegionMenu = () => {
             <BuildingLibraryIcon className="h-10 w-auto shrink-0 text-yellow-400" />
           )}
           <div className="flex min-w-0 items-center gap-1">
-            {isPrivate && <RegionStatusPill status="PRIVATE" variant="icon" />}
-            {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="icon" />}
+            <RegionTitleStatusIcon status={region.status} />
             <span className="font-semibold text-gray-900">{staticRegion.fullName}</span>
             {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="text" />}
           </div>

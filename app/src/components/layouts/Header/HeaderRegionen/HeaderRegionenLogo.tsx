@@ -3,6 +3,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
 import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { RegionTitleStatusIcon } from '@/components/regionen/regionMeta/RegionTitleStatusIcon'
 import { Img } from '@/components/shared/Img'
 import { productName } from '@/data/tildaProductNames.const'
 
@@ -15,7 +16,6 @@ export const HeaderRegionenLogo = () => {
   if (!staticRegion) return null
 
   const isDeactivated = region.status === 'DEACTIVATED'
-  const isPrivate = region.status === 'PRIVATE'
   const customLogo = staticRegion.logoPath || staticRegion.externalLogoPath
 
   return (
@@ -49,8 +49,7 @@ export const HeaderRegionenLogo = () => {
             customLogo ? 'text-gray-200' : 'text-yellow-400',
           )}
         >
-          {isPrivate && <RegionStatusPill status="PRIVATE" variant="icon" />}
-          {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="icon" />}
+          <RegionTitleStatusIcon status={region.status} />
           <span className="md:hidden">{staticRegion.name}</span>
           <span className="hidden md:inline">{staticRegion.fullName}</span>
           {isDeactivated && <RegionStatusPill status="DEACTIVATED" variant="text" />}

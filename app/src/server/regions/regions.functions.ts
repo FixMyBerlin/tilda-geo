@@ -3,7 +3,7 @@ import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { getAppSession } from '@/server/auth/session.server'
 import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
-import { membershipExists } from '@/server/memberships/queries/membershipExists.server'
+import { getRegionHasPermissions } from '@/server/authorization/getRegionHasPermissions.server'
 import type { TRegion } from '@/server/regions/queries/getRegion.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import { trackRegionAccess } from '@/server/users/trackRegionAccess.server'
@@ -68,17 +68,12 @@ export const getRegionPageLoaderFn = createServerFn({ method: 'GET' })
     }
 
     const appSession = await getAppSession(headers)
-    const userId = appSession?.userId
-    const role = appSession?.role
-    const membership =
-      userId && role !== 'ADMIN'
-        ? await membershipExists({ userId, regionSlug: data.regionSlug })
-        : false
+    const hasPermissions = await getRegionHasPermissions(appSession, data.regionSlug)
 
     return {
       authorized: true,
       region,
-      hasPermissions: role === 'ADMIN' || membership,
+      hasPermissions,
     }
   })
 

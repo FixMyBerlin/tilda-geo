@@ -1,5 +1,4 @@
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
-import type { StaticRegion } from '@/data/regions.const'
 import type {
   TopicDocGfiAttributeObject,
   TopicDocGfiAttributeValue,
@@ -7,8 +6,9 @@ import type {
   TopicDocMasterportalGfiConfig,
 } from '@/data/topicDocs/masterportalGfi.types'
 import type { TopicDocCompiled } from '@/data/topicDocs/runtime'
+import type { TRegion } from '@/server/regions/queries/getRegion.server'
 
-export type DocsPageRegion = (StaticRegion & { slug: string }) | null
+export type DocsPageRegion = TRegion | null
 
 export type DocsPageGroupDoc = {
   tableName: string

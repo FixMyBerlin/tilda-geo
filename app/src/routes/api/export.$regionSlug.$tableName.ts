@@ -11,16 +11,17 @@ import { getExportAttributeType } from '@/server/api/export/exportAttributeType'
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
 import {
   badRequestJson,
-  forbiddenJson,
   internalServerErrorJson,
   notFoundJson,
 } from '@/server/api/util/apiJsonResponses.server'
-import { resolveRegionAccessStatus } from '@/server/api/util/authGuards.server'
+import { guardAdmin, guardRegionMembership } from '@/server/api/util/authGuards.server'
+import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
 import { corsHeaders } from '@/server/api/util/cors'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
 import { getBaseDatabaseUrl } from '@/server/database-url.server'
 import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 import { geoDataClient } from '@/server/prisma-client.server'
+import { getRegion } from '@/server/regions/queries/getRegion.server'
 
 const exportMetadata = {
   licence: 'ODbL',
@@ -200,17 +201,32 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           requestId: request.headers.get('x-request-id') || undefined,
         })
 
-        const status = await resolveRegionAccessStatus({
-          headers: request.headers,
-          regionSlug,
-          apiKey,
-        })
-        if (status !== 200) {
-          console.warn(logPrefix, 'access denied', { status, regionSlug, tableName })
-          if (status === 404) {
-            return notFoundJson({ headers: corsHeaders })
+        let region
+        try {
+          region = await getRegion({ slug: regionSlug })
+        } catch {
+          console.warn(logPrefix, 'region not found', { regionSlug, tableName })
+          return notFoundJson({ headers: corsHeaders })
+        }
+
+        if (!region.exports?.includes(tableName)) {
+          console.warn(logPrefix, 'table not exported for region', { regionSlug, tableName })
+          return notFoundJson({ headers: corsHeaders })
+        }
+
+        if (!compareApiKeyTimingSafe(apiKey)) {
+          const authResponse =
+            region.status === 'DEACTIVATED'
+              ? await guardAdmin(request.headers, corsHeaders)
+              : await guardRegionMembership({
+                  headers: request.headers,
+                  regionIds: [region.id],
+                  responseHeaders: corsHeaders,
+                })
+          if (authResponse) {
+            console.warn(logPrefix, 'access denied', { regionSlug, tableName })
+            return authResponse
           }
-          return forbiddenJson({ headers: corsHeaders })
         }
 
         try {
