@@ -1,13 +1,9 @@
 import type { BetterAuthOptions } from 'better-auth'
-/**
- * tanstackStartCookies is intentionally NOT used - it pulls @tanstack/react-start/server
- * into the bundle, causing Vite to leak transformStreamWithRouter into the client build.
- * We set cookies manually in api/auth/$ via forwardAuthAndApplyCookies (auth-route-handler.server.ts).
- */
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { customSession } from 'better-auth/plugins'
 import { genericOAuth } from 'better-auth/plugins/generic-oauth'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { getOsmApiUrl, getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { osmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { UserRoleEnum } from '@/prisma/generated/client'
@@ -238,7 +234,7 @@ const options = {
 
 export const auth = betterAuth({
   ...options,
-  plugins: [...(options.plugins ?? []), customSessionWithRole(options)],
+  plugins: [...(options.plugins ?? []), customSessionWithRole(options), tanstackStartCookies()],
 })
 
 export type Session = typeof auth.$Infer.Session
