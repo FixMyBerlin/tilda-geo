@@ -7,7 +7,7 @@ export const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
   'H3-Gitter generieren',
   'Radwege laden',
-  'Hindernisse & Untergrund laden',
+  'Gebäude & Untergrund laden',
   'ÖPNV-Haltestellen laden',
   'Kreuzungen laden',
   'KFZ-Parkflächen laden',
@@ -21,12 +21,12 @@ export const SCORING_STEPS = [
 // Das steuernde Faktor-Gewicht je Schritt (0-basiert, index-gleich zu
 // SCORING_STEPS). Leeres Array = struktureller Schritt ohne Gewicht (läuft
 // immer). Ein Schritt gilt als „ohne Gewicht", wenn ALLE genannten Gewichte 0
-// sind (Hindernisse: erst wenn weder Hindernisfreiheit noch Untergrund zählen).
+// sind. Schritt 4 lädt Gebäude (harter Ausschluss, immer) und Untergrund.
 const STEP_WEIGHT_KEYS: string[][] = [
   ['w_vegetation'], //  1 Vegetationsflächen berechnen
   [], //                2 H3-Gitter generieren
   ['w_cyclepath'], //   3 Radwege laden
-  ['w_clearance', 'w_surface'], // 4 Hindernisse & Untergrund laden
+  ['w_surface'], //     4 Gebäude & Untergrund laden
   ['w_transit'], //     5 ÖPNV-Haltestellen laden
   ['w_intersection'], // 6 Kreuzungen laden
   ['w_parken'], //      7 KFZ-Parkflächen laden
@@ -40,7 +40,7 @@ const STEP_WEIGHT_KEYS: string[][] = [
 // Schritte, deren Ausgabe zusätzlich den harten Ausschluss steuert
 // (scorer.py::exclusion). Diese laufen auch bei Gewicht 0 weiter – sie werden
 // dann nicht „übersprungen", sondern „nur Ausschluss" markiert.
-const EXCLUSION_STEP_INDICES = new Set([3, 8]) // Hindernisse, Hangneigung
+const EXCLUSION_STEP_INDICES = new Set([3, 8]) // Gebäude & Untergrund, Hangneigung
 
 // Der ausklappbare Block fasst alle Faktor-Schritte zusammen (1-basierte
 // Schrittnummern 3–10). Schritt 1/2 (Vegetationsvorphase, H3) und 11/12

@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
   score_bodenbelag        real,
   score_zielorte          real,
   score_hangneigung       real,
-  score_hindernisfreiheit real,
   score_oepnv             real,
   score_vegetation        real,
   eignungsklasse          text
@@ -29,8 +28,8 @@ CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;
 
 -- Getrennte Teil-Scores (Issue #3415): Bedarfswahrscheinlichkeit (ÖPNV, Zielorte)
--- und Bebauungswahrscheinlichkeit (Radweg, Untergrund, Hangneigung,
--- Hindernisfreiheit + Modifier + Ausschluss). NULL bei Alt-Läufen bzw. wenn die
+-- und Bebauungswahrscheinlichkeit (Radweg, Untergrund, Hangneigung
+-- + Modifier + Ausschluss). NULL bei Alt-Läufen bzw. wenn die
 -- Gruppe im Szenario komplett ungewichtet ist. mce_gesamtscore bleibt die
 -- unveränderte Kombination.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bedarf real;

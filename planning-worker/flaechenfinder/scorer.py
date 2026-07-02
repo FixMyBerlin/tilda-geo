@@ -30,7 +30,7 @@ AGG_H3_RES = 11
 _SCORE_COLS = [
     "mce_gesamtscore", "score_bedarf", "score_bebauung",
     "score_radweg", "score_bodenbelag", "score_zielorte",
-    "score_hangneigung", "score_hindernisfreiheit", "score_oepnv", "score_vegetation",
+    "score_hangneigung", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken",
 ]
 
@@ -88,7 +88,7 @@ SCORING_STEPS = [
     "Vegetationsflächen berechnen",
     "H3-Gitter generieren",
     "Radwege laden",
-    "Hindernisse & Untergrund laden",
+    "Gebäude & Untergrund laden",
     "ÖPNV-Haltestellen laden",
     "Kreuzungen laden",
     "KFZ-Parkflächen laden",
@@ -179,17 +179,8 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_radweg_m"] = np.nan
 
-    # ── 4. Hindernisse / Untergrund ───────────────────────────────
+    # ── 4. Gebäude / Untergrund ───────────────────────────────────
     _step(4)
-    obstacles = osm_loader.features_from_polygon(study_area_geom, {
-        "building": True,
-        "landuse": ["grass", "forest", "meadow"],
-        "natural": ["water", "wood"],
-    })
-    obstacles_proj = obstacles.to_crs("EPSG:25832") if len(obstacles) else obstacles
-    hex_proj["abstand_hindernis_m"] = _dist_to_union(centroids, obstacles_proj)
-    del obstacles, obstacles_proj
-
     # Gebäude aus tilda DB: Hexagone mit Gebäudeüberschneidung werden hart ausgeschlossen.
     buildings = tilda_loader.load_buildings(study_area_geom)
     if len(buildings):
@@ -364,11 +355,8 @@ def run_flaechenfinder(
         hex_proj["score_radweg"] = np.nan
     hex_proj["score_bodenbelag"] = hex_proj["bodenbelag_osm"].apply(lambda t: SURFACE_SCORES.get(t, 40))
     hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
-    hex_proj["score_hindernisfreiheit"] = hex_proj["abstand_hindernis_m"].apply(
-        lambda d: min(100.0, d / 10 * 100) if d >= use_case.min_clearance_m else 0.0
-    )
 
-    # ── Basis-Score: gewichtete Summe der sechs positiven Faktoren ─────────
+    # ── Basis-Score: gewichtete Summe der positiven Faktoren ──────────────
     # Vegetation ist KEIN additiver Faktor mehr, sondern ein separater Abzug
     # (bzw. Bonus) weiter unten – sonst könnte die Summe der Gewichte 100
     # übersteigen. Übersprungene Faktoren (ÖPNV/Zielorte bei Gewicht 0) haben
@@ -383,7 +371,6 @@ def run_flaechenfinder(
         _term("score_bodenbelag",        "w_surface")   +
         _term("score_zielorte",          "w_target")    +
         _term("score_hangneigung",       "w_slope")     +
-        _term("score_hindernisfreiheit", "w_clearance") +
         _term("score_oepnv",             "w_transit")
     )
 
@@ -484,7 +471,7 @@ def run_flaechenfinder(
     #   Bedarf  („will hier parken")  → Radweg (w_cyclepath), ÖPNV (w_transit),
     #       Zielorte (w_target)
     #   Bebauung („kann hier bauen") → Untergrund (w_surface), Hangneigung
-    #       (w_slope), Hindernisfreiheit (w_clearance)
+    #       (w_slope)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
     # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt, damit der
     # Teil-Score unabhängig von der Gewichtsverteilung 0–100 bleibt. Ist eine
@@ -503,7 +490,7 @@ def run_flaechenfinder(
 
     base_bebauung = _group_score(
         [("score_bodenbelag", "w_surface"),
-         ("score_hangneigung", "w_slope"), ("score_hindernisfreiheit", "w_clearance")]
+         ("score_hangneigung", "w_slope")]
     )
     score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(
         lower=0.0, upper=100.0
@@ -518,7 +505,6 @@ def run_flaechenfinder(
     # NICHT mehr dazu – Radwegnähe ist ein Bedarfs-, kein Bebauungskriterium.
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
-        (hex_proj["score_hindernisfreiheit"] == 0) |
         (hex_proj["score_bodenbelag"]        < use_case.min_surface_score) |
         hex_proj["gebaeude"]
     )

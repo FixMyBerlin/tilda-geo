@@ -12,7 +12,6 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
     w_surface: 0.2,
     w_target: 0.15,
     w_slope: 0.2,
-    w_clearance: 0.1,
     w_transit: 0.15,
     w_vegetation: 0,
     w_intersection: 0.1,
@@ -21,7 +20,6 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   vegetation_direction: 'negative',
   cir_source: 'auto' as const,
   max_cyclepath_dist_m: 50,
-  min_clearance_m: 2.0,
   min_surface_score: 30,
   intersection_radius_m: 20,
   parken_radius_m: 15,
@@ -33,7 +31,6 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_surface: 'Untergrund',
   w_target: 'Zielorte',
   w_slope: 'Hangneigung',
-  w_clearance: 'Hindernisfreiheit',
   w_transit: 'ÖPNV',
   w_vegetation: 'Vegetation',
   w_intersection: 'Kreuzungen',
@@ -44,14 +41,14 @@ export const WEIGHT_LABELS: Record<string, string> = {
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
 //   Bedarf   → Radwegnähe, ÖPNV, Zielorte
-//   Bebauung → Untergrund, Hangneigung, Hindernisfreiheit + Modifier
+//   Bebauung → Untergrund, Hangneigung + Modifier
 //              (Vegetation, Kreuzungen, Parken)
 export const WEIGHT_GROUPS: { key: 'bedarf' | 'bebauung'; label: string; weights: string[] }[] = [
   { key: 'bedarf', label: 'Bedarf', weights: ['w_cyclepath', 'w_transit', 'w_target'] },
   {
     key: 'bebauung',
     label: 'Bebauung',
-    weights: ['w_surface', 'w_slope', 'w_clearance', 'w_vegetation', 'w_intersection', 'w_parken'],
+    weights: ['w_surface', 'w_slope', 'w_vegetation', 'w_intersection', 'w_parken'],
   },
 ]
 

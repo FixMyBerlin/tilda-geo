@@ -13,10 +13,9 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
    - `score_bodenbelag` – Untergrund-Bewertung (`SURFACE_SCORES`, OSM `surface`-Tag)
    - `score_zielorte` – Nähe zu den im Szenario konfigurierten `targets`
    - `score_hangneigung` – DEM-Hangneigung (`slope_score`)
-   - `score_hindernisfreiheit` – Abstand zu Hindernissen (Gebäude/Wald/Wasser/Wiese)
    - `score_oepnv` – Nähe zu ÖPNV-Haltestellen (max. über 4 Typen, Bus derzeit immer 0
      — siehe [`README.md`](README.md))
-3. **Basis-Score** – gewichtete Summe der sechs Teilscores (`weights` im
+3. **Basis-Score** – gewichtete Summe der Teilscores (`weights` im
    `factorConfig`, siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
 4. **Vegetations-Effekt** – kein additiver Teilscore, sondern stufenloser
    Abzug/Bonus auf den Basis-Score (Details: [`VEGETATION.md`](VEGETATION.md)).
@@ -24,7 +23,6 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
 5. **Harte Ausschlüsse** – unabhängig vom gewichteten Score wird `mce_gesamtscore`
    auf 0 gesetzt, wenn eines zutrifft:
    - Hangneigung zu steil (`score_hangneigung == 0`)
-   - zu nah an einem Hindernis (`score_hindernisfreiheit == 0`, Default < `min_clearance_m` = 2 m)
    - Bodenbelag unter `min_surface_score` (Default 30)
    - Radweg weiter als `max_cyclepath_dist_m` entfernt (Default 150 m)
    - Gebäudeüberschneidung (`gebaeude`)

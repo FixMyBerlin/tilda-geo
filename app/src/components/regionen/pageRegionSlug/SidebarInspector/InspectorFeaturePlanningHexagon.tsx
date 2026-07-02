@@ -9,7 +9,6 @@ const SCORE_LABELS: Record<string, string> = {
   score_radweg: 'Radweg',
   score_bodenbelag: 'Bodenbelag',
   score_hangneigung: 'Hangneigung',
-  score_hindernisfreiheit: 'Hindernisfreiheit',
   score_oepnv: 'ÖPNV',
   score_zielorte: 'Zielorte',
   score_vegetation: 'Vegetation',
@@ -32,7 +31,6 @@ const SCORE_GROUPS: { label: string; scoreKey: string; factors: string[] }[] = [
     factors: [
       'score_bodenbelag',
       'score_hangneigung',
-      'score_hindernisfreiheit',
       'score_vegetation',
       'score_kreuzung',
       'score_parken',

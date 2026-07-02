@@ -10,7 +10,6 @@ import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
 
 const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
   { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
-  { key: 'min_clearance_m', label: 'Min. Hindernisabstand (m)', step: 0.5 },
   { key: 'min_surface_score', label: 'Min. Untergrund-Score', step: 5 },
   { key: 'intersection_radius_m', label: 'Kreuzungs-Radius (m)', step: 5 },
   { key: 'parken_radius_m', label: 'Parken-Radius (m)', step: 5 },

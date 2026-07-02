@@ -21,7 +21,6 @@ const FactorConfigSchema = z
     vegetation_direction: z.enum(['positive', 'negative']).optional(),
     cir_source: z.enum(['auto', 'bayern', 'bb']).optional(),
     max_cyclepath_dist_m: z.number().optional(),
-    min_clearance_m: z.number().optional(),
     min_surface_score: z.number().optional(),
     intersection_radius_m: z.number().optional(),
     parken_radius_m: z.number().optional(),

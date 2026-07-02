@@ -55,7 +55,6 @@ class UseCaseConfig:
 
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
-    min_clearance_m: float = 2.0            # zu nah an Gebäude → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
 
     # CIR/RGBI-Kachelquelle für die Vegetationsberechnung.
@@ -72,7 +71,6 @@ DEFAULT_WEIGHTS = {
     "w_surface":   0.20,
     "w_target":    0.15,
     "w_slope":     0.20,
-    "w_clearance": 0.10,
     "w_transit":   0.15,
     "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
     "w_intersection": 0.1, # Kreuzungs-Bonus (max. Bonus in Punkten × 100)
@@ -86,9 +84,9 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
     Erwartetes Schema (alle Felder außer `study_area` optional, mit Defaults):
       {
         "name": str,
-        "weights": {w_cyclepath, w_surface, w_target, w_slope, w_clearance, w_transit},
+        "weights": {w_cyclepath, w_surface, w_target, w_slope, w_transit},
         "dem_source": "srtm" | "dgm1" | "mapterhorn",
-        "max_cyclepath_dist_m", "min_clearance_m", "min_surface_score",
+        "max_cyclepath_dist_m", "min_surface_score",
         "targets": [ {name, osm_tags, max_dist_m, optimal_dist_m, weight_in_target} ],
       }
     `study_area` und `h3_resolution` werden vom Worker separat aus dem factorConfig gelesen.
@@ -115,7 +113,6 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
             cfg.get("vegetation_penalty_threshold_pct", 20.0)
         ),
         max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 50.0)),
-        min_clearance_m=float(cfg.get("min_clearance_m", 2.0)),
         min_surface_score=float(cfg.get("min_surface_score", 30.0)),
         cir_source=cfg.get("cir_source", "auto"),
         intersection_radius_m=float(cfg.get("intersection_radius_m", 20.0)),
