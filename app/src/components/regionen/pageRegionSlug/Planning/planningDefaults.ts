@@ -33,7 +33,11 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
 // Größe wird frei eingegeben. Die Fläche wird aktuell nur im factorConfig mitgespeichert
 // (passthrough) und noch nicht vom Worker ausgewertet — Vorbereitung für die künftige
 // automatische Flächensuche.
-export type PlanningUseCase = 'fahrradbox' | 'fahrradabstellanlage' | 'mobilitaetsstation' | 'sonstiges'
+export type PlanningUseCase =
+  | 'fahrradbox'
+  | 'fahrradabstellanlage'
+  | 'mobilitaetsstation'
+  | 'sonstiges'
 
 export const PLANNING_USE_CASES: {
   key: PlanningUseCase

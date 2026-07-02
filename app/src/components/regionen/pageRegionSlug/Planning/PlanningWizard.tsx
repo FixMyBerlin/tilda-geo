@@ -19,7 +19,11 @@ import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import { FactorFields } from './FactorEditorPanel'
 import { GeoJsonUpload } from './GeoJsonUpload'
-import { DEFAULT_FACTOR_TEMPLATE, PLANNING_USE_CASES, type PlanningUseCase } from './planningDefaults'
+import {
+  DEFAULT_FACTOR_TEMPLATE,
+  PLANNING_USE_CASES,
+  type PlanningUseCase,
+} from './planningDefaults'
 import { WizardStep } from './WizardStep'
 
 type AreaTab = 'search' | 'custom'

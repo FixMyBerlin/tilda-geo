@@ -55,7 +55,9 @@ export const FactorFields = ({
               <div
                 key={key}
                 className={
-                  readOnly ? 'flex items-center justify-between py-0.5' : 'flex flex-col gap-0.5 py-1'
+                  readOnly
+                    ? 'flex items-center justify-between py-0.5'
+                    : 'flex flex-col gap-0.5 py-1'
                 }
               >
                 <span className="text-xs text-gray-600">{WEIGHT_LABELS[key] ?? key}</span>
