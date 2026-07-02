@@ -1,9 +1,11 @@
 import type { LngLatBounds } from 'maplibre-gl'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 
-// Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX).
+// Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX). Used as the
+// starting point for all Planungsmodus-Anwendungsfälle (PLANNING_USE_CASES) — der Worker
+// unterscheidet fachlich noch nicht zwischen ihnen, die Gewichte sind bewusst identisch.
 // `study_area` is filled in at creation time from the current map view.
-export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
+export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   name: 'Fahrradbox',
   h3_resolution: 13,
   dem_source: 'srtm',
@@ -25,6 +27,24 @@ export const FAHRRADBOX_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   parken_radius_m: 15,
   targets: [],
 }
+
+// Anwendungsfälle für Schritt 2 des Planungsassistenten ("Art & Größe der gesuchten Fläche").
+// `defaultAreaM2` ist die vorbelegte Flächengröße; bei „Sonstiges“ gibt es keinen Default, die
+// Größe wird frei eingegeben. Die Fläche wird aktuell nur im factorConfig mitgespeichert
+// (passthrough) und noch nicht vom Worker ausgewertet — Vorbereitung für die künftige
+// automatische Flächensuche.
+export type PlanningUseCase = 'fahrradbox' | 'fahrradabstellanlage' | 'mobilitaetsstation' | 'sonstiges'
+
+export const PLANNING_USE_CASES: {
+  key: PlanningUseCase
+  label: string
+  defaultAreaM2: number | null
+}[] = [
+  { key: 'fahrradbox', label: 'Fahrradboxen', defaultAreaM2: 2 },
+  { key: 'fahrradabstellanlage', label: 'Fahrradabstellanlage', defaultAreaM2: 20 },
+  { key: 'mobilitaetsstation', label: 'Mobilitätsstationen', defaultAreaM2: 50 },
+  { key: 'sonstiges', label: 'Sonstiges', defaultAreaM2: null },
+]
 
 export const WEIGHT_LABELS: Record<string, string> = {
   w_cyclepath: 'Radwegnähe',
