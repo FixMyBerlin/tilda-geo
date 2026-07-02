@@ -7,6 +7,23 @@ import { logPadded } from './logging'
 import { params, paramsFilteredForLogs } from './parameters'
 import { getTopicScheduleSkipReason } from './topicScheduleEligibility'
 
+/** Fixed iteration count — do not change without renaming the log field. */
+const CPU_BENCHMARK_ITERATIONS = 1_000_000_000
+
+/**
+ * Reference values (1e9-add loop, bun 1.3.14, idle, 2026-07-03):
+ *   tilda-production ~719 ms | tilda-staging ~1029 ms (1.43× slower)
+ * Normalize cross-host times: timeA × (cpuBenchmarkMs_B / cpuBenchmarkMs_A)
+ * Same-host spike → check hypervisor steal before blaming code.
+ */
+function runCpuBenchmark() {
+  const t0 = performance.now()
+  let s = 0
+  for (let i = 0; i < CPU_BENCHMARK_ITERATIONS; i++) s += i
+  const elapsed = performance.now() - t0
+  return Math.round(elapsed + (s < 0 ? 1 : 0))
+}
+
 function getTopicSchedulePreview(isSaturdayRun: boolean) {
   const eligible: string[] = []
   const skippedWeekend: string[] = []
@@ -33,8 +50,8 @@ function getTopicSchedulePreview(isSaturdayRun: boolean) {
 
 async function getOsm2pgsqlVersion() {
   try {
-    const result = await $`osm2pgsql --version`.text()
-    return { version: result.trim().split('\n')[0] }
+    const result = await $`osm2pgsql --version 2>&1`.text()
+    return { version: result.trim().split('\n')[0] || null }
   } catch (error) {
     return { version: null, error: String(error) }
   }
@@ -84,8 +101,11 @@ async function getPostgresVersion() {
 
 export async function logProcessingStartupContext() {
   const isSaturdayRun = isBerlinSaturday(new Date())
+  const osm2pgsqlPromise = getOsm2pgsqlVersion()
+  const postgresPromise = getPostgresVersion()
+  const cpuBenchmarkMs = runCpuBenchmark()
   const [{ version: osm2pgsqlVersion, error: osm2pgsqlVersionError }, postgres] = await Promise.all(
-    [getOsm2pgsqlVersion(), getPostgresVersion()],
+    [osm2pgsqlPromise, postgresPromise],
   )
 
   logPadded('Processing: Startup')
@@ -98,6 +118,7 @@ export async function logProcessingStartupContext() {
       hostname: hostname(),
       cpuCount: cpus().length,
       memoryTotalGb: Math.round(totalmem() / 1e9),
+      cpuBenchmarkMs,
       osm2pgsqlVersion,
       ...(osm2pgsqlVersionError ? { osm2pgsqlVersionError } : {}),
       postgresVersion: postgres.version,
