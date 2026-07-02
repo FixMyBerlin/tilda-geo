@@ -37,3 +37,11 @@ export const usePlanningScoreParam = () =>
     'planningScore',
     parseAsStringLiteral(PLANNING_SCORE_MODES).withDefault('kombination'),
   )
+
+/**
+ * Whether the hexagon result layer is visible. Toggled off via the icon state in
+ * the "Anzeige" switcher (ScoreModeSwitcher); the color mode is preserved so
+ * turning the layer back on restores the previous display mode.
+ */
+export const usePlanningHexagonsVisibleParam = () =>
+  useQueryState('planningHexagons', parseAsBoolean.withDefault(true))

@@ -330,10 +330,20 @@ describe('getRegionRedirectUrl()', () => {
         }
       })
 
+      test('planningHexagons is preserved, not stripped as an unused param', () => {
+        // Toggling the hexagon layer off must not drop the param.
+        const url = `${canonicalBase}&planning=true&planningHexagons=false`
+        const redirectUrl = getRegionRedirectUrl(url, 'berlin')
+        if (redirectUrl) {
+          expect(getUrl(redirectUrl).searchParams.get('planningHexagons')).toBe('false')
+        }
+      })
+
       test('no canonical-reorder redirect while a planning param is present', () => {
-        // Showing a saved result (planningRun) or switching display mode must not rewrite the URL,
-        // otherwise beforeLoad throws a 301 → full-page pending flash.
-        const url = `${canonicalBase}&planning=true&planningScenario=3&planningRun=5&planningScore=bedarf`
+        // Showing a saved result (planningRun), switching display mode, or toggling the
+        // hexagon layer must not rewrite the URL, otherwise beforeLoad throws a 301 →
+        // full-page pending flash.
+        const url = `${canonicalBase}&planning=true&planningScenario=3&planningRun=5&planningScore=bedarf&planningHexagons=false`
         const redirectUrl = getRegionRedirectUrl(url, 'berlin')
         expect(redirectUrl).toBe(null)
       })

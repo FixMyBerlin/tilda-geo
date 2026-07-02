@@ -18,4 +18,5 @@ export const searchParamsRegistry = {
   planningScenario: 'planningScenario',
   planningRun: 'planningRun',
   planningScore: 'planningScore', // which probability colors the hexagons (bedarf/bebauung/kombination)
+  planningHexagons: 'planningHexagons', // whether the hexagon result layer is visible
 } as const

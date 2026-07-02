@@ -3,6 +3,7 @@ import { Layer, Source } from 'react-map-gl/maplibre'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
 import {
   PLANNING_SCORE_PROPERTY,
+  usePlanningHexagonsVisibleParam,
   usePlanningRunParam,
   usePlanningScoreParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
@@ -81,6 +82,7 @@ const BoundaryHighlightLayer = () => {
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
   const [scoreMode] = usePlanningScoreParam()
+  const [hexagonsVisible] = usePlanningHexagonsVisibleParam()
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
 
@@ -104,9 +106,18 @@ export const SourcesLayersPlanning = () => {
     <>
       <BoundaryHighlightLayer />
 
-      <Source id={planningHexagonsSourceId} type="vector" tiles={[hexagonsUrl]} promoteId="h3_id" />
-      <Layer {...fillLayerProps} />
-      <LayerHighlight {...fillLayerProps} id={getLayerHighlightId(planningHexagonsLayerId)} />
+      {hexagonsVisible && (
+        <>
+          <Source
+            id={planningHexagonsSourceId}
+            type="vector"
+            tiles={[hexagonsUrl]}
+            promoteId="h3_id"
+          />
+          <Layer {...fillLayerProps} />
+          <LayerHighlight {...fillLayerProps} id={getLayerHighlightId(planningHexagonsLayerId)} />
+        </>
+      )}
 
       {vegetationOn && (
         <>
