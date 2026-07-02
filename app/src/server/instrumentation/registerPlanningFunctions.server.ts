@@ -21,6 +21,8 @@ async function ensurePlanningSchema() {
       h3_id                   text   NOT NULL,
       geom                    geometry(Polygon, 3857) NOT NULL,
       mce_gesamtscore         real,
+      score_bedarf            real,
+      score_bebauung          real,
       score_radweg            real,
       score_bodenbelag        real,
       score_zielorte          real,
@@ -35,6 +37,13 @@ async function ensurePlanningSchema() {
   // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;`,
+  )
+  // Getrennte Teil-Scores (Issue #3415): Bedarf vs. Bebauung; NULL bei Alt-Läufen.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bedarf real;`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bebauung real;`,
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzung real;`,
@@ -83,6 +92,8 @@ async function registerHexagonsFunction() {
         SELECT
           h3_id,
           mce_gesamtscore,
+          score_bedarf,
+          score_bebauung,
           score_radweg,
           score_bodenbelag,
           score_hangneigung,
@@ -107,6 +118,8 @@ async function registerHexagonsFunction() {
         fields: {
           h3_id: 'text',
           mce_gesamtscore: 'real',
+          score_bedarf: 'real',
+          score_bebauung: 'real',
           score_radweg: 'real',
           score_bodenbelag: 'real',
           score_hangneigung: 'real',

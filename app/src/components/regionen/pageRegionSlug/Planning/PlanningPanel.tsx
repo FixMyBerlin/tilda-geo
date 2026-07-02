@@ -16,6 +16,7 @@ import {
 import { FactorEditorPanel } from './FactorEditorPanel'
 import { RunButton } from './RunButton'
 import { ScenarioList } from './ScenarioList'
+import { ScoreModeSwitcher } from './ScoreModeSwitcher'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
 
@@ -120,6 +121,8 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
             : scenario.runs[0].status}
         </div>
       )}
+
+      {scenario.runs[0]?.status === 'COMPLETE' && <ScoreModeSwitcher />}
 
       {scenario.runs[0]?.status === 'COMPLETE' && (scenario.runs[0].vegCount ?? 0) > 0 && (
         <VegetationToggle />

@@ -6,7 +6,7 @@ import { twJoin } from 'tailwind-merge'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningScenarioFn } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
-import { WEIGHT_LABELS } from './planningDefaults'
+import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
 
 const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
   { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
@@ -95,36 +95,41 @@ export const FactorEditorPanel = ({
                 </span>
               </span>
             </div>
-            {Object.entries(WEIGHT_LABELS).map(([key, label]) => (
-              <div
-                key={key}
-                className={
-                  readOnly
-                    ? 'flex items-center justify-between py-0.5'
-                    : 'flex flex-col gap-0.5 py-1'
-                }
-              >
-                <span className="text-xs text-gray-600">{label}</span>
-                {readOnly ? (
-                  <span className="text-xs tabular-nums">
-                    {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={weights[key] ?? 0}
-                      onChange={(e) => setWeight(key, Number(e.target.value))}
-                      className="flex-1"
-                    />
-                    <span className="w-9 shrink-0 text-right tabular-nums">
-                      {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
-                    </span>
+            {WEIGHT_GROUPS.map((group) => (
+              <div key={group.key} className="mt-1.5 first:mt-0">
+                <div className="text-xs font-semibold text-gray-500 uppercase">{group.label}</div>
+                {group.weights.map((key) => (
+                  <div
+                    key={key}
+                    className={
+                      readOnly
+                        ? 'flex items-center justify-between py-0.5'
+                        : 'flex flex-col gap-0.5 py-1'
+                    }
+                  >
+                    <span className="text-xs text-gray-600">{WEIGHT_LABELS[key] ?? key}</span>
+                    {readOnly ? (
+                      <span className="text-xs tabular-nums">
+                        {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="range"
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          value={weights[key] ?? 0}
+                          onChange={(e) => setWeight(key, Number(e.target.value))}
+                          className="flex-1"
+                        />
+                        <span className="w-9 shrink-0 text-right tabular-nums">
+                          {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
             ))}
           </div>

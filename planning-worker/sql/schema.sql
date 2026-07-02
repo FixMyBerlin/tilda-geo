@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
 -- fügt einer vorhandenen Tabelle keine Spalte hinzu).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;
 
+-- Getrennte Teil-Scores (Issue #3415): Bedarfswahrscheinlichkeit (ÖPNV, Zielorte)
+-- und Bebauungswahrscheinlichkeit (Radweg, Untergrund, Hangneigung,
+-- Hindernisfreiheit + Modifier + Ausschluss). NULL bei Alt-Läufen bzw. wenn die
+-- Gruppe im Szenario komplett ungewichtet ist. mce_gesamtscore bleibt die
+-- unveränderte Kombination.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bedarf real;
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bebauung real;
+
 -- Kreuzungs-Bonus: Zuschlag nahe Bordstein-Ecken (Radabstellanlagen); NULL wenn
 -- der Faktor (w_intersection) im Szenario nicht gewichtet ist.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzung real;

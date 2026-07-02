@@ -311,6 +311,34 @@ describe('getRegionRedirectUrl()', () => {
       expect(parkingTildaCutouts.styles.find((s) => s.id === 'default')?.active).toBe(true)
     })
 
+    describe('Planning mode params do not trigger redirects', () => {
+      // Start from a URL that is already canonical (no config/map normalization to redirect on),
+      // so the only thing under test is the planning params.
+      const canonicalBase = (() => {
+        const seed = 'http://127.0.0.1:5173/regionen/berlin?map=13.5/52.4918/13.4261'
+        const normalized = getRegionRedirectUrl(seed, 'berlin')
+        return normalized ?? seed
+      })()
+
+      test('planningScore is preserved, not stripped as an unused param', () => {
+        // Switching the display mode (Bedarf/Bebauung/Kombination) must not drop the param.
+        const url = `${canonicalBase}&planning=true&planningScore=bebauung`
+        const redirectUrl = getRegionRedirectUrl(url, 'berlin')
+        // No redirect at all is the ideal outcome; if one happens it must keep the param.
+        if (redirectUrl) {
+          expect(getUrl(redirectUrl).searchParams.get('planningScore')).toBe('bebauung')
+        }
+      })
+
+      test('no canonical-reorder redirect while a planning param is present', () => {
+        // Showing a saved result (planningRun) or switching display mode must not rewrite the URL,
+        // otherwise beforeLoad throws a 301 → full-page pending flash.
+        const url = `${canonicalBase}&planning=true&planningScenario=3&planningRun=5&planningScore=bedarf`
+        const redirectUrl = getRegionRedirectUrl(url, 'berlin')
+        expect(redirectUrl).toBe(null)
+      })
+    })
+
     test('MIGRATION: Ensure hidden is active when checkbox was off and no style is active after merge (14ltyea.a099j9.0 to 1qldklk)', () => {
       // Background: When migrating from old format (checkbox) to new format (dropdown),
       // if a checkbox was OFF (default: false), it should become "hidden" active in the new format.

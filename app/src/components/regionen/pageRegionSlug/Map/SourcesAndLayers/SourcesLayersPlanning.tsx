@@ -1,7 +1,11 @@
 import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
-import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
+import {
+  PLANNING_SCORE_PROPERTY,
+  usePlanningRunParam,
+  usePlanningScoreParam,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
@@ -19,11 +23,13 @@ export const planningHexagonsLayerId = 'planning-hexagons'
 // When `planningRun` is absent (the normal viewer), this renders nothing — so the
 // existing viewer is untouched.
 
-// MCE score → red intensity ramp (0 = excluded/near-white … 100 = deep red).
-const MCE_COLOR: any = [
+// Score → red intensity ramp (0 = excluded/near-white … 100 = deep red).
+// The colored property depends on the active display mode (combination / demand /
+// buildability), so the ramp is built per selected tile property.
+const scoreColor = (property: string): any => [
   'interpolate',
   ['linear'],
-  ['coalesce', ['get', 'mce_gesamtscore'], 0],
+  ['coalesce', ['get', property], 0],
   0,
   '#fff5f0',
   40,
@@ -34,17 +40,17 @@ const MCE_COLOR: any = [
   '#67000d',
 ]
 
-const hexagonFillLayerProps = {
+const hexagonFillLayerProps = (property: string) => ({
   id: planningHexagonsLayerId,
   source: planningHexagonsSourceId,
   'source-layer': 'planning_hexagons',
   type: 'fill' as const,
   paint: {
-    'fill-color': MCE_COLOR,
+    'fill-color': scoreColor(property),
     'fill-opacity': 0.7,
     'fill-outline-color': 'rgba(0,0,0,0.15)',
   },
-}
+})
 
 const BoundaryHighlightLayer = () => {
   const geom = usePlanningBoundaryState((s) => s.boundaryHighlightGeom)
@@ -74,6 +80,7 @@ const BoundaryHighlightLayer = () => {
 
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
+  const [scoreMode] = usePlanningScoreParam()
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
 
@@ -91,17 +98,15 @@ export const SourcesLayersPlanning = () => {
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
+  const fillLayerProps = hexagonFillLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])
 
   return (
     <>
       <BoundaryHighlightLayer />
 
       <Source id={planningHexagonsSourceId} type="vector" tiles={[hexagonsUrl]} promoteId="h3_id" />
-      <Layer {...hexagonFillLayerProps} />
-      <LayerHighlight
-        {...hexagonFillLayerProps}
-        id={getLayerHighlightId(planningHexagonsLayerId)}
-      />
+      <Layer {...fillLayerProps} />
+      <LayerHighlight {...fillLayerProps} id={getLayerHighlightId(planningHexagonsLayerId)} />
 
       {vegetationOn && (
         <>

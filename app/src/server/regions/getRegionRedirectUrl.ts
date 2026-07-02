@@ -184,8 +184,9 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
 
   // Ensure canonical param ordering for stable URLs.
   // IMPORTANT: keep the order untouched when volatile map interaction params are present.
-  // These params change frequently (e.g. feature selection, calculator draw session, note dialog position) and
-  // reordering them can trigger same-route redirects, which can cause full-page pending transitions.
+  // These params change frequently (e.g. feature selection, calculator draw session, note dialog position,
+  // planning-mode scenario/run/display-mode switches) and reordering them can trigger same-route redirects,
+  // which can cause full-page pending transitions.
   const hasVolatileMapParam = [
     searchParamsRegistry.f,
     searchParamsRegistry.draw,
@@ -194,6 +195,10 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
     searchParamsRegistry.osmNote,
     searchParamsRegistry.atlasNotesFilter,
     searchParamsRegistry.osmNotesFilter,
+    searchParamsRegistry.planning,
+    searchParamsRegistry.planningScenario,
+    searchParamsRegistry.planningRun,
+    searchParamsRegistry.planningScore,
   ].some((param) => u.searchParams.has(param))
   if (!hasVolatileMapParam) {
     const params = [...Object.values(searchParamsRegistry), 'v']

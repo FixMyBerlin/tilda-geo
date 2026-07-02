@@ -28,7 +28,8 @@ AGG_H3_RES = 11
 # Score-Spalten, die beim Aggregieren gemittelt werden (eignungsklasse wird
 # daraus neu abgeleitet, nicht gemittelt).
 _SCORE_COLS = [
-    "mce_gesamtscore", "score_radweg", "score_bodenbelag", "score_zielorte",
+    "mce_gesamtscore", "score_bedarf", "score_bebauung",
+    "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_hindernisfreiheit", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken",
 ]
@@ -393,10 +394,10 @@ def run_flaechenfinder(
         veg_effect = (w_veg * 100.0) * ramp
         hex_proj["score_vegetation"] = veg_effect.round(1)
         sign = 1.0 if use_case.vegetation_direction == "positive" else -1.0
-        total = base_score + sign * veg_effect
+        veg_delta = sign * veg_effect
     else:
         hex_proj["score_vegetation"] = np.nan
-        total = base_score
+        veg_delta = 0.0
 
     # ── Kreuzungs-Bonus: stufenloser Zuschlag nahe Bordstein-Ecken ─────────
     # Radabstellanlagen lassen sich an Straßenecken gut platzieren – ideal
@@ -425,9 +426,10 @@ def run_flaechenfinder(
 
         kreuz_bonus = (w_kreuz * 100.0) * abstand_kreuzung.apply(_kreuz_faktor)
         hex_proj["score_kreuzung"] = kreuz_bonus.round(1)
-        total = total + kreuz_bonus
+        kreuz_delta = kreuz_bonus
     else:
         hex_proj["score_kreuzung"] = np.nan
+        kreuz_delta = 0.0
 
     # ── Parken-Bonus: Zuschlag auf/nahe KFZ-Parkflächen ────────────────────
     # Bestehende KFZ-Parkflächen (public.parkings / parkings_separate) lassen
@@ -452,13 +454,55 @@ def run_flaechenfinder(
 
         parken_bonus = (w_parken * 100.0) * abstand_parken.apply(_parken_faktor)
         hex_proj["score_parken"] = parken_bonus.round(1)
-        total = total + parken_bonus
+        parken_delta = parken_bonus
     else:
         hex_proj["score_parken"] = np.nan
+        parken_delta = 0.0
 
+    # ── Gesamtscore (Kombination) – unverändert gegenüber früher ───────────
+    # `total` ist bit-identisch zur alten Formel `base_score ± veg + kreuz +
+    # parken`; die Modifier liegen jetzt nur als eigene Delta-Serien vor, damit
+    # sie unten für die Bebauungswahrscheinlichkeit wiederverwendbar sind.
+    total = base_score + veg_delta + kreuz_delta + parken_delta
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
 
+    # ── Teil-Scores: Bedarf vs. Bebauung (Issue #3415) ─────────────────────
+    # Die Hexagon-Scores vermischen zwei fachlich getrennte Fragen. Sie werden
+    # hier zusätzlich als zwei getrennt normalisierte 0–100-Ansichten berechnet
+    # (die Kombination `mce_gesamtscore` oben bleibt davon unberührt):
+    #   Bedarf  („will hier parken")  → ÖPNV (w_transit), Zielorte (w_target)
+    #   Bebauung („kann hier bauen") → Radweg (w_cyclepath), Untergrund
+    #       (w_surface), Hangneigung (w_slope), Hindernisfreiheit (w_clearance)
+    #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
+    # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt, damit der
+    # Teil-Score unabhängig von der Gewichtsverteilung 0–100 bleibt. Ist eine
+    # Gruppe komplett ungewichtet, bleibt ihr Score NaN (→ DB NULL).
+    def _group_score(terms):
+        wsum = sum((w.get(k, 0) or 0) for _, k in terms)
+        if wsum <= 0:
+            return pd.Series(np.nan, index=hex_proj.index)
+        raw = sum(_term(col, k) for col, k in terms)
+        return raw / wsum
+
+    score_bedarf = _group_score(
+        [("score_oepnv", "w_transit"), ("score_zielorte", "w_target")]
+    ).clip(lower=0.0, upper=100.0)
+
+    base_bebauung = _group_score(
+        [("score_radweg", "w_cyclepath"), ("score_bodenbelag", "w_surface"),
+         ("score_hangneigung", "w_slope"), ("score_hindernisfreiheit", "w_clearance")]
+    )
+    score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(
+        lower=0.0, upper=100.0
+    )
+
+    hex_proj["score_bedarf"] = score_bedarf.round(1)
+    hex_proj["score_bebauung"] = score_bebauung.round(1)
+
+    # Harte Ausschlusskriterien sind ausschließlich Bebauungs-Kriterien: sie
+    # nullen Bebauung UND Kombination, aber NICHT den Bedarf (der Bedarf besteht
+    # auch dort, wo nicht gebaut werden kann).
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
         (hex_proj["score_hindernisfreiheit"] == 0) |
@@ -467,6 +511,7 @@ def run_flaechenfinder(
         hex_proj["gebaeude"]
     )
     hex_proj.loc[exclusion, "mce_gesamtscore"] = 0.0
+    hex_proj.loc[exclusion, "score_bebauung"] = 0.0
 
     hex_proj["eignungsklasse"] = pd.cut(
         hex_proj["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS

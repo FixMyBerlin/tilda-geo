@@ -40,6 +40,29 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_parken: 'Parken (Umwidmung)',
 }
 
+// Factor → probability grouping (Issue #3415). The weight sliders and the
+// per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
+// sync with the backend split in flaechenfinder/scorer.py (_group_score):
+//   Bedarf   → ÖPNV, Zielorte
+//   Bebauung → Radwegnähe, Untergrund, Hangneigung, Hindernisfreiheit + Modifier
+//              (Vegetation, Kreuzungen, Parken)
+export const WEIGHT_GROUPS: { key: 'bedarf' | 'bebauung'; label: string; weights: string[] }[] = [
+  { key: 'bedarf', label: 'Bedarf', weights: ['w_transit', 'w_target'] },
+  {
+    key: 'bebauung',
+    label: 'Bebauung',
+    weights: [
+      'w_cyclepath',
+      'w_surface',
+      'w_slope',
+      'w_clearance',
+      'w_vegetation',
+      'w_intersection',
+      'w_parken',
+    ],
+  },
+]
+
 // Build a GeoJSON Polygon (EPSG:4326) from current map bounds, used as study_area.
 export function boundsToPolygon(bounds: LngLatBounds) {
   const w = bounds.getWest()

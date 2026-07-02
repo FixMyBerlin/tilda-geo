@@ -24,6 +24,8 @@ BEGIN
             SELECT
                 h3_id,
                 mce_gesamtscore,
+                score_bedarf,
+                score_bebauung,
                 score_radweg,
                 score_bodenbelag,
                 score_hangneigung,

@@ -17,6 +17,26 @@ const SCORE_LABELS: Record<string, string> = {
   score_parken: 'Parken',
 }
 
+// Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
+// `scoreKey` is the persisted sub-score for the whole group; `factors` are the
+// individual factor columns that feed it. Mirrors scorer.py::_group_score.
+const SCORE_GROUPS: { label: string; scoreKey: string; factors: string[] }[] = [
+  { label: 'Bedarf', scoreKey: 'score_bedarf', factors: ['score_oepnv', 'score_zielorte'] },
+  {
+    label: 'Bebauung',
+    scoreKey: 'score_bebauung',
+    factors: [
+      'score_radweg',
+      'score_bodenbelag',
+      'score_hangneigung',
+      'score_hindernisfreiheit',
+      'score_vegetation',
+      'score_kreuzung',
+      'score_parken',
+    ],
+  },
+]
+
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',
   schlecht: 'bg-red-100 text-red-800',
@@ -70,6 +90,20 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           </div>
         </div>
 
+        <div className="flex gap-2">
+          {SCORE_GROUPS.map((group) => {
+            const val = props[group.scoreKey]
+            return (
+              <div key={group.scoreKey} className="flex-1 rounded bg-gray-50 px-2 py-1.5">
+                <div className="text-xs text-gray-500">{group.label}</div>
+                <div className="text-lg font-bold text-gray-800">
+                  {val != null ? Math.round(val) : '–'}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
         {props.gebaeude && (
           <div className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
             <strong>Hinweis:</strong> Auf dieser Fläche befindet sich ein Gebäude – eine Bebauung
@@ -79,21 +113,27 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
 
         <div className="h-px bg-gray-200" />
 
-        <table className="w-full text-xs">
-          <tbody>
-            {Object.entries(SCORE_LABELS).map(([key, label]) => {
-              const val = props[key]
-              return (
-                <tr key={key} className="border-b border-gray-100 last:border-0">
-                  <td className="py-1.5 pr-3 text-gray-500">{label}</td>
-                  <td className="py-1.5">
-                    <ScoreBar value={val} />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        <div className="space-y-3">
+          {SCORE_GROUPS.map((group) => (
+            <div key={group.scoreKey}>
+              <div className="mb-1 text-xs font-semibold text-gray-500 uppercase">
+                {group.label}
+              </div>
+              <table className="w-full text-xs">
+                <tbody>
+                  {group.factors.map((key) => (
+                    <tr key={key} className="border-b border-gray-100 last:border-0">
+                      <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
+                      <td className="py-1.5">
+                        <ScoreBar value={props[key]} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
       </div>
     </Disclosure>
   )
