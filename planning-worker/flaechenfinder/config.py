@@ -54,7 +54,7 @@ class UseCaseConfig:
     parken_radius_m: float = 15.0             # Reichweite des Bonus (UI-einstellbar)
 
     # Harte Ausschlussgrenzen
-    max_cyclepath_dist_m: float = 150.0     # weiter weg → Score 0
+    max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
     min_clearance_m: float = 2.0            # zu nah an Gebäude → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
 
@@ -114,7 +114,7 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         vegetation_penalty_threshold_pct=float(
             cfg.get("vegetation_penalty_threshold_pct", 20.0)
         ),
-        max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 150.0)),
+        max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 50.0)),
         min_clearance_m=float(cfg.get("min_clearance_m", 2.0)),
         min_surface_score=float(cfg.get("min_surface_score", 30.0)),
         cir_source=cfg.get("cir_source", "auto"),
