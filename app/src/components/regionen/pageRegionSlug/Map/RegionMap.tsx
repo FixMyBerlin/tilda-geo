@@ -29,7 +29,10 @@ import {
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
-import { firePlaywrightMapLoadedEvent } from '@/components/shared/utils/playwright'
+import {
+  exposeMainMapForDebugging,
+  firePlaywrightMapLoadedEvent,
+} from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
@@ -195,6 +198,7 @@ export const RegionMap = () => {
     markMapLoaded()
     updateMapBounds(mainMap?.getBounds() || null)
 
+    exposeMainMapForDebugging(mainMap?.getMap())
     firePlaywrightMapLoadedEvent()
   }
 

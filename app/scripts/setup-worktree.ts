@@ -11,17 +11,20 @@ function usage() {
   console.log(`setup-worktree — create a git worktree for feature development
 
 Usage (from app/):
-  bun run setup-worktree -- <branch> [--dir <folder-postfix>]
+  bun run setup-worktree -- my-branch [--dir my-worktree]
 
-Creates ../tilda-geo-<postfix> with the branch, copies .env files, runs husky prepare.
+Use a short 1-3 word kebab-case branch name that describes the work.
+By default, the worktree postfix matches the branch name.
+
+Creates ../tilda-geo--my-branch with the branch, copies .env files, runs husky prepare.
 Then: cd <printed-path>/app && bun run dev
 
 See ${DOC}
 `)
 }
 
-function sanitizeDirName(branch: string) {
-  return branch.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '')
+function sanitizePostfix(value: string) {
+  return value.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
 function copyEnvFilesRecursive(srcRoot: string, destRoot: string, relDir = '') {
@@ -77,13 +80,13 @@ if (branch === currentBranch) {
   process.exit(1)
 }
 
-const postfix = dirPostfix?.trim() || sanitizeDirName(branch)
+const postfix = sanitizePostfix(dirPostfix?.trim() || branch)
 if (!postfix) {
   console.error('Could not derive folder name — pass --dir <postfix>')
   process.exit(1)
 }
 
-const targetDir = resolve(repoRoot, '..', `tilda-geo-${postfix}`)
+const targetDir = resolve(repoRoot, '..', `tilda-geo--${postfix}`)
 if (existsSync(targetDir)) {
   console.error(`Target already exists: ${targetDir}`)
   process.exit(1)

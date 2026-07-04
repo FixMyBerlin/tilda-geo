@@ -18,7 +18,7 @@ The frontend visualizes our processed data it also provides options to annotate 
 
 **Why `127.0.0.1` and not `localhost`?** See [Local Development Domain Setup](../docs/Local-Development-Domain-Setup.md).
 
-**Worktrees and Docker:** See [Docker local development](../docs/docker-local-development.md). Feature branches: `bun run setup-worktree -- <branch>` then `bun run dev` in the new folder.
+**Worktrees and Docker:** See [Docker local development](../docs/docker-local-development.md). Work branches use short names like `my-branch`: `bun run setup-worktree -- my-branch` then `bun run dev` in the new folder.
 
 ### Start
 

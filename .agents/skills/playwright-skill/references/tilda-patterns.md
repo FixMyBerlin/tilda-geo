@@ -39,9 +39,10 @@ Use `mode: 'serial'` and nested `test.describe` per route when tests share the D
 
 ## Map
 
-1. App: `firePlaywrightMapLoadedEvent()` on map load when `VITE_PLAYWRIGHT_ENABLED`.
+1. App: call `exposeMainMapForDebugging(mainMap?.getMap())` and `firePlaywrightMapLoadedEvent()` on map load; `__mainMap` is dev/Playwright, `mapLoaded` is Playwright-only.
 2. Test: `waitForMapLoad(page)` listens for `mapLoaded` or falls back to `.maplibregl-canvas`.
-3. Optional: `verifyMapRendered(page)`, then `verifyMapNetworkRequests(page)` for tile/API coverage (`regions.spec.ts`).
+3. Optional: `getMapLayerIds(page)` reads `window.__mainMap.getStyle().layers` for layer-order assertions.
+4. Optional: `verifyMapRendered(page)`, then `verifyMapNetworkRequests(page)` for tile/API coverage (`regions.spec.ts`).
 
 ## Route fixtures
 

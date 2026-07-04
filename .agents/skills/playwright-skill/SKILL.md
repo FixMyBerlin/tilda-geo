@@ -156,18 +156,28 @@ export function playwrightTestId(testId: string) {
   return import.meta.env.VITE_PLAYWRIGHT_ENABLED === 'true' ? testId : undefined
 }
 
+export const exposeMainMapForDebugging = createIsomorphicFn()
+  .server((_map?: MaplibreMap) => {})
+  .client((map?: MaplibreMap) => {
+    const playwrightEnabled =
+      import.meta.env.VITE_PLAYWRIGHT_ENABLED === 'true' || window.__PLAYWRIGHT_ENABLED === 'true'
+    if (import.meta.env.DEV || playwrightEnabled) {
+      window.__mainMap = map
+    }
+  })
+
 export const firePlaywrightMapLoadedEvent = createIsomorphicFn()
   .server(() => {})
   .client(() => {
-    const enabled =
+    const playwrightEnabled =
       import.meta.env.VITE_PLAYWRIGHT_ENABLED === 'true' || window.__PLAYWRIGHT_ENABLED === 'true'
-    if (!enabled) return
+    if (!playwrightEnabled) return
     window.dispatchEvent(new CustomEvent('mapLoaded'))
     window.__mapLoaded = true
   })
 ```
 
-Call `firePlaywrightMapLoadedEvent()` from the map `onLoad` handler. Tests use `tests/utils/maps.ts` (`waitForMapLoad`, `verifyMapRendered`, `checkMapTilesLoaded`). For tile/API coverage on region pages, use `verifyMapNetworkRequests` from `tests/utils/network.ts` (after `waitForMapLoad`).
+Call both helpers from the map `onLoad` handler: `exposeMainMapForDebugging(mainMap?.getMap())` and `firePlaywrightMapLoadedEvent()`. `window.__mainMap` is available in dev and Playwright mode; the `mapLoaded` event remains Playwright-gated. Tests use `tests/utils/maps.ts` (`waitForMapLoad`, `verifyMapRendered`, `checkMapTilesLoaded`, `getMapLayerIds`). For tile/API coverage on region pages, use `verifyMapNetworkRequests` from `tests/utils/network.ts` (after `waitForMapLoad`).
 
 For **click/drag on map canvas**, consider [MapGrab](https://mapgrab.github.io/docs/getting-started/stage-two/playwright) (used in legacy Trassenscout surveys; adopt when migrating those flows to Start).
 
