@@ -5,7 +5,7 @@
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/finish-work/SKILL.md",
-      "computedHash": "3be454f952e48605d3c2ef324b0491f713bfd0a4119289a030a9565bdb383219"
+      "computedHash": "a58aaf4d46abeb1498b6d6abe3262f5881288f87f13c3e235b0701c8c2dc26f7"
     },
     "nuqs": {
       "source": "FixMyBerlin/fixmyskills",
@@ -17,7 +17,7 @@
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/playwright-skill/SKILL.md",
-      "computedHash": "72a922ab74632b5750c26ccc119ddcde38881b7c5a1400909fdad4005dd4f001"
+      "computedHash": "82dca8d03cc94bbd594838dbfecbf5ea69710a8923cde8fd326a9836077618f9"
     },
     "react-dev": {
       "source": "FixMyBerlin/fixmyskills",
@@ -29,13 +29,13 @@
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/react-map-gl/SKILL.md",
-      "computedHash": "d00708bcfba6b173bad6b5e6fa081f9d133d575af444a61be8e2e15488b79493"
+      "computedHash": "b14fac23b3a8cc3086f2a7fde5207b77f9eeb98a63b798ab7a90519df79555a3"
     },
     "review-dependabot": {
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
       "skillPath": "skills/review-dependabot/SKILL.md",
-      "computedHash": "fd04be5189e29ae0ad54c3f09016335ad6c9ef147c865e04a028a53818feee3e"
+      "computedHash": "24075b958c648c11c62bfa70b3632a92bb196c316eb4a3ca57c104f6be67a285"
     },
     "rust-wasm-geo": {
       "source": "FixMyBerlin/fixmyskills",

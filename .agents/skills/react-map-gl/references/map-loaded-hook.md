@@ -9,12 +9,12 @@ react-map-gl issue [#2123](https://github.com/visgl/react-map-gl/issues/2123): `
 Zustand flag set once in `onLoad`:
 
 ```tsx
-// tilda-geo: RegionMap.tsx — handleLoad
+// MapCanvas.tsx — handleLoad
 const handleLoad = () => {
   markMapLoaded()
 }
 
-<MapGl onLoad={handleLoad} … />
+<Map id="mainMap" onLoad={handleLoad} … />
 ```
 
 ```tsx
