@@ -171,7 +171,9 @@ Use **agent-browser MCP** (`agent_browser_open` -> `agent_browser_snapshot` -> c
 
 ### `window.__mainMap`
 
-In dev and Playwright mode, map load exposes the MapLibre instance as `window.__mainMap` so agents and tests can inspect runtime map state via `agent_browser_eval` or Playwright `page.evaluate`.
+In dev and Playwright mode, `onLoad` exposes the MapLibre instance as `window.__mainMap` so agents and tests can inspect runtime map state via `agent_browser_eval` or Playwright `page.evaluate`.
+
+Wiring: skill `react-map-gl` → [map-debug-exposure.md](../../../.agents/skills/react-map-gl/references/map-debug-exposure.md). In `RegionMap.tsx`, `handleLoad` calls `exposeMainMapForDebugging(event.target)` — inside Map handlers, **`event.target` is the MapLibre map**; use it directly, not `useMap()` / `getMap()`.
 
 ```js
 window.__mainMap?.getZoom()
@@ -185,7 +187,7 @@ window.__mainMap?.queryRenderedFeatures({ layers: ['some-layer'] })
 - `agent_browser_react_tree` around map components (`MapInterface`, `SourcesLayersAtlasGeo`)
 - Playwright helpers: `window.__mapLoaded`, `mapLoaded` event (when `VITE_PLAYWRIGHT_ENABLED=true`)
 
-React map id in app code: `<Map id="mainMap">` -> `useMap()` -> `mainMap` (`MapRef`; call `mainMap.getMap()` for maplibregl APIs).
+After load, elsewhere in React: `<Map id="mainMap">` → `useMap()` → `mainMap` (`MapRef`; `mainMap.getMap()` for maplibregl APIs outside event handlers). E2E helpers: skill `playwright-skill`.
 
 ---
 
@@ -246,7 +248,7 @@ For adding datasets, follow skill `add-static-dataset`, but perform file edits i
 
 ### Finishing work
 
-Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers the required checks, how to handle lint/format changes, and how to draft/commit cleanly. Commit only when the user asks.
+Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check`, lint/format staging, and commit messages. **Commit** when the user indicates intent ("commit it", "land this", "and commit", etc.); otherwise draft the message only.
 
 ### Command locations (common mistakes)
 

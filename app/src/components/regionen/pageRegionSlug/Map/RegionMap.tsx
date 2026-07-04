@@ -190,15 +190,15 @@ export const RegionMap = () => {
     updateHover([])
   }
 
-  const handleLoad = (_event: MapLibreEvent) => {
+  const handleLoad = (event: MapLibreEvent) => {
     // We disable rotation once after map startup to keep interactions consistent.
-    mainMap?.getMap().touchZoomRotate.disableRotation()
+    event.target.touchZoomRotate.disableRotation()
 
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
     markMapLoaded()
-    updateMapBounds(mainMap?.getBounds() || null)
+    updateMapBounds(event.target.getBounds())
 
-    exposeMainMapForDebugging(mainMap?.getMap())
+    exposeMainMapForDebugging(event.target)
     firePlaywrightMapLoadedEvent()
   }
 
