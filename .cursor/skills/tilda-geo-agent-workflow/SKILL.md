@@ -129,13 +129,14 @@ bun run processing -- --help   # full contract
 
 ### App DB setup (agents)
 
-**Use `bun run seed`** from `app/` to set up the local database with **dummy Prisma seed data**. It resets migrations and seeds the DB; it needs a healthy db (start via `bun run dev` first).
-
 ```bash
-bun run seed        # default for agents: dummy regions, users, uploads metadata, etc.
+bun run seed   # fresh local DB (~30s)
+bun run dev
 ```
 
 Do **not** use `db-pull`. It pulls staging/production snapshots and is for humans only.
+
+If you run `dev` without seeding first, predev warns — warn-only, does not block.
 
 ### Static datasets
 
@@ -272,7 +273,7 @@ Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping u
 ```
 - [ ] New work branch? -> from app/, `bun run setup-worktree -- my-branch`, then `bun run dev` in the new worktree
 - [ ] Local app/db needed? -> trust predev from `bun run dev`; do not hand-craft Docker or re-audit env
-- [ ] Fresh local db? -> bun run seed (not db-pull)
+- [ ] Fresh local db? -> `bun run seed`, then `bun run dev` (not db-pull)
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)
 - [ ] Static dataset change? -> worktree `tilda-static-data`, relink `geojson`, then load [add-static-dataset](../add-static-dataset/SKILL.md)
 - [ ] Map/UI bug? -> use agent-browser MCP; inspect `window.__mainMap` when available

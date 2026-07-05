@@ -15,5 +15,17 @@ export async function getProcessingMeta() {
     ORDER BY id DESC
     LIMIT 1
   `
+
+  if (!result) return null
+
   return ProcessingMetaDates.parse(result)
+}
+
+export async function getProcessingOsmDataFrom() {
+  const meta = await getProcessingMeta()
+  return meta?.osm_data_from ?? null
+}
+
+export async function getProcessingOsmDataFromIso() {
+  return (await getProcessingOsmDataFrom())?.toISOString() ?? new Date().toISOString()
 }

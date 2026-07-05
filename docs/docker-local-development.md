@@ -24,4 +24,4 @@ bun run dev
 
 Use a short 1-3 word kebab-case branch name like `my-branch`. The setup script applies the folder naming convention, copies `.env`, and prepares hooks.
 
-For agent guidance, static-data symlink rules, processing, seed data, browser debugging, and checks, read the agent workflow skill.
+For agent guidance, static-data symlink rules, processing, seed data, browser debugging, and checks, read the agent workflow skill. Fresh setup: `bun run seed`, then `bun run dev`.

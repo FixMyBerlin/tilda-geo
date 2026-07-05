@@ -1,3 +1,4 @@
+import { runGeoBootstrap } from '../scripts/geo-bootstrap/run'
 import seedInternalNotes from './seeds/atlasNotes'
 import seedMemberships from './seeds/memberships'
 import seedUploads from './seeds/pmtiles'
@@ -8,6 +9,8 @@ import seedRegions from './seeds/regions'
 import seedUsers from './seeds/users'
 
 const seed = async () => {
+  await runGeoBootstrap()
+
   await seedRegions()
   await seedUsers()
   await seedMemberships()

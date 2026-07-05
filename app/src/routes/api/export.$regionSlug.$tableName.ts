@@ -409,7 +409,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           })
 
           const metadata = await getProcessingMeta()
-          const filename = metadata.osm_data_from
+          const filename = metadata?.osm_data_from
             ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
             : `${tableName}.${format}`
 

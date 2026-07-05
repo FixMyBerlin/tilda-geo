@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
+import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
 import { getAppSession } from '@/server/auth/session.server'
 import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import { getRegionHasPermissions } from '@/server/authorization/getRegionHasPermissions.server'
@@ -10,7 +11,6 @@ import { trackRegionAccess } from '@/server/users/trackRegionAccess.server'
 import { createRegionWithData } from './mutations/createRegion.server'
 import { deleteRegion } from './mutations/deleteRegion.server'
 import { updateRegionWithData } from './mutations/updateRegion.server'
-import { getProcessingMetadata } from './queries/getProcessingMetadata.server'
 import { DeleteRegionSchema, RegionFormSchema } from './schemas'
 
 const RegionPageBeforeLoadInput = z.object({
@@ -77,8 +77,8 @@ export const getRegionPageLoaderFn = createServerFn({ method: 'GET' })
     }
   })
 
-export const getProcessingMetadataFn = createServerFn({ method: 'GET' }).handler(async () =>
-  getProcessingMetadata(),
+export const getProcessingMetaFn = createServerFn({ method: 'GET' }).handler(async () =>
+  getProcessingMeta(),
 )
 
 export const deleteRegionFn = createServerFn({ method: 'POST' })

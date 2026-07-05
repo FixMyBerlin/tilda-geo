@@ -14,6 +14,12 @@ export const Route = createFileRoute('/api/processing-dates')({
       GET: async () => {
         try {
           const parsed = await getProcessingMeta()
+          if (!parsed) {
+            return Response.json(
+              { error: 'No processing metadata' },
+              { status: 404, headers: corsHeaders },
+            )
+          }
 
           return Response.json(parsed, { headers: corsHeaders })
         } catch (error) {

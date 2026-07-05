@@ -133,36 +133,14 @@ const buildAfterthoughtsForRun = (processingCompletedAt: Date, dayIndex: number)
   return { afterthoughts }
 }
 
-const ensureMetaTable = async () => {
-  await db.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS public.meta (
-      id SERIAL PRIMARY KEY,
-      processing_duration TIME,
-      osm_data_from TIMESTAMP,
-      processing_started_at TIMESTAMP,
-      processing_completed_at TIMESTAMP,
-      qa_update_started_at TIMESTAMP,
-      qa_update_completed_at TIMESTAMP,
-      status VARCHAR(20) DEFAULT 'processed' CHECK (status IN ('processing', 'postprocessing', 'processed')),
-      topics JSONB NOT NULL DEFAULT '{}',
-      afterthoughts JSONB NOT NULL DEFAULT '{}'
-    )
-  `)
-
-  // Migration for existing local dev DBs: add the JSONB columns and drop the old statistics columns.
-  // Mirrors processing/steps/metadata.ts `initializeMetadataTable` (which runs on staging + production).
-  // !! We will remove this section after 2026-10-01
-  await db.$executeRawUnsafe(`
-    ALTER TABLE public.meta
-      ADD COLUMN IF NOT EXISTS topics JSONB NOT NULL DEFAULT '{}',
-      ADD COLUMN IF NOT EXISTS afterthoughts JSONB NOT NULL DEFAULT '{}',
-      DROP COLUMN IF EXISTS statistics_started_at,
-      DROP COLUMN IF EXISTS statistics_completed_at
-  `)
-}
-
 const seedProcessingMeta = async () => {
-  await ensureMetaTable()
+  const [row] = await db.$queryRaw<{ metaExists: boolean }[]>`
+    SELECT to_regclass('public.meta') IS NOT NULL AS "metaExists"
+  `
+  if (!row?.metaExists) {
+    throw new Error('public.meta does not exist — run `bun run seed` from app/')
+  }
+
   await db.$executeRawUnsafe(`TRUNCATE public.meta RESTART IDENTITY`)
 
   for (let dayIndex = RUN_DAYS - 1; dayIndex >= 0; dayIndex -= 1) {
