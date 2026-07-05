@@ -1,25 +1,16 @@
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
-import type {
-  TopicDocGfiAttributeObject,
-  TopicDocGfiAttributeValue,
-  TopicDocGfiHtmlConfig,
-  TopicDocMasterportalGfiConfig,
-} from '@/data/topicDocs/masterportalGfi.types'
+import type { TopicDocMasterportalGfiConfig } from '@/data/topicDocs/masterportalGfi.types'
 import type { TopicDocCompiled } from '@/data/topicDocs/runtime'
 import type { TRegion } from '@/server/regions/queries/getRegion.server'
 
 export type DocsPageRegion = TRegion | null
 
-export type DocsPageGroupDoc = {
+type DocsPageGroupDoc = {
   tableName: string
   topicDoc: TopicDocCompiled | null
 }
 
 export type DocsPageTopicDoc = TopicDocCompiled | null
-
-export type DocsPageGfiHtmlConfig = TopicDocGfiHtmlConfig
-export type DocsPageGfiAttributeObject = TopicDocGfiAttributeObject
-export type DocsPageGfiAttributeValue = TopicDocGfiAttributeValue
 
 export type DocsPageMasterportal = TopicDocMasterportalGfiConfig | null
 

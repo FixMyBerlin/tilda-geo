@@ -13,7 +13,7 @@ import { downloadFormatLinkClasses, OgrFormatDownloadLinks } from './OgrFormatDo
 const docsLinkClassesWithStructuredDocs =
   'min-w-28 w-max flex-none rounded-md border border-purple-800 bg-purple-700 px-3 py-2 text-left shadow-md no-underline hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1'
 
-export const DownloadModalDownloadList = () => {
+const DownloadModalDownloadList = () => {
   const regionSlug = useRegionSlug()
   const { region } = useRegionLoaderData()
   const { bbox, exports: regionExports } = region

@@ -4,7 +4,7 @@ import { z } from 'zod'
 import type { InternalPath } from '@/router'
 import { requireAdmin } from '@/server/auth/session.server'
 
-export const PRIVATE_HOOK_SLUGS = [
+const PRIVATE_HOOK_SLUGS = [
   'register-sql-functions',
   'post-processing-qa-update',
   'warm-cache',

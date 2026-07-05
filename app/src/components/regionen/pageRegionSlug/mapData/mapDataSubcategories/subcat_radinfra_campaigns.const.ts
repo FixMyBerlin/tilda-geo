@@ -12,7 +12,7 @@ const sourceLayer = 'todos_lines'
 export type SubcatRadinfraCampaignId = typeof subcatId
 export type SubcatRadinfraCampaignStyleIds = 'default' | TodoId
 
-export const campaignLegend: FileMapDataSubcategoryStyleLegend[] = [
+const campaignLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'todo',
     name: 'Hier gibt es was zu tun',

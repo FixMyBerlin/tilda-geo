@@ -5,8 +5,6 @@ import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
 const sourceLayer = 'bikelanes'
-export type SubcatRadinfraWidthId = typeof subcatId
-export type SubcatRadinfraWidthStyleIds = 'default'
 
 export const bikelanesWidthLegend: FileMapDataSubcategoryStyleLegend[] = [
   {

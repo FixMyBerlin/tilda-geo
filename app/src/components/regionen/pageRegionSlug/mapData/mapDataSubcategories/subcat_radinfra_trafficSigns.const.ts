@@ -5,9 +5,7 @@ import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
 const sourceLayer = 'bikelanes'
-export type SubcatBikelanesId = typeof subcatId
-export type SubcatBikelanesStyleIds = 'default'
-export const bikelanesTrafficSignLegend: FileMapDataSubcategoryStyleLegend[] = [
+const bikelanesTrafficSignLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'present',
     name: 'Beschildert',

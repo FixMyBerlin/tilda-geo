@@ -1,6 +1,6 @@
 import type { InternalPath } from '@/router'
 
-export type FooterLink =
+type FooterLink =
   | { name: string; to: InternalPath; href?: never }
   | { name: string; href: string; to?: never }
 

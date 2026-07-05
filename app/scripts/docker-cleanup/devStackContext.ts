@@ -11,7 +11,7 @@ export type DevStackInfo = {
   state: 'running' | 'stopped'
 }
 
-export type VolumeKind = 'dev-db' | 'dev-osm' | 'unknown'
+type VolumeKind = 'dev-db' | 'dev-osm' | 'unknown'
 
 export type ClassifiedVolume = {
   name: string
@@ -46,10 +46,6 @@ function stackIdFromDbContainer(name: string) {
   if (name === 'db') return DEVELOP_STACK_ID
   if (name.endsWith('_db')) return name.slice(0, -'_db'.length)
   return undefined
-}
-
-function dbContainerForStack(stackId: string) {
-  return stackId === DEVELOP_STACK_ID ? 'db' : `${stackId}_db`
 }
 
 function tilesContainerForStack(stackId: string) {
@@ -135,7 +131,7 @@ export function formatStackLine(stack: DevStackInfo) {
   return stack.stackId
 }
 
-export function classifyVolumeName(name: string): VolumeKind {
+function classifyVolumeName(name: string): VolumeKind {
   if (name.endsWith('_db_postgres_17') || name === 'db_postgres_17') return 'dev-db'
   if (name.endsWith('_osmfiles') || name === 'osmfiles') return 'dev-osm'
   return 'unknown'
@@ -154,5 +150,3 @@ export function formatVolumeClassification(volume: ClassifiedVolume) {
 export function containerNamesForStoppedDevStacks(stacks: DevStackInfo[]) {
   return listStoppedDevStacks(stacks).flatMap((s) => [s.dbContainer, s.tilesContainer])
 }
-
-export { dbContainerForStack, tilesContainerForStack, DEVELOP_STACK_ID }

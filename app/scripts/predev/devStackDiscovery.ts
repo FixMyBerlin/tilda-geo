@@ -118,7 +118,7 @@ export async function resolveRunningAttachStack(stackId: string) {
 }
 
 /** Stop db+tiles for one discovered stack. */
-export async function stopDevStack(stack: RunningDevStack) {
+async function stopDevStack(stack: RunningDevStack) {
   if (stack.repoRoot && stack.composeProject) {
     const proc = Bun.spawn(
       [

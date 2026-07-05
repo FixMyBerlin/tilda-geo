@@ -7,7 +7,7 @@ const sourceLayer = 'aggregated_lengths'
 export type SubcatRadinfraStatsId = typeof subcatId
 export type SubcatRadinfraStatsStyleIds = 'default' | 'level6'
 
-export const statsLegend: FileMapDataSubcategoryStyleLegend[] = [
+const statsLegend: FileMapDataSubcategoryStyleLegend[] = [
   // {
   //   id: 'todo',
   //   name: '≤ 1,0 m',

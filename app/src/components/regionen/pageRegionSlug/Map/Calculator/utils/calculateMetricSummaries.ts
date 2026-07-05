@@ -22,7 +22,7 @@ type CalculatorGroupSummary = {
   values: CalculatorGroupValueSummary[]
 }
 
-export type CalculatorMetricSummary = {
+type CalculatorMetricSummary = {
   total: number
   groups: CalculatorGroupSummary[]
 }

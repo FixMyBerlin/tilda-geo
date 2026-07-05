@@ -14,7 +14,7 @@ const topicDocNumericFormats = [
 ] as const
 const topicDocDateFormats = ['date'] as const
 
-export const topicDocAttributeFormatSchema = z.enum([
+const topicDocAttributeFormatSchema = z.enum([
   'string',
   ...topicDocNumericFormats,
   ...topicDocDateFormats,
@@ -22,15 +22,15 @@ export const topicDocAttributeFormatSchema = z.enum([
   'ignore',
 ])
 
-export const topicDocAttributePurposeSchema = z.enum(['experimentation', 'processing', 'qa'])
+const topicDocAttributePurposeSchema = z.enum(['experimentation', 'processing', 'qa'])
 
-export const chapterLinkSchema = z
+const chapterLinkSchema = z
   .object({
     chapterId: z.string().min(1),
   })
   .strict()
 
-export const valueDocNodeSchema = z.lazy(() =>
+const valueDocNodeSchema = z.lazy(() =>
   z
     .object({
       value: z.string().min(1),
@@ -41,7 +41,7 @@ export const valueDocNodeSchema = z.lazy(() =>
     .strict(),
 )
 
-export const keyDocEntrySchema = z
+const keyDocEntrySchema = z
   .object({
     key: z.string().min(1),
     format: topicDocAttributeFormatSchema.default('string'),
@@ -123,13 +123,11 @@ export const topicDocsGroupsYamlSchema = topicDocsGroupSchema
 export type ValueDocNode = z.infer<typeof valueDocNodeSchema>
 export type KeyDocEntry = z.infer<typeof keyDocEntrySchema>
 export type TopicDocsYaml = z.infer<typeof topicDocsYamlSchema>
-export type TopicDocsGroupsYaml = z.infer<typeof topicDocsGroupsYamlSchema>
-export type TopicDocsChapterFrontMatter = z.infer<typeof topicDocsChapterFrontMatterSchema>
 export type TopicDocAttributeFormat = z.infer<typeof topicDocAttributeFormatSchema>
 export type TopicDocAttributePurpose = z.infer<typeof topicDocAttributePurposeSchema>
 export type TopicDocNumericFormat = (typeof topicDocNumericFormats)[number]
 export type TopicDocDateFormat = (typeof topicDocDateFormats)[number]
-export type TopicDocNumericUnitFormat = Exclude<TopicDocNumericFormat, 'number'>
+type TopicDocNumericUnitFormat = Exclude<TopicDocNumericFormat, 'number'>
 
 type TopicDocFormatDisplay = {
   label: string
@@ -138,7 +136,7 @@ type TopicDocFormatDisplay = {
   documentedValuesIntro?: string
 }
 
-export const topicDocNumericFormatDisplay = {
+const topicDocNumericFormatDisplay = {
   number: { label: 'Zahl' },
   meter: { label: 'Meter', suffix: 'm' },
   kilometer: { label: 'Kilometer', suffix: 'km' },
@@ -150,7 +148,7 @@ export const topicDocNumericFormatDisplay = {
   population_label: { label: 'Einwohner:innen', suffix: 'Einwohner:innen' },
 } satisfies Record<TopicDocNumericFormat, TopicDocFormatDisplay>
 
-export const topicDocDateFormatDisplay = {
+const topicDocDateFormatDisplay = {
   date: { label: 'Datum' },
 } satisfies Record<TopicDocDateFormat, TopicDocFormatDisplay>
 
@@ -162,18 +160,17 @@ export const topicDocSanitizedStringsFormatDisplay = {
 } satisfies TopicDocFormatDisplay
 
 export const topicDocNumericFormatSet = new Set<TopicDocNumericFormat>(topicDocNumericFormats)
-export const topicDocDateFormatSet = new Set<TopicDocDateFormat>(topicDocDateFormats)
+const topicDocDateFormatSet = new Set<TopicDocDateFormat>(topicDocDateFormats)
 
-export const topicDocNumericFormatSuffix: Record<TopicDocNumericUnitFormat, string> =
-  Object.fromEntries(
-    (
-      Object.entries(topicDocNumericFormatDisplay) as Array<
-        [TopicDocNumericFormat, TopicDocFormatDisplay]
-      >
-    ).flatMap(([format, display]) =>
-      format === 'number' || !display.suffix ? [] : [[format, display.suffix]],
-    ),
-  ) as Record<TopicDocNumericUnitFormat, string>
+const topicDocNumericFormatSuffix: Record<TopicDocNumericUnitFormat, string> = Object.fromEntries(
+  (
+    Object.entries(topicDocNumericFormatDisplay) as Array<
+      [TopicDocNumericFormat, TopicDocFormatDisplay]
+    >
+  ).flatMap(([format, display]) =>
+    format === 'number' || !display.suffix ? [] : [[format, display.suffix]],
+  ),
+) as Record<TopicDocNumericUnitFormat, string>
 
 export const getTopicDocNumericFormatSuffix = (format: TopicDocNumericFormat) => {
   if (format === 'number') return undefined

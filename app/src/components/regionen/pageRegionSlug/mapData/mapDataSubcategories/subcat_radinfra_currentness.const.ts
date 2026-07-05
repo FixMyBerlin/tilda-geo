@@ -6,8 +6,6 @@ import type { MapboxStyleLayer } from './mapboxStyles/types'
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
 const sourceLayer = 'bikelanes'
-export type SubcatRadinfraCurrentnesshId = typeof subcatId
-export type SubcatRadinfraCurrentnesshStyleIds = 'default'
 
 // Calculate timestamps for age thresholds based on legend
 const timestamp3YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 3))) // 3 years ago (Jan 1)
@@ -16,7 +14,7 @@ const timestamp10YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 10))) /
 
 // This used to be at app/src/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/groups/radinfra_currentness.ts
 // But since we need to have JS in here, it now moved here.
-export const bikelanesCurrentLayers: MapboxStyleLayer[] = [
+const bikelanesCurrentLayers: MapboxStyleLayer[] = [
   {
     type: 'line',
     id: 'current-colors',
@@ -57,7 +55,7 @@ export const bikelanesCurrentLayers: MapboxStyleLayer[] = [
   },
 ]
 
-export const bikelanesCurrentnessLegend: FileMapDataSubcategoryStyleLegend[] = [
+const bikelanesCurrentnessLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'good',
     name: '1-3 Jahre',

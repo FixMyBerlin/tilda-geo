@@ -44,8 +44,3 @@ export function getPrismaCliDatabaseUrl() {
 export function getGeoDatabaseUrl() {
   return `${getBaseDatabaseUrl()}?pool_timeout=0`
 }
-
-/** @internal Resets one-shot warning state for tests. */
-export function resetDatabaseUrlWarningsForTests() {
-  passwordUrlEncodingWarned = false
-}

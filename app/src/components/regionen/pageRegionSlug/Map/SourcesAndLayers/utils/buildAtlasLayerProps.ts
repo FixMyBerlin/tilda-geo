@@ -10,7 +10,7 @@ import { beforeId } from './beforeId'
 
 export type AtlasStyleLayer = Extract<FileMapDataSubcategoryStyleLayer, { type: AtlasLayerType }>
 
-export const ATLAS_LAYER_TYPES = [
+const ATLAS_LAYER_TYPES = [
   'fill',
   'line',
   'circle',

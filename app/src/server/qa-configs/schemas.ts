@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const QaConfigSchema = z.object({
+const QaConfigSchema = z.object({
   id: z.number().optional(),
   slug: z.string(),
   label: z.string(),
@@ -39,10 +39,6 @@ export const CreateQaConfigFormSchema = QaConfigSchema.omit({
 // Schema for updating QA configs (includes id)
 export const UpdateQaConfigFormSchema = CreateQaConfigFormSchema.extend({
   id: z.coerce.number().int().positive('ID must be a valid positive integer'),
-})
-
-export const GetQaConfigsSchema = z.object({
-  regionId: z.number().optional(),
 })
 
 export const GetQaConfigSchema = z.object({

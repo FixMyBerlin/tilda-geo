@@ -236,5 +236,3 @@ export const auth = betterAuth({
   ...options,
   plugins: [...(options.plugins ?? []), customSessionWithRole(options), tanstackStartCookies()],
 })
-
-export type Session = typeof auth.$Infer.Session

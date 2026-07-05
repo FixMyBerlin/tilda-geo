@@ -23,7 +23,7 @@ type StaticRegionInitialMapPositionZoom = {
 }
 
 /** Internal (to) or external (href must be https) nav link. */
-export type RegionNavigationLink =
+type RegionNavigationLink =
   | { name: string; to: InternalPath }
   | { name: string; href: `https://${string}` }
 
@@ -136,7 +136,7 @@ export type RegionSlug =
   | 'ueberlingen'
   | 'woldegk'
 
-export const defaultTildaRadverkehrSources = [
+const defaultTildaRadverkehrSources = [
   // DEFAULT
   // The order here specifies the order in the UI
   'poi',
@@ -146,7 +146,7 @@ export const defaultTildaRadverkehrSources = [
   'lit',
   'mapillary',
 ] satisfies MapDataCategoryId[]
-export const defaultTildaRadverkehrExports = [
+const defaultTildaRadverkehrExports = [
   // DEFAULT
   // The order here specifies the order in the UI
   'bikelanes',

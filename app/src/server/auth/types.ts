@@ -9,5 +9,3 @@ export type AppSession = {
   user: Session['user']
   role: UserRoleEnum
 }
-
-export type SessionWithRole = Session & { role: UserRoleEnum }

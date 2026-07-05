@@ -6,7 +6,7 @@ const SIZE_UNITS: Record<string, number> = {
   TB: 1e12,
 }
 
-export const DOCKER_QUERY_TIMEOUT_MS = 15_000
+const DOCKER_QUERY_TIMEOUT_MS = 15_000
 export const DOCKER_PRUNE_TIMEOUT_MS = 120_000
 
 export type DockerCmdResult = {

@@ -43,8 +43,5 @@ export const useInspectorMissingTranslationsEntries = () => {
   )
 }
 
-export const useInspectorMissingTranslationsActions = () =>
-  useInspectorMissingTranslationsStore((state) => state.actions)
-
 export const registerInspectorMissingTranslation = (entry: InspectorMissingTranslationEntry) =>
   useInspectorMissingTranslationsStore.getState().actions.registerMissingTranslation(entry)

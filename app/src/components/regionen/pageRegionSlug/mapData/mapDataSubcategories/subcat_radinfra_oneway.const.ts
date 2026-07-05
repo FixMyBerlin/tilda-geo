@@ -5,10 +5,8 @@ import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
 const sourceLayer = 'bikelanes'
-export type SubcatRadinfraOnewayId = typeof subcatId
-export type SubcatRadinfraOnewayStyleIds = 'default'
 
-export const bikelanesOnewayLegend: FileMapDataSubcategoryStyleLegend[] = [
+const bikelanesOnewayLegend: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'yes',
     name: 'eine Richtung',

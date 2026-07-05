@@ -8,7 +8,7 @@ import { inverse } from '../utils/log'
 
 const geoJsonFolder = 'scripts/StaticDatasets/geojson'
 
-export interface SharedArgs {
+interface SharedArgs {
   'folder-filter'?: string
   'keep-tmp'?: boolean
 }

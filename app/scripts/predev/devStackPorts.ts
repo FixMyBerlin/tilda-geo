@@ -3,7 +3,7 @@ import { connect } from 'node:net'
 export const DEV_DB_PORT = 5432
 export const DEV_TILES_PORT = 3000
 
-export function isPortFreeOnHost(host: string, port: number) {
+function isPortFreeOnHost(host: string, port: number) {
   return new Promise<boolean>((resolve) => {
     const socket = connect({ host, port })
     socket.once('connect', () => {

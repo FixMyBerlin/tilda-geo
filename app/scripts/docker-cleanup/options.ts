@@ -60,7 +60,7 @@ function getReclaimableBytes(summary: DfSummary, action: CleanupAction): number 
     .reduce((s, r) => s + r.reclaimableBytes, 0)
 }
 
-export async function getActionReclaimableBytes(summary: DfSummary, action: CleanupAction) {
+async function getActionReclaimableBytes(summary: DfSummary, action: CleanupAction) {
   if (action.getCustomReclaimableBytes) {
     return action.getCustomReclaimableBytes()
   }

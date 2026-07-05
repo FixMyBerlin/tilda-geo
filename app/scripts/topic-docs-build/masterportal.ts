@@ -15,7 +15,7 @@ const collectGfiValueFormat = (values: Array<CompiledValue>, acc: Record<string,
   }
 }
 
-export type MasterportalGfiAttributeValue =
+type MasterportalGfiAttributeValue =
   | string
   | {
       name: string

@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 /** Sheet color schemes — panel bg + grabber tint per use. */
-export type SheetTone = 'default' | 'calculator' | 'debug'
+type SheetTone = 'default' | 'calculator' | 'debug'
 
 const toneStyles: Record<SheetTone, { panel: string; grabber: string }> = {
   default: { panel: 'bg-white', grabber: 'bg-gray-300' },
@@ -14,7 +14,7 @@ const toneStyles: Record<SheetTone, { panel: string; grabber: string }> = {
 }
 
 /** How much of the map stays visible above the sheet. */
-export type SheetMapPeek = 'minimal' | '10%' | '20%'
+type SheetMapPeek = 'minimal' | '10%' | '20%'
 
 const maxHeightByPeek: Record<SheetMapPeek, string> = {
   // Just enough room for the close button above the sheet (sheet ≈ full height).

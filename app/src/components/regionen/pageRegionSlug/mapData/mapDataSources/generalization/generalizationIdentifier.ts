@@ -5,7 +5,7 @@ import type {
 
 export const atlasGeneralizedPrefix = 'atlas_generalized_' as const
 
-export type GeneralizedTableId = `${typeof atlasGeneralizedPrefix}${Lowercase<TableId>}`
+type GeneralizedTableId = `${typeof atlasGeneralizedPrefix}${Lowercase<TableId>}`
 export function generalizationFunctionIdentifier<T extends UnionTiles<TableId>>(tileId: T) {
   return tileId
     .split(',')

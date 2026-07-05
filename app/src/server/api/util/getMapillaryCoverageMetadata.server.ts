@@ -7,8 +7,6 @@ const MapillaryCoverageMetadataSchema = z.object({
   updated_at: z.coerce.date(),
 })
 
-export type MapillaryCoverageMetadata = z.infer<typeof MapillaryCoverageMetadataSchema>
-
 export async function getMapillaryCoverageMetadata() {
   const [result] = await geoDataClient.$queryRaw<
     Array<{ ml_data_from: Date; osm_data_from: Date; updated_at: Date }>

@@ -1,15 +1,18 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
   "ignoreFiles": ["scripts/StaticDatasets/geojson/**"],
+  "ignoreIssues": {
+    "scripts/StaticDatasets/types.ts": ["exports", "types"],
+  },
   "entry": [
     "scripts/ELILayers/**/*.ts",
     "scripts/generate-favicons/process.ts",
     "scripts/RegionalMasks/**/*.ts",
     "scripts/StaticDatasets/updateWfsSources/**/*.ts",
-    "scripts/setup-worktree.ts",
+    "scripts/parking-cutouts-import/index.ts",
     "src/server/instrumentation/nitro-*.plugin.server.ts",
   ],
-  "ignoreBinaries": ["code", "github", "gh"],
+  "ignoreBinaries": ["code", "gdal", "gdalinfo", "github", "gh", "ogrinfo", "which"],
   "ignoreDependencies": [
     "@tanstack/router-plugin",
     // Used in symlinked scripts/StaticDatasets/geojson/** (ignored by knip via ignoreFiles)

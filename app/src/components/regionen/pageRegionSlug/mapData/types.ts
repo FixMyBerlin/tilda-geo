@@ -7,8 +7,6 @@ import type {
   SymbolLayerSpecification,
   VectorSourceSpecification,
 } from 'maplibre-gl'
-import type { RegionSlug } from '@/data/regions.const'
-import type { translations } from '../../../../components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import type { LegendIconTypes } from '../../../../components/regionen/pageRegionSlug/SidebarLayerControls/Legend/LegendIcons/types'
 import type { MapDataCategoryId } from './mapDataCategories/MapDataCategoryId'
 import type { SourcesId } from './mapDataSources/sources.const'
@@ -26,43 +24,6 @@ export type MapDataBackgroundSource<TIds> = {
   maxzoom?: RasterSourceSpecification['maxzoom']
   minzoom?: RasterSourceSpecification['minzoom']
   tileSize?: RasterSourceSpecification['tileSize']
-}
-
-/** @desc: The data sources, configured in 'sourcesDatasets.const.ts' */
-export type MapDataDatasetsSource<TIds> = {
-  /** @desc Associate the dataset with a region. This is the only place where we connect object to region, not region to object. But it makes more sence this way. */
-  regionKey: RegionSlug[]
-  id: TIds | string // TODO the "string" part should go away, if we keep this. Or it should all be "string". This was added during the migration of LegacyStaticDatasets
-  /** @desc Whenever we have one dataset multipe time, we need a subid to make them unique */
-  subId?: string
-  name: string
-  description?: string
-  attributionHtml: string
-  inspector:
-    | ({
-        enabled: true
-        highlightingKey: 'TODO' // This is not implemented, yet
-        /** @desc Array of key strings OR `false` to list all available keys */
-        documentedKeys: string[] | false
-        editors?: MapDataSourceInspectorEditor[]
-      } & (
-        | { disableTranslations?: false; translations: typeof translations }
-        | { disableTranslations: true; translations?: never }
-      ))
-    | {
-        enabled: false
-      }
-  layers: (
-    | (CircleLayerSpecification & Required<Pick<CircleLayerSpecification, 'paint'>>)
-    | (FillLayerSpecification & Required<Pick<FillLayerSpecification, 'paint'>>)
-    | (LineLayerSpecification & Required<Pick<LineLayerSpecification, 'paint'>>)
-    | (SymbolLayerSpecification & Required<Pick<SymbolLayerSpecification, 'paint' | 'layout'>>)
-    | (HeatmapLayerSpecification & Required<Pick<HeatmapLayerSpecification, 'paint'>>)
-  )[]
-} & {
-  type: 'vector'
-  /** @desc Required format is `pmtiles://${DatasetFiles}` */
-  url: string
 }
 
 export type MapDataSourceInspectorEditor = {

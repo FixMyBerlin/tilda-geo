@@ -14,8 +14,3 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 export const DesktopOnly = ({ children }: { children: ReactNode }) => {
   return useBreakpoint('sm') ? <>{children}</> : null
 }
-
-/** Render children only below the desktop breakpoint (< sm); null at ≥ sm. */
-export const MobileOnly = ({ children }: { children: ReactNode }) => {
-  return useBreakpoint('sm') ? null : <>{children}</>
-}

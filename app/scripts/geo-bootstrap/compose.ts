@@ -1,7 +1,7 @@
 import { $ } from 'bun'
 import { GEO_BOOTSTRAP_FLAGS } from './flags'
 
-export function geoBootstrapProcessingCommand() {
+function geoBootstrapProcessingCommand() {
   return `bun run processing -- ${GEO_BOOTSTRAP_FLAGS.join(' ')}`
 }
 

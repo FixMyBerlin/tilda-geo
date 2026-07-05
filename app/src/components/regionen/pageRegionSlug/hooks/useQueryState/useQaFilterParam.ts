@@ -2,7 +2,7 @@ import { parseAsJson, useQueryState } from 'nuqs'
 import { z } from 'zod'
 import { searchParamsRegistry } from './searchParamsRegistry'
 
-export const zodQaFilterParam = z.object({
+const zodQaFilterParam = z.object({
   users: z.array(z.string()).optional().nullable(),
 })
 

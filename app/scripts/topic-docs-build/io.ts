@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs'
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { styleText } from 'node:util'
 import {
@@ -10,11 +10,6 @@ import {
 import { inputRoot } from './paths'
 
 export const readText = async (filePath: string) => readFile(filePath, 'utf-8')
-
-export const writeJson = async (filePath: string, data: unknown) => {
-  await mkdir(path.dirname(filePath), { recursive: true })
-  await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`)
-}
 
 const ensureDir = async (dirPath: string) => {
   if (!existsSync(dirPath)) {

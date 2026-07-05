@@ -1,12 +1,12 @@
 /** Masterportal services.json `gfiAttributes` value shapes (labels, numbers, HTML). */
 
-export type TopicDocGfiHtmlConfig = {
+type TopicDocGfiHtmlConfig = {
   tag: string
   innerHTML: string
   properties?: Record<string, string>
 }
 
-export type TopicDocGfiAttributeObject =
+type TopicDocGfiAttributeObject =
   | {
       name: string
       type: 'number'
@@ -26,7 +26,7 @@ export type TopicDocGfiAttributeObject =
       format: Record<string, string>
     }
 
-export type TopicDocGfiAttributeValue = string | TopicDocGfiAttributeObject
+type TopicDocGfiAttributeValue = string | TopicDocGfiAttributeObject
 
 export type TopicDocMasterportalGfiConfig = {
   gfiAttributes: Record<string, TopicDocGfiAttributeValue>

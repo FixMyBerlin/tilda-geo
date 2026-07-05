@@ -29,7 +29,7 @@ function adlerChecksum(s: string) {
   return value
 }
 
-export const getRegistrySourceKey = (feature: MapGeoJSONFeature) => {
+const getRegistrySourceKey = (feature: MapGeoJSONFeature) => {
   // Only true for additionalSourceKeys (notes): they use simple source ids that match the registry.
   if (persistableSourceKeys.has(feature.source)) return feature.source
   // Atlas: feature.source is a long key e.g. "cat:bikelanes--source:atlas_bikelanes--subcat:bikelanes" → parse to registry key.
@@ -92,7 +92,7 @@ function numericSourceIdToString(numericSourceId: number) {
   return `unknown-${numericSourceId}`
 }
 
-export const parseFeaturesParam = (query: string) => {
+const parseFeaturesParam = (query: string) => {
   return query
     .split(',')
     .map((s) => {

@@ -1,4 +1,3 @@
-import { z } from 'zod'
 import type { EnvironmentValues } from '@/server/envSchema'
 import { envKey } from './isEnv'
 import { makeOriginFromParts, type UrlParts } from './urlParts'
@@ -8,12 +7,6 @@ const tilesBaseUrl: Record<EnvironmentValues, UrlParts> = {
   staging: { protocol: 'https', host: 'staging-tiles.tilda-geo.de' },
   production: { protocol: 'https', host: 'tiles.tilda-geo.de' },
 }
-
-export const tilesHostSchema = z.enum([
-  tilesBaseUrl.development.host,
-  tilesBaseUrl.staging.host,
-  tilesBaseUrl.production.host,
-])
 
 export const getTilesUrl = (path?: string) => {
   const base = makeOriginFromParts(tilesBaseUrl[envKey])

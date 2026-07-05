@@ -37,30 +37,3 @@ export async function verifyMapRendered(page: Page) {
     throw new Error('Map canvas has no dimensions')
   }
 }
-
-export async function checkMapTilesLoaded(page: Page) {
-  await page.waitForSelector('.maplibregl-canvas', { state: 'visible' })
-
-  const hasControls = await page
-    .locator('.maplibregl-ctrl')
-    .first()
-    .isVisible()
-    .catch(() => false)
-
-  if (!hasControls) {
-    console.warn('Map controls not visible - map may still be loading')
-  }
-}
-
-/**
- * Returns the runtime layer ids of the main map, bottom to top.
- * Requires `window.__mainMap` (set on map load in dev/Playwright mode, see
- * `src/components/shared/utils/playwright.ts`) and a prior `waitForMapLoad`.
- */
-export async function getMapLayerIds(page: Page) {
-  return page.evaluate(() => {
-    const map = window.__mainMap
-    if (!map) throw new Error('window.__mainMap not set - is VITE_PLAYWRIGHT_ENABLED=true?')
-    return map.getStyle().layers.map((layer) => layer.id)
-  })
-}

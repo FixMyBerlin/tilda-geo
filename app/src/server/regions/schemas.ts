@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { RegionStatus } from '@/prisma/generated/browser'
 
-export const RegionSchema = z.object({
+const RegionSchema = z.object({
   slug: z.string(),
   promoted: z.boolean(),
   status: z.enum(RegionStatus),

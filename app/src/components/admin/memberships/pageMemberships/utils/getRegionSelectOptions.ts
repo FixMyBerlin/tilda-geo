@@ -5,7 +5,7 @@ type UserData = {
   Membership: Array<{ region: { slug: string } }>
 } | null
 
-export type RegionOption = {
+type RegionOption = {
   value: string
   label: string
   readonly?: boolean

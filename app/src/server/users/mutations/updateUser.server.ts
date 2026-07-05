@@ -1,11 +1,9 @@
-import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { isProd } from '@/components/shared/utils/isEnv'
 import { Prisma } from '@/prisma/generated/client'
 import { requireAuth } from '@/server/auth/session.server'
 import db from '@/server/db.server'
-import type { FormState } from '@/server/utils/validation'
-import { extractAndValidateFormData, validationErrorState } from '@/server/utils/validation'
+import { validationErrorState } from '@/server/utils/validation'
 import { UpdateUserSchema } from '../schema'
 
 const duplicateEmailMessage = 'Diese E-Mail-Adresse ist bereits vergeben.'
@@ -50,17 +48,6 @@ export async function updateUserWithData(data: z.infer<typeof UpdateUserSchema>,
         errors: { email: [duplicateEmailMessage] },
       }
     }
-    logUpdateUserError('unexpected', error)
-    return { success: false, message: updateUserErrorMessage, errors: {} }
-  }
-}
-
-export async function updateUser(_prevState: FormState | null, formData: FormData) {
-  try {
-    const parsed = extractAndValidateFormData(formData, UpdateUserSchema)
-    return updateUserWithData(parsed, getRequestHeaders())
-  } catch (error) {
-    if (error instanceof z.ZodError) return validationErrorState(error)
     logUpdateUserError('unexpected', error)
     return { success: false, message: updateUserErrorMessage, errors: {} }
   }

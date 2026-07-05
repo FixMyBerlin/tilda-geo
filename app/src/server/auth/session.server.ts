@@ -5,7 +5,7 @@ import { AuthorizationError } from './errors'
 
 type Session = typeof auth.$Infer.Session
 
-export async function getSession(headers: Headers) {
+async function getSession(headers: Headers) {
   const result = await auth.api.getSession({ headers })
   // Type assertion needed: Better Auth's getSession return type doesn't perfectly match
   // our Session type (from auth.$Infer.Session), even though customSession plugin ensures

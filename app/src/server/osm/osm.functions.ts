@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { createOsmNote } from './actions/createOsmNote.server'
-import { getOsmUserDetails } from './actions/getOsmUserDetails.server'
 
 const CreateOsmNoteInput = z.object({
   lat: z.number(),
@@ -12,7 +11,3 @@ const CreateOsmNoteInput = z.object({
 export const createOsmNoteFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof CreateOsmNoteInput>) => CreateOsmNoteInput.parse(data))
   .handler(async ({ data }) => createOsmNote(data))
-
-export const getOsmUserDetailsFn = createServerFn({ method: 'GET' }).handler(async () =>
-  getOsmUserDetails(),
-)

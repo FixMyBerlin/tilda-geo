@@ -37,7 +37,7 @@ const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
   false,
 ]
 
-export const createStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_default,
@@ -67,9 +67,7 @@ export const createStreetStyleLayers = (filter: MapboxStyleLayersProps['addition
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const createStreetSurfaceStyleLayers = (
-  filter: MapboxStyleLayersProps['additionalFilter'],
-) =>
+const createStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_surface,
@@ -99,7 +97,7 @@ export const createStreetSurfaceStyleLayers = (
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const createStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_kind,

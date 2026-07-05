@@ -29,7 +29,7 @@ export function iterate(obj: unknown, fn: Fn, path?: (string | number)[]) {
   }
 }
 
-export function setAllActiveToFalse<T>(config: T) {
+function setAllActiveToFalse<T>(config: T) {
   const allActiveFalse = structuredClone(config)
   iterate(allActiveFalse, (obj) => {
     obj.active = false

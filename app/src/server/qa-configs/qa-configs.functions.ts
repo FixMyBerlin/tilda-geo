@@ -7,7 +7,6 @@ import { deleteQaConfig } from './mutations/deleteQaConfig.server'
 import { updateQaConfigWithData } from './mutations/updateQaConfig.server'
 import { getQaAreasByStatus } from './queries/getQaAreasByStatus.server'
 import { getQaConfigsForRegion } from './queries/getQaConfigsForRegion.server'
-import { getQaConfigStatsForAdmin } from './queries/getQaConfigStatsForAdmin.server'
 import { getQaDataForMap } from './queries/getQaDataForMap.server'
 import { getQaDecisionDataForArea } from './queries/getQaDecisionDataForArea.server'
 import { getQaEvaluationsForArea } from './queries/getQaEvaluationsForArea.server'
@@ -16,7 +15,6 @@ import { CreateQaConfigFormSchema, DeleteQaConfigSchema, UpdateQaConfigFormSchem
 
 export type CreateQaEvaluationInput = z.infer<typeof CreateQaEvaluationSchema>
 
-const QaConfigStatsForAdminInput = z.object({ configId: z.number() })
 const QaAreasByStatusInput = z.object({
   configSlug: z.string(),
   regionSlug: z.string(),
@@ -34,12 +32,6 @@ const QaAreaInput = z.object({
   regionSlug: z.string(),
 })
 const GetQaConfigsForRegionInput = z.object({ regionSlug: z.string() })
-
-export const getQaConfigStatsForAdminFn = createServerFn({ method: 'GET' })
-  .validator((data: z.infer<typeof QaConfigStatsForAdminInput>) =>
-    QaConfigStatsForAdminInput.parse(data),
-  )
-  .handler(async ({ data }) => getQaConfigStatsForAdmin(data, getRequestHeaders()))
 
 export const getQaAreasByStatusFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof QaAreasByStatusInput>) => QaAreasByStatusInput.parse(data))

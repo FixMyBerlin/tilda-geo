@@ -125,6 +125,7 @@
     "@tanstack/router-core": "^1.171.13",
     "@turf/bbox": "7.3.5",
     "@turf/boolean-intersects": "7.3.5",
+    "@turf/boolean-within": "7.3.5",
     "@turf/helpers": "7.3.5",
     "@turf/truncate": "7.3.5",
     "@turf/turf": "7.3.5",

@@ -10,7 +10,7 @@ type Points = [[number, number], [number, number]]
 type MapPanelSize = { width: number; height: number }
 type MapInstance = Pick<MapLibreMap, 'getCanvas' | 'unproject' | 'fitBounds'>
 
-export function boundsToPoints(bounds: Bounds) {
+function boundsToPoints(bounds: Bounds) {
   const [x0, y0, x1, y1] = bounds
   return [
     [x0, y0],
@@ -18,7 +18,7 @@ export function boundsToPoints(bounds: Bounds) {
   ] satisfies Points
 }
 
-export function createBox(points: Points) {
+function createBox(points: Points) {
   const [[x0, y0], [x1, y1]] = points
   return polygon([
     [
@@ -31,7 +31,7 @@ export function createBox(points: Points) {
   ])
 }
 
-export function getMapSize(mapInstance: { getCanvas(): HTMLCanvasElement }) {
+function getMapSize(mapInstance: { getCanvas(): HTMLCanvasElement }) {
   const canvas = mapInstance.getCanvas()
   return { width: canvas.offsetWidth, height: canvas.offsetHeight }
 }
@@ -73,7 +73,7 @@ export function createBoundingPolygon(
   return poly
 }
 
-export function compareFeatures(feature1: Feature, feature2: Feature) {
+function compareFeatures(feature1: Feature, feature2: Feature) {
   // @ts-expect-error, see https://github.com/bjornharrtell/jsts/issues/532
   const geojsonReader = new GeoJSONReader()
   const f1 = geojsonReader.read(feature1.geometry)
@@ -105,7 +105,7 @@ function geojsonFromCoordinates(coordinates: [number, number] | [number, number,
   return coordinates.length === 2 ? point(coordinates) : createBox(boundsToPoints(coordinates))
 }
 
-export function createFeatureCollection(urlFeatures: UrlFeature[]) {
+function createFeatureCollection(urlFeatures: UrlFeature[]) {
   return featureCollection(
     // @ts-expect-error - probably a bug
     urlFeatures.map(({ coordinates }) => geojsonFromCoordinates(coordinates)),

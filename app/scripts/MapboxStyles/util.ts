@@ -1,6 +1,6 @@
 import { styleText } from 'node:util'
 
-export type MapboxStyleMetadata = {
+type MapboxStyleMetadata = {
   metadata: { 'mapbox:groups': Record<string, { name: string; collapsed: boolean }> }
   layers: unknown[]
   modified: string

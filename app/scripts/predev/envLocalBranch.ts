@@ -3,18 +3,9 @@ import { join } from 'node:path'
 import { repoRootFromApp } from './ensureEnv'
 import { logOk, logWarn } from './predevLog'
 
-export const DEFAULT_BRANCHES = ['develop', 'main']
+const DEFAULT_BRANCHES = ['develop', 'main']
 
 const label = 'env_local_branch'
-
-export type EnvLocalSyncAction =
-  | 'none'
-  | 'ok'
-  | 'missing'
-  | 'removed_on_default_branch'
-  | 'removed_on_main_checkout'
-  | 'stale_removed'
-  | 'env_example_restored'
 
 export function envLocalPath(repoRoot = repoRootFromApp()) {
   return join(repoRoot, '.env.local')
@@ -42,7 +33,7 @@ export async function isLinkedWorktree(repoRoot = repoRootFromApp()) {
   return gitDir.includes('/worktrees/')
 }
 
-export function readBranchFromEnvLocal(localPath = envLocalPath()) {
+function readBranchFromEnvLocal(localPath = envLocalPath()) {
   if (!existsSync(localPath)) return undefined
   const content = readFileSync(localPath, 'utf8')
   const match = content.match(/^# DEV_STACK_BRANCH=(.+)$/m)

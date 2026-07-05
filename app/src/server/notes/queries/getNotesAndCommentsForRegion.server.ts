@@ -10,10 +10,6 @@ const Schema = z.object({
   filter: zodInternalNotesFilterParam.nullish(),
 })
 
-export type NotesAndCommentsFeatureCollection = Awaited<
-  ReturnType<typeof getNotesAndCommentsForRegion>
->
-
 export async function getNotesAndCommentsForRegion(
   input: z.infer<typeof Schema>,
   headers: Headers,
