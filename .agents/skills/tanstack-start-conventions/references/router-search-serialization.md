@@ -164,13 +164,54 @@ See `react-map-gl` → `map-url-state.md`.
 
 ## Writing search params — history, defaults, throttle (nuqs → router parity)
 
-Encoding is only half the story. `navigate({ search })` does **not** carry the implicit behaviors nuqs bundled into `useQueryState` parser options. When you write a param (or migrate a route off nuqs), decide three things **per setter** — missing them is a silent regression:
+`navigate({ search })` does **not** include nuqs `useQueryState` defaults. Decide these per setter:
 
-- **History mode.** TanStack `navigate` defaults to **push** (a new history entry). nuqs defaulted to **replace**. For toggles / filters / viewport (anything that isn't "the user went somewhere new"), pass **`replace: true`** so Back leaves the page instead of stepping through every toggle. Reserve push for genuine navigations (selecting a feature, jumping to a location).
-- **Clear on default.** nuqs stripped a param whose value equalled its default (`clearOnDefault`). `navigate({ search })` only drops keys set to **`undefined`**. To keep share URLs clean, either set the key to `undefined` when it equals the default, or add the **`stripSearchParams`** search-middleware (from `@tanstack/react-router`) to the route with a defaults map. (`.default()`/`.catch()` in the Zod schema only affect _reading_ — they don't strip the param on write.)
-- **Throttle high-frequency writes.** Map pans and drags fire many times; throttle with **`@tanstack/react-pacer`** — `useThrottledCallback` for fire-and-forget, or `useThrottler` when you need `.cancel()` (e.g. cancel a pending trailing position write when a dialog closes). See `react-map-gl` → `map-url-state.md`.
+- **History mode:** TanStack defaults to **push** (`replace: false` — [NavigateOptions](https://tanstack.com/router/latest/docs/framework/react/api/router/NavigateOptionsType)). Pass **`replace: true`** for toggles, filters, and viewport updates. Use push only for real navigation.
+- **Clear on default:** set the key to **`undefined`** or add **`stripSearchParams`** with defaults ([search middlewares](https://tanstack.com/router/latest/docs/framework/react/guide/search-params#transforming-search-with-search-middlewares)). Zod defaults only affect reading.
+- **Throttle high-frequency writes:** map pans/drags need `@tanstack/react-pacer`; see `react-map-gl` → `map-url-state.md`.
 
-Prefer a thin shared `updateSearch(partial, { replace })` wrapper over `navigate` (functional-updater form: `navigate({ search: (prev) => … })`) so setters compose from fresh `prev` state instead of a stale render snapshot. Reference: `useRegionSearchNavigation` + the `useQueryState/*` hooks in tilda-geo.
+Use one route-local `updateSearch` wrapper so setters compose from fresh `prev` state ([functional search updater](https://tanstack.com/router/latest/docs/framework/react/guide/search-params#usenavigate-navigate-search)) and `undefined` deletes keys:
+
+```ts
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
+import type { RegionSearch } from '@/shared/regionen/regionSearchSchemas'
+
+const regionRouteApi = getRouteApi('/regionen/$regionSlug')
+
+type NavigateOptions = {
+  replace?: boolean
+}
+
+export const useRegionSearchNavigation = () => {
+  const search = regionRouteApi.useSearch()
+  const navigate = useNavigate({ from: '/regionen/$regionSlug' })
+
+  const updateSearch = (
+    partial: Partial<RegionSearch> | ((prev: RegionSearch) => Partial<RegionSearch>),
+    options?: NavigateOptions,
+  ) => {
+    void navigate({
+      search: (prev) => {
+        const updates = typeof partial === 'function' ? partial(prev) : partial
+        const next: Record<string, unknown> = { ...prev }
+
+        for (const [key, value] of Object.entries(updates)) {
+          if (value === undefined) {
+            delete next[key]
+          } else {
+            next[key] = value
+          }
+        }
+
+        return next as RegionSearch
+      },
+      replace: options?.replace,
+    })
+  }
+
+  return { search, updateSearch, navigate }
+}
+```
 
 ---
 
