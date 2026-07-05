@@ -4,7 +4,13 @@ import { parseArgs, styleText } from 'node:util'
 import * as p from '@clack/prompts'
 import { area, bboxPolygon } from '@turf/turf'
 import { $ } from 'bun'
+import dotenv from 'dotenv'
 import { topicsConfig } from '../../../processing/constants/topics.const'
+import { composeContainerPrefixFromEnv, dockerStackIdFromEnv } from '../predev/ensureDevStack'
+
+const repoRootFromScript = path.resolve(import.meta.dir, '../../..')
+dotenv.config({ path: path.join(repoRootFromScript, '.env') })
+dotenv.config({ path: path.join(repoRootFromScript, '.env.local') })
 
 const BBOX_PRESETS = {
   bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
@@ -335,8 +341,18 @@ function formatShellOneLiner(repoRoot: string, overrides: Record<string, string>
   }
   envParts.push(envAssignment('PROCESSING_DIFFING_MODE', diffMode))
 
+  const containerPrefix = composeContainerPrefixFromEnv()
+  if (containerPrefix) {
+    envParts.unshift(envAssignment('COMPOSE_DEV_CONTAINER_PREFIX', containerPrefix))
+  }
+
+  const stackId = dockerStackIdFromEnv()
+  const projectFlag = stackId ? `-p ${shellQuote(stackId)} ` : ''
+  const compose = detach
+    ? `docker compose ${projectFlag}up -d processing`
+    : `docker compose ${projectFlag}up processing`
+
   const repoAbs = path.resolve(repoRoot)
-  const compose = detach ? 'docker compose up -d processing' : 'docker compose up processing'
   return `( cd ${shellQuote(repoAbs)} && ${envParts.join(' ')} ${compose} )`
 }
 

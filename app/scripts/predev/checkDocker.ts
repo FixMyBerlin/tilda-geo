@@ -1,13 +1,17 @@
 import { join } from 'node:path'
-import { stopOtherRunningDevStacks } from './devStackDiscovery'
-import { isHostPortAvailable, publishedHostPorts } from './devStackPorts'
+import { stopOrphanedTilesContainers, stopOtherRunningDevStacks } from './devStackDiscovery'
+import {
+  DEV_DB_PORT,
+  DEV_TILES_PORT,
+  isHostPortAvailable,
+  publishedHostPorts,
+} from './devStackPorts'
 import {
   activeStackIdFromEnv,
   composeContainerPrefixFromEnv,
   devStackIdFromEnv,
-  getStackPortsFromEnv,
+  devStackPortsArePublished,
   isAttachMode,
-  stackPortsArePublished,
 } from './ensureDevStack'
 import { repoRootFromApp } from './ensureEnv'
 import { logErr, logOk, logWarn } from './predevLog'
@@ -16,9 +20,13 @@ const label = 'check_docker'
 
 export async function checkDocker() {
   try {
-    const { dbPort, tilesPort } = getStackPortsFromEnv()
     const attach = isAttachMode()
     const activeStackId = activeStackIdFromEnv()
+
+    const stoppedOrphans = await stopOrphanedTilesContainers()
+    if (stoppedOrphans.length > 0) {
+      logWarn('check_docker', `Stopped orphaned tiles containers: ${stoppedOrphans.join(', ')}`)
+    }
 
     const stopped = await stopOtherRunningDevStacks(activeStackId)
     if (stopped.length > 0) {
@@ -27,47 +35,47 @@ export async function checkDocker() {
     }
 
     if (attach) {
-      const ready = await stackPortsArePublished()
+      const ready = await devStackPortsArePublished()
       if (ready) {
-        logOk(`${label} (attached stack on ports ${dbPort}, ${tilesPort})`)
+        logOk(`${label} (attached stack on ports ${DEV_DB_PORT}, ${DEV_TILES_PORT})`)
         return
       }
       logErr(
         label,
-        `DEV_ATTACH_STACK is set but ports ${dbPort}, ${tilesPort} are not published — start the target stack first`,
+        `DEV_ATTACH_STACK is set but ports ${DEV_DB_PORT}, ${DEV_TILES_PORT} are not published — start the target stack first`,
       )
       process.exit(1)
     }
 
     const published = await publishedHostPorts()
-    const dbPublished = published.has(dbPort)
-    const tilesPublished = published.has(tilesPort)
+    const dbPublished = published.has(DEV_DB_PORT)
+    const tilesPublished = published.has(DEV_TILES_PORT)
 
     if (dbPublished && tilesPublished) {
-      logOk(`${label} (stack already running on ports ${dbPort}, ${tilesPort})`)
+      logOk(`${label} (stack already running on ports ${DEV_DB_PORT}, ${DEV_TILES_PORT})`)
       return
     }
 
     if (dbPublished || tilesPublished) {
       const busy = [
-        dbPublished && `DATABASE_PORT ${dbPort}`,
-        tilesPublished && `TILES_PORT ${tilesPort}`,
+        dbPublished && `db port ${DEV_DB_PORT}`,
+        tilesPublished && `tiles port ${DEV_TILES_PORT}`,
       ]
         .filter(Boolean)
         .join(', ')
       logErr(
         label,
-        `Port conflict: ${busy} in use but not both stack ports — pick other ports in .env.local`,
+        `Port conflict: ${busy} in use but not both stack ports — stop the other process or container`,
       )
       process.exit(1)
     }
 
-    const dbFree = await isHostPortAvailable(dbPort)
-    const tilesFree = await isHostPortAvailable(tilesPort)
+    const dbFree = await isHostPortAvailable(DEV_DB_PORT)
+    const tilesFree = await isHostPortAvailable(DEV_TILES_PORT)
     if (!dbFree || !tilesFree) {
       logErr(
         label,
-        `Ports not available (db ${dbPort}: ${dbFree ? 'free' : 'busy'}, tiles ${tilesPort}: ${tilesFree ? 'free' : 'busy'})`,
+        `Ports not available (db ${DEV_DB_PORT}: ${dbFree ? 'free' : 'busy'}, tiles ${DEV_TILES_PORT}: ${tilesFree ? 'free' : 'busy'})`,
       )
       process.exit(1)
     }
@@ -103,7 +111,7 @@ export async function checkDocker() {
     if (exitCode !== 0) {
       throw new Error(`exit code ${exitCode}`)
     }
-    logOk(`${label} (started stack on ports ${dbPort}, ${tilesPort})`)
+    logOk(`${label} (started stack on ports ${DEV_DB_PORT}, ${DEV_TILES_PORT})`)
   } catch (e) {
     logErr(label, e instanceof Error ? e.message : String(e))
     process.exit(1)

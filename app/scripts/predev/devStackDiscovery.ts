@@ -1,10 +1,9 @@
 import { join } from 'node:path'
+import { DEV_DB_PORT, DEV_TILES_PORT } from './devStackPorts'
 
 export type RunningDevStack = {
   /** `default` = develop stack (`db` / `tiles` on 5432 / 3000). */
   stackId: string
-  databasePort: number
-  tilesPort: number
   composeProject?: string
   repoRoot?: string
 }
@@ -95,12 +94,10 @@ export async function listRunningDevStacks() {
 
     const databasePort = await publishedHostPort(name, '5432')
     const tilesPort = await publishedHostPort(tilesName, '3000')
-    if (databasePort === undefined || tilesPort === undefined) continue
+    if (databasePort !== DEV_DB_PORT || tilesPort !== DEV_TILES_PORT) continue
 
     stacks.push({
       stackId,
-      databasePort,
-      tilesPort,
       composeProject: await composeProject(name),
       repoRoot: await composeWorkingDir(name),
     })
@@ -118,11 +115,6 @@ export async function resolveRunningAttachStack(stackId: string) {
     )
   }
   return entry
-}
-
-/** Stack id used for container names / compose -p (`default` → develop defaults). */
-export function attachStackIdForDocker(stackId: string) {
-  return stackId === DEVELOP_STACK_ID ? '' : stackId
 }
 
 /** Stop db+tiles for one discovered stack. */
@@ -151,6 +143,40 @@ export async function stopDevStack(stack: RunningDevStack) {
   const dbName = dbContainerForStack(stack.stackId)
   const tilesName = tilesContainerForStack(stack.stackId)
   await dockerText(['docker', 'stop', dbName, tilesName])
+}
+
+/** Stop tiles containers whose db sibling is not running (avoids restart loops on port 3000). */
+export async function stopOrphanedTilesContainers() {
+  const { out, exitCode } = await dockerText([
+    'docker',
+    'ps',
+    '-a',
+    '--format',
+    '{{.Names}}\t{{.State}}',
+  ])
+  if (exitCode !== 0) return []
+
+  const stopped: string[] = []
+
+  for (const line of out.split('\n').filter(Boolean)) {
+    const [name, state] = line.split('\t')
+    if (!name || !state) continue
+    if (state !== 'running' && state !== 'restarting') continue
+
+    let stackId: string | undefined
+    if (name === 'tiles') stackId = DEVELOP_STACK_ID
+    else if (name.endsWith('_tiles')) stackId = name.slice(0, -'_tiles'.length)
+    else continue
+
+    const dbName = dbContainerForStack(stackId)
+    const dbState = await dockerText(['docker', 'inspect', '--format', '{{.State.Status}}', dbName])
+    if (dbState.exitCode === 0 && dbState.out === 'running') continue
+
+    const stop = await dockerText(['docker', 'stop', name])
+    if (stop.exitCode === 0) stopped.push(name)
+  }
+
+  return stopped
 }
 
 /** Stop every running dev stack except the one this checkout uses. */

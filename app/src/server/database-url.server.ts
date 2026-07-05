@@ -1,7 +1,5 @@
 function getDatabaseConfig() {
   const host = process.env.DATABASE_HOST
-  // Non-default DATABASE_PORT from .env.local — see docs/docker-local-development.md
-  const port = process.env.DATABASE_PORT || '5432'
   const user = process.env.DATABASE_USER
   const password = process.env.DATABASE_PASSWORD
   const name = process.env.DATABASE_NAME
@@ -12,7 +10,7 @@ function getDatabaseConfig() {
     )
   }
 
-  return { host, port, user, password, name }
+  return { host, user, password, name }
 }
 
 function encodeCredential(value: string) {
@@ -32,9 +30,9 @@ function warnIfPasswordNeedsUrlEncoding(password: string) {
 }
 
 export function getBaseDatabaseUrl() {
-  const { host, port, user, password, name } = getDatabaseConfig()
+  const { host, user, password, name } = getDatabaseConfig()
   warnIfPasswordNeedsUrlEncoding(password)
-  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
+  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:5432/${name}`
 }
 
 // Note: The ?schema=prisma parameter is used by Prisma CLI (migrations, introspection, studio)

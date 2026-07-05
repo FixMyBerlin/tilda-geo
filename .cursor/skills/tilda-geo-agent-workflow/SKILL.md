@@ -67,7 +67,7 @@ FYI: manual `git worktree add` also works, but agents should prefer `bun run set
 ### Rules
 
 - **`develop` / `main`** -> main checkout, no `.env.local`, default Docker stack (`db` / `tiles`, ports 5432 / 3000).
-- **Work branches** -> linked worktree; predev auto-creates `.env.local` with isolated ports and `DEV_STACK_ID`.
+- **Work branches** -> linked worktree; predev auto-creates `.env.local` with `DEV_STACK_ID`.
 - Running `bun run dev` on a work branch in the **main checkout** only warns. Stop and use a worktree.
 
 ---
@@ -86,20 +86,19 @@ Run `bun run dev` and let **predev** manage env files, ports, Docker, and migrat
 Example auto-generated `.env.local`:
 
 ```env
-DATABASE_PORT=5433
-TILES_PORT=3001
 DEV_STACK_ID=wt_tilda_geo_my_branch
 ```
 
-| Variable                       | Role                                                                       |
-| ------------------------------ | -------------------------------------------------------------------------- |
-| `DEV_STACK_ID`                 | Compose project name; containers like `wt_foo_db`                          |
-| `DEV_ATTACH_STACK`             | Optional: attach to another running stack instead of starting new db+tiles |
-| `DATABASE_PORT` / `TILES_PORT` | Published host ports for this worktree                                     |
+| Variable           | Role                                                                       |
+| ------------------ | -------------------------------------------------------------------------- |
+| `DEV_STACK_ID`     | Compose project name; containers like `wt_foo_db`; separate DB volume      |
+| `DEV_ATTACH_STACK` | Optional: attach to another running stack instead of starting new db+tiles |
+
+Host ports are always **5432** (db) and **3000** (tiles). Predev stops other stacks before starting this worktree's stack — no per-worktree port allocation.
 
 `post-checkout` hook + predev remove stale `.env.local` when switching to `develop`/`main`.
 
-**Limits:** run one `bun run dev` at a time (port **5173**, OSM OAuth). Let predev actively manage one db+tiles stack per dev session.
+**Limits:** run one `bun run dev` at a time (port **5173**, OSM OAuth). One db+tiles stack at a time; switching worktrees stops the previous stack and starts yours on the default ports.
 
 If editing predev/Docker code, keep these invariants:
 
@@ -122,7 +121,7 @@ bun run processing -- --help   # full contract
 
 **Agents (no TTY):** pass the complete non-interactive flag set (bbox/preset, `--diff-mode`, topics, skip flags, `--foreground`/`--detach`/`--dry-run`). For exact flags and diff validation, load [test-processing-diff](../test-processing-diff/SKILL.md).
 
-**Worktree stacks:** the printed command must use this worktree's `.env.local` ports / `DEV_STACK_ID`. Prefer the line from `bun run processing` over manual env.
+**Worktree stacks:** the printed command uses this worktree's `DEV_STACK_ID` (host ports 5432/3000). Prefer the line from `bun run processing` over manual env.
 
 **Reference -> fixed diff workflow:** run `reference` on baseline commit, then `fixed` on your branch; inspect `public.*_diff` tables. Full steps in [test-processing-diff](../test-processing-diff/SKILL.md).
 
