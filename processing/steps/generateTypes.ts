@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url'
 import { $ } from 'bun'
 import { TYPES_DIR } from '../constants/directories.const'
 import { topicsConfig } from '../constants/topics.const'
-import { getTopicTables } from '../diffing/diffing'
 import { params } from '../utils/parameters'
 
 /**
@@ -16,38 +15,10 @@ export async function generateTypes() {
 
   console.log('[DEV] Generating types...')
 
-  writeTableIdTypes()
-  writeTopicIdTypes()
-  writeTodoIdTypes()
+  await writeTopicIdTypes()
+  await writeTodoIdTypes()
 
-  autoformatTypeFiles()
-}
-
-async function writeTableIdTypes() {
-  if (params.processOnlyTopics.length > 0) {
-    console.info('[DEV] Generating types:', 'Skipped because `PROCESS_ONLY_TOPICS` is present')
-    return
-  }
-
-  const processedTables = new Set<string>()
-  for (const [topic] of Array.from(topicsConfig)) {
-    const topicTables = await getTopicTables(topic)
-    topicTables.forEach((table) => {
-      processedTables.add(table)
-    })
-  }
-
-  const typeFile = join(TYPES_DIR, 'tableId.generated.const.ts')
-  const content = prefixGeneratedFiles(
-    `export type TableId = ${
-      Array.from(processedTables)
-        .sort()
-        .map((tableName) => `'${tableName}'`)
-        .join(' | ') || 'ERROR'
-    }`,
-  )
-
-  await Bun.write(typeFile, content)
+  await autoformatTypeFiles()
 }
 
 async function writeTopicIdTypes() {
@@ -108,30 +79,9 @@ function sortMapillarySpecial(a: string, b: string) {
 
 async function writeTodoIdTypes() {
   const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
-  const typeFile = Bun.file(typeFilePath)
 
   const bikelaneTodoNames = await callLuaForNames('extract_bikelane_todos')
-  const bikelaneTodos = bikelaneTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
-  const bikelaneTodoNamesTableAndField = bikelaneTodoNames
-    .filter((e) => e.todoTableOnly === false)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-  const bikelaneTodoNamesTableOnly = bikelaneTodoNames
-    .filter((e) => e.todoTableOnly === true)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-
   const roadTodoNames = await callLuaForNames('extract_road_todos')
-  const roadTodos = roadTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
-  const roadTodoNamesTableAndField = roadTodoNames
-    .filter((e) => e.todoTableOnly === false)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-  const roadTodoNamesTableOnly = roadTodoNames
-    .filter((e) => e.todoTableOnly === true)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-
   const todos = [...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id).sort(sortMapillarySpecial)
 
   const formatStringArray = (values: string[]) => {
@@ -140,30 +90,12 @@ async function writeTodoIdTypes() {
   }
 
   const fileContent = `
-  export const bikelaneTodoIds = [${formatStringArray(bikelaneTodos)}] as const
-  export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
-
-  export const bikelaneTodoIdsTableAndField = [${formatStringArray(bikelaneTodoNamesTableAndField)}] as const
-  export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
-
-  export const bikelaneTodoIdsTableOnly = [${formatStringArray(bikelaneTodoNamesTableOnly)}] as const
-  export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
-
-  export const roadTodoIds = [${formatStringArray(roadTodos)}] as const
-  export type RoadTodoId = (typeof roadTodoIds)[number]
-
-  export const roadTodoIdsTableAndField = [${formatStringArray(roadTodoNamesTableAndField)}] as const
-  export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
-
-  export const roadTodoIdsTableOnly = [${formatStringArray(roadTodoNamesTableOnly)}] as const
-  export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
-
-  export const todoIds = [${formatStringArray(todos)}] as const
-  export type TodoId = (typeof todoIds)[number]
-  `
+export const todoIds = [${formatStringArray(todos)}] as const
+export type TodoId = (typeof todoIds)[number]
+`
 
   const content = prefixGeneratedFiles(fileContent)
-  await Bun.write(typeFile, content)
+  await Bun.write(typeFilePath, content)
 }
 
 function prefixGeneratedFiles(content: string) {

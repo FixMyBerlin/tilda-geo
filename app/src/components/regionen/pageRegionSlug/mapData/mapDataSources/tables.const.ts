@@ -1,4 +1,6 @@
-// This is a list of all the tables we generate in tilda-geo. We might auto generate this list in the future.
+// Map-facing processing table IDs (tiles, cache warming, generalization).
+// Processing also creates auxiliary tables (e.g. *_errors) that are not listed here.
+// Export/tileset scripts use `exportIdentifier.ts` (`SourceExportApiIdentifier`).
 export type TableId =
   | 'barrierLines'
   | 'barrierAreas'
