@@ -26,7 +26,7 @@
     "preview": "cd .output && NITRO_PORT=4000 NITRO_HOST=127.0.0.1 bun --env-file=../.env --env-file=../.env.local ./server/index.mjs",
     "bleach": "rm -rf node_modules/ && rm -rf .output/ && bun install",
     "bleach-full": "rm bun.lock && bun run bleach",
-    "cleanup-docker": "bun scripts/docker-cleanup/index.ts",
+    "docker-cleanup": "bun scripts/docker-cleanup/index.ts",
     "cleanup-knip": "knip",
     "env-check:verify-manifest": "bun ../.github/scripts/verify-env-manifest.ts",
     "env-check:docs": "bun run --sequential env-check:docs:*",

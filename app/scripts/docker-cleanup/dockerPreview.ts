@@ -78,7 +78,7 @@ export function formatBytesAsGB(bytes: number): string {
   return `${gb.toFixed(2)} GB`
 }
 
-export type DfRow = {
+type DfRow = {
   type: string
   reclaimableBytes: number
   reclaimableHuman: string
@@ -143,12 +143,11 @@ export async function getDockerDf(): Promise<DfSummary> {
   }
 }
 
-export function getReclaimableForTypes(summary: DfSummary, types: string[]): string {
+export function formatDfStatus(summary: DfSummary) {
   if (!summary.ok) return summary.error
-  const bytes = summary.rows
-    .filter((r) => types.some((t) => r.type.toLowerCase().includes(t.toLowerCase())))
-    .reduce((s, r) => s + r.reclaimableBytes, 0)
-  return formatBytes(bytes)
+  const lines = summary.rows.map((r) => `  ${r.type}: ${r.reclaimableHuman} reclaimable`)
+  lines.push(`  Total: ${summary.totalReclaimableHuman} reclaimable`)
+  return lines.join('\n')
 }
 
 async function dockerFormat(args: string[]): Promise<string[]> {
@@ -175,6 +174,23 @@ export async function getDanglingImageRefs(): Promise<string[]> {
   return dockerFormat(['images', '-f', 'dangling=true', '--format', '{{.ID}}'])
 }
 
+export async function getDanglingImageSizeBytes() {
+  const result = await dockerCmd(['images', '-f', 'dangling=true', '--format', '{{.Size}}'])
+  if (result.timedOut || result.exitCode !== 0) return 0
+  let total = 0
+  for (const line of result.stdout.trim().split('\n').filter(Boolean)) {
+    total += parseSizeToBytes(line)
+  }
+  return total
+}
+
 export async function getUnusedVolumeNames(): Promise<string[]> {
   return dockerFormat(['volume', 'ls', '-f', 'dangling=true', '-q'])
+}
+
+export function truncatePreviewNames(names: string[], max = 15) {
+  if (names.length <= max) return names
+  const shown = names.slice(0, max)
+  shown.push(`…and ${names.length - max} more`)
+  return shown
 }
