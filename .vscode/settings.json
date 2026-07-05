@@ -9,6 +9,7 @@
   "oxc.typeAware": true,
   "oxc.path.oxfmt": "./app/node_modules/.bin/oxfmt",
   "oxc.path.oxlint": "./app/node_modules/.bin/oxlint",
+  "oxc.path.tsgolint": "./app/node_modules/.bin/tsgolint",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
