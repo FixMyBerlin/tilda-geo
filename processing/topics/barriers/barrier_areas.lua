@@ -3,6 +3,7 @@ local default_id = require('topics.helper.default_id')
 local LOG_ERROR = require('topics.barriers.barriers_errors')
 local result_tags = require('topics.barriers.helper.result_tags')
 local minzoom = require('topics.barriers.helper.minzoom')
+local compact_area = require('topics.barriers.helper.compact_area')
 
 local db_table = osm2pgsql.define_table({
   name = 'barrierAreas',
@@ -20,49 +21,50 @@ local db_table = osm2pgsql.define_table({
   }
 })
 
-local function preprocess_barrier_areas(object)
+--- Sets internal `_`-prefixed tags used by result_tags and minzoom.
+---@param object OsmObject
+local function prepare_barrier_area_tags(object)
   local tags = object.tags
   tags._computed_area = nil
-  tags._computed_circumference = nil
+  tags._is_compact_water = nil
 
   if tags.natural ~= 'water' then
     return
   end
 
-  tags._computed_area = object:as_multipolygon():transform(5243):area()
+  local area = object:as_multipolygon():transform(5243):area()
+  local perimeter = nil
   if object.type == 'way' then
-    tags._computed_circumference = object:as_linestring():transform(5243):length()
+    perimeter = object:as_linestring():transform(5243):length()
   end
+
+  tags._computed_area = area
+  tags._is_compact_water = compact_area.is_compact_water(area, perimeter)
 end
 
+---@param object OsmObject
+---@return boolean
 local function exit_processing_barrier_areas(object)
   if object.type == 'way' and not object.is_closed then
     return true
   end
 
   local tags = object.tags
-  local is_barrier = false
+
+  if tags.aeroway == 'aerodrome' then
+    return false
+  end
 
   if tags.natural == 'water' then
     local area = tags._computed_area
-    -- TODO: check this against individual polygons in multipolygons.
-    if area and area > 100000 then
-      is_barrier = true
-    elseif object.type == 'way' then
-      local circumference = tags._computed_circumference
-      if circumference and circumference > 1000 then
-        is_barrier = is_barrier or (area / circumference) < 3
-        is_barrier = true
-      end
-    end
+    return not area or area < compact_area.MIN_AREA_Z10
   end
 
-  is_barrier = is_barrier or tags.aeroway == 'aerodrome'
-  return not is_barrier
+  return true
 end
 
 local function barrier_areas(object)
-  preprocess_barrier_areas(object)
+  prepare_barrier_area_tags(object)
   if exit_processing_barrier_areas(object) then
     return
   end
@@ -75,7 +77,7 @@ local function barrier_areas(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = minzoom(cleaned_tags),
+    minzoom = minzoom(object.tags),
     id = default_id(object),
   })
 end
