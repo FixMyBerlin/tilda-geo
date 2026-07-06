@@ -6,8 +6,9 @@ from shapely.geometry import Polygon
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
-from .config import UseCaseConfig
+from .config import USER_LINE_BUFFER_M, USER_POINT_BUFFER_M, UseCaseConfig
 from .dem import DEMAdapter
+from .geometry import buffer_by_geom_type, dist_to_union as _dist_to_union
 from .tilda import TildaLoader
 
 
@@ -17,9 +18,6 @@ SURFACE_SCORES = {
     "gravel": 30, "unpaved": 10, "grass": 0, "dirt": 0,
     None: 40,
 }
-
-# Distanz-Platzhalter, wenn ein Layer leer ist (kein Feature gefunden).
-_FAR = 1e9
 
 # H3-Auflösungen: BASE ist das feine Scoring-Gitter (hohe Zoomstufen), AGG das
 # grobe Aggregat für niedrige Zoomstufen (z < 16). AGG_H3_RES muss mit der
@@ -34,7 +32,7 @@ _SCORE_COLS = [
     "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken", "score_fussgaengerzone",
-    "score_bestand",
+    "score_bestand", "score_eigendaten",
 ]
 
 # Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
@@ -141,20 +139,34 @@ SCORING_STEPS = [
     "Zielorte bewerten",
     "Hangneigung berechnen",
     "Vegetationsabdeckung verschneiden",
+    "Eigene Flächen verschneiden",
     "MCE-Score berechnen",
     "Ergebnisse speichern",
 ]
 SCORING_STEP_COUNT = len(SCORING_STEPS)
 
 
-def _dist_to_union(centroids: gpd.GeoSeries, features_proj: gpd.GeoDataFrame) -> pd.Series:
-    """Abstand jeder Zelle zum Union der Features. Leerer Layer → _FAR (überall fern)."""
-    if features_proj is None or len(features_proj) == 0:
-        return pd.Series(_FAR, index=centroids.index)
-    union = features_proj.geometry.union_all()
-    if union.is_empty:
-        return pd.Series(_FAR, index=centroids.index)
-    return centroids.distance(union)
+def apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore",)) -> None:
+    """Nullt die genannten Score-Spalten für alle vom `mask` getroffenen Hexagone.
+
+    Modularer harter Ausschluss: `mask` ist eine boolesche Serie über `hex_proj`.
+    Standardmäßig wird nur `mce_gesamtscore` genullt – z. B. für den
+    Eigendaten-Ausschluss, der die Teil-Scores Bedarf/Bebauung bewusst unberührt
+    lässt.
+    """
+    if mask is None or not mask.any():
+        return
+    for col in cols:
+        hex_proj.loc[mask, col] = 0.0
+
+
+def apply_bebauung_exclusion(hex_proj, mask) -> None:
+    """Bebauungs-Ausschluss: nullt Kombination UND Bebauung, lässt den Bedarf.
+
+    Für die klassischen Baubarkeits-Kriterien (Gebäude, Untergrund, Hangneigung):
+    der Bedarf besteht auch dort, wo nicht gebaut werden kann.
+    """
+    apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore", "score_bebauung"))
 
 
 def run_flaechenfinder(
@@ -165,6 +177,7 @@ def run_flaechenfinder(
     h3_resolution: int = BASE_H3_RES,
     osm_loader=None,
     vegetation_gdf=None,
+    user_geojson=None,
     progress_cb=None,
 ):
     """Berechnet das H3-Scoring-Gitter mit MCE-Score je Hexagon.
@@ -397,8 +410,32 @@ def run_flaechenfinder(
             del hexes
         del veg_proj
 
-    # ── 11. MCE-Scoring ────────────────────────────────────────────
+    # ── 11. Eigene Flächen verschneiden ────────────────────────────
+    # Nutzer-Upload (factorConfig.user_geojson): Punkte/Linien werden gepuffert
+    # (1,5 m / 2,5 m), Flächen unverändert; Distanz je Hexagon zur Union. Die
+    # eigentliche Score-/Ausschluss-Ableitung passiert im MCE-Schritt. Ohne Datei
+    # bleibt abstand_eigendaten_m NaN (→ Faktor wirkungslos).
     _step(11)
+    hex_proj["abstand_eigendaten_m"] = np.nan
+    if user_geojson is not None:
+        try:
+            _feats = user_geojson.get("features", []) if isinstance(user_geojson, dict) else user_geojson
+            user_gdf = gpd.GeoDataFrame.from_features(_feats, crs="EPSG:4326")
+        except Exception as exc:  # defensive: sanitisiert, aber nie dem Client trauen
+            print(f"   ⚠️  Eigene Flächen unlesbar, übersprungen: {exc}")
+            user_gdf = None
+        if user_gdf is not None and len(user_gdf):
+            user_gdf = user_gdf[user_gdf.geometry.notna() & ~user_gdf.geometry.is_empty]
+        if user_gdf is not None and len(user_gdf):
+            user_proj = buffer_by_geom_type(
+                user_gdf.to_crs("EPSG:25832"), USER_POINT_BUFFER_M, USER_LINE_BUFFER_M
+            )
+            hex_proj["abstand_eigendaten_m"] = _dist_to_union(centroids, user_proj)
+            del user_proj
+        del user_gdf
+
+    # ── 12. MCE-Scoring ────────────────────────────────────────────
+    _step(12)
     w = use_case.weights
 
     def slope_score(deg):
@@ -591,12 +628,48 @@ def run_flaechenfinder(
         hex_proj["score_bestand"] = np.nan
         bestand_delta = 0.0
 
+    # ── Eigene Flächen: weicher Modifier ODER harter Ausschluss ────────────
+    # `user_geojson_mode` bestimmt die Wirkung der in Schritt 11 berechneten
+    # Distanz. Punkte/Linien sind bereits gepuffert, Flächen exakt – ein Hexagon
+    # gilt als „innerhalb", wenn seine Distanz zur (gepufferten) Union 0 ist.
+    #   bonus/penalty    → voller Zu-/Abschlag innerhalb, 0 außerhalb; Stärke
+    #                      w_eigendaten (× 100). EIGENE Kategorie: fließt in den
+    #                      Gesamtscore, aber NICHT in Bedarf/Bebauung.
+    #   exclude_inside   → Hexagon innerhalb → mce = 0
+    #   exclude_outside  → Hexagon außerhalb → mce = 0 (erlaubte-Zonen-Maske)
+    # Harte Ausschlüsse nullen ausschließlich mce_gesamtscore (nicht Bedarf/Bebauung).
+    eigendaten_delta = 0.0
+    eigendaten_exclude = None
+    abstand_eig = hex_proj["abstand_eigendaten_m"]
+    has_eig = abstand_eig.notna().any()
+    inside_eig = abstand_eig.notna() & (abstand_eig <= 0)
+    eig_mode = use_case.user_geojson_mode
+    if has_eig and eig_mode == "exclude_inside":
+        eigendaten_exclude = inside_eig
+        hex_proj["score_eigendaten"] = np.nan
+    elif has_eig and eig_mode == "exclude_outside":
+        eigendaten_exclude = abstand_eig.notna() & ~inside_eig
+        hex_proj["score_eigendaten"] = np.nan
+    else:
+        w_eig = w.get("w_eigendaten", 0) or 0
+        if has_eig and w_eig > 0 and eig_mode in ("bonus", "penalty"):
+            sign = 1.0 if eig_mode == "bonus" else -1.0
+            effect = (w_eig * 100.0) * inside_eig.astype(float)
+            hex_proj["score_eigendaten"] = (sign * effect).round(1)
+            eigendaten_delta = sign * effect
+        else:
+            hex_proj["score_eigendaten"] = np.nan
+
     # ── Gesamtscore (Kombination) ──────────────────────────────────────────
-    # `total` = `base_score ± veg + kreuz + parken + fussgz + bestand`; die Modifier
-    # liegen als eigene Delta-Serien vor, damit sie unten für die Teil-Scores
-    # wiederverwendbar sind. `fussgz_delta`/`bestand_delta` sind per Default 0
-    # (w_fussgaengerzone=0, w_bestand=0), ändern bestehende Läufe also nicht.
-    total = base_score + veg_delta + kreuz_delta + parken_delta + fussgz_delta + bestand_delta
+    # `total` = `base_score ± veg + kreuz + parken + fussgz + bestand + eigendaten`;
+    # die Modifier liegen als eigene Delta-Serien vor, damit sie unten für die
+    # Teil-Scores wiederverwendbar sind. `fussgz_delta`/`bestand_delta`/
+    # `eigendaten_delta` sind per Default 0 (Gewichte 0), ändern bestehende Läufe
+    # also nicht.
+    total = (
+        base_score + veg_delta + kreuz_delta + parken_delta
+        + fussgz_delta + bestand_delta + eigendaten_delta
+    )
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
 
@@ -649,8 +722,11 @@ def run_flaechenfinder(
         (hex_proj["score_bodenbelag"]        < use_case.min_surface_score) |
         hex_proj["gebaeude"]
     )
-    hex_proj.loc[exclusion, "mce_gesamtscore"] = 0.0
-    hex_proj.loc[exclusion, "score_bebauung"] = 0.0
+    apply_bebauung_exclusion(hex_proj, exclusion)
+
+    # Eigendaten-Ausschluss (falls Modus exclude_*): nullt NUR mce_gesamtscore,
+    # lässt Bedarf/Bebauung bewusst unberührt (eigene Kategorie, siehe oben).
+    apply_score_exclusion(hex_proj, eigendaten_exclude, cols=("mce_gesamtscore",))
 
     hex_proj["eignungsklasse"] = pd.cut(
         hex_proj["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS

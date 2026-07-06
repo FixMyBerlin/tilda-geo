@@ -93,6 +93,7 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
   const { mainMap: map } = useMap()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setVegetationAttribution = usePlanningBoundaryState((s) => s.setVegetationAttribution)
+  const setUserObstaclesGeom = usePlanningBoundaryState((s) => s.setUserObstaclesGeom)
   const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
 
   // Show the scenario's latest result on the map when it is opened.
@@ -123,6 +124,13 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
     }
     return () => setBoundaryHighlightGeom(null)
   }, [studyArea, map, setBoundaryHighlightGeom])
+
+  // Show the scenario's uploaded "Eigene Flächen" as a control layer while it is open.
+  const userGeojson = (scenario?.factorConfig as FactorConfig | undefined)?.user_geojson
+  useEffect(() => {
+    setUserObstaclesGeom((userGeojson as object | undefined) ?? null)
+    return () => setUserObstaclesGeom(null)
+  }, [userGeojson, setUserObstaclesGeom])
 
   if (!scenario) return null
 

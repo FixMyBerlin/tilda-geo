@@ -92,6 +92,41 @@ const BoundaryHighlightLayer = () => {
   )
 }
 
+// Kontroll-Layer für die hochgeladenen „Eigene Flächen" (factorConfig.user_geojson).
+// Die Geometrie liegt clientseitig im Store (von ScenarioDetail gesetzt); Punkte,
+// Linien und Flächen werden mit eigenen Layern dargestellt.
+const UserObstaclesLayer = () => {
+  const geom = usePlanningBoundaryState((s) => s.userObstaclesGeom)
+  if (!geom) return null
+  return (
+    <Source id="planning-user-obstacles" type="geojson" data={geom as any}>
+      <Layer
+        id="planning-user-obstacles-fill"
+        type="fill"
+        filter={['==', ['geometry-type'], 'Polygon']}
+        paint={{ 'fill-color': '#7c3aed', 'fill-opacity': 0.2 }}
+      />
+      <Layer
+        id="planning-user-obstacles-line"
+        type="line"
+        filter={['in', ['geometry-type'], ['literal', ['LineString', 'Polygon']]]}
+        paint={{ 'line-color': '#6d28d9', 'line-width': 2 }}
+      />
+      <Layer
+        id="planning-user-obstacles-circle"
+        type="circle"
+        filter={['==', ['geometry-type'], 'Point']}
+        paint={{
+          'circle-radius': 4,
+          'circle-color': '#7c3aed',
+          'circle-stroke-color': '#6d28d9',
+          'circle-stroke-width': 1,
+        }}
+      />
+    </Source>
+  )
+}
+
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
   const [scoreMode] = usePlanningScoreParam()
@@ -111,7 +146,13 @@ export const SourcesLayersPlanning = () => {
     }
   }, [runId])
 
-  if (runId == null) return <BoundaryHighlightLayer />
+  if (runId == null)
+    return (
+      <>
+        <BoundaryHighlightLayer />
+        <UserObstaclesLayer />
+      </>
+    )
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
@@ -124,6 +165,7 @@ export const SourcesLayersPlanning = () => {
   return (
     <>
       <BoundaryHighlightLayer />
+      <UserObstaclesLayer />
 
       {hexagonsVisible && (
         <>

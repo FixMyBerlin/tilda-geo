@@ -24,6 +24,14 @@ type Store = {
   setDrawnGeometry: (geom: GeoJsonGeometry | null) => void
 
   /**
+   * The active scenario's uploaded "Eigene Flächen" GeoJSON (factorConfig.user_geojson),
+   * shown as a control layer on the map. Set by ScenarioDetail when a scenario is opened;
+   * null when none is uploaded.
+   */
+  userObstaclesGeom: GeoJsonGeometry | null
+  setUserObstaclesGeom: (geom: GeoJsonGeometry | null) => void
+
+  /**
    * Whether the on-demand vegetation (NDVI) result layer is shown. Kept in this
    * store (NOT in the URL) so toggling it doesn't trigger a router navigation –
    * a transient view switch the user flips frequently while inspecting hexagons.
@@ -57,6 +65,9 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
     ),
   drawnGeometry: null,
   setDrawnGeometry: (geom) => set({ drawnGeometry: geom }),
+
+  userObstaclesGeom: null,
+  setUserObstaclesGeom: (geom) => set({ userObstaclesGeom: geom }),
 
   vegetationVisible: false,
   setVegetationVisible: (visible) => set({ vegetationVisible: visible }),

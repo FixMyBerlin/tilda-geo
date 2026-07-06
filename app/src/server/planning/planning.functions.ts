@@ -3,6 +3,11 @@ import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { staticRegion } from '@/data/regions.const'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
+import {
+  MAX_USER_GEOJSON_BYTES,
+  sanitizeUserGeojson,
+  userGeojsonByteSize,
+} from '@/lib/planningUserGeojson'
 import { Prisma } from '@/prisma/generated/client'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
@@ -29,6 +34,31 @@ const FactorConfigSchema = z
     min_score_threshold: z.number().min(0).max(100).optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
+    // Nutzer-Upload „Eigene Flächen": sanitisiert (nur Geometrie, Typ-Whitelist,
+    // Feature-/Koordinaten-Limits) und auf 5 MB begrenzt. Der Server vertraut dem
+    // Client nicht: `sanitizeUserGeojson` läuft hier erneut und ersetzt den Wert
+    // durch die minimale, geprüfte FeatureCollection.
+    user_geojson: z
+      .any()
+      .optional()
+      .transform((val, ctx) => {
+        if (val == null) return undefined
+        try {
+          const clean = sanitizeUserGeojson(val as GeoJSON.GeoJSON)
+          if (userGeojsonByteSize(clean) > MAX_USER_GEOJSON_BYTES) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Eigene Flächen zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`,
+            })
+            return z.NEVER
+          }
+          return clean
+        } catch (e) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: (e as Error).message })
+          return z.NEVER
+        }
+      }),
+    user_geojson_mode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
   })
   .passthrough()
   .refine((c) => c.study_area != null, { message: 'study_area (GeoJSON) is required' })
@@ -135,7 +165,7 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
     })
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, job.scenario.region.slug)
-    const weights = (job.scenario.factorConfig as FactorConfig | null)?.weights
+    const fc = job.scenario.factorConfig as FactorConfig | null
     return {
       id: job.id,
       status: job.status,
@@ -147,7 +177,11 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
       // Die Faktor-Gewichte des Szenarios: Das UI leitet daraus pro Schritt ab,
       // ob er übersprungen wird (Gewicht 0) bzw. – bei ausschluss-gekoppelten
       // Faktoren – nur noch dem harten Ausschluss dient (siehe PlanningSteps).
-      weights: (weights ?? {}) as Record<string, number>,
+      weights: (fc?.weights ?? {}) as Record<string, number>,
+      // Der Eigendaten-Schritt läuft bei Ausschluss-Modi unabhängig vom Gewicht,
+      // sobald eine Datei vorliegt – das UI braucht dafür Präsenz + Modus.
+      userGeojsonPresent: fc?.user_geojson != null,
+      userGeojsonMode: fc?.user_geojson_mode ?? null,
     }
   })
 

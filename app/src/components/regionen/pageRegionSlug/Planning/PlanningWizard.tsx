@@ -24,6 +24,7 @@ import {
   PLANNING_USE_CASES,
   type PlanningUseCase,
 } from './planningDefaults'
+import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import { WizardStep } from './WizardStep'
 
 type AreaTab = 'search' | 'custom'
@@ -140,6 +141,10 @@ export const PlanningWizard = ({
     setConfig((c) => ({ ...c, [key]: value }))
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
+  const setUserGeojson = (geojson: GeoJSON.FeatureCollection | undefined) =>
+    setConfig((c) => ({ ...c, user_geojson: geojson }))
+  const setUserGeojsonMode = (mode: UserGeojsonMode) =>
+    setConfig((c) => ({ ...c, user_geojson_mode: mode }))
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -304,6 +309,15 @@ export const PlanningWizard = ({
           setWeight={setWeight}
           setField={setField}
           setVegetationDirection={setVegetationDirection}
+        />
+      </WizardStep>
+
+      <WizardStep number={4} title="Eigene Flächen (optional)" defaultOpen={false}>
+        <UserObstaclesField
+          config={config}
+          setWeight={setWeight}
+          setUserGeojson={setUserGeojson}
+          setUserGeojsonMode={setUserGeojsonMode}
         />
       </WizardStep>
 

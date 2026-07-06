@@ -36,6 +36,7 @@ BEGIN
                 score_parken,
                 score_fussgaengerzone,
                 score_bestand,
+                score_eigendaten,
                 cluster_area_m2,
                 eignungsklasse,
                 gebaeude,

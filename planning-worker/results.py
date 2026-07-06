@@ -14,7 +14,7 @@ HEX_COLUMNS = [
     "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_oepnv",
     "score_vegetation", "score_kreuzung", "score_parken", "score_fussgaengerzone",
-    "score_bestand", "cluster_area_m2",
+    "score_bestand", "score_eigendaten", "cluster_area_m2",
     "eignungsklasse", "gebaeude",
 ]
 

@@ -87,6 +87,21 @@ class UseCaseConfig:
     # Explizite Werte: "bayern" | "bb"
     cir_source: str = "auto"
 
+    # Eigene Flächen (Nutzer-Upload): wie die hochgeladene Geometrie in den Score
+    # eingeht. Die Geometrie selbst (factorConfig.user_geojson) liest der Worker
+    # separat aus dem Config-Dict, analog study_area. Stärke = weights["w_eigendaten"].
+    #   "bonus"           → weicher Zuschlag innerhalb des Puffers
+    #   "penalty"         → weicher Abzug innerhalb des Puffers
+    #   "exclude_inside"  → harter Ausschluss: Hexagon in der Geometrie → mce = 0
+    #   "exclude_outside" → harter Ausschluss: Hexagon außerhalb → mce = 0 (Maske)
+    user_geojson_mode: str = "bonus"
+
+
+# ── Puffer für Eigendaten-Geometrien (fest) ───────────────────────────────────
+# Punkte/Linien haben keine Fläche; sie werden vor dem Verschneiden gepuffert.
+USER_POINT_BUFFER_M = 1.5
+USER_LINE_BUFFER_M = 2.5
+
 
 # ── Defaults / Validierung ────────────────────────────────────────────────────
 
@@ -101,6 +116,7 @@ DEFAULT_WEIGHTS = {
     "w_parken": 0.1,       # Parken-Bonus (KFZ→Rad Umwidmung)
     "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
     "w_bestand": 0.0,          # Bestandsanlagen-Bedarfssenkung (neutral per Default → non-breaking)
+    "w_eigendaten": 0.0,       # Eigene Flächen (Nutzer-Upload); neutral per Default → non-breaking
 }
 
 
@@ -148,4 +164,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
+        user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
     )

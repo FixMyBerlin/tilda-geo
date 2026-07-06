@@ -2,12 +2,28 @@ import { ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { useRef, useState } from 'react'
 import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
 
-/** Drag & drop (or click-to-pick) a GeoJSON file containing a single Polygon/MultiPolygon. */
-export const GeoJsonUpload = ({
-  onGeometry,
+/**
+ * Generic drag & drop (or click-to-pick) file field for GeoJSON uploads.
+ *
+ * Parsing/validation is injected via `parse`, so the same component powers both
+ * the study-area upload (single Polygon) and the user-obstacle upload
+ * (Points/Lines/Polygons). `maxBytes`, when set, rejects oversized files before
+ * they are read into memory.
+ */
+export function GeoJsonUploadField<T>({
+  parse,
+  onResult,
+  accept = '.geojson,.json,application/geo+json,application/json',
+  maxBytes,
+  label,
 }: {
-  onGeometry: (geometry: StudyAreaGeometry, fileName: string) => void
-}) => {
+  parse: (text: string) => T
+  onResult: (result: T, fileName: string) => void
+  accept?: string
+  maxBytes?: number
+  /** Custom drop-zone hint; defaults to the study-area wording. */
+  label?: React.ReactNode
+}) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -15,11 +31,16 @@ export const GeoJsonUpload = ({
 
   const handleFile = async (file: File) => {
     setError(null)
+    if (maxBytes != null && file.size > maxBytes) {
+      setFileName(null)
+      setError(`Datei zu groß (max. ${Math.round(maxBytes / 1024 / 1024)} MB).`)
+      return
+    }
     try {
       const text = await file.text()
-      const geometry = parseStudyAreaGeometry(text)
+      const result = parse(text)
       setFileName(file.name)
-      onGeometry(geometry, file.name)
+      onResult(result, file.name)
     } catch (e) {
       setFileName(null)
       setError((e as Error).message)
@@ -50,15 +71,19 @@ export const GeoJsonUpload = ({
       >
         <ArrowUpTrayIcon className="h-5 w-5" />
         <span>
-          GeoJSON-Datei hierher ziehen
-          <br />
-          oder klicken zum Auswählen
+          {label ?? (
+            <>
+              GeoJSON-Datei hierher ziehen
+              <br />
+              oder klicken zum Auswählen
+            </>
+          )}
         </span>
       </button>
       <input
         ref={inputRef}
         type="file"
-        accept=".geojson,.json,application/geo+json,application/json"
+        accept={accept}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0]
@@ -71,3 +96,10 @@ export const GeoJsonUpload = ({
     </div>
   )
 }
+
+/** Study-area upload: a single Polygon/MultiPolygon. Thin wrapper over the generic field. */
+export const GeoJsonUpload = ({
+  onGeometry,
+}: {
+  onGeometry: (geometry: StudyAreaGeometry, fileName: string) => void
+}) => <GeoJsonUploadField parse={parseStudyAreaGeometry} onResult={onGeometry} />

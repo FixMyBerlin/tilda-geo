@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-// Die 12 fachlichen Schritte eines Laufs, in Reihenfolge. Müssen mit
+// Die 13 fachlichen Schritte eines Laufs, in Reihenfolge. Müssen mit
 // SCORING_STEPS im planning-worker (flaechenfinder/scorer.py) übereinstimmen.
 export const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
@@ -14,6 +14,7 @@ export const SCORING_STEPS = [
   'Zielorte bewerten',
   'Hangneigung berechnen',
   'Vegetationsabdeckung verschneiden',
+  'Eigene Flächen verschneiden',
   'MCE-Score berechnen',
   'Ergebnisse speichern',
 ] as const
@@ -33,19 +34,28 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_target'], //      8 Zielorte bewerten
   ['w_slope'], //       9 Hangneigung berechnen
   ['w_vegetation'], //  10 Vegetationsabdeckung verschneiden
-  [], //                11 MCE-Score berechnen
-  [], //                12 Ergebnisse speichern
+  ['w_eigendaten'], //  11 Eigene Flächen verschneiden (Sonderfall, siehe stepDisplay)
+  [], //                12 MCE-Score berechnen
+  [], //                13 Ergebnisse speichern
 ]
+
+// 0-basierter Index des Eigendaten-Schritts. Sonderbehandlung: bei Ausschluss-
+// Modi läuft er unabhängig vom Gewicht (sobald eine Datei vorliegt), ohne Datei
+// wird er übersprungen.
+const USER_OBSTACLES_STEP_INDEX = 10
 
 // Schritte, deren Ausgabe zusätzlich den harten Ausschluss steuert
 // (scorer.py::exclusion). Diese laufen auch bei Gewicht 0 weiter – sie werden
 // dann nicht „übersprungen", sondern „nur Ausschluss" markiert.
 const EXCLUSION_STEP_INDICES = new Set([3, 8]) // Gebäude & Untergrund, Hangneigung
 
+/** Präsenz + Modus des Eigendaten-Uploads (aus getPlanningJobFn). */
+export type UserObstaclesInfo = { present: boolean; mode: string | null }
+
 // Der ausklappbare Block fasst alle Faktor-Schritte zusammen (1-basierte
-// Schrittnummern 3–10). Schritt 1/2 (Vegetationsvorphase, H3) und 11/12
+// Schrittnummern 3–11). Schritt 1/2 (Vegetationsvorphase, H3) und 12/13
 // (MCE, Speichern) bleiben top-level.
-const LOAD_GROUP = { firstStep: 3, lastStep: 10, label: 'Eingangsdaten & Faktoren' }
+const LOAD_GROUP = { firstStep: 3, lastStep: 11, label: 'Eingangsdaten & Faktoren' }
 
 type StepDisplay = {
   done: boolean
@@ -80,15 +90,27 @@ function stepDisplay(
   i: number,
   currentStep: number,
   weights: Record<string, number> | undefined,
+  userObstacles?: UserObstaclesInfo,
 ): StepDisplay {
   const step = i + 1
   const keys = STEP_WEIGHT_KEYS[i] ?? []
   const structural = keys.length === 0
   const weightZero = !structural && keys.every((k) => !(weights?.[k] ?? 0))
   const excluded = EXCLUSION_STEP_INDICES.has(i)
+  const base = { done: step < currentStep, active: step === currentStep }
+
+  // Eigendaten-Schritt: ohne Datei übersprungen; mit Datei in einem Ausschluss-
+  // Modus läuft er unabhängig vom Gewicht, sonst greift die normale Gewicht-0-Regel.
+  if (i === USER_OBSTACLES_STEP_INDEX) {
+    const present = userObstacles?.present ?? false
+    const isExclude =
+      userObstacles?.mode === 'exclude_inside' || userObstacles?.mode === 'exclude_outside'
+    const skipped = !present || (!isExclude && weightZero)
+    return { ...base, skipped, exclusionOnly: false }
+  }
+
   return {
-    done: step < currentStep,
-    active: step === currentStep,
+    ...base,
     skipped: weightZero && !excluded,
     exclusionOnly: weightZero && excluded,
   }
@@ -159,11 +181,13 @@ const CollapsibleStepGroup = ({
   childIndices,
   currentStep,
   weights,
+  userObstacles,
 }: {
   label: string
   childIndices: number[]
   currentStep: number
   weights: Record<string, number> | undefined
+  userObstacles?: UserObstaclesInfo
 }) => {
   const firstStep = childIndices[0]! + 1
   const lastStep = childIndices[childIndices.length - 1]! + 1
@@ -215,7 +239,7 @@ const CollapsibleStepGroup = ({
             <StepRow
               key={SCORING_STEPS[i]}
               label={SCORING_STEPS[i]!}
-              d={stepDisplay(i, currentStep, weights)}
+              d={stepDisplay(i, currentStep, weights, userObstacles)}
             />
           ))}
         </ol>
@@ -234,9 +258,11 @@ const CollapsibleStepGroup = ({
 export const PlanningSteps = ({
   currentStep,
   weights,
+  userObstacles,
 }: {
   currentStep: number
   weights?: Record<string, number>
+  userObstacles?: UserObstaclesInfo
 }) => {
   const groupIndices = Array.from(
     { length: LOAD_GROUP.lastStep - LOAD_GROUP.firstStep + 1 },
@@ -257,6 +283,7 @@ export const PlanningSteps = ({
               childIndices={groupIndices}
               currentStep={currentStep}
               weights={weights}
+              userObstacles={userObstacles}
             />
           )
         }
@@ -267,7 +294,7 @@ export const PlanningSteps = ({
             key={label}
             label={label}
             numbered={i + 1}
-            d={stepDisplay(i, currentStep, weights)}
+            d={stepDisplay(i, currentStep, weights, userObstacles)}
           />
         )
       })}

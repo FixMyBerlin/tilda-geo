@@ -236,6 +236,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         h3_resolution=h3_res,
         osm_loader=loader,
         vegetation_gdf=vegetation,
+        user_geojson=cfg.get("user_geojson"),
         progress_cb=_scoring_progress,
     )
 

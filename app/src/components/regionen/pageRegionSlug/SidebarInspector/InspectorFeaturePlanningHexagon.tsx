@@ -17,6 +17,7 @@ const SCORE_LABELS: Record<string, string> = {
   score_parken: 'Parken',
   score_fussgaengerzone: 'Fußgängerzonen',
   score_bestand: 'Bestandsanlagen',
+  score_eigendaten: 'Eigene Flächen',
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
@@ -153,6 +154,27 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
               </table>
             </div>
           ))}
+
+          {/* Eigene Flächen: eigene Kategorie (nicht in Bedarf/Bebauung). Signierter
+              Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
+          {props.score_eigendaten != null && (
+            <div>
+              <div className="mb-1 text-xs font-semibold text-gray-500 uppercase">
+                Eigene Flächen
+              </div>
+              <table className="w-full text-xs">
+                <tbody>
+                  <tr>
+                    <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</td>
+                    <td className="py-1.5 text-right font-mono text-gray-700">
+                      {props.score_eigendaten > 0 ? '+' : ''}
+                      {Math.round(props.score_eigendaten)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </Disclosure>

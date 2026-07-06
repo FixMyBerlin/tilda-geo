@@ -7,6 +7,8 @@ import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningScenarioFn } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
 import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
+import { SegmentedChoice } from './SegmentedChoice'
+import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 
 const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
   { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
@@ -97,30 +99,17 @@ export const FactorFields = ({
           bevorzugen“ vergibt Bonuspunkte. Das Gewicht „Vegetation“ ist der maximale Effekt in
           Punkten; bei 0 ohne Wirkung.
         </p>
-        <div className="flex gap-1.5">
-          {(
+        <SegmentedChoice
+          options={
             [
               ['negative', 'Grün schützen'],
               ['positive', 'Grün bevorzugen'],
             ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              disabled={readOnly}
-              onClick={() => setVegetationDirection(value)}
-              className={twJoin(
-                'flex-1 rounded border px-2 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed',
-                vegetationDirection === value
-                  ? 'border-green-700 bg-green-700 text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-                readOnly && vegetationDirection !== value && 'opacity-50',
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+          }
+          value={vegetationDirection}
+          onChange={setVegetationDirection}
+          disabled={readOnly}
+        />
       </div>
 
       <div>
@@ -180,6 +169,11 @@ export const FactorEditorPanel = ({
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
 
+  const setUserGeojson = (geojson: GeoJSON.FeatureCollection | undefined) =>
+    setConfig((c) => ({ ...c, user_geojson: geojson }))
+  const setUserGeojsonMode = (mode: UserGeojsonMode) =>
+    setConfig((c) => ({ ...c, user_geojson_mode: mode }))
+
   return (
     <Disclosure as="div" className="rounded border border-gray-200">
       <DisclosureButton
@@ -217,6 +211,14 @@ export const FactorEditorPanel = ({
             setWeight={setWeight}
             setField={setField}
             setVegetationDirection={setVegetationDirection}
+            readOnly={readOnly}
+          />
+
+          <UserObstaclesField
+            config={config}
+            setWeight={setWeight}
+            setUserGeojson={setUserGeojson}
+            setUserGeojsonMode={setUserGeojsonMode}
             readOnly={readOnly}
           />
 
