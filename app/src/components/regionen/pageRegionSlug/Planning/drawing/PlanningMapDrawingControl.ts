@@ -5,7 +5,7 @@ import { PLANNING_TERRA_MODE, createPlanningTerraDrawModes } from './planningTer
 
 type Handlers = {
   /** Called with the single drawn study-area geometry, or null when cleared. */
-  onGeometryChange: (geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon | null) => void
+  onGeometryChange: (geometry: GeoJSON.Polygon | null) => void
   /**
    * Called with `true` while the user is actively placing polygon points (polygon mode)
    * and `false` once the polygon is finished (select/edit mode). Lets the map suppress
@@ -93,12 +93,10 @@ export class PlanningMapDrawingControl {
     })
   }
 
-  private currentGeometry(): GeoJSON.Polygon | GeoJSON.MultiPolygon | null {
+  private currentGeometry(): GeoJSON.Polygon | null {
     if (!this.draw) return null
-    const feature = this.draw
-      .getSnapshot()
-      .find((f) => f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon')
-    return (feature?.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon | undefined) ?? null
+    const feature = this.draw.getSnapshot().find((f) => f.geometry.type === 'Polygon')
+    return (feature?.geometry as GeoJSON.Polygon | undefined) ?? null
   }
 
   private attachListeners() {
