@@ -106,7 +106,7 @@
   "dependencies": {
     "@date-fns/tz": "1.5.0",
     "@date-fns/utc": "2.1.1",
-    "@getbrevo/brevo": "^5.0.4",
+    "@getbrevo/brevo": "^6.0.1",
     "@headlessui/react": "2.2.10",
     "@json2csv/plainjs": "7.0.6",
     "@osm-traffic-signs/converter": "0.6.0",
