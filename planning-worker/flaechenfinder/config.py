@@ -53,6 +53,14 @@ class UseCaseConfig:
     #   d > radius               → 0
     parken_radius_m: float = 15.0             # Reichweite des Bonus (UI-einstellbar)
 
+    # Fußgängerzonen-Bonus: an Kreuzungen, wo eine der üblichen Straßenkategorien
+    # auf eine Fußgängerzone (highway=pedestrian) trifft, besteht besonders hoher
+    # Bedarf. Nutzt denselben Bordstein-Ecken-Mechanismus wie der Kreuzungs-Bonus
+    # (gleiche ideal_min/ideal_max-Rampe), aber eigenes Gewicht
+    # weights["w_fussgaengerzone"] und eigene äußere Reichweite. Modifier auf den
+    # Basis-Score, zählt zur Bedarfsgruppe (siehe scorer.py).
+    fussgaengerzone_radius_m: float = 20.0    # äußere Reichweite (UI-einstellbar)
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
@@ -75,6 +83,7 @@ DEFAULT_WEIGHTS = {
     "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
     "w_intersection": 0.1, # Kreuzungs-Bonus (max. Bonus in Punkten × 100)
     "w_parken": 0.1,       # Parken-Bonus (KFZ→Rad Umwidmung)
+    "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
 }
 
 
@@ -119,4 +128,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),
         intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
+        fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
     )

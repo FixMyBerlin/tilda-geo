@@ -18,6 +18,7 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
     w_vegetation: 0,
     w_intersection: 0.1,
     w_parken: 0.1,
+    w_fussgaengerzone: 0.2,
   },
   vegetation_direction: 'negative',
   cir_source: 'auto' as const,
@@ -25,6 +26,7 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   min_surface_score: 30,
   intersection_radius_m: 20,
   parken_radius_m: 15,
+  fussgaengerzone_radius_m: 20,
   targets: [],
 }
 
@@ -59,16 +61,21 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_vegetation: 'Vegetation',
   w_intersection: 'Kreuzungen',
   w_parken: 'Parken (Umwidmung)',
+  w_fussgaengerzone: 'Fußgängerzonen',
 }
 
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
-//   Bedarf   → Radwegnähe, ÖPNV, Zielorte
+//   Bedarf   → Radwegnähe, ÖPNV, Zielorte + Modifier Fußgängerzonen
 //   Bebauung → Untergrund, Hangneigung + Modifier
 //              (Vegetation, Kreuzungen, Parken)
 export const WEIGHT_GROUPS: { key: 'bedarf' | 'bebauung'; label: string; weights: string[] }[] = [
-  { key: 'bedarf', label: 'Bedarf', weights: ['w_cyclepath', 'w_transit', 'w_target'] },
+  {
+    key: 'bedarf',
+    label: 'Bedarf',
+    weights: ['w_cyclepath', 'w_transit', 'w_target', 'w_fussgaengerzone'],
+  },
   {
     key: 'bebauung',
     label: 'Bebauung',

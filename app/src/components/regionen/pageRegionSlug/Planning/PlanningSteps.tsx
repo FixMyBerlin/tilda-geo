@@ -28,7 +28,7 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_cyclepath'], //   3 Radwege laden
   ['w_surface'], //     4 Gebäude & Untergrund laden
   ['w_transit'], //     5 ÖPNV-Haltestellen laden
-  ['w_intersection'], // 6 Kreuzungen laden
+  ['w_intersection', 'w_fussgaengerzone'], // 6 Kreuzungen & Fußgängerzonen laden
   ['w_parken'], //      7 KFZ-Parkflächen laden
   ['w_target'], //      8 Zielorte bewerten
   ['w_slope'], //       9 Hangneigung berechnen

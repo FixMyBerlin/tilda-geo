@@ -24,6 +24,7 @@ const FactorConfigSchema = z
     min_surface_score: z.number().optional(),
     intersection_radius_m: z.number().optional(),
     parken_radius_m: z.number().optional(),
+    fussgaengerzone_radius_m: z.number().optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
   })

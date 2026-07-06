@@ -41,6 +41,15 @@ class TildaLoader:
             print(f"   ⚠️  Kreuzungs-Ecken-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_pedestrian_intersection_corners(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bordstein-Ecken, wo eine Straße auf eine Fußgängerzone trifft."""
+        try:
+            gdf = self._loader.load_pedestrian_intersection_corners(study_area_geom)
+            return gdf[gdf.geometry.geom_type == "Point"].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Fußgängerzonen-Ecken-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     def load_car_parking(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
         """KFZ-Parkflächen (Linien + Polygone) als Umwidmungs-Kandidaten."""
         try:

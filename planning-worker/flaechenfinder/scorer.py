@@ -31,7 +31,7 @@ _SCORE_COLS = [
     "mce_gesamtscore", "score_bedarf", "score_bebauung",
     "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
-    "score_kreuzung", "score_parken",
+    "score_kreuzung", "score_parken", "score_fussgaengerzone",
 ]
 
 # Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
@@ -257,6 +257,17 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_kreuzung_m"] = np.nan
 
+    # Fußgängerzonen-Ecken (Straße × Fußgängerzone) – gleicher Ecken-Mechanismus,
+    # aber eigener Loader/Gewicht. Nur bei Gewicht > 0 den PostGIS-Query fahren.
+    # Bonus-Ableitung ebenfalls im MCE-Schritt (11).
+    if (use_case.weights.get("w_fussgaengerzone", 0) or 0) > 0:
+        fussgz = tilda_loader.load_pedestrian_intersection_corners(study_area_geom)
+        fussgz_proj = fussgz.to_crs("EPSG:25832") if len(fussgz) else fussgz
+        hex_proj["abstand_fussgaengerzone_m"] = _dist_to_union(centroids, fussgz_proj)
+        del fussgz, fussgz_proj
+    else:
+        hex_proj["abstand_fussgaengerzone_m"] = np.nan
+
     # ── 7. KFZ-Parkflächen laden ──────────────────────────────────
     # KFZ-Parkflächen für den Umwidmungs-Bonus. Nur bei Gewicht > 0 laden; sonst
     # abstand_parken_m als NaN markieren. Bonus-Ableitung im MCE-Schritt (11).
@@ -456,11 +467,46 @@ def run_flaechenfinder(
         hex_proj["score_parken"] = np.nan
         parken_delta = 0.0
 
-    # ── Gesamtscore (Kombination) – unverändert gegenüber früher ───────────
-    # `total` ist bit-identisch zur alten Formel `base_score ± veg + kreuz +
-    # parken`; die Modifier liegen jetzt nur als eigene Delta-Serien vor, damit
-    # sie unten für die Bebauungswahrscheinlichkeit wiederverwendbar sind.
-    total = base_score + veg_delta + kreuz_delta + parken_delta
+    # ── Fußgängerzonen-Bonus: Zuschlag an Ecken Straße × Fußgängerzone ─────
+    # An Kreuzungen, wo eine der üblichen Straßenkategorien auf eine
+    # Fußgängerzone trifft, besteht besonders hoher Bedarf. Gleicher
+    # Bordstein-Ecken-Mechanismus und dieselbe Distanz-Rampe wie beim
+    # Kreuzungs-Bonus (ideal 5–8 m von der Ecke), aber eigenes Gewicht
+    # `w_fussgaengerzone` und eigene äußere Reichweite `fussgaengerzone_radius_m`.
+    # Der Bonus zählt zur Bedarfsgruppe (siehe unten). `abstand_fussgaengerzone_m`
+    # wurde bereits in Schritt 6 geladen (NaN ohne Gewicht); ohne Gewicht bleibt
+    # auch `score_fussgaengerzone` NaN (→ DB NULL).
+    w_fussgz = w.get("w_fussgaengerzone", 0) or 0
+    if w_fussgz > 0:
+        abstand_fussgz = hex_proj["abstand_fussgaengerzone_m"]
+        _flo = use_case.intersection_ideal_min_m
+        _fhi = min(use_case.intersection_ideal_max_m, use_case.fussgaengerzone_radius_m)
+        _fr = use_case.fussgaengerzone_radius_m
+
+        def _fussgz_faktor(d, lo=_flo, hi=_fhi, r=_fr):
+            if d <= 0:
+                return 0.0
+            if d < lo:
+                return d / lo if lo > 0 else 1.0
+            if d <= hi:
+                return 1.0
+            if d <= r:
+                return max(0.0, (r - d) / max(1.0, r - hi))
+            return 0.0
+
+        fussgz_bonus = (w_fussgz * 100.0) * abstand_fussgz.apply(_fussgz_faktor)
+        hex_proj["score_fussgaengerzone"] = fussgz_bonus.round(1)
+        fussgz_delta = fussgz_bonus
+    else:
+        hex_proj["score_fussgaengerzone"] = np.nan
+        fussgz_delta = 0.0
+
+    # ── Gesamtscore (Kombination) ──────────────────────────────────────────
+    # `total` = `base_score ± veg + kreuz + parken + fussgz`; die Modifier liegen
+    # als eigene Delta-Serien vor, damit sie unten für die Teil-Scores
+    # wiederverwendbar sind. `fussgz_delta` ist per Default 0 (w_fussgaengerzone=0),
+    # ändert bestehende Läufe also nicht.
+    total = base_score + veg_delta + kreuz_delta + parken_delta + fussgz_delta
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
 
@@ -469,7 +515,7 @@ def run_flaechenfinder(
     # hier zusätzlich als zwei getrennt normalisierte 0–100-Ansichten berechnet
     # (die Kombination `mce_gesamtscore` oben bleibt davon unberührt):
     #   Bedarf  („will hier parken")  → Radweg (w_cyclepath), ÖPNV (w_transit),
-    #       Zielorte (w_target)
+    #       Zielorte (w_target) + Modifier Fußgängerzonen
     #   Bebauung („kann hier bauen") → Untergrund (w_surface), Hangneigung
     #       (w_slope)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
@@ -483,10 +529,13 @@ def run_flaechenfinder(
         raw = sum(_term(col, k) for col, k in terms)
         return raw / wsum
 
-    score_bedarf = _group_score(
+    # Fußgängerzonen-Bonus ist ein Bedarfs-Modifier (analog Kreuzung/Parken bei
+    # Bebauung): erst normalisieren, dann `fussgz_delta` addieren, dann clippen.
+    base_bedarf = _group_score(
         [("score_radweg", "w_cyclepath"), ("score_oepnv", "w_transit"),
          ("score_zielorte", "w_target")]
-    ).clip(lower=0.0, upper=100.0)
+    )
+    score_bedarf = (base_bedarf + fussgz_delta).clip(lower=0.0, upper=100.0)
 
     base_bebauung = _group_score(
         [("score_bodenbelag", "w_surface"),

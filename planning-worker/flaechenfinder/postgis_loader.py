@@ -155,6 +155,54 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_pedestrian_intersection_corners(
+        self, polygon_4326: BaseGeometry, road_classes: list[str] | None = None
+    ) -> gpd.GeoDataFrame:
+        """Bordstein-Ecken, wo eine Straße auf eine Fußgängerzone trifft.
+
+        Wie `load_intersection_corners`, aber mit anderem Klassen-Filter: an der
+        Ecke muss die EINE beteiligte Straße in `road_classes` (die üblichen
+        Straßenkategorien) liegen und die ANDERE eine Fußgängerzone
+        (`tags->>'road' = 'pedestrian'`) sein. Reine Fußgängerzonen-Ecken (beide
+        Seiten `pedestrian`) und normale Straßenkreuzungen werden ausgeschlossen.
+
+        Datengrundlage: lineare `highway=pedestrian` liegen in `_parking_roads`
+        (nur `area=yes`-Polygone fehlen) und erzeugen über den regulären
+        Kerb-/Kreuzungs-Mechanismus des Parking-Topics Ecken in
+        `_parking_intersection_corners`. Der Ecken-Datensatz selbst muss dafür
+        nicht geändert werden.
+
+        Abhängigkeit + Fallback identisch zu `load_intersection_corners`.
+        Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
+        """
+        classes = road_classes or [
+            "primary", "secondary", "tertiary", "residential", "living_street",
+        ]
+        cats_sql = ", ".join(f"'{_sql_literal(c)}'" for c in classes)
+        wkt = polygon_4326.wkt
+        sql = f"""
+            SELECT ST_Transform(c.geom, 4326) AS geom
+            FROM public."_parking_intersection_corners" c
+            JOIN public."_parking_kerbs" k1 ON k1.id = c.kerb1_id
+            JOIN public."_parking_kerbs" k2 ON k2.id = c.kerb2_id
+            JOIN public."_parking_roads" r1 ON r1.osm_id = k1.osm_id
+            JOIN public."_parking_roads" r2 ON r2.osm_id = k2.osm_id
+            WHERE c.geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+              AND (
+                    (r1.tags->>'road' IN ({cats_sql}) AND r2.tags->>'road' = 'pedestrian')
+                 OR (r1.tags->>'road' = 'pedestrian' AND r2.tags->>'road' IN ({cats_sql}))
+              )
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Fußgängerzonen-Ecken aus _parking_intersection_corners")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners (Fußgängerzone) fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def load_car_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """KFZ-Parkflächen als Umwidmungs-Kandidaten (für den Parken-Bonus).
 
