@@ -1,4 +1,5 @@
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { usePlanningAreaFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
@@ -72,6 +73,7 @@ const ScoreBar = ({ value }: { value: number | null | undefined }) => {
 }
 
 export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
+  const [areaFilterOn] = usePlanningAreaFilterParam()
   const props = feature.properties
   if (!props) return null
 
@@ -120,7 +122,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           </div>
         )}
 
-        {props.cluster_area_m2 != null && (
+        {areaFilterOn && props.cluster_area_m2 != null && (
           <div className="flex items-center justify-between text-xs">
             <span className="text-gray-500">Zusammenhängende Fläche</span>
             <span className="font-semibold text-gray-800">
