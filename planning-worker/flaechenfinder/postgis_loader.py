@@ -27,9 +27,10 @@ def _sql_literal(v) -> str:
 # Maps OSM tag dicts (as used in scorer.py _TRANSIT_TYPES) to publicTransport categories.
 # Values are lists of category strings stored in tags->>'category' in the DB.
 # Bus stops (highway=bus_stop) are not yet in the publicTransport table.
+# subway_entrance is not mapped here: it has its own table/loader (`_publicTransport_entrances`,
+# `PostgisLoader.load_subway_entrances`), not a publicTransport category.
 _TRANSIT_TAG_MAP: list[tuple[dict, list[str]]] = [
     ({"railway": "tram_stop"},             ["tram_station"]),
-    ({"railway": "subway_entrance"},        ["subway_station"]),
     ({"railway": ["station", "halt"]},      ["railway_station", "light_rail_station"]),
 ]
 
@@ -108,6 +109,17 @@ class PostgisLoader:
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """Radwege aus `public.bikelanes` (ersetzt den PBF-Pfad)."""
         gdf = self._read_table("bikelanes", polygon_4326)
+        return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
+
+    def load_subway_entrances(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """U-Bahn-Eingänge (railway=subway_entrance) aus `public._publicTransport_entrances`.
+
+        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/publicTransport/
+        public_transport_entrances.lua), EPSG:3857 wie die publicTransport-Haupttabelle.
+        Ersetzt den früheren Stopgap, der stattdessen den Stationspunkt
+        (category='subway_station') gescort hat.
+        """
+        gdf = self._read_table("_publicTransport_entrances", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_intersection_corners(

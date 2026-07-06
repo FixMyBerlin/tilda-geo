@@ -261,7 +261,9 @@ def run_flaechenfinder(
     _step(5)
     if (use_case.weights.get("w_transit", 0) or 0) > 0:
         _TRANSIT_TYPES = [
-            ("U-Bahn-Eingang", {"railway": "subway_entrance"}, 50),
+            # U-Bahn-Eingang hat keinen publicTransport-Tag-Dict-Eintrag, sondern
+            # eigene Tabelle/Loader (`_publicTransport_entrances`), siehe unten.
+            ("U-Bahn-Eingang", None,                          50),
             ("Straßenbahn",    {"railway": "tram_stop"},       50),
             # Bus bleibt vorerst wirkungslos: highway=bus_stop wird in
             # public."publicTransport" nicht abgelegt (siehe postgis_loader.py),
@@ -272,7 +274,10 @@ def run_flaechenfinder(
         _transit_scores = []
         for _tname, _ttags, _tradius in _TRANSIT_TYPES:
             try:
-                _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
+                if _tname == "U-Bahn-Eingang":
+                    _stops = osm_loader.load_subway_entrances(study_area_geom)
+                else:
+                    _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
                 if not len(_stops):
                     _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
                     continue

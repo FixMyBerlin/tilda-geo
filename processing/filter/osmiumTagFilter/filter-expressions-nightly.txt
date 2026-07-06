@@ -22,6 +22,7 @@ wr/aeroway
 # Topic: Public transport
 w/public_transport
 n/public_transport
+n/railway=subway_entrance
 
 # Topic: poiClassification
 nw/tourism
