@@ -61,6 +61,16 @@ class UseCaseConfig:
     # Basis-Score, zählt zur Bedarfsgruppe (siehe scorer.py).
     fussgaengerzone_radius_m: float = 20.0    # äußere Reichweite (UI-einstellbar)
 
+    # Bestands-Radabstellanlagen: bestehende Fahrradabstellanlagen
+    # (public."bicycleParking_points") senken den Bedarf in ihrem Umkreis. Der
+    # Faktor ist ein negativer Modifier auf die BEDARFS-Gruppe (analog zum
+    # Fußgängerzonen-Bonus, nur mit umgekehrtem Vorzeichen, siehe scorer.py);
+    # Stärke = weights["w_bestand"] (max. Abzug in Punkten × 100). Die Reichweite
+    # je Anlage hängt an ihrer Kapazität: Durchmesser = capacity/2 m (→ Radius
+    # capacity/4). Fehlt das capacity-Tag, gilt dieser Default-Durchmesser.
+    # Innerhalb des Einzugskreises voller Abzug, außen 0.
+    bestand_default_diameter_m: float = 20.0  # Durchmesser ohne capacity (UI-einstellbar)
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
@@ -84,6 +94,7 @@ DEFAULT_WEIGHTS = {
     "w_intersection": 0.1, # Kreuzungs-Bonus (max. Bonus in Punkten × 100)
     "w_parken": 0.1,       # Parken-Bonus (KFZ→Rad Umwidmung)
     "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
+    "w_bestand": 0.0,          # Bestandsanlagen-Bedarfssenkung (neutral per Default → non-breaking)
 }
 
 
@@ -129,4 +140,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
+        bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
     )

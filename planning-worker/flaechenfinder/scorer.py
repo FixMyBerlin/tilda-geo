@@ -32,6 +32,7 @@ _SCORE_COLS = [
     "score_radweg", "score_bodenbelag", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken", "score_fussgaengerzone",
+    "score_bestand",
 ]
 
 # Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
@@ -501,12 +502,51 @@ def run_flaechenfinder(
         hex_proj["score_fussgaengerzone"] = np.nan
         fussgz_delta = 0.0
 
+    # ── Bestandsanlagen: Bedarfssenkung um bestehende Radabstellanlagen ─────
+    # Bestehende Fahrradabstellanlagen (public."bicycleParking_points") senken den
+    # Bedarf: wo bereits abgestellt werden kann, braucht es weniger neue Anlagen.
+    # Negativer Modifier auf die BEDARFS-Gruppe (analog zum Fußgängerzonen-Bonus,
+    # nur mit umgekehrtem Vorzeichen). `w_bestand` (0–1) ist der maximale Abzug in
+    # Punkten (× 100). Die Reichweite je Anlage hängt an ihrer Kapazität:
+    # Durchmesser = capacity/2 m (→ Radius capacity/4); ohne capacity-Tag gilt der
+    # Default-Durchmesser. Innerhalb des Einzugskreises voller Abzug, außen 0 (harte
+    # Kante – die Stärke kommt allein aus dem Gewicht). Nur bei Gewicht > 0 wird der
+    # PostGIS-Query gefahren; sonst bleibt `score_bestand` NaN (→ DB NULL).
+    # Ausschluss der Bebauung durch Bestandsanlagen ist bewusst (noch) nicht
+    # umgesetzt – nur die Bedarfssenkung.
+    w_bestand = w.get("w_bestand", 0) or 0
+    if w_bestand > 0:
+        bp = tilda_loader.load_bicycle_parking(study_area_geom)
+        if len(bp):
+            bp_proj = bp.to_crs("EPSG:25832")
+            default_radius = use_case.bestand_default_diameter_m / 2.0
+            if "capacity" in bp_proj.columns:
+                cap = pd.to_numeric(bp_proj["capacity"], errors="coerce").to_numpy()
+            else:
+                cap = np.full(len(bp_proj), np.nan)
+            radii = np.where(cap > 0, cap / 4.0, default_radius)
+            coverage = bp_proj.geometry.buffer(radii).union_all()
+            covered = (
+                centroids.within(coverage)
+                if coverage is not None and not coverage.is_empty
+                else pd.Series(False, index=hex_proj.index)
+            )
+        else:
+            covered = pd.Series(False, index=hex_proj.index)
+        del bp
+        bestand_abzug = (w_bestand * 100.0) * covered.astype(float)
+        hex_proj["score_bestand"] = (-bestand_abzug).round(1)
+        bestand_delta = -bestand_abzug
+    else:
+        hex_proj["score_bestand"] = np.nan
+        bestand_delta = 0.0
+
     # ── Gesamtscore (Kombination) ──────────────────────────────────────────
-    # `total` = `base_score ± veg + kreuz + parken + fussgz`; die Modifier liegen
-    # als eigene Delta-Serien vor, damit sie unten für die Teil-Scores
-    # wiederverwendbar sind. `fussgz_delta` ist per Default 0 (w_fussgaengerzone=0),
-    # ändert bestehende Läufe also nicht.
-    total = base_score + veg_delta + kreuz_delta + parken_delta + fussgz_delta
+    # `total` = `base_score ± veg + kreuz + parken + fussgz + bestand`; die Modifier
+    # liegen als eigene Delta-Serien vor, damit sie unten für die Teil-Scores
+    # wiederverwendbar sind. `fussgz_delta`/`bestand_delta` sind per Default 0
+    # (w_fussgaengerzone=0, w_bestand=0), ändern bestehende Läufe also nicht.
+    total = base_score + veg_delta + kreuz_delta + parken_delta + fussgz_delta + bestand_delta
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
 
@@ -515,7 +555,8 @@ def run_flaechenfinder(
     # hier zusätzlich als zwei getrennt normalisierte 0–100-Ansichten berechnet
     # (die Kombination `mce_gesamtscore` oben bleibt davon unberührt):
     #   Bedarf  („will hier parken")  → Radweg (w_cyclepath), ÖPNV (w_transit),
-    #       Zielorte (w_target) + Modifier Fußgängerzonen
+    #       Zielorte (w_target) + Modifier Fußgängerzonen (Zuschlag) und
+    #       Bestandsanlagen (Abzug)
     #   Bebauung („kann hier bauen") → Untergrund (w_surface), Hangneigung
     #       (w_slope)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
@@ -529,13 +570,14 @@ def run_flaechenfinder(
         raw = sum(_term(col, k) for col, k in terms)
         return raw / wsum
 
-    # Fußgängerzonen-Bonus ist ein Bedarfs-Modifier (analog Kreuzung/Parken bei
-    # Bebauung): erst normalisieren, dann `fussgz_delta` addieren, dann clippen.
+    # Fußgängerzonen-Bonus (Zuschlag) und Bestandsanlagen (Abzug) sind
+    # Bedarfs-Modifier (analog Kreuzung/Parken bei Bebauung): erst normalisieren,
+    # dann die Deltas addieren, dann clippen.
     base_bedarf = _group_score(
         [("score_radweg", "w_cyclepath"), ("score_oepnv", "w_transit"),
          ("score_zielorte", "w_target")]
     )
-    score_bedarf = (base_bedarf + fussgz_delta).clip(lower=0.0, upper=100.0)
+    score_bedarf = (base_bedarf + fussgz_delta + bestand_delta).clip(lower=0.0, upper=100.0)
 
     base_bebauung = _group_score(
         [("score_bodenbelag", "w_surface"),

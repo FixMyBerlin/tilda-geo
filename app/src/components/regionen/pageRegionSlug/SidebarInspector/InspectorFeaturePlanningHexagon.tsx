@@ -15,6 +15,7 @@ const SCORE_LABELS: Record<string, string> = {
   score_kreuzung: 'Kreuzungen',
   score_parken: 'Parken',
   score_fussgaengerzone: 'Fußgängerzonen',
+  score_bestand: 'Bestandsanlagen',
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
@@ -24,7 +25,13 @@ const SCORE_GROUPS: { label: string; scoreKey: string; factors: string[] }[] = [
   {
     label: 'Bedarf',
     scoreKey: 'score_bedarf',
-    factors: ['score_radweg', 'score_oepnv', 'score_zielorte', 'score_fussgaengerzone'],
+    factors: [
+      'score_radweg',
+      'score_oepnv',
+      'score_zielorte',
+      'score_fussgaengerzone',
+      'score_bestand',
+    ],
   },
   {
     label: 'Bebauung',

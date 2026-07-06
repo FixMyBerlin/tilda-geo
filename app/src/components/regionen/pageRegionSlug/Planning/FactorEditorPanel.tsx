@@ -14,6 +14,7 @@ const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }
   { key: 'intersection_radius_m', label: 'Kreuzungs-Radius (m)', step: 5 },
   { key: 'parken_radius_m', label: 'Parken-Radius (m)', step: 5 },
   { key: 'fussgaengerzone_radius_m', label: 'Fußgängerzonen-Radius (m)', step: 5 },
+  { key: 'bestand_default_diameter_m', label: 'Bestand: Standard-Durchmesser (m)', step: 5 },
 ]
 
 /**

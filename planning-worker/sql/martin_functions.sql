@@ -35,6 +35,7 @@ BEGIN
                 score_kreuzung,
                 score_parken,
                 score_fussgaengerzone,
+                score_bestand,
                 eignungsklasse,
                 gebaeude,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom

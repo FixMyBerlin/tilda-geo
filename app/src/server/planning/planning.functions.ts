@@ -25,6 +25,7 @@ const FactorConfigSchema = z
     intersection_radius_m: z.number().optional(),
     parken_radius_m: z.number().optional(),
     fussgaengerzone_radius_m: z.number().optional(),
+    bestand_default_diameter_m: z.number().optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
   })

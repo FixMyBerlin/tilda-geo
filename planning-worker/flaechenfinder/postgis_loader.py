@@ -260,6 +260,48 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage parkings/parkings_separate fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_bicycle_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bestehende Fahrradabstellanlagen (für den Bestands-Bedarfsfaktor).
+
+        Liest `public."bicycleParking_points"` – die Punkt-Tabelle des
+        bicycleParking-Topics. Sie ist der Superset „eine Anlage = ein Punkt":
+        OSM-Knoten (`amenity=bicycle_parking`) UND die Zentroide der Flächen aus
+        `bicycleParking_areas` emittieren hierher. Es zählen bewusst ALLE
+        erfassten Anlagen (kein Typ-/Kapazitätsfilter).
+
+        Die (optionale) Kapazität wird als numerische Spalte `capacity`
+        zurückgegeben – der Scorer leitet daraus die Reichweite je Anlage ab
+        (Durchmesser = capacity/2). Der JSONB-Wert ist nicht garantiert
+        numerisch, daher wird per Regex geprüft, bevor gecastet wird (sonst würfe
+        der Cast); fehlt/ungültig → NULL (→ NaN → Default-Reichweite).
+
+        Abhängigkeit: die `bicycleParking_*`-Tabellen existieren nur, wenn das
+        bicycleParking-Topic für die Region prozessiert wurde. Fehlen sie, wird
+        ein leeres GeoDataFrame zurückgegeben (der Faktor trägt dann 0 bei) –
+        analog zum graceful Fallback bei den KFZ-Parkflächen.
+
+        Geometrie liegt in EPSG:3857; Rückgabe in EPSG:4326.
+        """
+        wkt = polygon_4326.wkt
+        bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
+        cap_num = "NULLIF(tags->>'capacity', '') ~ '^[0-9]+(\\.[0-9]+)?$'"
+        sql = f"""
+            SELECT
+                ST_Transform(geom, 4326) AS geom,
+                CASE WHEN {cap_num} THEN (tags->>'capacity')::numeric END AS capacity
+            FROM public."bicycleParking_points"
+            WHERE geom && {bbox}
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Bestands-Radabstellanlagen aus bicycleParking_points")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage bicycleParking_points fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 

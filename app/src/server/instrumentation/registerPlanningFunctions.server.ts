@@ -32,6 +32,7 @@ async function ensurePlanningSchema() {
       score_kreuzung          real,
       score_parken            real,
       score_fussgaengerzone   real,
+      score_bestand           real,
       eignungsklasse          text
     );`)
   // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
@@ -53,6 +54,9 @@ async function ensurePlanningSchema() {
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_fussgaengerzone real;`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand real;`,
   )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
@@ -106,6 +110,7 @@ async function registerHexagonsFunction() {
           score_kreuzung,
           score_parken,
           score_fussgaengerzone,
+          score_bestand,
           eignungsklasse,
           ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
         FROM planning.scenario_hexagons
@@ -132,6 +137,7 @@ async function registerHexagonsFunction() {
           score_kreuzung: 'real',
           score_parken: 'real',
           score_fussgaengerzone: 'real',
+          score_bestand: 'real',
           eignungsklasse: 'text',
         },
       },
