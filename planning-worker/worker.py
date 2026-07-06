@@ -17,6 +17,7 @@ import select as _select
 import sys
 import traceback
 
+import geopandas as gpd
 import psycopg
 from psycopg.types.json import Jsonb
 from shapely.geometry import shape
@@ -49,6 +50,49 @@ def _study_area_from_config(cfg: dict):
     elif geo.get("type") == "Feature":
         geo = geo["geometry"]
     return shape(geo)
+
+
+# Vegetationsflächen hängen nur vom Studiengebiet ab (NDVI aus CIR-Kacheln),
+# nie von Gewichten/Schwellen. Ändert ein Nutzer nur einen Faktor und startet
+# neu, ist das Ergebnis eines früheren Laufs mit identischem Studiengebiet
+# bit-identisch – die (teure) Neuberechnung lässt sich dann überspringen.
+_VEGETATION_REUSE_CANDIDATES = 5
+
+
+def _find_reusable_vegetation(conn, engine, scenario_id: int, current_run_id: int, study_area):
+    """Sucht unter den letzten Läufen desselben Szenarios einen mit identischem
+    Studiengebiet, in dem Vegetation tatsächlich berechnet wurde, und lädt dessen
+    `scenario_vegetation`-Zeilen. None = kein Treffer, muss neu berechnet werden."""
+    with conn.cursor() as cur:
+        cur.execute(
+            """SELECT id, "factorConfigSnapshot" FROM prisma."PlanningRun"
+               WHERE "scenarioId" = %s AND id != %s
+               ORDER BY id DESC LIMIT %s""",
+            (scenario_id, current_run_id, _VEGETATION_REUSE_CANDIDATES),
+        )
+        candidates = cur.fetchall()
+
+    for prev_run_id, snapshot in candidates:
+        if not ((snapshot.get("weights") or {}).get("w_vegetation", 0) or 0):
+            continue  # Vegetation wurde in diesem Lauf gar nicht berechnet
+        try:
+            prev_study_area = _study_area_from_config(snapshot)
+        except Exception:
+            continue
+        if not study_area.equals(prev_study_area):
+            continue
+        return _load_vegetation_rows(engine, prev_run_id)
+    return None
+
+
+def _load_vegetation_rows(engine, run_id: int) -> gpd.GeoDataFrame:
+    gdf = gpd.read_postgis(
+        'SELECT geom, ndvi, flaeche_m2 FROM planning.scenario_vegetation WHERE run_id = %(run_id)s',
+        engine, geom_col="geom", params={"run_id": run_id},
+    )
+    if not len(gdf):
+        return gpd.GeoDataFrame({"ndvi": [], "flaeche_m2": []}, geometry=[], crs="EPSG:3857")
+    return gdf.rename_geometry("geometry")
 
 
 def claim_job(conn: psycopg.Connection):
@@ -159,13 +203,22 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
             set_progress(conn, job_id, 70, step1_label)
         else:
             try:
-                vegetation = compute_vegetation_areas(
-                    study_area, source=cir_source, progress_cb=_veg_progress
-                )
+                vegetation = _find_reusable_vegetation(conn, engine, scenario_id, run_id, study_area)
             except Exception as e:
-                print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+                print(f"   ⚠️  Cache-Suche für Vegetation fehlgeschlagen: {e}")
                 vegetation = None
-            set_progress(conn, job_id, 70, step1_label)
+            if vegetation is not None:
+                print(f"   ♻️  Vegetation aus vorherigem Lauf wiederverwendet ({len(vegetation)} Flächen)")
+                set_progress(conn, job_id, 70, step1_label)
+            else:
+                try:
+                    vegetation = compute_vegetation_areas(
+                        study_area, source=cir_source, progress_cb=_veg_progress
+                    )
+                except Exception as e:
+                    print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+                    vegetation = None
+                set_progress(conn, job_id, 70, step1_label)
 
     # Schritte 2–11 (Scoring in run_flaechenfinder) auf 72–90 % abbilden und
     # ihren Namen als progressLabel an die App weiterreichen. Format
