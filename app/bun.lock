@@ -7,7 +7,7 @@
       "dependencies": {
         "@date-fns/tz": "1.5.0",
         "@date-fns/utc": "2.1.1",
-        "@getbrevo/brevo": "^5.0.4",
+        "@getbrevo/brevo": "^6.0.1",
         "@headlessui/react": "2.2.10",
         "@json2csv/plainjs": "7.0.6",
         "@osm-traffic-signs/converter": "0.6.0",
@@ -365,7 +365,7 @@
 
     "@formatjs/intl": ["@formatjs/intl@4.1.13", "", { "dependencies": { "@formatjs/fast-memoize": "3.1.6", "@formatjs/icu-messageformat-parser": "3.5.11", "intl-messageformat": "11.2.8" } }, "sha512-dufOl09iREq8V+laVdlGuyoqNmuzqDvyeA3O3k+0XQfvKJgK8bBWFKqYYWejFMKeOij/4LuPKJA+LsshpXQ4sw=="],
 
-    "@getbrevo/brevo": ["@getbrevo/brevo@5.0.4", "", {}, "sha512-wN4mHE6O0Pb/d/Dh3E4MAm2zCHbLLUcFF8/wgwTeMPy9KzHBYLu7S/nsJbzd0AWL09MHn8vwue8ULL9YOzluOQ=="],
+    "@getbrevo/brevo": ["@getbrevo/brevo@6.0.1", "", {}, "sha512-XFFbR1CvMTdu9n98ToLC1lWPIZ0F1P5y7Wxml6YpLEMt9lDwqOwt5hqkgavQ8/t2oJn2/BcyiTZIgYaaLI3uzA=="],
 
     "@headlessui/react": ["@headlessui/react@2.2.10", "", { "dependencies": { "@floating-ui/react": "^0.26.16", "@react-aria/focus": "^3.20.2", "@react-aria/interactions": "^3.25.0", "@tanstack/react-virtual": "^3.13.9", "use-sync-external-store": "^1.5.0" }, "peerDependencies": { "react": "^18 || ^19 || ^19.0.0-rc", "react-dom": "^18 || ^19 || ^19.0.0-rc" } }, "sha512-5pVLNK9wlpxTUTy9GpgbX/SdcRh+HBnPktjM2wbiLTH4p+2EPHBO1aoSryUCuKUIItdDWO9ITlhUL8UnUN/oIA=="],
 
