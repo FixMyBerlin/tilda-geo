@@ -69,7 +69,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   },
   bikeroutes: {
     stylingKeys: ['network', 'ref', 'cycle_highway'],
-    minzoom: 9,
+    minzoom: 5,
   },
   boundaries: {
     stylingKeys: ['category_municipality', 'category_district', 'name', 'name_prefix'],
