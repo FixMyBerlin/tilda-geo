@@ -79,7 +79,9 @@ const MinAreaFilter = () => {
         placeholder="aus"
         disabled={!filterOn}
         value={minArea > 0 ? minArea : ''}
-        onChange={(e) => setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
+        onChange={(e) =>
+          setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
+        }
         className="w-20 rounded border border-gray-300 px-1 py-0.5 text-right disabled:bg-gray-50 disabled:text-gray-400"
       />
     </div>
