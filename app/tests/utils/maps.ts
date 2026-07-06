@@ -37,3 +37,19 @@ export async function verifyMapRendered(page: Page) {
     throw new Error('Map canvas has no dimensions')
   }
 }
+
+/**
+ * Returns the runtime layer ids of the main map, bottom to top.
+ * Requires Playwright mode (`window.__mainMap` is set on map load, see
+ * `src/components/shared/utils/playwright.ts`) and a prior `waitForMapLoad`.
+ */
+export async function getMapLayerIds(page: Page) {
+  // waitForMapLoad can resolve on the canvas appearing, which happens before the map 'load'
+  // event sets __mainMap — wait for the instance explicitly.
+  await page.waitForFunction(() => window.__mainMap !== undefined, undefined, { timeout: 60_000 })
+  return page.evaluate(() => {
+    const map = window.__mainMap
+    if (!map) throw new Error('window.__mainMap not set — is VITE_PLAYWRIGHT_ENABLED=true?')
+    return map.getStyle().layers.map((layer) => layer.id)
+  })
+}

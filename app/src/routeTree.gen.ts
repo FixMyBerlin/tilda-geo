@@ -43,6 +43,7 @@ import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/ma
 import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
 import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
 import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
+import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
 import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
 import { Route as PagesKontaktRouteImport } from './routes/_pages/kontakt'
 import { Route as PagesDatenschutzRouteImport } from './routes/_pages/datenschutz'
@@ -269,6 +270,11 @@ const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
 const AdminApiTokensRoute = AdminApiTokensRouteImport.update({
   id: '/api-tokens',
   path: '/api-tokens',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
+  id: '/layer-order',
+  path: '/layer-order',
   getParentRoute: () => AdminRoute,
 } as any)
 const PagesOAuthErrorRoute = PagesOAuthErrorRouteImport.update({
@@ -590,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/kontakt': typeof PagesKontaktRoute
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
@@ -679,6 +686,7 @@ export interface FileRoutesByTo {
   '/kontakt': typeof PagesKontaktRoute
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
   '/api/boundary': typeof ApiBoundaryRoute
@@ -765,6 +773,7 @@ export interface FileRoutesById {
   '/_pages/kontakt': typeof PagesKontaktRoute
   '/_pages/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
@@ -858,6 +867,7 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/oAuthError'
     | '/admin/api-tokens'
+    | '/admin/layer-order'
     | '/admin/audit-log'
     | '/admin/data-schema'
     | '/admin/map-dataset-categories'
@@ -947,6 +957,7 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/oAuthError'
     | '/admin/api-tokens'
+    | '/admin/layer-order'
     | '/admin/audit-log'
     | '/admin/data-schema'
     | '/api/boundary'
@@ -1032,6 +1043,7 @@ export interface FileRouteTypes {
     | '/_pages/kontakt'
     | '/_pages/oAuthError'
     | '/admin/api-tokens'
+    | '/admin/layer-order'
     | '/admin/audit-log'
     | '/admin/data-schema'
     | '/admin/map-dataset-categories'
@@ -1392,6 +1404,13 @@ declare module '@tanstack/react-router' {
       path: '/api-tokens'
       fullPath: '/admin/api-tokens'
       preLoaderRoute: typeof AdminApiTokensRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/layer-order': {
+      id: '/admin/layer-order'
+      path: '/layer-order'
+      fullPath: '/admin/layer-order'
+      preLoaderRoute: typeof AdminLayerOrderRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_pages/oAuthError': {
@@ -1922,6 +1941,7 @@ const AdminRegionsRouteWithChildren = AdminRegionsRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
+  AdminLayerOrderRoute: typeof AdminLayerOrderRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminDataSchemaRoute: typeof AdminDataSchemaRoute
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
@@ -1936,6 +1956,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApiTokensRoute: AdminApiTokensRoute,
+  AdminLayerOrderRoute: AdminLayerOrderRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminDataSchemaRoute: AdminDataSchemaRoute,
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,

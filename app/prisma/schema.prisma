@@ -630,3 +630,21 @@ enum DataSchemaImportStatus {
 
   @@schema("prisma")
 }
+
+// Global, cross-region order of Atlas-Geo map layers (see LAYER_SORTING_REQUIREMENTS.md).
+// One row per layer key (from createLayerKeyAtlasGeo). `position` orders the full list
+// bottom-first; regions render only their subset, gaps are fine (relative order).
+// `beforeId` optionally pins the layer to a basemap anchor group (atlas-app-beforeid-*);
+// null means the config/type-based default applies.
+model MapLayerOrder {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  layerKey String  @unique // e.g. "source:atlas_bikelanes--subcat:bikelanes--style:default--layer:line_base"
+  position Int // bottom-first, unique by convention (list is replaced as a whole)
+  beforeId String? // anchor layer id in the basemap style, e.g. "atlas-app-beforeid-below-roadname"
+
+  @@map("MapLayerOrder")
+  @@schema("prisma")
+}

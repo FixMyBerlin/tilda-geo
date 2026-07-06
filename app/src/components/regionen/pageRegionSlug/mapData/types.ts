@@ -131,21 +131,29 @@ type StaticMapDataSubcategory = FileMapDataSubcategory & {
   // TODO: We might need to add a "mapOrder" value here to specify that "places" needs to be at the top on the map but at the bottom of the dropdown in the UI
 }
 
+// The empty anchor layers in our Maptiler basemap style that our layers can be spliced at
+// (bottom-first). Single source of truth — consumed by the admin layer-order UI, the
+// map-layer-order zod schema, the map rendering, and the e2e smoke test.
+// Modify at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
+export const ATLAS_APP_ANCHOR_IDS = [
+  'atlas-app-beforeid-above-landuse',
+  'atlas-app-beforeid-below-road',
+  'atlas-app-beforeid-below-roadname',
+  'atlas-app-beforeid-group2',
+  'atlas-app-beforeid-fallback',
+  'atlas-app-beforeid-group1',
+  'atlas-app-beforeid-top',
+] as const
+
+export type AtlasAppAnchorId = (typeof ATLAS_APP_ANCHOR_IDS)[number]
+
 export type TBeforeIds =
   | 'housenumber'
   | 'boundary_country_outline'
   | 'boundary_country'
   | 'landuse'
   | 'building'
-  // We have some layer without content that can be used as an anchor
-  // Modify at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
-  | 'atlas-app-beforeid-above-landuse'
-  | 'atlas-app-beforeid-below-road'
-  | 'atlas-app-beforeid-below-roadname'
-  | 'atlas-app-beforeid-group2'
-  | 'atlas-app-beforeid-fallback'
-  | 'atlas-app-beforeid-group1'
-  | 'atlas-app-beforeid-top'
+  | AtlasAppAnchorId
   | undefined
 
 /** @desc: Thematic "filter" on the raw vector tile data; eg. 'Radinfrastruktur, Oberflächen, Beleuchtung' */

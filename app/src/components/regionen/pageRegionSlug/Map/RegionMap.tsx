@@ -42,15 +42,8 @@ import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { QaZoomNotice } from './QaZoomNotice'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
-import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
-import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
-import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
-import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
-import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
-import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
-import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
-import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
-import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
+import { AllLayers } from './SourcesAndLayers/AllLayers'
+import { AllSources } from './SourcesAndLayers/AllSources'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
@@ -305,17 +298,11 @@ export const RegionMap = () => {
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
     >
-      {/* Order: First Background Sources, then Vector Tile Sources */}
       <UpdateFeatureState />
-      <SourcesLayerRasterBackgrounds />
-      <SourcesLayersMap3dDem />
-      <SourcesLayersMap3dBuildings />
-      <SourcesLayersSystemDatasets />
-      <SourcesLayersAtlasGeo />
-      <SourcesLayersStaticDatasets />
-      <SourcesLayersOsmNotes />
-      <SourcesLayersInternalNotes />
-      <SourcesLayersQa />
+      {/* Sources and Layers render separately so all Layers form one flat, sortable list.
+          Layer order is defined in <AllLayers>. See LAYER_SORTING_REQUIREMENTS.md. */}
+      <AllSources />
+      <AllLayers />
       <SearchResultLayers />
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
       <TerrainProfileHoverMarkerLayer />

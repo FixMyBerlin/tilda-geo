@@ -58,6 +58,11 @@ export const LayerHighlight = (props: LayerProps) => {
     paint: 'paint' in props && props.paint ? structuredClone(props.paint) : undefined,
   } as LayerProps
 
+  // Highlight layers must follow the visibility of their base layer. Some branches below
+  // replace `layout` entirely, so we re-apply the visibility afterwards.
+  const visibility =
+    'layout' in props && props.layout?.visibility ? { visibility: props.layout.visibility } : {}
+
   if (layerProps.type === 'line') {
     if (!layerProps.paint) layerProps.paint = {}
     delete layerProps.paint['line-blur']
@@ -74,6 +79,7 @@ export const LayerHighlight = (props: LayerProps) => {
       layout: {
         'line-cap': 'round',
         'line-join': 'round',
+        ...visibility,
       },
       paint: {
         'line-color': color,
@@ -103,7 +109,7 @@ export const LayerHighlight = (props: LayerProps) => {
     layerProps = {
       ...layerProps,
       type: 'circle',
-      layout: {},
+      layout: { ...visibility },
       paint: {
         'circle-color': 'transparent',
         'circle-stroke-opacity': opacity,

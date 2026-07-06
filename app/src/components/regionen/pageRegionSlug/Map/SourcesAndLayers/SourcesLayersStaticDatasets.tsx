@@ -8,89 +8,98 @@ import {
   createSourceKeyStaticDatasets,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { getLayerHighlightId } from '../utils/layerHighlight'
+import { layerVisibility } from '../utils/layerVisibility'
 import { LayerHighlight } from './LayerHighlight'
 import { buildUploadLayerProps, type UploadLayerWithAtlasType } from './utils/buildUploadLayerProps'
-import { createPmtilesUrl } from './utils/createPmtilesUrl'
-
-function createSourceProps(mapRenderFormat: string, mapRenderUrl: string) {
-  return mapRenderFormat === 'geojson'
-    ? { type: 'geojson' as const, data: mapRenderUrl }
-    : { type: 'vector' as const, url: createPmtilesUrl(mapRenderUrl) }
-}
+import { createUploadSourceProps, resolveUploadBeforeId } from './utils/uploadSourceLayerUtils'
 
 // Renders user-selectable static datasets controlled by URL parameters.
 // SystemLayer datasets are handled separately by SourcesLayersSystemDatasets.
 //
-// Performance optimizations:
-// - Filters datasets before mapping to avoid unnecessary iterations
-// - Uses Set for O(1) visibility lookups instead of O(n) array.includes()
-// - React Compiler handles memoization automatically
+// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
+// so all Layers of the map form one flat, sortable list independent of their Source.
+// See LAYER_SORTING_REQUIREMENTS.md.
 //
-// MapLibre GL JS best practices:
-// - Sources are only loaded when shown layers reference them (lazy loading)
-// - Unmounting hidden datasets is fine for memory, but causes remount overhead on toggle
-// - For frequently toggled datasets, consider keeping mounted with visibility: 'none'
-// - Layer identity (id, type) remains stable to avoid style diffing overhead
-export const SourcesLayersStaticDatasets = () => {
+// All datasets of the region are always mounted; selection via URL state only toggles the
+// layer visibility. Unmounting layers would break the layer order: a layer that mounts later
+// is inserted at the top of its beforeId group, ignoring the intended order.
+// Vector (pmtiles) sources only load tiles when a visible layer references them; geojson
+// sources start with empty data and load the real URL on selection (deselecting drops the
+// data again — a re-selection refetches, which the browser cache absorbs).
+
+export const SourcesStaticDatasets = () => {
+  const { dataParam: selectedDatasetIds } = useDataParam()
+  const { data: regionDatasets } = useRegionDatasetsQuery()
+  if (!regionDatasets.length) return null
+
+  const selectedDatasetIdsSet = new Set(selectedDatasetIds ?? [])
+
+  return (
+    <>
+      {regionDatasets.map(
+        ({ id: sourceId, subId, mapRenderFormat, mapRenderUrl, attributionHtml }) => {
+          const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
+          const sourceProps = createUploadSourceProps({
+            mapRenderFormat,
+            mapRenderUrl,
+            loadData: selectedDatasetIdsSet.has(datasetSourceId),
+          })
+
+          return (
+            <Source
+              id={datasetSourceId}
+              key={datasetSourceId}
+              attribution={attributionHtml}
+              {...sourceProps}
+            />
+          )
+        },
+      )}
+    </>
+  )
+}
+
+export const LayersStaticDatasets = () => {
   const { dataParam: selectedDatasetIds } = useDataParam()
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { data: regionDatasets } = useRegionDatasetsQuery()
 
-  // Use Set for O(1) lookups instead of O(n) array.includes()
-  const selectedDatasetIdsSet = selectedDatasetIds ? new Set(selectedDatasetIds) : null
+  if (!regionDatasets.length) return null
 
-  // Filter visible datasets before mapping to avoid unnecessary iterations
-  const visibleDatasets = selectedDatasetIdsSet
-    ? regionDatasets.filter(({ id: sourceId, subId }) => {
-        const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
-        return selectedDatasetIdsSet.has(datasetSourceId)
-      })
-    : []
-
-  if (!selectedDatasetIdsSet || visibleDatasets.length === 0) return null
+  const selectedDatasetIdsSet = new Set(selectedDatasetIds ?? [])
 
   return (
     <>
-      {visibleDatasets.map(
-        ({ id: sourceId, subId, mapRenderFormat, mapRenderUrl, attributionHtml, layers }) => {
-          const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
-          const sourceProps = createSourceProps(mapRenderFormat, mapRenderUrl)
+      {regionDatasets.map(({ id: sourceId, subId, mapRenderFormat, layers }) => {
+        const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
+        const visible = selectedDatasetIdsSet.has(datasetSourceId)
 
-          return (
-            <Fragment key={datasetSourceId}>
-              <Source
-                id={datasetSourceId}
-                key={datasetSourceId}
-                attribution={attributionHtml}
-                {...sourceProps}
-              />
-              {layers.map((layer) => {
-                const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
-                const layerHighlightId = getLayerHighlightId(layerId)
-                const beforeId =
-                  'beforeId' in layer
-                    ? layer.beforeId || 'atlas-app-beforeid-fallback'
-                    : 'atlas-app-beforeid-fallback'
-                const layerProps = buildUploadLayerProps({
-                  layer: layer as UploadLayerWithAtlasType,
-                  layerId,
-                  sourceId: datasetSourceId,
-                  debugLayerStyles,
-                  beforeId,
-                  ...(mapRenderFormat === 'pmtiles' && { sourceLayer: 'default' as const }),
-                })
+        return (
+          <Fragment key={datasetSourceId}>
+            {layers.map((layer) => {
+              const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
+              const layerHighlightId = getLayerHighlightId(layerId)
+              const beforeId = resolveUploadBeforeId(layer)
+              const layerProps = buildUploadLayerProps({
+                layer: layer as UploadLayerWithAtlasType,
+                layerId,
+                sourceId: datasetSourceId,
+                debugLayerStyles,
+                beforeId,
+                visibility: layerVisibility(visible),
+                ...(mapRenderFormat === 'pmtiles' && { sourceLayer: 'default' as const }),
+              })
 
-                return (
-                  <Fragment key={layerId}>
-                    <Layer key={layerId} {...layerProps} />
-                    <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
-                  </Fragment>
-                )
-              })}
-            </Fragment>
-          )
-        },
-      )}
+              return (
+                <Fragment key={layerId}>
+                  <Layer key={layerId} {...layerProps} />
+                  <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
+                </Fragment>
+              )
+            })}
+          </Fragment>
+        )
+      })}
     </>
   )
 }

@@ -5,6 +5,7 @@ import RegionPagePending from '@/components/regionen/pageRegionSlug/RegionPagePe
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
 import { productName } from '@/data/tildaProductNames.const'
 import { DEV_REGION_ERROR_QUERY_KEY } from '@/dev/errorPreviews'
+import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
 import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions'
 import { getRegionPageDataFn } from '@/server/regions/regions.functions'
@@ -71,6 +72,9 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
       queryClient.ensureQueryData(regionUploadsUserQueryOptions(regionSlug)),
       queryClient.ensureQueryData(regionUploadsSystemLayerQueryOptions(regionSlug)),
       queryClient.ensureQueryData(processingMetadataQueryOptions()),
+      // Atlas-Geo layers wait for this before mounting (LayersAtlasGeo); preloading it here
+      // avoids a serial client roundtrip after style load and keeps mount timing aligned.
+      queryClient.ensureQueryData(mapLayerOrderQueryOptions()),
     ])
 
     return {
