@@ -51,6 +51,8 @@ export const PlanningWizard = ({
   const setDrawnGeometry = usePlanningBoundaryState((s) => s.setDrawnGeometry)
 
   const [title, setTitle] = useState('')
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const titleMissing = submitAttempted && title.trim().length === 0
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
   const [studyArea, setStudyArea] = useState<unknown>(null)
   const [areaTab, setAreaTab] = useState<AreaTab>('search')
@@ -168,6 +170,12 @@ export const PlanningWizard = ({
     },
   })
 
+  const handleSubmit = () => {
+    setSubmitAttempted(true)
+    if (title.trim().length === 0) return
+    mutation.mutate()
+  }
+
   const tabClass = (active: boolean) =>
     `flex-1 rounded px-2 py-1 text-xs font-medium ${
       active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
@@ -179,11 +187,18 @@ export const PlanningWizard = ({
         Titel
         <input
           type="text"
+          required
+          aria-invalid={titleMissing}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="rounded border border-gray-300 px-2 py-1 text-sm"
+          className={`rounded border px-2 py-1 text-sm ${
+            titleMissing
+              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:outline-none'
+              : 'border-gray-300'
+          }`}
         />
       </label>
+      {titleMissing && <p className="text-xs text-red-600">Bitte einen Titel angeben.</p>}
 
       <WizardStep number={1} title="Gebiet auswählen">
         <div className="flex flex-col gap-1 text-xs text-gray-600">
@@ -298,7 +313,7 @@ export const PlanningWizard = ({
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={handleSubmit}
           disabled={mutation.isPending || !effectiveStudyArea || areaTooLarge}
           className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
@@ -312,6 +327,9 @@ export const PlanningWizard = ({
           Abbrechen
         </button>
       </div>
+      {(title.trim().length === 0 || !effectiveStudyArea) && (
+        <p className="text-xs text-red-600">Alle Felder ausfüllen</p>
+      )}
     </div>
   )
 }
