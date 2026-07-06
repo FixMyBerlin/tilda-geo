@@ -200,6 +200,8 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
     searchParamsRegistry.planningRun,
     searchParamsRegistry.planningScore,
     searchParamsRegistry.planningHexagons,
+    searchParamsRegistry.planningMinArea,
+    searchParamsRegistry.planningAreaFilter,
   ].some((param) => u.searchParams.has(param))
   if (!hasVolatileMapParam) {
     const params = [...Object.values(searchParamsRegistry), 'v']

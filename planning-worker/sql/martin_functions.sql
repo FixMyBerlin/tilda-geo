@@ -36,6 +36,7 @@ BEGIN
                 score_parken,
                 score_fussgaengerzone,
                 score_bestand,
+                cluster_area_m2,
                 eignungsklasse,
                 gebaeude,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom

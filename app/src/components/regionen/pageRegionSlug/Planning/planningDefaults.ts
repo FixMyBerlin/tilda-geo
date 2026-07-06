@@ -29,6 +29,7 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   parken_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
+  min_score_threshold: 60,
   targets: [],
 }
 

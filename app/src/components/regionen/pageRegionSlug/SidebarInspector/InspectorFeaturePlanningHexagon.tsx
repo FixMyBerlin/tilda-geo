@@ -120,6 +120,15 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           </div>
         )}
 
+        {props.cluster_area_m2 != null && (
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-500">Zusammenhängende Fläche</span>
+            <span className="font-semibold text-gray-800">
+              {Math.round(props.cluster_area_m2).toLocaleString('de-DE')} m²
+            </span>
+          </div>
+        )}
+
         <div className="h-px bg-gray-200" />
 
         <div className="space-y-3">

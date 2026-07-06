@@ -3,7 +3,9 @@ import { Layer, Source } from 'react-map-gl/maplibre'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
 import {
   PLANNING_SCORE_PROPERTY,
+  usePlanningAreaFilterParam,
   usePlanningHexagonsVisibleParam,
+  usePlanningMinAreaParam,
   usePlanningRunParam,
   usePlanningScoreParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
@@ -41,14 +43,25 @@ const scoreColor = (property: string): any => [
   '#67000d',
 ]
 
-const hexagonFillLayerProps = (property: string) => ({
+// Flächen-Cluster-Filter: nur bei aktivierter Checkbox (filterOn) und gesetzter
+// Zielgröße (minArea > 0) werden Hexagone, deren zusammenhängende Fläche
+// (`cluster_area_m2`) die Zielgröße nicht erreicht (oder gar keinem Cluster
+// angehören, also NULL sind), stark abgedunkelt statt ausgeblendet – so bleibt
+// die Score-Einfärbung als Kontext sichtbar. Checkbox aus → wie vor Einführung
+// des Filters, alle Hexagone gleich eingefärbt.
+const clusterOpacity = (filterOn: boolean, minArea: number): any =>
+  filterOn && minArea > 0
+    ? ['case', ['>=', ['coalesce', ['get', 'cluster_area_m2'], 0], minArea], 0.7, 0.1]
+    : 0.7
+
+const hexagonFillLayerProps = (property: string, filterOn: boolean, minArea: number) => ({
   id: planningHexagonsLayerId,
   source: planningHexagonsSourceId,
   'source-layer': 'planning_hexagons',
   type: 'fill' as const,
   paint: {
     'fill-color': scoreColor(property),
-    'fill-opacity': 0.7,
+    'fill-opacity': clusterOpacity(filterOn, minArea),
     'fill-outline-color': 'rgba(0,0,0,0.15)',
   },
 })
@@ -83,6 +96,8 @@ export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
   const [scoreMode] = usePlanningScoreParam()
   const [hexagonsVisible] = usePlanningHexagonsVisibleParam()
+  const [minArea] = usePlanningMinAreaParam()
+  const [areaFilterOn] = usePlanningAreaFilterParam()
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
 
@@ -100,7 +115,11 @@ export const SourcesLayersPlanning = () => {
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
-  const fillLayerProps = hexagonFillLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])
+  const fillLayerProps = hexagonFillLayerProps(
+    PLANNING_SCORE_PROPERTY[scoreMode],
+    areaFilterOn,
+    minArea,
+  )
 
   return (
     <>

@@ -58,6 +58,12 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand real;`,
   )
+  // Flächen-Cluster (Connected-Component-Labeling über H3-Nachbarschaft): Gesamt-
+  // fläche der zusammenhängenden Fläche, zu der ein Hexagon gehört (NULL unter
+  // min_score_threshold). Client filtert clientseitig auf eine Zielgröße.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS cluster_area_m2 real;`,
+  )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
       run_id     bigint NOT NULL,
@@ -111,6 +117,7 @@ async function registerHexagonsFunction() {
           score_parken,
           score_fussgaengerzone,
           score_bestand,
+          cluster_area_m2,
           eignungsklasse,
           ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
         FROM planning.scenario_hexagons
@@ -138,6 +145,7 @@ async function registerHexagonsFunction() {
           score_parken: 'real',
           score_fussgaengerzone: 'real',
           score_bestand: 'real',
+          cluster_area_m2: 'real',
           eignungsklasse: 'text',
         },
       },

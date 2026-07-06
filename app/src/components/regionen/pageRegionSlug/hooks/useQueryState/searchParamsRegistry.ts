@@ -19,4 +19,6 @@ export const searchParamsRegistry = {
   planningRun: 'planningRun',
   planningScore: 'planningScore', // which probability colors the hexagons (bedarf/bebauung/kombination)
   planningHexagons: 'planningHexagons', // whether the hexagon result layer is visible
+  planningMinArea: 'planningMinArea', // gesuchte Mindestfläche (m²), Client-Filter auf cluster_area_m2
+  planningAreaFilter: 'planningAreaFilter', // ob der Zielgrößen-Filter aktiv ist
 } as const

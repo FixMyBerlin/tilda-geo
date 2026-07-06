@@ -45,3 +45,22 @@ export const usePlanningScoreParam = () =>
  */
 export const usePlanningHexagonsVisibleParam = () =>
   useQueryState('planningHexagons', parseAsBoolean.withDefault(true))
+
+/**
+ * Gesuchte Mindestfläche (m²) für die Flächensuche (Client-Filter auf die
+ * persistierte Tile-Spalte `cluster_area_m2`, siehe SourcesLayersPlanning).
+ * Bleibt auch erhalten, wenn der Filter per Checkbox (planningAreaFilter)
+ * ausgeschaltet wird, damit der Wert beim Wiedereinschalten nicht neu
+ * eingegeben werden muss.
+ */
+export const usePlanningMinAreaParam = () =>
+  useQueryState('planningMinArea', parseAsInteger.withDefault(0))
+
+/**
+ * Ob der Zielgrößen-Filter aktiv ist. Getrennt von `planningMinArea`, damit man
+ * per Checkbox jederzeit zur ungefilterten Ansicht (alle Hexagone normal
+ * eingefärbt, wie vor Einführung des Filters) zurückschalten kann, ohne die
+ * eingegebene Fläche zu verlieren.
+ */
+export const usePlanningAreaFilterParam = () =>
+  useQueryState('planningAreaFilter', parseAsBoolean.withDefault(false))

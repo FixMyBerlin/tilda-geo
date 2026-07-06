@@ -75,6 +75,12 @@ class UseCaseConfig:
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
 
+    # Mindest-Score, ab dem ein Hexagon zu einer zusammenhängenden Kandidaten-
+    # fläche zählt (Flächensuche). Cluster = benachbarte Hexagone mit
+    # mce_gesamtscore >= dieser Schwelle; ihre Gesamtfläche steht in
+    # scenario_hexagons.cluster_area_m2 (Client filtert danach auf Zielgröße).
+    min_score_threshold: float = 60.0
+
     # CIR/RGBI-Kachelquelle für die Vegetationsberechnung.
     # "auto" erkennt anhand des Studiengebiet-Zentroiden (12°E = UTM32/33-Grenze):
     #   Bayern → EPSG:25832 (WMS), Brandenburg/Berlin → EPSG:25833 (WMS).
@@ -141,4 +147,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
+        min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
     )

@@ -9,6 +9,8 @@ import type { FactorConfig } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import {
+  usePlanningAreaFilterParam,
+  usePlanningMinAreaParam,
   usePlanningModeParam,
   usePlanningRunParam,
   usePlanningScenarioParam,
@@ -43,6 +45,44 @@ const VegetationToggle = () => {
         />
       </Switch>
     </label>
+  )
+}
+
+/**
+ * Zielgröße-Filter für die Flächensuche: dunkelt Hexagone ab, deren
+ * zusammenhängende Fläche (`cluster_area_m2`, Connected-Component-Labeling im
+ * Worker über `min_score_threshold`) die eingegebene Mindestgröße nicht
+ * erreicht (siehe SourcesLayersPlanning). Reiner Client-Filter auf einer
+ * bereits persistierten Tile-Spalte, kein neuer Lauf nötig. Die Checkbox
+ * schaltet den Filter unabhängig vom eingegebenen Wert aus, sodass man
+ * jederzeit zur ungefilterten Ansicht (alle Hexagone gleich eingefärbt)
+ * zurückkommt, ohne die Fläche neu eingeben zu müssen.
+ */
+const MinAreaFilter = () => {
+  const [filterOn, setFilterOn] = usePlanningAreaFilterParam()
+  const [minArea, setMinArea] = usePlanningMinAreaParam()
+  return (
+    <div className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+      <label className="flex items-center gap-2 font-medium text-gray-800">
+        <input
+          type="checkbox"
+          checked={filterOn}
+          onChange={(e) => setFilterOn(e.target.checked)}
+          className="rounded border-gray-300"
+        />
+        Gesuchte Fläche (m²)
+      </label>
+      <input
+        type="number"
+        min={0}
+        step={5}
+        placeholder="aus"
+        disabled={!filterOn}
+        value={minArea > 0 ? minArea : ''}
+        onChange={(e) => setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))}
+        className="w-20 rounded border border-gray-300 px-1 py-0.5 text-right disabled:bg-gray-50 disabled:text-gray-400"
+      />
+    </div>
   )
 }
 
@@ -122,6 +162,8 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
       )}
 
       {scenario.runs[0]?.status === 'COMPLETE' && <ScoreModeSwitcher />}
+
+      {scenario.runs[0]?.status === 'COMPLETE' && <MinAreaFilter />}
 
       {scenario.runs[0]?.status === 'COMPLETE' && (scenario.runs[0].vegCount ?? 0) > 0 && (
         <VegetationToggle />

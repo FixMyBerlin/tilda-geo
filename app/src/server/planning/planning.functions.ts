@@ -26,6 +26,7 @@ const FactorConfigSchema = z
     parken_radius_m: z.number().optional(),
     fussgaengerzone_radius_m: z.number().optional(),
     bestand_default_diameter_m: z.number().optional(),
+    min_score_threshold: z.number().min(0).max(100).optional(),
     targets: z.array(z.any()).optional(),
     study_area: z.any(),
   })

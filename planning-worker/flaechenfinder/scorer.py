@@ -3,6 +3,8 @@ import geopandas as gpd
 import pandas as pd
 import numpy as np
 from shapely.geometry import Polygon
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
 
 from .config import UseCaseConfig
 from .dem import DEMAdapter
@@ -76,6 +78,49 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     agg_gdf = gpd.GeoDataFrame(agg, geometry="geometry", crs="EPSG:4326")
     print(f"   → {len(agg_gdf)} aggregierte Hexagone (Res {target_res})")
     return agg_gdf.to_crs("EPSG:25832")
+
+
+def assign_clusters(hex_proj: gpd.GeoDataFrame, min_score: float) -> gpd.GeoDataFrame:
+    """Fügt `cluster_area_m2` hinzu: Gesamtfläche (m²) der zusammenhängenden
+    Fläche, zu der ein Hexagon gehört. Cluster = benachbarte (H3-adjazente)
+    Zellen mit mce_gesamtscore >= min_score. Zellen unter der Schwelle bekommen
+    NaN (→ DB NULL). Reine Nachverarbeitung über H3-Nachbarschaft
+    (h3.grid_disk), keine Spatial-Joins. Nur fürs feine BASE-Gitter (Res 13).
+    """
+    hex_proj["cluster_area_m2"] = np.nan
+    if hex_proj is None or len(hex_proj) == 0:
+        return hex_proj
+
+    mask = hex_proj["mce_gesamtscore"] >= min_score
+    ids = hex_proj.loc[mask, "h3_id"].tolist()
+    if not ids:
+        return hex_proj
+
+    idx_of = {h: i for i, h in enumerate(ids)}
+    n = len(ids)
+
+    rows, cols = [], []
+    for h, i in idx_of.items():
+        for nb in h3.grid_disk(h, 1):        # h + 6 Nachbarn
+            j = idx_of.get(nb)
+            if j is not None and j > i:      # jede Kante nur einmal
+                rows.append(i); cols.append(j)
+
+    if rows:
+        graph = coo_matrix((np.ones(len(rows)), (rows, cols)), shape=(n, n))
+        _, labels = connected_components(graph, directed=False)
+    else:
+        labels = np.arange(n)                # lauter Einzelzellen
+
+    cell_area = np.fromiter(
+        (h3.cell_area(h, unit="m^2") for h in ids), dtype=float, count=n
+    )
+    area_per_label = pd.Series(cell_area).groupby(labels).transform("sum")
+    hex_proj.loc[mask, "cluster_area_m2"] = area_per_label.to_numpy()
+    print(f"   → Flächen-Cluster: {pd.Series(labels).nunique()} Cluster "
+          f"aus {n} Zellen (Score ≥ {min_score:g})")
+    return hex_proj
+
 
 # Die 12 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
 # Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
@@ -605,6 +650,8 @@ def run_flaechenfinder(
     hex_proj["eignungsklasse"] = pd.cut(
         hex_proj["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
+
+    assign_clusters(hex_proj, use_case.min_score_threshold)
 
     print(f"\n✅ Fertig: {len(hex_proj)} Hexagone")
     return hex_proj
