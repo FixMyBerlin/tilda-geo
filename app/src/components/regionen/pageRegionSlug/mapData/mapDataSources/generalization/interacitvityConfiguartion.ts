@@ -81,7 +81,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   },
   landuse: {
     stylingKeys: ['landuse'],
-    minzoom: 11,
+    minzoom: 9,
   },
   publicTransport: {
     stylingKeys: ['category'],
