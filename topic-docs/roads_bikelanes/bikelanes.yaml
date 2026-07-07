@@ -277,11 +277,7 @@ attributes:
   - key: surface
     ref: roads.surface
   - key: surface_source
-    label: Herkunft der Oberfläche
-    valuesRef: roads.surface_source
-    valuesAdd:
-      - value: parent_highway_tag
-        label: Von zugeordneter Straße (OSM)
+    ref: roads.surface_source
   - key: surface_confidence
     ref: roads.surface_confidence
   - key: smoothness

@@ -262,31 +262,12 @@ attributes:
       - value: low
         label: Niedrig
   - key: surface
-    label: Oberfläche
+    ref: roads.surface
     description: Oberflächenbelag des Parkraumabschnitts.
-    valuesRef: roads.surface
   - key: surface_confidence
-    purpose: qa
-    label: Konfidenz der Oberfläche
-    values:
-      - value: high
-        label: Hoch
-      - value: medium
-        label: Mittel
-      - value: low
-        label: Niedrig
+    ref: roads.surface_confidence
   - key: surface_source
-    purpose: qa
-    label: Herkunft der Oberfläche
-    values:
-      - value: tag
-        label: Explizite Angabe aus OSM
-      - value: tag_transformed
-        label: Aus OSM-Tag normalisiert
-      - value: parent_highway_tag
-        label: Von zugeordneter Straße (OSM)
-      - value: parent_highway_tag_transformed
-        label: Von zugeordneter Straße, normalisiert
+    ref: roads.surface_source
   - key: direction
     label: Einparkrichtung
     description: Vorgesehene oder ausgeschilderte Fahrzeugrichtung beim Einparken.

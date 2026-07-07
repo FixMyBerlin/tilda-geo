@@ -124,6 +124,59 @@ const followRefToTerminalEntry = (input: {
   return { tableName: targetTableName, entry: targetAttribute }
 }
 
+const resolveDescriptionAlongRefChain = (input: {
+  pointer: string
+  docsByTableName: Map<string, TopicDocsYaml>
+  visiting: Set<string>
+  errorContext: string
+}) => {
+  const { targetTableName, targetAttributeKey } = parseTableAttributePointer(
+    input.pointer,
+    'ref',
+    input.errorContext,
+  )
+  const visitToken = `${targetTableName}.${targetAttributeKey}`
+  if (input.visiting.has(visitToken)) {
+    throw new Error(`Circular attribute ref at "${visitToken}" (${input.errorContext})`)
+  }
+  input.visiting.add(visitToken)
+
+  try {
+    const targetDoc = input.docsByTableName.get(targetTableName)
+    if (!targetDoc) {
+      throw new Error(
+        `Unknown table "${targetTableName}" in ref "${input.pointer}" (${input.errorContext})`,
+      )
+    }
+
+    const targetAttribute = targetDoc.attributes.find(
+      (attribute) => attribute.key === targetAttributeKey,
+    )
+    if (!targetAttribute) {
+      throw new Error(
+        `Unknown attribute "${targetAttributeKey}" in ref "${input.pointer}" (${input.errorContext})`,
+      )
+    }
+
+    if (targetAttribute.description) {
+      return targetAttribute.description
+    }
+
+    if (targetAttribute.ref) {
+      return resolveDescriptionAlongRefChain({
+        pointer: targetAttribute.ref,
+        docsByTableName: input.docsByTableName,
+        visiting: input.visiting,
+        errorContext: input.errorContext,
+      })
+    }
+
+    return undefined
+  } finally {
+    input.visiting.delete(visitToken)
+  }
+}
+
 const resolveInheritedPurpose = (input: {
   pointer: string
   docsByTableName: Map<string, TopicDocsYaml>
@@ -207,7 +260,16 @@ export const compileAttributesForDoc = (input: {
         type: refEntry.format,
         label,
         purpose: attribute.purpose ?? refEntry.purpose,
-        description: resolveDescription(refEntry.description),
+        description: resolveDescription(
+          attribute.description ??
+            resolveDescriptionAlongRefChain({
+              pointer: attribute.ref,
+              docsByTableName,
+              visiting: new Set(),
+              errorContext,
+            }) ??
+            refEntry.description,
+        ),
         chapterRefs: refEntry.chapterRefs?.map((chapter) => chapter.chapterId),
         values: resolvedValues.map((valueNode) => compileValueNode(valueNode)),
       } satisfies CompiledAttribute

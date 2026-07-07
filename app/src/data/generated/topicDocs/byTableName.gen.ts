@@ -1834,11 +1834,19 @@ const data = {
         values: [
           {
             value: 'tag',
-            label: 'OSM-Tag `surface`',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
           },
           {
             value: 'parent_highway_tag',
             label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
           },
         ],
       },
@@ -1851,6 +1859,14 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
           },
         ],
       },
@@ -10754,7 +10770,19 @@ const data = {
         values: [
           {
             value: 'tag',
-            label: 'OSM-Tag `surface`',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
           },
         ],
       },
@@ -10767,6 +10795,14 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
           },
         ],
       },
@@ -11388,7 +11424,19 @@ const data = {
         values: [
           {
             value: 'tag',
-            label: 'OSM-Tag `surface`',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
           },
         ],
       },
@@ -11401,6 +11449,14 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
           },
         ],
       },

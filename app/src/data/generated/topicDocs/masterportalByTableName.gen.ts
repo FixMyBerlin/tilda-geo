@@ -755,8 +755,10 @@ const data = {
         condition: 'contains',
         type: 'string',
         format: {
-          tag: 'OSM-Tag `surface`',
+          tag: 'Explizite Angabe aus OSM',
+          tag_transformed: 'Aus OSM-Tag normalisiert',
           parent_highway_tag: 'Von zugeordneter Straße (OSM)',
+          parent_highway_tag_transformed: 'Von zugeordneter Straße, normalisiert',
         },
       },
       surface_confidence: {
@@ -765,6 +767,8 @@ const data = {
         type: 'string',
         format: {
           high: 'Hoch',
+          medium: 'Mittel',
+          low: 'Niedrig',
         },
       },
       smoothness: {
@@ -3978,7 +3982,10 @@ const data = {
         condition: 'contains',
         type: 'string',
         format: {
-          tag: 'OSM-Tag `surface`',
+          tag: 'Explizite Angabe aus OSM',
+          tag_transformed: 'Aus OSM-Tag normalisiert',
+          parent_highway_tag: 'Von zugeordneter Straße (OSM)',
+          parent_highway_tag_transformed: 'Von zugeordneter Straße, normalisiert',
         },
       },
       surface_confidence: {
@@ -3987,6 +3994,8 @@ const data = {
         type: 'string',
         format: {
           high: 'Hoch',
+          medium: 'Mittel',
+          low: 'Niedrig',
         },
       },
       smoothness: {
@@ -4272,7 +4281,10 @@ const data = {
         condition: 'contains',
         type: 'string',
         format: {
-          tag: 'OSM-Tag `surface`',
+          tag: 'Explizite Angabe aus OSM',
+          tag_transformed: 'Aus OSM-Tag normalisiert',
+          parent_highway_tag: 'Von zugeordneter Straße (OSM)',
+          parent_highway_tag_transformed: 'Von zugeordneter Straße, normalisiert',
         },
       },
       surface_confidence: {
@@ -4281,6 +4293,8 @@ const data = {
         type: 'string',
         format: {
           high: 'Hoch',
+          medium: 'Mittel',
+          low: 'Niedrig',
         },
       },
       smoothness: {
