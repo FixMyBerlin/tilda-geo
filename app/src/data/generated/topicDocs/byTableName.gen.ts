@@ -521,7 +521,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -529,7 +529,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -537,11 +537,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -573,11 +573,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -1738,7 +1738,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -1746,7 +1746,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -1754,11 +1754,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -1790,11 +1790,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -2953,7 +2953,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -2961,7 +2961,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -2969,11 +2969,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -3005,11 +3005,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -3756,7 +3756,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -3764,7 +3764,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -3772,11 +3772,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -3808,11 +3808,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -4349,7 +4349,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -4357,7 +4357,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -4365,11 +4365,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -4401,11 +4401,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -5295,7 +5295,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -5303,7 +5303,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -5311,11 +5311,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -5347,11 +5347,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -7028,7 +7028,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -7036,7 +7036,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -7044,11 +7044,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -7080,11 +7080,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -7902,7 +7902,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -7910,7 +7910,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -7918,11 +7918,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -7954,11 +7954,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -10658,7 +10658,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -10666,7 +10666,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -10674,11 +10674,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -10710,11 +10710,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -11292,7 +11292,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -11300,7 +11300,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -11308,11 +11308,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -11344,11 +11344,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',

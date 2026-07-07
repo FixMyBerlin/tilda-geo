@@ -278,17 +278,17 @@ attributes:
       - value: 'concrete:lanes'
         label: Betonstreifen / -bahnen
       - value: paving_stones
-        label: Pflastersteine
+        label: Verbundpflastersteine
       - value: 'paving_stones:lanes'
         label: Pflastersteinbahnen
       - value: sett
-        label: Kopfsteinpflaster
+        label: Behauenes Pflaster / Natursteinpflaster
       - value: mosaic_sett
         label: Mosaikpflaster
       - value: small_sett
-        label: Feines Kopfsteinpflaster
+        label: Kleinpflaster
       - value: large_sett
-        label: Grobes Kopfsteinpflaster
+        label: Großpflaster
       - value: bricks
         label: Ziegel
       - value: stone
@@ -304,9 +304,9 @@ attributes:
       - value: fine_gravel
         label: Splitt
       - value: gravel
-        label: Kies
+        label: Schotter
       - value: pebblestone
-        label: Kiesel
+        label: Kieselsteine
       - value: wood
         label: Holz
       - value: woodchips
