@@ -2,8 +2,6 @@
 const regionNames = [
   'Stadt Berlin',
   'Land Brandenburg',
-  'Landkreis Bielefeld',
-  'Landkreis Woldegk',
   'Stadt Bietigheim-Bissingen',
   'Stadt Überlingen',
   'Gemeinde Eichwalde',
