@@ -3,7 +3,12 @@ import { registerInspectorMissingTranslation } from '@/components/regionen/pageR
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { isDev } from '@/components/shared/utils/isEnv'
-import { getInspectorAttributeFormat, isNumericTopicDocFormat } from '@/data/topicDocs/runtime'
+import {
+  getInspectorAttributeFormat,
+  getInspectorValueTranslationKey,
+  formatInspectorTagValue,
+  isNumericTopicDocFormat,
+} from '@/data/topicDocs/runtime'
 import { getTopicDocNumericFormatSuffix, isTopicDocDateFormat } from '@/data/topicDocs/schema'
 import { NodataFallback } from '../compositTableRows/NodataFallback'
 import { translations } from './translations.const'
@@ -21,8 +26,8 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
   if (typeof tagValue === 'undefined') {
     return <NodataFallback />
   }
-  const fallbackValue = typeof tagValue === 'string' ? tagValue : JSON.stringify(tagValue)
-  const translationKey = `${sourceId}--${tagKey}=${fallbackValue}`
+  const fallbackValue = formatInspectorTagValue(tagValue)!
+  const translationKey = getInspectorValueTranslationKey(sourceId, tagKey, tagValue)!
   const debugTitle = isDev ? `(VALUE) ${translationKey}` : undefined
 
   const showRawValues = shouldShowRawInspectorValues(sourceId, regionDatasets)

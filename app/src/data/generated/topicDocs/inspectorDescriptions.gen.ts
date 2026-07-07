@@ -93,6 +93,7 @@ const data = {
   },
   atlas_roads: {
     keys: {
+      highway: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
       name_ref: 'Enthält Kurznamen wie `A 100` oder `B 96`, übernommen aus dem OSM-Tag `ref`.',
       length:
         'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',

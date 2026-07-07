@@ -553,7 +553,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -851,138 +851,7 @@ const data = {
       {
         key: 'road',
         type: 'string',
-        label: 'Straßentyp',
-        values: [
-          {
-            value: 'bicycle_road',
-            label: 'Fahrradstraße',
-          },
-          {
-            value: 'construction',
-            label: 'Straße ist in Bau',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
-            value: 'cycleway',
-            label: 'Radweg',
-          },
-          {
-            value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
-          },
-          {
-            value: 'footway_sidewalk',
-            label: 'Gehweg',
-          },
-          {
-            value: 'footway',
-            label: 'Fußweg',
-          },
-          {
-            value: 'living_street',
-            label: 'Verkehrsberuhigter Bereich',
-          },
-          {
-            value: 'motorway_link',
-            label: 'Zufahrt einer Autobahn',
-          },
-          {
-            value: 'motorway',
-            label: 'Autobahn',
-          },
-          {
-            value: 'path',
-            label: 'Weg / Pfad',
-          },
-          {
-            value: 'pedestrian',
-            label: 'Fußgängerzone',
-          },
-          {
-            value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
-          },
-          {
-            value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
-          },
-          {
-            value: 'residential',
-            label: 'Anwohnerstraße',
-          },
-          {
-            value: 'residential_priority_road',
-            label: 'residential_priority_road',
-          },
-          {
-            value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
-          },
-          {
-            value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
-          },
-          {
-            value: 'service_alley',
-            label: 'Gasse',
-          },
-          {
-            value: 'service_driveway',
-            label: 'Grundstückszufahrt',
-          },
-          {
-            value: 'service_emergency_access',
-            label: 'Rettungsweg',
-          },
-          {
-            value: 'service_parking_aisle',
-            label: 'Parkplatzweg',
-          },
-          {
-            value: 'service_road',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'service_uncategorized',
-            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
-          },
-          {
-            value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
-          },
-          {
-            value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
-          },
-          {
-            value: 'track',
-            label: 'Wald- / Feldweg',
-          },
-          {
-            value: 'unclassified',
-            label: 'Nebenstraße mit Verbindungscharakter',
-          },
-          {
-            value: 'unspecified_road',
-            label: 'Unkategorisierte Straße',
-          },
-        ],
-      },
-      {
-        key: '_parent_highway',
-        type: 'string',
-        label: 'Straßentyp',
+        label: 'Straßentyp Fahrbahn',
         values: [
           {
             value: 'bicycle_road',
@@ -1113,31 +982,11 @@ const data = {
       {
         key: 'highway',
         type: 'string',
-        label: 'Straßentyp',
+        label: 'Straßentyp Fahrbahn',
         values: [
-          {
-            value: 'bicycle_road',
-            label: 'Fahrradstraße',
-          },
-          {
-            value: 'construction',
-            label: 'Straße ist in Bau',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
           {
             value: 'cycleway',
             label: 'Radweg',
-          },
-          {
-            value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
-          },
-          {
-            value: 'footway_sidewalk',
-            label: 'Gehweg',
           },
           {
             value: 'footway',
@@ -1148,14 +997,6 @@ const data = {
             label: 'Verkehrsberuhigter Bereich',
           },
           {
-            value: 'motorway_link',
-            label: 'Zufahrt einer Autobahn',
-          },
-          {
-            value: 'motorway',
-            label: 'Autobahn',
-          },
-          {
             value: 'path',
             label: 'Weg / Pfad',
           },
@@ -1164,52 +1005,28 @@ const data = {
             label: 'Fußgängerzone',
           },
           {
-            value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
-          },
-          {
             value: 'primary',
             label: 'Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
           },
           {
             value: 'residential',
             label: 'Anwohnerstraße',
           },
           {
-            value: 'residential_priority_road',
-            label: 'residential_priority_road',
-          },
-          {
-            value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            value: 'road',
+            label: 'Unkategorisierte Straße',
           },
           {
             value: 'secondary',
             label: 'Landesstraße/Wichtige Durchgangsstraße',
           },
           {
-            value: 'service_alley',
-            label: 'Gasse',
-          },
-          {
-            value: 'service_driveway',
-            label: 'Grundstückszufahrt',
-          },
-          {
-            value: 'service_emergency_access',
-            label: 'Rettungsweg',
-          },
-          {
-            value: 'service_parking_aisle',
-            label: 'Parkplatzweg',
-          },
-          {
-            value: 'service_road',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'service_uncategorized',
-            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
           },
           {
             value: 'service',
@@ -1220,12 +1037,12 @@ const data = {
             label: 'Stufen',
           },
           {
-            value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
-          },
-          {
             value: 'tertiary',
             label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
           },
           {
             value: 'track',
@@ -1235,9 +1052,80 @@ const data = {
             value: 'unclassified',
             label: 'Nebenstraße mit Verbindungscharakter',
           },
+        ],
+      },
+      {
+        key: '_parent_highway',
+        type: 'string',
+        label: 'Straßentyp Fahrbahn',
+        values: [
           {
-            value: 'unspecified_road',
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary',
+            label: 'Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'road',
             label: 'Unkategorisierte Straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landesstraße/Wichtige Durchgangsstraße',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
           },
         ],
       },
@@ -1882,7 +1770,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -3097,7 +2985,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -3900,7 +3788,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -4493,7 +4381,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -5439,7 +5327,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -7172,7 +7060,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -8046,7 +7934,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -9871,6 +9759,98 @@ const data = {
         ],
       },
       {
+        key: 'highway',
+        type: 'string',
+        label: 'OSM-Straßentyp',
+        description: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
+        values: [
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary',
+            label: 'Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'road',
+            label: 'Unkategorisierte Straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landesstraße/Wichtige Durchgangsstraße',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'trunk',
+            label: 'Kraftfahrstraße',
+          },
+          {
+            value: 'trunk_link',
+            label: 'Kraftfahrstraßen-Anschluss',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+        ],
+      },
+      {
         key: 'name',
         type: 'sanitized_strings',
         label: 'Name',
@@ -10710,7 +10690,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -11344,7 +11324,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',

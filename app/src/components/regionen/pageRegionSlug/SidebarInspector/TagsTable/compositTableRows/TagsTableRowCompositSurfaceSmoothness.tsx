@@ -13,7 +13,7 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
   if (!(properties.smoothness || properties.surface)) return null
 
   return (
-    <TagsTableRowFrame label="Oberfläche und Zustand">
+    <TagsTableRowFrame label="Oberflächenqualität">
       <table className="w-full leading-4">
         <tbody>
           <tr>
@@ -63,7 +63,7 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
             </td>
           </tr>
           <tr className="border-t">
-            <th className="py-1 pr-2 text-left font-medium">Zustand</th>
+            <th className="py-1 pr-2 text-left font-medium">Fahrqualität</th>
             <td className="w-full py-1">
               <NodataFallbackWrapper fallback={!properties.smoothness}>
                 <ValueDisclosure>
@@ -103,7 +103,7 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
                       <em>Genauigkeit der Quelle:</em>{' '}
                       <ConditionalFormattedValue
                         sourceId={sourceId}
-                        tagKey={'confidence'}
+                        tagKey={'smoothness_confidence'}
                         tagValue={properties.smoothness_confidence}
                       />
                     </p>

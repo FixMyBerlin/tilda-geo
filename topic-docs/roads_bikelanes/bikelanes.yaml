@@ -67,10 +67,46 @@ attributes:
         label: Führungsform unklar
   - key: road
     ref: roads.road
-  - key: _parent_highway
-    ref: roads.road
+    label: Straßentyp Fahrbahn
   - key: highway
-    ref: roads.road
+    label: Straßentyp Fahrbahn
+    values:
+      - value: cycleway
+        label: Radweg
+      - value: footway
+        label: Fußweg
+      - value: living_street
+        label: Verkehrsberuhigter Bereich
+      - value: path
+        label: Weg / Pfad
+      - value: pedestrian
+        label: Fußgängerzone
+      - value: primary
+        label: Bundesstraße/Hauptverbindungsstraße
+      - value: primary_link
+        label: Zufahrt einer Bundesstraße/Hauptverbindungsstraße
+      - value: residential
+        label: Anwohnerstraße
+      - value: road
+        label: Unkategorisierte Straße
+      - value: secondary
+        label: Landesstraße/Wichtige Durchgangsstraße
+      - value: secondary_link
+        label: Zufahrt einer Landesstraße/wichtigen Durchgangsstraße
+      - value: service
+        label: Zufahrtsweg
+      - value: steps
+        label: Stufen
+      - value: tertiary
+        label: Kreisstraße/Untergeordnete Durchgangsstraße
+      - value: tertiary_link
+        label: Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße
+      - value: track
+        label: Wald- / Feldweg
+      - value: unclassified
+        label: Nebenstraße mit Verbindungscharakter
+  - key: _parent_highway
+    ref: bikelanes.highway
   - key: name
     ref: roads.name
   - key: length
