@@ -19,6 +19,12 @@
       "skillPath": "skills/playwright-skill/SKILL.md",
       "computedHash": "82dca8d03cc94bbd594838dbfecbf5ea69710a8923cde8fd326a9836077618f9"
     },
+    "prisma": {
+      "source": "FixMyBerlin/fixmyskills",
+      "sourceType": "github",
+      "skillPath": "skills/prisma/SKILL.md",
+      "computedHash": "7e59e58fe2d5d77a6a684a396a806f913bdc610b3a62257417c2bdf480b7fb94"
+    },
     "react-dev": {
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",
