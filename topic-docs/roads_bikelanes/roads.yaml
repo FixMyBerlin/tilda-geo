@@ -303,7 +303,63 @@ attributes:
         label: Spezielle Angaben
   - key: surface
     label: Oberfläche
-    valuesRef: parkings.surface
+    values:
+      - value: asphalt
+        label: Asphalt
+      - value: paved
+        label: Befestigt (unspezifisch)
+      - value: unpaved
+        label: Unbefestigt
+      - value: concrete
+        label: Beton
+      - value: 'concrete:plates'
+        label: Betonplatten
+      - value: 'concrete:lanes'
+        label: Betonstreifen / -bahnen
+      - value: paving_stones
+        label: Verbundpflastersteine
+      - value: 'paving_stones:lanes'
+        label: Pflastersteinbahnen
+      - value: sett
+        label: Behauenes Pflaster / Natursteinpflaster
+      - value: mosaic_sett
+        label: Mosaikpflaster
+      - value: small_sett
+        label: Kleinpflaster
+      - value: large_sett
+        label: Großpflaster
+      - value: bricks
+        label: Ziegel
+      - value: stone
+        label: Stein
+      - value: ground
+        label: Erde/Boden
+      - value: grass
+        label: Gras
+      - value: sand
+        label: Sand
+      - value: compacted
+        label: Verdichteter Untergrund
+      - value: fine_gravel
+        label: Splitt
+      - value: gravel
+        label: Schotter
+      - value: pebblestone
+        label: Kieselsteine
+      - value: wood
+        label: Holz
+      - value: woodchips
+        label: Hackschnitzel
+      - value: metal
+        label: Metall
+      - value: metal_grid
+        label: Metallgitter
+      - value: plastic
+        label: Kunststoff
+      - value: rubber
+        label: Gummi
+      - value: grass_paver
+        label: Rasengitter / Grasgitter
   - key: surface_source
     purpose: qa
     label: Herkunft der Oberfläche

@@ -100,7 +100,7 @@ attributes:
         label: Innen
   - key: surface
     label: Oberfläche
-    valuesRef: parkings.surface
+    valuesRef: roads.surface
   - key: surveillance
     label: Überwachung
     values:
