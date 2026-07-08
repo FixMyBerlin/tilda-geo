@@ -15,7 +15,7 @@ export const footerLinkGroups: FooterLinkGroup[] = [
     links: [
       { name: 'Über TILDA', href: 'https://fixmycity.de/tilda/' },
       { name: 'TILDA in der Praxis', href: 'https://fixmycity.de/referenzen/' },
-      { name: 'Der Trassenscout - für komplexe Projekte', href: 'https://trassenscout.de' },
+      { name: 'Der Trassenscout – für komplexe Projekte', href: 'https://trassenscout.de' },
       {
         name: 'Weitere Dienstleistungen',
         href: 'https://fixmycity.de/dienstleistungen/',
