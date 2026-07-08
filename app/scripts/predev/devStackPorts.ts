@@ -2,19 +2,25 @@ import { connect } from 'node:net'
 
 export const DEV_DB_PORT = 5432
 export const DEV_TILES_PORT = 3000
+export const PORT_PROBE_TIMEOUT_MS = 1000
+
+export function probeHostPort(host: string, port: number) {
+  return new Promise<'open' | 'closed'>((resolve) => {
+    const socket = connect({ host, port })
+    const finish = (state: 'open' | 'closed') => {
+      clearTimeout(timer)
+      socket.removeAllListeners()
+      socket.destroy()
+      resolve(state)
+    }
+    const timer = setTimeout(() => finish('closed'), PORT_PROBE_TIMEOUT_MS)
+    socket.once('connect', () => finish('open'))
+    socket.once('error', () => finish('closed'))
+  })
+}
 
 function isPortFreeOnHost(host: string, port: number) {
-  return new Promise<boolean>((resolve) => {
-    const socket = connect({ host, port })
-    socket.once('connect', () => {
-      socket.destroy()
-      resolve(false)
-    })
-    socket.once('error', () => {
-      socket.destroy()
-      resolve(true)
-    })
-  })
+  return probeHostPort(host, port).then((state) => state === 'closed')
 }
 
 /** Host ports published by running Docker containers (`0.0.0.0:5432->5432/tcp`). */

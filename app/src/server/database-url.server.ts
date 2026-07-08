@@ -32,7 +32,8 @@ function warnIfPasswordNeedsUrlEncoding(password: string) {
 export function getBaseDatabaseUrl() {
   const { host, user, password, name } = getDatabaseConfig()
   warnIfPasswordNeedsUrlEncoding(password)
-  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:5432/${name}`
+  const port = process.env.DATABASE_PORT ?? '5432'
+  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
 }
 
 // Note: The ?schema=prisma parameter is used by Prisma CLI (migrations, introspection, studio)

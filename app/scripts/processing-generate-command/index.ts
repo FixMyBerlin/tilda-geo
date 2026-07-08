@@ -6,11 +6,18 @@ import { area, bboxPolygon } from '@turf/turf'
 import { $ } from 'bun'
 import dotenv from 'dotenv'
 import { topicsConfig } from '../../../processing/constants/topics.const'
+import {
+  applyDevPortSlotToProcessEnv,
+  exitOnInvalidDevPortSlot,
+  isDevPortSlotMode,
+} from '../predev/devPortSlot'
 import { composeContainerPrefixFromEnv, dockerStackIdFromEnv } from '../predev/ensureDevStack'
 
 const repoRootFromScript = path.resolve(import.meta.dir, '../../..')
 dotenv.config({ path: path.join(repoRootFromScript, '.env') })
 dotenv.config({ path: path.join(repoRootFromScript, '.env.local') })
+exitOnInvalidDevPortSlot('processing')
+applyDevPortSlotToProcessEnv()
 
 const BBOX_PRESETS = {
   bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
@@ -344,6 +351,11 @@ function formatShellOneLiner(repoRoot: string, overrides: Record<string, string>
   const containerPrefix = composeContainerPrefixFromEnv()
   if (containerPrefix) {
     envParts.unshift(envAssignment('COMPOSE_DEV_CONTAINER_PREFIX', containerPrefix))
+  }
+
+  if (isDevPortSlotMode()) {
+    envParts.unshift(envAssignment('TILES_PORT', process.env.TILES_PORT ?? '3000'))
+    envParts.unshift(envAssignment('DATABASE_PORT', process.env.DATABASE_PORT ?? '5432'))
   }
 
   const stackId = dockerStackIdFromEnv()

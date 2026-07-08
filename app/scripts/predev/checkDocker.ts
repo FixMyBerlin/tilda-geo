@@ -1,11 +1,15 @@
 import { join } from 'node:path'
-import { stopOrphanedTilesContainers, stopOtherRunningDevStacks } from './devStackDiscovery'
 import {
-  DEV_DB_PORT,
-  DEV_TILES_PORT,
-  isHostPortAvailable,
-  publishedHostPorts,
-} from './devStackPorts'
+  applyDevPortSlotToProcessEnv,
+  exitOnInvalidDevPortSlot,
+  isDevPortSlotMode,
+} from './devPortSlot'
+import {
+  getRunningStackPublishedPorts,
+  stopOrphanedTilesContainers,
+  stopOtherRunningDevStacks,
+} from './devStackDiscovery'
+import { isHostPortAvailable, publishedHostPorts } from './devStackPorts'
 import {
   activeStackIdFromEnv,
   composeContainerPrefixFromEnv,
@@ -20,46 +24,65 @@ const label = 'check_docker'
 
 export async function checkDocker() {
   try {
+    exitOnInvalidDevPortSlot(label)
+    const { databasePort, tilesPort } = applyDevPortSlotToProcessEnv()
+    const slotMode = isDevPortSlotMode()
     const attach = isAttachMode()
     const activeStackId = activeStackIdFromEnv()
 
-    const stoppedOrphans = await stopOrphanedTilesContainers()
-    if (stoppedOrphans.length > 0) {
-      logWarn('check_docker', `Stopped orphaned tiles containers: ${stoppedOrphans.join(', ')}`)
+    if (slotMode) {
+      const stackId = devStackIdFromEnv()
+      if (stackId) {
+        const running = await getRunningStackPublishedPorts(stackId)
+        if (running && (running.databasePort !== databasePort || running.tilesPort !== tilesPort)) {
+          logErr(
+            label,
+            `DEV_STACK_ID "${stackId}" is already running on ports ${running.databasePort}/${running.tilesPort} — use a different worktree/.env.local DEV_STACK_ID or stop it`,
+          )
+          process.exit(1)
+        }
+      }
     }
 
-    const stopped = await stopOtherRunningDevStacks(activeStackId)
-    if (stopped.length > 0) {
-      const names = stopped.map((s) => s.stackId).join(', ')
-      logWarn('check_docker', `Stopped other dev stacks: ${names}`)
+    if (!slotMode) {
+      const stoppedOrphans = await stopOrphanedTilesContainers()
+      if (stoppedOrphans.length > 0) {
+        logWarn('check_docker', `Stopped orphaned tiles containers: ${stoppedOrphans.join(', ')}`)
+      }
+
+      const stopped = await stopOtherRunningDevStacks(activeStackId)
+      if (stopped.length > 0) {
+        const names = stopped.map((s) => s.stackId).join(', ')
+        logWarn('check_docker', `Stopped other dev stacks: ${names}`)
+      }
     }
 
     if (attach) {
       const ready = await devStackPortsArePublished()
       if (ready) {
-        logOk(`${label} (attached stack on ports ${DEV_DB_PORT}, ${DEV_TILES_PORT})`)
+        logOk(`${label} (attached stack on ports ${databasePort}, ${tilesPort})`)
         return
       }
       logErr(
         label,
-        `DEV_ATTACH_STACK is set but ports ${DEV_DB_PORT}, ${DEV_TILES_PORT} are not published — start the target stack first`,
+        `DEV_ATTACH_STACK is set but ports ${databasePort}, ${tilesPort} are not published — start the target stack first`,
       )
       process.exit(1)
     }
 
     const published = await publishedHostPorts()
-    const dbPublished = published.has(DEV_DB_PORT)
-    const tilesPublished = published.has(DEV_TILES_PORT)
+    const dbPublished = published.has(databasePort)
+    const tilesPublished = published.has(tilesPort)
 
     if (dbPublished && tilesPublished) {
-      logOk(`${label} (stack already running on ports ${DEV_DB_PORT}, ${DEV_TILES_PORT})`)
+      logOk(`${label} (stack already running on ports ${databasePort}, ${tilesPort})`)
       return
     }
 
     if (dbPublished || tilesPublished) {
       const busy = [
-        dbPublished && `db port ${DEV_DB_PORT}`,
-        tilesPublished && `tiles port ${DEV_TILES_PORT}`,
+        dbPublished && `db port ${databasePort}`,
+        tilesPublished && `tiles port ${tilesPort}`,
       ]
         .filter(Boolean)
         .join(', ')
@@ -70,12 +93,12 @@ export async function checkDocker() {
       process.exit(1)
     }
 
-    const dbFree = await isHostPortAvailable(DEV_DB_PORT)
-    const tilesFree = await isHostPortAvailable(DEV_TILES_PORT)
+    const dbFree = await isHostPortAvailable(databasePort)
+    const tilesFree = await isHostPortAvailable(tilesPort)
     if (!dbFree || !tilesFree) {
       logErr(
         label,
-        `Ports not available (db ${DEV_DB_PORT}: ${dbFree ? 'free' : 'busy'}, tiles ${DEV_TILES_PORT}: ${tilesFree ? 'free' : 'busy'})`,
+        `Ports not available (db ${databasePort}: ${dbFree ? 'free' : 'busy'}, tiles ${tilesPort}: ${tilesFree ? 'free' : 'busy'})`,
       )
       process.exit(1)
     }
@@ -104,6 +127,8 @@ export async function checkDocker() {
         env: {
           ...process.env,
           COMPOSE_DEV_CONTAINER_PREFIX: containerPrefix,
+          DATABASE_PORT: String(databasePort),
+          TILES_PORT: String(tilesPort),
         },
       },
     )
@@ -111,7 +136,7 @@ export async function checkDocker() {
     if (exitCode !== 0) {
       throw new Error(`exit code ${exitCode}`)
     }
-    logOk(`${label} (started stack on ports ${DEV_DB_PORT}, ${DEV_TILES_PORT})`)
+    logOk(`${label} (started stack on ports ${databasePort}, ${tilesPort})`)
   } catch (e) {
     logErr(label, e instanceof Error ? e.message : String(e))
     process.exit(1)

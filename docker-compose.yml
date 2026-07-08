@@ -118,7 +118,8 @@ services:
       traefik.http.routers.tiles.tls.certresolver: letsencrypt
       traefik.http.routers.tiles.tls: true
     ports:
-      - "3000:3000"
+      # Local DEV_PORT_SLOT only — do not set TILES_PORT in server/deploy environments.
+      - "${TILES_PORT:-3000}:3000"
     configs:
       - source: martin_conf
         target: /config.yaml
@@ -138,7 +139,8 @@ services:
       LC_ALL: en_US.UTF-8
       TZ: Europe/Berlin
     ports:
-      - "5432:5432"
+      # Local DEV_PORT_SLOT only — do not set DATABASE_PORT in server/deploy environments.
+      - "${DATABASE_PORT:-5432}:5432"
     volumes:
       - db_postgres_17:/var/lib/postgresql/data
     configs:

@@ -1,10 +1,11 @@
 import type { EnvironmentValues } from '@/server/envSchema'
+import { devTilesPort } from './devTilesPort'
 import { getTilesUrl } from './getTilesUrl'
 import { envKey } from './isEnv'
 import { makeOriginFromParts, type UrlParts } from './urlParts'
 
 const cachelessBaseUrl: Record<EnvironmentValues, UrlParts> = {
-  development: { protocol: 'http', host: 'localhost', port: 3000 },
+  development: { protocol: 'http', host: 'localhost', port: devTilesPort() },
   staging: { protocol: 'https', host: 'staging-cacheless.tilda-geo.de' },
   production: { protocol: 'https', host: 'cacheless.tilda-geo.de' },
 }

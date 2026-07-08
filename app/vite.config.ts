@@ -7,8 +7,24 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
+import dotenv from 'dotenv'
 import { nitro } from 'nitro/vite'
 import { createLogger, defineConfig } from 'vite'
+import { applyDevPortSlotToProcessEnv } from './scripts/predev/devPortSlot'
+import { logErr } from './scripts/predev/predevLog'
+
+const repoRoot = fileURLToPath(new URL('..', import.meta.url))
+dotenv.config({ path: `${repoRoot}/.env` })
+dotenv.config({ path: `${repoRoot}/.env.local` })
+
+let devPortSlot
+try {
+  devPortSlot = applyDevPortSlotToProcessEnv()
+} catch (e) {
+  logErr('vite_config', e instanceof Error ? e.message : String(e))
+  process.exit(1)
+}
+const devVitePort = devPortSlot.vitePort
 
 const appRoot = fileURLToPath(new URL('.', import.meta.url))
 
@@ -56,7 +72,7 @@ export default defineConfig({
   },
   server: {
     host: '127.0.0.1',
-    port: 5173,
+    port: devVitePort,
     strictPort: true,
     // Bun globalStore (app/bunfig.toml) symlinks realpath outside the project (~/.bun/install/cache/links/).
     // Extend (not replace) Vite's default fs.allow — setting allow alone drops the project root.
@@ -71,8 +87,8 @@ export default defineConfig({
     hmr: {
       protocol: 'ws',
       host: '127.0.0.1',
-      port: 5173,
-      clientPort: 5173,
+      port: devVitePort,
+      clientPort: devVitePort,
     },
   },
   resolve: {

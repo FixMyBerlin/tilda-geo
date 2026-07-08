@@ -83,7 +83,7 @@ Run `bun run dev` and let **predev** manage env files, ports, Docker, and migrat
 
 1. **`ensureEnv`** - root `.env` must exist (from `.env.example`).
 2. **`ensureDevStack`** - on feature worktrees, writes `.env.local` if missing.
-3. **`checkDocker`** - stops other stacks, starts this worktree's db+tiles via `docker compose -p <DEV_STACK_ID>`.
+3. **`checkDocker`** - stops other stacks (default mode), starts this worktree's db+tiles via `docker compose -p <DEV_STACK_ID>`.
 4. Migrations, topic-docs, etc.
 
 Example auto-generated `.env.local`:
@@ -92,23 +92,50 @@ Example auto-generated `.env.local`:
 DEV_STACK_ID=wt_tilda_geo_my_branch
 ```
 
+Optional parallel port slot (second worktree while another uses default ports):
+
+```env
+DEV_STACK_ID=wt_tilda_geo_my_branch
+DEV_PORT_SLOT=1
+```
+
 | Variable           | Role                                                                       |
 | ------------------ | -------------------------------------------------------------------------- |
 | `DEV_STACK_ID`     | Compose project name; containers like `wt_foo_db`; separate DB volume      |
 | `DEV_ATTACH_STACK` | Optional: attach to another running stack instead of starting new db+tiles |
+| `DEV_PORT_SLOT`    | Optional `1`–`5`: offset host ports for parallel worktrees (see below)     |
 
-Host ports are always **5432** (db) and **3000** (tiles). Predev stops other stacks before starting this worktree's stack — no per-worktree port allocation.
+**Default ports:** db **5432**, tiles **3000**, Vite **5173**. Predev stops other stacks before starting yours — one active default stack at a time.
+
+**Port slots** (`DEV_PORT_SLOT=1`…`5` in `.env.local`; absent or `0` = default):
+
+| Slot | db   | tiles | Vite | App origin              |
+| ---- | ---- | ----- | ---- | ----------------------- |
+| 1    | 5433 | 3001  | 5174 | `http://127.0.0.1:5174` |
+| 2    | 5434 | 3002  | 5175 | `http://127.0.0.1:5175` |
+| 3    | 5435 | 3003  | 5176 | `http://127.0.0.1:5176` |
+| 4    | 5436 | 3004  | 5177 | `http://127.0.0.1:5177` |
+| 5    | 5437 | 3005  | 5178 | `http://127.0.0.1:5178` |
+
+Slot mode does **not** stop other stacks. Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, and Vite/HMR port from `DEV_PORT_SLOT` at runtime — do not hand-edit those keys in `.env.local`. Hand-edited port keys are stripped on predev with a warning pointing to `DEV_PORT_SLOT`.
+
+`listRunningDevStacks` (used by default-mode stop-others) only lists stacks on the default ports (5432/3000). Offset-slot stacks are left alone. `DEV_ATTACH_STACK` resolves any running stack by id, including slot-mode ports. Prisma CLI (`migrate`, `seed`, `studio`) applies `DEV_PORT_SLOT` via `prisma.config.ts` the same way Vite does.
+
+Do **not** copy `.env.local` between worktrees — each worktree needs its own `DEV_STACK_ID`. Reusing a stack id while another checkout already runs that compose project on different ports will fail predev with a collision error.
+
+**OSM OAuth:** each slot's `VITE_APP_ORIGIN` must be registered as an OAuth redirect URL (user maintains up to five extra origins).
 
 `post-checkout` hook + predev remove stale `.env.local` when switching to `develop`/`main`.
 
-**Limits:** run one `bun run dev` at a time (port **5173**, OSM OAuth). One db+tiles stack at a time; switching worktrees stops the previous stack and starts yours on the default ports.
+**Limits:** default mode — one `bun run dev` at a time on port **5173**. With port slots, up to five parallel Vite instances on offset ports (each needs a registered OAuth origin). Default mode: one db+tiles stack on 5432/3000; slot mode stacks run in parallel on offset ports.
 
 If editing predev/Docker code, keep these invariants:
 
 - Predev passes `docker compose -p <DEV_STACK_ID>`; do not set `COMPOSE_PROJECT_NAME` in compose YAML.
 - `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only and derived by predev, not stored in `.env.local`.
 - `DEV_ATTACH_STACK` can attach to another stack, but the target db+tiles stack must already be running.
-- Relevant files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/ensureDevStack.ts`, `app/scripts/predev/envLocalBranch.ts`, `app/scripts/predev/devStackDiscovery.ts`, `app/scripts/predev/checkDocker.ts`, `app/scripts/predev/syncEnvLocal.ts`, `app/.husky/post-checkout`.
+- `DEV_PORT_SLOT` is the single source of truth for offset ports; legacy `DATABASE_PORT` / `TILES_PORT` lines in `.env.local` are stripped.
+- Relevant files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/ensureDevStack.ts`, `app/scripts/predev/devPortSlot.ts`, `app/scripts/predev/envLocalBranch.ts`, `app/scripts/predev/devStackDiscovery.ts`, `app/scripts/predev/checkDocker.ts`, `app/scripts/predev/syncEnvLocal.ts`, `app/.husky/post-checkout`.
 
 ---
 
@@ -124,7 +151,7 @@ bun run processing -- --help   # full contract
 
 **Agents (no TTY):** pass the complete non-interactive flag set (bbox/preset, `--diff-mode`, topics, skip flags, `--foreground`/`--detach`/`--dry-run`). For exact flags and diff validation, load [test-processing-diff](../test-processing-diff/SKILL.md).
 
-**Worktree stacks:** the printed command uses this worktree's `DEV_STACK_ID` (host ports 5432/3000). Prefer the line from `bun run processing` over manual env.
+**Worktree stacks:** the printed command uses this worktree's `DEV_STACK_ID` and default ports 5432/3000, or offset ports when `DEV_PORT_SLOT` is set (the printed line includes `DATABASE_PORT` / `TILES_PORT`). Prefer the line from `bun run processing` over manual env.
 
 **Reference -> fixed diff workflow:** run `reference` on baseline commit, then `fixed` on your branch; inspect `public.*_diff` tables. Full steps in [test-processing-diff](../test-processing-diff/SKILL.md).
 
@@ -271,7 +298,7 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 - Run `db-pull` (human workflow; pulls real staging/prod data).
 - Commit `.env.local`.
 - Edit `geojson/` through a tilda-geo worktree symlink for real dataset changes.
-- Run two `bun run dev` instances (OSM auth conflict).
+- Run two `bun run dev` instances on the default port (OSM auth conflict). Use `DEV_PORT_SLOT` for parallel worktrees.
 
 ---
 
