@@ -82,9 +82,10 @@ class UseCaseConfig:
     min_score_threshold: float = 60.0
 
     # CIR/RGBI-Kachelquelle für die Vegetationsberechnung.
-    # "auto" erkennt anhand des Studiengebiet-Zentroiden (12°E = UTM32/33-Grenze):
-    #   Bayern → EPSG:25832 (WMS), Brandenburg/Berlin → EPSG:25833 (WMS).
-    # Explizite Werte: "bayern" | "bb"
+    # "auto" erkennt anhand des Studiengebiet-Zentroiden: Hessen-Bounding-Box →
+    #   Hessen (EPSG:25832), sonst 12°E-Grenze → Bayern (EPSG:25832) bzw.
+    #   Brandenburg/Berlin (EPSG:25833) – alle drei via WMS.
+    # Explizite Werte: "bayern" | "bb" | "hessen"
     cir_source: str = "auto"
 
     # Eigene Flächen (Nutzer-Upload): wie die hochgeladene Geometrie in den Score

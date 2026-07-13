@@ -2,7 +2,8 @@
 
 Quellenunabhängig: Bandbelegung, CRS und Download-Logik kommen aus dem
 CirSource-Objekt (cir_sources.py). Derzeit unterstützt: Bayern DOP20 CIR
-(EPSG:25832, WMS, NIR=B1) und Brandenburg/Berlin DOP20 CIR (EPSG:25833, WMS, NIR=B1).
+(EPSG:25832, WMS, NIR=B1), Hessen DOP20 CIR (EPSG:25832, WMS, NIR=B1) und
+Brandenburg/Berlin DOP20 CIR (EPSG:25833, WMS, NIR=B1).
 
 Verarbeitung:
   1. Studiengebiet → Quell-CRS projizieren

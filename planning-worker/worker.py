@@ -179,7 +179,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     dem_adapter = DEMAdapter(source=use_case.dem_source, dgm1_path=use_case.dgm1_path)
 
     # Schritt 1: Vegetationsflächen on-demand aus CIR/RGBI-Kacheln berechnen.
-    # Die Quelle (Bayern WMS / BB ZIP-Download) wird aus use_case.cir_source aufgelöst.
+    # Die Quelle (Bayern / Hessen / BB – jeweils WMS) wird aus use_case.cir_source aufgelöst.
     # Fehlt die Datengrundlage oder liegt das Gebiet außerhalb bekannter Quellen,
     # läuft das restliche Scoring normal ohne Vegetationsdaten weiter – das
     # Frontend erkennt diesen Fall selbst (Gewicht w_vegetation=0) und zeigt
