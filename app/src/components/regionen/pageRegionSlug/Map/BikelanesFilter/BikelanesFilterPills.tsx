@@ -1,9 +1,9 @@
 import { useState } from 'react'
+import { BikelanesFuehrungsformFilterPill } from './BikelanesFuehrungsformFilterPill'
+import { BikelanesOberflaecheFilterPill } from './BikelanesOberflaecheFilterPill'
 import { useActiveBikelanesLayers } from './useActiveBikelanesLayers'
 import type { BikelanesWidthOperator } from './useBikelanesFilterState'
 import { useBikelanesFilterActions, useBikelanesWidthFilter } from './useBikelanesFilterState'
-import { BikelanesFuehrungsformFilterPill } from './BikelanesFuehrungsformFilterPill'
-import { BikelanesOberflaecheFilterPill } from './BikelanesOberflaecheFilterPill'
 
 const WIDTH_OPERATOR_OPTIONS: { value: BikelanesWidthOperator; label: string }[] = [
   { value: 'gt', label: 'Breite >' },

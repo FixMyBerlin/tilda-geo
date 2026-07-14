@@ -51,10 +51,7 @@ export const MapInterface = () => {
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
         <DesktopOnly>
           <PlaceSearch className="absolute top-2 right-[calc(var(--inspector-width)+3.5rem)] z-20" />
-          <div
-            className="absolute top-2 z-20"
-            style={{ left: sidebarSize.width + 8 }}
-          >
+          <div className="absolute top-2 z-20" style={{ left: sidebarSize.width + 8 }}>
             <BikelanesFilterPills />
           </div>
         </DesktopOnly>

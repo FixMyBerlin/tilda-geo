@@ -103,14 +103,7 @@ export const BikelanesFilterEffect = () => {
         }
       }
     },
-    [
-      mainMap,
-      mapLoaded,
-      activeLayers,
-      fuehrungsformDeselected,
-      oberflaecheDeselected,
-      widthFilter,
-    ],
+    [mainMap, mapLoaded, activeLayers, fuehrungsformDeselected, oberflaecheDeselected, widthFilter],
   )
 
   return null
