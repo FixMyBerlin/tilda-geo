@@ -36,6 +36,7 @@ import {
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
+import { BikelanesFilterEffect } from './BikelanesFilter/BikelanesFilterEffect'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
 import { SearchResultLayers } from './Search/SearchResultLayers'
@@ -302,6 +303,7 @@ export const RegionMap = () => {
       <SourcesLayerRasterBackgrounds />
       <SourcesLayersSystemDatasets />
       <SourcesLayersAtlasGeo />
+      <BikelanesFilterEffect />
       <SourcesLayersStaticDatasets />
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />

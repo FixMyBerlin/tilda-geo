@@ -6,7 +6,9 @@ import { BackgroundLegend } from './background/BackgroundLegend'
 import { SelectBackground } from './background/SelectBackground'
 import { DebugButton } from './DebugBoxes/DebugButton'
 import { DownloadModal } from './DownloadModal/DownloadModal'
+import { useMapSidebarSize } from './hooks/mapState/useMapState'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
+import { BikelanesFilterPills } from './Map/BikelanesFilter/BikelanesFilterPills'
 import { RegionMap } from './Map/RegionMap'
 import { PlaceSearch } from './Map/Search/PlaceSearch'
 import { MobileLayerButton } from './mobile/MobileLayerButton'
@@ -19,6 +21,8 @@ import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControl
 import { DesktopOnly } from './utils/Breakpoint'
 
 export const MapInterface = () => {
+  const sidebarSize = useMapSidebarSize()
+
   useEffect(function registerPmtilesProtocolOnMount() {
     const protocol = new Protocol()
     maplibregl.addProtocol('pmtiles', protocol.tile)
@@ -47,6 +51,12 @@ export const MapInterface = () => {
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
         <DesktopOnly>
           <PlaceSearch className="absolute top-2 right-[calc(var(--inspector-width)+3.5rem)] z-20" />
+          <div
+            className="absolute top-2 z-20"
+            style={{ left: sidebarSize.width + 8 }}
+          >
+            <BikelanesFilterPills />
+          </div>
         </DesktopOnly>
         <SidebarLayerControls />
         <SidebarInspector />
