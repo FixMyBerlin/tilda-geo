@@ -1,43 +1,47 @@
+import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { exportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { exportConfigs } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
-import { atlasGeneralizedPrefix } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/generalizationIdentifier'
+import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
+import type { TableId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
+import { hasExplicitTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/types'
 import {
   getCategoryData,
   getSourceData,
 } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { staticRegion } from '@/data/regions.const'
 import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
-import type { DocsPageRegion } from './types'
+
+export type RegionForDatasetDerivation = {
+  categories: MapDataCategoryId[]
+  exports: null | [ExportId, ...ExportId[]]
+}
 
 const exportTableSet = new Set<SourceExportApiIdentifier>(exportApiIdentifier)
 const exportTitleByTableName = new Map(exportConfigs.map((config) => [config.id, config.title]))
-const exportTableByNormalizedIdentifier = new Map(
-  exportApiIdentifier.map((tableName) => [tableName.replaceAll('_', '').toLowerCase(), tableName]),
-)
 const tableNamesReferencedByRegionExports = new Set(
   staticRegion.flatMap((region) => region.exports ?? []),
 )
 
-const sourceTileLayerRegex = new RegExp(`${atlasGeneralizedPrefix}([a-z0-9_]+)`, 'g')
+const isExportTableName = (tableId: TableId): tableId is SourceExportApiIdentifier =>
+  exportTableSet.has(tableId as SourceExportApiIdentifier)
 
 const getTableNamesForSourceId = (sourceId: SourcesId) => {
   const source = getSourceData(sourceId)
+  if (hasExplicitTilesUrl(source)) return []
+
   const tableNames = new Set<SourceExportApiIdentifier>()
 
-  for (const match of source.tiles.matchAll(sourceTileLayerRegex)) {
-    const sourceLayerId = match[1]
-    if (!sourceLayerId) continue
-    const normalizedSourceLayerId = sourceLayerId.replaceAll('_', '').toLowerCase()
-    const tableName = exportTableByNormalizedIdentifier.get(normalizedSourceLayerId)
-    if (!tableName || !exportTableSet.has(tableName)) continue
+  for (const tableId of source.tileTables) {
+    if (!isExportTableName(tableId)) continue
 
-    const isReferencedByAnyRegion = tableNamesReferencedByRegionExports.has(tableName)
-    const hasTopicDoc = Boolean(getTopicDocByTableName(tableName))
+    // Include tables used in any region export list or with structured topic docs.
+    const isReferencedByAnyRegion = tableNamesReferencedByRegionExports.has(tableId)
+    const hasTopicDoc = Boolean(getTopicDocByTableName(tableId))
     if (!isReferencedByAnyRegion && !hasTopicDoc) continue
 
-    tableNames.add(tableName)
+    tableNames.add(tableId)
   }
 
   return Array.from(tableNames)
@@ -56,7 +60,7 @@ export type RegionDatasetFromCategories = {
 }
 
 export const deriveRegionDatasetsFromCategories = (
-  region: NonNullable<DocsPageRegion>,
+  region: RegionForDatasetDerivation,
 ): RegionDatasetFromCategories[] => {
   const tableNames = new Set<SourceExportApiIdentifier>()
 

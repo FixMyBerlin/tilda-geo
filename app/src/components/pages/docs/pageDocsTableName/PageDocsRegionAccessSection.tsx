@@ -2,10 +2,10 @@ import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { twMerge } from 'tailwind-merge'
 import { OgrFormatDownloadLinks } from '@/components/regionen/pageRegionSlug/DownloadModal/OgrFormatDownloadLinks'
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
+import { deriveRegionDatasetsFromCategories } from '@/components/regionen/pageRegionSlug/regionDatasets/deriveRegionDatasetsFromCategories'
 import { RegionTitleStatusIcon } from '@/components/regionen/regionMeta/RegionTitleStatusIcon'
 import { Link } from '@/components/shared/links/Link'
 import { DOCS_PAGE_SECTION_H2_CLASSNAME, DOCS_PAGE_SECTION_IDS } from './docsSectionIds.const'
-import { deriveRegionDatasetsFromCategories } from './regionDatasetsFromCategories'
 import type { DocsPageRegion } from './types'
 
 type Props = {

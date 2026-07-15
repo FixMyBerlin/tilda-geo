@@ -6,6 +6,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
+import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import {
   createLayerKeyAtlasGeo,
@@ -52,7 +53,7 @@ export const SourcesLayersAtlasGeo = () => {
               )
 
               const tileUrl = getCachelessTilesUrl({
-                url: sourceData.tiles,
+                url: getMapDataSourceTilesUrl(sourceData),
                 cacheless: useDebugCachelessTiles,
               })
 

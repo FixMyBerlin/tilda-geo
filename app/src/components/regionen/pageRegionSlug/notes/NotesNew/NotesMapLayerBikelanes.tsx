@@ -3,6 +3,7 @@ import {
   buildAtlasLayerProps,
   isAtlasStyleLayer,
 } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/buildAtlasLayerProps'
+import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import { sources } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { subcat_bikelanes } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_bikelanes.const'
 
@@ -25,7 +26,7 @@ export const NotesMapLayerBikelanes = () => {
       <Source
         id={bikelanesSource.id}
         type="vector"
-        tiles={[bikelanesSource.tiles]}
+        tiles={[getMapDataSourceTilesUrl(bikelanesSource)]}
         maxzoom={bikelanesSource.maxzoom}
         minzoom={bikelanesSource.minzoom}
       />

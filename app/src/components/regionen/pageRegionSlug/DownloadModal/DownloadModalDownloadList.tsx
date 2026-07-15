@@ -1,5 +1,6 @@
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { exportConfigs } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
+import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import {
   getCategoryData,
@@ -139,7 +140,9 @@ const VectorTileUrlsSection = () => {
           {vectorTileSources.map((source) => (
             <li key={source.id} className="rounded-md bg-gray-50 p-3">
               <div className="mb-1 text-xs font-medium text-gray-900">{source.id}</div>
-              <div className="font-mono text-xs break-all text-gray-600">{source.tiles}</div>
+              <div className="font-mono text-xs break-all text-gray-600">
+                {getMapDataSourceTilesUrl(source)}
+              </div>
             </li>
           ))}
         </ul>

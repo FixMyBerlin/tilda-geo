@@ -10,6 +10,7 @@ import type {
 import type { LegendIconTypes } from '../../../../components/regionen/pageRegionSlug/SidebarLayerControls/Legend/LegendIcons/types'
 import type { MapDataCategoryId } from './mapDataCategories/MapDataCategoryId'
 import type { SourcesId } from './mapDataSources/sources.const'
+import type { TableId } from './mapDataSources/tables.const'
 import type { StyleId, SubcategoryId } from './typeId'
 
 /** @desc: The background tiles, configured in 'sourcesBackgroundsRaster.const.ts' */
@@ -72,11 +73,8 @@ export type MapDataOsmIdConfig =
   | { osmType: string; osmId: string }
   | { osmTypeId: string }
 
-/** @desc: Our own vector tile layers configured in 'sources.const.ts' */
-export type MapDataSource<TIds> = {
+type MapDataSourceShared<TIds> = {
   id: TIds
-  /** @desc URL of the vector tiles */
-  tiles: string
   /** @desc minzoom:4 (default, see `SIMPLIFY_MIN_ZOOM`) means no data is loaded for 0-4, only from 5+ (zoomed in) data is present
    * @desc `0---4=minzoom->-----maxzoom=14=overzoom->---22` */
   minzoom: VectorSourceSpecification['minzoom']
@@ -96,6 +94,27 @@ export type MapDataSource<TIds> = {
   /** @desc Calculator: Enable and configure calculator feature */
   calculator: MapDataSourceCalculator
 }
+
+/** Processing tables; tile URL via `getMapDataSourceTilesUrl` (`atlas_generalized_*` PG functions). */
+export type ProcessingMapDataSource<TIds> = MapDataSourceShared<TIds> & {
+  tileTables: readonly TableId[]
+}
+
+/** Explicit tile URL (internal Martin, Lars, Mapillary, …). */
+export type ExplicitTilesUrlMapDataSource<TIds> = MapDataSourceShared<TIds> & {
+  tileTables: null
+  /** @desc URL of the vector tiles */
+  tilesUrl: string
+}
+
+/** @desc: Our own vector tile layers configured in 'sources.const.ts' */
+export type MapDataSource<TIds> =
+  | ProcessingMapDataSource<TIds>
+  | ExplicitTilesUrlMapDataSource<TIds>
+
+export const hasExplicitTilesUrl = <TIds>(
+  source: MapDataSource<TIds>,
+): source is ExplicitTilesUrlMapDataSource<TIds> => source.tileTables === null
 
 export type StaticMapDataCategory = {
   id: MapDataCategoryId
