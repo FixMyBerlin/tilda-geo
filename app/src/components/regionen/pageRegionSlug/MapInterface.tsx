@@ -5,7 +5,7 @@ import { MapProvider } from 'react-map-gl/maplibre'
 import { BackgroundLegend } from './background/BackgroundLegend'
 import { SelectBackground } from './background/SelectBackground'
 import { DebugButton } from './DebugBoxes/DebugButton'
-import { DownloadModal } from './DownloadModal/DownloadModal'
+import { RegionDataModals } from './DownloadModal/RegionDataModals'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
 import { RegionMap } from './Map/RegionMap'
 import { PlaceSearch } from './Map/Search/PlaceSearch'
@@ -54,9 +54,9 @@ export const MapInterface = () => {
           <LoadingIndicator />
           <OsmNotes />
           <InternalNotes />
-          {/* Download lives in the MobileMapHeader (top-left) on mobile; desktop keeps it here. */}
+          {/* Download + documentation modals live in MobileMapHeader (top-left) on mobile; desktop keeps them here. */}
           <DesktopOnly>
-            <DownloadModal />
+            <RegionDataModals />
           </DesktopOnly>
           <BackgroundLegend />
           <SelectBackground />

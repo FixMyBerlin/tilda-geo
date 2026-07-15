@@ -13,7 +13,7 @@ import { twJoin } from 'tailwind-merge'
 
 type Props = {
   title: string
-  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit'
+  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs'
   buttonCloseName?: string
   open: boolean
   setOpen: (value: boolean) => void
@@ -49,6 +49,10 @@ export const ModalDialog = ({
     download: {
       bgClass: 'bg-purple-100',
       icon: <ArrowDownTrayIcon className="size-6 text-purple-600" aria-hidden="true" />,
+    },
+    docs: {
+      bgClass: 'bg-blue-100',
+      icon: <BookOpenIcon className="size-6 text-blue-600" aria-hidden="true" />,
     },
     edit: {
       bgClass: 'bg-gray-100',
