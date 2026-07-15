@@ -46,6 +46,7 @@
     "seed:2ensure-dev-stack": "bun --env-file=../.env scripts/predev/ensureDevStack.ts",
     "seed:3docker": "bun --env-file=../.env --env-file=../.env.local scripts/predev/checkDocker.ts",
     "seed:4migrate-reset": "bun --env-file=../.env --env-file=../.env.local prisma migrate reset --force",
+    "seed:5db-seed": "bun --env-file=../.env --env-file=../.env.local prisma db seed",
     "check": "bun run --parallel type-check lint format test-run",
     "type-check": "tsc --noEmit",
     "type-check-deploy": "sh -c 'bun run static-datasets-unlink && bun run type-check; EXIT_CODE=$?; bun run static-datasets-link; exit $EXIT_CODE'",
