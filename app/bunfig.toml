@@ -7,3 +7,9 @@ minimumReleaseAgeExcludes = [
   "@typescript/typescript-linux-x64",
   "@osm-traffic-signs/converter",
 ]
+
+# Global virtual store — requires isolated linker. Reinstall after changing: rm -rf node_modules && bun install
+# Vite dev: server.fs.allow in vite.config.ts (packages realpath into ~/.bun/install/cache/links/).
+# @see https://bun.com/docs/pm/global-store
+linker = "isolated"
+globalStore = true
