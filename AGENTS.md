@@ -5,3 +5,5 @@ Code Comments: Only add comments that provide context/meaning not already expres
 Local Docker / worktrees / `.env.local`: see [`docs/docker-local-development.md`](docs/docker-local-development.md).
 
 Refactoring: When moving or renaming exports, update all importers and delete the old export—do not add re-export shims (`export { x } from '…'`) or `@deprecated` wrappers. Leave no forwarding layer. Exception: staged migrations (e.g. URL/config version migrations) may keep temporary compatibility code until the migration is complete.
+
+Agent orchestration (premium parent + Composer workers): see [`.agents/skills/agent-orchestration/references/cursor-ide.md`](.agents/skills/agent-orchestration/references/cursor-ide.md). Large multi-step tasks — `@orchestrator-worker`.

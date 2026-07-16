@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "agent-orchestration": {
+      "source": "FixMyBerlin/fixmyskills",
+      "sourceType": "github",
+      "skillPath": "skills/agent-orchestration/SKILL.md",
+      "computedHash": "1d073250e24b896c9887f9e53c02ecc279f850dc5fa6b3403ee25464369e7907"
+    },
     "finish-work": {
       "source": "FixMyBerlin/fixmyskills",
       "sourceType": "github",

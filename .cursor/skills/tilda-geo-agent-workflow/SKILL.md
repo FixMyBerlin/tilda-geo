@@ -250,6 +250,10 @@ For adding datasets, follow skill `add-static-dataset`, but perform file edits i
 
 Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check`, lint/format staging, and commit messages. **Commit** when the user indicates intent ("commit it", "land this", "and commit", etc.); otherwise draft the message only.
 
+### Large multi-step tasks (orchestration)
+
+For multi-file features or parallel work, pick a premium orchestrator (Fable 5, Sonnet 5, or GPT-5.6 Sol) with **`@orchestrator-worker`** and Composer subagents (`/implementer`, `/verifier`). See [cursor-ide.md](../../../.agents/skills/agent-orchestration/references/cursor-ide.md). Skip for trivial one-file edits.
+
 ### Command locations (common mistakes)
 
 | Run from      | Examples                                                                         |
@@ -277,5 +281,6 @@ Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping u
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)
 - [ ] Static dataset change? -> worktree `tilda-static-data`, relink `geojson`, then load [add-static-dataset](../add-static-dataset/SKILL.md)
 - [ ] Map/UI bug? -> use agent-browser MCP; inspect `window.__mainMap` when available
+- [ ] Large multi-step task? -> premium orchestrator + `@orchestrator-worker` (see [cursor-ide](../../../.agents/skills/agent-orchestration/references/cursor-ide.md))
 - [ ] Done? -> load [finish-work](../../../.claude/skills/finish-work/SKILL.md)
 ```
