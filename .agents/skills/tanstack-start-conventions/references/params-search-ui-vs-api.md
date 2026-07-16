@@ -4,6 +4,8 @@ Validation uses **Zod 4** everywhere in FMC TanStack Start apps (no optional “
 
 TanStack Router follows **two execution paths**: UI routes run matching, `validateSearch`, loaders, and components; **server route handlers** are plain `Request` handlers. Handlers receive **`request`**, **`params`**, and **`context`** only — there is **no** validated `search` object on `GET`.
 
+**When to use which:** App-internal reads/writes → **`createServerFn`** (see [server-functions.md](server-functions.md)). API routes → public REST, webhooks, third-party callbacks, or Better Auth handlers under `routes/api/`.
+
 ---
 
 ## Zod 4 + `validateSearch`: one schema per route
@@ -166,6 +168,23 @@ export const Route = createFileRoute('/api/items/$itemId/export')({
         const { format } = parsed.data
 
         return Response.json({ itemId, format })
+      },
+    },
+  },
+})
+```
+
+**POST (webhooks, uploads):** same `ssr: false` handler-only pattern — parse body in the handler with Zod; no `validateSearch`.
+
+```ts
+export const Route = createFileRoute('/api/upload/image')({
+  ssr: false,
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const body = await request.json()
+        // validate with Zod, then process
+        return Response.json({ ok: true })
       },
     },
   },

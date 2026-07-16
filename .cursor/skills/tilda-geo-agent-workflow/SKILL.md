@@ -251,7 +251,7 @@ For adding datasets, follow skill `add-static-dataset`, but perform file edits i
 
 ### Finishing work
 
-Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check`, lint/format staging, and commit messages. **Commit** when the user indicates intent ("commit it", "land this", "and commit", etc.); otherwise draft the message only.
+Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check`, lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
 
 ### Large multi-step tasks (orchestration)
 

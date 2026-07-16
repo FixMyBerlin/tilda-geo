@@ -40,12 +40,13 @@ onError: (error) => {
 
 ## Route / API mismatch
 
-| Symptom       | Check                                                            |
-| ------------- | ---------------------------------------------------------------- |
-| 404 on POST   | Client `api` matches TanStack route path                         |
-| Unknown route | Client `route` string matches `routes: { upload: ... }` key      |
-| CORS on PUT   | S3 bucket CORS, not app CORS                                     |
-| Auth 401/403  | Handler runs before `handleRequest`; cookies on same-origin POST |
+| Symptom                                    | Check                                                                                      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| 404 on POST                                | Client `api` matches TanStack route path                                                   |
+| Unknown route                              | Client `route` string matches `routes: { upload: ... }` key                                |
+| CORS on PUT                                | S3 bucket CORS, not app CORS                                                               |
+| Auth 401/403                               | Handler runs before `handleRequest`; cookies on same-origin POST                           |
+| Dev 404 on `<img src="/api/...">`; prod OK | Add `forwardApiRequestsPastViteAssetMiddleware` — [serving-uploads.md](serving-uploads.md) |
 
 ## Metadata
 

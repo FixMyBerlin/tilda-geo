@@ -32,14 +32,14 @@ Also available: `cloudflare`, `backblaze`, `minio`, `custom`, etc. See [helpers-
 
 ## Router vs helpers
 
-| Use case                                                       | API                                             |
-| -------------------------------------------------------------- | ----------------------------------------------- |
-| Browser / dropzone uploads                                     | `Router` + `handleRequest` + presigned URLs     |
-| Server-side buffer/file put (email attachment, sync overwrite) | `putObject` helper + `getConfiguredS3Client()`  |
-| Download / stream                                              | `getObject`, `getObjectBlob`, `getObjectStream` |
-| Delete on record removal                                       | `deleteObject`, `deleteObjects`                 |
-| Signed download link                                           | `presignGetObject`                              |
-| Metadata only                                                  | `headObject`                                    |
+| Use case                                                       | API                                                                                                                                                                                      |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Browser / dropzone uploads                                     | `Router` + `handleRequest` + presigned URLs                                                                                                                                              |
+| Server-side buffer/file put (email attachment, sync overwrite) | `putObject` helper + `getConfiguredS3Client()`                                                                                                                                           |
+| Download / stream                                              | `getObject`, `getObjectBlob`, `getObjectStream` — inline `<img>` of private uploads usually via GET API route + proxy, not `presignGetObject` ([serving-uploads.md](serving-uploads.md)) |
+| Delete on record removal                                       | `deleteObject`, `deleteObjects`                                                                                                                                                          |
+| Signed download link                                           | `presignGetObject`                                                                                                                                                                       |
+| Metadata only                                                  | `headObject`                                                                                                                                                                             |
 
 **Direction:** browser-scale uploads → router; server-side small puts → `putObject` helper; never `PutObjectCommand` from `@aws-sdk/client-s3` when the helper suffices.
 

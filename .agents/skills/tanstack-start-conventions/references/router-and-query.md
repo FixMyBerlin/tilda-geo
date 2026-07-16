@@ -17,6 +17,12 @@ How we combine route loaders with React Query. Setup lives in `router.tsx` (`que
 
 Do **not** read Query-backed data only via `useLoaderData`. Query needs an observer (`useQuery` / `useSuspenseQuery`) for refetch, invalidation, and cache retention.
 
+## Loader contract
+
+Loaders receive `{ params, search?, context, deps? }` — typed from the route path and `validateSearch`. Return a **JSON-serializable** object (no functions, class instances). Non-Query data is read via `Route.useLoaderData()`.
+
+On TanStack Start, loaders run on the server **and** on client-side navigation — route server I/O through `createServerFn`. See [execution-model.md](execution-model.md).
+
 ## Loader + component
 
 1. Define **`fooQueryOptions(...)`** once (shared `queryKey` + `queryFn`, often wrapping a server Fn).
@@ -24,6 +30,12 @@ Do **not** read Query-backed data only via `useLoaderData`. Query needs an obser
 3. **Component:** same options — **`useSuspenseQuery`** for blocking UI (works with route `pendingComponent` / `errorComponent`), **`useQuery`** for optional or inline loading.
 
 Pattern: route loader calls `ensureQueryData` with shared options; page or hooks use `useQuery` / `useSuspenseQuery` with the same options.
+
+## Not found, pending, prefetch
+
+- **Not found:** `throw notFound()` in the loader when a resource does not exist — route `notFoundComponent` or root default handles the response.
+- **Pending UI:** `pendingComponent` on the route (skeleton while loader is in flight).
+- **Prefetch:** `<Link preload="intent" to="..." />` or `router.preloadRoute()` — pair with router `defaultPreload: 'intent'` (below).
 
 ## Router defaults
 

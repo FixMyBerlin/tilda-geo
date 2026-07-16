@@ -15,6 +15,10 @@ Task progress (Better Upload — required):
 - [ ] Client useUploadFiles({ route, api }) — names/paths match server
 - [ ] Smoke test: POST to app API, then PUT to S3, then DB row
 
+Task progress (serving — when previews/downloads use GET /api/ routes):
+- [ ] GET serve route (ssr: false) + auth in handler
+- [ ] forwardApiRequestsPastViteAssetMiddleware in vite.config.ts (if previews use `<img src="/api/...">`)
+
 Task progress (react-dropzone — only if multi-file dropzone UX):
 - [ ] bun add react-dropzone
 - [ ] Wire useDropzone onDrop → upload() — see dropzone-ui.md
@@ -180,7 +184,7 @@ Pair with `tanstack-start-conventions`:
 
 ## Serving uploaded objects
 
-Better Upload only uploads. Downloads use separate API routes + `getObject` / `presignGetObject` — [s3-helpers.md](s3-helpers.md).
+Better Upload only uploads. Serving bytes back uses separate GET API routes — proxy vs presigned URL, FMC examples, and the dev Vite plugin for `<img src="/api/...">` previews: [serving-uploads.md](serving-uploads.md). Helper APIs: [s3-helpers.md](s3-helpers.md).
 
 ## Smoke test
 

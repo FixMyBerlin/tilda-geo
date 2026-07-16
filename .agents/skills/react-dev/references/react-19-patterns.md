@@ -1,6 +1,6 @@
 # React 19 — TypeScript notes
 
-Behavior and full API docs: [react.dev/llms.txt](https://react.dev/llms.txt). FMC **server mutations** use `createServerFn` (`tanstack-start-migration`), not Next-style `'use server'`.
+Behavior and full API docs: [react.dev/llms.txt](https://react.dev/llms.txt).
 
 ## ref as prop
 
@@ -35,13 +35,11 @@ Blog: [React 19](https://react.dev/blog/2024/12/05/react-19)
 Unwraps promises and context; can suspend. **Do not** await a promise before passing it if the child should stream with Suspense.
 
 ```typescript
-'use client';
-
-import { use } from 'react';
+import { use } from 'react'
 
 function Profile({ userPromise }: { userPromise: Promise<User> }) {
-  const user = use(userPromise);
-  return <div>{user.name}</div>;
+  const user = use(userPromise)
+  return <div>{user.name}</div>
 }
 ```
 
@@ -49,7 +47,7 @@ function Profile({ userPromise }: { userPromise: Promise<User> }) {
 
 ## useActionState
 
-Replaces `useFormState`. Common in **Next/RSC** form posts; in TanStack Start prefer `createServerFn` + explicit client state or React Query mutations.
+Replaces `useFormState`. Common in apps that post forms to server actions with progressive enhancement.
 
 ```typescript
 import { useActionState } from 'react'
@@ -74,4 +72,3 @@ Reference: [useActionState](https://react.dev/reference/react/useActionState.md)
 - [ ] Replace `useFormState` with `useActionState`
 - [ ] `@types/react` 19.x
 - [ ] Enable React Compiler + oxlint `react-hooks-js` rules
-- [ ] TanStack Start: remove `'use server'` / `'use client'`; use `createServerFn`

@@ -1,0 +1,18 @@
+# Copy to project bunfig.toml. @see references/bun-install.md
+
+# Supply-chain cooldown — only install versions published at least N seconds ago.
+# @see https://bun.com/docs/runtime/bunfig#install-minimumreleaseage
+[install]
+minimumReleaseAge = 432000 # 5 days (5 × 24 × 60 × 60 seconds)
+minimumReleaseAgeExcludes = [
+  "typescript",
+  "@typescript/typescript-darwin-arm64",
+  "@typescript/typescript-linux-x64",
+]
+
+# Global virtual store — install once, link everywhere (requires isolated linker).
+# Reinstall after changing linker/store: rm -rf node_modules && bun install
+# Vite dev: server.fs.allow — @see references/bun-install.md
+# @see https://bun.com/docs/pm/global-store
+linker = "isolated"
+globalStore = true

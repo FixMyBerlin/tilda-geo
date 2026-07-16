@@ -129,5 +129,5 @@ Changelog file content stays **German**; the commit subject/body for this doc up
 
 ## Related
 
-- [finish-work](../finish-work/SKILL.md) — check + commit when landing the changelog
+- [finish-work](../finish-work/SKILL.md) — `bun run check` + commit when landing the changelog
 - [review-dependabot](../review-dependabot/SKILL.md) — do not list Dependabot commits as user changes

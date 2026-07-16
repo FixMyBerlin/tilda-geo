@@ -2,8 +2,7 @@
 
 Store viewport in query param **`map`** as `zoom/lat/lng` (e.g. `12.1/52.5/13.4`). Parse/serialize with Zod; round coordinates for clean URLs; sync on `onMoveEnd`.
 
-**Default (TanStack Router / Start):** route `validateSearch` + `navigate({ search })`.  
-**Fallback (Next.js, legacy, or tilda today):** nuqs `createParser` + `useQueryState` — see skill `nuqs`.
+**Default (TanStack Router / Start):** route `validateSearch` + `navigate({ search })` + `@tanstack/react-pacer` for throttled high-frequency updates.
 
 ## Format
 

@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+set -e
+
+. "$(dirname -- "$0")/ensure-bun.sh"
+
+# @see references/package-json-scripts.md
+bun run check-pre-push
+
+# Use `git push --no-verify` to skip (sparingly).

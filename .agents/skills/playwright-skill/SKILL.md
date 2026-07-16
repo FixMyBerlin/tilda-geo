@@ -7,7 +7,7 @@ description: E2E testing and browser automation for TanStack Start apps (FMC/TIL
 
 **Read the project’s `tests/README.md` first** — env vars, Docker, and scripts live there.
 
-**Related FMC skills:** `tanstack-start-migration` (post-migration smoke), `tanstack-start-auth` (sessions), `tanstack-start-conventions`.
+**Related FMC skills:** `tanstack-start-auth` (sessions), `tanstack-start-conventions`.
 
 ---
 
