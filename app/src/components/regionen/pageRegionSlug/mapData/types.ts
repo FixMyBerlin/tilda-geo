@@ -17,8 +17,8 @@ import type { StyleId, SubcategoryId } from './typeId'
 export type MapDataBackgroundSource<TIds> = {
   id: TIds
   name: string
-  /** @desc URL of the tiles */
-  tiles: string
+  /** @desc URL of the raster tiles */
+  tilesUrl: string
   attributionHtml: string
   /** @desc Show link to the external legend of that map layer. Will replace {z}/{x}/{y} if present  */
   legendUrl?: string
