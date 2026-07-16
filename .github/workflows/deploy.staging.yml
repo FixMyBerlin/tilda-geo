@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   setup_env:
+    if: github.repository == 'FixMyBerlin/tilda-geo'
     uses: ./.github/workflows/setup-env.yml
     with:
       ENVIRONMENT: staging

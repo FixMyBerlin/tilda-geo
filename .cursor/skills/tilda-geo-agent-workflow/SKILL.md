@@ -21,6 +21,7 @@ Start with the section that matches the task:
 - Processing, seed data, or static dataset commands: [Processing and local data](#3-processing-and-local-data)
 - Browser or map debugging: [agent-browser and map state](#4-agent-browser-and-map-state)
 - Static dataset files or symlinks: [`tilda-static-data` symlink](#5-tilda-static-data-symlink)
+- Private experimental repo / two remotes: [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md)
 - Env, MCP tools, checks, or command locations: [What else agents need](#6-what-else-agents-need)
 
 **Repo layout:** `app/` (TanStack Start frontend + API), `processing/` (osm2pgsql pipeline + tiles). Most agent commands run from **`app/`**. Root **`.env`** holds secrets; **`app/` scripts load `../.env` and `../.env.local`**.
@@ -63,6 +64,8 @@ bun run setup-worktree -- my-branch --dir my-worktree
 ```
 
 FYI: manual `git worktree add` also works, but agents should prefer `bun run setup-worktree` unless the user explicitly asks for manual setup.
+
+Two remotes (`origin` = public, `private` = experimental mirror) are org-wide shared via the main checkout's `.git` store. See [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md) for sync and PR recipes.
 
 ### Rules
 
@@ -282,5 +285,6 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 - [ ] Static dataset change? -> worktree `tilda-static-data`, relink `geojson`, then load [add-static-dataset](../add-static-dataset/SKILL.md)
 - [ ] Map/UI bug? -> use agent-browser MCP; inspect `window.__mainMap` when available
 - [ ] Large multi-step task? -> premium orchestrator + `@orchestrator-worker` (see [cursor-ide](../../../.agents/skills/agent-orchestration/references/cursor-ide.md))
+- [ ] Private experiment? -> load [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md)
 - [ ] Done? -> load [finish-work](../../../.claude/skills/finish-work/SKILL.md)
 ```
