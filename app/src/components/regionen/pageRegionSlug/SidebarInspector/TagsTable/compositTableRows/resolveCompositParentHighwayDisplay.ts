@@ -20,7 +20,7 @@ export const COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS = [
 export type CompositParentHighwayValueSourceKey =
   (typeof COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS)[number]
 
-export type CompositParentHighwayDisplay = {
+type CompositParentHighwayDisplay = {
   rowTagKey: typeof COMPOSIT_PARENT_HIGHWAY_ROW_TAG_KEY
   valueTagKey: CompositParentHighwayValueSourceKey
   tagValue: string

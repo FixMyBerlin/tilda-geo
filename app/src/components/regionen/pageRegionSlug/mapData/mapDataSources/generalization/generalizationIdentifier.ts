@@ -3,7 +3,7 @@ import type {
   UnionTiles,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
 
-export const atlasGeneralizedPrefix = 'atlas_generalized_' as const
+const atlasGeneralizedPrefix = 'atlas_generalized_' as const
 
 type GeneralizedTableId = `${typeof atlasGeneralizedPrefix}${Lowercase<TableId>}`
 export function generalizationFunctionIdentifier<T extends UnionTiles<TableId>>(tileId: T) {

@@ -80,11 +80,7 @@ const DownloadModalDownloadList = ({ datasets }: Props) => {
 
 // Category-mapped datasets without export/download; doc links only. Shown below the
 // downloadable section when regionModalAccess.showOtherDatasetsSectionInDownloadModal.
-export const DownloadModalOtherDatasetsSection = ({
-  datasets,
-}: {
-  datasets: RegionModalDataset[]
-}) => {
+const DownloadModalOtherDatasetsSection = ({ datasets }: { datasets: RegionModalDataset[] }) => {
   const regionSlug = useRegionSlug()
 
   if (datasets.length === 0) return null

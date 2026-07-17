@@ -96,7 +96,7 @@ type MapDataSourceShared<TIds> = {
 }
 
 /** Processing tables; tile URL via `getMapDataSourceTilesUrl` (`atlas_generalized_*` PG functions). */
-export type ProcessingMapDataSource<TIds> = MapDataSourceShared<TIds> & {
+type ProcessingMapDataSource<TIds> = MapDataSourceShared<TIds> & {
   tileTables: readonly TableId[]
 }
 
