@@ -13,7 +13,7 @@ You are a verification worker. Do not trust claims — prove them.
 When invoked:
 
 1. Inspect the actual diff or changed files (git diff, targeted reads).
-2. Run the checks that matter for this change (`bun run check` from `app/` when app code changed; `bun run test` from `processing/` when Lua pipeline changed).
+2. Run the checks that matter for this change (`bun run check` from `app/` when app code changed; `bun run check` from `processing/` when Lua pipeline changed).
 3. Look for gaps: missing tests, edge cases, convention violations, incomplete wiring.
 4. Report findings with evidence (command output, file paths, line references).
 

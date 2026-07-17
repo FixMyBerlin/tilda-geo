@@ -25,6 +25,9 @@
   "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  // Cursor rules (.mdc) — treat as markdown; open in text editor so oxfmt runs on save.
+  "files.associations": { "*.mdc": "markdown" },
+  "workbench.editorAssociations": { "*.mdc": "default" },
   "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
   "js/ts.experimental.useTsgo": true,
   "js/ts.tsdk.path": "app/node_modules/typescript",

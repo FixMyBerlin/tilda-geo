@@ -81,6 +81,7 @@ Do **not** add `eslint-plugin-react-compiler` — use native `react/react-compil
   "oxc.fixKind": "dangerous_fix_or_suggestion",
   "oxc.typeAware": true,
   "editor.codeActionsOnSave": {
+    "source.format.oxc": "always",
     "source.fixAll.oxc": "always",
     "source.fixAllDangerous.oxc": "always"
   }
@@ -88,6 +89,7 @@ Do **not** add `eslint-plugin-react-compiler` — use native `react/react-compil
 ```
 
 - **`oxc.fixKind`** — which fix levels appear in quick-fix / LSP (`dangerous_fix_or_suggestion` matches CLI boldness).
+- **`source.format.oxc`** — oxfmt on save (run before lint fixes when both are enabled).
 - **`source.fixAll.oxc`** — safe fixes + suggestions on save.
 - **`source.fixAllDangerous.oxc`** — dangerous fixes on save (pairs with `--fix-dangerously` on CLI).
 

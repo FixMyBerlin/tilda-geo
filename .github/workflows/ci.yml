@@ -50,21 +50,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Check types
-        run: bun run type-check
-
-      - name: Check formatting
-        run: bun run check-format
-
-      - name: Check linting
-        run: bun run check-lint
-
-      - name: Run tests
+      - name: Verify app (read-only)
         env:
           # Vitest loads repo `/.env` when present; PR runners have none. These match local dev (see `.env.example`).
           VITE_APP_ENV: development
           VITE_APP_ORIGIN: http://127.0.0.1:5173
-        run: bun run test-run
+        run: bun run check-ci
 
   run-processing-type-check:
     name: Run Processing Type Check

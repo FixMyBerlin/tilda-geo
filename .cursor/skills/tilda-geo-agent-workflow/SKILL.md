@@ -251,7 +251,7 @@ For adding datasets, follow skill `add-static-dataset`, but perform file edits i
 
 ### Finishing work
 
-Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check`, lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
+Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check` (includes advisory knip), lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
 
 ### Large multi-step tasks (orchestration)
 
@@ -259,11 +259,11 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 
 ### Command locations (common mistakes)
 
-| Run from      | Examples                                                                         |
-| ------------- | -------------------------------------------------------------------------------- |
-| `app/`        | `dev`, `processing`, `seed`, `static-datasets-update`, `check`, `setup-worktree` |
-| `processing/` | `bun run test` (Lua)                                                             |
-| Repo root     | Only when executing the **printed** processing compose line                      |
+| Run from      | Examples                                                                                     |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| `app/`        | `dev`, `processing`, `seed`, `static-datasets-update`, `check`, `check-ci`, `setup-worktree` |
+| `processing/` | `bun run test` (Lua)                                                                         |
+| Repo root     | Only when executing the **printed** processing compose line                                  |
 
 ### Do not
 

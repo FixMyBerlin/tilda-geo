@@ -7,6 +7,7 @@
     "lint": "oxlint --fix --fix-dangerously --deny-warnings .",
     "format": "oxfmt --write -c ../app/oxfmt.config.mjs .",
     "check": "bun run --parallel type-check type-check-lua check-lint check-format test",
+    "check-pre-push": "bun run --parallel type-check type-check-lua check-lint check-format test",
     "check-lint": "oxlint .",
     "check-format": "oxfmt --check -c ../app/oxfmt.config.mjs .",
     "type-check": "bunx tsc --noEmit -p tsconfig.json",

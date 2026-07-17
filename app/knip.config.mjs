@@ -1,0 +1,39 @@
+/** @type {import('knip').KnipConfig} */
+// @see .agents/skills/tech-stack/references/knip.md
+const strict = process.env.KNIP_STRICT === '1'
+
+export default {
+  entry: [
+    'src/router.tsx',
+    'src/routes/**/*.{ts,tsx}',
+    'src/**/*.test.{ts,tsx}',
+    'src/server/instrumentation/nitro-*.plugin.server.ts',
+    'scripts/**/*.{ts,js}',
+    'tests/**/*.ts',
+    'prisma/seeds/**/*.ts',
+  ],
+  ignore: ['.agents/**'],
+  ignoreFiles: ['scripts/StaticDatasets/geojson/**'],
+  ignoreIssues: {
+    'scripts/StaticDatasets/types.ts': ['exports', 'types'],
+  },
+  ignoreBinaries: ['code', 'gdal', 'gdalinfo', 'gh', 'github', 'ogrinfo', 'which'],
+  ignoreDependencies: [
+    '@tanstack/router-plugin',
+    // Symlinked scripts/StaticDatasets/geojson/** (ignoreFiles above)
+    '@maplibre/maplibre-gl-style-spec',
+    'papaparse',
+    '@types/papaparse',
+  ],
+  rules: {
+    files: 'error',
+    dependencies: 'error',
+    devDependencies: 'error',
+    unlisted: 'error',
+    binaries: 'error',
+    exports: strict ? 'error' : 'warn',
+    types: strict ? 'error' : 'warn',
+    enumMembers: strict ? 'error' : 'warn',
+    duplicates: 'warn',
+  },
+}
