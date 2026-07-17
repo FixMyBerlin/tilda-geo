@@ -13,6 +13,7 @@
       },
       "devDependencies": {
         "@types/bun": "^1.3.14",
+        "bun-types": "1.3.14",
         "oxfmt": "^0.56.0",
         "oxlint": "1.70.0",
         "typescript": "7.0.1-rc",
@@ -23,6 +24,9 @@
       },
     },
   },
+  "trustedDependencies": [
+    "bun-types",
+  ],
   "packages": {
     "@date-fns/tz": ["@date-fns/tz@1.5.0", "", {}, "sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg=="],
 

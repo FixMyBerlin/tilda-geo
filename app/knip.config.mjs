@@ -21,7 +21,6 @@ export default {
   ignoreDependencies: [
     '@tanstack/router-plugin',
     // Symlinked scripts/StaticDatasets/geojson/** (ignoreFiles above)
-    '@maplibre/maplibre-gl-style-spec',
     'papaparse',
     '@types/papaparse',
   ],

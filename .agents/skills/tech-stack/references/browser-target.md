@@ -86,6 +86,8 @@ Scoped to browser-shipped code. Server files excluded — they run on Bun/Nitro.
 },
 ```
 
+Oxlint loads these rules as **JS plugins**. Under Bun `isolated` + `globalStore`, a plugin that `require`s an undeclared transitive module can fail at load time — fix via `trustedDependencies` / upstream / patch, not by adding that module only as an app direct dep. General guidance: [bun-install.md](bun-install.md#phantom-dependencies-under-globalstore). Example: `eslint-plugin-compat` → undeclared `caniuse-lite` ([#692](https://github.com/amilajack/eslint-plugin-compat/issues/692)).
+
 ---
 
 ## Policy

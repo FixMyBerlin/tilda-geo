@@ -13,6 +13,7 @@ minimumReleaseAgeExcludes = [
 # Global virtual store — install once, link everywhere (requires isolated linker).
 # Reinstall after changing linker/store: rm -rf node_modules && bun install
 # Vite dev: server.fs.allow — @see references/bun-install.md
+# Phantom deps inside third-party packages: trustedDependencies / patch — @see references/bun-install.md
 # @see https://bun.com/docs/pm/global-store
 linker = "isolated"
 globalStore = true

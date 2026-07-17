@@ -17,11 +17,14 @@ node_modules/.bun/react@19.2.7  →  ~/.bun/install/cache/links/react@19.2.7-<ha
 
 ## Looks wrong but is normal
 
-| Observation                                 | Verdict                                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `@scope/` folders at `node_modules/@scope/` | Normal — symlinks are inside, not on the folder                                      |
-| Some `.bun/*` are real directories          | [Ineligible packages](https://bun.com/docs/pm/global-store#what-stays-project-local) |
-| Large `node_modules`                        | Expected with heavy graphs                                                           |
+- **Observation:** `@scope/` folders at `node_modules/@scope/`  
+  **Verdict:** Normal — symlinks are inside the scope folder, not on the folder itself.
+- **Observation:** Some `.bun/*` are real directories  
+  **Verdict:** Expected — [ineligible packages](https://bun.com/docs/pm/global-store#what-stays-project-local) (patches, `trustedDependencies`, workspace / `file:` / `link:`).
+- **Observation:** Large `node_modules`  
+  **Verdict:** Expected with heavy graphs.
+
+`trustedDependencies` / phantom fixes: [bun-install.md](bun-install.md#phantom-dependencies-under-globalstore).
 
 ---
 
@@ -41,12 +44,18 @@ ls ~/.bun/install/cache/links/ | wc -l
 
 ## Not working
 
-| Cause                                                           | Fix                                                     |
-| --------------------------------------------------------------- | ------------------------------------------------------- |
-| Bun < 1.3.14                                                    | [bun upgrade](https://bun.sh); reinstall                |
-| Install before config/Bun change                                | `rm -rf node_modules && bun install`                    |
-| `globalStore = false` or `linker = "hoisted"` in project bunfig | Fix [bunfig template](../examples/bunfig.toml.template) |
-| No `node_modules/.bun/`                                         | Need isolated linker + reinstall                        |
+- **Cause:** Bun < 1.3.14  
+  **Fix:** [bun upgrade](https://bun.sh); reinstall.
+- **Cause:** Install before config/Bun change  
+  **Fix:** `rm -rf node_modules && bun install`.
+- **Cause:** `globalStore = false` or `linker = "hoisted"` in project bunfig  
+  **Fix:** [bunfig template](../examples/bunfig.toml.template).
+- **Cause:** No `node_modules/.bun/`  
+  **Fix:** Need isolated linker + reinstall.
+- **Cause:** `Cannot find module '…'` from a package under `cache/links/`  
+  **Fix:** Phantom dep — [bun-install.md](bun-install.md#phantom-dependencies-under-globalstore). Do **not** only add the missing module as an app direct dep.
+- **Cause:** Trusted package still realpaths into `cache/links/`  
+  **Fix:** Confirm `trustedDependencies` in the **same** package’s `package.json`; reinstall.
 
 **Smoke test:** [bunfig.toml.template](../examples/bunfig.toml.template) + `slugify` in a temp dir → `readlink node_modules/.bun/slugify@…` should hit `cache/links/`.
 
