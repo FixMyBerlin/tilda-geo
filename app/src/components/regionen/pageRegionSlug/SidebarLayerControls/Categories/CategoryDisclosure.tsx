@@ -41,7 +41,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             >
               <h2 className="font-semibold">{currCategoryConfig.name}</h2>
               <p
-                className="mt-0.5 max-w-full overflow-hidden text-xs leading-3 text-ellipsis whitespace-nowrap text-gray-400"
+                className="mt-0.5 max-w-full overflow-hidden text-xs leading-4 text-ellipsis whitespace-nowrap text-gray-400"
                 title={currCategoryConfig.desc}
               >
                 {currCategoryConfig.desc}
