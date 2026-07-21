@@ -174,7 +174,6 @@
     "@clack/prompts": "1.7.0",
     "@faker-js/faker": "^10.5.0",
     "@heroicons/react": "2.2.0",
-    "@maplibre/maplibre-gl-style-spec": "^24.8.1",
     "@placemarkio/check-geojson": "0.1.14",
     "@playwright/test": "1.61.1",
     "@react-email/ui": "^6.6.4",
