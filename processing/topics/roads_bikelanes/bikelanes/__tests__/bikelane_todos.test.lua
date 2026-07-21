@@ -361,6 +361,25 @@ describe('bikelane_todos', function()
     end)
   end)
 
+  describe('`missing_width`:', function()
+    it('skips specific category cyclewayLink', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['cycleway'] = 'link',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(data._id, 'way/1')
+      assert.are.equal(table_includes(data._todo_list, 'missing_width'), false)
+    end)
+  end)
+
   describe('`missing_segregated`:', function()
     it('creates missing_segregated but not needs_clarification for path with designated bicycle and foot', function()
       local input_object = {

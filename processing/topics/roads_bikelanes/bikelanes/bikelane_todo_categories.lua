@@ -152,7 +152,7 @@ local missing_traffic_sign = BikelaneTodo.new({
         missing_traffic_sign_vehicle_destination(object_tags)
         -- Add any new missing_traffic_sign_* here so we only trigger this TODO when no other traffic_sign todo is present.
       )
-      and result_tags.category ~= 'cyclwayLink'
+      and result_tags.category ~= 'cyclewayLink'
       and result_tags.category ~= 'crossing'
       and result_tags.category ~= 'needsClarification'
   end
@@ -460,7 +460,7 @@ local missing_width = BikelaneTodo.new({
   end,
   conditions = function(object_tags, result_tags)
     return result_tags.width == nil
-      and result_tags.category ~= 'cyclwayLink'
+      and result_tags.category ~= 'cyclewayLink'
       and result_tags.category ~= 'crossing'
       and result_tags.category ~= 'pedestrianAreaBicycleYes'
       and result_tags.category ~= 'needsClarification'
@@ -493,7 +493,7 @@ local missing_surface = BikelaneTodo.new({
     -- Either the surface is missing. But also surface values that are not derived from the osm tag, should be added.
     -- (ATM all values are derive from osm tags, see processing/topics/helper/derive_surface.lua)
     return (result_tags.surface == nil or result_tags.surface_source ~= 'tag')
-      and result_tags.category ~= 'cyclwayLink'
+      and result_tags.category ~= 'cyclewayLink'
       and result_tags.category ~= 'needsClarification'
       and not contains_substring(result_tags.category, 'cyclewayOnHighway')
       and not contains_substring(result_tags.category, 'sharedBusLane')
