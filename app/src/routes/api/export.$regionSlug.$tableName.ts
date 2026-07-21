@@ -250,13 +250,11 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
               SELECT column_name
               FROM information_schema.columns
               WHERE table_name = '${tableName}'
-              AND column_name IN ('osm_id', 'osm_type', 'width_confidence', 'width_source')
+              AND column_name IN ('osm_id', 'osm_type')
             `)
         const existingColumns = columnExistsQuery.map(({ column_name }) => column_name)
         const hasOsmId = existingColumns.includes('osm_id')
         const hasOsmType = existingColumns.includes('osm_type')
-        const hasWidthConfidence = existingColumns.includes('width_confidence')
-        const hasWidthSource = existingColumns.includes('width_source')
         const columnsMetadataTimingsMs = {
           tagKeys: metaKeysStartedAt - tagKeysStartedAt,
           metaKeys: columnsCheckStartedAt - metaKeysStartedAt,
@@ -278,11 +276,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           'geom',
           hasOsmId ? 'osm_id' : undefined,
           hasOsmType ? 'osm_type' : undefined,
-          hasWidthConfidence ? 'width_confidence' : undefined,
-          hasWidthSource ? 'width_source' : undefined,
-          ...tagKeyQuery
-            .filter(({ key }) => key !== 'width_confidence' && key !== 'width_source')
-            .map(({ key }) => generateColumn(key, 'tags')),
+          ...tagKeyQuery.map(({ key }) => generateColumn(key, 'tags')),
           ...metaKeyQuery.map(({ key }) => generateColumn(key, 'meta')),
         ]
           .filter(Boolean)
