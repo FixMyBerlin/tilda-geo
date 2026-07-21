@@ -372,6 +372,8 @@ export const staticRegion: StaticRegion[] = [
       'off_street_parking_points',
       'parkings_no',
       'parkings_separate',
+      'parkings_quantized',
+      'off_street_parking_quantized',
     ],
   },
   {
