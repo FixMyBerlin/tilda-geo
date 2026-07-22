@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import type { EnvironmentValues } from '@/server/envSchema'
 import { devTilesPort } from './devTilesPort'
 import { getTilesUrl } from './getTilesUrl'
@@ -9,6 +10,12 @@ const cachelessBaseUrl: Record<EnvironmentValues, UrlParts> = {
   staging: { protocol: 'https', host: 'staging-cacheless.tilda-geo.de' },
   production: { protocol: 'https', host: 'cacheless.tilda-geo.de' },
 }
+
+export const cachelessHostSchema = z.enum([
+  cachelessBaseUrl.development.host,
+  cachelessBaseUrl.staging.host,
+  cachelessBaseUrl.production.host,
+])
 
 export const getCachelessTilesUrl = ({ url, cacheless }: { url: string; cacheless: boolean }) => {
   if (!cacheless) return url

@@ -9,6 +9,7 @@ export default {
     'src/**/*.test.{ts,tsx}',
     'src/server/instrumentation/nitro-*.plugin.server.ts',
     'scripts/**/*.{ts,js}',
+    '../.github/scripts/generate-deploy-env.ts',
     'tests/**/*.ts',
     'prisma/seeds/**/*.ts',
   ],
@@ -16,6 +17,10 @@ export default {
   ignoreFiles: ['scripts/StaticDatasets/geojson/**'],
   ignoreIssues: {
     'scripts/StaticDatasets/types.ts': ['exports', 'types'],
+    // Consumed by ../.github/scripts/generate-deploy-env.ts (outside app/ workspace)
+    'src/components/shared/utils/getAppBaseUrl.ts': ['exports'],
+    'src/components/shared/utils/getCachelessTilesUrl.ts': ['exports'],
+    'src/components/shared/utils/getTilesUrl.ts': ['exports'],
   },
   ignoreBinaries: ['code', 'gdal', 'gdalinfo', 'gh', 'github', 'ogrinfo', 'which'],
   ignoreDependencies: [
