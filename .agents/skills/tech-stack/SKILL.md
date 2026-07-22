@@ -159,7 +159,7 @@ Turf vs WASM, crates, Vite wiring: skill `rust-wasm-geo`.
 
 ## CI (GitHub Actions)
 
-- PR dependency review: permissive `allow-licenses` (not deprecated `deny-licenses`) — template: [examples/ci.yml.template](examples/ci.yml.template)
+- PR dependency review: permissive `allow-licenses` (not deprecated `deny-licenses`); include `AGPL-3.0` and `AGPL-3.0-or-later` when the project is AGPL — template: [examples/ci.yml.template](examples/ci.yml.template)
 
 ## Tests and quality
 
