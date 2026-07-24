@@ -1,7 +1,8 @@
-import { z } from 'zod'
+import type { z } from 'zod'
+import { adminFormAuditContext, runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
-import { errorState, validationErrorState } from '@/server/utils/validation'
+import { errorState, successState } from '@/server/utils/validation'
 import { UpdateQaConfigFormSchema } from '../schemas'
 
 export async function updateQaConfigWithData(
@@ -9,12 +10,13 @@ export async function updateQaConfigWithData(
   headers: Headers,
 ) {
   try {
-    await requireAdmin(headers)
+    const admin = await requireAdmin(headers)
     const { id, ...updateData } = data
-    await db.qaConfig.update({ where: { id }, data: updateData })
-    return { success: true, message: '', errors: {} }
+    await runWithAuditContextAsync(adminFormAuditContext(headers, admin.userId), () =>
+      db.qaConfig.update({ where: { id }, data: updateData }),
+    )
+    return successState()
   } catch (error) {
-    if (error instanceof z.ZodError) return validationErrorState(error)
     return errorState(error, 'Fehler beim Aktualisieren der QA-Konfiguration')
   }
 }

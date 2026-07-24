@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
@@ -22,9 +26,9 @@ export async function updateNoteComment(input: z.infer<typeof Schema>, headers: 
     throw new AuthorizationError('Only the author can update this comment')
   }
 
-  const result = await db.noteComment.update({
-    where: { id: parsed.commentId },
-    data: { body: parsed.body },
-  })
+  const result = await runWithAuditContextAsync(
+    memberFormAuditContext(headers, session.userId),
+    () => db.noteComment.update({ where: { id: parsed.commentId }, data: { body: parsed.body } }),
+  )
   return result
 }

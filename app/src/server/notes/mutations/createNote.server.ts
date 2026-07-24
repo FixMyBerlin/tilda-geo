@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
@@ -16,8 +20,9 @@ export async function createNote(input: z.infer<typeof Schema>, headers: Headers
 
   const regionId = await getRegionIdBySlug(regionSlug)
 
-  const result = await db.note.create({
-    data: { ...createData, regionId, userId: session.userId },
-  })
+  const result = await runWithAuditContextAsync(
+    memberFormAuditContext(headers, session.userId),
+    () => db.note.create({ data: { ...createData, regionId, userId: session.userId } }),
+  )
   return result
 }
