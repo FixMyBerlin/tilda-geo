@@ -1237,9 +1237,9 @@ const data = {
           },
           {
             value: 'implicit_yes',
-            label: 'Wahrscheinlich eine Richtung',
+            label: 'Eine Richtung (abgeleitet)',
             description:
-              'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.',
+              'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
           },
         ],
       },

@@ -44,7 +44,7 @@ const bikelanesOnewayLegend: FileMapDataSubcategoryStyleLegend[] = [
   },
   {
     id: 'implicit_yes',
-    name: 'Zu prüfen: eine Richtung?',
+    name: 'Eine Richtung (abgeleitet)',
     style: {
       type: 'line',
       color: '#d8a5fd',

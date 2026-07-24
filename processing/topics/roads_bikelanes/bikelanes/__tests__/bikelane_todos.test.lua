@@ -359,6 +359,26 @@ describe('bikelane_todos', function()
       assert.are.equal(left._id, 'way/1/cycleway/left')
       assert.are.equal(table_includes(left._todo_list, 'missing_oneway'), false)
     end)
+
+    it('skips advisory lane with implicit_yes oneway', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:lane'] = 'advisory',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local right = cycleways[1]
+      assert.are.equal(right._id, 'way/1/cycleway/right')
+      assert.are.equal(right.category, 'cyclewayOnHighway_advisory')
+      assert.are.equal(right.oneway, 'implicit_yes')
+      assert.are.equal(table_includes(right._todo_list, 'missing_oneway'), false)
+    end)
   end)
 
   describe('`missing_width`:', function()

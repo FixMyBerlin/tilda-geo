@@ -271,9 +271,9 @@ const data = {
   'atlas_bikelanes--oneway=assumed_no--description':
     'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.',
   'atlas_bikelanes--oneway=car_not_bike': 'Beide Richtungen für Fahrrad; Einbahnstraße für Kfz',
-  'atlas_bikelanes--oneway=implicit_yes': 'Wahrscheinlich eine Richtung',
+  'atlas_bikelanes--oneway=implicit_yes': 'Eine Richtung (abgeleitet)',
   'atlas_bikelanes--oneway=implicit_yes--description':
-    'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.',
+    'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
   'atlas_bikelanes--oneway=no': 'Beide Richtungen',
   'atlas_bikelanes--oneway=yes': 'Eine Richtung',
   'atlas_bikelanes--operator_type--key': 'Betreibertyp',

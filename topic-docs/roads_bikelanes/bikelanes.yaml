@@ -141,8 +141,8 @@ attributes:
         label: Wahrscheinlich beide Richtungen
         description: Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.
       - value: implicit_yes
-        label: Wahrscheinlich eine Richtung
-        description: Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.
+        label: Eine Richtung (abgeleitet)
+        description: Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.
   - key: bridge
     ref: roads.bridge
   - key: tunnel

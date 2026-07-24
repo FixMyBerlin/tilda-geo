@@ -476,7 +476,7 @@ const data = {
           no: 'Beide Richtungen',
           car_not_bike: 'Beide Richtungen für Fahrrad; Einbahnstraße für Kfz',
           assumed_no: 'Wahrscheinlich beide Richtungen',
-          implicit_yes: 'Wahrscheinlich eine Richtung',
+          implicit_yes: 'Eine Richtung (abgeleitet)',
         },
       },
       bridge: {
