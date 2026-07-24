@@ -26,7 +26,7 @@ Invalid OSM tokens (e.g. `abc`) are rejected with an error instead of being drop
 
 ## Cutover (one-time migration)
 
-After importing region config from const, run [`05-generate-region-masks.ts`](../app/scripts/migration-data/05-generate-region-masks.ts) once per environment. See [migration runbook](../app/scripts/migration-data/README.md).
+After importing region config from const (and StaticDatasets), run `bun run migration-data-masks` once per environment. See [migration runbook](../app/scripts/migration-data/README.md).
 
 Requires DB, S3, and geo DB access (`boundaries` table must contain the configured relation IDs).
 

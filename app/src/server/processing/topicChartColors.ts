@@ -1,6 +1,6 @@
 import type { TopicId } from '@/data/processingTypes/topicId.generated.const'
 
-type TopicChartHue =
+export type TopicChartHue =
   | 'blue'
   | 'indigo'
   | 'violet'
@@ -13,7 +13,7 @@ type TopicChartHue =
   | 'teal'
   | 'cyan'
 
-const topicChartHueById: Record<TopicId, TopicChartHue> = {
+export const topicChartHueById: Record<TopicId, TopicChartHue> = {
   roads_bikelanes: 'blue',
   bikeroutes: 'indigo',
   bicycleParking: 'violet',

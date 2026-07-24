@@ -4,12 +4,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { Textarea } from '@/components/shared/form/fields/Textarea'
 import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow, notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
+import { toastError } from '@/components/shared/toast/toastError'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type {
   DeleteNoteCommentInputType,
@@ -30,7 +31,7 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
   const queryClient = useQueryClient()
   const queryKeyMap = useQueryKey()
   const [open, setOpen] = useState(false)
-  const region = useStaticRegion()
+  const region = useRegion()
 
   const {
     mutateAsync: updateNoteCommentMutation,
@@ -53,7 +54,9 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
         queryKey: ['notes', 'getNoteAndComments', { id: comment.noteId }],
       })
       queryClient.invalidateQueries({ queryKey: queryKeyMap })
+      setOpen(false)
     },
+    onError: (error) => toastError(error, 'Kommentar konnte nicht gelöscht werden'),
   })
 
   const isAuthor = useIsAuthor(comment.author.id)
@@ -127,16 +130,10 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
                     if (
                       window.confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?')
                     ) {
-                      try {
-                        setOpen(false)
-                        deleteNoteCommentMutation({
-                          regionSlug: region.slug,
-                          commentId: comment.id,
-                        })
-                      } catch (err) {
-                        window.alert(String(err))
-                        console.error(err)
-                      }
+                      deleteNoteCommentMutation({
+                        regionSlug: region.slug,
+                        commentId: comment.id,
+                      })
                     }
                   }}
                   className={twMerge(notesButtonStyle, 'hover:bg-orange-400')}

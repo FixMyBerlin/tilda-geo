@@ -6,13 +6,14 @@ import { useState } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { Textarea } from '@/components/shared/form/fields/Textarea'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow, notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
+import { toastError } from '@/components/shared/toast/toastError'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type { DeleteNoteInputType, UpdateNoteInputType } from '@/server/notes/notes.functions'
 import { deleteNoteFn, updateNoteFn } from '@/server/notes/notes.functions'
@@ -34,7 +35,7 @@ export const EditNoteForm = ({ note }: Props) => {
   const queryClient = useQueryClient()
   const queryKeyMap = useQueryKey()
   const [open, setOpen] = useState(false)
-  const region = useStaticRegion()
+  const region = useRegion()
   const { clearInspectorFeatures } = useMapActions()
 
   const {
@@ -55,7 +56,10 @@ export const EditNoteForm = ({ note }: Props) => {
     mutationFn: (input: DeleteNoteInputType) => deleteNoteFn({ data: input }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeyMap })
+      setOpen(false)
+      clearInspectorFeatures()
     },
+    onError: (error) => toastError(error, 'Hinweis konnte nicht gelöscht werden'),
   })
 
   const isAuthor = useIsAuthor(note.author?.id ?? '')
@@ -193,17 +197,10 @@ export const EditNoteForm = ({ note }: Props) => {
                     if (
                       window.confirm('Sind Sie sicher, dass Sie diesen Hinweis löschen möchten?')
                     ) {
-                      try {
-                        setOpen(false)
-                        deleteNoteMutation({
-                          regionSlug: region.slug,
-                          noteId: note.id,
-                        })
-                        clearInspectorFeatures()
-                      } catch (err) {
-                        window.alert(String(err))
-                        console.error(err)
-                      }
+                      deleteNoteMutation({
+                        regionSlug: region.slug,
+                        noteId: note.id,
+                      })
                     }
                   }}
                   className={twMerge(notesButtonStyle, 'hover:bg-orange-400')}

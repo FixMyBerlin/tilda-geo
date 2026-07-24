@@ -1,4 +1,4 @@
-import { Link } from '@/components/shared/links/Link'
+import { AdminEditActionLink } from '@/components/admin/adminPageTitle'
 import type { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import type { QaConfigStats } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
 import { QaConfigStatsTable } from './QaConfigStatsTable'
@@ -27,14 +27,12 @@ export function QaConfigCard({
             {config.isActive ? 'Aktiv' : 'Inaktiv'}
           </span>
         </div>
-        <Link
+        <AdminEditActionLink
           button
           className="shrink-0"
           to="/admin/qa-configs/$id/edit"
           params={{ id: String(config.id) }}
-        >
-          Bearbeiten
-        </Link>
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">

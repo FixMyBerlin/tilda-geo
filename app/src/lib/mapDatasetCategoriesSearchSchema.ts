@@ -1,10 +1,10 @@
 import { z } from 'zod'
 import { optionalSearchString } from '@/lib/searchParamsSchema'
 
-export const staticDatasetCategoriesSearchSchema = z.object({
+export const mapDatasetCategoriesSearchSchema = z.object({
   groupKey: optionalSearchString(),
 })
 
-export type StaticDatasetCategoriesSearch = {
+export type MapDatasetCategoriesSearch = {
   groupKey: string | undefined
 }

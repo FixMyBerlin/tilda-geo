@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { isProd } from '@/components/shared/utils/isEnv'
 
 const maprouletteChallengeParamsSchema = z.object({
   challengeId: z.coerce.number().positive(),
@@ -47,43 +46,32 @@ export const Route = createFileRoute('/api/maproulette/statistic-proxy/$challeng
           )
         }
 
-        try {
-          const apiUrl = `https://maproulette.org/api/v2/data/challenge/${challengeId}`
+        const apiUrl = `https://maproulette.org/api/v2/data/challenge/${challengeId}`
 
-          const response = await fetch(apiUrl, {
-            cache: 'force-cache',
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              apiKey,
-            },
-          })
-          const json = await response.json()
-          const parsed = maprouletteChallengeStatistic.safeParse(json)
-
-          const responseHeaders = {
-            'Access-Control-Allow-Origin': '*',
+        const response = await fetch(apiUrl, {
+          cache: 'force-cache',
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
             'Content-Type': 'application/json',
-          }
-          if (parsed.success === false || !parsed.data[0]) {
-            return Response.json(
-              { error: 'Invalid response', parsed, json },
-              { status: 500, headers: responseHeaders },
-            )
-          }
+            apiKey,
+          },
+        })
+        const json = await response.json()
+        const parsed = maprouletteChallengeStatistic.safeParse(json)
 
-          return Response.json(parsed.data[0].actions, { headers: responseHeaders })
-        } catch (error) {
-          console.error(error)
+        const responseHeaders = {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+        }
+        if (parsed.success === false || !parsed.data[0]) {
           return Response.json(
-            {
-              error: 'Internal Server Error',
-              info: isProd ? undefined : error,
-            },
-            { status: 500 },
+            { error: 'Invalid response', parsed, json },
+            { status: 500, headers: responseHeaders },
           )
         }
+
+        return Response.json(parsed.data[0].actions, { headers: responseHeaders })
       },
     },
   },

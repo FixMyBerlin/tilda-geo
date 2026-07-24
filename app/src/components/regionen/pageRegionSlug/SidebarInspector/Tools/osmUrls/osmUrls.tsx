@@ -1,7 +1,6 @@
 import { format, subYears } from 'date-fns'
 import type { Point } from 'geojson'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
-import { mapillaryKeyUrl } from '@/lib/mapillaryPKeyUrl'
 import type { EditorUrlGeometry } from './editorUrl'
 import { editorUrl } from './editorUrl'
 import { pointFromGeometry } from './pointFromGeometry'
@@ -95,8 +94,6 @@ export const mapillaryUrl = (
 
   return url.toString()
 }
-
-export { mapillaryKeyUrl }
 
 export const osmUrlViewport = (zoom?: number, lat?: number, lng?: number) => {
   if (!zoom || !lat || !lng) return

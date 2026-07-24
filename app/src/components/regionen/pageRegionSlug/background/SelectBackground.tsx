@@ -7,9 +7,9 @@ import { useMap } from 'react-map-gl/maplibre'
 import { twJoin, twMerge } from 'tailwind-merge'
 import {
   defaultBackgroundParam,
-  useBackgroundParam,
   type BackgroundParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/backgroundParam.const'
+import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'

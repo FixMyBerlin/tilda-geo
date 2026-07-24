@@ -7,7 +7,6 @@ import {
   osmTypeIdString,
 } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '@/components/regionen/pageRegionSlug/SidebarInspector/Tools/osmUrls/pointFromGeometry'
-import { isProd } from '@/components/shared/utils/isEnv'
 import { Prisma } from '@/prisma/generated/client'
 import { geoDataClient } from '@/server/prisma-client.server'
 
@@ -21,34 +20,26 @@ export const Route = createFileRoute('/api/maproulette/data/test_tag_fix_two')({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        let parsedParams: z.infer<typeof MaprouletteSchema>
         const searchParams = new URL(request.url).searchParams
-        try {
-          parsedParams = MaprouletteSchema.parse({
-            ids: searchParams.getAll('ids'),
-          })
-        } catch (e) {
-          if (!isProd) throw e
-          console.error(e)
-          return new Response('Bad Request', { status: 200 })
+        const parsedParams = MaprouletteSchema.safeParse({
+          ids: searchParams.getAll('ids'),
+        })
+        if (!parsedParams.success) {
+          return new Response('Bad Request', { status: 400 })
         }
 
-        try {
-          const { ids } = parsedParams
+        const { ids } = parsedParams.data
 
-          const nHits = await geoDataClient.$executeRaw`
+        const nHits = await geoDataClient.$executeRaw`
             SELECT osm_id FROM boundaries WHERE osm_id IN (${Prisma.join(ids)})`
-          if (nHits !== ids.length) {
-            return new Response(
-              "Couldn't find given ids. At least one id is wrong or dupplicated.",
-              {
-                status: 404,
-              },
-            )
-          }
+        if (nHits !== ids.length) {
+          return new Response("Couldn't find given ids. At least one id is wrong or dupplicated.", {
+            status: 404,
+          })
+        }
 
-          type QueryTpye = { type: string; id: string; geometry: LineString }[]
-          const sqlWays = await geoDataClient.$queryRaw<QueryTpye>`
+        type QueryTpye = { type: string; id: string; geometry: LineString }[]
+        const sqlWays = await geoDataClient.$queryRaw<QueryTpye>`
             SELECT
               roads.osm_type as type,
               roads.osm_id as id,
@@ -65,17 +56,17 @@ export const Route = createFileRoute('/api/maproulette/data/test_tag_fix_two')({
               AND ST_intersects(subquery.union_geom, roads.geom);
           `
 
-          const markdown = ({
-            id,
-            type,
-            geometry,
-          }: {
-            id: number | string
-            type: string
-            geometry: GeoJSON.Geometry
-          }) => {
-            const [lng, lat] = pointFromGeometry(geometry)
-            return `
+        const markdown = ({
+          id,
+          type,
+          geometry,
+        }: {
+          id: number | string
+          type: string
+          geometry: GeoJSON.Geometry
+        }) => {
+          const [lng, lat] = pointFromGeometry(geometry)
+          return `
 ## Kontext
 
 TOOD
@@ -90,70 +81,63 @@ TODO
 * [TILDA Radverkehr an dieser Stelle](https://tilda-geo.de/regionen/deutschland?map=13/${lat}/${lng})
 * [OpenStreetMap](https://www.openstreetmap.org/${osmTypeIdString(type, id)})
 `
+        }
+
+        const featureCollections = sqlWays.map(({ type, id, geometry }) => {
+          const idString = osmTypeIdString(type, id)
+          const properties = {
+            id: idString,
+            task_updated_at: new Date().toISOString(),
+            task_markdown: markdown({
+              id,
+              type,
+              geometry,
+            }).replaceAll('\n', ' \n'),
           }
 
-          const featureCollections = sqlWays.map(({ type, id, geometry }) => {
-            const idString = osmTypeIdString(type, id)
-            const properties = {
-              id: idString,
-              task_updated_at: new Date().toISOString(),
-              task_markdown: markdown({
-                id,
-                type,
-                geometry,
-              }).replaceAll('\n', ' \n'),
-            }
-
-            const feature = turf.truncate(turf.feature(geometry, properties), {
-              precision: 8,
-            })
-
-            const maprouletteCooperativeWork = {
-              meta: {
-                version: 2,
-                type: 1,
-              },
-              operations: [
-                {
-                  operationType: 'modifyElement',
-                  data: {
-                    id: idString,
-                    operations: [
-                      {
-                        operation: 'setTags',
-                        data: {
-                          'cycleway:both': 'no',
-                        },
-                      },
-                    ],
-                  },
-                },
-              ],
-            }
-
-            /**
-             * MapRoulette cooperative challenge (Tag Fix) format:
-             * https://learn.maproulette.org/en-US/documentation/creating-cooperative-challenges/
-             */
-            return {
-              type: 'FeatureCollection',
-              features: [feature],
-              cooperativeWork: maprouletteCooperativeWork,
-            }
+          const feature = turf.truncate(turf.feature(geometry, properties), {
+            precision: 8,
           })
 
-          return Response.json(featureCollections, {
-            headers: {
-              'Access-Control-Allow-Origin': '*',
+          const maprouletteCooperativeWork = {
+            meta: {
+              version: 2,
+              type: 1,
             },
-          })
-        } catch (error) {
-          console.error(error)
-          return Response.json(
-            { error: 'Internal Server Error', info: isProd ? undefined : error },
-            { status: 500 },
-          )
-        }
+            operations: [
+              {
+                operationType: 'modifyElement',
+                data: {
+                  id: idString,
+                  operations: [
+                    {
+                      operation: 'setTags',
+                      data: {
+                        'cycleway:both': 'no',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          }
+
+          /**
+           * MapRoulette cooperative challenge (Tag Fix) format:
+           * https://learn.maproulette.org/en-US/documentation/creating-cooperative-challenges/
+           */
+          return {
+            type: 'FeatureCollection',
+            features: [feature],
+            cooperativeWork: maprouletteCooperativeWork,
+          }
+        })
+
+        return Response.json(featureCollections, {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+          },
+        })
       },
     },
   },

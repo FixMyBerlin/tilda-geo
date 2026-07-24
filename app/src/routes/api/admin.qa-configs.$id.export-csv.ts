@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { internalServerErrorJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
+import { notFoundJson } from '@/server/api/util/apiJsonResponses.server'
 import { guardAdmin } from '@/server/api/util/authGuards.server'
 import { corsHeaders } from '@/server/api/util/cors'
 import { buildQaConfigExportCsv } from '@/server/qa-configs/export/buildQaConfigExportCsv'
@@ -31,21 +31,16 @@ export const Route = createFileRoute('/api/admin/qa-configs/$id/export-csv')({
           return notFoundJson({ headers: corsHeaders })
         }
 
-        try {
-          const csv = buildQaConfigExportCsv(data.rows)
-          const filename = getQaConfigExportFilename(data.config.slug)
-          return new Response(`\uFEFF${csv}`, {
-            status: 200,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'text/csv; charset=utf-8',
-              'Content-Disposition': `attachment; filename="${filename}"`,
-            },
-          })
-        } catch (error) {
-          console.error('QA config CSV export error:', error)
-          return internalServerErrorJson({ headers: corsHeaders, message: 'Export failed' })
-        }
+        const csv = buildQaConfigExportCsv(data.rows)
+        const filename = getQaConfigExportFilename(data.config.slug)
+        return new Response(`\uFEFF${csv}`, {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'text/csv; charset=utf-8',
+            'Content-Disposition': `attachment; filename="${filename}"`,
+          },
+        })
       },
     },
   },

@@ -1,7 +1,7 @@
 import { CopyButton } from '@/components/shared/CopyButton'
 import { Link } from '@/components/shared/links/Link'
+import type { TopicDocMasterportalGfiConfig } from '@/data/topicDocs/masterportalGfi.types'
 import { DOCS_PAGE_SECTION_H2_CLASSNAME, DOCS_PAGE_SECTION_IDS } from './docsSectionIds.const'
-import type { DocsPageMasterportal } from './types'
 
 const masterportalDocsServicesUrl =
   'https://www.masterportal.org/mkdocs/doc/Latest/User/Global-Config/services.json/#gfi-attributes'
@@ -10,7 +10,7 @@ const masterportalDocsGfiHtmlUrl =
   'https://www.masterportal.org/mkdocs/doc/Latest/User/Global-Config/services.json/#gfiattributes-html'
 
 type Props = {
-  masterportal: DocsPageMasterportal
+  masterportal: TopicDocMasterportalGfiConfig | null
 }
 
 export const PageDocsMasterportalSection = ({ masterportal }: Props) => {

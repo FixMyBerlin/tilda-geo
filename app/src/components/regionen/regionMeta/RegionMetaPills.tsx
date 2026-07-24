@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge'
-import type { TRegion } from '@/server/regions/queries/getRegion.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { RegionPromotedPill } from './RegionPromotedPill'
 import { RegionStatusPill } from './RegionStatusPill'
 

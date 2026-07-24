@@ -10,7 +10,6 @@ import {
   getCategoryData,
   getSourceData,
 } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { staticRegion } from '@/data/regions.const'
 import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
 
 export type RegionForDatasetDerivation = {
@@ -20,14 +19,14 @@ export type RegionForDatasetDerivation = {
 
 const exportTableSet = new Set<SourceExportApiIdentifier>(exportApiIdentifier)
 const exportTitleByTableName = new Map(exportConfigs.map((config) => [config.id, config.title]))
-const tableNamesReferencedByRegionExports = new Set(
-  staticRegion.flatMap((region) => region.exports ?? []),
-)
 
 const isExportTableName = (tableId: TableId): tableId is SourceExportApiIdentifier =>
   exportTableSet.has(tableId as SourceExportApiIdentifier)
 
-const getTableNamesForSourceId = (sourceId: SourcesId) => {
+const getTableNamesForSourceId = (
+  sourceId: SourcesId,
+  tableNamesReferencedByRegionExports: Set<string>,
+) => {
   const source = getSourceData(sourceId)
   if (hasExplicitTilesUrl(source)) return []
 
@@ -36,7 +35,6 @@ const getTableNamesForSourceId = (sourceId: SourcesId) => {
   for (const tableId of source.tileTables) {
     if (!isExportTableName(tableId)) continue
 
-    // Include tables used in any region export list or with structured topic docs.
     const isReferencedByAnyRegion = tableNamesReferencedByRegionExports.has(tableId)
     const hasTopicDoc = Boolean(getTopicDocByTableName(tableId))
     if (!isReferencedByAnyRegion && !hasTopicDoc) continue
@@ -61,13 +59,18 @@ export type RegionDatasetFromCategories = {
 
 export const deriveRegionDatasetsFromCategories = (
   region: RegionForDatasetDerivation,
+  allRegionExportTables: Iterable<string> = exportApiIdentifier,
 ): RegionDatasetFromCategories[] => {
+  const tableNamesReferencedByRegionExports = new Set(allRegionExportTables)
   const tableNames = new Set<SourceExportApiIdentifier>()
 
   region.categories.forEach((categoryId) => {
     const categoryData = getCategoryData(categoryId)
     categoryData.subcategories.forEach((subcategory) => {
-      const mappedTableNames = getTableNamesForSourceId(subcategory.sourceId)
+      const mappedTableNames = getTableNamesForSourceId(
+        subcategory.sourceId,
+        tableNamesReferencedByRegionExports,
+      )
       mappedTableNames.forEach((tableName) => {
         tableNames.add(tableName)
       })

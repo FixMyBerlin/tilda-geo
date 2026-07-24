@@ -11,7 +11,7 @@ export async function getUserWithMemberships(input: { userId: string }, headers:
     select: {
       id: true,
       accessedRegions: true,
-      Membership: { select: { id: true, region: { select: { slug: true } } } },
+      memberships: { select: { id: true, region: { select: { slug: true } } } },
     },
   })
 

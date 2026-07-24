@@ -1,24 +1,21 @@
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
-import type { StaticRegion } from '@/data/regions.const'
 import type { EnvironmentValues } from '@/server/envSchema'
+import type { RegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 import { getAppBaseUrl } from './getAppBaseUrl'
-
-export const getBoundaryExportApiBaseUrl = (env?: EnvironmentValues) => {
-  return getAppBaseUrl('/api/boundary', env)
-}
 
 const getExportApiBboxUrl = (
   regionSlug: string,
   apiIdentifier: SourceExportApiIdentifier,
-  bbox: NonNullable<StaticRegion['bbox']>,
+  bbox: RegionGeoJsonBBox,
   env?: EnvironmentValues,
   apiKey?: string,
 ) => {
   const url = new URL(getAppBaseUrl(`/api/export/${regionSlug}/${apiIdentifier}`, env))
-  url.searchParams.append('minlon', String(bbox.min[0]))
-  url.searchParams.append('minlat', String(bbox.min[1]))
-  url.searchParams.append('maxlon', String(bbox.max[0]))
-  url.searchParams.append('maxlat', String(bbox.max[1]))
+  const [minLng, minLat, maxLng, maxLat] = bbox
+  url.searchParams.append('minlon', String(minLng))
+  url.searchParams.append('minlat', String(minLat))
+  url.searchParams.append('maxlon', String(maxLng))
+  url.searchParams.append('maxlat', String(maxLat))
   if (apiKey) {
     url.searchParams.append('apiKey', apiKey)
   }
@@ -28,7 +25,7 @@ const getExportApiBboxUrl = (
 export const getExportOgrApiBboxUrl = (
   regionSlug: string,
   apiIdentifier: SourceExportApiIdentifier,
-  bbox: NonNullable<StaticRegion['bbox']>,
+  bbox: RegionGeoJsonBBox,
   format: 'geojson' | 'gpkg' | 'fgb' = 'fgb',
   env?: EnvironmentValues,
   apiKey?: string,

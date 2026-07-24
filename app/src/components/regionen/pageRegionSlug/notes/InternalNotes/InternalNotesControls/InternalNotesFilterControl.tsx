@@ -6,8 +6,7 @@ import { Fragment } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { getFullname } from '@/components/admin/memberships/pageMemberships/utils/getFullname'
 import { useInternalNotesFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
-import { notesSplitControlSegmentClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
 
@@ -19,7 +18,7 @@ export const menuItemClasses = (active: boolean) => {
 }
 
 export const InternalNotesFilterControl = () => {
-  const { slug: regionSlug } = useStaticRegion()
+  const { slug: regionSlug } = useRegion()
   const { internalNotesFilterParam, setInternalNotesFilterParam } = useInternalNotesFilterParam()
   const { data, isLoading } = useQuery(
     internalNotesQueryOptions(regionSlug, internalNotesFilterParam),
@@ -48,13 +47,13 @@ export const InternalNotesFilterControl = () => {
           <button
             type="button"
             className={twJoin(
-              notesSplitControlSegmentClassName,
+              'z-0 -ml-px inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:text-gray-800 focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
               active ? 'bg-yellow-100' : 'bg-white hover:bg-yellow-50',
               noFilterActive ? '' : 'bg-yellow-400',
             )}
           >
             <span className="sr-only">Hinweise filtern</span>
-            <FunnelIcon className="size-6" aria-hidden="true" />
+            <FunnelIcon className="-mr-1 size-5" aria-hidden="true" />
           </button>
         )}
       </MenuButton>

@@ -3,36 +3,39 @@ import { afterthoughtSkipReasons } from '@/data/processingTypes/afterthoughts.co
 
 export const ProcessingMetaStatus = z.enum(['processing', 'postprocessing', 'processed'])
 
-const TopicPhaseWindowSchema = z.object({
+export const TopicPhaseWindowSchema = z.object({
   start: z.string(),
   end: z.string(),
 })
 
-const TopicSkipReasonSchema = z.enum(['weekend', 'unchanged', 'process_only_topics'])
+export const TopicSkipReasonSchema = z.enum(['weekend', 'unchanged', 'process_only_topics'])
 
-const TopicRanEntrySchema = z.object({
+export const TopicRanEntrySchema = z.object({
   lua: TopicPhaseWindowSchema.optional(),
   sql: TopicPhaseWindowSchema.optional(),
   diff: TopicPhaseWindowSchema.optional(),
 })
 
-const TopicSkippedEntrySchema = z.object({
+export const TopicSkippedEntrySchema = z.object({
   skipped: TopicSkipReasonSchema,
 })
 
-const TopicTimingEntrySchema = z.union([TopicRanEntrySchema, TopicSkippedEntrySchema])
+export const TopicTimingEntrySchema = z.union([TopicRanEntrySchema, TopicSkippedEntrySchema])
 
-const ProcessingTopicsMetaSchema = z.record(z.string(), TopicTimingEntrySchema)
+export const ProcessingTopicsMetaSchema = z.record(z.string(), TopicTimingEntrySchema)
 
-const AfterthoughtSkipReasonSchema = z.enum(afterthoughtSkipReasons)
+export const AfterthoughtSkipReasonSchema = z.enum(afterthoughtSkipReasons)
 
-const AfterthoughtSkippedEntrySchema = z.object({
+export const AfterthoughtSkippedEntrySchema = z.object({
   skipped: AfterthoughtSkipReasonSchema,
 })
 
-const AfterthoughtEntrySchema = z.union([TopicPhaseWindowSchema, AfterthoughtSkippedEntrySchema])
+export const AfterthoughtEntrySchema = z.union([
+  TopicPhaseWindowSchema,
+  AfterthoughtSkippedEntrySchema,
+])
 
-const ProcessingAfterthoughtsMetaSchema = z.record(z.string(), AfterthoughtEntrySchema)
+export const ProcessingAfterthoughtsMetaSchema = z.record(z.string(), AfterthoughtEntrySchema)
 
 export const isAfterthoughtSkipped = (
   entry: AfterthoughtEntry | undefined,
@@ -51,7 +54,7 @@ const normalizeJsonbObjectInput = (value: unknown) => {
 const normalizeTopicsMetaInput = normalizeJsonbObjectInput
 const normalizeAfterthoughtsMetaInput = normalizeJsonbObjectInput
 
-const ProcessingRunRowSchema = z.object({
+export const ProcessingRunRowSchema = z.object({
   id: z.number(),
   status: ProcessingMetaStatus,
   processing_duration: z.string().nullable(),
@@ -70,9 +73,12 @@ export const parseProcessingRunRow = (row: unknown) => ProcessingRunRowSchema.sa
 
 export type ProcessingMetaStatus = z.infer<typeof ProcessingMetaStatus>
 export type TopicPhaseWindow = z.infer<typeof TopicPhaseWindowSchema>
+export type TopicSkipReason = z.infer<typeof TopicSkipReasonSchema>
+export type TopicRanEntry = z.infer<typeof TopicRanEntrySchema>
 export type TopicSkippedEntry = z.infer<typeof TopicSkippedEntrySchema>
 export type TopicTimingEntry = z.infer<typeof TopicTimingEntrySchema>
 export type ProcessingTopicsMeta = z.infer<typeof ProcessingTopicsMetaSchema>
+export type AfterthoughtSkipReason = z.infer<typeof AfterthoughtSkipReasonSchema>
 export type AfterthoughtSkippedEntry = z.infer<typeof AfterthoughtSkippedEntrySchema>
 export type AfterthoughtEntry = z.infer<typeof AfterthoughtEntrySchema>
 export type ProcessingAfterthoughtsMeta = z.infer<typeof ProcessingAfterthoughtsMetaSchema>

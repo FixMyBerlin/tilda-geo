@@ -6,7 +6,7 @@ import {
   useShowInternalNotesParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/notes/InternalNotes/utils/useAllowInternalNotes'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
 
 export const internalNotesLayerId = 'internal-notes-layer'
@@ -14,7 +14,7 @@ export const internalNotesSourceId = 'internal-notes-source'
 
 export const SourcesLayersInternalNotes = () => {
   const { showInternalNotesParam } = useShowInternalNotesParam()
-  const region = useStaticRegion()
+  const region = useRegion()
   const allowInternalNotes = useAllowInternalNotes()
   const inspectorFeatures = useMapInspectorFeatures()
 

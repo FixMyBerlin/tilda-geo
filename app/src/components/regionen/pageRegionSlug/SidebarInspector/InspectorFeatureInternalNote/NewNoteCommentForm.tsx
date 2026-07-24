@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef } from 'react'
 import { z } from 'zod'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { Textarea } from '@/components/shared/form/fields/Textarea'
 import { Form } from '@/components/shared/form/Form'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
@@ -35,7 +35,7 @@ export const NewNoteCommentForm = ({ noteId }: Props) => {
     },
   })
 
-  const region = useStaticRegion()
+  const region = useRegion()
   const hasPermissions = useHasPermissions()
 
   if (!hasPermissions) {

@@ -4,7 +4,6 @@ import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { Select } from '@/components/shared/form/fields/Select'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
-import type { FormApi } from '@/components/shared/form/types'
 import type { FormState } from '@/server/utils/validation'
 
 export const QaConfigFormInputSchema = {
@@ -53,9 +52,9 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
   const regionOptions = regions.map((r) => [r.id.toString(), r.slug] as [string, string])
 
   return (
-    <Form
+    <Form<QaConfigFormBaseValues>
       actionBarRight={actionBarRight}
-      defaultValues={defaultValues as z.input<TSchema>}
+      defaultValues={defaultValues}
       schema={schema}
       onSubmit={async (values) => {
         const result = await onSubmit(values as z.infer<TSchema>)
@@ -70,75 +69,72 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
       }}
       submitLabel={submitLabel}
     >
-      {(form) => {
-        const f = form as unknown as FormApi<QaConfigFormBaseValues>
-        return (
-          <>
-            <Select
-              form={f}
-              name="regionId"
-              label="Region"
-              options={regionOptions}
-              help="Wähle die Region für diese QA Konfiguration"
-            />
-            <TextField
-              form={f}
-              name="slug"
-              label="Slug"
-              help="Eindeutiger Identifier für diese QA Konfiguration (z.B. 'parking_capacity')"
-            />
-            <TextField
-              form={f}
-              name="label"
-              label="Label"
-              help="Anzeigename für diese QA Konfiguration (z.B. 'Parkplätze Kapazität')"
-            />
-            <TextField
-              form={f}
-              name="mapTable"
-              label="Map Table"
-              help="Name der Datenbanktabelle (z.B. 'public.qa_parkings_euvm')"
-            />
-            <TextField
-              form={f}
-              name="mapAttribution"
-              label="Map Attribution"
-              optional
-              help="Attribution für die Kartenquelle (z.B. 'QA Data: &copy; OpenStreetMap; tilda-geo.de')"
-            />
-            <TextField
-              form={f}
-              name="goodThreshold"
-              label="Good Threshold"
-              type="number"
-              help="Maximale Abweichung für 'Gut' Status (grün). Bei Abweichung ≤ diesem Wert wird der Status als 'Gut' eingestuft."
-            />
-            <TextField
-              form={f}
-              name="needsReviewThreshold"
-              label="Needs Review Threshold"
-              type="number"
-              help="Maximale Abweichung für 'Überprüfung nötig' Status (gelb). Bei Abweichung > Good Threshold aber ≤ diesem Wert wird der Status als 'Überprüfung nötig' eingestuft."
-            />
-            <TextField
-              form={f}
-              name="absoluteDifferenceThreshold"
-              label="Absolute Difference Threshold"
-              type="number"
-              help="Maximale absolute Differenz, die nicht als Änderung betrachtet wird."
-            />
-            <RadioGroup
-              form={f}
-              name="isActive"
-              label="Status"
-              items={[
-                { value: 'true', label: 'Aktiv' },
-                { value: 'false', label: 'Inaktiv' },
-              ]}
-            />
-          </>
-        )
-      }}
+      {(form) => (
+        <>
+          <Select
+            form={form}
+            name="regionId"
+            label="Region"
+            options={regionOptions}
+            help="Wähle die Region für diese QA Konfiguration"
+          />
+          <TextField
+            form={form}
+            name="slug"
+            label="Slug"
+            help="Eindeutiger Identifier für diese QA Konfiguration (z.B. 'parking_capacity')"
+          />
+          <TextField
+            form={form}
+            name="label"
+            label="Label"
+            help="Anzeigename für diese QA Konfiguration (z.B. 'Parkplätze Kapazität')"
+          />
+          <TextField
+            form={form}
+            name="mapTable"
+            label="Map Table"
+            help="Name der Datenbanktabelle (z.B. 'public.qa_parkings_euvm')"
+          />
+          <TextField
+            form={form}
+            name="mapAttribution"
+            label="Map Attribution"
+            optional
+            help="Attribution für die Kartenquelle (z.B. 'QA Data: &copy; OpenStreetMap; tilda-geo.de')"
+          />
+          <TextField
+            form={form}
+            name="goodThreshold"
+            label="Good Threshold"
+            type="number"
+            help="Maximale Abweichung für 'Gut' Status (grün). Bei Abweichung ≤ diesem Wert wird der Status als 'Gut' eingestuft."
+          />
+          <TextField
+            form={form}
+            name="needsReviewThreshold"
+            label="Needs Review Threshold"
+            type="number"
+            help="Maximale Abweichung für 'Überprüfung nötig' Status (gelb). Bei Abweichung > Good Threshold aber ≤ diesem Wert wird der Status als 'Überprüfung nötig' eingestuft."
+          />
+          <TextField
+            form={form}
+            name="absoluteDifferenceThreshold"
+            label="Absolute Difference Threshold"
+            type="number"
+            help="Maximale absolute Differenz, die nicht als Änderung betrachtet wird."
+          />
+          <RadioGroup
+            form={form}
+            name="isActive"
+            label="Status"
+            items={[
+              { value: 'true', label: 'Aktiv' },
+              { value: 'false', label: 'Inaktiv' },
+            ]}
+          />
+        </>
+      )}
     </Form>
   )
 }
