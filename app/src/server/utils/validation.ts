@@ -16,7 +16,7 @@ export type FormState =
  */
 export function validationErrorState(error: z.ZodError) {
   return {
-    success: false,
+    success: false as const,
     message: 'Bitte korrigieren Sie die Fehler im Formular',
     errors: z.flattenError(error).fieldErrors,
   }
@@ -28,7 +28,7 @@ export function validationErrorState(error: z.ZodError) {
  */
 export function errorState(error: unknown, defaultMessage: string) {
   return {
-    success: false,
+    success: false as const,
     message: error instanceof Error ? error.message : defaultMessage,
     errors: {},
   }

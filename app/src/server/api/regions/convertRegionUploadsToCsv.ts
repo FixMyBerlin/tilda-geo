@@ -1,22 +1,15 @@
 import { Parser } from '@json2csv/plainjs'
 import invariant from 'tiny-invariant'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
-import type { Region, Upload } from '@/prisma/generated/client'
-import type { MetaData } from '@/scripts/StaticDatasets/types'
-import { categoryPresentationForConfigCategory } from '@/server/static-dataset-categories/queries/loadStaticDatasetCategoryMap.server'
-import { loadStaticDatasetCategoryMap } from '@/server/static-dataset-categories/queries/loadStaticDatasetCategoryMap.server'
+import type { MapDatasetLayerConfig, MapDatasetUpload, Region } from '@/prisma/generated/client'
+import { categoryPresentationForConfigCategory } from '@/server/map-dataset-categories/queries/loadMapDatasetCategoryMap.server'
+import { loadMapDatasetCategoryMap } from '@/server/map-dataset-categories/queries/loadMapDatasetCategoryMap.server'
 
-/**
- * Upload with regions included (matching our DB queries)
- */
-type UploadWithRegions = Upload & {
+type UploadWithRegions = MapDatasetUpload & {
   regions: Pick<Region, 'id' | 'slug'>[]
+  layerConfigs: MapDatasetLayerConfig[]
 }
 
-/**
- * Converts region uploads to CSV format
- * Contains metadata about datasets
- */
 type RegionCsvRow = {
   id: string
   name: string
@@ -25,7 +18,7 @@ type RegionCsvRow = {
   category_subtitle: string
   attribution: string
   licence: string
-  updated_at: string
+  data_updated_note: string
   licence_osm_compatible: string
   data_source: string
   geojson_download_url: string
@@ -39,32 +32,34 @@ export async function convertRegionUploadsToCsv(uploads: UploadWithRegions[], re
     throw new Error('No uploads found for this region')
   }
 
-  const categoryMap = await loadStaticDatasetCategoryMap()
+  const categoryMap = await loadMapDatasetCategoryMap()
   const csvRows: RegionCsvRow[] = []
 
   console.log(`Processing ${uploads.length} uploads for region ${regionSlug}`)
 
   for (const upload of uploads) {
-    const configs = upload.configs as MetaData['configs']
+    if (upload.layerConfigs.length === 0) {
+      throw new Error(`Upload "${upload.slug}" has no layer configs`)
+    }
 
-    for (const config of configs) {
+    for (const layerConfig of upload.layerConfigs) {
       const regionUrl = `${process.env.VITE_APP_ORIGIN}/regionen/${regionSlug}?data=${upload.slug}`
       const { categoryTitle, categorySubtitle } = categoryPresentationForConfigCategory(
-        config.category,
+        layerConfig.categoryKey,
         categoryMap,
       )
 
       const row: RegionCsvRow = {
         id: upload.slug,
-        name: config.name || '',
-        description: config.description || '',
-        updated_at: config.updatedAt || '',
+        name: layerConfig.name,
+        description: layerConfig.description || '',
+        data_updated_note: upload.dataUpdatedNote || '',
         category: categoryTitle || '',
         category_subtitle: categorySubtitle || '',
-        attribution: config.attributionHtml || '',
-        licence: config.licence || '',
-        licence_osm_compatible: config.licenceOsmCompatible || '',
-        data_source: config.dataSourceMarkdown || '',
+        attribution: upload.attributionHtml || '',
+        licence: upload.licence || '',
+        licence_osm_compatible: upload.licenceOsmCompatible || '',
+        data_source: upload.dataSourceMarkdown || '',
         geojson_download_url: getStaticDatasetUrl(upload.slug, 'geojson'),
         csv_download_url: getStaticDatasetUrl(upload.slug, 'csv'),
         region_url: regionUrl,

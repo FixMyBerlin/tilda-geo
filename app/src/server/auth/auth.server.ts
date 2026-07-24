@@ -7,6 +7,7 @@ import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { getOsmApiUrl, getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { osmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { UserRoleEnum } from '@/prisma/generated/client'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import { sendNewUserRegistration } from '@/server/notifications/sendNewUserRegistration.server'
 
@@ -132,26 +133,35 @@ const options = {
             let user = await db.user.findFirst({ where: { osmId } })
 
             if (user) {
-              user = await db.user.update({
-                where: { osmId },
-                data: {
-                  osmName,
-                  osmAvatar,
-                  osmDescription,
-                  ...(user.email ? {} : { email: osmPlaceholderEmail(osmId) }),
-                },
-              })
+              const existingUser = user
+              user = await runWithAuditContextAsync(
+                { userId: existingUser.id, metadata: { changeSource: 'API' as const } },
+                () =>
+                  db.user.update({
+                    where: { osmId },
+                    data: {
+                      osmName,
+                      osmAvatar,
+                      osmDescription,
+                      ...(existingUser.email ? {} : { email: osmPlaceholderEmail(osmId) }),
+                    },
+                  }),
+              )
             } else {
-              user = await db.user.create({
-                data: {
-                  osmId,
-                  osmName,
-                  osmAvatar,
-                  osmDescription,
-                  role: UserRoleEnum.USER,
-                  email: osmPlaceholderEmail(osmId),
-                },
-              })
+              user = await runWithAuditContextAsync(
+                { metadata: { changeSource: 'API' as const } },
+                () =>
+                  db.user.create({
+                    data: {
+                      osmId,
+                      osmName,
+                      osmAvatar,
+                      osmDescription,
+                      role: UserRoleEnum.USER,
+                      email: osmPlaceholderEmail(osmId),
+                    },
+                  }),
+              )
 
               // Send email notification for new user registration
               await sendNewUserRegistration({

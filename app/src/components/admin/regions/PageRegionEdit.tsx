@@ -1,11 +1,14 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { twMerge } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
+import { AdminPageTitleEdit, AdminPageTitleEditLabel } from '@/components/admin/adminPageTitle'
 import { adminTableClasses } from '@/components/admin/AdminTable'
+import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { ObjectDump } from '@/components/admin/ObjectDump'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { linkStyles } from '@/components/shared/links/styles'
+import { Quote } from '@/components/shared/text/Quotes'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { RegionFormEdit } from './pageRegions/RegionFormEdit'
 import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
@@ -13,7 +16,8 @@ import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 const routeApi = getRouteApi('/admin/regions/$regionSlug/edit')
 
 export function PageRegionEdit() {
-  const { region, users } = routeApi.useLoaderData()
+  const { region, users, formConfig, maskConfig, contracts, auditHistory } =
+    routeApi.useLoaderData()
 
   return (
     <>
@@ -21,15 +25,20 @@ export function PageRegionEdit() {
         <Breadcrumb
           pages={[
             { href: '/admin/regions', name: 'Regionen' },
-            { href: `/admin/regions/${region.slug}/edit`, name: 'Bearbeiten' },
+            {
+              href: `/admin/regions/${region.slug}/edit`,
+              name: <AdminPageTitleEditLabel name={region.name} variant="breadcrumb" />,
+            },
           ]}
         />
       </HeaderWrapper>
 
-      <ObjectDump data={region} className="my-10" />
+      <AdminPageTitleEdit name={region.name} />
 
       <div className="my-10">
-        <h2 className="mb-4 text-xl font-semibold">Benutzer dieser Region</h2>
+        <h2 className="mb-4 text-xl font-semibold">
+          Benutzer von <Quote>{region.name}</Quote>
+        </h2>
         {users.length === 0 ? (
           <p className="text-gray-500">Keine Benutzer gefunden</p>
         ) : (
@@ -40,16 +49,16 @@ export function PageRegionEdit() {
                   Benutzer
                 </th>
                 <th scope="col" className={adminTableClasses.thLeft}>
-                  Regionen
+                  Aktionen
                 </th>
                 <th scope="col" className={adminTableClasses.thLeft}>
-                  Aktionen
+                  Alle Regionen
                 </th>
               </tr>
             </thead>
             <tbody className={adminTableClasses.body}>
               {users.map((user) => {
-                const membershipInRegion = user.Membership.find(
+                const membershipInRegion = user.memberships.find(
                   (m) => m.region.slug === region.slug,
                 )
 
@@ -65,26 +74,31 @@ export function PageRegionEdit() {
                       {hasContactEmail(user.email) ? user.email : '–'}
                     </td>
                     <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
-                      <ul className={adminBulletedListClassName}>
-                        {user.Membership.map((membership) => (
-                          <li key={membership.id}>
-                            <div className="flex items-center gap-2">
-                              <span>{membership.region.slug}</span>
-                              <RegionStatusPill
-                                status={membership.region.status}
-                                className="text-xs"
-                              />
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </td>
-                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
                       {membershipInRegion ? (
                         <RemoveMembershipButton membershipId={membershipInRegion.id} />
                       ) : (
                         '–'
                       )}
+                    </td>
+                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
+                      <details>
+                        <summary className={twJoin(linkStyles, 'cursor-pointer whitespace-nowrap')}>
+                          Alle Regionen ({user.memberships.length})
+                        </summary>
+                        <ul className={twMerge(adminBulletedListClassName, 'mt-2')}>
+                          {user.memberships.map((membership) => (
+                            <li key={membership.id}>
+                              <div className="flex items-center gap-2">
+                                <span>{membership.region.slug}</span>
+                                <RegionStatusPill
+                                  status={membership.region.status}
+                                  className="text-xs"
+                                />
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
                     </td>
                   </tr>
                 )
@@ -95,10 +109,13 @@ export function PageRegionEdit() {
       </div>
 
       <RegionFormEdit
-        initialSlug={region.slug}
-        initialPromoted={region.promoted ? 'true' : 'false'}
-        initialStatus={region.status}
+        formConfig={formConfig}
+        maskConfig={maskConfig}
+        contracts={contracts}
+        regionId={region.id}
       />
+
+      <AuditHistoryPanel rows={auditHistory} model="Region" recordId={String(region.id)} />
     </>
   )
 }

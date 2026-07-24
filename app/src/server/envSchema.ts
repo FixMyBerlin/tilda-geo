@@ -29,6 +29,7 @@ const envServerSchema = z.object({
   S3_KEY: requiredString,
   S3_SECRET: requiredString,
   S3_REGION: z.literal('eu-central-1'),
+  S3_BUCKET: requiredString,
   ATLAS_API_KEY: requiredString,
   MAPROULETTE_API_KEY: requiredString,
   BREVO_API_KEY: z.string().optional(),
@@ -50,7 +51,6 @@ const envScriptOnlySchemaPart = z.object({
     apiRootUrlByEnvironment.staging,
     apiRootUrlByEnvironment.production,
   ]),
-  S3_BUCKET: requiredString,
   S3_UPLOAD_FOLDER: z.enum(['production', 'staging', 'localdev']),
   /** Local `.env` only: `bun run static-datasets-update -- --env=staging` requires this (no fallback to ATLAS_API_KEY). */
   ATLAS_API_KEY_STAGING: z.string().optional(),

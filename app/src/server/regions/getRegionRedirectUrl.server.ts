@@ -1,4 +1,3 @@
-import { searchParamsRegistry } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/searchParamsRegistry'
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
 import { migrateUrl } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl'
 import type {
@@ -6,19 +5,46 @@ import type {
   MapDataCategoryParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { mergeCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/utils/mergeCategoriesConfig'
-import { configs } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { parse as parseConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/parse'
 import { serialize as serializeConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/serialize'
 import {
   parseMapParam,
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
-import { staticRegion } from '@/data/regions.const'
+import { getRegion } from '@/server/regions/queries/getRegion.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
+import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 /** Returns URL to redirect to, or null if no redirect. */
+function sortedSearchParamEntries(searchParams: URLSearchParams) {
+  return [...searchParams.entries()].sort(([a], [b]) => a.localeCompare(b))
+}
+
+function searchParamsSemanticallyEqual(a: URLSearchParams, b: URLSearchParams) {
+  const aEntries = sortedSearchParamEntries(a)
+  const bEntries = sortedSearchParamEntries(b)
+  if (aEntries.length !== bEntries.length) return false
+  return aEntries.every(([key, value], index) => {
+    const [otherKey, otherValue] = bEntries[index]!
+    return key === otherKey && value === otherValue
+  })
+}
+
 function redirectIfChanged(oldUrl: string, newUrl: string) {
-  if (oldUrl === newUrl) return null
-  return newUrl
+  const oldParsed = new URL(oldUrl)
+  const newParsed = new URL(newUrl)
+  if (
+    oldParsed.pathname === newParsed.pathname &&
+    searchParamsSemanticallyEqual(oldParsed.searchParams, newParsed.searchParams) &&
+    oldParsed.hash === newParsed.hash
+  ) {
+    return null
+  }
+  return new URL(
+    `${newParsed.pathname}${newParsed.search}${newParsed.hash}`,
+    oldParsed.origin,
+  ).toString()
 }
 
 function getRenamedRegionSlug(slug: string) {
@@ -109,33 +135,37 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
 
 /**
  * Returns URL to redirect to, or null if no redirect.
- * Called from `/regionen/$regionSlug` route's beforeLoad.
+ * Called from `/regionen/$regionSlug` via getRegionPageDataFn in the route loader
+ * (not beforeLoad — search-param navigations must not re-run this).
  *
  * Routes that trigger this:
  * - `/regionen/berlin` → normalizes search params (map, config, etc.)
  * - `/regionen/bb-ag` → redirects to `/regionen/bb-pg` (region rename)
  *
- * Routes that DON'T trigger this (no route match, so beforeLoad never runs):
+ * Routes that DON'T trigger this (different or no route match, so this loader never runs):
  * - `/regionen/` → handled by `regionen/index.tsx`
- * - `/regionen/berlin/foo` → no route matches, 404
+ * - `/regionen/berlin/foo` → no route matches (`$regionSlug` is a single segment), 404
  */
-export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
+export async function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
   const absoluteUrl = new URL(locationHref, import.meta.env.VITE_APP_ORIGIN).toString()
   const slug = getRenamedRegionSlug(regionSlug)
 
-  const existingSlugs = staticRegion.map((r) => r.slug)
-  if (!existingSlugs.includes(slug)) return null
+  let region: TRegion | null = null
+  try {
+    region = await getRegion({ slug })
+  } catch {
+    return { redirectUrl: null, region: null }
+  }
 
   let migratedUrl = absoluteUrl
-  // If slug was renamed, update the URL pathname
   if (slug !== regionSlug) {
     const u = new URL(absoluteUrl)
     u.pathname = u.pathname.replace(regionSlug, slug)
     migratedUrl = u.toString()
   }
 
-  // Migrate URL
-  migratedUrl = migrateUrl(migratedUrl)
+  // URL param migrations need the region's current category list to rebuild defaults.
+  migratedUrl = migrateUrl(migratedUrl, { categories: region.categories })
 
   // Remove unused params
   const usedParams = ['v', ...Object.values(searchParamsRegistry)]
@@ -145,9 +175,6 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
       u.searchParams.delete(key)
     }
   })
-
-  const region = staticRegion.find((r) => r.slug === slug)
-  if (!region) return null
 
   // Make sure param 'map' is valid
   const map = u.searchParams.get('map')
@@ -162,19 +189,21 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
     const configParam = u.searchParams.get('config')
     const checksum = configParam?.split('.')[0]
     const simplifiedConfig =
-      configParam && checksum && checksum in configs
-        ? configs[checksum as keyof typeof configs]
-        : undefined
+      configParam && checksum ? await resolveConfigTemplate(checksum, freshConfig) : undefined
     if (simplifiedConfig && configParam) {
-      const parsedConfig = parseConfig(configParam, simplifiedConfig as MapDataCategoryConfig[])
-      const migratedConfig = migrateConfigCategoryIds(parsedConfig)
-      const mergedConfig = mergeCategoriesConfig({
-        freshConfig,
-        urlConfig: migratedConfig,
-      })
-      const finalConfig = ensureAtLeastOneStyleActive(mergedConfig)
-      const newConfigParam = serializeConfig(finalConfig)
-      u.searchParams.set('config', newConfigParam)
+      try {
+        const parsedConfig = parseConfig(configParam, simplifiedConfig as MapDataCategoryConfig[])
+        const migratedConfig = migrateConfigCategoryIds(parsedConfig)
+        const mergedConfig = mergeCategoriesConfig({
+          freshConfig,
+          urlConfig: migratedConfig,
+        })
+        const finalConfig = ensureAtLeastOneStyleActive(mergedConfig)
+        const newConfigParam = serializeConfig(finalConfig)
+        u.searchParams.set('config', newConfigParam)
+      } catch {
+        resetConfig()
+      }
     } else {
       resetConfig()
     }
@@ -182,33 +211,13 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
     resetConfig()
   }
 
-  // Ensure canonical param ordering for stable URLs.
-  // IMPORTANT: keep the order untouched when volatile map interaction params are present.
-  // These params change frequently (e.g. feature selection, calculator draw session, note dialog position) and
-  // reordering them can trigger same-route redirects, which can cause full-page pending transitions.
-  const hasVolatileMapParam = [
-    searchParamsRegistry.f,
-    searchParamsRegistry.draw,
-    searchParamsRegistry.data,
-    searchParamsRegistry.atlasNote,
-    searchParamsRegistry.osmNote,
-    searchParamsRegistry.atlasNotesFilter,
-    searchParamsRegistry.osmNotesFilter,
-  ].some((param) => u.searchParams.has(param))
-  if (!hasVolatileMapParam) {
-    const params = [...Object.values(searchParamsRegistry), 'v']
-    params.forEach((param) => {
-      if (u.searchParams.has(param)) {
-        const value = u.searchParams.get(param)
-        if (value !== null) {
-          u.searchParams.delete(param)
-          u.searchParams.append(param, value)
-        }
-      }
-    })
-  }
-
+  // NOTE: we intentionally do NOT reorder params to a canonical order. redirectIfChanged compares
+  // params semantically (order-independent), so reordering only produced cosmetic URL churn — and it
+  // was the main source of same-route 301 redirects during map interaction (the old
+  // `hasVolatileMapParam` skip-list was a bandaid for exactly that). Redirects here are now limited
+  // to real migrations: slug rename, config/map normalization, and unknown-param removal.
   migratedUrl = u.toString()
 
-  return redirectIfChanged(absoluteUrl, migratedUrl)
+  const redirectUrl = redirectIfChanged(absoluteUrl, migratedUrl)
+  return { redirectUrl, region: redirectUrl ? null : region }
 }

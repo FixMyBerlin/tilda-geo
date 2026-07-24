@@ -41,7 +41,6 @@ export const NavigationDesktopMenu = ({ menuItems, logo }: Props) => {
                       <MenuItem key={gi}>
                         {({ focus }) => (
                           <Link
-                            // @ts-expect-error How to solve this with TS?…
                             to={item.to}
                             hash={item.hash}
                             className={twJoin(

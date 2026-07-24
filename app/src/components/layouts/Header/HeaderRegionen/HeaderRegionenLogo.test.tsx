@@ -1,44 +1,32 @@
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import { HeaderRegionenLogo } from './HeaderRegionenLogo'
 
-const { useLoaderData } = vi.hoisted(() => ({
-  useLoaderData: vi.fn(),
+const { useRegionMock } = vi.hoisted(() => ({
+  useRegionMock: vi.fn(),
 }))
 
-vi.mock('@tanstack/react-router', () => ({
-  getRouteApi: () => ({
-    useLoaderData,
-  }),
-}))
-
-vi.mock('@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion', () => ({
-  useStaticRegion: () => ({
-    name: 'Berlin',
-    fullName: 'Berlin Baumanalyse',
-    product: 'atlas',
-    logoPath: null,
-    externalLogoPath: null,
-    logoWhiteBackgroundRequired: false,
-  }),
+vi.mock('@/components/regionen/pageRegionSlug/regionUtils/useRegion', () => ({
+  useRegion: () => useRegionMock(),
 }))
 
 vi.mock('@/components/shared/Img', () => ({
   Img: () => <div>Img</div>,
 }))
 
-vi.mock('@/components/shared/text/Pill', () => ({
-  Pill: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-}))
+const privateRegion = {
+  name: 'Berlin',
+  fullName: 'Berlin Baumanalyse',
+  product: 'analysis' as const,
+  status: 'PRIVATE' as const,
+  logoPath: null,
+  logoWhiteBackgroundRequired: false,
+}
 
 describe('HeaderRegionenLogo', () => {
-  test('renders for unauthorized private region without throwing', () => {
-    useLoaderData.mockReturnValue({
-      authorized: false,
-      region: { status: 'PRIVATE' },
-    })
+  test('renders for private region without throwing', () => {
+    useRegionMock.mockReturnValue(privateRegion)
 
     render(<HeaderRegionenLogo />)
 
@@ -46,10 +34,7 @@ describe('HeaderRegionenLogo', () => {
   })
 
   test('renders lock and Deaktiviert label for deactivated region', () => {
-    useLoaderData.mockReturnValue({
-      authorized: true,
-      region: { status: 'DEACTIVATED' },
-    })
+    useRegionMock.mockReturnValue({ ...privateRegion, status: 'DEACTIVATED' })
 
     const { container } = render(<HeaderRegionenLogo />)
 

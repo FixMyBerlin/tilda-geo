@@ -1,8 +1,8 @@
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { RegionTeaser } from './RegionTeaser'
 
 type Props = {
-  publicRegions: RegionWithAdditionalData[]
+  publicRegions: TRegion[]
 }
 
 export const RegionListPublic = ({ publicRegions }: Props) => {

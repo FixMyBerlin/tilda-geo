@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
+import { AdminPanelTrigger } from './AdminPanelTrigger'
 import { ContactProfilePromptModal } from './ContactProfilePromptModal'
 import { RemoveCookie } from './RemoveCookie'
 import { UserLoggedIn } from './UserLoggedIn'
@@ -10,6 +11,7 @@ export const User = () => {
   const user = data?.user ?? null
   return (
     <>
+      {user ? <AdminPanelTrigger variant="header" /> : null}
       {user ? <UserLoggedIn user={user} /> : <UserLoggedOut />}
       {user ? <ContactProfilePromptModal key={user.id} user={user} /> : null}
       <RemoveCookie />

@@ -1,10 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
-import { getRegionsWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
+import { getRegions } from '@/server/regions/queries/getRegions.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { getCurrentUser } from '@/server/users/queries/getCurrentUser.server'
 
-const emptyRegions: RegionWithAdditionalData[] = []
+const emptyRegions: TRegion[] = []
 
 export const getRegionenIndexLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
   const headers = getRequestHeaders()
@@ -12,18 +12,18 @@ export const getRegionenIndexLoaderFn = createServerFn({ method: 'GET' }).handle
 
   const [allRegionsForUser, nonPublicRegions, publicRegions] = await Promise.all([
     user?.id && user?.role
-      ? getRegionsWithAdditionalData({
-          where: { Membership: { some: { userId: user.id } } },
+      ? getRegions({
+          where: { memberships: { some: { userId: user.id } } },
         })
       : emptyRegions,
     user?.role === 'ADMIN'
-      ? getRegionsWithAdditionalData({
+      ? getRegions({
           where: {
             OR: [{ promoted: false }, { promoted: true, status: { not: 'PUBLIC' } }],
           },
         })
       : emptyRegions,
-    getRegionsWithAdditionalData({
+    getRegions({
       where: { promoted: true, status: 'PUBLIC' },
     }),
   ])

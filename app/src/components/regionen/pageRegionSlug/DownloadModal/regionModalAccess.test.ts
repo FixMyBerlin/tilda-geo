@@ -1,15 +1,49 @@
 import { describe, expect, test } from 'vitest'
-import { staticRegion } from '@/data/regions.const'
+import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
+import type { RegionForDatasetDerivation } from '@/components/regionen/pageRegionSlug/regionDatasets/deriveRegionDatasetsFromCategories'
 import { getRegionModalAccess, getRegionModalDatasets } from './regionModalAccess'
 
-const bibi = staticRegion.find((region) => region.slug === 'bibi')
-const parkraumBerlin = staticRegion.find((region) => region.slug === 'parkraum-berlin')
+const bibiExports = [
+  'bikelanes',
+  'bikeroutes',
+  'roads',
+  'roadsPathClasses',
+  'poiClassification',
+  'places',
+  'publicTransport',
+  'parkings',
+  'parkings_no',
+  'parkings_separate',
+  'off_street_parking_areas',
+  'off_street_parking_points',
+] as [ExportId, ...ExportId[]]
+
+const bibi: RegionForDatasetDerivation = {
+  categories: [
+    'poi',
+    'bikelanes',
+    'roads',
+    'surface',
+    'lit',
+    'parkingLars',
+    'parkingTilda',
+    'mapillary',
+  ],
+  exports: bibiExports,
+}
+
+const parkraumBerlin: RegionForDatasetDerivation = {
+  categories: ['parkingTilda', 'parkingLars', 'mapillary'],
+  exports: null,
+}
+
+const allRegionExportTables = bibiExports
+
+const testRegions: RegionForDatasetDerivation[] = [bibi, parkraumBerlin]
 
 describe('getRegionModalDatasets', () => {
   test('splits downloadable and other datasets for bibi', () => {
-    if (!bibi) throw new Error('bibi region not found')
-
-    const { downloadable, other, all } = getRegionModalDatasets(bibi)
+    const { downloadable, other, all } = getRegionModalDatasets(bibi, allRegionExportTables)
 
     expect(all.length).toBeGreaterThan(0)
     expect(downloadable.length).toBeGreaterThan(0)
@@ -21,9 +55,10 @@ describe('getRegionModalDatasets', () => {
   })
 
   test('marks all datasets as non-downloadable when exports is null', () => {
-    if (!parkraumBerlin) throw new Error('parkraum-berlin region not found')
-
-    const { downloadable, other, all } = getRegionModalDatasets(parkraumBerlin)
+    const { downloadable, other, all } = getRegionModalDatasets(
+      parkraumBerlin,
+      allRegionExportTables,
+    )
 
     expect(downloadable).toEqual([])
     expect(other.length).toBe(all.length)
@@ -33,9 +68,7 @@ describe('getRegionModalDatasets', () => {
 
 describe('getRegionModalAccess', () => {
   test('shows documentation button when user lacks permissions', () => {
-    if (!bibi) throw new Error('bibi region not found')
-
-    const access = getRegionModalAccess(bibi, false)
+    const access = getRegionModalAccess(bibi, false, allRegionExportTables)
 
     expect(access.showDownloadableSectionInDownloadModal).toBe(false)
     expect(access.showOtherDatasetsSectionInDownloadModal).toBe(false)
@@ -44,9 +77,7 @@ describe('getRegionModalAccess', () => {
   })
 
   test('shows download sections and hides documentation button for permitted user with exports', () => {
-    if (!bibi) throw new Error('bibi region not found')
-
-    const access = getRegionModalAccess(bibi, true)
+    const access = getRegionModalAccess(bibi, true, allRegionExportTables)
 
     expect(access.showDownloadableSectionInDownloadModal).toBe(true)
     expect(access.docsLinksVisibleInDownloadModal).toBe(true)
@@ -54,9 +85,7 @@ describe('getRegionModalAccess', () => {
   })
 
   test('shows documentation button when exports is null', () => {
-    if (!parkraumBerlin) throw new Error('parkraum-berlin region not found')
-
-    const access = getRegionModalAccess(parkraumBerlin, true)
+    const access = getRegionModalAccess(parkraumBerlin, true, allRegionExportTables)
 
     expect(access.showDownloadableSectionInDownloadModal).toBe(false)
     expect(access.showOtherDatasetsSectionInDownloadModal).toBe(false)
@@ -64,9 +93,7 @@ describe('getRegionModalAccess', () => {
   })
 
   test('other section requires downloadable section', () => {
-    if (!bibi) throw new Error('bibi region not found')
-
-    const access = getRegionModalAccess(bibi, true)
+    const access = getRegionModalAccess(bibi, true, allRegionExportTables)
 
     if (access.showOtherDatasetsSectionInDownloadModal) {
       expect(access.showDownloadableSectionInDownloadModal).toBe(true)
@@ -75,13 +102,13 @@ describe('getRegionModalAccess', () => {
   })
 })
 
-describe('getRegionModalAccess staticRegion matrix', () => {
+describe('getRegionModalAccess region matrix', () => {
   test.each(
-    staticRegion.flatMap((region) =>
+    testRegions.flatMap((region) =>
       [true, false].map((hasPermissions) => [region, hasPermissions] as const),
     ),
-  )('aligns doc surfaces for %s (permissions=%s)', (region, hasPermissions) => {
-    const access = getRegionModalAccess(region, hasPermissions)
+  )('aligns doc surfaces for region (permissions=%s)', (region, hasPermissions) => {
+    const access = getRegionModalAccess(region, hasPermissions, allRegionExportTables)
 
     expect(access.showDocumentationButton && access.docsLinksVisibleInDownloadModal).toBe(false)
 
