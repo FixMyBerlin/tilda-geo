@@ -25,7 +25,7 @@ const maprouletteSearchSchema = z.strictObject({
 })
 
 export const Route = createFileRoute('/api/maproulette/data/$projectKey')({
-  ssr: true,
+  ssr: false,
   params: {
     parse: (rawParams) => maprouletteParamsSchema.parse(rawParams),
   },

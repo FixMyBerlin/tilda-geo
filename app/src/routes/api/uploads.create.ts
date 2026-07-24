@@ -22,7 +22,7 @@ const Schema = z.object({
 })
 
 export const Route = createFileRoute('/api/uploads/create')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       POST: async ({ request }) => {

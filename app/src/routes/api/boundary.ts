@@ -10,7 +10,7 @@ const BoundarySearchSchema = z.object({
 })
 
 export const Route = createFileRoute('/api/boundary')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request }) => {

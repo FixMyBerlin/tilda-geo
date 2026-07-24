@@ -17,7 +17,7 @@ const MaprouletteSchema = z.object({
 })
 
 export const Route = createFileRoute('/api/maproulette/data/test_tag_fix_cycleway-shared')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request }) => {

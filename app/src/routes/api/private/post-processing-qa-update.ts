@@ -191,7 +191,7 @@ async function qaUpdate() {
 }
 
 export const Route = createFileRoute('/api/private/post-processing-qa-update')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: ({ request }) => {

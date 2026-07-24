@@ -158,7 +158,7 @@ const createExportFileResponseStream = ({
 }
 
 export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
-  ssr: true,
+  ssr: false,
   params: {
     parse: (rawParams) => exportParamsSchema.parse(rawParams),
   },

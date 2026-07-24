@@ -28,7 +28,7 @@ async function warmRegions(regions: StaticRegion[]) {
 }
 
 export const Route = createFileRoute('/api/private/warm-cache')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request }) => {

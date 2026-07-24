@@ -11,7 +11,7 @@ import { corsHeaders } from '@/server/api/util/cors'
 import db from '@/server/db.server'
 
 export const Route = createFileRoute('/api/uploads/$slug')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request, params }) => {

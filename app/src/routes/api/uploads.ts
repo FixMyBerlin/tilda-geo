@@ -3,7 +3,7 @@ import { checkApiKey } from '@/server/api/util/checkApiKey.server'
 import db from '@/server/db.server'
 
 export const Route = createFileRoute('/api/uploads')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request }) => {

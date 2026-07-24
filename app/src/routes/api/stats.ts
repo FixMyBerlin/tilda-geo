@@ -28,7 +28,7 @@ const DbStatSchema = z.object({
 const DbStatsSchema = z.array(DbStatSchema)
 
 export const Route = createFileRoute('/api/stats')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {

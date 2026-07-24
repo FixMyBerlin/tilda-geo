@@ -8,7 +8,7 @@ const corsHeaders = {
 }
 
 export const Route = createFileRoute('/api/processing-dates')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {

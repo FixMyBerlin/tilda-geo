@@ -6,7 +6,7 @@ import { corsHeaders } from '@/server/api/util/cors'
 import db from '@/server/db.server'
 
 export const Route = createFileRoute('/api/regions/$regionSlug/uploads-csv')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request, params }) => {

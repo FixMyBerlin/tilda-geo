@@ -9,7 +9,7 @@ const Schema = z.object({
 })
 
 export const Route = createFileRoute('/api/private/generate-maproulette-tasks')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: ({ request }) => {

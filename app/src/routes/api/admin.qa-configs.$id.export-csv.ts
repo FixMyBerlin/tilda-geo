@@ -12,7 +12,7 @@ const qaConfigExportParamsSchema = z.object({
 })
 
 export const Route = createFileRoute('/api/admin/qa-configs/$id/export-csv')({
-  ssr: true,
+  ssr: false,
   params: {
     parse: (rawParams) => qaConfigExportParamsSchema.parse(rawParams),
   },

@@ -67,7 +67,7 @@ function buildPoints(notes: NoteWithComments[], userNameById: Record<string, str
 }
 
 export const Route = createFileRoute('/api/notes/$regionSlug/download')({
-  ssr: true,
+  ssr: false,
   validateSearch: (search) => notesDownloadSearchSchema.parse(search),
   server: {
     handlers: {

@@ -29,7 +29,7 @@ const maprouletteChallengeStatistic = z.array(
 )
 
 export const Route = createFileRoute('/api/maproulette/statistic-proxy/$challengeId')({
-  ssr: true,
+  ssr: false,
   params: {
     parse: (rawParams) => maprouletteChallengeParamsSchema.parse(rawParams),
   },

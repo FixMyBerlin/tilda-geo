@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 export const Route = createFileRoute('/api/processing-dates-mapillary')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {
