@@ -27,7 +27,7 @@ export const Route = createFileRoute('/api/uploads/$slug')({
         }
         const { baseName, extension, usedFallback } = parseResult.result
 
-        const upload = await db.upload.findFirst({
+        const upload = await db.mapDatasetUpload.findFirst({
           where: { slug: baseName },
           include: { regions: { select: { id: true } } },
         })

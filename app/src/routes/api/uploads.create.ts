@@ -2,7 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { MapRenderFormatEnum } from '@/prisma/generated/client'
 import { checkApiKey, parseData } from '@/server/api/util/checkApiKey.server'
+import { runWithAuditContextAsync, systemApiAuditContext } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
+import { layerConfigsCreateFromConfigs } from '@/server/uploads/mapDatasetLayerConfig.server'
+import {
+  mapDatasetUploadConfigsSchema,
+  mapDatasetUploadConfigsToPrismaJson,
+} from '@/server/uploads/mapDatasetUploadConfigs.schema'
 
 const Schema = z.object({
   apiKey: z.string().nullish(),
@@ -10,7 +16,7 @@ const Schema = z.object({
   regionSlugs: z.array(z.string()),
   isPublic: z.boolean(),
   hideDownloadLink: z.boolean(),
-  configs: z.array(z.record(z.string(), z.any())),
+  configs: mapDatasetUploadConfigsSchema,
   mapRenderFormat: z.enum(MapRenderFormatEnum),
   mapRenderUrl: z.string(),
   pmtilesUrl: z.string().nullish(),
@@ -19,6 +25,12 @@ const Schema = z.object({
   externalSourceUrl: z.string().nullish(),
   cacheTtlSeconds: z.number().nullish(),
   systemLayer: z.boolean(),
+  // File-level metadata columns on MapDatasetUpload
+  attributionHtml: z.string().nullish(),
+  dataSourceMarkdown: z.string().nullish(),
+  dataUpdatedNote: z.string().nullish(),
+  licence: z.string().nullish(),
+  licenceOsmCompatible: z.string().nullish(),
 })
 
 export const Route = createFileRoute('/api/uploads/create')({
@@ -47,18 +59,23 @@ export const Route = createFileRoute('/api/uploads/create')({
           externalSourceUrl,
           cacheTtlSeconds,
           systemLayer,
+          attributionHtml,
+          dataSourceMarkdown,
+          dataUpdatedNote,
+          licence,
+          licenceOsmCompatible,
         } = data
 
-        await db.upload.deleteMany({ where: { slug: uploadSlug } })
+        await runWithAuditContextAsync(systemApiAuditContext(request.headers), async () => {
+          await db.mapDatasetUpload.deleteMany({ where: { slug: uploadSlug } })
 
-        try {
-          await db.upload.create({
+          await db.mapDatasetUpload.create({
             data: {
               slug: uploadSlug,
               regions: { connect: regionSlugs.map((slug) => ({ slug })) },
               public: isPublic,
               hideDownloadLink,
-              configs,
+              configs: mapDatasetUploadConfigsToPrismaJson(configs),
               mapRenderFormat,
               mapRenderUrl,
               pmtilesUrl: pmtilesUrl ?? null,
@@ -67,12 +84,16 @@ export const Route = createFileRoute('/api/uploads/create')({
               externalSourceUrl: externalSourceUrl ?? null,
               cacheTtlSeconds: cacheTtlSeconds ?? null,
               systemLayer,
+              attributionHtml: attributionHtml ?? null,
+              dataSourceMarkdown: dataSourceMarkdown ?? null,
+              dataUpdatedNote: dataUpdatedNote ?? null,
+              licence: licence ?? null,
+              licenceOsmCompatible: licenceOsmCompatible ?? null,
+              // Sync normalized layerConfigs rows from configs[] for the admin UI.
+              layerConfigs: { create: layerConfigsCreateFromConfigs(configs) },
             },
           })
-        } catch (e: unknown) {
-          const message = e instanceof Error ? e.message : String(e)
-          return Response.json({ statusText: 'Bad Request', message }, { status: 400 })
-        }
+        })
 
         return Response.json({ statusText: 'Created' }, { status: 201 })
       },

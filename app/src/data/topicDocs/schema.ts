@@ -24,25 +24,21 @@ const topicDocAttributeFormatSchema = z.enum([
 
 const topicDocAttributePurposeSchema = z.enum(['experimentation', 'processing', 'qa'])
 
-const chapterLinkSchema = z
-  .object({
-    chapterId: z.string().min(1),
-  })
-  .strict()
+const chapterLinkSchema = z.strictObject({
+  chapterId: z.string().min(1),
+})
 
 const valueDocNodeSchema = z.lazy(() =>
-  z
-    .object({
-      value: z.string().min(1),
-      label: textSchema,
-      description: textSchema.optional(),
-      chapterRefs: z.array(chapterLinkSchema).optional(),
-    })
-    .strict(),
+  z.strictObject({
+    value: z.string().min(1),
+    label: textSchema,
+    description: textSchema.optional(),
+    chapterRefs: z.array(chapterLinkSchema).optional(),
+  }),
 )
 
 const keyDocEntrySchema = z
-  .object({
+  .strictObject({
     key: z.string().min(1),
     format: topicDocAttributeFormatSchema.default('string'),
     label: textSchema.optional(),
@@ -54,7 +50,6 @@ const keyDocEntrySchema = z
     values: z.array(valueDocNodeSchema).optional(),
     purpose: topicDocAttributePurposeSchema.optional(),
   })
-  .strict()
   .refine(
     (attribute) => Boolean(attribute.ref || attribute.label || attribute.format === 'ignore'),
     {
@@ -88,35 +83,27 @@ const keyDocEntrySchema = z
     },
   )
 
-const topicDocsGroupSchema = z
-  .object({
-    groups: z.array(
-      z
-        .object({
-          id: z.string().min(1),
-          label: textSchema.optional(),
-          tables: z.array(z.string().min(1)).default([]),
-        })
-        .strict(),
-    ),
-  })
-  .strict()
+const topicDocsGroupSchema = z.strictObject({
+  groups: z.array(
+    z.strictObject({
+      id: z.string().min(1),
+      label: textSchema.optional(),
+      tables: z.array(z.string().min(1)).default([]),
+    }),
+  ),
+})
 
 // Required YAML block at the top of each `topic-docs/…/chapters/*.md` file (delimited by ---).
-export const topicDocsChapterFrontMatterSchema = z
-  .object({
-    title: textSchema,
-  })
-  .strict()
+export const topicDocsChapterFrontMatterSchema = z.strictObject({
+  title: textSchema,
+})
 
-export const topicDocsYamlSchema = z
-  .object({
-    title: textSchema,
-    summary: textSchema.optional(),
-    sourceIds: z.array(z.string().min(1)).default([]),
-    attributes: z.array(keyDocEntrySchema).min(1),
-  })
-  .strict()
+export const topicDocsYamlSchema = z.strictObject({
+  title: textSchema,
+  summary: textSchema.optional(),
+  sourceIds: z.array(z.string().min(1)).default([]),
+  attributes: z.array(keyDocEntrySchema).min(1),
+})
 
 export const topicDocsGroupsYamlSchema = topicDocsGroupSchema
 

@@ -2,13 +2,13 @@ import db from '../../src/server/db.server'
 
 const seedQaConfigs = async () => {
   const parkraumRegion = await db.region.findFirstOrThrow({
-    where: { slug: 'parkraum-berlin-euvm' },
+    where: { slug: 'dev-template-parkraum-city' },
   })
 
   await db.qaConfig.create({
     data: {
-      slug: 'euvm-parkraum-2025',
-      label: 'eUVM Parkraum 2025',
+      slug: 'dev-parkraum-qa-2025',
+      label: 'Parkraum QA (Dev)',
       isActive: true,
       mapTable: 'public.qa_parkings_euvm',
       mapAttribution: 'QA Data: tilda-geo.de',

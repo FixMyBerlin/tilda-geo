@@ -20,4 +20,4 @@ bun scripts/ELILayers/process.ts
 
 ## Manual Selection
 
-After running the script, manually select layers from the generated list and add them to your region configuration in `regions.const.ts`.
+After running the script, manually select layers from the generated list and add them to the region configuration via `/admin/regions`.

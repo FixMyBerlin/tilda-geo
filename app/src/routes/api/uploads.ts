@@ -10,7 +10,7 @@ export const Route = createFileRoute('/api/uploads')({
         const check = checkApiKey(request)
         if (!check.ok) return check.errorResponse
 
-        return Response.json(await db.upload.findMany())
+        return Response.json(await db.mapDatasetUpload.findMany())
       },
     },
   },
