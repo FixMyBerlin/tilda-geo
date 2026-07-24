@@ -1,20 +1,22 @@
-import { createParser, useQueryState } from 'nuqs'
-import { searchParamsRegistry } from './searchParamsRegistry'
-import { parseMapParam, serializeMapParam } from './utils/mapParam'
-import { mapParamFallback } from './utils/mapParamFallback.const'
+import { getMapParamFromSearch } from '@/shared/regionen/regionSearchSchemas'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useRegionSearchNavigation } from './useRegionSearchNavigation'
+import { serializeMapParam, type MapParam } from './utils/mapParam'
 
-const mapParamParser = createParser({
-  parse: (query) => parseMapParam(query),
-  serialize: (object) => serializeMapParam(object),
-})
-  .withOptions({ history: 'push', shallow: true })
-  .withDefault({
-    zoom: mapParamFallback.zoom,
-    lat: mapParamFallback.lat,
-    lng: mapParamFallback.lng,
-  })
+type SetMapParamOptions = {
+  history?: 'push' | 'replace'
+}
 
 export const useMapParam = () => {
-  const [mapParam, setMapParam] = useQueryState(searchParamsRegistry.map, mapParamParser)
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const mapParam = getMapParamFromSearch(search)
+
+  const setMapParam = (value: MapParam, options?: SetMapParamOptions) => {
+    updateSearch(
+      { [searchParamsRegistry.map]: serializeMapParam(value) },
+      { replace: options?.history === 'replace' },
+    )
+  }
+
   return { mapParam, setMapParam }
 }

@@ -1,47 +1,53 @@
-import { createParser, parseAsBoolean, parseAsJson, useQueryState } from 'nuqs'
-import { z } from 'zod'
-import { searchParamsRegistry } from './searchParamsRegistry'
-import { parseMapParam, serializeMapParam } from './utils/mapParam'
+import { useThrottler } from '@tanstack/react-pacer'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useRegionSearchNavigation } from './useRegionSearchNavigation'
+import { parseMapParam, serializeMapParam, type MapParam } from './utils/mapParam'
 
 export const useShowInternalNotesParam = () => {
-  const [showInternalNotesParam, setShowInternalNotesParam] = useQueryState(
-    searchParamsRegistry.atlasNotes,
-    parseAsBoolean.withDefault(false),
-  )
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const showInternalNotesParam = search[searchParamsRegistry.atlasNotes]
+
+  const setShowInternalNotesParam = (value: boolean) => {
+    // replace + drop the default (false) from the URL (matches old nuqs behavior).
+    updateSearch({ [searchParamsRegistry.atlasNotes]: value || undefined }, { replace: true })
+  }
+
   return { showInternalNotesParam, setShowInternalNotesParam }
 }
 
-const newInternalNoteMapParamParser = createParser({
-  parse: (query) => parseMapParam(query),
-  serialize: (object) => serializeMapParam(object),
-}).withOptions({
-  history: 'replace',
-  // Bugfix: Firefox breaks when zooming via scrool wheel due to too many events
-  throttleMs: 1000,
-})
-
 export const useNewInternalNoteMapParam = () => {
-  const [newInternalNoteMapParam, setNewInternalNoteMapParam] = useQueryState(
-    searchParamsRegistry.atlasNote,
-    newInternalNoteMapParamParser,
-  )
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const wire = search[searchParamsRegistry.atlasNote]
+  const newInternalNoteMapParam = wire ? parseMapParam(wire) : null
+
+  const commitPosition = (value: MapParam) => {
+    updateSearch({ [searchParamsRegistry.atlasNote]: serializeMapParam(value) }, { replace: true })
+  }
+
+  // useThrottler (not useThrottledCallback) so we can cancel the pending trailing write below.
+  const positionThrottler = useThrottler(commitPosition, { wait: 1000 })
+
+  const setNewInternalNoteMapParam = (value: MapParam | null) => {
+    if (value === null) {
+      // Cancel any pending trailing position write, otherwise closing the dialog would re-add the
+      // `atlasNote` param ~1s later and re-open the just-closed note.
+      positionThrottler.cancel()
+      updateSearch({ [searchParamsRegistry.atlasNote]: undefined }, { replace: true })
+      return
+    }
+    positionThrottler.maybeExecute(value)
+  }
+
   return { newInternalNoteMapParam, setNewInternalNoteMapParam }
 }
 
-export const zodInternalNotesFilterParam = z.object({
-  query: z.string().optional().nullable(),
-  completed: z.boolean().optional().nullable(),
-  user: z.string().optional().nullable(),
-  commented: z.boolean().optional().nullable(),
-  notReacted: z.boolean().optional().nullable(),
-})
-
 export const useInternalNotesFilterParam = () => {
-  const [internalNotesFilterParam, setInternalNotesFilterParam] = useQueryState(
-    searchParamsRegistry.atlasNotesFilter,
-    parseAsJson(zodInternalNotesFilterParam.parse).withOptions({
-      shallow: true,
-    }),
-  )
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const internalNotesFilterParam = search[searchParamsRegistry.atlasNotesFilter]
+
+  const setInternalNotesFilterParam = (value: typeof internalNotesFilterParam) => {
+    updateSearch({ [searchParamsRegistry.atlasNotesFilter]: value }, { replace: true })
+  }
+
   return { internalNotesFilterParam, setInternalNotesFilterParam }
 }

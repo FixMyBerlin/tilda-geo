@@ -1,36 +1,45 @@
-import { parseAsJson, useQueryState } from 'nuqs'
-import { z } from 'zod'
-import { searchParamsRegistry } from './searchParamsRegistry'
-
-const zodQaFilterParam = z.object({
-  users: z.array(z.string()).optional().nullable(),
-})
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useRegionSearchNavigation } from './useRegionSearchNavigation'
 
 export const useQaFilterParam = () => {
-  const [qaFilterParam, setQaFilterParam] = useQueryState(
-    searchParamsRegistry.qaFilter,
-    parseAsJson(zodQaFilterParam.parse).withOptions({
-      shallow: false, // Trigger server re-render when filter changes
-    }),
-  )
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const qaFilterParam = search[searchParamsRegistry.qaFilter]
 
+  const setQaFilterParam = (value: typeof qaFilterParam) => {
+    updateSearch({ [searchParamsRegistry.qaFilter]: value }, { replace: true })
+  }
+
+  // Use the functional updater (fresh `prev`) rather than the render-captured `qaFilterParam`, so
+  // rapid successive toggles compose correctly instead of each overwriting a stale snapshot.
   const toggleUser = (userId: string) => {
-    const currentUsers = qaFilterParam?.users || []
-    const isSelected = currentUsers.includes(userId)
-
-    if (isSelected) {
-      // Remove user
-      const newUsers = currentUsers.filter((id) => id !== userId)
-      setQaFilterParam({ ...qaFilterParam, users: newUsers.length > 0 ? newUsers : undefined })
-    } else {
-      // Add user
-      const newUsers = [...currentUsers, userId]
-      setQaFilterParam({ ...qaFilterParam, users: newUsers })
-    }
+    updateSearch(
+      (prev) => {
+        const current = prev[searchParamsRegistry.qaFilter]
+        const currentUsers = current?.users || []
+        const newUsers = currentUsers.includes(userId)
+          ? currentUsers.filter((id) => id !== userId)
+          : [...currentUsers, userId]
+        return {
+          [searchParamsRegistry.qaFilter]: {
+            ...current,
+            users: newUsers.length > 0 ? newUsers : undefined,
+          },
+        }
+      },
+      { replace: true },
+    )
   }
 
   const clearUsers = () => {
-    setQaFilterParam({ ...qaFilterParam, users: undefined })
+    updateSearch(
+      (prev) => ({
+        [searchParamsRegistry.qaFilter]: {
+          ...prev[searchParamsRegistry.qaFilter],
+          users: undefined,
+        },
+      }),
+      { replace: true },
+    )
   }
 
   return { qaFilterParam, setQaFilterParam, toggleUser, clearUsers }

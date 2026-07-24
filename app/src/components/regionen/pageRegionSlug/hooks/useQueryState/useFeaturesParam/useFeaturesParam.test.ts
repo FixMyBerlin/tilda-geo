@@ -2,7 +2,8 @@ import { pick } from 'es-toolkit/compat'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { describe, expect, test } from 'vitest'
 import type { UrlFeature } from '../types'
-import { convertToUrlFeature, serializeFeaturesParam } from './useFeaturesParam'
+import { serializeFeaturesParam } from './featuresParamCodec'
+import { convertToUrlFeature } from './useFeaturesParam'
 
 const allTestData = [
   // feature with string id and LineString geometry
