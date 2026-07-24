@@ -16,7 +16,13 @@ import type { Router } from '@/router'
 type AppLinkTo = LinkOptions<Router>['to']
 
 export type SubmitResult<T = Record<string, unknown>> =
-  | { success: true; message?: string; redirect?: AppLinkTo; search?: Record<string, unknown> }
+  | {
+      success: true
+      message?: string
+      redirect?: AppLinkTo
+      search?: Record<string, unknown>
+      resetValues?: T
+    }
   | {
       success: false
       message: string
@@ -46,19 +52,19 @@ function applyFieldErrors(
 }
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
-type FormProps<T extends z.ZodTypeAny> = {
+type FormProps<TValues extends Record<string, unknown>> = {
   actionBarRight?: ReactNode
-  defaultValues: z.input<T>
-  schema: T
-  onSubmit: (values: z.input<T>) => undefined | Promise<SubmitResult<z.input<T>> | undefined>
-  children: (form: FormApi<z.input<T>>) => ReactNode
+  defaultValues: TValues
+  schema: z.ZodTypeAny
+  onSubmit: (values: TValues) => undefined | Promise<SubmitResult<TValues> | undefined>
+  children: (form: FormApi<TValues>) => ReactNode
   className?: string
   submitLabel?: string
   submitClassName?: string
   showFormErrors?: boolean
 }
 
-export function Form<T extends z.ZodTypeAny>({
+export function Form<TValues extends Record<string, unknown>>({
   actionBarRight,
   defaultValues,
   schema,
@@ -68,7 +74,7 @@ export function Form<T extends z.ZodTypeAny>({
   showFormErrors = true,
   children,
   className,
-}: FormProps<T>) {
+}: FormProps<TValues>) {
   const navigate = useNavigate()
   const [submitMessage, setSubmitMessage] = useState<{
     type: 'success' | 'error'
@@ -76,13 +82,13 @@ export function Form<T extends z.ZodTypeAny>({
   } | null>(null)
 
   const form = useForm<
-    z.input<T>,
+    TValues,
     undefined,
-    FormValidateOrFn<z.input<T>>,
+    FormValidateOrFn<TValues>,
     undefined,
     undefined,
     undefined,
-    FormValidateOrFn<z.input<T>>,
+    FormValidateOrFn<TValues>,
     undefined,
     undefined,
     undefined,
@@ -91,15 +97,15 @@ export function Form<T extends z.ZodTypeAny>({
   >({
     defaultValues,
     validators: {
-      onChange: schema,
-      onSubmit: schema,
+      onChange: schema as FormValidateOrFn<TValues>,
+      onSubmit: schema as FormValidateOrFn<TValues>,
     },
     onSubmit: async ({ value }) => {
       setSubmitMessage(null)
       const result = await onSubmit(value)
       if (!result) return
       if (result.success) {
-        form.reset(value)
+        form.reset(result.resetValues ?? value)
         setSubmitMessage({ type: 'success', text: result.message ?? 'Gespeichert.' })
         if (result.redirect) {
           navigate({
@@ -131,7 +137,7 @@ export function Form<T extends z.ZodTypeAny>({
         form.handleSubmit()
       }}
     >
-      {children(form as FormApi<z.input<T>>)}
+      {children(form as FormApi<TValues>)}
 
       {showFormErrors ? (
         <form.Subscribe selector={(s) => s.errors}>
