@@ -1,13 +1,12 @@
 #!/usr/bin/env bun
+import { resolve } from 'node:path'
 import { $ } from 'bun'
 
 process.env.PATH = `/usr/local/bin:/opt/homebrew/bin:${process.env.HOME}/.docker/bin:${process.env.PATH ?? ''}`
 
-const root = (await $`git rev-parse --show-toplevel`.quiet()).text().trim()
-if (!root) {
-  console.error('Not inside a git repository.')
-  process.exit(1)
-}
+// Path-based root: during `git push`, husky sets GIT_DIR and `git rev-parse --show-toplevel`
+// from processing/ resolves to this package dir instead of the worktree/repo root.
+const root = resolve(import.meta.dir, '../..')
 
 const dockerCheck = await $`command -v docker`.quiet().nothrow()
 if (dockerCheck.exitCode !== 0) {

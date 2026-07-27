@@ -6,6 +6,7 @@ import type { StaticRegion } from '@/data/regions.const'
 import { staticRegion } from '@/data/regions.const'
 import { guardEndpoint } from '@/server/api/private/guardEndpoint'
 import { warmCache } from '@/server/api/private/warmCache'
+import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 
 const Schema = z.object({
   apiKey: z.string(),
@@ -31,6 +32,10 @@ export const Route = createFileRoute('/api/private/warm-cache')({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        // Full warming can take minutes with zero response bytes until complete.
+        // Bun's default ~10s idleTimeout otherwise closes the connection (empty reply).
+        extendBunRequestIdleTimeout(request, 0)
+
         const { access, response } = guardEndpoint(request, Schema)
         if (access === false) return response
 

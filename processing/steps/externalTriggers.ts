@@ -1,6 +1,23 @@
 import { isDev } from '../utils/isDev'
 import { params } from '../utils/parameters'
 
+/** Bun/Node connection failures that should retry while the app container restarts. */
+function isRetryableConnectionError(error: unknown) {
+  if (!(error instanceof Error)) return false
+
+  const message = error.message.toLowerCase()
+  return (
+    message.includes('econnreset') ||
+    message.includes('econnrefused') ||
+    message.includes('socket') ||
+    message.includes('connection') ||
+    // Bun: "Unable to connect. Is the computer able to access the url?"
+    message.includes('unable to connect') ||
+    // Bun: "Was there a typo in the url or port?"
+    message.includes('typo in the url')
+  )
+}
+
 export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
   const domain = isDev ? 'http://127.0.0.1:5173' : 'http://app:4000'
   const privateApiUrl = `${domain}/api/private/${endpoint}`
@@ -28,7 +45,7 @@ export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
     clearTimeout(timeoutId)
     if (!response.ok) {
       console.warn(
-        `[ERROR] Finishing up: ⚠️ Calling the ${endpoint} hook failed. This is likely due to the NextJS application not running.`,
+        `[ERROR] Finishing up: ⚠️ Calling the ${endpoint} hook failed. This is likely due to the app container not running.`,
         response.status,
       )
     } else {
@@ -41,15 +58,11 @@ export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
   } catch (error) {
     clearTimeout(timeoutId)
 
-    // Retry on connection errors (likely app container restarting)
-    const isConnectionError =
-      error instanceof Error &&
-      (error.name === 'AbortError' ||
-        error.message.includes('ECONNRESET') ||
-        error.message.includes('socket') ||
-        error.message.includes('connection'))
+    // Our AbortController timeout is not a transient connection blip — do not retry it.
+    const timedOutByUs =
+      error instanceof Error && error.name === 'AbortError' && controller.signal.aborted
 
-    if (isConnectionError && retryCount < maxRetries) {
+    if (!timedOutByUs && isRetryableConnectionError(error) && retryCount < maxRetries) {
       console.warn(
         `[ERROR] Finishing up: ⚠️ Failed to trigger ${endpoint} (attempt ${retryCount + 1}/${maxRetries + 1}). Retrying in ${retryDelayMs / 1000} seconds...`,
         error instanceof Error ? error.message : String(error),
@@ -59,14 +72,14 @@ export async function triggerPrivateApi(endpoint: string, retryCount = 0) {
     }
 
     // Log the error but don't crash the processing pipeline (no throw)
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (timedOutByUs) {
       console.warn(
         `[ERROR] Finishing up: ⚠️ Request to ${endpoint} timed out after ${timeoutMs / 1000 / 60} minutes`,
       )
     } else {
       console.warn(
         `[ERROR] Finishing up: ⚠️ Failed to trigger ${endpoint} after ${retryCount + 1} attempts. Operation was not triggered and will not run.`,
-        'Try callig it manually:',
+        'Try calling it manually:',
         redactedCurlCommand,
         error instanceof Error ? error.message : String(error),
       )
