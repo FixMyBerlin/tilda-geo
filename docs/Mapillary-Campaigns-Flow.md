@@ -12,9 +12,9 @@ The system uses Mapillary coverage data to create specialized campaigns that onl
 
 **Location:** `processing/pseudoTags/downloadPseudoTagsData.ts`
 
-- **Source:** External GitHub repository `vizsim/mapillary_coverage`
+- **Source:** https://data.vizsim.de/mapillary_coverage/ (produced by `vizsim/mapillary_coverage`)
 - **URL:** Defined in `processing/pseudoTags/mapillaryCoverageSource/source.const.ts`
-  - Current: `https://raw.githubusercontent.com/vizsim/mapillary_coverage/refs/heads/main/output/germany_osm-highways_mp-coverage_latest.csv`
+  - Current: `https://data.vizsim.de/mapillary_coverage/germany_osm-highways_mp-coverage_latest.csv`
 - **Format:** CSV with columns:
   - `osm_id` (Number): OSM way ID
   - `mapillary_coverage` (Enum: `'regular' | 'pano'`): Coverage type
@@ -26,7 +26,7 @@ The system uses Mapillary coverage data to create specialized campaigns that onl
 
 **External Processing:**
 
-- The source repository (`vizsim/mapillary_coverage`) processes Mapillary tiles for sequences in Germany
+- The upstream repository (`vizsim/mapillary_coverage`) processes Mapillary tiles for sequences in Germany and publishes output to data.vizsim.de
 - Matches them to OSM roads data using a fixed buffer
 - Includes ways where ≥60% has Mapillary coverage
 
@@ -411,7 +411,7 @@ When a user clicks on a feature in the map, the inspector shows campaign informa
 ```mermaid
 graph TB
     subgraph A["A: Data Processing Pipeline"]
-        A1[External Source<br/>vizsim/mapillary_coverage] --> A2[CSV Download<br/>downloadPseudoTagsData.ts]
+        A1[External Source<br/>data.vizsim.de/mapillary_coverage] --> A2[CSV Download<br/>downloadPseudoTagsData.ts]
         A2 --> A3[CSV File<br/>mapillary_coverage.csv]
         A3 --> A4[LUA Processing<br/>roads_bikelanes.lua]
         A4 --> A5[SQL Cleanup<br/>3_cleanup_todos_lines.sql]
