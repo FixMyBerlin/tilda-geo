@@ -298,7 +298,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'permissive',
@@ -3315,7 +3315,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'permissive',
@@ -3641,7 +3641,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -4290,7 +4290,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -5516,7 +5516,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -7249,7 +7249,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -8079,7 +8079,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',

@@ -126,7 +126,7 @@ const data = {
         type: 'string',
         format: {
           yes: 'Öffentlich',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           permissive: 'Öffentliche Nutzung geduldet',
           private: 'Privat',
         },
@@ -1310,7 +1310,7 @@ const data = {
         type: 'string',
         format: {
           yes: 'Öffentlich',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           permissive: 'Öffentliche Nutzung geduldet',
           private: 'Privat',
           public: 'Öffentlich (explizit)',
@@ -1426,7 +1426,7 @@ const data = {
         type: 'string',
         format: {
           private: 'Privat',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           destination: 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
           employees: 'Mitarbeiter',
           permissive: 'Öffentliche Nutzung geduldet',
@@ -1695,7 +1695,7 @@ const data = {
         type: 'string',
         format: {
           private: 'Privat',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           destination: 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
           employees: 'Mitarbeiter',
           permissive: 'Öffentliche Nutzung geduldet',
@@ -2182,7 +2182,7 @@ const data = {
         type: 'string',
         format: {
           private: 'Privat',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           destination: 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
           employees: 'Mitarbeiter',
           permissive: 'Öffentliche Nutzung geduldet',
@@ -2748,7 +2748,7 @@ const data = {
         type: 'string',
         format: {
           private: 'Privat',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           destination: 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
           employees: 'Mitarbeiter',
           permissive: 'Öffentliche Nutzung geduldet',
@@ -3068,7 +3068,7 @@ const data = {
         type: 'string',
         format: {
           private: 'Privat',
-          customers: 'Kunden',
+          customers: 'Kund:innen',
           destination: 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
           employees: 'Mitarbeiter',
           permissive: 'Öffentliche Nutzung geduldet',

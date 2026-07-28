@@ -52,7 +52,7 @@ const data = {
   'atlas_bicycleParking--access_cargo_bike--key': 'Zugang Lastenrad',
   'atlas_bicycleParking--access_cargo_bike=yes': 'Zugelassen',
   'atlas_bicycleParking--access--key': 'Zugang',
-  'atlas_bicycleParking--access=customers': 'Kunden',
+  'atlas_bicycleParking--access=customers': 'Kund:innen',
   'atlas_bicycleParking--access=permissive': 'Öffentliche Nutzung geduldet',
   'atlas_bicycleParking--access=private': 'Privat',
   'atlas_bicycleParking--access=yes': 'Öffentlich',
@@ -759,7 +759,7 @@ const data = {
   'atlas_boundaries--wikidata--key': 'Wikidata',
   'atlas_boundaries--wikipedia--key': 'Wikipedia',
   'atlas_landuse--access--key': 'Zugang',
-  'atlas_landuse--access=customers': 'Kunden',
+  'atlas_landuse--access=customers': 'Kund:innen',
   'atlas_landuse--access=no': 'Kein Zugang',
   'atlas_landuse--access=permissive': 'Öffentliche Nutzung geduldet',
   'atlas_landuse--access=private': 'Privat',
@@ -1845,7 +1845,7 @@ const data = {
   'tilda_parkings_no--_staggered_original_capacity--key':
     '(Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)',
   'tilda_parkings_no--access--key': 'Zugang',
-  'tilda_parkings_no--access=customers': 'Kunden',
+  'tilda_parkings_no--access=customers': 'Kund:innen',
   'tilda_parkings_no--access=delivery': 'Lieferverkehr',
   'tilda_parkings_no--access=destination': 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
   'tilda_parkings_no--access=employees': 'Mitarbeiter',
@@ -2090,7 +2090,7 @@ const data = {
   'tilda_parkings_no--traffic_sign--key': 'Verkehrszeichen',
   'tilda_parkings_no--zone--key': 'Parkzone',
   'tilda_parkings_off_street_quantized--access--key': 'Zugang',
-  'tilda_parkings_off_street_quantized--access=customers': 'Kunden',
+  'tilda_parkings_off_street_quantized--access=customers': 'Kund:innen',
   'tilda_parkings_off_street_quantized--access=delivery': 'Lieferverkehr',
   'tilda_parkings_off_street_quantized--access=destination':
     'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
@@ -2221,7 +2221,7 @@ const data = {
   'tilda_parkings_off_street_quantized--traffic_sign--key': 'Verkehrszeichen',
   'tilda_parkings_off_street_quantized--zone--key': 'Parkzone',
   'tilda_parkings_off_street--access--key': 'Zugang',
-  'tilda_parkings_off_street--access=customers': 'Kunden',
+  'tilda_parkings_off_street--access=customers': 'Kund:innen',
   'tilda_parkings_off_street--access=delivery': 'Lieferverkehr',
   'tilda_parkings_off_street--access=destination':
     'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
@@ -2404,7 +2404,7 @@ const data = {
   'tilda_parkings_quantized--_staggered_original_capacity--key':
     '(Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)',
   'tilda_parkings_quantized--access--key': 'Zugang',
-  'tilda_parkings_quantized--access=customers': 'Kunden',
+  'tilda_parkings_quantized--access=customers': 'Kund:innen',
   'tilda_parkings_quantized--access=delivery': 'Lieferverkehr',
   'tilda_parkings_quantized--access=destination': 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
   'tilda_parkings_quantized--access=employees': 'Mitarbeiter',
@@ -2604,7 +2604,7 @@ const data = {
   'tilda_parkings--_staggered_original_capacity--key':
     '(Intern) Ursprüngliche Kapazität (vor Staggered-Anpassung)',
   'tilda_parkings--access--key': 'Zugang',
-  'tilda_parkings--access=customers': 'Kunden',
+  'tilda_parkings--access=customers': 'Kund:innen',
   'tilda_parkings--access=delivery': 'Lieferverkehr',
   'tilda_parkings--access=destination': 'Anlieger frei (Nicht-Durchgangsverkehr erlaubt)',
   'tilda_parkings--access=employees': 'Mitarbeiter',

@@ -304,7 +304,7 @@ attributes:
       - value: private
         label: Privat
       - value: customers
-        label: Kunden
+        label: Kund:innen
       - value: destination
         label: Anlieger frei (Nicht-Durchgangsverkehr erlaubt)
       - value: employees

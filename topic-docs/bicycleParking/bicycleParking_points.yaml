@@ -14,7 +14,7 @@ attributes:
       - value: 'yes'
         label: Öffentlich
       - value: customers
-        label: Kunden
+        label: Kund:innen
       - value: permissive
         label: Öffentliche Nutzung geduldet
       - value: private
