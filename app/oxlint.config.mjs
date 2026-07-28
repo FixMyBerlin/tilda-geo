@@ -5,8 +5,6 @@ export default defineConfig({
   plugins: ['eslint', 'typescript', 'unicorn', 'oxc', 'react'],
   options: { typeAware: true },
   ignorePatterns: [
-    // Agent skills/reference docs — not application source
-    '../.agents/**',
     // TanStack Router codegen; overwritten by `bun run codegen` (see tilda-geo/app)
     'src/routeTree.gen.ts',
     // Vite/Nitro production build output

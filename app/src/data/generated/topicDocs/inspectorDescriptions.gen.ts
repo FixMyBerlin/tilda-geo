@@ -30,7 +30,7 @@ const data = {
         assumed_no:
           'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.',
         implicit_yes:
-          'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.',
+          'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
       },
       traffic_sign: {
         never:
@@ -81,18 +81,19 @@ const data = {
     values: {
       type: {
         'amenity-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
         'leisure-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
         'shop-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
         'tourism-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
       },
     },
   },
   atlas_roads: {
     keys: {
+      highway: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
       name_ref: 'Enthält Kurznamen wie `A 100` oder `B 96`, übernommen aus dem OSM-Tag `ref`.',
       length:
         'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',

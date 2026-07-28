@@ -4,7 +4,6 @@ import { isBefore, subDays } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { authClient } from '@/components/shared/auth/auth-client'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
@@ -12,8 +11,9 @@ import { IconModal } from '@/components/shared/Modal/IconModal'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
 import { ControlButtonDot } from '../ControlButtonDot'
 import { mobileControlButtonClassName } from '../mobile/mobileControlButton.const'
-import { DownloadModalDownloadListWithVectorTiles } from './DownloadModalDownloadList'
+import { DownloadModalDatasetSections } from './DownloadModalDownloadList'
 import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
+import type { RegionModalAccess } from './regionModalAccess'
 
 // Square map-control button (matches the other floating controls); `relative` so the
 // ControlButtonDot anchors to the button corner.
@@ -44,9 +44,13 @@ const DownloadModalTriggerIcon = () => {
   )
 }
 
-export const DownloadModal = () => {
+type Props = {
+  modalAccess: RegionModalAccess
+  hasPermissions: boolean
+}
+
+export const DownloadModal = ({ modalAccess, hasPermissions }: Props) => {
   const { region } = useRegionLoaderData()
-  const hasPermissions = useHasPermissions()
   const { data: session } = authClient.useSession()
   const isLoggedIn = Boolean(session?.role)
   const signInHref = useSignInUrl()
@@ -69,6 +73,11 @@ export const DownloadModal = () => {
       </section>
     )
   }
+
+  // Dataset lists (downloadable, other, vector tiles) when permitted; doc links in download
+  // modal when regionModalAccess allows — otherwise the documentation button covers them.
+  const showDatasetSections =
+    modalAccess.docsLinksVisibleInDownloadModal || (hasPermissions && region.exports != null)
 
   return (
     <section>
@@ -102,7 +111,12 @@ export const DownloadModal = () => {
 
         <DownloadModalUpdateDate />
 
-        {hasPermissions && <DownloadModalDownloadListWithVectorTiles />}
+        {showDatasetSections ? (
+          <DownloadModalDatasetSections
+            modalAccess={modalAccess}
+            showVectorTiles={hasPermissions}
+          />
+        ) : null}
       </IconModal>
     </section>
   )

@@ -58,7 +58,7 @@ local function barrier_lines(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = minzoom(cleaned_tags),
+    minzoom = minzoom(object.tags),
     id = default_id(object),
   })
 end

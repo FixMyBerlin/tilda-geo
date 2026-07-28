@@ -62,7 +62,7 @@ export async function downloadMapillaryCoverage() {
     console.log(
       '[Pseudo Tags][Mapillary] Download Mapillary Coverage…',
       forceDownload ? 'reference mode: refreshing baseline CSV for fixed-run comparisons.' : '',
-      mapillaryCoverageSources.github,
+      mapillaryCoverageSources.browse,
       JSON.stringify({ csvExists, datesChanged, forceDownload, diffingMode }),
     )
 

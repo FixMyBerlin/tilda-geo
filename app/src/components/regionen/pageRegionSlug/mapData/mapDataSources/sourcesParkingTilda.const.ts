@@ -1,4 +1,3 @@
-import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import type { MapDataSource } from '../types'
 
@@ -13,10 +12,8 @@ export type SourcesParkingTildaId =
 export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   {
     id: 'tilda_parkings',
-    tiles: getTilesUrl(
-      // NOTE: We have the lines, the labels and the areas (as "shadow" data) in one response
-      '/atlas_generalized_parkings,atlas_generalized_parkings_labels,atlas_generalized_parkings_separate/{z}/{x}/{y}',
-    ),
+    // NOTE: We have the lines, the labels and the areas (as "shadow" data) in one response
+    tileTables: ['parkings', 'parkings_labels', 'parkings_separate'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     // We need to apply a higher maxzoom here so the data from parkings_separate gets loaded that is only visible starting at 17
     // We could add the "separate" from 14 (our default) and only hide it visually.
@@ -48,7 +45,6 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'access__if_present',
         'composit_surface_smoothness',
         'area',
-        'source',
         // 'side',
         // Road
         'road',
@@ -64,7 +60,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   },
   {
     id: 'tilda_parkings_cutouts',
-    tiles: getTilesUrl('/atlas_generalized_parkings_cutouts/{z}/{x}/{y}'),
+    tileTables: ['parkings_cutouts'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: 17, // higher than default to fix geometric precision for circles and such
     attributionHtml:
@@ -78,7 +74,6 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
       documentedKeys: [
         //
         'category',
-        'source',
         'buffer_radius__if_present',
       ],
     },
@@ -86,7 +81,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   },
   {
     id: 'tilda_parkings_quantized',
-    tiles: getTilesUrl('/atlas_generalized_parkings_quantized/{z}/{x}/{y}'),
+    tileTables: ['parkings_quantized'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -111,7 +106,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   },
   {
     id: 'tilda_parkings_off_street_quantized',
-    tiles: getTilesUrl('/atlas_generalized_off_street_parking_quantized/{z}/{x}/{y}'),
+    tileTables: ['off_street_parking_quantized'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -136,7 +131,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   },
   {
     id: 'tilda_parkings_no',
-    tiles: getTilesUrl('/atlas_generalized_parkings_no/{z}/{x}/{y}'),
+    tileTables: ['parkings_no'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -158,9 +153,11 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   },
   {
     id: 'tilda_parkings_off_street',
-    tiles: getTilesUrl(
-      '/atlas_generalized_off_street_parking_areas,atlas_generalized_off_street_parking_area_labels,atlas_generalized_off_street_parking_points/{z}/{x}/{y}',
-    ),
+    tileTables: [
+      'off_street_parking_areas',
+      'off_street_parking_area_labels',
+      'off_street_parking_points',
+    ],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: 17, // higher than default to fix geometric precision for circles and such
     attributionHtml:
@@ -187,7 +184,6 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'access__if_present',
         'composit_surface_smoothness',
         'area',
-        'source',
         'operator_type',
         'composit_mapillary',
       ],

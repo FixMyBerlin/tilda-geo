@@ -34,7 +34,7 @@ export const TagsTableRowCompositMaxspeed = ({
             <em>Genauigkeit der Quelle:</em>{' '}
             <ConditionalFormattedValue
               sourceId={sourceId}
-              tagKey={'confidence'}
+              tagKey={'maxspeed_confidence'}
               tagValue={properties.maxspeed_confidence}
             />
           </p>

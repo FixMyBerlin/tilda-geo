@@ -58,6 +58,7 @@ file picker / dropzone* onDrop
 | `useUploadFiles`, events, DB payload after complete               | [client-hooks.md](references/client-hooks.md)         |
 | **Optional** multi-file dropzone UI (react-dropzone)              | [dropzone-ui.md](references/dropzone-ui.md)           |
 | `getObject`, `deleteObject`, `presignGetObject`, S3 client policy | [s3-helpers.md](references/s3-helpers.md)             |
+| Serving uploads (GET proxy, `<img>` previews, dev Vite plugin)    | [serving-uploads.md](references/serving-uploads.md)   |
 | Errors, anti-patterns, debugging                                  | [troubleshooting.md](references/troubleshooting.md)   |
 
 ## Related skills
@@ -66,14 +67,15 @@ file picker / dropzone* onDrop
 
 ## Usage rules (daily work)
 
-| Topic           | Rule                                                                                                                                                                    |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route name      | Client `route: 'upload'` must match `routes: { upload: route({...}) }`                                                                                                  |
-| API path        | Client defaults to `/api/upload`; set `api` when the TanStack route differs                                                                                             |
-| Handler         | `return handleRequest(request, router)` — no Next.js adapter                                                                                                            |
-| Auth            | Enforce in handler or `onBeforeUpload`; `endpointAuth.inherited(...)` when auth lives in handler                                                                        |
-| DB after upload | `useMutation({ mutationFn: createUploadFn })` in `onUploadComplete`                                                                                                     |
-| Boundaries      | Post-upload persistence in `*.functions.ts` + `createServerFn`; never import `@better-upload/server` in client components                                               |
-| S3 access       | `getConfiguredS3Client()` (`aws()`) + `@better-upload/server/helpers` — not `@aws-sdk/client-s3` unless helpers lack the op ([s3-helpers.md](references/s3-helpers.md)) |
+| Topic           | Rule                                                                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route name      | Client `route: 'upload'` must match `routes: { upload: route({...}) }`                                                                                                                      |
+| API path        | Client defaults to `/api/upload`; set `api` when the TanStack route differs                                                                                                                 |
+| Handler         | `return handleRequest(request, router)` — no Next.js adapter                                                                                                                                |
+| Auth            | Enforce in handler or `onBeforeUpload`; `endpointAuth.inherited(...)` when auth lives in handler                                                                                            |
+| DB after upload | `useMutation({ mutationFn: createUploadFn })` in `onUploadComplete`                                                                                                                         |
+| Boundaries      | Post-upload persistence in `*.functions.ts` + `createServerFn`; never import `@better-upload/server` in client components                                                                   |
+| S3 access       | `getConfiguredS3Client()` (`aws()`) + `@better-upload/server/helpers` — not `@aws-sdk/client-s3` unless helpers lack the op ([s3-helpers.md](references/s3-helpers.md))                     |
+| Serve via API   | GET `/api/` routes for `<img>` / `<video>` previews need `forwardApiRequestsPastViteAssetMiddleware()` in `vite.config.ts` (dev only) — [serving-uploads.md](references/serving-uploads.md) |
 
 For setup steps and checklists, start with [first-time-setup.md](references/first-time-setup.md).

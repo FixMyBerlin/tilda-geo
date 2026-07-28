@@ -1,8 +1,11 @@
-import { $ } from 'bun'
+import path from 'node:path'
 import { GEO_BOOTSTRAP_FLAGS } from './flags'
 
+const processingScriptPath = path.join(import.meta.dir, '../processing-generate-command/index.ts')
+const appRoot = path.join(import.meta.dir, '../..')
+
 function geoBootstrapProcessingCommand() {
-  return `bun run processing -- ${GEO_BOOTSTRAP_FLAGS.join(' ')}`
+  return `bun ${processingScriptPath} -- ${GEO_BOOTSTRAP_FLAGS.join(' ')}`
 }
 
 function extractComposeCommandLine(stdout: string) {
@@ -18,9 +21,15 @@ function extractComposeCommandLine(stdout: string) {
 }
 
 export async function resolveGeoBootstrapComposeLine() {
-  const result = await $`bun run processing -- ${GEO_BOOTSTRAP_FLAGS}`.quiet().nothrow()
-  if (result.exitCode === 0) {
-    return extractComposeCommandLine(result.text())
+  const proc = Bun.spawn(['bun', processingScriptPath, '--', ...GEO_BOOTSTRAP_FLAGS], {
+    cwd: appRoot,
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
+  const exitCode = await proc.exited
+  if (exitCode === 0) {
+    const stdout = await new Response(proc.stdout).text()
+    return extractComposeCommandLine(stdout)
   }
   return null
 }

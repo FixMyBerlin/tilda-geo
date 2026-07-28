@@ -1,4 +1,5 @@
-import { getDescriptionForInspectorTag } from '@/data/topicDocs/runtime'
+import { FormattedMessage } from 'react-intl'
+import { getInspectorValueDescriptionTranslationKey } from '@/data/topicDocs/runtime'
 import type { TagsTableRowProps } from './TagsTableRow'
 import { ConditionalFormattedValue } from './translations/ConditionalFormattedValue'
 import { ValueDisclosure, ValueDisclosureButton, ValueDisclosurePanel } from './ValueDisclosure'
@@ -9,22 +10,29 @@ export const TagsTableRowValueWithTooltip = ({
   tagValue,
   children,
 }: TagsTableRowProps) => {
-  const TagValueCell = tagValue && (
-    <ConditionalFormattedValue sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
-  )
+  const descriptionKey = getInspectorValueDescriptionTranslationKey(sourceId, tagKey, tagValue)
 
-  const dataDescription = getDescriptionForInspectorTag(sourceId, tagKey, tagValue ?? undefined)
+  const valueContent =
+    tagValue != null ? (
+      <ConditionalFormattedValue sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
+    ) : (
+      children
+    )
 
-  const hasTooltip = Boolean(dataDescription)
-
-  if (!hasTooltip) {
-    return <>{TagValueCell || children}</>
+  if (!descriptionKey) {
+    return <>{valueContent}</>
   }
 
   return (
     <ValueDisclosure>
-      <ValueDisclosureButton>{TagValueCell || children}</ValueDisclosureButton>
-      <ValueDisclosurePanel>{dataDescription}</ValueDisclosurePanel>
+      <ValueDisclosureButton>
+        <span>{valueContent}</span>
+      </ValueDisclosureButton>
+      <ValueDisclosurePanel>
+        <p>
+          <FormattedMessage id={descriptionKey} />
+        </p>
+      </ValueDisclosurePanel>
     </ValueDisclosure>
   )
 }

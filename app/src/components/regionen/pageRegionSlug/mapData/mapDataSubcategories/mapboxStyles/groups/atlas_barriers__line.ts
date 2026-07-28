@@ -14,7 +14,7 @@ export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
       true,
       false,
     ],
-    minzoom: 7,
+    minzoom: 5,
     paint: {
       'line-color': [
         'case',
@@ -25,45 +25,49 @@ export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
         '#000000',
       ],
       'line-opacity': 0.8,
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 18, 4],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.5, 10, 2, 18, 4],
     },
   },
   {
     id: 'railway-rail',
     type: 'line',
     filter: ['match', ['get', 'railway'], ['rail'], true, false],
+    minzoom: 5,
     paint: {
       'line-color': 'hsl(300, 88%, 10%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 2, 18, 4],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.5, 10, 2, 18, 4],
     },
   },
   {
     id: 'railway_rail-white',
     type: 'line',
     filter: ['match', ['get', 'railway'], ['rail'], true, false],
+    minzoom: 5,
     paint: {
       'line-color': 'hsl(300, 4%, 97%)',
       'line-dasharray': [1, 1.2],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.7, 18, 3],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 1.2, 10, 1.7, 18, 3],
     },
   },
   {
     id: 'railway_light_rail',
     type: 'line',
     filter: ['match', ['get', 'railway'], ['light_rail'], true, false],
+    minzoom: 5,
     paint: {
       'line-color': 'hsl(300, 88%, 10%)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 18, 2],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.8, 10, 1, 18, 2],
     },
   },
   {
     id: 'railway_light_rail-white',
     type: 'line',
     filter: ['match', ['get', 'railway'], ['light_rail'], true, false],
+    minzoom: 5,
     paint: {
       'line-color': 'hsl(300, 4%, 97%)',
       'line-dasharray': [2, 2],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.7, 18, 1.5],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.6, 10, 0.7, 18, 1.5],
     },
   },
 ]

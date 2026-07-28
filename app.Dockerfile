@@ -10,8 +10,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Dependencies (layer cached unless package files change)
-COPY app/package.json app/bun.lock app/bunfig.toml ./
+# Dependencies (layer cached unless package files change).
+# Do not copy app/bunfig.toml here: it enables globalStore for local/dev only.
+# That layout symlinks into /root/.bun, which USER bun cannot read at runtime.
+COPY app/package.json app/bun.lock ./
 # Install without lifecycle scripts `postinstall`.
 RUN bun install --frozen-lockfile --ignore-scripts
 

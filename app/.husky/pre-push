@@ -16,11 +16,11 @@ bun "$ROOT/.github/scripts/generate-github-readme.ts" || exit 1
 bun run format:github || exit 1
 git -C "$ROOT" diff --exit-code -- .github/README.md || exit 1
 
-# Linting, formatting and type-checks for `App`
-bun run check
-bun run type-check-deploy
+# Linting, formatting, type-checks, deploy typecheck, and explicit deps for `App`
+bun run check-pre-push
 
 # Type checks (Lua + tsc), lint/format, and tests for `Processing`
 cd "$ROOT/processing"
-bun run check
-bun run test
+bun run check-pre-push
+
+# Use `git push --no-verify` to skip (sparingly).

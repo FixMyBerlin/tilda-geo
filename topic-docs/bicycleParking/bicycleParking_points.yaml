@@ -14,7 +14,7 @@ attributes:
       - value: 'yes'
         label: Öffentlich
       - value: customers
-        label: Kunden
+        label: Kund:innen
       - value: permissive
         label: Öffentliche Nutzung geduldet
       - value: private
@@ -100,7 +100,7 @@ attributes:
         label: Innen
   - key: surface
     label: Oberfläche
-    valuesRef: parkings.surface
+    valuesRef: roads.surface
   - key: surveillance
     label: Überwachung
     values:

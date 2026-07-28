@@ -10,6 +10,7 @@
     - [3.1. System Overwrites System](#31-system-overwrites-system-no-user-decision)
     - [3.2. System Overwrites User Decision](#32-system-overwrites-user-decision)
 - [Data Flow](#data-flow)
+- [Parking client freeze + QA](Parking-Client-Freeze-QA.md)
 - [Adding a New QA Config](#adding-a-new-qa-config)
 
 ## Overview
@@ -114,7 +115,9 @@ All updates require data to have changed (`previousRelative !== currentRelative`
 
 ## Data Flow
 
-1. **Reference data**: Stored in `data.euvm_qa_voronoi`; during processing copied to `public.qa_parkings_euvm` (recreatable with limitations; all public). Example script: [`parking/8_qa_parkings_euvm_voronoi.sql`](processing/topics/parking/8_qa_parkings_euvm_voronoi.sql). The script keeps previous run data for comparison and joins TILDA data to reference; update rules use it ([§3.1](#31-system-overwrites-system-no-user-decision), [§3.2](#32-system-overwrites-user-decision)).
+Parking client freezes must include a QA package (quantized points) and a new production `data.*` voronoi baseline; see [Parking client freeze + QA](Parking-Client-Freeze-QA.md).
+
+1. **Reference data**: Stored in a dated `data.*` baseline (currently `data.euvm_qa_voronoi_2026`); during processing copied to `public.qa_parkings_euvm` / `public.qa_parkings_euvm_priority` (recreatable with limitations; all public). Script: [`parking/9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql). The script keeps previous run data for comparison and joins TILDA data to reference; update rules use it ([§3.1](#31-system-overwrites-system-no-user-decision), [§3.2](#32-system-overwrites-user-decision)).
 2. **QA update API** (`/api/private/post-processing-qa-update`): Runs after processing; loads active configs, queries each config’s map table, computes system status from thresholds, applies [System status update rules](#3-system-status-update-rules), creates new evaluations when warranted.
 3. **App**: Loads public vector tiles, enriches with private evaluation data (`setFeatureState`); map allows filtering and creating evaluations.
 

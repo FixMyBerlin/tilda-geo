@@ -67,10 +67,46 @@ attributes:
         label: Führungsform unklar
   - key: road
     ref: roads.road
-  - key: _parent_highway
-    ref: roads.road
+    label: Straßentyp Fahrbahn
   - key: highway
-    ref: roads.road
+    label: Straßentyp Fahrbahn
+    values:
+      - value: cycleway
+        label: Radweg
+      - value: footway
+        label: Fußweg
+      - value: living_street
+        label: Verkehrsberuhigter Bereich
+      - value: path
+        label: Weg / Pfad
+      - value: pedestrian
+        label: Fußgängerzone
+      - value: primary
+        label: Bundesstraße/Hauptverbindungsstraße
+      - value: primary_link
+        label: Zufahrt einer Bundesstraße/Hauptverbindungsstraße
+      - value: residential
+        label: Anwohnerstraße
+      - value: road
+        label: Unkategorisierte Straße
+      - value: secondary
+        label: Landesstraße/Wichtige Durchgangsstraße
+      - value: secondary_link
+        label: Zufahrt einer Landesstraße/wichtigen Durchgangsstraße
+      - value: service
+        label: Zufahrtsweg
+      - value: steps
+        label: Stufen
+      - value: tertiary
+        label: Kreisstraße/Untergeordnete Durchgangsstraße
+      - value: tertiary_link
+        label: Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße
+      - value: track
+        label: Wald- / Feldweg
+      - value: unclassified
+        label: Nebenstraße mit Verbindungscharakter
+  - key: _parent_highway
+    ref: bikelanes.highway
   - key: name
     ref: roads.name
   - key: length
@@ -105,8 +141,8 @@ attributes:
         label: Wahrscheinlich beide Richtungen
         description: Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.
       - value: implicit_yes
-        label: Wahrscheinlich eine Richtung
-        description: Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.
+        label: Eine Richtung (abgeleitet)
+        description: Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.
   - key: bridge
     ref: roads.bridge
   - key: tunnel
@@ -241,11 +277,7 @@ attributes:
   - key: surface
     ref: roads.surface
   - key: surface_source
-    label: Herkunft der Oberfläche
-    valuesRef: roads.surface_source
-    valuesAdd:
-      - value: parent_highway_tag
-        label: Von zugeordneter Straße (OSM)
+    ref: roads.surface_source
   - key: surface_confidence
     ref: roads.surface_confidence
   - key: smoothness

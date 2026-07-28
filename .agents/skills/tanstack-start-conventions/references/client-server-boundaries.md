@@ -2,6 +2,8 @@
 
 This doc describes how we keep server-only and client-only code in the right bundles: file naming, import protection, and when to use loaders vs. server functions vs. React Query.
 
+**Execution model (isomorphic loaders, soft nav):** [execution-model.md](execution-model.md) · **Server fn API:** [server-functions.md](server-functions.md)
+
 **Official docs:** [TanStack Start](https://tanstack.com/start/), [TanStack Router](https://tanstack.com/router/latest), [TanStack Query](https://tanstack.com/query/latest)
 
 ---

@@ -1,6 +1,6 @@
 # Endpoint Auth Lint Pattern
 
-Short form of the Trassenscout auth-boundary lint pattern.
+Auth-boundary rules enforced by Oxlint custom plugins.
 
 ## Intent
 
@@ -12,14 +12,15 @@ Every server boundary must make an auth decision first. The first non-empty stat
 
 This makes missing auth visible in review and machine-checkable by Oxlint.
 
-## Trassenscout reference
+## Oxlint plugins
 
-Trassenscout implements this as local ESLint-compatible rules loaded by **Oxlint custom plugins** (`jsPlugins`) in [`oxlint.config.mjs`](https://github.com/FixMyBerlin/trassenscout/blob/tanstack-start-migration/oxlint.config.mjs):
+Wire local ESLint-compatible rules as Oxlint `jsPlugins` in `oxlint.config.mjs`:
 
-- [`require-endpoint-auth`](https://github.com/FixMyBerlin/trassenscout/blob/tanstack-start-migration/lint/plugins/require-endpoint-auth.mjs): checks `src/routes/api/**/*.ts`, route `beforeLoad`, and `src/server/**/*.server.ts`
-- [`no-auth-boundary-import`](https://github.com/FixMyBerlin/trassenscout/blob/tanstack-start-migration/lint/plugins/no-auth-boundary-import.mjs): blocks direct imports from low-level auth/session helpers outside `src/server/auth/`
+- `lint/plugins/require-endpoint-auth.mjs` — `src/routes/api/**/*.ts`, route `beforeLoad`, `src/server/**/*.server.ts`
+- `lint/plugins/no-auth-boundary-import.mjs` — blocks direct imports from low-level auth/session helpers outside `src/server/auth/`
+- `lint/utils/endpoint-auth-ast.mjs` — AST helper for `endpointAuth.*` and allowed route auth functions
 
-The shared AST helper for detecting `endpointAuth.*` and allowed route auth functions is [`lint/utils/endpoint-auth-ast.mjs`](https://github.com/FixMyBerlin/trassenscout/blob/tanstack-start-migration/lint/utils/endpoint-auth-ast.mjs).
+Copy from [trassenscout `lint/`](https://github.com/FixMyBerlin/trassenscout/tree/develop/lint) when adopting in a new app. Base oxlint setup: `tech-stack` → [oxc-config.md](../../tech-stack/references/oxc-config.md).
 
 The public API is `src/server/auth/endpointAuth.server.ts`. Boundary functions start with calls like:
 
@@ -38,7 +39,7 @@ endpointAuth.inherited('auth enforced in serveProjectUploadObject')
 
 Route auth is still layout `beforeLoad`, not middleware.
 
-Trassenscout route layouts call a closed set of route server functions from `src/server/auth/auth.functions.ts`:
+Route layouts call a closed set of route server functions from `src/server/auth/auth.functions.ts`:
 
 - `routeGuestFn`
 - `routeSessionFn`

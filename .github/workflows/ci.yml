@@ -14,20 +14,20 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
 
       - uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
           comment-summary-in-pr: true
-          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, 0BSD, Unlicense, CC0-1.0
+          allow-licenses: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, 0BSD, Unlicense, CC0-1.0, AGPL-3.0, AGPL-3.0-or-later
 
   validate-env-contract:
     name: Validate Env Contract
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -43,28 +43,19 @@ jobs:
         working-directory: ./app
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Check types
-        run: bun run type-check
-
-      - name: Check formatting
-        run: bun run check-format
-
-      - name: Check linting
-        run: bun run check-lint
-
-      - name: Run tests
+      - name: Verify app (read-only)
         env:
           # Vitest loads repo `/.env` when present; PR runners have none. These match local dev (see `.env.example`).
           VITE_APP_ENV: development
           VITE_APP_ORIGIN: http://127.0.0.1:5173
-        run: bun run test-run
+        run: bun run check-ci
 
   run-processing-type-check:
     name: Run Processing Type Check
@@ -74,7 +65,7 @@ jobs:
         working-directory: ./processing
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
 
       - uses: oven-sh/setup-bun@v2
 
@@ -105,7 +96,7 @@ jobs:
   #       uses: docker/setup-buildx-action@v3
 
   #     - name: Checkout
-  #       uses: actions/checkout@v7.0.0
+  #       uses: actions/checkout@v7.0.1
 
   #     - name: Build Image
   #       uses: docker/build-push-action@v5

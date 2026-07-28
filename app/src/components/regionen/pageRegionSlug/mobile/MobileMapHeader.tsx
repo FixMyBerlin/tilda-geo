@@ -1,6 +1,6 @@
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { DebugButton } from '../DebugBoxes/DebugButton'
-import { DownloadModal } from '../DownloadModal/DownloadModal'
+import { RegionDataModals } from '../DownloadModal/RegionDataModals'
 import { PlaceSearch } from '../Map/Search/PlaceSearch'
 import { mobileMapHeaderClassName } from './mobileMapChrome.const'
 import { MobileRegionMenu } from './MobileRegionMenu'
@@ -8,7 +8,7 @@ import { MobileUserMenu } from './MobileUserMenu'
 
 /**
  * Mobile-only floating header overlaying the top of the map (replaces the dark
- * desktop header). Left: region menu (logo + "Über") + user + download.
+ * desktop header). Left: region menu (logo + "Über") + user + download/documentation.
  * Right: search (+ admin debug). The layer control lives in the bottom controls
  * cluster on mobile. `pointer-events-none` on the bar with auto on the controls
  * keeps the map pannable in the gap between the groups.
@@ -25,7 +25,7 @@ export const MobileMapHeader = () => {
       <div className="flex items-start gap-2">
         <MobileRegionMenu />
         <MobileUserMenu />
-        <DownloadModal />
+        <RegionDataModals />
       </div>
       <div className="flex items-start gap-2">
         <DebugButton />

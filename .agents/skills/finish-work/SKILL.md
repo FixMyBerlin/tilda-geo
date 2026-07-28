@@ -1,10 +1,10 @@
 ---
 name: finish-work
 description: >-
-  FMC finish-work workflow: run bun run check, fix failures, draft user-facing
-  English commit messages, and actually commit when user indicates commit intent
-  ("and commit", "commit it", "land this"). Use for finish work, run checks,
-  wrap up, prepare commit messages, or create commits.
+  FMC finish-work workflow: run bun run check, fix failures, commit with a
+  user-facing English message by default, and only show a draft when the user
+  clearly did not want a commit. Use for finish work, run checks, wrap up, land
+  changes, or create commits.
 ---
 
 # Finish work
@@ -15,20 +15,23 @@ Run in the project root, or in each changed monorepo package (`app/`, `processin
 
 1. Verify: read `scripts.check` in `package.json`, run `bun run check`, fix the root cause, and rerun until green. `lint`/`format` may rewrite files.
 2. Keep fixes together: stage lint/format changes with the functional changes; never make a separate "lint" or "format" commit.
-3. Draft the commit message using the format below.
-4. Decide from user intent:
-   - **Commit intent present:** actually run `git commit`; do not stop at a draft.
-   - **No commit intent:** show the drafted message only.
+3. Write the commit message using the format below.
+4. **Default: commit.** Run the commit path below unless the user clearly did not want a commit.
+5. **Draft only when no-commit intent is clear.** Show the message and stop; do not run `git commit`.
 
-Commit intent includes: "and commit", "then commit", "commit it", "land this", "create a commit", or "finish work" plus a commit phrase in the same or earlier user turn.
+No-commit intent includes: explicit deferral ("don't commit", "draft only", "message only", "what would the commit be"), check/fix-only asks ("run check", "fix lint", "fix CI" with no wrap-up), review or question-only turns, or the user saying they will commit themselves.
+
+When intent is ambiguous, prefer committing — especially after implementing changes or when the user invoked finish-work to wrap up.
 
 Commit path: `git status`, `git diff`, and `git log -5` in parallel; stage relevant files only; `git commit` via HEREDOC; `git status` to verify.
 
 Safety: no push unless asked. No `--no-verify`. No amend of pushed commits. Do not stage secrets or unrelated dirty files.
 
-Already committed and `check` only fixed lint/format: `git commit --amend --no-edit` when the user wants commit/amend and HEAD has not been pushed; otherwise stage and ask.
+Already committed and verify only fixed lint/format: `git commit --amend --no-edit` when HEAD has not been pushed; otherwise stage and ask before amending.
 
-E2E is not in `check`. For UI/routes/auth changes, also run `bun run e2e` (or `check-full` on trassenscout). See [playwright-skill](../playwright-skill/SKILL.md).
+E2E is not in `check`. For UI/routes/auth changes, also run `bun run e2e` (or `check-full` when defined). See [playwright-skill](../playwright-skill/SKILL.md).
+
+Script names: [package-json-scripts.md](../tech-stack/references/package-json-scripts.md).
 
 ## Commit message
 

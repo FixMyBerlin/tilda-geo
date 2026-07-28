@@ -22,7 +22,7 @@ export const CategoryHeadlineToggle = ({
       <Label
         as="div"
         className={twJoin(
-          'ml-4 min-w-0 flex-1 text-sm leading-4.25 sm:ml-2',
+          'ml-4 min-w-0 flex-1 text-sm leading-5 sm:ml-2',
           active ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-900',
         )}
         title={titleAttribute ? titleAttribute : undefined}

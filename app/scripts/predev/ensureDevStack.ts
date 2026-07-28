@@ -1,9 +1,12 @@
 import { existsSync, writeFileSync } from 'node:fs'
+import {
+  applyDevPortSlotToProcessEnv,
+  exitOnInvalidDevPortSlot,
+  isDevPortSlotMode,
+} from './devPortSlot'
 import { resolveRunningAttachStack } from './devStackDiscovery'
 import {
   composeContainerPrefixFromStackId,
-  DEV_DB_PORT,
-  DEV_TILES_PORT,
   publishedHostPorts,
   stackIdFromRepoRoot,
 } from './devStackPorts'
@@ -39,6 +42,8 @@ function formatEnvLocal(values: Record<string, string>) {
 }
 
 export async function ensureDevStack() {
+  exitOnInvalidDevPortSlot(label)
+  const { databasePort, tilesPort, vitePort } = applyDevPortSlotToProcessEnv()
   const repoRoot = repoRootFromApp()
   const localPath = envLocalPath(repoRoot)
 
@@ -72,9 +77,7 @@ export async function ensureDevStack() {
   }
 
   if (existsSync(localPath)) {
-    if (stripLegacyPortsFromEnvLocal(localPath)) {
-      logWarn(label, 'Removed legacy port keys from .env.local')
-    }
+    stripLegacyPortsFromEnvLocal(localPath)
     logOk(label)
     return
   }
@@ -85,8 +88,13 @@ export async function ensureDevStack() {
   if (attachFromEnv) {
     await resolveRunningAttachStack(attachFromEnv)
     logWarn(label, `Attaching to stack "${attachFromEnv}"`)
+  } else if (isDevPortSlotMode()) {
+    logWarn(
+      label,
+      `Isolated stack ${stackId} (port slot ${process.env.DEV_PORT_SLOT}: ${databasePort}/${tilesPort}/${vitePort})`,
+    )
   } else {
-    logWarn(label, `Isolated stack ${stackId} (host ports ${DEV_DB_PORT}/${DEV_TILES_PORT})`)
+    logWarn(label, `Isolated stack ${stackId} (host ports ${databasePort}/${tilesPort})`)
   }
 
   const content = formatEnvLocal({
@@ -133,8 +141,9 @@ export function composeContainerPrefixFromEnv() {
 }
 
 export async function devStackPortsArePublished() {
+  const { databasePort, tilesPort } = applyDevPortSlotToProcessEnv()
   const published = await publishedHostPorts()
-  return published.has(DEV_DB_PORT) && published.has(DEV_TILES_PORT)
+  return published.has(databasePort) && published.has(tilesPort)
 }
 
 if (import.meta.main) {

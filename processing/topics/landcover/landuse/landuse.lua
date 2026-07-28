@@ -3,7 +3,7 @@ local default_id = require('topics.helper.default_id')
 local LOG_ERROR = require('topics.landcover.landuse.landuse_errors')
 local exit_processing = require('topics.landcover.landuse.helper.exit_processing')
 local result_tags = require('topics.landcover.landuse.helper.result_tags')
-local minzoom = require('topics.landcover.landuse.helper.minzoom')
+local MINZOOM = require('topics.landcover.landuse.helper.minzoom')
 
 -- The `landuse` display table: land use polygons (the allowed landuse/amenity/leisure values
 -- defined in helper/allowed_values.lua) with the standard topic shape (id/tags/meta/geom/minzoom).
@@ -24,12 +24,29 @@ local db_table = osm2pgsql.define_table({
   },
 })
 
+--- Sets internal `_`-prefixed tags used by minzoom.
+---@param object OsmObject
+local function prepare_landuse_tags(object)
+  object.tags._computed_area = object:as_multipolygon():transform(5243):area()
+end
+
+---@param object OsmObject
+---@return boolean
+local function exit_processing_landuse_area(object)
+  return MINZOOM.is_excluded(object.tags._computed_area)
+end
+
 --- Area handler for the `landuse` table. The entrypoint routes area-eligible objects (closed
 --- ways, multipolygon relations) here; object:as_multipolygon() works for both (same pattern as
 --- barriers). The tag filter (exit_processing) decides which land use we keep.
 ---@param object table
 local function landuse(object)
   if exit_processing(object) then
+    return
+  end
+
+  prepare_landuse_tags(object)
+  if exit_processing_landuse_area(object) then
     return
   end
 
@@ -42,7 +59,7 @@ local function landuse(object)
     tags = cleaned_tags,
     meta = metadata(object),
     geom = geom,
-    minzoom = minzoom(cleaned_tags),
+    minzoom = MINZOOM.minzoom(object.tags),
     id = default_id(object),
   })
 end

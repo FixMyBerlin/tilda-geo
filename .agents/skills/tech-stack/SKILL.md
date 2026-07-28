@@ -5,8 +5,9 @@ description: >-
   maps, styling, TypeScript editor/CLI alignment, tsconfig templates,
   browserslist client targets, Cursor MCP (Postgres, agent-browser), and
   when to pick sibling skills. Use when scaffolding a new app, evaluating
-  libraries, changing supported browsers or compat lint, setting up Cursor MCP,
-  or making stack/architecture decisions on existing apps.
+  libraries, setting up Bun install/global store or Knip, changing supported
+  browsers or compat lint, setting up Cursor MCP, or making stack/architecture
+  decisions on existing apps.
 ---
 
 # FMC tech stack
@@ -18,6 +19,7 @@ Install sibling skills separately: `bunx skills add FixMyBerlin/fixmyskills --sk
 ## When to apply
 
 - Greenfield app scaffold (dependencies, tooling, folder layout)
+- Adding or renaming `package.json` scripts
 - Library or pattern choice (“should we use X?”)
 - Cross-cutting convention review on an existing app
 - Cursor MCP setup for Postgres schema inspection, agent DB queries, or browser exploration MCP
@@ -32,25 +34,26 @@ Load [references/llm-resources.md](references/llm-resources.md) **only for the a
 
 Prefer installed skill names when present; otherwise fetch from git.
 
-| Area                                     | Skill                        | GitHub                                                                                                                         |
-| ---------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Rust/WASM geo                            | `rust-wasm-geo`              | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/rust-wasm-geo>                                                    |
-| Maps (react-map-gl)                      | `react-map-gl`               | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-map-gl>                                                     |
-| React TS patterns, useEffect discipline  | `react-dev`                  | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-dev>                                                        |
-| TanStack Start (layout, boundaries, SSR) | `tanstack-start-conventions` | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-conventions>                                       |
-| Router search params (UI routes)         | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md> |
-| Router + Query loaders                   | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md>        |
-| Devtools debug panel                     | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/devtools.md>                |
-| URL state (Next.js / shared libs)        | `nuqs`                       | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/nuqs>                                                             |
-| Client global state                      | `zustand-state-management`   | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/zustand-state-management>                                         |
-| E2E / Playwright                         | `playwright-skill`           | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/playwright-skill>                                                 |
-| Next → Start migration                   | `tanstack-start-migration`   | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-migration>                                         |
+| Area                                      | Skill                        | GitHub                                                                                                                         |
+| ----------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Rust/WASM geo                             | `rust-wasm-geo`              | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/rust-wasm-geo>                                                    |
+| Maps (react-map-gl)                       | `react-map-gl`               | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-map-gl>                                                     |
+| React TS patterns, useEffect discipline   | `react-dev`                  | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/react-dev>                                                        |
+| TanStack Start (boundaries, SSR, loaders) | `tanstack-start-conventions` | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/tanstack-start-conventions>                                       |
+| Router search params (UI routes)          | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md> |
+| Router + Query loaders                    | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md>        |
+| Devtools debug panel                      | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/devtools.md>                |
+| App folder layout                         | —                            | <https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/app-structure.md>           |
+| URL state (TanStack Router apps)          | `tanstack-start-conventions` | `params-search-ui-vs-api.md`                                                                                                   |
+| URL state (Next.js / legacy)              | `nuqs`                       | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/nuqs>                                                             |
+| Client global state                       | `zustand-state-management`   | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/zustand-state-management>                                         |
+| Prisma schema naming, migrations          | `prisma`                     | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/prisma>                                                           |
+| E2E / Playwright                          | `playwright-skill`           | <https://github.com/FixMyBerlin/fixmyskills/tree/main/skills/playwright-skill>                                                 |
 
 ## Runtime and build
 
-- **Runtime / package manager:** [Bun](https://bun.sh)
+- **Runtime / package manager:** [Bun](https://bun.sh) — install policy [bun-install.md](references/bun-install.md) (≥ 1.3.14, global store, Vite dev)
 - **Build:** latest Vite (8+)
-- **Bun security:** `minimumReleaseAge = 5` in `bunfig.toml` (432000 seconds)
 - **Lint / format:** oxlint and oxfmt with fix flags; Prettier-compatible defaults:
   - class sorting, import sorting, `package.json` sorting
   - `printWidth` 100, semicolons `asNeeded`, single quotes
@@ -63,17 +66,16 @@ Prefer installed skill names when present; otherwise fetch from git.
 ## React and TypeScript
 
 - **UI:** React 19
-- **TypeScript (default):** `typescript@7.0.1-rc` (Go-native 7.x). Typecheck with `tsc --noEmit` via `bun run type-check`. The workspace `typescript` package provides both CLI and editor language service — do not add `@typescript/native-preview` or a separate `tsgo` binary for type-check.
-- **Editor/CLI alignment:** both SDK paths must resolve to the same `devDependencies.typescript` install:
-  - `typescript.tsdk` → `node_modules/typescript/lib`
-  - `typescript.native-preview.tsdk` → `node_modules/typescript` (package root)
-  - Misalignment makes IDE diagnostics disagree with `bun run type-check`.
-- **Scaffold (TS 7 RC):** `package.json` — `devDependencies.typescript` `7.0.1-rc`, script `"type-check": "tsc --noEmit"` (add `-p` when using split tsconfigs); `optionalDependencies` — `@typescript/typescript-darwin-arm64` and `@typescript/typescript-linux-x64` at the same version (extend for other CI/dev platforms). `bunfig.toml` — `minimumReleaseAgeExcludes = ["typescript", "@typescript/typescript-*"]`. Commit `.vscode/settings.json` (templates: [examples/vscode.settings.typescript.json.template](examples/vscode.settings.typescript.json.template)) and recommend `TypeScriptTeam.native-preview` in `.vscode/extensions.json` ([examples/vscode.extensions.json.template](examples/vscode.extensions.json.template)).
-- **Monorepos:** when TypeScript lives in a package subfolder, prefix both SDK paths to that package’s `node_modules` (e.g. `app/node_modules/typescript/lib` — [tilda-geo](https://github.com/FixMyBerlin/tilda-geo/blob/develop/.vscode/settings.json)).
-- **Cursor / VS Code:** install **TypeScript (Native Preview)** (`TypeScriptTeam.native-preview`). Copy [examples/vscode.settings.typescript.json.template](examples/vscode.settings.typescript.json.template) into `.vscode/settings.json` (merge with oxc keys from [references/oxc-config.md](references/oxc-config.md)).
+- **TypeScript (default):** `typescript@^7` (native port; [7.0 release](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/)). Typecheck with `tsc --noEmit` via `bun run type-check`. The workspace `typescript` package provides both CLI (`tsc`) and editor language service — do not add a separate compiler binary for type-check. Nightlies: `typescript@next` (not the retired `@typescript/native-preview` package).
+- **Editor/CLI alignment:** `js/ts.tsdk.path` must resolve to the same `devDependencies.typescript` install as `tsc` (package root, not `lib/`). Misalignment makes IDE diagnostics disagree with `bun run type-check`.
+- **Scaffold (TS 7):** `package.json` — `devDependencies.typescript` `^7`, script `"type-check": "tsc --noEmit"` (add `-p` when using split tsconfigs); pin `@typescript/typescript-darwin-arm64` / `@typescript/typescript-linux-x64` in `optionalDependencies` at the same version when CI runs on a different platform than dev (the `typescript` package lists these as optional — extend for other platforms as needed). `bunfig.toml` — [bun-install.md](references/bun-install.md). Commit `.vscode/settings.json` (template: [examples/vscode.settings.typescript.json.template](examples/vscode.settings.typescript.json.template)) and recommend the **TypeScript 7** extension in `.vscode/extensions.json` ([examples/vscode.extensions.json.template](examples/vscode.extensions.json.template)).
+- **Monorepos:** when TypeScript lives in a package subfolder, prefix `js/ts.tsdk.path` to that package’s `node_modules/typescript` (e.g. `app/node_modules/typescript` — [tilda-geo](https://github.com/FixMyBerlin/tilda-geo/blob/develop/.vscode/settings.json)).
+- **Cursor / VS Code:** install **TypeScript 7** (`TypeScriptTeam.native-preview` — marketplace ID unchanged). Enable via command palette **TypeScript: Enable TypeScript 7** or the settings template. Copy [examples/vscode.settings.typescript.json.template](examples/vscode.settings.typescript.json.template) into `.vscode/settings.json` (merge with oxc keys from [references/oxc-config.md](references/oxc-config.md)). Toggle back with **Disable TypeScript 7 Language Server** when editor plugins still require TS 6 (Vue, Astro, Svelte, Angular templates — see release notes).
+- **Tooling on TS 6 API:** TypeScript 7.0 has no programmatic compiler API. For typescript-eslint or similar, side-by-side TS 6 via `@typescript/typescript6` and npm aliases — see [release notes](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-60).
 - **Cursor MCP (user-level):** `~/.cursor/mcp.json` only — [examples/mcp.json.template](examples/mcp.json.template). Postgres: [references/cursor-mcp.md](references/cursor-mcp.md). Browser exploration: [references/agent-browser-mcp.md](references/agent-browser-mcp.md). Never commit MCP config to a repo.
+- **Cursor rules (app-level):** copy [examples/package-json-scripts.md.template](examples/package-json-scripts.md.template) → `.cursor/rules/package-json-scripts.md` on scaffold — [references/package-json-scripts.md](references/package-json-scripts.md)
 
-**Verify:** `node -e "console.log(require('typescript/package.json').version)"`, `tsc --version`, and `bun run type-check` — all 7.x. After `bun install`, accept **Use Workspace Version** if prompted. Do not add `typescript` to repos that have no TS source (e.g. this skills monorepo).
+**Verify:** `node -e "console.log(require('typescript/package.json').version)"`, `tsc --version`, and `bun run type-check` — all 7.x. In the editor, confirm **TypeScript 7** is enabled (status bar / command palette). Do not add `typescript` to repos that have no TS source (e.g. this skills monorepo).
 
 - **React Compiler:** on by default — see skill `react-dev` for memoization and typing conventions
 - **GeoJSON:** `@types/geojson` for all GeoJSON payloads
@@ -111,15 +113,17 @@ Component typing, Compiler, oxlint React rules, and useEffect discipline: skill 
 
 ## Data and state
 
-| Need                                        | Choice                                                                                                                                                                                        |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Server / async data                         | TanStack Query — no raw `useEffect` fetch; Suspense where the router supports it                                                                                                              |
-| Forms (non-trivial)                         | TanStack Form                                                                                                                                                                                 |
-| Routing                                     | TanStack Router / Start                                                                                                                                                                       |
-| Shareable URL state (TanStack apps)         | Route `validateSearch` (Zod) — see [params-search-ui-vs-api.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md) |
-| Shareable URL state (Next.js / shared libs) | nuqs — see skill `nuqs`                                                                                                                                                                       |
-| Global client state                         | Zustand (tkdodo patterns) — skill `zustand-state-management`                                                                                                                                  |
-| Local UI state                              | `useState`                                                                                                                                                                                    |
+| Need                                | Choice                                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Server / async data                 | TanStack Query — no raw `useEffect` fetch; Suspense where the router supports it               |
+| Forms (non-trivial)                 | TanStack Form                                                                                  |
+| Routing                             | TanStack Router / Start                                                                        |
+| Shareable URL state (TanStack apps) | Route `validateSearch` (Zod) — see `tanstack-start-conventions` → `params-search-ui-vs-api.md` |
+| Shareable URL state (Next.js)       | nuqs — see skill `nuqs`                                                                        |
+| High-frequency URL updates          | `@tanstack/react-pacer` — see <https://tanstack.com/pacer/latest>                              |
+| Global client state                 | Zustand (tkdodo patterns) — skill `zustand-state-management`                                   |
+| Local UI state                      | `useState`                                                                                     |
+| Prisma schema / migrations          | skill `prisma` — naming, relation fields, migrate workflows                                    |
 
 Loader + Query integration: [router-and-query.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md).
 
@@ -155,15 +159,16 @@ Turf vs WASM, crates, Vite wiring: skill `rust-wasm-geo`.
 
 ## CI (GitHub Actions)
 
-- PR dependency review: permissive `allow-licenses` (not deprecated `deny-licenses`) — template: [examples/ci.yml.template](examples/ci.yml.template)
+- PR dependency review: permissive `allow-licenses` (not deprecated `deny-licenses`); include `AGPL-3.0` and `AGPL-3.0-or-later` when the project is AGPL — template: [examples/ci.yml.template](examples/ci.yml.template)
 
 ## Tests and quality
 
-| Need                            | Skill / tool             |
-| ------------------------------- | ------------------------ |
-| Unit / component tests          | Vitest (always)          |
-| Cross-route, map, or auth flows | `playwright-skill`       |
-| Pure logic / utils only         | Vitest — skip Playwright |
+| Need                            | Skill / tool                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Unit / component tests          | Vitest (always)                                                                                              |
+| Cross-route, map, or auth flows | `playwright-skill`                                                                                           |
+| Pure logic / utils only         | Vitest — skip Playwright                                                                                     |
+| Explicit deps / dead exports    | [knip.md](references/knip.md) · verify scripts [package-json-scripts.md](references/package-json-scripts.md) |
 
 ## Quick decisions
 

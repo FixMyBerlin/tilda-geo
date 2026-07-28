@@ -1,92 +1,95 @@
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
-import { exportConfigs } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
+import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import {
   getCategoryData,
   getSourceData,
 } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { Link } from '@/components/shared/links/Link'
-import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
 import { useRegionSlug } from '../regionUtils/useRegionSlug'
-import { downloadFormatLinkClasses, OgrFormatDownloadLinks } from './OgrFormatDownloadLinks'
+import { OgrFormatDownloadLinks } from './OgrFormatDownloadLinks'
+import { RegionDatasetDocLink } from './RegionDatasetDocLink'
+import type { RegionModalAccess, RegionModalDataset } from './regionModalAccess'
+import { RegionModalDocLinksSection } from './RegionModalDocLinksSection'
 
-const docsLinkClassesWithStructuredDocs =
-  'min-w-28 w-max flex-none rounded-md border border-purple-800 bg-purple-700 px-3 py-2 text-left shadow-md no-underline hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-1'
+type Props = {
+  datasets: RegionModalDataset[]
+}
 
-const DownloadModalDownloadList = () => {
+const DownloadModalDownloadList = ({ datasets }: Props) => {
   const regionSlug = useRegionSlug()
   const { region } = useRegionLoaderData()
-  const { bbox, exports: regionExports } = region
-  if (regionExports === null) return null
-  const availableExports = exportConfigs.filter((exportData) =>
-    regionExports.includes(exportData.id),
-  )
+  const { bbox } = region
+  if (bbox === null) return null
 
   return (
     <ul className="mb-2 divide-y divide-gray-200 border-y border-gray-200">
-      {availableExports.map((exportData) => {
-        const hasStructuredDocs = getTopicDocByTableName(exportData.id) != null
+      {datasets.map((dataset) => (
+        <li key={dataset.tableName} className="pt-5 pb-4">
+          <h3 className="mb-1 text-sm font-bold text-purple-800">{dataset.title}:</h3>
 
-        return (
-          <li key={exportData.id} className="pt-5 pb-4">
-            <h3 className="mb-1 text-sm font-bold text-purple-800">{exportData.title}:</h3>
-
+          {dataset.desc || dataset.attributionHtml || dataset.licence ? (
             <table className="my-2 text-sm text-gray-500">
               <tbody>
-                <tr>
-                  <th className="w-24 align-top text-xs font-medium text-gray-900">
-                    Beschreibung:
-                  </th>
-                  <td className="pl-2">{exportData.desc}</td>
-                </tr>
-                <tr>
-                  <th className="w-24 align-top text-xs font-medium text-gray-900">Attribution:</th>
-                  <td
-                    className="pl-2"
-                    // oxlint-disable-next-line react/no-danger -- attribution HTML from dataset config
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        exportData.attributionHtml !== 'todo' ? exportData.attributionHtml : '',
-                    }}
-                  />
-                </tr>
-                <tr>
-                  <th className="w-24 align-top text-xs font-medium text-gray-900">Lizenz:</th>
-                  <td className="pl-2">{exportData.licence}</td>
-                </tr>
+                {dataset.desc ? (
+                  <tr>
+                    <th className="w-24 align-top text-xs font-medium text-gray-900">
+                      Beschreibung:
+                    </th>
+                    <td className="pl-2">{dataset.desc}</td>
+                  </tr>
+                ) : null}
+                {dataset.attributionHtml && dataset.attributionHtml !== 'todo' ? (
+                  <tr>
+                    <th className="w-24 align-top text-xs font-medium text-gray-900">
+                      Attribution:
+                    </th>
+                    <td
+                      className="pl-2"
+                      // oxlint-disable-next-line react/no-danger -- attribution HTML from dataset config
+                      dangerouslySetInnerHTML={{ __html: dataset.attributionHtml }}
+                    />
+                  </tr>
+                ) : null}
+                {dataset.licence ? (
+                  <tr>
+                    <th className="w-24 align-top text-xs font-medium text-gray-900">Lizenz:</th>
+                    <td className="pl-2">{dataset.licence}</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
+          ) : null}
 
-            <div className="flex flex-wrap gap-2">
-              <Link
-                to="/docs/$tableName"
-                params={{ tableName: exportData.id }}
-                search={{ r: regionSlug }}
-                classNameOverwrite={
-                  hasStructuredDocs ? docsLinkClassesWithStructuredDocs : downloadFormatLinkClasses
-                }
-              >
-                <strong
-                  className={`mb-0.5 block text-xs font-medium ${hasStructuredDocs ? 'text-purple-200' : 'text-gray-500'}`}
-                >
-                  Attribute
-                </strong>
-                <span
-                  className={`block border-0 p-0 font-mono focus:ring-0 sm:text-sm ${hasStructuredDocs ? 'text-white' : 'text-gray-900'}`}
-                >
-                  Dokumentation
-                </span>
-              </Link>
-              <OgrFormatDownloadLinks
-                regionSlug={regionSlug}
-                tableName={exportData.id}
-                bbox={bbox}
-              />
-            </div>
-          </li>
-        )
-      })}
+          <div className="flex flex-wrap gap-2">
+            <RegionDatasetDocLink
+              regionSlug={regionSlug}
+              tableName={dataset.tableName}
+              hasStructuredDocs={dataset.hasStructuredDocs}
+            />
+            <OgrFormatDownloadLinks
+              regionSlug={regionSlug}
+              tableName={dataset.tableName}
+              bbox={bbox}
+            />
+          </div>
+        </li>
+      ))}
     </ul>
+  )
+}
+
+// Category-mapped datasets without export/download; doc links only. Shown below the
+// downloadable section when regionModalAccess.showOtherDatasetsSectionInDownloadModal.
+const DownloadModalOtherDatasetsSection = ({ datasets }: { datasets: RegionModalDataset[] }) => {
+  const regionSlug = useRegionSlug()
+
+  if (datasets.length === 0) return null
+
+  return (
+    <section className="mt-6 border-t border-gray-200 pt-6">
+      <h3 className="mb-3 text-sm font-semibold text-gray-900">Weitere Datensätze</h3>
+      <RegionModalDocLinksSection regionSlug={regionSlug} datasets={datasets} />
+    </section>
   )
 }
 
@@ -139,7 +142,9 @@ const VectorTileUrlsSection = () => {
           {vectorTileSources.map((source) => (
             <li key={source.id} className="rounded-md bg-gray-50 p-3">
               <div className="mb-1 text-xs font-medium text-gray-900">{source.id}</div>
-              <div className="font-mono text-xs break-all text-gray-600">{source.tiles}</div>
+              <div className="font-mono text-xs break-all text-gray-600">
+                {getMapDataSourceTilesUrl(source)}
+              </div>
             </li>
           ))}
         </ul>
@@ -148,16 +153,24 @@ const VectorTileUrlsSection = () => {
   )
 }
 
-export const DownloadModalDownloadListWithVectorTiles = () => {
-  // Get the bbox and allowed exports from our region data
-  const { region } = useRegionLoaderData()
-  const { exports: regionExports } = region
-  if (regionExports === null) return null
-
+// Downloadable exports, optional "Weitere Datensätze", and vector tile URLs — gated by
+// regionModalAccess and hasPermissions (vector tiles only for permitted users).
+export const DownloadModalDatasetSections = ({
+  modalAccess,
+  showVectorTiles,
+}: {
+  modalAccess: RegionModalAccess
+  showVectorTiles: boolean
+}) => {
   return (
     <>
-      <DownloadModalDownloadList />
-      <VectorTileUrlsSection />
+      {modalAccess.showDownloadableSectionInDownloadModal ? (
+        <DownloadModalDownloadList datasets={modalAccess.downloadable} />
+      ) : null}
+      {modalAccess.showOtherDatasetsSectionInDownloadModal ? (
+        <DownloadModalOtherDatasetsSection datasets={modalAccess.other} />
+      ) : null}
+      {showVectorTiles ? <VectorTileUrlsSection /> : null}
     </>
   )
 }

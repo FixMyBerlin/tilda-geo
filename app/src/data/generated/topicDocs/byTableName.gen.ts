@@ -298,7 +298,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'permissive',
@@ -521,7 +521,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -529,7 +529,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -537,11 +537,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -553,7 +553,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -573,11 +573,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -851,138 +851,7 @@ const data = {
       {
         key: 'road',
         type: 'string',
-        label: 'Straßentyp',
-        values: [
-          {
-            value: 'bicycle_road',
-            label: 'Fahrradstraße',
-          },
-          {
-            value: 'construction',
-            label: 'Straße ist in Bau',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
-            value: 'cycleway',
-            label: 'Radweg',
-          },
-          {
-            value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
-          },
-          {
-            value: 'footway_sidewalk',
-            label: 'Gehweg',
-          },
-          {
-            value: 'footway',
-            label: 'Fußweg',
-          },
-          {
-            value: 'living_street',
-            label: 'Verkehrsberuhigter Bereich',
-          },
-          {
-            value: 'motorway_link',
-            label: 'Zufahrt einer Autobahn',
-          },
-          {
-            value: 'motorway',
-            label: 'Autobahn',
-          },
-          {
-            value: 'path',
-            label: 'Weg / Pfad',
-          },
-          {
-            value: 'pedestrian',
-            label: 'Fußgängerzone',
-          },
-          {
-            value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
-          },
-          {
-            value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
-          },
-          {
-            value: 'residential',
-            label: 'Anwohnerstraße',
-          },
-          {
-            value: 'residential_priority_road',
-            label: 'residential_priority_road',
-          },
-          {
-            value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
-          },
-          {
-            value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
-          },
-          {
-            value: 'service_alley',
-            label: 'Gasse',
-          },
-          {
-            value: 'service_driveway',
-            label: 'Grundstückszufahrt',
-          },
-          {
-            value: 'service_emergency_access',
-            label: 'Rettungsweg',
-          },
-          {
-            value: 'service_parking_aisle',
-            label: 'Parkplatzweg',
-          },
-          {
-            value: 'service_road',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'service_uncategorized',
-            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
-          },
-          {
-            value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
-          },
-          {
-            value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
-          },
-          {
-            value: 'track',
-            label: 'Wald- / Feldweg',
-          },
-          {
-            value: 'unclassified',
-            label: 'Nebenstraße mit Verbindungscharakter',
-          },
-          {
-            value: 'unspecified_road',
-            label: 'Unkategorisierte Straße',
-          },
-        ],
-      },
-      {
-        key: '_parent_highway',
-        type: 'string',
-        label: 'Straßentyp',
+        label: 'Straßentyp Fahrbahn',
         values: [
           {
             value: 'bicycle_road',
@@ -1113,31 +982,11 @@ const data = {
       {
         key: 'highway',
         type: 'string',
-        label: 'Straßentyp',
+        label: 'Straßentyp Fahrbahn',
         values: [
-          {
-            value: 'bicycle_road',
-            label: 'Fahrradstraße',
-          },
-          {
-            value: 'construction',
-            label: 'Straße ist in Bau',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
           {
             value: 'cycleway',
             label: 'Radweg',
-          },
-          {
-            value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
-          },
-          {
-            value: 'footway_sidewalk',
-            label: 'Gehweg',
           },
           {
             value: 'footway',
@@ -1148,14 +997,6 @@ const data = {
             label: 'Verkehrsberuhigter Bereich',
           },
           {
-            value: 'motorway_link',
-            label: 'Zufahrt einer Autobahn',
-          },
-          {
-            value: 'motorway',
-            label: 'Autobahn',
-          },
-          {
             value: 'path',
             label: 'Weg / Pfad',
           },
@@ -1164,52 +1005,28 @@ const data = {
             label: 'Fußgängerzone',
           },
           {
-            value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
-          },
-          {
             value: 'primary',
             label: 'Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
           },
           {
             value: 'residential',
             label: 'Anwohnerstraße',
           },
           {
-            value: 'residential_priority_road',
-            label: 'residential_priority_road',
-          },
-          {
-            value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            value: 'road',
+            label: 'Unkategorisierte Straße',
           },
           {
             value: 'secondary',
             label: 'Landesstraße/Wichtige Durchgangsstraße',
           },
           {
-            value: 'service_alley',
-            label: 'Gasse',
-          },
-          {
-            value: 'service_driveway',
-            label: 'Grundstückszufahrt',
-          },
-          {
-            value: 'service_emergency_access',
-            label: 'Rettungsweg',
-          },
-          {
-            value: 'service_parking_aisle',
-            label: 'Parkplatzweg',
-          },
-          {
-            value: 'service_road',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'service_uncategorized',
-            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
           },
           {
             value: 'service',
@@ -1220,12 +1037,12 @@ const data = {
             label: 'Stufen',
           },
           {
-            value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
-          },
-          {
             value: 'tertiary',
             label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
           },
           {
             value: 'track',
@@ -1235,9 +1052,80 @@ const data = {
             value: 'unclassified',
             label: 'Nebenstraße mit Verbindungscharakter',
           },
+        ],
+      },
+      {
+        key: '_parent_highway',
+        type: 'string',
+        label: 'Straßentyp Fahrbahn',
+        values: [
           {
-            value: 'unspecified_road',
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary',
+            label: 'Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'road',
             label: 'Unkategorisierte Straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landesstraße/Wichtige Durchgangsstraße',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
           },
         ],
       },
@@ -1349,9 +1237,9 @@ const data = {
           },
           {
             value: 'implicit_yes',
-            label: 'Wahrscheinlich eine Richtung',
+            label: 'Eine Richtung (abgeleitet)',
             description:
-              'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier eine Richtung als wahrscheinlich angenommen.',
+              'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
           },
         ],
       },
@@ -1850,7 +1738,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -1858,7 +1746,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -1866,11 +1754,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -1882,7 +1770,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -1902,11 +1790,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -1946,11 +1834,19 @@ const data = {
         values: [
           {
             value: 'tag',
-            label: 'OSM-Tag `surface`',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
           },
           {
             value: 'parent_highway_tag',
             label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
           },
         ],
       },
@@ -1963,6 +1859,14 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
           },
         ],
       },
@@ -3065,7 +2969,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -3073,7 +2977,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -3081,11 +2985,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -3097,7 +3001,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -3117,11 +3021,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -3411,7 +3315,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'permissive',
@@ -3737,7 +3641,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -3868,7 +3772,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -3876,7 +3780,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -3884,11 +3788,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -3900,7 +3804,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -3920,11 +3824,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -4386,7 +4290,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -4461,7 +4365,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -4469,7 +4373,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -4477,11 +4381,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -4493,7 +4397,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -4513,11 +4417,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -5407,7 +5311,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -5415,7 +5319,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -5423,11 +5327,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -5439,7 +5343,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -5459,11 +5363,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -5612,7 +5516,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -7140,7 +7044,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -7148,7 +7052,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -7156,11 +7060,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -7172,7 +7076,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -7192,11 +7096,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -7345,7 +7249,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -8014,7 +7918,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -8022,7 +7926,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -8030,11 +7934,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -8046,7 +7950,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -8066,11 +7970,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -8175,7 +8079,7 @@ const data = {
           },
           {
             value: 'customers',
-            label: 'Kunden',
+            label: 'Kund:innen',
           },
           {
             value: 'destination',
@@ -9017,7 +8921,7 @@ const data = {
           },
           {
             value: 'amenity-university',
-            label: 'Universitaet',
+            label: 'Universität',
           },
           {
             value: 'shop-second_hand',
@@ -9121,7 +9025,7 @@ const data = {
           },
           {
             value: 'amenity-public_building',
-            label: 'Oeffentliches Gebaeude',
+            label: 'Öffentliches Gebäude',
           },
           {
             value: 'amenity-boat_rental',
@@ -9309,7 +9213,7 @@ const data = {
           },
           {
             value: 'shop-baby_goods',
-            label: 'Babysachengeschäft',
+            label: 'Babyausstattung',
           },
           {
             value: 'leisure-park',
@@ -9325,7 +9229,7 @@ const data = {
           },
           {
             value: 'amenity-traffic_park',
-            label: 'Verkehrsuebungsplatz',
+            label: 'Verkehrsübungsplatz',
           },
           {
             value: 'amenity-prison',
@@ -9397,7 +9301,7 @@ const data = {
           },
           {
             value: 'shop-estate_agent',
-            label: 'Immobilienbuero',
+            label: 'Immobilienbüro',
           },
           {
             value: 'shop-wool',
@@ -9525,7 +9429,7 @@ const data = {
           },
           {
             value: 'shop-security',
-            label: 'Sicherheitsfachgeschaeft',
+            label: 'Sicherheitsfachgeschäft',
           },
           {
             value: 'shop-spices',
@@ -9533,7 +9437,7 @@ const data = {
           },
           {
             value: 'tourism-alpine_hut',
-            label: 'Berghuette',
+            label: 'Berghütte',
           },
           {
             value: 'shop-truck',
@@ -9569,7 +9473,7 @@ const data = {
           },
           {
             value: 'shop-food',
-            label: 'Lebensmittelgeschaeft',
+            label: 'Lebensmittelgeschäft',
           },
           {
             value: 'shop-groundskeeping',
@@ -9583,25 +9487,25 @@ const data = {
             value: 'amenity-fallback',
             label: 'Einrichtung (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
           },
           {
             value: 'leisure-fallback',
             label: 'Freizeit (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
           },
           {
             value: 'shop-fallback',
             label: 'Geschäft (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
           },
           {
             value: 'tourism-fallback',
             label: 'Tourismus (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
           },
         ],
       },
@@ -9867,6 +9771,98 @@ const data = {
           {
             value: 'unspecified_road',
             label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'highway',
+        type: 'string',
+        label: 'OSM-Straßentyp',
+        description: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
+        values: [
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary',
+            label: 'Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'road',
+            label: 'Unkategorisierte Straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landesstraße/Wichtige Durchgangsstraße',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'trunk',
+            label: 'Kraftfahrstraße',
+          },
+          {
+            value: 'trunk_link',
+            label: 'Kraftfahrstraßen-Anschluss',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
           },
         ],
       },
@@ -10678,7 +10674,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -10686,7 +10682,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -10694,11 +10690,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -10710,7 +10706,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -10730,11 +10726,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -10774,7 +10770,19 @@ const data = {
         values: [
           {
             value: 'tag',
-            label: 'OSM-Tag `surface`',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
           },
         ],
       },
@@ -10787,6 +10795,14 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
           },
         ],
       },
@@ -11312,7 +11328,7 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Pflastersteine',
+            label: 'Verbundpflastersteine',
           },
           {
             value: 'paving_stones:lanes',
@@ -11320,7 +11336,7 @@ const data = {
           },
           {
             value: 'sett',
-            label: 'Kopfsteinpflaster',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
           },
           {
             value: 'mosaic_sett',
@@ -11328,11 +11344,11 @@ const data = {
           },
           {
             value: 'small_sett',
-            label: 'Feines Kopfsteinpflaster',
+            label: 'Kleinpflaster',
           },
           {
             value: 'large_sett',
-            label: 'Grobes Kopfsteinpflaster',
+            label: 'Großpflaster',
           },
           {
             value: 'bricks',
@@ -11344,7 +11360,7 @@ const data = {
           },
           {
             value: 'ground',
-            label: 'Naturboden / Erde',
+            label: 'Erde/Boden',
           },
           {
             value: 'grass',
@@ -11364,11 +11380,11 @@ const data = {
           },
           {
             value: 'gravel',
-            label: 'Kies',
+            label: 'Schotter',
           },
           {
             value: 'pebblestone',
-            label: 'Kiesel',
+            label: 'Kieselsteine',
           },
           {
             value: 'wood',
@@ -11408,7 +11424,19 @@ const data = {
         values: [
           {
             value: 'tag',
-            label: 'OSM-Tag `surface`',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
           },
         ],
       },
@@ -11421,6 +11449,14 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
           },
         ],
       },

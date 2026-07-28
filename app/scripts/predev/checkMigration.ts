@@ -1,6 +1,7 @@
 import { styleText } from 'node:util'
 import { confirm, isCancel, note } from '@clack/prompts'
 import { $ } from 'bun'
+import { applyDevPortSlotToProcessEnv, exitOnInvalidDevPortSlot } from './devPortSlot'
 import { logErr, logOk } from './predevLog'
 
 const label = 'check_migration'
@@ -21,6 +22,8 @@ function showPendingMigrationsTip() {
 
 export async function checkMigration() {
   try {
+    exitOnInvalidDevPortSlot(label)
+    applyDevPortSlotToProcessEnv()
     // `prisma migrate status` exits 1 when migrations are pending; Bun `$` would throw before we can read stdout.
     const result = await $`bun run migrate-check`.quiet().nothrow()
     const output = result.text()

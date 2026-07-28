@@ -1,5 +1,6 @@
 import { note } from '@clack/prompts'
 import { describeGeoMetaProbeIssue, geoMetaProbeOk, probeGeoMeta } from '../geo-bootstrap/probe'
+import { applyDevPortSlotToProcessEnv, exitOnInvalidDevPortSlot } from './devPortSlot'
 import { logOk, logWarn } from './predevLog'
 
 const label = 'check_geo_bootstrap'
@@ -18,6 +19,8 @@ function showGeoBootstrapTip(issue: string) {
 }
 
 export async function checkGeoBootstrap() {
+  exitOnInvalidDevPortSlot(label)
+  applyDevPortSlotToProcessEnv()
   const probe = await probeGeoMeta()
 
   if (geoMetaProbeOk(probe)) {

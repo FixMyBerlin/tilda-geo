@@ -69,6 +69,31 @@ function tilesContainerForStack(stackId: string) {
   return stackId === DEVELOP_STACK_ID ? 'tiles' : `${stackId}_tiles`
 }
 
+/** Published host ports for a running stack, or undefined if db+tiles are not both up. */
+export async function getRunningStackPublishedPorts(stackId: string) {
+  const dbName = dbContainerForStack(stackId)
+  const tilesName = tilesContainerForStack(stackId)
+
+  const { out, exitCode } = await dockerText([
+    'docker',
+    'ps',
+    '--filter',
+    'status=running',
+    '--format',
+    '{{.Names}}',
+  ])
+  if (exitCode !== 0) return undefined
+
+  const names = new Set(out.split('\n').filter(Boolean))
+  if (!names.has(dbName) || !names.has(tilesName)) return undefined
+  if (!(await isPostgisDbContainer(dbName))) return undefined
+
+  const databasePort = await publishedHostPort(dbName, '5432')
+  const tilesPort = await publishedHostPort(tilesName, '3000')
+  if (databasePort === undefined || tilesPort === undefined) return undefined
+  return { databasePort, tilesPort }
+}
+
 /** Running isolated (or develop) db+tiles pairs discovered from Docker. */
 export async function listRunningDevStacks() {
   const { out, exitCode } = await dockerText([
@@ -107,14 +132,20 @@ export async function listRunningDevStacks() {
 }
 
 export async function resolveRunningAttachStack(stackId: string) {
-  const stacks = await listRunningDevStacks()
-  const entry = stacks.find((s) => s.stackId === stackId)
-  if (!entry) {
+  // Use port-agnostic discovery so attach works for default and DEV_PORT_SLOT stacks.
+  // listRunningDevStacks() only lists default ports (used by stop-others).
+  const ports = await getRunningStackPublishedPorts(stackId)
+  if (!ports) {
     throw new Error(
       `DEV_ATTACH_STACK=${stackId} not running — start that stack with bun run dev in its checkout first`,
     )
   }
-  return entry
+  const dbName = dbContainerForStack(stackId)
+  return {
+    stackId,
+    composeProject: await composeProject(dbName),
+    repoRoot: await composeWorkingDir(dbName),
+  } satisfies RunningDevStack
 }
 
 /** Stop db+tiles for one discovered stack. */

@@ -6,7 +6,7 @@ Server Components render React on the server and stream to the client. Heavy dep
 
 **Official docs:** [Server Components](https://tanstack.com/start/latest/docs/framework/react/guide/server-components)
 
-**Related FMC refs:** [client-server-boundaries.md](client-server-boundaries.md) (where RSC code lives) · [selective-ssr.md](selective-ssr.md) (pairing with `ssr`) · [router-and-query.md](router-and-query.md) (Query loaders)
+**Related FMC refs:** [execution-model.md](execution-model.md) · [client-server-boundaries.md](client-server-boundaries.md) (where RSC code lives) · [selective-ssr.md](selective-ssr.md) (pairing with `ssr`) · [router-and-query.md](router-and-query.md) (Query loaders)
 
 ---
 
@@ -18,9 +18,9 @@ Default FMC data/UI flow is isomorphic loaders + `createServerFn` + React Query 
 - Server-rendered UI composed with client interactivity via **slots**
 - Progressive streaming of server-rendered widgets
 
-RSC is **not** Next.js async server components in route files. Create UI in `*.functions.ts` (`createServerFn`), return through the route `loader`, render as `{Renderable}` or `<CompositeComponent src={...} />`.
+RSC is **not** async server components in route files. Create UI in `*.functions.ts` (`createServerFn`), return through the route `loader`, render as `{Renderable}` or `<CompositeComponent src={...} />`.
 
-Migrating from Next RSC? See `tanstack-start-migration` mental-model section — not a drop-in replacement.
+For the default isomorphic data path, see [execution-model.md](execution-model.md).
 
 ---
 

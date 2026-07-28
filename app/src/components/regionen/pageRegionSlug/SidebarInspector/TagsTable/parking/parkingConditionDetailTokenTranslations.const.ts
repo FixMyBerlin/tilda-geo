@@ -3,7 +3,7 @@ export const parkingConditionDetailTokenTranslations = {
   autumn: 'Herbst',
   axleload: 'Achslast',
   bus: 'Busse',
-  customers: 'Kunden',
+  customers: 'Kund:innen',
   day: 'Tag',
   days: 'Tage',
   delivery: 'Lieferverkehr',

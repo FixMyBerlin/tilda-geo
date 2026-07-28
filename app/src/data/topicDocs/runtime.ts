@@ -134,16 +134,63 @@ export const getInspectorAttributePurpose = (sourceId: string, tagKey: string) =
   return null
 }
 
+type InspectorTagValue = string | boolean | number | null | undefined
+
+export const formatInspectorTagValue = (tagValue: InspectorTagValue) => {
+  switch (typeof tagValue) {
+    case 'undefined':
+    case 'object': // null
+      return undefined
+    case 'string':
+      return tagValue
+    case 'boolean':
+    case 'number':
+      return String(tagValue)
+    case 'bigint': {
+      throw new Error('Not implemented yet: "bigint" case')
+    }
+    case 'function': {
+      throw new Error('Not implemented yet: "function" case')
+    }
+    case 'symbol': {
+      throw new Error('Not implemented yet: "symbol" case')
+    }
+  }
+}
+
+export const getInspectorValueTranslationKey = (
+  sourceId: string,
+  tagKey: string,
+  tagValue: InspectorTagValue,
+) => {
+  const formattedValue = formatInspectorTagValue(tagValue)
+  if (!formattedValue) return undefined
+  return `${sourceId}--${tagKey}=${formattedValue}`
+}
+
 export const getDescriptionForInspectorTag = (
   sourceId: string,
   tagKey: string,
-  tagValue: string | undefined,
+  tagValue: InspectorTagValue,
 ) => {
   const sourceDescriptions = inspectorDescriptionMap[sourceId]
   if (!sourceDescriptions) return undefined
-  if (tagValue) {
-    const fromValue = sourceDescriptions.values[tagKey]?.[tagValue]
+
+  const formattedValue = formatInspectorTagValue(tagValue)
+  if (formattedValue) {
+    const fromValue = sourceDescriptions.values[tagKey]?.[formattedValue]
     if (fromValue) return fromValue
   }
   return sourceDescriptions.keys[tagKey]
+}
+
+export const getInspectorValueDescriptionTranslationKey = (
+  sourceId: string,
+  tagKey: string,
+  tagValue: InspectorTagValue,
+) => {
+  const valueTranslationKey = getInspectorValueTranslationKey(sourceId, tagKey, tagValue)
+  if (!valueTranslationKey) return undefined
+  if (!getDescriptionForInspectorTag(sourceId, tagKey, tagValue)) return undefined
+  return `${valueTranslationKey}--description`
 }

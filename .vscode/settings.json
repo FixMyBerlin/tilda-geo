@@ -25,11 +25,12 @@
   "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  // Cursor rules (.mdc) — treat as markdown; open in text editor so oxfmt runs on save.
+  "files.associations": { "*.mdc": "markdown" },
+  "workbench.editorAssociations": { "*.mdc": "default" },
   "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
   "js/ts.experimental.useTsgo": true,
-  "typescript.tsdk": "app/node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.native-preview.tsdk": "app/node_modules/typescript",
+  "js/ts.tsdk.path": "app/node_modules/typescript",
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/

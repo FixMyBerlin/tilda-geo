@@ -23,7 +23,7 @@ export const SourcesLayerRasterBackgrounds: React.FC = () => {
 
   return (
     <>
-      {backgrounds.map(({ id, tiles, minzoom, maxzoom, tileSize, attributionHtml }) => {
+      {backgrounds.map(({ id, tilesUrl, minzoom, maxzoom, tileSize, attributionHtml }) => {
         const backgroundId = `${id}_tiles`
 
         const visible = backgroundParam === id
@@ -45,7 +45,7 @@ export const SourcesLayerRasterBackgrounds: React.FC = () => {
               id={backgroundId}
               key={backgroundId}
               type="raster"
-              tiles={[tiles]}
+              tiles={[tilesUrl]}
               attribution={enhancedAttributionHtml}
               {...(maxzoom ? { maxzoom } : {})}
               {...(minzoom ? { minzoom } : {})}

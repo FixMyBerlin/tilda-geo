@@ -1,3 +1,5 @@
+import { homedir } from 'node:os'
+import { join } from 'node:path'
 import { fileURLToPath, URL } from 'node:url'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
@@ -5,8 +7,26 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
 import browserslistToEsbuild from 'browserslist-to-esbuild'
+import dotenv from 'dotenv'
 import { nitro } from 'nitro/vite'
 import { createLogger, defineConfig } from 'vite'
+import { applyDevPortSlotToProcessEnv } from './scripts/predev/devPortSlot'
+import { logErr } from './scripts/predev/predevLog'
+
+const repoRoot = fileURLToPath(new URL('..', import.meta.url))
+dotenv.config({ path: `${repoRoot}/.env` })
+dotenv.config({ path: `${repoRoot}/.env.local` })
+
+let devPortSlot
+try {
+  devPortSlot = applyDevPortSlotToProcessEnv()
+} catch (e) {
+  logErr('vite_config', e instanceof Error ? e.message : String(e))
+  process.exit(1)
+}
+const devVitePort = devPortSlot.vitePort
+
+const appRoot = fileURLToPath(new URL('.', import.meta.url))
 
 // Suppress "Module X has been externalized for browser compatibility" (pg/events etc.). Client still
 // pulls in server modules via server-fn imports; we externalize them, so the warning is noise.
@@ -52,15 +72,23 @@ export default defineConfig({
   },
   server: {
     host: '127.0.0.1',
-    port: 5173,
+    port: devVitePort,
     strictPort: true,
+    // Bun globalStore (app/bunfig.toml) symlinks realpath outside the project (~/.bun/install/cache/links/).
+    // Extend (not replace) Vite's default fs.allow — setting allow alone drops the project root.
+    // Phantom deps (direct in package.json): crossws — Nitro dev entry imports crossws/adapters/node.
+    // @see https://bun.com/docs/pm/global-store#phantom-dependency-fallback
+    // @see https://vite.dev/config/server-options.html#server-fs-allow
+    fs: {
+      allow: [appRoot, join(homedir(), '.bun/install/cache/links')],
+    },
     // Keep HMR pinned to the same host/port as `bun run dev` so websocket reconnects
     // stay stable after config-triggered restarts.
     hmr: {
       protocol: 'ws',
       host: '127.0.0.1',
-      port: 5173,
-      clientPort: 5173,
+      port: devVitePort,
+      clientPort: devVitePort,
     },
   },
   resolve: {
