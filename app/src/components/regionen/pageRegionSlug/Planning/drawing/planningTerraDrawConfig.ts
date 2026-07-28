@@ -2,7 +2,7 @@ import type { GeoJSONStoreFeatures, HexColor } from 'terra-draw'
 import { TerraDrawPolygonMode, TerraDrawSelectMode } from 'terra-draw'
 
 /** Blue palette, matching the existing planning boundary highlight (#2563eb). */
-export const PLANNING_TERRA_COLORS = {
+const PLANNING_TERRA_COLORS = {
   drawing: '#2563eb' as HexColor,
   unselected: '#2563eb' as HexColor,
   selected: '#1d4ed8' as HexColor,

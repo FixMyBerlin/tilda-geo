@@ -26,7 +26,7 @@ export function parseStudyAreaGeometry(jsonStr: string): StudyAreaGeometry {
 }
 
 /** Extract the single study-area geometry from an already-parsed GeoJSON object. */
-export function extractStudyAreaGeometry(input: GeoJSON.GeoJSON): StudyAreaGeometry {
+function extractStudyAreaGeometry(input: GeoJSON.GeoJSON): StudyAreaGeometry {
   if (input.type === 'FeatureCollection') {
     const polygonal = input.features.filter((f) => isPolygonal(f.geometry))
     if (polygonal.length !== 1) throw new Error(ONLY_POLYGON_MSG)

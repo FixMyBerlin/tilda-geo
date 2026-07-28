@@ -1,4 +1,3 @@
-import type { LngLatBounds } from 'maplibre-gl'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 
 // Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX). Used as the
@@ -87,23 +86,3 @@ export const WEIGHT_GROUPS: { key: 'bedarf' | 'bebauung'; label: string; weights
     weights: ['w_surface', 'w_slope', 'w_vegetation', 'w_intersection', 'w_parken'],
   },
 ]
-
-// Build a GeoJSON Polygon (EPSG:4326) from current map bounds, used as study_area.
-export function boundsToPolygon(bounds: LngLatBounds) {
-  const w = bounds.getWest()
-  const s = bounds.getSouth()
-  const e = bounds.getEast()
-  const n = bounds.getNorth()
-  return {
-    type: 'Polygon' as const,
-    coordinates: [
-      [
-        [w, s],
-        [e, s],
-        [e, n],
-        [w, n],
-        [w, s],
-      ],
-    ],
-  }
-}

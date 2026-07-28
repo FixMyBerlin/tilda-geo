@@ -3,7 +3,7 @@ import { twJoin } from 'tailwind-merge'
 
 // Die 13 fachlichen Schritte eines Laufs, in Reihenfolge. Müssen mit
 // SCORING_STEPS im planning-worker (flaechenfinder/scorer.py) übereinstimmen.
-export const SCORING_STEPS = [
+const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
   'H3-Gitter generieren',
   'Radwege laden',

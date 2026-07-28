@@ -267,8 +267,8 @@ export function getActionsToRun(selectedIds: CleanupActionId[]) {
     return action ? [action] : []
   }
   const selected = new Set(selectedIds)
-  return ACTION_ORDER.filter((id) => selected.has(id)).map((id) =>
-    CLEANUP_ACTIONS.find((a) => a.id === id)!,
+  return ACTION_ORDER.filter((id) => selected.has(id)).map(
+    (id) => CLEANUP_ACTIONS.find((a) => a.id === id)!,
   )
 }
 

@@ -3,8 +3,8 @@ import { check } from '@placemarkio/check-geojson'
 // Grenzen für das vom Nutzer hochgeladene Eigendaten-GeoJSON. Client UND Server
 // erzwingen dieselben Werte (der Server vertraut dem Client nicht).
 export const MAX_USER_GEOJSON_BYTES = 5 * 1024 * 1024 // 5 MB
-export const MAX_USER_GEOJSON_FEATURES = 5_000
-export const MAX_USER_GEOJSON_COORDS = 500_000
+const MAX_USER_GEOJSON_FEATURES = 5_000
+const MAX_USER_GEOJSON_COORDS = 500_000
 
 /** Unterstützte Geometrietypen (Punkte/Linien/Flächen; keine GeometryCollection). */
 const ALLOWED_GEOMETRY_TYPES = new Set<GeoJSON.GeoJsonGeometryTypes>([
