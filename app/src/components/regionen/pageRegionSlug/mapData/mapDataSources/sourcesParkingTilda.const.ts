@@ -45,7 +45,6 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'access__if_present',
         'composit_surface_smoothness',
         'area',
-        'source',
         // 'side',
         // Road
         'road',
@@ -75,7 +74,6 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
       documentedKeys: [
         //
         'category',
-        'source',
         'buffer_radius__if_present',
       ],
     },
@@ -186,7 +184,6 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
         'access__if_present',
         'composit_surface_smoothness',
         'area',
-        'source',
         'operator_type',
         'composit_mapillary',
       ],
