@@ -82,7 +82,7 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
               {attributionHtml && (
                 <>
                   <p
-                    // biome-ignore lint/security/noDangerouslySetInnerHtml: attribution from dataset config
+                    // oxlint-disable-next-line react/no-danger -- attribution from dataset config
                     dangerouslySetInnerHTML={{ __html: attributionHtml }}
                   />
                   {licence && (

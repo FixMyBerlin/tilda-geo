@@ -13,12 +13,27 @@ function getDatabaseConfig() {
   return { host, user, password, name }
 }
 
+function encodeCredential(value: string) {
+  return encodeURIComponent(value)
+}
+
+let passwordUrlEncodingWarned = false
+
+function warnIfPasswordNeedsUrlEncoding(password: string) {
+  if (password === encodeCredential(password) || passwordUrlEncodingWarned) return
+
+  passwordUrlEncodingWarned = true
+  console.warn(
+    '[database-url] DATABASE_PASSWORD contains URL-unsafe characters (@, :, /, %, …). ' +
+      'They are percent-encoded in the connection string; prefer a URL-safe password in new deployments.',
+  )
+}
+
 export function getBaseDatabaseUrl() {
   const { host, user, password, name } = getDatabaseConfig()
-  // if (process.env.VITE_APP_ENV !== 'production') {
-  //   console.log('Database URL', { host, user, password: '***', name })
-  // }
-  return `postgresql://${user}:${password}@${host}:5432/${name}`
+  warnIfPasswordNeedsUrlEncoding(password)
+  const port = process.env.DATABASE_PORT ?? '5432'
+  return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
 }
 
 // Note: The ?schema=prisma parameter is used by Prisma CLI (migrations, introspection, studio)

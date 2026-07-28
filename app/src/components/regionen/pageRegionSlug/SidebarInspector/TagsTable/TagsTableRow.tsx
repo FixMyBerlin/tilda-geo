@@ -1,11 +1,22 @@
 import type React from 'react'
 import { twJoin } from 'tailwind-merge'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
-import { isDev } from '@/components/shared/utils/isEnv'
 import { NodataFallback } from './compositTableRows/NodataFallback'
+import {
+  tagsTableLabelCellClass,
+  tagsTableRowClass,
+  tagsTableValueCellClass,
+} from './tagsTableLayout'
 import { TagsTableRowValueWithTooltip } from './TagsTableRowValueWithTooltip'
 import { ConditionalFormattedKey } from './translations/ConditionalFormattedKey'
 import { splitSemicolonRespectingBrackets } from './utils/splitSemicolonRespectingBrackets'
+
+type TagsTableRowTone = 'primary' | 'secondary'
+type TagsTableRowFrameProps = {
+  label: React.ReactNode
+  tone?: TagsTableRowTone
+  children: React.ReactNode
+}
 
 export type TagsTableRowProps =
   | {
@@ -22,37 +33,51 @@ export type TagsTableRowProps =
       children: React.ReactNode
     }
 
-export const TagsTableRow = ({ sourceId, tagKey, tagValue, children }: TagsTableRowProps) => {
-  const secondaryRowPrefixes = ['tilda_', 'prio_', 'value_']
-  const isSecodaryRow = secondaryRowPrefixes.some((e) => tagKey.startsWith(e))
+export const TagsTableRowFrame = ({
+  label,
+  tone = 'primary',
+  children,
+}: TagsTableRowFrameProps) => {
+  const isSecondaryRow = tone === 'secondary'
 
   return (
-    <tr
-      className="group"
-      title={isDev && !children ? `${sourceId}--${tagKey}=${tagValue}` : undefined}
-    >
+    <tr className={tagsTableRowClass}>
       <td
         className={twJoin(
-          'w-2/5 py-2 pr-3 pl-4 text-sm font-medium',
-          isSecodaryRow ? 'text-gray-400 group-hover:text-gray-900' : 'text-gray-900',
+          tagsTableLabelCellClass,
+          isSecondaryRow ? 'text-gray-400 group-hover:text-gray-900' : 'text-gray-900',
         )}
       >
-        <ConditionalFormattedKey sourceId={sourceId} tagKey={tagKey} />
+        {label}
       </td>
       <td
         className={twJoin(
-          'px-3 py-2 text-sm',
-          isSecodaryRow ? 'text-gray-400 group-hover:text-gray-500' : 'text-gray-500',
+          tagsTableValueCellClass,
+          isSecondaryRow ? 'text-gray-400 group-hover:text-gray-500' : 'text-gray-500',
         )}
       >
-        {tagValue === null && <NodataFallback />}
-        {tagValue === undefined && !children && <NodataFallback />}
-        {tagValue && (
-          <TagsTableRowMaybeList sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
-        )}
-        {children && <>{children}</>}
+        {children}
       </td>
     </tr>
+  )
+}
+
+export const TagsTableRow = ({ sourceId, tagKey, tagValue, children }: TagsTableRowProps) => {
+  const secondaryRowPrefixes = ['tilda_', 'prio_', 'value_']
+  const isSecondaryRow = secondaryRowPrefixes.some((prefix) => tagKey.startsWith(prefix))
+
+  return (
+    <TagsTableRowFrame
+      label={<ConditionalFormattedKey sourceId={sourceId} tagKey={tagKey} />}
+      tone={isSecondaryRow ? 'secondary' : 'primary'}
+    >
+      {tagValue === null && <NodataFallback />}
+      {tagValue === undefined && !children && <NodataFallback />}
+      {tagValue && (
+        <TagsTableRowMaybeList sourceId={sourceId} tagKey={tagKey} tagValue={tagValue} />
+      )}
+      {children && <>{children}</>}
+    </TagsTableRowFrame>
   )
 }
 

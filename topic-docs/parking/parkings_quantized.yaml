@@ -1,0 +1,71 @@
+title: Straßenparken (quantisiert)
+summary: Punktförmige, quantisierte Ableitung aus `parkings` für rechnerische Auswertungen. Teilt die fachlichen Übersetzungen mit der Basistabelle über refs.
+sourceIds:
+  - tilda_parkings_quantized
+attributes:
+  - key: parking
+    ref: parkings.parking
+  - key: capacity
+    ref: parkings.capacity
+  - key: orientation
+    ref: parkings.orientation
+  - key: condition_category
+    ref: parkings.condition_category
+  - key: staggered
+    ref: parkings.staggered
+  - key: length
+    ref: parkings.length
+  - key: category
+    ref: parkings.category
+  - key: source
+    ref: parkings.source
+  - key: geom_sources
+    ref: parkings.geom_sources
+  - key: tag_sources
+    ref: parkings.tag_sources
+  - key: road
+    ref: parkings.road
+  - key: road_name
+    ref: parkings.road_name
+  - key: road_oneway
+    ref: parkings.road_oneway
+  - key: road_width
+    ref: parkings.road_width
+  - key: side
+    ref: parkings.side
+  - key: area
+    ref: parkings.area
+  - key: surface
+    ref: parkings.surface
+  - key: direction
+    ref: parkings.direction
+  - key: location
+    ref: parkings.location
+  - key: markings
+    ref: parkings.markings
+  - key: covered
+    ref: parkings.covered
+  - key: access
+    ref: parkings.access
+  - key: operator_type
+    ref: parkings.operator_type
+  - key: operator_type_source
+    ref: parkings.operator_type_source
+  - key: operator_type_confidence
+    ref: parkings.operator_type_confidence
+  - key: informal
+    ref: parkings.informal
+  - key: zone
+    ref: parkings.zone
+  - key: reason
+    ref: parkings.reason
+  - key: mapillary
+    ref: parkings.mapillary
+  - key: traffic_sign
+    ref: parkings.traffic_sign
+  - key: _staggered_maneuvering_loss
+    purpose: qa
+    ref: parkings._staggered_maneuvering_loss
+  - key: _staggered_original_capacity
+    purpose: qa
+    ref: parkings._staggered_original_capacity

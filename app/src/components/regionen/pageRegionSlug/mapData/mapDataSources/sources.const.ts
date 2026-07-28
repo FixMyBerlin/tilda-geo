@@ -41,9 +41,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   ...sourcesParkingTilda,
   {
     id: 'atlas_boundaries',
-    tiles: getTilesUrl(
-      '/atlas_generalized_boundaries,atlas_generalized_boundarylabels/{z}/{x}/{y}',
-    ),
+    tileTables: ['boundaries', 'boundaryLabels'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>',
@@ -60,7 +58,8 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_presenceStats',
-    tiles: getTilesUrl('/presenceStats/{z}/{x}/{y}'),
+    tileTables: null,
+    tilesUrl: getTilesUrl('/presenceStats/{z}/{x}/{y}'),
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>',
@@ -71,7 +70,7 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        'name:prefix',
+        'name_prefix',
         'name',
         'admin_level',
         'category_municipality__if_present',
@@ -93,8 +92,9 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'accidents_unfallatlas',
+    tileTables: null,
     // TODO Migrieren auf Maptiler
-    tiles: `https://api.mapbox.com/v4/hejco.5oexnrgf/{z}/{x}/{y}.vector.pbf?sku=101bSz70Afq22&access_token=${apiKeyMapbox}`,
+    tilesUrl: `https://api.mapbox.com/v4/hejco.5oexnrgf/{z}/{x}/{y}.vector.pbf?sku=101bSz70Afq22&access_token=${apiKeyMapbox}`,
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: 16, // https://studio.mapbox.com/tilesets/hejco.5oexnrgf/
     attributionHtml: 'Unfallatlas', // TODO
@@ -110,7 +110,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_bikelanes',
-    tiles: getTilesUrl('/atlas_generalized_bikelanes/{z}/{x}/{y}'),
+    tileTables: ['bikelanes'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -129,7 +129,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'operator_type__if_present',
         'oneway',
         'traffic_sign',
-        'composit_width',
+        'width',
         'bridge__if_present',
         'covered__if_present',
         'separation_left__if_present',
@@ -152,7 +152,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_bikeroutes',
-    tiles: getTilesUrl('/atlas_generalized_bikeroutes/{z}/{x}/{y}'),
+    tileTables: ['bikeroutes'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -186,7 +186,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_roads',
-    tiles: getTilesUrl('/atlas_generalized_roads/{z}/{x}/{y}'),
+    tileTables: ['roads'],
     minzoom: 8,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -205,11 +205,11 @@ export const sources: MapDataSource<SourcesId>[] = [
         'oneway_bicycle__if_present',
         'composit_surface_smoothness',
         'surface_color__if_present',
-        'composit_lit',
+        'lit__if_present',
         'composit_maxspeed',
         'traffic_sign',
         'composit_mapillary',
-        'composit_width',
+        'width',
         'length',
         'description__if_present',
       ],
@@ -219,7 +219,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_roadsPathClasses',
-    tiles: getTilesUrl('/atlas_generalized_roadspathclasses/{z}/{x}/{y}'),
+    tileTables: ['roadsPathClasses'],
     minzoom: 10,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -238,11 +238,11 @@ export const sources: MapDataSource<SourcesId>[] = [
         'oneway_bicycle__if_present',
         'composit_surface_smoothness',
         'surface_color__if_present',
-        'composit_lit',
+        'lit__if_present',
         'composit_maxspeed',
         'traffic_sign',
         'composit_mapillary',
-        'composit_width',
+        'width',
         'length',
         'description__if_present',
       ],
@@ -252,7 +252,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_bikelanesPresence',
-    tiles: getTilesUrl('/atlas_generalized_bikelanespresence/{z}/{x}/{y}'),
+    tileTables: ['bikelanesPresence'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -270,7 +270,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_bikeSuitability',
-    tiles: getTilesUrl('/atlas_generalized_bikesuitability/{z}/{x}/{y}'),
+    tileTables: ['bikeSuitability'],
     minzoom: 10,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -294,7 +294,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_publicTransport',
-    tiles: getTilesUrl('/atlas_generalized_publictransport/{z}/{x}/{y}'),
+    tileTables: ['publicTransport'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -312,7 +312,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_poiClassification',
-    tiles: getTilesUrl('/atlas_generalized_poiclassification/{z}/{x}/{y}'),
+    tileTables: ['poiClassification'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -330,7 +330,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_places',
-    tiles: getTilesUrl('/atlas_generalized_places/{z}/{x}/{y}'),
+    tileTables: ['places'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -341,16 +341,14 @@ export const sources: MapDataSource<SourcesId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['name', 'place', 'population', 'population:date'],
+      documentedKeys: ['name', 'place', 'population', 'population_date'],
     },
     // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
     id: 'atlas_barriers',
-    tiles: getTilesUrl(
-      '/atlas_generalized_barrierareas,atlas_generalized_barrierlines/{z}/{x}/{y}',
-    ),
+    tileTables: ['barrierAreas', 'barrierLines'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -364,7 +362,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_landuse',
-    tiles: getTilesUrl('/atlas_generalized_landuse/{z}/{x}/{y}'),
+    tileTables: ['landuse'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -382,9 +380,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_bicycleParking',
-    tiles: getTilesUrl(
-      '/atlas_generalized_bicycleparking_points,atlas_generalized_bicycleparking_areas/{z}/{x}/{y}',
-    ),
+    tileTables: ['bicycleParking_points', 'bicycleParking_areas'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -400,6 +396,8 @@ export const sources: MapDataSource<SourcesId>[] = [
         'capacity:cargo_bike__if_present',
         'access',
         'covered',
+        'operator_type__if_present',
+        'lit__if_present',
         'composit_mapillary',
         'description__if_present',
       ],
@@ -409,7 +407,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_trafficSigns',
-    tiles: getTilesUrl('/atlas_generalized_trafficsigns/{z}/{x}/{y}'),
+    tileTables: ['trafficSigns'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -427,7 +425,8 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_aggregated_lengths',
-    tiles: getTilesUrl('/aggregated_lengths/{z}/{x}/{y}'),
+    tileTables: null,
+    tilesUrl: getTilesUrl('/aggregated_lengths/{z}/{x}/{y}'),
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -445,7 +444,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_todos_lines',
-    tiles: getTilesUrl('/atlas_generalized_todos_lines/{z}/{x}/{y}'),
+    tileTables: ['todos_lines'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -464,7 +463,8 @@ export const sources: MapDataSource<SourcesId>[] = [
   {
     // https://www.mapillary.com/developer/api-documentation/#coverage-tiles
     id: 'mapillary_coverage',
-    tiles: `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${apiKeyMapillary}`,
+    tileTables: null,
+    tilesUrl: `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${apiKeyMapillary}`,
     minzoom: 0,
     maxzoom: 14,
     attributionHtml: 'Daten von Mapillary', // TODO – could not find anything specific; they don't attribute on their own page.

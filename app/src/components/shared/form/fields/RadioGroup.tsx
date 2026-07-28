@@ -5,10 +5,19 @@ import type { FormApi } from '@/components/shared/form/types'
 import type { FieldProps } from './sharedStyles'
 import { labelClass } from './sharedStyles'
 
+type RadioItem = {
+  value: string
+  /** Accessible name (and plain-text fallback). */
+  label: string
+  labelContent?: React.ReactNode
+  disabled?: boolean
+  className?: string
+}
+
 type Props<T extends Record<string, unknown>> = FieldProps & {
   form: FormApi<T>
   name: DeepKeys<T>
-  items: { value: string; label: string; disabled?: boolean; className?: string }[]
+  items: RadioItem[]
 }
 
 export function RadioGroup<T extends Record<string, unknown>>({
@@ -50,6 +59,7 @@ export function RadioGroup<T extends Record<string, unknown>>({
                     value={item.value}
                     disabled={item.disabled}
                     checked={value === item.value}
+                    aria-label={item.label}
                     onBlur={field.handleBlur}
                     onChange={() => field.handleChange((_prev) => item.value as typeof _prev)}
                     className={twJoin(
@@ -62,11 +72,12 @@ export function RadioGroup<T extends Record<string, unknown>>({
                   <label
                     htmlFor={`${String(name)}-${item.value}`}
                     className={twJoin(
-                      'ml-3 block text-sm font-medium',
+                      'ml-3 block text-sm',
+                      item.labelContent ? 'font-normal' : 'font-medium',
                       item.disabled ? 'cursor-not-allowed text-gray-500' : 'text-gray-700',
                     )}
                   >
-                    {item.label}
+                    {item.labelContent ?? item.label}
                   </label>
                 </div>
               ))}

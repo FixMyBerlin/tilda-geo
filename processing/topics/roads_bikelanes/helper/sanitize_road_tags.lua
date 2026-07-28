@@ -1,18 +1,131 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
-local parse_length = require('parse_length')
-require('Sanitize')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local parse_length = require('topics.helper.parse_length')
 
+local SEPARATION_ALLOWED = {
+  'no',
+  'bollard',
+  'flex_post',
+  'vertical_panel',
+  'studs',
+  'bump',
+  'planter',
+  'kerb',
+  'fence',
+  'jersey_barrier',
+  'guard_rail',
+  'structure',
+  'ditch',
+  'greenery',
+  'hedge',
+  'tree_row',
+  'cone',
+  'kerb;parking_lane',
+  'kerb;bollard',
+  'yes',
+}
+
+local MARKING_ALLOWED = {
+  'solid_line',
+  'dashed_line',
+  'double_solid_line',
+  'barred_area',
+  'pictogram',
+  'surface',
+}
+
+local TRAFFIC_MODE_ALLOWED = {
+  'no',
+  'motor_vehicle',
+  'parking',
+  'psv',
+  'bicycle',
+  'foot',
+}
+
+local SURFACE_COLOR_ALLOWED = {
+  'red',
+  'green',
+  'red;green',
+  'no',
+}
+
+--- Original `surface:colour` / `surface:color` before normalization (for error logging).
+---@param tags OsmTags
+---@return string|nil
+local function surface_color_raw(tags)
+  return tags['surface:colour'] or tags['surface:color']
+end
+
+--- Raw separation value for `side` before normalization.
+---@param tags OsmTags
+---@param side SideKey
+---@return string|nil
+local function separation_raw(tags, side)
+  local value = tags['separation:' .. side] or tags['separation:both']
+  if side == 'left' then
+    value = value or tags['separation']
+  end
+  return value
+end
+
+--- Raw marking value for `side` before normalization.
+---@param tags OsmTags
+---@param side SideKey
+---@return string|nil
+local function marking_raw(tags, side)
+  local value = tags['marking:' .. side] or tags['marking:both']
+  if side == 'left' then
+    value = value or tags['marking']
+  end
+  return value
+end
+
+--- Raw traffic_mode value for `side` before normalization.
+---@param tags OsmTags
+---@param side SideKey
+---@return string|nil
+local function traffic_mode_raw(tags, side)
+  local value = tags['traffic_mode:' .. side] or tags['traffic_mode:both']
+  if side == 'left' then
+    value = value or tags['traffic_mode']
+  end
+  return value
+end
+
+--- Map `separate_tags` result keys to OSM strings for `SANITIZED_VALUE` logging when value is disallowed.
+---@param tags OsmTags tag bag passed into the road/bikelane sanitizers (e.g. transformed_tags for bikelanes)
+---@return OsmTags
+local function log_source_overrides(tags)
+  return {
+    surface_color = surface_color_raw(tags),
+    separation_left = separation_raw(tags, 'left'),
+    separation_right = separation_raw(tags, 'right'),
+    marking_left = marking_raw(tags, 'left'),
+    marking_right = marking_raw(tags, 'right'),
+    traffic_mode_left = traffic_mode_raw(tags, 'left'),
+    traffic_mode_right = traffic_mode_raw(tags, 'right'),
+  }
+end
+
+---@class SanitizeRoadTags
+---@field log_source_overrides fun(tags: OsmTags): OsmTags
+---@field surface_color fun(tags: OsmTags): string|nil
+---@field separation fun(tags: OsmTags, side: SideKey): string|nil
+---@field marking fun(tags: OsmTags, side: SideKey): string|nil
+---@field traffic_mode fun(tags: OsmTags, side: SideKey): string|nil
+---@field buffer fun(tags: OsmTags, side: SideKey): number|nil
+---@field temporary fun(tags: OsmTags): string|nil
+---@type SanitizeRoadTags
 local SANITIZE_ROAD_TAGS = {
-  surface_color = function (tags)
-    -- Check for both British and American spelling
-    local surface_color_value = tags['surface:colour'] or tags['surface:color']
-    if surface_color_value == nil then return nil end
+  log_source_overrides = log_source_overrides,
 
-    -- Transform known but unsupported values to values that we support:
+  surface_color = function(tags)
+    local surface_color_value = surface_color_raw(tags)
+    if surface_color_value == nil then
+      return nil
+    end
+
     local transformations = {
-      -- https://taginfo.geofabrik.de/europe:germany/keys/surface%3Acolour#values
-      -- (Reminder: This list shows values for roofs and such as well as ways)
       ['none'] = 'no',
       ['grey'] = 'no',
       ['gray'] = 'no',
@@ -26,80 +139,59 @@ local SANITIZE_ROAD_TAGS = {
     if transformations[surface_color_value] then
       surface_color_value = transformations[surface_color_value]
     end
-    -- Sanitize values:
-    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-    return Sanitize(surface_color_value, { 'red', 'green', 'red;green', 'no' })
-    -- return sanitize_for_logging(
-    --   tags['surface:colour'],
-    --   { 'red', 'green', 'no' },
-    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
-    --   {}
-    -- )
-  end,
-  separation = function (tags, side)
-    -- The side-unspecific tags.separation is deprecated. We interpret it as 'in the direction of travel', meaning left
-    local value = tags['separation:' .. side] or tags['separation:both']
-    if side == 'left' then value = value or tags['separation'] end
-    if value == nil then return nil end
 
-    -- Transform known but unsupported values to values that we support:
+    return sanitize_for_logging(surface_color_value, SURFACE_COLOR_ALLOWED)
+  end,
+
+  separation = function(tags, side)
+    local value = tags['separation:' .. side] or tags['separation:both']
+    if side == 'left' then
+      value = value or tags['separation']
+    end
+    if value == nil then
+      return nil
+    end
+
     local transformations = {
       ['separation_kerb'] = 'bump',
       ['lane_separator'] = 'bump',
       ['surface'] = 'no',
-      ['tree_row;kerb'] = 'tree_row', -- primary separation is 'tree_row'
-      ['kerb;tree_row'] = 'tree_row', -- primary separation is 'tree_row'
-      ['tree_row;kerb;parking_lane'] = 'tree_row', -- primary separation is 'tree_row'
-      ['grass_verge;tree_row'] = 'tree_row', -- primary separation is 'tree_row'
-      ['kerb;greenery'] = 'kerb', -- primary
-      ['parking_lane;kerb'] = 'parking_lane', -- primary
-      ['solid_line;parking_lane'] = 'parking_lane', -- deprecated value
+      ['tree_row;kerb'] = 'tree_row',
+      ['kerb;tree_row'] = 'tree_row',
+      ['tree_row;kerb;parking_lane'] = 'tree_row',
+      ['grass_verge;tree_row'] = 'tree_row',
+      ['kerb;greenery'] = 'kerb',
+      ['parking_lane;kerb'] = 'parking_lane',
+      ['solid_line;parking_lane'] = 'parking_lane',
     }
     if transformations[value] then
       value = transformations[value]
     end
-    -- Sanitize values:
-    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-    return Sanitize(value, {
-      'no',
-      'bollard', 'flex_post', 'vertical_panel', 'studs', 'bump', 'planter', 'kerb', 'fence', 'jersey_barrier', 'guard_rail', 'structure', 'ditch', 'greenery', 'hedge', 'tree_row', 'cone',
-      -- We preserver some combinations but transform other
-      'kerb;parking_lane', -- sidewalk but additional protection
-      'kerb;bollard', -- meaning, its still on the side walk
-      'yes' -- unspecific
-    })
-    -- return sanitize_for_logging(
-    --   value,
-    --   { … },
-    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
-    --   {}
-    -- )
+
+    return sanitize_for_logging(value, SEPARATION_ALLOWED)
   end,
-  marking = function (tags, side)
-    -- The side-unspecific tags.marking is deprecated. We interpret it as 'in the direction of travel', meaning left
+
+  marking = function(tags, side)
     local value = tags['marking:' .. side] or tags['marking:both']
-    if side == 'left' then value = value or tags['marking'] end
-    if value == nil then return nil end
+    if side == 'left' then
+      value = value or tags['marking']
+    end
+    if value == nil then
+      return nil
+    end
 
-    -- Sanitize values:
-    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-    return Sanitize(value, {
-      'solid_line', 'dashed_line', 'double_solid_line', 'barred_area', 'pictogram', 'surface',
-    })
-    -- return sanitize_for_logging(
-    --   value,
-    --   { … },
-    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
-    --   {}
-    -- )
+    return sanitize_for_logging(value, MARKING_ALLOWED)
   end,
-  traffic_mode = function (tags, side)
-    -- The side-unspecific tags.traffic_mode is deprecated. We interpret it as 'in the direction of travel', meaning left
-    local value = tags['traffic_mode:' .. side] or tags['traffic_mode:both']
-    if side == 'left' then value = value or tags['traffic_mode'] end
-    if value == nil then return nil end
 
-    -- Transform known but unsupported values to values that we support:
+  traffic_mode = function(tags, side)
+    local value = tags['traffic_mode:' .. side] or tags['traffic_mode:both']
+    if side == 'left' then
+      value = value or tags['traffic_mode']
+    end
+    if value == nil then
+      return nil
+    end
+
     local transformations = {
       ['foot;bicycle'] = 'foot',
       ['motorized'] = 'motor_vehicle',
@@ -109,26 +201,18 @@ local SANITIZE_ROAD_TAGS = {
       value = transformations[value]
     end
 
-    -- Sanitize values:
-    -- TODO: We should migrate the roads_bikelanes to use the same sanitize_for_logging system that parkings now uses. Until then, we use the other Sanitize helper.
-    return Sanitize(value, {
-      'no',
-      'motor_vehicle', 'parking', 'psv', 'bicycle', 'foot'
-    })
-    -- return sanitize_for_logging(
-    --   value,
-    --   { … },
-    --   -- Values that we ignore (not part of the logging, just silently `nil`ed)
-    --   {}
-    -- )
+    return sanitize_for_logging(value, TRAFFIC_MODE_ALLOWED)
   end,
-  buffer = function (tags, side)
-    -- The side-unspecific tags.buffer is deprecated. We interpret it as 'in the direction of travel', meaning left
-    local value = tags['buffer:' .. side] or tags['buffer:both']
-    if side == 'left' then value = value or tags['buffer'] end
-    if value == nil then return nil end
 
-    -- We want values of type number, so we have to change no-strings to 0
+  buffer = function(tags, side)
+    local value = tags['buffer:' .. side] or tags['buffer:both']
+    if side == 'left' then
+      value = value or tags['buffer']
+    end
+    if value == nil then
+      return nil
+    end
+
     local transformations = {
       ['no'] = 0,
       ['none'] = 0,
@@ -139,7 +223,8 @@ local SANITIZE_ROAD_TAGS = {
 
     return parse_length(value)
   end,
-  temporary = function (tags)
+
+  temporary = function(tags)
     if tags.temporary == 'yes' then
       return 'temporary'
     end

@@ -1,23 +1,22 @@
-require('init')
-require("Set")
-require("Log")
+local SET = require('topics.helper.sets')
+local log = require('topics.helper.log')
 
 local function is_road(tags)
   if not tags.highway then return false end
 
-  local allowed_highways = Set({
-    "motorway_link",
-    "primary", "primary_link",
-    "secondary", "secondary_link",
-    "tertiary", "tertiary_link",
-    "residential",
-    "unclassified",
-    "living_street",
-    "pedestrian",
-    "road",
+  local allowed_highways = SET.set({
+    'motorway_link',
+    'primary', 'primary_link',
+    'secondary', 'secondary_link',
+    'tertiary', 'tertiary_link',
+    'residential',
+    'unclassified',
+    'living_street',
+    'pedestrian',
+    'road',
   })
   local is_allowed_highway = allowed_highways[tags.highway] or false
-  local is_construction_highway = (tags.highway == "construction" and allowed_highways[tags.construction]) or false
+  local is_construction_highway = (tags.highway == 'construction' and allowed_highways[tags.construction]) or false
 
   if ( is_allowed_highway or is_construction_highway) then return true end
   return false

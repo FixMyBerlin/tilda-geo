@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { optionalSearchString } from '@/lib/searchParamsSchema'
-import { forwardAuthAndApplyCookies } from '@/server/auth/auth-route-handler.server'
+import { applyAuthResponseCookies } from '@/server/auth/applyAuthResponseCookies.server'
+import { auth } from '@/server/auth/auth.server'
 
 const searchSchema = z.object({
   callbackURL: optionalSearchString(),
@@ -38,7 +39,7 @@ function toSafeCallbackURL(rawCallbackURL: string | null, requestUrl: string) {
 }
 
 export const Route = createFileRoute('/api/sign-in/osm')({
-  ssr: true,
+  ssr: false,
   validateSearch: (search) => searchSchema.parse(search),
   server: {
     handlers: {
@@ -54,7 +55,8 @@ export const Route = createFileRoute('/api/sign-in/osm')({
         })
 
         try {
-          const authResponse = await forwardAuthAndApplyCookies(authRequest)
+          const authResponse = await auth.handler(authRequest)
+          applyAuthResponseCookies(authResponse)
           const data = (await authResponse.json().catch(() => null)) as {
             url?: string
             code?: string

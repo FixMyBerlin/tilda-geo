@@ -1,4 +1,4 @@
-local time_helper = require('time_helper')
+local time_helper = require('topics.parking.helper.time_helper')
 
 local WEEKDAYS = time_helper.WEEKDAYS
 local ranges_to_string = time_helper.ranges_to_string
@@ -15,9 +15,9 @@ local function is_prohibition(entry)
     return false
   end
 
-  return entry:match("^no_parking")
-      or entry:match("^no_standing")
-      or entry:match("^no_stopping")
+  return entry:match('^no_parking')
+      or entry:match('^no_standing')
+      or entry:match('^no_stopping')
 end
 
 ------------------------------------------------------------
@@ -42,7 +42,7 @@ function subtract_prohibitions(list)
   -- Collect all prohibition intervals
   for _, entry in ipairs(list) do
     if is_prohibition(entry) then
-      local cond = entry:match("%((.*)%)")
+      local cond = entry:match('%((.*)%)')
       if cond then
         local map = build_day_map(cond)
         if map then
@@ -64,7 +64,7 @@ function subtract_prohibitions(list)
   local result = {}
   for _, entry in ipairs(list) do
     if not is_prohibition(entry) then
-      local cond = entry:match("%((.*)%)")
+      local cond = entry:match('%((.*)%)')
       if cond then
         local base_map = build_day_map(cond)
         if base_map then
@@ -79,8 +79,8 @@ function subtract_prohibitions(list)
           end
 
           local new_cond = compact_day_map(day_time_map)
-          if new_cond and new_cond ~= "" then
-            entry = entry:gsub("%(.*%)", "(" .. new_cond .. ")")
+          if new_cond and new_cond ~= '' then
+            entry = entry:gsub('%(.*%)', '(' .. new_cond .. ')')
           end
         end
       end

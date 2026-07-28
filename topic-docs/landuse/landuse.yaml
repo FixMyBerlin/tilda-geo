@@ -1,0 +1,85 @@
+title: Daten zur Landnutzung
+summary: Eine vereinfachte Darstellung der Landnutzung zur Unterstützung der Radnetzplanung.
+sourceIds:
+  - atlas_landuse
+attributes:
+  - key: landuse
+    label: Landnutzung
+    description: Enthält die zugelassenen `landuse`-Werte sowie ausgewählte `amenity`- und `leisure`-Flächen, die im Processing auf den `landuse`-Schlüssel normalisiert werden.
+    values:
+      # landuse=*
+      - value: allotments
+        label: Kleingartenanlage
+      - value: brownfield
+        label: Brachfläche
+      - value: cemetery
+        label: Friedhofsgelände
+      - value: civic
+        label: Fläche für öffentliche Einrichtungen
+      - value: civic_admin
+        label: Verwaltungsfläche
+      - value: commercial
+        label: Gewerbliche Nutzung
+      - value: construction
+        label: Baufläche (im Bau)
+      - value: education
+        label: Bildungsfläche
+      - value: farmyard
+        label: Landwirtschaftliche Nutzung
+      - value: garages
+        label: Garagen
+      - value: industrial
+        label: Industrielle Nutzung
+      - value: religious
+        label: Religiöse Nutzung
+      - value: residential
+        label: Wohngebiet
+      - value: retail
+        label: Gewerbliche Nutzung (Einzelhandel/Geschäfte)
+      # amenity=* (im Processing auf landuse normalisiert)
+      - value: school
+        label: Schulgelände
+      - value: university
+        label: Universitätsgelände
+      - value: kindergarten
+        label: Kindertagesstätte
+      - value: college
+        label: Hochschul-/College-Gelände
+      - value: hospital
+        label: Krankenhausgelände
+      - value: clinic
+        label: Klinikgelände
+      - value: prison
+        label: Justizvollzugsanstalt
+      # leisure=* (im Processing auf landuse normalisiert)
+      - value: park
+        label: Park
+      - value: garden
+        label: Garten
+      - value: dog_park
+        label: Hundeauslaufgebiet
+      - value: sports_centre
+        label: Sportzentrum
+      - value: stadium
+        label: Stadion
+  - key: access
+    label: Zugang
+    values:
+      - value: 'yes'
+        label: Öffentlich
+      - value: customers
+        label: Kund:innen
+      - value: permissive
+        label: Öffentliche Nutzung geduldet
+      - value: private
+        label: Privat
+      - value: public
+        label: Öffentlich (explizit)
+      - value: no
+        label: Kein Zugang
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: operator
+    label: Betreiber
+    format: sanitized_strings

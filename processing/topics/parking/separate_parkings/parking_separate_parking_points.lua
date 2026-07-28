@@ -1,10 +1,9 @@
-require('init')
-require('Log')
-require('MergeTable')
-local LOG_ERROR = require('parking_errors')
-local separate_parking_point_categories = require('separate_parking_point_categories')
-local categorize_separate_parking = require('categorize_separate_parking')
-local result_tags_separate_parking = require('result_tags_separate_parking')
+local log = require('topics.helper.log')
+local merge_table = require('topics.helper.merge_table')
+local LOG_ERROR = require('topics.parking.errors.parking_errors')
+local separate_parking_point_categories = require('topics.parking.separate_parkings.point.separate_parking_point_categories')
+local categorize_separate_parking = require('topics.parking.separate_parkings.helper.categorize_separate_parking')
+local result_tags = require('topics.parking.separate_parkings.helper.result_tags')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_separate_parking_points',
@@ -22,8 +21,8 @@ local function parking_separate_parking_points(object)
 
   local result = categorize_separate_parking(object, separate_parking_point_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags_separate_parking(result.category, result.object, nil)
-    local row = MergeTable({ geom = result.object:as_point() }, row_data)
+    local row_data, replaced_tags = result_tags(result.category, result.object, nil)
+    local row = merge_table({ geom = result.object:as_point() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_points')
     db_table:insert(row)

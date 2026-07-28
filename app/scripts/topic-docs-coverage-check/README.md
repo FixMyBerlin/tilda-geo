@@ -2,26 +2,22 @@
 
 Manual consistency check between:
 
-- **translation consts vs. topic-docs (generated YAML output)** — static, no DB required
+- **generated inspector translations vs. topic-docs (generated YAML output)** — static, no DB required
 - `(key, value)` pairs found in DB `tags`
 - documented attributes/values from `topic-docs`
 - generated inspector translations
 
-## Translation const vs. topic-docs YAML
+## Generated translations vs. topic-docs YAML
 
-After `bun run topic-docs-build`, the script compares topic-docs-relevant manual modules in the same order as `translations.const.ts` before the generated module: `translationsOneway`, `translationsSeparationTrafficModeMarking`, `translationsWdith`. TILDA parking translations now live only in `inspectorTranslations.gen.ts`. Not included: `translationsParkingLars` (external dataset), generated module output, and `translationsAtlasAndAll` (Atlas + broad `ALL--` fallbacks, not owned by parking YAML). `ALL--` entries without matching keys in topic-docs `sourceId`s are ignored.
+After `bun run topic-docs-build`, the script verifies generated translation completeness for topic-doc sources (for example `${sourceId}--title`) and reports the generated key set for visibility.
 
 - `app/src/data/generated/topicDocs/inspectorTranslations.gen.ts`
 - plus synthetic `${sourceId}--title` entries from compiled table titles
 
-Only keys are considered whose prefix is a topic-docs table `sourceId`, or that start with `ALL--` (`ALL--` is resolved against all topic-docs `sourceId`s).
-
-| Category                | Meaning                                                        | Default: check fails?                                |
-| ----------------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
-| **mismatch**            | same key in const and YAML output, but different string        | yes                                                  |
-| **orphansInManual**     | key exists in const (in scope) but not in YAML output          | yes                                                  |
-| **inconsistentAllKeys** | `ALL--...` matches multiple YAML keys with different labels    | yes                                                  |
-| **yamlOnlyKeys**        | key exists only in generated YAML output, not in const modules | no (info; goal is removing duplicated const entries) |
+| Category          | Meaning                                          | Default: check fails? |
+| ----------------- | ------------------------------------------------ | --------------------- |
+| **missingTitles** | sourceIds without generated `${sourceId}--title` | yes                   |
+| **yamlOnlyKeys**  | key exists in generated YAML output              | no (info)             |
 
 If this phase fails, the script exits with code 1 **before** opening a database connection.
 
@@ -68,7 +64,7 @@ Per-table markdown output (two sections: DB↔docs as above; filename `<tableNam
 bun run topic-docs-coverage-check -- --report-dir ./scripts/topic-docs-coverage-check/output/reports
 ```
 
-Structure: `translationConstVsYaml` (object with `mismatches`, `orphansInManual`, `inconsistentAllKeys`, `yamlOnlyKeys`) and `dbCoverage` (array per `tableName` including `extraDbKeysNotInDocs`, `missingDocKeys`, `documentedValuesNotInDb`, `missingDocValues`, `typeMismatches`, `missingInspectorKeys`, `missingInspectorValues`). If the translation phase fails, `dbCoverage` is `null` and only `translationConstVsYaml` is written; `--report-dir` is skipped in that case.
+Structure: `generatedTranslations` (object with `missingTitles`, `yamlOnlyKeys`) and `dbCoverage` (array per `tableName` including `extraDbKeysNotInDocs`, `missingDocKeys`, `documentedValuesNotInDb`, `missingDocValues`, `typeMismatches`, `missingInspectorKeys`, `missingInspectorValues`). If the translation phase fails, `dbCoverage` is `null` and only `generatedTranslations` is written; `--report-dir` is skipped in that case.
 
 The folder `scripts/topic-docs-coverage-check/output/` is ignored via `.gitignore`.
 

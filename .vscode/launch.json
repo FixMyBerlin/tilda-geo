@@ -2,24 +2,26 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Blitz: debug server-side",
+      "name": "TILDA: dev server",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run dev"
+      "cwd": "${workspaceFolder}/app",
+      "command": "bun run dev"
     },
     {
-      "name": "Blitz: debug client-side",
+      "name": "TILDA: debug client (Chrome)",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000"
+      "url": "http://127.0.0.1:5173"
     },
     {
-      "name": "Blitz: debug full stack",
+      "name": "TILDA: dev + Chrome",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run dev",
+      "cwd": "${workspaceFolder}/app",
+      "command": "bun run dev",
       "serverReadyAction": {
-        "pattern": "started server on .+, url: (https?://.+)",
+        "pattern": "Local:\\s+(https?://[^\\s]+)",
         "uriFormat": "%s",
         "action": "debugWithChrome"
       }

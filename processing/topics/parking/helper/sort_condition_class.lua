@@ -13,8 +13,8 @@ local function parse_entry(s)
     return false, nil
   end
 
-  local has_paren = s:find("%(") ~= nil
-  local h, m = s:match("(%d%d):(%d%d)")
+  local has_paren = s:find('%(') ~= nil
+  local h, m = s:match('(%d%d):(%d%d)')
   local time
   if h and m then
     time = tonumber(h) * 60 + tonumber(m)

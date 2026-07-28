@@ -57,7 +57,7 @@ async function fetchFileList() {
   }
   const files = await response.json()
 
-  return files.filter((file) => file.name.endsWith('.geojson'))
+  return files.filter((file: { name: string }) => file.name.endsWith('.geojson'))
 }
 
 async function downloadFile(filename: string) {
@@ -137,7 +137,7 @@ function convertELIToMapDataBackgroundSource(feature: ELIFeature, fileId: string
   const result: MapDataBackgroundSource<string> = {
     id: fileId,
     name: props.name,
-    tiles: converted.tiles,
+    tilesUrl: converted.tiles,
     attributionHtml,
   }
 
@@ -174,7 +174,7 @@ async function main() {
   const convertedLayers: Array<{
     id: string
     name: string
-    tiles: string
+    tilesUrl: string
     attributionHtml: string
     maxzoom?: number
     minzoom?: number

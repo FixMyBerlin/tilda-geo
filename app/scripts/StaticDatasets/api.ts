@@ -20,7 +20,8 @@ export const getRegions = async (api: StaticDatasetsApiConfig) => {
   const request = new Request(url)
   const response = await fetch(request)
   await checkResponse(request, response)
-  return (await response.json()).map((region) => ({
+  const regions = (await response.json()) as Array<{ id: string; slug: string }>
+  return regions.map((region) => ({
     id: region.id,
     slug: region.slug,
   }))

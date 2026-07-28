@@ -11,5 +11,8 @@ const searchSchema = z.object({
 export const Route = createFileRoute('/_pages/oAuthError')({
   ssr: true,
   validateSearch: (search) => searchSchema.parse(search),
+  head: () => ({
+    meta: [{ name: 'robots', content: 'noindex' }, { title: 'Anmeldefehler – tilda-geo.de' }],
+  }),
   component: PageOAuthError,
 })

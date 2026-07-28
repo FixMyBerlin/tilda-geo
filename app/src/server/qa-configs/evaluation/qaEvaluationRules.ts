@@ -1,6 +1,6 @@
 import type { QaSystemStatus } from '@/prisma/generated/client'
 
-export const qaResettableUserStatuses = [
+const qaResettableUserStatuses = [
   'NOT_OK_DATA_ERROR',
   'NOT_OK_PROCESSING_ERROR',
   'OK_QA_TOOLING_ERROR',
@@ -28,7 +28,7 @@ export function calculateSystemStatus(
   return 'PROBLEMATIC' as const
 }
 
-export function shouldResetUserDecision(
+function shouldResetUserDecision(
   newSystemStatus: QaSystemStatus,
   previousUserStatus: QaUserStatus | null,
 ) {
@@ -48,7 +48,7 @@ export function shouldResetUserDecision(
   return false
 }
 
-export function shouldCreateNewEvaluation(
+function shouldCreateNewEvaluation(
   previousEvaluation: { systemStatus: QaSystemStatus; userStatus: QaUserStatus | null } | null,
   newSystemStatus: QaSystemStatus,
 ) {
@@ -64,7 +64,7 @@ export function shouldCreateNewEvaluation(
   return shouldResetUserDecision(newSystemStatus, previousEvaluation.userStatus)
 }
 
-export function getEffectiveSystemStatus(input: {
+function getEffectiveSystemStatus(input: {
   systemStatus: QaSystemStatus
   absoluteDifference: number | null
   absoluteDifferenceThreshold: number

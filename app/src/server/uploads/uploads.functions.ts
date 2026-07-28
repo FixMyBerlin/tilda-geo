@@ -19,25 +19,23 @@ const DeleteUploadRegionInput = z.object({
 })
 
 export const getUploadsForRegionUserFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
+  .validator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
   .handler(async ({ data }) => {
     const result = await getUploadsForRegionUser(data, getRequestHeaders())
     return result as (RegionDatasetUser & TsrSerializable)[]
   })
 
 export const getUploadsForRegionSystemLayerFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
+  .validator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
   .handler(async ({ data }) => {
     const result = await getUploadsForRegionSystemLayer(data, getRequestHeaders())
     return result as (RegionDatasetSystemLayer & TsrSerializable)[]
   })
 
 export const deleteUploadFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof DeleteUploadInput>) => DeleteUploadInput.parse(data))
+  .validator((data: z.infer<typeof DeleteUploadInput>) => DeleteUploadInput.parse(data))
   .handler(async ({ data }) => deleteUpload(data, getRequestHeaders()))
 
 export const deleteUploadRegionFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof DeleteUploadRegionInput>) =>
-    DeleteUploadRegionInput.parse(data),
-  )
+  .validator((data: z.infer<typeof DeleteUploadRegionInput>) => DeleteUploadRegionInput.parse(data))
   .handler(async ({ data }) => deleteUploadRegion(data, getRequestHeaders()))

@@ -1,5 +1,4 @@
-require('init')
-local has_prefix = require('has_prefix')
+local has_prefix = require('topics.helper.has_prefix')
 
 -- Mutate the input to transform `construction:bicycle_road=yes` to be `bicycle_road=yes`.
 -- - Function returns the old tags `<oldKey>=<oldValue>` for debugging … but we don't use that ATM

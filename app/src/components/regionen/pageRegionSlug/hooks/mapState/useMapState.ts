@@ -14,13 +14,8 @@ const boundsEqual = (current: LngLatBounds | null, next: LngLatBounds | null) =>
   )
 }
 
-const shouldUpdateSize = (current: Store['inspectorSize'], next: Store['inspectorSize']) => {
-  const SIZE_UPDATE_WIDTH_THRESHOLD = 50 // px
-  const SIZE_UPDATE_HEIGHT_THRESHOLD = 25 // px
-  const widthDiff = Math.abs(current.width - next.width)
-  const heightDiff = Math.abs(current.height - next.height)
-  return widthDiff >= SIZE_UPDATE_WIDTH_THRESHOLD || heightDiff >= SIZE_UPDATE_HEIGHT_THRESHOLD
-}
+const panelSizeEqual = (current: Store['inspectorSize'], next: Store['inspectorSize']) =>
+  current.width === next.width && current.height === next.height
 
 // INFO DEBUGGING: We could use a middleware to log state changes https://github.com/pmndrs/zustand#middleware
 export type Store = StoreMapLoadedState &
@@ -56,6 +51,9 @@ export type StoreCalculator = {
     key: string
     features: MapGeoJSONFeature[]
   }[]
+  // True while the Calculator draw tool is mounted/active. Used to suppress the
+  // feature inspector on map clicks so drawing/editing areas doesn't open an overlay.
+  calculatorDrawActive: boolean
 }
 
 type StoreInspectorUI = {
@@ -77,6 +75,7 @@ type Actions = {
     updateCalculatorAreasWithFeatures: (
       calculatorAreasWithFeatures: Store['calculatorAreasWithFeatures'],
     ) => void
+    setCalculatorDrawActive: (active: Store['calculatorDrawActive']) => void
     setInspectorOtherPropertiesVisibility: (open: Store['inspectorOtherPropertiesOpen']) => void
   }
 }
@@ -93,6 +92,8 @@ const useMapStore = create<Store>()((set) => {
     inspectorFeatures: [],
     // Data for <Inspector> AND <LayerHighlight>
     calculatorAreasWithFeatures: [],
+    // True while the Calculator draw tool is active (suppresses inspector clicks)
+    calculatorDrawActive: false,
     mapBounds: null,
     inspectorSize: { width: 0, height: 0 },
     sidebarSize: { width: 0, height: 0 },
@@ -114,14 +115,18 @@ const useMapStore = create<Store>()((set) => {
         set((state) => (state.inspectorFeatures.length === 0 ? state : { inspectorFeatures: [] })),
       updateCalculatorAreasWithFeatures: (calculatorAreasWithFeatures) =>
         set({ calculatorAreasWithFeatures }),
+      setCalculatorDrawActive: (active) =>
+        set((state) =>
+          state.calculatorDrawActive === active ? state : { calculatorDrawActive: active },
+        ),
       updateMapBounds: (bounds) =>
         set((state) => (boundsEqual(state.mapBounds, bounds) ? state : { mapBounds: bounds })),
       updateInspectorSize: (size) =>
         set((state) =>
-          shouldUpdateSize(state.inspectorSize, size) ? { inspectorSize: size } : state,
+          panelSizeEqual(state.inspectorSize, size) ? state : { inspectorSize: size },
         ),
       updateSidebarSize: (size) =>
-        set((state) => (shouldUpdateSize(state.sidebarSize, size) ? { sidebarSize: size } : state)),
+        set((state) => (panelSizeEqual(state.sidebarSize, size) ? state : { sidebarSize: size })),
       setInspectorOtherPropertiesVisibility: (open) =>
         set((state) =>
           state.inspectorOtherPropertiesOpen === open
@@ -138,6 +143,7 @@ export const useShowMapLoadingIndicator = () =>
 export const useMapInspectorFeatures = () => useMapStore((state) => state.inspectorFeatures)
 export const useMapCalculatorAreasWithFeatures = () =>
   useMapStore((state) => state.calculatorAreasWithFeatures)
+export const useMapCalculatorDrawActive = () => useMapStore((state) => state.calculatorDrawActive)
 export const useMapBounds = () => useMapStore((state) => state.mapBounds)
 export const useMapInspectorSize = () => useMapStore((state) => state.inspectorSize)
 export const useMapSidebarSize = () => useMapStore((state) => state.sidebarSize)
@@ -155,6 +161,7 @@ export const useMapDebugSnapshot = () =>
       sidebarSize: state.sidebarSize,
       inspectorFeatures: state.inspectorFeatures,
       calculatorAreasWithFeatures: state.calculatorAreasWithFeatures,
+      calculatorDrawActive: state.calculatorDrawActive,
       inspectorOtherPropertiesOpen: state.inspectorOtherPropertiesOpen,
     })),
   )

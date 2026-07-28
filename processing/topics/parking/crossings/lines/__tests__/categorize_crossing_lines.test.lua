@@ -1,12 +1,11 @@
-describe("`categorize_crossing_line`", function()
-  require('init')
-  local categorize_crossing_line = require("categorize_crossing_line")
-  require("Log")
+describe('`categorize_crossing_line`', function()
+  local categorize_crossing_line = require('topics.parking.crossings.lines.categorize_crossing_line')
+  local log = require('topics.helper.log')
 
   it('no category matches', function()
     local tags = {
-      ["natural"] = 'tree',
-      ["obstacle:parking"] = 'yes',
+      ['natural'] = 'tree',
+      ['obstacle:parking'] = 'yes',
     }
     local result = categorize_crossing_line({ tags = tags })
     assert.are.equal(result.category, nil)
@@ -14,12 +13,12 @@ describe("`categorize_crossing_line`", function()
 
   it('handles category', function()
     local tags = {
-      ["highway"] = 'footway',
-      ["footway"] = 'crossing',
+      ['highway'] = 'footway',
+      ['footway'] = 'crossing',
     }
     local result = categorize_crossing_line({ tags = tags })
 
-    assert.are.equal(type(result), "table")
+    assert.are.equal(type(result), 'table')
     assert.are.equal(result.category.id, 'crossing_way')
     assert.are.equal(result.object.tags.side, 'self')
     assert.are.equal(result.object.tags.highway, 'footway')
@@ -28,13 +27,13 @@ describe("`categorize_crossing_line`", function()
 
   it('handles category zebra before others', function()
     local tags = {
-      ["highway"] = 'footway',
-      ["footway"] = 'crossing',
-      ["crossing_ref"] = 'zebra',
+      ['highway'] = 'footway',
+      ['footway'] = 'crossing',
+      ['crossing_ref'] = 'zebra',
     }
     local result = categorize_crossing_line({ tags = tags })
 
-    assert.are.equal(type(result), "table")
+    assert.are.equal(type(result), 'table')
     assert.are.equal(result.category.id, 'crossing_zebra_way')
     assert.are.equal(result.object.tags.side, 'self')
     assert.are.equal(result.object.tags.highway, 'footway')

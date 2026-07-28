@@ -13,7 +13,7 @@ export const mapboxStyleGroupLayers_atlas_bicycleparking_points: MapboxStyleLaye
         ['get', 'covered'],
         ['no', 'implicit_no'],
         'parking',
-        ['yes'],
+        ['yes', 'partial'],
         'parking-garage',
         'dot-11',
       ],

@@ -3,7 +3,6 @@ import { feature, featureCollection } from '@turf/turf'
 import { z } from 'zod'
 import { isProd } from '@/components/shared/utils/isEnv'
 import { geoDataClient } from '@/server/prisma-client.server'
-import { hasAggregatedLengthsTable } from '@/server/statistics/queries/guardAggregatedLengths.server'
 
 const position = z.tuple([z.number(), z.number()])
 const linearRing = z.array(position)
@@ -33,11 +32,6 @@ export const Route = createFileRoute('/api/stats')({
   server: {
     handlers: {
       GET: async () => {
-        const tableExists = await hasAggregatedLengthsTable()
-        if (!tableExists) {
-          return Response.json(featureCollection([]))
-        }
-
         try {
           const raw = await geoDataClient.$queryRaw`
             SELECT

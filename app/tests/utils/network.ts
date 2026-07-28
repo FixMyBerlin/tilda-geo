@@ -1,12 +1,12 @@
 import type { Page } from '@playwright/test'
 
-export interface NetworkRequest {
+interface NetworkRequest {
   url: string
   status: number
   method: string
 }
 
-export const EXPECTED_MAP_REQUESTS = [
+const EXPECTED_MAP_REQUESTS = [
   {
     pattern: /clarity\.maptiles\.arcgis\.com.*tile/,
     description: 'ArcGIS imagery tiles',

@@ -1,9 +1,8 @@
-require('init')
-require('class_obstacle_category')
-require('two_wheel_parking_helper')
-local TAG_HELPER = require('tag_helper')
+local class_obstacle_category = require('topics.parking.obstacles.helper.class_obstacle_category')
+local two_wheel_parking_helper = require('topics.parking.obstacles.helper.two_wheel_parking_helper')
+local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
-obstacle_area_categories = {
+return {
   class_obstacle_category.new({
     id = 'bicycle_parking',
     buffer_radius = function(tags) return nil end,
@@ -62,7 +61,7 @@ obstacle_area_categories = {
     id = 'tree_pit',
     buffer_radius = function(tags) return nil end,
     conditions = function(tags)
-      return TAG_HELPER.is_obstacle_parking(tags) and tags.landuse == "tree_pit"
+      return TAG_HELPER.is_obstacle_parking(tags) and tags.landuse == 'tree_pit'
     end,
     tags = function(tags) return { landuse = tags.landuse } end,
     tags_cc = {},

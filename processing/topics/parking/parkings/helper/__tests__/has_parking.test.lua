@@ -1,7 +1,6 @@
 describe('`has_parking`', function()
-  require('init')
-  local has_parking = require('has_parking')
-  require('Log')
+  local has_parking = require('topics.parking.parkings.helper.has_parking')
+  local log = require('topics.helper.log')
 
   it('ignores non highway', function()
     local tags = {
@@ -19,7 +18,7 @@ describe('`has_parking`', function()
     assert.are.is_true(result)
   end)
 
-  it('is_driveway is true when "parking:" given', function()
+  it('is_driveway is true when parking: is given', function()
     local tags = {
       ['highway'] = 'service',
       ['parking:left'] = 'lane',
@@ -38,7 +37,7 @@ describe('`has_parking`', function()
   --   assert.are.is_false(result)
   -- end)
 
-  it('is_driveway is false without "parking:"', function()
+  it('is_driveway is false without parking:', function()
     local tags = {
       ['highway'] = 'service',
     }

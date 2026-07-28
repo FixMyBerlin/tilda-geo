@@ -124,7 +124,7 @@ async function analyzeTable(tableName: string): Promise<AnalysisResult> {
       WHERE tags IS NOT NULL
       AND jsonb_typeof(tags) = 'object'
     `)
-    allKeys = result.map((row) => row.key).filter(Boolean)
+    allKeys = result.map((row: { key: string }) => row.key).filter(Boolean)
   } catch (error) {
     console.warn(`Could not query keys from ${tableName}:`, error)
     // Fallback to styling keys if database query fails
@@ -168,7 +168,7 @@ async function analyzeTable(tableName: string): Promise<AnalysisResult> {
         LIMIT 100
       `)
 
-      const values = result.map((row) => row.value).filter(Boolean)
+      const values = result.map((row: { value: string }) => row.value).filter(Boolean)
       keyValuesFromDb[key] = new Set(values)
     } catch (error) {
       console.warn(`Could not query ${tableName}.${key}:`, error)

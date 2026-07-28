@@ -1,19 +1,21 @@
+import { runAfterthoughts } from './steps/afterthoughts'
 import { updateCache } from './steps/cache'
 import { downloadFile, waitForFreshData } from './steps/download'
-import { restartTileServer, triggerPrivateApi } from './steps/externalTriggers'
-import { globalBboxFilter, tagFilter } from './steps/filter'
+import { triggerPrivateApi } from './steps/externalTriggers'
+import { globalBboxFilter, nightlyTagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
 import { initialize } from './steps/initialize'
 import { createProcessingEntry, updateProcessingEntry } from './steps/metadata'
 import { processTopics } from './steps/processTopics'
-import { exportSidepathData } from './topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { berlinTimeString } from './utils/berlinTime'
 import { logPadded, logTileInfo } from './utils/logging'
+import { logProcessingStartupContext } from './utils/logStartupContext'
 
 async function main() {
   try {
     logPadded('Processing', berlinTimeString(new Date()))
 
+    await logProcessingStartupContext()
     await initialize()
 
     // Create processing entry at the start
@@ -25,22 +27,23 @@ async function main() {
     const sourceFileName = fileName
 
     logPadded('Processing: Filter', berlinTimeString(new Date()))
-    // tagFilter regenerates filtered file if needed, but only returns sourceFileChanged
-    // (filter regeneration doesn't affect diffing logic)
-    const tagFilterResponse = await tagFilter(fileName, fileChanged)
-    if (tagFilterResponse) ({ fileName, fileChanged } = tagFilterResponse)
+    // nightlyTagFilter may regenerate the filtered PBF; filterRegenerated triggers bbox clip regen.
+    // fileChanged stays tied to the download — filter regeneration does not affect diffing.
+    const nightlyFilter = await nightlyTagFilter(fileName, fileChanged)
+    fileName = nightlyFilter.fileName
+    const nightlyFilterRegenerated = nightlyFilter.filterRegenerated
 
-    // globalBboxFilter regenerates filtered file when active, but only returns sourceFileChanged
-    // (filter regeneration doesn't affect diffing logic - filtered data can still be diffed)
-    const globalBboxFilterResponse = await globalBboxFilter(fileName, fileChanged)
-    if (globalBboxFilterResponse) ({ fileName, fileChanged } = globalBboxFilterResponse)
+    // globalBboxFilter may regenerate the bbox clip when active; fileChanged stays tied to the download.
+    // Filter regeneration does not affect diffing logic — filtered data can still be diffed.
+    const globalBboxFilterResponse = await globalBboxFilter(
+      fileName,
+      fileChanged,
+      nightlyFilterRegenerated,
+    )
+    if (globalBboxFilterResponse) fileName = globalBboxFilterResponse.fileName
 
-    logPadded('Processing: Pseudo Tags', berlinTimeString(new Date()))
-    // Start timing for the actual data processing (matches old behavior)
     const processingStartTime = Date.now()
-    // Export sidepath CSV from current DB (yesterday's data) before processTopics overwrites it
-    await exportSidepathData()
-    await processTopics(fileName, fileChanged)
+    const ranTopics = await processTopics(fileName, fileChanged, processingId, sourceFileName)
     await generateTypes()
     const timeElapsed = Date.now() - processingStartTime
 
@@ -49,19 +52,17 @@ async function main() {
     // Update processing entry: mark main processing as complete, set status to 'postprocessing'
     await updateProcessingEntry(processingId, sourceFileName, timeElapsed)
 
-    // Frontend: Registers sql functions and starts the analysis run (async, fire-and-forget)
+    // Frontend: Registers sql functions (async, fire-and-forget)
     // Frontend: Trigger QA evaluation updates for all regions (async, fire-and-forget)
-    console.log('Finishing up: Trigger async app init (sql functions, analysis) and qa update')
+    console.log('Finishing up: Trigger async app init (sql functions) and qa update')
     triggerPrivateApi('post-processing-hook')
     triggerPrivateApi('post-processing-qa-update')
-
-    // Restart `tiles` container to refresh `/catalog`
-    await restartTileServer()
 
     // Delete cache and (frontend) trigger cache warming
     await updateCache()
 
     logTileInfo()
+    await runAfterthoughts(processingId, fileChanged, ranTopics)
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
     console.error('[ERROR] Processing failed (catchall)', error)

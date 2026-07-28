@@ -5,7 +5,7 @@
 local M = {}
 
 ---@type string[]
-M.WEEKDAYS = { "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su", "PH", "SH" }
+M.WEEKDAYS = { 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su', 'PH', 'SH' }
 
 ---@param day string
 ---@return number|nil
@@ -21,13 +21,13 @@ end
 ---@param expr string
 ---@return string[]|nil
 local function expand_day_range(expr)
-  -- Single day (e.g. "Su")?
+  -- Single day (e.g. 'Su')?
   if weekday_index(expr) then
     return { expr }
   end
 
-  -- Range of days? (e.g. "Mo-Fr")
-  local a, b = expr:match("^(%a%a)%-(%a%a)$")
+  -- Range of days? (e.g. 'Mo-Fr')
+  local a, b = expr:match('^(%a%a)%-(%a%a)$')
   if not a then return nil end
 
   local ia = weekday_index(a)
@@ -41,10 +41,10 @@ local function expand_day_range(expr)
   return result
 end
 
----@param t string Time string "HH:MM" or "H:MM"
+---@param t string Time string 'HH:MM' or 'H:MM'
 ---@return number|nil Minutes since midnight
 local function time_to_min(t)
-  local h, m = t:match("^(%d%d?):(%d%d)$")
+  local h, m = t:match('^(%d%d?):(%d%d)$')
   if not h then
     return nil
   end
@@ -52,22 +52,22 @@ local function time_to_min(t)
 end
 
 ---@param m number Minutes since midnight
----@return string "HH:MM"
+---@return string 'HH:MM'
 local function min_to_time(m)
-  return string.format("%02d:%02d", math.floor(m / 60), m % 60)
+  return string.format('%02d:%02d', math.floor(m / 60), m % 60)
 end
 
 -- Expand expressions that can contain comma-separated days and ranges,
--- e.g. "Mo,We,Fr" or "Mo-We,Su".
+-- e.g. 'Mo,We,Fr' or 'Mo-We,Su'.
 ---@param expr string
 ---@return string[]|nil
 function M.expand_day_expr(expr)
   local all_days = {}
   local seen = {}
 
-  for part in expr:gmatch("[^,]+") do
-    part = part:match("^%s*(.-)%s*$")
-    if part ~= "" then
+  for part in expr:gmatch('[^,]+') do
+    part = part:match('^%s*(.-)%s*$')
+    if part ~= '' then
       local days = expand_day_range(part)
       if not days then
         return nil
@@ -84,14 +84,14 @@ function M.expand_day_expr(expr)
   return all_days
 end
 
----@param str string Comma-separated time ranges "HH:MM-HH:MM,..."
+---@param str string Comma-separated time ranges 'HH:MM-HH:MM,...'
 ---@return {from: number, to: number}[]|nil
 function M.parse_times(str)
   local ranges = {}
 
-  for r in str:gmatch("[^,]+") do
-    r = r:match("^%s*(.-)%s*$")
-    local a,b = r:match("^(%d%d?:%d%d)%-(%d%d?:%d%d)$")
+  for r in str:gmatch('[^,]+') do
+    r = r:match('^%s*(.-)%s*$')
+    local a,b = r:match('^(%d%d?:%d%d)%-(%d%d?:%d%d)$')
     if not a then return nil end
 
     local from = time_to_min(a)
@@ -133,13 +133,13 @@ function M.ranges_to_string(ranges)
   end
   local parts = {}
   for _, r in ipairs(ranges) do
-    table.insert(parts, min_to_time(r.from) .. "-" .. min_to_time(r.to))
+    table.insert(parts, min_to_time(r.from) .. '-' .. min_to_time(r.to))
   end
-  return table.concat(parts, ",")
+  return table.concat(parts, ',')
 end
 
 -- Compacting identical times on different days in the weekday list to generate day ranges
----@param day_time_map table<string, string> Map weekday key (e.g. "Mo") to time range string
+---@param day_time_map table<string, string> Map weekday key (e.g. 'Mo') to time range string
 ---@return string
 function M.compact_day_map(day_time_map)
   local groups = {}
@@ -161,7 +161,7 @@ function M.compact_day_map(day_time_map)
 
     -- Build contiguous segments (for ranges like Mo-Fr),
     -- then combine all segments with commas into a single expression,
-    -- e.g. "Mo,We,Fr" or "Mo-We,Su".
+    -- e.g. 'Mo,We,Fr' or 'Mo-We,Su'.
     local segments = {}
     local range_start = days[1]
     local prev_index = weekday_index(days[1])
@@ -187,24 +187,24 @@ function M.compact_day_map(day_time_map)
       if seg.start == seg.finish then
         table.insert(day_parts, seg.start)
       else
-        table.insert(day_parts, seg.start .. "-" .. seg.finish)
+        table.insert(day_parts, seg.start .. '-' .. seg.finish)
       end
     end
 
-    local day_expr = table.concat(day_parts, ",")
+    local day_expr = table.concat(day_parts, ',')
 
     -- Special case: if time applies equally to all weekdays Mo-Su, we omit the day expression and output only the time string.
-    if day_expr == "Mo-Su" then
+    if day_expr == 'Mo-Su' then
       table.insert(result_parts, time_str)
     else
-      table.insert(result_parts, day_expr .. " " .. time_str)
+      table.insert(result_parts, day_expr .. ' ' .. time_str)
     end
   end
 
   -- Sort resulting blocks by the first weekday in the expression
   table.sort(result_parts, function(a, b)
-    local da = a:match("^(%a%a)")
-    local db = b:match("^(%a%a)")
+    local da = a:match('^(%a%a)')
+    local db = b:match('^(%a%a)')
     local ia = weekday_index(da) or 99
     local ib = weekday_index(db) or 99
     if ia ~= ib then
@@ -212,7 +212,7 @@ function M.compact_day_map(day_time_map)
     end
     return a < b
   end)
-  return table.concat(result_parts, "; ")
+  return table.concat(result_parts, '; ')
 end
 
 ---@param ranges {from: number, to: number}[]
@@ -293,7 +293,7 @@ function M.subtract_ranges(base, forbidden)
   return result
 end
 
----@param condition string OSM-style condition (e.g. "Mo-Fr 08:00-18:00; Sa 09:00-14:00")
+---@param condition string OSM-style condition (e.g. 'Mo-Fr 08:00-18:00; Sa 09:00-14:00')
 ---@return table<string, {from: number, to: number}[]>|nil
 function M.build_day_map(condition)
   local day_map = {}
@@ -301,11 +301,11 @@ function M.build_day_map(condition)
     day_map[d] = {}
   end
 
-  for block in condition:gmatch("[^;]+") do
-    block = block:match("^%s*(.-)%s*$")
+  for block in condition:gmatch('[^;]+') do
+    block = block:match('^%s*(.-)%s*$')
 
     local day_part, time_part =
-      block:match("^([A-Za-z%-,]+)%s+(.+)$")
+      block:match('^([A-Za-z%-,]+)%s+(.+)$')
 
     if not day_part then
       local days_only = M.expand_day_expr(block)
@@ -313,8 +313,8 @@ function M.build_day_map(condition)
       if days_only then
         day_part = block
         time_part = nil
-      elseif block:match("^%d") then
-        day_part = "Mo-Su"
+      elseif block:match('^%d') then
+        day_part = 'Mo-Su'
         time_part = block
       else
         return nil
@@ -323,7 +323,7 @@ function M.build_day_map(condition)
 
     local days = M.expand_day_expr(day_part)
     if not days then
-      if day_part == "Mo-Su" then
+      if day_part == 'Mo-Su' then
         days = M.WEEKDAYS
       else
         return nil

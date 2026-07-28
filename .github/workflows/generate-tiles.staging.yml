@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   generate-tiles:
+    if: github.repository == 'FixMyBerlin/tilda-geo'
     uses: ./.github/workflows/generate-tiles.yml
     with:
       ENVIRONMENT: staging

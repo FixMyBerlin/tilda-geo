@@ -23,7 +23,7 @@ export const getStaticDatasetCategoriesAdminListFn = createServerFn({ method: 'G
 )
 
 export const getStaticDatasetCategoryAdminOneFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof CategoryKeyParam>) => CategoryKeyParam.parse(data))
+  .validator((data: z.infer<typeof CategoryKeyParam>) => CategoryKeyParam.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin(getRequestHeaders())
     const key = decodeURIComponent(data.categoryKey)
@@ -57,7 +57,7 @@ const CreateCategoryInput = z
   })
 
 export const createStaticDatasetCategoryFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateCategoryInput>) => CreateCategoryInput.parse(data))
+  .validator((data: z.infer<typeof CreateCategoryInput>) => CreateCategoryInput.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin(getRequestHeaders())
     const key = `${data.groupKey}/${data.categoryKey}`
@@ -94,7 +94,7 @@ const UpdateCategoryInput = z
   })
 
 export const updateStaticDatasetCategoryFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateCategoryInput>) => UpdateCategoryInput.parse(data))
+  .validator((data: z.infer<typeof UpdateCategoryInput>) => UpdateCategoryInput.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin(getRequestHeaders())
     const newKey = `${data.groupKey}/${data.categoryKey}`
@@ -121,7 +121,7 @@ export const updateStaticDatasetCategoryFn = createServerFn({ method: 'POST' })
 const DeleteCategoryInput = z.object({ key: z.string().min(1).max(191) })
 
 export const deleteStaticDatasetCategoryFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof DeleteCategoryInput>) => DeleteCategoryInput.parse(data))
+  .validator((data: z.infer<typeof DeleteCategoryInput>) => DeleteCategoryInput.parse(data))
   .handler(async ({ data }) => {
     await requireAdmin(getRequestHeaders())
     await db.staticDatasetCategory.delete({ where: { key: data.key } })

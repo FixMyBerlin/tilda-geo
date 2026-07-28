@@ -1,5 +1,5 @@
 import { isDev } from '@/components/shared/utils/isEnv'
-import { TagsTableRow } from '../TagsTableRow'
+import { TagsTableRowFrame } from '../TagsTableRow'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
 import { ValueDisclosure, ValueDisclosureButton, ValueDisclosurePanel } from '../ValueDisclosure'
 import { NodataFallbackWrapper } from './NodataFallbackWrapper'
@@ -8,13 +8,12 @@ import type { CompositTableRow } from './types'
 export const tableKeySurfaceSmoothness = 'composit_surface_smoothness'
 export const TagsTableRowCompositSurfaceSmoothness = ({
   sourceId,
-  tagKey,
   properties,
 }: CompositTableRow) => {
   if (!(properties.smoothness || properties.surface)) return null
 
   return (
-    <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
+    <TagsTableRowFrame label="Oberflächenqualität">
       <table className="w-full leading-4">
         <tbody>
           <tr>
@@ -64,7 +63,7 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
             </td>
           </tr>
           <tr className="border-t">
-            <th className="py-1 pr-2 text-left font-medium">Zustand</th>
+            <th className="py-1 pr-2 text-left font-medium">Fahrqualität</th>
             <td className="w-full py-1">
               <NodataFallbackWrapper fallback={!properties.smoothness}>
                 <ValueDisclosure>
@@ -104,7 +103,7 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
                       <em>Genauigkeit der Quelle:</em>{' '}
                       <ConditionalFormattedValue
                         sourceId={sourceId}
-                        tagKey={'confidence'}
+                        tagKey={'smoothness_confidence'}
                         tagValue={properties.smoothness_confidence}
                       />
                     </p>
@@ -115,6 +114,6 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
           </tr>
         </tbody>
       </table>
-    </TagsTableRow>
+    </TagsTableRowFrame>
   )
 }

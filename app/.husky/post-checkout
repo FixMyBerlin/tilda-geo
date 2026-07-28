@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# Keeps .env.local in sync when you switch branches (remove on develop/main
+# or main checkout, drop stale file if # DEV_STACK_BRANCH changed). Same logic
+# as predev; runs earlier so db-pull/migrate etc. see correct ports.
+# $3=1 on branch checkout (not file checkout)
+[ "$3" = "1" ] || exit 0
+
+. "$(dirname -- "$0")/ensure-bun.sh"
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT/app" || exit 0
+
+bun scripts/predev/syncEnvLocal.ts

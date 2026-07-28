@@ -1,10 +1,20 @@
-require('init')
-local SANITIZE_TAGS = require('sanitize_tags')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 
 describe('sanitize_tags', function()
+  describe('safe_string', function()
+    it('keeps apostrophes and quotes', function()
+      local input = [[L'Etoile "Nord"]]
+      assert.are.equal(SANITIZE_TAGS.safe_string(input), input)
+    end)
+  end)
+
   describe('access', function()
     it('allows destination', function()
       assert.are.equal(SANITIZE_TAGS.access('destination'), 'destination')
+    end)
+
+    it('maps construction to private', function()
+      assert.are.equal(SANITIZE_TAGS.access('construction'), 'private')
     end)
   end)
 

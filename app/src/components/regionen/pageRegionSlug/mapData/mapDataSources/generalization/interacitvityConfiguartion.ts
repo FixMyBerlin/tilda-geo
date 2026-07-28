@@ -57,10 +57,10 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['category', 'name', 'formalEducation', 'amenity'],
     minzoom: 13,
   },
-  barrierAreas: { stylingKeys: [], minzoom: 9 },
+  barrierAreas: { stylingKeys: [], minzoom: 8 },
   barrierLines: {
     stylingKeys: ['birdge', 'tunnel', 'railway', 'highway'],
-    minzoom: 9,
+    minzoom: 5,
   },
   bicycleParking_areas: { stylingKeys: [], minzoom: 9 },
   bicycleParking_points: {
@@ -69,19 +69,19 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   },
   bikeroutes: {
     stylingKeys: ['network', 'ref', 'cycle_highway'],
-    minzoom: 9,
+    minzoom: 5,
   },
   boundaries: {
-    stylingKeys: ['category_municipality', 'category_district', 'name', 'name:prefix'],
+    stylingKeys: ['category_municipality', 'category_district', 'name', 'name_prefix'],
     minzoom: 0,
   },
   boundaryLabels: {
-    stylingKeys: ['category_municipality', 'name:prefix', 'category_district'],
+    stylingKeys: ['category_municipality', 'name_prefix', 'category_district'],
     minzoom: 0,
   },
   landuse: {
     stylingKeys: ['landuse'],
-    minzoom: 11,
+    minzoom: 9,
   },
   publicTransport: {
     stylingKeys: ['category'],

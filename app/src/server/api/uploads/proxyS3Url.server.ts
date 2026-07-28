@@ -34,11 +34,15 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
   let response: GetObjectCommandOutput
   try {
     response = await s3Client.send(new GetObjectCommand(sendParams))
-  } catch (e) {
-    const { $metadata, message } = e
+  } catch (e: unknown) {
+    const metadata =
+      e && typeof e === 'object' && '$metadata' in e
+        ? (e as { $metadata: { httpStatusCode?: number } }).$metadata
+        : undefined
+    const message = e instanceof Error ? e.message : String(e)
 
     // Handle 304 Not Modified for conditional requests
-    if ($metadata.httpStatusCode === 304) {
+    if (metadata?.httpStatusCode === 304) {
       return new Response(null, {
         status: 304,
         headers: {
@@ -51,7 +55,7 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
 
     return Response.json(
       { source: 'S3', statusText: message },
-      { status: $metadata.httpStatusCode },
+      { status: metadata?.httpStatusCode ?? 500 },
     )
   }
 

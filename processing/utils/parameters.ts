@@ -8,10 +8,10 @@ function parseBbox(envVar: string | undefined): TopicConfigBbox | null {
   const result = envVar ? (envVar.split(',').map((t) => Number(t.trim())) as TopicConfigBbox) : null
   if (result !== null && result.length !== 4) {
     console.error(
-      styleText('red', 'ERROR: BBOX value was parsed but did not result in a valid bbox', {
-        input: envVar,
-        result,
-      }),
+      styleText(
+        'red',
+        `ERROR: BBOX value was parsed but did not result in a valid bbox (input: ${envVar}, result: ${JSON.stringify(result)})`,
+      ),
     )
   }
   return result
@@ -26,6 +26,10 @@ const oauthCredentialSchema = z
   .or(z.undefined())
 
 const urlSchema = z.url('Must be a valid URL')
+
+// Default 4 — benchmark and rationale: processing/docs/osm2pgsql-number-processes.md
+const OSM2PGSQL_DEFAULT_NUMBER_PROCESSES = 4
+const osm2pgsqlNumberProcessesSchema = z.coerce.number().default(OSM2PGSQL_DEFAULT_NUMBER_PROCESSES)
 
 function parseParameters() {
   return {
@@ -45,9 +49,11 @@ function parseParameters() {
       : [],
     processOnlyBbox: parseBbox(process.env.PROCESS_ONLY_BBOX),
     osm2pgsqlLogLevel: process.env.OSM2PGSQL_LOG_LEVEL || 'info',
-    osm2pgsqlNumberProcesses: process.env.OSM2PGSQL_NUMBER_PROCESSES
-      ? Number(process.env.OSM2PGSQL_NUMBER_PROCESSES) || undefined
-      : undefined,
+    osm2pgsqlNumberProcesses: osm2pgsqlNumberProcessesSchema.parse(
+      // Missing env → undefined → default 4. Compose may set the var to "" (key present, empty value);
+      // that is not undefined, and z.coerce.number() would parse "" as 0 — || undefined maps both to default.
+      process.env.OSM2PGSQL_NUMBER_PROCESSES || undefined,
+    ),
   }
 }
 
@@ -56,5 +62,6 @@ export const params = parseParameters()
 export const paramsFilteredForLogs = {
   ...params,
   apiKey: params.apiKey ? '***' : '',
+  osmUsername: params.osmUsername ? '***' : params.osmUsername,
   osmPassword: params.osmPassword ? '***' : params.osmPassword,
 }

@@ -156,7 +156,7 @@ async function getCookieFile() {
  * Get headers for HTTP requests, including OAuth cookie if enabled
  */
 export function getAuthHeaders(httpCookie: string | undefined) {
-  const headers: HeadersInit = {}
+  const headers: Record<string, string> = {}
 
   if (httpCookie) {
     headers.Cookie = httpCookie

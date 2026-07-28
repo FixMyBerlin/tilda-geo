@@ -1,8 +1,7 @@
-require('init')
-local SANITIZE_TAGS = require('sanitize_tags')
-local THIS_OR_THAT = require('this_or_that')
-local is_driveway = require('is_driveway')
-local WAY_IDS_OVERRIDE_TO_PRIVATE = require('operator_type_override_public_to_private')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local THIS_OR_THAT = require('topics.parking.parkings.helper.this_or_that')
+local is_driveway = require('topics.parking.roads.helper.is_driveway')
+local WAY_IDS_OVERRIDE_TO_PRIVATE = require('topics.parking.overwrites.operator_type_override_public_to_private')
 
 --- Resolves operator_type for parking areas (e.g. off-street, separate parking areas).
 --- Uses tags or default and applies manual way-ID override from see operator_type_override_public_to_private.lua when result is 'public'.

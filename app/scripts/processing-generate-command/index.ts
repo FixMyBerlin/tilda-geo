@@ -2,7 +2,22 @@
 import path from 'node:path'
 import { parseArgs, styleText } from 'node:util'
 import * as p from '@clack/prompts'
+import { area, bboxPolygon } from '@turf/turf'
 import { $ } from 'bun'
+import dotenv from 'dotenv'
+import { topicsConfig } from '../../../processing/constants/topics.const'
+import {
+  applyDevPortSlotToProcessEnv,
+  exitOnInvalidDevPortSlot,
+  isDevPortSlotMode,
+} from '../predev/devPortSlot'
+import { composeContainerPrefixFromEnv, dockerStackIdFromEnv } from '../predev/ensureDevStack'
+
+const repoRootFromScript = path.resolve(import.meta.dir, '../../..')
+dotenv.config({ path: path.join(repoRootFromScript, '.env') })
+dotenv.config({ path: path.join(repoRootFromScript, '.env.local') })
+exitOnInvalidDevPortSlot('processing')
+applyDevPortSlotToProcessEnv()
 
 const BBOX_PRESETS = {
   bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
@@ -18,15 +33,99 @@ const BBOX_PRESETS = {
   'berlin-parking-bus-stop': '13.295719,52.49283,13.33790,52.514279',
 } as const satisfies Record<string, string>
 
-const DEFAULT_DIFF_BBOX = BBOX_PRESETS['berlin-full']
-const DEFAULT_ONLY_BBOX = BBOX_PRESETS.bussonderstreifen
-
 const DIFFING_MODES = ['off', 'previous', 'fixed', 'reference'] as const
 type DiffingMode = (typeof DIFFING_MODES)[number]
 
 const PRESET_SLUGS_FOR_HELP = [...new Set(Object.keys(BBOX_PRESETS))].sort() as string[]
 
 const CUSTOM_COORDS = '__custom__'
+const VIEWER_BASE = 'https://viewer.tilda-geo.de'
+
+type TopicsRunMode = 'all' | 'daily' | 'specific'
+
+function allTopicIds() {
+  return [...topicsConfig.keys()].sort((a, b) => a.localeCompare(b))
+}
+
+function topicMultiselectOptions() {
+  return allTopicIds().map((id) => {
+    const entry = topicsConfig.get(id)
+    return {
+      value: id,
+      label: id,
+      hint: entry?.schedule,
+    }
+  })
+}
+
+function resolveProcessOnlyTopics(mode: TopicsRunMode, selected: string[] = []) {
+  if (mode === 'all') return allTopicIds().join(',')
+  if (mode === 'daily') return ''
+  if (selected.length === 0) {
+    console.error('Select at least one topic for PROCESS_ONLY_TOPICS')
+    process.exit(1)
+  }
+  return selected.join(',')
+}
+
+function topicsCliFlagsPresent() {
+  let n = 0
+  if (argPresent('--all-topics')) n++
+  if (argPresent('--all-daily-topics')) n++
+  if (argPresent('--topics')) n++
+  return n
+}
+
+function parseBboxCsv(csv: string) {
+  const parts = csv.split(',').map((s) => Number(s.trim()))
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return undefined
+  return parts as [number, number, number, number]
+}
+
+function normalizeBboxCsv(csv: string) {
+  const bbox = parseBboxCsv(csv)
+  if (!bbox) return undefined
+  return bbox.map((n) => n.toFixed(6)).join(',')
+}
+
+const DEFAULT_DIFF_BBOX = normalizeBboxCsv(BBOX_PRESETS['berlin-full'])!
+const DEFAULT_ONLY_BBOX = normalizeBboxCsv(BBOX_PRESETS.bussonderstreifen)!
+
+function bboxAreaSqm(csv: string) {
+  const bbox = parseBboxCsv(csv)
+  if (!bbox) return undefined
+  return area(bboxPolygon(bbox))
+}
+
+function formatAreaSqm(sqm: number) {
+  return `${Math.round(sqm).toLocaleString('en-US')} m²`
+}
+
+function viewerBboxUrl(coords: string) {
+  const normalized = normalizeBboxCsv(coords) ?? coords
+  return `${VIEWER_BASE}/?bbox=${normalized}`
+}
+
+function bboxHint(coords: string) {
+  const sqm = bboxAreaSqm(coords)
+  const areaPart = sqm !== undefined ? formatAreaSqm(sqm) : '?'
+  return `${areaPart} · ${viewerBboxUrl(coords)}`
+}
+
+function formatBboxSummaryLine(envKey: string, coords: string) {
+  const sqm = bboxAreaSqm(coords)
+  const areaPart = sqm !== undefined ? formatAreaSqm(sqm) : '?'
+  return `${envKey}: ${areaPart}\n${viewerBboxUrl(coords)}`
+}
+
+function buildBboxSummaryNote(onlyBbox: string, diffBbox: string, commandLine: string) {
+  const lines = [formatBboxSummaryLine('PROCESS_ONLY_BBOX', onlyBbox)]
+  if (diffBbox !== onlyBbox) {
+    lines.push('', formatBboxSummaryLine('PROCESSING_DIFFING_BBOX', diffBbox))
+  }
+  lines.push('', commandLine)
+  return lines.join('\n')
+}
 
 const ENV_ORDER_BEFORE_DIFF_MODE = [
   'PROCESSING_DIFFING_BBOX',
@@ -52,6 +151,7 @@ const { values } = parseArgs({
     'diff-mode': { type: 'string' },
     topics: { type: 'string' },
     'all-topics': { type: 'boolean', default: false },
+    'all-daily-topics': { type: 'boolean', default: false },
     'osm2pgsql-log-level': { type: 'string' },
     'skip-download': { type: 'string' },
     'skip-unchanged': { type: 'string' },
@@ -89,10 +189,23 @@ function explicitRunKind(): 'dry' | 'detach' | 'foreground' | 'ambiguous' | 'non
 }
 
 function topicsChoiceSatisfied() {
-  const allT = argPresent('--all-topics')
-  const top = argPresent('--topics')
-  if (allT && top) return false
-  return allT || top
+  return topicsCliFlagsPresent() === 1
+}
+
+function resolveTopicsFromCli() {
+  const flagCount = topicsCliFlagsPresent()
+  if (flagCount > 1) {
+    console.error('Use exactly one of --all-topics, --all-daily-topics, --topics')
+    process.exit(1)
+  }
+  if (argPresent('--all-topics')) return resolveProcessOnlyTopics('all')
+  if (argPresent('--all-daily-topics')) return resolveProcessOnlyTopics('daily')
+  const csv = values.topics?.trim() ?? ''
+  if (!csv) {
+    console.error('--topics requires a non-empty CSV')
+    process.exit(1)
+  }
+  return csv
 }
 
 function bboxChoiceSatisfied() {
@@ -114,11 +227,12 @@ function isFullNonInteractiveBatch() {
 }
 
 function printHelp() {
-  console.log(`processing-generate-command — print a copy-paste shell command for docker compose processing (see README)
+  console.log(`processing — print a copy-paste shell command for docker compose processing (see README)
 
-Usage: bun run processing-generate-command -- [options]
+Usage: bun run processing -- [options]
 
-Does not run Docker. Outputs one line that cds to the absolute repo root in a subshell, sets env vars, then runs docker compose.
+Interactive (TTY): prompts end with Show command (copy-paste) or Run command (execute in this terminal).
+Non-interactive: prints one line only (for CI/agents). The line cds to the absolute repo root in a subshell, sets env vars, then runs docker compose.
 Your shell cwd stays the same (safe to paste from app/). PROCESSING_DIFFING_MODE is last for easy edits.
 
 Default: interactive prompts (Clack) when stdin is a TTY.
@@ -127,7 +241,7 @@ Non-interactive (CI, agents): pass **all** of the following (see example):
   • Bbox: --preset <slug>  OR  (--only-bbox <coords> AND --diff-bbox <coords>)
     Optional with --preset: --distinct-diff-bbox, --diff-bbox (override diff area)
   • --diff-mode <off|previous|fixed|reference>
-  • Topics: --all-topics  OR  --topics <csv>
+  • Topics: exactly one of --all-topics (incl. weekly)  |  --all-daily-topics  |  --topics <csv>
   • --skip-download <0|1>  --skip-unchanged <0|1>  --skip-warm-cache <0|1>
   • If --skip-download 1: --wait-fresh-data <0|1>  (when --skip-download 0, flag optional)
   • Exactly one output mode: --dry-run  |  --detach (-d)  |  --foreground
@@ -135,12 +249,12 @@ Non-interactive (CI, agents): pass **all** of the following (see example):
 
 Optional (CLI only, never prompted): --osm2pgsql-log-level, --download-url (override Geofabrik extract URL; default comes from root .env)
 
-Example (preset, all topics; bun run injects skip defaults):
+Example (preset, all daily topics; bun run injects skip defaults):
 
-  bun run processing-generate-command -- \\
+  bun run processing -- \\
     --preset xhain \\
     --diff-mode fixed \\
-    --all-topics \\
+    --all-daily-topics \\
     --skip-download 1 \\
     --skip-unchanged 0 \\
     --skip-warm-cache 1 \\
@@ -156,10 +270,8 @@ Bbox presets: ${PRESET_SLUGS_FOR_HELP.join(', ')}
 }
 
 function printBatchRequiredError() {
-  console.error(
-    'processing-generate-command: stdin is not a TTY. Pass a full non-interactive flag set.',
-  )
-  console.error('Run from app/: bun run processing-generate-command -- --help')
+  console.error('processing: stdin is not a TTY. Pass a full non-interactive flag set.')
+  console.error('Run from app/: bun run processing -- --help')
 }
 
 function parseBin(name: string, raw: string | undefined, defaultVal: '0' | '1') {
@@ -177,7 +289,16 @@ function resolvePreset(slug: string) {
     console.error(`Unknown --preset "${slug}". Use one of: ${PRESET_SLUGS_FOR_HELP.join(', ')}`)
     process.exit(1)
   }
-  return coords
+  return readBboxCsv(coords)
+}
+
+function readBboxCsv(csv: string) {
+  const normalized = normalizeBboxCsv(csv)
+  if (!normalized) {
+    console.error(`Invalid bbox coordinates: ${csv}`)
+    process.exit(1)
+  }
+  return normalized
 }
 
 function parseDiffMode(raw: string | undefined): DiffingMode {
@@ -227,8 +348,23 @@ function formatShellOneLiner(repoRoot: string, overrides: Record<string, string>
   }
   envParts.push(envAssignment('PROCESSING_DIFFING_MODE', diffMode))
 
+  const containerPrefix = composeContainerPrefixFromEnv()
+  if (containerPrefix) {
+    envParts.unshift(envAssignment('COMPOSE_DEV_CONTAINER_PREFIX', containerPrefix))
+  }
+
+  if (isDevPortSlotMode()) {
+    envParts.unshift(envAssignment('TILES_PORT', process.env.TILES_PORT ?? '3000'))
+    envParts.unshift(envAssignment('DATABASE_PORT', process.env.DATABASE_PORT ?? '5432'))
+  }
+
+  const stackId = dockerStackIdFromEnv()
+  const projectFlag = stackId ? `-p ${shellQuote(stackId)} ` : ''
+  const compose = detach
+    ? `docker compose ${projectFlag}up -d processing`
+    : `docker compose ${projectFlag}up processing`
+
   const repoAbs = path.resolve(repoRoot)
-  const compose = detach ? 'docker compose up -d processing' : 'docker compose up processing'
   return `( cd ${shellQuote(repoAbs)} && ${envParts.join(' ')} ${compose} )`
 }
 
@@ -246,12 +382,57 @@ function printHighlightedCommand(line: string) {
   console.log(line)
 }
 
+async function runShellOneLiner(line: string) {
+  const proc = Bun.spawn(['sh', '-c', line], {
+    stdio: ['inherit', 'inherit', 'inherit'],
+    cwd: process.cwd(),
+  })
+  const code = await proc.exited
+  process.exit(code === 0 ? 0 : (code ?? 1))
+}
+
+async function finishInteractive(
+  repoRoot: string,
+  overrides: Record<string, string>,
+  detach: boolean,
+) {
+  const line = formatShellOneLiner(repoRoot, overrides, detach)
+  const onlyBbox = overrides.PROCESS_ONLY_BBOX ?? ''
+  const diffBbox = overrides.PROCESSING_DIFFING_BBOX ?? ''
+  const noteBody = buildBboxSummaryNote(onlyBbox, diffBbox, line)
+  const next = await p.select({
+    message: 'What next?',
+    options: [
+      { value: 'show', label: 'Show command — copy and paste', hint: 'default' },
+      { value: 'run', label: 'Run command — execute in this terminal', hint: 'live logs' },
+    ],
+    initialValue: 'show',
+  })
+  if (p.isCancel(next)) {
+    p.cancel('Cancelled.')
+    process.exit(0)
+  }
+  if (next === 'show') {
+    p.note(noteBody, 'copy paste this')
+    p.outro('Done.')
+    process.exit(0)
+  }
+  p.log.message(
+    'Running in this terminal (your cwd can stay in app/; compose runs from repo root):',
+  )
+  p.log.message(line)
+  await runShellOneLiner(line)
+}
+
 function presetOptionsForSelect() {
-  return PRESET_SLUGS_FOR_HELP.map((slug) => ({
-    value: slug,
-    label: slug,
-    hint: BBOX_PRESETS[slug as keyof typeof BBOX_PRESETS],
-  }))
+  return PRESET_SLUGS_FOR_HELP.map((slug) => {
+    const coords = BBOX_PRESETS[slug as keyof typeof BBOX_PRESETS]
+    return {
+      value: slug,
+      label: slug,
+      hint: bboxHint(coords),
+    }
+  })
 }
 
 async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PRESETS) {
@@ -265,10 +446,20 @@ async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PR
   })
   if (p.isCancel(choice)) return undefined
   if (choice === CUSTOM_COORDS) {
+    const seedCoords = BBOX_PRESETS[defaultSlug]
+    p.note(
+      [
+        'Preview/adjust bbox in the viewer:',
+        viewerBboxUrl(seedCoords),
+        '',
+        'Change the bbox on the map, then copy the bbox string from the viewer',
+        '(e.g. 12.5910,52.4017,14.0000,52.4915) and paste it below.',
+      ].join('\n'),
+      'Custom bbox',
+    )
     const raw = await p.text({
       message: 'Coordinates (MINLON,MINLAT,MAXLON,MAXLAT)',
-      initialValue: BBOX_PRESETS[defaultSlug],
-      placeholder: BBOX_PRESETS[defaultSlug],
+      placeholder: '12.5910,52.4017,14.0000,52.4915',
     })
     if (p.isCancel(raw)) return undefined
     const t = raw.trim()
@@ -276,9 +467,34 @@ async function pickBboxCoords(message: string, defaultSlug: keyof typeof BBOX_PR
       p.log.error('Coordinates cannot be empty.')
       return undefined
     }
-    return t
+    const normalized = normalizeBboxCsv(t)
+    if (!normalized) {
+      p.log.error('Invalid coordinates. Use MINLON,MINLAT,MAXLON,MAXLAT with four numbers.')
+      return undefined
+    }
+    const sqm = bboxAreaSqm(normalized)
+    if (sqm !== undefined) {
+      p.log.message(`${formatAreaSqm(sqm)} · ${viewerBboxUrl(normalized)}`)
+    }
+    return normalized
   }
-  return BBOX_PRESETS[choice as keyof typeof BBOX_PRESETS]
+  return readBboxCsv(BBOX_PRESETS[choice as keyof typeof BBOX_PRESETS])
+}
+
+function logCliResolvedFlag(message: string, answerLabel: string, cliFlag: string) {
+  p.log.step(
+    `${message}\n│  ● ${answerLabel}\n│  Already set on the command line (\`${cliFlag}\`) — prompt skipped.`,
+  )
+}
+
+function logCliResolvedBinary(
+  message: string,
+  long: string,
+  value: '0' | '1',
+  when1: string,
+  when0: string,
+) {
+  logCliResolvedFlag(message, value === '1' ? when1 : when0, `${long} ${value}`)
 }
 
 async function selectBinaryFlag(message: string, initial: '0' | '1', when1: string, when0: string) {
@@ -304,13 +520,17 @@ async function binaryFromCliOrPrompt(
 ) {
   if (argPresent(long)) {
     const v = parseBin(long, values[valueKey], initial)
-    p.log.message(`${long} ${v} (from CLI)`)
+    logCliResolvedBinary(message, long, v, when1, when0)
     return v
   }
   return selectBinaryFlag(message, initial, when1, when0)
 }
 
 function resolveWaitFreshData(skipDownload: '0' | '1') {
+  const message = 'Wait for fresh Geofabrik data? (WAIT_FOR_FRESH_DATA)'
+  const when1 = 'Yes — wait until extract is fresh'
+  const when0 = 'No — not waiting'
+
   if (skipDownload === '0') {
     if (argPresent('--wait-fresh-data') && values['wait-fresh-data'] !== '0') {
       p.log.warn(
@@ -321,13 +541,51 @@ function resolveWaitFreshData(skipDownload: '0' | '1') {
   }
   if (argPresent('--wait-fresh-data')) {
     const v = parseBin('--wait-fresh-data', values['wait-fresh-data'], '0')
-    p.log.message(`--wait-fresh-data ${v} (from CLI)`)
+    logCliResolvedBinary(message, '--wait-fresh-data', v, when1, when0)
     return v
   }
   return '0' as const
 }
 
 type RunPlan = { overrides: Record<string, string>; detach: boolean }
+
+async function pickProcessOnlyTopics() {
+  const mode = await p.select({
+    message: 'Which topics to run? (PROCESS_ONLY_TOPICS)',
+    options: [
+      {
+        value: 'all',
+        label: 'All (incl. weekly)',
+        hint: 'includes landcover (~weekly)',
+      },
+      {
+        value: 'daily',
+        label: 'All daily',
+        hint: 'default nightly pipeline',
+      },
+      { value: 'specific', label: 'Only specific topics' },
+    ],
+    initialValue: 'all',
+  })
+  if (p.isCancel(mode)) return undefined
+
+  if (mode === 'specific') {
+    const selected = await p.multiselect({
+      message: 'Which specific topics?',
+      options: topicMultiselectOptions(),
+      required: false,
+    })
+    if (p.isCancel(selected)) return undefined
+    const ids = Array.isArray(selected) ? selected : []
+    if (ids.length === 0) {
+      p.log.error('Select at least one topic.')
+      return undefined
+    }
+    return resolveProcessOnlyTopics('specific', ids)
+  }
+
+  return resolveProcessOnlyTopics(mode as TopicsRunMode)
+}
 
 async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   const onlyBbox = await pickBboxCoords('Processing bbox (PROCESS_ONLY_BBOX)', 'bussonderstreifen')
@@ -346,12 +604,8 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   })
   if (p.isCancel(diffModeRaw)) return undefined
 
-  const topicsRaw = await p.text({
-    message: 'Limit topics (PROCESS_ONLY_TOPICS)',
-    initialValue: '',
-    placeholder: 'empty = all — e.g. trafficSigns,parking',
-  })
-  if (p.isCancel(topicsRaw)) return undefined
+  const topicsRaw = await pickProcessOnlyTopics()
+  if (topicsRaw === undefined) return undefined
 
   const skipDownload = await binaryFromCliOrPrompt(
     '--skip-download',
@@ -389,7 +643,22 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
   if (argPresent('--download-url')) {
     const u = values['download-url']?.trim() ?? ''
     downloadUrl = u || undefined
-    if (downloadUrl) p.log.message(`--download-url set (from CLI)`)
+    if (downloadUrl) {
+      logCliResolvedFlag(
+        'Geofabrik extract URL (PROCESS_GEOFABRIK_DOWNLOAD_URL)',
+        downloadUrl,
+        `--download-url ${downloadUrl}`,
+      )
+    }
+  }
+
+  const logLevel = values['osm2pgsql-log-level']?.trim()
+  if (logLevel) {
+    logCliResolvedFlag(
+      'osm2pgsql log level (OSM2PGSQL_LOG_LEVEL)',
+      logLevel,
+      `--osm2pgsql-log-level ${logLevel}`,
+    )
   }
 
   const action = await p.select({
@@ -402,7 +671,7 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
       },
       { value: 'detach', label: 'Detached — docker compose up -d processing', hint: 'background' },
     ],
-    initialValue: 'run',
+    initialValue: 'detach',
   })
   if (p.isCancel(action)) return undefined
 
@@ -410,15 +679,14 @@ async function collectInteractiveConfig(): Promise<RunPlan | undefined> {
     PROCESSING_DIFFING_MODE: diffModeRaw as DiffingMode,
     PROCESSING_DIFFING_BBOX: diffBbox,
     PROCESS_ONLY_BBOX: onlyBbox,
-    PROCESS_ONLY_TOPICS: topicsRaw.trim(),
+    PROCESS_ONLY_TOPICS: topicsRaw,
     SKIP_DOWNLOAD: skipDownload,
     SKIP_UNCHANGED: skipUnchanged,
     SKIP_WARM_CACHE: skipWarm,
     WAIT_FOR_FRESH_DATA: waitFresh,
   }
-  const logLevel = values['osm2pgsql-log-level']?.trim()
-  if (logLevel) overrides.OSM2PGSQL_LOG_LEVEL = logLevel
   if (downloadUrl) overrides.PROCESS_GEOFABRIK_DOWNLOAD_URL = downloadUrl
+  if (logLevel) overrides.OSM2PGSQL_LOG_LEVEL = logLevel
 
   return {
     overrides,
@@ -439,8 +707,8 @@ function buildOverridesFromCliBatch() {
     process.exit(1)
   }
 
-  if (argPresent('--all-topics') && argPresent('--topics')) {
-    console.error('Use either --all-topics or --topics, not both')
+  if (topicsCliFlagsPresent() > 1) {
+    console.error('Use exactly one of --all-topics, --all-daily-topics, --topics')
     process.exit(1)
   }
 
@@ -469,8 +737,10 @@ function buildOverridesFromCliBatch() {
   }
   if (values['only-bbox']) onlyBbox = values['only-bbox']
   if (values['diff-bbox']) diffBbox = values['diff-bbox']
+  onlyBbox = readBboxCsv(onlyBbox)
+  diffBbox = readBboxCsv(diffBbox)
 
-  const topicsStr = values['all-topics'] ? '' : (values.topics ?? '')
+  const topicsStr = resolveTopicsFromCli()
 
   const skipDl = parseBin('--skip-download', values['skip-download'], '1')
   const waitFresh =
@@ -527,23 +797,16 @@ if (!fullBatch) {
   }
   if (userArgs.length > 0) {
     console.warn(
-      'processing-generate-command: incomplete CLI flag set — opening interactive prompts. Skip/wait/download-url/osm2pgsql-log-level flags on the command line are applied; pass a full non-interactive set (see --help) to avoid prompts.',
+      'processing: incomplete CLI flag set — opening interactive prompts. Skip/wait/download-url/osm2pgsql-log-level flags on the command line are applied; pass a full non-interactive set (see --help) to avoid prompts.',
     )
   }
-  p.intro('processing-generate-command')
+  p.intro('processing')
   const plan = await collectInteractiveConfig()
   if (!plan) {
     p.cancel('Cancelled.')
     process.exit(0)
   }
-  overrides = plan.overrides
-  detach = plan.detach
-  p.log.message(
-    'Copy the line below and press Enter (your cwd can stay in app/; compose runs from repo root):',
-  )
-  printHighlightedCommand(formatShellOneLiner(repoRoot, overrides, detach))
-  p.outro('Done.')
-  process.exit(0)
+  await finishInteractive(repoRoot, plan.overrides, plan.detach)
 }
 
 const batch = buildOverridesFromCliBatch()

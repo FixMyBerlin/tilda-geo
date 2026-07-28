@@ -19,7 +19,7 @@ Our vector tiles are served by [Martin](https://maplibre.org/martin/introduction
 Our general setup is:
 
 - [osm2pgsql](https://osm2pgsql.org/doc/manual.html) creates a table for each vector tile dataset that we want to serve (but we don't use that directly).
-- Our [`post-processing-hook`]() creates [a Postgres function for each table](app/src/registerSQLFunctions/registerGeneralizationFunctions.ts) that holds all the logic defined below.
+- Our [`post-processing-hook`](app/src/routes/api/private/post-processing-hook.ts) creates [a Postgres function for each table](app/src/registerSQLFunctions/registerGeneralizationFunctions.ts) that holds all the logic defined below.
   This is where our data gets reduced.
 - Our [cache-warming](./Cache-Warming.md) runs on certain datasets and zoom levels to cache larger vector tiles so users don't have to wait for the DB part to render the tiles.
 

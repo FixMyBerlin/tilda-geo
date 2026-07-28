@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url'
 import { $ } from 'bun'
 import { TYPES_DIR } from '../constants/directories.const'
 import { topicsConfig } from '../constants/topics.const'
-import { getTopicTables } from '../diffing/diffing'
 import { params } from '../utils/parameters'
 
 /**
@@ -16,48 +15,48 @@ export async function generateTypes() {
 
   console.log('[DEV] Generating types...')
 
-  writeTableIdTypes()
-  writeTodoIdTypes()
+  await writeTopicIdTypes()
+  await writeTodoIdTypes()
 
-  autoformatTypeFiles()
+  await autoformatTypeFiles()
 }
 
-async function writeTableIdTypes() {
-  if (params.processOnlyTopics.length > 0) {
-    console.info('[DEV] Generating types:', 'Skipped because `PROCESS_ONLY_TOPICS` is present')
-    return
+async function writeTopicIdTypes() {
+  const topicIds = Array.from(topicsConfig.keys())
+  const formatStringArray = (values: string[]) => {
+    if (values.length === 0) return '\n  // (oxlint: one line per entry)\n'
+    return `\n  ${values.map((name) => `'${name}'`).join(',\n  ')}\n  // (oxlint: one line per entry)\n`
   }
 
-  const processedTables = new Set<string>()
-  for (const [topic] of Array.from(topicsConfig)) {
-    const topicTables = await getTopicTables(topic)
-    topicTables.forEach((table) => {
-      processedTables.add(table)
-    })
-  }
+  const scheduleEntries = topicIds
+    .map((topicId) => `  ${topicId}: '${topicsConfig.get(topicId)!.schedule}'`)
+    .join(',\n')
 
-  const typeFile = join(TYPES_DIR, 'tableId.generated.const.ts')
-  const content = prefixGeneratedFiles(
-    `export type TableId = ${
-      Array.from(processedTables)
-        .sort()
-        .map((tableName) => `'${tableName}'`)
-        .join(' | ') || 'ERROR'
-    }`,
-  )
+  const fileContent = `
+  export const topicIds = [${formatStringArray(topicIds)}] as const
+  export type TopicId = (typeof topicIds)[number]
 
+  export type TopicSchedule = 'nightly' | 'weekend'
+
+  export const topicScheduleById = {
+  ${scheduleEntries},
+  } as const satisfies Record<TopicId, TopicSchedule>
+  `
+
+  const typeFile = join(TYPES_DIR, 'topicId.generated.const.ts')
+  const content = prefixGeneratedFiles(fileContent)
   await Bun.write(typeFile, content)
 }
 
-async function callLuaForNames(luaFilename: 'ExtractBikelaneTodos' | 'ExtractRoadTodos') {
+async function callLuaForNames(luaFilename: 'extract_bikelane_todos' | 'extract_road_todos') {
   try {
     const rawResult = await $`lua /processing/utils/types/${luaFilename}.lua`.text()
     const lines = rawResult.split('\n').filter(Boolean).sort()
-    const result = lines
-      .map((line) => line.split(';'))
-      .map(([id, todoTableOnly]) => {
-        return { id, todoTableOnly: JSON.parse(todoTableOnly) as boolean }
-      })
+    const result = lines.flatMap((line) => {
+      const [id, todoTableOnly] = line.split(';')
+      if (!id || todoTableOnly === undefined) return []
+      return [{ id, todoTableOnly: JSON.parse(todoTableOnly) as boolean }]
+    })
     return result
   } catch (error) {
     throw new Error(`[DEV] Failed to get names for "${luaFilename}": ${error}`)
@@ -80,71 +79,23 @@ function sortMapillarySpecial(a: string, b: string) {
 
 async function writeTodoIdTypes() {
   const typeFilePath = join(TYPES_DIR, 'todoId.generated.const.ts')
-  const typeFile = Bun.file(typeFilePath)
 
-  const bikelaneTodoNames = await callLuaForNames('ExtractBikelaneTodos')
-  const bikelaneTodos = bikelaneTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
-  const bikelaneTodoNamesTableAndField = bikelaneTodoNames
-    .filter((e) => e.todoTableOnly === false)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-  const bikelaneTodoNamesTableOnly = bikelaneTodoNames
-    .filter((e) => e.todoTableOnly === true)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-
-  const roadTodoNames = await callLuaForNames('ExtractRoadTodos')
-  const roadTodos = roadTodoNames.map((e) => e.id).sort(sortMapillarySpecial)
-  const roadTodoNamesTableAndField = roadTodoNames
-    .filter((e) => e.todoTableOnly === false)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-  const roadTodoNamesTableOnly = roadTodoNames
-    .filter((e) => e.todoTableOnly === true)
-    .map((e) => e.id)
-    .sort(sortMapillarySpecial)
-
+  const bikelaneTodoNames = await callLuaForNames('extract_bikelane_todos')
+  const roadTodoNames = await callLuaForNames('extract_road_todos')
   const todos = [...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id).sort(sortMapillarySpecial)
 
+  const formatStringArray = (values: string[]) => {
+    if (values.length === 0) return '\n  // (oxlint: one line per entry)\n'
+    return `\n  ${values.map((name) => `'${name}'`).join(',\n  ')}\n  // (oxlint: one line per entry)\n`
+  }
+
   const fileContent = `
-  export const bikelaneTodoIds = [${bikelaneTodos.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type BikelaneTodoId = (typeof bikelaneTodoIds)[number]
-
-  export const bikelaneTodoIdsTableAndField = [${bikelaneTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type BikelaneTodoIdTableAndField = (typeof bikelaneTodoIdsTableAndField)[number]
-
-  export const bikelaneTodoIdsTableOnly = [${bikelaneTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type BikelaneTodoIdTableOnly = (typeof bikelaneTodoIdsTableOnly)[number]
-
-  export const roadTodoIds = [${roadTodos.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type RoadTodoId = (typeof roadTodoIds)[number]
-
-  export const roadTodoIdsTableAndField = [${roadTodoNamesTableAndField.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type RoadTodoIdTableAndField = (typeof roadTodoIdsTableAndField)[number]
-
-  export const roadTodoIdsTableOnly = [${roadTodoNamesTableOnly.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type RoadTodoIdTableOnly = (typeof roadTodoIdsTableOnly)[number]
-
-  export const todoIds = [${todos.map((name) => `'${name}'`).join(',')}
-  // (biome: one line per entry)
-  ] as const
-  export type TodoId = (typeof todoIds)[number]
-  `
+export const todoIds = [${formatStringArray(todos)}] as const
+export type TodoId = (typeof todoIds)[number]
+`
 
   const content = prefixGeneratedFiles(fileContent)
-  await Bun.write(typeFile, content)
+  await Bun.write(typeFilePath, content)
 }
 
 function prefixGeneratedFiles(content: string) {
@@ -157,13 +108,13 @@ ${content}
 }
 
 function resolveOxfmtConfigPath() {
-  if (existsSync('/mnt/oxfmt.config.ts')) return '/mnt/oxfmt.config.ts'
-  const besideProcessing = fileURLToPath(new URL('../oxfmt.config.ts', import.meta.url))
+  if (existsSync('/mnt/oxfmt.config.mjs')) return '/mnt/oxfmt.config.mjs'
+  const besideProcessing = fileURLToPath(new URL('../oxfmt.config.mjs', import.meta.url))
   if (existsSync(besideProcessing)) return besideProcessing
-  const repoApp = fileURLToPath(new URL('../../app/oxfmt.config.ts', import.meta.url))
+  const repoApp = fileURLToPath(new URL('../../app/oxfmt.config.mjs', import.meta.url))
   if (existsSync(repoApp)) return repoApp
   throw new Error(
-    'oxfmt.config.ts not found (expected /mnt/oxfmt.config.ts, processing/oxfmt.config.ts, or app/oxfmt.config.ts)',
+    'oxfmt.config.mjs not found (expected /mnt/oxfmt.config.mjs, processing/oxfmt.config.mjs, or app/oxfmt.config.mjs)',
   )
 }
 

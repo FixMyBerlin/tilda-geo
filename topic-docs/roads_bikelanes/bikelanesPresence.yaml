@@ -1,0 +1,22 @@
+title: Daten zu Radinfrastruktur an Straßen
+sourceIds:
+  - atlas_bikelanesPresence
+attributes:
+  - key: bikelane_left
+    label: Radinfrastruktur links
+    valuesRef: bikelanes.category
+    valuesAdd:
+      - value: data_no
+        label: Vollständig (explizit keine)
+      - value: not_expected
+        label: Keine Infrastruktur erwartet
+      - value: assumed_no
+        label: Vermutlich vollständig
+      - value: missing
+        label: Unvollständig
+  - key: bikelane_self
+    label: Radinfrastruktur mittig
+    ref: bikelanesPresence.bikelane_left
+  - key: bikelane_right
+    label: Radinfrastruktur rechts
+    ref: bikelanesPresence.bikelane_left

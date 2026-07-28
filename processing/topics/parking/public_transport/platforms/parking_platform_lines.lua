@@ -1,11 +1,10 @@
-require('init')
-require('Log')
-require('DefaultId')
-local LOG_ERROR = require('parking_errors')
-local SANITIZE_TAGS = require('sanitize_tags')
-local sanitize_cleaner = require('sanitize_cleaner')
+local log = require('topics.helper.log')
+local default_id = require('topics.helper.default_id')
+local LOG_ERROR = require('topics.parking.errors.parking_errors')
+local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local CLEANER = require('topics.helper.sanitize_cleaner')
 
----@param tags table<string, string>
+---@param tags OsmTags<string, string>
 ---@return boolean
 local function is_platform_line(tags)
   return tags.public_transport == 'platform' and tags.bus == 'yes'
@@ -23,10 +22,10 @@ local function parking_platform_lines(object, db_table)
       operator = SANITIZE_TAGS.safe_string(object.tags.operator),
     }
 
-    local cleaned_tags, replaced_tags = sanitize_cleaner.split_cleaned_and_replaced_tags(result_tags, object.tags)
+    local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
 
     local row = {
-      id = DefaultId(object),
+      id = default_id(object),
       tags = cleaned_tags,
       meta = {},
       -- Reminder: This are mostly lines, but some of them are areas which we store as closed lines.

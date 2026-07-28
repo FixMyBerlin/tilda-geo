@@ -9,9 +9,5 @@ export const Route = createFileRoute('/preview')({
   head: () => ({
     meta: [{ name: 'robots', content: 'noindex' }],
   }),
-  component: PreviewLayout,
+  component: () => <Outlet />,
 })
-
-function PreviewLayout() {
-  return <Outlet />
-}

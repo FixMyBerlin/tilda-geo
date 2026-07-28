@@ -15,7 +15,7 @@ export const LoadingIndicator = () => {
     >
       <Tooltip
         text="Kartendaten werden geladen…"
-        className="flex size-9 cursor-help items-center justify-center"
+        className="flex size-10 cursor-help items-center justify-center"
       >
         <Spinner color="teal" screenReaderLabel={false} size="5" />
       </Tooltip>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import {
+  useMapActions,
   useMapBounds,
   useMapLoaded,
   useShowMapLoadingIndicator,
@@ -32,9 +33,20 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
   const mapBounds = useMapBounds()
   const mapLoaded = useMapLoaded()
   const showMapLoadingIndicator = useShowMapLoadingIndicator()
+  const { setCalculatorDrawActive } = useMapActions()
   const lastCalculationSignatureRef = useRef<string | null>(null)
   const [drawMode, setDrawMode] = useState<CalculatorUrlDrawMode>(() =>
     drawAreas.length > 0 ? 'edit' : 'polygon',
+  )
+
+  useEffect(
+    function flagCalculatorDrawActiveWhileMounted() {
+      // While the calculator draw tool is on screen (polygon or edit), map clicks
+      // should not open the feature inspector (see RegionMap.handleClick).
+      setCalculatorDrawActive(true)
+      return () => setCalculatorDrawActive(false)
+    },
+    [setCalculatorDrawActive],
   )
 
   const handleUserGeometry = (next: DrawArea[]) => {

@@ -7,6 +7,7 @@ import {
   useMapLoaded,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
+import { safeSetFeatureState } from './utils/safeSetFeatureState'
 
 const key = (f: MapGeoJSONFeature) => `${f.id}:::${f.layer.id}`
 
@@ -49,9 +50,14 @@ export const UpdateFeatureState = () => {
 
       const current = currentSelectedFeatures
       const previousSelectedFeatures = previous.current
+      const map = {
+        setFeatureState: (feature: MapGeoJSONFeature, state: { selected: boolean }) => {
+          safeSetFeatureState(mainMap, feature, state)
+        },
+      }
 
       syncSelectedFeatureState({
-        map: mainMap,
+        map,
         currentSelectedFeatures: current,
         previousSelectedFeatures,
       })

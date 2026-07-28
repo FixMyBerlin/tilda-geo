@@ -36,7 +36,6 @@ model User {
   role            UserRoleEnum   @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
   accessedRegions Json?          @default("[]") // Region access tracking (JSON array) - managed by app logic
   //
-  tokens          Token[]
   sessions        Session[]
   accounts        Account[]
   verifications   Verification[]
@@ -109,30 +108,6 @@ model Verification {
   //
   @@unique([identifier, value])
   @@map("Verification")
-  @@schema("prisma")
-}
-
-model Token {
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  //
-  hashedToken String
-  type        TokenType
-  expiresAt   DateTime
-  sentTo      String
-  //
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String
-
-  @@unique([hashedToken, type])
-  @@map("Token")
-  @@schema("prisma")
-}
-
-enum TokenType {
-  RESET_PASSWORD
-
   @@schema("prisma")
 }
 

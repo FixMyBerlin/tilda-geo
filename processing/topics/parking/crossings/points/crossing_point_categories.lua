@@ -1,6 +1,5 @@
-require('init')
-require('class_crossing_category')
-local helper = require('crossing_point_categories_helper')
+local class_crossing_category = require('topics.parking.crossings.helper.class_crossing_category')
+local helper = require('topics.parking.crossings.points.crossing_point_categories_helper')
 
 local crossing_point_categories = {
   class_crossing_category.new({
@@ -59,6 +58,17 @@ local crossing_point_categories = {
     tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension' },
   }),
   class_crossing_category.new({
+    id = 'crossing_continuous',
+    side_schema = 'none',
+    side_key = nil,
+    buffer_radius = function(tags) return 3 end,
+    conditions = function(tags)
+      return tags['crossing:continuous'] == 'yes'
+    end,
+    tags = function(tags) return {} end,
+    tags_cc = { 'crossing', 'crossing_ref', 'crossing:markings', 'crossing:buffer_marking', 'crossing:kerb_extension', 'crossing:continuous' },
+  }),
+  class_crossing_category.new({
     -- https://overpass-turbo.eu/s/24o4
     -- Examples: https://www.openstreetmap.org/node/7580579485, https://www.openstreetmap.org/node/7580552984
     --
@@ -67,7 +77,7 @@ local crossing_point_categories = {
     side_key = '_side_key_traffic_calming', -- see `transform_point_direction_tags.lua`
     buffer_radius = function(tags) return 3 end,
     conditions = function(tags)
-      -- no additional conditions; side_schema=direction_key will transform the tags; a missing `direction=forward|…` key is treated as "both".
+      -- no additional conditions; side_schema=direction_key will transform the tags; a missing `direction=forward|…` key is treated as 'both'.
       return tags['traffic_calming'] == 'choker'
     end,
     tags = function(tags) return { traffic_calming = tags.traffic_calming, direction = tags.direction } end,

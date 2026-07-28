@@ -694,6 +694,11 @@
       "description": "Used to derive side-specific crossing kerb extension behavior."
     },
     {
+      "key": "crossing:continuous",
+      "value": "yes",
+      "description": "Used to derive both-side parking cutouts at continuous crossings."
+    },
+    {
       "key": "traffic_calming",
       "description": "Used to classify crossing chokers, crossing tables, and obstacle kerb extensions."
     },

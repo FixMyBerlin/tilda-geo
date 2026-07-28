@@ -1,16 +1,19 @@
 /**
- * Playwright E2E testing utilities.
- * These helpers only activate when VITE_PLAYWRIGHT_ENABLED is set to 'true'.
+ * Browser test and agent-debugging utilities.
  *
  * See app/tests/README.md for setup and usage.
  */
 
 import { createIsomorphicFn } from '@tanstack/react-start'
+import type { Map as MaplibreMap } from 'maplibre-gl'
 
 declare global {
   interface Window {
     __PLAYWRIGHT_ENABLED?: 'true'
     __mapLoaded?: boolean
+    // The main map instance, for tests and agent tooling to inspect runtime state
+    // like `getStyle().layers` (layer order). Set in dev and Playwright mode.
+    __mainMap?: MaplibreMap
   }
 }
 
@@ -30,15 +33,30 @@ export function playwrightTestId(testId: string) {
 }
 
 /**
+ * Exposes the map instance as `window.__mainMap` in dev/Playwright mode so tests
+ * and agent tooling can inspect runtime state, e.g. layer order via
+ * `window.__mainMap.getStyle().layers`.
+ */
+export const exposeMainMapForDebugging = createIsomorphicFn()
+  .server((_map?: MaplibreMap) => {})
+  .client((map?: MaplibreMap) => {
+    const playwrightEnabled =
+      import.meta.env.VITE_PLAYWRIGHT_ENABLED === 'true' || window.__PLAYWRIGHT_ENABLED === 'true'
+    if (import.meta.env.DEV || playwrightEnabled) {
+      window.__mainMap = map
+    }
+  })
+
+/**
  * Fires a custom 'mapLoaded' event for Playwright E2E testing.
- * Only fires when VITE_PLAYWRIGHT_ENABLED is set to 'true'.
+ * Only active when VITE_PLAYWRIGHT_ENABLED is set to 'true'.
  */
 export const firePlaywrightMapLoadedEvent = createIsomorphicFn()
   .server(() => {})
   .client(() => {
-    const enabled =
+    const playwrightEnabled =
       import.meta.env.VITE_PLAYWRIGHT_ENABLED === 'true' || window.__PLAYWRIGHT_ENABLED === 'true'
-    if (!enabled) return
+    if (!playwrightEnabled) return
     window.dispatchEvent(new CustomEvent('mapLoaded'))
     window.__mapLoaded = true
   })

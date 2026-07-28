@@ -1,10 +1,3 @@
-import { notFound } from '@tanstack/react-router'
-import { isProd } from '@/components/shared/utils/isEnv'
-
-export function assertNonProdErrorPreviewRoute() {
-  if (isProd) throw notFound()
-}
-
 export const DEV_REGION_ERROR_QUERY_KEY = '__regionError'
 
 export const DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG = 'berlin'

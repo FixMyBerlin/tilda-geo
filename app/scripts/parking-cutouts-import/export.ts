@@ -6,7 +6,7 @@ import { SCHEMA } from './args'
 import { getDockerDatabaseUrl } from './db'
 
 /** pg_dump 17 adds psql \\restrict / \\unrestrict; strip so DBeaver etc. can run the file. */
-export function sanitizePgDumpForGuiClients(dump: string) {
+function sanitizePgDumpForGuiClients(dump: string) {
   return dump
     .split('\n')
     .filter((line) => !/^\s*\\/.test(line))

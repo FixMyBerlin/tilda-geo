@@ -23,7 +23,7 @@ type StaticRegionInitialMapPositionZoom = {
 }
 
 /** Internal (to) or external (href must be https) nav link. */
-export type RegionNavigationLink =
+type RegionNavigationLink =
   | { name: string; to: InternalPath }
   | { name: string; href: `https://${string}` }
 
@@ -136,7 +136,7 @@ export type RegionSlug =
   | 'ueberlingen'
   | 'woldegk'
 
-export const defaultTildaRadverkehrSources = [
+const defaultTildaRadverkehrSources = [
   // DEFAULT
   // The order here specifies the order in the UI
   'poi',
@@ -146,7 +146,7 @@ export const defaultTildaRadverkehrSources = [
   'lit',
   'mapillary',
 ] satisfies MapDataCategoryId[]
-export const defaultTildaRadverkehrExports = [
+const defaultTildaRadverkehrExports = [
   // DEFAULT
   // The order here specifies the order in the UI
   'bikelanes',
@@ -372,6 +372,8 @@ export const staticRegion: StaticRegion[] = [
       'off_street_parking_points',
       'parkings_no',
       'parkings_separate',
+      'parkings_quantized',
+      'off_street_parking_quantized',
     ],
   },
   {
@@ -968,7 +970,7 @@ export const staticRegion: StaticRegion[] = [
     fullName: 'Pankow',
     product: 'fussverkehr',
     mask: { osmRelationIds: [164723], bufferKm: 0.1 },
-    map: { lat: 52.5482, lng: 13.4016, zoom: 16 },
+    map: { lat: 52.548, lng: 13.422, zoom: 12.8 },
     bbox: null,
     externalLogoPath: 'https://pankow-logo-temporary.netlify.app/pankow.png',
     logoWhiteBackgroundRequired: true,

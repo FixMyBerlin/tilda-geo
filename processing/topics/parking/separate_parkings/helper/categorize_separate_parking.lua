@@ -1,5 +1,4 @@
-require('init')
-require('Log')
+local log = require('topics.helper.log')
 
 ---@return table<string, { category: SeparateParkingCategory, object: OSMObject} | { category: nil, object: nil}>
 local function categorize_parking_separate(object, categories)

@@ -1,5 +1,6 @@
 import { Markdown } from '@/components/shared/text/Markdown'
 import { Pill } from '@/components/shared/text/Pill'
+import { tagsTableRowClass } from '../tagsTableLayout'
 import type { CompositTableRow } from './types'
 
 // Use by `app/scripts/StaticDatasets/geojson/region-bb/bb-trassenscout-beteiligung/meta.ts`
@@ -12,7 +13,7 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
   const dimColor = properties.precision === 'point' ? '#ede9fe' : '#fae8ff'
 
   return (
-    <tr className="group">
+    <tr className={tagsTableRowClass}>
       <td
         className="space-y-3 border-l-2 py-2 pr-3 pl-4 text-sm font-medium text-gray-900"
         colSpan={2}

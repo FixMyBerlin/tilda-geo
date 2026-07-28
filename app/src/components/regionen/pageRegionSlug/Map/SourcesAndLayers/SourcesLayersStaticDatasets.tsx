@@ -27,8 +27,8 @@ function createSourceProps(mapRenderFormat: string, mapRenderUrl: string) {
 // - React Compiler handles memoization automatically
 //
 // MapLibre GL JS best practices:
-// - Sources are only loaded when visible layers reference them (lazy loading)
-// - Unmounting invisible datasets is fine for memory, but causes remount overhead on toggle
+// - Sources are only loaded when shown layers reference them (lazy loading)
+// - Unmounting hidden datasets is fine for memory, but causes remount overhead on toggle
 // - For frequently toggled datasets, consider keeping mounted with visibility: 'none'
 // - Layer identity (id, type) remains stable to avoid style diffing overhead
 export const SourcesLayersStaticDatasets = () => {

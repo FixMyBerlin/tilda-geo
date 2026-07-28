@@ -1,23 +1,30 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { isBefore, subDays } from 'date-fns'
+import { twMerge } from 'tailwind-merge'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { authClient } from '@/components/shared/auth/auth-client'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { IconModal } from '@/components/shared/Modal/IconModal'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
-import { DownloadModalDownloadListWithVectorTiles } from './DownloadModalDownloadList'
+import { ControlButtonDot } from '../ControlButtonDot'
+import { mobileControlButtonClassName } from '../mobile/mobileControlButton.const'
+import { DownloadModalDatasetSections } from './DownloadModalDownloadList'
 import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
+import type { RegionModalAccess } from './regionModalAccess'
+
+// Square map-control button (matches the other floating controls); `relative` so the
+// ControlButtonDot anchors to the button corner.
+const downloadTriggerClassName = twMerge(mobileControlButtonClassName, 'relative size-10')
 
 const DownloadModalTriggerIcon = () => {
   const { data: metadata } = useQuery(processingMetadataQueryOptions())
 
   // Show icon without indicator if no data yet and not processing
   if (!metadata?.osm_data_from && metadata?.status !== 'processing') {
-    return <ArrowDownTrayIcon className="size-5" />
+    return <ArrowDownTrayIcon className="size-6" />
   }
 
   // For postprocessing and processed, osm_data_from should be available
@@ -28,18 +35,22 @@ const DownloadModalTriggerIcon = () => {
   const isProcessing = metadata.status === 'processing'
 
   return (
-    <div className="relative">
-      <ArrowDownTrayIcon className="size-5" />
+    <>
+      <ArrowDownTrayIcon className="size-6" />
       {(isProcessing || isDataOlderThanYesterday) && (
-        <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-orange-500" />
+        <ControlButtonDot srLabel="Neue Kartendaten verfügbar oder Daten werden verarbeitet." />
       )}
-    </div>
+    </>
   )
 }
 
-export const DownloadModal = () => {
+type Props = {
+  modalAccess: RegionModalAccess
+  hasPermissions: boolean
+}
+
+export const DownloadModal = ({ modalAccess, hasPermissions }: Props) => {
   const { region } = useRegionLoaderData()
-  const hasPermissions = useHasPermissions()
   const { data: session } = authClient.useSession()
   const isLoggedIn = Boolean(session?.role)
   const signInHref = useSignInUrl()
@@ -51,7 +62,7 @@ export const DownloadModal = () => {
         <IconModal
           title="Daten-Informationen"
           titleIcon="info"
-          triggerStyle="button"
+          triggerStyle={downloadTriggerClassName}
           triggerIcon={<DownloadModalTriggerIcon />}
         >
           <DownloadModalUpdateDate />
@@ -63,12 +74,17 @@ export const DownloadModal = () => {
     )
   }
 
+  // Dataset lists (downloadable, other, vector tiles) when permitted; doc links in download
+  // modal when regionModalAccess allows — otherwise the documentation button covers them.
+  const showDatasetSections =
+    modalAccess.docsLinksVisibleInDownloadModal || (hasPermissions && region.exports != null)
+
   return (
     <section>
       <IconModal
         title="Daten downloaden"
         titleIcon="download"
-        triggerStyle="button"
+        triggerStyle={downloadTriggerClassName}
         triggerIcon={<DownloadModalTriggerIcon />}
       >
         {!hasPermissions && (
@@ -95,7 +111,12 @@ export const DownloadModal = () => {
 
         <DownloadModalUpdateDate />
 
-        {hasPermissions && <DownloadModalDownloadListWithVectorTiles />}
+        {showDatasetSections ? (
+          <DownloadModalDatasetSections
+            modalAccess={modalAccess}
+            showVectorTiles={hasPermissions}
+          />
+        ) : null}
       </IconModal>
     </section>
   )

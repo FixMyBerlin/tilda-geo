@@ -1,3 +1,4 @@
+import { getRouteApi } from '@tanstack/react-router'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { createStaticDatasetCategoryFn } from '@/server/static-dataset-categories/staticDatasetCategories.functions'
@@ -7,7 +8,11 @@ import {
   StaticDatasetCategoryFormInputDefaults,
 } from './StaticDatasetCategoryForm'
 
+const routeApi = getRouteApi('/admin/static-dataset-categories')
+
 export function PageStaticDatasetCategoryNew() {
+  const { groupKey } = routeApi.useSearch()
+
   return (
     <>
       <HeaderWrapper>
@@ -24,8 +29,9 @@ export function PageStaticDatasetCategoryNew() {
 
         <StaticDatasetCategoryForm
           schema={staticDatasetCategoryCreateFormSchema}
+          listGroupKey={groupKey}
           defaultValues={{
-            groupKey: StaticDatasetCategoryFormInputDefaults.groupKey,
+            groupKey: groupKey ?? StaticDatasetCategoryFormInputDefaults.groupKey,
             categoryKey: StaticDatasetCategoryFormInputDefaults.categoryKey,
             sortOrder: StaticDatasetCategoryFormInputDefaults.sortOrder,
             title: StaticDatasetCategoryFormInputDefaults.title,

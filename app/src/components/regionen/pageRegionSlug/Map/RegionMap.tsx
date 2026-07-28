@@ -11,6 +11,7 @@ import type {
 import { AttributionControl, Map as MapGl, NavigationControl, useMap } from 'react-map-gl/maplibre'
 import {
   useMapActions,
+  useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
@@ -19,17 +20,25 @@ import {
   useFeaturesParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
+import type { MapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
-import { interactivityConfiguration } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
+import {
+  interactivityConfiguration,
+  type InteracitvityConfiguartion,
+} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
+import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
-import { firePlaywrightMapLoadedEvent } from '@/components/shared/utils/playwright'
+import {
+  exposeMainMapForDebugging,
+  firePlaywrightMapLoadedEvent,
+} from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { useStaticRegion } from '../regionUtils/useStaticRegion'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
-import { Search } from './Search/Search'
+import { SearchResultLayers } from './Search/SearchResultLayers'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
@@ -39,22 +48,27 @@ import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersSta
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
+import { safeSetFeatureState } from './utils/safeSetFeatureState'
 import { useInteractiveLayers } from './utils/useInteractiveLayers'
 
 // On lower zoom level, our source data is stripped down to only styling data
 // We do not show those features in our Inspector, which would show wrong data
 // However, we do want to show an interaction (Tooltip) to inform our users,
 // which is why the layers stay in `interactiveLayerIds`
-const extractInteractiveFeatures = (mapParam, features: MapGeoJSONFeature[] | undefined) => {
+const extractInteractiveFeatures = (
+  mapParam: MapParam,
+  features: MapGeoJSONFeature[] | undefined,
+) => {
   if (!features) return []
-  return features?.filter(({ sourceLayer }) => {
-    sourceLayer = String(sourceLayer)
-    return (
-      !(sourceLayer in interactivityConfiguration) ||
-      mapParam.zoom >= interactivityConfiguration[sourceLayer].minzoom
-    )
+  return features.filter(({ sourceLayer }) => {
+    const layer = String(sourceLayer) as keyof InteracitvityConfiguartion
+    const config = interactivityConfiguration[layer]
+    return config === undefined || mapParam.zoom >= config.minzoom
   })
 }
+
+// Stable reference so toggling draw mode doesn't churn the <Map> interactiveLayerIds prop.
+const NO_INTERACTIVE_LAYERS: string[] = []
 
 export const RegionMap = () => {
   const { mapParam, setMapParam } = useMapParam()
@@ -68,6 +82,7 @@ export const RegionMap = () => {
     updateMapBounds,
   } = useMapActions()
   const region = useStaticRegion()
+  const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
 
@@ -79,6 +94,7 @@ export const RegionMap = () => {
   }
 
   const inspectorFeatures = useMapInspectorFeatures()
+  const calculatorDrawActive = useMapCalculatorDrawActive()
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (containMaskFeature(features)) {
@@ -105,8 +121,8 @@ export const RegionMap = () => {
       // Allow multi select with Control (Windows) / Command (Mac)
       if (event.originalEvent.ctrlKey || event.originalEvent.metaKey) {
         // ctrl/command is down - toggle features
-        const featureInArray = (f0, farr) =>
-          !!farr.find((f1) => f0.properties.id === f1.properties.id)
+        const featureInArray = (f0: MapGeoJSONFeature, farr: MapGeoJSONFeature[]) =>
+          !!farr.find((f1) => f0.properties?.id === f1.properties?.id)
         const keepFeatures = inspectorFeatures.filter((f) => !featureInArray(f, uniqueFeatures))
         const addFeatures = uniqueFeatures.filter((f) => !featureInArray(f, inspectorFeatures))
         newInspectorFeatures = [...keepFeatures, ...addFeatures]
@@ -143,15 +159,22 @@ export const RegionMap = () => {
 
   const hoveredFeatures = useRef<MapGeoJSONFeature[]>([])
   const key = ({ id, layer }: MapGeoJSONFeature) => `${id}>${layer.id}`
+  const sourceExists = (feature: MapGeoJSONFeature) => {
+    const sourceId = feature.source?.toString()
+    if (!sourceId) return false
+    return mainMap?.getMap().getSource(sourceId) != null
+  }
   const updateHover = (features: MapGeoJSONFeature[] | undefined) => {
     if (containMaskFeature(features)) features = []
-    const previous = hoveredFeatures.current
-    const current = features || []
+    const previous = hoveredFeatures.current.filter(sourceExists)
+    const current = (features || []).filter(sourceExists)
     differenceBy(previous, current, key).forEach((f) => {
-      mainMap?.setFeatureState(f, { hover: false })
+      if (!mainMap) return
+      safeSetFeatureState(mainMap, f, { hover: false })
     })
     differenceBy(current, previous, key).forEach((f) => {
-      mainMap?.setFeatureState(f, { hover: true })
+      if (!mainMap) return
+      safeSetFeatureState(mainMap, f, { hover: true })
     })
     hoveredFeatures.current = current
   }
@@ -167,14 +190,15 @@ export const RegionMap = () => {
     updateHover([])
   }
 
-  const handleLoad = (_event: MapLibreEvent<undefined>) => {
+  const handleLoad = (event: MapLibreEvent) => {
     // We disable rotation once after map startup to keep interactions consistent.
-    mainMap?.getMap().touchZoomRotate.disableRotation()
+    event.target.touchZoomRotate.disableRotation()
 
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
     markMapLoaded()
-    updateMapBounds(mainMap?.getBounds() || null)
+    updateMapBounds(event.target.getBounds())
 
+    exposeMainMapForDebugging(event.target)
     firePlaywrightMapLoadedEvent()
   }
 
@@ -205,7 +229,14 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  const interactiveLayerIds = useInteractiveLayers()
+  // While the calculator draw tool is active, no layers are interactive: clicking/hovering
+  // the data does nothing and the inspector can't open (queryRenderedFeatures returns none),
+  // so the draw tool owns all map interaction. This replaces a special-case guard in the
+  // click handler with the map's own interactivity mechanism.
+  const computedInteractiveLayerIds = useInteractiveLayers()
+  const interactiveLayerIds = calculatorDrawActive
+    ? NO_INTERACTIVE_LAYERS
+    : computedInteractiveLayerIds
 
   if (!mapParam) {
     return null
@@ -275,11 +306,13 @@ export const RegionMap = () => {
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
+      <SearchResultLayers />
       <AttributionControl compact={true} position="bottom-left" />
 
-      <Search />
-
-      <NavigationControl showCompass={false /* TODO: See Story */} visualizePitch={true} />
+      {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}
+      {isSmBreakpointOrAbove && (
+        <NavigationControl showCompass={false /* TODO: See Story */} visualizePitch={true} />
+      )}
       <Calculator />
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

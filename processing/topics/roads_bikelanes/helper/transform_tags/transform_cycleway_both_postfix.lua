@@ -1,4 +1,3 @@
-require('init')
 
 -- Mutate `cycleway=no` to `cycleway:both=no` for consistent transformation handling.
 -- For other cycleway-tags our transformation works fine but for `no` in combination with `bicycle_road=yes` it exited the processing too early.

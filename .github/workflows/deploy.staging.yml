@@ -4,12 +4,18 @@ on:
     branches:
       - develop
       - tinkering
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
 permissions:
   contents: read
   id-token: write
 
 jobs:
   setup_env:
+    if: github.repository == 'FixMyBerlin/tilda-geo'
     uses: ./.github/workflows/setup-env.yml
     with:
       ENVIRONMENT: staging

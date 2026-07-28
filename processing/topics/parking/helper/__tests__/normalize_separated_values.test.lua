@@ -1,6 +1,5 @@
-local normalize_separated_values = require('normalize_separated_values')
-
 describe('normalize_separated_values', function()
+  local normalize_separated_values = require('topics.parking.helper.normalize_separated_values')
   describe('basic functionality', function()
     it('should return nil for nil input', function()
       local result = normalize_separated_values(nil, ';')
@@ -93,7 +92,7 @@ describe('normalize_separated_values', function()
   end)
 
   describe('complex scenarios', function()
-    it('should handle the specific case requested: ";bbb;aaa;"', function()
+    it('should handle the specific case requested: ;bbb;aaa;', function()
       local result = normalize_separated_values(';bbb;aaa;', ';')
       assert.are.equal(result, 'aaa;bbb')
     end)

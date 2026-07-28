@@ -9,17 +9,20 @@
  * Use `splitParkingConditionCategoryValue` for the top-level `;` split only (parenthesis-aware, one nesting level).
  *
  * Detail-token copy uses `tilda_parkings--parking_condition_detail_token--<id>` (`--` subcategory: derived in the inspector, not a tile property).
- * Weekday and English month abbreviations in opening_hours-style fragments are translated in this module; other detail-token German strings live in `../translations/translationsTagsTableRowCompositConditionCategory.const.ts`.
+ * Weekday and English month abbreviations in opening_hours-style fragments are translated in this module; other detail-token German strings come from a dedicated static map.
  */
 import { translations } from '../translations/translations.const'
 import { splitSemicolonRespectingBrackets } from '../utils/splitSemicolonRespectingBrackets'
+import { parkingConditionDetailTokenTranslations } from './parkingConditionDetailTokenTranslations.const'
 
 export function resolveParkingConditionCategoryBase(baseKey: string) {
   return translations[`tilda_parkings--condition_category=${baseKey}`]
 }
 
 export function resolveParkingConditionDetailToken(tokenId: string) {
-  return translations[`tilda_parkings--parking_condition_detail_token--${tokenId}`]
+  return parkingConditionDetailTokenTranslations[
+    tokenId as keyof typeof parkingConditionDetailTokenTranslations
+  ]
 }
 
 /** Split full tile value at Lua’s class separator `;` without splitting `;` inside `( … )`. */
@@ -28,7 +31,7 @@ export function splitParkingConditionCategoryValue(value: string) {
 }
 
 /** Base keys from Lua `classify_parking_conditions` / `condition_category`, longest first for prefix matching. */
-export const PARKING_CONDITION_CATEGORY_BASE_KEYS_LONGEST_FIRST = [
+const PARKING_CONDITION_CATEGORY_BASE_KEYS_LONGEST_FIRST = [
   'vehicle_restriction',
   'access_restriction',
   'disabled_private',
@@ -119,7 +122,7 @@ function escapeRegExp(s: string) {
 }
 
 /** Weekday / holiday abbreviations as emitted by opening_hours-style strings in Lua. */
-export function translateParkingConditionCategoryWeekdays(detail: string) {
+function translateParkingConditionCategoryWeekdays(detail: string) {
   let out = detail.replace(/PH off/g, 'Feiertag ausgenommen')
 
   out = out.replace(
@@ -169,7 +172,7 @@ const MONTH_ABBRS_ORDERED = Object.keys(MONTH_ABBR_TO_DE)
  * English token so it is not left behind (e.g. `Apr-Sep.: ` → `April-Sep.: `). Month ranges need no
  * special case: `Mar-Oct` becomes `März-Okt.` by replacing each side.
  */
-export function translateParkingConditionCategoryMonths(detail: string) {
+function translateParkingConditionCategoryMonths(detail: string) {
   let out = detail
   for (const abbr of MONTH_ABBRS_ORDERED) {
     const label = MONTH_ABBR_TO_DE[abbr]
@@ -183,7 +186,7 @@ export function translateParkingConditionCategoryMonths(detail: string) {
  * Ids resolved via `tilda_parkings--parking_condition_detail_token--${id}` (synthetic subcategory, not a tile property).
  * Longer ids first (substring tokens must not steal from longer ones).
  */
-export const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
+const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
   'passenger_car',
   'load-unload',
   'agricultural',
@@ -237,7 +240,7 @@ export const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
   'no',
 ] as const
 
-export function translateParkingConditionCategoryDetailTokens(
+function translateParkingConditionCategoryDetailTokens(
   detail: string,
   resolveToken: (tokenId: string) => string | undefined,
 ) {
@@ -253,7 +256,7 @@ export function translateParkingConditionCategoryDetailTokens(
   return out
 }
 
-export function formatParkingConditionCategoryDetailGroup(
+function formatParkingConditionCategoryDetailGroup(
   detail: string,
   resolveToken: (tokenId: string) => string | undefined,
 ) {

@@ -3,6 +3,9 @@ import { RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
 
 export const Route = createFileRoute('/preview/root-fallback')({
   ssr: true,
+  head: () => ({
+    meta: [{ title: 'Root-Fallback-Vorschau – TILDA' }],
+  }),
   component: PreviewRootFallback,
 })
 

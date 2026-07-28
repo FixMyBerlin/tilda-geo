@@ -34,7 +34,7 @@ const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
   false,
 ]
 
-export const createOffStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createOffStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_off_default_area,
@@ -57,9 +57,7 @@ export const createOffStreetStyleLayers = (filter: MapboxStyleLayersProps['addit
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const createOffStreetSurfaceStyleLayers = (
-  filter: MapboxStyleLayersProps['additionalFilter'],
-) =>
+const createOffStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_off_surface_area,
@@ -82,9 +80,7 @@ export const createOffStreetSurfaceStyleLayers = (
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const createOffStreetKindStyleLayers = (
-  filter: MapboxStyleLayersProps['additionalFilter'],
-) =>
+const createOffStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
   [
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_off_kind_area,

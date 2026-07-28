@@ -35,9 +35,28 @@ export const CONSTANTS_DIR = '/processing/constants'
 export const DATA_TABLE_DIR = '/processing/dataTables'
 
 /**
- * The file name for the globally bbox filtered OSM file.
+ * Nightly osmium tag-filter output (full region, from regional download).
+ * Filter expressions: filter-expressions-nightly.txt
  */
-export const BBOX_FILTERED_FILE = `bbox_extracted.osm.pbf`
+export const NIGHTLY_FILTERED_FILE = `nightly_filtered.osm.pbf`
+
+/**
+ * Bbox clip of {@link NIGHTLY_FILTERED_FILE} when PROCESS_ONLY_BBOX is active.
+ * Applied once globally in index.ts before nightly topics run.
+ */
+export const NIGHTLY_BBOX_FILTERED_FILE = `nightly_bbox_extracted.osm.pbf`
+
+/**
+ * Weekend osmium tag-filter output (full region, from regional download).
+ * Filter expressions: filter-expressions-weekend.txt
+ */
+export const WEEKEND_FILTERED_FILE = `weekend_filtered.osm.pbf`
+
+/**
+ * Bbox clip of {@link WEEKEND_FILTERED_FILE} when PROCESS_ONLY_BBOX is active.
+ * Applied per weekend topic in resolveTopicInputFile (nightly global bbox is already in index.ts).
+ */
+export const WEEKEND_BBOX_FILTERED_FILE = `weekend_bbox_extracted.osm.pbf`
 
 /**
  * The path to save auto generated types to.

@@ -1,0 +1,40 @@
+title: ÖPNV-Haltepunkte und Fähranleger
+sourceIds:
+  - atlas_publicTransport
+attributes:
+  - key: category
+    label: Art
+    values:
+      - value: ferry_station
+        label: Fähranleger
+      - value: light_rail_station
+        label: S-Bahn-Station
+      - value: railway_station
+        label: Bahnhof regional / überregional
+      - value: subway_station
+        label: U-Bahn-Station
+      - value: tram_station
+        label: Tramstation
+      - value: undefined
+        label: Nicht kategorisiert
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: operator
+    label: Betreiber
+    format: sanitized_strings
+  - key: wikidata
+    label: Wikidata
+    format: sanitized_strings
+  - key: wikipedia
+    label: Wikipedia
+    format: sanitized_strings
+  - key: description
+    label: Beschreibung
+    format: sanitized_strings
+  - key: network
+    label: Verkehrsnetz
+    format: sanitized_strings
+  - key: network_short
+    label: Verkehrsnetz (Kurzname)
+    format: sanitized_strings

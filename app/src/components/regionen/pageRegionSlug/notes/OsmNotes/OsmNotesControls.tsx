@@ -1,10 +1,15 @@
 import { ChatBubbleLeftRightIcon, PlusIcon } from '@heroicons/react/24/outline'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import {
   useNewOsmNoteMapParam,
   useShowOsmNotesParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import {
+  mobileMapIconButtonClassName,
+  notesSplitControlGroupClassName,
+  notesSplitControlSegmentClassName,
+} from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { useNotesActiveByZoom } from '../utils/useNotesActiveByZoom'
@@ -19,7 +24,7 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
   const notesActiveByZoom = useNotesActiveByZoom()
 
   return (
-    <div className="relative flex shadow-lg">
+    <div className={twMerge('relative flex', showOsmNotesParam && notesSplitControlGroupClassName)}>
       <Tooltip
         text={
           notesActiveByZoom
@@ -32,10 +37,11 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
         <button
           type="button"
           onClick={() => setShowOsmNotesParam(!showOsmNotesParam)}
-          className={twJoin(
-            'z-0 inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium shadow-md focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
-            showOsmNotesParam ? 'rounded-l-md' : 'rounded-md',
-            showOsmNotesParam ? 'text-gray-700' : 'text-gray-500 hover:text-gray-700',
+          className={twMerge(
+            mobileMapIconButtonClassName,
+            'z-0',
+            isError && 'size-auto px-3 py-2',
+            showOsmNotesParam && 'rounded-none shadow-none',
             showOsmNotesParam
               ? notesActiveByZoom
                 ? 'bg-yellow-400'
@@ -48,7 +54,7 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
               <SmallSpinner />
             </div>
           ) : (
-            <ChatBubbleLeftRightIcon className="size-5" />
+            <ChatBubbleLeftRightIcon className="size-6" />
           )}
           {isError && <span className="ml-1 text-orange-500">Fehler beim Laden der Hinweise</span>}
         </button>
@@ -62,9 +68,12 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
               type="button"
               // Default zoom since Note pins on osm.org are only visible when zoomed in…
               onClick={() => setNewOsmNoteMapParam(mapParam)}
-              className="z-0 -ml-px justify-center rounded-r-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 hover:text-gray-800 focus:relative focus:z-10 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+              className={twMerge(
+                notesSplitControlSegmentClassName,
+                'bg-white hover:bg-yellow-50 hover:text-gray-800',
+              )}
             >
-              <PlusIcon className="size-5" />
+              <PlusIcon className="size-6" />
               <span className="sr-only">Neuen Hinweis auf openstreetmap.org erstellen</span>
             </button>
           </Tooltip>

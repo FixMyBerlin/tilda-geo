@@ -12,11 +12,13 @@ The frontend visualizes our processed data it also provides options to annotate 
 
 ### Initial setup
 
-1. Create a `/.env` file in the **repository root** based on [`/.env.example`](../.env.example). That is the only env file you need for local app dev; scripts under `app/` load it with `bun --env-file=../.env` (see [`package.json`](./package.json)).
+1. Create a `/.env` file in the **repository root** based on [`/.env.example`](../.env.example). Required for all local dev; `.env.local` is auto-generated on feature branches in worktrees (see below).
 2. Set `VITE_APP_ORIGIN=http://127.0.0.1:5173` (and `VITE_APP_ENV=development`). No `/etc/hosts` or certificates needed.
 3. To test the login, set up your own OSM OAuth 2 application (see [osm-auth](https://github.com/osmlab/osm-auth#registering-an-application)) and add credentials to the root `.env`.
 
 **Why `127.0.0.1` and not `localhost`?** See [Local Development Domain Setup](../docs/Local-Development-Domain-Setup.md).
+
+**Worktrees and Docker:** See [Docker local development](../docs/docker-local-development.md). Work branches use short names like `my-branch`: `bun run setup-worktree -- my-branch` then `bun run dev` in the new folder.
 
 ### Start
 
@@ -30,6 +32,12 @@ Run `bun run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and de
 - URL State Management: [nuqs](https://github.com/47ng/nuqs)
 - ORM: [Prisma](https://www.prisma.io/)
 - Styling: [Tailwind CSS](https://tailwindcss.com/), [Tailwind UI](https://tailwindui.com/) and [Headless UI](https://headlessui.com/)
+
+### Supported browsers
+
+Market-share queries in [`package.json`](./package.json) `browserslist`; wired to [`vite.config.ts`](./vite.config.ts) (client build) and [`oxlint.config.mjs`](./oxlint.config.mjs) (client API lint).
+
+**How it works:** [browser-target skill](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/browser-target/SKILL.md)
 
 ### Running the production bundle locally
 

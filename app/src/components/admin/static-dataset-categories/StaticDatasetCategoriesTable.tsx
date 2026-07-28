@@ -1,5 +1,6 @@
 import { adminTableClasses } from '@/components/admin/AdminTable'
 import { Link } from '@/components/shared/links/Link'
+import { buildStaticDatasetCategoriesListSearch } from './staticDatasetCategoriesListSearch'
 
 type CategoryRow = {
   id: number
@@ -11,7 +12,13 @@ type CategoryRow = {
   subtitle: string | null
 }
 
-export const StaticDatasetCategoriesTable = ({ categories }: { categories: CategoryRow[] }) => {
+export const StaticDatasetCategoriesTable = ({
+  categories,
+  listGroupKey,
+}: {
+  categories: CategoryRow[]
+  listGroupKey?: string
+}) => {
   const sections: Array<{ kind: 'group'; groupKey: string } | { kind: 'row'; row: CategoryRow }> =
     []
   let prevGroup: string | null = null
@@ -71,6 +78,7 @@ export const StaticDatasetCategoriesTable = ({ categories }: { categories: Categ
                   <Link
                     to="/admin/static-dataset-categories/$categoryKey"
                     params={{ categoryKey: row.key }}
+                    search={buildStaticDatasetCategoriesListSearch(listGroupKey)}
                   >
                     Bearbeiten
                   </Link>

@@ -1,6 +1,6 @@
 import { $ } from 'bun'
 
-export function databaseUrlToOgrPg(databaseUrl: string) {
+function databaseUrlToOgrPg(databaseUrl: string) {
   const url = new URL(databaseUrl)
   const port = url.port || '5432'
   const dbname = url.pathname.replace(/^\//, '')

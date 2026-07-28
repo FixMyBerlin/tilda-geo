@@ -10,9 +10,10 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Dependencies (layer cached unless package files change)
-COPY app/package.json app/bun.lock app/bunfig.toml ./
-COPY app/patches ./patches
+# Dependencies (layer cached unless package files change).
+# Do not copy app/bunfig.toml here: it enables globalStore for local/dev only.
+# That layout symlinks into /root/.bun, which USER bun cannot read at runtime.
+COPY app/package.json app/bun.lock ./
 # Install without lifecycle scripts `postinstall`.
 RUN bun install --frozen-lockfile --ignore-scripts
 
@@ -20,7 +21,7 @@ RUN bun install --frozen-lockfile --ignore-scripts
 COPY app /app
 
 # Generate `@prisma/client` explicitly for this image build because `bun run build` imports `@prisma/client`, so the generated client must exist before build.
-RUN bun scripts/prisma-generate-placeholder/index.ts
+RUN bun run postinstall
 
 # Build-time env for Vite client bundle (inlined at build)
 ARG VITE_APP_ENV

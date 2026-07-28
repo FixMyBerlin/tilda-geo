@@ -1,7 +1,7 @@
 import { Parser } from '@json2csv/plainjs'
 import type { QaConfigExportRow } from '@/server/qa-configs/queries/getQaConfigExportRows.server'
 
-export const QA_CONFIG_EXPORT_FIELDS = [
+const QA_CONFIG_EXPORT_FIELDS = [
   'area_id',
   'config_id',
   'config_slug',

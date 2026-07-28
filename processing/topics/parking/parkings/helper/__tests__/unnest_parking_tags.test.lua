@@ -1,83 +1,82 @@
 describe('`unnest_parking_tags`', function()
-  require('init')
-  require('unnest_parking_tags')
-  require('Log')
-  require('osm2pgsql')
+  local unnest_parking_tags = require('topics.parking.parkings.helper.unnest_parking_tags')
+  local log = require('topics.helper.log')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
   local inspect = require('inspect')
 
   it('does nothing when not postfix given', function()
-    local rawTags = {
+    local raw_tags = {
       ['foo'] = 'bar',
     }
     local result = {}
-    unnest_parking_tags(rawTags, ':both', result)
+    unnest_parking_tags(raw_tags, ':both', result)
     assert.are.equal(inspect(result), '{}')
   end)
 
   it('does nothing when wrong postfix given', function()
-    local rawTags = {
+    local raw_tags = {
       ['foo'] = 'bar',
       ['parking:both:orientation'] = 'bar',
     }
     local result = {}
-    unnest_parking_tags(rawTags, ':foobar', result)
+    unnest_parking_tags(raw_tags, ':foobar', result)
     assert.are.equal(inspect(result), '{}')
   end)
 
   it('resolves postfix :both', function()
-    local rawTags = {
+    local raw_tags = {
       ['foo'] = 'bar',
       ['parking:both'] = 'lane',
       ['parking:both:orientation'] = 'bar',
     }
     local result = {}
-    unnest_parking_tags(rawTags, ':both', result)
-    assert.are.equal(inspect(result), '{\n  orientation = "bar",\n  parking = "lane"\n}')
+    unnest_parking_tags(raw_tags, ':both', result)
+    assert.are.same(result, { orientation = 'bar', parking = 'lane' })
   end)
 
   it('resolves postfix :left', function()
-    local rawTags = {
+    local raw_tags = {
       ['foo'] = 'bar',
       ['parking:left:orientation'] = 'bar',
     }
     local result = {}
-    unnest_parking_tags(rawTags, ':left', result)
-    assert.are.equal(inspect(result), '{\n  orientation = "bar"\n}')
+    unnest_parking_tags(raw_tags, ':left', result)
+    assert.are.same(result, { orientation = 'bar' })
   end)
 
   it('resolves postfix :right', function()
-    local rawTags = {
+    local raw_tags = {
       ['foo'] = 'bar',
       ['parking:right:orientation'] = 'bar',
     }
     local result = {}
-    unnest_parking_tags(rawTags, ':right', result)
-    assert.are.equal(inspect(result), '{\n  orientation = "bar"\n}')
+    unnest_parking_tags(raw_tags, ':right', result)
+    assert.are.same(result, { orientation = 'bar' })
   end)
 
   it('resolves postfix :nil', function()
-  local rawTags = {
+  local raw_tags = {
       ['foo'] = 'bar',
       ['parking:orientation'] = 'bar',
       ['parking:fee'] = 'bar',
     }
     local result = {}
-    unnest_parking_tags(rawTags, '', result)
-    assert.are.equal(inspect(result), '{\n  fee = "bar",\n  orientation = "bar"\n}')
+    unnest_parking_tags(raw_tags, '', result)
+    assert.are.same(result, { fee = 'bar', orientation = 'bar' })
   end)
 
   it('handles all three cases', function()
-    local rawTags = {
+    local raw_tags = {
       ['foo'] = 'bar',
       ['parking:orientation'] = 'foo1',
       ['parking:both:orientation'] = 'foo2',
       ['parking:left:orientation'] = 'foo3',
     }
     local result = {}
-    unnest_parking_tags(rawTags, '', result)
-    unnest_parking_tags(rawTags, ':both', result)
-    unnest_parking_tags(rawTags, ':left', result)
-    assert.are.equal(inspect(result), '{\n  orientation = "foo3"\n}')
+    unnest_parking_tags(raw_tags, '', result)
+    unnest_parking_tags(raw_tags, ':both', result)
+    unnest_parking_tags(raw_tags, ':left', result)
+    assert.are.same(result, { orientation = 'foo3' })
   end)
 
 end)

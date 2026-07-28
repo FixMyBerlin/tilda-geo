@@ -7,20 +7,25 @@ import {
   updateStaticDatasetCategoryFn,
 } from '@/server/static-dataset-categories/staticDatasetCategories.functions'
 import { staticDatasetCategoryEditFormSchema } from '@/server/static-dataset-categories/staticDatasetCategoryFormSchema'
+import { buildStaticDatasetCategoriesListSearch } from './staticDatasetCategoriesListSearch'
 import {
   StaticDatasetCategoryForm,
   staticDatasetCategoryEditSubmitResult,
 } from './StaticDatasetCategoryForm'
 
 const routeApi = getRouteApi('/admin/static-dataset-categories/$categoryKey')
+const parentRouteApi = getRouteApi('/admin/static-dataset-categories')
 
 export function PageStaticDatasetCategoryEdit() {
   const { category, relatedCategories } = routeApi.useLoaderData()
+  const { groupKey: listGroupKey } = parentRouteApi.useSearch()
+  const listNavigateSearch = buildStaticDatasetCategoriesListSearch(listGroupKey)
   const router = useRouter()
   const navigate = useNavigate()
   const { href: editSelfHref } = router.buildLocation({
     to: '/admin/static-dataset-categories/$categoryKey',
     params: { categoryKey: category.key },
+    search: listNavigateSearch,
   })
 
   const { mutate: remove, isPending: isDeleting } = useMutation({
@@ -28,7 +33,7 @@ export function PageStaticDatasetCategoryEdit() {
       await deleteStaticDatasetCategoryFn({ data: { key } })
     },
     onSuccess: () => {
-      navigate({ to: '/admin/static-dataset-categories' })
+      navigate({ to: '/admin/static-dataset-categories', search: listNavigateSearch })
     },
   })
 
@@ -58,6 +63,7 @@ export function PageStaticDatasetCategoryEdit() {
 
         <StaticDatasetCategoryForm
           schema={staticDatasetCategoryEditFormSchema}
+          listGroupKey={listGroupKey}
           defaultValues={{
             groupKey: category.groupKey,
             categoryKey: category.categoryKey,

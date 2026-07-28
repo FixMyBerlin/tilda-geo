@@ -1,0 +1,68 @@
+---
+description: package.json scripts naming — colons only for parallel/sequential groups
+globs: **/package.json
+alwaysApply: false
+---
+
+# package.json script names
+
+Use `:` only for **step scripts** that belong to a group run via `bun run --parallel` or `bun run --sequential` with a glob (`<group>:*`).
+
+## Colon groups (`<group>:<step>`)
+
+- Parent script orchestrates: `bun run --parallel dev:*`, `bun run --sequential predev:*`, `bun run --sequential migrate-create:*`
+- Step names use the group prefix: `dev:vite`, `predev:3docker`, `migrate-create:1write`
+- Order steps with numeric prefixes when sequence matters: `predev:2dev-port`, `migrate-create:2format`
+
+## Standalone scripts (no `:`)
+
+One-off commands run directly — use kebab-case, no colon:
+
+- `migrate-check`, `setup-worktree`, `check-pre-push`, `bleach-full`
+
+## Verify scripts
+
+| Script           | Role                                                                 |
+| ---------------- | -------------------------------------------------------------------- |
+| `check`          | finish-work — `type-check lint format test-run knip-warn`            |
+| `check-ci`       | Read-only CI — `type-check lint-check format-check test-run`         |
+| `check-pre-push` | husky — `type-check-deploy lint format test-run knip`                |
+
+Full scaffold: `.agents/skills/tech-stack/references/package-json-scripts.md`.
+
+## Prefer sequential groups over `&&`
+
+Do **not** chain scripts with `&&`. Split steps into `<group>:<step>` and orchestrate with:
+
+```json
+"seed": "bun run --sequential seed:*"
+```
+
+Use `&&` only inside a single step when the shell must run multiple commands as one atomic action (rare).
+
+## Examples
+
+```json
+// ✅ Group + steps
+"dev": "bun run --parallel dev:*",
+"dev:vite": "vite dev",
+
+"seed": "bun run --sequential seed:*",
+"seed:1ensure-env": "bun scripts/predev/ensureEnv.ts",
+"seed:4migrate-reset": "bun --env-file=../.env --env-file=../.env.local prisma migrate reset --force",
+
+// ✅ Standalone
+"migrate-check": "prisma migrate status",
+
+// ❌ && chain across scripts
+"seed": "bun run predev && prisma migrate reset --force && prisma db seed",
+
+// ❌ Colon step without a parallel/sequential parent
+"db:reset": "prisma migrate reset --force"
+```
+
+Prefer `db-reset` unless `db` is a real orchestrator that runs `db:*` in parallel or sequence.
+
+## npm/bun lifecycle hooks
+
+Scripts named `pre<script>` or `post<script>` run automatically before/after `<script>`. Avoid accidental hook names (e.g. `preseed` runs before `seed`). Use `seed-prepare` only if a separate entry point is truly needed.

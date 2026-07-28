@@ -1,15 +1,31 @@
 -- WHAT IT DOES:
 -- QA comparison: count parkings in voronoi polygons vs reference data.
--- Splits by priority (data.euvm_qa_voronoi.priority boolean): false -> qa_parkings_euvm, true -> qa_parkings_euvm_priority.
+-- Splits by priority (data.euvm_qa_voronoi_2026.priority boolean): false -> qa_parkings_euvm, true -> qa_parkings_euvm_priority.
 -- 1. Preserve values in *_previous tables
--- 2. Load reference voronoi from data.euvm_qa_voronoi (filtered by priority)
+-- 2. Load reference voronoi from data.euvm_qa_voronoi_2026 (filtered by priority)
 -- 3. Clip geometries to Berlin boundary
 -- 4. Count current parkings on full-precision geometry, then difference, relative, previous_relative
 -- 5. Snap to grid (2 m) for presentation only; preserves shared edges
--- INPUT: data.euvm_qa_voronoi (polygon, priority boolean), public.parkings_quantized, public.off_street_parking_quantized
+-- INPUT: data.euvm_qa_voronoi_2026 (polygon, priority boolean), public.parkings_quantized, public.off_street_parking_quantized
 -- OUTPUT: public.qa_parkings_euvm (priority false), public.qa_parkings_euvm_priority (priority true)
 --
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
+
+-- In some dev/test DB setups the reference dataset (`data.euvm_qa_voronoi_2026`) may be missing.
+-- Instead of failing the whole processing run, create an empty placeholder so the QA step becomes a no-op.
+DO $$
+BEGIN
+  IF to_regclass('data.euvm_qa_voronoi_2026') IS NULL THEN
+    RAISE NOTICE 'Missing data.euvm_qa_voronoi_2026 - creating empty placeholder table for this run';
+    CREATE SCHEMA IF NOT EXISTS data;
+    CREATE TABLE data.euvm_qa_voronoi_2026 (
+      id TEXT,
+      priority BOOLEAN,
+      count_reference INTEGER,
+      geom geometry(Geometry, 3857)
+    );
+  END IF;
+END $$;
 
 -- Transform parkings to SRID 5243 for accurate spatial operations
 -- (5243 optimized for Germany, uses meters; needed for ST_Contains on line 105)
@@ -216,7 +232,7 @@ SELECT id, geom, count_reference, count_current, difference, previous_relative, 
 TRUNCATE TABLE public.qa_parkings_euvm;
 INSERT INTO public.qa_parkings_euvm (id, count_reference, geom)
 SELECT id::TEXT, count_reference, ST_Transform(geom::geometry, 3857)
-FROM data.euvm_qa_voronoi
+FROM data.euvm_qa_voronoi_2026
 WHERE priority IS NOT TRUE;
 
 -- 1b. Preserve previous and clear main (priority true)
@@ -227,7 +243,7 @@ SELECT id, geom, count_reference, count_current, difference, previous_relative, 
 TRUNCATE TABLE public.qa_parkings_euvm_priority;
 INSERT INTO public.qa_parkings_euvm_priority (id, count_reference, geom)
 SELECT id::TEXT, count_reference, ST_Transform(geom::geometry, 3857)
-FROM data.euvm_qa_voronoi
+FROM data.euvm_qa_voronoi_2026
 WHERE priority IS TRUE;
 
 -- 2. Clip to Berlin boundary (priority false)

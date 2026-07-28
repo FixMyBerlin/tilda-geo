@@ -39,7 +39,15 @@ export const Route = createFileRoute('/_pages/docs/$tableName')({
           )
       : []
 
-    const region = deps.r ? await getRegionForDocsLoaderFn({ data: { slug: deps.r } }) : null
+    const regionContext = deps.r ? await getRegionForDocsLoaderFn({ data: { slug: deps.r } }) : null
+    const region = regionContext?.region ?? null
+    const hasDownloadPermissions = regionContext?.hasDownloadPermissions ?? false
+    const showDownloads =
+      region != null &&
+      hasDownloadPermissions &&
+      region.bbox != null &&
+      region.exports != null &&
+      region.exports.includes(tableName)
 
     return {
       tableName,
@@ -48,6 +56,8 @@ export const Route = createFileRoute('/_pages/docs/$tableName')({
       groupDocs,
       region,
       regionSlug: region ? (deps.r ?? null) : null,
+      hasDownloadPermissions,
+      showDownloads,
     }
   },
   head: ({ loaderData }) => {

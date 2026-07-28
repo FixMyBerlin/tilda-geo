@@ -2,7 +2,7 @@
  * OSM OAuth does not provide email. Better Auth requires a non-empty email; we use a reserved
  * invalid-domain placeholder (RFC 2606). See auth server and isOsmPlaceholderEmail.
  */
-export const OSM_PLACEHOLDER_EMAIL_DOMAIN = 'users.openstreetmap.invalid'
+const OSM_PLACEHOLDER_EMAIL_DOMAIN = 'users.openstreetmap.invalid'
 
 export function osmPlaceholderEmail(osmId: number) {
   return `osm-${osmId}@${OSM_PLACEHOLDER_EMAIL_DOMAIN}`

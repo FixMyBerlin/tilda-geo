@@ -1,8 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, redirect } from '@tanstack/react-router'
-import { LayoutRoot } from '@/components/shared/layouts/LayoutRoot'
+import { LayoutRoot } from '@/components/layouts/LayoutRoot'
 import { APP_META } from '@/meta.const'
-import appCss from '@/components/shared/layouts/global.css?url'
+import appCss from '@/components/layouts/global.css?url'
 
 type MyRouterContext = {
   queryClient: QueryClient
@@ -24,7 +24,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      // `viewport-fit=cover` is required for `env(safe-area-inset-*)` to report non-zero values;
+      // without it the full-bleed map's floating chrome would sit under the notch / home indicator.
+      { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       { name: 'theme-color', content: APP_META.themeColor },
       { title: APP_META.title },
       { name: 'description', content: APP_META.description },

@@ -63,6 +63,15 @@ const seedUsers = async () => {
       lastName: 'Jordans',
     },
     {
+      osmId: 418040,
+      osmName: 'Supaplex030',
+      osmDescription: undefined,
+      role: 'ADMIN',
+      email: 'alex@fixmycity.de',
+      firstName: 'Alex',
+      lastName: '',
+    },
+    {
       // On master.apis.dev.openstreetmap.org
       osmId: 6501,
       osmName: 'tordansdev',

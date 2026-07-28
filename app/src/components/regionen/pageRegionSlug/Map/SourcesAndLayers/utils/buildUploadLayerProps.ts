@@ -37,7 +37,7 @@ export function buildUploadLayerProps({
     ...(sourceLayer !== undefined && { 'source-layer': sourceLayer }),
   }
   const debugStyle = debugLayerStyles ? getDebugStyleForLayerType(layer.type) : undefined
-  const layout = debugStyle ? { ...debugStyle.layout } : { ...(layer.layout ?? {}) }
+  const layout = debugStyle ? { ...debugStyle.layout } : { ...layer.layout }
   const paint = debugStyle ? debugStyle.paint : layer.paint
 
   switch (layer.type) {

@@ -1,7 +1,6 @@
 describe('transform_cycleway_both_postfix', function()
-  require('init')
-  require('Log')
-  local transform_cycleway_both_postfix = require('transform_cycleway_both_postfix')
+  local log = require('topics.helper.log')
+  local transform_cycleway_both_postfix = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_both_postfix')
 
   it('converts cycleway=no to cycleway:both=no when no side-specific tags exist', function()
     local tags = { cycleway = 'no' }
@@ -39,7 +38,7 @@ describe('transform_cycleway_both_postfix', function()
     assert.are.same(tags['cycleway:right'], 'lane')
   end)
 
-  it('does not convert when cycleway is not "no"', function()
+  it('does not convert when cycleway is not no', function()
     local tags = { cycleway = 'lane' }
     local unmodified = transform_cycleway_both_postfix(tags)
 

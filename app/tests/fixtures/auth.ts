@@ -3,7 +3,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Page } from '@playwright/test'
-import { test as base } from '@playwright/test'
 import db from '../../src/server/db.server'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -23,7 +22,7 @@ export type AuthenticatedContext = {
   expiresAt: number
 }
 
-export function hasValidSession() {
+function hasValidSession() {
   if (!fs.existsSync(AUTH_STORAGE_PATH)) {
     return false
   }
@@ -67,12 +66,6 @@ export async function switchUserToAdmin(userId: string) {
   await db.user.update({
     where: { id: userId },
     data: { role: 'ADMIN' },
-  })
-}
-
-export async function resetSession(userId: string) {
-  await db.session.deleteMany({
-    where: { userId },
   })
 }
 
@@ -278,37 +271,3 @@ export async function createStubbedUserSession(
 ) {
   return createStubbedSession(page, baseURL, 'USER', options)
 }
-
-export async function getAdminContext(_page: Page) {
-  const session = loadSession()
-  if (!session) {
-    throw new Error('No stored session found. Run auth-setup.spec.ts first.')
-  }
-
-  await switchUserToAdmin(session.userId)
-  await resetSession(session.userId)
-
-  throw new Error(
-    'Admin context requires re-authentication. This should be handled by auth-setup.spec.ts',
-  )
-}
-
-export const test = base.extend<{
-  authenticatedPage: Page
-  adminPage: Page
-}>({
-  authenticatedPage: async ({ page }, use) => {
-    const hasSession = await getAuthenticatedContext(page)
-    if (!hasSession) {
-      throw new Error('No valid session found. Run auth-setup.spec.ts first to create a session.')
-    }
-    await use(page)
-  },
-
-  adminPage: async ({ page }, use) => {
-    await getAdminContext(page)
-    await use(page)
-  },
-})
-
-export { expect } from '@playwright/test'

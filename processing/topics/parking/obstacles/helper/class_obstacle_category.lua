@@ -1,9 +1,8 @@
-require('init')
-require('Log')
+local log = require('topics.helper.log')
 
 ---@meta
 ---@class ObstacleCategory
-class_obstacle_category = {}
+local class_obstacle_category = {}
 class_obstacle_category.__index = class_obstacle_category
 
 ---@param args {
@@ -27,13 +26,13 @@ function class_obstacle_category.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 function class_obstacle_category:is_active(tags)
   return self._conditions(tags)
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return number|nil
 function class_obstacle_category:get_buffer_radius(tags)
   return self._buffer_radius(tags)
@@ -43,3 +42,5 @@ end
 function class_obstacle_category:get_tags(tags)
   return self._tags(tags)
 end
+
+return class_obstacle_category

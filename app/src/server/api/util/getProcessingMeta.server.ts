@@ -10,12 +10,22 @@ export async function getProcessingMeta() {
       processing_started_at,
       processing_completed_at,
       qa_update_started_at,
-      qa_update_completed_at,
-      statistics_started_at,
-      statistics_completed_at
+      qa_update_completed_at
     FROM public.meta
     ORDER BY id DESC
     LIMIT 1
   `
+
+  if (!result) return null
+
   return ProcessingMetaDates.parse(result)
+}
+
+export async function getProcessingOsmDataFrom() {
+  const meta = await getProcessingMeta()
+  return meta?.osm_data_from ?? null
+}
+
+export async function getProcessingOsmDataFromIso() {
+  return (await getProcessingOsmDataFrom())?.toISOString() ?? new Date().toISOString()
 }

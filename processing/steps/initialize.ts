@@ -6,10 +6,8 @@ import {
   initializeDiffingReferenceSchema,
 } from '../diffing/diffing'
 import { downloadPseudoTagsData } from '../pseudoTags/downloadPseudoTagsData'
-import { initializeLuaPackagePath } from '../utils/initializeLuaPackagePath'
-import { isDev } from '../utils/isDev'
 import { logPadded } from '../utils/logging'
-import { paramsFilteredForLogs } from '../utils/parameters'
+import { initializeAggregatedLengthsTable } from './afterthoughts/initializeAggregatedLengths'
 import { initializeMetadataTable } from './metadata'
 
 const DEBUG_LUA = false
@@ -17,9 +15,6 @@ const DEBUG_LUA = false
 /** Initialize Folder, Schema, Custom SQL Functions, Tables */
 export async function initialize() {
   logPadded('Processing: Initialize')
-  if (isDev) {
-    console.log('Current params:', JSON.stringify(paramsFilteredForLogs))
-  }
 
   await $`mkdir -p ${OSM_DOWNLOAD_DIR} ${OSM_FILTERED_DIR} ${HASH_DIR}`
 
@@ -42,9 +37,7 @@ export async function initialize() {
 
   // Meta Data
   await initializeMetadataTable()
-
-  // osm2pgsql LUA
-  await initializeLuaPackagePath('runProcessing')
+  await initializeAggregatedLengthsTable()
 
   // See ../pseudoTags
   await downloadPseudoTagsData()

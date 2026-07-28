@@ -1,5 +1,4 @@
-require('init')
-require('Log')
+local log = require('topics.helper.log')
 
 -- Transform misclassified highway=path tags to their correct primary highway type.
 --

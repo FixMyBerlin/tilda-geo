@@ -16,9 +16,9 @@ const translateKeys = [
 
 // Some input at https://stackoverflow.com/a/63116708/729221
 type TObjectInput =
-  // biome-ignore lint/suspicious/noExplicitAny: nested config structure for URL serialization
+  // oxlint-disable-next-line typescript/no-explicit-any -- nested config structure for URL serialization
   | Record<string, any>
-  // biome-ignore lint/suspicious/noExplicitAny: nested config structure for URL serialization
+  // oxlint-disable-next-line typescript/no-explicit-any -- nested config structure for URL serialization
   | any[]
   | null
   | undefined
@@ -31,7 +31,7 @@ type TObjectInput =
 // TODO TS types could be a lot nicer here…
 const replaceKeyInNestedObject = <TInput>(input: TInput, searchKey: string, newKey: string) => {
   if (Array.isArray(input)) {
-    const output = input.map((innerInput: TInput) => {
+    const output = input.map((innerInput) => {
       const item = replaceKeyInNestedObject<TObjectInput>(
         innerInput as TObjectInput,
         searchKey,
@@ -62,7 +62,7 @@ const replaceKeyInNestedObject = <TInput>(input: TInput, searchKey: string, newK
   return input
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: expands keys for URL config parsing
+// oxlint-disable-next-line typescript/no-explicit-any -- expands keys for URL config parsing
 export const expandObjectKeys = (inputObject: Record<string, any>) => {
   let expandedObject = inputObject
   translateKeys.forEach(([toKey, fromKey]) => {

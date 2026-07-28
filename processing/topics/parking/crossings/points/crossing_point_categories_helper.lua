@@ -9,10 +9,10 @@ local function check_tag_with_suffixes(tags, key, value)
 end
 
 local function remove_side_suffix(input)
-  if type(input) ~= "string" then return input end
-  return input:gsub(":left$", "")
-              :gsub(":right$", "")
-              :gsub(":both$", "")
+  if type(input) ~= 'string' then return input end
+  return input:gsub(':left$', '')
+              :gsub(':right$', '')
+              :gsub(':both$', '')
 end
 
 return {

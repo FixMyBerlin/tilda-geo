@@ -1,9 +1,6 @@
-require('init')
-require('Log')
-
-local subtract_prohibitions = require('subtract_time_ranges')
-
 describe('subtract_time_ranges (subtract_prohibitions)', function()
+  local subtract_prohibitions = require('topics.parking.helper.subtract_time_ranges')
+  local log = require('topics.helper.log')
   it('subtracts no_parking times from other rules', function()
     local list = {
       'loading (09:00-20:00)',

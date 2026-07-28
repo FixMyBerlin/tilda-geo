@@ -7,7 +7,7 @@ export const getBoundaryExportApiBaseUrl = (env?: EnvironmentValues) => {
   return getAppBaseUrl('/api/boundary', env)
 }
 
-export const getExportApiBboxUrl = (
+const getExportApiBboxUrl = (
   regionSlug: string,
   apiIdentifier: SourceExportApiIdentifier,
   bbox: NonNullable<StaticRegion['bbox']>,

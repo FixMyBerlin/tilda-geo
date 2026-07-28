@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { parseMapParam, serializeMapParam } from './utils/mapParam'
 
 // Shared parsers for client and server
-export const zodInternalNotesFilterParam = z.object({
+const zodInternalNotesFilterParam = z.object({
   query: z.string().optional().nullable(),
   completed: z.boolean().optional().nullable(),
   user: z.string().optional().nullable(),
@@ -11,7 +11,7 @@ export const zodInternalNotesFilterParam = z.object({
   notReacted: z.boolean().optional().nullable(),
 })
 
-export const zodQaFilterParam = z.object({
+const zodQaFilterParam = z.object({
   users: z.array(z.coerce.number()).optional().nullable(),
 })
 
@@ -33,7 +33,7 @@ export const searchParamsParsers = {
     shallow: false,
   }),
   atlasNotesFilter: parseAsJson(zodInternalNotesFilterParam.parse).withOptions({
-    shallow: false, // Trigger server re-render when filter changes
+    shallow: true,
   }),
   qaFilter: parseAsJson(zodQaFilterParam.parse).withOptions({
     shallow: false, // Trigger server re-render when filter changes

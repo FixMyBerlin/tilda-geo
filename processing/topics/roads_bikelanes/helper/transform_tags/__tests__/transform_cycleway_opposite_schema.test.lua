@@ -1,8 +1,7 @@
 describe('transform_cycleway_opposite_schema', function()
-  require('init')
-  require('CompareTables')
-  local transform_cycleway_opposite_schema = require('transform_cycleway_opposite_schema')
-  require('osm2pgsql')
+  local compare_tables = require('topics.helper.compare_tables')
+  local transform_cycleway_opposite_schema = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_opposite_schema')
+  local osm2pgsql = require('topics.helper.osm2pgsql')
 
   it('do nothing when cycleway is lane', function()
     local input = { ['cycleway'] = 'lane' }

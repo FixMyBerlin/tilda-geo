@@ -1,7 +1,6 @@
 describe('`categorize_obstacle_points`', function()
-  require('init')
-  local categorize_obstacle_points = require('categorize_obstacle_points')
-  require('Log')
+  local categorize_obstacle_points = require('topics.parking.obstacles.point.categorize_obstacle_points')
+  local log = require('topics.helper.log')
 
   it('works', function()
     local tags = {

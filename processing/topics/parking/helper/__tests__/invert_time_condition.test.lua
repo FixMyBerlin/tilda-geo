@@ -1,11 +1,8 @@
-require('init')
-require('Log')
-
-local invert_time_condition = require('invert_time_condition')
-
 describe('invert_time_condition', function()
+  local invert_time_condition = require('topics.parking.helper.invert_time_condition')
+  local log = require('topics.helper.log')
   it('inverts fee-free times to paid times for weekdays (exact output)', function()
-    -- "no fee" Mo-Fr 00:00-09:00,22:00-24:00 => "paid" Mo-Fr 09:00-22:00
+    -- 'no fee' Mo-Fr 00:00-09:00,22:00-24:00 => 'paid' Mo-Fr 09:00-22:00
     local result = invert_time_condition('Mo-Fr 00:00-09:00,22:00-24:00')
     assert.are.equal(result, 'Mo-Fr 09:00-22:00')
   end)
@@ -17,7 +14,7 @@ describe('invert_time_condition', function()
   end)
 
   it('inverts time-only block (applies to all days Mo-Su, output omits day prefix)', function()
-    -- Time-only: all weekdays get inverted range; compact_day_map outputs only time when day_expr == "Mo-Su"
+    -- Time-only: all weekdays get inverted range; compact_day_map outputs only time when day_expr == 'Mo-Su'
     local result = invert_time_condition('00:00-09:00')
     assert.are.equal(result, '09:00-24:00')
   end)

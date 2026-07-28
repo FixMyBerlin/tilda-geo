@@ -1,5 +1,4 @@
-require('init')
-require('class_separate_parking_category')
+local class_separate_parking_category = require('topics.parking.separate_parkings.helper.class_separate_parking_category')
 
 local separate_parking_point_categories = {
   class_separate_parking_category.new({

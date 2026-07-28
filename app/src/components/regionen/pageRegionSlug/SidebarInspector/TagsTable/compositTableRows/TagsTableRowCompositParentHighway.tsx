@@ -1,5 +1,6 @@
 import { TagsTableRow } from '../TagsTableRow'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
+import { resolveCompositParentHighwayDisplay } from './resolveCompositParentHighwayDisplay'
 import type { CompositTableRow } from './types'
 
 export const tableKeyHighway = 'composit_parent_highway'
@@ -8,38 +9,16 @@ export const TagsTableRowCompositParentHighway = ({
   tagKey: _, // is `composit_parent_highway` which is not helpful here
   properties,
 }: CompositTableRow) => {
-  if (properties._parent_highway) {
-    return (
-      <TagsTableRow sourceId={sourceId} tagKey={'_parent_highway'}>
-        <ConditionalFormattedValue
-          sourceId={sourceId}
-          tagKey={'highway'}
-          tagValue={properties._parent_highway}
-        />
-      </TagsTableRow>
-    )
-  }
-  if (properties.road) {
-    return (
-      <TagsTableRow sourceId={sourceId} tagKey={'_parent_highway'}>
-        <ConditionalFormattedValue
-          sourceId={sourceId}
-          tagKey={'highway'}
-          tagValue={properties.road}
-        />
-      </TagsTableRow>
-    )
-  }
-  if (properties.highway) {
-    return (
-      <TagsTableRow sourceId={sourceId} tagKey={'_parent_highway'}>
-        <ConditionalFormattedValue
-          sourceId={sourceId}
-          tagKey={'highway'}
-          tagValue={properties.highway}
-        />
-      </TagsTableRow>
-    )
-  }
-  return null
+  const display = resolveCompositParentHighwayDisplay(properties)
+  if (!display) return null
+
+  return (
+    <TagsTableRow sourceId={sourceId} tagKey={display.rowTagKey}>
+      <ConditionalFormattedValue
+        sourceId={sourceId}
+        tagKey={display.valueTagKey}
+        tagValue={display.tagValue}
+      />
+    </TagsTableRow>
+  )
 }

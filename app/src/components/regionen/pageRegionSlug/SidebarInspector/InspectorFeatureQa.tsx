@@ -7,6 +7,7 @@ import { ObjectDump } from '@/components/admin/ObjectDump'
 import { filterQaDataByStyle } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
 import { useQaFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaFilterParam'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
+import { safeSetFeatureState } from '@/components/regionen/pageRegionSlug/Map/utils/safeSetFeatureState'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { isDev } from '@/components/shared/utils/isEnv'
@@ -107,7 +108,7 @@ export const InspectorFeatureQa = ({ feature }: Props) => {
 
     const targetFeature = qaFeatures[0] // Should only be one feature
     if (targetFeature) {
-      mainMap.setFeatureState(targetFeature, {
+      safeSetFeatureState(mainMap, targetFeature, {
         userStatus: USER_STATUS_TO_LETTER[status as keyof typeof USER_STATUS_TO_LETTER],
         // Keep existing system status
         systemStatus: targetFeature.state?.systemStatus || null,

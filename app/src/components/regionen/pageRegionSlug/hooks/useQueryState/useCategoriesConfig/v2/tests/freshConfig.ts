@@ -1214,7 +1214,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: {
                   'text-field': [
                     'concat',
-                    ['to-string', ['get', 'name:prefix']],
+                    ['to-string', ['get', 'name_prefix']],
                     ' ',
                     ['to-string', ['get', 'name']],
                   ],
@@ -1235,7 +1235,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: {
                   'text-field': [
                     'concat',
-                    ['to-string', ['get', 'name:prefix']],
+                    ['to-string', ['get', 'name_prefix']],
                     ' ',
                     ['to-string', ['get', 'name']],
                   ],
@@ -1322,7 +1322,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: {
                   'text-field': [
                     'concat',
-                    ['to-string', ['get', 'name:prefix']],
+                    ['to-string', ['get', 'name_prefix']],
                     ' ',
                     ['to-string', ['get', 'name']],
                   ],
@@ -1343,7 +1343,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: {
                   'text-field': [
                     'concat',
-                    ['to-string', ['get', 'name:prefix']],
+                    ['to-string', ['get', 'name_prefix']],
                     ' ',
                     ['to-string', ['get', 'name']],
                   ],

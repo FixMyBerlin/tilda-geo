@@ -1,9 +1,8 @@
-require('init')
-require("Log")
+local log = require('topics.helper.log')
 
 ---@meta
 ---@class SeparateParkingCategory
-class_separate_parking_category = {}
+local class_separate_parking_category = {}
 class_separate_parking_category.__index = class_separate_parking_category
 
 ---@param args {
@@ -20,8 +19,10 @@ function class_separate_parking_category.new(args)
   return self
 end
 
----@param tags table
+---@param tags OsmTags
 ---@return boolean
 function class_separate_parking_category:is_active(tags)
   return self._conditions(tags)
 end
+
+return class_separate_parking_category

@@ -1,7 +1,6 @@
-require('init')
-require('Set')
-require('Log')
-local is_road = require('is_road')
+local SET = require('topics.helper.sets')
+local log = require('topics.helper.log')
+local is_road = require('topics.parking.roads.helper.is_road')
 
 -- Emergency roads are sometimes mapped as hw=path|footway but still require a driveway treatment
 -- Therefore all ways that allow any vehicle or emergency access are included.
@@ -17,7 +16,7 @@ local function is_driveway(tags)
   if not tags.highway then return false end
   if is_road(tags) then return false end
 
-  local allowed_highways = Set({
+  local allowed_highways = SET.set({
     'service',
     'track',
     'bus_guideway',

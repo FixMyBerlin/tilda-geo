@@ -15,3 +15,15 @@ export const buttonStylesSecondary = twJoin(
 export const buttonStylesOnYellow = twMerge(buttonStyles, 'bg-yellow-400/80 shadow')
 
 export const notesButtonStyle = twMerge(buttonStyles, 'bg-gray-100 p-1.5')
+
+/** Filter chips: admin table shell (ring-gray-900/5), no link underline. */
+export const filterChipStyles = twJoin(
+  'inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-sm font-medium no-underline',
+  'bg-white/40 text-gray-800 shadow-sm ring-1 ring-gray-900/5',
+  'hover:bg-white/90 hover:text-yellow-700',
+)
+
+export const filterChipStylesActive = twJoin(
+  filterChipStyles,
+  'bg-white/90 text-yellow-700 shadow-md ring-gray-900/10 hover:text-yellow-700',
+)

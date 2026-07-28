@@ -11,8 +11,16 @@ import { PageDocsTocSection } from './pageDocsTableName/PageDocsTocSection'
 const routeApi = getRouteApi('/_pages/docs/$tableName')
 
 export function PageDocsTableName() {
-  const { tableName, regionSlug, region, topicDoc, masterportal, groupDocs } =
-    routeApi.useLoaderData()
+  const {
+    tableName,
+    regionSlug,
+    region,
+    topicDoc,
+    masterportal,
+    groupDocs,
+    hasDownloadPermissions,
+    showDownloads,
+  } = routeApi.useLoaderData()
 
   return (
     <>
@@ -38,6 +46,8 @@ export function PageDocsTableName() {
           region={region}
           regionSlug={regionSlug}
           tableName={tableName}
+          hasDownloadPermissions={hasDownloadPermissions}
+          showDownloads={showDownloads}
         />
       ) : null}
 
@@ -54,7 +64,7 @@ export function PageDocsTableName() {
             topicDoc={topicDoc}
             tableName={tableName}
             regionSlug={regionSlug}
-            showDownloads={Boolean(region?.bbox)}
+            showDownloads={showDownloads}
           />
           <PageDocsAttributesSection
             topicDoc={topicDoc}

@@ -90,13 +90,13 @@ export const OsmNotesNewForm = () => {
 
   return (
     <section className="">
-      <div className="mt-4 flex justify-center">
-        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 leading-tight font-semibold text-teal-50">
+      <div className="mt-3 flex justify-center sm:mt-4">
+        <h2 className="z-10 rounded-lg bg-teal-700 px-2 py-1 text-sm leading-tight font-semibold text-teal-50 sm:text-base">
           2. Hinweis verfassen
         </h2>
       </div>
       <Form
-        className="p-4"
+        className="space-y-3.5 p-3 sm:space-y-6 sm:p-4"
         defaultValues={{ comment: '' }}
         schema={OsmNoteSchema}
         onSubmit={async (values) => {
@@ -121,7 +121,7 @@ export const OsmNotesNewForm = () => {
       >
         {(form) => (
           <>
-            <p className="leading-snug">
+            <p className="text-sm leading-snug text-gray-900 sm:text-base">
               Bitte beschreiben Sie möglichst genau,{' '}
               {commentedFeatureId ? (
                 <>
@@ -140,8 +140,8 @@ export const OsmNotesNewForm = () => {
               name="comment"
               label="Hinweistext"
               placeholder="Hinweis"
-              className="my-3 min-h-48 border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
-              rows={6}
+              className="my-1.5 min-h-28 border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:my-3 sm:min-h-48"
+              rows={4}
             />
             <div className="flex items-center gap-1 leading-tight">
               <form.Subscribe selector={(s) => s.isSubmitting}>

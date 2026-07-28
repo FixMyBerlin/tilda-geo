@@ -3,9 +3,9 @@ import { useRouter } from '@tanstack/react-router'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
 import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
 import { ObjectDump } from '@/components/admin/ObjectDump'
-import { RegionStatusPill } from '@/components/admin/RegionStatusPill'
+import { RegionPromotedPill } from '@/components/regionen/regionMeta/RegionPromotedPill'
+import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
 import { Link } from '@/components/shared/links/Link'
-import { Pill } from '@/components/shared/text/Pill'
 import type { TRegion } from '@/server/regions/queries/getRegion.server'
 import { deleteRegionFn } from '@/server/regions/regions.functions'
 
@@ -44,11 +44,7 @@ export const RegionsTable = ({ regions }: Props) => {
               <RegionStatusPill status={region.status} />
             </td>
             <td className={adminTableClasses.td}>
-              {region.promoted ? (
-                <Pill color="green">Gelistet</Pill>
-              ) : (
-                <Pill color="red">Nicht gelistet</Pill>
-              )}
+              <RegionPromotedPill promoted={region.promoted} />
             </td>
             <td className={adminTableClasses.td}>
               <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }}>

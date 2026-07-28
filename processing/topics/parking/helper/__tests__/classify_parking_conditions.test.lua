@@ -1,8 +1,6 @@
-require('init')
-require('Log')
-
 describe('classify_parking_conditions', function()
-  local classify_parking_conditions = require('classify_parking_conditions')
+  local log = require('topics.helper.log')
+  local classify_parking_conditions = require('topics.parking.helper.classify_parking_conditions')
 
   it('returns condition_category for paid parking', function()
     local tags = { fee = 'yes', zone = '' }

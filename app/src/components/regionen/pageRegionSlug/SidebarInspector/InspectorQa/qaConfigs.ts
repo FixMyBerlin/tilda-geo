@@ -8,7 +8,7 @@ import type { QaEvaluatorType } from '@/prisma/generated/browser'
 import { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/browser'
 
 // QA System Status Colors (from specification)
-export const QA_SYSTEM_STATUS_COLORS = {
+const QA_SYSTEM_STATUS_COLORS = {
   GOOD: '#009E73', // Green - no review needed
   NEEDS_REVIEW: '#E69F00', // Yellow - requires human evaluation
   PROBLEMATIC: '#D55E00', // Red - action needed
@@ -31,11 +31,6 @@ export const SYSTEM_STATUS_TO_LETTER = {
 } as const satisfies Record<QaSystemStatus, string>
 
 // Letter to system status mapping for translation back
-export const LETTER_TO_SYSTEM_STATUS: Record<string, QaSystemStatus> = {
-  G: QaSystemStatus.GOOD,
-  N: QaSystemStatus.NEEDS_REVIEW,
-  P: QaSystemStatus.PROBLEMATIC,
-} as const satisfies Record<string, QaSystemStatus>
 
 // User status to letter mapping for optimization (only user status needed for filtering)
 export const USER_STATUS_TO_LETTER = {
@@ -47,13 +42,6 @@ export const USER_STATUS_TO_LETTER = {
 } as const satisfies Record<QaEvaluationStatus, string>
 
 // Letter to user status mapping for translation back
-export const LETTER_TO_USER_STATUS: Record<string, QaEvaluationStatus> = {
-  S: QaEvaluationStatus.OK_STRUCTURAL_CHANGE,
-  R: QaEvaluationStatus.OK_REFERENCE_ERROR,
-  D: QaEvaluationStatus.NOT_OK_DATA_ERROR,
-  P: QaEvaluationStatus.NOT_OK_PROCESSING_ERROR,
-  QA: QaEvaluationStatus.OK_QA_TOOLING_ERROR,
-} as const satisfies Record<string, QaEvaluationStatus>
 
 // System Status Configuration
 export const systemStatusConfig = {

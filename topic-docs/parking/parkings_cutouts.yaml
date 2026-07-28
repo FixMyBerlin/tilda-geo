@@ -31,6 +31,8 @@ attributes:
         label: Markierung (Sperrfläche u.ä.) an Querungsstelle
       - value: crossing_kerb_extension
         label: Gehwegvorstreckung an Querungsstelle
+      - value: crossing_continuous
+        label: Durchgängige Querung
       - value: crossing_marked
         label: Markierte Querungsstelle
       - value: crossing_traffic_signals
@@ -113,12 +115,12 @@ attributes:
         label: Parkplätze die separat als Punkt erfasst sind
 
   - key: buffer_radius
-    format: number
+    format: meter
     label: Radius der Stanzung
     description: Radius der Stanzung in Metern.
 
   - key: radius
-    format: number
+    format: meter
     label: Pufferradius
     description: Radius eines Puffers in Metern, u. a. an Kreuzungs-Ecken (Bordsteinschnittpunkte) und eUVM-Punkten.
 
@@ -133,7 +135,7 @@ attributes:
         label: Bahnsteig / ohne Kerb-Seite
 
   - key: width
-    format: number
+    format: meter
     label: Breite
 
   - key: no_cutout_for_restrictions
@@ -176,10 +178,12 @@ attributes:
 
   - key: geom_sources
     label: Geometrie-Quellen
+    purpose: qa
     description: Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).
 
   - key: geometry_source
     format: sanitized_strings
+    purpose: qa
     label: Geometrieherkunft
 
   - key: kerb
@@ -216,6 +220,7 @@ attributes:
 
   - key: tag_sources
     label: Tag-Quellen
+    purpose: qa
     description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).
 
   - key: traffic_calming
@@ -223,79 +228,109 @@ attributes:
     label: Verkehrsberuhigung (OSM-Kategorie "traffic_calming")
 
   - key: 'osm_area:highway'
+    purpose: experimentation
     format: ignore
 
   - key: osm_barrier
+    purpose: experimentation
     format: ignore
 
   - key: osm_capacity
+    purpose: experimentation
     format: ignore
 
   - key: osm_crossing
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_crossing:buffer_marking'
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_crossing:kerb_extension'
+    purpose: experimentation
+    format: ignore
+
+  - key: 'osm_crossing:continuous'
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_crossing:markings'
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_crossing:signals'
+    purpose: experimentation
     format: ignore
 
   - key: osm_crossing_ref
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_fire_hydrant:position'
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_fire_hydrant:type'
+    purpose: experimentation
     format: ignore
 
   - key: osm_highway
+    purpose: experimentation
     format: ignore
 
   - key: osm_leisure
+    purpose: experimentation
     format: ignore
 
   - key: osm_mapillary
+    purpose: experimentation
     format: ignore
 
   - key: osm_natural
+    purpose: experimentation
     format: ignore
 
   - key: osm_network
+    purpose: experimentation
     format: ignore
 
   - key: osm_outdoor_seating
+    purpose: experimentation
     format: ignore
 
   - key: osm_position
+    purpose: experimentation
     format: ignore
 
   - key: osm_ref
+    purpose: experimentation
     format: ignore
 
   - key: osm_road_marking
+    purpose: experimentation
     format: ignore
 
   - key: 'osm_small_electric_vehicle_parking:position'
+    purpose: experimentation
     format: ignore
 
   - key: osm_street_cabinet
+    purpose: experimentation
     format: ignore
 
   - key: osm_traffic_calming
+    purpose: experimentation
     format: ignore
 
   - key: osm_traffic_sign
+    purpose: experimentation
     format: ignore
 
   - key: osm_vending
+    purpose: experimentation
     format: ignore
 
   - key: osm_zone
+    purpose: experimentation
     format: ignore

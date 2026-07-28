@@ -12,7 +12,7 @@ export const TagsTableRowCompositMaxspeed = ({
   if (!properties.maxspeed) return null
 
   return (
-    <TagsTableRow key={tagKey} sourceId={sourceId} tagKey={tagKey}>
+    <TagsTableRow key={tagKey} sourceId={sourceId} tagKey="maxspeed">
       <ValueDisclosure>
         <ValueDisclosureButton>
           <ConditionalFormattedValue
@@ -34,7 +34,7 @@ export const TagsTableRowCompositMaxspeed = ({
             <em>Genauigkeit der Quelle:</em>{' '}
             <ConditionalFormattedValue
               sourceId={sourceId}
-              tagKey={'confidence'}
+              tagKey={'maxspeed_confidence'}
               tagValue={properties.maxspeed_confidence}
             />
           </p>

@@ -5,15 +5,15 @@
 1. Install browsers: `bunx playwright install chromium` (Playwright is already a project dependency)
 2. Configure: Create `app/.env.test` with `TEST_OSM_USERNAME` and `TEST_OSM_PASSWORD`
 3. Configure app: Set `VITE_PLAYWRIGHT_ENABLED=true` in repo root `.env` (see `.env.example`). Vitest unit tests use the repo root `.env`; `app/.env.test` is Playwright-only.
-4. For smoke tests only: `bun run test-e2e` will start the dev server via `webServer` if not already running (requires `docker compose up db tiles -d` first if the app needs DB). For full suite: start app with `docker compose up db tiles -d && bun run dev`, then run tests.
+4. For smoke tests only: `bun run e2e` will start the dev server via `webServer` if not already running (requires db+tiles — see [`docs/docker-local-development.md`](../../docs/docker-local-development.md)). For full suite: start app with `bun run dev` (predev starts Docker), then run tests.
 
 ## Usage
 
 ```bash
-bun run test-e2e          # Run all tests (starts dev server if needed)
-bun run test-e2e -- tests/smoke # Run only smoke tests (one per public route)
-bun run test-e2e-ui       # UI mode
-bun run test-e2e-debug    # Debug mode
+bun run e2e                    # Run all tests (chromium; starts dev server if needed)
+bun run e2e -- tests/smoke     # Run only smoke tests (one per public route)
+bun run e2e -- --ui            # UI mode
+bun run e2e -- --debug         # Debug mode
 ```
 
 ## Smoke tests (autonomous)
@@ -26,7 +26,15 @@ Run `auth-setup.spec.ts` first to create session. Other tests (admin, regions as
 
 ## Map Testing
 
-Set `VITE_PLAYWRIGHT_ENABLED=true` to enable Playwright testing mode. This enables test IDs and the `mapLoaded` event. Tests wait for this event to verify map initialization.
+Set `VITE_PLAYWRIGHT_ENABLED=true` to enable Playwright testing mode. This enables test IDs, `window.__mainMap` (MapLibre instance for layer-order and style inspection), and the `mapLoaded` event.
+
+Helpers in [`tests/utils/maps.ts`](utils/maps.ts):
+
+- `waitForMapLoad` — waits for `mapLoaded` or canvas
+- `getMapLayerIds` — reads `window.__mainMap.getStyle().layers` (requires prior `waitForMapLoad`)
+- `verifyMapRendered`, `checkMapTilesLoaded`
+
+App wiring: `exposeMainMapForDebugging` / `firePlaywrightMapLoadedEvent` in `src/components/shared/utils/playwright.ts` (called from `RegionMap` `onLoad`). Skills: [playwright-skill](../../.agents/skills/playwright-skill/SKILL.md), [react-map-gl map-debug-exposure](../../.agents/skills/react-map-gl/references/map-debug-exposure.md).
 
 ## LLM Usage
 
@@ -37,4 +45,4 @@ Tests can be run autonomously to verify app quality:
 - Network requests succeed
 - No console errors
 
-Use `bun run test-e2e` to evaluate app state. Tests are self-contained and can be run in CI/CD.
+Use `bun run e2e` to evaluate app state. Tests are self-contained and can be run in CI/CD.

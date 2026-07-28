@@ -41,17 +41,18 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             >
               <h2 className="font-semibold">{currCategoryConfig.name}</h2>
               <p
-                className="mt-0.5 max-w-full overflow-hidden text-xs leading-3 text-ellipsis whitespace-nowrap text-gray-400"
+                className="mt-0.5 max-w-full overflow-hidden text-xs leading-4 text-ellipsis whitespace-nowrap text-gray-400"
                 title={currCategoryConfig.desc}
               >
                 {currCategoryConfig.desc}
               </p>
             </CategoryHeadlineToggle>
-            <DisclosureButton className="flex flex-none cursor-pointer items-center justify-center border-l border-gray-200 px-1 text-yellow-500 hover:bg-yellow-50">
+            {/* Larger tap target + chevron on mobile (the flyout has room); compact on desktop. */}
+            <DisclosureButton className="flex flex-none cursor-pointer items-center justify-center border-l border-gray-200 px-4 text-yellow-500 hover:bg-yellow-50 sm:px-1">
               {open ? (
-                <ChevronDownIcon className="size-7" />
+                <ChevronDownIcon className="size-9 sm:size-7" />
               ) : (
-                <ChevronLeftIcon className="size-7" />
+                <ChevronLeftIcon className="size-9 sm:size-7" />
               )}
             </DisclosureButton>
           </header>

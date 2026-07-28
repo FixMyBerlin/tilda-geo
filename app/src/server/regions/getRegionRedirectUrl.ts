@@ -1,7 +1,10 @@
 import { searchParamsRegistry } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/searchParamsRegistry'
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
 import { migrateUrl } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl'
-import type { MapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
+import type {
+  MapDataCategoryConfig,
+  MapDataCategoryParam,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { mergeCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/utils/mergeCategoriesConfig'
 import { configs } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { parse as parseConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/parse'
@@ -158,9 +161,12 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
   if (u.searchParams.has('config')) {
     const configParam = u.searchParams.get('config')
     const checksum = configParam?.split('.')[0]
-    const simplifiedConfig = configParam && checksum ? configs[checksum] : undefined
+    const simplifiedConfig =
+      configParam && checksum && checksum in configs
+        ? configs[checksum as keyof typeof configs]
+        : undefined
     if (simplifiedConfig && configParam) {
-      const parsedConfig = parseConfig(configParam, simplifiedConfig)
+      const parsedConfig = parseConfig(configParam, simplifiedConfig as MapDataCategoryConfig[])
       const migratedConfig = migrateConfigCategoryIds(parsedConfig)
       const mergedConfig = mergeCategoriesConfig({
         freshConfig,

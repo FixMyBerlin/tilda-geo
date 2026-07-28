@@ -40,7 +40,7 @@ export const useInternalNotesFilterParam = () => {
   const [internalNotesFilterParam, setInternalNotesFilterParam] = useQueryState(
     searchParamsRegistry.atlasNotesFilter,
     parseAsJson(zodInternalNotesFilterParam.parse).withOptions({
-      shallow: false, // Trigger server re-render when filter changes
+      shallow: true,
     }),
   )
   return { internalNotesFilterParam, setInternalNotesFilterParam }

@@ -1,11 +1,10 @@
-require('init')
-require('Log')
-require('MergeTable')
-require('result_tags_roads')
-local is_road_check = require('is_road')
-local is_driveway_check = require('is_driveway')
-local has_parking_check = require('has_parking')
-local LOG_ERROR = require('parking_errors')
+local log = require('topics.helper.log')
+local merge_table = require('topics.helper.merge_table')
+local result_tags = require('topics.parking.roads.helper.result_tags')
+local is_road_check = require('topics.parking.roads.helper.is_road')
+local is_driveway_check = require('topics.parking.roads.helper.is_driveway')
+local has_parking_check = require('topics.parking.parkings.helper.has_parking')
+local LOG_ERROR = require('topics.parking.errors.parking_errors')
 
 local db_table = osm2pgsql.define_table({
   name = '_parking_roads',
@@ -40,10 +39,10 @@ function parking_roads(object)
   if not (is_road or is_driveway) then return end
   if object.tags.area == 'yes' then return end -- exclude areas like https://www.openstreetmap.org/way/185835333
 
-  local row_data, replaced_tags = result_tags_roads(object)
+  local row_data, replaced_tags = result_tags(object)
   local has_parking = has_parking_check(object.tags)
   local is_parking_road = is_road or (is_driveway and has_parking)
-  local row = MergeTable({
+  local row = merge_table({
     geom = object:as_linestring(),
     is_driveway = is_driveway,
     has_parking = has_parking,
@@ -53,3 +52,5 @@ function parking_roads(object)
   LOG_ERROR.SANITIZED_VALUE(object, row.geom, replaced_tags, 'parking_roads')
   db_table:insert(row)
 end
+
+return parking_roads

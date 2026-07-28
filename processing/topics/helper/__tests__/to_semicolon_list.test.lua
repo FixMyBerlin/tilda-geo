@@ -1,6 +1,5 @@
-local to_semicolon_list = require('to_semicolon_list')
-
 describe('to_semicolon_list', function()
+  local to_semicolon_list = require('topics.helper.to_semicolon_list')
   describe('basic functionality', function()
     it('should return nil for nil input', function()
       local result = to_semicolon_list(nil)

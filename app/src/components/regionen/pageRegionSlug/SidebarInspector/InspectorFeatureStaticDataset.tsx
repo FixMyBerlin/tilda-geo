@@ -21,7 +21,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
   if (!sourceData) return null
   if (!sourceData.inspector.enabled) return null
 
-  const datasetTranslations = { ...translations, ...(sourceData.inspector.translations || {}) }
+  const datasetTranslations = { ...translations, ...sourceData.inspector.translations }
 
   return (
     <IntlProvider messages={datasetTranslations} locale="de" defaultLocale="de">
@@ -31,7 +31,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
         showLockIcon={!sourceData.isPublic}
       >
         <p
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: attribution HTML from dataset config
+          // oxlint-disable-next-line react/no-danger -- attribution HTML from dataset config
           dangerouslySetInnerHTML={{ __html: sourceData.attributionHtml }}
           className="border-b py-1.5 pr-3 pl-4 text-gray-400"
         />
@@ -47,10 +47,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
             editors={sourceData.inspector.editors}
             osmIdConfig={sourceData.osmIdConfig}
           />
-          <ToolsOtherProperties
-            feature={feature}
-            documentedKeys={sourceData.inspector.documentedKeys}
-          />
+          <ToolsOtherProperties feature={feature} sourceId={sourceId} />
         </ToolsWrapper>
       </Disclosure>
     </IntlProvider>

@@ -7,62 +7,24 @@ import type {
   SymbolLayerSpecification,
   VectorSourceSpecification,
 } from 'maplibre-gl'
-import type { RegionSlug } from '@/data/regions.const'
-import type { translations } from '../../../../components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import type { LegendIconTypes } from '../../../../components/regionen/pageRegionSlug/SidebarLayerControls/Legend/LegendIcons/types'
 import type { MapDataCategoryId } from './mapDataCategories/MapDataCategoryId'
 import type { SourcesId } from './mapDataSources/sources.const'
+import type { TableId } from './mapDataSources/tables.const'
 import type { StyleId, SubcategoryId } from './typeId'
 
 /** @desc: The background tiles, configured in 'sourcesBackgroundsRaster.const.ts' */
 export type MapDataBackgroundSource<TIds> = {
   id: TIds
   name: string
-  /** @desc URL of the tiles */
-  tiles: string
+  /** @desc URL of the raster tiles */
+  tilesUrl: string
   attributionHtml: string
   /** @desc Show link to the external legend of that map layer. Will replace {z}/{x}/{y} if present  */
   legendUrl?: string
   maxzoom?: RasterSourceSpecification['maxzoom']
   minzoom?: RasterSourceSpecification['minzoom']
   tileSize?: RasterSourceSpecification['tileSize']
-}
-
-/** @desc: The data sources, configured in 'sourcesDatasets.const.ts' */
-export type MapDataDatasetsSource<TIds> = {
-  /** @desc Associate the dataset with a region. This is the only place where we connect object to region, not region to object. But it makes more sence this way. */
-  regionKey: RegionSlug[]
-  id: TIds | string // TODO the "string" part should go away, if we keep this. Or it should all be "string". This was added during the migration of LegacyStaticDatasets
-  /** @desc Whenever we have one dataset multipe time, we need a subid to make them unique */
-  subId?: string
-  name: string
-  description?: string
-  attributionHtml: string
-  inspector:
-    | ({
-        enabled: true
-        highlightingKey: 'TODO' // This is not implemented, yet
-        /** @desc Array of key strings OR `false` to list all available keys */
-        documentedKeys: string[] | false
-        editors?: MapDataSourceInspectorEditor[]
-      } & (
-        | { disableTranslations?: false; translations: typeof translations }
-        | { disableTranslations: true; translations?: never }
-      ))
-    | {
-        enabled: false
-      }
-  layers: (
-    | (CircleLayerSpecification & Required<Pick<CircleLayerSpecification, 'paint'>>)
-    | (FillLayerSpecification & Required<Pick<FillLayerSpecification, 'paint'>>)
-    | (LineLayerSpecification & Required<Pick<LineLayerSpecification, 'paint'>>)
-    | (SymbolLayerSpecification & Required<Pick<SymbolLayerSpecification, 'paint' | 'layout'>>)
-    | (HeatmapLayerSpecification & Required<Pick<HeatmapLayerSpecification, 'paint'>>)
-  )[]
-} & {
-  type: 'vector'
-  /** @desc Required format is `pmtiles://${DatasetFiles}` */
-  url: string
 }
 
 export type MapDataSourceInspectorEditor = {
@@ -111,11 +73,8 @@ export type MapDataOsmIdConfig =
   | { osmType: string; osmId: string }
   | { osmTypeId: string }
 
-/** @desc: Our own vector tile layers configured in 'sources.const.ts' */
-export type MapDataSource<TIds> = {
+type MapDataSourceShared<TIds> = {
   id: TIds
-  /** @desc URL of the vector tiles */
-  tiles: string
   /** @desc minzoom:4 (default, see `SIMPLIFY_MIN_ZOOM`) means no data is loaded for 0-4, only from 5+ (zoomed in) data is present
    * @desc `0---4=minzoom->-----maxzoom=14=overzoom->---22` */
   minzoom: VectorSourceSpecification['minzoom']
@@ -135,6 +94,27 @@ export type MapDataSource<TIds> = {
   /** @desc Calculator: Enable and configure calculator feature */
   calculator: MapDataSourceCalculator
 }
+
+/** Processing tables; tile URL via `getMapDataSourceTilesUrl` (`atlas_generalized_*` PG functions). */
+type ProcessingMapDataSource<TIds> = MapDataSourceShared<TIds> & {
+  tileTables: readonly TableId[]
+}
+
+/** Explicit tile URL (internal Martin, Lars, Mapillary, …). */
+export type ExplicitTilesUrlMapDataSource<TIds> = MapDataSourceShared<TIds> & {
+  tileTables: null
+  /** @desc URL of the vector tiles */
+  tilesUrl: string
+}
+
+/** @desc: Our own vector tile layers configured in 'sources.const.ts' */
+export type MapDataSource<TIds> =
+  | ProcessingMapDataSource<TIds>
+  | ExplicitTilesUrlMapDataSource<TIds>
+
+export const hasExplicitTilesUrl = <TIds>(
+  source: MapDataSource<TIds>,
+): source is ExplicitTilesUrlMapDataSource<TIds> => source.tileTables === null
 
 export type StaticMapDataCategory = {
   id: MapDataCategoryId
@@ -215,6 +195,8 @@ export type FileMapDataSubcategoryStyleLayer = (
   | SymbolLayerSpecification
 ) & {
   'source-layer': string
+  /** @desc Override default layer stacking when using the default background map. */
+  beforeId?: TBeforeIds
   /**
    * @default `true`
    * @desc optional `false` will hide the layer from `interactiveLayerIds` */

@@ -3,6 +3,7 @@
 
 // This type is used in `mapboxStyleLayers` and gives some visibility into what kind of data we fetch from Mapbox.
 export type MapboxStyleLayer = {
+  beforeId?: unknown
   filter?: unknown
   id: unknown
   layout?: unknown

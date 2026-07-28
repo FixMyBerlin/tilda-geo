@@ -1,14 +1,21 @@
 // https://www.roboleary.net/vscode/2020/09/17/vscode-workspace-settings.html
 // All settings https://code.visualstudio.com/docs/getstarted/settings#_default-settings
-// Formatting: app/oxfmt.config.ts (oxfmt) — imports, Tailwind classes, package.json key order. Lint: Biome.
+// Format + lint: app/oxfmt.config.mjs and app/oxlint.config.mjs (Oxc). Binaries live under app/node_modules.
 {
   "prettier.enable": false,
-  "biome.configurationPath": "app/biome.json",
+  "oxc.fmt.configPath": "app/oxfmt.config.mjs",
+  "oxc.lint.configPath": "app/oxlint.config.mjs",
+  "oxc.fixKind": "dangerous_fix_or_suggestion",
+  "oxc.typeAware": true,
+  "oxc.path.oxfmt": "./app/node_modules/.bin/oxfmt",
+  "oxc.path.oxlint": "./app/node_modules/.bin/oxlint",
+  "oxc.path.tsgolint": "./app/node_modules/.bin/tsgolint",
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
+  "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll.biome": "always"
+    "source.format.oxc": "always",
+    "source.fixAll.oxc": "always",
+    "source.fixAllDangerous.oxc": "always"
   },
   "typescript.referencesCodeLens.enabled": true,
   "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
@@ -18,17 +25,40 @@
   "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  // Cursor rules (.mdc) — treat as markdown; open in text editor so oxfmt runs on save.
+  "files.associations": { "*.mdc": "markdown" },
+  "workbench.editorAssociations": { "*.mdc": "default" },
   "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
-  // Use TS version from node_modules
-  "typescript.tsdk": "app/node_modules/typescript/lib",
+  "js/ts.experimental.useTsgo": true,
+  "js/ts.tsdk.path": "app/node_modules/typescript",
   // LUA VS Code Plugin https://marketplace.visualstudio.com/items/?itemName=sumneko.lua
   // - Docs general: https://luals.github.io/wiki/
   // - Docs on the config options https://luals.github.io/wiki/configuration/
+  // Keep these in sync with `processing/.luarc.typecheck.json`:
+  // - `Lua.runtime.version` <-> `runtime.version`
+  // - `Lua.diagnostics.globals` <-> `diagnostics.globals`
+  // - `Lua.diagnostics.disable` <-> `diagnostics.disable`
   "Lua.runtime.version": "Lua 5.3",
   "Lua.diagnostics.globals": ["osm2pgsql", "describe", "it"],
   "Lua.diagnostics.disable": ["lowercase-global", "duplicate-set-field"],
   // FYI: The addons feature https://luals.github.io/wiki/addons/ does not work for us.
   "Lua.addonManager.enable": false,
+  // Monorepo: Lua only lives in processing/ — ignore the rest so LuaLS does not scan 100k+ files.
+  // https://luals.github.io/wiki/faq#why-is-the-server-scanning-the-wrong-folder
+  "Lua.workspace.useGitIgnore": true,
+  "Lua.workspace.ignoreDir": [
+    ".vscode",
+    "app/**",
+    "docs/**",
+    ".git/**",
+    ".cursor/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/.turbo/**",
+    "**/.cache/**",
+    "**/coverage/**"
+  ],
   // https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc
   "[sql]": { "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc" },
   "SQL-Formatter-VSCode.dialect": "postgresql", // for ReneSaarsoo.sql-formatter-vsc

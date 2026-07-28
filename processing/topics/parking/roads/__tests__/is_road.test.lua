@@ -1,11 +1,10 @@
-describe("`is_road`", function()
-  require('init')
-  require('Log')
-  local is_road = require('is_road')
+describe('`is_road`', function()
+  local log = require('topics.helper.log')
+  local is_road = require('topics.parking.roads.helper.is_road')
 
   it('ignores non highway', function()
     local tags = {
-      ["foo"] = 'bar',
+      ['foo'] = 'bar',
     }
     local result = is_road(tags)
     assert.are.equal(result, false)
@@ -13,7 +12,7 @@ describe("`is_road`", function()
 
   it('works for highways', function()
     local tags = {
-      ["highway"] = 'residential',
+      ['highway'] = 'residential',
     }
     local result = is_road(tags)
     assert.are.equal(result, true)
@@ -21,7 +20,7 @@ describe("`is_road`", function()
 
   it('ignores service highways', function()
     local tags = {
-      ["highway"] = 'service',
+      ['highway'] = 'service',
     }
     local result = is_road(tags)
     assert.are.equal(result, false)
@@ -29,8 +28,8 @@ describe("`is_road`", function()
 
   it('works for construction highways', function()
     local tags = {
-      ["highway"] = 'construction',
-      ["construction"] = 'residential',
+      ['highway'] = 'construction',
+      ['construction'] = 'residential',
     }
     local result = is_road(tags)
     assert.are.equal(result, true)
@@ -38,15 +37,15 @@ describe("`is_road`", function()
 
   it('ignores service construction highways', function()
     local tags = {
-      ["highway"] = 'construction',
-      ["construction"] = 'service',
+      ['highway'] = 'construction',
+      ['construction'] = 'service',
     }
     local result = is_road(tags)
     assert.are.equal(result, false)
   end)
 
   it('includes motorway_link (cutouts and 5m intersection corners; has_parking is false)', function()
-    local tags = { ["highway"] = 'motorway_link' }
+    local tags = { ['highway'] = 'motorway_link' }
     local result = is_road(tags)
     assert.are.equal(result, true)
   end)

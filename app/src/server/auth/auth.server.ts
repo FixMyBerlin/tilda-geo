@@ -1,13 +1,9 @@
 import type { BetterAuthOptions } from 'better-auth'
-/**
- * tanstackStartCookies is intentionally NOT used - it pulls @tanstack/react-start/server
- * into the bundle, causing Vite to leak transformStreamWithRouter into the client build.
- * We set cookies manually in api/auth/$ via forwardAuthAndApplyCookies (auth-route-handler.server.ts).
- */
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { customSession } from 'better-auth/plugins'
 import { genericOAuth } from 'better-auth/plugins/generic-oauth'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { getOsmApiUrl, getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { osmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { UserRoleEnum } from '@/prisma/generated/client'
@@ -65,9 +61,9 @@ const options = {
       config: [
         {
           providerId: 'osm',
-          // biome-ignore lint/style/noNonNullAssertion: Guarded by nitro plugin
+          // oxlint-disable-next-line typescript/no-non-null-assertion -- Guarded by nitro plugin
           clientId: process.env.OSM_CLIENT_ID!,
-          // biome-ignore lint/style/noNonNullAssertion: Guarded by nitro plugin
+          // oxlint-disable-next-line typescript/no-non-null-assertion -- Guarded by nitro plugin
           clientSecret: process.env.OSM_CLIENT_SECRET!,
           // OSM discovery endpoint occasionally responds with 429 in local/dev.
           // Set explicit endpoints so OAuth sign-in does not depend on live discovery.
@@ -238,7 +234,5 @@ const options = {
 
 export const auth = betterAuth({
   ...options,
-  plugins: [...(options.plugins ?? []), customSessionWithRole(options)],
+  plugins: [...(options.plugins ?? []), customSessionWithRole(options), tanstackStartCookies()],
 })
-
-export type Session = typeof auth.$Infer.Session

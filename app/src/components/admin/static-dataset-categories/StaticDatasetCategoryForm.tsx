@@ -17,6 +17,7 @@ import type {
   StaticDatasetCategoryEditFormValues,
 } from '@/server/static-dataset-categories/staticDatasetCategoryFormSchema'
 import type { FormState } from '@/server/utils/validation'
+import { buildStaticDatasetCategoriesListSearch } from './staticDatasetCategoriesListSearch'
 import {
   StaticDatasetCategorySiblingsPanel,
   type StaticDatasetSiblingRow,
@@ -60,11 +61,12 @@ function mergedCategoryKey(groupKey: string, categoryKey: string) {
   return `${g}/${c}`
 }
 
-function mapFormStateToSubmitResult(result: FormState | undefined) {
+function mapFormStateToSubmitResult(result: FormState | undefined, savedGroupKey?: string) {
   if (result?.success) {
     return {
       success: true,
       redirect: '/admin/static-dataset-categories',
+      search: buildStaticDatasetCategoriesListSearch(savedGroupKey),
     } satisfies SubmitResult<CategoryFormFieldValues>
   }
   if (result && !result.success) {
@@ -82,20 +84,23 @@ type CategoryFormLayoutProps =
       form: FormApi<CategoryFormFieldValues>
       variant: 'create'
       navigate: ReturnType<typeof useNavigate>
+      listGroupKey?: string
     }
   | {
       form: FormApi<CategoryFormFieldValues>
       variant: 'edit'
       navigate: ReturnType<typeof useNavigate>
+      listGroupKey?: string
       relatedCategories: StaticDatasetSiblingRow[]
       onDelete: () => void
       isDeleting: boolean
     }
 
 function CategoryFormLayout(props: CategoryFormLayoutProps) {
-  const { form, variant, navigate } = props
+  const { form, variant, navigate, listGroupKey } = props
   const isEdit = variant === 'edit'
   const isDeleting = isEdit ? props.isDeleting : false
+  const cancelListSearch = buildStaticDatasetCategoriesListSearch(listGroupKey)
 
   const mainColumn = (
     <form.Subscribe selector={(s) => s.isSubmitting}>
@@ -192,7 +197,12 @@ function CategoryFormLayout(props: CategoryFormLayoutProps) {
                     type="button"
                     disabled={isSubmitting || isDeleting}
                     className={buttonStylesSecondary}
-                    onClick={() => navigate({ to: '/admin/static-dataset-categories' })}
+                    onClick={() =>
+                      navigate({
+                        to: '/admin/static-dataset-categories',
+                        search: cancelListSearch,
+                      })
+                    }
                   >
                     Abbrechen
                   </button>
@@ -210,7 +220,12 @@ function CategoryFormLayout(props: CategoryFormLayoutProps) {
                   type="button"
                   disabled={isSubmitting}
                   className={buttonStylesSecondary}
-                  onClick={() => navigate({ to: '/admin/static-dataset-categories' })}
+                  onClick={() =>
+                    navigate({
+                      to: '/admin/static-dataset-categories',
+                      search: cancelListSearch,
+                    })
+                  }
                 >
                   Abbrechen
                 </button>
@@ -246,6 +261,7 @@ type StaticDatasetCategoryFormProps =
       defaultValues: StaticDatasetCategoryCreateFormValues
       onSubmit: (values: StaticDatasetCategoryCreateFormValues) => Promise<FormState | undefined>
       variant: 'create'
+      listGroupKey?: string
     }
   | {
       schema: typeof staticDatasetCategoryEditFormSchema
@@ -255,17 +271,12 @@ type StaticDatasetCategoryFormProps =
       ) => Promise<StaticDatasetCategoryEditSubmitResult | undefined>
       variant: 'edit'
       categoryKey: string
+      listGroupKey?: string
       relatedCategories: StaticDatasetSiblingRow[]
       onDelete: () => void
       isDeleting: boolean
     }
 
-export function StaticDatasetCategoryForm(
-  props: Extract<StaticDatasetCategoryFormProps, { variant: 'create' }>,
-)
-export function StaticDatasetCategoryForm(
-  props: Extract<StaticDatasetCategoryFormProps, { variant: 'edit' }>,
-)
 export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps) {
   const navigate = useNavigate()
 
@@ -279,7 +290,7 @@ export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps)
         className="min-w-0 space-y-4"
         onSubmit={async (values) => {
           const result = await props.onSubmit(values)
-          return mapFormStateToSubmitResult(result)
+          return mapFormStateToSubmitResult(result, values.groupKey)
         }}
       >
         {(form) => (
@@ -287,6 +298,7 @@ export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps)
             form={form as unknown as FormApi<CategoryFormFieldValues>}
             variant="create"
             navigate={navigate}
+            listGroupKey={props.listGroupKey}
           />
         )}
       </Form>
@@ -310,13 +322,14 @@ export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps)
           navigate({
             to: '/admin/static-dataset-categories/$categoryKey',
             params: { categoryKey: result.navigateToCategoryKey },
+            search: buildStaticDatasetCategoriesListSearch(props.listGroupKey),
           })
           return {
             success: true,
             message: result.message || 'Gespeichert.',
           } satisfies SubmitResult<CategoryFormFieldValues>
         }
-        return mapFormStateToSubmitResult(result)
+        return mapFormStateToSubmitResult(result, values.groupKey)
       }}
     >
       {(form) => (
@@ -324,6 +337,7 @@ export function StaticDatasetCategoryForm(props: StaticDatasetCategoryFormProps)
           form={form as unknown as FormApi<CategoryFormFieldValues>}
           variant="edit"
           navigate={navigate}
+          listGroupKey={props.listGroupKey}
           relatedCategories={props.relatedCategories}
           onDelete={props.onDelete}
           isDeleting={props.isDeleting}

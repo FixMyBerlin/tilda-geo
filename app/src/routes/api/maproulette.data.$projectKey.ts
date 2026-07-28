@@ -10,7 +10,7 @@ import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { isProd } from '@/components/shared/utils/isEnv'
 import { todoIds } from '@/data/processingTypes/todoId.generated.const'
 import { buildTaskInstructions } from '@/data/radinfra-de/utils/buildTaskInstructions'
-import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
+import { getProcessingOsmDataFrom } from '@/server/api/util/getProcessingMeta.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 const maprouletteParamsSchema = z.strictObject({
@@ -44,7 +44,7 @@ export const Route = createFileRoute('/api/maproulette/data/$projectKey')({
         const { download } = parsedSearch.data
 
         try {
-          const { osm_data_from } = await getProcessingMeta()
+          const osm_data_from = await getProcessingOsmDataFrom()
 
           type QueryType = {
             osm_type: string

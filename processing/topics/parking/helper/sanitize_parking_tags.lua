@@ -1,6 +1,4 @@
-require('init')
-require('Set')
-local sanitize_for_logging = require('sanitize_for_logging')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
 
 local SANITIZE_PARKING_TAGS = {
   parking = function(value)
@@ -55,6 +53,16 @@ local SANITIZE_PARKING_TAGS = {
   fee = function (value)
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
+  service = function (value)
+    return sanitize_for_logging(value, {
+      'driveway', 'parking_aisle', 'yard', 'alley', 'spur', 'siding',
+      'emergency_access', 'crossover', 'drive-through',
+    })
+  end,
+  amenity_off_street_parking = function(value)
+    -- Only used to log unexpected amenity values.
+    return sanitize_for_logging(value, {}, { 'parking', 'parking_entrance' })
+  end,
   parking_off_street = function(tags)
     if tags.parking then
       local parking_value = tags.parking
@@ -65,7 +73,7 @@ local SANITIZE_PARKING_TAGS = {
     end
 
     if tags.building then
-      -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and filter-expressions.txt
+      -- CRITICAL: Keep building values in sync with off_street_parking_area_categories.lua and filter-expressions-nightly.txt
       local building_to_parking = {
         parking = 'multi-storey',
         garage = 'garage',

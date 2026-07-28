@@ -210,7 +210,7 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
   ],
 }
 
-export const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
+const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
   id: 'width',
   name: 'Breite RVA',
   layers: mapboxStyleLayers({

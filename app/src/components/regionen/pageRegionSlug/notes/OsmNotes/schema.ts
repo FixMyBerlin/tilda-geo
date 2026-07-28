@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const osmNotesCommentSchema = z.object({
+const osmNotesCommentSchema = z.object({
   date: z.string(),
   action: z.enum(['opened', 'commented', 'closed', 'reopened']),
   // Apparently can be blank, see https://github.com/openstreetmap/openstreetmap-website/blob/master/app/views/api/notes/_note.xml.builder#L30-L33
@@ -12,7 +12,7 @@ export const osmNotesCommentSchema = z.object({
   user_url: z.url().optional(), // `https://api.openstreetmap.org/user/${string}.json`
 })
 
-export const osmApiNoteSchema = z.object({
+const osmApiNoteSchema = z.object({
   id: z.number(),
   url: z.url(), // `https://api.openstreetmap.org/api/0.6/notes/${number}.json`
   status: z.enum(['open', 'closed']),
@@ -26,7 +26,7 @@ export const osmApiNoteSchema = z.object({
 
 export type OsmApiNotesThreadType = z.infer<typeof osmApiNoteSchema>
 
-export const osmNoteSchema = osmApiNoteSchema.extend({ tilda: z.boolean() })
+const osmNoteSchema = osmApiNoteSchema.extend({ tilda: z.boolean() })
 
 const sharedFeaturePointSchema = z.object({
   type: z.literal('Feature'),

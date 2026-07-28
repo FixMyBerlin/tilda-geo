@@ -1,7 +1,6 @@
-require('init')
-require("Log")
-require("Clone")
-require("unnest_parking_tags")
+local log = require('topics.helper.log')
+local CLONE = require('topics.helper.clones')
+local unnest_parking_tags = require('topics.parking.parkings.helper.unnest_parking_tags')
 
 ---@class TransformedObject
 ---@field side string
@@ -18,8 +17,8 @@ require("unnest_parking_tags")
 local function transform_parkings(object)
   local result_objects = { left = nil, right = nil}
 
-  for _, side in ipairs({ "left", "right" }) do
-    local side_object = MetaClone(object)
+  for _, side in ipairs({ 'left', 'right' }) do
+    local side_object = CLONE.meta_clone(object)
 
     -- We look for tags with the following hierarchy: `prefix:side` > `prefix:both` > `prefix`
     -- thus a more specific tag will always overwrite a more general one

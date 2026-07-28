@@ -1,14 +1,16 @@
 {
   "recommendations": [
-    "orta.vscode-jest",
     "prisma.prisma",
     // https://vitest.dev/guide/#ide-integrations
     "vitest.explorer",
     "sumneko.lua",
     "ReneSaarsoo.sql-formatter-vsc",
-    "biomejs.biome",
     "oxc.oxc-vscode",
+    "TypeScriptTeam.native-preview",
     "redhat.vscode-yaml"
   ],
-  "unwantedRecommendations": []
+  "unwantedRecommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ]
 }

@@ -1,11 +1,11 @@
 ---
 name: add-static-dataset
-description: Add a new static dataset to app/scripts/StaticDatasets/geojson. Infers config from prompt, asks for missing data, uses types to guide required fields.
+description: Add a new static dataset to tilda-static-data geojson and integrate it through tilda-geo. Requires a matching tilda-static-data worktree, relinked geojson symlink, inferred config, missing-data questions, and type-guided meta.ts.
 ---
 
 # Add Static Dataset
 
-Adds a new static dataset folder to `app/scripts/StaticDatasets/geojson`. The `/geojson` folder is a symlink.
+Adds a new static dataset folder to **`tilda-static-data`** and uses the `tilda-geo` upload pipeline to process it. In `tilda-geo`, `app/scripts/StaticDatasets/geojson` is a symlink and must point at the matching `tilda-static-data` worktree before editing data files.
 
 ## When to Use
 
@@ -25,13 +25,33 @@ Extract from user prompt or ask if missing:
 
 ## Process
 
+### 0. Prepare `tilda-static-data` worktree and symlink
+
+Static dataset files live in the sibling repo **`tilda-static-data`**, not in `tilda-geo`.
+
+- If the task only reads existing static data, the regular symlink to `../../../../tilda-static-data/geojson` is enough.
+- If the task adds or edits dataset files, create a matching `tilda-static-data` worktree and relink `geojson` there.
+
+For a branch named `my-branch`:
+
+```bash
+cd ../tilda-static-data
+git worktree add ../tilda-static-data--my-branch my-branch
+
+cd ../tilda-geo--my-branch/app
+rm -f scripts/StaticDatasets/geojson
+ln -s ../../../../tilda-static-data--my-branch/geojson scripts/StaticDatasets/geojson
+```
+
+Do not edit `app/scripts/StaticDatasets/geojson` when it points at the regular shared `../tilda-static-data` checkout.
+
 ### 1. Create Folder Structure
 
 ```bash
 app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/
 ```
 
-**Important**: `/geojson` is a symlink. Create folders in `app/scripts/StaticDatasets/geojson/` path.
+**Important**: `/geojson` is a symlink. Before creating folders, ensure it points at the matching `tilda-static-data--my-branch` worktree.
 
 Create directory if group folder doesn't exist. Ensure sub-folder name follows naming convention (see Required Information above).
 
@@ -44,6 +64,8 @@ Run these **in order** on committed data files. **Never** reproject, round, or p
 Move source file to:
 
 `app/scripts/StaticDatasets/geojson/<GROUP_FOLDER>/<SUB_FOLDER>/<FILENAME>.geojson`
+
+This path should resolve into `../tilda-static-data--my-branch/geojson/...`.
 
 #### 2.2 CRS → EPSG:4326
 
@@ -106,12 +128,12 @@ Only if transformation required (**not** for CRS or coordinate precision — Ste
 Example:
 
 ```typescript
-import { FeatureCollection } from "geojson";
+import { FeatureCollection } from 'geojson'
 
 export const transform = (data: FeatureCollection) => {
   // Use helper functions from _utils when possible
-  return data;
-};
+  return data
+}
 ```
 
 ### 4. Create meta.ts
@@ -167,24 +189,24 @@ export const transform = (data: FeatureCollection) => {
 **Example structure**:
 
 ```typescript
-import { MetaData } from "../../../types";
-import { defaultLayerStyles } from "../../_utils/defaultLayerStyles";
+import { MetaData } from '../../../types'
+import { defaultLayerStyles } from '../../_utils/defaultLayerStyles'
 
 export const data: MetaData = {
-  regions: ["infravelo"], // From user or infer from group folder
+  regions: ['infravelo'], // From user or infer from group folder
   public: true,
-  dataSourceType: "local",
+  dataSourceType: 'local',
   configs: [
     {
-      name: "Dataset Name",
-      category: "berlin/misc", // Infer from similar datasets
-      attributionHtml: "Source Name", // Ask if unclear
-      licence: "DL-DE/ZERO-2.0", // Infer from similar datasets
+      name: 'Dataset Name',
+      category: 'berlin/misc', // Infer from similar datasets
+      attributionHtml: 'Source Name', // Ask if unclear
+      licence: 'DL-DE/ZERO-2.0', // Infer from similar datasets
       inspector: { enabled: false }, // Default unless specified
       layers: defaultLayerStyles(), // Or custom layers
     },
   ],
-};
+}
 ```
 
 ### 5. Verify Command
@@ -226,6 +248,7 @@ Before completing:
 
 ## References
 
+- User-facing request template (DE, GitHub issue style): [ANFRAGE-STATISCHER-DATENSATZ.md](./ANFRAGE-STATISCHER-DATENSATZ.md)
 - Types: `app/scripts/StaticDatasets/types.ts`
 - Examples: `app/scripts/StaticDatasets/geojson/region-berlin/*/meta.ts`
 - Utils: `app/scripts/StaticDatasets/geojson/_utils/`

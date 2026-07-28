@@ -5,8 +5,6 @@ import { bikelanesDefaultStyle, bikelanesDetailsStyle } from './subcat_bikelanes
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
 // const sourceLayer = 'bikelanes'
-export type SubcatRainfraBikelanesId = typeof subcatId
-export type SubcatRainfraBikelanesStyleIds = 'default' | 'details'
 
 export const subcat_radinfra_bikelanes: FileMapDataSubcategory = {
   id: subcatId,

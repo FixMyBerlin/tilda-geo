@@ -13,7 +13,7 @@ vi.mock('@tanstack/react-router', () => ({
   }),
 }))
 
-vi.mock('@/components/shared/layouts/Header/HeaderRegionen/HeaderRegionen', () => ({
+vi.mock('@/components/layouts/Header/HeaderRegionen/HeaderRegionen', () => ({
   HeaderRegionen: () => <header>HeaderRegionen</header>,
 }))
 

@@ -1,3 +1,9 @@
+# Agent files
+## Change this, if you need specific folders inside
+## Skills should be not commited, but added through npx skills
+.claude/*
+!.claude/settings.json
+
 # Editor
 .vscode-test
 .idea
@@ -6,6 +12,7 @@
 *.pbf
 *.log
 .env
+.env.local
 .env.deploy.generated
 *.DS_Store
 

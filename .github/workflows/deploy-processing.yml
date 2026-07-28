@@ -34,10 +34,10 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
 
       - name: 'AWS: Configure credentials'
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v6.2.3
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: eu-central-1
@@ -47,10 +47,10 @@ jobs:
           aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REGISTRY }}
 
       - name: Setup buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and push processing image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./processing.Dockerfile
@@ -64,6 +64,8 @@ jobs:
           tags: |
             ${{ vars.ECR_REGISTRY }}/tilda/processing:${{ github.sha }}
             ${{ vars.ECR_REGISTRY }}/tilda/processing:${{ inputs.ENVIRONMENT }}-latest
+          build-args: |
+            GIT_SHA=${{ github.sha }}
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
@@ -76,7 +78,7 @@ jobs:
       contents: read
     steps:
       - name: 'AWS: Configure credentials'
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v6.2.3
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: eu-central-1
@@ -108,9 +110,7 @@ jobs:
             echo "Pulling latest 'processing' image"
             docker compose pull processing
             echo "Restarting 'processing' container"
-            export PROCESSING_DIFFING_MODE="${{ vars.PROCESSING_DIFFING_MODE }}"
-            docker compose up processing -d
-            unset PROCESSING_DIFFING_MODE
+            docker compose up -d processing
             echo "Cleanup docker (containers and images) that are older than 72h"
             docker container prune -f --filter "until=72h"
             docker image prune -fa --filter "until=72h"

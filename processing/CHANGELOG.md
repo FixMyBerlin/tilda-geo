@@ -1,6 +1,45 @@
 # Changelog of schema changes
 
-This is an manual and incomplete list of change to the data structure.
+Manual and incomplete list of changes to processing output. Attribute documentation for all datasets lives in `topic-docs/` YAML (built into in-app docs via `topic-docs-build`); this file tracks schema and value-contract changes over time.
+
+## 2026-06
+
+### All tables
+
+- Move attribute documentation into `topic-docs/` YAML for all datasets. Parking tables already used this system; atlas topics (`barrierAreas`, `barrierLines`, `roads`, `roadsPathClasses`, `bikelanes`, `bikelanesPresence`, `bikeSuitability`, `bikeroutes`, `boundaries`, `landuse`, `places`, `poiClassification`, `publicTransport`, `bicycleParking_points`, `trafficSigns`, `todos_lines`) and additional parking tables (`parkings_quantized`, `off_street_parking_quantized`) are now documented the same way.
+- Documented attributes, allowed values, and cross-table refs are validated by `topic-docs-build` and `topic-docs-coverage-check`.
+- Add `minzoom` column to all output tables. Values are derived from map styles and topic-specific generalization settings (replacing hard-coded or style-only zoom logic where it existed before).
+- Refactor all processing topics to a unified data contract (barrier pattern): geometry modules own filters and table definitions; `result_tags` builders apply explicit sanitizers; unknown values are logged via `separate_tags` and not persisted.
+- Reserve `osm_*` keys for documented raw passthrough only. Remove duplicate `osm_*` copies of fields that are already exported as sanitized semantic keys.
+- Shared sanitizers in `topics/helper/sanitize_tags.lua` enforce predictable value ranges (for example `access=yes` → `public`, string fields stripped of control characters).
+
+### `poiClassification`
+
+- Unknown `shop`, `amenity`, `tourism`, or `leisure` values now map to `*-fallback` type suffixes (for example `shop-fallback`) instead of passing through raw OSM values.
+- Category resolution uses alias mapping (for example `shop=beauty` → category `Einkauf`, `shop=cafe` → `Freizeit`).
+- Import filtering for amenity/tourism/leisure values is stricter and aligned with the documented allowlists.
+
+### `barrierAreas`, `barrierLines`
+
+- Remove `circumference` from output tags. The value is still computed internally to filter elongated water areas but is no longer exported.
+- Exclude ways with `attraction=amusement_ride` from barrier processing.
+
+### `bicycleParking_points`
+
+- Remove bulk `osm_*` passthrough copies of sanitized attributes. Keep `osm_capacity` and `osm_capacity:cargo_bike` for raw capacity strings only.
+- Export sanitized semantic fields explicitly: `lit`, `position`, `indoor`, `maxstay`, `surface`, `surveillance`, `operator_type`.
+
+### `landuse`
+
+- Sanitize `access` through the shared access allowlist (`access=yes` → `public`, and so on).
+
+### `places`
+
+- Sanitize free-text fields (`name`, `website`, `wikidata`, `wikipedia`, `capital`, `population:date`) through `safe_string`.
+
+### `trafficSigns`
+
+- Apply explicit sanitizers for `traffic_sign`, direction fields, and documented `osm_traffic_sign:*` / `osm_direction` passthrough keys.
 
 ## 2026-01-14
 
@@ -52,7 +91,7 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `bikelanes`
 
-- For `category=crossing`, use the `surface` from the parent highway if none is given and data is derived from the centerline (tagged as `cyclway:SIDE=crossing`)
+- For `category=crossing`, use the `surface` from the parent highway if none is given and data is derived from the centerline (tagged as `cycleway:SIDE=crossing`)
 
 ## 2025-10-09
 
@@ -62,7 +101,7 @@ This is an manual and incomplete list of change to the data structure.
 
 ### `bikelanes`
 
-- Include ways tagged with `highway=path + foot=no + bicycle=designated`. They become `category=needsClarification` and havea todo campaign on radinfra.de to resolve the unexpected tagging. Usually those can be retagged as `highway=cycleway`.
+- Include ways tagged with `highway=path + foot=no + bicycle=designated`. They become `category=needsClarification` and have a todo campaign on radinfra.de to resolve the unexpected tagging. Usually those can be retagged as `highway=cycleway`.
 
 ### `roads`, `roadsPathClasses`
 
@@ -74,8 +113,8 @@ This is an manual and incomplete list of change to the data structure.
 ### `bikelanes`
 
 - Include ways on `highway=track` when also bike tagging present; those get a TILDA `description` notice when shared with other traffic modes.
-- Use the `width:lanes`,`surface:colour:lanes`, `surface:lanes`, `source:width:lanes`, `smoothness:lanes` data for `cyclewayOnHighwayBetweenLanes`.
-- If no `cyclway:right:width` is given for `cyclewayOnHighway*`, look at the last value of `width:lanes`.
+- Use the `width:lanes`, `surface:colour:lanes`, `surface:lanes`, `source:width:lanes`, `smoothness:lanes` data for `cyclewayOnHighwayBetweenLanes`.
+- If no `cycleway:right:width` is given for `cyclewayOnHighway*`, look at the last value of `width:lanes`.
 
 ## 2025-09-24
 
@@ -93,7 +132,7 @@ This is an manual and incomplete list of change to the data structure.
 - Include ways on `highway=service` when also bike tagging present; those get a TILDA `description` notice when shared with other traffic modes.
 - Categorize bicycle roads with "Kfz frei" as `bicycleRoad_vehicleDestination`
 
-### `roads`, `roadsPathClasses`,
+### `roads`, `roadsPathClasses`
 
 - Add attributes `operator_type`, `covered`
 - Include ways that are privately operated (still excluding indoor, informal)
@@ -122,7 +161,7 @@ This is an manual and incomplete list of change to the data structure.
 
 - Introduce `mapillary`, `mapillary_forward`, `mapillary_backward`, `mapillary_traffic_sign`
 
-  For `bikelanes`mapped on the centerlines thore are the`cycleway:left|rigth:\*` tags with a fallback to the centerline tags.
+  For `bikelanes` mapped on the centerlines those are the `cycleway:left|right:*` tags with a fallback to the centerline tags.
 
 ## 2025-07~02
 

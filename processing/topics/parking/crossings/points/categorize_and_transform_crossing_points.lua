@@ -1,8 +1,8 @@
-require('init')
-require('Clone')
-require('Log')
-require('transform_point_direction_tags')
-local crossing_point_categories = require('crossing_point_categories')
+local CLONE = require('topics.helper.clones')
+local log = require('topics.helper.log')
+local merge_table = require('topics.helper.merge_table')
+local transform_point_direction_tags = require('topics.parking.crossings.points.transform_point_direction_tags')
+local crossing_point_categories = require('topics.parking.crossings.points.crossing_point_categories')
 
 -- Categorize the object and transforms it if needed. Picks the best result for self, left, right.
 -- The best result is the one with the largest buffer.
@@ -24,7 +24,11 @@ local crossing_point_categories = require('crossing_point_categories')
 ---@field right BestCrossingResult
 --
 ---@return table<string, BestCrossingResult>
+---@return table<string, string> direction_replace Original `direction=*` when invalid (for `parking_errors`)
 local function categorize_and_transform_crossing_points(object)
+  ---@type table<string, string>
+  local direction_replaced = {}
+
   ---@type table<string, number>
   local max_buffer = { self = -1, left = -1, right = -1 }
 
@@ -51,7 +55,7 @@ local function categorize_and_transform_crossing_points(object)
               max_buffer[side] = buffer
               best_result[side].category = category
 
-              local side_object = MetaClone(object)
+              local side_object = CLONE.meta_clone(object)
               side_object.tags[category.side_key] = side_object.tags[both_key] or side_object.tags[side_key]
               side_object.tags[other_side_key] = nil
               side_object.tags[side_key] = nil
@@ -73,7 +77,10 @@ local function categorize_and_transform_crossing_points(object)
         -- CASE: Handle `direction_key` (`foo=bar + direction=forward`)
         -- Handled by the `side_value` code after we modify the tags to follow that schema
         if(category.side_schema == 'direction_key') then
-          transform_point_direction_tags(object.tags, category.side_key)
+          local dir_rep = transform_point_direction_tags(object.tags, category.side_key)
+          if next(dir_rep) then
+            merge_table(direction_replaced, dir_rep)
+          end
         end
 
         -- CASE: WITH side_key
@@ -85,16 +92,16 @@ local function categorize_and_transform_crossing_points(object)
           end
 
           for _, side in ipairs(side_set) do
-            -- Log(category, '333')
+            -- log(category, '333')
             local buffer = category:get_buffer_radius(object.tags)
-            -- Log(buffer, '333aaa')
-            -- Log(side, '333bbb')
-            -- Log(max_buffer[side], '333ccc')
+            -- log(buffer, '333aaa')
+            -- log(side, '333bbb')
+            -- log(max_buffer[side], '333ccc')
             if buffer > max_buffer[side] then
               max_buffer[side] = buffer
               best_result[side].category = category
 
-              local side_object = MetaClone(object)
+              local side_object = CLONE.meta_clone(object)
               side_object.tags[category.side_key] = side -- overwrite 'both' with left/right
               side_object.tags.side = side
               best_result[side].object = side_object
@@ -111,7 +118,7 @@ local function categorize_and_transform_crossing_points(object)
               max_buffer[side] = buffer
               best_result[side].category = category
 
-              local side_object = MetaClone(object)
+              local side_object = CLONE.meta_clone(object)
               side_object.tags.side = side
               best_result[side].object = side_object
             end
@@ -121,7 +128,7 @@ local function categorize_and_transform_crossing_points(object)
     end
   end
 
-  return best_result
+  return best_result, direction_replaced
 end
 
 return categorize_and_transform_crossing_points

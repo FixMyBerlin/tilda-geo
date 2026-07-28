@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parkbeschränkungen — Masterportal Style Preview</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.4.0/ol.css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+      }
+      #map {
+        width: 100vw;
+        height: 100vh;
+      }
+      .panel {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 12px 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        max-width: 320px;
+        font-size: 13px;
+      }
+      .panel h1 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      .panel label {
+        display: block;
+        margin: 4px 0;
+      }
+      .panel p {
+        margin: 8px 0 0;
+        color: #555;
+        line-height: 1.4;
+      }
+      #legend-panel {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 8px;
+        padding: 12px 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        max-width: 300px;
+        max-height: calc(100vh - 24px);
+        overflow-y: auto;
+        font-size: 13px;
+      }
+      #legend-panel h1 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      #legend-panel h2 {
+        margin: 12px 0 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      #legend-panel h2:first-of-type {
+        margin-top: 0;
+      }
+      .legend-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .legend-list li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+        line-height: 1.3;
+      }
+      .legend-swatch-line {
+        display: block;
+        width: 24px;
+        min-width: 24px;
+        border-radius: 1px;
+      }
+      .legend-swatch-polygon {
+        display: block;
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 2px;
+      }
+      #error {
+        display: none;
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        z-index: 2;
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/ol@10.4.0/dist/ol.js"></script>
+    <script src="./masterportalToOlStyle.js"></script>
+    <script src="./legendPanel.js"></script>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Parkbeschränkungen Preview</h1>
+      <label><input type="checkbox" id="toggle-street-line" checked /> Straßenraum Linien</label>
+      <label
+        ><input type="checkbox" id="toggle-street-pattern" checked /> Straßenraum Muster
+        (parallel)</label
+      >
+      <label
+        ><input type="checkbox" id="toggle-street-shadow" checked /> Separat erfasste Flächen</label
+      >
+      <label
+        ><input type="checkbox" id="toggle-street-labels" checked /> Straßenraum Kapazität</label
+      >
+      <label><input type="checkbox" id="toggle-off-area" checked /> Abseits Flächen</label>
+      <label><input type="checkbox" id="toggle-off-points" checked /> Abseits Punkte</label>
+      <label><input type="checkbox" id="toggle-off-labels" checked /> Abseits Kapazität</label>
+      <p>
+        Start: Berlin 52.5445 / 13.4438, Zoom 17<br />Styles: <code>/output/masterportal/</code>
+      </p>
+    </div>
+    <div id="legend-panel" aria-label="Legende"></div>
+    <div id="error"></div>
+    <div id="map"></div>
+
+    <script>
+      const showError = (message) => {
+        const el = document.getElementById('error')
+        el.textContent = message
+        el.style.display = 'block'
+      }
+
+      const init = async () => {
+        try {
+          const bundleRes = await fetch('/output/masterportal/parkbeschraenkungen.json')
+          if (!bundleRes.ok) {
+            throw new Error('Styles nicht gefunden — bitte zuerst convert.ts ausführen.')
+          }
+          const bundle = await bundleRes.json()
+          const manifestRes = await fetch('/output/tilda/manifest.json')
+          if (!manifestRes.ok) throw new Error('manifest.json nicht gefunden.')
+          const manifest = await manifestRes.json()
+
+          const legendRes = await fetch('/output/masterportal/parkbeschraenkungen-legend.json')
+          if (legendRes.ok) {
+            const legendStyles = await legendRes.json()
+            window.renderLegendPanel(legendStyles)
+          }
+
+          const styleById = Object.fromEntries(bundle.map((s) => [s.styleId, s.rules]))
+
+          const createLayer = (entry) => {
+            const rules = styleById[entry.styleId]
+            return new ol.layer.VectorTile({
+              source: new ol.source.VectorTile({
+                format: new ol.format.MVT(),
+                url: entry.tileUrl,
+                maxZoom: 17,
+              }),
+              style: window.createStyleFunction(rules, entry.geometryType),
+              visible: true,
+              properties: { styleId: entry.styleId, manifestEntry: entry },
+            })
+          }
+
+          const layers = manifest.layers.map(createLayer)
+
+          new ol.Map({
+            target: 'map',
+            layers: [new ol.layer.Tile({ source: new ol.source.OSM() }), ...layers],
+            view: new ol.View({
+              center: ol.proj.fromLonLat([13.4438, 52.5445]),
+              zoom: 17,
+            }),
+          })
+
+          const toggleMap = {
+            'toggle-street-line': 'tilda_parkings_parkbeschraenkungen_line',
+            'toggle-street-pattern': 'tilda_parkings_parkbeschraenkungen_pattern_parallel',
+            'toggle-street-shadow': 'tilda_parkings_separate_shadow',
+            'toggle-street-labels': 'tilda_parkings_labels',
+            'toggle-off-area': 'tilda_off_street_parkbeschraenkungen_area',
+            'toggle-off-points': 'tilda_off_street_points',
+            'toggle-off-labels': 'tilda_off_street_labels',
+          }
+
+          for (const [checkboxId, styleId] of Object.entries(toggleMap)) {
+            const checkbox = document.getElementById(checkboxId)
+            const layer = layers.find((l) => l.get('manifestEntry')?.styleId === styleId)
+            checkbox.addEventListener('change', () => {
+              layer.setVisible(checkbox.checked)
+            })
+          }
+        } catch (error) {
+          showError(error instanceof Error ? error.message : String(error))
+          console.error(error)
+        }
+      }
+
+      init()
+    </script>
+  </body>
+</html>

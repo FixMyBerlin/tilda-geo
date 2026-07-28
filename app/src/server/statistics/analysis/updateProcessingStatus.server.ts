@@ -1,30 +1,19 @@
 import { isDev } from '@/components/shared/utils/isEnv'
 import { geoDataClient } from '@/server/prisma-client.server'
 
+type MetaAsyncColumn = 'qa_update_started_at' | 'qa_update_completed_at'
+
 /**
- * Updates the processing meta table with a timestamp for an async operation.
- * Uses guard to ensure we only update recent entries.
- * Checks if both async operations are complete and updates status to `processed` if so.
+ * Updates the processing meta table with a timestamp for the QA post-processing step.
+ * Uses a guard to ensure we only update recent entries. When QA completes, also sets
+ * status to `processed` (the single owner of that transition).
  */
-export async function updateProcessingMetaAsync(
-  columnName:
-    | 'qa_update_started_at'
-    | 'statistics_started_at'
-    | 'qa_update_completed_at'
-    | 'statistics_completed_at',
-) {
+export async function updateProcessingMetaAsync(columnName: MetaAsyncColumn) {
   try {
-    type Query = Array<{
-      id: number
-      qa_update_started_at: Date | null
-      qa_update_completed_at: Date | null
-      statistics_started_at: Date | null
-      statistics_completed_at: Date | null
-      processing_completed_at: Date
-    }>
-    const [updatedEntry] = await geoDataClient.$queryRawUnsafe<Query>(`
+    const completesRun = columnName === 'qa_update_completed_at'
+    const [updatedEntry] = await geoDataClient.$queryRawUnsafe<{ id: number }[]>(`
       UPDATE public.meta
-      SET ${columnName} = NOW()
+      SET ${columnName} = NOW()${completesRun ? ", status = 'processed'" : ''}
       WHERE id = (
         SELECT id
         FROM public.meta
@@ -33,48 +22,22 @@ export async function updateProcessingMetaAsync(
         ORDER BY id DESC
         LIMIT 1
       )
-      RETURNING id, qa_update_started_at, qa_update_completed_at, statistics_started_at, statistics_completed_at, processing_completed_at
+      RETURNING id
     `)
 
     if (!updatedEntry) {
       console.warn(
         `[Meta] Warning: No recent postprocessing entry found to update \`${columnName}\``,
       )
-    } else {
-      if (isDev) {
-        console.log(`[Meta] \`${columnName}\` recorded`)
-      }
+      return
+    }
 
-      // Check if both async operations are complete and update status inline
-      const bothCompleted =
-        updatedEntry.qa_update_completed_at !== null &&
-        updatedEntry.statistics_completed_at !== null
+    if (isDev) {
+      console.log(`[Meta] \`${columnName}\` recorded`)
+    }
 
-      // Also check timeout: if both started but not completed, and it's been more than 2 hours since main processing completed
-      const bothStarted =
-        updatedEntry.qa_update_started_at !== null && updatedEntry.statistics_started_at !== null
-
-      const timeoutReached =
-        bothStarted &&
-        !bothCompleted &&
-        new Date(updatedEntry.processing_completed_at).getTime() < Date.now() - 2 * 60 * 60 * 1000
-
-      if (bothCompleted || timeoutReached) {
-        await geoDataClient.$executeRaw`
-          UPDATE public.meta
-          SET status = 'processed'
-          WHERE id = ${updatedEntry.id}
-        `
-        if (timeoutReached) {
-          console.log(
-            `[Meta] Processing status updated to 'processed' for entry ${updatedEntry.id} (timeout - operations started but not completed)`,
-          )
-        } else {
-          console.log(
-            `[Meta] Processing status updated to 'processed' for entry ${updatedEntry.id}`,
-          )
-        }
-      }
+    if (completesRun) {
+      console.log(`[Meta] Processing status set to 'processed' for entry ${updatedEntry.id}`)
     }
   } catch (error) {
     console.error(`Error updating \`${columnName}\`:`, error)

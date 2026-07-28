@@ -10,7 +10,7 @@ import { beforeId } from './beforeId'
 
 export type AtlasStyleLayer = Extract<FileMapDataSubcategoryStyleLayer, { type: AtlasLayerType }>
 
-export const ATLAS_LAYER_TYPES = [
+const ATLAS_LAYER_TYPES = [
   'fill',
   'line',
   'circle',
@@ -50,15 +50,18 @@ export function buildAtlasLayerProps({
   const layerFilter: FilterSpecification | undefined = debugLayerStyles
     ? (['all'] as const)
     : layer.filter
+  const styleBeforeId = backgroundId === 'default' && layer.beforeId ? layer.beforeId : undefined
   const base = {
     id: layerId,
     source: sourceKey,
     'source-layer': layer['source-layer'],
-    beforeId: beforeId({
-      backgroundId,
-      subcategoryBeforeId,
-      layerType: layer.type,
-    }),
+    beforeId:
+      styleBeforeId ??
+      beforeId({
+        backgroundId,
+        subcategoryBeforeId,
+        layerType: layer.type,
+      }),
     ...(layerFilter ? { filter: layerFilter } : {}),
     ...(layer.maxzoom ? { maxzoom: layer.maxzoom } : {}),
     ...(layer.minzoom ? { minzoom: layer.minzoom } : {}),
@@ -66,7 +69,7 @@ export function buildAtlasLayerProps({
   const debugStyle = debugLayerStyles ? getDebugStyleForLayerType(layer.type) : undefined
   const layout = debugStyle
     ? { ...debugStyle.layout, ...visibility }
-    : { ...visibility, ...(layer.layout ?? {}) }
+    : { ...visibility, ...layer.layout }
   const paint = debugStyle ? debugStyle.paint : layer.paint
 
   switch (layer.type) {

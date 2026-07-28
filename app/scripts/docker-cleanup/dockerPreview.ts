@@ -1,11 +1,53 @@
-import { $ } from 'bun'
-
 const SIZE_UNITS: Record<string, number> = {
   B: 1,
   KB: 1e3,
   MB: 1e6,
   GB: 1e9,
   TB: 1e12,
+}
+
+const DOCKER_QUERY_TIMEOUT_MS = 15_000
+export const DOCKER_PRUNE_TIMEOUT_MS = 120_000
+
+export type DockerCmdResult = {
+  stdout: string
+  stderr: string
+  exitCode: number
+  timedOut: boolean
+}
+
+export async function dockerCmd(
+  args: string[],
+  options?: { timeoutMs?: number },
+): Promise<DockerCmdResult> {
+  const timeoutMs = options?.timeoutMs ?? DOCKER_QUERY_TIMEOUT_MS
+  try {
+    const proc = Bun.spawn({
+      cmd: ['docker', ...args],
+      stdout: 'pipe',
+      stderr: 'pipe',
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+      proc.exited,
+    ])
+    const timedOut = exitCode === 143 || exitCode === 137
+    return { stdout, stderr, exitCode, timedOut }
+  } catch (e) {
+    const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError')
+    return {
+      stdout: '',
+      stderr: timedOut
+        ? `Docker command timed out after ${timeoutMs / 1000}s (daemon may not be running).`
+        : e instanceof Error
+          ? e.message
+          : String(e),
+      exitCode: -1,
+      timedOut: !!timedOut,
+    }
+  }
 }
 
 const RECLAIMABLE_REGEX = /(\d+(?:\.\d+)?)\s*(B|KB|MB|GB|TB)(?:\s*\(\d+%\))?/g
@@ -36,7 +78,7 @@ export function formatBytesAsGB(bytes: number): string {
   return `${gb.toFixed(2)} GB`
 }
 
-export type DfRow = {
+type DfRow = {
   type: string
   reclaimableBytes: number
   reclaimableHuman: string
@@ -80,11 +122,14 @@ function parseDfOutput(stdout: string): DfRow[] {
 
 export async function getDockerDf(): Promise<DfSummary> {
   try {
-    const result = await $`docker system df`.quiet().nothrow()
+    const result = await dockerCmd(['system', 'df'])
+    if (result.timedOut) {
+      return { ok: false, error: 'Docker daemon not responding (timed out). Is Docker running?' }
+    }
     if (result.exitCode !== 0) {
       return { ok: false, error: 'Docker command failed or daemon not running.' }
     }
-    const stdout = result.stdout.toString()
+    const stdout = result.stdout
     const rows = parseDfOutput(stdout)
     const totalReclaimableBytes = rows.reduce((s, r) => s + r.reclaimableBytes, 0)
     return {
@@ -98,23 +143,18 @@ export async function getDockerDf(): Promise<DfSummary> {
   }
 }
 
-export function getReclaimableForTypes(summary: DfSummary, types: string[]): string {
+export function formatDfStatus(summary: DfSummary) {
   if (!summary.ok) return summary.error
-  const bytes = summary.rows
-    .filter((r) => types.some((t) => r.type.toLowerCase().includes(t.toLowerCase())))
-    .reduce((s, r) => s + r.reclaimableBytes, 0)
-  return formatBytes(bytes)
+  const lines = summary.rows.map((r) => `  ${r.type}: ${r.reclaimableHuman} reclaimable`)
+  lines.push(`  Total: ${summary.totalReclaimableHuman} reclaimable`)
+  return lines.join('\n')
 }
 
 async function dockerFormat(args: string[]): Promise<string[]> {
-  try {
-    const result = await $`docker ${args}`.quiet().nothrow()
-    if (result.exitCode !== 0) return []
-    const out = result.stdout.toString().trim()
-    return out ? out.split('\n').filter(Boolean) : []
-  } catch {
-    return []
-  }
+  const result = await dockerCmd(args)
+  if (result.timedOut || result.exitCode !== 0) return []
+  const out = result.stdout.trim()
+  return out ? out.split('\n').filter(Boolean) : []
 }
 
 export async function getStoppedContainerNames(): Promise<string[]> {
@@ -134,13 +174,23 @@ export async function getDanglingImageRefs(): Promise<string[]> {
   return dockerFormat(['images', '-f', 'dangling=true', '--format', '{{.ID}}'])
 }
 
-export async function getUnusedVolumeNames(): Promise<string[]> {
-  try {
-    const result = await $`docker volume ls -f dangling=true -q`.quiet().nothrow()
-    if (result.exitCode !== 0) return []
-    const out = result.stdout.toString().trim()
-    return out ? out.split('\n').filter(Boolean) : []
-  } catch {
-    return []
+export async function getDanglingImageSizeBytes() {
+  const result = await dockerCmd(['images', '-f', 'dangling=true', '--format', '{{.Size}}'])
+  if (result.timedOut || result.exitCode !== 0) return 0
+  let total = 0
+  for (const line of result.stdout.trim().split('\n').filter(Boolean)) {
+    total += parseSizeToBytes(line)
   }
+  return total
+}
+
+export async function getUnusedVolumeNames(): Promise<string[]> {
+  return dockerFormat(['volume', 'ls', '-f', 'dangling=true', '-q'])
+}
+
+export function truncatePreviewNames(names: string[], max = 15) {
+  if (names.length <= max) return names
+  const shown = names.slice(0, max)
+  shown.push(`…and ${names.length - max} more`)
+  return shown
 }

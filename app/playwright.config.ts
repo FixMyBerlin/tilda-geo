@@ -6,6 +6,9 @@ import dotenv from 'dotenv'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Load repo-level .env first so webServer (bun run dev) gets DATABASE_* etc.
 dotenv.config({ path: path.resolve(__dirname, '../.env') })
+// Worktree-isolated dev stacks put DEV_STACK_ID in repo-root .env.local. Load it so the test
+// process matches `bun run dev` stack context.
+dotenv.config({ path: path.resolve(__dirname, '../.env.local') })
 // Optional app-local env can override or extend defaults.
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 // Then .env.test can override for test-only vars.

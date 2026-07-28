@@ -2,60 +2,82 @@ import { z } from 'zod'
 
 const withMessageSchema = z.object({ message: z.string() })
 const withFormSchema = z.object({ form: z.string() })
-const recordSchema = z.record(z.string(), z.unknown())
+
+const primitiveFormErrorSchema = z.union([
+  z.null().transform(() => ''),
+  z.undefined().transform(() => ''),
+  z.union([z.string(), z.number(), z.boolean(), z.bigint()]).pipe(z.coerce.string()),
+])
+
+const isPlainFormErrorObject = (value: unknown): value is object =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const joinFormattedFormErrors = (items: unknown[], parse: (value: unknown) => string) =>
+  items
+    .map((item) => parse(item))
+    .filter(Boolean)
+    .join(', ')
+
+const dedupeAndJoinMessages = (messages: string[]) => {
+  const unique = [...new Set(messages.filter(Boolean))]
+  return unique.length > 0 ? unique.join(', ') : ''
+}
+
+const stringifyFormErrorFallback = (value: unknown) => {
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return ''
+  }
+}
+
+const nestedFormErrorRecordSchema = (parseNested: (value: unknown) => string) =>
+  z.record(z.string(), z.unknown()).transform((record, ctx) => {
+    const joined = dedupeAndJoinMessages(Object.values(record).map((item) => parseNested(item)))
+    return joined || stringifyFormErrorFallback(ctx.value)
+  })
+
+const knownFormErrorObjectSchema = (parseNested: (value: unknown) => string) =>
+  z.union([
+    withMessageSchema.transform((data) => data.message),
+    withFormSchema.transform((data) => data.form),
+    nestedFormErrorRecordSchema(parseNested),
+  ])
+
+const parseFormErrorObjectOnce = (
+  obj: object,
+  seen: WeakSet<object>,
+  parse: (value: unknown) => string,
+) => {
+  if (seen.has(obj)) return ''
+  seen.add(obj)
+  return knownFormErrorObjectSchema(parse).parse(obj)
+}
+
+const cycleSafeFormErrorObjectSchema = (seen: WeakSet<object>, parse: (value: unknown) => string) =>
+  z
+    .custom<object>(isPlainFormErrorObject)
+    .transform((obj) => parseFormErrorObjectOnce(obj, seen, parse))
+
+const formErrorArraySchema = (parse: (value: unknown) => string) =>
+  z.array(z.unknown()).transform((items) => joinFormattedFormErrors(items, parse))
+
+function createFormErrorParser(seen: WeakSet<object>) {
+  const formErrorSchema: z.ZodType<string> = z.lazy(() =>
+    z.union([
+      primitiveFormErrorSchema,
+      formErrorArraySchema((value) => formErrorSchema.parse(value)),
+      cycleSafeFormErrorObjectSchema(seen, (value) => formErrorSchema.parse(value)),
+    ]),
+  )
+
+  return formErrorSchema
+}
 
 /** Normalize form/field error to string (Standard Schema and adapters may return objects with .message). */
 export function formatFormError(err: unknown) {
-  const visit = (value: unknown, seen: WeakSet<object>) => {
-    if (value == null) return ''
-    if (typeof value === 'string') return value
-    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
-      return String(value)
-    }
-
-    if (Array.isArray(value)) {
-      return value
-        .map((item) => visit(item, seen))
-        .filter(Boolean)
-        .join(', ')
-    }
-
-    if (typeof value === 'object') {
-      if (seen.has(value)) return ''
-      seen.add(value)
-
-      const withMessage = withMessageSchema.safeParse(value)
-      if (withMessage.success) {
-        return withMessage.data.message
-      }
-
-      const withForm = withFormSchema.safeParse(value)
-      if (withForm.success) {
-        return withForm.data.form
-      }
-
-      const recordResult = recordSchema.safeParse(value)
-      if (!recordResult.success) return ''
-
-      const nested = Object.values(recordResult.data)
-        .map((item) => visit(item, seen))
-        .filter(Boolean)
-
-      if (nested.length > 0) {
-        return Array.from(new Set(nested)).join(', ')
-      }
-
-      try {
-        return JSON.stringify(value)
-      } catch {
-        return ''
-      }
-    }
-
-    return String(value)
-  }
-
-  return visit(err, new WeakSet())
+  const result = createFormErrorParser(new WeakSet()).safeParse(err)
+  return result.success ? result.data : String(err)
 }
 
 /** Deduplicate by formatted message — Zod/adapters may attach multiple issues with the same text; keys must stay unique in lists. */

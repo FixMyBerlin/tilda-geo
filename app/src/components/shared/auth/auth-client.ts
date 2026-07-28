@@ -17,7 +17,3 @@ export const authClient = createAuthClient({
     inferAdditionalFields<typeof auth>(),
   ],
 })
-
-// Export the inferred session type for use in components
-export type ClientSession = typeof authClient.$Infer.Session
-export type ClientSessionUser = ClientSession['user']

@@ -11,40 +11,6 @@ export type FormState =
   | { success: false; message: string; errors: Record<string, string[]> }
 
 /**
- * Converts FormData to a plain object with string values.
- * Useful for extracting form data before Zod validation.
- */
-export function formDataToObject(formData: FormData) {
-  const obj: Record<string, string> = {}
-  for (const [key, value] of formData.entries()) {
-    obj[key] = value.toString()
-  }
-  return obj
-}
-
-/**
- * Extracts form data from FormData and validates it with a Zod schema in one step.
- * Throws ZodError if validation fails.
- *
- * @example
- * ```ts
- * try {
- *   const parsed = extractAndValidateFormData(formData, MySchema)
- *   await db.model.create({ data: parsed })
- * } catch (error) {
- *   if (error instanceof z.ZodError) {
- *     return validationErrorState(error)
- *   }
- *   return errorState(error, 'Fehler beim Speichern')
- * }
- * ```
- */
-export function extractAndValidateFormData<T extends z.ZodTypeAny>(formData: FormData, schema: T) {
-  const rawData = formDataToObject(formData)
-  return schema.parse(rawData)
-}
-
-/**
  * Returns a FormState for validation errors.
  * Use when catching ZodError from form validation.
  */

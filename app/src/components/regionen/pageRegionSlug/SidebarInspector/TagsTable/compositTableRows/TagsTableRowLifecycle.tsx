@@ -46,7 +46,8 @@ export const TagsTableRowlifecycle = ({
   const lifecycleValue = properties.lifecycle
   if (!lifecycleValue) return null
 
-  const style = lifecycleStyle[lifecycleValue] || lifecycleStyle.fallback
+  const lifecycleKey = String(lifecycleValue) as keyof typeof lifecycleStyle
+  const style = lifecycleStyle[lifecycleKey] ?? lifecycleStyle.fallback
 
   return (
     <TagsTableRow sourceId={sourceId} tagKey={'lifecycle'} tagValue={undefined}>

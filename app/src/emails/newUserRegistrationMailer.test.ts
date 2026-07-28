@@ -27,7 +27,8 @@ describe('newUserRegistrationMailer', () => {
     expect(callArgs).toBeDefined()
     expect(callArgs?.Subject).toBe('Neue Benutzerregistrierung: Test User')
     expect(callArgs?.From?.Email).toBe('noreply@tilda-geo.de')
-    expect(callArgs?.To[0]?.Email).toBe('tilda@fixmycity.de')
+    const toRecipients = Array.isArray(callArgs?.To) ? callArgs.To : [callArgs?.To]
+    expect(toRecipients[0]?.Email).toBe('tilda@fixmycity.de')
     expect(callArgs?.introMarkdown).toContain('Test User')
     expect(callArgs?.introMarkdown).toContain('**OSM-Beschreibung**')
     expect(callArgs?.introMarkdown).toContain('> Test description')

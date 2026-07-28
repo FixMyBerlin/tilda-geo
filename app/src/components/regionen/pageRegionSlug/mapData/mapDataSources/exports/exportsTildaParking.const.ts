@@ -41,4 +41,20 @@ export const exportConfigssTildaParking: MapDataExportConfig[] = [
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',
   },
+  {
+    id: 'parkings_quantized',
+    title: 'Straßenparken – ein Punkt pro Stellplatz für Summierung',
+    desc: 'Quantisierte Stellplatzpunkte (capacity=1) für Straßenparken aus OpenStreetMap.',
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+  },
+  {
+    id: 'off_street_parking_quantized',
+    title: 'Parken abseits des Straßenraums (quantisierte Punkte)',
+    desc: 'Quantisierte Stellplatzpunkte für Parkraum abseits der Straße aus OpenStreetMap.',
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+  },
 ]

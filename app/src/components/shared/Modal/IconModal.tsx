@@ -4,7 +4,7 @@ import { ModalDialog } from './ModalDialog'
 
 type ModalDialogProps = {
   title: string
-  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit'
+  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs'
   buttonCloseName?: string
   open: boolean
   setOpen: (value: boolean) => void

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { RegionStatus } from '@/prisma/generated/browser'
 
-export const RegionSchema = z.object({
+const RegionSchema = z.object({
   slug: z.string(),
   promoted: z.boolean(),
   status: z.enum(RegionStatus),
@@ -20,40 +20,36 @@ export const DeleteRegionSchema = z.object({
   slug: z.string(),
 })
 
+const processingMetaBase = {
+  osm_data_from: z.date().nullable(),
+  processing_started_at: z.date(),
+  processing_completed_at: z.date().nullable(),
+  qa_update_started_at: z.date().nullable(),
+  qa_update_completed_at: z.date().nullable(),
+}
+
 export const ProcessingMetaDates = z.discriminatedUnion('status', [
-  // Processing state: status is 'processing'
   z.object({
     status: z.literal('processing'),
+    ...processingMetaBase,
     osm_data_from: z.null(),
-    processing_started_at: z.date(),
     processing_completed_at: z.null(),
     qa_update_started_at: z.null(),
     qa_update_completed_at: z.null(),
-    statistics_started_at: z.null(),
-    statistics_completed_at: z.null(),
   }),
-  // Postprocessing state: main processing done, async operations running
   z.object({
-    status: z.literal('postprocessing'), // set in processing/index; the dates are separate
+    status: z.literal('postprocessing'),
+    ...processingMetaBase,
     osm_data_from: z.date(),
-    processing_started_at: z.date(),
     processing_completed_at: z.date(),
-    // Can be any combination of dates during this status
-    qa_update_started_at: z.date().nullable(),
-    qa_update_completed_at: z.date().nullable(),
-    statistics_started_at: z.date().nullable(),
-    statistics_completed_at: z.date().nullable(),
   }),
-  // Completed state: status is 'processed'
   z.object({
     status: z.literal('processed'),
+    ...processingMetaBase,
     osm_data_from: z.date(),
-    processing_started_at: z.date(),
     processing_completed_at: z.date(),
     qa_update_started_at: z.date(),
-    qa_update_completed_at: z.date().nullable(), // May be null if operation failed
-    statistics_started_at: z.date(),
-    statistics_completed_at: z.date().nullable(), // May be null if operation failed
+    qa_update_completed_at: z.date().nullable(),
   }),
 ])
 export type ProcessingMetaDate = z.infer<typeof ProcessingMetaDates>

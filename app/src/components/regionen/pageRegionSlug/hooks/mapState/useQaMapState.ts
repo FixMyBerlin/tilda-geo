@@ -121,8 +121,10 @@ export const useQaMapState = () => {
 
     // Set feature states for all map features
     if (mapQaFeatures.length > 0) {
-      // Get all area IDs that should be visible with current filter
-      const visibleAreaIds = new Set(filteredQaData.map((item) => item.areaId))
+      const styleFilteredQaData = currentQaData
+        ? filterQaDataByStyle(currentQaData, qaParamData.style)
+        : []
+      const visibleAreaIds = new Set(styleFilteredQaData.map((item) => item.areaId))
 
       // Update all map features
       mapQaFeatures.forEach((feature) => {
@@ -142,7 +144,7 @@ export const useQaMapState = () => {
     }
 
     if (!isProd) console.timeEnd('[DEV][useQaMapState] setFeatureState')
-  }, [mainMap, shouldUpdateFeatureStates, currentQaData, filteredQaData])
+  }, [mainMap, shouldUpdateFeatureStates, currentQaData, qaParamData.style])
 
   // Initial loading effect - runs when QA data first loads or style changes
   useEffect(

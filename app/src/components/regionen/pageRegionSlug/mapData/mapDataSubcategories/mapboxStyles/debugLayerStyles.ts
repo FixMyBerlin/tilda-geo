@@ -79,7 +79,7 @@ const debugLayerHeatmap = {
 } satisfies DebugLayerBase<HeatmapLayerSpecification>
 
 /** Lookup paint and layout by layer type. Keys are LayerSpecification['type']; types without a debug style are undefined. */
-export const DEBUG_STYLE_BY_TYPE: Record<
+const DEBUG_STYLE_BY_TYPE: Record<
   LayerSpecification['type'],
   { paint: object; layout: object } | undefined
 > = {

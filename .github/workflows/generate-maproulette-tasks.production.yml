@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   generate-maproulette-tasks:
+    if: github.repository == 'FixMyBerlin/tilda-geo'
     runs-on: ubuntu-latest
     environment:
       name: production

@@ -2,7 +2,7 @@ import { HomeIcon } from '@heroicons/react/20/solid'
 import { useRouter } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
 
-export type TBreadcrumb = { href: string; name: string }
+type TBreadcrumb = { href: string; name: string }
 type Props = { pages: TBreadcrumb[] }
 
 const separator = (

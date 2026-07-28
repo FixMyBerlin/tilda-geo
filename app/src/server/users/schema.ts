@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { isOsmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 
-export const nullishString = z
+const nullishString = z
   .string()
   .transform((v) => (v === '' ? null : v))
   .nullish()
@@ -36,7 +36,7 @@ export const UpdateOsmDescription = z.object({
   osmDescription: z.string(),
 })
 
-export const AccessedRegionSchema = z.object({
+const AccessedRegionSchema = z.object({
   slug: z.string(),
   lastAccessedDay: z.number().transform((val) => new Date(val)), // UTC timestamp (milliseconds) -> Date object
 })

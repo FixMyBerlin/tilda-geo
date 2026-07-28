@@ -11,7 +11,7 @@ export const mapboxStyleGroupLayers_atlas_boundaries_names: MapboxStyleLayer[] =
     layout: {
       'text-field': [
         'concat',
-        ['to-string', ['get', 'name:prefix']],
+        ['to-string', ['get', 'name_prefix']],
         ' ',
         ['to-string', ['get', 'name']],
       ],
@@ -30,7 +30,7 @@ export const mapboxStyleGroupLayers_atlas_boundaries_names: MapboxStyleLayer[] =
     layout: {
       'text-field': [
         'concat',
-        ['to-string', ['get', 'name:prefix']],
+        ['to-string', ['get', 'name_prefix']],
         ' ',
         ['to-string', ['get', 'name']],
       ],

@@ -1,0 +1,37 @@
+title: Grenzen
+sourceIds:
+  - atlas_boundaries
+attributes:
+  - key: admin_level
+    format: number
+    label: Grenzen Level
+    values:
+      - value: '7'
+        label: Level 7 — Meistens Verwaltungsgemeinschaft, Amt
+      - value: '8'
+        label: Level 8 — Meistens (Kreisangehörige) Gemeinde / Stadt
+  - key: population
+    format: population_label
+    label: Bevölkerung
+  - key: population_date
+    label: Bevölkerungsstand
+    format: date
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: name_prefix
+    label: Namenspräfix
+    format: sanitized_strings
+  - key: wikidata
+    label: Wikidata
+    format: sanitized_strings
+  - key: wikipedia
+    label: Wikipedia
+    format: sanitized_strings
+  - key: regionalschluessel
+    label: Regionalschlüssel
+    format: sanitized_strings
+  - key: category_municipality
+    label: Gemeindekategorie
+  - key: category_district
+    label: Kreiskategorie

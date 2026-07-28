@@ -1,4 +1,15 @@
 # 5 days. @see https://chrispennington.dev/blog/stop-installing-packages-the-second-theyre-published
 [install]
 minimumReleaseAge = 432000
-minimumReleaseAgeExcludes = ["@types/bun", "typescript"]
+minimumReleaseAgeExcludes = [
+  "typescript",
+  "@typescript/typescript-*",
+  "@osm-traffic-signs/converter",
+]
+
+# Global virtual store — requires isolated linker. Reinstall after changing: rm -rf node_modules && bun install
+# Vite dev: server.fs.allow in vite.config.ts (packages realpath into ~/.bun/install/cache/links/).
+# Phantom deps in third-party packages: package.json trustedDependencies — see tech-stack bun-install.md
+# @see https://bun.com/docs/pm/global-store
+linker = "isolated"
+globalStore = true

@@ -11,11 +11,11 @@
 -- Provided: tilda_sidepath_csv(buffer_distance, buffer_size) -> (osm_id text, is_sidepath_estimation text)
 --
 -- Default parameters (override with -v when invoking the entry script):
---   buffer_distance  Distance between checkpoints along a path, in meters (default 100.0).
+--   buffer_distance  Distance between checkpoints along a path, in meters (default 190.0).
 --   buffer_size      Radius of each checkpoint for ST_DWithin to roads, in meters (default 22.0).
 -------------------------------------------
 
-\if :{?buffer_distance} \else \set buffer_distance 100.0 \endif
+\if :{?buffer_distance} \else \set buffer_distance 190.0 \endif
 \if :{?buffer_size} \else \set buffer_size 22.0 \endif
 
 BEGIN;

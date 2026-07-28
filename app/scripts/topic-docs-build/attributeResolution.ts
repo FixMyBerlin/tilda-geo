@@ -1,4 +1,9 @@
-import type { KeyDocEntry, TopicDocsYaml, ValueDocNode } from '../../src/data/topicDocs/schema'
+import type {
+  KeyDocEntry,
+  TopicDocAttributePurpose,
+  TopicDocsYaml,
+  ValueDocNode,
+} from '../../src/data/topicDocs/schema'
 import type { CompiledAttribute, CompiledValue } from './types'
 
 const resolveDescription = (value: string | undefined) => value
@@ -8,7 +13,6 @@ const compileValueNode = (node: ValueDocNode): CompiledValue => ({
   label: node.label,
   description: resolveDescription(node.description),
   chapterRefs: node.chapterRefs?.map((chapter) => chapter.chapterId),
-  children: node.children?.map((child) => compileValueNode(child)),
 })
 
 const mergeValueNodes = (
@@ -120,6 +124,73 @@ const followRefToTerminalEntry = (input: {
   return { tableName: targetTableName, entry: targetAttribute }
 }
 
+const resolveDescriptionAlongRefChain = (input: {
+  pointer: string
+  docsByTableName: Map<string, TopicDocsYaml>
+  visiting: Set<string>
+  errorContext: string
+}) => {
+  const { targetTableName, targetAttributeKey } = parseTableAttributePointer(
+    input.pointer,
+    'ref',
+    input.errorContext,
+  )
+  const visitToken = `${targetTableName}.${targetAttributeKey}`
+  if (input.visiting.has(visitToken)) {
+    throw new Error(`Circular attribute ref at "${visitToken}" (${input.errorContext})`)
+  }
+  input.visiting.add(visitToken)
+
+  try {
+    const targetDoc = input.docsByTableName.get(targetTableName)
+    if (!targetDoc) {
+      throw new Error(
+        `Unknown table "${targetTableName}" in ref "${input.pointer}" (${input.errorContext})`,
+      )
+    }
+
+    const targetAttribute = targetDoc.attributes.find(
+      (attribute) => attribute.key === targetAttributeKey,
+    )
+    if (!targetAttribute) {
+      throw new Error(
+        `Unknown attribute "${targetAttributeKey}" in ref "${input.pointer}" (${input.errorContext})`,
+      )
+    }
+
+    if (targetAttribute.description) {
+      return targetAttribute.description
+    }
+
+    if (targetAttribute.ref) {
+      return resolveDescriptionAlongRefChain({
+        pointer: targetAttribute.ref,
+        docsByTableName: input.docsByTableName,
+        visiting: input.visiting,
+        errorContext: input.errorContext,
+      })
+    }
+
+    return undefined
+  } finally {
+    input.visiting.delete(visitToken)
+  }
+}
+
+const resolveInheritedPurpose = (input: {
+  pointer: string
+  docsByTableName: Map<string, TopicDocsYaml>
+  errorContext: string
+}): TopicDocAttributePurpose | undefined => {
+  const { entry } = followRefToTerminalEntry({
+    pointer: input.pointer,
+    docsByTableName: input.docsByTableName,
+    visiting: new Set(),
+    errorContext: input.errorContext,
+  })
+  return entry.purpose
+}
+
 const resolveValueDocNodesForEntry = (input: {
   attribute: KeyDocEntry
   owningTableName: string
@@ -167,7 +238,10 @@ export const compileAttributesForDoc = (input: {
         visiting: new Set(),
         errorContext,
       })
-      const label = refEntry.label ?? (refEntry.format === 'ignore' ? attribute.key : undefined)
+      const label =
+        attribute.label ??
+        refEntry.label ??
+        (refEntry.format === 'ignore' ? attribute.key : undefined)
       if (!label) {
         throw new Error(
           `Referenced attribute "${attribute.ref}" resolves to an entry without label (${errorContext})`,
@@ -185,7 +259,17 @@ export const compileAttributesForDoc = (input: {
         key: attribute.key,
         type: refEntry.format,
         label,
-        description: resolveDescription(refEntry.description),
+        purpose: attribute.purpose ?? refEntry.purpose,
+        description: resolveDescription(
+          attribute.description ??
+            resolveDescriptionAlongRefChain({
+              pointer: attribute.ref,
+              docsByTableName,
+              visiting: new Set(),
+              errorContext,
+            }) ??
+            refEntry.description,
+        ),
         chapterRefs: refEntry.chapterRefs?.map((chapter) => chapter.chapterId),
         values: resolvedValues.map((valueNode) => compileValueNode(valueNode)),
       } satisfies CompiledAttribute
@@ -207,10 +291,19 @@ export const compileAttributesForDoc = (input: {
       throw new Error(`Missing label for attribute "${attribute.key}" in table "${tableName}"`)
     }
 
+    const inheritedPurpose = attribute.valuesRef
+      ? resolveInheritedPurpose({
+          pointer: attribute.valuesRef,
+          docsByTableName,
+          errorContext: `${errorContext} via valuesRef "${attribute.valuesRef}"`,
+        })
+      : undefined
+
     return {
       key: attribute.key,
       type: attribute.format,
       label,
+      purpose: attribute.purpose ?? inheritedPurpose,
       description: resolveDescription(attribute.description),
       chapterRefs: attribute.chapterRefs?.map((chapter) => chapter.chapterId),
       values: resolvedValues?.map((valueNode) => compileValueNode(valueNode)),

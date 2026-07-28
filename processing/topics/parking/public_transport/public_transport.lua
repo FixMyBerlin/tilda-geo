@@ -1,6 +1,5 @@
-require('init')
-local parking_public_transport_stops = require('parking_public_transport_stops')
-local parking_platform_lines = require('parking_platform_lines')
+local parking_public_transport_stops = require('topics.parking.public_transport.stops.parking_public_transport_stops')
+local parking_platform_lines = require('topics.parking.public_transport.platforms.parking_platform_lines')
 
 -- NOTE ON PROJECTIONS:
 -- All `_parking_*` tables use EPSG:5243

@@ -41,9 +41,10 @@ export const Calculator = () => {
   return (
     <>
       <style
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: static CSS for map control position
+        // oxlint-disable-next-line react/no-danger -- static CSS for map control position
         dangerouslySetInnerHTML={{
-          __html: '.maplibregl-ctrl-top-left { left: 270px; }',
+          // Offset the top-left map controls past the desktop sidebar only (no sidebar on mobile).
+          __html: '@media (min-width: 640px) { .maplibregl-ctrl-top-left { left: 270px; } }',
         }}
       />
       <CalculatorControls queryLayers={queryLayers} />

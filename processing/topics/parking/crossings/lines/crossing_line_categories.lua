@@ -1,10 +1,9 @@
-require('init')
-require('class_crossing_category')
-require('Log')
+local class_crossing_category = require('topics.parking.crossings.helper.class_crossing_category')
+local log = require('topics.helper.log')
 
-crossing_line_categories = {
+local crossing_line_categories = {
   class_crossing_category.new({
-    -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
+    -- NOTICE: This data is unused ATM, see crossings/crossing_lines.lua
     id = 'crossing_zebra_way',
     side_schema = 'none',
     side_key = nil,
@@ -31,7 +30,7 @@ crossing_line_categories = {
     tags_cc = {},
   }),
   class_crossing_category.new({
-    -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
+    -- NOTICE: This data is unused ATM, see crossings/crossing_lines.lua
     id = 'crossing_table_way',
     side_schema = 'none',
     side_key = nil,
@@ -57,7 +56,7 @@ crossing_line_categories = {
     tags_cc = {},
   }),
   class_crossing_category.new({
-    -- NOTICE: This data is unused ATM, see crossings/parking_crossing_lines.lua
+    -- NOTICE: This data is unused ATM, see crossings/crossing_lines.lua
     id = 'crossing_way',
     side_schema = 'none',
     side_key = nil,

@@ -51,10 +51,12 @@ Reference: [taginfo schema](https://raw.githubusercontent.com/taginfo/taginfo-pr
 ### `description` field
 
 **What to include:**
+
 - How TILDA uses the tag in the context of bicycle infrastructure planning
 - What data is extracted or derived from this tag
 
 **What NOT to include:**
+
 - General OSM tag documentation (that's what taginfo/wiki is for)
 - Implementation details (how the code processes it)
 - HTML or markdown formatting (plain text only)

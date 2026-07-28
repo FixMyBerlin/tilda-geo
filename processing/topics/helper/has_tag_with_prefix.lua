@@ -1,5 +1,4 @@
-require('init')
-local has_prefix = require('has_prefix')
+local has_prefix = require('topics.helper.has_prefix')
 
 ---@param tags table | nil
 ---@param prefix string | nil

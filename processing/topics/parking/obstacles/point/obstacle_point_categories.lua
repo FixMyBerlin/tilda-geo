@@ -1,11 +1,9 @@
-require('init')
-local sanitize_for_logging = require('sanitize_for_logging')
-require('class_obstacle_category')
-require('two_wheel_parking_helper')
-local TAG_HELPER = require('tag_helper')
+local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
+local class_obstacle_category = require('topics.parking.obstacles.helper.class_obstacle_category')
+local two_wheel_parking_helper = require('topics.parking.obstacles.helper.two_wheel_parking_helper')
+local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
-
-obstacle_point_categories = {
+return {
   class_obstacle_category.new({
     id = 'bollard',
     buffer_radius = function(tags) return 0.15 end,

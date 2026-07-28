@@ -6,10 +6,8 @@ import { legendSurfaceDefault } from './subcat_surface_roads.const'
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
 const sourceLayer = 'bikelanes'
-export type SubcatRadinfraSmoothnesshId = typeof subcatId
-export type SubcatRadinfraSmoothnesshStyleIds = 'default'
 
-export const bikelanesSmoothnessLegend: FileMapDataSubcategoryStyleLegend[] = [
+const bikelanesSmoothnessLegend: FileMapDataSubcategoryStyleLegend[] = [
   ...legendSurfaceDefault,
   {
     id: 'missing',

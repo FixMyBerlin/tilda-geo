@@ -1,0 +1,8 @@
+// Copy into .vscode/settings.json on scaffold (merge with oxc keys from references/oxc-config.md).
+// Monorepos: prefix js/ts.tsdk.path to the package that owns devDependencies.typescript
+// (e.g. app/node_modules/typescript — tilda-geo root .vscode/settings.json).
+// Requires the TypeScript 7 extension — see examples/vscode.extensions.json.template.
+{
+  "js/ts.experimental.useTsgo": true,
+  "js/ts.tsdk.path": "node_modules/typescript"
+}

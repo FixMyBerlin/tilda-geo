@@ -13,7 +13,7 @@ function getVersion(url: string) {
 }
 
 const DEBUG = false
-function debug(...args) {
+function debug(...args: unknown[]) {
   if (DEBUG) console.debug(...args)
 }
 
@@ -25,9 +25,9 @@ export function migrateUrl(url: string) {
   for (let v = searchParamsVersion + 1; v <= currentVersion; v++) {
     debug(`Running migration ${v}`)
     debug('  before: ', migratedUrl)
-    const migrate = migrations[v]
+    const migrate = migrations[v as keyof typeof migrations]
     if (!migrate) throw new Error(`Migration ${v} is missing.`)
-    migratedUrl = migrations[v](migratedUrl)
+    migratedUrl = migrate(migratedUrl)
     debug('  after: ', migratedUrl)
   }
   const u = new URL(migratedUrl)

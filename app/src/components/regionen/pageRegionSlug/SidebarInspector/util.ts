@@ -1,13 +1,16 @@
 import { bbox, coordEach, difference, featureCollection, point, polygon } from '@turf/turf'
-import type { FeatureCollection } from 'geojson'
+import type { Feature, FeatureCollection } from 'geojson'
 import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader'
 import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp'
+import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { UrlFeature } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/types'
 
 type Bounds = [number, number, number, number]
 type Points = [[number, number], [number, number]]
+type MapPanelSize = { width: number; height: number }
+type MapInstance = Pick<MapLibreMap, 'getCanvas' | 'unproject' | 'fitBounds'>
 
-export function boundsToPoints(bounds: Bounds) {
+function boundsToPoints(bounds: Bounds) {
   const [x0, y0, x1, y1] = bounds
   return [
     [x0, y0],
@@ -15,7 +18,7 @@ export function boundsToPoints(bounds: Bounds) {
   ] satisfies Points
 }
 
-export function createBox(points: Points) {
+function createBox(points: Points) {
   const [[x0, y0], [x1, y1]] = points
   return polygon([
     [
@@ -28,12 +31,16 @@ export function createBox(points: Points) {
   ])
 }
 
-export function getMapSize(mapInstance: { getCanvas(): HTMLCanvasElement }) {
+function getMapSize(mapInstance: { getCanvas(): HTMLCanvasElement }) {
   const canvas = mapInstance.getCanvas()
   return { width: canvas.offsetWidth, height: canvas.offsetHeight }
 }
 
-export function createBoundingPolygon(mapInstance, sidebarSize, inspectorSize) {
+export function createBoundingPolygon(
+  mapInstance: MapInstance,
+  sidebarSize: MapPanelSize,
+  inspectorSize: MapPanelSize,
+) {
   const map = getMapSize(mapInstance)
   const side = sidebarSize
   const ins = inspectorSize
@@ -59,14 +66,14 @@ export function createBoundingPolygon(mapInstance, sidebarSize, inspectorSize) {
   const poly = diff1 && difference(featureCollection([diff1, inspectorBox]))
   if (!poly) return mapBox
   coordEach(poly, (coord) => {
-    const { lng, lat } = mapInstance.unproject(coord)
+    const { lng, lat } = mapInstance.unproject([coord[0]!, coord[1]!])
     coord[0] = lng
     coord[1] = lat
   })
   return poly
 }
 
-export function compareFeatures(feature1, feature2) {
+function compareFeatures(feature1: Feature, feature2: Feature) {
   // @ts-expect-error, see https://github.com/bjornharrtell/jsts/issues/532
   const geojsonReader = new GeoJSONReader()
   const f1 = geojsonReader.read(feature1.geometry)
@@ -98,20 +105,25 @@ function geojsonFromCoordinates(coordinates: [number, number] | [number, number,
   return coordinates.length === 2 ? point(coordinates) : createBox(boundsToPoints(coordinates))
 }
 
-export function createFeatureCollection(urlFeatures: UrlFeature[]) {
+function createFeatureCollection(urlFeatures: UrlFeature[]) {
   return featureCollection(
     // @ts-expect-error - probably a bug
     urlFeatures.map(({ coordinates }) => geojsonFromCoordinates(coordinates)),
   ) as FeatureCollection
 }
 
-export function allUrlFeaturesInBounds(urlFeatures, boundingPolygon) {
+export function allUrlFeaturesInBounds(urlFeatures: UrlFeature[], boundingPolygon: Feature) {
   return urlFeatures
     .map(({ coordinates }) => compareFeatures(boundingPolygon, geojsonFromCoordinates(coordinates)))
-    .every((r) => ['~', '>'].includes(r))
+    .every((r: string) => ['~', '>'].includes(r))
 }
 
-export function fitBounds(mapInstance, urlFeatures, sidebarSize, inspectorSize) {
+export function fitBounds(
+  mapInstance: MapInstance,
+  urlFeatures: UrlFeature[],
+  sidebarSize: MapPanelSize,
+  inspectorSize: MapPanelSize,
+) {
   const map = getMapSize(mapInstance)
   const [side, ins] = [sidebarSize, inspectorSize]
 
@@ -122,7 +134,8 @@ export function fitBounds(mapInstance, urlFeatures, sidebarSize, inspectorSize) 
     x: map.width - ins.width - pad,
     y: map.height - pad,
   }
-  const [nwc, sec] = [nwp, sep].map((p) => mapInstance.unproject(p))
+  const nwc = mapInstance.unproject([nwp[0]!, nwp[1]!])
+  const sec = mapInstance.unproject([sep.x, sep.y])
 
   const fc = createFeatureCollection(urlFeatures)
   fc.features = [
@@ -135,8 +148,8 @@ export function fitBounds(mapInstance, urlFeatures, sidebarSize, inspectorSize) 
 
   mapInstance.fitBounds(boundsToPoints(bbox(fc) as Bounds), {
     padding: {
-      top: nwp[1],
-      left: nwp[0],
+      top: nwp[1]!,
+      left: nwp[0]!,
       bottom: pad,
       right: ins.width + pad,
     },

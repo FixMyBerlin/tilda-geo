@@ -1,8 +1,6 @@
-require('init')
-require('Log')
-
 describe('capacity_tags', function()
-  local capacity_tags = require('capacity_tags')
+  local log = require('topics.helper.log')
+  local capacity_tags = require('topics.parking.helper.capacity_tags')
 
   it('returns value from capacity with high confidence and tag source when only capacity is set', function()
     local tags = { capacity = '10' }

@@ -1,8 +1,6 @@
-require('init')
-local THIS_OR_THAT = require('this_or_that')
-local SANITIZE_VALUES = require('sanitize_values')
-
 describe('THIS_OR_THAT', function()
+  local THIS_OR_THAT = require('topics.parking.parkings.helper.this_or_that')
+  local SANITIZE_VALUES = require('topics.helper.sanitize_values')
   describe('value', function()
     it('returns thisValue when it is valid', function()
       local result = THIS_OR_THAT.value('valid_value', 'fallback_value')

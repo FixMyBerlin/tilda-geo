@@ -1,10 +1,8 @@
-require('init')
-require('Clone')
-require('Log')
-require('obstacle_point_categories')
-require('transform_point_direction_tags')
-local TAG_HELPER = require('tag_helper')
-require('class_obstacle_category')
+local CLONE = require('topics.helper.clones')
+local log = require('topics.helper.log')
+local class_obstacle_category = require('topics.parking.obstacles.helper.class_obstacle_category')
+local obstacle_point_categories = require('topics.parking.obstacles.point.obstacle_point_categories')
+local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
 -- Categorize the object and picks the best result (with the largest buffer).
 ---@class ObstacleObject
@@ -29,7 +27,7 @@ local function categorize_obstacle_points(object)
       if buffer and buffer > max_buffer then
         max_buffer = buffer
         best_result.category = category
-        best_result.object = MetaClone(object)
+        best_result.object = CLONE.meta_clone(object)
       end
     end
   end
@@ -44,7 +42,7 @@ local function categorize_obstacle_points(object)
       tags = function(_) return {} end,
       tags_cc = {},
     })
-    best_result.object = MetaClone(object)
+    best_result.object = CLONE.meta_clone(object)
   end
 
   return best_result
