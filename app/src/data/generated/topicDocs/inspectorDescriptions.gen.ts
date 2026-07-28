@@ -81,13 +81,13 @@ const data = {
     values: {
       type: {
         'amenity-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
         'leisure-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
         'shop-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
         'tourism-fallback':
-          'Auffangkategorie fuer seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
+          'Auffangkategorie für seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
       },
     },
   },

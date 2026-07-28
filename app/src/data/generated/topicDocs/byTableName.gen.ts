@@ -8921,7 +8921,7 @@ const data = {
           },
           {
             value: 'amenity-university',
-            label: 'Universitaet',
+            label: 'Universität',
           },
           {
             value: 'shop-second_hand',
@@ -9025,7 +9025,7 @@ const data = {
           },
           {
             value: 'amenity-public_building',
-            label: 'Oeffentliches Gebaeude',
+            label: 'Öffentliches Gebäude',
           },
           {
             value: 'amenity-boat_rental',
@@ -9213,7 +9213,7 @@ const data = {
           },
           {
             value: 'shop-baby_goods',
-            label: 'Babysachengeschäft',
+            label: 'Babyausstattung',
           },
           {
             value: 'leisure-park',
@@ -9229,7 +9229,7 @@ const data = {
           },
           {
             value: 'amenity-traffic_park',
-            label: 'Verkehrsuebungsplatz',
+            label: 'Verkehrsübungsplatz',
           },
           {
             value: 'amenity-prison',
@@ -9301,7 +9301,7 @@ const data = {
           },
           {
             value: 'shop-estate_agent',
-            label: 'Immobilienbuero',
+            label: 'Immobilienbüro',
           },
           {
             value: 'shop-wool',
@@ -9429,7 +9429,7 @@ const data = {
           },
           {
             value: 'shop-security',
-            label: 'Sicherheitsfachgeschaeft',
+            label: 'Sicherheitsfachgeschäft',
           },
           {
             value: 'shop-spices',
@@ -9437,7 +9437,7 @@ const data = {
           },
           {
             value: 'tourism-alpine_hut',
-            label: 'Berghuette',
+            label: 'Berghütte',
           },
           {
             value: 'shop-truck',
@@ -9473,7 +9473,7 @@ const data = {
           },
           {
             value: 'shop-food',
-            label: 'Lebensmittelgeschaeft',
+            label: 'Lebensmittelgeschäft',
           },
           {
             value: 'shop-groundskeeping',
@@ -9487,25 +9487,25 @@ const data = {
             value: 'amenity-fallback',
             label: 'Einrichtung (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche amenity-Werte unterhalb des Volumen-Schwellenwertes.',
           },
           {
             value: 'leisure-fallback',
             label: 'Freizeit (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche leisure-Werte unterhalb des Volumen-Schwellenwertes.',
           },
           {
             value: 'shop-fallback',
             label: 'Geschäft (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche shop-Werte unterhalb des Volumen-Schwellenwertes.',
           },
           {
             value: 'tourism-fallback',
             label: 'Tourismus (Auffangkategorie)',
             description:
-              'Auffangkategorie fuer seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
+              'Auffangkategorie für seltene oder uneinheitliche tourism-Werte unterhalb des Volumen-Schwellenwertes.',
           },
         ],
       },
