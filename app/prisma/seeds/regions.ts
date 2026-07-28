@@ -150,6 +150,11 @@ const seedRegions = async () => {
       status: 'PUBLIC',
     },
     {
+      slug: 'frm',
+      promoted: false,
+      status: 'PUBLIC',
+    },
+    {
       slug: 'deutschland',
       promoted: false,
       status: 'PUBLIC',

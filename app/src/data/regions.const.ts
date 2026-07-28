@@ -8,6 +8,7 @@ import type {
   UnionTiles,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
 import svgBibi from '@/components/shared/assets/bibi-logo.svg'
+import imageFrankfurtRheinMain from '@/components/shared/assets/frankfurtrheinmain-logo.png'
 import svgInfravelo from '@/components/shared/assets/infravelo.svg'
 import svgNudafa from '@/components/shared/assets/nudafa-logo.svg'
 import svgParking from '@/components/shared/assets/osm-parkraum-logo-2025.svg'
@@ -111,6 +112,7 @@ export type RegionSlug =
   | 'bibi'
   | 'deutschland'
   | 'fahrradstellplaetze'
+  | 'frm' // FrankfurtRheinMain Metropolregion
   | 'herrenberg'
   | 'infravelo'
   | 'infravelo-rvn'
@@ -899,6 +901,37 @@ export const staticRegion: StaticRegion[] = [
     ],
     backgroundSources: [...defaultBackgroundSources, 'ELI_baden-w-rttemberg-dop20'],
     exports: ['bikelanes', 'bikeroutes', 'roads', 'roadsPathClasses'],
+  },
+  {
+    slug: 'frm',
+    name: 'FrankfurtRheinMain',
+    fullName: 'FrankfurtRheinMain Metropolregion',
+    product: 'radverkehr',
+    // TODO: Aktuell nur Wetteraukreis zum Testen. Die Relation-IDs der übrigen
+    // Kreise und kreisfreien Städte der Metropolregion werden hier ergänzt; die API
+    // verschmilzt alle IDs per ST_Union zu einer Fläche.
+    mask: { osmRelationIds: [62519], bufferKm: 5 },
+    map: { lat: 50.121, lng: 8.5954, zoom: 10 },
+    bbox: null,
+    logoPath: imageFrankfurtRheinMain,
+    logoWhiteBackgroundRequired: false,
+    showSearch: true,
+    categories: [
+      // The order here specifies the order in the UI
+      'bikelanes',
+      'roads',
+      'surface',
+      'lit',
+      // NOTE: Die `parking`-Prozessierung läuft nur für die Bboxen Berlin und BiBi
+      // (processing/constants/topics.const.ts). Bis dort eine Bbox für die Region
+      // ergänzt wird, bleibt diese Kategorie ohne Daten.
+      'parkingTilda',
+      'bicycleParking',
+      'mapillary',
+    ],
+    backgroundSources: defaultBackgroundSources,
+    notes: 'osmNotes',
+    exports: null,
   },
   {
     slug: 'deutschland',

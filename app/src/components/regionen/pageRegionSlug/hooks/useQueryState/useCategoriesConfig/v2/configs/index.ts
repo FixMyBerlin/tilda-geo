@@ -46,6 +46,7 @@ import { _df90j3 } from './_df90j3'
 import { _diykzs } from './_diykzs'
 import { _e6ilf4 } from './_e6ilf4'
 import { _e7reto } from './_e7reto'
+import { _e9hzam } from './_e9hzam'
 import { _e382z9 } from './_e382z9'
 import { _eu560i } from './_eu560i'
 import { _fk6w0v } from './_fk6w0v'
@@ -121,6 +122,7 @@ export const configs = {
   e382z9: _e382z9,
   e6ilf4: _e6ilf4,
   e7reto: _e7reto,
+  e9hzam: _e9hzam,
   eu560i: _eu560i,
   fk6w0v: _fk6w0v,
   gdl8v6: _gdl8v6,
