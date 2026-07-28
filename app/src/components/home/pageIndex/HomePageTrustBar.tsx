@@ -2,8 +2,6 @@
 const regionNames = [
   'Stadt Berlin',
   'Land Brandenburg',
-  'Landkreis Bielefeld',
-  'Landkreis Woldegk',
   'Stadt Bietigheim-Bissingen',
   'Stadt Überlingen',
   'Gemeinde Eichwalde',
@@ -20,9 +18,9 @@ export const HomePageTrustBar = () => {
     <section className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <p id="home-trust-bar-stats" className="text-center text-base text-gray-700 sm:text-lg">
-          Bereits über{' '}
+          Bereits mehr als{' '}
           <span className="font-semibold text-yellow-800">
-            15+ Kommunen, Landkreise und Bundesländer
+            15 Kommunen, Landkreise und Bundesländer
           </span>{' '}
           nutzen TILDA
         </p>

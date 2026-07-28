@@ -19,7 +19,7 @@ const faqs: Faq[] = [
   {
     question: 'Brauche ich eigene Befahrungen, um die Daten aktuell zu halten?',
     answer:
-      'Nein. TILDA basiert auf OpenStreetMap und bleibt dadurch fortlaufend tagesaktuell. Sie tragen nur Änderungen ein – teure Wiederholungsbefahrungen entfallen.',
+      'Nein. TILDA basiert auf OpenStreetMap und bleibt dadurch fortlaufend aktuell. Sie tragen nur Änderungen ein – teure Wiederholungsbefahrungen entfallen.',
   },
   {
     question: 'Wie schnell kann TILDA in unserer Kommune eingesetzt werden?',
@@ -34,7 +34,7 @@ const faqs: Faq[] = [
   {
     question: 'Können wir unsere bestehenden Daten in TILDA integrieren?',
     answer:
-      'Ja. TILDA ist als zentraler Daten-Hub konzipiert und ermöglicht die Einbindung vorhandener kommunaler Datenbestände. Bestehende Geodaten können übernommen, mit den TILDA-Daten verknüpft und für Analysen, Auswertungen und die weitere Planung genutzt werden. Gleichzeitig bleiben die Daten in offenen Formaten exportierbar und können weiterhin in bestehenden Fachverfahren verwendet werden.',
+      'Ja. TILDA ist als zentrale Datenplattform konzipiert und ermöglicht die Einbindung vorhandener kommunaler Datenbestände. Bestehende Geodaten können übernommen, mit den TILDA-Daten verknüpft und für Analysen, Auswertungen und die weitere Planung genutzt werden. Gleichzeitig bleiben die Daten in offenen Formaten exportierbar und können weiterhin in bestehenden Fachverfahren verwendet werden.',
   },
 ]
 

@@ -23,11 +23,11 @@ const features: Feature[] = [
   },
   {
     title: 'Teamplayer',
-    description: 'Kommentieren oder Teilen – alles in einem Browser-Tab. Keine Installation nötig.',
+    description: 'Kommentieren und teilen – alles in einem Browser-Tab. Keine Installation nötig.',
     icon: UsersIcon,
   },
   {
-    title: 'Budget-Schonend',
+    title: 'Budget-schonend',
     description:
       'Reduzieren Sie den Bedarf an teuren, externen Erfassungen durch eigene, valide Datengrundlagen.',
     icon: ArrowTrendingDownIcon,
@@ -41,7 +41,7 @@ const features: Feature[] = [
   {
     title: 'Ohne Neubefahrungen',
     description:
-      'OSM-basierte Daten bleiben tagesaktuell. Nur Änderungen werden eingetragen – keine teuren Wiederholungsbefahrungen.',
+      'OSM-basierte Daten werden regelmäßig aktualisiert. Nur Änderungen werden eingetragen – keine teuren Wiederholungsbefahrungen.',
     icon: ArrowPathIcon,
   },
   {

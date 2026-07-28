@@ -39,7 +39,7 @@ const products: Product[] = [
     icon: SvgBicycle,
     slogan: 'Radinfrastruktur – erfassen, bewerten und planen',
     description:
-      'Sie erhalten eine umfassende Bestandserfassung mit den von Ihnen gewünschten Attributen. Wenn gewünscht werden die Daten durch 360°-Befahrungen ergänzt – ganz ohne eigenen Aufwand. Darauf aufbauend werden gute Planungsgrundlagen geschaffen.',
+      'Sie erhalten eine umfassende Bestandserfassung mit den von Ihnen gewünschten Attributen. Wenn gewünscht, werden die Daten durch 360°-Befahrungen ergänzt – ganz ohne eigenen Aufwand. Darauf aufbauend werden gute Planungsgrundlagen geschaffen.',
     moreLabel: 'Mehr erfahren',
     moreHref: 'https://fixmycity.de/tilda-radverkehr/',
     image: screenshotRadverkehr,
@@ -85,7 +85,7 @@ export const HomePageProducts = () => {
     <section className="border-y border-gray-500/10 bg-brand-light">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
         <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-          Die TILDA Geodatenprodukte
+          Die TILDA-Geodatenprodukte
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-base text-gray-900/80 sm:text-lg">
           Spezialisierte Lösungen für die kommunale Verkehrsplanung – sofort einsetzbar, günstig im
