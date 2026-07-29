@@ -15,7 +15,7 @@ import { LayerHighlight } from './LayerHighlight'
 
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
-export const planningHexagonsLabelLayerId = 'planning-hexagons-label'
+const planningHexagonsLabelLayerId = 'planning-hexagons-label'
 
 // Ab Zoom 18 wird der Score-Wert des aktiven Anzeigemodus (Kombination/Bedarf/
 // Bebauung) gut lesbar im Hexagon eingeblendet. Unter Zoom 18 bleibt es wie
