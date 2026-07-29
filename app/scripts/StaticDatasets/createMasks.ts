@@ -7,6 +7,7 @@ import { styleText } from 'node:util'
 import { feature, featureCollection } from '@turf/turf'
 import { staticRegion } from '@/data/regions.const'
 import { downloadGeoJson } from './createMasks/download'
+import { removeSliverRings } from './createMasks/removeSliverRings'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
@@ -91,7 +92,7 @@ export const data: MetaData = maskMeta({
     }
 
     // Wrap geometry in FeatureCollection for proper GeoJSON format
-    const regionFeature = feature(geometry, {})
+    const regionFeature = feature(removeSliverRings(geometry), {})
     const featureCollectionData = featureCollection([regionFeature])
 
     // Save raw geojson file (transformation will happen via transform.ts during static dataset processing)

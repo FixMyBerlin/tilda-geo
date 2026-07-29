@@ -924,6 +924,10 @@ export const staticRegion: StaticRegion[] = [
         62519, // Wetteraukreis
         // Hessen, kreisfreie Städte
         62581, // Darmstadt
+        // Hanau ist Teil des Main-Kinzig-Kreises, in OSM aber als eigene Relation auf
+        // admin_level 6 erfasst und daher nicht in 62694 enthalten. Ohne diese ID bleibt
+        // ein 76 km² großes Loch mitten in der Region.
+        535895, // Hanau
         62400, // Frankfurt am Main
         62695, // Offenbach am Main
         62496, // Wiesbaden
