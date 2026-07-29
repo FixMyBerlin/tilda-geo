@@ -11,7 +11,7 @@ export function mcpEnvLabel(viteAppEnv: EnvironmentValues | undefined): McpEnvLa
 }
 
 const MCP_TOKEN_PLACEHOLDER_SUFFIX = 'REPLACE_WITH_YOUR_ADMIN_API_TOKEN'
-export const MCP_TOKEN_PLACEHOLDER = `${ADMIN_API_TOKEN_PREFIX}${MCP_TOKEN_PLACEHOLDER_SUFFIX}`
+const MCP_TOKEN_PLACEHOLDER = `${ADMIN_API_TOKEN_PREFIX}${MCP_TOKEN_PLACEHOLDER_SUFFIX}`
 
 /**
  * Build the Cursor / Claude `mcpServers` JSON for the REMOTE MCP endpoint at `<origin>/mcp`.

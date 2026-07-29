@@ -7,7 +7,7 @@ import db from '@/server/db.server'
 import { paginate } from '@/server/utils/paginate.server'
 import type { PaginatedList } from '@/shared/pagination/types'
 
-export type DbAuditLogRow = Prisma.AuditLogGetPayload<Record<string, never>>
+type DbAuditLogRow = Prisma.AuditLogGetPayload<Record<string, never>>
 
 export type AuditLogRow = DbAuditLogRow & {
   changeSource: AuditChangeSource | null

@@ -54,7 +54,7 @@ export type RegionNavigationLink =
  * Strip relation lists (wired separately on create/update), then override nullable JSON
  * with `Prisma.JsonNull` via `prismaJsonField` — plain `null` is rejected by Prisma.
  */
-export function regionWriteInputToScalarData(config: RegionWriteInput) {
+function regionWriteInputToScalarData(config: RegionWriteInput) {
   const {
     categories: _categories,
     backgroundSources: _backgroundSources,

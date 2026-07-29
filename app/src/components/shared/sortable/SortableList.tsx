@@ -3,7 +3,7 @@ import { Reorder, useDragControls, type DragControls } from 'motion/react'
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-export type SortableListRenderContext = {
+type SortableListRenderContext = {
   dragHandle: ReactNode
 }
 

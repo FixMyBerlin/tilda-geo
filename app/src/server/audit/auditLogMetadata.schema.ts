@@ -4,14 +4,14 @@ import {
   type AuditChangeSource,
 } from '@/server/audit/auditChangeSources.const'
 
-export const auditLogMetadataSchema = z.object({
+const auditLogMetadataSchema = z.object({
   changeSource: z.enum(AUDIT_CHANGE_SOURCES).optional(),
   adminTokenId: z.string().optional(),
 })
 
 export type AuditLogMetadata = z.infer<typeof auditLogMetadataSchema>
 
-export function parseAuditLogMetadata(value: unknown) {
+function parseAuditLogMetadata(value: unknown) {
   const parsed = auditLogMetadataSchema.safeParse(value)
   return parsed.success ? parsed.data : null
 }

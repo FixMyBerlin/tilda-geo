@@ -6,7 +6,7 @@ import { Quote } from '@/components/shared/text/Quotes'
 
 type AdminActionLinkProps = Omit<LinkProps, 'children'> & { children?: ReactNode }
 
-export const adminPageTitleClassName = 'flex items-center gap-2 text-2xl font-bold text-gray-900'
+const adminPageTitleClassName = 'flex items-center gap-2 text-2xl font-bold text-gray-900'
 
 const adminPageTitleIconClassName = 'size-6 shrink-0 text-gray-800'
 const adminBreadcrumbIconClassName = 'size-5 shrink-0'

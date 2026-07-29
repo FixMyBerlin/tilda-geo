@@ -24,7 +24,7 @@ export function getMultiRegionContracts(contracts: TRegionContract[]) {
   return contracts.filter((contract) => contract.regionCount > 1)
 }
 
-export type RegionContractGroup = {
+type RegionContractGroup = {
   contract: TRegionContract | null
   regions: TRegion[]
 }

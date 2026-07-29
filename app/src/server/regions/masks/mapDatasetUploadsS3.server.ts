@@ -37,6 +37,6 @@ export async function deleteMapDatasetFromS3(uploadSlug: string, filename: strin
   }
 }
 
-export function mapDatasetUploadS3Key(uploadSlug: string, filename: string) {
+function mapDatasetUploadS3Key(uploadSlug: string, filename: string) {
   return `uploads/${s3UploadEnvFolder()}/${uploadSlug}/${filename}`
 }

@@ -1,7 +1,7 @@
 import { Pill } from '@/components/shared/text/Pill'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
 
-export const auditActionColor = (action: string) => {
+const auditActionColor = (action: string) => {
   switch (action) {
     case 'CREATE':
       return 'green' as const

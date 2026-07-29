@@ -4,16 +4,15 @@ import type {
   ProcessingRunRow,
   ProcessingTopicsMeta,
   TopicPhaseWindow,
-  TopicRanEntry,
   TopicSkippedEntry,
   TopicTimingEntry,
 } from './schemas'
 
 const knownTopicIdSet = new Set<string>(topicIds)
 
-export const isKnownTopicId = (id: string): id is TopicId => knownTopicIdSet.has(id)
+const isKnownTopicId = (id: string): id is TopicId => knownTopicIdSet.has(id)
 
-export const getOrphanedTopicIds = (topics: ProcessingTopicsMeta) =>
+const getOrphanedTopicIds = (topics: ProcessingTopicsMeta) =>
   Object.keys(topics)
     .filter((id) => !isKnownTopicId(id))
     .sort()
@@ -28,8 +27,6 @@ export const collectOrphanedTopicIdsFromRuns = (runs: ProcessingRunRow[]) => {
   return [...ids].sort()
 }
 
-export type TopicPhase = 'lua' | 'sql' | 'diff'
-
 export type ParsedTopicTimingBase = {
   topicId: string
   status: 'completed' | 'skipped' | 'not_recorded'
@@ -40,17 +37,13 @@ export type ParsedTopicTimingBase = {
   totalMs?: number
 }
 
-export type ParsedTopicTiming = ParsedTopicTimingBase & {
-  topicId: TopicId
-}
-
 export type ParsedOrphanedTopicTiming = ParsedTopicTimingBase & {
   topicId: string
 }
 
 export type ChartPhaseFilter = 'both' | 'lua' | 'sql'
 
-export type ChartSegment = {
+type ChartSegment = {
   topicId: TopicId
   phase: 'lua' | 'sql'
   durationMs: number
@@ -69,17 +62,11 @@ const phaseDurationMs = (window: TopicPhaseWindow | undefined) => {
   return ms > 0 ? ms : 0
 }
 
-export const isSkippedTopicEntry = (
-  entry: TopicTimingEntry | undefined,
-): entry is TopicSkippedEntry => {
+const isSkippedTopicEntry = (entry: TopicTimingEntry | undefined): entry is TopicSkippedEntry => {
   return entry !== undefined && 'skipped' in entry
 }
 
-export const isRanTopicEntry = (entry: TopicTimingEntry | undefined): entry is TopicRanEntry => {
-  return entry !== undefined && !('skipped' in entry)
-}
-
-export const parseTopicEntry = (topicId: string, entry: TopicTimingEntry | undefined) => {
+const parseTopicEntry = (topicId: string, entry: TopicTimingEntry | undefined) => {
   if (!entry) {
     return {
       topicId,

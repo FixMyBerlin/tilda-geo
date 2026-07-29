@@ -9,7 +9,7 @@ export const productName = {
 } as const satisfies Record<RegionProduct, string>
 
 /** Short labels for admin region form select. */
-export const regionProductFormLabel = {
+const regionProductFormLabel = {
   radverkehr: 'Radverkehr',
   parkraum: 'Parkraum',
   fussverkehr: 'Fußverkehr',
