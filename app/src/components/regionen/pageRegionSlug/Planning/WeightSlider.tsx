@@ -2,14 +2,14 @@ import { twJoin } from 'tailwind-merge'
 
 // Gewichte werden intern als 0–1 gespeichert (so erwartet es der Worker), in der UI aber als
 // ganzzahlige Wichtigkeit 0–10 bedient: 0 = sehr unwichtig (fließt nicht ein), 10 = sehr wichtig.
-export const WEIGHT_STEPS = 10
+const WEIGHT_STEPS = 10
 
 /** 0–1-Gewicht → ganzzahlige UI-Stufe 0–10 (Altwerte wie 0.15 werden gerundet angezeigt). */
-export const weightToStep = (weight: number | undefined) =>
+const weightToStep = (weight: number | undefined) =>
   Math.min(WEIGHT_STEPS, Math.max(0, Math.round((weight ?? 0) * WEIGHT_STEPS)))
 
 /** UI-Stufe 0–10 → 0–1-Gewicht. */
-export const stepToWeight = (step: number) => step / WEIGHT_STEPS
+const stepToWeight = (step: number) => step / WEIGHT_STEPS
 
 /**
  * Erklärt die Skala einmal pro Gewichte-Block, damit die Bedeutung der Endpunkte sichtbar ist
