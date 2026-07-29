@@ -2,6 +2,7 @@ import { MAX_USER_GEOJSON_BYTES, parseUserGeojson } from '@/lib/planningUserGeoj
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { GeoJsonUploadField } from './GeoJsonUpload'
 import { SegmentedChoice } from './SegmentedChoice'
+import { WeightScaleLegend, WeightSlider } from './WeightSlider'
 
 const MODES = [
   ['bonus', 'Bonus'],
@@ -86,21 +87,14 @@ export const UserObstaclesField = ({
             className="grid grid-cols-2 gap-1.5"
           />
           {isSoft && (
-            <div className="flex items-center gap-2">
-              <span className="shrink-0 text-xs text-gray-600">Stärke</span>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.05}
-                value={weight}
-                disabled={readOnly}
-                onChange={(e) => setWeight('w_eigendaten', Number(e.target.value))}
-                className="flex-1"
+            <div>
+              {!readOnly && <WeightScaleLegend />}
+              <WeightSlider
+                label="Stärke"
+                weight={weight}
+                onChange={(value) => setWeight('w_eigendaten', value)}
+                readOnly={readOnly}
               />
-              <span className="w-9 shrink-0 text-right tabular-nums">
-                {Math.round(weight * 100)}&thinsp;%
-              </span>
             </div>
           )}
         </div>

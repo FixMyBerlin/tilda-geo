@@ -29,8 +29,17 @@ export const BoundaryPicker = ({
   const [query, setQuery] = useState('')
 
   if (isLoading) return <span className="text-xs text-gray-400">Lade Gebiete…</span>
+  // Datenlücke, kein Nutzerfehler: `public.boundaries` ist leer bzw. enthält keine Grenzen im
+  // Regions-Umriss (Processing für diese Region noch nicht gelaufen). Deutlich sichtbar machen,
+  // sonst wirkt es, als wäre die Gebietssuche verschwunden.
   if (!boundaries?.length)
-    return <span className="text-xs text-gray-400">Keine Gebiete gefunden.</span>
+    return (
+      <div className="rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+        Für diese Region sind keine Gebietsgrenzen verfügbar (Tabelle <code>public.boundaries</code>{' '}
+        ist leer). Bitte über „Eigenes Gebiet“ ein Polygon zeichnen oder eine GeoJSON-Datei
+        hochladen.
+      </div>
+    )
 
   const filteredBoundaries = boundaries
     .filter((b) => b.admin_level !== '10')

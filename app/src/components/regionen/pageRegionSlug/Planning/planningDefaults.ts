@@ -8,12 +8,13 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   name: 'Fahrradbox',
   h3_resolution: 13,
   dem_source: 'srtm',
+  // Wichtigkeiten liegen auf dem UI-Raster 0–10 (siehe WeightSlider), also Vielfache von 0.1.
   weights: {
     w_cyclepath: 0.2,
     w_surface: 0.2,
-    w_target: 0.15,
+    w_target: 0.2,
     w_slope: 0.2,
-    w_transit: 0.15,
+    w_transit: 0.2,
     w_vegetation: 0,
     w_intersection: 0.1,
     w_parken: 0.1,

@@ -1,14 +1,16 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
-import { ChevronRightIcon, InformationCircleIcon } from '@heroicons/react/20/solid'
+import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningScenarioFn } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
+import { InfoTooltip } from './InfoTooltip'
 import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
 import { SegmentedChoice } from './SegmentedChoice'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
+import { WeightScaleLegend, WeightSlider } from './WeightSlider'
 
 const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
   { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
@@ -45,48 +47,26 @@ export const FactorFields = ({
     <>
       <div>
         <div className="mb-1 flex items-center gap-1 font-semibold">
-          Gewichte
-          <span className="group relative">
-            <InformationCircleIcon className="size-4 cursor-default text-gray-400" />
-            <span className="pointer-events-none absolute top-0 left-5 z-10 w-56 rounded bg-gray-800 px-2 py-1.5 text-xs font-normal text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
-              Bestimmen die relative Bedeutung jedes Faktors bei der Standortbewertung.
-            </span>
-          </span>
+          Wichtigkeit der Faktoren
+          <InfoTooltip>
+            Bestimmen die relative Bedeutung jedes Faktors bei der Standortbewertung — in ganzen
+            Stufen von 0 (sehr unwichtig, fließt nicht ein) bis 10 (sehr wichtig).
+          </InfoTooltip>
         </div>
+        {!readOnly && <WeightScaleLegend />}
         {WEIGHT_GROUPS.map((group) => (
-          <div key={group.key} className="mt-1.5 first:mt-0">
-            <div className="text-xs font-semibold text-gray-500 uppercase">{group.label}</div>
+          <div key={group.key} className="mt-2 first:mt-0">
+            <div className="mb-0.5 border-b border-gray-200 pb-0.5 text-xs font-semibold text-gray-500 uppercase">
+              {group.label}
+            </div>
             {group.weights.map((key) => (
-              <div
+              <WeightSlider
                 key={key}
-                className={
-                  readOnly
-                    ? 'flex items-center justify-between py-0.5'
-                    : 'flex flex-col gap-0.5 py-1'
-                }
-              >
-                <span className="text-xs text-gray-600">{WEIGHT_LABELS[key] ?? key}</span>
-                {readOnly ? (
-                  <span className="text-xs tabular-nums">
-                    {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
-                  </span>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={weights[key] ?? 0}
-                      onChange={(e) => setWeight(key, Number(e.target.value))}
-                      className="flex-1"
-                    />
-                    <span className="w-9 shrink-0 text-right tabular-nums">
-                      {Math.round((weights[key] ?? 0) * 100)}&thinsp;%
-                    </span>
-                  </div>
-                )}
-              </div>
+                label={WEIGHT_LABELS[key] ?? key}
+                weight={weights[key]}
+                onChange={(value) => setWeight(key, value)}
+                readOnly={readOnly}
+              />
             ))}
           </div>
         ))}
@@ -96,8 +76,8 @@ export const FactorFields = ({
         <div className="mb-1 font-semibold">Vegetation (NDVI)</div>
         <p className="mb-1.5 text-xs text-gray-500">
           „Grün schützen“ zieht je nach Bedeckungsgrad Punkte ab (Gesamtscore nie unter 0), „Grün
-          bevorzugen“ vergibt Bonuspunkte. Das Gewicht „Vegetation“ ist der maximale Effekt in
-          Punkten; bei 0 ohne Wirkung.
+          bevorzugen“ vergibt Bonuspunkte. Jede Stufe der Wichtigkeit „Vegetation“ entspricht
+          maximal 10 Punkten Effekt; bei 0 ohne Wirkung.
         </p>
         <SegmentedChoice
           options={
