@@ -15,6 +15,12 @@ import { LayerHighlight } from './LayerHighlight'
 
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
+export const planningHexagonsLabelLayerId = 'planning-hexagons-label'
+
+// Ab Zoom 18 wird der Score-Wert des aktiven Anzeigemodus (Kombination/Bedarf/
+// Bebauung) gut lesbar im Hexagon eingeblendet. Unter Zoom 18 bleibt es wie
+// bisher (nur Einfärbung, kein Label).
+const HEXAGON_LABEL_MIN_ZOOM = 18
 
 // Planning module result layers (Flächenfinder).
 //
@@ -63,6 +69,25 @@ const hexagonFillLayerProps = (property: string, filterOn: boolean, minArea: num
     'fill-color': scoreColor(property),
     'fill-opacity': clusterOpacity(filterOn, minArea),
     'fill-outline-color': 'rgba(0,0,0,0.15)',
+  },
+})
+
+const hexagonLabelLayerProps = (property: string) => ({
+  id: planningHexagonsLabelLayerId,
+  source: planningHexagonsSourceId,
+  'source-layer': 'planning_hexagons',
+  type: 'symbol' as const,
+  minzoom: HEXAGON_LABEL_MIN_ZOOM,
+  layout: {
+    'text-field': ['to-string', ['round', ['coalesce', ['get', property], 0]]] as any,
+    'text-size': 14,
+    'text-allow-overlap': true,
+    'text-ignore-placement': true,
+  },
+  paint: {
+    'text-color': '#1a1a1a',
+    'text-halo-color': 'rgba(255,255,255,0.85)',
+    'text-halo-width': 1.5,
   },
 })
 
@@ -177,6 +202,7 @@ export const SourcesLayersPlanning = () => {
           />
           <Layer {...fillLayerProps} />
           <LayerHighlight {...fillLayerProps} id={getLayerHighlightId(planningHexagonsLayerId)} />
+          <Layer {...hexagonLabelLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])} />
         </>
       )}
 
