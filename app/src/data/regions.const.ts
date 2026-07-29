@@ -909,10 +909,40 @@ export const staticRegion: StaticRegion[] = [
     name: 'FrankfurtRheinMain',
     fullName: 'FrankfurtRheinMain Metropolregion',
     product: 'radverkehr',
-    // TODO: Aktuell nur Wetteraukreis zum Testen. Die Relation-IDs der übrigen
-    // Kreise und kreisfreien Städte der Metropolregion werden hier ergänzt; die API
-    // verschmilzt alle IDs per ST_Union zu einer Fläche.
-    mask: { osmRelationIds: [62519], bufferKm: 5 },
+    // Mitglieder der Metropolregion; die API verschmilzt alle IDs per ST_Union zu einer Fläche.
+    mask: {
+      osmRelationIds: [
+        // Hessen, Landkreise
+        62704, // Landkreis Darmstadt-Dieburg
+        62656, // Kreis Groß-Gerau
+        62566, // Hochtaunuskreis
+        62694, // Main-Kinzig-Kreis
+        62382, // Main-Taunus-Kreis
+        62596, // Odenwaldkreis
+        62715, // Landkreis Offenbach
+        62746, // Rheingau-Taunus-Kreis
+        62519, // Wetteraukreis
+        // Hessen, kreisfreie Städte
+        62581, // Darmstadt
+        62400, // Frankfurt am Main
+        62695, // Offenbach am Main
+        62496, // Wiesbaden
+        // Rheinland-Pfalz, Landkreise
+        62680, // Landkreis Alzey-Worms
+        62741, // Landkreis Bad Kreuznach
+        62632, // Landkreis Mainz-Bingen
+        62443, // Rhein-Lahn-Kreis
+        // Rheinland-Pfalz, kreisfreie Städte
+        62630, // Mainz
+        62453, // Worms
+        // Bayern, Landkreise
+        62497, // Landkreis Aschaffenburg
+        62404, // Landkreis Miltenberg
+        // Bayern, kreisfreie Städte
+        62532, // Aschaffenburg
+      ],
+      bufferKm: 5,
+    },
     map: { lat: 50.121, lng: 8.5954, zoom: 10 },
     bbox: null,
     logoPath: imageFrankfurtRheinMain,
