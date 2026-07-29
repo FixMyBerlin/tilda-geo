@@ -1,5 +1,5 @@
-import { styleText } from 'node:util'
 import type { Geometry } from 'geojson'
+import { blue, red } from '../utils/log'
 
 // Germany's bounding box in WGS84 coordinates
 const GERMANY_BBOX = {
@@ -59,13 +59,10 @@ function hasFeatures(v: unknown): v is GeoJsonWithFeatures {
 
 export function validateProjection(geojson: unknown, filename: string) {
   if (!hasFeatures(geojson) || geojson.features.length === 0) {
-    console.log(
-      styleText(
-        'yellow',
-        `  WARNING: Cannot validate projection - no features found in ${filename}`,
-      ),
+    blue(
+      `  NOTE: empty FeatureCollection (0 features) in ${filename} — OK if transform.ts fills from another file`,
     )
-    return true // Don't fail validation for empty/invalid structure - let other validators handle this
+    return true
   }
 
   let firstValidCoords: Position | null = null
@@ -83,13 +80,8 @@ export function validateProjection(geojson: unknown, filename: string) {
   }
 
   if (firstValidCoords === null) {
-    console.log(
-      styleText(
-        'yellow',
-        `  WARNING: Cannot validate projection - no valid coordinates found in ${filename}`,
-      ),
-    )
-    return true // Don't fail validation if we can't extract coordinates
+    blue(`  NOTE: no valid coordinates in ${filename} — OK if transform.ts fills from another file`)
+    return true
   }
 
   const [longitude, latitude] = firstValidCoords
@@ -102,21 +94,13 @@ export function validateProjection(geojson: unknown, filename: string) {
     latitude <= GERMANY_BBOX.maxLat
 
   if (!isWithinBounds) {
-    console.log(styleText('red', `  ERROR: Projection validation failed for ${filename}`))
-    console.log(
-      styleText(
-        'red',
-        `    First feature (index ${featureIndex}) coordinates: [${longitude}, ${latitude}]`,
-      ),
-    )
-    console.log(styleText('red', `    Expected coordinates within Germany's bounding box:`))
-    console.log(styleText('red', `    Longitude: ${GERMANY_BBOX.minLon} to ${GERMANY_BBOX.maxLon}`))
-    console.log(styleText('red', `    Latitude: ${GERMANY_BBOX.minLat} to ${GERMANY_BBOX.maxLat}`))
-    console.log(
-      styleText(
-        'red',
-        `    This suggests the data might be in a projected coordinate system (e.g., UTM) instead of WGS84.`,
-      ),
+    red(`  ERROR: Projection validation failed for ${filename}`)
+    red(`    First feature (index ${featureIndex}) coordinates: [${longitude}, ${latitude}]`)
+    red(`    Expected coordinates within Germany's bounding box:`)
+    red(`    Longitude: ${GERMANY_BBOX.minLon} to ${GERMANY_BBOX.maxLon}`)
+    red(`    Latitude: ${GERMANY_BBOX.minLat} to ${GERMANY_BBOX.maxLat}`)
+    red(
+      `    This suggests the data might be in a projected coordinate system (e.g., UTM) instead of WGS84.`,
     )
     return false
   }
