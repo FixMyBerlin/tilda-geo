@@ -200,6 +200,7 @@ export function getRegionRedirectUrl(locationHref: string, regionSlug: string) {
     searchParamsRegistry.planningRun,
     searchParamsRegistry.planningScore,
     searchParamsRegistry.planningHexagons,
+    searchParamsRegistry.planningHexagonsOpacity,
     searchParamsRegistry.planningMinArea,
     searchParamsRegistry.planningAreaFilter,
   ].some((param) => u.searchParams.has(param))

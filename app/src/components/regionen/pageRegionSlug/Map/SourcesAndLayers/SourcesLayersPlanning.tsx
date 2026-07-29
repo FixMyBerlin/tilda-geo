@@ -4,6 +4,7 @@ import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/h
 import {
   PLANNING_SCORE_PROPERTY,
   usePlanningAreaFilterParam,
+  usePlanningHexagonsOpacityParam,
   usePlanningHexagonsVisibleParam,
   usePlanningMinAreaParam,
   usePlanningRunParam,
@@ -49,25 +50,46 @@ const scoreColor = (property: string): any => [
   '#67000d',
 ]
 
+// Ursprüngliche feste Layer-Deckkraft (vor Einführung des Transparenz-Reglers).
+// Der Regler steht bei 100% für genau diesen Wert, nicht für CSS-Opacity 1 —
+// er skaliert die volle Fläche darunter, damit "100%" optisch dem alten,
+// unveränderten Layer entspricht.
+const MAX_FILL_OPACITY = 0.7
+
+// Verhältnis abgedunkelt : voll sichtbar aus den ursprünglichen Festwerten (0.1/0.7),
+// jetzt relativ zur per Regler eingestellten Deckkraft (usePlanningHexagonsOpacityParam)
+// angewendet, damit das Abdunkeln bei jeder Transparenz-Einstellung sichtbar bleibt.
+const DIMMED_RATIO = 0.1 / 0.7
+
 // Flächen-Cluster-Filter: nur bei aktivierter Checkbox (filterOn) und gesetzter
 // Zielgröße (minArea > 0) werden Hexagone, deren zusammenhängende Fläche
 // (`cluster_area_m2`) die Zielgröße nicht erreicht (oder gar keinem Cluster
 // angehören, also NULL sind), stark abgedunkelt statt ausgeblendet – so bleibt
 // die Score-Einfärbung als Kontext sichtbar. Checkbox aus → wie vor Einführung
-// des Filters, alle Hexagone gleich eingefärbt.
-const clusterOpacity = (filterOn: boolean, minArea: number): any =>
+// des Filters, alle Hexagone mit der eingestellten Deckkraft eingefärbt.
+const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number): any =>
   filterOn && minArea > 0
-    ? ['case', ['>=', ['coalesce', ['get', 'cluster_area_m2'], 0], minArea], 0.7, 0.1]
-    : 0.7
+    ? [
+        'case',
+        ['>=', ['coalesce', ['get', 'cluster_area_m2'], 0], minArea],
+        maxOpacity,
+        maxOpacity * DIMMED_RATIO,
+      ]
+    : maxOpacity
 
-const hexagonFillLayerProps = (property: string, filterOn: boolean, minArea: number) => ({
+const hexagonFillLayerProps = (
+  property: string,
+  filterOn: boolean,
+  minArea: number,
+  opacityPct: number,
+) => ({
   id: planningHexagonsLayerId,
   source: planningHexagonsSourceId,
   'source-layer': 'planning_hexagons',
   type: 'fill' as const,
   paint: {
     'fill-color': scoreColor(property),
-    'fill-opacity': clusterOpacity(filterOn, minArea),
+    'fill-opacity': clusterOpacity(filterOn, minArea, (opacityPct / 100) * MAX_FILL_OPACITY),
     'fill-outline-color': 'rgba(0,0,0,0.15)',
   },
 })
@@ -156,6 +178,7 @@ export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
   const [scoreMode] = usePlanningScoreParam()
   const [hexagonsVisible] = usePlanningHexagonsVisibleParam()
+  const [hexagonsOpacityPct] = usePlanningHexagonsOpacityParam()
   const [minArea] = usePlanningMinAreaParam()
   const [areaFilterOn] = usePlanningAreaFilterParam()
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
@@ -185,6 +208,7 @@ export const SourcesLayersPlanning = () => {
     PLANNING_SCORE_PROPERTY[scoreMode],
     areaFilterOn,
     minArea,
+    hexagonsOpacityPct,
   )
 
   return (
@@ -192,7 +216,7 @@ export const SourcesLayersPlanning = () => {
       <BoundaryHighlightLayer />
       <UserObstaclesLayer />
 
-      {hexagonsVisible && (
+      {hexagonsVisible && hexagonsOpacityPct > 0 && (
         <>
           <Source
             id={planningHexagonsSourceId}

@@ -47,6 +47,18 @@ export const usePlanningHexagonsVisibleParam = () =>
   useQueryState('planningHexagons', parseAsBoolean.withDefault(true))
 
 /**
+ * Deckkraft (0-100%) der Ergebnis-Hexagone. Kommt zusätzlich zu
+ * usePlanningHexagonsVisibleParam, ist aber damit gekoppelt (siehe
+ * ScoreModeSwitcher): 0% entspricht demselben "ausgeblendet"-Zustand wie der
+ * Eye-Slash-Button, damit der Regler beim Herunterziehen auf 0 die Hexagone
+ * genauso ausblendet. 100% (Default) entspricht der ursprünglichen festen
+ * Layer-Deckkraft (siehe MAX_FILL_OPACITY in SourcesLayersPlanning) — der
+ * Regler skaliert relativ dazu, nicht auf absolute CSS-Opacity 1.
+ */
+export const usePlanningHexagonsOpacityParam = () =>
+  useQueryState('planningHexagonsOpacity', parseAsInteger.withDefault(100))
+
+/**
  * Gesuchte Mindestfläche (m²) für die Flächensuche (Client-Filter auf die
  * persistierte Tile-Spalte `cluster_area_m2`, siehe SourcesLayersPlanning).
  * Bleibt auch erhalten, wenn der Filter per Checkbox (planningAreaFilter)
