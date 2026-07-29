@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import {
   getAdminBoundariesFn,
+  getBoundaryGeomFn,
   getPlanningJobFn,
   getPlanningScenarioFn,
   getPlanningScenariosFn,
@@ -27,9 +28,18 @@ export const planningJobQueryOptions = (jobId: number) =>
   })
 
 // Admin boundaries (levels 8–10) for study_area selection, filtered to the given region.
+// Metadata only – geometries are loaded per boundary via `boundaryGeomQueryOptions`.
 export const adminBoundariesQueryOptions = (regionSlug: string) =>
   queryOptions({
     queryKey: ['planning', 'adminBoundaries', regionSlug] as const,
     queryFn: () => getAdminBoundariesFn({ data: { regionSlug } }),
+    staleTime: 1000 * 60 * 60, // 1h
+  })
+
+// Geometry of a single admin boundary, fetched when the user picks it as study_area.
+export const boundaryGeomQueryOptions = (regionSlug: string, boundaryId: string) =>
+  queryOptions({
+    queryKey: ['planning', 'boundaryGeom', boundaryId] as const,
+    queryFn: () => getBoundaryGeomFn({ data: { regionSlug, boundaryId } }),
     staleTime: 1000 * 60 * 60, // 1h
   })

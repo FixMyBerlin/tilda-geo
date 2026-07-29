@@ -1,19 +1,30 @@
 import { Combobox, ComboboxInput, ComboboxOption, ComboboxOptions } from '@headlessui/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { bbox } from '@turf/turf'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
-import { adminBoundariesQueryOptions } from '@/server/planning/planningQueryOptions'
+import {
+  adminBoundariesQueryOptions,
+  boundaryGeomQueryOptions,
+} from '@/server/planning/planningQueryOptions'
 
+// Level 9 ist regional uneinheitlich: in Berlin Bezirk, in Brandenburg meist Ortsteil.
 const LEVEL_LABELS: Record<string, string> = {
   '8': 'Gemeinde',
-  '9': 'Bezirk',
+  '9': 'Bezirk / Ortsteil',
+  '10': 'Ortsteil',
 }
 
-type Boundary = { id: string; name: string; admin_level: string; geom: unknown }
+type Boundary = { id: string; name: string; name_prefix: string | null; admin_level: string }
 
-/** Searchable combobox to pick an OSM admin boundary (levels 8–9) as the study_area. */
+// Namen wiederholen sich über die Ebenen hinweg (Berlin hat „Mitte", „Pankow", „Spandau" … jeweils
+// als Bezirk und als Ortsteil). In der Liste trennt das die Gruppen-Überschrift, im Eingabefeld
+// nach der Auswahl nicht – deshalb dort die Ebene mit anzeigen.
+const displayName = (b: Boundary | null) =>
+  b ? `${b.name} (${b.name_prefix ?? LEVEL_LABELS[b.admin_level] ?? `Level ${b.admin_level}`})` : ''
+
+/** Searchable combobox to pick an OSM admin boundary (levels 8–10) as the study_area. */
 export const BoundaryPicker = ({
   value,
   onChange,
@@ -24,9 +35,12 @@ export const BoundaryPicker = ({
   regionSlug: string
 }) => {
   const { mainMap: map } = useMap()
+  const queryClient = useQueryClient()
   const { data: boundaries, isLoading } = useQuery(adminBoundariesQueryOptions(regionSlug))
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const [query, setQuery] = useState('')
+  const [geomLoading, setGeomLoading] = useState(false)
+  const [geomError, setGeomError] = useState<string | null>(null)
 
   if (isLoading) return <span className="text-xs text-gray-400">Lade Gebiete…</span>
   // Datenlücke, kein Nutzerfehler: `public.boundaries` ist leer bzw. enthält keine Grenzen im
@@ -41,9 +55,9 @@ export const BoundaryPicker = ({
       </div>
     )
 
-  const filteredBoundaries = boundaries
-    .filter((b) => b.admin_level !== '10')
-    .filter((b) => query === '' || b.name.toLowerCase().includes(query.toLowerCase()))
+  const filteredBoundaries = boundaries.filter(
+    (b) => query === '' || b.name.toLowerCase().includes(query.toLowerCase()),
+  )
 
   const grouped = filteredBoundaries.reduce<Record<string, Boundary[]>>((acc, b) => {
     const lvl = b.admin_level
@@ -54,18 +68,30 @@ export const BoundaryPicker = ({
 
   const currentBoundary = value ? (boundaries.find((b) => b.id === value) ?? null) : null
 
-  const handleChange = (boundary: Boundary | null) => {
+  // Die Geometrie hängt nicht an der Liste, sondern wird erst hier nachgeladen (sonst müsste die
+  // Liste alle Umrisse der Region mitliefern – für Berlin einige hundert Kilobyte).
+  const handleChange = async (boundary: Boundary | null) => {
     if (!boundary) return
-    onChange(boundary.id, boundary.geom, boundary.name)
-    setBoundaryHighlightGeom(boundary.geom as object)
+    setGeomError(null)
+    setGeomLoading(true)
+    try {
+      const geom = await queryClient.fetchQuery(boundaryGeomQueryOptions(regionSlug, boundary.id))
+      onChange(boundary.id, geom, boundary.name)
+      setBoundaryHighlightGeom(geom)
 
-    if (map) {
-      const [minLng, minLat, maxLng, maxLat] = bbox({
-        type: 'Feature',
-        geometry: boundary.geom as any,
-        properties: {},
-      })
-      map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+      if (map) {
+        const [minLng, minLat, maxLng, maxLat] = bbox({
+          type: 'Feature',
+          geometry: geom as any,
+          properties: {},
+        })
+        map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+      }
+    } catch (error) {
+      console.error(error)
+      setGeomError('Die Gebietsgrenze konnte nicht geladen werden. Bitte erneut versuchen.')
+    } finally {
+      setGeomLoading(false)
     }
   }
 
@@ -73,11 +99,13 @@ export const BoundaryPicker = ({
     <Combobox as="div" value={currentBoundary} onChange={handleChange} by="id">
       <ComboboxInput
         className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none"
-        displayValue={(b: Boundary | null) => b?.name ?? ''}
+        displayValue={displayName}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setQuery('')}
         placeholder="Gebiet suchen…"
       />
+      {geomLoading && <p className="mt-1 text-xs text-gray-400">Lade Gebietsgrenze…</p>}
+      {geomError && <p className="mt-1 text-xs text-red-600">{geomError}</p>}
       <ComboboxOptions
         anchor="bottom start"
         className="z-50 max-h-60 w-[var(--input-width)] overflow-auto rounded border border-gray-200 bg-white text-sm shadow-lg empty:hidden"

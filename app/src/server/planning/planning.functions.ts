@@ -185,8 +185,10 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
     }
   })
 
-// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk) filtered to the
+// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk, 10=Ortsteil) filtered to the
 // given region's geometry (looked up via the region's OSM relation IDs).
+// Metadata only – shipping every geometry would be a few hundred kB per call (Berlin: ~560 kB),
+// so the geometry is loaded on selection via `getBoundaryGeomFn`.
 export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
   .handler(async ({ data }) => {
@@ -208,15 +210,17 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
     const hasRegionGeom = regionGeom[0]?.geom != null
 
     const rows = await db.$queryRaw<
-      { id: string; name: string; admin_level: string; geom: object }[]
+      { id: string; name: string; name_prefix: string | null; admin_level: string }[]
     >`
       SELECT
         b.id,
-        COALESCE(b.tags->>'name', b.tags->>'name:de', b.tags->>'official_name', 'Ohne Namen (' || b.id || ')') AS name,
-        b.tags->>'admin_level' AS admin_level,
-        ST_AsGeoJSON(ST_Transform(b.geom, 4326))::json AS geom
+        b.tags->>'name' AS name,
+        b.tags->>'name_prefix' AS name_prefix,
+        b.tags->>'admin_level' AS admin_level
       FROM public.boundaries b
-      WHERE (b.tags->>'admin_level')::int IN (8, 9)
+      WHERE (b.tags->>'admin_level')::int IN (8, 9, 10)
+        AND b.tags->>'name' IS NOT NULL
+        AND b.tags->>'name' <> ''
         AND (
           NOT ${hasRegionGeom}
           OR ST_Intersects(
@@ -224,9 +228,29 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
             (SELECT ST_Union(geom) FROM public.boundaries WHERE id = ANY(${relationKeys}::text[]))
           )
         )
-      ORDER BY (b.tags->>'admin_level')::int, COALESCE(b.tags->>'name', b.tags->>'name:de', b.tags->>'official_name', 'Ohne Namen (' || b.id || ')')
+      ORDER BY (b.tags->>'admin_level')::int, b.tags->>'name'
     `
     return rows
+  })
+
+const BoundaryGeomInput = z.object({ regionSlug: z.string(), boundaryId: z.string() })
+
+// Returns the GeoJSON geometry (EPSG:4326) of a single admin boundary. Called when the user picks
+// a boundary in the study-area combobox; `boundaries.id` is uniquely indexed, so the lookup is cheap.
+export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
+  .inputValidator((data: z.infer<typeof BoundaryGeomInput>) => BoundaryGeomInput.parse(data))
+  .handler(async ({ data }) => {
+    const session = await requireAuth(getRequestHeaders())
+    await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
+
+    const rows = await db.$queryRaw<{ geom: object }[]>`
+      SELECT ST_AsGeoJSON(ST_Transform(b.geom, 4326))::json AS geom
+      FROM public.boundaries b
+      WHERE b.id = ${data.boundaryId}
+    `
+    const geom = rows[0]?.geom
+    if (!geom) throw new Error(`Gebietsgrenze ${data.boundaryId} nicht gefunden`)
+    return geom
   })
 
 // ── Mutations ───────────────────────────────────────────────────────────────────
