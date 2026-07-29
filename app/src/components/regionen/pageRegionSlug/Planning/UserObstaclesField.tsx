@@ -66,6 +66,7 @@ export const UserObstaclesField = ({
             parse={parseUserGeojson}
             onResult={(fc) => setUserGeojson(fc)}
             maxBytes={MAX_USER_GEOJSON_BYTES}
+            historyScope="user_geojson"
             label={
               <>
                 Eigene GeoJSON-Datei hierher ziehen
