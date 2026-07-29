@@ -81,7 +81,7 @@
     "mapbox-styles-update:2lint": "bun run lint",
     "mapbox-styles-update:3format": "bun run format",
     "mapbox-styles-update:4github": "github",
-    "static-datasets-update": "bun --preserve-symlinks --env-file=../.env --env-file=../.env.local ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=",
+    "static-datasets-update": "bun --env-file=../.env --env-file=../.env.local ./scripts/StaticDatasets/updateStaticDatasets.ts --folder-filter=",
     "static-datasets-download-sources": "bun --env-file=../.env --env-file=../.env.local ./scripts/StaticDatasets/updateDownloadSources.ts --folder-filter=",
     "static-datasets-link": "ln -sf ../../../../tilda-static-data/geojson scripts/StaticDatasets",
     "static-datasets-unlink": "rm -f scripts/StaticDatasets/geojson",
