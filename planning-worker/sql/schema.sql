@@ -76,6 +76,12 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution small
 -- Ausschlussgrund „Gebäude" anzuzeigen. Nur im Fein-Gitter (Res 13) gesetzt.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;
 
+-- Liegt das Hexagon auf einer Fahrbahn (public._parking_roads, gepuffert um
+-- die Straßenbreite)? Nur gesetzt, wenn „Fahrbahnen ausschließen" aktiv war;
+-- solche Zellen sind hart ausgeschlossen (mce_gesamtscore = 0). Nur im
+-- Fein-Gitter (Res 13) gesetzt.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;
+
 -- Potentialflächen (aus Hexagonen abgeleitete Polygone) werden nicht mehr
 -- berechnet; Altbestand aus früheren Läufen aufräumen.
 DROP TABLE IF EXISTS planning.scenario_areas;

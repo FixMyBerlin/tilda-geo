@@ -36,7 +36,7 @@ export const FactorFields = ({
 }: {
   config: FactorConfig
   setWeight: (key: string, value: number) => void
-  setField: (key: keyof FactorConfig, value: number) => void
+  setField: (key: keyof FactorConfig, value: number | boolean) => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
   readOnly?: boolean
 }) => {
@@ -108,6 +108,24 @@ export const FactorFields = ({
           </label>
         ))}
       </div>
+
+      <div>
+        <label className="flex items-center gap-1 font-medium text-gray-800">
+          <input
+            type="checkbox"
+            checked={config.exclude_carriageways ?? false}
+            disabled={readOnly}
+            onChange={(e) => setField('exclude_carriageways', e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          Fahrbahnen ausschließen
+          <InfoTooltip>
+            Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche
+            berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich,
+            unabhängig von den übrigen Faktoren.
+          </InfoTooltip>
+        </label>
+      </div>
     </>
   )
 }
@@ -143,7 +161,7 @@ export const FactorEditorPanel = ({
   const setWeight = (key: string, value: number) =>
     setConfig((c) => ({ ...c, weights: { ...c.weights, [key]: value } }))
 
-  const setField = (key: keyof FactorConfig, value: number) =>
+  const setField = (key: keyof FactorConfig, value: number | boolean) =>
     setConfig((c) => ({ ...c, [key]: value }))
 
   const setVegetationDirection = (value: 'positive' | 'negative') =>

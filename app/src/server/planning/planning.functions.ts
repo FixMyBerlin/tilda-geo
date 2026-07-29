@@ -27,6 +27,7 @@ const FactorConfigSchema = z
     cir_source: z.enum(['auto', 'bayern', 'bb', 'hessen']).optional(),
     max_cyclepath_dist_m: z.number().optional(),
     min_surface_score: z.number().optional(),
+    exclude_carriageways: z.boolean().optional(),
     intersection_radius_m: z.number().optional(),
     parken_radius_m: z.number().optional(),
     fussgaengerzone_radius_m: z.number().optional(),

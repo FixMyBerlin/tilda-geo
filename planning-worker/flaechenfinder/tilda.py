@@ -66,6 +66,15 @@ class TildaLoader:
             print(f"   ⚠️  Bestands-Radabstellanlagen-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_roads(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Straßen-Linien mit Breite (für den Fahrbahnen-Ausschluss)."""
+        try:
+            gdf = self._loader.load_roads(study_area_geom)
+            return gdf[gdf.geometry.geom_type.isin(["LineString", "MultiLineString"])].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Straßen-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     @staticmethod
     def score_cycleway_proximity(dist_m: float, max_dist_m: float) -> float:
         """0–100: < 20 m → 100, linear bis max_dist_m → 0, darüber 0."""

@@ -25,6 +25,7 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   cir_source: 'auto' as const,
   max_cyclepath_dist_m: 50,
   min_surface_score: 30,
+  exclude_carriageways: false,
   intersection_radius_m: 20,
   parken_radius_m: 15,
   fussgaengerzone_radius_m: 20,

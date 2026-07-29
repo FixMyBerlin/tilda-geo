@@ -75,6 +75,11 @@ class UseCaseConfig:
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
     min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
 
+    # Fahrbahnen ausschließen: Straßenflächen (public._parking_roads, gepuffert
+    # um ihre erfasste/geschätzte Breite) hart aus der Bebauung ausschließen.
+    # Reiner Ein/Aus-Schalter (kein Gewicht) — Default aus (non-breaking).
+    exclude_carriageways: bool = False
+
     # Mindest-Score, ab dem ein Hexagon zu einer zusammenhängenden Kandidaten-
     # fläche zählt (Flächensuche). Cluster = benachbarte Hexagone mit
     # mce_gesamtscore >= dieser Schwelle; ihre Gesamtfläche steht in
@@ -166,4 +171,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
+        exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),
     )

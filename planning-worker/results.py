@@ -15,7 +15,7 @@ HEX_COLUMNS = [
     "score_hangneigung", "score_oepnv",
     "score_vegetation", "score_kreuzung", "score_parken", "score_fussgaengerzone",
     "score_bestand", "score_eigendaten", "cluster_area_m2",
-    "eignungsklasse", "gebaeude",
+    "eignungsklasse", "gebaeude", "fahrbahn",
 ]
 
 

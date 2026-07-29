@@ -137,7 +137,7 @@ export const PlanningWizard = ({
 
   const setWeight = (key: string, value: number) =>
     setConfig((c) => ({ ...c, weights: { ...c.weights, [key]: value } }))
-  const setField = (key: keyof FactorConfig, value: number) =>
+  const setField = (key: keyof FactorConfig, value: number | boolean) =>
     setConfig((c) => ({ ...c, [key]: value }))
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))

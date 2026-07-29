@@ -123,6 +123,13 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           </div>
         )}
 
+        {props.fahrbahn && (
+          <div className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
+            <strong>Hinweis:</strong> Auf dieser Fläche verläuft eine Straße – eine Bebauung ist
+            hier nicht möglich.
+          </div>
+        )}
+
         {areaFilterOn && props.cluster_area_m2 != null && (
           <div className="flex items-center justify-between text-xs">
             <span className="text-gray-500">Zusammenhängende Fläche</span>

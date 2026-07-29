@@ -66,6 +66,9 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     # Aggregat-Zellen wäre „keine Bebauung möglich" irreführend, daher immer False –
     # die Spalte muss aber existieren (scenario_hexagons.gebaeude ist NOT NULL).
     agg["gebaeude"] = False
+    # Gleiche Begründung wie bei „gebaeude": auf dem groben Aggregat-Gitter ist
+    # ein Einzel-Flag pro Feingitter-Zelle nicht aussagekräftig.
+    agg["fahrbahn"] = False
     agg["eignungsklasse"] = pd.cut(
         agg["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
@@ -253,6 +256,25 @@ def run_flaechenfinder(
     else:
         hex_proj["gebaeude"] = False
     del buildings
+
+    # Fahrbahnen ausschließen (Checkbox, kein Gewicht): Straßen aus
+    # _parking_roads werden um ihre Breite gepuffert und wie Gebäude hart
+    # ausgeschlossen. Nur bei aktivierter Checkbox laden (sonst keine Abfrage).
+    if use_case.exclude_carriageways:
+        roads = tilda_loader.load_roads(study_area_geom)
+        if len(roads):
+            roads_proj = roads.to_crs("EPSG:25832").rename_geometry("geometry")
+            width = pd.to_numeric(roads_proj["width_m"], errors="coerce").fillna(3.0)
+            roads_proj = roads_proj.set_geometry(roads_proj.geometry.buffer(width / 2.0))
+            hexes = hex_proj[["geometry"]].copy()
+            pairs = gpd.sjoin(hexes, roads_proj[["geometry"]], how="inner", predicate="intersects")
+            hex_proj["fahrbahn"] = hex_proj.index.isin(pairs.index)
+            del hexes, pairs, roads_proj
+        else:
+            hex_proj["fahrbahn"] = False
+        del roads
+    else:
+        hex_proj["fahrbahn"] = False
 
     try:
         surfaces = osm_loader.features_from_polygon(study_area_geom, {"surface": True})
@@ -720,7 +742,8 @@ def run_flaechenfinder(
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
         (hex_proj["score_bodenbelag"]        < use_case.min_surface_score) |
-        hex_proj["gebaeude"]
+        hex_proj["gebaeude"] |
+        hex_proj["fahrbahn"]
     )
     apply_bebauung_exclusion(hex_proj, exclusion)
 

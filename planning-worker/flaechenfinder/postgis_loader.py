@@ -215,6 +215,35 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners (Fußgängerzone) fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_roads(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Straßen-Linien mit Breite (für den Fahrbahnen-Ausschluss).
+
+        Liest ALLE Zeilen aus `public._parking_roads` (inkl. Service-Wegen/
+        Zufahrten/Tracks, keine Klassenfilterung) mit der bereits vom
+        Parking-Topic berechneten Breite (`tags->>'width'`, siehe
+        `road_width_tags.lua` — löst OSM-`width`-Tag oder einen
+        Highway-Typ/Oneway-Fallback auf, ist praktisch immer gesetzt).
+
+        Abhängigkeit + Fallback identisch zu `load_intersection_corners`:
+        `_parking_roads` existiert nur, wenn das Parking-Topic für die Region
+        prozessiert wurde. Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
+        """
+        wkt = polygon_4326.wkt
+        sql = f"""
+            SELECT ST_Transform(geom, 4326) AS geom, (tags->>'width')::numeric AS width_m
+            FROM public."_parking_roads"
+            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Straßen aus _parking_roads")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage _parking_roads fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def load_car_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """KFZ-Parkflächen als Umwidmungs-Kandidaten (für den Parken-Bonus).
 

@@ -40,6 +40,7 @@ BEGIN
                 cluster_area_m2,
                 eignungsklasse,
                 gebaeude,
+                fahrbahn,
                 ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
             FROM planning.scenario_hexagons
             WHERE run_id = run_id_val

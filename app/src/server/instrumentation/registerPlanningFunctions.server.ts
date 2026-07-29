@@ -34,7 +34,8 @@ async function ensurePlanningSchema() {
       score_fussgaengerzone   real,
       score_bestand           real,
       score_eigendaten        real,
-      eignungsklasse          text
+      eignungsklasse          text,
+      fahrbahn                boolean NOT NULL DEFAULT false
     );`)
   // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
   await geoDataClient.$executeRawUnsafe(
@@ -69,6 +70,11 @@ async function ensurePlanningSchema() {
   // min_score_threshold). Client filtert clientseitig auf eine Zielgröße.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS cluster_area_m2 real;`,
+  )
+  // Fahrbahnen ausschließen: Hexagon liegt auf einer um ihre Breite gepufferten
+  // Straße (public._parking_roads); nur gesetzt, wenn die Checkbox aktiv war.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;`,
   )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
@@ -126,6 +132,7 @@ async function registerHexagonsFunction() {
           score_eigendaten,
           cluster_area_m2,
           eignungsklasse,
+          fahrbahn,
           ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
         FROM planning.scenario_hexagons
         WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
@@ -155,6 +162,7 @@ async function registerHexagonsFunction() {
           score_eigendaten: 'real',
           cluster_area_m2: 'real',
           eignungsklasse: 'text',
+          fahrbahn: 'boolean',
         },
       },
     ],
