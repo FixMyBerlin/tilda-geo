@@ -183,6 +183,7 @@ export const SourcesLayersPlanning = () => {
   const [areaFilterOn] = usePlanningAreaFilterParam()
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
+  const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
 
   useEffect(() => {
     if (runId != null) {
@@ -204,6 +205,7 @@ export const SourcesLayersPlanning = () => {
 
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
+  const carriagewaysUrl = getTilesUrl(`/planning_carriageways/{z}/{x}/{y}?run_id=${runId}`)
   const fillLayerProps = hexagonFillLayerProps(
     PLANNING_SCORE_PROPERTY[scoreMode],
     areaFilterOn,
@@ -251,6 +253,26 @@ export const SourcesLayersPlanning = () => {
             source-layer="planning_vegetation"
             type="line"
             paint={{ 'line-color': '#1b4332', 'line-width': 0.5, 'line-opacity': 0.6 }}
+          />
+        </>
+      )}
+
+      {carriagewaysOn && (
+        <>
+          <Source id="planning-carriageways-source" type="vector" tiles={[carriagewaysUrl]} />
+          <Layer
+            id="planning-carriageways-fill"
+            source="planning-carriageways-source"
+            source-layer="planning_carriageways"
+            type="fill"
+            paint={{ 'fill-color': '#b45309', 'fill-opacity': 0.45 }}
+          />
+          <Layer
+            id="planning-carriageways-outline"
+            source="planning-carriageways-source"
+            source-layer="planning_carriageways"
+            type="line"
+            paint={{ 'line-color': '#78350f', 'line-width': 0.5, 'line-opacity': 0.6 }}
           />
         </>
       )}

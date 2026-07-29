@@ -83,6 +83,14 @@ async function ensurePlanningSchema() {
       ndvi       real,
       flaeche_m2 real
     );`)
+  // Gepufferte Fahrbahnflächen (public._parking_roads, Breite als Puffer); nur
+  // befüllt, wenn „Fahrbahnen ausschließen" aktiv war. Dient der Kartenanzeige.
+  await geoDataClient.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS planning.scenario_carriageways (
+      run_id  bigint NOT NULL,
+      geom    geometry(MultiPolygon, 3857) NOT NULL,
+      width_m real
+    );`)
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);`,
   )
@@ -94,6 +102,12 @@ async function ensurePlanningSchema() {
   )
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_vegetation_geom_idx ON planning.scenario_vegetation USING gist (geom);`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS scenario_carriageways_run_id_idx ON planning.scenario_carriageways (run_id);`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS scenario_carriageways_geom_idx ON planning.scenario_carriageways USING gist (geom);`,
   )
   // Potentialflächen werden nicht mehr berechnet; Altbestand aufräumen.
   await geoDataClient.$executeRawUnsafe(`DROP TABLE IF EXISTS planning.scenario_areas;`)
@@ -202,8 +216,38 @@ async function registerVegetationFunction() {
   )
 }
 
+async function registerCarriagewaysFunction() {
+  await geoDataClient.$executeRawUnsafe(`
+    CREATE OR REPLACE FUNCTION public.planning_carriageways(z integer, x integer, y integer, query_params json)
+    RETURNS bytea AS $$
+    DECLARE
+      mvt bytea;
+      rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
+    BEGIN
+      IF rid IS NULL THEN
+        RETURN NULL;
+      END IF;
+      SELECT INTO mvt ST_AsMVT(tile, 'planning_carriageways', 4096, 'geom') FROM (
+        SELECT
+          width_m,
+          ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
+        FROM planning.scenario_carriageways
+        WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
+      ) AS tile;
+      RETURN mvt;
+    END
+    $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
+  const spec = {
+    vector_layers: [{ id: 'planning_carriageways', fields: { width_m: 'real' } }],
+  }
+  await geoDataClient.$executeRawUnsafe(
+    `COMMENT ON FUNCTION public.planning_carriageways IS '${JSON.stringify(spec)}';`,
+  )
+}
+
 export async function registerPlanningFunctions() {
   await ensurePlanningSchema()
   await registerHexagonsFunction()
   await registerVegetationFunction()
+  await registerCarriagewaysFunction()
 }

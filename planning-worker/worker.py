@@ -33,6 +33,7 @@ from flaechenfinder.scorer import (
     aggregate_hexagons,
     run_flaechenfinder,
 )
+from flaechenfinder.carriageways import compute_carriageway_areas
 from flaechenfinder.tilda import TildaLoader
 from flaechenfinder.vegetation import compute_vegetation_areas
 from results import write_results
@@ -220,6 +221,18 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
                     vegetation = None
                 set_progress(conn, job_id, 70, step1_label)
 
+    # Fahrbahnen ausschließen (Checkbox, kein eigener Scoring-Step): Straßen
+    # einmalig laden+puffern, damit dasselbe GeoDataFrame sowohl für den
+    # harten Ausschluss (run_flaechenfinder) als auch für die Kartenanzeige
+    # (scenario_carriageways) genutzt wird – analog zur Vegetation oben.
+    carriageways = None
+    if use_case.exclude_carriageways:
+        try:
+            carriageways = compute_carriageway_areas(study_area, tilda_loader)
+        except Exception as e:
+            print(f"   ⚠️  Fahrbahnen-Berechnung fehlgeschlagen: {e}")
+            carriageways = None
+
     # Schritte 2–11 (Scoring in run_flaechenfinder) auf 72–90 % abbilden und
     # ihren Namen als progressLabel an die App weiterreichen. Format
     # "n/total · Name", damit das Frontend den aktuellen Schritt in der
@@ -236,6 +249,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
         h3_resolution=h3_res,
         osm_loader=loader,
         vegetation_gdf=vegetation,
+        carriageway_gdf=carriageways,
         user_geojson=cfg.get("user_geojson"),
         progress_cb=_scoring_progress,
     )
@@ -245,10 +259,10 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     hex_agg = aggregate_hexagons(hex_proj)
 
     set_progress(conn, job_id, 92, f"{SCORING_STEP_COUNT}/{SCORING_STEP_COUNT} · {SCORING_STEPS[-1]}")
-    hex_count, veg_count = write_results(
-        engine, conn, run_id, hex_proj, vegetation, hex_agg=hex_agg
+    hex_count, veg_count, _carriageway_count = write_results(
+        engine, conn, run_id, hex_proj, vegetation, carriageways, hex_agg=hex_agg
     )
-    del hex_proj, hex_agg, vegetation
+    del hex_proj, hex_agg, vegetation, carriageways
     gc.collect()
     set_progress(conn, job_id, 100, "Fertig")
 

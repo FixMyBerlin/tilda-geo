@@ -77,3 +77,26 @@ BEGIN
     );
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION public.planning_carriageways(
+    z int, x int, y int, query_params json DEFAULT '{}'
+)
+RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
+DECLARE
+    run_id_val bigint := (query_params->>'run_id')::bigint;
+    bounds     geometry := ST_TileEnvelope(z, x, y);
+BEGIN
+    RETURN (
+        SELECT ST_AsMVT(t, 'planning_carriageways', 4096, 'geom')
+        FROM (
+            SELECT
+                width_m,
+                ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
+            FROM planning.scenario_carriageways
+            WHERE run_id = run_id_val
+              AND geom && bounds
+        ) t
+        WHERE t.geom IS NOT NULL
+    );
+END;
+$$;

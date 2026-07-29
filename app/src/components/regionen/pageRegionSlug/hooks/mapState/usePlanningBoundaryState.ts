@@ -48,6 +48,14 @@ type Store = {
    */
   vegetationAttribution: string | null
   setVegetationAttribution: (attribution: string | null) => void
+
+  /**
+   * Whether the Fahrbahnen ("Fahrbahnen ausschließen") result layer is shown.
+   * Same rationale as `vegetationVisible`: kept in this store, not the URL, so
+   * toggling doesn't trigger a router navigation.
+   */
+  carriagewaysVisible: boolean
+  setCarriagewaysVisible: (visible: boolean) => void
 }
 
 export const usePlanningBoundaryState = create<Store>((set) => ({
@@ -74,4 +82,7 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   vegetationAttribution: null,
   setVegetationAttribution: (attribution) => set({ vegetationAttribution: attribution }),
+
+  carriagewaysVisible: false,
+  setCarriagewaysVisible: (visible) => set({ carriagewaysVisible: visible }),
 }))

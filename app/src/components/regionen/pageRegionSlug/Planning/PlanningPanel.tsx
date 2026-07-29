@@ -48,6 +48,32 @@ const VegetationToggle = () => {
   )
 }
 
+/** Quick on/off toggle for the buffered carriageway ("Fahrbahnen ausschließen") result layer. */
+const CarriagewaysToggle = () => {
+  const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
+  const setCarriagewaysOn = usePlanningBoundaryState((s) => s.setCarriagewaysVisible)
+  return (
+    <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+      <span className="font-medium text-gray-800">Fahrbahnen</span>
+      <Switch
+        checked={carriagewaysOn}
+        onChange={setCarriagewaysOn}
+        className={twJoin(
+          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
+          carriagewaysOn ? 'bg-amber-700' : 'bg-gray-300',
+        )}
+      >
+        <span
+          className={twJoin(
+            'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
+            carriagewaysOn ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+          )}
+        />
+      </Switch>
+    </label>
+  )
+}
+
 /**
  * Zielgröße-Filter für die Flächensuche: dunkelt Hexagone ab, deren
  * zusammenhängende Fläche (`cluster_area_m2`, Connected-Component-Labeling im
@@ -178,6 +204,11 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
       {scenario.runs[0]?.status === 'COMPLETE' && (scenario.runs[0].vegCount ?? 0) > 0 && (
         <VegetationToggle />
       )}
+
+      {scenario.runs[0]?.status === 'COMPLETE' &&
+        (scenario.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
+          <CarriagewaysToggle />
+        )}
     </div>
   )
 }

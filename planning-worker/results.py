@@ -51,20 +51,22 @@ def write_results(
     run_id: int,
     hex_proj: gpd.GeoDataFrame,
     vegetation: gpd.GeoDataFrame | None = None,
+    carriageways: gpd.GeoDataFrame | None = None,
     hex_agg: gpd.GeoDataFrame | None = None,
 ):
-    """Schreibt Hexagone + Vegetation für `run_id`.
+    """Schreibt Hexagone + Vegetation + Fahrbahnflächen für `run_id`.
 
     `hex_proj` ist das feine BASE-Gitter, `hex_agg` das grobe Aggregat für
     niedrige Zoomstufen; beide landen mit ihrer jeweiligen `resolution` in
-    derselben Tabelle. Gibt (hex_count, veg_count) zurück, wobei `hex_count`
-    nur die feinen (BASE-)Hexagone zählt.
+    derselben Tabelle. Gibt (hex_count, veg_count, carriageway_count) zurück,
+    wobei `hex_count` nur die feinen (BASE-)Hexagone zählt.
     """
 
     # Idempotenz: evtl. vorhandene Zeilen dieses Laufs entfernen.
     with conn.cursor() as cur:
         cur.execute("DELETE FROM planning.scenario_hexagons WHERE run_id = %s", (run_id,))
         cur.execute("DELETE FROM planning.scenario_vegetation WHERE run_id = %s", (run_id,))
+        cur.execute("DELETE FROM planning.scenario_carriageways WHERE run_id = %s", (run_id,))
 
     hex_count = _write_hexagons(engine, hex_proj, run_id)
     _write_hexagons(engine, hex_agg, run_id)
@@ -85,8 +87,23 @@ def write_results(
         veg_count = len(vg)
         del vg
 
+    carriageway_count = 0
+    if carriageways is not None and len(carriageways):
+        cw = carriageways.to_crs("EPSG:3857")
+        cw = cw.rename_geometry("geom")
+        cw["geom"] = cw["geom"].apply(_to_multipolygon)
+        cw = cw[cw["geom"].notna()]
+        cw["run_id"] = run_id
+        if "width_m" not in cw.columns:
+            cw["width_m"] = None
+        cw = cw.set_geometry("geom")[["run_id", "geom", "width_m"]]
+        if len(cw):
+            cw.to_postgis("scenario_carriageways", engine, schema="planning", if_exists="append", index=False)
+        carriageway_count = len(cw)
+        del cw
+
     print(
-        f"   ✓ geschrieben: {hex_count} Hexagone, "
-        f"{veg_count} Vegetationsflächen (run_id={run_id})"
+        f"   ✓ geschrieben: {hex_count} Hexagone, {veg_count} Vegetationsflächen, "
+        f"{carriageway_count} Fahrbahnflächen (run_id={run_id})"
     )
-    return hex_count, veg_count
+    return hex_count, veg_count, carriageway_count

@@ -180,6 +180,7 @@ def run_flaechenfinder(
     h3_resolution: int = BASE_H3_RES,
     osm_loader=None,
     vegetation_gdf=None,
+    carriageway_gdf=None,
     user_geojson=None,
     progress_cb=None,
 ):
@@ -190,6 +191,13 @@ def run_flaechenfinder(
 
     `vegetation_gdf` (optional, EPSG:25832) enthält die on-demand berechneten
     Vegetationspolygone; daraus wird der Bedeckungsgrad je Hexagon abgeleitet.
+
+    `carriageway_gdf` (optional, EPSG:25832) enthält die vom Worker vorab
+    berechneten, um ihre Breite gepufferten Straßenflächen
+    (`flaechenfinder.carriageways.compute_carriageway_areas`) – nur gesetzt,
+    wenn `use_case.exclude_carriageways` aktiv war. Dient hier ausschließlich
+    dem harten Bebauungs-Ausschluss; die Kartenanzeige übernimmt der Worker
+    direkt aus demselben GeoDataFrame (siehe `results.py`).
 
     `progress_cb` (optional) wird vor jedem der hier ausgeführten Schritte
     (step:int 2..11, total:int, label:str) aufgerufen, damit der Worker den
@@ -257,22 +265,17 @@ def run_flaechenfinder(
         hex_proj["gebaeude"] = False
     del buildings
 
-    # Fahrbahnen ausschließen (Checkbox, kein Gewicht): Straßen aus
-    # _parking_roads werden um ihre Breite gepuffert und wie Gebäude hart
-    # ausgeschlossen. Nur bei aktivierter Checkbox laden (sonst keine Abfrage).
-    if use_case.exclude_carriageways:
-        roads = tilda_loader.load_roads(study_area_geom)
-        if len(roads):
-            roads_proj = roads.to_crs("EPSG:25832").rename_geometry("geometry")
-            width = pd.to_numeric(roads_proj["width_m"], errors="coerce").fillna(3.0)
-            roads_proj = roads_proj.set_geometry(roads_proj.geometry.buffer(width / 2.0))
-            hexes = hex_proj[["geometry"]].copy()
-            pairs = gpd.sjoin(hexes, roads_proj[["geometry"]], how="inner", predicate="intersects")
-            hex_proj["fahrbahn"] = hex_proj.index.isin(pairs.index)
-            del hexes, pairs, roads_proj
-        else:
-            hex_proj["fahrbahn"] = False
-        del roads
+    # Fahrbahnen ausschließen (Checkbox, kein Gewicht): die vom Worker vorab
+    # gepufferten Straßenflächen (carriageway_gdf) werden wie Gebäude hart
+    # ausgeschlossen. Laden+Puffern passiert einmalig im Worker (siehe
+    # flaechenfinder.carriageways), damit dasselbe GeoDataFrame auch für die
+    # Kartenanzeige (planning.scenario_carriageways) wiederverwendet werden kann.
+    if use_case.exclude_carriageways and carriageway_gdf is not None and len(carriageway_gdf):
+        roads_proj = carriageway_gdf.to_crs("EPSG:25832") if carriageway_gdf.crs != "EPSG:25832" else carriageway_gdf
+        hexes = hex_proj[["geometry"]].copy()
+        pairs = gpd.sjoin(hexes, roads_proj[["geometry"]], how="inner", predicate="intersects")
+        hex_proj["fahrbahn"] = hex_proj.index.isin(pairs.index)
+        del hexes, pairs, roads_proj
     else:
         hex_proj["fahrbahn"] = False
 

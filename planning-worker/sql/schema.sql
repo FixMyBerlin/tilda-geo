@@ -94,8 +94,19 @@ CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
   flaeche_m2 real
 );
 
+-- Gepufferte Fahrbahnflächen (public._parking_roads, Breite als Puffer), pro
+-- Lauf gespeichert. Nur befüllt, wenn „Fahrbahnen ausschließen" aktiv war
+-- (siehe scenario_hexagons.fahrbahn); dient hier der Kartenanzeige.
+CREATE TABLE IF NOT EXISTS planning.scenario_carriageways (
+  run_id   bigint NOT NULL,
+  geom     geometry(MultiPolygon, 3857) NOT NULL,
+  width_m  real
+);
+
 CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);
 CREATE INDEX IF NOT EXISTS scenario_hexagons_run_res_idx ON planning.scenario_hexagons (run_id, resolution);
 CREATE INDEX IF NOT EXISTS scenario_hexagons_geom_idx   ON planning.scenario_hexagons USING gist (geom);
 CREATE INDEX IF NOT EXISTS scenario_vegetation_run_id_idx ON planning.scenario_vegetation (run_id);
 CREATE INDEX IF NOT EXISTS scenario_vegetation_geom_idx   ON planning.scenario_vegetation USING gist (geom);
+CREATE INDEX IF NOT EXISTS scenario_carriageways_run_id_idx ON planning.scenario_carriageways (run_id);
+CREATE INDEX IF NOT EXISTS scenario_carriageways_geom_idx   ON planning.scenario_carriageways USING gist (geom);
