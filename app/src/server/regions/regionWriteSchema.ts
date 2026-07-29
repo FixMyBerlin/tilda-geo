@@ -274,12 +274,25 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
   }
 }
 
+export const RegionMaskFormRawSchema = z
+  .object({
+    maskEnabled: z.enum(['true', 'false']),
+    maskOsmRelationIds: z.string(),
+    maskBufferKm: z.string(),
+  })
+  .refine((form) => form.maskEnabled === 'false' || form.maskOsmRelationIds.trim().length > 0, {
+    message: 'Mindestens eine OSM Relation ID ist erforderlich.',
+    path: ['maskOsmRelationIds'],
+  })
+
+export type RegionMaskFormInput = z.input<typeof RegionMaskFormRawSchema>
+
 export function regionConfigToMaskFormValues(config: RegionMaskConfig) {
   return {
     maskEnabled: toTrueFalseString(config.maskOsmRelationIds.length > 0),
     maskOsmRelationIds: joinCommaList(config.maskOsmRelationIds.map(String)),
     maskBufferKm: String(config.maskBufferKm),
-  }
+  } satisfies RegionMaskFormInput
 }
 
 export const catalogOptions = {

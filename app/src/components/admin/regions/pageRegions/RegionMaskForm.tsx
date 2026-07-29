@@ -7,13 +7,13 @@ import { EN_DECIMAL_HELP } from '@/components/shared/form/enDecimalInput'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
-import {
-  RegionMaskFormRawSchema,
-  type RegionMaskFormInput,
-} from '@/server/regions/mutations/generateRegionMask.server'
 import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
 import { generateRegionMaskFn } from '@/server/regions/regions.functions'
-import { regionConfigToMaskFormValues } from '@/server/regions/regionWriteSchema'
+import {
+  RegionMaskFormRawSchema,
+  regionConfigToMaskFormValues,
+  type RegionMaskFormInput,
+} from '@/server/regions/regionWriteSchema'
 
 const regionMaskFormEmptyDefaults = {
   maskEnabled: 'false' as const,

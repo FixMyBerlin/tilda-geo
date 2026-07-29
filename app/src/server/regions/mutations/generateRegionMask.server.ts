@@ -10,19 +10,6 @@ import { updateRegionMaskConfig } from '@/server/regions/mutations/updateRegionM
 
 const trueOrFalse = z.enum(['true', 'false']).transform((v) => v === 'true')
 
-export const RegionMaskFormRawSchema = z
-  .object({
-    maskEnabled: z.enum(['true', 'false']),
-    maskOsmRelationIds: z.string(),
-    maskBufferKm: z.string(),
-  })
-  .refine((form) => form.maskEnabled === 'false' || form.maskOsmRelationIds.trim().length > 0, {
-    message: 'Mindestens eine OSM Relation ID ist erforderlich.',
-    path: ['maskOsmRelationIds'],
-  })
-
-export type RegionMaskFormInput = z.input<typeof RegionMaskFormRawSchema>
-
 export const RegionMaskActionSchema = z
   .object({
     slug: z.string(),
