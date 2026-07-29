@@ -250,7 +250,7 @@ export const PlanningWizard = ({
               }`}
             >
               <PencilSquareIcon className="h-4 w-4" />
-              {drawingActive ? 'Zeichnen beenden' : 'Gebiet zeichnen'}
+              {drawingActive ? 'Zeichnen abbrechen' : 'Gebiet zeichnen'}
             </button>
             {drawingActive && (
               <p className="text-xs text-gray-500">In der Karte ein Polygon zeichnen.</p>

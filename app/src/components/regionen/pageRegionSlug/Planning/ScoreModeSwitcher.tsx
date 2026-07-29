@@ -94,7 +94,7 @@ export const ScoreModeSwitcher = () => {
           onChange={(e) => handleOpacityChange(Number(e.target.value))}
           className="w-full accent-green-700"
         />
-        <span className="w-9 shrink-0 text-right text-xs tabular-nums text-gray-500">
+        <span className="w-9 shrink-0 text-right text-xs text-gray-500 tabular-nums">
           {visible ? opacity : 0}%
         </span>
       </div>
