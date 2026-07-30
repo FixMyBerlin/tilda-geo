@@ -1,9 +1,11 @@
 import { motion } from 'motion/react'
 import { useState, type ReactNode } from 'react'
+import { twJoin } from 'tailwind-merge'
 import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
+import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { SortableList } from '@/components/shared/sortable/SortableList'
-import type { RegionFormInput } from '@/server/regions/regionWriteSchema'
+import { navigationLinkPathError, type RegionFormInput } from '@/server/regions/regionWriteSchema'
 import { withSortOrder } from '@/shared/orderedList/assignSortOrder'
 import { newClientListKey } from '@/shared/orderedList/clientListKey'
 
@@ -32,14 +34,6 @@ const ensureTrailingEmpty = (links: NavLink[]) => {
   return normalized
 }
 
-const splitTrailingEmpty = (links: NavLink[]) => {
-  const last = links.at(-1)
-  if (last && isEmptyNavLink(last)) {
-    return { filledLinks: links.slice(0, -1), trailingLink: last }
-  }
-  return { filledLinks: links, trailingLink: null as NavLink | null }
-}
-
 function updateLink(links: NavLink[], index: number, patch: Partial<NavLink>) {
   return links.map((link, i) => (i === index ? { ...link, ...patch } : link))
 }
@@ -49,13 +43,33 @@ type NavLinkRowProps = {
   index: number
   dragHandle?: ReactNode
   showDelete: boolean
+  fadeIn: boolean
   onCommit: (links: NavLink[]) => void
   links: NavLink[]
 }
 
-function NavLinkRow({ link, index, dragHandle, showDelete, onCommit, links }: NavLinkRowProps) {
+function NavLinkRow({
+  link,
+  index,
+  dragHandle,
+  showDelete,
+  fadeIn,
+  onCommit,
+  links,
+}: NavLinkRowProps) {
+  const pathError = navigationLinkPathError(link)
+  const pathInputClassName = twJoin(
+    'rounded border px-2 py-1',
+    pathError ? 'border-red-800' : 'border-gray-300',
+  )
+
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded border border-gray-200 p-3">
+    <motion.div
+      initial={fadeIn ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="flex flex-wrap items-end gap-3 rounded border border-gray-200 p-3"
+    >
       {dragHandle}
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium text-gray-700">Name</span>
@@ -87,11 +101,17 @@ function NavLinkRow({ link, index, dragHandle, showDelete, onCommit, links }: Na
           {link.linkType === 'internal' ? 'Pfad' : 'URL'}
         </span>
         <input
-          className="rounded border border-gray-300 px-2 py-1"
+          className={pathInputClassName}
           value={link.path}
           placeholder={link.linkType === 'internal' ? '/regionen/:slug/…' : 'https://…'}
+          aria-invalid={Boolean(pathError)}
           onChange={(event) => onCommit(updateLink(links, index, { path: event.target.value }))}
         />
+        {pathError ? (
+          <span role="alert" className="text-sm text-red-800">
+            {pathError}
+          </span>
+        ) : null}
       </label>
       {showDelete ? (
         <AdminTrashIconButton
@@ -99,19 +119,20 @@ function NavLinkRow({ link, index, dragHandle, showDelete, onCommit, links }: Na
           onClick={() => onCommit(links.filter((_, i) => i !== index))}
         />
       ) : null}
-    </div>
+    </motion.div>
   )
 }
 
 type NavigationLinksFieldProps = {
   value: NavLink[]
   onChange: (links: NavLink[]) => void
+  fieldErrors: unknown[] | undefined
 }
 
-function NavigationLinksField({ value, onChange }: NavigationLinksFieldProps) {
+function NavigationLinksField({ value, onChange, fieldErrors }: NavigationLinksFieldProps) {
   const links = ensureTrailingEmpty(value)
-  const { filledLinks, trailingLink } = splitTrailingEmpty(links)
   const [fadeInKey, setFadeInKey] = useState<string | null>(null)
+  const errorLines = uniqueFormattedFormErrors(fieldErrors)
 
   const commit = (next: NavLink[]) => {
     const normalized = ensureTrailingEmpty(next)
@@ -119,6 +140,11 @@ function NavigationLinksField({ value, onChange }: NavigationLinksFieldProps) {
       setFadeInKey(normalized.at(-1)?._key ?? null)
     }
     onChange(normalized)
+  }
+
+  const handleReorder = (reordered: NavLink[]) => {
+    const withoutEmpty = reordered.filter((link) => !isEmptyNavLink(link))
+    commit(withoutEmpty)
   }
 
   return (
@@ -129,38 +155,31 @@ function NavigationLinksField({ value, onChange }: NavigationLinksFieldProps) {
         leere Zeilen werden beim Speichern ignoriert.
       </p>
       <SortableList
-        items={filledLinks}
+        items={links}
         getItemKey={(link) => link._key ?? `pending-${link.sortOrder}`}
-        onReorder={commit}
+        onReorder={handleReorder}
         renderItem={(link, { dragHandle }) => {
-          const index = filledLinks.indexOf(link)
+          const index = links.indexOf(link)
+          const isTrailingEmpty = index === links.length - 1 && isEmptyNavLink(link)
           return (
             <NavLinkRow
               link={link}
               index={index}
-              dragHandle={dragHandle}
-              showDelete
+              dragHandle={isTrailingEmpty ? undefined : dragHandle}
+              showDelete={!isTrailingEmpty}
+              fadeIn={fadeInKey === link._key}
               onCommit={commit}
               links={links}
             />
           )
         }}
       />
-      {trailingLink ? (
-        <motion.div
-          key={trailingLink._key}
-          initial={fadeInKey === trailingLink._key ? { opacity: 0 } : false}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <NavLinkRow
-            link={trailingLink}
-            index={filledLinks.length}
-            showDelete={false}
-            onCommit={commit}
-            links={links}
-          />
-        </motion.div>
+      {errorLines.length > 0 ? (
+        <div role="alert" className="text-sm text-red-800">
+          {errorLines.map((msg) => (
+            <p key={msg}>{msg}</p>
+          ))}
+        </div>
       ) : null}
     </div>
   )
@@ -173,6 +192,7 @@ export function RegionNavigationLinksEditor({ form }: Props) {
         <NavigationLinksField
           value={field.state.value}
           onChange={(links) => field.handleChange(links)}
+          fieldErrors={field.state.meta.errors}
         />
       )}
     </form.Field>

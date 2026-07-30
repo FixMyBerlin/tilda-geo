@@ -150,6 +150,53 @@ describe('RegionFormRawSchema en decimal map fields', () => {
   })
 })
 
+describe('RegionFormRawSchema navigationLinks', () => {
+  test('ignores empty trailing rows', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      navigationLinks: [{ name: '', linkType: 'external', path: '', sortOrder: 0 }],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  test('rejects internal path without leading slash', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      navigationLinks: [
+        { name: 'Impressum', linkType: 'internal', path: 'impressum', sortOrder: 0 },
+      ],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes('„/“'))).toBe(true)
+    }
+  })
+
+  test('rejects external URL without https', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      navigationLinks: [
+        { name: 'Website', linkType: 'external', path: 'http://example.com', sortOrder: 0 },
+      ],
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message.includes('https://'))).toBe(true)
+    }
+  })
+
+  test('accepts valid internal and external links', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      navigationLinks: [
+        { name: 'Impressum', linkType: 'internal', path: '/regionen/test/impressum', sortOrder: 0 },
+        { name: 'Website', linkType: 'external', path: 'https://example.com', sortOrder: 1 },
+      ],
+    })
+    expect(result.success).toBe(true)
+  })
+})
+
 describe('RegionFormSchema', () => {
   test('parses EN decimal strings into numbers for the map', () => {
     const parsed = RegionFormSchema.parse({

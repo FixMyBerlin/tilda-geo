@@ -125,6 +125,45 @@ const trueOrFalse = z.enum(['true', 'false']).transform((v) => v === 'true')
 
 const toTrueFalseString = (value: boolean) => (value ? ('true' as const) : ('false' as const))
 
+const RegionFormNavigationLinkSchema = z.object({
+  name: z.string(),
+  linkType: z.enum(['internal', 'external']),
+  path: z.string(),
+  sortOrder: z.number().int().nonnegative(),
+  // Client-only stable identity for the drag-reorder list. Assigned in
+  // `regionConfigToFormValues` / `emptyNavLink`; not persisted (transform maps explicit fields only).
+  _key: z.string().optional(),
+})
+
+type RegionFormNavigationLink = z.infer<typeof RegionFormNavigationLinkSchema>
+
+/** Path/URL format rules for named nav links (empty-name rows are ignored on save). */
+export function navigationLinkPathError(link: {
+  name: string
+  linkType: 'internal' | 'external'
+  path: string
+}) {
+  if (!link.name.trim()) return null
+  const path = link.path.trim()
+  // Empty path is allowed while typing; write schema rejects it on save.
+  if (!path) return null
+  if (link.linkType === 'internal' && !path.startsWith('/')) {
+    return 'Interner Pfad muss mit „/“ beginnen'
+  }
+  if (link.linkType === 'external' && !path.startsWith('https://')) {
+    return 'Externe URL muss mit https:// beginnen'
+  }
+  return null
+}
+
+const refineNavigationLinksPath = (links: RegionFormNavigationLink[], ctx: z.RefinementCtx) => {
+  links.forEach((link, index) => {
+    const message = navigationLinkPathError(link)
+    if (!message) return
+    ctx.addIssue({ code: 'custom', path: [index, 'path'], message })
+  })
+}
+
 export const RegionFormRawSchema = z.object({
   slug: slugSchema,
   name: z.string().min(1),
@@ -151,17 +190,7 @@ export const RegionFormRawSchema = z.object({
   categories: z.string(),
   backgroundSources: z.string(),
   exports: z.string(),
-  navigationLinks: z.array(
-    z.object({
-      name: z.string(),
-      linkType: z.enum(['internal', 'external']),
-      path: z.string(),
-      sortOrder: z.number().int().nonnegative(),
-      // Client-only stable identity for the drag-reorder list. Assigned in
-      // `regionConfigToFormValues` / `emptyNavLink`; not persisted (transform maps explicit fields only).
-      _key: z.string().optional(),
-    }),
-  ),
+  navigationLinks: z.array(RegionFormNavigationLinkSchema).superRefine(refineNavigationLinksPath),
   contractId: z.string(),
 })
 

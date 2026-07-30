@@ -9,6 +9,7 @@ import { getRegionRedirectUrl } from '@/server/regions/getRegionRedirectUrl.serv
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { trackRegionAccess } from '@/server/users/trackRegionAccess.server'
+import { validationErrorState } from '@/server/utils/validation'
 import { createRegionWithData } from './mutations/createRegion.server'
 import { deleteRegion } from './mutations/deleteRegion.server'
 import {
@@ -100,17 +101,20 @@ export const deleteRegionFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => deleteRegion(data, getRequestHeaders()))
 
 export const createRegionFn = createServerFn({ method: 'POST' })
-  .validator((data: z.input<typeof RegionFormSchema>) => RegionFormSchema.parse(data))
-  .handler(async ({ data }) => createRegionWithData(data, getRequestHeaders()))
+  .validator((data: z.input<typeof RegionFormRawSchema>) => data)
+  .handler(async ({ data }) => {
+    const parsed = RegionFormSchema.safeParse(data)
+    if (!parsed.success) return validationErrorState(parsed.error)
+    return createRegionWithData(parsed.data, getRequestHeaders())
+  })
 
 export const updateRegionFn = createServerFn({ method: 'POST' })
-  .validator((data: { regionSlug: string } & { values: z.input<typeof RegionFormRawSchema> }) => {
-    const { regionSlug, values } = data
-    return { regionSlug, data: RegionFormSchema.parse(values) }
+  .validator((data: { regionSlug: string; values: z.input<typeof RegionFormRawSchema> }) => data)
+  .handler(async ({ data: { regionSlug, values } }) => {
+    const parsed = RegionFormSchema.safeParse(values)
+    if (!parsed.success) return validationErrorState(parsed.error)
+    return updateRegionWithData(regionSlug, parsed.data, getRequestHeaders())
   })
-  .handler(async ({ data: { regionSlug, data } }) =>
-    updateRegionWithData(regionSlug, data, getRequestHeaders()),
-  )
 
 export const generateRegionMaskFn = createServerFn({ method: 'POST' })
   .validator((data: z.input<typeof RegionMaskActionSchema>) => data)
