@@ -1,3 +1,4 @@
+import { useRouter } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import type { z } from 'zod'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
@@ -49,7 +50,9 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
   submitLabel,
   regions,
 }: QaConfigFormProps<TSchema>) {
+  const router = useRouter()
   const regionOptions = regions.map((r) => [r.id.toString(), r.slug] as [string, string])
+  const isEdit = 'id' in defaultValues && defaultValues.id !== undefined
 
   return (
     <Form<QaConfigFormBaseValues>
@@ -59,7 +62,13 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
       schema={schema}
       onSubmit={async (values) => {
         const result = await onSubmit(values as z.infer<TSchema>)
-        if (result?.success) return { success: true, redirect: '/admin/qa-configs' }
+        if (result?.success) {
+          if (isEdit) {
+            await router.invalidate()
+            return { success: true }
+          }
+          return { success: true, redirect: '/admin/qa-configs' }
+        }
         if (result && !result.success)
           return {
             success: false,

@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
 import { Textarea } from '@/components/shared/form/fields/Textarea'
 import { TextField } from '@/components/shared/form/fields/TextField'
@@ -49,8 +49,15 @@ function mergedCategoryKey(groupKey: string, categoryKey: string) {
   return `${g}/${c}`
 }
 
-function mapFormStateToSubmitResult(result: FormState | undefined, savedGroupKey?: string) {
+function mapFormStateToSubmitResult(
+  result: FormState | undefined,
+  savedGroupKey?: string,
+  redirectOnSuccess = true,
+) {
   if (result?.success) {
+    if (!redirectOnSuccess) {
+      return { success: true } satisfies SubmitResult<MapDatasetCategoryFormValues>
+    }
     return {
       success: true,
       redirect: '/admin/map-dataset-categories',
@@ -267,6 +274,7 @@ type MapDatasetCategoryFormProps =
 
 export function MapDatasetCategoryForm(props: MapDatasetCategoryFormProps) {
   const navigate = useNavigate()
+  const router = useRouter()
 
   if (props.variant === 'create') {
     return (
@@ -278,7 +286,7 @@ export function MapDatasetCategoryForm(props: MapDatasetCategoryFormProps) {
         className="min-w-0 space-y-4"
         onSubmit={async (values) => {
           const result = await props.onSubmit(values)
-          return mapFormStateToSubmitResult(result, values.groupKey)
+          return mapFormStateToSubmitResult(result, values.groupKey, true)
         }}
       >
         {(form) => (
@@ -307,6 +315,7 @@ export function MapDatasetCategoryForm(props: MapDatasetCategoryFormProps) {
           'navigateToCategoryKey' in result &&
           typeof result.navigateToCategoryKey === 'string'
         ) {
+          await router.invalidate()
           navigate({
             to: '/admin/map-dataset-categories/$categoryKey',
             params: { categoryKey: result.navigateToCategoryKey },
@@ -317,7 +326,8 @@ export function MapDatasetCategoryForm(props: MapDatasetCategoryFormProps) {
             message: result.message || 'Gespeichert.',
           } satisfies SubmitResult<MapDatasetCategoryFormValues>
         }
-        return mapFormStateToSubmitResult(result, values.groupKey)
+        if (result?.success) await router.invalidate()
+        return mapFormStateToSubmitResult(result, values.groupKey, false)
       }}
     >
       {(form) => (

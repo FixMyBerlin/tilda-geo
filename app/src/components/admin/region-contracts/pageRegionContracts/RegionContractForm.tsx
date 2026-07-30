@@ -1,3 +1,4 @@
+import { useRouter } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import type { z } from 'zod'
@@ -44,6 +45,7 @@ export function RegionContractForm<TSchema extends z.ZodTypeAny>({
   editingContractId,
   slugDisabled = false,
 }: RegionContractFormProps<TSchema>) {
+  const router = useRouter()
   return (
     <Form<RegionContractFormInput>
       actionBarPlacement="both"
@@ -52,7 +54,13 @@ export function RegionContractForm<TSchema extends z.ZodTypeAny>({
       schema={schema}
       onSubmit={async (values) => {
         const result = await onSubmit(values as z.infer<TSchema>)
-        if (result?.success) return { success: true, redirect: '/admin/region-contracts' }
+        if (result?.success) {
+          if (editingContractId !== undefined) {
+            await router.invalidate()
+            return { success: true }
+          }
+          return { success: true, redirect: '/admin/region-contracts' }
+        }
         if (result && !result.success)
           return {
             success: false,

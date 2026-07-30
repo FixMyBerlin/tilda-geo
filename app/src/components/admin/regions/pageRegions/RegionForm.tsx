@@ -109,7 +109,8 @@ export function RegionForm(props: Props) {
         if (result.success) {
           await queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey })
           await router.invalidate()
-          return { success: true, redirect: '/admin/regions' }
+          if (mode === 'create') return { success: true, redirect: '/admin/regions' }
+          return { success: true }
         }
         return result as SubmitResult<RegionFormInput>
       }}

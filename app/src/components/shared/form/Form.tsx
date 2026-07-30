@@ -10,6 +10,7 @@ import { FormActionBar } from '@/components/shared/form/FormActionBar'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { buttonStyles } from '@/components/shared/links/styles'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { isProd } from '@/components/shared/utils/isEnv'
 import type { Router } from '@/router'
 
@@ -80,10 +81,7 @@ export function Form<TValues extends Record<string, unknown>>({
   className,
 }: FormProps<TValues>) {
   const navigate = useNavigate()
-  const [submitMessage, setSubmitMessage] = useState<{
-    type: 'success' | 'error'
-    text: string
-  } | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const form = useForm<
     TValues,
@@ -105,12 +103,12 @@ export function Form<TValues extends Record<string, unknown>>({
       onSubmit: schema as FormValidateOrFn<TValues>,
     },
     onSubmit: async ({ value }) => {
-      setSubmitMessage(null)
+      setSubmitError(null)
       const result = await onSubmit(value)
       if (!result) return
       if (result.success) {
         form.reset(result.resetValues ?? value)
-        setSubmitMessage({ type: 'success', text: result.message ?? 'Gespeichert.' })
+        toastSuccess(result.message ?? 'Gespeichert.')
         if (result.redirect) {
           navigate({
             to: result.redirect,
@@ -126,7 +124,7 @@ export function Form<TValues extends Record<string, unknown>>({
           values: value,
         })
       }
-      setSubmitMessage({ type: 'error', text: result.message })
+      setSubmitError(result.message)
       applyFieldErrors(form, result.errors)
     },
   })
@@ -186,14 +184,11 @@ export function Form<TValues extends Record<string, unknown>>({
         </form.Subscribe>
       ) : null}
 
-      {submitMessage && (
-        <div
-          className={`text-sm ${submitMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}
-          role={submitMessage.type === 'error' ? 'alert' : 'status'}
-        >
-          {submitMessage.text}
+      {submitError ? (
+        <div className="text-sm text-red-600" role="alert">
+          {submitError}
         </div>
-      )}
+      ) : null}
 
       {actionBar}
     </form>
