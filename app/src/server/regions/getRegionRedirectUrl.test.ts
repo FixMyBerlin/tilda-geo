@@ -217,8 +217,17 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(typeof resultUrl.searchParams.get('map')).toBe('string')
+      expect(resultUrl.searchParams.get('map')).toBe('11.8/52.507/13.367')
       expect(typeof resultUrl.searchParams.get('config')).toBe('string')
+    })
+
+    test('INIT: Replace typed-search map sentinel with region.map', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?map=0/0/0'
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+
+      expect(resultUrl.searchParams.get('map')).toBe('11.8/52.507/13.367')
     })
 
     test('MIGRATION: Migrate `lat`, `lng`, `zoom` params to `map` param', async () => {
@@ -240,7 +249,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('map')).toBe('12.1/1/2') // using mapParamFallback.zoom
+      expect(resultUrl.searchParams.get('map')).toBe('0/1/2') // using mapParamFallback.zoom
       expect(resultUrl.searchParams.getAll('map').length).toBe(1)
       expect(resultUrl.searchParams.get('lat')).toBe(null)
       expect(resultUrl.searchParams.get('lng')).toBe(null)

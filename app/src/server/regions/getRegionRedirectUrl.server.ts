@@ -11,6 +11,7 @@ import {
   parseMapParam,
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
+import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
@@ -176,9 +177,12 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
     }
   })
 
-  // Make sure param 'map' is valid
+  // Make sure param 'map' is valid. The global mapParamFallback is a typed-search sentinel
+  // (validateSearch / defaultRegionSearch), not a real viewport — replace it with region.map.
   const map = u.searchParams.get('map')
-  if (!map || !parseMapParam(map)) {
+  const isMissingOrInvalid = !map || !parseMapParam(map)
+  const isGlobalFallback = map === serializeMapParam(mapParamFallback)
+  if (isMissingOrInvalid || isGlobalFallback) {
     u.searchParams.set('map', serializeMapParam(region.map))
   }
 

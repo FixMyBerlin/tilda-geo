@@ -10,9 +10,9 @@ import { routerSearch } from '@/shared/routing/routerSearch'
 
 describe('routerSearch', () => {
   test('keeps map slashes readable in stringify output', () => {
-    const search = { map: '12.1/52.5/13.4' }
+    const search = { map: '11.8/52.507/13.367' }
     const stringified = routerSearch.stringify(search)
-    expect(stringified).toContain('map=12.1/52.5/13.4')
+    expect(stringified).toContain('map=11.8/52.507/13.367')
     expect(stringified).not.toContain('%2F')
 
     const parsed = routerSearch.parse(stringified)
