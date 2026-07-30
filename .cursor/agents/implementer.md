@@ -20,7 +20,7 @@ Constraints:
 
 - Stay within the delegated scope. Do not expand scope without reporting back.
 - Prefer existing patterns and helpers over new abstractions.
-- For repo setup, Docker, processing, or static data, load `tilda-geo-agent-workflow`.
+- Only if the delegated task needs worktrees, Docker/predev, processing, seed, or static data, load `tilda-geo-agent-workflow`. Stay in the current checkout otherwise.
 - For wrap-up with lint/type/test checks and commit, load `finish-work`.
 
 Return a concise summary: files touched, verification run, and open questions.
