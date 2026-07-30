@@ -72,7 +72,11 @@ export function RegionPagePendingMapShell() {
       </div>
 
       {/* Mobile bottom controls skeleton (OsmNotes, InternalNotes, SelectBackground, MobileLayerButton) */}
-      <div className={twJoin(mobileMapBottomControlsClassName, 'sm:hidden')} aria-hidden="true">
+      <div
+        className={twJoin(mobileMapBottomControlsClassName, 'sm:hidden')}
+        data-map-controls="true"
+        aria-hidden="true"
+      >
         <div className={twJoin(pulseButton, 'size-10')} />
         <div className={twJoin(pulseButton, 'size-10')} />
         <div className={twJoin(pulseButton, 'size-10')} />
@@ -82,6 +86,7 @@ export function RegionPagePendingMapShell() {
       {/* Desktop bottom controls skeleton */}
       <div
         className={twJoin(mobileMapBottomControlsClassName, 'hidden sm:flex')}
+        data-map-controls="true"
         aria-hidden="true"
       >
         <div className={twJoin(pulseButton, 'size-10')} />
