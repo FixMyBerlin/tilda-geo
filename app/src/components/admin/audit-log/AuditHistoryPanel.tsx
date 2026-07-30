@@ -1,4 +1,4 @@
-import { AuditLogListRow } from '@/components/admin/audit-log/AuditLogListRow'
+import { AuditLogTable } from '@/components/admin/audit-log/AuditLogTable'
 import { Link } from '@/components/shared/links/Link'
 import type { AuditLogRow } from '@/server/audit/queries/listAuditLog.server'
 
@@ -27,16 +27,7 @@ export const AuditHistoryPanel = ({ rows, model, recordId }: Props) => {
       {rows.length === 0 ? (
         <p className="text-gray-500">Keine Einträge.</p>
       ) : (
-        <ul className="divide-y divide-gray-200 rounded-lg ring-1 ring-gray-900/5">
-          {rows.map((row) => (
-            <AuditLogListRow
-              key={row.id}
-              row={row}
-              fixedModel={model}
-              fixedRecordId={String(recordId)}
-            />
-          ))}
-        </ul>
+        <AuditLogTable rows={rows} fixedModel={model} fixedRecordId={String(recordId)} />
       )}
     </section>
   )
