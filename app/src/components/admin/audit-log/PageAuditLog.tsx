@@ -1,15 +1,12 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { AdminConsoleDumpButton } from '@/components/admin/AdminConsoleDumpButton'
-import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
-import { AuditActionPill, auditChangeSourceColor } from '@/components/admin/audit-log/auditLogPills'
+import { AuditLogListRow } from '@/components/admin/audit-log/AuditLogListRow'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { FilterRow } from '@/components/shared/FilterRow/FilterRow'
 import type { FilterRowItem } from '@/components/shared/FilterRow/types'
+import { Link } from '@/components/shared/links/Link'
 import { PaginationControls } from '@/components/shared/pagination/PaginationControls'
 import { useAdminTablePagination } from '@/components/shared/pagination/useAdminTablePagination'
-import { Pill } from '@/components/shared/text/Pill'
 import { AUDIT_CHANGE_SOURCES } from '@/server/audit/auditChangeSources.const'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
 
@@ -41,11 +38,39 @@ export function PageAuditLog() {
   const navigate = routeApi.useNavigate()
   const { page, goToPage, result } = useAdminTablePagination(search, navigate, loaderData)
 
+  const fixedModel = search.model
+  const fixedRecordId = search.recordId
+  const regionRecordScope = search.model === 'Region' && search.recordId !== undefined
+
   return (
     <>
       <HeaderWrapper>
         <Breadcrumb pages={[{ href: '/admin/audit-log', name: 'Änderungsverlauf' }]} />
       </HeaderWrapper>
+
+      <div className="mb-6 max-w-prose space-y-3 text-sm text-gray-600">
+        <p>
+          Änderungen an wichtigen Admin-Daten werden automatisch protokolliert.{' '}
+          <strong>User</strong> und <strong>Quelle</strong> sind nur gesetzt, wenn die Änderung über
+          einen bekannten Pfad lief (Admin-UI, Mitglieder-UI, API/MCP-Token) — sonst erscheinen sie
+          als „—“, die Änderung selbst ist trotzdem erfasst.
+        </p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            <code>ADMIN_FORM</code> — Admin in der Admin-Oberfläche
+          </li>
+          <li>
+            <code>MEMBER_FORM</code> — Mitglied in der Regions-Oberfläche (z.&nbsp;B. Notizen, QA)
+          </li>
+          <li>
+            <code>API</code> — REST-API oder MCP; zugeschrieben dem Token-Inhaber (
+            <Link to="/admin/api-tokens">API-Tokens</Link>)
+          </li>
+          <li>
+            <code>MIGRATION</code> — Seeds oder Datenübernahmen
+          </li>
+        </ul>
+      </div>
 
       <div className="mb-4">
         <FilterRow
@@ -62,7 +87,7 @@ export function PageAuditLog() {
         />
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
         <FilterRow
           items={changeSourceFilterItems}
           activeId={search.changeSource ?? ''}
@@ -77,53 +102,47 @@ export function PageAuditLog() {
         />
       </div>
 
-      <div className={adminTableClasses.paginatedShell}>
-        <AdminTable
-          header={[
-            'Zeitpunkt',
-            'Modell',
-            'ID',
-            'Aktion',
-            'Quelle',
-            'User',
-            { id: 'audit-diff', label: '' },
-          ]}
-        >
-          {loaderData.rows.map((row) => (
-            <tr key={row.id}>
-              <td className={adminTableClasses.td}>{formatDateTimeBerlin(row.createdAt)}</td>
-              <td className={adminTableClasses.td}>{row.model}</td>
-              <td className={adminTableClasses.td}>
-                <span className="block max-w-[45px] truncate" title={row.recordId}>
-                  {row.recordId}
-                </span>
-              </td>
-              <td className={adminTableClasses.td}>
-                <AuditActionPill action={row.action} />
-              </td>
-              <td className={adminTableClasses.td}>
-                {row.changeSource ? (
-                  <Pill color={auditChangeSourceColor(row.changeSource)}>{row.changeSource}</Pill>
-                ) : (
-                  '—'
-                )}
-              </td>
-              <td className={adminTableClasses.td}>{row.userId ?? '—'}</td>
-              <td className={adminTableClasses.td}>
-                <AdminConsoleDumpButton
-                  name={`audit-${row.id}`}
-                  data={{
-                    changedFields: row.changedFields,
-                    oldData: row.oldData,
-                    newData: row.newData,
-                  }}
-                />
-              </td>
-            </tr>
-          ))}
-        </AdminTable>
-        <PaginationControls page={page} result={result} onPageChange={goToPage} />
-      </div>
+      {fixedRecordId !== undefined ? (
+        <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
+          <span>
+            Datensatz-ID: <code className="text-gray-900">{fixedRecordId}</code>
+          </span>
+          <button
+            type="button"
+            className="text-sm text-indigo-600 hover:text-indigo-500"
+            onClick={() =>
+              navigate({
+                search: { ...search, recordId: undefined, skip: undefined },
+              })
+            }
+          >
+            Filter aufheben
+          </button>
+          {regionRecordScope ? (
+            <span className="text-gray-500">
+              · inkl. zugehöriger Zuordnungen (Kategorien, Hintergründe, Exporte, Navigation)
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      {loaderData.rows.length === 0 ? (
+        <p className="text-gray-500">Keine Einträge.</p>
+      ) : (
+        <div className="space-y-4">
+          <ul className="divide-y divide-gray-200 rounded-lg ring-1 ring-gray-900/5">
+            {loaderData.rows.map((row) => (
+              <AuditLogListRow
+                key={row.id}
+                row={row}
+                fixedModel={fixedModel}
+                fixedRecordId={fixedRecordId}
+              />
+            ))}
+          </ul>
+          <PaginationControls page={page} result={result} onPageChange={goToPage} />
+        </div>
+      )}
     </>
   )
 }

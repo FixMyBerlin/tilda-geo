@@ -31,10 +31,31 @@ const REGION_ASSIGNMENT_AUDIT_MODELS = [
   'RegionNavigationLink',
 ] as const
 
+/** Region scalar row plus category/export/nav/background assignment changes for one region. */
+const regionAuditHistoryWhere = (regionId: number): Prisma.AuditLogWhereInput => {
+  const assignmentRegionFilter = REGION_ASSIGNMENT_AUDIT_MODELS.flatMap((model) => [
+    {
+      model,
+      oldData: { path: ['regionId'], equals: regionId },
+    },
+    {
+      model,
+      newData: { path: ['regionId'], equals: regionId },
+    },
+  ]) satisfies Prisma.AuditLogWhereInput[]
+
+  return {
+    OR: [{ model: 'Region', recordId: String(regionId) }, ...assignmentRegionFilter],
+  }
+}
+
 /**
  * Query the unified AuditLog (written by the @explita/prisma-audit-log extension) across all audited
  * models. Filterable by model, record, user, changeSource (stored in metadata JSON), and date range.
  * Ordered newest-first with offset pagination.
+ *
+ * When `model=Region` and `recordId` are both set, expands to the same scope as region edit history
+ * (Region row + related assignment models).
  *
  * Callers must enforce auth (`requireAdmin` or `guardAdminApi`) before invoking.
  */
@@ -43,9 +64,16 @@ export async function listAuditLog(filters: AuditLogListFilters = {}): Promise<L
   if (filters.from) createdAt.gte = filters.from
   if (filters.to) createdAt.lte = filters.to
 
+  const expandRegionHistory = filters.model === 'Region' && filters.recordId !== undefined
+  const regionId = expandRegionHistory ? Number(filters.recordId) : Number.NaN
+  const regionWhere =
+    expandRegionHistory && Number.isInteger(regionId) ? regionAuditHistoryWhere(regionId) : null
+
   const where: Prisma.AuditLogWhereInput = {
-    ...(filters.model ? { model: filters.model } : {}),
-    ...(filters.recordId ? { recordId: filters.recordId } : {}),
+    ...(regionWhere ?? {
+      ...(filters.model ? { model: filters.model } : {}),
+      ...(filters.recordId ? { recordId: filters.recordId } : {}),
+    }),
     ...(filters.userId ? { userId: filters.userId } : {}),
     ...(filters.changeSource
       ? { metadata: { path: ['changeSource'], equals: filters.changeSource } }
@@ -86,22 +114,9 @@ export async function getAuditHistoryForRegionEdit(
 ): Promise<AuditLogRow[]> {
   await requireAdmin(headers)
 
-  const assignmentRegionFilter = REGION_ASSIGNMENT_AUDIT_MODELS.flatMap((model) => [
-    {
-      model,
-      oldData: { path: ['regionId'], equals: regionId },
-    },
-    {
-      model,
-      newData: { path: ['regionId'], equals: regionId },
-    },
-  ]) satisfies Prisma.AuditLogWhereInput[]
-
   return db.auditLog
     .findMany({
-      where: {
-        OR: [{ model: 'Region', recordId: String(regionId) }, ...assignmentRegionFilter],
-      },
+      where: regionAuditHistoryWhere(regionId),
       orderBy: { createdAt: 'desc' },
       take,
     })
