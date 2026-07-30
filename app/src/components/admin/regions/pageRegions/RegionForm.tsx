@@ -63,7 +63,7 @@ export const regionFormEmptyDefaults = {
   cacheWarmingEnabled: 'false' as const,
   cacheWarmingMinZoom: '',
   cacheWarmingMaxZoom: '',
-  cacheWarmingTables: '',
+  cacheWarmingSources: '',
   categories: '',
   backgroundSources: '',
   exports: '',
@@ -311,20 +311,37 @@ export function RegionForm(props: Props) {
               ]}
             />
             <TextField
-              decimalEn
               form={form}
               name="cacheWarmingMinZoom"
               label="Min Zoom"
-              help={EN_DECIMAL_HELP}
+              type="number"
+              step={1}
+              min={4}
+              max={14}
+              inputMode="numeric"
+              help="Ganzzahl von 4 bis 14, z. B. 9"
             />
             <TextField
-              decimalEn
               form={form}
               name="cacheWarmingMaxZoom"
               label="Max Zoom"
-              help={EN_DECIMAL_HELP}
+              type="number"
+              step={1}
+              min={4}
+              max={14}
+              inputMode="numeric"
+              help="Ganzzahl von 4 bis 14, z. B. 9"
             />
-            <TextField form={form} name="cacheWarmingTables" label="Tabellen" />
+            <CheckboxGroup
+              form={form}
+              name="cacheWarmingSources"
+              label="Quellen"
+              help="Quellen, deren Kacheln beim Cache Warming vorab geladen werden (gleiche Martin-Pfade wie auf der Karte)."
+              options={catalogOptions.cacheWarmingSources.map((entry) => ({
+                value: entry.id,
+                label: entry.label,
+              }))}
+            />
           </fieldset>
         </div>
       )}

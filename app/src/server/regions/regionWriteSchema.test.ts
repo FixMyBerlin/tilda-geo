@@ -1,8 +1,18 @@
 import { describe, expect, test } from 'vitest'
 import {
-  RegionWriteSchema,
+  sourceIdToWarmingTablesKey,
+  sourceIdsToWarmingTables,
+  warmableSources,
+  warmableTablesKeySet,
+  warmingTablesKeyToSourceId,
+  warmingTablesToSourceIds,
+} from './cacheWarmingSources'
+import { parseRegionCacheWarming } from './regionGeoJson'
+import {
   RegionFormRawSchema,
   RegionFormSchema,
+  RegionWriteSchema,
+  regionConfigToFormValues,
   type RegionWriteInput,
 } from './regionWriteSchema'
 
@@ -98,6 +108,63 @@ describe('RegionWriteSchema', () => {
       expect(result.success).toBe(false)
     })
   })
+
+  describe('cacheWarming', () => {
+    test('accepts joined source tile paths (bb-style)', () => {
+      const result = RegionWriteSchema.safeParse({
+        ...validBase,
+        cacheWarming: {
+          minZoom: 8,
+          maxZoom: 10,
+          tables: ['bikelanes', 'roads', 'boundaries,boundaryLabels', 'barrierAreas,barrierLines'],
+        },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    test('rejects unknown table path', () => {
+      const result = RegionWriteSchema.safeParse({
+        ...validBase,
+        cacheWarming: {
+          minZoom: 8,
+          maxZoom: 10,
+          tables: ['not-a-real-table'],
+        },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    test('rejects empty tables', () => {
+      const result = RegionWriteSchema.safeParse({
+        ...validBase,
+        cacheWarming: { minZoom: 8, maxZoom: 10, tables: [] },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    test('rejects out-of-range zoom', () => {
+      expect(
+        RegionWriteSchema.safeParse({
+          ...validBase,
+          cacheWarming: { minZoom: 2, maxZoom: 10, tables: ['bikelanes'] },
+        }).success,
+      ).toBe(false)
+      expect(
+        RegionWriteSchema.safeParse({
+          ...validBase,
+          cacheWarming: { minZoom: 8, maxZoom: 20, tables: ['bikelanes'] },
+        }).success,
+      ).toBe(false)
+    })
+
+    test('rejects minZoom > maxZoom', () => {
+      const result = RegionWriteSchema.safeParse({
+        ...validBase,
+        cacheWarming: { minZoom: 12, maxZoom: 8, tables: ['bikelanes'] },
+      })
+      expect(result.success).toBe(false)
+    })
+  })
 })
 
 const regionFormBase = {
@@ -122,7 +189,7 @@ const regionFormBase = {
   cacheWarmingEnabled: 'false' as const,
   cacheWarmingMinZoom: '',
   cacheWarmingMaxZoom: '',
-  cacheWarmingTables: '',
+  cacheWarmingSources: '',
   categories: 'poi',
   backgroundSources: '',
   exports: '',
@@ -197,6 +264,81 @@ describe('RegionFormRawSchema navigationLinks', () => {
   })
 })
 
+describe('RegionFormRawSchema cacheWarming', () => {
+  test('disabled + empty → valid', () => {
+    expect(RegionFormRawSchema.safeParse(regionFormBase).success).toBe(true)
+  })
+
+  test('enabled + empty fields → invalid with field paths', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      cacheWarmingEnabled: 'true',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path.join('.'))
+      expect(paths).toContain('cacheWarmingMinZoom')
+      expect(paths).toContain('cacheWarmingMaxZoom')
+      expect(paths).toContain('cacheWarmingSources')
+    }
+  })
+
+  test('enabled + decimal zoom → invalid', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      cacheWarmingEnabled: 'true',
+      cacheWarmingMinZoom: '9.5',
+      cacheWarmingMaxZoom: '13',
+      cacheWarmingSources: 'atlas_bikelanes',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.join('.') === 'cacheWarmingMinZoom')).toBe(true)
+    }
+  })
+
+  test('enabled + out-of-range zoom → invalid', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      cacheWarmingEnabled: 'true',
+      cacheWarmingMinZoom: '2',
+      cacheWarmingMaxZoom: '13',
+      cacheWarmingSources: 'atlas_bikelanes',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  test('enabled + min > max → invalid', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      cacheWarmingEnabled: 'true',
+      cacheWarmingMinZoom: '12',
+      cacheWarmingMaxZoom: '8',
+      cacheWarmingSources: 'atlas_bikelanes',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.path.join('.') === 'cacheWarmingMaxZoom')).toBe(true)
+    }
+  })
+
+  test('enabled + unknown source id → invalid', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      cacheWarmingEnabled: 'true',
+      cacheWarmingMinZoom: '9',
+      cacheWarmingMaxZoom: '13',
+      cacheWarmingSources: 'not-a-source',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(
+        result.error.issues.some((i) => i.message.includes('Ungültige Cache-Warming-Quelle')),
+      ).toBe(true)
+    }
+  })
+})
+
 describe('RegionFormSchema', () => {
   test('parses EN decimal strings into numbers for the map', () => {
     const parsed = RegionFormSchema.parse({
@@ -221,5 +363,79 @@ describe('RegionFormSchema', () => {
       bboxMaxLat: '',
     })
     expect(result.success).toBe(false)
+  })
+
+  test('disabled + empty → cacheWarming null', () => {
+    const parsed = RegionFormSchema.parse(regionFormBase)
+    expect(parsed.cacheWarming).toBeNull()
+  })
+
+  test('enabled + sources maps to joined tables paths', () => {
+    const parsed = RegionFormSchema.parse({
+      ...regionFormBase,
+      cacheWarmingEnabled: 'true',
+      cacheWarmingMinZoom: '9',
+      cacheWarmingMaxZoom: '13',
+      cacheWarmingSources: 'atlas_bikelanes, atlas_boundaries',
+    })
+    expect(parsed.cacheWarming).toEqual({
+      minZoom: 9,
+      maxZoom: 13,
+      tables: ['bikelanes', 'boundaries,boundaryLabels'],
+    })
+  })
+
+  test('round-trips joined tables via form values', () => {
+    const config: RegionWriteInput = {
+      ...validBase,
+      cacheWarming: {
+        minZoom: 8,
+        maxZoom: 10,
+        tables: ['boundaries,boundaryLabels', 'barrierAreas,barrierLines'],
+      },
+    }
+    const formValues = regionConfigToFormValues(config)
+    expect(formValues.cacheWarmingEnabled).toBe('true')
+    expect(formValues.cacheWarmingSources).toContain('atlas_boundaries')
+    expect(formValues.cacheWarmingSources).toContain('atlas_barriers')
+
+    const parsed = RegionFormSchema.parse(formValues)
+    expect(parsed.cacheWarming?.tables).toEqual([
+      'boundaries,boundaryLabels',
+      'barrierAreas,barrierLines',
+    ])
+  })
+})
+
+describe('cacheWarmingSources helpers', () => {
+  test('warmable tile-path keys are unique', () => {
+    expect(warmableTablesKeySet.size).toBe(warmableSources.length)
+  })
+
+  test('maps atlas_boundaries to joined tables key', () => {
+    expect(sourceIdToWarmingTablesKey('atlas_boundaries')).toBe('boundaries,boundaryLabels')
+    expect(warmingTablesKeyToSourceId('boundaries,boundaryLabels')).toBe('atlas_boundaries')
+  })
+
+  test('sourceIdsToWarmingTables / warmingTablesToSourceIds round-trip', () => {
+    const ids = ['atlas_bikelanes', 'atlas_boundaries']
+    const tables = sourceIdsToWarmingTables(ids)
+    expect(tables).toEqual(['bikelanes', 'boundaries,boundaryLabels'])
+    expect(warmingTablesToSourceIds(tables)).toEqual(ids)
+  })
+
+  test('drops orphan table keys on reverse map', () => {
+    expect(warmingTablesToSourceIds(['bikelanes', 'legacy_orphan'])).toEqual(['atlas_bikelanes'])
+  })
+})
+
+describe('parseRegionCacheWarming (lenient read)', () => {
+  test('still accepts out-of-range zoom so legacy rows do not become null', () => {
+    const parsed = parseRegionCacheWarming({
+      minZoom: 2,
+      maxZoom: 20,
+      tables: ['bikelanes'],
+    })
+    expect(parsed).toEqual({ minZoom: 2, maxZoom: 20, tables: ['bikelanes'] })
   })
 })

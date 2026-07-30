@@ -12,11 +12,18 @@ import type {
 import { EN_DECIMAL_HELP, isValidEnDecimalInput } from '@/components/shared/form/enDecimalInput'
 import { slugSchema } from '@/lib/slugSchema'
 import { RegionNotesMode, RegionProduct, RegionStatus } from '@/prisma/generated/browser'
+import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import {
+  cacheWarmingSourceOptions,
+  sourceIdsToWarmingTables,
+  warmableSourceIdSet,
+  warmableTablesKeySet,
+  warmingTablesToSourceIds,
+} from '@/server/regions/cacheWarmingSources'
 import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
 import {
   formFieldsToGeoJsonBbox,
   geoJsonBboxToFormFields,
-  regionCacheWarmingSchema,
   regionGeoJsonBBoxSchema,
   type RegionCacheWarmingConfig,
 } from '@/server/regions/regionGeoJson'
@@ -51,6 +58,26 @@ const enDecimalFormField = z
   .min(1)
   .refine((value) => isValidEnDecimalInput(value), {
     message: EN_DECIMAL_HELP,
+  })
+
+const cacheWarmingZoomSchema = z.number().int().min(SIMPLIFY_MIN_ZOOM).max(SIMPLIFY_MAX_ZOOM)
+
+/** Write-only; read path keeps lenient `regionCacheWarmingSchema`. */
+const regionCacheWarmingWriteSchema = z
+  .object({
+    minZoom: cacheWarmingZoomSchema,
+    maxZoom: cacheWarmingZoomSchema,
+    tables: z
+      .array(
+        z.string().refine((key) => warmableTablesKeySet.has(key), {
+          error: (issue) => `Ungültige Cache-Warming-Quelle: ${String(issue.input)}`,
+        }),
+      )
+      .min(1),
+  })
+  .refine((data) => data.minZoom <= data.maxZoom, {
+    message: 'Max Zoom muss größer oder gleich Min Zoom sein',
+    path: ['maxZoom'],
   })
 
 const RegionNavigationLinkSchema = z
@@ -94,7 +121,7 @@ export const RegionWriteSchema = z
     logoWhiteBackgroundRequired: z.boolean(),
     headerLogoId: z.number().int().positive().nullable(),
     bbox: regionGeoJsonBBoxSchema.nullable(),
-    cacheWarming: regionCacheWarmingSchema.nullable(),
+    cacheWarming: regionCacheWarmingWriteSchema.nullable(),
     categories: z.array(catalogIdSchema('Kategorie', categoryIdSet)).min(1),
     backgroundSources: z.array(catalogIdSchema('Hintergrund', backgroundIdSet)),
     exports: z.array(catalogIdSchema('Export', exportIdSet)),
@@ -164,35 +191,111 @@ const refineNavigationLinksPath = (links: RegionFormNavigationLink[], ctx: z.Ref
   })
 }
 
-export const RegionFormRawSchema = z.object({
-  slug: slugSchema,
-  name: z.string().min(1),
-  fullName: z.string().min(1),
-  promoted: trueOrFalse,
-  status: RegionStatusSchema,
-  product: RegionProductSchema,
-  notes: RegionNotesModeSchema,
-  showSearch: trueOrFalse,
-  mapLat: enDecimalFormField,
-  mapLng: enDecimalFormField,
-  mapZoom: enDecimalFormField,
-  headerLogoId: z.string(),
-  logoWhiteBackgroundRequired: trueOrFalse,
-  downloadsEnabled: trueOrFalse,
-  bboxMinLng: z.string(),
-  bboxMinLat: z.string(),
-  bboxMaxLng: z.string(),
-  bboxMaxLat: z.string(),
-  cacheWarmingEnabled: trueOrFalse,
-  cacheWarmingMinZoom: z.string(),
-  cacheWarmingMaxZoom: z.string(),
-  cacheWarmingTables: z.string(),
-  categories: z.string(),
-  backgroundSources: z.string(),
-  exports: z.string(),
-  navigationLinks: z.array(RegionFormNavigationLinkSchema).superRefine(refineNavigationLinksPath),
-  contractId: z.string(),
-})
+const parseCacheWarmingZoom = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed || !/^\d+$/.test(trimmed)) return null
+  const zoom = Number(trimmed)
+  if (!Number.isInteger(zoom) || zoom < SIMPLIFY_MIN_ZOOM || zoom > SIMPLIFY_MAX_ZOOM) return null
+  return zoom
+}
+
+const refineCacheWarmingForm = (
+  form: {
+    cacheWarmingEnabled: boolean
+    cacheWarmingMinZoom: string
+    cacheWarmingMaxZoom: string
+    cacheWarmingSources: string
+  },
+  ctx: z.RefinementCtx,
+) => {
+  if (!form.cacheWarmingEnabled) return
+
+  const minZoom = parseCacheWarmingZoom(form.cacheWarmingMinZoom)
+  if (!form.cacheWarmingMinZoom.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMinZoom'],
+      message: 'Min Zoom ist erforderlich.',
+    })
+  } else if (minZoom == null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMinZoom'],
+      message: `Min Zoom muss eine Ganzzahl zwischen ${SIMPLIFY_MIN_ZOOM} und ${SIMPLIFY_MAX_ZOOM} sein.`,
+    })
+  }
+
+  const maxZoom = parseCacheWarmingZoom(form.cacheWarmingMaxZoom)
+  if (!form.cacheWarmingMaxZoom.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMaxZoom'],
+      message: 'Max Zoom ist erforderlich.',
+    })
+  } else if (maxZoom == null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMaxZoom'],
+      message: `Max Zoom muss eine Ganzzahl zwischen ${SIMPLIFY_MIN_ZOOM} und ${SIMPLIFY_MAX_ZOOM} sein.`,
+    })
+  } else if (minZoom != null && maxZoom < minZoom) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMaxZoom'],
+      message: 'Max Zoom muss größer oder gleich Min Zoom sein.',
+    })
+  }
+
+  const sourceIds = parseCommaList(form.cacheWarmingSources)
+  if (sourceIds.length === 0) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingSources'],
+      message: 'Mindestens eine Quelle ist erforderlich.',
+    })
+    return
+  }
+  for (const id of sourceIds) {
+    if (warmableSourceIdSet.has(id)) continue
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingSources'],
+      message: `Ungültige Cache-Warming-Quelle: ${id}`,
+    })
+  }
+}
+
+export const RegionFormRawSchema = z
+  .object({
+    slug: slugSchema,
+    name: z.string().min(1),
+    fullName: z.string().min(1),
+    promoted: trueOrFalse,
+    status: RegionStatusSchema,
+    product: RegionProductSchema,
+    notes: RegionNotesModeSchema,
+    showSearch: trueOrFalse,
+    mapLat: enDecimalFormField,
+    mapLng: enDecimalFormField,
+    mapZoom: enDecimalFormField,
+    headerLogoId: z.string(),
+    logoWhiteBackgroundRequired: trueOrFalse,
+    downloadsEnabled: trueOrFalse,
+    bboxMinLng: z.string(),
+    bboxMinLat: z.string(),
+    bboxMaxLng: z.string(),
+    bboxMaxLat: z.string(),
+    cacheWarmingEnabled: trueOrFalse,
+    cacheWarmingMinZoom: z.string(),
+    cacheWarmingMaxZoom: z.string(),
+    cacheWarmingSources: z.string(),
+    categories: z.string(),
+    backgroundSources: z.string(),
+    exports: z.string(),
+    navigationLinks: z.array(RegionFormNavigationLinkSchema).superRefine(refineNavigationLinksPath),
+    contractId: z.string(),
+  })
+  .superRefine(refineCacheWarmingForm)
 
 export type RegionFormInput = z.input<typeof RegionFormRawSchema>
 
@@ -208,12 +311,14 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
 
   const cacheWarmingEnabled = form.cacheWarmingEnabled
   const cacheWarmingMinZoom = cacheWarmingEnabled
-    ? parseOptionalNumber(form.cacheWarmingMinZoom)
+    ? parseCacheWarmingZoom(form.cacheWarmingMinZoom)
     : null
   const cacheWarmingMaxZoom = cacheWarmingEnabled
-    ? parseOptionalNumber(form.cacheWarmingMaxZoom)
+    ? parseCacheWarmingZoom(form.cacheWarmingMaxZoom)
     : null
-  const cacheWarmingTables = cacheWarmingEnabled ? parseCommaList(form.cacheWarmingTables) : []
+  const cacheWarmingTables = cacheWarmingEnabled
+    ? sourceIdsToWarmingTables(parseCommaList(form.cacheWarmingSources))
+    : []
   const cacheWarming =
     cacheWarmingEnabled &&
     cacheWarmingMinZoom != null &&
@@ -286,7 +391,7 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
     cacheWarmingEnabled: toTrueFalseString(config.cacheWarming != null),
     cacheWarmingMinZoom: config.cacheWarming != null ? String(config.cacheWarming.minZoom) : '',
     cacheWarmingMaxZoom: config.cacheWarming != null ? String(config.cacheWarming.maxZoom) : '',
-    cacheWarmingTables: joinCommaList(config.cacheWarming?.tables ?? []),
+    cacheWarmingSources: joinCommaList(warmingTablesToSourceIds(config.cacheWarming?.tables ?? [])),
     categories: joinCommaList(config.categories),
     backgroundSources: joinCommaList(config.backgroundSources),
     exports: joinCommaList(config.exports),
@@ -328,6 +433,7 @@ export const catalogOptions = {
   categories: categories.map((c) => ({ id: c.id, label: c.id })),
   exports: exportConfigs.map((e) => ({ id: e.id, label: e.title })),
   backgrounds: sourcesBackgroundsRaster.map((s) => ({ id: s.id, label: s.id })),
+  cacheWarmingSources: cacheWarmingSourceOptions,
 } as const
 
 export type RegionCacheWarming = RegionCacheWarmingConfig & {
