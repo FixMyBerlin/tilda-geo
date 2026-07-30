@@ -20,7 +20,3 @@ export async function getProcessingMeta() {
 
   return ProcessingMetaDates.parse(result)
 }
-
-export async function getProcessingOsmDataFromIso() {
-  return (await getProcessingMeta())?.osm_data_from?.toISOString() ?? new Date().toISOString()
-}
