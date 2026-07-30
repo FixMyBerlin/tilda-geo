@@ -5,6 +5,7 @@ import {
   adminFormLegendClassName,
 } from '@/components/admin/adminFormFieldsetClasses'
 import { RegionCategoriesField } from '@/components/admin/regions/pageRegions/RegionCategoriesField'
+import { RegionExportsField } from '@/components/admin/regions/pageRegions/RegionExportsField'
 import { RegionLogoPicker } from '@/components/admin/regions/pageRegions/RegionLogoPicker'
 import { RegionNavigationLinksEditor } from '@/components/admin/regions/pageRegions/RegionNavigationLinksEditor'
 import {
@@ -275,15 +276,7 @@ export function RegionForm(props: Props) {
               label="BBox max Lat"
               help={EN_DECIMAL_HELP}
             />
-            <CheckboxGroup
-              form={form}
-              name="exports"
-              label="Export-IDs"
-              options={catalogOptions.exports.map((entry) => ({
-                value: entry.id,
-                label: entry.label,
-              }))}
-            />
+            <RegionExportsField form={form} />
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>

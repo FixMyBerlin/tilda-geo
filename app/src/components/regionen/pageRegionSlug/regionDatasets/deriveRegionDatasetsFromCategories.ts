@@ -85,3 +85,21 @@ export const deriveRegionDatasetsFromCategories = (
     isDownloadable: downloadableTables.has(tableName),
   }))
 }
+
+const allExportIds = exportConfigs.map((config) => config.id)
+
+export const getExportIdsOrderedByRegionCategories = (
+  categories: MapDataCategoryId[],
+  catalogExportIds: readonly ExportId[] = allExportIds,
+  allRegionExportTables: Iterable<string> = exportApiIdentifier,
+) => {
+  const orderedFromCategories = deriveRegionDatasetsFromCategories(
+    { categories, exports: null },
+    allRegionExportTables,
+  ).map((dataset) => dataset.tableName)
+
+  const orderedSet = new Set(orderedFromCategories)
+  const remainder = catalogExportIds.filter((exportId) => !orderedSet.has(exportId))
+
+  return [...orderedFromCategories, ...remainder]
+}
