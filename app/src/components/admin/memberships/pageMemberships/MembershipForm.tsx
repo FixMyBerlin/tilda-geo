@@ -7,14 +7,14 @@ import { Form } from '@/components/shared/form/Form'
 import type { FormApi } from '@/components/shared/form/types'
 import { createMembershipFn } from '@/server/memberships/memberships.functions'
 import { MembershipSchema } from '@/server/memberships/schema'
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import type { User } from '@/server/users/queries/getUsers.server'
 import { getUserWithMembershipsFn } from '@/server/users/users.functions'
 import { getRegionSelectOptions } from './utils/getRegionSelectOptions'
 import { getUserSelectOptions } from './utils/getUserSelectOptions'
 
 type Props = {
-  regions: RegionWithAdditionalData[]
+  regions: TRegion[]
   users: User[]
   initialValues?: {
     userId?: string
@@ -35,7 +35,7 @@ function MembershipFormFields({
   form: FormApi<MembershipFormValues>
   userId: string
   onUserIdChange: (nextUserId: string) => void
-  regions: RegionWithAdditionalData[]
+  regions: TRegion[]
   users: User[]
 }) {
   const { data: userData, isPending: membershipQueryPending } = useQuery({

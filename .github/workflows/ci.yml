@@ -52,7 +52,7 @@ jobs:
 
       - name: Verify app (read-only)
         env:
-          # Vitest loads repo `/.env` when present; PR runners have none. These match local dev (see `.env.example`).
+          # PR runners have no repo `/.env`; `test-run` still works via setup fallbacks. `VITE_*` overrides match local dev (see `.env.example`).
           VITE_APP_ENV: development
           VITE_APP_ORIGIN: http://127.0.0.1:5173
         run: bun run check-ci

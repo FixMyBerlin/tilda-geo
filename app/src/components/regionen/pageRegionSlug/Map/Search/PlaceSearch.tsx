@@ -11,7 +11,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { mobileControlButtonClassName } from '../../mobile/mobileControlButton.const'
-import { useStaticRegion } from '../../regionUtils/useStaticRegion'
+import { useRegion } from '../../regionUtils/useRegion'
 import { type GeoFeature, type PlaceType, useGeocodingSearch } from './useGeocodingSearch'
 
 type Props = {
@@ -69,7 +69,7 @@ const resultContext = (feature: GeoFeature) =>
  * Closes via X, Escape, or tapping outside.
  */
 export const PlaceSearch = ({ className }: Props) => {
-  const region = useStaticRegion()
+  const region = useRegion()
   const [open, setOpen] = useState(false)
   const { query, setQuery, results, selectFeature, clearResult, activeFeature } =
     useGeocodingSearch()

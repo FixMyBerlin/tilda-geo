@@ -29,7 +29,7 @@ Run `bun run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and de
 ### Our Tooling
 
 - Framework: [TanStack Start](https://tanstack.com/start) (Vite + TanStack Router + Nitro) with React 19
-- URL State Management: [nuqs](https://github.com/47ng/nuqs)
+- URL State Management: TanStack Router `validateSearch` (Zod) + [`regionSearchSchemas.ts`](../app/src/shared/regionen/regionSearchSchemas.ts); throttled updates via [`@tanstack/react-pacer`](https://tanstack.com/pacer/latest)
 - ORM: [Prisma](https://www.prisma.io/)
 - Styling: [Tailwind CSS](https://tailwindcss.com/), [Tailwind UI](https://tailwindui.com/) and [Headless UI](https://headlessui.com/)
 
@@ -57,5 +57,5 @@ docker compose --profile frontend up
 All [helper scripts](./scripts) run with [bun](https://bun.sh/).
 
 - **Update mapbox styles** – See [/scripts/MapboxStyles/README.md](./scripts/MapboxStyles/README.md).
-- **Update regional masks** – See [/scripts/RegionalMasks/README.md](./scripts/RegionalMasks/README.md).
+- **Update regional masks** – See [../docs/Regional-Masks.md](../docs/Regional-Masks.md) (admin **Maske aktualisieren**; cutover: migration step 5).
 - **Update datasets** – See [/datasets/README.md](./datasets/README.md) (or StaticDatasets README) for processing and updating external datasets.

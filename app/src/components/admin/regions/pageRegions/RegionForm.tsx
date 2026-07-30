@@ -1,89 +1,344 @@
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useRouter } from '@tanstack/react-router'
+import {
+  adminFormFieldsetClassName,
+  adminFormLegendClassName,
+} from '@/components/admin/adminFormFieldsetClasses'
+import { RegionCategoriesField } from '@/components/admin/regions/pageRegions/RegionCategoriesField'
+import { RegionLogoPicker } from '@/components/admin/regions/pageRegions/RegionLogoPicker'
+import { RegionNavigationLinksEditor } from '@/components/admin/regions/pageRegions/RegionNavigationLinksEditor'
 import {
   regionPromotedFormRadioItems,
   regionStatusFormRadioItems,
 } from '@/components/regionen/regionMeta/regionFormRadioItems'
+import { EN_DECIMAL_HELP } from '@/components/shared/form/enDecimalInput'
+import { CheckboxGroup } from '@/components/shared/form/fields/CheckboxGroup'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
-import { Form } from '@/components/shared/form/Form'
-import { Link } from '@/components/shared/links/Link'
-import type { StaticRegion } from '@/data/regions.const'
-import type { RegionStatus } from '@/prisma/generated/browser'
+import { Select } from '@/components/shared/form/fields/Select'
+import { TextField } from '@/components/shared/form/fields/TextField'
+import { Form, type SubmitResult } from '@/components/shared/form/Form'
+import { buttonStylesSecondary } from '@/components/shared/links/styles'
+import { regionProductFormItems } from '@/data/tildaProductNames.const'
+import {
+  RegionContractStatus,
+  RegionNotesMode,
+  RegionProduct,
+  RegionStatus,
+} from '@/prisma/generated/browser'
+import { regionenIndexQueryKey } from '@/server/regions/regionenIndexQueryOptions'
 import { createRegionFn, updateRegionFn } from '@/server/regions/regions.functions'
-import { RegionFormSchema } from '@/server/regions/schemas'
+import {
+  catalogOptions,
+  RegionFormRawSchema,
+  regionConfigToFormValues,
+  type RegionFormInput,
+} from '@/server/regions/regionWriteSchema'
 
-type RegionFormValues = {
-  slug: string
-  promoted: 'true' | 'false'
-  status: RegionStatus
-}
+const notesItems = [
+  { value: RegionNotesMode.osmNotes, label: 'OSM Notes' },
+  { value: RegionNotesMode.internalNotes, label: 'Internal Notes' },
+  { value: RegionNotesMode.disabled, label: 'Deaktiviert' },
+] as const
 
-type Props =
-  | {
-      mode: 'create'
-      creatableRegions: StaticRegion[]
-      initialValues: RegionFormValues
-    }
-  | {
-      mode: 'edit'
-      initialValues: RegionFormValues
-    }
+export const regionFormEmptyDefaults = {
+  slug: '',
+  name: '',
+  fullName: '',
+  promoted: 'false' as const,
+  status: RegionStatus.PUBLIC,
+  product: RegionProduct.radverkehr,
+  notes: RegionNotesMode.osmNotes,
+  showSearch: 'false' as const,
+  mapLat: '52.5',
+  mapLng: '13.4',
+  mapZoom: '10',
+  headerLogoId: '',
+  logoWhiteBackgroundRequired: 'false' as const,
+  downloadsEnabled: 'false' as const,
+  bboxMinLng: '',
+  bboxMinLat: '',
+  bboxMaxLng: '',
+  bboxMaxLat: '',
+  cacheWarmingEnabled: 'false' as const,
+  cacheWarmingMinZoom: '',
+  cacheWarmingMaxZoom: '',
+  cacheWarmingTables: '',
+  categories: '',
+  backgroundSources: '',
+  exports: '',
+  navigationLinks: [] as RegionFormInput['navigationLinks'],
+  contractId: '',
+} satisfies RegionFormInput
+
+type RegionContractOption = { id: number; name: string; status: RegionContractStatus }
+
+type Props = {
+  contracts: RegionContractOption[]
+  /** Existing region (edit page) enables logo upload to its RegionUpload library. */
+  regionId?: number
+} & (
+  | { mode: 'create'; initialValues: RegionFormInput }
+  | { mode: 'edit'; initialValues: RegionFormInput; regionSlug: string }
+)
 
 export function RegionForm(props: Props) {
-  const { mode, initialValues } = props
-  /** Keep `promoted` as `'true'|'false'` strings — matches RadioGroup values and Zod input before `.transform()`. */
-  const defaultValues = { ...initialValues }
-
-  const slugRadioItems =
-    mode === 'create'
-      ? props.creatableRegions.map((r) => ({
-          value: r.slug,
-          label: `${r.slug} (${r.name})`,
-        }))
-      : []
+  const { mode, initialValues, contracts, regionId } = props
+  const regionSlug = mode === 'edit' ? props.regionSlug : undefined
+  const contractOptions: [string, string][] = [
+    ['', 'Kein Auftrag'],
+    ...contracts.map((c) => {
+      const inactive = c.status === RegionContractStatus.INACTIVE ? ' (inaktiv)' : ''
+      return [String(c.id), `${c.name}${inactive}`] as [string, string]
+    }),
+  ]
+  const navigate = useNavigate()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const defaultValues = { ...regionFormEmptyDefaults, ...initialValues }
 
   return (
-    <Form<typeof RegionFormSchema>
+    <Form<RegionFormInput>
       defaultValues={defaultValues}
-      schema={RegionFormSchema}
+      schema={RegionFormRawSchema}
       onSubmit={async (values) => {
-        const fn = mode === 'create' ? createRegionFn : updateRegionFn
-        const result = await fn({ data: values })
-        if (result.success) return { success: true, redirect: '/admin/regions' }
-        return result
+        const result =
+          mode === 'create'
+            ? await createRegionFn({ data: values })
+            : await updateRegionFn({ data: { regionSlug: props.regionSlug, values } })
+        if (result.success) {
+          await queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey })
+          await router.invalidate()
+          return { success: true, redirect: '/admin/regions' }
+        }
+        return result as SubmitResult<RegionFormInput>
       }}
       submitLabel="Region speichern"
+      actionBarRight={
+        <button
+          type="button"
+          className={buttonStylesSecondary}
+          onClick={() => navigate({ to: '/admin/regions', search: { contract: undefined } })}
+        >
+          Abbrechen
+        </button>
+      }
     >
       {(form) => (
-        <>
-          {mode === 'create' && (
+        <div className="space-y-6">
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Basis</legend>
+            {mode === 'create' ? (
+              <TextField
+                form={form}
+                name="slug"
+                label="Slug"
+                help="Kleinbuchstaben, Ziffern, Bindestriche"
+              />
+            ) : (
+              <TextField form={form} name="slug" label="Slug" disabled />
+            )}
+            <TextField form={form} name="name" label="Name" />
+            <TextField form={form} name="fullName" label="Vollständiger Name" />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <RadioGroup
+                form={form}
+                name="status"
+                label="Status"
+                items={regionStatusFormRadioItems}
+              />
+              <RadioGroup
+                form={form}
+                name="promoted"
+                label="Gelistet"
+                items={regionPromotedFormRadioItems}
+              />
+            </div>
             <RadioGroup
+              inline
               form={form}
-              name="slug"
-              label="Region (noch nicht in der Datenbank)"
-              items={slugRadioItems}
-              help={
-                <>
-                  Nur Einträge aus der statischen Liste, die noch keine DB-Region haben.
-                  Voraussetzung:{' '}
-                  <Link
-                    blank
-                    href="https://github.com/FixMyBerlin/tilda-geo/blob/develop/app/src/data/regions.const.ts#L161"
-                  >
-                    statische Daten deployed
-                  </Link>
-                  .
-                </>
-              }
+              name="product"
+              label="Produkt"
+              items={regionProductFormItems}
             />
-          )}
-          <RadioGroup form={form} name="status" label="Status" items={regionStatusFormRadioItems} />
-          <RadioGroup
-            form={form}
-            name="promoted"
-            label="Gelistet"
-            items={regionPromotedFormRadioItems}
-          />
-        </>
+            <RadioGroup
+              inline
+              form={form}
+              name="notes"
+              label="Notes-Modus"
+              items={[...notesItems]}
+            />
+            <RadioGroup
+              inline
+              form={form}
+              name="showSearch"
+              label="Suche anzeigen"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+            <Select
+              form={form}
+              name="contractId"
+              label="Auftrag"
+              optional
+              options={contractOptions}
+            />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Karte</legend>
+            <TextField
+              decimalEn
+              form={form}
+              name="mapLat"
+              label="Breitengrad (lat)"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="mapLng"
+              label="Längengrad (lng)"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField decimalEn form={form} name="mapZoom" label="Zoom" help={EN_DECIMAL_HELP} />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Logo</legend>
+            <div>
+              <span className="mb-1 block text-sm font-medium text-gray-700">Logo</span>
+              <RegionLogoPicker form={form} regionId={regionId} regionSlug={regionSlug} />
+            </div>
+            <RadioGroup
+              inline
+              form={form}
+              name="logoWhiteBackgroundRequired"
+              label="Weißer Hintergrund nötig"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+          </fieldset>
+
+          {mode === 'create' ? (
+            <fieldset className={adminFormFieldsetClassName}>
+              <legend className={adminFormLegendClassName}>Maske</legend>
+              <p className="text-sm text-gray-600">
+                Die Karten-Maske kann nach dem Anlegen der Region auf der Bearbeitungsseite
+                konfiguriert werden.
+              </p>
+            </fieldset>
+          ) : null}
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Downloads</legend>
+            <RadioGroup
+              inline
+              form={form}
+              name="downloadsEnabled"
+              label="Downloads aktiv"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="bboxMinLng"
+              label="BBox min Lng"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="bboxMinLat"
+              label="BBox min Lat"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="bboxMaxLng"
+              label="BBox max Lng"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="bboxMaxLat"
+              label="BBox max Lat"
+              help={EN_DECIMAL_HELP}
+            />
+            <CheckboxGroup
+              form={form}
+              name="exports"
+              label="Export-IDs"
+              options={catalogOptions.exports.map((entry) => ({
+                value: entry.id,
+                label: entry.label,
+              }))}
+            />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Katalog-Zuweisungen</legend>
+            <RegionCategoriesField form={form} />
+            <CheckboxGroup
+              form={form}
+              name="backgroundSources"
+              label="Hintergrund-Quellen"
+              options={catalogOptions.backgrounds.map((entry) => ({
+                value: entry.id,
+                label: entry.label,
+              }))}
+            />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Navigation</legend>
+            <RegionNavigationLinksEditor form={form} />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Cache Warming</legend>
+            <RadioGroup
+              inline
+              form={form}
+              name="cacheWarmingEnabled"
+              label="Cache Warming aktiv"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="cacheWarmingMinZoom"
+              label="Min Zoom"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="cacheWarmingMaxZoom"
+              label="Max Zoom"
+              help={EN_DECIMAL_HELP}
+            />
+            <TextField form={form} name="cacheWarmingTables" label="Tabellen" />
+          </fieldset>
+        </div>
       )}
     </Form>
   )
+}
+
+export function regionConfigToFormDefaults(
+  config: import('@/server/regions/regionWriteSchema').RegionWriteInput,
+) {
+  return regionConfigToFormValues(config) as RegionFormInput
 }

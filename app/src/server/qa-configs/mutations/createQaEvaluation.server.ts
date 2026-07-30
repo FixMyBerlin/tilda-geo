@@ -1,5 +1,9 @@
 import { z } from 'zod'
 import { QaEvaluationStatus } from '@/prisma/generated/client'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
@@ -46,28 +50,32 @@ export async function createQaEvaluation(
     })
   }
 
-  const evaluation = await db.qaEvaluation.create({
-    data: {
-      configId: qaConfig.id,
-      areaId,
-      userStatus,
-      body: body || null,
-      evaluatorType: 'USER',
-      userId: appSession.userId,
-      systemStatus: 'NEEDS_REVIEW', // Default, will be updated by system
-      decisionData: storedDecisionData,
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          osmName: true,
-          firstName: true,
-          lastName: true,
+  const evaluation = await runWithAuditContextAsync(
+    memberFormAuditContext(headers, appSession.userId),
+    () =>
+      db.qaEvaluation.create({
+        data: {
+          configId: qaConfig.id,
+          areaId,
+          userStatus,
+          body: body || null,
+          evaluatorType: 'USER',
+          userId: appSession.userId,
+          systemStatus: 'NEEDS_REVIEW', // Default, will be updated by system
+          decisionData: storedDecisionData,
         },
-      },
-    },
-  })
+        include: {
+          author: {
+            select: {
+              id: true,
+              osmName: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      }),
+  )
 
   return transformEvaluationWithDecisionData(evaluation)
 }

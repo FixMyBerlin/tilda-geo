@@ -5,11 +5,11 @@ import { parseArgs } from 'node:util'
 import { select } from '@clack/prompts'
 import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
+import { S3_UPLOAD_FOLDER_BY_APP_ENV } from '@/server/s3UploadEnvFolder.const'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
 import { getRegions } from './api'
 import {
   buildStaticDatasetsApiConfig,
-  S3_UPLOAD_FOLDER_BY_APP_ENV,
   STATIC_DATASETS_CLI_ENV_TO_APP,
   STATIC_DATASETS_CLI_ENVS,
   type StaticDatasetsCliEnv,

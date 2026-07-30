@@ -1,7 +1,8 @@
-import { z } from 'zod'
+import type { z } from 'zod'
+import { adminFormAuditContext, runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
-import { errorState, validationErrorState } from '@/server/utils/validation'
+import { errorState, successState } from '@/server/utils/validation'
 import { CreateQaConfigFormSchema } from '../schemas'
 
 export async function createQaConfigWithData(
@@ -9,11 +10,12 @@ export async function createQaConfigWithData(
   headers: Headers,
 ) {
   try {
-    await requireAdmin(headers)
-    await db.qaConfig.create({ data })
-    return { success: true, message: '', errors: {} }
+    const admin = await requireAdmin(headers)
+    await runWithAuditContextAsync(adminFormAuditContext(headers, admin.userId), () =>
+      db.qaConfig.create({ data }),
+    )
+    return successState()
   } catch (error) {
-    if (error instanceof z.ZodError) return validationErrorState(error)
     return errorState(error, 'Fehler beim Anlegen der QA-Konfiguration')
   }
 }

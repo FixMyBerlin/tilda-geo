@@ -1,15 +1,20 @@
 import { z } from 'zod'
 import type { MapRenderFormatEnum } from '@/prisma/generated/client'
-import type { MetaDataSystemLayer, MetaDataUser } from '@/scripts/StaticDatasets/types'
+import type {
+  MetaDataFileLevelMetadata,
+  MetaDataSystemLayer,
+  MetaDataUser,
+} from '@/scripts/StaticDatasets/types'
 import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import {
   categoryPresentationForConfigCategory,
-  loadStaticDatasetCategoryMap,
-} from '@/server/static-dataset-categories/queries/loadStaticDatasetCategoryMap.server'
+  loadMapDatasetCategoryMap,
+} from '@/server/map-dataset-categories/queries/loadMapDatasetCategoryMap.server'
+import { parseMapDatasetUploadConfigs } from '@/server/uploads/mapDatasetUploadConfigs.schema'
 
 type UploadFields = {
-  isPublic: boolean
+  public: boolean
   hideDownloadLink: boolean
   id: string
   mapRenderFormat: MapRenderFormatEnum
@@ -26,18 +31,28 @@ type CategoryPresentationFields = {
   categorySubtitle: string | null
 }
 
+type RegionDatasetFileLevelFields = {
+  attributionHtml: string
+  dataSourceMarkdown?: MetaDataFileLevelMetadata['dataSourceMarkdown'] | null
+  dataUpdatedNote?: MetaDataFileLevelMetadata['dataUpdatedNote'] | null
+  licence?: MetaDataFileLevelMetadata['licence'] | null
+  licenceOsmCompatible?: MetaDataFileLevelMetadata['licenceOsmCompatible'] | null
+}
+
 export type RegionDatasetUser = MetaDataUser['configs'][number] &
+  RegionDatasetFileLevelFields &
   UploadFields &
   CategoryPresentationFields
 
 export type RegionDatasetSystemLayer = MetaDataSystemLayer['configs'][number] &
+  RegionDatasetFileLevelFields &
   UploadFields &
   CategoryPresentationFields
 
 export type RegionDataset = RegionDatasetUser | RegionDatasetSystemLayer
 
 async function queryUploadsForRegion(regionSlug: string, systemLayer: boolean) {
-  return db.upload.findMany({
+  return db.mapDatasetUpload.findMany({
     where: {
       regions: { some: { slug: regionSlug } },
       systemLayer,
@@ -95,7 +110,7 @@ async function getFilteredUploadsForRegion(
   return filtered as UploadRowWithUserConfigs[]
 }
 
-type CategoryMap = Awaited<ReturnType<typeof loadStaticDatasetCategoryMap>>
+type CategoryMap = Awaited<ReturnType<typeof loadMapDatasetCategoryMap>>
 
 const emptyPresentation: CategoryPresentationFields = {
   categorySortOrder: 0,
@@ -107,7 +122,7 @@ type UploadShapeForFields = Omit<UploadRow, 'configs'>
 
 function uploadFieldsFromRow(upload: UploadShapeForFields) {
   return {
-    isPublic: upload.public,
+    public: upload.public,
     hideDownloadLink: upload.hideDownloadLink,
     id: upload.slug,
     mapRenderFormat: upload.mapRenderFormat,
@@ -119,33 +134,48 @@ function uploadFieldsFromRow(upload: UploadShapeForFields) {
   } satisfies UploadFields
 }
 
+function fileLevelFieldsFromRow(upload: UploadShapeForFields) {
+  return {
+    attributionHtml: upload.attributionHtml ?? '',
+    dataSourceMarkdown: upload.dataSourceMarkdown,
+    dataUpdatedNote: upload.dataUpdatedNote,
+    licence: upload.licence as RegionDatasetFileLevelFields['licence'],
+    licenceOsmCompatible:
+      upload.licenceOsmCompatible as RegionDatasetFileLevelFields['licenceOsmCompatible'],
+  } satisfies RegionDatasetFileLevelFields
+}
+
 function transformUserUploadsToRegionDatasets(
   uploads: UploadRowWithUserConfigs[],
   categoryMap: CategoryMap,
 ) {
-  return uploads.flatMap((upload) =>
-    upload.configs.map(
+  return uploads.flatMap((upload) => {
+    const configs = parseMapDatasetUploadConfigs(upload.configs) as MetaDataUser['configs']
+    return configs.map(
       (config) =>
         ({
           ...config,
-          ...categoryPresentationForConfigCategory(config.category, categoryMap),
+          ...categoryPresentationForConfigCategory(config.categoryKey, categoryMap),
           ...uploadFieldsFromRow(upload),
+          ...fileLevelFieldsFromRow(upload),
         }) satisfies RegionDatasetUser,
-    ),
-  )
+    )
+  })
 }
 
 function transformSystemUploadsToRegionDatasets(uploads: UploadRowWithSystemConfigs[]) {
-  return uploads.flatMap((upload) =>
-    upload.configs.map(
+  return uploads.flatMap((upload) => {
+    const configs = parseMapDatasetUploadConfigs(upload.configs) as MetaDataSystemLayer['configs']
+    return configs.map(
       (config) =>
         ({
           ...config,
           ...emptyPresentation,
           ...uploadFieldsFromRow(upload),
+          ...fileLevelFieldsFromRow(upload),
         }) satisfies RegionDatasetSystemLayer,
-    ),
-  )
+    )
+  })
 }
 
 const RegionSlugSchema = z.object({ regionSlug: z.string() })
@@ -157,7 +187,7 @@ export async function getUploadsForRegionUser(
   const { regionSlug } = RegionSlugSchema.parse(input)
   const [uploads, categoryMap] = await Promise.all([
     getFilteredUploadsForRegion(regionSlug, false, headers),
-    loadStaticDatasetCategoryMap(),
+    loadMapDatasetCategoryMap(),
   ])
   return transformUserUploadsToRegionDatasets(uploads, categoryMap)
 }

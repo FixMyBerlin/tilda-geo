@@ -1,5 +1,6 @@
 import type { DeepKeys } from '@tanstack/form-core'
 import { twJoin } from 'tailwind-merge'
+import { isPartialEnDecimalInput } from '@/components/shared/form/enDecimalInput'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import type { FieldProps } from './sharedStyles'
@@ -8,8 +9,10 @@ import { inputBase, inputError, inputNormal, inputReadonly, labelClass } from '.
 type Props<T extends Record<string, unknown>> = FieldProps & {
   form: FormApi<T>
   name: DeepKeys<T>
+  /** Text input with dot decimals (EN), for coordinates and other geo numbers. */
+  decimalEn?: boolean
   type?: 'text' | 'email' | 'password' | 'number'
-} & Omit<React.JSX.IntrinsicElements['input'], 'name' | 'form'>
+} & Omit<React.JSX.IntrinsicElements['input'], 'name' | 'form' | 'type'>
 
 export function TextField<T extends Record<string, unknown>>({
   form,
@@ -21,18 +24,22 @@ export function TextField<T extends Record<string, unknown>>({
   classNameOverwrite,
   labelClassNameOverwrite,
   labelSrOnly,
+  decimalEn = false,
   type = 'text',
   ...inputProps
 }: Props<T>) {
   const { readOnly, className, ...restInputProps } = inputProps
   const isReadonly = Boolean(readOnly)
+  const resolvedType = decimalEn ? 'text' : type
   return (
     <form.Field name={name}>
       {(field) => {
         const errors = field.state.meta.errors
         const hasError = Boolean(errors?.length)
         const autofillIgnoreProps =
-          type === 'password' ? {} : ({ 'data-1p-ignore': true, 'data-lpignore': true } as const)
+          resolvedType === 'password'
+            ? {}
+            : ({ 'data-1p-ignore': true, 'data-lpignore': true } as const)
         const resolvedLabelClassName =
           labelClassNameOverwrite ?? twJoin(labelClass, labelSrOnly ? 'sr-only' : '')
         const resolvedInputClassName =
@@ -53,8 +60,18 @@ export function TextField<T extends Record<string, unknown>>({
               name={field.name}
               value={String(field.state.value ?? '')}
               onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange((_prev) => e.target.value as typeof _prev)}
-              type={type}
+              onChange={(e) => {
+                const nextValue = decimalEn
+                  ? isPartialEnDecimalInput(e.target.value)
+                    ? e.target.value
+                    : String(field.state.value ?? '')
+                  : e.target.value
+                field.handleChange((_prev) => nextValue as typeof _prev)
+              }}
+              type={resolvedType}
+              inputMode={decimalEn ? 'decimal' : restInputProps.inputMode}
+              lang={decimalEn ? 'en' : restInputProps.lang}
+              spellCheck={decimalEn ? false : restInputProps.spellCheck}
               className={resolvedInputClassName}
               aria-invalid={hasError}
               readOnly={readOnly}

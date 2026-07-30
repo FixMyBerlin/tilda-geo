@@ -17,14 +17,19 @@ export const adminTableClasses = {
   headRow: 'bg-white/90',
   /** `<tbody>` — row dividers + body surface */
   body: 'divide-y divide-gray-200 bg-white/40',
-  /** `<th scope="col">` — centered (default list tables). */
-  th: twMerge(cellPad, 'text-center align-middle text-sm font-semibold text-gray-900'),
-  /** `<th scope="col">` — left-aligned (wide / form-adjacent tables). */
+  /** `<th scope="col">` */
+  th: twMerge(cellPad, 'text-left align-middle text-sm font-semibold text-gray-900'),
+  /** `<th scope="col">` — left-aligned (alias; prefer `th`). */
   thLeft: twMerge(cellPad, 'text-left align-middle text-sm font-semibold text-gray-900'),
   /** `<td>` */
   td,
   /** `<th scope="row">` in tbody — row title / first column. */
   thRow: twMerge(td, 'text-left font-medium text-gray-900'),
+  /** Wrapper for `AdminTable` + `PaginationControls` (strips inner table shell). */
+  paginatedShell: twMerge(
+    'overflow-hidden rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
+    '[&>table]:rounded-none [&>table]:bg-transparent [&>table]:shadow-none [&>table]:ring-0',
+  ),
 } as const
 
 export const AdminTable = ({

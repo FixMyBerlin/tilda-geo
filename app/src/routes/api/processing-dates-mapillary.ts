@@ -7,28 +7,20 @@ const corsHeaders = {
 }
 
 export const Route = createFileRoute('/api/processing-dates-mapillary')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {
-        try {
-          const metadata = await getMapillaryCoverageMetadataLoaderFn()
+        const metadata = await getMapillaryCoverageMetadataLoaderFn()
 
-          if (!metadata) {
-            return Response.json(
-              { error: 'No metadata available' },
-              { status: 404, headers: corsHeaders },
-            )
-          }
-
-          return Response.json(metadata, { headers: corsHeaders })
-        } catch (error) {
-          console.error(error)
+        if (!metadata) {
           return Response.json(
-            { error: 'Internal Server Error' },
-            { status: 500, headers: corsHeaders },
+            { error: 'No metadata available' },
+            { status: 404, headers: corsHeaders },
           )
         }
+
+        return Response.json(metadata, { headers: corsHeaders })
       },
     },
   },

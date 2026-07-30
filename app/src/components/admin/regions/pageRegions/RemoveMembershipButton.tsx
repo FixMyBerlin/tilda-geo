@@ -1,5 +1,7 @@
 import { useRouter } from '@tanstack/react-router'
-import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
+import { twJoin } from 'tailwind-merge'
+import { linkStyles } from '@/components/shared/links/styles'
+import { toastError } from '@/components/shared/toast/toastError'
 import { deleteMembershipFn } from '@/server/memberships/memberships.functions'
 
 type Props = {
@@ -22,14 +24,21 @@ export function RemoveMembershipButton({ membershipId }: Props) {
     ) {
       return
     }
-    await deleteMembershipFn({ data: { id: membershipId } })
-    await router.invalidate()
+    try {
+      await deleteMembershipFn({ data: { id: membershipId } })
+      await router.invalidate()
+    } catch (error) {
+      toastError(error, 'Mitgliedschaft konnte nicht entfernt werden')
+    }
   }
 
   return (
-    <AdminTrashIconButton
-      ariaLabel="Mitgliedschaft in dieser Region entfernen"
+    <button
+      type="button"
+      className={twJoin(linkStyles, 'text-sm text-red-700 hover:text-red-900')}
       onClick={() => void handleRemove()}
-    />
+    >
+      Aus Region entfernen
+    </button>
   )
 }

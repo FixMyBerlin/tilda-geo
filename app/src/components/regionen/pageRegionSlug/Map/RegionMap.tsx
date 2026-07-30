@@ -37,7 +37,7 @@ import {
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { PlanningMapDrawing } from '../Planning/drawing/PlanningMapDrawing'
-import { useStaticRegion } from '../regionUtils/useStaticRegion'
+import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
 import { QaZoomNotice } from './QaZoomNotice'
 import { SearchResultLayers } from './Search/SearchResultLayers'
@@ -84,7 +84,7 @@ export const RegionMap = () => {
     finishMapDataLoading,
     updateMapBounds,
   } = useMapActions()
-  const region = useStaticRegion()
+  const region = useRegion()
   const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
@@ -255,13 +255,7 @@ export const RegionMap = () => {
   }
   let mapMaxBoundsSettings: MapMaxBoundsProps | Record<string, never> = {}
   if (region?.bbox) {
-    // [minLon, minLat, maxLon, maxLat] for bboxPolygon
-    const maxBounds: [number, number, number, number] = [
-      region.bbox.min[0],
-      region.bbox.min[1],
-      region.bbox.max[0],
-      region.bbox.max[1],
-    ]
+    const maxBounds = region.bbox
     const buffered = buffer(bboxPolygon(maxBounds), 60, { units: 'kilometers' })
     if (buffered) {
       // turf bbox() returns 4 numbers for 2D; we have no elevation data

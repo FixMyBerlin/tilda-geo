@@ -7,7 +7,7 @@ type Props = {
   previewRegionSlug?: string
 }
 
-export default function RegionPagePending({ previewRegionSlug }: Props = {}) {
+export default function RegionPagePending(_props: Props = {}) {
   useEffect(function logRegionPendingInDev() {
     if (isDev) console.debug('[region] route pending UI shown')
   }, [])
@@ -24,7 +24,7 @@ export default function RegionPagePending({ previewRegionSlug }: Props = {}) {
         <RegionPagePendingHeader />
       </div>
       <main className="z-0 min-h-0 grow">
-        <RegionPagePendingMapShell previewRegionSlug={previewRegionSlug} />
+        <RegionPagePendingMapShell />
       </main>
     </div>
   )

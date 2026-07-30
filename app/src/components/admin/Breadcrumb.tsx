@@ -1,8 +1,9 @@
 import { HomeIcon } from '@heroicons/react/20/solid'
 import { useRouter } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-type TBreadcrumb = { href: string; name: string }
+type TBreadcrumb = { href: string; name: ReactNode }
 type Props = { pages: TBreadcrumb[] }
 
 const separator = (
@@ -50,7 +51,7 @@ export const Breadcrumb = ({ pages }: Props) => {
           const current = pathname === page.href
 
           return (
-            <li key={page.name} className="flex shrink-0">
+            <li key={page.href} className="flex shrink-0">
               <div className="flex h-full items-center">
                 {separator}
                 <a
@@ -60,7 +61,7 @@ export const Breadcrumb = ({ pages }: Props) => {
                     current
                       ? 'pointer-events-none font-semibold text-gray-800'
                       : 'font-medium text-gray-500 hover:text-gray-700',
-                    'ml-4 shrink-0 text-sm whitespace-nowrap',
+                    'ml-4 inline-flex shrink-0 items-center text-sm whitespace-nowrap',
                   )}
                   aria-current={current ? 'page' : undefined}
                 >

@@ -1,15 +1,27 @@
 import { Fragment } from 'react'
+import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { Link } from '@/components/shared/links/Link'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { TopicDocAttributePurposePill } from '@/components/shared/topicDocs/TopicDocAttributePurposePill'
 import { topicDocPurposeMeta, topicDocPurposeOrder } from '@/data/topicDocs/purpose'
-import type { TopicDocCompiledAttribute, TopicDocCompiledValue } from '@/data/topicDocs/runtime'
+import type {
+  TopicDocCompiled,
+  TopicDocCompiledAttribute,
+  TopicDocCompiledValue,
+} from '@/data/topicDocs/runtime'
 import {
   getTopicDocAttributeFormatDisplay,
   topicDocSanitizedStringsFormatDisplay,
 } from '@/data/topicDocs/schema'
 import { DOCS_PAGE_SECTION_H2_CLASSNAME, DOCS_PAGE_SECTION_IDS } from './docsSectionIds.const'
-import type { DocsPageAttributesProps } from './types'
+
+type Props = {
+  topicDoc: TopicDocCompiled | null
+  tableName: SourceExportApiIdentifier
+  regionSlug: string | null
+}
+
+type AttributeSectionContext = Pick<Props, 'tableName' | 'regionSlug'>
 
 const attributeDescriptionMarkdownClassName =
   'prose-sm max-w-none m-0 text-xs leading-snug text-gray-600 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_p]:m-0 [&_p]:text-xs [&_p]:leading-snug'
@@ -109,8 +121,8 @@ const AttributeDescriptionCell = ({
   valueDescription,
 }: {
   attribute: TopicDocCompiledAttribute
-  tableName: DocsPageAttributesProps['tableName']
-  regionSlug: DocsPageAttributesProps['regionSlug']
+  tableName: AttributeSectionContext['tableName']
+  regionSlug: AttributeSectionContext['regionSlug']
   valueDescription?: string
 }) => {
   const description = valueDescription ?? attribute.description?.trim()
@@ -195,8 +207,8 @@ const AttributeKeyRowCells = ({
   attributes: ReadonlyArray<TopicDocCompiledAttribute>
   representative: TopicDocCompiledAttribute
   hasValues: boolean
-  tableName: DocsPageAttributesProps['tableName']
-  regionSlug: DocsPageAttributesProps['regionSlug']
+  tableName: AttributeSectionContext['tableName']
+  regionSlug: AttributeSectionContext['regionSlug']
   showDescription?: boolean
 }) => (
   <td colSpan={2} className={`${keyRowCellClassName} p-0`}>
@@ -234,8 +246,8 @@ const AttributeGroupRows = ({
   regionSlug,
 }: {
   group: AttributePresentationGroup
-  tableName: DocsPageAttributesProps['tableName']
-  regionSlug: DocsPageAttributesProps['regionSlug']
+  tableName: AttributeSectionContext['tableName']
+  regionSlug: AttributeSectionContext['regionSlug']
 }) => {
   const { attributes, representative } = group
   const hasValues = Boolean(representative.values?.length)
@@ -305,8 +317,8 @@ const AttributesTable = ({
   regionSlug,
 }: {
   attributes: ReadonlyArray<TopicDocCompiledAttribute>
-  tableName: DocsPageAttributesProps['tableName']
-  regionSlug: DocsPageAttributesProps['regionSlug']
+  tableName: AttributeSectionContext['tableName']
+  regionSlug: AttributeSectionContext['regionSlug']
 }) => (
   <table className="w-full text-sm">
     <thead>
@@ -328,11 +340,7 @@ const AttributesTable = ({
   </table>
 )
 
-export const PageDocsAttributesSection = ({
-  topicDoc,
-  tableName,
-  regionSlug,
-}: DocsPageAttributesProps) => {
+export const PageDocsAttributesSection = ({ topicDoc, tableName, regionSlug }: Props) => {
   if (!topicDoc) return null
 
   const mainAttributes = topicDoc.attributes.filter(

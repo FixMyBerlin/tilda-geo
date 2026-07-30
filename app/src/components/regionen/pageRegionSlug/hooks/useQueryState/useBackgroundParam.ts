@@ -1,24 +1,19 @@
-import { parseAsStringLiteral, useQueryState } from 'nuqs'
-import {
-  sourcesBackgroundsRaster,
-  type SourcesRasterIds,
-} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
-import { searchParamsRegistry } from './searchParamsRegistry'
-
-export const defaultBackgroundParam = 'default' satisfies SourcesRasterIds
-
-const validBackgroundParams = [
-  defaultBackgroundParam,
-  ...sourcesBackgroundsRaster.map((source) => source.id),
-] as const
-
-export type BackgroundParam = (typeof validBackgroundParams)[number]
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { defaultBackgroundParam } from './backgroundParam.const'
+import { useRegionSearchNavigation } from './useRegionSearchNavigation'
 
 export const useBackgroundParam = () => {
-  const [backgroundParam, setBackgroundParam] = useQueryState(
-    searchParamsRegistry.bg,
-    parseAsStringLiteral(validBackgroundParams).withDefault(defaultBackgroundParam),
-  )
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const backgroundParam = search[searchParamsRegistry.bg]
+
+  const setBackgroundParam = (value: typeof backgroundParam) => {
+    // replace (switching background should not push history) + drop the default from the URL
+    // (clearOnDefault parity with the old nuqs parser).
+    updateSearch(
+      { [searchParamsRegistry.bg]: value === defaultBackgroundParam ? undefined : value },
+      { replace: true },
+    )
+  }
 
   return { backgroundParam, setBackgroundParam }
 }

@@ -2,9 +2,8 @@ import { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@/prisma/ge
 import db from '../../src/server/db.server'
 
 export default async function seed() {
-  // Get the QA config and users for seeding
   const qaConfig = await db.qaConfig.findFirst({
-    where: { slug: 'euvm-parkraum-2025' },
+    where: { slug: 'dev-parkraum-qa-2025' },
   })
 
   const users = await db.user.findMany({
@@ -196,10 +195,8 @@ export default async function seed() {
     },
   ]
 
-  // Create all evaluations
   const allEvaluations = [...evaluations3511, ...evaluations3510, ...evaluations3512]
 
-  // Use createMany for better performance and to avoid ID conflicts
   await db.qaEvaluation.createMany({
     data: allEvaluations,
   })

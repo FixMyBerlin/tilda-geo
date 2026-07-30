@@ -17,7 +17,6 @@ export const NavigationDesktopLinks = ({ menuItems }: Props) => {
           return (
             <Link
               key={item.name}
-              // @ts-expect-error How to solve this with TS?…
               to={item.to}
               hash={item.hash}
               className={twJoin(

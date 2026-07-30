@@ -1,26 +1,28 @@
-import { createParser, useQueryState } from 'nuqs'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
-import { searchParamsRegistry } from '../searchParamsRegistry'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useRegionSearchNavigation } from '../useRegionSearchNavigation'
 import { createFreshCategoriesConfig } from './createFreshCategoriesConfig'
 import type { MapDataCategoryConfig } from './type'
+import { calcConfigChecksum } from './v2/lib'
 import { parse } from './v2/parse'
 import { serialize } from './v2/serialize'
 
+// Invariant: ?config= is normalized in the region loader — see ./README.md
 export const useCategoriesConfig = () => {
-  const region = useStaticRegion()
+  const region = useRegion()
+  const { search, updateSearch } = useRegionSearchNavigation()
   const freshConfig = createFreshCategoriesConfig(region?.categories ?? [])
 
-  const configParamParser = createParser({
-    parse: (query: string) => parse(query, freshConfig),
-    serialize: (value: MapDataCategoryConfig[]) => serialize(value),
-  })
-    .withOptions({ history: 'push' })
-    .withDefault(freshConfig)
+  const configWire = search[searchParamsRegistry.config]
+  const checksum = configWire?.split('.')[0]
+  const categoriesConfig =
+    configWire && checksum === calcConfigChecksum(freshConfig)
+      ? parse(configWire, freshConfig)
+      : freshConfig
 
-  const [categoriesConfig, setCategoriesConfig] = useQueryState(
-    searchParamsRegistry.config,
-    configParamParser,
-  )
+  const setCategoriesConfig = (value: MapDataCategoryConfig[]) => {
+    updateSearch({ [searchParamsRegistry.config]: serialize(value) })
+  }
 
   return { categoriesConfig, setCategoriesConfig }
 }

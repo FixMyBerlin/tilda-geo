@@ -12,13 +12,6 @@ export const STATIC_DATASETS_CLI_ENV_TO_APP = {
   production: 'production',
 } as const satisfies Record<StaticDatasetsCliEnv, EnvironmentValues>
 
-/** S3 path segment under `uploads/` for static datasets (`--env` → app environment). */
-export const S3_UPLOAD_FOLDER_BY_APP_ENV = {
-  development: 'localdev',
-  staging: 'staging',
-  production: 'production',
-} as const satisfies Record<EnvironmentValues, string>
-
 function resolveAtlasApiKeyForStaticDatasets(appEnv: EnvironmentValues) {
   switch (appEnv) {
     case 'development': {

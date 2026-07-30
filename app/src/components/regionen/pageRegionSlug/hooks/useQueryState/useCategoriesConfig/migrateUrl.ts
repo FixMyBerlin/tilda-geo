@@ -1,4 +1,5 @@
 import { migrations } from './migrations'
+import type { UrlMigrationContext } from './migrations/types'
 
 const currentVersion = Math.max(...Object.keys(migrations).map((key) => Number(key)))
 
@@ -12,23 +13,13 @@ function getVersion(url: string) {
   return version
 }
 
-const DEBUG = false
-function debug(...args: unknown[]) {
-  if (DEBUG) console.debug(...args)
-}
-
-export function migrateUrl(url: string) {
-  debug('========== migrateUrl ==========')
+export function migrateUrl(url: string, ctx: UrlMigrationContext) {
   const searchParamsVersion = getVersion(url)
-  debug('searchParamsVersion:', searchParamsVersion, ', currentVersion:', currentVersion)
   let migratedUrl = url
   for (let v = searchParamsVersion + 1; v <= currentVersion; v++) {
-    debug(`Running migration ${v}`)
-    debug('  before: ', migratedUrl)
     const migrate = migrations[v as keyof typeof migrations]
     if (!migrate) throw new Error(`Migration ${v} is missing.`)
-    migratedUrl = migrate(migratedUrl)
-    debug('  after: ', migratedUrl)
+    migratedUrl = migrate(migratedUrl, ctx)
   }
   const u = new URL(migratedUrl)
   u.searchParams.set('v', String(currentVersion))

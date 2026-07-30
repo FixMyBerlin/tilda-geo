@@ -11,6 +11,7 @@ import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/Erro
 import { useVisibleViewportHeightVar } from '@/components/shared/hooks/viewport/useVisibleViewportHeightVar'
 import TanStackQueryDevtools from '@/components/shared/providers/tanstack-query/devtools'
 import { Provider as TanStackQueryProvider } from '@/components/shared/providers/tanstack-query/root-provider'
+import { AppToaster } from '@/components/shared/toast/AppToaster'
 
 // Region map/preview routes use their own chrome — skip app header/footer here.
 const HIDE_APP_CHROME_ROUTE_IDS = new Set([
@@ -50,6 +51,7 @@ export function LayoutRoot() {
               </ErrorBoundary>
             </div>
             {!hideAppChrome && <Footer />}
+            <AppToaster />
             <TailwindResponsiveHelper />
             <TanStackDevtools
               config={{ position: 'bottom-left' }}

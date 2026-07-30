@@ -62,7 +62,7 @@ async function getCampaignCounts(campaignIds: string[]) {
 }
 
 export const Route = createFileRoute('/api/campaigns')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {

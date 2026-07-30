@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
-import { staticRegion } from '@/data/regions.const'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import {
   MAX_USER_GEOJSON_BYTES,
@@ -196,8 +195,11 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
 
-    const staticData = staticRegion.find((r) => r.slug === data.regionSlug)
-    const osmRelationIds = staticData?.mask?.osmRelationIds ?? []
+    const region = await db.region.findFirst({
+      where: { slug: data.regionSlug },
+      select: { maskOsmRelationIds: true },
+    })
+    const osmRelationIds = region?.maskOsmRelationIds ?? []
     const relationKeys = osmRelationIds.map((id) => `relation/${id}`)
 
     // If no region geometry exists in the DB (e.g. non-Berlin regions), fall back to all boundaries.

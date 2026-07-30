@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
@@ -16,8 +20,12 @@ export async function createNoteComment(input: z.infer<typeof Schema>, headers: 
 
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
 
-  const result = await db.noteComment.create({
-    data: { noteId: parsed.noteId, body: parsed.body, userId: session.userId },
-  })
+  const result = await runWithAuditContextAsync(
+    memberFormAuditContext(headers, session.userId),
+    () =>
+      db.noteComment.create({
+        data: { noteId: parsed.noteId, body: parsed.body, userId: session.userId },
+      }),
+  )
   return result
 }

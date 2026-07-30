@@ -5,6 +5,7 @@ import seedUploads from './seeds/pmtiles'
 import seedProcessingMeta from './seeds/processingMeta'
 import seedQaConfigs from './seeds/qaConfigs'
 import seedQaEvaluations from './seeds/qaEvaluations'
+import seedRegionContracts from './seeds/regionContracts'
 import seedRegions from './seeds/regions'
 import seedUsers from './seeds/users'
 
@@ -12,6 +13,7 @@ const seed = async () => {
   await runGeoBootstrap()
 
   await seedRegions()
+  await seedRegionContracts()
   await seedUsers()
   await seedMemberships()
   await seedUploads()

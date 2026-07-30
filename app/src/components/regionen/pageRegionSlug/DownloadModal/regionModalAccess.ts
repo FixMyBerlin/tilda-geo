@@ -36,8 +36,13 @@ const enrichDataset = (
   }
 }
 
-export const getRegionModalDatasets = (region: RegionForDatasetDerivation) => {
-  const derived = deriveRegionDatasetsFromCategories(region).map(enrichDataset)
+export const getRegionModalDatasets = (
+  region: RegionForDatasetDerivation,
+  allRegionExportTables?: Iterable<string>,
+) => {
+  const derived = deriveRegionDatasetsFromCategories(region, allRegionExportTables).map(
+    enrichDataset,
+  )
   const downloadable = derived.filter((dataset) => dataset.isDownloadable)
   const other = derived.filter((dataset) => !dataset.isDownloadable)
 
@@ -54,8 +59,9 @@ export type RegionModalAccess = ReturnType<typeof getRegionModalAccess>
 export const getRegionModalAccess = (
   region: RegionForDatasetDerivation,
   hasPermissions: boolean,
+  allRegionExportTables?: Iterable<string>,
 ) => {
-  const { downloadable, other, all } = getRegionModalDatasets(region)
+  const { downloadable, other, all } = getRegionModalDatasets(region, allRegionExportTables)
 
   const showDownloadableSectionInDownloadModal =
     hasPermissions && region.exports != null && downloadable.length > 0

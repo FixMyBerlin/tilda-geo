@@ -8,6 +8,7 @@ import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { IconModal } from '@/components/shared/Modal/IconModal'
+import { Quote } from '@/components/shared/text/Quotes'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
 import { ControlButtonDot } from '../ControlButtonDot'
 import { mobileControlButtonClassName } from '../mobile/mobileControlButton.const'
@@ -67,7 +68,8 @@ export const DownloadModal = ({ modalAccess, hasPermissions }: Props) => {
         >
           <DownloadModalUpdateDate />
           <p className="mb-2.5 rounded bg-orange-100 p-2 text-sm">
-            Hinweis: Der Export ist für diese Region {region.fullName} nicht eingerichtet.
+            Hinweis: Der Export ist für diese Region <Quote>{region.fullName}</Quote> nicht
+            eingerichtet.
           </p>
         </IconModal>
       </section>

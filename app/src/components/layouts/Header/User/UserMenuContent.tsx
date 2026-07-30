@@ -6,19 +6,18 @@ import { Link } from '@/components/shared/links/Link'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import type { CurrentUser } from '@/server/users/queries/getCurrentUser.server'
-import { UserLoggedInAdminInfo } from './UserLoggedInAdminInfo'
 
 type Props = {
   user: NonNullable<CurrentUser>
-  inHeadlessMenu?: boolean
 }
 
 /**
- * The body of the signed-in user menu (account info + admin links), shared by the
+ * The body of the signed-in user menu (account info), shared by the
  * desktop dropdown (UserLoggedIn) and the mobile user sheet (MobileUserMenu).
+ * Admin tools live in AdminPanelTrigger (separate pink button + bottom sheet).
  * Callers add their own logout control around it.
  */
-export const UserMenuContent = ({ user, inHeadlessMenu = false }: Props) => {
+export const UserMenuContent = ({ user }: Props) => {
   const isRegionsPage = Boolean(useOptionalRegionSlug())
   const hasPermissions = useHasPermissions()
 
@@ -82,7 +81,6 @@ export const UserMenuContent = ({ user, inHeadlessMenu = false }: Props) => {
           <Link to="/settings/user">Account bearbeiten</Link>
         )}
       </div>
-      <UserLoggedInAdminInfo user={user} inHeadlessMenu={inHeadlessMenu} />
     </>
   )
 }

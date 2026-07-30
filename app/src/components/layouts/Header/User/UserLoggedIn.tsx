@@ -56,7 +56,7 @@ export const UserLoggedIn = ({ user }: Props) => {
           modal={false}
           className="absolute right-0 z-50 mt-2 w-72 origin-top-right rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5"
         >
-          <UserMenuContent user={user} inHeadlessMenu />
+          <UserMenuContent user={user} />
           <MenuItem>
             {({ focus }) => (
               <button

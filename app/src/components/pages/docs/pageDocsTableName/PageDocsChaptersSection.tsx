@@ -1,10 +1,10 @@
 import { DocumentHeading } from '@/components/shared/text/DocumentHeading'
 import { Markdown } from '@/components/shared/text/Markdown'
+import type { TopicDocCompiled } from '@/data/topicDocs/runtime'
 import { DOCS_PAGE_SECTION_H2_CLASSNAME } from './docsSectionIds.const'
-import type { DocsPageTopicDoc } from './types'
 
 type Props = {
-  topicDoc: DocsPageTopicDoc
+  topicDoc: TopicDocCompiled | null
 }
 
 export const PageDocsChaptersSection = ({ topicDoc }: Props) => {

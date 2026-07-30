@@ -2,6 +2,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@head
 import { ChevronDownIcon, ChevronLeftIcon, ListBulletIcon } from '@heroicons/react/20/solid'
 import { Suspense, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { useQaMapData } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapData'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { linkStyles } from '@/components/shared/links/styles'
@@ -24,6 +25,7 @@ export const QaConfigCategory = ({
   }
 }) => {
   const { qaParamData, setQaParamData } = useQaParam()
+  const { isFetching: isLoadingQaMapData } = useQaMapData()
   const regionSlug = useRegionSlug()
   const [dialogState, setDialogState] = useState<QaStyleKey | null>(null)
 
@@ -66,6 +68,7 @@ export const QaConfigCategory = ({
                   {qaConfig.label}{' '}
                   {/* {qaConfig.isActive ? null : <Pill color="gray">deaktiviert</Pill>} */}
                 </span>
+                {isSelected && isLoadingQaMapData && <SmallSpinner />}
               </h2>
             </div>
             <div className="flex min-h-12 flex-none items-center justify-center px-1 text-violet-500">

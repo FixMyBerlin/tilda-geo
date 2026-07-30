@@ -71,8 +71,8 @@ Then re-run it for **production** once staging looks healthy.
 Provided automatically by the `bun run audit-public-schema` script (`--env-file=../.env
 --env-file=../.env.local`):
 
-- `DATABASE_HOST` / `DATABASE_USER` / `DATABASE_PASSWORD` / `DATABASE_NAME` — the local dev DB
-  (the reference; port 5432).
+- `DATABASE_HOST` / `DATABASE_PORT` / `DATABASE_USER` / `DATABASE_PASSWORD` / `DATABASE_NAME` — the
+  local dev DB (the reference).
 - `DATABASE_URL_STAGING` / `DATABASE_URL_PRODUCTION` — the tunnel endpoints (same vars db-pull uses;
   see [.env.example](../../../.env.example) and [scripts/db-pull/README.md](../db-pull/README.md)).
 

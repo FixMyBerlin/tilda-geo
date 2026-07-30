@@ -2,10 +2,8 @@ import type { Prisma } from '@/prisma/generated/client'
 import db from '../../src/server/db.server'
 
 const seedInternalNotes = async () => {
-  // We cannot automate selecting the regions due to import errors with the logo svgs in regions.const.
-  // We will have to create a custom region list here, for now.
-  // const regionsWithInternalNotes = staticRegion.filter((r) => r.notes === 'atlasNotes')
-  const regionsWithInternalNotes = [{ slug: 'bb-sg', map: { lat: 52.3968, lng: 13.0342 } }]
+  // Dev seed uses an explicit slug list; extend when adding internal-notes fixtures.
+  const regionsWithInternalNotes = [{ slug: 'dev-status-public', map: { lat: 52.5, lng: 13.4 } }]
 
   // Get users for seeding (use first two users found)
   const users = await db.user.findMany({

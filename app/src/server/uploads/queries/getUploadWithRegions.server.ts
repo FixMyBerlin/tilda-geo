@@ -6,8 +6,12 @@ export async function getUploadWithRegions(input: { slug: string }, headers: Hea
   await requireAdmin(headers)
   const { slug } = GetUploadSchema.parse(input)
 
-  return await db.upload.findFirstOrThrow({
+  return await db.mapDatasetUpload.findFirstOrThrow({
     where: { slug },
-    include: { regions: { select: { id: true, slug: true } } },
+    include: {
+      regions: { select: { id: true, slug: true } },
+      // Layer-config rows power the admin detail "Ansichten" table.
+      layerConfigs: { orderBy: [{ subId: 'asc' }, { id: 'asc' }] },
+    },
   })
 }

@@ -1,3 +1,4 @@
+import { AdminPanelTrigger } from '@/components/layouts/Header/User/AdminPanelTrigger'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { DebugButton } from '../DebugBoxes/DebugButton'
 import { RegionDataModals } from '../DownloadModal/RegionDataModals'
@@ -24,6 +25,7 @@ export const MobileMapHeader = () => {
     <div className={mobileMapHeaderClassName}>
       <div className="flex items-start gap-2">
         <MobileRegionMenu />
+        <AdminPanelTrigger variant="mapControl" />
         <MobileUserMenu />
         <RegionDataModals />
       </div>

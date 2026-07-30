@@ -1,13 +1,18 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { adminTableClasses } from '@/components/admin/AdminTable'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { PaginationControls } from '@/components/shared/pagination/PaginationControls'
+import { useAdminTablePagination } from '@/components/shared/pagination/useAdminTablePagination'
 import { AdminMembershipsTable } from './pageMemberships/AdminMembershipsTable'
 
 const routeApi = getRouteApi('/admin/memberships/')
-const MAX_TAKE = 1000
 
 export function PageMemberships() {
-  const { users } = routeApi.useLoaderData()
+  const loaderData = routeApi.useLoaderData()
+  const search = routeApi.useSearch()
+  const navigate = routeApi.useNavigate()
+  const { page, goToPage, result } = useAdminTablePagination(search, navigate, loaderData)
 
   return (
     <>
@@ -17,14 +22,10 @@ export function PageMemberships() {
         />
       </HeaderWrapper>
 
-      {users.length >= MAX_TAKE && (
-        <p className="my-12 text-red-500">
-          Achtung, die Liste zeigt maximal {MAX_TAKE} Einträge. Wir müssen eine Paginierung bauen
-          oder `maxTake` erhöhen.
-        </p>
-      )}
-
-      <AdminMembershipsTable users={users} />
+      <div className={adminTableClasses.paginatedShell}>
+        <AdminMembershipsTable users={loaderData.rows} total={loaderData.total} />
+        <PaginationControls page={page} result={result} onPageChange={goToPage} />
+      </div>
     </>
   )
 }

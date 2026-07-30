@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util'
 import { z } from 'zod'
 
 export const SCHEMA = 'data'
-const SCRIPT_DIR = import.meta.dir
+export const SCRIPT_DIR = import.meta.dir
 export const DEFAULT_OUTPUT_DIR = resolve(SCRIPT_DIR, 'data')
 
 const tableNameSchema = z

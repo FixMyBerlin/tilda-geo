@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import type { QaSystemStatus } from '@/prisma/generated/client'
 import { GuardEndpointSchema, guardEndpoint } from '@/server/api/private/guardEndpoint'
+import { runWithAuditContextAsync, systemApiAuditContext } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import {
   calculateSystemStatus,
@@ -105,33 +106,34 @@ async function upsertQaEvaluationWithRules(
   }
 }
 
-async function qaUpdate() {
+async function qaUpdate(headers: Headers) {
   const startTime = Date.now()
   console.log('QA update: Started processing')
 
   try {
     await updateProcessingMetaAsync('qa_update_started_at')
 
-    const qaConfigs = await db.qaConfig.findMany({
-      where: { isActive: true },
-      include: { region: true },
-    })
+    const result = await runWithAuditContextAsync(systemApiAuditContext(headers), async () => {
+      const qaConfigs = await db.qaConfig.findMany({
+        where: { isActive: true },
+        include: { region: true },
+      })
 
-    let totalEvaluations = 0
-    let newEvaluations = 0
+      let totalEvaluations = 0
+      let newEvaluations = 0
 
-    for (const config of qaConfigs) {
-      const tableName = getQaTableName(config.mapTable)
+      for (const config of qaConfigs) {
+        const tableName = getQaTableName(config.mapTable)
 
-      type QaAreaRow = {
-        id: string
-        relative: number | null
-        previous_relative: number | null
-        count_reference: number | null
-        count_current: number | null
-        absoluteDifference: number | null
-      }
-      const areas = await db.$queryRawUnsafe<QaAreaRow[]>(`
+        type QaAreaRow = {
+          id: string
+          relative: number | null
+          previous_relative: number | null
+          count_reference: number | null
+          count_current: number | null
+          absoluteDifference: number | null
+        }
+        const areas = await db.$queryRawUnsafe<QaAreaRow[]>(`
         SELECT
           id,
           relative::float,
@@ -142,48 +144,51 @@ async function qaUpdate() {
         FROM ${tableName}
       `)
 
-      for (const area of areas) {
-        const systemStatus = calculateSystemStatus(area.relative, config)
+        for (const area of areas) {
+          const systemStatus = calculateSystemStatus(area.relative, config)
 
-        const decisionData = qaDecisionDataSchema.parse({
-          relative: area.relative,
-          currentCount: area.count_current,
-          referenceCount: area.count_reference,
-          absoluteChange: area.absoluteDifference,
-          goodThreshold: config.goodThreshold,
-          needsReviewThreshold: config.needsReviewThreshold,
-        })
+          const decisionData = qaDecisionDataSchema.parse({
+            relative: area.relative,
+            currentCount: area.count_current,
+            referenceCount: area.count_reference,
+            absoluteChange: area.absoluteDifference,
+            goodThreshold: config.goodThreshold,
+            needsReviewThreshold: config.needsReviewThreshold,
+          })
 
-        const evaluation = await upsertQaEvaluationWithRules(config.id, area.id.toString(), {
-          systemStatus,
-          previousRelative: area.previous_relative,
-          currentRelative: area.relative,
-          absoluteDifference: area.absoluteDifference,
-          absoluteDifferenceThreshold: config.absoluteDifferenceThreshold,
-          decisionData,
-        })
+          const evaluation = await upsertQaEvaluationWithRules(config.id, area.id.toString(), {
+            systemStatus,
+            previousRelative: area.previous_relative,
+            currentRelative: area.relative,
+            absoluteDifference: area.absoluteDifference,
+            absoluteDifferenceThreshold: config.absoluteDifferenceThreshold,
+            decisionData,
+          })
 
-        totalEvaluations++
-        if (
-          evaluation?.createdAt &&
-          new Date(evaluation.createdAt).getTime() > Date.now() - 60000
-        ) {
-          newEvaluations++
+          totalEvaluations++
+          if (
+            evaluation?.createdAt &&
+            new Date(evaluation.createdAt).getTime() > Date.now() - 60000
+          ) {
+            newEvaluations++
+          }
         }
       }
-    }
 
-    await updateProcessingMetaAsync('qa_update_completed_at')
+      await updateProcessingMetaAsync('qa_update_completed_at')
+
+      return {
+        success: true as const,
+        totalEvaluations,
+        newEvaluations,
+        configsProcessed: qaConfigs.length,
+      }
+    })
 
     const secondsElapsed = Math.round((Date.now() - startTime) / 100) / 10
     console.log(`QA update: Completed in ${secondsElapsed} s`)
 
-    return {
-      success: true,
-      totalEvaluations,
-      newEvaluations,
-      configsProcessed: qaConfigs.length,
-    }
+    return result
   } catch (error) {
     console.error('QA update: Error', error)
     throw error
@@ -191,14 +196,14 @@ async function qaUpdate() {
 }
 
 export const Route = createFileRoute('/api/private/post-processing-qa-update')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: ({ request }) => {
         const { access, response } = guardEndpoint(request, GuardEndpointSchema)
         if (access === false) return response
 
-        qaUpdate().catch((error) => {
+        qaUpdate(request.headers).catch((error) => {
           console.error('QA update: Unhandled error in background task', error)
         })
 

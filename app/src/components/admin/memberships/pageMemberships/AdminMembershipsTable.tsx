@@ -9,6 +9,7 @@ import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
+import { toastError } from '@/components/shared/toast/toastError'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { deleteMembershipFn } from '@/server/memberships/memberships.functions'
 import type { UserWithMemberships } from '@/server/users/queries/getUsersAndMemberships.server'
@@ -16,19 +17,24 @@ import { getFullname } from './utils/getFullname'
 
 type Props = {
   users: UserWithMemberships[]
+  total: number
 }
 
-export const AdminMembershipsTable = ({ users }: Props) => {
+export const AdminMembershipsTable = ({ users, total }: Props) => {
   const router = useRouter()
 
-  const handleDelete = async (membership: UserWithMemberships['Membership'][number]) => {
+  const handleDelete = async (membership: UserWithMemberships['memberships'][number]) => {
     if (
       window.confirm(
         `Den Eintrag mit ID ${membership.id} auf Projekt ${membership.region.slug} unwiderruflich löschen?`,
       )
     ) {
-      await deleteMembershipFn({ data: { id: membership.id } })
-      router.invalidate()
+      try {
+        await deleteMembershipFn({ data: { id: membership.id } })
+        await router.invalidate()
+      } catch (error) {
+        toastError(error, 'Mitgliedschaft konnte nicht gelöscht werden')
+      }
     }
   }
 
@@ -37,7 +43,7 @@ export const AdminMembershipsTable = ({ users }: Props) => {
       <thead>
         <tr className={adminTableClasses.headRow}>
           <th scope="col" className={adminTableClasses.thLeft}>
-            User ({users.length})
+            User ({total})
           </th>
           <th scope="col" className={adminTableClasses.thLeft}>
             Projekt
@@ -66,11 +72,11 @@ export const AdminMembershipsTable = ({ users }: Props) => {
                 <span className="text-gray-400">({formatRelativeTime(user.createdAt)})</span>
               </td>
               <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
-                {user?.Membership?.length === 0 ? (
+                {user?.memberships?.length === 0 ? (
                   <>Bisher keine Rechte</>
                 ) : (
                   <ul className={twMerge(adminBulletedListClassName, 'mt-0')}>
-                    {user?.Membership?.map((membership) => {
+                    {user?.memberships?.map((membership) => {
                       return (
                         <li key={membership.id}>
                           <div className="flex items-center justify-between gap-2">
@@ -112,7 +118,7 @@ export const AdminMembershipsTable = ({ users }: Props) => {
                     <div className="mb-1 font-semibold text-gray-600">Zugriffene Regionen:</div>
                     <ul className={twMerge(adminBulletedListClassName, 'text-xs')}>
                       {user.accessedRegions.map((accessedRegion) => {
-                        const hasAccess = user.Membership?.some(
+                        const hasAccess = user.memberships?.some(
                           (m) => m.region.slug === accessedRegion.slug,
                         )
                         const relativeTime = formatRelativeTime(accessedRegion.lastAccessedDay)

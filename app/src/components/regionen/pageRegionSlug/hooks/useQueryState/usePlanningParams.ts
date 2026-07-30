@@ -1,8 +1,29 @@
-import { parseAsBoolean, parseAsInteger, parseAsStringLiteral, useQueryState } from 'nuqs'
+import {
+  PLANNING_SCORE_PROPERTY,
+  type PlanningScoreMode,
+} from '@/shared/regionen/planningScoreMode.const'
+import type { RegionSearch } from '@/shared/regionen/regionSearchSchemas'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useRegionSearchNavigation } from './useRegionSearchNavigation'
+
+export type { PlanningScoreMode }
+export { PLANNING_SCORE_PROPERTY }
+
+/**
+ * [value, setValue] pair matching the nuqs `useQueryState` shape these hooks used to return
+ * (including `null` as "clear the param", which callers still rely on).
+ */
+const usePlanningSearchParam = <Key extends keyof RegionSearch>(key: Key) => {
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const value = search[key]
+  const setValue = (next: RegionSearch[Key] | null) => {
+    updateSearch({ [key]: next === null ? undefined : next } as Partial<RegionSearch>)
+  }
+  return [value, setValue] as const
+}
 
 /** Whether the interactive planning mode is active (entry from the map). */
-export const usePlanningModeParam = () =>
-  useQueryState('planning', parseAsBoolean.withDefault(false))
+export const usePlanningModeParam = () => usePlanningSearchParam(searchParamsRegistry.planning)
 
 /**
  * Planning-mode URL state (shareable). Both are absent in the normal viewer, so
@@ -12,31 +33,13 @@ export const usePlanningModeParam = () =>
  * - planningRun: the run id whose immutable result tiles are displayed
  *   (drives the `?run_id=N` Martin function source + long-lived tile cache).
  */
-export const usePlanningScenarioParam = () => useQueryState('planningScenario', parseAsInteger)
+export const usePlanningScenarioParam = () =>
+  usePlanningSearchParam(searchParamsRegistry.planningScenario)
 
-export const usePlanningRunParam = () => useQueryState('planningRun', parseAsInteger)
-
-/**
- * Which of the three probabilities colors the hexagons (Issue #3415):
- * - 'kombination': the combined score `mce_gesamtscore` (default, unchanged behavior)
- * - 'bedarf': demand probability `score_bedarf`
- * - 'bebauung': buildability probability `score_bebauung`
- */
-const PLANNING_SCORE_MODES = ['kombination', 'bedarf', 'bebauung'] as const
-export type PlanningScoreMode = (typeof PLANNING_SCORE_MODES)[number]
-
-/** Tile property colored for each display mode. */
-export const PLANNING_SCORE_PROPERTY: Record<PlanningScoreMode, string> = {
-  kombination: 'mce_gesamtscore',
-  bedarf: 'score_bedarf',
-  bebauung: 'score_bebauung',
-}
+export const usePlanningRunParam = () => usePlanningSearchParam(searchParamsRegistry.planningRun)
 
 export const usePlanningScoreParam = () =>
-  useQueryState(
-    'planningScore',
-    parseAsStringLiteral(PLANNING_SCORE_MODES).withDefault('kombination'),
-  )
+  usePlanningSearchParam(searchParamsRegistry.planningScore)
 
 /**
  * Whether the hexagon result layer is visible. Toggled off via the icon state in
@@ -44,7 +47,7 @@ export const usePlanningScoreParam = () =>
  * turning the layer back on restores the previous display mode.
  */
 export const usePlanningHexagonsVisibleParam = () =>
-  useQueryState('planningHexagons', parseAsBoolean.withDefault(true))
+  usePlanningSearchParam(searchParamsRegistry.planningHexagons)
 
 /**
  * Deckkraft (0-100%) der Ergebnis-Hexagone. Kommt zusätzlich zu
@@ -56,7 +59,7 @@ export const usePlanningHexagonsVisibleParam = () =>
  * Regler skaliert relativ dazu, nicht auf absolute CSS-Opacity 1.
  */
 export const usePlanningHexagonsOpacityParam = () =>
-  useQueryState('planningHexagonsOpacity', parseAsInteger.withDefault(100))
+  usePlanningSearchParam(searchParamsRegistry.planningHexagonsOpacity)
 
 /**
  * Gesuchte Mindestfläche (m²) für die Flächensuche (Client-Filter auf die
@@ -66,7 +69,7 @@ export const usePlanningHexagonsOpacityParam = () =>
  * eingegeben werden muss.
  */
 export const usePlanningMinAreaParam = () =>
-  useQueryState('planningMinArea', parseAsInteger.withDefault(0))
+  usePlanningSearchParam(searchParamsRegistry.planningMinArea)
 
 /**
  * Ob der Zielgrößen-Filter aktiv ist. Getrennt von `planningMinArea`, damit man
@@ -75,4 +78,4 @@ export const usePlanningMinAreaParam = () =>
  * eingegebene Fläche zu verlieren.
  */
 export const usePlanningAreaFilterParam = () =>
-  useQueryState('planningAreaFilter', parseAsBoolean.withDefault(false))
+  usePlanningSearchParam(searchParamsRegistry.planningAreaFilter)

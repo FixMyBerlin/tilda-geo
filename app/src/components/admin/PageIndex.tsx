@@ -13,15 +13,18 @@ import type { InternalPath } from '@/router'
 
 const rowLinkClassName = twMerge(
   'flex w-full items-center justify-between gap-x-6 px-4 py-4 no-underline transition-colors sm:px-6',
-  'hover:bg-gray-50',
+  'hover:bg-pink-50',
 )
 
 const items = [
   { to: '/admin/regions', label: 'Regionen' },
+  { to: '/admin/region-contracts', label: 'Regionen-Aufträge' },
   { to: '/admin/qa-configs', label: 'QA Konfigurationen' },
   { to: '/admin/memberships', label: 'Nutzer:innen & Mitgliedschaften' },
-  { to: '/admin/uploads', label: 'Statische Daten (Uploads)' },
-  { to: '/admin/static-dataset-categories', label: 'Statische Datensatz-Kategorien' },
+  { to: '/admin/map-dataset-uploads', label: 'Statische Daten (Uploads)' },
+  { to: '/admin/map-dataset-categories', label: 'Statische Daten: Kategorien' },
+  { to: '/admin/audit-log', label: 'Änderungsverlauf (Audit-Log)' },
+  { to: '/admin/api-tokens', label: 'API-Tokens (MCP)' },
   { to: '/admin/processing', label: 'Processing' },
 ] satisfies { to: InternalPath; label: string }[]
 

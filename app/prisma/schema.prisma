@@ -36,13 +36,14 @@ model User {
   role              UserRoleEnum       @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
   accessedRegions   Json?              @default("[]") // Region access tracking (JSON array) - managed by app logic
   //
-  sessions          Session[]
-  accounts          Account[]
-  verifications     Verification[]
-  Membership        Membership[]
-  Note              Note[]
-  NoteComment       NoteComment[]
-  qaEvaluations     QaEvaluation[]
+  sessions       Session[]
+  accounts       Account[]
+  verifications  Verification[]
+  memberships    Membership[]
+  notes          Note[]
+  noteComments   NoteComment[]
+  qaEvaluations  QaEvaluation[]
+  adminApiTokens AdminApiToken[]
   //
   // Planning module: scenarios this user created (any region member may still edit them).
   planningScenarios PlanningScenario[]
@@ -122,6 +123,43 @@ enum RegionStatus {
   @@schema("prisma")
 }
 
+enum RegionProduct {
+  radverkehr
+  parkraum
+  fussverkehr
+  analysis
+
+  @@schema("prisma")
+}
+
+enum RegionNotesMode {
+  osmNotes
+  internalNotes
+  disabled
+
+  @@schema("prisma")
+}
+
+enum RegionContractStatus {
+  ACTIVE
+  INACTIVE
+
+  @@schema("prisma")
+}
+
+model RegionContract {
+  id        Int                  @id @default(autoincrement())
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+  slug      String               @unique
+  name      String
+  status    RegionContractStatus @default(ACTIVE)
+  regions   Region[]
+
+  @@map("RegionContract")
+  @@schema("prisma")
+}
+
 model Region {
   id        Int          @id @default(autoincrement())
   createdAt DateTime     @default(now())
@@ -131,13 +169,169 @@ model Region {
   promoted  Boolean      @default(false)
   status    RegionStatus @default(PUBLIC)
 
-  Membership        Membership[]
-  uploads           Upload[]
-  Note              Note[]
+  name       String          @default("")
+  fullName   String          @default("")
+  product    RegionProduct   @default(radverkehr)
+  notes      RegionNotesMode @default(osmNotes)
+  showSearch Boolean         @default(false)
+
+  mapLat  Float @default(0)
+  mapLng  Float @default(0)
+  mapZoom Float @default(10)
+
+  logoWhiteBackgroundRequired Boolean @default(false)
+
+  // Active header logo via RegionUpload FK.
+  headerLogoId Int?
+  headerLogo   RegionUpload? @relation("RegionHeaderLogo", fields: [headerLogoId], references: [id], onDelete: SetNull)
+
+  maskOsmRelationIds Int[]  @default([])
+  maskBufferKm       Float  @default(10)
+
+  /// GeoJSON 2D bbox: [minLng, minLat, maxLng, maxLat]
+  bbox Json?
+
+  /// { minZoom, maxZoom, tables: string[] }
+  cacheWarming Json?
+
+  contractId Int?
+  contract   RegionContract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
+  categoryAssignments   RegionCategoryAssignment[]
+  backgroundAssignments RegionBackgroundAssignment[]
+  exportAssignments     RegionExportAssignment[]
+  navigationLinks       RegionNavigationLink[]
+
+  memberships       Membership[]
+  mapDatasetUploads MapDatasetUpload[] @relation("RegionToMapDatasetUpload")
+  regionUploads     RegionUpload[]     @relation("RegionUploadLibrary")
+  noteRecords       Note[]
   qaConfigs         QaConfig[]
   planningScenarios PlanningScenario[]
 
+  @@index([contractId])
+  @@index([headerLogoId])
   @@map("Region")
+  @@schema("prisma")
+}
+
+/// Per-region file library (logos, …). Stored in S3 under the code-defined `region-uploads/` prefix
+/// (see regionUploadsS3.server.ts). A row's role is defined by which Region FK points at it
+/// (e.g. headerLogoId) — there is no `purpose` column.
+model RegionUpload {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title    String
+  s3Key    String @unique
+  mimeType String
+  fileSize Int
+
+  regionId Int
+  region   Region @relation("RegionUploadLibrary", fields: [regionId], references: [id], onDelete: Cascade)
+
+  /// Better Auth user id of the admin who uploaded it (audit; not an FK to keep User untouched).
+  createdById String?
+
+  headerLogoForRegions Region[] @relation("RegionHeaderLogo")
+
+  @@index([regionId])
+  @@map("RegionUpload")
+  @@schema("prisma")
+}
+
+model RegionCategoryAssignment {
+  id         Int    @id @default(autoincrement())
+  regionId   Int
+  categoryId String
+  sortOrder  Int
+  region     Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@unique([regionId, categoryId])
+  @@map("RegionCategoryAssignment")
+  @@schema("prisma")
+}
+
+model RegionBackgroundAssignment {
+  id         Int    @id @default(autoincrement())
+  regionId   Int
+  sourceId   String
+  region     Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@unique([regionId, sourceId])
+  @@map("RegionBackgroundAssignment")
+  @@schema("prisma")
+}
+
+model RegionExportAssignment {
+  id        Int    @id @default(autoincrement())
+  regionId  Int
+  exportId  String
+  region    Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@unique([regionId, exportId])
+  @@map("RegionExportAssignment")
+  @@schema("prisma")
+}
+
+model RegionNavigationLink {
+  id           Int     @id @default(autoincrement())
+  regionId     Int
+  name         String
+  internalPath String?
+  externalUrl  String?
+  sortOrder    Int
+  region       Region  @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  @@map("RegionNavigationLink")
+  @@schema("prisma")
+}
+
+// Decode templates for the `?config=checksum.bits` URL param. Keyed by checksum (region-agnostic,
+// immutable per checksum), upserted whenever a region's categories are saved. Not audited
+// (derived data). See regionConfigTemplates.server.ts.
+model RegionConfigTemplate {
+  checksum  String   @id
+  template  Json
+  createdAt DateTime @default(now())
+
+  @@map("RegionConfigTemplate")
+  @@schema("prisma")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  recordId      String
+  action        String
+  model         String
+  oldData       Json?
+  newData       Json?
+  changedFields String[]
+  ipAddress     String?
+  userAgent     String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([model, recordId])
+  @@index([createdAt])
+  @@map("AuditLog")
+  @@schema("prisma")
+}
+
+model AdminApiToken {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  name        String
+  hashedToken String    @unique
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@map("AdminApiToken")
   @@schema("prisma")
 }
 
@@ -155,16 +349,18 @@ model Membership {
   @@schema("prisma")
 }
 
-model Upload {
-  id                Int                 @id @default(autoincrement())
-  createdAt         DateTime            @default(now())
-  createdBy         UploadCreatedByEnum @default(SCRIPT)
-  updatedAt         DateTime            @updatedAt
+/// Map-dataset file artifact (PMTiles/GeoJSON shown on the map), one row per static-dataset folder.
+/// Distinct from RegionUpload (region logos).
+model MapDatasetUpload {
+  id                Int                       @id @default(autoincrement())
+  createdAt         DateTime                  @default(now())
+  createdBy         MapDatasetUploadCreatedBy @default(SCRIPT)
+  updatedAt         DateTime                  @updatedAt
   //
-  slug              String              @unique
+  slug              String                    @unique
   configs           Json
-  public            Boolean             @default(false)
-  hideDownloadLink  Boolean             @default(false)
+  public            Boolean                   @default(false)
+  hideDownloadLink  Boolean                   @default(false)
   mapRenderFormat   MapRenderFormatEnum
   mapRenderUrl      String
   githubUrl         String
@@ -173,23 +369,60 @@ model Upload {
   geojsonUrl        String?
   //
   externalSourceUrl String?
-  cacheTtlSeconds   Int?                @default(86400)
+  cacheTtlSeconds   Int?                      @default(86400)
   //
-  systemLayer       Boolean             @default(false)
+  systemLayer       Boolean                   @default(false)
   //
-  regions           Region[]
+  // File-level metadata (one value per dataset file, not per layer-config "Ansicht").
+  // Admin/CSV read these columns (and `layerConfigs` rows); map region datasets still expand `configs` JSON.
+  attributionHtml      String?
+  dataSourceMarkdown   String?
+  dataUpdatedNote      String? // free-text e.g. "2024-11-13" — kept separate from the row's updatedAt
+  licence              String? // licence enum values as in StaticDatasets/types.ts
+  licenceOsmCompatible String? // 'licence' | 'waiver' | 'no'
+  //
+  regions           Region[]                  @relation("RegionToMapDatasetUpload")
+  layerConfigs      MapDatasetLayerConfig[]
 
-  @@map("Upload")
+  @@map("MapDatasetUpload")
   @@schema("prisma")
 }
 
-model StaticDatasetCategory {
+/// One layer-config "Ansicht" of a MapDatasetUpload. Synced from `configs[]` on upload create;
+/// admin UI reads these rows while `configs` JSON remains the wire format from static-dataset scripts.
+model MapDatasetLayerConfig {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  /// Same string as Upload.configs[].category (e.g. bb/Netzkonzeption). Globally unique.
-  key String @unique @db.VarChar(191)
+  mapDatasetUploadId Int
+  mapDatasetUpload   MapDatasetUpload @relation(fields: [mapDatasetUploadId], references: [id], onDelete: Cascade)
+
+  /// null = the dataset's primary view. Unique per upload (Postgres treats NULLs as distinct).
+  subId       String?
+  name        String
+  /// Same string as MapDatasetUpload.configs[].categoryKey → MapDatasetCategory.key.
+  categoryKey String?
+
+  layers      Json
+  inspector   Json
+  legends     Json?
+  osmIdConfig Json?
+  description String?
+
+  @@unique([mapDatasetUploadId, subId])
+  @@index([categoryKey])
+  @@map("MapDatasetLayerConfig")
+  @@schema("prisma")
+}
+
+model MapDatasetCategory {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Same string as MapDatasetUpload.configs[].categoryKey (e.g. bb/Netzkonzeption). Globally unique.
+  key         String @unique @db.VarChar(191)
 
   /// First path segment (before first `/`), e.g. bb from bb/Netzkonzeption.
   groupKey String @db.VarChar(191)
@@ -200,17 +433,17 @@ model StaticDatasetCategory {
   /// Display order in the region sidebar; supports fractional values (e.g. 1.5).
   sortOrder Float
 
-  /// Max lengths: `staticDatasetCategoryDisplayLimits.ts`.
+  /// Max lengths: `mapDatasetCategoryDisplayLimits.ts`.
   title    String  @db.VarChar(40)
   subtitle String? @db.VarChar(100)
 
   @@unique([groupKey, categoryKey])
   @@index([groupKey, sortOrder, categoryKey])
-  @@map("StaticDatasetCategory")
+  @@map("MapDatasetCategory")
   @@schema("prisma")
 }
 
-enum UploadCreatedByEnum {
+enum MapDatasetUploadCreatedBy {
   USER
   SCRIPT
 

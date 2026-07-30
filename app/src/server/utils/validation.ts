@@ -16,7 +16,7 @@ export type FormState =
  */
 export function validationErrorState(error: z.ZodError) {
   return {
-    success: false,
+    success: false as const,
     message: 'Bitte korrigieren Sie die Fehler im Formular',
     errors: z.flattenError(error).fieldErrors,
   }
@@ -28,8 +28,40 @@ export function validationErrorState(error: z.ZodError) {
  */
 export function errorState(error: unknown, defaultMessage: string) {
   return {
-    success: false,
+    success: false as const,
     message: error instanceof Error ? error.message : defaultMessage,
     errors: {},
   }
+}
+
+/**
+ * Returns a FormState for successful mutations.
+ */
+export function successState(): {
+  success: true
+  message: string
+  errors: Record<string, never>
+}
+export function successState<T>(options: { message?: string; data: T }): {
+  success: true
+  message: string
+  errors: Record<string, never>
+  data: T
+}
+export function successState(options?: { message?: string }): {
+  success: true
+  message: string
+  errors: Record<string, never>
+}
+export function successState<T>(options?: { message?: string; data?: T }) {
+  const message = options?.message ?? ''
+  if (options !== undefined && 'data' in options) {
+    return {
+      success: true as const,
+      message,
+      errors: {} as Record<string, never>,
+      data: options.data,
+    }
+  }
+  return { success: true as const, message, errors: {} as Record<string, never> }
 }

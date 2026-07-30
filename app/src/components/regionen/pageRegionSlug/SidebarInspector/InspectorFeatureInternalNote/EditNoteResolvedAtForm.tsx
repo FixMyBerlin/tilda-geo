@@ -2,7 +2,7 @@ import { Field, Label, Switch } from '@headlessui/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { startTransition, useEffect, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { NativeForm } from '@/components/shared/form/NativeForm'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import type { UpdateNoteResolvedAtInputType } from '@/server/notes/notes.functions'
@@ -17,7 +17,7 @@ type Props = { note: NonNullable<NoteAndComments> }
 export const EditNoteResolvedAtForm = ({ note }: Props) => {
   const queryClient = useQueryClient()
   const queryKeyMap = useQueryKey()
-  const region = useStaticRegion()
+  const region = useRegion()
   const resolvedFromNote = note.resolvedAt !== null
   const [userInteracted, setUserInteracted] = useState(false)
   const [formResolved, setFormResolved] = useState(resolvedFromNote)

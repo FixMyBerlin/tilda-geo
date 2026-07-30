@@ -5,6 +5,8 @@ export const yellow = (s: string, ...rest: unknown[]) =>
 
 export const green = (s: string, ...rest: unknown[]) => console.log(styleText('green', s), ...rest)
 
+export const blue = (s: string, ...rest: unknown[]) => console.log(styleText('blue', s), ...rest)
+
 export const red = (s: string, ...rest: unknown[]) => console.log(styleText('red', s), ...rest)
 
 export const inverse = (s: string, ...rest: unknown[]) =>

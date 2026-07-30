@@ -8,7 +8,7 @@ import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import {
   createDatasetSourceLayerKey,
@@ -90,7 +90,7 @@ export const useInteractiveLayers = () => {
   const hasPermissions = useHasPermissions()
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
-  const region = useStaticRegion()
+  const region = useRegion()
   const { showOsmNotesParam } = useShowOsmNotesParam()
   const { showInternalNotesParam } = useShowInternalNotesParam()
   const { qaParamData } = useQaParam()

@@ -75,5 +75,10 @@ export async function processLocalSource(
     geojsonUrl,
     githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
     systemLayer: metaData.systemLayer ?? false,
+    attributionHtml: metaData.attributionHtml,
+    dataSourceMarkdown: metaData.dataSourceMarkdown ?? null,
+    dataUpdatedNote: metaData.dataUpdatedNote ?? null,
+    licence: metaData.licence ?? null,
+    licenceOsmCompatible: metaData.licenceOsmCompatible ?? null,
   })
 }

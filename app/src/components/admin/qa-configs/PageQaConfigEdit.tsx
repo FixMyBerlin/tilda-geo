@@ -1,9 +1,12 @@
 import { useMutation } from '@tanstack/react-query'
 import { getRouteApi, useNavigate, useRouter } from '@tanstack/react-router'
+import { AdminConsoleDumpButton } from '@/components/admin/AdminConsoleDumpButton'
+import { AdminPageTitleEdit, AdminPageTitleEditLabel } from '@/components/admin/adminPageTitle'
 import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
+import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { ObjectDump } from '@/components/admin/ObjectDump'
+import { toastError } from '@/components/shared/toast/toastError'
 import { deleteQaConfigFn, updateQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
 import { UpdateQaConfigFormSchema } from '@/server/qa-configs/schemas'
 import { QaConfigExportSection } from './pageQaConfigs/QaConfigExportSection'
@@ -12,7 +15,7 @@ import { QaConfigForm } from './pageQaConfigs/QaConfigForm'
 const routeApi = getRouteApi('/admin/qa-configs/$id/edit')
 
 export function PageQaConfigEdit() {
-  const { qaConfig, regions, id } = routeApi.useLoaderData()
+  const { qaConfig, regions, auditHistory } = routeApi.useLoaderData()
   const router = useRouter()
   const navigate = useNavigate()
 
@@ -22,6 +25,7 @@ export function PageQaConfigEdit() {
       await router.invalidate()
       navigate({ to: '/admin/qa-configs' })
     },
+    onError: (error) => toastError(error, 'QA-Konfiguration konnte nicht gelöscht werden'),
   })
 
   const handleDeleteQaConfig = () => {
@@ -40,12 +44,19 @@ export function PageQaConfigEdit() {
         <Breadcrumb
           pages={[
             { href: '/admin/qa-configs', name: 'QA Konfigurationen' },
-            { href: `/admin/qa-configs/${id}/edit`, name: 'Bearbeiten' },
+            {
+              href: `/admin/qa-configs/${qaConfig.id}/edit`,
+              name: <AdminPageTitleEditLabel name={qaConfig.label} variant="breadcrumb" />,
+            },
           ]}
         />
       </HeaderWrapper>
 
-      <ObjectDump data={qaConfig} className="my-10" />
+      <AdminPageTitleEdit name={qaConfig.label} />
+
+      <div className="my-10">
+        <AdminConsoleDumpButton name={qaConfig.slug} data={qaConfig} />
+      </div>
 
       <QaConfigExportSection
         configId={qaConfig.id}
@@ -80,6 +91,8 @@ export function PageQaConfigEdit() {
         regions={regions}
         onSubmit={async (values) => updateQaConfigFn({ data: values })}
       />
+
+      <AuditHistoryPanel rows={auditHistory} model="QaConfig" recordId={String(qaConfig.id)} />
     </>
   )
 }

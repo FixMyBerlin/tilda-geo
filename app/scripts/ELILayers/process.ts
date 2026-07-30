@@ -23,29 +23,25 @@ const outputFile = path.join(
   '../../src/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundRasterELI.const.ts',
 )
 
-const ELIFeatureSchema = z
-  .object({
-    type: z.literal('Feature'),
-    properties: z
+const ELIFeatureSchema = z.object({
+  type: z.literal('Feature'),
+  properties: z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.string(),
+    category: z.string().optional(),
+    url: z.string(),
+    attribution: z
       .object({
-        id: z.string(),
-        name: z.string(),
-        type: z.string(),
-        category: z.string().optional(),
-        url: z.string(),
-        attribution: z
-          .object({
-            text: z.string(),
-            required: z.boolean().optional(),
-          })
-          .optional(),
-        min_zoom: z.number().optional(),
-        max_zoom: z.number().optional(),
-        tile_size: z.number().optional(),
+        text: z.string(),
+        required: z.boolean().optional(),
       })
-      .strip(), // Remove any properties we don't need
-  })
-  .strip() // Remove geometry and any other top-level fields we don't need
+      .optional(),
+    min_zoom: z.number().optional(),
+    max_zoom: z.number().optional(),
+    tile_size: z.number().optional(),
+  }),
+})
 
 type ELIFeature = z.infer<typeof ELIFeatureSchema>
 

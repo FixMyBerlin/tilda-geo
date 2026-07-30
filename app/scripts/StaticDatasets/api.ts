@@ -36,7 +36,7 @@ type UploadData = {
   configs: Record<string, unknown>[]
   systemLayer: boolean
 } & Pick<
-  Prisma.UploadCreateInput,
+  Prisma.MapDatasetUploadCreateInput,
   // Types could be narrowed more. See schema.prisma and app/scripts/StaticDatasets/types.ts
   | 'pmtilesUrl'
   | 'geojsonUrl'
@@ -45,6 +45,12 @@ type UploadData = {
   | 'mapRenderUrl'
   | 'externalSourceUrl'
   | 'cacheTtlSeconds'
+  // File-level metadata columns on MapDatasetUpload (not duplicated per configs[] entry)
+  | 'attributionHtml'
+  | 'dataSourceMarkdown'
+  | 'dataUpdatedNote'
+  | 'licence'
+  | 'licenceOsmCompatible'
 >
 
 export const createUpload = async (api: StaticDatasetsApiConfig, data: UploadData) => {

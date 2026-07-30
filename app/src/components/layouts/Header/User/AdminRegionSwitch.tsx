@@ -1,13 +1,13 @@
-import { CheckIcon } from '@heroicons/react/20/solid'
-import { ChevronUpDownIcon } from '@heroicons/react/24/outline'
+import { CheckIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useQuery } from '@tanstack/react-query'
 import { useLocation, useNavigate } from '@tanstack/react-router'
 import { type KeyboardEvent, type MouseEvent, useLayoutEffect, useRef, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
-import { useOptionalRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
+import { useAdminRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { regionenIndexQueryOptions } from '@/server/regions/regionenIndexQueryOptions'
+import { defaultRegionSearch, parseRegionSearch } from '@/shared/regionen/regionSearchSchemas'
 import {
   filterPartitionedRegions,
   mergeRegionenIndexRegions,
@@ -16,7 +16,7 @@ import {
 
 const pillClassName = 'shrink-0 px-1 py-0 text-[10px]'
 const listboxId = 'admin-region-switch-listbox'
-const triggerId = 'admin-region-switch-trigger'
+const disclosureClassName = 'mb-2 overflow-hidden rounded-lg border border-pink-500/40 bg-white/50'
 
 const preventMenuClickDefault = (event: MouseEvent) => {
   event.preventDefault()
@@ -35,10 +35,10 @@ const RegionListOption = ({
   onSelect,
   className,
 }: {
-  region: RegionWithAdditionalData
+  region: TRegion
   isCurrent: boolean
   isFocused: boolean
-  onSelect: (region: RegionWithAdditionalData) => void
+  onSelect: (region: TRegion) => void
   className?: string
 }) => (
   <li role="presentation" className={className}>
@@ -83,7 +83,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [focusedSlug, setFocusedSlug] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const regionSlug = useOptionalRegionSlug()
+  const regionSlug = useAdminRegionSlug()
   const location = useLocation()
   const navigate = useNavigate()
   const { data, isPending } = useQuery(regionenIndexQueryOptions())
@@ -125,7 +125,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
     [focusedSlug, open],
   )
 
-  const handleSelect = (region: RegionWithAdditionalData) => {
+  const handleSelect = (region: TRegion) => {
     if (region.slug === regionSlug) {
       closePanel()
       return
@@ -134,7 +134,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
     void navigate({
       to: '/regionen/$regionSlug',
       params: { regionSlug: region.slug },
-      ...(regionSlug ? { search: location.search } : {}),
+      search: regionSlug ? parseRegionSearch(location.search) : defaultRegionSearch(),
     })
     closePanel()
   }
@@ -204,27 +204,28 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
   }
 
   return (
-    <div className="my-2">
-      <p className="mb-1 font-medium text-gray-900">Region wechseln</p>
+    <div className={disclosureClassName}>
       <button
-        id={triggerId}
         type="button"
         onClick={handleToggle}
         disabled={isPending}
         aria-expanded={open}
-        aria-controls={open ? listboxId : undefined}
-        aria-haspopup="listbox"
-        className="flex w-full items-center gap-2 rounded border border-pink-400/60 bg-white px-2 py-1.5 text-left text-xs text-gray-900 disabled:cursor-wait disabled:opacity-70"
+        aria-controls={listboxId}
+        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-semibold text-gray-900 hover:bg-white/80 disabled:cursor-wait disabled:opacity-70"
       >
-        <span className="min-w-0 flex-1 truncate">
-          {isPending ? 'Regionen laden…' : (currentRegion?.name ?? 'Region wählen')}
-        </span>
-        <ChevronUpDownIcon className="size-4 shrink-0 text-gray-500" aria-hidden="true" />
+        <ChevronRightIcon
+          className={twMerge(
+            'size-4 shrink-0 text-gray-500 transition-transform',
+            open ? 'rotate-90' : '',
+          )}
+          aria-hidden="true"
+        />
+        Region wechseln
       </button>
 
-      {open && !isPending && (
-        <div className="mt-1 rounded border border-gray-200 bg-white shadow-sm">
-          <div className="border-b border-gray-100 p-1.5">
+      {open && !isPending ? (
+        <div className="border-t border-pink-500/40">
+          <div className="border-b border-pink-500/20 p-1.5">
             <input
               ref={searchInputRef}
               type="text"
@@ -260,10 +261,10 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
                 onSelect={handleSelect}
               />
             ))}
-            {deactivated.length > 0 && (
+            {deactivated.length > 0 ? (
               <>
                 <li
-                  className="mt-1 border-t border-gray-200 px-2 pt-1.5 pb-0.5 text-[10px] font-medium text-gray-500"
+                  className="mt-1 border-t border-pink-500/20 px-2 pt-1.5 pb-0.5 text-[10px] font-medium text-gray-500"
                   role="presentation"
                 >
                   Deaktivierte Regionen
@@ -279,11 +280,13 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
                   />
                 ))}
               </>
-            )}
-            {!hasResults && <li className="px-2 py-1.5 text-gray-500">Keine Region gefunden.</li>}
+            ) : null}
+            {!hasResults ? (
+              <li className="px-2 py-1.5 text-gray-500">Keine Region gefunden.</li>
+            ) : null}
           </ul>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

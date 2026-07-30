@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
@@ -22,8 +26,9 @@ export async function deleteNoteComment(input: z.infer<typeof Schema>, headers: 
     throw new AuthorizationError('Only the author can delete this comment')
   }
 
-  const result = await db.noteComment.deleteMany({
-    where: { id: parsed.commentId },
-  })
+  const result = await runWithAuditContextAsync(
+    memberFormAuditContext(headers, session.userId),
+    () => db.noteComment.deleteMany({ where: { id: parsed.commentId } }),
+  )
   return result
 }
