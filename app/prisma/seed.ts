@@ -1,4 +1,6 @@
 import { runGeoBootstrap } from '../scripts/geo-bootstrap/run'
+import { seedLocalAccess } from '../scripts/seed-local/seedLocalAccess'
+import { offerLocalCursorMcpSetup } from '../scripts/seed-local/setupCursorMcp'
 import seedInternalNotes from './seeds/atlasNotes'
 import seedMemberships from './seeds/memberships'
 import seedUploads from './seeds/pmtiles'
@@ -15,12 +17,14 @@ const seed = async () => {
   await seedRegions()
   await seedRegionContracts()
   await seedUsers()
+  await seedLocalAccess()
   await seedMemberships()
   await seedUploads()
   await seedInternalNotes()
   await seedQaConfigs()
   await seedQaEvaluations()
   await seedProcessingMeta()
+  await offerLocalCursorMcpSetup()
 }
 
 seed()

@@ -160,11 +160,11 @@ bun run processing -- --help   # full contract
 ### App DB setup (agents)
 
 ```bash
-bun run seed   # fresh local DB (~30s)
+bun run seed   # fresh local DB (~30s); also installs local MCP Bearer `tildageode_admin_local_dev_mcp_only`
 bun run dev
 ```
 
-Do **not** use `db-pull`. It pulls staging/production snapshots and is for humans only.
+Do **not** use `db-pull`. It pulls staging/production snapshots and is for humans only (prisma restores scrub PII/credentials and re-run the same local-access seed — see `app/scripts/db-pull/README.md`).
 
 If you run `dev` without seeding first, predev warns — warn-only, does not block.
 

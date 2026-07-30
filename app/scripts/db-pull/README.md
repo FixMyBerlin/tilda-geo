@@ -18,6 +18,16 @@ Pull command:
 - Pull is read-only (`pg_dump` only).
 - `pg_dump`/`psql` are run via Dockerized Postgres CLI (`postgres:17-alpine`) to avoid host client version mismatches.
 
+## Prisma restore cleanup
+
+After a successful `--schema prisma` restore (dump files under `data/` stay raw/sensitive):
+
+- Pseudonymize non-`@fixmycity.de` user names/emails (`id` / `osmId` kept; OSM placeholder emails kept).
+- Delete restored tokens, sessions, verifications, and audit logs; clear Account OAuth secrets.
+- Run `seedLocalAccess()` (same as `bun run seed`): ensure FMC admins + local MCP token `tildageode_admin_local_dev_mcp_only`.
+
+Interactive seed/restore may offer to add `tilda-geo-admin--DEV` to an existing `~/.cursor/mcp.json` (see `scripts/seed-local/`). Missing file / non-TTY → skip and print the JSON to merge manually.
+
 ## Dump files
 
 Generated dumps are written to `app/scripts/db-pull/data`:

@@ -13,14 +13,18 @@ function generateToken() {
   return `${ADMIN_API_TOKEN_PREFIX}${randomBytes(32).toString('hex')}`
 }
 
-function hashToken(plaintext: string) {
+export function hashAdminApiToken(plaintext: string) {
   return createHash('sha256').update(plaintext).digest('hex')
 }
 
 export async function createAdminApiToken(input: { name: string; createdById: string }) {
   const token = generateToken()
   const row = await db.adminApiToken.create({
-    data: { name: input.name, hashedToken: hashToken(token), createdById: input.createdById },
+    data: {
+      name: input.name,
+      hashedToken: hashAdminApiToken(token),
+      createdById: input.createdById,
+    },
   })
   // `token` (plaintext) is returned only here — never stored or logged.
   return { token, row }
@@ -55,7 +59,7 @@ export async function verifyAdminApiToken(plaintext: string) {
   if (!plaintext.startsWith(ADMIN_API_TOKEN_PREFIX)) return null
 
   const row = await db.adminApiToken.findUnique({
-    where: { hashedToken: hashToken(plaintext) },
+    where: { hashedToken: hashAdminApiToken(plaintext) },
     select: {
       id: true,
       createdById: true,

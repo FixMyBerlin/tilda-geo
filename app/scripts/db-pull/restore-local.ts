@@ -4,6 +4,7 @@ import { basename, dirname } from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { z } from 'zod'
+import { offerLocalCursorMcpSetup } from '../seed-local/setupCursorMcp'
 import {
   ALLOWED_SCHEMAS,
   ALLOWED_SOURCES,
@@ -16,6 +17,7 @@ import {
   PRE_RESTORE_SQL_PATH,
   toDockerNetworkUrl,
 } from './db-helpers'
+import { sanitizePrismaRestore } from './sanitize-prisma-restore'
 
 function printHelp() {
   process.stdout.write(`db-restore
@@ -134,6 +136,11 @@ async function main() {
   process.stdout.write(
     `Restored ${schema} schema from ${source} dump into local DB (${tableCount} tables).\n`,
   )
+
+  if (schema === 'prisma') {
+    await sanitizePrismaRestore()
+    await offerLocalCursorMcpSetup()
+  }
 }
 
 await main()

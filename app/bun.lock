@@ -73,6 +73,7 @@
       "devDependencies": {
         "@aws-sdk/client-s3": "3.1092.0",
         "@clack/prompts": "1.7.0",
+        "@faker-js/faker": "^10.5.0",
         "@heroicons/react": "2.2.0",
         "@maplibre/maplibre-gl-style-spec": "^24.8.1",
         "@placemarkio/check-geojson": "0.1.14",
@@ -351,6 +352,8 @@
     "@exodus/bytes": ["@exodus/bytes@1.15.0", "", { "peerDependencies": { "@noble/hashes": "^1.8.0 || ^2.0.0" }, "optionalPeers": ["@noble/hashes"] }, "sha512-UY0nlA+feH81UGSHv92sLEPLCeZFjXOuHhrIo0HQydScuQc8s0A7kL/UdgwgDq8g8ilksmuoF35YVTNphV2aBQ=="],
 
     "@explita/prisma-audit-log": ["@explita/prisma-audit-log@0.2.3", "", { "peerDependencies": { "@prisma/client": "^7" } }, "sha512-TkNxQpceAHbSD6NEhdMKU/MX7+7UJd/gmjhzIttVh+bwFSFHimCgM4cosXagDOuDah7OgxhZ4RqEIFLyR0TvxA=="],
+
+    "@faker-js/faker": ["@faker-js/faker@10.5.0", "", {}, "sha512-bsxD8WLS5lIj7aaoCx1YJkktqYj5vlBUE6HWzu2Q51ksrGJ0H737ECCKlFU7Yf8Br45z9t99frBp/J7kzbMPAg=="],
 
     "@floating-ui/core": ["@floating-ui/core@1.7.4", "", { "dependencies": { "@floating-ui/utils": "^0.2.10" } }, "sha512-C3HlIdsBxszvm5McXlB8PeOEWfBhcGBTZGkGlWc2U0KFY5IwG5OQEuQ8rq52DZmcHDlPLd+YFBK+cZcytwIFWg=="],
 
