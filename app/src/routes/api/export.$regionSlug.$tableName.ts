@@ -9,6 +9,7 @@ import { formatDateBerlin } from '@/components/shared/date/formatDateBerlin'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { getExportAttributeType } from '@/server/api/export/exportAttributeType'
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
+import { resolveExportBbox } from '@/server/api/export/resolveExportBbox.server'
 import { badRequestJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
 import { guardAdmin, guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
@@ -77,10 +78,6 @@ const exportParamsSchema = z.object({
 
 const exportSearchSchema = z.object({
   apiKey: z.string().optional(),
-  minlon: z.coerce.number(),
-  minlat: z.coerce.number(),
-  maxlon: z.coerce.number(),
-  maxlat: z.coerce.number(),
   format: z.enum(formats),
 })
 
@@ -169,10 +166,6 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         const rawSearchParams = new URL(request.url).searchParams
         const parsedSearch = exportSearchSchema.safeParse({
           apiKey: rawSearchParams.get('apiKey') || '',
-          minlon: rawSearchParams.get('minlon'),
-          minlat: rawSearchParams.get('minlat'),
-          maxlon: rawSearchParams.get('maxlon'),
-          maxlat: rawSearchParams.get('maxlat'),
           format: rawSearchParams.get('format') || 'fgb',
         })
 
@@ -187,15 +180,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           })
         }
         const { regionSlug, tableName } = params
-        const { apiKey, minlon, minlat, maxlon, maxlat, format } = parsedSearch.data
-        console.info(logPrefix, 'start export', {
-          regionSlug,
-          tableName,
-          format,
-          bbox: { minlon, minlat, maxlon, maxlat },
-          hasApiKey: Boolean(apiKey),
-          requestId: request.headers.get('x-request-id') || undefined,
-        })
+        const { apiKey, format } = parsedSearch.data
 
         let region
         try {
@@ -209,6 +194,29 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           console.warn(logPrefix, 'table not exported for region', { regionSlug, tableName })
           return notFoundJson({ headers: corsHeaders })
         }
+
+        const resolvedBbox = resolveExportBbox(rawSearchParams, region.bbox)
+        if (!resolvedBbox.ok) {
+          console.error(logPrefix, 'invalid export bbox', {
+            url: request.url,
+            error: resolvedBbox.error,
+          })
+          return badRequestJson({
+            headers: corsHeaders,
+            info: { message: resolvedBbox.error },
+          })
+        }
+        const { minlon, minlat, maxlon, maxlat } = resolvedBbox.bbox
+
+        console.info(logPrefix, 'start export', {
+          regionSlug,
+          tableName,
+          format,
+          bbox: { minlon, minlat, maxlon, maxlat },
+          bboxSource: resolvedBbox.source,
+          hasApiKey: Boolean(apiKey),
+          requestId: request.headers.get('x-request-id') || undefined,
+        })
 
         if (!compareApiKeyTimingSafe(apiKey)) {
           const authResponse =
