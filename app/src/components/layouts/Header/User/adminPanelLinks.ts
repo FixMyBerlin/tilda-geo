@@ -34,6 +34,11 @@ export const regionAdminLinks = (
       search: { regionSlug },
     },
     {
+      label: 'Statische Daten (Uploads)',
+      to: '/admin/map-dataset-uploads',
+      search: { regionSlug },
+    },
+    {
       label: 'Export Static Data CSV',
       to: '/api/regions/$regionSlug/uploads-csv',
       params: { regionSlug },

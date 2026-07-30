@@ -6,7 +6,9 @@ import { adminTableClasses } from '@/components/admin/AdminTable'
 import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { buildUploadsListSearch } from '@/components/admin/map-dataset-uploads/pageMapDatasetUploads/mapDatasetUploadsListSearch'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { Quote } from '@/components/shared/text/Quotes'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
@@ -34,6 +36,15 @@ export function PageRegionEdit() {
       </HeaderWrapper>
 
       <AdminPageTitleEdit name={region.name} />
+
+      <p className="mt-4 text-sm text-gray-700">
+        <Link
+          to="/admin/map-dataset-uploads"
+          search={buildUploadsListSearch({ regionSlug: region.slug })}
+        >
+          Uploads dieser Region
+        </Link>
+      </p>
 
       <div className="my-10">
         <h2 className="mb-4 text-xl font-semibold">
