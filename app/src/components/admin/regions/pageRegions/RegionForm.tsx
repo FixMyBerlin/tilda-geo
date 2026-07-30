@@ -147,12 +147,14 @@ export function RegionForm(props: Props) {
                 form={form}
                 name="status"
                 label="Status"
+                inline
                 items={regionStatusFormRadioItems}
               />
               <RadioGroup
                 form={form}
                 name="promoted"
                 label="Gelistet"
+                inline
                 items={regionPromotedFormRadioItems}
               />
             </div>
@@ -191,21 +193,23 @@ export function RegionForm(props: Props) {
 
           <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Karte</legend>
-            <TextField
-              decimalEn
-              form={form}
-              name="mapLat"
-              label="Breitengrad (lat)"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="mapLng"
-              label="Längengrad (lng)"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField decimalEn form={form} name="mapZoom" label="Zoom" help={EN_DECIMAL_HELP} />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <TextField
+                decimalEn
+                form={form}
+                name="mapLat"
+                label="Breitengrad (lat)"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="mapLng"
+                label="Längengrad (lng)"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField decimalEn form={form} name="mapZoom" label="Zoom" help={EN_DECIMAL_HELP} />
+            </div>
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>
@@ -248,34 +252,36 @@ export function RegionForm(props: Props) {
                 { value: 'false', label: 'Nein' },
               ]}
             />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMinLng"
-              label="BBox min Lng"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMinLat"
-              label="BBox min Lat"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMaxLng"
-              label="BBox max Lng"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMaxLat"
-              label="BBox max Lat"
-              help={EN_DECIMAL_HELP}
-            />
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMinLng"
+                label="BBox min Lng"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMinLat"
+                label="BBox min Lat"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMaxLng"
+                label="BBox max Lng"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMaxLat"
+                label="BBox max Lat"
+                help={EN_DECIMAL_HELP}
+              />
+            </div>
             <RegionExportsField form={form} />
           </fieldset>
 
@@ -310,28 +316,30 @@ export function RegionForm(props: Props) {
                 { value: 'false', label: 'Nein' },
               ]}
             />
-            <TextField
-              form={form}
-              name="cacheWarmingMinZoom"
-              label="Min Zoom"
-              type="number"
-              step={1}
-              min={4}
-              max={14}
-              inputMode="numeric"
-              help="Ganzzahl von 4 bis 14, z. B. 9"
-            />
-            <TextField
-              form={form}
-              name="cacheWarmingMaxZoom"
-              label="Max Zoom"
-              type="number"
-              step={1}
-              min={4}
-              max={14}
-              inputMode="numeric"
-              help="Ganzzahl von 4 bis 14, z. B. 9"
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField
+                form={form}
+                name="cacheWarmingMinZoom"
+                label="Min Zoom"
+                type="number"
+                step={1}
+                min={4}
+                max={14}
+                inputMode="numeric"
+                help="Ganzzahl von 4 bis 14, z. B. 9"
+              />
+              <TextField
+                form={form}
+                name="cacheWarmingMaxZoom"
+                label="Max Zoom"
+                type="number"
+                step={1}
+                min={4}
+                max={14}
+                inputMode="numeric"
+                help="Ganzzahl von 4 bis 14, z. B. 9"
+              />
+            </div>
             <CheckboxGroup
               form={form}
               name="cacheWarmingSources"
@@ -339,7 +347,13 @@ export function RegionForm(props: Props) {
               help="Quellen, deren Kacheln beim Cache Warming vorab geladen werden (gleiche Martin-Pfade wie auf der Karte)."
               options={catalogOptions.cacheWarmingSources.map((entry) => ({
                 value: entry.id,
-                label: entry.label,
+                ariaLabel: `${entry.id} (${entry.tablesKey})`,
+                label: (
+                  <span className="flex flex-col gap-0.5">
+                    <span>{entry.id}</span>
+                    <span className="font-mono text-xs text-gray-500">{entry.tablesKey}</span>
+                  </span>
+                ),
               }))}
             />
           </fieldset>

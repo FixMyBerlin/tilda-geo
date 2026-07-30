@@ -21,6 +21,7 @@ export const warmableTablesKeySet = new Set(tablesKeyToSourceId.keys())
 export const cacheWarmingSourceOptions = warmableSources.map((source) => ({
   id: source.id,
   label: source.id,
+  tablesKey: source.tileTables.join(','),
 }))
 
 export const sourceIdToWarmingTablesKey = (id: string) => sourceIdToTablesKey.get(id as SourcesId)

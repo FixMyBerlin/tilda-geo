@@ -74,19 +74,21 @@ export function RegionMaskForm({ regionSlug, initialValues }: Props) {
               { value: 'false', label: 'Nein' },
             ]}
           />
-          <TextField
-            form={form}
-            name="maskOsmRelationIds"
-            label="OSM Relation IDs"
-            help="Komma- oder leerzeichengetrennt"
-          />
-          <TextField
-            decimalEn
-            form={form}
-            name="maskBufferKm"
-            label="Buffer (km)"
-            help={EN_DECIMAL_HELP}
-          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              form={form}
+              name="maskOsmRelationIds"
+              label="OSM Relation IDs"
+              help="Komma- oder leerzeichengetrennt"
+            />
+            <TextField
+              decimalEn
+              form={form}
+              name="maskBufferKm"
+              label="Buffer (km)"
+              help={EN_DECIMAL_HELP}
+            />
+          </div>
           <form.Subscribe selector={(state) => state.values.maskEnabled}>
             {(maskEnabled) =>
               maskEnabled === 'false' ? (

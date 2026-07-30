@@ -57,7 +57,7 @@ function CategoriesField({ value, onChange }: CategoriesFieldProps) {
         }}
       />
       {unselected.length > 0 ? (
-        <div>
+        <div className="pt-2">
           <p className="mb-2 text-sm font-medium text-gray-700">Hinzufügen</p>
           <div className="columns-2 gap-x-4">
             {unselected.map((option) => (

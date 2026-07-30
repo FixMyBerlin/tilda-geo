@@ -9,8 +9,10 @@ export const inputReadonly =
   'border-gray-400 bg-gray-200 text-gray-700 shadow-inner cursor-not-allowed focus:border-gray-400 focus:ring-0'
 export const labelClass = 'mb-1 block text-sm font-semibold text-gray-700'
 
-export const choiceOptionClassName =
-  'group -mx-1.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1 ring-1 ring-transparent transition-[background-color,box-shadow,color] hover:bg-gray-50/90 hover:ring-gray-200/70 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 has-[:disabled]:hover:bg-transparent has-[:disabled]:hover:ring-transparent'
+export const choiceOptionBaseClassName =
+  'group -mx-1.5 flex cursor-pointer items-center gap-2.5 rounded-md px-1.5 py-1 ring-1 ring-transparent transition-[background-color,box-shadow,color] hover:bg-gray-50/90 hover:ring-gray-200/70 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 has-[:disabled]:hover:bg-transparent has-[:disabled]:hover:ring-transparent'
+
+export const choiceOptionClassName = `${choiceOptionBaseClassName} w-full`
 
 export const choiceOptionListClassName = 'space-y-3'
 

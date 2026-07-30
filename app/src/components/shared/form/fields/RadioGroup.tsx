@@ -5,6 +5,7 @@ import type { FormApi } from '@/components/shared/form/types'
 import type { FieldProps } from './sharedStyles'
 import {
   choiceControlClassName,
+  choiceOptionBaseClassName,
   choiceOptionClassName,
   choiceOptionListClassName,
   choiceTextClassName,
@@ -52,14 +53,20 @@ export function RadioGroup<T extends Record<string, unknown>>({
             )}
             <div
               className={
-                inline ? 'flex flex-wrap items-center gap-x-5 gap-y-2' : choiceOptionListClassName
+                inline
+                  ? 'flex flex-row flex-wrap items-center gap-x-5 gap-y-2'
+                  : choiceOptionListClassName
               }
             >
               {items.map((item) => (
                 <label
                   key={item.value}
                   htmlFor={`${String(name)}-${item.value}`}
-                  className={twJoin(choiceOptionClassName, item.className)}
+                  className={twJoin(
+                    inline ? choiceOptionBaseClassName : choiceOptionClassName,
+                    inline && 'inline-flex w-fit shrink-0',
+                    item.className,
+                  )}
                 >
                   <input
                     type="radio"
