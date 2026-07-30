@@ -2,7 +2,9 @@ import { existsSync, mkdirSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import * as p from '@clack/prompts'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { z } from 'zod'
+import { PrismaClient } from '@/prisma/generated/client'
 import { getBaseDatabaseUrl } from '../../src/server/database-url.server'
 
 export const ALLOWED_SCHEMAS = ['prisma', 'data'] as const
@@ -76,6 +78,14 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
 
 export function getLocalTargetDatabaseUrl() {
   return getBaseDatabaseUrl()
+}
+
+/** Prisma client without audit extensions — for bulk restore/sanitize writes. */
+export function createUnauditedPrismaClient() {
+  const adapter = new PrismaPg({
+    connectionString: getBaseDatabaseUrl(),
+  })
+  return new PrismaClient({ adapter })
 }
 
 export function toDockerNetworkUrl(databaseUrl: string) {

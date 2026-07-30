@@ -99,7 +99,7 @@ async function main() {
   }
 
   assertDumpFilePresent(dumpPath)
-  process.stdout.write(`Created ${dumpPath}\n`)
+  p.log.success(`Created ${dumpPath}`)
 }
 
 function printFatalError(error: unknown) {

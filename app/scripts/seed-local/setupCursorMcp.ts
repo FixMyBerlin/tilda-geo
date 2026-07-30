@@ -104,28 +104,19 @@ async function offerLocalCursorMcpSetupInner(options?: {
     manualJson = formatManualLocalDevMcpJson(origin)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    process.stdout.write(`Skipped Cursor MCP config: ${message}\n`)
+    p.log.warn(`Skipped Cursor MCP config: ${message}`)
     return { status: 'skipped' as const, reason: message }
   }
 
   if (!existsSync(path)) {
-    process.stdout.write(
-      [
-        `Skipped: ${path} does not exist (will not create it).`,
-        'Add this manually to ~/.cursor/mcp.json:',
-        manualJson,
-        '',
-      ].join('\n'),
-    )
+    p.log.warn(`Skipped: ${path} does not exist (will not create it).`)
+    p.note(manualJson, 'Add manually to ~/.cursor/mcp.json')
     return { status: 'skipped' as const, reason: 'missing-file' }
   }
 
   if (!isTty) {
-    process.stdout.write(
-      [`Skipped Cursor MCP prompt (non-interactive). Merge into ${path}:`, manualJson, ''].join(
-        '\n',
-      ),
-    )
+    p.log.warn(`Skipped Cursor MCP prompt (non-interactive). Merge into ${path}:`)
+    p.note(manualJson, 'mcp.json entry')
     return { status: 'skipped' as const, reason: 'non-tty' }
   }
 
@@ -134,18 +125,15 @@ async function offerLocalCursorMcpSetupInner(options?: {
     existing = JSON.parse(await readFile(path, 'utf8'))
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    process.stdout.write(
-      [`Skipped: could not parse ${path} (${message}).`, 'Merge manually:', manualJson, ''].join(
-        '\n',
-      ),
-    )
+    p.log.warn(`Skipped: could not parse ${path} (${message}).`)
+    p.note(manualJson, 'Merge manually')
     return { status: 'skipped' as const, reason: 'parse-error' }
   }
 
   const serverEntry = buildLocalDevMcpServerEntry(origin)
   const { next, action } = mergeLocalDevMcpServer(existing, serverEntry)
   if (action === 'unchanged') {
-    process.stdout.write(`Cursor MCP already configured (${LOCAL_DEV_MCP_SERVER_KEY}).\n`)
+    p.log.info(`Cursor MCP already configured (${LOCAL_DEV_MCP_SERVER_KEY}).`)
     return { status: 'unchanged' as const }
   }
 
@@ -169,11 +157,12 @@ async function offerLocalCursorMcpSetupInner(options?: {
 
   const ok = await confirm(`Update ${path}?`)
   if (!ok) {
-    process.stdout.write(['Declined. Manual entry:', manualJson, ''].join('\n'))
+    p.log.warn('Declined. Manual entry:')
+    p.note(manualJson, 'mcp.json entry')
     return { status: 'declined' as const }
   }
 
   await writeFile(path, `${JSON.stringify(next, null, 2)}\n`)
-  process.stdout.write(`Updated ${path} (${action} ${LOCAL_DEV_MCP_SERVER_KEY}).\n`)
+  p.log.success(`Updated ${path} (${action} ${LOCAL_DEV_MCP_SERVER_KEY}).`)
   return { status: 'updated' as const, action }
 }
