@@ -92,136 +92,136 @@ function CategoryFormLayout(props: CategoryFormLayoutProps) {
 
   const mainColumn = (
     <form.Subscribe selector={(s) => s.isSubmitting}>
-      {(isSubmitting) => (
-        <div className="min-w-0 space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <TextField
-              form={form}
-              name="groupKey"
-              label="Gruppe"
-              maxLength={190}
-              placeholder="z. B. bb"
-              autoComplete="off"
-              disabled={isSubmitting || (isEdit && isDeleting)}
-              className="max-w-full"
+      {(isSubmitting) => {
+        const actionBarLeft = (
+          <button
+            type="submit"
+            disabled={isSubmitting || (isEdit && isDeleting)}
+            className={buttonStyles}
+          >
+            {isSubmitting ? '…' : 'Speichern'}
+          </button>
+        )
+        const actionBarRight = isEdit ? (
+          <>
+            <button
+              type="button"
+              disabled={isSubmitting || isDeleting}
+              className={buttonStylesSecondary}
+              onClick={() =>
+                navigate({
+                  to: '/admin/map-dataset-categories',
+                  search: cancelListSearch,
+                })
+              }
+            >
+              Abbrechen
+            </button>
+            <AdminTrashIconButton
+              ariaLabel="Statische Daten: Kategorie löschen"
+              disabled={isDeleting}
+              size="comfortable"
+              onClick={() => {
+                if (props.variant === 'edit') props.onDelete()
+              }}
             />
-            <TextField
-              form={form}
-              name="categoryKey"
-              label="Kategorie"
-              maxLength={190}
-              placeholder="z. B. Netzkonzeption"
-              autoComplete="off"
-              disabled={isSubmitting || (isEdit && isDeleting)}
-              className="max-w-full"
-            />
-          </div>
+          </>
+        ) : (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            className={buttonStylesSecondary}
+            onClick={() =>
+              navigate({
+                to: '/admin/map-dataset-categories',
+                search: cancelListSearch,
+              })
+            }
+          >
+            Abbrechen
+          </button>
+        )
 
-          {isEdit ? (
-            <p className="text-sm text-gray-600">
-              Hinweis: Änderungen an Gruppe oder Kategorie setzen einen neuen Kategorie-Schlüssel.
-              Bereits konfigurierte Uploads behalten den bisherigen Schlüssel — passen Sie die
-              Upload-Daten bei Bedarf manuell an.
-            </p>
-          ) : null}
-
-          <form.Subscribe selector={(s) => [s.values.groupKey, s.values.categoryKey] as const}>
-            {([gk, ck]) => {
-              const preview = mergedCategoryKey(gk, ck)
-              return preview ? (
-                <p className="text-sm text-gray-600">
-                  Vollständiger Schlüssel für Uploads:{' '}
-                  <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-800">
-                    {preview}
-                  </code>
-                </p>
-              ) : null
-            }}
-          </form.Subscribe>
-
-          <TextField
-            form={form}
-            name="sortOrder"
-            label="Sortierung"
-            type="number"
-            step="any"
-            disabled={isSubmitting || (isEdit && isDeleting)}
-            className="max-w-full"
-          />
-          <TextField
-            form={form}
-            name="title"
-            label="Titel"
-            maxLength={STATIC_DATASET_CATEGORY_TITLE_MAX}
-            disabled={isSubmitting || (isEdit && isDeleting)}
-            className="max-w-full"
-          />
-          <Textarea
-            form={form}
-            name="subtitle"
-            label="Untertitel"
-            optional
-            rows={4}
-            maxLength={STATIC_DATASET_CATEGORY_SUBTITLE_MAX}
-            disabled={isSubmitting || (isEdit && isDeleting)}
-            className="max-w-full"
-          />
-
-          <FormActionBar
-            className="mt-6"
-            left={
-              <button
-                type="submit"
+        return (
+          <div className="min-w-0 space-y-4">
+            <FormActionBar left={actionBarLeft} right={actionBarRight} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField
+                form={form}
+                name="groupKey"
+                label="Gruppe"
+                maxLength={190}
+                placeholder="z. B. bb"
+                autoComplete="off"
                 disabled={isSubmitting || (isEdit && isDeleting)}
-                className={buttonStyles}
-              >
-                {isSubmitting ? '…' : 'Speichern'}
-              </button>
-            }
-            right={
-              isEdit ? (
-                <>
-                  <button
-                    type="button"
-                    disabled={isSubmitting || isDeleting}
-                    className={buttonStylesSecondary}
-                    onClick={() =>
-                      navigate({
-                        to: '/admin/map-dataset-categories',
-                        search: cancelListSearch,
-                      })
-                    }
-                  >
-                    Abbrechen
-                  </button>
-                  <AdminTrashIconButton
-                    ariaLabel="Statische Daten: Kategorie löschen"
-                    disabled={isDeleting}
-                    size="comfortable"
-                    onClick={() => {
-                      if (props.variant === 'edit') props.onDelete()
-                    }}
-                  />
-                </>
-              ) : (
-                <button
-                  type="button"
-                  disabled={isSubmitting}
-                  className={buttonStylesSecondary}
-                  onClick={() =>
-                    navigate({
-                      to: '/admin/map-dataset-categories',
-                      search: cancelListSearch,
-                    })
-                  }
-                >
-                  Abbrechen
-                </button>
-              )
-            }
-          />
-        </div>
-      )}
+                className="max-w-full"
+              />
+              <TextField
+                form={form}
+                name="categoryKey"
+                label="Kategorie"
+                maxLength={190}
+                placeholder="z. B. Netzkonzeption"
+                autoComplete="off"
+                disabled={isSubmitting || (isEdit && isDeleting)}
+                className="max-w-full"
+              />
+            </div>
+
+            {isEdit ? (
+              <p className="text-sm text-gray-600">
+                Hinweis: Änderungen an Gruppe oder Kategorie setzen einen neuen Kategorie-Schlüssel.
+                Bereits konfigurierte Uploads behalten den bisherigen Schlüssel — passen Sie die
+                Upload-Daten bei Bedarf manuell an.
+              </p>
+            ) : null}
+
+            <form.Subscribe selector={(s) => [s.values.groupKey, s.values.categoryKey] as const}>
+              {([gk, ck]) => {
+                const preview = mergedCategoryKey(gk, ck)
+                return preview ? (
+                  <p className="text-sm text-gray-600">
+                    Vollständiger Schlüssel für Uploads:{' '}
+                    <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-800">
+                      {preview}
+                    </code>
+                  </p>
+                ) : null
+              }}
+            </form.Subscribe>
+
+            <TextField
+              form={form}
+              name="sortOrder"
+              label="Sortierung"
+              type="number"
+              step="any"
+              disabled={isSubmitting || (isEdit && isDeleting)}
+              className="max-w-full"
+            />
+            <TextField
+              form={form}
+              name="title"
+              label="Titel"
+              maxLength={STATIC_DATASET_CATEGORY_TITLE_MAX}
+              disabled={isSubmitting || (isEdit && isDeleting)}
+              className="max-w-full"
+            />
+            <Textarea
+              form={form}
+              name="subtitle"
+              label="Untertitel"
+              optional
+              rows={4}
+              maxLength={STATIC_DATASET_CATEGORY_SUBTITLE_MAX}
+              disabled={isSubmitting || (isEdit && isDeleting)}
+              className="max-w-full"
+            />
+
+            <FormActionBar className="mt-6" left={actionBarLeft} right={actionBarRight} />
+          </div>
+        )
+      }}
     </form.Subscribe>
   )
 

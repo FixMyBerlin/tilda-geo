@@ -52,7 +52,10 @@ function applyFieldErrors(
 }
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
+type ActionBarPlacement = 'bottom' | 'both'
+
 type FormProps<TValues extends Record<string, unknown>> = {
+  actionBarPlacement?: ActionBarPlacement
   actionBarRight?: ReactNode
   defaultValues: TValues
   schema: z.ZodTypeAny
@@ -65,6 +68,7 @@ type FormProps<TValues extends Record<string, unknown>> = {
 }
 
 export function Form<TValues extends Record<string, unknown>>({
+  actionBarPlacement = 'bottom',
   actionBarRight,
   defaultValues,
   schema,
@@ -127,6 +131,25 @@ export function Form<TValues extends Record<string, unknown>>({
     },
   })
 
+  const actionBar = submitLabel ? (
+    <FormActionBar
+      left={
+        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
+          {([canSubmit, isSubmitting]) => (
+            <button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+              className={submitClassName ?? buttonStyles}
+            >
+              {isSubmitting ? '…' : submitLabel}
+            </button>
+          )}
+        </form.Subscribe>
+      }
+      right={actionBarRight}
+    />
+  ) : null
+
   return (
     <form
       method="post"
@@ -137,6 +160,8 @@ export function Form<TValues extends Record<string, unknown>>({
         form.handleSubmit()
       }}
     >
+      {actionBarPlacement === 'both' ? actionBar : null}
+
       {children(form as FormApi<TValues>)}
 
       {showFormErrors ? (
@@ -170,24 +195,7 @@ export function Form<TValues extends Record<string, unknown>>({
         </div>
       )}
 
-      {submitLabel && (
-        <FormActionBar
-          left={
-            <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
-              {([canSubmit, isSubmitting]) => (
-                <button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className={submitClassName ?? buttonStyles}
-                >
-                  {isSubmitting ? '…' : submitLabel}
-                </button>
-              )}
-            </form.Subscribe>
-          }
-          right={actionBarRight}
-        />
-      )}
+      {actionBar}
     </form>
   )
 }

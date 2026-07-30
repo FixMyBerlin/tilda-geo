@@ -46,6 +46,7 @@ export function RegionContractForm<TSchema extends z.ZodTypeAny>({
 }: RegionContractFormProps<TSchema>) {
   return (
     <Form<RegionContractFormInput>
+      actionBarPlacement="both"
       actionBarRight={actionBarRight}
       defaultValues={defaultValues}
       schema={schema}

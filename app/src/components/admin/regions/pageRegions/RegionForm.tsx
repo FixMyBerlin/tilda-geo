@@ -98,6 +98,7 @@ export function RegionForm(props: Props) {
 
   return (
     <Form<RegionFormInput>
+      actionBarPlacement="both"
       defaultValues={defaultValues}
       schema={RegionFormRawSchema}
       onSubmit={async (values) => {

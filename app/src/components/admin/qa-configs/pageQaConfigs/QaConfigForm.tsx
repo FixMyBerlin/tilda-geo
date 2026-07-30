@@ -53,6 +53,7 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
 
   return (
     <Form<QaConfigFormBaseValues>
+      actionBarPlacement="both"
       actionBarRight={actionBarRight}
       defaultValues={defaultValues}
       schema={schema}
