@@ -1,4 +1,6 @@
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
+import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 
 type Faq = {
   question: string
@@ -51,24 +53,34 @@ export const HomePageFaq = () => {
 
         <div className="mt-10 flex flex-col gap-4">
           {faqs.map((faq, index) => (
-            <details
+            <Disclosure
               key={faq.question}
-              open={index === 0}
-              className="group overflow-hidden rounded-2xl bg-white"
+              as="div"
+              defaultOpen={index === 0}
+              className="overflow-hidden rounded-2xl bg-white"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left hover:bg-black/[0.02] focus-visible:ring focus-visible:ring-yellow-500 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-                <span className="text-base font-semibold text-gray-900 sm:text-lg">
-                  {faq.question}
-                </span>
-                <ChevronDownIcon
-                  aria-hidden
-                  className="size-6 flex-none rotate-90 text-gray-700 transition-transform group-open:rotate-0"
-                />
-              </summary>
-              <div className="px-6 pb-5 text-base leading-relaxed text-gray-700 sm:text-lg">
-                {faq.answer}
-              </div>
-            </details>
+              {({ open }) => (
+                <>
+                  <DisclosureButton className="flex w-full cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left hover:bg-black/[0.02] focus-visible:ring focus-visible:ring-yellow-500 focus-visible:outline-none">
+                    <span className="text-base font-semibold text-gray-900 sm:text-lg">
+                      {faq.question}
+                    </span>
+                    <ChevronDownIcon
+                      aria-hidden
+                      className={`size-6 flex-none text-gray-700 transition-transform ${open ? 'rotate-0' : 'rotate-90'}`}
+                    />
+                  </DisclosureButton>
+                  <MotionCollapse open={open}>
+                    <DisclosurePanel
+                      static
+                      className="px-6 pb-5 text-base leading-relaxed text-gray-700 sm:text-lg"
+                    >
+                      {faq.answer}
+                    </DisclosurePanel>
+                  </MotionCollapse>
+                </>
+              )}
+            </Disclosure>
           ))}
         </div>
       </div>
