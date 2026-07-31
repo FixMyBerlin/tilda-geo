@@ -7,6 +7,7 @@ import {
   UsersIcon,
 } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
+import { ScrollReveal } from '@/components/shared/motion/ScrollReveal'
 
 type Feature = {
   title: string
@@ -56,26 +57,33 @@ export const HomePageWhy = () => {
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-          Warum TILDA?
-        </h2>
-        <p className="mt-4 text-center text-base text-gray-700 sm:text-lg">
-          Datenbasiert planen, nachhaltig handeln
-        </p>
+        <ScrollReveal className="text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            Warum TILDA?
+          </h2>
+          <p className="mt-4 text-base text-gray-700 sm:text-lg">
+            Datenbasiert planen, nachhaltig handeln
+          </p>
+        </ScrollReveal>
 
         <div className="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => {
+          {features.map((feature, index) => {
             const Icon = feature.icon
             return (
-              <div key={feature.title} className="flex flex-col items-center text-center">
-                <span className="inline-flex size-24 items-center justify-center rounded-full bg-yellow-800/8 text-yellow-900">
+              // Staggered scroll-in; the icon scales gently when its card is hovered.
+              <ScrollReveal
+                key={feature.title}
+                delay={0.1 + index * 0.08}
+                className="group flex flex-col items-center text-center"
+              >
+                <span className="inline-flex size-24 items-center justify-center rounded-full bg-yellow-800/8 text-yellow-900 transition-transform duration-200 motion-safe:group-hover:scale-105">
                   <Icon className="size-12" />
                 </span>
                 <h3 className="mt-5 text-2xl font-semibold text-gray-900">{feature.title}</h3>
                 <p className="mt-2 max-w-xs text-sm leading-relaxed text-gray-700">
                   {feature.description}
                 </p>
-              </div>
+              </ScrollReveal>
             )
           })}
         </div>

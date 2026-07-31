@@ -6,6 +6,7 @@ import screenshotParkraum from '@/components/home/assets/HomePageProducts/parkra
 import screenshotRadverkehr from '@/components/home/assets/HomePageProducts/radverkehr.jpg'
 import { Img } from '@/components/shared/Img'
 import { Link } from '@/components/shared/links/Link'
+import { ScrollReveal } from '@/components/shared/motion/ScrollReveal'
 import { Pill } from '@/components/shared/text/Pill'
 import type { Router } from '@/router'
 import { SvgBicycle } from './icons/SvgBicycle'
@@ -84,80 +85,81 @@ export const HomePageProducts = () => {
   return (
     <section className="border-y border-gray-500/10 bg-brand-light">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <h2 className="text-center text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-          Die TILDA-Geodatenprodukte
-        </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-center text-base text-gray-900/80 sm:text-lg">
-          Spezialisierte Lösungen für die kommunale Verkehrsplanung – sofort einsetzbar, günstig im
-          Betrieb
-        </p>
+        <ScrollReveal className="text-center">
+          <h2 className="text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            Die TILDA-Geodatenprodukte
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base text-gray-900/80 sm:text-lg">
+            Spezialisierte Lösungen für die kommunale Verkehrsplanung – sofort einsetzbar, günstig
+            im Betrieb
+          </p>
+        </ScrollReveal>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {products.map((product) => {
+          {products.map((product, index) => {
             const Icon = product.icon
             return (
-              <div
-                key={product.name}
-                className="flex flex-col overflow-hidden rounded-2xl border border-gray-500/15 bg-white"
-              >
-                {product.image && (
-                  <div className="relative">
-                    <Img
-                      src={product.image}
-                      alt={product.imageAlt ?? ''}
-                      loading="lazy"
-                      className="aspect-[16/10] w-full border-b border-gray-500/10 object-cover object-center"
-                    />
-                    {product.beta && (
-                      <Pill
-                        color="amber"
-                        className="absolute top-3 right-3 rounded py-0.5 font-semibold shadow-sm"
-                      >
-                        beta
-                      </Pill>
-                    )}
-                  </div>
-                )}
+              <ScrollReveal key={product.name} delay={0.12 + index * 0.1} className="flex">
+                <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-gray-500/15 bg-white transition duration-200 motion-safe:has-[a:focus-visible]:-translate-y-1 motion-safe:has-[a:focus-visible]:shadow-xl motion-safe:has-[a:hover]:-translate-y-1 motion-safe:has-[a:hover]:shadow-xl">
+                  {product.image && (
+                    <div className="relative">
+                      <Img
+                        src={product.image}
+                        alt={product.imageAlt ?? ''}
+                        loading="lazy"
+                        className="aspect-[16/10] w-full border-b border-gray-500/10 object-cover object-center"
+                      />
+                      {product.beta && (
+                        <Pill
+                          color="amber"
+                          className="absolute top-3 right-3 rounded py-0.5 font-semibold shadow-sm"
+                        >
+                          beta
+                        </Pill>
+                      )}
+                    </div>
+                  )}
 
-                <div className="flex flex-1 flex-col p-7 sm:p-8">
-                  <div className="flex items-center gap-4">
-                    <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-yellow-800">
-                      <Icon className="size-9" />
-                    </span>
-                    <h3 className="text-xl font-semibold text-gray-900 sm:text-2xl">
-                      {product.name}
-                    </h3>
-                  </div>
+                  <div className="flex flex-1 flex-col p-7 sm:p-8">
+                    <div className="flex items-center gap-4">
+                      <span className="inline-flex size-16 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-yellow-800">
+                        <Icon className="size-9" />
+                      </span>
+                      <h3 className="text-xl font-semibold text-gray-900 sm:text-2xl">
+                        {product.name}
+                      </h3>
+                    </div>
 
-                  <p className="mt-3 text-lg leading-snug font-medium text-gray-900">
-                    {product.slogan}
-                  </p>
-                  <p className="mt-3 text-[15px] leading-normal text-gray-700">
-                    {product.description}
-                  </p>
+                    <p className="mt-3 text-lg leading-snug font-medium text-gray-900">
+                      {product.slogan}
+                    </p>
+                    <p className="mt-3 text-[15px] leading-normal text-gray-700">
+                      {product.description}
+                    </p>
 
-                  <div className="mt-auto flex flex-col items-center gap-3 pt-6">
-                    <Link
-                      href={product.moreHref}
-                      classNameOverwrite="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-gray-900 no-underline shadow-lg transition-colors select-none hover:bg-brand/70 focus-visible:ring-2 focus-visible:ring-yellow-800/40 focus-visible:outline-none active:bg-brand/70"
-                      blank
-                    >
-                      {product.moreLabel}
-                      <ArrowTopRightOnSquareIcon className="size-5" aria-hidden />
-                    </Link>
-                    {product.liveDemo && (
+                    <div className="mt-auto flex flex-col items-center gap-3 pt-6">
                       <Link
-                        to={product.liveDemo.to}
-                        params={product.liveDemo.params}
-                        search={product.liveDemo.search}
-                        classNameOverwrite="text-center text-sm font-medium text-yellow-800 underline underline-offset-4 transition-colors hover:text-yellow-900 focus-visible:ring-2 focus-visible:ring-yellow-800/30 focus-visible:outline-none"
+                        href={product.moreHref}
+                        classNameOverwrite="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-base font-medium text-gray-900 no-underline shadow-lg transition-colors select-none hover:bg-brand/70 focus-visible:ring-2 focus-visible:ring-yellow-800/40 focus-visible:outline-none active:bg-brand/70"
+                        blank
                       >
-                        Live Demo ausprobieren
+                        {product.moreLabel}
+                        <ArrowTopRightOnSquareIcon className="size-5" aria-hidden />
                       </Link>
-                    )}
+                      {product.liveDemo && (
+                        <Link
+                          to={product.liveDemo.to}
+                          params={product.liveDemo.params}
+                          search={product.liveDemo.search}
+                          classNameOverwrite="text-center text-sm font-medium text-yellow-800 underline underline-offset-4 transition-colors hover:text-yellow-900 focus-visible:ring-2 focus-visible:ring-yellow-800/30 focus-visible:outline-none"
+                        >
+                          Live Demo ausprobieren
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
             )
           })}
         </div>
