@@ -6,6 +6,7 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { z } from 'zod'
 import { PrismaClient } from '@/prisma/generated/client'
 import { getBaseDatabaseUrl } from '../../src/server/database-url.server'
+import { applyDevPortSlotToProcessEnv } from '../predev/devPortSlot'
 
 export const ALLOWED_SCHEMAS = ['prisma', 'data'] as const
 export const ALLOWED_SOURCES = ['production', 'staging'] as const
@@ -88,13 +89,15 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
 }
 
 export function getLocalTargetDatabaseUrl() {
+  // Match predev / prisma.config: DEV_PORT_SLOT=1 → DATABASE_PORT=5433, etc.
+  applyDevPortSlotToProcessEnv()
   return getBaseDatabaseUrl()
 }
 
 /** Prisma client without audit extensions — for bulk restore/sanitize writes. */
 export function createUnauditedPrismaClient() {
   const adapter = new PrismaPg({
-    connectionString: getBaseDatabaseUrl(),
+    connectionString: getLocalTargetDatabaseUrl(),
   })
   return new PrismaClient({ adapter })
 }

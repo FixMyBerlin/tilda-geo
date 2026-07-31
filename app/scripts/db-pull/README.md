@@ -43,6 +43,7 @@ Generated dumps are written to `app/scripts/db-pull/data`:
 - `DATABASE_URL_PRODUCTION` (pull source)
 - `DATABASE_URL_STAGING` (pull source)
 - `DATABASE_HOST`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME` (restore target)
+- Optional `DEV_PORT_SLOT` in `.env.local` (same as predev): restore uses the derived `DATABASE_PORT`, not a hard-coded 5432
 
 ## Remote access order (staging/production pull)
 
