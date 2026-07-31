@@ -24,12 +24,6 @@ To disable a mask, set **Maske aktiv** to **Nein** and click **Maske aktualisier
 
 Invalid OSM tokens (e.g. `abc`) are rejected with an error instead of being dropped silently.
 
-## Cutover (one-time migration)
-
-After importing region config from const (and StaticDatasets), run `bun run migration-data-masks` once per environment. See [migration runbook](../app/scripts/migration-data/README.md).
-
-Requires DB, S3, and geo DB access (`boundaries` table must contain the configured relation IDs).
-
 ## Region delete
 
 Deleting a region via admin also removes its mask `MapDatasetUpload` row and the S3 object (`region-{slug}/mask.geojson`).

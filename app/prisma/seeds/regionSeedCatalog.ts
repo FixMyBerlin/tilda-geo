@@ -91,8 +91,7 @@ const withDownloads = (
 /**
  * Seed regions for local / CI:
  * - `dev-*` — status/download fixtures (no production client names)
- * - production-like PUBLIC regions — mirror [`regions.const.ts`](../../scripts/migration-data/regions.const.ts)
- *   so E2E and local always have radinfra / bb-kampagne / parkraum without running migration-data
+ * - production-like PUBLIC regions — radinfra / bb-kampagne / parkraum for E2E and local
  */
 export const seedRegionCatalog: SeedRegionEntry[] = [
   {
@@ -295,7 +294,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
     },
   },
 
-  // —— Production-like PUBLIC (from regions.const.ts; logos via admin / migration-data) ——
+  // —— Production-like PUBLIC (logos via admin) ——
   {
     slug: 'radinfra',
     config: {

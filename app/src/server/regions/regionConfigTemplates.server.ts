@@ -4,7 +4,6 @@ import type {
   MapDataCategoryParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { simplifyConfigForParams } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/utils/simplifyConfigForParams'
-import { configs } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { calcConfigChecksum } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/lib'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import db from '@/server/db.server'
@@ -15,8 +14,7 @@ type RegionConfigTemplateDb = Pick<typeof db, 'regionConfigTemplate'>
  * Decode templates for the `?config=checksum.bits` URL param, keyed by checksum.
  *
  * The `bits` decode positionally against a template tree determined by the region's ordered category
- * list at encode time. Upserted on every region save so admin category edits produce decodable URLs
- * without pre-committed `v2/configs/*` files.
+ * list at encode time. Upserted on every region save so admin category edits produce decodable URLs.
  *
  * Templates are immutable per checksum, so reads are memoised for the process lifetime.
  */
@@ -38,7 +36,7 @@ export async function upsertRegionConfigTemplate(
   return checksum
 }
 
-/** Tier 1 (current fresh) → tier 2 (DB) → tier 3 (frozen archive); undefined if unknown. */
+/** Tier 1 (current fresh) → tier 2 (DB); undefined if unknown. */
 export async function resolveConfigTemplate(
   checksum: string,
   freshConfig: MapDataCategoryConfig[],
@@ -47,12 +45,7 @@ export async function resolveConfigTemplate(
     return simplifyConfigForParams(freshConfig)
   }
 
-  const fromDb = await getRegionConfigTemplate(checksum)
-  if (fromDb) return fromDb
-
-  if (checksum in configs) {
-    return configs[checksum as keyof typeof configs] as MapDataCategoryParam[]
-  }
+  return getRegionConfigTemplate(checksum)
 }
 
 export async function getRegionConfigTemplate(checksum: string) {

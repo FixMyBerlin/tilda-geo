@@ -23,8 +23,6 @@ One row = one **dataset file**. File-level fields live on the upload columns and
 
 Per-layer “Ansichten” come from `meta.ts` `configs[]` (field `categoryKey`). On create, that array is stored as `configs` JSON (wire format for the map) and synced into `MapDatasetLayerConfig` rows (admin UI + CSV export).
 
-**Cutover note:** the `Upload` → `MapDatasetUpload` migration truncates existing rows instead of rewriting legacy `configs.category`. Recreate via a full StaticDatasets run before serving the new app — see [migration-data README](/app/scripts/migration-data/README.md).
-
 ### Data source: `local` or `external`
 
 Configured in `meta.ts`:

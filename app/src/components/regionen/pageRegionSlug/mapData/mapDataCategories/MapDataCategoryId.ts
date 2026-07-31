@@ -11,7 +11,7 @@ export type MapDataCategoryId =
   | 'statistics'
   | 'surface'
   // TILDA Parkraum
-  | 'parking' // LEGACY for app/src/regionen/[regionSlug]/_hooks/useQueryState/useCategoriesConfig/v2/configs/_*.ts
+  | 'parking' // LEGACY id kept for decoding old ?config= URLs stored in RegionConfigTemplate
   | 'parkingLars'
   | 'parkingTilda'
   // bicycleParking Atlas

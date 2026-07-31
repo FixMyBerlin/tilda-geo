@@ -17,7 +17,7 @@ const DOCS_PARKINGS = '/docs/parkings'
  */
 /** PUBLIC, bbox + exports (download UI when member/admin). */
 const SLUG_DOWNLOADS = 'parkraum-berlin-euvm'
-/** PUBLIC, no bbox (no download section) — radinfra mirrors regions.const. */
+/** PUBLIC, no bbox (no download section) — radinfra from regionSeedCatalog. */
 const SLUG_NO_DOWNLOADS = 'radinfra'
 /** PUBLIC parkraum + parkings exports — regression for #3421. */
 const SLUG_PARKRAUM = 'parkraum-berlin-euvm'

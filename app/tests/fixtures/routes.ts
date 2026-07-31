@@ -1,4 +1,4 @@
-/** Seeded PUBLIC region (`radinfra` in regionSeedCatalog — mirrors regions.const). */
+/** Seeded PUBLIC region (`radinfra` in regionSeedCatalog). */
 const TEST_REGION_SLUG = 'radinfra'
 export const TEST_REGION_URL = `/regionen/${TEST_REGION_SLUG}`
 export const TEST_REGION_URL_WITH_CONFIG =
