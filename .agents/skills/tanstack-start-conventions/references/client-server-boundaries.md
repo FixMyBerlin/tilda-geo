@@ -62,11 +62,11 @@ Route files must always import and call server Fns in `loader`/`beforeLoad`; the
 ## Routes: When to use `beforeLoad` vs `loader`
 
 - **`beforeLoad`:** Redirects (URL normalization, auth redirect), auth/authorization, and returning context for the route (e.g. `isAuthorized`, `region`). Keep it light; server work is fine for ordinary route entry, but see the hot-route caveat below.
-- **`loader`:** Page data and cache priming. Can use `context` from `beforeLoad`. For React Query–backed data, see [router-and-query.md](router-and-query.md); otherwise return serializable data for `useLoaderData()` (e.g. admin pages).
+- **`loader`:** Page data and cache priming. Can use `context` from `beforeLoad`. For React Query–backed data, see `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md); otherwise return serializable data for `useLoaderData()` (e.g. admin pages).
 
 ### `beforeLoad` runs on **every** navigation — gate server work with `loaderDeps`
 
-`beforeLoad` is **not** gated by `loaderDeps`: it re-runs on **every** navigation to the route, **including search-param-only changes on the same route** (a map pan writing `?map=`, a layer toggle, a feature selection). The `loader` is different — it only re-runs when `loaderDeps` or path params change ([TanStack Router — data loading](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#using-loaderdeps-to-access-search-params)).
+`beforeLoad` is **not** gated by `loaderDeps`: it re-runs on **every** navigation to the route, **including search-param-only changes on the same route** (a map pan writing `?map=`, a layer toggle, a feature selection). The `loader` is different — it only re-runs when `loaderDeps` or path params change ([TanStack Router — data loading](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#using-loaderdeps-to-access-search-params)). Map URL format: `tanstack-router-conventions` → [map-search-param.md](../../tanstack-router-conventions/references/map-search-param.md).
 
 Consequence: **any server round-trip in `beforeLoad` runs on every search-param change.** For a route whose search params are high-frequency and client-only (map viewport, feature selection, layer toggles), a redirect resolver or auth check that hits the DB in `beforeLoad` turns every client-side interaction into a server request — and can flash the `pendingComponent` / remount the map on a spurious redirect.
 
@@ -93,7 +93,7 @@ Our default is explicit `ssr: true` on UI routes unless a leaf needs a more rest
 
 ## Router + React Query
 
-See **[router-and-query.md](router-and-query.md)** for loader vs `useLoaderData` vs `useQuery` / `useSuspenseQuery`, shared `*QueryOptions`, and SSR. This file covers server/client boundaries only.
+See **`tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md)** for loader vs `useLoaderData` vs `useQuery` / `useSuspenseQuery` and shared `*QueryOptions`. SSR / dehydration: [selective-ssr.md](selective-ssr.md). This file covers server/client boundaries only.
 
 ## Error handling
 

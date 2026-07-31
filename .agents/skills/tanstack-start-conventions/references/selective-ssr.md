@@ -4,6 +4,8 @@ How to use TanStack Start selective SSR and how it differs from `@tanstack/react
 
 Applies to FMC TanStack Start apps (e.g. **TILDA**, **Trassenscout**): same route `ssr` rules under each app’s `src/routes/` tree.
 
+**Loader + Query conventions** (cache priming, `useSuspenseQuery`, router defaults) → skill `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md). This file covers only Start `ssr` + Query dehydration.
+
 Official docs:
 
 - TanStack Start Selective SSR: <https://tanstack.com/start/latest/docs/framework/react/guide/selective-ssr>

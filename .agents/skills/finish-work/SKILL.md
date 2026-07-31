@@ -61,4 +61,4 @@ Internal-only (no user-visible change): maintainer bullets ok; omit user bullets
 
 ## Related
 
-[playwright-skill](../playwright-skill/SKILL.md) | [tech-stack](../tech-stack/SKILL.md) | [review-dependabot](../review-dependabot/SKILL.md) / babysit | [user-changelog](../user-changelog/SKILL.md)
+[close-worktree](../close-worktree/SKILL.md) (land worktree → develop; calls this skill if dirty) | [playwright-skill](../playwright-skill/SKILL.md) | [tech-stack](../tech-stack/SKILL.md) | [review-dependabot](../review-dependabot/SKILL.md) / babysit | [user-changelog](../user-changelog/SKILL.md)

@@ -4,7 +4,7 @@ TanStack Start is **isomorphic by default**: route components and loaders can ru
 
 **Official docs:** [Execution model](https://tanstack.com/start/latest/docs/framework/react/guide/execution-model)
 
-**Related:** [client-server-boundaries.md](client-server-boundaries.md) (file suffixes) · [server-functions.md](server-functions.md) (RPC API) · [router-and-query.md](router-and-query.md) (loaders + Query)
+**Related:** [client-server-boundaries.md](client-server-boundaries.md) (file suffixes) · [server-functions.md](server-functions.md) (RPC API) · `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md) (loaders + Query)
 
 ---
 
@@ -40,6 +40,6 @@ Route files and components import `*.functions.ts` exports — never `*.server.t
 ## Common mistakes
 
 1. **Direct DB/fs in loader or component** — works on SSR, breaks on client nav. Wrap I/O in `createServerFn`.
-2. **`useLoaderData` for Query-backed data** — use `useSuspenseQuery` with the same `*QueryOptions`. See [router-and-query.md](router-and-query.md).
+2. **`useLoaderData` for Query-backed data** — use `useSuspenseQuery` with the same `*QueryOptions`. See `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md).
 3. **Fat route files** — FMC: route exports config + one component import from `@/components/`.
 4. **String-interpolated `<Link to>`** — use typed `params` prop. See `react-dev` → [tanstack-router.md](../../react-dev/references/tanstack-router.md).

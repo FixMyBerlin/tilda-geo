@@ -14,72 +14,44 @@ Most FMC apps share the same core (plugins, type-aware lint, switch exhaustivene
 - **Custom oxlint `jsPlugins`** — e.g. TanStack Start auth-boundary rules; see skill `tanstack-start-auth` → [endpoint-auth-lint.md](../../tanstack-start-auth/references/endpoint-auth-lint.md).
 - **`eslint-plugin-compat`** — `compat/compat` on client-shipped paths; scoped override in [browser-target.md](browser-target.md). JS-plugin load issues under Bun `globalStore`: [bun-install.md](bun-install.md).
 
-## React Compiler (oxlint native)
+## React Compiler
 
-Enforce React Compiler rules on `**/*.tsx` with oxlint's built-in **`react/react-compiler`** rule — no `eslint-plugin-react-compiler` jsPlugin or extra devDependency.
+Use oxlint's native **`react/react-compiler`** on `**/*.tsx` — not `eslint-plugin-react-compiler`. Hooks via `eslint-plugin-react-hooks` jsPlugin; see [examples/oxlint.config.mjs](../examples/oxlint.config.mjs). Component conventions: skill `react-dev`.
 
-```javascript
-// oxlint.config.mjs — `plugins` must include `'react'`
-{
-  files: ['**/*.tsx'],
-  jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }],
-  rules: {
-    ...reactHooksJs.rules,
-    'react/react-compiler': 'error',
-  },
-}
-```
+## Type-aware linting
 
-**Migration from `eslint-plugin-react-compiler`:** remove the `react-compiler-js` jsPlugin and `eslint-plugin-react-compiler` from `package.json`; replace `'react-compiler-js/react-compiler': 'error'` with `'react/react-compiler': 'error'`. Drop any Dependabot `ignore` entry for `eslint-plugin-react-compiler`.
+- Root config: `options: { typeAware: true }` (FMC template default — no `--type-aware` CLI flag in scripts).
+- Add **`oxlint-tsgolint@7`**; pin with `oxlint`. Version tracks TypeScript (e.g. `7.0.2001`).
+- Keep **`tsc --noEmit`** separate — do not set `options.typeCheck` or use `oxlint --type-check`.
+- Noisy type-aware rules: commented in [examples/oxlint.config.mjs](../examples/oxlint.config.mjs); [tilda-geo](https://github.com/FixMyBerlin/tilda-geo/blob/develop/app/oxlint.config.mjs) for production overrides.
 
-Requires oxlint with the `react` plugin enabled (see [examples/oxlint.config.mjs](../examples/oxlint.config.mjs)). Component conventions: skill `react-dev`.
+## Scaffold packages
 
-## Scaffold setup
-
-**devDependencies** (pin versions together across apps):
+Pin together across apps:
 
 ```json
 {
   "devDependencies": {
     "eslint-plugin-react-hooks": "^7.1.1",
-    "oxfmt": "0.52.0",
-    "oxlint": "1.67.0",
+    "oxfmt": "0.56.0",
+    "oxlint": "1.70.0",
     "oxlint-config-react-hooks-js": "^1.1.3",
-    "oxlint-tsgolint": "^0.23.0"
+    "oxlint-tsgolint": "7.0.2001"
   }
 }
 ```
 
-Do **not** add `eslint-plugin-react-compiler` — use native `react/react-compiler` in oxlint (see above).
+Lint/format **scripts** and `check` orchestrators: [package-json-scripts.md](package-json-scripts.md).
 
-**scripts** — use `--fix --fix-dangerously` on write-mode lint so suggestion/dangerous fixes apply (e.g. removing unused imports). Plain `--fix` only applies safe fixes. Verify orchestrators (`check`, `check-ci`, `check-pre-push`): [package-json-scripts.md](package-json-scripts.md).
+## Editor (VS Code / Cursor)
 
-```json
-{
-  "scripts": {
-    "lint": "oxlint --fix --fix-dangerously --deny-warnings -c oxlint.config.mjs .",
-    "lint-check": "oxlint --deny-warnings -c oxlint.config.mjs .",
-    "format": "oxfmt --write -c oxfmt.config.mjs .",
-    "format-check": "oxfmt --check -c oxfmt.config.mjs .",
-    "check": "bun run --parallel type-check lint format test-run",
-    "check-ci": "bun run --parallel type-check lint-check format-check test-run"
-  }
-}
-```
-
-- **`bun run lint`** — fix and write; fails on remaining issues (`--deny-warnings` where used).
-- **`bun run lint-check`** — read-only; same rules, no `--fix`.
-- **`bun run format`** — oxfmt write; does not remove unused imports.
-- **`bun run format-check`** — read-only oxfmt verify.
-- **`bun run check`** — mutating verify (autofix lint/format + type-check + tests).
-- **`bun run check-ci`** — read-only CI verify; reuses `lint-check` / `format-check` leaves, not write-mode `lint`/`format`.
-
-**VS Code / Cursor** — extension `oxc.oxc-vscode`, `oxc.typeAware: true`. Merge with TypeScript keys from [examples/vscode.settings.typescript.json.template](../examples/vscode.settings.typescript.json.template) (see [SKILL.md](../SKILL.md)).
+Extension `oxc.oxc-vscode`. Merge with [examples/vscode.settings.typescript.json.template](../examples/vscode.settings.typescript.json.template). Monorepos: config paths and binaries under the app package — [tilda-geo `.vscode/settings.json`](https://github.com/FixMyBerlin/tilda-geo/blob/develop/.vscode/settings.json).
 
 ```json
 {
   "oxc.fixKind": "dangerous_fix_or_suggestion",
   "oxc.typeAware": true,
+  "oxc.path.tsgolint": "./app/node_modules/.bin/tsgolint",
   "editor.codeActionsOnSave": {
     "source.format.oxc": "always",
     "source.fixAll.oxc": "always",
@@ -87,10 +59,3 @@ Do **not** add `eslint-plugin-react-compiler` — use native `react/react-compil
   }
 }
 ```
-
-- **`oxc.fixKind`** — which fix levels appear in quick-fix / LSP (`dangerous_fix_or_suggestion` matches CLI boldness).
-- **`source.format.oxc`** — oxfmt on save (run before lint fixes when both are enabled).
-- **`source.fixAll.oxc`** — safe fixes + suggestions on save.
-- **`source.fixAllDangerous.oxc`** — dangerous fixes on save (pairs with `--fix-dangerously` on CLI).
-
-React Compiler and component conventions: skill `react-dev`.

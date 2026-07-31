@@ -32,6 +32,7 @@ Single skill for **library configuration** and **Start-specific wiring** in FMC 
 
 ## Related skills
 
+- `tanstack-router-conventions` — `validateSearch`, search serialization, loaders + Query
 - `tanstack-start-conventions` — layout, `.server.ts` / `.functions.ts`, boundaries, SSR
 - `playwright-skill` — E2E stubbed auth (TILDA)
 
