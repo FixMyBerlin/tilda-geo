@@ -1,6 +1,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { InformationCircleIcon as InformationCircleIconOutline } from '@heroicons/react/24/outline'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 
 export const ValueDisclosure = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -52,9 +53,15 @@ export const ValueDisclosureButton = ({
 }
 
 export const ValueDisclosurePanel = ({ children }: { children: React.ReactNode }) => {
+  // `static` keeps the panel mounted so MotionCollapse can animate its height (0 ↔ auto),
+  // smoothing the inspector resize instead of the previous instant height jump.
   return (
-    <DisclosurePanel className="mt-0.5 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">
-      {children}
+    <DisclosurePanel static>
+      {({ open }) => (
+        <MotionCollapse open={open}>
+          <div className="mt-0.5 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">{children}</div>
+        </MotionCollapse>
+      )}
     </DisclosurePanel>
   )
 }

@@ -1,3 +1,4 @@
+import type React from 'react'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
@@ -34,53 +35,30 @@ export const Inspector = ({ features }: Props) => {
         const sourceKey = String(inspectObject.source) // Format: `category:lit--source:atlas_lit--subcategory:lit`
         if (!sourceKey) return null
 
+        let key: string
+        let content: React.ReactNode
         if (inspectObject.source === osmNotesSourceId) {
-          return (
-            <InspectorFeatureOsmNote
-              key={`${osmNotesSourceId}-${inspectObject?.properties?.id}`}
-              feature={inspectObject}
-            />
-          )
-        }
-        if (inspectObject.source === internalNotesSourceId) {
-          return (
-            <InspectorFeatureInternalNote
-              key={`${internalNotesSourceId}-${inspectObject?.properties?.id}`}
-              noteId={inspectObject.properties.id}
-            />
-          )
-        }
-        if (inspectObject.source === qaSourceId) {
-          return (
-            <InspectorFeatureQa
-              key={`${qaSourceId}-${inspectObject?.properties?.id}`}
-              feature={inspectObject}
-            />
-          )
+          key = `${osmNotesSourceId}-${inspectObject?.properties?.id}`
+          content = <InspectorFeatureOsmNote feature={inspectObject} />
+        } else if (inspectObject.source === internalNotesSourceId) {
+          key = `${internalNotesSourceId}-${inspectObject?.properties?.id}`
+          content = <InspectorFeatureInternalNote noteId={inspectObject.properties.id} />
+        } else if (inspectObject.source === qaSourceId) {
+          key = `${qaSourceId}-${inspectObject?.properties?.id}`
+          content = <InspectorFeatureQa feature={inspectObject} />
+        } else if (
+          // Inspector-Block for Datasets
+          regionDatasets.some((d) => d.id === parseSourceKeyStaticDatasets(sourceKey).sourceId)
+        ) {
+          key = createInspectorFeatureKey(inspectObject)
+          content = <InspectorFeatureStaticDataset sourceKey={sourceKey} feature={inspectObject} />
+        } else {
+          // Inspector-Block for Features
+          key = createInspectorFeatureKey(inspectObject)
+          content = <InspectorFeatureTilda sourceKey={sourceKey} feature={inspectObject} />
         }
 
-        // Inspector-Block for Datasets
-        const isDataset = regionDatasets.some(
-          (d) => d.id === parseSourceKeyStaticDatasets(sourceKey).sourceId,
-        )
-        if (isDataset) {
-          return (
-            <InspectorFeatureStaticDataset
-              key={createInspectorFeatureKey(inspectObject)}
-              sourceKey={sourceKey}
-              feature={inspectObject}
-            />
-          )
-        }
-
-        // Inspector-Block for Features
-        return (
-          <InspectorFeatureTilda
-            key={createInspectorFeatureKey(inspectObject)}
-            sourceKey={sourceKey}
-            feature={inspectObject}
-          />
-        )
+        return <div key={key}>{content}</div>
       })}
 
       <ToolsMissingTranslations />
