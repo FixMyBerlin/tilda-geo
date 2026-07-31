@@ -39,7 +39,10 @@ const DownloadModalTriggerIcon = () => {
     <>
       <ArrowDownTrayIcon className="size-6" />
       {(isProcessing || isDataOlderThanYesterday) && (
-        <ControlButtonDot srLabel="Neue Kartendaten verfügbar oder Daten werden verarbeitet." />
+        <ControlButtonDot
+          srLabel="Neue Kartendaten verfügbar oder Daten werden verarbeitet."
+          ping={isProcessing}
+        />
       )}
     </>
   )
