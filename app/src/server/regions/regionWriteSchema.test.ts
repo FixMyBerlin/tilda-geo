@@ -37,6 +37,8 @@ const validBase: RegionWriteInput = {
   exports: [],
   navigationLinks: [],
   contractId: null,
+  maskOsmRelationIds: [],
+  maskBufferKm: 10,
 }
 
 const fullBbox = { bbox: [13.0, 52.3, 13.8, 52.6] as const }
@@ -195,6 +197,9 @@ const regionFormBase = {
   exports: '',
   navigationLinks: [],
   contractId: '',
+  maskEnabled: 'false' as const,
+  maskOsmRelationIds: '',
+  maskBufferKm: '10',
 }
 
 describe('RegionFormRawSchema en decimal map fields', () => {
@@ -404,6 +409,28 @@ describe('RegionFormSchema', () => {
       'boundaries,boundaryLabels',
       'barrierAreas,barrierLines',
     ])
+  })
+
+  test('parses mask fields when enabled', () => {
+    const parsed = RegionFormSchema.parse({
+      ...regionFormBase,
+      maskEnabled: 'true',
+      maskOsmRelationIds: '62422, 2787952',
+      maskBufferKm: '10',
+    })
+    expect(parsed.maskOsmRelationIds).toEqual([62422, 2787952])
+    expect(parsed.maskBufferKm).toBe(10)
+  })
+
+  test('clears mask ids when disabled', () => {
+    const parsed = RegionFormSchema.parse({
+      ...regionFormBase,
+      maskEnabled: 'false',
+      maskOsmRelationIds: '62422',
+      maskBufferKm: '5',
+    })
+    expect(parsed.maskOsmRelationIds).toEqual([])
+    expect(parsed.maskBufferKm).toBe(10)
   })
 })
 

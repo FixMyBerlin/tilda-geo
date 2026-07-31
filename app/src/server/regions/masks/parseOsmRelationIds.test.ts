@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseOsmRelationIds } from '@/server/regions/masks/parseOsmRelationIds.server'
+import { parseOsmRelationIds } from '@/server/regions/masks/parseOsmRelationIds'
 
 describe('parseOsmRelationIds', () => {
   it('parses comma- and whitespace-separated ids', () => {

@@ -255,5 +255,5 @@ Before completing:
 - Types: `app/scripts/StaticDatasets/types.ts`
 - Examples: `app/scripts/StaticDatasets/geojson/region-berlin/*/meta.ts`
 - Utils: `app/scripts/StaticDatasets/geojson/_utils/`
-- Docs: `docs/Features-Parameter-Deeplinks.md`, `docs/Regional-Masks.md`
+- Docs: `docs/Features-Parameter-Deeplinks.md`
 - Update script: `app/scripts/StaticDatasets/updateStaticDatasets.ts`

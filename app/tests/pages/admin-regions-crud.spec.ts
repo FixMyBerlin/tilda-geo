@@ -42,6 +42,8 @@ const regionConfig = {
   exports: [],
   navigationLinks: [],
   contractId: null,
+  maskOsmRelationIds: [],
+  maskBufferKm: 10,
 }
 
 const authHeaders = (extra?: Record<string, string>) => ({
@@ -54,10 +56,18 @@ test.describe('Admin regions REST API CRUD', () => {
 
   test.beforeAll(async () => {
     await db.region.deleteMany({ where: { slug: SLUG } })
-    const user = await db.user.upsert({
-      where: { email: USER_EMAIL },
-      update: { role: 'ADMIN' },
-      create: { email: USER_EMAIL, osmId: 1_900_000_001, osmName: 'e2e-admin-crud', role: 'ADMIN' },
+    const staleUsers = await db.user.findMany({
+      where: { OR: [{ email: USER_EMAIL }, { osmId: 1_900_000_001 }] },
+      select: { id: true },
+    })
+    if (staleUsers.length > 0) {
+      await db.adminApiToken.deleteMany({
+        where: { createdById: { in: staleUsers.map((u) => u.id) } },
+      })
+      await db.user.deleteMany({ where: { id: { in: staleUsers.map((u) => u.id) } } })
+    }
+    const user = await db.user.create({
+      data: { email: USER_EMAIL, osmId: 1_900_000_001, osmName: 'e2e-admin-crud', role: 'ADMIN' },
     })
     userId = user.id
     const created = await createAdminApiToken({ name: TOKEN_NAME, createdById: userId })

@@ -30,6 +30,8 @@ const regionConfig = {
   exports: [],
   navigationLinks: [],
   contractId: null,
+  maskOsmRelationIds: [],
+  maskBufferKm: 10,
 } satisfies RegionWriteInput
 
 describe.skipIf(!integrationDb)('region write audit — ADMIN_FORM path (integration)', () => {

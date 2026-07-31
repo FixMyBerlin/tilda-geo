@@ -18,8 +18,7 @@ import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 const routeApi = getRouteApi('/admin/regions/$regionSlug/edit')
 
 export function PageRegionEdit() {
-  const { region, users, formConfig, maskConfig, contracts, auditHistory } =
-    routeApi.useLoaderData()
+  const { region, users, formConfig, contracts, auditHistory } = routeApi.useLoaderData()
 
   return (
     <>
@@ -119,12 +118,7 @@ export function PageRegionEdit() {
         )}
       </div>
 
-      <RegionFormEdit
-        formConfig={formConfig}
-        maskConfig={maskConfig}
-        contracts={contracts}
-        regionId={region.id}
-      />
+      <RegionFormEdit formConfig={formConfig} contracts={contracts} regionId={region.id} />
 
       <AuditHistoryPanel rows={auditHistory} model="Region" recordId={String(region.id)} />
     </>

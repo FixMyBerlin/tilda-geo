@@ -3,9 +3,8 @@ import { isIntegrationDbAvailable } from '../../../../test/integrationDb'
 
 const integrationDb = await isIntegrationDbAvailable()
 
-const { fetchBoundaryGeometry, requireAdmin } = vi.hoisted(() => ({
+const { fetchBoundaryGeometry } = vi.hoisted(() => ({
   fetchBoundaryGeometry: vi.fn(),
-  requireAdmin: vi.fn(),
 }))
 
 vi.mock('@/server/regions/masks/fetchBoundaryGeometry.server', () => ({
@@ -19,22 +18,18 @@ vi.mock('@/server/regions/masks/mapDatasetUploadsS3.server', () => ({
   mapDatasetUploadS3Key: vi.fn((slug: string, filename: string) => `${slug}/${filename}`),
 }))
 
-vi.mock('@/server/auth/session.server', () => ({
-  requireAdmin,
-}))
-
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import { regionMaskUploadSlug } from '@/server/regions/masks/generateRegionMask.server'
-import { generateRegionMaskWithData } from '@/server/regions/mutations/generateRegionMask.server'
+import { syncRegionMaskAfterWrite } from '@/server/regions/masks/syncRegionMaskAfterWrite.server'
 
 const REGION_SLUG = 'vitest-mask-regen'
 const ADMIN_USER_ID = 'vitest-mask-regen-admin'
 
-describe.skipIf(!integrationDb)('generateRegionMaskWithData (integration)', () => {
+describe.skipIf(!integrationDb)('syncRegionMaskAfterWrite (integration)', () => {
   let regionRecordId = ''
 
   beforeAll(async () => {
-    requireAdmin.mockResolvedValue({ userId: ADMIN_USER_ID })
     fetchBoundaryGeometry.mockResolvedValue({
       type: 'Polygon',
       coordinates: [
@@ -80,17 +75,15 @@ describe.skipIf(!integrationDb)('generateRegionMaskWithData (integration)', () =
   })
 
   test('creates MapDatasetUpload on update, then removes it when mask is disabled', async () => {
-    const headers = new Headers()
-
-    const enableResult = await generateRegionMaskWithData(
-      {
-        slug: REGION_SLUG,
-        maskOsmRelationIds: [62422],
-        maskBufferKm: 10,
-      },
-      headers,
+    await runWithAuditContextAsync(
+      { userId: ADMIN_USER_ID, metadata: { changeSource: 'ADMIN_FORM' } },
+      () =>
+        syncRegionMaskAfterWrite({
+          slug: REGION_SLUG,
+          maskOsmRelationIds: [62422],
+          maskBufferKm: 10,
+        }),
     )
-    expect(enableResult.success).toBe(true)
 
     const upload = await db.mapDatasetUpload.findFirst({
       where: { slug: regionMaskUploadSlug(REGION_SLUG), systemLayer: true },
@@ -100,16 +93,15 @@ describe.skipIf(!integrationDb)('generateRegionMaskWithData (integration)', () =
     const regionWithMask = await db.region.findUniqueOrThrow({ where: { slug: REGION_SLUG } })
     expect(regionWithMask.maskOsmRelationIds).toEqual([62422])
 
-    const disableResult = await generateRegionMaskWithData(
-      {
-        slug: REGION_SLUG,
-        maskOsmRelationIds: [],
-        maskBufferKm: 10,
-      },
-      headers,
+    await runWithAuditContextAsync(
+      { userId: ADMIN_USER_ID, metadata: { changeSource: 'ADMIN_FORM' } },
+      () =>
+        syncRegionMaskAfterWrite({
+          slug: REGION_SLUG,
+          maskOsmRelationIds: [],
+          maskBufferKm: 10,
+        }),
     )
-    expect(disableResult.success).toBe(true)
-    expect(disableResult.message).toMatch(/deaktiviert/)
 
     const uploadAfterDisable = await db.mapDatasetUpload.findFirst({
       where: { slug: regionMaskUploadSlug(REGION_SLUG), systemLayer: true },

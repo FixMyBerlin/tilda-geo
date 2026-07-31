@@ -20,7 +20,7 @@ import {
   warmableTablesKeySet,
   warmingTablesToSourceIds,
 } from '@/server/regions/cacheWarmingSources'
-import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
+import { parseOsmRelationIds } from '@/server/regions/masks/parseOsmRelationIds'
 import {
   formFieldsToGeoJsonBbox,
   geoJsonBboxToFormFields,
@@ -127,6 +127,8 @@ export const RegionWriteSchema = z
     exports: z.array(catalogIdSchema('Export', exportIdSet)),
     navigationLinks: z.array(RegionNavigationLinkSchema),
     contractId: z.number().int().positive().nullable(),
+    maskOsmRelationIds: z.array(z.number().int().positive()),
+    maskBufferKm: z.number().positive(),
   })
   .refine(
     (data) => {
@@ -265,6 +267,49 @@ const refineCacheWarmingForm = (
   }
 }
 
+const refineMaskForm = (
+  form: {
+    maskEnabled: boolean
+    maskOsmRelationIds: string
+    maskBufferKm: string
+  },
+  ctx: z.RefinementCtx,
+) => {
+  if (!form.maskEnabled) return
+
+  if (!form.maskOsmRelationIds.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskOsmRelationIds'],
+      message: 'Mindestens eine OSM Relation ID ist erforderlich.',
+    })
+  } else {
+    try {
+      parseOsmRelationIds(form.maskOsmRelationIds)
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['maskOsmRelationIds'],
+        message: error instanceof Error ? error.message : 'Ungültige OSM-Relation-IDs',
+      })
+    }
+  }
+
+  if (!form.maskBufferKm.trim() || !isValidEnDecimalInput(form.maskBufferKm.trim())) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskBufferKm'],
+      message: EN_DECIMAL_HELP,
+    })
+  } else if (!(Number(form.maskBufferKm) > 0)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskBufferKm'],
+      message: 'Buffer muss größer als 0 sein.',
+    })
+  }
+}
+
 export const RegionFormRawSchema = z
   .object({
     slug: slugSchema,
@@ -294,8 +339,12 @@ export const RegionFormRawSchema = z
     exports: z.string(),
     navigationLinks: z.array(RegionFormNavigationLinkSchema).superRefine(refineNavigationLinksPath),
     contractId: z.string(),
+    maskEnabled: trueOrFalse,
+    maskOsmRelationIds: z.string(),
+    maskBufferKm: z.string(),
   })
   .superRefine(refineCacheWarmingForm)
+  .superRefine(refineMaskForm)
 
 export type RegionFormInput = z.input<typeof RegionFormRawSchema>
 
@@ -333,6 +382,11 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
 
   const headerLogoId = parseOptionalNumber(form.headerLogoId)
 
+  const maskEnabled = form.maskEnabled
+  const maskOsmRelationIds = maskEnabled ? parseOsmRelationIds(form.maskOsmRelationIds) : []
+  // When mask is off, relation IDs are cleared; buffer stays at default 10 km (inert).
+  const maskBufferKm = maskEnabled ? Number(form.maskBufferKm) : 10
+
   return {
     slug: form.slug,
     name: form.name,
@@ -361,6 +415,8 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
         sortOrder: link.sortOrder,
       })),
     contractId: parseOptionalNumber(form.contractId),
+    maskOsmRelationIds,
+    maskBufferKm,
   }
 }).pipe(RegionWriteSchema)
 
@@ -405,28 +461,10 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
       _key: newClientListKey(),
     })),
     contractId: config.contractId != null ? String(config.contractId) : '',
-  }
-}
-
-export const RegionMaskFormRawSchema = z
-  .object({
-    maskEnabled: z.enum(['true', 'false']),
-    maskOsmRelationIds: z.string(),
-    maskBufferKm: z.string(),
-  })
-  .refine((form) => form.maskEnabled === 'false' || form.maskOsmRelationIds.trim().length > 0, {
-    message: 'Mindestens eine OSM Relation ID ist erforderlich.',
-    path: ['maskOsmRelationIds'],
-  })
-
-export type RegionMaskFormInput = z.input<typeof RegionMaskFormRawSchema>
-
-export function regionConfigToMaskFormValues(config: RegionMaskConfig) {
-  return {
     maskEnabled: toTrueFalseString(config.maskOsmRelationIds.length > 0),
     maskOsmRelationIds: joinCommaList(config.maskOsmRelationIds.map(String)),
     maskBufferKm: String(config.maskBufferKm),
-  } satisfies RegionMaskFormInput
+  }
 }
 
 export const catalogOptions = {

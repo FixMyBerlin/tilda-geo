@@ -34,15 +34,6 @@ export type RegionMaskConfig = {
   maskBufferKm: number
 }
 
-export function regionRowToMaskConfig(
-  region: Pick<Region, 'maskOsmRelationIds' | 'maskBufferKm'>,
-): RegionMaskConfig {
-  return {
-    maskOsmRelationIds: region.maskOsmRelationIds,
-    maskBufferKm: region.maskBufferKm,
-  }
-}
-
 /** Internal (`to`) or external (`href`, https) region nav link. Canonical home after the migration. */
 export type RegionNavigationLink =
   | { name: string; to: InternalPath }
@@ -60,6 +51,9 @@ function regionWriteInputToScalarData(config: RegionWriteInput) {
     backgroundSources: _backgroundSources,
     exports: _exports,
     navigationLinks: _navigationLinks,
+    // Mask columns are written only via syncRegionMaskAfterWrite (with geometry upload).
+    maskOsmRelationIds: _maskOsmRelationIds,
+    maskBufferKm: _maskBufferKm,
     ...scalars
   } = config
   return {
@@ -179,13 +173,15 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
     navigationLinks,
     bbox,
     cacheWarming,
-    maskOsmRelationIds: _maskOsmRelationIds,
-    maskBufferKm: _maskBufferKm,
+    maskOsmRelationIds,
+    maskBufferKm,
     ...scalars
   } = region
 
   return {
     ...scalars,
+    maskOsmRelationIds,
+    maskBufferKm,
     bbox: parseRegionGeoJsonBBox(bbox),
     cacheWarming: parseRegionCacheWarming(cacheWarming),
     categories: categoryAssignments.map((a) => a.categoryId as MapDataCategoryId),
@@ -204,9 +200,8 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
  * DB row → client `TRegion`.
  *
  * Separate from `regionRowToWriteInput`: write input mirrors the form/API schema (flat map fields,
- * internalPath/externalUrl links); mask config is owned by the mask form. The client nests mask/map,
- * builds logoPath, and uses
- * `{ to }` / `{ href }` nav links. Going through write input first only added a pass-through copy.
+ * internalPath/externalUrl links, maskOsmRelationIds/maskBufferKm); the client nests mask/map,
+ * builds logoPath, and uses `{ to }` / `{ href }` nav links.
  */
 export function regionRowToClient(region: RegionWithRelations) {
   const {

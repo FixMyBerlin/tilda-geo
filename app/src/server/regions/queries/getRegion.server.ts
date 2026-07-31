@@ -4,9 +4,7 @@ import db from '@/server/db.server'
 import {
   regionInclude,
   regionRowToClient,
-  regionRowToMaskConfig,
   regionRowToWriteInput,
-  type RegionMaskConfig,
   type TRegion,
 } from '@/server/regions/regionConfigMapper.server'
 import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
@@ -45,6 +43,5 @@ export async function getRegionEditData(input: { slug: string }) {
   return {
     region: regionRowToClient(region),
     config: regionRowToWriteInput(region),
-    maskConfig: regionRowToMaskConfig(region),
-  } satisfies { region: TRegion; config: RegionWriteInput; maskConfig: RegionMaskConfig }
+  } satisfies { region: TRegion; config: RegionWriteInput }
 }

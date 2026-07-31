@@ -64,6 +64,8 @@ const baseRegionConfig = {
   exports: [] as ExportId[],
   navigationLinks: [],
   contractId: null,
+  maskOsmRelationIds: [],
+  maskBufferKm: 10,
 } satisfies Omit<
   RegionWriteInput,
   | 'slug'

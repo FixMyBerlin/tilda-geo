@@ -45,10 +45,10 @@ const run = async (fn: () => Promise<unknown>) => {
 
 const regionConfigDescription =
   'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, categories, ' +
-  'backgroundSources, exports, navigationLinks, notes, …). Mask fields (maskOsmRelationIds / ' +
-  'maskBufferKm) are not part of this schema — the mask is managed by a separate generate mask flow. ' +
-  'Validated with RegionWriteSchema; returns an error with the issues on invalid input. See the ' +
-  'manage-regions skill for required fields.'
+  'backgroundSources, exports, navigationLinks, notes, maskOsmRelationIds, maskBufferKm, …). ' +
+  'When maskOsmRelationIds or maskBufferKm change on create/update, mask geometry is generated ' +
+  '(or removed if IDs are empty) in the same request. Validated with RegionWriteSchema; returns an ' +
+  'error with the issues on invalid input. See the manage-regions skill for required fields.'
 
 /**
  * Build the per-request MCP server. Tools call the admin services in-process (same code paths as the

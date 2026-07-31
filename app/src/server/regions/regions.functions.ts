@@ -2,20 +2,17 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
-import { getAppSession } from '@/server/auth/session.server'
+import { getAppSession, requireAdmin } from '@/server/auth/session.server'
 import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import { membershipExists } from '@/server/memberships/queries/membershipExists.server'
 import { getRegionRedirectUrl } from '@/server/regions/getRegionRedirectUrl.server'
+import { lookupBoundaryOsmIds } from '@/server/regions/masks/lookupBoundaryOsmIds.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { trackRegionAccess } from '@/server/users/trackRegionAccess.server'
 import { validationErrorState } from '@/server/utils/validation'
 import { createRegionWithData } from './mutations/createRegion.server'
 import { deleteRegion } from './mutations/deleteRegion.server'
-import {
-  RegionMaskActionSchema,
-  generateRegionMaskWithData,
-} from './mutations/generateRegionMask.server'
 import { updateRegionWithData } from './mutations/updateRegion.server'
 import { DeleteRegionSchema, RegionFormRawSchema, RegionFormSchema } from './regionWriteSchema'
 
@@ -116,21 +113,16 @@ export const updateRegionFn = createServerFn({ method: 'POST' })
     return updateRegionWithData(regionSlug, parsed.data, getRequestHeaders())
   })
 
-export const generateRegionMaskFn = createServerFn({ method: 'POST' })
-  .validator((data: z.input<typeof RegionMaskActionSchema>) => data)
-  .handler(async ({ data }) => {
-    const parsed = RegionMaskActionSchema.safeParse(data)
-    if (!parsed.success) {
-      const message = parsed.error.issues[0]?.message ?? 'Ungültige Masken-Eingabe'
-      return { success: false as const, message }
-    }
+const CheckMaskBoundaryIdsInput = z.object({
+  ids: z.array(z.number().int().positive()).max(50),
+})
 
-    try {
-      const result = await generateRegionMaskWithData(parsed.data, getRequestHeaders())
-      return result
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Maske konnte nicht aktualisiert werden'
-      return { success: false as const, message }
-    }
+/** Soft admin check: which mask OSM relation IDs exist in the geo `boundaries` table. */
+export const checkMaskBoundaryIdsFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof CheckMaskBoundaryIdsInput>) =>
+    CheckMaskBoundaryIdsInput.parse(data),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin(getRequestHeaders())
+    return lookupBoundaryOsmIds(data.ids)
   })
