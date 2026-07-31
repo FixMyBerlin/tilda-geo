@@ -8,8 +8,10 @@ import {
   MapPinIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
+import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { FadeSlideIn } from '@/components/shared/motion/FadeSlideIn'
 import { mobileControlButtonClassName } from '../../mobile/mobileControlButton.const'
 import { useRegion } from '../../regionUtils/useRegion'
 import { type GeoFeature, type PlaceType, useGeocodingSearch } from './useGeocodingSearch'
@@ -133,101 +135,116 @@ export const PlaceSearch = ({ className }: Props) => {
       {/* Dim the map below the open search (mobile) so the panel + results stand out.
           `pointer-events-none` keeps the map pannable and outside-tap-to-close working. */}
       {open && (
-        <div
+        <motion.div
           aria-hidden="true"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
           className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[55vh] bg-linear-to-b from-black/45 to-transparent sm:hidden"
         />
       )}
 
       {open && (
-        <Combobox
-          as="div"
-          immediate
-          by="id"
-          value={activeFeature}
-          onChange={(feature: GeoFeature | null) => {
-            if (feature) {
-              selectFeature(feature)
-              // Keep the panel open and show the picked name as the bar's value.
-              setQuery(feature.place_name ?? '')
-            }
-          }}
+        <FadeSlideIn
+          x={12}
           className="pointer-events-auto absolute top-0 right-0 z-50 w-[min(22rem,calc(100vw-4.5rem))]"
         >
-          <div className="flex h-10 items-stretch overflow-hidden rounded-md border border-gray-300 bg-white shadow-md">
-            <MagnifyingGlassIcon
-              className={twMerge(
-                'ml-2 size-5 shrink-0 self-center',
-                searchIconViolet ? 'text-violet-600' : 'text-gray-400',
-              )}
-              aria-hidden="true"
-            />
-            <ComboboxInput
-              ref={inputRef}
-              displayValue={(feature: GeoFeature | null) => feature?.place_name ?? ''}
-              onChange={(event) => {
-                const text = event.target.value
-                setQuery(text)
-                // Emptying the field clears the active geometry (map reset to nothing).
-                if (text === '') clearResult()
-              }}
-              onKeyDown={(event) => {
-                if (event.key === 'Escape' && !activeFeature) setOpen(false)
-              }}
-              placeholder="Suche"
-              aria-label="Suche"
-              // @tailwindcss/forms adds a border + a focus box-shadow ring to inputs; clear both
-              // (border-0 + focus:ring-0) so the field blends into the surrounding panel.
-              className="min-w-0 flex-1 border-0 bg-transparent px-2 text-base text-gray-900 outline-none placeholder:text-gray-500 focus:border-0 focus:ring-0 focus:outline-none sm:text-sm"
-            />
-            {/* preventDefault on mousedown keeps the focused input from blurring (a blur would
+          <Combobox
+            as="div"
+            immediate
+            by="id"
+            value={activeFeature}
+            onChange={(feature: GeoFeature | null) => {
+              if (feature) {
+                selectFeature(feature)
+                // Keep the panel open and show the picked name as the bar's value.
+                setQuery(feature.place_name ?? '')
+              }
+            }}
+          >
+            <div className="flex h-10 items-stretch overflow-hidden rounded-md border border-gray-300 bg-white shadow-md">
+              <MagnifyingGlassIcon
+                className={twMerge(
+                  'ml-2 size-5 shrink-0 self-center',
+                  searchIconViolet ? 'text-violet-600' : 'text-gray-400',
+                )}
+                aria-hidden="true"
+              />
+              <ComboboxInput
+                ref={inputRef}
+                displayValue={(feature: GeoFeature | null) => feature?.place_name ?? ''}
+                onChange={(event) => {
+                  const text = event.target.value
+                  setQuery(text)
+                  // Emptying the field clears the active geometry (map reset to nothing).
+                  if (text === '') clearResult()
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape' && !activeFeature) setOpen(false)
+                }}
+                placeholder="Suche"
+                aria-label="Suche"
+                // @tailwindcss/forms adds a border + a focus box-shadow ring to inputs; clear both
+                // (border-0 + focus:ring-0) so the field blends into the surrounding panel.
+                className="min-w-0 flex-1 border-0 bg-transparent px-2 text-base text-gray-900 outline-none placeholder:text-gray-500 focus:border-0 focus:ring-0 focus:outline-none sm:text-sm"
+              />
+              {/* preventDefault on mousedown keeps the focused input from blurring (a blur would
                 swallow the first click); it does not affect :hover. Closing on click (not
                 pointerdown) keeps the panel mounted through the whole press/tap, so the magnifier
                 underneath never receives a ghost click that would reopen the search. */}
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={clearAndClose}
-              aria-label="Suche schließen"
-              className="flex w-10 shrink-0 cursor-pointer items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900"
-            >
-              <XMarkIcon className="size-5" aria-hidden="true" />
-            </button>
-          </div>
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={clearAndClose}
+                aria-label="Suche schließen"
+                className="flex w-10 shrink-0 cursor-pointer items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              >
+                <XMarkIcon className="size-5" aria-hidden="true" />
+              </button>
+            </div>
 
-          {/* modal={false}: the default (true) marks everything outside the input/options `inert`
-              while open — which disabled our trailing X button (no hover, clicks ignored). */}
-          <ComboboxOptions
-            modal={false}
-            className="mt-1 max-h-80 overflow-y-auto rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg empty:invisible"
-          >
-            {showResults &&
-              results.map((feature) => {
-                const Icon = resultIcon(feature)
-                const context = resultContext(feature)
-                return (
-                  <ComboboxOption
-                    key={feature.id}
-                    value={feature}
-                    className="group flex cursor-pointer items-start gap-2 px-3 py-2 select-none data-focus:bg-violet-50"
-                  >
-                    <Icon className="mt-0.5 size-5 shrink-0 text-gray-400" aria-hidden="true" />
-                    <div className="min-w-0 flex-1 leading-snug">
-                      <div className="truncate">
-                        <span className="font-semibold text-gray-900 group-data-focus:text-violet-700">
-                          {feature.text ?? feature.place_name}
-                        </span>
-                        {feature.place_type_name?.[0] && (
-                          <span className="ml-1.5 text-gray-500">{feature.place_type_name[0]}</span>
-                        )}
-                      </div>
-                      {context && <div className="truncate text-gray-500">{context}</div>}
-                    </div>
-                  </ComboboxOption>
-                )
-              })}
-          </ComboboxOptions>
-        </Combobox>
+            {/* modal={false}: the default (true) marks everything outside the input/options `inert`
+              while open — which disabled our trailing X button (no hover, clicks ignored).
+              `static` + conditional mount: we control visibility so the dropdown gets a small
+              enter animation when results first appear (no re-animation while typing). */}
+            {showResults && results.length > 0 && (
+              <FadeSlideIn y={-6}>
+                <ComboboxOptions
+                  modal={false}
+                  static
+                  className="mt-1 max-h-80 overflow-y-auto rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg"
+                >
+                  {results.map((feature) => {
+                    const Icon = resultIcon(feature)
+                    const context = resultContext(feature)
+                    return (
+                      <ComboboxOption
+                        key={feature.id}
+                        value={feature}
+                        className="group flex cursor-pointer items-start gap-2 px-3 py-2 select-none data-focus:bg-violet-50"
+                      >
+                        <Icon className="mt-0.5 size-5 shrink-0 text-gray-400" aria-hidden="true" />
+                        <div className="min-w-0 flex-1 leading-snug">
+                          <div className="truncate">
+                            <span className="font-semibold text-gray-900 group-data-focus:text-violet-700">
+                              {feature.text ?? feature.place_name}
+                            </span>
+                            {feature.place_type_name?.[0] && (
+                              <span className="ml-1.5 text-gray-500">
+                                {feature.place_type_name[0]}
+                              </span>
+                            )}
+                          </div>
+                          {context && <div className="truncate text-gray-500">{context}</div>}
+                        </div>
+                      </ComboboxOption>
+                    )
+                  })}
+                </ComboboxOptions>
+              </FadeSlideIn>
+            )}
+          </Combobox>
+        </FadeSlideIn>
       )}
     </div>
   )
