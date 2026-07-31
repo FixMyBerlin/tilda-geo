@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/api/export-ogr/$regionSlug/$tableName')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: ({ request, params }) => {

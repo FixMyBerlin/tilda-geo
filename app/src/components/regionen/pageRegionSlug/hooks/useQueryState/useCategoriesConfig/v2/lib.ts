@@ -1,6 +1,4 @@
 import adler32 from 'adler-32'
-import { staticRegion } from '@/data/regions.const'
-import { createFreshCategoriesConfig } from '../createFreshCategoriesConfig'
 import type { MapDataCategoryConfig } from '../type'
 import { simplifyConfigForParams } from '../utils/simplifyConfigForParams'
 
@@ -67,23 +65,4 @@ export function decodeBits(integers: number[]) {
     }
   }
   return booleans
-}
-
-export function getSimplifiedConfigs() {
-  type Result = Map<
-    string,
-    { config: ReturnType<typeof simplifyConfigForParams>; regionSlugs: string[] }
-  >
-  const result: Result = new Map([])
-  for (const region of staticRegion) {
-    const freshConfig = createFreshCategoriesConfig(region.categories)
-    const checksum = calcConfigChecksum(freshConfig)
-    const simplifiedConfig = simplifyConfigForParams(freshConfig)
-    const existing = result.get(checksum)?.regionSlugs ?? []
-    result.set(checksum, {
-      config: simplifiedConfig,
-      regionSlugs: [...existing, region.slug].sort((a, b) => a.localeCompare(b)),
-    })
-  }
-  return result
 }

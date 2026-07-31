@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import data from '@/server/api/map-style/style.json'
 
 export const Route = createFileRoute('/api/map-style')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: () => {

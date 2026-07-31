@@ -1,31 +1,23 @@
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
-import type { StaticRegion } from '@/data/regions.const'
+import type { RegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 
 // Configruation:
 // BBox: Brandenburg
-const bboxBrandenburg = {
-  min: [11.2662278, 51.359064],
-  max: [14.7658159, 53.5590907],
-} satisfies StaticRegion['bbox']
+const bboxBrandenburg = [11.2662278, 51.359064, 14.7658159, 53.5590907] satisfies RegionGeoJsonBBox
 // BBox: A bit of Berlin and rual areas below (NUDAFA)
-// const bboxBerlinPlus = {
-//   min: [13.2809, 52.2095],
-//   max: [13.825, 52.5528],
-// } satisfies StaticRegion['bbox']
+// const bboxBerlinPlus = [13.2809, 52.2095, 13.825, 52.5528] satisfies RegionGeoJsonBBox
 // BBox: Whole Germany
-const bboxPartOfNorthGermany = {
-  min: [6.635773437502678, 50.666899472786724],
-  max: [13.842804687502621, 53.422653072698324],
-} satisfies StaticRegion['bbox']
-const bboxNeukoelln = {
-  min: [13.389234353393391, 52.462071347640034],
-  max: [13.476194386902677, 52.49780866576984],
-} satisfies StaticRegion['bbox']
+const bboxPartOfNorthGermany = [
+  6.635773437502678, 50.666899472786724, 13.842804687502621, 53.422653072698324,
+] satisfies RegionGeoJsonBBox
+const bboxNeukoelln = [
+  13.389234353393391, 52.462071347640034, 13.476194386902677, 52.49780866576984,
+] satisfies RegionGeoJsonBBox
 
 // Datasets:
 export const tilesetConfigs: Record<
   SourceExportApiIdentifier,
-  { sourceLayer: string; uploadUrl: string; bbox: NonNullable<StaticRegion['bbox']> }
+  { sourceLayer: string; uploadUrl: string; bbox: RegionGeoJsonBBox }
 > = {
   bicycleParking_points: {
     sourceLayer: 'bicycleParking_points',

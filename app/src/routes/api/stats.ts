@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { feature, featureCollection } from '@turf/turf'
 import { z } from 'zod'
-import { isProd } from '@/components/shared/utils/isEnv'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 const position = z.tuple([z.number(), z.number()])
@@ -28,12 +27,11 @@ const DbStatSchema = z.object({
 const DbStatsSchema = z.array(DbStatSchema)
 
 export const Route = createFileRoute('/api/stats')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {
-        try {
-          const raw = await geoDataClient.$queryRaw`
+        const raw = await geoDataClient.$queryRaw`
             SELECT
               id,
               name,
@@ -50,23 +48,16 @@ export const Route = createFileRoute('/api/stats')({
               )::jsonb AS geometry
             FROM public.aggregated_lengths;`
 
-          const parsed = DbStatsSchema.parse(raw)
-
-          const features = parsed.map(({ geometry, ...properties }) => {
-            return feature(geometry, properties, { id: properties.id })
-          })
-
-          return Response.json(featureCollection(features))
-        } catch (error) {
-          console.error(error)
-          return Response.json(
-            {
-              error: 'Internal Server Error',
-              info: isProd ? undefined : error,
-            },
-            { status: 500 },
-          )
+        const parsed = DbStatsSchema.safeParse(raw)
+        if (!parsed.success) {
+          return new Response('Bad Request', { status: 400 })
         }
+
+        const features = parsed.data.map(({ geometry, ...properties }) => {
+          return feature(geometry, properties, { id: properties.id })
+        })
+
+        return Response.json(featureCollection(features))
       },
     },
   },

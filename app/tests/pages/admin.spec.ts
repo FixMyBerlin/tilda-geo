@@ -33,7 +33,7 @@ test.describe('Admin Pages', () => {
       await page.goto(route)
       await expect(page).toHaveURL(new RegExp(escapeRegExp(route)))
 
-      // Verify admin layout renders (pink background)
+      // Admin chrome uses pink (same brand as AdminPanelTrigger / admin form legends)
       const adminLayout = page.locator('.bg-pink-300').first()
       await expect(adminLayout).toBeVisible()
 

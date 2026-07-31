@@ -20,8 +20,7 @@ export const transformFile = async (
   })
   let data = await Bun.file(filenameToRead).json()
 
-  // INTERMEZZO: Do some checks on the file
-  // Validate with placemarkio/check-geojson
+  // INTERMEZZO: placemarkio on source only; projection validated on data that will be uploaded
   const issues = getIssues(JSON.stringify(data))
   if (issues.length > 0) {
     console.log(styleText('red', `  ERROR: GeoJSON validation issues in ${filenameToRead}`))
@@ -40,14 +39,15 @@ export const transformFile = async (
       ),
     )
   }
-  // Validate projection
-  validateProjection(data, filenameToRead)
 
   type TransformFunc = (data: unknown) => unknown
   const transform = await import_<TransformFunc>(datasetFolderPath, 'transform', 'transform')
   if (transform !== null) {
     console.log(`  Transforming geojson file...`)
     data = transform(data)
+    validateProjection(data, `${datasetFolderName} (after transform)`)
+  } else {
+    validateProjection(data, filenameToRead)
   }
 
   data = addUniqueIds(data)

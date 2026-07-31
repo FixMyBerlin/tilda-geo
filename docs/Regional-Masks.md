@@ -1,94 +1,53 @@
-# Regional Masks System
+# Regional Masks
 
-Regional masks (also called "passepartouts") are system layers that create a visual focus on a specific region by masking out the rest of the world. They are always active on the map but hidden from the UI layer controls.
+Regional masks dim the map outside a region's OSM relation boundary. They are **system-layer** `MapDatasetUpload` rows (slug `region-{regionSlug}`) served at `/api/uploads/region-{slug}.geojson`.
 
-## Overview
+## Admin workflow (two steps)
 
-The regional masks system integrates with the [Static Datasets system](../app/scripts/StaticDatasets/README.md) and uses the `systemLayer` flag to mark datasets as system layers.
+Mask config in the DB (`Region.maskOsmRelationIds`, `Region.maskBufferKm`) and the map upload (`MapDatasetUpload` + S3 GeoJSON) are updated separately.
 
-## How Masks Are Created
+1. Open **Admin → Regionen → {region} bearbeiten**
+2. In the **Maske** section, set **Maske aktiv**, **OSM Relation IDs**, and **Buffer (km)**
+3. Click **Maske aktualisieren** — validates OSM IDs against the geo DB, transforms the geometry, uploads GeoJSON to S3, and upserts the `MapDatasetUpload` row. Mask config is persisted only after the update succeeds.
 
-Masks are created using the `bun run regions:masks` script, which:
+**Region speichern** does **not** apply mask field changes on existing regions. Use it for all other region settings; always use **Maske aktualisieren** for mask updates.
 
-1. Iterates through all regions defined in [`regions.const.ts`](../app/src/data/regions.const.ts)
-2. For each region with `osmRelationIds`:
-   - Checks if a mask folder exists at `scripts/StaticDatasets/geojson/masks/region-<SLUG>-mask`
-   - If the folder doesn't exist, creates it with:
-     - `meta.ts` - Configuration file (generated from shared helper)
-     - `transform.ts` - Transform function (generated from shared helper)
-   - Downloads the region boundary GeoJSON from the API
-   - Applies the transform to create a mask (world polygon minus buffered region)
-   - Saves the mask GeoJSON file
-3. Calls `updateStaticDatasets.ts` with `--folder-filter=-mask` to upload masks
+To disable a mask, set **Maske aktiv** to **Nein** and click **Maske aktualisieren** (removes config and upload).
 
-See [`app/scripts/Regions/createMasks.ts`](../app/scripts/Regions/createMasks.ts) for the implementation.
+### Failure recovery
 
-## Mask Creation Logic
+| Situation                                              | What happened                                           | What to do                                   |
+| ------------------------------------------------------ | ------------------------------------------------------- | -------------------------------------------- |
+| Bad OSM ID on **Maske aktualisieren**                  | Inline error; DB config and map upload unchanged        | Fix IDs, click **Maske aktualisieren** again |
+| Changed mask fields, clicked **Region speichern** only | Other region fields saved; mask config/upload unchanged | Click **Maske aktualisieren**                |
+| Map shows old mask after config change                 | Upload not updated yet                                  | Click **Maske aktualisieren**                |
 
-The mask is created using [Turf.js](https://turfjs.org/):
+Invalid OSM tokens (e.g. `abc`) are rejected with an error instead of being dropped silently.
 
-- **OUTER**: World polygon `[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]`
-- **INNER**: Region polygon (from API, buffered by configurable amount, default: 10km)
-- **MASK**: `turf.difference(world, bufferedRegion)`
+## Cutover (one-time migration)
 
-The transform helper is located at [`app/scripts/StaticDatasets/createMasks/transform.ts`](../app/scripts/StaticDatasets/createMasks/transform.ts).
+After importing region config from const (and StaticDatasets), run `bun run migration-data-masks` once per environment. See [migration runbook](../app/scripts/migration-data/README.md).
 
-## Configuration
+Requires DB, S3, and geo DB access (`boundaries` table must contain the configured relation IDs).
 
-### Region Configuration
+## Region delete
 
-Regions are configured in [`regions.const.ts`](../app/src/data/regions.const.ts) with:
+Deleting a region via admin also removes its mask `MapDatasetUpload` row and the S3 object (`region-{slug}/mask.geojson`).
 
-- `osmRelationIds`: Array of OSM relation IDs used to fetch the boundary
-- `slug`: Region identifier used for folder and file naming
+## Implementation
 
-### Mask Configuration
+| Piece                                   | Location                                                       |
+| --------------------------------------- | -------------------------------------------------------------- |
+| Transform (buffer + world-minus-region) | `app/src/server/regions/masks/transformRegionMask.server.ts`   |
+| Layer styles                            | `app/src/server/regions/masks/regionMaskLayers.const.ts`       |
+| Boundary fetch                          | `app/src/server/regions/masks/fetchBoundaryGeometry.server.ts` |
+| S3 upload                               | `app/src/server/regions/masks/mapDatasetUploadsS3.server.ts`   |
+| Orchestration                           | `app/src/server/regions/masks/generateRegionMask.server.ts`    |
+| Admin server fn                         | `generateRegionMaskFn` in `regions.functions.ts`               |
+| UI                                      | `RegionMaskForm.tsx` (sibling form on region edit page)        |
 
-Mask-specific configuration is generated from the shared helper at [`app/scripts/StaticDatasets/createMasks/config.ts`](../app/scripts/StaticDatasets/createMasks/config.ts), which sets:
+Mask parameters are stored on `Region.maskOsmRelationIds` and `Region.maskBufferKm` (default **10 km** when the mask is off); geometry and map packaging are `systemLayer` `MapDatasetUpload` rows updated by admin/server — not StaticDatasets script output.
 
-- `systemLayer: true` - Marks the dataset as a system layer
-- Map styles (fill and line layers similar to MapTiler)
-- Attribution and other metadata
+## Dev seed
 
-### Buffer Configuration
-
-The buffer distance (default: 10km) can be adjusted by editing the `transform.ts` file in each region's mask folder:
-
-```typescript
-const bufferDistanceKm = 10 // Adjust this value
-```
-
-## How Masks Are Stored
-
-Masks are stored as static datasets following the standard structure:
-
-- **Location**: `scripts/StaticDatasets/geojson/masks/region-<SLUG>-mask/`
-- **Files**:
-  - `meta.ts` - Dataset metadata and configuration
-  - `transform.ts` - Transform function (references shared helper)
-  - `<region-slug>-mask.geojson` - The mask GeoJSON file
-
-See [Static Datasets README](../app/scripts/StaticDatasets/README.md) for details on the static datasets system.
-
-## How Masks Are Served
-
-Masks are served through the standard [Uploads API system](./Uploads.md):
-
-- Masks are always stored as GeoJSON (not PMTiles)
-- Files are accessible via `/api/uploads/region-<SLUG>-mask.geojson`
-
-## System Layer Behavior
-
-Datasets with `systemLayer: true` are:
-
-- **Filtered from UI**: Not shown in `SelectDataset` component (uses `useRegionDatasets()` which queries `systemLayer: false`)
-- **Always rendered**: Automatically rendered by `SourcesLayersSystemDatasets` component, separate from user-selectable datasets
-- **Minimal metadata**: Can omit optional fields like `description`, `dataSourceMarkdown`, `category`, etc.
-
-See [`app/src/app/regionen/[regionSlug]/_components/Map/SourcesAndLayers/SourcesLayersSystemDatasets.tsx`](../app/src/app/regionen/[regionSlug]/_components/Map/SourcesAndLayers/SourcesLayersSystemDatasets.tsx) for implementation details.
-
-## Related Scripts
-
-- `bun run regions` - Runs both `regions:masks` and `regions:configs`
-- `bun run regions:masks` - Creates/updates regional masks
-- `bun run regions:configs` - Updates category configs
+Dev-template regions with mask config (`dev-template-parkraum-city`, `dev-template-regional-network`) need **Maske aktualisieren** in admin after `bun run seed` so the map shows masks locally.

@@ -157,23 +157,26 @@ export const transform = (data: FeatureCollection) => {
 - `regions`: RegionSlug[] (required)
 - `public`: boolean (required)
 - `dataSourceType`: 'local' (required)
+- `attributionHtml`: string (required)
 - `configs`: Array with at least one config (required)
+
+**Optional on `export const data`**:
+
+- `dataUpdatedNote`: string
+- `dataSourceMarkdown`: string
+- `licence`: License type (see types.ts)
+- `licenceOsmCompatible`: 'licence' | 'waiver' | 'no'
 
 **Config required fields**:
 
 - `name`: string
-- `attributionHtml`: string
 - `inspector`: { enabled: boolean, ... } or { enabled: false }
 - `layers`: Layer[] (required)
 
 **Config optional fields**:
 
 - `category`: string | null — grouping key; titles/order are managed in Admin → Statische Datensatz-Kategorien (DB).
-- `updatedAt`: string
 - `description`: string
-- `dataSourceMarkdown`: string
-- `licence`: License type (see types.ts)
-- `licenceOsmCompatible`: 'licence' | 'waiver' | 'no'
 - `legends`: Legend[]
 
 **Style/Legend**: If not specified, make best guess:
@@ -196,12 +199,12 @@ export const data: MetaData = {
   regions: ['infravelo'], // From user or infer from group folder
   public: true,
   dataSourceType: 'local',
+  attributionHtml: 'Source Name', // Ask if unclear
+  licence: 'DL-DE/ZERO-2.0', // Infer from similar datasets
   configs: [
     {
       name: 'Dataset Name',
-      category: 'berlin/misc', // Infer from similar datasets
-      attributionHtml: 'Source Name', // Ask if unclear
-      licence: 'DL-DE/ZERO-2.0', // Infer from similar datasets
+      categoryKey: 'berlin/misc', // Infer from similar datasets
       inspector: { enabled: false }, // Default unless specified
       layers: defaultLayerStyles(), // Or custom layers
     },

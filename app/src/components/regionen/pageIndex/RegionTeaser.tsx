@@ -2,19 +2,34 @@ import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
 import { Link } from '@tanstack/react-router'
 import { RegionMetaPills } from '@/components/regionen/regionMeta/RegionMetaPills'
 import { Img } from '@/components/shared/Img'
-import type { TRegion } from '@/server/regions/queries/getRegion.server'
+import { Pill } from '@/components/shared/text/Pill'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
+import { defaultRegionSearch } from '@/shared/regionen/regionSearchSchemas'
 
 type Props = { region: TRegion }
 
 export const RegionTeaser = ({ region }: Props) => {
-  const customLogo = region.logoPath || region.externalLogoPath
+  const customLogo = region.logoPath
+  const contract = region.contract
 
   return (
-    <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }}>
+    <Link
+      to="/regionen/$regionSlug"
+      params={{ regionSlug: region.slug }}
+      search={defaultRegionSearch()}
+    >
       <div
         key={region.slug}
         className="group relative border-r border-b border-gray-200 px-4 pt-4 hover:bg-yellow-50 sm:px-6 sm:pt-6"
       >
+        {contract ? (
+          <Pill
+            color="gray"
+            className="absolute top-3 left-3 z-10 max-w-[calc(100%-1.5rem)] shadow-sm sm:top-4 sm:left-4"
+          >
+            {contract.name}
+          </Pill>
+        ) : null}
         <RegionMetaPills
           region={region}
           className="absolute top-3 right-3 z-10 max-w-[calc(100%-1.5rem)] justify-end sm:top-4 sm:right-4"
@@ -22,12 +37,7 @@ export const RegionTeaser = ({ region }: Props) => {
         />
         <div className="aspect-auto h-20 overflow-hidden rounded-lg border border-gray-200 bg-white group-hover:opacity-75">
           <span className="flex h-full w-full items-center justify-center object-cover object-center py-2">
-            {customLogo && region.externalLogoPath && (
-              <Img src={region.externalLogoPath} className="max-h-full w-auto" alt="" />
-            )}
-            {customLogo && region.logoPath && (
-              <Img src={region.logoPath} className="max-h-full w-auto" alt="" />
-            )}
+            {customLogo && <Img src={customLogo} className="max-h-full w-auto" alt="" />}
             {!customLogo && <BuildingLibraryIcon className="block h-20 w-auto" />}
           </span>
         </div>

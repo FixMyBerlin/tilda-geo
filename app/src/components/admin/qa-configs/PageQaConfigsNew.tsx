@@ -1,4 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { AdminPageTitleNew, AdminPageTitleNewLabel } from '@/components/admin/adminPageTitle'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { createQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
@@ -16,10 +17,15 @@ export function PageQaConfigsNew() {
         <Breadcrumb
           pages={[
             { href: '/admin/qa-configs', name: 'QA Konfigurationen' },
-            { href: '/admin/qa-configs/new', name: 'Neue QA Konfiguration' },
+            {
+              href: '/admin/qa-configs/new',
+              name: <AdminPageTitleNewLabel label="Neue QA Konfiguration" variant="breadcrumb" />,
+            },
           ]}
         />
       </HeaderWrapper>
+
+      <AdminPageTitleNew label="Neue QA Konfiguration" />
 
       <QaConfigForm
         schema={CreateQaConfigFormSchema}

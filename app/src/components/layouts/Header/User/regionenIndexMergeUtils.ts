@@ -1,15 +1,15 @@
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import type { getRegionenIndexLoaderFn } from '@/server/regions/regionen.functions'
 
 type RegionenIndexData = Awaited<ReturnType<typeof getRegionenIndexLoaderFn>>
 
-const sortByName = (regions: RegionWithAdditionalData[]) =>
+const sortByName = (regions: TRegion[]) =>
   [...regions].sort((a, b) => a.name.localeCompare(b.name, 'de'))
 
 export const mergeRegionenIndexRegions = (data: RegionenIndexData | undefined) => {
   if (!data) return []
 
-  const bySlug = new Map<string, RegionWithAdditionalData>()
+  const bySlug = new Map<string, TRegion>()
   for (const region of [
     ...data.activeRegions,
     ...data.deactivatedRegions,
@@ -22,17 +22,17 @@ export const mergeRegionenIndexRegions = (data: RegionenIndexData | undefined) =
   return sortByName([...bySlug.values()])
 }
 
-export const partitionRegionsByStatus = (regions: RegionWithAdditionalData[]) => {
+export const partitionRegionsByStatus = (regions: TRegion[]) => {
   const active = regions.filter((r) => r.status !== 'DEACTIVATED')
   const deactivated = regions.filter((r) => r.status === 'DEACTIVATED')
 
   return { active, deactivated } satisfies {
-    active: RegionWithAdditionalData[]
-    deactivated: RegionWithAdditionalData[]
+    active: TRegion[]
+    deactivated: TRegion[]
   }
 }
 
-const matchesQuery = (region: RegionWithAdditionalData, query: string) => {
+const matchesQuery = (region: TRegion, query: string) => {
   const normalized = query.trim().toLowerCase()
   if (!normalized) return true
 
@@ -43,7 +43,7 @@ const matchesQuery = (region: RegionWithAdditionalData, query: string) => {
   )
 }
 
-export const filterRegions = (regions: RegionWithAdditionalData[], query: string) =>
+export const filterRegions = (regions: TRegion[], query: string) =>
   regions.filter((region) => matchesQuery(region, query))
 
 export const filterPartitionedRegions = (

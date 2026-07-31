@@ -35,6 +35,11 @@ export async function processExternalSource(
     externalSourceUrl,
     cacheTtlSeconds,
     systemLayer: false,
+    attributionHtml: metaData.attributionHtml,
+    dataSourceMarkdown: metaData.dataSourceMarkdown ?? null,
+    dataUpdatedNote: metaData.dataUpdatedNote ?? null,
+    licence: metaData.licence ?? null,
+    licenceOsmCompatible: metaData.licenceOsmCompatible ?? null,
   })
 
   green('  OK')

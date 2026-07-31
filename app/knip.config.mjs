@@ -28,6 +28,7 @@ export default {
     // Symlinked scripts/StaticDatasets/geojson/** (ignoreFiles above)
     'papaparse',
     '@types/papaparse',
+    '@maplibre/maplibre-gl-style-spec',
   ],
   rules: {
     files: 'error',

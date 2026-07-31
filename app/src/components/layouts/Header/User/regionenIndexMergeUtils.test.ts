@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'vitest'
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
 import {
   filterPartitionedRegions,
   filterRegions,
@@ -7,7 +6,10 @@ import {
   partitionRegionsByStatus,
 } from './regionenIndexMergeUtils'
 
-const region = (slug: string, overrides: Partial<RegionWithAdditionalData> = {}) =>
+type RegionenIndexData = NonNullable<Parameters<typeof mergeRegionenIndexRegions>[0]>
+type RegionenIndexRegion = RegionenIndexData['publicRegions'][number]
+
+const region = (slug: string, overrides: Partial<RegionenIndexRegion> = {}) =>
   ({
     slug,
     name: slug.toUpperCase(),
@@ -15,7 +17,7 @@ const region = (slug: string, overrides: Partial<RegionWithAdditionalData> = {})
     status: 'PUBLIC',
     promoted: true,
     ...overrides,
-  }) as RegionWithAdditionalData
+  }) as RegionenIndexRegion
 
 describe('mergeRegionenIndexRegions', () => {
   test('returns empty array when data is undefined', () => {

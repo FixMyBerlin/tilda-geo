@@ -62,12 +62,11 @@ export const checkUpdatedAt = async (wfsUrl: string, datasetFolderPath: string) 
 
     if (date) {
       const meta = await import_<MetaData>(datasetFolderPath, 'meta', 'data')
-      const metaDates = meta?.configs.map((c) => c.updatedAt)
-      const outdatedDates = metaDates?.filter((d) => d !== date)
-      if (outdatedDates?.length) {
-        red('  Some `meta.ts` have outdated `config.updatedAt`', outdatedDates)
+      const metaDate = meta?.dataUpdatedNote
+      if (metaDate !== date) {
+        red('  meta.ts has outdated `dataUpdatedNote`', { expected: date, actual: metaDate })
       } else {
-        green('  meta.ts `updatedAt` are all correct', metaDates)
+        green('  meta.ts `dataUpdatedNote` is correct', metaDate)
       }
     }
   } catch (error) {

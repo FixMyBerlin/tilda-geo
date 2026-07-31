@@ -1,5 +1,5 @@
 import { Link } from '@/components/shared/links/Link'
-import { mapillaryKeyUrl } from '../Tools/osmUrls/osmUrls'
+import { mapillaryKeyUrl } from '@/lib/mapillaryPKeyUrl'
 
 type Props = {
   visible: boolean

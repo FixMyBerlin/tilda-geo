@@ -1,3 +1,4 @@
+/** Seeded PUBLIC region (`radinfra` in regionSeedCatalog — mirrors regions.const). */
 const TEST_REGION_SLUG = 'radinfra'
 export const TEST_REGION_URL = `/regionen/${TEST_REGION_SLUG}`
 export const TEST_REGION_URL_WITH_CONFIG =
@@ -33,9 +34,12 @@ export const ADMIN_REDIRECT_SMOKE_ROUTE = '/admin' as const
 export const ADMIN_ROUTES = [
   '/admin',
   '/admin/regions',
-  '/admin/uploads',
-  '/admin/static-dataset-categories',
+  '/admin/region-contracts',
+  '/admin/map-dataset-uploads',
+  '/admin/map-dataset-categories',
   '/admin/qa-configs',
   '/admin/memberships',
+  '/admin/audit-log',
+  '/admin/api-tokens',
   '/admin/processing',
 ] as const

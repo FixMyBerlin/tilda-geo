@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { isProd } from '@/components/shared/utils/isEnv'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
 
 const corsHeaders = {
@@ -8,30 +7,19 @@ const corsHeaders = {
 }
 
 export const Route = createFileRoute('/api/processing-dates')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async () => {
-        try {
-          const parsed = await getProcessingMeta()
-          if (!parsed) {
-            return Response.json(
-              { error: 'No processing metadata' },
-              { status: 404, headers: corsHeaders },
-            )
-          }
-
-          return Response.json(parsed, { headers: corsHeaders })
-        } catch (error) {
-          console.error(error)
+        const parsed = await getProcessingMeta()
+        if (!parsed) {
           return Response.json(
-            {
-              error: 'Internal Server Error',
-              info: isProd ? undefined : error,
-            },
-            { status: 500, headers: corsHeaders },
+            { error: 'No processing metadata' },
+            { status: 404, headers: corsHeaders },
           )
         }
+
+        return Response.json(parsed, { headers: corsHeaders })
       },
     },
   },

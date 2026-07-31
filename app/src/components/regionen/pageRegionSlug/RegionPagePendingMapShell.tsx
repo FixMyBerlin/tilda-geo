@@ -1,14 +1,11 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useParams } from '@tanstack/react-router'
 import { twJoin } from 'tailwind-merge'
-import invariant from 'tiny-invariant'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { isProd } from '@/components/shared/utils/isEnv'
-import { staticRegion } from '@/data/regions.const'
 import { mobileControlButtonClassName } from './mobile/mobileControlButton.const'
 import {
+  mobileMapBottomControlsClassName,
   mobileMapHeaderClassName,
-  pendingMapBottomControlsClassName,
 } from './mobile/mobileMapChrome.const'
 
 const pulseButton = twJoin(
@@ -16,23 +13,12 @@ const pulseButton = twJoin(
   'pointer-events-none animate-pulse bg-white/80',
 )
 
-type Props = {
-  previewRegionSlug?: string
-}
-
-function usePendingShellStaticRegion(previewRegionSlug?: string) {
-  const params = useParams({ strict: false })
-  const regionSlug = previewRegionSlug ?? params?.regionSlug
-  invariant(regionSlug, 'RegionPagePendingMapShell requires a region slug')
-  const resultRegion = staticRegion.find((data) => data.slug === regionSlug)
-  invariant(resultRegion, `Static region not found: ${regionSlug}`)
-  return resultRegion
-}
-
-export function RegionPagePendingMapShell({ previewRegionSlug }: Props = {}) {
-  const staticRegion = usePendingShellStaticRegion(previewRegionSlug)
+export function RegionPagePendingMapShell() {
   const showDebugPlaceholder = !isProd
-  const showSearchPlaceholder = staticRegion.showSearch === true
+  // The region config isn't resolved at pending time (it now lives in the route loader, not
+  // beforeLoad context), so render the search-button placeholder generically. This skeleton only
+  // appears on slow path/region loads (route pendingMs), so exact parity here is not important.
+  const showSearchPlaceholder = true
 
   return (
     <div className="relative flex h-full w-full flex-row gap-4">
@@ -64,7 +50,7 @@ export function RegionPagePendingMapShell({ previewRegionSlug }: Props = {}) {
 
       {/* Desktop zoom controls placeholder (hidden on mobile, matching the live map) */}
       <div
-        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2.5 z-10 hidden sm:block"
+        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2 z-10 hidden sm:block"
         aria-hidden="true"
       >
         <div className="maplibregl-ctrl-group">
@@ -85,16 +71,29 @@ export function RegionPagePendingMapShell({ previewRegionSlug }: Props = {}) {
         </div>
       </div>
 
-      {/* Bottom controls skeleton — one cluster like MapInterface (mobile + desktop) */}
-      <div className={pendingMapBottomControlsClassName} aria-hidden="true">
+      {/* Mobile bottom controls skeleton (OsmNotes, InternalNotes, SelectBackground, MobileLayerButton) */}
+      <div
+        className={twJoin(mobileMapBottomControlsClassName, 'sm:hidden')}
+        data-map-controls="true"
+        aria-hidden="true"
+      >
         <div className={twJoin(pulseButton, 'size-10')} />
         <div className={twJoin(pulseButton, 'size-10')} />
         <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10', 'hidden sm:block')} />
-        <div className={twJoin(pulseButton, 'size-13 sm:size-10')} />
-        {showDebugPlaceholder && (
-          <div className={twJoin(pulseButton, 'size-10', 'hidden sm:block')} />
-        )}
+        <div className={twJoin(pulseButton, 'size-13')} />
+      </div>
+
+      {/* Desktop bottom controls skeleton */}
+      <div
+        className={twJoin(mobileMapBottomControlsClassName, 'hidden sm:flex')}
+        data-map-controls="true"
+        aria-hidden="true"
+      >
+        <div className={twJoin(pulseButton, 'size-10')} />
+        <div className={twJoin(pulseButton, 'size-10')} />
+        <div className={twJoin(pulseButton, 'size-10')} />
+        <div className={twJoin(pulseButton, 'size-10')} />
+        <div className={twJoin(pulseButton, 'size-10')} />
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-5 flex flex-col items-center justify-center gap-4">

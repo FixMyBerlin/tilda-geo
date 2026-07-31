@@ -7,11 +7,13 @@
   "oxc.lint.configPath": "app/oxlint.config.mjs",
   "oxc.fixKind": "dangerous_fix_or_suggestion",
   "oxc.typeAware": true,
-  "oxc.path.oxfmt": "./app/node_modules/.bin/oxfmt",
-  "oxc.path.oxlint": "./app/node_modules/.bin/oxlint",
-  "oxc.path.tsgolint": "./app/node_modules/.bin/tsgolint",
+  // Use dist/cli.js paths — the extension often fails to resolve .bin symlinks in this monorepo.
+  "oxc.path.oxfmt": "app/node_modules/oxfmt/dist/cli.js",
+  "oxc.path.oxlint": "app/node_modules/oxlint/dist/cli.js",
+  "oxc.path.tsgolint": "app/node_modules/oxlint-tsgolint/bin/tsgolint.js",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": false,
+  "editor.formatOnSaveMode": "file",
   "editor.codeActionsOnSave": {
     "source.format.oxc": "always",
     "source.fixAll.oxc": "always",

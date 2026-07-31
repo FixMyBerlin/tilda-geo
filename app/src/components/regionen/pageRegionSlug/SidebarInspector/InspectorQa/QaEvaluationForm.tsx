@@ -21,7 +21,7 @@ type Props = {
 
 export const QaEvaluationForm = ({ onSubmit, isLoading }: Props) => {
   return (
-    <Form<typeof schema>
+    <Form<Values>
       defaultValues={{ userStatus: '', comment: '' } satisfies Values}
       schema={schema}
       onSubmit={async (values) => {

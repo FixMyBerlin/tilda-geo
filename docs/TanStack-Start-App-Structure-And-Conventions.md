@@ -32,7 +32,7 @@ Route files define the `Route` (config, `beforeLoad`, `loader`, `head`, `compone
 
 ## 5. Routes ↔ components naming and symmetry
 
-- **Layout vs page**: The route’s `component` is often a **layout** (e.g. `LayoutRegionSlug`, `LayoutPages`) that then renders the actual **page** component (e.g. `PageRegionSlug`). Layouts can wrap with NuqsAdapter or other providers.
+- **Layout vs page**: The route’s `component` is often a **layout** (e.g. `LayoutRegionSlug`, `LayoutPages`) that then renders the actual **page** component (e.g. `PageRegionSlug`).
 - **Naming conventions** (aligned with `Page*.tsx`):
   - **Layouts**: File and export use the **`Layout*.tsx`** pattern in **`components/layouts/`** (e.g. [LayoutRoot.tsx](../app/src/components/layouts/LayoutRoot.tsx), [LayoutPages.tsx](../app/src/components/layouts/LayoutPages.tsx), [LayoutRegionSlug.tsx](../app/src/components/layouts/LayoutRegionSlug.tsx)). Shared chrome (Header, Footer, `global.css`) lives in the same folder.
   - **Pages**: File and export use the **`Page*.tsx`** pattern (e.g. `PageRegionSlug`, `PageIndex`, `PageDatenschutz`). We use this consistently for route-level page components.
@@ -52,13 +52,12 @@ For server/client boundaries and loaders, see **`tanstack-start-conventions`**. 
 
 ## 7. SSR and client boundaries (TanStack Start)
 
-- **SSR**: We use TanStack Start’s default SSR. Router and React Query SSR integration are set up in [app/src/router.tsx](../app/src/router.tsx) (`setupRouterSsrQueryIntegration`). Loader data is SSR’d; React Query cache can be preloaded in loaders and dehydrated to the client.
-- **nuqs and SSR**: We use **NuqsAdapter** from `nuqs/adapters/tanstack-router`. It is placed only where URL search state is needed — e.g. [LayoutRegionSlug.tsx](../app/src/components/regionen/LayoutRegionSlug.tsx) wraps `PageRegionSlug` with `<NuqsAdapter>`. Everything **below** the adapter is effectively a client boundary for nuqs (no SSR of nuqs state there). We may add a dedicated SSR/boundaries doc later; for now this section states the pattern.
+- **SSR**: We use TanStack Start’s default SSR. Router and React Query SSR integration are set up in [app/src/router.tsx](../app/src/router.tsx) (`setupRouterSsrQueryIntegration`, `parseSearch` / `stringifySearch` via [routerSearch.ts](../app/src/shared/routing/routerSearch.ts)). Loader data is SSR’d; React Query cache can be preloaded in loaders and dehydrated to the client.
 
-## 8. State — Zustand and nuqs
+## 8. State — Zustand and URL search
 
 - **Zustand**: Stores live in dedicated files (e.g. under **components/…/hooks/mapState/**). We export **custom hooks only**, not the raw store. TypeScript store uses `create<StoreType>()(...)`. Best practices: [zustand-state-management](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/zustand-state-management/SKILL.md). Example: [useMapState.ts](../app/src/components/regionen/pageRegionSlug/hooks/mapState/useMapState.ts).
-- **nuqs**: URL state lives in **hooks** (e.g. **components/regionen/pageRegionSlug/hooks/useQueryState/**). Parsers and registry are colocated. Search params must be registered in [searchParamsRegistry.ts](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/searchParamsRegistry.ts) so [getRegionRedirectUrl.ts](../app/src/server/regions/getRegionRedirectUrl.ts) (URL normalization) doesn’t strip them; see the [useQueryState README](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/README.md). Best practices: [nuqs](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/nuqs/SKILL.md). Example: [useMapParam.ts](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam.ts).
+- **URL search**: Region map params use TanStack Router `validateSearch` on [regionen/$regionSlug.tsx](../app/src/routes/regionen/$regionSlug.tsx) with [regionSearchSchemas.ts](../app/src/shared/regionen/regionSearchSchemas.ts). Thin hooks under **components/regionen/pageRegionSlug/hooks/useQueryState/** call `Route.useSearch()` + `navigate({ search })`. Search params must be registered in [searchParamsRegistry.ts](../app/src/shared/regionen/searchParamsRegistry.ts) so [getRegionRedirectUrl.server.ts](../app/src/server/regions/getRegionRedirectUrl.server.ts) (URL normalization) doesn’t strip them. High-frequency URL updates (note mini-map, calculator draw) use [`@tanstack/react-pacer`](https://tanstack.com/pacer/latest). Example: [useMapParam.ts](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam.ts).
 
 ## 9. Route file naming — folders vs dot-notation
 
@@ -87,4 +86,4 @@ For server/client boundaries and loaders, see **`tanstack-start-conventions`**. 
 | Auth and route protection                          | `tanstack-start-auth` → [auth.md](../.agents/skills/tanstack-start-auth/references/auth.md)                                                       |
 | Portable app folder layout                         | `tanstack-start-app-structure` → [SKILL.md](../.agents/skills/tanstack-start-app-structure/SKILL.md)                                              |
 | Zustand patterns                                   | [zustand-state-management](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/zustand-state-management/SKILL.md)                         |
-| nuqs (URL state)                                   | [nuqs](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/nuqs/SKILL.md)                                                                 |
+| URL search (`validateSearch`)                      | `tanstack-start-conventions` → [params-search-ui-vs-api.md](../.agents/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md)   |

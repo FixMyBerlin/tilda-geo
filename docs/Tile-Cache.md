@@ -17,4 +17,4 @@ In [`processing/steps/cache.ts`](/processing/steps/cache.ts), we remove the tile
 
 To avoid this, the script executes [`warmCache.ts`](/app/src/app/api/private/warm-cache/warmCache.ts), which pre-generates the most frequently used tiles — particularly those at low zoom levels that are more computationally expensive.
 
-The `cacheWarming` config in [`regions.const.ts`](/app/src/data/regions.const.ts) defines which layers and geographic bounds to pre-warm.
+The `cacheWarming` config on `prisma."Region"` (editable via `/admin/regions`) defines which layers and geographic bounds to pre-warm.

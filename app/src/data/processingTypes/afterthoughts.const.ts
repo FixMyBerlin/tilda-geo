@@ -5,6 +5,7 @@
  */
 export const afterthoughtLabels = {
   statistics: 'Statistiken',
+  campaign_counts: 'Kampagnen-Zähler',
   sidepath_export: 'Sidepath-Export',
 } as const
 
@@ -19,6 +20,7 @@ export const afterthoughtSkipReasonLabels = {
   failed: 'Fehlgeschlagen',
   unchanged: 'Unverändert',
   roads_bikelanes_skipped: 'roads_bikelanes übersprungen',
+  missing_tables: 'Tabellen fehlen',
   no_settlement_areas_table: '_settlement_areas fehlt',
 } as const
 

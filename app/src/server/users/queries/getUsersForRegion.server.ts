@@ -15,7 +15,7 @@ export async function getUsersForRegion(input: { regionSlug: string }, headers: 
 
   const users = await db.user.findMany({
     where: {
-      Membership: {
+      memberships: {
         some: {
           regionId,
         },
@@ -28,7 +28,7 @@ export async function getUsersForRegion(input: { regionSlug: string }, headers: 
       firstName: true,
       lastName: true,
       email: true,
-      Membership: {
+      memberships: {
         select: {
           id: true,
           region: {

@@ -1,114 +1,51 @@
-# Uploads System / Static Dataset System
+# Uploads
 
-The uploads system provides access to static datasets (PMTiles and GeoJSON) with authentication, caching, and multiple data source types.
+Two separate upload systems share the same S3 bucket and credentials.
 
-**See also:** [Static Datasets Scripts](/app/scripts/StaticDatasets/README.md) for how datasets are created and uploaded.
+**See also:** [Static Datasets Scripts](/app/scripts/StaticDatasets/README.md) for how static datasets are created and uploaded.
 
-## Uploads can be created by `script` or `user`
+| Concept     | Static datasets (`MapDatasetUpload`)                        | Region uploads (`RegionUpload`)                                |
+| ----------- | ----------------------------------------------------------- | -------------------------------------------------------------- |
+| Purpose     | PMTiles / GeoJSON map datasets                              | Region files (currently: header logo)                          |
+| Model       | M2M to regions; `configs` JSON + synced `layerConfigs` rows | Per-region library; role = which `Region` FK points at it      |
+| S3 path     | `uploads/{ENV}/…`                                           | `region-uploads/{ENV}/{regionSlug}/{uuid}/{filename}`          |
+| Path source | StaticDatasets script (`S3_UPLOAD_FOLDER_BY_APP_ENV`)       | `regionUploadsS3.server.ts` (same `{ENV}` from `VITE_APP_ENV`) |
+| Created by  | Script (`createdBy: SCRIPT`; `USER` exists but unused)      | Admin via region edit form (better-upload)                     |
+| Serving     | `/api/uploads/{slug}.{pmtiles\|geojson\|csv}`               | `/api/region-uploads/$id/$filename`                            |
 
-All uploads from `/app/scripts/StaticDatasets` are of `createdBy: SCRIPT`.
-The system allows to create uploads `createdBy: USER` that are managed manually. This is not in use ATM.
+`{ENV}` is `localdev` / `staging` / `production` from `VITE_APP_ENV` (code constant, not a free-floating env knob).
 
-## Uploads can have source the data `local` or `external`
+## Static datasets (`MapDatasetUpload`)
 
-The system supports two data source types, configured in `meta.ts` when creating datasets:
+### File-level metadata vs. layer config
 
-1. **Local Sources** (`dataSourceType: 'local'`)
-   - Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
-   - Files: Stored on S3 at the same time.
-2. **External Sources** (`dataSourceType: 'external'`)
-   - Uploads-DB Entry: Created manually via `bun run static-datasets-update` / related `static-datasets-*` scripts
-   - Files: Downloaded and cached on the server with TTL to auto-update the files regularly
+One row = one **dataset file**. File-level fields live on the upload columns and at the `meta.ts` root: `attributionHtml`, `dataSourceMarkdown`, `dataUpdatedNote`, `licence`, `licenceOsmCompatible`.
 
-## API Endpoints
+Per-layer “Ansichten” come from `meta.ts` `configs[]` (field `categoryKey`). On create, that array is stored as `configs` JSON (wire format for the map) and synced into `MapDatasetLayerConfig` rows (admin UI + CSV export).
 
-- `GET /api/uploads/{slug}.pmtiles` - Returns PMTiles file
-- `GET /api/uploads/{slug}.geojson` - Returns GeoJSON file
-- `GET /api/uploads/{slug}.csv` - CSV export of GeoJSON data with semicolon delimiter
-- `GET /api/uploads/{slug}` - _deprecated_ Returns PMTiles (fallback for old URLs)
+**Cutover note:** the `Upload` → `MapDatasetUpload` migration truncates existing rows instead of rewriting legacy `configs.category`. Recreate via a full StaticDatasets run before serving the new app — see [migration-data README](/app/scripts/migration-data/README.md).
 
-### CSV Format
+### Data source: `local` or `external`
 
-- `geometry_type`: Geometry type (Point, LineString, Polygon, etc.)
-- `geometry_wkt`: WKT representation (QGIS compatible)
-- All GeoJSON feature properties as additional columns
+Configured in `meta.ts`:
 
-## Data Source Types
+- **`local`** — GeoJSON → tippecanoe → PMTiles; files uploaded to S3; DB row points at those URLs.
+- **`external`** — DB row points at `externalSourceUrl` with `cacheTtlSeconds`; API caches the remote file on the server.
 
-### Internal Sources `dataSourceType: 'local'`
+### API
 
-**Creation (via StaticDatasets scripts, from `app/` with `bun run …`):**
+- `GET /api/uploads/{slug}.pmtiles` / `.geojson` / `.csv` (semicolon CSV with `geometry_type`, `geometry_wkt`, plus feature properties)
+- `GET /api/uploads/{slug}` — deprecated; falls back to PMTiles
 
-When using `dataSourceType: 'local'` in `meta.ts`:
+Proxies: `proxyS3Url.server.ts` (S3) and `proxyExternalUrl.ts` (external + file cache).
 
-1. Read the input GeoJSON (uncompress if needed) and run the folders `transform.ts` if present
-2. Run `tippecanoe` and create the PMTiles file
-3. Upload the transformed GeoJSON and PMTiles files to S3
-4. Delete and create the database relation to connect these files to the region(s)
+### Auth
 
-**Serving:**
+- `public: true` — anyone
+- `public: false` — admin, or member of a related region
 
-Handled by: [`proxyS3Url`](/app/src/app/api/uploads/[slug]/utils/proxyS3Url.ts)
+## Region uploads (logos)
 
-Files are proxied through the API.
+Admin uploads a logo on the region edit form → `POST /api/admin/region-uploads/upload` → `RegionUpload` row; form stores its id in `Region.headerLogoId`.
 
-- HTTP Range request support for PMTiles (partial file downloads)
-- Optional compression for GeoJSON (gzip/br) based on Accept-Encoding header
-- Download headers for GeoJSON files
-
-**Caching Strategy:**
-
-- Uses S3 ETags and Last-Modified for cache validation
-- 1 hour cache with must-revalidate (browser checks after 1 hour)
-- PMTiles range requests are typically not cached by browsers
-- S3 handles conditional requests (If-None-Match/304 responses)
-
-### External Sources `dataSourceType: 'external'`
-
-**Creation (via StaticDatasets scripts, from `app/` with `bun run …`):**
-
-When using `dataSourceType: 'external'` in `meta.ts`:
-
-1. Create database entry pointing to the external URL (`externalSourceUrl`)
-2. Configure cache TTL (`cacheTtlSeconds`)
-
-**Serving:**
-
-Handled by: [`proxyExternalUrl`](/app/src/app/api/uploads/[slug]/utils/proxyExternalUrl.ts)
-
-Files are proxied from external URLs with file-based caching and configurable TTL.
-
-**Caching Strategy:**
-
-- Uses file-based cache in `public/temp/uploads-cache/`
-- Cache validity checked via TTL (time-to-live) per upload
-- Preserves Last-Modified header from external source
-- Handles .gz decompression for compressed GeoJSON
-- Returns debugging headers (`X-Data-Last-Fetched`, `X-Source-Last-Modified`)
-
-**Three Response Branches:**
-
-1. **PMTiles range request** - Handles HTTP Range requests for partial PMTiles data
-   - Returns `206 Partial Content` with `Content-Range` header
-   - Supports byte-range requests for efficient tile loading
-
-2. **GeoJSON full download** - Handles full GeoJSON download with optional compression (gzip/br)
-   - Compresses response if client supports it via Accept-Encoding header
-   - Handles `.gz` decompression for compressed source files
-
-3. **PMTiles full file** - Handles full PMTiles download when no range request
-   - Returns complete file with standard caching headers
-
-**Cache Management:**
-
-- Cache metadata stored in `{slug}-{format}.meta.json` files
-- Cached files stored as `{slug}-{timestamp}.{format}`
-- Old cache files automatically cleaned up when new versions are fetched
-- Respects `ETag` and `Last-Modified` headers for conditional requests (304 Not Modified)
-
-## Authentication
-
-- **Public uploads** (`public: true`): Accessible to all users
-- **Private uploads** (`public: false`): Require authentication
-  - Admin users: Full access
-  - Regular users: Must be a member of at least one region the upload is related to
+Serve URL is `/api/region-uploads/{id}/{filename}` (filename cosmetic). Public only when that upload is the active logo of a **PUBLIC** region; otherwise admin-only (preview before save). Unreferenced uploads are GC’d via `deleteRegionUploadIfUnreferenced` (S3 + DB) when no `headerLogoId` still points at them.

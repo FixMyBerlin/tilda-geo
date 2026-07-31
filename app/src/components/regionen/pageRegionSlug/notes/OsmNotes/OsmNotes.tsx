@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useNewOsmNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { NotesNew } from '../NotesNew/NotesNew'
 import { NotesNewMap } from '../NotesNew/NotesNewMap'
 import { OsmNotesControls } from './OsmNotesControls'
@@ -10,7 +10,7 @@ import { useLoadOsmNotes } from './utils/useLoadOsmNotes'
 const osmNotesQueryClient = new QueryClient()
 
 export const OsmNotes = () => {
-  const region = useStaticRegion()
+  const region = useRegion()
   // This will not just hide the UI, but also prevent the query so no data is rendered on the map
   if (region?.notes !== 'osmNotes') return null
 

@@ -1,4 +1,5 @@
 import { URL } from 'node:url'
+import type { BBox } from 'geojson'
 import { generalizationFunctionIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/generalizationIdentifier'
 import type {
   TableId,
@@ -36,17 +37,12 @@ function tileFactor(zoomDelta: number) {
 }
 
 export async function warmCache(
-  {
-    min: [minLng, minLat],
-    max: [maxLng, maxLat],
-  }: {
-    min: readonly [number, number]
-    max: readonly [number, number]
-  },
+  bbox: BBox & [number, number, number, number],
   minZoom: number,
   maxZoom: number,
   tables: UnionTiles<TableId>[],
 ) {
+  const [minLng, minLat, maxLng, maxLat] = bbox
   const { minX, minY, maxX, maxY } = bbox2Tiles(minLng, minLat, maxLng, maxLat, minZoom)
   const nTilesTopLevel = (maxX - minX + 1) * (maxY - minY + 1)
   const nTilesTotal = nTilesTopLevel * tileFactor(maxZoom - minZoom + 1)

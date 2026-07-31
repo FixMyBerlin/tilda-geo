@@ -5,6 +5,7 @@ import { getMapillaryCoverageMetadata } from '@/server/api/util/getMapillaryCove
 import { getAppSession } from '@/server/auth/session.server'
 import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import { getRegionHasPermissions } from '@/server/authorization/getRegionHasPermissions.server'
+import db from '@/server/db.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 
 export const getMapillaryCoverageMetadataLoaderFn = createServerFn({ method: 'GET' }).handler(
@@ -32,3 +33,14 @@ export const getRegionForDocsLoaderFn = createServerFn({ method: 'GET' })
 
     return { region, hasDownloadPermissions }
   })
+
+/** Distinct export table names referenced by any region — drives the docs "available datasets" filter. */
+export const getRegionExportTableNamesForDocsLoaderFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const rows = await db.regionExportAssignment.findMany({
+      distinct: ['exportId'],
+      select: { exportId: true },
+    })
+    return rows.map((row) => row.exportId)
+  },
+)

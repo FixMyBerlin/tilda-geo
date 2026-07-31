@@ -58,7 +58,7 @@ Unten muss die `category` angegeben werden, die im Interface angezeigt wird:
 | **OSM-kompatibel?** (`licenceOsmCompatible`) | optional  | [ ] `licence` [ ] `waiver` [ ] `no`     |
 | **Beschreibung** (`description`)             | optional  | <!-- Kurztext für Nutzer:innen -->      |
 | **Datenherkunft** (`dataSourceMarkdown`)     | optional  | <!-- Link oder Erklärung (Markdown) --> |
-| **Stand / Aktualität** (`updatedAt`)         | optional  | <!-- z. B. `2026-06-01` -->             |
+| **Stand / Aktualität** (`dataUpdatedNote`)   | optional  | <!-- z. B. `2026-06-01` -->             |
 | **Sichtbarkeit** (`public`)                  | ja        | [ ] öffentlich [ ] eingeschränkt        |
 | **Download-Link verbergen**                  | optional  | [ ] ja (nur Admins)                     |
 

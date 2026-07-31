@@ -1,16 +1,19 @@
+import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { CopyButton } from '@/components/shared/CopyButton'
 import { Link } from '@/components/shared/links/Link'
+import type { TopicDocCompiled } from '@/data/topicDocs/runtime'
 import {
   TILDA_DATASET_ATTRIBUTION_HTML,
   TILDA_DATASET_LICENSE,
 } from '@/data/topicDocs/topicDocsDatasetAttribution.const'
-import type { DocsPageSummaryProps } from './types'
 
-export const PageDocsSummarySection = ({
-  tableName,
-  groupDocs,
-  regionSlug,
-}: DocsPageSummaryProps) => {
+type Props = {
+  tableName: SourceExportApiIdentifier
+  groupDocs: Array<{ tableName: string; topicDoc: TopicDocCompiled | null }>
+  regionSlug: string | null
+}
+
+export const PageDocsSummarySection = ({ tableName, groupDocs, regionSlug }: Props) => {
   const relatedGroupDocs = groupDocs.filter((d) => d.tableName !== tableName)
 
   return (

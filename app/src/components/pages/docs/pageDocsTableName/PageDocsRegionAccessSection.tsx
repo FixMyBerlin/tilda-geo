@@ -5,25 +5,25 @@ import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegion
 import { deriveRegionDatasetsFromCategories } from '@/components/regionen/pageRegionSlug/regionDatasets/deriveRegionDatasetsFromCategories'
 import { RegionTitleStatusIcon } from '@/components/regionen/regionMeta/RegionTitleStatusIcon'
 import { Link } from '@/components/shared/links/Link'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { DOCS_PAGE_SECTION_H2_CLASSNAME, DOCS_PAGE_SECTION_IDS } from './docsSectionIds.const'
-import type { DocsPageRegion } from './types'
 
 type Props = {
-  region: NonNullable<DocsPageRegion>
-  regionSlug: string
+  region: TRegion
   tableName: SourceExportApiIdentifier
   hasDownloadPermissions: boolean
   showDownloads: boolean
+  allRegionExportTables: string[]
 }
 
 export const PageDocsRegionAccessSection = ({
   region,
-  regionSlug,
   tableName,
   hasDownloadPermissions,
   showDownloads,
+  allRegionExportTables,
 }: Props) => {
-  const regionDatasets = deriveRegionDatasetsFromCategories(region)
+  const regionDatasets = deriveRegionDatasetsFromCategories(region, allRegionExportTables)
 
   return (
     <section
@@ -42,7 +42,7 @@ export const PageDocsRegionAccessSection = ({
       </h2>
 
       <p className="mt-3">
-        <Link to="/regionen/$regionSlug" params={{ regionSlug }} button>
+        <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }} button>
           Zur Region
         </Link>
       </p>
@@ -57,7 +57,7 @@ export const PageDocsRegionAccessSection = ({
                 <Link
                   to="/docs/$tableName"
                   params={{ tableName: dataset.tableName }}
-                  search={{ r: regionSlug }}
+                  search={{ r: region.slug }}
                   className="whitespace-nowrap"
                 >
                   {dataset.label}
@@ -86,11 +86,7 @@ export const PageDocsRegionAccessSection = ({
             Downloads
           </h2>
           <div className="not-prose flex flex-wrap gap-2">
-            <OgrFormatDownloadLinks
-              regionSlug={region.slug}
-              tableName={tableName}
-              bbox={region.bbox}
-            />
+            <OgrFormatDownloadLinks regionSlug={region.slug} tableName={tableName} />
           </div>
         </>
       ) : null}

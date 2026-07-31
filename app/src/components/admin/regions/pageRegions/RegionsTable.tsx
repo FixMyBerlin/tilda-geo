@@ -1,26 +1,65 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
+import { toast } from 'sonner'
+import { AdminConsoleDumpButton } from '@/components/admin/AdminConsoleDumpButton'
+import { AdminEditActionLink } from '@/components/admin/adminPageTitle'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
 import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
-import { ObjectDump } from '@/components/admin/ObjectDump'
 import { RegionPromotedPill } from '@/components/regionen/regionMeta/RegionPromotedPill'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
 import { Link } from '@/components/shared/links/Link'
-import type { TRegion } from '@/server/regions/queries/getRegion.server'
+import { toastError } from '@/components/shared/toast/toastError'
+import {
+  groupRegionsByContract,
+  SINGLETON_CONTRACT_PARAM,
+  UNASSIGNED_CONTRACT_GROUP_LABEL,
+} from '@/server/region-contracts/regionContracts.utils'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
+import { regionenIndexQueryKey } from '@/server/regions/regionenIndexQueryOptions'
 import { deleteRegionFn } from '@/server/regions/regions.functions'
 
 type Props = {
   regions: TRegion[]
+  showContractGroups?: boolean
 }
 
-export const RegionsTable = ({ regions }: Props) => {
+export const RegionsTable = ({ regions, showContractGroups = false }: Props) => {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { mutate: deleteRegionMutation } = useMutation({
     mutationFn: (input: { slug: string }) => deleteRegionFn({ data: input }),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      if (!result.success) {
+        toast.error(result.message)
+        return
+      }
+      await queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey })
       await router.invalidate()
     },
+    onError: (error) => {
+      toastError(error, 'Fehler beim Löschen der Region')
+    },
   })
+
+  let sections: Array<
+    { kind: 'group'; name: string; key: string } | { kind: 'row'; region: TRegion }
+  >
+  if (!showContractGroups) {
+    sections = regions.map((region) => ({ kind: 'row' as const, region }))
+  } else {
+    const grouped = groupRegionsByContract(regions)
+    sections = []
+    for (const { contract, regions: contractRegions } of grouped) {
+      sections.push({
+        kind: 'group',
+        name: contract?.name ?? UNASSIGNED_CONTRACT_GROUP_LABEL,
+        key: contract?.slug ?? SINGLETON_CONTRACT_PARAM,
+      })
+      for (const region of contractRegions) {
+        sections.push({ kind: 'row', region })
+      }
+    }
+  }
 
   return (
     <AdminTable
@@ -29,12 +68,27 @@ export const RegionsTable = ({ regions }: Props) => {
         'Status',
         'Gelistet',
         'Region',
-        'Rohdaten',
+        { id: 'regions-debug', label: '' },
         { id: 'regions-delete', label: '' },
         { id: 'regions-edit', label: '' },
       ]}
     >
-      {regions.map((region) => {
+      {sections.map((item) => {
+        if (item.kind === 'group') {
+          return (
+            <tr key={`group:${item.key}`} className="bg-gray-100/90">
+              <th
+                colSpan={7}
+                scope="colgroup"
+                className="px-3 py-2 text-left text-xs font-semibold tracking-wide text-gray-600 uppercase"
+              >
+                {item.name}
+              </th>
+            </tr>
+          )
+        }
+
+        const region = item.region
         return (
           <tr key={region.slug}>
             <th scope="row" className={adminTableClasses.thRow}>
@@ -52,7 +106,7 @@ export const RegionsTable = ({ regions }: Props) => {
               </Link>
             </td>
             <td className={adminTableClasses.td}>
-              <ObjectDump data={region} />
+              <AdminConsoleDumpButton data={region} name={region.slug} />
             </td>
             <td className={adminTableClasses.td}>
               <AdminTrashIconButton
@@ -65,9 +119,10 @@ export const RegionsTable = ({ regions }: Props) => {
               />
             </td>
             <td className={adminTableClasses.td}>
-              <Link to="/admin/regions/$regionSlug/edit" params={{ regionSlug: region.slug }}>
-                Bearbeiten
-              </Link>
+              <AdminEditActionLink
+                to="/admin/regions/$regionSlug/edit"
+                params={{ regionSlug: region.slug }}
+              />
             </td>
           </tr>
         )

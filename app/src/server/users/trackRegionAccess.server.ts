@@ -1,5 +1,9 @@
 import { UTCDate } from '@date-fns/utc'
 import { isSameDay, startOfDay } from 'date-fns'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import type { AccessedRegionType } from '@/server/users/schema'
@@ -64,8 +68,10 @@ export async function trackRegionAccess(regionSlug: string, headers: Headers) {
   const updatedRegions = mergeAccessedRegions(accessedRegions, newEntry)
 
   // Update User table
-  await db.user.update({
-    where: { id: userId },
-    data: { accessedRegions: updatedRegions },
-  })
+  await runWithAuditContextAsync(memberFormAuditContext(headers, userId), () =>
+    db.user.update({
+      where: { id: userId },
+      data: { accessedRegions: updatedRegions },
+    }),
+  )
 }

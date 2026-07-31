@@ -15,14 +15,13 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
     id,
     subId,
     name,
-    updatedAt,
+    dataUpdatedNote,
     description,
     dataSourceMarkdown,
     attributionHtml,
     licence,
     licenceOsmCompatible,
     legends,
-    isPublic,
     githubUrl,
     geojsonUrl,
     pmtilesUrl,
@@ -57,9 +56,9 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
           />
           <div className="flex grow justify-between gap-1 font-medium">
             <span>{name}</span>
-            {!isPublic && (
+            {!dataset.public && (
               <LockClosedIcon
-                className="h-4 w-4 flex-none text-gray-400"
+                className="size-4 flex-none text-gray-400"
                 title="Datensatz nur für angemeldete Nutzer:innen mit Rechten für die Region sichtbar."
               />
             )}
@@ -73,9 +72,9 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
       </button>
       {selected && (
         <div className="flex flex-col gap-3 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
-          {(updatedAt || dataSourceMarkdown || attributionHtml) && (
+          {(dataUpdatedNote || dataSourceMarkdown || attributionHtml) && (
             <div className="flex flex-col gap-1">
-              {updatedAt && <p>{updatedAt}</p>}
+              {dataUpdatedNote && <p>{dataUpdatedNote}</p>}
               {dataSourceMarkdown && (
                 <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
               )}
@@ -129,7 +128,7 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
               <summary className="cursor-pointer underline">Admin Upload Details</summary>
 
               <div className="flex flex-col gap-1">
-                <Link blank to="/admin/uploads/$slug" params={{ slug: id }}>
+                <Link blank to="/admin/map-dataset-uploads/$slug" params={{ slug: id }}>
                   DB-Config
                 </Link>
 

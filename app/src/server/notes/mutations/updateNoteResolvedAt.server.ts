@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
@@ -15,9 +19,13 @@ export async function updateNoteResolvedAt(input: z.infer<typeof Schema>, header
 
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
 
-  const result = await db.note.update({
-    where: { id: parsed.noteId },
-    data: { resolvedAt: parsed.resolved ? new Date() : null },
-  })
+  const result = await runWithAuditContextAsync(
+    memberFormAuditContext(headers, session.userId),
+    () =>
+      db.note.update({
+        where: { id: parsed.noteId },
+        data: { resolvedAt: parsed.resolved ? new Date() : null },
+      }),
+  )
   return result
 }

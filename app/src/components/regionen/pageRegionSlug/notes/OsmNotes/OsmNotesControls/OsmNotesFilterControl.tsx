@@ -6,10 +6,10 @@ import { Fragment } from 'react'
 import { twJoin } from 'tailwind-merge'
 import type z from 'zod'
 import { useOsmNotesFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import type { zodOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
 import { useOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
 import { notesSplitControlSegmentClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
+import type { zodOsmFilterParam } from '@/shared/regionen/regionSearchZod'
 import { menuItemClasses } from '../../InternalNotes/InternalNotesControls/InternalNotesFilterControl'
 
 export const OsmNotesFilterControl = () => {

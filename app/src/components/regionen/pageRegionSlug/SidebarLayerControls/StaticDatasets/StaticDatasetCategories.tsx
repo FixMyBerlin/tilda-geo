@@ -11,7 +11,7 @@ export const StaticDatasetCategories = () => {
   regionDatasets
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach((dataset) => {
-      const category = (dataset.category as string) || fallbackCategory
+      const category = dataset.categoryKey || fallbackCategory
       groupedDatasets[category] = [...(groupedDatasets[category] || []), dataset]
     })
 

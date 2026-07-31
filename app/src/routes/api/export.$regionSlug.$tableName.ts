@@ -9,11 +9,8 @@ import { formatDateBerlin } from '@/components/shared/date/formatDateBerlin'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { getExportAttributeType } from '@/server/api/export/exportAttributeType'
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
-import {
-  badRequestJson,
-  internalServerErrorJson,
-  notFoundJson,
-} from '@/server/api/util/apiJsonResponses.server'
+import { resolveExportBbox } from '@/server/api/export/resolveExportBbox.server'
+import { badRequestJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
 import { guardAdmin, guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
 import { corsHeaders } from '@/server/api/util/cors'
@@ -81,10 +78,6 @@ const exportParamsSchema = z.object({
 
 const exportSearchSchema = z.object({
   apiKey: z.string().optional(),
-  minlon: z.coerce.number(),
-  minlat: z.coerce.number(),
-  maxlon: z.coerce.number(),
-  maxlat: z.coerce.number(),
   format: z.enum(formats),
 })
 
@@ -158,7 +151,7 @@ const createExportFileResponseStream = ({
 }
 
 export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
-  ssr: true,
+  ssr: false,
   params: {
     parse: (rawParams) => exportParamsSchema.parse(rawParams),
   },
@@ -173,10 +166,6 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         const rawSearchParams = new URL(request.url).searchParams
         const parsedSearch = exportSearchSchema.safeParse({
           apiKey: rawSearchParams.get('apiKey') || '',
-          minlon: rawSearchParams.get('minlon'),
-          minlat: rawSearchParams.get('minlat'),
-          maxlon: rawSearchParams.get('maxlon'),
-          maxlat: rawSearchParams.get('maxlat'),
           format: rawSearchParams.get('format') || 'fgb',
         })
 
@@ -191,15 +180,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           })
         }
         const { regionSlug, tableName } = params
-        const { apiKey, minlon, minlat, maxlon, maxlat, format } = parsedSearch.data
-        console.info(logPrefix, 'start export', {
-          regionSlug,
-          tableName,
-          format,
-          bbox: { minlon, minlat, maxlon, maxlat },
-          hasApiKey: Boolean(apiKey),
-          requestId: request.headers.get('x-request-id') || undefined,
-        })
+        const { apiKey, format } = parsedSearch.data
 
         let region
         try {
@@ -213,6 +194,29 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           console.warn(logPrefix, 'table not exported for region', { regionSlug, tableName })
           return notFoundJson({ headers: corsHeaders })
         }
+
+        const resolvedBbox = resolveExportBbox(rawSearchParams, region.bbox)
+        if (!resolvedBbox.ok) {
+          console.error(logPrefix, 'invalid export bbox', {
+            url: request.url,
+            error: resolvedBbox.error,
+          })
+          return badRequestJson({
+            headers: corsHeaders,
+            info: { message: resolvedBbox.error },
+          })
+        }
+        const { minlon, minlat, maxlon, maxlat } = resolvedBbox.bbox
+
+        console.info(logPrefix, 'start export', {
+          regionSlug,
+          tableName,
+          format,
+          bbox: { minlon, minlat, maxlon, maxlat },
+          bboxSource: resolvedBbox.source,
+          hasApiKey: Boolean(apiKey),
+          requestId: request.headers.get('x-request-id') || undefined,
+        })
 
         if (!compareApiKeyTimingSafe(apiKey)) {
           const authResponse =
@@ -229,57 +233,56 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           }
         }
 
-        try {
-          const tagKeysStartedAt = Date.now()
-          const tagKeyQuery: Array<{ key: string }> = await geoDataClient.$queryRawUnsafe(`
+        const tagKeysStartedAt = Date.now()
+        const tagKeyQuery: Array<{ key: string }> = await geoDataClient.$queryRawUnsafe(`
               SELECT DISTINCT jsonb_object_keys(tags) AS key
               FROM "${tableName}"
             `)
-          const metaKeysStartedAt = Date.now()
-          const metaKeyQuery: Array<{ key: string }> = await geoDataClient.$queryRawUnsafe(`
+        const metaKeysStartedAt = Date.now()
+        const metaKeyQuery: Array<{ key: string }> = await geoDataClient.$queryRawUnsafe(`
               SELECT DISTINCT jsonb_object_keys(meta) AS key
               FROM "${tableName}"
             `)
-          const columnsCheckStartedAt = Date.now()
+        const columnsCheckStartedAt = Date.now()
 
-          const columnExistsQuery: Array<{ column_name: string }> =
-            await geoDataClient.$queryRawUnsafe(`
+        const columnExistsQuery: Array<{ column_name: string }> =
+          await geoDataClient.$queryRawUnsafe(`
               SELECT column_name
               FROM information_schema.columns
               WHERE table_name = '${tableName}'
               AND column_name IN ('osm_id', 'osm_type')
             `)
-          const existingColumns = columnExistsQuery.map(({ column_name }) => column_name)
-          const hasOsmId = existingColumns.includes('osm_id')
-          const hasOsmType = existingColumns.includes('osm_type')
-          const columnsMetadataTimingsMs = {
-            tagKeys: metaKeysStartedAt - tagKeysStartedAt,
-            metaKeys: columnsCheckStartedAt - metaKeysStartedAt,
-            columnsCheck: Date.now() - columnsCheckStartedAt,
-          }
+        const existingColumns = columnExistsQuery.map(({ column_name }) => column_name)
+        const hasOsmId = existingColumns.includes('osm_id')
+        const hasOsmType = existingColumns.includes('osm_type')
+        const columnsMetadataTimingsMs = {
+          tagKeys: metaKeysStartedAt - tagKeysStartedAt,
+          metaKeys: columnsCheckStartedAt - metaKeysStartedAt,
+          columnsCheck: Date.now() - columnsCheckStartedAt,
+        }
 
-          const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
-          const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
-            const attributeType = getExportAttributeType(key)
-            const sanitizedKey = sanitizeKey(key)
+        const sanitizeKey = (key: string) => key.replace(/[^a-z]/gi, '_')
+        const generateColumn = (key: string, columnType: 'tags' | 'meta') => {
+          const attributeType = getExportAttributeType(key)
+          const sanitizedKey = sanitizeKey(key)
 
-            return attributeType === 'number'
-              ? `CAST(${columnType}->>'${key}' AS numeric) AS "${sanitizedKey}"`
-              : `${columnType}->>'${key}' AS "${sanitizedKey}"`
-          }
+          return attributeType === 'number'
+            ? `CAST(${columnType}->>'${key}' AS numeric) AS "${sanitizedKey}"`
+            : `${columnType}->>'${key}' AS "${sanitizedKey}"`
+        }
 
-          const columns = [
-            'id',
-            'geom',
-            hasOsmId ? 'osm_id' : undefined,
-            hasOsmType ? 'osm_type' : undefined,
-            ...tagKeyQuery.map(({ key }) => generateColumn(key, 'tags')),
-            ...metaKeyQuery.map(({ key }) => generateColumn(key, 'meta')),
-          ]
-            .filter(Boolean)
-            .join(',\n')
+        const columns = [
+          'id',
+          'geom',
+          hasOsmId ? 'osm_id' : undefined,
+          hasOsmType ? 'osm_type' : undefined,
+          ...tagKeyQuery.map(({ key }) => generateColumn(key, 'tags')),
+          ...metaKeyQuery.map(({ key }) => generateColumn(key, 'meta')),
+        ]
+          .filter(Boolean)
+          .join(',\n')
 
-          const sqlQuery = `
+        const sqlQuery = `
             SELECT ${columns}
             FROM public."${tableName}"
             WHERE geom && ST_Transform(
@@ -287,19 +290,15 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
               3857
             )
           `.replaceAll('"', '\\"')
-          const outputFilePath = path.resolve(
-            'public',
-            'temp',
-            `export-temp-${Date.now()}.${format}`,
-          )
-          const dbConnection = `PG:"${getBaseDatabaseUrl()}"`
-          const layerName = regionSlug && regionSlug !== 'noRegion' ? regionSlug : undefined
+        const outputFilePath = path.resolve('public', 'temp', `export-temp-${Date.now()}.${format}`)
+        const dbConnection = `PG:"${getBaseDatabaseUrl()}"`
+        const layerName = regionSlug && regionSlug !== 'noRegion' ? regionSlug : undefined
 
-          const isGdalAvailable = await checkGdalVersion()
+        const isGdalAvailable = await checkGdalVersion()
 
-          const ogrFormat = ogrFormats[format]
-          // Export output is WGS84 (GeoJSON RFC 7946; public API contract)
-          const ogrCommand = `ogr2ogr \
+        const ogrFormat = ogrFormats[format]
+        // Export output is WGS84 (GeoJSON RFC 7946; public API contract)
+        const ogrCommand = `ogr2ogr \
             -f "${ogrFormat.driver}" \
             -t_srs EPSG:4326 \
             -lco COORDINATE_PRECISION=8 \
@@ -308,143 +307,133 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             "${outputFilePath}" \
             ${dbConnection}`
 
-          const ogrStartedAt = Date.now()
-          let ogrDurationMs = 0
-          await new Promise<void>((resolve, reject) => {
-            exec(ogrCommand, { maxBuffer: 1024 * 1024 * 50 }, (error, stdout, stderr) => {
-              ogrDurationMs = Date.now() - ogrStartedAt
-              if (error) {
-                console.error(logPrefix, 'ogr2ogr failed', {
-                  ogrDurationMs,
-                  errorMessage: error.message,
-                  stderrPreview: stderr ? stderr.slice(0, 4000) : undefined,
-                  stdoutPreview: stdout ? stdout.slice(0, 2000) : undefined,
-                })
-                reject(error)
-                return
-              }
-              if (stderr && isDev) {
-                console.warn('[EXPORT] ogr2ogr stderr:', stderr)
-              }
-              if (stdout && isDev) {
-                console.info('[EXPORT] ogr2ogr stdout:', stdout)
-              }
-              resolve()
-            })
+        const ogrStartedAt = Date.now()
+        let ogrDurationMs = 0
+        await new Promise<void>((resolve, reject) => {
+          exec(ogrCommand, { maxBuffer: 1024 * 1024 * 50 }, (error, stdout, stderr) => {
+            ogrDurationMs = Date.now() - ogrStartedAt
+            if (error) {
+              console.error(logPrefix, 'ogr2ogr failed', {
+                ogrDurationMs,
+                errorMessage: error.message,
+                stderrPreview: stderr ? stderr.slice(0, 4000) : undefined,
+                stdoutPreview: stdout ? stdout.slice(0, 2000) : undefined,
+              })
+              reject(error)
+              return
+            }
+            if (stderr && isDev) {
+              console.warn('[EXPORT] ogr2ogr stderr:', stderr)
+            }
+            if (stdout && isDev) {
+              console.info('[EXPORT] ogr2ogr stdout:', stdout)
+            }
+            resolve()
           })
+        })
 
-          let metadataEditDurationMs = 0
-          if (isGdalAvailable) {
-            const exportExt = path.extname(outputFilePath)
-            const exportBase = path.basename(outputFilePath, exportExt)
-            const exportDir = path.dirname(outputFilePath)
-            // FlatGeobuf treats paths like "*.fgb.<non-ext>" as directory outputs; keep real suffix.
-            const tempMetadataPath = path.join(exportDir, `${exportBase}.gdal-meta${exportExt}`)
-            const metadataArgs = Object.entries(exportMetadata).flatMap(([key, value]) => [
-              '--metadata',
-              `${key}=${value}`,
-            ])
+        let metadataEditDurationMs = 0
+        if (isGdalAvailable) {
+          const exportExt = path.extname(outputFilePath)
+          const exportBase = path.basename(outputFilePath, exportExt)
+          const exportDir = path.dirname(outputFilePath)
+          // FlatGeobuf treats paths like "*.fgb.<non-ext>" as directory outputs; keep real suffix.
+          const tempMetadataPath = path.join(exportDir, `${exportBase}.gdal-meta${exportExt}`)
+          const metadataArgs = Object.entries(exportMetadata).flatMap(([key, value]) => [
+            '--metadata',
+            `${key}=${value}`,
+          ])
 
-            const gdalMetadataStartedAt = Date.now()
-            await new Promise<void>((resolve) => {
-              execFile(
-                'gdal',
-                [
-                  'vector',
-                  'edit',
-                  '-i',
-                  outputFilePath,
-                  '-o',
-                  tempMetadataPath,
-                  '-f',
-                  ogrFormat.driver,
-                  ...metadataArgs,
-                ],
-                { maxBuffer: 1024 * 1024 * 50 },
-                (error) => {
-                  void (async () => {
-                    try {
-                      if (error) {
-                        console.warn(logPrefix, 'gdal metadata update failed', {
-                          errorMessage: error.message,
-                          metadataEditDurationMs: Date.now() - gdalMetadataStartedAt,
-                        })
-                        await unlinkExportFile(tempMetadataPath, logPrefix, 'gdal_metadata_failed')
-                      } else {
-                        await fs.unlink(outputFilePath)
-                        await fs.rename(tempMetadataPath, outputFilePath)
-                        metadataEditDurationMs = Date.now() - gdalMetadataStartedAt
-                      }
-                    } catch (replaceError) {
-                      console.warn(logPrefix, 'gdal metadata replace failed', {
-                        replaceError,
+          const gdalMetadataStartedAt = Date.now()
+          await new Promise<void>((resolve) => {
+            execFile(
+              'gdal',
+              [
+                'vector',
+                'edit',
+                '-i',
+                outputFilePath,
+                '-o',
+                tempMetadataPath,
+                '-f',
+                ogrFormat.driver,
+                ...metadataArgs,
+              ],
+              { maxBuffer: 1024 * 1024 * 50 },
+              (error) => {
+                void (async () => {
+                  try {
+                    if (error) {
+                      console.warn(logPrefix, 'gdal metadata update failed', {
+                        errorMessage: error.message,
                         metadataEditDurationMs: Date.now() - gdalMetadataStartedAt,
                       })
-                      await unlinkExportFile(
-                        tempMetadataPath,
-                        logPrefix,
-                        'gdal_metadata_replace_failed',
-                      )
-                    } finally {
-                      resolve()
+                      await unlinkExportFile(tempMetadataPath, logPrefix, 'gdal_metadata_failed')
+                    } else {
+                      await fs.unlink(outputFilePath)
+                      await fs.rename(tempMetadataPath, outputFilePath)
+                      metadataEditDurationMs = Date.now() - gdalMetadataStartedAt
                     }
-                  })()
-                },
-              )
-            })
-          }
-
-          const outputStats = await fs.stat(outputFilePath)
-          console.info(logPrefix, 'prepared export', {
-            outputFilePath,
-            outputBytes: outputStats.size,
-            tagKeysCount: tagKeyQuery.length,
-            metaKeysCount: metaKeyQuery.length,
-            hasOsmId,
-            hasOsmType,
-            columnsMetadataTimingsMs,
-            ogrDurationMs,
-            metadataEditDurationMs,
-            totalDurationMs: Date.now() - requestStartedAt,
-          })
-
-          const metadata = await getProcessingMeta()
-          const filename = metadata?.osm_data_from
-            ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
-            : `${tableName}.${format}`
-
-          console.info(logPrefix, 'starting response stream', {
-            filename,
-            mimeType: ogrFormat.mimeType,
-            contentLength: outputStats.size,
-            totalDurationMs: Date.now() - requestStartedAt,
-          })
-
-          return new Response(
-            createExportFileResponseStream({
-              outputFilePath,
-              logPrefix,
-              requestStartedAt,
-            }),
-            {
-              headers: {
-                ...corsHeaders,
-                'Content-Type': ogrFormat.mimeType,
-                'Content-Length': outputStats.size.toString(),
-                'Content-Disposition': `attachment; filename="${filename}"`,
+                  } catch (replaceError) {
+                    console.warn(logPrefix, 'gdal metadata replace failed', {
+                      replaceError,
+                      metadataEditDurationMs: Date.now() - gdalMetadataStartedAt,
+                    })
+                    await unlinkExportFile(
+                      tempMetadataPath,
+                      logPrefix,
+                      'gdal_metadata_replace_failed',
+                    )
+                  } finally {
+                    resolve()
+                  }
+                })()
               },
-            },
-          )
-        } catch (error) {
-          console.error(logPrefix, 'export failed', {
-            regionSlug: params.regionSlug,
-            tableName: params.tableName,
-            requestUrl: request.url,
-            totalDurationMs: Date.now() - requestStartedAt,
-            error,
+            )
           })
-          return internalServerErrorJson({ headers: corsHeaders, cause: error })
         }
+
+        const outputStats = await fs.stat(outputFilePath)
+        console.info(logPrefix, 'prepared export', {
+          outputFilePath,
+          outputBytes: outputStats.size,
+          tagKeysCount: tagKeyQuery.length,
+          metaKeysCount: metaKeyQuery.length,
+          hasOsmId,
+          hasOsmType,
+          columnsMetadataTimingsMs,
+          ogrDurationMs,
+          metadataEditDurationMs,
+          totalDurationMs: Date.now() - requestStartedAt,
+        })
+
+        const metadata = await getProcessingMeta()
+        const filename = metadata?.osm_data_from
+          ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
+          : `${tableName}.${format}`
+
+        console.info(logPrefix, 'starting response stream', {
+          filename,
+          mimeType: ogrFormat.mimeType,
+          contentLength: outputStats.size,
+          totalDurationMs: Date.now() - requestStartedAt,
+        })
+
+        return new Response(
+          createExportFileResponseStream({
+            outputFilePath,
+            logPrefix,
+            requestStartedAt,
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              'Content-Type': ogrFormat.mimeType,
+              'Content-Length': outputStats.size.toString(),
+              'Content-Disposition': `attachment; filename="${filename}"`,
+            },
+          },
+        )
       },
     },
   },

@@ -1,6 +1,7 @@
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { getObjectBlob } from '@better-upload/server/helpers'
 import invariant from 'tiny-invariant'
 import type { z } from 'zod'
+import { getConfiguredS3Client } from '@/server/s3Client.server'
 
 /**
  * Fetches JSON data directly from S3 without compression for processing
@@ -9,29 +10,14 @@ import type { z } from 'zod'
  */
 export async function fetchS3Json<T extends z.ZodTypeAny>(url: string, schema: T) {
   const { hostname, pathname } = new URL(url)
-  const accessKeyId = process.env.S3_KEY
-  const secretAccessKey = process.env.S3_SECRET
-  const region = process.env.S3_REGION
-
-  const s3Client = new S3Client({
-    credentials: { accessKeyId, secretAccessKey },
-    region,
-  })
 
   const bucket = hostname.split('.')[0]
   invariant(bucket, 'Invalid S3 URL: could not parse bucket from hostname')
-  const sendParams = {
-    Bucket: bucket,
-    Key: pathname.substring(1),
-  }
+  const key = pathname.substring(1)
 
   try {
-    const response = await s3Client.send(new GetObjectCommand(sendParams))
-
-    invariant(response.Body, 'No response body from S3')
-
-    // Get the raw string without any compression
-    const jsonString = await response.Body.transformToString()
+    const object = await getObjectBlob(getConfiguredS3Client(), { bucket, key })
+    const jsonString = await object.blob.text()
     const rawData = JSON.parse(jsonString)
     return schema.parse(rawData)
   } catch (error) {

@@ -66,11 +66,7 @@ const DownloadModalDownloadList = ({ datasets }: Props) => {
               tableName={dataset.tableName}
               hasStructuredDocs={dataset.hasStructuredDocs}
             />
-            <OgrFormatDownloadLinks
-              regionSlug={regionSlug}
-              tableName={dataset.tableName}
-              bbox={bbox}
-            />
+            <OgrFormatDownloadLinks regionSlug={regionSlug} tableName={dataset.tableName} />
           </div>
         </li>
       ))}

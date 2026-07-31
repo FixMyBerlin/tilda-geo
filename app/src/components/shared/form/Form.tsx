@@ -10,13 +10,20 @@ import { FormActionBar } from '@/components/shared/form/FormActionBar'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { buttonStyles } from '@/components/shared/links/styles'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { isProd } from '@/components/shared/utils/isEnv'
 import type { Router } from '@/router'
 
 type AppLinkTo = LinkOptions<Router>['to']
 
 export type SubmitResult<T = Record<string, unknown>> =
-  | { success: true; message?: string; redirect?: AppLinkTo; search?: Record<string, unknown> }
+  | {
+      success: true
+      message?: string
+      redirect?: AppLinkTo
+      search?: Record<string, unknown>
+      resetValues?: T
+    }
   | {
       success: false
       message: string
@@ -46,19 +53,23 @@ function applyFieldErrors(
 }
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
-type FormProps<T extends z.ZodTypeAny> = {
+type ActionBarPlacement = 'bottom' | 'both'
+
+type FormProps<TValues extends Record<string, unknown>> = {
+  actionBarPlacement?: ActionBarPlacement
   actionBarRight?: ReactNode
-  defaultValues: z.input<T>
-  schema: T
-  onSubmit: (values: z.input<T>) => undefined | Promise<SubmitResult<z.input<T>> | undefined>
-  children: (form: FormApi<z.input<T>>) => ReactNode
+  defaultValues: TValues
+  schema: z.ZodTypeAny
+  onSubmit: (values: TValues) => undefined | Promise<SubmitResult<TValues> | undefined>
+  children: (form: FormApi<TValues>) => ReactNode
   className?: string
   submitLabel?: string
   submitClassName?: string
   showFormErrors?: boolean
 }
 
-export function Form<T extends z.ZodTypeAny>({
+export function Form<TValues extends Record<string, unknown>>({
+  actionBarPlacement = 'bottom',
   actionBarRight,
   defaultValues,
   schema,
@@ -68,21 +79,18 @@ export function Form<T extends z.ZodTypeAny>({
   showFormErrors = true,
   children,
   className,
-}: FormProps<T>) {
+}: FormProps<TValues>) {
   const navigate = useNavigate()
-  const [submitMessage, setSubmitMessage] = useState<{
-    type: 'success' | 'error'
-    text: string
-  } | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const form = useForm<
-    z.input<T>,
+    TValues,
     undefined,
-    FormValidateOrFn<z.input<T>>,
+    FormValidateOrFn<TValues>,
     undefined,
     undefined,
     undefined,
-    FormValidateOrFn<z.input<T>>,
+    FormValidateOrFn<TValues>,
     undefined,
     undefined,
     undefined,
@@ -91,16 +99,16 @@ export function Form<T extends z.ZodTypeAny>({
   >({
     defaultValues,
     validators: {
-      onChange: schema,
-      onSubmit: schema,
+      onChange: schema as FormValidateOrFn<TValues>,
+      onSubmit: schema as FormValidateOrFn<TValues>,
     },
     onSubmit: async ({ value }) => {
-      setSubmitMessage(null)
+      setSubmitError(null)
       const result = await onSubmit(value)
       if (!result) return
       if (result.success) {
-        form.reset(value)
-        setSubmitMessage({ type: 'success', text: result.message ?? 'Gespeichert.' })
+        form.reset(result.resetValues ?? value)
+        toastSuccess(result.message ?? 'Gespeichert.')
         if (result.redirect) {
           navigate({
             to: result.redirect,
@@ -116,10 +124,29 @@ export function Form<T extends z.ZodTypeAny>({
           values: value,
         })
       }
-      setSubmitMessage({ type: 'error', text: result.message })
+      setSubmitError(result.message)
       applyFieldErrors(form, result.errors)
     },
   })
+
+  const actionBar = submitLabel ? (
+    <FormActionBar
+      left={
+        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
+          {([canSubmit, isSubmitting]) => (
+            <button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+              className={submitClassName ?? buttonStyles}
+            >
+              {isSubmitting ? '…' : submitLabel}
+            </button>
+          )}
+        </form.Subscribe>
+      }
+      right={actionBarRight}
+    />
+  ) : null
 
   return (
     <form
@@ -131,7 +158,9 @@ export function Form<T extends z.ZodTypeAny>({
         form.handleSubmit()
       }}
     >
-      {children(form as FormApi<z.input<T>>)}
+      {actionBarPlacement === 'both' ? actionBar : null}
+
+      {children(form as FormApi<TValues>)}
 
       {showFormErrors ? (
         <form.Subscribe selector={(s) => s.errors}>
@@ -155,33 +184,13 @@ export function Form<T extends z.ZodTypeAny>({
         </form.Subscribe>
       ) : null}
 
-      {submitMessage && (
-        <div
-          className={`text-sm ${submitMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}
-          role={submitMessage.type === 'error' ? 'alert' : 'status'}
-        >
-          {submitMessage.text}
+      {submitError ? (
+        <div className="text-sm text-red-600" role="alert">
+          {submitError}
         </div>
-      )}
+      ) : null}
 
-      {submitLabel && (
-        <FormActionBar
-          left={
-            <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
-              {([canSubmit, isSubmitting]) => (
-                <button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className={submitClassName ?? buttonStyles}
-                >
-                  {isSubmitting ? '…' : submitLabel}
-                </button>
-              )}
-            </form.Subscribe>
-          }
-          right={actionBarRight}
-        />
-      )}
+      {actionBar}
     </form>
   )
 }

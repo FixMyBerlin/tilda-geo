@@ -12,6 +12,7 @@ import { nitro } from 'nitro/vite'
 import { createLogger, defineConfig } from 'vite'
 import { applyDevPortSlotToProcessEnv } from './scripts/predev/devPortSlot'
 import { logErr } from './scripts/predev/predevLog'
+import { forwardApiRequestsPastViteAssetMiddleware } from './vite/forwardApiRequestsPastViteAssetMiddleware'
 
 const repoRoot = fileURLToPath(new URL('..', import.meta.url))
 dotenv.config({ path: `${repoRoot}/.env` })
@@ -116,6 +117,9 @@ export default defineConfig({
     },
   },
   plugins: [
+    // Dev-only: let `<img src="/api/...">` (Sec-Fetch-Dest: image) reach the route handlers instead
+    // of Vite's static-asset pipeline (which 404s). Must run before Vite's asset middleware.
+    forwardApiRequestsPastViteAssetMiddleware(),
     devtools({
       injectSource: {
         enabled: true,

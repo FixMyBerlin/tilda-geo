@@ -1,4 +1,4 @@
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { NavigationDesktop } from '../NavigationDesktop/NavigationDesktop'
 import { NavigationMobile } from '../NavigationMobile/NavigationMobile'
 import { NavigationWrapper } from '../NavigationWrapper/NavigationWrapper'
@@ -6,7 +6,7 @@ import { HeaderRegionenLogo } from './HeaderRegionenLogo'
 import { defaultPrimaryNavigation, defaultSecondaryNavigationGrouped } from './navigation.const'
 
 export const HeaderRegionen = () => {
-  const region = useStaticRegion()
+  const region = useRegion()
   const primaryNavigation = [...defaultPrimaryNavigation, ...(region?.navigationLinks ?? [])]
   return (
     <NavigationWrapper>

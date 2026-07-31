@@ -19,7 +19,6 @@ export type SourcesRasterIdsTILDA =
   | 'areal2019'
   | 'parkraumkarte_neukoelln'
   | 'cyclosm'
-  | 'memomaps-transport'
   | 'thunderforest-opencyclemap'
   | 'thunderforest-transport'
   | 'thunderforest-landscape'

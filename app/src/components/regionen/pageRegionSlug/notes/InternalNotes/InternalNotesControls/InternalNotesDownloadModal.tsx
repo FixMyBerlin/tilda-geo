@@ -1,23 +1,18 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
-import { twJoin } from 'tailwind-merge'
-import { notesSplitControlSegmentClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
-import { useStaticRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useStaticRegion'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { Link } from '@/components/shared/links/Link'
 import { IconModal } from '@/components/shared/Modal/IconModal'
 
 export const InternalNotesDownloadModal = () => {
-  const region = useStaticRegion()
+  const region = useRegion()
 
   return (
     <section>
       <IconModal
         title="Interne Hinweise downloaden"
         titleIcon="download"
-        triggerStyle={twJoin(
-          notesSplitControlSegmentClassName,
-          'bg-white hover:bg-yellow-50 hover:text-gray-800',
-        )}
-        triggerIcon={<ArrowDownTrayIcon className="size-6" />}
+        triggerStyle="z-0 -ml-px inline-flex justify-center border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 shadow-md hover:text-gray-800 focus:relative focus:z-10 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white hover:bg-yellow-50"
+        triggerIcon={<ArrowDownTrayIcon className="size-5" />}
       >
         <p className="pt-5 pb-2.5 text-sm">
           Die internen Hinweise stehen alle Nutzer:innen mit Rechten auf der Region zum Download zur

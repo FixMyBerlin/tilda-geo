@@ -43,7 +43,7 @@ type OSMFeature = z.infer<typeof OSMFeatureSchema>
 type OSMComment = z.infer<typeof OSMCommentSchema>
 
 export const Route = createFileRoute('/api/osm-notes/rss')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request }) => {

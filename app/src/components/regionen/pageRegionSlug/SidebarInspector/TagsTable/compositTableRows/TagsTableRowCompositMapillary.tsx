@@ -7,8 +7,8 @@ import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import z from 'zod'
 import { Link } from '@/components/shared/links/Link'
+import { mapillaryKeyUrl } from '@/lib/mapillaryPKeyUrl'
 import { MapillaryIframe } from '../../MapillaryIframe/MapillaryIframe'
-import { mapillaryKeyUrl } from '../../Tools/osmUrls/osmUrls'
 import {
   tagsTableLabelCellClass,
   tagsTableRowClass,

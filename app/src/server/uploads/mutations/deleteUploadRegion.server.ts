@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { adminFormAuditContext, runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 
@@ -11,14 +12,16 @@ export async function deleteUploadRegion(
   input: z.infer<typeof DeleteUploadRegion>,
   headers: Headers,
 ) {
-  await requireAdmin(headers)
+  const admin = await requireAdmin(headers)
   const { uploadSlug, regionSlug } = DeleteUploadRegion.parse(input)
-  return await db.upload.update({
-    where: { slug: uploadSlug },
-    data: {
-      regions: {
-        disconnect: { slug: regionSlug },
+  return runWithAuditContextAsync(adminFormAuditContext(headers, admin.userId), () =>
+    db.mapDatasetUpload.update({
+      where: { slug: uploadSlug },
+      data: {
+        regions: {
+          disconnect: { slug: regionSlug },
+        },
       },
-    },
-  })
+    }),
+  )
 }

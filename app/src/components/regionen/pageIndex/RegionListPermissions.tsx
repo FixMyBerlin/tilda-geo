@@ -1,9 +1,9 @@
-import type { RegionWithAdditionalData } from '@/server/regions/queries/getRegionsWithAdditionalData.server'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { RegionTeaser } from './RegionTeaser'
 
 type Props = {
-  activeRegions: RegionWithAdditionalData[]
-  deactivatedRegions: RegionWithAdditionalData[]
+  activeRegions: TRegion[]
+  deactivatedRegions: TRegion[]
 }
 
 export const RegionListPermissions = ({ activeRegions, deactivatedRegions }: Props) => {

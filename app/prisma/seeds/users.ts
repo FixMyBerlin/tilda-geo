@@ -52,39 +52,8 @@ const seedUsers = async () => {
     lastName: undefined,
   }))
 
-  const fmcAdmins: Users = [
-    {
-      osmId: 11881,
-      osmName: 'tordans',
-      osmDescription: undefined,
-      role: 'ADMIN',
-      email: 'tobias@fixmycity.de',
-      firstName: 'Tobias',
-      lastName: 'Jordans',
-    },
-    {
-      osmId: 418040,
-      osmName: 'Supaplex030',
-      osmDescription: undefined,
-      role: 'ADMIN',
-      email: 'alex@fixmycity.de',
-      firstName: 'Alex',
-      lastName: '',
-    },
-    {
-      // On master.apis.dev.openstreetmap.org
-      osmId: 6501,
-      osmName: 'tordansdev',
-      osmDescription: undefined,
-      role: 'ADMIN',
-      email: 'tobias+osmdev@fixmycity.de',
-      firstName: 'Tobias',
-      lastName: 'Jordans',
-    },
-  ]
-
-  const users = [...genericUsers, ...regionAdmins, ...fmcAdmins]
-  for (const user of users) {
+  // FMC admins + local MCP token: scripts/seed-local/seedLocalAccess.ts (shared with db-pull)
+  for (const user of [...genericUsers, ...regionAdmins]) {
     await db.user.create({ data: user })
   }
 }

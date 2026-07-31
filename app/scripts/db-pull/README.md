@@ -18,6 +18,17 @@ Pull command:
 - Pull is read-only (`pg_dump` only).
 - `pg_dump`/`psql` are run via Dockerized Postgres CLI (`postgres:17-alpine`) to avoid host client version mismatches.
 
+## Prisma restore cleanup
+
+After a successful `--schema prisma` restore (dump files under `data/` stay raw/sensitive):
+
+- Run `prisma migrate deploy` so the local schema matches the app (production dumps may lag behind develop).
+- Pseudonymize non-`@fixmycity.de` user names/emails (`id` / `osmId` kept; OSM placeholder emails kept).
+- Delete restored tokens, sessions, verifications, and audit logs; clear Account OAuth secrets.
+- Run `seedLocalAccess()` (same as `bun run seed`): ensure FMC admins + local MCP token `tildageode_admin_local_dev_mcp_only`.
+
+Interactive seed/restore may offer to add `tilda-geo-admin--DEV` to an existing `~/.cursor/mcp.json` (see `scripts/seed-local/`). Missing file / non-TTY → skip and print the JSON to merge manually.
+
 ## Dump files
 
 Generated dumps are written to `app/scripts/db-pull/data`:
@@ -32,6 +43,7 @@ Generated dumps are written to `app/scripts/db-pull/data`:
 - `DATABASE_URL_PRODUCTION` (pull source)
 - `DATABASE_URL_STAGING` (pull source)
 - `DATABASE_HOST`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_NAME` (restore target)
+- Optional `DEV_PORT_SLOT` in `.env.local` (same as predev): restore uses the derived `DATABASE_PORT`, not a hard-coded 5432
 
 ## Remote access order (staging/production pull)
 

@@ -1,9 +1,13 @@
-import { z } from 'zod'
+import type { z } from 'zod'
 import { isProd } from '@/components/shared/utils/isEnv'
 import { Prisma } from '@/prisma/generated/client'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { requireAuth } from '@/server/auth/session.server'
 import db from '@/server/db.server'
-import { validationErrorState } from '@/server/utils/validation'
+import { successState } from '@/server/utils/validation'
 import { UpdateUserSchema } from '../schema'
 
 const duplicateEmailMessage = 'Diese E-Mail-Adresse ist bereits vergeben.'
@@ -28,17 +32,11 @@ function logUpdateUserError(context: 'duplicate-email' | 'unexpected', error: un
 export async function updateUserWithData(data: z.infer<typeof UpdateUserSchema>, headers: Headers) {
   try {
     const session = await requireAuth(headers)
-    const parsed = UpdateUserSchema.parse(data)
-    await db.user.update({ where: { id: session.userId }, data: parsed })
-    return {
-      success: true,
-      message: 'Account erfolgreich aktualisiert',
-      errors: {},
-    }
+    await runWithAuditContextAsync(memberFormAuditContext(headers, session.userId), () =>
+      db.user.update({ where: { id: session.userId }, data }),
+    )
+    return successState({ message: 'Account erfolgreich aktualisiert' })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return validationErrorState(error)
-    }
     // P2002 `meta.target` is often the index name (`User_email_key`), not `email`; only `email` is unique here.
     if (isPrismaUniqueConstraintError(error)) {
       logUpdateUserError('duplicate-email', error)

@@ -3,7 +3,7 @@ import { GuardEndpointSchema, guardEndpoint } from '@/server/api/private/guardEn
 import { runRegisterSqlFunctionsTask } from '@/server/api/private/postProcessingHookTasks.server'
 
 export const Route = createFileRoute('/api/private/register-sql-functions')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: ({ request }) => {

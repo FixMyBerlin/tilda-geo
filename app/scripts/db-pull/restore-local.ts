@@ -4,6 +4,7 @@ import { basename, dirname } from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { z } from 'zod'
+import { offerLocalCursorMcpSetup } from '../seed-local/setupCursorMcp'
 import {
   ALLOWED_SCHEMAS,
   ALLOWED_SOURCES,
@@ -16,6 +17,7 @@ import {
   PRE_RESTORE_SQL_PATH,
   toDockerNetworkUrl,
 } from './db-helpers'
+import { sanitizePrismaRestore } from './sanitize-prisma-restore'
 
 function printHelp() {
   process.stdout.write(`db-restore
@@ -131,9 +133,26 @@ async function main() {
     throw new Error(`Restore verification failed: schema "${schema}" has no tables after restore.`)
   }
 
-  process.stdout.write(
-    `Restored ${schema} schema from ${source} dump into local DB (${tableCount} tables).\n`,
+  p.log.success(
+    `Restored ${schema} schema from ${source} dump into local DB (${tableCount} tables).`,
   )
+
+  if (schema === 'prisma') {
+    const migrateResult =
+      await $`bun --env-file=../.env --env-file=../.env.local prisma migrate deploy`
+        .quiet()
+        .nothrow()
+    if (migrateResult.exitCode !== 0) {
+      const stderr = migrateResult.stderr.toString().trim()
+      throw new Error(
+        stderr || `prisma migrate deploy failed with exit code ${migrateResult.exitCode}`,
+      )
+    }
+    p.log.success('Applied pending Prisma migrations after restore.')
+
+    await sanitizePrismaRestore()
+    await offerLocalCursorMcpSetup()
+  }
 }
 
 await main()

@@ -1,12 +1,12 @@
 import { queryOptions } from '@tanstack/react-query'
 import type { z } from 'zod'
-import type { zodInternalNotesFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import { STALE_TIME_LONG_CACHE_MS, STALE_TIME_NOTES_MS } from '@/config/queryStaleTimes'
 import { getNotesAndCommentsForRegionFn } from '@/server/notes/notes.functions'
 import {
   getQaConfigsForRegionFn,
   getQaDataForMapFn,
 } from '@/server/qa-configs/qa-configs.functions'
+import type { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 
 type InternalNotesFilter = z.infer<typeof zodInternalNotesFilterParam>
 

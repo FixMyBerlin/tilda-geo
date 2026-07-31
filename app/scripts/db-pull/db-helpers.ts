@@ -2,8 +2,11 @@ import { existsSync, mkdirSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import * as p from '@clack/prompts'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { z } from 'zod'
+import { PrismaClient } from '@/prisma/generated/client'
 import { getBaseDatabaseUrl } from '../../src/server/database-url.server'
+import { applyDevPortSlotToProcessEnv } from '../predev/devPortSlot'
 
 export const ALLOWED_SCHEMAS = ['prisma', 'data'] as const
 export const ALLOWED_SOURCES = ['production', 'staging'] as const
@@ -53,6 +56,16 @@ export function looksLikeConnectionError(message: string) {
   )
 }
 
+/** Network failures plus auth failures that usually mean the SSH tunnel is down (local Docker is on the same port). */
+export function looksLikeRemoteAccessError(message: string) {
+  return (
+    looksLikeConnectionError(message) ||
+    /password authentication failed|authentication failed|no password supplied|fe_sendauth/i.test(
+      message,
+    )
+  )
+}
+
 export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl: string) {
   const localPortHint = source === 'production' ? '5434' : '5433'
   const tunnelCommand =
@@ -60,14 +73,15 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
       ? 'ssh tilda-production-postgres-tunnel'
       : 'ssh tilda-staging-postgres-tunnel'
 
-  p.log.warn(`Connection to ${source} DB failed.`)
+  p.log.warn(`Connection to ${source} DB failed — start the SSH tunnel first.`)
   p.note(
     [
       `1) Terminal 1: start SSH tunnel for ${source}`,
       `   ${tunnelCommand}`,
-      '2) Terminal 2: run db-pull command',
+      '2) Terminal 2: re-run db-pull',
       `   bun run db-pull:pull -- --source ${source}`,
-      `3) Ensure DATABASE_URL_${source.toUpperCase()} points to localhost:${localPortHint} tunnel endpoint.`,
+      `3) Ensure DATABASE_URL_${source.toUpperCase()} points to localhost:${localPortHint}.`,
+      `   Without the tunnel, that port may hit your local Docker DB (password auth fails).`,
       '   Setup docs: https://github.com/FixMyBerlin/dev-documentation/blob/main/server-management/ionos-tilda.md#use-the-ssh-tunnel',
     ].join('\n'),
     'How to connect',
@@ -75,7 +89,17 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
 }
 
 export function getLocalTargetDatabaseUrl() {
+  // Match predev / prisma.config: DEV_PORT_SLOT=1 → DATABASE_PORT=5433, etc.
+  applyDevPortSlotToProcessEnv()
   return getBaseDatabaseUrl()
+}
+
+/** Prisma client without audit extensions — for bulk restore/sanitize writes. */
+export function createUnauditedPrismaClient() {
+  const adapter = new PrismaPg({
+    connectionString: getLocalTargetDatabaseUrl(),
+  })
+  return new PrismaClient({ adapter })
 }
 
 export function toDockerNetworkUrl(databaseUrl: string) {

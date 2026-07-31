@@ -1,0 +1,22 @@
+/** Prisma models included in the audit-log extension (see prismaAuditExtensions.server). */
+export const AUDITED_MODELS = [
+  'User',
+  'Session',
+  'Account',
+  'Verification',
+  'Region',
+  'RegionCategoryAssignment',
+  'RegionBackgroundAssignment',
+  'RegionExportAssignment',
+  'RegionNavigationLink',
+  'RegionContract',
+  'RegionUpload',
+  'Membership',
+  'MapDatasetUpload',
+  'MapDatasetCategory',
+  'Note',
+  'NoteComment',
+  'QaConfig',
+  'QaEvaluation',
+  'AdminApiToken',
+] as const

@@ -1,8 +1,10 @@
 import type { Prisma } from '@/prisma/generated/client'
+import { layerConfigsCreateFromConfigs } from '@/server/uploads/mapDatasetLayerConfig.server'
+import { parseMapDatasetUploadConfigs } from '@/server/uploads/mapDatasetUploadConfigs.schema'
 import db from '../../src/server/db.server'
 
 const lineLayer = {
-  id: 'nudafa-combined-line',
+  id: 'seed-static-line',
   type: 'line',
   paint: {
     'line-width': ['coalesce', ['get', 'felt:strokeWidth'], ['get', 'stroke-width'], 10],
@@ -12,85 +14,111 @@ const lineLayer = {
   filter: ['match', ['get', 'Typ'], ['Zielnetz'], true, false],
 }
 
+const vectorConfigBase = {
+  type: 'vector',
+  inspector: {
+    enabled: true,
+    documentedKeys: false,
+    disableTranslations: true,
+  },
+  layers: [lineLayer],
+} as const
+
+const testDataBaseUrl = 'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data'
+
 const seedUploads = async () => {
-  const seedUploadsNudafa: Prisma.UploadUncheckedCreateInput[] = [
+  const regionalNetworkUploads: Prisma.MapDatasetUploadUncheckedCreateInput[] = [
     {
-      slug: 'nudafa-combined',
-      pmtilesUrl:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.pmtiles',
-      geojsonUrl:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.geojson',
+      slug: 'regional-network-combined',
+      pmtilesUrl: `${testDataBaseUrl}/nudafa-combined.pmtiles`,
+      geojsonUrl: `${testDataBaseUrl}/nudafa-combined.geojson`,
       githubUrl:
         'https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/region-nudafa/nudafa-combined',
       mapRenderFormat: 'pmtiles',
-      mapRenderUrl:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/nudafa-combined.pmtiles',
+      mapRenderUrl: `${testDataBaseUrl}/nudafa-combined.pmtiles`,
+      attributionHtml: '',
       configs: [
         {
-          name: 'Zielnetz Stand 22.11.2023',
-          category: null,
-          attributionHtml: '',
-          type: 'vector',
-          inspector: {
-            enabled: true,
-            documentedKeys: false,
-            disableTranslations: true,
-          },
-          layers: [lineLayer],
+          name: 'Zielnetz (Seed)',
+          categoryKey: 'nudafa/general',
+          ...vectorConfigBase,
         },
       ],
     },
   ]
 
-  const seedUploadsBibi: Prisma.UploadUncheckedCreateInput[] = [
+  const parkraumCityUploads: Prisma.MapDatasetUploadUncheckedCreateInput[] = [
     {
-      slug: 'two-configs',
-      pmtilesUrl:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/two-configs.pmtiles',
-      geojsonUrl:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/two-configs.geojson',
+      slug: 'parkraum-static-configs',
+      pmtilesUrl: `${testDataBaseUrl}/two-configs.pmtiles`,
+      geojsonUrl: `${testDataBaseUrl}/two-configs.geojson`,
       githubUrl:
         'https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/region-bibi/two-configs',
       mapRenderFormat: 'pmtiles',
-      mapRenderUrl:
-        'https://atlas-private.s3.eu-central-1.amazonaws.com/test-data/two-configs.pmtiles',
+      mapRenderUrl: `${testDataBaseUrl}/two-configs.pmtiles`,
+      attributionHtml: 'Seed-Daten',
       configs: [
         {
-          name: 'two-configs config 1',
-          subId: 'config1',
-          attributionHtml: 'Lorem Ipsum',
-          type: 'vector',
-          inspector: {
-            enabled: true,
-            documentedKeys: false,
-            disableTranslations: true,
-          },
-          layers: [lineLayer],
+          name: 'Parkflächen eUVM (Seed)',
+          subId: 'euvm',
+          categoryKey: 'parkraum/euvm',
+          ...vectorConfigBase,
         },
         {
-          name: 'two configs, config 2',
-          subId: 'config2',
-          type: 'vector',
-          attributionHtml: 'Lorem Ipsum',
-          inspector: {
-            enabled: true,
-            documentedKeys: false,
-            disableTranslations: true,
-          },
-          layers: [lineLayer],
+          name: 'Weitere Parkdaten (Seed)',
+          subId: 'misc',
+          categoryKey: 'parkraum/misc',
+          ...vectorConfigBase,
+        },
+      ],
+    },
+    {
+      slug: 'parkraum-static-placeholder',
+      pmtilesUrl: `${testDataBaseUrl}/two-configs.pmtiles`,
+      geojsonUrl: `${testDataBaseUrl}/two-configs.geojson`,
+      githubUrl:
+        'https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/region-bibi/two-configs',
+      mapRenderFormat: 'pmtiles',
+      mapRenderUrl: `${testDataBaseUrl}/two-configs.pmtiles`,
+      attributionHtml: '',
+      configs: [
+        {
+          name: 'Platzhalter-Datensatz (Seed)',
+          categoryKey: null,
+          ...vectorConfigBase,
         },
       ],
     },
   ]
 
-  const regionNudafa = await db.region.findFirstOrThrow({ where: { slug: 'nudafa' } })
-  for (const data of seedUploadsNudafa) {
-    await db.upload.create({ data: { ...data, regions: { connect: { id: regionNudafa.id } } } })
+  const regionalNetworkRegion = await db.region.findFirstOrThrow({
+    where: { slug: 'dev-template-regional-network' },
+  })
+  for (const data of regionalNetworkUploads) {
+    await db.mapDatasetUpload.create({
+      data: {
+        ...data,
+        regions: { connect: { id: regionalNetworkRegion.id } },
+        layerConfigs: {
+          create: layerConfigsCreateFromConfigs(parseMapDatasetUploadConfigs(data.configs)),
+        },
+      },
+    })
   }
 
-  const regionBibi = await db.region.findFirstOrThrow({ where: { slug: 'bibi' } })
-  for (const data of seedUploadsBibi) {
-    await db.upload.create({ data: { ...data, regions: { connect: { id: regionBibi.id } } } })
+  const parkraumCityRegion = await db.region.findFirstOrThrow({
+    where: { slug: 'dev-template-parkraum-city' },
+  })
+  for (const data of parkraumCityUploads) {
+    await db.mapDatasetUpload.create({
+      data: {
+        ...data,
+        regions: { connect: { id: parkraumCityRegion.id } },
+        layerConfigs: {
+          create: layerConfigsCreateFromConfigs(parseMapDatasetUploadConfigs(data.configs)),
+        },
+      },
+    })
   }
 }
 
