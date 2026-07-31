@@ -1,12 +1,15 @@
 import { ChevronRightIcon } from '@heroicons/react/24/outline'
 import { type ReactNode, useState } from 'react'
 import { MobileBottomSheet } from '@/components/regionen/pageRegionSlug/mobile/MobileBottomSheet'
+import { AnimatedNumber } from '@/components/shared/motion/AnimatedNumber'
 
 type Props = {
   /** Metric label shown above the number (or a generic title when no areas). */
   label: string
-  /** Pre-formatted total, or null to show the "draw areas" prompt instead. */
-  total: string | null
+  /** Raw total (animated count-up), or null to show the "draw areas" prompt instead. */
+  total: number | null
+  /** Formats the total for display. */
+  formatTotal: (value: number) => string
   /** The breakdown, shown inside the sheet when opened. */
   children: ReactNode
 }
@@ -16,7 +19,7 @@ type Props = {
  * the full breakdown in a bottom sheet (so the table no longer covers the map). Owns its
  * own open state — the parent only provides the headline label/total and the breakdown.
  */
-export const CalculatorMobileSummary = ({ label, total, children }: Props) => {
+export const CalculatorMobileSummary = ({ label, total, formatTotal, children }: Props) => {
   const [open, setOpen] = useState(false)
 
   return (
@@ -33,7 +36,9 @@ export const CalculatorMobileSummary = ({ label, total, children }: Props) => {
             {label}
           </span>
           {total !== null ? (
-            <span className="text-base leading-tight font-bold tabular-nums">{total}</span>
+            <span className="text-base leading-tight font-bold tabular-nums">
+              <AnimatedNumber value={total} format={formatTotal} />
+            </span>
           ) : (
             <span className="text-xs">Flächen zeichnen</span>
           )}
