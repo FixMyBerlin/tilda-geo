@@ -7,6 +7,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import type { MapDataOsmIdConfig } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { buttonStyles } from '@/components/shared/links/styles'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { useAllowInternalNotes } from '../../notes/InternalNotes/utils/useAllowInternalNotes'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import { pointFromGeometry } from './osmUrls/pointFromGeometry'
@@ -34,7 +35,8 @@ export const ToolsLinkNewInternalNote = ({ properties, geometry, osmIdConfig }: 
     <button
       type="button"
       className={buttonStyles}
-      onClick={() => {
+      onClick={(e) => {
+        captureModalOpenOrigin(e.currentTarget)
         setShowInternalNotesParam(true)
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         setNewNoteTildaDeeplink(window.location.href)

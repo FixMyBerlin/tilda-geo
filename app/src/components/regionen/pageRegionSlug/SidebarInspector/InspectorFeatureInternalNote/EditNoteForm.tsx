@@ -12,6 +12,7 @@ import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow, notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { toastError } from '@/components/shared/toast/toastError'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
@@ -68,7 +69,14 @@ export const EditNoteForm = ({ note }: Props) => {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={notesButtonStyle}>
+      <button
+        type="button"
+        onClick={(e) => {
+          captureModalOpenOrigin(e.currentTarget)
+          setOpen(true)
+        }}
+        className={notesButtonStyle}
+      >
         <PencilSquareIcon className="size-6" />
       </button>
 
