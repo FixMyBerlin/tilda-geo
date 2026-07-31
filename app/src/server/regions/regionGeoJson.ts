@@ -6,7 +6,7 @@ export type RegionGeoJsonBBox = BBox & [number, number, number, number]
 
 export const regionGeoJsonBBoxSchema = z.tuple([z.number(), z.number(), z.number(), z.number()])
 
-export const regionCacheWarmingSchema = z.object({
+const regionCacheWarmingSchema = z.object({
   minZoom: z.number().int(),
   maxZoom: z.number().int(),
   tables: z.array(z.string().min(1)),
