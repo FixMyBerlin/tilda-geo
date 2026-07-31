@@ -24,11 +24,6 @@ export const parseRegionCacheWarming = (value: unknown) => {
   return parsed.success ? parsed.data : null
 }
 
-export const staticBboxToGeoJson = (bbox: {
-  min: readonly [number, number]
-  max: readonly [number, number]
-}): RegionGeoJsonBBox => [bbox.min[0], bbox.min[1], bbox.max[0], bbox.max[1]]
-
 export const geoJsonBboxToFormFields = (bbox: RegionGeoJsonBBox | null) => {
   if (!bbox) {
     return { bboxMinLng: '', bboxMinLat: '', bboxMaxLng: '', bboxMaxLat: '' }
