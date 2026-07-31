@@ -100,10 +100,14 @@ export async function computeCampaignCounts(processingId: number | null, ranTopi
     logStart('Afterthoughts: Campaign counts')
     const todoIds = await getTodoIds()
 
+    // Bun passes bare JS arrays as comma-joined strings; ANY() needs a real PG array.
+    // Explicit TEXT: default array type is JSON and would quote each id.
+    const todoIdArray = sql.array(todoIds, 'TEXT')
+
     const totalRows = await sql<TotalCountRow[]>`
       SELECT k.key AS todo_id, COUNT(DISTINCT t.osm_id)::int AS count
       FROM public.todos_lines t, LATERAL jsonb_object_keys(t.tags) AS k(key)
-      WHERE k.key = ANY(${todoIds})
+      WHERE k.key = ANY(${todoIdArray})
       GROUP BY k.key
     `
 
@@ -117,7 +121,7 @@ export async function computeCampaignCounts(processingId: number | null, ranTopi
       JOIN public.todos_lines t ON ST_Intersects(t.geom, b.geom)
       CROSS JOIN LATERAL jsonb_object_keys(t.tags) AS k(key)
       WHERE b.tags->>'admin_level' = '4'
-        AND k.key = ANY(${todoIds})
+        AND k.key = ANY(${todoIdArray})
       GROUP BY b.id, b.tags->>'name', k.key
     `
 
