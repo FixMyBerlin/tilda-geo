@@ -30,11 +30,11 @@ export const ValueDisclosureButton = ({
   /** @description use to hide the button conditionally */
   hasBody?: boolean
 }) => {
-  if (hasBody === false) return <div className="w-full">{children}</div>
+  if (hasBody === false) return <div className="w-full min-w-0">{children}</div>
 
   return (
-    <DisclosureButton className="group/button flex w-full cursor-pointer items-center justify-between gap-1 text-left">
-      <div className="w-full">{children}</div>
+    <DisclosureButton className="group/button flex w-full min-w-0 cursor-pointer items-center justify-between gap-1 text-left">
+      <div className="w-full min-w-0">{children}</div>
       <div className="focus-visible:ring-opacity-75 -m-0.5 rounded border border-transparent bg-gray-50 p-0.5 text-left text-sm font-medium group-hover/button:border-gray-500 group-hover/button:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
         <InformationCircleIcon
           data-active-icon="open" // see ValueDisclosure

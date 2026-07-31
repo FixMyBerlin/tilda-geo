@@ -1,4 +1,4 @@
-import { FormattedDate, FormattedMessage, FormattedNumber } from 'react-intl'
+import { FormattedDate, FormattedNumber } from 'react-intl'
 import { registerInspectorMissingTranslation } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInspectorMissingTranslationsState'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
@@ -11,6 +11,7 @@ import {
 } from '@/data/topicDocs/runtime'
 import { getTopicDocNumericFormatSuffix, isTopicDocDateFormat } from '@/data/topicDocs/schema'
 import { NodataFallback } from '../compositTableRows/NodataFallback'
+import { InspectorFormattedMessage } from './InspectorFormattedMessage'
 import { translations } from './translations.const'
 import { shouldShowRawInspectorValues } from './utils/shouldShowRawInspectorValues'
 
@@ -33,7 +34,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
   const showRawValues = shouldShowRawInspectorValues(sourceId, regionDatasets)
   if (showRawValues) {
     return (
-      <code className="break-all" title={debugTitle}>
+      <code className="wrap-break-word" title={debugTitle}>
         {fallbackValue || '–'}
       </code>
     )
@@ -44,7 +45,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     if (translations[translationKey]) {
       return (
         <span title={debugTitle}>
-          <FormattedMessage id={translationKey} defaultMessage={fallbackValue} />
+          <InspectorFormattedMessage id={translationKey} defaultMessage={fallbackValue} />
         </span>
       )
     }
@@ -82,7 +83,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
 
   return (
     <span title={debugTitle}>
-      <FormattedMessage id={translationKey} defaultMessage={fallbackValue} />
+      <InspectorFormattedMessage id={translationKey} defaultMessage={fallbackValue} />
     </span>
   )
 }

@@ -93,4 +93,14 @@ describe('Markdown', () => {
     expect(container.querySelector('script')).toBeNull()
     expect(container.querySelector('b')).toBeNull()
   })
+
+  test('inline mode keeps line flow and renders code without prose wrapper', () => {
+    const { container } = render(
+      <Markdown markdown={'In OSM erfasst über einen `maxspeed`-Kategorie-Tag'} inline />,
+    )
+    expect(container.querySelector('div.prose')).toBeNull()
+    expect(container.querySelector('p')).toBeNull()
+    expect(container.querySelector('code')?.textContent).toBe('maxspeed')
+    expect(container.textContent).toBe('In OSM erfasst über einen maxspeed-Kategorie-Tag')
+  })
 })
