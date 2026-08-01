@@ -67,7 +67,7 @@ export const HomePageFaq = () => {
                     </span>
                     <ChevronDownIcon
                       aria-hidden
-                      className={`size-6 flex-none text-gray-700 transition-transform ${open ? 'rotate-0' : 'rotate-90'}`}
+                      className={`size-6 flex-none text-gray-700 transition-transform ${open ? 'rotate-180' : ''}`}
                     />
                   </DisclosureButton>
                   <MotionCollapse open={open}>

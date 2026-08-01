@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { createAdminApiToken } from '../../src/server/admin/adminApiTokens.server'
 import db from '../../src/server/db.server'
+import { regionMaskUploadSlug } from '../../src/server/regions/masks/generateRegionMask.server'
 
 const JOIN_SLUG = 'e2e-api-region-join'
 const DELETE_BLOCK_SLUG = 'e2e-api-region-delete-block'
@@ -42,6 +43,7 @@ const baseRegionConfig = (slug: string) => ({
   contractId: null,
   maskOsmRelationIds: [] as number[],
   maskBufferKm: 10,
+  welcome: null,
 })
 
 const authHeaders = () => ({
@@ -53,18 +55,10 @@ test.describe('Admin regions REST API — advanced writes', () => {
 
   test.beforeAll(async () => {
     await db.region.deleteMany({ where: { slug: { in: TEST_SLUGS } } })
-    const staleUsers = await db.user.findMany({
-      where: { OR: [{ email: USER_EMAIL }, { osmId: 1_900_000_002 }] },
-      select: { id: true },
-    })
-    if (staleUsers.length > 0) {
-      await db.adminApiToken.deleteMany({
-        where: { createdById: { in: staleUsers.map((u) => u.id) } },
-      })
-      await db.user.deleteMany({ where: { id: { in: staleUsers.map((u) => u.id) } } })
-    }
-    const user = await db.user.create({
-      data: { email: USER_EMAIL, osmId: 1_900_000_002, osmName: 'e2e-advanced', role: 'ADMIN' },
+    const user = await db.user.upsert({
+      where: { email: USER_EMAIL },
+      update: { role: 'ADMIN' },
+      create: { email: USER_EMAIL, osmId: 1_900_000_002, osmName: 'e2e-advanced', role: 'ADMIN' },
     })
     userId = user.id
     const created = await createAdminApiToken({ name: TOKEN_NAME, createdById: userId })
@@ -73,7 +67,7 @@ test.describe('Admin regions REST API — advanced writes', () => {
 
   test.afterAll(async () => {
     await db.mapDatasetUpload.deleteMany({
-      where: { slug: { in: [`e2e-block-${DELETE_BLOCK_SLUG}`, `region-${DELETE_BLOCK_SLUG}`] } },
+      where: { slug: regionMaskUploadSlug(DELETE_BLOCK_SLUG) },
     })
     await db.region.deleteMany({ where: { slug: { in: TEST_SLUGS } } })
     await db.adminApiToken.deleteMany({ where: { createdById: userId } })
@@ -123,7 +117,7 @@ test.describe('Admin regions REST API — advanced writes', () => {
     expect(updateRes.status()).toBe(200)
     const body = await updateRes.json()
     expect(body.categories).toEqual(['bikelanes'])
-    expect(body.exports).toBeNull()
+    expect(body.exports).toEqual([])
     expect(body.navigationLinks).toEqual([])
 
     const updated = await db.region.findUniqueOrThrow({
@@ -154,15 +148,15 @@ test.describe('Admin regions REST API — advanced writes', () => {
     const region = await db.region.findUniqueOrThrow({ where: { slug: DELETE_BLOCK_SLUG } })
     await db.mapDatasetUpload.create({
       data: {
-        slug: `e2e-block-${DELETE_BLOCK_SLUG}`,
+        slug: regionMaskUploadSlug(DELETE_BLOCK_SLUG),
         configs: [],
         public: true,
         hideDownloadLink: true,
         mapRenderFormat: 'geojson',
-        mapRenderUrl: 'https://example.com/e2e-block.geojson',
+        mapRenderUrl: 'https://example.com/e2e-mask.geojson',
         githubUrl: '',
-        geojsonUrl: 'https://example.com/e2e-block.geojson',
-        systemLayer: false,
+        geojsonUrl: 'https://example.com/e2e-mask.geojson',
+        systemLayer: true,
         regions: { connect: { id: region.id } },
       },
     })

@@ -17,6 +17,10 @@ vi.mock('@/components/layouts/Header/HeaderRegionen/HeaderRegionen', () => ({
   HeaderRegionen: () => <header>HeaderRegionen</header>,
 }))
 
+vi.mock('@/components/shared/hooks/viewport/useBreakpoint', () => ({
+  useBreakpoint: () => true,
+}))
+
 vi.mock('./pageRegionSlug/MapInterface', () => ({
   MapInterface: () => <div>MapInterface</div>,
 }))
@@ -24,7 +28,6 @@ vi.mock('./pageRegionSlug/MapInterface', () => ({
 vi.mock('./pageRegionSlug/RegionDeactivated', () => ({
   RegionAccessDenied: ({ status }: { status: string }) => <div>RegionAccessDenied:{status}</div>,
 }))
-
 describe('PageRegionSlug', () => {
   test('renders map interface when authorized', () => {
     useLoaderData.mockReturnValue({

@@ -14,4 +14,6 @@ export const searchParamsRegistry = {
   debugMap: 'debugMap',
   qa: 'qa', // QA layer selection
   qaFilter: 'qaFilter', // QA filter params
+  dialog: 'dialog',
+  welcomeSkipDialog: '__skipDialog',
 } as const

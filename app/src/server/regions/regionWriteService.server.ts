@@ -55,17 +55,18 @@ export async function createRegionConfig(
     await db.$transaction(async (tx) => {
       await tx.region.create({
         data: createData,
+        include: regionInclude,
       })
       await upsertRegionConfigTemplate(parsed.categories as MapDataCategoryId[], tx)
     })
 
     await syncMaskIfChanged(parsed.slug, DEFAULT_MASK, parsed)
 
-    const withMask = await db.region.findUniqueOrThrow({
+    const refreshed = await db.region.findUniqueOrThrow({
       where: { slug: parsed.slug },
       include: regionInclude,
     })
-    return regionRowToClient(withMask)
+    return regionRowToClient(refreshed)
   })
 }
 
@@ -86,6 +87,7 @@ export async function updateRegionConfig(
     if (!existing) throw new RegionNotFoundError(slug)
 
     const previousHeaderLogoId = existing.headerLogoId
+    const previousWelcomeImageUploadId = existing.welcomeImageUploadId
     const previousMask = {
       maskOsmRelationIds: existing.maskOsmRelationIds,
       maskBufferKm: existing.maskBufferKm,
@@ -116,6 +118,13 @@ export async function updateRegionConfig(
       await upsertRegionConfigTemplate(parsed.categories as MapDataCategoryId[], tx)
     })
 
+    const nextWelcomeImageUploadId = parsed.welcome?.image?.uploadId ?? null
+    if (
+      previousWelcomeImageUploadId != null &&
+      previousWelcomeImageUploadId !== nextWelcomeImageUploadId
+    ) {
+      await deleteRegionUploadIfUnreferenced(previousWelcomeImageUploadId)
+    }
     if (previousHeaderLogoId != null && previousHeaderLogoId !== parsed.headerLogoId) {
       await deleteRegionUploadIfUnreferenced(previousHeaderLogoId)
     }

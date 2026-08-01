@@ -1,13 +1,9 @@
-import { BuildingLibraryIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
-import { twJoin, twMerge } from 'tailwind-merge'
-import {
-  defaultPrimaryNavigation,
-  defaultSecondaryNavigationGrouped,
-} from '@/components/layouts/Header/HeaderRegionen/navigation.const'
-import type { PrimaryNavigation, SecondaryNavigation } from '@/components/layouts/Header/types'
+import { twMerge } from 'tailwind-merge'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
-import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { RegionWelcomeMobileCtaFooter } from '@/components/regionen/pageRegionSlug/welcome/RegionWelcomeMobileCtaFooter'
+import { RegionWelcomePanelBody } from '@/components/regionen/pageRegionSlug/welcome/RegionWelcomePanelBody'
+import { useRegionWelcomePanel } from '@/components/regionen/pageRegionSlug/welcome/useRegionWelcomePanel'
 import { Img } from '@/components/shared/Img'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
@@ -25,52 +21,43 @@ const regionAbbreviation = (name: string) => {
   return name.trim().slice(0, 2).toUpperCase()
 }
 
-const NavLink = ({ item }: { item: PrimaryNavigation | SecondaryNavigation }) => {
-  const className =
-    'block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-yellow-50'
-  if ('to' in item) {
-    const href = item.hash ? `${item.to}#${item.hash}` : item.to
-    return (
-      <a href={href} className={className}>
-        {item.name}
-      </a>
-    )
-  }
-  return (
-    <a href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
-      {item.name}
-    </a>
-  )
-}
-
 /**
  * Mobile region menu: a floating logo/abbreviation button (placed top-left in
- * the MobileMapHeader) that opens a bottom sheet repeating the region logo and
- * info plus all navigation links — the mobile replacement for the dark header.
+ * the MobileMapHeader) that opens a bottom sheet with welcome content and nav links.
  */
 export const MobileRegionMenu = () => {
-  const [open, setOpen] = useState(false)
   const region = useRegion()
+  const { welcome, isOpen, openPanel, closePanel, panelRef } = useRegionWelcomePanel()
+  const [panelView, setPanelView] = useState<'welcome' | 'faq'>('welcome')
+
+  const openMenu = () => {
+    setPanelView('welcome')
+    openPanel()
+  }
+
+  const closeMenu = () => {
+    setPanelView('welcome')
+    closePanel()
+  }
 
   if (!region) return null
 
   const customLogo = region.logoPath
-  const isPrivate = region.status === 'PRIVATE'
-  const isDeactivated = region.status === 'DEACTIVATED'
-  const primaryNavigation = [...defaultPrimaryNavigation, ...(region.navigationLinks ?? [])]
+  const menuLabel = welcome && region.status === 'PUBLIC' ? welcome.title : region.name
+  const showFaqLink = (welcome?.sections ?? []).length > 0
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openMenu}
         aria-label={`Menü – ${region.fullName}`}
-        aria-expanded={open}
+        aria-expanded={isOpen}
         className={twMerge(
           mobileControlButtonClassName,
           'h-10 min-w-10 gap-1.5 px-2',
           customLogo && region.logoWhiteBackgroundRequired ? 'bg-white' : '',
-          open && mobileControlButtonActiveClassName,
+          isOpen && mobileControlButtonActiveClassName,
         )}
       >
         {customLogo ? (
@@ -80,49 +67,33 @@ export const MobileRegionMenu = () => {
             {regionAbbreviation(region.name)}
           </span>
         )}
-        <span className="text-sm font-medium text-gray-700">Über</span>
+        <span className="max-w-24 truncate text-sm font-medium text-gray-700">{menuLabel}</span>
       </button>
 
-      <MobileBottomSheet open={open} onClose={() => setOpen(false)} title={region.name}>
-        <div className="flex items-center gap-3 px-4 pt-1 pb-4">
-          {customLogo ? (
-            <div
-              className={twJoin(
-                'shrink-0',
-                region.logoWhiteBackgroundRequired ? 'rounded-sm bg-white px-1 py-1' : '',
-              )}
-            >
-              <Img src={customLogo} className="h-10 w-auto" alt="" />
-            </div>
-          ) : (
-            <BuildingLibraryIcon className="h-10 w-auto shrink-0 text-yellow-400" />
-          )}
-          <div className="flex min-w-0 items-center gap-1">
-            {isPrivate && (
-              <LockClosedIcon className="size-4 shrink-0 text-gray-400" aria-hidden="true" />
-            )}
-            <span className="font-semibold text-gray-900">{region.fullName}</span>
-            {isDeactivated && (
-              <RegionStatusPill status="DEACTIVATED" className="shrink-0 px-1.5 py-0.5" />
-            )}
-          </div>
-        </div>
-
-        <nav className="border-t border-gray-200 px-2 py-2">
-          {primaryNavigation.map((item) => (
-            <NavLink key={item.name} item={item} />
-          ))}
-          {defaultSecondaryNavigationGrouped.map((group) => (
-            <div
-              key={group.map((item) => item.name).join(',')}
-              className="mt-2 border-t border-gray-100 pt-2"
-            >
-              {group.map((item) => (
-                <NavLink key={item.name} item={item} />
-              ))}
-            </div>
-          ))}
-        </nav>
+      <MobileBottomSheet
+        open={isOpen}
+        onClose={closeMenu}
+        title={welcome?.title ?? region.name}
+        mapPeek="15%"
+        panelClassName="bg-gray-900 text-white"
+        grabberClassName="bg-white/30"
+        footer={
+          <RegionWelcomeMobileCtaFooter
+            onClose={closeMenu}
+            panelView={panelView}
+            showFaqLink={showFaqLink}
+            onShowFaq={() => setPanelView('faq')}
+          />
+        }
+      >
+        <RegionWelcomePanelBody
+          welcome={welcome}
+          onClose={closeMenu}
+          variant="mobile"
+          panelRef={panelRef}
+          panelView={panelView}
+          onPanelViewChange={setPanelView}
+        />
       </MobileBottomSheet>
     </>
   )

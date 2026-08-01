@@ -9,6 +9,7 @@ import { RegionExportsField } from '@/components/admin/regions/pageRegions/Regio
 import { RegionLogoPicker } from '@/components/admin/regions/pageRegions/RegionLogoPicker'
 import { RegionMaskOsmRelationIdsField } from '@/components/admin/regions/pageRegions/RegionMaskOsmRelationIdsField'
 import { RegionNavigationLinksEditor } from '@/components/admin/regions/pageRegions/RegionNavigationLinksEditor'
+import { RegionWelcomeEditor } from '@/components/admin/regions/pageRegions/RegionWelcomeEditor'
 import {
   regionPromotedFormRadioItems,
   regionStatusFormRadioItems,
@@ -73,6 +74,13 @@ export const regionFormEmptyDefaults = {
   maskEnabled: 'false' as const,
   maskOsmRelationIds: '',
   maskBufferKm: '10',
+  welcomeEnabled: 'false' as const,
+  welcomeTitle: '',
+  welcomeSubtitle: '',
+  welcomeBodyMarkdown: '',
+  welcomeImageUploadId: '',
+  welcomeImageAltText: '',
+  welcomeSections: [] as RegionFormInput['welcomeSections'],
 } satisfies RegionFormInput
 
 type RegionContractOption = { id: number; name: string; status: RegionContractStatus }
@@ -333,6 +341,11 @@ export function RegionForm(props: Props) {
           <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Navigation</legend>
             <RegionNavigationLinksEditor form={form} />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Willkommens-Dialog</legend>
+            <RegionWelcomeEditor form={form} regionId={regionId} regionSlug={regionSlug} />
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>

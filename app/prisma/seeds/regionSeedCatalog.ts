@@ -5,6 +5,10 @@ import { RegionNotesMode, RegionProduct, RegionStatus } from '@/prisma/generated
 import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
 import type { RegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
+import {
+  regionWelcomeDemoSpecToWriteInput,
+  regionWelcomeDemoSpecs,
+} from './regionWelcomeDemoContent'
 
 type SeedRegionEntry = {
   slug: string
@@ -66,6 +70,7 @@ const baseRegionConfig = {
   contractId: null,
   maskOsmRelationIds: [],
   maskBufferKm: 10,
+  welcome: null,
 } satisfies Omit<
   RegionWriteInput,
   | 'slug'
@@ -339,6 +344,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
           sortOrder: 1,
         },
       ],
+      // Welcome copy on create; hero image attached later (needs regionId).
+      welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.radinfra, null),
     },
   },
   {
@@ -357,6 +364,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       logoWhiteBackgroundRequired: true,
       categories: ['bikelanes', 'roads', 'surface', 'boundaries', 'mapillary'],
       backgroundSources: [...regionalNetworkBackgroundSources],
+      // Welcome copy on create; hero image attached later (needs regionId).
+      welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs['bb-kampagne'], null),
     },
     mask: {
       maskOsmRelationIds: [62504],
@@ -378,6 +387,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapZoom: 13.5,
       categories: ['parkingLars', 'mapillary'],
       backgroundSources: [...cityParkraumBackgroundSources],
+      // Text-only welcome (no hero image).
+      welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
     },
   },
   {

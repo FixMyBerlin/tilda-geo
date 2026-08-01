@@ -1,10 +1,7 @@
-import { useUploadFile } from '@better-upload/client'
+import { FileUploadButton } from '@/components/shared/form/fields/FileUploadButton'
 import type { FormApi } from '@/components/shared/form/types'
 import type { RegionFormInput } from '@/server/regions/regionWriteSchema'
-import {
-  regionLogoClientMetadataSchema,
-  regionLogoResponseMetadataSchema,
-} from '@/server/regions/uploads/regionLogoUpload.schemas'
+import { REGION_UPLOAD_ACCEPT, useRegionUploadFile } from './useRegionUploadFile'
 
 type Props = {
   form: FormApi<RegionFormInput>
@@ -18,14 +15,8 @@ type Props = {
  * form's `headerLogoId`. Preview + remove. Upload needs an existing region (create page → hint).
  */
 export function RegionLogoPicker({ form, regionId, regionSlug }: Props) {
-  const { uploadAsync, isPending } = useUploadFile({
-    api: '/api/admin/region-uploads/upload',
-    route: 'regionLogo',
-    onUploadComplete: ({ metadata }) => {
-      // better-upload types client metadata as Record<string, unknown>; parse the shared schema.
-      const { regionUploadId } = regionLogoResponseMetadataSchema.parse(metadata)
-      form.setFieldValue('headerLogoId', String(regionUploadId))
-    },
+  const { uploadRegionFile, isPending } = useRegionUploadFile((uploadId) => {
+    form.setFieldValue('headerLogoId', uploadId)
   })
 
   return (
@@ -46,25 +37,15 @@ export function RegionLogoPicker({ form, regionId, regionSlug }: Props) {
 
             {regionId != null && regionSlug ? (
               <div className="flex flex-wrap items-center gap-3">
-                <input
-                  type="file"
-                  accept="image/svg+xml,image/png,image/jpeg"
-                  disabled={isPending}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0]
-                    if (file) {
-                      void uploadAsync(file, {
-                        metadata: regionLogoClientMetadataSchema.parse({
-                          regionSlug,
-                          regionId,
-                        }),
-                      })
-                    }
-                    event.target.value = ''
+                <FileUploadButton
+                  id="region-logo-upload"
+                  accept={REGION_UPLOAD_ACCEPT}
+                  label={currentId ? 'Logo ersetzen' : 'Logo hochladen'}
+                  isPending={isPending}
+                  onFile={(file) => {
+                    void uploadRegionFile(file, { regionSlug, regionId })
                   }}
-                  className="text-sm"
                 />
-                {isPending ? <span className="text-sm text-gray-500">Lädt hoch…</span> : null}
                 {currentId ? (
                   <button
                     type="button"

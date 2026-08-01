@@ -9,6 +9,7 @@
  */
 import db from '@/server/db.server'
 import { RegionNotFoundError } from '@/server/regions/regionWriteErrors.server'
+import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
 
 /** Prisma only verifies the contract row exists when updating contractId — not that the id is valid upfront. */
 export async function assertRegionContractExists(contractId: number | null) {
@@ -30,6 +31,16 @@ export async function assertHeaderLogoBelongsToRegion(
   })
   if (!upload) {
     throw new Error(`Header-Logo (id=${headerLogoId}) gehört nicht zu dieser Region`)
+  }
+}
+
+async function assertWelcomeImageBelongsToRegion(uploadId: number | null, regionId: number) {
+  if (uploadId == null) return
+  const upload = await db.regionUpload.findFirst({
+    where: { id: uploadId, regionId },
+  })
+  if (!upload) {
+    throw new Error('Das Willkommens-Bild gehört nicht zu dieser Region')
   }
 }
 
@@ -71,16 +82,26 @@ export async function assertRegionCanBeDeleted(slug: string) {
 
 /** Create/update entry point: contract FK, header-logo ownership, and create-time logo rejection. */
 export async function validateRegionConfigRelations(
-  config: { contractId: number | null; headerLogoId: number | null },
+  config: Pick<RegionWriteInput, 'contractId' | 'headerLogoId' | 'welcome'>,
   regionId?: number,
 ) {
   await assertRegionContractExists(config.contractId)
   if (regionId != null) {
     await assertHeaderLogoBelongsToRegion(config.headerLogoId, regionId)
-  } else if (config.headerLogoId != null) {
-    // Uploads need regionId first — set headerLogoId only after the region row exists.
-    throw new Error(
-      'Header-Logo kann beim Anlegen nicht gesetzt werden — Region zuerst speichern, dann Logo hochladen',
-    )
+    // The image id is stored even while welcome is disabled, so ownership must be checked
+    // regardless of `enabled` — the FK only proves the upload exists, not that it is ours.
+    await assertWelcomeImageBelongsToRegion(config.welcome?.image?.uploadId ?? null, regionId)
+  } else {
+    if (config.headerLogoId != null) {
+      // Uploads need regionId first — set headerLogoId only after the region row exists.
+      throw new Error(
+        'Header-Logo kann beim Anlegen nicht gesetzt werden — Region zuerst speichern, dann Logo hochladen',
+      )
+    }
+    if (config.welcome?.image != null) {
+      throw new Error(
+        'Willkommens-Bild kann beim Anlegen nicht gesetzt werden — Region zuerst speichern, dann Bild hochladen',
+      )
+    }
   }
 }

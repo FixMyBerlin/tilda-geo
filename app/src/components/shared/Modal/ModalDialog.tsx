@@ -26,6 +26,7 @@ type Props = {
   children: React.ReactNode
   /** Optional test id on the dialog panel (E2E). */
   panelTestId?: string
+  onExitComplete?: () => void
 }
 
 export const ModalDialog = ({
@@ -36,6 +37,7 @@ export const ModalDialog = ({
   buttonCloseName,
   children,
   panelTestId,
+  onExitComplete,
 }: Props) => {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -72,7 +74,12 @@ export const ModalDialog = ({
   // Motion + `Dialog static` (same split as MobileBottomSheet): Headless UI keeps the
   // a11y plumbing (focus trap, Escape, outside click), Motion runs enter/exit springs.
   return (
-    <AnimatePresence onExitComplete={clearModalOpenOrigin}>
+    <AnimatePresence
+      onExitComplete={() => {
+        clearModalOpenOrigin()
+        onExitComplete?.()
+      }}
+    >
       {open && (
         <Dialog
           static
