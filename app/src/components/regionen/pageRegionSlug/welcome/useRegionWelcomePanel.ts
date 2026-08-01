@@ -5,7 +5,7 @@ import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useR
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
 import type { TRegionWelcome } from '@/server/regions/regionConfigMapper.server'
-import { writeWelcomeDismissedCookie } from './welcomeDismissCookie.client'
+import { writeWelcomeDismissedCookie } from './writeWelcomeDismissedCookie'
 
 export const useRegionWelcomePanel = () => {
   const region = useRegion()
