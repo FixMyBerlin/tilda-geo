@@ -9,6 +9,13 @@ Following migrations have not yet been applied:
     expect(classifyMigrateStatus(output, 1)).toBe(10)
   })
 
+  test('single pending migration with Prisma exit 1 -> 10', () => {
+    const output = `49 migrations found in prisma/migrations
+Following migration have not yet been applied:
+20260801120000_region_welcome_columns`
+    expect(classifyMigrateStatus(output, 1)).toBe(10)
+  })
+
   test('up-to-date -> 0', () => {
     const output = `48 migrations found in prisma/migrations
 

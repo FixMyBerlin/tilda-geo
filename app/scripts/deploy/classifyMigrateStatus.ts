@@ -1,7 +1,7 @@
-export const pendingMigrationsBanner = 'Following migrations have not yet been applied'
+export const pendingMigrationsBanner = /Following migrations? have not yet been applied/
 
 export function classifyMigrateStatus(output: string, prismaExitCode: number | null | undefined) {
-  if (output.includes(pendingMigrationsBanner)) {
+  if (pendingMigrationsBanner.test(output)) {
     return 10
   }
   if (prismaExitCode === 0 && output.trim().length > 0) {
