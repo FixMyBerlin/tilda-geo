@@ -155,7 +155,7 @@ If editing predev/Docker code, keep these invariants:
 
 - Predev passes `docker compose -p <DEV_STACK_ID>`; do not set `COMPOSE_PROJECT_NAME` in compose YAML.
 - `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only and derived by predev, not stored in `.env.local`.
-- `DEV_ATTACH_STACK` can attach to another stack, but the target db+tiles stack must already be running.
+- `DEV_ATTACH_STACK` can attach to another stack, but the target db+tiles stack must already be running. Processing/`seed` geo-bootstrap uses that stack’s real compose project (`-p`, e.g. `tilda-geo` for `default`) so `docker compose up processing` joins the shared `db` instead of creating a conflicting `/db` under the worktree folder name.
 - `DEV_PORT_SLOT` is the single source of truth for offset ports; legacy `DATABASE_PORT` / `TILES_PORT` lines in `.env.local` are stripped.
 - Relevant files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/ensureDevStack.ts`, `app/scripts/predev/devPortSlot.ts`, `app/scripts/predev/envLocalBranch.ts`, `app/scripts/predev/devStackDiscovery.ts`, `app/scripts/predev/checkDocker.ts`, `app/scripts/predev/syncEnvLocal.ts`, `app/.husky/post-checkout`.
 
