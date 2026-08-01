@@ -1,4 +1,5 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
+import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
 import { mapboxStyleGroupLayers_radinfra_traffic_signs } from './mapboxStyles/groups/radinfra_traffic_signs'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
@@ -51,7 +52,7 @@ export const subcat_radinfra_trafficSigns: FileMapDataSubcategory = {
       id: 'default',
       name: 'Beschilderung', // field hidden
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_radinfra_traffic_signs,
+        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_radinfra_traffic_signs),
         source,
         sourceLayer,
       }),

@@ -1,5 +1,6 @@
 import { getUnixTime, startOfYear, subYears } from 'date-fns'
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
+import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 import type { MapboxStyleLayer } from './mapboxStyles/types'
 
@@ -109,7 +110,7 @@ export const subcat_radinfra_currentness: FileMapDataSubcategory = {
       id: 'default',
       name: 'RVA Aktualität', // field hidden
       layers: mapboxStyleLayers({
-        layers: bikelanesCurrentLayers,
+        layers: withBikelaneVisualLineOffset(bikelanesCurrentLayers),
         source,
         sourceLayer,
       }),

@@ -1,4 +1,5 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
+import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
 import { mapboxStyleGroupLayers_radinfra_smoothness } from './mapboxStyles/groups/radinfra_smoothness'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 import { legendSurfaceDefault } from './subcat_surface_roads.const'
@@ -27,7 +28,7 @@ export const subcat_radinfra_smoothness: FileMapDataSubcategory = {
       id: 'default',
       name: 'RVA Oberflächenqualität', // field hidden
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_radinfra_smoothness,
+        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_radinfra_smoothness),
         source,
         sourceLayer,
       }),

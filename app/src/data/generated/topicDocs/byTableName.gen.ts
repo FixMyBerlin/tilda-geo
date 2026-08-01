@@ -1150,6 +1150,7 @@ const data = {
         purpose: 'processing',
         description:
           'Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.',
+        chapterRefs: ['versetzte-geometrien'],
         values: [
           {
             value: 'cycleway',
@@ -1702,9 +1703,10 @@ const data = {
         key: 'offset',
         type: 'meter',
         label: 'Linien-Offset',
-        purpose: 'processing',
+        purpose: 'rendering',
         description:
-          'Seitlicher Versatz der Liniengeometrie in Metern. Der Wert wird im Processing aus der halben Straßenbreite berechnet; positive Werte liegen links der Referenzlinie, negative rechts.',
+          'Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen: positiv = links, negativ = rechts der Mittellinie. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.',
+        chapterRefs: ['versetzte-geometrien'],
         values: [],
       },
       {
@@ -2032,7 +2034,7 @@ const data = {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -2480,7 +2482,7 @@ const data = {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -3090,7 +3092,7 @@ const data = {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -12196,7 +12198,7 @@ const data = {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -13276,7 +13278,7 @@ const data = {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -13328,7 +13330,7 @@ const data = {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },

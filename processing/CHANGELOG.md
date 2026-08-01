@@ -23,6 +23,15 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `minzoom` follows polygon area (m²): < 200 → 14, ≥ 200 → 13, ≥ 600 → 12, ≥ 2500 → 11, ≥ 10000 → 10 (was always 0). Labels stay at least z11.
 - Add `condition_category_primary` (same as `parkings`). Also written on `off_street_parking_points`; quantized points inherit it from areas.
 
+## 2026-09
+
+### `bikelanes`
+
+- Geometry now stays on the road **centerline**. Bikelane geometries derived from the centerline are no longer shifted sideways in the database (removed the `ST_OffsetCurve` step in the former `2_move_bikelanes.sql`). This makes geometry-based analyses simpler: no artificial left/right displacement to account for, and the two sides of a street share the same reference line.
+- **Geometry direction** of derived bikelanes changed as a consequence: all `…/left` and `…/right` geometries now run in the **OSM way direction** (identical to the parent road, no `ST_Simplify` either). Previously the removed SQL step reversed `…/left` geometries so each side ran in its right-hand-traffic flow direction. Direction-relative attributes (`mapillary_forward`/`mapillary_backward`, `traffic_sign_forward`/`traffic_sign_backward`) were always relative to the OSM way direction, so for `…/left` lanes they now match the exported geometry direction where they did not before. Consumers that derived travel direction from left-side geometry direction need to use `oneway` and `offset` (sign = side) instead.
+- The `offset` attribute is unchanged in meaning (signed meters, `+` left / `-` right, half the road width) but is now consumed **only by the map style** for a visual `line-offset`, not by the database geometry. It was added to the bikelanes tile `stylingKeys` so it is available at all rendered zoom levels.
+- Map-style note: the sideways separation is reproduced visually for **line** layers via a zoom-scaled `line-offset` derived from `offset`. The meter→pixel conversion is calibrated for ~52.5° latitude (center of Germany) and is off by roughly ±9% at the edges of Germany. **Symbol/text** layers placed along the line (width/surface/traffic-sign labels, `symbol-placement: line-center`) cannot be perpendicular-offset via the style and now render on the centerline.
+
 ## 2026-06
 
 ### All tables

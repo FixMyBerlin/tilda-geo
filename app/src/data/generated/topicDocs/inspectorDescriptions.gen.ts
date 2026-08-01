@@ -23,7 +23,7 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
       offset:
-        'Seitlicher Versatz der Liniengeometrie in Metern. Der Wert wird im Processing aus der halben Straßenbreite berechnet; positive Werte liegen links der Referenzlinie, negative rechts.',
+        'Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen: positiv = links, negativ = rechts der Mittellinie. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.',
     },
     values: {
       oneway: {
