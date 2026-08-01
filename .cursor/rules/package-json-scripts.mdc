@@ -26,7 +26,7 @@ One-off commands run directly — use kebab-case, no colon:
 | ---------------- | -------------------------------------------------------------------- |
 | `check`          | finish-work — `type-check lint format test-run knip-warn`            |
 | `check-ci`       | Read-only CI — `type-check lint-check format-check test-run`         |
-| `check-pre-push` | husky — `type-check-deploy lint format test-run knip`                |
+| `check-pre-push` | husky — `type-check-deploy lint format test-run knip build`          |
 
 Full scaffold: `.agents/skills/tech-stack/references/package-json-scripts.md`.
 
