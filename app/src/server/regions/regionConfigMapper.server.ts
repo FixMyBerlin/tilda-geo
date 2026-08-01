@@ -18,6 +18,7 @@ import {
   type TRegionContract,
 } from '@/server/region-contracts/regionContractMapper.server'
 import {
+  cacheWarmingToWriteInput,
   parseRegionCacheWarming,
   parseRegionGeoJsonBBox,
   type RegionGeoJsonBBox,
@@ -249,7 +250,7 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
   return {
     ...scalars,
     bbox: parseRegionGeoJsonBBox(bbox),
-    cacheWarming: parseRegionCacheWarming(cacheWarming),
+    cacheWarming: cacheWarmingToWriteInput(cacheWarming),
     // Copy so write-input and client `mask.osmRelationIds` do not share one array reference
     // (Seroval would otherwise alias them; a later mutation would empty the form defaults).
     maskOsmRelationIds: [...maskOsmRelationIds],

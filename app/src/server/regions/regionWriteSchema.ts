@@ -178,6 +178,7 @@ export const RegionWriteSchema = z
     maskBufferKm: z.number().positive(),
     welcome: RegionWelcomeWriteSchema.nullable(),
   })
+  .strict()
   .refine(
     (data) => {
       const hasBbox = data.bbox != null

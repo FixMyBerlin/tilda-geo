@@ -7,7 +7,7 @@ import {
   warmingTablesKeyToSourceId,
   warmingTablesToSourceIds,
 } from './cacheWarmingSources'
-import { parseRegionCacheWarming } from './regionGeoJson'
+import { parseRegionCacheWarming, cacheWarmingToWriteInput } from './regionGeoJson'
 import {
   RegionFormRawSchema,
   RegionFormSchema,
@@ -47,6 +47,11 @@ const fullBbox = { bbox: [13.0, 52.3, 13.8, 52.6] as const }
 describe('RegionWriteSchema', () => {
   test('accepts a minimal valid config (no exports, no bbox)', () => {
     expect(RegionWriteSchema.safeParse(validBase).success).toBe(true)
+  })
+
+  test('rejects unknown keys (strict)', () => {
+    const result = RegionWriteSchema.safeParse({ ...validBase, notAField: true })
+    expect(result.success).toBe(false)
   })
 
   describe('exports ⇔ bbox invariant', () => {
@@ -588,5 +593,32 @@ describe('parseRegionCacheWarming (lenient read)', () => {
       tables: ['bikelanes'],
     })
     expect(parsed).toEqual({ minZoom: 2, maxZoom: 20, tables: ['bikelanes'] })
+  })
+})
+
+describe('cacheWarmingToWriteInput (strict write round-trip)', () => {
+  test('clamps out-of-range zooms so RegionWriteSchema accepts the result', () => {
+    const write = cacheWarmingToWriteInput({
+      minZoom: 2,
+      maxZoom: 20,
+      tables: ['bikelanes'],
+    })
+    expect(write).toEqual({ minZoom: 4, maxZoom: 14, tables: ['bikelanes'] })
+    expect(
+      RegionWriteSchema.safeParse({
+        ...validBase,
+        cacheWarming: write,
+      }).success,
+    ).toBe(true)
+  })
+
+  test('drops unknown tables and nulls when none remain', () => {
+    expect(
+      cacheWarmingToWriteInput({
+        minZoom: 8,
+        maxZoom: 10,
+        tables: ['legacy_orphan'],
+      }),
+    ).toBeNull()
   })
 })

@@ -17,7 +17,7 @@ const GetRegionSchema = z.object({
   slug: z.string(),
 })
 
-export async function getRegion(input: { slug: string }) {
+async function findRegionRow(input: { slug: string }) {
   const { slug } = GetRegionSchema.parse(input)
 
   const region = await db.region.findFirst({
@@ -29,24 +29,28 @@ export async function getRegion(input: { slug: string }) {
     throw notFound()
   }
 
-  return regionRowToClient(region)
+  return region
+}
+
+export async function getRegion(input: { slug: string }) {
+  return regionRowToClient(await findRegionRow(input))
+}
+
+/** Client `TRegion` + write-shaped `config` for MCP / admin API round-trips into create/update. */
+export async function getRegionWithWriteConfig(input: { slug: string }) {
+  const region = await findRegionRow(input)
+
+  return {
+    region: regionRowToClient(region),
+    config: regionRowToWriteInput(region),
+  } satisfies { region: TRegion; config: RegionWriteInput }
 }
 
 export async function getRegionEditData(input: { slug: string }) {
-  const { slug } = GetRegionSchema.parse(input)
+  const { region, config } = await getRegionWithWriteConfig(input)
 
-  const region = await db.region.findFirst({
-    where: { slug },
-    include: regionInclude,
-  })
-
-  if (!region) {
-    throw notFound()
-  }
-
-  const config = regionRowToWriteInput(region)
   return {
-    region: regionRowToClient(region),
+    region,
     config,
     // Precompute on the server so mask IDs are plain strings in loader data (avoids Int[] /
     // shared-ref quirks on the client when seeding TanStack Form defaultValues).
