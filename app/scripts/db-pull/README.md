@@ -25,9 +25,7 @@ After a successful `--schema prisma` restore (dump files under `data/` stay raw/
 - Run `prisma migrate deploy` so the local schema matches the app (production dumps may lag behind develop).
 - Pseudonymize non-`@fixmycity.de` user names/emails (`id` / `osmId` kept; OSM placeholder emails kept).
 - Delete restored tokens, sessions, verifications, and audit logs; clear Account OAuth secrets.
-- Run `seedLocalAccess()` (same as `bun run seed`): ensure FMC admins + local MCP token `tildageode_admin_local_dev_mcp_only`.
-
-Interactive seed/restore may offer to add `tilda-geo-admin--DEV` to an existing `~/.cursor/mcp.json` (see `scripts/seed-local/`). Missing file / non-TTY → skip and print the JSON to merge manually.
+- Run `seedLocalAccess()` (same as `bun run seed`): ensure FMC admins + local MCP token `tildageode_admin_local_dev_mcp_only` (matches committed `.cursor/mcp.json` `tilda-geo-admin--DEV`).
 
 ## Dump files
 
