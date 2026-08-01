@@ -7,7 +7,11 @@ import {
   regionRowToWriteInput,
   type TRegion,
 } from '@/server/regions/regionConfigMapper.server'
-import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
+import {
+  regionConfigToFormValues,
+  type RegionFormInput,
+  type RegionWriteInput,
+} from '@/server/regions/regionWriteSchema'
 
 const GetRegionSchema = z.object({
   slug: z.string(),
@@ -40,8 +44,12 @@ export async function getRegionEditData(input: { slug: string }) {
     throw notFound()
   }
 
+  const config = regionRowToWriteInput(region)
   return {
     region: regionRowToClient(region),
-    config: regionRowToWriteInput(region),
-  } satisfies { region: TRegion; config: RegionWriteInput }
+    config,
+    // Precompute on the server so mask IDs are plain strings in loader data (avoids Int[] /
+    // shared-ref quirks on the client when seeding TanStack Form defaultValues).
+    formValues: regionConfigToFormValues(config) as RegionFormInput,
+  } satisfies { region: TRegion; config: RegionWriteInput; formValues: RegionFormInput }
 }

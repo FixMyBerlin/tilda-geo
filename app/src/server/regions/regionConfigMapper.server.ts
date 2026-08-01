@@ -250,7 +250,9 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
     ...scalars,
     bbox: parseRegionGeoJsonBBox(bbox),
     cacheWarming: parseRegionCacheWarming(cacheWarming),
-    maskOsmRelationIds,
+    // Copy so write-input and client `mask.osmRelationIds` do not share one array reference
+    // (Seroval would otherwise alias them; a later mutation would empty the form defaults).
+    maskOsmRelationIds: [...maskOsmRelationIds],
     maskBufferKm,
     categories: categoryAssignments.map((a) => a.categoryId as MapDataCategoryId),
     backgroundSources: backgroundAssignments.map((a) => a.sourceId as SourcesRasterIds),
@@ -330,7 +332,7 @@ export function regionRowToClient(region: RegionWithRelations) {
     showSearch: scalars.showSearch || undefined,
     mask:
       maskOsmRelationIds.length > 0
-        ? { osmRelationIds: maskOsmRelationIds, bufferKm: maskBufferKm }
+        ? { osmRelationIds: [...maskOsmRelationIds], bufferKm: maskBufferKm }
         : null,
     map: { lat: mapLat, lng: mapLng, zoom: mapZoom },
     navigationLinks: navigationLinks

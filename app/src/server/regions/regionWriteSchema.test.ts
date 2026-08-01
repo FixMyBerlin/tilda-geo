@@ -418,6 +418,22 @@ describe('RegionFormSchema', () => {
       'barrierAreas,barrierLines',
     ])
   })
+
+  test('round-trips mask OSM relation IDs into the form string field', () => {
+    const config: RegionWriteInput = {
+      ...validBase,
+      maskOsmRelationIds: [2787952, 62504],
+      maskBufferKm: 1.5,
+    }
+    const formValues = regionConfigToFormValues(config)
+    expect(formValues.maskEnabled).toBe('true')
+    expect(formValues.maskOsmRelationIds).toBe('2787952, 62504')
+    expect(formValues.maskBufferKm).toBe('1.5')
+
+    const parsed = RegionFormSchema.parse(formValues)
+    expect(parsed.maskOsmRelationIds).toEqual([2787952, 62504])
+    expect(parsed.maskBufferKm).toBe(1.5)
+  })
 })
 
 describe('RegionFormSchema welcome image', () => {

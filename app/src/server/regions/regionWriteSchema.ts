@@ -539,6 +539,19 @@ export const DeleteRegionSchema = z.object({
   slug: z.string(),
 })
 
+/** Mask columns → form strings. Shared so loaders can precompute without duplicating join logic. */
+function maskConfigToFormFields(config: {
+  maskOsmRelationIds: readonly number[]
+  maskBufferKm: number
+}) {
+  const maskOsmRelationIds = [...config.maskOsmRelationIds]
+  return {
+    maskEnabled: toTrueFalseString(maskOsmRelationIds.length > 0),
+    maskOsmRelationIds: joinCommaList(maskOsmRelationIds.map(String)),
+    maskBufferKm: String(config.maskBufferKm),
+  }
+}
+
 export function regionConfigToFormValues(config: RegionWriteInput) {
   const downloadsEnabled = config.bbox != null
   const bboxFields = geoJsonBboxToFormFields(config.bbox)
@@ -576,9 +589,7 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
       _key: newClientListKey(),
     })),
     contractId: config.contractId != null ? String(config.contractId) : '',
-    maskEnabled: toTrueFalseString(config.maskOsmRelationIds.length > 0),
-    maskOsmRelationIds: joinCommaList(config.maskOsmRelationIds.map(String)),
-    maskBufferKm: String(config.maskBufferKm),
+    ...maskConfigToFormFields(config),
     welcomeEnabled: toTrueFalseString(config.welcome?.enabled ?? false),
     welcomeTitle: config.welcome?.title ?? '',
     welcomeSubtitle: config.welcome?.subtitle ?? '',
