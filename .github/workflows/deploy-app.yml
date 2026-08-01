@@ -117,9 +117,10 @@ jobs:
             set -e
 
             if [ "$status" -eq 10 ]; then
-              echo "==> Pending migrations — running Scaleway backup (~1 min)"
-              "$HOME/ionos-db-backup.sh"
-              echo "==> Backup finished"
+              # Temporary: backup script lives on quirky-penguin, not github $HOME.
+              # Re-enable once FixMyBerlin/backup-script#1 host ownership is settled.
+              echo "==> Pending migrations — SKIPPING Scaleway backup (temporary; see FixMyBerlin/backup-script#1)"
+              # "$HOME/ionos-db-backup.sh"
             elif [ "$status" -ne 0 ]; then
               echo "==> Migration status check failed (exit $status)" >&2
               exit "$status"
