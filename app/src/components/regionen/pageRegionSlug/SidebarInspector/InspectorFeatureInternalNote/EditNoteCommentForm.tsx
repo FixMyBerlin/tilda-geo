@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
-import { Textarea } from '@/components/shared/form/fields/Textarea'
+import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow, notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
@@ -106,13 +106,11 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
         >
           {(form) => (
             <>
-              <Textarea
+              <MarkdownEditorField
                 form={form}
                 name="body"
                 label="Antwort bearbeiten (Markdown)"
                 placeholder="Antwort"
-                className="my-3 min-h-28 border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset"
-                rows={6}
               />
 
               <div className="mt-6 flex items-center justify-between leading-tight">

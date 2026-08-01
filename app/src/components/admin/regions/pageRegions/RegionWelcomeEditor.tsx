@@ -1,8 +1,9 @@
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { useEffect, useRef, useState } from 'react'
 import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
-import { MarkdownEditorField } from '@/components/admin/regions/pageRegions/MarkdownEditorField'
 import { FileUploadButton } from '@/components/shared/form/fields/FileUploadButton'
+import { MarkdownEditor } from '@/components/shared/form/fields/MarkdownEditor'
+import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import type { FormApi } from '@/components/shared/form/types'
@@ -32,12 +33,13 @@ type WelcomeSection = RegionFormInput['welcomeSections'][number]
 
 const welcomeImageHelpText = `Empfehlung für Rasterbilder: mindestens ${REGION_WELCOME_IMAGE_MIN_WIDTH_PX} px breit (entspricht ${REGION_WELCOME_IMAGE_MIN_WIDTH_PX / 2} px auf Retina-Displays), ideal ${REGION_WELCOME_IMAGE_RECOMMENDED_WIDTH_PX} px; Seitenverhältnis zwischen 3:2 und 16:9. Formate: PNG, JPEG, WebP oder SVG; max. ${REGION_UPLOAD_MAX_MB} MB. Das Bild wird als großes Visual neben dem Willkommenstext angezeigt — ohne Bild erscheint ein Platzhalter.`
 
-const emptySection = (sortOrder: number): WelcomeSection => ({
-  title: '',
-  bodyMarkdown: '',
-  sortOrder,
-  _key: newClientListKey(),
-})
+const emptySection = (sortOrder: number) =>
+  ({
+    title: '',
+    bodyMarkdown: '',
+    sortOrder,
+    _key: newClientListKey(),
+  }) satisfies WelcomeSection
 
 const isEmptySection = (section: WelcomeSection) => !section.title.trim()
 
@@ -216,16 +218,13 @@ function WelcomeSectionsEditor({
                 }
               />
             </label>
-            <label className="flex flex-col gap-1 text-sm">
+            <div className="flex flex-col gap-1 text-sm">
               <span className="font-medium text-gray-700">Antwort (Markdown)</span>
-              <textarea
-                className="min-h-24 rounded border border-gray-300 px-2 py-1 font-mono text-sm"
+              <MarkdownEditor
                 value={section.bodyMarkdown}
-                onChange={(event) =>
-                  commit(updateSectionRow(rows, index, { bodyMarkdown: event.target.value }))
-                }
+                onChange={(bodyMarkdown) => commit(updateSectionRow(rows, index, { bodyMarkdown }))}
               />
-            </label>
+            </div>
             {!isTrailingEmpty ? (
               <AdminTrashIconButton
                 ariaLabel="Abschnitt entfernen"
@@ -311,6 +310,7 @@ export function RegionWelcomeEditor({ form, regionId, regionSlug }: Props) {
                 form={form}
                 name="welcomeBodyMarkdown"
                 label="Intro (Markdown)"
+                help="Markdown wird auf der Regionsseite gerendert."
                 optional
               />
               <form.Subscribe selector={(state) => state.values.welcomeImageUploadId}>

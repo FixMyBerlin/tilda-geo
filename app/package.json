@@ -134,6 +134,7 @@
     "@turf/helpers": "7.3.5",
     "@turf/truncate": "7.3.5",
     "@turf/turf": "7.3.5",
+    "@uiw/react-md-editor": "4.1.1",
     "adler-32": "1.3.1",
     "better-auth": "1.6.23",
     "betterknown": "1.2.0",
