@@ -16,16 +16,6 @@ type Props = {
   feature: Feature
 }
 
-const getFeatureLengthMeters = (feature: Feature) => {
-  const lengthValue = feature.properties?.length
-  if (typeof lengthValue === 'number' && lengthValue > 0) return lengthValue
-  if (typeof lengthValue === 'string') {
-    const parsed = Number.parseFloat(lengthValue)
-    if (Number.isFinite(parsed) && parsed > 0) return parsed
-  }
-  return null
-}
-
 export const terrainProfileQueryKey = (feature: Feature, geometryFingerprint: string) => [
   'terrain-profile',
   feature.id ?? feature.properties?.id ?? geometryFingerprint,
@@ -47,10 +37,7 @@ export const SelectedFeatureTerrainProfilePanel = ({ feature }: Props) => {
 
   const query = useQuery({
     queryKey: terrainProfileQueryKey(feature, geometryFingerprint),
-    queryFn: () =>
-      buildTerrainProfileData(geometry!, {
-        featureLengthMeters: getFeatureLengthMeters(feature),
-      }),
+    queryFn: () => buildTerrainProfileData(geometry!),
     enabled: is3dTerrainActive && geometry !== null,
     staleTime: 5 * 60 * 1000,
   })

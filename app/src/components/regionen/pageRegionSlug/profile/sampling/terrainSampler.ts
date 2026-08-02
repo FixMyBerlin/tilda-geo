@@ -75,7 +75,12 @@ const getTileForCoordinate = async (lng: number, lat: number) => {
   const cached = tileCache.get(cacheKey)
   if (cached) return cached
 
-  const promise = loadTile(TILE_ZOOM, tileX, tileY)
+  const promise = loadTile(TILE_ZOOM, tileX, tileY).catch((error) => {
+    tileCache.delete(cacheKey)
+    const cacheIndex = cacheOrder.indexOf(cacheKey)
+    if (cacheIndex >= 0) cacheOrder.splice(cacheIndex, 1)
+    throw error
+  })
   tileCache.set(cacheKey, promise)
   rememberCacheKey(cacheKey)
   return promise

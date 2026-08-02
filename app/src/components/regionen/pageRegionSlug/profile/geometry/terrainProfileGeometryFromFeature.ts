@@ -1,4 +1,4 @@
-import { flatten } from '@turf/turf'
+import { flatten, length, lineString } from '@turf/turf'
 import type { Feature, LineString } from 'geojson'
 import type { TerrainProfileLine } from '../types'
 
@@ -22,13 +22,15 @@ export const terrainProfileGeometryFromFeature = (feature: Feature) => {
   if (!firstLine) return null
 
   let longest: LineString = firstLine.geometry
-  let longestLength = longest.coordinates.length
+  let longestLengthMeters = length(lineString(longest.coordinates), { units: 'meters' })
 
   for (const lineFeature of lineFeatures.slice(1)) {
-    const coordinateCount = lineFeature.geometry.coordinates.length
-    if (coordinateCount > longestLength) {
+    const segmentLengthMeters = length(lineString(lineFeature.geometry.coordinates), {
+      units: 'meters',
+    })
+    if (segmentLengthMeters > longestLengthMeters) {
       longest = lineFeature.geometry
-      longestLength = coordinateCount
+      longestLengthMeters = segmentLengthMeters
     }
   }
 

@@ -9,6 +9,27 @@ export const ResetCameraWhen3dDisabled = () => {
   const { is3dActive } = useBg3dParam()
   const { mapParam, setMapParam } = useMapParam()
   const was3dActiveRef = useRef(is3dActive)
+  const didNormalizeInactiveCameraRef = useRef(false)
+
+  useEffect(
+    function normalizeMapParamCameraWhen3dInactiveOnLoad() {
+      if (didNormalizeInactiveCameraRef.current || is3dActive) return
+      if (!hasNonNeutralCamera(mapParam)) return
+
+      didNormalizeInactiveCameraRef.current = true
+
+      const map = mainMap?.getMap()
+      if (map) {
+        map.jumpTo({ bearing: 0, pitch: 0 })
+      }
+
+      void setMapParam(
+        { zoom: mapParam.zoom, lat: mapParam.lat, lng: mapParam.lng },
+        { history: 'replace' },
+      )
+    },
+    [is3dActive, mainMap, mapParam, setMapParam],
+  )
 
   useEffect(
     function resetCameraAndMapParamWhen3dDisabled() {

@@ -33,10 +33,7 @@ const buildStats = (samples: TerrainProfileData['samples'], distanceMeters: numb
   } satisfies TerrainProfileStats
 }
 
-export const buildTerrainProfileData = async (
-  geometry: TerrainProfileLine,
-  options?: { featureLengthMeters?: number | null },
-) => {
+export const buildTerrainProfileData = async (geometry: TerrainProfileLine) => {
   const pathSamples = sampleLineForTerrainProfile(geometry)
   const elevations = await sampleTerrainElevations(pathSamples)
   const samples = pathSamples.map((sample, index) => ({
@@ -44,11 +41,7 @@ export const buildTerrainProfileData = async (
     elevationMeters: elevations[index] ?? 0,
   }))
 
-  const turfDistanceMeters = length(lineString(geometry.coordinates), { units: 'meters' })
-  const distanceMeters =
-    typeof options?.featureLengthMeters === 'number' && options.featureLengthMeters > 0
-      ? options.featureLengthMeters
-      : turfDistanceMeters
+  const distanceMeters = length(lineString(geometry.coordinates), { units: 'meters' })
 
   return {
     samples,

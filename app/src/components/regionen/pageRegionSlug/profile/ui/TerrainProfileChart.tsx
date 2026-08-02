@@ -37,7 +37,9 @@ export const TerrainProfileChart = ({ profile }: Props) => {
     const svg = svgRef.current
     if (!svg) return
     const rect = svg.getBoundingClientRect()
-    const relativeX = event.clientX - rect.left - CHART_PADDING.left
+    const scaleX = width / rect.width
+    const xInViewBox = (event.clientX - rect.left) * scaleX
+    const relativeX = xInViewBox - CHART_PADDING.left
     const ratio = Math.min(1, Math.max(0, relativeX / innerWidth))
     const targetDistance = ratio * maxDistance
 

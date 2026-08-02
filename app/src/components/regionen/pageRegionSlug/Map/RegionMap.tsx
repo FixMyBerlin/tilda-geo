@@ -21,7 +21,10 @@ import {
   useFeaturesParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
-import type { MapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
+import {
+  hasNonNeutralCamera,
+  type MapParam,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import {
   interactivityConfiguration,
@@ -236,6 +239,8 @@ export const RegionMap = () => {
     if (is3dActive) {
       nextMapParam.bearing = bearing
       nextMapParam.pitch = pitch
+    } else if (hasNonNeutralCamera({ zoom, lat: latitude, lng: longitude, bearing, pitch })) {
+      mainMap?.getMap().jumpTo({ bearing: 0, pitch: 0 })
     }
     void setMapParam(nextMapParam, { history: 'replace' })
     updateMapBounds(mainMap?.getBounds() || null)
@@ -280,8 +285,8 @@ export const RegionMap = () => {
         longitude: mapParam.lng,
         latitude: mapParam.lat,
         zoom: mapParam.zoom,
-        bearing: mapParam.bearing ?? 0,
-        pitch: mapParam.pitch ?? 0,
+        bearing: is3dActive ? (mapParam.bearing ?? 0) : 0,
+        pitch: is3dActive ? (mapParam.pitch ?? 0) : 0,
       }}
       // We prevent users from zooming out too far which puts too much load on our vector tiles db
       {...mapMaxBoundsSettings}
