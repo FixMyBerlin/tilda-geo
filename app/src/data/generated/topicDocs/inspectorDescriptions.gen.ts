@@ -26,6 +26,10 @@ const data = {
         'Seitlicher Versatz der Liniengeometrie in Metern. Der Wert wird im Processing aus der halben Straßenbreite berechnet; positive Werte liegen links der Referenzlinie, negative rechts.',
     },
     values: {
+      width_confidence: {
+        high: 'Wert stammt aus dem OSM-Tag `width`.',
+        low: 'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
+      },
       oneway: {
         assumed_no:
           'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.',
@@ -108,7 +112,12 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
-    values: {},
+    values: {
+      width_confidence: {
+        high: 'Wert stammt aus dem OSM-Tag `width`.',
+        low: 'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
+      },
+    },
   },
   atlas_roadsPathClasses: {
     keys: {
@@ -125,7 +134,12 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
-    values: {},
+    values: {
+      width_confidence: {
+        high: 'Wert stammt aus dem OSM-Tag `width`.',
+        low: 'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
+      },
+    },
   },
   atlas_trafficSigns: {
     keys: {
