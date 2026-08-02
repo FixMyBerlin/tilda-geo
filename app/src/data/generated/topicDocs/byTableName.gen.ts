@@ -1198,7 +1198,7 @@ const data = {
       },
       {
         key: 'width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
         values: [
@@ -6059,7 +6059,7 @@ const data = {
       },
       {
         key: 'geom_sources',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Geometrie-Quellen',
         purpose: 'qa',
         description: 'Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).',
@@ -6122,7 +6122,7 @@ const data = {
       },
       {
         key: 'tag_sources',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Tag-Quellen',
         purpose: 'qa',
         description: 'Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).',
@@ -9924,7 +9924,7 @@ const data = {
       },
       {
         key: 'width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
         values: [
@@ -11283,7 +11283,7 @@ const data = {
       },
       {
         key: 'width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
         values: [

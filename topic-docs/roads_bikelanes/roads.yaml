@@ -144,6 +144,7 @@ attributes:
   - key: width_source
     purpose: qa
     label: Quelle Breite
+    format: sanitized_strings
     values:
       - value: ALKIS
         label: Aus ALKIS Daten ausgemessen
