@@ -10,20 +10,24 @@ type Props = {
 
 /**
  * Animated height collapse for disclosure-style content. Unlike scale/opacity
- * transitions, animating the real height means surrounding layout (sidebar,
+ * transitions, animating real layout height means surrounding layout (sidebar,
  * bottom sheet) grows/shrinks smoothly instead of snapping.
  *
- * Content stays mounted while collapsed (required for height measurement);
+ * Uses CSS grid `0fr` / `1fr` instead of Motion `height: 'auto'`. Animating to
+ * `auto` pins an inline pixel height that goes stale when siblings change size
+ * (e.g. Höhenprofil unmounting) and leaves the inspector looking short/clipped.
+ *
+ * Content stays mounted while collapsed (required for measurement);
  * `inert` keeps the hidden content out of tab order and the a11y tree.
  */
 export const MotionCollapse = ({ open, children, className }: Props) => (
   <motion.div
     initial={false}
-    animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
+    animate={{ gridTemplateRows: open ? '1fr' : '0fr', opacity: open ? 1 : 0 }}
     transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
     inert={!open}
-    className={twMerge('overflow-hidden', className)}
+    className={twMerge('grid', className)}
   >
-    {children}
+    <div className="overflow-hidden">{children}</div>
   </motion.div>
 )

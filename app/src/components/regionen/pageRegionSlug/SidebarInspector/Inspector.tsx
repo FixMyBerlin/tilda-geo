@@ -4,6 +4,7 @@ import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hoo
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
+import { SelectedFeatureTerrainProfilePanel } from '../terrainProfile/ui/SelectedFeatureTerrainProfilePanel'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
@@ -11,6 +12,7 @@ import { InspectorFeatureOsmNote } from './InspectorFeatureOsmNote'
 import { InspectorFeatureQa } from './InspectorFeatureQa'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 import { InspectorFeatureTilda } from './InspectorFeatureTilda'
+import { InspectorHints } from './InspectorHints'
 import { ToolsMissingTranslations } from './Tools/ToolsMissingTranslations'
 
 export type InspectorFeatureProperty = NonNullable<GeoJSON.GeoJsonProperties>
@@ -60,6 +62,10 @@ export const Inspector = ({ features }: Props) => {
 
         return <div key={key}>{content}</div>
       })}
+
+      <SelectedFeatureTerrainProfilePanel features={features} />
+
+      <InspectorHints />
 
       <ToolsMissingTranslations />
     </div>

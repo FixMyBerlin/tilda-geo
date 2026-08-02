@@ -24,12 +24,9 @@ export function PageRegionSlug() {
       {isDesktop ? <HeaderRegionen /> : null}
       <motion.main layout className="z-0 min-h-0 grow">
         {data.authorized ? (
+          // Clip the oversized map canvas (see MapInterface); overlays size to this box.
           <div className="relative h-full overflow-hidden">
-            {/* Desktop: fixed full-viewport map height clipped by the flex main area so the
-                welcome panel can push the map down without MapLibre re-layout each frame. */}
-            <div className="h-full sm:absolute sm:inset-x-0 sm:top-0 sm:h-(--app-height,100dvh)">
-              <MapInterface />
-            </div>
+            <MapInterface />
           </div>
         ) : (
           <RegionAccessDenied status={data.region.status} />

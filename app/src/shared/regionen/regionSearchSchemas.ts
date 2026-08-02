@@ -100,6 +100,7 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.data]: searchStringArray().default([]),
   [searchParamsRegistry.f]: optionalSearchString(),
   [searchParamsRegistry.bg]: backgroundSearchParam(),
+  [searchParamsRegistry.bg3d]: searchBoolean(false),
   [searchParamsRegistry.draw]: optionalSearchString(),
   [searchParamsRegistry.osmNotes]: searchBoolean(false),
   [searchParamsRegistry.osmNote]: optionalSearchString(),

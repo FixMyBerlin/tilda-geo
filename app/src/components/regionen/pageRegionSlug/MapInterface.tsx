@@ -33,17 +33,15 @@ export const MapInterface = () => {
   // inherently mobile-only (MobileMapHeader, MobileLayerButton) gate themselves (return null).
   return (
     <MapProvider>
-      <div className="relative flex h-full w-full flex-row gap-4">
-        {/* The map is a full-screen backdrop on mobile (`fixed inset-0`) so it bleeds *under* the
-        iOS status bar and Safari toolbar — edge to edge. The floating UI below stays positioned
-        against this *visible-height* container (`h-full` of the `--app-height` page wrapper), so
-        the header/controls remain clear of the browser chrome (esp. the Chrome iOS address bar).
-        On desktop the map fills its absolute full-viewport-height parent (see PageRegionSlug),
-        clipped at the bottom when the welcome panel expands. `z-0` keeps it behind the overlays
-        (which are z-10+). */}
-        <div className="fixed inset-0 z-0 sm:absolute sm:inset-0 sm:h-full sm:w-full">
+      {/* Visible chrome box (= main under the header). Inspector/sidebars size to this. */}
+      <div className="relative h-full w-full">
+        {/* Map canvas only: full viewport tall on desktop so welcome-panel open/close can clip
+            the bottom without MapLibre resizing. Parent `overflow-hidden` clips the overflow.
+            Mobile stays `fixed inset-0` for edge-to-edge under browser chrome. */}
+        <div className="fixed inset-0 z-0 sm:absolute sm:inset-x-0 sm:top-0 sm:h-(--app-height,100dvh) sm:w-full">
           <RegionMap />
         </div>
+
         <MobileMapHeader />
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
         <DesktopOnly>
