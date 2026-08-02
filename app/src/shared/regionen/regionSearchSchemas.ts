@@ -8,6 +8,11 @@ import {
   jurlStringify,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v1/jurlParseStringify'
 import {
+  parseBg3dParam,
+  serializeBg3dParam,
+  type Bg3dModule,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/bg3dParam'
+import {
   parseMapParam,
   serializeMapParam,
   type MapParam,
@@ -90,6 +95,14 @@ const backgroundSearchParam = () =>
 
 const qaSearchParam = () => z.preprocess(normalizeQaSearchParam, z.string().default('').catch(''))
 
+const normalizeBg3dSearchParam = (raw: unknown) => {
+  const wire = optionalSearchString().safeParse(raw).data
+  return serializeBg3dParam(parseBg3dParam(wire)) ?? ''
+}
+
+const bg3dSearchParam = () =>
+  z.preprocess(normalizeBg3dSearchParam, z.string().default('').catch(''))
+
 export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
 
 export type RegionDialogParam = z.infer<typeof regionDialogParamSchema>
@@ -100,6 +113,7 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.data]: searchStringArray().default([]),
   [searchParamsRegistry.f]: optionalSearchString(),
   [searchParamsRegistry.bg]: backgroundSearchParam(),
+  [searchParamsRegistry.bg3d]: bg3dSearchParam(),
   [searchParamsRegistry.draw]: optionalSearchString(),
   [searchParamsRegistry.osmNotes]: searchBoolean(false),
   [searchParamsRegistry.osmNote]: optionalSearchString(),
@@ -135,4 +149,8 @@ export const getQaParamFromSearch = (search: RegionSearch): QaParamData => {
 
 export const getDrawAreasFromSearch = (search: RegionSearch): DrawArea[] => {
   return parseDrawParam(search[searchParamsRegistry.draw])
+}
+
+export const getBg3dModulesFromSearch = (search: RegionSearch): Bg3dModule[] => {
+  return parseBg3dParam(search[searchParamsRegistry.bg3d] || undefined)
 }

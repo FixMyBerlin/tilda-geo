@@ -4,6 +4,7 @@ export const searchParamsRegistry = {
   data: 'data',
   f: 'f', // selected features
   bg: 'bg',
+  bg3d: 'bg3d',
   draw: 'draw',
   osmNotes: 'osmNotes', // show osmNotes on the map
   osmNote: 'osmNote', // show new osmNotes dialogue

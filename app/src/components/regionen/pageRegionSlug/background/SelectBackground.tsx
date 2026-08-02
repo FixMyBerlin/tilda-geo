@@ -10,6 +10,7 @@ import {
   type BackgroundParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/backgroundParam.const'
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
+import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
@@ -18,11 +19,14 @@ import {
   mobileControlButtonActiveClassName,
   mobileControlButtonClassName,
 } from '../mobile/mobileControlButton.const'
+import { Background3dToggleRow } from './Background3dToggleRow'
 import { ListOption } from './ListOption'
 
 export const SelectBackground: React.FC = () => {
   const { mainMap } = useMap()
   const { backgroundParam, setBackgroundParam } = useBackgroundParam()
+  const { is3dBuildingActive, is3dTerrainActive, toggle3dBuildings, toggle3dTerrain } =
+    useBg3dParam()
   const { region } = useRegionLoaderData()
   const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -42,6 +46,28 @@ export const SelectBackground: React.FC = () => {
 
   // Mobile: an icon button that opens the same options as a bottom sheet (consistent
   // with the other mobile controls), instead of the desktop dropdown.
+  const threeDOptionsSection = (
+    <div className="border-t border-gray-200 px-2 py-2">
+      <p className="px-1 pb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+        3D-Optionen
+      </p>
+      <Background3dToggleRow
+        id="bg3d-buildings"
+        checked={is3dBuildingActive}
+        onChange={toggle3dBuildings}
+        label="3D-Gebäude"
+        description="Vereinfachte 3D-Gebäude anzeigen"
+      />
+      <Background3dToggleRow
+        id="bg3d-terrain"
+        checked={is3dTerrainActive}
+        onChange={toggle3dTerrain}
+        label="Höhenrelief"
+        description="Höhenrelief/Höhenoberfläche anzeigen"
+      />
+    </div>
+  )
+
   if (!isSmBreakpointOrAbove) {
     const options: { value: BackgroundParam; name: string }[] = [
       ...backgrounds.map(({ id, name }) => ({ value: id, name })),
@@ -102,6 +128,7 @@ export const SelectBackground: React.FC = () => {
               })}
             </div>
           </div>
+          {threeDOptionsSection}
         </MobileBottomSheet>
       </section>
     )
@@ -134,6 +161,7 @@ export const SelectBackground: React.FC = () => {
           value={defaultBackgroundParam}
           name="Standard"
         />
+        {threeDOptionsSection}
       </ListboxOptions>
     </Listbox>
   )

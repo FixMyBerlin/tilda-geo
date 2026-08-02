@@ -14,6 +14,7 @@ import {
   useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import {
   convertToUrlFeature,
   isPersistableFeature,
@@ -37,15 +38,19 @@ import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
+import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { QaZoomNotice } from './QaZoomNotice'
+import { ResetCameraWhen3dDisabled } from './ResetCameraWhen3dDisabled'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
+import { SourcesLayersMap3d, MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/SourcesLayersMap3d'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
+import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
 import { safeSetFeatureState } from './utils/safeSetFeatureState'
@@ -72,6 +77,7 @@ const NO_INTERACTIVE_LAYERS: string[] = []
 
 export const RegionMap = () => {
   const { mapParam, setMapParam } = useMapParam()
+  const { is3dActive, is3dTerrainActive } = useBg3dParam()
   const { setFeaturesParam } = useFeaturesParam()
   const {
     replaceInspectorFeatures,
@@ -191,8 +197,9 @@ export const RegionMap = () => {
   }
 
   const handleLoad = (event: MapLibreEvent) => {
-    // We disable rotation once after map startup to keep interactions consistent.
-    event.target.touchZoomRotate.disableRotation()
+    if (!is3dActive) {
+      event.target.touchZoomRotate.disableRotation()
+    }
 
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
     markMapLoaded()
@@ -224,8 +231,13 @@ export const RegionMap = () => {
 
   const handleMoveEnd = (event: ViewStateChangeEvent) => {
     // Note: <SourcesAndLayersOsmNotes> simulates a moveEnd by watching the lat/lng url params
-    const { latitude, longitude, zoom } = event.viewState
-    void setMapParam({ zoom, lat: latitude, lng: longitude }, { history: 'replace' })
+    const { latitude, longitude, zoom, bearing, pitch } = event.viewState
+    const nextMapParam: MapParam = { zoom, lat: latitude, lng: longitude }
+    if (is3dActive) {
+      nextMapParam.bearing = bearing
+      nextMapParam.pitch = pitch
+    }
+    void setMapParam(nextMapParam, { history: 'replace' })
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
@@ -268,6 +280,8 @@ export const RegionMap = () => {
         longitude: mapParam.lng,
         latitude: mapParam.lat,
         zoom: mapParam.zoom,
+        bearing: mapParam.bearing ?? 0,
+        pitch: mapParam.pitch ?? 0,
       }}
       // We prevent users from zooming out too far which puts too much load on our vector tiles db
       {...mapMaxBoundsSettings}
@@ -287,26 +301,42 @@ export const RegionMap = () => {
       onData={startMapDataLoading}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
-      dragRotate={false}
+      dragRotate={is3dActive}
+      terrain={
+        is3dTerrainActive ? { source: MAPTERHORN_DEM_SOURCE_ID, exaggeration: 1.5 } : undefined
+      }
+      sky={
+        is3dActive
+          ? {
+              'sky-type': 'atmosphere',
+              'sky-atmosphere-sun': [0.0, 90.0],
+              'sky-atmosphere-sun-intensity': 15,
+            }
+          : undefined
+      }
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
     >
       {/* Order: First Background Sources, then Vector Tile Sources */}
       <UpdateFeatureState />
       <SourcesLayerRasterBackgrounds />
+      <SourcesLayersMap3d />
       <SourcesLayersSystemDatasets />
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
+      <TerrainProfileHoverMarkerLayer />
       <SearchResultLayers />
       <AttributionControl compact={true} position="bottom-left" />
 
-      {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}
-      {isSmBreakpointOrAbove && (
-        <NavigationControl showCompass={false /* TODO: See Story */} visualizePitch={true} />
+      {/* Desktop always gets zoom controls; mobile only when 3D is active (compass reset). */}
+      {(isSmBreakpointOrAbove || is3dActive) && (
+        <NavigationControl showCompass={is3dActive} visualizePitch={true} />
       )}
+      <Map3dTouchRotation />
+      <ResetCameraWhen3dDisabled />
       <Calculator />
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

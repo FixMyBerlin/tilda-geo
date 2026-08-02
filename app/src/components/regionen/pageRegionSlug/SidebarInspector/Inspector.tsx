@@ -4,6 +4,8 @@ import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hoo
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
+import { isTerrainProfileEligibleFeature } from '../profile/geometry/terrainProfileGeometryFromFeature'
+import { SelectedFeatureTerrainProfilePanel } from '../profile/ui/SelectedFeatureTerrainProfilePanel'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { InspectorFeatureInternalNote } from './InspectorFeatureInternalNote'
@@ -28,6 +30,7 @@ type Props = {
 
 export const Inspector = ({ features }: Props) => {
   const { data: regionDatasets } = useRegionDatasetsQuery()
+  const profileFeature = features.find((feature) => isTerrainProfileEligibleFeature(feature))
 
   return (
     <div className="space-y-4">
@@ -60,6 +63,8 @@ export const Inspector = ({ features }: Props) => {
 
         return <div key={key}>{content}</div>
       })}
+
+      {profileFeature && <SelectedFeatureTerrainProfilePanel feature={profileFeature} />}
 
       <ToolsMissingTranslations />
     </div>
