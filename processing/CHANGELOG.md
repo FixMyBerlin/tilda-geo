@@ -4,6 +4,14 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### `roads`, `roadsPathClasses`, `bikelanes`
+
+- `width` falls back to OSM `est_width` when `width` is missing or unparsable.
+- New `width_confidence`: `high` (from `width`) | `low` (from `est_width`). Missing when there is no usable width.
+- `width_source` (`source:width`) is only set together with `width`; it is dropped when `width` is present but unparsable. `bikelanes` now sanitizes it like `roads`.
+- `bikelanes` todo `missing_width` no longer lists ways that have `est_width` (the campaign already asks mappers to add `est_width` when they can only estimate).
+- `routing` inherits the fallback via `width` (without `width_confidence`).
+
 ### `parkings`
 
 - Tagged `capacity` of a parking line that is cut into several segments: the rounding remainder goes to the longest segment. When two segments have exactly the same length, the one with the lower segment id now gets it. Before, the choice was random, so `capacity` could move between the two segments from one run to the next. The sum per parking line is unchanged.
