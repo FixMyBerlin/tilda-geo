@@ -93,6 +93,13 @@ export const NoticeMaprouletteTask = ({
   // The location of the MR pin is the best we can use, but we can always fall back to the one we use internally elsewhere
   const [centerLng, centerLat] = data?.location?.coordinates || pointFromGeometry(geometry)
   const rapidCampaignLink = `https://rapideditor.org/edit#map=19.5/${centerLat}/${centerLng}&maproulette=${mapRouletteId}&datasets=&disable_features=points,building_parts,indoor,boundaries,pistes,aerialways,power`
+  // Experimental MapRoulette-in-iD (https://github.com/tordans/iD/pull/4)
+  const idMaprouletteCampaignLink = [
+    `https://deploy-preview-4--tordans-id-experiments.netlify.app/#disable_features=boundaries`,
+    `map=19.5/${centerLat}/${centerLng}`,
+    `maproulette=${mapRouletteId}`,
+    ...(projectKey.endsWith('__mapillary') ? ['photo_dates=2024-02-23_'] : []),
+  ].join('&')
 
   const maprouletteTaskLink = isLoading
     ? undefined
@@ -133,8 +140,8 @@ export const NoticeMaprouletteTask = ({
       <div className="mb-4 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
         {showMaproulette && (
           <>
-            <Link href={rapidCampaignLink} blank button>
-              Kampagne im Rapid Editor bearbeiten
+            <Link href={idMaprouletteCampaignLink} blank button>
+              Kampagne im iD Editor bearbeiten
             </Link>
             {/* {osmEditIdUrlHref && (
               <Link href={osmEditIdUrlHref} blank button>
