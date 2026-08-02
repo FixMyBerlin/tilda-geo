@@ -79,11 +79,28 @@ describe('bikelanes', function()
       assert.are.equal(result[1].width, 5)
     end)
 
+    it('handles est_width alone with low width_confidence', function()
+      local input_object = {
+        tags = {
+          highway = 'path',
+          bicycle = 'designated',
+          foot = 'designated',
+          est_width = '2.5',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(result[1].width, 2.5)
+      assert.are.equal(result[1].width_confidence, 'low')
+    end)
+
     it('handles source:cycleway:left:width for width_source', function()
       local input_object = {
         tags = {
           highway = 'primary',
           ['cycleway:left'] = 'lane',
+          ['cycleway:left:width'] = '2 m',
           ['source:cycleway:left:width'] = 'infra3D',
         },
         id = 1,
@@ -100,6 +117,7 @@ describe('bikelanes', function()
           highway = 'primary',
           ['sidewalk:left'] = 'yes',
           ['sidewalk:left:bicycle'] = 'yes',
+          ['sidewalk:both:width'] = '2 m',
           ['source:sidewalk:both:width'] = 'infra3D',
         },
         id = 1,
@@ -115,6 +133,7 @@ describe('bikelanes', function()
         tags = {
           highway = 'primary',
           ['cycleway:left'] = 'lane',
+          ['cycleway:width'] = '2 m',
           ['source:cycleway:width'] = 'infra3D',
         },
         id = 1,
@@ -131,6 +150,7 @@ describe('bikelanes', function()
           highway = 'path',
           ['bicycle'] = 'designated',
           ['foot'] = 'designated',
+          ['cycleway:width'] = '2 m',
           ['source:cycleway:width'] = 'infra3D',
         },
         id = 1,
@@ -147,6 +167,7 @@ describe('bikelanes', function()
           highway = 'primary',
           ['sidewalk:left'] = 'yes',
           ['sidewalk:left:bicycle'] = 'yes',
+          ['cycleway:width'] = '2 m',
           ['source:cycleway:width'] = 'infra3D',
         },
         id = 1,
@@ -162,6 +183,7 @@ describe('bikelanes', function()
         tags = {
           highway = 'footway',
           ['bicycle'] = 'yes',
+          ['cycleway:width'] = '2 m',
           ['source:cycleway:width'] = 'infra3D',
         },
         id = 1,

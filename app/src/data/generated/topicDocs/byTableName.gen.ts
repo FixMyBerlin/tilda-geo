@@ -1213,6 +1213,25 @@ const data = {
         ],
       },
       {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Direkt gemessen',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'low',
+            label: 'Geschätzt',
+            description:
+              'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
+          },
+        ],
+      },
+      {
         key: 'oneway',
         type: 'string',
         label: 'Verkehrsrichtung',
@@ -9939,6 +9958,25 @@ const data = {
         ],
       },
       {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Direkt gemessen',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'low',
+            label: 'Geschätzt',
+            description:
+              'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
+          },
+        ],
+      },
+      {
         key: 'oneway',
         type: 'string',
         label: 'Verkehrsrichtung',
@@ -11294,6 +11332,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Direkt gemessen',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'low',
+            label: 'Geschätzt',
+            description:
+              'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
           },
         ],
       },

@@ -128,6 +128,8 @@ attributes:
     ref: roads.width_effective
   - key: width_source
     ref: roads.width_source
+  - key: width_confidence
+    ref: roads.width_confidence
   - key: oneway
     label: Verkehrsrichtung
     values:
