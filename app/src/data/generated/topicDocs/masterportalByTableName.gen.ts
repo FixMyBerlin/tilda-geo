@@ -502,6 +502,15 @@ const data = {
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
         },
       },
+      width_confidence: {
+        name: 'Konfidenz der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          low: 'Niedrig (geschätzt)',
+        },
+      },
       oneway: {
         name: 'Verkehrsrichtung',
         condition: 'contains',
@@ -4349,6 +4358,15 @@ const data = {
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
         },
       },
+      width_confidence: {
+        name: 'Konfidenz der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          low: 'Niedrig (geschätzt)',
+        },
+      },
       oneway: {
         name: 'Verkehrsrichtung',
         condition: 'contains',
@@ -4961,6 +4979,15 @@ const data = {
         format: {
           ALKIS: 'Aus ALKIS Daten ausgemessen',
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+        },
+      },
+      width_confidence: {
+        name: 'Konfidenz der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          low: 'Niedrig (geschätzt)',
         },
       },
       surface: {
