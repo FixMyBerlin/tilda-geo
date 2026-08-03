@@ -7,6 +7,11 @@ import { geoDataClient } from '@/server/prisma-client.server'
 // They take a `query_params json` 4th argument — Martin passes URL query params
 // as JSON, e.g. `…/planning_hexagons/{z}/{x}/{y}?run_id=42`.
 //
+// Signatur und Rumpf müssen mit planning-worker/sql/martin_functions.sql
+// übereinstimmen: beide Seiten legen dieselben Funktionen an (App beim Start,
+// Worker beim Lauf). Abweichende Parameter-Defaults lässt Postgres bei
+// CREATE OR REPLACE nicht zu (42P13).
+//
 // A completed run is immutable, so its tiles are cacheable forever under the
 // run_id-keyed URL (see configs/nginx.conf `planning_cache` zone). A re-run
 // produces a new run_id → new URL → automatic cache busting.
@@ -76,6 +81,16 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;`,
   )
+  // H3-Auflösung der Zeile: BASE (13) für hohe Zoomstufen, AGG (11) als grobes
+  // Aggregat darunter. planning_hexagons wählt je Zoomstufe.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution smallint NOT NULL DEFAULT 13;`,
+  )
+  // Hexagon liegt auf einem Gebäude (public._buildings) → hart ausgeschlossen;
+  // das Flag erlaubt der Sidebar, den Ausschlussgrund anzuzeigen.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;`,
+  )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
       run_id     bigint NOT NULL,
@@ -93,6 +108,9 @@ async function ensurePlanningSchema() {
     );`)
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_hexagons_run_id_idx ON planning.scenario_hexagons (run_id);`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `CREATE INDEX IF NOT EXISTS scenario_hexagons_run_res_idx ON planning.scenario_hexagons (run_id, resolution);`,
   )
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_hexagons_geom_idx ON planning.scenario_hexagons USING gist (geom);`,
@@ -118,11 +136,13 @@ async function ensurePlanningSchema() {
 
 async function registerHexagonsFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_hexagons(z integer, x integer, y integer, query_params json)
+    CREATE OR REPLACE FUNCTION public.planning_hexagons(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       mvt bytea;
       rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
+      bounds geometry := ST_TileEnvelope(z, x, y);
+      res_val smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
     BEGIN
       IF rid IS NULL THEN
         RETURN NULL;
@@ -146,10 +166,11 @@ async function registerHexagonsFunction() {
           score_eigendaten,
           cluster_area_m2,
           eignungsklasse,
+          gebaeude,
           fahrbahn,
-          ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
+          ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_hexagons
-        WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
+        WHERE run_id = rid AND resolution = res_val AND (geom && bounds)
       ) AS tile;
       RETURN mvt;
     END
@@ -176,6 +197,7 @@ async function registerHexagonsFunction() {
           score_eigendaten: 'real',
           cluster_area_m2: 'real',
           eignungsklasse: 'text',
+          gebaeude: 'boolean',
           fahrbahn: 'boolean',
         },
       },
@@ -188,11 +210,12 @@ async function registerHexagonsFunction() {
 
 async function registerVegetationFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_vegetation(z integer, x integer, y integer, query_params json)
+    CREATE OR REPLACE FUNCTION public.planning_vegetation(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       mvt bytea;
       rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
+      bounds geometry := ST_TileEnvelope(z, x, y);
     BEGIN
       IF rid IS NULL THEN
         RETURN NULL;
@@ -201,9 +224,9 @@ async function registerVegetationFunction() {
         SELECT
           ndvi,
           flaeche_m2,
-          ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
+          ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_vegetation
-        WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
+        WHERE run_id = rid AND (geom && bounds)
       ) AS tile;
       RETURN mvt;
     END
@@ -218,11 +241,12 @@ async function registerVegetationFunction() {
 
 async function registerCarriagewaysFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_carriageways(z integer, x integer, y integer, query_params json)
+    CREATE OR REPLACE FUNCTION public.planning_carriageways(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       mvt bytea;
       rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
+      bounds geometry := ST_TileEnvelope(z, x, y);
     BEGIN
       IF rid IS NULL THEN
         RETURN NULL;
@@ -230,9 +254,9 @@ async function registerCarriagewaysFunction() {
       SELECT INTO mvt ST_AsMVT(tile, 'planning_carriageways', 4096, 'geom') FROM (
         SELECT
           width_m,
-          ST_AsMVTGeom(geom, ST_TileEnvelope(z, x, y), 4096, 64, true) AS geom
+          ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_carriageways
-        WHERE run_id = rid AND (geom && ST_TileEnvelope(z, x, y))
+        WHERE run_id = rid AND (geom && bounds)
       ) AS tile;
       RETURN mvt;
     END
