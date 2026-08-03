@@ -12,11 +12,18 @@ import type {
 import { EN_DECIMAL_HELP, isValidEnDecimalInput } from '@/components/shared/form/enDecimalInput'
 import { slugSchema } from '@/lib/slugSchema'
 import { RegionNotesMode, RegionProduct, RegionStatus } from '@/prisma/generated/browser'
-import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
+import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import {
+  cacheWarmingSourceOptions,
+  sourceIdsToWarmingTables,
+  warmableSourceIdSet,
+  warmableTablesKeySet,
+  warmingTablesToSourceIds,
+} from '@/server/regions/cacheWarmingSources'
+import { parseOsmRelationIds } from '@/server/regions/masks/parseOsmRelationIds'
 import {
   formFieldsToGeoJsonBbox,
   geoJsonBboxToFormFields,
-  regionCacheWarmingSchema,
   regionGeoJsonBBoxSchema,
   type RegionCacheWarmingConfig,
 } from '@/server/regions/regionGeoJson'
@@ -53,6 +60,26 @@ const enDecimalFormField = z
     message: EN_DECIMAL_HELP,
   })
 
+const cacheWarmingZoomSchema = z.number().int().min(SIMPLIFY_MIN_ZOOM).max(SIMPLIFY_MAX_ZOOM)
+
+/** Write-only; read path keeps lenient `regionCacheWarmingSchema`. */
+const regionCacheWarmingWriteSchema = z
+  .object({
+    minZoom: cacheWarmingZoomSchema,
+    maxZoom: cacheWarmingZoomSchema,
+    tables: z
+      .array(
+        z.string().refine((key) => warmableTablesKeySet.has(key), {
+          error: (issue) => `Ungültige Cache-Warming-Quelle: ${String(issue.input)}`,
+        }),
+      )
+      .min(1),
+  })
+  .refine((data) => data.minZoom <= data.maxZoom, {
+    message: 'Max Zoom muss größer oder gleich Min Zoom sein',
+    path: ['maxZoom'],
+  })
+
 const RegionNavigationLinkSchema = z
   .object({
     name: z.string().min(1),
@@ -78,6 +105,53 @@ const RegionNavigationLinkSchema = z
     message: 'Externe URL muss mit https:// beginnen',
   })
 
+const RegionWelcomeImageWriteSchema = z.object({
+  uploadId: z.number().int().positive(),
+  altText: z.string().min(1),
+})
+
+export const RegionWelcomeSectionWriteSchema = z.object({
+  title: z.string().min(1),
+  bodyMarkdown: z.string().nullable().optional(),
+  sortOrder: z.number().int().nonnegative(),
+})
+
+const RegionWelcomeWriteSchema = z
+  .object({
+    enabled: z.boolean(),
+    title: z.string(),
+    subtitle: z.string().nullable().optional(),
+    bodyMarkdown: z.string().nullable().optional(),
+    image: RegionWelcomeImageWriteSchema.nullable(),
+    sections: z.array(RegionWelcomeSectionWriteSchema).max(8),
+  })
+  .superRefine((welcome, ctx) => {
+    if (!welcome.enabled) return
+    if (!welcome.title.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['title'],
+        message: 'Titel ist erforderlich, wenn der Willkommens-Dialog aktiv ist.',
+      })
+    }
+    if (welcome.image != null && !welcome.image.altText.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['image', 'altText'],
+        message: 'Bildbeschreibung (Alt-Text) ist erforderlich, wenn ein Bild gesetzt ist.',
+      })
+    }
+  })
+
+export type RegionWelcomeWriteInput = z.infer<typeof RegionWelcomeWriteSchema>
+
+const RegionFormWelcomeSectionSchema = z.object({
+  title: z.string(),
+  bodyMarkdown: z.string(),
+  sortOrder: z.number().int().nonnegative(),
+  _key: z.string().optional(),
+})
+
 export const RegionWriteSchema = z
   .object({
     slug: slugSchema,
@@ -94,13 +168,17 @@ export const RegionWriteSchema = z
     logoWhiteBackgroundRequired: z.boolean(),
     headerLogoId: z.number().int().positive().nullable(),
     bbox: regionGeoJsonBBoxSchema.nullable(),
-    cacheWarming: regionCacheWarmingSchema.nullable(),
+    cacheWarming: regionCacheWarmingWriteSchema.nullable(),
     categories: z.array(catalogIdSchema('Kategorie', categoryIdSet)).min(1),
     backgroundSources: z.array(catalogIdSchema('Hintergrund', backgroundIdSet)),
     exports: z.array(catalogIdSchema('Export', exportIdSet)),
     navigationLinks: z.array(RegionNavigationLinkSchema),
     contractId: z.number().int().positive().nullable(),
+    maskOsmRelationIds: z.array(z.number().int().positive()),
+    maskBufferKm: z.number().positive(),
+    welcome: RegionWelcomeWriteSchema.nullable(),
   })
+  .strict()
   .refine(
     (data) => {
       const hasBbox = data.bbox != null
@@ -125,45 +203,238 @@ const trueOrFalse = z.enum(['true', 'false']).transform((v) => v === 'true')
 
 const toTrueFalseString = (value: boolean) => (value ? ('true' as const) : ('false' as const))
 
-export const RegionFormRawSchema = z.object({
-  slug: slugSchema,
-  name: z.string().min(1),
-  fullName: z.string().min(1),
-  promoted: trueOrFalse,
-  status: RegionStatusSchema,
-  product: RegionProductSchema,
-  notes: RegionNotesModeSchema,
-  showSearch: trueOrFalse,
-  mapLat: enDecimalFormField,
-  mapLng: enDecimalFormField,
-  mapZoom: enDecimalFormField,
-  headerLogoId: z.string(),
-  logoWhiteBackgroundRequired: trueOrFalse,
-  downloadsEnabled: trueOrFalse,
-  bboxMinLng: z.string(),
-  bboxMinLat: z.string(),
-  bboxMaxLng: z.string(),
-  bboxMaxLat: z.string(),
-  cacheWarmingEnabled: trueOrFalse,
-  cacheWarmingMinZoom: z.string(),
-  cacheWarmingMaxZoom: z.string(),
-  cacheWarmingTables: z.string(),
-  categories: z.string(),
-  backgroundSources: z.string(),
-  exports: z.string(),
-  navigationLinks: z.array(
-    z.object({
-      name: z.string(),
-      linkType: z.enum(['internal', 'external']),
-      path: z.string(),
-      sortOrder: z.number().int().nonnegative(),
-      // Client-only stable identity for the drag-reorder list. Assigned in
-      // `regionConfigToFormValues` / `emptyNavLink`; not persisted (transform maps explicit fields only).
-      _key: z.string().optional(),
-    }),
-  ),
-  contractId: z.string(),
+const RegionFormNavigationLinkSchema = z.object({
+  name: z.string(),
+  linkType: z.enum(['internal', 'external']),
+  path: z.string(),
+  sortOrder: z.number().int().nonnegative(),
+  // Client-only stable identity for the drag-reorder list. Assigned in
+  // `regionConfigToFormValues` / `emptyNavLink`; not persisted (transform maps explicit fields only).
+  _key: z.string().optional(),
 })
+
+type RegionFormNavigationLink = z.infer<typeof RegionFormNavigationLinkSchema>
+
+/** Path/URL format rules for named nav links (empty-name rows are ignored on save). */
+export function navigationLinkPathError(link: {
+  name: string
+  linkType: 'internal' | 'external'
+  path: string
+}) {
+  if (!link.name.trim()) return null
+  const path = link.path.trim()
+  // Empty path is allowed while typing; write schema rejects it on save.
+  if (!path) return null
+  if (link.linkType === 'internal' && !path.startsWith('/')) {
+    return 'Interner Pfad muss mit „/“ beginnen'
+  }
+  if (link.linkType === 'external' && !path.startsWith('https://')) {
+    return 'Externe URL muss mit https:// beginnen'
+  }
+  return null
+}
+
+const refineNavigationLinksPath = (links: RegionFormNavigationLink[], ctx: z.RefinementCtx) => {
+  links.forEach((link, index) => {
+    const message = navigationLinkPathError(link)
+    if (!message) return
+    ctx.addIssue({ code: 'custom', path: [index, 'path'], message })
+  })
+}
+
+const parseCacheWarmingZoom = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed || !/^\d+$/.test(trimmed)) return null
+  const zoom = Number(trimmed)
+  if (!Number.isInteger(zoom) || zoom < SIMPLIFY_MIN_ZOOM || zoom > SIMPLIFY_MAX_ZOOM) return null
+  return zoom
+}
+
+const refineCacheWarmingForm = (
+  form: {
+    cacheWarmingEnabled: boolean
+    cacheWarmingMinZoom: string
+    cacheWarmingMaxZoom: string
+    cacheWarmingSources: string
+  },
+  ctx: z.RefinementCtx,
+) => {
+  if (!form.cacheWarmingEnabled) return
+
+  const minZoom = parseCacheWarmingZoom(form.cacheWarmingMinZoom)
+  if (!form.cacheWarmingMinZoom.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMinZoom'],
+      message: 'Min Zoom ist erforderlich.',
+    })
+  } else if (minZoom == null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMinZoom'],
+      message: `Min Zoom muss eine Ganzzahl zwischen ${SIMPLIFY_MIN_ZOOM} und ${SIMPLIFY_MAX_ZOOM} sein.`,
+    })
+  }
+
+  const maxZoom = parseCacheWarmingZoom(form.cacheWarmingMaxZoom)
+  if (!form.cacheWarmingMaxZoom.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMaxZoom'],
+      message: 'Max Zoom ist erforderlich.',
+    })
+  } else if (maxZoom == null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMaxZoom'],
+      message: `Max Zoom muss eine Ganzzahl zwischen ${SIMPLIFY_MIN_ZOOM} und ${SIMPLIFY_MAX_ZOOM} sein.`,
+    })
+  } else if (minZoom != null && maxZoom < minZoom) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingMaxZoom'],
+      message: 'Max Zoom muss größer oder gleich Min Zoom sein.',
+    })
+  }
+
+  const sourceIds = parseCommaList(form.cacheWarmingSources)
+  if (sourceIds.length === 0) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingSources'],
+      message: 'Mindestens eine Quelle ist erforderlich.',
+    })
+    return
+  }
+  for (const id of sourceIds) {
+    if (warmableSourceIdSet.has(id)) continue
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cacheWarmingSources'],
+      message: `Ungültige Cache-Warming-Quelle: ${id}`,
+    })
+  }
+}
+
+const refineMaskForm = (
+  form: {
+    maskEnabled: boolean
+    maskOsmRelationIds: string
+    maskBufferKm: string
+  },
+  ctx: z.RefinementCtx,
+) => {
+  if (!form.maskEnabled) return
+
+  if (!form.maskOsmRelationIds.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskOsmRelationIds'],
+      message: 'Mindestens eine OSM Relation ID ist erforderlich.',
+    })
+  } else {
+    try {
+      parseOsmRelationIds(form.maskOsmRelationIds)
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['maskOsmRelationIds'],
+        message: error instanceof Error ? error.message : 'Ungültige OSM-Relation-IDs',
+      })
+    }
+  }
+
+  if (!form.maskBufferKm.trim() || !isValidEnDecimalInput(form.maskBufferKm.trim())) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskBufferKm'],
+      message: EN_DECIMAL_HELP,
+    })
+  } else if (!(Number(form.maskBufferKm) > 0)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskBufferKm'],
+      message: 'Buffer muss größer als 0 sein.',
+    })
+  }
+}
+
+export const RegionFormRawSchema = z
+  .object({
+    slug: slugSchema,
+    name: z.string().min(1),
+    fullName: z.string().min(1),
+    promoted: trueOrFalse,
+    status: RegionStatusSchema,
+    product: RegionProductSchema,
+    notes: RegionNotesModeSchema,
+    showSearch: trueOrFalse,
+    mapLat: enDecimalFormField,
+    mapLng: enDecimalFormField,
+    mapZoom: enDecimalFormField,
+    headerLogoId: z.string(),
+    logoWhiteBackgroundRequired: trueOrFalse,
+    downloadsEnabled: trueOrFalse,
+    bboxMinLng: z.string(),
+    bboxMinLat: z.string(),
+    bboxMaxLng: z.string(),
+    bboxMaxLat: z.string(),
+    cacheWarmingEnabled: trueOrFalse,
+    cacheWarmingMinZoom: z.string(),
+    cacheWarmingMaxZoom: z.string(),
+    cacheWarmingSources: z.string(),
+    categories: z.string(),
+    backgroundSources: z.string(),
+    exports: z.string(),
+    navigationLinks: z.array(RegionFormNavigationLinkSchema).superRefine(refineNavigationLinksPath),
+    contractId: z.string(),
+    maskEnabled: trueOrFalse,
+    maskOsmRelationIds: z.string(),
+    maskBufferKm: z.string(),
+    welcomeEnabled: trueOrFalse,
+    welcomeTitle: z.string(),
+    welcomeSubtitle: z.string(),
+    welcomeBodyMarkdown: z.string(),
+    welcomeImageUploadId: z.string(),
+    welcomeImageAltText: z.string(),
+    welcomeSections: z.array(RegionFormWelcomeSectionSchema),
+  })
+  .superRefine(refineCacheWarmingForm)
+  .superRefine(refineMaskForm)
+  .superRefine((form, ctx) => {
+    if (!form.welcomeEnabled) return
+    if (!form.welcomeTitle.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['welcomeTitle'],
+        message: 'Titel ist erforderlich, wenn der Willkommens-Dialog aktiv ist.',
+      })
+    }
+    if (form.welcomeImageUploadId.trim()) {
+      if (!form.welcomeImageAltText.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['welcomeImageAltText'],
+          message: 'Alt-Text ist erforderlich.',
+        })
+      }
+      const uploadId = Number(form.welcomeImageUploadId)
+      if (!Number.isInteger(uploadId) || uploadId <= 0) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['welcomeImageUploadId'],
+          message: 'Ungültige Upload-ID.',
+        })
+      }
+    }
+    if (form.welcomeSections.length > 8) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['welcomeSections'],
+        message: 'Maximal 8 Abschnitte erlaubt.',
+      })
+    }
+  })
 
 export type RegionFormInput = z.input<typeof RegionFormRawSchema>
 
@@ -179,12 +450,14 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
 
   const cacheWarmingEnabled = form.cacheWarmingEnabled
   const cacheWarmingMinZoom = cacheWarmingEnabled
-    ? parseOptionalNumber(form.cacheWarmingMinZoom)
+    ? parseCacheWarmingZoom(form.cacheWarmingMinZoom)
     : null
   const cacheWarmingMaxZoom = cacheWarmingEnabled
-    ? parseOptionalNumber(form.cacheWarmingMaxZoom)
+    ? parseCacheWarmingZoom(form.cacheWarmingMaxZoom)
     : null
-  const cacheWarmingTables = cacheWarmingEnabled ? parseCommaList(form.cacheWarmingTables) : []
+  const cacheWarmingTables = cacheWarmingEnabled
+    ? sourceIdsToWarmingTables(parseCommaList(form.cacheWarmingSources))
+    : []
   const cacheWarming =
     cacheWarmingEnabled &&
     cacheWarmingMinZoom != null &&
@@ -198,6 +471,36 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
       : null
 
   const headerLogoId = parseOptionalNumber(form.headerLogoId)
+
+  const maskEnabled = form.maskEnabled
+  const maskOsmRelationIds = maskEnabled ? parseOsmRelationIds(form.maskOsmRelationIds) : []
+  // When mask is off, relation IDs are cleared; buffer stays at default 10 km (inert).
+  const maskBufferKm = maskEnabled ? Number(form.maskBufferKm) : 10
+
+  const welcomeEnabled = form.welcomeEnabled
+  const welcomeImageUploadId = parseOptionalNumber(form.welcomeImageUploadId)
+  const welcomeImage =
+    welcomeImageUploadId != null
+      ? {
+          uploadId: welcomeImageUploadId,
+          altText: form.welcomeImageAltText.trim(),
+        }
+      : null
+  const welcomeSections = form.welcomeSections
+    .filter((section) => section.title.trim())
+    .map((section, sortOrder) => ({
+      title: section.title.trim(),
+      bodyMarkdown: section.bodyMarkdown.trim() || null,
+      sortOrder,
+    }))
+  const welcome = {
+    enabled: welcomeEnabled,
+    title: form.welcomeTitle.trim(),
+    subtitle: form.welcomeSubtitle.trim() || null,
+    bodyMarkdown: form.welcomeBodyMarkdown.trim() || null,
+    image: welcomeImage,
+    sections: welcomeSections,
+  }
 
   return {
     slug: form.slug,
@@ -227,12 +530,28 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
         sortOrder: link.sortOrder,
       })),
     contractId: parseOptionalNumber(form.contractId),
+    maskOsmRelationIds,
+    maskBufferKm,
+    welcome,
   }
 }).pipe(RegionWriteSchema)
 
 export const DeleteRegionSchema = z.object({
   slug: z.string(),
 })
+
+/** Mask columns → form strings. Shared so loaders can precompute without duplicating join logic. */
+function maskConfigToFormFields(config: {
+  maskOsmRelationIds: readonly number[]
+  maskBufferKm: number
+}) {
+  const maskOsmRelationIds = [...config.maskOsmRelationIds]
+  return {
+    maskEnabled: toTrueFalseString(maskOsmRelationIds.length > 0),
+    maskOsmRelationIds: joinCommaList(maskOsmRelationIds.map(String)),
+    maskBufferKm: String(config.maskBufferKm),
+  }
+}
 
 export function regionConfigToFormValues(config: RegionWriteInput) {
   const downloadsEnabled = config.bbox != null
@@ -257,7 +576,7 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
     cacheWarmingEnabled: toTrueFalseString(config.cacheWarming != null),
     cacheWarmingMinZoom: config.cacheWarming != null ? String(config.cacheWarming.minZoom) : '',
     cacheWarmingMaxZoom: config.cacheWarming != null ? String(config.cacheWarming.maxZoom) : '',
-    cacheWarmingTables: joinCommaList(config.cacheWarming?.tables ?? []),
+    cacheWarmingSources: joinCommaList(warmingTablesToSourceIds(config.cacheWarming?.tables ?? [])),
     categories: joinCommaList(config.categories),
     backgroundSources: joinCommaList(config.backgroundSources),
     exports: joinCommaList(config.exports),
@@ -271,34 +590,28 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
       _key: newClientListKey(),
     })),
     contractId: config.contractId != null ? String(config.contractId) : '',
+    ...maskConfigToFormFields(config),
+    welcomeEnabled: toTrueFalseString(config.welcome?.enabled ?? false),
+    welcomeTitle: config.welcome?.title ?? '',
+    welcomeSubtitle: config.welcome?.subtitle ?? '',
+    welcomeBodyMarkdown: config.welcome?.bodyMarkdown ?? '',
+    welcomeImageUploadId:
+      config.welcome?.image != null ? String(config.welcome.image.uploadId) : '',
+    welcomeImageAltText: config.welcome?.image?.altText ?? '',
+    welcomeSections: (config.welcome?.sections ?? []).map((section) => ({
+      title: section.title,
+      bodyMarkdown: section.bodyMarkdown ?? '',
+      sortOrder: section.sortOrder,
+      _key: newClientListKey(),
+    })),
   }
-}
-
-export const RegionMaskFormRawSchema = z
-  .object({
-    maskEnabled: z.enum(['true', 'false']),
-    maskOsmRelationIds: z.string(),
-    maskBufferKm: z.string(),
-  })
-  .refine((form) => form.maskEnabled === 'false' || form.maskOsmRelationIds.trim().length > 0, {
-    message: 'Mindestens eine OSM Relation ID ist erforderlich.',
-    path: ['maskOsmRelationIds'],
-  })
-
-export type RegionMaskFormInput = z.input<typeof RegionMaskFormRawSchema>
-
-export function regionConfigToMaskFormValues(config: RegionMaskConfig) {
-  return {
-    maskEnabled: toTrueFalseString(config.maskOsmRelationIds.length > 0),
-    maskOsmRelationIds: joinCommaList(config.maskOsmRelationIds.map(String)),
-    maskBufferKm: String(config.maskBufferKm),
-  } satisfies RegionMaskFormInput
 }
 
 export const catalogOptions = {
   categories: categories.map((c) => ({ id: c.id, label: c.id })),
   exports: exportConfigs.map((e) => ({ id: e.id, label: e.title })),
   backgrounds: sourcesBackgroundsRaster.map((s) => ({ id: s.id, label: s.id })),
+  cacheWarmingSources: cacheWarmingSourceOptions,
 } as const
 
 export type RegionCacheWarming = RegionCacheWarmingConfig & {

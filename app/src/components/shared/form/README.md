@@ -10,7 +10,7 @@ TanStack Form–based form wrapper and field components.
 ## Errors
 
 - **Form-level** — Return `{ success: false, message: string, errors?: Record<field, string[]> }` from `onSubmit`. `message` is shown as a red banner; `errors` are applied to each field’s `meta.errors` (see [applyFieldErrors](Form.tsx)).
-- **Form state errors** — `form.state.errors` (e.g. from validators) are rendered below the form fields in a red block.
+- **Form state errors** — `form.state.errors` (e.g. from validators) are shown next to the submit button in the action bar.
 
 ## Submit message (banner)
 

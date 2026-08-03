@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
+import { mapDatasetUploadsSearchSchema } from '@/lib/mapDatasetUploadsSearchSchema'
 import { auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
 import {
   getAuditHistoryForRecord,
@@ -8,6 +9,7 @@ import {
   listAuditLog,
 } from '@/server/audit/queries/listAuditLog.server'
 import { requireAdmin } from '@/server/auth/session.server'
+import db from '@/server/db.server'
 import { getQaConfig } from '@/server/qa-configs/queries/getQaConfig.server'
 import { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { getQaConfigStatsForAdmin } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
@@ -15,6 +17,10 @@ import { getRegionContractBySlug } from '@/server/region-contracts/queries/getRe
 import { getRegionContracts } from '@/server/region-contracts/queries/getRegionContracts.server'
 import { getRegionEditData } from '@/server/regions/queries/getRegion.server'
 import { getRegionRows, getRegions } from '@/server/regions/queries/getRegions.server'
+import {
+  buildMapDatasetUploadsRegionWhere,
+  buildMapDatasetUploadsWhere,
+} from '@/server/uploads/buildMapDatasetUploadsWhere.server'
 import { getUploads } from '@/server/uploads/queries/getUploads.server'
 import { getUploadWithRegions } from '@/server/uploads/queries/getUploadWithRegions.server'
 import { getUsers } from '@/server/users/queries/getUsers.server'
@@ -43,22 +49,35 @@ export const getAdminRegionEditLoaderFn = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     await requireAdmin(headers)
-    const [{ region, config: formConfig, maskConfig }, users, contracts] = await Promise.all([
+    const [{ region, config: formConfig, formValues }, users, contracts] = await Promise.all([
       getRegionEditData({ slug: data.regionSlug }),
       getUsersForRegion({ regionSlug: data.regionSlug }, headers),
       getRegionContracts(headers),
     ])
     const auditHistory = await getAuditHistoryForRegionEdit(headers, region.id)
-    return { region, users, formConfig, maskConfig, contracts, auditHistory }
+    return { region, users, formConfig, formValues, contracts, auditHistory }
   })
 
-const AdminUploadsLoaderInput = createOffsetSearchSchema({ maxTake: 200 })
+const AdminUploadsLoaderInput = mapDatasetUploadsSearchSchema
 
 export const getAdminUploadsLoaderFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof AdminUploadsLoaderInput>) =>
     AdminUploadsLoaderInput.parse(data ?? {}),
   )
-  .handler(async ({ data }) => getUploads(data, getRequestHeaders()))
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    const where = buildMapDatasetUploadsWhere(data)
+    const regionWhere = buildMapDatasetUploadsRegionWhere(data.regionSlug)
+    const [result, datasetsCount, systemCount] = await Promise.all([
+      getUploads({ where, skip: data.skip, take: data.take }, headers),
+      db.mapDatasetUpload.count({ where: { ...regionWhere, systemLayer: false } }),
+      db.mapDatasetUpload.count({ where: { ...regionWhere, systemLayer: true } }),
+    ])
+    return {
+      ...result,
+      kindCounts: { datasets: datasetsCount, system: systemCount },
+    }
+  })
 
 const AdminUploadLoaderInput = z.object({ slug: z.string() })
 

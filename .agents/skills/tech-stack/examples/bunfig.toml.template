@@ -1,4 +1,5 @@
-# Copy to project bunfig.toml. @see references/bun-install.md
+# Copy to project bunfig.toml (local/dev). Do not COPY into Docker before bun install.
+# @see references/bun-install.md
 
 # Supply-chain cooldown — only install versions published at least N seconds ago.
 # @see https://bun.com/docs/runtime/bunfig#install-minimumreleaseage
@@ -10,7 +11,7 @@ minimumReleaseAgeExcludes = [
   "@typescript/typescript-linux-x64",
 ]
 
-# Global virtual store — install once, link everywhere (requires isolated linker).
+# Global virtual store — install once, link everywhere (requires isolated linker). Local/dev only.
 # Reinstall after changing linker/store: rm -rf node_modules && bun install
 # Vite dev: server.fs.allow — @see references/bun-install.md
 # Phantom deps inside third-party packages: trustedDependencies / patch — @see references/bun-install.md

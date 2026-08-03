@@ -14,9 +14,6 @@ CREATE TABLE IF NOT EXISTS public.aggregated_lengths
   road_length JSONB
 );
 
--- TODO(2026-12): Remove ALTER ADD COLUMN when all deployments are migrated.
-ALTER TABLE public.aggregated_lengths ADD COLUMN IF NOT EXISTS regionalschluessel TEXT;
-
 DO $$
 DECLARE
   row_count INT;

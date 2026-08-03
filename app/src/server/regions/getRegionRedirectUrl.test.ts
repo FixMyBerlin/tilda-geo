@@ -1,16 +1,16 @@
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
 import type {
   MapDataCategoryConfig,
   MapDataCategoryParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { simplifyConfigForParams } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/utils/simplifyConfigForParams'
-import { configs } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/configs'
 import { calcConfigChecksum } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/lib'
 import { parse } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/parse'
 import { serialize } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/serialize'
 import { parseMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
+import { getLegacyConfigTemplate } from './getRegionRedirectUrl.fixtures'
 import { getRegionRedirectUrl } from './getRegionRedirectUrl.server'
 
 const { mockGetRegionConfigTemplate } = vi.hoisted(() => ({
@@ -84,9 +84,8 @@ vi.mock('@/server/regions/queries/getRegion.server', () => ({
   }),
 }))
 
-// Unit tests mock tier-2 (DB template) to miss so decode falls through to the frozen archive
-// (tier 3). resolveConfigTemplate is reimplemented here so it calls the mocked
-// getRegionConfigTemplate (same-module closure would bypass vi.mock).
+// resolveConfigTemplate is reimplemented here so it calls the mocked getRegionConfigTemplate
+// (same-module closure would bypass vi.mock). Default mock serves legacy fixtures as tier 2.
 vi.mock('@/server/regions/regionConfigTemplates.server', () => ({
   getRegionConfigTemplate: mockGetRegionConfigTemplate,
   upsertRegionConfigTemplate: vi.fn(),
@@ -94,14 +93,16 @@ vi.mock('@/server/regions/regionConfigTemplates.server', () => ({
     if (checksum === calcConfigChecksum(freshConfig)) {
       return simplifyConfigForParams(freshConfig)
     }
-    return (
-      (await mockGetRegionConfigTemplate(checksum)) ??
-      (checksum in configs
-        ? (configs[checksum as keyof typeof configs] as MapDataCategoryParam[])
-        : undefined)
-    )
+    return mockGetRegionConfigTemplate(checksum)
   },
 }))
+
+beforeEach(() => {
+  mockGetRegionConfigTemplate.mockReset()
+  mockGetRegionConfigTemplate.mockImplementation(async (checksum: string) =>
+    getLegacyConfigTemplate(checksum),
+  )
+})
 
 function getUrl(redirectUrl: string | null) {
   if (!redirectUrl) throw new Error('Expected redirect URL but got null')
@@ -133,7 +134,8 @@ function parseCategoryFromResponse(
 
   const checksum = configParam?.split('.')[0]
   if (!configParam || !checksum) throw new Error('Missing config param or checksum')
-  const simplifiedConfig = configs[checksum as keyof typeof configs]
+  const simplifiedConfig = getLegacyConfigTemplate(checksum)
+  if (!simplifiedConfig) throw new Error(`Missing fixture template for checksum ${checksum}`)
   const parsedConfig = parse(configParam, simplifiedConfig as MapDataCategoryConfig[])
   const category = parsedConfig.find((c) => c.id === categoryId)
   if (!category) throw new Error('Category not found')
@@ -217,8 +219,17 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(typeof resultUrl.searchParams.get('map')).toBe('string')
+      expect(resultUrl.searchParams.get('map')).toBe('11.8/52.507/13.367')
       expect(typeof resultUrl.searchParams.get('config')).toBe('string')
+    })
+
+    test('INIT: Replace typed-search map sentinel with region.map', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?map=0/0/0'
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+
+      expect(resultUrl.searchParams.get('map')).toBe('11.8/52.507/13.367')
     })
 
     test('MIGRATION: Migrate `lat`, `lng`, `zoom` params to `map` param', async () => {
@@ -240,7 +251,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('map')).toBe('12.1/1/2') // using mapParamFallback.zoom
+      expect(resultUrl.searchParams.get('map')).toBe('0/1/2') // using mapParamFallback.zoom
       expect(resultUrl.searchParams.getAll('map').length).toBe(1)
       expect(resultUrl.searchParams.get('lat')).toBe(null)
       expect(resultUrl.searchParams.get('lng')).toBe(null)
@@ -464,7 +475,7 @@ describe('getRegionRedirectUrl()', () => {
 
     test('CONFIG TEMPLATE (tier 2): a stored checksum resolves via getRegionConfigTemplate, not reset', async () => {
       // A ?config= URL whose checksum matches an older category combination: not the region's
-      // current fresh config (tier 1) and not in the frozen archive — only in RegionConfigTemplate.
+      // current fresh config (tier 1) — only available via RegionConfigTemplate (mocked).
       const oldCategories = ['poi', 'bikelanes'] as MapDataCategoryId[]
       const oldFresh = createFreshCategoriesConfig(oldCategories).map((category) =>
         category.id === 'poi' ? { ...category, active: true } : category,
@@ -496,11 +507,12 @@ describe('getRegionRedirectUrl()', () => {
       expect(parsed.find((category) => category.id === 'poi')?.active).toBe(true)
     })
 
-    test('CONFIG TEMPLATE (tier 3): frozen archive checksum decodes when DB template misses', async () => {
+    test('CONFIG TEMPLATE (tier 2): legacy checksum from fixtures decodes via getRegionConfigTemplate', async () => {
       const url =
         'http://127.0.0.1:5173/regionen/parkraum?map=13.5%2F52.4918%2F13.4261&config=1r6doko.4qfsxx.0&v=2'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
       expect(redirectUrl).toBeTruthy()
+      expect(mockGetRegionConfigTemplate).toHaveBeenCalledWith('1r6doko')
       expect(getUrl(redirectUrl).searchParams.get('config')?.startsWith('12nl2cs')).toBe(true)
     })
 

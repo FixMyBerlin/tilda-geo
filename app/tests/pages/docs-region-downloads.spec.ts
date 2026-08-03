@@ -17,7 +17,7 @@ const DOCS_PARKINGS = '/docs/parkings'
  */
 /** PUBLIC, bbox + exports (download UI when member/admin). */
 const SLUG_DOWNLOADS = 'parkraum-berlin-euvm'
-/** PUBLIC, no bbox (no download section) — radinfra mirrors regions.const. */
+/** PUBLIC, no bbox (no download section) — radinfra from regionSeedCatalog. */
 const SLUG_NO_DOWNLOADS = 'radinfra'
 /** PUBLIC parkraum + parkings exports — regression for #3421. */
 const SLUG_PARKRAUM = 'parkraum-berlin-euvm'
@@ -150,7 +150,13 @@ test.describe('Docs page — region `r` search param and download UI', () => {
       await page.goto(`${DOCS_ROADS}?r=${SLUG_DOWNLOADS}`)
       await expect(page.locator('main').first()).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Downloads' })).toBeVisible()
-      await expect(page.getByRole('link', { name: 'GPKG' }).first()).toBeVisible()
+      const gpkgLink = page.getByRole('link', { name: 'GPKG' }).first()
+      await expect(gpkgLink).toBeVisible()
+      const href = await gpkgLink.getAttribute('href')
+      expect(href).toContain(`/api/export/${SLUG_DOWNLOADS}/`)
+      expect(href).toContain('format=')
+      expect(href).not.toContain('minlon')
+      expect(href).not.toContain('minlat')
       await expect(page.getByRole('link', { name: 'Zur Region' })).toBeVisible()
       await expectNoConsoleErrors(page)
     } finally {
@@ -193,6 +199,16 @@ test.describe('Export API — region membership required', () => {
     expect([401, 403]).toContain(response.status())
   })
 
+  test('anonymous slug-only export request is rejected', async ({ request }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL
+    if (typeof baseURL !== 'string') {
+      throw new Error('Playwright baseURL must be a string')
+    }
+
+    const response = await request.get(`${baseURL}/api/export/${SLUG_PARKRAUM}/parkings?format=fgb`)
+    expect([401, 403]).toContain(response.status())
+  })
+
   test('admin export request is not forbidden', async ({ page }, testInfo) => {
     const baseURL = testInfo.project.use.baseURL
     if (typeof baseURL !== 'string') {
@@ -209,6 +225,76 @@ test.describe('Export API — region membership required', () => {
       expect(response.status()).not.toBe(404)
     } finally {
       await cleanupStubbedSessionData('ADMIN', 'export-api-admin')
+    }
+  })
+
+  test('admin slug-only export request is not forbidden', async ({ page }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL
+    if (typeof baseURL !== 'string') {
+      throw new Error('Playwright baseURL must be a string')
+    }
+
+    await createStubbedAdminSession(page, baseURL, { identityKey: 'export-api-admin-slug' })
+    try {
+      const response = await page.request.get(
+        `${baseURL}/api/export/${SLUG_PARKRAUM}/parkings?format=fgb`,
+      )
+      expect(response.status()).not.toBe(403)
+      expect(response.status()).not.toBe(401)
+      expect(response.status()).not.toBe(404)
+      expect(response.status()).not.toBe(400)
+    } finally {
+      await cleanupStubbedSessionData('ADMIN', 'export-api-admin-slug')
+    }
+  })
+
+  test('region member slug-only export request is not forbidden', async ({ page }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL
+    if (typeof baseURL !== 'string') {
+      throw new Error('Playwright baseURL must be a string')
+    }
+
+    const user = await createStubbedUserSession(page, baseURL, {
+      identityKey: 'export-api-member-slug',
+    })
+    const region = await db.region.findUnique({
+      where: { slug: SLUG_PARKRAUM },
+      select: { id: true },
+    })
+    if (!region) {
+      throw new Error(`E2E docs-region-downloads: region "${SLUG_PARKRAUM}" missing.`)
+    }
+
+    await db.membership.upsert({
+      where: {
+        regionId_userId: {
+          regionId: region.id,
+          userId: user.id,
+        },
+      },
+      update: {},
+      create: {
+        regionId: region.id,
+        userId: user.id,
+      },
+    })
+
+    try {
+      const response = await page.request.get(
+        `${baseURL}/api/export/${SLUG_PARKRAUM}/parkings?format=fgb`,
+      )
+      expect(response.status()).not.toBe(403)
+      expect(response.status()).not.toBe(401)
+      expect(response.status()).not.toBe(404)
+      expect(response.status()).not.toBe(400)
+    } finally {
+      await db.membership.deleteMany({
+        where: {
+          regionId: region.id,
+          userId: user.id,
+        },
+      })
+      await cleanupStubbedSessionData('USER', 'export-api-member-slug')
     }
   })
 

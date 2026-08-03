@@ -125,6 +125,21 @@ export function dockerStackIdFromEnv() {
   return devStackIdFromEnv()
 }
 
+/**
+ * Compose `-p` project for commands that must join the active stack's network/db.
+ * `DEV_ATTACH_STACK=default` uses unprefixed container names (`db` / `tiles`) but the
+ * compose project is the develop checkout's folder name (e.g. `tilda-geo`) — not omitted
+ * `-p`, which would invent a new project from this worktree path and conflict on `/db`.
+ */
+export async function dockerComposeProjectFromEnv() {
+  const attach = process.env.DEV_ATTACH_STACK?.trim()
+  if (attach === 'default') {
+    const stack = await resolveRunningAttachStack('default')
+    return stack.composeProject
+  }
+  return dockerStackIdFromEnv()
+}
+
 /** Stack id for discovery/stop logic (`default` on develop/main). */
 export function activeStackIdFromEnv() {
   const attach = process.env.DEV_ATTACH_STACK?.trim()

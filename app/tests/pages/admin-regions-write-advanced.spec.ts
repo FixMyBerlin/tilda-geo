@@ -41,6 +41,9 @@ const baseRegionConfig = (slug: string) => ({
     sortOrder: number
   }>,
   contractId: null,
+  maskOsmRelationIds: [] as number[],
+  maskBufferKm: 10,
+  welcome: null,
 })
 
 const authHeaders = () => ({

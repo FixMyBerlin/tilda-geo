@@ -49,13 +49,15 @@ ls ~/.bun/install/cache/links/ | wc -l
 - **Cause:** Install before config/Bun change  
   **Fix:** `rm -rf node_modules && bun install`.
 - **Cause:** `globalStore = false` or `linker = "hoisted"` in project bunfig  
-  **Fix:** [bunfig template](../examples/bunfig.toml.template).
+  **Fix:** [bunfig template](../examples/bunfig.toml.template) (local/dev only).
 - **Cause:** No `node_modules/.bun/`  
   **Fix:** Need isolated linker + reinstall.
 - **Cause:** `Cannot find module '…'` from a package under `cache/links/`  
   **Fix:** Phantom dep — [bun-install.md](bun-install.md#phantom-dependencies-under-globalstore). Do **not** only add the missing module as an app direct dep.
 - **Cause:** Trusted package still realpaths into `cache/links/`  
   **Fix:** Confirm `trustedDependencies` in the **same** package’s `package.json`; reinstall.
+- **Cause:** Docker/`USER bun` → `EACCES` opening `node_modules/<pkg>` (realpath under `/root/.bun/…`)  
+  **Fix:** Omit bunfig from image install `COPY` (or `BUN_INSTALL_GLOBAL_STORE=0`). [bun-install.md](bun-install.md).
 
 **Smoke test:** [bunfig.toml.template](../examples/bunfig.toml.template) + `slugify` in a temp dir → `readlink node_modules/.bun/slugify@…` should hit `cache/links/`.
 

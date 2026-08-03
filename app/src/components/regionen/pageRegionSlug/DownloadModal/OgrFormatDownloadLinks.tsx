@@ -1,9 +1,8 @@
 import type { SourceExportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
 import { Link } from '@/components/shared/links/Link'
-import { getExportOgrApiBboxUrl } from '@/components/shared/utils/getExportApiUrl'
+import { getExportOgrApiUrl } from '@/components/shared/utils/getExportApiUrl'
 import type { Formats } from '@/server/api/export/ogrFormats.const'
 import { ogrFormats } from '@/server/api/export/ogrFormats.const'
-import type { RegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 
 export const downloadFormatLinkClasses =
   'min-w-28 w-max flex-none rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-left shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500'
@@ -11,16 +10,15 @@ export const downloadFormatLinkClasses =
 type Props = {
   regionSlug: string
   tableName: SourceExportApiIdentifier
-  bbox: RegionGeoJsonBBox
 }
 
-export const OgrFormatDownloadLinks = ({ regionSlug, tableName, bbox }: Props) => {
+export const OgrFormatDownloadLinks = ({ regionSlug, tableName }: Props) => {
   return (
     <>
       {Object.entries(ogrFormats).map(([param, format]) => (
         <Link
           key={param}
-          href={getExportOgrApiBboxUrl(regionSlug, tableName, bbox, param as Formats)}
+          href={getExportOgrApiUrl(regionSlug, tableName, param as Formats)}
           classNameOverwrite={downloadFormatLinkClasses}
           download
           blank

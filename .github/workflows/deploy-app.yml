@@ -107,10 +107,29 @@ jobs:
             set -e
             echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
             cd /srv
-            echo "Pulling latest 'app' image"
+            echo "==> Pulling latest app image"
             docker compose pull app
-            echo "Restarting 'app' container"
+
+            echo "==> Checking pending Prisma migrations"
+            set +e
+            docker compose run --rm --no-deps --entrypoint bun app ./scripts/deploy/checkPendingMigrations.ts
+            status=$?
+            set -e
+
+            if [ "$status" -eq 10 ]; then
+              # Temporary: backup script lives on quirky-penguin, not github $HOME.
+              # Re-enable once FixMyBerlin/backup-script#1 host ownership is settled.
+              echo "==> Pending migrations — SKIPPING Scaleway backup (temporary; see FixMyBerlin/backup-script#1)"
+              # "$HOME/ionos-db-backup.sh"
+            elif [ "$status" -ne 0 ]; then
+              echo "==> Migration status check failed (exit $status)" >&2
+              exit "$status"
+            else
+              echo "==> No pending migrations — skipping backup"
+            fi
+
+            echo "==> Restarting app container (migrate deploy on start)"
             docker compose up app -d
-            echo "Cleanup docker (containers and images) that are older than 72h"
+            echo "==> Cleanup docker (containers and images) that are older than 72h"
             docker container prune -f --filter "until=72h"
             docker image prune -fa --filter "until=72h"

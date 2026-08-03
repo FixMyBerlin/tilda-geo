@@ -177,6 +177,7 @@ attributes:
     label: OSM-Kategorie "emergency"
 
   - key: geom_sources
+    format: sanitized_strings
     label: Geometrie-Quellen
     purpose: qa
     description: Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).
@@ -219,6 +220,7 @@ attributes:
     label: Separater Parkplatz (OSM-Bezug)
 
   - key: tag_sources
+    format: sanitized_strings
     label: Tag-Quellen
     purpose: qa
     description: Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).

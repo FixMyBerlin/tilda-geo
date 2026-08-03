@@ -11,7 +11,7 @@ import {
   ensureDataDir,
   getDumpFilePath,
   getRemoteDatabaseUrl,
-  looksLikeConnectionError,
+  looksLikeRemoteAccessError,
   parseCliArgs,
   POSTGRES_CLI_IMAGE,
   printRemoteConnectionGuidance,
@@ -92,14 +92,14 @@ async function main() {
       .nothrow()
   if (dumpResult.exitCode !== 0) {
     const stderr = dumpResult.stderr.toString().trim()
-    if (looksLikeConnectionError(stderr)) {
+    if (looksLikeRemoteAccessError(stderr)) {
       printRemoteConnectionGuidance(source, remoteUrl)
     }
     throw new Error(stderr || `pg_dump failed with exit code ${dumpResult.exitCode}`)
   }
 
   assertDumpFilePresent(dumpPath)
-  process.stdout.write(`Created ${dumpPath}\n`)
+  p.log.success(`Created ${dumpPath}`)
 }
 
 function printFatalError(error: unknown) {

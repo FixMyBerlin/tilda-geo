@@ -2,8 +2,8 @@
 name: implementer
 description: >-
   Implements code changes, refactors, and tests. Always use for multi-file
-  edits, feature work, installs, and shell commands that modify state. Delegate
-  proactively when the parent has a clear plan.
+  edits, feature work, installs, and shell commands that modify state. Runs on
+  composer-2.5[fast=false] (frontmatter pin). Parent must omit Task inline model.
 model: composer-2.5[fast=false]
 ---
 
@@ -20,6 +20,7 @@ Constraints:
 
 - Stay within the delegated scope. Do not expand scope without reporting back.
 - Prefer existing patterns and helpers over new abstractions.
+- If the repo has a project-specific local-stack / worktree / Docker skill, load it only when the delegated task needs that setup.
 - For wrap-up with lint/type/test checks and commit, load the project's `finish-work` skill if installed.
 
 Return a concise summary: files touched, verification run, and open questions.

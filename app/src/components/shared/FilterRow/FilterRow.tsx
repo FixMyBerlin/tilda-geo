@@ -38,7 +38,7 @@ export function FilterRow<TSearch>({
           <select
             value={activeItem?.id ?? ''}
             aria-label={ariaLabel}
-            className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/90 py-2 pr-8 pl-3 text-base text-gray-800 shadow-sm ring-1 ring-gray-900/5 focus:ring-2 focus:ring-yellow-200 focus:outline-none"
+            className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white/90 bg-none py-1.5 pr-8 pl-3 text-base leading-5 text-gray-800 shadow-sm ring-1 ring-gray-900/5 focus:ring-2 focus:ring-yellow-200 focus:outline-none"
             onChange={(e) => {
               navigate({
                 to,
@@ -55,7 +55,7 @@ export function FilterRow<TSearch>({
           </select>
           <ChevronDownIcon
             aria-hidden="true"
-            className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
+            className="pointer-events-none col-start-1 row-start-1 mr-2 size-4 self-center justify-self-end fill-gray-500"
           />
         </div>
         <nav aria-label={ariaLabel} className="hidden flex-wrap gap-2 sm:flex">

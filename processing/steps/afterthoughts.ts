@@ -2,6 +2,7 @@ import type { Topic } from '../constants/topics.const'
 import { exportSidepathData } from '../topics/roads_bikelanes/pseudo_tags_sidepath/exportSidepathData'
 import { logEnd, logStart } from '../utils/logging'
 import { aggregateLengths } from './afterthoughts/aggregateLengths'
+import { computeCampaignCounts } from './afterthoughts/campaignCounts'
 import { recordAfterthought } from './metadata'
 
 /**
@@ -22,6 +23,11 @@ export async function runAfterthoughts(
   )
 
   await recordAfterthought(processingId, 'statistics', await aggregateLengths())
+  await recordAfterthought(
+    processingId,
+    'campaign_counts',
+    await computeCampaignCounts(processingId, ranTopics),
+  )
   await recordAfterthought(
     processingId,
     'sidepath_export',

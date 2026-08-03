@@ -1,4 +1,5 @@
 import type { DeepKeys } from '@tanstack/form-core'
+import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
@@ -9,7 +10,9 @@ import { choiceOptionListClassName, labelClass } from './sharedStyles'
 
 type CheckboxOption = {
   value: string
-  label: string
+  label: ReactNode
+  /** Accessible name when `label` is not a plain string. */
+  ariaLabel?: string
   disabled?: boolean
 }
 
@@ -62,7 +65,10 @@ export function CheckboxGroup<T extends Record<string, unknown>>({
                   checked={selected.includes(option.value)}
                   disabled={option.disabled}
                   hasError={hasError}
-                  ariaLabel={option.label}
+                  ariaLabel={
+                    option.ariaLabel ??
+                    (typeof option.label === 'string' ? option.label : option.value)
+                  }
                   label={option.label}
                   className={columns === 2 ? 'mb-2 break-inside-avoid' : undefined}
                   onBlur={field.handleBlur}

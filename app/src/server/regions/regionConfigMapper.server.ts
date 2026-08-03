@@ -6,16 +6,11 @@ import type {
   UnionTiles,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
 import type {
-  Region,
-  RegionBackgroundAssignment,
-  RegionCategoryAssignment,
-  RegionExportAssignment,
-  RegionNavigationLink as DbNavigationLink,
+  Prisma,
   RegionNotesMode,
   RegionProduct,
   RegionStatus,
 } from '@/prisma/generated/client'
-import type { RegionContract } from '@/prisma/generated/client'
 import type { InternalPath } from '@/router'
 import { prismaJsonField } from '@/server/prismaJsonField.server'
 import {
@@ -23,10 +18,12 @@ import {
   type TRegionContract,
 } from '@/server/region-contracts/regionContractMapper.server'
 import {
+  cacheWarmingToWriteInput,
   parseRegionCacheWarming,
   parseRegionGeoJsonBBox,
   type RegionGeoJsonBBox,
 } from '@/server/regions/regionGeoJson'
+import { parseRegionWelcomeSections } from '@/server/regions/regionWelcomeSections'
 import type { RegionWriteInput, RegionCacheWarming } from '@/server/regions/regionWriteSchema'
 
 export type RegionMaskConfig = {
@@ -34,19 +31,55 @@ export type RegionMaskConfig = {
   maskBufferKm: number
 }
 
-export function regionRowToMaskConfig(
-  region: Pick<Region, 'maskOsmRelationIds' | 'maskBufferKm'>,
-): RegionMaskConfig {
-  return {
-    maskOsmRelationIds: region.maskOsmRelationIds,
-    maskBufferKm: region.maskBufferKm,
-  }
-}
-
 /** Internal (`to`) or external (`href`, https) region nav link. Canonical home after the migration. */
 export type RegionNavigationLink =
   | { name: string; to: InternalPath }
   | { name: string; href: `https://${string}` }
+
+export type TRegionWelcomeSection = {
+  title: string
+  bodyMarkdown?: string | null
+  sortOrder: number
+}
+
+export type TRegionWelcomeImage = {
+  uploadId: number
+  path: string
+  altText: string
+}
+
+export type TRegionWelcome = {
+  enabled: true
+  title: string
+  subtitle?: string | null
+  bodyMarkdown?: string | null
+  image: TRegionWelcomeImage | null
+  sections: TRegionWelcomeSection[]
+}
+
+function welcomeWriteInputToScalarData(welcome: RegionWriteInput['welcome']) {
+  if (welcome == null) {
+    return {
+      welcomeEnabled: false,
+      welcomeTitle: '',
+      welcomeSubtitle: null,
+      welcomeBodyMarkdown: null,
+      welcomeSections: [] as Prisma.InputJsonValue,
+      welcomeImageUploadId: null,
+      welcomeImageAltText: null,
+    }
+  }
+
+  return {
+    welcomeEnabled: welcome.enabled,
+    welcomeTitle: welcome.title,
+    welcomeSubtitle: welcome.subtitle ?? null,
+    welcomeBodyMarkdown: welcome.bodyMarkdown ?? null,
+    welcomeSections: welcome.sections as Prisma.InputJsonValue,
+    welcomeImageUploadId: welcome.image?.uploadId ?? null,
+    welcomeImageAltText: welcome.image?.altText ?? null,
+  }
+}
 
 /**
  * Map validated write input → Prisma Region scalar columns.
@@ -60,10 +93,15 @@ function regionWriteInputToScalarData(config: RegionWriteInput) {
     backgroundSources: _backgroundSources,
     exports: _exports,
     navigationLinks: _navigationLinks,
+    // Mask columns are written only via syncRegionMaskAfterWrite (with geometry upload).
+    maskOsmRelationIds: _maskOsmRelationIds,
+    maskBufferKm: _maskBufferKm,
+    welcome: _welcome,
     ...scalars
   } = config
   return {
     ...scalars,
+    ...welcomeWriteInputToScalarData(config.welcome),
     bbox: prismaJsonField(config.bbox),
     cacheWarming: prismaJsonField(config.cacheWarming),
   }
@@ -120,18 +158,7 @@ export function regionWriteInputToUpdateData(config: RegionWriteInput) {
   }
 }
 
-type RegionContractWithCount = RegionContract & {
-  _count: { regions: number }
-}
-
-type RegionWithRelations = Region & {
-  contract: RegionContractWithCount | null
-  categoryAssignments: RegionCategoryAssignment[]
-  backgroundAssignments: RegionBackgroundAssignment[]
-  exportAssignments: RegionExportAssignment[]
-  navigationLinks: DbNavigationLink[]
-  headerLogo: { id: number; title: string } | null
-}
+type RegionWithRelations = Prisma.RegionGetPayload<{ include: typeof regionInclude }>
 
 export type TRegion = {
   id: number
@@ -154,6 +181,7 @@ export type TRegion = {
   backgroundSources: SourcesRasterIds[]
   cacheWarming?: RegionCacheWarming
   contract: TRegionContract | null
+  welcome?: TRegionWelcome | null
 } & (
   | {
       exports: null
@@ -165,6 +193,33 @@ export type TRegion = {
     }
 )
 
+function regionRowToWelcomeWriteInput(region: RegionWithRelations) {
+  const hasWelcomeContent =
+    region.welcomeEnabled ||
+    region.welcomeTitle.trim() !== '' ||
+    region.welcomeSubtitle != null ||
+    region.welcomeBodyMarkdown != null ||
+    region.welcomeImageUploadId != null ||
+    parseRegionWelcomeSections(region.welcomeSections).length > 0
+
+  if (!hasWelcomeContent) return null
+
+  return {
+    enabled: region.welcomeEnabled,
+    title: region.welcomeTitle,
+    subtitle: region.welcomeSubtitle,
+    bodyMarkdown: region.welcomeBodyMarkdown,
+    image:
+      region.welcomeImageUploadId != null && region.welcomeImageAltText
+        ? {
+            uploadId: region.welcomeImageUploadId,
+            altText: region.welcomeImageAltText,
+          }
+        : null,
+    sections: parseRegionWelcomeSections(region.welcomeSections),
+  }
+}
+
 export function regionRowToWriteInput(region: RegionWithRelations) {
   // Drop DB-only / relation payloads; `regionInclude` already orders assignment/link rows.
   const {
@@ -173,21 +228,33 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
     updatedAt: _updatedAt,
     contract: _contract,
     headerLogo: _headerLogo,
+    welcomeImageUpload: _welcomeImageUpload,
+    welcomeEnabled: _welcomeEnabled,
+    welcomeTitle: _welcomeTitle,
+    welcomeSubtitle: _welcomeSubtitle,
+    welcomeBodyMarkdown: _welcomeBodyMarkdown,
+    welcomeSections: _welcomeSections,
+    welcomeImageUploadId: _welcomeImageUploadId,
+    welcomeImageAltText: _welcomeImageAltText,
     categoryAssignments,
     backgroundAssignments,
     exportAssignments,
     navigationLinks,
     bbox,
     cacheWarming,
-    maskOsmRelationIds: _maskOsmRelationIds,
-    maskBufferKm: _maskBufferKm,
+    maskOsmRelationIds,
+    maskBufferKm,
     ...scalars
   } = region
 
   return {
     ...scalars,
     bbox: parseRegionGeoJsonBBox(bbox),
-    cacheWarming: parseRegionCacheWarming(cacheWarming),
+    cacheWarming: cacheWarmingToWriteInput(cacheWarming),
+    // Copy so write-input and client `mask.osmRelationIds` do not share one array reference
+    // (Seroval would otherwise alias them; a later mutation would empty the form defaults).
+    maskOsmRelationIds: [...maskOsmRelationIds],
+    maskBufferKm,
     categories: categoryAssignments.map((a) => a.categoryId as MapDataCategoryId),
     backgroundSources: backgroundAssignments.map((a) => a.sourceId as SourcesRasterIds),
     exports: exportAssignments.map((a) => a.exportId as ExportId),
@@ -197,7 +264,27 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
       externalUrl: link.externalUrl,
       sortOrder: link.sortOrder,
     })),
+    welcome: regionRowToWelcomeWriteInput(region),
   }
+}
+
+const mapWelcomeRowToClient = (region: RegionWithRelations) => {
+  if (!region.welcomeEnabled) return null
+  return {
+    enabled: true as const,
+    title: region.welcomeTitle,
+    subtitle: region.welcomeSubtitle,
+    bodyMarkdown: region.welcomeBodyMarkdown,
+    image:
+      region.welcomeImageUploadId != null && region.welcomeImageUpload && region.welcomeImageAltText
+        ? {
+            uploadId: region.welcomeImageUploadId,
+            path: `/api/region-uploads/${region.welcomeImageUpload.id}/${encodeURIComponent(region.welcomeImageUpload.title)}`,
+            altText: region.welcomeImageAltText,
+          }
+        : null,
+    sections: parseRegionWelcomeSections(region.welcomeSections),
+  } satisfies TRegionWelcome
 }
 
 /**
@@ -217,6 +304,14 @@ export function regionRowToClient(region: RegionWithRelations) {
     maskBufferKm,
     headerLogoId: _headerLogoId,
     headerLogo,
+    welcomeEnabled: _welcomeEnabled,
+    welcomeTitle: _welcomeTitle,
+    welcomeSubtitle: _welcomeSubtitle,
+    welcomeBodyMarkdown: _welcomeBodyMarkdown,
+    welcomeSections: _welcomeSections,
+    welcomeImageUploadId: _welcomeImageUploadId,
+    welcomeImageAltText: _welcomeImageAltText,
+    welcomeImageUpload: _welcomeImageUpload,
     categoryAssignments,
     backgroundAssignments,
     exportAssignments,
@@ -238,7 +333,7 @@ export function regionRowToClient(region: RegionWithRelations) {
     showSearch: scalars.showSearch || undefined,
     mask:
       maskOsmRelationIds.length > 0
-        ? { osmRelationIds: maskOsmRelationIds, bufferKm: maskBufferKm }
+        ? { osmRelationIds: [...maskOsmRelationIds], bufferKm: maskBufferKm }
         : null,
     map: { lat: mapLat, lng: mapLng, zoom: mapZoom },
     navigationLinks: navigationLinks
@@ -264,6 +359,7 @@ export function regionRowToClient(region: RegionWithRelations) {
     logoPath: headerLogo
       ? `/api/region-uploads/${headerLogo.id}/${encodeURIComponent(headerLogo.title)}`
       : null,
+    welcome: mapWelcomeRowToClient(region),
   }
 
   if (!hasDownloads) {
@@ -285,4 +381,5 @@ export const regionInclude = {
   exportAssignments: { orderBy: { exportId: 'asc' as const } },
   navigationLinks: { orderBy: { sortOrder: 'asc' as const } },
   headerLogo: { select: { id: true, title: true } },
+  welcomeImageUpload: { select: { id: true, title: true } },
 } as const

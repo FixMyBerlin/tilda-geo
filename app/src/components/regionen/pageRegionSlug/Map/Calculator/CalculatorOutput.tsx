@@ -155,7 +155,8 @@ export const CalculatorOutput = ({
         // Mobile: compact total pill that opens the breakdown in a bottom sheet.
         <CalculatorMobileSummary
           label={hasAreas ? selectedMetricLabel : 'Summierung'}
-          total={total !== null ? numberFormatter.format(total) : null}
+          total={total}
+          formatTotal={(value) => numberFormatter.format(value)}
         >
           {breakdown}
         </CalculatorMobileSummary>

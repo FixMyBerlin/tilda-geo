@@ -1,8 +1,8 @@
-import { FormattedMessage } from 'react-intl'
 import { registerInspectorMissingTranslation } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInspectorMissingTranslationsState'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { isDev } from '@/components/shared/utils/isEnv'
+import { InspectorFormattedMessage } from './InspectorFormattedMessage'
 import { translations } from './translations.const'
 import { shouldShowRawInspectorValues } from './utils/shouldShowRawInspectorValues'
 
@@ -29,7 +29,7 @@ export const ConditionalFormattedKey = ({ sourceId, tagKey }: Props) => {
 
   return (
     <span title={debugTitle}>
-      <FormattedMessage id={translationKey} defaultMessage={tagKey} />
+      <InspectorFormattedMessage id={translationKey} defaultMessage={tagKey} />
     </span>
   )
 }

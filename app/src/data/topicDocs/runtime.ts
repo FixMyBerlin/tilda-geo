@@ -183,14 +183,3 @@ export const getDescriptionForInspectorTag = (
   }
   return sourceDescriptions.keys[tagKey]
 }
-
-export const getInspectorValueDescriptionTranslationKey = (
-  sourceId: string,
-  tagKey: string,
-  tagValue: InspectorTagValue,
-) => {
-  const valueTranslationKey = getInspectorValueTranslationKey(sourceId, tagKey, tagValue)
-  if (!valueTranslationKey) return undefined
-  if (!getDescriptionForInspectorTag(sourceId, tagKey, tagValue)) return undefined
-  return `${valueTranslationKey}--description`
-}

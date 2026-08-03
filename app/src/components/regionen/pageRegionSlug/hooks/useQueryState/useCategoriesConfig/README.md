@@ -36,7 +36,7 @@ Two dot-separated parts:
 
 Encode/decode: [`v2/serialize.ts`](./v2/serialize.ts), [`v2/parse.ts`](./v2/parse.ts). Checksum algorithm: [`v2/lib.ts`](./v2/lib.ts).
 
-Example frozen template: [`v2/configs/_1oy2q4i.ts`](./v2/configs/_1oy2q4i.ts). Templates are simplified trees from [`simplifyConfigForParams`](./utils/simplifyConfigForParams.ts), derived from the region’s category list and [`categories.const.ts`](../../../mapData/mapDataCategories/categories.const.ts).
+Templates are simplified trees from [`simplifyConfigForParams`](./utils/simplifyConfigForParams.ts), derived from the region’s category list and [`categories.const.ts`](../../../mapData/mapDataCategories/categories.const.ts). Historical checksums live in `RegionConfigTemplate` (upserted on every region save).
 
 Template `active` defaults in part 1 are **not** used at decode time — part 2 overwrites them, then [`mergeCategoriesConfig`](./utils/mergeCategoriesConfig.ts) merges with the region’s fresh defaults.
 
@@ -46,7 +46,6 @@ When decoding an old URL, [`resolveConfigTemplate`](../../../../../../server/reg
 
 1. **Current region categories** — rebuild template if checksum matches today’s list (no DB read)
 2. **`RegionConfigTemplate` (DB)** — upserted on every region save when categories change
-3. **Frozen `v2/configs/*` archive** — fallback for older share links and test fixtures
 
 If nothing matches, `config` resets to the region’s fresh defaults.
 

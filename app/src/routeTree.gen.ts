@@ -66,6 +66,7 @@ import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
 import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiAdminRegionsRouteImport } from './routes/api/admin/regions'
+import { Route as ApiAdminRegionUploadsRouteImport } from './routes/api/admin/region-uploads'
 import { Route as ApiAdminAuditLogRouteImport } from './routes/api/admin/audit-log'
 import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions/new'
 import { Route as AdminRegionContractsNewRouteImport } from './routes/admin/region-contracts/new'
@@ -388,6 +389,11 @@ const ApiAdminRegionsRoute = ApiAdminRegionsRouteImport.update({
   path: '/api/admin/regions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminRegionUploadsRoute = ApiAdminRegionUploadsRouteImport.update({
+  id: '/api/admin/region-uploads',
+  path: '/api/admin/region-uploads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminAuditLogRoute = ApiAdminAuditLogRouteImport.update({
   id: '/api/admin/audit-log',
   path: '/api/admin/audit-log',
@@ -519,9 +525,9 @@ const ApiAdminRegionsSlugRoute = ApiAdminRegionsSlugRouteImport.update({
 } as any)
 const ApiAdminRegionUploadsUploadRoute =
   ApiAdminRegionUploadsUploadRouteImport.update({
-    id: '/api/admin/region-uploads/upload',
-    path: '/api/admin/region-uploads/upload',
-    getParentRoute: () => rootRouteImport,
+    id: '/upload',
+    path: '/upload',
+    getParentRoute: () => ApiAdminRegionUploadsRoute,
   } as any)
 const AdminRegionsRegionSlugEditRoute =
   AdminRegionsRegionSlugEditRouteImport.update({
@@ -596,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/admin/region-contracts/new': typeof AdminRegionContractsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
   '/api/admin/audit-log': typeof ApiAdminAuditLogRoute
+  '/api/admin/region-uploads': typeof ApiAdminRegionUploadsRouteWithChildren
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
@@ -673,6 +680,7 @@ export interface FileRoutesByTo {
   '/admin/region-contracts/new': typeof AdminRegionContractsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
   '/api/admin/audit-log': typeof ApiAdminAuditLogRoute
+  '/api/admin/region-uploads': typeof ApiAdminRegionUploadsRouteWithChildren
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
@@ -761,6 +769,7 @@ export interface FileRoutesById {
   '/admin/region-contracts/new': typeof AdminRegionContractsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
   '/api/admin/audit-log': typeof ApiAdminAuditLogRoute
+  '/api/admin/region-uploads': typeof ApiAdminRegionUploadsRouteWithChildren
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
@@ -849,6 +858,7 @@ export interface FileRouteTypes {
     | '/admin/region-contracts/new'
     | '/admin/regions/new'
     | '/api/admin/audit-log'
+    | '/api/admin/region-uploads'
     | '/api/admin/regions'
     | '/api/auth/$'
     | '/api/notes/$regionSlug'
@@ -926,6 +936,7 @@ export interface FileRouteTypes {
     | '/admin/region-contracts/new'
     | '/admin/regions/new'
     | '/api/admin/audit-log'
+    | '/api/admin/region-uploads'
     | '/api/admin/regions'
     | '/api/auth/$'
     | '/api/notes/$regionSlug'
@@ -1013,6 +1024,7 @@ export interface FileRouteTypes {
     | '/admin/region-contracts/new'
     | '/admin/regions/new'
     | '/api/admin/audit-log'
+    | '/api/admin/region-uploads'
     | '/api/admin/regions'
     | '/api/auth/$'
     | '/api/notes/$regionSlug'
@@ -1067,6 +1079,7 @@ export interface RootRouteChildren {
   ApiStatsRoute: typeof ApiStatsRoute
   ApiUploadsRoute: typeof ApiUploadsRouteWithChildren
   ApiAdminAuditLogRoute: typeof ApiAdminAuditLogRoute
+  ApiAdminRegionUploadsRoute: typeof ApiAdminRegionUploadsRouteWithChildren
   ApiAdminRegionsRoute: typeof ApiAdminRegionsRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiNotesRegionSlugRoute: typeof ApiNotesRegionSlugRouteWithChildren
@@ -1078,7 +1091,6 @@ export interface RootRouteChildren {
   ApiPrivateRegisterSqlFunctionsRoute: typeof ApiPrivateRegisterSqlFunctionsRoute
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
-  ApiAdminRegionUploadsUploadRoute: typeof ApiAdminRegionUploadsUploadRoute
   ApiExportOgrRegionSlugTableNameRoute: typeof ApiExportOgrRegionSlugTableNameRoute
   ApiExportRegionSlugTableNameRoute: typeof ApiExportRegionSlugTableNameRoute
   ApiMaprouletteDataProjectKeyRoute: typeof ApiMaprouletteDataProjectKeyRoute
@@ -1491,6 +1503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminRegionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/region-uploads': {
+      id: '/api/admin/region-uploads'
+      path: '/api/admin/region-uploads'
+      fullPath: '/api/admin/region-uploads'
+      preLoaderRoute: typeof ApiAdminRegionUploadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/audit-log': {
       id: '/api/admin/audit-log'
       path: '/api/admin/audit-log'
@@ -1654,10 +1673,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/admin/region-uploads/upload': {
       id: '/api/admin/region-uploads/upload'
-      path: '/api/admin/region-uploads/upload'
+      path: '/upload'
       fullPath: '/api/admin/region-uploads/upload'
       preLoaderRoute: typeof ApiAdminRegionUploadsUploadRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiAdminRegionUploadsRoute
     }
     '/admin/regions/$regionSlug/edit': {
       id: '/admin/regions/$regionSlug/edit'
@@ -1912,6 +1931,19 @@ const ApiUploadsRouteWithChildren = ApiUploadsRoute._addFileChildren(
   ApiUploadsRouteChildren,
 )
 
+interface ApiAdminRegionUploadsRouteChildren {
+  ApiAdminRegionUploadsUploadRoute: typeof ApiAdminRegionUploadsUploadRoute
+}
+
+const ApiAdminRegionUploadsRouteChildren: ApiAdminRegionUploadsRouteChildren = {
+  ApiAdminRegionUploadsUploadRoute: ApiAdminRegionUploadsUploadRoute,
+}
+
+const ApiAdminRegionUploadsRouteWithChildren =
+  ApiAdminRegionUploadsRoute._addFileChildren(
+    ApiAdminRegionUploadsRouteChildren,
+  )
+
 interface ApiAdminRegionsRouteChildren {
   ApiAdminRegionsSlugRoute: typeof ApiAdminRegionsSlugRoute
 }
@@ -1951,6 +1983,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiStatsRoute: ApiStatsRoute,
   ApiUploadsRoute: ApiUploadsRouteWithChildren,
   ApiAdminAuditLogRoute: ApiAdminAuditLogRoute,
+  ApiAdminRegionUploadsRoute: ApiAdminRegionUploadsRouteWithChildren,
   ApiAdminRegionsRoute: ApiAdminRegionsRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiNotesRegionSlugRoute: ApiNotesRegionSlugRouteWithChildren,
@@ -1963,7 +1996,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPrivateRegisterSqlFunctionsRoute: ApiPrivateRegisterSqlFunctionsRoute,
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,
-  ApiAdminRegionUploadsUploadRoute: ApiAdminRegionUploadsUploadRoute,
   ApiExportOgrRegionSlugTableNameRoute: ApiExportOgrRegionSlugTableNameRoute,
   ApiExportRegionSlugTableNameRoute: ApiExportRegionSlugTableNameRoute,
   ApiMaprouletteDataProjectKeyRoute: ApiMaprouletteDataProjectKeyRoute,

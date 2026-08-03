@@ -15,13 +15,14 @@ import {
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
+import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import {
   convertToUrlFeature,
   isPersistableFeature,
   useFeaturesParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
-import type { MapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
+import { type MapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import {
   interactivityConfiguration,
@@ -39,16 +40,21 @@ import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const
 import { PlanningMapDrawing } from '../Planning/drawing/PlanningMapDrawing'
 import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
+import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { QaZoomNotice } from './QaZoomNotice'
 import { SearchResultLayers } from './Search/SearchResultLayers'
+import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
 import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
+import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
+import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
 import { SourcesLayersPlanning } from './SourcesAndLayers/SourcesLayersPlanning'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
+import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
 import { safeSetFeatureState } from './utils/safeSetFeatureState'
@@ -75,6 +81,7 @@ const NO_INTERACTIVE_LAYERS: string[] = []
 
 export const RegionMap = () => {
   const { mapParam, setMapParam } = useMapParam()
+  const { is3dActive } = useBg3dParam()
   const { setFeaturesParam } = useFeaturesParam()
   const {
     replaceInspectorFeatures,
@@ -195,10 +202,8 @@ export const RegionMap = () => {
   }
 
   const handleLoad = (event: MapLibreEvent) => {
-    // We disable rotation once after map startup to keep interactions consistent.
-    event.target.touchZoomRotate.disableRotation()
-
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
+    // Rotate/pitch handlers: Map3dTouchRotation (runs once mapLoaded is set).
     markMapLoaded()
     updateMapBounds(event.target.getBounds())
 
@@ -228,8 +233,15 @@ export const RegionMap = () => {
 
   const handleMoveEnd = (event: ViewStateChangeEvent) => {
     // Note: <SourcesAndLayersOsmNotes> simulates a moveEnd by watching the lat/lng url params
-    const { latitude, longitude, zoom } = event.viewState
-    void setMapParam({ zoom, lat: latitude, lng: longitude }, { history: 'replace' })
+    const { latitude, longitude, zoom, bearing, pitch } = event.viewState
+    const nextMapParam: MapParam = { zoom, lat: latitude, lng: longitude }
+    if (is3dActive) {
+      nextMapParam.bearing = bearing
+      nextMapParam.pitch = pitch
+    }
+    // When 3D is off, omit bearing/pitch from the URL. Do not jumpTo here — that
+    // cancels SelectBackground's resetNorthPitch animation when disabling 3D.
+    void setMapParam(nextMapParam, { history: 'replace' })
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
@@ -275,6 +287,8 @@ export const RegionMap = () => {
         longitude: mapParam.lng,
         latitude: mapParam.lat,
         zoom: mapParam.zoom,
+        bearing: is3dActive ? (mapParam.bearing ?? 0) : 0,
+        pitch: is3dActive ? (mapParam.pitch ?? 0) : 0,
       }}
       // We prevent users from zooming out too far which puts too much load on our vector tiles db
       {...mapMaxBoundsSettings}
@@ -294,13 +308,15 @@ export const RegionMap = () => {
       onData={startMapDataLoading}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
-      dragRotate={false}
+      terrain={is3dActive ? { source: MAPTERHORN_DEM_SOURCE_ID, exaggeration: 1.5 } : undefined}
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
     >
       {/* Order: First Background Sources, then Vector Tile Sources */}
       <UpdateFeatureState />
       <SourcesLayerRasterBackgrounds />
+      <SourcesLayersMap3dDem />
+      <SourcesLayersMap3dBuildings />
       <SourcesLayersSystemDatasets />
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
@@ -310,12 +326,20 @@ export const RegionMap = () => {
       <SearchResultLayers />
       <SourcesLayersPlanning />
       <PlanningMapDrawing />
+      {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
+      <TerrainProfileHoverMarkerLayer />
       <AttributionControl compact={true} position="bottom-left" />
 
-      {/* Zoom controls are hidden on mobile to keep the map clean (pinch-to-zoom remains). */}
-      {isSmBreakpointOrAbove && (
-        <NavigationControl showCompass={false /* TODO: See Story */} visualizePitch={true} />
+      {/* Desktop always gets zoom controls; mobile only when 3D is active (compass reset).
+          key remounts the control: react-map-gl only applies showCompass at create time. */}
+      {(isSmBreakpointOrAbove || is3dActive) && (
+        <NavigationControl
+          key={is3dActive ? 'nav-3d' : 'nav-2d'}
+          showCompass={is3dActive}
+          visualizePitch={true}
+        />
       )}
+      <Map3dTouchRotation />
       <Calculator />
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

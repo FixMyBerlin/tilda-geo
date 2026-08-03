@@ -8,6 +8,7 @@ import {
 import type { MapDataOsmIdConfig } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { buttonStyles } from '@/components/shared/links/styles'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import { pointFromGeometry } from './osmUrls/pointFromGeometry'
 
@@ -34,7 +35,8 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
     <button
       type="button"
       className={buttonStyles}
-      onClick={() => {
+      onClick={(e) => {
+        captureModalOpenOrigin(e.currentTarget)
         setShowOsmNotesParam(true)
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         setNewNoteTildaDeeplink(window.location.href)

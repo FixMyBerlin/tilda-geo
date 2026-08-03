@@ -64,8 +64,20 @@
    indicator. These controls render outside React, so env() padding on our floating chrome can't
    reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
 :root {
-  --inspector-width: 0;
+  /* Must be `0px` (not unitless `0`): `calc(var(--inspector-width) + …)` is invalid if the
+     custom property is a bare number, which parks bottom map controls on the left until JS
+     seeds a px value (e.g. pending/error shells never mount the inspector). */
+  --inspector-width: 0px;
   --map-controls-inset: 10px;
+  /* Mobile: floating header button row (MobileMapHeader `pt`). */
+  --map-chrome-top-inset: calc(env(safe-area-inset-top) + 0.5rem);
+}
+
+@media (min-width: 640px) {
+  :root {
+    /* Desktop map UI height: h-16 header, top-2 controls, bottom-4 + size-10 trigger, anchor gap. */
+    --map-chrome-max-height: calc(100dvh - 4rem - 0.5rem - 1rem - 2.5rem - 0.5rem);
+  }
 }
 
 .maplibregl-ctrl-top-left {

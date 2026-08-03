@@ -6,13 +6,15 @@ import { auditChangeSourceFilterLabel } from '@/server/audit/auditChangeSources.
 import { auditLogFilterWireFields, auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
 import { listAuditLog } from '@/server/audit/queries/listAuditLog.server'
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
-import { getRegion } from '@/server/regions/queries/getRegion.server'
-import { getRegions } from '@/server/regions/queries/getRegions.server'
+import { getRegionWithWriteConfig } from '@/server/regions/queries/getRegion.server'
+import { getRegionsWithWriteConfig } from '@/server/regions/queries/getRegions.server'
 import {
   createRegionConfig,
   deleteRegionConfig,
   updateRegionConfig,
 } from '@/server/regions/regionWriteService.server'
+import { createRegionUploadFromBytes } from '@/server/regions/uploads/createRegionUploadFromBytes.server'
+import { regionUploadFromBytesInputSchema } from '@/server/regions/uploads/regionUploadFromBytes.schema'
 import { joinCommaList } from '@/shared/orderedList/commaList'
 import { offsetSearchFields } from '@/shared/pagination/offsetSearchSchema'
 
@@ -45,10 +47,13 @@ const run = async (fn: () => Promise<unknown>) => {
 
 const regionConfigDescription =
   'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, categories, ' +
-  'backgroundSources, exports, navigationLinks, notes, …). Mask fields (maskOsmRelationIds / ' +
-  'maskBufferKm) are not part of this schema — the mask is managed by a separate generate mask flow. ' +
-  'Validated with RegionWriteSchema; returns an error with the issues on invalid input. See the ' +
-  'manage-regions skill for required fields.'
+  'backgroundSources, exports, navigationLinks, notes, maskOsmRelationIds, maskBufferKm, welcome ' +
+  '{ enabled, title, subtitle, bodyMarkdown, image { uploadId, altText } | null, sections ' +
+  '[{ title, bodyMarkdown?, sortOrder }] (max 8) }, …). When maskOsmRelationIds or maskBufferKm ' +
+  'change on create/update, mask geometry is generated (or removed if IDs are empty) in the same ' +
+  'request. Validated with RegionWriteSchema (unknown keys are rejected). ' +
+  'Full replace only — omit a field and it is cleared. Round-trip from regions_get/list `config`, ' +
+  'not from nested client `region` fields. Create logo/welcome images first with region_uploads_create.'
 
 /**
  * Build the per-request MCP server. Tools call the admin services in-process (same code paths as the
@@ -66,9 +71,11 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     {
       instructions:
         `TILDA region admin tools bound to the ${envLabel} environment (${origin}). ` +
-        `Writes (regions_create / regions_update / regions_delete) mutate the ${envLabel} database — ` +
+        `Writes (regions_create / regions_update / regions_delete / region_uploads_create) mutate the ${envLabel} database — ` +
         `call env_info first and confirm you are on the intended environment before any write. ` +
-        `Writes are attributed in the audit log to the API token owner.`,
+        `Writes are attributed in the audit log to the API token owner. ` +
+        `regions_get / regions_list return { region, config }; use config for regions_update. ` +
+        `Upload logo/welcome files with region_uploads_create, then attach via headerLogoId or welcome.image.uploadId.`,
     },
   )
 
@@ -77,21 +84,31 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     {
       description:
         'Report which TILDA environment (DEV/STG/PRD) and origin this MCP server is bound to. ' +
-        'Call this first to confirm the target environment before any write.',
+        'Call this first to confirm the target environment before any write. ' +
+        'Tools include region_uploads_create for logo/welcome images.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
 
   server.registerTool(
     'regions_list',
-    { description: 'List all regions with their full DB-backed config.' },
-    () => run(() => getRegions()),
+    {
+      description:
+        'List all regions. Each item is { region: TRegion (client/nested), config: RegionWriteInput }. ' +
+        'Use config for regions_create/update round-trips; do not feed nested region fields into writes.',
+    },
+    () => run(() => getRegionsWithWriteConfig()),
   )
 
   server.registerTool(
     'regions_get',
-    { description: 'Get a single region by slug.', inputSchema: { slug: z.string() } },
-    ({ slug }) => run(() => getRegion({ slug })),
+    {
+      description:
+        'Get a single region by slug as { region: TRegion (client/nested), config: RegionWriteInput }. ' +
+        'Use config for regions_update; do not feed nested region fields into writes.',
+      inputSchema: { slug: z.string() },
+    },
+    ({ slug }) => run(() => getRegionWithWriteConfig({ slug })),
   )
 
   server.registerTool(
@@ -116,6 +133,21 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     'regions_delete',
     { description: 'Delete a region by slug.', inputSchema: { slug: z.string() } },
     ({ slug }) => run(() => deleteRegionConfig(slug, auditContext())),
+  )
+
+  server.registerTool(
+    'region_uploads_create',
+    {
+      description:
+        'Create a RegionUpload library row (S3 + DB) for an existing region. ' +
+        'Pass filename, mimeType (image/png|jpeg|webp|svg+xml), and contentBase64 (raw or data-URL). ' +
+        'Returns { uploadId, title, mimeType, fileSize, regionSlug }. ' +
+        'Does not attach the file — then regions_update with headerLogoId or ' +
+        'welcome.image: { uploadId, altText }. Max 5 MB; the bytes must really be the declared ' +
+        'image type and SVGs must not contain scripts.',
+      inputSchema: regionUploadFromBytesInputSchema.shape,
+    },
+    (args) => run(() => createRegionUploadFromBytes(args, auditContext())),
   )
 
   server.registerTool(

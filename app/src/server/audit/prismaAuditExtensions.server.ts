@@ -2,6 +2,16 @@ import { auditLogExtension } from '@explita/prisma-audit-log'
 import type { PrismaClient } from '@/prisma/generated/client'
 import { AUDITED_MODELS } from '@/server/audit/auditAuditedModels.const'
 import { getAuditContext } from '@/server/audit/auditContext.server'
+import {
+  AUDIT_IGNORED_FIELDS,
+  AUDIT_SKIP_UPDATE_MODELS,
+} from '@/server/audit/auditIgnoredFields.const'
+
+const auditFieldFilters = Object.fromEntries(
+  Object.entries(AUDIT_IGNORED_FIELDS).map(([model, fields]) => [model, { exclude: [...fields] }]),
+)
+
+const skipUpdateModels = new Set<string>(AUDIT_SKIP_UPDATE_MODELS)
 
 /**
  * Prisma audit logging is two cooperating parts:
@@ -68,12 +78,24 @@ export function extendWithAuditLog(client: PrismaClient) {
             }
           },
 
+          fieldFilters: auditFieldFilters,
+
           skip: ({ model, operation, args }) => {
             if (model === 'AuditLog') return true
-            if (model === 'Session' && operation === 'update') return true
-            if (model === 'AdminApiToken' && operation === 'update') {
-              const data = args?.data as Record<string, unknown> | undefined
-              if (data && Object.keys(data).length === 1 && 'lastUsedAt' in data) return true
+            if (operation === 'update' && skipUpdateModels.has(model)) return true
+
+            if (operation === 'update') {
+              const ignored = AUDIT_IGNORED_FIELDS[model as keyof typeof AUDIT_IGNORED_FIELDS]
+              if (ignored) {
+                const data = args?.data as Record<string, unknown> | undefined
+                const keys = data ? Object.keys(data) : []
+                if (
+                  keys.length > 0 &&
+                  keys.every((key) => (ignored as readonly string[]).includes(key))
+                ) {
+                  return true
+                }
+              }
             }
             return false
           },

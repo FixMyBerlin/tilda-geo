@@ -1,6 +1,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { InformationCircleIcon as InformationCircleIconOutline } from '@heroicons/react/24/outline'
 import { InformationCircleIcon } from '@heroicons/react/24/solid'
+import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 
 export const ValueDisclosure = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -30,11 +31,11 @@ export const ValueDisclosureButton = ({
   /** @description use to hide the button conditionally */
   hasBody?: boolean
 }) => {
-  if (hasBody === false) return <div className="w-full">{children}</div>
+  if (hasBody === false) return <div className="w-full min-w-0">{children}</div>
 
   return (
-    <DisclosureButton className="group/button flex w-full cursor-pointer items-center justify-between gap-1 text-left">
-      <div className="w-full">{children}</div>
+    <DisclosureButton className="group/button flex w-full min-w-0 cursor-pointer items-center justify-between gap-1 text-left">
+      <div className="w-full min-w-0">{children}</div>
       <div className="focus-visible:ring-opacity-75 -m-0.5 rounded border border-transparent bg-gray-50 p-0.5 text-left text-sm font-medium group-hover/button:border-gray-500 group-hover/button:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
         <InformationCircleIcon
           data-active-icon="open" // see ValueDisclosure
@@ -52,9 +53,15 @@ export const ValueDisclosureButton = ({
 }
 
 export const ValueDisclosurePanel = ({ children }: { children: React.ReactNode }) => {
+  // `static` keeps the panel mounted so MotionCollapse can animate its height (0 ↔ auto),
+  // smoothing the inspector resize instead of the previous instant height jump.
   return (
-    <DisclosurePanel className="mt-0.5 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">
-      {children}
+    <DisclosurePanel static>
+      {({ open }) => (
+        <MotionCollapse open={open}>
+          <div className="mt-0.5 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">{children}</div>
+        </MotionCollapse>
+      )}
     </DisclosurePanel>
   )
 }

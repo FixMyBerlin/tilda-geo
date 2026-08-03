@@ -4,8 +4,7 @@ import { serialize } from '../v2/serialize'
 import type { UrlMigration } from './types'
 
 // v2-short configs are `checksum.bits[.bits…]` — base36 dot-separated segments. v1 jsurl configs
-// start with `!(` and use `~`. Detect "already v2-short" by format, not registry membership, so
-// checksums without a frozen `v2/configs/*` entry are still recognised.
+// start with `!(` and use `~`. Detect "already v2-short" by format, not by known checksums.
 const shortConfigPattern = /^[0-9a-z]+(\.[0-9a-z]+)+$/i
 
 const isShortConfigParam = (value: string) => shortConfigPattern.test(value)

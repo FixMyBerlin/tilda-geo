@@ -1,20 +1,42 @@
 ---
 name: tilda-geo-agent-workflow
 description: >-
-  Guides agents working in tilda-geo through repo setup, sibling git worktrees,
-  predev-managed Docker stacks, local dummy DB seeding, bun run processing,
-  agent-browser map debugging, and tilda-static-data symlink rules. Use when
-  starting work in this repo, setting up short work branches, running processing,
-  touching static datasets, or debugging maps in the browser.
+  Guides isolated feature / local-stack setup in tilda-geo: sibling worktrees,
+  predev Docker, seed, processing, static-data symlinks, agent-browser map debug.
+  Use when creating a feature worktree, needing an isolated Docker stack, running
+  processing/seed, touching static datasets, or debugging maps. Do not use for
+  ordinary edits on develop/main or when already on an existing branch — stay in
+  the current checkout.
 ---
 
 # TILDA Geo agent workflow
 
-Use this skill first when an agent starts work in **tilda-geo**. It captures repo-specific rules that are easy to miss. Use the list below to jump to the relevant section; each section links onward only when another doc or focused skill is needed.
+Local isolation / stack playbook for **tilda-geo**. Not the everyday coding entrypoint.
+
+## Default: stay where you are
+
+Work in the **current checkout**. Do not run `setup-worktree` unless the user asks for a new branch/worktree/isolated stack (or already said “new feature branch / worktree”). A one-line suggestion that large work would fit a worktree is OK; creating one is not.
+
+Everyday conventions live in [AGENTS.md](../../../AGENTS.md).
+
+### When to use
+
+- User asks for a **new branch / worktree / isolated stack**
+- Dedicated feature that should not dirty the main `develop` checkout
+- Task needs **processing**, **fresh seed DB**, **parallel Docker**, or **static-data worktrees**
+- Map/UI debugging with `bun run dev` + agent-browser ([section 4](#4-agent-browser-and-map-state) — no worktree ceremony unless isolation is also needed)
+- Implementer hits Docker / processing / static-data setup questions
+
+### When not to use
+
+- Q&A, exploration, small edits on `develop` / `main`
+- Continuing work already on a branch or in a worktree
+- One-file or few-file fixes where the current checkout is enough
+- Docs, copy, config tweaks that don’t need a private DB stack
 
 ## Quick orientation
 
-Start with the section that matches the task:
+Jump to the section that matches the task:
 
 - New branch or checkout setup: [Git worktrees](#1-git-worktrees)
 - Docker, ports, `.env.local`, or `bun run dev`: [Docker and predev](#2-docker-and-predev-envlocal)
@@ -30,7 +52,7 @@ Start with the section that matches the task:
 
 ## 1. Git worktrees
 
-Feature work uses a **sibling checkout** next to the main repo. Do not do feature work in the main checkout.
+When isolating feature work, use a **sibling checkout** next to the main repo. Do not do that feature work in the main checkout.
 
 ```
 ../
@@ -133,7 +155,7 @@ If editing predev/Docker code, keep these invariants:
 
 - Predev passes `docker compose -p <DEV_STACK_ID>`; do not set `COMPOSE_PROJECT_NAME` in compose YAML.
 - `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only and derived by predev, not stored in `.env.local`.
-- `DEV_ATTACH_STACK` can attach to another stack, but the target db+tiles stack must already be running.
+- `DEV_ATTACH_STACK` can attach to another stack, but the target db+tiles stack must already be running. Processing/`seed` geo-bootstrap uses that stack’s real compose project (`-p`, e.g. `tilda-geo` for `default`) so `docker compose up processing` joins the shared `db` instead of creating a conflicting `/db` under the worktree folder name.
 - `DEV_PORT_SLOT` is the single source of truth for offset ports; legacy `DATABASE_PORT` / `TILES_PORT` lines in `.env.local` are stripped.
 - Relevant files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/ensureDevStack.ts`, `app/scripts/predev/devPortSlot.ts`, `app/scripts/predev/envLocalBranch.ts`, `app/scripts/predev/devStackDiscovery.ts`, `app/scripts/predev/checkDocker.ts`, `app/scripts/predev/syncEnvLocal.ts`, `app/.husky/post-checkout`.
 
@@ -160,11 +182,11 @@ bun run processing -- --help   # full contract
 ### App DB setup (agents)
 
 ```bash
-bun run seed   # fresh local DB (~30s)
+bun run seed   # fresh local DB (~30s); also installs local MCP Bearer `tildageode_admin_local_dev_mcp_only`
 bun run dev
 ```
 
-Do **not** use `db-pull`. It pulls staging/production snapshots and is for humans only.
+Do **not** use `db-pull`. It pulls staging/production snapshots and is for humans only (prisma restores scrub PII/credentials and re-run the same local-access seed — see `app/scripts/db-pull/README.md`).
 
 If you run `dev` without seeding first, predev warns — warn-only, does not block.
 
@@ -302,10 +324,11 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 
 ---
 
-## Agent checklist (new task)
+## Isolation checklist (only when this skill applies)
 
 ```
-- [ ] New work branch? -> from app/, `bun run setup-worktree -- my-branch`, then `bun run dev` in the new worktree
+- [ ] Already on develop/main or an existing branch? -> skip worktree setup; stay put
+- [ ] User asked for a new work branch? -> from app/, `bun run setup-worktree -- my-branch`, then `bun run dev` in the new worktree
 - [ ] Local app/db needed? -> trust predev from `bun run dev`; do not hand-craft Docker or re-audit env
 - [ ] Fresh local db? -> `bun run seed`, then `bun run dev` (not db-pull)
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)

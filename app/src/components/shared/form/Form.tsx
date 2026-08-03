@@ -10,6 +10,7 @@ import { FormActionBar } from '@/components/shared/form/FormActionBar'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { buttonStyles } from '@/components/shared/links/styles'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { isProd } from '@/components/shared/utils/isEnv'
 import type { Router } from '@/router'
 
@@ -52,7 +53,10 @@ function applyFieldErrors(
 }
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
+type ActionBarPlacement = 'bottom' | 'both'
+
 type FormProps<TValues extends Record<string, unknown>> = {
+  actionBarPlacement?: ActionBarPlacement
   actionBarRight?: ReactNode
   defaultValues: TValues
   schema: z.ZodTypeAny
@@ -65,6 +69,7 @@ type FormProps<TValues extends Record<string, unknown>> = {
 }
 
 export function Form<TValues extends Record<string, unknown>>({
+  actionBarPlacement = 'bottom',
   actionBarRight,
   defaultValues,
   schema,
@@ -76,10 +81,7 @@ export function Form<TValues extends Record<string, unknown>>({
   className,
 }: FormProps<TValues>) {
   const navigate = useNavigate()
-  const [submitMessage, setSubmitMessage] = useState<{
-    type: 'success' | 'error'
-    text: string
-  } | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const form = useForm<
     TValues,
@@ -101,12 +103,12 @@ export function Form<TValues extends Record<string, unknown>>({
       onSubmit: schema as FormValidateOrFn<TValues>,
     },
     onSubmit: async ({ value }) => {
-      setSubmitMessage(null)
+      setSubmitError(null)
       const result = await onSubmit(value)
       if (!result) return
       if (result.success) {
         form.reset(result.resetValues ?? value)
-        setSubmitMessage({ type: 'success', text: result.message ?? 'Gespeichert.' })
+        toastSuccess(result.message ?? 'Gespeichert.')
         if (result.redirect) {
           navigate({
             to: result.redirect,
@@ -122,10 +124,46 @@ export function Form<TValues extends Record<string, unknown>>({
           values: value,
         })
       }
-      setSubmitMessage({ type: 'error', text: result.message })
+      setSubmitError(result.message)
       applyFieldErrors(form, result.errors)
     },
   })
+
+  const actionBar = submitLabel ? (
+    <FormActionBar
+      left={
+        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting, s.errors] as const}>
+          {([canSubmit, isSubmitting, errors]) => {
+            const lines = showFormErrors ? uniqueFormattedFormErrors(errors) : []
+            return (
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                  className={submitClassName ?? buttonStyles}
+                  title={
+                    !canSubmit && lines.length > 0
+                      ? `Formular unvollständig: ${lines.join(' · ')}`
+                      : undefined
+                  }
+                >
+                  {isSubmitting ? '…' : submitLabel}
+                </button>
+                {lines.length > 0 ? (
+                  <div className="min-w-0 text-sm text-red-800" role="alert">
+                    {lines.map((msg) => (
+                      <p key={msg}>{msg}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            )
+          }}
+        </form.Subscribe>
+      }
+      right={actionBarRight}
+    />
+  ) : null
 
   return (
     <form
@@ -137,57 +175,17 @@ export function Form<TValues extends Record<string, unknown>>({
         form.handleSubmit()
       }}
     >
+      {actionBarPlacement === 'both' ? actionBar : null}
+
       {children(form as FormApi<TValues>)}
 
-      {showFormErrors ? (
-        <form.Subscribe selector={(s) => s.errors}>
-          {(errors) => {
-            const lines = uniqueFormattedFormErrors(errors)
-            if (lines.length === 0) return null
-            if (!isProd) {
-              console.info('[Form] validation errors (client)', {
-                raw: errors,
-                formattedLines: lines,
-              })
-            }
-            return (
-              <div className="text-sm text-red-600" role="alert">
-                {lines.map((msg) => (
-                  <p key={msg}>{msg}</p>
-                ))}
-              </div>
-            )
-          }}
-        </form.Subscribe>
+      {submitError ? (
+        <div className="text-sm text-red-600" role="alert">
+          {submitError}
+        </div>
       ) : null}
 
-      {submitMessage && (
-        <div
-          className={`text-sm ${submitMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}
-          role={submitMessage.type === 'error' ? 'alert' : 'status'}
-        >
-          {submitMessage.text}
-        </div>
-      )}
-
-      {submitLabel && (
-        <FormActionBar
-          left={
-            <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
-              {([canSubmit, isSubmitting]) => (
-                <button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className={submitClassName ?? buttonStyles}
-                >
-                  {isSubmitting ? '…' : submitLabel}
-                </button>
-              )}
-            </form.Subscribe>
-          }
-          right={actionBarRight}
-        />
-      )}
+      {actionBar}
     </form>
   )
 }

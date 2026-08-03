@@ -10,6 +10,7 @@ Load for global store setup, Vite dev with globalStore, or phantom deps.
 - Commit `bunfig.toml` per repo ([template](../examples/bunfig.toml.template)); overrides `~/.bunfig.toml`
 - Vite dev: extend [server.fs.allow](https://vite.dev/config/server-options.html#server-fs-allow) with `~/.bun/install/cache/links` (extend defaults — do not replace the project root) — do **not** disable globalStore first
 - Explicit dep enforcement (your imports): [knip.md](knip.md)
+- **Docker images:** Do **not** `COPY` `bunfig.toml` before image `bun install` — `globalStore` links into `/root/.bun/…` and breaks non-root `USER` (`EACCES`). Install from `package.json` + lockfile only (or `BUN_INSTALL_GLOBAL_STORE=0`)
 
 ## Phantom dependencies under `globalStore`
 
@@ -48,6 +49,8 @@ Verify: `realpath node_modules/<pkg>` should be under the **project** `node_modu
 
 - **Question:** Did global store work?  
   **See:** [bun-install-verify.md](bun-install-verify.md)
+- **Question:** `EACCES` / `permission denied` on `node_modules/…` in Docker as non-root  
+  **See:** Decisions — Docker images (above)
 - **Question:** `ERR_LOAD_URL` / `cache/links`  
   **See:** [vitejs/vite#22662](https://github.com/vitejs/vite/issues/22662) · [server.fs.allow](https://vite.dev/config/server-options.html#server-fs-allow) (above)
 - **Question:** compat / `caniuse-lite`  

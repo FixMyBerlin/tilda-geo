@@ -1,4 +1,5 @@
 import { NavigationDesktop } from '../NavigationDesktop/NavigationDesktop'
+import { NavigationDesktopMenu } from '../NavigationDesktop/NavigationDesktopMenu'
 import { NavigationMobile } from '../NavigationMobile/NavigationMobile'
 import { NavigationWrapper } from '../NavigationWrapper/NavigationWrapper'
 import { HeaderAppLogoWhite } from './HeaderAppLogo'
@@ -15,8 +16,7 @@ export const HeaderApp = () => {
       <NavigationDesktop
         logo={<HeaderAppLogoWhite />}
         primaryNavigation={primaryNavigation}
-        secondaryNavigation={secondaryNavigationGrouped}
-        secondaryNavigationLogo={false}
+        trailing={<NavigationDesktopMenu menuItems={secondaryNavigationGrouped} logo={false} />}
       />
     </NavigationWrapper>
   )

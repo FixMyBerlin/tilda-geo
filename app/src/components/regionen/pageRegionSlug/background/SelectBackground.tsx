@@ -10,6 +10,8 @@ import {
   type BackgroundParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/backgroundParam.const'
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
+import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
+import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
@@ -18,11 +20,14 @@ import {
   mobileControlButtonActiveClassName,
   mobileControlButtonClassName,
 } from '../mobile/mobileControlButton.const'
+import { Background3dToggleRow } from './Background3dToggleRow'
 import { ListOption } from './ListOption'
 
 export const SelectBackground: React.FC = () => {
   const { mainMap } = useMap()
   const { backgroundParam, setBackgroundParam } = useBackgroundParam()
+  const { mapParam, setMapParam } = useMapParam()
+  const { is3dActive, toggle3d } = useBg3dParam()
   const { region } = useRegionLoaderData()
   const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -37,11 +42,32 @@ export const SelectBackground: React.FC = () => {
     void setBackgroundParam(value)
   }
 
+  const on3dChange = (active: boolean) => {
+    toggle3d(active)
+    if (active || !mainMap || !mapParam) return
+
+    // Same API as NavigationControl compass click (visualizePitch path).
+    mainMap.getMap().resetNorthPitch({ duration: 500 })
+    // Use `=== undefined` — bearing/pitch of 0 are valid and must still be stripped.
+    if (mapParam.bearing === undefined && mapParam.pitch === undefined) return
+    void setMapParam(
+      { zoom: mapParam.zoom, lat: mapParam.lat, lng: mapParam.lng },
+      { history: 'replace' },
+    )
+  }
+
   if (!mainMap) return null
   if (!backgroundParam) return null
 
   // Mobile: an icon button that opens the same options as a bottom sheet (consistent
   // with the other mobile controls), instead of the desktop dropdown.
+  const threeDOptionsSection = (
+    <div className="border-t border-gray-200 px-2 py-2">
+      <p className="sr-only">3D-Optionen</p>
+      <Background3dToggleRow checked={is3dActive} onChange={on3dChange} label="3D Höhenprofil" />
+    </div>
+  )
+
   if (!isSmBreakpointOrAbove) {
     const options: { value: BackgroundParam; name: string }[] = [
       ...backgrounds.map(({ id, name }) => ({ value: id, name })),
@@ -102,6 +128,7 @@ export const SelectBackground: React.FC = () => {
               })}
             </div>
           </div>
+          {threeDOptionsSection}
         </MobileBottomSheet>
       </section>
     )
@@ -134,6 +161,7 @@ export const SelectBackground: React.FC = () => {
           value={defaultBackgroundParam}
           name="Standard"
         />
+        {threeDOptionsSection}
       </ListboxOptions>
     </Listbox>
   )

@@ -1,0 +1,25 @@
+/*
+ * With highlightEnable={false} the highlighted <pre> is omitted, so the absolute
+ * textarea no longer gets a sized parent. Tailwind preflight (`resize`) and
+ * @tailwindcss/forms (border/focus ring) also fight the library styles.
+ */
+.markdown-editor .w-md-editor-text {
+  height: 100%;
+}
+
+.markdown-editor textarea.w-md-editor-text-input {
+  position: absolute !important;
+  inset: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  resize: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+  padding: inherit !important;
+  margin: 0 !important;
+}

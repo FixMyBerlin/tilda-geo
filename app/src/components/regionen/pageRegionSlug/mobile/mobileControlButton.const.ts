@@ -13,16 +13,25 @@ export const mobileControlButtonClassName =
 export const mobileMapIconButtonClassName = twMerge(mobileControlButtonClassName, 'size-10')
 
 /**
- * Middle/end segment of a split notes control group (filter, download, plus).
- * `-ml-px` overlaps borders with the previous segment. Shadow/outer rounding live on the group wrapper.
+ * Middle segment of a split notes control group (filter, download).
+ * `-ml-px` overlaps borders with the previous segment. Outer rounding is on the first/last segments.
  */
 export const notesSplitControlSegmentClassName = twMerge(
   mobileMapIconButtonClassName,
   'z-0 -ml-px rounded-none shadow-none',
 )
 
+/** Toggle button when the split group is open (left segment). */
+export const notesSplitControlFirstSegmentClassName = 'rounded-l-md rounded-r-none shadow-none'
+
+/** Plus button (right segment). Square inner corners avoid white gaps at the group radius. */
+export const notesSplitControlLastSegmentClassName = twMerge(
+  notesSplitControlSegmentClassName,
+  'rounded-l-none rounded-r-md',
+)
+
 /** Wrapper when the notes control is expanded into a split button group. */
-export const notesSplitControlGroupClassName = 'overflow-hidden rounded-md shadow-md'
+export const notesSplitControlGroupClassName = 'isolate flex rounded-md shadow-md'
 
 /**
  * Applied (via `twMerge`) on top of the base when the button's panel/sheet is open,

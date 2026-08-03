@@ -6,7 +6,9 @@ import { adminTableClasses } from '@/components/admin/AdminTable'
 import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
 import { Breadcrumb } from '@/components/admin/Breadcrumb'
 import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { buildUploadsListSearch } from '@/components/admin/map-dataset-uploads/pageMapDatasetUploads/mapDatasetUploadsListSearch'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
+import { Link } from '@/components/shared/links/Link'
 import { linkStyles } from '@/components/shared/links/styles'
 import { Quote } from '@/components/shared/text/Quotes'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
@@ -16,7 +18,7 @@ import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 const routeApi = getRouteApi('/admin/regions/$regionSlug/edit')
 
 export function PageRegionEdit() {
-  const { region, users, formConfig, maskConfig, contracts, auditHistory } =
+  const { region, users, formConfig, formValues, contracts, auditHistory } =
     routeApi.useLoaderData()
 
   return (
@@ -34,6 +36,18 @@ export function PageRegionEdit() {
       </HeaderWrapper>
 
       <AdminPageTitleEdit name={region.name} />
+
+      <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700">
+        <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }}>
+          Öffnen…
+        </Link>
+        <Link
+          to="/admin/map-dataset-uploads"
+          search={buildUploadsListSearch({ regionSlug: region.slug })}
+        >
+          Uploads dieser Region
+        </Link>
+      </p>
 
       <div className="my-10">
         <h2 className="mb-4 text-xl font-semibold">
@@ -110,7 +124,7 @@ export function PageRegionEdit() {
 
       <RegionFormEdit
         formConfig={formConfig}
-        maskConfig={maskConfig}
+        formValues={formValues}
         contracts={contracts}
         regionId={region.id}
       />

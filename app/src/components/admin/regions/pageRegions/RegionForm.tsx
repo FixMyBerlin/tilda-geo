@@ -5,8 +5,11 @@ import {
   adminFormLegendClassName,
 } from '@/components/admin/adminFormFieldsetClasses'
 import { RegionCategoriesField } from '@/components/admin/regions/pageRegions/RegionCategoriesField'
+import { RegionExportsField } from '@/components/admin/regions/pageRegions/RegionExportsField'
 import { RegionLogoPicker } from '@/components/admin/regions/pageRegions/RegionLogoPicker'
+import { RegionMaskOsmRelationIdsField } from '@/components/admin/regions/pageRegions/RegionMaskOsmRelationIdsField'
 import { RegionNavigationLinksEditor } from '@/components/admin/regions/pageRegions/RegionNavigationLinksEditor'
+import { RegionWelcomeEditor } from '@/components/admin/regions/pageRegions/RegionWelcomeEditor'
 import {
   regionPromotedFormRadioItems,
   regionStatusFormRadioItems,
@@ -62,12 +65,22 @@ export const regionFormEmptyDefaults = {
   cacheWarmingEnabled: 'false' as const,
   cacheWarmingMinZoom: '',
   cacheWarmingMaxZoom: '',
-  cacheWarmingTables: '',
+  cacheWarmingSources: '',
   categories: '',
   backgroundSources: '',
   exports: '',
   navigationLinks: [] as RegionFormInput['navigationLinks'],
   contractId: '',
+  maskEnabled: 'false' as const,
+  maskOsmRelationIds: '',
+  maskBufferKm: '10',
+  welcomeEnabled: 'false' as const,
+  welcomeTitle: '',
+  welcomeSubtitle: '',
+  welcomeBodyMarkdown: '',
+  welcomeImageUploadId: '',
+  welcomeImageAltText: '',
+  welcomeSections: [] as RegionFormInput['welcomeSections'],
 } satisfies RegionFormInput
 
 type RegionContractOption = { id: number; name: string; status: RegionContractStatus }
@@ -98,6 +111,7 @@ export function RegionForm(props: Props) {
 
   return (
     <Form<RegionFormInput>
+      actionBarPlacement="both"
       defaultValues={defaultValues}
       schema={RegionFormRawSchema}
       onSubmit={async (values) => {
@@ -108,7 +122,8 @@ export function RegionForm(props: Props) {
         if (result.success) {
           await queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey })
           await router.invalidate()
-          return { success: true, redirect: '/admin/regions' }
+          if (mode === 'create') return { success: true, redirect: '/admin/regions' }
+          return { success: true }
         }
         return result as SubmitResult<RegionFormInput>
       }}
@@ -144,12 +159,14 @@ export function RegionForm(props: Props) {
                 form={form}
                 name="status"
                 label="Status"
+                inline
                 items={regionStatusFormRadioItems}
               />
               <RadioGroup
                 form={form}
                 name="promoted"
                 label="Gelistet"
+                inline
                 items={regionPromotedFormRadioItems}
               />
             </div>
@@ -188,21 +205,23 @@ export function RegionForm(props: Props) {
 
           <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Karte</legend>
-            <TextField
-              decimalEn
-              form={form}
-              name="mapLat"
-              label="Breitengrad (lat)"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="mapLng"
-              label="Längengrad (lng)"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField decimalEn form={form} name="mapZoom" label="Zoom" help={EN_DECIMAL_HELP} />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <TextField
+                decimalEn
+                form={form}
+                name="mapLat"
+                label="Breitengrad (lat)"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="mapLng"
+                label="Längengrad (lng)"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField decimalEn form={form} name="mapZoom" label="Zoom" help={EN_DECIMAL_HELP} />
+            </div>
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>
@@ -223,15 +242,42 @@ export function RegionForm(props: Props) {
             />
           </fieldset>
 
-          {mode === 'create' ? (
-            <fieldset className={adminFormFieldsetClassName}>
-              <legend className={adminFormLegendClassName}>Maske</legend>
-              <p className="text-sm text-gray-600">
-                Die Karten-Maske kann nach dem Anlegen der Region auf der Bearbeitungsseite
-                konfiguriert werden.
-              </p>
-            </fieldset>
-          ) : null}
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Maske</legend>
+            <p className="text-sm text-gray-600">
+              Änderungen an den OSM-Relation-IDs oder dem Buffer lösen beim Speichern der Region
+              eine Aktualisierung der Maske aus.
+            </p>
+            <RadioGroup
+              inline
+              form={form}
+              name="maskEnabled"
+              label="Maske aktiv"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <RegionMaskOsmRelationIdsField form={form} />
+              <TextField
+                decimalEn
+                form={form}
+                name="maskBufferKm"
+                label="Buffer (km)"
+                help={EN_DECIMAL_HELP}
+              />
+            </div>
+            <form.Subscribe selector={(state) => state.values.maskEnabled}>
+              {(maskEnabled) =>
+                maskEnabled === 'false' && initialValues.maskEnabled === 'true' ? (
+                  <p className="text-sm text-gray-500">
+                    Deaktiviert die Maske und entfernt den zugehörigen Upload.
+                  </p>
+                ) : null
+              }
+            </form.Subscribe>
+          </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Downloads</legend>
@@ -245,43 +291,37 @@ export function RegionForm(props: Props) {
                 { value: 'false', label: 'Nein' },
               ]}
             />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMinLng"
-              label="BBox min Lng"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMinLat"
-              label="BBox min Lat"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMaxLng"
-              label="BBox max Lng"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField
-              decimalEn
-              form={form}
-              name="bboxMaxLat"
-              label="BBox max Lat"
-              help={EN_DECIMAL_HELP}
-            />
-            <CheckboxGroup
-              form={form}
-              name="exports"
-              label="Export-IDs"
-              options={catalogOptions.exports.map((entry) => ({
-                value: entry.id,
-                label: entry.label,
-              }))}
-            />
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMinLng"
+                label="BBox min Lng"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMinLat"
+                label="BBox min Lat"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMaxLng"
+                label="BBox max Lng"
+                help={EN_DECIMAL_HELP}
+              />
+              <TextField
+                decimalEn
+                form={form}
+                name="bboxMaxLat"
+                label="BBox max Lat"
+                help={EN_DECIMAL_HELP}
+              />
+            </div>
+            <RegionExportsField form={form} />
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>
@@ -304,6 +344,11 @@ export function RegionForm(props: Props) {
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Willkommens-Dialog</legend>
+            <RegionWelcomeEditor form={form} regionId={regionId} regionSlug={regionSlug} />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Cache Warming</legend>
             <RadioGroup
               inline
@@ -315,21 +360,46 @@ export function RegionForm(props: Props) {
                 { value: 'false', label: 'Nein' },
               ]}
             />
-            <TextField
-              decimalEn
+            <div className="grid gap-4 sm:grid-cols-2">
+              <TextField
+                form={form}
+                name="cacheWarmingMinZoom"
+                label="Min Zoom"
+                type="number"
+                step={1}
+                min={4}
+                max={14}
+                inputMode="numeric"
+                help="Ganzzahl von 4 bis 14, z. B. 9"
+              />
+              <TextField
+                form={form}
+                name="cacheWarmingMaxZoom"
+                label="Max Zoom"
+                type="number"
+                step={1}
+                min={4}
+                max={14}
+                inputMode="numeric"
+                help="Ganzzahl von 4 bis 14, z. B. 9"
+              />
+            </div>
+            <CheckboxGroup
               form={form}
-              name="cacheWarmingMinZoom"
-              label="Min Zoom"
-              help={EN_DECIMAL_HELP}
+              name="cacheWarmingSources"
+              label="Quellen"
+              help="Quellen, deren Kacheln beim Cache Warming vorab geladen werden (gleiche Martin-Pfade wie auf der Karte)."
+              options={catalogOptions.cacheWarmingSources.map((entry) => ({
+                value: entry.id,
+                ariaLabel: `${entry.id} (${entry.tablesKey})`,
+                label: (
+                  <span className="flex flex-col gap-0.5">
+                    <span>{entry.id}</span>
+                    <span className="font-mono text-xs text-gray-500">{entry.tablesKey}</span>
+                  </span>
+                ),
+              }))}
             />
-            <TextField
-              decimalEn
-              form={form}
-              name="cacheWarmingMaxZoom"
-              label="Max Zoom"
-              help={EN_DECIMAL_HELP}
-            />
-            <TextField form={form} name="cacheWarmingTables" label="Tabellen" />
           </fieldset>
         </div>
       )}

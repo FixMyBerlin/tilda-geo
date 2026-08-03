@@ -1,6 +1,6 @@
 import { twJoin } from 'tailwind-merge'
 import { z } from 'zod'
-import { Textarea } from '@/components/shared/form/fields/Textarea'
+import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
 import { formatFormError } from '@/components/shared/form/formatError'
 import { buttonStyles } from '@/components/shared/links/styles'
@@ -85,13 +85,12 @@ export const QaEvaluationForm = ({ onSubmit, isLoading }: Props) => {
             </form.Field>
           </div>
 
-          <Textarea
+          <MarkdownEditorField
             form={form}
             name="comment"
-            label="Kommentar (Optional, Markdown)"
+            label="Kommentar (Markdown)"
             optional
             placeholder="Zusätzliche Anmerkungen..."
-            rows={3}
             disabled={isLoading}
           />
 

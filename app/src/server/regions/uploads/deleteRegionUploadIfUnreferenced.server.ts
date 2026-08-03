@@ -16,8 +16,10 @@ export async function deleteRegionUploadIfUnreferenced(id: number) {
   })
   if (!upload) return
 
-  const referencedAsHeaderLogo = await db.region.count({ where: { headerLogoId: id } })
-  if (referencedAsHeaderLogo > 0) return
+  const referenced = await db.region.count({
+    where: { OR: [{ headerLogoId: id }, { welcomeImageUploadId: id }] },
+  })
+  if (referenced > 0) return
 
   await deleteRegionUploadS3Object(upload.s3Key)
   await db.regionUpload.delete({ where: { id } })

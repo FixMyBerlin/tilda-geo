@@ -14,16 +14,20 @@ export async function createRegionUpload(
   },
   auditContext: AuditContext = { metadata: { changeSource: 'ADMIN_FORM' } },
 ) {
-  return runWithAuditContextAsync({ userId: input.createdById ?? undefined, ...auditContext }, () =>
-    db.regionUpload.create({
-      data: {
-        regionId: input.regionId,
-        s3Key: input.s3Key,
-        title: input.title,
-        mimeType: input.mimeType,
-        fileSize: input.fileSize,
-        createdById: input.createdById ?? null,
-      },
-    }),
+  // Must be `async () => await …` (not `() => promise`) so ALS stays active for the Prisma
+  // query + audit extension — same pattern as regionWriteService.
+  return runWithAuditContextAsync(
+    { userId: input.createdById ?? undefined, ...auditContext },
+    async () =>
+      db.regionUpload.create({
+        data: {
+          regionId: input.regionId,
+          s3Key: input.s3Key,
+          title: input.title,
+          mimeType: input.mimeType,
+          fileSize: input.fileSize,
+          createdById: input.createdById ?? null,
+        },
+      }),
   )
 }

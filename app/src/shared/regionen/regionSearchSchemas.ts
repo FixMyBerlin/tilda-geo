@@ -98,12 +98,17 @@ const planningScoreSearchParam = () =>
     .transform((s) => s ?? 'kombination')
     .pipe(z.enum(PLANNING_SCORE_MODES).catch('kombination'))
 
+export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
+
+export type RegionDialogParam = z.infer<typeof regionDialogParamSchema>
+
 export const regionSearchSchema = z.object({
   [searchParamsRegistry.map]: mapSearchParam(defaultMapSearchValue),
   [searchParamsRegistry.config]: optionalSearchString(),
   [searchParamsRegistry.data]: searchStringArray().default([]),
   [searchParamsRegistry.f]: optionalSearchString(),
   [searchParamsRegistry.bg]: backgroundSearchParam(),
+  [searchParamsRegistry.bg3d]: searchBoolean(false),
   [searchParamsRegistry.draw]: optionalSearchString(),
   [searchParamsRegistry.osmNotes]: searchBoolean(false),
   [searchParamsRegistry.osmNote]: optionalSearchString(),
@@ -114,6 +119,12 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.debugMap]: optionalSearchBoolean(),
   [searchParamsRegistry.qa]: qaSearchParam(),
   [searchParamsRegistry.qaFilter]: optionalSearchJson(zodQaFilterParam),
+  // Invalid values (e.g. ?dialog=foo) clear rather than throwing the region route into error UI.
+  [searchParamsRegistry.dialog]: regionDialogParamSchema.optional().catch(undefined),
+  [searchParamsRegistry.welcomeSkipDialog]: z
+    .literal(regionDialogParamSchema.enum.welcome)
+    .optional()
+    .catch(undefined),
   [searchParamsRegistry.planning]: searchBoolean(false),
   [searchParamsRegistry.planningScenario]: optionalSearchNumber(),
   [searchParamsRegistry.planningRun]: optionalSearchNumber(),

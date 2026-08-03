@@ -86,11 +86,7 @@ export const PageDocsRegionAccessSection = ({
             Downloads
           </h2>
           <div className="not-prose flex flex-wrap gap-2">
-            <OgrFormatDownloadLinks
-              regionSlug={region.slug}
-              tableName={tableName}
-              bbox={region.bbox}
-            />
+            <OgrFormatDownloadLinks regionSlug={region.slug} tableName={tableName} />
           </div>
         </>
       ) : null}

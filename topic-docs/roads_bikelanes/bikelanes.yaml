@@ -82,25 +82,25 @@ attributes:
       - value: pedestrian
         label: Fußgängerzone
       - value: primary
-        label: Bundesstraße/Hauptverbindungsstraße
+        label: Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
       - value: primary_link
-        label: Zufahrt einer Bundesstraße/Hauptverbindungsstraße
+        label: Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
       - value: residential
         label: Anwohnerstraße
       - value: road
         label: Unkategorisierte Straße
       - value: secondary
-        label: Landesstraße/Wichtige Durchgangsstraße
+        label: Landes&shy;straße/Wichtige Durchgangs&shy;straße
       - value: secondary_link
-        label: Zufahrt einer Landesstraße/wichtigen Durchgangsstraße
+        label: Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße
       - value: service
         label: Zufahrtsweg
       - value: steps
         label: Stufen
       - value: tertiary
-        label: Kreisstraße/Untergeordnete Durchgangsstraße
+        label: Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße
       - value: tertiary_link
-        label: Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße
+        label: Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße
       - value: track
         label: Wald- / Feldweg
       - value: unclassified
@@ -283,7 +283,7 @@ attributes:
   - key: smoothness
     ref: roads.smoothness
   - key: smoothness_source
-    label: Herkunft der Oberflächenqualität
+    label: Herkunft der Ober&shy;flächen&shy;qualität
     valuesRef: roads.smoothness_source
     valuesAdd:
       - value: parent_highway_tag

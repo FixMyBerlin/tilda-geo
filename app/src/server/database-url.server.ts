@@ -42,6 +42,16 @@ export function getPrismaCliDatabaseUrl() {
   return `${getBaseDatabaseUrl()}?schema=prisma`
 }
 
+// Long-running SELECTs on todos_lines hold ACCESS SHARE locks that block osm2pgsql CLUSTER
+// (ACCESS EXCLUSIVE). Kill queries that exceed this limit so the nightly rebuild cannot stall again.
+const GEO_STATEMENT_TIMEOUT_MS = '60000'
+const GEO_LOCK_TIMEOUT_MS = '5000'
+
+function getGeoPgSessionOptions() {
+  return `-c statement_timeout=${GEO_STATEMENT_TIMEOUT_MS} -c lock_timeout=${GEO_LOCK_TIMEOUT_MS}`
+}
+
 export function getGeoDatabaseUrl() {
-  return `${getBaseDatabaseUrl()}?pool_timeout=0`
+  const options = encodeURIComponent(getGeoPgSessionOptions())
+  return `${getBaseDatabaseUrl()}?pool_timeout=0&options=${options}`
 }

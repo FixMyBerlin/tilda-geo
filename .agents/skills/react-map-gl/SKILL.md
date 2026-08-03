@@ -40,11 +40,11 @@ Conventions for `react-map-gl/maplibre` in FixMyBerlin / FMC projects. Import fr
 10. [map-props-attribution-locale.md](references/map-props-attribution-locale.md) — `attributionControl={false}`, `locale`, `RTLTextPlugin`
 11. [cursor-handling.md](references/cursor-handling.md) — `cursor` prop from hover state
 12. [initial-view-state.md](references/initial-view-state.md) — uncontrolled `initialViewState` vs URL-driven vs bounds
-13. [map-url-state.md](references/map-url-state.md) — `map=zoom/lat/lng` hook, rounding, nuqs
+13. [map-url-state.md](references/map-url-state.md) — Map ↔ URL sync (`onMoveEnd`); URL format → `tanstack-router-conventions` → `map-search-param.md`
 14. [map-images-missing.md](references/map-images-missing.md) — `styleimagemissing` + dynamic icons
 15. [map-images-proactive.md](references/map-images-proactive.md) — proactive `addImage` for known sprites (vzk-bw)
 
-Pair with: skill `nuqs` (URL parsers), skill `zustand-state-management` (map UI store like `useMapLoaded`), skill `playwright-skill` (E2E map helpers, `getMapLayerIds`).
+Pair with: skill `tanstack-router-conventions` (`?map=` URL contract), skill `nuqs` (legacy URL parsers), skill `zustand-state-management` (map UI store like `useMapLoaded`), skill `playwright-skill` (E2E map helpers, `getMapLayerIds`).
 
 ## Non-negotiable rules
 
