@@ -6,7 +6,7 @@ import type { PlanningCandidate } from '../../hooks/mapState/usePlanningCandidat
  * Ausschluss-Flags) werden unverändert übernommen und um die Position in der
  * Auswahlliste ergänzt, damit die Reihenfolge aus der Sidebar erhalten bleibt.
  */
-export const candidatesToGeojson = (candidates: PlanningCandidate[]) => ({
+const candidatesToGeojson = (candidates: PlanningCandidate[]) => ({
   type: 'FeatureCollection' as const,
   features: candidates.map((candidate, index) => ({
     type: 'Feature' as const,
