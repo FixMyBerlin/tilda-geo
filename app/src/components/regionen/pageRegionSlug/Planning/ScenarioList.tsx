@@ -11,14 +11,7 @@ import {
 } from '../hooks/useQueryState/usePlanningParams'
 import { CollapsibleBox } from './CollapsibleBox'
 import { PlanningWizard } from './PlanningWizard'
-
-/** Spinner shown while a job is in flight. */
-const Spinner = () => (
-  <span
-    className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"
-    aria-label="Berechnung läuft"
-  />
-)
+import { Spinner } from './Spinner'
 
 type Scenario = {
   id: number

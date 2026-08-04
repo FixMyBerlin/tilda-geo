@@ -7,6 +7,7 @@ import {
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import { usePlanningRunParam } from '../hooks/useQueryState/usePlanningParams'
 import { deriveScoringStep, PlanningSteps } from './PlanningSteps'
+import { Spinner } from './Spinner'
 
 const LABELS: Record<string, string> = {
   QUEUED: 'In Warteschlange…',
@@ -50,6 +51,8 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
   const showProgress =
     (data.status === 'RUNNING' || data.status === 'QUEUED') && data.progress != null
 
+  const jobActive = data.status === 'RUNNING' || data.status === 'QUEUED'
+
   const currentStep = deriveScoringStep(data.status, data.progress, data.progressLabel)
   // Das numerische "n/total · "-Präfix der Scoring-Schritte zeigt schon die
   // Schrittliste – im Header nur den reinen Namen anhängen.
@@ -58,9 +61,17 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
   return (
     <div className={`rounded px-2 py-1 text-sm ${COLORS[data.status] ?? ''}`}>
       <div className="flex items-center justify-between gap-2">
-        <span>
-          {LABELS[data.status] ?? data.status}
-          {showProgress && headerLabel ? ` – ${headerLabel}` : ''}
+        <span className="flex items-center gap-1.5">
+          {jobActive ? (
+            <Spinner
+              className="h-3 w-3 border-current"
+              label={LABELS[data.status] ?? data.status}
+            />
+          ) : null}
+          <span>
+            {LABELS[data.status] ?? data.status}
+            {showProgress && headerLabel ? ` – ${headerLabel}` : ''}
+          </span>
         </span>
         {showProgress ? <span className="tabular-nums">{data.progress} %</span> : null}
       </div>
