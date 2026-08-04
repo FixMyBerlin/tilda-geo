@@ -167,7 +167,7 @@ def set_progress(conn, job_id: int, pct: int, label: str = ""):
 
 def process_job(conn, engine, job_id: int, scenario_id: int):
     print(f"\n=== Job {job_id} (Scenario {scenario_id}) ===")
-    set_progress(conn, job_id, 2, "Vorbereitung")
+    set_progress(conn, job_id, 1, "Vorbereitung")
     cfg = _load_scenario_config(conn, scenario_id)
     run_id = _create_run(conn, scenario_id, cfg)
 
@@ -185,23 +185,34 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
     # läuft das restliche Scoring normal ohne Vegetationsdaten weiter – das
     # Frontend erkennt diesen Fall selbst (Gewicht w_vegetation=0) und zeigt
     # den Schritt dort als übersprungen an, statt sich auf den Fortschrittstext
-    # zu verlassen. Fortschritt 5–70 % entfällt auf diese (meist längste) Phase.
+    # zu verlassen.
+    #
+    # Fortschritts-Budget: die Vegetationsphase ist die mit Abstand längste,
+    # läuft aber nicht immer (Gewicht 0, keine CIR-Quelle, Cache-Treffer). Nur
+    # wenn sie wirklich rechnet, bekommt sie VEG_RANGE (5–70 %); sonst bleibt
+    # der Balken bei VEG_SKIPPED_PCT und die Scoring-Schritte bekommen das
+    # ganze Budget ab ~3 % – statt scheinbar erst bei 72 % loszulaufen.
+    VEG_RANGE = (5, 70)
+    VEG_SKIPPED_PCT = 2
+    SCORING_END = 90
     step1_label = f"1/{SCORING_STEP_COUNT} · {SCORING_STEPS[0]}"
 
     def _veg_progress(frac, label):
-        set_progress(conn, job_id, 5 + frac * 65, f"{step1_label} – {label}")
+        lo, hi = VEG_RANGE
+        set_progress(conn, job_id, lo + frac * (hi - lo), f"{step1_label} – {label}")
 
     cir_source = None
+    veg_phase_ran = False
     if not (use_case.weights.get("w_vegetation", 0) or 0):
         print("   ℹ️  w_vegetation=0 – Vegetationsberechnung übersprungen")
         vegetation = None
-        set_progress(conn, job_id, 70, step1_label)
+        set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
     else:
         cir_source = resolve_source(use_case.cir_source, study_area)
         if cir_source is None:
             print("   ℹ️  Keine CIR-Quelle für dieses Gebiet – Vegetation übersprungen")
             vegetation = None
-            set_progress(conn, job_id, 70, step1_label)
+            set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
         else:
             try:
                 vegetation = _find_reusable_vegetation(conn, engine, scenario_id, run_id, study_area)
@@ -210,8 +221,11 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
                 vegetation = None
             if vegetation is not None:
                 print(f"   ♻️  Vegetation aus vorherigem Lauf wiederverwendet ({len(vegetation)} Flächen)")
-                set_progress(conn, job_id, 70, step1_label)
+                set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
             else:
+                # Ab hier läuft die lange Phase – der Balken bewegt sich in VEG_RANGE,
+                # auch wenn sie später fehlschlägt (dann bleibt er am oberen Rand).
+                veg_phase_ran = True
                 try:
                     vegetation = compute_vegetation_areas(
                         study_area, source=cir_source, progress_cb=_veg_progress
@@ -219,7 +233,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
                 except Exception as e:
                     print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
                     vegetation = None
-                set_progress(conn, job_id, 70, step1_label)
+                set_progress(conn, job_id, VEG_RANGE[1], step1_label)
 
     # Fahrbahnen ausschließen (Checkbox, kein eigener Scoring-Step): Straßen
     # einmalig laden+puffern, damit dasselbe GeoDataFrame sowohl für den
@@ -233,13 +247,19 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
             print(f"   ⚠️  Fahrbahnen-Berechnung fehlgeschlagen: {e}")
             carriageways = None
 
-    # Schritte 2–11 (Scoring in run_flaechenfinder) auf 72–90 % abbilden und
-    # ihren Namen als progressLabel an die App weiterreichen. Format
+    # Schritte 2–11 (Scoring in run_flaechenfinder) auf das verbleibende Budget
+    # bis SCORING_END abbilden: 72–90 %, wenn die Vegetationsphase gelaufen ist,
+    # sonst 3–90 %. Den Namen als progressLabel an die App weiterreichen, Format
     # "n/total · Name", damit das Frontend den aktuellen Schritt in der
     # Schrittliste hervorheben kann.
+    scoring_start = VEG_RANGE[1] + 2 if veg_phase_ran else VEG_SKIPPED_PCT + 1
+
     def _scoring_progress(step, total, label):
         first, last = 2, total - 1  # Schritt 1 (Vegetation) und total (Speichern) laufen hier nicht
-        set_progress(conn, job_id, 72 + (step - first) / (last - first) * 18, f"{step}/{total} · {label}")
+        frac = (step - first) / (last - first)
+        set_progress(
+            conn, job_id, scoring_start + frac * (SCORING_END - scoring_start), f"{step}/{total} · {label}"
+        )
 
     hex_proj = run_flaechenfinder(
         study_area_geom=study_area,
