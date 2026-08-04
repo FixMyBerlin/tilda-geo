@@ -64,6 +64,15 @@ type Store = {
    */
   panelCollapsed: boolean
   setPanelCollapsed: (collapsed: boolean) => void
+
+  /**
+   * Id of the job for which the DONE auto-collapse already fired. Lives here (not
+   * component state) because JobStatusBadge unmounts/remounts as the panel
+   * collapses/expands (ScenarioDetail only renders while expanded) – without this,
+   * re-expanding the panel would remount the badge and immediately re-collapse it.
+   */
+  autoCollapsedJobId: number | null
+  setAutoCollapsedJobId: (jobId: number | null) => void
 }
 
 export const usePlanningBoundaryState = create<Store>((set) => ({
@@ -96,4 +105,7 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   panelCollapsed: false,
   setPanelCollapsed: (collapsed) => set({ panelCollapsed: collapsed }),
+
+  autoCollapsedJobId: null,
+  setAutoCollapsedJobId: (jobId) => set({ autoCollapsedJobId: jobId }),
 }))

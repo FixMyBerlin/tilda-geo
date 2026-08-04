@@ -28,6 +28,8 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
   const queryClient = useQueryClient()
   const [, setRun] = usePlanningRunParam()
   const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
+  const autoCollapsedJobId = usePlanningBoundaryState((s) => s.autoCollapsedJobId)
+  const setAutoCollapsedJobId = usePlanningBoundaryState((s) => s.setAutoCollapsedJobId)
 
   const { data } = useQuery({
     ...planningJobQueryOptions(jobId),
@@ -38,13 +40,27 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
   })
 
   useEffect(() => {
-    if (data?.status === 'DONE' && data.resultRunId != null) {
-      setRun(data.resultRunId)
-      queryClient.invalidateQueries(planningScenarioQueryOptions(scenarioId))
-      // Result is saved – collapse the panel so more of the map is visible.
+    if (data?.status !== 'DONE' || data.resultRunId == null) return
+    setRun(data.resultRunId)
+    queryClient.invalidateQueries(planningScenarioQueryOptions(scenarioId))
+    // Collapse the panel once per job so more of the map is visible – guarded so
+    // re-expanding the panel (which remounts this badge) doesn't immediately
+    // collapse it again, and the user can freely toggle it afterwards.
+    if (autoCollapsedJobId !== jobId) {
       setPanelCollapsed(true)
+      setAutoCollapsedJobId(jobId)
     }
-  }, [data?.status, data?.resultRunId, scenarioId, setRun, queryClient, setPanelCollapsed])
+  }, [
+    data?.status,
+    data?.resultRunId,
+    jobId,
+    scenarioId,
+    setRun,
+    queryClient,
+    setPanelCollapsed,
+    autoCollapsedJobId,
+    setAutoCollapsedJobId,
+  ])
 
   if (!data) return null
 
