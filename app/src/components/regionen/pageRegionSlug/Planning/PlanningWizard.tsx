@@ -137,6 +137,7 @@ export const PlanningWizard = ({
 
   const setWeight = (key: string, value: number) =>
     setConfig((c) => ({ ...c, weights: { ...c.weights, [key]: value } }))
+  const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
   const setField = (key: keyof FactorConfig, value: number | boolean) =>
     setConfig((c) => ({ ...c, [key]: value }))
   const setVegetationDirection = (value: 'positive' | 'negative') =>
@@ -306,7 +307,7 @@ export const PlanningWizard = ({
       <WizardStep number={3} title="Faktoren & Schwellenwerte">
         <FactorFields
           config={config}
-          setWeight={setWeight}
+          setWeights={setWeights}
           setField={setField}
           setVegetationDirection={setVegetationDirection}
         />

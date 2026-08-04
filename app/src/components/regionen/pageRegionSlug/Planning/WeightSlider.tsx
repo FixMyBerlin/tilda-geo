@@ -1,19 +1,10 @@
 import { twJoin } from 'tailwind-merge'
-
-// Gewichte werden intern als 0–1 gespeichert (so erwartet es der Worker), in der UI aber als
-// ganzzahlige Wichtigkeit 0–10 bedient: 0 = sehr unwichtig (fließt nicht ein), 10 = sehr wichtig.
-const WEIGHT_STEPS = 10
-
-/** 0–1-Gewicht → ganzzahlige UI-Stufe 0–10 (Altwerte wie 0.15 werden gerundet angezeigt). */
-const weightToStep = (weight: number | undefined) =>
-  Math.min(WEIGHT_STEPS, Math.max(0, Math.round((weight ?? 0) * WEIGHT_STEPS)))
-
-/** UI-Stufe 0–10 → 0–1-Gewicht. */
-const stepToWeight = (step: number) => step / WEIGHT_STEPS
+import { stepToWeight, WEIGHT_BUDGET_STEPS, WEIGHT_STEPS, weightToStep } from './weightBudget'
 
 /**
  * Erklärt die Skala einmal pro Gewichte-Block, damit die Bedeutung der Endpunkte sichtbar ist
- * (und nicht an jedem einzelnen Regler wiederholt werden muss).
+ * (und nicht an jedem einzelnen Regler wiederholt werden muss). Für die Budget-Faktoren
+ * (Bedarf/Bebauung) erklärt stattdessen `WeightBudgetLegend` die Skala.
  */
 export const WeightScaleLegend = () => (
   <div className="mb-2 rounded border border-gray-200 bg-gray-50 px-2 py-1.5">
@@ -29,6 +20,41 @@ export const WeightScaleLegend = () => (
     </div>
   </div>
 )
+
+/**
+ * Legende für die Budget-Faktoren (Bedarf + Bebauung): erklärt, dass die Regler sich 10 Stufen
+ * teilen, und zeigt die aktuell verteilte Summe. Bei Altdaten über Budget bleibt der Wert
+ * sichtbar stehen, bis der/die Nutzende einen Regler bewegt — dann gleicht die Verteilung an.
+ */
+export const WeightBudgetLegend = ({ totalSteps }: { totalSteps: number }) => {
+  const balanced = totalSteps === WEIGHT_BUDGET_STEPS
+
+  return (
+    <div className="mb-2 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-[11px] leading-tight text-gray-500">
+      <div className="flex items-start justify-between gap-3">
+        <span>
+          Alle Faktoren teilen sich{' '}
+          <span className="font-semibold text-gray-700">{WEIGHT_BUDGET_STEPS} Stufen</span> (= 100
+          %). Wird ein Regler erhöht, sinken die anderen entsprechend.
+        </span>
+        <span
+          className={twJoin(
+            'shrink-0 rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums',
+            balanced ? 'bg-green-50 text-green-800' : 'bg-amber-100 text-amber-800',
+          )}
+        >
+          {totalSteps}
+          <span className="font-normal opacity-60">/{WEIGHT_BUDGET_STEPS}</span>
+        </span>
+      </div>
+      {!balanced && (
+        <p className="mt-1 text-amber-700">
+          Ältere Einstellung — die Verteilung wird angeglichen, sobald ein Regler bewegt wird.
+        </p>
+      )}
+    </div>
+  )
+}
 
 /** Wert-Chip rechts neben dem Faktornamen; bei 0 gedämpft mit Hinweis „geht nicht ein“. */
 const WeightBadge = ({ step }: { step: number }) => (

@@ -9,16 +9,19 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   h3_resolution: 13,
   dem_source: 'mapterhorn',
   // Wichtigkeiten liegen auf dem UI-Raster 0–10 (siehe WeightSlider), also Vielfache von 0.1.
+  // Bedarf und Bebauung teilen sich zusammen 10 Stufen (WEIGHT_BUDGET_STEPS, = Gewichtssumme
+  // 1.0 = 100 % des Scores); die Verteilung hier entspricht den früheren Verhältnissen (Summe
+  // 1.4) proportional auf das Budget heruntergerechnet, also 5 Stufen je Gruppe.
   weights: {
     w_cyclepath: 0.2,
     w_surface: 0.2,
-    w_target: 0.2,
-    w_slope: 0.2,
-    w_transit: 0.2,
+    w_target: 0.1,
+    w_slope: 0.1,
+    w_transit: 0.1,
     w_vegetation: 0,
     w_intersection: 0.1,
     w_parken: 0.1,
-    w_fussgaengerzone: 0.2,
+    w_fussgaengerzone: 0.1,
     w_bestand: 0,
   },
   vegetation_direction: 'negative',

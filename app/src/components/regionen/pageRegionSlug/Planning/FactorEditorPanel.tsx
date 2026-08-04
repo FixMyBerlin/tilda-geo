@@ -10,7 +10,13 @@ import { InfoTooltip } from './InfoTooltip'
 import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
 import { SegmentedChoice } from './SegmentedChoice'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
-import { WeightScaleLegend, WeightSlider } from './WeightSlider'
+import {
+  applyWeightWithinBudget,
+  groupWeightSteps,
+  totalWeightSteps,
+  WEIGHT_BUDGET_STEPS,
+} from './weightBudget'
+import { WeightBudgetLegend, WeightSlider } from './WeightSlider'
 
 const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
   { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
@@ -29,19 +35,23 @@ const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }
  */
 export const FactorFields = ({
   config,
-  setWeight,
+  setWeights,
   setField,
   setVegetationDirection,
   readOnly = false,
 }: {
   config: FactorConfig
-  setWeight: (key: string, value: number) => void
+  setWeights: (weights: Record<string, number>) => void
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
   readOnly?: boolean
 }) => {
   const weights = config.weights ?? {}
   const vegetationDirection = config.vegetation_direction ?? 'negative'
+  // Bedarf und Bebauung teilen sich ein festes Budget: jede Änderung an einem Regler verschiebt
+  // die übrigen mit, damit die Summe 10 Stufen (= 100 %) bleibt — siehe `weightBudget.ts`.
+  const setWeight = (key: string, value: number) =>
+    setWeights(applyWeightWithinBudget(weights, key, value))
 
   return (
     <>
@@ -49,15 +59,21 @@ export const FactorFields = ({
         <div className="mb-1 flex items-center gap-1 font-semibold">
           Wichtigkeit der Faktoren
           <InfoTooltip>
-            Bestimmen die relative Bedeutung jedes Faktors bei der Standortbewertung — in ganzen
-            Stufen von 0 (sehr unwichtig, fließt nicht ein) bis 10 (sehr wichtig).
+            Bestimmen die relative Bedeutung jedes Faktors bei der Standortbewertung. Bedarf und
+            Bebauung teilen sich zusammen {WEIGHT_BUDGET_STEPS} Stufen (= 100 % des Scores): Wird
+            ein Faktor wichtiger, werden die übrigen automatisch entsprechend unwichtiger. 0
+            bedeutet, dass ein Faktor nicht einfließt.
           </InfoTooltip>
         </div>
-        {!readOnly && <WeightScaleLegend />}
+        {!readOnly && <WeightBudgetLegend totalSteps={totalWeightSteps(weights)} />}
         {WEIGHT_GROUPS.map((group) => (
           <div key={group.key} className="mt-2 first:mt-0">
-            <div className="mb-0.5 border-b border-gray-200 pb-0.5 text-xs font-semibold text-gray-500 uppercase">
-              {group.label}
+            <div className="mb-0.5 flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-xs font-semibold text-gray-500 uppercase">
+              <span>{group.label}</span>
+              <span className="tabular-nums">
+                {groupWeightSteps(weights, group.weights)}
+                <span className="font-normal opacity-60">/{WEIGHT_BUDGET_STEPS}</span>
+              </span>
             </div>
             {group.weights.map((key) => (
               <WeightSlider
@@ -161,6 +177,8 @@ export const FactorEditorPanel = ({
   const setWeight = (key: string, value: number) =>
     setConfig((c) => ({ ...c, weights: { ...c.weights, [key]: value } }))
 
+  const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
+
   const setField = (key: keyof FactorConfig, value: number | boolean) =>
     setConfig((c) => ({ ...c, [key]: value }))
 
@@ -206,7 +224,7 @@ export const FactorEditorPanel = ({
 
           <FactorFields
             config={config}
-            setWeight={setWeight}
+            setWeights={setWeights}
             setField={setField}
             setVegetationDirection={setVegetationDirection}
             readOnly={readOnly}
