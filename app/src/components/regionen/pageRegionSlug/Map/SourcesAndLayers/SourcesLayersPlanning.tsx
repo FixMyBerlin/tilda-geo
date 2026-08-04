@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
+import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
 import {
   PLANNING_SCORE_PROPERTY,
   usePlanningAreaFilterParam,
@@ -16,6 +17,8 @@ import { LayerHighlight } from './LayerHighlight'
 
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
+/** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
+export const planningHexagonsSourceLayer = 'planning_hexagons'
 const planningHexagonsLabelLayerId = 'planning-hexagons-label'
 
 // Ab Zoom 18 wird der Score-Wert des aktiven Anzeigemodus (Kombination/Bedarf/
@@ -85,7 +88,7 @@ const hexagonFillLayerProps = (
 ) => ({
   id: planningHexagonsLayerId,
   source: planningHexagonsSourceId,
-  'source-layer': 'planning_hexagons',
+  'source-layer': planningHexagonsSourceLayer,
   type: 'fill' as const,
   paint: {
     'fill-color': scoreColor(property),
@@ -97,7 +100,7 @@ const hexagonFillLayerProps = (
 const hexagonLabelLayerProps = (property: string) => ({
   id: planningHexagonsLabelLayerId,
   source: planningHexagonsSourceId,
-  'source-layer': 'planning_hexagons',
+  'source-layer': planningHexagonsSourceLayer,
   type: 'symbol' as const,
   minzoom: HEXAGON_LABEL_MIN_ZOOM,
   layout: {
@@ -174,6 +177,38 @@ const UserObstaclesLayer = () => {
   )
 }
 
+// Gelbe Umrandung der als Kandidaten ausgewählten Hexagone (Auswahl-Werkzeug,
+// siehe PlanningCandidateToggle). Die Geometrien liegen beim Klick bereits im
+// Store, deshalb eine eigene GeoJSON-Source statt eines Filter-Ausdrucks auf der
+// Vektor-Source – so bleibt die Markierung auch sichtbar, wenn ein Hexagon gerade
+// nicht in den gerenderten Kacheln liegt.
+const CandidateHighlightLayer = () => {
+  const candidates = usePlanningCandidatesState((s) => s.candidates)
+  if (!candidates.length) return null
+
+  return (
+    <Source
+      id="planning-candidates"
+      type="geojson"
+      data={{
+        type: 'FeatureCollection',
+        features: candidates.map((candidate) => ({
+          type: 'Feature' as const,
+          id: candidate.h3Id,
+          geometry: candidate.geometry as any,
+          properties: {},
+        })),
+      }}
+    >
+      <Layer
+        id="planning-candidates-outline"
+        type="line"
+        paint={{ 'line-color': '#eab308', 'line-width': 2.5 }}
+      />
+    </Source>
+  )
+}
+
 export const SourcesLayersPlanning = () => {
   const [runId] = usePlanningRunParam()
   const [scoreMode] = usePlanningScoreParam()
@@ -200,6 +235,7 @@ export const SourcesLayersPlanning = () => {
       <>
         <BoundaryHighlightLayer />
         <UserObstaclesLayer />
+        <CandidateHighlightLayer />
       </>
     )
 
@@ -231,6 +267,9 @@ export const SourcesLayersPlanning = () => {
           <Layer {...hexagonLabelLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])} />
         </>
       )}
+
+      {/* Nach den Hexagon-Layern, damit die gelbe Auswahl-Umrandung darüber liegt. */}
+      <CandidateHighlightLayer />
 
       {vegetationOn && (
         <>

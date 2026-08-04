@@ -14,6 +14,7 @@ import { mobileMapBottomControlsClassName } from './mobile/mobileMapChrome.const
 import { MobileMapHeader } from './mobile/MobileMapHeader'
 import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
+import { PlanningCandidateToggle } from './Planning/candidates/PlanningCandidateToggle'
 import { PlanningPanel } from './Planning/PlanningPanel'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
@@ -44,11 +45,14 @@ export const MapInterface = () => {
         </div>
 
         <MobileMapHeader />
-        {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader. */}
+        {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader.
+            Left of it (planning mode only): the candidate-selection tool, same button look. */}
         <DesktopOnly>
           <PlaceSearch className="absolute top-2 right-[calc(var(--inspector-width)+3.5rem)] z-20" />
+          <PlanningCandidateToggle className="absolute top-2 right-[calc(var(--inspector-width)+6.5rem)] z-20" />
         </DesktopOnly>
         <SidebarLayerControls />
+        {/* Also renders the planning candidate list while that tool is active. */}
         <SidebarInspector />
         <PlanningPanel />
         <div className={mobileMapBottomControlsClassName} data-map-controls="true">

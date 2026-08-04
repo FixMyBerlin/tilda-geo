@@ -15,6 +15,7 @@ import {
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
+import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import {
   convertToUrlFeature,
@@ -50,7 +51,10 @@ import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInte
 import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
-import { SourcesLayersPlanning } from './SourcesAndLayers/SourcesLayersPlanning'
+import {
+  planningHexagonsSourceLayer,
+  SourcesLayersPlanning,
+} from './SourcesAndLayers/SourcesLayersPlanning'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
@@ -106,9 +110,27 @@ export const RegionMap = () => {
   const inspectorFeatures = useMapInspectorFeatures()
   const calculatorDrawActive = useMapCalculatorDrawActive()
   const planningPolygonDrawing = usePlanningBoundaryState((s) => s.polygonDrawInProgress)
+  const candidateSelectActive = usePlanningCandidatesState((s) => s.selectActive)
+  const toggleCandidate = usePlanningCandidatesState((s) => s.toggleCandidate)
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (containMaskFeature(features)) {
+      return
+    }
+
+    // Kandidaten-Auswahlwerkzeug des Planungsmoduls (PlanningCandidateToggle): solange
+    // es aktiv ist, sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den
+    // Inspector zu öffnen – auch ein Klick ins Leere lässt die Auswahl unangetastet.
+    if (candidateSelectActive) {
+      const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
+      const h3Id = hexagon?.properties?.h3_id
+      if (hexagon && h3Id) {
+        toggleCandidate({
+          h3Id: String(h3Id),
+          geometry: hexagon.geometry,
+          properties: { ...hexagon.properties },
+        })
+      }
       return
     }
     if (!isProd) {
