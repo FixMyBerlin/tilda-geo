@@ -18,6 +18,21 @@ const LEVEL_LABELS: Record<string, string> = {
 
 type Boundary = { id: string; name: string; name_prefix: string | null; admin_level: string }
 
+// Die Liste enthält alle Gebiete der Region (in Berlin über 3.000). Alle davon als Combobox-Optionen
+// zu rendern macht jeden Tastendruck spürbar langsam – deshalb hart auf 20 Treffer begrenzen und
+// den Rest über „Suche verfeinern“ ausblenden.
+const MAX_RESULTS = 20
+
+// Bei nur 20 sichtbaren Treffern muss das Naheliegende oben stehen: erst exakte Namen, dann
+// Präfix-Treffer („Mitte“ vor „Alt-Mitte“), dann Treffer an einer Wortgrenze, dann der Rest.
+const matchRank = (name: string, query: string) => {
+  const n = name.toLowerCase()
+  if (n === query) return 0
+  if (n.startsWith(query)) return 1
+  if (new RegExp(`\\b${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(n)) return 2
+  return 3
+}
+
 // Namen wiederholen sich über die Ebenen hinweg (Berlin hat „Mitte", „Pankow", „Spandau" … jeweils
 // als Bezirk und als Ortsteil). In der Liste trennt das die Gruppen-Überschrift, im Eingabefeld
 // nach der Auswahl nicht – deshalb dort die Ebene mit anzeigen.
@@ -55,11 +70,20 @@ export const BoundaryPicker = ({
       </div>
     )
 
-  const filteredBoundaries = boundaries.filter(
-    (b) => query === '' || b.name.toLowerCase().includes(query.toLowerCase()),
-  )
+  const normalizedQuery = query.trim().toLowerCase()
+  const matchingBoundaries =
+    normalizedQuery === ''
+      ? boundaries
+      : boundaries
+          .filter((b) => b.name.toLowerCase().includes(normalizedQuery))
+          // Stabil sortieren: die Server-Reihenfolge (admin_level, name) bleibt innerhalb einer
+          // Rang-Gruppe erhalten.
+          .sort((a, b) => matchRank(a.name, normalizedQuery) - matchRank(b.name, normalizedQuery))
 
-  const grouped = filteredBoundaries.reduce<Record<string, Boundary[]>>((acc, b) => {
+  const visibleBoundaries = matchingBoundaries.slice(0, MAX_RESULTS)
+  const hiddenCount = matchingBoundaries.length - visibleBoundaries.length
+
+  const grouped = visibleBoundaries.reduce<Record<string, Boundary[]>>((acc, b) => {
     const lvl = b.admin_level
     if (!acc[lvl]) acc[lvl] = []
     acc[lvl].push(b)
@@ -128,7 +152,12 @@ export const BoundaryPicker = ({
               ))}
             </div>
           ))}
-        {filteredBoundaries.length === 0 && (
+        {hiddenCount > 0 && (
+          <div className="border-t border-gray-100 bg-gray-50 px-3 py-1.5 text-xs text-gray-500">
+            … {hiddenCount.toLocaleString('de-DE')} weitere Treffer. Suche verfeinern.
+          </div>
+        )}
+        {matchingBoundaries.length === 0 && (
           <div className="px-3 py-2 text-gray-400">Keine Ergebnisse.</div>
         )}
       </ComboboxOptions>
