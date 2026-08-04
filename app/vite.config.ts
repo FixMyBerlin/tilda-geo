@@ -46,6 +46,11 @@ const customLogger = {
 
 export default defineConfig({
   customLogger,
+  // MapLibre v6 is ESM-only; keep it in the SSR bundle so Vite does not resolve a stale CJS path.
+  // @see https://maplibre.org/maplibre-gl-js/docs/#installation
+  ssr: {
+    noExternal: ['maplibre-gl'],
+  },
   // Pull `better-auth` client graph into the first `optimizeDeps` pass so the initial page load
   // does not discover dozens of `@better-auth/*` deps late, trigger a full reload, and abort the
   // in-flight `import(virtual:tanstack-start-client-entry)` (browser: Failed to fetch).

@@ -381,7 +381,7 @@ MapLibre-API-Äquivalent zur Laufzeit: `map.getZoom()` + `MercatorCoordinate.fro
 | [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua)                                                         | `road_width`-Attribut für Parken                                                       |
 | [`processing/topics/roads_bikelanes/2_move_bikelanes.sql`](../processing/topics/roads_bikelanes/2_move_bikelanes.sql)                                                                 | Meter-Offset via `ST_OffsetCurve`                                                      |
 | [`app/.../mapboxStyles/groups/atlas_bikelane_presence.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/atlas_bikelane_presence.ts) | Beispiel: pixelbasierte `line-offset`-Stops                                            |
-| [`app/package.json`](../app/package.json)                                                                                                                                             | `maplibre-gl@5.24.0`, `@maplibre/maplibre-gl-style-spec@^24.8.1`                       |
+| [`app/package.json`](../app/package.json)                                                                                                                                             | `maplibre-gl@6.0.0`, `@maplibre/maplibre-gl-style-spec@^26.2.1`                        |
 
 ---
 

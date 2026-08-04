@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl'
+import { addProtocol, removeProtocol } from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
 import { useEffect } from 'react'
 import { MapProvider } from 'react-map-gl/maplibre'
@@ -7,6 +7,7 @@ import { SelectBackground } from './background/SelectBackground'
 import { DebugButton } from './DebugBoxes/DebugButton'
 import { RegionDataModals } from './DownloadModal/RegionDataModals'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
+import './Map/maplibreWorker'
 import { RegionMap } from './Map/RegionMap'
 import { PlaceSearch } from './Map/Search/PlaceSearch'
 import { MobileLayerButton } from './mobile/MobileLayerButton'
@@ -21,9 +22,9 @@ import { DesktopOnly } from './utils/Breakpoint'
 export const MapInterface = () => {
   useEffect(function registerPmtilesProtocolOnMount() {
     const protocol = new Protocol()
-    maplibregl.addProtocol('pmtiles', protocol.tile)
+    addProtocol('pmtiles', protocol.tile)
     return function removePmtilesProtocolOnUnmount() {
-      maplibregl.removeProtocol('pmtiles')
+      removeProtocol('pmtiles')
     }
   }, [])
 
