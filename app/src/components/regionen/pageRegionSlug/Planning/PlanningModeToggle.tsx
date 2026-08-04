@@ -25,7 +25,11 @@ export const PlanningModeToggle = () => {
   }
 
   return (
-    <div role="tablist" aria-label="Kartenmodus" className="flex gap-0.5 rounded-md bg-gray-700 p-1">
+    <div
+      role="tablist"
+      aria-label="Kartenmodus"
+      className="flex gap-0.5 rounded-md bg-gray-700 p-1"
+    >
       {TABS.map(([value, label]) => {
         const selected = Boolean(planningMode) === value
         return (
