@@ -56,6 +56,14 @@ type Store = {
    */
   carriagewaysVisible: boolean
   setCarriagewaysVisible: (visible: boolean) => void
+
+  /**
+   * Whether the planning panel is collapsed to its header (title + active scenario
+   * summary) to free up map space. Auto-set to true when a run's result is saved
+   * (JobStatusBadge on DONE); toggled manually via the header button in PlanningPanel.
+   */
+  panelCollapsed: boolean
+  setPanelCollapsed: (collapsed: boolean) => void
 }
 
 export const usePlanningBoundaryState = create<Store>((set) => ({
@@ -85,4 +93,7 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   carriagewaysVisible: false,
   setCarriagewaysVisible: (visible) => set({ carriagewaysVisible: visible }),
+
+  panelCollapsed: false,
+  setPanelCollapsed: (collapsed) => set({ panelCollapsed: collapsed }),
 }))

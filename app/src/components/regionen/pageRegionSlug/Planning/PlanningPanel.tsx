@@ -1,4 +1,5 @@
 import { Switch } from '@headlessui/react'
+import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
@@ -213,32 +214,61 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
   )
 }
 
+/**
+ * Summary row shown below the header while the panel is collapsed: the active
+ * scenario's title plus a pill with its creation date (day + short month, no year).
+ */
+const CollapsedScenarioSummary = ({ scenarioId }: { scenarioId: number }) => {
+  const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
+  if (!scenario) return null
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="truncate font-medium text-gray-800">{scenario.title}</span>
+      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+        {new Date(scenario.createdAt).toLocaleDateString('de-DE', {
+          day: 'numeric',
+          month: 'short',
+        })}
+      </span>
+    </div>
+  )
+}
+
 /** Planning-mode entry button + interactive panel. Renders nothing intrusive in the viewer. */
 export const PlanningPanel = () => {
-  const [planningMode, setPlanningMode] = usePlanningModeParam()
-  const [activeScenario, setActiveScenario] = usePlanningScenarioParam()
-  const [, setRun] = usePlanningRunParam()
+  const [planningMode] = usePlanningModeParam()
+  const [activeScenario] = usePlanningScenarioParam()
+  const panelCollapsed = usePlanningBoundaryState((s) => s.panelCollapsed)
+  const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
   const { regionSlug } = routeApi.useParams()
 
   if (!planningMode) return null
-
-  const close = () => {
-    setPlanningMode(false)
-    setActiveScenario(null)
-    setRun(null)
-  }
 
   return (
     <div className="pointer-events-auto absolute top-2.5 left-[17rem] z-30 flex max-h-[calc(100vh-8rem)] w-80 flex-col gap-3 overflow-auto rounded bg-white p-3 shadow-lg">
       <div className="flex items-center justify-between">
         <h2 className="font-bold">Planungsmodus</h2>
-        <button type="button" onClick={close} className="text-gray-500 hover:text-gray-800">
-          ✕
+        <button
+          type="button"
+          onClick={() => setPanelCollapsed(!panelCollapsed)}
+          aria-label={panelCollapsed ? 'Planungsmodus ausklappen' : 'Planungsmodus einklappen'}
+          className="text-gray-500 hover:text-gray-800"
+        >
+          <ChevronRightIcon
+            className={twJoin('size-4 transition-transform', panelCollapsed ? '' : 'rotate-90')}
+          />
         </button>
       </div>
-      <ScenarioList regionSlug={regionSlug} />
-      {activeScenario != null && (
-        <ScenarioDetail scenarioId={activeScenario} regionSlug={regionSlug} />
+      {panelCollapsed ? (
+        activeScenario != null && <CollapsedScenarioSummary scenarioId={activeScenario} />
+      ) : (
+        <>
+          <ScenarioList regionSlug={regionSlug} />
+          {activeScenario != null && (
+            <ScenarioDetail scenarioId={activeScenario} regionSlug={regionSlug} />
+          )}
+        </>
       )}
     </div>
   )

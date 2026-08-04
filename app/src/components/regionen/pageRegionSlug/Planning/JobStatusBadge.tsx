@@ -4,6 +4,7 @@ import {
   planningJobQueryOptions,
   planningScenarioQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import { usePlanningRunParam } from '../hooks/useQueryState/usePlanningParams'
 import { deriveScoringStep, PlanningSteps } from './PlanningSteps'
 
@@ -25,6 +26,7 @@ const COLORS: Record<string, string> = {
 export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioId: number }) => {
   const queryClient = useQueryClient()
   const [, setRun] = usePlanningRunParam()
+  const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
 
   const { data } = useQuery({
     ...planningJobQueryOptions(jobId),
@@ -38,8 +40,10 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
     if (data?.status === 'DONE' && data.resultRunId != null) {
       setRun(data.resultRunId)
       queryClient.invalidateQueries(planningScenarioQueryOptions(scenarioId))
+      // Result is saved – collapse the panel so more of the map is visible.
+      setPanelCollapsed(true)
     }
-  }, [data?.status, data?.resultRunId, scenarioId, setRun, queryClient])
+  }, [data?.status, data?.resultRunId, scenarioId, setRun, queryClient, setPanelCollapsed])
 
   if (!data) return null
 
