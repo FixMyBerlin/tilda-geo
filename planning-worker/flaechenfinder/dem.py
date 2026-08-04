@@ -16,6 +16,7 @@ class DEMAdapter:
         self.source = source
         self.dgm1_path = dgm1_path
         self._dgm1_ds = None
+        self._mapterhorn_tile_cache: dict = {}
 
     def __del__(self):
         if self._dgm1_ds is not None:
@@ -69,9 +70,96 @@ class DEMAdapter:
             print("   ⚠️  rasterio nicht verfügbar – Fallback auf SRTM")
             return self._slopes_srtm_fallback(points)
 
+    # Gleiche Kachelquelle/-schema wie das Höhenprofil im Frontend
+    # (app/.../terrainProfile/sampling/{terrarium,terrainSampler}.ts): Terrarium-
+    # kodierte WebP-Kacheln von tiles.mapterhorn.com, weltweit, ~30m-Basisauflösung
+    # (Copernicus GLO-30). Zoom 13 @ 512px ergibt ~6m/Pixel bei mittleren Breiten –
+    # für die Score-Klassifizierung ausreichend, nicht baugenau.
+    _MAPTERHORN_ZOOM = 13
+    _MAPTERHORN_TILE_SIZE = 512
+    _MAPTERHORN_TILES_ORIGIN = "https://tiles.mapterhorn.com"
+
+    @classmethod
+    def _mapterhorn_tile_pixel(cls, lng, lat, zoom, tile_size):
+        import math
+
+        lat_rad = math.radians(lat)
+        scale = 2 ** zoom
+        x = (lng + 180.0) / 360.0 * scale
+        y = (1 - math.log(math.tan(lat_rad) + 1 / math.cos(lat_rad)) / math.pi) / 2 * scale
+        tile_x = int(math.floor(x))
+        tile_y = int(math.floor(y))
+        px = min(tile_size - 1, max(0, (x - tile_x) * tile_size))
+        py = min(tile_size - 1, max(0, (y - tile_y) * tile_size))
+        return tile_x, tile_y, px, py
+
+    def _load_mapterhorn_tile(self, tile_x, tile_y):
+        """Lädt+decodiert eine Mapterhorn-Kachel zu einem Höhen-Array (Meter).
+        Pro DEMAdapter-Instanz gecacht (ein Lauf trifft meist wenige Kacheln
+        mehrfach), analog zum Tile-Cache im Frontend."""
+        key = (tile_x, tile_y)
+        if key in self._mapterhorn_tile_cache:
+            return self._mapterhorn_tile_cache[key]
+
+        import io
+        import urllib.request
+        from PIL import Image
+
+        url = f"{self._MAPTERHORN_TILES_ORIGIN}/{self._MAPTERHORN_ZOOM}/{tile_x}/{tile_y}.webp"
+        # Ohne User-Agent blockt der CDN mit 403 (Standard-urllib-UA wird gefiltert).
+        req = urllib.request.Request(url, headers={"User-Agent": "tilda-geo-planning-worker"})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = resp.read()
+            img = Image.open(io.BytesIO(data)).convert("RGB")
+            rgb = np.asarray(img, dtype=np.float64)
+            elevation = rgb[:, :, 0] * 256 + rgb[:, :, 1] + rgb[:, :, 2] / 256 - 32768
+        except Exception as exc:
+            print(f"   ⚠️  Mapterhorn-Kachel {self._MAPTERHORN_ZOOM}/{tile_x}/{tile_y} nicht ladbar: {exc}")
+            elevation = None
+
+        self._mapterhorn_tile_cache[key] = elevation
+        return elevation
+
     def _slopes_from_mapterhorn(self, points):
-        print("   ⚠️  Mapterhorn/PMTiles noch nicht implementiert – nutze SRTM-Fallback")
-        return self._slopes_srtm_fallback(points)
+        import math
+
+        try:
+            from PIL import Image  # noqa: F401 – nur Verfügbarkeit prüfen
+        except ImportError:
+            print("   ⚠️  Pillow nicht verfügbar – Fallback auf SRTM")
+            return self._slopes_srtm_fallback(points)
+
+        tile_size = self._MAPTERHORN_TILE_SIZE
+        zoom = self._MAPTERHORN_ZOOM
+        # WebMercator-Pixelauflösung (m/px) bei gegebener Breite/Zoom, für 256px-
+        # Kachelschema; auf die tatsächliche Kachelgröße skaliert.
+        equator_res = 156543.03392804097
+
+        slopes = []
+        for lng, lat in points:
+            tile_x, tile_y, px, py = self._mapterhorn_tile_pixel(lng, lat, zoom, tile_size)
+            elevation = self._load_mapterhorn_tile(tile_x, tile_y)
+            if elevation is None:
+                slopes.append(0.0)
+                continue
+
+            x0 = min(tile_size - 1, max(0, round(px)))
+            y0 = min(tile_size - 1, max(0, round(py)))
+            x_minus, x_plus = max(0, x0 - 1), min(tile_size - 1, x0 + 1)
+            y_minus, y_plus = max(0, y0 - 1), min(tile_size - 1, y0 + 1)
+            if x_minus == x_plus or y_minus == y_plus:
+                # Punkt liegt auf einer Kachelecke ohne beidseitigen Nachbarn
+                slopes.append(0.0)
+                continue
+
+            res_m = equator_res * math.cos(math.radians(lat)) / (2 ** zoom) * (256 / tile_size)
+            dz_dx = (elevation[y0, x_plus] - elevation[y0, x_minus]) / ((x_plus - x_minus) * res_m)
+            dz_dy = (elevation[y_minus, x0] - elevation[y_plus, x0]) / ((y_plus - y_minus) * res_m)
+            slope_rad = math.atan(math.hypot(dz_dx, dz_dy))
+            slopes.append(float(math.degrees(slope_rad)))
+
+        return slopes
 
     def _slopes_srtm_fallback(self, points):
         """

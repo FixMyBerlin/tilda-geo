@@ -7,6 +7,7 @@ numpy>=1.26
 pandas>=2.2
 rasterio>=1.3
 scipy>=1.11            # morphologisches Closing (vegetation.py NDVI-Maske)
+Pillow>=10.0            # WebP-Decoding für Mapterhorn-DEM-Kacheln (dem.py)
 
 # DB-Zugriff
 SQLAlchemy>=2.0

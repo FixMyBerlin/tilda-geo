@@ -42,8 +42,17 @@ SELECT count(*) FROM planning.scenario_hexagons WHERE run_id = <runId>;
 
 ## DEM / Hangneigung
 
-MVP nutzt den SRTM-Fallback (konstante Neigung). Echte DGM1-GeoTIFFs werden über das
-`planning_dem`-Volume (`/dem`) gemountet und via `dem_source: "dgm1"` aktiviert.
+Default: `dem_source: "mapterhorn"` – lädt WebP-Kacheln (Terrarium-Encoding) von
+`tiles.mapterhorn.com` (Zoom 13, ~6m/Pixel; gleiche Quelle wie das Höhenprofil im
+Frontend, siehe `app/.../terrainProfile/sampling/`) und berechnet die Neigung je
+Hexagon-Zentrum per Gradient (`flaechenfinder/dem.py:_slopes_from_mapterhorn`).
+Weltweit verfügbar, kein Datendownload nötig – der Worker braucht Internetzugriff
+(analog zu den CIR-WMS-Aufrufen für Vegetation).
+
+Höhere Genauigkeit für einzelne Regionen: echte DGM1-GeoTIFFs über das
+`planning_dem`-Volume (`/dem`) mounten und via `dem_source: "dgm1"` aktivieren.
+`dem_source: "srtm"` bleibt als Fallback mit konstanter Neigung (2°) erhalten, falls
+weder Mapterhorn noch DGM1 verfügbar sind.
 
 ## Weitere Doku
 

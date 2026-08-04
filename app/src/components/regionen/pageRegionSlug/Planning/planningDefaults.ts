@@ -7,7 +7,7 @@ import type { FactorConfig } from '@/server/planning/planning.functions'
 export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   name: 'Fahrradbox',
   h3_resolution: 13,
-  dem_source: 'srtm',
+  dem_source: 'mapterhorn',
   // Wichtigkeiten liegen auf dem UI-Raster 0–10 (siehe WeightSlider), also Vielfache von 0.1.
   weights: {
     w_cyclepath: 0.2,
