@@ -111,6 +111,12 @@ USER_LINE_BUFFER_M = 2.5
 
 # ── Defaults / Validierung ────────────────────────────────────────────────────
 
+# Zwei Arten von Gewichten (siehe scorer.py):
+#   Kriterien (w_cyclepath/w_surface/w_target/w_slope/w_transit) gehen in den
+#     gewichteten Durchschnitt der 0–100-Teilscores ein. Nur ihr Verhältnis
+#     zueinander zählt – die Summe muss nichts Bestimmtes ergeben.
+#   Modifier (alle übrigen) verschieben den fertigen Score um bis zu w × 100
+#     Punkte; hier ist der absolute Wert die Aussage.
 DEFAULT_WEIGHTS = {
     "w_cyclepath": 0.20,
     "w_surface":   0.20,

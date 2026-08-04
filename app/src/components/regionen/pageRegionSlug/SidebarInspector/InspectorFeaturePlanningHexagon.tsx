@@ -21,32 +21,26 @@ const SCORE_LABELS: Record<string, string> = {
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
-// `scoreKey` is the persisted sub-score for the whole group; `factors` are the
-// individual factor columns that feed it. Mirrors scorer.py::_group_score.
-const SCORE_GROUPS: { label: string; scoreKey: string; factors: string[] }[] = [
-  {
-    label: 'Bedarf',
-    scoreKey: 'score_bedarf',
-    factors: [
-      'score_radweg',
-      'score_oepnv',
-      'score_zielorte',
-      'score_fussgaengerzone',
-      'score_bestand',
-    ],
-  },
-  {
-    label: 'Bebauung',
-    scoreKey: 'score_bebauung',
-    factors: [
-      'score_bodenbelag',
-      'score_hangneigung',
-      'score_vegetation',
-      'score_kreuzung',
-      'score_parken',
-    ],
-  },
-]
+// `scoreKey` is the persisted sub-score for the whole group. Innerhalb der Gruppe
+// unterscheiden sich die beiden Faktorarten auch in der Anzeige, weil sie andere
+// Werte halten (mirrors scorer.py):
+//   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
+//   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → vorzeichenbehaftete Zahl
+const SCORE_GROUPS: { label: string; scoreKey: string; criteria: string[]; modifiers: string[] }[] =
+  [
+    {
+      label: 'Bedarf',
+      scoreKey: 'score_bedarf',
+      criteria: ['score_radweg', 'score_oepnv', 'score_zielorte'],
+      modifiers: ['score_fussgaengerzone', 'score_bestand'],
+    },
+    {
+      label: 'Bebauung',
+      scoreKey: 'score_bebauung',
+      criteria: ['score_bodenbelag', 'score_hangneigung'],
+      modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken'],
+    },
+  ]
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',
@@ -55,6 +49,15 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   gut: 'bg-yellow-100 text-yellow-800',
   'sehr gut': 'bg-green-100 text-green-800',
 }
+
+/** Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala. */
+const PointsValue = ({ value }: { value: number | null | undefined }) => (
+  <span className="font-mono text-xs text-gray-700">
+    {value == null
+      ? '–'
+      : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}`}
+  </span>
+)
 
 const ScoreBar = ({ value }: { value: number | null | undefined }) => {
   const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
@@ -149,11 +152,27 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
               </div>
               <table className="w-full text-xs">
                 <tbody>
-                  {group.factors.map((key) => (
-                    <tr key={key} className="border-b border-gray-100 last:border-0">
+                  {group.criteria.map((key) => (
+                    <tr key={key} className="border-b border-gray-100">
                       <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
                       <td className="py-1.5">
                         <ScoreBar value={props[key]} />
+                      </td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td
+                      colSpan={2}
+                      className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase"
+                    >
+                      Zu- und Abschläge
+                    </td>
+                  </tr>
+                  {group.modifiers.map((key) => (
+                    <tr key={key} className="border-b border-gray-100 last:border-0">
+                      <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
+                      <td className="py-1.5 text-right">
+                        <PointsValue value={props[key]} />
                       </td>
                     </tr>
                   ))}
@@ -173,9 +192,8 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                 <tbody>
                   <tr>
                     <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</td>
-                    <td className="py-1.5 text-right font-mono text-gray-700">
-                      {props.score_eigendaten > 0 ? '+' : ''}
-                      {Math.round(props.score_eigendaten)}
+                    <td className="py-1.5 text-right">
+                      <PointsValue value={props.score_eigendaten} />
                     </td>
                   </tr>
                 </tbody>

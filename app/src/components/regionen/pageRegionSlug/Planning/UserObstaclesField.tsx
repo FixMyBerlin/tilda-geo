@@ -2,7 +2,7 @@ import { MAX_USER_GEOJSON_BYTES, parseUserGeojson } from '@/lib/planningUserGeoj
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { GeoJsonUploadField } from './GeoJsonUpload'
 import { SegmentedChoice } from './SegmentedChoice'
-import { WeightScaleLegend, WeightSlider } from './WeightSlider'
+import { ModifierSlider } from './WeightSlider'
 
 const MODES = [
   ['bonus', 'Bonus'],
@@ -87,16 +87,17 @@ export const UserObstaclesField = ({
             disabled={readOnly}
             className="grid grid-cols-2 gap-1.5"
           />
+          {/* Eigene Flächen sind ein Zu-/Abschlag wie Kreuzungen oder Bestandsanlagen, gehören
+              aber in keine der beiden Gruppen — die Stärke steht deshalb hier statt im
+              Faktorenblock, in derselben Einheit (Punkte auf den Gesamtscore). */}
           {isSoft && (
-            <div>
-              {!readOnly && <WeightScaleLegend />}
-              <WeightSlider
-                label="Stärke"
-                weight={weight}
-                onChange={(value) => setWeight('w_eigendaten', value)}
-                readOnly={readOnly}
-              />
-            </div>
+            <ModifierSlider
+              label="Stärke"
+              weight={weight}
+              direction={mode === 'bonus' ? 'positive' : 'negative'}
+              onChange={(value) => setWeight('w_eigendaten', value)}
+              readOnly={readOnly}
+            />
           )}
         </div>
       )}

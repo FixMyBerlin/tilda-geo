@@ -8,10 +8,10 @@ export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
   name: 'Fahrradbox',
   h3_resolution: 13,
   dem_source: 'mapterhorn',
-  // Wichtigkeiten liegen auf dem UI-Raster 0–10 (siehe WeightSlider), also Vielfache von 0.1.
-  // Bedarf und Bebauung teilen sich zusammen 10 Stufen (WEIGHT_BUDGET_STEPS, = Gewichtssumme
-  // 1.0 = 100 % des Scores); die Verteilung hier entspricht den früheren Verhältnissen (Summe
-  // 1.4) proportional auf das Budget heruntergerechnet, also 5 Stufen je Gruppe.
+  // Kriterien liegen auf dem UI-Raster 0–10 (Vielfache von 0.1); nur ihr Verhältnis zueinander
+  // zählt, weil scorer.py durch die Summe der aktiven Gewichte teilt — Radwegnähe und Untergrund
+  // wiegen hier also doppelt so schwer wie Zielorte, Hangneigung und ÖPNV. Die übrigen Gewichte
+  // sind Zu-/Abschläge und stehen für „bis zu w × 100 Punkte" (siehe `weightScale.ts`).
   weights: {
     w_cyclepath: 0.2,
     w_surface: 0.2,
@@ -72,6 +72,10 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_bestand: 'Bestandsanlagen',
 }
 
+// Wirkrichtung eines Zu-/Abschlags. `vegetation` steht für „richtet sich nach
+// `vegetation_direction`" — nur die Vegetation kann je nach Einstellung Bonus oder Abzug sein.
+export type ModifierDirection = 'positive' | 'negative' | 'vegetation'
+
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
@@ -79,15 +83,35 @@ export const WEIGHT_LABELS: Record<string, string> = {
 //              und Bestandsanlagen (Abzug)
 //   Bebauung → Untergrund, Hangneigung + Modifier
 //              (Vegetation, Kreuzungen, Parken)
-export const WEIGHT_GROUPS: { key: 'bedarf' | 'bebauung'; label: string; weights: string[] }[] = [
+//
+// Innerhalb der Gruppen trennen wir zusätzlich nach Rechenart, weil beide Arten in scorer.py
+// unterschiedlich wirken und deshalb auch unterschiedlich eingestellt werden (siehe
+// `weightScale.ts`):
+//   criteria  → gewichteter Durchschnitt der 0–100-Teilscores; Gewicht = Anteil am Grundscore
+//   modifiers → Zu-/Abschläge in Punkten auf den fertigen Score
+export const WEIGHT_GROUPS: {
+  key: 'bedarf' | 'bebauung'
+  label: string
+  criteria: string[]
+  modifiers: { key: string; direction: ModifierDirection }[]
+}[] = [
   {
     key: 'bedarf',
     label: 'Bedarf',
-    weights: ['w_cyclepath', 'w_transit', 'w_target', 'w_fussgaengerzone', 'w_bestand'],
+    criteria: ['w_cyclepath', 'w_transit', 'w_target'],
+    modifiers: [
+      { key: 'w_fussgaengerzone', direction: 'positive' },
+      { key: 'w_bestand', direction: 'negative' },
+    ],
   },
   {
     key: 'bebauung',
     label: 'Bebauung',
-    weights: ['w_surface', 'w_slope', 'w_vegetation', 'w_intersection', 'w_parken'],
+    criteria: ['w_surface', 'w_slope'],
+    modifiers: [
+      { key: 'w_vegetation', direction: 'vegetation' },
+      { key: 'w_intersection', direction: 'positive' },
+      { key: 'w_parken', direction: 'positive' },
+    ],
   },
 ]

@@ -11,12 +11,12 @@ import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
 import { SegmentedChoice } from './SegmentedChoice'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import {
-  applyWeightWithinBudget,
-  groupWeightSteps,
-  totalWeightSteps,
-  WEIGHT_BUDGET_STEPS,
-} from './weightBudget'
-import { WeightBudgetLegend, WeightSlider } from './WeightSlider'
+  criterionShares,
+  groupShare,
+  modifierPointRange,
+  resolveModifierDirection,
+} from './weightScale'
+import { CriterionSlider, ModifierSlider, WeightScaleLegend } from './WeightSlider'
 
 const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
   { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
@@ -48,52 +48,73 @@ export const FactorFields = ({
 }) => {
   const weights = config.weights ?? {}
   const vegetationDirection = config.vegetation_direction ?? 'negative'
-  // Bedarf und Bebauung teilen sich ein festes Budget: jede Änderung an einem Regler verschiebt
-  // die übrigen mit, damit die Summe 10 Stufen (= 100 %) bleibt — siehe `weightBudget.ts`.
-  const setWeight = (key: string, value: number) =>
-    setWeights(applyWeightWithinBudget(weights, key, value))
+  // Die Regler sind voneinander unabhängig: der Scorer normiert die Kriterien selbst (Division
+  // durch die Gewichtssumme), es gibt also keine Summe, die die UI einhalten müsste.
+  const setWeight = (key: string, value: number) => setWeights({ ...weights, [key]: value })
+  const shares = criterionShares(weights)
+  const points = modifierPointRange(weights, vegetationDirection)
 
   return (
     <>
       <div>
         <div className="mb-1 flex items-center gap-1 font-semibold">
-          Wichtigkeit der Faktoren
+          Gewichtung der Faktoren
           <InfoTooltip>
-            Bestimmen die relative Bedeutung jedes Faktors bei der Standortbewertung. Bedarf und
-            Bebauung teilen sich zusammen {WEIGHT_BUDGET_STEPS} Stufen (= 100 % des Scores): Wird
-            ein Faktor wichtiger, werden die übrigen automatisch entsprechend unwichtiger. 0
-            bedeutet, dass ein Faktor nicht einfließt.
+            Kriterien bewerten jeden Ort mit 0–100 Punkten; ihre Wichtigkeit bestimmt, mit welchem
+            Anteil sie in den Grundscore eingehen (nur das Verhältnis zueinander zählt). Zu- und
+            Abschläge verschieben den Grundscore danach um die eingestellten Punkte. 0 bedeutet in
+            beiden Fällen, dass ein Faktor nicht einfließt.
           </InfoTooltip>
         </div>
-        {!readOnly && <WeightBudgetLegend totalSteps={totalWeightSteps(weights)} />}
+        {!readOnly && <WeightScaleLegend />}
         {WEIGHT_GROUPS.map((group) => (
-          <div key={group.key} className="mt-2 first:mt-0">
-            <div className="mb-0.5 flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-xs font-semibold text-gray-500 uppercase">
+          <div key={group.key} className="mt-3 first:mt-0">
+            <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-xs font-semibold text-gray-500 uppercase">
               <span>{group.label}</span>
-              <span className="tabular-nums">
-                {groupWeightSteps(weights, group.weights)}
-                <span className="font-normal opacity-60">/{WEIGHT_BUDGET_STEPS}</span>
+              <span className="normal-case tabular-nums">
+                {Math.round(groupShare(shares, group.criteria))} % des Grundscores
               </span>
             </div>
-            {group.weights.map((key) => (
-              <WeightSlider
+
+            <div className="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">Kriterien</div>
+            {group.criteria.map((key) => (
+              <CriterionSlider
                 key={key}
                 label={WEIGHT_LABELS[key] ?? key}
                 weight={weights[key]}
+                sharePct={shares[key] ?? 0}
+                onChange={(value) => setWeight(key, value)}
+                readOnly={readOnly}
+              />
+            ))}
+
+            <div className="mt-1.5 text-[11px] tracking-wide text-gray-400 uppercase">
+              Zu- und Abschläge
+            </div>
+            {group.modifiers.map(({ key, direction }) => (
+              <ModifierSlider
+                key={key}
+                label={WEIGHT_LABELS[key] ?? key}
+                weight={weights[key]}
+                direction={resolveModifierDirection(direction, vegetationDirection)}
                 onChange={(value) => setWeight(key, value)}
                 readOnly={readOnly}
               />
             ))}
           </div>
         ))}
+        <p className="mt-2 text-[11px] text-gray-500">
+          Zu- und Abschläge zusammen: max. <span className="font-semibold">+{points.plus}</span> /{' '}
+          <span className="font-semibold">−{points.minus}</span> Punkte auf den Grundscore.
+        </p>
       </div>
 
       <div>
         <div className="mb-1 font-semibold">Vegetation (NDVI)</div>
         <p className="mb-1.5 text-xs text-gray-500">
           „Grün schützen“ zieht je nach Bedeckungsgrad Punkte ab (Gesamtscore nie unter 0), „Grün
-          bevorzugen“ vergibt Bonuspunkte. Jede Stufe der Wichtigkeit „Vegetation“ entspricht
-          maximal 10 Punkten Effekt; bei 0 ohne Wirkung.
+          bevorzugen“ vergibt Bonuspunkte. Wie viele Punkte, steht beim Zu-/Abschlag „Vegetation“ in
+          der Gruppe Bebauung; bei 0 Punkten ohne Wirkung.
         </p>
         <SegmentedChoice
           options={

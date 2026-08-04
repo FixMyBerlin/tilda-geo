@@ -480,23 +480,41 @@ def run_flaechenfinder(
     hex_proj["score_bodenbelag"] = hex_proj["bodenbelag_osm"].apply(lambda t: SURFACE_SCORES.get(t, 40))
     hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
 
-    # ── Basis-Score: gewichtete Summe der positiven Faktoren ──────────────
-    # Vegetation ist KEIN additiver Faktor mehr, sondern ein separater Abzug
-    # (bzw. Bonus) weiter unten – sonst könnte die Summe der Gewichte 100
-    # übersteigen. Übersprungene Faktoren (ÖPNV/Zielorte bei Gewicht 0) haben
-    # eine NaN-Score-Spalte; `_term` überspringt sie als Skalar 0.0, damit die
-    # Summe nicht durch `NaN * 0 = NaN` vergiftet wird.
+    # ── Basis-Score: gewichteter Durchschnitt der Kriterien ───────────────
+    # Vegetation ist KEIN Kriterium, sondern ein separater Abzug (bzw. Bonus)
+    # weiter unten – wie alle Modifier verschiebt sie den fertigen Score um
+    # Punkte, statt sich einen Anteil an ihm zu teilen. Übersprungene Faktoren
+    # (ÖPNV/Zielorte bei Gewicht 0) haben eine NaN-Score-Spalte; `_term`
+    # überspringt sie als Skalar 0.0, damit die Summe nicht durch
+    # `NaN * 0 = NaN` vergiftet wird.
     def _term(col, wkey):
         wv = w.get(wkey, 0) or 0
         return hex_proj[col] * wv if wv else 0.0
 
-    base_score = (
-        _term("score_radweg",            "w_cyclepath") +
-        _term("score_bodenbelag",        "w_surface")   +
-        _term("score_zielorte",          "w_target")    +
-        _term("score_hangneigung",       "w_slope")     +
-        _term("score_oepnv",             "w_transit")
-    )
+    # Gewichteter Durchschnitt statt gewichteter Summe: durch die Division durch
+    # die Summe der aktiven Gewichte liegt das Ergebnis immer in 0–100, egal wie
+    # die Gewichte gesetzt sind. Nur ihr Verhältnis zueinander zählt – die UI
+    # muss die Gewichte deshalb nicht auf eine feste Summe zwingen.
+    def _group_score(terms):
+        wsum = sum((w.get(k, 0) or 0) for _, k in terms)
+        if wsum <= 0:
+            return pd.Series(np.nan, index=hex_proj.index)
+        raw = sum(_term(col, k) for col, k in terms)
+        return raw / wsum
+
+    BEDARF_TERMS = [
+        ("score_radweg", "w_cyclepath"),
+        ("score_oepnv", "w_transit"),
+        ("score_zielorte", "w_target"),
+    ]
+    BEBAUUNG_TERMS = [
+        ("score_bodenbelag", "w_surface"),
+        ("score_hangneigung", "w_slope"),
+    ]
+    # Ohne ein einziges gewichtetes Kriterium bleibt der Grundscore 0 (statt NaN),
+    # damit der Gesamtscore auch dann nur aus den Modifiern besteht und die
+    # NOT-NULL-Spalte `mce_gesamtscore` gefüllt bleibt.
+    base_score = _group_score(BEDARF_TERMS + BEBAUUNG_TERMS).fillna(0.0)
 
     # ── Vegetations-Effekt: stufenloser Abzug bzw. Bonus ───────────────────
     # `w_vegetation` (0–1) ist der maximale Effekt in Punkten (× 100). Unter der
@@ -504,18 +522,20 @@ def run_flaechenfinder(
     # Maximum bei 100 % Bedeckung.
     #   direction "negative" (Grün schützen)   → Abzug
     #   direction "positive" (Grün bevorzugen) → Bonus
-    # `score_vegetation` hält den tatsächlich angewandten Effekt in Punkten
-    # (0 .. w_vegetation*100); ohne Gewicht NaN (→ DB NULL, Sidebar zeigt „–"),
-    # da die Coverage dann gar nicht berechnet wurde.
+    # `score_vegetation` hält den tatsächlich angewandten Effekt in Punkten,
+    # vorzeichenbehaftet wie `score_bestand` (−w_vegetation*100 .. +w_vegetation*100) –
+    # die Sidebar kann die Richtung sonst nicht anzeigen, sie steht nur im
+    # factorConfig. Ohne Gewicht NaN (→ DB NULL, Sidebar zeigt „–"), da die
+    # Coverage dann gar nicht berechnet wurde.
     w_veg = w.get("w_vegetation", 0) or 0
     if w_veg > 0:
         thr = use_case.vegetation_penalty_threshold_pct
         span = max(1.0, 100.0 - thr)
         ramp = ((hex_proj["vegetation_coverage_pct"] - thr) / span).clip(0.0, 1.0)
         veg_effect = (w_veg * 100.0) * ramp
-        hex_proj["score_vegetation"] = veg_effect.round(1)
         sign = 1.0 if use_case.vegetation_direction == "positive" else -1.0
         veg_delta = sign * veg_effect
+        hex_proj["score_vegetation"] = veg_delta.round(1)
     else:
         hex_proj["score_vegetation"] = np.nan
         veg_delta = 0.0
@@ -708,29 +728,18 @@ def run_flaechenfinder(
     #   Bebauung („kann hier bauen") → Untergrund (w_surface), Hangneigung
     #       (w_slope)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
-    # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt, damit der
-    # Teil-Score unabhängig von der Gewichtsverteilung 0–100 bleibt. Ist eine
-    # Gruppe komplett ungewichtet, bleibt ihr Score NaN (→ DB NULL).
-    def _group_score(terms):
-        wsum = sum((w.get(k, 0) or 0) for _, k in terms)
-        if wsum <= 0:
-            return pd.Series(np.nan, index=hex_proj.index)
-        raw = sum(_term(col, k) for col, k in terms)
-        return raw / wsum
-
+    # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt (dasselbe
+    # `_group_score` wie beim Grundscore oben), damit der Teil-Score unabhängig
+    # von der Gewichtsverteilung 0–100 bleibt. Ist eine Gruppe komplett
+    # ungewichtet, bleibt ihr Score NaN (→ DB NULL).
+    #
     # Fußgängerzonen-Bonus (Zuschlag) und Bestandsanlagen (Abzug) sind
     # Bedarfs-Modifier (analog Kreuzung/Parken bei Bebauung): erst normalisieren,
     # dann die Deltas addieren, dann clippen.
-    base_bedarf = _group_score(
-        [("score_radweg", "w_cyclepath"), ("score_oepnv", "w_transit"),
-         ("score_zielorte", "w_target")]
-    )
+    base_bedarf = _group_score(BEDARF_TERMS)
     score_bedarf = (base_bedarf + fussgz_delta + bestand_delta).clip(lower=0.0, upper=100.0)
 
-    base_bebauung = _group_score(
-        [("score_bodenbelag", "w_surface"),
-         ("score_hangneigung", "w_slope")]
-    )
+    base_bebauung = _group_score(BEBAUUNG_TERMS)
     score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(
         lower=0.0, upper=100.0
     )
