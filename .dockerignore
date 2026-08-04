@@ -3,3 +3,10 @@ app/.output
 app/.env*
 .editorconfig
 processing/node_modules
+# The image installs its own deps via `bun install --frozen-lockfile`. Without
+# this line a dev machine's app/node_modules (2.4GB, and symlinks into .bun when
+# bunfig.toml globalStore is on) is copied over that install by `COPY app /app`,
+# which fails outright: "cannot replace to directory ... with file". CI and the
+# deploy hosts never noticed — they build from a fresh checkout that has no
+# app/node_modules to copy.
+app/node_modules
