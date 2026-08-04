@@ -14,6 +14,8 @@ const envViteSchema = z.object({
   VITE_APP_ENV: environmentValues,
   VITE_APP_ORIGIN: z.url(),
   VITE_PLAYWRIGHT_ENABLED: z.string().optional(),
+  /** Self-hosted instances only (e.g. Flächenfinder): overrides the fixed per-environment tiles host. */
+  VITE_TILES_URL: z.string().optional(),
 })
 
 export type EnvVite = z.infer<typeof envViteSchema>

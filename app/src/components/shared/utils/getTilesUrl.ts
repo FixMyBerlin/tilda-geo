@@ -17,7 +17,12 @@ export const tilesHostSchema = z.enum([
 ])
 
 export const getTilesUrl = (path?: string) => {
-  const base = makeOriginFromParts(tilesBaseUrl[envKey])
+  // Self-hosted instances (e.g. Flächenfinder) run their own tile server and set this
+  // to override the fixed per-environment host above, which only covers the main deploys.
+  const overrideHost = import.meta.env.VITE_TILES_URL
+  const base = overrideHost
+    ? makeOriginFromParts({ protocol: 'https', host: overrideHost })
+    : makeOriginFromParts(tilesBaseUrl[envKey])
 
   if (!path) return base
   const cleanPath = path.startsWith('/') ? path.slice(1) : path

@@ -26,8 +26,10 @@ RUN bun run postinstall
 # Build-time env for Vite client bundle (inlined at build)
 ARG VITE_APP_ENV
 ARG VITE_APP_ORIGIN
+ARG VITE_TILES_URL
 ENV VITE_APP_ENV=${VITE_APP_ENV}
 ENV VITE_APP_ORIGIN=${VITE_APP_ORIGIN}
+ENV VITE_TILES_URL=${VITE_TILES_URL}
 RUN bun run build
 
 # Run as non-root (same goal as 3a98065). oven/bun provides a pre-created `bun` user; chown so it can read/write app files.
