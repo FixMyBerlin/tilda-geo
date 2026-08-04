@@ -1,8 +1,9 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import bbox from '@turf/bbox'
 import type { Geometry } from 'geojson'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
+import { useDebouncedValue } from '@/components/shared/hooks/useDebouncedValue'
 import { MAPTILER_API_KEY } from '../utils/maptilerApiKey.const'
 import { useSearchResultStore } from './useSearchResultStore'
 
@@ -58,21 +59,6 @@ const fetchFeatureById = async (
   if (!response.ok) throw new Error(`Geocoding feature request failed: ${response.status}`)
   const json = (await response.json()) as { features?: GeoFeature[] }
   return json.features?.[0]
-}
-
-/** Debounce a value via a timer (a legitimate external-timing effect; see react-useeffect skill). */
-const useDebouncedValue = (value: string, delayMs: number) => {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(
-    function syncDebouncedValue() {
-      const timer = setTimeout(() => setDebounced(value), delayMs)
-      return function cancelDebounce() {
-        clearTimeout(timer)
-      }
-    },
-    [value, delayMs],
-  )
-  return debounced
 }
 
 /**

@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import {
   getAdminBoundariesFn,
   getBoundaryGeomFn,
@@ -28,11 +28,16 @@ export const planningJobQueryOptions = (jobId: number) =>
   })
 
 // Admin boundaries (levels 8–10) for study_area selection, filtered to the given region.
+// Die Suche läuft serverseitig und liefert höchstens MAX_BOUNDARY_RESULTS Treffer – die Liste wird
+// nie komplett geladen, deshalb steckt der Suchbegriff im queryKey.
 // Metadata only – geometries are loaded per boundary via `boundaryGeomQueryOptions`.
-export const adminBoundariesQueryOptions = (regionSlug: string) =>
+export const adminBoundariesQueryOptions = (regionSlug: string, query: string) =>
   queryOptions({
-    queryKey: ['planning', 'adminBoundaries', regionSlug] as const,
-    queryFn: () => getAdminBoundariesFn({ data: { regionSlug } }),
+    queryKey: ['planning', 'adminBoundaries', regionSlug, query] as const,
+    queryFn: () => getAdminBoundariesFn({ data: { regionSlug, query } }),
+    // Vorherige Treffer stehen lassen, während die nächste Suche läuft – sonst flackert die Liste
+    // bei jedem Tastendruck leer.
+    placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 60, // 1h
   })
 

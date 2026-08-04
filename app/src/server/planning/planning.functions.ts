@@ -12,6 +12,7 @@ import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
+import { parseRegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 
 // ── factorConfig (UseCaseConfig) ──────────────────────────────────────────────
 // Permissive JSON consumed by the Python worker (flaechenfinder/config.py).
@@ -185,33 +186,77 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
     }
   })
 
-// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk, 10=Ortsteil) filtered to the
-// given region's geometry (looked up via the region's OSM relation IDs).
+const BoundarySearchInput = z.object({
+  regionSlug: z.string(),
+  query: z.string().max(100).default(''),
+})
+
+/** Höchstzahl der Treffer, die die Gebietssuche pro Anfrage liefert. */
+const MAX_BOUNDARY_RESULTS = 20
+
+// `%` und `_` aus der Nutzereingabe sind in LIKE Platzhalter und müssen escaped werden
+// (Postgres-Default-Escape ist der Backslash).
+const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&')
+
+// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk, 10=Ortsteil) matching `query`, scoped to
+// the region. Es wird nie die ganze Tabelle geladen: das Ergebnis ist immer auf
+// MAX_BOUNDARY_RESULTS begrenzt, die Suche läuft in SQL. Ohne `query` kommen die ersten
+// MAX_BOUNDARY_RESULTS als Startvorschlag zurück.
 // Metadata only – shipping every geometry would be a few hundred kB per call (Berlin: ~560 kB),
 // so the geometry is loaded on selection via `getBoundaryGeomFn`.
 export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
+  .inputValidator((data: z.infer<typeof BoundarySearchInput>) => BoundarySearchInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
 
     const region = await db.region.findFirst({
       where: { slug: data.regionSlug },
-      select: { maskOsmRelationIds: true },
+      select: { maskOsmRelationIds: true, bbox: true },
     })
-    const osmRelationIds = region?.maskOsmRelationIds ?? []
-    const relationKeys = osmRelationIds.map((id) => `relation/${id}`)
+    const relationKeys = (region?.maskOsmRelationIds ?? []).map((id) => `relation/${id}`)
+    const regionBbox = parseRegionGeoJsonBBox(region?.bbox)
 
-    // If no region geometry exists in the DB (e.g. non-Berlin regions), fall back to all boundaries.
-    const regionGeom =
+    // Räumlicher Filter, in absteigender Genauigkeit: Regions-Umriss aus den Masken-Relationen,
+    // sonst die Download-Bbox der Region. Hat die Region beides nicht, bleibt nur der Namensfilter
+    // – das LIMIT unten verhindert trotzdem, dass die ganze Tabelle rausgeht.
+    const regionFilter =
       relationKeys.length > 0
-        ? await db.$queryRaw<{ geom: object | null }[]>`
-            SELECT ST_Union(geom) AS geom FROM public.boundaries WHERE id = ANY(${relationKeys}::text[])
-          `
-        : [{ geom: null }]
+        ? Prisma.sql`AND ST_Intersects(
+            b.geom,
+            (SELECT ST_Union(geom) FROM public.boundaries WHERE id = ANY(${relationKeys}::text[]))
+          )`
+        : regionBbox
+          ? Prisma.sql`AND ST_Intersects(
+              b.geom,
+              ST_Transform(
+                ST_MakeEnvelope(${regionBbox[0]}, ${regionBbox[1]}, ${regionBbox[2]}, ${regionBbox[3]}, 4326),
+                3857
+              )
+            )`
+          : Prisma.empty
 
-    const hasRegionGeom = regionGeom[0]?.geom != null
+    const query = data.query.trim()
+    const nameFilter =
+      query === ''
+        ? Prisma.empty
+        : Prisma.sql`AND b.tags->>'name' ILIKE ${`%${escapeLikePattern(query)}%`}`
 
+    // Bei nur 20 Treffern muss das Naheliegende oben stehen: exakter Name, dann Präfix, dann Rest.
+    // (Kein konstanter Ausdruck für den leeren Fall – `ORDER BY 0` liest Postgres als Spaltenposition.)
+    const orderBy =
+      query === ''
+        ? Prisma.sql`ORDER BY (b.tags->>'admin_level')::int, b.tags->>'name'`
+        : Prisma.sql`ORDER BY
+            CASE
+              WHEN lower(b.tags->>'name') = lower(${query}) THEN 0
+              WHEN b.tags->>'name' ILIKE ${`${escapeLikePattern(query)}%`} THEN 1
+              ELSE 2
+            END,
+            (b.tags->>'admin_level')::int,
+            b.tags->>'name'`
+
+    // Ein Treffer mehr als nötig, um „weitere Treffer“ anzeigen zu können, ohne zu zählen.
     const rows = await db.$queryRaw<
       { id: string; name: string; name_prefix: string | null; admin_level: string }[]
     >`
@@ -224,16 +269,15 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
       WHERE (b.tags->>'admin_level')::int IN (8, 9, 10)
         AND b.tags->>'name' IS NOT NULL
         AND b.tags->>'name' <> ''
-        AND (
-          NOT ${hasRegionGeom}
-          OR ST_Intersects(
-            b.geom,
-            (SELECT ST_Union(geom) FROM public.boundaries WHERE id = ANY(${relationKeys}::text[]))
-          )
-        )
-      ORDER BY (b.tags->>'admin_level')::int, b.tags->>'name'
+        ${nameFilter}
+        ${regionFilter}
+      ${orderBy}
+      LIMIT ${MAX_BOUNDARY_RESULTS + 1}
     `
-    return rows
+    return {
+      boundaries: rows.slice(0, MAX_BOUNDARY_RESULTS),
+      hasMore: rows.length > MAX_BOUNDARY_RESULTS,
+    }
   })
 
 const BoundaryGeomInput = z.object({ regionSlug: z.string(), boundaryId: z.string() })
