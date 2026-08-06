@@ -121,6 +121,7 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setVegetationAttribution = usePlanningBoundaryState((s) => s.setVegetationAttribution)
   const setUserObstaclesGeom = usePlanningBoundaryState((s) => s.setUserObstaclesGeom)
+  const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
   const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
 
   // Show the scenario's latest result on the map when it is opened.
@@ -136,7 +137,10 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
     return () => setVegetationAttribution(null)
   }, [scenario, setVegetationAttribution])
 
-  // Outline the scenario's study area (border only, no fill) and fly to it on open.
+  // Outline the scenario's study area (border only, no fill) and fly to it on open –
+  // but only when the boundary actually differs from the one we last flew to. Switching
+  // between scenarios of the same study area is the "compare variants" workflow, where
+  // moving the camera would break the comparison.
   const studyArea = (scenario?.factorConfig as FactorConfig | undefined)?.study_area
   useEffect(() => {
     if (!studyArea) return
@@ -147,10 +151,16 @@ const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; region
         geometry: studyArea as any,
         properties: {},
       })
-      map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+      // The bbox is what the camera is derived from, so identical bboxes mean an
+      // identical target view – comparing it is enough to detect "same boundary".
+      const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
+      if (usePlanningBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
+        setLastFittedBoundaryKey(boundaryKey)
+        map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+      }
     }
     return () => setBoundaryHighlightGeom(null)
-  }, [studyArea, map, setBoundaryHighlightGeom])
+  }, [studyArea, map, setBoundaryHighlightGeom, setLastFittedBoundaryKey])
 
   // Show the scenario's uploaded "Eigene Flächen" as a control layer while it is open.
   const userGeojson = (scenario?.factorConfig as FactorConfig | undefined)?.user_geojson

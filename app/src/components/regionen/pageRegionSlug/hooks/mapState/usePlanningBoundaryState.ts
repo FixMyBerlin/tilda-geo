@@ -73,6 +73,16 @@ type Store = {
    */
   autoCollapsedJobId: number | null
   setAutoCollapsedJobId: (jobId: number | null) => void
+
+  /**
+   * Bbox key of the study area the map was last flown to (see ScenarioDetail).
+   * Lives here (not component state) so it survives ScenarioDetail unmounting when
+   * the panel collapses. Switching between scenarios that share the same study area
+   * – the "compare variants" case – must not move the camera; only a scenario with a
+   * different boundary triggers a new fitBounds.
+   */
+  lastFittedBoundaryKey: string | null
+  setLastFittedBoundaryKey: (key: string | null) => void
 }
 
 export const usePlanningBoundaryState = create<Store>((set) => ({
@@ -108,4 +118,7 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   autoCollapsedJobId: null,
   setAutoCollapsedJobId: (jobId) => set({ autoCollapsedJobId: jobId }),
+
+  lastFittedBoundaryKey: null,
+  setLastFittedBoundaryKey: (key) => set({ lastFittedBoundaryKey: key }),
 }))
