@@ -4,6 +4,39 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-09
 
+### `bikelanes`, `routing`
+
+- Rename `parent_highway` → `parent_road`. Value is the TILDA `roads.road` class of the parent centerline (same classifier as `road`), not the raw OSM `highway`.
+- `adjoining_road`: on non-crossings a usable OSM `is_sidepath:of` wins over the sidepath CSV (mapper override). Unusable `:of` (typo, street name, trunk) falls through to the CSV. Crossings stay CSV-only. `:of` does not produce `residential_priority_road`; the coarser class is kept. CSV maxspeed is kept only when it belongs to the published class.
+- New `todos_lines` id `adjoining_of_vs_csv` when non-crossing `:of` and CSV differ. Table-only; crossings are not listed (the two sources name different roads).
+
+### `routing` (experimental)
+
+- New table: score-free **directed** road + bike edges for routing (one OSM way can become several rows). Object `id` is the travel-edge id (`way/{id}`, `way/{id}/left|right`, plus bikelane prefix/side suffixes). Geometry of carriageway edges is **travel-oriented** (line direction matches legal cycling direction). Virtual bikelanes stay on the road centerline like `bikelanes`: left (`offset` > 0) runs against the OSM way, right runs with the OSM way.
+- `segment_kind`: `virtual_bikelane` (left/right/centerline infra from OSM tags), `carriageway` (mixed-traffic directed edges), or `standalone_path` (path-like highway without virtual infra).
+- Carriageway categories `mixedTrafficMotor` and `mixedTrafficMotorContraflow` are assigned in processing (not OSM-mapped bike infra). Standalone paths keep a non-infra self category id when present, else `mixedTrafficFoot` (Mischverkehr mit Fußverkehr). Unclear / non-indexable `bikelanes.category` values are still emitted when cycling is allowed.
+- Dropped when cycling is not allowed (`bicycle` access `no`/`private`/…), when `informal=yes` and bicycle access is unresolved, when own or parent `highway` is `motorway`/`trunk` (including `_link`), or when a standalone path would not enter `roadsPathClasses` (OSM sidewalk/sidepath, indoor, informal, destination/customers access — same helper as the roads writer). Centerline bike infra stays as `virtual_bikelane` (joins `bikelanes`). `mixedTrafficFoot` / standalone_path is join-symmetric with `roadsPathClasses`.
+- Tags: `category`, `road`, `parent_road`, `maxspeed` (carriageway own speed), `adjoining_road`, `adjoining_maxspeed` (nearby / crossed motor road; same value as `bikelanes` — empty on `side=left|right`), `access_bicycle` (resolved bicycle access, including `use_sidepath` and `dismount`; those edges stay in the graph; not set on centerline-derived lanes, which do not inherit the carriageway's access), `prefix`, `offset`, `side`, `oneway`, `parent_id`, plus `name`/`length`/`surface`/`smoothness`/`width` when present. `offset` is the same visual sideways shift as on `bikelanes` (meters, geometry stays on the centerline). Docs: `topic-docs/roads_bikelanes/routing.yaml`.
+- Join columns (indexed, not a full attribute copy): `parent_id`, `source_table` (`bikelanes` / `roads` / `roadsPathClasses`), `source_id` (id in that table; for carriageway this is `way/{id}`, not the directed `way/{id}/left|right`). Standalone paths always join `roadsPathClasses`.
+- Standalone `oneway`: `car_not_bike` and bicycle-both-ways values are `no`; OSM `oneway=-1` is travel-oriented `yes` with reversed geometry.
+- `minzoom`: major TILDA `road` classes → 8; minor roads → 10 if length ≥ 250 m else 12; paths/tracks/service/sidepaths → 12 if length ≥ 500 m else 13.
+- **Experimental:** schema, ids, directed-edge rules, and categories may still change. Do not treat this table as a stable contract yet.
+
+### `todos_lines`
+
+- Rename column `table` → `source_table` (same values `bikelanes` / `roads`; unique `(id, source_table)`). Tile/inspector property follows the new name.
+
+### `bikelanes`
+
+- Rename `_parent_highway` → `parent_highway` (OSM `highway=*` of the parent centerline for mapped-on-road / derived segments). Inspector composit lookup follows the new key.
+- Add `parent_maxspeed` on those derived segments (same maxspeed derivation as the parent road).
+- Add `adjoining_road` and `adjoining_maxspeed` on path-like / sidepath features: indicator of danger from nearby motor traffic (class and maxspeed of the relevant road, not membership). Parallel accompanying street on sidepaths; the crossed street on crossings. Sources: sanitized OSM `is_sidepath:of` wins on non-crossings; otherwise the previous run’s sidepath estimation (`roads.road`); crossings use the estimation only. Also set on independently routed paths next to a motor road. Fahrradstraße / Fußgängerzone-Rad-frei do not get `adjoining_*`.
+- `oneway`: `oneway:bicycle=no` together with `oneway=-1` is now `car_not_bike` (same as `oneway=yes`), so contraflow cycling is recognized on reversed oneways.
+
+### `roadsPathClasses`
+
+- Add `adjoining_road` and `adjoining_maxspeed` (same nearby-motor-road meaning as `bikelanes`).
+
 ### `parkings`, `parkings_no`, `parkings_quantized`
 
 - `meta` (`updated_at`, `updated_by`, `changeset_id`) is filled again (was `{}`). A merged parking line keeps the meta of its most recently edited source way; quantized points inherit it.

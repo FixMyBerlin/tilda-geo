@@ -6,6 +6,8 @@ local road_width = require('topics.helper.road_width')
 local derive_surface = require('topics.helper.derive_surface')
 local derive_smoothness = require('topics.helper.derive_smoothness')
 local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
+local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
+local bikelane_todos = adjoining_of_vs_csv_todo.append_to(bikelane_todo_categories)
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
 local default_id = require('topics.helper.default_id')
@@ -22,6 +24,9 @@ local to_semicolon_list = require('topics.helper.to_semicolon_list')
 local derive_traffic_mode = require('topics.roads_bikelanes.bikelanes.helper.derive_traffic_mode')
 local derive_bikelane_surface = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_surface')
 local derive_bikelane_smoothness = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_smoothness')
+local maxspeed = require('topics.roads_bikelanes.maxspeed.maxspeed')
+local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_context')
+local HIGHWAYS = require('topics.helper.highway_classes')
 
 local side_sign_map = {
   ['left'] = 1,
@@ -137,12 +142,21 @@ local function bikelanes(object_tags, object_geom)
 
         if transformed_tags._side ~= 'self' then
           result_tags._id = default_id({ type = object_tags._type, id = object_tags._id }) .. '/' .. transformed_tags._prefix .. '/' .. transformed_tags._side
-          result_tags._parent_highway = transformed_tags._parent_highway
+          result_tags.parent_road = transformed_tags.parent_road
+          -- object_tags is the parent centerline; maxspeed() reads exactly the tags the old
+          -- synthetic-table rebuild copied (maxspeed*/zone:maxspeed/source:maxspeed + highway).
+          result_tags.parent_maxspeed = maxspeed(object_tags).maxspeed
           -- Recommended sideways offset in meters (signed: + left / - right of the
           -- centerline). The geometry itself stays on the road centerline; this value
           -- is exported as the `offset` attribute and consumed purely visually by the
           -- map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
           result_tags.offset = side_sign_map[transformed_tags._side] * road_width(object_tags) / 2
+        elseif HIGHWAYS.path_classes[transformed_tags.highway]
+          or HIGHWAYS.sidepath_highway_classes[transformed_tags.highway] then
+          merge_table(
+            result_tags,
+            adjoining_context.derive_adjoining_context(object_tags, transformed_tags)
+          )
         end
 
         merge_bikelane_public_tags(
@@ -152,7 +166,7 @@ local function bikelanes(object_tags, object_geom)
           object_geom
         )
 
-        local todos = collect_todos(bikelane_todo_categories, transformed_tags, result_tags)
+        local todos = collect_todos(bikelane_todos, transformed_tags, result_tags)
         result_tags._todo_list = to_todo_tags(todos)
         result_tags.todos = to_markdown_list(todos)
       end

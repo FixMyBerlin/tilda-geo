@@ -61,3 +61,9 @@
 
 ---@alias SideKey 'left'|'right'|'self'
 ---@alias SideFilter fun(tags: OsmTags): boolean
+
+---@class MotorRoadContext
+---@field sidepath 'yes'|'no'|nil
+---@field adjoining_road string|nil
+---@field adjoining_maxspeed string|number|nil
+---@field maxspeed string|number|nil

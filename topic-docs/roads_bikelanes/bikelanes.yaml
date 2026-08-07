@@ -62,51 +62,38 @@ attributes:
       - value: sharedBusLaneBusWithBike
         label: Bussonderfahrstreifen mit Fahrrad frei
       - value: sharedMotorVehicleLane
-        label: Gemeinsamer Fahrstreifen
+        label: Anteilig genutzter Fahrstreifen (Sharrows)
       - value: needsClarification
         label: Führungsform unklar
   - key: road
     ref: roads.road
     label: Straßentyp Fahrbahn
-  - key: highway
-    label: Straßentyp Fahrbahn
-    values:
-      - value: cycleway
-        label: Radweg
-      - value: footway
-        label: Fußweg
-      - value: living_street
-        label: Verkehrsberuhigter Bereich
-      - value: path
-        label: Weg / Pfad
-      - value: pedestrian
-        label: Fußgängerzone
-      - value: primary
-        label: Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
-      - value: primary_link
-        label: Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
-      - value: residential
-        label: Anwohnerstraße
-      - value: road
-        label: Unkategorisierte Straße
-      - value: secondary
-        label: Landes&shy;straße/Wichtige Durchgangs&shy;straße
-      - value: secondary_link
-        label: Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße
-      - value: service
-        label: Zufahrtsweg
-      - value: steps
-        label: Stufen
-      - value: tertiary
-        label: Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße
-      - value: tertiary_link
-        label: Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße
-      - value: track
-        label: Wald- / Feldweg
-      - value: unclassified
-        label: Nebenstraße mit Verbindungscharakter
-  - key: _parent_highway
-    ref: bikelanes.highway
+  - key: parent_road
+    ref: roads.road
+    description: TILDA-Straßentyp (`roads.road`) der zugeordneten Straßenmittellinie für aus ihr abgeleitete, straßenbegleitende Radinfrastruktur.
+  - key: parent_maxspeed
+    label: Höchstgeschwindigkeit der zugeordneten Straße
+    format: kilometer_per_hour
+    description: Abgeleitete Höchstgeschwindigkeit der zugeordneten Straßenmittellinie für aus ihr abgeleitete, straßenbegleitende Radinfrastruktur.
+  - key: adjoining_road
+    label: Straßentyp der angrenzenden Straße
+    valuesRef: roads.road
+    chapterRefs:
+      - chapterId: adjoining-road
+    description: >-
+      Ein Indikator für die Gefährdung durch nahen Kfz-Verkehr: TILDA-Straßenklasse
+      der relevanten Kfz-Straße (keine Aussage, ob der Weg zu dieser Straße gehört).
+      Bei begleitenden Wegen die parallele Straße; bei Querungen die gequerte Straße.
+      Primär, außer bei Querungen: OSM `is_sidepath:of`, über die TILDA-Straßenklassifikation
+      gemappt (nur die `highway`-Klasse, ohne Untertags). Damit kann eine Kartierung die
+      Schätzung überschreiben. `residential_priority_road` entsteht so nicht; der gröbere
+      `:of`-Wert bleibt. Unbrauchbare `:of`-Werte (Tippfehler, Straßenname, `trunk`) fallen
+      auf die Schätzung zurück. Bei Querungen immer nur die Schätzung (gequerte Straße), nie `:of`.
+      Auch gesetzt, wenn der Weg selbstständig geführt ist.
+  - key: adjoining_maxspeed
+    label: Höchstgeschwindigkeit der angrenzenden Straße
+    format: kilometer_per_hour
+    description: 'TILDA-Höchstgeschwindigkeit (gleiche Ableitung wie roads.maxspeed: Tags, Zonen, Straßenklasse) der angrenzenden Straße; Maximum über die zugeordneten Straßensegmente der dominanten Klasse.'
   - key: name
     ref: roads.name
   - key: length

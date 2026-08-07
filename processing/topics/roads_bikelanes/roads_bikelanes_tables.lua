@@ -79,12 +79,33 @@ local bike_suitability_table = osm2pgsql.define_table({
   }
 })
 
+local routing_infra_table = osm2pgsql.define_table({
+  name = 'routing',
+  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
+  columns = {
+    { column = 'id', type = 'text', not_null = true },
+    { column = 'parent_id', type = 'text', not_null = true },
+    { column = 'source_table', type = 'text', not_null = true },
+    { column = 'source_id', type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'linestring' },
+    { column = 'minzoom', type = 'integer', not_null = true },
+  },
+  indexes = {
+    { column = { 'minzoom', 'geom' }, method = 'gist' },
+    { column = 'id', method = 'btree', unique = true },
+    { column = 'parent_id', method = 'btree' },
+    { column = { 'source_table', 'source_id' }, method = 'btree' },
+  }
+})
+
 local todo_lines_table = osm2pgsql.define_table({
   name = 'todos_lines',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     { column = 'id', type = 'text', not_null = true },
-    { column = 'table', type = 'text', not_null = true },
+    { column = 'source_table', type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'linestring' },
@@ -93,7 +114,7 @@ local todo_lines_table = osm2pgsql.define_table({
   },
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
-    { column = { 'id', 'table' }, method = 'btree', unique = true },
+    { column = { 'id', 'source_table' }, method = 'btree', unique = true },
     { column = { 'tags' }, method = 'gin' },
     { column = { 'meta' }, method = 'gin' },
     { column = { 'length' }, method = 'btree' },
@@ -133,6 +154,7 @@ return {
   bikelanes_table = bikelanes_table,
   bikelanes_presence_table = bikelanes_presence_table,
   bike_suitability_table = bike_suitability_table,
+  routing_infra_table = routing_infra_table,
   todo_lines_table = todo_lines_table,
   highway_areas_table = highway_areas_table,
 }

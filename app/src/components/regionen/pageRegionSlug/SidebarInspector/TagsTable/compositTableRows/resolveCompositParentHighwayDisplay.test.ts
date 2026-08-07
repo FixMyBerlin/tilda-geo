@@ -6,36 +6,33 @@ import {
 } from './resolveCompositParentHighwayDisplay'
 
 describe('resolveCompositParentHighwayDisplay', () => {
-  test('returns null when no parent-highway source is present', () => {
+  test('returns null when no parent-road source is present', () => {
     expect(resolveCompositParentHighwayDisplay({})).toBeNull()
     expect(
       resolveCompositParentHighwayDisplay({
-        _parent_highway: undefined,
+        parent_road: undefined,
         road: '',
-        highway: undefined,
       }),
     ).toBeNull()
   })
 
-  test('uses _parent_highway first and keeps OSM highway translation key', () => {
+  test('uses parent_road first', () => {
     expect(
       resolveCompositParentHighwayDisplay({
-        _parent_highway: 'primary',
+        parent_road: 'primary',
         road: 'footway_sidewalk',
-        highway: 'cycleway',
       }),
     ).toEqual({
       rowTagKey: COMPOSIT_PARENT_HIGHWAY_ROW_TAG_KEY,
-      valueTagKey: '_parent_highway',
+      valueTagKey: 'parent_road',
       tagValue: 'primary',
     })
   })
 
-  test('falls back to classified road when _parent_highway is missing', () => {
+  test('falls back to classified road when parent_road is missing', () => {
     expect(
       resolveCompositParentHighwayDisplay({
         road: 'footway_sidewalk',
-        highway: 'cycleway',
       }),
     ).toEqual({
       rowTagKey: COMPOSIT_PARENT_HIGHWAY_ROW_TAG_KEY,
@@ -44,29 +41,13 @@ describe('resolveCompositParentHighwayDisplay', () => {
     })
   })
 
-  test('falls back to highway on the bikelane geometry last', () => {
-    expect(
-      resolveCompositParentHighwayDisplay({
-        highway: 'cycleway',
-      }),
-    ).toEqual({
-      rowTagKey: COMPOSIT_PARENT_HIGHWAY_ROW_TAG_KEY,
-      valueTagKey: 'highway',
-      tagValue: 'cycleway',
-    })
-  })
-
-  test('always labels the row from _parent_highway even when value comes from road', () => {
+  test('always labels the row from parent_road even when value comes from road', () => {
     const display = resolveCompositParentHighwayDisplay({ road: 'service_alley' })
-    expect(display?.rowTagKey).toBe('_parent_highway')
+    expect(display?.rowTagKey).toBe('parent_road')
     expect(display?.valueTagKey).toBe('road')
   })
 
-  test('documents lookup priority for staging/production parity', () => {
-    expect(COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS).toEqual([
-      '_parent_highway',
-      'road',
-      'highway',
-    ])
+  test('documents lookup priority', () => {
+    expect(COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS).toEqual(['parent_road', 'road'])
   })
 })

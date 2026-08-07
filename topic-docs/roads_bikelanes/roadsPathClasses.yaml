@@ -62,6 +62,10 @@ attributes:
     ref: bikelanesPresence.bikelane_right
   - key: todos
     ref: todos_lines.todos
+  - key: adjoining_road
+    ref: bikelanes.adjoining_road
+  - key: adjoining_maxspeed
+    ref: bikelanes.adjoining_maxspeed
   - key: _is_sidepath
     ref: roads._is_sidepath
   - key: _in_settlement_area

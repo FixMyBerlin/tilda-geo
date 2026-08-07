@@ -1,0 +1,114 @@
+title: Routing
+summary: Score-free directed road+bike edges for routing, derived from roads_bikelanes infrastructure.
+attributes:
+  - key: segment_kind
+    label: Segmenttyp
+    description: carriageway, virtual_bikelane oder standalone_path.
+  - key: category
+    label: Bauliche Führung
+    description: >-
+      TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot`
+      auf standalone_path, wenn keine Self-Kategorie vorliegt. Standalone-Pfade
+      joinen immer `roadsPathClasses`.
+    valuesRef: bikelanes.category
+    valuesAdd:
+      - value: mixedTrafficMotor
+        label: Mischverkehr mit Kfz-Verkehr
+        description: Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn-Kante ohne bauliche Radinfrastruktur.
+      - value: mixedTrafficMotorContraflow
+        label: Mischverkehr mit Kfz-Verkehr in Gegenrichtung
+        description: Verarbeitung zugewiesen. Gegenrichtung auf der Fahrbahn, wenn nur der Kfz-Verkehr einbahnig ist.
+      - value: mixedTrafficFoot
+        label: Mischverkehr mit Fußverkehr
+        description: Verarbeitung zugewiesen auf standalone_path, wenn keine Self-Bikelane-Kategorie vorliegt. Join immer roadsPathClasses.
+  - key: road
+    ref: roads.road
+  - key: parent_road
+    ref: bikelanes.parent_road
+  - key: adjoining_road
+    label: Straßentyp der angrenzenden Straße
+    valuesRef: roads.road
+    chapterRefs:
+      - chapterId: adjoining-road
+    description: >-
+      Gleicher Wert wie `bikelanes.adjoining_road`. Auf `side=self` die begleitende
+      (parallele) bzw. bei Querungen die gequerte Kfz-Straße; auf `side=left`/`right`
+      leer (`road` trägt dort die Elternstraße).
+  - key: adjoining_maxspeed
+    ref: bikelanes.adjoining_maxspeed
+  - key: maxspeed
+    ref: roads.maxspeed
+  - key: prefix
+    ref: bikelanes.prefix
+  - key: offset
+    ref: bikelanes.offset
+    description: >-
+      Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei `virtual_bikelane` läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten laufen in Fahrtrichtung. Transformierte Bikelanes übernehmen den bereits berechneten Wert.
+  - key: side
+    label: Seite
+    purpose: processing
+    description: Seite des Segments relativ zur Referenzlinie (left/right/self).
+  - key: oneway
+    label: Einbahnrichtung
+    description: Aufgelöste Fahrtrichtung des Segments (yes/no/car_not_bike-Kontext als yes/no).
+  - key: parent_id
+    label: Parent-Way
+    purpose: processing
+    description: OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Auch als SQL-Spalte für Joins.
+  - key: source_table
+    label: Quelltabelle
+    purpose: processing
+    description: TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). SQL-Spalte, nicht in `tags`.
+    values:
+      - value: bikelanes
+        label: Radinfrastruktur
+      - value: roads
+        label: Straßen
+      - value: roadsPathClasses
+        label: Wege
+        description: >-
+          Join-Ziel für standalone_path (Kategorie-ID der Self-Cycleway-Zeile
+          oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses
+          existieren (gleicher Skip-Helper wie der Path-Writer).
+  - key: source_id
+    label: Quell-ID
+    purpose: processing
+    description: >-
+      `id` in `source_table`. Bei Carriageway `way/N` (nicht die gerichtete Kante
+      `way/N/left` oder `way/N/right`). SQL-Spalte, nicht in `tags`.
+  - key: name
+    ref: roads.name
+  - key: length
+    ref: roads.length
+  - key: surface
+    ref: roads.surface
+  - key: smoothness
+    ref: roads.smoothness
+  - key: width
+    ref: roads.width
+  - key: access_bicycle
+    label: Zugang Radverkehr
+    description: >-
+      Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`,
+      Allowlist). Kein Roh-OSM-Wert. Router können `use_sidepath` und `dismount`
+      am Graphen entscheiden; die Kanten bleiben enthalten. Auf Radinfrastruktur,
+      die an der Fahrbahn-Mittellinie gemappt ist (`side=left`/`right`), leer: der
+      Zugang der Fahrbahn (z. B. `use_sidepath`) gilt nicht für den Radweg selbst.
+    values:
+      - value: yes
+        label: Ja
+      - value: no
+        label: Nein
+      - value: designated
+        label: Gebaut / vorgesehen
+      - value: permissive
+        label: Geduldet
+      - value: use_sidepath
+        label: Seitenweg benutzen
+        description: Fahrbahn rechtlich nicht vorgesehen; parallele Infrastruktur nutzen. Kante bleibt im Graphen.
+      - value: optional_sidepath
+        label: Seitenweg optional
+      - value: discouraged
+        label: Unerwünscht
+      - value: dismount
+        label: Absteigen

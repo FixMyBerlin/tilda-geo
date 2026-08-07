@@ -34,7 +34,7 @@ SELECT
   r.geom,
   jsonb_build_object(
     'osm_id', r.osm_id,
-    'highway', r.highway,
+    'road', r.road,
     'name', r.name,
     'layer', r.layer,
     'maxspeed', r.maxspeed
@@ -49,6 +49,7 @@ WITH points_debug AS (
     row_number() OVER (PARTITION BY p.osm_id ORDER BY (SELECT 1)) AS checkpoint_nr
   FROM _sidepath_estimation_paths p,
        LATERAL tilda_sidepath_dict_interpolated_points(:buffer_distance, p.geom) AS pt(geom)
+  WHERE NOT COALESCE(p.is_crossing, false)
 )
 INSERT INTO public._debug_is_sidepath_checkpoints (geom, tags)
 SELECT
@@ -68,6 +69,7 @@ WITH points_debug AS (
     row_number() OVER (PARTITION BY p.osm_id ORDER BY (SELECT 1)) AS checkpoint_nr
   FROM _sidepath_estimation_paths p,
        LATERAL tilda_sidepath_dict_interpolated_points(:buffer_distance, p.geom) AS pt(geom)
+  WHERE NOT COALESCE(p.is_crossing, false)
 )
 INSERT INTO public._debug_is_sidepath_matches (geom, tags)
 SELECT
@@ -76,17 +78,13 @@ SELECT
     'path_osm_id', c.osm_id,
     'checkpoint_nr', c.checkpoint_nr,
     'road_osm_id', r.osm_id,
-    'road_highway', r.highway,
+    'road_highway', r.road,
     'road_name', r.name,
     'road_layer', r.layer
   )
 FROM points_debug c
 JOIN _sidepath_estimation_roads r
-  ON ST_DWithin(
-       ST_Transform(c.point_geom, 3857),
-       ST_Transform(r.geom, 3857),
-       :buffer_size
-     );
+  ON ST_DWithin(c.point_geom, r.geom, :buffer_size);
 
 WITH points_debug AS (
   SELECT
@@ -96,6 +94,7 @@ WITH points_debug AS (
     p.layer
   FROM _sidepath_estimation_paths p,
        LATERAL tilda_sidepath_dict_interpolated_points(:buffer_distance, p.geom) AS pt(geom)
+  WHERE NOT COALESCE(p.is_crossing, false)
 ),
 joined AS (
   SELECT
@@ -103,17 +102,13 @@ joined AS (
     c.nr,
     c.layer,
     r.osm_id AS road_id,
-    r.highway AS road_highway,
+    r.road AS road_highway,
     r.name AS road_name,
     r.layer AS road_layer,
     r.maxspeed AS road_maxspeed
   FROM points_debug c
   LEFT OUTER JOIN _sidepath_estimation_roads r
-    ON ST_DWithin(
-         ST_Transform(c.point_geom, 3857),
-         ST_Transform(r.geom, 3857),
-         :buffer_size
-       )
+    ON ST_DWithin(c.point_geom, r.geom, :buffer_size)
 ),
 agg AS (
   SELECT
@@ -133,6 +128,17 @@ SELECT
   )
 FROM agg
 JOIN _sidepath_estimation_paths p ON p.osm_id = agg.osm_id;
+
+INSERT INTO public._debug_is_sidepath_paths (geom, tags)
+SELECT
+  p.geom,
+  jsonb_build_object(
+    'osm_id', p.osm_id,
+    'is_crossing', true,
+    'is_sidepath_estimation', 'false'
+  )
+FROM _sidepath_estimation_paths p
+WHERE COALESCE(p.is_crossing, false);
 
 ALTER TABLE public._debug_is_sidepath_checkpoints
   ALTER COLUMN geom TYPE geometry(Geometry, 4326) USING ST_Transform(geom, 4326);

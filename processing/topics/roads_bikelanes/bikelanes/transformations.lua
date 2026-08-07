@@ -1,6 +1,7 @@
 local merge_table = require('topics.helper.merge_table')
 local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
+local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 
 ---@class CenterLineTransformation
 ---@field highway string
@@ -134,7 +135,7 @@ end
 ---@field _side 'self' | 'left' | 'right'
 ---@field _prefix string? prefix of the transformation (e.g., 'cycleway', 'sidewalk')
 ---@field _parent OsmTags? original tags from the parent object
----@field _parent_highway string? highway value from the parent object
+---@field parent_road string? TILDA `road` of the parent centerline
 ---@field _infix string? infix that was matched (e.g., ':left', ':both', '')
 ---@field highway string highway value for the transformed object
 --- Additional tags from unnesting (e.g., width, source:width, note, traffic_sign, etc.) are also present
@@ -173,7 +174,7 @@ function get_transformed_objects(tags, transformations)
           _prefix = prefix,
           _side = side,
           _parent = tags,
-          _parent_highway = tags.highway,
+          parent_road = road_classification_road_value(tags),
           -- REFACOTRING: This should be `_highway`, see https://github.com/FixMyBerlin/private-issues/issues/2236
           highway = transformation.highway
         }

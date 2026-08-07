@@ -57,10 +57,6 @@ attributes:
         label: Zufahrtsweg
       - value: service_uncategorized
         label: Zufahrtsweg (unbekannte Klassifizierung)
-      - value: service
-        label: Zufahrtsweg
-      - value: steps
-        label: Stufen
       - value: tertiary_link
         label: Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße
       - value: tertiary

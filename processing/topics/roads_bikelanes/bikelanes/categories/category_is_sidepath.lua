@@ -3,7 +3,7 @@
 ---@return boolean
 local function category_is_sidepath(tags)
   return tags.is_sidepath == 'yes'
-      or tags._parent_highway -- indicates that this way was split of the centerline; in this case, we consider it a sidepath.
+      or tags.parent_road -- set when this way was split off the centerline; treat that as a sidepath.
       or tags.footway == 'sidewalk'
       or tags.path == 'sidewalk'
       or tags.path == 'sidepath'

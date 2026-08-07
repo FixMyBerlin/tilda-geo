@@ -7,7 +7,7 @@ local function derive_oneway(tags, category)
   if tags['oneway:bicycle'] == 'yes' then
     return 'yes'
   elseif tags['oneway:bicycle'] == 'no' then
-    if tags.oneway == 'yes' then
+    if tags.oneway == 'yes' or tags.oneway == '-1' then
       return 'car_not_bike'
     else
       return 'no'

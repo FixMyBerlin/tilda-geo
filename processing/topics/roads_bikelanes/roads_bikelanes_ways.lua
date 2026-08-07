@@ -8,6 +8,7 @@ local prepare_pseudo_tags_roads_bikelanes = require('topics.roads_bikelanes.pseu
 local roads_bikelanes_sidepath_source_paths = require('topics.roads_bikelanes.pseudo_tags_sidepath.roads_bikelanes_sidepath_source_paths')
 local prepare_shared_bikelane_state_roads_bikelanes = require('topics.roads_bikelanes.helper.prepare_shared_bikelane_state_roads_bikelanes')
 local roads_bikelanes_bikelanes = require('topics.roads_bikelanes.roads_bikelanes_bikelanes')
+local roads_bikelanes_routing_infra = require('topics.roads_bikelanes.roads_bikelanes_routing_infra')
 local roads_bikelanes_roads = require('topics.roads_bikelanes.roads_bikelanes_roads')
 local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
@@ -49,6 +50,7 @@ local function process_roads_bikelanes_way(object)
   }
 
   roads_bikelanes_sidepath_source_paths(object_tags, object_geom)
+  roads_bikelanes_routing_infra(context)
   roads_bikelanes_bikelanes(context)
   roads_bikelanes_roads(context)
 end

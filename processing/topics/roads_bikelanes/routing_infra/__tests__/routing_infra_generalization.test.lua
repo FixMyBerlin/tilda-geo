@@ -1,0 +1,28 @@
+local routing_infra_generalization = require('topics.roads_bikelanes.routing_infra.routing_infra_generalization')
+
+describe('routing_infra_generalization (per-object minzoom)', function()
+  it('keeps major roads visible when zoomed out (regardless of length)', function()
+    assert.are.equal(8, routing_infra_generalization({ road = 'primary' }, 50))
+    assert.are.equal(8, routing_infra_generalization({ road = 'secondary' }, 5000))
+    assert.are.equal(8, routing_infra_generalization({ road = 'tertiary_link' }, 10))
+  end)
+
+  it('buckets minor roads by length', function()
+    assert.are.equal(10, routing_infra_generalization({ road = 'residential' }, 300))
+    assert.are.equal(10, routing_infra_generalization({ road = 'bicycle_road' }, 250))
+    assert.are.equal(10, routing_infra_generalization({ road = 'residential_priority_road' }, 300))
+    assert.are.equal(12, routing_infra_generalization({ road = 'residential' }, 100))
+  end)
+
+  it('pushes paths/service/sidepaths to high zoom, longer ones a bit earlier', function()
+    assert.are.equal(13, routing_infra_generalization({ road = 'service_road' }, 100))
+    assert.are.equal(12, routing_infra_generalization({ road = 'track' }, 600))
+    assert.are.equal(13, routing_infra_generalization({ road = nil }, 50))
+    assert.are.equal(12, routing_infra_generalization({ road = nil }, 800))
+  end)
+
+  it('treats a missing length as 0 (highest minzoom bucket)', function()
+    assert.are.equal(12, routing_infra_generalization({ road = 'residential' }, nil))
+    assert.are.equal(13, routing_infra_generalization({ road = nil }, nil))
+  end)
+end)

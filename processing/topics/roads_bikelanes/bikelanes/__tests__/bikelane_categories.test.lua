@@ -658,4 +658,21 @@ describe('bikelane_categories', function()
       assert.are.equal(categorized.right.tags['separation:right'], 'kerb;bollard')
     end)
   end)
+
+  describe('is_own_cycling_facility', function()
+    local is_own = bikelane_categories.is_own_cycling_facility
+
+    it('matches bicycleRoad and pedestrianAreaBicycleYes', function()
+      assert.is_true(is_own({ bicycle_road = 'yes' }))
+      assert.is_true(is_own({ traffic_sign = 'DE:244.1' }))
+      assert.is_true(is_own({ highway = 'pedestrian', bicycle = 'yes' }))
+      assert.is_true(is_own({ highway = 'pedestrian', bicycle = 'designated' }))
+    end)
+
+    it('is false for ordinary paths', function()
+      assert.is_falsy(is_own({ highway = 'cycleway' }))
+      assert.is_falsy(is_own({ highway = 'pedestrian' }))
+      assert.is_falsy(is_own({}))
+    end)
+  end)
 end)

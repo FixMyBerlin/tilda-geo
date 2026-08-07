@@ -15,7 +15,7 @@ WITH
         PARTITION BY
           osm_type,
           osm_id,
-          'table',
+          source_table,
           tags,
           meta,
           geom,

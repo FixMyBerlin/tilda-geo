@@ -1,21 +1,15 @@
 /** Row label for `composit_parent_highway` always comes from this topic-doc key. */
-export const COMPOSIT_PARENT_HIGHWAY_ROW_TAG_KEY = '_parent_highway' as const
+export const COMPOSIT_PARENT_HIGHWAY_ROW_TAG_KEY = 'parent_road' as const
 
 /**
- * Bikelanes expose parent-road type on up to three properties. The inspector shows one
- * composite row (`composit_parent_highway`) and picks the first available value in this
- * order. Each property has its own topic-doc value enum, so translations must use the
- * winning property name as `valueTagKey` (not always `highway`).
+ * Bikelanes expose the parent street class on `parent_road` (TILDA `roads.road`).
+ * The inspector shows one composite row and picks the first available value.
+ * Both keys share the `roads.road` value enum.
  *
- * - `_parent_highway`: OSM `highway=*` of the parent road when a sidepath was split off
- * - `road`: classified Straßentyp (`roads.road`, e.g. `footway_sidewalk`)
- * - `highway`: OSM `highway=*` on the bikelane geometry itself
+ * - `parent_road`: classified class of the parent centerline when infra was split off
+ * - `road`: classified class of this feature when there is no parent
  */
-export const COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS = [
-  '_parent_highway',
-  'road',
-  'highway',
-] as const
+export const COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS = ['parent_road', 'road'] as const
 
 export type CompositParentHighwayValueSourceKey =
   (typeof COMPOSIT_PARENT_HIGHWAY_VALUE_SOURCE_KEYS)[number]

@@ -39,7 +39,7 @@ local function roads_bikelanes_bikelanes(context)
         informal = shared_result_tags.informal,
         lit = shared_result_tags.lit,
         covered = shared_result_tags.covered,
-        _parent_highway = cycleway._parent_highway,
+        parent_road = cycleway.parent_road,
         _is_sidepath = object_tags._is_sidepath,
         _in_settlement_area = object_tags._in_settlement_area,
       }
@@ -61,7 +61,7 @@ local function roads_bikelanes_bikelanes(context)
         }
         todo_lines_table:insert({
           id = cycleway._id,
-          table = 'bikelanes',
+          source_table = 'bikelanes',
           tags = cycleway._todo_list,
           meta = merge_table(todo_meta, meta),
           length = math.floor(result_tags.length),
