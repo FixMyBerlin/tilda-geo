@@ -3909,6 +3909,7 @@ const data = {
         type: 'string',
         label: 'Ausrichtung',
         description: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+        chapterRefs: ['capacity-calculation'],
         values: [
           {
             value: 'parallel',
@@ -3974,10 +3975,12 @@ const data = {
         key: 'informal',
         type: 'string',
         label: 'Duldung',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
             label: 'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
+            chapterRefs: ['parking-position'],
           },
         ],
       },
@@ -4072,13 +4075,19 @@ const data = {
         id: 'capacity-calculation',
         title: 'Berechnung der Kapazität',
         markdown:
-          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+          'Die Stellplatzanzahl (`capacity`) wird in der Prozessierung abgeleitet, wenn in OpenStreetMap keine explizite Angabe vorliegt. Die Herkunft ist im Feld `capacity_source` dokumentiert.\n\n## Subtraktives Modell\n\nAus OSM-Daten zu Parken links und rechts der Fahrbahn werden Liniengeometrien erzeugt. Bereiche, in denen nicht geparkt werden kann oder darf – z. B. Einfahrten, Haltestellen, Hindernisse, Parkverbote – werden „ausgestanzt“. Die verbleibende Linienlänge ist die Grundlage für Flächen- und Kapazitätsschätzungen.\n\nZusätzlich zu in OSM erfassten Hindernissen kann ein ergänzender Stanzungs-Datensatz (Einfahrten, Poller, Bäume, Laternen u. a.) genutzt werden, wo OSM-Lücken bestehen. Explizite OSM-Stanzungen haben Vorrang; externe Stanzungen werden verworfen, wenn sie ungeeignet sind.\n\n## Schätzung aus Länge und Ausrichtung\n\nFür nicht markierte Stellplätze wird die Kapazität aus der Linienlänge des Parksegments und der Parkausrichtung (`orientation`) interpoliert. Dabei gilt ein einheitliches „Standardfahrzeug“:\n\n| Ausrichtung   | Fahrzeuglänge entlang der Kante | Fahrzeugtiefe quer zur Kante | Abstand zwischen Fahrzeugen |\n| ------------- | ------------------------------- | ---------------------------- | --------------------------- |\n| parallel      | 4,4 m                           | 2,0 m                        | 0,8 m                       |\n| perpendicular | 2,0 m                           | 4,4 m                        | 0,5 m                       |\n| diagonal      | berechnet (30°-Rotation)        | berechnet                    | berechnet                   |\n\nFormel (Länge): `(Länge + Abstand) / (Fahrzeuglänge + Abstand)`\n\nDie Fläche (`area`) wird bei fehlender Geometrie aus der Länge geschätzt: `Länge × (Fahrzeugtiefe + 0,25 m)`. `area_source` ist dann `estimated`.\n\n## Rundung\n\nBerechnete Kapazitäten werden vor der Ausgabe gerundet:\n\n- **Unter 10 Stellplätzen:** Abrunden, ab 0,8 aufgerundet (Beispiel: 1,5 → 1; 1,8 → 2; 4,9 → 5).\n- **Ab 10 Stellplätzen:** Mathematische Rundung.\n\nDamit wird kleineren Parklücken Rechnung getragen, die von kürzeren Fahrzeugen belegt werden können, ohne systematisch zu überschätzen.\n\n## Alternierendes Parken\n\nBei `staggered=yes` und paralleler Ausrichtung wird die Kapazität angepasst:\n\n1. Halbierung (nur eine Straßenseite wird gleichzeitig genutzt).\n2. Abzug von Manövrierraum: pro 60 m Abschnitt werden 10 m (≈ 1,9 Stellplätze bei 5,2 m pro Platz) abgezogen.\n\nInterne QA-Felder `_staggered_original_capacity` und `_staggered_maneuvering_loss` dokumentieren die Zwischenschritte.\n\n## Explizite OSM-Angaben und Umverteilung\n\nLiegt in OSM `capacity` oder `est_capacity` vor, wird dieser Wert übernommen (`capacity_source`: `tag` bzw. `tag_estimation`). Wird ein Segment durch Stanzung geteilt, wird die Kapazität anteilig nach Länge umverteilt (`*_redistributed` in `capacity_source`).\n\n## Nachvollziehbarkeit\n\n| Feld                   | Bedeutung                                    |\n| ---------------------- | -------------------------------------------- |\n| `capacity`             | Stellplatzanzahl (gerundet)                  |\n| `capacity_source`      | Herleitung (Tag, Schätzung, Umverteilung, …) |\n| `capacity_confidence`  | Konfidenz der Angabe                         |\n| `length`               | Länge der Parklinie in Metern                |\n| `area` / `area_source` | Fläche und Herkunft                          |\n',
       },
       {
         id: 'condition-category',
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'parking-position',
+        title: 'Parkposition und rechtliche Graubereiche',
+        markdown:
+          'Das Attribut `parking` beschreibt Lage oder Art des Parkraums im Straßenland. Die Zuordnung erfolgt in OpenStreetMap und wird von der Prozessierung übernommen – sie wird nicht automatisch aus der Geometrie abgeleitet.\n\n## Grundsatz: Rechtliche Zulässigkeit\n\nDer Datensatz orientiert sich an der rechtlichen Zulässigkeit des Parkens, nicht allein am beobachteten Parkverhalten. Situationen im rechtlichen Graubereich können erfasst werden; eindeutig ordnungswidriges Parken wird nicht als regulärer Parkraum geführt (siehe Tabelle „Kein Parken“).\n\n## `parking=lane` – Parken auf der Fahrbahn\n\nFür Parken auf der Fahrbahn muss neben parkenden Fahrzeugen eine Restfahrbahnbreite von mindestens 3,05 m verbleiben. Bei einer mittleren Fahrzeugbreite von ca. 2 m ergibt sich als Faustregel für die Tagging-Entscheidung:\n\n- ab ca. **5 m** Fahrbahnbreite: einseitiges Fahrbahnparken möglich\n- ab ca. **7 m** Fahrbahnbreite: beidseitiges Fahrbahnparken möglich\n\n`road_width` kann aus OSM-Tags oder Standardwerten je Straßentyp stammen (`road_width_source`).\n\n## `parking=shoulder` – Parken auf dem Seitenstreifen\n\nLaut StVO ist Parken auf Seitenstreifen nur auf ausreichend befestigten Streifen zulässig. In randstädtischen Bereichen ohne baulich angelegte Gehwege ist es üblich, neben der Fahrbahn auf nicht dafür vorgesehenen, aber durch Nutzung verfestigten Randbereichen zu parken.\n\nDiese Situationen werden als Graubereich behandelt:\n\n- `parking=shoulder` für die Lage auf dem Seitenstreifen bzw. Randbereich\n- `informal=yes` für geduldetes Parken im rechtlichen Graubereich\n\n**Nicht erfasst** wird Parken auf grasbewachsenen Flächen (`surface=grass` o. ä.) – das gilt als ordnungswidrig und erscheint nicht im regulären Parkraum-Layer.\n\n## Alternierendes Parken (`staggered=yes`)\n\nLässt die Fahrbahnbreite einseitiges, aber nicht beidseitiges Fahrbahnparken zu, kann sich örtlich die Praxis versetzten Parkens entwickeln: Fahrzeuge parken abwechselnd auf der einen oder anderen Seite.\n\nIn diesen Fällen werden Geometrien auf beiden Straßenseiten geführt, aber:\n\n- `staggered=yes` kennzeichnet die Parkweise\n- die Kapazität wird reduziert (siehe Kapitel „Berechnung der Kapazität“)\n\n## Weitere Parkpositionen\n\n| Wert                       | Bedeutung                            |\n| -------------------------- | ------------------------------------ |\n| `half_on_kerb` / `on_kerb` | Teilweise bzw. ganz auf dem Gehweg   |\n| `street_side`              | Parkbucht                            |\n| `separate`                 | Separat als eigene Geometrie erfasst |\n| `yes`                      | Straßenparken ohne nähere Bestimmung |\n\n## Abgrenzung zu „Kein Parken“\n\nFolgende Situationen werden nicht als regulärer Parkraum geführt (Layer „Kein Parken“, `reason`):\n\n- Parken außerhalb markierter Stellplätze in verkehrsberuhigten Bereichen\n- nicht angeordnetes Parken auf Gehwegen oder erhöhten Bordsteinen\n- zu schmale Fahrbahn (`reason=narrow`)\n- explizite Verbote (`restriction_no_parking`, `restriction_no_stopping`, …)\n\nEingeschränkte Haltverbote (`no_parking` / `no_standing`) sind im Nicht-Parken-Layer erfasst, nicht im regulären Parkraum.\n',
       },
     ],
   },
@@ -4458,6 +4467,7 @@ const data = {
         type: 'string',
         label: 'Ausrichtung',
         description: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+        chapterRefs: ['capacity-calculation'],
         values: [
           {
             value: 'parallel',
@@ -4523,10 +4533,12 @@ const data = {
         key: 'informal',
         type: 'string',
         label: 'Duldung',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
             label: 'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
+            chapterRefs: ['parking-position'],
           },
         ],
       },
@@ -4621,13 +4633,19 @@ const data = {
         id: 'capacity-calculation',
         title: 'Berechnung der Kapazität',
         markdown:
-          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+          'Die Stellplatzanzahl (`capacity`) wird in der Prozessierung abgeleitet, wenn in OpenStreetMap keine explizite Angabe vorliegt. Die Herkunft ist im Feld `capacity_source` dokumentiert.\n\n## Subtraktives Modell\n\nAus OSM-Daten zu Parken links und rechts der Fahrbahn werden Liniengeometrien erzeugt. Bereiche, in denen nicht geparkt werden kann oder darf – z. B. Einfahrten, Haltestellen, Hindernisse, Parkverbote – werden „ausgestanzt“. Die verbleibende Linienlänge ist die Grundlage für Flächen- und Kapazitätsschätzungen.\n\nZusätzlich zu in OSM erfassten Hindernissen kann ein ergänzender Stanzungs-Datensatz (Einfahrten, Poller, Bäume, Laternen u. a.) genutzt werden, wo OSM-Lücken bestehen. Explizite OSM-Stanzungen haben Vorrang; externe Stanzungen werden verworfen, wenn sie ungeeignet sind.\n\n## Schätzung aus Länge und Ausrichtung\n\nFür nicht markierte Stellplätze wird die Kapazität aus der Linienlänge des Parksegments und der Parkausrichtung (`orientation`) interpoliert. Dabei gilt ein einheitliches „Standardfahrzeug“:\n\n| Ausrichtung   | Fahrzeuglänge entlang der Kante | Fahrzeugtiefe quer zur Kante | Abstand zwischen Fahrzeugen |\n| ------------- | ------------------------------- | ---------------------------- | --------------------------- |\n| parallel      | 4,4 m                           | 2,0 m                        | 0,8 m                       |\n| perpendicular | 2,0 m                           | 4,4 m                        | 0,5 m                       |\n| diagonal      | berechnet (30°-Rotation)        | berechnet                    | berechnet                   |\n\nFormel (Länge): `(Länge + Abstand) / (Fahrzeuglänge + Abstand)`\n\nDie Fläche (`area`) wird bei fehlender Geometrie aus der Länge geschätzt: `Länge × (Fahrzeugtiefe + 0,25 m)`. `area_source` ist dann `estimated`.\n\n## Rundung\n\nBerechnete Kapazitäten werden vor der Ausgabe gerundet:\n\n- **Unter 10 Stellplätzen:** Abrunden, ab 0,8 aufgerundet (Beispiel: 1,5 → 1; 1,8 → 2; 4,9 → 5).\n- **Ab 10 Stellplätzen:** Mathematische Rundung.\n\nDamit wird kleineren Parklücken Rechnung getragen, die von kürzeren Fahrzeugen belegt werden können, ohne systematisch zu überschätzen.\n\n## Alternierendes Parken\n\nBei `staggered=yes` und paralleler Ausrichtung wird die Kapazität angepasst:\n\n1. Halbierung (nur eine Straßenseite wird gleichzeitig genutzt).\n2. Abzug von Manövrierraum: pro 60 m Abschnitt werden 10 m (≈ 1,9 Stellplätze bei 5,2 m pro Platz) abgezogen.\n\nInterne QA-Felder `_staggered_original_capacity` und `_staggered_maneuvering_loss` dokumentieren die Zwischenschritte.\n\n## Explizite OSM-Angaben und Umverteilung\n\nLiegt in OSM `capacity` oder `est_capacity` vor, wird dieser Wert übernommen (`capacity_source`: `tag` bzw. `tag_estimation`). Wird ein Segment durch Stanzung geteilt, wird die Kapazität anteilig nach Länge umverteilt (`*_redistributed` in `capacity_source`).\n\n## Nachvollziehbarkeit\n\n| Feld                   | Bedeutung                                    |\n| ---------------------- | -------------------------------------------- |\n| `capacity`             | Stellplatzanzahl (gerundet)                  |\n| `capacity_source`      | Herleitung (Tag, Schätzung, Umverteilung, …) |\n| `capacity_confidence`  | Konfidenz der Angabe                         |\n| `length`               | Länge der Parklinie in Metern                |\n| `area` / `area_source` | Fläche und Herkunft                          |\n',
       },
       {
         id: 'condition-category',
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'parking-position',
+        title: 'Parkposition und rechtliche Graubereiche',
+        markdown:
+          'Das Attribut `parking` beschreibt Lage oder Art des Parkraums im Straßenland. Die Zuordnung erfolgt in OpenStreetMap und wird von der Prozessierung übernommen – sie wird nicht automatisch aus der Geometrie abgeleitet.\n\n## Grundsatz: Rechtliche Zulässigkeit\n\nDer Datensatz orientiert sich an der rechtlichen Zulässigkeit des Parkens, nicht allein am beobachteten Parkverhalten. Situationen im rechtlichen Graubereich können erfasst werden; eindeutig ordnungswidriges Parken wird nicht als regulärer Parkraum geführt (siehe Tabelle „Kein Parken“).\n\n## `parking=lane` – Parken auf der Fahrbahn\n\nFür Parken auf der Fahrbahn muss neben parkenden Fahrzeugen eine Restfahrbahnbreite von mindestens 3,05 m verbleiben. Bei einer mittleren Fahrzeugbreite von ca. 2 m ergibt sich als Faustregel für die Tagging-Entscheidung:\n\n- ab ca. **5 m** Fahrbahnbreite: einseitiges Fahrbahnparken möglich\n- ab ca. **7 m** Fahrbahnbreite: beidseitiges Fahrbahnparken möglich\n\n`road_width` kann aus OSM-Tags oder Standardwerten je Straßentyp stammen (`road_width_source`).\n\n## `parking=shoulder` – Parken auf dem Seitenstreifen\n\nLaut StVO ist Parken auf Seitenstreifen nur auf ausreichend befestigten Streifen zulässig. In randstädtischen Bereichen ohne baulich angelegte Gehwege ist es üblich, neben der Fahrbahn auf nicht dafür vorgesehenen, aber durch Nutzung verfestigten Randbereichen zu parken.\n\nDiese Situationen werden als Graubereich behandelt:\n\n- `parking=shoulder` für die Lage auf dem Seitenstreifen bzw. Randbereich\n- `informal=yes` für geduldetes Parken im rechtlichen Graubereich\n\n**Nicht erfasst** wird Parken auf grasbewachsenen Flächen (`surface=grass` o. ä.) – das gilt als ordnungswidrig und erscheint nicht im regulären Parkraum-Layer.\n\n## Alternierendes Parken (`staggered=yes`)\n\nLässt die Fahrbahnbreite einseitiges, aber nicht beidseitiges Fahrbahnparken zu, kann sich örtlich die Praxis versetzten Parkens entwickeln: Fahrzeuge parken abwechselnd auf der einen oder anderen Seite.\n\nIn diesen Fällen werden Geometrien auf beiden Straßenseiten geführt, aber:\n\n- `staggered=yes` kennzeichnet die Parkweise\n- die Kapazität wird reduziert (siehe Kapitel „Berechnung der Kapazität“)\n\n## Weitere Parkpositionen\n\n| Wert                       | Bedeutung                            |\n| -------------------------- | ------------------------------------ |\n| `half_on_kerb` / `on_kerb` | Teilweise bzw. ganz auf dem Gehweg   |\n| `street_side`              | Parkbucht                            |\n| `separate`                 | Separat als eigene Geometrie erfasst |\n| `yes`                      | Straßenparken ohne nähere Bestimmung |\n\n## Abgrenzung zu „Kein Parken“\n\nFolgende Situationen werden nicht als regulärer Parkraum geführt (Layer „Kein Parken“, `reason`):\n\n- Parken außerhalb markierter Stellplätze in verkehrsberuhigten Bereichen\n- nicht angeordnetes Parken auf Gehwegen oder erhöhten Bordsteinen\n- zu schmale Fahrbahn (`reason=narrow`)\n- explizite Verbote (`restriction_no_parking`, `restriction_no_stopping`, …)\n\nEingeschränkte Haltverbote (`no_parking` / `no_standing`) sind im Nicht-Parken-Layer erfasst, nicht im regulären Parkraum.\n',
       },
     ],
   },
@@ -4650,10 +4668,12 @@ const data = {
         type: 'string',
         label: 'Parkposition',
         description: 'Lage oder Art des Parkraums im Straßenland.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'lane',
             label: 'Auf der Fahrbahn',
+            chapterRefs: ['parking-position'],
           },
           {
             value: 'half_on_kerb',
@@ -4678,6 +4698,7 @@ const data = {
           {
             value: 'shoulder',
             label: 'Auf dem Seitenstreifen',
+            chapterRefs: ['parking-position'],
           },
           {
             value: 'street_side',
@@ -4797,6 +4818,7 @@ const data = {
         type: 'string',
         label: 'Ausrichtung',
         description: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+        chapterRefs: ['capacity-calculation'],
         values: [
           {
             value: 'parallel',
@@ -4914,6 +4936,7 @@ const data = {
         label: 'Parkweise',
         description:
           'Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
@@ -5157,6 +5180,7 @@ const data = {
         type: 'meter',
         label: 'Fahrbahnbreite',
         description: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
+        chapterRefs: ['parking-position'],
         values: [],
       },
       {
@@ -5221,6 +5245,7 @@ const data = {
         label: 'Fläche',
         description:
           'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+        chapterRefs: ['capacity-calculation'],
         values: [],
       },
       {
@@ -5619,10 +5644,12 @@ const data = {
         key: 'informal',
         type: 'string',
         label: 'Duldung',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
             label: 'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
+            chapterRefs: ['parking-position'],
           },
         ],
       },
@@ -5639,6 +5666,7 @@ const data = {
         type: 'string',
         label: 'Grund',
         description: 'Angabe eines Grundes bei Nicht-Parken.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'missing_data',
@@ -5718,13 +5746,19 @@ const data = {
         id: 'capacity-calculation',
         title: 'Berechnung der Kapazität',
         markdown:
-          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+          'Die Stellplatzanzahl (`capacity`) wird in der Prozessierung abgeleitet, wenn in OpenStreetMap keine explizite Angabe vorliegt. Die Herkunft ist im Feld `capacity_source` dokumentiert.\n\n## Subtraktives Modell\n\nAus OSM-Daten zu Parken links und rechts der Fahrbahn werden Liniengeometrien erzeugt. Bereiche, in denen nicht geparkt werden kann oder darf – z. B. Einfahrten, Haltestellen, Hindernisse, Parkverbote – werden „ausgestanzt“. Die verbleibende Linienlänge ist die Grundlage für Flächen- und Kapazitätsschätzungen.\n\nZusätzlich zu in OSM erfassten Hindernissen kann ein ergänzender Stanzungs-Datensatz (Einfahrten, Poller, Bäume, Laternen u. a.) genutzt werden, wo OSM-Lücken bestehen. Explizite OSM-Stanzungen haben Vorrang; externe Stanzungen werden verworfen, wenn sie ungeeignet sind.\n\n## Schätzung aus Länge und Ausrichtung\n\nFür nicht markierte Stellplätze wird die Kapazität aus der Linienlänge des Parksegments und der Parkausrichtung (`orientation`) interpoliert. Dabei gilt ein einheitliches „Standardfahrzeug“:\n\n| Ausrichtung   | Fahrzeuglänge entlang der Kante | Fahrzeugtiefe quer zur Kante | Abstand zwischen Fahrzeugen |\n| ------------- | ------------------------------- | ---------------------------- | --------------------------- |\n| parallel      | 4,4 m                           | 2,0 m                        | 0,8 m                       |\n| perpendicular | 2,0 m                           | 4,4 m                        | 0,5 m                       |\n| diagonal      | berechnet (30°-Rotation)        | berechnet                    | berechnet                   |\n\nFormel (Länge): `(Länge + Abstand) / (Fahrzeuglänge + Abstand)`\n\nDie Fläche (`area`) wird bei fehlender Geometrie aus der Länge geschätzt: `Länge × (Fahrzeugtiefe + 0,25 m)`. `area_source` ist dann `estimated`.\n\n## Rundung\n\nBerechnete Kapazitäten werden vor der Ausgabe gerundet:\n\n- **Unter 10 Stellplätzen:** Abrunden, ab 0,8 aufgerundet (Beispiel: 1,5 → 1; 1,8 → 2; 4,9 → 5).\n- **Ab 10 Stellplätzen:** Mathematische Rundung.\n\nDamit wird kleineren Parklücken Rechnung getragen, die von kürzeren Fahrzeugen belegt werden können, ohne systematisch zu überschätzen.\n\n## Alternierendes Parken\n\nBei `staggered=yes` und paralleler Ausrichtung wird die Kapazität angepasst:\n\n1. Halbierung (nur eine Straßenseite wird gleichzeitig genutzt).\n2. Abzug von Manövrierraum: pro 60 m Abschnitt werden 10 m (≈ 1,9 Stellplätze bei 5,2 m pro Platz) abgezogen.\n\nInterne QA-Felder `_staggered_original_capacity` und `_staggered_maneuvering_loss` dokumentieren die Zwischenschritte.\n\n## Explizite OSM-Angaben und Umverteilung\n\nLiegt in OSM `capacity` oder `est_capacity` vor, wird dieser Wert übernommen (`capacity_source`: `tag` bzw. `tag_estimation`). Wird ein Segment durch Stanzung geteilt, wird die Kapazität anteilig nach Länge umverteilt (`*_redistributed` in `capacity_source`).\n\n## Nachvollziehbarkeit\n\n| Feld                   | Bedeutung                                    |\n| ---------------------- | -------------------------------------------- |\n| `capacity`             | Stellplatzanzahl (gerundet)                  |\n| `capacity_source`      | Herleitung (Tag, Schätzung, Umverteilung, …) |\n| `capacity_confidence`  | Konfidenz der Angabe                         |\n| `length`               | Länge der Parklinie in Metern                |\n| `area` / `area_source` | Fläche und Herkunft                          |\n',
       },
       {
         id: 'condition-category',
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'parking-position',
+        title: 'Parkposition und rechtliche Graubereiche',
+        markdown:
+          'Das Attribut `parking` beschreibt Lage oder Art des Parkraums im Straßenland. Die Zuordnung erfolgt in OpenStreetMap und wird von der Prozessierung übernommen – sie wird nicht automatisch aus der Geometrie abgeleitet.\n\n## Grundsatz: Rechtliche Zulässigkeit\n\nDer Datensatz orientiert sich an der rechtlichen Zulässigkeit des Parkens, nicht allein am beobachteten Parkverhalten. Situationen im rechtlichen Graubereich können erfasst werden; eindeutig ordnungswidriges Parken wird nicht als regulärer Parkraum geführt (siehe Tabelle „Kein Parken“).\n\n## `parking=lane` – Parken auf der Fahrbahn\n\nFür Parken auf der Fahrbahn muss neben parkenden Fahrzeugen eine Restfahrbahnbreite von mindestens 3,05 m verbleiben. Bei einer mittleren Fahrzeugbreite von ca. 2 m ergibt sich als Faustregel für die Tagging-Entscheidung:\n\n- ab ca. **5 m** Fahrbahnbreite: einseitiges Fahrbahnparken möglich\n- ab ca. **7 m** Fahrbahnbreite: beidseitiges Fahrbahnparken möglich\n\n`road_width` kann aus OSM-Tags oder Standardwerten je Straßentyp stammen (`road_width_source`).\n\n## `parking=shoulder` – Parken auf dem Seitenstreifen\n\nLaut StVO ist Parken auf Seitenstreifen nur auf ausreichend befestigten Streifen zulässig. In randstädtischen Bereichen ohne baulich angelegte Gehwege ist es üblich, neben der Fahrbahn auf nicht dafür vorgesehenen, aber durch Nutzung verfestigten Randbereichen zu parken.\n\nDiese Situationen werden als Graubereich behandelt:\n\n- `parking=shoulder` für die Lage auf dem Seitenstreifen bzw. Randbereich\n- `informal=yes` für geduldetes Parken im rechtlichen Graubereich\n\n**Nicht erfasst** wird Parken auf grasbewachsenen Flächen (`surface=grass` o. ä.) – das gilt als ordnungswidrig und erscheint nicht im regulären Parkraum-Layer.\n\n## Alternierendes Parken (`staggered=yes`)\n\nLässt die Fahrbahnbreite einseitiges, aber nicht beidseitiges Fahrbahnparken zu, kann sich örtlich die Praxis versetzten Parkens entwickeln: Fahrzeuge parken abwechselnd auf der einen oder anderen Seite.\n\nIn diesen Fällen werden Geometrien auf beiden Straßenseiten geführt, aber:\n\n- `staggered=yes` kennzeichnet die Parkweise\n- die Kapazität wird reduziert (siehe Kapitel „Berechnung der Kapazität“)\n\n## Weitere Parkpositionen\n\n| Wert                       | Bedeutung                            |\n| -------------------------- | ------------------------------------ |\n| `half_on_kerb` / `on_kerb` | Teilweise bzw. ganz auf dem Gehweg   |\n| `street_side`              | Parkbucht                            |\n| `separate`                 | Separat als eigene Geometrie erfasst |\n| `yes`                      | Straßenparken ohne nähere Bestimmung |\n\n## Abgrenzung zu „Kein Parken“\n\nFolgende Situationen werden nicht als regulärer Parkraum geführt (Layer „Kein Parken“, `reason`):\n\n- Parken außerhalb markierter Stellplätze in verkehrsberuhigten Bereichen\n- nicht angeordnetes Parken auf Gehwegen oder erhöhten Bordsteinen\n- zu schmale Fahrbahn (`reason=narrow`)\n- explizite Verbote (`restriction_no_parking`, `restriction_no_stopping`, …)\n\nEingeschränkte Haltverbote (`no_parking` / `no_standing`) sind im Nicht-Parken-Layer erfasst, nicht im regulären Parkraum.\n',
       },
     ],
   },
@@ -6329,13 +6363,19 @@ const data = {
         id: 'capacity-calculation',
         title: 'Berechnung der Kapazität',
         markdown:
-          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+          'Die Stellplatzanzahl (`capacity`) wird in der Prozessierung abgeleitet, wenn in OpenStreetMap keine explizite Angabe vorliegt. Die Herkunft ist im Feld `capacity_source` dokumentiert.\n\n## Subtraktives Modell\n\nAus OSM-Daten zu Parken links und rechts der Fahrbahn werden Liniengeometrien erzeugt. Bereiche, in denen nicht geparkt werden kann oder darf – z. B. Einfahrten, Haltestellen, Hindernisse, Parkverbote – werden „ausgestanzt“. Die verbleibende Linienlänge ist die Grundlage für Flächen- und Kapazitätsschätzungen.\n\nZusätzlich zu in OSM erfassten Hindernissen kann ein ergänzender Stanzungs-Datensatz (Einfahrten, Poller, Bäume, Laternen u. a.) genutzt werden, wo OSM-Lücken bestehen. Explizite OSM-Stanzungen haben Vorrang; externe Stanzungen werden verworfen, wenn sie ungeeignet sind.\n\n## Schätzung aus Länge und Ausrichtung\n\nFür nicht markierte Stellplätze wird die Kapazität aus der Linienlänge des Parksegments und der Parkausrichtung (`orientation`) interpoliert. Dabei gilt ein einheitliches „Standardfahrzeug“:\n\n| Ausrichtung   | Fahrzeuglänge entlang der Kante | Fahrzeugtiefe quer zur Kante | Abstand zwischen Fahrzeugen |\n| ------------- | ------------------------------- | ---------------------------- | --------------------------- |\n| parallel      | 4,4 m                           | 2,0 m                        | 0,8 m                       |\n| perpendicular | 2,0 m                           | 4,4 m                        | 0,5 m                       |\n| diagonal      | berechnet (30°-Rotation)        | berechnet                    | berechnet                   |\n\nFormel (Länge): `(Länge + Abstand) / (Fahrzeuglänge + Abstand)`\n\nDie Fläche (`area`) wird bei fehlender Geometrie aus der Länge geschätzt: `Länge × (Fahrzeugtiefe + 0,25 m)`. `area_source` ist dann `estimated`.\n\n## Rundung\n\nBerechnete Kapazitäten werden vor der Ausgabe gerundet:\n\n- **Unter 10 Stellplätzen:** Abrunden, ab 0,8 aufgerundet (Beispiel: 1,5 → 1; 1,8 → 2; 4,9 → 5).\n- **Ab 10 Stellplätzen:** Mathematische Rundung.\n\nDamit wird kleineren Parklücken Rechnung getragen, die von kürzeren Fahrzeugen belegt werden können, ohne systematisch zu überschätzen.\n\n## Alternierendes Parken\n\nBei `staggered=yes` und paralleler Ausrichtung wird die Kapazität angepasst:\n\n1. Halbierung (nur eine Straßenseite wird gleichzeitig genutzt).\n2. Abzug von Manövrierraum: pro 60 m Abschnitt werden 10 m (≈ 1,9 Stellplätze bei 5,2 m pro Platz) abgezogen.\n\nInterne QA-Felder `_staggered_original_capacity` und `_staggered_maneuvering_loss` dokumentieren die Zwischenschritte.\n\n## Explizite OSM-Angaben und Umverteilung\n\nLiegt in OSM `capacity` oder `est_capacity` vor, wird dieser Wert übernommen (`capacity_source`: `tag` bzw. `tag_estimation`). Wird ein Segment durch Stanzung geteilt, wird die Kapazität anteilig nach Länge umverteilt (`*_redistributed` in `capacity_source`).\n\n## Nachvollziehbarkeit\n\n| Feld                   | Bedeutung                                    |\n| ---------------------- | -------------------------------------------- |\n| `capacity`             | Stellplatzanzahl (gerundet)                  |\n| `capacity_source`      | Herleitung (Tag, Schätzung, Umverteilung, …) |\n| `capacity_confidence`  | Konfidenz der Angabe                         |\n| `length`               | Länge der Parklinie in Metern                |\n| `area` / `area_source` | Fläche und Herkunft                          |\n',
       },
       {
         id: 'condition-category',
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'parking-position',
+        title: 'Parkposition und rechtliche Graubereiche',
+        markdown:
+          'Das Attribut `parking` beschreibt Lage oder Art des Parkraums im Straßenland. Die Zuordnung erfolgt in OpenStreetMap und wird von der Prozessierung übernommen – sie wird nicht automatisch aus der Geometrie abgeleitet.\n\n## Grundsatz: Rechtliche Zulässigkeit\n\nDer Datensatz orientiert sich an der rechtlichen Zulässigkeit des Parkens, nicht allein am beobachteten Parkverhalten. Situationen im rechtlichen Graubereich können erfasst werden; eindeutig ordnungswidriges Parken wird nicht als regulärer Parkraum geführt (siehe Tabelle „Kein Parken“).\n\n## `parking=lane` – Parken auf der Fahrbahn\n\nFür Parken auf der Fahrbahn muss neben parkenden Fahrzeugen eine Restfahrbahnbreite von mindestens 3,05 m verbleiben. Bei einer mittleren Fahrzeugbreite von ca. 2 m ergibt sich als Faustregel für die Tagging-Entscheidung:\n\n- ab ca. **5 m** Fahrbahnbreite: einseitiges Fahrbahnparken möglich\n- ab ca. **7 m** Fahrbahnbreite: beidseitiges Fahrbahnparken möglich\n\n`road_width` kann aus OSM-Tags oder Standardwerten je Straßentyp stammen (`road_width_source`).\n\n## `parking=shoulder` – Parken auf dem Seitenstreifen\n\nLaut StVO ist Parken auf Seitenstreifen nur auf ausreichend befestigten Streifen zulässig. In randstädtischen Bereichen ohne baulich angelegte Gehwege ist es üblich, neben der Fahrbahn auf nicht dafür vorgesehenen, aber durch Nutzung verfestigten Randbereichen zu parken.\n\nDiese Situationen werden als Graubereich behandelt:\n\n- `parking=shoulder` für die Lage auf dem Seitenstreifen bzw. Randbereich\n- `informal=yes` für geduldetes Parken im rechtlichen Graubereich\n\n**Nicht erfasst** wird Parken auf grasbewachsenen Flächen (`surface=grass` o. ä.) – das gilt als ordnungswidrig und erscheint nicht im regulären Parkraum-Layer.\n\n## Alternierendes Parken (`staggered=yes`)\n\nLässt die Fahrbahnbreite einseitiges, aber nicht beidseitiges Fahrbahnparken zu, kann sich örtlich die Praxis versetzten Parkens entwickeln: Fahrzeuge parken abwechselnd auf der einen oder anderen Seite.\n\nIn diesen Fällen werden Geometrien auf beiden Straßenseiten geführt, aber:\n\n- `staggered=yes` kennzeichnet die Parkweise\n- die Kapazität wird reduziert (siehe Kapitel „Berechnung der Kapazität“)\n\n## Weitere Parkpositionen\n\n| Wert                       | Bedeutung                            |\n| -------------------------- | ------------------------------------ |\n| `half_on_kerb` / `on_kerb` | Teilweise bzw. ganz auf dem Gehweg   |\n| `street_side`              | Parkbucht                            |\n| `separate`                 | Separat als eigene Geometrie erfasst |\n| `yes`                      | Straßenparken ohne nähere Bestimmung |\n\n## Abgrenzung zu „Kein Parken“\n\nFolgende Situationen werden nicht als regulärer Parkraum geführt (Layer „Kein Parken“, `reason`):\n\n- Parken außerhalb markierter Stellplätze in verkehrsberuhigten Bereichen\n- nicht angeordnetes Parken auf Gehwegen oder erhöhten Bordsteinen\n- zu schmale Fahrbahn (`reason=narrow`)\n- explizite Verbote (`restriction_no_parking`, `restriction_no_stopping`, …)\n\nEingeschränkte Haltverbote (`no_parking` / `no_standing`) sind im Nicht-Parken-Layer erfasst, nicht im regulären Parkraum.\n',
       },
     ],
   },
@@ -6358,10 +6398,12 @@ const data = {
         type: 'string',
         label: 'Parkposition',
         description: 'Lage oder Art des Parkraums im Straßenland.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'lane',
             label: 'Auf der Fahrbahn',
+            chapterRefs: ['parking-position'],
           },
           {
             value: 'half_on_kerb',
@@ -6386,6 +6428,7 @@ const data = {
           {
             value: 'shoulder',
             label: 'Auf dem Seitenstreifen',
+            chapterRefs: ['parking-position'],
           },
           {
             value: 'street_side',
@@ -6418,6 +6461,7 @@ const data = {
         type: 'string',
         label: 'Grund',
         description: 'Angabe eines Grundes bei Nicht-Parken.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'missing_data',
@@ -6653,6 +6697,7 @@ const data = {
         type: 'string',
         label: 'Ausrichtung',
         description: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+        chapterRefs: ['capacity-calculation'],
         values: [
           {
             value: 'parallel',
@@ -6674,6 +6719,7 @@ const data = {
         label: 'Parkweise',
         description:
           'Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
@@ -6890,6 +6936,7 @@ const data = {
         type: 'meter',
         label: 'Fahrbahnbreite',
         description: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
+        chapterRefs: ['parking-position'],
         values: [],
       },
       {
@@ -6954,6 +7001,7 @@ const data = {
         label: 'Fläche',
         description:
           'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+        chapterRefs: ['capacity-calculation'],
         values: [],
       },
       {
@@ -7352,10 +7400,12 @@ const data = {
         key: 'informal',
         type: 'string',
         label: 'Duldung',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
             label: 'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
+            chapterRefs: ['parking-position'],
           },
         ],
       },
@@ -7403,13 +7453,19 @@ const data = {
         id: 'capacity-calculation',
         title: 'Berechnung der Kapazität',
         markdown:
-          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+          'Die Stellplatzanzahl (`capacity`) wird in der Prozessierung abgeleitet, wenn in OpenStreetMap keine explizite Angabe vorliegt. Die Herkunft ist im Feld `capacity_source` dokumentiert.\n\n## Subtraktives Modell\n\nAus OSM-Daten zu Parken links und rechts der Fahrbahn werden Liniengeometrien erzeugt. Bereiche, in denen nicht geparkt werden kann oder darf – z. B. Einfahrten, Haltestellen, Hindernisse, Parkverbote – werden „ausgestanzt“. Die verbleibende Linienlänge ist die Grundlage für Flächen- und Kapazitätsschätzungen.\n\nZusätzlich zu in OSM erfassten Hindernissen kann ein ergänzender Stanzungs-Datensatz (Einfahrten, Poller, Bäume, Laternen u. a.) genutzt werden, wo OSM-Lücken bestehen. Explizite OSM-Stanzungen haben Vorrang; externe Stanzungen werden verworfen, wenn sie ungeeignet sind.\n\n## Schätzung aus Länge und Ausrichtung\n\nFür nicht markierte Stellplätze wird die Kapazität aus der Linienlänge des Parksegments und der Parkausrichtung (`orientation`) interpoliert. Dabei gilt ein einheitliches „Standardfahrzeug“:\n\n| Ausrichtung   | Fahrzeuglänge entlang der Kante | Fahrzeugtiefe quer zur Kante | Abstand zwischen Fahrzeugen |\n| ------------- | ------------------------------- | ---------------------------- | --------------------------- |\n| parallel      | 4,4 m                           | 2,0 m                        | 0,8 m                       |\n| perpendicular | 2,0 m                           | 4,4 m                        | 0,5 m                       |\n| diagonal      | berechnet (30°-Rotation)        | berechnet                    | berechnet                   |\n\nFormel (Länge): `(Länge + Abstand) / (Fahrzeuglänge + Abstand)`\n\nDie Fläche (`area`) wird bei fehlender Geometrie aus der Länge geschätzt: `Länge × (Fahrzeugtiefe + 0,25 m)`. `area_source` ist dann `estimated`.\n\n## Rundung\n\nBerechnete Kapazitäten werden vor der Ausgabe gerundet:\n\n- **Unter 10 Stellplätzen:** Abrunden, ab 0,8 aufgerundet (Beispiel: 1,5 → 1; 1,8 → 2; 4,9 → 5).\n- **Ab 10 Stellplätzen:** Mathematische Rundung.\n\nDamit wird kleineren Parklücken Rechnung getragen, die von kürzeren Fahrzeugen belegt werden können, ohne systematisch zu überschätzen.\n\n## Alternierendes Parken\n\nBei `staggered=yes` und paralleler Ausrichtung wird die Kapazität angepasst:\n\n1. Halbierung (nur eine Straßenseite wird gleichzeitig genutzt).\n2. Abzug von Manövrierraum: pro 60 m Abschnitt werden 10 m (≈ 1,9 Stellplätze bei 5,2 m pro Platz) abgezogen.\n\nInterne QA-Felder `_staggered_original_capacity` und `_staggered_maneuvering_loss` dokumentieren die Zwischenschritte.\n\n## Explizite OSM-Angaben und Umverteilung\n\nLiegt in OSM `capacity` oder `est_capacity` vor, wird dieser Wert übernommen (`capacity_source`: `tag` bzw. `tag_estimation`). Wird ein Segment durch Stanzung geteilt, wird die Kapazität anteilig nach Länge umverteilt (`*_redistributed` in `capacity_source`).\n\n## Nachvollziehbarkeit\n\n| Feld                   | Bedeutung                                    |\n| ---------------------- | -------------------------------------------- |\n| `capacity`             | Stellplatzanzahl (gerundet)                  |\n| `capacity_source`      | Herleitung (Tag, Schätzung, Umverteilung, …) |\n| `capacity_confidence`  | Konfidenz der Angabe                         |\n| `length`               | Länge der Parklinie in Metern                |\n| `area` / `area_source` | Fläche und Herkunft                          |\n',
       },
       {
         id: 'condition-category',
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'parking-position',
+        title: 'Parkposition und rechtliche Graubereiche',
+        markdown:
+          'Das Attribut `parking` beschreibt Lage oder Art des Parkraums im Straßenland. Die Zuordnung erfolgt in OpenStreetMap und wird von der Prozessierung übernommen – sie wird nicht automatisch aus der Geometrie abgeleitet.\n\n## Grundsatz: Rechtliche Zulässigkeit\n\nDer Datensatz orientiert sich an der rechtlichen Zulässigkeit des Parkens, nicht allein am beobachteten Parkverhalten. Situationen im rechtlichen Graubereich können erfasst werden; eindeutig ordnungswidriges Parken wird nicht als regulärer Parkraum geführt (siehe Tabelle „Kein Parken“).\n\n## `parking=lane` – Parken auf der Fahrbahn\n\nFür Parken auf der Fahrbahn muss neben parkenden Fahrzeugen eine Restfahrbahnbreite von mindestens 3,05 m verbleiben. Bei einer mittleren Fahrzeugbreite von ca. 2 m ergibt sich als Faustregel für die Tagging-Entscheidung:\n\n- ab ca. **5 m** Fahrbahnbreite: einseitiges Fahrbahnparken möglich\n- ab ca. **7 m** Fahrbahnbreite: beidseitiges Fahrbahnparken möglich\n\n`road_width` kann aus OSM-Tags oder Standardwerten je Straßentyp stammen (`road_width_source`).\n\n## `parking=shoulder` – Parken auf dem Seitenstreifen\n\nLaut StVO ist Parken auf Seitenstreifen nur auf ausreichend befestigten Streifen zulässig. In randstädtischen Bereichen ohne baulich angelegte Gehwege ist es üblich, neben der Fahrbahn auf nicht dafür vorgesehenen, aber durch Nutzung verfestigten Randbereichen zu parken.\n\nDiese Situationen werden als Graubereich behandelt:\n\n- `parking=shoulder` für die Lage auf dem Seitenstreifen bzw. Randbereich\n- `informal=yes` für geduldetes Parken im rechtlichen Graubereich\n\n**Nicht erfasst** wird Parken auf grasbewachsenen Flächen (`surface=grass` o. ä.) – das gilt als ordnungswidrig und erscheint nicht im regulären Parkraum-Layer.\n\n## Alternierendes Parken (`staggered=yes`)\n\nLässt die Fahrbahnbreite einseitiges, aber nicht beidseitiges Fahrbahnparken zu, kann sich örtlich die Praxis versetzten Parkens entwickeln: Fahrzeuge parken abwechselnd auf der einen oder anderen Seite.\n\nIn diesen Fällen werden Geometrien auf beiden Straßenseiten geführt, aber:\n\n- `staggered=yes` kennzeichnet die Parkweise\n- die Kapazität wird reduziert (siehe Kapitel „Berechnung der Kapazität“)\n\n## Weitere Parkpositionen\n\n| Wert                       | Bedeutung                            |\n| -------------------------- | ------------------------------------ |\n| `half_on_kerb` / `on_kerb` | Teilweise bzw. ganz auf dem Gehweg   |\n| `street_side`              | Parkbucht                            |\n| `separate`                 | Separat als eigene Geometrie erfasst |\n| `yes`                      | Straßenparken ohne nähere Bestimmung |\n\n## Abgrenzung zu „Kein Parken“\n\nFolgende Situationen werden nicht als regulärer Parkraum geführt (Layer „Kein Parken“, `reason`):\n\n- Parken außerhalb markierter Stellplätze in verkehrsberuhigten Bereichen\n- nicht angeordnetes Parken auf Gehwegen oder erhöhten Bordsteinen\n- zu schmale Fahrbahn (`reason=narrow`)\n- explizite Verbote (`restriction_no_parking`, `restriction_no_stopping`, …)\n\nEingeschränkte Haltverbote (`no_parking` / `no_standing`) sind im Nicht-Parken-Layer erfasst, nicht im regulären Parkraum.\n',
       },
     ],
   },
@@ -7432,10 +7488,12 @@ const data = {
         type: 'string',
         label: 'Parkposition',
         description: 'Lage oder Art des Parkraums im Straßenland.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'lane',
             label: 'Auf der Fahrbahn',
+            chapterRefs: ['parking-position'],
           },
           {
             value: 'half_on_kerb',
@@ -7460,6 +7518,7 @@ const data = {
           {
             value: 'shoulder',
             label: 'Auf dem Seitenstreifen',
+            chapterRefs: ['parking-position'],
           },
           {
             value: 'street_side',
@@ -7500,6 +7559,7 @@ const data = {
         type: 'string',
         label: 'Ausrichtung',
         description: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+        chapterRefs: ['capacity-calculation'],
         values: [
           {
             value: 'parallel',
@@ -7617,6 +7677,7 @@ const data = {
         label: 'Parkweise',
         description:
           'Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
@@ -7860,6 +7921,7 @@ const data = {
         type: 'meter',
         label: 'Fahrbahnbreite',
         description: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
+        chapterRefs: ['parking-position'],
         values: [],
       },
       {
@@ -7884,6 +7946,7 @@ const data = {
         label: 'Fläche',
         description:
           'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+        chapterRefs: ['capacity-calculation'],
         values: [],
       },
       {
@@ -8182,10 +8245,12 @@ const data = {
         key: 'informal',
         type: 'string',
         label: 'Duldung',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'yes',
             label: 'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
+            chapterRefs: ['parking-position'],
           },
         ],
       },
@@ -8202,6 +8267,7 @@ const data = {
         type: 'string',
         label: 'Grund',
         description: 'Angabe eines Grundes bei Nicht-Parken.',
+        chapterRefs: ['parking-position'],
         values: [
           {
             value: 'missing_data',
@@ -8281,13 +8347,19 @@ const data = {
         id: 'capacity-calculation',
         title: 'Berechnung der Kapazität',
         markdown:
-          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+          'Die Stellplatzanzahl (`capacity`) wird in der Prozessierung abgeleitet, wenn in OpenStreetMap keine explizite Angabe vorliegt. Die Herkunft ist im Feld `capacity_source` dokumentiert.\n\n## Subtraktives Modell\n\nAus OSM-Daten zu Parken links und rechts der Fahrbahn werden Liniengeometrien erzeugt. Bereiche, in denen nicht geparkt werden kann oder darf – z. B. Einfahrten, Haltestellen, Hindernisse, Parkverbote – werden „ausgestanzt“. Die verbleibende Linienlänge ist die Grundlage für Flächen- und Kapazitätsschätzungen.\n\nZusätzlich zu in OSM erfassten Hindernissen kann ein ergänzender Stanzungs-Datensatz (Einfahrten, Poller, Bäume, Laternen u. a.) genutzt werden, wo OSM-Lücken bestehen. Explizite OSM-Stanzungen haben Vorrang; externe Stanzungen werden verworfen, wenn sie ungeeignet sind.\n\n## Schätzung aus Länge und Ausrichtung\n\nFür nicht markierte Stellplätze wird die Kapazität aus der Linienlänge des Parksegments und der Parkausrichtung (`orientation`) interpoliert. Dabei gilt ein einheitliches „Standardfahrzeug“:\n\n| Ausrichtung   | Fahrzeuglänge entlang der Kante | Fahrzeugtiefe quer zur Kante | Abstand zwischen Fahrzeugen |\n| ------------- | ------------------------------- | ---------------------------- | --------------------------- |\n| parallel      | 4,4 m                           | 2,0 m                        | 0,8 m                       |\n| perpendicular | 2,0 m                           | 4,4 m                        | 0,5 m                       |\n| diagonal      | berechnet (30°-Rotation)        | berechnet                    | berechnet                   |\n\nFormel (Länge): `(Länge + Abstand) / (Fahrzeuglänge + Abstand)`\n\nDie Fläche (`area`) wird bei fehlender Geometrie aus der Länge geschätzt: `Länge × (Fahrzeugtiefe + 0,25 m)`. `area_source` ist dann `estimated`.\n\n## Rundung\n\nBerechnete Kapazitäten werden vor der Ausgabe gerundet:\n\n- **Unter 10 Stellplätzen:** Abrunden, ab 0,8 aufgerundet (Beispiel: 1,5 → 1; 1,8 → 2; 4,9 → 5).\n- **Ab 10 Stellplätzen:** Mathematische Rundung.\n\nDamit wird kleineren Parklücken Rechnung getragen, die von kürzeren Fahrzeugen belegt werden können, ohne systematisch zu überschätzen.\n\n## Alternierendes Parken\n\nBei `staggered=yes` und paralleler Ausrichtung wird die Kapazität angepasst:\n\n1. Halbierung (nur eine Straßenseite wird gleichzeitig genutzt).\n2. Abzug von Manövrierraum: pro 60 m Abschnitt werden 10 m (≈ 1,9 Stellplätze bei 5,2 m pro Platz) abgezogen.\n\nInterne QA-Felder `_staggered_original_capacity` und `_staggered_maneuvering_loss` dokumentieren die Zwischenschritte.\n\n## Explizite OSM-Angaben und Umverteilung\n\nLiegt in OSM `capacity` oder `est_capacity` vor, wird dieser Wert übernommen (`capacity_source`: `tag` bzw. `tag_estimation`). Wird ein Segment durch Stanzung geteilt, wird die Kapazität anteilig nach Länge umverteilt (`*_redistributed` in `capacity_source`).\n\n## Nachvollziehbarkeit\n\n| Feld                   | Bedeutung                                    |\n| ---------------------- | -------------------------------------------- |\n| `capacity`             | Stellplatzanzahl (gerundet)                  |\n| `capacity_source`      | Herleitung (Tag, Schätzung, Umverteilung, …) |\n| `capacity_confidence`  | Konfidenz der Angabe                         |\n| `length`               | Länge der Parklinie in Metern                |\n| `area` / `area_source` | Fläche und Herkunft                          |\n',
       },
       {
         id: 'condition-category',
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'parking-position',
+        title: 'Parkposition und rechtliche Graubereiche',
+        markdown:
+          'Das Attribut `parking` beschreibt Lage oder Art des Parkraums im Straßenland. Die Zuordnung erfolgt in OpenStreetMap und wird von der Prozessierung übernommen – sie wird nicht automatisch aus der Geometrie abgeleitet.\n\n## Grundsatz: Rechtliche Zulässigkeit\n\nDer Datensatz orientiert sich an der rechtlichen Zulässigkeit des Parkens, nicht allein am beobachteten Parkverhalten. Situationen im rechtlichen Graubereich können erfasst werden; eindeutig ordnungswidriges Parken wird nicht als regulärer Parkraum geführt (siehe Tabelle „Kein Parken“).\n\n## `parking=lane` – Parken auf der Fahrbahn\n\nFür Parken auf der Fahrbahn muss neben parkenden Fahrzeugen eine Restfahrbahnbreite von mindestens 3,05 m verbleiben. Bei einer mittleren Fahrzeugbreite von ca. 2 m ergibt sich als Faustregel für die Tagging-Entscheidung:\n\n- ab ca. **5 m** Fahrbahnbreite: einseitiges Fahrbahnparken möglich\n- ab ca. **7 m** Fahrbahnbreite: beidseitiges Fahrbahnparken möglich\n\n`road_width` kann aus OSM-Tags oder Standardwerten je Straßentyp stammen (`road_width_source`).\n\n## `parking=shoulder` – Parken auf dem Seitenstreifen\n\nLaut StVO ist Parken auf Seitenstreifen nur auf ausreichend befestigten Streifen zulässig. In randstädtischen Bereichen ohne baulich angelegte Gehwege ist es üblich, neben der Fahrbahn auf nicht dafür vorgesehenen, aber durch Nutzung verfestigten Randbereichen zu parken.\n\nDiese Situationen werden als Graubereich behandelt:\n\n- `parking=shoulder` für die Lage auf dem Seitenstreifen bzw. Randbereich\n- `informal=yes` für geduldetes Parken im rechtlichen Graubereich\n\n**Nicht erfasst** wird Parken auf grasbewachsenen Flächen (`surface=grass` o. ä.) – das gilt als ordnungswidrig und erscheint nicht im regulären Parkraum-Layer.\n\n## Alternierendes Parken (`staggered=yes`)\n\nLässt die Fahrbahnbreite einseitiges, aber nicht beidseitiges Fahrbahnparken zu, kann sich örtlich die Praxis versetzten Parkens entwickeln: Fahrzeuge parken abwechselnd auf der einen oder anderen Seite.\n\nIn diesen Fällen werden Geometrien auf beiden Straßenseiten geführt, aber:\n\n- `staggered=yes` kennzeichnet die Parkweise\n- die Kapazität wird reduziert (siehe Kapitel „Berechnung der Kapazität“)\n\n## Weitere Parkpositionen\n\n| Wert                       | Bedeutung                            |\n| -------------------------- | ------------------------------------ |\n| `half_on_kerb` / `on_kerb` | Teilweise bzw. ganz auf dem Gehweg   |\n| `street_side`              | Parkbucht                            |\n| `separate`                 | Separat als eigene Geometrie erfasst |\n| `yes`                      | Straßenparken ohne nähere Bestimmung |\n\n## Abgrenzung zu „Kein Parken“\n\nFolgende Situationen werden nicht als regulärer Parkraum geführt (Layer „Kein Parken“, `reason`):\n\n- Parken außerhalb markierter Stellplätze in verkehrsberuhigten Bereichen\n- nicht angeordnetes Parken auf Gehwegen oder erhöhten Bordsteinen\n- zu schmale Fahrbahn (`reason=narrow`)\n- explizite Verbote (`restriction_no_parking`, `restriction_no_stopping`, …)\n\nEingeschränkte Haltverbote (`no_parking` / `no_standing`) sind im Nicht-Parken-Layer erfasst, nicht im regulären Parkraum.\n',
       },
     ],
   },
