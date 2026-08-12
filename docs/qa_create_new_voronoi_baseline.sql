@@ -9,6 +9,10 @@
 -- 2. Run the whole script (psql, TablePlus, …)
 -- 3. Point processing step 9 at the new target table name if it changed
 --    (public outputs stay qa_parkings_euvm / qa_parkings_euvm_priority)
+-- 4. On production /admin/data-schema: "Aus dieser Umgebung veröffentlichen"
+--    for data.<target_table> (enable snapshot) so staging and dev can Import it.
+--    Also publish the undated base table data.euvm_qa_voronoi once so the
+--    generator can be re-run outside production.
 
 CREATE SCHEMA IF NOT EXISTS data;
 

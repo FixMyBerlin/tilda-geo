@@ -1,19 +1,6 @@
 import { $ } from 'bun'
-
-export function databaseUrlToOgrPg(databaseUrl: string) {
-  const url = new URL(databaseUrl)
-  const port = url.port || '5432'
-  const dbname = url.pathname.replace(/^\//, '')
-  const params = new URLSearchParams()
-  params.set('host', url.hostname)
-  params.set('port', port)
-  params.set('dbname', dbname)
-  params.set('user', decodeURIComponent(url.username))
-  if (url.password) {
-    params.set('password', decodeURIComponent(url.password))
-  }
-  return `PG:${params.toString().replace(/&/g, ' ')}`
-}
+import type { DataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { databaseUrlToOgrPg } from './ogrHelpers'
 
 export async function assertOgrToolsPresent() {
   for (const bin of ['ogr2ogr', 'ogrinfo']) {
@@ -36,36 +23,39 @@ async function getFirstLayerName(filePath: string) {
   return layerMatch[1]
 }
 
-export async function getSourceFeatureCount(filePath: string) {
-  const layerName = await getFirstLayerName(filePath)
+export async function getSourceLayerInfo(filePath: string, layer: string | null | undefined) {
+  const layerName = layer?.trim() || (await getFirstLayerName(filePath))
   const result = await $`ogrinfo -so ${filePath} ${layerName}`.quiet().nothrow()
   if (result.exitCode !== 0) {
     throw new Error(result.stderr.toString().trim() || 'ogrinfo failed')
   }
   const stdout = result.stdout.toString()
-  const match = stdout.match(/Feature Count:\s*(\d+)/)
-  if (!match?.[1]) {
+  const countMatch = stdout.match(/Feature Count:\s*(\d+)/)
+  if (!countMatch?.[1]) {
     throw new Error(`Could not read feature count from ogrinfo output for ${filePath}`)
   }
-  return Number(match[1])
+  const geometryMatch = stdout.match(/^Geometry:\s*(.+)$/m)
+  if (!geometryMatch?.[1]) {
+    throw new Error(`Could not read geometry type from ogrinfo output for ${filePath}`)
+  }
+  return {
+    layerName,
+    featureCount: Number(countMatch[1]),
+    geometryType: geometryMatch[1].trim(),
+  }
 }
 
 export async function runOgr2ogrImport({
   filePath,
-  tableName,
-  schema,
+  spec,
   databaseUrl,
-  overwrite,
-  dryRun,
 }: {
   filePath: string
-  tableName: string
-  schema: string
+  spec: DataSchemaSpec
   databaseUrl: string
-  overwrite: boolean
-  dryRun: boolean
 }) {
   const pg = databaseUrlToOgrPg(databaseUrl)
+  const { import: importOpts, table } = spec
   const args = [
     'ogr2ogr',
     '-f',
@@ -73,25 +63,26 @@ export async function runOgr2ogrImport({
     pg,
     filePath,
     '-nln',
-    tableName,
+    table,
     '-lco',
-    `SCHEMA=${schema}`,
+    'SCHEMA=data',
     '-lco',
-    'GEOMETRY_NAME=geom',
+    `GEOMETRY_NAME=${importOpts.geometryName}`,
     '-lco',
-    'FID=id',
+    `FID=${importOpts.fidColumn}`,
+    '-lco',
+    'OVERWRITE=YES',
+    '-lco',
+    'SPATIAL_INDEX=YES',
     '-t_srs',
-    'EPSG:4326',
-    '-select',
-    'type',
+    `EPSG:${importOpts.srid}`,
     '-progress',
   ]
-  if (overwrite) {
-    args.push('-lco', 'OVERWRITE=YES')
+  if (importOpts.selectColumns && importOpts.selectColumns.length > 0) {
+    args.push('-select', importOpts.selectColumns.join(','))
   }
-
-  if (dryRun) {
-    return { command: args.join(' ') }
+  if (importOpts.layer) {
+    args.push(importOpts.layer)
   }
 
   const result = Bun.spawnSync(args, { stdout: 'pipe', stderr: 'pipe' })
@@ -102,5 +93,6 @@ export async function runOgr2ogrImport({
       [stderr, stdout].filter(Boolean).join('\n') || `ogr2ogr failed (${result.exitCode})`,
     )
   }
-  return { command: args.join(' ') }
+  const safeArgs = args.map((a) => (a.startsWith('PG:') ? 'PG:…' : a))
+  return { command: safeArgs.join(' ') }
 }

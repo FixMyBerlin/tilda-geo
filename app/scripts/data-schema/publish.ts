@@ -1,0 +1,188 @@
+import { existsSync, statSync } from 'node:fs'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { basename, dirname, join } from 'node:path'
+import * as p from '@clack/prompts'
+import { $ } from 'bun'
+import { buildDataSchemaManifest } from '@/server/dataSchema/buildDataSchemaManifest'
+import {
+  dataSchemaLocalSourcePath,
+  dataSchemaLocalSpecPath,
+} from '@/server/dataSchema/dataSchemaLocalPaths'
+import {
+  createDataSchemaS3Client,
+  putS3FileMultipart,
+  putS3Json,
+} from '@/server/dataSchema/dataSchemaS3.server'
+import {
+  dataSchemaLatestDumpKey,
+  dataSchemaLatestManifestKey,
+  dataSchemaSnapshotDumpKey,
+  dataSchemaSnapshotId,
+  dataSchemaSnapshotManifestKey,
+} from '@/server/dataSchema/dataSchemaS3Keys'
+import { dataSchemaSpecSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { resolveLargeForRepublish } from '@/server/dataSchema/resolveLargeForRepublish'
+import { sha256File } from '@/server/dataSchema/sha256File'
+import { toDockerNetworkUrl } from '../db-pull/db-helpers'
+import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
+import { parsePublishArgs, printPublishHelp } from './args'
+import {
+  POSTGRES_CLI_IMAGE,
+  SCHEMA,
+  assertDevelopmentEnvironment,
+  getDatabaseUrl,
+  getRowCount,
+} from './db'
+
+async function getPgDumpVersion() {
+  const result = await $`docker run --rm --entrypoint pg_dump ${POSTGRES_CLI_IMAGE} --version`
+    .quiet()
+    .nothrow()
+  if (result.exitCode !== 0) {
+    throw new Error(result.stderr.toString().trim() || 'pg_dump --version failed')
+  }
+  const text = result.stdout.toString().trim()
+  const match = text.match(/(\d+\.\d+(?:\.\d+)?)/)
+  return match?.[1] ?? text
+}
+
+export async function runPublish(argv: string[]) {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    printPublishHelp()
+    return
+  }
+
+  const options = parsePublishArgs(argv)
+  assertDevelopmentEnvironment()
+  getValidatedEnv(staticDatasetsS3CredentialsSchema)
+
+  const localSpecPath = dataSchemaLocalSpecPath(options.table)
+  /** Explicit only when local spec.json sets `large`; otherwise inherit from S3 latest manifest. */
+  let largeOverride: boolean | undefined
+  let sourceFile: string | undefined
+  let sourceSha256: string | undefined
+  let specSha256: string | undefined
+
+  if (existsSync(localSpecPath)) {
+    const raw = await readFile(localSpecPath, 'utf8')
+    const rawJson = JSON.parse(raw) as { large?: unknown; table?: unknown }
+    const spec = dataSchemaSpecSchema.parse(rawJson)
+    if (spec.table !== options.table) {
+      throw new Error(
+        `Spec table mismatch: --table ${options.table} but spec.table is "${spec.table}".`,
+      )
+    }
+    if (typeof rawJson.large === 'boolean') {
+      largeOverride = rawJson.large
+    }
+    sourceFile = spec.source.file
+    const { createHash } = await import('node:crypto')
+    specSha256 = createHash('sha256').update(raw).digest('hex')
+    const localSource = dataSchemaLocalSourcePath(options.table, spec.source.file)
+    if (existsSync(localSource)) {
+      sourceSha256 = await sha256File(localSource)
+    }
+  }
+
+  p.intro('data-schema publish')
+  const rowCount = await getRowCount(options.table)
+  p.log.info(`Row count: ${rowCount.toLocaleString()}`)
+
+  const tempDir = await mkdtemp(join(tmpdir(), 'data-schema-publish-'))
+  const dumpPath = join(tempDir, 'table.dump')
+  const dumpDir = dirname(dumpPath)
+  const dumpFile = basename(dumpPath)
+  const dockerDumpPath = `/dump/${dumpFile}`
+  const databaseUrl = getDatabaseUrl()
+  const dockerUrl = toDockerNetworkUrl(databaseUrl)
+
+  try {
+    const spinner = p.spinner()
+    spinner.start(`pg_dump ${SCHEMA}.${options.table}…`)
+    const dumpResult =
+      await $`docker run --rm --add-host=host.docker.internal:host-gateway --volume ${dumpDir}:/dump --entrypoint pg_dump ${POSTGRES_CLI_IMAGE} --format=custom --no-owner --no-privileges --table=${SCHEMA}.${options.table} --file=${dockerDumpPath} ${dockerUrl}`
+        .quiet()
+        .nothrow()
+    if (dumpResult.exitCode !== 0) {
+      throw new Error(
+        dumpResult.stderr.toString().trim() || `pg_dump failed (${dumpResult.exitCode})`,
+      )
+    }
+    spinner.stop('Dump created.')
+
+    if (!existsSync(dumpPath) || statSync(dumpPath).size <= 0) {
+      throw new Error(`Dump file missing or empty: ${dumpPath}`)
+    }
+
+    const bytes = statSync(dumpPath).size
+    const sha256 = await sha256File(dumpPath)
+    const pgDumpVersion = await getPgDumpVersion()
+    const publishedAt = new Date().toISOString()
+    const publishedBy = process.env.USER?.trim() || process.env.LOGNAME?.trim() || 'unknown'
+    const publishedFrom = process.env.ENVIRONMENT?.trim() || 'development'
+
+    const { client, bucket } = createDataSchemaS3Client()
+    const large = await resolveLargeForRepublish(client, bucket, options.table, largeOverride)
+
+    const latestManifest = buildDataSchemaManifest({
+      table: options.table,
+      publishedAt,
+      snapshotId: null,
+      bytes,
+      sha256,
+      rowCount,
+      large,
+      pgDumpVersion,
+      publishedBy,
+      publishedFrom,
+      sourceFile,
+      sourceSha256,
+      specSha256,
+    })
+
+    const latestDumpKey = dataSchemaLatestDumpKey(options.table)
+    const latestManifestKey = dataSchemaLatestManifestKey(options.table)
+
+    spinner.start(`Uploading latest dump (${bytes.toLocaleString()} bytes)…`)
+    await putS3FileMultipart(client, bucket, latestDumpKey, dumpPath)
+    await putS3Json(client, bucket, latestManifestKey, latestManifest)
+    spinner.stop(`Uploaded s3://${bucket}/${latestDumpKey}`)
+
+    const written = [
+      `s3://${bucket}/${latestDumpKey} (${bytes.toLocaleString()} bytes)`,
+      `s3://${bucket}/${latestManifestKey}`,
+    ]
+
+    if (options.snapshot) {
+      const snapshotId = dataSchemaSnapshotId()
+      const snapshotManifest = buildDataSchemaManifest({
+        table: options.table,
+        publishedAt,
+        snapshotId,
+        bytes,
+        sha256,
+        rowCount,
+        large,
+        pgDumpVersion,
+        publishedBy,
+        publishedFrom,
+        sourceFile,
+        sourceSha256,
+        specSha256,
+      })
+      const snapDumpKey = dataSchemaSnapshotDumpKey(options.table, snapshotId)
+      const snapManifestKey = dataSchemaSnapshotManifestKey(options.table, snapshotId)
+      spinner.start(`Uploading snapshot ${snapshotId}…`)
+      await putS3FileMultipart(client, bucket, snapDumpKey, dumpPath)
+      await putS3Json(client, bucket, snapManifestKey, snapshotManifest)
+      spinner.stop(`Uploaded s3://${bucket}/${snapDumpKey}`)
+      written.push(`s3://${bucket}/${snapDumpKey}`, `s3://${bucket}/${snapManifestKey}`)
+    }
+
+    p.note(written.join('\n'), 'Written')
+    p.outro(`Published ${SCHEMA}.${options.table} (sha256=${sha256.slice(0, 12)}…).`)
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => undefined)
+  }
+}

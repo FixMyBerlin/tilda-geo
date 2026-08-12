@@ -597,3 +597,31 @@ enum QaEvaluatorType {
 
   @@schema("prisma")
 }
+
+model DataSchemaImport {
+  id          Int                    @id @default(autoincrement())
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  tableName   String
+  publishedAt DateTime?
+  snapshotId  String?
+  sha256      String
+  status      DataSchemaImportStatus @default(PENDING)
+  rowCount    Int?
+  durationMs  Int?
+  errorText   String?
+  userId      String?
+
+  @@index([tableName, createdAt])
+  @@map("DataSchemaImport")
+  @@schema("prisma")
+}
+
+enum DataSchemaImportStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+
+  @@schema("prisma")
+}

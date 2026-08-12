@@ -40,6 +40,7 @@ import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
 import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
+import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
 import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
 import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
 import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
@@ -91,6 +92,9 @@ import { Route as ApiExportRegionSlugTableNameRouteImport } from './routes/api/e
 import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/api/export-ogr.$regionSlug.$tableName'
 import { Route as ApiAdminRegionsSlugRouteImport } from './routes/api/admin/regions.$slug'
 import { Route as ApiAdminRegionUploadsUploadRouteImport } from './routes/api/admin/region-uploads.upload'
+import { Route as ApiAdminDataSchemaPublishRouteImport } from './routes/api/admin/data-schema.publish'
+import { Route as ApiAdminDataSchemaImportAllRouteImport } from './routes/api/admin/data-schema.import-all'
+import { Route as ApiAdminDataSchemaImportRouteImport } from './routes/api/admin/data-schema.import'
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
 import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
 import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
@@ -252,6 +256,11 @@ const AdminMapDatasetCategoriesRoute =
     path: '/map-dataset-categories',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminDataSchemaRoute = AdminDataSchemaRouteImport.update({
+  id: '/data-schema',
+  path: '/data-schema',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
   id: '/audit-log',
   path: '/audit-log',
@@ -529,6 +538,24 @@ const ApiAdminRegionUploadsUploadRoute =
     path: '/upload',
     getParentRoute: () => ApiAdminRegionUploadsRoute,
   } as any)
+const ApiAdminDataSchemaPublishRoute =
+  ApiAdminDataSchemaPublishRouteImport.update({
+    id: '/api/admin/data-schema/publish',
+    path: '/api/admin/data-schema/publish',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminDataSchemaImportAllRoute =
+  ApiAdminDataSchemaImportAllRouteImport.update({
+    id: '/api/admin/data-schema/import-all',
+    path: '/api/admin/data-schema/import-all',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAdminDataSchemaImportRoute =
+  ApiAdminDataSchemaImportRouteImport.update({
+    id: '/api/admin/data-schema/import',
+    path: '/api/admin/data-schema/import',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminRegionsRegionSlugEditRoute =
   AdminRegionsRegionSlugEditRouteImport.update({
     id: '/$regionSlug/edit',
@@ -565,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
+  '/admin/data-schema': typeof AdminDataSchemaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
@@ -626,6 +654,9 @@ export interface FileRoutesByFullPath {
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
+  '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
+  '/api/admin/data-schema/import-all': typeof ApiAdminDataSchemaImportAllRoute
+  '/api/admin/data-schema/publish': typeof ApiAdminDataSchemaPublishRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
   '/api/admin/regions/$slug': typeof ApiAdminRegionsSlugRoute
   '/api/export-ogr/$regionSlug/$tableName': typeof ApiExportOgrRegionSlugTableNameRoute
@@ -650,6 +681,7 @@ export interface FileRoutesByTo {
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
+  '/admin/data-schema': typeof AdminDataSchemaRoute
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -704,6 +736,9 @@ export interface FileRoutesByTo {
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
+  '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
+  '/api/admin/data-schema/import-all': typeof ApiAdminDataSchemaImportAllRoute
+  '/api/admin/data-schema/publish': typeof ApiAdminDataSchemaPublishRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
   '/api/admin/regions/$slug': typeof ApiAdminRegionsSlugRoute
   '/api/export-ogr/$regionSlug/$tableName': typeof ApiExportOgrRegionSlugTableNameRoute
@@ -732,6 +767,7 @@ export interface FileRoutesById {
   '/_pages/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
+  '/admin/data-schema': typeof AdminDataSchemaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
@@ -793,6 +829,9 @@ export interface FileRoutesById {
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
+  '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
+  '/api/admin/data-schema/import-all': typeof ApiAdminDataSchemaImportAllRoute
+  '/api/admin/data-schema/publish': typeof ApiAdminDataSchemaPublishRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
   '/api/admin/regions/$slug': typeof ApiAdminRegionsSlugRoute
   '/api/export-ogr/$regionSlug/$tableName': typeof ApiExportOgrRegionSlugTableNameRoute
@@ -821,6 +860,7 @@ export interface FileRouteTypes {
     | '/oAuthError'
     | '/admin/api-tokens'
     | '/admin/audit-log'
+    | '/admin/data-schema'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
@@ -882,6 +922,9 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
+    | '/api/admin/data-schema/import'
+    | '/api/admin/data-schema/import-all'
+    | '/api/admin/data-schema/publish'
     | '/api/admin/region-uploads/upload'
     | '/api/admin/regions/$slug'
     | '/api/export-ogr/$regionSlug/$tableName'
@@ -906,6 +949,7 @@ export interface FileRouteTypes {
     | '/oAuthError'
     | '/admin/api-tokens'
     | '/admin/audit-log'
+    | '/admin/data-schema'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -960,6 +1004,9 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
+    | '/api/admin/data-schema/import'
+    | '/api/admin/data-schema/import-all'
+    | '/api/admin/data-schema/publish'
     | '/api/admin/region-uploads/upload'
     | '/api/admin/regions/$slug'
     | '/api/export-ogr/$regionSlug/$tableName'
@@ -987,6 +1034,7 @@ export interface FileRouteTypes {
     | '/_pages/oAuthError'
     | '/admin/api-tokens'
     | '/admin/audit-log'
+    | '/admin/data-schema'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
@@ -1048,6 +1096,9 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
+    | '/api/admin/data-schema/import'
+    | '/api/admin/data-schema/import-all'
+    | '/api/admin/data-schema/publish'
     | '/api/admin/region-uploads/upload'
     | '/api/admin/regions/$slug'
     | '/api/export-ogr/$regionSlug/$tableName'
@@ -1091,6 +1142,9 @@ export interface RootRouteChildren {
   ApiPrivateRegisterSqlFunctionsRoute: typeof ApiPrivateRegisterSqlFunctionsRoute
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
+  ApiAdminDataSchemaImportRoute: typeof ApiAdminDataSchemaImportRoute
+  ApiAdminDataSchemaImportAllRoute: typeof ApiAdminDataSchemaImportAllRoute
+  ApiAdminDataSchemaPublishRoute: typeof ApiAdminDataSchemaPublishRoute
   ApiExportOgrRegionSlugTableNameRoute: typeof ApiExportOgrRegionSlugTableNameRoute
   ApiExportRegionSlugTableNameRoute: typeof ApiExportRegionSlugTableNameRoute
   ApiMaprouletteDataProjectKeyRoute: typeof ApiMaprouletteDataProjectKeyRoute
@@ -1319,6 +1373,13 @@ declare module '@tanstack/react-router' {
       path: '/map-dataset-categories'
       fullPath: '/admin/map-dataset-categories'
       preLoaderRoute: typeof AdminMapDatasetCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/data-schema': {
+      id: '/admin/data-schema'
+      path: '/data-schema'
+      fullPath: '/admin/data-schema'
+      preLoaderRoute: typeof AdminDataSchemaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/audit-log': {
@@ -1678,6 +1739,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminRegionUploadsUploadRouteImport
       parentRoute: typeof ApiAdminRegionUploadsRoute
     }
+    '/api/admin/data-schema/publish': {
+      id: '/api/admin/data-schema/publish'
+      path: '/api/admin/data-schema/publish'
+      fullPath: '/api/admin/data-schema/publish'
+      preLoaderRoute: typeof ApiAdminDataSchemaPublishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/data-schema/import-all': {
+      id: '/api/admin/data-schema/import-all'
+      path: '/api/admin/data-schema/import-all'
+      fullPath: '/api/admin/data-schema/import-all'
+      preLoaderRoute: typeof ApiAdminDataSchemaImportAllRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/data-schema/import': {
+      id: '/api/admin/data-schema/import'
+      path: '/api/admin/data-schema/import'
+      fullPath: '/api/admin/data-schema/import'
+      preLoaderRoute: typeof ApiAdminDataSchemaImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/regions/$regionSlug/edit': {
       id: '/admin/regions/$regionSlug/edit'
       path: '/$regionSlug/edit'
@@ -1843,6 +1925,7 @@ const AdminRegionsRouteWithChildren = AdminRegionsRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
+  AdminDataSchemaRoute: typeof AdminDataSchemaRoute
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRouteWithChildren
@@ -1856,6 +1939,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApiTokensRoute: AdminApiTokensRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
+  AdminDataSchemaRoute: AdminDataSchemaRoute,
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRouteWithChildren,
@@ -1996,6 +2080,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPrivateRegisterSqlFunctionsRoute: ApiPrivateRegisterSqlFunctionsRoute,
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,
+  ApiAdminDataSchemaImportRoute: ApiAdminDataSchemaImportRoute,
+  ApiAdminDataSchemaImportAllRoute: ApiAdminDataSchemaImportAllRoute,
+  ApiAdminDataSchemaPublishRoute: ApiAdminDataSchemaPublishRoute,
   ApiExportOgrRegionSlugTableNameRoute: ApiExportOgrRegionSlugTableNameRoute,
   ApiExportRegionSlugTableNameRoute: ApiExportRegionSlugTableNameRoute,
   ApiMaprouletteDataProjectKeyRoute: ApiMaprouletteDataProjectKeyRoute,

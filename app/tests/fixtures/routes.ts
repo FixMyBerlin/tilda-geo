@@ -42,4 +42,5 @@ export const ADMIN_ROUTES = [
   '/admin/audit-log',
   '/admin/api-tokens',
   '/admin/processing',
+  '/admin/data-schema',
 ] as const

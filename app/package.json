@@ -21,6 +21,7 @@
     "db-pull": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/run.ts",
     "db-pull:pull": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/pull.ts",
     "db-pull:restore": "bun --env-file=../.env --env-file=../.env.local scripts/db-pull/restore-local.ts",
+    "data-schema": "bun --env-file=../.env --env-file=../.env.local ./scripts/data-schema/index.ts",
     "audit-public-schema": "bun --env-file=../.env --env-file=../.env.local scripts/audit-public-schema/index.ts",
     "build": "vite build",
     "preview": "cd .output && NITRO_PORT=4000 NITRO_HOST=127.0.0.1 bun --env-file=../.env --env-file=../.env.local ./server/index.mjs",
@@ -102,6 +103,8 @@
     "prepare": "cd .. && husky app/.husky"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1092.0",
+    "@aws-sdk/lib-storage": "3.1092.0",
     "@better-upload/client": "^3.0.19",
     "@better-upload/server": "^3.0.19",
     "@date-fns/tz": "1.5.0",
@@ -170,7 +173,6 @@
     "zustand": "5.0.14"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.1092.0",
     "@clack/prompts": "1.7.0",
     "@faker-js/faker": "^10.5.0",
     "@heroicons/react": "2.2.0",
