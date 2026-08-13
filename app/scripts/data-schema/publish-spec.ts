@@ -13,14 +13,14 @@ import {
 import { dataSchemaSourceFileKey, dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
-import { parsePublishSpecArgs, printCommandHelp } from './args'
+import { parsePublishSpecArgs, printPublishSpecHelp } from './args'
 
 const RAW_UPLOAD_LIMIT_BYTES = 100 * 1024 * 1024
 
 export async function runPublishSpec(argv: string[]) {
   // Allow --help without --table
   if (argv.includes('--help') || argv.includes('-h')) {
-    printCommandHelp('publish-spec')
+    printPublishSpecHelp()
     return
   }
 

@@ -15,11 +15,11 @@ import {
 import { dataSchemaSourceFileKey, dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
-import { parseSyncArgs, printCommandHelp } from './args'
+import { parseSyncArgs, printSyncHelp } from './args'
 
 export async function runSync(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printCommandHelp('sync')
+    printSyncHelp()
     return
   }
 

@@ -7,14 +7,14 @@ import {
   dataSchemaLocalSpecPath,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { parseImportRawArgs, printCommandHelp } from './args'
+import { parseImportRawArgs, printImportRawHelp } from './args'
 import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount, runPsql } from './db'
 import { assertOgrToolsPresent, getSourceLayerInfo, runOgr2ogrImport } from './ogr'
 import { geometryTypesMatch } from './ogrHelpers'
 
 export async function runImportRaw(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printCommandHelp('import-raw')
+    printImportRawHelp()
     return
   }
 

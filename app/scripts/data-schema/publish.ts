@@ -24,7 +24,7 @@ import { resolveLargeForRepublish } from '@/server/dataSchema/resolveLargeForRep
 import { sha256File } from '@/server/dataSchema/sha256File'
 import { POSTGRES_CLI_IMAGE, toDockerNetworkUrl } from '../db-pull/db-helpers'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
-import { parsePublishArgs, printCommandHelp } from './args'
+import { parsePublishArgs, printPublishHelp } from './args'
 import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount } from './db'
 
 async function getPgDumpVersion() {
@@ -41,7 +41,7 @@ async function getPgDumpVersion() {
 
 export async function runPublish(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printCommandHelp('publish')
+    printPublishHelp()
     return
   }
 
