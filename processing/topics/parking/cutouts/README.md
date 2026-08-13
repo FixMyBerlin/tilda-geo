@@ -12,7 +12,7 @@ https://drive.google.com/drive/u/0/folders/1wEKkUayaySZ6AhsdrkTGbbeVAx1YJARs
 
 #### Import / Update
 
-Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-table/SKILL.md), [folder README](../../../../data-schema/README.md)). Specs are gitignored — seed them with `publish-spec`.
+Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-table/SKILL.md), [folder README](../../../../data-schema/README.md)). Specs are gitignored — seed them with `data-schema-publish --spec-only`.
 
 **Point (`data.euvm_cutouts_point`) — example `spec.json`:**
 
@@ -43,15 +43,15 @@ Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-t
 
 - `table` / `source.file` / index name → `euvm_cutouts_polygon*`
 - `selectColumns`: `["type"]`
-- `expectedGeometryType`: `"MultiPolygon"` (or `"Polygon"` depending on the delivery). Use WKB-style names in the spec; `import-raw` accepts ogrinfo’s spaced forms (e.g. `Multi Polygon`).
+- `expectedGeometryType`: `"MultiPolygon"` (or `"Polygon"` depending on the delivery). Use WKB-style names in the spec; `data-schema-load` accepts ogrinfo’s spaced forms (e.g. `Multi Polygon`).
 
 From `app/`:
 
 ```bash
-bun run data-schema sync
-bun run data-schema publish-spec -- --table euvm_cutouts_point
-bun run data-schema import-raw -- --table euvm_cutouts_point --file /path/to/euvm_cutouts_point.geojson
-bun run data-schema publish -- --table euvm_cutouts_point
+bun run data-schema-sync
+bun run data-schema-publish -- --table euvm_cutouts_point --spec-only
+bun run data-schema-load -- --table euvm_cutouts_point --file /path/to/euvm_cutouts_point.geojson
+bun run data-schema-publish -- --table euvm_cutouts_point
 # repeat for euvm_cutouts_polygon
 ```
 

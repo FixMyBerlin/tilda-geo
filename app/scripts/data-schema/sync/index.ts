@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { mkdir, writeFile } from 'node:fs/promises'
 import * as p from '@clack/prompts'
 import {
@@ -14,10 +15,11 @@ import {
 } from '@/server/dataSchema/dataSchemaS3.server'
 import { dataSchemaSourceFileKey, dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
+import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../../shared/env'
+import { runCli } from '../cli'
 import { parseSyncArgs, printSyncHelp } from './args'
 
-export async function runSync(argv: string[]) {
+async function runSync(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
     printSyncHelp()
     return
@@ -35,7 +37,7 @@ export async function runSync(argv: string[]) {
     return
   }
 
-  p.intro('data-schema sync')
+  p.intro('data-schema-sync')
   const rows: { table: string; spec: string; raw: string }[] = []
 
   for (const table of tables) {
@@ -75,4 +77,8 @@ export async function runSync(argv: string[]) {
     .join('\n')
   p.note(summary, 'Summary')
   p.outro(`Synced ${rows.filter((r) => r.spec === 'synced').length}/${tables.length} table(s).`)
+}
+
+if (import.meta.main) {
+  await runCli(runSync)
 }

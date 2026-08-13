@@ -1,48 +1,27 @@
 #!/usr/bin/env bun
-import * as p from '@clack/prompts'
-import { type Subcommand, SUBCOMMANDS, printRootHelp } from './args'
-import { runImportRaw } from './import-raw'
-import { runPublish } from './publish'
-import { runPublishSpec } from './publish-spec'
-import { runSync } from './sync'
 
-function stripDoubleDash(argv: string[]) {
-  return argv.filter((arg) => arg !== '--')
+export function formatRootHelp() {
+  return `data-schema
+
+Three scripts (from app/):
+
+  data-schema-sync     Pull specs from S3 into local data-schema/ (any machine)
+  data-schema-load     Laptop: source file → local data.<table> (ogr2ogr)
+  data-schema-publish  Laptop: spec.json + pg_dump → S3 latest/
+
+Staging/production get data.* tables via /admin/data-schema Import, not via sync.
+
+Usage:
+  bun run data-schema-sync [-- --table <name>]
+  bun run data-schema-load -- --table <name> [--file <path>]
+  bun run data-schema-publish -- --table <name> [--spec-only] [--mode override|snapshot]
+
+  bun run data-schema-sync -- --help
+  bun run data-schema-load -- --help
+  bun run data-schema-publish -- --help
+`
 }
 
-async function main() {
-  const argv = stripDoubleDash(Bun.argv.slice(2))
-  const command = argv[0]
-
-  if (!command || command === '--help' || command === '-h') {
-    printRootHelp()
-    return
-  }
-
-  if (!SUBCOMMANDS.includes(command as Subcommand)) {
-    printRootHelp()
-    throw new Error(`Unknown command: ${command}`)
-  }
-
-  const commandArgv = argv.slice(1)
-
-  switch (command as Subcommand) {
-    case 'sync':
-      await runSync(commandArgv)
-      break
-    case 'publish-spec':
-      await runPublishSpec(commandArgv)
-      break
-    case 'import-raw':
-      await runImportRaw(commandArgv)
-      break
-    case 'publish':
-      await runPublish(commandArgv)
-      break
-  }
+if (import.meta.main) {
+  process.stdout.write(formatRootHelp())
 }
-
-main().catch((error) => {
-  p.log.error(error instanceof Error ? error.message : String(error))
-  process.exit(1)
-})

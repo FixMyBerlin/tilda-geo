@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { existsSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
@@ -7,24 +8,27 @@ import {
   dataSchemaLocalSpecPath,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { parseImportRawArgs, printImportRawHelp } from './args'
-import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount, runPsql } from './db'
+import { runCli } from '../cli'
+import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount, runPsql } from '../db'
+import { parseLoadArgs, printLoadHelp } from './args'
 import { assertOgrToolsPresent, getSourceLayerInfo, runOgr2ogrImport } from './ogr'
 import { geometryTypesMatch } from './ogrHelpers'
 
-export async function runImportRaw(argv: string[]) {
+async function runLoad(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printImportRawHelp()
+    printLoadHelp()
     return
   }
 
-  const options = parseImportRawArgs(argv)
+  const options = parseLoadArgs(argv)
   assertDevelopmentEnvironment()
   await assertOgrToolsPresent()
 
   const localSpecPath = dataSchemaLocalSpecPath(options.table)
   if (!existsSync(localSpecPath)) {
-    throw new Error(`Local spec not found: ${localSpecPath} (run sync or create it first)`)
+    throw new Error(
+      `Local spec not found: ${localSpecPath} (run data-schema-sync or create it first)`,
+    )
   }
 
   const spec = parseDataSchemaSpec(JSON.parse(await readFile(localSpecPath, 'utf8')), options.table)
@@ -37,7 +41,7 @@ export async function runImportRaw(argv: string[]) {
     throw new Error(`Source file not found: ${filePath}`)
   }
 
-  p.intro('data-schema import-raw')
+  p.intro('data-schema-load')
   const layerInfo = await getSourceLayerInfo(filePath, spec.import.layer)
   p.log.info(
     `Source: ${layerInfo.featureCount.toLocaleString()} features, geometry=${layerInfo.geometryType}, layer=${layerInfo.layerName}`,
@@ -72,4 +76,8 @@ export async function runImportRaw(argv: string[]) {
   }
 
   p.outro(`Done. ${SCHEMA}.${spec.table}: ${dbCount.toLocaleString()} rows.`)
+}
+
+if (import.meta.main) {
+  await runCli(runLoad)
 }

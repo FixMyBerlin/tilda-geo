@@ -1,6 +1,6 @@
 ---
 name: add-db-data-table
-description: Add or update a Postgres data.* table via data-schema (spec, import-raw, publish dump, admin Import). Use when processing SQL needs data inside Postgres; not for map tiles/GeoJSON StaticDatasets.
+description: Add or update a Postgres data.* table via data-schema (spec, data-schema-load, data-schema-publish dump, admin Import). Use when processing SQL needs data inside Postgres; not for map tiles/GeoJSON StaticDatasets.
 ---
 
 # Add DB data table (`data.*`)
@@ -12,9 +12,9 @@ description: Add or update a Postgres data.* table via data-schema (spec, import
 
 ## Boundary
 
-1. **Laptop (stage 1):** raw file → local `data.<table>` via `import-raw`.
-2. **Publish (stage 2):** `pg_dump -Fc` → S3 `data-schema/<table>/latest/`.
-3. Staging / production / fresh dev **only** import the published dump via `/admin/data-schema`.
+1. **Laptop (stage 1):** raw file → local `data.<table>` via `data-schema-load`.
+2. **Publish (stage 2):** `data-schema-publish` (`pg_dump -Fc` → S3 `data-schema/<table>/latest/`).
+3. Staging / production / fresh dev **only** import the published dump via `/admin/data-schema`. `data-schema-sync` only mirrors specs (and optionally source files), including on servers — it does not load `data.*`.
 
 `data.*` reaches map layers only after processing rebuilds `public.*`.
 
@@ -47,20 +47,20 @@ Repo-root `data-schema/<table>/`: `spec.json` + exactly one source file named af
 }
 ```
 
-Polygon variant: same shape with `table` / `source.file` / index name `euvm_cutouts_polygon*`, `expectedGeometryType: "MultiPolygon"` (or `Polygon`). Specs use WKB-style names (`MultiPolygon`, `LineString`); `import-raw` normalises ogrinfo’s spaced forms (`Multi Polygon`, `3D Point`, …) before comparing. Seed specs with `publish-spec` (they are gitignored).
+Polygon variant: same shape with `table` / `source.file` / index name `euvm_cutouts_polygon*`, `expectedGeometryType: "MultiPolygon"` (or `Polygon`). Specs use WKB-style names (`MultiPolygon`, `LineString`); `data-schema-load` normalises ogrinfo’s spaced forms (`Multi Polygon`, `3D Point`, …) before comparing. Seed specs with `data-schema-publish --spec-only` (they are gitignored).
 
 ## Commands (from `app/`)
 
 ```bash
-bun run data-schema sync
-bun run data-schema publish-spec -- --table <table>
-bun run data-schema import-raw -- --table <table> [--file /abs/path]
-bun run data-schema publish -- --table <table> [--snapshot]
+bun run data-schema-sync
+bun run data-schema-publish -- --table <table> --spec-only
+bun run data-schema-load -- --table <table> [--file /abs/path]
+bun run data-schema-publish -- --table <table> [--mode override|snapshot]
 ```
 
 Then **Import** on `/admin/data-schema` (staging, then production).
 
-`publish` overwrites `latest/` by default; `--snapshot` is the opt-in immutable copy (no version folder per upload).
+`data-schema-publish` overwrites `latest/` by default; `--mode snapshot` is the opt-in immutable copy of this publish (no version folder per upload). When `latest/` is at least 1 day old and `--mode` is omitted, the laptop CLI asks override vs snapshot.
 
 ## Verify
 
@@ -69,8 +69,8 @@ Then **Import** on `/admin/data-schema` (staging, then production).
 
 ## Operational notes
 
-- **Fresh databases:** Both `import-raw` (stage 1) and admin Import call `CREATE SCHEMA IF NOT EXISTS data` before writing tables. Published dumps from `pg_dump --table=data.*` do not include `CREATE SCHEMA`, so a machine that has never run `processing/` can still bootstrap `data.*` from S3 alone (or from `import-raw` after Prisma migrations only).
-- **`large` on republish:** CLI `publish` and server republish inherit `large` from the existing `latest/manifest.json` when the local spec omits it (or there is no local spec). Default `false` only when there is no previous manifest — so a multi-GB opt-in table is not silently cleared.
+- **Fresh databases:** Both `data-schema-load` (stage 1) and admin Import call `CREATE SCHEMA IF NOT EXISTS data` before writing tables. Published dumps from `pg_dump --table=data.*` do not include `CREATE SCHEMA`, so a machine that has never run `processing/` can still bootstrap `data.*` from S3 alone (or from `data-schema-load` after Prisma migrations only).
+- **`large` on republish:** CLI `data-schema-publish` and server republish inherit `large` from the existing `latest/manifest.json` when the local spec omits it (or there is no local spec). Default `false` only when there is no previous manifest — so a multi-GB opt-in table is not silently cleared.
 - **Publish order:** dump goes to `objects/<sha256>.dump` first, then `latest/manifest.json` (the pointer), then a convenience copy at `latest/table.dump`. Import prefers the object dump so a failed pointer update cannot pair a new dump with an old sha256.
 - **Process death mid-import:** a container restart during restore can leave `data.<table>_…__old` and a history row stuck in `RUNNING`. The next Import detects an existing aside and refuses to proceed until it is restored or dropped manually.
 - **Concurrent Import:** an advisory lock per table returns a clear “Import läuft bereits” error instead of racing.

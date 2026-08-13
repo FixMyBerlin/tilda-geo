@@ -17,28 +17,28 @@ Contents except this README and `.gitignore` are gitignored and synced from S3. 
 ## CLI (from `app/`)
 
 ```bash
-# Pull specs from S3 (all tables, or one)
-bun run data-schema sync
-bun run data-schema sync -- --table euvm_cutouts_point
-bun run data-schema sync -- --with-raw   # also download source files when present on S3
+# Pull specs from S3 (spec mirror on this machine)
+bun run data-schema-sync
+bun run data-schema-sync -- --table euvm_cutouts_point
+bun run data-schema-sync -- --with-raw   # also download source files when present on S3
 
-# Validate local spec and overwrite S3 sources/spec.json
-bun run data-schema publish-spec -- --table euvm_cutouts_point
-bun run data-schema publish-spec -- --table euvm_cutouts_point --with-raw
-
-# Stage 1: ogr2ogr into local data.<table> (ENVIRONMENT=development)
+# Laptop only: load source file → local data.<table> (ENVIRONMENT=development)
 # Creates schema `data` if missing. Specs use WKB geometry names (MultiPolygon);
 # ogrinfo spaced names (Multi Polygon) are accepted.
-bun run data-schema import-raw -- --table euvm_cutouts_point
-bun run data-schema import-raw -- --table census_population_points --file /path/to/file.gpkg
+bun run data-schema-load -- --table euvm_cutouts_point
+bun run data-schema-load -- --table census_population_points --file /path/to/file.gpkg
 
-# Stage 2: pg_dump custom format → S3 latest/ (optional --snapshot)
+# Laptop only: upload spec.json + pg_dump → S3 latest/
+# --spec-only skips the dump (recipe-only). --with-source-file uploads the geojson/gpkg (opt-in; can be large).
 # Inherits `large` from the previous latest/manifest when the local spec omits it.
-bun run data-schema publish -- --table euvm_cutouts_point
-bun run data-schema publish -- --table euvm_cutouts_point --snapshot
+# Always replaces latest/. Snapshot = extra copy of *this* dump under snapshots/<UTC>/.
+# When latest/ is ≥1 day old and --mode is omitted, the CLI asks (override vs snapshot).
+bun run data-schema-publish -- --table euvm_cutouts_point
+bun run data-schema-publish -- --table euvm_cutouts_point --spec-only
+bun run data-schema-publish -- --table euvm_cutouts_point --mode snapshot
 ```
 
-After publish: Import on staging/production at `/admin/data-schema`. `publish` overwrites `latest/` by default; `--snapshot` keeps an immutable copy under `snapshots/{UTC}/`.
+After publish: Import on staging/production at `/admin/data-schema`. `data-schema-publish` overwrites `latest/` by default; `--mode snapshot` keeps an immutable copy of this dump under `snapshots/{UTC}/`.
 
 ## S3 layout (env-agnostic)
 
@@ -53,9 +53,9 @@ After publish: Import on staging/production at `/admin/data-schema`. `publish` o
 
 ## Workflow
 
-1. `sync` (or draft a local `spec.json` + `publish-spec`)
+1. `data-schema-sync` (or draft a local `spec.json` and `data-schema-publish --spec-only`)
 2. Place the source file beside the spec (or pass `--file`)
-3. `import-raw` → verify counts on local DB
-4. `publish` → Import on `/admin/data-schema` (staging, then production)
+3. `data-schema-load` → verify counts on local DB
+4. `data-schema-publish` → Import on `/admin/data-schema` (staging, then production)
 
 Raw multi-GB files are never pulled by default; use `--file` or `--with-raw` deliberately. Map layers fed by processing update only after a processing rebuild.
