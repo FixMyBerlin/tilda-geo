@@ -23,13 +23,14 @@ import {
 } from './dataSchemaS3.server'
 import {
   assertDataSchemaTableName,
-  dataSchemaLatestDumpKey,
   dataSchemaLatestManifestKey,
   dataSchemaSnapshotDumpKey,
   dataSchemaSnapshotManifestKey,
 } from './dataSchemaS3Keys'
+import { shouldRecordImportAsFailed } from './importDataSchemaHistory'
 import { assertDumpContainsOnlyTable } from './parsePgRestoreToc'
 import type { AsideRenameMapping } from './pgIdentifier'
+import { resolveLatestDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { type AsideHolder, restoreVerifyDataSchemaTable } from './restoreVerifyDataSchemaTable'
 import { sha256File } from './sha256File'
 
@@ -44,6 +45,10 @@ function truncateErrorText(message: string) {
 function errorMessage(error: unknown) {
   if (error instanceof Error) return error.message
   return String(error)
+}
+
+function joinWarnings(...parts: Array<string | null | undefined>) {
+  return parts.filter((part): part is string => Boolean(part && part.length > 0)).join('; ')
 }
 
 async function rollbackAsideBestEffort(mapping: AsideRenameMapping | null, liveTable: string) {
@@ -76,13 +81,14 @@ export async function importDataSchemaTable({
   const manifestKey = snapshotId
     ? dataSchemaSnapshotManifestKey(table, snapshotId)
     : dataSchemaLatestManifestKey(table)
-  const dumpKey = snapshotId
-    ? dataSchemaSnapshotDumpKey(table, snapshotId)
-    : dataSchemaLatestDumpKey(table)
 
   const rawManifest = await getS3ObjectJson(client, bucket, manifestKey)
   const manifest = dataSchemaManifestSchema.parse(rawManifest)
   assertManifestMatchesTable(manifest, table)
+
+  const dumpKey = snapshotId
+    ? dataSchemaSnapshotDumpKey(table, snapshotId)
+    : await resolveLatestDataSchemaDumpKey(client, bucket, table, manifest.file.sha256)
 
   const startedAt = Date.now()
   const history = await db.dataSchemaImport.create({
@@ -104,6 +110,9 @@ export async function importDataSchemaTable({
   const tempDir = await mkdtemp(join(tmpdir(), 'data-schema-import-'))
   const dumpPath = join(tempDir, 'table.dump')
   const aside: AsideHolder = { mapping: null }
+  let restoreCommitted = false
+  let committedRowCount: number | undefined
+  let committedWarning: string | null = null
 
   try {
     return await withDataSchemaImportLock(table, async () => {
@@ -140,41 +149,48 @@ export async function importDataSchemaTable({
           expectedRowCount: manifest.rowCount,
           aside,
         })
+        restoreCommitted = true
+        committedRowCount = rowCount
+        committedWarning = asideDropWarning
 
         const durationMs = Date.now() - startedAt
-        if (asideDropWarning) {
+        try {
           await db.dataSchemaImport.update({
             where: { id: history.id },
             data: {
               status: 'SUCCESS',
               rowCount,
               durationMs,
-              errorText: truncateErrorText(asideDropWarning),
+              errorText: asideDropWarning ? truncateErrorText(asideDropWarning) : null,
             },
           })
+        } catch (bookkeepingError) {
+          const warning = joinWarnings(
+            asideDropWarning,
+            `Import OK, aber Verlaufseintrag konnte nicht auf SUCCESS gesetzt werden: ${errorMessage(bookkeepingError)}`,
+          )
+          committedWarning = warning
           return {
             ok: true as const,
             rowCount,
             durationMs,
             importId: history.id,
-            warning: asideDropWarning,
+            warning,
           }
         }
 
-        await db.dataSchemaImport.update({
-          where: { id: history.id },
-          data: {
-            status: 'SUCCESS',
-            rowCount,
-            durationMs,
-            errorText: null,
-          },
-        })
-
-        return { ok: true as const, rowCount, durationMs, importId: history.id }
+        return asideDropWarning
+          ? {
+              ok: true as const,
+              rowCount,
+              durationMs,
+              importId: history.id,
+              warning: asideDropWarning,
+            }
+          : { ok: true as const, rowCount, durationMs, importId: history.id }
       } catch (error) {
         // Rollback while the advisory lock is still held so a concurrent import cannot interleave.
-        if (aside.mapping) {
+        if (!restoreCommitted && aside.mapping) {
           try {
             await rollbackAsideBestEffort(aside.mapping, table)
             aside.mapping = null
@@ -188,6 +204,34 @@ export async function importDataSchemaTable({
       }
     })
   } catch (error) {
+    if (!shouldRecordImportAsFailed(restoreCommitted)) {
+      const durationMs = Date.now() - startedAt
+      const warning = joinWarnings(
+        committedWarning,
+        `Import OK, aber Verlaufseintrag konnte nicht auf SUCCESS gesetzt werden: ${errorMessage(error)}`,
+      )
+      try {
+        await db.dataSchemaImport.update({
+          where: { id: history.id },
+          data: {
+            status: 'SUCCESS',
+            rowCount: committedRowCount,
+            durationMs,
+            errorText: truncateErrorText(warning),
+          },
+        })
+      } catch {
+        // Leave RUNNING rather than FAILED — the live table is already swapped in.
+      }
+      return {
+        ok: true as const,
+        rowCount: committedRowCount!,
+        durationMs,
+        importId: history.id,
+        warning,
+      }
+    }
+
     // aside.mapping is normally cleared inside the lock (success or rollback). Defensive only.
     let message = truncateErrorText(errorMessage(error))
     if (aside.mapping) {
@@ -229,6 +273,7 @@ export async function importAllDataSchemaTables({
     rowCount?: number
     durationMs?: number
     error?: string
+    warning?: string
   }> = []
 
   for (const table of tables) {
@@ -250,6 +295,7 @@ export async function importAllDataSchemaTables({
         ok: true,
         rowCount: result.rowCount,
         durationMs: result.durationMs,
+        ...(result.warning ? { warning: result.warning } : {}),
       })
     } catch (error) {
       results.push({

@@ -36,6 +36,7 @@ async function postJson(url: string, body: unknown) {
   const data = (await response.json().catch(() => null)) as {
     ok?: boolean
     message?: string
+    warning?: string
     results?: Array<{
       table: string
       ok: boolean
@@ -44,6 +45,7 @@ async function postJson(url: string, body: unknown) {
       rowCount?: number
       durationMs?: number
       error?: string
+      warning?: string
     }>
   } | null
   if (!response.ok || data?.ok === false) {
@@ -59,7 +61,7 @@ function formatImportAllFeedback(data: Awaited<ReturnType<typeof postJson>>) {
   const lines = data.results.map((r) => {
     if (r.skipped) return `${r.table}: übersprungen (${r.reason ?? 'skipped'})`
     if (!r.ok) return `${r.table}: fehlgeschlagen — ${r.error ?? 'Fehler'}`
-    return `${r.table}: OK${r.rowCount != null ? ` (${r.rowCount.toLocaleString('de-DE')} Zeilen)` : ''}`
+    return `${r.table}: OK${r.rowCount != null ? ` (${r.rowCount.toLocaleString('de-DE')} Zeilen)` : ''}${r.warning ? ` — ${r.warning}` : ''}`
   })
   return [data.message || 'Import-All abgeschlossen.', ...lines].join('\n')
 }
@@ -81,8 +83,11 @@ export function PageDataSchema() {
     setPendingKey(key)
     try {
       const result = await action()
+      const data = result as Awaited<ReturnType<typeof postJson>>
       if (key === 'import-all') {
-        setFeedback(formatImportAllFeedback(result as Awaited<ReturnType<typeof postJson>>))
+        setFeedback(formatImportAllFeedback(data))
+      } else if (data?.warning) {
+        setFeedback(`Aktion abgeschlossen. ${data.warning}`)
       } else {
         setFeedback('Aktion abgeschlossen.')
       }

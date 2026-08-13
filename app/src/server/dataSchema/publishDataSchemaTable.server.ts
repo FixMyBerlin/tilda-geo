@@ -9,14 +9,11 @@ import {
   getPgDumpVersion,
 } from './dataSchemaDb.server'
 import { createDataSchemaS3Client, putS3FileMultipart, putS3Json } from './dataSchemaS3.server'
+import { assertDataSchemaTableName, dataSchemaSnapshotId } from './dataSchemaS3Keys'
 import {
-  assertDataSchemaTableName,
-  dataSchemaLatestDumpKey,
-  dataSchemaLatestManifestKey,
-  dataSchemaSnapshotDumpKey,
-  dataSchemaSnapshotId,
-  dataSchemaSnapshotManifestKey,
-} from './dataSchemaS3Keys'
+  publishLatestDumpAndManifest,
+  publishSnapshotDumpAndManifest,
+} from './publishDataSchemaArtifacts'
 import { resolveLargeForRepublish } from './resolveLargeForRepublish'
 import { sha256File } from './sha256File'
 
@@ -65,6 +62,10 @@ export async function publishDataSchemaTableFromEnvironment({
 
     const { client, bucket } = createDataSchemaS3Client()
     const resolvedLarge = await resolveLargeForRepublish(client, bucket, table, large)
+    const puts = {
+      putFile: (key: string, filePath: string) => putS3FileMultipart(client, bucket, key, filePath),
+      putJson: (key: string, value: unknown) => putS3Json(client, bucket, key, value),
+    }
 
     const latestManifest = buildDataSchemaManifest({
       table,
@@ -79,13 +80,11 @@ export async function publishDataSchemaTableFromEnvironment({
       publishedFrom,
     })
 
-    const latestDumpKey = dataSchemaLatestDumpKey(table)
-    const latestManifestKey = dataSchemaLatestManifestKey(table)
-
-    await putS3FileMultipart(client, bucket, latestDumpKey, dumpPath)
-    await putS3Json(client, bucket, latestManifestKey, latestManifest)
-
-    const written = [latestDumpKey, latestManifestKey]
+    const latest = await publishLatestDumpAndManifest(
+      { table, dumpPath, manifest: latestManifest },
+      puts,
+    )
+    const written = [...latest.keys]
     let snapshotId: string | null = null
 
     if (snapshot) {
@@ -102,11 +101,11 @@ export async function publishDataSchemaTableFromEnvironment({
         publishedBy: by,
         publishedFrom,
       })
-      const snapDumpKey = dataSchemaSnapshotDumpKey(table, snapshotId)
-      const snapManifestKey = dataSchemaSnapshotManifestKey(table, snapshotId)
-      await putS3FileMultipart(client, bucket, snapDumpKey, dumpPath)
-      await putS3Json(client, bucket, snapManifestKey, snapshotManifest)
-      written.push(snapDumpKey, snapManifestKey)
+      const snap = await publishSnapshotDumpAndManifest(
+        { table, snapshotId, dumpPath, manifest: snapshotManifest },
+        puts,
+      )
+      written.push(...snap.keys)
     }
 
     return {
@@ -118,6 +117,7 @@ export async function publishDataSchemaTableFromEnvironment({
       snapshotId,
       large: resolvedLarge,
       keys: written,
+      warning: latest.warning,
     }
   } finally {
     await rm(tempDir, { recursive: true, force: true }).catch(() => undefined)

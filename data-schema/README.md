@@ -42,13 +42,14 @@ After publish: Import on staging/production at `/admin/data-schema`. `publish` o
 
 ## S3 layout (env-agnostic)
 
-| Path                                       | Role                        |
-| ------------------------------------------ | --------------------------- |
-| `data-schema/<table>/sources/spec.json`    | Stage-1 recipe              |
-| `data-schema/<table>/sources/<file>`       | Optional small raw delivery |
-| `data-schema/<table>/latest/table.dump`    | Current dump (overwritten)  |
-| `data-schema/<table>/latest/manifest.json` | Metadata for latest         |
-| `data-schema/<table>/snapshots/<UTC>/`     | Opt-in immutable copies     |
+| Path                                        | Role                                 |
+| ------------------------------------------- | ------------------------------------ |
+| `data-schema/<table>/sources/spec.json`     | Stage-1 recipe                       |
+| `data-schema/<table>/sources/<file>`        | Optional small raw delivery          |
+| `data-schema/<table>/objects/<sha256>.dump` | Immutable dump (written first)       |
+| `data-schema/<table>/latest/manifest.json`  | Pointer for latest (written second)  |
+| `data-schema/<table>/latest/table.dump`     | Convenience copy of current dump     |
+| `data-schema/<table>/snapshots/<UTC>/`      | Opt-in immutable copies              |
 
 ## Workflow
 

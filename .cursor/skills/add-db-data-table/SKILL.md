@@ -71,6 +71,7 @@ Then **Import** on `/admin/data-schema` (staging, then production).
 
 - **Fresh databases:** Both `import-raw` (stage 1) and admin Import call `CREATE SCHEMA IF NOT EXISTS data` before writing tables. Published dumps from `pg_dump --table=data.*` do not include `CREATE SCHEMA`, so a machine that has never run `processing/` can still bootstrap `data.*` from S3 alone (or from `import-raw` after Prisma migrations only).
 - **`large` on republish:** CLI `publish` and server republish inherit `large` from the existing `latest/manifest.json` when the local spec omits it (or there is no local spec). Default `false` only when there is no previous manifest — so a multi-GB opt-in table is not silently cleared.
+- **Publish order:** dump goes to `objects/<sha256>.dump` first, then `latest/manifest.json` (the pointer), then a convenience copy at `latest/table.dump`. Import prefers the object dump so a failed pointer update cannot pair a new dump with an old sha256.
 - **Process death mid-import:** a container restart during restore can leave `data.<table>_…__old` and a history row stuck in `RUNNING`. The next Import detects an existing aside and refuses to proceed until it is restored or dropped manually.
 - **Concurrent Import:** an advisory lock per table returns a clear “Import läuft bereits” error instead of racing.
 - **Rename vs readers:** `renameTableAside` sets `lock_timeout=5s` so an `ACCESS EXCLUSIVE` rename fails fast if nightly processing (or another reader) holds the table — safe failure, retry after processing finishes.

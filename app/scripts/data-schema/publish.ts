@@ -14,14 +14,12 @@ import {
   putS3FileMultipart,
   putS3Json,
 } from '@/server/dataSchema/dataSchemaS3.server'
-import {
-  dataSchemaLatestDumpKey,
-  dataSchemaLatestManifestKey,
-  dataSchemaSnapshotDumpKey,
-  dataSchemaSnapshotId,
-  dataSchemaSnapshotManifestKey,
-} from '@/server/dataSchema/dataSchemaS3Keys'
+import { dataSchemaSnapshotId } from '@/server/dataSchema/dataSchemaS3Keys'
 import { dataSchemaSpecSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
+import {
+  publishLatestDumpAndManifest,
+  publishSnapshotDumpAndManifest,
+} from '@/server/dataSchema/publishDataSchemaArtifacts'
 import { resolveLargeForRepublish } from '@/server/dataSchema/resolveLargeForRepublish'
 import { sha256File } from '@/server/dataSchema/sha256File'
 import { toDockerNetworkUrl } from '../db-pull/db-helpers'
@@ -141,18 +139,23 @@ export async function runPublish(argv: string[]) {
       specSha256,
     })
 
-    const latestDumpKey = dataSchemaLatestDumpKey(options.table)
-    const latestManifestKey = dataSchemaLatestManifestKey(options.table)
+    const puts = {
+      putFile: (key: string, filePath: string) => putS3FileMultipart(client, bucket, key, filePath),
+      putJson: (key: string, value: unknown) => putS3Json(client, bucket, key, value),
+    }
 
     spinner.start(`Uploading latest dump (${bytes.toLocaleString()} bytes)…`)
-    await putS3FileMultipart(client, bucket, latestDumpKey, dumpPath)
-    await putS3Json(client, bucket, latestManifestKey, latestManifest)
-    spinner.stop(`Uploaded s3://${bucket}/${latestDumpKey}`)
+    const latest = await publishLatestDumpAndManifest(
+      { table: options.table, dumpPath, manifest: latestManifest },
+      puts,
+    )
+    spinner.stop(
+      latest.warning
+        ? `Uploaded latest manifest (${latest.warning})`
+        : `Uploaded s3://${bucket}/${latest.keys[0]}`,
+    )
 
-    const written = [
-      `s3://${bucket}/${latestDumpKey} (${bytes.toLocaleString()} bytes)`,
-      `s3://${bucket}/${latestManifestKey}`,
-    ]
+    const written = latest.keys.map((key) => `s3://${bucket}/${key}`)
 
     if (options.snapshot) {
       const snapshotId = dataSchemaSnapshotId()
@@ -171,13 +174,13 @@ export async function runPublish(argv: string[]) {
         sourceSha256,
         specSha256,
       })
-      const snapDumpKey = dataSchemaSnapshotDumpKey(options.table, snapshotId)
-      const snapManifestKey = dataSchemaSnapshotManifestKey(options.table, snapshotId)
       spinner.start(`Uploading snapshot ${snapshotId}…`)
-      await putS3FileMultipart(client, bucket, snapDumpKey, dumpPath)
-      await putS3Json(client, bucket, snapManifestKey, snapshotManifest)
-      spinner.stop(`Uploaded s3://${bucket}/${snapDumpKey}`)
-      written.push(`s3://${bucket}/${snapDumpKey}`, `s3://${bucket}/${snapManifestKey}`)
+      const snap = await publishSnapshotDumpAndManifest(
+        { table: options.table, snapshotId, dumpPath, manifest: snapshotManifest },
+        puts,
+      )
+      spinner.stop(`Uploaded s3://${bucket}/${snap.keys[0]}`)
+      written.push(...snap.keys.map((key) => `s3://${bucket}/${key}`))
     }
 
     p.note(written.join('\n'), 'Written')

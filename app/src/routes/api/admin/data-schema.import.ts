@@ -37,7 +37,12 @@ export const Route = createFileRoute('/api/admin/data-schema/import')({
             userId: admin.userId,
           })
           return Response.json(
-            { ok: true, rowCount: result.rowCount, durationMs: result.durationMs },
+            {
+              ok: true,
+              rowCount: result.rowCount,
+              durationMs: result.durationMs,
+              ...(result.warning ? { warning: result.warning } : {}),
+            },
             { status: 200 },
           )
         } catch (error) {

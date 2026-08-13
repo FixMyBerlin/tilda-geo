@@ -23,6 +23,20 @@ export function dataSchemaLatestManifestKey(table: string) {
   return `${dataSchemaLatestPrefix(table)}/manifest.json`
 }
 
+const sha256HexRegex = /^[a-f0-9]{64}$/
+
+/** Immutable dump keyed by content hash. Written before latest/manifest.json so a failed pointer update cannot strand a new dump under latest/. */
+export function dataSchemaObjectDumpKey(table: string, sha256: string) {
+  if (!sha256HexRegex.test(sha256)) {
+    throw new Error(`Invalid dump sha256 "${sha256}" (expected 64 lowercase hex chars).`)
+  }
+  return `${DATA_SCHEMA_S3_PREFIX}/${assertDataSchemaTableName(table)}/objects/${sha256}.dump`
+}
+
+export function isDataSchemaSha256Hex(sha256: string) {
+  return sha256HexRegex.test(sha256)
+}
+
 function dataSchemaSourcesPrefix(table: string) {
   return `${DATA_SCHEMA_S3_PREFIX}/${assertDataSchemaTableName(table)}/sources`
 }
