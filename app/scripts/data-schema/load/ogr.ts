@@ -1,13 +1,29 @@
+import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import type { DataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { databaseUrlToOgrPg } from './ogrHelpers'
+import {
+  databaseUrlToOgrPg,
+  gdalVersionMeetsMinimum,
+  MIN_GDAL_VERSION,
+  parseGdalVersion,
+} from './ogrHelpers'
 
-export async function assertOgrToolsPresent() {
-  for (const bin of ['ogr2ogr', 'ogrinfo']) {
-    const result = await $`which ${bin}`.quiet().nothrow()
-    if (result.exitCode !== 0) {
-      throw new Error(`Missing ${bin} on PATH (install GDAL).`)
-    }
+export async function assertGdalPresent() {
+  const result = await $`ogr2ogr --version`.quiet().nothrow()
+  if (result.exitCode !== 0) {
+    p.note(
+      'macOS: brew install gdal\nNot required for bun run dev / the map — only data-schema-load, local /api/export, and static-dataset GeoJSON prep.',
+      'Install GDAL',
+    )
+    throw new Error(`ogr2ogr not found (need GDAL ${MIN_GDAL_VERSION}+).`)
+  }
+
+  const versionText = `${result.stdout.toString()}\n${result.stderr.toString()}`
+  const version = parseGdalVersion(versionText)
+  if (!version || !gdalVersionMeetsMinimum(version)) {
+    const found = version ? `${version.major}.${version.minor}` : 'unknown'
+    p.note('macOS: brew upgrade gdal', 'Upgrade GDAL')
+    throw new Error(`GDAL ${found} is too old (need ${MIN_GDAL_VERSION}+).`)
   }
 }
 

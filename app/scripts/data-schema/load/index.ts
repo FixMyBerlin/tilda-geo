@@ -11,7 +11,7 @@ import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { runCli } from '../cli'
 import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount, runPsql } from '../db'
 import { parseLoadArgs, printLoadHelp } from './args'
-import { assertOgrToolsPresent, getSourceLayerInfo, runOgr2ogrImport } from './ogr'
+import { assertGdalPresent, getSourceLayerInfo, runOgr2ogrImport } from './ogr'
 import { geometryTypesMatch } from './ogrHelpers'
 
 async function runLoad(argv: string[]) {
@@ -22,7 +22,7 @@ async function runLoad(argv: string[]) {
 
   const options = parseLoadArgs(argv)
   assertDevelopmentEnvironment()
-  await assertOgrToolsPresent()
+  await assertGdalPresent()
 
   const localSpecPath = dataSchemaLocalSpecPath(options.table)
   if (!existsSync(localSpecPath)) {

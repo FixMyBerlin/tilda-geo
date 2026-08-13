@@ -26,6 +26,13 @@ Run `nvm use` to use the recommended Node version.
 
 Run `bun run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and dependencies start automatically if needed.
 
+### Optional native tools
+
+Not required for `bun run dev` or the map.
+
+- **GDAL 3.8+** (`brew install gdal`) — `data-schema-load`, local `/api/export`, and static-dataset GeoJSON CRS/precision. `data-schema-load` checks the version and prints this install hint if it is missing.
+- **tippecanoe** (`brew install tippecanoe`) — static-dataset PMTiles on the laptop (until that pipeline moves to the server). See [StaticDatasets README](./scripts/StaticDatasets/README.md).
+
 ### Our Tooling
 
 - Framework: [TanStack Start](https://tanstack.com/start) (Vite + TanStack Router + Nitro) with React 19

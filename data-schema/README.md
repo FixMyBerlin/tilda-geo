@@ -27,8 +27,8 @@ bun run data-schema-sync -- --table euvm_cutouts_point
 bun run data-schema-sync -- --with-raw   # also download source files when present on S3
 
 # Local dev computer only: load source file → local data.<table> (ENVIRONMENT=development)
-# Creates schema `data` if missing. Specs use WKB geometry names (MultiPolygon);
-# ogrinfo spaced names (Multi Polygon) are accepted.
+# Host GDAL 3.8+ (`brew install gdal`). Creates schema `data` if missing.
+# Specs use WKB geometry names (MultiPolygon); ogrinfo spaced names (Multi Polygon) are accepted.
 bun run data-schema-load -- --table euvm_cutouts_point
 bun run data-schema-load -- --table census_population_points --file /path/to/file.gpkg
 

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { databaseUrlToOgrPg, geometryTypesMatch, normalizeOgrGeometryType } from './ogrHelpers'
+import {
+  databaseUrlToOgrPg,
+  gdalVersionMeetsMinimum,
+  geometryTypesMatch,
+  normalizeOgrGeometryType,
+  parseGdalVersion,
+} from './ogrHelpers'
 
 describe('normalizeOgrGeometryType / geometryTypesMatch', () => {
   it('matches ogrinfo "Multi Polygon" with spec MultiPolygon', () => {
@@ -36,5 +42,26 @@ describe('databaseUrlToOgrPg', () => {
   it('backslash-escapes a single quote inside the password', () => {
     const pg = databaseUrlToOgrPg('postgresql://user:p%27ass@localhost:5432/db')
     expect(pg).toContain("password='p\\'ass'")
+  })
+})
+
+describe('parseGdalVersion / gdalVersionMeetsMinimum', () => {
+  it('parses ogr2ogr --version output', () => {
+    expect(parseGdalVersion('GDAL 3.11.3, released 2025/07/12')).toEqual({
+      major: 3,
+      minor: 11,
+      patch: 3,
+    })
+  })
+
+  it('accepts 3.8 and newer', () => {
+    expect(gdalVersionMeetsMinimum({ major: 3, minor: 8 })).toBe(true)
+    expect(gdalVersionMeetsMinimum({ major: 3, minor: 11 })).toBe(true)
+    expect(gdalVersionMeetsMinimum({ major: 4, minor: 0 })).toBe(true)
+  })
+
+  it('rejects below 3.8', () => {
+    expect(gdalVersionMeetsMinimum({ major: 3, minor: 6 })).toBe(false)
+    expect(parseGdalVersion('not a version')).toBeNull()
   })
 })

@@ -67,7 +67,7 @@ bun run data-schema-load -- --table <table>
 bun run data-schema-load -- --table <table> --file /abs/path
 ```
 
-`--file` only overrides the path. Columns, SRID, geometry type, and indexes still come from the spec. Load runs ogr2ogr into local `data.<table>` and checks feature count vs Postgres — that is the local source check. There is no separate local dump-restore CLI.
+`--file` only overrides the path. Columns, SRID, geometry type, and indexes still come from the spec. Load runs host `ogr2ogr` (GDAL 3.8+, `brew install gdal`) into local `data.<table>` and checks feature count vs Postgres — that is the local source check. There is no separate local dump-restore CLI.
 
 ### 4. Publish
 
