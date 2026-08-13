@@ -4,12 +4,19 @@ import {
   dataSchemaLatestManifestKey,
   dataSchemaObjectDumpKey,
   dataSchemaSnapshotDumpKey,
+  dataSchemaSnapshotId,
   dataSchemaSnapshotManifestKey,
 } from './dataSchemaS3Keys'
 
 export type DataSchemaPublishPuts = {
   putFile: (key: string, filePath: string) => Promise<void>
   putJson: (key: string, value: unknown) => Promise<void>
+}
+
+export type DataSchemaArchivePuts = {
+  copyObject: (fromKey: string, toKey: string) => Promise<void>
+  putJson: (key: string, value: unknown) => Promise<void>
+  objectExists: (key: string) => Promise<boolean>
 }
 
 function errorMessage(error: unknown) {
@@ -56,24 +63,35 @@ export async function publishLatestDumpAndManifest(
   }
 }
 
-/** Snapshot prefix is unique, so dump-then-manifest cannot clobber a live pointer. */
-export async function publishSnapshotDumpAndManifest(
+/**
+ * Keep the current latest dump importable after the next publish overwrites latest/.
+ * Snapshot id is the previous publishedAt (UTC minute). No-op if that snapshot already exists.
+ */
+export async function archiveLatestAsSnapshot(
   {
     table,
-    snapshotId,
-    dumpPath,
-    manifest,
+    previous,
+    sourceDumpKey,
   }: {
     table: string
-    snapshotId: string
-    dumpPath: string
-    manifest: DataSchemaManifest
+    previous: DataSchemaManifest
+    sourceDumpKey: string
   },
-  puts: DataSchemaPublishPuts,
+  puts: DataSchemaArchivePuts,
 ) {
+  const publishedMs = Date.parse(previous.publishedAt)
+  if (Number.isNaN(publishedMs)) {
+    throw new Error(`Cannot archive latest: invalid publishedAt "${previous.publishedAt}"`)
+  }
+  const snapshotId = dataSchemaSnapshotId(new Date(publishedMs))
   const snapDumpKey = dataSchemaSnapshotDumpKey(table, snapshotId)
   const snapManifestKey = dataSchemaSnapshotManifestKey(table, snapshotId)
-  await puts.putFile(snapDumpKey, dumpPath)
-  await puts.putJson(snapManifestKey, manifest)
-  return { keys: [snapDumpKey, snapManifestKey] }
+
+  if (await puts.objectExists(snapManifestKey)) {
+    return { keys: [snapManifestKey], snapshotId, skipped: true as const }
+  }
+
+  await puts.copyObject(sourceDumpKey, snapDumpKey)
+  await puts.putJson(snapManifestKey, { ...previous, snapshotId })
+  return { keys: [snapDumpKey, snapManifestKey], snapshotId, skipped: false as const }
 }

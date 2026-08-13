@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { buildDataSchemaManifest } from './buildDataSchemaManifest'
-import {
-  publishLatestDumpAndManifest,
-  publishSnapshotDumpAndManifest,
-} from './publishDataSchemaArtifacts'
+import { archiveLatestAsSnapshot, publishLatestDumpAndManifest } from './publishDataSchemaArtifacts'
 
 const sha256 = 'a'.repeat(64)
 
@@ -90,28 +87,51 @@ describe('publishLatestDumpAndManifest', () => {
   })
 })
 
-describe('publishSnapshotDumpAndManifest', () => {
-  it('uploads dump before snapshot manifest', async () => {
+describe('archiveLatestAsSnapshot', () => {
+  it('copies the previous latest dump into snapshots/ using publishedAt as the id', async () => {
+    const previous = sampleManifest()
     const calls: string[] = []
-    await publishSnapshotDumpAndManifest(
+    const result = await archiveLatestAsSnapshot(
       {
         table: 'euvm_cutouts_point',
-        snapshotId: '20260813T0800',
-        dumpPath: '/tmp/table.dump',
-        manifest: sampleManifest('20260813T0800'),
+        previous,
+        sourceDumpKey: `data-schema/euvm_cutouts_point/objects/${sha256}.dump`,
       },
       {
-        putFile: async (key) => {
-          calls.push(`file:${key}`)
+        copyObject: async (fromKey, toKey) => {
+          calls.push(`copy:${fromKey}->${toKey}`)
         },
         putJson: async (key) => {
           calls.push(`json:${key}`)
         },
+        objectExists: async () => false,
       },
     )
+    expect(result.snapshotId).toBe('20260813T0800')
+    expect(result.skipped).toBe(false)
     expect(calls).toEqual([
-      'file:data-schema/euvm_cutouts_point/snapshots/20260813T0800/table.dump',
+      `copy:data-schema/euvm_cutouts_point/objects/${sha256}.dump->data-schema/euvm_cutouts_point/snapshots/20260813T0800/table.dump`,
       'json:data-schema/euvm_cutouts_point/snapshots/20260813T0800/manifest.json',
     ])
+  })
+
+  it('skips when that snapshot already exists', async () => {
+    const putJson = vi.fn()
+    const copyObject = vi.fn()
+    const result = await archiveLatestAsSnapshot(
+      {
+        table: 'euvm_cutouts_point',
+        previous: sampleManifest(),
+        sourceDumpKey: 'data-schema/euvm_cutouts_point/latest/table.dump',
+      },
+      {
+        copyObject,
+        putJson,
+        objectExists: async () => true,
+      },
+    )
+    expect(result.skipped).toBe(true)
+    expect(copyObject).not.toHaveBeenCalled()
+    expect(putJson).not.toHaveBeenCalled()
   })
 })

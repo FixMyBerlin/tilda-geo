@@ -295,7 +295,7 @@ export function PageDataSchema() {
                             }))
                           }
                         />
-                        zusätzlich Snapshot
+                        zusätzlich bisheriges latest sichern
                       </label>
                       <button
                         type="button"
@@ -305,7 +305,7 @@ export function PageDataSchema() {
                           void runAction(
                             `publish:${dataset.table}`,
                             alsoSnapshot
-                              ? `data.${dataset.table} aus dieser Umgebung nach S3 veröffentlichen (latest + Snapshot)?`
+                              ? `data.${dataset.table} nach S3 veröffentlichen und die bisherige latest-Version als Snapshot behalten?`
                               : `data.${dataset.table} aus dieser Umgebung nach S3 veröffentlichen (latest überschreiben)?`,
                             () =>
                               postJson('/api/admin/data-schema/publish', {

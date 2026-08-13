@@ -4,7 +4,7 @@ When we freeze parking data for delivery, we always:
 
 1. **Export** the core tables and the quantized point backups from the freeze environment.
 2. **Run** [`qa_create_new_voronoi_baseline.sql`](qa_create_new_voronoi_baseline.sql) on production: edit `base_table` / `target_table` in the `DECLARE` block, then run the script. That builds a new `data.*` voronoi baseline from live `public.*_quantized` (recalculated `count_reference`).
-3. **Publish** `data.<target_table>` from production `/admin/data-schema` (“Aus dieser Umgebung veröffentlichen”, with snapshot) so staging and dev can import the same baseline. Publish the undated base table `data.euvm_qa_voronoi` once as well so the generator SQL can be re-run outside production.
+3. **Publish** `data.<target_table>` from production `/admin/data-schema` (“Aus dieser Umgebung veröffentlichen”). Staging and dev import **latest**. Tick “bisheriges latest sichern” only when you are replacing an existing latest you still need as a snapshot. Publish the undated base table `data.euvm_qa_voronoi` once as well so the generator SQL can be re-run outside production.
 4. **Import** that published dump on staging and on each developer machine via `/admin/data-schema` → Import (instead of empty placeholders from processing).
 5. **(Decide)** Update the reference in [`9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql) to the new `data.*` table and deploy, so nightly QA fills the stable public maps `qa_parkings_euvm` / `qa_parkings_euvm_priority`. `QaConfig` on `parkraum-berlin-euvm` keeps pointing at those public tables. Behaviour details: [QA Documentation](QA-Documentation.md).
 

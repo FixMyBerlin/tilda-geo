@@ -2,7 +2,7 @@ import { basename, resolve } from 'node:path'
 import { assertDataSchemaTableName } from './dataSchemaS3Keys'
 
 /** Repo-root `data-schema/` resolved from this module (`app/src/server/dataSchema`). */
-function dataSchemaRootDir() {
+export function dataSchemaRootDir() {
   return resolve(import.meta.dir, '../../../../data-schema')
 }
 

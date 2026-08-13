@@ -3,7 +3,7 @@ import * as p from '@clack/prompts'
 export const PUBLISH_MODES = ['override', 'snapshot'] as const
 export type PublishMode = (typeof PUBLISH_MODES)[number]
 
-/** Prompt when previous latest/ is at least this old (laptop CLI; major-version heuristic). */
+/** Prompt when previous latest/ is at least this old (local CLI; major-version heuristic). */
 export const STALE_LATEST_MS = 24 * 60 * 60 * 1000
 
 export function daysSincePublished(publishedAt: string, now = new Date()) {
@@ -57,7 +57,7 @@ export async function resolveWriteSnapshot(input: {
 
   if (!decision.prompt) {
     if (decision.mode === 'snapshot') {
-      p.log.info('Mode: snapshot — replace latest/ and write snapshots/<UTC>/')
+      p.log.info('Mode: snapshot — archive current latest/ to snapshots/, then replace latest/')
     } else if (input.previousPublishedAt) {
       p.log.info(
         `Mode: override — replace latest/ (${formatLatestAge(input.previousPublishedAt, input.now)})`,
@@ -71,24 +71,24 @@ export async function resolveWriteSnapshot(input: {
   const age = formatLatestAge(input.previousPublishedAt!, input.now)
   if (!interactive) {
     p.log.warn(
-      `Latest data.${input.table} was published ${age}. Pass --mode snapshot to keep a recoverable copy, or --mode override to silence this. Continuing with override.`,
+      `Latest data.${input.table} was published ${age}. Pass --mode snapshot to keep that version under snapshots/, or --mode override to replace latest/ only. Continuing with override.`,
     )
     return false
   }
 
   const selected = await p.select({
-    message: `Latest data.${input.table} was published ${age} (${input.previousPublishedAt}). Publish always replaces latest/. Also keep a snapshot of this publish?`,
+    message: `Latest data.${input.table} was published ${age} (${input.previousPublishedAt}). Replace latest/ with this publish?`,
     initialValue: 'snapshot',
     options: [
       {
         value: 'snapshot',
-        label: 'Snapshot this publish',
-        hint: 'latest + snapshots/<UTC>/ — import later from admin',
+        label: 'Archive current latest, then publish',
+        hint: 'copies today’s latest to snapshots/<when it was published>/, then writes the new dump as latest/',
       },
       {
         value: 'override',
-        label: 'Override latest only',
-        hint: 'replace latest/; previous is not listed under snapshots/',
+        label: 'Replace latest only',
+        hint: 'previous latest is not listed under snapshots/ (object dump may still exist by sha256)',
       },
     ],
   })
@@ -97,7 +97,7 @@ export async function resolveWriteSnapshot(input: {
     process.exit(0)
   }
   if (selected === 'snapshot') {
-    p.log.info('Mode: snapshot — replace latest/ and write snapshots/<UTC>/')
+    p.log.info('Mode: snapshot — archive current latest/ to snapshots/, then replace latest/')
     return true
   }
   p.log.info('Mode: override — replace latest/ only')

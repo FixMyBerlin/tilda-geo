@@ -4,6 +4,7 @@ import { dirname } from 'node:path'
 import { Readable } from 'node:stream'
 import { pipeline } from 'node:stream/promises'
 import {
+  CopyObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
@@ -121,6 +122,21 @@ export async function putS3Json(client: S3Client, bucket: string, key: string, v
       Key: key,
       Body: JSON.stringify(value, null, 2),
       ContentType: 'application/json',
+    }),
+  )
+}
+
+export async function copyS3Object(
+  client: S3Client,
+  bucket: string,
+  fromKey: string,
+  toKey: string,
+) {
+  await client.send(
+    new CopyObjectCommand({
+      Bucket: bucket,
+      CopySource: `${bucket}/${fromKey}`,
+      Key: toKey,
     }),
   )
 }

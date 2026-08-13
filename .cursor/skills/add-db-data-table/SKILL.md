@@ -1,6 +1,6 @@
 ---
 name: add-db-data-table
-description: Add or update a Postgres data.* table via data-schema (spec, data-schema-load, data-schema-publish dump, admin Import). Use when processing SQL needs data inside Postgres; not for map tiles/GeoJSON StaticDatasets.
+description: Add or update a Postgres data.* table via data-schema (spec, verify, load, publish dump, admin Import). Use when processing SQL needs data inside Postgres; not for map tiles/GeoJSON StaticDatasets.
 ---
 
 # Add DB data table (`data.*`)
@@ -10,19 +10,13 @@ description: Add or update a Postgres data.* table via data-schema (spec, data-s
 - **Use** for datasets that `processing/` SQL reads from Postgres `data.*`.
 - **Do not use** for map tiles / GeoJSON served to the map — use [add-static-dataset](../add-static-dataset/SKILL.md) instead.
 
-## Boundary
+Specs and source files live at repo-root `data-schema/<table>/` (gitignored). Commands run from `app/`. Updating an existing table: `bun run data-schema-sync -- --table <table>` first so the local spec matches S3.
 
-1. **Laptop (stage 1):** raw file → local `data.<table>` via `data-schema-load`.
-2. **Publish (stage 2):** `data-schema-publish` (`pg_dump -Fc` → S3 `data-schema/<table>/latest/`).
-3. Staging / production / fresh dev **only** import the published dump via `/admin/data-schema`. `data-schema-sync` only mirrors specs (and optionally source files), including on servers — it does not load `data.*`.
+## Steps
 
-`data.*` reaches map layers only after processing rebuilds `public.*`.
+### 1. Write `data-schema/<table>/spec.json`
 
-## Layout
-
-Repo-root `data-schema/<table>/`: `spec.json` + exactly one source file named after the table (both gitignored). Specs on S3: `data-schema/<table>/sources/spec.json`.
-
-## Spec example
+Match [`app/src/server/dataSchema/dataSchemaSpec.schema.ts`](../../../app/src/server/dataSchema/dataSchemaSpec.schema.ts) (`DataSchemaSpec` / `parseDataSchemaSpec`). Folder name, `spec.table`, and CLI `--table` must be the same snake_case identifier.
 
 ```json
 {
@@ -47,32 +41,54 @@ Repo-root `data-schema/<table>/`: `spec.json` + exactly one source file named af
 }
 ```
 
-Polygon variant: same shape with `table` / `source.file` / index name `euvm_cutouts_polygon*`, `expectedGeometryType: "MultiPolygon"` (or `Polygon`). Specs use WKB-style names (`MultiPolygon`, `LineString`); `data-schema-load` normalises ogrinfo’s spaced forms (`Multi Polygon`, `3D Point`, …) before comparing. Seed specs with `data-schema-publish --spec-only` (they are gitignored).
+- `consumedBy`: optional note of which processing SQL reads this table. Nothing validates it against the SQL.
+- `large` (default `false`): ask the user if this dump is multi-GB. If yes, set `true` so “Alle importieren” skips it unless they tick large tables. If unclear, leave `false`.
+- Geometry names are WKB-style (`MultiPolygon`, `LineString`). `data-schema-load` treats ogrinfo’s spaced forms (`Multi Polygon`) as the same.
 
-## Commands (from `app/`)
+### 2. Verify + format
 
 ```bash
-bun run data-schema-sync
-bun run data-schema-publish -- --table <table> --spec-only
-bun run data-schema-load -- --table <table> [--file /abs/path]
+bun run data-schema-verify -- --table <table>
+bun run format:data-schema
+```
+
+Verify parses the spec with the same Zod schema load/publish use. Fix errors before load. Specs are gitignored, so `format:data-schema` (not `format:main`) is what formats them.
+
+### 3. Source file + load
+
+Load needs the geojson/gpkg. Resolve the path in this order:
+
+1. Absolute path already in the user prompt.
+2. Existing file at `data-schema/<table>/<spec.source.file>`.
+3. Otherwise **ask the user** for the path (Downloads, a large file they do not want next to the spec).
+
+```bash
+bun run data-schema-load -- --table <table>
+bun run data-schema-load -- --table <table> --file /abs/path
+```
+
+`--file` only overrides the path. Columns, SRID, geometry type, and indexes still come from the spec. Load runs ogr2ogr into local `data.<table>` and checks feature count vs Postgres — that is the local source check. There is no separate local dump-restore CLI.
+
+### 4. Publish
+
+Required for staging/production (skip only if the user asked for a local load only).
+
+```bash
 bun run data-schema-publish -- --table <table> [--mode override|snapshot]
 ```
 
-Then **Import** on `/admin/data-schema` (staging, then production).
+Uploads spec + `pg_dump` of the local table to S3 `latest/`. Default `--mode override` replaces latest (v1 → v1.1 → v1.2). `--mode snapshot` archives the **current** latest under `snapshots/<when it was published>/`, then writes the new dump — use that when keeping a previous latest (e.g. v1.2) before a major bump. When latest is at least 1 day old and `--mode` is omitted, the CLI asks.
 
-`data-schema-publish` overwrites `latest/` by default; `--mode snapshot` is the opt-in immutable copy of this publish (no version folder per upload). When `latest/` is at least 1 day old and `--mode` is omitted, the laptop CLI asks override vs snapshot.
+`--spec-only` uploads the spec without a dump (new recipe before load, or spec-only edits).
 
-## Verify
+### 5. Import via admin UI — give the user the URLs
 
-- `bun run type-check-deploy`
-- Confirm the SQL path in `spec.consumedBy` still references `data.<table>`
+Do **not** POST `/api/admin/data-schema/import` yourself. That route requires an admin session cookie; the agent usually has none.
 
-## Operational notes
+There is no per-table deeplink. Hand over the page and the table name. Optional local Import after publish is the dump-roundtrip check (same UI as staging/prod):
 
-- **Fresh databases:** Both `data-schema-load` (stage 1) and admin Import call `CREATE SCHEMA IF NOT EXISTS data` before writing tables. Published dumps from `pg_dump --table=data.*` do not include `CREATE SCHEMA`, so a machine that has never run `processing/` can still bootstrap `data.*` from S3 alone (or from `data-schema-load` after Prisma migrations only).
-- **`large` on republish:** CLI `data-schema-publish` and server republish inherit `large` from the existing `latest/manifest.json` when the local spec omits it (or there is no local spec). Default `false` only when there is no previous manifest — so a multi-GB opt-in table is not silently cleared.
-- **Publish order:** dump goes to `objects/<sha256>.dump` first, then `latest/manifest.json` (the pointer), then a convenience copy at `latest/table.dump`. Import prefers the object dump so a failed pointer update cannot pair a new dump with an old sha256.
-- **Process death mid-import:** a container restart during restore can leave `data.<table>_…__old` and a history row stuck in `RUNNING`. The next Import detects an existing aside and refuses to proceed until it is restored or dropped manually.
-- **Concurrent Import:** an advisory lock per table returns a clear “Import läuft bereits” error instead of racing.
-- **Rename vs readers:** `renameTableAside` sets `lock_timeout=5s` so an `ACCESS EXCLUSIVE` rename fails fast if nightly processing (or another reader) holds the table — safe failure, retry after processing finishes.
-- **Large tables:** data-schema DB work uses a client without the geo `statement_timeout=60s`, so `COUNT(*)` on multi-million-row tables is not cancelled mid-import.
+- Local: http://127.0.0.1:5173/admin/data-schema
+- Staging: https://staging.tilda-geo.de/admin/data-schema
+- Production: https://tilda-geo.de/admin/data-schema
+
+Import updates `data.*` only. If `consumedBy` processing SQL exists, the map’s `public.*` tables need a processing run after Import.

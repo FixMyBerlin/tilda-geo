@@ -58,14 +58,15 @@ export function printPublishHelp() {
 Usage:
   bun run data-schema-publish -- --table <name> [--spec-only] [--mode override|snapshot]
 
-Laptop only. Always uploads local spec.json when present (tiny). Then replaces
-latest/ with a new dump, unless --spec-only. Snapshot is an extra immutable copy
-of this dump under snapshots/<UTC>/ (not a backup of the previous latest).
+Local dev computer only. Always uploads local spec.json when present (tiny). Then replaces
+latest/ with a new dump, unless --spec-only. --mode snapshot first copies the current
+latest/ to snapshots/<when that version was published>/, then writes the new dump as latest/.
 
 Source geojson/gpkg stays off S3 unless --with-source-file (can be large).
 
 When --mode is omitted and latest/ is at least 1 day old, the CLI asks
-(TTY). Non-interactive stale publishes override and warn; pass --mode to skip.
+(TTY) whether to archive that latest first. Non-interactive stale publishes
+override and warn; pass --mode to skip.
 
 Options:
   --table <name>          Required table name
@@ -74,7 +75,7 @@ Options:
   --with-raw              Same as --with-source-file
   --force                 Allow uploading source files larger than 100 MB
   --mode override         Replace latest/ only
-  --mode snapshot         Replace latest/ and write snapshots/<UTC>/
+  --mode snapshot         Archive current latest/, then replace latest/
   --snapshot              Same as --mode snapshot
   -h, --help              This message
 

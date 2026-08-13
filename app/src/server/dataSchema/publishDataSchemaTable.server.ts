@@ -8,13 +8,18 @@ import {
   getDataSchemaTableRowCount,
   getPgDumpVersion,
 } from './dataSchemaDb.server'
-import { createDataSchemaS3Client, putS3FileMultipart, putS3Json } from './dataSchemaS3.server'
-import { assertDataSchemaTableName, dataSchemaSnapshotId } from './dataSchemaS3Keys'
 import {
-  publishLatestDumpAndManifest,
-  publishSnapshotDumpAndManifest,
-} from './publishDataSchemaArtifacts'
+  copyS3Object,
+  createDataSchemaS3Client,
+  putS3FileMultipart,
+  putS3Json,
+  s3ObjectExists,
+} from './dataSchemaS3.server'
+import { assertDataSchemaTableName } from './dataSchemaS3Keys'
+import { getLatestDataSchemaManifest } from './getLatestDataSchemaManifest'
+import { archiveLatestAsSnapshot, publishLatestDumpAndManifest } from './publishDataSchemaArtifacts'
 import { resolveLargeForRepublish } from './resolveLargeForRepublish'
+import { resolveLatestDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { sha256File } from './sha256File'
 
 export async function publishDataSchemaTableFromEnvironment({
@@ -61,6 +66,7 @@ export async function publishDataSchemaTableFromEnvironment({
       'unknown'
 
     const { client, bucket } = createDataSchemaS3Client()
+    const previous = await getLatestDataSchemaManifest(client, bucket, table)
     const resolvedLarge = await resolveLargeForRepublish(client, bucket, table, large)
     const puts = {
       putFile: (key: string, filePath: string) => putS3FileMultipart(client, bucket, key, filePath),
@@ -80,33 +86,33 @@ export async function publishDataSchemaTableFromEnvironment({
       publishedFrom,
     })
 
+    const written: string[] = []
+    let snapshotId: string | null = null
+
+    if (snapshot && previous) {
+      const sourceDumpKey = await resolveLatestDataSchemaDumpKey(
+        client,
+        bucket,
+        table,
+        previous.file.sha256,
+      )
+      const snap = await archiveLatestAsSnapshot(
+        { table, previous, sourceDumpKey },
+        {
+          copyObject: (fromKey, toKey) => copyS3Object(client, bucket, fromKey, toKey),
+          putJson: puts.putJson,
+          objectExists: (key) => s3ObjectExists(client, bucket, key),
+        },
+      )
+      snapshotId = snap.snapshotId
+      written.push(...snap.keys)
+    }
+
     const latest = await publishLatestDumpAndManifest(
       { table, dumpPath, manifest: latestManifest },
       puts,
     )
-    const written = [...latest.keys]
-    let snapshotId: string | null = null
-
-    if (snapshot) {
-      snapshotId = dataSchemaSnapshotId()
-      const snapshotManifest = buildDataSchemaManifest({
-        table,
-        publishedAt,
-        snapshotId,
-        bytes,
-        sha256,
-        rowCount,
-        large: resolvedLarge,
-        pgDumpVersion,
-        publishedBy: by,
-        publishedFrom,
-      })
-      const snap = await publishSnapshotDumpAndManifest(
-        { table, snapshotId, dumpPath, manifest: snapshotManifest },
-        puts,
-      )
-      written.push(...snap.keys)
-    }
+    written.push(...latest.keys)
 
     return {
       ok: true as const,
