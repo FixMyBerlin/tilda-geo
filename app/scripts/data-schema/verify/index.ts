@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-import { existsSync } from 'node:fs'
-import { readdir, readFile } from 'node:fs/promises'
 import * as p from '@clack/prompts'
 import {
   dataSchemaLocalSpecPath,
@@ -14,22 +12,29 @@ import { runCli } from '../cli'
 import { parseVerifyArgs, printVerifyHelp } from './args'
 
 async function listLocalTablesWithSpec() {
-  if (!existsSync(dataSchemaRootDir())) return []
-  const entries = await readdir(dataSchemaRootDir(), { withFileTypes: true })
-  return entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .filter(
-      (name) => dataSchemaIdentifierRegex.test(name) && existsSync(dataSchemaLocalSpecPath(name)),
-    )
+  const tables: string[] = []
+  try {
+    for await (const match of new Bun.Glob('*/spec.json').scan({
+      cwd: dataSchemaRootDir(),
+      onlyFiles: true,
+    })) {
+      const table = match.split('/')[0] ?? ''
+      if (dataSchemaIdentifierRegex.test(table)) tables.push(table)
+    }
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return []
+    throw error
+  }
+  return tables
 }
 
 async function verifyTable(table: string) {
   const specPath = dataSchemaLocalSpecPath(table)
-  if (!existsSync(specPath)) {
+  const specFile = Bun.file(specPath)
+  if (!(await specFile.exists())) {
     throw new Error(`Local spec not found: ${specPath}`)
   }
-  parseDataSchemaSpec(JSON.parse(await readFile(specPath, 'utf8')), table)
+  parseDataSchemaSpec(await specFile.json(), table)
   p.log.success(`${table}: ${specPath}`)
 }
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env bun
-import { mkdir, writeFile } from 'node:fs/promises'
 import * as p from '@clack/prompts'
 import {
   dataSchemaLocalSourcePath,
   dataSchemaLocalSpecPath,
-  dataSchemaTableDir,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
   createDataSchemaS3Client,
@@ -52,8 +50,7 @@ async function runSync(argv: string[]) {
     const parsed = parseDataSchemaSpec(await getS3ObjectJson(client, bucket, specKey), table)
 
     const localSpecPath = dataSchemaLocalSpecPath(table)
-    await mkdir(dataSchemaTableDir(table), { recursive: true })
-    await writeFile(localSpecPath, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8')
+    await Bun.write(localSpecPath, `${JSON.stringify(parsed, null, 2)}\n`)
 
     let rawStatus = 'skipped'
     if (options.withRaw) {

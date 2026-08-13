@@ -1,5 +1,3 @@
-import { existsSync, statSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
 import type { S3Client } from '@aws-sdk/client-s3'
 import * as p from '@clack/prompts'
 import {
@@ -14,9 +12,10 @@ const SOURCE_UPLOAD_LIMIT_BYTES = 100 * 1024 * 1024
 
 export async function loadLocalSpec(table: string) {
   const localSpecPath = dataSchemaLocalSpecPath(table)
-  if (!existsSync(localSpecPath)) return null
+  const specFile = Bun.file(localSpecPath)
+  if (!(await specFile.exists())) return null
 
-  const raw = await readFile(localSpecPath, 'utf8')
+  const raw = await specFile.text()
   const rawJson = JSON.parse(raw) as { large?: unknown }
   const spec = parseDataSchemaSpec(rawJson, table)
   const largeOverride = typeof rawJson.large === 'boolean' ? rawJson.large : undefined
@@ -43,10 +42,11 @@ export async function uploadSourceFile(
   force: boolean,
 ) {
   const localSource = dataSchemaLocalSourcePath(table, sourceFile)
-  if (!existsSync(localSource)) {
+  const source = Bun.file(localSource)
+  if (!(await source.exists())) {
     throw new Error(`Local source file not found: ${localSource}`)
   }
-  const size = statSync(localSource).size
+  const size = source.size
   if (size > SOURCE_UPLOAD_LIMIT_BYTES && !force) {
     throw new Error(
       `Source file is ${(size / (1024 * 1024)).toFixed(1)} MB (>100 MB). Pass --force to upload anyway.`,

@@ -18,16 +18,8 @@ export function assertDevelopmentEnvironment() {
   }
 }
 
-export function getDatabaseUrl() {
-  return getLocalTargetDatabaseUrl()
-}
-
-export function getDockerDatabaseUrl() {
-  return toDockerNetworkUrl(getDatabaseUrl())
-}
-
 export async function runPsql(command: string) {
-  const dockerUrl = getDockerDatabaseUrl()
+  const dockerUrl = toDockerNetworkUrl(getLocalTargetDatabaseUrl())
   const result =
     await $`docker run --rm --add-host=host.docker.internal:host-gateway --entrypoint psql ${POSTGRES_CLI_IMAGE} --tuples-only --no-align --command=${command} ${dockerUrl}`
       .quiet()

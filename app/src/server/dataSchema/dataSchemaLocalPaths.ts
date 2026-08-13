@@ -6,7 +6,7 @@ export function dataSchemaRootDir() {
   return resolve(import.meta.dir, '../../../../data-schema')
 }
 
-export function dataSchemaTableDir(table: string) {
+function dataSchemaTableDir(table: string) {
   return resolve(dataSchemaRootDir(), assertDataSchemaTableName(table))
 }
 

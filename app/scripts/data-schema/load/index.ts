@@ -1,6 +1,4 @@
 #!/usr/bin/env bun
-import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import * as p from '@clack/prompts'
 import {
@@ -8,8 +6,9 @@ import {
   dataSchemaLocalSpecPath,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { getLocalTargetDatabaseUrl } from '../../db-pull/db-helpers'
 import { runCli } from '../cli'
-import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount, runPsql } from '../db'
+import { SCHEMA, assertDevelopmentEnvironment, getRowCount, runPsql } from '../db'
 import { parseLoadArgs, printLoadHelp } from './args'
 import { assertGdalPresent, getSourceLayerInfo, runOgr2ogrImport } from './ogr'
 import { geometryTypesMatch } from './ogrHelpers'
@@ -25,19 +24,20 @@ async function runLoad(argv: string[]) {
   await assertGdalPresent()
 
   const localSpecPath = dataSchemaLocalSpecPath(options.table)
-  if (!existsSync(localSpecPath)) {
+  const specFile = Bun.file(localSpecPath)
+  if (!(await specFile.exists())) {
     throw new Error(
       `Local spec not found: ${localSpecPath} (run data-schema-sync or create it first)`,
     )
   }
 
-  const spec = parseDataSchemaSpec(JSON.parse(await readFile(localSpecPath, 'utf8')), options.table)
+  const spec = parseDataSchemaSpec(await specFile.json(), options.table)
 
   const filePath = options.file
     ? resolve(options.file)
     : dataSchemaLocalSourcePath(options.table, spec.source.file)
 
-  if (!existsSync(filePath)) {
+  if (!(await Bun.file(filePath).exists())) {
     throw new Error(`Source file not found: ${filePath}`)
   }
 
@@ -56,7 +56,7 @@ async function runLoad(argv: string[]) {
   // Fresh DBs after Prisma migrations alone may lack `data`; ogr2ogr -lco SCHEMA=data does not create it.
   await runPsql(`CREATE SCHEMA IF NOT EXISTS ${SCHEMA};`)
 
-  const databaseUrl = getDatabaseUrl()
+  const databaseUrl = getLocalTargetDatabaseUrl()
   const spinner = p.spinner()
   spinner.start(`Importing into ${SCHEMA}.${spec.table}…`)
   await runOgr2ogrImport({ filePath, spec, databaseUrl })

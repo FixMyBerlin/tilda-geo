@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-import { existsSync, statSync } from 'node:fs'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
@@ -24,10 +23,14 @@ import {
 } from '@/server/dataSchema/publishDataSchemaArtifacts'
 import { resolveLatestDataSchemaDumpKey } from '@/server/dataSchema/resolveLatestDataSchemaDumpKey'
 import { sha256File } from '@/server/dataSchema/sha256File'
-import { POSTGRES_CLI_IMAGE, toDockerNetworkUrl } from '../../db-pull/db-helpers'
+import {
+  POSTGRES_CLI_IMAGE,
+  getLocalTargetDatabaseUrl,
+  toDockerNetworkUrl,
+} from '../../db-pull/db-helpers'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../../shared/env'
 import { runCli } from '../cli'
-import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount } from '../db'
+import { SCHEMA, assertDevelopmentEnvironment, getRowCount } from '../db'
 import { parsePublishArgs, printPublishHelp } from './args'
 import { resolveWriteSnapshot } from './publishMode'
 import { loadLocalSpec, uploadSourceFile, uploadSpecJson } from './uploadSources'
@@ -94,7 +97,7 @@ async function runPublish(argv: string[]) {
     const { createHash } = await import('node:crypto')
     specSha256 = createHash('sha256').update(loaded.raw).digest('hex')
     const localSource = dataSchemaLocalSourcePath(options.table, loaded.spec.source.file)
-    if (existsSync(localSource)) {
+    if (await Bun.file(localSource).exists()) {
       sourceSha256 = await sha256File(localSource)
     }
   }
@@ -115,7 +118,7 @@ async function runPublish(argv: string[]) {
   const dumpDir = dirname(dumpPath)
   const dumpFile = basename(dumpPath)
   const dockerDumpPath = `/dump/${dumpFile}`
-  const databaseUrl = getDatabaseUrl()
+  const databaseUrl = getLocalTargetDatabaseUrl()
   const dockerUrl = toDockerNetworkUrl(databaseUrl)
 
   try {
@@ -132,11 +135,12 @@ async function runPublish(argv: string[]) {
     }
     spinner.stop('Dump created.')
 
-    if (!existsSync(dumpPath) || statSync(dumpPath).size <= 0) {
+    const dump = Bun.file(dumpPath)
+    if (!(await dump.exists()) || dump.size <= 0) {
       throw new Error(`Dump file missing or empty: ${dumpPath}`)
     }
 
-    const bytes = statSync(dumpPath).size
+    const bytes = dump.size
     const sha256 = await sha256File(dumpPath)
     const pgDumpVersion = await getPgDumpVersion()
     const publishedAt = new Date().toISOString()
