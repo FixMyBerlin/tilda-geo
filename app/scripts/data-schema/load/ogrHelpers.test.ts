@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  databaseUrlToOgrPg,
   gdalVersionMeetsMinimum,
   geometryTypesMatch,
   normalizeOgrGeometryType,
+  ogrPgConnectionString,
   parseGdalVersion,
 } from './ogrHelpers'
 
@@ -28,20 +28,32 @@ describe('normalizeOgrGeometryType / geometryTypesMatch', () => {
   })
 })
 
-describe('databaseUrlToOgrPg', () => {
+describe('ogrPgConnectionString', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  function stubDatabaseEnv(password: string) {
+    vi.stubEnv('DATABASE_HOST', 'localhost')
+    vi.stubEnv('DATABASE_PORT', '5432')
+    vi.stubEnv('DATABASE_NAME', 'db')
+    vi.stubEnv('DATABASE_USER', 'user')
+    vi.stubEnv('DATABASE_PASSWORD', password)
+  }
+
   it('single-quotes a password that contains a space', () => {
-    const pg = databaseUrlToOgrPg('postgresql://user:pass%20word@localhost:5432/db')
-    expect(pg).toContain("password='pass word'")
+    stubDatabaseEnv('pass word')
+    expect(ogrPgConnectionString()).toContain("password='pass word'")
   })
 
   it('single-quotes a password that contains =', () => {
-    const pg = databaseUrlToOgrPg('postgresql://user:a%3Db@localhost:5432/db')
-    expect(pg).toContain("password='a=b'")
+    stubDatabaseEnv('a=b')
+    expect(ogrPgConnectionString()).toContain("password='a=b'")
   })
 
   it('backslash-escapes a single quote inside the password', () => {
-    const pg = databaseUrlToOgrPg('postgresql://user:p%27ass@localhost:5432/db')
-    expect(pg).toContain("password='p\\'ass'")
+    stubDatabaseEnv("p'ass")
+    expect(ogrPgConnectionString()).toContain("password='p\\'ass'")
   })
 })
 

@@ -1,4 +1,12 @@
-function getDatabaseConfig() {
+type DatabaseConfig = {
+  host: string
+  user: string
+  password: string
+  name: string
+  port: string
+}
+
+export function getDatabaseConfig() {
   const host = process.env.DATABASE_HOST
   const user = process.env.DATABASE_USER
   const password = process.env.DATABASE_PASSWORD
@@ -10,7 +18,13 @@ function getDatabaseConfig() {
     )
   }
 
-  return { host, user, password, name }
+  return {
+    host,
+    user,
+    password,
+    name,
+    port: process.env.DATABASE_PORT ?? '5432',
+  } satisfies DatabaseConfig
 }
 
 function encodeCredential(value: string) {
@@ -30,9 +44,8 @@ function warnIfPasswordNeedsUrlEncoding(password: string) {
 }
 
 export function getBaseDatabaseUrl() {
-  const { host, user, password, name } = getDatabaseConfig()
+  const { host, user, password, name, port } = getDatabaseConfig()
   warnIfPasswordNeedsUrlEncoding(password)
-  const port = process.env.DATABASE_PORT ?? '5432'
   return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
 }
 

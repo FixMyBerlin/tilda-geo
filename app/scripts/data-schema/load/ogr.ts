@@ -1,10 +1,11 @@
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import type { DataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { applyDevPortSlotToProcessEnv } from '../../predev/devPortSlot'
 import {
-  databaseUrlToOgrPg,
   gdalVersionMeetsMinimum,
   MIN_GDAL_VERSION,
+  ogrPgConnectionString,
   parseGdalVersion,
 } from './ogrHelpers'
 
@@ -64,41 +65,38 @@ export async function getSourceLayerInfo(filePath: string, layer: string | null 
 export async function runOgr2ogrImport({
   filePath,
   spec,
-  databaseUrl,
 }: {
   filePath: string
   spec: DataSchemaSpec
-  databaseUrl: string
 }) {
-  const pg = databaseUrlToOgrPg(databaseUrl)
-  const { import: importOpts, table } = spec
+  applyDevPortSlotToProcessEnv()
   const args = [
     'ogr2ogr',
     '-f',
     'PostgreSQL',
-    pg,
+    ogrPgConnectionString(),
     filePath,
     '-nln',
-    table,
+    spec.table,
     '-lco',
     'SCHEMA=data',
     '-lco',
-    `GEOMETRY_NAME=${importOpts.geometryName}`,
+    `GEOMETRY_NAME=${spec.import.geometryName}`,
     '-lco',
-    `FID=${importOpts.fidColumn}`,
+    `FID=${spec.import.fidColumn}`,
     '-lco',
     'OVERWRITE=YES',
     '-lco',
     'SPATIAL_INDEX=YES',
     '-t_srs',
-    `EPSG:${importOpts.srid}`,
+    `EPSG:${spec.import.srid}`,
     '-progress',
   ]
-  if (importOpts.selectColumns && importOpts.selectColumns.length > 0) {
-    args.push('-select', importOpts.selectColumns.join(','))
+  if (spec.import.selectColumns && spec.import.selectColumns.length > 0) {
+    args.push('-select', spec.import.selectColumns.join(','))
   }
-  if (importOpts.layer) {
-    args.push(importOpts.layer)
+  if (spec.import.layer) {
+    args.push(spec.import.layer)
   }
 
   const result = Bun.spawnSync(args, { stdout: 'pipe', stderr: 'pipe' })

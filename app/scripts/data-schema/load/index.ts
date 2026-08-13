@@ -6,7 +6,6 @@ import {
   dataSchemaLocalSpecPath,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { getLocalTargetDatabaseUrl } from '../../db-pull/db-helpers'
 import { runCli } from '../cli'
 import { SCHEMA, assertDevelopmentEnvironment, getRowCount, runPsql } from '../db'
 import { parseLoadArgs, printLoadHelp } from './args'
@@ -56,10 +55,9 @@ async function runLoad(argv: string[]) {
   // Fresh DBs after Prisma migrations alone may lack `data`; ogr2ogr -lco SCHEMA=data does not create it.
   await runPsql(`CREATE SCHEMA IF NOT EXISTS ${SCHEMA};`)
 
-  const databaseUrl = getLocalTargetDatabaseUrl()
   const spinner = p.spinner()
   spinner.start(`Importing into ${SCHEMA}.${spec.table}…`)
-  await runOgr2ogrImport({ filePath, spec, databaseUrl })
+  await runOgr2ogrImport({ filePath, spec })
   spinner.stop(`Imported into ${SCHEMA}.${spec.table}.`)
 
   const dbCount = await getRowCount(spec.table)

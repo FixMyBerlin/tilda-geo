@@ -1,21 +1,20 @@
+import { getDatabaseConfig } from '@/server/database-url.server'
+
 /** Escape a value for libpq keyword/value syntax (single-quoted). */
 function quoteLibpqValue(value: string) {
   return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
 }
 
-export function databaseUrlToOgrPg(databaseUrl: string) {
-  const url = new URL(databaseUrl)
-  // Build key=value pairs manually — GDAL does not URL-decode PG: connection strings.
-  // Values must be single-quoted: passwords may contain spaces, `=`, `'`, or `\`.
+/** GDAL PG: does not URL-decode; quote raw env values (not a connection URL). */
+export function ogrPgConnectionString() {
+  const { host, port, name, user, password } = getDatabaseConfig()
   const parts = [
-    `host=${quoteLibpqValue(url.hostname)}`,
-    `port=${quoteLibpqValue(url.port || '5432')}`,
-    `dbname=${quoteLibpqValue(url.pathname.replace(/^\//, ''))}`,
-    `user=${quoteLibpqValue(decodeURIComponent(url.username))}`,
+    `host=${quoteLibpqValue(host)}`,
+    `port=${quoteLibpqValue(port)}`,
+    `dbname=${quoteLibpqValue(name)}`,
+    `user=${quoteLibpqValue(user)}`,
+    `password=${quoteLibpqValue(password)}`,
   ]
-  if (url.password) {
-    parts.push(`password=${quoteLibpqValue(decodeURIComponent(url.password))}`)
-  }
   return `PG:${parts.join(' ')}`
 }
 
