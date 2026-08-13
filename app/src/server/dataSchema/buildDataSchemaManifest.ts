@@ -8,8 +8,6 @@ export type BuildDataSchemaManifestInput = {
   bytes: number
   sha256: string
   rowCount: number
-  large: boolean
-  pgDumpVersion: string
   publishedBy: string
   publishedFrom: string
   sourceFile?: string
@@ -25,8 +23,6 @@ export function buildDataSchemaManifest(input: BuildDataSchemaManifestInput) {
     snapshotId: input.snapshotId,
     file: { name: 'table.dump', bytes: input.bytes, sha256: input.sha256 },
     rowCount: input.rowCount,
-    large: input.large,
-    pgDumpVersion: input.pgDumpVersion,
     provenance: {
       publishedBy: input.publishedBy,
       publishedFrom: input.publishedFrom,
@@ -43,9 +39,4 @@ export function assertManifestMatchesTable(manifest: { table: string }, table: s
       `Manifest table mismatch: expected "${table}" but manifest.table is "${manifest.table}".`,
     )
   }
-}
-
-/** Server-side republish must keep `large` from the previous latest manifest when present. */
-export function inheritLargeFromPreviousManifest(previous: { large: boolean } | null | undefined) {
-  return previous?.large ?? false
 }

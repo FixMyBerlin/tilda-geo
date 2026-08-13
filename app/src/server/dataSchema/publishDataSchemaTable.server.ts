@@ -3,11 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { buildDataSchemaManifest } from './buildDataSchemaManifest'
-import {
-  dumpTableToFile,
-  getDataSchemaTableRowCount,
-  getPgDumpVersion,
-} from './dataSchemaDb.server'
+import { dumpTableToFile, getDataSchemaTableRowCount } from './dataSchemaDb.server'
 import {
   copyS3Object,
   createDataSchemaS3Client,
@@ -18,7 +14,6 @@ import {
 import { assertDataSchemaTableName } from './dataSchemaS3Keys'
 import { getLatestDataSchemaManifest } from './getLatestDataSchemaManifest'
 import { archiveLatestAsSnapshot, publishLatestDumpAndManifest } from './publishDataSchemaArtifacts'
-import { resolveLargeForRepublish } from './resolveLargeForRepublish'
 import { resolveLatestDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { sha256File } from './sha256File'
 
@@ -27,14 +22,11 @@ export async function publishDataSchemaTableFromEnvironment({
   snapshot = false,
   userId,
   publishedBy,
-  large,
 }: {
   table: string
   snapshot?: boolean
   userId?: string | null
   publishedBy?: string
-  /** Explicit override; when omitted, inherit from existing latest/manifest.json. */
-  large?: boolean
 }) {
   assertDataSchemaTableName(table)
 
@@ -54,7 +46,6 @@ export async function publishDataSchemaTableFromEnvironment({
 
     const bytes = statSync(dumpPath).size
     const sha256 = await sha256File(dumpPath)
-    const pgDumpVersion = await getPgDumpVersion()
     const publishedAt = new Date().toISOString()
     const publishedFrom =
       process.env.VITE_APP_ENV?.trim() || process.env.ENVIRONMENT?.trim() || 'unknown'
@@ -67,7 +58,6 @@ export async function publishDataSchemaTableFromEnvironment({
 
     const { client, bucket } = createDataSchemaS3Client()
     const previous = await getLatestDataSchemaManifest(client, bucket, table)
-    const resolvedLarge = await resolveLargeForRepublish(client, bucket, table, large)
     const puts = {
       putFile: (key: string, filePath: string) => putS3FileMultipart(client, bucket, key, filePath),
       putJson: (key: string, value: unknown) => putS3Json(client, bucket, key, value),
@@ -80,8 +70,6 @@ export async function publishDataSchemaTableFromEnvironment({
       bytes,
       sha256,
       rowCount,
-      large: resolvedLarge,
-      pgDumpVersion,
       publishedBy: by,
       publishedFrom,
     })
@@ -121,7 +109,6 @@ export async function publishDataSchemaTableFromEnvironment({
       bytes,
       sha256,
       snapshotId,
-      large: resolvedLarge,
       keys: written,
       warning: latest.warning,
     }

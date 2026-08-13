@@ -284,16 +284,6 @@ export async function dumpTableToFile(table: string, dumpPath: string) {
   }
 }
 
-export async function getPgDumpVersion() {
-  const result = Bun.spawnSync(['pg_dump', '--version'], { stdout: 'pipe', stderr: 'pipe' })
-  if (result.exitCode !== 0) {
-    throw new Error(result.stderr.toString().trim() || 'pg_dump --version failed')
-  }
-  const text = result.stdout.toString().trim()
-  const match = text.match(/(\d+\.\d+(?:\.\d+)?)/)
-  return match?.[1] ?? text
-}
-
 function quoteIdent(ident: string) {
   if (!ident || ident.includes('\0')) {
     throw new Error(`Unsafe SQL identifier "${ident}"`)

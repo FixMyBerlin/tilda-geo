@@ -12,8 +12,6 @@ function sampleManifest(snapshotId: string | null = null) {
     bytes: 12,
     sha256,
     rowCount: 3,
-    large: false,
-    pgDumpVersion: '17.5',
     publishedBy: 'tester',
     publishedFrom: 'development',
   })

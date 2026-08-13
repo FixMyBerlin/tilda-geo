@@ -10,13 +10,15 @@ description: Add or update a Postgres data.* table via data-schema (spec, verify
 - **Use** for datasets that `processing/` SQL reads from Postgres `data.*`.
 - **Do not use** for map tiles / GeoJSON served to the map — use [add-static-dataset](../add-static-dataset/SKILL.md) instead.
 
-Specs and source files live at repo-root `data-schema/<table>/` (gitignored). Commands run from `app/`. Updating an existing table: `bun run data-schema-sync -- --table <table>` first so the local spec matches S3.
+Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the laptop (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-sync -- --table <table>` first so the local spec matches S3.
 
 ## Steps
 
 ### 1. Write `data-schema/<table>/spec.json`
 
 Match [`app/src/server/dataSchema/dataSchemaSpec.schema.ts`](../../../app/src/server/dataSchema/dataSchemaSpec.schema.ts) (`DataSchemaSpec` / `parseDataSchemaSpec`). Folder name, `spec.table`, and CLI `--table` must be the same snake_case identifier.
+
+**Ask the user** how they obtain or generate the source file (Drive folder, export from a GIS, API, …). Put that in `source.documentation` as Markdown — it is shown on `/admin/data-schema` under “Quelle aktualisieren”. Do not put secrets in it.
 
 ```json
 {
@@ -25,7 +27,7 @@ Match [`app/src/server/dataSchema/dataSchemaSpec.schema.ts`](../../../app/src/se
   "source": {
     "file": "euvm_cutouts_point.geojson",
     "provider": "eUVM Berlin",
-    "note": "Google Drive delivery"
+    "documentation": "Google Drive: https://drive.google.com/drive/folders/1wEKkUayaySZ6AhsdrkTGbbeVAx1YJARs\n\nDownload the point GeoJSON delivery and load it with data-schema-load."
   },
   "import": {
     "srid": 4326,
@@ -36,13 +38,14 @@ Match [`app/src/server/dataSchema/dataSchemaSpec.schema.ts`](../../../app/src/se
     "layer": null
   },
   "indexes": [{ "name": "euvm_cutouts_point_geom_idx", "using": "gist", "columns": ["geom"] }],
-  "consumedBy": "processing/topics/parking/cutouts/2_external_cutouts_euvm.sql",
-  "large": false
+  "consumedBy": "processing/topics/parking/cutouts/2_external_cutouts_euvm.sql"
 }
 ```
 
-- `consumedBy`: optional note of which processing SQL reads this table. Nothing validates it against the SQL.
-- `large` (default `false`): ask the user if this dump is multi-GB. If yes, set `true` so “Alle importieren” skips it unless they tick large tables. If unclear, leave `false`.
+- `source.file`: basename of the local geojson/gpkg used by load (not stored on S3).
+- `source.provider`: optional short label in admin.
+- `source.documentation`: optional Markdown — how to get or generate that file next time.
+- `consumedBy`: optional path of processing SQL that reads this table. Shown in admin; nothing validates it against the SQL.
 - Geometry names are WKB-style (`MultiPolygon`, `LineString`). `data-schema-load` treats ogrinfo’s spaced forms (`Multi Polygon`) as the same.
 
 ### 2. Verify + format
@@ -79,16 +82,16 @@ bun run data-schema-publish -- --table <table> [--mode override|snapshot]
 
 Uploads spec + `pg_dump` of the local table to S3 `latest/`. Default `--mode override` replaces latest (v1 → v1.1 → v1.2). `--mode snapshot` archives the **current** latest under `snapshots/<when it was published>/`, then writes the new dump — use that when keeping a previous latest (e.g. v1.2) before a major bump. When latest is at least 1 day old and `--mode` is omitted, the CLI asks.
 
-`--spec-only` uploads the spec without a dump (new recipe before load, or spec-only edits).
+`--spec-only` uploads the spec without a dump (new recipe before load, or metadata edits: `provider`, `documentation`, `consumedBy`). Column/geometry changes need load + a full publish.
 
 ### 5. Import via admin UI — give the user the URLs
 
 Do **not** POST `/api/admin/data-schema/import` yourself. That route requires an admin session cookie; the agent usually has none.
 
-There is no per-table deeplink. Hand over the page and the table name. Optional local Import after publish is the dump-roundtrip check (same UI as staging/prod):
+There is no per-table deeplink. Hand over the page and the table name; they click **Import** on that row. Optional local Import after publish is the dump-roundtrip check (same UI as staging/prod):
 
 - Local: http://127.0.0.1:5173/admin/data-schema
 - Staging: https://staging.tilda-geo.de/admin/data-schema
 - Production: https://tilda-geo.de/admin/data-schema
 
-Import updates `data.*` only. If `consumedBy` processing SQL exists, the map’s `public.*` tables need a processing run after Import.
+Import updates `data.*` only. If `consumedBy` processing SQL exists, the map’s `public.*` tables need a processing run after Import. Source documentation is on that page under “Quelle aktualisieren”.

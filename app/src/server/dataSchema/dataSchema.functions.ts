@@ -1,3 +1,4 @@
+import type { S3Client } from '@aws-sdk/client-s3'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { requireAdmin } from '@/server/auth/session.server'
@@ -10,7 +11,8 @@ import {
   listDataSchemaSnapshotIds,
   listDataSchemaTables,
 } from './dataSchemaS3.server'
-import { dataSchemaLatestManifestKey } from './dataSchemaS3Keys'
+import { dataSchemaLatestManifestKey, dataSchemaSpecKey } from './dataSchemaS3Keys'
+import { parseDataSchemaSpec } from './dataSchemaSpec.schema'
 
 const HISTORY_LIMIT_OVERVIEW = 5
 
@@ -29,6 +31,23 @@ const historySelect = {
   createdById: true,
   updatedById: true,
 } as const
+
+async function loadSpecSummary(client: S3Client, bucket: string, table: string) {
+  try {
+    const parsed = parseDataSchemaSpec(
+      await getS3ObjectJson(client, bucket, dataSchemaSpecKey(table)),
+      table,
+    )
+    return {
+      file: parsed.source.file,
+      provider: parsed.source.provider ?? null,
+      documentation: parsed.source.documentation ?? null,
+      consumedBy: parsed.consumedBy ?? null,
+    }
+  } catch {
+    return null
+  }
+}
 
 export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
   await requireAdmin(getRequestHeaders())
@@ -70,18 +89,20 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
         recentImports = []
       }
 
+      const spec = await loadSpecSummary(client, bucket, table)
+
       try {
         const raw = await getS3ObjectJson(client, bucket, dataSchemaLatestManifestKey(table))
         const manifest = dataSchemaManifestSchema.parse(raw)
         return {
           table,
           error: null as string | null,
+          spec,
           manifest: {
             publishedAt: manifest.publishedAt,
             rowCount: manifest.rowCount,
             bytes: manifest.file.bytes,
             sha256: manifest.file.sha256,
-            large: manifest.large,
             publishedFrom: manifest.provenance.publishedFrom,
             publishedBy: manifest.provenance.publishedBy,
             snapshotId: manifest.snapshotId,
@@ -94,6 +115,7 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
         return {
           table,
           error: error instanceof Error ? error.message : String(error),
+          spec,
           manifest: null,
           liveRowCount,
           snapshotIds,

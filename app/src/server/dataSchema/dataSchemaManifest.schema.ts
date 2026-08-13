@@ -16,8 +16,6 @@ export const dataSchemaManifestSchema = z.object({
     sha256: z.string().min(1),
   }),
   rowCount: z.number().int().nonnegative(),
-  large: z.boolean(),
-  pgDumpVersion: z.string().min(1),
   provenance: z.object({
     publishedBy: z.string().min(1),
     publishedFrom: z.string().min(1),

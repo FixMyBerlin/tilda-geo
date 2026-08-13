@@ -93,7 +93,6 @@ import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/ap
 import { Route as ApiAdminRegionsSlugRouteImport } from './routes/api/admin/regions.$slug'
 import { Route as ApiAdminRegionUploadsUploadRouteImport } from './routes/api/admin/region-uploads.upload'
 import { Route as ApiAdminDataSchemaPublishRouteImport } from './routes/api/admin/data-schema.publish'
-import { Route as ApiAdminDataSchemaImportAllRouteImport } from './routes/api/admin/data-schema.import-all'
 import { Route as ApiAdminDataSchemaImportRouteImport } from './routes/api/admin/data-schema.import'
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
 import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
@@ -544,12 +543,6 @@ const ApiAdminDataSchemaPublishRoute =
     path: '/api/admin/data-schema/publish',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAdminDataSchemaImportAllRoute =
-  ApiAdminDataSchemaImportAllRouteImport.update({
-    id: '/api/admin/data-schema/import-all',
-    path: '/api/admin/data-schema/import-all',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiAdminDataSchemaImportRoute =
   ApiAdminDataSchemaImportRouteImport.update({
     id: '/api/admin/data-schema/import',
@@ -655,7 +648,6 @@ export interface FileRoutesByFullPath {
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
-  '/api/admin/data-schema/import-all': typeof ApiAdminDataSchemaImportAllRoute
   '/api/admin/data-schema/publish': typeof ApiAdminDataSchemaPublishRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
   '/api/admin/regions/$slug': typeof ApiAdminRegionsSlugRoute
@@ -737,7 +729,6 @@ export interface FileRoutesByTo {
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
-  '/api/admin/data-schema/import-all': typeof ApiAdminDataSchemaImportAllRoute
   '/api/admin/data-schema/publish': typeof ApiAdminDataSchemaPublishRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
   '/api/admin/regions/$slug': typeof ApiAdminRegionsSlugRoute
@@ -830,7 +821,6 @@ export interface FileRoutesById {
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
-  '/api/admin/data-schema/import-all': typeof ApiAdminDataSchemaImportAllRoute
   '/api/admin/data-schema/publish': typeof ApiAdminDataSchemaPublishRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
   '/api/admin/regions/$slug': typeof ApiAdminRegionsSlugRoute
@@ -923,7 +913,6 @@ export interface FileRouteTypes {
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/api/admin/data-schema/import'
-    | '/api/admin/data-schema/import-all'
     | '/api/admin/data-schema/publish'
     | '/api/admin/region-uploads/upload'
     | '/api/admin/regions/$slug'
@@ -1005,7 +994,6 @@ export interface FileRouteTypes {
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/api/admin/data-schema/import'
-    | '/api/admin/data-schema/import-all'
     | '/api/admin/data-schema/publish'
     | '/api/admin/region-uploads/upload'
     | '/api/admin/regions/$slug'
@@ -1097,7 +1085,6 @@ export interface FileRouteTypes {
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/api/admin/data-schema/import'
-    | '/api/admin/data-schema/import-all'
     | '/api/admin/data-schema/publish'
     | '/api/admin/region-uploads/upload'
     | '/api/admin/regions/$slug'
@@ -1143,7 +1130,6 @@ export interface RootRouteChildren {
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
   ApiAdminDataSchemaImportRoute: typeof ApiAdminDataSchemaImportRoute
-  ApiAdminDataSchemaImportAllRoute: typeof ApiAdminDataSchemaImportAllRoute
   ApiAdminDataSchemaPublishRoute: typeof ApiAdminDataSchemaPublishRoute
   ApiExportOgrRegionSlugTableNameRoute: typeof ApiExportOgrRegionSlugTableNameRoute
   ApiExportRegionSlugTableNameRoute: typeof ApiExportRegionSlugTableNameRoute
@@ -1746,13 +1732,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminDataSchemaPublishRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/data-schema/import-all': {
-      id: '/api/admin/data-schema/import-all'
-      path: '/api/admin/data-schema/import-all'
-      fullPath: '/api/admin/data-schema/import-all'
-      preLoaderRoute: typeof ApiAdminDataSchemaImportAllRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/admin/data-schema/import': {
       id: '/api/admin/data-schema/import'
       path: '/api/admin/data-schema/import'
@@ -2081,7 +2060,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,
   ApiAdminDataSchemaImportRoute: ApiAdminDataSchemaImportRoute,
-  ApiAdminDataSchemaImportAllRoute: ApiAdminDataSchemaImportAllRoute,
   ApiAdminDataSchemaPublishRoute: ApiAdminDataSchemaPublishRoute,
   ApiExportOgrRegionSlugTableNameRoute: ApiExportOgrRegionSlugTableNameRoute,
   ApiExportRegionSlugTableNameRoute: ApiExportRegionSlugTableNameRoute,

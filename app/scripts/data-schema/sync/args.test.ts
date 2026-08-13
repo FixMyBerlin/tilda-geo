@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { parseSyncArgs } from './args'
 
 describe('parseSyncArgs', () => {
-  it('parses --with-raw', () => {
-    expect(parseSyncArgs(['--with-raw']).withRaw).toBe(true)
+  it('parses --table', () => {
+    expect(parseSyncArgs(['--table', 'euvm_cutouts_point']).table).toBe('euvm_cutouts_point')
   })
 })

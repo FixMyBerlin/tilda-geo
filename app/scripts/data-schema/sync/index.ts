@@ -1,17 +1,13 @@
 #!/usr/bin/env bun
 import * as p from '@clack/prompts'
-import {
-  dataSchemaLocalSourcePath,
-  dataSchemaLocalSpecPath,
-} from '@/server/dataSchema/dataSchemaLocalPaths'
+import { dataSchemaLocalSpecPath } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
   createDataSchemaS3Client,
-  downloadS3ObjectToFile,
   getS3ObjectJson,
   listDataSchemaTables,
   s3ObjectExists,
 } from '@/server/dataSchema/dataSchemaS3.server'
-import { dataSchemaSourceFileKey, dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
+import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../../shared/env'
 import { runCli } from '../cli'
@@ -36,13 +32,13 @@ async function runSync(argv: string[]) {
   }
 
   p.intro('data-schema-sync')
-  const rows: { table: string; spec: string; raw: string }[] = []
+  const rows: { table: string; spec: string }[] = []
 
   for (const table of tables) {
     const specKey = dataSchemaSpecKey(table)
     const exists = await s3ObjectExists(client, bucket, specKey)
     if (!exists) {
-      rows.push({ table, spec: 'missing on S3', raw: '—' })
+      rows.push({ table, spec: 'missing on S3' })
       p.log.warn(`${table}: no ${specKey}`)
       continue
     }
@@ -52,26 +48,11 @@ async function runSync(argv: string[]) {
     const localSpecPath = dataSchemaLocalSpecPath(table)
     await Bun.write(localSpecPath, `${JSON.stringify(parsed, null, 2)}\n`)
 
-    let rawStatus = 'skipped'
-    if (options.withRaw) {
-      const sourceKey = dataSchemaSourceFileKey(table, parsed.source.file)
-      const rawExists = await s3ObjectExists(client, bucket, sourceKey)
-      if (!rawExists) {
-        rawStatus = 'not on S3'
-      } else {
-        const dest = dataSchemaLocalSourcePath(table, parsed.source.file)
-        await downloadS3ObjectToFile(client, bucket, sourceKey, dest)
-        rawStatus = 'downloaded'
-      }
-    }
-
-    rows.push({ table, spec: 'synced', raw: rawStatus })
+    rows.push({ table, spec: 'synced' })
     p.log.success(`${table}: spec → ${localSpecPath}`)
   }
 
-  const summary = rows
-    .map((r) => `${r.table.padEnd(32)} spec=${r.spec.padEnd(14)} raw=${r.raw}`)
-    .join('\n')
+  const summary = rows.map((r) => `${r.table.padEnd(32)} spec=${r.spec}`).join('\n')
   p.note(summary, 'Summary')
   p.outro(`Synced ${rows.filter((r) => r.spec === 'synced').length}/${tables.length} table(s).`)
 }

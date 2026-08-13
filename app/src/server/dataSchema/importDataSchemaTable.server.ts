@@ -19,7 +19,6 @@ import {
   createDataSchemaS3Client,
   downloadS3ObjectToFile,
   getS3ObjectJson,
-  listDataSchemaTables,
 } from './dataSchemaS3.server'
 import {
   assertDataSchemaTableName,
@@ -258,57 +257,4 @@ export async function importDataSchemaTable({
   } finally {
     await rm(tempDir, { recursive: true, force: true }).catch(() => undefined)
   }
-}
-
-export async function importAllDataSchemaTables({
-  includeLarge = false,
-  userId,
-}: {
-  includeLarge?: boolean
-  userId?: string | null
-}) {
-  const { client, bucket } = createDataSchemaS3Client()
-  const tables = await listDataSchemaTables(client, bucket)
-  const results: Array<{
-    table: string
-    ok: boolean
-    skipped?: boolean
-    reason?: string
-    rowCount?: number
-    durationMs?: number
-    error?: string
-    warning?: string
-  }> = []
-
-  for (const table of tables) {
-    try {
-      const raw = await getS3ObjectJson(client, bucket, dataSchemaLatestManifestKey(table))
-      const manifest = dataSchemaManifestSchema.parse(raw)
-      if (manifest.large && !includeLarge) {
-        results.push({
-          table,
-          ok: true,
-          skipped: true,
-          reason: 'large (skipped; pass includeLarge to import)',
-        })
-        continue
-      }
-      const result = await importDataSchemaTable({ table, userId })
-      results.push({
-        table,
-        ok: true,
-        rowCount: result.rowCount,
-        durationMs: result.durationMs,
-        ...(result.warning ? { warning: result.warning } : {}),
-      })
-    } catch (error) {
-      results.push({
-        table,
-        ok: false,
-        error: truncateErrorText(errorMessage(error)),
-      })
-    }
-  }
-
-  return results
 }

@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  assertManifestMatchesTable,
-  buildDataSchemaManifest,
-  inheritLargeFromPreviousManifest,
-} from './buildDataSchemaManifest'
+import { assertManifestMatchesTable, buildDataSchemaManifest } from './buildDataSchemaManifest'
 
 describe('assertManifestMatchesTable', () => {
   it('accepts matching table names', () => {
@@ -28,27 +24,10 @@ describe('buildDataSchemaManifest', () => {
       bytes: 100,
       sha256: 'abc',
       rowCount: 10,
-      large: false,
-      pgDumpVersion: '17.5',
       publishedBy: 'tester',
       publishedFrom: 'development',
     })
     expect(manifest.table).toBe('euvm_cutouts_point')
     expect(() => assertManifestMatchesTable(manifest, 'wrong_table')).toThrow()
-  })
-})
-
-describe('inheritLargeFromPreviousManifest', () => {
-  it('defaults to false when no previous manifest exists', () => {
-    expect(inheritLargeFromPreviousManifest(null)).toBe(false)
-    expect(inheritLargeFromPreviousManifest(undefined)).toBe(false)
-  })
-
-  it('inherits large: true from a previous latest manifest', () => {
-    expect(inheritLargeFromPreviousManifest({ large: true })).toBe(true)
-  })
-
-  it('inherits large: false from a previous latest manifest', () => {
-    expect(inheritLargeFromPreviousManifest({ large: false })).toBe(false)
   })
 })

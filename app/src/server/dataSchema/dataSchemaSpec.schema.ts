@@ -14,7 +14,7 @@ const dataSchemaSpecSchema = z.object({
   source: z.object({
     file: z.string().min(1),
     provider: z.string().min(1).optional(),
-    note: z.string().min(1).optional(),
+    documentation: z.string().min(1).optional(),
   }),
   import: z.object({
     srid: z.number().int().positive(),
@@ -32,7 +32,6 @@ const dataSchemaSpecSchema = z.object({
     }),
   ),
   consumedBy: z.string().min(1).optional(),
-  large: z.boolean().default(false),
 })
 
 export type DataSchemaSpec = z.infer<typeof dataSchemaSpecSchema>

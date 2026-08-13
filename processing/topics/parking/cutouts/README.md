@@ -23,7 +23,7 @@ Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-t
   "source": {
     "file": "euvm_cutouts_point.geojson",
     "provider": "eUVM Berlin",
-    "note": "Google Drive delivery"
+    "documentation": "Google Drive: https://drive.google.com/drive/u/0/folders/1wEKkUayaySZ6AhsdrkTGbbeVAx1YJARs\n\nDownload the point GeoJSON delivery and load it with data-schema-load."
   },
   "import": {
     "srid": 4326,
@@ -34,8 +34,7 @@ Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-t
     "layer": null
   },
   "indexes": [{ "name": "euvm_cutouts_point_geom_idx", "using": "gist", "columns": ["geom"] }],
-  "consumedBy": "processing/topics/parking/cutouts/2_external_cutouts_euvm.sql",
-  "large": false
+  "consumedBy": "processing/topics/parking/cutouts/2_external_cutouts_euvm.sql"
 }
 ```
 
@@ -55,6 +54,6 @@ bun run data-schema-publish -- --table euvm_cutouts_point
 # repeat for euvm_cutouts_polygon
 ```
 
-Then on staging and production: `/admin/data-schema` → Import latest for each table.
+Then on staging and production: `/admin/data-schema` → Import for each table.
 
 Processing still reads `data.euvm_cutouts_point` / `data.euvm_cutouts_polygon` via [`2_external_cutouts_euvm.sql`](2_external_cutouts_euvm.sql).

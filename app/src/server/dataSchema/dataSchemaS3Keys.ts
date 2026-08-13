@@ -45,13 +45,6 @@ export function dataSchemaSpecKey(table: string) {
   return `${dataSchemaSourcesPrefix(table)}/spec.json`
 }
 
-export function dataSchemaSourceFileKey(table: string, filename: string) {
-  if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) {
-    throw new Error(`Invalid source filename "${filename}" (basename only).`)
-  }
-  return `${dataSchemaSourcesPrefix(table)}/${filename}`
-}
-
 function dataSchemaSnapshotPrefix(table: string, snapshotId: string) {
   if (!/^\d{8}T\d{4}$/.test(snapshotId)) {
     throw new Error(`Invalid snapshotId "${snapshotId}" (expected YYYYMMDDTHHmm UTC).`)

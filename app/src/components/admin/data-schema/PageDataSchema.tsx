@@ -8,6 +8,7 @@ import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { Link } from '@/components/shared/links/Link'
 import { buttonStyles, buttonStylesSecondary } from '@/components/shared/links/styles'
+import { Markdown } from '@/components/shared/text/Markdown'
 import { Pill } from '@/components/shared/text/Pill'
 
 const routeApi = getRouteApi('/admin/data-schema')
@@ -37,33 +38,11 @@ async function postJson(url: string, body: unknown) {
     ok?: boolean
     message?: string
     warning?: string
-    results?: Array<{
-      table: string
-      ok: boolean
-      skipped?: boolean
-      reason?: string
-      rowCount?: number
-      durationMs?: number
-      error?: string
-      warning?: string
-    }>
   } | null
   if (!response.ok || data?.ok === false) {
     throw new Error(data?.message || `HTTP ${response.status}`)
   }
   return data
-}
-
-function formatImportAllFeedback(data: Awaited<ReturnType<typeof postJson>>) {
-  if (!data?.results || !Array.isArray(data.results)) {
-    return data?.message || 'Aktion abgeschlossen.'
-  }
-  const lines = data.results.map((r) => {
-    if (r.skipped) return `${r.table}: übersprungen (${r.reason ?? 'skipped'})`
-    if (!r.ok) return `${r.table}: fehlgeschlagen — ${r.error ?? 'Fehler'}`
-    return `${r.table}: OK${r.rowCount != null ? ` (${r.rowCount.toLocaleString('de-DE')} Zeilen)` : ''}${r.warning ? ` — ${r.warning}` : ''}`
-  })
-  return [data.message || 'Import-All abgeschlossen.', ...lines].join('\n')
 }
 
 export function PageDataSchema() {
@@ -72,7 +51,6 @@ export function PageDataSchema() {
   const [pendingKey, setPendingKey] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [includeLarge, setIncludeLarge] = useState(false)
   const [snapshotByTable, setSnapshotByTable] = useState<Record<string, boolean>>({})
   const [selectedSnapshotByTable, setSelectedSnapshotByTable] = useState<Record<string, string>>({})
 
@@ -84,13 +62,7 @@ export function PageDataSchema() {
     try {
       const result = await action()
       const data = result as Awaited<ReturnType<typeof postJson>>
-      if (key === 'import-all') {
-        setFeedback(formatImportAllFeedback(data))
-      } else if (data?.warning) {
-        setFeedback(`Aktion abgeschlossen. ${data.warning}`)
-      } else {
-        setFeedback('Aktion abgeschlossen.')
-      }
+      setFeedback(data?.warning ? `Aktion abgeschlossen. ${data.warning}` : 'Aktion abgeschlossen.')
       await router.invalidate()
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
@@ -106,11 +78,11 @@ export function PageDataSchema() {
       </HeaderWrapper>
 
       <section className={sectionClassName}>
-        <h2 className="text-lg font-semibold text-gray-900">Data-Schema Import</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Data-Schema</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Tabellen unter <code className="text-xs">data.*</code> werden aus S3-Dumps (
-          <code className="text-xs">data-schema/…/latest/</code>) in diese Umgebung importiert.
-          Karten-Layer aus Processing sehen die Daten erst nach einem Rebuild der{' '}
+          Pro Tabelle <strong>Import</strong> klicken, um den S3-Dump (
+          <code className="text-xs">latest/</code>) nach <code className="text-xs">data.*</code> zu
+          schreiben. Karten-Layer aus Processing sehen die Daten erst nach einem Rebuild der{' '}
           <code className="text-xs">public.*</code>-Tabellen — siehe{' '}
           <Link to="/admin/processing">Processing</Link>.
         </p>
@@ -124,42 +96,10 @@ export function PageDataSchema() {
             S3-Liste konnte nicht geladen werden: {listError}
           </p>
         ) : null}
-
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              checked={includeLarge}
-              onChange={(e) => setIncludeLarge(e.target.checked)}
-            />
-            Auch große Tabellen (<code className="text-xs">large: true</code>) importieren
-          </label>
-          <button
-            type="button"
-            disabled={pendingKey !== null}
-            className={smallButtonClassName}
-            onClick={() =>
-              void runAction(
-                'import-all',
-                includeLarge
-                  ? 'Alle Data-Schema-Tabellen inkl. großer Tabellen in dieser Umgebung überschreiben?'
-                  : 'Alle Data-Schema-Tabellen (ohne large) in dieser Umgebung überschreiben? Große Tabellen werden übersprungen.',
-                () => postJson('/api/admin/data-schema/import-all', { includeLarge }),
-              )
-            }
-          >
-            {pendingKey === 'import-all' ? 'Import läuft…' : 'Alle importieren'}
-          </button>
-        </div>
-        <p className="mt-2 text-xs text-gray-500">
-          Standard: Tabellen mit <code>large: true</code> werden bei „Alle importieren“
-          übersprungen.
-        </p>
-
         {feedback ? (
-          <pre className="mt-3 text-sm whitespace-pre-wrap text-green-800" role="status">
+          <p className="mt-3 text-sm text-green-800" role="status">
             {feedback}
-          </pre>
+          </p>
         ) : null}
         {error ? (
           <p className="mt-3 text-sm text-red-700" role="alert">
@@ -169,7 +109,7 @@ export function PageDataSchema() {
       </section>
 
       <section className={twMerge(sectionClassName, 'mt-8 overflow-x-auto')}>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Datensätze</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">Tabellen</h2>
         {datasets.length === 0 ? (
           <p className="text-sm text-gray-600">Keine Tabellen unter data-schema/ in S3 gefunden.</p>
         ) : (
@@ -193,7 +133,6 @@ export function PageDataSchema() {
                   <th scope="row" className={adminTableClasses.thRow}>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-sm">{dataset.table}</span>
-                      {dataset.manifest?.large ? <Pill color="yellow">large</Pill> : null}
                       {dataset.error ? <Pill color="red">Manifest-Fehler</Pill> : null}
                     </div>
                     {dataset.error ? (
@@ -205,6 +144,31 @@ export function PageDataSchema() {
                       <p className="mt-1 text-xs font-normal text-gray-500">
                         von {dataset.manifest.publishedFrom}
                       </p>
+                    ) : null}
+                    {dataset.spec?.provider ? (
+                      <p className="mt-1 text-xs font-normal text-gray-600">
+                        {dataset.spec.provider}
+                      </p>
+                    ) : null}
+                    {dataset.spec?.file ? (
+                      <p className="mt-1 font-mono text-xs font-normal text-gray-500">
+                        {dataset.spec.file}
+                      </p>
+                    ) : null}
+                    {dataset.spec?.consumedBy ? (
+                      <p className="mt-1 font-mono text-xs font-normal text-gray-500">
+                        {dataset.spec.consumedBy}
+                      </p>
+                    ) : null}
+                    {dataset.spec?.documentation ? (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-xs font-normal text-gray-700">
+                          Quelle aktualisieren
+                        </summary>
+                        <div className="mt-2 max-w-md text-left font-normal">
+                          <Markdown markdown={dataset.spec.documentation} headingStyle="compact" />
+                        </div>
+                      </details>
                     ) : null}
                   </th>
                   <td className={adminTableClasses.td}>
@@ -240,7 +204,7 @@ export function PageDataSchema() {
                           )
                         }
                       >
-                        {pendingKey === `import:${dataset.table}` ? 'Import…' : 'Import (latest)'}
+                        {pendingKey === `import:${dataset.table}` ? 'Import…' : 'Import'}
                       </button>
 
                       {dataset.snapshotIds.length > 0 ? (
