@@ -1,5 +1,6 @@
-import { basename, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import { assertDataSchemaTableName } from './dataSchemaS3Keys'
+import { isDataSchemaSourceBasename, parseDataSchemaSpec } from './dataSchemaSpec.schema'
 
 /** Repo-root `data-schema/` resolved from this module (`app/src/server/dataSchema`). */
 export function dataSchemaRootDir() {
@@ -14,8 +15,14 @@ export function dataSchemaLocalSpecPath(table: string) {
   return resolve(dataSchemaTableDir(table), 'spec.json')
 }
 
+export async function loadLocalSpec(table: string) {
+  const specFile = Bun.file(dataSchemaLocalSpecPath(table))
+  if (!(await specFile.exists())) return null
+  return parseDataSchemaSpec(await specFile.json(), table)
+}
+
 export function dataSchemaLocalSourcePath(table: string, sourceFile: string) {
-  if (basename(sourceFile) !== sourceFile || sourceFile === '.' || sourceFile === '..') {
+  if (!isDataSchemaSourceBasename(sourceFile)) {
     throw new Error(`Invalid sourceFile "${sourceFile}" (basename only, no path separators).`)
   }
   return resolve(dataSchemaTableDir(table), sourceFile)

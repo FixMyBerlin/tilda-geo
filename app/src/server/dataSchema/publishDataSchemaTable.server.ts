@@ -49,12 +49,7 @@ export async function publishDataSchemaTableFromEnvironment({
     const publishedAt = new Date().toISOString()
     const publishedFrom =
       process.env.VITE_APP_ENV?.trim() || process.env.ENVIRONMENT?.trim() || 'unknown'
-    const by =
-      publishedBy?.trim() ||
-      userId?.trim() ||
-      process.env.USER?.trim() ||
-      process.env.LOGNAME?.trim() ||
-      'unknown'
+    const by = publishedBy?.trim() || userId?.trim() || 'unknown'
 
     const { client, bucket } = createDataSchemaS3Client()
     const previous = await getLatestDataSchemaManifest(client, bucket, table)
@@ -72,6 +67,9 @@ export async function publishDataSchemaTableFromEnvironment({
       rowCount,
       publishedBy: by,
       publishedFrom,
+      sourceFile: previous?.provenance.sourceFile,
+      sourceSha256: previous?.provenance.sourceSha256,
+      specSha256: previous?.provenance.specSha256,
     })
 
     const written: string[] = []

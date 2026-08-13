@@ -10,7 +10,7 @@ description: Add or update a Postgres data.* table via data-schema (spec, verify
 - **Use** for datasets that `processing/` SQL reads from Postgres `data.*`.
 - **Do not use** for map tiles / GeoJSON served to the map — use [add-static-dataset](../add-static-dataset/SKILL.md) instead.
 
-Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the laptop (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-sync -- --table <table>` first so the local spec matches S3.
+Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the local dev computer (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-sync -- --table <table>` first so the local spec matches S3.
 
 ## Steps
 

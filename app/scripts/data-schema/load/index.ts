@@ -4,8 +4,8 @@ import * as p from '@clack/prompts'
 import {
   dataSchemaLocalSourcePath,
   dataSchemaLocalSpecPath,
+  loadLocalSpec,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
-import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { runCli } from '../cli'
 import { SCHEMA, assertDevelopmentEnvironment, getRowCount, runPsql } from '../db'
 import { parseLoadArgs, printLoadHelp } from './args'
@@ -22,15 +22,12 @@ async function runLoad(argv: string[]) {
   assertDevelopmentEnvironment()
   await assertGdalPresent()
 
-  const localSpecPath = dataSchemaLocalSpecPath(options.table)
-  const specFile = Bun.file(localSpecPath)
-  if (!(await specFile.exists())) {
+  const spec = await loadLocalSpec(options.table)
+  if (!spec) {
     throw new Error(
-      `Local spec not found: ${localSpecPath} (run data-schema-sync or create it first)`,
+      `Local spec not found: ${dataSchemaLocalSpecPath(options.table)} (run data-schema-sync or create it first)`,
     )
   }
-
-  const spec = parseDataSchemaSpec(await specFile.json(), options.table)
 
   const filePath = options.file
     ? resolve(options.file)

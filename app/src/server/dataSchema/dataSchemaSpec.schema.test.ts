@@ -19,6 +19,41 @@ describe('parseDataSchemaSpec', () => {
     expect(parseDataSchemaSpec(validSpec, 'euvm_cutouts_point').table).toBe('euvm_cutouts_point')
   })
 
+  it('keeps optional provider and documentation', () => {
+    const spec = parseDataSchemaSpec(
+      {
+        ...validSpec,
+        source: {
+          file: 'euvm_cutouts_point.geojson',
+          provider: 'eUVM Berlin',
+          documentation: 'Google Drive folder …',
+        },
+      },
+      'euvm_cutouts_point',
+    )
+    expect(spec.source.provider).toBe('eUVM Berlin')
+    expect(spec.source.documentation).toBe('Google Drive folder …')
+  })
+
+  it('strips leftover large and source.note from older specs', () => {
+    const spec = parseDataSchemaSpec(
+      { ...validSpec, large: true, source: { file: 'euvm_cutouts_point.geojson', note: 'old' } },
+      'euvm_cutouts_point',
+    )
+    expect(spec).not.toHaveProperty('large')
+    expect(spec.source).not.toHaveProperty('note')
+    expect(spec.source.documentation).toBeUndefined()
+  })
+
+  it('rejects a path-shaped source.file', () => {
+    expect(() =>
+      parseDataSchemaSpec(
+        { ...validSpec, source: { file: 'subdir/euvm_cutouts_point.geojson' } },
+        'euvm_cutouts_point',
+      ),
+    ).toThrow(/basename/)
+  })
+
   it('rejects an invalid spec without throwing from Zod.parse', () => {
     expect(() => parseDataSchemaSpec({ specVersion: 1 }, 'euvm_cutouts_point')).toThrow(
       /Invalid spec for "euvm_cutouts_point"/,

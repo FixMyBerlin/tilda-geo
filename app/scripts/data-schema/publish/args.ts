@@ -16,7 +16,7 @@ export function parsePublishArgs(argv: string[]) {
     strict: true,
   })
   const specOnly = values['spec-only'] === true
-  if (specOnly && values.mode === 'snapshot') {
+  if (specOnly && values.mode) {
     throw new Error('--spec-only does not write a dump; omit --mode')
   }
   return z

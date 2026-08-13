@@ -1,14 +1,15 @@
-import { dataSchemaIdentifierRegex } from './dataSchemaSpec.schema'
+import { dataSchemaIdentifierRegex, dataSchemaIdentifierSchema } from './dataSchemaSpec.schema'
 
 export const DATA_SCHEMA_S3_PREFIX = 'data-schema'
 
 export function assertDataSchemaTableName(table: string) {
-  if (!dataSchemaIdentifierRegex.test(table)) {
+  const parsed = dataSchemaIdentifierSchema.safeParse(table)
+  if (!parsed.success) {
     throw new Error(
-      `Invalid data-schema table name "${table}" (must match ${dataSchemaIdentifierRegex}).`,
+      `Invalid data-schema table name "${table}" (must match ${dataSchemaIdentifierRegex}, max 63 chars).`,
     )
   }
-  return table
+  return parsed.data
 }
 
 function dataSchemaLatestPrefix(table: string) {

@@ -44,6 +44,6 @@ Options:
   --file <path>   Override source file (default: data-schema/<table>/<spec.source.file>)
   -h, --help      This message
 
-Requires: GDAL 3.8+ (ogr2ogr, ogrinfo — brew install gdal), Docker, ENVIRONMENT=development.
+Requires: GDAL 3.8+ (ogr2ogr, ogrinfo — brew install gdal), Docker (psql for CREATE SCHEMA / indexes), ENVIRONMENT=development.
 `)
 }

@@ -8,4 +8,14 @@ describe('parseLoadArgs', () => {
       '/tmp/a.gpkg',
     )
   })
+
+  it('rejects a table name longer than 63 characters', () => {
+    expect(() => parseLoadArgs(['--table', `a${'x'.repeat(63)}`])).toThrow()
+  })
+
+  it('rejects removed --with-raw', () => {
+    expect(() => parseLoadArgs(['--table', 'euvm_cutouts_point', '--with-raw'])).toThrow(
+      /Unknown option '--with-raw'/,
+    )
+  })
 })

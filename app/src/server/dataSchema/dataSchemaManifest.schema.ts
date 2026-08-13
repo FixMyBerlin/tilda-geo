@@ -1,13 +1,9 @@
 import { z } from 'zod'
-import { dataSchemaIdentifierRegex } from './dataSchemaSpec.schema'
-
-const identifierSchema = z
-  .string()
-  .regex(dataSchemaIdentifierRegex, 'Must be lowercase snake_case starting with a letter')
+import { dataSchemaIdentifierSchema } from './dataSchemaSpec.schema'
 
 export const dataSchemaManifestSchema = z.object({
   manifestVersion: z.literal(1),
-  table: identifierSchema,
+  table: dataSchemaIdentifierSchema,
   publishedAt: z.string().min(1),
   snapshotId: z.string().min(1).nullable(),
   file: z.object({

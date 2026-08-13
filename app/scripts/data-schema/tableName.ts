@@ -1,8 +1,4 @@
 import { z } from 'zod'
-import { dataSchemaIdentifierRegex } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { dataSchemaIdentifierSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
 
-export const tableNameSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .regex(dataSchemaIdentifierRegex, 'Table name must be lowercase snake_case')
+export const tableNameSchema = z.string().trim().pipe(dataSchemaIdentifierSchema)

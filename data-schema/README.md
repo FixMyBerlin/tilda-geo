@@ -1,6 +1,6 @@
 # data-schema/
 
-Stage-1 inputs for Postgres `data.*` tables: a gitignored local mirror of S3 specs, plus the source geojson/gpkg used by load (laptop only). Published dumps live only on S3 under the same `data-schema/` prefix — this folder never holds dumps.
+Stage-1 inputs for Postgres `data.*` tables: a gitignored local mirror of S3 specs, plus the source geojson/gpkg used by load (local dev computer only). Published dumps live only on S3 under the same `data-schema/` prefix — this folder never holds dumps.
 
 Agent procedure: [`.cursor/skills/add-db-data-table/SKILL.md`](../.cursor/skills/add-db-data-table/SKILL.md). Every environment imports dumps via [`/admin/data-schema`](../app/src/routes/admin/data-schema.tsx). How to obtain or generate a source file lives in `spec.source.documentation` (shown in admin).
 

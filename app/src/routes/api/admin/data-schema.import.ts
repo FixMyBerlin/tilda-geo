@@ -3,12 +3,12 @@ import { z } from 'zod'
 import { apiJsonMessages } from '@/server/api/util/apiJsonResponses.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import { requireAdmin } from '@/server/auth/session.server'
-import { dataSchemaIdentifierRegex } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { dataSchemaIdentifierSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { importDataSchemaTable } from '@/server/dataSchema/importDataSchemaTable.server'
 import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 
 const bodySchema = z.object({
-  table: z.string().regex(dataSchemaIdentifierRegex),
+  table: dataSchemaIdentifierSchema,
   snapshotId: z.string().min(1).nullable().optional(),
 })
 

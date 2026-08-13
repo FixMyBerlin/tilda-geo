@@ -46,7 +46,7 @@ async function runSync(argv: string[]) {
     const parsed = parseDataSchemaSpec(await getS3ObjectJson(client, bucket, specKey), table)
 
     const localSpecPath = dataSchemaLocalSpecPath(table)
-    await Bun.write(localSpecPath, `${JSON.stringify(parsed, null, 2)}\n`)
+    await Bun.write(localSpecPath, JSON.stringify(parsed, null, 2))
 
     rows.push({ table, spec: 'synced' })
     p.log.success(`${table}: spec → ${localSpecPath}`)

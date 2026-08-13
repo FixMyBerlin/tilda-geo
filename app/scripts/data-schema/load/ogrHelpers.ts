@@ -34,7 +34,7 @@ export function geometryTypesMatch(ogrinfoValue: string, expectedSpecValue: stri
   return normalizeOgrGeometryType(ogrinfoValue) === normalizeOgrGeometryType(expectedSpecValue)
 }
 
-/** Floor for laptop ogr2ogr (PostGIS). Export metadata edits want 3.11+ separately. */
+/** Floor for local-dev ogr2ogr (PostGIS). Export metadata edits want 3.11+ separately. */
 export const MIN_GDAL_VERSION = '3.8'
 
 export function parseGdalVersion(text: string) {

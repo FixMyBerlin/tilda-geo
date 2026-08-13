@@ -3,11 +3,9 @@ import * as p from '@clack/prompts'
 import {
   dataSchemaLocalSpecPath,
   dataSchemaRootDir,
+  loadLocalSpec,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
-import {
-  dataSchemaIdentifierRegex,
-  parseDataSchemaSpec,
-} from '@/server/dataSchema/dataSchemaSpec.schema'
+import { dataSchemaIdentifierRegex } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { runCli } from '../cli'
 import { parseVerifyArgs, printVerifyHelp } from './args'
 
@@ -30,11 +28,9 @@ async function listLocalTablesWithSpec() {
 
 async function verifyTable(table: string) {
   const specPath = dataSchemaLocalSpecPath(table)
-  const specFile = Bun.file(specPath)
-  if (!(await specFile.exists())) {
+  if (!(await loadLocalSpec(table))) {
     throw new Error(`Local spec not found: ${specPath}`)
   }
-  parseDataSchemaSpec(await specFile.json(), table)
   p.log.success(`${table}: ${specPath}`)
 }
 

@@ -6,7 +6,7 @@ import { basename, dirname, join } from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { buildDataSchemaManifest } from '@/server/dataSchema/buildDataSchemaManifest'
-import { dataSchemaLocalSourcePath } from '@/server/dataSchema/dataSchemaLocalPaths'
+import { dataSchemaLocalSourcePath, loadLocalSpec } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
   createDataSchemaS3Client,
   copyS3Object,
@@ -31,7 +31,7 @@ import { runCli } from '../cli'
 import { SCHEMA, assertDevelopmentEnvironment, getRowCount } from '../db'
 import { parsePublishArgs, printPublishHelp } from './args'
 import { resolveWriteSnapshot } from './publishMode'
-import { loadLocalSpec, uploadSpecJson } from './uploadSources'
+import { uploadSpecJson } from './uploadSources'
 
 async function runPublish(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
