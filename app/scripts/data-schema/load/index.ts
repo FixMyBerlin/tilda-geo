@@ -25,7 +25,7 @@ async function runLoad(argv: string[]) {
   const spec = await loadLocalSpec(options.table)
   if (!spec) {
     throw new Error(
-      `Local spec not found: ${dataSchemaLocalSpecPath(options.table)} (run data-schema-sync or create it first)`,
+      `Local spec not found: ${dataSchemaLocalSpecPath(options.table)} (run data-schema-pull or create it first)`,
     )
   }
 

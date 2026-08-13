@@ -15,6 +15,7 @@ export function isDataSchemaSourceBasename(sourceFile: string) {
 
 const dataSchemaSpecSchema = z.object({
   specVersion: z.literal(1),
+  updatedAt: z.iso.datetime().optional(),
   table: dataSchemaIdentifierSchema,
   source: z.object({
     file: z

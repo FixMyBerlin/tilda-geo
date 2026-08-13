@@ -47,7 +47,7 @@ Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-t
 From `app/`:
 
 ```bash
-bun run data-schema-sync
+bun run data-schema-pull
 bun run data-schema-publish -- --table euvm_cutouts_point --spec-only
 bun run data-schema-load -- --table euvm_cutouts_point --file /path/to/euvm_cutouts_point.geojson
 bun run data-schema-publish -- --table euvm_cutouts_point

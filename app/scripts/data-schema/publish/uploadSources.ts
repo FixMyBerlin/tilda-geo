@@ -1,17 +1,10 @@
-import type { S3Client } from '@aws-sdk/client-s3'
 import * as p from '@clack/prompts'
-import { putS3Json } from '@/server/dataSchema/dataSchemaS3.server'
+import { putS3File } from '@/server/dataSchema/dataSchemaS3.server'
 import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
-import type { DataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 
-export async function uploadSpecJson(
-  client: S3Client,
-  bucket: string,
-  table: string,
-  spec: DataSchemaSpec,
-) {
+export async function uploadSpecJson(table: string, specPath: string) {
   const specKey = dataSchemaSpecKey(table)
-  await putS3Json(client, bucket, specKey, spec)
-  p.log.success(`Uploaded s3://${bucket}/${specKey}`)
+  await putS3File(specKey, specPath, 'application/json')
+  p.log.success(`Uploaded ${specKey}`)
   return specKey
 }

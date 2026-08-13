@@ -1,31 +1,27 @@
 import * as p from '@clack/prompts'
+import { differenceInHours, formatDistanceStrict, isValid, parseISO } from 'date-fns'
 
 export const PUBLISH_MODES = ['override', 'snapshot'] as const
 export type PublishMode = (typeof PUBLISH_MODES)[number]
 
 /** Prompt when previous latest/ is at least this old (local CLI; major-version heuristic). */
-export const STALE_LATEST_MS = 24 * 60 * 60 * 1000
+const STALE_LATEST_HOURS = 24
 
-export function daysSincePublished(publishedAt: string, now = new Date()) {
-  const publishedMs = Date.parse(publishedAt)
-  if (Number.isNaN(publishedMs)) return null
-  return (now.getTime() - publishedMs) / STALE_LATEST_MS
+function publishedAtDate(publishedAt: string) {
+  const date = parseISO(publishedAt)
+  return isValid(date) ? date : null
 }
 
 export function isLatestStale(publishedAt: string, now = new Date()) {
-  const days = daysSincePublished(publishedAt, now)
-  return days !== null && days >= 1
+  const published = publishedAtDate(publishedAt)
+  if (!published) return false
+  return differenceInHours(now, published) >= STALE_LATEST_HOURS
 }
 
 export function formatLatestAge(publishedAt: string, now = new Date()) {
-  const days = daysSincePublished(publishedAt, now)
-  if (days === null) return publishedAt
-  if (days < 1) {
-    const hours = Math.max(1, Math.round(days * 24))
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`
-  }
-  const wholeDays = Math.round(days)
-  return `${wholeDays} day${wholeDays === 1 ? '' : 's'} ago`
+  const published = publishedAtDate(publishedAt)
+  if (!published) return publishedAt
+  return formatDistanceStrict(published, now, { addSuffix: true })
 }
 
 export function decidePublishMode(input: {

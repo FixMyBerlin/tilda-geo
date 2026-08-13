@@ -1,4 +1,3 @@
-import type { S3Client } from '@aws-sdk/client-s3'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { requireAdmin } from '@/server/auth/session.server'
@@ -6,7 +5,6 @@ import db from '@/server/db.server'
 import { getDataSchemaTableRowCount } from './dataSchemaDb.server'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
 import {
-  createDataSchemaS3Client,
   getS3ObjectJson,
   listDataSchemaSnapshotIds,
   listDataSchemaTables,
@@ -32,12 +30,9 @@ const historySelect = {
   updatedById: true,
 } as const
 
-async function loadSpecSummary(client: S3Client, bucket: string, table: string) {
+async function loadSpecSummary(table: string) {
   try {
-    const parsed = parseDataSchemaSpec(
-      await getS3ObjectJson(client, bucket, dataSchemaSpecKey(table)),
-      table,
-    )
+    const parsed = parseDataSchemaSpec(await getS3ObjectJson(dataSchemaSpecKey(table)), table)
     return {
       file: parsed.source.file,
       provider: parsed.source.provider ?? null,
@@ -52,11 +47,10 @@ async function loadSpecSummary(client: S3Client, bucket: string, table: string) 
 export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
   await requireAdmin(getRequestHeaders())
 
-  const { client, bucket } = createDataSchemaS3Client()
   let tables: string[] = []
   let listError: string | null = null
   try {
-    tables = await listDataSchemaTables(client, bucket)
+    tables = await listDataSchemaTables()
   } catch (error) {
     listError = error instanceof Error ? error.message : String(error)
   }
@@ -72,7 +66,7 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
 
       let snapshotIds: string[] = []
       try {
-        snapshotIds = await listDataSchemaSnapshotIds(client, bucket, table)
+        snapshotIds = await listDataSchemaSnapshotIds(table)
       } catch {
         snapshotIds = []
       }
@@ -89,10 +83,10 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
         recentImports = []
       }
 
-      const spec = await loadSpecSummary(client, bucket, table)
+      const spec = await loadSpecSummary(table)
 
       try {
-        const raw = await getS3ObjectJson(client, bucket, dataSchemaLatestManifestKey(table))
+        const raw = await getS3ObjectJson(dataSchemaLatestManifestKey(table))
         const manifest = dataSchemaManifestSchema.parse(raw)
         return {
           table,

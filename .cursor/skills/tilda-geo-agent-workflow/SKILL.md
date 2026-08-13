@@ -2,11 +2,12 @@
 name: tilda-geo-agent-workflow
 description: >-
   Guides isolated feature / local-stack setup in tilda-geo: sibling worktrees,
-  predev Docker, seed, processing, static-data symlinks, agent-browser map debug.
-  Use when creating a feature worktree, needing an isolated Docker stack, running
-  processing/seed, touching static datasets, or debugging maps. Do not use for
-  ordinary edits on develop/main or when already on an existing branch — stay in
-  the current checkout.
+  predev Docker, `.env.local`, reusing the develop db (`DEV_ATTACH_STACK`),
+  seed, processing, static-data symlinks, agent-browser map debug. Use when
+  creating a feature worktree, needing an isolated Docker stack, reusing another
+  checkout's db, running processing/seed, touching static datasets, or debugging
+  maps. Do not use for ordinary edits on develop/main or when already on an
+  existing branch — stay in the current checkout.
 ---
 
 # TILDA Geo agent workflow
@@ -22,6 +23,7 @@ Everyday conventions live in [AGENTS.md](../../../AGENTS.md).
 ### When to use
 
 - User asks for a **new branch / worktree / isolated stack**
+- User asks to **reuse the develop db**, **attach to develop**, or test on the **default local Postgres** without a private stack
 - Dedicated feature that should not dirty the main `develop` checkout
 - Task needs **processing**, **fresh seed DB**, **parallel Docker**, or **static-data worktrees**
 - Map/UI debugging with `bun run dev` + agent-browser ([section 4](#4-agent-browser-and-map-state) — no worktree ceremony unless isolation is also needed)
@@ -39,7 +41,7 @@ Everyday conventions live in [AGENTS.md](../../../AGENTS.md).
 Jump to the section that matches the task:
 
 - New branch or checkout setup: [Git worktrees](#1-git-worktrees)
-- Docker, ports, `.env.local`, or `bun run dev`: [Docker and predev](#2-docker-and-predev-envlocal)
+- Docker, ports, `.env.local`, develop db reuse, or `bun run dev`: [Docker and predev](#2-docker-and-predev-envlocal)
 - Processing, seed data, or static dataset commands: [Processing and local data](#3-processing-and-local-data)
 - Browser or map debugging: [agent-browser and map state](#4-agent-browser-and-map-state)
 - Static dataset files or symlinks: [`tilda-static-data` symlink](#5-tilda-static-data-symlink)
@@ -92,8 +94,8 @@ Two remotes (`origin` = public, `private` = experimental mirror) are org-wide sh
 ### Rules
 
 - **`develop` / `main`** -> main checkout, no `.env.local`, default Docker stack (`db` / `tiles`, ports 5432 / 3000).
-- **Work branches** -> linked worktree; predev auto-creates `.env.local` with `DEV_STACK_ID`.
-- Running `bun run dev` on a work branch in the **main checkout** only warns. Stop and use a worktree.
+- **Work branches** -> linked worktree; predev auto-creates `.env.local` with `DEV_STACK_ID` (or attach — see [decision tree](#decision-tree-local-db-and-envlocal)).
+- Feature branch on the **main checkout** -> predev **warns** about worktrees but still works; uses the **same default develop stack** (no `.env.local`). Do not create `.env.local` there — predev removes it.
 
 ---
 
@@ -101,11 +103,58 @@ Two remotes (`origin` = public, `private` = experimental mirror) are org-wide sh
 
 Run `bun run dev` and let **predev** manage env files, ports, Docker, and migrations. Do not hand-craft `docker compose` for db/tiles.
 
+### Decision tree: local db and `.env.local`
+
+Use this when the user says **use develop db**, **attach to develop**, **test on the develop database**, or asks to set up `.env.local`.
+
+| Where           | Branch             | `.env.local`                                                    | Db stack                                                                  |
+| --------------- | ------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Main checkout   | `develop` / `main` | **None** — removed if present                                   | Default: containers `db` / `tiles`, ports **5432** / **3000**             |
+| Main checkout   | feature branch     | **None** — removed if present (`removed_on_main_checkout`)      | **Same default stack** as develop (same Postgres volume on this checkout) |
+| Linked worktree | feature branch     | Auto-created on first `bun run dev`, or hand-written for attach | Own isolated stack **or** attach to another running stack                 |
+
+**Default stack identity:** unprefixed container names `db` and `tiles`, compose project from the checkout folder name (e.g. `tilda-geo` for `../tilda-geo`). Predev calls this stack id `default` in attach/discovery code.
+
+#### Main checkout + feature branch + develop db (most common shortcut)
+
+No `.env.local`. No `DEV_ATTACH_STACK`. No worktree required for db sharing.
+
+```bash
+cd app
+bun run dev   # predev warns about worktree; still starts/uses default db on 5432
+```
+
+If the db is empty: `bun run seed` then `bun run dev`.
+
+**Do not** hand-write `.env.local` on the main checkout for a feature branch — `syncEnvLocalForBranch` deletes it every predev run.
+
+#### Worktree + reuse develop's running db (`DEV_ATTACH_STACK`)
+
+Only for a **linked worktree**. The target db+tiles must already be running (e.g. `bun run dev` on `develop` in the main checkout, or `bun scripts/predev/checkDocker.ts` from `app/`).
+
+In the **worktree** root `.env.local`:
+
+```env
+# DEV_STACK_BRANCH=my-branch
+DEV_STACK_ID=wt_tilda_geo_my_branch
+DEV_ATTACH_STACK=default
+```
+
+`DEV_ATTACH_STACK=default` → attach to unprefixed `db` / `tiles` on 5432 / 3000 (the main checkout's develop stack). Predev will **not** start a second db for this worktree.
+
+If develop's Vite is already on **5173**, add `DEV_PORT_SLOT=1` (or another slot) in the attaching worktree so Vite uses an offset port and a separate OAuth origin.
+
+**Branch already checked out in main checkout?** `setup-worktree` needs that branch free — e.g. `git checkout develop` in main, then `bun run setup-worktree -- my-branch` from `app/`.
+
+#### Worktree + private isolated db
+
+First `bun run dev` in the worktree auto-writes `.env.local` with only `DEV_STACK_ID` (containers like `wt_my_branch_db`, separate volume). No attach.
+
 `bun run dev` runs `predev` before Vite:
 
 1. **`ensureEnv`** - root `.env` must exist (from `.env.example`).
 2. **`ensureDevStack`** - on feature worktrees, writes `.env.local` if missing.
-3. **`checkDocker`** - stops other stacks (default mode), starts this worktree's db+tiles via `docker compose -p <DEV_STACK_ID>`.
+3. **`checkDocker`** - stops other stacks (default mode), then starts db+tiles or verifies attach target ports are published.
 4. Migrations, topic-docs, etc.
 
 Example auto-generated `.env.local`:
@@ -121,11 +170,11 @@ DEV_STACK_ID=wt_tilda_geo_my_branch
 DEV_PORT_SLOT=1
 ```
 
-| Variable           | Role                                                                       |
-| ------------------ | -------------------------------------------------------------------------- |
-| `DEV_STACK_ID`     | Compose project name; containers like `wt_foo_db`; separate DB volume      |
-| `DEV_ATTACH_STACK` | Optional: attach to another running stack instead of starting new db+tiles |
-| `DEV_PORT_SLOT`    | Optional `1`–`5`: offset host ports for parallel worktrees (see below)     |
+| Variable           | Role                                                                                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEV_STACK_ID`     | Compose project name; containers like `wt_foo_db`; separate DB volume                                                                                                                                                                  |
+| `DEV_ATTACH_STACK` | **Worktrees only.** Reuse another running stack's db+tiles instead of starting your own. Use `default` for the main checkout's develop stack (`db` / `tiles` on 5432 / 3000). Ignored on main checkout — `.env.local` is removed there |
+| `DEV_PORT_SLOT`    | Optional `1`–`5`: offset host ports for parallel worktrees (see below)                                                                                                                                                                 |
 
 **Default ports:** db **5432**, tiles **3000**, Vite **5173**. Predev stops other stacks before starting yours — one active default stack at a time.
 
@@ -182,11 +231,13 @@ bun run processing -- --help   # full contract
 ### App DB setup (agents)
 
 ```bash
-bun run seed   # fresh local DB (~30s); also installs local MCP Bearer `tildageode_admin_local_dev_mcp_only`
+bun run seed   # fresh local DB (~30s); pulls data-schema specs
 bun run dev
 ```
 
 Do **not** use `db-pull`. It pulls staging/production snapshots and is for humans only (prisma restores scrub PII/credentials and re-run the same local-access seed — see `app/scripts/db-pull/README.md`).
+
+If processing needs `data.*` after seed: Import on http://127.0.0.1:5173/admin/data-schema (do not POST the import API).
 
 If you run `dev` without seeding first, predev warns — warn-only, does not block.
 
@@ -319,6 +370,7 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 - Hand-craft `docker compose` for db/tiles/processing (use predev / `bun run processing`).
 - Run `db-pull` (human workflow; pulls real staging/prod data).
 - Commit `.env.local`.
+- Create `.env.local` on the **main checkout** for a feature branch (predev removes it; use no file, or a worktree with attach).
 - Edit `geojson/` through a tilda-geo worktree symlink for real dataset changes.
 - Run two `bun run dev` instances on the default port (OSM auth conflict). Use `DEV_PORT_SLOT` for parallel worktrees.
 
@@ -329,6 +381,7 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 ```
 - [ ] Already on develop/main or an existing branch? -> skip worktree setup; stay put
 - [ ] User asked for a new work branch? -> from app/, `bun run setup-worktree -- my-branch`, then `bun run dev` in the new worktree
+- [ ] Reuse develop db? -> main checkout feature branch: no `.env.local`, just `bun run dev`; worktree: `DEV_ATTACH_STACK=default` in `.env.local` (target stack must be running)
 - [ ] Local app/db needed? -> trust predev from `bun run dev`; do not hand-craft Docker or re-audit env
 - [ ] Fresh local db? -> `bun run seed`, then `bun run dev` (not db-pull)
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)

@@ -9,7 +9,7 @@ alwaysApply: false
 - The schema `prisma` is managed by Prisma, see `app/prisma/schema.prisma`; this holds sensitive data.
   - Use `bun run migrate-create` to create a migration for changes to the schema.prisma.
 - The schema `public` is managed by `/processing` using osm2pgsql and custom .sql files; this data is recreated each night.
-- The schema `data` is loaded locally with `data-schema-load` and imported in every environment via `/admin/data-schema` (published `pg_dump` artifacts). Procedure: [`.cursor/skills/add-db-data-table/SKILL.md`](../skills/add-db-data-table/SKILL.md).
+- The schema `data` is loaded locally with `data-schema-load` and imported via `/admin/data-schema` (published `pg_dump` artifacts). Procedure: [`.cursor/skills/add-db-data-table/SKILL.md`](../skills/add-db-data-table/SKILL.md).
 - We have have the SQL Formatter VSCode (https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc) running
 
 ## Queries

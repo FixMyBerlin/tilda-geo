@@ -32,7 +32,7 @@ export function printLoadHelp() {
 Usage:
   bun run data-schema-load -- --table <name> [--file <path>]
 
-Requires data-schema/<table>/spec.json first (write it, or data-schema-sync).
+Requires data-schema/<table>/spec.json first (write it, or data-schema-pull).
 Local dev computer only. Reads that spec, ogr2ogr into data.<table>, then
 verifies row count and creates indexes. --file only overrides the geojson/gpkg
 path; columns, SRID, geometry, and indexes still come from the spec.

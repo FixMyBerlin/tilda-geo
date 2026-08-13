@@ -1,19 +1,25 @@
 #!/usr/bin/env bun
-import { createHash } from 'node:crypto'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, dirname, join } from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { buildDataSchemaManifest } from '@/server/dataSchema/buildDataSchemaManifest'
-import { dataSchemaLocalSourcePath, loadLocalSpec } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
-  createDataSchemaS3Client,
+  dataSchemaLocalSourcePath,
+  dataSchemaLocalSpecPath,
+  loadLocalSpec,
+} from '@/server/dataSchema/dataSchemaLocalPaths'
+import {
   copyS3Object,
-  putS3FileMultipart,
+  dataSchemaS3Bucket,
+  getS3ObjectJsonIfExists,
+  putS3File,
   putS3Json,
   s3ObjectExists,
 } from '@/server/dataSchema/dataSchemaS3.server'
+import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
+import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getLatestDataSchemaManifest } from '@/server/dataSchema/getLatestDataSchemaManifest'
 import {
   archiveLatestAsSnapshot,
@@ -29,6 +35,7 @@ import {
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../../shared/env'
 import { runCli } from '../cli'
 import { SCHEMA, assertDevelopmentEnvironment, getRowCount } from '../db'
+import { resolveSpecOverwrite } from '../specConflict'
 import { parsePublishArgs, printPublishHelp } from './args'
 import { resolveWriteSnapshot } from './publishMode'
 import { uploadSpecJson } from './uploadSources'
@@ -45,13 +52,32 @@ async function runPublish(argv: string[]) {
   const spec = await loadLocalSpec(options.table)
   if (!spec) {
     throw new Error(
-      `Local spec not found: ${options.table} (write spec.json or run data-schema-sync)`,
+      `Local spec not found: ${options.table} (write spec.json or run data-schema-pull)`,
     )
   }
 
   p.intro('data-schema-publish')
-  const { client, bucket } = createDataSchemaS3Client()
-  await uploadSpecJson(client, bucket, options.table, spec)
+
+  const remoteJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(options.table))
+  const remoteSpec = remoteJson ? parseDataSchemaSpec(remoteJson, options.table) : null
+  const specWrite = await resolveSpecOverwrite({
+    table: options.table,
+    direction: 'publish',
+    existing: remoteSpec,
+    incoming: spec,
+  })
+  if (!specWrite.write) {
+    if (options.specOnly) {
+      p.outro('Kept S3 spec.')
+      return
+    }
+    throw new Error('Kept S3 spec; dump not published. Resolve the spec conflict and re-run.')
+  }
+
+  const stamped = { ...spec, updatedAt: new Date().toISOString() }
+  const localSpecPath = dataSchemaLocalSpecPath(options.table)
+  await Bun.write(localSpecPath, JSON.stringify(stamped, null, 2))
+  await uploadSpecJson(options.table, localSpecPath)
 
   if (options.specOnly) {
     p.outro('Done (spec only; dump not published).')
@@ -60,9 +86,7 @@ async function runPublish(argv: string[]) {
 
   assertDevelopmentEnvironment()
 
-  const specSha256 = createHash('sha256')
-    .update(JSON.stringify(spec, null, 2))
-    .digest('hex')
+  const specSha256 = await sha256File(localSpecPath)
   const sourceFile = spec.source.file
   const localSource = dataSchemaLocalSourcePath(options.table, sourceFile)
   const sourceSha256 = (await Bun.file(localSource).exists())
@@ -72,7 +96,7 @@ async function runPublish(argv: string[]) {
   const rowCount = await getRowCount(options.table)
   p.log.info(`Row count: ${rowCount.toLocaleString()}`)
 
-  const previous = await getLatestDataSchemaManifest(client, bucket, options.table)
+  const previous = await getLatestDataSchemaManifest(options.table)
   const writeSnapshot = await resolveWriteSnapshot({
     explicitMode: options.mode,
     previousPublishedAt: previous?.publishedAt ?? null,
@@ -125,10 +149,11 @@ async function runPublish(argv: string[]) {
     })
 
     const puts = {
-      putFile: (key: string, filePath: string) => putS3FileMultipart(client, bucket, key, filePath),
-      putJson: (key: string, value: unknown) => putS3Json(client, bucket, key, value),
+      putFile: (key: string, filePath: string) => putS3File(key, filePath),
+      putJson: (key: string, value: unknown) => putS3Json(key, value),
     }
     const written: string[] = []
+    const bucket = dataSchemaS3Bucket()
 
     if (writeSnapshot) {
       if (!previous) {
@@ -136,17 +161,15 @@ async function runPublish(argv: string[]) {
       } else {
         spinner.start(`Archiving previous latest (${previous.publishedAt})…`)
         const sourceDumpKey = await resolveLatestDataSchemaDumpKey(
-          client,
-          bucket,
           options.table,
           previous.file.sha256,
         )
         const snap = await archiveLatestAsSnapshot(
           { table: options.table, previous, sourceDumpKey },
           {
-            copyObject: (fromKey, toKey) => copyS3Object(client, bucket, fromKey, toKey),
+            copyObject: (fromKey, toKey) => copyS3Object(fromKey, toKey),
             putJson: puts.putJson,
-            objectExists: (key) => s3ObjectExists(client, bucket, key),
+            objectExists: (key) => s3ObjectExists(key),
           },
         )
         spinner.stop(

@@ -15,11 +15,7 @@ import {
   withDataSchemaImportLock,
 } from './dataSchemaDb.server'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
-import {
-  createDataSchemaS3Client,
-  downloadS3ObjectToFile,
-  getS3ObjectJson,
-} from './dataSchemaS3.server'
+import { downloadS3ObjectToFile, getS3ObjectJson } from './dataSchemaS3.server'
 import {
   assertDataSchemaTableName,
   dataSchemaLatestManifestKey,
@@ -74,19 +70,18 @@ export async function importDataSchemaTable({
   userId?: string | null
 }) {
   assertDataSchemaTableName(table)
-  const { client, bucket } = createDataSchemaS3Client()
 
   const manifestKey = snapshotId
     ? dataSchemaSnapshotManifestKey(table, snapshotId)
     : dataSchemaLatestManifestKey(table)
 
-  const rawManifest = await getS3ObjectJson(client, bucket, manifestKey)
+  const rawManifest = await getS3ObjectJson(manifestKey)
   const manifest = dataSchemaManifestSchema.parse(rawManifest)
   assertManifestMatchesTable(manifest, table)
 
   const dumpKey = snapshotId
     ? dataSchemaSnapshotDumpKey(table, snapshotId)
-    : await resolveLatestDataSchemaDumpKey(client, bucket, table, manifest.file.sha256)
+    : await resolveLatestDataSchemaDumpKey(table, manifest.file.sha256)
 
   const startedAt = Date.now()
   const history = await db.dataSchemaImport.create({
@@ -123,7 +118,7 @@ export async function importDataSchemaTable({
           )
         }
 
-        await downloadS3ObjectToFile(client, bucket, dumpKey, dumpPath)
+        await downloadS3ObjectToFile(dumpKey, dumpPath)
         const actualSha = await sha256File(dumpPath)
         if (actualSha !== manifest.file.sha256) {
           throw new Error(

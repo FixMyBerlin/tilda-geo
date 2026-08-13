@@ -1,7 +1,6 @@
-import type { S3Client } from '@aws-sdk/client-s3'
 import { assertManifestMatchesTable } from './buildDataSchemaManifest'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
-import { getS3ObjectJson, s3ObjectExists } from './dataSchemaS3.server'
+import { getS3ObjectJsonIfExists } from './dataSchemaS3.server'
 import { dataSchemaLatestManifestKey } from './dataSchemaS3Keys'
 
 export function parseLatestDataSchemaManifest(raw: unknown, table: string) {
@@ -14,11 +13,8 @@ export function parseLatestDataSchemaManifest(raw: unknown, table: string) {
   return parsed.data
 }
 
-export async function getLatestDataSchemaManifest(client: S3Client, bucket: string, table: string) {
-  const latestManifestKey = dataSchemaLatestManifestKey(table)
-  if (!(await s3ObjectExists(client, bucket, latestManifestKey))) return null
-  return parseLatestDataSchemaManifest(
-    await getS3ObjectJson(client, bucket, latestManifestKey),
-    table,
-  )
+export async function getLatestDataSchemaManifest(table: string) {
+  const raw = await getS3ObjectJsonIfExists(dataSchemaLatestManifestKey(table))
+  if (!raw) return null
+  return parseLatestDataSchemaManifest(raw, table)
 }

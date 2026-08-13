@@ -63,4 +63,12 @@ describe('parseDataSchemaSpec', () => {
   it('rejects a table mismatch', () => {
     expect(() => parseDataSchemaSpec(validSpec, 'other_table')).toThrow(/Spec table mismatch/)
   })
+
+  it('accepts updatedAt when present', () => {
+    const spec = parseDataSchemaSpec(
+      { ...validSpec, updatedAt: '2026-08-13T13:00:00.000Z' },
+      'euvm_cutouts_point',
+    )
+    expect(spec.updatedAt).toBe('2026-08-13T13:00:00.000Z')
+  })
 })

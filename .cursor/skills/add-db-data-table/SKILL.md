@@ -1,6 +1,6 @@
 ---
 name: add-db-data-table
-description: Add or update a Postgres data.* table via data-schema (spec, verify, load, publish dump, admin Import). Use when processing SQL needs data inside Postgres; not for map tiles/GeoJSON StaticDatasets.
+description: Add or update a Postgres data.* table via data-schema (spec, verify, load, publish dump, `/admin/data-schema` Import). Use when processing SQL needs data inside Postgres; not for map tiles/GeoJSON StaticDatasets.
 ---
 
 # Add DB data table (`data.*`)
@@ -10,7 +10,7 @@ description: Add or update a Postgres data.* table via data-schema (spec, verify
 - **Use** for datasets that `processing/` SQL reads from Postgres `data.*`.
 - **Do not use** for map tiles / GeoJSON served to the map — use [add-static-dataset](../add-static-dataset/SKILL.md) instead.
 
-Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the local dev computer (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-sync -- --table <table>` first so the local spec matches S3.
+Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the local dev computer (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-pull -- --table <table>` first so the local spec matches S3. Pull/publish compare `spec.updatedAt` (stamped on publish); the CLI asks when that would clobber a newer spec.
 
 ## Steps
 
@@ -46,6 +46,7 @@ Match [`app/src/server/dataSchema/dataSchemaSpec.schema.ts`](../../../app/src/se
 - `source.provider`: optional short label in admin.
 - `source.documentation`: optional Markdown — how to get or generate that file next time.
 - `consumedBy`: optional path of processing SQL that reads this table. Shown in admin; nothing validates it against the SQL.
+- `updatedAt`: ISO datetime. Omit on a new spec; publish writes it on the local file first, then uploads that same file. Do not hand-edit.
 - Geometry names are WKB-style (`MultiPolygon`, `LineString`). `data-schema-load` treats ogrinfo’s spaced forms (`Multi Polygon`) as the same.
 
 ### 2. Verify + format
@@ -70,7 +71,7 @@ bun run data-schema-load -- --table <table>
 bun run data-schema-load -- --table <table> --file /abs/path
 ```
 
-`--file` only overrides the path. Columns, SRID, geometry type, and indexes still come from the spec. Load runs host `ogr2ogr` (GDAL 3.8+, `brew install gdal`) into local `data.<table>` and checks feature count vs Postgres — that is the local source check. There is no separate local dump-restore CLI.
+`--file` only overrides the path. Columns, SRID, geometry type, and indexes still come from the spec. Load runs host `ogr2ogr` (GDAL 3.8+, `brew install gdal`) into local `data.<table>` and checks feature count vs Postgres — that is the local source check. Dump restore is Import on `/admin/data-schema`.
 
 ### 4. Publish
 
@@ -84,14 +85,16 @@ Uploads spec + `pg_dump` of the local table to S3 `latest/`. Default `--mode ove
 
 `--spec-only` uploads the spec without a dump (new recipe before load, or metadata edits: `provider`, `documentation`, `consumedBy`). Column/geometry changes need load + a full publish.
 
-### 5. Import via admin UI — give the user the URLs
+### 5. Import dumps (admin UI)
 
-Do **not** POST `/api/admin/data-schema/import` yourself. That route requires an admin session cookie; the agent usually has none.
+Dump restore is only `/admin/data-schema` **Import** (local, staging, production). Do **not** POST `/api/admin/data-schema/import` from an agent.
 
-There is no per-table deeplink. Hand over the page and the table name; they click **Import** on that row. Optional local Import after publish is the dump-roundtrip check (same UI as staging/prod):
+`bun run seed` always runs `data-schema-pull` (fail-soft if S3 is missing). It does not restore dumps.
 
 - Local: http://127.0.0.1:5173/admin/data-schema
 - Staging: https://staging.tilda-geo.de/admin/data-schema
 - Production: https://tilda-geo.de/admin/data-schema
+
+There is no per-table deeplink. Hand over the page and the table name; they click **Import** on that row.
 
 Import updates `data.*` only. If `consumedBy` processing SQL exists, the map’s `public.*` tables need a processing run after Import. Source documentation is on that page under “Quelle aktualisieren”.
