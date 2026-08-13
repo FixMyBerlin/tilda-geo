@@ -44,6 +44,8 @@ model User {
   noteComments  NoteComment[]
   qaEvaluations   QaEvaluation[]
   adminApiTokens  AdminApiToken[]
+  dataSchemaImportsCreated DataSchemaImport[] @relation("DataSchemaImportCreatedBy")
+  dataSchemaImportsUpdated DataSchemaImport[] @relation("DataSchemaImportUpdatedBy")
 
   @@map("User")
   @@schema("prisma")
@@ -610,7 +612,10 @@ model DataSchemaImport {
   rowCount    Int?
   durationMs  Int?
   errorText   String?
-  userId      String?
+  createdById String?
+  createdBy   User?                  @relation("DataSchemaImportCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?                  @relation("DataSchemaImportUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
 
   @@index([tableName, createdAt])
   @@map("DataSchemaImport")

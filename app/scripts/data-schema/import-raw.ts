@@ -6,15 +6,15 @@ import {
   dataSchemaLocalSourcePath,
   dataSchemaLocalSpecPath,
 } from '@/server/dataSchema/dataSchemaLocalPaths'
-import { dataSchemaSpecSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { parseImportRawArgs, printImportRawHelp } from './args'
+import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { parseImportRawArgs, printCommandHelp } from './args'
 import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount, runPsql } from './db'
 import { assertOgrToolsPresent, getSourceLayerInfo, runOgr2ogrImport } from './ogr'
 import { geometryTypesMatch } from './ogrHelpers'
 
 export async function runImportRaw(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printImportRawHelp()
+    printCommandHelp('import-raw')
     return
   }
 
@@ -27,19 +27,7 @@ export async function runImportRaw(argv: string[]) {
     throw new Error(`Local spec not found: ${localSpecPath} (run sync or create it first)`)
   }
 
-  let spec
-  try {
-    spec = dataSchemaSpecSchema.parse(JSON.parse(await readFile(localSpecPath, 'utf8')))
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Invalid local spec for "${options.table}": ${message}`)
-  }
-
-  if (spec.table !== options.table) {
-    throw new Error(
-      `Spec table mismatch: --table ${options.table} but spec.table is "${spec.table}".`,
-    )
-  }
+  const spec = parseDataSchemaSpec(JSON.parse(await readFile(localSpecPath, 'utf8')), options.table)
 
   const filePath = options.file
     ? resolve(options.file)

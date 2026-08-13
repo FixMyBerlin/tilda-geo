@@ -1,3 +1,4 @@
+import { $ } from 'bun'
 import { assertDataSchemaTableName } from '@/server/dataSchema/dataSchemaS3Keys'
 import {
   POSTGRES_CLI_IMAGE,
@@ -26,7 +27,6 @@ export function getDockerDatabaseUrl() {
 }
 
 export async function runPsql(command: string) {
-  const { $ } = await import('bun')
   const dockerUrl = getDockerDatabaseUrl()
   const result =
     await $`docker run --rm --add-host=host.docker.internal:host-gateway --entrypoint psql ${POSTGRES_CLI_IMAGE} --tuples-only --no-align --command=${command} ${dockerUrl}`
@@ -47,5 +47,3 @@ export async function getRowCount(tableName: string) {
   }
   return count
 }
-
-export { POSTGRES_CLI_IMAGE }

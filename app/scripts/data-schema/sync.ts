@@ -13,13 +13,13 @@ import {
   s3ObjectExists,
 } from '@/server/dataSchema/dataSchemaS3.server'
 import { dataSchemaSourceFileKey, dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
-import { dataSchemaSpecSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
-import { parseSyncArgs, printSyncHelp } from './args'
+import { parseSyncArgs, printCommandHelp } from './args'
 
 export async function runSync(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printSyncHelp()
+    printCommandHelp('sync')
     return
   }
 
@@ -47,18 +47,7 @@ export async function runSync(argv: string[]) {
       continue
     }
 
-    let parsed
-    try {
-      const json = await getS3ObjectJson(client, bucket, specKey)
-      parsed = dataSchemaSpecSchema.parse(json)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      throw new Error(`Invalid spec for table "${table}": ${message}`)
-    }
-
-    if (parsed.table !== table) {
-      throw new Error(`Spec table mismatch for "${table}": spec.table is "${parsed.table}".`)
-    }
+    const parsed = parseDataSchemaSpec(await getS3ObjectJson(client, bucket, specKey), table)
 
     const localSpecPath = dataSchemaLocalSpecPath(table)
     await mkdir(dataSchemaTableDir(table), { recursive: true })

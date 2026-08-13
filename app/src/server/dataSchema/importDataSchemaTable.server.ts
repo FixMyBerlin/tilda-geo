@@ -98,13 +98,14 @@ export async function importDataSchemaTable({
       snapshotId: snapshotId ?? null,
       sha256: manifest.file.sha256,
       status: 'PENDING' satisfies DataSchemaImportStatus,
-      userId: userId ?? null,
+      createdById: userId ?? null,
+      updatedById: userId ?? null,
     },
   })
 
   await db.dataSchemaImport.update({
     where: { id: history.id },
-    data: { status: 'RUNNING' },
+    data: { status: 'RUNNING', updatedById: userId ?? null },
   })
 
   const tempDir = await mkdtemp(join(tmpdir(), 'data-schema-import-'))
@@ -162,6 +163,7 @@ export async function importDataSchemaTable({
               rowCount,
               durationMs,
               errorText: asideDropWarning ? truncateErrorText(asideDropWarning) : null,
+              updatedById: userId ?? null,
             },
           })
         } catch (bookkeepingError) {
@@ -218,6 +220,7 @@ export async function importDataSchemaTable({
             rowCount: committedRowCount,
             durationMs,
             errorText: truncateErrorText(warning),
+            updatedById: userId ?? null,
           },
         })
       } catch {
@@ -248,6 +251,7 @@ export async function importDataSchemaTable({
         status: 'FAILED',
         durationMs: Date.now() - startedAt,
         errorText: message,
+        updatedById: userId ?? null,
       },
     })
     throw new Error(message, { cause: error })

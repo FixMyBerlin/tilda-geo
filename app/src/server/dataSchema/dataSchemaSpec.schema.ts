@@ -8,7 +8,7 @@ const identifierSchema = z
   // Postgres identifiers are capped at 63 bytes (NAMEDATALEN-1).
   .max(63)
 
-export const dataSchemaSpecSchema = z.object({
+const dataSchemaSpecSchema = z.object({
   specVersion: z.literal(1),
   table: identifierSchema,
   source: z.object({
@@ -36,3 +36,17 @@ export const dataSchemaSpecSchema = z.object({
 })
 
 export type DataSchemaSpec = z.infer<typeof dataSchemaSpecSchema>
+
+export function parseDataSchemaSpec(raw: unknown, table: string) {
+  const parsed = dataSchemaSpecSchema.safeParse(raw)
+  if (!parsed.success) {
+    const detail = parsed.error.issues.map((issue) => issue.message).join('; ')
+    throw new Error(`Invalid spec for "${table}": ${detail}`)
+  }
+  if (parsed.data.table !== table) {
+    throw new Error(
+      `Spec table mismatch: expected "${table}" but spec.table is "${parsed.data.table}".`,
+    )
+  }
+  return parsed.data
+}

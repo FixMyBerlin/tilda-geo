@@ -15,23 +15,17 @@ import {
   putS3Json,
 } from '@/server/dataSchema/dataSchemaS3.server'
 import { dataSchemaSnapshotId } from '@/server/dataSchema/dataSchemaS3Keys'
-import { dataSchemaSpecSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import {
   publishLatestDumpAndManifest,
   publishSnapshotDumpAndManifest,
 } from '@/server/dataSchema/publishDataSchemaArtifacts'
 import { resolveLargeForRepublish } from '@/server/dataSchema/resolveLargeForRepublish'
 import { sha256File } from '@/server/dataSchema/sha256File'
-import { toDockerNetworkUrl } from '../db-pull/db-helpers'
+import { POSTGRES_CLI_IMAGE, toDockerNetworkUrl } from '../db-pull/db-helpers'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
-import { parsePublishArgs, printPublishHelp } from './args'
-import {
-  POSTGRES_CLI_IMAGE,
-  SCHEMA,
-  assertDevelopmentEnvironment,
-  getDatabaseUrl,
-  getRowCount,
-} from './db'
+import { parsePublishArgs, printCommandHelp } from './args'
+import { SCHEMA, assertDevelopmentEnvironment, getDatabaseUrl, getRowCount } from './db'
 
 async function getPgDumpVersion() {
   const result = await $`docker run --rm --entrypoint pg_dump ${POSTGRES_CLI_IMAGE} --version`
@@ -47,7 +41,7 @@ async function getPgDumpVersion() {
 
 export async function runPublish(argv: string[]) {
   if (argv.includes('--help') || argv.includes('-h')) {
-    printPublishHelp()
+    printCommandHelp('publish')
     return
   }
 
@@ -64,13 +58,8 @@ export async function runPublish(argv: string[]) {
 
   if (existsSync(localSpecPath)) {
     const raw = await readFile(localSpecPath, 'utf8')
-    const rawJson = JSON.parse(raw) as { large?: unknown; table?: unknown }
-    const spec = dataSchemaSpecSchema.parse(rawJson)
-    if (spec.table !== options.table) {
-      throw new Error(
-        `Spec table mismatch: --table ${options.table} but spec.table is "${spec.table}".`,
-      )
-    }
+    const rawJson = JSON.parse(raw) as { large?: unknown }
+    const spec = parseDataSchemaSpec(rawJson, options.table)
     if (typeof rawJson.large === 'boolean') {
       largeOverride = rawJson.large
     }

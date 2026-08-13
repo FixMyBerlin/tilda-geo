@@ -11,16 +11,16 @@ import {
   putS3Json,
 } from '@/server/dataSchema/dataSchemaS3.server'
 import { dataSchemaSourceFileKey, dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
-import { dataSchemaSpecSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
-import { parsePublishSpecArgs, printPublishSpecHelp } from './args'
+import { parsePublishSpecArgs, printCommandHelp } from './args'
 
 const RAW_UPLOAD_LIMIT_BYTES = 100 * 1024 * 1024
 
 export async function runPublishSpec(argv: string[]) {
   // Allow --help without --table
   if (argv.includes('--help') || argv.includes('-h')) {
-    printPublishSpecHelp()
+    printCommandHelp('publish-spec')
     return
   }
 
@@ -32,20 +32,7 @@ export async function runPublishSpec(argv: string[]) {
     throw new Error(`Local spec not found: ${localSpecPath}`)
   }
 
-  const raw = await readFile(localSpecPath, 'utf8')
-  let spec
-  try {
-    spec = dataSchemaSpecSchema.parse(JSON.parse(raw))
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Invalid local spec for "${options.table}": ${message}`)
-  }
-
-  if (spec.table !== options.table) {
-    throw new Error(
-      `Spec table mismatch: --table ${options.table} but spec.table is "${spec.table}".`,
-    )
-  }
+  const spec = parseDataSchemaSpec(JSON.parse(await readFile(localSpecPath, 'utf8')), options.table)
 
   p.intro('data-schema publish-spec')
   const { client, bucket } = createDataSchemaS3Client()

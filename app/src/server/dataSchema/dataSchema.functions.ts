@@ -26,7 +26,8 @@ const historySelect = {
   rowCount: true,
   durationMs: true,
   errorText: true,
-  userId: true,
+  createdById: true,
+  updatedById: true,
 } as const
 
 export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
