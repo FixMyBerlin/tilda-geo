@@ -26,7 +26,6 @@ import {
   dataSchemaSnapshotDumpKey,
   dataSchemaSnapshotManifestKey,
 } from './dataSchemaS3Keys'
-import { shouldRecordImportAsFailed } from './importDataSchemaHistory'
 import { assertDumpContainsOnlyTable } from './parsePgRestoreToc'
 import type { AsideRenameMapping } from './pgIdentifier'
 import { resolveLatestDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
@@ -205,7 +204,8 @@ export async function importDataSchemaTable({
       }
     })
   } catch (error) {
-    if (!shouldRecordImportAsFailed(restoreCommitted)) {
+    // Restore already swapped the live table in; later history writes must not mark FAILED.
+    if (restoreCommitted) {
       const durationMs = Date.now() - startedAt
       const warning = joinWarnings(
         committedWarning,

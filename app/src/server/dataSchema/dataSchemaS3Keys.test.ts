@@ -1,16 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { dataSchemaObjectDumpKey } from './dataSchemaS3Keys'
-import { shouldRecordImportAsFailed } from './importDataSchemaHistory'
-
-describe('shouldRecordImportAsFailed', () => {
-  it('does not mark FAILED after a committed restore', () => {
-    expect(shouldRecordImportAsFailed(true)).toBe(false)
-  })
-
-  it('marks FAILED when restore did not commit', () => {
-    expect(shouldRecordImportAsFailed(false)).toBe(true)
-  })
-})
 
 describe('dataSchemaObjectDumpKey', () => {
   it('builds a content-addressed key', () => {
