@@ -8,56 +8,29 @@ vi.mock('./dataSchemaS3.server', () => ({
 
 import { resolveDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 
-const sha256 = 'b'.repeat(64)
-
 describe('resolveDataSchemaDumpKey', () => {
   beforeEach(() => {
     s3ObjectExists.mockReset()
   })
 
-  it('prefers data.dump when it exists', async () => {
-    s3ObjectExists.mockImplementation(async (key: string) => key.endsWith('/data.dump'))
-    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point', sha256)).resolves.toBe(
+  it('returns data.dump when it exists', async () => {
+    s3ObjectExists.mockResolvedValue(true)
+    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point')).resolves.toBe(
       'data-schema/euvm_cutouts_point/data.dump',
     )
   })
 
-  it('falls back to objects/<sha> for leftover publishes', async () => {
-    s3ObjectExists.mockImplementation(async (key: string) => key.includes('/objects/'))
-    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point', sha256)).resolves.toBe(
-      `data-schema/euvm_cutouts_point/objects/${sha256}.dump`,
+  it('returns snapshots/<id>/data.dump', async () => {
+    s3ObjectExists.mockResolvedValue(true)
+    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point', '20260813T0800')).resolves.toBe(
+      'data-schema/euvm_cutouts_point/snapshots/20260813T0800/data.dump',
     )
   })
 
-  it('falls back to latest/table.dump when data.dump and objects/ are missing', async () => {
-    s3ObjectExists.mockImplementation(async (key: string) => key.endsWith('/latest/table.dump'))
-    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point', sha256)).resolves.toBe(
-      'data-schema/euvm_cutouts_point/latest/table.dump',
-    )
-  })
-
-  it('prefers snapshots/<id>/data.dump', async () => {
-    s3ObjectExists.mockImplementation(
-      async (key: string) => key.includes('/snapshots/') && key.endsWith('/data.dump'),
-    )
-    await expect(
-      resolveDataSchemaDumpKey('euvm_cutouts_point', sha256, '20260813T0800'),
-    ).resolves.toBe('data-schema/euvm_cutouts_point/snapshots/20260813T0800/data.dump')
-  })
-
-  it('falls back to leftover snapshot table.dump', async () => {
-    s3ObjectExists.mockImplementation(async (key: string) =>
-      key.endsWith('/snapshots/20260813T0800/table.dump'),
-    )
-    await expect(
-      resolveDataSchemaDumpKey('euvm_cutouts_point', sha256, '20260813T0800'),
-    ).resolves.toBe('data-schema/euvm_cutouts_point/snapshots/20260813T0800/table.dump')
-  })
-
-  it('throws when no dump object exists', async () => {
+  it('throws when the dump object does not exist', async () => {
     s3ObjectExists.mockResolvedValue(false)
-    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point', sha256)).rejects.toThrow(
-      /No dump object for data\.euvm_cutouts_point/,
+    await expect(resolveDataSchemaDumpKey('euvm_cutouts_point')).rejects.toThrow(
+      /No dump object at data-schema\/euvm_cutouts_point\/data\.dump/,
     )
   })
 })

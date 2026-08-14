@@ -1,8 +1,11 @@
 #!/usr/bin/env bun
 import * as p from '@clack/prompts'
 import { dataSchemaLocalSpecPath, loadLocalSpec } from '@/server/dataSchema/dataSchemaLocalPaths'
-import { getS3ObjectJsonFirst, listDataSchemaTables } from '@/server/dataSchema/dataSchemaS3.server'
-import { dataSchemaSpecReadKeys } from '@/server/dataSchema/dataSchemaS3Keys'
+import {
+  getS3ObjectJsonIfExists,
+  listDataSchemaTables,
+} from '@/server/dataSchema/dataSchemaS3.server'
+import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../../shared/env'
 import { runCli } from '../cli'
@@ -30,14 +33,14 @@ export async function runPull(argv: string[]) {
   const rows: { table: string; spec: string }[] = []
 
   for (const table of tables) {
-    const specHit = await getS3ObjectJsonFirst(dataSchemaSpecReadKeys(table))
-    if (!specHit) {
+    const specJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(table))
+    if (!specJson) {
       rows.push({ table, spec: 'missing on S3' })
       p.log.warn(`${table}: no spec.json`)
       continue
     }
 
-    const incoming = parseDataSchemaSpec(specHit.json, table)
+    const incoming = parseDataSchemaSpec(specJson, table)
     const existing = await loadLocalSpec(table)
     const resolved = await resolveSpecOverwrite({
       table,

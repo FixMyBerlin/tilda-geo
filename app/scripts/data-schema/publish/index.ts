@@ -7,16 +7,17 @@ import { $ } from 'bun'
 import { buildDataSchemaManifest } from '@/server/dataSchema/buildDataSchemaManifest'
 import { dataSchemaLocalSpecPath, loadLocalSpec } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
-  getS3ObjectJsonFirst,
+  getS3ObjectJsonIfExists,
   copyS3Object,
   dataSchemaS3Bucket,
   putS3File,
   putS3Json,
   s3ObjectExists,
 } from '@/server/dataSchema/dataSchemaS3.server'
-import { dataSchemaSpecReadKeys } from '@/server/dataSchema/dataSchemaS3Keys'
+import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getLatestDataSchemaManifest } from '@/server/dataSchema/getLatestDataSchemaManifest'
+import { pgDumpArchiveFlags } from '@/server/dataSchema/pgDumpArchiveFlags'
 import {
   archiveLatestAsSnapshot,
   publishLatestDumpAndManifest,
@@ -54,8 +55,8 @@ async function runPublish(argv: string[]) {
 
   p.intro('data-schema-publish')
 
-  const specHit = await getS3ObjectJsonFirst(dataSchemaSpecReadKeys(options.table))
-  const remoteSpec = specHit ? parseDataSchemaSpec(specHit.json, options.table) : null
+  const specJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(options.table))
+  const remoteSpec = specJson ? parseDataSchemaSpec(specJson, options.table) : null
   const specWrite = await resolveSpecOverwrite({
     table: options.table,
     direction: 'publish',
@@ -103,7 +104,7 @@ async function runPublish(argv: string[]) {
     const spinner = p.spinner()
     spinner.start(`pg_dump ${SCHEMA}.${options.table}…`)
     const dumpResult =
-      await $`docker run --rm --add-host=host.docker.internal:host-gateway --volume ${dumpDir}:/dump --entrypoint pg_dump ${POSTGRES_CLI_IMAGE} --format=custom --no-owner --no-privileges --table=${SCHEMA}.${options.table} --file=${dockerDumpPath} ${dockerUrl}`
+      await $`docker run --rm --add-host=host.docker.internal:host-gateway --volume ${dumpDir}:/dump --entrypoint pg_dump ${POSTGRES_CLI_IMAGE} ${pgDumpArchiveFlags} --table=${SCHEMA}.${options.table} --file=${dockerDumpPath} ${dockerUrl}`
         .quiet()
         .nothrow()
     if (dumpResult.exitCode !== 0) {
@@ -141,7 +142,7 @@ async function runPublish(argv: string[]) {
         p.log.warn('No previous dump to archive; publishing as current only.')
       } else {
         spinner.start(`Archiving previous dump (${previous.publishedAt})…`)
-        const sourceDumpKey = await resolveDataSchemaDumpKey(options.table, previous.sha256)
+        const sourceDumpKey = await resolveDataSchemaDumpKey(options.table)
         const snap = await archiveLatestAsSnapshot(
           { table: options.table, previous, sourceDumpKey },
           {

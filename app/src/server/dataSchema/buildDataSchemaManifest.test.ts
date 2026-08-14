@@ -38,18 +38,25 @@ describe('buildDataSchemaManifest', () => {
 })
 
 describe('dataSchemaManifestSchema', () => {
-  it('accepts a legacy nested file.sha256 manifest', () => {
+  it('accepts a current manifest', () => {
     const parsed = dataSchemaManifestSchema.parse({
-      manifestVersion: 1,
       table: 'euvm_cutouts_point',
       publishedAt: '2026-08-12T10:42:00Z',
-      snapshotId: null,
-      file: { name: 'table.dump', bytes: 100, sha256 },
+      sha256,
       rowCount: 10,
-      provenance: { publishedBy: 'tester', publishedFrom: 'development' },
+      snapshotId: null,
     })
     expect(parsed.sha256).toBe(sha256)
-    expect(parsed).not.toHaveProperty('file')
-    expect(parsed).not.toHaveProperty('provenance')
+  })
+
+  it('rejects a nested file.sha256 without a top-level sha256', () => {
+    expect(() =>
+      dataSchemaManifestSchema.parse({
+        table: 'euvm_cutouts_point',
+        publishedAt: '2026-08-12T10:42:00Z',
+        file: { sha256 },
+        rowCount: 10,
+      }),
+    ).toThrow()
   })
 })

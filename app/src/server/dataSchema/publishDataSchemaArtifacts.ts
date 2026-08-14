@@ -1,7 +1,6 @@
 import type { DataSchemaManifest } from './dataSchemaManifest.schema'
 import {
   dataSchemaDumpKey,
-  dataSchemaLegacySnapshotManifestKey,
   dataSchemaManifestKey,
   dataSchemaSnapshotDumpKey,
   dataSchemaSnapshotId,
@@ -65,10 +64,7 @@ export async function archiveLatestAsSnapshot(
   const snapDumpKey = dataSchemaSnapshotDumpKey(table, snapshotId)
   const snapManifestKey = dataSchemaSnapshotManifestKey(table, snapshotId)
 
-  if (
-    (await puts.objectExists(snapManifestKey)) ||
-    (await puts.objectExists(dataSchemaLegacySnapshotManifestKey(table, snapshotId)))
-  ) {
+  if (await puts.objectExists(snapManifestKey)) {
     return { keys: [snapManifestKey], snapshotId, skipped: true as const }
   }
 

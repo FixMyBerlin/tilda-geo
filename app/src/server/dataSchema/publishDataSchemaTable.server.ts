@@ -54,7 +54,7 @@ export async function publishDataSchemaTableFromEnvironment({
     let snapshotId: string | null = null
 
     if (snapshot && previous) {
-      const sourceDumpKey = await resolveDataSchemaDumpKey(table, previous.sha256)
+      const sourceDumpKey = await resolveDataSchemaDumpKey(table)
       const snap = await archiveLatestAsSnapshot(
         { table, previous, sourceDumpKey },
         {

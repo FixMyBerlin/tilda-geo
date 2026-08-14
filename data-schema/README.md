@@ -13,11 +13,11 @@ On your local machine:
 1. Write `data-schema/<table>/spec.json` (see the skill).
 2. `bun run data-schema-load` reads the spec and source GeoJSON/GPKG into local `data.<table>`.
 3. `bun run data-schema-publish` uploads the spec and a `pg_dump` of that table to S3.
-4. Open `/admin/data-schema` and **Import** to restore the dump (that is also how you test the round-trip locally).
+4. Open `/admin/data-schema` and **Import** to drop `data.<table>` if it exists and restore the dump (that is also how you test the round-trip locally).
 
 ## Existing table
 
-- **Staging / production:** On `/admin/data-schema`, click **Import** to restore the dump from S3. If processing SQL reads this table for map layers, run processing afterwards.
+- **Staging / production:** On `/admin/data-schema`, click **Import** to replace the live table with the dump from S3 (no backup). If processing SQL reads this table for map layers, run processing afterwards.
 - **Local machine:** `bun run data-schema-pull` for specs from S3; **Import** for dumps. `bun run seed` pulls specs (and ignores missing S3) but does not restore dumps.
 
 To change the data: pull the spec, load the new source file, publish, then Import on each environment:
@@ -39,7 +39,7 @@ Everything except this README and `.gitignore` is gitignored.
 
 ## What is on S3
 
-Publish overwrites three current files per table. Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current dump and manifest into `snapshots/<UTC>/` first, then overwrites the current files.
+Publish overwrites three current files per table. The dump is a `pg_dump` custom archive with zstd (`pg_restore` reads it; not a `.sql` file). Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current dump and manifest into `snapshots/<UTC>/` first, then overwrites the current files.
 
 ```
 data-schema/<table>/spec.json
@@ -49,4 +49,4 @@ data-schema/<table>/snapshots/<UTC>/data.dump
 data-schema/<table>/snapshots/<UTC>/data.manifest.json
 ```
 
-The same prefix is used in every environment. Older `sources/`, `latest/`, and `objects/` keys may still exist until a table is published again; reads fall back to them.
+The same prefix is used in every environment.

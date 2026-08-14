@@ -1,16 +1,20 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequestHeaders } from '@tanstack/react-start/server'
+import { getRequest, getRequestHeaders } from '@tanstack/react-start/server'
+import { z } from 'zod'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
+import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 import { getDataSchemaTableRowCount } from './dataSchemaDb.server'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
 import {
-  getS3ObjectJsonFirst,
+  getS3ObjectJsonIfExists,
   listDataSchemaSnapshotIds,
   listDataSchemaTables,
 } from './dataSchemaS3.server'
-import { dataSchemaManifestReadKeys, dataSchemaSpecReadKeys } from './dataSchemaS3Keys'
-import { parseDataSchemaSpec } from './dataSchemaSpec.schema'
+import { dataSchemaManifestKey, dataSchemaSpecKey } from './dataSchemaS3Keys'
+import { dataSchemaIdentifierSchema, parseDataSchemaSpec } from './dataSchemaSpec.schema'
+import { importDataSchemaTable } from './importDataSchemaTable.server'
+import { publishDataSchemaTableFromEnvironment } from './publishDataSchemaTable.server'
 
 const HISTORY_LIMIT_OVERVIEW = 5
 
@@ -32,9 +36,9 @@ const historySelect = {
 
 async function loadSpecSummary(table: string) {
   try {
-    const specHit = await getS3ObjectJsonFirst(dataSchemaSpecReadKeys(table))
-    if (!specHit) return null
-    const parsed = parseDataSchemaSpec(specHit.json, table)
+    const specJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(table))
+    if (!specJson) return null
+    const parsed = parseDataSchemaSpec(specJson, table)
     return {
       file: parsed.source.file,
       provider: parsed.source.provider ?? null,
@@ -88,9 +92,9 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
       const spec = await loadSpecSummary(table)
 
       try {
-        const hit = await getS3ObjectJsonFirst(dataSchemaManifestReadKeys(table))
-        if (!hit) throw new Error('No data.manifest.json')
-        const manifest = dataSchemaManifestSchema.parse(hit.json)
+        const json = await getS3ObjectJsonIfExists(dataSchemaManifestKey(table))
+        if (!json) throw new Error('No data.manifest.json')
+        const manifest = dataSchemaManifestSchema.parse(json)
         return {
           table,
           error: null as string | null,
@@ -121,3 +125,42 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
 
   return { datasets, listError }
 })
+
+const ImportDataSchemaInput = z.object({
+  table: dataSchemaIdentifierSchema,
+  snapshotId: z.string().min(1).nullable().optional(),
+})
+
+export const importDataSchemaTableFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof ImportDataSchemaInput>) => ImportDataSchemaInput.parse(data))
+  .handler(async ({ data }) => {
+    const admin = await requireAdmin(getRequestHeaders())
+    extendBunRequestIdleTimeout(getRequest(), 0)
+    const result = await importDataSchemaTable({
+      table: data.table,
+      snapshotId: data.snapshotId ?? null,
+      userId: admin.userId,
+    })
+    return {
+      warning: result.warning ?? null,
+    }
+  })
+
+const PublishDataSchemaInput = z.object({
+  table: dataSchemaIdentifierSchema,
+  snapshot: z.boolean().optional(),
+})
+
+export const publishDataSchemaTableFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof PublishDataSchemaInput>) => PublishDataSchemaInput.parse(data))
+  .handler(async ({ data }) => {
+    await requireAdmin(getRequestHeaders())
+    extendBunRequestIdleTimeout(getRequest(), 0)
+    const result = await publishDataSchemaTableFromEnvironment({
+      table: data.table,
+      snapshot: data.snapshot ?? false,
+    })
+    return {
+      warning: result.warning ?? null,
+    }
+  })

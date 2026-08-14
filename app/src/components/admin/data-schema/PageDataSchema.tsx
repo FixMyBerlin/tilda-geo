@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
@@ -10,6 +11,10 @@ import { Link } from '@/components/shared/links/Link'
 import { buttonStyles, buttonStylesSecondary } from '@/components/shared/links/styles'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { Pill } from '@/components/shared/text/Pill'
+import {
+  importDataSchemaTableFn,
+  publishDataSchemaTableFn,
+} from '@/server/dataSchema/dataSchema.functions'
 
 const routeApi = getRouteApi('/admin/data-schema')
 
@@ -20,48 +25,50 @@ const sectionClassName = twMerge(
 const smallButtonClassName = twMerge(buttonStyles, 'px-3 py-1.5 text-sm')
 const smallSecondaryButtonClassName = twMerge(buttonStylesSecondary, 'px-3 py-1.5 text-sm')
 
-async function postJson(url: string, body: unknown) {
-  const response = await fetch(url, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  const data = (await response.json().catch(() => null)) as {
-    ok?: boolean
-    message?: string
-    warning?: string
-  } | null
-  if (!response.ok || data?.ok === false) {
-    throw new Error(data?.message || `HTTP ${response.status}`)
-  }
-  return data
-}
+type DataSchemaAction =
+  | { key: `import:${string}`; kind: 'import'; table: string; snapshotId?: undefined }
+  | { key: `import-snap:${string}`; kind: 'import'; table: string; snapshotId: string }
+  | { key: `publish:${string}`; kind: 'publish'; table: string; snapshot: boolean }
 
 export function PageDataSchema() {
   const { datasets, listError } = routeApi.useLoaderData()
   const router = useRouter()
-  const [pendingKey, setPendingKey] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [snapshotByTable, setSnapshotByTable] = useState<Record<string, boolean>>({})
   const [selectedSnapshotByTable, setSelectedSnapshotByTable] = useState<Record<string, string>>({})
 
-  async function runAction(key: string, confirmMessage: string, action: () => Promise<unknown>) {
+  const { mutate, isPending, variables } = useMutation({
+    mutationFn: async (action: DataSchemaAction) => {
+      if (action.kind === 'import') {
+        return importDataSchemaTableFn({
+          data: { table: action.table, snapshotId: action.snapshotId ?? null },
+        })
+      }
+      return publishDataSchemaTableFn({
+        data: { table: action.table, snapshot: action.snapshot },
+      })
+    },
+    onSuccess: async (result) => {
+      setError(null)
+      setFeedback(
+        result.warning ? `Aktion abgeschlossen. ${result.warning}` : 'Aktion abgeschlossen.',
+      )
+      await router.invalidate()
+    },
+    onError: (e) => {
+      setFeedback(null)
+      setError(e instanceof Error ? e.message : String(e))
+    },
+  })
+
+  const pendingKey = isPending && variables ? variables.key : null
+
+  function runAction(action: DataSchemaAction, confirmMessage: string) {
     if (!window.confirm(confirmMessage)) return
     setFeedback(null)
     setError(null)
-    setPendingKey(key)
-    try {
-      const result = await action()
-      const data = result as Awaited<ReturnType<typeof postJson>>
-      setFeedback(data?.warning ? `Aktion abgeschlossen. ${data.warning}` : 'Aktion abgeschlossen.')
-      await router.invalidate()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e))
-    } finally {
-      setPendingKey(null)
-    }
+    mutate(action)
   }
 
   return (
@@ -73,16 +80,11 @@ export function PageDataSchema() {
       <section className={sectionClassName}>
         <h2 className="text-lg font-semibold text-gray-900">Data-Schema</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Pro Tabelle <strong>Import</strong> klicken, um den S3-Dump (
-          <code className="text-xs">data.dump</code>) nach <code className="text-xs">data.*</code>{' '}
-          zu schreiben. Karten-Layer aus Processing sehen die Daten erst nach einem Rebuild der{' '}
+          Pro Tabelle <strong>Import</strong> klicken, um <code className="text-xs">data.*</code>{' '}
+          durch den S3-Dump (<code className="text-xs">data.dump</code>) zu ersetzen. Karten-Layer
+          aus Processing sehen die Daten erst nach einem Rebuild der{' '}
           <code className="text-xs">public.*</code>-Tabellen — siehe{' '}
           <Link to="/admin/processing">Processing</Link>.
-        </p>
-        <p className="mt-2 text-xs text-amber-800">
-          Hinweis: Stirbt der Prozess mitten im Import (z.&nbsp;B. Container-Neustart), kann eine
-          Aside-Tabelle mit Suffix <code className="text-xs">__old</code> und ein Status RUNNING
-          zurückbleiben — vor dem nächsten Import prüfen und manuell bereinigen.
         </p>
         {listError ? (
           <p className="mt-3 text-sm text-red-700" role="alert">
@@ -178,13 +180,13 @@ export function PageDataSchema() {
                         disabled={pendingKey !== null || !dataset.manifest}
                         className={smallButtonClassName}
                         onClick={() =>
-                          void runAction(
-                            `import:${dataset.table}`,
+                          runAction(
+                            {
+                              key: `import:${dataset.table}`,
+                              kind: 'import',
+                              table: dataset.table,
+                            },
                             `Tabelle data.${dataset.table} mit data.dump überschreiben?`,
-                            () =>
-                              postJson('/api/admin/data-schema/import', {
-                                table: dataset.table,
-                              }),
                           )
                         }
                       >
@@ -214,14 +216,14 @@ export function PageDataSchema() {
                             disabled={pendingKey !== null || !selectedSnapshot}
                             className={smallSecondaryButtonClassName}
                             onClick={() =>
-                              void runAction(
-                                `import-snap:${dataset.table}`,
+                              runAction(
+                                {
+                                  key: `import-snap:${dataset.table}`,
+                                  kind: 'import',
+                                  table: dataset.table,
+                                  snapshotId: selectedSnapshot,
+                                },
                                 `Tabelle data.${dataset.table} mit Snapshot ${selectedSnapshot} überschreiben?`,
-                                () =>
-                                  postJson('/api/admin/data-schema/import', {
-                                    table: dataset.table,
-                                    snapshotId: selectedSnapshot,
-                                  }),
                               )
                             }
                           >
@@ -250,16 +252,16 @@ export function PageDataSchema() {
                         disabled={pendingKey !== null || dataset.liveRowCount === null}
                         className={smallSecondaryButtonClassName}
                         onClick={() =>
-                          void runAction(
-                            `publish:${dataset.table}`,
+                          runAction(
+                            {
+                              key: `publish:${dataset.table}`,
+                              kind: 'publish',
+                              table: dataset.table,
+                              snapshot: alsoSnapshot,
+                            },
                             alsoSnapshot
                               ? `data.${dataset.table} nach S3 veröffentlichen und den bisherigen Dump als Snapshot behalten?`
                               : `data.${dataset.table} aus dieser Umgebung nach S3 veröffentlichen (data.dump überschreiben)?`,
-                            () =>
-                              postJson('/api/admin/data-schema/publish', {
-                                table: dataset.table,
-                                snapshot: alsoSnapshot,
-                              }),
                           )
                         }
                       >

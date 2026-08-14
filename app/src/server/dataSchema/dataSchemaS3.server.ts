@@ -88,21 +88,13 @@ async function getS3ObjectJson(key: string) {
   return JSON.parse(await object.blob.text()) as unknown
 }
 
-async function getS3ObjectJsonIfExists(key: string) {
+export async function getS3ObjectJsonIfExists(key: string) {
   try {
     return await getS3ObjectJson(key)
   } catch (error: unknown) {
     if (isS3NotFoundError(error)) return null
     throw error
   }
-}
-
-export async function getS3ObjectJsonFirst(keys: string[]) {
-  for (const key of keys) {
-    const json = await getS3ObjectJsonIfExists(key)
-    if (json !== null) return { key, json }
-  }
-  return null
 }
 
 export async function putS3Json(key: string, value: unknown) {

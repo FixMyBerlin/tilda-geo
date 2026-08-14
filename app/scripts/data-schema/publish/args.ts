@@ -45,7 +45,7 @@ Local dev computer only. Requires local spec.json. If the S3 spec differs,
 the CLI asks (TTY). Non-interactive publish throws instead of clobbering a
 different S3 spec. Matching specs are left as-is; the dump still publishes.
 
-Then uploads data.dump and data.manifest.json, unless --spec-only.
+Then uploads data.dump (pg_dump custom + zstd) and data.manifest.json, unless --spec-only.
 --mode snapshot first copies those two files to snapshots/<when that version
 was published>/, then overwrites the current files.
 

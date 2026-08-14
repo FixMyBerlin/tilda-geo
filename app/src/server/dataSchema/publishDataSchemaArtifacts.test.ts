@@ -103,24 +103,4 @@ describe('archiveLatestAsSnapshot', () => {
     expect(copyObject).not.toHaveBeenCalled()
     expect(putJson).not.toHaveBeenCalled()
   })
-
-  it('skips when only a leftover snapshot manifest.json exists', async () => {
-    const putJson = vi.fn()
-    const copyObject = vi.fn()
-    const result = await archiveLatestAsSnapshot(
-      {
-        table: 'euvm_cutouts_point',
-        previous: sampleManifest(),
-        sourceDumpKey: 'data-schema/euvm_cutouts_point/latest/table.dump',
-      },
-      {
-        copyObject,
-        putJson,
-        objectExists: async (key) => key.endsWith('/snapshots/20260813T0800/manifest.json'),
-      },
-    )
-    expect(result.skipped).toBe(true)
-    expect(copyObject).not.toHaveBeenCalled()
-    expect(putJson).not.toHaveBeenCalled()
-  })
 })
