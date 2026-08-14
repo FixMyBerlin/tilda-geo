@@ -1,40 +1,34 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { runPlanningScenarioFn } from '@/server/planning/planning.functions'
+import { runPlanningVariantFn } from '@/server/planning/planning.functions'
 import {
-  planningScenariosQueryOptions,
-  planningScenarioQueryOptions,
+  planningAreasQueryOptions,
+  planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { JobStatusBadge } from './JobStatusBadge'
 
 type LatestJob = { id: number; status: string }
 
-/**
- * Enqueues a background run for a scenario.
- * Job status comes from the parent scenario query (persists across reloads)
- * rather than local state.
- */
+/** Enqueues a background run for a variant. */
 export const RunButton = ({
-  scenarioId,
+  variantId,
   regionSlug,
   latestJob,
 }: {
-  scenarioId: number
+  variantId: number
   regionSlug: string
   latestJob?: LatestJob | null
 }) => {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: () => runPlanningScenarioFn({ data: { scenarioId } }),
+    mutationFn: () => runPlanningVariantFn({ data: { variantId } }),
     onSuccess: () => {
-      queryClient.invalidateQueries(planningScenarioQueryOptions(scenarioId))
-      queryClient.invalidateQueries(planningScenariosQueryOptions(regionSlug))
+      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
     },
   })
 
   const isInFlight = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
-  // A previous run finished (DONE/FAILED): allow re-running the same study area
-  // with (potentially) changed factors. Only hide the button while in flight.
   const hasFinishedRun = latestJob?.status === 'DONE' || latestJob?.status === 'FAILED'
 
   const label = mutation.isPending
@@ -55,7 +49,7 @@ export const RunButton = ({
           {label}
         </button>
       )}
-      {latestJob != null && <JobStatusBadge jobId={latestJob.id} scenarioId={scenarioId} />}
+      {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variantId} />}
     </div>
   )
 }

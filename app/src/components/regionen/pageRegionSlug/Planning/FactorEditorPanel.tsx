@@ -3,20 +3,22 @@ import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
-import type { FactorConfig } from '@/server/planning/planning.functions'
-import { updatePlanningScenarioFn } from '@/server/planning/planning.functions'
-import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
+import type { FactorConfig, VariantFactorConfig } from '@/server/planning/planning.functions'
+import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
+import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
 import { InfoTooltip } from './InfoTooltip'
 import {
+  DEFAULT_FACTOR_TEMPLATE,
   FACTOR_HELP,
   FACTOR_PARAMS,
   GROUP_HELP,
+  PLANNING_USE_CASES,
+  type PlanningUseCase,
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
 } from './planningDefaults'
 import { planningNumberInputClass } from './planningPanelStyles'
 import { SegmentedChoice } from './SegmentedChoice'
-import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import {
   criterionShares,
   groupShare,
@@ -75,28 +77,18 @@ const FactorParamInputs = ({
   })
 }
 
-/**
- * Gewichte-/Vegetations-/Schwellenwert-Formularfelder für ein `FactorConfig`. Ungestylte
- * Präsentationskomponente ohne eigenen State — wird sowohl vom `FactorEditorPanel` (Bearbeiten
- * eines bestehenden Szenarios) als auch von Schritt 3 des `PlanningWizard` (Neuanlage) verwendet.
- */
-export const FactorFields = ({
+/** Gewichte-/Schwellen-Formularfelder (ohne Geometrie / eigene Flächen). */
+const FactorFields = ({
   config,
   setWeights,
-  setWeight,
   setField,
   setVegetationDirection,
-  setUserGeojson,
-  setUserGeojsonMode,
   readOnly = false,
 }: {
   config: FactorConfig
   setWeights: (weights: Record<string, number>) => void
-  setWeight: (key: string, value: number) => void
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
-  setUserGeojson: (geojson: GeoJSON.FeatureCollection | undefined) => void
-  setUserGeojsonMode: (mode: UserGeojsonMode) => void
   readOnly?: boolean
 }) => {
   const weights = config.weights ?? {}
@@ -197,24 +189,6 @@ export const FactorFields = ({
           Zu- und Abschläge zusammen: max. <span className="font-semibold">+{points.plus}</span> /{' '}
           <span className="font-semibold">−{points.minus}</span> Punkte auf den Grundscore.
         </p>
-
-        <div className="mt-3">
-          <div className={groupHeadlineClass}>
-            <span className="flex items-center gap-1">
-              Eigene Daten
-              <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
-            </span>
-          </div>
-          <div className="mt-1">
-            <UserObstaclesField
-              config={config}
-              setWeight={setWeight}
-              setUserGeojson={setUserGeojson}
-              setUserGeojsonMode={setUserGeojsonMode}
-              readOnly={readOnly}
-            />
-          </div>
-        </div>
       </div>
 
       <div>
@@ -257,36 +231,101 @@ export const FactorFields = ({
   )
 }
 
-/** Edits a scenario's factorConfig (weights + thresholds). Read-only once a job exists. */
-export const FactorEditorPanel = ({
-  scenarioId,
-  factorConfig,
-  readOnly = false,
+const UseCaseFields = ({
+  config,
+  setUseCase,
+  setAreaSizeM2,
+  readOnly,
 }: {
-  scenarioId: number
+  config: FactorConfig
+  setUseCase: (key: PlanningUseCase) => void
+  setAreaSizeM2: (value: number | null) => void
+  readOnly: boolean
+}) => {
+  const useCase = (config.use_case as PlanningUseCase | undefined) ?? 'fahrradbox'
+  const areaSizeM2 = (config.area_size_m2 as number | null | undefined) ?? null
+
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-semibold text-gray-700">Art & Größe der gesuchten Fläche</div>
+      <div className="grid grid-cols-2 gap-1.5">
+        {PLANNING_USE_CASES.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            disabled={readOnly}
+            onClick={() => {
+              setUseCase(key)
+              const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
+              if (defaultAreaM2 != null) setAreaSizeM2(defaultAreaM2)
+            }}
+            className={twJoin(
+              'rounded border px-2 py-1.5 text-xs font-medium transition-colors disabled:opacity-50',
+              useCase === key
+                ? 'border-blue-600 bg-blue-50 text-blue-700'
+                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+        <span>Flächengröße (m²)</span>
+        <input
+          type="number"
+          min={0}
+          step={1}
+          disabled={readOnly}
+          value={areaSizeM2 ?? ''}
+          onChange={(e) => setAreaSizeM2(e.target.value === '' ? null : Number(e.target.value))}
+          className={planningNumberInputClass}
+        />
+      </label>
+    </div>
+  )
+}
+
+/** Edits a variant's factorConfig. Read-only while a job is in flight. */
+export const FactorEditorPanel = (props: {
+  variantId: number
   factorConfig: FactorConfig
   readOnly?: boolean
+  defaultOpen?: boolean
+}) => <FactorEditorPanelForm key={props.variantId} {...props} />
+
+const FactorEditorPanelForm = ({
+  variantId,
+  factorConfig,
+  readOnly = false,
+  defaultOpen = true,
+}: {
+  variantId: number
+  factorConfig: FactorConfig
+  readOnly?: boolean
+  defaultOpen?: boolean
 }) => {
   const queryClient = useQueryClient()
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(defaultOpen)
   const prevReadOnly = useRef(readOnly)
 
   useEffect(() => {
-    // Collapse when a run starts (locks factors); re-open when it finishes and
-    // factors become editable again, so recomputing with new factors is discoverable.
     if (!prevReadOnly.current && readOnly) setOpen(false)
     else if (prevReadOnly.current && !readOnly) setOpen(true)
     prevReadOnly.current = readOnly
   }, [readOnly])
 
-  const mutation = useMutation({
-    mutationFn: () => updatePlanningScenarioFn({ data: { scenarioId, factorConfig: config } }),
-    onSuccess: () => queryClient.invalidateQueries(planningScenarioQueryOptions(scenarioId)),
-  })
+  const toVariantConfig = (c: FactorConfig): VariantFactorConfig => {
+    const { study_area: _sa, user_geojson: _ug, user_geojson_mode: _ugm, ...rest } = c
+    return rest
+  }
 
-  const setWeight = (key: string, value: number) =>
-    setConfig((c) => ({ ...c, weights: { ...c.weights, [key]: value } }))
+  const mutation = useMutation({
+    mutationFn: () =>
+      updatePlanningVariantFn({ data: { variantId, factorConfig: toVariantConfig(config) } }),
+    onSuccess: () => queryClient.invalidateQueries(planningVariantQueryOptions(variantId)),
+  })
 
   const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
 
@@ -296,10 +335,21 @@ export const FactorEditorPanel = ({
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
 
-  const setUserGeojson = (geojson: GeoJSON.FeatureCollection | undefined) =>
-    setConfig((c) => ({ ...c, user_geojson: geojson }))
-  const setUserGeojsonMode = (mode: UserGeojsonMode) =>
-    setConfig((c) => ({ ...c, user_geojson_mode: mode }))
+  const setUseCase = (key: PlanningUseCase) => setConfig((c) => ({ ...c, use_case: key }))
+
+  const setAreaSizeM2 = (value: number | null) => setConfig((c) => ({ ...c, area_size_m2: value }))
+
+  const resetWeightsToDefaults = () => {
+    setConfig((c) => ({
+      ...c,
+      ...DEFAULT_FACTOR_TEMPLATE,
+      use_case: c.use_case,
+      area_size_m2: c.area_size_m2,
+      study_area: c.study_area,
+      user_geojson: c.user_geojson,
+      user_geojson_mode: c.user_geojson_mode,
+    }))
+  }
 
   return (
     <Disclosure as="div" className="rounded border border-gray-200">
@@ -333,19 +383,23 @@ export const FactorEditorPanel = ({
             </p>
           )}
 
+          <UseCaseFields
+            config={config}
+            setUseCase={setUseCase}
+            setAreaSizeM2={setAreaSizeM2}
+            readOnly={readOnly}
+          />
+
           <FactorFields
             config={config}
             setWeights={setWeights}
-            setWeight={setWeight}
             setField={setField}
             setVegetationDirection={setVegetationDirection}
-            setUserGeojson={setUserGeojson}
-            setUserGeojsonMode={setUserGeojsonMode}
             readOnly={readOnly}
           />
 
           {!readOnly && (
-            <>
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => mutation.mutate()}
@@ -354,8 +408,15 @@ export const FactorEditorPanel = ({
               >
                 {mutation.isPending ? 'Speichern…' : 'Faktoren speichern'}
               </button>
+              <button
+                type="button"
+                onClick={resetWeightsToDefaults}
+                className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                Auf Standardwerte zurücksetzen
+              </button>
               {mutation.isSuccess && <span className="text-xs text-green-700">Gespeichert ✓</span>}
-            </>
+            </div>
           )}
         </DisclosurePanel>
       </Transition>

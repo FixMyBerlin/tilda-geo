@@ -1,7 +1,7 @@
 import { CollapsibleBox } from './CollapsibleBox'
 
 /**
- * Nummerierter, unabhängig auf-/zuklappbarer Schritt eines Assistenten (z.B. `PlanningWizard`).
+ * Nummerierter, unabhängig auf-/zuklappbarer Schritt eines Assistenten (z.B. `AreaWizard`).
  * Jeder Schritt startet offen und lässt sich per Klick auf den Titel einklappen.
  */
 export const WizardStep = ({

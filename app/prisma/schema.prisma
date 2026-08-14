@@ -45,8 +45,9 @@ model User {
   qaEvaluations  QaEvaluation[]
   adminApiTokens AdminApiToken[]
   //
-  // Planning module: scenarios this user created (any region member may still edit them).
-  planningScenarios PlanningScenario[]
+  // Planning module: areas/variants this user created (any region member may still edit them).
+  planningAreas    PlanningArea[]
+  planningVariants PlanningVariant[]
 
   @@map("User")
   @@schema("prisma")
@@ -217,7 +218,7 @@ model Region {
   regionUploads     RegionUpload[]     @relation("RegionUploadLibrary")
   noteRecords       Note[]
   qaConfigs         QaConfig[]
-  planningScenarios PlanningScenario[]
+  planningAreas PlanningArea[]
 
   @@index([contractId])
   @@index([headerLogoId])
@@ -603,80 +604,105 @@ enum QaEvaluatorType {
 }
 
 // ── Planning module (Flächenfinder) ──────────────────────────────────────────
-// New, additive product module. A scenario ("Datenstand") holds an editable
-// factorConfig; running it enqueues a PlanningJob that the Python worker consumes
-// and turns into an immutable PlanningRun whose geometries live in the `planning`
-// PostGIS schema (keyed by run id = PlanningRun.id), served via Martin functions.
+// Planungsgebiet (selten geändert: Geometrie, eigene Flächen) + Variante
+// (häufig: Gewichte, Schwellen, Use-Case). Ein Lauf merged beides in
+// factorConfigSnapshot; PostGIS-Ergebnisse hängen an PlanningRun.id.
 //
-// Permissions: any region member may edit/run any scenario of that region; the
-// creator is tracked for attribution only. Scenarios can build upon each other
-// via `parentId` (lineage).
+// Permissions: any region member may edit/run any area/variant of that region;
+// the creator is tracked for attribution only. Variants duplicate via `parentId`.
 
-model PlanningScenario {
-  id           Int                @id @default(autoincrement())
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+model PlanningArea {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   //
-  title        String
-  description  String?
+  title     String
   //
-  region       Region             @relation(fields: [regionId], references: [id])
-  regionId     Int
+  region    Region @relation(fields: [regionId], references: [id])
+  regionId  Int
   //
-  // Attribution only — editing is open to all region members.
-  creator      User               @relation(fields: [creatorId], references: [id])
-  creatorId    String
+  creator   User   @relation(fields: [creatorId], references: [id])
+  creatorId String
   //
-  // Lineage: "build upon" creates a child scenario seeded from the parent's config.
-  parent       PlanningScenario?  @relation("Lineage", fields: [parentId], references: [id])
-  parentId     Int?
-  children     PlanningScenario[] @relation("Lineage")
+  // GeoJSON geometry (EPSG:4326) and optional user-upload obstacles.
+  studyArea        Json
+  userGeojson      Json?
+  userGeojsonMode  String?
+  // Bumped when geometry/obstacles change — marks existing COMPLETE runs stale.
+  inputUpdatedAt   DateTime @default(now())
   //
-  // Editable UseCaseConfig: weights, hard thresholds, targets, h3_resolution,
-  // dem_source, and the study-area geometry (GeoJSON).
+  variants PlanningVariant[]
+
+  @@index([regionId])
+  @@map("PlanningArea")
+  @@schema("prisma")
+}
+
+model PlanningVariant {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  title       String
+  description String?
+  //
+  area      PlanningArea @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId    Int
+  //
+  creator   User   @relation(fields: [creatorId], references: [id])
+  creatorId String
+  //
+  // Lineage: duplicate creates a child variant seeded from the parent's config.
+  parent    PlanningVariant?  @relation("Lineage", fields: [parentId], references: [id], onDelete: SetNull)
+  parentId  Int?
+  children  PlanningVariant[] @relation("Lineage")
+  //
+  // Editable UseCaseConfig ohne Geometrie: weights, thresholds, use_case, area_size_m2, …
   factorConfig Json
   //
   // Pointer to the latest successful run used for display. Plain Int (logical FK
   // to PlanningRun.id) to avoid a relation cycle.
   currentRunId Int?
   //
-  runs         PlanningRun[]
-  jobs         PlanningJob[]
+  runs PlanningRun[]
+  jobs PlanningJob[]
 
-  @@index([regionId])
-  @@map("PlanningScenario")
+  @@index([areaId])
+  @@map("PlanningVariant")
   @@schema("prisma")
 }
 
 model PlanningRun {
-  id                   Int               @id @default(autoincrement())
-  createdAt            DateTime          @default(now())
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
   //
-  scenario             PlanningScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  scenarioId           Int
+  variant   PlanningVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId Int
   //
-  // Frozen copy of the config used for THIS run (reproducibility).
+  // Frozen merge of area geometry + variant assumptions (reproducibility).
   factorConfigSnapshot Json
   //
-  status               PlanningRunStatus @default(PENDING)
-  hexCount             Int?
-  vegCount             Int?
-  cirAttribution       String?
+  // true when the parent area's geometry changed after this run completed.
+  stale            Boolean           @default(false)
+  status           PlanningRunStatus @default(PENDING)
+  hexCount         Int?
+  vegCount         Int?
+  cirAttribution   String?
   //
-  job                  PlanningJob?
+  job PlanningJob?
 
-  @@index([scenarioId])
+  @@index([variantId])
   @@map("PlanningRun")
   @@schema("prisma")
 }
 
 model PlanningJob {
-  id           Int               @id @default(autoincrement())
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   //
-  scenario     PlanningScenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  scenarioId   Int
+  variant   PlanningVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId Int
   //
   status       PlanningJobStatus @default(QUEUED)
   startedAt    DateTime?
@@ -687,11 +713,11 @@ model PlanningJob {
   progressLabel String?
   //
   // Set when DONE — links to the immutable run used for tile display.
-  resultRun    PlanningRun?      @relation(fields: [resultRunId], references: [id])
-  resultRunId  Int?              @unique
+  resultRun   PlanningRun? @relation(fields: [resultRunId], references: [id])
+  resultRunId Int?         @unique
 
   @@index([status])
-  @@index([scenarioId])
+  @@index([variantId])
   @@map("PlanningJob")
   @@schema("prisma")
 }

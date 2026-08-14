@@ -20,10 +20,10 @@ const candidatesToGeojson = (candidates: PlanningCandidate[]) => ({
   })),
 })
 
-export const candidateExportFileName = (scenarioId: number | null | undefined) => {
+export const candidateExportFileName = (variantId: number | null | undefined) => {
   const date = new Date().toISOString().slice(0, 10)
-  return scenarioId != null
-    ? `${date}--abstellanlagen-kandidaten-szenario-${scenarioId}.geojson`
+  return variantId != null
+    ? `${date}--abstellanlagen-kandidaten-variante-${variantId}.geojson`
     : `${date}--abstellanlagen-kandidaten.geojson`
 }
 

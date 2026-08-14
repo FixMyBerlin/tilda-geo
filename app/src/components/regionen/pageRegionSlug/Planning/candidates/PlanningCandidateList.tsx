@@ -5,7 +5,7 @@ import {
   type PlanningCandidate,
   usePlanningCandidatesState,
 } from '../../hooks/mapState/usePlanningCandidatesState'
-import { usePlanningScenarioParam } from '../../hooks/useQueryState/usePlanningParams'
+import { usePlanningVariantParam } from '../../hooks/useQueryState/usePlanningParams'
 import { candidateExportFileName, downloadCandidatesGeojson } from './planningCandidateExport'
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
@@ -79,7 +79,7 @@ const CandidateRow = ({
  * sich wie gewohnt in der Breite ziehen lässt.
  */
 export const PlanningCandidateList = () => {
-  const [scenarioId] = usePlanningScenarioParam()
+  const [variantId] = usePlanningVariantParam()
   const candidates = usePlanningCandidatesState((s) => s.candidates)
   const removeCandidate = usePlanningCandidatesState((s) => s.removeCandidate)
   const clearCandidates = usePlanningCandidatesState((s) => s.clearCandidates)
@@ -120,7 +120,7 @@ export const PlanningCandidateList = () => {
         <button
           type="button"
           disabled={candidates.length === 0}
-          onClick={() => downloadCandidatesGeojson(candidates, candidateExportFileName(scenarioId))}
+          onClick={() => downloadCandidatesGeojson(candidates, candidateExportFileName(variantId))}
           className="flex items-center justify-center gap-2 rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           <ArrowDownTrayIcon className="size-4" />

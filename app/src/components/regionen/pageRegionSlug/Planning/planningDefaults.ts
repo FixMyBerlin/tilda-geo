@@ -1,10 +1,8 @@
+import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 
-// Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX). Used as the
-// starting point for all Planungsmodus-Anwendungsfälle (PLANNING_USE_CASES) — der Worker
-// unterscheidet fachlich noch nicht zwischen ihnen, die Gewichte sind bewusst identisch.
-// `study_area` is filled in at creation time from the current map view.
-export const DEFAULT_FACTOR_TEMPLATE: Omit<FactorConfig, 'study_area'> = {
+// Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX).
+export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   name: 'Fahrradbox',
   h3_resolution: 13,
   dem_source: 'mapterhorn',

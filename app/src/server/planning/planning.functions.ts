@@ -13,11 +13,18 @@ import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/author
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
 import { parseRegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
+import {
+  areaInputFromRow,
+  mergeFactorConfig,
+  type MergedFactorConfig,
+  type VariantFactorConfig,
+} from './mergeFactorConfig'
 
-// ── factorConfig (UseCaseConfig) ──────────────────────────────────────────────
-// Permissive JSON consumed by the Python worker (flaechenfinder/config.py).
-// `study_area` (GeoJSON geometry, EPSG:4326) is the only strictly required field.
-const FactorConfigSchema = z
+export type { VariantFactorConfig }
+
+// ── factorConfig schemas ───────────────────────────────────────────────────────
+// Variant config: weights, thresholds, use_case — no geometry.
+const VariantFactorConfigSchema = z
   .object({
     name: z.string().optional(),
     h3_resolution: z.number().int().min(6).max(15).optional(),
@@ -34,95 +41,201 @@ const FactorConfigSchema = z
     bestand_default_diameter_m: z.number().optional(),
     min_score_threshold: z.number().min(0).max(100).optional(),
     targets: z.array(z.any()).optional(),
-    study_area: z.any(),
-    // Nutzer-Upload „Eigene Flächen": sanitisiert (nur Geometrie, Typ-Whitelist,
-    // Feature-/Koordinaten-Limits) und auf 5 MB begrenzt. Der Server vertraut dem
-    // Client nicht: `sanitizeUserGeojson` läuft hier erneut und ersetzt den Wert
-    // durch die minimale, geprüfte FeatureCollection.
-    user_geojson: z
-      .any()
-      .optional()
-      .transform((val, ctx) => {
-        if (val == null) return undefined
-        try {
-          const clean = sanitizeUserGeojson(val as GeoJSON.GeoJSON)
-          if (userGeojsonByteSize(clean) > MAX_USER_GEOJSON_BYTES) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: `Eigene Flächen zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`,
-            })
-            return z.NEVER
-          }
-          return clean
-        } catch (e) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, message: (e as Error).message })
-          return z.NEVER
-        }
-      }),
-    user_geojson_mode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
+    use_case: z.string().optional(),
+    area_size_m2: z.number().nullable().optional(),
   })
   .passthrough()
-  .refine((c) => c.study_area != null, { message: 'study_area (GeoJSON) is required' })
+
+// Merged config (variant + area) — used by UI for map layers and worker payload.
+export type FactorConfig = MergedFactorConfig
+
+const StudyAreaSchema = z
+  .any()
   .refine(
-    (c) =>
-      c.study_area == null ||
-      studyAreaSizeKm2(c.study_area as GeoJSON.Geometry) <= MAX_STUDY_AREA_KM2,
+    (geom) => geom != null && studyAreaSizeKm2(geom as GeoJSON.Geometry) <= MAX_STUDY_AREA_KM2,
     { message: `Das Berechnungsgebiet darf maximal ${MAX_STUDY_AREA_KM2} km² groß sein.` },
   )
 
-export type FactorConfig = z.infer<typeof FactorConfigSchema>
+const UserGeojsonSchema = z
+  .any()
+  .optional()
+  .transform((val, ctx) => {
+    if (val === null) return null
+    if (val === undefined) return undefined
+    try {
+      const clean = sanitizeUserGeojson(val as GeoJSON.GeoJSON)
+      if (userGeojsonByteSize(clean) > MAX_USER_GEOJSON_BYTES) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Eigene Flächen zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`,
+        })
+        return z.NEVER
+      }
+      return clean
+    } catch (e) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: (e as Error).message })
+      return z.NEVER
+    }
+  })
 
-// Derive a scenario's region slug + authorize the current user as a region member.
-async function authorizeByScenario(headers: Headers, scenarioId: number) {
+const AreaGeometryInputSchema = z.object({
+  studyArea: StudyAreaSchema,
+  userGeojson: UserGeojsonSchema,
+  userGeojsonMode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
+})
+
+// ── Authorization helpers ──────────────────────────────────────────────────────
+
+async function authorizeByArea(headers: Headers, areaId: number) {
   const session = await requireAuth(headers)
-  const scenario = await db.planningScenario.findFirstOrThrow({
-    where: { id: scenarioId },
+  const area = await db.planningArea.findFirstOrThrow({
+    where: { id: areaId },
     select: { id: true, region: { select: { slug: true } } },
   })
-  await authorizeRegionMemberByRegionSlug(session, scenario.region.slug)
+  await authorizeRegionMemberByRegionSlug(session, area.region.slug)
   return session
+}
+
+async function authorizeByVariant(headers: Headers, variantId: number) {
+  const session = await requireAuth(headers)
+  const variant = await db.planningVariant.findFirstOrThrow({
+    where: { id: variantId },
+    select: { id: true, area: { select: { region: { select: { slug: true } } } } },
+  })
+  await authorizeRegionMemberByRegionSlug(session, variant.area.region.slug)
+  return session
+}
+
+async function markRunsStaleForArea(areaId: number) {
+  await db.planningRun.updateMany({
+    where: {
+      variant: { areaId },
+      status: { in: ['COMPLETE', 'EMPTY'] },
+      stale: false,
+    },
+    data: { stale: true },
+  })
+}
+
+const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
+
+async function deleteVariantPostgisResults(variantId: number) {
+  const runs = await db.planningRun.findMany({
+    where: { variantId },
+    select: { id: true },
+  })
+  if (runs.length === 0) return
+  const runIds = runs.map((r) => r.id)
+  // Fine + aggregate grids share planning.scenario_hexagons (resolution column).
+  await db.$executeRaw`DELETE FROM planning.scenario_hexagons WHERE run_id = ANY(${runIds})`
+  await db.$executeRaw`DELETE FROM planning.scenario_vegetation WHERE run_id = ANY(${runIds})`
+  await db.$executeRaw`DELETE FROM planning.scenario_carriageways WHERE run_id = ANY(${runIds})`
 }
 
 // ── Queries ───────────────────────────────────────────────────────────────────
 
 const RegionSlugInput = z.object({ regionSlug: z.string() })
 
-export const getPlanningScenariosFn = createServerFn({ method: 'GET' })
+export const getPlanningAreasFn = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
     const regionId = await getRegionIdBySlug(data.regionSlug)
-    return db.planningScenario.findMany({
+    return db.planningArea.findMany({
       where: { regionId },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         title: true,
-        description: true,
-        currentRunId: true,
+        inputUpdatedAt: true,
         createdAt: true,
         updatedAt: true,
         creator: { select: { id: true, osmName: true } },
-        // Latest job for status display (loader / green checkmark in list).
-        jobs: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-          select: { status: true },
+        variants: {
+          orderBy: { createdAt: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            currentRunId: true,
+            createdAt: true,
+            updatedAt: true,
+            creator: { select: { id: true, osmName: true } },
+            jobs: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: { status: true },
+            },
+            runs: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: { hexCount: true, stale: true, status: true },
+            },
+          },
         },
       },
     })
   })
 
-const ScenarioIdInput = z.object({ scenarioId: z.number().int() })
+const AreaIdInput = z.object({ areaId: z.number().int() })
 
-export const getPlanningScenarioFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof ScenarioIdInput>) => ScenarioIdInput.parse(data))
+export const getPlanningAreaFn = createServerFn({ method: 'GET' })
+  .inputValidator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByScenario(getRequestHeaders(), data.scenarioId)
-    return db.planningScenario.findFirstOrThrow({
-      where: { id: data.scenarioId },
+    await authorizeByArea(getRequestHeaders(), data.areaId)
+    return db.planningArea.findFirstOrThrow({
+      where: { id: data.areaId },
+      select: {
+        id: true,
+        title: true,
+        studyArea: true,
+        userGeojson: true,
+        userGeojsonMode: true,
+        inputUpdatedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        creator: { select: { id: true, osmName: true } },
+        variants: {
+          orderBy: { createdAt: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            currentRunId: true,
+            jobs: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: { status: true },
+            },
+            runs: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: { hexCount: true, stale: true, status: true },
+            },
+          },
+        },
+      },
+    })
+  })
+
+const VariantIdInput = z.object({ variantId: z.number().int() })
+
+export const getPlanningVariantFn = createServerFn({ method: 'GET' })
+  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
+  .handler(async ({ data }) => {
+    await authorizeByVariant(getRequestHeaders(), data.variantId)
+    const variant = await db.planningVariant.findFirstOrThrow({
+      where: { id: data.variantId },
       include: {
+        area: {
+          select: {
+            id: true,
+            title: true,
+            studyArea: true,
+            userGeojson: true,
+            userGeojsonMode: true,
+            inputUpdatedAt: true,
+          },
+        },
         creator: { select: { id: true, osmName: true } },
         runs: {
           orderBy: { createdAt: 'desc' },
@@ -131,6 +244,7 @@ export const getPlanningScenarioFn = createServerFn({ method: 'GET' })
             status: true,
             hexCount: true,
             vegCount: true,
+            stale: true,
             createdAt: true,
             cirAttribution: true,
           },
@@ -142,6 +256,11 @@ export const getPlanningScenarioFn = createServerFn({ method: 'GET' })
         },
       },
     })
+    const factorConfig = mergeFactorConfig(
+      areaInputFromRow(variant.area),
+      variant.factorConfig as VariantFactorConfig,
+    )
+    return { ...variant, factorConfig: factorConfig as FactorConfig }
   })
 
 const JobIdInput = z.object({ jobId: z.number().int() })
@@ -155,34 +274,42 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
         id: true,
         status: true,
         errorMessage: true,
-        scenarioId: true,
+        variantId: true,
         resultRunId: true,
         progress: true,
         progressLabel: true,
-        scenario: {
-          select: { factorConfig: true, region: { select: { slug: true } } },
+        variant: {
+          select: {
+            factorConfig: true,
+            area: {
+              select: {
+                studyArea: true,
+                userGeojson: true,
+                userGeojsonMode: true,
+                region: { select: { slug: true } },
+              },
+            },
+          },
         },
       },
     })
     const session = await requireAuth(getRequestHeaders())
-    await authorizeRegionMemberByRegionSlug(session, job.scenario.region.slug)
-    const fc = job.scenario.factorConfig as FactorConfig | null
+    await authorizeRegionMemberByRegionSlug(session, job.variant.area.region.slug)
+    const fc = mergeFactorConfig(
+      areaInputFromRow(job.variant.area),
+      job.variant.factorConfig as VariantFactorConfig,
+    )
     return {
       id: job.id,
       status: job.status,
       errorMessage: job.errorMessage,
-      scenarioId: job.scenarioId,
+      variantId: job.variantId,
       resultRunId: job.resultRunId,
       progress: job.progress,
       progressLabel: job.progressLabel,
-      // Die Faktor-Gewichte des Szenarios: Das UI leitet daraus pro Schritt ab,
-      // ob er übersprungen wird (Gewicht 0) bzw. – bei ausschluss-gekoppelten
-      // Faktoren – nur noch dem harten Ausschluss dient (siehe PlanningSteps).
-      weights: (fc?.weights ?? {}) as Record<string, number>,
-      // Der Eigendaten-Schritt läuft bei Ausschluss-Modi unabhängig vom Gewicht,
-      // sobald eine Datei vorliegt – das UI braucht dafür Präsenz + Modus.
-      userGeojsonPresent: fc?.user_geojson != null,
-      userGeojsonMode: fc?.user_geojson_mode ?? null,
+      weights: (fc.weights ?? {}) as Record<string, number>,
+      userGeojsonPresent: fc.user_geojson != null,
+      userGeojsonMode: fc.user_geojson_mode ?? null,
     }
   })
 
@@ -191,19 +318,10 @@ const BoundarySearchInput = z.object({
   query: z.string().max(100).default(''),
 })
 
-/** Höchstzahl der Treffer, die die Gebietssuche pro Anfrage liefert. */
 const MAX_BOUNDARY_RESULTS = 20
 
-// `%` und `_` aus der Nutzereingabe sind in LIKE Platzhalter und müssen escaped werden
-// (Postgres-Default-Escape ist der Backslash).
 const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&')
 
-// Returns admin boundaries (level 8=Gemeinde, 9=Bezirk, 10=Ortsteil) matching `query`, scoped to
-// the region. Es wird nie die ganze Tabelle geladen: das Ergebnis ist immer auf
-// MAX_BOUNDARY_RESULTS begrenzt, die Suche läuft in SQL. Ohne `query` kommen die ersten
-// MAX_BOUNDARY_RESULTS als Startvorschlag zurück.
-// Metadata only – shipping every geometry would be a few hundred kB per call (Berlin: ~560 kB),
-// so the geometry is loaded on selection via `getBoundaryGeomFn`.
 export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof BoundarySearchInput>) => BoundarySearchInput.parse(data))
   .handler(async ({ data }) => {
@@ -217,9 +335,6 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
     const relationKeys = (region?.maskOsmRelationIds ?? []).map((id) => `relation/${id}`)
     const regionBbox = parseRegionGeoJsonBBox(region?.bbox)
 
-    // Räumlicher Filter, in absteigender Genauigkeit: Regions-Umriss aus den Masken-Relationen,
-    // sonst die Download-Bbox der Region. Hat die Region beides nicht, bleibt nur der Namensfilter
-    // – das LIMIT unten verhindert trotzdem, dass die ganze Tabelle rausgeht.
     const regionFilter =
       relationKeys.length > 0
         ? Prisma.sql`AND ST_Intersects(
@@ -242,8 +357,6 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
         ? Prisma.empty
         : Prisma.sql`AND b.tags->>'name' ILIKE ${`%${escapeLikePattern(query)}%`}`
 
-    // Bei nur 20 Treffern muss das Naheliegende oben stehen: exakter Name, dann Präfix, dann Rest.
-    // (Kein konstanter Ausdruck für den leeren Fall – `ORDER BY 0` liest Postgres als Spaltenposition.)
     const orderBy =
       query === ''
         ? Prisma.sql`ORDER BY (b.tags->>'admin_level')::int, b.tags->>'name'`
@@ -256,7 +369,6 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
             (b.tags->>'admin_level')::int,
             b.tags->>'name'`
 
-    // Ein Treffer mehr als nötig, um „weitere Treffer“ anzeigen zu können, ohne zu zählen.
     const rows = await db.$queryRaw<
       { id: string; name: string; name_prefix: string | null; admin_level: string }[]
     >`
@@ -282,8 +394,6 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
 
 const BoundaryGeomInput = z.object({ regionSlug: z.string(), boundaryId: z.string() })
 
-// Returns the GeoJSON geometry (EPSG:4326) of a single admin boundary. Called when the user picks
-// a boundary in the study-area combobox; `boundaries.id` is uniquely indexed, so the lookup is cheap.
 export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
   .inputValidator((data: z.infer<typeof BoundaryGeomInput>) => BoundaryGeomInput.parse(data))
   .handler(async ({ data }) => {
@@ -300,46 +410,117 @@ export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
     return geom
   })
 
-// ── Mutations ───────────────────────────────────────────────────────────────────
+// ── Mutations: Area ───────────────────────────────────────────────────────────
 
-const CreateScenarioInput = z.object({
+const CreateAreaInput = z.object({
   regionSlug: z.string(),
   title: z.string().min(1),
-  description: z.string().optional(),
-  factorConfig: FactorConfigSchema,
+  ...AreaGeometryInputSchema.shape,
+  variantTitle: z.string().min(1).optional(),
+  factorConfig: VariantFactorConfigSchema.optional(),
 })
 
-export const createPlanningScenarioFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateScenarioInput>) => CreateScenarioInput.parse(data))
+/** Creates a planning area and its first variant (no auto-run). */
+export const createPlanningAreaFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
     const regionId = await getRegionIdBySlug(data.regionSlug)
-    return db.planningScenario.create({
+    const area = await db.planningArea.create({
       data: {
         regionId,
         creatorId: session.userId,
         title: data.title,
-        description: data.description,
-        factorConfig: data.factorConfig as Prisma.InputJsonValue,
+        studyArea: data.studyArea as Prisma.InputJsonValue,
+        userGeojson: data.userGeojson as Prisma.InputJsonValue | undefined,
+        userGeojsonMode: data.userGeojsonMode,
+        variants: {
+          create: {
+            creatorId: session.userId,
+            title: data.variantTitle ?? 'Variante 1',
+            factorConfig: (data.factorConfig ?? {}) as Prisma.InputJsonValue,
+          },
+        },
+      },
+      select: {
+        id: true,
+        variants: { select: { id: true }, take: 1 },
+      },
+    })
+    return { areaId: area.id, variantId: area.variants[0]!.id }
+  })
+
+const UpdateAreaInput = z.object({
+  areaId: z.number().int(),
+  title: z.string().min(1).optional(),
+  studyArea: StudyAreaSchema.optional(),
+  userGeojson: UserGeojsonSchema,
+  userGeojsonMode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
+  markRunsStale: z.boolean().optional(),
+})
+
+export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof UpdateAreaInput>) => UpdateAreaInput.parse(data))
+  .handler(async ({ data }) => {
+    await authorizeByArea(getRequestHeaders(), data.areaId)
+    const existing = await db.planningArea.findFirstOrThrow({
+      where: { id: data.areaId },
+      select: { studyArea: true, userGeojson: true, userGeojsonMode: true },
+    })
+    const areaInputsChanged =
+      data.markRunsStale === true ||
+      (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) ||
+      (data.userGeojson !== undefined &&
+        !jsonEqual(data.userGeojson ?? null, existing.userGeojson ?? null)) ||
+      (data.userGeojsonMode !== undefined && data.userGeojsonMode !== existing.userGeojsonMode)
+    const result = await db.planningArea.update({
+      where: { id: data.areaId },
+      data: {
+        ...(data.title !== undefined && { title: data.title }),
+        ...(data.studyArea !== undefined && { studyArea: data.studyArea as Prisma.InputJsonValue }),
+        ...(data.userGeojson !== undefined && {
+          userGeojson:
+            data.userGeojson == null
+              ? Prisma.DbNull
+              : (data.userGeojson as unknown as Prisma.InputJsonValue),
+        }),
+        ...(data.userGeojsonMode !== undefined && { userGeojsonMode: data.userGeojsonMode }),
+        ...(areaInputsChanged && { inputUpdatedAt: new Date() }),
       },
       select: { id: true },
     })
+    if (areaInputsChanged) await markRunsStaleForArea(data.areaId)
+    return result
   })
 
-const UpdateScenarioInput = z.object({
-  scenarioId: z.number().int(),
+export const deletePlanningAreaFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
+  .handler(async ({ data }) => {
+    await authorizeByArea(getRequestHeaders(), data.areaId)
+    const variants = await db.planningVariant.findMany({
+      where: { areaId: data.areaId },
+      select: { id: true },
+    })
+    for (const v of variants) await deleteVariantPostgisResults(v.id)
+    await db.planningArea.delete({ where: { id: data.areaId } })
+  })
+
+// ── Mutations: Variant ────────────────────────────────────────────────────────
+
+const UpdateVariantInput = z.object({
+  variantId: z.number().int(),
   title: z.string().min(1).optional(),
   description: z.string().optional(),
-  factorConfig: FactorConfigSchema.optional(),
+  factorConfig: VariantFactorConfigSchema.optional(),
 })
 
-export const updatePlanningScenarioFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateScenarioInput>) => UpdateScenarioInput.parse(data))
+export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof UpdateVariantInput>) => UpdateVariantInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByScenario(getRequestHeaders(), data.scenarioId)
-    return db.planningScenario.update({
-      where: { id: data.scenarioId },
+    await authorizeByVariant(getRequestHeaders(), data.variantId)
+    return db.planningVariant.update({
+      where: { id: data.variantId },
       data: {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.description !== undefined && { description: data.description }),
@@ -347,36 +528,70 @@ export const updatePlanningScenarioFn = createServerFn({ method: 'POST' })
           factorConfig: data.factorConfig as Prisma.InputJsonValue,
         }),
       },
-      select: { id: true },
+      select: { id: true, areaId: true },
     })
   })
 
-// Enqueue a run: insert a QUEUED PlanningJob and wake the worker via NOTIFY.
-export const runPlanningScenarioFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof ScenarioIdInput>) => ScenarioIdInput.parse(data))
+export const duplicatePlanningVariantFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByScenario(getRequestHeaders(), data.scenarioId)
+    const session = await authorizeByVariant(getRequestHeaders(), data.variantId)
+    const source = await db.planningVariant.findFirstOrThrow({
+      where: { id: data.variantId },
+      select: { areaId: true, title: true, factorConfig: true },
+    })
+    const created = await db.planningVariant.create({
+      data: {
+        areaId: source.areaId,
+        creatorId: session.userId,
+        parentId: data.variantId,
+        title: `${source.title} (Kopie)`,
+        factorConfig: source.factorConfig as Prisma.InputJsonValue,
+      },
+      select: { id: true, areaId: true },
+    })
+    return created
+  })
+
+const CreateVariantInput = z.object({
+  areaId: z.number().int(),
+  title: z.string().min(1).optional(),
+  factorConfig: VariantFactorConfigSchema.optional(),
+})
+
+/** Creates a new variant on an existing planungsgebiet (e.g. after all variants were deleted). */
+export const createPlanningVariantFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof CreateVariantInput>) => CreateVariantInput.parse(data))
+  .handler(async ({ data }) => {
+    const session = await authorizeByArea(getRequestHeaders(), data.areaId)
+    const variantCount = await db.planningVariant.count({ where: { areaId: data.areaId } })
+    return db.planningVariant.create({
+      data: {
+        areaId: data.areaId,
+        creatorId: session.userId,
+        title: data.title ?? `Variante ${variantCount + 1}`,
+        factorConfig: (data.factorConfig ?? {}) as Prisma.InputJsonValue,
+      },
+      select: { id: true, areaId: true },
+    })
+  })
+
+export const runPlanningVariantFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
+  .handler(async ({ data }) => {
+    await authorizeByVariant(getRequestHeaders(), data.variantId)
     const job = await db.planningJob.create({
-      data: { scenarioId: data.scenarioId, status: 'QUEUED' },
+      data: { variantId: data.variantId, status: 'QUEUED' },
       select: { id: true, status: true },
     })
     await db.$executeRaw`SELECT pg_notify('planning_jobs', ${String(job.id)})`
     return job
   })
 
-// Delete a scenario and all its results (hexagons in the planning schema).
-export const deletePlanningScenarioFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof ScenarioIdInput>) => ScenarioIdInput.parse(data))
+export const deletePlanningVariantFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByScenario(getRequestHeaders(), data.scenarioId)
-    const runs = await db.planningRun.findMany({
-      where: { scenarioId: data.scenarioId },
-      select: { id: true },
-    })
-    if (runs.length > 0) {
-      const runIds = runs.map((r) => r.id)
-      await db.$executeRaw`DELETE FROM planning.scenario_hexagons WHERE run_id = ANY(${runIds})`
-    }
-    // PlanningJob and PlanningRun cascade-delete via FK.
-    await db.planningScenario.delete({ where: { id: data.scenarioId } })
+    await authorizeByVariant(getRequestHeaders(), data.variantId)
+    await deleteVariantPostgisResults(data.variantId)
+    await db.planningVariant.delete({ where: { id: data.variantId } })
   })

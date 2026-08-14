@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   planningJobQueryOptions,
-  planningScenarioQueryOptions,
+  planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import { usePlanningRunParam } from '../hooks/useQueryState/usePlanningParams'
@@ -23,13 +23,15 @@ const COLORS: Record<string, string> = {
   FAILED: 'bg-red-100 text-red-800',
 }
 
-/** Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes scenario. */
-export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioId: number }) => {
+/** Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant. */
+export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId: number }) => {
   const queryClient = useQueryClient()
   const [, setRun] = usePlanningRunParam()
   const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
   const autoCollapsedJobId = usePlanningBoundaryState((s) => s.autoCollapsedJobId)
   const setAutoCollapsedJobId = usePlanningBoundaryState((s) => s.setAutoCollapsedJobId)
+
+  const sawInFlight = useRef(false)
 
   const { data } = useQuery({
     ...planningJobQueryOptions(jobId),
@@ -40,13 +42,16 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
   })
 
   useEffect(() => {
+    if (data?.status === 'QUEUED' || data?.status === 'RUNNING') {
+      sawInFlight.current = true
+    }
     if (data?.status !== 'DONE' || data.resultRunId == null) return
     setRun(data.resultRunId)
-    queryClient.invalidateQueries(planningScenarioQueryOptions(scenarioId))
-    // Collapse the panel once per job so more of the map is visible – guarded so
-    // re-expanding the panel (which remounts this badge) doesn't immediately
-    // collapse it again, and the user can freely toggle it afterwards.
-    if (autoCollapsedJobId !== jobId) {
+    queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+    queryClient.invalidateQueries({ queryKey: ['planning', 'areas'] })
+    // Only collapse when this job actually finished in this session — not when
+    // selecting a variant whose latest job is already DONE.
+    if (sawInFlight.current && autoCollapsedJobId !== jobId) {
       setPanelCollapsed(true)
       setAutoCollapsedJobId(jobId)
     }
@@ -54,7 +59,7 @@ export const JobStatusBadge = ({ jobId, scenarioId }: { jobId: number; scenarioI
     data?.status,
     data?.resultRunId,
     jobId,
-    scenarioId,
+    variantId,
     setRun,
     queryClient,
     setPanelCollapsed,

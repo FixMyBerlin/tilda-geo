@@ -60,16 +60,16 @@ def _study_area_from_config(cfg: dict):
 _VEGETATION_REUSE_CANDIDATES = 5
 
 
-def _find_reusable_vegetation(conn, engine, scenario_id: int, current_run_id: int, study_area):
-    """Sucht unter den letzten Läufen desselben Szenarios einen mit identischem
+def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int, study_area):
+    """Sucht unter den letzten Läufen derselben Variante einen mit identischem
     Studiengebiet, in dem Vegetation tatsächlich berechnet wurde, und lädt dessen
     `scenario_vegetation`-Zeilen. None = kein Treffer, muss neu berechnet werden."""
     with conn.cursor() as cur:
         cur.execute(
             """SELECT id, "factorConfigSnapshot" FROM prisma."PlanningRun"
-               WHERE "scenarioId" = %s AND id != %s
+               WHERE "variantId" = %s AND id != %s
                ORDER BY id DESC LIMIT %s""",
-            (scenario_id, current_run_id, _VEGETATION_REUSE_CANDIDATES),
+            (variant_id, current_run_id, _VEGETATION_REUSE_CANDIDATES),
         )
         candidates = cur.fetchall()
 
@@ -97,7 +97,7 @@ def _load_vegetation_rows(engine, run_id: int) -> gpd.GeoDataFrame:
 
 
 def claim_job(conn: psycopg.Connection):
-    """Beansprucht den ältesten QUEUED-Job atomar. Gibt (job_id, scenario_id) oder None."""
+    """Beansprucht den ältesten QUEUED-Job atomar. Gibt (job_id, variant_id) oder None."""
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -110,11 +110,11 @@ def claim_job(conn: psycopg.Connection):
               FOR UPDATE SKIP LOCKED
               LIMIT 1
             )
-            RETURNING id, "scenarioId";
+            RETURNING id, "variantId";
             """
         )
         row = cur.fetchone()
-    return row  # None oder (id, scenarioId)
+    return row  # None oder (id, variantId)
 
 
 def requeue_stale(conn: psycopg.Connection):
@@ -128,24 +128,35 @@ def requeue_stale(conn: psycopg.Connection):
         print(f"   ↺ {n} hängengebliebene RUNNING-Jobs requeued")
 
 
-def _load_scenario_config(conn, scenario_id: int):
+def _load_variant_config(conn, variant_id: int):
+    """Lädt Variante + Planungsgebiet und merged zu einem flachen factorConfig-Dict."""
     with conn.cursor() as cur:
         cur.execute(
-            'SELECT "factorConfig" FROM prisma."PlanningScenario" WHERE id = %s',
-            (scenario_id,),
+            """SELECT v."factorConfig", a."studyArea", a."userGeojson", a."userGeojsonMode"
+               FROM prisma."PlanningVariant" v
+               JOIN prisma."PlanningArea" a ON a.id = v."areaId"
+               WHERE v.id = %s""",
+            (variant_id,),
         )
         row = cur.fetchone()
     if not row:
-        raise ValueError(f"Scenario {scenario_id} nicht gefunden")
-    return row[0]
+        raise ValueError(f"Variant {variant_id} nicht gefunden")
+    factor_config, study_area, user_geojson, user_geojson_mode = row
+    cfg = dict(factor_config)
+    cfg["study_area"] = study_area
+    if user_geojson is not None:
+        cfg["user_geojson"] = user_geojson
+    if user_geojson_mode is not None:
+        cfg["user_geojson_mode"] = user_geojson_mode
+    return cfg
 
 
-def _create_run(conn, scenario_id: int, snapshot: dict) -> int:
+def _create_run(conn, variant_id: int, snapshot: dict) -> int:
     with conn.cursor() as cur:
         cur.execute(
-            """INSERT INTO prisma."PlanningRun" ("scenarioId", "factorConfigSnapshot", status, "createdAt")
+            """INSERT INTO prisma."PlanningRun" ("variantId", "factorConfigSnapshot", status, "createdAt")
                VALUES (%s, %s, 'PENDING', now()) RETURNING id""",
-            (scenario_id, Jsonb(snapshot)),
+            (variant_id, Jsonb(snapshot)),
         )
         return cur.fetchone()[0]
 
@@ -165,11 +176,11 @@ def set_progress(conn, job_id: int, pct: int, label: str = ""):
         print(f"   ⚠️  Fortschritt konnte nicht gespeichert werden: {e}")
 
 
-def process_job(conn, engine, job_id: int, scenario_id: int):
-    print(f"\n=== Job {job_id} (Scenario {scenario_id}) ===")
+def process_job(conn, engine, job_id: int, variant_id: int):
+    print(f"\n=== Job {job_id} (Variant {variant_id}) ===")
     set_progress(conn, job_id, 1, "Vorbereitung")
-    cfg = _load_scenario_config(conn, scenario_id)
-    run_id = _create_run(conn, scenario_id, cfg)
+    cfg = _load_variant_config(conn, variant_id)
+    run_id = _create_run(conn, variant_id, cfg)
 
     study_area = _study_area_from_config(cfg)
     h3_res = int(cfg.get("h3_resolution", 13))
@@ -215,7 +226,7 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
             set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
         else:
             try:
-                vegetation = _find_reusable_vegetation(conn, engine, scenario_id, run_id, study_area)
+                vegetation = _find_reusable_vegetation(conn, engine, variant_id, run_id, study_area)
             except Exception as e:
                 print(f"   ⚠️  Cache-Suche für Vegetation fehlgeschlagen: {e}")
                 vegetation = None
@@ -293,8 +304,8 @@ def process_job(conn, engine, job_id: int, scenario_id: int):
             (run_status, hex_count, veg_count, cir_source.attribution if cir_source else None, run_id),
         )
         cur.execute(
-            'UPDATE prisma."PlanningScenario" SET "currentRunId"=%s, "updatedAt"=now() WHERE id=%s',
-            (run_id, scenario_id),
+            'UPDATE prisma."PlanningVariant" SET "currentRunId"=%s, "updatedAt"=now() WHERE id=%s',
+            (run_id, variant_id),
         )
         cur.execute(
             """UPDATE prisma."PlanningJob"
@@ -324,9 +335,9 @@ def drain(conn, engine):
         row = claim_job(conn)
         if row is None:
             return
-        job_id, scenario_id = row
+        job_id, variant_id = row
         try:
-            process_job(conn, engine, job_id, scenario_id)
+            process_job(conn, engine, job_id, variant_id)
         except Exception:
             tb = traceback.format_exc()
             print(f"   ✗ Job {job_id} fehlgeschlagen:\n{tb}", file=sys.stderr)

@@ -13,9 +13,13 @@ const MODES = [
 
 export type UserGeojsonMode = (typeof MODES)[number][0]
 
+export type UserObstaclesConfig = Pick<
+  FactorConfig,
+  'user_geojson' | 'user_geojson_mode' | 'weights'
+>
+
 /**
  * Upload, Modus und – bei weichen Modi – Stärke-Slider im Block Eigene Daten.
- * Wird von `FactorFields` gerendert.
  */
 export const UserObstaclesField = ({
   config,
@@ -23,12 +27,15 @@ export const UserObstaclesField = ({
   setUserGeojson,
   setUserGeojsonMode,
   readOnly = false,
+  showWeight = true,
 }: {
-  config: FactorConfig
+  config: UserObstaclesConfig
   setWeight: (key: string, value: number) => void
   setUserGeojson: (geojson: GeoJSON.FeatureCollection | undefined) => void
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
   readOnly?: boolean
+  /** Gewicht-Slider nur in der Varianten-Faktoransicht; am Planungsgebiet entfällt er. */
+  showWeight?: boolean
 }) => {
   const geojson = config.user_geojson as GeoJSON.FeatureCollection | undefined
   const mode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
@@ -80,7 +87,7 @@ export const UserObstaclesField = ({
           className="grid grid-cols-2 gap-1.5"
         />
       )}
-      {showSlider && (
+      {showWeight && showSlider && (
         <ModifierSlider
           label="Stärke"
           weight={weight}

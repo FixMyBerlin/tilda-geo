@@ -2,49 +2,47 @@ import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 import {
   getAdminBoundariesFn,
   getBoundaryGeomFn,
+  getPlanningAreaFn,
+  getPlanningAreasFn,
   getPlanningJobFn,
-  getPlanningScenarioFn,
-  getPlanningScenariosFn,
+  getPlanningVariantFn,
 } from './planning.functions'
 
-export const planningScenariosQueryOptions = (regionSlug: string) =>
+export const planningAreasQueryOptions = (regionSlug: string) =>
   queryOptions({
-    queryKey: ['planning', 'scenarios', regionSlug] as const,
-    queryFn: () => getPlanningScenariosFn({ data: { regionSlug } }),
+    queryKey: ['planning', 'areas', regionSlug] as const,
+    queryFn: () => getPlanningAreasFn({ data: { regionSlug } }),
   })
 
-export const planningScenarioQueryOptions = (scenarioId: number) =>
+export const planningAreaQueryOptions = (areaId: number) =>
   queryOptions({
-    queryKey: ['planning', 'scenario', scenarioId] as const,
-    queryFn: () => getPlanningScenarioFn({ data: { scenarioId } }),
+    queryKey: ['planning', 'area', areaId] as const,
+    queryFn: () => getPlanningAreaFn({ data: { areaId } }),
   })
 
-// Polled while a job is in flight; stops once DONE/FAILED (handled in the component
-// via refetchInterval returning false).
+export const planningVariantQueryOptions = (variantId: number) =>
+  queryOptions({
+    queryKey: ['planning', 'variant', variantId] as const,
+    queryFn: () => getPlanningVariantFn({ data: { variantId } }),
+  })
+
 export const planningJobQueryOptions = (jobId: number) =>
   queryOptions({
     queryKey: ['planning', 'job', jobId] as const,
     queryFn: () => getPlanningJobFn({ data: { jobId } }),
   })
 
-// Admin boundaries (levels 8–10) for study_area selection, filtered to the given region.
-// Die Suche läuft serverseitig und liefert höchstens MAX_BOUNDARY_RESULTS Treffer – die Liste wird
-// nie komplett geladen, deshalb steckt der Suchbegriff im queryKey.
-// Metadata only – geometries are loaded per boundary via `boundaryGeomQueryOptions`.
 export const adminBoundariesQueryOptions = (regionSlug: string, query: string) =>
   queryOptions({
     queryKey: ['planning', 'adminBoundaries', regionSlug, query] as const,
     queryFn: () => getAdminBoundariesFn({ data: { regionSlug, query } }),
-    // Vorherige Treffer stehen lassen, während die nächste Suche läuft – sonst flackert die Liste
-    // bei jedem Tastendruck leer.
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 60, // 1h
+    staleTime: 1000 * 60 * 60,
   })
 
-// Geometry of a single admin boundary, fetched when the user picks it as study_area.
 export const boundaryGeomQueryOptions = (regionSlug: string, boundaryId: string) =>
   queryOptions({
     queryKey: ['planning', 'boundaryGeom', boundaryId] as const,
     queryFn: () => getBoundaryGeomFn({ data: { regionSlug, boundaryId } }),
-    staleTime: 1000 * 60 * 60, // 1h
+    staleTime: 1000 * 60 * 60,
   })

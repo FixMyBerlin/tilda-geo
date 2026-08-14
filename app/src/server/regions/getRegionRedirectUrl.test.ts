@@ -467,7 +467,7 @@ describe('getRegionRedirectUrl()', () => {
         // Showing a saved result (planningRun), switching display mode, or toggling the
         // hexagon layer must not rewrite the URL, otherwise beforeLoad throws a 301 →
         // full-page pending flash.
-        const url = `${await canonicalBase()}&planning=true&planningScenario=3&planningRun=5&planningScore=bedarf&planningHexagons=false`
+        const url = `${await canonicalBase()}&planning=true&planningArea=2&planningVariant=3&planningRun=5&planningScore=bedarf&planningHexagons=false`
         const redirectUrl = await redirectOnly(url, 'berlin')
         expect(redirectUrl).toBe(null)
       })

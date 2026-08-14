@@ -8,3 +8,7 @@ const planningInputClass =
 export const planningNumberInputClass = `${planningInputClass} w-14 text-right tabular-nums`
 
 export const planningTextInputClass = `${planningInputClass} w-full`
+
+/** Volle Panel-Breite, normale Schriftgröße — für Titel/Name-Felder im Assistenten. */
+export const planningPanelTitleInputClass =
+  'w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none'

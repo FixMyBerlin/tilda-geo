@@ -3,28 +3,33 @@ import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import type { FactorConfig } from '@/server/planning/planning.functions'
-import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
+import {
+  planningAreaQueryOptions,
+  planningVariantQueryOptions,
+} from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import {
   usePlanningAreaFilterParam,
+  usePlanningAreaParam,
   usePlanningMinAreaParam,
   usePlanningModeParam,
   usePlanningRunParam,
-  usePlanningScenarioParam,
+  usePlanningVariantParam,
 } from '../hooks/useQueryState/usePlanningParams'
+import { AreaContextBar } from './AreaContextBar'
 import { FactorEditorPanel } from './FactorEditorPanel'
 import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
-import { ScenarioList } from './ScenarioList'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
+import { VariantList } from './VariantList'
+import { VariantTitleField } from './VariantTitleField'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
 
-/** Quick on/off toggle for the on-demand vegetation (NDVI) result layer. */
 const VegetationToggle = () => {
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const setVegetationOn = usePlanningBoundaryState((s) => s.setVegetationVisible)
@@ -50,7 +55,6 @@ const VegetationToggle = () => {
   )
 }
 
-/** Quick on/off toggle for the buffered carriageway ("Fahrbahnen ausschließen") result layer. */
 const CarriagewaysToggle = () => {
   const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
   const setCarriagewaysOn = usePlanningBoundaryState((s) => s.setCarriagewaysVisible)
@@ -76,16 +80,6 @@ const CarriagewaysToggle = () => {
   )
 }
 
-/**
- * Zielgröße-Filter für die Flächensuche: dunkelt Hexagone ab, deren
- * zusammenhängende Fläche (`cluster_area_m2`, Connected-Component-Labeling im
- * Worker über `min_score_threshold`) die eingegebene Mindestgröße nicht
- * erreicht (siehe SourcesLayersPlanning). Reiner Client-Filter auf einer
- * bereits persistierten Tile-Spalte, kein neuer Lauf nötig. Die Checkbox
- * schaltet den Filter unabhängig vom eingegebenen Wert aus, sodass man
- * jederzeit zur ungefilterten Ansicht (alle Hexagone gleich eingefärbt)
- * zurückkommt, ohne die Fläche neu eingeben zu müssen.
- */
 const MinAreaFilter = () => {
   const [filterOn, setFilterOn] = usePlanningAreaFilterParam()
   const [minArea, setMinArea] = usePlanningMinAreaParam()
@@ -116,145 +110,152 @@ const MinAreaFilter = () => {
   )
 }
 
-const ScenarioDetail = ({ scenarioId, regionSlug }: { scenarioId: number; regionSlug: string }) => {
+const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlug: string }) => {
   const [, setRun] = usePlanningRunParam()
-  const { mainMap: map } = useMap()
-  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setVegetationAttribution = usePlanningBoundaryState((s) => s.setVegetationAttribution)
   const setUserObstaclesGeom = usePlanningBoundaryState((s) => s.setUserObstaclesGeom)
-  const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
-  const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
+  const { data: variant } = useQuery(planningVariantQueryOptions(variantId))
 
-  // Show the scenario's latest result on the map when it is opened.
   useEffect(() => {
-    if (scenario?.currentRunId != null) setRun(scenario.currentRunId)
-  }, [scenario?.currentRunId, setRun])
+    if (variant?.currentRunId != null) setRun(variant.currentRunId)
+    else setRun(null)
+  }, [variant?.currentRunId, setRun])
 
-  // Propagate the CIR source attribution to the map store so SourcesLayersPlanning
-  // can pass it to MapLibre's <Source> (shows in AttributionControl when layer is on).
   useEffect(() => {
-    if (!scenario) return
-    setVegetationAttribution(scenario.runs[0]?.cirAttribution ?? null)
+    if (!variant) return
+    setVegetationAttribution(variant.runs[0]?.cirAttribution ?? null)
     return () => setVegetationAttribution(null)
-  }, [scenario, setVegetationAttribution])
+  }, [variant, setVegetationAttribution])
 
-  // Outline the scenario's study area (border only, no fill) and fly to it on open –
-  // but only when the boundary actually differs from the one we last flew to. Switching
-  // between scenarios of the same study area is the "compare variants" workflow, where
-  // moving the camera would break the comparison.
-  const studyArea = (scenario?.factorConfig as FactorConfig | undefined)?.study_area
-  useEffect(() => {
-    if (!studyArea) return
-    setBoundaryHighlightGeom(studyArea as object, { filled: false })
-    if (map) {
-      const [minLng, minLat, maxLng, maxLat] = bbox({
-        type: 'Feature',
-        geometry: studyArea as any,
-        properties: {},
-      })
-      // The bbox is what the camera is derived from, so identical bboxes mean an
-      // identical target view – comparing it is enough to detect "same boundary".
-      const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
-      if (usePlanningBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
-        setLastFittedBoundaryKey(boundaryKey)
-        map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
-      }
-    }
-    return () => setBoundaryHighlightGeom(null)
-  }, [studyArea, map, setBoundaryHighlightGeom, setLastFittedBoundaryKey])
-
-  // Show the scenario's uploaded "Eigene Flächen" as a control layer while it is open.
-  const userGeojson = (scenario?.factorConfig as FactorConfig | undefined)?.user_geojson
+  const userGeojson = (variant?.factorConfig as FactorConfig | undefined)?.user_geojson
   useEffect(() => {
     setUserObstaclesGeom((userGeojson as object | undefined) ?? null)
     return () => setUserObstaclesGeom(null)
   }, [userGeojson, setUserObstaclesGeom])
 
-  if (!scenario) return null
+  if (!variant) return null
 
-  // Scenario is locked (read-only) only while a run is in flight. Once the latest
-  // job is DONE/FAILED, factors become editable again so the same study area can
-  // be recomputed with different factors via the run button ("Neu berechnen").
-  const latestJob = scenario.jobs[0] ?? null
+  const latestJob = variant.jobs[0] ?? null
+  const latestRun = variant.runs[0] ?? null
   const isLocked = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
+  const hasCompleteRun = latestRun?.status === 'COMPLETE'
+  const factorsDefaultOpen = !hasCompleteRun
 
   return (
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-3">
-      <h3 className="font-semibold">
-        <span className="mr-1 text-xs font-normal text-gray-400">#{scenario.id}</span>
-        {scenario.title}
-      </h3>
-      <p className="text-xs text-gray-400">
-        Erstellt:{' '}
-        {new Date(scenario.createdAt).toLocaleString('de-DE', {
-          dateStyle: 'short',
-          timeStyle: 'short',
-        })}
-      </p>
+      {latestRun?.stale && (
+        <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+          Gebiet geändert — Ergebnis veraltet. Bitte neu berechnen.
+        </p>
+      )}
 
-      <RunButton scenarioId={scenarioId} regionSlug={regionSlug} latestJob={latestJob} />
-
-      <FactorEditorPanel
-        scenarioId={scenarioId}
-        factorConfig={scenario.factorConfig as FactorConfig}
+      <VariantTitleField
+        variantId={variantId}
+        title={variant.title}
+        regionSlug={regionSlug}
         readOnly={isLocked}
       />
 
-      {scenario.runs[0] && (
+      <RunButton variantId={variantId} regionSlug={regionSlug} latestJob={latestJob} />
+
+      <FactorEditorPanel
+        variantId={variantId}
+        factorConfig={variant.factorConfig as FactorConfig}
+        readOnly={isLocked}
+        defaultOpen={factorsDefaultOpen}
+      />
+
+      {latestRun && (
         <div className="text-xs text-gray-600">
           Letzter Lauf:{' '}
-          {scenario.runs[0].status === 'COMPLETE'
-            ? `${scenario.runs[0].hexCount ?? 0} Hexagone`
-            : scenario.runs[0].status}
+          {latestRun.status === 'COMPLETE'
+            ? `${latestRun.hexCount ?? 0} Hexagone`
+            : latestRun.status}
         </div>
       )}
 
-      {scenario.runs[0]?.status === 'COMPLETE' && <ScoreModeSwitcher />}
-
-      {scenario.runs[0]?.status === 'COMPLETE' && <MinAreaFilter />}
-
-      {scenario.runs[0]?.status === 'COMPLETE' && (scenario.runs[0].vegCount ?? 0) > 0 && (
-        <VegetationToggle />
-      )}
-
-      {scenario.runs[0]?.status === 'COMPLETE' &&
-        (scenario.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
+      {hasCompleteRun && <ScoreModeSwitcher />}
+      {hasCompleteRun && <MinAreaFilter />}
+      {hasCompleteRun && (latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
+      {hasCompleteRun &&
+        (variant.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
           <CarriagewaysToggle />
         )}
     </div>
   )
 }
 
-/**
- * Summary row shown below the header while the panel is collapsed: the active
- * scenario's title plus a pill with its creation date (day + short month, no year).
- */
-const CollapsedScenarioSummary = ({ scenarioId }: { scenarioId: number }) => {
-  const { data: scenario } = useQuery(planningScenarioQueryOptions(scenarioId))
-  if (!scenario) return null
-
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="truncate font-medium text-gray-800">{scenario.title}</span>
-      <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
-        {new Date(scenario.createdAt).toLocaleDateString('de-DE', {
-          day: 'numeric',
-          month: 'short',
-        })}
-      </span>
-    </div>
-  )
-}
-
-/** Planning-mode entry button + interactive panel. Renders nothing intrusive in the viewer. */
+/** Planning-mode entry button + interactive panel. */
 export const PlanningPanel = () => {
   const [planningMode] = usePlanningModeParam()
-  const [activeScenario] = usePlanningScenarioParam()
+  const [activeArea, setActiveArea] = usePlanningAreaParam()
+  const [activeVariant] = usePlanningVariantParam()
   const panelCollapsed = usePlanningBoundaryState((s) => s.panelCollapsed)
   const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
   const { regionSlug } = routeApi.useParams()
+  const [creatingArea, setCreatingArea] = useState(false)
+  const { mainMap: map } = useMap()
+  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
+
+  const { data: variant } = useQuery({
+    ...planningVariantQueryOptions(activeVariant!),
+    enabled: activeVariant != null,
+  })
+
+  const { data: area } = useQuery({
+    ...planningAreaQueryOptions(activeArea!),
+    enabled: activeArea != null,
+  })
+
+  // Resolve area from variant when only legacy planningScenario URL is set.
+  useEffect(() => {
+    if (variant?.area?.id != null && activeArea == null) setActiveArea(variant.area.id)
+  }, [variant?.area?.id, activeArea, setActiveArea])
+
+  const studyArea =
+    (area?.studyArea as GeoJSON.Geometry | undefined) ??
+    ((variant?.factorConfig as FactorConfig | undefined)?.study_area as
+      | GeoJSON.Geometry
+      | undefined)
+
+  // Outline lives on the panel (not VariantDetail) so it stays on the map when the
+  // panel is collapsed or while switching variants of the same planungsgebiet.
+  useEffect(() => {
+    if (!planningMode) {
+      setBoundaryHighlightGeom(null)
+      return
+    }
+    if (creatingArea || !studyArea) return
+    setBoundaryHighlightGeom(studyArea, { filled: false })
+    if (map) {
+      const [minLng, minLat, maxLng, maxLat] = bbox({
+        type: 'Feature',
+        geometry: studyArea,
+        properties: {},
+      })
+      const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
+      if (usePlanningBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
+        setLastFittedBoundaryKey(boundaryKey)
+        map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+      }
+    }
+  }, [
+    planningMode,
+    creatingArea,
+    studyArea,
+    map,
+    setBoundaryHighlightGeom,
+    setLastFittedBoundaryKey,
+  ])
 
   if (!planningMode) return null
+
+  const areaTitle = area?.title ?? variant?.area?.title
+  const variantTitle = variant?.title
+  const expandPanel = () => {
+    if (panelCollapsed) setPanelCollapsed(false)
+  }
 
   return (
     <div
@@ -263,26 +264,45 @@ export const PlanningPanel = () => {
         PLANNING_PANEL_WIDTH,
       )}
     >
-      <div className="flex items-center justify-between">
-        <h2 className="font-bold">Planungsmodus</h2>
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={expandPanel}
+          disabled={!panelCollapsed}
+          className={twJoin(
+            'min-w-0 flex-1 text-left',
+            panelCollapsed && 'cursor-pointer rounded hover:bg-gray-50',
+          )}
+        >
+          <h2 className="font-bold">Flächenfinder</h2>
+          {panelCollapsed && (areaTitle || variantTitle) && (
+            <p className="truncate text-sm text-gray-600">
+              {areaTitle}
+              {variantTitle ? ` · ${variantTitle}` : ''}
+            </p>
+          )}
+        </button>
         <button
           type="button"
           onClick={() => setPanelCollapsed(!panelCollapsed)}
-          aria-label={panelCollapsed ? 'Planungsmodus ausklappen' : 'Planungsmodus einklappen'}
-          className="text-gray-500 hover:text-gray-800"
+          aria-label={panelCollapsed ? 'Flächenfinder ausklappen' : 'Flächenfinder einklappen'}
+          className="shrink-0 text-gray-500 hover:text-gray-800"
         >
           <ChevronRightIcon
             className={twJoin('size-4 transition-transform', panelCollapsed ? '' : 'rotate-90')}
           />
         </button>
       </div>
-      {panelCollapsed ? (
-        activeScenario != null && <CollapsedScenarioSummary scenarioId={activeScenario} />
-      ) : (
+      {!panelCollapsed && (
         <>
-          <ScenarioList regionSlug={regionSlug} />
-          {activeScenario != null && (
-            <ScenarioDetail scenarioId={activeScenario} regionSlug={regionSlug} />
+          <AreaContextBar regionSlug={regionSlug} onCreatingChange={setCreatingArea} />
+          {!creatingArea && (
+            <>
+              <VariantList regionSlug={regionSlug} />
+              {activeVariant != null && (
+                <VariantDetail variantId={activeVariant} regionSlug={regionSlug} />
+              )}
+            </>
           )}
         </>
       )}

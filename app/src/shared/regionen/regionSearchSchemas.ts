@@ -126,6 +126,8 @@ export const regionSearchSchema = z.object({
     .optional()
     .catch(undefined),
   [searchParamsRegistry.planning]: searchBoolean(false),
+  [searchParamsRegistry.planningArea]: optionalSearchNumber(),
+  [searchParamsRegistry.planningVariant]: optionalSearchNumber(),
   [searchParamsRegistry.planningScenario]: optionalSearchNumber(),
   [searchParamsRegistry.planningRun]: optionalSearchNumber(),
   [searchParamsRegistry.planningScore]: planningScoreSearchParam(),

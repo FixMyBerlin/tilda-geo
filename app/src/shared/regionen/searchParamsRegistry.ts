@@ -18,6 +18,9 @@ export const searchParamsRegistry = {
   dialog: 'dialog',
   welcomeSkipDialog: '__skipDialog',
   planning: 'planning',
+  planningArea: 'planningArea',
+  planningVariant: 'planningVariant',
+  /** @deprecated Use planningVariant — kept for one release of URL compat. */
   planningScenario: 'planningScenario',
   planningRun: 'planningRun',
   planningScore: 'planningScore', // which probability colors the hexagons (bedarf/bebauung/kombination)
