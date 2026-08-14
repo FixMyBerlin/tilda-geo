@@ -4,7 +4,7 @@ import { differenceInHours, formatDistanceStrict, isValid, parseISO } from 'date
 export const PUBLISH_MODES = ['override', 'snapshot'] as const
 export type PublishMode = (typeof PUBLISH_MODES)[number]
 
-/** Prompt when previous latest/ is at least this old (local CLI; major-version heuristic). */
+/** Prompt when the current dump is at least this old (local CLI; major-version heuristic). */
 const STALE_LATEST_HOURS = 24
 
 function publishedAtDate(publishedAt: string) {
@@ -53,13 +53,13 @@ export async function resolveWriteSnapshot(input: {
 
   if (!decision.prompt) {
     if (decision.mode === 'snapshot') {
-      p.log.info('Mode: snapshot — archive current latest/ to snapshots/, then replace latest/')
+      p.log.info('Mode: snapshot — copy current dump to snapshots/, then replace data.dump')
     } else if (input.previousPublishedAt) {
       p.log.info(
-        `Mode: override — replace latest/ (${formatLatestAge(input.previousPublishedAt, input.now)})`,
+        `Mode: override — replace data.dump (${formatLatestAge(input.previousPublishedAt, input.now)})`,
       )
     } else {
-      p.log.info('Mode: override — first publish, writing latest/ only')
+      p.log.info('Mode: override — first publish')
     }
     return decision.mode === 'snapshot'
   }
@@ -67,24 +67,24 @@ export async function resolveWriteSnapshot(input: {
   const age = formatLatestAge(input.previousPublishedAt!, input.now)
   if (!interactive) {
     p.log.warn(
-      `Latest data.${input.table} was published ${age}. Pass --mode snapshot to keep that version under snapshots/, or --mode override to replace latest/ only. Continuing with override.`,
+      `Current data.${input.table} was published ${age}. Pass --mode snapshot to keep that version under snapshots/, or --mode override to replace data.dump only. Continuing with override.`,
     )
     return false
   }
 
   const selected = await p.select({
-    message: `Latest data.${input.table} was published ${age} (${input.previousPublishedAt}). Replace latest/ with this publish?`,
+    message: `Current data.${input.table} was published ${age} (${input.previousPublishedAt}). Replace data.dump with this publish?`,
     initialValue: 'snapshot',
     options: [
       {
         value: 'snapshot',
-        label: 'Archive current latest, then publish',
-        hint: 'copies today’s latest to snapshots/<when it was published>/, then writes the new dump as latest/',
+        label: 'Archive current dump, then publish',
+        hint: 'copies data.dump to snapshots/<when it was published>/, then overwrites the current files',
       },
       {
         value: 'override',
-        label: 'Replace latest only',
-        hint: 'previous latest is not listed under snapshots/ (object dump may still exist by sha256)',
+        label: 'Replace current dump only',
+        hint: 'previous dump is not listed under snapshots/',
       },
     ],
   })
@@ -93,9 +93,9 @@ export async function resolveWriteSnapshot(input: {
     process.exit(0)
   }
   if (selected === 'snapshot') {
-    p.log.info('Mode: snapshot — archive current latest/ to snapshots/, then replace latest/')
+    p.log.info('Mode: snapshot — copy current dump to snapshots/, then replace data.dump')
     return true
   }
-  p.log.info('Mode: override — replace latest/ only')
+  p.log.info('Mode: override — replace data.dump only')
   return false
 }

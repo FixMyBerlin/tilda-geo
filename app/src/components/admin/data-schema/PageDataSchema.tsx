@@ -20,13 +20,6 @@ const sectionClassName = twMerge(
 const smallButtonClassName = twMerge(buttonStyles, 'px-3 py-1.5 text-sm')
 const smallSecondaryButtonClassName = twMerge(buttonStylesSecondary, 'px-3 py-1.5 text-sm')
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
-}
-
 async function postJson(url: string, body: unknown) {
   const response = await fetch(url, {
     method: 'POST',
@@ -81,8 +74,8 @@ export function PageDataSchema() {
         <h2 className="text-lg font-semibold text-gray-900">Data-Schema</h2>
         <p className="mt-2 text-sm text-gray-600">
           Pro Tabelle <strong>Import</strong> klicken, um den S3-Dump (
-          <code className="text-xs">latest/</code>) nach <code className="text-xs">data.*</code> zu
-          schreiben. Karten-Layer aus Processing sehen die Daten erst nach einem Rebuild der{' '}
+          <code className="text-xs">data.dump</code>) nach <code className="text-xs">data.*</code>{' '}
+          zu schreiben. Karten-Layer aus Processing sehen die Daten erst nach einem Rebuild der{' '}
           <code className="text-xs">public.*</code>-Tabellen — siehe{' '}
           <Link to="/admin/processing">Processing</Link>.
         </p>
@@ -119,7 +112,6 @@ export function PageDataSchema() {
               'Veröffentlicht am',
               'Zeilen (S3)',
               'Zeilen (diese Umgebung)',
-              'Größe',
               'Aktionen',
               'Verlauf',
             ]}
@@ -138,11 +130,6 @@ export function PageDataSchema() {
                     {dataset.error ? (
                       <p className="mt-1 max-w-xs text-xs font-normal text-red-700">
                         {dataset.error}
-                      </p>
-                    ) : null}
-                    {dataset.manifest?.publishedFrom ? (
-                      <p className="mt-1 text-xs font-normal text-gray-500">
-                        von {dataset.manifest.publishedFrom}
                       </p>
                     ) : null}
                     {dataset.spec?.provider ? (
@@ -185,9 +172,6 @@ export function PageDataSchema() {
                       : dataset.liveRowCount.toLocaleString('de-DE')}
                   </td>
                   <td className={adminTableClasses.td}>
-                    {dataset.manifest ? formatBytes(dataset.manifest.bytes) : '—'}
-                  </td>
-                  <td className={adminTableClasses.td}>
                     <div className="flex min-w-56 flex-col gap-2">
                       <button
                         type="button"
@@ -196,7 +180,7 @@ export function PageDataSchema() {
                         onClick={() =>
                           void runAction(
                             `import:${dataset.table}`,
-                            `Tabelle data.${dataset.table} mit latest-Dump überschreiben?`,
+                            `Tabelle data.${dataset.table} mit data.dump überschreiben?`,
                             () =>
                               postJson('/api/admin/data-schema/import', {
                                 table: dataset.table,
@@ -259,7 +243,7 @@ export function PageDataSchema() {
                             }))
                           }
                         />
-                        zusätzlich bisheriges latest sichern
+                        zusätzlich bisherigen Dump sichern
                       </label>
                       <button
                         type="button"
@@ -269,8 +253,8 @@ export function PageDataSchema() {
                           void runAction(
                             `publish:${dataset.table}`,
                             alsoSnapshot
-                              ? `data.${dataset.table} nach S3 veröffentlichen und die bisherige latest-Version als Snapshot behalten?`
-                              : `data.${dataset.table} aus dieser Umgebung nach S3 veröffentlichen (latest überschreiben)?`,
+                              ? `data.${dataset.table} nach S3 veröffentlichen und den bisherigen Dump als Snapshot behalten?`
+                              : `data.${dataset.table} aus dieser Umgebung nach S3 veröffentlichen (data.dump überschreiben)?`,
                             () =>
                               postJson('/api/admin/data-schema/publish', {
                                 table: dataset.table,
@@ -305,7 +289,7 @@ export function PageDataSchema() {
                                 {row.snapshotId ? (
                                   <span className="font-mono">{row.snapshotId}</span>
                                 ) : (
-                                  <span>latest</span>
+                                  <span>aktuell</span>
                                 )}
                               </div>
                               {row.errorText ? (

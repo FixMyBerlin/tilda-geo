@@ -97,6 +97,14 @@ export async function getS3ObjectJsonIfExists(key: string) {
   }
 }
 
+export async function getS3ObjectJsonFirst(keys: string[]) {
+  for (const key of keys) {
+    const json = await getS3ObjectJsonIfExists(key)
+    if (json !== null) return { key, json }
+  }
+  return null
+}
+
 export async function putS3Json(key: string, value: unknown) {
   const { client, bucket } = dataSchemaS3()
   await putObject(client, {

@@ -5,11 +5,11 @@ import db from '@/server/db.server'
 import { getDataSchemaTableRowCount } from './dataSchemaDb.server'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
 import {
-  getS3ObjectJson,
+  getS3ObjectJsonFirst,
   listDataSchemaSnapshotIds,
   listDataSchemaTables,
 } from './dataSchemaS3.server'
-import { dataSchemaLatestManifestKey, dataSchemaSpecKey } from './dataSchemaS3Keys'
+import { dataSchemaManifestReadKeys, dataSchemaSpecReadKeys } from './dataSchemaS3Keys'
 import { parseDataSchemaSpec } from './dataSchemaSpec.schema'
 
 const HISTORY_LIMIT_OVERVIEW = 5
@@ -32,7 +32,9 @@ const historySelect = {
 
 async function loadSpecSummary(table: string) {
   try {
-    const parsed = parseDataSchemaSpec(await getS3ObjectJson(dataSchemaSpecKey(table)), table)
+    const specHit = await getS3ObjectJsonFirst(dataSchemaSpecReadKeys(table))
+    if (!specHit) return null
+    const parsed = parseDataSchemaSpec(specHit.json, table)
     return {
       file: parsed.source.file,
       provider: parsed.source.provider ?? null,
@@ -86,8 +88,9 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
       const spec = await loadSpecSummary(table)
 
       try {
-        const raw = await getS3ObjectJson(dataSchemaLatestManifestKey(table))
-        const manifest = dataSchemaManifestSchema.parse(raw)
+        const hit = await getS3ObjectJsonFirst(dataSchemaManifestReadKeys(table))
+        if (!hit) throw new Error('No data.manifest.json')
+        const manifest = dataSchemaManifestSchema.parse(hit.json)
         return {
           table,
           error: null as string | null,
@@ -95,11 +98,8 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
           manifest: {
             publishedAt: manifest.publishedAt,
             rowCount: manifest.rowCount,
-            bytes: manifest.file.bytes,
-            sha256: manifest.file.sha256,
-            publishedFrom: manifest.provenance.publishedFrom,
-            publishedBy: manifest.provenance.publishedBy,
-            snapshotId: manifest.snapshotId,
+            sha256: manifest.sha256,
+            snapshotId: manifest.snapshotId ?? null,
           },
           liveRowCount,
           snapshotIds,

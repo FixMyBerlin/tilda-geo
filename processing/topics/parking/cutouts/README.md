@@ -12,7 +12,7 @@ https://drive.google.com/drive/u/0/folders/1wEKkUayaySZ6AhsdrkTGbbeVAx1YJARs
 
 #### Import / Update
 
-Use the `data-schema` pipeline ([skill](../../../../.cursor/skills/add-db-data-table/SKILL.md), [folder README](../../../../data-schema/README.md)). Specs are gitignored — seed them with `data-schema-publish --spec-only`.
+Use the `data-schema` pipeline ([overview](../../../../data-schema/README.md), [skill](../../../../.cursor/skills/add-db-data-table/SKILL.md)). Specs are gitignored — seed them with `data-schema-publish --spec-only`.
 
 **Point (`data.euvm_cutouts_point`) — example `spec.json`:**
 

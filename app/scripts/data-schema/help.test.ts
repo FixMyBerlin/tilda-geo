@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { formatDataSchemaBigPictureHelp } from './help'
+import { formatDataSchemaDocsHelp } from './help'
 
-describe('formatDataSchemaBigPictureHelp', () => {
-  it('names the produce and consume steps', () => {
-    const help = formatDataSchemaBigPictureHelp()
-    expect(help).toContain('skill `/add-db-data-table`')
-    expect(help).toContain('`bun run data-schema-load`')
-    expect(help).toContain('`bun run data-schema-publish`')
-    expect(help).toContain('/admin/data-schema')
-    expect(help).toContain('data-schema-pull')
+describe('formatDataSchemaDocsHelp', () => {
+  it('points at the README chapter from app/', () => {
+    expect(formatDataSchemaDocsHelp('new-table')).toBe(
+      'General setup: Read ../data-schema/README.md#new-table',
+    )
+    expect(formatDataSchemaDocsHelp('existing-table')).toBe(
+      'General setup: Read ../data-schema/README.md#existing-table',
+    )
   })
 })

@@ -10,7 +10,7 @@ description: Add or update a Postgres data.* table via data-schema (spec, verify
 - **Use** for datasets that `processing/` SQL reads from Postgres `data.*`.
 - **Do not use** for map tiles / GeoJSON served to the map — use [add-static-dataset](../add-static-dataset/SKILL.md) instead.
 
-Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the local dev computer (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-pull -- --table <table>` first so the local spec matches S3. Pull/publish compare `spec.updatedAt` (stamped on publish); the CLI asks when that would clobber a newer spec.
+Specs live at repo-root `data-schema/<table>/` (gitignored). Source geojson/gpkg stays on the local dev computer (next to the spec or via `--file`). Commands run from `app/`. Updating an existing table: `bun run data-schema-pull -- --table <table>` first so the local spec matches S3. Pull/publish compare spec **content**; the CLI asks when local and S3 specs differ.
 
 ## Steps
 
@@ -46,7 +46,6 @@ Match [`app/src/server/dataSchema/dataSchemaSpec.schema.ts`](../../../app/src/se
 - `source.provider`: optional short label in admin.
 - `source.documentation`: optional Markdown — how to get or generate that file next time.
 - `consumedBy`: optional path of processing SQL that reads this table. Shown in admin; nothing validates it against the SQL.
-- `updatedAt`: ISO datetime. Omit on a new spec; publish writes it on the local file first, then uploads that same file. Do not hand-edit.
 - Geometry names are WKB-style (`MultiPolygon`, `LineString`). `data-schema-load` treats ogrinfo’s spaced forms (`Multi Polygon`) as the same.
 
 ### 2. Verify + format
@@ -81,7 +80,7 @@ Required for staging/production (skip only if the user asked for a local load on
 bun run data-schema-publish -- --table <table> [--mode override|snapshot]
 ```
 
-Uploads spec + `pg_dump` of the local table to S3 `latest/`. Default `--mode override` replaces latest (v1 → v1.1 → v1.2). `--mode snapshot` archives the **current** latest under `snapshots/<when it was published>/`, then writes the new dump — use that when keeping a previous latest (e.g. v1.2) before a major bump. When latest is at least 1 day old and `--mode` is omitted, the CLI asks.
+Uploads spec + `pg_dump` of the local table to S3. Default `--mode override` overwrites `spec.json`, `data.dump`, and `data.manifest.json`. `--mode snapshot` copies the current dump+manifest to `snapshots/<when it was published>/` first — use that when keeping a previous version (e.g. v1.2) before a major bump. When the current dump is at least 1 day old and `--mode` is omitted, the CLI asks.
 
 `--spec-only` uploads the spec without a dump (new recipe before load, or metadata edits: `provider`, `documentation`, `consumedBy`). Column/geometry changes need load + a full publish.
 

@@ -1,15 +1,16 @@
 import { s3ObjectExists } from './dataSchemaS3.server'
-import {
-  dataSchemaLatestDumpKey,
-  dataSchemaObjectDumpKey,
-  isDataSchemaSha256Hex,
-} from './dataSchemaS3Keys'
+import { dataSchemaDumpReadKeys } from './dataSchemaS3Keys'
 
-/** Prefer the content-addressed dump; fall back to latest/table.dump for publishes from before objects/. */
-export async function resolveLatestDataSchemaDumpKey(table: string, sha256: string) {
-  if (isDataSchemaSha256Hex(sha256)) {
-    const objectKey = dataSchemaObjectDumpKey(table, sha256)
-    if (await s3ObjectExists(objectKey)) return objectKey
+/** Current data.dump, then leftover objects/ or latest/table.dump / snapshot table.dump. */
+export async function resolveDataSchemaDumpKey(
+  table: string,
+  sha256: string,
+  snapshotId?: string | null,
+) {
+  const keys = dataSchemaDumpReadKeys(table, sha256, snapshotId)
+  for (const key of keys) {
+    if (await s3ObjectExists(key)) return key
   }
-  return dataSchemaLatestDumpKey(table)
+  const where = snapshotId ? ` snapshot ${snapshotId}` : ''
+  throw new Error(`No dump object for data.${table}${where} (tried ${keys.join(', ')})`)
 }

@@ -1,31 +1,52 @@
-# data-schema/
+# Reference data in Postgres
 
-Gitignored local mirror of S3 specs, plus the source geojson/gpkg used by load (local dev computer only). Published dumps live only on S3 under the same `data-schema/` prefix — this folder never holds dumps. Do not commit table folders.
+Processing SQL sometimes needs datasets that are not OpenStreetMap — a city’s extra geometries, an official layer, a one-off extract. Those tables live in Postgres as `data.<table>` on each environment (local, staging, production).
 
-## Docs
+This is **not** how layers get onto the map. Map GeoJSON and tiles are static datasets. Use this when `processing/` should read from Postgres.
 
-- **Procedure** (new table, existing table, spec fields, Import): skill [`/add-db-data-table`](../.cursor/skills/add-db-data-table/SKILL.md)
-- **CLI** (from `app/`): `bun run data-schema` for the overview, then `--help` on each script (`data-schema-verify`, `data-schema-pull`, `data-schema-load`, `data-schema-publish`)
+Commands below run from `app/` (`bun run data-schema` lists them; each script has `--help`). How to write the spec is in the [`add-db-data-table` skill](../.cursor/skills/add-db-data-table/SKILL.md) — this page is the overview.
+
+## New table
+
+On your local machine:
+
+1. Write `data-schema/<table>/spec.json` (see the skill).
+2. `bun run data-schema-load` — spec + GeoJSON/GPKG → local `data.<table>`
+3. `bun run data-schema-publish` — spec + `pg_dump` → S3
+4. Open `/admin/data-schema` and **Import** to restore the dump (that is also how you test the round-trip locally)
+
+## Existing table
+
+- **Staging / production:** `/admin/data-schema` → **Import** (restores the dump from S3). If processing SQL reads this table for map layers, run processing afterwards.
+- **Local machine:** `bun run data-schema-pull` for specs from S3; **Import** for dumps. `bun run seed` pulls specs (and ignores missing S3) but does not restore dumps.
+
+To change the data: pull the spec, load the new source file, publish, then Import on each environment.
+
+Admin: [local](http://127.0.0.1:5173/admin/data-schema) · [staging](https://staging.tilda-geo.de/admin/data-schema) · [production](https://tilda-geo.de/admin/data-schema)
 
 ## This folder
+
+Gitignored local mirror of specs, plus the source GeoJSON/GPKG used by load. Dumps never live here — they are only on S3. Do not commit table folders.
 
 ```
 data-schema/
   <table>/
-    spec.json              # pulled from S3 sources/spec.json (updatedAt stamped on publish)
-    <table>.geojson|.gpkg  # local load input (basename from spec.source.file; not on S3)
+    spec.json              # pulled from S3
+    <table>.geojson|.gpkg  # local load input (not on S3)
 ```
 
-Everything except this README and `.gitignore` is gitignored. Specs are pulled from S3; source files are not.
+Everything except this README and `.gitignore` is gitignored.
 
-## S3 layout (env-agnostic)
+## What is on S3
 
-| Path                                        | Role                                |
-| ------------------------------------------- | ----------------------------------- |
-| `data-schema/<table>/sources/spec.json`     | Stage-1 recipe                      |
-| `data-schema/<table>/objects/<sha256>.dump` | Immutable dump (written first)      |
-| `data-schema/<table>/latest/manifest.json`  | Pointer for latest (written second) |
-| `data-schema/<table>/latest/table.dump`     | Convenience copy of current dump    |
-| `data-schema/<table>/snapshots/<UTC>/`      | Archived previous latest versions   |
+Publish overwrites three current files per table. Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current dump and manifest into `snapshots/<UTC>/` first, then overwrites the current files.
 
-Older `sources/<file>` objects may still exist from earlier uploads; they are unused.
+```
+data-schema/<table>/spec.json
+data-schema/<table>/data.dump
+data-schema/<table>/data.manifest.json
+data-schema/<table>/snapshots/<UTC>/data.dump
+data-schema/<table>/snapshots/<UTC>/data.manifest.json
+```
+
+The same prefix is used in every environment. Older `sources/`, `latest/`, and `objects/` keys may still exist until a table is published again; reads fall back to them.

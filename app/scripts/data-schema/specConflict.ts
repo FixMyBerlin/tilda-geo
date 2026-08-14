@@ -1,14 +1,8 @@
+import { isDeepStrictEqual } from 'node:util'
 import * as p from '@clack/prompts'
-import { formatDistanceStrict, isValid, parseISO } from 'date-fns'
 import type { DataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 
 export type SpecOverwriteDirection = 'pull' | 'publish'
-
-function updatedAtMs(updatedAt: string | undefined) {
-  if (!updatedAt) return 0
-  const date = parseISO(updatedAt)
-  return isValid(date) ? date.getTime() : 0
-}
 
 export function decideSpecOverwrite(input: {
   direction: SpecOverwriteDirection
@@ -18,51 +12,16 @@ export function decideSpecOverwrite(input: {
   if (!input.existing) {
     return { write: true, prompt: false, reason: 'missing' } as const
   }
-  const existingMs = updatedAtMs(input.existing.updatedAt)
-  const incomingMs = updatedAtMs(input.incoming.updatedAt)
-  if (incomingMs > existingMs) {
-    return { write: true, prompt: false, reason: 'incoming-newer' } as const
+  if (isDeepStrictEqual(input.existing, input.incoming)) {
+    return { write: false, prompt: false, reason: 'same' } as const
   }
-  if (incomingMs < existingMs) {
-    return { write: true, prompt: true, reason: 'conflict' } as const
-  }
-  if (input.direction === 'publish') {
-    return { write: true, prompt: false, reason: 'same' } as const
-  }
-  return { write: false, prompt: false, reason: 'same' } as const
+  return { write: true, prompt: true, reason: 'conflict' } as const
 }
 
-export function formatSpecUpdatedAt(updatedAt: string | undefined, now = new Date()) {
-  if (!updatedAt) return 'no updatedAt (never published)'
-  const date = parseISO(updatedAt)
-  if (!isValid(date)) return updatedAt
-  return `${formatDistanceStrict(date, now, { addSuffix: true })} (${updatedAt})`
-}
-
-export function describeSpecConflict(input: {
-  table: string
-  direction: SpecOverwriteDirection
-  existing: DataSchemaSpec
-  incoming: DataSchemaSpec
-  now?: Date
-}) {
-  const now = input.now ?? new Date()
-  const existingName = input.direction === 'pull' ? 'local spec.json' : 'S3 spec'
-  const incomingName = input.direction === 'pull' ? 'S3 spec' : 'local spec.json'
-  const headline =
-    input.direction === 'pull'
-      ? `Local spec.json for ${input.table} has a newer updatedAt than S3.`
-      : `S3 spec for ${input.table} has a newer updatedAt than local spec.json.`
-  const consequence =
-    input.direction === 'pull'
-      ? 'Pulling overwrites local spec.json with S3.'
-      : 'Publishing overwrites the S3 spec with local spec.json (and stamps a new updatedAt).'
-  return [
-    headline,
-    `  ${existingName}: ${formatSpecUpdatedAt(input.existing.updatedAt, now)}`,
-    `  ${incomingName}: ${formatSpecUpdatedAt(input.incoming.updatedAt, now)}`,
-    consequence,
-  ].join('\n')
+export function describeSpecConflict(input: { table: string; direction: SpecOverwriteDirection }) {
+  return input.direction === 'pull'
+    ? `Local spec.json for ${input.table} differs from S3. Pulling overwrites local spec.json with S3.`
+    : `S3 spec for ${input.table} differs from local spec.json. Publishing overwrites the S3 spec with local spec.json.`
 }
 
 export async function resolveSpecOverwrite(input: {
@@ -71,7 +30,6 @@ export async function resolveSpecOverwrite(input: {
   existing: DataSchemaSpec | null
   incoming: DataSchemaSpec
   interactive?: boolean
-  now?: Date
 }) {
   const interactive = input.interactive ?? Boolean(process.stdin.isTTY)
   const decision = decideSpecOverwrite(input)
@@ -79,13 +37,7 @@ export async function resolveSpecOverwrite(input: {
     return { write: decision.write, reason: decision.reason }
   }
 
-  const message = describeSpecConflict({
-    table: input.table,
-    direction: input.direction,
-    existing: input.existing!,
-    incoming: input.incoming,
-    now: input.now,
-  })
+  const message = describeSpecConflict({ table: input.table, direction: input.direction })
 
   if (!interactive) {
     if (input.direction === 'publish') {
@@ -123,7 +75,7 @@ export async function resolveSpecOverwrite(input: {
             {
               value: 'overwrite',
               label: 'Overwrite S3 with local',
-              hint: 'replaces sources/spec.json and stamps a new updatedAt',
+              hint: 'replaces spec.json',
             },
           ],
   })

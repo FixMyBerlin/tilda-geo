@@ -8,19 +8,15 @@ import { copyS3Object, putS3File, putS3Json, s3ObjectExists } from './dataSchema
 import { assertDataSchemaTableName } from './dataSchemaS3Keys'
 import { getLatestDataSchemaManifest } from './getLatestDataSchemaManifest'
 import { archiveLatestAsSnapshot, publishLatestDumpAndManifest } from './publishDataSchemaArtifacts'
-import { resolveLatestDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
+import { resolveDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { sha256File } from './sha256File'
 
 export async function publishDataSchemaTableFromEnvironment({
   table,
   snapshot = false,
-  userId,
-  publishedBy,
 }: {
   table: string
   snapshot?: boolean
-  userId?: string | null
-  publishedBy?: string
 }) {
   assertDataSchemaTableName(table)
 
@@ -38,12 +34,8 @@ export async function publishDataSchemaTableFromEnvironment({
       throw new Error(`Dump file missing or empty: ${dumpPath}`)
     }
 
-    const bytes = statSync(dumpPath).size
     const sha256 = await sha256File(dumpPath)
     const publishedAt = new Date().toISOString()
-    const publishedFrom =
-      process.env.VITE_APP_ENV?.trim() || process.env.ENVIRONMENT?.trim() || 'unknown'
-    const by = publishedBy?.trim() || userId?.trim() || 'unknown'
 
     const previous = await getLatestDataSchemaManifest(table)
     const puts = {
@@ -54,22 +46,15 @@ export async function publishDataSchemaTableFromEnvironment({
     const latestManifest = buildDataSchemaManifest({
       table,
       publishedAt,
-      snapshotId: null,
-      bytes,
       sha256,
       rowCount,
-      publishedBy: by,
-      publishedFrom,
-      sourceFile: previous?.provenance.sourceFile,
-      sourceSha256: previous?.provenance.sourceSha256,
-      specSha256: previous?.provenance.specSha256,
     })
 
     const written: string[] = []
     let snapshotId: string | null = null
 
     if (snapshot && previous) {
-      const sourceDumpKey = await resolveLatestDataSchemaDumpKey(table, previous.file.sha256)
+      const sourceDumpKey = await resolveDataSchemaDumpKey(table, previous.sha256)
       const snap = await archiveLatestAsSnapshot(
         { table, previous, sourceDumpKey },
         {
@@ -92,7 +77,7 @@ export async function publishDataSchemaTableFromEnvironment({
       ok: true as const,
       table,
       rowCount,
-      bytes,
+      bytes: statSync(dumpPath).size,
       sha256,
       snapshotId,
       keys: written,

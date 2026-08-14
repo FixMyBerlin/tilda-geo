@@ -1,7 +1,7 @@
 import { assertManifestMatchesTable } from './buildDataSchemaManifest'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
-import { getS3ObjectJsonIfExists } from './dataSchemaS3.server'
-import { dataSchemaLatestManifestKey } from './dataSchemaS3Keys'
+import { getS3ObjectJsonFirst } from './dataSchemaS3.server'
+import { dataSchemaManifestReadKeys } from './dataSchemaS3Keys'
 
 export function parseLatestDataSchemaManifest(raw: unknown, table: string) {
   const parsed = dataSchemaManifestSchema.safeParse(raw)
@@ -14,7 +14,7 @@ export function parseLatestDataSchemaManifest(raw: unknown, table: string) {
 }
 
 export async function getLatestDataSchemaManifest(table: string) {
-  const raw = await getS3ObjectJsonIfExists(dataSchemaLatestManifestKey(table))
-  if (!raw) return null
-  return parseLatestDataSchemaManifest(raw, table)
+  const hit = await getS3ObjectJsonFirst(dataSchemaManifestReadKeys(table))
+  if (!hit) return null
+  return parseLatestDataSchemaManifest(hit.json, table)
 }

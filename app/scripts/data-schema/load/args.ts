@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util'
 import { z } from 'zod'
-import { formatDataSchemaBigPictureHelp } from '../help'
+import { formatDataSchemaDocsHelp } from '../help'
 import { tableNameSchema } from '../tableName'
 
 export function parseLoadArgs(argv: string[]) {
@@ -47,6 +47,6 @@ Options:
 
 Requires: GDAL 3.8+ (ogr2ogr, ogrinfo — brew install gdal), Docker (psql for CREATE SCHEMA / indexes), ENVIRONMENT=development.
 
-${formatDataSchemaBigPictureHelp()}
+${formatDataSchemaDocsHelp('new-table')}
 `)
 }

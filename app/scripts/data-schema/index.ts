@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { formatDataSchemaBigPictureHelp } from './help'
+import { formatDataSchemaDocsHelp } from './help'
 
 export function formatRootHelp() {
   return `data-schema
@@ -10,7 +10,7 @@ Commands (from app/):
   data-schema-verify   Validate local spec.json (no DB, no S3)
   data-schema-pull     Download S3 specs into local data-schema/
   data-schema-load     Local dev computer only: source file → local data.<table> (ogr2ogr)
-  data-schema-publish  Local dev computer only: spec.json + pg_dump → S3 latest/
+  data-schema-publish  Local dev computer only: spec.json + pg_dump → S3
 
 Usage:
   bun run data-schema-verify [-- --table <name>]
@@ -23,7 +23,7 @@ Usage:
   bun run data-schema-load -- --help
   bun run data-schema-publish -- --help
 
-${formatDataSchemaBigPictureHelp()}
+${formatDataSchemaDocsHelp('new-table')}
 `
 }
 

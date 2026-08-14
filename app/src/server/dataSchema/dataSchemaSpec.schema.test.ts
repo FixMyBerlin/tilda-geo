@@ -64,11 +64,11 @@ describe('parseDataSchemaSpec', () => {
     expect(() => parseDataSchemaSpec(validSpec, 'other_table')).toThrow(/Spec table mismatch/)
   })
 
-  it('accepts updatedAt when present', () => {
+  it('strips leftover updatedAt from older specs', () => {
     const spec = parseDataSchemaSpec(
       { ...validSpec, updatedAt: '2026-08-13T13:00:00.000Z' },
       'euvm_cutouts_point',
     )
-    expect(spec.updatedAt).toBe('2026-08-13T13:00:00.000Z')
+    expect(spec).not.toHaveProperty('updatedAt')
   })
 })

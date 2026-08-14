@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { assertManifestMatchesTable, buildDataSchemaManifest } from './buildDataSchemaManifest'
+import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
+
+const sha256 = 'a'.repeat(64)
 
 describe('assertManifestMatchesTable', () => {
   it('accepts matching table names', () => {
@@ -16,35 +19,37 @@ describe('assertManifestMatchesTable', () => {
 })
 
 describe('buildDataSchemaManifest', () => {
-  it('builds a valid manifest and rejects table mismatch via parse', () => {
+  it('builds a slim pointer manifest', () => {
     const manifest = buildDataSchemaManifest({
       table: 'euvm_cutouts_point',
       publishedAt: '2026-08-12T10:42:00Z',
-      snapshotId: null,
-      bytes: 100,
-      sha256: 'abc',
+      sha256,
       rowCount: 10,
-      publishedBy: 'tester',
-      publishedFrom: 'development',
     })
-    expect(manifest.table).toBe('euvm_cutouts_point')
+    expect(manifest).toEqual({
+      table: 'euvm_cutouts_point',
+      sha256,
+      publishedAt: '2026-08-12T10:42:00Z',
+      rowCount: 10,
+      snapshotId: null,
+    })
     expect(() => assertManifestMatchesTable(manifest, 'wrong_table')).toThrow()
   })
+})
 
-  it('keeps optional spec provenance when provided', () => {
-    const manifest = buildDataSchemaManifest({
+describe('dataSchemaManifestSchema', () => {
+  it('accepts a legacy nested file.sha256 manifest', () => {
+    const parsed = dataSchemaManifestSchema.parse({
+      manifestVersion: 1,
       table: 'euvm_cutouts_point',
       publishedAt: '2026-08-12T10:42:00Z',
       snapshotId: null,
-      bytes: 100,
-      sha256: 'abc',
+      file: { name: 'table.dump', bytes: 100, sha256 },
       rowCount: 10,
-      publishedBy: 'tester',
-      publishedFrom: 'staging',
-      sourceFile: 'euvm_cutouts_point.geojson',
-      specSha256: 'd'.repeat(64),
+      provenance: { publishedBy: 'tester', publishedFrom: 'development' },
     })
-    expect(manifest.provenance.sourceFile).toBe('euvm_cutouts_point.geojson')
-    expect(manifest.provenance.specSha256).toBe('d'.repeat(64))
+    expect(parsed.sha256).toBe(sha256)
+    expect(parsed).not.toHaveProperty('file')
+    expect(parsed).not.toHaveProperty('provenance')
   })
 })

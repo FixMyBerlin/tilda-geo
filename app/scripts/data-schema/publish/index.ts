@@ -5,27 +5,23 @@ import { basename, dirname, join } from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { buildDataSchemaManifest } from '@/server/dataSchema/buildDataSchemaManifest'
+import { dataSchemaLocalSpecPath, loadLocalSpec } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
-  dataSchemaLocalSourcePath,
-  dataSchemaLocalSpecPath,
-  loadLocalSpec,
-} from '@/server/dataSchema/dataSchemaLocalPaths'
-import {
+  getS3ObjectJsonFirst,
   copyS3Object,
   dataSchemaS3Bucket,
-  getS3ObjectJsonIfExists,
   putS3File,
   putS3Json,
   s3ObjectExists,
 } from '@/server/dataSchema/dataSchemaS3.server'
-import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
+import { dataSchemaSpecReadKeys } from '@/server/dataSchema/dataSchemaS3Keys'
 import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { getLatestDataSchemaManifest } from '@/server/dataSchema/getLatestDataSchemaManifest'
 import {
   archiveLatestAsSnapshot,
   publishLatestDumpAndManifest,
 } from '@/server/dataSchema/publishDataSchemaArtifacts'
-import { resolveLatestDataSchemaDumpKey } from '@/server/dataSchema/resolveLatestDataSchemaDumpKey'
+import { resolveDataSchemaDumpKey } from '@/server/dataSchema/resolveLatestDataSchemaDumpKey'
 import { sha256File } from '@/server/dataSchema/sha256File'
 import {
   POSTGRES_CLI_IMAGE,
@@ -58,15 +54,19 @@ async function runPublish(argv: string[]) {
 
   p.intro('data-schema-publish')
 
-  const remoteJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(options.table))
-  const remoteSpec = remoteJson ? parseDataSchemaSpec(remoteJson, options.table) : null
+  const specHit = await getS3ObjectJsonFirst(dataSchemaSpecReadKeys(options.table))
+  const remoteSpec = specHit ? parseDataSchemaSpec(specHit.json, options.table) : null
   const specWrite = await resolveSpecOverwrite({
     table: options.table,
     direction: 'publish',
     existing: remoteSpec,
     incoming: spec,
   })
-  if (!specWrite.write) {
+  if (specWrite.write) {
+    const localSpecPath = dataSchemaLocalSpecPath(options.table)
+    await Bun.write(localSpecPath, JSON.stringify(spec, null, 2))
+    await uploadSpecJson(options.table, localSpecPath)
+  } else if (specWrite.reason !== 'same') {
     if (options.specOnly) {
       p.outro('Kept S3 spec.')
       return
@@ -74,24 +74,12 @@ async function runPublish(argv: string[]) {
     throw new Error('Kept S3 spec; dump not published. Resolve the spec conflict and re-run.')
   }
 
-  const stamped = { ...spec, updatedAt: new Date().toISOString() }
-  const localSpecPath = dataSchemaLocalSpecPath(options.table)
-  await Bun.write(localSpecPath, JSON.stringify(stamped, null, 2))
-  await uploadSpecJson(options.table, localSpecPath)
-
   if (options.specOnly) {
-    p.outro('Done (spec only; dump not published).')
+    p.outro(specWrite.write ? 'Done (spec only; dump not published).' : 'S3 spec already matches.')
     return
   }
 
   assertDevelopmentEnvironment()
-
-  const specSha256 = await sha256File(localSpecPath)
-  const sourceFile = spec.source.file
-  const localSource = dataSchemaLocalSourcePath(options.table, sourceFile)
-  const sourceSha256 = (await Bun.file(localSource).exists())
-    ? await sha256File(localSource)
-    : undefined
 
   const rowCount = await getRowCount(options.table)
   p.log.info(`Row count: ${rowCount.toLocaleString()}`)
@@ -137,15 +125,8 @@ async function runPublish(argv: string[]) {
     const latestManifest = buildDataSchemaManifest({
       table: options.table,
       publishedAt,
-      snapshotId: null,
-      bytes,
       sha256,
       rowCount,
-      publishedBy: 'unknown',
-      publishedFrom: 'development',
-      sourceFile,
-      sourceSha256,
-      specSha256,
     })
 
     const puts = {
@@ -157,13 +138,10 @@ async function runPublish(argv: string[]) {
 
     if (writeSnapshot) {
       if (!previous) {
-        p.log.warn('No previous latest/ to archive; publishing new dump as latest/ only.')
+        p.log.warn('No previous dump to archive; publishing as current only.')
       } else {
-        spinner.start(`Archiving previous latest (${previous.publishedAt})…`)
-        const sourceDumpKey = await resolveLatestDataSchemaDumpKey(
-          options.table,
-          previous.file.sha256,
-        )
+        spinner.start(`Archiving previous dump (${previous.publishedAt})…`)
+        const sourceDumpKey = await resolveDataSchemaDumpKey(options.table, previous.sha256)
         const snap = await archiveLatestAsSnapshot(
           { table: options.table, previous, sourceDumpKey },
           {
@@ -173,18 +151,18 @@ async function runPublish(argv: string[]) {
           },
         )
         spinner.stop(
-          snap.skipped ? `Snapshot ${snap.snapshotId} already exists` : 'Archived previous latest.',
+          snap.skipped ? `Snapshot ${snap.snapshotId} already exists` : 'Archived previous dump.',
         )
         written.push(...snap.keys.map((key) => `s3://${bucket}/${key}`))
       }
     }
 
-    spinner.start(`Uploading latest dump (${bytes.toLocaleString()} bytes)…`)
+    spinner.start(`Uploading data.dump (${bytes.toLocaleString()} bytes)…`)
     const latest = await publishLatestDumpAndManifest(
       { table: options.table, dumpPath, manifest: latestManifest },
       puts,
     )
-    spinner.stop('Uploaded latest.')
+    spinner.stop('Uploaded data.dump.')
     if (latest.warning) p.log.warn(latest.warning)
 
     written.push(...latest.keys.map((key) => `s3://${bucket}/${key}`))

@@ -1,24 +1,34 @@
 import { z } from 'zod'
 import { dataSchemaIdentifierSchema } from './dataSchemaSpec.schema'
 
-export const dataSchemaManifestSchema = z.object({
-  manifestVersion: z.literal(1),
+const sha256Schema = z.string().regex(/^[a-f0-9]{64}$/, 'Expected 64 lowercase hex chars')
+
+const dataSchemaManifestFields = z.object({
   table: dataSchemaIdentifierSchema,
+  sha256: sha256Schema,
   publishedAt: z.string().min(1),
-  snapshotId: z.string().min(1).nullable(),
-  file: z.object({
-    name: z.literal('table.dump'),
-    bytes: z.number().int().nonnegative(),
-    sha256: z.string().min(1),
-  }),
   rowCount: z.number().int().nonnegative(),
-  provenance: z.object({
-    publishedBy: z.string().min(1),
-    publishedFrom: z.string().min(1),
-    sourceFile: z.string().min(1).optional(),
-    sourceSha256: z.string().min(1).optional(),
-    specSha256: z.string().min(1).optional(),
-  }),
+  snapshotId: z.string().min(1).nullable().optional(),
 })
 
-export type DataSchemaManifest = z.infer<typeof dataSchemaManifestSchema>
+/** Older publishes nested sha256 under file and added provenance / bytes / manifestVersion. */
+function coerceLegacyManifest(raw: unknown) {
+  if (!raw || typeof raw !== 'object') return raw
+  const value = raw as Record<string, unknown>
+  const file = value.file
+  const nestedSha =
+    file && typeof file === 'object' && file !== null && 'sha256' in file
+      ? (file as { sha256: unknown }).sha256
+      : undefined
+  return {
+    table: value.table,
+    sha256: typeof value.sha256 === 'string' ? value.sha256 : nestedSha,
+    publishedAt: value.publishedAt,
+    rowCount: value.rowCount,
+    snapshotId: value.snapshotId ?? null,
+  }
+}
+
+export const dataSchemaManifestSchema = z.preprocess(coerceLegacyManifest, dataSchemaManifestFields)
+
+export type DataSchemaManifest = z.infer<typeof dataSchemaManifestFields>

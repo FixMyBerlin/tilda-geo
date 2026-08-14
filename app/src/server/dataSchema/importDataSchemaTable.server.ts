@@ -15,16 +15,11 @@ import {
   withDataSchemaImportLock,
 } from './dataSchemaDb.server'
 import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
-import { downloadS3ObjectToFile, getS3ObjectJson } from './dataSchemaS3.server'
-import {
-  assertDataSchemaTableName,
-  dataSchemaLatestManifestKey,
-  dataSchemaSnapshotDumpKey,
-  dataSchemaSnapshotManifestKey,
-} from './dataSchemaS3Keys'
+import { downloadS3ObjectToFile, getS3ObjectJsonFirst } from './dataSchemaS3.server'
+import { assertDataSchemaTableName, dataSchemaManifestReadKeys } from './dataSchemaS3Keys'
 import { assertDumpContainsOnlyTable } from './parsePgRestoreToc'
 import type { AsideRenameMapping } from './pgIdentifier'
-import { resolveLatestDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
+import { resolveDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { type AsideHolder, restoreVerifyDataSchemaTable } from './restoreVerifyDataSchemaTable'
 import { sha256File } from './sha256File'
 
@@ -71,17 +66,18 @@ export async function importDataSchemaTable({
 }) {
   assertDataSchemaTableName(table)
 
-  const manifestKey = snapshotId
-    ? dataSchemaSnapshotManifestKey(table, snapshotId)
-    : dataSchemaLatestManifestKey(table)
-
-  const rawManifest = await getS3ObjectJson(manifestKey)
-  const manifest = dataSchemaManifestSchema.parse(rawManifest)
+  const manifestHit = await getS3ObjectJsonFirst(dataSchemaManifestReadKeys(table, snapshotId))
+  if (!manifestHit) {
+    throw new Error(
+      snapshotId
+        ? `No snapshot manifest for data.${table} (${snapshotId})`
+        : `No data.manifest.json for data.${table}`,
+    )
+  }
+  const manifest = dataSchemaManifestSchema.parse(manifestHit.json)
   assertManifestMatchesTable(manifest, table)
 
-  const dumpKey = snapshotId
-    ? dataSchemaSnapshotDumpKey(table, snapshotId)
-    : await resolveLatestDataSchemaDumpKey(table, manifest.file.sha256)
+  const dumpKey = await resolveDataSchemaDumpKey(table, manifest.sha256, snapshotId)
 
   const startedAt = Date.now()
   const history = await db.dataSchemaImport.create({
@@ -89,7 +85,7 @@ export async function importDataSchemaTable({
       tableName: table,
       publishedAt: new Date(manifest.publishedAt),
       snapshotId: snapshotId ?? null,
-      sha256: manifest.file.sha256,
+      sha256: manifest.sha256,
       status: 'PENDING' satisfies DataSchemaImportStatus,
       createdById: userId ?? null,
       updatedById: userId ?? null,
@@ -120,9 +116,9 @@ export async function importDataSchemaTable({
 
         await downloadS3ObjectToFile(dumpKey, dumpPath)
         const actualSha = await sha256File(dumpPath)
-        if (actualSha !== manifest.file.sha256) {
+        if (actualSha !== manifest.sha256) {
           throw new Error(
-            `SHA-256 mismatch for ${dumpKey}: expected ${manifest.file.sha256}, got ${actualSha}`,
+            `SHA-256 mismatch for ${dumpKey}: expected ${manifest.sha256}, got ${actualSha}`,
           )
         }
 

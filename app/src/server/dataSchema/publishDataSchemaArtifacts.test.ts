@@ -9,16 +9,13 @@ function sampleManifest(snapshotId: string | null = null) {
     table: 'euvm_cutouts_point',
     publishedAt: '2026-08-13T08:00:00Z',
     snapshotId,
-    bytes: 12,
     sha256,
     rowCount: 3,
-    publishedBy: 'tester',
-    publishedFrom: 'development',
   })
 }
 
 describe('publishLatestDumpAndManifest', () => {
-  it('writes the object dump, then latest/manifest.json, then latest/table.dump', async () => {
+  it('replaces data.dump, then data.manifest.json', async () => {
     const calls: string[] = []
     const result = await publishLatestDumpAndManifest(
       { table: 'euvm_cutouts_point', dumpPath: '/tmp/table.dump', manifest: sampleManifest() },
@@ -33,67 +30,41 @@ describe('publishLatestDumpAndManifest', () => {
     )
 
     expect(calls).toEqual([
-      `file:data-schema/euvm_cutouts_point/objects/${sha256}.dump`,
-      'json:data-schema/euvm_cutouts_point/latest/manifest.json',
-      'file:data-schema/euvm_cutouts_point/latest/table.dump',
+      'file:data-schema/euvm_cutouts_point/data.dump',
+      'json:data-schema/euvm_cutouts_point/data.manifest.json',
     ])
-    expect(result.warning).toBeNull()
-    expect(result.keys).toContain(`data-schema/euvm_cutouts_point/objects/${sha256}.dump`)
-  })
-
-  it('keeps the new manifest when the latest/table.dump copy fails', async () => {
-    const calls: string[] = []
-    const result = await publishLatestDumpAndManifest(
-      { table: 'euvm_cutouts_point', dumpPath: '/tmp/table.dump', manifest: sampleManifest() },
-      {
-        putFile: async (key) => {
-          calls.push(`file:${key}`)
-          if (key.endsWith('/latest/table.dump')) throw new Error('S3 copy failed')
-        },
-        putJson: async (key) => {
-          calls.push(`json:${key}`)
-        },
-      },
-    )
-
-    expect(calls).toEqual([
-      `file:data-schema/euvm_cutouts_point/objects/${sha256}.dump`,
-      'json:data-schema/euvm_cutouts_point/latest/manifest.json',
-      'file:data-schema/euvm_cutouts_point/latest/table.dump',
-    ])
-    expect(result.warning).toMatch(/latest\/table\.dump/)
     expect(result.keys).toEqual([
-      `data-schema/euvm_cutouts_point/objects/${sha256}.dump`,
-      'data-schema/euvm_cutouts_point/latest/manifest.json',
+      'data-schema/euvm_cutouts_point/data.dump',
+      'data-schema/euvm_cutouts_point/data.manifest.json',
     ])
   })
 
-  it('does not write latest/manifest.json if the object dump upload fails', async () => {
+  it('does not write the manifest if the dump upload fails', async () => {
     const putJson = vi.fn()
     await expect(
       publishLatestDumpAndManifest(
         { table: 'euvm_cutouts_point', dumpPath: '/tmp/table.dump', manifest: sampleManifest() },
         {
           putFile: async () => {
-            throw new Error('object dump failed')
+            throw new Error('dump failed')
           },
           putJson,
         },
       ),
-    ).rejects.toThrow('object dump failed')
+    ).rejects.toThrow('dump failed')
     expect(putJson).not.toHaveBeenCalled()
   })
 })
 
 describe('archiveLatestAsSnapshot', () => {
-  it('copies the previous latest dump into snapshots/ using publishedAt as the id', async () => {
+  it('copies the current dump into snapshots/<UTC>/data.dump', async () => {
     const previous = sampleManifest()
     const calls: string[] = []
     const result = await archiveLatestAsSnapshot(
       {
         table: 'euvm_cutouts_point',
         previous,
-        sourceDumpKey: `data-schema/euvm_cutouts_point/objects/${sha256}.dump`,
+        sourceDumpKey: 'data-schema/euvm_cutouts_point/data.dump',
       },
       {
         copyObject: async (fromKey, toKey) => {
@@ -108,12 +79,32 @@ describe('archiveLatestAsSnapshot', () => {
     expect(result.snapshotId).toBe('20260813T0800')
     expect(result.skipped).toBe(false)
     expect(calls).toEqual([
-      `copy:data-schema/euvm_cutouts_point/objects/${sha256}.dump->data-schema/euvm_cutouts_point/snapshots/20260813T0800/table.dump`,
-      'json:data-schema/euvm_cutouts_point/snapshots/20260813T0800/manifest.json',
+      'copy:data-schema/euvm_cutouts_point/data.dump->data-schema/euvm_cutouts_point/snapshots/20260813T0800/data.dump',
+      'json:data-schema/euvm_cutouts_point/snapshots/20260813T0800/data.manifest.json',
     ])
   })
 
   it('skips when that snapshot already exists', async () => {
+    const putJson = vi.fn()
+    const copyObject = vi.fn()
+    const result = await archiveLatestAsSnapshot(
+      {
+        table: 'euvm_cutouts_point',
+        previous: sampleManifest(),
+        sourceDumpKey: 'data-schema/euvm_cutouts_point/data.dump',
+      },
+      {
+        copyObject,
+        putJson,
+        objectExists: async () => true,
+      },
+    )
+    expect(result.skipped).toBe(true)
+    expect(copyObject).not.toHaveBeenCalled()
+    expect(putJson).not.toHaveBeenCalled()
+  })
+
+  it('skips when only a leftover snapshot manifest.json exists', async () => {
     const putJson = vi.fn()
     const copyObject = vi.fn()
     const result = await archiveLatestAsSnapshot(
@@ -125,7 +116,7 @@ describe('archiveLatestAsSnapshot', () => {
       {
         copyObject,
         putJson,
-        objectExists: async () => true,
+        objectExists: async (key) => key.endsWith('/snapshots/20260813T0800/manifest.json'),
       },
     )
     expect(result.skipped).toBe(true)

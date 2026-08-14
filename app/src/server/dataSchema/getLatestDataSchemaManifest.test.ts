@@ -5,12 +5,8 @@ import { parseLatestDataSchemaManifest } from './getLatestDataSchemaManifest'
 const validManifest = buildDataSchemaManifest({
   table: 'euvm_cutouts_point',
   publishedAt: '2026-08-13T08:00:00Z',
-  snapshotId: null,
-  bytes: 12,
   sha256: 'a'.repeat(64),
   rowCount: 3,
-  publishedBy: 'tester',
-  publishedFrom: 'development',
 })
 
 describe('parseLatestDataSchemaManifest', () => {

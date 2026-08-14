@@ -12,11 +12,8 @@ describe('data-schema help', () => {
     expect(help).not.toContain('local load')
   })
 
-  it('includes the shared big-picture section', () => {
+  it('points at the README for general setup', () => {
     const help = formatRootHelp()
-    expect(help).toContain('add-db-data-table')
-    expect(help).toContain('/admin/data-schema')
-    expect(help).toContain('Big picture — new table')
-    expect(help).toContain('Big picture — existing table')
+    expect(help).toContain('General setup: Read ../data-schema/README.md#new-table')
   })
 })

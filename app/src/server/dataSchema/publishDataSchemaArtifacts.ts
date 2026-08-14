@@ -1,8 +1,8 @@
 import type { DataSchemaManifest } from './dataSchemaManifest.schema'
 import {
-  dataSchemaLatestDumpKey,
-  dataSchemaLatestManifestKey,
-  dataSchemaObjectDumpKey,
+  dataSchemaDumpKey,
+  dataSchemaLegacySnapshotManifestKey,
+  dataSchemaManifestKey,
   dataSchemaSnapshotDumpKey,
   dataSchemaSnapshotId,
   dataSchemaSnapshotManifestKey,
@@ -19,18 +19,7 @@ export type DataSchemaArchivePuts = {
   objectExists: (key: string) => Promise<boolean>
 }
 
-function errorMessage(error: unknown) {
-  if (error instanceof Error) return error.message
-  return String(error)
-}
-
-/**
- * Publish latest: immutable object dump, then latest/manifest.json (the pointer),
- * then a convenience copy at latest/table.dump.
- *
- * Overwriting latest/table.dump before the manifest can leave a new dump with an old
- * sha256 so later imports fail until republish.
- */
+/** Replace data.dump, then data.manifest.json. */
 export async function publishLatestDumpAndManifest(
   {
     table,
@@ -43,28 +32,17 @@ export async function publishLatestDumpAndManifest(
   },
   puts: DataSchemaPublishPuts,
 ) {
-  const objectKey = dataSchemaObjectDumpKey(table, manifest.file.sha256)
-  const latestManifestKey = dataSchemaLatestManifestKey(table)
-  const latestDumpKey = dataSchemaLatestDumpKey(table)
+  const dumpKey = dataSchemaDumpKey(table)
+  const manifestKey = dataSchemaManifestKey(table)
 
-  await puts.putFile(objectKey, dumpPath)
-  await puts.putJson(latestManifestKey, manifest)
+  await puts.putFile(dumpKey, dumpPath)
+  await puts.putJson(manifestKey, manifest)
 
-  let warning: string | null = null
-  try {
-    await puts.putFile(latestDumpKey, dumpPath)
-  } catch (error) {
-    warning = `Latest-Manifest ist aktuell, aber ${latestDumpKey} konnte nicht überschrieben werden: ${errorMessage(error)}. Import nutzt ${objectKey}.`
-  }
-
-  return {
-    keys: warning ? [objectKey, latestManifestKey] : [objectKey, latestManifestKey, latestDumpKey],
-    warning,
-  }
+  return { keys: [dumpKey, manifestKey], warning: null as string | null }
 }
 
 /**
- * Keep the current latest dump importable after the next publish overwrites latest/.
+ * Copy the current dump aside before the next publish overwrites it.
  * Snapshot id is the previous publishedAt (UTC minute). No-op if that snapshot already exists.
  */
 export async function archiveLatestAsSnapshot(
@@ -87,7 +65,10 @@ export async function archiveLatestAsSnapshot(
   const snapDumpKey = dataSchemaSnapshotDumpKey(table, snapshotId)
   const snapManifestKey = dataSchemaSnapshotManifestKey(table, snapshotId)
 
-  if (await puts.objectExists(snapManifestKey)) {
+  if (
+    (await puts.objectExists(snapManifestKey)) ||
+    (await puts.objectExists(dataSchemaLegacySnapshotManifestKey(table, snapshotId)))
+  ) {
     return { keys: [snapManifestKey], snapshotId, skipped: true as const }
   }
 

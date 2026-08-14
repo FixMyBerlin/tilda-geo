@@ -18,7 +18,7 @@ export const Route = createFileRoute('/api/admin/data-schema/publish')({
     handlers: {
       POST: async ({ request }) => {
         try {
-          const admin = await requireAdmin(request.headers)
+          await requireAdmin(request.headers)
           // After auth only — unauthenticated clients must not hold idle connections open.
           extendBunRequestIdleTimeout(request, 0)
 
@@ -31,23 +31,9 @@ export const Route = createFileRoute('/api/admin/data-schema/publish')({
             )
           }
 
-          const userRecord = admin.user as {
-            email?: string | null
-            osmName?: string | null
-            firstName?: string | null
-            lastName?: string | null
-          }
-          const publishedBy =
-            userRecord.email?.trim() ||
-            userRecord.osmName?.trim() ||
-            [userRecord.firstName, userRecord.lastName].filter(Boolean).join(' ').trim() ||
-            admin.userId
-
           const result = await publishDataSchemaTableFromEnvironment({
             table: parsed.data.table,
             snapshot: parsed.data.snapshot ?? false,
-            userId: admin.userId,
-            publishedBy,
           })
           return Response.json(
             {
