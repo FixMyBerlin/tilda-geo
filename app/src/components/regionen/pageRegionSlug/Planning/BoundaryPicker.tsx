@@ -9,6 +9,7 @@ import {
   adminBoundariesQueryOptions,
   boundaryGeomQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { planningTextInputClass } from './planningPanelStyles'
 
 // Level 9 ist regional uneinheitlich: in Berlin Bezirk, in Brandenburg meist Ortsteil.
 const LEVEL_LABELS: Record<string, string> = {
@@ -106,7 +107,7 @@ export const BoundaryPicker = ({
   return (
     <Combobox as="div" value={currentBoundary} onChange={handleChange} by="id">
       <ComboboxInput
-        className="w-full rounded border border-gray-300 px-2 py-1 text-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        className={`w-full ${planningTextInputClass}`}
         displayValue={displayName}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setQuery('')}

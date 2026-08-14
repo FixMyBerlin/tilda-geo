@@ -2,7 +2,7 @@ import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import { type ReactNode, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-const TOOLTIP_WIDTH = 224 // = w-56, für das Clamping am rechten Fensterrand
+const TOOLTIP_WIDTH = 320 // = w-80, für das Clamping am rechten Fensterrand
 
 /**
  * Info-Icon mit Hover-/Fokus-Tooltip. Der Tooltip wird per Portal an `document.body` gehängt und
@@ -42,7 +42,7 @@ export const InfoTooltip = ({ children }: { children: ReactNode }) => {
           <div
             role="tooltip"
             style={{ top: position.top, left: position.left }}
-            className="pointer-events-none fixed z-50 w-56 rounded bg-gray-800 px-2 py-1.5 text-xs font-normal text-white shadow-lg"
+            className="pointer-events-none fixed z-50 w-80 rounded bg-gray-800 px-2 py-1.5 text-xs font-normal text-white shadow-lg"
           >
             {children}
           </div>,

@@ -49,19 +49,32 @@ const FactorRow = ({
   slider,
   muted,
   readOnly,
+  info,
+  nested,
 }: {
   label: string
   badge: React.ReactNode
   slider: React.ReactNode
   muted: boolean
   readOnly: boolean
+  info?: React.ReactNode
+  nested?: React.ReactNode
 }) => (
   <div className={readOnly ? 'py-0.5' : 'py-1'}>
     <div className="flex items-baseline justify-between gap-2">
-      <span className={twJoin('text-xs', muted ? 'text-gray-400' : 'text-gray-700')}>{label}</span>
+      <span
+        className={twJoin(
+          'flex items-center gap-1 text-xs',
+          muted ? 'text-gray-400' : 'text-gray-700',
+        )}
+      >
+        {label}
+        {info}
+      </span>
       {badge}
     </div>
     {!readOnly && slider}
+    {nested && <div className="ml-3 space-y-0.5">{nested}</div>}
   </div>
 )
 
@@ -76,12 +89,16 @@ export const CriterionSlider = ({
   sharePct,
   onChange,
   readOnly = false,
+  info,
+  nested,
 }: {
   label: string
   weight: number | undefined
   sharePct: number
   onChange: (weight: number) => void
   readOnly?: boolean
+  info?: React.ReactNode
+  nested?: React.ReactNode
 }) => {
   const step = weightToStep(weight)
 
@@ -90,6 +107,8 @@ export const CriterionSlider = ({
       label={label}
       muted={step === 0}
       readOnly={readOnly}
+      info={info}
+      nested={nested}
       badge={
         <span className="flex shrink-0 items-baseline gap-1.5">
           <span className="text-[11px] text-gray-400 tabular-nums">
@@ -107,7 +126,7 @@ export const CriterionSlider = ({
           value={step}
           aria-label={`${label} — Wichtigkeit 0 (fließt nicht ein) bis ${WEIGHT_STEPS} (sehr wichtig)`}
           onChange={(e) => onChange(stepToWeight(Number(e.target.value)))}
-          className="mt-0.5 w-full accent-green-700"
+          className="w-full accent-green-700"
         />
       }
     />
@@ -125,35 +144,55 @@ export const ModifierSlider = ({
   direction,
   onChange,
   readOnly = false,
+  info,
+  nested,
+  badge: badgeOverride,
+  showSlider = true,
 }: {
   label: string
   weight: number | undefined
   direction: 'positive' | 'negative'
   onChange: (weight: number) => void
   readOnly?: boolean
+  info?: React.ReactNode
+  nested?: React.ReactNode
+  badge?: React.ReactNode
+  showSlider?: boolean
 }) => {
   const points = weightToPoints(weight)
   const sign = direction === 'positive' ? '+' : '−'
+  const sliderVisible = showSlider && !readOnly
 
   return (
     <FactorRow
       label={label}
-      muted={points === 0}
+      muted={showSlider && points === 0}
       readOnly={readOnly}
+      info={info}
+      nested={nested}
       badge={
-        <FactorBadge value={`${points === 0 ? '' : sign}${points} Pkt.`} muted={points === 0} />
+        !showSlider
+          ? null
+          : (badgeOverride ?? (
+              <FactorBadge
+                value={`${points === 0 ? '' : sign}${points} Pkt.`}
+                muted={points === 0}
+              />
+            ))
       }
       slider={
-        <input
-          type="range"
-          min={0}
-          max={MODIFIER_MAX_POINTS}
-          step={MODIFIER_POINT_STEP}
-          value={points}
-          aria-label={`${label} — ${direction === 'positive' ? 'Zuschlag' : 'Abschlag'} 0 bis ${MODIFIER_MAX_POINTS} Punkte`}
-          onChange={(e) => onChange(pointsToWeight(Number(e.target.value)))}
-          className="mt-0.5 w-full accent-green-700"
-        />
+        sliderVisible ? (
+          <input
+            type="range"
+            min={0}
+            max={MODIFIER_MAX_POINTS}
+            step={MODIFIER_POINT_STEP}
+            value={points}
+            aria-label={`${label} — ${direction === 'positive' ? 'Zuschlag' : 'Abschlag'} 0 bis ${MODIFIER_MAX_POINTS} Punkte`}
+            onChange={(e) => onChange(pointsToWeight(Number(e.target.value)))}
+            className="w-full accent-green-700"
+          />
+        ) : null
       }
     />
   )

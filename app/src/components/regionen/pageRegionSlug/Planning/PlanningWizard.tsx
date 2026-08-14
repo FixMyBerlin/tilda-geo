@@ -24,15 +24,16 @@ import {
   PLANNING_USE_CASES,
   type PlanningUseCase,
 } from './planningDefaults'
-import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
+import { planningNumberInputClass, planningTextInputClass } from './planningPanelStyles'
+import { type UserGeojsonMode } from './UserObstaclesField'
 import { WizardStep } from './WizardStep'
 
 type AreaTab = 'search' | 'custom'
 
 /**
  * 3-Schritte-Assistent zum Anlegen eines Szenarios: 1. Gebiet auswählen, 2. Art & Größe der
- * gesuchten Fläche, 3. Faktoren & Schwellenwerte. Der Abschluss-Button legt das Szenario an und
- * startet die Berechnung in einem Schritt (statt wie zuvor zwei getrennte Aktionen).
+ * gesuchten Fläche, 3. Faktoren. Der Abschluss-Button legt das Szenario an und startet die
+ * Berechnung in einem Schritt (statt wie zuvor zwei getrennte Aktionen).
  */
 export const PlanningWizard = ({
   regionSlug,
@@ -197,11 +198,10 @@ export const PlanningWizard = ({
           aria-invalid={titleMissing}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className={`rounded border px-2 py-1 text-sm ${
-            titleMissing
-              ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:outline-none'
-              : 'border-gray-300'
-          }`}
+          className={twJoin(
+            planningTextInputClass,
+            titleMissing && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+          )}
         />
       </label>
       {titleMissing && <p className="text-xs text-red-600">Bitte einen Titel angeben.</p>}
@@ -294,7 +294,7 @@ export const PlanningWizard = ({
             step={1}
             value={areaSizeM2 ?? ''}
             onChange={(e) => setAreaSizeM2(e.target.value === '' ? null : Number(e.target.value))}
-            className="w-24 rounded border border-gray-300 px-1 py-0.5 text-right"
+            className={planningNumberInputClass}
           />
         </label>
 
@@ -304,19 +304,13 @@ export const PlanningWizard = ({
         </div>
       </WizardStep>
 
-      <WizardStep number={3} title="Faktoren & Schwellenwerte">
+      <WizardStep number={3} title="Faktoren">
         <FactorFields
           config={config}
           setWeights={setWeights}
+          setWeight={setWeight}
           setField={setField}
           setVegetationDirection={setVegetationDirection}
-        />
-      </WizardStep>
-
-      <WizardStep number={4} title="Eigene Flächen (optional)" defaultOpen={false}>
-        <UserObstaclesField
-          config={config}
-          setWeight={setWeight}
           setUserGeojson={setUserGeojson}
           setUserGeojsonMode={setUserGeojsonMode}
         />

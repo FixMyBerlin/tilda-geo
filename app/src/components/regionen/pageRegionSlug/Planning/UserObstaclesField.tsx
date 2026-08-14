@@ -14,10 +14,8 @@ const MODES = [
 export type UserGeojsonMode = (typeof MODES)[number][0]
 
 /**
- * Gesammelter Block „Eigene Flächen": Upload einer GeoJSON-Datei (Punkte/Linien/
- * Flächen) plus Wirkungsmodus und – bei weichen Modi – Stärke. Komponiert aus den
- * geteilten Bausteinen `GeoJsonUploadField` und `SegmentedChoice`. Wird von
- * `FactorFields` gerendert und erscheint dadurch in Wizard und Editor.
+ * Upload, Modus und – bei weichen Modi – Stärke-Slider im Block Eigene Daten.
+ * Wird von `FactorFields` gerendert.
  */
 export const UserObstaclesField = ({
   config,
@@ -37,16 +35,10 @@ export const UserObstaclesField = ({
   const featureCount = geojson?.features?.length ?? 0
   const isSoft = mode === 'bonus' || mode === 'penalty'
   const weight = config.weights?.w_eigendaten ?? 0
+  const showSlider = isSoft && !!geojson
 
   return (
-    <div>
-      <div className="mb-1 font-semibold">Eigene Flächen</div>
-      <p className="mb-1.5 text-xs text-gray-500">
-        GeoJSON hochladen (Punkte, Linien, Flächen). Punkte werden mit 1,5 m, Linien mit 2,5 m
-        gepuffert. „Bonus/Abzug“ verschieben den Gesamtscore innerhalb der Fläche; „Ausschluss
-        innen/außen“ schließen Hexagone hart aus (Gesamtscore 0).
-      </p>
-
+    <div className="space-y-1">
       {geojson ? (
         <div className="flex items-center justify-between rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs">
           <span className="text-green-700">✓ {featureCount} Objekt(e) geladen</span>
@@ -62,44 +54,40 @@ export const UserObstaclesField = ({
         </div>
       ) : (
         !readOnly && (
-          <GeoJsonUploadField
-            parse={parseUserGeojson}
-            onResult={(fc) => setUserGeojson(fc)}
-            maxBytes={MAX_USER_GEOJSON_BYTES}
-            historyScope="user_geojson"
-            label={
-              <>
-                Eigene GeoJSON-Datei hierher ziehen
-                <br />
-                oder klicken (max. 5 MB)
-              </>
-            }
-          />
+          <div className="mt-2">
+            <GeoJsonUploadField
+              parse={parseUserGeojson}
+              onResult={(fc) => setUserGeojson(fc)}
+              maxBytes={MAX_USER_GEOJSON_BYTES}
+              historyScope="user_geojson"
+              label={
+                <>
+                  Eigene GeoJSON-Datei hierher ziehen
+                  <br />
+                  oder klicken (max. 5 MB)
+                </>
+              }
+            />
+          </div>
         )
       )}
-
       {geojson && (
-        <div className="mt-1.5 flex flex-col gap-1.5">
-          <SegmentedChoice
-            options={MODES}
-            value={mode}
-            onChange={setUserGeojsonMode}
-            disabled={readOnly}
-            className="grid grid-cols-2 gap-1.5"
-          />
-          {/* Eigene Flächen sind ein Zu-/Abschlag wie Kreuzungen oder Bestandsanlagen, gehören
-              aber in keine der beiden Gruppen — die Stärke steht deshalb hier statt im
-              Faktorenblock, in derselben Einheit (Punkte auf den Gesamtscore). */}
-          {isSoft && (
-            <ModifierSlider
-              label="Stärke"
-              weight={weight}
-              direction={mode === 'bonus' ? 'positive' : 'negative'}
-              onChange={(value) => setWeight('w_eigendaten', value)}
-              readOnly={readOnly}
-            />
-          )}
-        </div>
+        <SegmentedChoice
+          options={MODES}
+          value={mode}
+          onChange={setUserGeojsonMode}
+          disabled={readOnly}
+          className="grid grid-cols-2 gap-1.5"
+        />
+      )}
+      {showSlider && (
+        <ModifierSlider
+          label="Stärke"
+          weight={weight}
+          direction={mode === 'penalty' ? 'negative' : 'positive'}
+          onChange={(value) => setWeight('w_eigendaten', value)}
+          readOnly={readOnly}
+        />
       )}
     </div>
   )

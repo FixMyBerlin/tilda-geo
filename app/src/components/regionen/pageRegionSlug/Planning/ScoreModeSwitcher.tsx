@@ -45,8 +45,8 @@ export const ScoreModeSwitcher = () => {
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-gray-500">Anzeige</span>
+    <div className="mt-1 flex flex-col gap-1">
+      <span className="py-0.5 text-xs font-medium text-gray-500">Anzeige</span>
       <div className="flex gap-1.5">
         {MODES.map(([value, label]) => (
           <button
@@ -83,7 +83,7 @@ export const ScoreModeSwitcher = () => {
         </button>
       </div>
       <div className="flex items-center gap-2">
-        <span className="w-16 shrink-0 text-xs text-gray-500">Transparenz</span>
+        <span className="w-16 shrink-0 py-0.5 text-xs text-gray-500">Transparenz</span>
         <input
           type="range"
           min={0}

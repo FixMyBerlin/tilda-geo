@@ -17,6 +17,7 @@ import {
   usePlanningScenarioParam,
 } from '../hooks/useQueryState/usePlanningParams'
 import { FactorEditorPanel } from './FactorEditorPanel'
+import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
 import { ScenarioList } from './ScenarioList'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
@@ -109,7 +110,7 @@ const MinAreaFilter = () => {
         onChange={(e) =>
           setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
         }
-        className="w-20 rounded border border-gray-300 px-1 py-0.5 text-right disabled:bg-gray-50 disabled:text-gray-400"
+        className={planningNumberInputClass}
       />
     </div>
   )
@@ -256,7 +257,12 @@ export const PlanningPanel = () => {
   if (!planningMode) return null
 
   return (
-    <div className="pointer-events-auto absolute top-2.5 left-[17rem] z-30 flex max-h-[calc(100vh-8rem)] w-80 flex-col gap-3 overflow-auto rounded bg-white p-3 shadow-lg">
+    <div
+      className={twJoin(
+        'pointer-events-auto absolute top-2.5 left-[17rem] z-30 flex max-h-[calc(100vh-8rem)] flex-col gap-3 overflow-auto rounded bg-white p-3 shadow-lg',
+        PLANNING_PANEL_WIDTH,
+      )}
+    >
       <div className="flex items-center justify-between">
         <h2 className="font-bold">Planungsmodus</h2>
         <button

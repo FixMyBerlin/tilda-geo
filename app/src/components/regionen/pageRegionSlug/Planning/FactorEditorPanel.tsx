@@ -7,7 +7,14 @@ import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningScenarioFn } from '@/server/planning/planning.functions'
 import { planningScenarioQueryOptions } from '@/server/planning/planningQueryOptions'
 import { InfoTooltip } from './InfoTooltip'
-import { WEIGHT_GROUPS, WEIGHT_LABELS } from './planningDefaults'
+import {
+  FACTOR_HELP,
+  FACTOR_PARAMS,
+  GROUP_HELP,
+  WEIGHT_GROUPS,
+  WEIGHT_LABELS,
+} from './planningDefaults'
+import { planningNumberInputClass } from './planningPanelStyles'
 import { SegmentedChoice } from './SegmentedChoice'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import {
@@ -15,18 +22,58 @@ import {
   groupShare,
   modifierPointRange,
   resolveModifierDirection,
+  weightToPoints,
+  weightToStep,
 } from './weightScale'
 import { CriterionSlider, ModifierSlider, WeightScaleLegend } from './WeightSlider'
 
-const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }[] = [
-  { key: 'max_cyclepath_dist_m', label: 'Max. Radwegdistanz (m)', step: 10 },
-  { key: 'min_surface_score', label: 'Min. Untergrund-Score', step: 5 },
-  { key: 'intersection_radius_m', label: 'Kreuzungs-Radius (m)', step: 5 },
-  { key: 'parken_radius_m', label: 'Parken-Radius (m)', step: 5 },
-  { key: 'fussgaengerzone_radius_m', label: 'Fußgängerzonen-Radius (m)', step: 5 },
-  { key: 'bestand_default_diameter_m', label: 'Bestand: Standard-Durchmesser (m)', step: 5 },
-  { key: 'min_score_threshold', label: 'Mindest-Score (Flächensuche)', step: 5 },
-]
+const FactorInfo = ({ factorKey }: { factorKey: string }) => {
+  const text = FACTOR_HELP[factorKey]
+  if (!text) return null
+  return <InfoTooltip>{text}</InfoTooltip>
+}
+
+const groupHeadlineClass =
+  'flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-sm font-bold text-gray-800'
+
+const FactorParamInputs = ({
+  factorKey,
+  config,
+  weight,
+  setField,
+  readOnly,
+}: {
+  factorKey: string
+  config: FactorConfig
+  weight: number | undefined
+  setField: (key: keyof FactorConfig, value: number | boolean) => void
+  readOnly: boolean
+}) => {
+  const params = FACTOR_PARAMS[factorKey]
+  if (!params) return null
+
+  const weightOff = weightToStep(weight) === 0 && weightToPoints(weight) === 0
+
+  return params.map(({ key, label, step, alwaysEditable }) => {
+    const disabled = readOnly || (weightOff && !alwaysEditable)
+    return (
+      <label
+        key={String(key)}
+        className="flex items-center justify-between gap-2 text-xs text-gray-600"
+      >
+        <span className={disabled ? 'text-gray-400' : ''}>{label}</span>
+        <input
+          type="number"
+          step={step}
+          value={Number(config[key] ?? 0)}
+          disabled={disabled}
+          onChange={(e) => setField(key, Number(e.target.value))}
+          className={planningNumberInputClass}
+        />
+      </label>
+    )
+  })
+}
 
 /**
  * Gewichte-/Vegetations-/Schwellenwert-Formularfelder für ein `FactorConfig`. Ungestylte
@@ -36,42 +83,42 @@ const THRESHOLD_FIELDS: { key: keyof FactorConfig; label: string; step: number }
 export const FactorFields = ({
   config,
   setWeights,
+  setWeight,
   setField,
   setVegetationDirection,
+  setUserGeojson,
+  setUserGeojsonMode,
   readOnly = false,
 }: {
   config: FactorConfig
   setWeights: (weights: Record<string, number>) => void
+  setWeight: (key: string, value: number) => void
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
+  setUserGeojson: (geojson: GeoJSON.FeatureCollection | undefined) => void
+  setUserGeojsonMode: (mode: UserGeojsonMode) => void
   readOnly?: boolean
 }) => {
   const weights = config.weights ?? {}
   const vegetationDirection = config.vegetation_direction ?? 'negative'
-  // Die Regler sind voneinander unabhängig: der Scorer normiert die Kriterien selbst (Division
-  // durch die Gewichtssumme), es gibt also keine Summe, die die UI einhalten müsste.
-  const setWeight = (key: string, value: number) => setWeights({ ...weights, [key]: value })
+  const setWeightFromWeights = (key: string, value: number) =>
+    setWeights({ ...weights, [key]: value })
   const shares = criterionShares(weights)
   const points = modifierPointRange(weights, vegetationDirection)
 
   return (
     <>
       <div>
-        <div className="mb-1 flex items-center gap-1 font-semibold">
-          Gewichtung der Faktoren
-          <InfoTooltip>
-            Kriterien bewerten jeden Ort mit 0–100 Punkten; ihre Wichtigkeit bestimmt, mit welchem
-            Anteil sie in den Grundscore eingehen (nur das Verhältnis zueinander zählt). Zu- und
-            Abschläge verschieben den Grundscore danach um die eingestellten Punkte. 0 bedeutet in
-            beiden Fällen, dass ein Faktor nicht einfließt.
-          </InfoTooltip>
-        </div>
+        <div className="mb-1 font-semibold">Gewichtung der Faktoren</div>
         {!readOnly && <WeightScaleLegend />}
         {WEIGHT_GROUPS.map((group) => (
           <div key={group.key} className="mt-3 first:mt-0">
-            <div className="flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-xs font-semibold text-gray-500 uppercase">
-              <span>{group.label}</span>
-              <span className="normal-case tabular-nums">
+            <div className={groupHeadlineClass}>
+              <span className="flex items-center gap-1">
+                {group.label}
+                <InfoTooltip>{GROUP_HELP[group.key]}</InfoTooltip>
+              </span>
+              <span className="text-xs font-normal text-gray-500 tabular-nums">
                 {Math.round(groupShare(shares, group.criteria))} % des Grundscores
               </span>
             </div>
@@ -83,8 +130,18 @@ export const FactorFields = ({
                 label={WEIGHT_LABELS[key] ?? key}
                 weight={weights[key]}
                 sharePct={shares[key] ?? 0}
-                onChange={(value) => setWeight(key, value)}
+                onChange={(value) => setWeightFromWeights(key, value)}
                 readOnly={readOnly}
+                info={<FactorInfo factorKey={key} />}
+                nested={
+                  <FactorParamInputs
+                    factorKey={key}
+                    config={config}
+                    weight={weights[key]}
+                    setField={setField}
+                    readOnly={readOnly}
+                  />
+                }
               />
             ))}
 
@@ -97,8 +154,41 @@ export const FactorFields = ({
                 label={WEIGHT_LABELS[key] ?? key}
                 weight={weights[key]}
                 direction={resolveModifierDirection(direction, vegetationDirection)}
-                onChange={(value) => setWeight(key, value)}
+                onChange={(value) => setWeightFromWeights(key, value)}
                 readOnly={readOnly}
+                info={<FactorInfo factorKey={key} />}
+                nested={
+                  key === 'w_vegetation' ? (
+                    <>
+                      <SegmentedChoice
+                        options={
+                          [
+                            ['negative', 'Grün schützen'],
+                            ['positive', 'Grün bevorzugen'],
+                          ] as const
+                        }
+                        value={vegetationDirection}
+                        onChange={setVegetationDirection}
+                        disabled={readOnly || weightToPoints(weights[key]) === 0}
+                      />
+                      <FactorParamInputs
+                        factorKey={key}
+                        config={config}
+                        weight={weights[key]}
+                        setField={setField}
+                        readOnly={readOnly}
+                      />
+                    </>
+                  ) : (
+                    <FactorParamInputs
+                      factorKey={key}
+                      config={config}
+                      weight={weights[key]}
+                      setField={setField}
+                      readOnly={readOnly}
+                    />
+                  )
+                }
               />
             ))}
           </div>
@@ -107,61 +197,61 @@ export const FactorFields = ({
           Zu- und Abschläge zusammen: max. <span className="font-semibold">+{points.plus}</span> /{' '}
           <span className="font-semibold">−{points.minus}</span> Punkte auf den Grundscore.
         </p>
+
+        <div className="mt-3">
+          <div className={groupHeadlineClass}>
+            <span className="flex items-center gap-1">
+              Eigene Daten
+              <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
+            </span>
+          </div>
+          <div className="mt-1">
+            <UserObstaclesField
+              config={config}
+              setWeight={setWeight}
+              setUserGeojson={setUserGeojson}
+              setUserGeojsonMode={setUserGeojsonMode}
+              readOnly={readOnly}
+            />
+          </div>
+        </div>
       </div>
 
       <div>
-        <div className="mb-1 font-semibold">Vegetation (NDVI)</div>
-        <p className="mb-1.5 text-xs text-gray-500">
-          „Grün schützen“ zieht je nach Bedeckungsgrad Punkte ab (Gesamtscore nie unter 0), „Grün
-          bevorzugen“ vergibt Bonuspunkte. Wie viele Punkte, steht beim Zu-/Abschlag „Vegetation“ in
-          der Gruppe Bebauung; bei 0 Punkten ohne Wirkung.
-        </p>
-        <SegmentedChoice
-          options={
-            [
-              ['negative', 'Grün schützen'],
-              ['positive', 'Grün bevorzugen'],
-            ] as const
-          }
-          value={vegetationDirection}
-          onChange={setVegetationDirection}
-          disabled={readOnly}
-        />
-      </div>
-
-      <div>
-        <div className="mb-1 font-semibold">Schwellenwerte</div>
-        {THRESHOLD_FIELDS.map(({ key, label, step }) => (
-          <label key={String(key)} className="flex items-center justify-between gap-2 py-0.5">
-            <span>{label}</span>
+        <div className={groupHeadlineClass}>
+          <span>Allgemein</span>
+        </div>
+        <div className="mt-1 space-y-2">
+          <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              Mindest-Score (Flächensuche)
+              <InfoTooltip>{FACTOR_HELP.min_score_threshold}</InfoTooltip>
+            </div>
             <input
               type="number"
-              step={step}
-              value={Number(config[key] ?? 0)}
+              step={5}
+              value={Number(config.min_score_threshold ?? 0)}
               disabled={readOnly}
-              onChange={(e) => setField(key, Number(e.target.value))}
-              className="w-24 rounded border border-gray-300 px-1 py-0.5 text-right disabled:bg-gray-50 disabled:text-gray-500"
+              onChange={(e) => setField('min_score_threshold', Number(e.target.value))}
+              className={planningNumberInputClass}
             />
           </label>
-        ))}
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1 font-medium text-gray-800">
-          <input
-            type="checkbox"
-            checked={config.exclude_carriageways ?? false}
-            disabled={readOnly}
-            onChange={(e) => setField('exclude_carriageways', e.target.checked)}
-            className="rounded border-gray-300"
-          />
-          Fahrbahnen ausschließen
-          <InfoTooltip>
-            Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche
-            berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich,
-            unabhängig von den übrigen Faktoren.
-          </InfoTooltip>
-        </label>
+          <label className="flex items-center gap-1 text-xs text-gray-600">
+            <input
+              type="checkbox"
+              checked={config.exclude_carriageways ?? false}
+              disabled={readOnly}
+              onChange={(e) => setField('exclude_carriageways', e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            Fahrbahnen ausschließen
+            <InfoTooltip>
+              Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche
+              berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich,
+              unabhängig von den übrigen Faktoren.
+            </InfoTooltip>
+          </label>
+        </div>
       </div>
     </>
   )
@@ -246,14 +336,9 @@ export const FactorEditorPanel = ({
           <FactorFields
             config={config}
             setWeights={setWeights}
+            setWeight={setWeight}
             setField={setField}
             setVegetationDirection={setVegetationDirection}
-            readOnly={readOnly}
-          />
-
-          <UserObstaclesField
-            config={config}
-            setWeight={setWeight}
             setUserGeojson={setUserGeojson}
             setUserGeojsonMode={setUserGeojsonMode}
             readOnly={readOnly}
