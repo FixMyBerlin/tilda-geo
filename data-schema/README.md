@@ -11,28 +11,28 @@ Commands below run from `app/` (`bun run data-schema` lists them; each script ha
 On your local machine:
 
 1. Write `data-schema/<table>/spec.json` (see the skill).
-2. `bun run data-schema-load` — spec + GeoJSON/GPKG → local `data.<table>`
-3. `bun run data-schema-publish` — spec + `pg_dump` → S3
-4. Open `/admin/data-schema` and **Import** to restore the dump (that is also how you test the round-trip locally)
+2. `bun run data-schema-load` reads the spec and source GeoJSON/GPKG into local `data.<table>`.
+3. `bun run data-schema-publish` uploads the spec and a `pg_dump` of that table to S3.
+4. Open `/admin/data-schema` and **Import** to restore the dump (that is also how you test the round-trip locally).
 
 ## Existing table
 
-- **Staging / production:** `/admin/data-schema` → **Import** (restores the dump from S3). If processing SQL reads this table for map layers, run processing afterwards.
+- **Staging / production:** On `/admin/data-schema`, click **Import** to restore the dump from S3. If processing SQL reads this table for map layers, run processing afterwards.
 - **Local machine:** `bun run data-schema-pull` for specs from S3; **Import** for dumps. `bun run seed` pulls specs (and ignores missing S3) but does not restore dumps.
 
-To change the data: pull the spec, load the new source file, publish, then Import on each environment.
+To change the data: pull the spec, load the new source file, publish, then Import on each environment:
 
-Admin: [local](http://127.0.0.1:5173/admin/data-schema) · [staging](https://staging.tilda-geo.de/admin/data-schema) · [production](https://tilda-geo.de/admin/data-schema)
+- [local](http://127.0.0.1:5173/admin/data-schema)
+- [staging](https://staging.tilda-geo.de/admin/data-schema)
+- [production](https://tilda-geo.de/admin/data-schema)
 
 ## This folder
 
 Gitignored local mirror of specs, plus the source GeoJSON/GPKG used by load. Dumps never live here — they are only on S3. Do not commit table folders.
 
 ```
-data-schema/
-  <table>/
-    spec.json              # pulled from S3
-    <table>.geojson|.gpkg  # local load input (not on S3)
+data-schema/<table>/spec.json             # pulled from S3
+data-schema/<table>/<table>.geojson|.gpkg # local load input (not on S3)
 ```
 
 Everything except this README and `.gitignore` is gitignored.
