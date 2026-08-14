@@ -82,13 +82,13 @@ export async function s3ObjectExists(key: string) {
   return listed.contents[0]?.key === key
 }
 
-export async function getS3ObjectJson(key: string) {
+async function getS3ObjectJson(key: string) {
   const { client, bucket } = dataSchemaS3()
   const object = await getObjectBlob(client, { bucket, key })
   return JSON.parse(await object.blob.text()) as unknown
 }
 
-export async function getS3ObjectJsonIfExists(key: string) {
+async function getS3ObjectJsonIfExists(key: string) {
   try {
     return await getS3ObjectJson(key)
   } catch (error: unknown) {

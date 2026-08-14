@@ -55,20 +55,20 @@ export function dataSchemaSnapshotId(date: Date = new Date()) {
 
 const sha256HexRegex = /^[a-f0-9]{64}$/
 
-export function isDataSchemaSha256Hex(sha256: string) {
+function isDataSchemaSha256Hex(sha256: string) {
   return sha256HexRegex.test(sha256)
 }
 
 /** Pre-flatten layout. Read-only fallback until tables are republished. */
-export function dataSchemaLegacySpecKey(table: string) {
+function dataSchemaLegacySpecKey(table: string) {
   return `${tablePrefix(table)}/sources/spec.json`
 }
 
-export function dataSchemaLegacyLatestDumpKey(table: string) {
+function dataSchemaLegacyLatestDumpKey(table: string) {
   return `${tablePrefix(table)}/latest/table.dump`
 }
 
-export function dataSchemaLegacyLatestManifestKey(table: string) {
+function dataSchemaLegacyLatestManifestKey(table: string) {
   return `${tablePrefix(table)}/latest/manifest.json`
 }
 
@@ -79,7 +79,7 @@ export function dataSchemaLegacyObjectDumpKey(table: string, sha256: string) {
   return `${tablePrefix(table)}/objects/${sha256}.dump`
 }
 
-export function dataSchemaLegacySnapshotDumpKey(table: string, snapshotId: string) {
+function dataSchemaLegacySnapshotDumpKey(table: string, snapshotId: string) {
   return `${dataSchemaSnapshotPrefix(table, snapshotId)}/table.dump`
 }
 
