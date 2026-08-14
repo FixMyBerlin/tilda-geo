@@ -91,94 +91,42 @@ FYI: manual `git worktree add` also works, but agents should prefer `bun run set
 
 Two remotes (`origin` = public, `private` = experimental mirror) are org-wide shared via the main checkout's `.git` store. See [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md) for sync and PR recipes.
 
-### Rules
-
-- **`develop` / `main`** -> main checkout, no `.env.local`, default Docker stack (`db` / `tiles`, ports 5432 / 3000).
-- **Work branches** -> linked worktree; predev auto-creates `.env.local` with `DEV_STACK_ID` (or attach — see [decision tree](#decision-tree-local-db-and-envlocal)).
-- Feature branch on the **main checkout** -> predev **warns** about worktrees but still works; uses the **same default develop stack** (no `.env.local`). Do not create `.env.local` there — predev removes it.
+Stack / `.env.local` rules: [section 2](#2-docker-and-predev-envlocal). `setup-worktree` needs the branch free in this checkout (`git checkout develop` first if the feature branch is already here).
 
 ---
 
 ## 2. Docker and predev (`.env.local`)
 
-Run `bun run dev` and let **predev** manage env files, ports, Docker, and migrations. Do not hand-craft `docker compose` for db/tiles.
+Run `bun run dev` from `app/` and let **predev** manage env, ports, Docker, and migrations. Do not hand-craft `docker compose` for db/tiles.
 
-### Decision tree: local db and `.env.local`
+Predev: `ensureEnv` (root `.env`) → `ensureDevStack` (worktree `.env.local` if missing) → `checkDocker` (stop other default-port stacks, start db+tiles or verify attach) → migrations / topic-docs.
 
-Use this when the user says **use develop db**, **attach to develop**, **test on the develop database**, or asks to set up `.env.local`.
+### Which db stack?
 
-| Where           | Branch             | `.env.local`                                                    | Db stack                                                                  |
-| --------------- | ------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Main checkout   | `develop` / `main` | **None** — removed if present                                   | Default: containers `db` / `tiles`, ports **5432** / **3000**             |
-| Main checkout   | feature branch     | **None** — removed if present (`removed_on_main_checkout`)      | **Same default stack** as develop (same Postgres volume on this checkout) |
-| Linked worktree | feature branch     | Auto-created on first `bun run dev`, or hand-written for attach | Own isolated stack **or** attach to another running stack                 |
+| Where           | Branch             | `.env.local`                                  | Stack                                                                |
+| --------------- | ------------------ | --------------------------------------------- | -------------------------------------------------------------------- |
+| Main checkout   | `develop` / `main` | None (removed if present)                     | Default: `db` / `tiles` on **5432** / **3000**                       |
+| Main checkout   | feature branch     | None (removed every predev)                   | **Same default stack** — `bun run dev` is enough; worktree warn only |
+| Linked worktree | feature branch     | Required; auto-written on first `bun run dev` | Isolated `DEV_STACK_ID` **or** attach (below)                        |
 
-**Default stack identity:** unprefixed container names `db` and `tiles`, compose project from the checkout folder name (e.g. `tilda-geo` for `../tilda-geo`). Predev calls this stack id `default` in attach/discovery code.
+Default stack id in attach/discovery is `default`. Compose project is the checkout folder (e.g. `tilda-geo`). Empty db: `bun run seed` then `bun run dev`.
 
-#### Main checkout + feature branch + develop db (most common shortcut)
-
-No `.env.local`. No `DEV_ATTACH_STACK`. No worktree required for db sharing.
-
-```bash
-cd app
-bun run dev   # predev warns about worktree; still starts/uses default db on 5432
-```
-
-If the db is empty: `bun run seed` then `bun run dev`.
-
-**Do not** hand-write `.env.local` on the main checkout for a feature branch — `syncEnvLocalForBranch` deletes it every predev run.
-
-#### Worktree + reuse develop's running db (`DEV_ATTACH_STACK`)
-
-Only for a **linked worktree**. The target db+tiles must already be running (e.g. `bun run dev` on `develop` in the main checkout, or `bun scripts/predev/checkDocker.ts` from `app/`).
-
-In the **worktree** root `.env.local`:
+**Worktree attaching to develop** — target db+tiles must already be running. Worktree root `.env.local`:
 
 ```env
-# DEV_STACK_BRANCH=my-branch
 DEV_STACK_ID=wt_tilda_geo_my_branch
 DEV_ATTACH_STACK=default
 ```
 
-`DEV_ATTACH_STACK=default` → attach to unprefixed `db` / `tiles` on 5432 / 3000 (the main checkout's develop stack). Predev will **not** start a second db for this worktree.
+Add `DEV_PORT_SLOT=1` (or another slot) if Vite **5173** is already taken. Do not copy `.env.local` between worktrees.
 
-If develop's Vite is already on **5173**, add `DEV_PORT_SLOT=1` (or another slot) in the attaching worktree so Vite uses an offset port and a separate OAuth origin.
+| Variable           | Role                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DEV_STACK_ID`     | This worktree's compose project; containers like `wt_foo_db`; own DB volume unless attaching                                                                        |
+| `DEV_ATTACH_STACK` | Worktrees only. Reuse a **running** stack; `default` = main checkout `db`/`tiles`. Processing/seed join that stack's compose project (`-p tilda-geo` for `default`) |
+| `DEV_PORT_SLOT`    | Optional `1`–`5`. Runtime source of truth for offset ports — do not put `DATABASE_PORT` / `TILES_PORT` in `.env.local` (stripped)                                   |
 
-**Branch already checked out in main checkout?** `setup-worktree` needs that branch free — e.g. `git checkout develop` in main, then `bun run setup-worktree -- my-branch` from `app/`.
-
-#### Worktree + private isolated db
-
-First `bun run dev` in the worktree auto-writes `.env.local` with only `DEV_STACK_ID` (containers like `wt_my_branch_db`, separate volume). No attach.
-
-`bun run dev` runs `predev` before Vite:
-
-1. **`ensureEnv`** - root `.env` must exist (from `.env.example`).
-2. **`ensureDevStack`** - on feature worktrees, writes `.env.local` if missing.
-3. **`checkDocker`** - stops other stacks (default mode), then starts db+tiles or verifies attach target ports are published.
-4. Migrations, topic-docs, etc.
-
-Example auto-generated `.env.local`:
-
-```env
-DEV_STACK_ID=wt_tilda_geo_my_branch
-```
-
-Optional parallel port slot (second worktree while another uses default ports):
-
-```env
-DEV_STACK_ID=wt_tilda_geo_my_branch
-DEV_PORT_SLOT=1
-```
-
-| Variable           | Role                                                                                                                                                                                                                                   |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEV_STACK_ID`     | Compose project name; containers like `wt_foo_db`; separate DB volume                                                                                                                                                                  |
-| `DEV_ATTACH_STACK` | **Worktrees only.** Reuse another running stack's db+tiles instead of starting your own. Use `default` for the main checkout's develop stack (`db` / `tiles` on 5432 / 3000). Ignored on main checkout — `.env.local` is removed there |
-| `DEV_PORT_SLOT`    | Optional `1`–`5`: offset host ports for parallel worktrees (see below)                                                                                                                                                                 |
-
-**Default ports:** db **5432**, tiles **3000**, Vite **5173**. Predev stops other stacks before starting yours — one active default stack at a time.
-
-**Port slots** (`DEV_PORT_SLOT=1`…`5` in `.env.local`; absent or `0` = default):
+**Ports:** default db **5432**, tiles **3000**, Vite **5173** (one Vite on 5173). Slot mode does **not** stop other stacks.
 
 | Slot | db   | tiles | Vite | App origin              |
 | ---- | ---- | ----- | ---- | ----------------------- |
@@ -188,25 +136,9 @@ DEV_PORT_SLOT=1
 | 4    | 5436 | 3004  | 5177 | `http://127.0.0.1:5177` |
 | 5    | 5437 | 3005  | 5178 | `http://127.0.0.1:5178` |
 
-Slot mode does **not** stop other stacks. Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, and Vite/HMR port from `DEV_PORT_SLOT` at runtime — do not hand-edit those keys in `.env.local`. Hand-edited port keys are stripped on predev with a warning pointing to `DEV_PORT_SLOT`.
+Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, Vite/HMR from the slot. Prisma CLI uses the same mapping. `listRunningDevStacks` (stop-others) only sees default ports; attach resolves any running stack id including slots. Each slot origin needs an OSM OAuth redirect URL.
 
-`listRunningDevStacks` (used by default-mode stop-others) only lists stacks on the default ports (5432/3000). Offset-slot stacks are left alone. `DEV_ATTACH_STACK` resolves any running stack by id, including slot-mode ports. Prisma CLI (`migrate`, `seed`, `studio`) applies `DEV_PORT_SLOT` via `prisma.config.ts` the same way Vite does.
-
-Do **not** copy `.env.local` between worktrees — each worktree needs its own `DEV_STACK_ID`. Reusing a stack id while another checkout already runs that compose project on different ports will fail predev with a collision error.
-
-**OSM OAuth:** each slot's `VITE_APP_ORIGIN` must be registered as an OAuth redirect URL (user maintains up to five extra origins).
-
-`post-checkout` hook + predev remove stale `.env.local` when switching to `develop`/`main`.
-
-**Limits:** default mode — one `bun run dev` at a time on port **5173**. With port slots, up to five parallel Vite instances on offset ports (each needs a registered OAuth origin). Default mode: one db+tiles stack on 5432/3000; slot mode stacks run in parallel on offset ports.
-
-If editing predev/Docker code, keep these invariants:
-
-- Predev passes `docker compose -p <DEV_STACK_ID>`; do not set `COMPOSE_PROJECT_NAME` in compose YAML.
-- `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only and derived by predev, not stored in `.env.local`.
-- `DEV_ATTACH_STACK` can attach to another stack, but the target db+tiles stack must already be running. Processing/`seed` geo-bootstrap uses that stack’s real compose project (`-p`, e.g. `tilda-geo` for `default`) so `docker compose up processing` joins the shared `db` instead of creating a conflicting `/db` under the worktree folder name.
-- `DEV_PORT_SLOT` is the single source of truth for offset ports; legacy `DATABASE_PORT` / `TILES_PORT` lines in `.env.local` are stripped.
-- Relevant files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/ensureDevStack.ts`, `app/scripts/predev/devPortSlot.ts`, `app/scripts/predev/envLocalBranch.ts`, `app/scripts/predev/devStackDiscovery.ts`, `app/scripts/predev/checkDocker.ts`, `app/scripts/predev/syncEnvLocal.ts`, `app/.husky/post-checkout`.
+Editing predev: `docker compose -p <DEV_STACK_ID>` (never `COMPOSE_PROJECT_NAME` in YAML); `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only. Files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/{ensureDevStack,devPortSlot,envLocalBranch,devStackDiscovery,checkDocker,syncEnvLocal}.ts`, `app/.husky/post-checkout`.
 
 ---
 
@@ -369,10 +301,9 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 
 - Hand-craft `docker compose` for db/tiles/processing (use predev / `bun run processing`).
 - Run `db-pull` (human workflow; pulls real staging/prod data).
-- Commit `.env.local`.
-- Create `.env.local` on the **main checkout** for a feature branch (predev removes it; use no file, or a worktree with attach).
+- Commit `.env.local` or create one on the **main checkout** (see [section 2](#which-db-stack)).
 - Edit `geojson/` through a tilda-geo worktree symlink for real dataset changes.
-- Run two `bun run dev` instances on the default port (OSM auth conflict). Use `DEV_PORT_SLOT` for parallel worktrees.
+- Run two `bun run dev` instances on Vite **5173** (OSM auth). Use `DEV_PORT_SLOT` for a second instance.
 
 ---
 
@@ -381,7 +312,7 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 ```
 - [ ] Already on develop/main or an existing branch? -> skip worktree setup; stay put
 - [ ] User asked for a new work branch? -> from app/, `bun run setup-worktree -- my-branch`, then `bun run dev` in the new worktree
-- [ ] Reuse develop db? -> main checkout feature branch: no `.env.local`, just `bun run dev`; worktree: `DEV_ATTACH_STACK=default` in `.env.local` (target stack must be running)
+- [ ] Which db? -> [section 2](#which-db-stack); do not invent `.env.local` on the main checkout
 - [ ] Local app/db needed? -> trust predev from `bun run dev`; do not hand-craft Docker or re-audit env
 - [ ] Fresh local db? -> `bun run seed`, then `bun run dev` (not db-pull)
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)
