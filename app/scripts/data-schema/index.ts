@@ -1,16 +1,16 @@
 #!/usr/bin/env bun
 
+import { formatDataSchemaBigPictureHelp } from './help'
+
 export function formatRootHelp() {
   return `data-schema
 
-Four scripts (from app/):
+Commands (from app/):
 
   data-schema-verify   Validate local spec.json (no DB, no S3)
   data-schema-pull     Download S3 specs into local data-schema/
-  data-schema-load     Local dev computer: source file → local data.<table> (ogr2ogr)
-  data-schema-publish  Local dev computer: spec.json + pg_dump → S3 latest/
-
-Restore dumps into data.* via /admin/data-schema Import (every environment).
+  data-schema-load     Local dev computer only: source file → local data.<table> (ogr2ogr)
+  data-schema-publish  Local dev computer only: spec.json + pg_dump → S3 latest/
 
 Usage:
   bun run data-schema-verify [-- --table <name>]
@@ -22,6 +22,8 @@ Usage:
   bun run data-schema-pull -- --help
   bun run data-schema-load -- --help
   bun run data-schema-publish -- --help
+
+${formatDataSchemaBigPictureHelp()}
 `
 }
 

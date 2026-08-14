@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util'
 import { z } from 'zod'
+import { formatDataSchemaBigPictureHelp } from '../help'
 import { tableNameSchema } from '../tableName'
 
 export function parseVerifyArgs(argv: string[]) {
@@ -35,5 +36,7 @@ Postgres or talk to S3.
 Options:
   --table <name>  One table (default: every local data-schema/<table>/spec.json)
   -h, --help      This message
+
+${formatDataSchemaBigPictureHelp()}
 `)
 }

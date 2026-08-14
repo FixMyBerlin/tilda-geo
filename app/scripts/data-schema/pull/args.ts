@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util'
 import { z } from 'zod'
+import { formatDataSchemaBigPictureHelp } from '../help'
 import { tableNameSchema } from '../tableName'
 
 export function parsePullArgs(argv: string[]) {
@@ -29,15 +30,12 @@ export function printPullHelp() {
 Usage:
   bun run data-schema-pull [-- --table <name>]
 
-Local dev computer. Writes data-schema/<table>/spec.json from S3
+Local dev computer only. Writes data-schema/<table>/spec.json from S3
 sources/spec.json. Does not import dumps or touch Postgres.
 
 Compares spec.updatedAt (stamped by publish). Missing or older local
 spec is overwritten. Same updatedAt is left alone. Newer local: the CLI
 asks (TTY) and shows both timestamps. Non-interactive skips that table.
-
-To fill data.* from a published dump: /admin/data-schema Import.
-(staging/production). To upload a spec: data-schema-publish.
 
 Source geojson/gpkg is not on S3; data-schema-load reads
 data-schema/<table>/<spec.source.file> or --file.
@@ -45,5 +43,7 @@ data-schema/<table>/<spec.source.file> or --file.
 Options:
   --table <name>  One table (default: all tables under data-schema/ on S3)
   -h, --help      This message
+
+${formatDataSchemaBigPictureHelp()}
 `)
 }

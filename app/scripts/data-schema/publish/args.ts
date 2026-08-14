@@ -1,5 +1,6 @@
 import { parseArgs } from 'node:util'
 import { z } from 'zod'
+import { formatDataSchemaBigPictureHelp } from '../help'
 import { tableNameSchema } from '../tableName'
 import { PUBLISH_MODES } from './publishMode'
 
@@ -62,5 +63,7 @@ Options:
   -h, --help              This message
 
 Dump path requires: Docker, ENVIRONMENT=development.
+
+${formatDataSchemaBigPictureHelp()}
 `)
 }
