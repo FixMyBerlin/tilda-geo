@@ -267,14 +267,34 @@ def run_flaechenfinder(
 
     # Fahrbahnen ausschließen (Checkbox, kein Gewicht): die vom Worker vorab
     # gepufferten Straßenflächen (carriageway_gdf) werden wie Gebäude hart
-    # ausgeschlossen. Laden+Puffern passiert einmalig im Worker (siehe
-    # flaechenfinder.carriageways), damit dasselbe GeoDataFrame auch für die
-    # Kartenanzeige (planning.scenario_carriageways) wiederverwendet werden kann.
+    # ausgeschlossen – aber erst, wenn die Fahrbahn den Großteil der
+    # Hexagonfläche bedeckt (> FAHRBAHN_EXCLUSION_COVERAGE), nicht schon bei
+    # jeder noch so kleinen Randberührung. Laden+Puffern passiert einmalig im
+    # Worker (siehe flaechenfinder.carriageways), damit dasselbe GeoDataFrame
+    # auch für die Kartenanzeige (planning.scenario_carriageways)
+    # wiederverwendet werden kann.
+    FAHRBAHN_EXCLUSION_COVERAGE = 2 / 3
     if use_case.exclude_carriageways and carriageway_gdf is not None and len(carriageway_gdf):
+        from shapely import area as _shp_area
+        from shapely import intersection as _shp_intersection
+
         roads_proj = carriageway_gdf.to_crs("EPSG:25832") if carriageway_gdf.crs != "EPSG:25832" else carriageway_gdf
+        roads_proj = roads_proj[["geometry"]].reset_index(drop=True)
         hexes = hex_proj[["geometry"]].copy()
-        pairs = gpd.sjoin(hexes, roads_proj[["geometry"]], how="inner", predicate="intersects")
-        hex_proj["fahrbahn"] = hex_proj.index.isin(pairs.index)
+        hexes["_hid"] = np.arange(len(hexes))
+        hex_area = hex_proj.geometry.area.to_numpy()
+        pairs = gpd.sjoin(hexes, roads_proj, how="inner", predicate="intersects")
+        coverage = np.zeros(len(hexes))
+        if len(pairs):
+            left = pairs.geometry.to_numpy()
+            right = roads_proj.geometry.to_numpy()[pairs["index_right"].to_numpy()]
+            pairs = pairs.assign(_ia=_shp_area(_shp_intersection(left, right)))
+            coverage = (
+                pairs.groupby("_hid")["_ia"].sum()
+                .reindex(np.arange(len(hexes)), fill_value=0.0)
+                .to_numpy()
+            )
+        hex_proj["fahrbahn"] = (coverage / hex_area) > FAHRBAHN_EXCLUSION_COVERAGE
         del hexes, pairs, roads_proj
     else:
         hex_proj["fahrbahn"] = False
