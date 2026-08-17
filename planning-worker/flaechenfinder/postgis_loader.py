@@ -224,6 +224,13 @@ class PostgisLoader:
         `road_width_tags.lua` — löst OSM-`width`-Tag oder einen
         Highway-Typ/Oneway-Fallback auf, ist praktisch immer gesetzt).
 
+        Brücken/Tunnel (`tags->>'bridge'`/`tags->>'tunnel'` = 'yes', siehe
+        `result_tags.lua`) werden ausgeschlossen: dort liegt die Fahrbahn nicht
+        auf der Oberfläche, eine Bebauung darunter/daneben ist grundsätzlich
+        möglich. `IS DISTINCT FROM 'yes'` statt `<> 'yes'`, da beide Tags meist
+        fehlen (NULL) und `NULL <> 'yes'` wieder NULL ergäbe (Zeile fiele aus
+        dem WHERE raus statt eingeschlossen zu bleiben).
+
         Abhängigkeit + Fallback identisch zu `load_intersection_corners`:
         `_parking_roads` existiert nur, wenn das Parking-Topic für die Region
         prozessiert wurde. Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
@@ -233,6 +240,8 @@ class PostgisLoader:
             SELECT ST_Transform(geom, 4326) AS geom, (tags->>'width')::numeric AS width_m
             FROM public."_parking_roads"
             WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+              AND tags->>'bridge' IS DISTINCT FROM 'yes'
+              AND tags->>'tunnel' IS DISTINCT FROM 'yes'
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
