@@ -38,6 +38,9 @@ MIN_FLAECHE_M2 = 5.0    # Polygone kleiner als dieser Wert werden verworfen.
 
 CIR_DOWNLOAD_ENABLED = os.environ.get("PLANNING_CIR_DOWNLOAD", "1") not in ("0", "false", "")
 
+# Anzahl gleichzeitiger Kachel-Downloads (I/O-bound, daher Threads statt Prozesse).
+CIR_DOWNLOAD_PARALLELISM = int(os.environ.get("PLANNING_CIR_DOWNLOAD_PARALLELISM", "4"))
+
 
 # ── Interne Hilfsfunktionen ───────────────────────────────────────────────────
 
@@ -186,14 +189,25 @@ def compute_vegetation_areas(
     total = len(erwartet) or 1
 
     # ── Phase 1: Kacheln bereitstellen (Cache / Download) ────────────────────
+    # Downloads sind I/O-bound (WMS-Requests) und laufen daher mit mehreren
+    # Threads parallel (Standard: 4, siehe PLANNING_CIR_DOWNLOAD_PARALLELISM).
     # Speichert (pfad, easting_m, northing_m) für die spätere Geotransform-Berechnung.
-    kacheln: list[tuple[str, int, int]] = []
-    for i, (e, n) in enumerate(erwartet, 1):
-        pfad = _ensure_tile(e, n, cir_dir, source)
-        if pfad:
-            kacheln.append((pfad, e, n))
-        print(f"   Kacheln bereitgestellt {i}/{total} ({i / total * 100:.0f} %)")
-        _report(0.5 * i / total, f"Luftbild-Kacheln laden {i}/{total}")
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    kacheln_by_tile: dict[tuple[int, int], str] = {}
+    with ThreadPoolExecutor(max_workers=CIR_DOWNLOAD_PARALLELISM) as pool:
+        future_to_tile = {
+            pool.submit(_ensure_tile, e, n, cir_dir, source): (e, n) for e, n in erwartet
+        }
+        for i, future in enumerate(as_completed(future_to_tile), 1):
+            e, n = future_to_tile[future]
+            pfad = future.result()
+            if pfad:
+                kacheln_by_tile[(e, n)] = pfad
+            print(f"   Kacheln bereitgestellt {i}/{total} ({i / total * 100:.0f} %)")
+            _report(0.5 * i / total, f"Luftbild-Kacheln laden {i}/{total}")
+
+    kacheln = [(kacheln_by_tile[t], t[0], t[1]) for t in erwartet if t in kacheln_by_tile]
 
     if not kacheln:
         print(
