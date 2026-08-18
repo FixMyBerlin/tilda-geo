@@ -1,3 +1,5 @@
+import { databaseEnvSchema } from './envSchema'
+
 type DatabaseConfig = {
   host: string
   user: string
@@ -7,23 +9,13 @@ type DatabaseConfig = {
 }
 
 export function getDatabaseConfig() {
-  const host = process.env.DATABASE_HOST
-  const user = process.env.DATABASE_USER
-  const password = process.env.DATABASE_PASSWORD
-  const name = process.env.DATABASE_NAME
-
-  if (!host || !user || !password || !name) {
-    throw new Error(
-      'Missing database env. Provide DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME.',
-    )
-  }
-
+  const parsed = databaseEnvSchema.parse(process.env)
   return {
-    host,
-    user,
-    password,
-    name,
-    port: process.env.DATABASE_PORT ?? '5432',
+    host: parsed.DATABASE_HOST,
+    user: parsed.DATABASE_USER,
+    password: parsed.DATABASE_PASSWORD,
+    name: parsed.DATABASE_NAME,
+    port: parsed.DATABASE_PORT,
   } satisfies DatabaseConfig
 }
 

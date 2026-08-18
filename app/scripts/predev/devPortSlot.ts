@@ -1,8 +1,9 @@
+import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from '@/server/envDefaultPorts'
 import { isHostPortAvailable } from './devStackPorts'
 import { logErr } from './predevLog'
 
-export const DEV_DB_PORT_BASE = 5432
-export const DEV_TILES_PORT_BASE = 3000
+export const DEV_DB_PORT_BASE = Number(DEFAULT_DATABASE_PORT)
+export const DEV_TILES_PORT_BASE = Number(DEFAULT_TILES_PORT)
 export const DEV_VITE_PORT_BASE = 5173
 export const MAX_DEV_PORT_SLOT = 5
 

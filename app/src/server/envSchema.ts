@@ -5,6 +5,7 @@
  */
 import { z } from 'zod'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
+import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from './envDefaultPorts'
 
 const environmentValues = z.enum(['development', 'staging', 'production'])
 const mapboxToken = z.string().regex(/^pk\./)
@@ -18,12 +19,18 @@ const envViteSchema = z.object({
 
 export type EnvVite = z.infer<typeof envViteSchema>
 
-const envServerSchema = z.object({
-  SESSION_SECRET_KEY: requiredString,
+/** DB connection fields. `DATABASE_PORT` defaults when unset (local Docker / RDS 5432). */
+export const databaseEnvSchema = z.object({
   DATABASE_HOST: requiredString,
   DATABASE_USER: requiredString,
   DATABASE_PASSWORD: requiredString,
   DATABASE_NAME: requiredString,
+  DATABASE_PORT: z.string().min(1).default(DEFAULT_DATABASE_PORT),
+})
+
+const envServerSchema = z.object({
+  SESSION_SECRET_KEY: requiredString,
+  ...databaseEnvSchema.shape,
   OSM_CLIENT_ID: requiredString,
   OSM_CLIENT_SECRET: requiredString,
   S3_KEY: requiredString,
@@ -74,6 +81,7 @@ const envProcessingSchema = z.object({
   PROCESS_ONLY_BBOX: z.string().optional(),
   OSM2PGSQL_LOG_LEVEL: z.string().optional(),
   OSM2PGSQL_NUMBER_PROCESSES: z.string().optional(),
+  TILES_PORT: z.string().min(1).default(DEFAULT_TILES_PORT),
 })
 
 /** Validated at app startup (Nitro). Unknown keys are allowed; the plugin logs them as FYI. */
