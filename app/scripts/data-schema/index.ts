@@ -14,7 +14,7 @@ Commands (from app/):
 
 Usage:
   bun run data-schema-verify [-- --table <name>]
-  bun run data-schema-pull [-- --table <name>]
+  bun run data-schema-pull [-- --table <name>] [--snapshot <id>]
   bun run data-schema-load -- --table <name> [--file <path>]
   bun run data-schema-publish -- --table <name> [--spec-only] [--mode override|snapshot]
 

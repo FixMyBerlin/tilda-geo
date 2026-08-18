@@ -3,15 +3,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { DataSchemaImportStatus } from '@/prisma/generated/client'
 import db from '@/server/db.server'
-import { assertManifestMatchesTable } from './buildDataSchemaManifest'
 import { pgRestoreList, replaceTableFromDump } from './dataSchemaDb.server'
-import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
-import { downloadS3ObjectToFile, getS3ObjectJsonIfExists } from './dataSchemaS3.server'
-import {
-  assertDataSchemaTableName,
-  dataSchemaManifestKey,
-  dataSchemaSnapshotManifestKey,
-} from './dataSchemaS3Keys'
+import { downloadS3ObjectToFile, getDataSchemaManifestIfExists } from './dataSchemaS3.server'
+import { assertDataSchemaTableName } from './dataSchemaS3Keys'
 import { assertDumpContainsOnlyTable } from './parsePgRestoreToc'
 import { resolveDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { sha256File } from './sha256File'
@@ -39,19 +33,14 @@ export async function importDataSchemaTable({
 }) {
   assertDataSchemaTableName(table)
 
-  const manifestKey = snapshotId
-    ? dataSchemaSnapshotManifestKey(table, snapshotId)
-    : dataSchemaManifestKey(table)
-  const manifestJson = await getS3ObjectJsonIfExists(manifestKey)
-  if (!manifestJson) {
+  const manifest = await getDataSchemaManifestIfExists(table, snapshotId)
+  if (!manifest) {
     throw new Error(
       snapshotId
         ? `No snapshot manifest for data.${table} (${snapshotId})`
         : `No data.manifest.json for data.${table}`,
     )
   }
-  const manifest = dataSchemaManifestSchema.parse(manifestJson)
-  assertManifestMatchesTable(manifest, table)
 
   const dumpKey = await resolveDataSchemaDumpKey(table, snapshotId)
 

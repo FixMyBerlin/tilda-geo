@@ -5,6 +5,8 @@ import {
   dataSchemaSnapshotDumpKey,
   dataSchemaSnapshotId,
   dataSchemaSnapshotManifestKey,
+  dataSchemaSnapshotSpecKey,
+  dataSchemaSpecKey,
 } from './dataSchemaS3Keys'
 
 export type DataSchemaPublishPuts = {
@@ -41,7 +43,7 @@ export async function publishLatestDumpAndManifest(
 }
 
 /**
- * Copy the current dump aside before the next publish overwrites it.
+ * Copy the current spec + dump aside before the next publish overwrites them.
  * Snapshot id is the previous publishedAt (UTC minute). No-op if that snapshot already exists.
  */
 export async function archiveLatestAsSnapshot(
@@ -61,6 +63,7 @@ export async function archiveLatestAsSnapshot(
     throw new Error(`Cannot archive latest: invalid publishedAt "${previous.publishedAt}"`)
   }
   const snapshotId = dataSchemaSnapshotId(new Date(publishedMs))
+  const snapSpecKey = dataSchemaSnapshotSpecKey(table, snapshotId)
   const snapDumpKey = dataSchemaSnapshotDumpKey(table, snapshotId)
   const snapManifestKey = dataSchemaSnapshotManifestKey(table, snapshotId)
 
@@ -68,7 +71,8 @@ export async function archiveLatestAsSnapshot(
     return { keys: [snapManifestKey], snapshotId, skipped: true as const }
   }
 
+  await puts.copyObject(dataSchemaSpecKey(table), snapSpecKey)
   await puts.copyObject(sourceDumpKey, snapDumpKey)
   await puts.putJson(snapManifestKey, { ...previous, snapshotId })
-  return { keys: [snapDumpKey, snapManifestKey], snapshotId, skipped: false as const }
+  return { keys: [snapSpecKey, snapDumpKey, snapManifestKey], snapshotId, skipped: false as const }
 }

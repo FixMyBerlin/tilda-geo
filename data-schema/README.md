@@ -39,12 +39,13 @@ Everything except this README and `.gitignore` is gitignored.
 
 ## What is on S3
 
-Publish overwrites three current files per table. The dump is a `pg_dump` custom archive with zstd (`pg_restore` reads it; not a `.sql` file). Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current dump and manifest into `snapshots/<UTC>/` first, then overwrites the current files.
+Publish overwrites three current files per table. The dump is a `pg_dump` custom archive with zstd (`pg_restore` reads it; not a `.sql` file). Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current spec, dump, and manifest into `snapshots/<UTC>/` first, then overwrites the current files.
 
 ```
 data-schema/<table>/spec.json
 data-schema/<table>/data.dump
 data-schema/<table>/data.manifest.json
+data-schema/<table>/snapshots/<UTC>/spec.json
 data-schema/<table>/snapshots/<UTC>/data.dump
 data-schema/<table>/snapshots/<UTC>/data.manifest.json
 ```

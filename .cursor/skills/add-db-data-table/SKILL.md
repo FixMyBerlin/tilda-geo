@@ -80,7 +80,7 @@ Required for staging/production (skip only if the user asked for a local load on
 bun run data-schema-publish -- --table <table> [--mode override|snapshot]
 ```
 
-Uploads spec + a zstd-compressed `pg_dump` custom archive of the local table to S3 (`data.dump`; not plain SQL). Default `--mode override` overwrites `spec.json`, `data.dump`, and `data.manifest.json`. `--mode snapshot` copies the current dump+manifest to `snapshots/<when it was published>/` first — use that when keeping a previous version (e.g. v1.2) before a major bump. When the current dump is at least 1 day old and `--mode` is omitted, the CLI asks.
+Uploads spec + a zstd-compressed `pg_dump` custom archive of the local table to S3 (`data.dump`; not plain SQL). Default `--mode override` overwrites `spec.json`, `data.dump`, and `data.manifest.json`. `--mode snapshot` copies those three current files to `snapshots/<when it was published>/` first — use that when keeping a previous version (e.g. v1.2) before a major bump. When the current dump is at least 1 day old and `--mode` is omitted, the CLI asks. Import still restores the dump only; restore a snapshot spec with `bun run data-schema-pull -- --table <table> --snapshot <id>`.
 
 `--spec-only` uploads the spec without a dump (new recipe before load, or metadata edits: `provider`, `documentation`, `consumedBy`). Column/geometry changes need load + a full publish.
 

@@ -57,7 +57,7 @@ describe('publishLatestDumpAndManifest', () => {
 })
 
 describe('archiveLatestAsSnapshot', () => {
-  it('copies the current dump into snapshots/<UTC>/data.dump', async () => {
+  it('copies the current spec and dump into snapshots/<UTC>/', async () => {
     const previous = sampleManifest()
     const calls: string[] = []
     const result = await archiveLatestAsSnapshot(
@@ -79,6 +79,7 @@ describe('archiveLatestAsSnapshot', () => {
     expect(result.snapshotId).toBe('20260813T0800')
     expect(result.skipped).toBe(false)
     expect(calls).toEqual([
+      'copy:data-schema/euvm_cutouts_point/spec.json->data-schema/euvm_cutouts_point/snapshots/20260813T0800/spec.json',
       'copy:data-schema/euvm_cutouts_point/data.dump->data-schema/euvm_cutouts_point/snapshots/20260813T0800/data.dump',
       'json:data-schema/euvm_cutouts_point/snapshots/20260813T0800/data.manifest.json',
     ])

@@ -10,3 +10,17 @@ export const dataSchemaManifestSchema = z.object({
 })
 
 export type DataSchemaManifest = z.infer<typeof dataSchemaManifestSchema>
+
+export function parseDataSchemaManifest(raw: unknown, table: string) {
+  const parsed = dataSchemaManifestSchema.safeParse(raw)
+  if (!parsed.success) {
+    const detail = parsed.error.issues.map((issue) => issue.message).join('; ')
+    throw new Error(`Invalid manifest for "${table}": ${detail}`)
+  }
+  if (parsed.data.table !== table) {
+    throw new Error(
+      `Manifest table mismatch: expected "${table}" but manifest.table is "${parsed.data.table}".`,
+    )
+  }
+  return parsed.data
+}

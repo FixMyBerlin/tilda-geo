@@ -109,14 +109,7 @@ export function PageDataSchema() {
           <p className="text-sm text-gray-600">Keine Tabellen unter data-schema/ in S3 gefunden.</p>
         ) : (
           <AdminTable
-            header={[
-              'Tabelle',
-              'Veröffentlicht am',
-              'Zeilen (S3)',
-              'Zeilen (diese Umgebung)',
-              'Aktionen',
-              'Verlauf',
-            ]}
+            header={['Tabelle', 'Veröffentlicht am', 'Zeilen (S3)', 'Aktionen', 'Verlauf']}
           >
             {datasets.map((dataset) => {
               const selectedSnapshot =
@@ -167,11 +160,6 @@ export function PageDataSchema() {
                   </td>
                   <td className={adminTableClasses.td}>
                     {dataset.manifest ? dataset.manifest.rowCount.toLocaleString('de-DE') : '—'}
-                  </td>
-                  <td className={adminTableClasses.td}>
-                    {dataset.liveRowCount === null
-                      ? 'nicht vorhanden'
-                      : dataset.liveRowCount.toLocaleString('de-DE')}
                   </td>
                   <td className={adminTableClasses.td}>
                     <div className="flex min-w-56 flex-col gap-2">
@@ -249,7 +237,7 @@ export function PageDataSchema() {
                       </label>
                       <button
                         type="button"
-                        disabled={pendingKey !== null || dataset.liveRowCount === null}
+                        disabled={pendingKey !== null}
                         className={smallSecondaryButtonClassName}
                         onClick={() =>
                           runAction(

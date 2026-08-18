@@ -41,6 +41,9 @@ export function decidePublishMode(input: {
   return { mode: 'override' as const, prompt: false }
 }
 
+const SNAPSHOT_MODE_LOG =
+  'Mode: snapshot — copy current spec, dump, and manifest to snapshots/, then replace current files'
+
 export async function resolveWriteSnapshot(input: {
   explicitMode: PublishMode | undefined
   previousPublishedAt: string | null
@@ -53,7 +56,7 @@ export async function resolveWriteSnapshot(input: {
 
   if (!decision.prompt) {
     if (decision.mode === 'snapshot') {
-      p.log.info('Mode: snapshot — copy current dump to snapshots/, then replace data.dump')
+      p.log.info(SNAPSHOT_MODE_LOG)
     } else if (input.previousPublishedAt) {
       p.log.info(
         `Mode: override — replace data.dump (${formatLatestAge(input.previousPublishedAt, input.now)})`,
@@ -78,8 +81,8 @@ export async function resolveWriteSnapshot(input: {
     options: [
       {
         value: 'snapshot',
-        label: 'Archive current dump, then publish',
-        hint: 'copies data.dump to snapshots/<when it was published>/, then overwrites the current files',
+        label: 'Archive current files, then publish',
+        hint: 'copies spec.json, data.dump, and data.manifest.json to snapshots/<when it was published>/, then overwrites the current files',
       },
       {
         value: 'override',
@@ -93,7 +96,7 @@ export async function resolveWriteSnapshot(input: {
     process.exit(0)
   }
   if (selected === 'snapshot') {
-    p.log.info('Mode: snapshot — copy current dump to snapshots/, then replace data.dump')
+    p.log.info(SNAPSHOT_MODE_LOG)
     return true
   }
   p.log.info('Mode: override — replace data.dump only')

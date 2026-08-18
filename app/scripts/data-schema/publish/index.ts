@@ -7,16 +7,13 @@ import { $ } from 'bun'
 import { buildDataSchemaManifest } from '@/server/dataSchema/buildDataSchemaManifest'
 import { dataSchemaLocalSpecPath, loadLocalSpec } from '@/server/dataSchema/dataSchemaLocalPaths'
 import {
-  getS3ObjectJsonIfExists,
+  getDataSchemaManifestIfExists,
+  getDataSchemaSpecIfExists,
   copyS3Object,
-  dataSchemaS3Bucket,
   putS3File,
   putS3Json,
   s3ObjectExists,
 } from '@/server/dataSchema/dataSchemaS3.server'
-import { dataSchemaSpecKey } from '@/server/dataSchema/dataSchemaS3Keys'
-import { parseDataSchemaSpec } from '@/server/dataSchema/dataSchemaSpec.schema'
-import { getLatestDataSchemaManifest } from '@/server/dataSchema/getLatestDataSchemaManifest'
 import { pgDumpArchiveFlags } from '@/server/dataSchema/pgDumpArchiveFlags'
 import {
   archiveLatestAsSnapshot,
@@ -55,8 +52,7 @@ async function runPublish(argv: string[]) {
 
   p.intro('data-schema-publish')
 
-  const specJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(options.table))
-  const remoteSpec = specJson ? parseDataSchemaSpec(specJson, options.table) : null
+  const remoteSpec = await getDataSchemaSpecIfExists(options.table)
   const specWrite = await resolveSpecOverwrite({
     table: options.table,
     direction: 'publish',
@@ -85,7 +81,7 @@ async function runPublish(argv: string[]) {
   const rowCount = await getRowCount(options.table)
   p.log.info(`Row count: ${rowCount.toLocaleString()}`)
 
-  const previous = await getLatestDataSchemaManifest(options.table)
+  const previous = await getDataSchemaManifestIfExists(options.table)
   const writeSnapshot = await resolveWriteSnapshot({
     explicitMode: options.mode,
     previousPublishedAt: previous?.publishedAt ?? null,
@@ -135,7 +131,7 @@ async function runPublish(argv: string[]) {
       putJson: (key: string, value: unknown) => putS3Json(key, value),
     }
     const written: string[] = []
-    const bucket = dataSchemaS3Bucket()
+    const bucket = process.env.S3_BUCKET
 
     if (writeSnapshot) {
       if (!previous) {

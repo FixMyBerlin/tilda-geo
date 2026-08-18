@@ -4,9 +4,14 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { buildDataSchemaManifest } from './buildDataSchemaManifest'
 import { dumpTableToFile, getDataSchemaTableRowCount } from './dataSchemaDb.server'
-import { copyS3Object, putS3File, putS3Json, s3ObjectExists } from './dataSchemaS3.server'
+import {
+  copyS3Object,
+  getDataSchemaManifestIfExists,
+  putS3File,
+  putS3Json,
+  s3ObjectExists,
+} from './dataSchemaS3.server'
 import { assertDataSchemaTableName } from './dataSchemaS3Keys'
-import { getLatestDataSchemaManifest } from './getLatestDataSchemaManifest'
 import { archiveLatestAsSnapshot, publishLatestDumpAndManifest } from './publishDataSchemaArtifacts'
 import { resolveDataSchemaDumpKey } from './resolveLatestDataSchemaDumpKey'
 import { sha256File } from './sha256File'
@@ -37,7 +42,7 @@ export async function publishDataSchemaTableFromEnvironment({
     const sha256 = await sha256File(dumpPath)
     const publishedAt = new Date().toISOString()
 
-    const previous = await getLatestDataSchemaManifest(table)
+    const previous = await getDataSchemaManifestIfExists(table)
     const puts = {
       putFile: (key: string, filePath: string) => putS3File(key, filePath),
       putJson: (key: string, value: unknown) => putS3Json(key, value),

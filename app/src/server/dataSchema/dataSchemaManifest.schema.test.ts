@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildDataSchemaManifest } from './buildDataSchemaManifest'
-import { parseLatestDataSchemaManifest } from './getLatestDataSchemaManifest'
+import { parseDataSchemaManifest } from './dataSchemaManifest.schema'
 
 const validManifest = buildDataSchemaManifest({
   table: 'euvm_cutouts_point',
@@ -9,21 +9,21 @@ const validManifest = buildDataSchemaManifest({
   rowCount: 3,
 })
 
-describe('parseLatestDataSchemaManifest', () => {
+describe('parseDataSchemaManifest', () => {
   it('returns a valid manifest', () => {
-    expect(parseLatestDataSchemaManifest(validManifest, 'euvm_cutouts_point').table).toBe(
+    expect(parseDataSchemaManifest(validManifest, 'euvm_cutouts_point').table).toBe(
       'euvm_cutouts_point',
     )
   })
 
   it('throws when latest exists but is invalid so snapshot cannot no-op', () => {
     expect(() =>
-      parseLatestDataSchemaManifest({ table: 'euvm_cutouts_point' }, 'euvm_cutouts_point'),
-    ).toThrow(/Invalid latest manifest for "euvm_cutouts_point"/)
+      parseDataSchemaManifest({ table: 'euvm_cutouts_point' }, 'euvm_cutouts_point'),
+    ).toThrow(/Invalid manifest for "euvm_cutouts_point"/)
   })
 
   it('rejects a valid manifest for a different table', () => {
-    expect(() => parseLatestDataSchemaManifest(validManifest, 'other_table')).toThrow(
+    expect(() => parseDataSchemaManifest(validManifest, 'other_table')).toThrow(
       /Manifest table mismatch/,
     )
   })

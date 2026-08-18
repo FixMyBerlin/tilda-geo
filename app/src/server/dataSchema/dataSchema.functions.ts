@@ -4,15 +4,13 @@ import { z } from 'zod'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
-import { getDataSchemaTableRowCount } from './dataSchemaDb.server'
-import { dataSchemaManifestSchema } from './dataSchemaManifest.schema'
 import {
-  getS3ObjectJsonIfExists,
+  getDataSchemaManifestIfExists,
+  getDataSchemaSpecIfExists,
   listDataSchemaSnapshotIds,
   listDataSchemaTables,
 } from './dataSchemaS3.server'
-import { dataSchemaManifestKey, dataSchemaSpecKey } from './dataSchemaS3Keys'
-import { dataSchemaIdentifierSchema, parseDataSchemaSpec } from './dataSchemaSpec.schema'
+import { dataSchemaIdentifierSchema } from './dataSchemaSpec.schema'
 import { importDataSchemaTable } from './importDataSchemaTable.server'
 import { publishDataSchemaTableFromEnvironment } from './publishDataSchemaTable.server'
 
@@ -36,9 +34,8 @@ const historySelect = {
 
 async function loadSpecSummary(table: string) {
   try {
-    const specJson = await getS3ObjectJsonIfExists(dataSchemaSpecKey(table))
-    if (!specJson) return null
-    const parsed = parseDataSchemaSpec(specJson, table)
+    const parsed = await getDataSchemaSpecIfExists(table)
+    if (!parsed) return null
     return {
       file: parsed.source.file,
       provider: parsed.source.provider ?? null,
@@ -63,13 +60,6 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
 
   const datasets = await Promise.all(
     tables.map(async (table) => {
-      let liveRowCount: number | null = null
-      try {
-        liveRowCount = await getDataSchemaTableRowCount(table)
-      } catch {
-        liveRowCount = null
-      }
-
       let snapshotIds: string[] = []
       try {
         snapshotIds = await listDataSchemaSnapshotIds(table)
@@ -92,9 +82,8 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
       const spec = await loadSpecSummary(table)
 
       try {
-        const json = await getS3ObjectJsonIfExists(dataSchemaManifestKey(table))
-        if (!json) throw new Error('No data.manifest.json')
-        const manifest = dataSchemaManifestSchema.parse(json)
+        const manifest = await getDataSchemaManifestIfExists(table)
+        if (!manifest) throw new Error('No data.manifest.json')
         return {
           table,
           error: null as string | null,
@@ -105,7 +94,6 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
             sha256: manifest.sha256,
             snapshotId: manifest.snapshotId ?? null,
           },
-          liveRowCount,
           snapshotIds,
           recentImports,
         }
@@ -115,7 +103,6 @@ export const getDataSchemaOverviewLoaderFn = createServerFn({ method: 'GET' }).h
           error: error instanceof Error ? error.message : String(error),
           spec,
           manifest: null,
-          liveRowCount,
           snapshotIds,
           recentImports,
         }

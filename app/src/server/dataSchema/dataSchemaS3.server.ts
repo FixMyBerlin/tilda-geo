@@ -11,19 +11,18 @@ import {
   putObject,
 } from '@better-upload/server/helpers'
 import { getConfiguredS3Client } from '@/server/s3Client.server'
-import { DATA_SCHEMA_S3_PREFIX } from './dataSchemaS3Keys'
-
-function dataSchemaS3() {
-  const bucket = process.env.S3_BUCKET
-  if (!bucket) {
-    throw new Error('Missing S3_BUCKET in environment.')
-  }
-  return { client: getConfiguredS3Client(), bucket }
-}
-
-export function dataSchemaS3Bucket() {
-  return dataSchemaS3().bucket
-}
+import { parseDataSchemaManifest } from './dataSchemaManifest.schema'
+import {
+  DATA_SCHEMA_S3_PREFIX,
+  dataSchemaManifestKey,
+  dataSchemaSnapshotManifestKey,
+  dataSchemaSnapshotSpecKey,
+  dataSchemaSnapshotsPrefix,
+  dataSchemaSpecKey,
+  parseDataSchemaSnapshotFolder,
+  parseDataSchemaTableFolder,
+} from './dataSchemaS3Keys'
+import { parseDataSchemaSpec } from './dataSchemaSpec.schema'
 
 function isS3NotFoundError(error: unknown) {
   return (
@@ -34,20 +33,19 @@ function isS3NotFoundError(error: unknown) {
 }
 
 export async function listDataSchemaTables() {
-  const { client, bucket } = dataSchemaS3()
   const tables: string[] = []
   let continuationToken: string | undefined
   do {
-    const response = await listObjectsV2(client, {
-      bucket,
+    const response = await listObjectsV2(getConfiguredS3Client(), {
+      bucket: process.env.S3_BUCKET,
       prefix: `${DATA_SCHEMA_S3_PREFIX}/`,
       delimiter: '/',
       continuationToken,
     })
     for (const { prefix } of response.commonPrefixes) {
       if (!prefix) continue
-      const match = prefix.match(new RegExp(`^${DATA_SCHEMA_S3_PREFIX}/([^/]+)/$`))
-      if (match?.[1]) tables.push(match[1])
+      const table = parseDataSchemaTableFolder(prefix)
+      if (table) tables.push(table)
     }
     continuationToken = response.isTruncated ? response.nextContinuationToken : undefined
   } while (continuationToken)
@@ -55,21 +53,20 @@ export async function listDataSchemaTables() {
 }
 
 export async function listDataSchemaSnapshotIds(table: string) {
-  const { client, bucket } = dataSchemaS3()
-  const prefix = `${DATA_SCHEMA_S3_PREFIX}/${table}/snapshots/`
+  const prefix = dataSchemaSnapshotsPrefix(table)
   const ids: string[] = []
   let continuationToken: string | undefined
   do {
-    const response = await listObjectsV2(client, {
-      bucket,
+    const response = await listObjectsV2(getConfiguredS3Client(), {
+      bucket: process.env.S3_BUCKET,
       prefix,
       delimiter: '/',
       continuationToken,
     })
     for (const { prefix: commonPrefix } of response.commonPrefixes) {
       if (!commonPrefix) continue
-      const match = commonPrefix.match(new RegExp(`^${prefix}(\\d{8}T\\d{4})/$`))
-      if (match?.[1]) ids.push(match[1])
+      const id = parseDataSchemaSnapshotFolder(commonPrefix, table)
+      if (id) ids.push(id)
     }
     continuationToken = response.isTruncated ? response.nextContinuationToken : undefined
   } while (continuationToken)
@@ -77,18 +74,23 @@ export async function listDataSchemaSnapshotIds(table: string) {
 }
 
 export async function s3ObjectExists(key: string) {
-  const { client, bucket } = dataSchemaS3()
-  const listed = await listObjectsV2(client, { bucket, prefix: key, maxKeys: 1 })
+  const listed = await listObjectsV2(getConfiguredS3Client(), {
+    bucket: process.env.S3_BUCKET,
+    prefix: key,
+    maxKeys: 1,
+  })
   return listed.contents[0]?.key === key
 }
 
 async function getS3ObjectJson(key: string) {
-  const { client, bucket } = dataSchemaS3()
-  const object = await getObjectBlob(client, { bucket, key })
+  const object = await getObjectBlob(getConfiguredS3Client(), {
+    bucket: process.env.S3_BUCKET,
+    key,
+  })
   return JSON.parse(await object.blob.text()) as unknown
 }
 
-export async function getS3ObjectJsonIfExists(key: string) {
+async function getS3ObjectJsonIfExists(key: string) {
   try {
     return await getS3ObjectJson(key)
   } catch (error: unknown) {
@@ -97,10 +99,25 @@ export async function getS3ObjectJsonIfExists(key: string) {
   }
 }
 
+export async function getDataSchemaSpecIfExists(table: string, snapshotId?: string | null) {
+  const key = snapshotId ? dataSchemaSnapshotSpecKey(table, snapshotId) : dataSchemaSpecKey(table)
+  const json = await getS3ObjectJsonIfExists(key)
+  if (json == null) return null
+  return parseDataSchemaSpec(json, table)
+}
+
+export async function getDataSchemaManifestIfExists(table: string, snapshotId?: string | null) {
+  const key = snapshotId
+    ? dataSchemaSnapshotManifestKey(table, snapshotId)
+    : dataSchemaManifestKey(table)
+  const json = await getS3ObjectJsonIfExists(key)
+  if (json == null) return null
+  return parseDataSchemaManifest(json, table)
+}
+
 export async function putS3Json(key: string, value: unknown) {
-  const { client, bucket } = dataSchemaS3()
-  await putObject(client, {
-    bucket,
+  await putObject(getConfiguredS3Client(), {
+    bucket: process.env.S3_BUCKET,
     key,
     body: JSON.stringify(value, null, 2),
     contentType: 'application/json',
@@ -108,10 +125,9 @@ export async function putS3Json(key: string, value: unknown) {
 }
 
 export async function copyS3Object(fromKey: string, toKey: string) {
-  const { client, bucket } = dataSchemaS3()
-  await copyObject(client, {
-    source: { bucket, key: fromKey },
-    destination: { bucket, key: toKey },
+  await copyObject(getConfiguredS3Client(), {
+    source: { bucket: process.env.S3_BUCKET, key: fromKey },
+    destination: { bucket: process.env.S3_BUCKET, key: toKey },
   })
 }
 
@@ -120,10 +136,9 @@ export async function putS3File(
   filePath: string,
   contentType = 'application/octet-stream',
 ) {
-  const { client, bucket } = dataSchemaS3()
   const body = new Uint8Array(await readFile(filePath))
-  await putObject(client, {
-    bucket,
+  await putObject(getConfiguredS3Client(), {
+    bucket: process.env.S3_BUCKET,
     key,
     body,
     contentType,
@@ -132,8 +147,10 @@ export async function putS3File(
 }
 
 export async function downloadS3ObjectToFile(key: string, destPath: string) {
-  const { client, bucket } = dataSchemaS3()
-  const { stream } = await getObjectStream(client, { bucket, key })
+  const { stream } = await getObjectStream(getConfiguredS3Client(), {
+    bucket: process.env.S3_BUCKET,
+    key,
+  })
   await mkdir(dirname(destPath), { recursive: true })
   await pipeline(Readable.fromWeb(stream as never), createWriteStream(destPath))
 }
