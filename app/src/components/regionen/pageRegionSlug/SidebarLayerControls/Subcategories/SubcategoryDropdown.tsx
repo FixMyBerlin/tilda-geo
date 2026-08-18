@@ -1,10 +1,12 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { produce } from 'immer'
+import { useRef } from 'react'
 import { twJoin } from 'tailwind-merge'
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
+import { MotionAutoHeight } from '@/components/shared/motion/MotionAutoHeight'
 import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { Legend } from '../Legend/Legend'
 
@@ -18,6 +20,7 @@ type Props = {
 
 export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props) => {
   const { categoriesConfig, setCategoriesConfig } = useCategoriesConfig()
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
 
   type SelectActiveProps = { subcatId: string; styleId: string }
   const selectActive = ({ subcatId, styleId }: SelectActiveProps) => {
@@ -58,6 +61,20 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
           'mb-1 text-sm leading-4 font-medium',
           disabled ? 'cursor-not-allowed text-gray-500' : 'cursor-pointer text-gray-900',
         )}
+        onPointerDown={(e) => {
+          if (disabled || e.button !== 0) return
+          // MenuButton toggles on pointerdown for mouse and ignores later .click() once
+          // pointerType was "mouse" — so forward pointerdown, not click.
+          e.preventDefault()
+          menuButtonRef.current?.dispatchEvent(
+            new PointerEvent('pointerdown', {
+              bubbles: true,
+              cancelable: true,
+              pointerType: 'mouse',
+              button: 0,
+            }),
+          )
+        }}
       >
         {subcategory.name}
       </legend>
@@ -66,6 +83,7 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
         {({ open }) => (
           <>
             <MenuButton
+              ref={menuButtonRef}
               disabled={disabled}
               // `w-*` has to be set fo the `truncate` to work
               className={twJoin(
@@ -135,12 +153,12 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
         )}
       </Menu>
 
-      {!disabled && (
-        // No left indent on mobile (flush with the dropdown above); keep it on the desktop sidebar.
-        <div className="sm:ml-6">
-          <Legend subcategoryId={subcategory.id} styleConfig={activeStyleConfig} />
-        </div>
-      )}
+      {/* No left indent on mobile (flush with the dropdown above); keep it on the desktop sidebar.
+          The wrapper stays mounted while disabled so toggling the category morphs the height
+          instead of dropping the legend instantly. */}
+      <MotionAutoHeight className="sm:ml-6">
+        {!disabled && <Legend subcategoryId={subcategory.id} styleConfig={activeStyleConfig} />}
+      </MotionAutoHeight>
     </fieldset>
   )
 }

@@ -1,10 +1,11 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { produce } from 'immer'
 import { Fragment } from 'react'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
+import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { SubcategoryCheckbox } from '../Subcategories/SubcategoryCheckbox'
 import { SubcategoryDropdown } from '../Subcategories/SubcategoryDropdown'
 import { CategoryHeadlineToggle } from './CategoryHeadlineToggle'
@@ -57,15 +58,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             </DisclosureButton>
           </header>
 
-          <Transition
-            show={open}
-            enter="transition duration-100 ease-out"
-            enterFrom="transform scale-95 opacity-0"
-            enterTo="transform scale-100 opacity-100"
-            leave="transition duration-75 ease-out"
-            leaveFrom="transform scale-100 opacity-100"
-            leaveTo="transform scale-95 opacity-0"
-          >
+          <MotionCollapse open={open}>
             <DisclosurePanel static as="nav" className="mt-3 mb-2 space-y-2.5">
               {currCategoryConfig.subcategories?.map((subcat) => {
                 const showSpacer = currCategoryConfig.spacerAfter?.has(subcat.id)
@@ -90,7 +83,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
                 )
               })}
             </DisclosurePanel>
-          </Transition>
+          </MotionCollapse>
         </>
       )}
     </Disclosure>

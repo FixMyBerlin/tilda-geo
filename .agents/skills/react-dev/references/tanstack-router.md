@@ -1,6 +1,9 @@
 # TanStack Router — TypeScript only
 
-**Routing behavior and layout** (loaders, React Query, `ssr`, `validateSearch`, thin routes, API routes) → skill `tanstack-start-conventions`.
+**Canonical copy:** skill `tanstack-router-conventions` → [router-typescript.md](../../tanstack-router-conventions/references/router-typescript.md).
+
+**Routing behavior** (loaders, React Query, `validateSearch`, pretty search URLs) → `tanstack-router-conventions`.  
+**Start-only** (SSR, server functions, API routes) → `tanstack-start-conventions`.
 
 Docs: [TanStack Router](https://tanstack.com/router/latest/docs/framework/react/overview) · [llms.txt](https://tanstack.com/llms.txt)
 
@@ -22,7 +25,7 @@ export const Route = createFileRoute('/users/$userId')({
 function UserPage() {
   const { userId } = Route.useParams()
   const search = Route.useSearch()
-  const data = Route.useLoaderData() // prefer Query patterns per conventions skill
+  const data = Route.useLoaderData() // prefer Query patterns per tanstack-router-conventions
 }
 ```
 
@@ -56,9 +59,8 @@ Catch-all splat routes (`routes/posts/$.tsx`) expose the remainder via `Route.us
 
 ## Search params
 
-- UI routes: Zod `validateSearch` on the route — see `tanstack-start-conventions` / `params-search-ui-vs-api.md`
-- **Router `router.tsx`:** required `parseSearch` / `stringifySearch` (pretty JSON + per-param encodings) — `tanstack-start-conventions` / `router-search-serialization.md`
-- **URL search:** route `validateSearch` (Zod) — skill `tanstack-start-conventions` → `params-search-ui-vs-api.md`
+- UI routes: Zod `validateSearch` — `tanstack-router-conventions` → `params-search-ui-routes.md`
+- **Router `router.tsx`:** required `parseSearch` / `stringifySearch` — `tanstack-router-conventions` → `router-search-serialization.md`
 
 ## Router type registration
 
@@ -74,9 +76,6 @@ declare module '@tanstack/react-router' {
 
 ## Do not duplicate here
 
-- Loader vs `useLoaderData` vs `useSuspenseQuery`
-- `createServerFn` / `*.functions.ts`
-- Selective `ssr`
-- Auth `beforeLoad`
-
-All of the above are in `tanstack-start-conventions` and related skills.
+- Loader vs `useLoaderData` vs `useSuspenseQuery` → `tanstack-router-conventions`
+- `createServerFn` / `*.functions.ts` / selective `ssr` → `tanstack-start-conventions`
+- Auth `beforeLoad` → `tanstack-start-auth`

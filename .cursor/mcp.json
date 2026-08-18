@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "tilda-geo-admin--DEV": {
+      "url": "http://127.0.0.1:5173/mcp",
+      "headers": {
+        "Authorization": "Bearer tildageode_admin_local_dev_mcp_only"
+      }
+    },
+    "tilda-geo-admin--STG": {
+      "url": "https://staging.tilda-geo.de/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_STG}"
+      }
+    },
+    "tilda-geo-admin--PRD": {
+      "url": "https://tilda-geo.de/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_PRD}"
+      }
+    }
+  }
+}

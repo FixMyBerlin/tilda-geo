@@ -4,6 +4,7 @@ import { twJoin } from 'tailwind-merge'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
+import { AnimatedNumber } from '@/components/shared/motion/AnimatedNumber'
 import {
   calculateMetricSummaryForAreas,
   calculatorMetricOrder,
@@ -169,7 +170,7 @@ const AreaSummary = ({
         </button>
       </div>
       <strong className="text-sm tabular-nums sm:text-[0.7rem]">
-        {formatNumber(areaSummary.total)}
+        <AnimatedNumber value={areaSummary.total} format={formatNumber} />
       </strong>
     </div>
 
@@ -264,7 +265,9 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
             <div className="-mx-2 mt-1 border-t border-white/70 px-2 pt-1.5 text-sm font-semibold sm:text-[0.72rem]">
               <div className="flex items-center justify-between gap-2">
                 <span>{selectedMetricLabel} Kombiniert</span>
-                <span className="tabular-nums">{data.formatNumber(summary.combined.total)}</span>
+                <span className="tabular-nums">
+                  <AnimatedNumber value={summary.combined.total} format={data.formatNumber} />
+                </span>
               </div>
             </div>
           )}

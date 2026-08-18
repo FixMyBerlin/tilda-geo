@@ -7,7 +7,7 @@ import {
   warmingTablesKeyToSourceId,
   warmingTablesToSourceIds,
 } from './cacheWarmingSources'
-import { parseRegionCacheWarming } from './regionGeoJson'
+import { parseRegionCacheWarming, cacheWarmingToWriteInput } from './regionGeoJson'
 import {
   RegionFormRawSchema,
   RegionFormSchema,
@@ -37,6 +37,9 @@ const validBase: RegionWriteInput = {
   exports: [],
   navigationLinks: [],
   contractId: null,
+  maskOsmRelationIds: [],
+  maskBufferKm: 10,
+  welcome: null,
 }
 
 const fullBbox = { bbox: [13.0, 52.3, 13.8, 52.6] as const }
@@ -44,6 +47,11 @@ const fullBbox = { bbox: [13.0, 52.3, 13.8, 52.6] as const }
 describe('RegionWriteSchema', () => {
   test('accepts a minimal valid config (no exports, no bbox)', () => {
     expect(RegionWriteSchema.safeParse(validBase).success).toBe(true)
+  })
+
+  test('rejects unknown keys (strict)', () => {
+    const result = RegionWriteSchema.safeParse({ ...validBase, notAField: true })
+    expect(result.success).toBe(false)
   })
 
   describe('exports ⇔ bbox invariant', () => {
@@ -195,6 +203,16 @@ const regionFormBase = {
   exports: '',
   navigationLinks: [],
   contractId: '',
+  maskEnabled: 'false' as const,
+  maskOsmRelationIds: '',
+  maskBufferKm: '10',
+  welcomeEnabled: 'false' as const,
+  welcomeTitle: '',
+  welcomeSubtitle: '',
+  welcomeBodyMarkdown: '',
+  welcomeImageUploadId: '',
+  welcomeImageAltText: '',
+  welcomeSections: [],
 }
 
 describe('RegionFormRawSchema en decimal map fields', () => {
@@ -405,6 +423,144 @@ describe('RegionFormSchema', () => {
       'barrierAreas,barrierLines',
     ])
   })
+
+  test('round-trips mask OSM relation IDs into the form string field', () => {
+    const config: RegionWriteInput = {
+      ...validBase,
+      maskOsmRelationIds: [2787952, 62504],
+      maskBufferKm: 1.5,
+    }
+    const formValues = regionConfigToFormValues(config)
+    expect(formValues.maskEnabled).toBe('true')
+    expect(formValues.maskOsmRelationIds).toBe('2787952, 62504')
+    expect(formValues.maskBufferKm).toBe('1.5')
+
+    const parsed = RegionFormSchema.parse(formValues)
+    expect(parsed.maskOsmRelationIds).toEqual([2787952, 62504])
+    expect(parsed.maskBufferKm).toBe(1.5)
+  })
+})
+
+describe('RegionFormSchema welcome image', () => {
+  test('rejects image uploadId but empty altText', () => {
+    const result = RegionFormRawSchema.safeParse({
+      ...regionFormBase,
+      welcomeEnabled: 'true',
+      welcomeTitle: 'Willkommen',
+      welcomeImageUploadId: '1',
+      welcomeImageAltText: '',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues.some((issue) => issue.path.includes('welcomeImageAltText'))).toBe(
+        true,
+      )
+    }
+  })
+
+  test('accepts image with uploadId and altText', () => {
+    const result = RegionFormSchema.safeParse({
+      ...regionFormBase,
+      welcomeEnabled: 'true',
+      welcomeTitle: 'Willkommen',
+      welcomeImageUploadId: '1',
+      welcomeImageAltText: 'Radwege auf der Karte',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.welcome?.image).toEqual({
+        uploadId: 1,
+        altText: 'Radwege auf der Karte',
+      })
+    }
+  })
+})
+
+describe('RegionFormSchema welcome disable preserves content', () => {
+  test('disabled toggle keeps welcome object with enabled false', () => {
+    const parsed = RegionFormSchema.parse({
+      ...regionFormBase,
+      welcomeEnabled: 'false',
+      welcomeTitle: 'Saved title',
+      welcomeSubtitle: 'Saved subtitle',
+      welcomeBodyMarkdown: 'Saved body',
+      welcomeSections: [{ title: 'FAQ', bodyMarkdown: 'Answer', sortOrder: 0 }],
+    })
+    expect(parsed.welcome).toEqual({
+      enabled: false,
+      title: 'Saved title',
+      subtitle: 'Saved subtitle',
+      bodyMarkdown: 'Saved body',
+      image: null,
+      sections: [{ title: 'FAQ', bodyMarkdown: 'Answer', sortOrder: 0 }],
+    })
+  })
+})
+
+describe('RegionWelcomeWriteSchema', () => {
+  test('enabled requires non-empty title', () => {
+    const result = RegionWriteSchema.safeParse({
+      ...validBase,
+      welcome: {
+        enabled: true,
+        title: '',
+        image: null,
+        sections: [],
+      },
+    })
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects more than 8 sections', () => {
+    const result = RegionWriteSchema.safeParse({
+      ...validBase,
+      welcome: {
+        enabled: true,
+        title: 'Willkommen',
+        image: null,
+        sections: [
+          { title: 'A', sortOrder: 0 },
+          { title: 'B', sortOrder: 1 },
+          { title: 'C', sortOrder: 2 },
+          { title: 'D', sortOrder: 3 },
+          { title: 'E', sortOrder: 4 },
+          { title: 'F', sortOrder: 5 },
+          { title: 'G', sortOrder: 6 },
+          { title: 'H', sortOrder: 7 },
+          { title: 'I', sortOrder: 8 },
+        ],
+      },
+    })
+    expect(result.success).toBe(false)
+  })
+
+  test('image requires non-empty altText', () => {
+    const result = RegionWriteSchema.safeParse({
+      ...validBase,
+      welcome: {
+        enabled: true,
+        title: 'Willkommen',
+        image: { uploadId: 1, altText: '' },
+        sections: [],
+      },
+    })
+    expect(result.success).toBe(false)
+  })
+
+  test('accepts enabled welcome with image and sections', () => {
+    const result = RegionWriteSchema.safeParse({
+      ...validBase,
+      welcome: {
+        enabled: true,
+        title: 'Willkommen',
+        subtitle: 'Untertitel',
+        bodyMarkdown: 'Intro',
+        image: { uploadId: 1, altText: 'Hero-Bild' },
+        sections: [{ title: 'FAQ', bodyMarkdown: 'Antwort', sortOrder: 0 }],
+      },
+    })
+    expect(result.success).toBe(true)
+  })
 })
 
 describe('cacheWarmingSources helpers', () => {
@@ -437,5 +593,32 @@ describe('parseRegionCacheWarming (lenient read)', () => {
       tables: ['bikelanes'],
     })
     expect(parsed).toEqual({ minZoom: 2, maxZoom: 20, tables: ['bikelanes'] })
+  })
+})
+
+describe('cacheWarmingToWriteInput (strict write round-trip)', () => {
+  test('clamps out-of-range zooms so RegionWriteSchema accepts the result', () => {
+    const write = cacheWarmingToWriteInput({
+      minZoom: 2,
+      maxZoom: 20,
+      tables: ['bikelanes'],
+    })
+    expect(write).toEqual({ minZoom: 4, maxZoom: 14, tables: ['bikelanes'] })
+    expect(
+      RegionWriteSchema.safeParse({
+        ...validBase,
+        cacheWarming: write,
+      }).success,
+    ).toBe(true)
+  })
+
+  test('drops unknown tables and nulls when none remain', () => {
+    expect(
+      cacheWarmingToWriteInput({
+        minZoom: 8,
+        maxZoom: 10,
+        tables: ['legacy_orphan'],
+      }),
+    ).toBeNull()
   })
 })

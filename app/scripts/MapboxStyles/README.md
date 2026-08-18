@@ -28,5 +28,5 @@ The reason for that is, that styling the data there has the best editor experien
    - The styles are cleaned up by removing 'source', 'source-layer', 'metadata' which we add back later in our subcategory configuration.
 2. The script generates merged sprite files in `public/map-style/` (e.g. `sprite`, `sprite@2x`).
 3. The script stores the original base style in `src/server/api/map-style/style.json`.
-   The `style.json` represents our `baseMapStyle`.
-   The `/api/map-style` route replaces the sprite reference with our own at request time.
+   The `style.json` represents our `baseMapStyle` (generated — do not hand-edit).
+   The `/api/map-style` route applies app-only overrides at request time (merged sprite URL, MapLibre `sky`).

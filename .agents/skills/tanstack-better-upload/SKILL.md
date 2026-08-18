@@ -63,6 +63,7 @@ file picker / dropzone* onDrop
 
 ## Related skills
 
+- `tanstack-router-conventions` — routes, search params (when wiring upload UI to URL state)
 - `tanstack-start-conventions` — layout, `.server.ts` / `.functions.ts`, API route boundaries, SSR
 
 ## Usage rules (daily work)

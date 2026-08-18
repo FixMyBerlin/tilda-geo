@@ -75,7 +75,7 @@ When PR-body release notes or tier say investigate:
 
 1. `gh pr diff <number>` — focus on `package.json`, `bun.lock`, not only lockfile noise.
 2. Grep the local checkout for APIs mentioned in breaking sections (deprecated props, renamed exports, config keys).
-3. Load the relevant FMC skill if the bump touches that area (`react-dev`, `react-map-gl`, `tanstack-start-conventions`, `playwright-skill`, etc.).
+3. Load the relevant FMC skill if the bump touches that area (`react-dev`, `react-map-gl`, `tanstack-router-conventions`, `tanstack-start-conventions`, `playwright-skill`, etc.).
 4. Check **peer dependency** warnings in CI logs.
 
 **browserslist** bumps: Dependabot does not change the browserslist query — but lockfile may refresh `caniuse-lite`. After merge, ensure `bun oxlint` and `bun run build` still pass ([browser-target.md](../tech-stack/references/browser-target.md)).

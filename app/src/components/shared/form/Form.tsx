@@ -132,16 +132,33 @@ export function Form<TValues extends Record<string, unknown>>({
   const actionBar = submitLabel ? (
     <FormActionBar
       left={
-        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting] as const}>
-          {([canSubmit, isSubmitting]) => (
-            <button
-              type="submit"
-              disabled={!canSubmit || isSubmitting}
-              className={submitClassName ?? buttonStyles}
-            >
-              {isSubmitting ? '…' : submitLabel}
-            </button>
-          )}
+        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting, s.errors] as const}>
+          {([canSubmit, isSubmitting, errors]) => {
+            const lines = showFormErrors ? uniqueFormattedFormErrors(errors) : []
+            return (
+              <div className="flex min-w-0 flex-wrap items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting}
+                  className={submitClassName ?? buttonStyles}
+                  title={
+                    !canSubmit && lines.length > 0
+                      ? `Formular unvollständig: ${lines.join(' · ')}`
+                      : undefined
+                  }
+                >
+                  {isSubmitting ? '…' : submitLabel}
+                </button>
+                {lines.length > 0 ? (
+                  <div className="min-w-0 text-sm text-red-800" role="alert">
+                    {lines.map((msg) => (
+                      <p key={msg}>{msg}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            )
+          }}
         </form.Subscribe>
       }
       right={actionBarRight}
@@ -161,28 +178,6 @@ export function Form<TValues extends Record<string, unknown>>({
       {actionBarPlacement === 'both' ? actionBar : null}
 
       {children(form as FormApi<TValues>)}
-
-      {showFormErrors ? (
-        <form.Subscribe selector={(s) => s.errors}>
-          {(errors) => {
-            const lines = uniqueFormattedFormErrors(errors)
-            if (lines.length === 0) return null
-            if (!isProd) {
-              console.info('[Form] validation errors (client)', {
-                raw: errors,
-                formattedLines: lines,
-              })
-            }
-            return (
-              <div className="text-sm text-red-600" role="alert">
-                {lines.map((msg) => (
-                  <p key={msg}>{msg}</p>
-                ))}
-              </div>
-            )
-          }}
-        </form.Subscribe>
-      ) : null}
 
       {submitError ? (
         <div className="text-sm text-red-600" role="alert">

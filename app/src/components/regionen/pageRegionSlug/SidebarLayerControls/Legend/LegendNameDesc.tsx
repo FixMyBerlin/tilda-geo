@@ -4,7 +4,7 @@ import { Markdown } from '@/components/shared/text/Markdown'
 type Props = Pick<FileMapDataSubcategoryStyleLegend, 'name' | 'desc'>
 
 export const LegendNameDesc = ({ name, desc }: Props) => {
-  const wrapperClass = 'text-sm leading-none font-normal text-gray-700 hyphens-auto'
+  const wrapperClass = 'min-w-0 flex-1 text-sm leading-none font-normal text-gray-700 hyphens-auto'
 
   if (desc) {
     return (

@@ -12,6 +12,7 @@ import {
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
+import { FadeSlideIn } from '@/components/shared/motion/FadeSlideIn'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
 import { Inspector } from './Inspector'
 import { InspectorHeader } from './InspectorHeader'
@@ -97,7 +98,7 @@ export const SidebarInspector = () => {
     <div
       ref={desktopPanelRef}
       className={twJoin(
-        'group/panel absolute top-0 right-0 bottom-0 z-20 w-(--inspector-width) max-w-[800px] overflow-hidden bg-white shadow-md',
+        'group/panel absolute top-0 right-0 bottom-0 z-20 w-(--inspector-width) max-w-[800px] overflow-hidden bg-white shadow-md transition-opacity duration-150',
         !renderFeatures && 'pointer-events-none opacity-0',
       )}
     >
@@ -110,10 +111,13 @@ export const SidebarInspector = () => {
             className="absolute top-0 bottom-0 left-0 z-30 w-2 cursor-col-resize touch-none bg-gray-400/70 opacity-0 transition-opacity select-none group-hover/panel:opacity-100 active:opacity-100"
             onPointerDown={onResizeHandlePointerDown}
           />
-          <div className="relative h-full overflow-y-auto p-5 pr-3">
+          {/* Enter-only transform/opacity animation on the content only: the outer panel
+              div must stay a plain, always-mounted div — its ResizeObserver and the
+              --inspector-width layout effect depend on it (see useResizableInspectorWidth). */}
+          <FadeSlideIn x={24} className="relative h-full overflow-y-auto p-5 pr-3">
             <InspectorHeader count={features.length} handleClose={handleClose} />
             <Inspector features={features} />
-          </div>
+          </FadeSlideIn>
         </>
       ) : null}
     </div>

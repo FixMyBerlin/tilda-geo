@@ -194,6 +194,16 @@ model Region {
   contractId Int?
   contract   RegionContract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
 
+  welcomeEnabled       Boolean @default(false)
+  welcomeTitle         String  @default("")
+  welcomeSubtitle      String?
+  welcomeBodyMarkdown  String?
+  /// [{ title, bodyMarkdown, sortOrder }] — validated by regionWelcomeSectionsSchema (max 8)
+  welcomeSections      Json    @default("[]")
+  welcomeImageUploadId Int?
+  welcomeImageUpload   RegionUpload? @relation("RegionWelcomeImage", fields: [welcomeImageUploadId], references: [id], onDelete: SetNull)
+  welcomeImageAltText  String?
+
   categoryAssignments   RegionCategoryAssignment[]
   backgroundAssignments RegionBackgroundAssignment[]
   exportAssignments     RegionExportAssignment[]
@@ -207,6 +217,7 @@ model Region {
 
   @@index([contractId])
   @@index([headerLogoId])
+  @@index([welcomeImageUploadId])
   @@map("Region")
   @@schema("prisma")
 }
@@ -230,7 +241,8 @@ model RegionUpload {
   /// Better Auth user id of the admin who uploaded it (audit; not an FK to keep User untouched).
   createdById String?
 
-  headerLogoForRegions Region[] @relation("RegionHeaderLogo")
+  headerLogoForRegions     Region[] @relation("RegionHeaderLogo")
+  welcomeImageForRegions   Region[] @relation("RegionWelcomeImage")
 
   @@index([regionId])
   @@map("RegionUpload")

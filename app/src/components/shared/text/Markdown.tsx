@@ -23,6 +23,11 @@ type Props = {
   headingLevelOffset?: number
   /** Prefix for generated heading `id`s (e.g. chapter id) so subsections are linkable via URL hash. */
   headingIdPrefix?: string
+  /**
+   * Stay in the surrounding line flow: span wrapper, paragraphs unwrap to spans, no prose typography.
+   * Use for inspector labels/values that may contain `` `code` `` but sit inside existing text.
+   */
+  inline?: boolean
 }
 
 type HeadingMdProps = ComponentPropsWithoutRef<'h1'> & ExtraProps
@@ -115,6 +120,21 @@ type HrMdProps = ComponentPropsWithoutRef<'hr'> & ExtraProps
 
 const MdHr = ({ node: _node, ...props }: HrMdProps) => <hr className="my-2" {...props} />
 
+type ParagraphMdProps = ComponentPropsWithoutRef<'p'> & ExtraProps
+type CodeMdProps = ComponentPropsWithoutRef<'code'> & ExtraProps
+
+const MdInlineP = ({ node: _node, ...props }: ParagraphMdProps) => <span {...props} />
+
+const MdInlineCode = ({ node: _node, className, ...props }: CodeMdProps) => (
+  <code
+    className={twMerge(
+      'rounded-sm bg-gray-100 px-0.5 py-px font-mono text-[0.925em] font-normal',
+      className,
+    )}
+    {...props}
+  />
+)
+
 const compactMarkdownComponents = {
   h1: MdH1,
   h2: MdH2,
@@ -124,6 +144,12 @@ const compactMarkdownComponents = {
   h6: MdH6,
   a: MdA,
   hr: MdHr,
+}
+
+const inlineMarkdownComponents = {
+  ...compactMarkdownComponents,
+  p: MdInlineP,
+  code: MdInlineCode,
 }
 
 const createDocumentMarkdownComponents = (
@@ -147,20 +173,29 @@ export const Markdown = ({
   headingStyle = 'compact',
   headingLevelOffset = 0,
   headingIdPrefix,
+  inline = false,
 }: Props) => {
   const components = useMemo(() => {
+    if (inline) return inlineMarkdownComponents
     if (headingStyle !== 'document') return compactMarkdownComponents
     const idRegistry: HeadingIdRegistry = new Map()
     return createDocumentMarkdownComponents(headingLevelOffset, idRegistry, headingIdPrefix)
-  }, [headingStyle, headingLevelOffset, headingIdPrefix])
+  }, [inline, headingStyle, headingLevelOffset, headingIdPrefix])
 
   if (!markdown) return null
 
-  return (
-    <div className={twMerge(proseClasses, className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} components={components}>
-        {markdown}
-      </ReactMarkdown>
-    </div>
+  const body = (
+    <ReactMarkdown
+      remarkPlugins={inline ? [remarkGfm] : [remarkGfm, remarkBreaks]}
+      components={components}
+    >
+      {markdown}
+    </ReactMarkdown>
   )
+
+  if (inline) {
+    return <span className={className}>{body}</span>
+  }
+
+  return <div className={twMerge(proseClasses, className)}>{body}</div>
 }

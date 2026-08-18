@@ -30,17 +30,17 @@ attributes:
       - value: pedestrian
         label: Fußgängerzone
       - value: primary_link
-        label: Zufahrt einer Bundesstraße/Hauptverbindungsstraße
+        label: Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
       - value: primary
-        label: Bundesstraße/Hauptverbindungsstraße
+        label: Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
       - value: residential
         label: Anwohnerstraße
       - value: residential_priority_road
         label: residential_priority_road
       - value: secondary_link
-        label: Zufahrt einer Landesstraße/wichtigen Durchgangsstraße
+        label: Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße
       - value: secondary
-        label: Landesstraße/Wichtige Durchgangsstraße
+        label: Landes&shy;straße/Wichtige Durchgangs&shy;straße
       - value: service_alley
         label: Gasse
       - value: service_driveway
@@ -58,9 +58,9 @@ attributes:
       - value: steps
         label: Stufen
       - value: tertiary_link
-        label: Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße
+        label: Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße
       - value: tertiary
-        label: Kreisstraße/Untergeordnete Durchgangsstraße
+        label: Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße
       - value: track
         label: Wald- / Feldweg
       - value: unclassified
@@ -86,25 +86,25 @@ attributes:
       - value: pedestrian
         label: Fußgängerzone
       - value: primary
-        label: Bundesstraße/Hauptverbindungsstraße
+        label: Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
       - value: primary_link
-        label: Zufahrt einer Bundesstraße/Hauptverbindungsstraße
+        label: Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße
       - value: residential
         label: Anwohnerstraße
       - value: road
         label: Unkategorisierte Straße
       - value: secondary
-        label: Landesstraße/Wichtige Durchgangsstraße
+        label: Landes&shy;straße/Wichtige Durchgangs&shy;straße
       - value: secondary_link
-        label: Zufahrt einer Landesstraße/wichtigen Durchgangsstraße
+        label: Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße
       - value: service
         label: Zufahrtsweg
       - value: steps
         label: Stufen
       - value: tertiary
-        label: Kreisstraße/Untergeordnete Durchgangsstraße
+        label: Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße
       - value: tertiary_link
-        label: Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße
+        label: Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße
       - value: track
         label: Wald- / Feldweg
       - value: trunk
@@ -144,6 +144,7 @@ attributes:
   - key: width_source
     purpose: qa
     label: Quelle Breite
+    format: sanitized_strings
     values:
       - value: ALKIS
         label: Aus ALKIS Daten ausgemessen
@@ -317,9 +318,9 @@ attributes:
       - value: 'concrete:lanes'
         label: Betonstreifen / -bahnen
       - value: paving_stones
-        label: Verbundpflastersteine
+        label: Verbund&shy;pflastersteine
       - value: 'paving_stones:lanes'
-        label: Pflastersteinbahnen
+        label: Pflasterstein&shy;bahnen
       - value: sett
         label: Behauenes Pflaster / Natursteinpflaster
       - value: mosaic_sett
@@ -383,7 +384,7 @@ attributes:
       - value: low
         label: Niedrig
   - key: smoothness
-    label: Oberflächenqualität
+    label: Ober&shy;flächen&shy;qualität
     values:
       - value: excellent
         label: Sehr gut
@@ -397,7 +398,7 @@ attributes:
         label: Sehr schlecht
   - key: smoothness_source
     purpose: qa
-    label: Herkunft der Oberflächenqualität
+    label: Herkunft der Ober&shy;flächen&shy;qualität
     values:
       - value: tag
         label: OSM-Tag `smoothness`
@@ -411,14 +412,14 @@ attributes:
         label: Abgeleitet von `mtb:scale`
   - key: smoothness_confidence
     purpose: qa
-    label: Konfidenz Oberflächenqualität
+    label: Konfidenz Ober&shy;flächen&shy;qualität
     values:
       - value: high
         label: Hoch
       - value: medium
         label: Mittel
   - key: surface_color
-    label: Oberflächenfarbe
+    label: Ober&shy;flächen&shy;farbe
     values:
       - value: red
         label: Rot

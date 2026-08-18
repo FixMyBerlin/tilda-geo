@@ -60,7 +60,12 @@ export default defineConfig({
       optimizeDeps: {
         // holdUntilCrawlEnd defaults to true in Vite 8 — deps bundle into deps_temp_* but
         // never commit to deps/ while crawl is active, stalling react.js and all client hydration.
-        include: ['better-auth/react', 'better-auth/client/plugins', 'motion/react'],
+        include: [
+          'better-auth/react',
+          'better-auth/client/plugins',
+          'motion/react',
+          '@floating-ui/react',
+        ],
         holdUntilCrawlEnd: false,
         ignoreOutdatedRequests: true,
       },

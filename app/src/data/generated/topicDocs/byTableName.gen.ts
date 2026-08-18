@@ -521,11 +521,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -903,11 +903,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -919,11 +919,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -959,11 +959,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -1006,11 +1006,11 @@ const data = {
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -1022,11 +1022,11 @@ const data = {
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'service',
@@ -1038,11 +1038,11 @@ const data = {
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -1081,11 +1081,11 @@ const data = {
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -1097,11 +1097,11 @@ const data = {
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'service',
@@ -1113,11 +1113,11 @@ const data = {
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -1198,7 +1198,7 @@ const data = {
       },
       {
         key: 'width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
         values: [
@@ -1268,7 +1268,7 @@ const data = {
       {
         key: 'surface_color',
         type: 'string',
-        label: 'Oberflächenfarbe',
+        label: 'Ober&shy;flächen&shy;farbe',
         values: [
           {
             value: 'red',
@@ -1738,11 +1738,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -1873,7 +1873,7 @@ const data = {
       {
         key: 'smoothness',
         type: 'string',
-        label: 'Oberflächenqualität',
+        label: 'Ober&shy;flächen&shy;qualität',
         values: [
           {
             value: 'excellent',
@@ -1900,7 +1900,7 @@ const data = {
       {
         key: 'smoothness_source',
         type: 'string',
-        label: 'Herkunft der Oberflächenqualität',
+        label: 'Herkunft der Ober&shy;flächen&shy;qualität',
         purpose: 'qa',
         values: [
           {
@@ -1948,7 +1948,7 @@ const data = {
       {
         key: 'smoothness_confidence',
         type: 'string',
-        label: 'Konfidenz Oberflächenqualität',
+        label: 'Konfidenz Ober&shy;flächen&shy;qualität',
         purpose: 'qa',
         values: [
           {
@@ -2714,11 +2714,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -2730,11 +2730,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -2770,11 +2770,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -2969,11 +2969,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -3060,7 +3060,7 @@ const data = {
       {
         key: 'smoothness',
         type: 'string',
-        label: 'Oberflächenqualität',
+        label: 'Ober&shy;flächen&shy;qualität',
         values: [
           {
             value: 'excellent',
@@ -3772,11 +3772,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -4365,11 +4365,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -5049,11 +5049,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -5065,11 +5065,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -5105,11 +5105,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -5311,11 +5311,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -6059,7 +6059,7 @@ const data = {
       },
       {
         key: 'geom_sources',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Geometrie-Quellen',
         purpose: 'qa',
         description: 'Interne Aufschlüsselung der für die Geometrie verwendeten Quellen (JSON).',
@@ -6122,7 +6122,7 @@ const data = {
       },
       {
         key: 'tag_sources',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Tag-Quellen',
         purpose: 'qa',
         description: 'Interne Aufschlüsselung der OSM-Tag-Herkunft (JSON).',
@@ -6782,11 +6782,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -6798,11 +6798,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -6838,11 +6838,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -7044,11 +7044,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -7752,11 +7752,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -7768,11 +7768,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -7808,11 +7808,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -7918,11 +7918,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -9698,11 +9698,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -9714,11 +9714,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -9754,11 +9754,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -9810,11 +9810,11 @@ const data = {
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -9826,11 +9826,11 @@ const data = {
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'service',
@@ -9842,11 +9842,11 @@ const data = {
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -9924,7 +9924,7 @@ const data = {
       },
       {
         key: 'width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
         values: [
@@ -10674,11 +10674,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -10809,7 +10809,7 @@ const data = {
       {
         key: 'smoothness',
         type: 'string',
-        label: 'Oberflächenqualität',
+        label: 'Ober&shy;flächen&shy;qualität',
         values: [
           {
             value: 'excellent',
@@ -10836,7 +10836,7 @@ const data = {
       {
         key: 'smoothness_source',
         type: 'string',
-        label: 'Herkunft der Oberflächenqualität',
+        label: 'Herkunft der Ober&shy;flächen&shy;qualität',
         purpose: 'qa',
         values: [
           {
@@ -10864,7 +10864,7 @@ const data = {
       {
         key: 'smoothness_confidence',
         type: 'string',
-        label: 'Konfidenz Oberflächenqualität',
+        label: 'Konfidenz Ober&shy;flächen&shy;qualität',
         purpose: 'qa',
         values: [
           {
@@ -10880,7 +10880,7 @@ const data = {
       {
         key: 'surface_color',
         type: 'string',
-        label: 'Oberflächenfarbe',
+        label: 'Ober&shy;flächen&shy;farbe',
         values: [
           {
             value: 'red',
@@ -10998,11 +10998,11 @@ const data = {
           },
           {
             value: 'primary_link',
-            label: 'Zufahrt einer Bundesstraße/Hauptverbindungsstraße',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'primary',
-            label: 'Bundesstraße/Hauptverbindungsstraße',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
@@ -11014,11 +11014,11 @@ const data = {
           },
           {
             value: 'secondary_link',
-            label: 'Zufahrt einer Landesstraße/wichtigen Durchgangsstraße',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
             value: 'secondary',
-            label: 'Landesstraße/Wichtige Durchgangsstraße',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
           },
           {
             value: 'service_alley',
@@ -11054,11 +11054,11 @@ const data = {
           },
           {
             value: 'tertiary_link',
-            label: 'Zufahrt einer Kreisstraße/untergeordneten Durchgangsstraße',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
           {
             value: 'tertiary',
-            label: 'Kreisstraße/Untergeordnete Durchgangsstraße',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -11283,7 +11283,7 @@ const data = {
       },
       {
         key: 'width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
         values: [
@@ -11328,11 +11328,11 @@ const data = {
           },
           {
             value: 'paving_stones',
-            label: 'Verbundpflastersteine',
+            label: 'Verbund&shy;pflastersteine',
           },
           {
             value: 'paving_stones:lanes',
-            label: 'Pflastersteinbahnen',
+            label: 'Pflasterstein&shy;bahnen',
           },
           {
             value: 'sett',
@@ -11463,7 +11463,7 @@ const data = {
       {
         key: 'smoothness',
         type: 'string',
-        label: 'Oberflächenqualität',
+        label: 'Ober&shy;flächen&shy;qualität',
         values: [
           {
             value: 'excellent',
@@ -11490,7 +11490,7 @@ const data = {
       {
         key: 'smoothness_source',
         type: 'string',
-        label: 'Herkunft der Oberflächenqualität',
+        label: 'Herkunft der Ober&shy;flächen&shy;qualität',
         purpose: 'qa',
         values: [
           {
@@ -11518,7 +11518,7 @@ const data = {
       {
         key: 'smoothness_confidence',
         type: 'string',
-        label: 'Konfidenz Oberflächenqualität',
+        label: 'Konfidenz Ober&shy;flächen&shy;qualität',
         purpose: 'qa',
         values: [
           {
@@ -11534,7 +11534,7 @@ const data = {
       {
         key: 'surface_color',
         type: 'string',
-        label: 'Oberflächenfarbe',
+        label: 'Ober&shy;flächen&shy;farbe',
         values: [
           {
             value: 'red',

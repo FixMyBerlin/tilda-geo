@@ -42,6 +42,9 @@ const regionConfig = {
   exports: [],
   navigationLinks: [],
   contractId: null,
+  maskOsmRelationIds: [],
+  maskBufferKm: 10,
+  welcome: null,
 }
 
 const authHeaders = (extra?: Record<string, string>) => ({

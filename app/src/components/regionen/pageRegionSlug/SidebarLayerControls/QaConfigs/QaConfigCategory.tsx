@@ -1,4 +1,4 @@
-import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ChevronDownIcon, ChevronLeftIcon, ListBulletIcon } from '@heroicons/react/20/solid'
 import { Suspense, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
@@ -6,6 +6,8 @@ import { useQaMapData } from '@/components/regionen/pageRegionSlug/hooks/mapStat
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { linkStyles } from '@/components/shared/links/styles'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { QaIcon } from '../../SidebarInspector/InspectorQa/QaIcon'
 import { QaAreasListDialog } from './QaAreasListDialog'
@@ -80,15 +82,7 @@ export const QaConfigCategory = ({
             </div>
           </DisclosureButton>
 
-          <Transition
-            show={open}
-            enter="transition duration-100 ease-out"
-            enterFrom="transform scale-95 opacity-0"
-            enterTo="transform scale-100 opacity-100"
-            leave="transition duration-75 ease-out"
-            leaveFrom="transform scale-100 opacity-100"
-            leaveTo="transform scale-95 opacity-0"
-          >
+          <MotionCollapse open={open}>
             <DisclosurePanel static as="section" className="mt-1 mb-2">
               <div className="mx-2 space-y-1">
                 {QA_STYLE_OPTIONS.map((option) => (
@@ -106,7 +100,10 @@ export const QaConfigCategory = ({
                       {isListableOption(option) && (
                         <button
                           type="button"
-                          onClick={() => setDialogState(option.key)}
+                          onClick={(e) => {
+                            captureModalOpenOrigin(e.currentTarget)
+                            setDialogState(option.key)
+                          }}
                           className={twJoin(
                             'ml-2 shrink-0 text-xs',
                             linkStyles,
@@ -138,7 +135,7 @@ export const QaConfigCategory = ({
                 <QaUserDropdown configId={qaConfig.id} regionSlug={regionSlug} />
               )}
             </DisclosurePanel>
-          </Transition>
+          </MotionCollapse>
         </>
       )}
     </Disclosure>

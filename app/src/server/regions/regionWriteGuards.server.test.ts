@@ -18,6 +18,7 @@ import {
   assertHeaderLogoBelongsToRegion,
   assertRegionCanBeDeleted,
   assertRegionContractExists,
+  validateRegionConfigRelations,
 } from './regionWriteGuards.server'
 
 beforeEach(() => {
@@ -49,6 +50,57 @@ describe('assertHeaderLogoBelongsToRegion', () => {
     await expect(assertHeaderLogoBelongsToRegion(42, 1)).rejects.toThrow(
       'Header-Logo (id=42) gehört nicht zu dieser Region',
     )
+  })
+})
+
+describe('validateRegionConfigRelations', () => {
+  test('rejects welcome image on create', async () => {
+    await expect(
+      validateRegionConfigRelations({
+        contractId: null,
+        headerLogoId: null,
+        welcome: {
+          enabled: true,
+          title: 'Willkommen',
+          image: { uploadId: 1, altText: 'Bild' },
+          sections: [],
+        },
+      }),
+    ).rejects.toThrow('Willkommens-Bild kann beim Anlegen nicht gesetzt werden')
+  })
+
+  test('rejects welcome image on create even when welcome is disabled', async () => {
+    await expect(
+      validateRegionConfigRelations({
+        contractId: null,
+        headerLogoId: null,
+        welcome: {
+          enabled: false,
+          title: '',
+          image: { uploadId: 1, altText: 'Bild' },
+          sections: [],
+        },
+      }),
+    ).rejects.toThrow('Willkommens-Bild kann beim Anlegen nicht gesetzt werden')
+  })
+
+  test('checks welcome image ownership on update even when welcome is disabled', async () => {
+    regionUploadFindFirst.mockResolvedValueOnce(null)
+    await expect(
+      validateRegionConfigRelations(
+        {
+          contractId: null,
+          headerLogoId: null,
+          welcome: {
+            enabled: false,
+            title: '',
+            image: { uploadId: 42, altText: 'Bild' },
+            sections: [],
+          },
+        },
+        1,
+      ),
+    ).rejects.toThrow('Das Willkommens-Bild gehört nicht zu dieser Region')
   })
 })
 

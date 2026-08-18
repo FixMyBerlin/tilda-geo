@@ -49,13 +49,13 @@ export const getAdminRegionEditLoaderFn = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     await requireAdmin(headers)
-    const [{ region, config: formConfig, maskConfig }, users, contracts] = await Promise.all([
+    const [{ region, config: formConfig, formValues }, users, contracts] = await Promise.all([
       getRegionEditData({ slug: data.regionSlug }),
       getUsersForRegion({ regionSlug: data.regionSlug }, headers),
       getRegionContracts(headers),
     ])
     const auditHistory = await getAuditHistoryForRegionEdit(headers, region.id)
-    return { region, users, formConfig, maskConfig, contracts, auditHistory }
+    return { region, users, formConfig, formValues, contracts, auditHistory }
   })
 
 const AdminUploadsLoaderInput = mapDatasetUploadsSearchSchema

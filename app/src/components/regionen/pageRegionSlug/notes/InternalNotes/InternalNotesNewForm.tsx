@@ -6,7 +6,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
-import { Textarea } from '@/components/shared/form/fields/Textarea'
+import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
@@ -125,15 +125,12 @@ export const InternalNotesNewForm = () => {
               placeholder="Betreff"
               required
             />
-            <Textarea
+            <MarkdownEditorField
               form={form}
               name="body"
               label="Hinweistext (Markdown)"
               labelSrOnly
-              classNameOverwrite="my-1.5 block min-h-28 w-full rounded-md border-0 bg-gray-50 py-2 leading-tight text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-yellow-600 focus:ring-inset sm:my-3 sm:min-h-48"
               placeholder="Hinweis"
-              required
-              rows={7}
             />
             <div className="flex items-center gap-1 leading-tight">
               <form.Subscribe selector={(s) => s.isSubmitting}>

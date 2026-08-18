@@ -2,6 +2,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
 import { HeadContent, Outlet, Scripts, useMatches, useRouteContext } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { MotionConfig } from 'motion/react'
 import { StrictMode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { Footer } from '@/components/layouts/Footer/Footer'
@@ -43,25 +44,28 @@ export function LayoutRoot() {
         )}
       >
         <StrictMode>
-          <TanStackQueryProvider queryClient={queryClient}>
-            {!hideAppChrome && <HeaderApp />}
-            <div className="flex w-full min-w-0 grow flex-col overflow-x-clip">
-              <ErrorBoundary fallback={(props) => <RootErrorFallback {...props} />}>
-                <Outlet />
-              </ErrorBoundary>
-            </div>
-            {!hideAppChrome && <Footer />}
-            <AppToaster />
-            <TailwindResponsiveHelper />
-            <TanStackDevtools
-              config={{ position: 'bottom-left' }}
-              plugins={[
-                { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
-                { name: 'TanStack Query', render: <TanStackQueryDevtools /> },
-                formDevtoolsPlugin(),
-              ]}
-            />
-          </TanStackQueryProvider>
+          {/* All Motion animations respect the OS `prefers-reduced-motion` setting. */}
+          <MotionConfig reducedMotion="user">
+            <TanStackQueryProvider queryClient={queryClient}>
+              {!hideAppChrome && <HeaderApp />}
+              <div className="flex w-full min-w-0 grow flex-col overflow-x-clip">
+                <ErrorBoundary fallback={(props) => <RootErrorFallback {...props} />}>
+                  <Outlet />
+                </ErrorBoundary>
+              </div>
+              {!hideAppChrome && <Footer />}
+              <AppToaster />
+              <TailwindResponsiveHelper />
+              <TanStackDevtools
+                config={{ position: 'bottom-left' }}
+                plugins={[
+                  { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
+                  { name: 'TanStack Query', render: <TanStackQueryDevtools /> },
+                  formDevtoolsPlugin(),
+                ]}
+              />
+            </TanStackQueryProvider>
+          </MotionConfig>
         </StrictMode>
         <Scripts />
       </body>

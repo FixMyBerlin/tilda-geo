@@ -28,7 +28,7 @@ export function TextField<T extends Record<string, unknown>>({
   type = 'text',
   ...inputProps
 }: Props<T>) {
-  const { readOnly, className, ...restInputProps } = inputProps
+  const { readOnly, className, onBlur, ...restInputProps } = inputProps
   const isReadonly = Boolean(readOnly)
   const resolvedType = decimalEn ? 'text' : type
   return (
@@ -59,7 +59,10 @@ export function TextField<T extends Record<string, unknown>>({
               id={String(name)}
               name={field.name}
               value={String(field.state.value ?? '')}
-              onBlur={field.handleBlur}
+              onBlur={(event) => {
+                field.handleBlur()
+                onBlur?.(event)
+              }}
               onChange={(e) => {
                 const nextValue = decimalEn
                   ? isPartialEnDecimalInput(e.target.value)

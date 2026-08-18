@@ -21,6 +21,7 @@ export type SourcesRasterIdsELI =
   | 'ELI_berlinaerialphotograph2024'
   | 'ELI_berlinaerialphotograph2025'
   | 'ELI_berlinaerialphotograph2025-summer'
+  | 'ELI_berlinaerialphotograph2026'
   | 'ELI_berlinalkis'
   | 'ELI_berlinbaeumealkis'
   | 'ELI_berlinstrassenbefahrungalkis'
@@ -62,6 +63,7 @@ export type SourcesRasterIdsELI =
   | 'ELI_mecklenburg-vorpommern-orka-mv'
   | 'ELI_mecklenburg-vorpommern-topo'
   | 'ELI_metropoleruhrluftbilder-10cm'
+  | 'ELI_niedersachsen-alkis'
   | 'ELI_niedersachsen-dop20'
   | 'ELI_nrw-alkis'
   | 'ELI_nrw-alkis-buildings'
@@ -87,6 +89,7 @@ export type SourcesRasterIdsELI =
   | 'ELI_saxony-dop20-historic-2015-2017'
   | 'ELI_saxony-dop20-historic-2018-2020'
   | 'ELI_saxony-dop20-historic-2021-2022'
+  | 'ELI_saxony-dop20-historic-2023-2024'
   | 'ELI_saxony-dop20-latest'
   | 'ELI_saxony-dop20-latest-infrared'
   | 'ELI_saxony-dop20-raw'
@@ -246,6 +249,14 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
       'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-truedop20rgb/{z}/{x}/{y}.png',
     attributionHtml:
       'Geoportal Berlin/Digitale farbige TrueOrthophotos 2025 (DOP20RGB) (codefor.de mirror)',
+    maxzoom: 20,
+  },
+  {
+    id: 'ELI_berlinaerialphotograph2026',
+    name: 'Berlin/Geoportal DOP20RGB (2026)',
+    tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2026-dop20rgb/{z}/{x}/{y}.png',
+    attributionHtml:
+      'Geoportal Berlin/Digitale farbige Orthophotos 2026 (DOP20RGB) (codefor.de mirror)',
     maxzoom: 20,
   },
   {
@@ -588,6 +599,14 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     tileSize: 512,
   },
   {
+    id: 'ELI_niedersachsen-alkis',
+    name: 'Niedersachsen ALKIS',
+    tilesUrl:
+      'https://opendata.lgln.niedersachsen.de/doorman/noauth/alkis_wms?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=ALKIS&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/LGLN YEAR',
+    tileSize: 512,
+  },
+  {
     id: 'ELI_niedersachsen-dop20',
     name: 'Niedersachsen DOP20',
     tilesUrl:
@@ -783,6 +802,14 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     name: 'Saxony historical aerial imagery 2021-2022',
     tilesUrl:
       'https://geodienste.sachsen.de/wms_geosn_dop_2021_2022/guest?LAYERS=dop_2021_2022_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 512,
+  },
+  {
+    id: 'ELI_saxony-dop20-historic-2023-2024',
+    name: 'Saxony historical aerial imagery 2023-2024',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2023_2024/guest?LAYERS=dop_2023_2024_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
     attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
     tileSize: 512,
   },

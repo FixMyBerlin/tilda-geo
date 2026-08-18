@@ -1,7 +1,7 @@
-import { FormattedMessage } from 'react-intl'
-import { getInspectorValueDescriptionTranslationKey } from '@/data/topicDocs/runtime'
+import { getDescriptionForInspectorTag } from '@/data/topicDocs/runtime'
 import type { TagsTableRowProps } from './TagsTableRow'
 import { ConditionalFormattedValue } from './translations/ConditionalFormattedValue'
+import { renderTranslationHtml } from './translations/renderTranslationHtml'
 import { ValueDisclosure, ValueDisclosureButton, ValueDisclosurePanel } from './ValueDisclosure'
 
 export const TagsTableRowValueWithTooltip = ({
@@ -10,7 +10,8 @@ export const TagsTableRowValueWithTooltip = ({
   tagValue,
   children,
 }: TagsTableRowProps) => {
-  const descriptionKey = getInspectorValueDescriptionTranslationKey(sourceId, tagKey, tagValue)
+  // Prefer value-level topic-doc descriptions; fall back to key-level (e.g. `length`).
+  const description = getDescriptionForInspectorTag(sourceId, tagKey, tagValue)
 
   const valueContent =
     tagValue != null ? (
@@ -19,7 +20,7 @@ export const TagsTableRowValueWithTooltip = ({
       children
     )
 
-  if (!descriptionKey) {
+  if (!description) {
     return <>{valueContent}</>
   }
 
@@ -29,9 +30,7 @@ export const TagsTableRowValueWithTooltip = ({
         <span>{valueContent}</span>
       </ValueDisclosureButton>
       <ValueDisclosurePanel>
-        <p>
-          <FormattedMessage id={descriptionKey} />
-        </p>
+        <p>{renderTranslationHtml(description)}</p>
       </ValueDisclosurePanel>
     </ValueDisclosure>
   )

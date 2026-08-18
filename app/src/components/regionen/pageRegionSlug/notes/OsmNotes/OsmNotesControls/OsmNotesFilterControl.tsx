@@ -10,7 +10,10 @@ import { useOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/us
 import { notesSplitControlSegmentClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
 import type { zodOsmFilterParam } from '@/shared/regionen/regionSearchZod'
-import { menuItemClasses } from '../../InternalNotes/InternalNotesControls/InternalNotesFilterControl'
+import {
+  menuItemClasses,
+  notesFilterMenuItemsClassName,
+} from '../../InternalNotes/InternalNotesControls/InternalNotesFilterControl'
 
 export const OsmNotesFilterControl = () => {
   const { osmNotesFilterParam, setOsmNotesFilterParam } = useOsmFilterParam()
@@ -69,7 +72,7 @@ export const OsmNotesFilterControl = () => {
       <MenuItems
         transition
         anchor="top start"
-        className="absolute right-0 z-10 mt-2 w-64 rounded-md bg-white text-sm shadow-lg outline-1 outline-black/5 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+        className={twJoin(notesFilterMenuItemsClassName, 'w-64')}
       >
         <MenuSection className="m-1 overflow-clip rounded-md border">
           <MenuHeading className="bg-gray-100 px-4 py-1 text-xs font-semibold text-gray-600 uppercase">

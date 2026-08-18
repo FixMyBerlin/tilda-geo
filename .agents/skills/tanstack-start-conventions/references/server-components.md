@@ -6,13 +6,13 @@ Server Components render React on the server and stream to the client. Heavy dep
 
 **Official docs:** [Server Components](https://tanstack.com/start/latest/docs/framework/react/guide/server-components)
 
-**Related FMC refs:** [execution-model.md](execution-model.md) · [client-server-boundaries.md](client-server-boundaries.md) (where RSC code lives) · [selective-ssr.md](selective-ssr.md) (pairing with `ssr`) · [router-and-query.md](router-and-query.md) (Query loaders)
+**Related FMC refs:** [execution-model.md](execution-model.md) · [client-server-boundaries.md](client-server-boundaries.md) (where RSC code lives) · [selective-ssr.md](selective-ssr.md) (pairing with `ssr`) · `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md) (Query loaders)
 
 ---
 
 ## When to use RSC
 
-Default FMC data/UI flow is isomorphic loaders + `createServerFn` + React Query — see [client-server-boundaries.md](client-server-boundaries.md) and [router-and-query.md](router-and-query.md). Reach for RSC when you need:
+Default FMC data/UI flow is isomorphic loaders + `createServerFn` + React Query — see [client-server-boundaries.md](client-server-boundaries.md) and `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md). Reach for RSC when you need:
 
 - Heavy server-only rendering (markdown, syntax highlighting) without bloating the client bundle
 - Server-rendered UI composed with client interactivity via **slots**
@@ -52,7 +52,7 @@ RSC is additive on that baseline. Follow the official [**Setup → Vite**](https
 
 ### Caching with Query
 
-Use the FMC loader + Query pattern from [router-and-query.md](router-and-query.md). RSC adds one constraint on top of official [Caching → TanStack Query](https://tanstack.com/start/latest/docs/framework/react/guide/server-components#tanstack-query): **`structuralSharing: false`** on any `*QueryOptions` that cache RSC values.
+Use the FMC loader + Query pattern from `tanstack-router-conventions` → [router-and-query.md](../../tanstack-router-conventions/references/router-and-query.md). RSC adds one constraint on top of official [Caching → TanStack Query](https://tanstack.com/start/latest/docs/framework/react/guide/server-components#tanstack-query): **`structuralSharing: false`** on any `*QueryOptions` that cache RSC values.
 
 ### Selective SSR
 

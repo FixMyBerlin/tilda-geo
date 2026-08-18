@@ -4,7 +4,6 @@ import { basename, dirname } from 'node:path'
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { z } from 'zod'
-import { offerLocalCursorMcpSetup } from '../seed-local/setupCursorMcp'
 import {
   ALLOWED_SCHEMAS,
   ALLOWED_SOURCES,
@@ -151,7 +150,6 @@ async function main() {
     p.log.success('Applied pending Prisma migrations after restore.')
 
     await sanitizePrismaRestore()
-    await offerLocalCursorMcpSetup()
   }
 }
 

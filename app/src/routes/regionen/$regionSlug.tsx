@@ -57,7 +57,10 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
       data: { url: location.href, regionSlug: params.regionSlug },
     })
     if (pageData.redirectUrl) {
-      throw redirect({ href: pageData.redirectUrl, statusCode: 301 })
+      throw redirect({
+        href: pageData.redirectUrl,
+        statusCode: pageData.redirectPermanent === false ? 302 : 301,
+      })
     }
 
     const { queryClient } = context

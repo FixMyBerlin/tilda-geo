@@ -7,7 +7,9 @@ import {
 import { RegionCategoriesField } from '@/components/admin/regions/pageRegions/RegionCategoriesField'
 import { RegionExportsField } from '@/components/admin/regions/pageRegions/RegionExportsField'
 import { RegionLogoPicker } from '@/components/admin/regions/pageRegions/RegionLogoPicker'
+import { RegionMaskOsmRelationIdsField } from '@/components/admin/regions/pageRegions/RegionMaskOsmRelationIdsField'
 import { RegionNavigationLinksEditor } from '@/components/admin/regions/pageRegions/RegionNavigationLinksEditor'
+import { RegionWelcomeEditor } from '@/components/admin/regions/pageRegions/RegionWelcomeEditor'
 import {
   regionPromotedFormRadioItems,
   regionStatusFormRadioItems,
@@ -69,6 +71,16 @@ export const regionFormEmptyDefaults = {
   exports: '',
   navigationLinks: [] as RegionFormInput['navigationLinks'],
   contractId: '',
+  maskEnabled: 'false' as const,
+  maskOsmRelationIds: '',
+  maskBufferKm: '10',
+  welcomeEnabled: 'false' as const,
+  welcomeTitle: '',
+  welcomeSubtitle: '',
+  welcomeBodyMarkdown: '',
+  welcomeImageUploadId: '',
+  welcomeImageAltText: '',
+  welcomeSections: [] as RegionFormInput['welcomeSections'],
 } satisfies RegionFormInput
 
 type RegionContractOption = { id: number; name: string; status: RegionContractStatus }
@@ -230,15 +242,42 @@ export function RegionForm(props: Props) {
             />
           </fieldset>
 
-          {mode === 'create' ? (
-            <fieldset className={adminFormFieldsetClassName}>
-              <legend className={adminFormLegendClassName}>Maske</legend>
-              <p className="text-sm text-gray-600">
-                Die Karten-Maske kann nach dem Anlegen der Region auf der Bearbeitungsseite
-                konfiguriert werden.
-              </p>
-            </fieldset>
-          ) : null}
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Maske</legend>
+            <p className="text-sm text-gray-600">
+              Änderungen an den OSM-Relation-IDs oder dem Buffer lösen beim Speichern der Region
+              eine Aktualisierung der Maske aus.
+            </p>
+            <RadioGroup
+              inline
+              form={form}
+              name="maskEnabled"
+              label="Maske aktiv"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
+            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <RegionMaskOsmRelationIdsField form={form} />
+              <TextField
+                decimalEn
+                form={form}
+                name="maskBufferKm"
+                label="Buffer (km)"
+                help={EN_DECIMAL_HELP}
+              />
+            </div>
+            <form.Subscribe selector={(state) => state.values.maskEnabled}>
+              {(maskEnabled) =>
+                maskEnabled === 'false' && initialValues.maskEnabled === 'true' ? (
+                  <p className="text-sm text-gray-500">
+                    Deaktiviert die Maske und entfernt den zugehörigen Upload.
+                  </p>
+                ) : null
+              }
+            </form.Subscribe>
+          </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Downloads</legend>
@@ -302,6 +341,11 @@ export function RegionForm(props: Props) {
           <fieldset className={adminFormFieldsetClassName}>
             <legend className={adminFormLegendClassName}>Navigation</legend>
             <RegionNavigationLinksEditor form={form} />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Willkommens-Dialog</legend>
+            <RegionWelcomeEditor form={form} regionId={regionId} regionSlug={regionSlug} />
           </fieldset>
 
           <fieldset className={adminFormFieldsetClassName}>

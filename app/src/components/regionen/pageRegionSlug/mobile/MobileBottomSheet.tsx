@@ -14,12 +14,13 @@ const toneStyles: Record<SheetTone, { panel: string; grabber: string }> = {
 }
 
 /** How much of the map stays visible above the sheet. */
-type SheetMapPeek = 'minimal' | '10%' | '20%'
+type SheetMapPeek = 'minimal' | '10%' | '15%' | '20%'
 
 const maxHeightByPeek: Record<SheetMapPeek, string> = {
   // Just enough room for the close button above the sheet (sheet ≈ full height).
   minimal: 'max-h-[calc(100dvh-3.5rem)]',
   '10%': 'max-h-[90dvh]',
+  '15%': 'max-h-[85dvh]',
   '20%': 'max-h-[80dvh]',
 }
 
@@ -28,10 +29,16 @@ type Props = {
   onClose: () => void
   title: ReactNode
   children: ReactNode
+  /** Pinned below the scroll area (e.g. primary CTA that must stay visible). */
+  footer?: ReactNode
   /** How much map to leave visible above the sheet (default `minimal` ≈ full height). */
   mapPeek?: SheetMapPeek
   /** Color scheme of the sheet chrome (default white). Content colors are the child's job. */
   tone?: SheetTone
+  /** Overrides `tone` panel classes (e.g. region welcome uses gray-900 chrome). */
+  panelClassName?: string
+  /** Overrides `tone` grabber classes. */
+  grabberClassName?: string
 }
 
 /**
@@ -50,8 +57,11 @@ export const MobileBottomSheet = ({
   onClose,
   title,
   children,
+  footer,
   mapPeek = 'minimal',
   tone = 'default',
+  panelClassName,
+  grabberClassName,
 }: Props) => {
   const dragControls = useDragControls()
   const toneStyle = toneStyles[tone]
@@ -85,6 +95,7 @@ export const MobileBottomSheet = ({
               className={twMerge(
                 'flex w-full flex-col overflow-hidden rounded-t-xl shadow-xl',
                 toneStyle.panel,
+                panelClassName,
                 maxHeight,
               )}
               initial={{ y: '100%' }}
@@ -109,13 +120,27 @@ export const MobileBottomSheet = ({
                   onPointerDown={(event) => dragControls.start(event)}
                   className="relative z-10 flex shrink-0 cursor-grab touch-none flex-col py-2.5 select-none after:absolute after:inset-x-0 after:-top-2 after:-bottom-2 after:content-[''] active:cursor-grabbing"
                 >
-                  <div className={twMerge('mx-auto h-1.5 w-10 rounded-full', toneStyle.grabber)} />
+                  <div
+                    className={twMerge(
+                      'mx-auto h-1.5 w-10 rounded-full',
+                      toneStyle.grabber,
+                      grabberClassName,
+                    )}
+                  />
                   <DialogTitle className="sr-only">{title}</DialogTitle>
                 </header>
 
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
+                <div
+                  className={twMerge(
+                    'min-h-0 flex-1 overflow-y-auto overscroll-contain',
+                    !footer && 'pb-[env(safe-area-inset-bottom)]',
+                  )}
+                >
                   {children}
                 </div>
+                {footer ? (
+                  <div className="shrink-0 pb-[env(safe-area-inset-bottom)]">{footer}</div>
+                ) : null}
               </DialogPanel>
             </motion.div>
           </div>

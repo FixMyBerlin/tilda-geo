@@ -4,6 +4,7 @@ export const searchParamsRegistry = {
   data: 'data',
   f: 'f', // selected features
   bg: 'bg',
+  bg3d: 'bg3d',
   draw: 'draw',
   osmNotes: 'osmNotes', // show osmNotes on the map
   osmNote: 'osmNote', // show new osmNotes dialogue
@@ -14,4 +15,6 @@ export const searchParamsRegistry = {
   debugMap: 'debugMap',
   qa: 'qa', // QA layer selection
   qaFilter: 'qaFilter', // QA filter params
+  dialog: 'dialog',
+  welcomeSkipDialog: '__skipDialog',
 } as const

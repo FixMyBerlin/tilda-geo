@@ -5,8 +5,10 @@ import db from '@/server/db.server'
 import {
   regionInclude,
   regionRowToClient,
+  regionRowToWriteInput,
   type TRegion,
 } from '@/server/regions/regionConfigMapper.server'
+import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
 
 export type GetRegionsInput = {
   where?: Prisma.RegionWhereInput
@@ -15,8 +17,7 @@ export type GetRegionsInput = {
 
 type GetRegionRowsInput = Pick<Prisma.RegionFindManyArgs, 'where' | 'orderBy' | 'skip' | 'take'>
 
-/** Client regions (`TRegion`) with contract joined via `regionInclude`. */
-export async function getRegions(input: GetRegionsInput = {}) {
+async function findRegionRows(input: GetRegionsInput) {
   const { where, orderBy = { slug: 'asc' } } = input
   const regions = await db.region.findMany({ where, orderBy, include: regionInclude })
 
@@ -24,7 +25,24 @@ export async function getRegions(input: GetRegionsInput = {}) {
     throw notFound()
   }
 
+  return regions
+}
+
+/** Client regions (`TRegion`) with contract joined via `regionInclude`. */
+export async function getRegions(input: GetRegionsInput = {}) {
+  const regions = await findRegionRows(input)
+
   return regions.map(regionRowToClient) satisfies TRegion[]
+}
+
+/** Client + write-shaped config per region for MCP round-trips into create/update. */
+export async function getRegionsWithWriteConfig(input: GetRegionsInput = {}) {
+  const regions = await findRegionRows(input)
+
+  return regions.map((region) => ({
+    region: regionRowToClient(region),
+    config: regionRowToWriteInput(region),
+  })) satisfies Array<{ region: TRegion; config: RegionWriteInput }>
 }
 
 /** Admin-only raw `Region` rows (e.g. id/slug pickers); no `regionInclude`. */

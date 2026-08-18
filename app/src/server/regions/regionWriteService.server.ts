@@ -3,6 +3,11 @@ import { runWithAuditContextAsync, type AuditContext } from '@/server/audit/audi
 import db from '@/server/db.server'
 import { deleteRegionMaskUpload } from '@/server/regions/masks/generateRegionMask.server'
 import {
+  maskParamsEqual,
+  RegionMaskSyncError,
+  syncRegionMaskAfterWrite,
+} from '@/server/regions/masks/syncRegionMaskAfterWrite.server'
+import {
   regionWriteInputToCreateData,
   regionWriteInputToUpdateData,
   regionInclude,
@@ -18,6 +23,27 @@ import { RegionWriteSchema, type RegionWriteInput } from '@/server/regions/regio
 import { deleteRegionUploadIfUnreferenced } from '@/server/regions/uploads/deleteRegionUploadIfUnreferenced.server'
 import { deleteRegionUploadS3Object } from '@/server/regions/uploads/regionUploadsS3.server'
 
+const DEFAULT_MASK = { maskOsmRelationIds: [] as number[], maskBufferKm: 10 }
+
+async function syncMaskIfChanged(
+  slug: string,
+  previous: { maskOsmRelationIds: number[]; maskBufferKm: number },
+  next: RegionWriteInput,
+) {
+  const desired = {
+    maskOsmRelationIds: next.maskOsmRelationIds,
+    maskBufferKm: next.maskBufferKm,
+  }
+  if (maskParamsEqual(previous, desired)) return
+
+  try {
+    await syncRegionMaskAfterWrite({ slug, ...desired })
+  } catch (error) {
+    const cause = error instanceof Error ? error.message : String(error)
+    throw new RegionMaskSyncError(cause)
+  }
+}
+
 export async function createRegionConfig(
   config: RegionWriteInput,
   auditContext: AuditContext = {},
@@ -26,15 +52,21 @@ export async function createRegionConfig(
   await validateRegionConfigRelations(parsed)
   return runWithAuditContextAsync(auditContext, async () => {
     const createData = regionWriteInputToCreateData(parsed)
-    const region = await db.$transaction(async (tx) => {
-      const created = await tx.region.create({
+    await db.$transaction(async (tx) => {
+      await tx.region.create({
         data: createData,
         include: regionInclude,
       })
       await upsertRegionConfigTemplate(parsed.categories as MapDataCategoryId[], tx)
-      return created
     })
-    return regionRowToClient(region)
+
+    await syncMaskIfChanged(parsed.slug, DEFAULT_MASK, parsed)
+
+    const refreshed = await db.region.findUniqueOrThrow({
+      where: { slug: parsed.slug },
+      include: regionInclude,
+    })
+    return regionRowToClient(refreshed)
   })
 }
 
@@ -55,6 +87,11 @@ export async function updateRegionConfig(
     if (!existing) throw new RegionNotFoundError(slug)
 
     const previousHeaderLogoId = existing.headerLogoId
+    const previousWelcomeImageUploadId = existing.welcomeImageUploadId
+    const previousMask = {
+      maskOsmRelationIds: existing.maskOsmRelationIds,
+      maskBufferKm: existing.maskBufferKm,
+    }
 
     await validateRegionConfigRelations(parsed, existing.id)
 
@@ -71,7 +108,8 @@ export async function updateRegionConfig(
 
     // Join lists are full-replaced via nested Prisma deleteMany + create (ordered catalog rows; no
     // stable child IDs). Scalar FKs (contractId, headerLogoId) stay on the parent — contract admin
-    // reassigns the inverse with regions.set. Mask columns are owned by generateRegionMask.
+    // reassigns the inverse with regions.set. Mask columns are synced after write via
+    // syncRegionMaskAfterWrite (geometry upload + column update).
     await db.$transaction(async (tx) => {
       await tx.region.update({
         where: { slug },
@@ -80,9 +118,18 @@ export async function updateRegionConfig(
       await upsertRegionConfigTemplate(parsed.categories as MapDataCategoryId[], tx)
     })
 
+    const nextWelcomeImageUploadId = parsed.welcome?.image?.uploadId ?? null
+    if (
+      previousWelcomeImageUploadId != null &&
+      previousWelcomeImageUploadId !== nextWelcomeImageUploadId
+    ) {
+      await deleteRegionUploadIfUnreferenced(previousWelcomeImageUploadId)
+    }
     if (previousHeaderLogoId != null && previousHeaderLogoId !== parsed.headerLogoId) {
       await deleteRegionUploadIfUnreferenced(previousHeaderLogoId)
     }
+
+    await syncMaskIfChanged(slug, previousMask, parsed)
 
     const region = await db.region.findUniqueOrThrow({
       where: { slug },

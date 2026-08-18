@@ -11,7 +11,10 @@ import {
   exitOnInvalidDevPortSlot,
   isDevPortSlotMode,
 } from '../predev/devPortSlot'
-import { composeContainerPrefixFromEnv, dockerStackIdFromEnv } from '../predev/ensureDevStack'
+import {
+  composeContainerPrefixFromEnv,
+  dockerComposeProjectFromEnv,
+} from '../predev/ensureDevStack'
 
 const repoRootFromScript = path.resolve(import.meta.dir, '../../..')
 dotenv.config({ path: path.join(repoRootFromScript, '.env') })
@@ -324,7 +327,11 @@ function envAssignment(key: string, value: string) {
   return `${key}=${shellQuote(safe)}`
 }
 
-function formatShellOneLiner(repoRoot: string, overrides: Record<string, string>, detach: boolean) {
+async function formatShellOneLiner(
+  repoRoot: string,
+  overrides: Record<string, string>,
+  detach: boolean,
+) {
   const diffMode = overrides.PROCESSING_DIFFING_MODE
   if (diffMode === undefined) {
     console.error('Internal error: PROCESSING_DIFFING_MODE missing from overrides')
@@ -358,8 +365,8 @@ function formatShellOneLiner(repoRoot: string, overrides: Record<string, string>
     envParts.unshift(envAssignment('DATABASE_PORT', process.env.DATABASE_PORT ?? '5432'))
   }
 
-  const stackId = dockerStackIdFromEnv()
-  const projectFlag = stackId ? `-p ${shellQuote(stackId)} ` : ''
+  const composeProject = await dockerComposeProjectFromEnv()
+  const projectFlag = composeProject ? `-p ${shellQuote(composeProject)} ` : ''
   const compose = detach
     ? `docker compose ${projectFlag}up -d processing`
     : `docker compose ${projectFlag}up processing`
@@ -396,7 +403,7 @@ async function finishInteractive(
   overrides: Record<string, string>,
   detach: boolean,
 ) {
-  const line = formatShellOneLiner(repoRoot, overrides, detach)
+  const line = await formatShellOneLiner(repoRoot, overrides, detach)
   const onlyBbox = overrides.PROCESS_ONLY_BBOX ?? ''
   const diffBbox = overrides.PROCESSING_DIFFING_BBOX ?? ''
   const noteBody = buildBboxSummaryNote(onlyBbox, diffBbox, line)
@@ -813,5 +820,5 @@ const batch = buildOverridesFromCliBatch()
 overrides = batch.overrides
 detach = batch.detach
 
-printHighlightedCommand(formatShellOneLiner(repoRoot, overrides, detach))
+printHighlightedCommand(await formatShellOneLiner(repoRoot, overrides, detach))
 process.exit(0)

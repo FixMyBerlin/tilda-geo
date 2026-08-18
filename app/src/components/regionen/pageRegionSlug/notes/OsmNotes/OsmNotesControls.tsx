@@ -7,9 +7,11 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
 import {
   mobileMapIconButtonClassName,
+  notesSplitControlFirstSegmentClassName,
   notesSplitControlGroupClassName,
-  notesSplitControlSegmentClassName,
+  notesSplitControlLastSegmentClassName,
 } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { useNotesActiveByZoom } from '../utils/useNotesActiveByZoom'
@@ -41,7 +43,7 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
             mobileMapIconButtonClassName,
             'z-0',
             isError && 'size-auto px-3 py-2',
-            showOsmNotesParam && 'rounded-none shadow-none',
+            showOsmNotesParam && notesSplitControlFirstSegmentClassName,
             showOsmNotesParam
               ? notesActiveByZoom
                 ? 'bg-yellow-400'
@@ -67,9 +69,12 @@ export const OsmNotesControls = ({ isLoading, isError }: Props) => {
             <button
               type="button"
               // Default zoom since Note pins on osm.org are only visible when zoomed in…
-              onClick={() => setNewOsmNoteMapParam(mapParam)}
+              onClick={(e) => {
+                captureModalOpenOrigin(e.currentTarget)
+                setNewOsmNoteMapParam(mapParam)
+              }}
               className={twMerge(
-                notesSplitControlSegmentClassName,
+                notesSplitControlLastSegmentClassName,
                 'bg-white hover:bg-yellow-50 hover:text-gray-800',
               )}
             >

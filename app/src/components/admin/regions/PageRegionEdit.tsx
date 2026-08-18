@@ -18,7 +18,7 @@ import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 const routeApi = getRouteApi('/admin/regions/$regionSlug/edit')
 
 export function PageRegionEdit() {
-  const { region, users, formConfig, maskConfig, contracts, auditHistory } =
+  const { region, users, formConfig, formValues, contracts, auditHistory } =
     routeApi.useLoaderData()
 
   return (
@@ -37,7 +37,10 @@ export function PageRegionEdit() {
 
       <AdminPageTitleEdit name={region.name} />
 
-      <p className="mt-4 text-sm text-gray-700">
+      <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700">
+        <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }}>
+          Öffnen…
+        </Link>
         <Link
           to="/admin/map-dataset-uploads"
           search={buildUploadsListSearch({ regionSlug: region.slug })}
@@ -121,7 +124,7 @@ export function PageRegionEdit() {
 
       <RegionFormEdit
         formConfig={formConfig}
-        maskConfig={maskConfig}
+        formValues={formValues}
         contracts={contracts}
         regionId={region.id}
       />

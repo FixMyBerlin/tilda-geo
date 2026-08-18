@@ -30,12 +30,12 @@ Prefer **project-local** agents for team repos.
 
 ## What personal workers do not replace
 
-Workers pin Composer models globally, but the orchestrator still needs `@orchestrator-worker` per repo:
+Workers pin Composer models globally, but orchestration behavior still comes from the project rule — run init once per repo:
 
 ```bash
 bash .agents/skills/agent-orchestration/scripts/init-cursor.sh
 ```
 
-Or paste the delegation block from [cursor-ide.md](cursor-ide.md) each task.
+Then attach **`@orchestrator-worker`** plus your task. No delegation boilerplate to paste.
 
 Do **not** put orchestration in global Cursor User Rules (`alwaysApply`).

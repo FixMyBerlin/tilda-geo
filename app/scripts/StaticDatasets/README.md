@@ -62,5 +62,3 @@ Use `--keep-tmp` to keep the files for debugging.
 ## Delete existing database entries
 
 The script will **not remove existing database configs** if the dataset folder was rename or removed.
-
-**Regions DB cutover:** migration `20260606000000_map_datasets` truncates `MapDatasetUpload` and expects a **full** `static-datasets-update` afterward (see [`../migration-data/README.md`](../migration-data/README.md)). Do not treat a partial `--folder-filter` run as sufficient for that cutover.

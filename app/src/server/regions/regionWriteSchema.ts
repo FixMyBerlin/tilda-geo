@@ -20,7 +20,7 @@ import {
   warmableTablesKeySet,
   warmingTablesToSourceIds,
 } from '@/server/regions/cacheWarmingSources'
-import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
+import { parseOsmRelationIds } from '@/server/regions/masks/parseOsmRelationIds'
 import {
   formFieldsToGeoJsonBbox,
   geoJsonBboxToFormFields,
@@ -105,6 +105,53 @@ const RegionNavigationLinkSchema = z
     message: 'Externe URL muss mit https:// beginnen',
   })
 
+const RegionWelcomeImageWriteSchema = z.object({
+  uploadId: z.number().int().positive(),
+  altText: z.string().min(1),
+})
+
+export const RegionWelcomeSectionWriteSchema = z.object({
+  title: z.string().min(1),
+  bodyMarkdown: z.string().nullable().optional(),
+  sortOrder: z.number().int().nonnegative(),
+})
+
+const RegionWelcomeWriteSchema = z
+  .object({
+    enabled: z.boolean(),
+    title: z.string(),
+    subtitle: z.string().nullable().optional(),
+    bodyMarkdown: z.string().nullable().optional(),
+    image: RegionWelcomeImageWriteSchema.nullable(),
+    sections: z.array(RegionWelcomeSectionWriteSchema).max(8),
+  })
+  .superRefine((welcome, ctx) => {
+    if (!welcome.enabled) return
+    if (!welcome.title.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['title'],
+        message: 'Titel ist erforderlich, wenn der Willkommens-Dialog aktiv ist.',
+      })
+    }
+    if (welcome.image != null && !welcome.image.altText.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['image', 'altText'],
+        message: 'Bildbeschreibung (Alt-Text) ist erforderlich, wenn ein Bild gesetzt ist.',
+      })
+    }
+  })
+
+export type RegionWelcomeWriteInput = z.infer<typeof RegionWelcomeWriteSchema>
+
+const RegionFormWelcomeSectionSchema = z.object({
+  title: z.string(),
+  bodyMarkdown: z.string(),
+  sortOrder: z.number().int().nonnegative(),
+  _key: z.string().optional(),
+})
+
 export const RegionWriteSchema = z
   .object({
     slug: slugSchema,
@@ -127,7 +174,11 @@ export const RegionWriteSchema = z
     exports: z.array(catalogIdSchema('Export', exportIdSet)),
     navigationLinks: z.array(RegionNavigationLinkSchema),
     contractId: z.number().int().positive().nullable(),
+    maskOsmRelationIds: z.array(z.number().int().positive()),
+    maskBufferKm: z.number().positive(),
+    welcome: RegionWelcomeWriteSchema.nullable(),
   })
+  .strict()
   .refine(
     (data) => {
       const hasBbox = data.bbox != null
@@ -265,6 +316,49 @@ const refineCacheWarmingForm = (
   }
 }
 
+const refineMaskForm = (
+  form: {
+    maskEnabled: boolean
+    maskOsmRelationIds: string
+    maskBufferKm: string
+  },
+  ctx: z.RefinementCtx,
+) => {
+  if (!form.maskEnabled) return
+
+  if (!form.maskOsmRelationIds.trim()) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskOsmRelationIds'],
+      message: 'Mindestens eine OSM Relation ID ist erforderlich.',
+    })
+  } else {
+    try {
+      parseOsmRelationIds(form.maskOsmRelationIds)
+    } catch (error) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['maskOsmRelationIds'],
+        message: error instanceof Error ? error.message : 'Ungültige OSM-Relation-IDs',
+      })
+    }
+  }
+
+  if (!form.maskBufferKm.trim() || !isValidEnDecimalInput(form.maskBufferKm.trim())) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskBufferKm'],
+      message: EN_DECIMAL_HELP,
+    })
+  } else if (!(Number(form.maskBufferKm) > 0)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['maskBufferKm'],
+      message: 'Buffer muss größer als 0 sein.',
+    })
+  }
+}
+
 export const RegionFormRawSchema = z
   .object({
     slug: slugSchema,
@@ -294,8 +388,53 @@ export const RegionFormRawSchema = z
     exports: z.string(),
     navigationLinks: z.array(RegionFormNavigationLinkSchema).superRefine(refineNavigationLinksPath),
     contractId: z.string(),
+    maskEnabled: trueOrFalse,
+    maskOsmRelationIds: z.string(),
+    maskBufferKm: z.string(),
+    welcomeEnabled: trueOrFalse,
+    welcomeTitle: z.string(),
+    welcomeSubtitle: z.string(),
+    welcomeBodyMarkdown: z.string(),
+    welcomeImageUploadId: z.string(),
+    welcomeImageAltText: z.string(),
+    welcomeSections: z.array(RegionFormWelcomeSectionSchema),
   })
   .superRefine(refineCacheWarmingForm)
+  .superRefine(refineMaskForm)
+  .superRefine((form, ctx) => {
+    if (!form.welcomeEnabled) return
+    if (!form.welcomeTitle.trim()) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['welcomeTitle'],
+        message: 'Titel ist erforderlich, wenn der Willkommens-Dialog aktiv ist.',
+      })
+    }
+    if (form.welcomeImageUploadId.trim()) {
+      if (!form.welcomeImageAltText.trim()) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['welcomeImageAltText'],
+          message: 'Alt-Text ist erforderlich.',
+        })
+      }
+      const uploadId = Number(form.welcomeImageUploadId)
+      if (!Number.isInteger(uploadId) || uploadId <= 0) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['welcomeImageUploadId'],
+          message: 'Ungültige Upload-ID.',
+        })
+      }
+    }
+    if (form.welcomeSections.length > 8) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['welcomeSections'],
+        message: 'Maximal 8 Abschnitte erlaubt.',
+      })
+    }
+  })
 
 export type RegionFormInput = z.input<typeof RegionFormRawSchema>
 
@@ -333,6 +472,36 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
 
   const headerLogoId = parseOptionalNumber(form.headerLogoId)
 
+  const maskEnabled = form.maskEnabled
+  const maskOsmRelationIds = maskEnabled ? parseOsmRelationIds(form.maskOsmRelationIds) : []
+  // When mask is off, relation IDs are cleared; buffer stays at default 10 km (inert).
+  const maskBufferKm = maskEnabled ? Number(form.maskBufferKm) : 10
+
+  const welcomeEnabled = form.welcomeEnabled
+  const welcomeImageUploadId = parseOptionalNumber(form.welcomeImageUploadId)
+  const welcomeImage =
+    welcomeImageUploadId != null
+      ? {
+          uploadId: welcomeImageUploadId,
+          altText: form.welcomeImageAltText.trim(),
+        }
+      : null
+  const welcomeSections = form.welcomeSections
+    .filter((section) => section.title.trim())
+    .map((section, sortOrder) => ({
+      title: section.title.trim(),
+      bodyMarkdown: section.bodyMarkdown.trim() || null,
+      sortOrder,
+    }))
+  const welcome = {
+    enabled: welcomeEnabled,
+    title: form.welcomeTitle.trim(),
+    subtitle: form.welcomeSubtitle.trim() || null,
+    bodyMarkdown: form.welcomeBodyMarkdown.trim() || null,
+    image: welcomeImage,
+    sections: welcomeSections,
+  }
+
   return {
     slug: form.slug,
     name: form.name,
@@ -361,12 +530,28 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
         sortOrder: link.sortOrder,
       })),
     contractId: parseOptionalNumber(form.contractId),
+    maskOsmRelationIds,
+    maskBufferKm,
+    welcome,
   }
 }).pipe(RegionWriteSchema)
 
 export const DeleteRegionSchema = z.object({
   slug: z.string(),
 })
+
+/** Mask columns → form strings. Shared so loaders can precompute without duplicating join logic. */
+function maskConfigToFormFields(config: {
+  maskOsmRelationIds: readonly number[]
+  maskBufferKm: number
+}) {
+  const maskOsmRelationIds = [...config.maskOsmRelationIds]
+  return {
+    maskEnabled: toTrueFalseString(maskOsmRelationIds.length > 0),
+    maskOsmRelationIds: joinCommaList(maskOsmRelationIds.map(String)),
+    maskBufferKm: String(config.maskBufferKm),
+  }
+}
 
 export function regionConfigToFormValues(config: RegionWriteInput) {
   const downloadsEnabled = config.bbox != null
@@ -405,28 +590,21 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
       _key: newClientListKey(),
     })),
     contractId: config.contractId != null ? String(config.contractId) : '',
+    ...maskConfigToFormFields(config),
+    welcomeEnabled: toTrueFalseString(config.welcome?.enabled ?? false),
+    welcomeTitle: config.welcome?.title ?? '',
+    welcomeSubtitle: config.welcome?.subtitle ?? '',
+    welcomeBodyMarkdown: config.welcome?.bodyMarkdown ?? '',
+    welcomeImageUploadId:
+      config.welcome?.image != null ? String(config.welcome.image.uploadId) : '',
+    welcomeImageAltText: config.welcome?.image?.altText ?? '',
+    welcomeSections: (config.welcome?.sections ?? []).map((section) => ({
+      title: section.title,
+      bodyMarkdown: section.bodyMarkdown ?? '',
+      sortOrder: section.sortOrder,
+      _key: newClientListKey(),
+    })),
   }
-}
-
-export const RegionMaskFormRawSchema = z
-  .object({
-    maskEnabled: z.enum(['true', 'false']),
-    maskOsmRelationIds: z.string(),
-    maskBufferKm: z.string(),
-  })
-  .refine((form) => form.maskEnabled === 'false' || form.maskOsmRelationIds.trim().length > 0, {
-    message: 'Mindestens eine OSM Relation ID ist erforderlich.',
-    path: ['maskOsmRelationIds'],
-  })
-
-export type RegionMaskFormInput = z.input<typeof RegionMaskFormRawSchema>
-
-export function regionConfigToMaskFormValues(config: RegionMaskConfig) {
-  return {
-    maskEnabled: toTrueFalseString(config.maskOsmRelationIds.length > 0),
-    maskOsmRelationIds: joinCommaList(config.maskOsmRelationIds.map(String)),
-    maskBufferKm: String(config.maskBufferKm),
-  } satisfies RegionMaskFormInput
 }
 
 export const catalogOptions = {

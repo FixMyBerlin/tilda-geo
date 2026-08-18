@@ -34,7 +34,14 @@ export const Route = createFileRoute('/api/region-uploads/$id/$filename')({
         const referencedByPublicRegion = await db.region.count({
           where: { headerLogoId: id, status: 'PUBLIC' },
         })
-        if (referencedByPublicRegion === 0) {
+        const referencedByPublicWelcomeImage = await db.region.count({
+          where: {
+            welcomeImageUploadId: id,
+            status: 'PUBLIC',
+            welcomeEnabled: true,
+          },
+        })
+        if (referencedByPublicRegion === 0 && referencedByPublicWelcomeImage === 0) {
           const session = await getFreshSession(request.headers)
           if (session?.role !== UserRoleEnum.ADMIN) {
             return Response.json({ message: 'Not found' }, { status: 404 })

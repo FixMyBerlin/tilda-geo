@@ -7,6 +7,7 @@ import {
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import type { CalculatorUrlDrawMode } from './calculatorUrlDrawMode'
 
 type Props = {
@@ -85,7 +86,10 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
           type="button"
           className={groupedBtn({ active: false, rounded: 'right' })}
           title="Hilfe"
-          onClick={() => setHelpModalOpen(true)}
+          onClick={(e) => {
+            captureModalOpenOrigin(e.currentTarget)
+            setHelpModalOpen(true)
+          }}
         >
           <QuestionMarkCircleIcon className="size-7 shrink-0 sm:hidden" aria-hidden />
           <span className="hidden sm:inline">Hilfe</span>
