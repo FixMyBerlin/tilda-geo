@@ -35,8 +35,6 @@ data-schema/<table>/spec.json             # pulled from S3
 data-schema/<table>/<table>.geojson|.gpkg # local load input (not on S3)
 ```
 
-Everything except this README and `.gitignore` is gitignored.
-
 ## What is on S3
 
 Publish overwrites three current files per table. The dump is a `pg_dump` custom archive with zstd (`pg_restore` reads it; not a `.sql` file). Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current spec, dump, and manifest into `snapshots/<UTC>/` first, then overwrites the current files.

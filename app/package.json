@@ -68,7 +68,7 @@
     "format:main": "oxfmt --write -c oxfmt.config.mjs .",
     "format:github": "cd .. && oxfmt --write .github -c app/oxfmt.config.mjs",
     "format:docs": "cd .. && oxfmt --write docs -c app/oxfmt.config.mjs",
-    "format:data-schema": "cd .. && oxfmt --write -c app/oxfmt.config.mjs --no-error-on-unmatched-pattern data-schema/README.md $(find data-schema -name spec.json)",
+    "format:data-schema": "cd .. && oxfmt --write -c app/oxfmt.config.mjs --no-error-on-unmatched-pattern data-schema data-schema/*/spec.json",
     "format:topic-docs": "cd .. && oxfmt --write topic-docs -c app/oxfmt.config.mjs",
     "format:processing": "cd .. && oxfmt --write processing -c app/oxfmt.config.mjs",
     "format:skills": "cd .. && oxfmt --write .cursor/skills .agents/skills -c app/oxfmt.config.mjs",

@@ -6,8 +6,6 @@
  * sequences / constraints). Publish already dumps with `pg_dump --table=`, so a normal dump
  * always passes; this catches a wrong or extra-wide archive on S3 before restore can create
  * functions, other schemas, or other tables.
- *
- * There is no JS library for this — the TOC text is PostgreSQL’s own `pg_restore -l` format.
  */
 
 type PgRestoreTocEntry = {
