@@ -1,5 +1,5 @@
 import { connect } from 'node:net'
-import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from '@/server/envDefaultPorts'
+import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from '../../src/server/envDefaultPorts'
 
 export const DEV_DB_PORT = Number(DEFAULT_DATABASE_PORT)
 export const DEV_TILES_PORT = Number(DEFAULT_TILES_PORT)

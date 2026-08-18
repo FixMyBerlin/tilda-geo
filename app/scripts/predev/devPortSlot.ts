@@ -1,4 +1,4 @@
-import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from '@/server/envDefaultPorts'
+import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from '../../src/server/envDefaultPorts'
 import { isHostPortAvailable } from './devStackPorts'
 import { logErr } from './predevLog'
 
