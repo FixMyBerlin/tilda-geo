@@ -22,10 +22,16 @@ local to_semicolon_list = require('topics.helper.to_semicolon_list')
 local derive_traffic_mode = require('topics.roads_bikelanes.bikelanes.helper.derive_traffic_mode')
 local derive_bikelane_surface = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_surface')
 local derive_bikelane_smoothness = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_smoothness')
+local era_check = require('topics.roads_bikelanes.bikelanes.era_check.era_check')
 
 local side_sign_map = {
   ['left'] = 1,
   ['right'] = -1,
+}
+
+local opposite_side_map = {
+  ['left'] = 'right',
+  ['right'] = 'left',
 }
 
 local footway_transformation = CenterLineTransformation.new({
@@ -70,9 +76,23 @@ local function bikelanes(object_tags, object_geom)
   ---@type TransformedObject[]
   local transformed_objects = get_transformed_objects(object_tags, transformations)
 
+  ---@type {tags: TransformedObject, category: BikelaneCategory|nil}[]
+  local categorized_objects = {}
+  -- Auf welchen Seiten dieses Wegs gibt es Radinfrastruktur? Der ERA-Check braucht das, um einen
+  -- einseitigen von einem beidseitigen Zweirichtungsradweg zu unterscheiden.
+  local infrastructure_sides = {}
   for _, transformed_tags in ipairs(transformed_objects) do
     transformed_tags._length = object_tags._length
     local category = categorize_bikelane(transformed_tags)
+    table.insert(categorized_objects, { tags = transformed_tags, category = category })
+    if category ~= nil and category.infrastructureExists then
+      infrastructure_sides[transformed_tags._side] = true
+    end
+  end
+
+  for _, categorized_object in ipairs(categorized_objects) do
+    local transformed_tags = categorized_object.tags
+    local category = categorized_object.category
     if category ~= nil then
       local result_tags = {
         _side = transformed_tags._side,
@@ -134,6 +154,23 @@ local function bikelanes(object_tags, object_geom)
         merge_table(result_tags, derive_bikelane_surface(transformed_tags, category))
         merge_table(result_tags, derive_bikelane_smoothness(transformed_tags, category))
         result_tags.description = SANITIZE_TAGS.safe_string(result_tags.description)
+
+        -- Eigenständige Geometrien (`_side == 'self'`) haben keine Gegenseite, die wir hier kennen
+        -- könnten; `nil` heißt für den ERA-Check "unbekannt".
+        local opposite_side = opposite_side_map[transformed_tags._side]
+        local has_opposite_side_infrastructure = nil
+        if opposite_side ~= nil then
+          has_opposite_side_infrastructure = infrastructure_sides[opposite_side] == true
+        end
+
+        merge_table(result_tags, era_check({
+          category_id = category.id,
+          width = result_tags.width,
+          oneway = result_tags.oneway,
+          prefix = result_tags.prefix,
+          traffic_mode_right = result_tags.traffic_mode_right,
+          has_opposite_side_infrastructure = has_opposite_side_infrastructure,
+        }))
 
         if transformed_tags._side ~= 'self' then
           result_tags._id = default_id({ type = object_tags._type, id = object_tags._id }) .. '/' .. transformed_tags._prefix .. '/' .. transformed_tags._side

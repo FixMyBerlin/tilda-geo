@@ -128,6 +128,71 @@ attributes:
     ref: roads.width_effective
   - key: width_source
     ref: roads.width_source
+  - key: era_anlagentyp
+    label: ERA-Anlagentyp
+    description: Zeile der FGSV ERA 2010, Tabelle 5, an der diese Anlage gemessen wird. Wird aus der Führungsform, der Verkehrsrichtung und der Lage an der Straße abgeleitet. Sind mehrere Anlagentypen möglich, stehen sie alle hier – bewertet wird dann gegen alle. Führungsformen, für die Tabelle 5 kein Breitenmaß kennt (z. B. Fahrradstraßen, Gehwege mit Radfahrer frei), haben keinen Wert.
+    chapterRefs:
+      - chapterId: era-check
+    values:
+      - value: schutzstreifen
+        label: Schutzstreifen
+      - value: radfahrstreifen
+        label: Radfahrstreifen
+      - value: einrichtungsradweg
+        label: Einrichtungsradweg
+      - value: zweirichtungsradweg_beidseitig
+        label: Zweirichtungsradweg (beidseitig)
+        description: Zweirichtungsradweg, dem auf der anderen Straßenseite ein weiterer Radweg gegenübersteht. Erkennen können wir das nur bei seitenbezogen erfasster Radinfrastruktur (`cycleway:left`/`:right`), nicht bei eigenständig erfassten Geometrien.
+      - value: zweirichtungsradweg_einseitig
+        label: Zweirichtungsradweg (einseitig)
+        description: Einziger Radweg an der Straße, deshalb das größte Regelmaß der Tabelle 5.
+      - value: gemeinsamer_geh_und_radweg
+        label: Gemeinsamer Geh- und Radweg
+  - key: era_width_check
+    label: ERA-Konformität der Breite
+    description: Ergebnis der Breitenprüfung nach FGSV ERA 2010, Tabelle 5.
+    chapterRefs:
+      - chapterId: era-check
+    values:
+      - value: regelmass
+        label: Regelmaß erfüllt
+        description: Die Anlage erreicht das Regelmaß der ERA. Damit ist sie zugleich konform zur FGSV E-Klima, die die Regelmaße als Mindestwerte versteht.
+      - value: mindestmass
+        label: Nur Mindestmaß erfüllt
+        description: Das echte ERA-Mindestmaß ist erreicht, das Regelmaß nicht. Gibt es nur beim Schutzstreifen (1,25 m statt 1,50 m). Nicht konform zur FGSV E-Klima.
+      - value: klammerwert
+        label: Nur Klammerwert erfüllt
+        description: Erreicht wird nur der ERA-Klammerwert für geringe Radverkehrsstärke. Dieser ist nach FGSV E-Klima nicht mehr anzuwenden.
+      - value: unterschritten
+        label: Unterschritten
+        description: Die Breite bleibt unter allen Werten, die die ERA für diesen Anlagentyp nennt.
+      - value: unbekannt
+        label: Nicht bewertbar
+        description: Es fehlt die Breite, oder die möglichen Anlagentypen führen zu unterschiedlichen Ergebnissen. Welche Anlagentypen geprüft wurden, steht im Attribut ERA-Anlagentyp.
+  - key: era_width_confidence
+    label: Konfidenz der ERA-Bewertung
+    description: Beruht die Bewertung auf einer angenommenen Verkehrsrichtung, ist sie nur „vermutlich“ richtig. Angenommen ist die Richtung, wenn sie nicht aus einem OSM-Tag stammt, sondern aus der Führungsform abgeleitet (`implicit_yes`) oder geschätzt wurde (`assumed_no`).
+    chapterRefs:
+      - chapterId: era-check
+    values:
+      - value: high
+        label: Hoch
+        description: Alle Angaben, die in die Bewertung eingehen, stammen aus OSM-Tags.
+      - value: low
+        label: Niedrig
+        description: Die Verkehrsrichtung ist angenommen. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.
+  - key: era_width_used
+    label: Geprüfte Breite
+    format: meter
+    description: Breite, die mit der ERA verglichen wurde, einschließlich Markierung. Bei markierten Anlagen (Schutz- und Radfahrstreifen) ist das die erfasste Breite zuzüglich 0,25 m Markierung, bei baulichen Anlagen die erfasste Breite.
+    chapterRefs:
+      - chapterId: era-check
+  - key: era_width_regelmass
+    label: ERA-Regelmaß
+    format: meter
+    description: Regelmaß, an dem gemessen wurde. Kommen mehrere Anlagentypen in Frage, ist es bei erfülltem Regelmaß das strengste erfüllte, sonst das mildeste verfehlte.
+    chapterRefs:
+      - chapterId: era-check
   - key: oneway
     label: Verkehrsrichtung
     values:

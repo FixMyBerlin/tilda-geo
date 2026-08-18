@@ -216,6 +216,44 @@ const data = {
   'atlas_bikelanes--covered=indoor': 'In einem Gebäude',
   'atlas_bikelanes--covered=partial': 'Teilweise überdacht',
   'atlas_bikelanes--description--key': 'Hinweis aus OSM',
+  'atlas_bikelanes--era_anlagentyp--key': 'ERA-Anlagentyp',
+  'atlas_bikelanes--era_anlagentyp=einrichtungsradweg': 'Einrichtungsradweg',
+  'atlas_bikelanes--era_anlagentyp=gemeinsamer_geh_und_radweg': 'Gemeinsamer Geh- und Radweg',
+  'atlas_bikelanes--era_anlagentyp=radfahrstreifen': 'Radfahrstreifen',
+  'atlas_bikelanes--era_anlagentyp=schutzstreifen': 'Schutzstreifen',
+  'atlas_bikelanes--era_anlagentyp=zweirichtungsradweg_beidseitig':
+    'Zweirichtungsradweg (beidseitig)',
+  'atlas_bikelanes--era_anlagentyp=zweirichtungsradweg_beidseitig--description':
+    'Zweirichtungsradweg, dem auf der anderen Straßenseite ein weiterer Radweg gegenübersteht. Erkennen können wir das nur bei seitenbezogen erfasster Radinfrastruktur (`cycleway:left`/`:right`), nicht bei eigenständig erfassten Geometrien.',
+  'atlas_bikelanes--era_anlagentyp=zweirichtungsradweg_einseitig':
+    'Zweirichtungsradweg (einseitig)',
+  'atlas_bikelanes--era_anlagentyp=zweirichtungsradweg_einseitig--description':
+    'Einziger Radweg an der Straße, deshalb das größte Regelmaß der Tabelle 5.',
+  'atlas_bikelanes--era_width_check--key': 'ERA-Konformität der Breite',
+  'atlas_bikelanes--era_width_check=klammerwert': 'Nur Klammerwert erfüllt',
+  'atlas_bikelanes--era_width_check=klammerwert--description':
+    'Erreicht wird nur der ERA-Klammerwert für geringe Radverkehrsstärke. Dieser ist nach FGSV E-Klima nicht mehr anzuwenden.',
+  'atlas_bikelanes--era_width_check=mindestmass': 'Nur Mindestmaß erfüllt',
+  'atlas_bikelanes--era_width_check=mindestmass--description':
+    'Das echte ERA-Mindestmaß ist erreicht, das Regelmaß nicht. Gibt es nur beim Schutzstreifen (1,25 m statt 1,50 m). Nicht konform zur FGSV E-Klima.',
+  'atlas_bikelanes--era_width_check=regelmass': 'Regelmaß erfüllt',
+  'atlas_bikelanes--era_width_check=regelmass--description':
+    'Die Anlage erreicht das Regelmaß der ERA. Damit ist sie zugleich konform zur FGSV E-Klima, die die Regelmaße als Mindestwerte versteht.',
+  'atlas_bikelanes--era_width_check=unbekannt': 'Nicht bewertbar',
+  'atlas_bikelanes--era_width_check=unbekannt--description':
+    'Es fehlt die Breite, oder die möglichen Anlagentypen führen zu unterschiedlichen Ergebnissen. Welche Anlagentypen geprüft wurden, steht im Attribut ERA-Anlagentyp.',
+  'atlas_bikelanes--era_width_check=unterschritten': 'Unterschritten',
+  'atlas_bikelanes--era_width_check=unterschritten--description':
+    'Die Breite bleibt unter allen Werten, die die ERA für diesen Anlagentyp nennt.',
+  'atlas_bikelanes--era_width_confidence--key': 'Konfidenz der ERA-Bewertung',
+  'atlas_bikelanes--era_width_confidence=high': 'Hoch',
+  'atlas_bikelanes--era_width_confidence=high--description':
+    'Alle Angaben, die in die Bewertung eingehen, stammen aus OSM-Tags.',
+  'atlas_bikelanes--era_width_confidence=low': 'Niedrig',
+  'atlas_bikelanes--era_width_confidence=low--description':
+    'Die Verkehrsrichtung ist angenommen. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.',
+  'atlas_bikelanes--era_width_regelmass--key': 'ERA-Regelmaß',
+  'atlas_bikelanes--era_width_used--key': 'Geprüfte Breite',
   'atlas_bikelanes--highway--key': 'Straßentyp Fahrbahn',
   'atlas_bikelanes--highway=cycleway': 'Radweg',
   'atlas_bikelanes--highway=footway': 'Fußweg',
