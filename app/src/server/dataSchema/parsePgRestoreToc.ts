@@ -1,3 +1,15 @@
+/**
+ * Guard for admin Import: after the dump SHA matches the manifest, before DROP + pg_restore.
+ *
+ * `pg_restore --list` prints the custom-archive table of contents (object types, not row data).
+ * We parse that text and reject anything that is not `data.<this table>` (plus its indexes /
+ * sequences / constraints). Publish already dumps with `pg_dump --table=`, so a normal dump
+ * always passes; this catches a wrong or extra-wide archive on S3 before restore can create
+ * functions, other schemas, or other tables.
+ *
+ * There is no JS library for this — the TOC text is PostgreSQL’s own `pg_restore -l` format.
+ */
+
 type PgRestoreTocEntry = {
   dumpId: number
   desc: string

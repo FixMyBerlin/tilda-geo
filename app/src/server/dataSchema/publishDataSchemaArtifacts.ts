@@ -45,6 +45,10 @@ export async function publishLatestDumpAndManifest(
 /**
  * Copy the current spec + dump aside before the next publish overwrites them.
  * Snapshot id is the previous publishedAt (UTC minute). No-op if that snapshot already exists.
+ *
+ * Independent of Import history: we archive whatever is currently on S3 (complete publish =
+ * manifest + dump). A PENDING/FAILED Import only means that environment did not restore the
+ * dump; the S3 objects are still the version to keep.
  */
 export async function archiveLatestAsSnapshot(
   {
