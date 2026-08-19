@@ -25,10 +25,19 @@ import { FactorEditorPanel } from './FactorEditorPanel'
 import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
+import { useDraggableMapPanel } from './useDraggableMapPanel'
 import { VariantList } from './VariantList'
 import { VariantTitleField } from './VariantTitleField'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
+
+const DragGripIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 16 16" fill="currentColor" className={className} aria-hidden="true">
+    {[3, 8, 13].flatMap((cy) =>
+      [3, 8, 13].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={1.35} />),
+    )}
+  </svg>
+)
 
 const VegetationToggle = () => {
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
@@ -192,6 +201,8 @@ export const PlanningPanel = () => {
   const [activeVariant] = usePlanningVariantParam()
   const panelCollapsed = usePlanningBoundaryState((s) => s.panelCollapsed)
   const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
+  const { panelRef, dragging, didDragRef, panelStyle, defaultPositionClassName, headerDragProps } =
+    useDraggableMapPanel(planningMode)
   const { regionSlug } = routeApi.useParams()
   const [creatingArea, setCreatingArea] = useState(false)
   const { mainMap: map } = useMap()
@@ -254,39 +265,56 @@ export const PlanningPanel = () => {
   const areaTitle = area?.title ?? variant?.area?.title
   const variantTitle = variant?.title
   const expandPanel = () => {
+    if (didDragRef.current) return
     if (panelCollapsed) setPanelCollapsed(false)
   }
 
   return (
     <div
+      ref={panelRef}
+      style={panelStyle}
       className={twJoin(
-        'pointer-events-auto absolute top-2.5 left-[17rem] z-30 flex max-h-[calc(100vh-8rem)] flex-col gap-3 overflow-auto rounded bg-white p-3 shadow-lg',
+        'pointer-events-auto absolute z-10 flex max-h-[calc(100%-1.25rem)] flex-col overflow-hidden rounded bg-white shadow-lg',
+        defaultPositionClassName,
         PLANNING_PANEL_WIDTH,
       )}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div
+        {...headerDragProps}
+        title="Flächenfinder verschieben"
+        className={twJoin(
+          'group/drag flex shrink-0 cursor-grab touch-none items-center justify-between gap-2 px-3 py-2 select-none',
+          'hover:bg-gray-50',
+          dragging && 'cursor-grabbing bg-gray-50',
+        )}
+      >
         <button
           type="button"
           onClick={expandPanel}
           disabled={!panelCollapsed}
           className={twJoin(
-            'min-w-0 flex-1 text-left',
-            panelCollapsed && 'cursor-pointer rounded hover:bg-gray-50',
+            'flex min-w-0 flex-1 cursor-grab items-center gap-1.5 text-left disabled:cursor-grab',
+            dragging && 'cursor-grabbing disabled:cursor-grabbing',
           )}
         >
-          <h2 className="font-bold">Flächenfinder</h2>
-          {panelCollapsed && (areaTitle || variantTitle) && (
-            <p className="truncate text-sm text-gray-600">
-              {areaTitle}
-              {variantTitle ? ` · ${variantTitle}` : ''}
-            </p>
-          )}
+          <DragGripIcon className="size-4 shrink-0 text-gray-400 group-hover/drag:text-gray-600" />
+          <span className="min-w-0">
+            <h2 className="font-bold">Flächenfinder</h2>
+            {panelCollapsed && (areaTitle || variantTitle) && (
+              <p className="truncate text-sm text-gray-600">
+                {areaTitle}
+                {variantTitle ? ` · ${variantTitle}` : ''}
+              </p>
+            )}
+          </span>
         </button>
         <button
           type="button"
+          data-drag-ignore
+          onPointerDown={(event) => event.stopPropagation()}
           onClick={() => setPanelCollapsed(!panelCollapsed)}
           aria-label={panelCollapsed ? 'Flächenfinder ausklappen' : 'Flächenfinder einklappen'}
-          className="shrink-0 text-gray-500 hover:text-gray-800"
+          className="shrink-0 cursor-pointer text-gray-500 hover:text-gray-800"
         >
           <ChevronRightIcon
             className={twJoin('size-4 transition-transform', panelCollapsed ? '' : 'rotate-90')}
@@ -294,7 +322,7 @@ export const PlanningPanel = () => {
         </button>
       </div>
       {!panelCollapsed && (
-        <>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-3 pt-1 pb-3">
           <AreaContextBar regionSlug={regionSlug} onCreatingChange={setCreatingArea} />
           {!creatingArea && (
             <>
@@ -304,7 +332,7 @@ export const PlanningPanel = () => {
               )}
             </>
           )}
-        </>
+        </div>
       )}
     </div>
   )

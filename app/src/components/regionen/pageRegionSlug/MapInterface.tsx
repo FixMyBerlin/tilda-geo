@@ -47,6 +47,7 @@ export const MapInterface = () => {
         <MobileMapHeader />
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader.
             Left of it (planning mode only): the candidate-selection tool, same button look. */}
+        <PlanningPanel />
         <DesktopOnly>
           <PlaceSearch className="absolute top-2 right-[calc(var(--inspector-width)+3.5rem)] z-20" />
           <PlanningCandidateToggle className="absolute top-2 right-[calc(var(--inspector-width)+6.5rem)] z-20" />
@@ -54,7 +55,6 @@ export const MapInterface = () => {
         <SidebarLayerControls />
         {/* Also renders the planning candidate list while that tool is active. */}
         <SidebarInspector />
-        <PlanningPanel />
         <div className={mobileMapBottomControlsClassName} data-map-controls="true">
           <LoadingIndicator />
           <OsmNotes />
