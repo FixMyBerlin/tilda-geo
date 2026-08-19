@@ -190,7 +190,7 @@ export const AreaFormFields = ({
             {drawingActive && (
               <p className="text-xs text-gray-500">In der Karte ein Polygon zeichnen.</p>
             )}
-            <GeoJsonUpload onGeometry={handleStudyUpload} />
+            <GeoJsonUpload onGeometry={handleStudyUpload} regionSlug={regionSlug} />
           </div>
         )}
 
@@ -212,6 +212,7 @@ export const AreaFormFields = ({
           </div>
           <div className="mt-1">
             <UserObstaclesField
+              regionSlug={regionSlug}
               config={{
                 user_geojson: state.userGeojson,
                 user_geojson_mode: state.userGeojsonMode,

@@ -23,6 +23,7 @@ export type UserObstaclesConfig = Pick<
  */
 export const UserObstaclesField = ({
   config,
+  regionSlug,
   setWeight,
   setUserGeojson,
   setUserGeojsonMode,
@@ -30,6 +31,8 @@ export const UserObstaclesField = ({
   showWeight = true,
 }: {
   config: UserObstaclesConfig
+  /** Frühere Uploads werden nur in der Region wieder vorgeschlagen, in der sie entstanden. */
+  regionSlug: string
   setWeight: (key: string, value: number) => void
   setUserGeojson: (geojson: GeoJSON.FeatureCollection | undefined) => void
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
@@ -67,6 +70,7 @@ export const UserObstaclesField = ({
               onResult={(fc) => setUserGeojson(fc)}
               maxBytes={MAX_USER_GEOJSON_BYTES}
               historyScope="user_geojson"
+              regionSlug={regionSlug}
               label={
                 <>
                   Eigene GeoJSON-Datei hierher ziehen

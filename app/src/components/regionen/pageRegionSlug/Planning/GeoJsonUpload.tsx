@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   deleteGeojsonHistoryEntry,
   type GeojsonHistoryEntry,
+  type GeojsonHistoryKind,
   listGeojsonHistoryEntries,
   saveGeojsonHistoryEntry,
 } from '@/lib/planningGeojsonHistory'
@@ -15,8 +16,9 @@ import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAr
  * the study-area upload (single Polygon) and the user-obstacle upload
  * (Points/Lines/Polygons). `maxBytes`, when set, rejects oversized files before
  * they are read into memory. Every successful upload is also persisted to
- * IndexedDB under `historyScope`, so it shows up in a list below the drop-zone
- * for later re-selection (clicking an entry behaves exactly like re-uploading it).
+ * IndexedDB under `historyScope` and the current region, so it shows up in a list
+ * below the drop-zone – but only in the region it was uploaded in – for later
+ * re-selection (clicking an entry behaves exactly like re-uploading it).
  */
 export function GeoJsonUploadField<T>({
   parse,
@@ -25,6 +27,7 @@ export function GeoJsonUploadField<T>({
   maxBytes,
   label,
   historyScope,
+  regionSlug,
 }: {
   parse: (text: string) => T
   onResult: (result: T, fileName: string) => void
@@ -33,7 +36,9 @@ export function GeoJsonUploadField<T>({
   /** Custom drop-zone hint; defaults to the study-area wording. */
   label?: React.ReactNode
   /** Namespace for the IndexedDB upload history, e.g. `study_area` or `user_geojson`. */
-  historyScope: string
+  historyScope: GeojsonHistoryKind
+  /** Uploads are only listed again in the region they were made for. */
+  regionSlug: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
@@ -42,10 +47,10 @@ export function GeoJsonUploadField<T>({
   const [history, setHistory] = useState<GeojsonHistoryEntry[]>([])
 
   const refreshHistory = () => {
-    void listGeojsonHistoryEntries(historyScope).then(setHistory)
+    void listGeojsonHistoryEntries(regionSlug, historyScope).then(setHistory)
   }
 
-  useEffect(refreshHistory, [historyScope])
+  useEffect(refreshHistory, [historyScope, regionSlug])
 
   const handleFile = async (file: File) => {
     setError(null)
@@ -59,7 +64,7 @@ export function GeoJsonUploadField<T>({
       const result = parse(text)
       setFileName(file.name)
       onResult(result, file.name)
-      await saveGeojsonHistoryEntry(historyScope, file.name, result)
+      await saveGeojsonHistoryEntry(regionSlug, historyScope, file.name, result)
       refreshHistory()
     } catch (e) {
       setFileName(null)
@@ -159,12 +164,15 @@ export function GeoJsonUploadField<T>({
 /** Study-area upload: a single Polygon/MultiPolygon. Thin wrapper over the generic field. */
 export const GeoJsonUpload = ({
   onGeometry,
+  regionSlug,
 }: {
   onGeometry: (geometry: StudyAreaGeometry, fileName: string) => void
+  regionSlug: string
 }) => (
   <GeoJsonUploadField
     parse={parseStudyAreaGeometry}
     onResult={onGeometry}
     historyScope="study_area"
+    regionSlug={regionSlug}
   />
 )
