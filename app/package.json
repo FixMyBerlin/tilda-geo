@@ -8,7 +8,7 @@
   "scripts": {
     "start": "vite preview --host 127.0.0.1 --port 4000 --strictPort",
     "dev": "bun --env-file=../.env --env-file=../.env.local run --parallel dev:*",
-    "dev:vite": "FORCE_COLOR=1 vite dev --host 127.0.0.1 --strictPort",
+    "dev:vite": "FORCE_COLOR=1 bun --bun vite dev --host 127.0.0.1 --strictPort",
     "dev:topic-docs-watch": "bun ./scripts/topic-docs-build/watch.ts",
     "predev": "bun scripts/predev/ensureEnv.ts && bun --env-file=../.env --env-file=../.env.local scripts/predev/ensureDevStack.ts && bun --env-file=../.env --env-file=../.env.local run --sequential predev:*",
     "predev:2dev-port": "bun scripts/predev/checkDevServer.ts",

@@ -22,8 +22,6 @@ The frontend visualizes our processed data it also provides options to annotate 
 
 ### Start
 
-Run `nvm use` to use the recommended Node version.
-
 Run `bun run dev`. Open **http://127.0.0.1:5173** in your browser. Docker and dependencies start automatically if needed.
 
 ### Our Tooling
