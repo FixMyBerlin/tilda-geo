@@ -137,7 +137,7 @@ async function deleteVariantPostgisResults(variantId: number) {
 const RegionSlugInput = z.object({ regionSlug: z.string() })
 
 export const getPlanningAreasFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
+  .validator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
@@ -180,7 +180,7 @@ export const getPlanningAreasFn = createServerFn({ method: 'GET' })
 const AreaIdInput = z.object({ areaId: z.number().int() })
 
 export const getPlanningAreaFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
+  .validator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByArea(getRequestHeaders(), data.areaId)
     return db.planningArea.findFirstOrThrow({
@@ -220,7 +220,7 @@ export const getPlanningAreaFn = createServerFn({ method: 'GET' })
 const VariantIdInput = z.object({ variantId: z.number().int() })
 
 export const getPlanningVariantFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
+  .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
     const variant = await db.planningVariant.findFirstOrThrow({
@@ -266,7 +266,7 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
 const JobIdInput = z.object({ jobId: z.number().int() })
 
 export const getPlanningJobFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof JobIdInput>) => JobIdInput.parse(data))
+  .validator((data: z.infer<typeof JobIdInput>) => JobIdInput.parse(data))
   .handler(async ({ data }) => {
     const job = await db.planningJob.findFirstOrThrow({
       where: { id: data.jobId },
@@ -323,7 +323,7 @@ const MAX_BOUNDARY_RESULTS = 20
 const escapeLikePattern = (value: string) => value.replace(/[\\%_]/g, '\\$&')
 
 export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof BoundarySearchInput>) => BoundarySearchInput.parse(data))
+  .validator((data: z.infer<typeof BoundarySearchInput>) => BoundarySearchInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
@@ -395,7 +395,7 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
 const BoundaryGeomInput = z.object({ regionSlug: z.string(), boundaryId: z.string() })
 
 export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
-  .inputValidator((data: z.infer<typeof BoundaryGeomInput>) => BoundaryGeomInput.parse(data))
+  .validator((data: z.infer<typeof BoundaryGeomInput>) => BoundaryGeomInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
@@ -422,7 +422,7 @@ const CreateAreaInput = z.object({
 
 /** Creates a planning area and its first variant (no auto-run). */
 export const createPlanningAreaFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
+  .validator((data: z.infer<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
@@ -461,7 +461,7 @@ const UpdateAreaInput = z.object({
 })
 
 export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateAreaInput>) => UpdateAreaInput.parse(data))
+  .validator((data: z.infer<typeof UpdateAreaInput>) => UpdateAreaInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByArea(getRequestHeaders(), data.areaId)
     const existing = await db.planningArea.findFirstOrThrow({
@@ -495,7 +495,7 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
   })
 
 export const deletePlanningAreaFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
+  .validator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByArea(getRequestHeaders(), data.areaId)
     const variants = await db.planningVariant.findMany({
@@ -516,7 +516,7 @@ const UpdateVariantInput = z.object({
 })
 
 export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof UpdateVariantInput>) => UpdateVariantInput.parse(data))
+  .validator((data: z.infer<typeof UpdateVariantInput>) => UpdateVariantInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
     return db.planningVariant.update({
@@ -533,7 +533,7 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
   })
 
 export const duplicatePlanningVariantFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
+  .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
     const session = await authorizeByVariant(getRequestHeaders(), data.variantId)
     const source = await db.planningVariant.findFirstOrThrow({
@@ -561,7 +561,7 @@ const CreateVariantInput = z.object({
 
 /** Creates a new variant on an existing planungsgebiet (e.g. after all variants were deleted). */
 export const createPlanningVariantFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof CreateVariantInput>) => CreateVariantInput.parse(data))
+  .validator((data: z.infer<typeof CreateVariantInput>) => CreateVariantInput.parse(data))
   .handler(async ({ data }) => {
     const session = await authorizeByArea(getRequestHeaders(), data.areaId)
     const variantCount = await db.planningVariant.count({ where: { areaId: data.areaId } })
@@ -577,7 +577,7 @@ export const createPlanningVariantFn = createServerFn({ method: 'POST' })
   })
 
 export const runPlanningVariantFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
+  .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
     const job = await db.planningJob.create({
@@ -589,7 +589,7 @@ export const runPlanningVariantFn = createServerFn({ method: 'POST' })
   })
 
 export const deletePlanningVariantFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
+  .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
     await deleteVariantPostgisResults(data.variantId)
