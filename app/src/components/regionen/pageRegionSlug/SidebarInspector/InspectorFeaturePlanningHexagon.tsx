@@ -1,5 +1,15 @@
+import { useQuery } from '@tanstack/react-query'
+import { twJoin } from 'tailwind-merge'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { usePlanningAreaFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
+import {
+  usePlanningAreaFilterParam,
+  usePlanningVariantParam,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
+import {
+  MODIFIER_MAX_POINTS,
+  weightToPoints,
+} from '@/components/regionen/pageRegionSlug/Planning/weightScale'
+import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
@@ -25,7 +35,7 @@ const SCORE_LABELS: Record<string, string> = {
 // unterscheiden sich die beiden Faktorarten auch in der Anzeige, weil sie andere
 // Werte halten (mirrors scorer.py):
 //   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
-//   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → vorzeichenbehaftete Zahl
+//   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
 const SCORE_GROUPS: { label: string; scoreKey: string; criteria: string[]; modifiers: string[] }[] =
   [
     {
@@ -42,6 +52,17 @@ const SCORE_GROUPS: { label: string; scoreKey: string; criteria: string[]; modif
     },
   ]
 
+// `score_*` (Ergebnis pro Hexagon) → `w_*` (Gewicht der Variante) — nötig, um den maximal
+// möglichen Effekt (`weightToPoints`) für den Anteils-Balken zu bestimmen (mirrors weightScale.ts).
+const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
+  score_fussgaengerzone: 'w_fussgaengerzone',
+  score_bestand: 'w_bestand',
+  score_vegetation: 'w_vegetation',
+  score_kreuzung: 'w_intersection',
+  score_parken: 'w_parken',
+  score_eigendaten: 'w_eigendaten',
+}
+
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',
   schlecht: 'bg-red-100 text-red-800',
@@ -50,14 +71,36 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   'sehr gut': 'bg-green-100 text-green-800',
 }
 
-/** Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala. */
-const PointsValue = ({ value }: { value: number | null | undefined }) => (
-  <span className="font-mono text-xs text-gray-700">
-    {value == null
-      ? '–'
-      : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}`}
-  </span>
-)
+/**
+ * Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala.
+ * Gleiche Balken-/Label-Maße wie `ScoreBar`, damit beide Zeilenarten sauber untereinander
+ * ausgerichtet sind. Die Füllung zeigt den Anteil am maximal möglichen Effekt dieses Faktors
+ * (`max` = `weightToPoints(Gewicht)`, siehe `weightScale.ts`) und ist grün (Zuschlag) bzw. rot
+ * (Abschlag) eingefärbt.
+ */
+const ModifierBar = ({ value, max }: { value: number | null | undefined; max: number }) => {
+  const pct = value != null && max > 0 ? Math.min(100, (Math.abs(value) / max) * 100) : 0
+  const positive = value != null && value > 0
+  const negative = value != null && value < 0
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200">
+        <div
+          className={twJoin(
+            'h-full rounded-full',
+            positive ? 'bg-green-600' : negative ? 'bg-red-600' : 'bg-gray-300',
+          )}
+          style={{ width: `${pct}%`, opacity: 0.4 + (pct / 100) * 0.6 }}
+        />
+      </div>
+      <span className="w-8 text-right font-mono text-xs text-gray-600">
+        {value == null
+          ? '–'
+          : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}`}
+      </span>
+    </div>
+  )
+}
 
 const ScoreBar = ({ value }: { value: number | null | undefined }) => {
   const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
@@ -78,6 +121,17 @@ const ScoreBar = ({ value }: { value: number | null | undefined }) => {
 
 export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
   const [areaFilterOn] = usePlanningAreaFilterParam()
+  const [variantId] = usePlanningVariantParam()
+  const { data: variant } = useQuery({
+    ...planningVariantQueryOptions(variantId!),
+    enabled: variantId != null,
+  })
+  const weights = variant?.factorConfig?.weights
+  const modifierMax = (scoreKey: string) => {
+    const weightKey = MODIFIER_WEIGHT_KEYS[scoreKey]
+    return weightKey ? weightToPoints(weights?.[weightKey]) : MODIFIER_MAX_POINTS
+  }
+
   const props = feature.properties
   if (!props) return null
 
@@ -171,8 +225,8 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                   {group.modifiers.map((key) => (
                     <tr key={key} className="border-b border-gray-100 last:border-0">
                       <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
-                      <td className="py-1.5 text-right">
-                        <PointsValue value={props[key]} />
+                      <td className="py-1.5">
+                        <ModifierBar value={props[key]} max={modifierMax(key)} />
                       </td>
                     </tr>
                   ))}
@@ -192,8 +246,11 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                 <tbody>
                   <tr>
                     <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</td>
-                    <td className="py-1.5 text-right">
-                      <PointsValue value={props.score_eigendaten} />
+                    <td className="py-1.5">
+                      <ModifierBar
+                        value={props.score_eigendaten}
+                        max={modifierMax('score_eigendaten')}
+                      />
                     </td>
                   </tr>
                 </tbody>
