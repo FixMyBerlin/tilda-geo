@@ -16,6 +16,7 @@ import {
   usePlanningVariantParam,
 } from '../hooks/useQueryState/usePlanningParams'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
+import type { PlanningUseCase } from './planningDefaults'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
 type PlanningAreaDetail = Awaited<ReturnType<typeof getPlanningAreaFn>>
@@ -51,6 +52,10 @@ const AreaEditorForm = ({
   const [userGeojsonMode, setUserGeojsonMode] = useState<UserGeojsonMode>(
     (area.userGeojsonMode as UserGeojsonMode) ?? 'bonus',
   )
+  const [useCase, setUseCase] = useState<PlanningUseCase>(
+    (area.useCase as PlanningUseCase) ?? 'fahrradbox',
+  )
+  const [areaSizeM2, setAreaSizeM2] = useState<number | null>(area.areaSizeM2)
   const [obstaclesDirty, setObstaclesDirty] = useState(false)
 
   useEffect(() => {
@@ -67,6 +72,9 @@ const AreaEditorForm = ({
     obstaclesDirty ||
     !jsonEqual(userGeojson ?? null, area.userGeojson ?? null) ||
     userGeojsonMode !== ((area.userGeojsonMode as UserGeojsonMode) ?? 'bonus')
+  const useCaseChanged =
+    useCase !== ((area.useCase as PlanningUseCase) ?? 'fahrradbox') ||
+    areaSizeM2 !== area.areaSizeM2
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -77,6 +85,8 @@ const AreaEditorForm = ({
           studyArea: effectiveStudyArea!,
           userGeojson: userGeojson ?? null,
           userGeojsonMode,
+          useCase,
+          areaSizeM2,
         },
       }),
     onSuccess: () => {
@@ -114,10 +124,10 @@ const AreaEditorForm = ({
         </button>
       </div>
 
-      {hasCompleteRuns && (geometryDirty || obstaclesChanged) && (
+      {hasCompleteRuns && (geometryDirty || obstaclesChanged || useCaseChanged) && (
         <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-          Änderungen am Planungsgebiet markieren bestehende Ergebnisse als veraltet. Bitte
-          betroffene Varianten neu berechnen.
+          Änderungen am Planungsgebiet (Gebiet, eigene Daten, Art oder Größe) markieren bestehende
+          Ergebnisse als veraltet. Bitte betroffene Varianten neu berechnen.
         </p>
       )}
 
@@ -130,6 +140,8 @@ const AreaEditorForm = ({
           areaTab,
           userGeojson,
           userGeojsonMode,
+          useCase,
+          areaSizeM2,
         }}
         onTitleChange={setTitle}
         onBoundaryIdChange={setBoundaryId}
@@ -143,6 +155,8 @@ const AreaEditorForm = ({
           setUserGeojsonMode(mode)
           setObstaclesDirty(true)
         }}
+        onUseCaseChange={setUseCase}
+        onAreaSizeM2Change={setAreaSizeM2}
         geometryStepTitle="Gebiet überschreiben"
       />
 
@@ -178,7 +192,7 @@ const AreaEditorForm = ({
   )
 }
 
-/** Edit an existing planungsgebiet: geometry, name, and user obstacles. */
+/** Edit an existing planungsgebiet: geometry, name, use-case/size, and user obstacles. */
 export const AreaEditor = ({
   areaId,
   regionSlug,

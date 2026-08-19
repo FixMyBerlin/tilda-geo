@@ -132,7 +132,8 @@ def _load_variant_config(conn, variant_id: int):
     """Lädt Variante + Planungsgebiet und merged zu einem flachen factorConfig-Dict."""
     with conn.cursor() as cur:
         cur.execute(
-            """SELECT v."factorConfig", a."studyArea", a."userGeojson", a."userGeojsonMode"
+            """SELECT v."factorConfig", a."studyArea", a."userGeojson", a."userGeojsonMode",
+                      a."useCase", a."areaSizeM2"
                FROM prisma."PlanningVariant" v
                JOIN prisma."PlanningArea" a ON a.id = v."areaId"
                WHERE v.id = %s""",
@@ -141,9 +142,11 @@ def _load_variant_config(conn, variant_id: int):
         row = cur.fetchone()
     if not row:
         raise ValueError(f"Variant {variant_id} nicht gefunden")
-    factor_config, study_area, user_geojson, user_geojson_mode = row
+    factor_config, study_area, user_geojson, user_geojson_mode, use_case, area_size_m2 = row
     cfg = dict(factor_config)
     cfg["study_area"] = study_area
+    cfg["use_case"] = use_case
+    cfg["area_size_m2"] = area_size_m2
     if user_geojson is not None:
         cfg["user_geojson"] = user_geojson
     if user_geojson_mode is not None:

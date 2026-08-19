@@ -8,7 +8,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
-import { DEFAULT_FACTOR_TEMPLATE } from './planningDefaults'
+import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from './planningDefaults'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
 /** Reduced wizard: name + geometry + eigene Daten. Creates area + first variant (no auto-run). */
@@ -30,6 +30,8 @@ export const AreaWizard = ({
   const [areaTab, setAreaTab] = useState<'search' | 'custom'>('search')
   const [userGeojson, setUserGeojson] = useState<GeoJSON.FeatureCollection | undefined>()
   const [userGeojsonMode, setUserGeojsonMode] = useState<UserGeojsonMode>('bonus')
+  const [useCase, setUseCase] = useState<PlanningUseCase>('fahrradbox')
+  const [areaSizeM2, setAreaSizeM2] = useState<number | null>(2)
 
   const effectiveStudyArea = useEffectiveStudyArea(studyArea)
   const areaKm2 = useStudyAreaKm2(effectiveStudyArea)
@@ -49,11 +51,9 @@ export const AreaWizard = ({
           studyArea: effectiveStudyArea,
           userGeojson,
           userGeojsonMode,
-          factorConfig: {
-            ...DEFAULT_FACTOR_TEMPLATE,
-            use_case: 'fahrradbox',
-            area_size_m2: 2,
-          },
+          useCase,
+          areaSizeM2,
+          factorConfig: DEFAULT_FACTOR_TEMPLATE,
         },
       })
     },
@@ -82,6 +82,8 @@ export const AreaWizard = ({
           areaTab,
           userGeojson,
           userGeojsonMode,
+          useCase,
+          areaSizeM2,
         }}
         onTitleChange={setTitle}
         onBoundaryIdChange={setBoundaryId}
@@ -89,6 +91,8 @@ export const AreaWizard = ({
         onAreaTabChange={setAreaTab}
         onUserGeojsonChange={setUserGeojson}
         onUserGeojsonModeChange={setUserGeojsonMode}
+        onUseCaseChange={setUseCase}
+        onAreaSizeM2Change={setAreaSizeM2}
         titleMissing={titleMissing}
       />
 

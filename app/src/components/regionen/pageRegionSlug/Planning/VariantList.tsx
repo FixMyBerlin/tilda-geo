@@ -144,11 +144,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
       createPlanningVariantFn({
         data: {
           areaId: activeArea!,
-          factorConfig: {
-            ...DEFAULT_FACTOR_TEMPLATE,
-            use_case: 'fahrradbox',
-            area_size_m2: 2,
-          },
+          factorConfig: DEFAULT_FACTOR_TEMPLATE,
         },
       }),
     onSuccess: (created) => {

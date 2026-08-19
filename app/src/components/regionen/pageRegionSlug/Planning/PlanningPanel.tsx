@@ -154,7 +154,7 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-3">
       {latestRun?.stale && (
         <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-          Gebiet geändert — Ergebnis veraltet. Bitte neu berechnen.
+          Planungsgebiet geändert — Ergebnis veraltet. Bitte neu berechnen.
         </p>
       )}
 

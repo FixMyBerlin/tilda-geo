@@ -12,8 +12,6 @@ import {
   FACTOR_HELP,
   FACTOR_PARAMS,
   GROUP_HELP,
-  PLANNING_USE_CASES,
-  type PlanningUseCase,
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
 } from './planningDefaults'
@@ -231,61 +229,6 @@ const FactorFields = ({
   )
 }
 
-const UseCaseFields = ({
-  config,
-  setUseCase,
-  setAreaSizeM2,
-  readOnly,
-}: {
-  config: FactorConfig
-  setUseCase: (key: PlanningUseCase) => void
-  setAreaSizeM2: (value: number | null) => void
-  readOnly: boolean
-}) => {
-  const useCase = (config.use_case as PlanningUseCase | undefined) ?? 'fahrradbox'
-  const areaSizeM2 = (config.area_size_m2 as number | null | undefined) ?? null
-
-  return (
-    <div className="space-y-2">
-      <div className="text-xs font-semibold text-gray-700">Art & Größe der gesuchten Fläche</div>
-      <div className="grid grid-cols-2 gap-1.5">
-        {PLANNING_USE_CASES.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            disabled={readOnly}
-            onClick={() => {
-              setUseCase(key)
-              const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
-              if (defaultAreaM2 != null) setAreaSizeM2(defaultAreaM2)
-            }}
-            className={twJoin(
-              'rounded border px-2 py-1.5 text-xs font-medium transition-colors disabled:opacity-50',
-              useCase === key
-                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-            )}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
-        <span>Flächengröße (m²)</span>
-        <input
-          type="number"
-          min={0}
-          step={1}
-          disabled={readOnly}
-          value={areaSizeM2 ?? ''}
-          onChange={(e) => setAreaSizeM2(e.target.value === '' ? null : Number(e.target.value))}
-          className={planningNumberInputClass}
-        />
-      </label>
-    </div>
-  )
-}
-
 /** Edits a variant's factorConfig. Read-only while a job is in flight. */
 export const FactorEditorPanel = (props: {
   variantId: number
@@ -317,7 +260,14 @@ const FactorEditorPanelForm = ({
   }, [readOnly])
 
   const toVariantConfig = (c: FactorConfig): VariantFactorConfig => {
-    const { study_area: _sa, user_geojson: _ug, user_geojson_mode: _ugm, ...rest } = c
+    const {
+      study_area: _sa,
+      user_geojson: _ug,
+      user_geojson_mode: _ugm,
+      use_case: _uc,
+      area_size_m2: _as,
+      ...rest
+    } = c
     return rest
   }
 
@@ -335,19 +285,15 @@ const FactorEditorPanelForm = ({
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
 
-  const setUseCase = (key: PlanningUseCase) => setConfig((c) => ({ ...c, use_case: key }))
-
-  const setAreaSizeM2 = (value: number | null) => setConfig((c) => ({ ...c, area_size_m2: value }))
-
   const resetWeightsToDefaults = () => {
     setConfig((c) => ({
       ...c,
       ...DEFAULT_FACTOR_TEMPLATE,
-      use_case: c.use_case,
-      area_size_m2: c.area_size_m2,
       study_area: c.study_area,
       user_geojson: c.user_geojson,
       user_geojson_mode: c.user_geojson_mode,
+      use_case: c.use_case,
+      area_size_m2: c.area_size_m2,
     }))
   }
 
@@ -382,13 +328,6 @@ const FactorEditorPanelForm = ({
               Faktoren gesperrt — Berechnung wurde gestartet.
             </p>
           )}
-
-          <UseCaseFields
-            config={config}
-            setUseCase={setUseCase}
-            setAreaSizeM2={setAreaSizeM2}
-            readOnly={readOnly}
-          />
 
           <FactorFields
             config={config}
