@@ -17,15 +17,15 @@ export type VariantFactorConfig = {
   bestand_default_diameter_m?: number
   min_score_threshold?: number
   targets?: object[]
-  use_case?: string
-  area_size_m2?: number | null
 }
 
-/** Area geometry + optional user obstacles (stored on PlanningArea). */
+/** Area geometry, use-case, size, and optional user obstacles (stored on PlanningArea). */
 export type PlanningAreaInput = {
   studyArea: unknown
   userGeojson?: unknown
   userGeojsonMode?: string | null
+  useCase: string
+  areaSizeM2: number | null
 }
 
 /** Flat dict consumed by the Python worker and planning UI (area + variant merged). */
@@ -33,6 +33,8 @@ export type MergedFactorConfig = VariantFactorConfig & {
   study_area?: object
   user_geojson?: object
   user_geojson_mode?: string
+  use_case?: string
+  area_size_m2?: number | null
 }
 
 export const mergeFactorConfig = (
@@ -42,6 +44,8 @@ export const mergeFactorConfig = (
   const merged: MergedFactorConfig = {
     ...variantConfig,
     study_area: area.studyArea as object,
+    use_case: area.useCase,
+    area_size_m2: area.areaSizeM2,
   }
   if (area.userGeojson != null) merged.user_geojson = area.userGeojson as object
   if (area.userGeojsonMode != null) merged.user_geojson_mode = area.userGeojsonMode
@@ -52,8 +56,12 @@ export const areaInputFromRow = (row: {
   studyArea: Prisma.JsonValue
   userGeojson: Prisma.JsonValue | null
   userGeojsonMode: string | null
+  useCase: string
+  areaSizeM2: number | null
 }): PlanningAreaInput => ({
   studyArea: row.studyArea,
   userGeojson: row.userGeojson ?? undefined,
   userGeojsonMode: row.userGeojsonMode,
+  useCase: row.useCase,
+  areaSizeM2: row.areaSizeM2,
 })

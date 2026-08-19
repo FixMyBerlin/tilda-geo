@@ -35,10 +35,10 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   targets: [],
 }
 
-// Anwendungsfälle für Schritt 2 des Planungsassistenten ("Art & Größe der gesuchten Fläche").
+// Anwendungsfälle für das Planungsgebiet ("Art & Größe der gesuchten Fläche").
 // `defaultAreaM2` ist die vorbelegte Flächengröße; bei „Sonstiges“ gibt es keinen Default, die
-// Größe wird frei eingegeben. Die Fläche wird aktuell nur im factorConfig mitgespeichert
-// (passthrough) und noch nicht vom Worker ausgewertet — Vorbereitung für die künftige
+// Größe wird frei eingegeben. Die Fläche liegt auf dem Planungsgebiet (nicht im variant
+// factorConfig) und wird aktuell nur mitgespeichert — Vorbereitung für die künftige
 // automatische Flächensuche.
 export type PlanningUseCase =
   | 'fahrradbox'

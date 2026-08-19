@@ -23,7 +23,7 @@ import {
 export type { VariantFactorConfig }
 
 // ── factorConfig schemas ───────────────────────────────────────────────────────
-// Variant config: weights, thresholds, use_case — no geometry.
+// Variant config: weights and thresholds — no geometry, use-case, or size.
 const VariantFactorConfigSchema = z
   .object({
     name: z.string().optional(),
@@ -41,10 +41,15 @@ const VariantFactorConfigSchema = z
     bestand_default_diameter_m: z.number().optional(),
     min_score_threshold: z.number().min(0).max(100).optional(),
     targets: z.array(z.any()).optional(),
-    use_case: z.string().optional(),
-    area_size_m2: z.number().nullable().optional(),
   })
   .passthrough()
+
+const PlanningUseCaseSchema = z.enum([
+  'fahrradbox',
+  'fahrradabstellanlage',
+  'mobilitaetsstation',
+  'sonstiges',
+])
 
 // Merged config (variant + area) — used by UI for map layers and worker payload.
 export type FactorConfig = MergedFactorConfig
@@ -191,6 +196,8 @@ export const getPlanningAreaFn = createServerFn({ method: 'GET' })
         studyArea: true,
         userGeojson: true,
         userGeojsonMode: true,
+        useCase: true,
+        areaSizeM2: true,
         inputUpdatedAt: true,
         createdAt: true,
         updatedAt: true,
@@ -233,6 +240,8 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
             studyArea: true,
             userGeojson: true,
             userGeojsonMode: true,
+            useCase: true,
+            areaSizeM2: true,
             inputUpdatedAt: true,
           },
         },
@@ -286,6 +295,8 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
                 studyArea: true,
                 userGeojson: true,
                 userGeojsonMode: true,
+                useCase: true,
+                areaSizeM2: true,
                 region: { select: { slug: true } },
               },
             },
@@ -416,6 +427,8 @@ const CreateAreaInput = z.object({
   regionSlug: z.string(),
   title: z.string().min(1),
   ...AreaGeometryInputSchema.shape,
+  useCase: PlanningUseCaseSchema.optional(),
+  areaSizeM2: z.number().nullable().optional(),
   variantTitle: z.string().min(1).optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
 })
@@ -435,6 +448,8 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
         studyArea: data.studyArea as Prisma.InputJsonValue,
         userGeojson: data.userGeojson as Prisma.InputJsonValue | undefined,
         userGeojsonMode: data.userGeojsonMode,
+        useCase: data.useCase ?? 'fahrradbox',
+        areaSizeM2: data.areaSizeM2 ?? null,
         variants: {
           create: {
             creatorId: session.userId,
@@ -457,6 +472,8 @@ const UpdateAreaInput = z.object({
   studyArea: StudyAreaSchema.optional(),
   userGeojson: UserGeojsonSchema,
   userGeojsonMode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
+  useCase: PlanningUseCaseSchema.optional(),
+  areaSizeM2: z.number().nullable().optional(),
   markRunsStale: z.boolean().optional(),
 })
 
@@ -466,14 +483,22 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
     await authorizeByArea(getRequestHeaders(), data.areaId)
     const existing = await db.planningArea.findFirstOrThrow({
       where: { id: data.areaId },
-      select: { studyArea: true, userGeojson: true, userGeojsonMode: true },
+      select: {
+        studyArea: true,
+        userGeojson: true,
+        userGeojsonMode: true,
+        useCase: true,
+        areaSizeM2: true,
+      },
     })
     const areaInputsChanged =
       data.markRunsStale === true ||
       (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) ||
       (data.userGeojson !== undefined &&
         !jsonEqual(data.userGeojson ?? null, existing.userGeojson ?? null)) ||
-      (data.userGeojsonMode !== undefined && data.userGeojsonMode !== existing.userGeojsonMode)
+      (data.userGeojsonMode !== undefined && data.userGeojsonMode !== existing.userGeojsonMode) ||
+      (data.useCase !== undefined && data.useCase !== existing.useCase) ||
+      (data.areaSizeM2 !== undefined && data.areaSizeM2 !== existing.areaSizeM2)
     const result = await db.planningArea.update({
       where: { id: data.areaId },
       data: {
@@ -486,6 +511,8 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
               : (data.userGeojson as unknown as Prisma.InputJsonValue),
         }),
         ...(data.userGeojsonMode !== undefined && { userGeojsonMode: data.userGeojsonMode }),
+        ...(data.useCase !== undefined && { useCase: data.useCase }),
+        ...(data.areaSizeM2 !== undefined && { areaSizeM2: data.areaSizeM2 }),
         ...(areaInputsChanged && { inputUpdatedAt: new Date() }),
       },
       select: { id: true },

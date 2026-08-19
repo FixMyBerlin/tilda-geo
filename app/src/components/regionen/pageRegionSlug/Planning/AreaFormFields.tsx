@@ -9,8 +9,8 @@ import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import { GeoJsonUpload } from './GeoJsonUpload'
 import { InfoTooltip } from './InfoTooltip'
-import { GROUP_HELP } from './planningDefaults'
-import { planningPanelTitleInputClass } from './planningPanelStyles'
+import { GROUP_HELP, PLANNING_USE_CASES, type PlanningUseCase } from './planningDefaults'
+import { planningNumberInputClass, planningPanelTitleInputClass } from './planningPanelStyles'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import { WizardStep } from './WizardStep'
 
@@ -31,6 +31,8 @@ type AreaFormState = {
   areaTab: AreaTab
   userGeojson: GeoJSON.FeatureCollection | undefined
   userGeojsonMode: UserGeojsonMode
+  useCase: PlanningUseCase
+  areaSizeM2: number | null
 }
 
 type AreaFormFieldsProps = {
@@ -42,6 +44,8 @@ type AreaFormFieldsProps = {
   onAreaTabChange: (tab: AreaTab) => void
   onUserGeojsonChange: (geojson: GeoJSON.FeatureCollection | undefined) => void
   onUserGeojsonModeChange: (mode: UserGeojsonMode) => void
+  onUseCaseChange: (useCase: PlanningUseCase) => void
+  onAreaSizeM2Change: (value: number | null) => void
   titleMissing?: boolean
   showUserData?: boolean
   geometryStepTitle?: string
@@ -57,6 +61,8 @@ export const AreaFormFields = ({
   onAreaTabChange,
   onUserGeojsonChange,
   onUserGeojsonModeChange,
+  onUseCaseChange,
+  onAreaSizeM2Change,
   titleMissing = false,
   showUserData = true,
   geometryStepTitle = 'Gebiet auswählen',
@@ -139,6 +145,44 @@ export const AreaFormFields = ({
         />
       </label>
       {titleMissing && <p className="text-xs text-red-600">Bitte einen Namen angeben.</p>}
+
+      <div className="space-y-2">
+        <div className="text-xs font-semibold text-gray-700">Art & Größe der gesuchten Fläche</div>
+        <div className="grid grid-cols-2 gap-1.5">
+          {PLANNING_USE_CASES.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                onUseCaseChange(key)
+                const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
+                if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
+              }}
+              className={twJoin(
+                'rounded border px-2 py-1.5 text-xs font-medium transition-colors',
+                state.useCase === key
+                  ? 'border-blue-600 bg-blue-50 text-blue-700'
+                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+          <span>Flächengröße (m²)</span>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            value={state.areaSizeM2 ?? ''}
+            onChange={(e) =>
+              onAreaSizeM2Change(e.target.value === '' ? null : Number(e.target.value))
+            }
+            className={planningNumberInputClass}
+          />
+        </label>
+      </div>
 
       <WizardStep number={1} title={geometryStepTitle}>
         <div className="flex flex-col gap-1 text-xs text-gray-600">

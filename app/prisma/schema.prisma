@@ -628,7 +628,10 @@ model PlanningArea {
   studyArea        Json
   userGeojson      Json?
   userGeojsonMode  String?
-  // Bumped when geometry/obstacles change — marks existing COMPLETE runs stale.
+  // Shared by all variants of this area; merged into worker snapshots as use_case / area_size_m2.
+  useCase          String   @default("fahrradbox")
+  areaSizeM2       Float?
+  // Bumped when geometry/obstacles/use-case/size change — marks existing COMPLETE runs stale.
   inputUpdatedAt   DateTime @default(now())
   //
   variants PlanningVariant[]
@@ -657,7 +660,7 @@ model PlanningVariant {
   parentId  Int?
   children  PlanningVariant[] @relation("Lineage")
   //
-  // Editable UseCaseConfig ohne Geometrie: weights, thresholds, use_case, area_size_m2, …
+  // Editable UseCaseConfig ohne Geometrie: weights and thresholds only (use-case/size live on PlanningArea).
   factorConfig Json
   //
   // Pointer to the latest successful run used for display. Plain Int (logical FK
@@ -679,10 +682,10 @@ model PlanningRun {
   variant   PlanningVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId Int
   //
-  // Frozen merge of area geometry + variant assumptions (reproducibility).
+  // Frozen merge of area geometry + use-case/size + variant assumptions (reproducibility).
   factorConfigSnapshot Json
   //
-  // true when the parent area's geometry changed after this run completed.
+  // true when the parent area's geometry, obstacles, use-case, or size changed after this run completed.
   stale            Boolean           @default(false)
   status           PlanningRunStatus @default(PENDING)
   hexCount         Int?
