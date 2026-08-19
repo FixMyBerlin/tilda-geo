@@ -63,7 +63,12 @@ _VEGETATION_REUSE_CANDIDATES = 5
 def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int, study_area):
     """Sucht unter den letzten Läufen derselben Variante einen mit identischem
     Studiengebiet, in dem Vegetation tatsächlich berechnet wurde, und lädt dessen
-    `scenario_vegetation`-Zeilen. None = kein Treffer, muss neu berechnet werden."""
+    `scenario_vegetation`-Zeilen. None = kein Treffer, muss neu berechnet werden.
+
+    Läufe ohne gespeicherte Flächen zählen nicht als Treffer: 0 Zeilen heißt in
+    der Praxis, dass die Berechnung damals fehlgeschlagen ist (z. B. WMS-Ausfall).
+    Würden wir sie wiederverwenden, würde ein einziger fehlgeschlagener Lauf alle
+    Folgeläufe derselben Variante dauerhaft leer halten."""
     with conn.cursor() as cur:
         cur.execute(
             """SELECT id, "factorConfigSnapshot" FROM prisma."PlanningRun"
@@ -82,7 +87,10 @@ def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int
             continue
         if not study_area.equals(prev_study_area):
             continue
-        return _load_vegetation_rows(engine, prev_run_id)
+        gdf = _load_vegetation_rows(engine, prev_run_id)
+        if not len(gdf):
+            continue  # leerer Lauf = damals fehlgeschlagen, nicht wiederverwenden
+        return gdf
     return None
 
 

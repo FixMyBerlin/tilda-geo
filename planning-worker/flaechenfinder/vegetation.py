@@ -7,7 +7,7 @@ Brandenburg/Berlin DOP20 CIR (EPSG:25833, WMS, NIR=B1).
 
 Verarbeitung:
   1. Studiengebiet → Quell-CRS projizieren
-  2. 1-km-Kacheln bestimmen (Cache-Check / Download)
+  2. Kacheln bestimmen (Rastergröße je Quelle; Cache-Check / Download)
   3. NDVI = (NIR – Rot) / (NIR + Rot) je Kachel
   4. Binärmaske > NDVI_MIN + morphologisches Closing
   5. Vektorisieren, vereinfachen, Kleinflächen entfernen
@@ -68,7 +68,7 @@ def _closing(maske: np.ndarray) -> np.ndarray:
 
 
 def _expected_tiles(bounds_src, tile_size_m: float) -> list[tuple[int, int]]:
-    """SW-Ecken aller 1-km-Kacheln über der bbox (Koordinaten in Quell-CRS-Metern)."""
+    """SW-Ecken aller Kacheln über der bbox (Koordinaten in Quell-CRS-Metern)."""
     minx, miny, maxx, maxy = bounds_src
     ts = int(tile_size_m)
     e0 = int(minx // ts) * ts

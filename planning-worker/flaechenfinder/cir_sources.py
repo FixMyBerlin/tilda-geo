@@ -161,11 +161,20 @@ SOURCE_BB = CirSource(
 #
 # WMS: https://www.gds-srv.hessen.de/cgi-bin/lika-services/ogc-free-images.ows
 # Layer: he_dop20_cir  (DOP20 CIR-False-Color, 0,2 m, kostenfrei/OGC-„free-images")
-# Kachelraster: 1000 m, Pixel 0,2 m (5000×5000 px).
+# Kachelraster: 500 m, Pixel 0,2 m (2500×2500 px).
 # Bandbelegung im TIFF: False-Color-RGB(+Alpha) → NIR=B1 (Rot-Kanal),
 #   Rot=B2 (Grün-Kanal), Grün=B3; das Alpha-Band (B4) bleibt ungenutzt.
 # Wie Bayern liegt Hessen in EPSG:25832 (UTM32) und liefert GeoTIFF.
 # Lizenz: dl-de/zero-2-0 (freie Geodaten der HVBG).
+#
+# Kachelgröße 500 m statt 1000 m wie bei Bayern/BB: Der MapServer hinter diesem
+# WMS begrenzt WIDTH/HEIGHT hart auf 3000 px und beantwortet größere Anfragen
+# mit einer ServiceException statt mit einem Bild ("Image size out of range").
+# 1000 m bei 0,2 m wären 5000 px – damit schlug bisher jede Kachel fehl und die
+# Vegetation blieb in ganz Hessen leer. 500 m ergeben 2500 px; die Auflösung
+# bleibt bei 0,2 m, es sind nur 4 Requests pro km² statt einem.
+_HESSEN_TILE_M = 500
+
 
 def _hessen_download(easting_m: int, northing_m: int, dest: str) -> bool:
     wms_url = os.environ.get(
@@ -173,7 +182,7 @@ def _hessen_download(easting_m: int, northing_m: int, dest: str) -> bool:
         "https://www.gds-srv.hessen.de/cgi-bin/lika-services/ogc-free-images.ows",
     )
     layer = os.environ.get("PLANNING_CIR_HE_WMS_LAYER", "he_dop20_cir")
-    tile_m = 1000
+    tile_m = _HESSEN_TILE_M
     px = int(round(tile_m / 0.2))
     params = {
         "service": "wms", "version": "1.1.1", "request": "GetMap",
@@ -211,7 +220,7 @@ def _hessen_download(easting_m: int, northing_m: int, dest: str) -> bool:
 SOURCE_HESSEN = CirSource(
     name="Hessen DOP20 CIR",
     crs="EPSG:25832",
-    tile_size_m=1000.0,
+    tile_size_m=float(_HESSEN_TILE_M),
     pixel_size_m=0.2,
     band_nir=1,
     band_red=2,

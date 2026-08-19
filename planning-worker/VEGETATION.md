@@ -9,8 +9,8 @@ Kerncode: [`flaechenfinder/vegetation.py`](flaechenfinder/vegetation.py).
 ## Funktionsweise
 
 1. **Kacheln bestimmen** – aus der Bounding-Box des Studiengebiets werden die
-   überdeckenden 1-km-CIR-DOP-Kacheln abgeleitet (Bayern DOP20 CIR, EPSG:25832,
-   Dateiname `{easting}_{northing}.tiff`).
+   überdeckenden CIR-DOP-Kacheln abgeleitet. Kachelraster, CRS und Dateiname
+   kommen aus der jeweiligen Quelle (siehe unten), nicht aus `vegetation.py`.
 2. **NDVI je Kachel** – `NDVI = (NIR − Rot) / (NIR + Rot)` (Band 1 = NIR, Band 2 = Rot),
    Maske `NDVI > NDVI_MIN`, morphologisches Closing, Polygonisierung, Vereinfachung,
    Entfernen kleiner Löcher/Flächen.
@@ -27,17 +27,34 @@ Kerncode: [`flaechenfinder/vegetation.py`](flaechenfinder/vegetation.py).
 | `MIN_LOCH_M2` | 20.0 | kleinere Innenlöcher schließen |
 | `MIN_FLAECHE_M2` | 5.0 | kleinere Polygone verwerfen |
 
-## Datenquelle (Bayern)
+## Datenquellen
 
-Kacheln werden zur Laufzeit per **WMS GetMap** von Bayern bezogen
-(`geoservices.bayern.de/pro/wms/dop/v1/dop20datenabgabe`, Layer `by_dop20cir_bayern`,
-5000×5000 px je Kachel; URL-Muster wie in `dop20cir.meta4`). Heruntergeladene Kacheln
-werden im Volume `planning_cir` (`/cir`) **gecacht** und nicht erneut geladen.
+Kacheln werden zur Laufzeit per **WMS GetMap** bezogen; jede Quelle ist ein
+`CirSource` in [`flaechenfinder/cir_sources.py`](flaechenfinder/cir_sources.py).
+Überall NIR = Band 1, Rot = Band 2, Bodenauflösung 0,2 m.
 
-> Nur **Bayern** ist abgedeckt. Außerhalb gibt es keine Kacheln → Vegetation bleibt
-> leer, das übrige Scoring läuft normal weiter.
+| Quelle | `cir_source` | CRS | Kachel | Bild | Format |
+|---|---|---|---|---|---|
+| Bayern DOP20 CIR | `bayern` | EPSG:25832 | 1000 m | 5000×5000 px | TIFF |
+| Brandenburg/Berlin DOP20 CIR | `bb` | EPSG:25833 | 1000 m | 5000×5000 px | PNG |
+| Hessen DOP20 CIR | `hessen` | EPSG:25832 | 500 m | 2500×2500 px | TIFF |
 
-Eine Kachel ist ~90 MB – der erste Lauf eines größeren Gebiets lädt entsprechend viel.
+`cir_source: "auto"` (Default) wählt anhand des Studiengebiet-Zentroiden:
+Hessen-Bounding-Box → Hessen, sonst < 12° O → Bayern, ≥ 12° O → Brandenburg/Berlin.
+
+> **Hessen: 500-m-Raster ist Pflicht.** Der MapServer hinter dem HVBG-WMS begrenzt
+> `WIDTH`/`HEIGHT` hart auf **3000 px** und antwortet darüber mit einer
+> ServiceException statt mit einem Bild. Ein 1000-m-Raster bei 0,2 m wären 5000 px –
+> damit schlägt *jede* Kachel fehl und die Vegetation bleibt landesweit leer.
+
+Heruntergeladene Kacheln werden im Volume `planning_cir` (`/cir`) **gecacht** und
+nicht erneut geladen. Außerhalb der abgedeckten Länder gibt es keine Kacheln →
+Vegetation bleibt leer, das übrige Scoring läuft normal weiter.
+
+Pro km² fallen ~100–200 MB an – der erste Lauf eines größeren Gebiets lädt
+entsprechend viel. Ein fehlgeschlagener Lauf wird **nicht** als Cache-Treffer
+wiederverwendet (siehe `_find_reusable_vegetation` in `worker.py`), sonst würde ein
+einzelner WMS-Ausfall alle Folgeläufe derselben Variante leer halten.
 
 ## Scoring-Integration
 
