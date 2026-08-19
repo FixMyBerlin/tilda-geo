@@ -40,6 +40,7 @@ const VariantFactorConfigSchema = z
     fussgaengerzone_radius_m: z.number().optional(),
     bestand_default_diameter_m: z.number().optional(),
     min_score_threshold: z.number().min(0).max(100).optional(),
+    min_area_m2: z.number().min(0).nullable().optional(),
     targets: z.array(z.any()).optional(),
   })
   .passthrough()
@@ -540,19 +541,32 @@ const UpdateVariantInput = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
+  /** Nur die Zielgröße der Flächensuche setzen, ohne die übrige factorConfig mitzuschicken. */
+  minAreaM2: z.number().min(0).nullable().optional(),
 })
 
 export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof UpdateVariantInput>) => UpdateVariantInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
+    let factorConfig = data.factorConfig
+    if (data.minAreaM2 !== undefined) {
+      const existing = await db.planningVariant.findFirstOrThrow({
+        where: { id: data.variantId },
+        select: { factorConfig: true },
+      })
+      factorConfig = {
+        ...((factorConfig ?? existing.factorConfig) as VariantFactorConfig),
+        min_area_m2: data.minAreaM2,
+      }
+    }
     return db.planningVariant.update({
       where: { id: data.variantId },
       data: {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.description !== undefined && { description: data.description }),
-        ...(data.factorConfig !== undefined && {
-          factorConfig: data.factorConfig as Prisma.InputJsonValue,
+        ...(factorConfig !== undefined && {
+          factorConfig: factorConfig as Prisma.InputJsonValue,
         }),
       },
       select: { id: true, areaId: true },

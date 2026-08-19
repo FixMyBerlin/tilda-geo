@@ -53,7 +53,9 @@ export const AreaWizard = ({
           userGeojsonMode,
           useCase,
           areaSizeM2,
-          factorConfig: DEFAULT_FACTOR_TEMPLATE,
+          // Die gewählte Flächengröße belegt die Flächensuche der ersten Variante vor;
+          // danach ist sie je Variante frei änderbar.
+          factorConfig: { ...DEFAULT_FACTOR_TEMPLATE, min_area_m2: areaSizeM2 },
         },
       })
     },

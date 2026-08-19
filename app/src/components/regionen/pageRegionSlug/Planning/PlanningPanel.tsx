@@ -1,12 +1,13 @@
 import { Switch } from '@headlessui/react'
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import type { FactorConfig } from '@/server/planning/planning.functions'
+import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
   planningVariantQueryOptions,
@@ -89,9 +90,46 @@ const CarriagewaysToggle = () => {
   )
 }
 
-const MinAreaFilter = () => {
+/**
+ * Zielgrößen-Filter der Flächensuche. Der Wert gehört zur Variante
+ * (`factorConfig.min_area_m2`, beim Anlegen des Planungsgebiets aus dessen Flächengröße
+ * vorbelegt) und wird beim Verlassen des Felds gespeichert — Muster wie VariantTitleField.
+ * Der URL-Param hält den in der Karte wirksamen Wert, damit sie schon beim Tippen reagiert.
+ */
+const MinAreaFilterForm = ({
+  variantId,
+  savedMinArea,
+}: {
+  variantId: number
+  savedMinArea: number
+}) => {
+  const queryClient = useQueryClient()
   const [filterOn, setFilterOn] = usePlanningAreaFilterParam()
   const [minArea, setMinArea] = usePlanningMinAreaParam()
+  const lastSaved = useRef(savedMinArea)
+
+  // Beim Öffnen einer Variante deren gespeicherten Wert einmalig in die Karte übernehmen
+  // (die Komponente ist je Variante gekeyed); spätere Tipp-Eingaben bleiben unangetastet.
+  const initialized = useRef(false)
+  useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
+    if (savedMinArea !== minArea) setMinArea(savedMinArea)
+  }, [savedMinArea, minArea, setMinArea])
+
+  const mutation = useMutation({
+    mutationFn: (value: number) =>
+      updatePlanningVariantFn({ data: { variantId, minAreaM2: value } }),
+    onSuccess: (_, value) => {
+      lastSaved.current = value
+      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+    },
+  })
+
+  const save = () => {
+    if (minArea !== lastSaved.current) mutation.mutate(minArea)
+  }
+
   return (
     <div className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
       <label className="flex items-center gap-2 font-medium text-gray-800">
@@ -113,11 +151,19 @@ const MinAreaFilter = () => {
         onChange={(e) =>
           setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
         }
+        onBlur={save}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') e.currentTarget.blur()
+        }}
         className={planningNumberInputClass}
       />
     </div>
   )
 }
+
+const MinAreaFilter = (props: { variantId: number; savedMinArea: number }) => (
+  <MinAreaFilterForm key={props.variantId} {...props} />
+)
 
 const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlug: string }) => {
   const [, setRun] = usePlanningRunParam()
@@ -184,7 +230,12 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
       )}
 
       {hasCompleteRun && <ScoreModeSwitcher />}
-      {hasCompleteRun && <MinAreaFilter />}
+      {hasCompleteRun && (
+        <MinAreaFilter
+          variantId={variantId}
+          savedMinArea={(variant.factorConfig as FactorConfig | undefined)?.min_area_m2 ?? 0}
+        />
+      )}
       {hasCompleteRun && (latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
       {hasCompleteRun &&
         (variant.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (

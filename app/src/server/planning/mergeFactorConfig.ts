@@ -16,6 +16,8 @@ export type VariantFactorConfig = {
   fussgaengerzone_radius_m?: number
   bestand_default_diameter_m?: number
   min_score_threshold?: number
+  /** Zielgröße der Flächensuche (m²), Client-Filter auf cluster_area_m2 — pro Variante. */
+  min_area_m2?: number | null
   targets?: object[]
 }
 

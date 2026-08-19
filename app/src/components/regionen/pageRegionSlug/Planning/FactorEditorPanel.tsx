@@ -273,7 +273,14 @@ const FactorEditorPanelForm = ({
 
   const mutation = useMutation({
     mutationFn: () =>
-      updatePlanningVariantFn({ data: { variantId, factorConfig: toVariantConfig(config) } }),
+      updatePlanningVariantFn({
+        data: {
+          variantId,
+          // `min_area_m2` wird außerhalb dieses Formulars (Flächensuche-Filter) gepflegt —
+          // immer der frische Prop-Wert, damit der lokale Entwurf ihn nicht zurückdreht.
+          factorConfig: toVariantConfig({ ...config, min_area_m2: factorConfig.min_area_m2 }),
+        },
+      }),
     onSuccess: () => queryClient.invalidateQueries(planningVariantQueryOptions(variantId)),
   })
 
