@@ -31,6 +31,14 @@ Ob ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hän
 
 Beim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.
 
+## Innerorts und außerorts
+
+Steht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.
+
+Wo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.
+
+Für den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.
+
 ## Getrennte Geh- und Radwege
 
 Tabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.

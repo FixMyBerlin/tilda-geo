@@ -72,6 +72,58 @@ describe('era_check', function()
     }, result)
   end)
 
+  it('misst innerorts am Einrichtungsradweg und weist die Lage-Annahme aus', function()
+    local result = era_check({
+      category_id = 'cycleway_adjoining',
+      width = 2.1,
+      oneway = 'assumed_no',
+      has_opposite_side_infrastructure = false,
+      in_settlement_area = 'assumed_yes',
+    })
+    assert.are.same({
+      era_anlagentyp = 'einrichtungsradweg',
+      era_lage = 'innerorts',
+      era_width_check = 'regelmass',
+      era_width_confidence = 'low',
+      era_width_used = 2.1,
+      era_width_regelmass = 2.00,
+    }, result)
+  end)
+
+  it('misst dieselbe Anlage außerorts am Zweirichtungsradweg', function()
+    local result = era_check({
+      category_id = 'cycleway_adjoining',
+      width = 2.1,
+      oneway = 'assumed_no',
+      has_opposite_side_infrastructure = false,
+      in_settlement_area = 'assumed_no',
+    })
+    assert.are.same({
+      era_anlagentyp = 'zweirichtungsradweg_einseitig',
+      era_lage = 'ausserorts',
+      era_width_check = 'unterschritten',
+      era_width_confidence = 'low',
+      era_width_used = 2.1,
+      era_width_regelmass = 3.00,
+    }, result)
+  end)
+
+  it('bleibt ohne Lage beim bisherigen Ergebnis und schreibt kein `era_lage`', function()
+    local result = era_check({
+      category_id = 'cycleway_adjoining',
+      width = 2.1,
+      oneway = 'assumed_no',
+      has_opposite_side_infrastructure = false,
+    })
+    assert.are.same({
+      era_anlagentyp = 'zweirichtungsradweg_einseitig',
+      era_width_check = 'unterschritten',
+      era_width_confidence = 'low',
+      era_width_used = 2.1,
+      era_width_regelmass = 3.00,
+    }, result)
+  end)
+
   it('unterscheidet den einseitigen vom beidseitigen Zweirichtungsradweg', function()
     local einseitig = era_check({
       category_id = 'cycleway_adjoining',

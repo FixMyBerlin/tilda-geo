@@ -53,6 +53,10 @@ export const TagsTableRowCompositEraWidth = ({ sourceId, properties }: CompositT
   const anlagentypen =
     typeof properties.era_anlagentyp === 'string' ? properties.era_anlagentyp.split(';') : []
   const assumed = properties.era_width_confidence === 'low'
+  const lage =
+    properties.era_lage === 'innerorts' || properties.era_lage === 'ausserorts'
+      ? properties.era_lage
+      : undefined
   const regelmass = properties.era_width_regelmass as number | undefined
   const usedWidth = properties.era_width_used as number | undefined
   const width = properties.width as number | undefined
@@ -100,6 +104,17 @@ export const TagsTableRowCompositEraWidth = ({ sourceId, properties }: CompositT
                   />
                   {assumed && ' vermutlich'}
                   {check === 'regelmass' ? ' erfüllt' : ' nicht erfüllt'}
+                  {lage !== undefined && (
+                    <>
+                      {' (Annahme: '}
+                      <ConditionalFormattedValue
+                        sourceId={sourceId}
+                        tagKey="era_lage"
+                        tagValue={lage}
+                      />
+                      {')'}
+                    </>
+                  )}
                 </>
               )}
             </span>
@@ -122,6 +137,17 @@ export const TagsTableRowCompositEraWidth = ({ sourceId, properties }: CompositT
               <p>
                 Die Verkehrsrichtung ist nicht erfasst, sondern angenommen. Trifft die Annahme nicht
                 zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.
+              </p>
+            )}
+            {lage !== undefined && (
+              <p>
+                Grundlage dieser Annahme ist die geschätzte Lage{' '}
+                <ConditionalFormattedValue sourceId={sourceId} tagKey="era_lage" tagValue={lage} />:
+                {lage === 'innerorts'
+                  ? ' Innerorts sind Radwege in der Regel Einrichtungsradwege.'
+                  : ' Außerorts führen Radwege in der Regel beide Richtungen.'}{' '}
+                Auch die Lage selbst ist geschätzt (überwiegender Längenanteil in einer
+                Siedlungsfläche).
               </p>
             )}
             {usedWidth !== undefined && (

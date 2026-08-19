@@ -24,6 +24,28 @@ Zeilen als Semikolon-Liste.
 OSM-Tag, sondern aus `implicit_yes` / `assumed_no`, folgen wir ihr, setzen aber
 `era_width_confidence = low` („vermutlich erfüllt“).
 
+## Innerorts / außerorts (vorbereitet, noch ohne Daten)
+
+`era_check` nimmt die geschätzte Lage als `in_settlement_area` entgegen (Pseudo-Tag
+`_in_settlement_area` aus [`../../pseudo_tags_settlement_area/`](../../pseudo_tags_settlement_area/README.md);
+außerorts heißt: mehr als die Hälfte der Länge liegt außerhalb aller Siedlungsflächen).
+
+Genutzt wird sie an genau einer Stelle: Wenn zur Verkehrsrichtung eines baulichen Radwegs nichts in
+OSM steht (`derive_oneway` fällt auf `assumed_no` zurück), nehmen wir **innerorts einen
+Einrichtungsradweg** (2,00 m) und **außerorts einen Zweirichtungsradweg** (2,50 / 3,00 m) an — die
+ERA misst beide verschieden, ohne diese Annahme bliebe es beim heutigen pauschalen
+Zweirichtungsradweg. Der gemeinsame Geh- und Radweg braucht die Lage nicht: Tabelle 5 nennt
+innerorts wie außerorts 2,50 m.
+
+Wo die Lage das Urteil trägt, steht sie als `era_lage` in den Daten und die Konfidenz ist `low`;
+die App weist die Annahme in der Breiten-Zeile aus. Nichts davon ist derzeit aktiv:
+`_in_settlement_area` wird nicht angehängt (private-issues#3051 / #3423), der Wert ist `nil` und
+der Check verhält sich wie zuvor. **Vor dem Aktivieren** sollte die fachliche Annahme
+(innerorts ⇒ Einrichtungs-, außerorts ⇒ Zweirichtungsradweg) noch einmal bestätigt werden.
+
+Nächster Ausbau, der die Lage braucht: der Sicherheitstrennstreifen zur Fahrbahn (1,75 m an
+Landstraßen).
+
 ## Ausblick
 
 **Kartenlayer ERA-Konformität.** `era_width_check` liegt als Attribut auf jeder Kante in den Tiles.

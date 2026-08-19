@@ -14,9 +14,11 @@ const data = {
         'Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.',
       era_anlagentyp:
         'Zeile der FGSV ERA 2010, Tabelle 5, an der diese Anlage gemessen wird. Wird aus der Führungsform, der Verkehrsrichtung und der Lage an der Straße abgeleitet. Sind mehrere Anlagentypen möglich, stehen sie alle hier – bewertet wird dann gegen alle. Führungsformen, für die Tabelle 5 kein Breitenmaß kennt (z. B. Fahrradstraßen, Gehwege mit Radfahrer frei), haben keinen Wert.',
+      era_lage:
+        'Steht nur dort, wo die geschätzte Lage innerorts/außerorts den Anlagentyp bestimmt hat – nämlich bei baulichen Radwegen, deren Verkehrsrichtung nicht erfasst ist. Innerorts nehmen wir dann einen Einrichtungsradweg an, außerorts einen Zweirichtungsradweg. Die Bewertung ist damit nur „vermutlich“ richtig.',
       era_width_check: 'Ergebnis der Breitenprüfung nach FGSV ERA 2010, Tabelle 5.',
       era_width_confidence:
-        'Beruht die Bewertung auf einer angenommenen Verkehrsrichtung, ist sie nur „vermutlich“ richtig. Angenommen ist die Richtung, wenn sie nicht aus einem OSM-Tag stammt, sondern aus der Führungsform abgeleitet (`implicit_yes`) oder geschätzt wurde (`assumed_no`).',
+        'Beruht die Bewertung auf einer angenommenen Verkehrsrichtung, ist sie nur „vermutlich“ richtig. Angenommen ist die Richtung, wenn sie nicht aus einem OSM-Tag stammt, sondern aus der Führungsform abgeleitet (`implicit_yes`) oder geschätzt wurde (`assumed_no`) – im letzten Fall gegebenenfalls anhand der geschätzten Lage innerorts/außerorts, siehe Attribut ERA-Lage.',
       era_width_used:
         'Breite, die mit der ERA verglichen wurde, einschließlich Markierung. Bei markierten Anlagen (Schutz- und Radfahrstreifen) ist das die erfasste Breite zuzüglich 0,25 m Markierung, bei baulichen Anlagen die erfasste Breite.',
       era_width_regelmass:
@@ -41,6 +43,10 @@ const data = {
         zweirichtungsradweg_einseitig:
           'Einziger Radweg an der Straße, deshalb das größte Regelmaß der Tabelle 5.',
       },
+      era_lage: {
+        innerorts: 'Der Weg liegt überwiegend innerhalb einer Siedlungsfläche.',
+        ausserorts: 'Der Weg liegt überwiegend außerhalb aller Siedlungsflächen.',
+      },
       era_width_check: {
         regelmass:
           'Die Anlage erreicht das Regelmaß der ERA. Damit ist sie zugleich konform zur FGSV E-Klima, die die Regelmaße als Mindestwerte versteht.',
@@ -55,7 +61,7 @@ const data = {
       },
       era_width_confidence: {
         high: 'Alle Angaben, die in die Bewertung eingehen, stammen aus OSM-Tags.',
-        low: 'Die Verkehrsrichtung ist angenommen. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.',
+        low: 'Die Verkehrsrichtung ist angenommen, unter Umständen aus der ebenfalls geschätzten Lage innerorts/außerorts. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.',
       },
       oneway: {
         assumed_no:

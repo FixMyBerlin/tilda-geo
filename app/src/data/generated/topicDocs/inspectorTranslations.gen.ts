@@ -229,6 +229,13 @@ const data = {
     'Zweirichtungsradweg (einseitig)',
   'atlas_bikelanes--era_anlagentyp=zweirichtungsradweg_einseitig--description':
     'Einziger Radweg an der Straße, deshalb das größte Regelmaß der Tabelle 5.',
+  'atlas_bikelanes--era_lage--key': 'ERA-Lage (Annahme)',
+  'atlas_bikelanes--era_lage=ausserorts': 'Außerorts (angenommen)',
+  'atlas_bikelanes--era_lage=ausserorts--description':
+    'Der Weg liegt überwiegend außerhalb aller Siedlungsflächen.',
+  'atlas_bikelanes--era_lage=innerorts': 'Innerorts (angenommen)',
+  'atlas_bikelanes--era_lage=innerorts--description':
+    'Der Weg liegt überwiegend innerhalb einer Siedlungsfläche.',
   'atlas_bikelanes--era_width_check--key': 'ERA-Konformität der Breite',
   'atlas_bikelanes--era_width_check=klammerwert': 'Nur Klammerwert erfüllt',
   'atlas_bikelanes--era_width_check=klammerwert--description':
@@ -251,7 +258,7 @@ const data = {
     'Alle Angaben, die in die Bewertung eingehen, stammen aus OSM-Tags.',
   'atlas_bikelanes--era_width_confidence=low': 'Niedrig',
   'atlas_bikelanes--era_width_confidence=low--description':
-    'Die Verkehrsrichtung ist angenommen. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.',
+    'Die Verkehrsrichtung ist angenommen, unter Umständen aus der ebenfalls geschätzten Lage innerorts/außerorts. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.',
   'atlas_bikelanes--era_width_regelmass--key': 'ERA-Regelmaß',
   'atlas_bikelanes--era_width_used--key': 'Geprüfte Breite',
   'atlas_bikelanes--highway--key': 'Straßentyp Fahrbahn',

@@ -74,6 +74,40 @@ describe('era_anlagentyp', function()
       assert.is_true(assumed)
     end)
 
+    it('nimmt innerorts einen Einrichtungsradweg an, wenn die Richtung nicht erfasst ist', function()
+      local result, assumed, lage = era_anlagentyp({
+        category_id = 'cycleway_adjoining',
+        oneway = 'assumed_no',
+        in_settlement_area = 'assumed_yes',
+      })
+      assert.are.same({ 'einrichtungsradweg' }, result)
+      assert.is_true(assumed)
+      assert.are.equal('innerorts', lage)
+    end)
+
+    it('nimmt außerorts einen Zweirichtungsradweg an, wenn die Richtung nicht erfasst ist', function()
+      local result, assumed, lage = era_anlagentyp({
+        category_id = 'cycleway_adjoining',
+        oneway = 'assumed_no',
+        has_opposite_side_infrastructure = false,
+        in_settlement_area = 'assumed_no',
+      })
+      assert.are.same({ 'zweirichtungsradweg_einseitig' }, result)
+      assert.is_true(assumed)
+      assert.are.equal('ausserorts', lage)
+    end)
+
+    it('lässt die Lage unbeachtet, wenn die Richtung erfasst ist', function()
+      local result, _assumed, lage = era_anlagentyp({
+        category_id = 'cycleway_adjoining',
+        oneway = 'no',
+        has_opposite_side_infrastructure = true,
+        in_settlement_area = 'assumed_yes',
+      })
+      assert.are.same({ 'zweirichtungsradweg_beidseitig' }, result)
+      assert.is_nil(lage)
+    end)
+
     it('lässt ohne `oneway` alles offen', function()
       local result, assumed = era_anlagentyp({ category_id = 'cycleway_adjoining' })
       assert.are.same({
@@ -93,6 +127,17 @@ describe('era_anlagentyp', function()
         'footAndCyclewayShared_adjoiningOrIsolated',
       }) do
         assert.are.same({ 'gemeinsamer_geh_und_radweg' }, era_anlagentyp({ category_id = category_id }))
+      end
+    end)
+
+    it('bleibt bei derselben Zeile, egal ob innerorts oder außerorts', function()
+      for _, in_settlement_area in ipairs({ 'assumed_yes', 'assumed_no' }) do
+        local result, _assumed, lage = era_anlagentyp({
+          category_id = 'footAndCyclewayShared_adjoining',
+          in_settlement_area = in_settlement_area,
+        })
+        assert.are.same({ 'gemeinsamer_geh_und_radweg' }, result)
+        assert.is_nil(lage)
       end
     end)
   end)

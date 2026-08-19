@@ -148,6 +148,18 @@ attributes:
         description: Einziger Radweg an der Straße, deshalb das größte Regelmaß der Tabelle 5.
       - value: gemeinsamer_geh_und_radweg
         label: Gemeinsamer Geh- und Radweg
+  - key: era_lage
+    label: ERA-Lage (Annahme)
+    description: Steht nur dort, wo die geschätzte Lage innerorts/außerorts den Anlagentyp bestimmt hat – nämlich bei baulichen Radwegen, deren Verkehrsrichtung nicht erfasst ist. Innerorts nehmen wir dann einen Einrichtungsradweg an, außerorts einen Zweirichtungsradweg. Die Bewertung ist damit nur „vermutlich“ richtig.
+    chapterRefs:
+      - chapterId: era-check
+    values:
+      - value: innerorts
+        label: Innerorts (angenommen)
+        description: Der Weg liegt überwiegend innerhalb einer Siedlungsfläche.
+      - value: ausserorts
+        label: Außerorts (angenommen)
+        description: Der Weg liegt überwiegend außerhalb aller Siedlungsflächen.
   - key: era_width_check
     label: ERA-Konformität der Breite
     description: Ergebnis der Breitenprüfung nach FGSV ERA 2010, Tabelle 5.
@@ -171,7 +183,7 @@ attributes:
         description: Es fehlt die Breite, oder die möglichen Anlagentypen führen zu unterschiedlichen Ergebnissen. Welche Anlagentypen geprüft wurden, steht im Attribut ERA-Anlagentyp.
   - key: era_width_confidence
     label: Konfidenz der ERA-Bewertung
-    description: Beruht die Bewertung auf einer angenommenen Verkehrsrichtung, ist sie nur „vermutlich“ richtig. Angenommen ist die Richtung, wenn sie nicht aus einem OSM-Tag stammt, sondern aus der Führungsform abgeleitet (`implicit_yes`) oder geschätzt wurde (`assumed_no`).
+    description: Beruht die Bewertung auf einer angenommenen Verkehrsrichtung, ist sie nur „vermutlich“ richtig. Angenommen ist die Richtung, wenn sie nicht aus einem OSM-Tag stammt, sondern aus der Führungsform abgeleitet (`implicit_yes`) oder geschätzt wurde (`assumed_no`) – im letzten Fall gegebenenfalls anhand der geschätzten Lage innerorts/außerorts, siehe Attribut ERA-Lage.
     chapterRefs:
       - chapterId: era-check
     values:
@@ -180,7 +192,7 @@ attributes:
         description: Alle Angaben, die in die Bewertung eingehen, stammen aus OSM-Tags.
       - value: low
         label: Niedrig
-        description: Die Verkehrsrichtung ist angenommen. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.
+        description: Die Verkehrsrichtung ist angenommen, unter Umständen aus der ebenfalls geschätzten Lage innerorts/außerorts. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.
   - key: era_width_used
     label: Geprüfte Breite
     format: meter

@@ -480,6 +480,15 @@ const data = {
           gemeinsamer_geh_und_radweg: 'Gemeinsamer Geh- und Radweg',
         },
       },
+      era_lage: {
+        name: 'ERA-Lage (Annahme)',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          innerorts: 'Innerorts (angenommen)',
+          ausserorts: 'Außerorts (angenommen)',
+        },
+      },
       era_width_check: {
         name: 'ERA-Konformität der Breite',
         condition: 'contains',

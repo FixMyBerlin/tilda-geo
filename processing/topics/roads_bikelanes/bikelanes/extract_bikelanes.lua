@@ -170,6 +170,9 @@ local function bikelanes(object_tags, object_geom)
           prefix = result_tags.prefix,
           traffic_mode_right = result_tags.traffic_mode_right,
           has_opposite_side_infrastructure = has_opposite_side_infrastructure,
+          -- Geschätzte Lage innerorts/außerorts. Wird derzeit nicht angehängt (private-issues#3423),
+          -- ist also `nil`; siehe `era_check/README.md`.
+          in_settlement_area = object_tags._in_settlement_area,
         }))
 
         if transformed_tags._side ~= 'self' then
