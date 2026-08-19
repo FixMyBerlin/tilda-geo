@@ -201,7 +201,7 @@ export const PlanningPanel = () => {
   const [activeVariant] = usePlanningVariantParam()
   const panelCollapsed = usePlanningBoundaryState((s) => s.panelCollapsed)
   const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
-  const { panelRef, dragging, didDragRef, panelStyle, defaultPositionClassName, headerDragProps } =
+  const { panelRef, dragging, panelStyle, defaultPositionClassName, headerDragProps } =
     useDraggableMapPanel(planningMode)
   const { regionSlug } = routeApi.useParams()
   const [creatingArea, setCreatingArea] = useState(false)
@@ -264,10 +264,7 @@ export const PlanningPanel = () => {
 
   const areaTitle = area?.title ?? variant?.area?.title
   const variantTitle = variant?.title
-  const expandPanel = () => {
-    if (didDragRef.current) return
-    if (panelCollapsed) setPanelCollapsed(false)
-  }
+  const collapsedTrail = panelCollapsed && (areaTitle || variantTitle)
 
   return (
     <div
@@ -288,26 +285,10 @@ export const PlanningPanel = () => {
           dragging && 'cursor-grabbing bg-gray-50',
         )}
       >
-        <button
-          type="button"
-          onClick={expandPanel}
-          disabled={!panelCollapsed}
-          className={twJoin(
-            'flex min-w-0 flex-1 cursor-grab items-center gap-1.5 text-left disabled:cursor-grab',
-            dragging && 'cursor-grabbing disabled:cursor-grabbing',
-          )}
-        >
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
           <DragGripIcon className="size-4 shrink-0 text-gray-400 group-hover/drag:text-gray-600" />
-          <span className="min-w-0">
-            <h2 className="font-bold">Flächenfinder</h2>
-            {panelCollapsed && (areaTitle || variantTitle) && (
-              <p className="truncate text-sm text-gray-600">
-                {areaTitle}
-                {variantTitle ? ` · ${variantTitle}` : ''}
-              </p>
-            )}
-          </span>
-        </button>
+          <h2 className="font-bold">Flächenfinder</h2>
+        </div>
         <button
           type="button"
           data-drag-ignore
@@ -321,6 +302,45 @@ export const PlanningPanel = () => {
           />
         </button>
       </div>
+      {collapsedTrail && (
+        <button
+          type="button"
+          data-drag-ignore
+          onClick={() => setPanelCollapsed(false)}
+          aria-label="Flächenfinder ausklappen"
+          className="shrink-0 cursor-pointer border-t border-gray-200 px-3 py-2 text-left hover:bg-gray-50"
+        >
+          <ol className="flex min-w-0 items-center">
+            {areaTitle && (
+              <li className="min-w-0">
+                <span
+                  className={twJoin(
+                    'block truncate text-sm font-medium',
+                    variantTitle ? 'text-gray-500' : 'text-gray-700',
+                  )}
+                >
+                  {areaTitle}
+                </span>
+              </li>
+            )}
+            {variantTitle && (
+              <li className="flex min-w-0 items-center">
+                {areaTitle && (
+                  <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
+                )}
+                <span
+                  className={twJoin(
+                    'min-w-0 truncate text-sm font-medium text-gray-700',
+                    areaTitle && 'ml-1',
+                  )}
+                >
+                  {variantTitle}
+                </span>
+              </li>
+            )}
+          </ol>
+        </button>
+      )}
       {!panelCollapsed && (
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-3 pt-1 pb-3">
           <AreaContextBar regionSlug={regionSlug} onCreatingChange={setCreatingArea} />
