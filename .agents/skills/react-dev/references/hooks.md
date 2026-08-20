@@ -4,7 +4,7 @@ Basics (`useState`, `useRef`, `useReducer`, `useContext`) are covered in [Using 
 
 ## Compiler and memoization
 
-FMC apps use **React Compiler**. Do not add `useCallback` / `useMemo` / `memo` unless profiling or oxlint (`react-hooks-js/*`) requires it.
+FMC apps use **React Compiler**. Do not add `useCallback` / `useMemo` / `memo` unless profiling or oxlint (`react/*` compiler rules) requires it.
 
 - [React Compiler](https://react.dev/learn/react-compiler.md)
 - [useMemo](https://react.dev/reference/react/useMemo.md) — when manual memo is still appropriate

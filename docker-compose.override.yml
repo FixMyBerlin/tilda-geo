@@ -28,7 +28,7 @@ services:
     # Docker Desktop has 8GB total, so we allocate 4GB max for processing
     mem_limit: 4g
     mem_reservation: 2g
-    cpus: "4"
+    cpus: '4'
   app:
     container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}app
     image: app:latest
@@ -66,7 +66,7 @@ services:
     # PostgreSQL benefits significantly from dedicated CPU and memory
     mem_limit: 5g
     mem_reservation: 4g
-    cpus: "4"
+    cpus: '4'
 
 configs:
   postgres_conf:

@@ -22,13 +22,16 @@ export default {
     'src/components/shared/utils/getCachelessTilesUrl.ts': ['exports'],
     'src/components/shared/utils/getTilesUrl.ts': ['exports'],
   },
-  ignoreBinaries: ['code', 'gdal', 'gdalinfo', 'gh', 'github', 'ogrinfo', 'which'],
+  ignoreBinaries: ['code', 'gdal', 'gdalinfo', 'gh', 'github', 'ogr2ogr', 'ogrinfo'],
   ignoreDependencies: [
     '@tanstack/router-plugin',
     // Symlinked scripts/StaticDatasets/geojson/** (ignoreFiles above)
     'papaparse',
     '@types/papaparse',
     '@maplibre/maplibre-gl-style-spec',
+    // Direct deps for `update-browserslist-db` (not imported in app code)
+    'baseline-browser-mapping',
+    'caniuse-lite',
   ],
   rules: {
     files: 'error',

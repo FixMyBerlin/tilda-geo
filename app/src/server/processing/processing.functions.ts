@@ -1,14 +1,16 @@
+import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
-import { getProcessingRunDetailForAdmin } from './queries/getProcessingRunDetailForAdmin.server'
-import { getProcessingRunsForAdmin } from './queries/getProcessingRunsForAdmin.server'
+import { requireAdmin } from '@/server/auth/session.server'
+import { getProcessingRun } from './queries/getProcessingRun.server'
+import { listProcessingRuns } from './queries/listProcessingRuns.server'
 
 export const getAdminProcessingOverviewLoaderFn = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const headers = getRequestHeaders()
-    const runs = await getProcessingRunsForAdmin(headers)
-    return { runs }
+    await requireAdmin(getRequestHeaders())
+    const { rows } = await listProcessingRuns({ take: 50 })
+    return { runs: rows }
   },
 )
 
@@ -19,7 +21,11 @@ export const getAdminProcessingRunDetailLoaderFn = createServerFn({ method: 'GET
     ProcessingRunDetailInput.parse(data),
   )
   .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    const run = await getProcessingRunDetailForAdmin(data.metaId, headers)
-    return { run }
+    await requireAdmin(getRequestHeaders())
+    try {
+      const run = await getProcessingRun(data.metaId)
+      return { run }
+    } catch {
+      throw notFound()
+    }
   })

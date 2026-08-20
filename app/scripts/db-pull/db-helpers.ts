@@ -15,6 +15,7 @@ export type AllowedSchema = (typeof ALLOWED_SCHEMAS)[number]
 export type AllowedSource = (typeof ALLOWED_SOURCES)[number]
 
 const REQUIRED_RESTORE_ENVIRONMENT = 'development'
+/** Publish + db-pull `pg_dump`/`psql`. Same major as Postgres — data-schema/README.md#postgres-major-versions */
 export const POSTGRES_CLI_IMAGE = 'postgres:17-alpine'
 const sourceArgSchema = z.string().trim().pipe(z.enum(ALLOWED_SOURCES))
 const schemaArgSchema = z.string().trim().pipe(z.enum(ALLOWED_SCHEMAS))

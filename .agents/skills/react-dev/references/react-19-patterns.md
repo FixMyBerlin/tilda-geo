@@ -71,4 +71,4 @@ Reference: [useActionState](https://react.dev/reference/react/useActionState.md)
 - [ ] Replace `forwardRef` with `ref` prop
 - [ ] Replace `useFormState` with `useActionState`
 - [ ] `@types/react` 19.x
-- [ ] Enable React Compiler + oxlint `react-hooks-js` rules
+- [ ] Enable React Compiler + oxlint native `react/*` compiler rules

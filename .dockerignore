@@ -2,4 +2,5 @@ app/.husky
 app/.output
 app/.env*
 .editorconfig
+data-schema
 processing/node_modules

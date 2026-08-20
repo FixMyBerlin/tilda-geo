@@ -1,7 +1,8 @@
 import { connect } from 'node:net'
+import { DEFAULT_DATABASE_PORT, DEFAULT_TILES_PORT } from '../../src/server/envDefaultPorts'
 
-export const DEV_DB_PORT = 5432
-export const DEV_TILES_PORT = 3000
+export const DEV_DB_PORT = Number(DEFAULT_DATABASE_PORT)
+export const DEV_TILES_PORT = Number(DEFAULT_TILES_PORT)
 export const PORT_PROBE_TIMEOUT_MS = 1000
 
 export function probeHostPort(host: string, port: number) {

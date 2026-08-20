@@ -16,7 +16,7 @@ Pull command:
 - Blocked schemas: `public`, `backup`.
 - Restore runtime must be local: `ENVIRONMENT` must be `development` or restore aborts.
 - Pull is read-only (`pg_dump` only).
-- `pg_dump`/`psql` are run via Dockerized Postgres CLI (`postgres:17-alpine`) to avoid host client version mismatches.
+- `pg_dump`/`psql` are run via Dockerized Postgres CLI (`POSTGRES_CLI_IMAGE`) to avoid host client version mismatches. Same major as Postgres: [data-schema README](../../../data-schema/README.md#postgres-major-versions).
 
 ## Prisma restore cleanup
 

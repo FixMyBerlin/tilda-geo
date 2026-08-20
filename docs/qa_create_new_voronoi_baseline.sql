@@ -9,6 +9,11 @@
 -- 2. Run the whole script (psql, TablePlus, …)
 -- 3. Point processing step 9 at the new target table name if it changed
 --    (public outputs stay qa_parkings_euvm / qa_parkings_euvm_priority)
+-- 4. Copy data.<target_table> to local Postgres, then
+--    bun run data-schema-publish (CLI only; not the admin page) so staging
+--    and other machines can Import it. Use --mode snapshot to keep the
+--    previous dump. Also publish the undated base table data.euvm_qa_voronoi
+--    once so the generator can be re-run outside production.
 
 CREATE SCHEMA IF NOT EXISTS data;
 

@@ -1,12 +1,11 @@
 import { defineConfig } from 'oxlint'
-import reactHooksJs from 'oxlint-config-react-hooks-js/configs/recommended-latest.json' with { type: 'json' }
 
 export default defineConfig({
   plugins: ['eslint', 'typescript', 'unicorn', 'oxc', 'react'],
   options: { typeAware: true },
   ignorePatterns: [
     // TanStack Router codegen; overwritten by `bun run codegen` (see tilda-geo/app)
-    'src/routeTree.gen.ts',
+    '**/routeTree.gen.ts',
     // Vite/Nitro production build output
     '.output/**',
     // Playwright HTML report from `e2e` (gitignored)
@@ -26,6 +25,18 @@ export default defineConfig({
     'typescript/no-misused-spread': 'off',
     'typescript/require-array-sort-compare': 'off',
     'typescript/no-array-delete': 'off',
+    // Restriction category — keep ESLint recommended coverage (off by default in oxlint)
+    'react/unsupported-syntax': 'error',
+    // Allow bare `_` (oxlint default ignores `_foo` but not `_`); object config clears defaults
+    'eslint/no-unused-vars': [
+      'warn',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      },
+    ],
   },
   overrides: [
     {
@@ -38,14 +49,6 @@ export default defineConfig({
       files: ['**/*.test.ts', '**/*.test.tsx'],
       rules: {
         'typescript/no-non-null-assertion': 'off',
-      },
-    },
-    {
-      files: ['**/*.tsx'],
-      jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }],
-      rules: {
-        ...reactHooksJs.rules,
-        'react/react-compiler': 'error',
       },
     },
     // Browser API guard — only for code that ships to the client (components + route UI).
