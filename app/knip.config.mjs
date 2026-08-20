@@ -29,6 +29,9 @@ export default {
     'papaparse',
     '@types/papaparse',
     '@maplibre/maplibre-gl-style-spec',
+    // Direct deps for `update-browserslist-db` (not imported in app code)
+    'baseline-browser-mapping',
+    'caniuse-lite',
   ],
   rules: {
     files: 'error',
