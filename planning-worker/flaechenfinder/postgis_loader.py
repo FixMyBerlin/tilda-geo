@@ -26,10 +26,12 @@ def _sql_literal(v) -> str:
 
 # Maps OSM tag dicts (as used in scorer.py _TRANSIT_TYPES) to publicTransport categories.
 # Values are lists of category strings stored in tags->>'category' in the DB.
-# Bus stops (highway=bus_stop) are not yet in the publicTransport table.
+# Bus stops (highway=bus_stop) land in the same table with category='bus_stop'
+# (see processing/topics/publicTransport/helper/result_tags.lua).
 # subway_entrance is not mapped here: it has its own table/loader (`_publicTransport_entrances`,
 # `PostgisLoader.load_subway_entrances`), not a publicTransport category.
 _TRANSIT_TAG_MAP: list[tuple[dict, list[str]]] = [
+    ({"highway": "bus_stop"},              ["bus_stop"]),
     ({"railway": "tram_stop"},             ["tram_station"]),
     ({"railway": ["station", "halt"]},      ["railway_station", "light_rail_station"]),
 ]
@@ -356,7 +358,7 @@ class PostgisLoader:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 
         Mappt OSM-Tag-Dicts auf `public."publicTransport"` (categories via JSONB).
-        Nicht zugeordnete Tags (z. B. highway=bus_stop) geben ein leeres GeoDataFrame zurück.
+        Nicht zugeordnete Tags geben ein leeres GeoDataFrame zurück.
         """
         categories = _match_transit_tags(tags)
         if not categories:

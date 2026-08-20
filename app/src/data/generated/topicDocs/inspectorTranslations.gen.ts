@@ -1106,6 +1106,7 @@ const data = {
   'atlas_poiClassification--type=tourism-viewpoint': 'Aussichtspunkt',
   'atlas_poiClassification--type=tourism-zoo': 'Zoo',
   'atlas_publicTransport--category--key': 'Art',
+  'atlas_publicTransport--category=bus_stop': 'Bushaltestelle',
   'atlas_publicTransport--category=ferry_station': 'Fähranleger',
   'atlas_publicTransport--category=light_rail_station': 'S-Bahn-Station',
   'atlas_publicTransport--category=railway_station': 'Bahnhof regional / überregional',

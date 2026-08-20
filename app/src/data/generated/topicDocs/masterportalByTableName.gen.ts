@@ -3499,6 +3499,7 @@ const data = {
         condition: 'contains',
         type: 'string',
         format: {
+          bus_stop: 'Bushaltestelle',
           ferry_station: 'Fähranleger',
           light_rail_station: 'S-Bahn-Station',
           railway_station: 'Bahnhof regional / überregional',

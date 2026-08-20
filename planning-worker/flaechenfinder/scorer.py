@@ -323,9 +323,6 @@ def run_flaechenfinder(
             # eigene Tabelle/Loader (`_publicTransport_entrances`), siehe unten.
             ("U-Bahn-Eingang", None,                          50),
             ("Straßenbahn",    {"railway": "tram_stop"},       50),
-            # Bus bleibt vorerst wirkungslos: highway=bus_stop wird in
-            # public."publicTransport" nicht abgelegt (siehe postgis_loader.py),
-            # daher liefert features_from_polygon() hier immer 0 Treffer.
             ("Bus",            {"highway": "bus_stop"},         30),
             ("Bahnhof",        {"railway": ["station", "halt"]}, 100),
         ]

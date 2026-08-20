@@ -70,7 +70,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_cyclepath:
     'Vorhandene Radwege aus OpenStreetMap heben den Bedarf. Bis 20 m Entfernung gibt es die volle Punktzahl, danach fällt sie bis zur eingestellten Maximaldistanz auf null. Das Gewicht bestimmt, wie stark diese Nähe im Grundscore zählt.',
   w_transit:
-    'Haltestellen von U-Bahn, Straßenbahn und Bahn in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen. Das Gewicht bestimmt den Anteil am Grundscore.',
+    'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore.',
   w_target:
     'Nähe zu hinterlegten Alltagszielen hebt den Bedarf: innerhalb einer kurzen Distanz voll, danach abfallend. Das Gewicht bestimmt den Anteil am Grundscore. Ohne hinterlegte Zielorte bleibt der Faktor ohne Wirkung.',
   w_fussgaengerzone:

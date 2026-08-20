@@ -4,6 +4,8 @@ local category_minzoom = {
   tram_station = 13,
   ferry_station = 13,
   subway_station = 13,
+  -- Bus stops are by far the most numerous category, so they start one zoom level later.
+  bus_stop = 14,
 }
 
 ---@param result_tags table
