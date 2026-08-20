@@ -111,8 +111,25 @@ const groupAttributesForPresentation = (attributes: ReadonlyArray<TopicDocCompil
   return groups
 }
 
-const attributeHasDescriptionContent = (attribute: TopicDocCompiledAttribute) =>
-  Boolean(attribute.description?.trim() || attribute.chapterRefs?.[0])
+const AttributeChapterLink = ({
+  tableName,
+  regionSlug,
+  chapterRef,
+}: {
+  tableName: AttributeSectionContext['tableName']
+  regionSlug: AttributeSectionContext['regionSlug']
+  chapterRef: string
+}) => (
+  <Link
+    to="/docs/$tableName"
+    params={{ tableName }}
+    search={{ r: regionSlug ?? undefined }}
+    hash={chapterRef}
+    className="text-xs leading-snug"
+  >
+    Mehr...
+  </Link>
+)
 
 const AttributeDescriptionCell = ({
   attribute,
@@ -126,28 +143,23 @@ const AttributeDescriptionCell = ({
   valueDescription?: string
 }) => {
   const description = valueDescription ?? attribute.description?.trim()
-  const chapterRef = attribute.chapterRefs?.[0]
+  const chapterRef = !valueDescription ? attribute.chapterRefs?.[0] : undefined
 
   if (!description && !chapterRef) return null
 
   return (
-    <>
+    <div>
       {description ? (
         <Markdown markdown={description} className={attributeDescriptionMarkdownClassName} />
       ) : null}
-      {chapterRef && !valueDescription ? (
-        <p className="m-0 text-xs leading-snug">
-          <Link
-            to="/docs/$tableName"
-            params={{ tableName }}
-            search={{ r: regionSlug ?? undefined }}
-            hash={chapterRef}
-          >
-            Mehr...
-          </Link>
-        </p>
+      {chapterRef ? (
+        <AttributeChapterLink
+          tableName={tableName}
+          regionSlug={regionSlug}
+          chapterRef={chapterRef}
+        />
       ) : null}
-    </>
+    </div>
   )
 }
 
@@ -210,35 +222,49 @@ const AttributeKeyRowCells = ({
   tableName: AttributeSectionContext['tableName']
   regionSlug: AttributeSectionContext['regionSlug']
   showDescription?: boolean
-}) => (
-  <td colSpan={2} className={`${keyRowCellClassName} p-0`}>
-    <div className={keyRowGridClassName}>
-      {attributes.map((attribute) => (
-        <Fragment key={attribute.key}>
-          <div className="min-w-0">
-            <AttributeKeyCell keyName={attribute.key} />
+}) => {
+  const description = representative.description?.trim()
+  const chapterRef = representative.chapterRefs?.[0]
+  const showInlineChapterLink = Boolean(showDescription && !description && chapterRef)
+  const showBlockDescription = Boolean(showDescription && description)
+
+  return (
+    <td colSpan={2} className={`${keyRowCellClassName} p-0`}>
+      <div className={keyRowGridClassName}>
+        {attributes.map((attribute, index) => (
+          <Fragment key={attribute.key}>
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+              <AttributeKeyCell keyName={attribute.key} />
+              {showInlineChapterLink && index === 0 && chapterRef ? (
+                <AttributeChapterLink
+                  tableName={tableName}
+                  regionSlug={regionSlug}
+                  chapterRef={chapterRef}
+                />
+              ) : null}
+            </div>
+            <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+              <AttributeKeyLabelCell label={attribute.label} />
+              {(!hasValues || representative.type === 'sanitized_strings') &&
+              attributeHasFormatDisplay(representative) ? (
+                <AttributeFormat attribute={representative} />
+              ) : null}
+            </div>
+          </Fragment>
+        ))}
+        {showBlockDescription ? (
+          <div className="col-span-2 pt-0">
+            <AttributeDescriptionCell
+              attribute={representative}
+              tableName={tableName}
+              regionSlug={regionSlug}
+            />
           </div>
-          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-            <AttributeKeyLabelCell label={attribute.label} />
-            {(!hasValues || representative.type === 'sanitized_strings') &&
-            attributeHasFormatDisplay(representative) ? (
-              <AttributeFormat attribute={representative} />
-            ) : null}
-          </div>
-        </Fragment>
-      ))}
-      {showDescription && attributeHasDescriptionContent(representative) ? (
-        <div className="col-span-2 pt-0">
-          <AttributeDescriptionCell
-            attribute={representative}
-            tableName={tableName}
-            regionSlug={regionSlug}
-          />
-        </div>
-      ) : null}
-    </div>
-  </td>
-)
+        ) : null}
+      </div>
+    </td>
+  )
+}
 
 const AttributeGroupRows = ({
   group,
