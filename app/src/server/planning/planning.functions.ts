@@ -256,6 +256,7 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
             stale: true,
             createdAt: true,
             cirAttribution: true,
+            factorConfigSnapshot: true,
           },
         },
         jobs: {

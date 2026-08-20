@@ -3,12 +3,17 @@ import { twJoin } from 'tailwind-merge'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
   usePlanningAreaFilterParam,
+  usePlanningRunParam,
   usePlanningVariantParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
+import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/Planning/planningDefaults'
 import {
+  criterionShares,
+  groupShare,
   MODIFIER_MAX_POINTS,
   weightToPoints,
 } from '@/components/regionen/pageRegionSlug/Planning/weightScale'
+import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
 import { Disclosure } from './Disclosure/Disclosure'
 
@@ -71,6 +76,15 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_eigendaten: 'w_eigendaten',
 }
 
+// Dasselbe für die Kriterien — `criterionShares` (weightScale.ts) ist nach Gewichts-Namen
+// indiziert, die Sidebar zeigt aber Score-Namen.
+const CRITERION_WEIGHT_KEYS: Record<string, string> = {
+  score_radweg: 'w_cyclepath',
+  score_oepnv: 'w_transit',
+  score_zielorte: 'w_target',
+  score_hangneigung: 'w_slope',
+}
+
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',
   schlecht: 'bg-red-100 text-red-800',
@@ -80,11 +94,28 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
 }
 
 /**
+ * Anteil eines Faktors an seiner Gruppe, gerechnet auf den Gewichten des Laufs, der die gerade
+ * angezeigten Werte tatsächlich erzeugt hat — nicht auf den womöglich seither veränderten,
+ * aktuellen Variantengewichten (sonst stimmen Prozent und Score bei ungespeicherter Änderung nicht
+ * mehr überein). Bewusst unauffällig gehalten: klein, gedämpfte Farbe, in Klammern.
+ */
+const SharePct = ({ pct }: { pct: number | undefined }) => {
+  if (pct == null) return null
+  return (
+    <span className="w-9 text-right text-[10px] text-gray-400 tabular-nums">
+      ({Math.round(pct)}%)
+    </span>
+  )
+}
+
+/**
  * Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala.
  * Gleiche Balken-/Label-Maße wie `ScoreBar`, damit beide Zeilenarten sauber untereinander
  * ausgerichtet sind. Die Füllung zeigt den Anteil am maximal möglichen Effekt dieses Faktors
  * (`max` = `weightToPoints(Gewicht)`, siehe `weightScale.ts`) und ist grün (Zuschlag) bzw. rot
- * (Abschlag) eingefärbt.
+ * (Abschlag) eingefärbt. Statt eines Prozentanteils (bei vorzeichenbehafteten Punkten ohne
+ * gemeinsame Bezugsgröße wenig aussagekräftig) zeigt der Wert direkt den Bruch aus angewandtem
+ * Effekt und dem im Faktor eingestellten Maximum, z. B. „5/15".
  */
 const ModifierBar = ({ value, max }: { value: number | null | undefined; max: number }) => {
   const pct = value != null && max > 0 ? Math.min(100, (Math.abs(value) / max) * 100) : 0
@@ -101,10 +132,10 @@ const ModifierBar = ({ value, max }: { value: number | null | undefined; max: nu
           style={{ width: `${pct}%`, opacity: 0.4 + (pct / 100) * 0.6 }}
         />
       </div>
-      <span className="w-8 text-right font-mono text-xs text-gray-600">
+      <span className="w-14 text-right font-mono text-xs text-gray-600">
         {value == null
           ? '–'
-          : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}`}
+          : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}${max > 0 ? `/${max}` : ''}`}
       </span>
     </div>
   )
@@ -122,7 +153,7 @@ const ComingSoonBar = () => (
   </div>
 )
 
-const ScoreBar = ({ value }: { value: number | null | undefined }) => {
+const ScoreBar = ({ value, sharePct }: { value: number | null | undefined; sharePct?: number }) => {
   const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
   return (
     <div className="flex items-center gap-2">
@@ -135,6 +166,7 @@ const ScoreBar = ({ value }: { value: number | null | undefined }) => {
       <span className="w-8 text-right font-mono text-xs text-gray-600">
         {value != null ? Math.round(value) : '–'}
       </span>
+      <SharePct pct={sharePct} />
     </div>
   )
 }
@@ -142,14 +174,30 @@ const ScoreBar = ({ value }: { value: number | null | undefined }) => {
 export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
   const [areaFilterOn] = usePlanningAreaFilterParam()
   const [variantId] = usePlanningVariantParam()
+  const [runId] = usePlanningRunParam()
   const { data: variant } = useQuery({
     ...planningVariantQueryOptions(variantId!),
     enabled: variantId != null,
   })
-  const weights = variant?.factorConfig?.weights
+
+  // Gewichte des Laufs, der die hier angezeigten Werte tatsächlich erzeugt hat — NICHT die
+  // (womöglich seither ohne Neuberechnung veränderten) aktuellen Variantengewichte. Sonst würden
+  // Balkenmaximum und Prozentanteile einer nicht mehr aktuellen Faktor-Konfiguration entsprechen.
+  const run = variant?.runs?.find((r) => r.id === runId)
+  const snapshot = run?.factorConfigSnapshot as VariantFactorConfig | undefined
+  const weights = snapshot?.weights
+  const shares = weights ? criterionShares(weights) : undefined
   const modifierMax = (scoreKey: string) => {
     const weightKey = MODIFIER_WEIGHT_KEYS[scoreKey]
     return weightKey ? weightToPoints(weights?.[weightKey]) : MODIFIER_MAX_POINTS
+  }
+  // Verteilung zwischen Bedarf und Bebauung: Anteil der Kriterien dieser Gruppe am Grundscore
+  // (dieselbe Größe, die FactorEditorPanel als "XX % des Grundscores" neben der Gruppen-
+  // überschrift zeigt) — hier auf den Gewichten des Laufs statt der Live-Variante.
+  const groupSharePct = (scoreKey: string) => {
+    if (!shares) return undefined
+    const weightGroup = WEIGHT_GROUPS.find((g) => scoreKey === `score_${g.key}`)
+    return weightGroup ? groupShare(shares, weightGroup.criteria) : undefined
   }
 
   const props = feature.properties
@@ -182,9 +230,17 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
         <div className="flex gap-2">
           {SCORE_GROUPS.map((group) => {
             const val = props[group.scoreKey]
+            const sharePct = groupSharePct(group.scoreKey)
             return (
               <div key={group.scoreKey} className="flex-1 rounded bg-gray-50 px-2 py-1.5">
-                <div className="text-xs text-gray-500">{group.label}</div>
+                <div className="text-xs text-gray-500">
+                  {group.label}
+                  {sharePct != null && (
+                    <span className="ml-1 text-[10px] text-gray-400 tabular-nums">
+                      ({Math.round(sharePct)}%)
+                    </span>
+                  )}
+                </div>
                 <div className="text-lg font-bold text-gray-800">
                   {val != null ? Math.round(val) : '–'}
                 </div>
@@ -230,7 +286,10 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                     <tr key={key} className="border-b border-gray-100">
                       <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
                       <td className="py-1.5">
-                        <ScoreBar value={props[key]} />
+                        <ScoreBar
+                          value={props[key]}
+                          sharePct={shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]}
+                        />
                       </td>
                     </tr>
                   ))}
