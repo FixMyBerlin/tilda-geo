@@ -22,12 +22,10 @@ export function useResizableInspectorWidth({ enabled, isOpen }: UseResizableInsp
   const { updateInspectorSize } = useMapActions()
 
   const active = enabled && isOpen
-  const activeRef = useRef(active)
-  activeRef.current = active
 
   const ref = useElementSize<HTMLDivElement>(
     (size) => {
-      if (activeRef.current) updateInspectorSize(size)
+      if (active) updateInspectorSize(size)
     },
     { elementRef: panelRef },
   )

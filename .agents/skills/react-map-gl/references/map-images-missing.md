@@ -1,15 +1,17 @@
 # Missing style images (`styleimagemissing`)
 
-Symbol layers reference icons by id (`icon-image`). When an id is not in the style sprite, MapLibre emits **`styleimagemissing`**. Fix with **proactive** registration, a **reactive** handler, or a **style/sprite** fix.
+Symbol layers reference icons by id (`icon-image`). When an id is not in the style sprite, MapLibre emits **`styleimagemissing`**. Fix with **proactive** registration, a **reactive** resolver, or a **style/sprite** fix.
+
+**MapLibre v6:** `styleimagemissing` is **notify-only** — calling `addImage` inside the event handler no longer resolves the missing request. Supply images with **`Map#setMissingStyleImageResolver`** (sync or async). Keep `styleimagemissing` for observe/warn only. See the [v5→v6 migration guide](https://maplibre.org/maplibre-gl-js/docs/guides/v5-to-v6-migration-guide/#styleimagemissing).
 
 ## Choose a strategy
 
-| Strategy                         | When                                      | FMC example                                                                                          |
-| -------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Proactive `addImage`**         | Fixed, known icon ids                     | vzk `useMapImages` → `NO_SIGN_ICON` placeholder — [map-images-proactive.md](map-images-proactive.md) |
-| **Reactive `styleimagemissing`** | Dynamic / unbounded ids from feature data | vzk sign supports: `icon-image` = aggregation JSON → generate canvas → `addImage`                    |
-| **Style / sprite fix**           | Id should be in the built sprite          | tilda atlas styles                                                                                   |
-| **Dev warn only**                | Find missing ids during development       | tilda `RegionMap`                                                                                    |
+| Strategy                                    | When                                      | FMC example                                                                                          |
+| ------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Proactive `addImage`**                    | Fixed, known icon ids                     | vzk `useMapImages` → `NO_SIGN_ICON` placeholder — [map-images-proactive.md](map-images-proactive.md) |
+| **Reactive `setMissingStyleImageResolver`** | Dynamic / unbounded ids from feature data | vzk sign supports: `icon-image` = aggregation JSON → generate canvas → `addImage`                    |
+| **Style / sprite fix**                      | Id should be in the built sprite          | tilda atlas styles                                                                                   |
+| **Dev warn only** (`styleimagemissing`)     | Find missing ids during development       | tilda `RegionMap`                                                                                    |
 
 ## Proactive — `useMapImages` (vzk-bw)
 
@@ -23,28 +25,28 @@ useMapImages({
 
 See [map-images-proactive.md](map-images-proactive.md) for the full hook (SVG `pixelRatio`, `loadImage` for PNG, `useMap()` + `useEffect`).
 
-## Reactive — dynamic icons (vzk-bw sign supports)
+## Reactive — dynamic icons (MapLibre v6)
 
-Vector tiles expose an **`aggregation`** property; the symbol layer uses it as **`icon-image`**. Each distinct aggregation string is a **new image id** — too many to pre-register. Generate on demand.
+Vector tiles expose an **`aggregation`** property; the symbol layer uses it as **`icon-image`**. Each distinct aggregation string is a **new image id** — too many to pre-register. Generate on demand via **`setMissingStyleImageResolver`**.
 
-`styleimagemissing` has **no** react-map-gl `<Map>` prop — use MapLibre `map.on` in a **`useEffect`** so you can **`off()` on unmount**. See [map-event-handlers.md](map-event-handlers.md).
+`setMissingStyleImageResolver` has **no** react-map-gl `<Map>` prop — call it on the MapLibre instance in a **`useEffect`**. Clear with `setMissingStyleImageResolver(null)` (or equivalent) on unmount if you need to remove the resolver. See [map-event-handlers.md](map-event-handlers.md).
 
 ```tsx
-// vzk-bw: SignSupportsLayer.tsx — useEffect for subscribe + unmount cleanup
+// MapLibre v6 — supply missing images via resolver (not styleimagemissing + addImage)
 useEffect(
   function registerDynamicSignImages() {
     if (!mainMap || !mapLoaded) return
+    const map = mainMap.getMap()
 
-    const handleStyleImageMissing = async ({ id }: MapStyleImageMissingEvent) => {
-      if (mainMap.hasImage(id)) return
+    map.setMissingStyleImageResolver(async (id) => {
+      if (map.hasImage(id)) return
 
       const aggregation = JSON.parse(id)
       const image = await generateSignSupportImage(aggregation)
-      if (image) mainMap.addImage(id, image, {})
-    }
+      if (image) map.addImage(id, image, {})
+    })
 
-    mainMap.on('styleimagemissing', handleStyleImageMissing)
-    return () => mainMap.off('styleimagemissing', handleStyleImageMissing)
+    return () => map.setMissingStyleImageResolver(null)
   },
   [mainMap, mapLoaded],
 )
@@ -61,11 +63,13 @@ useEffect(
 />
 ```
 
-**Async handler:** MapLibre may fire the event again until `addImage` completes — always guard with `hasImage(id)` before adding.
+**Async resolver:** Call `addImage` before the resolver’s promise settles. Guard with `hasImage(id)` when the same id can be requested concurrently.
 
-**Do not** call `map.on('styleimagemissing', …)` in the component **render body** (vzk currently does this — duplicates listeners every render).
+**Do not** call `map.on('styleimagemissing', …)` to _resolve_ missing images in MapLibre v6 — that only notifies.
 
 ## Dev-only warning (tilda)
+
+`styleimagemissing` remains valid for **observation** (tilda’s pattern):
 
 ```tsx
 useEffect(
@@ -100,15 +104,17 @@ Skip sentinel ids (`'null'`, empty string) when your style uses conditional fall
 ## React lifecycle
 
 ```tsx
-// ✅ useEffect — subscribe after mapLoaded, off() on unmount
+// ✅ useEffect — set resolver after mapLoaded; clear on unmount
 useEffect(() => {
   if (!mainMap || !mapLoaded) return
-  mainMap.on('styleimagemissing', handler)
-  return () => mainMap.off('styleimagemissing', handler)
-}, [mainMap, mapLoaded, handler])
+  const map = mainMap.getMap()
+  map.setMissingStyleImageResolver(resolver)
+  return () => map.setMissingStyleImageResolver(null)
+}, [mainMap, mapLoaded, resolver])
 
-// ❌ map.on('styleimagemissing') in render body (re-subscribes every render)
-// ❌ onLoad without off() on unmount
+// ✅ styleimagemissing in useEffect for warn/observe only (off on unmount)
+// ❌ addImage inside styleimagemissing to resolve the request (broken in MapLibre v6)
+// ❌ map.on / setMissingStyleImageResolver in render body
 ```
 
 Re-subscribe when `mapStyle` changes if the map instance is reused (`reuseMaps`).
@@ -116,8 +122,9 @@ Re-subscribe when `mapStyle` changes if the map instance is reused (`reuseMaps`)
 ## Checklist
 
 - [ ] Fixed icons → **`useMapImages`** ([map-images-proactive.md](map-images-proactive.md))
-- [ ] Dynamic icons → `styleimagemissing` in `useEffect` (subscribe + unmount cleanup) + `hasImage` guard
+- [ ] Dynamic icons → **`setMissingStyleImageResolver`** in `useEffect` + `addImage` inside resolver + `hasImage` guard
+- [ ] Dev audit → `styleimagemissing` warn only (do not use it to supply images on MapLibre v6+)
 - [ ] Guard `mainMap` + preferably `useMapLoaded()`
 - [ ] SVG icons: explicit size + `pixelRatio` (not `loadImage`)
 - [ ] Handle sentinel ids (`'null'`, empty string) in dev handlers
-- [ ] Do not register listeners in render — use `useMap()` (map-provider-wrapper.md)
+- [ ] Do not register listeners/resolvers in render — use `useMap()` (map-provider-wrapper.md)

@@ -27,8 +27,14 @@
   "[json]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[jsonc]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "[markdown]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[yaml]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   // Cursor rules (.mdc) — treat as markdown; open in text editor so oxfmt runs on save.
-  "files.associations": { "*.mdc": "markdown" },
+  // Compose files: keep yaml so oxfmt formats them (Docker extension uses dockercompose).
+  "files.associations": {
+    "*.mdc": "markdown",
+    "docker-compose*.yml": "yaml",
+    "compose*.yml": "yaml"
+  },
   "workbench.editorAssociations": { "*.mdc": "default" },
   "[prisma]": { "editor.defaultFormatter": "Prisma.prisma" },
   "js/ts.experimental.useTsgo": true,

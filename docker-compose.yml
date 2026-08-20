@@ -61,7 +61,7 @@ services:
     restart: unless-stopped
     # TanStack Start (Vite + Nitro, Bun). Port 4000 = Nitro server.
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://127.0.0.1:4000/ || exit 1"]
+      test: ['CMD-SHELL', 'curl -f http://127.0.0.1:4000/ || exit 1']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -98,7 +98,7 @@ services:
       # header; `br` (Brotli) is preferred, `gzip` is the fallback. Upstream responses
       # that already carry a `Content-Encoding` are left untouched (no double-compression).
       traefik.http.middlewares.compress.compress: true
-      traefik.http.middlewares.compress.compress.encodings: "br,gzip"
+      traefik.http.middlewares.compress.compress.encodings: 'br,gzip'
       # Apex host only (non-www canonical).
       traefik.http.routers.app-apex.rule: Host(`${APP_URL}`)
       traefik.http.routers.app-apex.entrypoints: websecure
@@ -108,8 +108,8 @@ services:
       traefik.http.routers.app-apex.middlewares: compress
       # www → apex 301 at the edge (no app-side redirect).
       traefik.http.middlewares.www-to-apex.redirectregex.regex: "^https://www\\.(.+)$"
-      traefik.http.middlewares.www-to-apex.redirectregex.replacement: "https://$$1"
-      traefik.http.middlewares.www-to-apex.redirectregex.permanent: "true"
+      traefik.http.middlewares.www-to-apex.redirectregex.replacement: 'https://$$1'
+      traefik.http.middlewares.www-to-apex.redirectregex.permanent: 'true'
       traefik.http.routers.app-www.rule: Host(`www.${APP_URL}`)
       traefik.http.routers.app-www.entrypoints: websecure
       traefik.http.routers.app-www.tls.certresolver: letsencrypt
@@ -124,7 +124,7 @@ services:
   tiles:
     image: ghcr.io/maplibre/martin:1.11.0
     container_name: tiles
-    command: ["--config", "/config.yaml"]
+    command: ['--config', '/config.yaml']
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}
@@ -140,7 +140,7 @@ services:
       traefik.http.routers.tiles.tls: true
     ports:
       # Local DEV_PORT_SLOT only — do not set TILES_PORT in server/deploy environments.
-      - "${TILES_PORT:-3000}:3000"
+      - '${TILES_PORT:-3000}:3000'
     configs:
       - source: martin_conf
         target: /config.yaml
@@ -148,6 +148,7 @@ services:
       db:
         condition: service_healthy
   db:
+    # Bumping this major: read data-schema/README.md#postgres-major-versions (dump/restore clients must follow).
     image: ghcr.io/baosystems/postgis:17-3.5
     container_name: db
     shm_size: 2g
@@ -161,7 +162,7 @@ services:
       TZ: Europe/Berlin
     ports:
       # Local DEV_PORT_SLOT only — do not set DATABASE_PORT in server/deploy environments.
-      - "${DATABASE_PORT:-5432}:5432"
+      - '${DATABASE_PORT:-5432}:5432'
     volumes:
       - db_postgres_17:/var/lib/postgresql/data
     configs:
@@ -169,9 +170,9 @@ services:
         target: /postgresql/postgresql.conf
       - source: postgres_init
         target: /docker-entrypoint-initdb.d/11-postgres.sql
-    command: ["-c", "config_file=/postgresql/postgresql.conf"]
+    command: ['-c', 'config_file=/postgresql/postgresql.conf']
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}']
       interval: 5s
       timeout: 5s
       retries: 5

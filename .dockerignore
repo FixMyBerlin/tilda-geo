@@ -2,6 +2,7 @@ app/.husky
 app/.output
 app/.env*
 .editorconfig
+data-schema
 processing/node_modules
 # The image installs its own deps via `bun install --frozen-lockfile`. Without
 # this line a dev machine's app/node_modules (2.4GB, and symlinks into .bun when

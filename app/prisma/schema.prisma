@@ -44,6 +44,8 @@ model User {
   noteComments   NoteComment[]
   qaEvaluations  QaEvaluation[]
   adminApiTokens AdminApiToken[]
+  dataSchemaImportsCreated DataSchemaImport[] @relation("DataSchemaImportCreatedBy")
+  dataSchemaImportsUpdated DataSchemaImport[] @relation("DataSchemaImportUpdatedBy")
   //
   // Planning module: areas/variants this user created (any region member may still edit them).
   planningAreas    PlanningArea[]
@@ -737,6 +739,37 @@ enum PlanningJobStatus {
   QUEUED
   RUNNING
   DONE
+  FAILED
+
+  @@schema("prisma")
+}
+
+model DataSchemaImport {
+  id          Int                    @id @default(autoincrement())
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  tableName   String
+  publishedAt DateTime?
+  snapshotId  String?
+  sha256      String
+  status      DataSchemaImportStatus @default(PENDING)
+  rowCount    Int?
+  durationMs  Int?
+  errorText   String?
+  createdById String?
+  createdBy   User?                  @relation("DataSchemaImportCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?                  @relation("DataSchemaImportUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([tableName, createdAt])
+  @@map("DataSchemaImport")
+  @@schema("prisma")
+}
+
+enum DataSchemaImportStatus {
+  PENDING
+  RUNNING
+  SUCCESS
   FAILED
 
   @@schema("prisma")

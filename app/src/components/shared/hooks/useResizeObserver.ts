@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useEffectEvent, useState } from 'react'
 
 type ResizeObserverBoxOptions = 'border-box' | 'content-box' | 'device-pixel-content-box'
 
@@ -11,25 +11,18 @@ export default function useResizeObserver<T extends HTMLElement = HTMLElement>(
   options: UseResizeObserverOptions<T> = {},
 ) {
   const { box = 'content-box', onResize } = options
-  const elementRef = useRef<T | null>(null)
-  const observerRef = useRef<ResizeObserver | null>(null)
+  const [element, setElement] = useState<T | null>(null)
 
-  const ref = useCallback(
-    (element: T | null) => {
-      // Clean up previous observer
-      if (observerRef.current) {
-        observerRef.current.disconnect()
-        observerRef.current = null
-      }
+  // Non-reactive: keep the observer subscribed; always invoke the latest onResize.
+  const onResizeEvent = useEffectEvent((size: { width?: number; height?: number }) => {
+    onResize?.(size)
+  })
 
-      elementRef.current = element
+  useEffect(
+    function observeElementSize() {
+      if (!element) return
 
-      if (!element) {
-        return
-      }
-
-      // Create new observer
-      observerRef.current = new ResizeObserver((entries) => {
+      const observer = new ResizeObserver((entries) => {
         if (!entries.length) return
 
         const entry = entries[0]
@@ -55,22 +48,19 @@ export default function useResizeObserver<T extends HTMLElement = HTMLElement>(
           height = entry.contentRect.height
         }
 
-        onResize?.({ width, height })
+        onResizeEvent({ width, height })
       })
 
-      observerRef.current.observe(element, { box })
+      observer.observe(element, { box })
+      return function disconnectObserver() {
+        observer.disconnect()
+      }
     },
-    [box, onResize],
+    [element, box],
   )
 
-  // Cleanup on unmount
-  useEffect(function disconnectObserverOnUnmount() {
-    return function disconnectObserver() {
-      if (observerRef.current) {
-        observerRef.current.disconnect()
-        observerRef.current = null
-      }
-    }
+  const ref = useCallback((node: T | null) => {
+    setElement(node)
   }, [])
 
   return { ref }

@@ -26,9 +26,9 @@ For the default isomorphic data path, see [execution-model.md](execution-model.m
 
 ## Setup
 
-FMC TanStack Start apps use **Vite** (e.g. [tilda-geo `app/vite.config.ts`](https://github.com/FixMyBerlin/tilda-geo/blob/main/app/vite.config.ts)): `nitro`, `tailwindcss`, `tanstackStart`, `viteReact`, React Compiler via `@rolldown/plugin-babel`. **Not Rsbuild.**
+FMC TanStack Start apps use **Vite** (e.g. [tilda-geo `app/vite.config.ts`](https://github.com/FixMyBerlin/tilda-geo/blob/main/app/vite.config.ts)): `nitro`, `tailwindcss`, `tanstackStart`, `viteReact({ compiler: true })` with peer `oxc-transform-react`. **Not Rsbuild.**
 
-RSC is additive on that baseline. Follow the official [**Setup → Vite**](https://tanstack.com/start/latest/docs/framework/react/guide/server-components#setup) steps (`@vitejs/plugin-rsc`, enable `rsc` in `tanstackStart`, add `rsc()`). In FMC configs, keep plugin order: existing plugins → `tanstackStart({ rsc: { enabled: true } })` → `rsc()` → `viteReact()` → babel (React Compiler). Requirements: React 19+, Vite 7+.
+RSC is additive on that baseline. Follow the official [**Setup → Vite**](https://tanstack.com/start/latest/docs/framework/react/guide/server-components#setup) steps (`@vitejs/plugin-rsc`, enable `rsc` in `tanstackStart`, add `rsc()`). In FMC configs, keep plugin order: existing plugins → `tanstackStart({ rsc: { enabled: true } })` → `rsc()` → `viteReact({ compiler: true })`. Requirements: React 19+, Vite 7+.
 
 ---
 
