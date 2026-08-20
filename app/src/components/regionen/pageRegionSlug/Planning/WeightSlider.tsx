@@ -79,6 +79,26 @@ const FactorRow = ({
 )
 
 /**
+ * Platzhalter für einen angekündigten, aber noch nicht integrierten Faktor (z. B. Bewohnerbedarf
+ * aus Zensusdaten). Zeigt Label, Info-Tooltip und einen "bald verfügbar"-Hinweis statt eines
+ * Reglers — der Faktor lässt sich noch nicht einstellen und fließt in keinen Score ein.
+ */
+export const ComingSoonFactorRow = ({ label, info }: { label: string; info?: React.ReactNode }) => (
+  <FactorRow
+    label={label}
+    muted
+    readOnly
+    info={info}
+    badge={
+      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
+        bald verfügbar
+      </span>
+    }
+    slider={null}
+  />
+)
+
+/**
  * Ein Kriterium: Wichtigkeit 0–10 als Regler, angezeigt wird der daraus abgeleitete Anteil am
  * Grundscore. Die Regler sind voneinander unabhängig — wird einer erhöht, sinken die Anteile der
  * übrigen automatisch, weil der Scorer durch die Gewichtssumme teilt.

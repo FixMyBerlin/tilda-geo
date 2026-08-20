@@ -25,7 +25,12 @@ import {
   weightToPoints,
   weightToStep,
 } from './weightScale'
-import { CriterionSlider, ModifierSlider, WeightScaleLegend } from './WeightSlider'
+import {
+  ComingSoonFactorRow,
+  CriterionSlider,
+  ModifierSlider,
+  WeightScaleLegend,
+} from './WeightSlider'
 
 const FactorInfo = ({ factorKey }: { factorKey: string }) => {
   const text = FACTOR_HELP[factorKey]
@@ -132,6 +137,13 @@ const FactorFields = ({
                     readOnly={readOnly}
                   />
                 }
+              />
+            ))}
+            {group.comingSoon?.map((key) => (
+              <ComingSoonFactorRow
+                key={key}
+                label={WEIGHT_LABELS[key] ?? key}
+                info={<FactorInfo factorKey={key} />}
               />
             ))}
 

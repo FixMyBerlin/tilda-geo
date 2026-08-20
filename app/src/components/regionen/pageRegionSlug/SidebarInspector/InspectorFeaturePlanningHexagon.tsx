@@ -27,6 +27,7 @@ const SCORE_LABELS: Record<string, string> = {
   score_fussgaengerzone: 'Fußgängerzonen',
   score_bestand: 'Bestandsanlagen',
   score_eigendaten: 'Eigene Flächen',
+  score_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
@@ -35,21 +36,29 @@ const SCORE_LABELS: Record<string, string> = {
 // Werte halten (mirrors scorer.py):
 //   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
 //   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
-const SCORE_GROUPS: { label: string; scoreKey: string; criteria: string[]; modifiers: string[] }[] =
-  [
-    {
-      label: 'Bedarf',
-      scoreKey: 'score_bedarf',
-      criteria: ['score_radweg', 'score_oepnv', 'score_zielorte'],
-      modifiers: ['score_fussgaengerzone', 'score_bestand'],
-    },
-    {
-      label: 'Bebauung',
-      scoreKey: 'score_bebauung',
-      criteria: ['score_hangneigung'],
-      modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken'],
-    },
-  ]
+const SCORE_GROUPS: {
+  label: string
+  scoreKey: string
+  criteria: string[]
+  modifiers: string[]
+  // Angekündigte, aber noch nicht integrierte Kriterien (keine Daten am Hexagon) — werden nur als
+  // deaktivierte Zeile mit "bald verfügbar"-Hinweis angezeigt.
+  comingSoon?: string[]
+}[] = [
+  {
+    label: 'Bedarf',
+    scoreKey: 'score_bedarf',
+    criteria: ['score_radweg', 'score_oepnv', 'score_zielorte'],
+    modifiers: ['score_fussgaengerzone', 'score_bestand'],
+    comingSoon: ['score_bewohnerbedarf'],
+  },
+  {
+    label: 'Bebauung',
+    scoreKey: 'score_bebauung',
+    criteria: ['score_hangneigung'],
+    modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken'],
+  },
+]
 
 // `score_*` (Ergebnis pro Hexagon) → `w_*` (Gewicht der Variante) — nötig, um den maximal
 // möglichen Effekt (`weightToPoints`) für den Anteils-Balken zu bestimmen (mirrors weightScale.ts).
@@ -100,6 +109,18 @@ const ModifierBar = ({ value, max }: { value: number | null | undefined; max: nu
     </div>
   )
 }
+
+/**
+ * Platzhalter für ein angekündigtes, aber noch nicht integriertes Kriterium (z. B.
+ * Bewohnerbedarf aus Zensusdaten) — es gibt noch keine Daten am Hexagon, daher kein Balken,
+ * sondern nur ein "bald"-Hinweis.
+ */
+const ComingSoonBar = () => (
+  <div className="flex items-center gap-2">
+    <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-100" />
+    <span className="w-14 text-right text-[10px] text-gray-400">bald</span>
+  </div>
+)
 
 const ScoreBar = ({ value }: { value: number | null | undefined }) => {
   const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
@@ -210,6 +231,14 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                       <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
                       <td className="py-1.5">
                         <ScoreBar value={props[key]} />
+                      </td>
+                    </tr>
+                  ))}
+                  {group.comingSoon?.map((key) => (
+                    <tr key={key} className="border-b border-gray-100">
+                      <td className="py-1.5 pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</td>
+                      <td className="py-1.5">
+                        <ComingSoonBar />
                       </td>
                     </tr>
                   ))}

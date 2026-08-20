@@ -85,6 +85,8 @@ export const FACTOR_HELP: Record<string, string> = {
     'Bestehende Kfz-Parkflächen am Straßenrand und auf Parkplätzen eignen sich zur Umwidmung. Liegt die Fläche direkt auf dem Parken, gibt es den vollen Zuschlag; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_eigendaten:
     'Laden Sie eigene Punkte, Linien oder Flächen hoch. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Das Gewicht gilt nur für Bonus und Abzug.',
+  w_bewohnerbedarf:
+    'Geplant: der Bedarf je Gebäude wird aus Zensusdaten (Einwohnerzahl je Gebäude) ermittelt und hebt den Bedarf dort, wo viele Menschen wohnen. Dieser Faktor ist in Vorbereitung und noch nicht auswertbar — er lässt sich noch nicht einstellen und fließt in keinen Score ein.',
   min_score_threshold:
     'Nur Flächen ab diesem Gesamtscore zählen zur zusammenhängenden Kandidatenfläche. Der Filter „Gesuchte Fläche (m²)“ im Panel nutzt diese Cluster. Der Score selbst ändert sich dadurch nicht.',
 }
@@ -110,6 +112,7 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_parken: 'Parken (Umwidmung)',
   w_fussgaengerzone: 'Fußgängerzonen',
   w_bestand: 'Bestandsanlagen',
+  w_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
 // Wirkrichtung eines Zu-/Abschlags. `vegetation` steht für „richtet sich nach
@@ -134,6 +137,9 @@ export const WEIGHT_GROUPS: {
   label: string
   criteria: string[]
   modifiers: { key: string; direction: ModifierDirection }[]
+  // Angekündigte, aber noch nicht integrierte Kriterien (kein Gewicht, kein Score) — werden nur
+  // als deaktivierte Zeile mit "bald verfügbar"-Hinweis angezeigt (ComingSoonFactorRow).
+  comingSoon?: string[]
 }[] = [
   {
     key: 'bedarf',
@@ -143,6 +149,7 @@ export const WEIGHT_GROUPS: {
       { key: 'w_fussgaengerzone', direction: 'positive' },
       { key: 'w_bestand', direction: 'negative' },
     ],
+    comingSoon: ['w_bewohnerbedarf'],
   },
   {
     key: 'bebauung',
