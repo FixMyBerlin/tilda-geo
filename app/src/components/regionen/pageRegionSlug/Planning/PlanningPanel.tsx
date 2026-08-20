@@ -23,6 +23,7 @@ import {
 } from '../hooks/useQueryState/usePlanningParams'
 import { AreaContextBar } from './AreaContextBar'
 import { FactorEditorPanel } from './FactorEditorPanel'
+import { InfoTooltip } from './InfoTooltip'
 import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
@@ -70,7 +71,14 @@ const CarriagewaysToggle = () => {
   const setCarriagewaysOn = usePlanningBoundaryState((s) => s.setCarriagewaysVisible)
   return (
     <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-      <span className="font-medium text-gray-800">Fahrbahnen</span>
+      <span className="flex items-center gap-1 font-medium text-gray-800">
+        Fahrbahnen
+        <InfoTooltip>
+          Die Fahrbahnbreiten sind Schätzungen auf Basis der in OpenStreetMap erfassten Straßen und
+          können von der tatsächlichen Breite abweichen. Sofern die tatsächliche Breite in den Daten
+          enthalten ist, wird diese verwendet.
+        </InfoTooltip>
+      </span>
       <Switch
         checked={carriagewaysOn}
         onChange={setCarriagewaysOn}
