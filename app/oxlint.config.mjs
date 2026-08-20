@@ -6,7 +6,7 @@ export default defineConfig({
   options: { typeAware: true },
   ignorePatterns: [
     // TanStack Router codegen; overwritten by `bun run codegen` (see tilda-geo/app)
-    'src/routeTree.gen.ts',
+    '**/routeTree.gen.ts',
     // Vite/Nitro production build output
     '.output/**',
     // Playwright HTML report from `e2e` (gitignored)
