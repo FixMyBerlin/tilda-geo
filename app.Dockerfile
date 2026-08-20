@@ -1,7 +1,8 @@
 # TanStack Start (Vite + Nitro preset bun)
-FROM oven/bun:1 AS base
+# oven/bun:1-debian installs the latest Bun 1.x whenever this image is built.
+# Debian (not Alpine) is the right choice: apt can install gdal-bin and postgresql-client, and Prisma needs glibc.
+FROM oven/bun:1-debian AS base
 
-# TODO: Validate which distro oven/bun is and which gdal is installed there.
 # Usage
 #   - gdal-bin: ogr2ogr for exports.
 #     Reminder: Debian 13 Trixie (stable) ships GDAL 3.10.3. `gdal vector edit` needs 3.11+ (not in Trixie).

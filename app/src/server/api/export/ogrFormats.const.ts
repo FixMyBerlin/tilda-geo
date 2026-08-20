@@ -2,9 +2,9 @@ export const formats = [
   'geojson',
   'gpkg',
   'fgb',
-  // geoparket requires gdal 3.9+ which is not available in node:22-bookworm-slim (app.Dockerfile)
-  // (see https://gdal.org/en/stable/drivers/vector/parquet.html)
-  // 'geoparket'
+  // GeoParquet needs GDAL built with Apache Arrow. Debian gdal-bin (Trixie 3.10.3, and still unstable) does not ship that driver.
+  // https://gdal.org/en/stable/drivers/vector/parquet.html
+  // 'geoparquet'
 ] as const
 
 type OgrFormatEntry = { driver: string; mimeType: string }
