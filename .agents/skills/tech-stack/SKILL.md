@@ -60,7 +60,7 @@ Prefer installed skill names when present; otherwise fetch from git.
   - class sorting, import sorting, `package.json` sorting
   - `printWidth` 100, semicolons `asNeeded`, single quotes
   - `'typescript/switch-exhaustiveness-check': 'error'`
-  - React Compiler: native oxlint rule `'react/react-compiler': 'error'` on `**/*.tsx` (not `eslint-plugin-react-compiler`)
+  - React Compiler: oxlint `react` plugin (correctness rules on by default) + `'react/unsupported-syntax': 'error'`; Vite via `viteReact({ compiler: true })` + `oxc-transform-react` (not Babel / not `eslint-plugin-react-compiler`)
   - Templates: [examples/oxfmt.config.mjs](examples/oxfmt.config.mjs), [examples/oxlint.config.mjs](examples/oxlint.config.mjs)
   - Setup and per-project tuning: [references/oxc-config.md](references/oxc-config.md)
 - **Client browser target:** `browserslist` in `package.json` drives Vite client `build.target` and `eslint-plugin-compat` in oxlint — [references/browser-target.md](references/browser-target.md)

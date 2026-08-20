@@ -6,7 +6,7 @@ description: >-
   generics, ref-as-prop, Compiler-first memoization, and useEffect discipline
   (naming, when not to use Effect, alternatives). Use when typing React
   components/hooks/events, or writing/reviewing useEffect, useEffectEvent,
-  derived state, data-fetch effects, or eslint-plugin-react-hooks effect rules.
+  derived state, data-fetch effects, or oxlint React Compiler / Rules of React effect rules.
   Not for routing/server boundaries (see tanstack-start-* skills).
 ---
 
@@ -28,16 +28,16 @@ Type-safe React = compile-time guarantees. This skill covers **TypeScript patter
 
 ## FMC stack (required)
 
-| Requirement        | Rule                                                                                                                                                                                                                                                                                                                                      |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **React 19**       | Target 19.x; no `forwardRef` / `useFormState` in new code                                                                                                                                                                                                                                                                                 |
-| **React Compiler** | Enabled in the app build — auto-memoization is the default                                                                                                                                                                                                                                                                                |
-| **Lint**           | **Oxlint** + React Compiler rules via `eslint-plugin-react-hooks` v7+ as a **jsPlugin** (e.g. namespace `react-hooks-js` — `react-hooks` is reserved in oxlint). See [oxc plugins](https://oxc.rs/docs/guide/usage/linter/plugins.html), preset [oxlint-config-react-hooks-js](https://github.com/eai04191/oxlint-config-react-hooks-js). |
-| **Memoization**    | Do **not** add `useMemo` / `useCallback` / `memo` by default; add only when profiling or a lint rule requires it                                                                                                                                                                                                                          |
-| **TanStack Start** | Server I/O and mutations → `tanstack-start-conventions` (this skill covers component typing only)                                                                                                                                                                                                                                         |
-| **Data fetching**  | Route loaders + React Query — not `useEffect` fetch (see `tanstack-router-conventions`)                                                                                                                                                                                                                                                   |
+| Requirement        | Rule                                                                                                                                                                                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **React 19**       | Target 19.x; no `forwardRef` / `useFormState` in new code                                                                                                                                                                                                         |
+| **React Compiler** | Enabled in the app build — auto-memoization is the default                                                                                                                                                                                                        |
+| **Lint**           | **Oxlint** `react` plugin — native React Compiler rules (correctness on by default; set `'react/unsupported-syntax': 'error'`). No `eslint-plugin-react-hooks` jsPlugin. See [Oxc React Compiler Support](https://oxc.rs/blog/2026-08-18-react-compiler-support). |
+| **Memoization**    | Do **not** add `useMemo` / `useCallback` / `memo` by default; add only when profiling or a lint rule requires it                                                                                                                                                  |
+| **TanStack Start** | Server I/O and mutations → `tanstack-start-conventions` (this skill covers component typing only)                                                                                                                                                                 |
+| **Data fetching**  | Route loaders + React Query — not `useEffect` fetch (see `tanstack-router-conventions`)                                                                                                                                                                           |
 
-Docs: [React Compiler](https://react.dev/learn/react-compiler.md) · [eslint-plugin-react-hooks](https://react.dev/reference/eslint-plugin-react-hooks.md) · [Rules of React](https://react.dev/reference/rules.md)
+Docs: [React Compiler](https://react.dev/learn/react-compiler.md) · [Rules of React](https://react.dev/reference/rules.md) · [Oxc React Compiler Support](https://oxc.rs/blog/2026-08-18-react-compiler-support)
 
 ## Related skills
 
@@ -212,7 +212,7 @@ If the honest name sounds like **internal React bookkeeping**, the code often be
 
 - **Render work:** Prefer deriving values during render. With Compiler enabled (FMC default), skip manual `useMemo` unless profiling shows a need.
 - **Effects:** Compiler does not replace Effects for **external** synchronization. Changed memoization can change when effects re-run — fix effect design (deps, splits, `useEffectEvent`) rather than disabling the compiler.
-- **Lint:** Use `eslint-plugin-react-hooks@latest` via oxlint jsPlugin (`react-hooks-js/*`). Rules such as `set-state-in-effect` align with [Anti-Patterns](references/anti-patterns.md).
+- **Lint:** Oxlint native React Compiler rules (`react/set-state-in-effect`, `react/immutability`, …). Align with [Anti-Patterns](references/anti-patterns.md).
 
 ### Legitimate effects: `useEffectEvent`
 
@@ -309,7 +309,7 @@ const { tab } = Route.useSearch()
 - Explicit `useState` when inference fails (null, `[]`, unions)
 - Discriminated unions for variant props
 - `ref` as prop in React 19
-- React Compiler on; oxlint with Compiler rules (jsPlugin)
+- React Compiler on; oxlint native `react/*` compiler rules
 
 **Never**
 
