@@ -298,18 +298,23 @@ def run_flaechenfinder(
     _step(5)
     if (use_case.weights.get("w_transit", 0) or 0) > 0:
         _TRANSIT_TYPES = [
-            # U-Bahn-Eingang hat keinen publicTransport-Tag-Dict-Eintrag, sondern
-            # eigene Tabelle/Loader (`_publicTransport_entrances`), siehe unten.
-            ("U-Bahn-Eingang", None,                          50),
-            ("Straßenbahn",    {"railway": "tram_stop"},       50),
-            ("Bus",            {"highway": "bus_stop"},         30),
-            ("Bahnhof",        {"railway": ["station", "halt"]}, 100),
+            # U-Bahn-Eingang und Bahnhofsgebäude haben keinen publicTransport-Tag-Dict-
+            # Eintrag, sondern eigene Tabelle/Loader, siehe unten.
+            ("U-Bahn-Eingang",   None,                          50),
+            ("Straßenbahn",      {"railway": "tram_stop"},       50),
+            ("Bus",              {"highway": "bus_stop"},         30),
+            ("Bahnhof",          {"railway": ["station", "halt"]}, 100),
+            # Bahnhofsgebäude (building=train_station): Abstellanlagen sollen möglichst
+            # nah ans Gebäude, nicht nur an den Bahnsteig-/Stationspunkt.
+            ("Bahnhofsgebäude",  None,                          100),
         ]
         _transit_scores = []
         for _tname, _ttags, _tradius in _TRANSIT_TYPES:
             try:
                 if _tname == "U-Bahn-Eingang":
                     _stops = osm_loader.load_subway_entrances(study_area_geom)
+                elif _tname == "Bahnhofsgebäude":
+                    _stops = osm_loader.load_train_station_buildings(study_area_geom)
                 else:
                     _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
                 if not len(_stops):
