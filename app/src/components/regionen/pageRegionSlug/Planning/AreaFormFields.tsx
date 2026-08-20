@@ -10,7 +10,11 @@ import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import { GeoJsonUpload } from './GeoJsonUpload'
 import { InfoTooltip } from './InfoTooltip'
 import { GROUP_HELP, PLANNING_USE_CASES, type PlanningUseCase } from './planningDefaults'
-import { planningNumberInputClass, planningPanelTitleInputClass } from './planningPanelStyles'
+import {
+  planningNumberInputClass,
+  planningPanelTitleInputClass,
+  planningRadioButtonClass,
+} from './planningPanelStyles'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import { WizardStep } from './WizardStep'
 
@@ -158,12 +162,7 @@ export const AreaFormFields = ({
                 const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
                 if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
               }}
-              className={twJoin(
-                'rounded border px-2 py-1.5 text-xs font-medium transition-colors',
-                state.useCase === key
-                  ? 'border-blue-600 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-              )}
+              className={planningRadioButtonClass(state.useCase === key)}
             >
               {label}
             </button>
@@ -222,11 +221,10 @@ export const AreaFormFields = ({
             <button
               type="button"
               onClick={toggleDrawing}
-              className={`flex items-center justify-center gap-1.5 rounded border px-2 py-1.5 text-xs font-medium ${
-                drawingActive
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-              }`}
+              className={twJoin(
+                'flex items-center justify-center gap-1.5',
+                planningRadioButtonClass(drawingActive),
+              )}
             >
               <PencilSquareIcon className="h-4 w-4" />
               {drawingActive ? 'Zeichnen abbrechen' : 'Gebiet zeichnen'}

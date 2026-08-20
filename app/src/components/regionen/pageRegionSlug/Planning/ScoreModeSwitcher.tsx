@@ -6,6 +6,7 @@ import {
   usePlanningHexagonsVisibleParam,
   usePlanningScoreParam,
 } from '../hooks/useQueryState/usePlanningParams'
+import { planningRadioButtonClass } from './planningPanelStyles'
 
 // Tab-like switcher for the three display modes (Issue #3415): the demand
 // probability, the buildability probability, or their combination. Colors the
@@ -59,10 +60,8 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
               show()
             }}
             className={twJoin(
-              'flex-1 rounded border px-2 py-1.5 text-xs font-medium transition-colors',
-              visible && mode === value
-                ? 'border-green-700 bg-green-700 text-white'
-                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+              'flex-1',
+              planningRadioButtonClass(visible && mode === value, 'green'),
             )}
           >
             {label}
@@ -74,12 +73,7 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
           title="Hexagone ausblenden"
           aria-label="Hexagone ausblenden"
           aria-pressed={!visible}
-          className={twJoin(
-            'rounded border px-2 py-1.5 transition-colors',
-            !visible
-              ? 'border-green-700 bg-green-700 text-white'
-              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
-          )}
+          className={planningRadioButtonClass(!visible, 'green')}
         >
           <EyeSlashIcon className="h-4 w-4" />
         </button>

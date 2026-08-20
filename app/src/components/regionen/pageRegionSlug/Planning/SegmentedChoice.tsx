@@ -1,4 +1,5 @@
 import { twJoin } from 'tailwind-merge'
+import { planningRadioButtonClass } from './planningPanelStyles'
 
 /**
  * Segmented button group for picking one value from a small fixed set. Extracted
@@ -29,10 +30,8 @@ export function SegmentedChoice<T extends string>({
           disabled={disabled}
           onClick={() => onChange(val)}
           className={twJoin(
-            'flex-1 rounded border px-2 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed',
-            value === val
-              ? 'border-green-700 bg-green-700 text-white'
-              : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+            'flex-1 disabled:cursor-not-allowed',
+            planningRadioButtonClass(value === val, 'green'),
             disabled && value !== val && 'opacity-50',
           )}
         >
