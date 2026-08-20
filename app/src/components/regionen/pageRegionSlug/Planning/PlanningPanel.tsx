@@ -324,6 +324,7 @@ export const PlanningPanel = () => {
   const areaTitle = area?.title ?? variant?.area?.title
   const variantTitle = variant?.title
   const collapsedTrail = panelCollapsed && (areaTitle || variantTitle)
+  const hasCompleteRun = variant?.runs[0]?.status === 'COMPLETE'
 
   return (
     <div
@@ -399,6 +400,11 @@ export const PlanningPanel = () => {
             )}
           </ol>
         </button>
+      )}
+      {panelCollapsed && hasCompleteRun && (
+        <div className="shrink-0 border-t border-gray-200 px-3 py-2">
+          <ScoreModeSwitcher compact />
+        </div>
       )}
       {!panelCollapsed && (
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-3 pt-1 pb-3">
