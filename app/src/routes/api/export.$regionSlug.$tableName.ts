@@ -29,6 +29,9 @@ const exportMetadata = {
 let gdalVersionCheckPromise: Promise<boolean> | null = null
 let hasLoggedUnsupportedGdalVersion = false
 
+// Host PATH GDAL (brew locally, gdal-bin in the image). Do not docker-run this from the app.
+// See app/README.md#host-binaries-local-vs-server
+
 async function checkGdalVersion() {
   if (gdalVersionCheckPromise) return gdalVersionCheckPromise
 

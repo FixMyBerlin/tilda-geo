@@ -5,6 +5,13 @@ import { AUDITED_MODELS } from '@/server/audit/auditAuditedModels.const'
 import { auditChangeSourceFilterLabel } from '@/server/audit/auditChangeSources.const'
 import { auditLogFilterWireFields, auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
 import { listAuditLog } from '@/server/audit/queries/listAuditLog.server'
+import {
+  listDataSchemaImports,
+  listDataSchemaOverview,
+} from '@/server/dataSchema/dataSchemaQueries.server'
+import { dataSchemaIdentifierSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
+import { importDataSchemaTable } from '@/server/dataSchema/importDataSchemaTable.server'
+import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
 import { getRegionWithWriteConfig } from '@/server/regions/queries/getRegion.server'
 import { getRegionsWithWriteConfig } from '@/server/regions/queries/getRegions.server'
@@ -70,12 +77,13 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     { name: `tilda-geo-admin--${envLabel}`, version: '1.0.0' },
     {
       instructions:
-        `TILDA region admin tools bound to the ${envLabel} environment (${origin}). ` +
-        `Writes (regions_create / regions_update / regions_delete / region_uploads_create) mutate the ${envLabel} database — ` +
+        `TILDA admin tools bound to the ${envLabel} environment (${origin}). ` +
+        `Writes (regions_create / regions_update / regions_delete / region_uploads_create / data_schema_import) mutate the ${envLabel} database — ` +
         `call env_info first and confirm you are on the intended environment before any write. ` +
         `Writes are attributed in the audit log to the API token owner. ` +
         `regions_get / regions_list return { region, config }; use config for regions_update. ` +
-        `Upload logo/welcome files with region_uploads_create, then attach via headerLogoId or welcome.image.uploadId.`,
+        `Upload logo/welcome files with region_uploads_create, then attach via headerLogoId or welcome.image.uploadId. ` +
+        `data_schema_list / data_schema_imports_list show S3 dumps, Postgres data.* tables, and Import runs on this environment.`,
     },
   )
 
@@ -85,7 +93,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
       description:
         'Report which TILDA environment (DEV/STG/PRD) and origin this MCP server is bound to. ' +
         'Call this first to confirm the target environment before any write. ' +
-        'Tools include region_uploads_create for logo/welcome images.',
+        'Tools include data_schema_list / data_schema_imports_list / data_schema_import and region_uploads_create.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
@@ -148,6 +156,54 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
       inputSchema: regionUploadFromBytesInputSchema.shape,
     },
     (args) => run(() => createRegionUploadFromBytes(args, auditContext())),
+  )
+
+  server.registerTool(
+    'data_schema_list',
+    {
+      description:
+        `List data-schema tables on ${envLabel}: S3 spec/dump summary, snapshot ids, recent Import runs, ` +
+        'and which tables currently exist in Postgres data.*. Same environment as env_info. ' +
+        'Use data_schema_imports_list for the full Import history.',
+    },
+    () => run(() => listDataSchemaOverview()),
+  )
+
+  server.registerTool(
+    'data_schema_imports_list',
+    {
+      description:
+        `List all data-schema Import runs on ${envLabel} (PENDING/RUNNING/SUCCESS/FAILED), newest first. ` +
+        'Optional table and status filters; paginate with take/skip.',
+      inputSchema: {
+        table: dataSchemaIdentifierSchema.optional(),
+        status: z.enum(['PENDING', 'RUNNING', 'SUCCESS', 'FAILED']).optional(),
+        ...offsetSearchFields({ maxTake: 200 }),
+      },
+    },
+    (args) => run(() => listDataSchemaImports(args)),
+  )
+
+  server.registerTool(
+    'data_schema_import',
+    {
+      description:
+        `Restore S3 data.dump into Postgres data.<table> on ${envLabel} (same as /admin/data-schema Import). ` +
+        'Drops the table if it exists, then pg_restore. Call env_info first. Optional snapshotId restores that snapshot dump.',
+      inputSchema: {
+        table: dataSchemaIdentifierSchema,
+        snapshotId: z.string().min(1).nullable().optional(),
+      },
+    },
+    (args) =>
+      run(async () => {
+        extendBunRequestIdleTimeout(request, 0)
+        return importDataSchemaTable({
+          table: args.table,
+          snapshotId: args.snapshotId ?? null,
+          userId: auth.createdById,
+        })
+      }),
   )
 
   server.registerTool(

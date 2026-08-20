@@ -1,0 +1,17 @@
+specVersion: 1
+table: census_population_point
+source: 
+  file: population_de.gpkg
+  provider: Destatis Zensus 2022 (disaggregated)
+  documentation: "Source repo: https://github.com/FixMyBerlin/census-building-disaggregation\n\nFile: `bevoelkerungsmodell/data/output/population_de.gpkg` (layer `population`). Keep it as a symlink in this folder; do not copy the GPKG. How to run the Germany pipeline is in that repo’s README (`python -m bevoelkerungsmodell.run_de_population`)."
+import: 
+  srid: 5243
+  geometryName: geom
+  fidColumn: fid
+  expectedGeometryType: Point
+  layer: population
+indexes: 
+  - name: census_population_point_geom_idx
+    using: gist
+    columns: 
+      - geom

@@ -15,9 +15,11 @@ These scripts manage geodata files, which are made public or semi-public in tild
 - [Install Bun](https://bun.sh/docs/installation)
   - macOS `brew tap oven-sh/bun && brew install bun`
   - Archlinux `yay -S bun-bin`
-- [Install felt/tippecanoe](https://github.com/felt/tippecanoe/blob/main/README.md#installation)
+- [Install felt/tippecanoe](https://github.com/felt/tippecanoe/blob/main/README.md#installation) — also listed under [Host binaries](../../README.md#host-binaries-local-vs-server)
   - macOS `brew install tippecanoe`
   - Archlinux `yay -S tippecanoe`
+- [GDAL](https://gdal.org) 3.8+ (`ogr2ogr`) for GeoPackage → GeoJSON and CRS/precision. Not needed for `bun run dev`.
+  - macOS `brew install gdal`
 - Setup [`tilda-static-data`](https://github.com/FixMyBerlin/tilda-static-data), see README.
 
 ## Update and add data

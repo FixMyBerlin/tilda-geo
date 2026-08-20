@@ -1,0 +1,20 @@
+specVersion: 1
+table: euvm_cutouts_polygon
+source: 
+  file: euvm_cutouts_polygon.geojson
+  provider: eUVM Berlin
+  documentation: "Google Drive: https://drive.google.com/drive/folders/1wEKkUayaySZ6AhsdrkTGbbeVAx1YJARs\n\nDownload the polygon GeoJSON delivery. Load with data-schema-load."
+import: 
+  srid: 4326
+  geometryName: geom
+  fidColumn: id
+  selectColumns: 
+    - type
+  expectedGeometryType: MultiPolygon
+  layer: null
+indexes: 
+  - name: euvm_cutouts_polygon_geom_idx
+    using: gist
+    columns: 
+      - geom
+consumedBy: processing/topics/parking/cutouts/2_external_cutouts_euvm.sql

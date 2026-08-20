@@ -84,6 +84,8 @@ export const generatePMTilesFile = (
     inputFullFile,
   ]
 
+  // Host PATH tippecanoe (brew locally). Do not docker-run this from the app.
+  // See app/README.md#host-binaries-local-vs-server
   const { success, exitCode, stdout, stderr } = Bun.spawnSync(['tippecanoe', ...parameters], {
     stdout: 'pipe',
     stderr: 'pipe',
