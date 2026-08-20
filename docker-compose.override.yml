@@ -55,7 +55,7 @@ services:
     # Als Host-User laufen, damit in den gemounteten Quellcode geschriebene Dateien
     # (z. B. __pycache__) dem Host-User gehören und nicht root. Sonst lassen sie sich
     # ohne sudo nicht mehr löschen. UID/GID kommen aus .env (siehe .env.example).
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
     volumes:
       # Quellcode mounten für Iteration ohne Rebuild.
       - ./planning-worker:/planning-worker

@@ -19,13 +19,13 @@ Kerncode: [`flaechenfinder/vegetation.py`](flaechenfinder/vegetation.py).
 
 ### Parameter (1:1 aus dem Standalone-Flächenfinder)
 
-| Parameter | Wert | Bedeutung |
-|---|---|---|
-| `NDVI_MIN` | 0.1 | Schwellwert Vegetation (≥ Wiese/Buschwerk) |
-| `MORPH_CLOSING_ITER` | 3 | Lücken ≤ 0,6 m schließen |
-| `SIMPLIFY_TOLERANZ_M` | 0.5 | Geometrie-Vereinfachung |
-| `MIN_LOCH_M2` | 20.0 | kleinere Innenlöcher schließen |
-| `MIN_FLAECHE_M2` | 5.0 | kleinere Polygone verwerfen |
+| Parameter             | Wert | Bedeutung                                  |
+| --------------------- | ---- | ------------------------------------------ |
+| `NDVI_MIN`            | 0.1  | Schwellwert Vegetation (≥ Wiese/Buschwerk) |
+| `MORPH_CLOSING_ITER`  | 3    | Lücken ≤ 0,6 m schließen                   |
+| `SIMPLIFY_TOLERANZ_M` | 0.5  | Geometrie-Vereinfachung                    |
+| `MIN_LOCH_M2`         | 20.0 | kleinere Innenlöcher schließen             |
+| `MIN_FLAECHE_M2`      | 5.0  | kleinere Polygone verwerfen                |
 
 ## Datenquellen
 
@@ -33,11 +33,11 @@ Kacheln werden zur Laufzeit per **WMS GetMap** bezogen; jede Quelle ist ein
 `CirSource` in [`flaechenfinder/cir_sources.py`](flaechenfinder/cir_sources.py).
 Überall NIR = Band 1, Rot = Band 2, Bodenauflösung 0,2 m.
 
-| Quelle | `cir_source` | CRS | Kachel | Bild | Format |
-|---|---|---|---|---|---|
-| Bayern DOP20 CIR | `bayern` | EPSG:25832 | 1000 m | 5000×5000 px | TIFF |
-| Brandenburg/Berlin DOP20 CIR | `bb` | EPSG:25833 | 1000 m | 5000×5000 px | PNG |
-| Hessen DOP20 CIR | `hessen` | EPSG:25832 | 500 m | 2500×2500 px | TIFF |
+| Quelle                       | `cir_source` | CRS        | Kachel | Bild         | Format |
+| ---------------------------- | ------------ | ---------- | ------ | ------------ | ------ |
+| Bayern DOP20 CIR             | `bayern`     | EPSG:25832 | 1000 m | 5000×5000 px | TIFF   |
+| Brandenburg/Berlin DOP20 CIR | `bb`         | EPSG:25833 | 1000 m | 5000×5000 px | PNG    |
+| Hessen DOP20 CIR             | `hessen`     | EPSG:25832 | 500 m  | 2500×2500 px | TIFF   |
 
 `cir_source: "auto"` (Default) wählt anhand des Studiengebiet-Zentroiden:
 Hessen-Bounding-Box → Hessen, sonst < 12° O → Bayern, ≥ 12° O → Brandenburg/Berlin.
@@ -45,7 +45,7 @@ Hessen-Bounding-Box → Hessen, sonst < 12° O → Bayern, ≥ 12° O → Brande
 > **Hessen: 500-m-Raster ist Pflicht.** Der MapServer hinter dem HVBG-WMS begrenzt
 > `WIDTH`/`HEIGHT` hart auf **3000 px** und antwortet darüber mit einer
 > ServiceException statt mit einem Bild. Ein 1000-m-Raster bei 0,2 m wären 5000 px –
-> damit schlägt *jede* Kachel fehl und die Vegetation bleibt landesweit leer.
+> damit schlägt _jede_ Kachel fehl und die Vegetation bleibt landesweit leer.
 
 Heruntergeladene Kacheln werden im Volume `planning_cir` (`/cir`) **gecacht** und
 nicht erneut geladen. Außerhalb der abgedeckten Länder gibt es keine Kacheln →
@@ -96,13 +96,13 @@ einzelner WMS-Ausfall alle Folgeläufe derselben Variante leer halten.
 
 ## Konfiguration (Env)
 
-| Variable | Default | Zweck |
-|---|---|---|
-| `PLANNING_CIR_DIR` | `/cir` | Cache-Verzeichnis der Kacheln |
-| `PLANNING_CIR_DOWNLOAD` | `1` | Auto-Download (`0` = nur Cache) |
-| `PLANNING_CIR_WMS_URL` | Bayern-WMS | WMS-Endpunkt |
-| `PLANNING_CIR_WMS_LAYER` | `by_dop20cir_bayern` | WMS-Layer |
-| `PLANNING_CIR_DOWNLOAD_TIMEOUT_S` | `180` | Timeout je Kachel |
+| Variable                          | Default              | Zweck                           |
+| --------------------------------- | -------------------- | ------------------------------- |
+| `PLANNING_CIR_DIR`                | `/cir`               | Cache-Verzeichnis der Kacheln   |
+| `PLANNING_CIR_DOWNLOAD`           | `1`                  | Auto-Download (`0` = nur Cache) |
+| `PLANNING_CIR_WMS_URL`            | Bayern-WMS           | WMS-Endpunkt                    |
+| `PLANNING_CIR_WMS_LAYER`          | `by_dop20cir_bayern` | WMS-Layer                       |
+| `PLANNING_CIR_DOWNLOAD_TIMEOUT_S` | `180`                | Timeout je Kachel               |
 
 ## Abhängigkeiten
 

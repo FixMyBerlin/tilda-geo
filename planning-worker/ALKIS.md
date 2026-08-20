@@ -12,18 +12,18 @@ ergänzt um DGM1 (Höhe) und DOP20-CIR-Luftbilder (Vegetation).
 
 Siehe [`SCORING.md`](SCORING.md), Loader in [`flaechenfinder/postgis_loader.py`](flaechenfinder/postgis_loader.py).
 
-| Faktor / Flag | Quelle | Herkunft |
-|---|---|---|
-| `score_radweg` | `public.bikelanes` | OSM |
-| `score_zielorte` | OSM-Tags je Szenario-`targets` | OSM |
-| `score_oepnv` | `public.publicTransport`, `public._publicTransport_entrances` | OSM |
-| `score_kreuzung`, `score_fussgaengerzone` | `public._parking_intersection_corners` (+ `_parking_kerbs`/`_parking_roads`) | OSM (Parking-Topic) |
-| `score_parken` | `public.parkings`, `public.parkings_separate` | OSM (Parking-Topic) |
-| `score_bestand` | `public.bicycleParking_points` | OSM |
-| `gebaeude` (harter Ausschluss) | `public._buildings` | **OSM** (Landcover-Topic), *nicht* ALKIS-Gebäude |
-| `score_hangneigung` | DGM1-GeoTIFF via `planning_dem`-Volume, sonst SRTM-Fallback | amtliches DGM, kein ALKIS |
-| `score_vegetation` | DOP20-CIR (Bayern, Brandenburg/Berlin, Hessen) → NDVI | amtliche Orthophotos, kein ALKIS |
-| `score_eigendaten` | GeoJSON-Upload des Nutzers | Nutzerdaten |
+| Faktor / Flag                             | Quelle                                                                       | Herkunft                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------ |
+| `score_radweg`                            | `public.bikelanes`                                                           | OSM                                              |
+| `score_zielorte`                          | OSM-Tags je Szenario-`targets`                                               | OSM                                              |
+| `score_oepnv`                             | `public.publicTransport`, `public._publicTransport_entrances`                | OSM                                              |
+| `score_kreuzung`, `score_fussgaengerzone` | `public._parking_intersection_corners` (+ `_parking_kerbs`/`_parking_roads`) | OSM (Parking-Topic)                              |
+| `score_parken`                            | `public.parkings`, `public.parkings_separate`                                | OSM (Parking-Topic)                              |
+| `score_bestand`                           | `public.bicycleParking_points`                                               | OSM                                              |
+| `gebaeude` (harter Ausschluss)            | `public._buildings`                                                          | **OSM** (Landcover-Topic), _nicht_ ALKIS-Gebäude |
+| `score_hangneigung`                       | DGM1-GeoTIFF via `planning_dem`-Volume, sonst SRTM-Fallback                  | amtliches DGM, kein ALKIS                        |
+| `score_vegetation`                        | DOP20-CIR (Bayern, Brandenburg/Berlin, Hessen) → NDVI                        | amtliche Orthophotos, kein ALKIS                 |
+| `score_eigendaten`                        | GeoJSON-Upload des Nutzers                                                   | Nutzerdaten                                      |
 
 Das Gebäude-Flag ist der einzige Faktor, der inhaltlich nach ALKIS aussieht — er kommt
 aber aus OSM (`processing/topics/landcover/buildings/`, Filter: < 100 m² verworfen).

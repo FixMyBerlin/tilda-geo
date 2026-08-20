@@ -27,13 +27,13 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
 6. **Klassifikation** – `eignungsklasse` wird aus `mce_gesamtscore` gebinnt
    (`_KLASSE_BINS`/`_KLASSE_LABELS`):
 
-   | Score | Klasse |
-   |---|---|
-   | 0 | ausgeschlossen |
-   | 0–40 | schlecht |
-   | 40–60 | mittel |
-   | 60–80 | gut |
-   | 80–100 | sehr gut |
+   | Score  | Klasse         |
+   | ------ | -------------- |
+   | 0      | ausgeschlossen |
+   | 0–40   | schlecht       |
+   | 40–60  | mittel         |
+   | 60–80  | gut            |
+   | 80–100 | sehr gut       |
 
 ## Zoom-Aggregation (Darstellung)
 
