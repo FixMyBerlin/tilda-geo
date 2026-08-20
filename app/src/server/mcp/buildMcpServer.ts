@@ -13,6 +13,12 @@ import { dataSchemaIdentifierSchema } from '@/server/dataSchema/dataSchemaSpec.s
 import { importDataSchemaTable } from '@/server/dataSchema/importDataSchemaTable.server'
 import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
+import {
+  mapProcessingRunDetail,
+  mapProcessingRunListItem,
+} from '@/server/processing/mapProcessingRunTimings'
+import { getProcessingRun } from '@/server/processing/queries/getProcessingRun.server'
+import { listProcessingRuns } from '@/server/processing/queries/listProcessingRuns.server'
 import { getRegionWithWriteConfig } from '@/server/regions/queries/getRegion.server'
 import { getRegionsWithWriteConfig } from '@/server/regions/queries/getRegions.server'
 import {
@@ -83,7 +89,8 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         `Writes are attributed in the audit log to the API token owner. ` +
         `regions_get / regions_list return { region, config }; use config for regions_update. ` +
         `Upload logo/welcome files with region_uploads_create, then attach via headerLogoId or welcome.image.uploadId. ` +
-        `data_schema_list / data_schema_imports_list show S3 dumps, Postgres data.* tables, and Import runs on this environment.`,
+        `data_schema_list / data_schema_imports_list show S3 dumps, Postgres data.* tables, and Import runs on this environment. ` +
+        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing).`,
     },
   )
 
@@ -93,7 +100,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
       description:
         'Report which TILDA environment (DEV/STG/PRD) and origin this MCP server is bound to. ' +
         'Call this first to confirm the target environment before any write. ' +
-        'Tools include data_schema_list / data_schema_imports_list / data_schema_import and region_uploads_create.',
+        'Tools include data_schema_*, processing_runs_*, region_uploads_create, and audit_list.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
@@ -203,6 +210,45 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
           snapshotId: args.snapshotId ?? null,
           userId: auth.createdById,
         })
+      }),
+  )
+
+  server.registerTool(
+    'processing_runs_list',
+    {
+      description:
+        `List processing runs on ${envLabel} from public.meta (newest first), same source as /admin/processing. ` +
+        'Each item has status, durations, OSM date, topic completed/skipped counts, and the slowest topics. ' +
+        'Paginate with take/skip (default 50, max 200). Use processing_runs_get for per-topic timings.',
+      inputSchema: {
+        ...offsetSearchFields({ maxTake: 200 }),
+      },
+    },
+    (args) =>
+      run(async () => {
+        const result = await listProcessingRuns(args)
+        return {
+          ...result,
+          rows: result.rows.map(mapProcessingRunListItem),
+        }
+      }),
+  )
+
+  server.registerTool(
+    'processing_runs_get',
+    {
+      description:
+        `Get one processing run on ${envLabel} with parsed topic timings (lua/sql/diff ms), skip reasons, ` +
+        'orphaned topic ids, and afterthoughts. Omit id for the latest run. Optional topic filters to one topic id.',
+      inputSchema: {
+        id: z.coerce.number().int().positive().optional(),
+        topic: z.string().min(1).optional(),
+      },
+    },
+    (args) =>
+      run(async () => {
+        const run = await getProcessingRun(args.id)
+        return mapProcessingRunDetail(run, args.topic)
       }),
   )
 

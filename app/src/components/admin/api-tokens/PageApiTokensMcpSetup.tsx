@@ -21,7 +21,8 @@ export function PageApiTokensMcpSetup({ envLabel, origin }: PageApiTokensMcpSetu
         Bearer-Tokens autorisieren die Admin-REST-API (<code>GET/POST/PUT/DELETE /api/admin/*</code>
         ) und den <strong>Remote-MCP-Server</strong> unter <code>{origin}/mcp</code>. Der Token-Wert
         wird nur einmal beim Erstellen angezeigt. Ein aktiver Token erlaubt Region-CRUD,
-        Data-Schema-Import und Audit-Log-Lesen — bei Verlust oder Ende der Nutzung widerrufen.
+        Data-Schema-Import, Processing-Timings und Audit-Log-Lesen — bei Verlust oder Ende der
+        Nutzung widerrufen.
       </p>
 
       <Disclosure title="MCP einrichten (Cursor, Claude & Co.)" defaultOpen={false}>
@@ -59,10 +60,11 @@ export function PageApiTokensMcpSetup({ envLabel, origin }: PageApiTokensMcpSetu
               </li>
               <li>MCP-Server neu laden bzw. Cursor neu starten.</li>
               <li>
-                Im Chat z. B. „Liste alle Regionen“ oder „Data-Schema Import-Verlauf“ fragen —
-                Cursor ruft Tools wie <code>regions_list</code> / <code>data_schema_list</code> auf.
-                Mit <code>env_info</code> prüfen, auf welche Umgebung der Server zeigt,{' '}
-                <strong>bevor</strong> du schreibst.
+                Im Chat z. B. „Liste alle Regionen“, „Data-Schema Import-Verlauf“ oder
+                „Processing-Timings der letzten Runs“ fragen — Cursor ruft Tools wie{' '}
+                <code>regions_list</code> / <code>data_schema_list</code> /{' '}
+                <code>processing_runs_list</code> auf. Mit <code>env_info</code> prüfen, auf welche
+                Umgebung der Server zeigt, <strong>bevor</strong> du schreibst.
               </li>
             </ol>
           </section>
