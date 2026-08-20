@@ -86,12 +86,14 @@ const FactorFields = ({
   setWeights,
   setField,
   setVegetationDirection,
+  onReset,
   readOnly = false,
 }: {
   config: FactorConfig
   setWeights: (weights: Record<string, number>) => void
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
+  onReset?: () => void
   readOnly?: boolean
 }) => {
   const weights = config.weights ?? {}
@@ -106,6 +108,15 @@ const FactorFields = ({
       <div>
         <div className="mb-1 font-semibold">Gewichtung der Faktoren</div>
         {!readOnly && <WeightScaleLegend />}
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="mb-1 text-xs font-medium text-gray-500 hover:text-gray-800"
+          >
+            Auf Standardwerte zurücksetzen
+          </button>
+        )}
         {WEIGHT_GROUPS.map((group) => (
           <div key={group.key} className="mt-3 first:mt-0">
             <div className={groupHeadlineClass}>
@@ -353,6 +364,7 @@ const FactorEditorPanelForm = ({
             setWeights={setWeights}
             setField={setField}
             setVegetationDirection={setVegetationDirection}
+            onReset={readOnly ? undefined : resetWeightsToDefaults}
             readOnly={readOnly}
           />
 
@@ -362,16 +374,9 @@ const FactorEditorPanelForm = ({
                 type="button"
                 onClick={() => mutation.mutate()}
                 disabled={mutation.isPending}
-                className="rounded bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+                className="rounded bg-gray-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 disabled:opacity-50"
               >
                 {mutation.isPending ? 'Speichern…' : 'Faktoren speichern'}
-              </button>
-              <button
-                type="button"
-                onClick={resetWeightsToDefaults}
-                className="rounded border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-              >
-                Auf Standardwerte zurücksetzen
               </button>
               {mutation.isSuccess && <span className="text-xs text-green-700">Gespeichert ✓</span>}
             </div>
