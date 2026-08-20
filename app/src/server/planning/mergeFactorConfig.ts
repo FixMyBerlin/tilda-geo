@@ -9,7 +9,6 @@ export type VariantFactorConfig = {
   vegetation_direction?: 'positive' | 'negative'
   cir_source?: 'auto' | 'bayern' | 'bb' | 'hessen'
   max_cyclepath_dist_m?: number
-  min_surface_score?: number
   exclude_carriageways?: boolean
   intersection_radius_m?: number
   parken_radius_m?: number

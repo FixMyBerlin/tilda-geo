@@ -15,7 +15,6 @@ Siehe [`SCORING.md`](SCORING.md), Loader in [`flaechenfinder/postgis_loader.py`]
 | Faktor / Flag | Quelle | Herkunft |
 |---|---|---|
 | `score_radweg` | `public.bikelanes` | OSM |
-| `score_bodenbelag` | OSM-Tag `surface` | OSM |
 | `score_zielorte` | OSM-Tags je Szenario-`targets` | OSM |
 | `score_oepnv` | `public.publicTransport`, `public._publicTransport_entrances` | OSM |
 | `score_kreuzung`, `score_fussgaengerzone` | `public._parking_intersection_corners` (+ `_parking_kerbs`/`_parking_roads`) | OSM (Parking-Topic) |

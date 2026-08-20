@@ -7,7 +7,7 @@ const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
   'H3-Gitter generieren',
   'Radwege laden',
-  'Gebäude & Untergrund laden',
+  'Gebäude laden',
   'ÖPNV-Haltestellen laden',
   'Kreuzungen laden',
   'KFZ-Parkflächen laden',
@@ -22,12 +22,12 @@ const SCORING_STEPS = [
 // Das steuernde Faktor-Gewicht je Schritt (0-basiert, index-gleich zu
 // SCORING_STEPS). Leeres Array = struktureller Schritt ohne Gewicht (läuft
 // immer). Ein Schritt gilt als „ohne Gewicht", wenn ALLE genannten Gewichte 0
-// sind. Schritt 4 lädt Gebäude (harter Ausschluss, immer) und Untergrund.
+// sind. Schritt 4 lädt Gebäude (harter Ausschluss, läuft immer, kein Gewicht).
 const STEP_WEIGHT_KEYS: string[][] = [
   ['w_vegetation'], //  1 Vegetationsflächen berechnen
   [], //                2 H3-Gitter generieren
   ['w_cyclepath'], //   3 Radwege laden
-  ['w_surface'], //     4 Gebäude & Untergrund laden
+  [], //                4 Gebäude laden
   ['w_transit'], //     5 ÖPNV-Haltestellen laden
   ['w_intersection', 'w_fussgaengerzone'], // 6 Kreuzungen & Fußgängerzonen laden
   ['w_parken'], //      7 KFZ-Parkflächen laden
@@ -47,7 +47,7 @@ const USER_OBSTACLES_STEP_INDEX = 10
 // Schritte, deren Ausgabe zusätzlich den harten Ausschluss steuert
 // (scorer.py::exclusion). Diese laufen auch bei Gewicht 0 weiter – sie werden
 // dann nicht „übersprungen", sondern „nur Ausschluss" markiert.
-const EXCLUSION_STEP_INDICES = new Set([3, 8]) // Gebäude & Untergrund, Hangneigung
+const EXCLUSION_STEP_INDICES = new Set([8]) // Hangneigung
 
 /** Präsenz + Modus des Eigendaten-Uploads (aus getPlanningJobFn). */
 export type UserObstaclesInfo = { present: boolean; mode: string | null }

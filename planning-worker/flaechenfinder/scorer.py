@@ -12,13 +12,6 @@ from .geometry import buffer_by_geom_type, dist_to_union as _dist_to_union
 from .tilda import TildaLoader
 
 
-SURFACE_SCORES = {
-    "asphalt": 100, "paved": 100, "concrete": 95,
-    "paving_stones": 85, "compacted": 60,
-    "gravel": 30, "unpaved": 10, "grass": 0, "dirt": 0,
-    None: 40,
-}
-
 # H3-Auflösungen: BASE ist das feine Scoring-Gitter (hohe Zoomstufen), AGG das
 # grobe Aggregat für niedrige Zoomstufen (z < 16). AGG_H3_RES muss mit der
 # Zoom-Verzweigung in planning-worker/sql/martin_functions.sql übereinstimmen.
@@ -29,7 +22,7 @@ AGG_H3_RES = 11
 # daraus neu abgeleitet, nicht gemittelt).
 _SCORE_COLS = [
     "mce_gesamtscore", "score_bedarf", "score_bebauung",
-    "score_radweg", "score_bodenbelag", "score_zielorte",
+    "score_radweg", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken", "score_fussgaengerzone",
     "score_bestand", "score_eigendaten",
@@ -135,7 +128,7 @@ SCORING_STEPS = [
     "Vegetationsflächen berechnen",
     "H3-Gitter generieren",
     "Radwege laden",
-    "Gebäude & Untergrund laden",
+    "Gebäude laden",
     "ÖPNV-Haltestellen laden",
     "Kreuzungen laden",
     "KFZ-Parkflächen laden",
@@ -166,7 +159,7 @@ def apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore",)) -> None:
 def apply_bebauung_exclusion(hex_proj, mask) -> None:
     """Bebauungs-Ausschluss: nullt Kombination UND Bebauung, lässt den Bedarf.
 
-    Für die klassischen Baubarkeits-Kriterien (Gebäude, Untergrund, Hangneigung):
+    Für die klassischen Baubarkeits-Kriterien (Gebäude, Hangneigung):
     der Bedarf besteht auch dort, wo nicht gebaut werden kann.
     """
     apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore", "score_bebauung"))
@@ -249,7 +242,7 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_radweg_m"] = np.nan
 
-    # ── 4. Gebäude / Untergrund ───────────────────────────────────
+    # ── 4. Gebäude ─────────────────────────────────────────────────
     _step(4)
     # Gebäude aus tilda DB: Hexagone mit Gebäudeüberschneidung werden hart ausgeschlossen.
     buildings = tilda_loader.load_buildings(study_area_geom)
@@ -298,20 +291,6 @@ def run_flaechenfinder(
         del hexes, pairs, roads_proj
     else:
         hex_proj["fahrbahn"] = False
-
-    try:
-        surfaces = osm_loader.features_from_polygon(study_area_geom, {"surface": True})
-        if len(surfaces) and "surface" in surfaces.columns:
-            surfaces_proj = surfaces[surfaces.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].to_crs("EPSG:25832")
-            joined = gpd.sjoin(hex_proj[["geometry"]], surfaces_proj[["geometry", "surface"]],
-                               how="left", predicate="intersects")
-            hex_proj["bodenbelag_osm"] = joined.groupby(joined.index)["surface"].first()
-            del surfaces_proj, joined
-        else:
-            hex_proj["bodenbelag_osm"] = None
-        del surfaces
-    except Exception:
-        hex_proj["bodenbelag_osm"] = None
 
     # ── 5. ÖPNV-Haltestellen ──────────────────────────────────────
     # Nur bei Gewicht > 0 laden – sonst die vier Transit-Queries sparen und
@@ -494,7 +473,6 @@ def run_flaechenfinder(
         )
     else:
         hex_proj["score_radweg"] = np.nan
-    hex_proj["score_bodenbelag"] = hex_proj["bodenbelag_osm"].apply(lambda t: SURFACE_SCORES.get(t, 40))
     hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
 
     # ── Basis-Score: gewichteter Durchschnitt der Kriterien ───────────────
@@ -525,7 +503,6 @@ def run_flaechenfinder(
         ("score_zielorte", "w_target"),
     ]
     BEBAUUNG_TERMS = [
-        ("score_bodenbelag", "w_surface"),
         ("score_hangneigung", "w_slope"),
     ]
     # Ohne ein einziges gewichtetes Kriterium bleibt der Grundscore 0 (statt NaN),
@@ -742,8 +719,7 @@ def run_flaechenfinder(
     #   Bedarf  („will hier parken")  → Radweg (w_cyclepath), ÖPNV (w_transit),
     #       Zielorte (w_target) + Modifier Fußgängerzonen (Zuschlag) und
     #       Bestandsanlagen (Abzug)
-    #   Bebauung („kann hier bauen") → Untergrund (w_surface), Hangneigung
-    #       (w_slope)
+    #   Bebauung („kann hier bauen") → Hangneigung (w_slope)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
     # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt (dasselbe
     # `_group_score` wie beim Grundscore oben), damit der Teil-Score unabhängig
@@ -770,7 +746,6 @@ def run_flaechenfinder(
     # NICHT mehr dazu – Radwegnähe ist ein Bedarfs-, kein Bebauungskriterium.
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
-        (hex_proj["score_bodenbelag"]        < use_case.min_surface_score) |
         hex_proj["gebaeude"] |
         hex_proj["fahrbahn"]
     )

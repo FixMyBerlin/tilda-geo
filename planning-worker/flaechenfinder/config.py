@@ -73,7 +73,6 @@ class UseCaseConfig:
 
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
-    min_surface_score: float = 30.0         # Untergrund-Score unter Schwelle → Score 0
 
     # Fahrbahnen ausschließen: Straßenflächen (public._parking_roads, gepuffert
     # um ihre erfasste/geschätzte Breite) hart aus der Bebauung ausschließen.
@@ -112,14 +111,13 @@ USER_LINE_BUFFER_M = 2.5
 # ── Defaults / Validierung ────────────────────────────────────────────────────
 
 # Zwei Arten von Gewichten (siehe scorer.py):
-#   Kriterien (w_cyclepath/w_surface/w_target/w_slope/w_transit) gehen in den
+#   Kriterien (w_cyclepath/w_target/w_slope/w_transit) gehen in den
 #     gewichteten Durchschnitt der 0–100-Teilscores ein. Nur ihr Verhältnis
 #     zueinander zählt – die Summe muss nichts Bestimmtes ergeben.
 #   Modifier (alle übrigen) verschieben den fertigen Score um bis zu w × 100
 #     Punkte; hier ist der absolute Wert die Aussage.
 DEFAULT_WEIGHTS = {
     "w_cyclepath": 0.20,
-    "w_surface":   0.20,
     "w_target":    0.15,
     "w_slope":     0.20,
     "w_transit":   0.15,
@@ -138,9 +136,9 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
     Erwartetes Schema (alle Felder außer `study_area` optional, mit Defaults):
       {
         "name": str,
-        "weights": {w_cyclepath, w_surface, w_target, w_slope, w_transit},
+        "weights": {w_cyclepath, w_target, w_slope, w_transit},
         "dem_source": "srtm" | "dgm1" | "mapterhorn",
-        "max_cyclepath_dist_m", "min_surface_score",
+        "max_cyclepath_dist_m",
         "targets": [ {name, osm_tags, max_dist_m, optimal_dist_m, weight_in_target} ],
       }
     `study_area` und `h3_resolution` werden vom Worker separat aus dem factorConfig gelesen.
@@ -167,7 +165,6 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
             cfg.get("vegetation_penalty_threshold_pct", 20.0)
         ),
         max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 50.0)),
-        min_surface_score=float(cfg.get("min_surface_score", 30.0)),
         cir_source=cfg.get("cir_source", "auto"),
         intersection_radius_m=float(cfg.get("intersection_radius_m", 20.0)),
         intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),

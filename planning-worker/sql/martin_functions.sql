@@ -27,7 +27,6 @@ BEGIN
                 score_bedarf,
                 score_bebauung,
                 score_radweg,
-                score_bodenbelag,
                 score_hangneigung,
                 score_oepnv,
                 score_zielorte,

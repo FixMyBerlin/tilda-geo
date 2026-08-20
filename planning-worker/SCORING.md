@@ -10,7 +10,6 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
    (`BASE_H3_RES`) überdeckt (`h3.geo_to_cells`).
 2. **Teilscores je Hexagon** (0–100, aus Distanz zu Layern bzw. Attributen):
    - `score_radweg` – Nähe zu `public.bikelanes`
-   - `score_bodenbelag` – Untergrund-Bewertung (`SURFACE_SCORES`, OSM `surface`-Tag)
    - `score_zielorte` – Nähe zu den im Szenario konfigurierten `targets`
    - `score_hangneigung` – DEM-Hangneigung (`slope_score`)
    - `score_oepnv` – Nähe zu ÖPNV-Haltestellen (max. über 4 Typen: U-Bahn-Eingang,
@@ -23,7 +22,6 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
 5. **Harte Ausschlüsse** – unabhängig vom gewichteten Score wird `mce_gesamtscore`
    auf 0 gesetzt, wenn eines zutrifft:
    - Hangneigung zu steil (`score_hangneigung == 0`)
-   - Bodenbelag unter `min_surface_score` (Default 30)
    - Radweg weiter als `max_cyclepath_dist_m` entfernt (Default 150 m)
    - Gebäudeüberschneidung (`gebaeude`)
 6. **Klassifikation** – `eignungsklasse` wird aus `mce_gesamtscore` gebinnt

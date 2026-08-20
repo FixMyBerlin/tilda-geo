@@ -11,13 +11,12 @@ const rounded = (shares: Record<string, number>) =>
 
 describe('criterionShares', () => {
   it('verteilt die Anteile im Verhältnis der Wichtigkeiten', () => {
-    // Defaults: Radwegnähe/Untergrund 2 Stufen, Zielorte/Hangneigung/ÖPNV je 1 → 7 Stufen gesamt.
+    // Defaults: Radwegnähe 2 Stufen, Zielorte/Hangneigung/ÖPNV je 1 → 5 Stufen gesamt.
     expect(rounded(criterionShares(DEFAULT_WEIGHTS))).toEqual({
-      w_cyclepath: 29,
-      w_transit: 14,
-      w_target: 14,
-      w_surface: 29,
-      w_slope: 14,
+      w_cyclepath: 40,
+      w_transit: 20,
+      w_target: 20,
+      w_slope: 20,
     })
   })
 
@@ -27,19 +26,18 @@ describe('criterionShares', () => {
   })
 
   it('ignoriert Zu-/Abschläge und Kriterien ohne Gewicht', () => {
-    const shares = criterionShares({ w_cyclepath: 0.3, w_surface: 0.1, w_intersection: 0.5 })
+    const shares = criterionShares({ w_cyclepath: 0.3, w_intersection: 0.5 })
     expect(rounded(shares)).toEqual({
-      w_cyclepath: 75,
+      w_cyclepath: 100,
       w_transit: 0,
       w_target: 0,
-      w_surface: 25,
       w_slope: 0,
     })
   })
 
   it('hängt nur am Verhältnis, nicht an der Summe der Gewichte', () => {
-    expect(criterionShares({ w_cyclepath: 0.1, w_surface: 0.1 })).toEqual(
-      criterionShares({ w_cyclepath: 0.5, w_surface: 0.5 }),
+    expect(criterionShares({ w_cyclepath: 0.1, w_slope: 0.1 })).toEqual(
+      criterionShares({ w_cyclepath: 0.5, w_slope: 0.5 }),
     )
   })
 
@@ -51,8 +49,8 @@ describe('criterionShares', () => {
 describe('groupShare', () => {
   it('summiert die Anteile einer Gruppe', () => {
     const shares = criterionShares(DEFAULT_WEIGHTS)
-    expect(Math.round(groupShare(shares, ['w_cyclepath', 'w_transit', 'w_target']))).toBe(57)
-    expect(Math.round(groupShare(shares, ['w_surface', 'w_slope']))).toBe(43)
+    expect(Math.round(groupShare(shares, ['w_cyclepath', 'w_transit', 'w_target']))).toBe(80)
+    expect(Math.round(groupShare(shares, ['w_slope']))).toBe(20)
   })
 })
 

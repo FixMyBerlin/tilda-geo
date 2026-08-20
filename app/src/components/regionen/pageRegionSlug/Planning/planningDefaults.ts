@@ -7,12 +7,11 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   h3_resolution: 13,
   dem_source: 'mapterhorn',
   // Kriterien liegen auf dem UI-Raster 0–10 (Vielfache von 0.1); nur ihr Verhältnis zueinander
-  // zählt, weil scorer.py durch die Summe der aktiven Gewichte teilt — Radwegnähe und Untergrund
-  // wiegen hier also doppelt so schwer wie Zielorte, Hangneigung und ÖPNV. Die übrigen Gewichte
-  // sind Zu-/Abschläge und stehen für „bis zu w × 100 Punkte" (siehe `weightScale.ts`).
+  // zählt, weil scorer.py durch die Summe der aktiven Gewichte teilt — Radwegnähe wiegt hier also
+  // doppelt so schwer wie Zielorte, Hangneigung und ÖPNV. Die übrigen Gewichte sind Zu-/Abschläge
+  // und stehen für „bis zu w × 100 Punkte" (siehe `weightScale.ts`).
   weights: {
     w_cyclepath: 0.2,
-    w_surface: 0.2,
     w_target: 0.1,
     w_slope: 0.1,
     w_transit: 0.1,
@@ -25,7 +24,6 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   vegetation_direction: 'negative',
   cir_source: 'auto' as const,
   max_cyclepath_dist_m: 50,
-  min_surface_score: 30,
   exclude_carriageways: false,
   intersection_radius_m: 20,
   parken_radius_m: 15,
@@ -61,7 +59,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
   bedarf:
     'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege, ÖPNV, Zielorte, plus ein Zuschlag an Fußgängerzonen und ein Abzug, wo schon Anlagen stehen.',
   bebauung:
-    'Wo lässt sich baulich etwas errichten? Untergrund und Hangneigung bilden den Grund, Vegetation, Kreuzungen und Parkflächen schieben danach Punkte. Gebäude und zu steile oder zu schlechte Böden schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
+    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen und Parkflächen schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
     'Ihre hochgeladenen Flächen greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Damit lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen berücksichtigen.',
 }
@@ -77,8 +75,6 @@ export const FACTOR_HELP: Record<string, string> = {
     'An Ecken, wo eine normale Straße auf eine Fußgängerzone trifft, ist der Bedarf besonders hoch. Der volle Zuschlag liegt rund 5–8 m von der Ecke; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_bestand:
     'Bestehende Fahrradabstellanlagen senken den Bedarf: wo schon geparkt werden kann, braucht es weniger neue Anlagen. Jede Anlage hat einen Einzugskreis (aus der Kapazität, sonst dem Standard-Durchmesser); darin voller Abzug, außerhalb keiner. Das Gewicht bestimmt, wie viele Punkte maximal abgezogen werden.',
-  w_surface:
-    'Der in OpenStreetMap erfasste Belag (Asphalt, Pflaster, Schotter, …) bewertet, wie gut sich die Fläche bebauen lässt. Unter der Schwelle wird die Fläche ganz ausgeschlossen. Das Gewicht bestimmt den Anteil am Grundscore; die Ausschluss-Schwelle gilt auch bei Gewicht 0.',
   w_slope:
     'Die Geländeneigung kommt aus dem Höhenmodell. Flach (bis etwa 2°) ist ideal; ab etwa 8° wird die Fläche ganz ausgeschlossen. Das Gewicht bestimmt den Anteil am Grundscore; der Ausschluss steiler Lagen gilt immer.',
   w_vegetation:
@@ -100,16 +96,12 @@ export const FACTOR_PARAMS: Record<
   w_cyclepath: [{ key: 'max_cyclepath_dist_m', label: 'Max. Distanz (m)', step: 1 }],
   w_fussgaengerzone: [{ key: 'fussgaengerzone_radius_m', label: 'Radius (m)', step: 1 }],
   w_bestand: [{ key: 'bestand_default_diameter_m', label: 'Standard-Durchmesser (m)', step: 1 }],
-  w_surface: [
-    { key: 'min_surface_score', label: 'Min. Untergrund-Score', step: 1, alwaysEditable: true },
-  ],
   w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1 }],
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1 }],
 }
 
 export const WEIGHT_LABELS: Record<string, string> = {
   w_cyclepath: 'Radwegnähe',
-  w_surface: 'Untergrund',
   w_target: 'Zielorte',
   w_slope: 'Hangneigung',
   w_transit: 'ÖPNV',
@@ -129,7 +121,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation'
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
 //   Bedarf   → Radwegnähe, ÖPNV, Zielorte + Modifier Fußgängerzonen (Zuschlag)
 //              und Bestandsanlagen (Abzug)
-//   Bebauung → Untergrund, Hangneigung + Modifier
+//   Bebauung → Hangneigung + Modifier
 //              (Vegetation, Kreuzungen, Parken)
 //
 // Innerhalb der Gruppen trennen wir zusätzlich nach Rechenart, weil beide Arten in scorer.py
@@ -155,7 +147,7 @@ export const WEIGHT_GROUPS: {
   {
     key: 'bebauung',
     label: 'Bebauung',
-    criteria: ['w_surface', 'w_slope'],
+    criteria: ['w_slope'],
     modifiers: [
       { key: 'w_vegetation', direction: 'vegetation' },
       { key: 'w_intersection', direction: 'positive' },

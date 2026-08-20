@@ -18,7 +18,6 @@ type Props = {
 
 const SCORE_LABELS: Record<string, string> = {
   score_radweg: 'Radweg',
-  score_bodenbelag: 'Bodenbelag',
   score_hangneigung: 'Hangneigung',
   score_oepnv: 'ÖPNV',
   score_zielorte: 'Zielorte',
@@ -47,7 +46,7 @@ const SCORE_GROUPS: { label: string; scoreKey: string; criteria: string[]; modif
     {
       label: 'Bebauung',
       scoreKey: 'score_bebauung',
-      criteria: ['score_bodenbelag', 'score_hangneigung'],
+      criteria: ['score_hangneigung'],
       modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken'],
     },
   ]
