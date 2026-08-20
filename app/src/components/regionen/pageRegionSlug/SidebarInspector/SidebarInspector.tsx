@@ -57,8 +57,9 @@ export const SidebarInspector = () => {
   const handleClose = () => {
     setFeaturesParam(null)
     clearInspectorFeatures()
-    // Schließt die Sidebar auch dann, wenn sie gerade die Kandidatenliste zeigt
-    // (die Auswahl selbst bleibt erhalten und wird auf der Karte weiter markiert).
+    // Schließt die Sidebar auch dann, wenn sie gerade die Kandidatenliste zeigt.
+    // Die Auswahl selbst bleibt erhalten, verschwindet aber von der Karte (die
+    // gelbe Markierung hängt an selectActive, siehe CandidateHighlightLayer).
     setCandidateSelectActive(false)
   }
 

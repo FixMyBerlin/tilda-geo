@@ -182,9 +182,15 @@ const UserObstaclesLayer = () => {
 // Store, deshalb eine eigene GeoJSON-Source statt eines Filter-Ausdrucks auf der
 // Vektor-Source – so bleibt die Markierung auch sichtbar, wenn ein Hexagon gerade
 // nicht in den gerenderten Kacheln liegt.
+//
+// Nur sichtbar, während das Auswahl-Werkzeug aktiv ist (selectActive): Toggle-Knopf
+// oder Schließen der Kandidaten-Sidebar setzen selectActive auf false und blenden die
+// Markierung damit aus, ohne die Auswahl selbst zu löschen (siehe PlanningCandidateToggle,
+// SidebarInspector handleClose).
 const CandidateHighlightLayer = () => {
+  const selectActive = usePlanningCandidatesState((s) => s.selectActive)
   const candidates = usePlanningCandidatesState((s) => s.candidates)
-  if (!candidates.length) return null
+  if (!selectActive || !candidates.length) return null
 
   return (
     <Source
