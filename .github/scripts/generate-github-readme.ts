@@ -19,6 +19,7 @@ type Manifest = {
 const START_MARKER = '<!-- GENERATED_ENV_TABLE_START -->'
 const END_MARKER = '<!-- GENERATED_ENV_TABLE_END -->'
 const MANIFEST_PATH = resolve(import.meta.dir, '..', 'env', 'deploy.manifest.json')
+// Listed in /.prettierignore so oxfmt does not pad the generated table.
 const README_PATH = resolve(import.meta.dir, '..', 'README.md')
 
 function readManifest(path: string) {
