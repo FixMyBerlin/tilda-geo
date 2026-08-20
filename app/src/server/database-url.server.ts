@@ -1,16 +1,22 @@
-function getDatabaseConfig() {
-  const host = process.env.DATABASE_HOST
-  const user = process.env.DATABASE_USER
-  const password = process.env.DATABASE_PASSWORD
-  const name = process.env.DATABASE_NAME
+import { databaseEnvSchema } from './envSchema.database'
 
-  if (!host || !user || !password || !name) {
-    throw new Error(
-      'Missing database env. Provide DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME.',
-    )
-  }
+type DatabaseConfig = {
+  host: string
+  user: string
+  password: string
+  name: string
+  port: string
+}
 
-  return { host, user, password, name }
+export function getDatabaseConfig() {
+  const parsed = databaseEnvSchema.parse(process.env)
+  return {
+    host: parsed.DATABASE_HOST,
+    user: parsed.DATABASE_USER,
+    password: parsed.DATABASE_PASSWORD,
+    name: parsed.DATABASE_NAME,
+    port: parsed.DATABASE_PORT,
+  } satisfies DatabaseConfig
 }
 
 function encodeCredential(value: string) {
@@ -30,9 +36,8 @@ function warnIfPasswordNeedsUrlEncoding(password: string) {
 }
 
 export function getBaseDatabaseUrl() {
-  const { host, user, password, name } = getDatabaseConfig()
+  const { host, user, password, name, port } = getDatabaseConfig()
   warnIfPasswordNeedsUrlEncoding(password)
-  const port = process.env.DATABASE_PORT ?? '5432'
   return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
 }
 

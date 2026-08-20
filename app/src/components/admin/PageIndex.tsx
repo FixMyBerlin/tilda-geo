@@ -26,6 +26,7 @@ const items = [
   { to: '/admin/audit-log', label: 'Änderungsverlauf (Audit-Log)' },
   { to: '/admin/api-tokens', label: 'API-Tokens (MCP)' },
   { to: '/admin/processing', label: 'Processing' },
+  { to: '/admin/data-schema', label: 'Data-Schema' },
 ] satisfies { to: InternalPath; label: string }[]
 
 const errorPreviewItems = [

@@ -57,7 +57,7 @@ Create directory if group folder doesn't exist. Ensure sub-folder name follows n
 
 ### 2. Prepare GeoJSON file
 
-Run these **in order** on committed data files. **Never** reproject, round, or pretty-print coordinates in `transform.ts` — use ogr2ogr (2.2–2.3) and oxfmt (2.4) on the files instead.
+Run these **in order** on committed data files. **Never** reproject, round, or pretty-print coordinates in `transform.ts` — use ogr2ogr (2.2–2.3) and oxfmt (2.4) on the files instead. Host GDAL 3.8+ (`brew install gdal`); not required for `bun run dev`.
 
 #### 2.1 Move
 

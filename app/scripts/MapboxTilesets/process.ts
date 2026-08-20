@@ -145,6 +145,7 @@ async function main() {
       fs.writeFileSync(fgbFile, Buffer.from(fgbBuffer))
 
       log.info('  RUN', `tippecanoe → ${mbtilesFile}`)
+      // Host PATH tippecanoe (brew locally). See app/README.md#host-binaries-local-vs-server
       const tippecanoe = Bun.spawnSync(
         [
           'tippecanoe',

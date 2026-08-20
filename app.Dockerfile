@@ -2,9 +2,17 @@
 FROM oven/bun:1 AS base
 
 # TODO: Validate which distro oven/bun is and which gdal is installed there.
-# Debian 13 Trixie (stable) includes GDAL 3.10.3+ (supports gdal vector edit)
+# Usage
+#   - gdal-bin: ogr2ogr for exports.
+#     Reminder: Debian 13 Trixie (stable) ships GDAL 3.10.3. `gdal vector edit` needs 3.11+ (not in Trixie).
+#   - postgresql-client: pg_restore for data-schema Import (Debian metapackage; Trixie default is 17).
+# Important for local dev:
+#   staging and production use these packages in this image; local dev needs host copies.
+#   See app/README.md#host-binaries-local-vs-server for details.
+# Important for Postgres updates:
+#   See data-schema/README.md#postgres-major-versions for details
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gdal-bin curl && \
+    apt-get install -y --no-install-recommends gdal-bin postgresql-client curl && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

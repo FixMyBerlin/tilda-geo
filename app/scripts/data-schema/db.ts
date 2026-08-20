@@ -1,12 +1,13 @@
 import { $ } from 'bun'
+import { assertDataSchemaTableName } from '@/server/dataSchema/dataSchemaS3Keys'
 import {
   POSTGRES_CLI_IMAGE,
   getLocalTargetDatabaseUrl,
   toDockerNetworkUrl,
 } from '../db-pull/db-helpers'
-import { SCHEMA } from './args'
 
 const REQUIRED_ENVIRONMENT = 'development'
+export const SCHEMA = 'data'
 
 export function assertDevelopmentEnvironment() {
   const environment = process.env.ENVIRONMENT?.trim().toLowerCase()
@@ -17,16 +18,8 @@ export function assertDevelopmentEnvironment() {
   }
 }
 
-export function getDatabaseUrl() {
-  return getLocalTargetDatabaseUrl()
-}
-
-export function getDockerDatabaseUrl() {
-  return toDockerNetworkUrl(getDatabaseUrl())
-}
-
-async function runPsql(command: string) {
-  const dockerUrl = getDockerDatabaseUrl()
+export async function runPsql(command: string) {
+  const dockerUrl = toDockerNetworkUrl(getLocalTargetDatabaseUrl())
   const result =
     await $`docker run --rm --add-host=host.docker.internal:host-gateway --entrypoint psql ${POSTGRES_CLI_IMAGE} --tuples-only --no-align --command=${command} ${dockerUrl}`
       .quiet()
@@ -37,16 +30,8 @@ async function runPsql(command: string) {
   return result.stdout.toString().trim()
 }
 
-export async function tableExists(tableName: string) {
-  const sql = `SELECT EXISTS (
-    SELECT 1 FROM information_schema.tables
-    WHERE table_schema = '${SCHEMA}' AND table_name = '${tableName}'
-  );`
-  const raw = await runPsql(sql)
-  return raw === 't'
-}
-
 export async function getRowCount(tableName: string) {
+  assertDataSchemaTableName(tableName)
   const raw = await runPsql(`SELECT count(*)::bigint FROM ${SCHEMA}.${tableName};`)
   const count = Number(raw)
   if (!Number.isFinite(count)) {
