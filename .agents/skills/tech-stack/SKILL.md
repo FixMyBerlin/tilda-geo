@@ -54,13 +54,13 @@ Prefer installed skill names when present; otherwise fetch from git.
 
 ## Runtime and build
 
-- **Runtime / package manager:** [Bun](https://bun.sh) — install policy [bun-install.md](references/bun-install.md) (≥ 1.3.14, global store, Vite dev)
+- **Runtime / package manager:** [Bun](https://bun.sh) — install policy [bun-install.md](references/bun-install.md) (≥ 1.3.14, global store, `bun --bun` for Vite, `.nvmrc` for Prisma/Playwright)
 - **Build:** latest Vite (8+)
 - **Lint / format:** oxlint and oxfmt with fix flags; Prettier-compatible defaults:
   - class sorting, import sorting, `package.json` sorting
   - `printWidth` 100, semicolons `asNeeded`, single quotes
   - `'typescript/switch-exhaustiveness-check': 'error'`
-  - React Compiler: oxlint `react` plugin (correctness rules on by default) + `'react/unsupported-syntax': 'error'`; Vite via `viteReact({ compiler: true })` + `oxc-transform-react` (not Babel / not `eslint-plugin-react-compiler`)
+  - React Compiler: oxlint `react` plugin + `'react/unsupported-syntax': 'error'`; Vite via `viteReact({ compiler: true })` + `oxc-transform-react` (not Babel)
   - Templates: [examples/oxfmt.config.mjs](examples/oxfmt.config.mjs), [examples/oxlint.config.mjs](examples/oxlint.config.mjs)
   - Setup and per-project tuning: [references/oxc-config.md](references/oxc-config.md)
 - **Client browser target:** `browserslist` in `package.json` drives Vite client `build.target` and `eslint-plugin-compat` in oxlint — [references/browser-target.md](references/browser-target.md)
@@ -153,9 +153,9 @@ Turf vs WASM, crates, Vite wiring: skill `rust-wasm-geo`.
 
 ## Dependency updates (Dependabot)
 
-- Weekly Monday 07:00 Europe/Berlin; **one open PR at a time** per ecosystem (`open-pull-requests-limit: 1`).
+- Schedule by project type — **AskQuestion** if unclear. FixMyCity: weekly Monday. Private OSS and Astro: first Friday of the month. Same template. Details: [dependabot.md](references/dependabot.md).
+- **One open PR at a time** per ecosystem (`open-pull-requests-limit: 1`).
 - Template: [examples/dependabot.yml.template](examples/dependabot.yml.template)
-- Grouping, monorepo tuning, and ignores: [references/dependabot.md](references/dependabot.md)
 - **Reviewing and merging PRs:** skill `review-dependabot` (changelog triage, risk tiers, rebase merge)
 
 ## CI (GitHub Actions)

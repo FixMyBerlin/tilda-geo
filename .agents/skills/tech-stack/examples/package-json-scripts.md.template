@@ -43,7 +43,7 @@ Use `&&` only inside a single step when the shell must run multiple commands as 
 ```json
 // ✅ Group + steps
 "dev": "bun run --parallel dev:*",
-"dev:vite": "vite dev",
+"dev:vite": "FORCE_COLOR=1 bun --bun vite dev --host 127.0.0.1 --strictPort",
 
 "seed": "bun run --sequential seed:*",
 "seed:1ensure-env": "bun scripts/predev/ensureEnv.ts",

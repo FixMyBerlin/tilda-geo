@@ -1,6 +1,7 @@
 # Copy to .github/dependabot.yml on scaffold.
 # Source: tilda-geo — https://github.com/FixMyBerlin/tilda-geo/blob/develop/.github/dependabot.yml
-# Tune directories, groups, and ignore rules for your layout (see references/dependabot.md).
+# Schedule here is FixMyCity weekly. Private OSS / Astro: first-Friday cron — references/dependabot.md.
+# Tune directories, groups, and ignore rules for your layout.
 version: 2
 updates:
   - package-ecosystem: bun

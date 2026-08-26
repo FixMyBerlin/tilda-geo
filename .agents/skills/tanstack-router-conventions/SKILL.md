@@ -50,6 +50,8 @@ Stack conventions for **TanStack Router** apps (Vite SPA or the router layer of 
 
 **Loader vs Query:** Shared, invalidatable, multi-route data → `*QueryOptions` + `ensureQueryData` in loader + `useSuspenseQuery` in UI. One-off page data → loader return value + `useLoaderData`.
 
+**Multi-query joins:** Prefer a server/API join. On the client, default to composing in a wrapper hook; only put derivation in `queryFn` / `fetchQuery` when many consumers share an expensive join — [router-and-query.md](references/router-and-query.md#derived--combined-query-data).
+
 **Search writes:** Prefer `replace: true` for filters/toggles; set keys to `undefined` to clear; use a route-local `updateSearch` wrapper — [router-search-serialization.md](references/router-search-serialization.md).
 
 ## Related skills

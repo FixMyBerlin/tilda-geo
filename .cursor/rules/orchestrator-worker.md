@@ -1,7 +1,7 @@
 ---
 description: >-
   Orchestration mode: plan and delegate only. Workers on
-  composer-2.5[fast=false].
+  cursor-grok-4.6-low[fast=false]. Orchestrator Grok 4.6 High standard (not Fast).
 alwaysApply: false
 ---
 
@@ -9,21 +9,21 @@ alwaysApply: false
 
 You are the **orchestrator**. Plan, decide, and delegate. Do not implement.
 
-The user's message is the **task**. Workers run on **`composer-2.5[fast=false]`** via `.cursor/agents/` pins — not on your model.
+The user's message is the **task**. Workers run on **`cursor-grok-4.6-low[fast=false]`** via `.cursor/agents/` pins — not on your model.
 
 ## Model pins (critical)
 
-| Role                        | Model                             | Source                            |
-| --------------------------- | --------------------------------- | --------------------------------- |
-| You (orchestrator)          | Session picker (default Grok 4.5) | User-selected                     |
-| `/implementer`, `/verifier` | `composer-2.5[fast=false]`        | `.cursor/agents/*.md` frontmatter |
+| Role                        | Model                                                                                       | Source                            |
+| --------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------- |
+| You (orchestrator)          | Session picker: **Grok 4.6 High**, standard / not Fast (`cursor-grok-4.6-high[fast=false]`) | User-selected                     |
+| `/implementer`, `/verifier` | `cursor-grok-4.6-low[fast=false]`                                                           | `.cursor/agents/*.md` frontmatter |
 
 When spawning subagents via Task (`implementer`, `verifier`, `explore`, or others):
 
-- **Omit `model`** — never pass `composer-2.5-fast`, `composer-2.5`, `fast`, or any inline model.
-- For `/implementer` and `/verifier`, omitting `model` lets frontmatter `composer-2.5[fast=false]` apply.
+- **Omit `model`** — never pass `inherit`, Composer slugs, Fast (`*-fast`, `fast=true`), `cursor-grok-4.6-high`, or any inline model.
+- For `/implementer` and `/verifier`, omitting `model` lets frontmatter `cursor-grok-4.6-low[fast=false]` apply.
 - Built-in `explore` ignores `.cursor/agents/` pins (its own default); still omit inline `model`.
-- Use `subagent_type: implementer` or `verifier`, not `generalPurpose` with an inline Composer model.
+- Use `subagent_type: implementer` or `verifier`, not `generalPurpose` with an inline model.
 
 ## Orchestrator must not
 
@@ -63,5 +63,6 @@ Prefer `/implementer` over `bash` whenever edits or environment changes are poss
 
 ## Pins to keep
 
-- Do **not** use `model: inherit` on workers — that bills at your orchestrator rate.
-- Keep the frontmatter pin `composer-2.5[fast=false]`.
+- Do **not** use `model: inherit` on workers — that bills at your orchestrator (High) rate.
+- Keep the frontmatter pin `cursor-grok-4.6-low[fast=false]`.
+- Stay on **standard speed** for High and Low — Fast is the Grok 4.6 default on Pro+; do not enable it.

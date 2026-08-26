@@ -28,14 +28,14 @@ Type-safe React = compile-time guarantees. This skill covers **TypeScript patter
 
 ## FMC stack (required)
 
-| Requirement        | Rule                                                                                                                                                                                                                                                              |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **React 19**       | Target 19.x; no `forwardRef` / `useFormState` in new code                                                                                                                                                                                                         |
-| **React Compiler** | Enabled in the app build — auto-memoization is the default                                                                                                                                                                                                        |
-| **Lint**           | **Oxlint** `react` plugin — native React Compiler rules (correctness on by default; set `'react/unsupported-syntax': 'error'`). No `eslint-plugin-react-hooks` jsPlugin. See [Oxc React Compiler Support](https://oxc.rs/blog/2026-08-18-react-compiler-support). |
-| **Memoization**    | Do **not** add `useMemo` / `useCallback` / `memo` by default; add only when profiling or a lint rule requires it                                                                                                                                                  |
-| **TanStack Start** | Server I/O and mutations → `tanstack-start-conventions` (this skill covers component typing only)                                                                                                                                                                 |
-| **Data fetching**  | Route loaders + React Query — not `useEffect` fetch (see `tanstack-router-conventions`)                                                                                                                                                                           |
+| Requirement        | Rule                                                                                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **React 19**       | Target 19.x; no `forwardRef` / `useFormState` in new code                                                                                            |
+| **React Compiler** | Enabled in the app build — auto-memoization is the default                                                                                           |
+| **Lint**           | **Oxlint** `react` plugin — native Compiler rules on by default, plus `'react/unsupported-syntax': 'error'`; no `eslint-plugin-react-hooks` jsPlugin |
+| **Memoization**    | Do **not** add `useMemo` / `useCallback` / `memo` by default; add only when profiling or a lint rule requires it                                     |
+| **TanStack Start** | Server I/O and mutations → `tanstack-start-conventions` (this skill covers component typing only)                                                    |
+| **Data fetching**  | Route loaders + React Query — not `useEffect` fetch (see `tanstack-router-conventions`)                                                              |
 
 Docs: [React Compiler](https://react.dev/learn/react-compiler.md) · [Rules of React](https://react.dev/reference/rules.md) · [Oxc React Compiler Support](https://oxc.rs/blog/2026-08-18-react-compiler-support)
 
@@ -50,6 +50,7 @@ Docs: [React Compiler](https://react.dev/learn/react-compiler.md) · [Rules of R
 | `createServerFn`, server mutations      | `tanstack-start-conventions` → [server-functions.md](../tanstack-start-conventions/references/server-functions.md) |
 | Client stores                           | `zustand-state-management`                                                                                         |
 | URL state (prefer router search)        | `tanstack-router-conventions`                                                                                      |
+| Semantic HTML (div/span leftovers)      | `unslop-code` → [semantic-html.md](../unslop-code/references/semantic-html.md)                                     |
 
 ## Component props
 
@@ -305,6 +306,7 @@ const { tab } = Route.useSearch()
 **Always**
 
 - `ComponentPropsWithoutRef` for native element extension
+- Prefer semantic HTML over generic `div`/`span` when the meaning is clear — `unslop-code` → [semantic-html.md](../unslop-code/references/semantic-html.md)
 - Specific `React.*Event<HTMLElement>` types
 - Explicit `useState` when inference fails (null, `[]`, unions)
 - Discriminated unions for variant props

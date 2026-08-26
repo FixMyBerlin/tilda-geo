@@ -33,12 +33,13 @@ Folder layout, thin routes, Layout/Page naming, and test layout: [app-structure.
 
 0. **Prerequisite:** skill `tanstack-router-conventions` (search serialization, UI `validateSearch`, `?map=`, router + Query, TypeScript, devtools)
 1. [app-structure.md](references/app-structure.md) — `src` folders, thin routes, Layout/Page naming, tests
-2. [execution-model.md](references/execution-model.md) — isomorphic execution, loaders on soft nav, server fn boundary
-3. [client-server-boundaries.md](references/client-server-boundaries.md) — file suffixes, import protection, `beforeLoad` vs `loader`
-4. [server-functions.md](references/server-functions.md) — `createServerFn` API, validation, form submit, invalidation
-5. [params-search-api-routes.md](references/params-search-api-routes.md) — Zod in API `GET` (no route-level `validateSearch`)
-6. [selective-ssr.md](references/selective-ssr.md) — `ssr: true` / `'data-only'` / `false` (handler-only API routes: `false`)
-7. [server-components.md](references/server-components.md) — experimental RSC: FMC conventions, official doc map, selective SSR pairing
+2. [local-runtime.md](references/local-runtime.md) — `bun --bun` for Vite + Nitro so local SSR matches production Bun
+3. [execution-model.md](references/execution-model.md) — isomorphic execution, loaders on soft nav, server fn boundary
+4. [client-server-boundaries.md](references/client-server-boundaries.md) — file suffixes, import protection, `beforeLoad` vs `loader`
+5. [server-functions.md](references/server-functions.md) — `createServerFn` API, validation, form submit, invalidation
+6. [params-search-api-routes.md](references/params-search-api-routes.md) — Zod in API `GET` (no route-level `validateSearch`)
+7. [selective-ssr.md](references/selective-ssr.md) — `ssr: true` / `'data-only'` / `false` (handler-only API routes: `false`)
+8. [server-components.md](references/server-components.md) — experimental RSC: FMC conventions, official doc map, selective SSR pairing
 
 Auth-specific flows: skill `tanstack-start-auth`.
 
@@ -52,6 +53,7 @@ Auth-specific flows: skill `tanstack-start-auth`.
 | API route files       | No `server-only` import marker on the route file; server-only logic inside handlers or tree-shaken imports                                                                            |
 | API search params     | Do **not** use `validateSearch` on API routes; `safeParse` in `GET` from `request.url` with explicit 4xx JSON — [params-search-api-routes.md](references/params-search-api-routes.md) |
 | SSR                   | Set `ssr` explicitly on every route; UI default full SSR (`true`); handler-only API routes: `false`; map-heavy UI: `data-only`                                                        |
+| Local Bun runtime     | Vite `dev` and Nitro `start`/`preview` use `bun --bun` so SSR matches production `preset: bun` — [local-runtime.md](references/local-runtime.md)                                      |
 | Router search / Query | Owned by `tanstack-router-conventions` — Start apps still **must** follow that skill’s `parseSearch` / `stringifySearch` and loader + Query rules                                     |
 
 ## Quick decisions
@@ -66,9 +68,11 @@ Auth-specific flows: skill `tanstack-start-auth`.
 
 ## Related skills
 
-| Topic             | Skill                         |
-| ----------------- | ----------------------------- |
-| Router (required) | `tanstack-router-conventions` |
-| Auth / session    | `tanstack-start-auth`         |
-| Zustand           | `zustand-state-management`    |
-| nuqs (Next.js)    | `nuqs`                        |
+| Topic                              | Skill                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Router (required)                  | `tanstack-router-conventions`                                                                    |
+| Auth / session                     | `tanstack-start-auth`                                                                            |
+| Bun install / nvm                  | `tech-stack` → bun-install                                                                       |
+| Zustand                            | `zustand-state-management`                                                                       |
+| nuqs (Next.js)                     | `nuqs`                                                                                           |
+| Leftover placement after refactors | `unslop-code` Phase 6 → [component-location.md](../unslop-code/references/component-location.md) |
