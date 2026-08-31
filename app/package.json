@@ -215,9 +215,9 @@
     "oxfmt": "0.65.0",
     "oxlint": "1.79.0",
     "oxlint-tsgolint": "7.0.2001",
-    "papaparse": "5.7.0",
+    "papaparse": "^5.7.0",
     "parse-gitignore": "2.0.0",
-    "picomatch": "4.0.7",
+    "picomatch": "^4.0.7",
     "preview-email": "3.3.0",
     "prisma": "7.8.0",
     "react-email": "6.9.3",
@@ -225,7 +225,7 @@
     "spritesmith": "3.5.1",
     "tailwindcss": "4.3.2",
     "typescript": "7.0.2",
-    "vite": "^8.1.5",
+    "vite": "8.2.2",
     "vitest": "4.1.10"
   },
   "optionalDependencies": {
