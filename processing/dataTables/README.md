@@ -1,8 +1,7 @@
 # About
 
-We have a schema `data` that holds external datasets for special purpose processing that requires the data to be in the database.
-All static, external data is handled by the "static data" tooling in tilda-geo.
+This folder creates the Postgres `data` schema (`CREATE SCHEMA IF NOT EXISTS data`). Processing SQL reads `data.*` from there.
 
-## UNUSED
+[`dataTables.ts`](dataTables.ts) also runs at processing initialize (`initializeCustomFunctionsDataTables`). Put custom SQL functions here when processing needs them in the database. Nothing is registered there yet.
 
-This table is unused ATM.
+The `data.*` tables themselves are not owned here. Specs, dumps, and how to load them are the [data-schema](../../data-schema/README.md) pipeline (`add-db-data-table` skill). Per-table docs live in each `spec.yaml` (`source.documentation`, `consumedBy`) and on `/admin/data-schema`. Map GeoJSON/tiles are static datasets, not this schema.
