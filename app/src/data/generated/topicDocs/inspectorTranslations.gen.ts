@@ -462,6 +462,12 @@ const data = {
   'atlas_bikelanes--traffic_sign=none': 'Unbeschildert',
   'atlas_bikelanes--tunnel--key': 'Tunnel',
   'atlas_bikelanes--tunnel=yes': 'Ja',
+  'atlas_bikelanes--width_confidence--key': 'Konfidenz Breite',
+  'atlas_bikelanes--width_confidence=high': 'Direkt gemessen',
+  'atlas_bikelanes--width_confidence=high--description': 'Wert stammt aus dem OSM-Tag `width`.',
+  'atlas_bikelanes--width_confidence=low': 'Geschätzt',
+  'atlas_bikelanes--width_confidence=low--description':
+    'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
   'atlas_bikelanes--width_effective--key': 'Effektive Breite',
   'atlas_bikelanes--width_source--key': 'Quelle Breite',
   'atlas_bikelanes--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1444,6 +1450,12 @@ const data = {
   'atlas_roads--traffic_sign=none': 'Unbeschildert',
   'atlas_roads--tunnel--key': 'Tunnel',
   'atlas_roads--tunnel=yes': 'Ja',
+  'atlas_roads--width_confidence--key': 'Konfidenz Breite',
+  'atlas_roads--width_confidence=high': 'Direkt gemessen',
+  'atlas_roads--width_confidence=high--description': 'Wert stammt aus dem OSM-Tag `width`.',
+  'atlas_roads--width_confidence=low': 'Geschätzt',
+  'atlas_roads--width_confidence=low--description':
+    'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
   'atlas_roads--width_effective--key': 'Effektive Breite',
   'atlas_roads--width_source--key': 'Quelle Breite',
   'atlas_roads--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1733,6 +1745,13 @@ const data = {
   'atlas_roadsPathClasses--todos--key': 'Todo-Liste',
   'atlas_roadsPathClasses--traffic_sign--key': 'Beschilderung',
   'atlas_roadsPathClasses--traffic_sign=none': 'Unbeschildert',
+  'atlas_roadsPathClasses--width_confidence--key': 'Konfidenz Breite',
+  'atlas_roadsPathClasses--width_confidence=high': 'Direkt gemessen',
+  'atlas_roadsPathClasses--width_confidence=high--description':
+    'Wert stammt aus dem OSM-Tag `width`.',
+  'atlas_roadsPathClasses--width_confidence=low': 'Geschätzt',
+  'atlas_roadsPathClasses--width_confidence=low--description':
+    'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht geparst werden konnte.',
   'atlas_roadsPathClasses--width_source--key': 'Quelle Breite',
   'atlas_roadsPathClasses--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
   'atlas_roadsPathClasses--width_source=ARCore':
