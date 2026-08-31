@@ -217,7 +217,7 @@
     "oxlint-tsgolint": "7.0.2001",
     "papaparse": "5.7.0",
     "parse-gitignore": "2.0.0",
-    "picomatch": "^4.0.5",
+    "picomatch": "4.0.7",
     "preview-email": "3.2.0",
     "prisma": "7.8.0",
     "react-email": "6.9.0",
