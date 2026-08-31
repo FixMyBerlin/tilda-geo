@@ -118,7 +118,7 @@
         "oxfmt": "0.65.0",
         "oxlint": "1.79.0",
         "oxlint-tsgolint": "7.0.2001",
-        "papaparse": "^5.5.4",
+        "papaparse": "5.7.0",
         "parse-gitignore": "2.0.0",
         "picomatch": "^4.0.5",
         "preview-email": "3.2.0",
@@ -2350,7 +2350,7 @@
 
     "p-wait-for": ["p-wait-for@3.2.0", "", { "dependencies": { "p-timeout": "^3.0.0" } }, "sha512-wpgERjNkLrBiFmkMEjuZJEWKKDrNfHCKA1OhyN1wg1FrLkULbviEy6py1AyJUgZ72YWFbZ38FIpnqvVqAlDUwA=="],
 
-    "papaparse": ["papaparse@5.5.4", "", {}, "sha512-SwzWD9gl/ElwYLCI0nUja1mFJzjq2D8ziShfNBa7zCHzkOozeOGDwHWQ+tvCzEZcewecWZ5U7kUopDnG+DFYEQ=="],
+    "papaparse": ["papaparse@5.7.0", "", {}, "sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA=="],
 
     "parse-data-uri": ["parse-data-uri@0.2.0", "", { "dependencies": { "data-uri-to-buffer": "0.0.3" } }, "sha512-uOtts8NqDcaCt1rIsO3VFDRsAfgE4c6osG4d9z3l4dCBlxYFzni6Di/oNU270SDrjkfZuUvLZx1rxMyqh46Y9w=="],
 
