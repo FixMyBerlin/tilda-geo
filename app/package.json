@@ -102,7 +102,7 @@
     "prepare": "cd .. && husky app/.husky"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.1092.0",
+    "@aws-sdk/client-s3": "3.1118.0",
     "@better-upload/client": "^3.0.19",
     "@better-upload/server": "^3.0.19",
     "@date-fns/tz": "1.5.0",
