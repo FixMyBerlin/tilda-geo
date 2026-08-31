@@ -142,7 +142,7 @@
     "caniuse-lite": "^1.0.30001806",
     "crossws": "0.4.10",
     "date-fns": "4.4.0",
-    "dompurify": "3.4.12",
+    "dompurify": "3.4.13",
     "es-toolkit": "^1.49.0",
     "geojson": "0.5.0",
     "h3": "^2.0.1-rc.22",
