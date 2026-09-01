@@ -1,17 +1,38 @@
-import { MAX_USER_GEOJSON_BYTES, parseUserGeojson } from '@/lib/planningUserGeojson'
+import {
+  MAX_USER_GEOJSON_BYTES,
+  MAX_USER_GEOJSON_FEATURES,
+  parseUserGeojson,
+} from '@/lib/planningUserGeojson'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { GeoJsonUploadField } from './GeoJsonUpload'
 import { SegmentedChoice } from './SegmentedChoice'
 import { ModifierSlider } from './WeightSlider'
 
-const MODES = [
-  ['bonus', 'Bonus'],
-  ['penalty', 'Abzug'],
-  ['exclude_inside', 'Ausschluss innen'],
-  ['exclude_outside', 'Ausschluss außen'],
+/** `[value, label, tooltip]` — die Erklärung erscheint als Info-Icon auf dem jeweiligen Button. */
+export const USER_GEOJSON_MODES = [
+  [
+    'bonus',
+    'Bonus',
+    'Erhöht den Score innerhalb der hochgeladenen Fläche um die eingestellte Stärke.',
+  ],
+  [
+    'penalty',
+    'Abzug',
+    'Senkt den Score innerhalb der hochgeladenen Fläche um die eingestellte Stärke.',
+  ],
+  [
+    'exclude_inside',
+    'Ausschluss innen',
+    'Schließt die hochgeladene Fläche komplett von der Suche aus, z. B. für Tabuzonen.',
+  ],
+  [
+    'exclude_outside',
+    'Ausschluss außen',
+    'Nur die hochgeladene Fläche bleibt zulässig, alles andere wird ausgeschlossen, z. B. für erlaubte Zonen.',
+  ],
 ] as const
 
-export type UserGeojsonMode = (typeof MODES)[number][0]
+export type UserGeojsonMode = (typeof USER_GEOJSON_MODES)[number][0]
 
 export type UserObstaclesConfig = Pick<
   FactorConfig,
@@ -29,6 +50,7 @@ export const UserObstaclesField = ({
   setUserGeojsonMode,
   readOnly = false,
   showWeight = true,
+  showModePicker = true,
 }: {
   config: UserObstaclesConfig
   /** Frühere Uploads werden nur in der Region wieder vorgeschlagen, in der sie entstanden. */
@@ -39,6 +61,9 @@ export const UserObstaclesField = ({
   readOnly?: boolean
   /** Gewicht-Slider nur in der Varianten-Faktoransicht; am Planungsgebiet entfällt er. */
   showWeight?: boolean
+  /** Modus (Bonus/Abzug/Ausschluss) wird in der Faktoren-Auswahl gewählt, nicht am
+   *  Planungsgebiet — dort bleibt nur der Upload. */
+  showModePicker?: boolean
 }) => {
   const geojson = config.user_geojson as GeoJSON.FeatureCollection | undefined
   const mode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
@@ -50,16 +75,23 @@ export const UserObstaclesField = ({
   return (
     <div className="space-y-1">
       {geojson ? (
-        <div className="flex items-center justify-between rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs">
-          <span className="text-green-700">✓ {featureCount} Objekt(e) geladen</span>
-          {!readOnly && (
-            <button
-              type="button"
-              onClick={() => setUserGeojson(undefined)}
-              className="text-gray-500 hover:text-red-600"
-            >
-              Entfernen
-            </button>
+        <div className="rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-green-700">✓ {featureCount} Objekt(e) geladen</span>
+            {!readOnly && (
+              <button
+                type="button"
+                onClick={() => setUserGeojson(undefined)}
+                className="text-gray-500 hover:text-red-600"
+              >
+                Entfernen
+              </button>
+            )}
+          </div>
+          {!showModePicker && (
+            <p className="mt-1 text-gray-500">
+              Umgang mit der Datei (Bonus/Abzug/Ausschluss) bei den Faktoren einstellen.
+            </p>
           )}
         </div>
       ) : (
@@ -75,16 +107,17 @@ export const UserObstaclesField = ({
                 <>
                   Eigene GeoJSON-Datei hierher ziehen
                   <br />
-                  oder klicken (max. 5 MB)
+                  oder klicken (max. 5 MB, {MAX_USER_GEOJSON_FEATURES.toLocaleString('de-DE')}{' '}
+                  Objekte)
                 </>
               }
             />
           </div>
         )
       )}
-      {geojson && (
+      {geojson && showModePicker && (
         <SegmentedChoice
-          options={MODES}
+          options={USER_GEOJSON_MODES}
           value={mode}
           onChange={setUserGeojsonMode}
           disabled={readOnly}

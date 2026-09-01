@@ -9,7 +9,12 @@ import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import { GeoJsonUpload } from './GeoJsonUpload'
 import { InfoTooltip } from './InfoTooltip'
-import { GROUP_HELP, PLANNING_USE_CASES, type PlanningUseCase } from './planningDefaults'
+import {
+  GROUP_HELP,
+  PLANNING_USE_CASES,
+  SHOW_PLANNING_USE_CASE_UI,
+  type PlanningUseCase,
+} from './planningDefaults'
 import {
   planningNumberInputClass,
   planningPanelTitleInputClass,
@@ -150,38 +155,47 @@ export const AreaFormFields = ({
       </label>
       {titleMissing && <p className="text-xs text-red-600">Bitte einen Namen angeben.</p>}
 
-      <div className="space-y-2">
-        <div className="text-xs font-semibold text-gray-700">Art & Größe der gesuchten Fläche</div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {PLANNING_USE_CASES.map(({ key, label }) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => {
-                onUseCaseChange(key)
-                const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
-                if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
-              }}
-              className={planningRadioButtonClass(state.useCase === key)}
-            >
-              {label}
-            </button>
-          ))}
+      {/* TODO Flächenfinder: Auswahl „Art & Größe der gesuchten Fläche“ ist über
+          `SHOW_PLANNING_USE_CASE_UI` (planningDefaults.ts) ausgeblendet, weil sie bisher keinen
+          Effekt auf Score oder Flächensuche hat. Der Block bleibt bewusst stehen und wird durch
+          Umstellen des Flags wieder sichtbar; die Werte laufen weiterhin über die Defaults der
+          aufrufenden Formulare (AreaWizard/AreaEditor) und werden gespeichert. */}
+      {SHOW_PLANNING_USE_CASE_UI && (
+        <div className="space-y-2">
+          <div className="text-xs font-semibold text-gray-700">
+            Art & Größe der gesuchten Fläche
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {PLANNING_USE_CASES.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => {
+                  onUseCaseChange(key)
+                  const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
+                  if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
+                }}
+                className={planningRadioButtonClass(state.useCase === key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+            <span>Flächengröße (m²)</span>
+            <input
+              type="number"
+              min={0}
+              step={1}
+              value={state.areaSizeM2 ?? ''}
+              onChange={(e) =>
+                onAreaSizeM2Change(e.target.value === '' ? null : Number(e.target.value))
+              }
+              className={planningNumberInputClass}
+            />
+          </label>
         </div>
-        <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
-          <span>Flächengröße (m²)</span>
-          <input
-            type="number"
-            min={0}
-            step={1}
-            value={state.areaSizeM2 ?? ''}
-            onChange={(e) =>
-              onAreaSizeM2Change(e.target.value === '' ? null : Number(e.target.value))
-            }
-            className={planningNumberInputClass}
-          />
-        </label>
-      </div>
+      )}
 
       <WizardStep number={1} title={geometryStepTitle}>
         <div className="flex flex-col gap-1 text-xs text-gray-600">
@@ -264,6 +278,7 @@ export const AreaFormFields = ({
               setUserGeojson={onUserGeojsonChange}
               setUserGeojsonMode={onUserGeojsonModeChange}
               showWeight={false}
+              showModePicker={false}
             />
           </div>
         </div>

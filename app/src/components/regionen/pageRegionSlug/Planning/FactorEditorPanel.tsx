@@ -1,11 +1,18 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { twJoin } from 'tailwind-merge'
+import { toastError } from '@/components/shared/toast/toastError'
 import type { FactorConfig, VariantFactorConfig } from '@/server/planning/planning.functions'
-import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
-import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
+import { updatePlanningAreaFn, updatePlanningVariantFn } from '@/server/planning/planning.functions'
+import {
+  planningAreaQueryOptions,
+  planningVariantQueryOptions,
+} from '@/server/planning/planningQueryOptions'
+import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
+import { factorFingerprint, factorsDiffer } from './factorFingerprint'
 import { InfoTooltip } from './InfoTooltip'
 import {
   DEFAULT_FACTOR_TEMPLATE,
@@ -17,6 +24,7 @@ import {
 } from './planningDefaults'
 import { planningNumberInputClass } from './planningPanelStyles'
 import { SegmentedChoice } from './SegmentedChoice'
+import { USER_GEOJSON_MODES, type UserGeojsonMode } from './UserObstaclesField'
 import {
   criterionShares,
   groupShare,
@@ -86,6 +94,7 @@ const FactorFields = ({
   setWeights,
   setField,
   setVegetationDirection,
+  setUserGeojsonMode,
   onReset,
   readOnly = false,
 }: {
@@ -93,11 +102,13 @@ const FactorFields = ({
   setWeights: (weights: Record<string, number>) => void
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
+  setUserGeojsonMode: (mode: UserGeojsonMode) => void
   onReset?: () => void
   readOnly?: boolean
 }) => {
   const weights = config.weights ?? {}
   const vegetationDirection = config.vegetation_direction ?? 'negative'
+  const eigendatenMode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
   const setWeightFromWeights = (key: string, value: number) =>
     setWeights({ ...weights, [key]: value })
   const shares = criterionShares(weights)
@@ -212,6 +223,36 @@ const FactorFields = ({
         </p>
       </div>
 
+      {config.user_geojson != null && (
+        <div>
+          <div className={groupHeadlineClass}>
+            <span className="flex items-center gap-1">
+              Eigene Daten
+              <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
+            </span>
+          </div>
+          <div className="mt-1">
+            <SegmentedChoice
+              options={USER_GEOJSON_MODES}
+              value={eigendatenMode}
+              onChange={setUserGeojsonMode}
+              disabled={readOnly}
+              className="grid grid-cols-2 gap-1.5"
+            />
+          </div>
+          {(eigendatenMode === 'bonus' || eigendatenMode === 'penalty') && (
+            <ModifierSlider
+              label="Stärke"
+              weight={weights.w_eigendaten}
+              direction={eigendatenMode === 'penalty' ? 'negative' : 'positive'}
+              onChange={(value) => setWeightFromWeights('w_eigendaten', value)}
+              readOnly={readOnly}
+              info={<FactorInfo factorKey="w_eigendaten" />}
+            />
+          )}
+        </div>
+      )}
+
       <div>
         <div className={groupHeadlineClass}>
           <span>Allgemein</span>
@@ -252,22 +293,37 @@ const FactorFields = ({
   )
 }
 
-/** Edits a variant's factorConfig. Read-only while a job is in flight. */
+/** Wie lange nach der letzten Reglerbewegung gewartet wird, bevor gespeichert wird. */
+const AUTOSAVE_DELAY_MS = 700
+
+/**
+ * Edits a variant's factorConfig. Read-only while a job is in flight.
+ *
+ * Änderungen speichern sich selbst (siehe Auto-Save unten) — es gibt keinen Speichern-Button.
+ * `lastRunConfig` ist der eingefrorene Faktorenstand des letzten Laufs
+ * (`PlanningRun.factorConfigSnapshot`) und dient als Bezugspunkt für „Änderungen verwerfen".
+ */
 export const FactorEditorPanel = (props: {
   variantId: number
+  areaId: number
   factorConfig: FactorConfig
+  lastRunConfig?: FactorConfig | null
   readOnly?: boolean
   defaultOpen?: boolean
 }) => <FactorEditorPanelForm key={props.variantId} {...props} />
 
 const FactorEditorPanelForm = ({
   variantId,
+  areaId,
   factorConfig,
+  lastRunConfig,
   readOnly = false,
   defaultOpen = true,
 }: {
   variantId: number
+  areaId: number
   factorConfig: FactorConfig
+  lastRunConfig?: FactorConfig | null
   readOnly?: boolean
   defaultOpen?: boolean
 }) => {
@@ -275,6 +331,10 @@ const FactorEditorPanelForm = ({
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
   const [open, setOpen] = useState(defaultOpen)
   const prevReadOnly = useRef(readOnly)
+  const setFactorSavePending = usePlanningBoundaryState((s) => s.setFactorSavePending)
+  // Fingerprint des Stands, der zuletzt an den Server geschickt wurde — der Vergleich mit dem
+  // aktuellen Entwurf steuert Auto-Save, Verwerfen-Button und die Sperre von „Neu berechnen".
+  const [savedFingerprint, setSavedFingerprint] = useState(() => factorFingerprint(factorConfig))
 
   useEffect(() => {
     if (!prevReadOnly.current && readOnly) setOpen(false)
@@ -295,17 +355,51 @@ const FactorEditorPanelForm = ({
   }
 
   const mutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (next: FactorConfig) =>
       updatePlanningVariantFn({
         data: {
           variantId,
           // `min_area_m2` wird außerhalb dieses Formulars (Flächensuche-Filter) gepflegt —
           // immer der frische Prop-Wert, damit der lokale Entwurf ihn nicht zurückdreht.
-          factorConfig: toVariantConfig({ ...config, min_area_m2: factorConfig.min_area_m2 }),
+          factorConfig: toVariantConfig({ ...next, min_area_m2: factorConfig.min_area_m2 }),
         },
       }),
-    onSuccess: () => queryClient.invalidateQueries(planningVariantQueryOptions(variantId)),
+    onSuccess: () => {
+      toast.success('Faktoren gespeichert', { id: 'planning-factors-saved' })
+      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+    },
+    onError: (error) => {
+      // Fingerprint verwerfen: der Server hat den Stand nicht — die nächste Änderung soll wieder
+      // einen vollständigen Speicherversuch auslösen, und „Neu berechnen" bleibt gesperrt.
+      setSavedFingerprint('')
+      toastError(error, 'Faktoren konnten nicht gespeichert werden')
+    },
   })
+
+  const { mutate } = mutation
+  const save = useCallback(
+    (next: FactorConfig) => {
+      setSavedFingerprint(factorFingerprint(next))
+      mutate(next)
+    },
+    [mutate],
+  )
+
+  const unsavedFactors = factorFingerprint(config) !== savedFingerprint
+
+  // Auto-Save: jede Faktorenänderung speichert sich nach kurzer Ruhepause von selbst. Der Timer
+  // fasst das Ziehen eines Reglers zu einem einzigen Schreibvorgang zusammen.
+  useEffect(() => {
+    if (readOnly || !unsavedFactors) return
+    const timeout = setTimeout(() => save(config), AUTOSAVE_DELAY_MS)
+    return () => clearTimeout(timeout)
+  }, [config, readOnly, unsavedFactors, save])
+
+  // Solange etwas ungespeichert ist oder gerade geschrieben wird, darf keine Berechnung starten.
+  useEffect(() => {
+    setFactorSavePending(unsavedFactors || mutation.isPending)
+    return () => setFactorSavePending(false)
+  }, [unsavedFactors, mutation.isPending, setFactorSavePending])
 
   const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
 
@@ -314,6 +408,23 @@ const FactorEditorPanelForm = ({
 
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
+
+  // `user_geojson_mode` gehört zum Planungsgebiet (nicht zur Variante, siehe `toVariantConfig`
+  // oben) — er geht deshalb an eine eigene Mutation und wirkt auf alle Varianten dieses
+  // Planungsgebiets, statt wie die Gewichte über den Auto-Save der Variante zu laufen.
+  const eigendatenModeMutation = useMutation({
+    mutationFn: (mode: UserGeojsonMode) =>
+      updatePlanningAreaFn({ data: { areaId, userGeojson: undefined, userGeojsonMode: mode } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
+      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+    },
+  })
+
+  const setUserGeojsonMode = (mode: UserGeojsonMode) => {
+    setConfig((c) => ({ ...c, user_geojson_mode: mode }))
+    eigendatenModeMutation.mutate(mode)
+  }
 
   const resetWeightsToDefaults = () => {
     setConfig((c) => ({
@@ -325,6 +436,23 @@ const FactorEditorPanelForm = ({
       use_case: c.use_case,
       area_size_m2: c.area_size_m2,
     }))
+  }
+
+  // Bezugspunkt für „Änderungen verwerfen": der Faktorenstand, mit dem der letzte Lauf gerechnet
+  // hat. Vor dem ersten Lauf gibt es keinen Snapshot — dann gilt der Stand beim Öffnen der
+  // Variante (danach bleibt nur „Auf Standardwerte zurücksetzen").
+  const [openedWithConfig] = useState(factorConfig)
+  const discardBase = lastRunConfig ?? openedWithConfig
+  const canDiscard = factorsDiffer(config, discardBase)
+
+  const discardChanges = () => {
+    const restored: FactorConfig = {
+      ...config,
+      ...toVariantConfig(discardBase),
+      min_area_m2: factorConfig.min_area_m2,
+    }
+    setConfig(restored)
+    save(restored) // sofort, nicht erst nach der Auto-Save-Pause
   }
 
   return (
@@ -364,6 +492,7 @@ const FactorEditorPanelForm = ({
             setWeights={setWeights}
             setField={setField}
             setVegetationDirection={setVegetationDirection}
+            setUserGeojsonMode={setUserGeojsonMode}
             onReset={readOnly ? undefined : resetWeightsToDefaults}
             readOnly={readOnly}
           />
@@ -372,13 +501,17 @@ const FactorEditorPanelForm = ({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => mutation.mutate()}
-                disabled={mutation.isPending}
-                className="rounded bg-gray-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-900 disabled:opacity-50"
+                onClick={discardChanges}
+                disabled={!canDiscard}
+                className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-default disabled:opacity-40"
               >
-                {mutation.isPending ? 'Speichern…' : 'Faktoren speichern'}
+                Änderungen verwerfen
               </button>
-              {mutation.isSuccess && <span className="text-xs text-green-700">Gespeichert ✓</span>}
+              <span className="text-xs text-gray-500">
+                {unsavedFactors || mutation.isPending
+                  ? 'Speichern…'
+                  : 'Änderungen werden automatisch gespeichert'}
+              </span>
             </div>
           )}
         </DisclosurePanel>

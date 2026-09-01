@@ -3,7 +3,7 @@ import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import type { FactorConfig } from '@/server/planning/planning.functions'
@@ -23,6 +23,7 @@ import {
 } from '../hooks/useQueryState/usePlanningParams'
 import { AreaContextBar } from './AreaContextBar'
 import { FactorEditorPanel } from './FactorEditorPanel'
+import { factorsDiffer } from './factorFingerprint'
 import { InfoTooltip } from './InfoTooltip'
 import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
@@ -41,28 +42,57 @@ const DragGripIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
+/**
+ * Ein/Aus-Schalter für einen der Kontroll-Layer der Karte (Vegetation, Fahrbahnen,
+ * Eigene Daten). Die Schalterfarbe entspricht der Layer-Farbe in der Karte,
+ * siehe SourcesLayersPlanning.
+ */
+const LayerToggle = ({
+  label,
+  checked,
+  onChange,
+  onColorClass,
+  info,
+}: {
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  onColorClass: string
+  info?: ReactNode
+}) => (
+  <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+    <span className="flex items-center gap-1 font-medium text-gray-800">
+      {label}
+      {info && <InfoTooltip>{info}</InfoTooltip>}
+    </span>
+    <Switch
+      checked={checked}
+      onChange={onChange}
+      className={twJoin(
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
+        checked ? onColorClass : 'bg-gray-300',
+      )}
+    >
+      <span
+        className={twJoin(
+          'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
+          checked ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+        )}
+      />
+    </Switch>
+  </label>
+)
+
 const VegetationToggle = () => {
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const setVegetationOn = usePlanningBoundaryState((s) => s.setVegetationVisible)
   return (
-    <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-      <span className="font-medium text-gray-800">Vegetationsflächen</span>
-      <Switch
-        checked={vegetationOn}
-        onChange={setVegetationOn}
-        className={twJoin(
-          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
-          vegetationOn ? 'bg-green-700' : 'bg-gray-300',
-        )}
-      >
-        <span
-          className={twJoin(
-            'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
-            vegetationOn ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
-          )}
-        />
-      </Switch>
-    </label>
+    <LayerToggle
+      label="Vegetationsflächen"
+      checked={vegetationOn}
+      onChange={setVegetationOn}
+      onColorClass="bg-green-700"
+    />
   )
 }
 
@@ -70,31 +100,27 @@ const CarriagewaysToggle = () => {
   const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
   const setCarriagewaysOn = usePlanningBoundaryState((s) => s.setCarriagewaysVisible)
   return (
-    <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-      <span className="flex items-center gap-1 font-medium text-gray-800">
-        Fahrbahnen
-        <InfoTooltip>
-          Die Fahrbahnbreiten sind Schätzungen auf Basis der in OpenStreetMap erfassten Straßen und
-          können von der tatsächlichen Breite abweichen. Sofern die tatsächliche Breite in den Daten
-          enthalten ist, wird diese verwendet.
-        </InfoTooltip>
-      </span>
-      <Switch
-        checked={carriagewaysOn}
-        onChange={setCarriagewaysOn}
-        className={twJoin(
-          'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
-          carriagewaysOn ? 'bg-amber-700' : 'bg-gray-300',
-        )}
-      >
-        <span
-          className={twJoin(
-            'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
-            carriagewaysOn ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
-          )}
-        />
-      </Switch>
-    </label>
+    <LayerToggle
+      label="Fahrbahnen"
+      checked={carriagewaysOn}
+      onChange={setCarriagewaysOn}
+      onColorClass="bg-amber-700"
+      info="Die Fahrbahnbreiten sind Schätzungen auf Basis der in OpenStreetMap erfassten Straßen und können von der tatsächlichen Breite abweichen. Sofern die tatsächliche Breite in den Daten enthalten ist, wird diese verwendet."
+    />
+  )
+}
+
+const UserObstaclesToggle = () => {
+  const userObstaclesOn = usePlanningBoundaryState((s) => s.userObstaclesVisible)
+  const setUserObstaclesOn = usePlanningBoundaryState((s) => s.setUserObstaclesVisible)
+  return (
+    <LayerToggle
+      label="Eigene Daten"
+      checked={userObstaclesOn}
+      onChange={setUserObstaclesOn}
+      onColorClass="bg-violet-700"
+      info="Die für diese Variante hochgeladene GeoJSON-Datei. Nur eine Anzeige in der Karte — das Ausblenden ändert die Berechnung nicht."
+    />
   )
 }
 
@@ -203,12 +229,23 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
   const isLocked = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
   const hasCompleteRun = latestRun?.status === 'COMPLETE'
   const factorsDefaultOpen = !hasCompleteRun
+  const lastRunConfig = (latestRun?.factorConfigSnapshot as FactorConfig | undefined) ?? null
+  // Warum das Ergebnis nicht mehr zu den Eingaben passt: das Planungsgebiet wurde bearbeitet
+  // (`stale`, vom Server gepflegt) oder die Faktoren wurden seit dem Lauf geändert — sie speichern
+  // sich sofort, gerechnet wird aber erst auf Klick.
+  const outdatedReason = latestRun?.stale
+    ? 'Planungsgebiet geändert'
+    : hasCompleteRun &&
+        !isLocked &&
+        factorsDiffer(variant.factorConfig as FactorConfig, lastRunConfig)
+      ? 'Faktoren geändert'
+      : null
 
   return (
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-3">
-      {latestRun?.stale && (
+      {outdatedReason && (
         <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-          Planungsgebiet geändert — Ergebnis veraltet. Bitte neu berechnen.
+          {outdatedReason} — Ergebnis veraltet. Bitte neu berechnen.
         </p>
       )}
 
@@ -223,7 +260,9 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
 
       <FactorEditorPanel
         variantId={variantId}
+        areaId={variant.area.id}
         factorConfig={variant.factorConfig as FactorConfig}
+        lastRunConfig={lastRunConfig}
         readOnly={isLocked}
         defaultOpen={factorsDefaultOpen}
       />
@@ -249,6 +288,9 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
         (variant.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
           <CarriagewaysToggle />
         )}
+      {/* Ohne hasCompleteRun-Bedingung: die eigenen Daten liegen im Client und werden
+          schon vor dem ersten Lauf in der Karte gezeigt (siehe UserObstaclesLayer). */}
+      {userGeojson != null && <UserObstaclesToggle />}
     </div>
   )
 }

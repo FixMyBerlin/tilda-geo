@@ -144,10 +144,12 @@ const BoundaryHighlightLayer = () => {
 
 // Kontroll-Layer für die hochgeladenen „Eigene Flächen" (factorConfig.user_geojson).
 // Die Geometrie liegt clientseitig im Store (von ScenarioDetail gesetzt); Punkte,
-// Linien und Flächen werden mit eigenen Layern dargestellt.
+// Linien und Flächen werden mit eigenen Layern dargestellt. Über den Schalter im
+// Panel (userObstaclesVisible) ein- und ausblendbar wie Vegetation/Fahrbahnen.
 const UserObstaclesLayer = () => {
   const geom = usePlanningBoundaryState((s) => s.userObstaclesGeom)
-  if (!geom) return null
+  const visible = usePlanningBoundaryState((s) => s.userObstaclesVisible)
+  if (!geom || !visible) return null
   return (
     <Source id="planning-user-obstacles" type="geojson" data={geom as any}>
       <Layer

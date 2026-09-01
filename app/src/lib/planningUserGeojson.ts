@@ -3,7 +3,7 @@ import { check } from '@placemarkio/check-geojson'
 // Grenzen für das vom Nutzer hochgeladene Eigendaten-GeoJSON. Client UND Server
 // erzwingen dieselben Werte (der Server vertraut dem Client nicht).
 export const MAX_USER_GEOJSON_BYTES = 5 * 1024 * 1024 // 5 MB
-const MAX_USER_GEOJSON_FEATURES = 5_000
+export const MAX_USER_GEOJSON_FEATURES = 5_000
 const MAX_USER_GEOJSON_COORDS = 500_000
 
 /** Unterstützte Geometrietypen (Punkte/Linien/Flächen; keine GeometryCollection). */
@@ -43,7 +43,11 @@ function validatePositions(coords: unknown, counter: { n: number }): void {
     if (!Number.isFinite(lon) || lat == null || !Number.isFinite(lat))
       throw new Error('GeoJSON enthält ungültige (nicht-endliche) Koordinaten.')
     if (lon < -180 || lon > 180 || lat < -90 || lat > 90)
-      throw new Error('GeoJSON-Koordinaten liegen außerhalb des gültigen Bereichs (Lon/Lat).')
+      throw new Error(
+        `GeoJSON-Koordinaten liegen außerhalb des gültigen Bereichs (Lon ${lon}, Lat ${lat}). ` +
+          'Die Datei muss in WGS84 (EPSG:4326, Grad) vorliegen – vermutlich wurde sie in einem ' +
+          'projizierten Koordinatensystem (z. B. UTM) exportiert.',
+      )
     counter.n++
     return
   }

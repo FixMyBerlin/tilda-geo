@@ -33,6 +33,14 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   targets: [],
 }
 
+// TODO Flächenfinder: Auswahl „Art & Größe der gesuchten Fläche“ ist vorübergehend deaktiviert.
+// Grund: Die Auswahl wird zwar am Planungsgebiet gespeichert, hat aber bisher keinen Effekt auf
+// Score oder Flächensuche. Bis die automatische Flächensuche daran hängt, blenden wir die Felder
+// aus — der komplette Code (State, Server-Felder, DB-Spalten) bleibt absichtlich bestehen.
+// Zum Reaktivieren: hier auf `true` setzen; die UI dazu steht in `AreaFormFields.tsx`, gespeist
+// aus `AreaWizard.tsx` und `AreaEditor.tsx`. Dann greifen wieder die Defaults unten.
+export const SHOW_PLANNING_USE_CASE_UI = false
+
 // Anwendungsfälle für das Planungsgebiet ("Art & Größe der gesuchten Fläche").
 // `defaultAreaM2` ist die vorbelegte Flächengröße; bei „Sonstiges“ gibt es keinen Default, die
 // Größe wird frei eingegeben. Die Fläche liegt auf dem Planungsgebiet (nicht im variant
