@@ -38,6 +38,8 @@ const VariantFactorConfigSchema = z
     parken_radius_m: z.number().optional(),
     fussgaengerzone_radius_m: z.number().optional(),
     bestand_default_diameter_m: z.number().optional(),
+    bewohnerbedarf_radius_m: z.number().optional(),
+    bewohnerbedarf_saettigung_ew: z.number().optional(),
     min_score_threshold: z.number().min(0).max(100).optional(),
     min_area_m2: z.number().min(0).nullable().optional(),
     targets: z.array(z.any()).optional(),

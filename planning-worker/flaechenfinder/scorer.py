@@ -2,13 +2,18 @@ import h3
 import geopandas as gpd
 import pandas as pd
 import numpy as np
+from shapely import area as _shp_area, intersection as _shp_intersection
 from shapely.geometry import Polygon
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
 from .config import USER_LINE_BUFFER_M, USER_POINT_BUFFER_M, UseCaseConfig
 from .dem import DEMAdapter
-from .geometry import buffer_by_geom_type, dist_to_union as _dist_to_union
+from .geometry import (
+    buffer_by_geom_type,
+    dist_to_union as _dist_to_union,
+    weighted_proximity_sum,
+)
 from .tilda import TildaLoader
 
 
@@ -25,7 +30,7 @@ _SCORE_COLS = [
     "score_radweg", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken", "score_fussgaengerzone",
-    "score_bestand", "score_eigendaten",
+    "score_bestand", "score_eigendaten", "score_bewohnerbedarf",
 ]
 
 # Klassifikationsschwellen für eignungsklasse (identisch in run_flaechenfinder
@@ -116,19 +121,20 @@ def assign_clusters(hex_proj: gpd.GeoDataFrame, min_score: float) -> gpd.GeoData
     return hex_proj
 
 
-# Die 12 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
+# Die 14 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
 # Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
 # verwendet. Die Namen müssen mit der Schrittliste im Frontend übereinstimmen
-# (PlanningSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 12
+# (PlanningSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 14
 # (Ergebnisse speichern) laufen außerhalb von run_flaechenfinder() im Worker
 # (worker.py); die Nummerierung hier beginnt daher bei 2.
-# Kreuzungen (6) und KFZ-Parkflächen (7) sind eigene, sichtbare Ladeschritte –
-# nur die reine Bonus-Ableitung passiert später im MCE-Schritt (11).
+# Kreuzungen (7) und KFZ-Parkflächen (8) sind eigene, sichtbare Ladeschritte –
+# nur die reine Bonus-Ableitung passiert später im MCE-Schritt (13).
 SCORING_STEPS = [
     "Vegetationsflächen berechnen",
     "H3-Gitter generieren",
     "Radwege laden",
     "Gebäude laden",
+    "Bewohnerbedarf laden (Zensus)",
     "ÖPNV-Haltestellen laden",
     "Kreuzungen laden",
     "KFZ-Parkflächen laden",
@@ -165,6 +171,53 @@ def apply_bebauung_exclusion(hex_proj, mask) -> None:
     apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore", "score_bebauung"))
 
 
+def _census_demand_sources(
+    census_proj: gpd.GeoDataFrame, buildings_proj: gpd.GeoDataFrame | None
+) -> gpd.GeoDataFrame:
+    """Bewohnerbedarfs-Quellen: Zensus-Einwohner auf Gebäudepolygone aggregiert.
+
+    Die Punkte aus `data.census_population_point` liegen auf dem Gebäudemittelpunkt.
+    Für eine Distanzrampe, die an der Gebäudekante beginnt, werden sie den Gebäuden
+    per Point-in-Polygon zugeordnet und je Gebäude aufsummiert; Quelle ist dann das
+    Polygon. Punkte ohne Gebäudetreffer – die 0,5 % `cluster_typ='gitter_mitte'`
+    sowie Abweichungen zwischen ALKIS (Zensus) und OSM (`public._buildings`) –
+    behalten ihre Punktgeometrie, damit ihre Einwohner nicht verloren gehen.
+
+    Beide GeoDataFrames müssen im selben metrischen CRS liegen. Rückgabe:
+    GeoDataFrame mit der Spalte `einwohner` und gemischten Geometrien
+    (Gebäudepolygone + Restpunkte).
+    """
+    points = census_proj.rename(columns={"total": "einwohner"})
+    points["einwohner"] = pd.to_numeric(points["einwohner"], errors="coerce").fillna(0.0)
+    points = points[["geometry", "einwohner"]]
+
+    if buildings_proj is None or not len(buildings_proj):
+        return points
+
+    bld = buildings_proj[["geometry"]].reset_index(drop=True)
+    hits = gpd.sjoin(points, bld, how="left", predicate="within")
+    # Bei überlappenden Gebäuden trifft ein Punkt mehrfach – nur den ersten Treffer
+    # zählen, sonst würden seine Einwohner mehrfach in die Summe eingehen.
+    hits = hits[~hits.index.duplicated(keep="first")]
+
+    matched = hits["index_right"].notna()
+    per_building = hits.loc[matched].groupby(
+        hits.loc[matched, "index_right"].astype(int)
+    )["einwohner"].sum()
+
+    building_sources = bld.loc[per_building.index].copy()
+    building_sources["einwohner"] = per_building.to_numpy()
+    leftover = hits.loc[~matched, ["geometry", "einwohner"]]
+
+    print(f"   ✓ Zensus: {int(matched.sum())} von {len(points)} Punkten auf "
+          f"{len(building_sources)} Gebäude aggregiert, {int((~matched).sum())} als Punkt")
+    return gpd.GeoDataFrame(
+        pd.concat([building_sources, leftover], ignore_index=True),
+        geometry="geometry",
+        crs=census_proj.crs,
+    )
+
+
 def run_flaechenfinder(
     study_area_geom,
     use_case: UseCaseConfig,
@@ -193,9 +246,9 @@ def run_flaechenfinder(
     direkt aus demselben GeoDataFrame (siehe `results.py`).
 
     `progress_cb` (optional) wird vor jedem der hier ausgeführten Schritte
-    (step:int 2..11, total:int, label:str) aufgerufen, damit der Worker den
+    (step:int 2..13, total:int, label:str) aufgerufen, damit der Worker den
     aktuellen Schritt an das UI weiterreichen kann. Schritt 1 (Vegetations-
-    flächen berechnen) und Schritt 12 (Ergebnisse speichern) meldet der
+    flächen berechnen) und Schritt 14 (Ergebnisse speichern) meldet der
     Worker selbst, außerhalb dieser Funktion.
     """
 
@@ -244,15 +297,40 @@ def run_flaechenfinder(
 
     # ── 4. Gebäude ─────────────────────────────────────────────────
     _step(4)
-    # Gebäude aus tilda DB: Hexagone mit Gebäudeüberschneidung werden hart ausgeschlossen.
+    # Gebäude aus tilda DB: nur Hexagone, deren Fläche zu mehr als
+    # GEBAEUDE_EXCLUSION_COVERAGE von einem Gebäude bedeckt ist, werden hart
+    # ausgeschlossen (analog FAHRBAHN_EXCLUSION_COVERAGE unten). Hexagone, die ein
+    # Gebäude nur zu einem kleineren Anteil berühren (z. B. am Rand), bleiben
+    # bebaubar und behalten ihren vollen Wert – der Ausschluss soll das Gebäude
+    # selbst treffen, nicht dessen Umgebung.
+    GEBAEUDE_EXCLUSION_COVERAGE = 2 / 3
     buildings = tilda_loader.load_buildings(study_area_geom)
+    # Der Bewohnerbedarf (Schritt 5) braucht dieselben Polygone: die Zensus-Einwohner
+    # werden darauf aggregiert und die Distanzrampe ab der Gebäudekante gemessen.
+    # Nur bei Gewicht > 0 behalten – sonst wie bisher sofort freigeben.
+    keep_buildings = (use_case.weights.get("w_bewohnerbedarf", 0) or 0) > 0
+    buildings_for_census = None
     if len(buildings):
         # load_buildings() liefert die Geometrie in der Spalte "geom" (SELECT … AS geom);
         # auf "geometry" normalisieren, damit die Spaltenauswahl unten passt.
         buildings_proj = buildings.to_crs("EPSG:25832").rename_geometry("geometry")
         hexes = hex_proj[["geometry"]].copy()
+        hexes["_hid"] = np.arange(len(hexes))
+        hex_area = hex_proj.geometry.area.to_numpy()
         pairs = gpd.sjoin(hexes, buildings_proj[["geometry"]], how="inner", predicate="intersects")
-        hex_proj["gebaeude"] = hex_proj.index.isin(pairs.index)
+        coverage = np.zeros(len(hexes))
+        if len(pairs):
+            left = pairs.geometry.to_numpy()
+            right = buildings_proj.geometry.to_numpy()[pairs["index_right"].to_numpy()]
+            pairs = pairs.assign(_ia=_shp_area(_shp_intersection(left, right)))
+            coverage = (
+                pairs.groupby("_hid")["_ia"].sum()
+                .reindex(np.arange(len(hexes)), fill_value=0.0)
+                .to_numpy()
+            )
+        hex_proj["gebaeude"] = (coverage / hex_area) >= GEBAEUDE_EXCLUSION_COVERAGE
+        if keep_buildings:
+            buildings_for_census = buildings_proj[["geometry"]].reset_index(drop=True)
         del hexes, pairs, buildings_proj
     else:
         hex_proj["gebaeude"] = False
@@ -268,9 +346,6 @@ def run_flaechenfinder(
     # wiederverwendet werden kann.
     FAHRBAHN_EXCLUSION_COVERAGE = 2 / 3
     if use_case.exclude_carriageways and carriageway_gdf is not None and len(carriageway_gdf):
-        from shapely import area as _shp_area
-        from shapely import intersection as _shp_intersection
-
         roads_proj = carriageway_gdf.to_crs("EPSG:25832") if carriageway_gdf.crs != "EPSG:25832" else carriageway_gdf
         roads_proj = roads_proj[["geometry"]].reset_index(drop=True)
         hexes = hex_proj[["geometry"]].copy()
@@ -292,10 +367,45 @@ def run_flaechenfinder(
     else:
         hex_proj["fahrbahn"] = False
 
-    # ── 5. ÖPNV-Haltestellen ──────────────────────────────────────
+    # ── 5. Bewohnerbedarf (Zensus) ────────────────────────────────
+    # Einwohnerpunkte aus `data.census_population_point` (Zensus 2022, auf Gebäude
+    # disaggregiert) erzeugen rund um bewohnte Gebäude Bedarf – altersunabhängig, es
+    # zählt allein `total`. Die Punkte sitzen auf dem Gebäudemittelpunkt; damit die
+    # Rampe an der GEBÄUDEKANTE beginnt (und nicht schon in der Gebäudemitte), werden
+    # sie per Point-in-Polygon auf die in Schritt 4 geladenen Gebäude aggregiert
+    # (`_census_demand_sources`). Ergebnis ist die gewichtete Nachbarschaftssumme
+    # `bewohner_ew`: Einwohner, linear mit dem Abstand abfallend. Die Bonus-Ableitung
+    # passiert im MCE-Schritt (13). Nur bei Gewicht > 0 wird geladen; sonst bleibt
+    # `bewohner_ew` NaN (→ score_bewohnerbedarf NaN → DB NULL).
+    _step(5)
+    hex_proj["bewohner_ew"] = np.nan
+    if (use_case.weights.get("w_bewohnerbedarf", 0) or 0) > 0:
+        census = tilda_loader.load_census_population(study_area_geom)
+        if len(census):
+            # load_census_population() liefert die Geometrie in der Spalte "geom"
+            # (SELECT … AS geom) – wie bei den Gebäuden oben auf "geometry" normalisieren.
+            census_proj = (
+                census.to_crs("EPSG:25832")
+                .rename_geometry("geometry")[["geometry", "total"]]
+                .reset_index(drop=True)
+            )
+            sources = _census_demand_sources(census_proj, buildings_for_census)
+            hex_proj["bewohner_ew"] = weighted_proximity_sum(
+                centroids, sources, "einwohner", use_case.bewohnerbedarf_radius_m
+            )
+            print(f"   → {len(sources)} Bedarfsquellen mit "
+                  f"{sources['einwohner'].sum():.0f} Einwohnern, Reichweite "
+                  f"{use_case.bewohnerbedarf_radius_m:g} m")
+            del census_proj, sources
+        else:
+            hex_proj["bewohner_ew"] = 0.0
+        del census
+    del buildings_for_census
+
+    # ── 6. ÖPNV-Haltestellen ──────────────────────────────────────
     # Nur bei Gewicht > 0 laden – sonst die vier Transit-Queries sparen und
     # score_oepnv als NaN (→ DB NULL, Sidebar „–") markieren.
-    _step(5)
+    _step(6)
     if (use_case.weights.get("w_transit", 0) or 0) > 0:
         _TRANSIT_TYPES = [
             # U-Bahn-Eingang und Bahnhofsgebäude haben keinen publicTransport-Tag-Dict-
@@ -334,11 +444,11 @@ def run_flaechenfinder(
     else:
         hex_proj["score_oepnv"] = np.nan
 
-    # ── 6. Kreuzungen laden ───────────────────────────────────────
+    # ── 7. Kreuzungen laden ───────────────────────────────────────
     # Bordstein-Ecken für den Kreuzungs-Bonus. Nur bei Gewicht > 0 den (teuren)
     # PostGIS-Query fahren; sonst abstand_kreuzung_m als NaN markieren. Die
-    # Bonus-Ableitung selbst passiert im MCE-Schritt (11) aus dieser Distanz.
-    _step(6)
+    # Bonus-Ableitung selbst passiert im MCE-Schritt (13) aus dieser Distanz.
+    _step(7)
     if (use_case.weights.get("w_intersection", 0) or 0) > 0:
         corners = tilda_loader.load_intersection_corners(study_area_geom)
         corners_proj = corners.to_crs("EPSG:25832") if len(corners) else corners
@@ -349,7 +459,7 @@ def run_flaechenfinder(
 
     # Fußgängerzonen-Ecken (Straße × Fußgängerzone) – gleicher Ecken-Mechanismus,
     # aber eigener Loader/Gewicht. Nur bei Gewicht > 0 den PostGIS-Query fahren.
-    # Bonus-Ableitung ebenfalls im MCE-Schritt (11).
+    # Bonus-Ableitung ebenfalls im MCE-Schritt (13).
     if (use_case.weights.get("w_fussgaengerzone", 0) or 0) > 0:
         fussgz = tilda_loader.load_pedestrian_intersection_corners(study_area_geom)
         fussgz_proj = fussgz.to_crs("EPSG:25832") if len(fussgz) else fussgz
@@ -358,10 +468,10 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_fussgaengerzone_m"] = np.nan
 
-    # ── 7. KFZ-Parkflächen laden ──────────────────────────────────
+    # ── 8. KFZ-Parkflächen laden ──────────────────────────────────
     # KFZ-Parkflächen für den Umwidmungs-Bonus. Nur bei Gewicht > 0 laden; sonst
-    # abstand_parken_m als NaN markieren. Bonus-Ableitung im MCE-Schritt (11).
-    _step(7)
+    # abstand_parken_m als NaN markieren. Bonus-Ableitung im MCE-Schritt (13).
+    _step(8)
     if (use_case.weights.get("w_parken", 0) or 0) > 0:
         parken = tilda_loader.load_car_parking(study_area_geom)
         parken_proj = parken.to_crs("EPSG:25832") if len(parken) else parken
@@ -370,10 +480,10 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_parken_m"] = np.nan
 
-    # ── 8. Zielorte ────────────────────────────────────────────────
+    # ── 9. Zielorte ────────────────────────────────────────────────
     # Nur bei Gewicht > 0 laden – sonst die OSM-Zielort-Queries sparen und
     # score_zielorte als NaN (→ DB NULL, Sidebar „–") markieren.
-    _step(8)
+    _step(9)
     if (use_case.weights.get("w_target", 0) or 0) > 0:
         target_scores = []
         for t in use_case.targets:
@@ -399,21 +509,18 @@ def run_flaechenfinder(
     else:
         hex_proj["score_zielorte"] = np.nan
 
-    # ── 9. DEM / Hangneigung ─────────────────────────────────────────
-    _step(9)
+    # ── 10. DEM / Hangneigung ─────────────────────────────────────────
+    _step(10)
     hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
     del latlng_points
 
-    # ── 10. Vegetationsabdeckung verschneiden ───────────────────────
+    # ── 11. Vegetationsabdeckung verschneiden ───────────────────────
     # Nur berechnen, wenn der Faktor auch gewichtet ist – sonst dient die
     # Vegetation nur als Anzeige-Layer und die teure Verschneidung entfällt.
-    _step(10)
+    _step(11)
     hex_proj["vegetation_coverage_pct"] = 0.0
     w_veg = use_case.weights.get("w_vegetation", 0) or 0
     if w_veg > 0 and vegetation_gdf is not None and len(vegetation_gdf):
-        from shapely import area as _shp_area
-        from shapely import intersection as _shp_intersection
-
         veg_proj = vegetation_gdf.to_crs("EPSG:25832")[["geometry"]].reset_index(drop=True)
         veg_proj = veg_proj[veg_proj.geometry.notna() & ~veg_proj.geometry.is_empty]
         if len(veg_proj):
@@ -436,12 +543,12 @@ def run_flaechenfinder(
             del hexes
         del veg_proj
 
-    # ── 11. Eigene Flächen verschneiden ────────────────────────────
+    # ── 12. Eigene Flächen verschneiden ────────────────────────────
     # Nutzer-Upload (factorConfig.user_geojson): Punkte/Linien werden gepuffert
     # (1,5 m / 2,5 m), Flächen unverändert; Distanz je Hexagon zur Union. Die
     # eigentliche Score-/Ausschluss-Ableitung passiert im MCE-Schritt. Ohne Datei
     # bleibt abstand_eigendaten_m NaN (→ Faktor wirkungslos).
-    _step(11)
+    _step(12)
     hex_proj["abstand_eigendaten_m"] = np.nan
     if user_geojson is not None:
         try:
@@ -460,8 +567,8 @@ def run_flaechenfinder(
             del user_proj
         del user_gdf
 
-    # ── 12. MCE-Scoring ────────────────────────────────────────────
-    _step(12)
+    # ── 13. MCE-Scoring ────────────────────────────────────────────
+    _step(13)
     w = use_case.weights
 
     def slope_score(deg):
@@ -544,7 +651,7 @@ def run_flaechenfinder(
     # ~5–8 m von der Bordsteinecke entfernt (nicht in der Kreuzungsmitte). Der
     # Bonus ist ein Modifier auf den Basis-Score (wie Vegetation); `w_intersection`
     # (0–1) ist der maximale Zuschlag in Punkten (× 100). Die Ecken-Distanz
-    # `abstand_kreuzung_m` wurde bereits in Schritt 6 geladen (NaN ohne Gewicht);
+    # `abstand_kreuzung_m` wurde bereits in Schritt 7 geladen (NaN ohne Gewicht);
     # ohne Gewicht bleibt auch `score_kreuzung` NaN (→ DB NULL).
     w_kreuz = w.get("w_intersection", 0) or 0
     if w_kreuz > 0:
@@ -578,7 +685,7 @@ def run_flaechenfinder(
     # Punkten (× 100). Anders als bei der Kreuzung ist der Bonus maximal, wenn das
     # Hexagon direkt auf der Parkfläche liegt (Distanz 0), und fällt linear bis
     # `parken_radius_m` auf 0 ab. Die Flächen-Distanz `abstand_parken_m` wurde
-    # bereits in Schritt 7 geladen (NaN ohne Gewicht); ohne Gewicht bleibt auch
+    # bereits in Schritt 8 geladen (NaN ohne Gewicht); ohne Gewicht bleibt auch
     # `score_parken` NaN (→ DB NULL).
     w_parken = w.get("w_parken", 0) or 0
     if w_parken > 0:
@@ -606,7 +713,7 @@ def run_flaechenfinder(
     # Kreuzungs-Bonus (ideal 5–8 m von der Ecke), aber eigenes Gewicht
     # `w_fussgaengerzone` und eigene äußere Reichweite `fussgaengerzone_radius_m`.
     # Der Bonus zählt zur Bedarfsgruppe (siehe unten). `abstand_fussgaengerzone_m`
-    # wurde bereits in Schritt 6 geladen (NaN ohne Gewicht); ohne Gewicht bleibt
+    # wurde bereits in Schritt 7 geladen (NaN ohne Gewicht); ohne Gewicht bleibt
     # auch `score_fussgaengerzone` NaN (→ DB NULL).
     w_fussgz = w.get("w_fussgaengerzone", 0) or 0
     if w_fussgz > 0:
@@ -632,6 +739,32 @@ def run_flaechenfinder(
     else:
         hex_proj["score_fussgaengerzone"] = np.nan
         fussgz_delta = 0.0
+
+    # ── Bewohnerbedarf: Zuschlag rund um bewohnte Gebäude ──────────────────
+    # Aus der in Schritt 5 berechneten gewichteten Nachbarschaftssumme `bewohner_ew`
+    # (Einwohner, linear mit dem Abstand ab Gebäudekante abfallend) wird ein Zuschlag
+    # auf die BEDARFS-Gruppe – wo viele Menschen wohnen, wird auch abgestellt.
+    # `bewohnerbedarf_saettigung_ew` ist der Wert, ab dem der Zuschlag voll ausgereizt
+    # ist (darüber wird gekappt); `w_bewohnerbedarf` (0–1) der maximale Zuschlag in
+    # Punkten (× 100).
+    # Hexagone, die überwiegend von einem Gebäude bedeckt sind (`gebaeude`, s.
+    # Schritt 4), bekommen bewusst 0: der Bedarf entsteht RUND UM das Gebäude,
+    # nicht darauf. Sie sind ohnehin hart ausgeschlossen (mce/Bebauung), der
+    # Bedarf bliebe sonst aber stehen und die Sidebar wiese Bedarf auf dem Dach
+    # aus. Hexagone, die ein Gebäude nur zu einem kleineren Anteil berühren,
+    # gelten NICHT als `gebaeude` und behalten ihren vollen Zuschlag.
+    # Ohne Gewicht bleibt `score_bewohnerbedarf` NaN (→ DB NULL, Sidebar „–").
+    w_bewohner = w.get("w_bewohnerbedarf", 0) or 0
+    if w_bewohner > 0:
+        saettigung = max(1.0, use_case.bewohnerbedarf_saettigung_ew)
+        bewohner_faktor = (hex_proj["bewohner_ew"].fillna(0.0) / saettigung).clip(0.0, 1.0)
+        bewohner_faktor = bewohner_faktor.where(~hex_proj["gebaeude"], 0.0)
+        bewohner_bonus = (w_bewohner * 100.0) * bewohner_faktor
+        hex_proj["score_bewohnerbedarf"] = bewohner_bonus.round(1)
+        bewohner_delta = bewohner_bonus
+    else:
+        hex_proj["score_bewohnerbedarf"] = np.nan
+        bewohner_delta = 0.0
 
     # ── Bestandsanlagen: Bedarfssenkung um bestehende Radabstellanlagen ─────
     # Bestehende Fahrradabstellanlagen (public."bicycleParking_points") senken den
@@ -673,7 +806,7 @@ def run_flaechenfinder(
         bestand_delta = 0.0
 
     # ── Eigene Flächen: weicher Modifier ODER harter Ausschluss ────────────
-    # `user_geojson_mode` bestimmt die Wirkung der in Schritt 11 berechneten
+    # `user_geojson_mode` bestimmt die Wirkung der in Schritt 12 berechneten
     # Distanz. Punkte/Linien sind bereits gepuffert, Flächen exakt – ein Hexagon
     # gilt als „innerhalb", wenn seine Distanz zur (gepufferten) Union 0 ist.
     #   bonus/penalty    → voller Zu-/Abschlag innerhalb, 0 außerhalb; Stärke
@@ -705,14 +838,14 @@ def run_flaechenfinder(
             hex_proj["score_eigendaten"] = np.nan
 
     # ── Gesamtscore (Kombination) ──────────────────────────────────────────
-    # `total` = `base_score ± veg + kreuz + parken + fussgz + bestand + eigendaten`;
-    # die Modifier liegen als eigene Delta-Serien vor, damit sie unten für die
-    # Teil-Scores wiederverwendbar sind. `fussgz_delta`/`bestand_delta`/
-    # `eigendaten_delta` sind per Default 0 (Gewichte 0), ändern bestehende Läufe
-    # also nicht.
+    # `total` = `base_score ± veg + kreuz + parken + fussgz + bewohner + bestand
+    # + eigendaten`; die Modifier liegen als eigene Delta-Serien vor, damit sie unten
+    # für die Teil-Scores wiederverwendbar sind. `fussgz_delta`/`bewohner_delta`/
+    # `bestand_delta`/`eigendaten_delta` sind per Default 0 (Gewichte 0), ändern
+    # bestehende Läufe also nicht.
     total = (
         base_score + veg_delta + kreuz_delta + parken_delta
-        + fussgz_delta + bestand_delta + eigendaten_delta
+        + fussgz_delta + bewohner_delta + bestand_delta + eigendaten_delta
     )
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
@@ -722,8 +855,8 @@ def run_flaechenfinder(
     # hier zusätzlich als zwei getrennt normalisierte 0–100-Ansichten berechnet
     # (die Kombination `mce_gesamtscore` oben bleibt davon unberührt):
     #   Bedarf  („will hier parken")  → Radweg (w_cyclepath), ÖPNV (w_transit),
-    #       Zielorte (w_target) + Modifier Fußgängerzonen (Zuschlag) und
-    #       Bestandsanlagen (Abzug)
+    #       Zielorte (w_target) + Modifier Fußgängerzonen (Zuschlag),
+    #       Bewohnerbedarf (Zuschlag) und Bestandsanlagen (Abzug)
     #   Bebauung („kann hier bauen") → Hangneigung (w_slope)
     #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
     # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt (dasselbe
@@ -731,11 +864,13 @@ def run_flaechenfinder(
     # von der Gewichtsverteilung 0–100 bleibt. Ist eine Gruppe komplett
     # ungewichtet, bleibt ihr Score NaN (→ DB NULL).
     #
-    # Fußgängerzonen-Bonus (Zuschlag) und Bestandsanlagen (Abzug) sind
-    # Bedarfs-Modifier (analog Kreuzung/Parken bei Bebauung): erst normalisieren,
-    # dann die Deltas addieren, dann clippen.
+    # Fußgängerzonen-Bonus und Bewohnerbedarf (Zuschläge) sowie Bestandsanlagen
+    # (Abzug) sind Bedarfs-Modifier (analog Kreuzung/Parken bei Bebauung): erst
+    # normalisieren, dann die Deltas addieren, dann clippen.
     base_bedarf = _group_score(BEDARF_TERMS)
-    score_bedarf = (base_bedarf + fussgz_delta + bestand_delta).clip(lower=0.0, upper=100.0)
+    score_bedarf = (base_bedarf + fussgz_delta + bewohner_delta + bestand_delta).clip(
+        lower=0.0, upper=100.0
+    )
 
     base_bebauung = _group_score(BEBAUUNG_TERMS)
     score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(

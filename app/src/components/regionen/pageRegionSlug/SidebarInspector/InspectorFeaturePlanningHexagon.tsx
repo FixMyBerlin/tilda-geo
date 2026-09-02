@@ -54,8 +54,7 @@ const SCORE_GROUPS: {
     label: 'Bedarf',
     scoreKey: 'score_bedarf',
     criteria: ['score_radweg', 'score_oepnv', 'score_zielorte'],
-    modifiers: ['score_fussgaengerzone', 'score_bestand'],
-    comingSoon: ['score_bewohnerbedarf'],
+    modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_bestand'],
   },
   {
     label: 'Bebauung',

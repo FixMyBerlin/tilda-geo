@@ -66,6 +66,14 @@ class TildaLoader:
             print(f"   ⚠️  Bestands-Radabstellanlagen-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_census_population(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Zensus-Einwohnerpunkte (für den Bewohnerbedarf-Faktor)."""
+        try:
+            return self._loader.load_census_population(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Zensus-Einwohner-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     def load_roads(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
         """Straßen-Linien mit Breite (für den Fahrbahnen-Ausschluss)."""
         try:

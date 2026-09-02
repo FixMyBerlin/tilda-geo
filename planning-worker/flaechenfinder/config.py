@@ -71,6 +71,34 @@ class UseCaseConfig:
     # Innerhalb des Einzugskreises voller Abzug, außen 0.
     bestand_default_diameter_m: float = 20.0  # Durchmesser ohne capacity (UI-einstellbar)
 
+    # Bewohnerbedarf (Zensus): die auf Gebäude disaggregierten Einwohnerzahlen des
+    # Zensus 2022 (data.census_population_point) erzeugen rund um bewohnte Gebäude
+    # Bedarf – altersunabhängig, es zählt allein `total`. Positiver Modifier auf die
+    # BEDARFS-Gruppe (analog Fußgängerzonen); Stärke = weights["w_bewohnerbedarf"]
+    # (max. Zuschlag in Punkten × 100). Gerechnet wird eine gewichtete
+    # Nachbarschaftssumme (geometry.weighted_proximity_sum): jedes bewohnte Gebäude
+    # trägt `einwohner × (1 − Abstand/Radius)` bei, gemessen ab der GEBÄUDEKANTE.
+    # Die Summe wird am Sättigungswert auf 1.0 gekappt.
+    #   d = 0 (direkt am Gebäude) → voller Beitrag des Gebäudes
+    #   d ≥ radius                → kein Beitrag
+    # Auf Hexagonen, die selbst ein Gebäude schneiden, ist der Zuschlag 0: der Bedarf
+    # entsteht rund um das Gebäude, nicht darauf (siehe scorer.py).
+    # Der Radius ist bewusst NICHT UI-einstellbar (User-Entscheid): 20 m ist die fachliche
+    # Setzung für „unmittelbar am Gebäude", und ein zweiter Regler neben der Sättigung war
+    # mehr Erklärungsaufwand als Nutzen. Hier ändern, wenn er doch variieren soll — dann
+    # aber die Sättigung mitziehen, sie hängt direkt an der Reichweite (siehe unten).
+    bewohnerbedarf_radius_m: float = 20.0        # Reichweite ab Gebäudekante (fest)
+
+    # Der Sättigungs-Default ist an Berliner Realdaten kalibriert (gewichtete Summe je
+    # baubarem Hexagon, bei Radius 20 m): dichter Blockrand (Kreuzberg, 16.000 EW/km²)
+    # p50 ≈ 25 / p75 ≈ 52 / p90 ≈ 98, gemischte Innenstadt p50 ≈ 9 / p90 ≈ 37,
+    # Einfamilienhausgebiet p50 ≈ 3 / p90 ≈ 13. Bei 30 (User-Setzung) liegt der Median des
+    # dichten Blockrands schon bei ~83 % des vollen Zuschlags und dessen obere Hälfte am
+    # Anschlag; Mischgebiet und Einfamilienhauslagen differenzieren über die volle Spanne.
+    # ACHTUNG: die Werte skalieren stark mit dem Radius (bei 50 m lagen dieselben Gebiete
+    # rund 3× höher) — wird oben der Radius geändert, ist dieser Default neu zu messen.
+    bewohnerbedarf_saettigung_ew: float = 30.0   # gewichtete Einwohner für den vollen Zuschlag
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
 
@@ -126,6 +154,7 @@ DEFAULT_WEIGHTS = {
     "w_parken": 0.1,       # Parken-Bonus (KFZ→Rad Umwidmung)
     "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
     "w_bestand": 0.0,          # Bestandsanlagen-Bedarfssenkung (neutral per Default → non-breaking)
+    "w_bewohnerbedarf": 0.0,   # Bewohnerbedarf aus Zensusdaten; neutral per Default → non-breaking
     "w_eigendaten": 0.0,       # Eigene Flächen (Nutzer-Upload); neutral per Default → non-breaking
 }
 
@@ -172,6 +201,8 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
+        bewohnerbedarf_radius_m=float(cfg.get("bewohnerbedarf_radius_m", 20.0)),
+        bewohnerbedarf_saettigung_ew=float(cfg.get("bewohnerbedarf_saettigung_ew", 30.0)),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
         exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),

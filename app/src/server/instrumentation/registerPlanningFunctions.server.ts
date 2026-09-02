@@ -38,6 +38,7 @@ async function ensurePlanningSchema() {
       score_fussgaengerzone   real,
       score_bestand           real,
       score_eigendaten        real,
+      score_bewohnerbedarf    real,
       eignungsklasse          text,
       fahrbahn                boolean NOT NULL DEFAULT false
     );`)
@@ -68,6 +69,11 @@ async function ensurePlanningSchema() {
   // und Ausschluss-Modi.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigendaten real;`,
+  )
+  // Bewohnerbedarf (Zensus): Zuschlag in Punkten rund um bewohnte Gebäude; 0 auf
+  // Gebäude-Hexagonen, NULL bei Alt-Läufen und ohne Gewicht.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bewohnerbedarf real;`,
   )
   // Flächen-Cluster (Connected-Component-Labeling über H3-Nachbarschaft): Gesamt-
   // fläche der zusammenhängenden Fläche, zu der ein Hexagon gehört (NULL unter
@@ -138,7 +144,8 @@ async function registerHexagonsFunction() {
     CREATE OR REPLACE FUNCTION public.planning_hexagons(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
-      mvt bytea;
+      hex_mvt bytea;
+      label_mvt bytea;
       rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
       bounds geometry := ST_TileEnvelope(z, x, y);
       res_val smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
@@ -146,7 +153,7 @@ async function registerHexagonsFunction() {
       IF rid IS NULL THEN
         RETURN NULL;
       END IF;
-      SELECT INTO mvt ST_AsMVT(tile, 'planning_hexagons', 4096, 'geom') FROM (
+      SELECT INTO hex_mvt ST_AsMVT(tile, 'planning_hexagons', 4096, 'geom') FROM (
         SELECT
           h3_id,
           mce_gesamtscore,
@@ -162,6 +169,7 @@ async function registerHexagonsFunction() {
           score_fussgaengerzone,
           score_bestand,
           score_eigendaten,
+          score_bewohnerbedarf,
           cluster_area_m2,
           eignungsklasse,
           gebaeude,
@@ -170,7 +178,32 @@ async function registerHexagonsFunction() {
         FROM planning.scenario_hexagons
         WHERE run_id = rid AND resolution = res_val AND (geom && bounds)
       ) AS tile;
-      RETURN mvt;
+
+      -- Eigener Punkt-Layer für das Label (nur ab z18, siehe HEXAGON_LABEL_MIN_ZOOM in
+      -- SourcesLayersPlanning.tsx): der Fläche-Layer oben puffert & schneidet die
+      -- Hexagon-Polygone pro Kachel (buffer=256) für nahtlose Füllung an
+      -- Kachelgrenzen — dasselbe Polygon liegt dadurch oft in mehreren Kacheln, je
+      -- mit einem eigenen, zur sichtbaren Teilfläche versetzten Zentroid. Ein
+      -- Symbol-Layer darauf würde also mehrfache, außermittige Labels je Hexagon
+      -- zeigen. Der Label-Layer nimmt stattdessen den echten Hexagon-Mittelpunkt,
+      -- ungepuffert (buffer=0) und via ST_Contains auf die ungeweiteten
+      -- Kachelgrenzen gefiltert — jedes Hexagon liefert seinen Mittelpunkt so in
+      -- genau einer Kachel.
+      IF z >= 18 THEN
+        SELECT INTO label_mvt ST_AsMVT(tile, 'planning_hexagons_label', 4096, 'geom') FROM (
+          SELECT
+            h3_id,
+            mce_gesamtscore,
+            score_bedarf,
+            score_bebauung,
+            ST_AsMVTGeom(ST_Centroid(geom), bounds, 4096, 0, true) AS geom
+          FROM planning.scenario_hexagons
+          WHERE run_id = rid AND resolution = res_val
+            AND ST_Contains(bounds, ST_Centroid(geom))
+        ) AS tile;
+      END IF;
+
+      RETURN NULLIF(COALESCE(hex_mvt, ''::bytea) || COALESCE(label_mvt, ''::bytea), ''::bytea);
     END
     $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
   const spec = {
@@ -192,10 +225,20 @@ async function registerHexagonsFunction() {
           score_fussgaengerzone: 'real',
           score_bestand: 'real',
           score_eigendaten: 'real',
+          score_bewohnerbedarf: 'real',
           cluster_area_m2: 'real',
           eignungsklasse: 'text',
           gebaeude: 'boolean',
           fahrbahn: 'boolean',
+        },
+      },
+      {
+        id: 'planning_hexagons_label',
+        fields: {
+          h3_id: 'text',
+          mce_gesamtscore: 'real',
+          score_bedarf: 'real',
+          score_bebauung: 'real',
         },
       },
     ],
@@ -266,9 +309,72 @@ async function registerCarriagewaysFunction() {
   )
 }
 
+/**
+ * Zensus-Einwohnerpunkte des Bewohnerbedarf-Faktors als Punktlayer.
+ *
+ * Liest DIREKT aus `data.census_population_point` — es wird bewusst nichts pro Lauf
+ * ins `planning`-Schema kopiert: die Tabelle deckt ganz Deutschland ab (~24 Mio.
+ * Punkte, EPSG:5243) und liegt ohnehin in dieser DB. Gezeigt wird derselbe
+ * Ausschnitt, den auch das Scoring benutzt — `PostgisLoader.load_census_population()`
+ * filtert mit `geom && ST_Transform(study_area, 5243)`, also über die Bounding-Box
+ * des Planungsgebiets. Das Gebiet kommt aus dem eingefrorenen
+ * `factorConfigSnapshot` des Laufs, damit der Layer zum Ergebnis passt, auch wenn
+ * das Planungsgebiet danach bearbeitet wurde.
+ *
+ * Fehlt das Data-Schema auf dieser Umgebung, liefert die Funktion NULL statt eines
+ * Fehlers (leere Kachel) — wie die graceful Fallbacks im Worker.
+ *
+ * Muss mit planning-worker/sql/martin_functions.sql übereinstimmen.
+ */
+async function registerCensusFunction() {
+  await geoDataClient.$executeRawUnsafe(`
+    CREATE OR REPLACE FUNCTION public.planning_census(z integer, x integer, y integer, query_params json DEFAULT '{}')
+    RETURNS bytea AS $$
+    DECLARE
+      mvt bytea;
+      rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
+      bounds geometry := ST_TileEnvelope(z, x, y);
+      geo jsonb;
+      area_5243 geometry;
+    BEGIN
+      IF rid IS NULL OR to_regclass('data.census_population_point') IS NULL THEN
+        RETURN NULL;
+      END IF;
+      SELECT "factorConfigSnapshot" -> 'study_area' INTO geo
+      FROM prisma."PlanningRun" WHERE id = rid;
+      IF geo IS NULL THEN
+        RETURN NULL;
+      END IF;
+      IF geo->>'type' = 'FeatureCollection' THEN
+        geo := geo->'features'->0->'geometry';
+      ELSIF geo->>'type' = 'Feature' THEN
+        geo := geo->'geometry';
+      END IF;
+      area_5243 := ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON(geo::text), 4326), 5243);
+      SELECT INTO mvt ST_AsMVT(tile, 'planning_census', 4096, 'geom') FROM (
+        SELECT
+          c.total AS einwohner,
+          ST_AsMVTGeom(ST_Transform(c.geom, 3857), bounds, 4096, 256, true) AS geom
+        FROM data.census_population_point c
+        WHERE c.total > 0
+          AND (c.geom && ST_Transform(ST_Expand(bounds, (ST_XMax(bounds) - ST_XMin(bounds)) * 0.1), 5243))
+          AND (c.geom && area_5243)
+      ) AS tile;
+      RETURN mvt;
+    END
+    $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
+  const spec = {
+    vector_layers: [{ id: 'planning_census', fields: { einwohner: 'real' } }],
+  }
+  await geoDataClient.$executeRawUnsafe(
+    `COMMENT ON FUNCTION public.planning_census IS '${JSON.stringify(spec)}';`,
+  )
+}
+
 export async function registerPlanningFunctions() {
   await ensurePlanningSchema()
   await registerHexagonsFunction()
   await registerVegetationFunction()
   await registerCarriagewaysFunction()
+  await registerCensusFunction()
 }

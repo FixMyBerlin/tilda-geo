@@ -110,6 +110,20 @@ const CarriagewaysToggle = () => {
   )
 }
 
+const CensusToggle = () => {
+  const censusOn = usePlanningBoundaryState((s) => s.censusVisible)
+  const setCensusOn = usePlanningBoundaryState((s) => s.setCensusVisible)
+  return (
+    <LayerToggle
+      label="Zensus-Einwohner"
+      checked={censusOn}
+      onChange={setCensusOn}
+      onColorClass="bg-blue-700"
+      info="Die Einwohnerpunkte aus dem Zensus 2022 (Destatis, auf Gebäude verteilt), die in den Faktor „Bewohnerbedarf“ eingehen. Punktgröße und -farbe zeigen die Einwohnerzahl, ab Zoom 17 auch als Zahl. Nur eine Anzeige in der Karte — das Ausblenden ändert die Berechnung nicht."
+    />
+  )
+}
+
 const UserObstaclesToggle = () => {
   const userObstaclesOn = usePlanningBoundaryState((s) => s.userObstaclesVisible)
   const setUserObstaclesOn = usePlanningBoundaryState((s) => s.setUserObstaclesVisible)
@@ -258,6 +272,13 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
 
       <RunButton variantId={variantId} regionSlug={regionSlug} latestJob={latestJob} />
 
+      {hasCompleteRun && (
+        <MinAreaFilter
+          variantId={variantId}
+          savedMinArea={(variant.factorConfig as FactorConfig | undefined)?.min_area_m2 ?? 0}
+        />
+      )}
+
       <FactorEditorPanel
         variantId={variantId}
         areaId={variant.area.id}
@@ -277,17 +298,16 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
       )}
 
       {hasCompleteRun && <ScoreModeSwitcher />}
-      {hasCompleteRun && (
-        <MinAreaFilter
-          variantId={variantId}
-          savedMinArea={(variant.factorConfig as FactorConfig | undefined)?.min_area_m2 ?? 0}
-        />
-      )}
       {hasCompleteRun && (latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
       {hasCompleteRun &&
         (variant.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
           <CarriagewaysToggle />
         )}
+      {/* Aus dem Lauf-Snapshot, nicht aus der aktuellen Konfiguration: die Kacheln
+          werden auf das Planungsgebiet DIESES Laufs zugeschnitten (siehe
+          planning_census), der Schalter soll also genau dann erscheinen, wenn der
+          Bewohnerbedarf tatsächlich mitgerechnet wurde. */}
+      {hasCompleteRun && (lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && <CensusToggle />}
       {/* Ohne hasCompleteRun-Bedingung: die eigenen Daten liegen im Client und werden
           schon vor dem ersten Lauf in der Karte gezeigt (siehe UserObstaclesLayer). */}
       {userGeojson != null && <UserObstaclesToggle />}

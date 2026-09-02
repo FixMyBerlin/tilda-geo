@@ -377,6 +377,46 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage bicycleParking_points fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_census_population(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Zensus-Einwohnerpunkte für den Bewohnerbedarf-Faktor.
+
+        Liest `data.census_population_point` – die auf Gebäude disaggregierten
+        Einwohnerzahlen des Zensus 2022 (Destatis, siehe
+        `data-schema/census_population_point/spec.yaml`). Ein Punkt liegt in aller
+        Regel auf dem Gebäudemittelpunkt (`cluster_typ='gebaeude_mitte'`, 99,5 %);
+        der Rest sitzt auf der Mitte der 100-m-Rasterzelle, wenn die Bevölkerung
+        keinem Gebäude zugeordnet werden konnte.
+
+        Zurückgegeben wird nur `total` (Gesamteinwohner) – die Altersgruppen-
+        spalten der Tabelle bleiben bewusst ungenutzt, der Bedarf entsteht
+        altersunabhängig.
+
+        Die Tabelle liegt in EPSG:5243 und deckt ganz Deutschland ab (~24 Mio.
+        Punkte); der Bbox-Filter läuft deshalb im Quell-CRS über den GiST-Index.
+        Rückgabe in EPSG:4326.
+
+        Abhängigkeit: die Tabelle existiert nur, wenn das Data-Schema auf dieser
+        Umgebung importiert wurde (siehe data-schema/README.md). Fehlt sie, wird
+        ein leeres GeoDataFrame zurückgegeben und der Faktor trägt 0 bei – analog
+        zum graceful Fallback der übrigen Loader.
+        """
+        wkt = polygon_4326.wkt
+        sql = f"""
+            SELECT ST_Transform(geom, 4326) AS geom, total
+            FROM data.census_population_point
+            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+              AND total > 0
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Zensuspunkte aus data.census_population_point")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage data.census_population_point fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 

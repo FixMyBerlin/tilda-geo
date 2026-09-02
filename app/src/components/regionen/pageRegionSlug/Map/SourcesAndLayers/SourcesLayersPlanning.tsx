@@ -19,6 +19,15 @@ export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
 /** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
 export const planningHexagonsSourceLayer = 'planning_hexagons'
+/**
+ * Eigener Punkt-Layer mit dem Hexagon-Mittelpunkt, je Hexagon in genau einer
+ * Kachel enthalten (siehe registerPlanningFunctions.server.ts). Der Fläche-Layer
+ * `planningHexagonsSourceLayer` puffert & schneidet Polygone pro Kachel, sodass
+ * dasselbe Hexagon oft in mehreren Kacheln mit versetztem Zentroid auftaucht — ein
+ * Label darauf wäre mehrfach und außermittig. Deshalb ein eigener, ungepufferter
+ * Punkt-Layer nur fürs Label.
+ */
+const planningHexagonsLabelSourceLayer = 'planning_hexagons_label'
 const planningHexagonsLabelLayerId = 'planning-hexagons-label'
 
 // Ab Zoom 18 wird der Score-Wert des aktiven Anzeigemodus (Kombination/Bedarf/
@@ -100,7 +109,7 @@ const hexagonFillLayerProps = (
 const hexagonLabelLayerProps = (property: string) => ({
   id: planningHexagonsLabelLayerId,
   source: planningHexagonsSourceId,
-  'source-layer': planningHexagonsSourceLayer,
+  'source-layer': planningHexagonsLabelSourceLayer,
   type: 'symbol' as const,
   minzoom: HEXAGON_LABEL_MIN_ZOOM,
   layout: {
@@ -115,6 +124,75 @@ const hexagonLabelLayerProps = (property: string) => ({
     'text-halo-width': 1.5,
   },
 })
+
+// Zensus-Einwohnerpunkte (Faktor „Bewohnerbedarf"). Die Kacheln kommen direkt aus
+// `data.census_population_point`, auf die Bounding-Box des Planungsgebiets
+// beschränkt — es liegt nichts pro Lauf im planning-Schema (siehe die
+// Martin-Funktion `planning_census`). Ein Punkt sitzt in aller Regel auf dem
+// Gebäudemittelpunkt und trägt dessen Einwohnerzahl.
+const planningCensusSourceId = 'planning-census-source'
+
+const CENSUS_ATTRIBUTION =
+  '<a href="https://www.zensus2022.de/" target="_blank" rel="noopener">Zensus 2022</a> (Destatis, auf Gebäude disaggregiert)'
+
+// Ab Zoom 17 die Einwohnerzahl neben den Punkt schreiben — darunter liegen die
+// Gebäude zu dicht beieinander, als dass Zahlen lesbar wären.
+const CENSUS_LABEL_MIN_ZOOM = 17
+
+const censusCircleLayerProps = {
+  id: 'planning-census-circle',
+  source: planningCensusSourceId,
+  'source-layer': 'planning_census',
+  type: 'circle' as const,
+  paint: {
+    // Radius wächst mit Zoom UND Einwohnerzahl, damit ein Mehrfamilienhaus auch
+    // ohne Label vom Einfamilienhaus zu unterscheiden ist.
+    'circle-radius': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      12,
+      2,
+      16,
+      ['interpolate', ['linear'], ['coalesce', ['get', 'einwohner'], 0], 0, 3, 100, 8],
+      19,
+      ['interpolate', ['linear'], ['coalesce', ['get', 'einwohner'], 0], 0, 5, 100, 16],
+    ] as any,
+    'circle-color': [
+      'interpolate',
+      ['linear'],
+      ['coalesce', ['get', 'einwohner'], 0],
+      0,
+      '#bfdbfe',
+      25,
+      '#60a5fa',
+      100,
+      '#1d4ed8',
+    ] as any,
+    'circle-opacity': 0.8,
+    'circle-stroke-color': '#1e3a8a',
+    'circle-stroke-width': 0.75,
+  },
+}
+
+const censusLabelLayerProps = {
+  id: 'planning-census-label',
+  source: planningCensusSourceId,
+  'source-layer': 'planning_census',
+  type: 'symbol' as const,
+  minzoom: CENSUS_LABEL_MIN_ZOOM,
+  layout: {
+    'text-field': ['to-string', ['round', ['coalesce', ['get', 'einwohner'], 0]]] as any,
+    'text-size': 12,
+    'text-offset': [0, -1.1] as [number, number],
+    'text-allow-overlap': false,
+  },
+  paint: {
+    'text-color': '#1e3a8a',
+    'text-halo-color': 'rgba(255,255,255,0.85)',
+    'text-halo-width': 1.5,
+  },
+}
 
 const BoundaryHighlightLayer = () => {
   const geom = usePlanningBoundaryState((s) => s.boundaryHighlightGeom)
@@ -227,6 +305,7 @@ export const SourcesLayersPlanning = () => {
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
   const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
+  const censusOn = usePlanningBoundaryState((s) => s.censusVisible)
 
   useEffect(() => {
     if (runId != null) {
@@ -250,6 +329,7 @@ export const SourcesLayersPlanning = () => {
   const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
   const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
   const carriagewaysUrl = getTilesUrl(`/planning_carriageways/{z}/{x}/{y}?run_id=${runId}`)
+  const censusUrl = getTilesUrl(`/planning_census/{z}/{x}/{y}?run_id=${runId}`)
   const fillLayerProps = hexagonFillLayerProps(
     PLANNING_SCORE_PROPERTY[scoreMode],
     areaFilterOn,
@@ -321,6 +401,19 @@ export const SourcesLayersPlanning = () => {
             type="line"
             paint={{ 'line-color': '#78350f', 'line-width': 0.5, 'line-opacity': 0.6 }}
           />
+        </>
+      )}
+
+      {censusOn && (
+        <>
+          <Source
+            id={planningCensusSourceId}
+            type="vector"
+            tiles={[censusUrl]}
+            attribution={CENSUS_ATTRIBUTION}
+          />
+          <Layer {...censusCircleLayerProps} />
+          <Layer {...censusLabelLayerProps} />
         </>
       )}
     </>

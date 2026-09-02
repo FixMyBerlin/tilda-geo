@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-// Die 13 fachlichen Schritte eines Laufs, in Reihenfolge. Müssen mit
+// Die 14 fachlichen Schritte eines Laufs, in Reihenfolge. Müssen mit
 // SCORING_STEPS im planning-worker (flaechenfinder/scorer.py) übereinstimmen.
 const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
   'H3-Gitter generieren',
   'Radwege laden',
   'Gebäude laden',
+  'Bewohnerbedarf laden (Zensus)',
   'ÖPNV-Haltestellen laden',
   'Kreuzungen laden',
   'KFZ-Parkflächen laden',
@@ -27,35 +28,36 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_vegetation'], //  1 Vegetationsflächen berechnen
   [], //                2 H3-Gitter generieren
   ['w_cyclepath'], //   3 Radwege laden
-  [], //                4 Gebäude laden
-  ['w_transit'], //     5 ÖPNV-Haltestellen laden
-  ['w_intersection', 'w_fussgaengerzone'], // 6 Kreuzungen & Fußgängerzonen laden
-  ['w_parken'], //      7 KFZ-Parkflächen laden
-  ['w_target'], //      8 Zielorte bewerten
-  ['w_slope'], //       9 Hangneigung berechnen
-  ['w_vegetation'], //  10 Vegetationsabdeckung verschneiden
-  ['w_eigendaten'], //  11 Eigene Flächen verschneiden (Sonderfall, siehe stepDisplay)
-  [], //                12 MCE-Score berechnen
-  [], //                13 Ergebnisse speichern
+  [], //                    4 Gebäude laden
+  ['w_bewohnerbedarf'], //  5 Bewohnerbedarf laden (Zensus)
+  ['w_transit'], //         6 ÖPNV-Haltestellen laden
+  ['w_intersection', 'w_fussgaengerzone'], // 7 Kreuzungen & Fußgängerzonen laden
+  ['w_parken'], //          8 KFZ-Parkflächen laden
+  ['w_target'], //          9 Zielorte bewerten
+  ['w_slope'], //           10 Hangneigung berechnen
+  ['w_vegetation'], //      11 Vegetationsabdeckung verschneiden
+  ['w_eigendaten'], //      12 Eigene Flächen verschneiden (Sonderfall, siehe stepDisplay)
+  [], //                    13 MCE-Score berechnen
+  [], //                    14 Ergebnisse speichern
 ]
 
 // 0-basierter Index des Eigendaten-Schritts. Sonderbehandlung: bei Ausschluss-
 // Modi läuft er unabhängig vom Gewicht (sobald eine Datei vorliegt), ohne Datei
 // wird er übersprungen.
-const USER_OBSTACLES_STEP_INDEX = 10
+const USER_OBSTACLES_STEP_INDEX = 11
 
 // Schritte, deren Ausgabe zusätzlich den harten Ausschluss steuert
 // (scorer.py::exclusion). Diese laufen auch bei Gewicht 0 weiter – sie werden
 // dann nicht „übersprungen", sondern „nur Ausschluss" markiert.
-const EXCLUSION_STEP_INDICES = new Set([8]) // Hangneigung
+const EXCLUSION_STEP_INDICES = new Set([9]) // Hangneigung
 
 /** Präsenz + Modus des Eigendaten-Uploads (aus getPlanningJobFn). */
 export type UserObstaclesInfo = { present: boolean; mode: string | null }
 
 // Der ausklappbare Block fasst alle Faktor-Schritte zusammen (1-basierte
-// Schrittnummern 3–11). Schritt 1/2 (Vegetationsvorphase, H3) und 12/13
+// Schrittnummern 3–12). Schritt 1/2 (Vegetationsvorphase, H3) und 13/14
 // (MCE, Speichern) bleiben top-level.
-const LOAD_GROUP = { firstStep: 3, lastStep: 11, label: 'Eingangsdaten & Faktoren' }
+const LOAD_GROUP = { firstStep: 3, lastStep: 12, label: 'Eingangsdaten & Faktoren' }
 
 type StepDisplay = {
   done: boolean

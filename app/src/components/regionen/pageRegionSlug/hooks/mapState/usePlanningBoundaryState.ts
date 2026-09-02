@@ -66,6 +66,14 @@ type Store = {
   setCarriagewaysVisible: (visible: boolean) => void
 
   /**
+   * Whether the Zensus-Einwohnerpunkte layer (Bewohnerbedarf factor) is shown.
+   * Same rationale as `vegetationVisible`: store, not URL. Default off — es sind
+   * viele Punkte, sie sollen den Blick auf die Hexagone nicht verstellen.
+   */
+  censusVisible: boolean
+  setCensusVisible: (visible: boolean) => void
+
+  /**
    * Whether the planning panel is collapsed to its header (title + active scenario
    * summary) to free up map space. Auto-set to true when a run's result is saved
    * (JobStatusBadge on DONE); toggled manually via the header button in PlanningPanel.
@@ -132,6 +140,9 @@ export const usePlanningBoundaryState = create<Store>((set) => ({
 
   carriagewaysVisible: false,
   setCarriagewaysVisible: (visible) => set({ carriagewaysVisible: visible }),
+
+  censusVisible: false,
+  setCensusVisible: (visible) => set({ censusVisible: visible }),
 
   panelCollapsed: false,
   setPanelCollapsed: (collapsed) => set({ panelCollapsed: collapsed }),

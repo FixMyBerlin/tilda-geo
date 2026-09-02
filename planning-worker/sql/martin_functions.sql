@@ -38,6 +38,7 @@ BEGIN
             score_fussgaengerzone,
             score_bestand,
             score_eigendaten,
+            score_bewohnerbedarf,
             cluster_area_m2,
             eignungsklasse,
             gebaeude,
@@ -123,6 +124,66 @@ BEGIN
             FROM planning.scenario_carriageways
             WHERE run_id = run_id_val
               AND geom && bounds
+        ) t
+        WHERE t.geom IS NOT NULL
+    );
+END;
+$$;
+
+-- Zensus-Einwohnerpunkte (Bewohnerbedarf-Faktor) als Punktlayer.
+--
+-- Liest direkt aus `data.census_population_point` – KEINE Kopie pro Lauf: die
+-- Tabelle deckt ganz Deutschland ab (~24 Mio. Punkte, EPSG:5243) und liegt
+-- ohnehin in dieser DB. Gezeigt wird genau der Ausschnitt, den auch das Scoring
+-- benutzt: `PostgisLoader.load_census_population()` filtert mit
+-- `geom && ST_Transform(study_area, 5243)`, also über die Bounding-Box des
+-- Planungsgebiets – dieselbe Bedingung steht unten. Das Planungsgebiet kommt aus
+-- dem eingefrorenen `factorConfigSnapshot` des Laufs, damit der Layer zum
+-- Ergebnis passt, auch wenn das Gebiet später bearbeitet wurde.
+--
+-- Fehlt das Data-Schema auf dieser Umgebung (Tabelle nicht importiert), liefert
+-- die Funktion NULL statt eines Fehlers – wie die graceful Fallbacks im Worker.
+CREATE OR REPLACE FUNCTION public.planning_census(
+    z int, x int, y int, query_params json DEFAULT '{}'
+)
+RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
+DECLARE
+    run_id_val bigint := NULLIF(query_params->>'run_id', '')::bigint;
+    bounds     geometry := ST_TileEnvelope(z, x, y);
+    geo        jsonb;
+    area_5243  geometry;
+BEGIN
+    IF run_id_val IS NULL OR to_regclass('data.census_population_point') IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    SELECT "factorConfigSnapshot" -> 'study_area' INTO geo
+    FROM prisma."PlanningRun" WHERE id = run_id_val;
+    IF geo IS NULL THEN
+        RETURN NULL;
+    END IF;
+    -- Wie _study_area_from_config() im Worker: Feature/FeatureCollection auspacken.
+    IF geo->>'type' = 'FeatureCollection' THEN
+        geo := geo->'features'->0->'geometry';
+    ELSIF geo->>'type' = 'Feature' THEN
+        geo := geo->'geometry';
+    END IF;
+    area_5243 := ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON(geo::text), 4326), 5243);
+
+    RETURN (
+        SELECT ST_AsMVT(t, 'planning_census', 4096, 'geom')
+        FROM (
+            SELECT
+                c.total AS einwohner,
+                ST_AsMVTGeom(ST_Transform(c.geom, 3857), bounds, 4096, 256, true) AS geom
+            FROM data.census_population_point c
+            -- Beide Bedingungen laufen über den GiST-Index im Quell-CRS. Die
+            -- Kachel wird vor dem Transformieren um 10 % geweitet, damit die
+            -- Projektionsverzerrung 3857 → 5243 an den Kachelrändern keine
+            -- Punkte verschluckt; ST_AsMVTGeom schneidet danach exakt zu.
+            WHERE c.total > 0
+              AND c.geom && ST_Transform(ST_Expand(bounds, (ST_XMax(bounds) - ST_XMin(bounds)) * 0.1), 5243)
+              AND c.geom && area_5243
         ) t
         WHERE t.geom IS NOT NULL
     );

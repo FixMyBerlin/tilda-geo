@@ -14,6 +14,8 @@ export type VariantFactorConfig = {
   parken_radius_m?: number
   fussgaengerzone_radius_m?: number
   bestand_default_diameter_m?: number
+  bewohnerbedarf_radius_m?: number
+  bewohnerbedarf_saettigung_ew?: number
   min_score_threshold?: number
   /** Zielgröße der Flächensuche (m²), Client-Filter auf cluster_area_m2 — pro Variante. */
   min_area_m2?: number | null

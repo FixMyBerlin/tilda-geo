@@ -20,6 +20,7 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
     w_parken: 0.1,
     w_fussgaengerzone: 0.1,
     w_bestand: 0,
+    w_bewohnerbedarf: 0,
   },
   vegetation_direction: 'negative',
   cir_source: 'auto' as const,
@@ -29,6 +30,7 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   parken_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
+  bewohnerbedarf_saettigung_ew: 30,
   min_score_threshold: 60,
   targets: [],
 }
@@ -65,7 +67,7 @@ export const PLANNING_USE_CASES: {
 
 export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = {
   bedarf:
-    'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege, ÖPNV, Zielorte, plus ein Zuschlag an Fußgängerzonen und ein Abzug, wo schon Anlagen stehen.',
+    'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege, ÖPNV, Zielorte, plus Zuschläge an Fußgängerzonen und rund um bewohnte Gebäude sowie ein Abzug, wo schon Anlagen stehen.',
   bebauung:
     'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen und Parkflächen schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
@@ -94,7 +96,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_eigendaten:
     'Laden Sie eigene Punkte, Linien oder Flächen hoch. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Das Gewicht gilt nur für Bonus und Abzug.',
   w_bewohnerbedarf:
-    'Geplant: der Bedarf je Gebäude wird aus Zensusdaten (Einwohnerzahl je Gebäude) ermittelt und hebt den Bedarf dort, wo viele Menschen wohnen. Dieser Faktor ist in Vorbereitung und noch nicht auswertbar — er lässt sich noch nicht einstellen und fließt in keinen Score ein.',
+    'Einwohnerzahlen aus dem Zensus 2022, auf einzelne Gebäude heruntergerechnet, heben den Bedarf dort, wo viele Menschen wohnen — unabhängig vom Alter. Jedes bewohnte Gebäude wirkt 20 m weit: direkt an der Gebäudekante mit seiner vollen Einwohnerzahl, auf halber Strecke nur noch zur Hälfte, ab 20 m gar nicht mehr. Ein Haus mit 100 Einwohnern zählt direkt daneben also 100, aus 10 m Entfernung 50. Mehrere Gebäude in Reichweite addieren sich. Der eingestellte Wert ist die Summe, ab der es den vollen Zuschlag gibt — zum Vergleich: dichter Berliner Blockrand liegt typisch bei 25–100, ein Einfamilienhausgebiet bei 3–13. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   min_score_threshold:
     'Nur Flächen ab diesem Gesamtscore zählen zur zusammenhängenden Kandidatenfläche. Der Filter „Gesuchte Fläche (m²)“ im Panel nutzt diese Cluster. Der Score selbst ändert sich dadurch nicht.',
 }
@@ -108,6 +110,16 @@ export const FACTOR_PARAMS: Record<
   w_bestand: [{ key: 'bestand_default_diameter_m', label: 'Standard-Durchmesser (m)', step: 1 }],
   w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1 }],
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1 }],
+  // Der 20-m-Radius ist bewusst fest verdrahtet (kein UI-Feld) und steht als Konstante in
+  // flaechenfinder/config.py. Einstellbar ist nur die Sättigung; ihr Label nennt die Einheit,
+  // weil „Einwohner" allein nicht erkennen lässt, dass der Abstand schon eingerechnet ist.
+  w_bewohnerbedarf: [
+    {
+      key: 'bewohnerbedarf_saettigung_ew',
+      label: 'Voller Zuschlag ab (Einwohnern nebenan)',
+      step: 5,
+    },
+  ],
 }
 
 export const WEIGHT_LABELS: Record<string, string> = {
@@ -130,8 +142,8 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation'
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
-//   Bedarf   → Radwegnähe, ÖPNV, Zielorte + Modifier Fußgängerzonen (Zuschlag)
-//              und Bestandsanlagen (Abzug)
+//   Bedarf   → Radwegnähe, ÖPNV, Zielorte + Modifier Fußgängerzonen (Zuschlag),
+//              Bewohnerbedarf (Zuschlag) und Bestandsanlagen (Abzug)
 //   Bebauung → Hangneigung + Modifier
 //              (Vegetation, Kreuzungen, Parken)
 //
@@ -155,9 +167,9 @@ export const WEIGHT_GROUPS: {
     criteria: ['w_cyclepath', 'w_transit', 'w_target'],
     modifiers: [
       { key: 'w_fussgaengerzone', direction: 'positive' },
+      { key: 'w_bewohnerbedarf', direction: 'positive' },
       { key: 'w_bestand', direction: 'negative' },
     ],
-    comingSoon: ['w_bewohnerbedarf'],
   },
   {
     key: 'bebauung',

@@ -58,6 +58,12 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand re
 -- oder wenn der Faktor (w_eigendaten) nicht gewichtet bzw. keine Datei geladen ist.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigendaten real;
 
+-- Bewohnerbedarf (Zensus): Zuschlag in Punkten rund um bewohnte Gebäude, aus der
+-- gewichteten Einwohner-Nachbarschaftssumme (data.census_population_point) gegen den
+-- Sättigungswert normiert. 0 auf Hexagonen, die selbst ein Gebäude schneiden;
+-- NULL, wenn der Faktor (w_bewohnerbedarf) nicht gewichtet ist.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bewohnerbedarf real;
+
 -- Flächen-Cluster (Connected-Component-Labeling über H3-Nachbarschaft): Gesamt-
 -- fläche der zusammenhängenden Fläche, zu der ein Hexagon gehört (nur Zellen mit
 -- mce_gesamtscore >= min_score_threshold; sonst NULL). Client filtert darauf auf
