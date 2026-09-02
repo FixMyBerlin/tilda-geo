@@ -45,14 +45,22 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // When `planningRun` is absent (the normal viewer), this renders nothing — so the
 // existing viewer is untouched.
 
-// Score → red intensity ramp (0 = excluded/near-white … 100 = deep red).
-// The colored property depends on the active display mode (combination / demand /
-// buildability), so the ramp is built per selected tile property.
+// Score → red intensity ramp (0 = ausgeschlossen/transparent … 100 = tiefrot).
+// Hexagone mit Wert 0 bekommen keine Füllfarbe, nur der Rand (fill-outline-color)
+// markiert sie noch. Zwischen 0 und HEXAGON_FADE_IN_THRESHOLD blendet die
+// Deckkraft graduell ein (statt hart bei 0 umzuschalten) – sonst entsteht bei
+// vielen knapp über 0 liegenden Werten ein löchriges Muster aus abrupt
+// wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Die
+// eingefärbte Property hängt vom aktiven Anzeigemodus ab (Kombination/Bedarf/
+// Bebauung), daher wird die Rampe pro ausgewählter Tile-Property gebaut.
+const HEXAGON_FADE_IN_THRESHOLD = 10
 const scoreColor = (property: string): any => [
   'interpolate',
   ['linear'],
   ['coalesce', ['get', property], 0],
   0,
+  'rgba(255,245,240,0)',
+  HEXAGON_FADE_IN_THRESHOLD,
   '#fff5f0',
   40,
   '#fc9272',
