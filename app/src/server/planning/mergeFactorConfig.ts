@@ -46,7 +46,7 @@ export const FALLBACK_SAETTIGUNG_EW = 30
  * Sie kommen aus dem Planungsgebiet, nicht aus der Variante, und dürfen deshalb nie in
  * `PlanningVariant.factorConfig` landen (sonst friert der Vorschlag als Nutzerwert ein).
  */
-export const AUTO_SAETTIGUNG_KEYS = [
+const AUTO_SAETTIGUNG_KEYS = [
   'bewohnerbedarf_saettigung_auto',
   'bewohnerbedarf_saettigung_auto_ew',
   'bewohnerbedarf_ew_pro_ha',

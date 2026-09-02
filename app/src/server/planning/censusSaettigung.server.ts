@@ -57,7 +57,7 @@ type CensusStats = { saettigungEw: number; ewPerHa: number }
  * analog zu den graceful Fallbacks der Worker-Loader. Der Aufrufer speichert dann NULL, und der
  * Worker-Default (30) greift.
  */
-export async function computeCensusStats(studyArea: unknown): Promise<CensusStats | null> {
+async function computeCensusStats(studyArea: unknown): Promise<CensusStats | null> {
   const geometry = unwrapGeometry(studyArea)
   if (geometry == null) return null
 
