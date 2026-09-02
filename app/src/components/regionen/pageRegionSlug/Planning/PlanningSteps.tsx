@@ -101,14 +101,13 @@ function stepDisplay(
   const excluded = EXCLUSION_STEP_INDICES.has(i)
   const base = { done: step < currentStep, active: step === currentStep }
 
-  // Eigendaten-Schritt: ohne Datei übersprungen; mit Datei in einem Ausschluss-
-  // Modus läuft er unabhängig vom Gewicht, sonst greift die normale Gewicht-0-Regel.
+  // Eigendaten-Schritt: die Distanzberechnung (scorer.py) läuft immer, sobald
+  // eine Datei vorliegt – unabhängig von Modus/Gewicht (die bestimmen erst im
+  // MCE-Schritt, ob sich die Distanz auf den Score auswirkt). Ohne Datei wird
+  // der Schritt übersprungen.
   if (i === USER_OBSTACLES_STEP_INDEX) {
     const present = userObstacles?.present ?? false
-    const isExclude =
-      userObstacles?.mode === 'exclude_inside' || userObstacles?.mode === 'exclude_outside'
-    const skipped = !present || (!isExclude && weightZero)
-    return { ...base, skipped, exclusionOnly: false }
+    return { ...base, skipped: !present, exclusionOnly: false }
   }
 
   return {
