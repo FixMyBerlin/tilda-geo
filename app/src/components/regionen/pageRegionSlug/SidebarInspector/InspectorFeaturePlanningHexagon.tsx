@@ -7,6 +7,7 @@ import {
   usePlanningVariantParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/Planning/planningDefaults'
+import { planningGroupStyle } from '@/components/regionen/pageRegionSlug/Planning/planningPanelStyles'
 import {
   criterionShares,
   groupShare,
@@ -42,6 +43,9 @@ const SCORE_LABELS: Record<string, string> = {
 //   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
 //   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
 const SCORE_GROUPS: {
+  // Gruppenschlüssel wie in WEIGHT_GROUPS — verbindet die Sidebar mit den Gewichten der Variante
+  // und mit den Gruppenfarben (`planningGroupStyle`) des Flächenfinder-Panels.
+  key: 'bedarf' | 'bebauung'
   label: string
   scoreKey: string
   criteria: string[]
@@ -51,12 +55,14 @@ const SCORE_GROUPS: {
   comingSoon?: string[]
 }[] = [
   {
+    key: 'bedarf',
     label: 'Bedarf',
     scoreKey: 'score_bedarf',
     criteria: ['score_radweg', 'score_oepnv', 'score_zielorte'],
     modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_bestand'],
   },
   {
+    key: 'bebauung',
     label: 'Bebauung',
     scoreKey: 'score_bebauung',
     criteria: ['score_hangneigung'],
@@ -92,83 +98,53 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   'sehr gut': 'bg-green-100 text-green-800',
 }
 
-/**
- * Anteil eines Faktors an seiner Gruppe, gerechnet auf den Gewichten des Laufs, der die gerade
- * angezeigten Werte tatsächlich erzeugt hat — nicht auf den womöglich seither veränderten,
- * aktuellen Variantengewichten (sonst stimmen Prozent und Score bei ungespeicherter Änderung nicht
- * mehr überein). Bewusst unauffällig gehalten: klein, gedämpfte Farbe, in Klammern.
- */
-const SharePct = ({ pct }: { pct: number | undefined }) => {
-  if (pct == null) return null
-  return (
-    <span className="w-9 text-right text-[10px] text-gray-400 tabular-nums">
-      ({Math.round(pct)}%)
-    </span>
-  )
-}
+// Gemeinsames Spaltenraster für alle Faktor-Zeilen (Kriterien, Zu-/Abschläge, "bald verfügbar"):
+// Label bekommt den Restplatz, Balken/Wert/Prozent haben feste Breiten. Nur so bleiben die Balken
+// exakt untereinander ausgerichtet — unabhängig davon, ob eine Zeile einen Prozent-Anteil zeigt
+// (Kriterien) oder nicht (Zu-/Abschläge), und über beide Gruppen-Tabellen (Bedarf/Bebauung) hinweg.
+const ROW_GRID = 'grid grid-cols-[1fr_6rem_2.75rem_2.5rem] items-center gap-x-2'
 
-/**
- * Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala.
- * Gleiche Balken-/Label-Maße wie `ScoreBar`, damit beide Zeilenarten sauber untereinander
- * ausgerichtet sind. Die Füllung zeigt den Anteil am maximal möglichen Effekt dieses Faktors
- * (`max` = `weightToPoints(Gewicht)`, siehe `weightScale.ts`) und ist grün (Zuschlag) bzw. rot
- * (Abschlag) eingefärbt. Statt eines Prozentanteils (bei vorzeichenbehafteten Punkten ohne
- * gemeinsame Bezugsgröße wenig aussagekräftig) zeigt der Wert direkt den Bruch aus angewandtem
- * Effekt und dem im Faktor eingestellten Maximum, z. B. „5/15".
- */
-const ModifierBar = ({ value, max }: { value: number | null | undefined; max: number }) => {
-  const pct = value != null && max > 0 ? Math.min(100, (Math.abs(value) / max) * 100) : 0
-  const positive = value != null && value > 0
-  const negative = value != null && value < 0
-  return (
-    <div className="flex items-center gap-2">
-      <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200">
-        <div
-          className={twJoin(
-            'h-full rounded-full',
-            positive ? 'bg-green-600' : negative ? 'bg-red-600' : 'bg-gray-300',
-          )}
-          style={{ width: `${pct}%`, opacity: 0.4 + (pct / 100) * 0.6 }}
-        />
-      </div>
-      <span className="w-14 text-right font-mono text-xs text-gray-600">
-        {value == null
-          ? '–'
-          : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}${max > 0 ? `/${max}` : ''}`}
-      </span>
-    </div>
-  )
-}
-
-/**
- * Platzhalter für ein angekündigtes, aber noch nicht integriertes Kriterium (z. B.
- * Bewohnerbedarf aus Zensusdaten) — es gibt noch keine Daten am Hexagon, daher kein Balken,
- * sondern nur ein "bald"-Hinweis.
- */
-const ComingSoonBar = () => (
-  <div className="flex items-center gap-2">
-    <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-100" />
-    <span className="w-14 text-right text-[10px] text-gray-400">bald</span>
+const BarTrack = ({
+  pct,
+  fillClassName,
+  trackClassName = 'bg-gray-200',
+}: {
+  pct: number
+  fillClassName?: string
+  trackClassName?: string
+}) => (
+  <div className={twJoin('h-2 w-24 overflow-hidden rounded-full', trackClassName)}>
+    {fillClassName && (
+      <div
+        className={twJoin('h-full rounded-full', fillClassName)}
+        style={{ width: `${pct}%`, opacity: 0.4 + (pct / 100) * 0.6 }}
+      />
+    )}
   </div>
 )
 
-const ScoreBar = ({ value, sharePct }: { value: number | null | undefined; sharePct?: number }) => {
-  const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
-  return (
-    <div className="flex items-center gap-2">
-      <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200">
-        <div
-          className="h-full rounded-full bg-red-600"
-          style={{ width: `${pct}%`, opacity: 0.4 + (pct / 100) * 0.6 }}
-        />
-      </div>
-      <span className="w-8 text-right font-mono text-xs text-gray-600">
-        {value != null ? Math.round(value) : '–'}
-      </span>
-      <SharePct pct={sharePct} />
-    </div>
-  )
-}
+/**
+ * Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala.
+ * Die Füllung zeigt den Anteil am maximal möglichen Effekt dieses Faktors (`max` =
+ * `weightToPoints(Gewicht)`, siehe `weightScale.ts`) und ist grün (Zuschlag) bzw. rot (Abschlag)
+ * eingefärbt. Statt eines Prozentanteils (bei vorzeichenbehafteten Punkten ohne gemeinsame
+ * Bezugsgröße wenig aussagekräftig) zeigt der Wert direkt den Bruch aus angewandtem Effekt und dem
+ * im Faktor eingestellten Maximum, z. B. „5/15".
+ */
+const formatModifierValue = (value: number | null | undefined, max: number) =>
+  value == null
+    ? '–'
+    : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(Math.round(value))}${max > 0 ? `/${max}` : ''}`
+
+const modifierBarPct = (value: number | null | undefined, max: number) =>
+  value != null && max > 0 ? Math.min(100, (Math.abs(value) / max) * 100) : 0
+
+const modifierFillClassName = (value: number | null | undefined) =>
+  value != null && value > 0
+    ? 'bg-green-600'
+    : value != null && value < 0
+      ? 'bg-red-600'
+      : 'bg-gray-300'
 
 export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
   const [areaFilterOn] = usePlanningAreaFilterParam()
@@ -193,9 +169,9 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
   // Verteilung zwischen Bedarf und Bebauung: Anteil der Kriterien dieser Gruppe am Grundscore
   // (dieselbe Größe, die FactorEditorPanel als "XX % des Grundscores" neben der Gruppen-
   // überschrift zeigt) — hier auf den Gewichten des Laufs statt der Live-Variante.
-  const groupSharePct = (scoreKey: string) => {
+  const groupSharePct = (groupKey: 'bedarf' | 'bebauung') => {
     if (!shares) return undefined
-    const weightGroup = WEIGHT_GROUPS.find((g) => scoreKey === `score_${g.key}`)
+    const weightGroup = WEIGHT_GROUPS.find((g) => g.key === groupKey)
     return weightGroup ? groupShare(shares, weightGroup.criteria) : undefined
   }
 
@@ -210,7 +186,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
       : 'bg-gray-100 text-gray-600'
 
   return (
-    <Disclosure title="Planungs-Hexagon">
+    <Disclosure title="Potenzialflächen-Hexagon">
       <div className="space-y-3 px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">Gesamtscore</span>
@@ -229,13 +205,19 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
         <div className="flex gap-2">
           {SCORE_GROUPS.map((group) => {
             const val = props[group.scoreKey]
-            const sharePct = groupSharePct(group.scoreKey)
+            const sharePct = groupSharePct(group.key)
             return (
-              <div key={group.scoreKey} className="flex-1 rounded bg-gray-50 px-2 py-1.5">
-                <div className="text-xs text-gray-500">
+              <div
+                key={group.scoreKey}
+                className={twJoin(
+                  'flex-1 rounded-r border-l-[3px] px-2 py-1.5',
+                  planningGroupStyle[group.key].block,
+                )}
+              >
+                <div className={twJoin('text-xs font-medium', planningGroupStyle[group.key].text)}>
                   {group.label}
                   {sharePct != null && (
-                    <span className="ml-1 text-[10px] text-gray-400 tabular-nums">
+                    <span className="ml-1 text-[10px] text-gray-500 tabular-nums">
                       ({Math.round(sharePct)}%)
                     </span>
                   )}
@@ -275,49 +257,71 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
 
         <div className="space-y-3">
           {SCORE_GROUPS.map((group) => (
-            <div key={group.scoreKey}>
-              <div className="mb-1 text-xs font-semibold text-gray-500 uppercase">
+            // Gleiche Gruppenfarben wie im Flächenfinder-Panel, damit die lange Faktorenliste hier
+            // und die Gewichte dort ohne Suchen zusammenzubringen sind.
+            <div
+              key={group.scoreKey}
+              className={twJoin(
+                'rounded-r border-l-[3px] py-1 pr-1 pl-2',
+                planningGroupStyle[group.key].block,
+              )}
+            >
+              <div
+                className={twJoin(
+                  'mb-1 text-xs font-semibold uppercase',
+                  planningGroupStyle[group.key].text,
+                )}
+              >
                 {group.label}
               </div>
-              <table className="w-full text-xs">
-                <tbody>
-                  {group.criteria.map((key) => (
-                    <tr key={key} className="border-b border-gray-100">
-                      <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
-                      <td className="py-1.5">
-                        <ScoreBar
-                          value={props[key]}
-                          sharePct={shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                  {group.comingSoon?.map((key) => (
-                    <tr key={key} className="border-b border-gray-100">
-                      <td className="py-1.5 pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</td>
-                      <td className="py-1.5">
-                        <ComingSoonBar />
-                      </td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td
-                      colSpan={2}
-                      className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase"
+              <div className="space-y-0 text-xs">
+                {group.criteria.map((key) => {
+                  const value = props[key] as number | null | undefined
+                  const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
+                  const sharePct = shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]
+                  return (
+                    <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
+                      <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
+                      <BarTrack pct={pct} fillClassName="bg-red-600" />
+                      <span className="text-right font-mono text-gray-600">
+                        {value != null ? Math.round(value) : '–'}
+                      </span>
+                      <span className="text-right text-[10px] text-gray-400 tabular-nums">
+                        {sharePct != null ? `(${Math.round(sharePct)}%)` : null}
+                      </span>
+                    </div>
+                  )
+                })}
+                {group.comingSoon?.map((key) => (
+                  <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
+                    <span className="pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</span>
+                    <BarTrack pct={0} trackClassName="bg-gray-100" />
+                    <span className="col-span-2 text-right text-[10px] text-gray-400">bald</span>
+                  </div>
+                ))}
+                <div className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase">
+                  Zu- und Abschläge
+                </div>
+                {group.modifiers.map((key) => {
+                  const value = props[key] as number | null | undefined
+                  const max = modifierMax(key)
+                  return (
+                    <div
+                      key={key}
+                      className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5 last:border-0')}
                     >
-                      Zu- und Abschläge
-                    </td>
-                  </tr>
-                  {group.modifiers.map((key) => (
-                    <tr key={key} className="border-b border-gray-100 last:border-0">
-                      <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</td>
-                      <td className="py-1.5">
-                        <ModifierBar value={props[key]} max={modifierMax(key)} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
+                      <BarTrack
+                        pct={modifierBarPct(value, max)}
+                        fillClassName={modifierFillClassName(value)}
+                      />
+                      <span className="col-span-2 text-right font-mono text-gray-600">
+                        {formatModifierValue(value, max)}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           ))}
 
@@ -328,19 +332,16 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
               <div className="mb-1 text-xs font-semibold text-gray-500 uppercase">
                 Eigene Flächen
               </div>
-              <table className="w-full text-xs">
-                <tbody>
-                  <tr>
-                    <td className="py-1.5 pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</td>
-                    <td className="py-1.5">
-                      <ModifierBar
-                        value={props.score_eigendaten}
-                        max={modifierMax('score_eigendaten')}
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
+                <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
+                <BarTrack
+                  pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
+                  fillClassName={modifierFillClassName(props.score_eigendaten)}
+                />
+                <span className="col-span-2 text-right font-mono text-gray-600">
+                  {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
+                </span>
+              </div>
             </div>
           )}
         </div>

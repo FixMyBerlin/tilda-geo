@@ -1,5 +1,4 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -12,6 +11,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
+import { DisclosureChevron } from './CollapsibleBox'
 import { factorFingerprint, factorsDiffer } from './factorFingerprint'
 import { InfoTooltip } from './InfoTooltip'
 import {
@@ -22,7 +22,12 @@ import {
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
 } from './planningDefaults'
-import { planningNumberInputClass } from './planningPanelStyles'
+import {
+  planningDisclosureBoxClass,
+  planningDisclosureHeaderClass,
+  planningGroupStyle,
+  planningNumberInputClass,
+} from './planningPanelStyles'
 import { SegmentedChoice } from './SegmentedChoice'
 import { USER_GEOJSON_MODES, type UserGeojsonMode } from './UserObstaclesField'
 import {
@@ -46,8 +51,37 @@ const FactorInfo = ({ factorKey }: { factorKey: string }) => {
   return <InfoTooltip>{text}</InfoTooltip>
 }
 
-const groupHeadlineClass =
-  'flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-sm font-bold text-gray-800'
+/** Basis der Blocküberschriften; die Farbe kommt je Block dazu (Faktorgruppen farbig, Rest grau). */
+const groupHeadlineBaseClass =
+  'flex items-baseline justify-between gap-2 border-b pb-0.5 text-sm font-bold'
+
+const groupHeadlineClass = twJoin(groupHeadlineBaseClass, 'border-gray-200 text-gray-800')
+
+/**
+ * Anteil beider Faktorgruppen am Grundscore als farbige Chips — die Kurzfassung der
+ * Gruppenüberschriften für den zugeklappten Faktoren-Kopf.
+ */
+const GroupShareChips = ({ weights }: { weights: Record<string, number> | undefined }) => {
+  const shares = criterionShares(weights)
+  return (
+    <div className="flex w-full items-center gap-1.5">
+      {WEIGHT_GROUPS.map((group) => (
+        <span
+          key={group.key}
+          className={twJoin(
+            'rounded px-1.5 py-0.5 text-[11px] font-medium',
+            planningGroupStyle[group.key].chip,
+          )}
+        >
+          {group.label}{' '}
+          <span className="font-bold tabular-nums">
+            {Math.round(groupShare(shares, group.criteria))} %
+          </span>
+        </span>
+      ))}
+    </div>
+  )
+}
 
 /**
  * Herkunftshinweis unter der Bewohnerbedarf-Sättigung. Der Wert wird je Planungsgebiet einmal aus
@@ -186,8 +220,17 @@ const FactorFields = ({
           </button>
         )}
         {WEIGHT_GROUPS.map((group) => (
-          <div key={group.key} className="mt-3 first:mt-0">
-            <div className={groupHeadlineClass}>
+          // Farbiger Streifen + zarte Tönung je Gruppe: im langen Formular ist sonst nicht auf
+          // einen Blick zu sehen, wo Bedarf aufhört und Bebauung anfängt. Gleiche Farben wie die
+          // Anteil-Chips im zugeklappten Kopf.
+          <div
+            key={group.key}
+            className={twJoin(
+              'mt-3 rounded-r border-l-[3px] py-1.5 pr-1 pl-2 first:mt-0',
+              planningGroupStyle[group.key].block,
+            )}
+          >
+            <div className={twJoin(groupHeadlineBaseClass, planningGroupStyle[group.key].headline)}>
               <span className="flex items-center gap-1">
                 {group.label}
                 <InfoTooltip>{GROUP_HELP[group.key]}</InfoTooltip>
@@ -538,19 +581,20 @@ const FactorEditorPanelForm = ({
   }
 
   return (
-    <Disclosure as="div" className="rounded border border-gray-200">
+    <Disclosure as="div" className={planningDisclosureBoxClass(open)}>
       <DisclosureButton
         as="div"
         onClick={() => setOpen((v) => !v)}
-        className={twJoin(
-          'flex w-full cursor-pointer items-center justify-between px-2.5 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50',
-          open ? 'border-b border-gray-200' : '',
-        )}
+        className={planningDisclosureHeaderClass(open, !open)}
       >
-        <span>Faktoren</span>
-        <ChevronRightIcon
-          className={twJoin('size-4 text-gray-500 transition-transform', open ? 'rotate-90' : '')}
-        />
+        <div className="flex w-full items-center gap-2">
+          <span className="flex-1">Faktoren</span>
+          <DisclosureChevron open={open} />
+        </div>
+        {/* Zugeklappt ist nicht zu sehen, wie die Gewichte stehen — die zweite Zeile zeigt
+            deshalb den Anteil beider Gruppen am Grundscore (wie die Gruppenüberschriften im
+            geöffneten Formular). */}
+        {!open && <GroupShareChips weights={config.weights} />}
       </DisclosureButton>
 
       <Transition

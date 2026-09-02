@@ -2,6 +2,23 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@head
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { planningDisclosureBoxClass, planningDisclosureHeaderClass } from './planningPanelStyles'
+
+/**
+ * Chevron der Klapp-Boxen. Zugeklappt sitzt er in einem weißen Chip — zusammen mit dem gefüllten
+ * Kopf (siehe `planningDisclosureHeaderClass`) ist die Zeile so auch ohne sichtbaren Inhalt klar
+ * als aufklappbar zu erkennen.
+ */
+export const DisclosureChevron = ({ open }: { open: boolean }) => (
+  <span
+    className={twJoin(
+      'flex size-5 shrink-0 items-center justify-center rounded-full transition-colors',
+      open ? 'text-gray-500' : 'border border-gray-300 bg-white text-gray-700 shadow-sm',
+    )}
+  >
+    <ChevronRightIcon className={twJoin('size-4 transition-transform', open && 'rotate-90')} />
+  </span>
+)
 
 /**
  * Auf-/zuklappbare Box mit Titelzeile. Basis für die nummerierten `WizardStep`s und die
@@ -22,20 +39,15 @@ export const CollapsibleBox = ({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <Disclosure as="div" className="rounded border border-gray-200">
+    <Disclosure as="div" className={planningDisclosureBoxClass(open)}>
       <DisclosureButton
         as="div"
         onClick={() => setOpen((v) => !v)}
-        className={twJoin(
-          'flex w-full cursor-pointer items-center gap-2 px-2.5 py-2 text-left text-sm font-semibold text-gray-800 hover:bg-gray-50',
-          open ? 'border-b border-gray-200' : '',
-        )}
+        className={planningDisclosureHeaderClass(open)}
       >
         {leading}
         <span className="flex-1">{title}</span>
-        <ChevronRightIcon
-          className={twJoin('size-4 text-gray-500 transition-transform', open ? 'rotate-90' : '')}
-        />
+        <DisclosureChevron open={open} />
       </DisclosureButton>
 
       <Transition

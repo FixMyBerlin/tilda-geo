@@ -67,7 +67,8 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     setAutoCollapsedJobId,
   ])
 
-  if (!data) return null
+  // Der "Neu berechnen"-Button in RunButton zeigt den fertigen Zustand schon an.
+  if (!data || data.status === 'DONE') return null
 
   const showProgress =
     (data.status === 'RUNNING' || data.status === 'QUEUED') && data.progress != null
