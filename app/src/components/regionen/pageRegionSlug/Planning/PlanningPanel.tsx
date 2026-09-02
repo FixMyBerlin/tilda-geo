@@ -255,6 +255,10 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
       ? 'Faktoren geändert'
       : null
 
+  // Ob am Ende überhaupt ein Layer-Schalter erscheint: ScoreModeSwitcher, Vegetation,
+  // Fahrbahnen und Zensus hängen alle an hasCompleteRun, nur Eigene-Daten nicht.
+  const showLayerSection = hasCompleteRun || userGeojson != null
+
   return (
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-3">
       {outdatedReason && (
@@ -297,20 +301,27 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
         </div>
       )}
 
-      {hasCompleteRun && <ScoreModeSwitcher />}
-      {hasCompleteRun && (latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
-      {hasCompleteRun &&
-        (variant.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
-          <CarriagewaysToggle />
-        )}
-      {/* Aus dem Lauf-Snapshot, nicht aus der aktuellen Konfiguration: die Kacheln
-          werden auf das Planungsgebiet DIESES Laufs zugeschnitten (siehe
-          planning_census), der Schalter soll also genau dann erscheinen, wenn der
-          Bewohnerbedarf tatsächlich mitgerechnet wurde. */}
-      {hasCompleteRun && (lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && <CensusToggle />}
-      {/* Ohne hasCompleteRun-Bedingung: die eigenen Daten liegen im Client und werden
-          schon vor dem ersten Lauf in der Karte gezeigt (siehe UserObstaclesLayer). */}
-      {userGeojson != null && <UserObstaclesToggle />}
+      {showLayerSection && (
+        <div className="flex flex-col gap-2 border-t border-gray-200 pt-3">
+          <span className="text-xs font-bold text-gray-500">Layer</span>
+          {hasCompleteRun && <ScoreModeSwitcher />}
+          {hasCompleteRun && (latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
+          {hasCompleteRun &&
+            (variant.factorConfig as FactorConfig | undefined)?.exclude_carriageways && (
+              <CarriagewaysToggle />
+            )}
+          {/* Aus dem Lauf-Snapshot, nicht aus der aktuellen Konfiguration: die Kacheln
+              werden auf das Planungsgebiet DIESES Laufs zugeschnitten (siehe
+              planning_census), der Schalter soll also genau dann erscheinen, wenn der
+              Bewohnerbedarf tatsächlich mitgerechnet wurde. */}
+          {hasCompleteRun && (lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && (
+            <CensusToggle />
+          )}
+          {/* Ohne hasCompleteRun-Bedingung: die eigenen Daten liegen im Client und werden
+              schon vor dem ersten Lauf in der Karte gezeigt (siehe UserObstaclesLayer). */}
+          {userGeojson != null && <UserObstaclesToggle />}
+        </div>
+      )}
     </div>
   )
 }
