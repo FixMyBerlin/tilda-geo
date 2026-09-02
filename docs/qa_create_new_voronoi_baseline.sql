@@ -3,17 +3,12 @@
 -- Create a new data.* QA voronoi baseline from live public.*_quantized points.
 -- Copies id / geom / name / priority from an existing base table; recalculates count_reference.
 --
--- Run on production at freeze / delivery time (same DB that will feed nightly QA).
+-- Run on production at freeze / delivery time (same DB that will feed nightly QA):
+-- edit the variables in the DECLARE block, then run the whole script.
 --
--- 1. Edit the variables in the DECLARE block
--- 2. Run the whole script (psql, TablePlus, …)
--- 3. Point processing step 9 at the new target table name if it changed
---    (public outputs stay qa_parkings_euvm / qa_parkings_euvm_priority)
--- 4. Copy data.<target_table> to local Postgres, then
---    bun run data-schema-publish (CLI only; not the admin page) so staging
---    and other machines can Import it. Use --mode snapshot to keep the
---    previous dump. Also publish the undated base table data.euvm_qa_voronoi
---    once so the generator can be re-run outside production.
+-- This script is step 2 of the freeze checklist. Everything that happens before
+-- and after it (SQL dump export, spec, load/verify, publish, Import, processing
+-- step 9) is documented once in docs/Parking-Client-Freeze-QA.md — follow that.
 
 CREATE SCHEMA IF NOT EXISTS data;
 

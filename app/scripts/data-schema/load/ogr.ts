@@ -65,12 +65,16 @@ export async function getSourceLayerInfo(filePath: string, layer: string | null 
   }
 }
 
+type DataSchemaOgrSpec = DataSchemaSpec & {
+  import: NonNullable<DataSchemaSpec['import']>
+}
+
 export async function runOgr2ogrImport({
   filePath,
   spec,
 }: {
   filePath: string
-  spec: DataSchemaSpec
+  spec: DataSchemaOgrSpec
 }) {
   applyDevPortSlotToProcessEnv()
   const args = [

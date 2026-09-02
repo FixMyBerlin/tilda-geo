@@ -14,6 +14,19 @@ const validSpec = {
   indexes: [{ name: 'euvm_cutouts_point_geom_idx', using: 'gist', columns: ['geom'] }],
 }
 
+const validSqlSpec = {
+  specVersion: 1,
+  table: 'euvm_qa_voronoi_2026',
+  source: {
+    file: 'euvm_qa_voronoi_2026.sql',
+    provider: 'TILDA production',
+    documentation:
+      'Generated on production by docs/qa_create_new_voronoi_baseline.sql, then exported as a SQL dump.',
+  },
+  indexes: [{ name: 'euvm_qa_voronoi_2026_geom_idx', using: 'gist', columns: ['geom'] }],
+  consumedBy: 'processing/topics/parking/9_qa_parkings_euvm_voronoi.sql',
+}
+
 describe('parseDataSchemaSpec', () => {
   it('returns the spec when it matches the table', () => {
     expect(parseDataSchemaSpec(validSpec, 'euvm_cutouts_point').table).toBe('euvm_cutouts_point')
@@ -54,13 +67,27 @@ describe('parseDataSchemaSpec', () => {
     ).toThrow(/basename/)
   })
 
-  it('rejects a source.file that is not geojson or gpkg', () => {
+  it('rejects a source.file that is not geojson, gpkg or sql', () => {
     expect(() =>
       parseDataSchemaSpec(
         { ...validSpec, source: { file: 'euvm_cutouts_point.csv' } },
         'euvm_cutouts_point',
       ),
-    ).toThrow(/geojson or \.gpkg/)
+    ).toThrow(/geojson, \.gpkg or \.sql/)
+  })
+
+  it('accepts a .sql source without an import block', () => {
+    const spec = parseDataSchemaSpec(validSqlSpec, 'euvm_qa_voronoi_2026')
+    expect(spec.source.file).toBe('euvm_qa_voronoi_2026.sql')
+    expect(spec.import).toBeUndefined()
+    expect(spec.consumedBy).toBe('processing/topics/parking/9_qa_parkings_euvm_voronoi.sql')
+  })
+
+  it('rejects a .geojson source without an import block', () => {
+    const { import: _import, ...withoutImport } = validSpec
+    expect(() => parseDataSchemaSpec(withoutImport, 'euvm_cutouts_point')).toThrow(
+      /import is required/,
+    )
   })
 
   it('rejects an invalid spec without throwing from Zod.parse', () => {
