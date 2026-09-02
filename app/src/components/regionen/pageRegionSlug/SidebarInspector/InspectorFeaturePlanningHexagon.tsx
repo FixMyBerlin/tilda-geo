@@ -24,7 +24,7 @@ type Props = {
 const SCORE_LABELS: Record<string, string> = {
   score_radweg: 'Radweg',
   score_hangneigung: 'Hangneigung',
-  score_oepnv: 'ÖPNV',
+  score_oepnv: 'ÖPNV + Bikesharing',
   score_zielorte: 'Zielorte',
   score_vegetation: 'Vegetation',
   score_kreuzung: 'Kreuzungen',

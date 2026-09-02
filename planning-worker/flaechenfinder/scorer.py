@@ -135,7 +135,7 @@ SCORING_STEPS = [
     "Radwege laden",
     "Gebäude laden",
     "Bewohnerbedarf laden (Zensus)",
-    "ÖPNV-Haltestellen laden",
+    "ÖPNV + Bikesharing laden",
     "Kreuzungen laden",
     "KFZ-Parkflächen laden",
     "Zielorte bewerten",
@@ -402,14 +402,14 @@ def run_flaechenfinder(
         del census
     del buildings_for_census
 
-    # ── 6. ÖPNV-Haltestellen ──────────────────────────────────────
-    # Nur bei Gewicht > 0 laden – sonst die vier Transit-Queries sparen und
+    # ── 6. ÖPNV-Haltestellen + Bikesharing ────────────────────────
+    # Nur bei Gewicht > 0 laden – sonst die Transit-Queries sparen und
     # score_oepnv als NaN (→ DB NULL, Sidebar „–") markieren.
     _step(6)
     if (use_case.weights.get("w_transit", 0) or 0) > 0:
         _TRANSIT_TYPES = [
-            # U-Bahn-Eingang und Bahnhofsgebäude haben keinen publicTransport-Tag-Dict-
-            # Eintrag, sondern eigene Tabelle/Loader, siehe unten.
+            # U-Bahn-Eingang, Bahnhofsgebäude und Bikesharing haben keinen publicTransport-
+            # Tag-Dict-Eintrag, sondern eigene Tabelle/Loader, siehe unten.
             ("U-Bahn-Eingang",   None,                          50),
             ("Straßenbahn",      {"railway": "tram_stop"},       50),
             ("Bus",              {"highway": "bus_stop"},         30),
@@ -417,6 +417,9 @@ def run_flaechenfinder(
             # Bahnhofsgebäude (building=train_station): Abstellanlagen sollen möglichst
             # nah ans Gebäude, nicht nur an den Bahnsteig-/Stationspunkt.
             ("Bahnhofsgebäude",  None,                          100),
+            # Bikesharing (poiClassification, *=bicycle_rental): wie Bushaltestellen ein
+            # „Last Mile"-Zugangspunkt, deshalb derselbe Radius von 30 m.
+            ("Bikesharing",      None,                           30),
         ]
         _transit_scores = []
         for _tname, _ttags, _tradius in _TRANSIT_TYPES:
@@ -425,6 +428,8 @@ def run_flaechenfinder(
                     _stops = osm_loader.load_subway_entrances(study_area_geom)
                 elif _tname == "Bahnhofsgebäude":
                     _stops = osm_loader.load_train_station_buildings(study_area_geom)
+                elif _tname == "Bikesharing":
+                    _stops = osm_loader.load_bikesharing(study_area_geom)
                 else:
                     _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
                 if not len(_stops):

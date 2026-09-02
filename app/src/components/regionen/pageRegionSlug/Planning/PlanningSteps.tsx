@@ -9,7 +9,7 @@ const SCORING_STEPS = [
   'Radwege laden',
   'Gebäude laden',
   'Bewohnerbedarf laden (Zensus)',
-  'ÖPNV-Haltestellen laden',
+  'ÖPNV + Bikesharing laden',
   'Kreuzungen laden',
   'KFZ-Parkflächen laden',
   'Zielorte bewerten',
@@ -30,7 +30,7 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_cyclepath'], //   3 Radwege laden
   [], //                    4 Gebäude laden
   ['w_bewohnerbedarf'], //  5 Bewohnerbedarf laden (Zensus)
-  ['w_transit'], //         6 ÖPNV-Haltestellen laden
+  ['w_transit'], //         6 ÖPNV + Bikesharing laden
   ['w_intersection', 'w_fussgaengerzone'], // 7 Kreuzungen & Fußgängerzonen laden
   ['w_parken'], //          8 KFZ-Parkflächen laden
   ['w_target'], //          9 Zielorte bewerten

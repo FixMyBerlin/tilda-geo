@@ -12,8 +12,9 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
    - `score_radweg` – Nähe zu `public.bikelanes`
    - `score_zielorte` – Nähe zu den im Szenario konfigurierten `targets`
    - `score_hangneigung` – DEM-Hangneigung (`slope_score`)
-   - `score_oepnv` – Nähe zu ÖPNV-Haltestellen (max. über 4 Typen: U-Bahn-Eingang,
-     Straßenbahn, Bus, Bahnhof)
+   - `score_oepnv` – Nähe zu ÖPNV-Haltestellen und Bikesharing (max. über 6 Typen:
+     U-Bahn-Eingang, Straßenbahn, Bus, Bahnhof, Bahnhofsgebäude, Bikesharing;
+     Bikesharing mit demselben Radius wie Bushaltestellen)
 3. **Basis-Score** – gewichtete Summe der Teilscores (`weights` im
    `factorConfig`, siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
 4. **Vegetations-Effekt** – kein additiver Teilscore, sondern stufenloser

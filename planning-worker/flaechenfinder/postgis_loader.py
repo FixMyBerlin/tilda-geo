@@ -184,6 +184,22 @@ class PostgisLoader:
         gdf = self._read_table("_publicTransport_entrances", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
+    def load_bikesharing(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bikesharing-Stationen (`*=bicycle_rental`) aus `public."poiClassification"`.
+
+        Bikesharing liegt nicht in `publicTransport`, sondern als POI in
+        `poiClassification` – deshalb eigener Loader statt eines Eintrags in
+        `_TRANSIT_TAG_MAP`. Gefiltert wird über `tags->>'type'`, das das Topic als
+        `<osm-key>-bicycle_rental` ablegt (siehe processing/topics/poiClassification/
+        helper/result_tags.lua); dieselben drei Werte filtert auch der Kartenlayer
+        (`subcat_poi_plus_busStops.const.ts`).
+        """
+        types = ("amenity-bicycle_rental", "tourism-bicycle_rental", "leisure-bicycle_rental")
+        types_sql = ", ".join(f"'{_sql_literal(t)}'" for t in types)
+        where = f"tags->>'type' IN ({types_sql})"
+        gdf = self._read_table("poiClassification", polygon_4326, where=where)
+        return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
+
     def load_intersection_corners(
         self, polygon_4326: BaseGeometry, road_classes: list[str] | None = None
     ) -> gpd.GeoDataFrame:
