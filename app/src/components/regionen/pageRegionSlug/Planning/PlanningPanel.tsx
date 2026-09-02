@@ -30,7 +30,6 @@ import { RunButton } from './RunButton'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
 import { useDraggableMapPanel } from './useDraggableMapPanel'
 import { VariantList } from './VariantList'
-import { VariantTitleField } from './VariantTitleField'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
 
@@ -141,7 +140,7 @@ const UserObstaclesToggle = () => {
 /**
  * Zielgrößen-Filter der Flächensuche. Der Wert gehört zur Variante
  * (`factorConfig.min_area_m2`, beim Anlegen des Planungsgebiets aus dessen Flächengröße
- * vorbelegt) und wird beim Verlassen des Felds gespeichert — Muster wie VariantTitleField.
+ * vorbelegt) und wird beim Verlassen des Felds gespeichert.
  * Der URL-Param hält den in der Karte wirksamen Wert, damit sie schon beim Tippen reagiert.
  */
 const MinAreaFilterForm = ({
@@ -266,13 +265,6 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
           {outdatedReason} — Ergebnis veraltet. Bitte neu berechnen.
         </p>
       )}
-
-      <VariantTitleField
-        variantId={variantId}
-        title={variant.title}
-        regionSlug={regionSlug}
-        readOnly={isLocked}
-      />
 
       {hasCompleteRun && (
         <MinAreaFilter

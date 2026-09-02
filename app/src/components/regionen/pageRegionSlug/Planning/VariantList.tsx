@@ -1,11 +1,12 @@
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { formatDate } from '@/components/shared/date/formatDate'
 import {
   createPlanningVariantFn,
   deletePlanningVariantFn,
   duplicatePlanningVariantFn,
+  updatePlanningVariantFn,
 } from '@/server/planning/planning.functions'
 import {
   planningAreasQueryOptions,
@@ -39,16 +40,78 @@ const StatusIcon = ({ variant }: { variant: VariantSummary }) => {
   return null
 }
 
+/** Inline-Umbenennen in der Variantenliste — Enter oder Fokusverlust speichert, Escape verwirft. */
+const VariantRenameInput = ({
+  variantId,
+  title: savedTitle,
+  regionSlug,
+  onDone,
+}: {
+  variantId: number
+  title: string
+  regionSlug: string
+  onDone: () => void
+}) => {
+  const queryClient = useQueryClient()
+  const [title, setTitle] = useState(savedTitle)
+  const done = useRef(false)
+
+  const mutation = useMutation({
+    mutationFn: (newTitle: string) =>
+      updatePlanningVariantFn({ data: { variantId, title: newTitle } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
+      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+    },
+  })
+
+  const finish = (save: boolean) => {
+    if (done.current) return
+    done.current = true
+    const trimmed = title.trim()
+    if (save && trimmed && trimmed !== savedTitle) {
+      // Liste sofort umbenennen, damit der Wechsel vom Input zurück zum Label nicht springt.
+      queryClient.setQueryData(planningAreasQueryOptions(regionSlug).queryKey, (old) =>
+        old?.map((area) => ({
+          ...area,
+          variants: area.variants.map((v) => (v.id === variantId ? { ...v, title: trimmed } : v)),
+        })),
+      )
+      mutation.mutate(trimmed)
+    }
+    onDone()
+  }
+
+  return (
+    <input
+      type="text"
+      autoFocus
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      onFocus={(e) => e.currentTarget.select()}
+      onClick={(e) => e.stopPropagation()}
+      onBlur={() => finish(true)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') finish(true)
+        if (e.key === 'Escape') finish(false)
+      }}
+      className="min-w-0 flex-1 rounded border border-blue-400 px-2 py-1 text-sm focus:ring-1 focus:ring-blue-400 focus:outline-none"
+    />
+  )
+}
+
 const VariantMenu = ({
   variant,
   regionSlug,
   onDeleted,
   onDuplicated,
+  onRename,
 }: {
   variant: VariantSummary
   regionSlug: string
   onDeleted: () => void
   onDuplicated: (variantId: number) => void
+  onRename: () => void
 }) => {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
@@ -86,6 +149,18 @@ const VariantMenu = ({
           <li>
             <button
               type="button"
+              onClick={() => {
+                setOpen(false)
+                onRename()
+              }}
+              className="block w-full px-2 py-1 text-left hover:bg-gray-100"
+            >
+              Umbenennen
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
               onClick={() => duplicateMutation.mutate()}
               disabled={duplicateMutation.isPending}
               className="block w-full px-2 py-1 text-left hover:bg-gray-100"
@@ -115,6 +190,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
   const [activeArea] = usePlanningAreaParam()
   const [activeVariant, setActiveVariant] = usePlanningVariantParam()
   const [, setRun] = usePlanningRunParam()
+  const [renamingId, setRenamingId] = useState<number | null>(null)
   const queryClient = useQueryClient()
 
   const { data: areas } = useQuery({
@@ -181,37 +257,47 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
             const isStale = latestRun?.stale === true
             return (
               <li key={variant.id} className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveVariant(variant.id)
-                    setRun(variant.currentRunId ?? null)
-                  }}
-                  className={`flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-gray-100 ${
-                    activeVariant === variant.id ? 'bg-blue-50 font-medium' : ''
-                  }`}
-                >
-                  <span className="w-4 shrink-0 text-center">
-                    {activeVariant === variant.id ? '●' : '○'}
-                  </span>
-                  <span className="w-4 shrink-0 text-center">
-                    <StatusIcon variant={variant} />
-                  </span>
-                  <span className="truncate">{variant.title}</span>
-                  {latestRun?.status === 'COMPLETE' && (
-                    <span className="shrink-0 text-xs text-gray-400 tabular-nums">
-                      {formatDate(latestRun.createdAt)}
+                {renamingId === variant.id ? (
+                  <VariantRenameInput
+                    variantId={variant.id}
+                    title={variant.title}
+                    regionSlug={regionSlug}
+                    onDone={() => setRenamingId(null)}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveVariant(variant.id)
+                      setRun(variant.currentRunId ?? null)
+                    }}
+                    className={`flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-gray-100 ${
+                      activeVariant === variant.id ? 'bg-blue-50 font-medium' : ''
+                    }`}
+                  >
+                    <span className="w-4 shrink-0 text-center">
+                      {activeVariant === variant.id ? '●' : '○'}
                     </span>
-                  )}
-                  {isStale && (
-                    <span className="shrink-0 rounded bg-amber-100 px-1 text-[10px] text-amber-800">
-                      veraltet
+                    <span className="w-4 shrink-0 text-center">
+                      <StatusIcon variant={variant} />
                     </span>
-                  )}
-                </button>
+                    <span className="truncate">{variant.title}</span>
+                    {latestRun?.status === 'COMPLETE' && (
+                      <span className="shrink-0 text-xs text-gray-400 tabular-nums">
+                        {formatDate(latestRun.createdAt)}
+                      </span>
+                    )}
+                    {isStale && (
+                      <span className="shrink-0 rounded bg-amber-100 px-1 text-[10px] text-amber-800">
+                        veraltet
+                      </span>
+                    )}
+                  </button>
+                )}
                 <VariantMenu
                   variant={variant}
                   regionSlug={regionSlug}
+                  onRename={() => setRenamingId(variant.id)}
                   onDuplicated={(id) => {
                     setActiveVariant(id)
                     setRun(null)
