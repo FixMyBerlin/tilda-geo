@@ -178,7 +178,7 @@ export const getPlanningAreasFn = createServerFn({ method: 'GET' })
             runs: {
               orderBy: { createdAt: 'desc' },
               take: 1,
-              select: { hexCount: true, stale: true, status: true },
+              select: { hexCount: true, stale: true, status: true, createdAt: true },
             },
           },
         },

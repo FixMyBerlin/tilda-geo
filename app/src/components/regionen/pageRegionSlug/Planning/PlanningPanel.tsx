@@ -274,8 +274,6 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
         readOnly={isLocked}
       />
 
-      <RunButton variantId={variantId} regionSlug={regionSlug} latestJob={latestJob} />
-
       {hasCompleteRun && (
         <MinAreaFilter
           variantId={variantId}
@@ -292,14 +290,7 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
         defaultOpen={factorsDefaultOpen}
       />
 
-      {latestRun && (
-        <div className="text-xs text-gray-600">
-          Letzter Lauf:{' '}
-          {latestRun.status === 'COMPLETE'
-            ? `${latestRun.hexCount ?? 0} Hexagone`
-            : latestRun.status}
-        </div>
-      )}
+      <RunButton variantId={variantId} regionSlug={regionSlug} latestJob={latestJob} />
 
       {showLayerSection && (
         <div className="flex flex-col gap-2 border-t border-gray-200 pt-3">

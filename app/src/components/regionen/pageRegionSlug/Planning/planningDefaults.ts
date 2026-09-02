@@ -108,9 +108,7 @@ export const FACTOR_PARAMS: Record<
   { key: keyof FactorConfig; label: string; step: number; min?: number; alwaysEditable?: boolean }[]
 > = {
   w_cyclepath: [{ key: 'max_cyclepath_dist_m', label: 'Max. Distanz (m)', step: 1, min: 0 }],
-  w_fussgaengerzone: [
-    { key: 'fussgaengerzone_radius_m', label: 'Radius (m)', step: 1, min: 0 },
-  ],
+  w_fussgaengerzone: [{ key: 'fussgaengerzone_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   w_bestand: [
     { key: 'bestand_default_diameter_m', label: 'Standard-Durchmesser (m)', step: 1, min: 0 },
   ],

@@ -189,7 +189,9 @@ export const AreaFormFields = ({
               step={1}
               value={state.areaSizeM2 ?? ''}
               onChange={(e) =>
-                onAreaSizeM2Change(e.target.value === '' ? null : Number(e.target.value))
+                onAreaSizeM2Change(
+                  e.target.value === '' ? null : Math.max(0, Number(e.target.value)),
+                )
               }
               className={planningNumberInputClass}
             />

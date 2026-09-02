@@ -1,6 +1,7 @@
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { formatDate } from '@/components/shared/date/formatDate'
 import {
   createPlanningVariantFn,
   deletePlanningVariantFn,
@@ -23,7 +24,7 @@ type VariantSummary = {
   title: string
   currentRunId: number | null
   jobs: { status: string }[]
-  runs: { hexCount: number | null; stale: boolean; status: string }[]
+  runs: { hexCount: number | null; stale: boolean; status: string; createdAt: string | Date }[]
 }
 
 const StatusIcon = ({ variant }: { variant: VariantSummary }) => {
@@ -197,12 +198,9 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                     <StatusIcon variant={variant} />
                   </span>
                   <span className="truncate">{variant.title}</span>
-                  {latestRun?.status === 'COMPLETE' && latestRun.hexCount != null && (
+                  {latestRun?.status === 'COMPLETE' && (
                     <span className="shrink-0 text-xs text-gray-400 tabular-nums">
-                      {latestRun.hexCount >= 1000
-                        ? `${(latestRun.hexCount / 1000).toFixed(1).replace('.0', '')}k`
-                        : latestRun.hexCount}{' '}
-                      Hex
+                      {formatDate(latestRun.createdAt)}
                     </span>
                   )}
                   {isStale && (
