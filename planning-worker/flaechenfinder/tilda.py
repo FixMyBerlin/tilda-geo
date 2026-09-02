@@ -32,6 +32,23 @@ class TildaLoader:
             print(f"   ⚠️  Gebäude-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_building_entrances(
+        self,
+        study_area_geom: BaseGeometry,
+        kinds: tuple[str, ...] = ("yes", "main", "home", "staircase"),
+    ) -> gpd.GeoDataFrame:
+        """Gebäudeeingänge (Default `entrance=yes`/`main`/`home`/`staircase`) als Punkte.
+
+        Noch von keinem Faktor genutzt: gedacht als Ansatzpunkt, den Bewohnerbedarf künftig
+        am Eingang statt am Gebäude entstehen zu lassen.
+        """
+        try:
+            gdf = self._loader.load_building_entrances(study_area_geom, kinds)
+            return gdf[gdf.geometry.geom_type == "Point"].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Gebäudeeingangs-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     def load_intersection_corners(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
         """Bordstein-Eckpunkte an Straßenkreuzungen (für den Kreuzungs-Bonus)."""
         try:

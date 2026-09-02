@@ -131,6 +131,43 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage public._buildings_train_station fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_building_entrances(
+        self,
+        polygon_4326: BaseGeometry,
+        kinds: tuple[str, ...] = ("yes", "main", "home", "staircase"),
+    ) -> gpd.GeoDataFrame:
+        """Gebäudeeingänge (`entrance=*`) aus `public._building_entrances`.
+
+        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/landcover/buildings/
+        building_entrances.lua), EPSG:5243 wie `_buildings`. Die Tabelle enthält alle
+        entrance-Werte; `kinds` filtert daraus. Default sind die für Bewohner relevanten
+        Eingänge: `yes`/`main` plus `home`/`staircase`, die in DE an Wohnblöcken den
+        Regelfall bilden. `kinds=()` liefert alle (inkl. `service`, `emergency`).
+
+        Gibt `geom` (EPSG:4326) und die Spalte `entrance` zurück. Die Tabelle entsteht im
+        Weekend-Topic `landcover`; fehlt sie (Instanz ohne landcover-Lauf), kommt ein leeres
+        GeoDataFrame zurück – wie bei `load_train_station_buildings`.
+        """
+        wkt = polygon_4326.wkt
+        kind_filter = ""
+        if kinds:
+            values = ", ".join(f"'{_sql_literal(k)}'" for k in kinds)
+            kind_filter = f" AND entrance IN ({values})"
+        sql = f"""
+            SELECT entrance, ST_Transform(geom, 4326) AS geom
+            FROM public."_building_entrances"
+            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243){kind_filter}
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Gebäudeeingänge aus public._building_entrances")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage public._building_entrances fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """Radwege aus `public.bikelanes` (ersetzt den PBF-Pfad)."""
         gdf = self._read_table("bikelanes", polygon_4326)

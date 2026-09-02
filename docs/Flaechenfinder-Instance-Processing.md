@@ -51,6 +51,10 @@ Rechne mit mehreren Stunden und hebe ggf. `mem_limit`/`cpus` des `processing`-Co
 
 ## Gebäude (`_buildings`) neu bauen
 
+Dasselbe gilt für `public._building_entrances` (Gebäudeeingänge, `entrance=*`): ebenfalls aus
+`landcover`, existiert also erst nach einem expliziten Lauf. Vorher liefert
+`PostgisLoader.load_building_entrances()` ein leeres GeoDataFrame.
+
 `public._buildings` ist kein eigenes Topic, sondern Teil von **`landcover`**
 (`schedule: 'weekend'`). Auf dieser Instanz gibt es **keinen Cronjob fürs Processing** –
 der einzige Timer ist `tilda-autodeploy.timer` (nur Deploy). Die Weekend-Schedule greift hier

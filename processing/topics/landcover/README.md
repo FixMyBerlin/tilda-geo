@@ -42,16 +42,18 @@ Each leg starts detached and follows logs until the container exits; `docker log
 
 ## Datasets
 
-`landcover.lua` is one osm2pgsql entrypoint that delegates to per-dataset area handlers; each
-dataset lives in its own folder (handler + helpers + SQL + docs):
+`landcover.lua` is one osm2pgsql entrypoint that delegates to per-dataset area handlers (plus one
+node handler for `_building_entrances`); each dataset lives in its own folder (handler + helpers +
+SQL + docs):
 
-| table                      | folder                                   | notes                                                               |
-| -------------------------- | ---------------------------------------- | ------------------------------------------------------------------- |
-| `landuse`                  | [`landuse/`](landuse/)                   | land use display table                                              |
-| `_settlement_areas`        | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README               |
-| `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only)                                     |
-| `_buildings`               | [`buildings/`](buildings/)               | building geometries ≥ 100 m² (geometry-only)                        |
-| `_buildings_train_station` | [`buildings/`](buildings/)               | `building=train_station` geometries, no size filter (geometry-only) |
+| table                      | folder                                   | notes                                                                        |
+| -------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
+| `landuse`                  | [`landuse/`](landuse/)                   | land use display table                                                       |
+| `_settlement_areas`        | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README                        |
+| `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only)                                              |
+| `_buildings`               | [`buildings/`](buildings/)               | building geometries ≥ 100 m² (geometry-only)                                 |
+| `_buildings_train_station` | [`buildings/`](buildings/)               | `building=train_station` geometries, no size filter (geometry-only)          |
+| `_building_entrances`      | [`buildings/`](buildings/)               | `entrance=*` nodes (point + `entrance` value); the topic's only point output |
 
 The `_` prefix marks a table **internal/debug**: still exposed to Martin for inspection, but not a
 curated display layer (no `atlas_*` function). `_settlement_areas` carries the standard shape
