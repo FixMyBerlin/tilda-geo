@@ -17,37 +17,66 @@ DECLARE
     -- (Res 11, ~49× weniger Features). Muss mit AGG_H3_RES/BASE_H3_RES in
     -- planning-worker/flaechenfinder/scorer.py übereinstimmen.
     res_val    smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
+    hex_mvt    bytea;
+    label_mvt  bytea;
 BEGIN
-    RETURN (
-        SELECT ST_AsMVT(t, 'planning_hexagons', 4096, 'geom')
+    SELECT ST_AsMVT(t, 'planning_hexagons', 4096, 'geom')
+    INTO hex_mvt
+    FROM (
+        SELECT
+            h3_id,
+            mce_gesamtscore,
+            score_bedarf,
+            score_bebauung,
+            score_radweg,
+            score_hangneigung,
+            score_oepnv,
+            score_zielorte,
+            score_vegetation,
+            score_kreuzung,
+            score_parken,
+            score_fussgaengerzone,
+            score_bestand,
+            score_eigendaten,
+            cluster_area_m2,
+            eignungsklasse,
+            gebaeude,
+            fahrbahn,
+            ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
+        FROM planning.scenario_hexagons
+        WHERE run_id = run_id_val
+          AND resolution = res_val
+          AND geom && bounds
+    ) t
+    WHERE t.geom IS NOT NULL;
+
+    -- Eigener Punkt-Layer für das Label (nur ab z18, siehe HEXAGON_LABEL_MIN_ZOOM in
+    -- SourcesLayersPlanning.tsx): der Fläche-Layer oben puffert & schneidet die
+    -- Hexagon-Polygone pro Kachel (buffer=256), damit die Füllung an Kachelgrenzen
+    -- nahtlos bleibt — dasselbe Polygon liegt dadurch aber oft in mehreren Kacheln,
+    -- je mit einem eigenen, zur sichtbaren Teilfläche versetzten Zentroid. Ein darauf
+    -- basierendes Symbol-Layer würde also mehrfache, außermittige Labels je Hexagon
+    -- erzeugen. Der Label-Layer nimmt stattdessen den echten Hexagon-Mittelpunkt,
+    -- ungepuffert (buffer=0) und via ST_Contains auf die ungeweiteten Kachelgrenzen
+    -- gefiltert — jedes Hexagon liefert seinen Mittelpunkt so in genau einer Kachel.
+    IF z >= 18 THEN
+        SELECT ST_AsMVT(t, 'planning_hexagons_label', 4096, 'geom')
+        INTO label_mvt
         FROM (
             SELECT
                 h3_id,
                 mce_gesamtscore,
                 score_bedarf,
                 score_bebauung,
-                score_radweg,
-                score_hangneigung,
-                score_oepnv,
-                score_zielorte,
-                score_vegetation,
-                score_kreuzung,
-                score_parken,
-                score_fussgaengerzone,
-                score_bestand,
-                score_eigendaten,
-                cluster_area_m2,
-                eignungsklasse,
-                gebaeude,
-                fahrbahn,
-                ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
+                ST_AsMVTGeom(ST_Centroid(geom), bounds, 4096, 0, true) AS geom
             FROM planning.scenario_hexagons
             WHERE run_id = run_id_val
               AND resolution = res_val
-              AND geom && bounds
-        ) t
-        WHERE t.geom IS NOT NULL
-    );
+              AND ST_Contains(bounds, ST_Centroid(geom))
+        ) t;
+    END IF;
+
+    RETURN NULLIF(COALESCE(hex_mvt, ''::bytea) || COALESCE(label_mvt, ''::bytea), ''::bytea);
 END;
 $$;
 
