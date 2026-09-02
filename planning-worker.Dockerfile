@@ -1,8 +1,15 @@
 FROM python:3.12-slim AS planning-worker
 
+COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /uvx /bin/
+
 ARG DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
 ENV PYTHONUNBUFFERED=1
+# venv statt System-Python: byte-compilen fürs schnellere erste Import,
+# hart verlinken statt kopieren spart Platz im Layer (Cache-Mount, s.u.).
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+ENV UV_PYTHON_DOWNLOADS=never
 LABEL maintainer="FixMyCity - https://fixmycity.de"
 
 WORKDIR /planning-worker
@@ -15,11 +22,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential curl libexpat1 \
   && rm -rf /var/lib/apt/lists/*
 
-COPY planning-worker/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Erst nur die Lockfiles: Dependency-Layer bleibt gecacht, solange sich
+# pyproject.toml/uv.lock nicht ändern (Quellcode ändert sich häufiger).
+COPY planning-worker/pyproject.toml planning-worker/uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-install-project
 
 # Quellcode
 COPY planning-worker/ /planning-worker/
+
+ENV PATH="/planning-worker/.venv/bin:$PATH"
 
 # DEM-Raster werden später über das `planning_dem`-Volume gemountet.
 # CIR-DOP-Kacheln (NDVI-Vegetation) über das `planning_cir`-Volume.

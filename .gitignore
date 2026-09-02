@@ -23,3 +23,6 @@ processing/node_modules
 __pycache__/
 *.pyc
 *.pyo
+
+# uv venvs (planning-worker)
+.venv/

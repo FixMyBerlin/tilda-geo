@@ -59,6 +59,8 @@ services:
     volumes:
       # Quellcode mounten für Iteration ohne Rebuild.
       - ./planning-worker:/planning-worker
+      # Das im Image von `uv sync` gebaute venv nicht vom leeren Host-Ordner überschreiben lassen.
+      - /planning-worker/.venv
     environment:
       PGHOST: db
     logging:
