@@ -49,17 +49,62 @@ const FactorInfo = ({ factorKey }: { factorKey: string }) => {
 const groupHeadlineClass =
   'flex items-baseline justify-between gap-2 border-b border-gray-200 pb-0.5 text-sm font-bold text-gray-800'
 
+/**
+ * Herkunftshinweis unter der Bewohnerbedarf-Sättigung. Der Wert wird je Planungsgebiet einmal aus
+ * dem Zensus geschätzt (siehe `censusSaettigung.server.ts`) und gilt für alle seine Varianten,
+ * solange ihn niemand überschreibt — deshalb zwei Zustände: „automatisch ermittelt" und
+ * „von Hand gesetzt, Vorschlag war X".
+ */
+const AutoSaettigungHint = ({
+  config,
+  restoreAuto,
+  readOnly,
+}: {
+  config: FactorConfig
+  restoreAuto: () => void
+  readOnly: boolean
+}) => {
+  const auto = config.bewohnerbedarf_saettigung_auto_ew
+  if (auto == null) return null
+
+  const ewProHa = config.bewohnerbedarf_ew_pro_ha
+  if (config.bewohnerbedarf_saettigung_auto) {
+    return (
+      <p className="text-[11px] leading-snug text-gray-500">
+        Automatisch aus dem Zensus im Planungsgebiet ermittelt
+        {ewProHa ? ` (${ewProHa.toLocaleString('de-DE')} EW/ha)` : ''} — überschreibbar.
+      </p>
+    )
+  }
+  return (
+    <p className="text-[11px] leading-snug text-gray-500">
+      Von Hand gesetzt. Zensus-Vorschlag: {auto}.{' '}
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={restoreAuto}
+          className="font-medium text-gray-600 underline hover:text-gray-900"
+        >
+          Wieder automatisch
+        </button>
+      )}
+    </p>
+  )
+}
+
 const FactorParamInputs = ({
   factorKey,
   config,
   weight,
   setField,
+  restoreAutoSaettigung,
   readOnly,
 }: {
   factorKey: string
   config: FactorConfig
   weight: number | undefined
   setField: (key: keyof FactorConfig, value: number | boolean) => void
+  restoreAutoSaettigung: () => void
   readOnly: boolean
 }) => {
   const params = FACTOR_PARAMS[factorKey]
@@ -67,23 +112,33 @@ const FactorParamInputs = ({
 
   const weightOff = weightToStep(weight) === 0 && weightToPoints(weight) === 0
 
-  return params.map(({ key, label, step, alwaysEditable }) => {
+  return params.map(({ key, label, step, min, alwaysEditable }) => {
     const disabled = readOnly || (weightOff && !alwaysEditable)
     return (
-      <label
-        key={String(key)}
-        className="flex items-center justify-between gap-2 text-xs text-gray-600"
-      >
-        <span className={disabled ? 'text-gray-400' : ''}>{label}</span>
-        <input
-          type="number"
-          step={step}
-          value={Number(config[key] ?? 0)}
-          disabled={disabled}
-          onChange={(e) => setField(key, Number(e.target.value))}
-          className={planningNumberInputClass}
-        />
-      </label>
+      <div key={String(key)} className="space-y-0.5">
+        <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+          <span className={disabled ? 'text-gray-400' : ''}>{label}</span>
+          <input
+            type="number"
+            step={step}
+            min={min}
+            value={Number(config[key] ?? 0)}
+            disabled={disabled}
+            onChange={(e) => {
+              const value = Number(e.target.value)
+              setField(key, min != null ? Math.max(min, value) : value)
+            }}
+            className={planningNumberInputClass}
+          />
+        </label>
+        {key === 'bewohnerbedarf_saettigung_ew' && !disabled && (
+          <AutoSaettigungHint
+            config={config}
+            restoreAuto={restoreAutoSaettigung}
+            readOnly={readOnly}
+          />
+        )}
+      </div>
     )
   })
 }
@@ -93,6 +148,7 @@ const FactorFields = ({
   config,
   setWeights,
   setField,
+  restoreAutoSaettigung,
   setVegetationDirection,
   setUserGeojsonMode,
   onReset,
@@ -101,6 +157,7 @@ const FactorFields = ({
   config: FactorConfig
   setWeights: (weights: Record<string, number>) => void
   setField: (key: keyof FactorConfig, value: number | boolean) => void
+  restoreAutoSaettigung: () => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
   onReset?: () => void
@@ -156,6 +213,7 @@ const FactorFields = ({
                     config={config}
                     weight={weights[key]}
                     setField={setField}
+                    restoreAutoSaettigung={restoreAutoSaettigung}
                     readOnly={readOnly}
                   />
                 }
@@ -200,6 +258,7 @@ const FactorFields = ({
                         config={config}
                         weight={weights[key]}
                         setField={setField}
+                        restoreAutoSaettigung={restoreAutoSaettigung}
                         readOnly={readOnly}
                       />
                     </>
@@ -209,6 +268,7 @@ const FactorFields = ({
                       config={config}
                       weight={weights[key]}
                       setField={setField}
+                      restoreAutoSaettigung={restoreAutoSaettigung}
                       readOnly={readOnly}
                     />
                   )
@@ -404,7 +464,24 @@ const FactorEditorPanelForm = ({
   const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
 
   const setField = (key: keyof FactorConfig, value: number | boolean) =>
-    setConfig((c) => ({ ...c, [key]: value }))
+    setConfig((c) => ({
+      ...c,
+      [key]: value,
+      // Der Zensus-Vorschlag gilt nur, solange das Feld unangetastet ist — sobald jemand eine Zahl
+      // eintippt, wird sie als Nutzerwert in der Variante gespeichert (siehe `stripAutoSaettigung`).
+      ...(key === 'bewohnerbedarf_saettigung_ew' && { bewohnerbedarf_saettigung_auto: false }),
+    }))
+
+  const restoreAutoSaettigung = () =>
+    setConfig((c) =>
+      c.bewohnerbedarf_saettigung_auto_ew == null
+        ? c
+        : {
+            ...c,
+            bewohnerbedarf_saettigung_ew: c.bewohnerbedarf_saettigung_auto_ew,
+            bewohnerbedarf_saettigung_auto: true,
+          },
+    )
 
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
@@ -430,6 +507,11 @@ const FactorEditorPanelForm = ({
     setConfig((c) => ({
       ...c,
       ...DEFAULT_FACTOR_TEMPLATE,
+      // Standard heißt für die Sättigung: zurück auf den Zensus-Vorschlag des Gebiets. Nur wo es
+      // keinen gibt, bleibt der Wert aus dem Worker-Default stehen.
+      bewohnerbedarf_saettigung_ew:
+        c.bewohnerbedarf_saettigung_auto_ew ?? c.bewohnerbedarf_saettigung_ew,
+      bewohnerbedarf_saettigung_auto: c.bewohnerbedarf_saettigung_auto_ew != null,
       study_area: c.study_area,
       user_geojson: c.user_geojson,
       user_geojson_mode: c.user_geojson_mode,
@@ -491,6 +573,7 @@ const FactorEditorPanelForm = ({
             config={config}
             setWeights={setWeights}
             setField={setField}
+            restoreAutoSaettigung={restoreAutoSaettigung}
             setVegetationDirection={setVegetationDirection}
             setUserGeojsonMode={setUserGeojsonMode}
             onReset={readOnly ? undefined : resetWeightsToDefaults}

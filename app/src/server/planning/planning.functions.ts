@@ -13,10 +13,12 @@ import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/author
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
 import { parseRegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
+import { ensureAreaCensusStats, refreshAreaCensusStats } from './censusSaettigung.server'
 import {
   areaInputFromRow,
   mergeFactorConfig,
   type MergedFactorConfig,
+  stripAutoSaettigung,
   type VariantFactorConfig,
 } from './mergeFactorConfig'
 
@@ -200,6 +202,8 @@ export const getPlanningAreaFn = createServerFn({ method: 'GET' })
         userGeojsonMode: true,
         useCase: true,
         areaSizeM2: true,
+        censusSaettigungEw: true,
+        censusEwPerHa: true,
         inputUpdatedAt: true,
         createdAt: true,
         updatedAt: true,
@@ -244,6 +248,8 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
             userGeojsonMode: true,
             useCase: true,
             areaSizeM2: true,
+            censusSaettigungEw: true,
+            censusEwPerHa: true,
             inputUpdatedAt: true,
           },
         },
@@ -268,8 +274,14 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
         },
       },
     })
+    // Gebiete, die vor dem Zensus-Vorschlag angelegt wurden, holen ihn hier einmalig nach —
+    // der Faktoren-Editor hängt an dieser Query, also ist das der Ort, an dem der Wert gebraucht wird.
+    const stats = await ensureAreaCensusStats(variant.areaId)
+    const area = stats
+      ? { ...variant.area, censusSaettigungEw: stats.saettigungEw, censusEwPerHa: stats.ewPerHa }
+      : variant.area
     const factorConfig = mergeFactorConfig(
-      areaInputFromRow(variant.area),
+      areaInputFromRow(area),
       variant.factorConfig as VariantFactorConfig,
     )
     return { ...variant, factorConfig: factorConfig as FactorConfig }
@@ -300,6 +312,8 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
                 userGeojsonMode: true,
                 useCase: true,
                 areaSizeM2: true,
+                censusSaettigungEw: true,
+                censusEwPerHa: true,
                 region: { select: { slug: true } },
               },
             },
@@ -457,7 +471,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
           create: {
             creatorId: session.userId,
             title: data.variantTitle ?? 'Variante 1',
-            factorConfig: (data.factorConfig ?? {}) as Prisma.InputJsonValue,
+            factorConfig: stripAutoSaettigung(data.factorConfig ?? {}) as Prisma.InputJsonValue,
           },
         },
       },
@@ -466,6 +480,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
         variants: { select: { id: true }, take: 1 },
       },
     })
+    await refreshAreaCensusStats(area.id, data.studyArea)
     return { areaId: area.id, variantId: area.variants[0]!.id }
   })
 
@@ -521,6 +536,10 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
       select: { id: true },
     })
     if (areaInputsChanged) await markRunsStaleForArea(data.areaId)
+    // Nur die Geometrie verschiebt die Zensus-Kennzahlen; Titel, Nutzung oder eigene Flächen nicht.
+    if (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) {
+      await refreshAreaCensusStats(data.areaId, data.studyArea)
+    }
     return result
   })
 
@@ -568,7 +587,7 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
         ...(data.title !== undefined && { title: data.title }),
         ...(data.description !== undefined && { description: data.description }),
         ...(factorConfig !== undefined && {
-          factorConfig: factorConfig as Prisma.InputJsonValue,
+          factorConfig: stripAutoSaettigung(factorConfig) as Prisma.InputJsonValue,
         }),
       },
       select: { id: true, areaId: true },
@@ -613,7 +632,7 @@ export const createPlanningVariantFn = createServerFn({ method: 'POST' })
         areaId: data.areaId,
         creatorId: session.userId,
         title: data.title ?? `Variante ${variantCount + 1}`,
-        factorConfig: (data.factorConfig ?? {}) as Prisma.InputJsonValue,
+        factorConfig: stripAutoSaettigung(data.factorConfig ?? {}) as Prisma.InputJsonValue,
       },
       select: { id: true, areaId: true },
     })

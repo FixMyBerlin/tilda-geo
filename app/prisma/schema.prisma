@@ -639,6 +639,15 @@ model PlanningArea {
   // Bumped when geometry/obstacles/use-case/size change — marks existing COMPLETE runs stale.
   inputUpdatedAt   DateTime @default(now())
   //
+  // Zensus-Kennzahlen des Planungsgebiets, einmal je Gebiet aus `data.census_population_point`
+  // ermittelt (siehe server/planning/censusSaettigung.server.ts). Sie füllen den Faktor-Parameter
+  // `bewohnerbedarf_saettigung_ew` vor; alle Varianten des Gebiets starten damit auf demselben
+  // Wert. `censusComputedAt` unterscheidet „noch nie gerechnet" von „gerechnet, nichts gefunden"
+  // (dann bleiben beide Werte NULL und der Worker-Default greift).
+  censusSaettigungEw Float?
+  censusEwPerHa      Float?
+  censusComputedAt   DateTime?
+  //
   variants PlanningVariant[]
 
   @@index([regionId])

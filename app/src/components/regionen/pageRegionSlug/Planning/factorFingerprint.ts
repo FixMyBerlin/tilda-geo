@@ -5,6 +5,8 @@ import type { FactorConfig } from '@/server/planning/planning.functions'
  * - Planungsgebiet (Geometrie, eigene Daten, Nutzung, Größe) — dafür gibt es `PlanningRun.stale`,
  *   das der Server pflegt, sobald das Gebiet bearbeitet wird.
  * - `min_area_m2` — reiner Client-Filter der Flächensuche, geht in keinen Lauf ein.
+ * - die Marker rund um die Zensus-Sättigung — sie beschreiben, WOHER der Wert kommt; berechnet
+ *   wird mit `bewohnerbedarf_saettigung_ew`, und das zählt weiterhin mit.
  */
 const IGNORED_KEYS = new Set([
   'study_area',
@@ -13,6 +15,9 @@ const IGNORED_KEYS = new Set([
   'use_case',
   'area_size_m2',
   'min_area_m2',
+  'bewohnerbedarf_saettigung_auto',
+  'bewohnerbedarf_saettigung_auto_ew',
+  'bewohnerbedarf_ew_pro_ha',
 ])
 
 /**

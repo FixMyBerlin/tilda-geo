@@ -30,7 +30,9 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   parken_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
-  bewohnerbedarf_saettigung_ew: 30,
+  // `bewohnerbedarf_saettigung_ew` fehlt hier bewusst: ohne Wert in der Varianten-Config gilt der
+  // Zensus-Vorschlag des Planungsgebiets (siehe `mergeFactorConfig`). Erst wenn jemand das Feld
+  // von Hand ändert, steht eine Zahl in der Variante.
   min_score_threshold: 60,
   targets: [],
 }
@@ -96,28 +98,33 @@ export const FACTOR_HELP: Record<string, string> = {
   w_eigendaten:
     'Laden Sie eigene Punkte, Linien oder Flächen hoch. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Das Gewicht gilt nur für Bonus und Abzug.',
   w_bewohnerbedarf:
-    'Einwohnerzahlen aus dem Zensus 2022, auf einzelne Gebäude heruntergerechnet, heben den Bedarf dort, wo viele Menschen wohnen — unabhängig vom Alter. Jedes bewohnte Gebäude wirkt 20 m weit: direkt an der Gebäudekante mit seiner vollen Einwohnerzahl, auf halber Strecke nur noch zur Hälfte, ab 20 m gar nicht mehr. Ein Haus mit 100 Einwohnern zählt direkt daneben also 100, aus 10 m Entfernung 50. Mehrere Gebäude in Reichweite addieren sich. Der eingestellte Wert ist die Summe, ab der es den vollen Zuschlag gibt — zum Vergleich: dichter Berliner Blockrand liegt typisch bei 25–100, ein Einfamilienhausgebiet bei 3–13. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Einwohnerzahlen aus dem Zensus 2022, auf einzelne Gebäude heruntergerechnet, heben den Bedarf dort, wo viele Menschen wohnen — unabhängig vom Alter. Jedes bewohnte Gebäude wirkt 20 m weit: direkt an der Gebäudekante mit seiner vollen Einwohnerzahl, auf halber Strecke nur noch zur Hälfte, ab 20 m gar nicht mehr. Ein Haus mit 100 Einwohnern zählt direkt daneben also 100, aus 10 m Entfernung 50. Mehrere Gebäude in Reichweite addieren sich. Der eingestellte Wert ist die Summe, ab der es den vollen Zuschlag gibt. Er wird je Planungsgebiet automatisch aus dem Zensus vorbelegt — so, dass ungefähr das dichteste Zehntel der bewohnten Fläche den vollen Zuschlag bekommt — und lässt sich überschreiben. Zur Einordnung: dichte Berliner Innenstadt landet bei etwa 20–25, ein Einfamilienhausgebiet bei etwa 5. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   min_score_threshold:
     'Nur Flächen ab diesem Gesamtscore zählen zur zusammenhängenden Kandidatenfläche. Der Filter „Gesuchte Fläche (m²)“ im Panel nutzt diese Cluster. Der Score selbst ändert sich dadurch nicht.',
 }
 
 export const FACTOR_PARAMS: Record<
   string,
-  { key: keyof FactorConfig; label: string; step: number; alwaysEditable?: boolean }[]
+  { key: keyof FactorConfig; label: string; step: number; min?: number; alwaysEditable?: boolean }[]
 > = {
-  w_cyclepath: [{ key: 'max_cyclepath_dist_m', label: 'Max. Distanz (m)', step: 1 }],
-  w_fussgaengerzone: [{ key: 'fussgaengerzone_radius_m', label: 'Radius (m)', step: 1 }],
-  w_bestand: [{ key: 'bestand_default_diameter_m', label: 'Standard-Durchmesser (m)', step: 1 }],
-  w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1 }],
-  w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1 }],
+  w_cyclepath: [{ key: 'max_cyclepath_dist_m', label: 'Max. Distanz (m)', step: 1, min: 0 }],
+  w_fussgaengerzone: [
+    { key: 'fussgaengerzone_radius_m', label: 'Radius (m)', step: 1, min: 0 },
+  ],
+  w_bestand: [
+    { key: 'bestand_default_diameter_m', label: 'Standard-Durchmesser (m)', step: 1, min: 0 },
+  ],
+  w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
+  w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   // Der 20-m-Radius ist bewusst fest verdrahtet (kein UI-Feld) und steht als Konstante in
   // flaechenfinder/config.py. Einstellbar ist nur die Sättigung; ihr Label nennt die Einheit,
   // weil „Einwohner" allein nicht erkennen lässt, dass der Abstand schon eingerechnet ist.
   w_bewohnerbedarf: [
     {
       key: 'bewohnerbedarf_saettigung_ew',
-      label: 'Voller Zuschlag ab (Einwohnern nebenan)',
+      label: 'Voller Zuschlag ab (Einwohnern) bis 20 Meter Radius',
       step: 5,
+      min: 0,
     },
   ],
 }
