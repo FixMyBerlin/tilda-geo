@@ -172,6 +172,7 @@ export type TRegion = {
   product: RegionProduct
   notes: RegionNotesMode
   showSearch?: boolean
+  spaceFinderEnabled: boolean
   mask: { osmRelationIds: number[]; bufferKm: number } | null
   map: { lat: number; lng: number; zoom: number }
   logoWhiteBackgroundRequired: boolean

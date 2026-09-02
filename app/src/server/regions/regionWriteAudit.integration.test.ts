@@ -22,6 +22,7 @@ const regionConfig = {
   product: 'radverkehr',
   notes: 'osmNotes',
   showSearch: false,
+  spaceFinderEnabled: true,
   mapLat: 52.5,
   mapLng: 13.4,
   mapZoom: 10,

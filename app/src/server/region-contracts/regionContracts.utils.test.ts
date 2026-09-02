@@ -26,6 +26,7 @@ const mockRegion = (slug: string, contract: TRegionContract | null = null): TReg
     status: 'PRIVATE',
     product: 'radverkehr',
     notes: 'disabled',
+    spaceFinderEnabled: true,
     map: { lat: 0, lng: 0, zoom: 10 },
     mask: null,
     logoPath: null,

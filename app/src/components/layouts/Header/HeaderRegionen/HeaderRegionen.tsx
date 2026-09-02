@@ -31,7 +31,7 @@ export const HeaderRegionen = () => {
         <NavigationDesktop
           logo={<HeaderRegionenLogo />}
           primaryNavigation={primaryNavigation}
-          extra={<PlanningModeToggle />}
+          extra={region?.spaceFinderEnabled ? <PlanningModeToggle /> : undefined}
           trailing={
             // Always shown: the panel is also the region secondary-links surface (not welcome-only).
             <RegionPanelToggle

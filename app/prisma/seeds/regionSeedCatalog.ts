@@ -60,6 +60,7 @@ const baseRegionConfig = {
   product: RegionProduct.radverkehr,
   notes: RegionNotesMode.osmNotes,
   showSearch: false,
+  spaceFinderEnabled: true,
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
   bbox: null,

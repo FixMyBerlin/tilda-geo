@@ -17,11 +17,14 @@ import { InternalNotes } from './notes/InternalNotes/InternalNotes'
 import { OsmNotes } from './notes/OsmNotes/OsmNotes'
 import { PlanningCandidateToggle } from './Planning/candidates/PlanningCandidateToggle'
 import { PlanningPanel } from './Planning/PlanningPanel'
+import { useRegion } from './regionUtils/useRegion'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
 import { DesktopOnly } from './utils/Breakpoint'
 
 export const MapInterface = () => {
+  const { spaceFinderEnabled } = useRegion()
+
   useEffect(function registerPmtilesProtocolOnMount() {
     const protocol = new Protocol()
     addProtocol('pmtiles', protocol.tile)
@@ -48,10 +51,12 @@ export const MapInterface = () => {
         <MobileMapHeader />
         {/* Desktop search overlay (top-right, left of the zoom control); mobile uses MobileMapHeader.
             Left of it (planning mode only): the candidate-selection tool, same button look. */}
-        <PlanningPanel />
+        {spaceFinderEnabled && <PlanningPanel />}
         <DesktopOnly>
           <PlaceSearch className="absolute top-2 right-[calc(var(--inspector-width)+3.5rem)] z-20" />
-          <PlanningCandidateToggle className="absolute top-2 right-[calc(var(--inspector-width)+6.5rem)] z-20" />
+          {spaceFinderEnabled && (
+            <PlanningCandidateToggle className="absolute top-2 right-[calc(var(--inspector-width)+6.5rem)] z-20" />
+          )}
         </DesktopOnly>
         <SidebarLayerControls />
         {/* Also renders the planning candidate list while that tool is active. */}

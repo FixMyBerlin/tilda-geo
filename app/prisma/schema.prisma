@@ -178,6 +178,9 @@ model Region {
   notes      RegionNotesMode @default(osmNotes)
   showSearch Boolean         @default(false)
 
+  /// Flächenfinder (Planungsmodus). Default an; Regionen können ihn im Admin abschalten.
+  spaceFinderEnabled Boolean @default(true)
+
   mapLat  Float @default(0)
   mapLng  Float @default(0)
   mapZoom Float @default(10)

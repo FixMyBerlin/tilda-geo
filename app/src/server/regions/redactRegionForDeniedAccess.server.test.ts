@@ -14,6 +14,7 @@ const privateRegion = {
   product: 'radverkehr',
   notes: 'osmNotes',
   showSearch: true,
+  spaceFinderEnabled: true,
   mask: { osmRelationIds: [1], bufferKm: 2 },
   map: { lat: 52.5, lng: 13.4, zoom: 12 },
   logoWhiteBackgroundRequired: false,

@@ -24,6 +24,7 @@ const baseRegionConfig = (slug: string) => ({
   product: 'radverkehr' as const,
   notes: 'osmNotes' as const,
   showSearch: false,
+  spaceFinderEnabled: true,
   mapLat: 52.5,
   mapLng: 13.4,
   mapZoom: 10,

@@ -52,6 +52,7 @@ export const regionFormEmptyDefaults = {
   product: RegionProduct.radverkehr,
   notes: RegionNotesMode.osmNotes,
   showSearch: 'false' as const,
+  spaceFinderEnabled: 'true' as const,
   mapLat: '52.5',
   mapLng: '13.4',
   mapZoom: '10',
@@ -200,6 +201,20 @@ export function RegionForm(props: Props) {
               label="Auftrag"
               optional
               options={contractOptions}
+            />
+          </fieldset>
+
+          <fieldset className={adminFormFieldsetClassName}>
+            <legend className={adminFormLegendClassName}>Modus</legend>
+            <RadioGroup
+              inline
+              form={form}
+              name="spaceFinderEnabled"
+              label="Flächenfinder aktiv"
+              items={[
+                { value: 'true', label: 'Ja' },
+                { value: 'false', label: 'Nein' },
+              ]}
             />
           </fieldset>
 
