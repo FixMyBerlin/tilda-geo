@@ -1,20 +1,10 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
-
-
-@dataclass
-class TargetConfig:
-    name: str
-    osm_tags: Dict
-    max_dist_m: float
-    optimal_dist_m: float
-    weight_in_target: float  # Gewicht innerhalb des Ziel-Scores (0–1)
+from typing import Dict, Optional
 
 
 @dataclass
 class UseCaseConfig:
     name: str
-    targets: List[TargetConfig]
     weights: Dict[str, float]
     dem_source: str = "srtm"                 # "dgm1" | "mapterhorn" | "srtm"
     dgm1_path: Optional[str] = None
@@ -99,6 +89,19 @@ class UseCaseConfig:
     # rund 3× höher) — wird oben der Radius geändert, ist dieser Default neu zu messen.
     bewohnerbedarf_saettigung_ew: float = 30.0   # gewichtete Einwohner für den vollen Zuschlag
 
+    # Zielorte-Bonus: Gebäude mit Alltagszielen lassen an sich Bedarf entstehen – analog zum
+    # Bewohnerbedarf, nur mit Zielort- statt Zensus-Quellen (siehe scorer.py
+    # `_target_demand_sources`/`weighted_proximity_sum`). Quelle ist public."poiClassification"
+    # (processing/topics/poiClassification), kombiniert über alle vier dort vergebenen
+    # Kategorien (Grundversorgung, Bildung, Einkauf, Freizeit) – kein einzelner Zielort-Typ wird
+    # bevorzugt. Positiver Modifier auf die BEDARFS-Gruppe; Stärke = weights["w_target"] (max.
+    # Zuschlag in Punkten × 100). Ein Gebäude zählt dabei unabhängig von der Anzahl der darin
+    # liegenden Zielorte nur EINMAL (reine Vorhandenheits-Gewichtung, User-Entscheid – ein Haus
+    # mit Supermarkt UND Bäckerei wirkt nicht doppelt so stark wie eines mit nur einem Laden).
+    # Radius bewusst NICHT UI-einstellbar (wie bewohnerbedarf_radius_m, gleiche Begründung).
+    zielort_radius_m: float = 20.0        # Reichweite ab Gebäudekante (fest, wie Bewohnerbedarf)
+    zielort_saettigung: float = 30.0      # Anzahl Zielort-Gebäude im Radius für vollen Zuschlag
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
 
@@ -139,14 +142,14 @@ USER_LINE_BUFFER_M = 2.5
 # ── Defaults / Validierung ────────────────────────────────────────────────────
 
 # Zwei Arten von Gewichten (siehe scorer.py):
-#   Kriterien (w_cyclepath/w_target/w_slope/w_transit) gehen in den
-#     gewichteten Durchschnitt der 0–100-Teilscores ein. Nur ihr Verhältnis
-#     zueinander zählt – die Summe muss nichts Bestimmtes ergeben.
-#   Modifier (alle übrigen) verschieben den fertigen Score um bis zu w × 100
+#   Kriterien (w_cyclepath/w_slope/w_transit) gehen in den gewichteten Durchschnitt der
+#     0–100-Teilscores ein. Nur ihr Verhältnis zueinander zählt – die Summe muss nichts
+#     Bestimmtes ergeben.
+#   Modifier (alle übrigen, inkl. w_target) verschieben den fertigen Score um bis zu w × 100
 #     Punkte; hier ist der absolute Wert die Aussage.
 DEFAULT_WEIGHTS = {
     "w_cyclepath": 0.20,
-    "w_target":    0.15,
+    "w_target":    0.15,   # Zielorte-Bonus (max. Bonus in Punkten × 100)
     "w_slope":     0.20,
     "w_transit":   0.15,
     "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
@@ -168,24 +171,12 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         "weights": {w_cyclepath, w_target, w_slope, w_transit},
         "dem_source": "srtm" | "dgm1" | "mapterhorn",
         "max_cyclepath_dist_m",
-        "targets": [ {name, osm_tags, max_dist_m, optimal_dist_m, weight_in_target} ],
       }
     `study_area` und `h3_resolution` werden vom Worker separat aus dem factorConfig gelesen.
     """
     weights = {**DEFAULT_WEIGHTS, **(cfg.get("weights") or {})}
-    targets = [
-        TargetConfig(
-            name=t["name"],
-            osm_tags=t.get("osm_tags", {}),
-            max_dist_m=float(t.get("max_dist_m", 400)),
-            optimal_dist_m=float(t.get("optimal_dist_m", 50)),
-            weight_in_target=float(t.get("weight_in_target", 1.0)),
-        )
-        for t in (cfg.get("targets") or [])
-    ]
     return UseCaseConfig(
         name=cfg.get("name", "Szenario"),
-        targets=targets,
         weights=weights,
         dem_source=cfg.get("dem_source", "srtm"),
         dgm1_path=cfg.get("dgm1_path"),
@@ -203,6 +194,8 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
         bewohnerbedarf_radius_m=float(cfg.get("bewohnerbedarf_radius_m", 20.0)),
         bewohnerbedarf_saettigung_ew=float(cfg.get("bewohnerbedarf_saettigung_ew", 30.0)),
+        zielort_radius_m=float(cfg.get("zielort_radius_m", 20.0)),
+        zielort_saettigung=float(cfg.get("zielort_saettigung", 30.0)),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
         exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),

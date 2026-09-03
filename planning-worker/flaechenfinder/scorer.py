@@ -138,7 +138,7 @@ SCORING_STEPS = [
     "ÖPNV + Bikesharing laden",
     "Kreuzungen laden",
     "KFZ-Parkflächen laden",
-    "Zielorte bewerten",
+    "Zielorte laden",
     "Hangneigung berechnen",
     "Vegetationsabdeckung verschneiden",
     "Eigene Flächen verschneiden",
@@ -215,6 +215,52 @@ def _census_demand_sources(
         pd.concat([building_sources, leftover], ignore_index=True),
         geometry="geometry",
         crs=census_proj.crs,
+    )
+
+
+def _target_demand_sources(
+    target_proj: gpd.GeoDataFrame, buildings_proj: gpd.GeoDataFrame | None
+) -> gpd.GeoDataFrame:
+    """Zielorte-Quellen: POI-Punkte (public."poiClassification") auf Gebäudepolygone
+    aggregiert – analog `_census_demand_sources`, aber mit reiner Vorhandensein-
+    Gewichtung (0/1) statt Summe. Ein Gebäude mit mehreren Zielorten (z. B.
+    Supermarkt + Bäckerei im selben Haus) zählt genau wie eines mit nur einem –
+    die ANZAHL der Zielorte im Gebäude soll den Bedarf nicht vervielfachen
+    (User-Entscheid, siehe `zielort_saettigung` in config.py).
+
+    Punkte ohne Gebäudetreffer behalten ihre Punktgeometrie, jeweils mit
+    Gewicht 1.0 – ein einzelner Zielort ohne erkanntes Gebäude zählt wie ein
+    Gebäude mit Zielort.
+
+    Beide GeoDataFrames müssen im selben metrischen CRS liegen. Rückgabe:
+    GeoDataFrame mit der Spalte `ziel_gewicht` (immer 1.0) und gemischten
+    Geometrien (Gebäudepolygone + Restpunkte).
+    """
+    points = target_proj[["geometry"]].copy()
+
+    if buildings_proj is None or not len(buildings_proj):
+        points["ziel_gewicht"] = 1.0
+        return points
+
+    bld = buildings_proj[["geometry"]].reset_index(drop=True)
+    hits = gpd.sjoin(points, bld, how="left", predicate="within")
+    # Mehrere Zielorte im selben Gebäude sollen das Gebäude nur EINMAL als Quelle
+    # zählen – nicht wie beim Bewohnerbedarf aufsummieren, sondern die betroffenen
+    # Gebäude einmalig herausziehen.
+    matched = hits["index_right"].notna()
+    matched_building_ids = hits.loc[matched, "index_right"].astype(int).unique()
+
+    building_sources = bld.loc[matched_building_ids].copy()
+    building_sources["ziel_gewicht"] = 1.0
+    leftover = hits.loc[~matched, ["geometry"]].copy()
+    leftover["ziel_gewicht"] = 1.0
+
+    print(f"   ✓ Zielorte: {int(matched.sum())} von {len(points)} Punkten auf "
+          f"{len(building_sources)} Gebäude aggregiert, {int((~matched).sum())} als Punkt")
+    return gpd.GeoDataFrame(
+        pd.concat([building_sources, leftover], ignore_index=True),
+        geometry="geometry",
+        crs=target_proj.crs,
     )
 
 
@@ -305,11 +351,15 @@ def run_flaechenfinder(
     # selbst treffen, nicht dessen Umgebung.
     GEBAEUDE_EXCLUSION_COVERAGE = 2 / 3
     buildings = tilda_loader.load_buildings(study_area_geom)
-    # Der Bewohnerbedarf (Schritt 5) braucht dieselben Polygone: die Zensus-Einwohner
-    # werden darauf aggregiert und die Distanzrampe ab der Gebäudekante gemessen.
-    # Nur bei Gewicht > 0 behalten – sonst wie bisher sofort freigeben.
-    keep_buildings = (use_case.weights.get("w_bewohnerbedarf", 0) or 0) > 0
-    buildings_for_census = None
+    # Der Bewohnerbedarf (Schritt 5) und die Zielorte (Schritt 9) brauchen dieselben
+    # Polygone: ihre Punktquellen (Zensus bzw. poiClassification) werden darauf
+    # aggregiert und die Distanzrampe ab der Gebäudekante gemessen. Nur bei Gewicht > 0
+    # behalten – sonst wie bisher sofort freigeben.
+    keep_buildings = (
+        (use_case.weights.get("w_bewohnerbedarf", 0) or 0) > 0
+        or (use_case.weights.get("w_target", 0) or 0) > 0
+    )
+    buildings_for_demand = None
     if len(buildings):
         # load_buildings() liefert die Geometrie in der Spalte "geom" (SELECT … AS geom);
         # auf "geometry" normalisieren, damit die Spaltenauswahl unten passt.
@@ -330,7 +380,7 @@ def run_flaechenfinder(
             )
         hex_proj["gebaeude"] = (coverage / hex_area) >= GEBAEUDE_EXCLUSION_COVERAGE
         if keep_buildings:
-            buildings_for_census = buildings_proj[["geometry"]].reset_index(drop=True)
+            buildings_for_demand = buildings_proj[["geometry"]].reset_index(drop=True)
         del hexes, pairs, buildings_proj
     else:
         hex_proj["gebaeude"] = False
@@ -389,7 +439,7 @@ def run_flaechenfinder(
                 .rename_geometry("geometry")[["geometry", "total"]]
                 .reset_index(drop=True)
             )
-            sources = _census_demand_sources(census_proj, buildings_for_census)
+            sources = _census_demand_sources(census_proj, buildings_for_demand)
             hex_proj["bewohner_ew"] = weighted_proximity_sum(
                 centroids, sources, "einwohner", use_case.bewohnerbedarf_radius_m
             )
@@ -485,34 +535,36 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_parken_m"] = np.nan
 
-    # ── 9. Zielorte ────────────────────────────────────────────────
-    # Nur bei Gewicht > 0 laden – sonst die OSM-Zielort-Queries sparen und
-    # score_zielorte als NaN (→ DB NULL, Sidebar „–") markieren.
+    # ── 9. Zielorte laden ────────────────────────────────────────────
+    # Alltagsziele (public."poiClassification": Grundversorgung, Bildung, Einkauf,
+    # Freizeit – siehe `load_target_locations`) erzeugen rund um ihre Gebäude Bedarf,
+    # analog zum Bewohnerbedarf (Schritt 5): Punkte werden per Point-in-Polygon auf
+    # die in Schritt 4 geladenen Gebäude aggregiert (`_target_demand_sources`,
+    # Vorhandensein-Gewichtung 0/1), dann gewichtete Nachbarschaftssumme
+    # `ziel_praesenz` (Anzahl erreichbarer Zielort-Gebäude, linear mit dem Abstand
+    # abfallend). Die Bonus-Ableitung passiert im MCE-Schritt (13). Nur bei
+    # Gewicht > 0 wird geladen; sonst bleibt `ziel_praesenz` NaN
+    # (→ score_zielorte NaN → DB NULL).
     _step(9)
+    hex_proj["ziel_praesenz"] = np.nan
     if (use_case.weights.get("w_target", 0) or 0) > 0:
-        target_scores = []
-        for t in use_case.targets:
-            try:
-                features = osm_loader.features_from_polygon(study_area_geom, t.osm_tags)
-            except Exception:
-                features = gpd.GeoDataFrame()
-            if not len(features):
-                target_scores.append(pd.Series(0.0, index=hex_proj.index))
-                continue
-            feat_proj = features.to_crs("EPSG:25832")
-            dist = _dist_to_union(centroids, feat_proj)
-            raw_score = dist.apply(lambda d: max(0.0,
-                100.0 - max(0.0, d - t.optimal_dist_m) / max(1.0, t.max_dist_m - t.optimal_dist_m) * 100.0
-            ))
-            target_scores.append(raw_score * t.weight_in_target)
-
-        if target_scores:
-            hex_proj["score_zielorte"] = pd.concat(target_scores, axis=1).max(axis=1)
-        else:
-            hex_proj["score_zielorte"] = 0.0
-        del target_scores
-    else:
-        hex_proj["score_zielorte"] = np.nan
+        targets = tilda_loader.load_target_locations(study_area_geom)
+        if len(targets):
+            # load_target_locations() liefert die Geometrie in der Spalte "geom"
+            # (SELECT … AS geom) – wie bei den Gebäuden oben auf "geometry" normalisieren.
+            targets_proj = (
+                targets.to_crs("EPSG:25832")
+                .rename_geometry("geometry")[["geometry"]]
+                .reset_index(drop=True)
+            )
+            sources = _target_demand_sources(targets_proj, buildings_for_demand)
+            hex_proj["ziel_praesenz"] = weighted_proximity_sum(
+                centroids, sources, "ziel_gewicht", use_case.zielort_radius_m
+            )
+            print(f"   → {len(sources)} Zielort-Quellen, Reichweite "
+                  f"{use_case.zielort_radius_m:g} m")
+            del targets_proj, sources
+        del targets
 
     # ── 10. DEM / Hangneigung ─────────────────────────────────────────
     _step(10)
@@ -596,9 +648,8 @@ def run_flaechenfinder(
     # Vegetation ist KEIN Kriterium, sondern ein separater Abzug (bzw. Bonus)
     # weiter unten – wie alle Modifier verschiebt sie den fertigen Score um
     # Punkte, statt sich einen Anteil an ihm zu teilen. Übersprungene Faktoren
-    # (ÖPNV/Zielorte bei Gewicht 0) haben eine NaN-Score-Spalte; `_term`
-    # überspringt sie als Skalar 0.0, damit die Summe nicht durch
-    # `NaN * 0 = NaN` vergiftet wird.
+    # (ÖPNV bei Gewicht 0) haben eine NaN-Score-Spalte; `_term` überspringt sie
+    # als Skalar 0.0, damit die Summe nicht durch `NaN * 0 = NaN` vergiftet wird.
     def _term(col, wkey):
         wv = w.get(wkey, 0) or 0
         return hex_proj[col] * wv if wv else 0.0
@@ -617,7 +668,6 @@ def run_flaechenfinder(
     BEDARF_TERMS = [
         ("score_radweg", "w_cyclepath"),
         ("score_oepnv", "w_transit"),
-        ("score_zielorte", "w_target"),
     ]
     BEBAUUNG_TERMS = [
         ("score_hangneigung", "w_slope"),
@@ -771,6 +821,29 @@ def run_flaechenfinder(
         hex_proj["score_bewohnerbedarf"] = np.nan
         bewohner_delta = 0.0
 
+    # ── Zielorte-Bonus: Zuschlag rund um Gebäude mit Alltagszielen ──────────
+    # Aus der in Schritt 9 berechneten gewichteten Nachbarschaftssumme `ziel_praesenz`
+    # (Anzahl erreichbarer Zielort-Gebäude – Grundversorgung/Bildung/Einkauf/Freizeit
+    # aus public."poiClassification" –, linear mit dem Abstand ab Gebäudekante
+    # abfallend) wird ein Zuschlag auf die BEDARFS-Gruppe – analog zum Bewohnerbedarf,
+    # nur mit Zielort- statt Zensus-Quellen (siehe `_target_demand_sources`).
+    # `zielort_saettigung` ist der Wert, ab dem der Zuschlag voll ausgereizt ist;
+    # `w_target` (0–1) der maximale Zuschlag in Punkten (× 100). Wie beim
+    # Bewohnerbedarf bekommen Hexagone, die überwiegend von einem Gebäude bedeckt
+    # sind, bewusst 0 (Bedarf entsteht RUND UM das Gebäude, nicht darauf). Ohne
+    # Gewicht bleibt `score_zielorte` NaN (→ DB NULL, Sidebar „–").
+    w_ziel = w.get("w_target", 0) or 0
+    if w_ziel > 0:
+        ziel_saettigung = max(1.0, use_case.zielort_saettigung)
+        ziel_faktor = (hex_proj["ziel_praesenz"].fillna(0.0) / ziel_saettigung).clip(0.0, 1.0)
+        ziel_faktor = ziel_faktor.where(~hex_proj["gebaeude"], 0.0)
+        ziel_bonus = (w_ziel * 100.0) * ziel_faktor
+        hex_proj["score_zielorte"] = ziel_bonus.round(1)
+        ziel_delta = ziel_bonus
+    else:
+        hex_proj["score_zielorte"] = np.nan
+        ziel_delta = 0.0
+
     # ── Bestandsanlagen: Bedarfssenkung um bestehende Radabstellanlagen ─────
     # Bestehende Fahrradabstellanlagen (public."bicycleParking_points") senken den
     # Bedarf: wo bereits abgestellt werden kann, braucht es weniger neue Anlagen.
@@ -843,14 +916,16 @@ def run_flaechenfinder(
             hex_proj["score_eigendaten"] = np.nan
 
     # ── Gesamtscore (Kombination) ──────────────────────────────────────────
-    # `total` = `base_score ± veg + kreuz + parken + fussgz + bewohner + bestand
+    # `total` = `base_score ± veg + kreuz + parken + fussgz + bewohner + ziel + bestand
     # + eigendaten`; die Modifier liegen als eigene Delta-Serien vor, damit sie unten
     # für die Teil-Scores wiederverwendbar sind. `fussgz_delta`/`bewohner_delta`/
     # `bestand_delta`/`eigendaten_delta` sind per Default 0 (Gewichte 0), ändern
-    # bestehende Läufe also nicht.
+    # bestehende Läufe also nicht. `ziel_delta` NICHT mehr per Default 0: w_target war
+    # vorher ein Kriterium mit Default-Gewicht 0.15, jetzt ein Modifier mit demselben
+    # Gewicht – bestehende Läufe verhalten sich also beim nächsten Neuberechnen anders.
     total = (
         base_score + veg_delta + kreuz_delta + parken_delta
-        + fussgz_delta + bewohner_delta + bestand_delta + eigendaten_delta
+        + fussgz_delta + bewohner_delta + ziel_delta + bestand_delta + eigendaten_delta
     )
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
     hex_proj["mce_gesamtscore"] = total.clip(lower=0.0, upper=100.0).round(1)
@@ -869,13 +944,13 @@ def run_flaechenfinder(
     # von der Gewichtsverteilung 0–100 bleibt. Ist eine Gruppe komplett
     # ungewichtet, bleibt ihr Score NaN (→ DB NULL).
     #
-    # Fußgängerzonen-Bonus und Bewohnerbedarf (Zuschläge) sowie Bestandsanlagen
-    # (Abzug) sind Bedarfs-Modifier (analog Kreuzung/Parken bei Bebauung): erst
-    # normalisieren, dann die Deltas addieren, dann clippen.
+    # Fußgängerzonen-Bonus, Bewohnerbedarf und Zielorte (Zuschläge) sowie
+    # Bestandsanlagen (Abzug) sind Bedarfs-Modifier (analog Kreuzung/Parken bei
+    # Bebauung): erst normalisieren, dann die Deltas addieren, dann clippen.
     base_bedarf = _group_score(BEDARF_TERMS)
-    score_bedarf = (base_bedarf + fussgz_delta + bewohner_delta + bestand_delta).clip(
-        lower=0.0, upper=100.0
-    )
+    score_bedarf = (
+        base_bedarf + fussgz_delta + bewohner_delta + ziel_delta + bestand_delta
+    ).clip(lower=0.0, upper=100.0)
 
     base_bebauung = _group_score(BEBAUUNG_TERMS)
     score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(

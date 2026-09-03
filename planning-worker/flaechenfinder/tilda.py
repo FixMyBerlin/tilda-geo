@@ -91,6 +91,14 @@ class TildaLoader:
             print(f"   ⚠️  Zensus-Einwohner-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_target_locations(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Zielort-Punkte aus public.poiClassification (für den Zielorte-Bonus)."""
+        try:
+            return self._loader.load_target_locations(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Zielort-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     def load_roads(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
         """Straßen-Linien mit Breite (für den Fahrbahnen-Ausschluss)."""
         try:

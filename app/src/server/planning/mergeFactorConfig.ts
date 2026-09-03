@@ -16,10 +16,10 @@ export type VariantFactorConfig = {
   bestand_default_diameter_m?: number
   bewohnerbedarf_radius_m?: number
   bewohnerbedarf_saettigung_ew?: number
+  zielort_saettigung?: number
   min_score_threshold?: number
   /** Zielgröße der Flächensuche (m²), Client-Filter auf cluster_area_m2 — pro Variante. */
   min_area_m2?: number | null
-  targets?: object[]
 }
 
 /** Area geometry, use-case, size, and optional user obstacles (stored on PlanningArea). */

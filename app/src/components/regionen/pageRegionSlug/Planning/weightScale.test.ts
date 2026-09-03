@@ -11,12 +11,12 @@ const rounded = (shares: Record<string, number>) =>
 
 describe('criterionShares', () => {
   it('verteilt die Anteile im Verhältnis der Wichtigkeiten', () => {
-    // Defaults: Radwegnähe 2 Stufen, Zielorte/Hangneigung/ÖPNV je 1 → 5 Stufen gesamt.
+    // Defaults: Radwegnähe 2 Stufen, Hangneigung/ÖPNV je 1 → 4 Stufen gesamt. Zielorte ist kein
+    // Kriterium mehr (siehe modifierPointRange-Tests unten).
     expect(rounded(criterionShares(DEFAULT_WEIGHTS))).toEqual({
-      w_cyclepath: 40,
-      w_transit: 20,
-      w_target: 20,
-      w_slope: 20,
+      w_cyclepath: 50,
+      w_transit: 25,
+      w_slope: 25,
     })
   })
 
@@ -30,7 +30,6 @@ describe('criterionShares', () => {
     expect(rounded(shares)).toEqual({
       w_cyclepath: 100,
       w_transit: 0,
-      w_target: 0,
       w_slope: 0,
     })
   })
@@ -49,31 +48,32 @@ describe('criterionShares', () => {
 describe('groupShare', () => {
   it('summiert die Anteile einer Gruppe', () => {
     const shares = criterionShares(DEFAULT_WEIGHTS)
-    expect(Math.round(groupShare(shares, ['w_cyclepath', 'w_transit', 'w_target']))).toBe(80)
-    expect(Math.round(groupShare(shares, ['w_slope']))).toBe(20)
+    expect(Math.round(groupShare(shares, ['w_cyclepath', 'w_transit']))).toBe(75)
+    expect(Math.round(groupShare(shares, ['w_slope']))).toBe(25)
   })
 })
 
 describe('modifierPointRange', () => {
   it('trennt Zuschläge von Abschlägen', () => {
-    // Defaults: Kreuzungen + Parken + Fußgängerzonen je 10 Punkte Zuschlag, keine Abschläge.
-    expect(modifierPointRange(DEFAULT_WEIGHTS, 'negative')).toEqual({ plus: 30, minus: 0 })
+    // Defaults: Kreuzungen + Parken + Fußgängerzonen + Zielorte je 10 Punkte Zuschlag,
+    // keine Abschläge.
+    expect(modifierPointRange(DEFAULT_WEIGHTS, 'negative')).toEqual({ plus: 40, minus: 0 })
   })
 
   it('zählt Bestandsanlagen als Abschlag', () => {
     const weights = { ...DEFAULT_WEIGHTS, w_bestand: 0.2 }
-    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 30, minus: 20 })
+    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 40, minus: 20 })
   })
 
   it('richtet die Vegetation nach der Vegetationsrichtung', () => {
     const weights = { ...DEFAULT_WEIGHTS, w_vegetation: 0.15 }
-    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 30, minus: 15 })
-    expect(modifierPointRange(weights, 'positive')).toEqual({ plus: 45, minus: 0 })
+    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 40, minus: 15 })
+    expect(modifierPointRange(weights, 'positive')).toEqual({ plus: 55, minus: 0 })
   })
 
   it('lässt das Eigendaten-Gewicht außen vor (eigene Kategorie)', () => {
     const weights = { ...DEFAULT_WEIGHTS, w_eigendaten: 0.4 }
-    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 30, minus: 0 })
+    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 40, minus: 0 })
   })
 })
 

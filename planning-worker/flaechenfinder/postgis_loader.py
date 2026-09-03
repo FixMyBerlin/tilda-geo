@@ -470,6 +470,42 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS-Abfrage data.census_population_point fehlgeschlagen: {e}")
             return _empty("EPSG:4326")
 
+    def load_target_locations(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Zielort-Punkte für den Zielorte-Bonus.
+
+        Liest `public."poiClassification"` – die tilda-weite POI-Klassifizierung
+        (processing/topics/poiClassification), die jeden relevanten OSM-Punkt
+        (shop=*/amenity=*/tourism=*/leisure=*) in genau eine von vier Kategorien
+        einsortiert: Grundversorgung, Bildung, Einkauf, Freizeit. Alle vier werden
+        kombiniert gelesen – kein einzelner Zielort-Typ wird bevorzugt (siehe
+        `zielort_radius_m`/`zielort_saettigung` in config.py).
+
+        Geometrie liegt in EPSG:3857 (osm2pgsql-Default, wie `bicycleParking_points`);
+        Rückgabe in EPSG:4326.
+
+        Abhängigkeit: die Tabelle existiert nur, wenn das poiClassification-Topic für
+        die Region prozessiert wurde. Fehlt sie, wird ein leeres GeoDataFrame
+        zurückgegeben und der Faktor trägt 0 bei – analog zum graceful Fallback der
+        übrigen Loader.
+        """
+        wkt = polygon_4326.wkt
+        bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
+        sql = f"""
+            SELECT ST_Transform(geom, 4326) AS geom
+            FROM public."poiClassification"
+            WHERE geom && {bbox}
+              AND tags->>'category' IN ('Grundversorgung', 'Bildung', 'Einkauf', 'Freizeit')
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            print(f"   ✓ PostGIS: {len(gdf)} Zielorte aus public.poiClassification")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS-Abfrage public.poiClassification fehlgeschlagen: {e}")
+            return _empty("EPSG:4326")
+
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
         """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
 

@@ -58,8 +58,8 @@ const SCORE_GROUPS: {
     key: 'bedarf',
     label: 'Bedarf',
     scoreKey: 'score_bedarf',
-    criteria: ['score_radweg', 'score_oepnv', 'score_zielorte'],
-    modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_bestand'],
+    criteria: ['score_radweg', 'score_oepnv'],
+    modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_zielorte', 'score_bestand'],
   },
   {
     key: 'bebauung',
@@ -79,6 +79,7 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_kreuzung: 'w_intersection',
   score_parken: 'w_parken',
   score_eigendaten: 'w_eigendaten',
+  score_zielorte: 'w_target',
 }
 
 // Dasselbe für die Kriterien — `criterionShares` (weightScale.ts) ist nach Gewichts-Namen
@@ -86,7 +87,6 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
 const CRITERION_WEIGHT_KEYS: Record<string, string> = {
   score_radweg: 'w_cyclepath',
   score_oepnv: 'w_transit',
-  score_zielorte: 'w_target',
   score_hangneigung: 'w_slope',
 }
 
