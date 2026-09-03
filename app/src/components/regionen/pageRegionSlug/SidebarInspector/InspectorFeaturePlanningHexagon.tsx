@@ -328,7 +328,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                           pct={modifierBarPct(value, max)}
                           fillClassName={modifierFillClassName(value)}
                         />
-                        <span className="col-span-2 text-right font-mono text-gray-600">
+                        <span className="col-span-2 text-right font-mono text-black">
                           {formatModifierValue(value, max)}
                         </span>
                       </div>
@@ -352,7 +352,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                   pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
                   fillClassName={modifierFillClassName(props.score_eigendaten)}
                 />
-                <span className="col-span-2 text-right font-mono text-gray-600">
+                <span className="col-span-2 text-right font-mono text-black">
                   {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
                 </span>
               </div>

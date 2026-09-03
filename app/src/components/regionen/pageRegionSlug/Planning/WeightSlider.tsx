@@ -29,13 +29,21 @@ export const WeightScaleLegend = () => (
 )
 
 /** Wert-Chip rechts neben dem Faktornamen; bei 0 gedämpft mit Hinweis „geht nicht ein“. */
-const FactorBadge = ({ value, muted }: { value: string; muted: boolean }) => (
+const FactorBadge = ({
+  value,
+  muted,
+  valueClassName = 'bg-green-50 text-green-800',
+}: {
+  value: string
+  muted: boolean
+  valueClassName?: string
+}) => (
   <span className="flex shrink-0 items-baseline gap-1">
     {muted && <span className="text-[11px] text-gray-400">geht nicht ein</span>}
     <span
       className={twJoin(
         'rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums',
-        muted ? 'bg-gray-100 text-gray-400' : 'bg-green-50 text-green-800',
+        muted ? 'bg-gray-100 text-gray-400' : valueClassName,
       )}
     >
       {value}
@@ -224,6 +232,7 @@ export const ModifierSlider = ({
               <FactorBadge
                 value={`${points === 0 ? '' : sign}${points} Pkt.`}
                 muted={points === 0}
+                valueClassName="bg-green-50 text-black"
               />
             ))
       }

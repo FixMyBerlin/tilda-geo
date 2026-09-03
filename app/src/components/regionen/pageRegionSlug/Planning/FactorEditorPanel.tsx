@@ -342,8 +342,10 @@ const FactorFields = ({
           </div>
         ))}
         <p className="mt-2 text-[11px] text-gray-500">
-          Zu- und Abschläge zusammen: max. <span className="font-semibold">+{points.plus}</span> /{' '}
-          <span className="font-semibold">−{points.minus}</span> Punkte auf den Grundscore.
+          Zu- und Abschläge zusammen: max.{' '}
+          <span className="font-semibold text-black">+{points.plus}</span> /{' '}
+          <span className="font-semibold text-black">−{points.minus}</span> Punkte auf den
+          Grundscore.
         </p>
       </div>
 

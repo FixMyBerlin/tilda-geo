@@ -1,18 +1,18 @@
 import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 import {
+  convertGeopackageToGeoJson,
+  isGeopackageFile,
+  mightNeedReprojection,
+  reprojectToWgs84,
+} from '@/lib/planningGeoConversion'
+import {
   deleteGeojsonHistoryEntry,
   type GeojsonHistoryEntry,
   type GeojsonHistoryKind,
   listGeojsonHistoryEntries,
   saveGeojsonHistoryEntry,
 } from '@/lib/planningGeojsonHistory'
-import {
-  convertGeopackageToGeoJson,
-  isGeopackageFile,
-  mightNeedReprojection,
-  reprojectToWgs84,
-} from '@/lib/planningGeoConversion'
 import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
 import { Spinner } from './Spinner'
 
