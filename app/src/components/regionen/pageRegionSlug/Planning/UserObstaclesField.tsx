@@ -105,10 +105,10 @@ export const UserObstaclesField = ({
               regionSlug={regionSlug}
               label={
                 <>
-                  Eigene GeoJSON-Datei hierher ziehen
+                  Eigene GeoJSON- oder GeoPackage-Datei hierher ziehen
                   <br />
-                  oder klicken (max. 5 MB, {MAX_USER_GEOJSON_FEATURES.toLocaleString('de-DE')}{' '}
-                  Objekte)
+                  oder klicken (max. {MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB,{' '}
+                  {MAX_USER_GEOJSON_FEATURES.toLocaleString('de-DE')} Objekte)
                 </>
               }
             />

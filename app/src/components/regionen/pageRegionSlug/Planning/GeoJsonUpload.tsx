@@ -7,7 +7,36 @@ import {
   listGeojsonHistoryEntries,
   saveGeojsonHistoryEntry,
 } from '@/lib/planningGeojsonHistory'
+import {
+  convertGeopackageToGeoJson,
+  isGeopackageFile,
+  mightNeedReprojection,
+  reprojectToWgs84,
+} from '@/lib/planningGeoConversion'
 import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
+import { Spinner } from './Spinner'
+
+/**
+ * Normalises an uploaded file to a GeoJSON string before it reaches `parse`: converts
+ * GeoPackage files and reprojects legacy `crs`-tagged GeoJSON to WGS84. Both steps
+ * dynamically import their (WASM-backed) dependency, so a plain WGS84 GeoJSON upload —
+ * the common case — never pays for either.
+ */
+async function readAsGeoJsonText(file: File): Promise<string> {
+  if (isGeopackageFile(file)) {
+    const featureCollection = await convertGeopackageToGeoJson(file)
+    return JSON.stringify(featureCollection)
+  }
+  const text = await file.text()
+  if (!mightNeedReprojection(text)) return text
+  let parsed: GeoJSON.GeoJSON
+  try {
+    parsed = JSON.parse(text) as GeoJSON.GeoJSON
+  } catch {
+    return text // invalid JSON — let `parse` below report it with its usual formatting
+  }
+  return JSON.stringify(await reprojectToWgs84(parsed))
+}
 
 /**
  * Generic drag & drop (or click-to-pick) file field for GeoJSON uploads.
@@ -23,7 +52,7 @@ import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAr
 export function GeoJsonUploadField<T>({
   parse,
   onResult,
-  accept = '.geojson,.json,application/geo+json,application/json',
+  accept = '.geojson,.json,.gpkg,application/geo+json,application/json',
   maxBytes,
   label,
   historyScope,
@@ -45,6 +74,7 @@ export function GeoJsonUploadField<T>({
   const [fileName, setFileName] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [history, setHistory] = useState<GeojsonHistoryEntry[]>([])
+  const [isConverting, setIsConverting] = useState(false)
 
   const refreshHistory = () => {
     void listGeojsonHistoryEntries(regionSlug, historyScope).then(setHistory)
@@ -59,8 +89,9 @@ export function GeoJsonUploadField<T>({
       setError(`Datei zu groß (max. ${Math.round(maxBytes / 1024 / 1024)} MB).`)
       return
     }
+    setIsConverting(true)
     try {
-      const text = await file.text()
+      const text = await readAsGeoJsonText(file)
       const result = parse(text)
       setFileName(file.name)
       onResult(result, file.name)
@@ -69,6 +100,8 @@ export function GeoJsonUploadField<T>({
     } catch (e) {
       setFileName(null)
       setError((e as Error).message)
+    } finally {
+      setIsConverting(false)
     }
   }
 
@@ -88,6 +121,7 @@ export function GeoJsonUploadField<T>({
     <div className="flex flex-col gap-1">
       <button
         type="button"
+        disabled={isConverting}
         onClick={() => inputRef.current?.click()}
         onDragOver={(e) => {
           e.preventDefault()
@@ -97,25 +131,37 @@ export function GeoJsonUploadField<T>({
         onDrop={(e) => {
           e.preventDefault()
           setDragOver(false)
+          if (isConverting) return
           const file = e.dataTransfer.files[0]
           if (file) void handleFile(file)
         }}
         className={`flex flex-col items-center gap-1 rounded border-2 border-dashed px-3 py-4 text-center text-xs transition-colors ${
-          dragOver
-            ? 'border-blue-400 bg-blue-50 text-blue-700'
-            : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:bg-gray-50'
+          isConverting
+            ? 'cursor-wait border-gray-300 text-gray-500'
+            : dragOver
+              ? 'border-blue-400 bg-blue-50 text-blue-700'
+              : 'border-gray-300 text-gray-500 hover:border-gray-400 hover:bg-gray-50'
         }`}
       >
-        <ArrowUpTrayIcon className="h-5 w-5" />
-        <span>
-          {label ?? (
-            <>
-              GeoJSON-Datei hierher ziehen
-              <br />
-              oder klicken zum Auswählen
-            </>
-          )}
-        </span>
+        {isConverting ? (
+          <>
+            <Spinner className="h-5 w-5 border-blue-500" />
+            <span>Datei wird verarbeitet …</span>
+          </>
+        ) : (
+          <>
+            <ArrowUpTrayIcon className="h-5 w-5" />
+            <span>
+              {label ?? (
+                <>
+                  GeoJSON- oder GeoPackage-Datei hierher ziehen
+                  <br />
+                  oder klicken zum Auswählen
+                </>
+              )}
+            </span>
+          </>
+        )}
       </button>
       <input
         ref={inputRef}
