@@ -2,7 +2,7 @@ import { AdminConsoleDumpButton } from '@/components/admin/AdminConsoleDumpButto
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
 import type { AdminTableHeaderCell } from '@/components/admin/AdminTable'
 import { AuditActionPill, auditChangeSourceColor } from '@/components/admin/audit-log/auditLogPills'
-import { formatAuditLogUser } from '@/components/admin/audit-log/formatAuditLogUser'
+import { AuditLogUserCell } from '@/components/admin/audit-log/AuditLogUserCell'
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { Pill } from '@/components/shared/text/Pill'
 import type { AuditLogRow } from '@/server/audit/queries/listAuditLog.server'
@@ -54,7 +54,9 @@ const AuditLogTableRow = ({
         '—'
       )}
     </td>
-    <td className={adminTableClasses.td}>{formatAuditLogUser(row)}</td>
+    <td className={adminTableClasses.td}>
+      <AuditLogUserCell row={row} />
+    </td>
     <td className={adminTableClasses.td}>
       {row.changedFields.length > 0 ? row.changedFields.join(', ') : '—'}
     </td>
