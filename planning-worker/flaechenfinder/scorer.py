@@ -450,7 +450,6 @@ def run_flaechenfinder(
         else:
             hex_proj["bewohner_ew"] = 0.0
         del census
-    del buildings_for_census
 
     # ── 6. ÖPNV-Haltestellen + Bikesharing ────────────────────────
     # Nur bei Gewicht > 0 laden – sonst die Transit-Queries sparen und
