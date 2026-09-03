@@ -71,10 +71,11 @@ export const planningGroupStyle: Record<
  * `full` = Kriterien-Balken sowie Zuschläge, `pale` = Abschläge (Vorzeichen bleibt so über die
  * Sättigung erkennbar, ohne die Gruppenzuordnung zu verlassen).
  */
-export const planningGroupBarStyle: Record<'bedarf' | 'bebauung', { full: string; pale: string }> = {
-  bedarf: { full: 'bg-blue-600', pale: 'bg-blue-200' },
-  bebauung: { full: 'bg-purple-600', pale: 'bg-purple-200' },
-}
+export const planningGroupBarStyle: Record<'bedarf' | 'bebauung', { full: string; pale: string }> =
+  {
+    bedarf: { full: 'bg-blue-600', pale: 'bg-blue-200' },
+    bebauung: { full: 'bg-purple-600', pale: 'bg-purple-200' },
+  }
 
 /**
  * Toggle-Button in der Gruppenfarbe (aktiv) bzw. neutral (inaktiv) — für `ScoreModeSwitcher`.
