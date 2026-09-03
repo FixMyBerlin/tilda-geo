@@ -188,46 +188,18 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
   return (
     <Disclosure title="Potenzialflächen-Hexagon">
       <div className="space-y-3 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-500">Gesamtscore</span>
+        <div className="flex items-center justify-between rounded-r border-l-[3px] border-gray-400 bg-gray-50 py-1.5 pr-2 pl-2">
+          <span className="text-xs font-bold text-gray-700 uppercase">Gesamtscore</span>
           <div className="flex items-center gap-2">
             {eignungsklasse && (
               <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${badgeClass}`}>
                 {eignungsklasse}
               </span>
             )}
-            <span className="text-2xl font-bold text-gray-800">
+            <span className="text-4xl leading-none font-bold text-gray-800 tabular-nums">
               {gesamtscore != null ? Math.round(gesamtscore) : '–'}
             </span>
           </div>
-        </div>
-
-        <div className="flex gap-2">
-          {SCORE_GROUPS.map((group) => {
-            const val = props[group.scoreKey]
-            const sharePct = groupSharePct(group.key)
-            return (
-              <div
-                key={group.scoreKey}
-                className={twJoin(
-                  'flex-1 rounded-r border-l-[3px] px-2 py-1.5',
-                  planningGroupStyle[group.key].block,
-                )}
-              >
-                <div className={twJoin('text-xs font-medium', planningGroupStyle[group.key].text)}>
-                  {group.label}
-                  {sharePct != null && (
-                    <span className="ml-1 text-[10px] text-gray-500 tabular-nums">
-                      ({Math.round(sharePct)}%)
-                    </span>
-                  )}
-                </div>
-                <div className="text-lg font-bold text-gray-800">
-                  {val != null ? Math.round(val) : '–'}
-                </div>
-              </div>
-            )
-          })}
         </div>
 
         {props.gebaeude && (
@@ -256,74 +228,99 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
         <div className="h-px bg-gray-200" />
 
         <div className="space-y-3">
-          {SCORE_GROUPS.map((group) => (
-            // Gleiche Gruppenfarben wie im Flächenfinder-Panel, damit die lange Faktorenliste hier
-            // und die Gewichte dort ohne Suchen zusammenzubringen sind.
-            <div
-              key={group.scoreKey}
-              className={twJoin(
-                'rounded-r border-l-[3px] py-1 pr-1 pl-2',
-                planningGroupStyle[group.key].block,
-              )}
-            >
+          {SCORE_GROUPS.map((group) => {
+            const groupVal = props[group.scoreKey]
+            const sharePct = groupSharePct(group.key)
+            return (
+              // Gleiche Gruppenfarben wie im Flächenfinder-Panel, damit die lange Faktorenliste hier
+              // und die Gewichte dort ohne Suchen zusammenzubringen sind.
               <div
+                key={group.scoreKey}
                 className={twJoin(
-                  'mb-1 text-xs font-semibold uppercase',
-                  planningGroupStyle[group.key].text,
+                  'rounded-r border-l-[3px] py-1 pr-1 pl-2',
+                  planningGroupStyle[group.key].block,
                 )}
               >
-                {group.label}
-              </div>
-              <div className="space-y-0 text-xs">
-                {group.criteria.map((key) => {
-                  const value = props[key] as number | null | undefined
-                  const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
-                  const sharePct = shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]
-                  return (
-                    <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
-                      <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                      <BarTrack pct={pct} fillClassName="bg-red-600" />
-                      <span className="text-right font-mono text-gray-600">
-                        {value != null ? Math.round(value) : '–'}
+                <div className="mb-5 flex items-center justify-between">
+                  <div
+                    className={twJoin(
+                      'text-xs font-semibold uppercase',
+                      planningGroupStyle[group.key].text,
+                    )}
+                  >
+                    {group.label}
+                    {sharePct != null && (
+                      <span className="ml-1 text-[10px] font-normal text-gray-500 tabular-nums">
+                        ({Math.round(sharePct)}%)
                       </span>
-                      <span className="text-right text-[10px] text-gray-400 tabular-nums">
-                        {sharePct != null ? `(${Math.round(sharePct)}%)` : null}
-                      </span>
-                    </div>
-                  )
-                })}
-                {group.comingSoon?.map((key) => (
-                  <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
-                    <span className="pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</span>
-                    <BarTrack pct={0} trackClassName="bg-gray-100" />
-                    <span className="col-span-2 text-right text-[10px] text-gray-400">bald</span>
+                    )}
                   </div>
-                ))}
-                <div className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase">
-                  Zu- und Abschläge
+                  <span
+                    className={twJoin(
+                      'text-2xl leading-none font-bold tabular-nums',
+                      planningGroupStyle[group.key].text,
+                    )}
+                  >
+                    {groupVal != null ? Math.round(groupVal) : '–'}
+                  </span>
                 </div>
-                {group.modifiers.map((key) => {
-                  const value = props[key] as number | null | undefined
-                  const max = modifierMax(key)
-                  return (
-                    <div
-                      key={key}
-                      className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5 last:border-0')}
-                    >
-                      <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                      <BarTrack
-                        pct={modifierBarPct(value, max)}
-                        fillClassName={modifierFillClassName(value)}
-                      />
-                      <span className="col-span-2 text-right font-mono text-gray-600">
-                        {formatModifierValue(value, max)}
-                      </span>
+                <div className="space-y-0 text-xs">
+                  {group.criteria.map((key) => {
+                    const value = props[key] as number | null | undefined
+                    const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
+                    const sharePct = shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]
+                    return (
+                      <div
+                        key={key}
+                        className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}
+                      >
+                        <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
+                        <BarTrack pct={pct} fillClassName="bg-red-600" />
+                        <span className="text-right font-mono text-gray-600">
+                          {value != null ? Math.round(value) : '–'}
+                        </span>
+                        <span className="text-right text-[10px] text-gray-400 tabular-nums">
+                          {sharePct != null ? `(${Math.round(sharePct)}%)` : null}
+                        </span>
+                      </div>
+                    )
+                  })}
+                  {group.comingSoon?.map((key) => (
+                    <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
+                      <span className="pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</span>
+                      <BarTrack pct={0} trackClassName="bg-gray-100" />
+                      <span className="col-span-2 text-right text-[10px] text-gray-400">bald</span>
                     </div>
-                  )
-                })}
+                  ))}
+                  <div className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase">
+                    Zu- und Abschläge
+                  </div>
+                  {group.modifiers.map((key) => {
+                    const value = props[key] as number | null | undefined
+                    const max = modifierMax(key)
+                    return (
+                      <div
+                        key={key}
+                        className={twJoin(
+                          ROW_GRID,
+                          'border-b border-gray-100 py-1.5 last:border-0',
+                        )}
+                      >
+                        <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
+                        <BarTrack
+                          pct={modifierBarPct(value, max)}
+                          fillClassName={modifierFillClassName(value)}
+                        />
+                        <span className="col-span-2 text-right font-mono text-gray-600">
+                          {formatModifierValue(value, max)}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
 
           {/* Eigene Flächen: eigene Kategorie (nicht in Bedarf/Bebauung). Signierter
               Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}

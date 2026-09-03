@@ -6,7 +6,7 @@ import {
   usePlanningHexagonsVisibleParam,
   usePlanningScoreParam,
 } from '../hooks/useQueryState/usePlanningParams'
-import { planningRadioButtonClass } from './planningPanelStyles'
+import { planningGroupButtonClass, planningRadioButtonClass } from './planningPanelStyles'
 
 // Tab-like switcher for the three display modes (Issue #3415): the demand
 // probability, the buildability probability, or their combination. Colors the
@@ -61,7 +61,7 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
             }}
             className={twJoin(
               'flex-1',
-              planningRadioButtonClass(visible && mode === value, 'green'),
+              planningGroupButtonClass(visible && mode === value, value),
             )}
           >
             {label}

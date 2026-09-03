@@ -4,6 +4,7 @@ import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/h
 import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
 import {
   PLANNING_SCORE_PROPERTY,
+  type PlanningScoreMode,
   usePlanningAreaFilterParam,
   usePlanningHexagonsOpacityParam,
   usePlanningHexagonsVisibleParam,
@@ -45,30 +46,48 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // When `planningRun` is absent (the normal viewer), this renders nothing — so the
 // existing viewer is untouched.
 
-// Score → red intensity ramp (0 = ausgeschlossen/transparent … 100 = tiefrot).
+// Score → Farbintensitäts-Rampe (0 = ausgeschlossen/transparent … 100 = kräftigste Farbe).
 // Hexagone mit Wert 0 bekommen keine Füllfarbe, nur der Rand (fill-outline-color)
 // markiert sie noch. Zwischen 0 und HEXAGON_FADE_IN_THRESHOLD blendet die
 // Deckkraft graduell ein (statt hart bei 0 umzuschalten) – sonst entsteht bei
 // vielen knapp über 0 liegenden Werten ein löchriges Muster aus abrupt
-// wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Die
-// eingefärbte Property hängt vom aktiven Anzeigemodus ab (Kombination/Bedarf/
-// Bebauung), daher wird die Rampe pro ausgewählter Tile-Property gebaut.
+// wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Der Farbton
+// hängt vom aktiven Anzeigemodus ab — dieselben Farben wie `planningGroupStyle`
+// (Bedarf blau, Bebauung lila); Kombination bleibt beim ursprünglichen Rot, da sie
+// keine Faktorgruppe mit eigener Farbe ist.
 const HEXAGON_FADE_IN_THRESHOLD = 10
-const scoreColor = (property: string): any => [
-  'interpolate',
-  ['linear'],
-  ['coalesce', ['get', property], 0],
-  0,
-  'rgba(255,245,240,0)',
-  HEXAGON_FADE_IN_THRESHOLD,
-  '#fff5f0',
-  40,
-  '#fc9272',
-  70,
-  '#de2d26',
-  100,
-  '#67000d',
-]
+const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: string[] }> = {
+  kombination: {
+    fadeFrom: 'rgba(255,245,240,0)',
+    stops: ['#fff5f0', '#fc9272', '#de2d26', '#67000d'],
+  },
+  bedarf: {
+    fadeFrom: 'rgba(239,246,255,0)',
+    stops: ['#eff6ff', '#60a5fa', '#2563eb', '#1e3a8a'],
+  },
+  bebauung: {
+    fadeFrom: 'rgba(250,245,255,0)',
+    stops: ['#faf5ff', '#c084fc', '#9333ea', '#581c87'],
+  },
+}
+const scoreColor = (property: string, mode: PlanningScoreMode): any => {
+  const { fadeFrom, stops } = HEXAGON_SCORE_RAMP[mode]
+  return [
+    'interpolate',
+    ['linear'],
+    ['coalesce', ['get', property], 0],
+    0,
+    fadeFrom,
+    HEXAGON_FADE_IN_THRESHOLD,
+    stops[0],
+    40,
+    stops[1],
+    70,
+    stops[2],
+    100,
+    stops[3],
+  ]
+}
 
 // Ursprüngliche feste Layer-Deckkraft (vor Einführung des Transparenz-Reglers).
 // Der Regler steht bei 100% für genau diesen Wert, nicht für CSS-Opacity 1 —
@@ -99,6 +118,7 @@ const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number):
 
 const hexagonFillLayerProps = (
   property: string,
+  mode: PlanningScoreMode,
   filterOn: boolean,
   minArea: number,
   opacityPct: number,
@@ -108,7 +128,7 @@ const hexagonFillLayerProps = (
   'source-layer': planningHexagonsSourceLayer,
   type: 'fill' as const,
   paint: {
-    'fill-color': scoreColor(property),
+    'fill-color': scoreColor(property, mode),
     'fill-opacity': clusterOpacity(filterOn, minArea, (opacityPct / 100) * MAX_FILL_OPACITY),
     'fill-outline-color': 'rgba(0,0,0,0.15)',
   },
@@ -340,6 +360,7 @@ export const SourcesLayersPlanning = () => {
   const censusUrl = getTilesUrl(`/planning_census/{z}/{x}/{y}?run_id=${runId}`)
   const fillLayerProps = hexagonFillLayerProps(
     PLANNING_SCORE_PROPERTY[scoreMode],
+    scoreMode,
     areaFilterOn,
     minArea,
     hexagonsOpacityPct,

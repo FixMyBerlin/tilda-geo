@@ -1,17 +1,21 @@
 import { twJoin } from 'tailwind-merge'
+import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
 
 /** Planungspanel-Breite (etwas über Standard-`w-80`). */
 export const PLANNING_PANEL_WIDTH = 'w-[22rem]'
 
+const planningToggleButtonBase = 'rounded border px-2 py-1.5 text-xs font-medium transition-colors'
+const planningToggleButtonInactive = 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+
 /** Radio-artige Auswahlbuttons (eine Option aktiv). Farbe bleibt pro Kontext. */
 export const planningRadioButtonClass = (active: boolean, accent: 'blue' | 'green' = 'blue') =>
   twJoin(
-    'rounded border px-2 py-1.5 text-xs font-medium transition-colors',
+    planningToggleButtonBase,
     active
       ? accent === 'green'
         ? 'border-green-700 bg-green-50 text-green-700'
         : 'border-blue-600 bg-blue-50 text-blue-700'
-      : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+      : planningToggleButtonInactive,
   )
 
 /**
@@ -31,30 +35,49 @@ export const planningDisclosureHeaderClass = (open: boolean, twoLine = false) =>
 
 /**
  * Farbe der beiden Faktorgruppen. Dient nur dazu, die Gruppen auf einen Blick auseinanderzuhalten
- * — Anteil-Chip im zugeklappten Faktoren-Kopf, Block/Überschrift im geöffneten Formular und
- * dieselben Gruppen in der Sidebar (Hexagon-Inspector). Die Farben haben keine eigene Bedeutung
- * und sind bewusst nicht die der Kartenlayer.
+ * — Anteil-Chip im zugeklappten Faktoren-Kopf, Block/Überschrift im geöffneten Formular, dieselben
+ * Gruppen in der Sidebar (Hexagon-Inspector) und die Modus-Buttons (`ScoreModeSwitcher`).
+ * Kombination hat bewusst keine eigene Farbe (bleibt neutral/grün) — sie ist keine Faktorgruppe,
+ * sondern das gemeinsame Ergebnis. Die Farben selbst haben keine eigene Bedeutung und sind bewusst
+ * nicht die der Kartenlayer.
  *
  * `chip` = farbiger Wert-Chip, `block` = linker Streifen + Tönung eines Gruppenblocks,
- * `headline` = Überschrift mit Unterstrich, `text` = nur die Textfarbe.
+ * `headline` = Überschrift mit Unterstrich, `text` = nur die Textfarbe, `button` = aktiver
+ * Zustand eines Toggle-Buttons (siehe `planningGroupButtonClass`).
  */
 export const planningGroupStyle: Record<
   'bedarf' | 'bebauung',
-  { chip: string; block: string; headline: string; text: string }
+  { chip: string; block: string; headline: string; text: string; button: string }
 > = {
   bedarf: {
     chip: 'bg-blue-100 text-blue-800',
     block: 'border-blue-400 bg-blue-50/60',
     headline: 'border-blue-200 text-blue-900',
     text: 'text-blue-800',
+    button: 'border-blue-600 bg-blue-50 text-blue-700',
   },
   bebauung: {
     chip: 'bg-purple-100 text-purple-800',
     block: 'border-purple-400 bg-purple-50/60',
     headline: 'border-purple-200 text-purple-900',
     text: 'text-purple-800',
+    button: 'border-purple-600 bg-purple-50 text-purple-700',
   },
 }
+
+/**
+ * Toggle-Button in der Gruppenfarbe (aktiv) bzw. neutral (inaktiv) — für `ScoreModeSwitcher`.
+ * Kombination hat keine Gruppenfarbe und fällt auf den ursprünglichen Grün-Akzent zurück.
+ */
+export const planningGroupButtonClass = (active: boolean, mode: PlanningScoreMode) =>
+  twJoin(
+    planningToggleButtonBase,
+    active
+      ? mode === 'kombination'
+        ? 'border-green-700 bg-green-50 text-green-700'
+        : planningGroupStyle[mode].button
+      : planningToggleButtonInactive,
+  )
 
 /** Kompakte Eingabefelder — eine Stufe kleiner als Panel-Fließtext (`text-sm`). */
 const planningInputClass =
