@@ -59,10 +59,7 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
               setMode(value)
               show()
             }}
-            className={twJoin(
-              'flex-1',
-              planningGroupButtonClass(visible && mode === value, value),
-            )}
+            className={twJoin('flex-1', planningGroupButtonClass(visible && mode === value, value))}
           >
             {label}
           </button>
