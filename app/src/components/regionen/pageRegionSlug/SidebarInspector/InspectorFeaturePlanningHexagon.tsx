@@ -7,7 +7,10 @@ import {
   usePlanningVariantParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/Planning/planningDefaults'
-import { planningGroupStyle } from '@/components/regionen/pageRegionSlug/Planning/planningPanelStyles'
+import {
+  planningGroupBarStyle,
+  planningGroupStyle,
+} from '@/components/regionen/pageRegionSlug/Planning/planningPanelStyles'
 import {
   criterionShares,
   groupShare,
@@ -164,7 +167,19 @@ const formatModifierValue = (value: number | null | undefined, max: number) =>
 const modifierBarPct = (value: number | null | undefined, max: number) =>
   value != null && max > 0 ? Math.min(100, (Math.abs(value) / max) * 100) : 0
 
-const modifierFillClassName = (value: number | null | undefined) =>
+const modifierFillClassName = (
+  value: number | null | undefined,
+  groupKey: 'bedarf' | 'bebauung',
+) =>
+  value != null && value > 0
+    ? planningGroupBarStyle[groupKey].full
+    : value != null && value < 0
+      ? planningGroupBarStyle[groupKey].pale
+      : 'bg-gray-300'
+
+// Eigene Flächen gehören zu keiner der beiden Gruppen (siehe unten) — daher weiterhin
+// gruppenunabhängig grün/rot statt Bedarf-/Bebauung-Farbe.
+const ungroupedModifierFillClassName = (value: number | null | undefined) =>
   value != null && value > 0
     ? 'bg-green-600'
     : value != null && value < 0
@@ -292,7 +307,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                         className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}
                       >
                         <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                        <BarTrack pct={pct} fillClassName="bg-red-600" />
+                        <BarTrack pct={pct} fillClassName={planningGroupBarStyle[group.key].full} />
                         <span className="text-right font-mono text-gray-600">
                           {value != null ? Math.round(value) : '–'}
                         </span>
@@ -326,7 +341,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                         <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
                         <BarTrack
                           pct={modifierBarPct(value, max)}
-                          fillClassName={modifierFillClassName(value)}
+                          fillClassName={modifierFillClassName(value, group.key)}
                         />
                         <span className="col-span-2 text-right font-mono text-black">
                           {formatModifierValue(value, max)}
@@ -350,7 +365,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                 <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
                 <BarTrack
                   pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
-                  fillClassName={modifierFillClassName(props.score_eigendaten)}
+                  fillClassName={ungroupedModifierFillClassName(props.score_eigendaten)}
                 />
                 <span className="col-span-2 text-right font-mono text-black">
                   {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
