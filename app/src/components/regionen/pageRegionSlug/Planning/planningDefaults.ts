@@ -33,7 +33,6 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   // `bewohnerbedarf_saettigung_ew` fehlt hier bewusst: ohne Wert in der Varianten-Config gilt der
   // Zensus-Vorschlag des Planungsgebiets (siehe `mergeFactorConfig`). Erst wenn jemand das Feld
   // von Hand ändert, steht eine Zahl in der Variante.
-  zielort_saettigung: 30,
   min_score_threshold: 60,
 }
 
@@ -82,7 +81,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_transit:
     'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore.',
   w_target:
-    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit aus OpenStreetMap) heben den Bedarf in ihrer Nähe — unabhängig davon, wie viele Zielorte in einem Gebäude liegen. Jedes solche Gebäude wirkt 20 m weit: direkt an der Gebäudekante mit vollem Gewicht, auf halber Strecke nur noch zur Hälfte, ab 20 m gar nicht mehr. Mehrere Gebäude in Reichweite addieren sich. Der eingestellte Wert ist die Anzahl erreichbarer Zielort-Gebäude, ab der es den vollen Zuschlag gibt. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit aus OpenStreetMap) heben den Bedarf in ihrer Nähe — unabhängig davon, wie viele Zielorte in einem Gebäude liegen. Schon ein einzelnes solches Gebäude direkt an der Gebäudekante löst den vollen Zuschlag aus; mit zunehmendem Abstand nimmt er linear ab und ist ab 20 m verbraucht. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_fussgaengerzone:
     'An Ecken, wo eine normale Straße auf eine Fußgängerzone trifft, ist der Bedarf besonders hoch. Der volle Zuschlag liegt rund 5–8 m von der Ecke; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_bestand:
@@ -125,16 +124,8 @@ export const FACTOR_PARAMS: Record<
       min: 0,
     },
   ],
-  // Derselbe fest verdrahtete 20-m-Radius wie beim Bewohnerbedarf (siehe Kommentar dort);
-  // einstellbar ist nur die Sättigung.
-  w_target: [
-    {
-      key: 'zielort_saettigung',
-      label: 'Voller Zuschlag ab (Zielort-Gebäuden) bis 20 Meter Radius',
-      step: 5,
-      min: 0,
-    },
-  ],
+  // Kein Eintrag für w_target: Radius (20 m) UND Sättigung (fest 1.0) sind beide nicht
+  // UI-einstellbar (siehe Kommentar in flaechenfinder/config.py).
 }
 
 /** Faktoren, die `public._parking_*`-Tabellen lesen (siehe `postgis_loader.py`) — das

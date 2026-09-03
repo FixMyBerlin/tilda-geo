@@ -98,9 +98,11 @@ class UseCaseConfig:
     # Zuschlag in Punkten × 100). Ein Gebäude zählt dabei unabhängig von der Anzahl der darin
     # liegenden Zielorte nur EINMAL (reine Vorhandenheits-Gewichtung, User-Entscheid – ein Haus
     # mit Supermarkt UND Bäckerei wirkt nicht doppelt so stark wie eines mit nur einem Laden).
+    # Sättigung ist FEST auf 1.0 verdrahtet (User-Entscheid, kein Konfigfeld, kein UI-Regler):
+    # schon EIN Zielort-Gebäude direkt an der Hexagonkante löst den vollen Zuschlag aus – anders
+    # als beim Bewohnerbedarf gibt es hier keine Akkumulations-Sättigung (siehe scorer.py).
     # Radius bewusst NICHT UI-einstellbar (wie bewohnerbedarf_radius_m, gleiche Begründung).
     zielort_radius_m: float = 20.0        # Reichweite ab Gebäudekante (fest, wie Bewohnerbedarf)
-    zielort_saettigung: float = 30.0      # Anzahl Zielort-Gebäude im Radius für vollen Zuschlag
 
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
@@ -195,7 +197,6 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         bewohnerbedarf_radius_m=float(cfg.get("bewohnerbedarf_radius_m", 20.0)),
         bewohnerbedarf_saettigung_ew=float(cfg.get("bewohnerbedarf_saettigung_ew", 30.0)),
         zielort_radius_m=float(cfg.get("zielort_radius_m", 20.0)),
-        zielort_saettigung=float(cfg.get("zielort_saettigung", 30.0)),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
         exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),

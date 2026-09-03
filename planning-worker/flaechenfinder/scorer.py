@@ -227,7 +227,7 @@ def _target_demand_sources(
     Gewichtung (0/1) statt Summe. Ein Gebäude mit mehreren Zielorten (z. B.
     Supermarkt + Bäckerei im selben Haus) zählt genau wie eines mit nur einem –
     die ANZAHL der Zielorte im Gebäude soll den Bedarf nicht vervielfachen
-    (User-Entscheid, siehe `zielort_saettigung` in config.py).
+    (User-Entscheid).
 
     Punkte ohne Gebäudetreffer behalten ihre Punktgeometrie, jeweils mit
     Gewicht 1.0 – ein einzelner Zielort ohne erkanntes Gebäude zählt wie ein
@@ -826,16 +826,17 @@ def run_flaechenfinder(
     # (Anzahl erreichbarer Zielort-Gebäude – Grundversorgung/Bildung/Einkauf/Freizeit
     # aus public."poiClassification" –, linear mit dem Abstand ab Gebäudekante
     # abfallend) wird ein Zuschlag auf die BEDARFS-Gruppe – analog zum Bewohnerbedarf,
-    # nur mit Zielort- statt Zensus-Quellen (siehe `_target_demand_sources`).
-    # `zielort_saettigung` ist der Wert, ab dem der Zuschlag voll ausgereizt ist;
-    # `w_target` (0–1) der maximale Zuschlag in Punkten (× 100). Wie beim
+    # nur mit Zielort- statt Zensus-Quellen (siehe `_target_demand_sources`) UND mit
+    # fest auf 1.0 verdrahteter Sättigung (User-Entscheid, kein Konfigfeld): schon EIN
+    # Zielort-Gebäude direkt an der Hexagonkante (ziel_praesenz=1.0) löst den vollen
+    # Zuschlag aus, das simple `.clip(0, 1)` ersetzt die Division durch die Sättigung.
+    # `w_target` (0–1) ist der maximale Zuschlag in Punkten (× 100). Wie beim
     # Bewohnerbedarf bekommen Hexagone, die überwiegend von einem Gebäude bedeckt
     # sind, bewusst 0 (Bedarf entsteht RUND UM das Gebäude, nicht darauf). Ohne
     # Gewicht bleibt `score_zielorte` NaN (→ DB NULL, Sidebar „–").
     w_ziel = w.get("w_target", 0) or 0
     if w_ziel > 0:
-        ziel_saettigung = max(1.0, use_case.zielort_saettigung)
-        ziel_faktor = (hex_proj["ziel_praesenz"].fillna(0.0) / ziel_saettigung).clip(0.0, 1.0)
+        ziel_faktor = hex_proj["ziel_praesenz"].fillna(0.0).clip(0.0, 1.0)
         ziel_faktor = ziel_faktor.where(~hex_proj["gebaeude"], 0.0)
         ziel_bonus = (w_ziel * 100.0) * ziel_faktor
         hex_proj["score_zielorte"] = ziel_bonus.round(1)

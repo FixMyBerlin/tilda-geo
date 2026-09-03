@@ -478,7 +478,7 @@ class PostgisLoader:
         (shop=*/amenity=*/tourism=*/leisure=*) in genau eine von vier Kategorien
         einsortiert: Grundversorgung, Bildung, Einkauf, Freizeit. Alle vier werden
         kombiniert gelesen – kein einzelner Zielort-Typ wird bevorzugt (siehe
-        `zielort_radius_m`/`zielort_saettigung` in config.py).
+        `zielort_radius_m` in config.py).
 
         Geometrie liegt in EPSG:3857 (osm2pgsql-Default, wie `bicycleParking_points`);
         Rückgabe in EPSG:4326.

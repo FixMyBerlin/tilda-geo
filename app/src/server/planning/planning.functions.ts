@@ -43,7 +43,6 @@ const VariantFactorConfigSchema = z
     bestand_default_diameter_m: z.number().optional(),
     bewohnerbedarf_radius_m: z.number().optional(),
     bewohnerbedarf_saettigung_ew: z.number().optional(),
-    zielort_saettigung: z.number().optional(),
     min_score_threshold: z.number().min(0).max(100).optional(),
     min_area_m2: z.number().min(0).nullable().optional(),
   })
