@@ -90,6 +90,31 @@ const CRITERION_WEIGHT_KEYS: Record<string, string> = {
   score_hangneigung: 'w_slope',
 }
 
+// Vollständige Ausschlussgründe (nullen mce_gesamtscore, siehe scorer.py
+// Z. 966-975 `exclusion` bzw. Z. 902-906 `eigendaten_exclude`), jeweils mit
+// erklärendem Sidebar-Hinweis. Gebäude/Fahrbahn/Eigene-Flächen haben dafür ein
+// eigenes persistiertes Flag (analog `gebaeude`); Steilhang braucht keins –
+// `score_hangneigung` wird unconditional berechnet und ist exakt 0 nur bei
+// Hangneigung > 8°, identisch zur Ausschlussbedingung im Worker.
+const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text: string }[] = [
+  {
+    check: (props) => !!props.gebaeude,
+    text: 'Auf dieser Fläche befindet sich ein Gebäude – eine Bebauung ist hier nicht möglich.',
+  },
+  {
+    check: (props) => !!props.fahrbahn,
+    text: 'Auf dieser Fläche verläuft eine Straße – eine Bebauung ist hier nicht möglich.',
+  },
+  {
+    check: (props) => props.score_hangneigung === 0,
+    text: 'Diese Fläche ist zu steil (Hangneigung > 8°) – eine Bebauung ist hier nicht möglich.',
+  },
+  {
+    check: (props) => !!props.eigendaten_ausschluss,
+    text: 'Diese Fläche liegt im Ausschlussbereich eigener Flächen.',
+  },
+]
+
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',
   schlecht: 'bg-red-100 text-red-800',
@@ -202,19 +227,11 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           </div>
         </div>
 
-        {props.gebaeude && (
-          <div className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
-            <strong>Hinweis:</strong> Auf dieser Fläche befindet sich ein Gebäude – eine Bebauung
-            ist hier nicht möglich.
+        {EXCLUSION_REASONS.filter((reason) => reason.check(props)).map((reason) => (
+          <div key={reason.text} className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
+            <strong>Hinweis:</strong> {reason.text}
           </div>
-        )}
-
-        {props.fahrbahn && (
-          <div className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
-            <strong>Hinweis:</strong> Auf dieser Fläche verläuft eine Straße – eine Bebauung ist
-            hier nicht möglich.
-          </div>
-        )}
+        ))}
 
         {areaFilterOn && props.cluster_area_m2 != null && (
           <div className="flex items-center justify-between text-xs">

@@ -87,6 +87,14 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean
 -- Fein-Gitter (Res 13) gesetzt.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;
 
+-- Liegt das Hexagon im Ausschlussbereich eigener Flächen (Nutzer-Upload,
+-- user_geojson_mode = exclude_inside/exclude_outside)? Nur dann gesetzt;
+-- solche Zellen sind hart ausgeschlossen (mce_gesamtscore = 0). Das Flag
+-- erlaubt der Sidebar, den Ausschlussgrund anzuzeigen, auch wenn
+-- score_eigendaten in diesem Modus NULL bleibt. Nur im Fein-Gitter (Res 13)
+-- gesetzt.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_ausschluss boolean NOT NULL DEFAULT false;
+
 -- Potentialflächen (aus Hexagonen abgeleitete Polygone) werden nicht mehr
 -- berechnet; Altbestand aus früheren Läufen aufräumen.
 DROP TABLE IF EXISTS planning.scenario_areas;

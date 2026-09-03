@@ -67,6 +67,7 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     # Gleiche Begründung wie bei „gebaeude": auf dem groben Aggregat-Gitter ist
     # ein Einzel-Flag pro Feingitter-Zelle nicht aussagekräftig.
     agg["fahrbahn"] = False
+    agg["eigendaten_ausschluss"] = False
     agg["eignungsklasse"] = pd.cut(
         agg["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
@@ -913,6 +914,14 @@ def run_flaechenfinder(
             eigendaten_delta = sign * effect
         else:
             hex_proj["score_eigendaten"] = np.nan
+
+    # Persistiertes Flag analog `gebaeude`/`fahrbahn` – erlaubt der Sidebar, den
+    # Ausschlussgrund „Eigene Flächen" anzuzeigen, auch wenn `score_eigendaten`
+    # in Ausschluss-Modi NaN ist (siehe oben).
+    hex_proj["eigendaten_ausschluss"] = (
+        eigendaten_exclude if eigendaten_exclude is not None
+        else pd.Series(False, index=hex_proj.index)
+    )
 
     # ── Gesamtscore (Kombination) ──────────────────────────────────────────
     # `total` = `base_score ± veg + kreuz + parken + fussgz + bewohner + ziel + bestand

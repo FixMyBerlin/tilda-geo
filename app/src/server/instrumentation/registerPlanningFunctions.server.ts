@@ -40,7 +40,8 @@ async function ensurePlanningSchema() {
       score_eigendaten        real,
       score_bewohnerbedarf    real,
       eignungsklasse          text,
-      fahrbahn                boolean NOT NULL DEFAULT false
+      fahrbahn                boolean NOT NULL DEFAULT false,
+      eigendaten_ausschluss   boolean NOT NULL DEFAULT false
     );`)
   // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
   await geoDataClient.$executeRawUnsafe(
@@ -95,6 +96,13 @@ async function ensurePlanningSchema() {
   // das Flag erlaubt der Sidebar, den Ausschlussgrund anzuzeigen.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;`,
+  )
+  // Hexagon liegt im Ausschlussbereich eigener Flächen (Nutzer-Upload,
+  // exclude_inside/exclude_outside) → hart ausgeschlossen; das Flag erlaubt der
+  // Sidebar, den Ausschlussgrund anzuzeigen, auch wenn score_eigendaten in
+  // diesem Modus NULL bleibt.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_ausschluss boolean NOT NULL DEFAULT false;`,
   )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
@@ -174,6 +182,7 @@ async function registerHexagonsFunction() {
           eignungsklasse,
           gebaeude,
           fahrbahn,
+          eigendaten_ausschluss,
           ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_hexagons
         WHERE run_id = rid AND resolution = res_val AND (geom && bounds)
@@ -230,6 +239,7 @@ async function registerHexagonsFunction() {
           eignungsklasse: 'text',
           gebaeude: 'boolean',
           fahrbahn: 'boolean',
+          eigendaten_ausschluss: 'boolean',
         },
       },
       {
