@@ -18,6 +18,19 @@ import { LayerHighlight } from './LayerHighlight'
 
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
+/**
+ * Unsichtbarer Fixpunkt, direkt (und ausschließlich) beim ersten Rendern mit
+ * gesetztem `runId` gemountet und danach nie mehr entfernt oder neu erzeugt.
+ * Die Hexagon-Layer (Fläche/Highlight/Label) hängen sich per `beforeId` immer
+ * direkt darunter ein. Vegetation/Fahrbahnen/Zensus/Eigene-Daten-Layer werden
+ * dagegen ganz normal ohne `beforeId` angehängt (landen also immer ganz oben
+ * auf dem aktuellen Stapel) und liegen dadurch immer über der Decke – und
+ * damit immer über den Hexagonen. Ohne diesen Fixpunkt würde ein Neu-Mount der
+ * Hexagon-Layer (z.B. Ein-/Ausblenden über ScoreModeSwitcher) sie ohne
+ * `beforeId` ganz oben neu einfügen, also über bereits sichtbare
+ * Vegetation/Zensus/Eigene-Daten-Layer.
+ */
+const planningOverlayCeilingLayerId = 'planning-overlay-ceiling'
 /** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
 export const planningHexagonsSourceLayer = 'planning_hexagons'
 /**
@@ -369,7 +382,9 @@ export const SourcesLayersPlanning = () => {
   return (
     <>
       <BoundaryHighlightLayer />
-      <UserObstaclesLayer />
+
+      {/* Siehe Kommentar bei planningOverlayCeilingLayerId. */}
+      <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
 
       {hexagonsVisible && hexagonsOpacityPct > 0 && (
         <>
@@ -379,14 +394,23 @@ export const SourcesLayersPlanning = () => {
             tiles={[hexagonsUrl]}
             promoteId="h3_id"
           />
-          <Layer {...fillLayerProps} />
-          <LayerHighlight {...fillLayerProps} id={getLayerHighlightId(planningHexagonsLayerId)} />
-          <Layer {...hexagonLabelLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])} />
+          <Layer {...fillLayerProps} beforeId={planningOverlayCeilingLayerId} />
+          <LayerHighlight
+            {...fillLayerProps}
+            id={getLayerHighlightId(planningHexagonsLayerId)}
+            beforeId={planningOverlayCeilingLayerId}
+          />
+          <Layer
+            {...hexagonLabelLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])}
+            beforeId={planningOverlayCeilingLayerId}
+          />
         </>
       )}
 
       {/* Nach den Hexagon-Layern, damit die gelbe Auswahl-Umrandung darüber liegt. */}
       <CandidateHighlightLayer />
+
+      <UserObstaclesLayer />
 
       {vegetationOn && (
         <>
