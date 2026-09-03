@@ -137,6 +137,13 @@ export const FACTOR_PARAMS: Record<
   ],
 }
 
+/** Faktoren, die `public._parking_*`-Tabellen lesen (siehe `postgis_loader.py`) — das
+ * `parking`-Topic läuft nur in festen Bboxen (`processing/constants/topics.const.ts`), außerhalb
+ * gibt es dort keine Daten. `parkingDataAvailable` (aus `getPlanningVariantFn`) blendet diese
+ * Faktoren in `FactorEditorPanel` aus, statt lautlos 0 beizutragen. `exclude_carriageways` gehört
+ * fachlich auch dazu, ist aber kein Gewicht und wird dort separat behandelt. */
+export const PARKING_DATA_DEPENDENT_KEYS = ['w_parken', 'w_intersection', 'w_fussgaengerzone']
+
 export const WEIGHT_LABELS: Record<string, string> = {
   w_cyclepath: 'Radwegnähe',
   w_target: 'Zielorte',

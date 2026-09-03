@@ -280,6 +280,7 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
         lastRunConfig={lastRunConfig}
         readOnly={isLocked}
         defaultOpen={factorsDefaultOpen}
+        parkingDataAvailable={variant.parkingDataAvailable}
       />
 
       <RunButton variantId={variantId} regionSlug={regionSlug} latestJob={latestJob} />

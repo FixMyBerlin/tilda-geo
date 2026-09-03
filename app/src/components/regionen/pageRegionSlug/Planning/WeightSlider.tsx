@@ -99,6 +99,33 @@ export const ComingSoonFactorRow = ({ label, info }: { label: string; info?: Rea
 )
 
 /**
+ * Zeile für einen Faktor, der grundsätzlich implementiert ist, aber für dieses Planungsgebiet
+ * keine Datengrundlage hat (z. B. Parken/Kreuzungen/Fußgängerzonen außerhalb der
+ * Parking-Topic-Bboxen, siehe `parkingDataAvailability.server.ts`). Wie `ComingSoonFactorRow`,
+ * nur mit anderem Hinweistext — der Faktor ist implementiert, nur hier ohne Daten.
+ */
+export const UnavailableFactorRow = ({
+  label,
+  info,
+}: {
+  label: string
+  info?: React.ReactNode
+}) => (
+  <FactorRow
+    label={label}
+    muted
+    readOnly
+    info={info}
+    badge={
+      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
+        keine Daten
+      </span>
+    }
+    slider={null}
+  />
+)
+
+/**
  * Ein Kriterium: Wichtigkeit 0–10 als Regler, angezeigt wird der daraus abgeleitete Anteil am
  * Grundscore. Die Regler sind voneinander unabhängig — wird einer erhöht, sinken die Anteile der
  * übrigen automatisch, weil der Scorer durch die Gewichtssumme teilt.

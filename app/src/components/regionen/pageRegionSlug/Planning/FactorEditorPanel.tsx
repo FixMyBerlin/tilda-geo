@@ -19,6 +19,7 @@ import {
   FACTOR_HELP,
   FACTOR_PARAMS,
   GROUP_HELP,
+  PARKING_DATA_DEPENDENT_KEYS,
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
 } from './planningDefaults'
@@ -42,11 +43,16 @@ import {
   ComingSoonFactorRow,
   CriterionSlider,
   ModifierSlider,
+  UnavailableFactorRow,
   WeightScaleLegend,
 } from './WeightSlider'
 
-const FactorInfo = ({ factorKey }: { factorKey: string }) => {
-  const text = FACTOR_HELP[factorKey]
+/** Hinweis unter den Parkdaten-abhängigen Faktoren, wenn `parkingDataAvailable` false ist —
+ * siehe [[PARKING_DATA_DEPENDENT_KEYS]] in planningDefaults.ts. */
+const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Faktor hier deaktiviert.'
+
+const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string }) => {
+  const text = [FACTOR_HELP[factorKey], extra].filter(Boolean).join(' ')
   if (!text) return null
   return <InfoTooltip>{text}</InfoTooltip>
 }
@@ -187,6 +193,7 @@ const FactorFields = ({
   setUserGeojsonMode,
   onReset,
   readOnly = false,
+  parkingDataAvailable = true,
 }: {
   config: FactorConfig
   setWeights: (weights: Record<string, number>) => void
@@ -196,6 +203,7 @@ const FactorFields = ({
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
   onReset?: () => void
   readOnly?: boolean
+  parkingDataAvailable?: boolean
 }) => {
   const weights = config.weights ?? {}
   const vegetationDirection = config.vegetation_direction ?? 'negative'
@@ -273,29 +281,51 @@ const FactorFields = ({
             <div className="mt-1.5 text-[11px] tracking-wide text-gray-400 uppercase">
               Zu- und Abschläge
             </div>
-            {group.modifiers.map(({ key, direction }) => (
-              <ModifierSlider
-                key={key}
-                label={WEIGHT_LABELS[key] ?? key}
-                weight={weights[key]}
-                direction={resolveModifierDirection(direction, vegetationDirection)}
-                onChange={(value) => setWeightFromWeights(key, value)}
-                readOnly={readOnly}
-                info={<FactorInfo factorKey={key} />}
-                nested={
-                  key === 'w_vegetation' ? (
-                    <>
-                      <SegmentedChoice
-                        options={
-                          [
-                            ['negative', 'Grün schützen'],
-                            ['positive', 'Grün bevorzugen'],
-                          ] as const
-                        }
-                        value={vegetationDirection}
-                        onChange={setVegetationDirection}
-                        disabled={readOnly || weightToPoints(weights[key]) === 0}
-                      />
+            {group.modifiers.map(({ key, direction }) => {
+              const dataUnavailable =
+                !parkingDataAvailable && PARKING_DATA_DEPENDENT_KEYS.includes(key)
+              if (dataUnavailable) {
+                return (
+                  <UnavailableFactorRow
+                    key={key}
+                    label={WEIGHT_LABELS[key] ?? key}
+                    info={<FactorInfo factorKey={key} extra={PARKING_DATA_HINT} />}
+                  />
+                )
+              }
+              return (
+                <ModifierSlider
+                  key={key}
+                  label={WEIGHT_LABELS[key] ?? key}
+                  weight={weights[key]}
+                  direction={resolveModifierDirection(direction, vegetationDirection)}
+                  onChange={(value) => setWeightFromWeights(key, value)}
+                  readOnly={readOnly}
+                  info={<FactorInfo factorKey={key} />}
+                  nested={
+                    key === 'w_vegetation' ? (
+                      <>
+                        <SegmentedChoice
+                          options={
+                            [
+                              ['negative', 'Grün schützen'],
+                              ['positive', 'Grün bevorzugen'],
+                            ] as const
+                          }
+                          value={vegetationDirection}
+                          onChange={setVegetationDirection}
+                          disabled={readOnly || weightToPoints(weights[key]) === 0}
+                        />
+                        <FactorParamInputs
+                          factorKey={key}
+                          config={config}
+                          weight={weights[key]}
+                          setField={setField}
+                          restoreAutoSaettigung={restoreAutoSaettigung}
+                          readOnly={readOnly}
+                        />
+                      </>
+                    ) : (
                       <FactorParamInputs
                         factorKey={key}
                         config={config}
@@ -304,20 +334,11 @@ const FactorFields = ({
                         restoreAutoSaettigung={restoreAutoSaettigung}
                         readOnly={readOnly}
                       />
-                    </>
-                  ) : (
-                    <FactorParamInputs
-                      factorKey={key}
-                      config={config}
-                      weight={weights[key]}
-                      setField={setField}
-                      restoreAutoSaettigung={restoreAutoSaettigung}
-                      readOnly={readOnly}
-                    />
-                  )
-                }
-              />
-            ))}
+                    )
+                  }
+                />
+              )
+            })}
           </div>
         ))}
         <p className="mt-2 text-[11px] text-gray-500">
@@ -379,15 +400,17 @@ const FactorFields = ({
             <input
               type="checkbox"
               checked={config.exclude_carriageways ?? false}
-              disabled={readOnly}
+              disabled={readOnly || !parkingDataAvailable}
               onChange={(e) => setField('exclude_carriageways', e.target.checked)}
               className="rounded border-gray-300"
             />
-            Fahrbahnen ausschließen
+            <span className={!parkingDataAvailable ? 'text-gray-400' : undefined}>
+              Fahrbahnen ausschließen
+            </span>
             <InfoTooltip>
-              Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche
-              berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich,
-              unabhängig von den übrigen Faktoren.
+              {parkingDataAvailable
+                ? 'Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich, unabhängig von den übrigen Faktoren.'
+                : PARKING_DATA_HINT}
             </InfoTooltip>
           </label>
         </div>
@@ -413,6 +436,7 @@ export const FactorEditorPanel = (props: {
   lastRunConfig?: FactorConfig | null
   readOnly?: boolean
   defaultOpen?: boolean
+  parkingDataAvailable?: boolean
 }) => <FactorEditorPanelForm key={props.variantId} {...props} />
 
 const FactorEditorPanelForm = ({
@@ -422,6 +446,7 @@ const FactorEditorPanelForm = ({
   lastRunConfig,
   readOnly = false,
   defaultOpen = true,
+  parkingDataAvailable = true,
 }: {
   variantId: number
   areaId: number
@@ -429,6 +454,7 @@ const FactorEditorPanelForm = ({
   lastRunConfig?: FactorConfig | null
   readOnly?: boolean
   defaultOpen?: boolean
+  parkingDataAvailable?: boolean
 }) => {
   const queryClient = useQueryClient()
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
@@ -622,6 +648,7 @@ const FactorEditorPanelForm = ({
             setUserGeojsonMode={setUserGeojsonMode}
             onReset={readOnly ? undefined : resetWeightsToDefaults}
             readOnly={readOnly}
+            parkingDataAvailable={parkingDataAvailable}
           />
 
           {!readOnly && (

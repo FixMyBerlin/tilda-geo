@@ -21,6 +21,7 @@ import {
   stripAutoSaettigung,
   type VariantFactorConfig,
 } from './mergeFactorConfig'
+import { checkParkingDataAvailable } from './parkingDataAvailability.server'
 
 export type { VariantFactorConfig }
 
@@ -284,7 +285,8 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
       areaInputFromRow(area),
       variant.factorConfig as VariantFactorConfig,
     )
-    return { ...variant, factorConfig: factorConfig as FactorConfig }
+    const parkingDataAvailable = await checkParkingDataAvailable(area.studyArea)
+    return { ...variant, factorConfig: factorConfig as FactorConfig, parkingDataAvailable }
   })
 
 const JobIdInput = z.object({ jobId: z.number().int() })

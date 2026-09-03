@@ -176,8 +176,9 @@ export async function ensureAreaCensusStats(areaId: number) {
 }
 
 /** GeoJSON auf die nackte Geometrie herunterbrechen — Gebiete liegen mal als Feature, mal als
- * FeatureCollection, mal als Geometrie vor (gleiche Normalisierung wie `planning_census`). */
-function unwrapGeometry(studyArea: unknown) {
+ * FeatureCollection, mal als Geometrie vor (gleiche Normalisierung wie `planning_census`).
+ * Exportiert, weil `parkingDataAvailability.server.ts` dieselbe Normalisierung braucht. */
+export function unwrapGeometry(studyArea: unknown) {
   const geo = studyArea as {
     type?: string
     geometry?: unknown
