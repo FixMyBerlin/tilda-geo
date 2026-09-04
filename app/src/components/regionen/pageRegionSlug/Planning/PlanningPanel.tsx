@@ -10,6 +10,7 @@ import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
+  planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
@@ -218,10 +219,16 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
   const setUserObstaclesGeom = usePlanningBoundaryState((s) => s.setUserObstaclesGeom)
   const { data: variant } = useQuery(planningVariantQueryOptions(variantId))
 
-  useEffect(() => {
-    if (variant?.currentRunId != null) setRun(variant.currentRunId)
-    else setRun(null)
-  }, [variant?.currentRunId, setRun])
+  const currentRunId = variant?.currentRunId ?? null
+  useEffect(
+    function syncRunParamFromVariant() {
+      // Wait until the variant query has loaded so we do not clear a run just written
+      // by useSetPlanningSelection (area/variant switch) while this query is in flight.
+      if (!variant) return
+      setRun(currentRunId)
+    },
+    [variant, currentRunId, setRun],
+  )
 
   useEffect(() => {
     if (!variant) return
@@ -320,10 +327,17 @@ export const PlanningPanel = () => {
   const { panelRef, dragging, panelStyle, defaultPositionClassName, headerDragProps } =
     useDraggableMapPanel(planningMode)
   const { regionSlug } = routeApi.useParams()
-  const [creatingArea, setCreatingArea] = useState(false)
+  const [showCreate, setShowCreate] = useState(false)
+  const [pendingCreatedAreaId, setPendingCreatedAreaId] = useState<number | null>(null)
   const { mainMap: map } = useMap()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
+
+  const { data: areas } = useQuery(planningAreasQueryOptions(regionSlug))
+  const waitingForCreatedArea =
+    pendingCreatedAreaId != null &&
+    (activeArea !== pendingCreatedAreaId || !areas?.some((a) => a.id === pendingCreatedAreaId))
+  const creatingArea = showCreate || waitingForCreatedArea
 
   const { data: variant } = useQuery({
     ...planningVariantQueryOptions(activeVariant!),
@@ -336,9 +350,12 @@ export const PlanningPanel = () => {
   })
 
   // Resolve area from variant when only legacy planningScenario URL is set.
-  useEffect(() => {
-    if (variant?.area?.id != null && activeArea == null) setActiveArea(variant.area.id)
-  }, [variant?.area?.id, activeArea, setActiveArea])
+  useEffect(
+    function resolveAreaFromLegacyVariantParam() {
+      if (variant?.area?.id != null && activeArea == null) setActiveArea(variant.area.id)
+    },
+    [variant?.area?.id, activeArea, setActiveArea],
+  )
 
   const studyArea =
     (area?.studyArea as GeoJSON.Geometry | undefined) ??
@@ -348,33 +365,53 @@ export const PlanningPanel = () => {
 
   // Outline lives on the panel (not VariantDetail) so it stays on the map when the
   // panel is collapsed or while switching variants of the same planungsgebiet.
-  useEffect(() => {
-    if (!planningMode) {
-      setBoundaryHighlightGeom(null)
-      return
-    }
-    if (creatingArea || !studyArea) return
-    setBoundaryHighlightGeom(studyArea, { filled: false })
-    if (map) {
-      const [minLng, minLat, maxLng, maxLat] = bbox({
-        type: 'Feature',
-        geometry: studyArea,
-        properties: {},
-      })
-      const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
-      if (usePlanningBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
-        setLastFittedBoundaryKey(boundaryKey)
-        map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+  useEffect(
+    function syncStudyAreaOutline() {
+      if (!planningMode) {
+        setBoundaryHighlightGeom(null)
+        return
       }
-    }
-  }, [
-    planningMode,
-    creatingArea,
-    studyArea,
-    map,
-    setBoundaryHighlightGeom,
-    setLastFittedBoundaryKey,
-  ])
+      // While creating, AreaFormFields / the wizard own the highlight — do not re-apply
+      // the previous area's studyArea. Missing geometry while an area is selected means
+      // the query is still in flight; keep the current outline instead of flashing it off.
+      if (creatingArea) return
+      if (activeArea == null) {
+        setBoundaryHighlightGeom(null)
+        return
+      }
+      if (!studyArea) return
+      setBoundaryHighlightGeom(studyArea, { filled: false })
+      if (map) {
+        const [minLng, minLat, maxLng, maxLat] = bbox({
+          type: 'Feature',
+          geometry: studyArea,
+          properties: {},
+        })
+        const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
+        if (usePlanningBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
+          setLastFittedBoundaryKey(boundaryKey)
+          map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
+        }
+      }
+    },
+    [
+      planningMode,
+      creatingArea,
+      activeArea,
+      studyArea,
+      map,
+      setBoundaryHighlightGeom,
+      setLastFittedBoundaryKey,
+    ],
+  )
+
+  if (
+    pendingCreatedAreaId != null &&
+    activeArea === pendingCreatedAreaId &&
+    areas?.some((a) => a.id === pendingCreatedAreaId)
+  ) {
+    setPendingCreatedAreaId(null)
+  }
 
   if (!planningMode) return null
 
@@ -465,7 +502,13 @@ export const PlanningPanel = () => {
       )}
       {!panelCollapsed && (
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-3 pt-1 pb-3">
-          <AreaContextBar regionSlug={regionSlug} onCreatingChange={setCreatingArea} />
+          <AreaContextBar
+            regionSlug={regionSlug}
+            creating={creatingArea}
+            pendingCreatedAreaId={pendingCreatedAreaId}
+            onShowCreate={setShowCreate}
+            onPendingCreatedAreaId={setPendingCreatedAreaId}
+          />
           {!creatingArea && (
             <>
               <VariantList regionSlug={regionSlug} />

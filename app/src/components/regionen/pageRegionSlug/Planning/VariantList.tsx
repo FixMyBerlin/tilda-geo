@@ -15,8 +15,8 @@ import {
 } from '@/server/planning/planningQueryOptions'
 import {
   usePlanningAreaParam,
-  usePlanningRunParam,
   usePlanningVariantParam,
+  useSetPlanningSelection,
 } from '../hooks/useQueryState/usePlanningParams'
 import { DEFAULT_FACTOR_TEMPLATE } from './planningDefaults'
 import { Spinner } from './Spinner'
@@ -183,10 +183,18 @@ const VariantMenu = ({
 /** A/B variant switcher for the active planungsgebiet. */
 export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
   const [activeArea] = usePlanningAreaParam()
-  const [activeVariant, setActiveVariant] = usePlanningVariantParam()
-  const [, setRun] = usePlanningRunParam()
+  const [activeVariant] = usePlanningVariantParam()
+  const setPlanningSelection = useSetPlanningSelection()
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const queryClient = useQueryClient()
+
+  const selectVariant = (variantId: number | null, runId: number | null) => {
+    setPlanningSelection({
+      area: activeArea ?? null,
+      variant: variantId,
+      run: runId,
+    })
+  }
 
   const { data: areas } = useQuery({
     ...planningAreasQueryOptions(regionSlug),
@@ -206,8 +214,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
     mutationFn: (variantId: number) => duplicatePlanningVariantFn({ data: { variantId } }),
     onSuccess: (created) => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      setActiveVariant(created.id)
-      setRun(null)
+      selectVariant(created.id, null)
     },
   })
 
@@ -222,7 +229,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
     onSuccess: (created) => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
-      setActiveVariant(created.id)
+      selectVariant(created.id, null)
     },
   })
 
@@ -262,10 +269,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => {
-                      setActiveVariant(variant.id)
-                      setRun(variant.currentRunId ?? null)
-                    }}
+                    onClick={() => selectVariant(variant.id, variant.currentRunId ?? null)}
                     className={`flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-gray-100 ${
                       activeVariant === variant.id ? 'bg-blue-50 font-medium' : ''
                     }`}
@@ -293,14 +297,10 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                   variant={variant}
                   regionSlug={regionSlug}
                   onRename={() => setRenamingId(variant.id)}
-                  onDuplicated={(id) => {
-                    setActiveVariant(id)
-                    setRun(null)
-                  }}
+                  onDuplicated={(id) => selectVariant(id, null)}
                   onDeleted={() => {
                     if (activeVariant === variant.id) {
-                      setActiveVariant(null)
-                      setRun(null)
+                      selectVariant(null, null)
                     }
                   }}
                 />
