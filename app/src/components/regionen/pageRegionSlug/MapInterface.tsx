@@ -36,10 +36,12 @@ export const MapInterface = () => {
     <MapProvider>
       {/* Visible chrome box (= main under the header). Inspector/sidebars size to this. */}
       <div className="relative h-full w-full">
-        {/* Map canvas only: full viewport tall on desktop so welcome-panel open/close can clip
-            the bottom without MapLibre resizing. Parent `overflow-hidden` clips the overflow.
-            Mobile stays `fixed inset-0` for edge-to-edge under browser chrome. */}
-        <div className="fixed inset-0 z-0 sm:absolute sm:inset-x-0 sm:top-0 sm:h-(--app-height,100dvh) sm:w-full">
+        {/* Map canvas only. Desktop height is pinned to the visible box (viewport minus header)
+            rather than `h-full`: with the welcome panel closed that is exactly this container, and
+            when the panel opens and shrinks `main` the map keeps its size and gets pushed down /
+            clipped by the parent `overflow-hidden` instead of making MapLibre re-layout every
+            animation frame. Mobile stays `fixed inset-0` for edge-to-edge under browser chrome. */}
+        <div className="fixed inset-0 z-0 sm:absolute sm:inset-x-0 sm:top-0 sm:h-[calc(var(--app-height,100dvh)-var(--app-header-height))] sm:w-full">
           <RegionMap />
         </div>
 

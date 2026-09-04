@@ -1,6 +1,10 @@
 import { toast } from 'sonner'
+import { z } from 'zod'
 
-/** Show an error toast; prefers `Error.message` when available. */
+const errorWithMessageSchema = z.object({ message: z.string().min(1) })
+
+/** Show an error toast; reads `.message` from `Error` and `{ message }` (Better Upload). */
 export function toastError(error: unknown, fallback = 'Ein Fehler ist aufgetreten') {
-  toast.error(error instanceof Error ? error.message : fallback)
+  const parsed = errorWithMessageSchema.safeParse(error)
+  toast.error(parsed.success ? parsed.data.message : fallback)
 }

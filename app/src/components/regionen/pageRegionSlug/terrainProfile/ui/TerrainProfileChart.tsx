@@ -8,6 +8,30 @@ import {
 } from '../state/terrain-profile-hover-store'
 import type { CombinedTerrainProfileData, TerrainProfileChartSample } from '../types'
 
+/** Split samples into solid (DEM) vs dashed (bridge/tunnel) polyline runs. */
+const splitProfilePolylineRuns = (samples: TerrainProfileChartSample[]) => {
+  if (samples.length < 2) return []
+
+  type Run = { dashed: boolean; samples: TerrainProfileChartSample[] }
+  const runs: Run[] = []
+  let current: Run | null = null
+
+  for (let index = 0; index < samples.length - 1; index += 1) {
+    const left = samples[index]!
+    const right = samples[index + 1]!
+    const dashed = left.source === 'interpolated' || right.source === 'interpolated'
+
+    if (!current || current.dashed !== dashed) {
+      current = { dashed, samples: [left, right] }
+      runs.push(current)
+      continue
+    }
+    current.samples.push(right)
+  }
+
+  return runs
+}
+
 type Props = {
   profile: CombinedTerrainProfileData
 }
@@ -330,7 +354,7 @@ export const TerrainProfileChart = ({ profile }: Props) => {
             const plotPoints = entry.samples.map((sample) =>
               chartDistanceToPoint(sample.chartDistanceMeters, sample.elevationMeters),
             )
-            const polylinePoints = plotPoints.map(({ x, y }) => `${x},${y}`).join(' ')
+            const runs = splitProfilePolylineRuns(entry.samples)
             const maxMidDots = 18
             const midStep = Math.max(1, Math.ceil((plotPoints.length - 2) / maxMidDots))
             const dotIndexes = new Set<number>([0, plotPoints.length - 1])
@@ -340,14 +364,26 @@ export const TerrainProfileChart = ({ profile }: Props) => {
 
             return (
               <g key={entry.featureKey} opacity={opacity}>
-                <polyline
-                  fill="none"
-                  stroke={stroke}
-                  strokeWidth={isDimmed ? 1.5 : 2.5}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  points={polylinePoints}
-                />
+                {runs.map((run, runIndex) => {
+                  const points = run.samples
+                    .map((sample) =>
+                      chartDistanceToPoint(sample.chartDistanceMeters, sample.elevationMeters),
+                    )
+                    .map(({ x, y }) => `${x},${y}`)
+                    .join(' ')
+                  return (
+                    <polyline
+                      key={`${entry.featureKey}-run-${runIndex}`}
+                      fill="none"
+                      stroke={stroke}
+                      strokeWidth={isDimmed ? 1.5 : 2.5}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      strokeDasharray={run.dashed ? '5 4' : undefined}
+                      points={points}
+                    />
+                  )
+                })}
                 {[...dotIndexes].map((index) => {
                   const point = plotPoints[index]
                   if (!point) return null

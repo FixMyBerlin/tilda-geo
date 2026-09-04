@@ -5,12 +5,16 @@ import { mapboxStyleGroupLayers_atlas_roads_mainstreets } from './mapboxStyles/g
 import { mapboxStyleGroupLayers_atlas_roads_mainstreets_classified } from './mapboxStyles/groups/atlas_roads_mainstreets_classified'
 import { mapboxStyleGroupLayers_atlas_roads_sidestreets } from './mapboxStyles/groups/atlas_roads_sidestreets'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { structureIconLayers } from './mapboxStyles/structureIconLayers'
 
 const subcatId = 'roads'
 const source = 'atlas_roads'
 const sourceLayer = 'roads'
 export type SubcatRoadsId = typeof subcatId
 export type SubcatRoadsStyleIds = 'default' | 'sidestreets' | 'mainstreets' | 'classified'
+
+const structureIcons = structureIconLayers({ source, sourceLayer })
+
 export const subcat_roads: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Straßentypen',
@@ -21,11 +25,14 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Alle',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_all,
-        source,
-        sourceLayer,
-      }),
+      layers: [
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_atlas_roads_all,
+          source,
+          sourceLayer,
+        }),
+        ...structureIcons,
+      ],
       legends: [
         {
           id: 'main',
@@ -62,11 +69,14 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'sidestreets',
       name: 'Nur Nebenstraßen',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_sidestreets,
-        source,
-        sourceLayer,
-      }),
+      layers: [
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_atlas_roads_sidestreets,
+          source,
+          sourceLayer,
+        }),
+        ...structureIcons,
+      ],
       legends: [
         {
           id: 'side-high',
@@ -93,11 +103,14 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'mainstreets',
       name: 'Nur Hauptstraßen',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_mainstreets,
-        source,
-        sourceLayer,
-      }),
+      layers: [
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_atlas_roads_mainstreets,
+          source,
+          sourceLayer,
+        }),
+        ...structureIcons,
+      ],
       legends: [
         {
           id: 'main',
@@ -114,11 +127,14 @@ export const subcat_roads: FileMapDataSubcategory = {
     {
       id: 'classified',
       name: 'Klassifizierung',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_mainstreets_classified,
-        source,
-        sourceLayer,
-      }),
+      layers: [
+        ...mapboxStyleLayers({
+          layers: mapboxStyleGroupLayers_atlas_roads_mainstreets_classified,
+          source,
+          sourceLayer,
+        }),
+        ...structureIcons,
+      ],
       legends: [
         {
           id: 'bundesstraßen',

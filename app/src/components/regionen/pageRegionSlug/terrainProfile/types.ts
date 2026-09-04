@@ -1,8 +1,12 @@
-type TerrainProfileSample = {
+type TerrainProfileSampleSource = 'dem' | 'interpolated'
+
+export type TerrainProfileSample = {
   lng: number
   lat: number
   distanceMeters: number
   elevationMeters: number
+  /** `interpolated` = bridge/tunnel chord; otherwise DEM ground sample. */
+  source?: TerrainProfileSampleSource
 }
 
 export type TerrainProfileChartSample = TerrainProfileSample & {
