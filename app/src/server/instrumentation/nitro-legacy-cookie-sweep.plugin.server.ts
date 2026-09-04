@@ -1,7 +1,16 @@
-import { deleteCookie, getCookie, getRequestURL, type H3Event, parseCookies, setCookie } from 'h3'
+import {
+  deleteCookie,
+  getCookie,
+  getRequestURL,
+  type H3Event,
+  type HTTPEvent,
+  parseCookies,
+  setCookie,
+} from 'h3'
 import { definePlugin } from 'nitro'
+import type { NitroAppPlugin } from 'nitro/types'
 
-export default definePlugin((nitroApp) => {
+const cookieSweepPlugin: NitroAppPlugin = (nitroApp) => {
   // ---------------------------------------------------------------------------
   // One-time removal of pre–Better Auth cookies (atlas_*, next-auth.*).
   // Remove this plugin from vite.config.ts and delete this file when done.
@@ -24,7 +33,7 @@ export default definePlugin((nitroApp) => {
     ...(process.env.VITE_APP_ORIGIN?.startsWith('https://') ? { secure: true as const } : {}),
   }
 
-  nitroApp.hooks.hook('request', (event) => {
+  nitroApp.hooks.hook('request', (event: HTTPEvent) => {
     if (Date.now() > LEGACY_COOKIE_SWEEP_UNTIL_MS) return
     if (getCookie(event, LEGACY_COOKIE_SWEEP_MARKER) === LEGACY_COOKIE_SWEEP_MARKER_VALUE) return
 
@@ -45,4 +54,6 @@ export default definePlugin((nitroApp) => {
       httpOnly: true,
     })
   })
-})
+}
+
+export default definePlugin(cookieSweepPlugin)
