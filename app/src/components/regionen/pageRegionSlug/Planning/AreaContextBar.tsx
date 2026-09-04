@@ -1,3 +1,4 @@
+import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from '@headlessui/react'
 import { ChevronDownIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -30,7 +31,6 @@ export const AreaContextBar = ({
   const setPlanningSelection = useSetPlanningSelection()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
-  const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(false)
 
   const startCreate = () => {
@@ -78,7 +78,6 @@ export const AreaContextBar = ({
       variant: firstVariant?.id ?? null,
       run: firstVariant?.currentRunId ?? null,
     })
-    setOpen(false)
     onShowCreate(false)
     onPendingCreatedAreaId(null)
     setEditing(false)
@@ -128,45 +127,47 @@ export const AreaContextBar = ({
   return (
     <div className="flex items-center gap-1 border-b border-gray-200 pb-2 text-sm">
       <span className="shrink-0 text-xs text-gray-500">Planungsgebiet:</span>
-      <div className="relative min-w-0 flex-1">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="flex w-full items-center gap-1 rounded border border-gray-200 px-2 py-1 text-left hover:bg-gray-50"
-        >
+      <Listbox
+        as="div"
+        className="relative min-w-0 flex-1"
+        value={activeArea ?? undefined}
+        onChange={(areaId) => {
+          const area = areas?.find((a) => a.id === areaId)
+          selectArea(areaId, area?.variants[0])
+        }}
+      >
+        <ListboxButton className="flex w-full items-center gap-1 rounded border border-gray-200 px-2 py-1 text-left hover:bg-gray-50">
           <span className="truncate font-medium">{current?.title ?? '—'}</span>
           <ChevronDownIcon className="size-4 shrink-0 text-gray-400" />
-        </button>
-        {open && (
-          <ul className="absolute top-full right-0 left-0 z-10 mt-0.5 max-h-48 overflow-auto rounded border border-gray-200 bg-white shadow-lg">
-            {(areas ?? []).map((area) => (
-              <li key={area.id}>
-                <button
-                  type="button"
-                  onClick={() => selectArea(area.id, area.variants[0])}
-                  className={`block w-full truncate px-2 py-1.5 text-left text-sm hover:bg-gray-100 ${
-                    area.id === activeArea ? 'bg-blue-50 font-medium' : ''
-                  }`}
-                >
-                  {area.title}
-                </button>
-              </li>
-            ))}
-            <li className="border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false)
-                  startCreate()
-                }}
-                className="block w-full px-2 py-1.5 text-left text-sm text-blue-700 hover:bg-blue-50"
-              >
-                + Neues Planungsgebiet
-              </button>
-            </li>
-          </ul>
-        )}
-      </div>
+        </ListboxButton>
+        <ListboxOptions
+          anchor="bottom start"
+          className="z-50 max-h-48 w-[var(--button-width)] overflow-auto rounded border border-gray-200 bg-white text-sm shadow-lg"
+        >
+          {(areas ?? []).map((area) => (
+            <ListboxOption
+              key={area.id}
+              value={area.id}
+              className={({ focus, selected }) =>
+                `block w-full cursor-pointer truncate px-2 py-1.5 text-left ${
+                  focus ? 'bg-gray-100' : ''
+                } ${selected ? 'bg-blue-50 font-medium' : ''}`
+              }
+            >
+              {area.title}
+            </ListboxOption>
+          ))}
+          <div className="border-t border-gray-100">
+            <button
+              type="button"
+              onClick={startCreate}
+              className="block w-full px-2 py-1.5 text-left text-blue-700 hover:bg-blue-50"
+            >
+              + Neues Planungsgebiet
+            </button>
+          </div>
+        </ListboxOptions>
+      </Listbox>
       {activeArea != null && (
         <button
           type="button"
