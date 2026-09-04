@@ -1,5 +1,5 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
+import { EllipsisVerticalIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { formatDate } from '@/components/shared/date/formatDate'
@@ -29,9 +29,22 @@ type VariantSummary = {
   runs: { hexCount: number | null; stale: boolean; status: string; createdAt: string | Date }[]
 }
 
+/** Wie `hasCompleteRun` im Detail-Panel — nur abgeschlossene Läufe können „veraltet“ sein. */
+const hasStaleCompleteRun = (runs: VariantSummary['runs']) =>
+  runs[0]?.status === 'COMPLETE' && runs[0].stale === true
+
 const StatusIcon = ({ variant }: { variant: VariantSummary }) => {
   const jobStatus = variant.jobs[0]?.status
   if (jobStatus === 'QUEUED' || jobStatus === 'RUNNING') return <Spinner />
+  if (hasStaleCompleteRun(variant.runs))
+    return (
+      <span title="Ergebnis veraltet — neu berechnen">
+        <ExclamationTriangleIcon
+          className="inline-block size-3.5 text-amber-600"
+          aria-hidden="true"
+        />
+      </span>
+    )
   if (variant.currentRunId != null)
     return (
       <span className="font-bold text-green-600" title="Berechnung abgeschlossen">
@@ -256,7 +269,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
         <ul className="flex flex-col gap-0.5">
           {variants.map((variant) => {
             const latestRun = variant.runs[0]
-            const isStale = latestRun?.stale === true
+            const isStale = hasStaleCompleteRun(variant.runs)
             return (
               <li key={variant.id} className="flex items-center gap-1">
                 {renamingId === variant.id ? (

@@ -14,6 +14,7 @@ import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
 import { parseRegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 import { ensureAreaCensusStats, refreshAreaCensusStats } from './censusSaettigung.server'
+import { factorsDiffer } from './factorFingerprint'
 import {
   areaInputFromRow,
   mergeFactorConfig,
@@ -119,6 +120,17 @@ async function markRunsStaleForArea(areaId: number) {
   await db.planningRun.updateMany({
     where: {
       variant: { areaId },
+      status: { in: ['COMPLETE', 'EMPTY'] },
+      stale: false,
+    },
+    data: { stale: true },
+  })
+}
+
+async function markRunsStaleForVariant(variantId: number) {
+  await db.planningRun.updateMany({
+    where: {
+      variantId,
       status: { in: ['COMPLETE', 'EMPTY'] },
       stale: false,
     },
@@ -285,7 +297,7 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
       variant.factorConfig as VariantFactorConfig,
     )
     const parkingDataAvailable = await checkParkingDataAvailable(area.studyArea)
-    return { ...variant, factorConfig: factorConfig as FactorConfig, parkingDataAvailable }
+    return { ...variant, area, factorConfig: factorConfig as FactorConfig, parkingDataAvailable }
   })
 
 const JobIdInput = z.object({ jobId: z.number().int() })
@@ -571,28 +583,38 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof UpdateVariantInput>) => UpdateVariantInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
+    const existing = await db.planningVariant.findFirstOrThrow({
+      where: { id: data.variantId },
+      select: { factorConfig: true },
+    })
     let factorConfig = data.factorConfig
     if (data.minAreaM2 !== undefined) {
-      const existing = await db.planningVariant.findFirstOrThrow({
-        where: { id: data.variantId },
-        select: { factorConfig: true },
-      })
       factorConfig = {
         ...((factorConfig ?? existing.factorConfig) as VariantFactorConfig),
         min_area_m2: data.minAreaM2,
       }
     }
-    return db.planningVariant.update({
+    const stored = factorConfig !== undefined ? stripAutoSaettigung(factorConfig) : undefined
+    const result = await db.planningVariant.update({
       where: { id: data.variantId },
       data: {
         ...(data.title !== undefined && { title: data.title }),
         ...(data.description !== undefined && { description: data.description }),
-        ...(factorConfig !== undefined && {
-          factorConfig: stripAutoSaettigung(factorConfig) as Prisma.InputJsonValue,
+        ...(stored !== undefined && {
+          factorConfig: stored as Prisma.InputJsonValue,
         }),
       },
       select: { id: true, areaId: true },
     })
+    // Titel, Beschreibung und `min_area_m2` (Client-Filter) ändern das Ergebnis nicht.
+    // `factorsDiffer` ignoriert `min_area_m2`, deshalb reicht der Vergleich der gespeicherten Config.
+    if (
+      stored !== undefined &&
+      factorsDiffer(existing.factorConfig as VariantFactorConfig, stored)
+    ) {
+      await markRunsStaleForVariant(data.variantId)
+    }
+    return result
   })
 
 export const duplicatePlanningVariantFn = createServerFn({ method: 'POST' })

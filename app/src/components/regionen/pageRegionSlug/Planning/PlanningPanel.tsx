@@ -6,6 +6,13 @@ import { bbox } from '@turf/turf'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
+import {
+  areaInputsDiffer,
+  comparableRunSnapshot,
+  factorsDiffer,
+  outdatedBannerReason,
+} from '@/server/planning/factorFingerprint'
+import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import {
@@ -24,7 +31,6 @@ import {
 } from '../hooks/useQueryState/usePlanningParams'
 import { AreaContextBar } from './AreaContextBar'
 import { FactorEditorPanel } from './FactorEditorPanel'
-import { factorsDiffer } from './factorFingerprint'
 import { InfoTooltip } from './InfoTooltip'
 import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
@@ -250,15 +256,17 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
   const hasCompleteRun = latestRun?.status === 'COMPLETE'
   const factorsDefaultOpen = !hasCompleteRun
   const lastRunConfig = (latestRun?.factorConfigSnapshot as FactorConfig | undefined) ?? null
-  // Warum das Ergebnis nicht mehr zu den Eingaben passt: das Planungsgebiet wurde bearbeitet
-  // (`stale`, vom Server gepflegt) oder die Faktoren wurden seit dem Lauf geändert — sie speichern
-  // sich sofort, gerechnet wird aber erst auf Klick.
-  const outdatedReason = latestRun?.stale
-    ? 'Planungsgebiet geändert'
-    : hasCompleteRun &&
-        !isLocked &&
-        factorsDiffer(variant.factorConfig as FactorConfig, lastRunConfig)
-      ? 'Faktoren geändert'
+  // `stale` kann Gebiet und Faktoren bedeuten — die Texte kommen deshalb aus zwei Vergleichen.
+  // Faktoren: Alt-Snapshots ohne Auto-Schwelle erst re-mergen. Gebiet: Roh-Snapshot, sonst würde
+  // der Merge das heutige Gebiet auf den alten Lauf schreiben und die Änderung verschlucken.
+  const comparableSnapshot = comparableRunSnapshot(lastRunConfig, areaInputFromRow(variant.area))
+  const currentConfig = variant.factorConfig as FactorConfig
+  const outdatedReason =
+    hasCompleteRun && !isLocked
+      ? outdatedBannerReason(
+          factorsDiffer(currentConfig, comparableSnapshot),
+          areaInputsDiffer(currentConfig, lastRunConfig),
+        )
       : null
 
   // Ob am Ende überhaupt ein Layer-Schalter erscheint: ScoreModeSwitcher, Vegetation,
@@ -283,8 +291,9 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
       <FactorEditorPanel
         variantId={variantId}
         areaId={variant.area.id}
+        regionSlug={regionSlug}
         factorConfig={variant.factorConfig as FactorConfig}
-        lastRunConfig={lastRunConfig}
+        lastRunConfig={comparableSnapshot}
         readOnly={isLocked}
         defaultOpen={factorsDefaultOpen}
         parkingDataAvailable={variant.parkingDataAvailable}

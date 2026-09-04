@@ -36,7 +36,8 @@ export type PlanningAreaInput = {
 /**
  * Fallback, wenn für das Gebiet kein Zensus-Vorschlag vorliegt (Data-Schema fehlt, unbewohntes
  * Gebiet). Muss `UseCaseConfig.bewohnerbedarf_saettigung_ew` in `flaechenfinder/config.py`
- * entsprechen — sonst rechnet der Worker mit einem anderen Wert als die UI anzeigt.
+ * und `FALLBACK_SAETTIGUNG_EW` in `planning-worker/merge_factor_config.py` entsprechen — sonst
+ * rechnet der Worker mit einem anderen Wert als die UI anzeigt.
  */
 export const FALLBACK_SAETTIGUNG_EW = 30
 
@@ -67,6 +68,7 @@ export type MergedFactorConfig = VariantFactorConfig & {
   bewohnerbedarf_ew_pro_ha?: number | null
 }
 
+/** Spiegel von `merge_factor_config` in `planning-worker/merge_factor_config.py` (Fallback 30). */
 export const mergeFactorConfig = (
   area: PlanningAreaInput,
   variantConfig: VariantFactorConfig,

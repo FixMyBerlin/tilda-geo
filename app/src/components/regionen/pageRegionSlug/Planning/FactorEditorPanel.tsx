@@ -4,15 +4,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { twJoin } from 'tailwind-merge'
 import { toastError } from '@/components/shared/toast/toastError'
+import { factorFingerprint, factorsDiffer } from '@/server/planning/factorFingerprint'
 import type { FactorConfig, VariantFactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningAreaFn, updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
+  planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import { DisclosureChevron } from './CollapsibleBox'
-import { factorFingerprint, factorsDiffer } from './factorFingerprint'
 import { InfoTooltip } from './InfoTooltip'
 import {
   DEFAULT_FACTOR_TEMPLATE,
@@ -434,6 +435,7 @@ const AUTOSAVE_DELAY_MS = 700
 export const FactorEditorPanel = (props: {
   variantId: number
   areaId: number
+  regionSlug: string
   factorConfig: FactorConfig
   lastRunConfig?: FactorConfig | null
   readOnly?: boolean
@@ -444,6 +446,7 @@ export const FactorEditorPanel = (props: {
 const FactorEditorPanelForm = ({
   variantId,
   areaId,
+  regionSlug,
   factorConfig,
   lastRunConfig,
   readOnly = false,
@@ -452,6 +455,7 @@ const FactorEditorPanelForm = ({
 }: {
   variantId: number
   areaId: number
+  regionSlug: string
   factorConfig: FactorConfig
   lastRunConfig?: FactorConfig | null
   readOnly?: boolean
@@ -498,6 +502,8 @@ const FactorEditorPanelForm = ({
     onSuccess: () => {
       toast.success('Faktoren gespeichert', { id: 'planning-factors-saved' })
       queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
+      queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
     },
     onError: (error) => {
       // Fingerprint verwerfen: der Server hat den Stand nicht — die nächste Änderung soll wieder
