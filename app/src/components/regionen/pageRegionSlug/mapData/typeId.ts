@@ -38,11 +38,22 @@ import type {
   SubcatBikelanesStatsId,
   SubcatBikelanesStatsStyleIds,
 } from './mapDataSubcategories/subcat_bikelanesStatistics.const'
-import type { SubcatLitId, SubcatLitStyleIds } from './mapDataSubcategories/subcat_lit.const'
 import type {
-  SubcatLitPlusCompletenessId,
-  SubcatLitPlusCompletenessStyleIds,
-} from './mapDataSubcategories/subcat_lit_plus_completeness.const'
+  SubcatLitBikelanesId,
+  SubcatLitBikelanesStyleIds,
+} from './mapDataSubcategories/subcat_lit_bikelanes.const'
+import type {
+  SubcatLitHighwayAreasId,
+  SubcatLitHighwayAreasStyleIds,
+} from './mapDataSubcategories/subcat_lit_highway_areas.const'
+import type {
+  SubcatLitPathClassesId,
+  SubcatLitPathClassesStyleIds,
+} from './mapDataSubcategories/subcat_lit_path_classes.const'
+import type {
+  SubcatLitRoadsId,
+  SubcatLitRoadsStyleIds,
+} from './mapDataSubcategories/subcat_lit_roads.const'
 import type {
   SubcatMapillaryCoverageId,
   SubcatMapillaryCoverageStyleIds,
@@ -141,6 +152,22 @@ import type {
   SubcatRadinfraCampaignStyleIds,
 } from './mapDataSubcategories/subcat_radinfra_campaigns.const'
 import type {
+  SubcatRadinfraLitBikelanesId,
+  SubcatRadinfraLitBikelanesStyleIds,
+} from './mapDataSubcategories/subcat_radinfra_lit_bikelanes.const'
+import type {
+  SubcatRadinfraLitHighwayAreasId,
+  SubcatRadinfraLitHighwayAreasStyleIds,
+} from './mapDataSubcategories/subcat_radinfra_lit_highway_areas.const'
+import type {
+  SubcatRadinfraLitPathClassesId,
+  SubcatRadinfraLitPathClassesStyleIds,
+} from './mapDataSubcategories/subcat_radinfra_lit_path_classes.const'
+import type {
+  SubcatRadinfraLitRoadsId,
+  SubcatRadinfraLitRoadsStyleIds,
+} from './mapDataSubcategories/subcat_radinfra_lit_roads.const'
+import type {
   SubcatRadinfraPlusMapillaryId,
   SubcatRadinfraPlusMapillaryStyleIds,
 } from './mapDataSubcategories/subcat_radinfra_plus_mapillary.const'
@@ -183,8 +210,10 @@ export type SubcategoryId =
   | SubcatBikelanesPlusSurfaceId
   | SubcatBikelanesPlusWidthTextId
   | SubcatBikelanesStatsId
-  | SubcatLitId
-  | SubcatLitPlusCompletenessId
+  | SubcatLitRoadsId
+  | SubcatLitBikelanesId
+  | SubcatLitHighwayAreasId
+  | SubcatLitPathClassesId
   | SubcatMapillaryCoverageId
   | SubcatMaxspeedId
   | SubcatMaxspeedPlusPresenceId
@@ -210,6 +239,10 @@ export type SubcategoryId =
   | SubcatPoiPlusLanduseId
   | SubcatPoiPlusPublicTransportId
   | SubcatRadinfraCampaignId
+  | SubcatRadinfraLitBikelanesId
+  | SubcatRadinfraLitHighwayAreasId
+  | SubcatRadinfraLitPathClassesId
+  | SubcatRadinfraLitRoadsId
   | SubcatRadinfraPlusMapillaryId
   | SubcatRadinfraStatsId
   | SubcatRadinfraStatsId
@@ -220,6 +253,7 @@ export type SubcategoryId =
   | SubcatSignsId
   | SubcatSurfaceBikelaneId
   | SubcatSurfaceRoadsId
+  | 'lit-completeness' // LEGACY id kept for decoding old ?config= URLs
   | 'parking' // LEGACY id kept for decoding old ?config= URLs stored in RegionConfigTemplate
 
 type StyleIdDefaults = StaticMapDataCategory['subcategories'][number]['defaultStyle']
@@ -236,8 +270,10 @@ export type StyleId =
   | SubcatBikelanesPlusWidthTextStyleIds
   | SubcatBikelanesStatsStyleIds
   | SubcatBikelanesStyleIds
-  | SubcatLitPlusCompletenessStyleIds
-  | SubcatLitStyleIds
+  | SubcatLitBikelanesStyleIds
+  | SubcatLitHighwayAreasStyleIds
+  | SubcatLitPathClassesStyleIds
+  | SubcatLitRoadsStyleIds
   | SubcatMapillaryCoverageStyleIds
   | SubcatMaxspeedPlusPresenceStyleIds
   | SubcatMaxspeedStyleIds
@@ -263,6 +299,10 @@ export type StyleId =
   | SubcatPoiPlusPublicTransportStyleIds
   | SubcatPoiStyleIds
   | SubcatRadinfraCampaignStyleIds
+  | SubcatRadinfraLitBikelanesStyleIds
+  | SubcatRadinfraLitHighwayAreasStyleIds
+  | SubcatRadinfraLitPathClassesStyleIds
+  | SubcatRadinfraLitRoadsStyleIds
   | SubcatRadinfraPlusMapillaryStyleIds
   | SubcatRadinfraStatsStyleIds
   | SubcatRadinfraStatsStyleIds

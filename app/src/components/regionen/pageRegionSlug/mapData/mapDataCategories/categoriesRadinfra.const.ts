@@ -5,6 +5,10 @@ import { subcat_mapillaryCoverage } from '../mapDataSubcategories/subcat_mapilla
 import { subcat_radinfra_bikelanes } from '../mapDataSubcategories/subcat_radinfra_bikelanes.const'
 import { subcat_radinfra_campaigns } from '../mapDataSubcategories/subcat_radinfra_campaigns.const'
 import { subcat_radinfra_currentness } from '../mapDataSubcategories/subcat_radinfra_currentness.const'
+import { subcat_radinfra_lit_bikelanes } from '../mapDataSubcategories/subcat_radinfra_lit_bikelanes.const'
+import { subcat_radinfra_lit_highway_areas } from '../mapDataSubcategories/subcat_radinfra_lit_highway_areas.const'
+import { subcat_radinfra_lit_path_classes } from '../mapDataSubcategories/subcat_radinfra_lit_path_classes.const'
+import { subcat_radinfra_lit_roads } from '../mapDataSubcategories/subcat_radinfra_lit_roads.const'
 import { subcat_radinfra_oneway } from '../mapDataSubcategories/subcat_radinfra_oneway.const'
 import { subcat_radinfraPlusMapillary } from '../mapDataSubcategories/subcat_radinfra_plus_mapillary.const'
 import { subcat_radinfra_smoothness } from '../mapDataSubcategories/subcat_radinfra_smoothness.const'
@@ -35,6 +39,17 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
         ...subcat_bikelanes_plus_surface_text,
         defaultStyle: 'hidden',
       },
+    ],
+  },
+  {
+    id: 'radinfra_lit',
+    name: 'Beleuchtung',
+    desc: 'Vollständigkeit der Beleuchtungsangaben',
+    subcategories: [
+      { ...subcat_radinfra_lit_bikelanes, defaultStyle: 'default' },
+      { ...subcat_radinfra_lit_roads, defaultStyle: 'default' },
+      { ...subcat_radinfra_lit_path_classes, defaultStyle: 'default' },
+      { ...subcat_radinfra_lit_highway_areas, defaultStyle: 'default' },
     ],
   },
   {

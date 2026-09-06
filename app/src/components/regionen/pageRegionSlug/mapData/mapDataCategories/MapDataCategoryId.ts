@@ -25,6 +25,7 @@ export type MapDataCategoryId =
   | 'radinfra_bikelanes'
   | 'radinfra_trafficSigns'
   | 'radinfra_surface'
+  | 'radinfra_lit'
   | 'radinfra_width'
   | 'radinfra_oneway'
   | 'radinfra_campagins'

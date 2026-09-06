@@ -8,8 +8,10 @@ import { subcat_bikelanes_plus_signs } from '../mapDataSubcategories/subcat_bike
 import { subcat_bikelanes_plus_surface_text } from '../mapDataSubcategories/subcat_bikelanes_plus_surface_text.const'
 import { subcat_bikelanes_plus_width_text } from '../mapDataSubcategories/subcat_bikelanes_plus_width_text.const'
 import { subcat_bikelanesStatistics } from '../mapDataSubcategories/subcat_bikelanesStatistics.const'
-import { subcat_lit } from '../mapDataSubcategories/subcat_lit.const'
-import { subcat_lit_plus_completeness } from '../mapDataSubcategories/subcat_lit_plus_completeness.const'
+import { subcat_lit_bikelanes } from '../mapDataSubcategories/subcat_lit_bikelanes.const'
+import { subcat_lit_highway_areas } from '../mapDataSubcategories/subcat_lit_highway_areas.const'
+import { subcat_lit_path_classes } from '../mapDataSubcategories/subcat_lit_path_classes.const'
+import { subcat_lit_roads } from '../mapDataSubcategories/subcat_lit_roads.const'
 import { subcat_mapillaryCoverage } from '../mapDataSubcategories/subcat_mapillaryCoverage.const'
 import { subcat_maxspeed } from '../mapDataSubcategories/subcat_maxspeed.const'
 import { subcat_parkingLars } from '../mapDataSubcategories/subcat_parkingLars.const'
@@ -109,8 +111,10 @@ export const categories: StaticMapDataCategory[] = [
     name: 'Beleuchtung',
     desc: 'Fahrbahn & Radinfrastruktur',
     subcategories: [
-      { ...subcat_lit, defaultStyle: 'default' },
-      { ...subcat_lit_plus_completeness, defaultStyle: 'hidden' },
+      { ...subcat_lit_roads, defaultStyle: 'default' },
+      { ...subcat_lit_bikelanes, defaultStyle: 'hidden' },
+      { ...subcat_lit_path_classes, defaultStyle: 'hidden' },
+      { ...subcat_lit_highway_areas, defaultStyle: 'hidden' },
     ],
   },
   {

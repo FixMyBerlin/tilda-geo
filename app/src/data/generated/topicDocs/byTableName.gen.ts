@@ -1699,6 +1699,25 @@ const data = {
         ],
       },
       {
+        key: 'lit',
+        type: 'string',
+        label: 'Beleuchtung',
+        values: [
+          {
+            value: 'yes',
+            label: 'Beleuchtet',
+          },
+          {
+            value: 'no',
+            label: 'Nicht beleuchtet',
+          },
+          {
+            value: 'special',
+            label: 'Spezielle Angaben',
+          },
+        ],
+      },
+      {
         key: 'offset',
         type: 'meter',
         label: 'Linien-Offset',
@@ -3177,6 +3196,664 @@ const data = {
       },
     ],
     chapters: [],
+  },
+  highwayAreas: {
+    topic: 'roads_bikelanes',
+    tableName: 'highwayAreas',
+    sourceIds: ['atlas_highwayAreas'],
+    title: 'Daten zu Straßenflächen',
+    summary:
+      '**Experimentell, noch nicht stabil.** Schema, Attribute und regionale Verfügbarkeit können sich noch ändern.',
+    groups: [],
+    attributes: [
+      {
+        key: 'road',
+        type: 'string',
+        label: 'Straßentyp',
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radverkehr)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fußverkehr)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'length',
+        type: 'meter',
+        label: 'Länge',
+        description:
+          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+        values: [],
+      },
+      {
+        key: 'lifecycle',
+        type: 'string',
+        label: 'Status',
+        values: [
+          {
+            value: 'blocked',
+            label: 'Gesperrt (Sperrung)',
+          },
+          {
+            value: 'construction',
+            label: 'In Bau',
+          },
+          {
+            value: 'construction_no_access',
+            label: 'Gesperrt aufgrund einer Baustelle',
+          },
+          {
+            value: 'temporary',
+            label: 'Temporärer Weg',
+          },
+        ],
+      },
+      {
+        key: 'oneway',
+        type: 'string',
+        label: 'Verkehrsrichtung',
+        values: [
+          {
+            value: 'no',
+            label: 'Beide Richtungen',
+          },
+          {
+            value: 'yes',
+            label: 'Einbahnstraße',
+          },
+          {
+            value: 'yes_dual_carriageway',
+            label: 'Einbahnstraße da separate Geometrie pro Seite',
+          },
+        ],
+      },
+      {
+        key: 'oneway_bicycle',
+        type: 'string',
+        label: 'Verkehrsrichtung Fahrrad',
+        values: [
+          {
+            value: 'no',
+            label: 'Beide Richtungen für Radverkehr',
+          },
+          {
+            value: 'yes',
+            label: 'Eine Richtung (auch für Radverkehr)',
+          },
+        ],
+      },
+      {
+        key: 'bridge',
+        type: 'string',
+        label: 'Brücke',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
+        key: 'tunnel',
+        type: 'string',
+        label: 'Tunnel',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
+        key: 'mapillary_coverage',
+        type: 'string',
+        label: 'Mapillary-Abdeckung',
+        description:
+          'Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage',
+        values: [
+          {
+            value: 'regular',
+            label: 'Standard-Aufnahmen',
+          },
+          {
+            value: 'pano',
+            label: 'Panorama-Aufnahmen',
+          },
+        ],
+      },
+      {
+        key: 'mapillary',
+        type: 'sanitized_strings',
+        label: 'Straßenfotos (Mapillary)',
+        description:
+          'Mapillary-Bild-IDs (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'mapillary_forward',
+        type: 'sanitized_strings',
+        label: 'Mapillary in Linienrichtung',
+        description:
+          'Mapillary-Bild-IDs in Linienrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'mapillary_backward',
+        type: 'sanitized_strings',
+        label: 'Mapillary gegen Linienrichtung',
+        description:
+          'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'mapillary_traffic_sign',
+        type: 'sanitized_strings',
+        label: 'Mapillary für Verkehrszeichen',
+        description:
+          'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'traffic_sign',
+        type: 'sanitized_strings',
+        label: 'Beschilderung',
+        values: [
+          {
+            value: 'none',
+            label: 'Unbeschildert',
+          },
+        ],
+      },
+      {
+        key: 'description',
+        type: 'sanitized_strings',
+        label: 'Hinweis aus OSM',
+        values: [],
+      },
+      {
+        key: 'operator_type',
+        type: 'string',
+        label: 'Betreibertyp',
+        values: [
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+        ],
+      },
+      {
+        key: 'informal',
+        type: 'string',
+        label: 'Trampelpfad',
+        values: [
+          {
+            value: 'yes',
+            label: 'Weg als informeller Weg erfasst',
+          },
+        ],
+      },
+      {
+        key: 'covered',
+        type: 'string',
+        label: 'Überdacht',
+        values: [
+          {
+            value: 'covered',
+            label: 'Überdacht',
+          },
+          {
+            value: 'partial',
+            label: 'Teilweise überdacht',
+          },
+          {
+            value: 'indoor',
+            label: 'In einem Gebäude',
+          },
+        ],
+      },
+      {
+        key: 'lit',
+        type: 'string',
+        label: 'Beleuchtung',
+        values: [
+          {
+            value: 'yes',
+            label: 'Beleuchtet',
+          },
+          {
+            value: 'no',
+            label: 'Nicht beleuchtet',
+          },
+          {
+            value: 'special',
+            label: 'Spezielle Angaben',
+          },
+        ],
+      },
+      {
+        key: 'width',
+        type: 'meter',
+        label: 'Breite',
+        values: [],
+      },
+      {
+        key: 'width_effective',
+        type: 'meter',
+        label: 'Effektive Breite',
+        values: [],
+      },
+      {
+        key: 'width_source',
+        type: 'sanitized_strings',
+        label: 'Quelle Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'ALKIS',
+            label: 'Aus ALKIS Daten ausgemessen',
+          },
+          {
+            value: 'ARCore',
+            label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'surface',
+        type: 'string',
+        label: 'Oberfläche',
+        values: [
+          {
+            value: 'asphalt',
+            label: 'Asphalt',
+          },
+          {
+            value: 'paved',
+            label: 'Befestigt (unspezifisch)',
+          },
+          {
+            value: 'unpaved',
+            label: 'Unbefestigt',
+          },
+          {
+            value: 'concrete',
+            label: 'Beton',
+          },
+          {
+            value: 'concrete:plates',
+            label: 'Betonplatten',
+          },
+          {
+            value: 'concrete:lanes',
+            label: 'Betonstreifen / -bahnen',
+          },
+          {
+            value: 'paving_stones',
+            label: 'Verbund&shy;pflastersteine',
+          },
+          {
+            value: 'paving_stones:lanes',
+            label: 'Pflasterstein&shy;bahnen',
+          },
+          {
+            value: 'sett',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
+          },
+          {
+            value: 'mosaic_sett',
+            label: 'Mosaikpflaster',
+          },
+          {
+            value: 'small_sett',
+            label: 'Kleinpflaster',
+          },
+          {
+            value: 'large_sett',
+            label: 'Großpflaster',
+          },
+          {
+            value: 'bricks',
+            label: 'Ziegel',
+          },
+          {
+            value: 'stone',
+            label: 'Stein',
+          },
+          {
+            value: 'ground',
+            label: 'Erde/Boden',
+          },
+          {
+            value: 'grass',
+            label: 'Gras',
+          },
+          {
+            value: 'sand',
+            label: 'Sand',
+          },
+          {
+            value: 'compacted',
+            label: 'Verdichteter Untergrund',
+          },
+          {
+            value: 'fine_gravel',
+            label: 'Splitt',
+          },
+          {
+            value: 'gravel',
+            label: 'Schotter',
+          },
+          {
+            value: 'pebblestone',
+            label: 'Kieselsteine',
+          },
+          {
+            value: 'wood',
+            label: 'Holz',
+          },
+          {
+            value: 'woodchips',
+            label: 'Hackschnitzel',
+          },
+          {
+            value: 'metal',
+            label: 'Metall',
+          },
+          {
+            value: 'metal_grid',
+            label: 'Metallgitter',
+          },
+          {
+            value: 'plastic',
+            label: 'Kunststoff',
+          },
+          {
+            value: 'rubber',
+            label: 'Gummi',
+          },
+          {
+            value: 'grass_paver',
+            label: 'Rasengitter / Grasgitter',
+          },
+        ],
+      },
+      {
+        key: 'surface_source',
+        type: 'string',
+        label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'tag',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
+          },
+        ],
+      },
+      {
+        key: 'surface_confidence',
+        type: 'string',
+        label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
+          },
+        ],
+      },
+      {
+        key: 'smoothness',
+        type: 'string',
+        label: 'Ober&shy;flächen&shy;qualität',
+        values: [
+          {
+            value: 'excellent',
+            label: 'Sehr gut',
+          },
+          {
+            value: 'good',
+            label: 'Gut',
+          },
+          {
+            value: 'intermediate',
+            label: 'Mittel gut',
+          },
+          {
+            value: 'bad',
+            label: 'Schlecht',
+          },
+          {
+            value: 'very_bad',
+            label: 'Sehr schlecht',
+          },
+        ],
+      },
+      {
+        key: 'smoothness_source',
+        type: 'string',
+        label: 'Herkunft der Ober&shy;flächen&shy;qualität',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'tag',
+            label: 'OSM-Tag `smoothness`',
+          },
+          {
+            value: 'tag_normalized',
+            label: 'OSM-Tag `smoothness` (normalisiert)',
+          },
+          {
+            value: 'surface_to_smoothness',
+            label: 'Abgeleitet von `surface`',
+          },
+          {
+            value: 'tracktype_to_smoothness',
+            label: 'Abgeleitet von `tracktype`',
+          },
+          {
+            value: 'mtb:scale_to_smoothness',
+            label: 'Abgeleitet von `mtb:scale`',
+          },
+        ],
+      },
+      {
+        key: 'smoothness_confidence',
+        type: 'string',
+        label: 'Konfidenz Ober&shy;flächen&shy;qualität',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+        ],
+      },
+      {
+        key: 'surface_color',
+        type: 'string',
+        label: 'Ober&shy;flächen&shy;farbe',
+        values: [
+          {
+            value: 'red',
+            label: 'Rot',
+          },
+          {
+            value: 'green',
+            label: 'Grün',
+          },
+          {
+            value: 'red;green',
+            label: 'Rot und Grün',
+          },
+          {
+            value: 'no',
+            label: 'Keine besondere Farbe',
+          },
+        ],
+      },
+    ],
+    chapters: [
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Die Geometrien für Radinfrastruktur, die von der Straßen-Mittellinie abgeleitet werden (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht), werden als Teil der Prozessierung nach links und rechts versetzt. Dafür verwenden wir die Breite der Straße als Referenz.\n\n**HINWEIS:** Wir planen dieses Feature in der Zukunft umzubauen. Dann werden die Daten eine Eigenschaft haben, aus der der empfohlene Versatz hervorgeht, so dass man sie im Kartenstil visuell versetzen kann, aber sie in den Daten auf der Mittellinie bleiben.\n',
+      },
+    ],
   },
   landuse: {
     topic: 'landuse',

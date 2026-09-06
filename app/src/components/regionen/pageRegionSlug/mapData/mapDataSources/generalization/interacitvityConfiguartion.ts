@@ -18,7 +18,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
       'road',
       'oneway',
       'oneway_bicycle',
-      // 'lit',
+      // 'lit', // skip at low zoom (tile size); layers already minzoom 9
       'maxspeed',
       'smoothness',
       // 'surface',
@@ -29,7 +29,10 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     minzoom: 9,
   },
   roadsPathClasses: {
-    stylingKeys: ['road'],
+    stylingKeys: [
+      'road',
+      // 'lit', // skip at low zoom (tile size); layers already minzoom 9
+    ],
     minzoom: 9,
   },
   bikelanesPresence: {
@@ -43,6 +46,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   bikelanes: {
     stylingKeys: [
       'category',
+      // 'lit', // skip at low zoom (tile size); layers already minzoom 9
       // 'surface',
       'smoothness',
       'width',
@@ -58,6 +62,13 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     minzoom: 13,
   },
   barrierAreas: { stylingKeys: [], minzoom: 8 },
+  highwayAreas: {
+    stylingKeys: [
+      'road',
+      // 'lit', // skip at low zoom (tile size); layers already minzoom 9
+    ],
+    minzoom: 9,
+  },
   barrierLines: {
     stylingKeys: ['birdge', 'tunnel', 'railway', 'highway'],
     minzoom: 5,
