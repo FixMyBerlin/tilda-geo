@@ -9,24 +9,7 @@ local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
-local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
-
-local highway_areas_table = roads_bikelanes_tables.highway_areas_table
-
--- Roads skip `area=yes`. This table is that inverse: closed `highway=*` polygons.
--- Not `area:highway` — those describe road space, tags live on the `highway=*` object.
----@param object table
----@return boolean
-local function is_highway_area(object)
-  local tags = object.tags
-  if tags.highway == nil or tags.area ~= 'yes' then
-    return false
-  end
-  if object.type == 'way' then
-    return object.is_closed == true
-  end
-  return object.type == 'relation'
-end
+local highway_areas_table = require('topics.roads_bikelanes.roads_bikelanes_tables').highway_areas_table
 
 ---@param object table
 local function process_highway_area(object)
@@ -66,6 +49,5 @@ local function process_highway_area(object)
 end
 
 return {
-  is_highway_area = is_highway_area,
   process_highway_area = process_highway_area,
 }

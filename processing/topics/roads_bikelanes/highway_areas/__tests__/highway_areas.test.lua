@@ -1,11 +1,10 @@
 describe('highway_areas', function()
-  require('topics.helper.osm2pgsql')
-  local highway_areas = require('topics.roads_bikelanes.roads_bikelanes_highway_areas')
+  local is_highway_area = require('topics.roads_bikelanes.highway_areas.is_highway_area')
   local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
 
   describe('is_highway_area', function()
     it('accepts closed ways with highway and area=yes', function()
-      assert.is_true(highway_areas.is_highway_area({
+      assert.is_true(is_highway_area({
         type = 'way',
         is_closed = true,
         tags = { highway = 'pedestrian', area = 'yes' },
@@ -13,7 +12,7 @@ describe('highway_areas', function()
     end)
 
     it('rejects area:highway without highway+area=yes', function()
-      assert.is_false(highway_areas.is_highway_area({
+      assert.is_false(is_highway_area({
         type = 'way',
         is_closed = true,
         tags = { ['area:highway'] = 'pedestrian' },
@@ -21,7 +20,7 @@ describe('highway_areas', function()
     end)
 
     it('rejects open ways', function()
-      assert.is_false(highway_areas.is_highway_area({
+      assert.is_false(is_highway_area({
         type = 'way',
         is_closed = false,
         tags = { highway = 'pedestrian', area = 'yes' },
@@ -29,7 +28,7 @@ describe('highway_areas', function()
     end)
 
     it('rejects closed ways without area=yes', function()
-      assert.is_false(highway_areas.is_highway_area({
+      assert.is_false(is_highway_area({
         type = 'way',
         is_closed = true,
         tags = { highway = 'pedestrian' },
@@ -37,7 +36,7 @@ describe('highway_areas', function()
     end)
 
     it('accepts relations with highway and area=yes', function()
-      assert.is_true(highway_areas.is_highway_area({
+      assert.is_true(is_highway_area({
         type = 'relation',
         tags = { highway = 'pedestrian', area = 'yes' },
       }))
