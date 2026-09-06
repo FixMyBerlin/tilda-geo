@@ -34,6 +34,14 @@ export const exportConfigsTilda: MapDataExportConfig[] = [
     licence: 'ODbL',
   },
   {
+    id: 'highwayAreas',
+    title: 'Daten zu Straßenflächen',
+    desc: 'Experimentell, noch nicht stabil. Schema, Attribute und regionale Verfügbarkeit können sich noch ändern.',
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+  },
+  {
     id: 'publicTransport',
     title: 'ÖPNV-Haltepunkte und Fähranleger',
     desc: 'Punktdaten von Haltestellen',
