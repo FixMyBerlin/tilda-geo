@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Reorder, useDragControls } from 'motion/react'
+import type React from 'react'
 import { useState } from 'react'
 import { z } from 'zod'
 import { getAllAtlasLayerKeys } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerKeys'
@@ -61,22 +62,28 @@ function initGroups(dbEntries: MapLayerOrderEntry[]) {
   return groups
 }
 
-function LayerRow({
-  layerKey,
-  group,
-  isStale,
-  isNew,
-  onMove,
-}: {
+type LayerRowProps = {
   layerKey: string
   group: GroupKey
   isStale: boolean
   isNew: boolean
   onMove: (layerKey: string, from: GroupKey, to: GroupKey) => void
-}) {
+}
+
+function LayerRow({ layerKey, group, isStale, isNew, onMove }: LayerRowProps) {
   // Dedicated drag handle so dragging never conflicts with the group <select>
   // (touch/trackpad: the whole row as drag surface swallows select interactions).
   const dragControls = useDragControls()
+
+  function handleDragPointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    dragControls.start(event)
+  }
+
+  function handleGroupChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    const parsed = GroupKeySchema.safeParse(event.currentTarget.value)
+    if (parsed.success) onMove(layerKey, group, parsed.data)
+  }
+
   return (
     <Reorder.Item
       value={layerKey}
@@ -88,7 +95,7 @@ function LayerRow({
         type="button"
         aria-label="Ziehen zum Sortieren"
         className="cursor-grab touch-none px-1 text-gray-400 select-none active:cursor-grabbing"
-        onPointerDown={(event) => dragControls.start(event)}
+        onPointerDown={handleDragPointerDown}
       >
         ⠿
       </button>
@@ -105,10 +112,7 @@ function LayerRow({
         aria-label="Gruppe wechseln"
         className="shrink-0 rounded border-gray-300 py-0.5 text-xs"
         value={group}
-        onChange={(event) => {
-          const parsed = GroupKeySchema.safeParse(event.target.value)
-          if (parsed.success) onMove(layerKey, group, parsed.data)
-        }}
+        onChange={handleGroupChange}
       >
         {GROUPS.map((g) => (
           <option key={g} value={g}>
@@ -120,7 +124,11 @@ function LayerRow({
   )
 }
 
-function LayerOrderEditor({ dbEntries }: { dbEntries: MapLayerOrderEntry[] }) {
+type LayerOrderEditorProps = {
+  dbEntries: MapLayerOrderEntry[]
+}
+
+function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
   const queryClient = useQueryClient()
   const dbKeySet = new Set(dbEntries.map((e) => e.layerKey))
   const [groups, setGroups] = useState<GroupedState>(() => initGroups(dbEntries))
