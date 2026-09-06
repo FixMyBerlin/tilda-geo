@@ -18,6 +18,7 @@ import {
   zodNotesModeParam,
 } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { zodQaParam } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
+import { migrateOldLitCategory } from '@/server/regions/migrateLitCompletenessConfig.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
@@ -132,10 +133,12 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
 
   return urlConfig.map((category) => {
     const newCategoryId = categoryMigrations[category.id] || category.id
+    const migratedCategory = category.id === 'lit' ? migrateOldLitCategory(category) : category
+
     return {
-      ...category,
+      ...migratedCategory,
       id: newCategoryId as MapDataCategoryParam['id'],
-      subcategories: category.subcategories.map((subcategory) => {
+      subcategories: migratedCategory.subcategories.map((subcategory) => {
         const newSubcategoryId = subcategoryMigrations[subcategory.id] || subcategory.id
 
         // MIGRATION: Preserve visibility for subcategories that changed UI from checkbox to dropdown.

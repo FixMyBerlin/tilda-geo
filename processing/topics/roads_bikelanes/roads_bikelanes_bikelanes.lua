@@ -37,6 +37,7 @@ local function roads_bikelanes_bikelanes(context)
         description = SANITIZE_TAGS.safe_string(cycleway.description) or shared_result_tags.description,
         operator_type = shared_result_tags.operator_type,
         informal = shared_result_tags.informal,
+        lit = shared_result_tags.lit,
         covered = shared_result_tags.covered,
         _parent_highway = cycleway._parent_highway,
         _is_sidepath = object_tags._is_sidepath,

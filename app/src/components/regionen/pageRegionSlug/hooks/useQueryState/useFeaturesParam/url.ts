@@ -55,6 +55,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   33: 'internal-notes-source',
   34: 'review-entries-source',
   35: 'qa-source',
+  36: 'tilda_highwayAreas',
 }
 
 export const persistableSourceKeys = new Set(Object.values(numericSourceIds))

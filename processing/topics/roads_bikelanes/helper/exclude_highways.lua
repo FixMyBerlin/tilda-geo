@@ -51,12 +51,13 @@ local exclude_highways = {
     return false
   end,
 
-  by_other_tags = function(tags)
-    -- Skip any area. See https://github.com/FixMyBerlin/private-issues/issues/1038 for more.
-    if tags.area == 'yes' then
-      return true
-    end
+  -- Roads skip these; highwayAreas is the inverse and keeps them.
+  -- See https://github.com/FixMyBerlin/private-issues/issues/1038
+  by_area = function(tags)
+    return tags.area == 'yes'
+  end,
 
+  by_other_tags = function(tags)
     -- Skip piers
     if tags.man_made == 'pier' then
       return true

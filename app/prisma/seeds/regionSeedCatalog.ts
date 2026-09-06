@@ -44,6 +44,7 @@ const defaultRadverkehrExports = [
   'bikeroutes',
   'roads',
   'roadsPathClasses',
+  'highwayAreas',
   'poiClassification',
   'places',
   'publicTransport',
@@ -216,6 +217,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       categories: [
         'radinfra_bikelanes',
         'radinfra_surface',
+        'radinfra_lit',
         'radinfra_width',
         'radinfra_oneway',
         'radinfra_trafficSigns',
@@ -325,6 +327,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       categories: [
         'radinfra_bikelanes',
         'radinfra_surface',
+        'radinfra_lit',
         'radinfra_width',
         'radinfra_oneway',
         'radinfra_trafficSigns',
