@@ -1,7 +1,6 @@
 import type { ExpressionSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { Layer } from 'react-map-gl/maplibre'
-import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 
 const createMatchExpression = ({
   valueNone,
@@ -45,9 +44,6 @@ const color = createMatchExpression({
 })
 
 export const LayerHighlight = (props: LayerProps) => {
-  const mapLoaded = useMapLoaded()
-  if (!mapLoaded) return null
-
   // Type guard: check if this is a standard layer (not custom layer)
   if (!('type' in props) || props.type === 'custom') {
     return null
