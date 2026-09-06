@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategoryStyleLegend } from '../../types'
 import type { MapboxStyleLayer } from '../mapboxStyles/types'
 
-export const litColors = {
+const litColors = {
   yes: '#f8c52a',
   no: '#736e59',
   special: '#ffac38',
