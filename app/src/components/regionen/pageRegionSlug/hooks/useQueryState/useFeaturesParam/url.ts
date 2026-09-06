@@ -28,7 +28,6 @@ export const numericSourceIds: Record<number, SourceNames> = {
   11: 'atlas_bikeroutes',
   12: 'atlas_roads',
   13: 'atlas_roadsPathClasses',
-  29: 'atlas_highwayAreas',
   14: 'atlas_publicTransport',
   15: 'atlas_poiClassification',
   16: 'atlas_places',
@@ -44,10 +43,12 @@ export const numericSourceIds: Record<number, SourceNames> = {
   26: 'tilda_parkings',
   27: 'tilda_parkings_cutouts',
   28: 'tilda_parkings_quantized',
+  // 29: 'tilda_parkings_separate',
   30: 'tilda_parkings_no',
   31: 'tilda_parkings_off_street',
   32: 'tilda_parkings_off_street_quantized',
   33: internalNotesSourceId,
+  34: 'atlas_highwayAreas',
 }
 
 export const persistableSourceKeys = new Set(Object.values(numericSourceIds))
