@@ -4,10 +4,6 @@ import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { layerVisibility } from '../utils/layerVisibility'
 
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
-
 const useRegionBackgrounds = () => {
   const { region } = useRegionLoaderData()
   if (!region?.backgroundSources) return []
@@ -54,10 +50,7 @@ export const LayersRasterBackgrounds = () => {
   const { backgroundParam } = useBackgroundParam()
   const backgrounds = useRegionBackgrounds()
 
-  // Last layer in Array `allLayer.filter((l) => l.source === 'openmaptiles')`
-  // Picking a different layer would who maptiler Vector data on top of the background
-  // Check the list via <Map> => `handleLoad` => `console.log`
-  // See also <SourceAndLayers> => `layerOrder`
+  // Anchor from ATLAS_APP_ANCHOR_IDS (mapData/types.ts); mount order in <AllLayers>.
   const beforeId = 'atlas-app-beforeid-below-roadname'
 
   return (

@@ -1,5 +1,6 @@
-// Sorts layer entries by a static, bottom-first order list (see LAYER_SORTING_REQUIREMENTS.md).
-// Entries whose key is not in the order list keep their original relative order
+// Sorts layer entries by a bottom-first order list (admin DB keys).
+// Pass orderedKeys: [] to keep the input order (empty DB table).
+// Entries whose key is not in the list keep their original relative order
 // and are placed after all known keys (= rendered on top of them within their beforeId group).
 export function sortByLayerOrder<T>({
   items,

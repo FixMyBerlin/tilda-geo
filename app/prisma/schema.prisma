@@ -631,7 +631,7 @@ enum DataSchemaImportStatus {
   @@schema("prisma")
 }
 
-// Global, cross-region order of Atlas-Geo map layers (see LAYER_SORTING_REQUIREMENTS.md).
+// Global, cross-region order of Atlas-Geo map layers.
 // One row per layer key (from createLayerKeyAtlasGeo). `position` orders the full list
 // bottom-first; regions render only their subset, gaps are fine (relative order).
 // `beforeId` optionally pins the layer to a basemap anchor group (atlas-app-beforeid-*);

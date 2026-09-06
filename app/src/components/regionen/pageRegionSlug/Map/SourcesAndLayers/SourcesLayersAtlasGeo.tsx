@@ -23,10 +23,6 @@ import { LayerHighlight } from './LayerHighlight'
 import { sortByLayerOrder } from './sortLayers/sortByLayerOrder'
 import { buildAtlasLayerProps, isAtlasStyleLayer } from './utils/buildAtlasLayerProps'
 
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
-//
 // We add map-components for all categories and all subcategories of the given config.
 // We then toggle the visibility of the layer based on the URL state (config) — layers are
 // never unmounted on toggle, which keeps the mount order (= order within a beforeId group) stable.
@@ -86,9 +82,8 @@ export const LayersAtlasGeo = () => {
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
   const { backgroundParam } = useBackgroundParam()
-  // Admin-managed global order (see /admin/layer-order). Layers must mount ONCE in their
-  // final order (mount order = order within a beforeId group), so we wait for this query
-  // before rendering any layer.
+  // Admin-managed global order (see /admin/layer-order). Wait for this query so the first
+  // mount is already sorted (mount order = order within a beforeId group).
   const { data: dbLayerOrder, isPending: layerOrderPending } = useQuery(mapLayerOrderQueryOptions())
 
   if (!categoriesConfig?.length) return null
@@ -110,7 +105,6 @@ export const LayersAtlasGeo = () => {
       : [],
   )
 
-  // Collect all layers of all categories/subcategories/styles into one flat list…
   const layerEntries = categoriesConfig.flatMap((categoryConfig) => {
     return categoryConfig.subcategories.flatMap((subcategoryConfig) => {
       const sourceData = getSourceData(subcategoryConfig?.sourceId)
@@ -146,8 +140,6 @@ export const LayersAtlasGeo = () => {
     })
   })
 
-  // …then sort by the global order list (bottom-first) so the render order — and with it the
-  // order within each beforeId group — matches the configured order.
   const sortedLayerEntries = sortByLayerOrder({
     items: layerEntries,
     getKey: (entry) => entry.layerId,

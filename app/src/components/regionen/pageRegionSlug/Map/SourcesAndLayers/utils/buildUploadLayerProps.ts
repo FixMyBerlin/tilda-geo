@@ -28,8 +28,6 @@ type BuildUploadLayerPropsParams = {
   debugLayerStyles: boolean
   beforeId?: string
   sourceLayer?: 'default'
-  // Layers that toggle via URL state must stay mounted and switch visibility instead of
-  // unmounting, so the mount order (= order within a beforeId group) stays stable.
   visibility?: { visibility: 'visible' | 'none' }
 }
 

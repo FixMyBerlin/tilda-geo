@@ -299,8 +299,6 @@ export const RegionMap = () => {
       attributionControl={false}
     >
       <UpdateFeatureState />
-      {/* Sources and Layers render separately so all Layers form one flat, sortable list.
-          Layer order is defined in <AllLayers>. See LAYER_SORTING_REQUIREMENTS.md. */}
       <AllSources />
       <AllLayers />
       <SearchResultLayers />

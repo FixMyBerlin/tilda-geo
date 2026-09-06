@@ -7,7 +7,7 @@ const getKey = (e: Entry) => e.layerId
 const ids = (entries: Entry[]) => entries.map((e) => e.layerId)
 
 describe('sortByLayerOrder', () => {
-  test('empty order list keeps the original order (parity mode)', () => {
+  test('empty order list keeps the original order', () => {
     const items = [entry('c'), entry('a'), entry('b')]
     const result = sortByLayerOrder({ items, getKey, orderedKeys: [] })
     expect(ids(result)).toEqual(['c', 'a', 'b'])

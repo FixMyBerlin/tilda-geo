@@ -19,10 +19,6 @@ export const qaLayerId = 'qa-layer'
 export const qaSourceId = 'qa-source'
 export const qaMinZoom = 12
 
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
-
 // Both halves share the same (react-query cached) query and the same guards so the Layer
 // half never renders without its Source half.
 const useActiveQaConfig = () => {
@@ -37,15 +33,14 @@ const useActiveQaConfig = () => {
   const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.configSlug)
 
   if (!hasPermissions) return undefined
-  // Don't render if no QA config is selected. Style 'none' only hides via visibility —
-  // unmounting on a style toggle would change the mount order (see LAYER_SORTING_REQUIREMENTS.md).
+  // Don't render if no QA config is selected. Style 'none' only hides via visibility;
+  // unmounting on a style toggle would change the mount order.
   if (!activeQaConfig) return undefined
   return { activeQaConfig, qaStyleVisible: qaParamData.style !== 'none' }
 }
 
 export const SourcesQa = () => {
   // Initialize QA map state to trigger data loading and feature state updates
-  // Must be called before any conditional returns to satisfy Rules of Hooks
   useQaMapState()
   const active = useActiveQaConfig()
   if (!active) return null

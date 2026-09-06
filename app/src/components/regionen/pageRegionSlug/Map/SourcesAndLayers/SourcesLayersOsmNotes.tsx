@@ -7,10 +7,6 @@ import { useFilteredOsmNotes } from './utils/useFilteredOsmNotes'
 export const osmNotesLayerId = 'osm-notes-layer'
 export const osmNotesSourceId = 'osm-notes-source'
 
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
-
 export const SourcesOsmNotes = () => {
   const filteredFeatures = useFilteredOsmNotes()
 
@@ -33,8 +29,6 @@ export const LayersOsmNotes = () => {
     .filter((feature) => feature.source === osmNotesSourceId)
     .map((feature) => (feature?.id || 0) as number)
 
-  // Layers stay mounted and toggle via visibility so the mount order (= order within a
-  // beforeId group) never depends on the toggle sequence. See LAYER_SORTING_REQUIREMENTS.md.
   const visibility = layerVisibility(showOsmNotesParam)
 
   return (

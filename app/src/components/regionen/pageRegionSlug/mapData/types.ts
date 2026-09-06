@@ -128,12 +128,10 @@ export type StaticMapDataCategory = {
 type StaticMapDataSubcategory = FileMapDataSubcategory & {
   id: SubcategoryId
   defaultStyle: 'default' | 'hidden'
-  // TODO: We might need to add a "mapOrder" value here to specify that "places" needs to be at the top on the map but at the bottom of the dropdown in the UI
+  // TODO: Atlas layer stack order is admin DB; add mapOrder here only if sidebar dropdown order still differs from map stacking.
 }
 
-// The empty anchor layers in our Maptiler basemap style that our layers can be spliced at
-// (bottom-first). Single source of truth — consumed by the admin layer-order UI, the
-// map-layer-order zod schema, the map rendering, and the e2e smoke test.
+// Empty anchor layers in our Maptiler basemap style that our layers splice at (bottom-first).
 // Modify at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
 export const ATLAS_APP_ANCHOR_IDS = [
   'atlas-app-beforeid-above-landuse',

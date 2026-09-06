@@ -13,10 +13,6 @@ import { layerVisibility } from '../utils/layerVisibility'
 export const internalNotesLayerId = 'internal-notes-layer'
 export const internalNotesSourceId = 'internal-notes-source'
 
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
-
 // Both halves share the same (react-query cached) query and the same guards so the Layer
 // half never renders without its Source half.
 const useInternalNotes = () => {
@@ -56,8 +52,6 @@ export const LayersInternalNotes = () => {
     .filter((feature) => feature.source === internalNotesSourceId)
     .map((feature) => (feature?.properties?.id || 0) as number)
 
-  // Layers stay mounted and toggle via visibility so the mount order (= order within a
-  // beforeId group) never depends on the toggle sequence. See LAYER_SORTING_REQUIREMENTS.md.
   const visibility = layerVisibility(showInternalNotesParam)
 
   return (

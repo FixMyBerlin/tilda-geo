@@ -13,10 +13,6 @@ import { createUploadSourceProps, resolveUploadBeforeId } from './utils/uploadSo
 // Renders systemLayer datasets that are always active and hidden from UI.
 // These datasets are not controlled by URL parameters and are always visible.
 // Mask layers are systemLayer but the layer ID gets special treatment.
-//
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
 
 export const SourcesSystemDatasets = () => {
   const { data: systemLayerDatasets } = useRegionSystemLayerDatasetsQuery()

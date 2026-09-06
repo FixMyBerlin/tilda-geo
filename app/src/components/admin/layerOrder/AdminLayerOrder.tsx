@@ -55,7 +55,6 @@ function initGroups(dbEntries: MapLayerOrderEntry[]) {
     const group: GroupKey = anchor.success ? anchor.data : DEFAULT_GROUP
     groups[group].push(entry.layerKey)
   }
-  // Code keys missing from the DB appear at the end of the default group.
   for (const key of CODE_KEYS) {
     if (!dbKeys.has(key)) groups[DEFAULT_GROUP].push(key)
   }
@@ -103,7 +102,7 @@ function LayerRow({ layerKey, group, isStale, isNew, onMove }: LayerRowProps) {
         {layerKey}
         {isStale && (
           <span className="ml-2 rounded bg-red-100 px-1 py-0.5 text-red-700">
-            nicht mehr im Code — wird beim Speichern entfernt
+            nicht mehr im Code, wird beim Speichern entfernt
           </span>
         )}
         {isNew && <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-amber-700">neu</span>}
@@ -160,8 +159,6 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
             beforeId: group === DEFAULT_GROUP ? null : group,
           })),
       )
-      // Guard against destructive saves: dropping many entries (drifted keys) should be
-      // a conscious decision, not a silent side effect.
       if (dbEntries.length > 0 && entries.length < dbEntries.length) {
         const dropped = dbEntries.length - entries.length
         if (
@@ -181,14 +178,14 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
     <div className="space-y-6">
       <p className="text-sm text-gray-600">
         Reihenfolge innerhalb einer Gruppe: unten in der Liste = oben auf der Karte. Die Gruppen
-        bestimmen, wo die Layer in die Basemap eingespleißt werden (beforeId-Anker). Änderungen
-        wirken nach dem nächsten Laden der Karte.
+        bestimmen, wo die Layer in die Basemap eingefügt werden (beforeId-Anker). Änderungen wirken
+        nach dem nächsten Laden der Karte.
       </p>
       <p className="text-sm text-gray-600">
-        Hinweise: Die Gruppen gelten nur für den Standard-Hintergrund — auf eigenen
+        Hinweise: Die Gruppen gelten nur für den Standard-Hintergrund. Auf eigenen
         Raster-Hintergründen liegen alle Daten-Layer oben. Sortierbar sind hier nur Atlas-Geo-Layer;
         Hintergründe, statische Daten, Notes, QA und Maske haben feste Positionen relativ zueinander
-        (Interleaving nur über die Anker-Gruppen).
+        (nur über die Anker-Gruppen).
       </p>
       {GROUPS.map((group) => (
         <section key={group}>

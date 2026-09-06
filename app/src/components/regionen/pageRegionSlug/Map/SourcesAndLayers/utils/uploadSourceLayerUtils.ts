@@ -2,9 +2,10 @@ import type { FeatureCollection } from 'geojson'
 import { createPmtilesUrl } from './createPmtilesUrl'
 
 // GeoJSON sources fetch their `data` URL eagerly the moment they are added to the style
-// (unlike vector/pmtiles sources, which only load tiles for visible layers). Sources of
-// unselected datasets therefore mount with an empty FeatureCollection and only swap to the
-// real URL once the dataset is selected — mount order stays stable, no eager download.
+// (unlike vector/pmtiles sources, which only load tiles for visible layers).
+// https://maplibre.org/maplibre-gl-js/docs/API/classes/GeoJSONSource/
+// Unselected datasets therefore mount with an empty FeatureCollection and only swap to the
+// real URL once the dataset is selected.
 const EMPTY_FEATURE_COLLECTION: FeatureCollection = { type: 'FeatureCollection', features: [] }
 
 export function createUploadSourceProps({

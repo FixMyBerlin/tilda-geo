@@ -7,8 +7,7 @@ import { SourcesStaticDatasets } from './SourcesLayersStaticDatasets'
 import { SourcesSystemDatasets } from './SourcesLayersSystemDatasets'
 
 // All map Sources, rendered separately from the Layers (see <AllLayers>).
-// The order of Sources has no effect on the map; layer order is defined in <AllLayers>.
-// See LAYER_SORTING_REQUIREMENTS.md.
+// Source mount order has no effect on the map; layer stacking is defined in <AllLayers>.
 export const AllSources = () => {
   return (
     <>

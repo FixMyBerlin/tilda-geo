@@ -15,17 +15,6 @@ import { createUploadSourceProps, resolveUploadBeforeId } from './utils/uploadSo
 
 // Renders user-selectable static datasets controlled by URL parameters.
 // SystemLayer datasets are handled separately by SourcesLayersSystemDatasets.
-//
-// Sources and Layers are rendered by two separate components (via <AllSources> / <AllLayers>)
-// so all Layers of the map form one flat, sortable list independent of their Source.
-// See LAYER_SORTING_REQUIREMENTS.md.
-//
-// All datasets of the region are always mounted; selection via URL state only toggles the
-// layer visibility. Unmounting layers would break the layer order: a layer that mounts later
-// is inserted at the top of its beforeId group, ignoring the intended order.
-// Vector (pmtiles) sources only load tiles when a visible layer references them; geojson
-// sources start with empty data and load the real URL on selection (deselecting drops the
-// data again — a re-selection refetches, which the browser cache absorbs).
 
 export const SourcesStaticDatasets = () => {
   const { dataParam: selectedDatasetIds } = useDataParam()

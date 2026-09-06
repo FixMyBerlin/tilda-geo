@@ -2,13 +2,12 @@ import { expect, test } from '@playwright/test'
 import { ATLAS_APP_ANCHOR_IDS } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { getMapLayerIds, waitForMapLoad } from '../utils/maps'
 
-// Verifies the layer ordering mechanics of <AllSources>/<AllLayers>
-// (see LAYER_SORTING_REQUIREMENTS.md):
+// Verifies the layer ordering mechanics of <AllSources>/<AllLayers>:
 // - our beforeId anchor layers exist in the basemap style, in the expected order
 // - Atlas-Geo layers are spliced between the anchors (not stacked on top of the basemap)
 // Uses `window.__mainMap`, exposed in Playwright mode on map load.
 
-// Bottom-to-top, as defined in the Maptiler style — single source of truth in mapData/types.ts
+// Bottom-to-top anchor IDs — see ATLAS_APP_ANCHOR_IDS in mapData/types.ts
 const ANCHORS = ATLAS_APP_ANCHOR_IDS
 
 test.describe('Smoke – map layer order', () => {
