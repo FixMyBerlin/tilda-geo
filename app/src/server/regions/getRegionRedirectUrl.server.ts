@@ -12,8 +12,8 @@ import {
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
-import { getRegion } from '@/server/regions/queries/getRegion.server'
 import { migrateLitCompletenessSubcategories } from '@/server/regions/migrateLitCompletenessConfig.server'
+import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'

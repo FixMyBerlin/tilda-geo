@@ -3203,7 +3203,7 @@ const data = {
     sourceIds: ['atlas_highwayAreas'],
     title: 'Daten zu Straßenflächen',
     summary:
-      '**Experimentell, noch nicht stabil.** Schema, Attribute und regionale Verfügbarkeit können sich noch ändern.',
+      '**Experimentell, noch nicht stabil.** Attribute und Datenfilter können sich noch ändern.',
     groups: [],
     attributes: [
       {
@@ -3344,11 +3344,10 @@ const data = {
         values: [],
       },
       {
-        key: 'length',
-        type: 'meter',
-        label: 'Länge',
-        description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+        key: 'area',
+        type: 'square_meter',
+        label: 'Fläche',
+        description: 'Fläche in Quadratmetern, aus der Geometrie.',
         values: [],
       },
       {
@@ -3371,62 +3370,6 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
-          },
-        ],
-      },
-      {
-        key: 'oneway',
-        type: 'string',
-        label: 'Verkehrsrichtung',
-        values: [
-          {
-            value: 'no',
-            label: 'Beide Richtungen',
-          },
-          {
-            value: 'yes',
-            label: 'Einbahnstraße',
-          },
-          {
-            value: 'yes_dual_carriageway',
-            label: 'Einbahnstraße da separate Geometrie pro Seite',
-          },
-        ],
-      },
-      {
-        key: 'oneway_bicycle',
-        type: 'string',
-        label: 'Verkehrsrichtung Fahrrad',
-        values: [
-          {
-            value: 'no',
-            label: 'Beide Richtungen für Radverkehr',
-          },
-          {
-            value: 'yes',
-            label: 'Eine Richtung (auch für Radverkehr)',
-          },
-        ],
-      },
-      {
-        key: 'bridge',
-        type: 'string',
-        label: 'Brücke',
-        values: [
-          {
-            value: 'yes',
-            label: 'Ja',
-          },
-        ],
-      },
-      {
-        key: 'tunnel',
-        type: 'string',
-        label: 'Tunnel',
-        values: [
-          {
-            value: 'yes',
-            label: 'Ja',
           },
         ],
       },
@@ -3478,17 +3421,6 @@ const data = {
         description:
           'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
         values: [],
-      },
-      {
-        key: 'traffic_sign',
-        type: 'sanitized_strings',
-        label: 'Beschilderung',
-        values: [
-          {
-            value: 'none',
-            label: 'Unbeschildert',
-          },
-        ],
       },
       {
         key: 'description',
@@ -3557,34 +3489,6 @@ const data = {
           {
             value: 'special',
             label: 'Spezielle Angaben',
-          },
-        ],
-      },
-      {
-        key: 'width',
-        type: 'meter',
-        label: 'Breite',
-        values: [],
-      },
-      {
-        key: 'width_effective',
-        type: 'meter',
-        label: 'Effektive Breite',
-        values: [],
-      },
-      {
-        key: 'width_source',
-        type: 'sanitized_strings',
-        label: 'Quelle Breite',
-        purpose: 'qa',
-        values: [
-          {
-            value: 'ALKIS',
-            label: 'Aus ALKIS Daten ausgemessen',
-          },
-          {
-            value: 'ARCore',
-            label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
           },
         ],
       },
@@ -3819,29 +3723,6 @@ const data = {
           {
             value: 'medium',
             label: 'Mittel',
-          },
-        ],
-      },
-      {
-        key: 'surface_color',
-        type: 'string',
-        label: 'Ober&shy;flächen&shy;farbe',
-        values: [
-          {
-            value: 'red',
-            label: 'Rot',
-          },
-          {
-            value: 'green',
-            label: 'Grün',
-          },
-          {
-            value: 'red;green',
-            label: 'Rot und Grün',
-          },
-          {
-            value: 'no',
-            label: 'Keine besondere Farbe',
           },
         ],
       },

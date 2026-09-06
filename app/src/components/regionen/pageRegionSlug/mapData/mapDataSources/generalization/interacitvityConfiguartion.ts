@@ -29,10 +29,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     minzoom: 9,
   },
   roadsPathClasses: {
-    stylingKeys: [
-      'road',
-      'lit',
-    ],
+    stylingKeys: ['road', 'lit'],
     minzoom: 9,
   },
   bikelanesPresence: {
@@ -63,10 +60,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
   },
   barrierAreas: { stylingKeys: [], minzoom: 8 },
   highwayAreas: {
-    stylingKeys: [
-      'road',
-      'lit',
-    ],
+    stylingKeys: ['road', 'lit'],
     minzoom: 9,
   },
   barrierLines: {

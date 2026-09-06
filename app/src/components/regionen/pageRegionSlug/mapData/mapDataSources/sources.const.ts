@@ -234,10 +234,9 @@ export const sources: MapDataSource<SourcesId>[] = [
       documentedKeys: [
         'name',
         'road',
-        'oneway',
-        'oneway_bicycle__if_present',
         'lit__if_present',
-        'length',
+        'composit_surface_smoothness',
+        'area',
         'description__if_present',
       ],
     },

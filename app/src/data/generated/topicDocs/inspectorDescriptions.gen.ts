@@ -71,8 +71,7 @@ const data = {
   },
   atlas_highwayAreas: {
     keys: {
-      length:
-        'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+      area: 'Fläche in Quadratmetern, aus der Geometrie.',
       mapillary_coverage:
         'Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage',
       mapillary:

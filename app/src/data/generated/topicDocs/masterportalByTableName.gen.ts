@@ -1320,10 +1320,10 @@ const data = {
         },
       },
       name: 'Name',
-      length: {
-        name: 'Länge',
+      area: {
+        name: 'Fläche',
         type: 'number',
-        suffix: 'm',
+        suffix: 'm²',
       },
       lifecycle: {
         name: 'Status',
@@ -1334,41 +1334,6 @@ const data = {
           construction: 'In Bau',
           construction_no_access: 'Gesperrt aufgrund einer Baustelle',
           temporary: 'Temporärer Weg',
-        },
-      },
-      oneway: {
-        name: 'Verkehrsrichtung',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          no: 'Beide Richtungen',
-          yes: 'Einbahnstraße',
-          yes_dual_carriageway: 'Einbahnstraße da separate Geometrie pro Seite',
-        },
-      },
-      oneway_bicycle: {
-        name: 'Verkehrsrichtung Fahrrad',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          no: 'Beide Richtungen für Radverkehr',
-          yes: 'Eine Richtung (auch für Radverkehr)',
-        },
-      },
-      bridge: {
-        name: 'Brücke',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          yes: 'Ja',
-        },
-      },
-      tunnel: {
-        name: 'Tunnel',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          yes: 'Ja',
         },
       },
       mapillary_coverage: {
@@ -1431,14 +1396,6 @@ const data = {
           },
         },
       },
-      traffic_sign: {
-        name: 'Beschilderung',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          none: 'Unbeschildert',
-        },
-      },
       description: 'Hinweis aus OSM',
       operator_type: {
         name: 'Betreibertyp',
@@ -1475,25 +1432,6 @@ const data = {
           yes: 'Beleuchtet',
           no: 'Nicht beleuchtet',
           special: 'Spezielle Angaben',
-        },
-      },
-      width: {
-        name: 'Breite',
-        type: 'number',
-        suffix: 'm',
-      },
-      width_effective: {
-        name: 'Effektive Breite',
-        type: 'number',
-        suffix: 'm',
-      },
-      width_source: {
-        name: 'Quelle Breite',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          ALKIS: 'Aus ALKIS Daten ausgemessen',
-          ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
         },
       },
       surface: {
@@ -1583,17 +1521,6 @@ const data = {
         format: {
           high: 'Hoch',
           medium: 'Mittel',
-        },
-      },
-      surface_color: {
-        name: 'Ober&shy;flächen&shy;farbe',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          red: 'Rot',
-          green: 'Grün',
-          'red;green': 'Rot und Grün',
-          no: 'Keine besondere Farbe',
         },
       },
     },
