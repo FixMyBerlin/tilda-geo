@@ -48,6 +48,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   31: 'tilda_parkings_off_street',
   32: 'tilda_parkings_off_street_quantized',
   33: internalNotesSourceId,
+  34: 'atlas_highwayAreas',
 }
 
 export const persistableSourceKeys = new Set(Object.values(numericSourceIds))

@@ -500,6 +500,57 @@ describe('getRegionRedirectUrl()', () => {
       )
     })
 
+    test('MIGRATION: Migrate lit-completeness onto roads lit completeness style (12nu7if completeness on)', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=12nu7if.l.0&v=2'
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+      expect(mockGetRegionConfigTemplate).toHaveBeenCalledWith('12nu7if')
+
+      const bibiCategories = regionFixtures.bibi!.categories as MapDataCategoryId[]
+      const bibiFresh = createFreshCategoriesConfig(bibiCategories)
+      const bibiChecksum = calcConfigChecksum(bibiFresh)
+      const resultConfig = getUrl(redirectUrl).searchParams.get('config')
+      expect(resultConfig?.startsWith(bibiChecksum)).toBe(true)
+
+      const parsed = parse(
+        resultConfig!,
+        simplifyConfigForParams(bibiFresh) as MapDataCategoryConfig[],
+      )
+      const litCategory = parsed.find((category) => category.id === 'lit')
+      expect(litCategory).toBeTruthy()
+
+      const litRoads = litCategory!.subcategories.find((subcategory) => subcategory.id === 'lit')!
+      expect(litRoads.styles.find((style) => style.id === 'completeness')?.active).toBe(true)
+      expect(litRoads.styles.find((style) => style.id === 'default')?.active).toBe(false)
+      expect(litRoads.styles.find((style) => style.id === 'lit')?.active).toBe(false)
+      expect(litRoads.styles.filter((style) => style.active).length).toBe(1)
+    })
+
+    test('MIGRATION: Drop inactive lit-completeness and preserve roads lit (12nu7if completeness off)', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=12nu7if.5.0&v=2'
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+
+      const bibiCategories = regionFixtures.bibi!.categories as MapDataCategoryId[]
+      const bibiFresh = createFreshCategoriesConfig(bibiCategories)
+      const resultConfig = getUrl(redirectUrl).searchParams.get('config')
+      const parsed = parse(
+        resultConfig!,
+        simplifyConfigForParams(bibiFresh) as MapDataCategoryConfig[],
+      )
+      const litCategory = parsed.find((category) => category.id === 'lit')
+      expect(litCategory).toBeTruthy()
+      expect(
+        litCategory!.subcategories.some((subcategory) => subcategory.id === 'lit-completeness'),
+      ).toBe(false)
+
+      const litRoads = litCategory!.subcategories.find((subcategory) => subcategory.id === 'lit')!
+      expect(litRoads.styles.find((style) => style.id === 'default')?.active).toBe(true)
+      expect(litRoads.styles.find((style) => style.id === 'completeness')?.active).toBe(false)
+    })
+
     test('MIGRATION: Ensure hidden is active when checkbox was off and no style is active after merge (14ltyea.a099j9.0 to 1qldklk)', async () => {
       // Background: When migrating from old format (checkbox) to new format (dropdown),
       // if a checkbox was OFF (default: false), it should become "hidden" active in the new format.

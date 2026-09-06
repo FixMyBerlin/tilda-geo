@@ -69,6 +69,11 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.cx602vbw/#14/52.51622/13.37036',
     bbox: bboxPartOfNorthGermany,
   },
+  highwayAreas: {
+    sourceLayer: 'atlas-highwayAreas-placeholder',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.placeholder/#14/52.51622/13.37036',
+    bbox: bboxPartOfNorthGermany,
+  },
   // boundaries: {
   //   sourceLayer: 'atlas-boundaries-66z5h4',
   //   uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.4u44tl11/#14/52.51622/13.37036',

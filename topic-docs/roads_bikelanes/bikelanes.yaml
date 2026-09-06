@@ -269,6 +269,8 @@ attributes:
     ref: roads.informal
   - key: covered
     ref: roads.covered
+  - key: lit
+    ref: roads.lit
   - key: offset
     format: meter
     purpose: processing

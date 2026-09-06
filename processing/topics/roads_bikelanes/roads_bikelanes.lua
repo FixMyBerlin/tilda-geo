@@ -11,9 +11,15 @@ local roads_bikelanes_bikelanes = require('topics.roads_bikelanes.roads_bikelane
 local roads_bikelanes_roads = require('topics.roads_bikelanes.roads_bikelanes_roads')
 local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
+local is_highway_area = require('topics.roads_bikelanes.highway_areas.is_highway_area')
+local roads_bikelanes_highway_areas = require('topics.roads_bikelanes.roads_bikelanes_highway_areas')
 
 ---@param object table
 function osm2pgsql.process_way(object)
+  if is_highway_area(object) then
+    roads_bikelanes_highway_areas.process_highway_area(object)
+    return
+  end
   if not object.tags.highway then return end
 
   ---@type OsmTags
@@ -51,4 +57,10 @@ function osm2pgsql.process_way(object)
   roads_bikelanes_sidepath_source_paths(object_tags, object_geom)
   roads_bikelanes_bikelanes(context)
   roads_bikelanes_roads(context)
+end
+
+function osm2pgsql.process_relation(object)
+  if is_highway_area(object) then
+    roads_bikelanes_highway_areas.process_highway_area(object)
+  end
 end

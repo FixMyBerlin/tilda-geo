@@ -12,6 +12,7 @@ import {
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
+import { migrateLitCompletenessSubcategories } from '@/server/regions/migrateLitCompletenessConfig.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
@@ -104,10 +105,15 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
 
   return urlConfig.map((category) => {
     const newCategoryId = categoryMigrations[category.id] || category.id
+    const subcategories =
+      category.id === 'lit'
+        ? migrateLitCompletenessSubcategories(category.subcategories)
+        : category.subcategories
+
     return {
       ...category,
       id: newCategoryId as MapDataCategoryParam['id'],
-      subcategories: category.subcategories.map((subcategory) => {
+      subcategories: subcategories.map((subcategory) => {
         const newSubcategoryId = subcategoryMigrations[subcategory.id] || subcategory.id
 
         // MIGRATION: Preserve visibility for subcategories that changed UI from checkbox to dropdown.

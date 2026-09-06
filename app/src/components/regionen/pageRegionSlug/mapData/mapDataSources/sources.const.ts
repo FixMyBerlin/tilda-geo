@@ -13,6 +13,7 @@ type AtlasSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
+  | 'atlas_highwayAreas'
   | 'atlas_presenceStats'
   | 'atlas_landuse'
   | 'atlas_places'
@@ -215,6 +216,30 @@ export const sources: MapDataSource<SourcesId>[] = [
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
+    calculator: { enabled: false },
+  },
+  {
+    id: 'atlas_highwayAreas',
+    tileTables: ['highwayAreas'],
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: SIMPLIFY_MAX_ZOOM,
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+    promoteId: 'id',
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'id',
+      documentedKeys: [
+        'name',
+        'road',
+        'lit__if_present',
+        'composit_surface_smoothness',
+        'area',
+        'description__if_present',
+      ],
+    },
     calculator: { enabled: false },
   },
   {

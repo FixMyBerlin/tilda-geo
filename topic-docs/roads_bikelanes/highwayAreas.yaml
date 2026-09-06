@@ -1,0 +1,49 @@
+title: Daten zu Straßenflächen
+summary: >-
+  **Experimentell, noch nicht stabil.** Attribute und Datenfilter
+  können sich noch ändern.
+sourceIds:
+  - atlas_highwayAreas
+attributes:
+  - key: road
+    ref: roads.road
+  - key: name
+    ref: roads.name
+  - key: area
+    format: square_meter
+    label: Fläche
+    description: Fläche in Quadratmetern, aus der Geometrie.
+  - key: lifecycle
+    ref: roads.lifecycle
+  - key: mapillary_coverage
+    ref: bikelanes.mapillary_coverage
+  - key: mapillary
+    ref: bikelanes.mapillary
+  - key: mapillary_forward
+    ref: bikelanes.mapillary_forward
+  - key: mapillary_backward
+    ref: bikelanes.mapillary_backward
+  - key: mapillary_traffic_sign
+    ref: bikelanes.mapillary_traffic_sign
+  - key: description
+    ref: roads.description
+  - key: operator_type
+    ref: roads.operator_type
+  - key: informal
+    ref: roads.informal
+  - key: covered
+    ref: roads.covered
+  - key: lit
+    ref: roads.lit
+  - key: surface
+    ref: roads.surface
+  - key: surface_source
+    ref: roads.surface_source
+  - key: surface_confidence
+    ref: roads.surface_confidence
+  - key: smoothness
+    ref: roads.smoothness
+  - key: smoothness_source
+    ref: roads.smoothness_source
+  - key: smoothness_confidence
+    ref: roads.smoothness_confidence
