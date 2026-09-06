@@ -3,10 +3,7 @@ import { Reorder, useDragControls } from 'motion/react'
 import { useState } from 'react'
 import { z } from 'zod'
 import { getAllAtlasLayerKeys } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerKeys'
-import {
-  ATLAS_APP_ANCHOR_IDS,
-  type AtlasAppAnchorId,
-} from '@/components/regionen/pageRegionSlug/mapData/types'
+import { ATLAS_APP_ANCHOR_IDS } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { updateMapLayerOrderFn } from '@/server/map-layer-order/map-layer-order.functions'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import type { MapLayerOrderEntry } from '@/server/map-layer-order/queries/getMapLayerOrder.server'
@@ -35,8 +32,19 @@ const CODE_KEY_SET = new Set(CODE_KEYS)
 
 type GroupedState = Record<GroupKey, string[]>
 
-function initGroups(dbEntries: MapLayerOrderEntry[]): GroupedState {
-  const groups = Object.fromEntries(GROUPS.map((g) => [g, [] as string[]])) as GroupedState
+const EMPTY_GROUPED_STATE = {
+  default: [],
+  'atlas-app-beforeid-above-landuse': [],
+  'atlas-app-beforeid-below-road': [],
+  'atlas-app-beforeid-below-roadname': [],
+  'atlas-app-beforeid-group2': [],
+  'atlas-app-beforeid-fallback': [],
+  'atlas-app-beforeid-group1': [],
+  'atlas-app-beforeid-top': [],
+} satisfies GroupedState
+
+function initGroups(dbEntries: MapLayerOrderEntry[]) {
+  const groups: GroupedState = structuredClone(EMPTY_GROUPED_STATE)
   const dbKeys = new Set<string>()
   for (const entry of dbEntries) {
     dbKeys.add(entry.layerKey)
@@ -141,7 +149,7 @@ function LayerOrderEditor({ dbEntries }: { dbEntries: MapLayerOrderEntry[] }) {
           .filter((layerKey) => CODE_KEY_SET.has(layerKey)) // drop stale keys
           .map((layerKey) => ({
             layerKey,
-            beforeId: group === DEFAULT_GROUP ? null : (group as AtlasAppAnchorId),
+            beforeId: group === DEFAULT_GROUP ? null : group,
           })),
       )
       // Guard against destructive saves: dropping many entries (drifted keys) should be

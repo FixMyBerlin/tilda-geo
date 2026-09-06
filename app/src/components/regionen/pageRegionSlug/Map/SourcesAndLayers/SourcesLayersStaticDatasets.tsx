@@ -10,7 +10,7 @@ import {
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { layerVisibility } from '../utils/layerVisibility'
 import { LayerHighlight } from './LayerHighlight'
-import { buildUploadLayerProps, type UploadLayerWithAtlasType } from './utils/buildUploadLayerProps'
+import { buildUploadLayerProps, isUploadStyleLayer } from './utils/buildUploadLayerProps'
 import { createUploadSourceProps, resolveUploadBeforeId } from './utils/uploadSourceLayerUtils'
 
 // Renders user-selectable static datasets controlled by URL parameters.
@@ -76,12 +76,12 @@ export const LayersStaticDatasets = () => {
 
         return (
           <Fragment key={datasetSourceId}>
-            {layers.map((layer) => {
+            {layers.filter(isUploadStyleLayer).map((layer) => {
               const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
               const layerHighlightId = getLayerHighlightId(layerId)
               const beforeId = resolveUploadBeforeId(layer)
               const layerProps = buildUploadLayerProps({
-                layer: layer as UploadLayerWithAtlasType,
+                layer,
                 layerId,
                 sourceId: datasetSourceId,
                 debugLayerStyles,

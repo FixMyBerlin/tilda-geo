@@ -8,6 +8,19 @@ import { wrapFilterWithAll } from './filterUtils/wrapFilterWithAll'
 type UploadLayer = RegionDataset['layers'][number]
 export type UploadLayerWithAtlasType = Extract<UploadLayer, { type: AtlasLayerType }>
 
+const UPLOAD_LAYER_TYPES = [
+  'fill',
+  'line',
+  'circle',
+  'symbol',
+  'heatmap',
+] as const satisfies AtlasLayerType[]
+
+/** Convention: upload configs use only these layer types; filter before buildUploadLayerProps. */
+export function isUploadStyleLayer(layer: UploadLayer): layer is UploadLayerWithAtlasType {
+  return UPLOAD_LAYER_TYPES.includes(layer.type)
+}
+
 type BuildUploadLayerPropsParams = {
   layer: UploadLayerWithAtlasType
   layerId: string

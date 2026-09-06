@@ -7,7 +7,7 @@ import {
   createSourceKeyStaticDatasets,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { isMaskLayer } from '../utils/maskLayerUtils'
-import { buildUploadLayerProps, type UploadLayerWithAtlasType } from './utils/buildUploadLayerProps'
+import { buildUploadLayerProps, isUploadStyleLayer } from './utils/buildUploadLayerProps'
 import { createUploadSourceProps, resolveUploadBeforeId } from './utils/uploadSourceLayerUtils'
 
 // Renders systemLayer datasets that are always active and hidden from UI.
@@ -61,7 +61,7 @@ export const LayersSystemDatasets = () => {
 
         return (
           <Fragment key={datasetSourceId}>
-            {layers.map((layer) => {
+            {layers.filter(isUploadStyleLayer).map((layer) => {
               // Mask layers use hardcoded IDs (without prefix) so they can be added to interactive layers.
               const isMask = isMaskLayer(layer.id)
               const layerId = isMask
@@ -69,7 +69,7 @@ export const LayersSystemDatasets = () => {
                 : createDatasetSourceLayerKey(sourceId, subId ?? undefined, layer.id)
               const beforeId = isMask ? undefined : resolveUploadBeforeId(layer)
               const layerProps = buildUploadLayerProps({
-                layer: layer as UploadLayerWithAtlasType,
+                layer,
                 layerId,
                 sourceId: datasetSourceId,
                 debugLayerStyles,

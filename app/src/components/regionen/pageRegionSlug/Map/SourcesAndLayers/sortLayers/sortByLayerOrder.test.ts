@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { sortByLayerOrder } from './sortByLayerOrder'
 
 type Entry = { layerId: string; label?: string }
-const entry = (layerId: string, label?: string): Entry => ({ layerId, label })
+const entry = (layerId: string, label?: string) => ({ layerId, label }) satisfies Entry
 const getKey = (e: Entry) => e.layerId
 const ids = (entries: Entry[]) => entries.map((e) => e.layerId)
 
