@@ -130,7 +130,7 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
           const hasCompletenessStyle = subcategory.styles.some(
             (style) => style.id === 'completeness',
           )
-          const styles: MapDataCategoryParam['subcategories'][number]['styles'] = [
+          const styles = [
             ...subcategory.styles.map((style) => {
               if (style.id === 'completeness') return { id: style.id, active: true }
               if (style.id === 'hidden' || style.id === 'default' || style.id === 'lit') {
@@ -138,7 +138,7 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
               }
               return { id: style.id, active: style.active }
             }),
-            ...(hasCompletenessStyle ? [] : [{ id: 'completeness', active: true }]),
+            ...(hasCompletenessStyle ? [] : [{ id: 'completeness' as const, active: true }]),
           ]
           return [
             {
