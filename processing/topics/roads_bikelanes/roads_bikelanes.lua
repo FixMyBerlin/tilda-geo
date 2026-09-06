@@ -15,7 +15,8 @@ local roads_bikelanes_highway_areas = require('topics.roads_bikelanes.roads_bike
 
 ---@param object table
 function osm2pgsql.process_way(object)
-  if roads_bikelanes_highway_areas.try_process_way(object) then
+  if object.is_closed and object.tags.highway and object.tags.area == 'yes' then
+    roads_bikelanes_highway_areas.process_highway_area(object)
     return
   end
   if not object.tags.highway then return end
@@ -58,5 +59,7 @@ function osm2pgsql.process_way(object)
 end
 
 function osm2pgsql.process_relation(object)
-  roads_bikelanes_highway_areas.process_relation(object)
+  if object.tags.highway and object.tags.area == 'yes' then
+    roads_bikelanes_highway_areas.process_highway_area(object)
+  end
 end
