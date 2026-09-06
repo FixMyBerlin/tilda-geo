@@ -1,0 +1,65 @@
+title: Daten zu Straßenflächen
+summary: >-
+  **Experimentell, noch nicht stabil.** Schema, Attribute und regionale Verfügbarkeit
+  können sich noch ändern.
+sourceIds:
+  - atlas_highwayAreas
+attributes:
+  - key: road
+    ref: roads.road
+  - key: name
+    ref: roads.name
+  - key: length
+    ref: roads.length
+  - key: lifecycle
+    ref: roads.lifecycle
+  - key: oneway
+    ref: roads.oneway
+  - key: oneway_bicycle
+    ref: roads.oneway_bicycle
+  - key: bridge
+    ref: roads.bridge
+  - key: tunnel
+    ref: roads.tunnel
+  - key: mapillary_coverage
+    ref: bikelanes.mapillary_coverage
+  - key: mapillary
+    ref: bikelanes.mapillary
+  - key: mapillary_forward
+    ref: bikelanes.mapillary_forward
+  - key: mapillary_backward
+    ref: bikelanes.mapillary_backward
+  - key: mapillary_traffic_sign
+    ref: bikelanes.mapillary_traffic_sign
+  - key: traffic_sign
+    ref: roads.traffic_sign
+  - key: description
+    ref: roads.description
+  - key: operator_type
+    ref: roads.operator_type
+  - key: informal
+    ref: roads.informal
+  - key: covered
+    ref: roads.covered
+  - key: lit
+    ref: roads.lit
+  - key: width
+    ref: roads.width
+  - key: width_effective
+    ref: roads.width_effective
+  - key: width_source
+    ref: roads.width_source
+  - key: surface
+    ref: roads.surface
+  - key: surface_source
+    ref: roads.surface_source
+  - key: surface_confidence
+    ref: roads.surface_confidence
+  - key: smoothness
+    ref: roads.smoothness
+  - key: smoothness_source
+    ref: roads.smoothness_source
+  - key: smoothness_confidence
+    ref: roads.smoothness_confidence
+  - key: surface_color
+    ref: roads.surface_color
