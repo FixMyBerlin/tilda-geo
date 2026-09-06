@@ -1,4 +1,5 @@
 describe('highway_areas', function()
+  require('topics.helper.osm2pgsql')
   local highway_areas = require('topics.roads_bikelanes.roads_bikelanes_highway_areas')
   local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
 
