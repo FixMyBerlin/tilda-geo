@@ -12,9 +12,8 @@ import {
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
-import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
-import type { SubcategoryId } from '@/components/regionen/pageRegionSlug/mapData/typeId'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
+import { migrateLitCompletenessSubcategories } from '@/server/regions/migrateLitCompletenessConfig.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
@@ -97,57 +96,25 @@ function ensureAtLeastOneStyleActive(config: ReturnType<typeof mergeCategoriesCo
  * and add 'hidden: true' to preserve the user's intent.
  */
 function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
-  const categoryMigrations = {
+  const categoryMigrations: Record<string, string> = {
     parking: 'parkingLars',
-  } satisfies Partial<Record<MapDataCategoryId, MapDataCategoryId>>
-  const subcategoryMigrations = {
+  }
+  const subcategoryMigrations: Record<string, string> = {
     parking: 'parkingLars',
-  } satisfies Partial<Record<SubcategoryId, SubcategoryId>>
+  }
 
   return urlConfig.map((category) => {
-    const newCategoryId =
-      categoryMigrations[category.id as keyof typeof categoryMigrations] ?? category.id
-    const litCompletenessActive =
-      category.id === 'lit' &&
-      category.subcategories.some(
-        (subcategory) =>
-          subcategory.id === 'lit-completeness' && subcategory.styles.some((style) => style.active),
-      )
+    const newCategoryId = categoryMigrations[category.id] || category.id
+    const subcategories =
+      category.id === 'lit'
+        ? migrateLitCompletenessSubcategories(category.subcategories)
+        : category.subcategories
 
     return {
       ...category,
-      id: newCategoryId,
-      subcategories: category.subcategories.flatMap((subcategory) => {
-        if (subcategory.id === 'lit-completeness') {
-          return [] as MapDataCategoryParam['subcategories']
-        }
-
-        const newSubcategoryId =
-          subcategoryMigrations[subcategory.id as keyof typeof subcategoryMigrations] ??
-          subcategory.id
-
-        if (category.id === 'lit' && subcategory.id === 'lit' && litCompletenessActive) {
-          const hasCompletenessStyle = subcategory.styles.some(
-            (style) => style.id === 'completeness',
-          )
-          const styles = [
-            ...subcategory.styles.map((style) => {
-              if (style.id === 'completeness') return { id: style.id, active: true }
-              if (style.id === 'hidden' || style.id === 'default' || style.id === 'lit') {
-                return { id: style.id, active: false }
-              }
-              return { id: style.id, active: style.active }
-            }),
-            ...(hasCompletenessStyle ? [] : [{ id: 'completeness' as const, active: true }]),
-          ]
-          return [
-            {
-              ...subcategory,
-              id: newSubcategoryId,
-              styles,
-            },
-          ] as MapDataCategoryParam['subcategories']
-        }
+      id: newCategoryId as MapDataCategoryParam['id'],
+      subcategories: subcategories.map((subcategory) => {
+        const newSubcategoryId = subcategoryMigrations[subcategory.id] || subcategory.id
 
         // MIGRATION: Preserve visibility for subcategories that changed UI from checkbox to dropdown.
         // Background: When UI changed from checkbox (old format, e.g., 14ltyea) to dropdown (new format, e.g., 1qldklk),
@@ -157,21 +124,17 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
         const noHiddenStyle = !subcategory.styles.some((s) => s.id === 'hidden')
         const hasDefaultTrue = subcategory.styles.some((s) => s.id === 'default' && s.active)
         if (noHiddenStyle && hasDefaultTrue) {
-          return [
-            {
-              ...subcategory,
-              id: newSubcategoryId,
-              styles: [{ id: 'hidden', active: false }, ...subcategory.styles],
-            },
-          ] as MapDataCategoryParam['subcategories']
-        }
-
-        return [
-          {
+          return {
             ...subcategory,
             id: newSubcategoryId,
-          },
-        ] as MapDataCategoryParam['subcategories']
+            styles: [{ id: 'hidden', active: false }, ...subcategory.styles],
+          }
+        }
+
+        return {
+          ...subcategory,
+          id: newSubcategoryId,
+        }
       }),
     }
   }) as MapDataCategoryParam[]

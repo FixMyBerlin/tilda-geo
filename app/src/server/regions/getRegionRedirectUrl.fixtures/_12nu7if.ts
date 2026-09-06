@@ -1,7 +1,9 @@
 // Legacy RegionConfigTemplate fixture for getRegionRedirectUrl migration tests.
 import type { MapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 
-// Old production lit category: roads `lit` subcategory + separate `lit-completeness` checkbox.
+// Test snapshot of the old production Beleuchtung config: roads `lit` plus a separate
+// `lit-completeness` checkbox. Live URLs still go through getRegionRedirectUrl; this file
+// only feeds the migration tests (checksum 12nu7if).
 export const _12nu7if: MapDataCategoryParam[] = [
   {
     id: 'lit',
