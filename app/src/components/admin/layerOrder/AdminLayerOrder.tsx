@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Reorder, useDragControls } from 'motion/react'
 import { useState } from 'react'
+import { z } from 'zod'
 import { getAllAtlasLayerKeys } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerKeys'
 import {
   ATLAS_APP_ANCHOR_IDS,
@@ -9,11 +10,13 @@ import {
 import { updateMapLayerOrderFn } from '@/server/map-layer-order/map-layer-order.functions'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import type { MapLayerOrderEntry } from '@/server/map-layer-order/queries/getMapLayerOrder.server'
+import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
 
 // Layers without an explicit anchor keep their config/type-based default placement.
 const DEFAULT_GROUP = 'default' as const
 const GROUPS = [DEFAULT_GROUP, ...ATLAS_APP_ANCHOR_IDS] as const
 type GroupKey = (typeof GROUPS)[number]
+const GroupKeySchema = z.enum(GROUPS)
 
 const GROUP_LABELS: Record<GroupKey, string> = {
   default: 'Standard (Platzierung aus Config)',
@@ -39,10 +42,8 @@ function initGroups(dbEntries: MapLayerOrderEntry[]): GroupedState {
     dbKeys.add(entry.layerKey)
     // Stale DB keys (no longer in code) are kept visible so the admin sees the drift;
     // they are dropped on save.
-    const group =
-      entry.beforeId && (ATLAS_APP_ANCHOR_IDS as readonly string[]).includes(entry.beforeId)
-        ? (entry.beforeId as GroupKey)
-        : DEFAULT_GROUP
+    const anchor = AtlasAppAnchorIdSchema.safeParse(entry.beforeId)
+    const group: GroupKey = anchor.success ? anchor.data : DEFAULT_GROUP
     groups[group].push(entry.layerKey)
   }
   // Code keys missing from the DB appear at the end of the default group.
@@ -96,7 +97,10 @@ function LayerRow({
         aria-label="Gruppe wechseln"
         className="shrink-0 rounded border-gray-300 py-0.5 text-xs"
         value={group}
-        onChange={(event) => onMove(layerKey, group, event.target.value as GroupKey)}
+        onChange={(event) => {
+          const parsed = GroupKeySchema.safeParse(event.target.value)
+          if (parsed.success) onMove(layerKey, group, parsed.data)
+        }}
       >
         {GROUPS.map((g) => (
           <option key={g} value={g}>

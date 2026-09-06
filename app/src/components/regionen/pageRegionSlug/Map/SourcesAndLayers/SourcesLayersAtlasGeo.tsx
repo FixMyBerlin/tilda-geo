@@ -8,10 +8,7 @@ import {
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
-import {
-  ATLAS_APP_ANCHOR_IDS,
-  type AtlasAppAnchorId,
-} from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { AtlasAppAnchorId } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import {
   createLayerKeyAtlasGeo,
@@ -19,6 +16,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
+import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { layerVisibility } from '../utils/layerVisibility'
 import { LayerHighlight } from './LayerHighlight'
@@ -104,13 +102,12 @@ export const LayersAtlasGeo = () => {
   // Anchor overrides only apply on the default background (custom raster backgrounds put
   // all data on top), so skip building them otherwise. Unknown anchor ids (e.g. renamed
   // in the style after being saved) are dropped — maplibre would silently not add such layers.
-  const isKnownAnchor = (value: string | null): value is AtlasAppAnchorId =>
-    (ATLAS_APP_ANCHOR_IDS as readonly string[]).includes(value ?? '')
   const beforeIdOverrides = new Map<string, AtlasAppAnchorId>(
     backgroundParam === 'default'
-      ? (dbLayerOrder ?? [])
-          .filter((e) => isKnownAnchor(e.beforeId))
-          .map((e) => [e.layerKey, e.beforeId as AtlasAppAnchorId])
+      ? (dbLayerOrder ?? []).flatMap((e) => {
+          const anchor = AtlasAppAnchorIdSchema.safeParse(e.beforeId)
+          return anchor.success ? [[e.layerKey, anchor.data] as const] : []
+        })
       : [],
   )
 
