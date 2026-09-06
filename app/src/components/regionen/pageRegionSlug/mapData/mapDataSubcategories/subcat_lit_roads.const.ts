@@ -1,7 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import {
-  litColors,
   litLineCompletenessLayers,
   litLineLayers,
   litLineLegends,
@@ -50,12 +49,12 @@ export const subcat_lit_roads: FileMapDataSubcategory = {
       id: 'completeness',
       name: 'Vollständigkeit',
       layers: mapboxStyleLayers({
-        layers: litLineCompletenessLayers({ missingColor: litColors.missingGeneral }),
+        layers: litLineCompletenessLayers(),
         source,
         sourceLayer,
         idPrefix: sourceLayer,
       }),
-      legends: [...litLineLegends, litMissingDataLegend(litColors.missingGeneral, 'line')],
+      legends: [...litLineLegends, litMissingDataLegend],
     },
   ],
 }

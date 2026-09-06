@@ -9,25 +9,18 @@ export const litColors = {
   missingRadinfra: '#fda5e4',
 } as const
 
-type LitCompletenessLayerOptions = {
-  missingColor: string
-  dashed?: boolean
-}
+const litSpecialLegendDesc = [
+  'Alles außer `lit=yes` / `lit=no`, z.B. `automatic`, `interval`, zeitliche Angaben.',
+]
 
 const lineWidth = ['interpolate', ['linear'], ['zoom'], 12, 3, 14, 5, 18, 12] as const
-
 const lineOpacityLit = ['interpolate', ['linear'], ['zoom'], 13, 1, 18, 0.6] as const
 const lineOpacityDim = ['interpolate', ['linear'], ['zoom'], 13, 0.8, 18, 0.6] as const
-
 const missingLineWidth = ['interpolate', ['linear'], ['zoom'], 12, 1, 14, 1.5, 18, 3] as const
-
 const hitareaLineWidth = ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12] as const
-
 const radinfraMissingLineWidth = ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4] as const
-
 const areaFillOpacity = ['interpolate', ['linear'], ['zoom'], 11, 0.35, 16, 0.5] as const
-
-const LIT_MIN_ZOOM = 9
+const areaOutlineWidth = ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5] as const
 
 export const litLineLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
@@ -38,6 +31,7 @@ export const litLineLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'lit-special',
     name: 'Beleuchtet (Sonderfälle)',
+    desc: litSpecialLegendDesc,
     style: { type: 'line', color: litColors.special },
   },
   {
@@ -47,18 +41,7 @@ export const litLineLegends: FileMapDataSubcategoryStyleLegend[] = [
   },
 ]
 
-export const litLineLitOnlyLegends: FileMapDataSubcategoryStyleLegend[] = [
-  {
-    id: 'lit',
-    name: 'Beleuchtet',
-    style: { type: 'line', color: litColors.yes },
-  },
-  {
-    id: 'lit-special',
-    name: 'Beleuchtet (Sonderfälle)',
-    style: { type: 'line', color: litColors.special },
-  },
-]
+export const litLineLitOnlyLegends = litLineLegends.filter((legend) => legend.id !== 'unlit')
 
 export const litAreaLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
@@ -69,6 +52,7 @@ export const litAreaLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
     id: 'lit-special',
     name: 'Beleuchtet (Sonderfälle)',
+    desc: litSpecialLegendDesc,
     style: { type: 'fill', color: litColors.special },
   },
   {
@@ -78,51 +62,37 @@ export const litAreaLegends: FileMapDataSubcategoryStyleLegend[] = [
   },
 ]
 
-export const litAreaLitOnlyLegends: FileMapDataSubcategoryStyleLegend[] = [
-  {
-    id: 'lit',
-    name: 'Beleuchtet',
-    style: { type: 'fill', color: litColors.yes },
-  },
-  {
-    id: 'lit-special',
-    name: 'Beleuchtet (Sonderfälle)',
-    style: { type: 'fill', color: litColors.special },
-  },
-]
+export const litAreaLitOnlyLegends = litAreaLegends.filter((legend) => legend.id !== 'unlit')
 
-export const litMissingDataLegend = (missingColor: string, geometry: 'line', dashed?: boolean) =>
-  ({
-    id: 'missing',
-    name: 'Daten fehlen',
-    style: {
-      type: 'line',
-      color: missingColor,
-      ...(dashed ? { dasharray: [3, 2], width: 2 } : {}),
-    },
-  }) satisfies FileMapDataSubcategoryStyleLegend
+export const litMissingDataLegend = {
+  id: 'missing',
+  name: 'Daten fehlen',
+  style: { type: 'line', color: litColors.missingGeneral },
+} satisfies FileMapDataSubcategoryStyleLegend
 
-export const litMissingAreaDataLegend = (missingColor: string) =>
-  ({
-    id: 'missing',
-    name: 'Daten fehlen',
-    style: {
-      type: 'fill',
-      color: missingColor,
-    },
-  }) satisfies FileMapDataSubcategoryStyleLegend
+export const litMissingDataLegendRadinfra = {
+  id: 'missing',
+  name: 'Daten fehlen',
+  style: { type: 'line', color: litColors.missingRadinfra, dasharray: [3, 2], width: 2 },
+} satisfies FileMapDataSubcategoryStyleLegend
 
-export const radinfraLitCompletenessOptions = {
-  missingColor: litColors.missingRadinfra,
-  dashed: true,
-} satisfies LitCompletenessLayerOptions
+export const litMissingAreaDataLegend = {
+  id: 'missing',
+  name: 'Daten fehlen',
+  style: { type: 'fill', color: litColors.missingGeneral },
+} satisfies FileMapDataSubcategoryStyleLegend
+
+export const litMissingAreaDataLegendRadinfra = {
+  id: 'missing',
+  name: 'Daten fehlen',
+  style: { type: 'fill', color: litColors.missingRadinfra },
+} satisfies FileMapDataSubcategoryStyleLegend
 
 export function litLineLayers() {
   return [
     {
       id: 'lit-special-line',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['special'], true, false],
       layout: { 'line-cap': 'round' },
       paint: {
@@ -135,7 +105,6 @@ export function litLineLayers() {
     {
       id: 'lit-no-line',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['no'], true, false],
       layout: { 'line-cap': 'round' },
       paint: {
@@ -148,7 +117,6 @@ export function litLineLayers() {
     {
       id: 'lit-yes-line',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['yes'], true, false],
       layout: { 'line-cap': 'round' },
       paint: {
@@ -161,7 +129,6 @@ export function litLineLayers() {
     {
       id: 'hitarea-lit',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['has', 'lit'],
       layout: { 'line-cap': 'round' },
       paint: {
@@ -173,24 +140,19 @@ export function litLineLayers() {
   ]
 }
 
-function litLineMissingLayers({ missingColor, dashed = false }: LitCompletenessLayerOptions) {
-  const missingPaint: Record<string, unknown> = {
-    'line-color': missingColor,
-    'line-opacity': dashed ? 1 : 0.7,
-    'line-width': dashed ? radinfraMissingLineWidth : missingLineWidth,
-  }
-  if (dashed) {
-    missingPaint['line-dasharray'] = [3, 1]
-  }
-
+function litLineMissingLayers(missingColor: string, dashed: boolean) {
   const layers: MapboxStyleLayer[] = [
     {
       id: 'lit-missing',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['!', ['has', 'lit']],
       layout: dashed ? { 'line-cap': 'round', 'line-join': 'round' } : undefined,
-      paint: missingPaint,
+      paint: {
+        'line-color': missingColor,
+        'line-opacity': dashed ? 1 : 0.7,
+        'line-width': dashed ? radinfraMissingLineWidth : missingLineWidth,
+        ...(dashed ? { 'line-dasharray': [3, 1] } : {}),
+      },
     },
   ]
 
@@ -198,7 +160,6 @@ function litLineMissingLayers({ missingColor, dashed = false }: LitCompletenessL
     layers.push({
       id: 'hitarea-lit-missing',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['!', ['has', 'lit']],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
@@ -213,8 +174,12 @@ function litLineMissingLayers({ missingColor, dashed = false }: LitCompletenessL
   return layers
 }
 
-export function litLineCompletenessLayers(options: LitCompletenessLayerOptions) {
-  return [...litLineLayers(), ...litLineMissingLayers(options)]
+export function litLineCompletenessLayers() {
+  return [...litLineLayers(), ...litLineMissingLayers(litColors.missingGeneral, false)]
+}
+
+export function litLineCompletenessLayersRadinfra() {
+  return [...litLineLayers(), ...litLineMissingLayers(litColors.missingRadinfra, true)]
 }
 
 export function litAreaLayers() {
@@ -222,7 +187,6 @@ export function litAreaLayers() {
     {
       id: 'lit-special-fill',
       type: 'fill',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['special'], true, false],
       paint: {
         'fill-color': litColors.special,
@@ -232,7 +196,6 @@ export function litAreaLayers() {
     {
       id: 'lit-no-fill',
       type: 'fill',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['no'], true, false],
       paint: {
         'fill-color': litColors.no,
@@ -242,7 +205,6 @@ export function litAreaLayers() {
     {
       id: 'lit-yes-fill',
       type: 'fill',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['yes'], true, false],
       paint: {
         'fill-color': litColors.yes,
@@ -252,40 +214,36 @@ export function litAreaLayers() {
     {
       id: 'lit-special-outline',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['special'], true, false],
       paint: {
         'line-color': litColors.special,
         'line-opacity': lineOpacityDim,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5],
+        'line-width': areaOutlineWidth,
       },
     },
     {
       id: 'lit-no-outline',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['no'], true, false],
       paint: {
         'line-color': litColors.no,
         'line-opacity': lineOpacityDim,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5],
+        'line-width': areaOutlineWidth,
       },
     },
     {
       id: 'lit-yes-outline',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['match', ['get', 'lit'], ['yes'], true, false],
       paint: {
         'line-color': litColors.yes,
         'line-opacity': lineOpacityLit,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5],
+        'line-width': areaOutlineWidth,
       },
     },
     {
       id: 'hitarea-lit-area',
       type: 'fill',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['has', 'lit'],
       paint: {
         'fill-color': '#d814ff',
@@ -295,21 +253,11 @@ export function litAreaLayers() {
   ]
 }
 
-function litAreaMissingLayers({ missingColor, dashed = false }: LitCompletenessLayerOptions) {
-  const outlinePaint: Record<string, unknown> = {
-    'line-color': missingColor,
-    'line-opacity': 0.85,
-    'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5],
-  }
-  if (dashed) {
-    outlinePaint['line-dasharray'] = [3, 1]
-  }
-
+function litAreaMissingLayers(missingColor: string, dashed: boolean) {
   const layers: MapboxStyleLayer[] = [
     {
       id: 'lit-missing-fill',
       type: 'fill',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['!', ['has', 'lit']],
       paint: {
         'fill-color': missingColor,
@@ -319,9 +267,13 @@ function litAreaMissingLayers({ missingColor, dashed = false }: LitCompletenessL
     {
       id: 'lit-missing-outline',
       type: 'line',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['!', ['has', 'lit']],
-      paint: outlinePaint,
+      paint: {
+        'line-color': missingColor,
+        'line-opacity': 0.85,
+        'line-width': areaOutlineWidth,
+        ...(dashed ? { 'line-dasharray': [3, 1] } : {}),
+      },
     },
   ]
 
@@ -329,7 +281,6 @@ function litAreaMissingLayers({ missingColor, dashed = false }: LitCompletenessL
     layers.push({
       id: 'hitarea-lit-missing-area',
       type: 'fill',
-      minzoom: LIT_MIN_ZOOM,
       filter: ['!', ['has', 'lit']],
       paint: {
         'fill-color': 'rgb(216, 20, 255)',
@@ -341,6 +292,10 @@ function litAreaMissingLayers({ missingColor, dashed = false }: LitCompletenessL
   return layers
 }
 
-export function litAreaCompletenessLayers(options: LitCompletenessLayerOptions) {
-  return [...litAreaLayers(), ...litAreaMissingLayers(options)]
+export function litAreaCompletenessLayers() {
+  return [...litAreaLayers(), ...litAreaMissingLayers(litColors.missingGeneral, false)]
+}
+
+export function litAreaCompletenessLayersRadinfra() {
+  return [...litAreaLayers(), ...litAreaMissingLayers(litColors.missingRadinfra, true)]
 }

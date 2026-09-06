@@ -1,9 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import {
-  litAreaCompletenessLayers,
+  litAreaCompletenessLayersRadinfra,
   litAreaLegends,
-  litMissingAreaDataLegend,
-  radinfraLitCompletenessOptions,
+  litMissingAreaDataLegendRadinfra,
 } from './manualStyles/lit'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
@@ -13,10 +12,7 @@ const sourceLayer = 'highwayAreas'
 export type SubcatRadinfraLitHighwayAreasId = typeof subcatId
 export type SubcatRadinfraLitHighwayAreasStyleIds = 'default'
 
-const completenessLegends = [
-  ...litAreaLegends,
-  litMissingAreaDataLegend(radinfraLitCompletenessOptions.missingColor),
-]
+const completenessLegends = [...litAreaLegends, litMissingAreaDataLegendRadinfra]
 
 export const subcat_radinfra_lit_highway_areas: FileMapDataSubcategory = {
   id: subcatId,
@@ -28,7 +24,7 @@ export const subcat_radinfra_lit_highway_areas: FileMapDataSubcategory = {
       id: 'default',
       name: 'Flächen Beleuchtung',
       layers: mapboxStyleLayers({
-        layers: litAreaCompletenessLayers(radinfraLitCompletenessOptions),
+        layers: litAreaCompletenessLayersRadinfra(),
         source,
         sourceLayer,
         idPrefix: sourceLayer,

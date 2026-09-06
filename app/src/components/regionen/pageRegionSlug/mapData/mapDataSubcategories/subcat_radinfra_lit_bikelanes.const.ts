@@ -1,9 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import {
-  litLineCompletenessLayers,
+  litLineCompletenessLayersRadinfra,
   litLineLegends,
-  litMissingDataLegend,
-  radinfraLitCompletenessOptions,
+  litMissingDataLegendRadinfra,
 } from './manualStyles/lit'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
@@ -13,10 +12,7 @@ const sourceLayer = 'bikelanes'
 export type SubcatRadinfraLitBikelanesId = typeof subcatId
 export type SubcatRadinfraLitBikelanesStyleIds = 'default'
 
-const completenessLegends = [
-  ...litLineLegends,
-  litMissingDataLegend(radinfraLitCompletenessOptions.missingColor, 'line', true),
-]
+const completenessLegends = [...litLineLegends, litMissingDataLegendRadinfra]
 
 export const subcat_radinfra_lit_bikelanes: FileMapDataSubcategory = {
   id: subcatId,
@@ -29,7 +25,7 @@ export const subcat_radinfra_lit_bikelanes: FileMapDataSubcategory = {
       id: 'default',
       name: 'RVA Beleuchtung',
       layers: mapboxStyleLayers({
-        layers: litLineCompletenessLayers(radinfraLitCompletenessOptions),
+        layers: litLineCompletenessLayersRadinfra(),
         source,
         sourceLayer,
         idPrefix: sourceLayer,

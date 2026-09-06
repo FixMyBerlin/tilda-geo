@@ -5,7 +5,6 @@ import {
   litAreaLayers,
   litAreaLegends,
   litAreaLitOnlyLegends,
-  litColors,
   litMissingAreaDataLegend,
 } from './manualStyles/lit'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
@@ -50,12 +49,12 @@ export const subcat_lit_highway_areas: FileMapDataSubcategory = {
       id: 'completeness',
       name: 'Vollständigkeit',
       layers: mapboxStyleLayers({
-        layers: litAreaCompletenessLayers({ missingColor: litColors.missingGeneral }),
+        layers: litAreaCompletenessLayers(),
         source,
         sourceLayer,
         idPrefix: sourceLayer,
       }),
-      legends: [...litAreaLegends, litMissingAreaDataLegend(litColors.missingGeneral)],
+      legends: [...litAreaLegends, litMissingAreaDataLegend],
     },
   ],
 }
