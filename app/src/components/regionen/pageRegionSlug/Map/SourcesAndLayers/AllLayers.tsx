@@ -14,8 +14,8 @@ import { LayersSystemDatasets } from './SourcesLayersSystemDatasets'
 // Two ordering mechanisms:
 // 1. `beforeId` splices each layer into the basemap at an anchor layer (groups).
 // 2. Within a beforeId group, the mount order below defines the stacking (bottom → top).
-//    Atlas-Geo layers are additionally sorted by the admin-managed DB order (fallback:
-//    `sortLayers/atlasLayerOrder.const.ts`).
+//    Atlas-Geo layers are additionally sorted by the admin-managed DB order (empty table:
+//    preserve JSX config order).
 // Layers toggle via `layout.visibility`, never mount/unmount, so this order stays stable.
 //
 // BY DESIGN (see LAYER_SORTING_REQUIREMENTS.md): only Atlas-Geo layers are freely sortable.

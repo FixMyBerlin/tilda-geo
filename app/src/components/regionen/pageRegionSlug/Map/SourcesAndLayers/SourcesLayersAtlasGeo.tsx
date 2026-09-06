@@ -20,7 +20,6 @@ import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { layerVisibility } from '../utils/layerVisibility'
 import { LayerHighlight } from './LayerHighlight'
-import { atlasLayerOrder } from './sortLayers/atlasLayerOrder.const'
 import { sortByLayerOrder } from './sortLayers/sortByLayerOrder'
 import { buildAtlasLayerProps, isAtlasStyleLayer } from './utils/buildAtlasLayerProps'
 
@@ -89,16 +88,16 @@ export const LayersAtlasGeo = () => {
   const { backgroundParam } = useBackgroundParam()
   // Admin-managed global order (see /admin/layer-order). Layers must mount ONCE in their
   // final order (mount order = order within a beforeId group), so we wait for this query
-  // before rendering any layer. On error we fall back to the code default below.
+  // before rendering any layer.
   const { data: dbLayerOrder, isPending: layerOrderPending } = useQuery(mapLayerOrderQueryOptions())
 
   if (!categoriesConfig?.length) return null
   if (layerOrderPending) return null
 
-  // DB order wins when present; the (currently empty) code list is the fallback.
+  // DB order when the table has rows; otherwise [] so sortByLayerOrder keeps JSX config order.
   // NOTE: A changed DB order applies on the next page load — layers are deliberately
   // not remounted mid-session (staleTime: Infinity).
-  const orderedKeys = dbLayerOrder?.length ? dbLayerOrder.map((e) => e.layerKey) : atlasLayerOrder
+  const orderedKeys = dbLayerOrder?.length ? dbLayerOrder.map((e) => e.layerKey) : []
   // Anchor overrides only apply on the default background (custom raster backgrounds put
   // all data on top), so skip building them otherwise. Unknown anchor ids (e.g. renamed
   // in the style after being saved) are dropped — maplibre would silently not add such layers.
