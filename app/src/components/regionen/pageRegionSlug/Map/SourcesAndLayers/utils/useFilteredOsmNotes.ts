@@ -1,10 +1,17 @@
 import { featureCollection } from '@turf/turf'
-import { useOsmNotesFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import { useOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import type { z } from 'zod'
+import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
+import type { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 
-export const useFilteredOsmNotes = () => {
-  const { osmNotesFilterParam: filter } = useOsmFilterParam()
-  const osmNotesFeatureCollection = useOsmNotesFeatures()
+type NotesFilter = z.infer<typeof zodInternalNotesFilterParam>
+
+/**
+ * OSM notes from the Query cache, optionally filtered. The filter is passed in (owned by the notes
+ * mode); the map overlay on other modes does not load OSM notes.
+ */
+export const useFilteredOsmNotes = (filter?: NotesFilter | null) => {
+  const { data } = useOsmNotesQuery()
+  const osmNotesFeatureCollection = data ?? featureCollection([])
 
   // Filter data
   let filteredOsmNotes = osmNotesFeatureCollection.features
