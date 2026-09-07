@@ -10,9 +10,14 @@ local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 local highway_areas_table = require('topics.roads_bikelanes.roads_bikelanes_tables').highway_areas_table
+local is_highway_area = require('topics.roads_bikelanes.highway_areas.is_highway_area')
 
 ---@param object table
 local function process_highway_area(object)
+  if not is_highway_area(object) then
+    return
+  end
+
   ---@type OsmTags
   local object_tags = object.tags
   transform_lifecycle_tags(object_tags)
@@ -48,6 +53,4 @@ local function process_highway_area(object)
   })
 end
 
-return {
-  process_highway_area = process_highway_area,
-}
+return process_highway_area
