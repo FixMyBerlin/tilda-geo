@@ -12,7 +12,7 @@ export const QaDecisionData = ({ decisionData }: Props) => {
   }
 
   return (
-    <div className="prose prose-sm mb-3 rounded-lg bg-gray-50 p-3">
+    <div className="rounded-lg bg-gray-50 p-3 text-gray-700">
       <p>
         Aktuell:{' '}
         <strong className="font-semibold">{formatNumber(decisionData.currentCount)}</strong> —{' '}
