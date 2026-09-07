@@ -18,7 +18,7 @@ Each environment restores the same S3 `data.dump` into Postgres `data.<table>`. 
 
 If processing SQL reads this table for map layers, run processing afterwards to update the user facing data.
 
-`bun run data-schema-pull` and `bun run seed` copy `spec.yaml` onto this machine. Postgres `data.*` is filled by Import (Admin UI or MCP) above.
+`bun run data-schema-pull` and `bun run seed` copy `spec.yaml` onto this machine. Postgres `data.*` is filled by Import (Admin UI or MCP) above. `bun run db-pull` restores the prisma schema only; it does not fill `data.*`.
 
 ## New or updated data
 

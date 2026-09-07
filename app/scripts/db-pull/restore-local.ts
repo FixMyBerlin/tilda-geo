@@ -14,6 +14,7 @@ import {
   parseCliArgs,
   POSTGRES_CLI_IMAGE,
   PRE_RESTORE_SQL_PATH,
+  resolveSchemaArg,
   toDockerNetworkUrl,
 } from './db-helpers'
 import { sanitizePrismaRestore } from './sanitize-prisma-restore'
@@ -24,17 +25,18 @@ function printHelp() {
 Restore a schema-scoped SQL dump into the local development database only.
 
 Usage:
-  bun scripts/db-pull/restore-local.ts [--schema prisma|data] [--source production|staging]
+  bun scripts/db-pull/restore-local.ts [--schema ${ALLOWED_SCHEMAS.join('|')}] [--source production|staging]
 
 Examples:
   bun scripts/db-pull/restore-local.ts
-  bun scripts/db-pull/restore-local.ts --schema data --source staging
+  bun scripts/db-pull/restore-local.ts --source staging
 
 Notes:
   - Allowed schemas: ${ALLOWED_SCHEMAS.join(', ')}
   - Allowed dump sources: ${ALLOWED_SOURCES.join(', ')}
-  - When --schema / --source are omitted in a TTY, interactive prompts are shown.
-  - In non-interactive mode, pass both --schema and --source explicitly.
+  - Schema is prompted only when more than one is allowed.
+  - When --source is omitted in a TTY, an interactive prompt is shown.
+  - In non-interactive mode, pass --source explicitly.
   - Uses Dockerized psql (${POSTGRES_CLI_IMAGE}) to avoid local client version issues.
 `)
 }
@@ -46,48 +48,37 @@ async function main() {
     return
   }
 
-  let schema = schemaArg
   let source = sourceArg
+  const schema = await resolveSchemaArg(schemaArg)
+  if (schema === null) {
+    p.cancel('Cancelled.')
+    return
+  }
 
-  if (!schema || !source) {
+  if (!source) {
     if (!process.stdin.isTTY) {
       throw new Error(
-        'Missing required args in non-interactive mode. Pass --schema <prisma|data> and --source <production|staging>.',
+        'Missing required arg in non-interactive mode. Pass --source <production|staging>.',
       )
     }
 
     printHelp()
     p.intro('db-restore')
 
-    if (!schema) {
-      const selected = await p.select({
-        message: 'Select schema to restore',
-        initialValue: 'prisma',
-        options: ALLOWED_SCHEMAS.map((value) => ({ value, label: value })),
-      })
-      if (p.isCancel(selected)) {
-        p.cancel('Cancelled.')
-        return
-      }
-      schema = z.enum(ALLOWED_SCHEMAS).parse(selected)
+    const selected = await p.select({
+      message: 'Select source dump',
+      initialValue: 'production',
+      options: ALLOWED_SOURCES.map((value) => ({ value, label: value })),
+    })
+    if (p.isCancel(selected)) {
+      p.cancel('Cancelled.')
+      return
     }
-
-    if (!source) {
-      const selected = await p.select({
-        message: 'Select source dump',
-        initialValue: 'production',
-        options: ALLOWED_SOURCES.map((value) => ({ value, label: value })),
-      })
-      if (p.isCancel(selected)) {
-        p.cancel('Cancelled.')
-        return
-      }
-      source = z.enum(ALLOWED_SOURCES).parse(selected)
-    }
+    source = z.enum(ALLOWED_SOURCES).parse(selected)
   }
 
-  if (!schema || !source) {
-    throw new Error('Missing required schema/source after argument resolution.')
+  if (!source) {
+    throw new Error('Missing required source after argument resolution.')
   }
 
   const dumpPath = getDumpFilePath(source, schema)
