@@ -44,6 +44,37 @@ export const usePlanningVariantParam = () => {
 
 export const usePlanningRunParam = () => usePlanningSearchParam(searchParamsRegistry.planningRun)
 
+type PlanningSelection = {
+  area: number | null
+  variant: number | null
+  run: number | null
+  /** When set, also writes `planning` in the same navigation (leave-mode must not race). */
+  planning?: boolean
+}
+
+/** Search patch for one atomic planningArea + variant + run (+ optional mode) write. */
+export const planningSelectionSearch = (selection: PlanningSelection) => ({
+  [searchParamsRegistry.planningArea]: selection.area === null ? undefined : selection.area,
+  [searchParamsRegistry.planningVariant]:
+    selection.variant === null ? undefined : selection.variant,
+  [searchParamsRegistry.planningScenario]: undefined,
+  [searchParamsRegistry.planningRun]: selection.run === null ? undefined : selection.run,
+  ...(selection.planning === undefined
+    ? {}
+    : { [searchParamsRegistry.planning]: selection.planning ? true : undefined }),
+})
+
+/**
+ * Write planningArea + planningVariant + planningRun in one navigation so map
+ * overlays (hexagon tiles) and the dropdown stay in sync across create/delete/switch.
+ */
+export const useSetPlanningSelection = () => {
+  const { updateSearch } = useRegionSearchNavigation()
+  return (selection: PlanningSelection) => {
+    updateSearch(planningSelectionSearch(selection), { replace: true })
+  }
+}
+
 export const usePlanningScoreParam = () =>
   usePlanningSearchParam(searchParamsRegistry.planningScore)
 

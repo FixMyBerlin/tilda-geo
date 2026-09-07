@@ -23,6 +23,7 @@ from psycopg.types.json import Jsonb
 from shapely.geometry import shape
 
 import db
+from flaechenfinder.carriageways import compute_carriageway_areas
 from flaechenfinder.cir_sources import resolve_source
 from flaechenfinder.config import use_case_from_dict
 from flaechenfinder.dem import DEMAdapter
@@ -33,9 +34,9 @@ from flaechenfinder.scorer import (
     aggregate_hexagons,
     run_flaechenfinder,
 )
-from flaechenfinder.carriageways import compute_carriageway_areas
 from flaechenfinder.tilda import TildaLoader
 from flaechenfinder.vegetation import compute_vegetation_areas
+from merge_factor_config import merge_factor_config as _merge_factor_config
 from results import write_results
 
 CHANNEL = "planning_jobs"
@@ -137,11 +138,15 @@ def requeue_stale(conn: psycopg.Connection):
 
 
 def _load_variant_config(conn, variant_id: int):
-    """Lädt Variante + Planungsgebiet und merged zu einem flachen factorConfig-Dict."""
+    """Lädt Variante + Planungsgebiet und merged zu einem flachen factorConfig-Dict.
+
+    Der Merge (`_merge_factor_config`) ist der Spiegel von `mergeFactorConfig.ts`, damit
+    Snapshot und Scoring dieselbe Sättigung sehen wie die UI (Zensus-Vorschlag bzw. 30).
+    """
     with conn.cursor() as cur:
         cur.execute(
             """SELECT v."factorConfig", a."studyArea", a."userGeojson", a."userGeojsonMode",
-                      a."useCase", a."areaSizeM2"
+                      a."useCase", a."areaSizeM2", a."censusSaettigungEw", a."censusEwPerHa"
                FROM prisma."PlanningVariant" v
                JOIN prisma."PlanningArea" a ON a.id = v."areaId"
                WHERE v.id = %s""",
@@ -150,16 +155,28 @@ def _load_variant_config(conn, variant_id: int):
         row = cur.fetchone()
     if not row:
         raise ValueError(f"Variant {variant_id} nicht gefunden")
-    factor_config, study_area, user_geojson, user_geojson_mode, use_case, area_size_m2 = row
-    cfg = dict(factor_config)
-    cfg["study_area"] = study_area
-    cfg["use_case"] = use_case
-    cfg["area_size_m2"] = area_size_m2
-    if user_geojson is not None:
-        cfg["user_geojson"] = user_geojson
-    if user_geojson_mode is not None:
-        cfg["user_geojson_mode"] = user_geojson_mode
-    return cfg
+    (
+        factor_config,
+        study_area,
+        user_geojson,
+        user_geojson_mode,
+        use_case,
+        area_size_m2,
+        census_saettigung_ew,
+        census_ew_per_ha,
+    ) = row
+    return _merge_factor_config(
+        dict(factor_config),
+        {
+            "studyArea": study_area,
+            "userGeojson": user_geojson,
+            "userGeojsonMode": user_geojson_mode,
+            "useCase": use_case,
+            "areaSizeM2": area_size_m2,
+            "censusSaettigungEw": census_saettigung_ew,
+            "censusEwPerHa": census_ew_per_ha,
+        },
+    )
 
 
 def _create_run(conn, variant_id: int, snapshot: dict) -> int:

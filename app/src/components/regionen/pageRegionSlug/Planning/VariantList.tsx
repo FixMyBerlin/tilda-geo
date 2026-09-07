@@ -1,4 +1,5 @@
-import { EllipsisVerticalIcon } from '@heroicons/react/20/solid'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
+import { EllipsisVerticalIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { formatDate } from '@/components/shared/date/formatDate'
@@ -14,8 +15,8 @@ import {
 } from '@/server/planning/planningQueryOptions'
 import {
   usePlanningAreaParam,
-  usePlanningRunParam,
   usePlanningVariantParam,
+  useSetPlanningSelection,
 } from '../hooks/useQueryState/usePlanningParams'
 import { DEFAULT_FACTOR_TEMPLATE } from './planningDefaults'
 import { Spinner } from './Spinner'
@@ -28,9 +29,22 @@ type VariantSummary = {
   runs: { hexCount: number | null; stale: boolean; status: string; createdAt: string | Date }[]
 }
 
+/** Wie `hasCompleteRun` im Detail-Panel — nur abgeschlossene Läufe können „veraltet“ sein. */
+const hasStaleCompleteRun = (runs: VariantSummary['runs']) =>
+  runs[0]?.status === 'COMPLETE' && runs[0].stale === true
+
 const StatusIcon = ({ variant }: { variant: VariantSummary }) => {
   const jobStatus = variant.jobs[0]?.status
   if (jobStatus === 'QUEUED' || jobStatus === 'RUNNING') return <Spinner />
+  if (hasStaleCompleteRun(variant.runs))
+    return (
+      <span title="Ergebnis veraltet — neu berechnen">
+        <ExclamationTriangleIcon
+          className="inline-block size-3.5 text-amber-600"
+          aria-hidden="true"
+        />
+      </span>
+    )
   if (variant.currentRunId != null)
     return (
       <span className="font-bold text-green-600" title="Berechnung abgeschlossen">
@@ -114,7 +128,6 @@ const VariantMenu = ({
   onRename: () => void
 }) => {
   const queryClient = useQueryClient()
-  const [open, setOpen] = useState(false)
 
   const duplicateMutation = useMutation({
     mutationFn: () => duplicatePlanningVariantFn({ data: { variantId: variant.id } }),
@@ -122,7 +135,6 @@ const VariantMenu = ({
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
       onDuplicated(created.id)
-      setOpen(false)
     },
   })
 
@@ -131,67 +143,71 @@ const VariantMenu = ({
     onSuccess: () => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       onDeleted()
-      setOpen(false)
     },
   })
 
   return (
-    <div className="relative" onClick={(e) => e.stopPropagation()}>
-      <button
+    <Menu as="div" className="relative" onClick={(e) => e.stopPropagation()}>
+      <MenuButton
         type="button"
-        onClick={() => setOpen((v) => !v)}
         className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
       >
         <EllipsisVerticalIcon className="size-4" />
-      </button>
-      {open && (
-        <ul className="absolute top-full right-0 z-10 mt-0.5 w-36 rounded border border-gray-200 bg-white py-0.5 text-xs shadow-lg">
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false)
-                onRename()
-              }}
-              className="block w-full px-2 py-1 text-left hover:bg-gray-100"
-            >
-              Umbenennen
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              onClick={() => duplicateMutation.mutate()}
-              disabled={duplicateMutation.isPending}
-              className="block w-full px-2 py-1 text-left hover:bg-gray-100"
-            >
-              Duplizieren
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm('Variante löschen?')) deleteMutation.mutate()
-              }}
-              className="block w-full px-2 py-1 text-left text-red-600 hover:bg-red-50"
-            >
-              Löschen
-            </button>
-          </li>
-        </ul>
-      )}
-    </div>
+      </MenuButton>
+      <MenuItems
+        anchor="bottom end"
+        className="z-50 mt-0.5 w-36 rounded border border-gray-200 bg-white py-0.5 text-xs shadow-lg outline-none"
+      >
+        <MenuItem>
+          <button
+            type="button"
+            onClick={() => onRename()}
+            className="block w-full px-2 py-1 text-left data-focus:bg-gray-100"
+          >
+            Umbenennen
+          </button>
+        </MenuItem>
+        <MenuItem>
+          <button
+            type="button"
+            onClick={() => duplicateMutation.mutate()}
+            disabled={duplicateMutation.isPending}
+            className="block w-full px-2 py-1 text-left disabled:opacity-50 data-focus:bg-gray-100"
+          >
+            Duplizieren
+          </button>
+        </MenuItem>
+        <MenuItem>
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Variante löschen?')) deleteMutation.mutate()
+            }}
+            className="block w-full px-2 py-1 text-left text-red-600 data-focus:bg-red-50"
+          >
+            Löschen
+          </button>
+        </MenuItem>
+      </MenuItems>
+    </Menu>
   )
 }
 
 /** A/B variant switcher for the active planungsgebiet. */
 export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
   const [activeArea] = usePlanningAreaParam()
-  const [activeVariant, setActiveVariant] = usePlanningVariantParam()
-  const [, setRun] = usePlanningRunParam()
+  const [activeVariant] = usePlanningVariantParam()
+  const setPlanningSelection = useSetPlanningSelection()
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const queryClient = useQueryClient()
+
+  const selectVariant = (variantId: number | null, runId: number | null) => {
+    setPlanningSelection({
+      area: activeArea ?? null,
+      variant: variantId,
+      run: runId,
+    })
+  }
 
   const { data: areas } = useQuery({
     ...planningAreasQueryOptions(regionSlug),
@@ -211,8 +227,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
     mutationFn: (variantId: number) => duplicatePlanningVariantFn({ data: { variantId } }),
     onSuccess: (created) => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      setActiveVariant(created.id)
-      setRun(null)
+      selectVariant(created.id, null)
     },
   })
 
@@ -227,7 +242,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
     onSuccess: (created) => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
-      setActiveVariant(created.id)
+      selectVariant(created.id, null)
     },
   })
 
@@ -254,7 +269,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
         <ul className="flex flex-col gap-0.5">
           {variants.map((variant) => {
             const latestRun = variant.runs[0]
-            const isStale = latestRun?.stale === true
+            const isStale = hasStaleCompleteRun(variant.runs)
             return (
               <li key={variant.id} className="flex items-center gap-1">
                 {renamingId === variant.id ? (
@@ -267,10 +282,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => {
-                      setActiveVariant(variant.id)
-                      setRun(variant.currentRunId ?? null)
-                    }}
+                    onClick={() => selectVariant(variant.id, variant.currentRunId ?? null)}
                     className={`flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-gray-100 ${
                       activeVariant === variant.id ? 'bg-blue-50 font-medium' : ''
                     }`}
@@ -298,14 +310,10 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                   variant={variant}
                   regionSlug={regionSlug}
                   onRename={() => setRenamingId(variant.id)}
-                  onDuplicated={(id) => {
-                    setActiveVariant(id)
-                    setRun(null)
-                  }}
+                  onDuplicated={(id) => selectVariant(id, null)}
                   onDeleted={() => {
                     if (activeVariant === variant.id) {
-                      setActiveVariant(null)
-                      setRun(null)
+                      selectVariant(null, null)
                     }
                   }}
                 />

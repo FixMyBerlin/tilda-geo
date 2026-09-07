@@ -10,11 +10,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import {
-  usePlanningAreaParam,
-  usePlanningRunParam,
-  usePlanningVariantParam,
-} from '../hooks/useQueryState/usePlanningParams'
+import { useSetPlanningSelection } from '../hooks/useQueryState/usePlanningParams'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { PlanningUseCase } from './planningDefaults'
 import type { UserGeojsonMode } from './UserObstaclesField'
@@ -38,9 +34,7 @@ const AreaEditorForm = ({
 }) => {
   const queryClient = useQueryClient()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
-  const [, setActiveArea] = usePlanningAreaParam()
-  const [, setActiveVariant] = usePlanningVariantParam()
-  const [, setRun] = usePlanningRunParam()
+  const setPlanningSelection = useSetPlanningSelection()
 
   const [title, setTitle] = useState(area.title)
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
@@ -102,10 +96,24 @@ const AreaEditorForm = ({
   const deleteMutation = useMutation({
     mutationFn: () => deletePlanningAreaFn({ data: { areaId } }),
     onSuccess: () => {
+      const areasKey = planningAreasQueryOptions(regionSlug).queryKey
+      const previous = queryClient.getQueryData(areasKey) ?? []
+      const remaining = previous.filter((a) => a.id !== areaId)
+      // Optimistic remove so auto-select cannot resurrect the deleted id.
+      queryClient.setQueryData(areasKey, remaining)
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      setActiveArea(null)
-      setActiveVariant(null)
-      setRun(null)
+
+      const next = remaining[0]
+      if (next) {
+        const firstVariant = next.variants[0]
+        setPlanningSelection({
+          area: next.id,
+          variant: firstVariant?.id ?? null,
+          run: firstVariant?.currentRunId ?? null,
+        })
+      } else {
+        setPlanningSelection({ area: null, variant: null, run: null })
+      }
       onDeleted?.()
       onClose()
     },

@@ -1,9 +1,7 @@
 import { twJoin } from 'tailwind-merge'
 import {
-  usePlanningAreaParam,
   usePlanningModeParam,
-  usePlanningRunParam,
-  usePlanningVariantParam,
+  useSetPlanningSelection,
 } from '../hooks/useQueryState/usePlanningParams'
 
 const TABS: [flaechenfinder: boolean, label: string][] = [
@@ -14,17 +12,14 @@ const TABS: [flaechenfinder: boolean, label: string][] = [
 /** Topbar mode selector. "Betrachten" = standard viewer; "Flächenfinder" = planning mode. */
 export const PlanningModeToggle = () => {
   const [planningMode, setPlanningMode] = usePlanningModeParam()
-  const [, setActiveVariant] = usePlanningVariantParam()
-  const [, setActiveArea] = usePlanningAreaParam()
-  const [, setRun] = usePlanningRunParam()
+  const setPlanningSelection = useSetPlanningSelection()
 
   const handleSelect = (next: boolean) => {
-    setPlanningMode(next)
-    if (!next) {
-      setActiveVariant(null)
-      setActiveArea(null)
-      setRun(null)
+    if (next) {
+      setPlanningMode(true)
+      return
     }
+    setPlanningSelection({ area: null, variant: null, run: null, planning: false })
   }
 
   return (
