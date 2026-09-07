@@ -1,4 +1,5 @@
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
+import { formatUserNameWithOsmHandle } from '@/components/admin/memberships/pageMemberships/utils/formatUserName'
 import {
   evaluatorTypeConfig,
   systemStatusConfig,
@@ -10,12 +11,6 @@ import type { QaOrphanedEvaluation } from '@/server/qa-configs/queries/getQaOrph
 type Props = {
   items: QaOrphanedEvaluation[]
   totalCount: number
-}
-
-const formatAuthor = (item: QaOrphanedEvaluation) => {
-  const name = [item.authorFirstName, item.authorLastName].filter(Boolean).join(' ')
-  if (name && item.authorOsmName) return `${name} (${item.authorOsmName})`
-  return name || item.authorOsmName || '—'
 }
 
 const latestStatusLabel = (item: QaOrphanedEvaluation) => {
@@ -87,7 +82,13 @@ export function QaConfigOrphanedEvaluationsSection({ items, totalCount }: Props)
                 <td className={adminTableClasses.td}>
                   {item.userEvaluationCount.toLocaleString('de-DE')}
                 </td>
-                <td className={adminTableClasses.td}>{formatAuthor(item)}</td>
+                <td className={adminTableClasses.td}>
+                  {formatUserNameWithOsmHandle({
+                    firstName: item.authorFirstName,
+                    lastName: item.authorLastName,
+                    osmName: item.authorOsmName,
+                  })}
+                </td>
                 <td className={adminTableClasses.td}>{formatDateTimeBerlin(item.createdAt)}</td>
               </tr>
             ))}
