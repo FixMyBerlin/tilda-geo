@@ -7,7 +7,7 @@ import { sourcesParkingLars } from './sourcesParkingLars.const'
 import type { SourcesParkingTildaId } from './sourcesParkingTilda.const'
 import { sourcesParkingTilda } from './sourcesParkingTilda.const'
 
-type AtlasSourceId =
+type TildaSourceId =
   | 'atlas_barriers'
   | 'atlas_bicycleParking'
   | 'atlas_bikelanes'
@@ -25,8 +25,7 @@ type AtlasSourceId =
   | 'atlas_trafficSigns'
   | 'atlas_todos_lines'
   | 'atlas_aggregated_lengths'
-
-type TildaSourceId = 'tilda_highwayAreas'
+  | 'tilda_highwayAreas'
 
 type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapillary_trafficSigns'
 
@@ -34,7 +33,6 @@ type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapil
 export type SourcesId =
   | SourcesParkingLarsId
   | SourcesParkingTildaId
-  | AtlasSourceId
   | TildaSourceId
   | MapillarySourceId
   | 'accidents_unfallatlas'
@@ -236,12 +234,12 @@ export const sources: MapDataSource<SourcesId>[] = [
       documentedKeys: [
         'name',
         'road',
-        'oneway',
+        'oneway__if_present',
         'oneway_bicycle__if_present',
         'lit__if_present',
         'composit_surface_smoothness',
         'traffic_sign',
-        'width',
+        'width__if_present',
         'bridge__if_present',
         'tunnel__if_present',
         'area',
