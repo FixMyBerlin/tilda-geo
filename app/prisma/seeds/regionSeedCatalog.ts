@@ -1,7 +1,7 @@
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
 import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
-import { RegionNotesMode, RegionProduct, RegionStatus } from '@/prisma/generated/client'
+import { RegionProduct, RegionStatus } from '@/prisma/generated/client'
 import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
 import type { RegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
@@ -58,7 +58,8 @@ const minimalCategories = ['roads', 'mapillary'] satisfies MapDataCategoryId[]
 
 const baseRegionConfig = {
   product: RegionProduct.radverkehr,
-  notes: RegionNotesMode.osmNotes,
+  notesOsm: true,
+  notesInternal: false,
   showSearch: false,
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
@@ -110,7 +111,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       fullName: 'Dev-Region: Status öffentlich, nicht gelistet',
       promoted: false,
       status: RegionStatus.PUBLIC,
-      notes: RegionNotesMode.internalNotes,
+      notesOsm: false,
+      notesInternal: true,
       mapLat: 52.5,
       mapLng: 13.4,
       mapZoom: 10,
@@ -426,7 +428,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.507,
       mapLng: 13.367,
       mapZoom: 11.8,
-      notes: RegionNotesMode.internalNotes,
+      notesOsm: false,
+      notesInternal: true,
       categories: ['parkingTilda', 'roads', 'mapillary'],
       backgroundSources: [...cityParkraumBackgroundSources],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
