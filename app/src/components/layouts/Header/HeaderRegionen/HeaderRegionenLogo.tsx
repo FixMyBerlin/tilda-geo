@@ -15,7 +15,7 @@ export const HeaderRegionenLogo = () => {
   const customLogo = region.logoPath
 
   return (
-    <>
+    <div className="flex items-center gap-6">
       {customLogo && (
         <div
           className={twJoin(
@@ -33,7 +33,7 @@ export const HeaderRegionenLogo = () => {
         </>
       )}
 
-      <div className="ml-3 min-w-0 leading-tight">
+      <div className="min-w-0 leading-tight tracking-tight">
         <div
           className={twJoin(
             'flex items-center gap-1 truncate',
@@ -51,6 +51,6 @@ export const HeaderRegionenLogo = () => {
         </div>
         <div className="text-xs text-gray-400">{productName[region.product]}</div>
       </div>
-    </>
+    </div>
   )
 }
