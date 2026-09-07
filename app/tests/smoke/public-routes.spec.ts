@@ -15,6 +15,9 @@ test.describe('Smoke – public routes (unauthenticated)', () => {
       const main = page.locator('main').first()
       await expect(main).toBeVisible()
 
+      // RegionError preview always logs via logError; that is the page under test, not a crash.
+      if (route.startsWith('/preview/region-error')) return
+
       await expectNoConsoleErrors(page)
     })
   }
