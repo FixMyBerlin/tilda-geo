@@ -141,10 +141,13 @@ export function litLineLayers() {
 }
 
 function litLineMissingLayers(missingColor: string, dashed: boolean) {
+  // Without `lit` in stylingKeys, `!has lit` would match every feature below interactivity minzoom
+  const missingMinzoom = 9
   const layers: MapboxStyleLayer[] = [
     {
       id: 'lit-missing',
       type: 'line',
+      minzoom: missingMinzoom,
       filter: ['!', ['has', 'lit']],
       layout: dashed ? { 'line-cap': 'round', 'line-join': 'round' } : undefined,
       paint: {
@@ -160,6 +163,7 @@ function litLineMissingLayers(missingColor: string, dashed: boolean) {
     layers.push({
       id: 'hitarea-lit-missing',
       type: 'line',
+      minzoom: missingMinzoom,
       filter: ['!', ['has', 'lit']],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
@@ -254,10 +258,12 @@ export function litAreaLayers() {
 }
 
 function litAreaMissingLayers(missingColor: string, dashed: boolean) {
+  const missingMinzoom = 9
   const layers: MapboxStyleLayer[] = [
     {
       id: 'lit-missing-fill',
       type: 'fill',
+      minzoom: missingMinzoom,
       filter: ['!', ['has', 'lit']],
       paint: {
         'fill-color': missingColor,
@@ -267,6 +273,7 @@ function litAreaMissingLayers(missingColor: string, dashed: boolean) {
     {
       id: 'lit-missing-outline',
       type: 'line',
+      minzoom: missingMinzoom,
       filter: ['!', ['has', 'lit']],
       paint: {
         'line-color': missingColor,
@@ -281,6 +288,7 @@ function litAreaMissingLayers(missingColor: string, dashed: boolean) {
     layers.push({
       id: 'hitarea-lit-missing-area',
       type: 'fill',
+      minzoom: missingMinzoom,
       filter: ['!', ['has', 'lit']],
       paint: {
         'fill-color': 'rgb(216, 20, 255)',
