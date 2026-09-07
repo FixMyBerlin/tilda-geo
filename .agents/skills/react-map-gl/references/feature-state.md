@@ -78,7 +78,7 @@ const selectedFeatureIds = inspectorFeatures
   .map((f) => f.id as number)
 
 <Layer
-  id="osm-notes-layer-hover"
+  id="osm-notes-layer-selected"
   source="osm-notes-source"
   type="circle"
   paint={{ 'circle-radius': 12, 'circle-color': '#f9a8d4' }}
