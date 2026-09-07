@@ -237,9 +237,10 @@ test.describe('Region welcome panel', () => {
 
     try {
       await page.goto(`/regionen/${privateRegion.slug}`)
-      await expect(page.getByRole('heading', { name: 'Zugriff verweigert' })).toBeVisible()
+      await expect(page).toHaveURL(/\/access-denied/)
+      await expect(page.getByRole('heading', { name: 'Anmeldung erforderlich' })).toBeVisible()
       await expect(page).not.toHaveURL(/dialog=welcome/)
-      await expect(welcomeDesktopPanel(page)).toHaveAttribute('aria-hidden', 'true')
+      await expect(welcomeDesktopPanel(page)).toHaveCount(0)
       await expect(welcomeMobilePanel(page)).toHaveCount(0)
       await expect(page.getByText(PRIVATE_WELCOME_LEAK.title)).toHaveCount(0)
       await expect(page.getByText(PRIVATE_WELCOME_LEAK.subtitle)).toHaveCount(0)
