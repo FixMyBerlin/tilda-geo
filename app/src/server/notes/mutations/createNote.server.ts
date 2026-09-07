@@ -9,7 +9,9 @@ import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
 import { CreateNoteSchema } from '../schemas'
 
-const Schema = CreateNoteSchema.extend({ regionSlug: z.string() })
+const Schema = CreateNoteSchema.extend({
+  regionSlug: z.string(),
+})
 
 export async function createNote(input: z.infer<typeof Schema>, headers: Headers) {
   const session = await requireAuth(headers)
@@ -22,7 +24,10 @@ export async function createNote(input: z.infer<typeof Schema>, headers: Headers
 
   const result = await runWithAuditContextAsync(
     memberFormAuditContext(headers, session.userId),
-    () => db.note.create({ data: { ...createData, regionId, userId: session.userId } }),
+    () =>
+      db.note.create({
+        data: { ...createData, regionId, userId: session.userId },
+      }),
   )
   return result
 }

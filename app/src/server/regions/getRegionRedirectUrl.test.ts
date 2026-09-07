@@ -26,6 +26,8 @@ const { regionFixtures } = vi.hoisted(() => ({
     parkraum: {
       map: { lat: 52.4918, lng: 13.4261, zoom: 13.5 },
       categories: ['parkingLars', 'mapillary'],
+      notesOsm: true,
+      notesInternal: false,
     },
     berlin: {
       map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
@@ -39,6 +41,8 @@ const { regionFixtures } = vi.hoisted(() => ({
         'poi',
         'mapillary',
       ],
+      notesOsm: true,
+      notesInternal: true,
     },
     'bb-pg': {
       map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
@@ -65,7 +69,15 @@ const { regionFixtures } = vi.hoisted(() => ({
       map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
       categories: ['parkingTilda', 'roads', 'mapillary'],
     },
-  } as Record<string, { map: { lat: number; lng: number; zoom: number }; categories: string[] }>,
+  } as Record<
+    string,
+    {
+      map: { lat: number; lng: number; zoom: number }
+      categories: string[]
+      notesOsm?: boolean
+      notesInternal?: boolean
+    }
+  >,
 }))
 
 vi.mock('@/server/regions/queries/getRegion.server', () => ({
@@ -184,6 +196,186 @@ describe('getRegionRedirectUrl()', () => {
       const url = 'http://127.0.0.1:5173/regionen/unkownRegion'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
       expect(redirectUrl).toBe(null)
+    })
+  })
+
+  describe('QA and notes: root bookmarks become mode routes', () => {
+    test('?osmNotes=true on the root → /hinweise, no osmNotes', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?osmNotes=true'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/hinweise')
+      expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
+      expect(await redirectOnly(redirectUrl!, 'berlin')).toBe(null)
+    })
+
+    test('?notes=true on the root → /hinweise', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?notes=true'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/hinweise')
+      expect(resultUrl.searchParams.has('notes')).toBe(false)
+      expect(resultUrl.searchParams.has('internalNotes')).toBe(false)
+    })
+
+    test('?osmNotes=false on the root stays on the root', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?osmNotes=false'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
+    })
+
+    test('?osmNotes=true on /hinweise stays, flag stripped', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin/hinweise?osmNotes=true'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/hinweise')
+      expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
+    })
+
+    test('?qa=euvm-parkraum-2025--all on the root → /qa with the same key', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?qa=euvm-parkraum-2025--all'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/qa')
+      expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
+        key: 'euvm-parkraum-2025',
+      })
+      expect(await redirectOnly(redirectUrl!, 'berlin')).toBe(null)
+    })
+
+    test('?qa={"key":"euvm-parkraum-2026"} on the root stays on the root (live JSON is not an overlay bookmark)', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?qa={"key":"euvm-parkraum-2026"}'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
+        key: 'euvm-parkraum-2026',
+      })
+    })
+
+    test('?qa={"key":"euvm-parkraum-2026"} on /qa is not nested to /qa/qa', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin/qa?qa={"key":"euvm-parkraum-2026"}'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/qa')
+    })
+
+    test('?osmNotes=true&qa=euvm-parkraum-2025--all on the root → /qa, no osmNotes', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?osmNotes=true&qa=euvm-parkraum-2025--all'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/qa')
+      expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
+      expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
+        key: 'euvm-parkraum-2025',
+      })
+    })
+
+    test('unknown qa=my-config--all is dropped', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?qa=my-config--all'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(resultUrl.searchParams.has('qa')).toBe(false)
+    })
+
+    test('?osmNote=<map param> on the root stays on the root, osmNote preserved', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?osmNote=15/52.5/13.4'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(resultUrl.searchParams.get('osmNote')).toBe('15/52.5/13.4')
+    })
+
+    test('?internalNote=<map param> on the root stays on the root, internalNote preserved', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?internalNote=15/52.5/13.4'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(resultUrl.searchParams.get('internalNote')).toBe('15/52.5/13.4')
+    })
+
+    test('root + live qa JSON + osmNote stays on the region root', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/berlin?qa={"key":"euvm-parkraum-2026"}&osmNote=15/52.5/13.4'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
+        key: 'euvm-parkraum-2026',
+      })
+      expect(resultUrl.searchParams.get('osmNote')).toBe('15/52.5/13.4')
+    })
+  })
+
+  describe('v3: notes param cleanup', () => {
+    test('renames atlasNote and converts filter params into notesMode', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/berlin?notes=true&atlasNote=15/52.5/13.4&atlasNotesFilter=%7B%7D&osmNotesFilter=%7B%7D&v=2'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const params = getUrl(redirectUrl).searchParams
+
+      expect(getUrl(redirectUrl).pathname).toBe('/regionen/berlin/hinweise')
+      expect(params.get('internalNote')).toBe('15/52.5/13.4')
+      expect(params.has('notes')).toBe(false)
+      expect(params.has('internalNotes')).toBe(false)
+      expect(params.has('atlasNote')).toBe(false)
+      expect(params.has('atlasNotesFilter')).toBe(false)
+      expect(params.has('osmNotesFilter')).toBe(false)
+      expect(params.get('v')).toBe('3')
+    })
+
+    test('a v3 URL with notesMode is stable (no redirect loop)', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/berlin/hinweise?notesMode={"completed":false,"extent":"view"}'
+      const first = await redirectOnly(url, 'berlin')
+      expect(first).toBeTruthy()
+      expect(getUrl(first).pathname).toBe('/regionen/berlin/hinweise')
+      expect(await redirectOnly(first!, 'berlin')).toBe(null)
+    })
+  })
+
+  describe('Mode sub-routes (e.g. /regionen/:slug/hinweise)', () => {
+    test('Normalization preserves the sub-path', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin/hinweise'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+
+      expect(resultUrl.pathname).toBe('/regionen/berlin/hinweise')
+      expect(typeof resultUrl.searchParams.get('map')).toBe('string')
+      expect(typeof resultUrl.searchParams.get('config')).toBe('string')
+    })
+
+    test('Region rename keeps the sub-path and search params', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/bb-ag/hinweise?map=5/6/7'
+      const redirectUrl = await redirectOnly(url, 'bb-ag')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+
+      expect(resultUrl.pathname).toBe('/regionen/bb-pg/hinweise')
+      expect(resultUrl.searchParams.get('map')).toBe('5/6/7')
+      expect(typeof resultUrl.searchParams.get('config')).toBe('string')
+    })
+
+    test('No redirect when sub-path URL is already normalized', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin/hinweise'
+      const firstRedirect = await redirectOnly(url, 'berlin')
+      expect(firstRedirect).toBeTruthy()
+      // Running the normalized URL through again must be a no-op (no redirect loop)
+      const secondRedirect = await redirectOnly(firstRedirect!, 'berlin')
+      expect(secondRedirect).toBe(null)
     })
   })
 
@@ -341,7 +533,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('v')).toBe('2')
+      expect(resultUrl.searchParams.get('v')).toBe('3')
       expect(resultUrl.searchParams.get('config')).toBe('166cmie.ivb7ah.2r53k')
     })
 
@@ -352,7 +544,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('v')).toBe('2')
+      expect(resultUrl.searchParams.get('v')).toBe('3')
 
       const parkingTildaCategory = parseCategoryFromResponse(redirectUrl, '', 'parkingTilda')
       expect(parkingTildaCategory.active).toBe(true)

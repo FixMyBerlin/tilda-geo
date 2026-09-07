@@ -13,10 +13,13 @@ import db from '@/server/db.server'
 import { getQaConfig } from '@/server/qa-configs/queries/getQaConfig.server'
 import { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { getQaConfigStatsForAdmin } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
+import { getQaOrphanedEvaluationsForAdmin } from '@/server/qa-configs/queries/getQaOrphanedEvaluationsForAdmin.server'
 import { getRegionContractBySlug } from '@/server/region-contracts/queries/getRegionContract.server'
 import { getRegionContracts } from '@/server/region-contracts/queries/getRegionContracts.server'
 import { getRegionEditData } from '@/server/regions/queries/getRegion.server'
 import { getRegionRows, getRegions } from '@/server/regions/queries/getRegions.server'
+import { getReviewList } from '@/server/review-lists/queries/getReviewList.server'
+import { getReviewListsForAdmin } from '@/server/review-lists/queries/getReviewListsForAdmin.server'
 import {
   buildMapDatasetUploadsRegionWhere,
   buildMapDatasetUploadsWhere,
@@ -105,7 +108,11 @@ export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
       getRegionRows({}, headers),
       getAuditHistoryForRecord(headers, 'QaConfig', String(data.id)),
     ])
-    return { qaConfig, regions, auditHistory }
+    const orphanedEvaluations = await getQaOrphanedEvaluationsForAdmin(
+      { configId: qaConfig.id, mapTable: qaConfig.mapTable },
+      headers,
+    )
+    return { qaConfig, regions, auditHistory, orphanedEvaluations }
   })
 
 export const getAdminQaConfigNewLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
@@ -126,6 +133,27 @@ export const getAdminQaConfigsLoaderFn = createServerFn({ method: 'GET' }).handl
   )
   return { qaConfigs, statsByConfigId }
 })
+
+export const getAdminReviewListsLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
+  const lists = await getReviewListsForAdmin(getRequestHeaders())
+  return { lists }
+})
+
+const AdminReviewListEditInput = z.object({ id: z.number() })
+
+export const getAdminReviewListEditLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof AdminReviewListEditInput>) =>
+    AdminReviewListEditInput.parse(data),
+  )
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    const [list, regions, auditHistory] = await Promise.all([
+      getReviewList({ id: data.id }, headers),
+      getRegionRows({}, headers),
+      getAuditHistoryForRecord(headers, 'ReviewList', String(data.id)),
+    ])
+    return { list, regions, auditHistory }
+  })
 
 const AdminMembershipsLoaderInput = createOffsetSearchSchema({ maxTake: 200 })
 
