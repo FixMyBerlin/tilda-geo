@@ -13,7 +13,6 @@ type AtlasSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
-  | 'atlas_highwayAreas'
   | 'atlas_presenceStats'
   | 'atlas_landuse'
   | 'atlas_places'
@@ -27,6 +26,8 @@ type AtlasSourceId =
   | 'atlas_todos_lines'
   | 'atlas_aggregated_lengths'
 
+type TildaSourceId = 'tilda_highwayAreas'
+
 type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapillary_trafficSigns'
 
 // TODO type MapDataConfigSourcesIds = typeof sources[number]['id']
@@ -34,6 +35,7 @@ export type SourcesId =
   | SourcesParkingLarsId
   | SourcesParkingTildaId
   | AtlasSourceId
+  | TildaSourceId
   | MapillarySourceId
   | 'accidents_unfallatlas'
 
@@ -219,7 +221,7 @@ export const sources: MapDataSource<SourcesId>[] = [
     calculator: { enabled: false },
   },
   {
-    id: 'atlas_highwayAreas',
+    id: 'tilda_highwayAreas',
     tileTables: ['highwayAreas'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
@@ -234,8 +236,14 @@ export const sources: MapDataSource<SourcesId>[] = [
       documentedKeys: [
         'name',
         'road',
+        'oneway',
+        'oneway_bicycle__if_present',
         'lit__if_present',
         'composit_surface_smoothness',
+        'traffic_sign',
+        'width',
+        'bridge__if_present',
+        'tunnel__if_present',
         'area',
         'description__if_present',
       ],

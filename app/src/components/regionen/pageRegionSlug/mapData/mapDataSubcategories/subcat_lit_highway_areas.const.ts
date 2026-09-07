@@ -10,7 +10,7 @@ import {
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'lit_highway_areas'
-const source = 'atlas_highwayAreas'
+const source = 'tilda_highwayAreas'
 const sourceLayer = 'highwayAreas'
 export type SubcatLitHighwayAreasId = typeof subcatId
 export type SubcatLitHighwayAreasStyleIds = 'default' | 'lit' | 'completeness'

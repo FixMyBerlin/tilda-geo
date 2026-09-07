@@ -7,7 +7,7 @@ import {
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
 const subcatId = 'lit_highway_areas'
-const source = 'atlas_highwayAreas'
+const source = 'tilda_highwayAreas'
 const sourceLayer = 'highwayAreas'
 export type SubcatRadinfraLitHighwayAreasId = typeof subcatId
 export type SubcatRadinfraLitHighwayAreasStyleIds = 'default'

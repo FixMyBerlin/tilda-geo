@@ -70,7 +70,7 @@ export const tilesetConfigs: Record<
     bbox: bboxPartOfNorthGermany,
   },
   highwayAreas: {
-    sourceLayer: 'atlas-highwayAreas-placeholder',
+    sourceLayer: 'tilda-highwayAreas-placeholder',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.placeholder/#14/52.51622/13.37036',
     bbox: bboxPartOfNorthGermany,
   },

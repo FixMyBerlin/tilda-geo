@@ -3200,7 +3200,7 @@ const data = {
   highwayAreas: {
     topic: 'roads_bikelanes',
     tableName: 'highwayAreas',
-    sourceIds: ['atlas_highwayAreas'],
+    sourceIds: ['tilda_highwayAreas'],
     title: 'Daten zu Straßenflächen',
     summary:
       '**Experimentell, noch nicht stabil.** Attribute und Datenfilter können sich noch ändern.',
@@ -3374,6 +3374,40 @@ const data = {
         ],
       },
       {
+        key: 'oneway',
+        type: 'string',
+        label: 'Verkehrsrichtung',
+        values: [
+          {
+            value: 'no',
+            label: 'Beide Richtungen',
+          },
+          {
+            value: 'yes',
+            label: 'Einbahnstraße',
+          },
+          {
+            value: 'yes_dual_carriageway',
+            label: 'Einbahnstraße da separate Geometrie pro Seite',
+          },
+        ],
+      },
+      {
+        key: 'oneway_bicycle',
+        type: 'string',
+        label: 'Verkehrsrichtung Fahrrad',
+        values: [
+          {
+            value: 'no',
+            label: 'Beide Richtungen für Radverkehr',
+          },
+          {
+            value: 'yes',
+            label: 'Eine Richtung (auch für Radverkehr)',
+          },
+        ],
+      },
+      {
         key: 'mapillary_coverage',
         type: 'string',
         label: 'Mapillary-Abdeckung',
@@ -3421,6 +3455,17 @@ const data = {
         description:
           'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
         values: [],
+      },
+      {
+        key: 'traffic_sign',
+        type: 'sanitized_strings',
+        label: 'Beschilderung',
+        values: [
+          {
+            value: 'none',
+            label: 'Unbeschildert',
+          },
+        ],
       },
       {
         key: 'description',
@@ -3489,6 +3534,50 @@ const data = {
           {
             value: 'special',
             label: 'Spezielle Angaben',
+          },
+        ],
+      },
+      {
+        key: 'width',
+        type: 'meter',
+        label: 'Breite',
+        values: [],
+      },
+      {
+        key: 'width_source',
+        type: 'sanitized_strings',
+        label: 'Quelle Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'ALKIS',
+            label: 'Aus ALKIS Daten ausgemessen',
+          },
+          {
+            value: 'ARCore',
+            label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'bridge',
+        type: 'string',
+        label: 'Brücke',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
+        key: 'tunnel',
+        type: 'string',
+        label: 'Tunnel',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
           },
         ],
       },

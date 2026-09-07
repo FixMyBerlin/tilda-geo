@@ -1336,6 +1336,25 @@ const data = {
           temporary: 'Temporärer Weg',
         },
       },
+      oneway: {
+        name: 'Verkehrsrichtung',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          no: 'Beide Richtungen',
+          yes: 'Einbahnstraße',
+          yes_dual_carriageway: 'Einbahnstraße da separate Geometrie pro Seite',
+        },
+      },
+      oneway_bicycle: {
+        name: 'Verkehrsrichtung Fahrrad',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          no: 'Beide Richtungen für Radverkehr',
+          yes: 'Eine Richtung (auch für Radverkehr)',
+        },
+      },
       mapillary_coverage: {
         name: 'Mapillary-Abdeckung',
         type: 'html',
@@ -1396,6 +1415,14 @@ const data = {
           },
         },
       },
+      traffic_sign: {
+        name: 'Beschilderung',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          none: 'Unbeschildert',
+        },
+      },
       description: 'Hinweis aus OSM',
       operator_type: {
         name: 'Betreibertyp',
@@ -1432,6 +1459,36 @@ const data = {
           yes: 'Beleuchtet',
           no: 'Nicht beleuchtet',
           special: 'Spezielle Angaben',
+        },
+      },
+      width: {
+        name: 'Breite',
+        type: 'number',
+        suffix: 'm',
+      },
+      width_source: {
+        name: 'Quelle Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          ALKIS: 'Aus ALKIS Daten ausgemessen',
+          ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+        },
+      },
+      bridge: {
+        name: 'Brücke',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Ja',
+        },
+      },
+      tunnel: {
+        name: 'Tunnel',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Ja',
         },
       },
       surface: {

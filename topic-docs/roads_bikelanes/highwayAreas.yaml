@@ -3,7 +3,7 @@ summary: >-
   **Experimentell, noch nicht stabil.** Attribute und Datenfilter
   können sich noch ändern.
 sourceIds:
-  - atlas_highwayAreas
+  - tilda_highwayAreas
 attributes:
   - key: road
     ref: roads.road
@@ -15,6 +15,10 @@ attributes:
     description: Fläche in Quadratmetern, aus der Geometrie.
   - key: lifecycle
     ref: roads.lifecycle
+  - key: oneway
+    ref: roads.oneway
+  - key: oneway_bicycle
+    ref: roads.oneway_bicycle
   - key: mapillary_coverage
     ref: bikelanes.mapillary_coverage
   - key: mapillary
@@ -25,6 +29,8 @@ attributes:
     ref: bikelanes.mapillary_backward
   - key: mapillary_traffic_sign
     ref: bikelanes.mapillary_traffic_sign
+  - key: traffic_sign
+    ref: roads.traffic_sign
   - key: description
     ref: roads.description
   - key: operator_type
@@ -35,6 +41,14 @@ attributes:
     ref: roads.covered
   - key: lit
     ref: roads.lit
+  - key: width
+    ref: roads.width
+  - key: width_source
+    ref: roads.width_source
+  - key: bridge
+    ref: roads.bridge
+  - key: tunnel
+    ref: roads.tunnel
   - key: surface
     ref: roads.surface
   - key: surface_source
