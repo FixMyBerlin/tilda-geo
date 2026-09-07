@@ -5,7 +5,7 @@ import { createQaConfigWithData } from './mutations/createQaConfig.server'
 import { CreateQaEvaluationSchema, createQaEvaluation } from './mutations/createQaEvaluation.server'
 import { deleteQaConfig } from './mutations/deleteQaConfig.server'
 import { updateQaConfigWithData } from './mutations/updateQaConfig.server'
-import { getQaAreasByStatus } from './queries/getQaAreasByStatus.server'
+import { getQaAreaList, QaAreaListSchema } from './queries/getQaAreaList.server'
 import { getQaConfigsForRegion } from './queries/getQaConfigsForRegion.server'
 import { getQaDataForMap } from './queries/getQaDataForMap.server'
 import { getQaDecisionDataForArea } from './queries/getQaDecisionDataForArea.server'
@@ -15,15 +15,11 @@ import { CreateQaConfigFormSchema, DeleteQaConfigSchema, UpdateQaConfigFormSchem
 
 export type CreateQaEvaluationInput = z.infer<typeof CreateQaEvaluationSchema>
 
-const QaAreasByStatusInput = z.object({
+const QaDataForMapInput = z.object({
   configSlug: z.string(),
   regionSlug: z.string(),
-  styleKey: z.string(),
-})
-const QaDataForMapInput = z.object({
-  configId: z.number(),
-  regionSlug: z.string(),
   userIds: z.array(z.string()).optional(),
+  search: z.string().optional(),
 })
 const QaUsersForConfigInput = z.object({ configId: z.number(), regionSlug: z.string() })
 const QaAreaInput = z.object({
@@ -33,9 +29,9 @@ const QaAreaInput = z.object({
 })
 const GetQaConfigsForRegionInput = z.object({ regionSlug: z.string() })
 
-export const getQaAreasByStatusFn = createServerFn({ method: 'GET' })
-  .validator((data: z.infer<typeof QaAreasByStatusInput>) => QaAreasByStatusInput.parse(data))
-  .handler(async ({ data }) => getQaAreasByStatus(data, getRequestHeaders()))
+export const getQaAreaListFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof QaAreaListSchema>) => QaAreaListSchema.parse(data))
+  .handler(async ({ data }) => getQaAreaList(data, getRequestHeaders()))
 
 export const getQaDataForMapFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof QaDataForMapInput>) => QaDataForMapInput.parse(data))
