@@ -20,6 +20,7 @@ const items = [
   { to: '/admin/regions', label: 'Regionen' },
   { to: '/admin/region-contracts', label: 'Regionen-Aufträge' },
   { to: '/admin/qa-configs', label: 'QA Konfigurationen' },
+  { to: '/admin/review-lists', label: 'Prüflisten' },
   { to: '/admin/memberships', label: 'Nutzer:innen & Mitgliedschaften' },
   { to: '/admin/map-dataset-uploads', label: 'Statische Daten (Uploads)' },
   { to: '/admin/map-dataset-categories', label: 'Statische Daten: Kategorien' },
