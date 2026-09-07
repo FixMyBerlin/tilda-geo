@@ -47,6 +47,8 @@ import {
   UnavailableFactorRow,
   WeightScaleLegend,
 } from './WeightSlider'
+import { ZielortCategorySliders } from './ZielortCategorySliders'
+import { readZielortShares, type ZielortShares } from './zielortShares'
 
 /** Hinweis unter den Parkdaten-abhängigen Faktoren, wenn `parkingDataAvailable` false ist —
  * siehe [[PARKING_DATA_DEPENDENT_KEYS]] in planningDefaults.ts. */
@@ -191,6 +193,7 @@ const FactorFields = ({
   setField,
   restoreAutoSaettigung,
   setVegetationDirection,
+  setZielortShares,
   setUserGeojsonMode,
   onReset,
   readOnly = false,
@@ -201,6 +204,7 @@ const FactorFields = ({
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   restoreAutoSaettigung: () => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
+  setZielortShares: (shares: ZielortShares) => void
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
   onReset?: () => void
   readOnly?: boolean
@@ -213,6 +217,10 @@ const FactorFields = ({
     setWeights({ ...weights, [key]: value })
   const shares = criterionShares(weights)
   const points = modifierPointRange(weights, vegetationDirection)
+  const zielortShares = readZielortShares(config.zielort_category_shares)
+  // Offen/zu der Zielort-Arten liegt hier, weil davon die Hervorhebung der ganzen Zielorte-Zeile
+  // abhängt (siehe unten) — nicht nur der Inhalt unterhalb des Reglers.
+  const [zielortCategoriesOpen, setZielortCategoriesOpen] = useState(false)
 
   return (
     <>
@@ -294,9 +302,8 @@ const FactorFields = ({
                   />
                 )
               }
-              return (
+              const slider = (
                 <ModifierSlider
-                  key={key}
                   label={WEIGHT_LABELS[key] ?? key}
                   weight={weights[key]}
                   direction={resolveModifierDirection(direction, vegetationDirection)}
@@ -304,8 +311,8 @@ const FactorFields = ({
                   readOnly={readOnly}
                   info={<FactorInfo factorKey={key} />}
                   nested={
-                    key === 'w_vegetation' ? (
-                      <>
+                    <>
+                      {key === 'w_vegetation' && (
                         <SegmentedChoice
                           options={
                             [
@@ -317,16 +324,7 @@ const FactorFields = ({
                           onChange={setVegetationDirection}
                           disabled={readOnly || weightToPoints(weights[key]) === 0}
                         />
-                        <FactorParamInputs
-                          factorKey={key}
-                          config={config}
-                          weight={weights[key]}
-                          setField={setField}
-                          restoreAutoSaettigung={restoreAutoSaettigung}
-                          readOnly={readOnly}
-                        />
-                      </>
-                    ) : (
+                      )}
                       <FactorParamInputs
                         factorKey={key}
                         config={config}
@@ -335,10 +333,35 @@ const FactorFields = ({
                         restoreAutoSaettigung={restoreAutoSaettigung}
                         readOnly={readOnly}
                       />
-                    )
+                      {/* Die Kategorie-Aufteilung hängt am Zielorte-Regler: sie verteilt dessen
+                          Punkte auf die vier Zielort-Arten, ohne die übrigen Faktoren zu berühren. */}
+                      {key === 'w_target' && (
+                        <ZielortCategorySliders
+                          shares={zielortShares}
+                          onChange={setZielortShares}
+                          open={zielortCategoriesOpen}
+                          onOpenChange={setZielortCategoriesOpen}
+                          disabled={readOnly || weightToPoints(weights[key]) === 0}
+                        />
+                      )}
+                    </>
                   }
                 />
               )
+              // Aufgeklappt gehören Zielorte-Regler und Arten-Regler sichtbar zusammen: die weiße
+              // Karte hebt beide gemeinsam aus dem getönten Gruppenblock heraus, statt die Arten
+              // als lose Regler unter dem Faktor stehen zu lassen.
+              if (key === 'w_target' && zielortCategoriesOpen) {
+                return (
+                  <div
+                    key={key}
+                    className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+                  >
+                    {slider}
+                  </div>
+                )
+              }
+              return <div key={key}>{slider}</div>
             })}
           </div>
         ))}
@@ -563,6 +586,9 @@ const FactorEditorPanelForm = ({
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
 
+  const setZielortShares = (shares: ZielortShares) =>
+    setConfig((c) => ({ ...c, zielort_category_shares: shares }))
+
   // `user_geojson_mode` gehört zum Planungsgebiet (nicht zur Variante, siehe `toVariantConfig`
   // oben) — er geht deshalb an eine eigene Mutation und wirkt auf alle Varianten dieses
   // Planungsgebiets, statt wie die Gewichte über den Auto-Save der Variante zu laufen.
@@ -653,6 +679,7 @@ const FactorEditorPanelForm = ({
             setField={setField}
             restoreAutoSaettigung={restoreAutoSaettigung}
             setVegetationDirection={setVegetationDirection}
+            setZielortShares={setZielortShares}
             setUserGeojsonMode={setUserGeojsonMode}
             onReset={readOnly ? undefined : resetWeightsToDefaults}
             readOnly={readOnly}

@@ -14,6 +14,8 @@ from __future__ import annotations
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
 
+from .config import ZIELORT_CATEGORIES
+
 
 def _empty(crs="EPSG:3857") -> gpd.GeoDataFrame:
     return gpd.GeoDataFrame(geometry=[], crs=crs)
@@ -476,9 +478,9 @@ class PostgisLoader:
         Liest `public."poiClassification"` – die tilda-weite POI-Klassifizierung
         (processing/topics/poiClassification), die jeden relevanten OSM-Punkt
         (shop=*/amenity=*/tourism=*/leisure=*) in genau eine von vier Kategorien
-        einsortiert: Grundversorgung, Bildung, Einkauf, Freizeit. Alle vier werden
-        kombiniert gelesen – kein einzelner Zielort-Typ wird bevorzugt (siehe
-        `zielort_radius_m` in config.py).
+        einsortiert: Grundversorgung, Bildung, Einkauf, Freizeit. Alle vier werden gelesen;
+        die Kategorie kommt als Spalte `category` mit, weil ihr Verhältnis zueinander
+        einstellbar ist (`zielort_category_shares` in config.py).
 
         Geometrie liegt in EPSG:3857 (osm2pgsql-Default, wie `bicycleParking_points`);
         Rückgabe in EPSG:4326.
@@ -490,11 +492,12 @@ class PostgisLoader:
         """
         wkt = polygon_4326.wkt
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
+        cats_sql = ", ".join(f"'{_sql_literal(c)}'" for c in ZIELORT_CATEGORIES)
         sql = f"""
-            SELECT ST_Transform(geom, 4326) AS geom
+            SELECT ST_Transform(geom, 4326) AS geom, tags->>'category' AS category
             FROM public."poiClassification"
             WHERE geom && {bbox}
-              AND tags->>'category' IN ('Grundversorgung', 'Bildung', 'Einkauf', 'Freizeit')
+              AND tags->>'category' IN ({cats_sql})
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")

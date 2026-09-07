@@ -2,6 +2,41 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 
 
+# ── Zielort-Kategorien ────────────────────────────────────────────────────────
+# Die vier Kategorien, die processing/topics/poiClassification vergibt. Reihenfolge und
+# Schreibweise müssen exakt zu den Werten in public."poiClassification".tags->>'category'
+# passen (siehe postgis_loader.load_target_locations) und zur UI-Liste in
+# app/.../Planning/zielortCategories.ts.
+ZIELORT_CATEGORIES = ("Grundversorgung", "Bildung", "Einkauf", "Freizeit")
+
+# Gleichverteilung: der Stand, mit dem sich der Zielorte-Bonus verhält wie vor der
+# Kategorie-Gewichtung (jede Kategorie löst den vollen Zuschlag aus).
+DEFAULT_ZIELORT_CATEGORY_SHARES = {c: 25.0 for c in ZIELORT_CATEGORIES}
+
+
+def zielort_category_factors(shares: Dict[str, float]) -> Dict[str, float]:
+    """Anteile (Prozent, Summe 100) → Faktor 0–1 je Kategorie, normiert auf den größten Anteil.
+
+    Der Faktor sagt, welchen Bruchteil des vollen Zielorte-Zuschlags ein Gebäude DIESER
+    Kategorie allein auslöst. Die Normierung auf das Maximum (statt auf die Summe) hält den
+    Default gleichverteilt bei 1.0 je Kategorie — sonst würde die Umstellung jeden
+    bestehenden Lauf auf ein Viertel drücken. Unbekannte Kategorien werden ignoriert,
+    fehlende zählen 0; ohne verwertbare Anteile gilt Gleichverteilung.
+    """
+    values = {}
+    for category in ZIELORT_CATEGORIES:
+        raw = shares.get(category) if shares else None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            value = 0.0
+        values[category] = max(0.0, value)
+    largest = max(values.values()) if values else 0.0
+    if largest <= 0:
+        return {c: 1.0 for c in ZIELORT_CATEGORIES}
+    return {c: v / largest for c, v in values.items()}
+
+
 @dataclass
 class UseCaseConfig:
     name: str
@@ -104,6 +139,16 @@ class UseCaseConfig:
     # Radius bewusst NICHT UI-einstellbar (wie bewohnerbedarf_radius_m, gleiche Begründung).
     zielort_radius_m: float = 20.0        # Reichweite ab Gebäudekante (fest, wie Bewohnerbedarf)
 
+    # Verhältnis der vier Kategorien zueinander, in Prozent (Summe 100; UI-Regler, siehe
+    # app/.../Planning/ZielortCategorySliders.tsx). Gerechnet wird mit dem auf das MAXIMUM
+    # normierten Anteil: die stärkste Kategorie steht für den vollen Zuschlag, eine halb so
+    # stark gewichtete für den halben (siehe `zielort_category_factors` und scorer.py).
+    # Gleichverteilung (Default) heißt also: jede Kategorie löst wie bisher den vollen
+    # Zuschlag aus — der Default ist bewusst non-breaking.
+    zielort_category_shares: Dict[str, float] = field(
+        default_factory=lambda: dict(DEFAULT_ZIELORT_CATEGORY_SHARES)
+    )
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
 
@@ -197,6 +242,9 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         bewohnerbedarf_radius_m=float(cfg.get("bewohnerbedarf_radius_m", 20.0)),
         bewohnerbedarf_saettigung_ew=float(cfg.get("bewohnerbedarf_saettigung_ew", 30.0)),
         zielort_radius_m=float(cfg.get("zielort_radius_m", 20.0)),
+        zielort_category_shares=dict(
+            cfg.get("zielort_category_shares") or DEFAULT_ZIELORT_CATEGORY_SHARES
+        ),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
         exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),

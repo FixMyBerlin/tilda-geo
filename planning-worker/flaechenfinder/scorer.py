@@ -7,7 +7,13 @@ from shapely.geometry import Polygon
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
-from .config import USER_LINE_BUFFER_M, USER_POINT_BUFFER_M, UseCaseConfig
+from .config import (
+    USER_LINE_BUFFER_M,
+    USER_POINT_BUFFER_M,
+    ZIELORT_CATEGORIES,
+    UseCaseConfig,
+    zielort_category_factors,
+)
 from .dem import DEMAdapter
 from .geometry import (
     buffer_by_geom_type,
@@ -220,44 +226,62 @@ def _census_demand_sources(
 
 
 def _target_demand_sources(
-    target_proj: gpd.GeoDataFrame, buildings_proj: gpd.GeoDataFrame | None
+    target_proj: gpd.GeoDataFrame,
+    buildings_proj: gpd.GeoDataFrame | None,
+    category_factors: dict[str, float],
 ) -> gpd.GeoDataFrame:
     """Zielorte-Quellen: POI-Punkte (public."poiClassification") auf Gebäudepolygone
     aggregiert – analog `_census_demand_sources`, aber mit reiner Vorhandensein-
-    Gewichtung (0/1) statt Summe. Ein Gebäude mit mehreren Zielorten (z. B.
-    Supermarkt + Bäckerei im selben Haus) zählt genau wie eines mit nur einem –
+    Gewichtung statt Summe. Ein Gebäude mit mehreren Zielorten DERSELBEN Kategorie
+    (z. B. Supermarkt + Bäckerei im selben Haus) zählt genau wie eines mit nur einem –
     die ANZAHL der Zielorte im Gebäude soll den Bedarf nicht vervielfachen
-    (User-Entscheid).
+    (User-Entscheid). Je Kategorie wird ein Gebäude aber einmal gezählt, weil die
+    Kategorien unterschiedlich stark gewichtet sein können: ein Haus mit Schule UND
+    Supermarkt ist Quelle für Bildung und für Einkauf.
 
-    Punkte ohne Gebäudetreffer behalten ihre Punktgeometrie, jeweils mit
-    Gewicht 1.0 – ein einzelner Zielort ohne erkanntes Gebäude zählt wie ein
-    Gebäude mit Zielort.
+    `category_factors` (aus `zielort_category_factors`) gibt je Kategorie den Anteil am
+    vollen Zuschlag; er wird direkt zum Quellgewicht. Bei Gleichverteilung ist das
+    überall 1.0 – dann verhält sich alles wie vor der Kategorie-Gewichtung.
+
+    Punkte ohne Gebäudetreffer behalten ihre Punktgeometrie – ein einzelner Zielort
+    ohne erkanntes Gebäude zählt wie ein Gebäude mit Zielort.
 
     Beide GeoDataFrames müssen im selben metrischen CRS liegen. Rückgabe:
-    GeoDataFrame mit der Spalte `ziel_gewicht` (immer 1.0) und gemischten
+    GeoDataFrame mit der Spalte `ziel_gewicht` (Kategorie-Faktor 0–1) und gemischten
     Geometrien (Gebäudepolygone + Restpunkte).
     """
-    points = target_proj[["geometry"]].copy()
+    points = target_proj[["geometry", "category"]].copy()
+    points["ziel_gewicht"] = (
+        points["category"].map(category_factors).astype(float).fillna(0.0)
+    )
+    # Kategorien ohne Gewicht (Regler auf 0) tragen nichts bei – gar nicht erst mitschleppen.
+    points = points[points["ziel_gewicht"] > 0]
+    if not len(points):
+        return gpd.GeoDataFrame(
+            {"ziel_gewicht": []}, geometry=[], crs=target_proj.crs
+        )
 
     if buildings_proj is None or not len(buildings_proj):
-        points["ziel_gewicht"] = 1.0
-        return points
+        return points[["geometry", "ziel_gewicht"]]
 
     bld = buildings_proj[["geometry"]].reset_index(drop=True)
     hits = gpd.sjoin(points, bld, how="left", predicate="within")
-    # Mehrere Zielorte im selben Gebäude sollen das Gebäude nur EINMAL als Quelle
-    # zählen – nicht wie beim Bewohnerbedarf aufsummieren, sondern die betroffenen
-    # Gebäude einmalig herausziehen.
+    # Mehrere Zielorte derselben Kategorie im selben Gebäude sollen das Gebäude nur EINMAL
+    # als Quelle zählen – nicht wie beim Bewohnerbedarf aufsummieren, sondern je
+    # (Gebäude, Kategorie) einmalig herausziehen.
     matched = hits["index_right"].notna()
-    matched_building_ids = hits.loc[matched, "index_right"].astype(int).unique()
-
-    building_sources = bld.loc[matched_building_ids].copy()
-    building_sources["ziel_gewicht"] = 1.0
-    leftover = hits.loc[~matched, ["geometry"]].copy()
-    leftover["ziel_gewicht"] = 1.0
+    per_building = (
+        hits.loc[matched, ["index_right", "category", "ziel_gewicht"]]
+        .astype({"index_right": int})
+        .drop_duplicates(subset=["index_right", "category"])
+    )
+    building_sources = bld.loc[per_building["index_right"].to_numpy()].copy()
+    building_sources["ziel_gewicht"] = per_building["ziel_gewicht"].to_numpy()
+    leftover = hits.loc[~matched, ["geometry", "ziel_gewicht"]].copy()
 
     print(f"   ✓ Zielorte: {int(matched.sum())} von {len(points)} Punkten auf "
-          f"{len(building_sources)} Gebäude aggregiert, {int((~matched).sum())} als Punkt")
+          f"{len(building_sources)} Gebäude-Kategorie-Quellen aggregiert, "
+          f"{int((~matched).sum())} als Punkt")
     return gpd.GeoDataFrame(
         pd.concat([building_sources, leftover], ignore_index=True),
         geometry="geometry",
@@ -540,7 +564,7 @@ def run_flaechenfinder(
     # Freizeit – siehe `load_target_locations`) erzeugen rund um ihre Gebäude Bedarf,
     # analog zum Bewohnerbedarf (Schritt 5): Punkte werden per Point-in-Polygon auf
     # die in Schritt 4 geladenen Gebäude aggregiert (`_target_demand_sources`,
-    # Vorhandensein-Gewichtung 0/1), dann gewichtete Nachbarschaftssumme
+    # Gewichtung je Kategorie über `zielort_category_shares`), dann gewichtete Nachbarschaftssumme
     # `ziel_praesenz` (Anzahl erreichbarer Zielort-Gebäude, linear mit dem Abstand
     # abfallend). Die Bonus-Ableitung passiert im MCE-Schritt (13). Nur bei
     # Gewicht > 0 wird geladen; sonst bleibt `ziel_praesenz` NaN
@@ -554,15 +578,22 @@ def run_flaechenfinder(
             # (SELECT … AS geom) – wie bei den Gebäuden oben auf "geometry" normalisieren.
             targets_proj = (
                 targets.to_crs("EPSG:25832")
-                .rename_geometry("geometry")[["geometry"]]
+                .rename_geometry("geometry")[["geometry", "category"]]
                 .reset_index(drop=True)
             )
-            sources = _target_demand_sources(targets_proj, buildings_for_demand)
-            hex_proj["ziel_praesenz"] = weighted_proximity_sum(
-                centroids, sources, "ziel_gewicht", use_case.zielort_radius_m
+            category_factors = zielort_category_factors(use_case.zielort_category_shares)
+            print("   → Zielort-Arten wirken zu: " + ", ".join(
+                f"{c} {category_factors[c] * 100:.0f} %" for c in ZIELORT_CATEGORIES
+            ))
+            sources = _target_demand_sources(
+                targets_proj, buildings_for_demand, category_factors
             )
-            print(f"   → {len(sources)} Zielort-Quellen, Reichweite "
-                  f"{use_case.zielort_radius_m:g} m")
+            if len(sources):
+                hex_proj["ziel_praesenz"] = weighted_proximity_sum(
+                    centroids, sources, "ziel_gewicht", use_case.zielort_radius_m
+                )
+                print(f"   → {len(sources)} Zielort-Quellen, Reichweite "
+                      f"{use_case.zielort_radius_m:g} m")
             del targets_proj, sources
         del targets
 
@@ -828,8 +859,11 @@ def run_flaechenfinder(
     # abfallend) wird ein Zuschlag auf die BEDARFS-Gruppe – analog zum Bewohnerbedarf,
     # nur mit Zielort- statt Zensus-Quellen (siehe `_target_demand_sources`) UND mit
     # fest auf 1.0 verdrahteter Sättigung (User-Entscheid, kein Konfigfeld): schon EIN
-    # Zielort-Gebäude direkt an der Hexagonkante (ziel_praesenz=1.0) löst den vollen
-    # Zuschlag aus, das simple `.clip(0, 1)` ersetzt die Division durch die Sättigung.
+    # Zielort-Gebäude der stärksten Kategorie direkt an der Hexagonkante (ziel_praesenz=1.0)
+    # löst den vollen Zuschlag aus, das simple `.clip(0, 1)` ersetzt die Division durch die
+    # Sättigung. Schwächer gewichtete Kategorien bringen ihre Quelle nur anteilig ein
+    # (Quellgewicht = `zielort_category_factors`), mehrere Kategorien addieren sich bis zum
+    # Deckel 1.0.
     # `w_target` (0–1) ist der maximale Zuschlag in Punkten (× 100). Wie beim
     # Bewohnerbedarf bekommen Hexagone, die überwiegend von einem Gebäude bedeckt
     # sind, bewusst 0 (Bedarf entsteht RUND UM das Gebäude, nicht darauf). Ohne

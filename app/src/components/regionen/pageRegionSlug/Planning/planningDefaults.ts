@@ -1,5 +1,6 @@
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
+import { DEFAULT_ZIELORT_SHARES } from './zielortCategories'
 
 // Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX).
 export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
@@ -30,6 +31,9 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   parken_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
+  // Gleichverteilung der vier Zielort-Arten: der Faktor verhält sich damit wie vor der
+  // Kategorie-Gewichtung (siehe `zielortShares.ts`).
+  zielort_category_shares: { ...DEFAULT_ZIELORT_SHARES },
   // `bewohnerbedarf_saettigung_ew` fehlt hier bewusst: ohne Wert in der Varianten-Config gilt der
   // Zensus-Vorschlag des Planungsgebiets (siehe `mergeFactorConfig`). Erst wenn jemand das Feld
   // von Hand ändert, steht eine Zahl in der Variante.
@@ -81,7 +85,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_transit:
     'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore.',
   w_target:
-    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit aus OpenStreetMap) heben den Bedarf in ihrer Nähe — unabhängig davon, wie viele Zielorte in einem Gebäude liegen. Schon ein einzelnes solches Gebäude direkt an der Gebäudekante löst den vollen Zuschlag aus; mit zunehmendem Abstand nimmt er linear ab und ist ab 20 m verbraucht. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit aus OpenStreetMap) heben den Bedarf in ihrer Nähe — unabhängig davon, wie viele Zielorte in einem Gebäude liegen. Schon ein einzelnes solches Gebäude direkt an der Gebäudekante löst den vollen Zuschlag aus; mit zunehmendem Abstand nimmt er linear ab und ist ab 20 m verbraucht. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen. Unter „Zielort-Arten“ steht das Verhältnis der vier Arten zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor.',
   w_fussgaengerzone:
     'An Ecken, wo eine normale Straße auf eine Fußgängerzone trifft, ist der Bedarf besonders hoch. Der volle Zuschlag liegt rund 5–8 m von der Ecke; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_bestand:

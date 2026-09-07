@@ -16,6 +16,10 @@ export type VariantFactorConfig = {
   bestand_default_diameter_m?: number
   bewohnerbedarf_radius_m?: number
   bewohnerbedarf_saettigung_ew?: number
+  /** Verhältnis der vier Zielort-Kategorien zueinander in Prozent (Summe 100) — wirkt nur
+   * innerhalb des Faktors `w_target`, siehe `zielortShares.ts` und `scorer.py`. Fehlt das Feld
+   * (Varianten von vor der Kategorie-Gewichtung), gilt Gleichverteilung. */
+  zielort_category_shares?: Record<string, number>
   min_score_threshold?: number
   /** Zielgröße der Flächensuche (m²), Client-Filter auf cluster_area_m2 — pro Variante. */
   min_area_m2?: number | null
