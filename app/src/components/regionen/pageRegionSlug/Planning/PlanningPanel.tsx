@@ -30,6 +30,7 @@ import {
   usePlanningVariantParam,
 } from '../hooks/useQueryState/usePlanningParams'
 import { AreaContextBar } from './AreaContextBar'
+import { PlanningCandidateToggle } from './candidates/PlanningCandidateToggle'
 import { FactorEditorPanel } from './FactorEditorPanel'
 import { InfoTooltip } from './InfoTooltip'
 import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
@@ -185,32 +186,35 @@ const MinAreaFilterForm = ({
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-      <label className="flex items-center gap-2 font-medium text-gray-800">
+    <div className="flex flex-col gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+      <div className="flex items-center justify-between gap-2">
+        <label className="flex items-center gap-2 font-medium text-gray-800">
+          <input
+            type="checkbox"
+            checked={filterOn}
+            onChange={(e) => setFilterOn(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          Gesuchte Fläche (m²)
+        </label>
         <input
-          type="checkbox"
-          checked={filterOn}
-          onChange={(e) => setFilterOn(e.target.checked)}
-          className="rounded border-gray-300"
+          type="number"
+          min={0}
+          step={5}
+          placeholder="aus"
+          disabled={!filterOn}
+          value={minArea > 0 ? minArea : ''}
+          onChange={(e) =>
+            setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
+          }
+          onBlur={save}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.currentTarget.blur()
+          }}
+          className={planningNumberInputClass}
         />
-        Gesuchte Fläche (m²)
-      </label>
-      <input
-        type="number"
-        min={0}
-        step={5}
-        placeholder="aus"
-        disabled={!filterOn}
-        value={minArea > 0 ? minArea : ''}
-        onChange={(e) =>
-          setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
-        }
-        onBlur={save}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') e.currentTarget.blur()
-        }}
-        className={planningNumberInputClass}
-      />
+      </div>
+      <PlanningCandidateToggle />
     </div>
   )
 }

@@ -1,45 +1,28 @@
 import { SquaresPlusIcon } from '@heroicons/react/24/outline'
 import { useEffect } from 'react'
-import { twMerge } from 'tailwind-merge'
+import { twJoin } from 'tailwind-merge'
 import { useMapActions } from '../../hooks/mapState/useMapState'
-import { usePlanningBoundaryState } from '../../hooks/mapState/usePlanningBoundaryState'
 import { usePlanningCandidatesState } from '../../hooks/mapState/usePlanningCandidatesState'
 import { useFeaturesParam } from '../../hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import {
   usePlanningModeParam,
   usePlanningRunParam,
 } from '../../hooks/useQueryState/usePlanningParams'
-import {
-  mobileControlButtonActiveClassName,
-  mobileControlButtonClassName,
-} from '../../mobile/mobileControlButton.const'
-
-type Props = {
-  /** Extra classes for positioning (the desktop overlay, left of the search button). */
-  className?: string
-}
 
 /**
- * Werkzeug „Kandidaten auswählen": schaltet die Karte in einen Auswahlmodus, in dem
- * ein Klick auf ein Ergebnis-Hexagon dieses der Kandidatenliste hinzufügt bzw. wieder
- * entfernt (RegionMap `handleClick`), statt den Feature-Inspector zu öffnen. Die
- * Auswahl selbst zeigt `PlanningCandidatePanel` in der Sidebar.
+ * Setzt Werkzeug und Auswahl zurück, sobald der Planungsmodus verlassen wird oder kein
+ * Lauf mehr angezeigt wird – die Kandidaten gehören zu genau diesem Ergebnis.
  *
- * Sichtbar nur im Planungsmodus mit angezeigtem Lauf – ohne Ergebnis-Hexagone gäbe
- * es nichts auszuwählen. Optik bewusst identisch zum Suchknopf daneben.
+ * Bewusst getrennt vom Knopf: der lebt im Planungspanel und ist dort nur bei einem
+ * fertigen Lauf gemountet; das Zurücksetzen muss aber gerade dann laufen, wenn dieser
+ * Zustand endet. Diese Komponente rendert nichts und hängt im MapInterface.
  */
-export const PlanningCandidateToggle = ({ className }: Props) => {
+export const PlanningCandidateSelectionReset = () => {
   const [planningMode] = usePlanningModeParam()
   const [runId] = usePlanningRunParam()
-  const selectActive = usePlanningCandidatesState((s) => s.selectActive)
   const setSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
   const clearCandidates = usePlanningCandidatesState((s) => s.clearCandidates)
-  const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
-  const { clearInspectorFeatures } = useMapActions()
-  const { setFeaturesParam } = useFeaturesParam()
 
-  // Beim Verlassen des Planungsmodus (oder wenn kein Lauf mehr angezeigt wird) Werkzeug
-  // und Auswahl zurücksetzen – die Kandidaten gehören zu genau diesem Ergebnis.
   useEffect(
     function resetCandidateSelectionOutsidePlanningResult() {
       if (planningMode && runId != null) return
@@ -49,15 +32,34 @@ export const PlanningCandidateToggle = ({ className }: Props) => {
     [planningMode, runId, setSelectActive, clearCandidates],
   )
 
+  return null
+}
+
+/**
+ * Werkzeug „Kandidaten auswählen": schaltet die Karte in einen Auswahlmodus, in dem
+ * ein Klick auf ein Ergebnis-Hexagon dieses der Kandidatenliste hinzufügt bzw. wieder
+ * entfernt (RegionMap `handleClick`), statt den Feature-Inspector zu öffnen. Die
+ * Auswahl selbst zeigt `PlanningCandidatePanel` in der Sidebar.
+ *
+ * Sitzt im Planungspanel unter dem Flächenfilter. Optik bewusst sekundär (grün,
+ * umrandet), damit er sich vom blauen „Neu berechnen“ abhebt.
+ */
+export const PlanningCandidateToggle = () => {
+  const [planningMode] = usePlanningModeParam()
+  const [runId] = usePlanningRunParam()
+  const selectActive = usePlanningCandidatesState((s) => s.selectActive)
+  const setSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
+  const { clearInspectorFeatures } = useMapActions()
+  const { setFeaturesParam } = useFeaturesParam()
+
   if (!planningMode || runId == null) return null
 
   const handleClick = () => {
     const next = !selectActive
     setSelectActive(next)
     if (!next) return
-    // Beim Aktivieren Platz schaffen: Planungspanel einklappen und einen offenen
-    // Inspector schließen (dessen Sidebar-Platz übernimmt die Kandidatenliste).
-    setPanelCollapsed(true)
+    // Beim Aktivieren einen offenen Inspector schließen – dessen Sidebar-Platz
+    // übernimmt die Kandidatenliste.
     clearInspectorFeatures()
     setFeaturesParam(null)
   }
@@ -66,17 +68,16 @@ export const PlanningCandidateToggle = ({ className }: Props) => {
     <button
       type="button"
       onClick={handleClick}
-      aria-label="Kandidaten auswählen"
       aria-pressed={selectActive}
-      title="Kandidaten auswählen"
-      className={twMerge(
-        mobileControlButtonClassName,
-        'size-10',
-        selectActive && mobileControlButtonActiveClassName,
-        className,
+      className={twJoin(
+        'flex w-full items-center justify-center gap-1.5 rounded border px-3 py-1.5 text-sm font-medium',
+        selectActive
+          ? 'border-emerald-700 bg-emerald-700 text-white hover:bg-emerald-800'
+          : 'border-emerald-700 bg-white text-emerald-800 hover:bg-emerald-50',
       )}
     >
-      <SquaresPlusIcon className="size-6" aria-hidden="true" />
+      <SquaresPlusIcon className="size-4" aria-hidden="true" />
+      {selectActive ? 'Auswahl beenden' : 'Kandidaten auswählen'}
     </button>
   )
 }
