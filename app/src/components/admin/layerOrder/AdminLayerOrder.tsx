@@ -151,10 +151,24 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
         eine feste Gruppe zu.
       </p>
       <p className="text-sm text-gray-600">
-        Gut zu wissen: Die Gruppen wirken nur auf dem Standard-Hintergrund. Ein Raster-Hintergrund
-        (Luftbild, Mapnik usw.) wird selbst in die Basemap eingefügt, und zwar an der Stelle „Unter
-        Straßennamen“: Er verdeckt alles darunter, Straßennamen und Hausnummern der Basemap bleiben
-        sichtbar. Alle Daten-Layer liegen dann darüber – ganz oben, unabhängig von den Gruppen.
+        Hintergrundkarten: Alle Raster-Hintergründe (Luftbild, Mapnik usw.) stecken immer in der
+        Basemap, direkt unterhalb der Gruppe „Unter Straßennamen“; sichtbar ist nur der gewählte.
+        Auf dem Standard-Hintergrund sind alle ausgeblendet, und die Gruppen gelten wie oben
+        beschrieben. Ist ein Raster-Hintergrund aktiv, sieht der Stapel von unten nach oben so aus:
+      </p>
+      <ol className="list-decimal space-y-1 pl-6 text-sm text-gray-600">
+        <li>Basemap bis einschließlich Straßen – vom Raster-Hintergrund verdeckt</li>
+        <li>der gewählte Raster-Hintergrund</li>
+        <li>Straßennamen und Hausnummern der Basemap – bleiben sichtbar</li>
+        <li>statische Daten (Uploads), die immer in der Fallback-Gruppe liegen</li>
+        <li>
+          alle Atlas-Geo-Layer, ohne Gruppen-Zuordnung ganz oben; ihre Reihenfolge untereinander
+          folgt dieser Liste: Gruppen von oben nach unten auf dieser Seite = von unten nach oben auf
+          der Karte
+        </li>
+        <li>Notizen, QA und Maske</li>
+      </ol>
+      <p className="text-sm text-gray-600">
         Sortieren lassen sich hier nur die Atlas-Geo-Layer. Hintergründe, statische Daten, Notizen,
         QA und Maske haben eine feste Reihenfolge zueinander, die im Code festgelegt ist.
       </p>
