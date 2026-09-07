@@ -1,6 +1,6 @@
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { describe, expect, test, vi } from 'vitest'
-import { syncSelectedFeatureState } from './UpdateFeatureState'
+import { syncSelectedFeatureState } from './syncSelectedFeatureState'
 
 const createFeature = (id: string, layerId = 'atlas_bikelanes-default') => {
   return {

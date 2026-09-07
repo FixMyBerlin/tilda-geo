@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { twJoin } from 'tailwind-merge'
 import { useShowMapLoadingIndicator } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
+import { mapOverlayControlSizeClassName } from '../mapOverlayChrome.const'
 
 export const LoadingIndicator = () => {
   const showIndicator = useShowMapLoadingIndicator()
@@ -20,7 +22,10 @@ export const LoadingIndicator = () => {
         >
           <Tooltip
             text="Kartendaten werden geladen…"
-            className="flex size-10 cursor-help items-center justify-center"
+            className={twJoin(
+              'flex cursor-help items-center justify-center',
+              mapOverlayControlSizeClassName,
+            )}
           >
             <Spinner color="teal" screenReaderLabel={false} size="5" />
           </Tooltip>

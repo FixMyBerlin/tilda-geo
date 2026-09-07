@@ -11,9 +11,12 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
+import { isModeOwnedSource } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { FadeSlideIn } from '@/components/shared/motion/FadeSlideIn'
+import { mapOverlayMaxHeightClassName, mapOverlaySheetClassName } from '../mapOverlayChrome.const'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
+import { PanelResizeHandle } from '../PanelResizeHandle'
 import { Inspector } from './Inspector'
 import { InspectorHeader } from './InspectorHeader'
 import { useResizableInspectorWidth } from './useResizableInspectorWidth'
@@ -31,9 +34,10 @@ export const SidebarInspector = () => {
   const inspectorSize = useMapInspectorSize()
   const sidebarSize = useMapSidebarSize()
 
-  const features = inspectorFeatures.length
+  const rawFeatures = inspectorFeatures.length
     ? inspectorFeatures
     : selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
+  const features = rawFeatures.filter((feature) => !isModeOwnedSource(feature.source))
 
   const renderFeatures = !!features.length
 
@@ -42,10 +46,11 @@ export const SidebarInspector = () => {
     isOpen: renderFeatures,
   })
 
-  const { setFeaturesParam } = useFeaturesParam()
+  const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const { clearInspectorFeatures } = useMapActions()
   const handleClose = () => {
-    setFeaturesParam(null)
+    const modeUrlFeatures = featuresParam.filter((feature) => isModeOwnedSource(feature.sourceId))
+    setFeaturesParam(modeUrlFeatures.length > 0 ? modeUrlFeatures : null)
     clearInspectorFeatures()
   }
 
@@ -93,28 +98,28 @@ export const SidebarInspector = () => {
     )
   }
 
-  // Desktop: right-hand sidebar (this branch + its map-control offset run on desktop only).
+  // Desktop: floating right-hand sheet (this branch + its map-control offset run on desktop only).
   return (
     <div
       ref={desktopPanelRef}
       className={twJoin(
-        'group/panel absolute top-0 right-0 bottom-0 z-20 w-(--inspector-width) max-w-[800px] overflow-hidden bg-white shadow-md transition-opacity duration-150',
+        'absolute z-20 flex w-(--inspector-width) max-w-[800px] flex-col overflow-hidden transition-opacity duration-150',
+        'top-(--map-overlay-inset) right-(--map-overlay-inset)',
+        mapOverlayMaxHeightClassName,
+        mapOverlaySheetClassName,
         !renderFeatures && 'pointer-events-none opacity-0',
       )}
     >
       {renderFeatures ? (
         <>
-          <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Inspectorbreite ändern"
-            className="absolute top-0 bottom-0 left-0 z-30 w-2 cursor-col-resize touch-none bg-gray-400/70 opacity-0 transition-opacity select-none group-hover/panel:opacity-100 active:opacity-100"
+          <PanelResizeHandle
+            label="Inspectorbreite ändern"
             onPointerDown={onResizeHandlePointerDown}
           />
           {/* Enter-only transform/opacity animation on the content only: the outer panel
               div must stay a plain, always-mounted div — its ResizeObserver and the
               --inspector-width layout effect depend on it (see useResizableInspectorWidth). */}
-          <FadeSlideIn x={24} className="relative h-full overflow-y-auto p-5 pr-3">
+          <FadeSlideIn x={24} className="relative min-h-0 overflow-y-auto p-2">
             <InspectorHeader count={features.length} handleClose={handleClose} />
             <Inspector features={features} />
           </FadeSlideIn>

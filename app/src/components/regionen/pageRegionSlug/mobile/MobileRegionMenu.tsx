@@ -55,7 +55,7 @@ export const MobileRegionMenu = () => {
         aria-expanded={isOpen}
         className={twMerge(
           mobileControlButtonClassName,
-          'h-10 min-w-10 gap-1.5 px-2',
+          'h-8.5 min-w-8.5 gap-1.5 px-2',
           customLogo && region.logoWhiteBackgroundRequired ? 'bg-white' : '',
           isOpen && mobileControlButtonActiveClassName,
         )}

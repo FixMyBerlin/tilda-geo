@@ -2,6 +2,8 @@ import type { ExpressionSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { Layer } from 'react-map-gl/maplibre'
 import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 
 const createMatchExpression = ({
   valueNone,
@@ -30,22 +32,37 @@ const createMatchExpression = ({
   ] satisfies ExpressionSpecification
 }
 
-const opacity = createMatchExpression({
-  valueNone: 0,
-  valueHover: 0.5,
-  valueSelected: 0.8,
-  valueHoverSelected: 0.8,
-})
+const HOVER_COLOR = '#ff9933'
 
-const color = createMatchExpression({
-  valueNone: 'black',
-  valueHover: '#ff9933',
-  valueSelected: '#ff0000',
-  valueHoverSelected: '#ff0000', // Same as selected when both hover and selected
-})
+type Props = LayerProps & {
+  /** Override pointer-hover color. Default orange; QA passes the mode accent. */
+  hoverColor?: string
+  /** When false, skip feature-state selected paint (QA uses a dedicated `${qaLayerId}-selected` layer). */
+  includeSelected?: boolean
+}
 
-export const LayerHighlight = (props: LayerProps) => {
+export const LayerHighlight = ({
+  hoverColor = HOVER_COLOR,
+  includeSelected = true,
+  ...props
+}: Props) => {
   const mapLoaded = useMapLoaded()
+  const mode = useCurrentMode()
+  // Selected uses the mode accent (QA purple, notes blue, …). Default hover stays orange so
+  // pointer interest stays distinct from “this feature is open in the panel”.
+  const selectedColor = modeIdentity[mode].accent
+  const opacity = createMatchExpression({
+    valueNone: 0,
+    valueHover: 0.5,
+    valueSelected: includeSelected ? 0.8 : 0,
+    valueHoverSelected: includeSelected ? 0.8 : 0.5,
+  })
+  const color = createMatchExpression({
+    valueNone: 'black',
+    valueHover: hoverColor,
+    valueSelected: includeSelected ? selectedColor : hoverColor,
+    valueHoverSelected: includeSelected ? selectedColor : hoverColor,
+  })
   if (!mapLoaded) return null
 
   // Type guard: check if this is a standard layer (not custom layer)

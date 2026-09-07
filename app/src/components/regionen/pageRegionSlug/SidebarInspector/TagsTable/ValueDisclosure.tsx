@@ -34,17 +34,17 @@ export const ValueDisclosureButton = ({
   if (hasBody === false) return <div className="w-full min-w-0">{children}</div>
 
   return (
-    <DisclosureButton className="group/button flex w-full min-w-0 cursor-pointer items-center justify-between gap-1 text-left">
-      <div className="w-full min-w-0">{children}</div>
-      <div className="focus-visible:ring-opacity-75 -m-0.5 rounded border border-transparent bg-gray-50 p-0.5 text-left text-sm font-medium group-hover/button:border-gray-500 group-hover/button:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
+    <DisclosureButton className="group/button flex w-full min-w-0 cursor-pointer items-center gap-1 text-left">
+      <div className="min-w-0 flex-1">{children}</div>
+      <div className="focus-visible:ring-opacity-75 shrink-0 rounded border border-transparent bg-gray-50 text-left text-sm font-medium group-hover/button:border-gray-500 group-hover/button:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
         <InformationCircleIcon
           data-active-icon="open" // see ValueDisclosure
-          className="hidden size-5"
+          className="hidden size-4"
           title="Hinweise anzeigen…"
         />
         <InformationCircleIconOutline
           data-active-icon="closed" // see ValueDisclosure
-          className="hidden size-5"
+          className="hidden size-4"
           title="Hinweise anzeigen…"
         />
       </div>

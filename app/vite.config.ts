@@ -133,6 +133,9 @@ export default defineConfig({
       injectSource: {
         enabled: true,
         ignore: {
+          // react-map-gl spreads remaining props into map.addSource/addLayer; `data-tsd-source`
+          // fails MapLibre validation if those props leak onto a Source/Layer.
+          components: ['Source', 'Layer'],
           // Skip source injection for the map subtree: these files are large/high-churn and make
           // TanStack Devtools slower and noisier during local debugging.
           files: [/src\/components\/regionen\/pageRegionSlug\/Map\//],

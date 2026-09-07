@@ -100,7 +100,7 @@ const TagsTableRowMaybeList = ({
   }
 
   return (
-    <ul className="list-disc pl-4">
+    <ul className="list-disc pl-3">
       {listValues.map((value) => {
         return (
           <li key={value}>
