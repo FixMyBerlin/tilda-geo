@@ -10,6 +10,9 @@ minimumReleaseAgeExcludes = [
 # Global virtual store — requires isolated linker. Reinstall after changing: rm -rf node_modules && bun install
 # Vite dev: server.fs.allow in vite.config.ts (packages realpath into ~/.bun/install/cache/links/).
 # Phantom deps in third-party packages: package.json trustedDependencies — see tech-stack bun-install.md
+# `nitro` is npm:nitro-nightly; trustedDependencies must use the published name (nitro-nightly)
+# so the package stays project-local. Otherwise dist/vite.mjs `from "nitro/meta"` cannot resolve
+# from ~/.bun/install/cache/links/ (publicHoistPattern does not help packages in the global store).
 # @see https://bun.com/docs/pm/global-store
 linker = "isolated"
 globalStore = true
