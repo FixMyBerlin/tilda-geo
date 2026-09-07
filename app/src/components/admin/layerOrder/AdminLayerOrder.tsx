@@ -151,16 +151,21 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
         eine feste Gruppe zu.
       </p>
       <p className="text-sm text-gray-600">
-        Gut zu wissen: Die Gruppen wirken nur auf dem Standard-Hintergrund. Bei Luftbildern und
-        anderen Hintergrundkarten liegen alle Daten-Layer immer oben. Sortieren lassen sich hier nur
-        die Atlas-Geo-Layer. Hintergründe, statische Daten, Notizen, QA und Maske haben eine feste
-        Reihenfolge zueinander, die im Code festgelegt ist.
+        Gut zu wissen: Die Gruppen wirken nur auf dem Standard-Hintergrund. Ein Raster-Hintergrund
+        (Luftbild, Mapnik usw.) wird selbst in die Basemap eingefügt, und zwar an der Stelle „Unter
+        Straßennamen“: Er verdeckt alles darunter, Straßennamen und Hausnummern der Basemap bleiben
+        sichtbar. Alle Daten-Layer liegen dann darüber – ganz oben, unabhängig von den Gruppen.
+        Sortieren lassen sich hier nur die Atlas-Geo-Layer. Hintergründe, statische Daten, Notizen,
+        QA und Maske haben eine feste Reihenfolge zueinander, die im Code festgelegt ist.
       </p>
       <p className="text-sm text-gray-600">
-        Speichern schreibt die komplette Liste für alle Regionen. Beim ersten Speichern wird damit
-        die Reihenfolge aus dem Code für alle Regionen festgeschrieben; Regionen mit abweichender
-        Kategorie-Reihenfolge können sich dadurch leicht ändern. Gespeicherte Änderungen sind
-        sichtbar, sobald die Karte neu geladen wird.
+        Gespeichert wird eine einzige globale Liste – nicht eine Liste pro Region. Jede Region zeigt
+        nur die Layer ihrer Kategorien; diese Teilmenge wird beim Laden der Karte nach der globalen
+        Liste sortiert. Solange noch nichts gespeichert wurde, gilt die Reihenfolge aus dem Code –
+        dort folgt sie der Kategorie-Reihenfolge der jeweiligen Region. Ab dem ersten Speichern gilt
+        für alle Regionen dieselbe Liste; Regionen mit abweichender Kategorie-Reihenfolge können
+        sich dadurch leicht ändern. Gespeicherte Änderungen sind sichtbar, sobald die Karte neu
+        geladen wird.
       </p>
       {GROUPS.map((group) => (
         <section key={group}>
