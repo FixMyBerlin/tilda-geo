@@ -141,9 +141,14 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
         Liste weiter unten steht, liegt auf der Karte weiter oben.
       </p>
       <p className="text-sm text-gray-600">
-        Die Gruppe „Standard“ ist ein Sonderfall: Diese Layer werden dort einsortiert, wo es ihre
-        Konfiguration vorgibt. Der graue Hinweis hinter dem Namen zeigt, an welcher Stelle das ist.
-        Nur Layer mit derselben Stelle lassen sich untereinander sortieren.
+        Die Gruppe „Standard“ ist ein Sonderfall: Diese Layer haben keine eigene Gruppe, sondern
+        übernehmen ihre Position aus der Karten-Konfiguration – meist abhängig vom Layer-Typ:
+        Flächen liegen unter der Landnutzung, Linien unter den Landesgrenzen, Punkte und
+        Beschriftungen unter den Hausnummern. Der graue Hinweis hinter dem Namen (z. B. „→ landuse“)
+        zeigt diese Position. Beim Sortieren zählt deshalb nur die Reihenfolge zwischen Layern mit
+        demselben grauen Hinweis; Layer mit unterschiedlichen Hinweisen beeinflussen sich nicht,
+        egal wo sie in der Liste stehen. Um einen Layer gezielt zu verschieben, weist man ihm rechts
+        eine feste Gruppe zu.
       </p>
       <p className="text-sm text-gray-600">
         Gut zu wissen: Die Gruppen wirken nur auf dem Standard-Hintergrund. Bei Luftbildern und
