@@ -59,10 +59,11 @@ export const RegionWelcomeNavLinks = ({
   className,
   linkClassName = headerNavLinkClassName,
   regionItems,
-  includeSecondaryLinks = regionItems === undefined,
+  includeSecondaryLinks,
   layout = 'row',
 }: Props) => {
-  const secondaryItems = includeSecondaryLinks ? defaultSecondaryNavigationGrouped.flat() : []
+  const showSecondaryLinks = includeSecondaryLinks ?? regionItems === undefined
+  const secondaryItems = showSecondaryLinks ? defaultSecondaryNavigationGrouped.flat() : []
   const regionLinks = regionItems ?? []
   if (secondaryItems.length === 0 && regionLinks.length === 0) return null
 

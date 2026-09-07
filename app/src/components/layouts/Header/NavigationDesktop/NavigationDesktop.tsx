@@ -7,12 +7,22 @@ type Props = {
   primaryNavigation: PrimaryNavigation[]
   /** Control after User — secondary menu (app) or region panel toggle (regionen). */
   trailing: React.ReactNode
+  /** Region mode switcher (see modes/ModeSwitcher.tsx), rendered next to the logo */
+  modeSwitcher?: React.ReactNode
 }
 
-export const NavigationDesktop = ({ logo: Logo, primaryNavigation, trailing }: Props) => {
+export const NavigationDesktop = ({
+  logo: Logo,
+  primaryNavigation,
+  trailing,
+  modeSwitcher,
+}: Props) => {
   return (
     <div className="relative z-50 hidden min-h-16 w-full min-w-0 items-center justify-between gap-4 sm:flex sm:h-16">
-      <div className="flex min-w-0 shrink-0 items-center">{Logo}</div>
+      <div className="flex min-w-0 shrink-0 items-center gap-4">
+        {Logo}
+        {modeSwitcher}
+      </div>
       <div className="flex min-w-0 shrink-0 items-center gap-3 sm:gap-4">
         <NavigationDesktopLinks menuItems={primaryNavigation} />
         <User />

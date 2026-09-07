@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { MobileBottomSheet } from '@/components/regionen/pageRegionSlug/mobile/MobileBottomSheet'
-import { mobileControlButtonClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
+import { mobileMapIconButtonClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
 import { AdminPanelContent } from './AdminPanelContent'
@@ -38,8 +38,8 @@ export const AdminPanelTrigger = ({ variant }: Props) => {
         className={
           isMapControl
             ? twMerge(
-                mobileControlButtonClassName,
-                'size-10 border-pink-400 bg-pink-300 text-pink-900 hover:bg-pink-400 focus:ring-pink-500',
+                mobileMapIconButtonClassName,
+                'border-pink-400 bg-pink-300 text-pink-900 hover:bg-pink-400 focus:ring-pink-500',
                 open && 'border-pink-600 bg-pink-400',
               )
             : headerButtonClassName

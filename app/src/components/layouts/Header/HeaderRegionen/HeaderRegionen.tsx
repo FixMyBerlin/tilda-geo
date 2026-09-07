@@ -1,5 +1,6 @@
 import { MotionConfig } from 'motion/react'
 import { useId } from 'react'
+import { ModeSwitcher } from '@/components/regionen/pageRegionSlug/modes/ModeSwitcher'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { RegionPanelToggle } from '@/components/regionen/pageRegionSlug/welcome/RegionPanelToggle'
 import { RegionWelcomeDesktopPanel } from '@/components/regionen/pageRegionSlug/welcome/RegionWelcomeDesktopPanel'
@@ -26,10 +27,12 @@ export const HeaderRegionen = () => {
           logo={<HeaderRegionenLogo />}
           primaryNavigation={primaryNavigation}
           secondaryNavigation={defaultSecondaryNavigationGrouped}
+          modeSwitcher={<ModeSwitcher />}
         />
         <NavigationDesktop
           logo={<HeaderRegionenLogo />}
           primaryNavigation={primaryNavigation}
+          modeSwitcher={<ModeSwitcher />}
           trailing={
             // Always shown: the panel is also the region secondary-links surface (not welcome-only).
             <RegionPanelToggle
