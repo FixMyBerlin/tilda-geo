@@ -3,7 +3,7 @@ local class_obstacle_category = require('topics.parking.obstacles.helper.class_o
 local obstacle_line_categories = require('topics.parking.obstacles.line.obstacle_line_categories')
 local TAG_HELPER = require('topics.parking.obstacles.helper.tag_helper')
 
----@return table<string, { category: ObstacleCategory, object: OSMObject} | { category: nil, object: nil}>
+---@return table<string, { category: ObstacleCategory, object: OsmObject} | { category: nil, object: nil}>
 local function categorize_line(object)
   for _, category in ipairs(obstacle_line_categories) do
     if category:is_active(object.tags) then

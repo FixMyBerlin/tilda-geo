@@ -1,7 +1,4 @@
-local time_utils = require('topics.helper.time_utils')
-local log = require('topics.helper.log')
-
----@param object table
+---@param object OsmObject
 ---@return ObjectMeta
 local function metadata(object)
   local meta = {

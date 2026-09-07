@@ -117,6 +117,16 @@ local highway_areas_table = osm2pgsql.define_table({
   }
 })
 
+---@class RoadsBikelanesTables
+---@field roads_table Osm2pgsqlTable
+---@field roads_path_classes_table Osm2pgsqlTable
+---@field bikelanes_table Osm2pgsqlTable
+---@field bikelanes_presence_table Osm2pgsqlTable
+---@field bike_suitability_table Osm2pgsqlTable
+---@field todo_lines_table Osm2pgsqlTable
+---@field highway_areas_table Osm2pgsqlTable
+
+---@type RoadsBikelanesTables
 return {
   roads_table = roads_table,
   roads_path_classes_table = roads_path_classes_table,

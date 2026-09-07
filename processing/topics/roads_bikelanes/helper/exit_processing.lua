@@ -3,7 +3,7 @@ local exclude = require('topics.roads_bikelanes.helper.exclude_highways')
 
 local forbidden_accesses_bikelanes = SET.set({ 'private', 'no', 'delivery', 'permit' })
 
----@param object_tags table<string, string | nil>
+---@param object_tags OsmTags
 ---@param include_areas boolean|nil keep `area=yes` (highwayAreas table)
 ---@return boolean
 local function exit_processing(object_tags, include_areas)

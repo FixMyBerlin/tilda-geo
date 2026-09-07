@@ -2,7 +2,11 @@
 -- We need to copy and modify this in order to be able to use those helpers in our `*.test.lua` files
 -- We can still use the 'original' osm2pgsql in our code elswhere, just for tests we need to also `require('topics.helper.osm2pgsql')`.
 
+---@class Osm2pgsqlTable
+---@field insert fun(self: Osm2pgsqlTable, row: table)
+
 ---@class osm2pgsql
+---@field define_table fun(def: table): Osm2pgsqlTable
 osm2pgsql = {}
 
 --
@@ -96,7 +100,7 @@ function osm2pgsql.make_check_values_func(list, default)
 end
 
 ---@param keys string[]
----@return fun(tags: OsmTags): boolean
+---@return fun(tags: table<string, OsmTagValue>): boolean
 function osm2pgsql.make_clean_tags_func(keys)
   local keys_to_delete = {}
   local prefixes_to_delete = {}

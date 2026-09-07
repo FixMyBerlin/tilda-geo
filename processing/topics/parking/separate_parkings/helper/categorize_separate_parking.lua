@@ -1,6 +1,6 @@
 local log = require('topics.helper.log')
 
----@return table<string, { category: SeparateParkingCategory, object: OSMObject} | { category: nil, object: nil}>
+---@return table<string, { category: SeparateParkingCategory, object: OsmObject} | { category: nil, object: nil}>
 local function categorize_parking_separate(object, categories)
   for _, category in ipairs(categories) do
     if category:is_active(object.tags) then

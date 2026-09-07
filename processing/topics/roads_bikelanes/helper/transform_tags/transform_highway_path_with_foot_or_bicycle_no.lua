@@ -1,5 +1,3 @@
-local log = require('topics.helper.log')
-
 -- Transform misclassified highway=path tags to their correct primary highway type.
 --
 -- Background: We allow highway=path with foot=no for bikelane categorization, but for roads processing
@@ -8,8 +6,8 @@ local log = require('topics.helper.log')
 -- - highway=path + foot=no + bicycle=designated/yes/nil → highway=cycleway
 -- - highway=path + foot=yes/designated/nil + bicycle=no → highway=footway
 --
----@param destTags table<string, string> The input table of OSM tags to mutate in-place
----@return table<string, string> unmodified_tags A table containing the original values that were overwritten
+---@param destTags OsmTags The input table of OSM tags to mutate in-place
+---@return OsmTags unmodified_tags A table containing the original values that were overwritten
 local function transform_highway_path_with_foot_or_bicycle_no(destTags)
   local unmodified_tags = {}
 
