@@ -2,74 +2,37 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Reorder, useDragControls } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
-import { z } from 'zod'
-import { getAllAtlasLayerKeys } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerKeys'
-import { ATLAS_APP_ANCHOR_IDS } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { getAllAtlasLayerEntries } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerKeys'
 import { updateMapLayerOrderFn } from '@/server/map-layer-order/map-layer-order.functions'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import type { MapLayerOrderEntry } from '@/server/map-layer-order/queries/getMapLayerOrder.server'
-import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
-
-// Layers without an explicit anchor keep their config/type-based default placement.
-const DEFAULT_GROUP = 'default' as const
-const GROUPS = [DEFAULT_GROUP, ...ATLAS_APP_ANCHOR_IDS] as const
-type GroupKey = (typeof GROUPS)[number]
-const GroupKeySchema = z.enum(GROUPS)
-
-const GROUP_LABELS: Record<GroupKey, string> = {
-  default: 'Standard (Platzierung aus Config)',
-  'atlas-app-beforeid-above-landuse': 'Über Landnutzung (ganz unten)',
-  'atlas-app-beforeid-below-road': 'Unter Straßen',
-  'atlas-app-beforeid-below-roadname': 'Unter Straßennamen',
-  'atlas-app-beforeid-group2': 'Gruppe 2',
-  'atlas-app-beforeid-fallback': 'Fallback-Gruppe',
-  'atlas-app-beforeid-group1': 'Gruppe 1',
-  'atlas-app-beforeid-top': 'Ganz oben',
-}
+import {
+  DEFAULT_GROUP,
+  flattenGroups,
+  GROUPS,
+  GROUP_LABELS,
+  GroupKeySchema,
+  initGroups,
+  type GroupedState,
+  type GroupKey,
+} from './layerOrderGroups'
 
 // Static, region-independent — compute once, not per render/drag-update.
-const CODE_KEYS = getAllAtlasLayerKeys()
+const CODE_ENTRIES = getAllAtlasLayerEntries()
+const CODE_KEYS = CODE_ENTRIES.map((e) => e.layerKey)
 const CODE_KEY_SET = new Set(CODE_KEYS)
-
-type GroupedState = Record<GroupKey, string[]>
-
-const EMPTY_GROUPED_STATE = {
-  default: [],
-  'atlas-app-beforeid-above-landuse': [],
-  'atlas-app-beforeid-below-road': [],
-  'atlas-app-beforeid-below-roadname': [],
-  'atlas-app-beforeid-group2': [],
-  'atlas-app-beforeid-fallback': [],
-  'atlas-app-beforeid-group1': [],
-  'atlas-app-beforeid-top': [],
-} satisfies GroupedState
-
-function initGroups(dbEntries: MapLayerOrderEntry[]) {
-  const groups: GroupedState = structuredClone(EMPTY_GROUPED_STATE)
-  const dbKeys = new Set<string>()
-  for (const entry of dbEntries) {
-    dbKeys.add(entry.layerKey)
-    // Stale DB keys (no longer in code) are kept visible so the admin sees the drift;
-    // they are dropped on save.
-    const anchor = AtlasAppAnchorIdSchema.safeParse(entry.beforeId)
-    const group: GroupKey = anchor.success ? anchor.data : DEFAULT_GROUP
-    groups[group].push(entry.layerKey)
-  }
-  for (const key of CODE_KEYS) {
-    if (!dbKeys.has(key)) groups[DEFAULT_GROUP].push(key)
-  }
-  return groups
-}
+const CODE_DEFAULT_BEFORE_ID = new Map(CODE_ENTRIES.map((e) => [e.layerKey, e.defaultBeforeId]))
 
 type LayerRowProps = {
   layerKey: string
   group: GroupKey
   isStale: boolean
   isNew: boolean
+  defaultBeforeId?: string
   onMove: (layerKey: string, from: GroupKey, to: GroupKey) => void
 }
 
-function LayerRow({ layerKey, group, isStale, isNew, onMove }: LayerRowProps) {
+function LayerRow({ layerKey, group, isStale, isNew, defaultBeforeId, onMove }: LayerRowProps) {
   // Dedicated drag handle so dragging never conflicts with the group <select>
   // (touch/trackpad: the whole row as drag surface swallows select interactions).
   const dragControls = useDragControls()
@@ -100,6 +63,11 @@ function LayerRow({ layerKey, group, isStale, isNew, onMove }: LayerRowProps) {
       </button>
       <span className="grow font-mono break-all">
         {layerKey}
+        {defaultBeforeId && (
+          <span className="ml-2 rounded bg-gray-100 px-1 py-0.5 text-gray-600">
+            → {defaultBeforeId}
+          </span>
+        )}
         {isStale && (
           <span className="ml-2 rounded bg-red-100 px-1 py-0.5 text-red-700">
             nicht mehr im Code, wird beim Speichern entfernt
@@ -130,7 +98,7 @@ type LayerOrderEditorProps = {
 function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
   const queryClient = useQueryClient()
   const dbKeySet = new Set(dbEntries.map((e) => e.layerKey))
-  const [groups, setGroups] = useState<GroupedState>(() => initGroups(dbEntries))
+  const [groups, setGroups] = useState<GroupedState>(() => initGroups(dbEntries, CODE_KEYS))
 
   const moveToGroup = (layerKey: string, from: GroupKey, to: GroupKey) => {
     if (from === to) return
@@ -149,16 +117,7 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
     error: saveError,
   } = useMutation({
     mutationFn: () => {
-      // Flatten bottom-first: group order is irrelevant for splicing (beforeId decides),
-      // but keeping a deterministic full-list order keeps positions stable and readable.
-      const entries = GROUPS.flatMap((group) =>
-        groups[group]
-          .filter((layerKey) => CODE_KEY_SET.has(layerKey)) // drop stale keys
-          .map((layerKey) => ({
-            layerKey,
-            beforeId: group === DEFAULT_GROUP ? null : group,
-          })),
-      )
+      const entries = flattenGroups(groups, CODE_KEY_SET)
       if (dbEntries.length > 0 && entries.length < dbEntries.length) {
         const dropped = dbEntries.length - entries.length
         if (
@@ -177,15 +136,26 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-gray-600">
-        Reihenfolge innerhalb einer Gruppe: unten in der Liste = oben auf der Karte. Die Gruppen
-        bestimmen, wo die Layer in die Basemap eingefügt werden (beforeId-Anker). Änderungen wirken
-        nach dem nächsten Laden der Karte.
+        So funktioniert die Sortierung: Jede Gruppe steht für eine feste Stelle in der
+        Hintergrundkarte, zum Beispiel „Unter Straßennamen“. Innerhalb einer Gruppe gilt: Was in der
+        Liste weiter unten steht, liegt auf der Karte weiter oben.
       </p>
       <p className="text-sm text-gray-600">
-        Hinweise: Die Gruppen gelten nur für den Standard-Hintergrund. Auf eigenen
-        Raster-Hintergründen liegen alle Daten-Layer oben. Sortierbar sind hier nur Atlas-Geo-Layer;
-        Hintergründe, statische Daten, Notes, QA und Maske haben feste Positionen relativ zueinander
-        (nur über die Anker-Gruppen).
+        Die Gruppe „Standard“ ist ein Sonderfall: Diese Layer werden dort einsortiert, wo es ihre
+        Konfiguration vorgibt. Der graue Hinweis hinter dem Namen zeigt, an welcher Stelle das ist.
+        Nur Layer mit derselben Stelle lassen sich untereinander sortieren.
+      </p>
+      <p className="text-sm text-gray-600">
+        Gut zu wissen: Die Gruppen wirken nur auf dem Standard-Hintergrund. Bei Luftbildern und
+        anderen Hintergrundkarten liegen alle Daten-Layer immer oben. Sortieren lassen sich hier nur
+        die Atlas-Geo-Layer. Hintergründe, statische Daten, Notizen, QA und Maske haben eine feste
+        Reihenfolge zueinander, die im Code festgelegt ist.
+      </p>
+      <p className="text-sm text-gray-600">
+        Speichern schreibt die komplette Liste für alle Regionen. Beim ersten Speichern wird damit
+        die Reihenfolge aus dem Code für alle Regionen festgeschrieben; Regionen mit abweichender
+        Kategorie-Reihenfolge können sich dadurch leicht ändern. Gespeicherte Änderungen sind
+        sichtbar, sobald die Karte neu geladen wird.
       </p>
       {GROUPS.map((group) => (
         <section key={group}>
@@ -211,6 +181,9 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
                   group={group}
                   isStale={!CODE_KEY_SET.has(layerKey)}
                   isNew={!dbKeySet.has(layerKey)}
+                  defaultBeforeId={
+                    group === DEFAULT_GROUP ? CODE_DEFAULT_BEFORE_ID.get(layerKey) : undefined
+                  }
                   onMove={moveToGroup}
                 />
               ))}

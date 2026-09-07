@@ -3,6 +3,9 @@ import { ATLAS_APP_ANCHOR_IDS } from '@/components/regionen/pageRegionSlug/mapDa
 
 export const AtlasAppAnchorIdSchema = z.enum(ATLAS_APP_ANCHOR_IDS)
 
+// Empty table means use code/config order.
+// The first admin save persists the code order (global `categories` order) for all regions —
+// from then on the DB is the single source of truth for Atlas-Geo stacking.
 // Full-list replace: the admin UI always saves the complete ordered list (bottom-first).
 // `position` is derived from the array index on write.
 export const UpdateMapLayerOrderSchema = z.object({

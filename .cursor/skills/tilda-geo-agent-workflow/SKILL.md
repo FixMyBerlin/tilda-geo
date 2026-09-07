@@ -219,7 +219,7 @@ window.__mainMap?.queryRenderedFeatures({ layers: ['some-layer'] })
 `window.__mainMap` is set during map load in dev, or when `VITE_PLAYWRIGHT_ENABLED=true` / `window.__PLAYWRIGHT_ENABLED === 'true'`. The `mapLoaded` event remains Playwright-gated. If `__mainMap` is unavailable, prefer:
 
 - Annotated screenshots for visual checks
-- `agent_browser_react_tree` around map components (`MapInterface`, `SourcesLayersAtlasGeo`)
+- `agent_browser_react_tree` around map components (`MapInterface`, `AllSources`/`AllLayers` with `SourcesAtlasGeo`/`LayersAtlasGeo`)
 - Playwright helpers: `window.__mapLoaded`, `mapLoaded` event (when `VITE_PLAYWRIGHT_ENABLED=true`)
 
 After load, elsewhere in React: `<Map id="mainMap">` → `useMap()` → `mainMap` (`MapRef`; `mainMap.getMap()` for maplibregl APIs outside event handlers). E2E helpers: skill `playwright-skill`.

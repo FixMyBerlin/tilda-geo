@@ -25,7 +25,7 @@ export function createUploadSourceProps({
 export const UPLOAD_FALLBACK_BEFORE_ID = 'atlas-app-beforeid-fallback'
 
 // Upload config layers may specify a beforeId anchor; default to the fallback anchor group.
-export function resolveUploadBeforeId(layer: unknown & object) {
+export function resolveUploadBeforeId(layer: object) {
   return 'beforeId' in layer && typeof layer.beforeId === 'string' && layer.beforeId
     ? layer.beforeId
     : UPLOAD_FALLBACK_BEFORE_ID

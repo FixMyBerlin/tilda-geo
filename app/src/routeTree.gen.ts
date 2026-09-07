@@ -40,10 +40,10 @@ import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
 import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
+import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
 import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
 import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
 import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
-import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
 import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
 import { Route as PagesKontaktRouteImport } from './routes/_pages/kontakt'
 import { Route as PagesDatenschutzRouteImport } from './routes/_pages/datenschutz'
@@ -257,6 +257,11 @@ const AdminMapDatasetCategoriesRoute =
     path: '/map-dataset-categories',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
+  id: '/layer-order',
+  path: '/layer-order',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDataSchemaRoute = AdminDataSchemaRouteImport.update({
   id: '/data-schema',
   path: '/data-schema',
@@ -270,11 +275,6 @@ const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
 const AdminApiTokensRoute = AdminApiTokensRouteImport.update({
   id: '/api-tokens',
   path: '/api-tokens',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
-  id: '/layer-order',
-  path: '/layer-order',
   getParentRoute: () => AdminRoute,
 } as any)
 const PagesOAuthErrorRoute = PagesOAuthErrorRouteImport.update({
@@ -596,9 +596,9 @@ export interface FileRoutesByFullPath {
   '/kontakt': typeof PagesKontaktRoute
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
-  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
@@ -686,9 +686,9 @@ export interface FileRoutesByTo {
   '/kontakt': typeof PagesKontaktRoute
   '/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
-  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -773,9 +773,9 @@ export interface FileRoutesById {
   '/_pages/kontakt': typeof PagesKontaktRoute
   '/_pages/oAuthError': typeof PagesOAuthErrorRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
-  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
@@ -867,9 +867,9 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/oAuthError'
     | '/admin/api-tokens'
-    | '/admin/layer-order'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
@@ -957,9 +957,9 @@ export interface FileRouteTypes {
     | '/kontakt'
     | '/oAuthError'
     | '/admin/api-tokens'
-    | '/admin/layer-order'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -1043,9 +1043,9 @@ export interface FileRouteTypes {
     | '/_pages/kontakt'
     | '/_pages/oAuthError'
     | '/admin/api-tokens'
-    | '/admin/layer-order'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
@@ -1385,6 +1385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMapDatasetCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/layer-order': {
+      id: '/admin/layer-order'
+      path: '/layer-order'
+      fullPath: '/admin/layer-order'
+      preLoaderRoute: typeof AdminLayerOrderRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/data-schema': {
       id: '/admin/data-schema'
       path: '/data-schema'
@@ -1404,13 +1411,6 @@ declare module '@tanstack/react-router' {
       path: '/api-tokens'
       fullPath: '/admin/api-tokens'
       preLoaderRoute: typeof AdminApiTokensRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/layer-order': {
-      id: '/admin/layer-order'
-      path: '/layer-order'
-      fullPath: '/admin/layer-order'
-      preLoaderRoute: typeof AdminLayerOrderRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_pages/oAuthError': {
@@ -1941,9 +1941,9 @@ const AdminRegionsRouteWithChildren = AdminRegionsRoute._addFileChildren(
 
 interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
-  AdminLayerOrderRoute: typeof AdminLayerOrderRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminDataSchemaRoute: typeof AdminDataSchemaRoute
+  AdminLayerOrderRoute: typeof AdminLayerOrderRoute
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRouteWithChildren
@@ -1956,9 +1956,9 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminApiTokensRoute: AdminApiTokensRoute,
-  AdminLayerOrderRoute: AdminLayerOrderRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminDataSchemaRoute: AdminDataSchemaRoute,
+  AdminLayerOrderRoute: AdminLayerOrderRoute,
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRouteWithChildren,

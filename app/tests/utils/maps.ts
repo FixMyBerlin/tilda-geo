@@ -53,3 +53,14 @@ export async function getMapLayerIds(page: Page) {
     return map.getStyle().layers.map((layer) => layer.id)
   })
 }
+
+/** Atlas-Geo layers mount after the layer-order query; map 'load' can fire first. */
+export async function waitForAtlasGeoLayers(page: Page) {
+  await getMapLayerIds(page)
+  await page.waitForFunction(
+    () =>
+      (window.__mainMap?.getStyle().layers ?? []).some((layer) => layer.id.startsWith('source:')),
+    undefined,
+    { timeout: 60_000 },
+  )
+}

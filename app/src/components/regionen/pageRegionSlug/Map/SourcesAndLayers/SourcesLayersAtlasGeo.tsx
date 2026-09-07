@@ -8,20 +8,12 @@ import {
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
-import type { AtlasAppAnchorId } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import {
-  createLayerKeyAtlasGeo,
-  createSourceKeyAtlasGeo,
-} from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createSourceKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
-import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
-import { getLayerHighlightId } from '../utils/layerHighlight'
-import { layerVisibility } from '../utils/layerVisibility'
 import { LayerHighlight } from './LayerHighlight'
-import { sortByLayerOrder } from './sortLayers/sortByLayerOrder'
-import { buildAtlasLayerProps, isAtlasStyleLayer } from './utils/buildAtlasLayerProps'
+import { buildAtlasLayerEntries } from './sortLayers/buildAtlasLayerEntries'
 
 // We add map-components for all categories and all subcategories of the given config.
 // We then toggle the visibility of the layer based on the URL state (config) — layers are
@@ -89,73 +81,22 @@ export const LayersAtlasGeo = () => {
   if (!categoriesConfig?.length) return null
   if (layerOrderPending) return null
 
-  // DB order when the table has rows; otherwise [] so sortByLayerOrder keeps JSX config order.
-  // NOTE: A changed DB order applies on the next page load — layers are deliberately
-  // not remounted mid-session (staleTime: Infinity).
-  const orderedKeys = dbLayerOrder?.length ? dbLayerOrder.map((e) => e.layerKey) : []
-  // Anchor overrides only apply on the default background (custom raster backgrounds put
-  // all data on top), so skip building them otherwise. Unknown anchor ids (e.g. renamed
-  // in the style after being saved) are dropped — maplibre would silently not add such layers.
-  const beforeIdOverrides = new Map<string, AtlasAppAnchorId>(
-    backgroundParam === 'default'
-      ? (dbLayerOrder ?? []).flatMap((e) => {
-          const anchor = AtlasAppAnchorIdSchema.safeParse(e.beforeId)
-          return anchor.success ? [[e.layerKey, anchor.data] as const] : []
-        })
-      : [],
-  )
-
-  const layerEntries = categoriesConfig.flatMap((categoryConfig) => {
-    return categoryConfig.subcategories.flatMap((subcategoryConfig) => {
-      const sourceData = getSourceData(subcategoryConfig?.sourceId)
-      const sourceKey = createSourceKeyAtlasGeo(
-        categoryConfig.id,
-        sourceData.id,
-        subcategoryConfig.id,
-      )
-
-      return subcategoryConfig.styles.flatMap((styleConfig) => {
-        const visibility = layerVisibility((categoryConfig.active && styleConfig.active) || false)
-        const supportedLayers = styleConfig?.layers?.filter(isAtlasStyleLayer) ?? []
-        return supportedLayers.map((layer) => {
-          const layerId = createLayerKeyAtlasGeo(
-            sourceData.id,
-            subcategoryConfig.id,
-            styleConfig.id,
-            layer.id,
-          )
-          const layerProps = buildAtlasLayerProps({
-            layer,
-            layerId,
-            sourceKey,
-            visibility,
-            debugLayerStyles,
-            backgroundId: backgroundParam,
-            subcategoryBeforeId: subcategoryConfig.beforeId,
-            adminBeforeId: beforeIdOverrides.get(layerId),
-          })
-          return { layerId, highlightLayerId: getLayerHighlightId(layer.id), layerProps }
-        })
-      })
-    })
-  })
-
-  const sortedLayerEntries = sortByLayerOrder({
-    items: layerEntries,
-    getKey: (entry) => entry.layerId,
-    orderedKeys,
+  const sortedLayerEntries = buildAtlasLayerEntries({
+    categoriesConfig,
+    dbLayerOrder,
+    backgroundParam,
+    debugLayerStyles,
   })
 
   return (
     <>
-      {sortedLayerEntries.map(({ layerId, highlightLayerId, layerProps }) => {
-        return (
-          <Fragment key={layerId}>
-            <Layer key={layerId} {...layerProps} />
-            <LayerHighlight key={highlightLayerId} {...layerProps} id={highlightLayerId} />
-          </Fragment>
-        )
-      })}
+      {/* Highlights after all base layers so a highlighted feature is never covered by a sibling base layer of the same beforeId group (matches the pre-DB-order behaviour). */}
+      {sortedLayerEntries.map(({ layerId, layerProps }) => (
+        <Layer key={layerId} {...layerProps} />
+      ))}
+      {sortedLayerEntries.map(({ highlightLayerId, layerProps }) => (
+        <LayerHighlight key={highlightLayerId} {...layerProps} id={highlightLayerId} />
+      ))}
     </>
   )
 }

@@ -1,4 +1,3 @@
-import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useMapDebugDebugLayerStyles } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
@@ -14,7 +13,7 @@ import { buildUploadLayerProps, isUploadStyleLayer } from './utils/buildUploadLa
 import { createUploadSourceProps, resolveUploadBeforeId } from './utils/uploadSourceLayerUtils'
 
 // Renders user-selectable static datasets controlled by URL parameters.
-// SystemLayer datasets are handled separately by SourcesLayersSystemDatasets.
+// SystemLayer datasets are handled separately by SourcesSystemDatasets / LayersSystemDatasets.
 
 export const SourcesStaticDatasets = () => {
   const { dataParam: selectedDatasetIds } = useDataParam()
@@ -57,38 +56,38 @@ export const LayersStaticDatasets = () => {
 
   const selectedDatasetIdsSet = new Set(selectedDatasetIds ?? [])
 
+  const layerEntries = regionDatasets.flatMap(
+    ({ id: sourceId, subId, mapRenderFormat, layers }) => {
+      const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
+      const visible = selectedDatasetIdsSet.has(datasetSourceId)
+
+      return layers.filter(isUploadStyleLayer).map((layer) => {
+        const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
+        const layerHighlightId = getLayerHighlightId(layerId)
+        const beforeId = resolveUploadBeforeId(layer)
+        const layerProps = buildUploadLayerProps({
+          layer,
+          layerId,
+          sourceId: datasetSourceId,
+          debugLayerStyles,
+          beforeId,
+          visibility: layerVisibility(visible),
+          ...(mapRenderFormat === 'pmtiles' && { sourceLayer: 'default' as const }),
+        })
+        return { layerId, layerHighlightId, layerProps }
+      })
+    },
+  )
+
   return (
     <>
-      {regionDatasets.map(({ id: sourceId, subId, mapRenderFormat, layers }) => {
-        const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
-        const visible = selectedDatasetIdsSet.has(datasetSourceId)
-
-        return (
-          <Fragment key={datasetSourceId}>
-            {layers.filter(isUploadStyleLayer).map((layer) => {
-              const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
-              const layerHighlightId = getLayerHighlightId(layerId)
-              const beforeId = resolveUploadBeforeId(layer)
-              const layerProps = buildUploadLayerProps({
-                layer,
-                layerId,
-                sourceId: datasetSourceId,
-                debugLayerStyles,
-                beforeId,
-                visibility: layerVisibility(visible),
-                ...(mapRenderFormat === 'pmtiles' && { sourceLayer: 'default' as const }),
-              })
-
-              return (
-                <Fragment key={layerId}>
-                  <Layer key={layerId} {...layerProps} />
-                  <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
-                </Fragment>
-              )
-            })}
-          </Fragment>
-        )
-      })}
+      {/* Highlights after all base layers so a highlighted feature is never covered by a sibling base layer of the same beforeId group (matches the pre-DB-order behaviour). */}
+      {layerEntries.map(({ layerId, layerProps }) => (
+        <Layer key={layerId} {...layerProps} />
+      ))}
+      {layerEntries.map(({ layerHighlightId, layerProps }) => (
+        <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
+      ))}
     </>
   )
 }

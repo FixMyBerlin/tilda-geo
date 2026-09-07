@@ -26,6 +26,7 @@ export const AllLayers = () => {
   return (
     <>
       <LayersRasterBackgrounds />
+      {/* DEM + 3D buildings still mount source and layer together (no ordering interaction with data layers). */}
       <SourcesLayersMap3dDem />
       <SourcesLayersMap3dBuildings />
       <LayersSystemDatasets />

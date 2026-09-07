@@ -74,7 +74,9 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
       queryClient.ensureQueryData(processingMetadataQueryOptions()),
       // Atlas-Geo layers wait for this before mounting (LayersAtlasGeo); preloading it here
       // avoids a serial client roundtrip after style load and keeps mount timing aligned.
-      queryClient.ensureQueryData(mapLayerOrderQueryOptions()),
+      // prefetchQuery never throws, so a failing layer-order query must not break the region
+      // page — LayersAtlasGeo falls back to config order when data is undefined.
+      queryClient.prefetchQuery(mapLayerOrderQueryOptions()),
     ])
 
     return {

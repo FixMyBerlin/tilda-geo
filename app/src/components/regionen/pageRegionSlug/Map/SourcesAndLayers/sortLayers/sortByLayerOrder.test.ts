@@ -19,10 +19,9 @@ describe('sortByLayerOrder', () => {
     expect(ids(result)).toEqual(['a', 'b', 'c'])
   })
 
-  test('gaps in the order list are fine — a region renders only its subset', () => {
-    // Order list knows layers of ALL regions; this "region" only has two of them.
+  test('gaps in the order list are fine, a region renders only its subset', () => {
     const items = [entry('z'), entry('a')]
-    const orderedKeys = ['a', 'm', 'x', 'z'] // 'm' and 'x' do not exist in this region
+    const orderedKeys = ['a', 'm', 'x', 'z']
     const result = sortByLayerOrder({ items, getKey, orderedKeys })
     expect(ids(result)).toEqual(['a', 'z'])
   })
@@ -38,20 +37,5 @@ describe('sortByLayerOrder', () => {
     const result = sortByLayerOrder({ items, getKey, orderedKeys: ['a', 'b'] })
     expect(ids(items)).toEqual(['b', 'a'])
     expect(ids(result)).toEqual(['a', 'b'])
-  })
-
-  test('works with realistic atlas layer keys', () => {
-    const items = [
-      entry('source:bikelanes--subcat:bikelanes--style:default--layer:line_label'),
-      entry('source:roads--subcat:roads--style:default--layer:line_base'),
-      entry('source:bikelanes--subcat:bikelanes--style:default--layer:line_base'),
-    ]
-    const orderedKeys = [
-      'source:roads--subcat:roads--style:default--layer:line_base',
-      'source:bikelanes--subcat:bikelanes--style:default--layer:line_base',
-      'source:bikelanes--subcat:bikelanes--style:default--layer:line_label',
-    ]
-    const result = sortByLayerOrder({ items, getKey, orderedKeys })
-    expect(ids(result)).toEqual(orderedKeys)
   })
 })
