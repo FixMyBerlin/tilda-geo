@@ -62,6 +62,8 @@ type FormProps<TValues extends Record<string, unknown>> = {
   schema: z.ZodTypeAny
   onSubmit: (values: TValues) => undefined | Promise<SubmitResult<TValues> | undefined>
   children: (form: FormApi<TValues>) => ReactNode
+  /** Associates an external submit button via the HTML `form` attribute. */
+  id?: string
   className?: string
   submitLabel?: string
   submitClassName?: string
@@ -78,6 +80,7 @@ export function Form<TValues extends Record<string, unknown>>({
   submitClassName,
   showFormErrors = true,
   children,
+  id,
   className,
 }: FormProps<TValues>) {
   const navigate = useNavigate()
@@ -167,6 +170,7 @@ export function Form<TValues extends Record<string, unknown>>({
 
   return (
     <form
+      id={id}
       method="post"
       className={twMerge('space-y-6', className)}
       onSubmit={(e) => {
