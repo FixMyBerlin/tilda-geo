@@ -12,6 +12,7 @@ import {
   useModePanelWidthDragging,
 } from './mode-panel-width-store'
 import { modeAccentStyle, modeAccentTintClassName, modeIdentity } from './modeIdentity'
+import { ModeMobileDock } from './ModeMobileDock'
 import { modeColumnElevationClassName } from './modePanel.const'
 import { readModePanelWidth } from './modePanelWidthStorage'
 import { useOptimisticMode } from './useCurrentMode'
@@ -21,9 +22,12 @@ const setModePanelWidthCssVar = (width: number) =>
   document.documentElement.style.setProperty('--mode-panel-width', `${width}px`)
 
 /**
- * Animated right column for mode routes. Outer shell springs width 0 ↔ stored panel width when
- * entering/leaving a mode; switching between modes keeps width open. Inner clip keeps content at
- * full target width so list/table layout does not squash during the spring.
+ * Animated right column for mode routes on desktop. Outer shell springs width 0 ↔ stored
+ * panel width when entering/leaving a mode; switching between modes keeps width open. Inner
+ * clip keeps content at full target width so list/table layout does not squash during the spring.
+ *
+ * Below `sm` the same outlet is a fixed, non-Dialog dock (`ModeMobileDock`) so the map flex
+ * column stays full-bleed.
  *
  * Sheet chrome (left `modeColumnElevationClassName` + outline hairline) sits on this shell
  * shell (overflow visible when open) so it can cast onto the map / inspector. Content stays
@@ -55,6 +59,10 @@ export const ModeColumnShell = () => {
     },
     [resetFromStorage, seedCssVar],
   )
+
+  if (!isDesktop) {
+    return isModeRoute ? <ModeMobileDock /> : null
+  }
 
   return (
     <AnimatePresence initial={false}>

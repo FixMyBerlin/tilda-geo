@@ -58,7 +58,9 @@ export const ModeCollectionSelect = ({
             }}
             className={twJoin(
               'flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm select-none',
-              isSelected ? 'bg-white/20 font-medium text-white' : 'text-white/90 hover:bg-white/10',
+              isSelected
+                ? 'bg-white/20 font-medium text-white'
+                : 'text-white/90 hover:bg-white/10 focus-visible:bg-white/10 active:bg-white/10',
               option.inactive && !isSelected ? 'text-white/70' : '',
               readOnly ? 'cursor-default' : '',
             )}

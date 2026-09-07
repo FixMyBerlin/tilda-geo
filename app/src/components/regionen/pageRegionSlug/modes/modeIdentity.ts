@@ -16,6 +16,14 @@ export const modeIdentity = {
   reviewLists: { label: 'Prüflisten', accent: '#0d9488', icon: ClipboardDocumentCheckIcon },
 } as const satisfies Record<RegionMode, { label: string; accent: string; icon: ModeIcon }>
 
+/** Compact labels for the mobile header control (QA is too long for that slot). */
+export const modeShortLabel = {
+  map: 'Karte',
+  notes: 'Hinweise',
+  qa: 'QA',
+  reviewLists: 'Prüflisten',
+} as const satisfies Record<RegionMode, string>
+
 /** Sets `--mode-accent` for Tailwind arbitrary values and color-mix tints. */
 export const modeAccentStyle = (accent: string) =>
   ({ '--mode-accent': accent }) as CSSProperties & { '--mode-accent': string }

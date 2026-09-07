@@ -63,7 +63,7 @@ export const ModeListItem = ({
         onFocus={() => hoverListItem({ id, coordinates })}
         onBlur={() => unhoverListItem(id)}
         className={twJoin(
-          'block w-full px-4 py-3 text-left text-sm',
+          'block w-full cursor-pointer px-4 py-3 text-left text-sm select-none',
           active ? '' : modePanelListItemHoverClassName,
         )}
         aria-current={active ? 'true' : undefined}

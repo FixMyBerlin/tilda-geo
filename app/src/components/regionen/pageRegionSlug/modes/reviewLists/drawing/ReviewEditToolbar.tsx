@@ -36,7 +36,7 @@ export const ReviewEditToolbar = ({
   const canAddPart = addMode !== null
 
   return (
-    <div className="pointer-events-auto absolute top-[10px] left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs">
+    <div className="pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-[10px]">
       <button
         type="button"
         aria-pressed={mode === REVIEW_DRAW_MODE.select}
