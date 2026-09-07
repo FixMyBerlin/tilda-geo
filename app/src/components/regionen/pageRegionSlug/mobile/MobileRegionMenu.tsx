@@ -77,6 +77,7 @@ export const MobileRegionMenu = () => {
         mapPeek="15%"
         panelClassName="bg-gray-900 text-white"
         grabberClassName="bg-white/30"
+        grabIconClassName="text-white"
         footer={
           <RegionWelcomeMobileCtaFooter
             onClose={closeMenu}

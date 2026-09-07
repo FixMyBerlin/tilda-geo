@@ -71,6 +71,8 @@
   /* Same unit rule as --inspector-width. Seeded to the stored panel width only while a
      desktop mode column is open; stays 0px on the default map and on mobile. */
   --mode-panel-width: 0px;
+  /* Mobile mode dock height; bottom map controls sit above it. 0px off mode routes. */
+  --mode-mobile-dock-height: 0px;
   /* Map-edge gap for inspector/categories AND floating buttons (10px to the inspector). */
   --map-overlay-inset: 10px;
   /* Desktop `HeaderRegionen` height (`sm:h-16`). The region map sizes to the viewport *minus*

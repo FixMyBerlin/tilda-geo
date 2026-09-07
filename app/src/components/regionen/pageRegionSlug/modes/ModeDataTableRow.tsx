@@ -49,7 +49,7 @@ export const ModeDataTableCellsRow = ({
         className={twJoin(
           modeDataTableBodyRowClass,
           active ? modePanelListItemActiveClassName : modePanelListItemHoverClassName,
-          'cursor-pointer',
+          'cursor-pointer select-none',
         )}
         onClick={onClick}
         onMouseEnter={() => hoverListItem({ id, coordinates })}

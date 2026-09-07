@@ -22,7 +22,7 @@ export const modeRoutePaths = {
   reviewLists: '/regionen/$regionSlug/prueflisten',
 } as const
 
-const regionModeOrder = ['map', 'notes', 'qa', 'reviewLists'] as const
+export const regionModeOrder = ['map', 'notes', 'qa', 'reviewLists'] as const
 
 export type RegionMode = keyof typeof regionModeRouteIds
 

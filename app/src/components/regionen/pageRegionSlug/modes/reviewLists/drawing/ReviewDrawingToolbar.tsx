@@ -14,7 +14,7 @@ const OPTIONS: { mode: ReviewDrawMode; label: string }[] = [
 
 /** Compose-only toolbar: pick a geometry type for a new review entry. Hidden in entry detail. */
 export const ReviewDrawingToolbar = ({ mode, onModeChange }: Props) => (
-  <div className="pointer-events-auto absolute top-[10px] left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs">
+  <div className="pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-[10px]">
     {OPTIONS.map((option, index) => (
       <button
         key={option.mode}

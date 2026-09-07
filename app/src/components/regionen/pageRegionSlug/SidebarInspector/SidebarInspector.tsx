@@ -19,6 +19,7 @@ import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
 import { PanelResizeHandle } from '../PanelResizeHandle'
 import { Inspector } from './Inspector'
 import { InspectorHeader } from './InspectorHeader'
+import { inspectorRenderableFeatures } from './useInspectorRenderableFeatures'
 import { useResizableInspectorWidth } from './useResizableInspectorWidth'
 import { allUrlFeaturesInBounds, createBoundingPolygon, fitBounds } from './util'
 
@@ -34,10 +35,10 @@ export const SidebarInspector = () => {
   const inspectorSize = useMapInspectorSize()
   const sidebarSize = useMapSidebarSize()
 
-  const rawFeatures = inspectorFeatures.length
-    ? inspectorFeatures
-    : selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
-  const features = rawFeatures.filter((feature) => !isModeOwnedSource(feature.source))
+  const features = inspectorRenderableFeatures(
+    inspectorFeatures,
+    selectedFeatures.map((feature) => feature.mapFeature),
+  )
 
   const renderFeatures = !!features.length
 

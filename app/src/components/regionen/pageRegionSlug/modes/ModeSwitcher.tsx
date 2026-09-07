@@ -3,18 +3,21 @@ import { motion } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
-import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import {
   modeAccentInvertedClassName,
   modeAccentInvertedFgClassName,
   modeAccentStyle,
   modeIdentity,
 } from './modeIdentity'
-import { type RegionMode, modeRoutePaths, useOptimisticMode } from './useCurrentMode'
+import { modeSwitcherSearch } from './modeSwitcherSearch'
+import {
+  type RegionMode,
+  modeRoutePaths,
+  regionModeOrder,
+  useOptimisticMode,
+} from './useCurrentMode'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
-
-const modeOrder: RegionMode[] = ['map', 'notes', 'qa', 'reviewLists']
 
 const HOVER_LEAVE_MS = 200
 
@@ -56,7 +59,7 @@ export const ModeSwitcher = () => {
     }
   }, [])
 
-  const modes = modeOrder.filter((mode) => mode === 'map' || availableModes[mode])
+  const modes = regionModeOrder.filter((mode) => mode === 'map' || availableModes[mode])
   const highlightedMode = hoveredMode ?? optimisticMode
 
   useLayoutEffect(
@@ -129,20 +132,7 @@ export const ModeSwitcher = () => {
             from="/regionen/$regionSlug"
             to={modeRoutePaths[mode]}
             params={{ regionSlug }}
-            search={(prev) => {
-              // Compose is Hinweise-only; strip create params when leaving so the map unlocks.
-              if (mode === 'notes') return prev
-              if (
-                prev[searchParamsRegistry.osmNote] === undefined &&
-                prev[searchParamsRegistry.internalNote] === undefined
-              ) {
-                return prev
-              }
-              const next = { ...prev }
-              delete next[searchParamsRegistry.osmNote]
-              delete next[searchParamsRegistry.internalNote]
-              return next
-            }}
+            search={(prev) => modeSwitcherSearch(mode, prev)}
             className={twJoin(
               tabLayoutClassName,
               'rounded text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-white',

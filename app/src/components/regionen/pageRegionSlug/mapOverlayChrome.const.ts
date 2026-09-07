@@ -84,7 +84,7 @@ export const mapOverlayTopRightControlsClassName = twMerge(
 )
 
 export const mapOverlayBottomRightControlsClassName =
-  'pointer-events-none z-10 flex items-end gap-2 *:pointer-events-auto max-sm:fixed max-sm:right-[calc(env(safe-area-inset-right)+0.5rem)] max-sm:bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] sm:absolute sm:right-(--map-overlay-inset) sm:bottom-(--map-overlay-inset) sm:w-8.5 sm:flex-col sm:overflow-x-visible'
+  'pointer-events-none z-10 flex items-end gap-2 *:pointer-events-auto max-sm:fixed max-sm:right-[calc(env(safe-area-inset-right)+0.5rem)] max-sm:bottom-[calc(env(safe-area-inset-bottom)+0.5rem+var(--mode-mobile-dock-height,0px))] sm:absolute sm:right-(--map-overlay-inset) sm:bottom-(--map-overlay-inset) sm:w-8.5 sm:flex-col sm:overflow-x-visible'
 
 /** Separate buttons stacked with 8px `gap-2`. Zoom ± stays a glued group. */
 export const mapOverlayControlStackClassName = 'flex w-8.5 flex-col items-end gap-2'
