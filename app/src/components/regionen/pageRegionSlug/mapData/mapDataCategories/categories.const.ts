@@ -112,9 +112,9 @@ export const categories: StaticMapDataCategory[] = [
     desc: 'Fahrbahn & Radinfrastruktur',
     subcategories: [
       { ...subcat_lit_roads, defaultStyle: 'default' },
-      { ...subcat_lit_bikelanes, defaultStyle: 'hidden' },
-      { ...subcat_lit_path_classes, defaultStyle: 'hidden' },
-      { ...subcat_lit_highway_areas, defaultStyle: 'hidden' },
+      { ...subcat_lit_bikelanes, defaultStyle: 'default' },
+      { ...subcat_lit_path_classes, defaultStyle: 'default' },
+      { ...subcat_lit_highway_areas, defaultStyle: 'default' },
     ],
   },
   {

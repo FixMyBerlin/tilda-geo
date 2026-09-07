@@ -1,31 +1,18 @@
 import type { MapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 
-type Subcategories = MapDataCategoryParam['subcategories']
-
-// Old Beleuchtung had a separate `lit-completeness` checkbox next to roads `lit`.
-// Merge that onto the roads completeness style, then drop the checkbox subcategory.
-export function migrateLitCompletenessSubcategories(subcategories: Subcategories) {
-  const completenessOn = subcategories.some(
+function hasOldLitConfig(category: MapDataCategoryParam) {
+  return category.subcategories.some(
     (subcategory) =>
-      subcategory.id === 'lit-completeness' && subcategory.styles.some((style) => style.active),
+      subcategory.id === 'lit-completeness' ||
+      subcategory.styles.some((style) => style.id !== 'default'),
   )
+}
 
-  return subcategories.flatMap((subcategory) => {
-    if (subcategory.id === 'lit-completeness') return []
-    if (subcategory.id !== 'lit' || !completenessOn) return [subcategory]
+// Old Beleuchtung URLs used dropdown styles (`hidden` / `default` / `lit` / `completeness`)
+// and/or a `lit-completeness` checkbox. Do not preserve those choices: turn the category on
+// and drop subcategory state so merge applies current defaults (all dataset checkboxes on).
+export function migrateOldLitCategory(category: MapDataCategoryParam) {
+  if (category.id !== 'lit' || !hasOldLitConfig(category)) return category
 
-    const hasCompletenessStyle = subcategory.styles.some((style) => style.id === 'completeness')
-    const styles = [
-      ...subcategory.styles.map((style) => {
-        if (style.id === 'completeness') return { id: style.id, active: true }
-        if (style.id === 'hidden' || style.id === 'default' || style.id === 'lit') {
-          return { id: style.id, active: false }
-        }
-        return { id: style.id, active: style.active }
-      }),
-      ...(hasCompletenessStyle ? [] : [{ id: 'completeness' as const, active: true }]),
-    ]
-
-    return [{ ...subcategory, styles }]
-  })
+  return { ...category, active: true, subcategories: [] }
 }
