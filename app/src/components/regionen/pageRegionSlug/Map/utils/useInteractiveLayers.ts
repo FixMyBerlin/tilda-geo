@@ -2,11 +2,10 @@ import { useMapDebugDebugLayerStyles } from '@/components/regionen/pageRegionSlu
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
-import { useShowInternalNotesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
-import { useShowOsmNotesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
+import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import {
@@ -14,6 +13,7 @@ import {
   createSourceKeyStaticDatasets,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
+import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntriesLayers.const'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
@@ -89,11 +89,10 @@ export const useInteractiveLayers = () => {
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
   const region = useRegion()
-  const { showOsmNotesParam } = useShowOsmNotesParam()
-  const { showInternalNotesParam } = useShowInternalNotesParam()
   const { qaParamData } = useQaParam()
   const { dataParam: selectedDatasetIds } = useDataParam()
   const { data: regionDatasets } = useRegionDatasetsQuery()
+  const currentMode = useCurrentMode()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -107,14 +106,17 @@ export const useInteractiveLayers = () => {
     categories: activeCategoriesConfig,
   })
 
-  if (showOsmNotesParam) {
+  if (region.notesOsm && currentMode === 'notes') {
     activeCategoryLayerIds.push(osmNotesLayerId)
   }
-  if (showInternalNotesParam) {
+  if (region.notesInternal && hasPermissions && currentMode === 'notes') {
     activeCategoryLayerIds.push(internalNotesLayerId)
   }
-  if (hasPermissions && qaParamData.configSlug && qaParamData.style !== 'none') {
+  if (hasPermissions && qaParamData.key && currentMode === 'qa') {
     activeCategoryLayerIds.push(qaLayerId)
+  }
+  if (currentMode === 'reviewLists') {
+    activeCategoryLayerIds.push(...reviewEntriesInteractiveLayerIds)
   }
 
   // Mask layers are systemLayer datasets with inspector.enabled: false, so they won't be included
