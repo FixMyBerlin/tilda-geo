@@ -84,12 +84,9 @@ const iconByStyle = ({
   }
 }
 
+/** Layer-config legend names may include light HTML (`<br>`, `&nbsp;`). Tooltips need plain text. */
 const legendLabelPlain = (name: string) =>
-  name
-    .replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .trim()
+  new DOMParser().parseFromString(name, 'text/html').body.textContent?.trim() ?? ''
 
 /** Disclosure-styled toggle (chevron + label); still a plain button, not native details. */
 const LegendDetailToggle = ({
