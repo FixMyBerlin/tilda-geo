@@ -12,7 +12,7 @@ local roads_bikelanes_roads = require('topics.roads_bikelanes.roads_bikelanes_ro
 local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 
----@param object table
+---@param object OsmObject
 local function process_roads_bikelanes_way(object)
   if not object.tags.highway then return end
 

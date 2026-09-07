@@ -1,6 +1,6 @@
 -- Roads skip `area=yes`. highwayAreas is that inverse: closed `highway=*` polygons.
 -- Not `area:highway` — those describe road space, tags live on the `highway=*` object.
----@param object table
+---@param object OsmObject
 ---@return boolean
 local function is_highway_area(object)
   local tags = object.tags

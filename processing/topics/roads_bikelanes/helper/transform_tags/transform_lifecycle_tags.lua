@@ -10,7 +10,7 @@ local ALLOWED_HIGHWAYS = SET.join_sets({
   highway_classes.path_classes,
 })
 
----@param tags table<string, string | nil>
+---@param tags OsmTags
 ---@return string[]
 local function restricted_access_tag_keys(tags)
   local restricted_tags = {}
@@ -20,7 +20,7 @@ local function restricted_access_tag_keys(tags)
   return restricted_tags
 end
 
----@param tags table<string, string | nil>
+---@param tags OsmTags
 ---@return boolean
 local function has_construction_no_access_text(tags)
   local construction_no_access_terms = {
@@ -38,7 +38,7 @@ local function has_construction_no_access_text(tags)
   return false
 end
 
----@param tags table<string, string | nil>
+---@param tags OsmTags
 ---@return boolean
 local function has_blocked_text(tags)
   local blocked_terms = {
@@ -62,8 +62,8 @@ local function has_blocked_text(tags)
 end
 
 -- Mutate the input tags to normalize lifecycle-related OSM tagging before filtering.
----@param dest_tags table<string, string | nil>
----@return table<string, string | nil> unmodified_tags Original values overwritten by the transform.
+---@param dest_tags OsmTags
+---@return OsmTags unmodified_tags Original values overwritten by the transform.
 local function transform_lifecycle_tags(dest_tags)
   local unmodified_tags = {}
 
