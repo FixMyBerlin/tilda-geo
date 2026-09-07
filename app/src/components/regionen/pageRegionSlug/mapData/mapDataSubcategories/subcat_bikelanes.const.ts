@@ -4,6 +4,7 @@ import { mapboxStyleGroupLayers_atlas_bikelanes_default } from './mapboxStyles/g
 import { mapboxStyleGroupLayers_atlas_bikelanes_details } from './mapboxStyles/groups/atlas_bikelanes_details'
 import { mapboxStyleGroupLayers_atlas_bikelanes_widths } from './mapboxStyles/groups/atlas_bikelanes_widths'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { structureIconLayers } from './mapboxStyles/structureIconLayers'
 import { bikelanesWidthLegend } from './subcat_radinfra_width.const'
 
 const subcatId = 'bikelanes'
@@ -18,14 +19,19 @@ export type SubcatBikelanesStyleIds =
   | 'freshness'
   | 'bikelane_oneway_arrows'
 
+const structureIcons = structureIconLayers({ source, sourceLayer })
+
 export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
   id: 'default',
   name: 'Führungsform einfach',
-  layers: mapboxStyleLayers({
-    layers: mapboxStyleGroupLayers_atlas_bikelanes_default,
-    source,
-    sourceLayer,
-  }),
+  layers: [
+    ...mapboxStyleLayers({
+      layers: mapboxStyleGroupLayers_atlas_bikelanes_default,
+      source,
+      sourceLayer,
+    }),
+    ...structureIcons,
+  ],
   legends: [
     {
       id: 'separated',
@@ -91,11 +97,14 @@ export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
 export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
   id: 'details',
   name: 'Führungsform details',
-  layers: mapboxStyleLayers({
-    layers: mapboxStyleGroupLayers_atlas_bikelanes_details,
-    source,
-    sourceLayer,
-  }),
+  layers: [
+    ...mapboxStyleLayers({
+      layers: mapboxStyleGroupLayers_atlas_bikelanes_details,
+      source,
+      sourceLayer,
+    }),
+    ...structureIcons,
+  ],
   legends: [
     {
       id: 'footAndCyclewaySegregated',
@@ -213,11 +222,14 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
 const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
   id: 'width',
   name: 'Breite RVA',
-  layers: mapboxStyleLayers({
-    layers: mapboxStyleGroupLayers_atlas_bikelanes_widths,
-    source,
-    sourceLayer,
-  }),
+  layers: [
+    ...mapboxStyleLayers({
+      layers: mapboxStyleGroupLayers_atlas_bikelanes_widths,
+      source,
+      sourceLayer,
+    }),
+    ...structureIcons,
+  ],
   legends: bikelanesWidthLegend,
 }
 

@@ -6,6 +6,6 @@ export async function initializeSchemaData() {
 }
 
 export async function initializeCustomFunctionsDataTables() {
-  // Not used ATM
+  // Add custom SQL functions here when processing needs them in the database.
   return true
 }

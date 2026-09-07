@@ -24,10 +24,10 @@ services:
       # since Docker Compose resolves ${DATABASE_HOST} from .env before override applies
       DATABASE_HOST: db
       PGHOST: db
-    # Performance: Allocate resources for processing container
-    # Docker Desktop has 8GB total, so we allocate 4GB max for processing
-    mem_limit: 4g
-    mem_reservation: 2g
+    # Docker Desktop VM is 8GB (Settings → Resources). db 4g + processing 3g leaves ~1GB for tiles/app.
+    # osm2pgsql runs without --slim (node cache in RAM) with --number-processes=4 by default.
+    mem_limit: 3g
+    mem_reservation: 512m
     cpus: '4'
   app:
     container_name: ${COMPOSE_DEV_CONTAINER_PREFIX:-}app
@@ -60,12 +60,11 @@ services:
     logging:
       driver: json-file
     # Performance: Increase shared memory for PostgreSQL (needed for large queries and parallel workers)
-    shm_size: 2g
-    # Performance: Allocate resources for database container
-    # Docker Desktop has 8GB total, allocating 5GB for DB (leaving room for processing/tiles)
-    # PostgreSQL benefits significantly from dedicated CPU and memory
-    mem_limit: 5g
-    mem_reservation: 4g
+    shm_size: 1g
+    # 4g fits shared_buffers=1GB + maintenance_work_mem + parallel work_mem (configs/postgres.development.conf).
+    # Low reservation so a second worktree stack (DEV_PORT_SLOT) can coexist in the same 8GB VM.
+    mem_limit: 4g
+    mem_reservation: 1g
     cpus: '4'
 
 configs:

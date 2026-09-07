@@ -61,4 +61,4 @@ Internal-only (no user-visible change): maintainer bullets ok; omit user bullets
 
 ## Related
 
-[close-worktree](../close-worktree/SKILL.md) (land worktree → develop; calls this skill if dirty) | [playwright-skill](../playwright-skill/SKILL.md) | [tech-stack](../tech-stack/SKILL.md) | [review-dependabot](../review-dependabot/SKILL.md) / babysit | [user-changelog](../user-changelog/SKILL.md)
+[close-worktree](../close-worktree/SKILL.md) (land worktree → develop; calls this skill if dirty) | [unslop-code](../unslop-code/SKILL.md) (post-LLM cleanup; calls this skill per phase commit) | [playwright-skill](../playwright-skill/SKILL.md) | [tech-stack](../tech-stack/SKILL.md) | [review-dependabot](../review-dependabot/SKILL.md) / babysit | [user-changelog](../user-changelog/SKILL.md)

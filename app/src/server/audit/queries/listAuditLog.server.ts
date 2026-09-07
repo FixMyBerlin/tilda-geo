@@ -1,4 +1,4 @@
-import type { Prisma } from '@/prisma/generated/client'
+import type { Prisma, UserRoleEnum } from '@/prisma/generated/client'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
 import type { AuditLogListFilters } from '@/server/audit/auditLogFilters.schema'
 import { auditLogChangeSource } from '@/server/audit/auditLogMetadata.schema'
@@ -9,8 +9,18 @@ import type { PaginatedList } from '@/shared/pagination/types'
 
 type DbAuditLogRow = Prisma.AuditLogGetPayload<Record<string, never>>
 
+type AuditLogUser = {
+  osmName: string | null
+  osmId: number
+  firstName: string | null
+  lastName: string | null
+  email: string
+  role: UserRoleEnum
+}
+
 export type AuditLogRow = DbAuditLogRow & {
   changeSource: AuditChangeSource | null
+  user: AuditLogUser | null
 }
 
 export type ListAuditLogResult = PaginatedList<AuditLogRow>
@@ -18,10 +28,49 @@ export type ListAuditLogResult = PaginatedList<AuditLogRow>
 const DEFAULT_TAKE = 50
 const MAX_TAKE = 200
 
-const toAuditLogRow = (row: DbAuditLogRow): AuditLogRow => ({
-  ...row,
-  changeSource: auditLogChangeSource(row.metadata),
-})
+const AUDIT_LOG_USER_SELECT = {
+  id: true,
+  osmName: true,
+  osmId: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  role: true,
+} as const
+
+const loadUsersById = async (userIds: string[]) => {
+  const uniqueIds = [...new Set(userIds.filter(Boolean))]
+  if (uniqueIds.length === 0) return new Map<string, AuditLogUser>()
+
+  const users = await db.user.findMany({
+    where: { id: { in: uniqueIds } },
+    select: AUDIT_LOG_USER_SELECT,
+  })
+
+  return new Map(
+    users.map((user) => [
+      user.id,
+      {
+        osmName: user.osmName,
+        osmId: user.osmId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+      } satisfies AuditLogUser,
+    ]),
+  )
+}
+
+const toAuditLogRows = async (rows: DbAuditLogRow[]): Promise<AuditLogRow[]> => {
+  const usersById = await loadUsersById(rows.flatMap((row) => (row.userId ? [row.userId] : [])))
+
+  return rows.map((row) => ({
+    ...row,
+    changeSource: auditLogChangeSource(row.metadata),
+    user: row.userId ? (usersById.get(row.userId) ?? null) : null,
+  }))
+}
 
 /** Child rows of Region that MCP/admin region writes replace via deleteMany + createMany. */
 const REGION_ASSIGNMENT_AUDIT_MODELS = [
@@ -89,7 +138,7 @@ export async function listAuditLog(filters: AuditLogListFilters = {}): Promise<L
     count: () => db.auditLog.count({ where }),
     query: async ({ skip, take }) => {
       const rows = await db.auditLog.findMany({ where, orderBy: { createdAt: 'desc' }, take, skip })
-      return rows.map(toAuditLogRow)
+      return toAuditLogRows(rows)
     },
   })
 }
@@ -114,11 +163,10 @@ export async function getAuditHistoryForRegionEdit(
 ): Promise<AuditLogRow[]> {
   await requireAdmin(headers)
 
-  return db.auditLog
-    .findMany({
-      where: regionAuditHistoryWhere(regionId),
-      orderBy: { createdAt: 'desc' },
-      take,
-    })
-    .then((rows) => rows.map(toAuditLogRow))
+  const rows = await db.auditLog.findMany({
+    where: regionAuditHistoryWhere(regionId),
+    orderBy: { createdAt: 'desc' },
+    take,
+  })
+  return toAuditLogRows(rows)
 }

@@ -69,14 +69,19 @@
      seeds a px value (e.g. pending/error shells never mount the inspector). */
   --inspector-width: 0px;
   --map-controls-inset: 10px;
+  /* Desktop `HeaderRegionen` height (`sm:h-16`). The region map sizes to the viewport *minus*
+     this, so the map box matches the visible area below the header. */
+  --app-header-height: 4rem;
   /* Mobile: floating header button row (MobileMapHeader `pt`). */
   --map-chrome-top-inset: calc(env(safe-area-inset-top) + 0.5rem);
 }
 
 @media (min-width: 640px) {
   :root {
-    /* Desktop map UI height: h-16 header, top-2 controls, bottom-4 + size-10 trigger, anchor gap. */
-    --map-chrome-max-height: calc(100dvh - 4rem - 0.5rem - 1rem - 2.5rem - 0.5rem);
+    /* Desktop map UI height: header, top-2 controls, bottom-4 + size-10 trigger, anchor gap. */
+    --map-chrome-max-height: calc(
+      100dvh - var(--app-header-height) - 0.5rem - 1rem - 2.5rem - 0.5rem
+    );
   }
 }
 

@@ -1,7 +1,8 @@
 import { FileUploadButton } from '@/components/shared/form/fields/FileUploadButton'
 import type { FormApi } from '@/components/shared/form/types'
 import type { RegionFormInput } from '@/server/regions/regionWriteSchema'
-import { REGION_UPLOAD_ACCEPT, useRegionUploadFile } from './useRegionUploadFile'
+import { REGION_UPLOAD_ACCEPT } from '@/server/regions/uploads/regionUploadImage.const'
+import { useRegionUploadFile } from './useRegionUploadFile'
 
 type Props = {
   form: FormApi<RegionFormInput>

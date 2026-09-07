@@ -4,7 +4,6 @@ const strict = process.env.KNIP_STRICT === '1'
 
 export default {
   entry: [
-    'src/router.tsx',
     'src/routes/**/*.{ts,tsx}',
     'src/**/*.test.{ts,tsx}',
     'src/server/instrumentation/nitro-*.plugin.server.ts',
@@ -22,10 +21,10 @@ export default {
     'src/components/shared/utils/getCachelessTilesUrl.ts': ['exports'],
     'src/components/shared/utils/getTilesUrl.ts': ['exports'],
   },
-  ignoreBinaries: ['code', 'gdal', 'gdalinfo', 'gh', 'github', 'ogr2ogr', 'ogrinfo'],
+  ignoreBinaries: ['gdal', 'gdalinfo', 'github', 'ogr2ogr', 'ogrinfo'],
   ignoreDependencies: [
     '@tanstack/router-plugin',
-    // Symlinked scripts/StaticDatasets/geojson/** (ignoreFiles above)
+    // Used in symlinked tilda-static-data geojson scripts (gitignored; see static-datasets-link)
     'papaparse',
     '@types/papaparse',
     '@maplibre/maplibre-gl-style-spec',

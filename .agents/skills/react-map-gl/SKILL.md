@@ -58,7 +58,7 @@ Pair with: skill `tanstack-router-conventions` (`?map=` URL contract), skill `nu
 | Layers            | Flat siblings: one `<Source>` per source id, then `<Layer>` siblings (not nested layers under Source for refactorability).                                                                                |
 | Clicks            | Put layer ids in `interactiveLayerIds`; read `event.features` in handlers — do not call `queryRenderedFeatures` for primary click picking unless syncing URL features.                                    |
 | Feature highlight | Inspector/form truth in React; map tint via `setFeatureState` (paint) or React `filter` layer — see feature-state.md. Clear old state before applying new.                                                |
-| Attribution       | `attributionControl={false}` on `<Map>`; add `<AttributionControl>` as child with desired position.                                                                                                       |
+| Attribution       | `attributionControl={false}` on `<Map>`; add `<AttributionControl compact>` as child. `compact` is not start-closed — see map-props-attribution-locale.md.                                                |
 | Viewport URL      | Serialize `zoom/lat/lng` with zoom-aware lat/lng rounding; write on `onMoveEnd` with `history: 'replace'`.                                                                                                |
 | View state        | Prefer **uncontrolled** `initialViewState` seeded from URL; do not mirror full viewState in React state unless you need programmatic camera control.                                                      |
 

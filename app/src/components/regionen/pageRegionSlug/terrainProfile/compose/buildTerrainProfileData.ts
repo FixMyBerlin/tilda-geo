@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query'
 import { length, lineString } from '@turf/turf'
 import type { Feature } from 'geojson'
 import { terrainProfileGeometryFromFeature } from '../geometry/terrainProfileGeometryFromFeature'
+import { applyStructureElevationInterpolation } from '../sampling/applyStructureElevationInterpolation'
 import { sampleLineForTerrainProfile } from '../sampling/sampleLineForTerrainProfile'
 import { sampleTerrainElevations } from '../sampling/terrainSampler'
 import type {
@@ -56,16 +57,17 @@ const buildStats = (samples: TerrainProfileData['samples'], distanceMeters: numb
   } satisfies TerrainProfileStats
 }
 
-/** Async atom: sample one line and fetch DEM elevations. */
-const buildTerrainProfileData = async (geometry: TerrainProfileLine) => {
-  const pathSamples = sampleLineForTerrainProfile(geometry)
+/** Async atom: sample one line, fetch DEM elevations, interpolate bridges/tunnels. */
+const buildTerrainProfileData = async (entry: EligibleTerrainProfileLine) => {
+  const pathSamples = sampleLineForTerrainProfile(entry.geometry)
   const elevations = await sampleTerrainElevations(pathSamples)
-  const samples = pathSamples.map((sample, index) => ({
+  const demSamples = pathSamples.map((sample, index) => ({
     ...sample,
     elevationMeters: elevations[index] ?? 0,
   }))
+  const samples = applyStructureElevationInterpolation(demSamples, entry.feature.properties)
 
-  const distanceMeters = length(lineString(geometry.coordinates), { units: 'meters' })
+  const distanceMeters = length(lineString(entry.geometry.coordinates), { units: 'meters' })
 
   return {
     samples,
@@ -76,7 +78,7 @@ const buildTerrainProfileData = async (geometry: TerrainProfileLine) => {
 export const terrainProfileQueryOptions = (entry: EligibleTerrainProfileLine, enabled: boolean) =>
   queryOptions({
     queryKey: ['terrain-profile', entry.featureKey] as const,
-    queryFn: () => buildTerrainProfileData(entry.geometry),
+    queryFn: () => buildTerrainProfileData(entry),
     enabled,
     staleTime: Infinity,
     gcTime: Infinity,

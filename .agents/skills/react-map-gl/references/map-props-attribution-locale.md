@@ -17,6 +17,37 @@ Per [react-map-gl AttributionControl docs](https://visgl.github.io/react-map-gl/
 
 Static dataset sources can still pass `attribution={attributionHtml}` on `<Source>` for layer-attributed credits.
 
+### compact starts expanded — start closed after mount
+
+`compact` is **not** “start as the ⓘ button”. In MapLibre 5/6 it means: use the compact `<details>` toggle, and collapse when the user pans. On add, MapLibre still sets `open` plus `.maplibregl-compact-show`, so the text is expanded. There is no `closedOnLoad` option ([maplibre-gl-js#7426](https://github.com/maplibre/maplibre-gl-js/issues/7426)).
+
+**Pending FMC pattern** (osmcha-frontend-v2 `views/map.tsx`; not in tilda yet): render `<AttributionControl compact>` then a sibling whose `useEffect` runs after `useControl` and removes `.maplibregl-compact-show`. Later `sourcedata` will not re-add that class once `.maplibregl-compact` is already present. Click still expands; pan still collapses.
+
+```tsx
+<Map attributionControl={false} …>
+  {/* compact = ⓘ toggle (also collapses on pan). MapLibre still starts expanded. */}
+  <AttributionControl compact position="bottom-left" />
+  <CollapseCompactAttributionOnMount />
+</Map>
+
+function CollapseCompactAttributionOnMount() {
+  const { mainMap } = useMap() // keyed by <Map id="mainMap">
+  useEffect(
+    function collapseCompactAttribution() {
+      mainMap
+        ?.getMap()
+        .getContainer()
+        .querySelector('.maplibregl-ctrl-attrib')
+        ?.classList.remove('maplibregl-compact-show')
+    },
+    [mainMap],
+  )
+  return null
+}
+```
+
+Put the collapse sibling **after** `<AttributionControl>` so effects run after the control is added. Do not collapse in `onLoad` — react-map-gl `useControl` often mounts the control after `onLoad`.
+
 ## locale (UI strings, not label language)
 
 MapLibre / react-map-gl expose a **`locale`** prop on `<Map>`: `Record<string, string>` patching the default UI string table (control tooltips, etc.). Replaces removed `*Label` props on controls ([upgrade guide](https://visgl.github.io/react-map-gl/docs/upgrade-guide)).
@@ -67,13 +98,14 @@ Audit CSP and consent if you enable this.
   // locale={{ … }}   // optional: German control strings
 >
   <AttributionControl compact position="bottom-left" />
+  {/* pending: CollapseCompactAttributionOnMount — see compact starts expanded */}
 </Map>
 ```
 
 ## Checklist
 
 - [ ] `attributionControl={false}` on every `<Map>`
-- [ ] `<AttributionControl>` (or legal requirement equivalent) as child
+- [ ] `<AttributionControl compact>` (or legal requirement equivalent) as child; collapse `.maplibregl-compact-show` after mount if it should start closed
 - [ ] `locale` for control UI translations if not English
 - [ ] Do not confuse `locale` with vector label i18n — style/tiles problem
 - [ ] `RTLTextPlugin={false}` on every `<Map>` unless RTL symbol text is required (never rely on omit — default loads external CDN)

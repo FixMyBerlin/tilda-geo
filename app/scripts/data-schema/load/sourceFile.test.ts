@@ -12,7 +12,7 @@ describe('pickFolderSourceFile', () => {
     ).toBe('euvm_cutouts_point.geojson')
   })
 
-  it('uses the only .geojson/.gpkg when spec.source.file is missing', () => {
+  it('uses the only .geojson/.gpkg/.sql when spec.source.file is missing', () => {
     expect(
       pickFolderSourceFile({
         table: 'euvm_cutouts_point',
@@ -20,6 +20,16 @@ describe('pickFolderSourceFile', () => {
         files: ['delivery.gpkg', 'spec.yaml'],
       }),
     ).toBe('delivery.gpkg')
+  })
+
+  it('accepts a .sql source file', () => {
+    expect(
+      pickFolderSourceFile({
+        table: 'euvm_qa_voronoi_2026',
+        specFile: 'euvm_qa_voronoi_2026.sql',
+        files: ['euvm_qa_voronoi_2026.sql', 'spec.yaml'],
+      }),
+    ).toBe('euvm_qa_voronoi_2026.sql')
   })
 
   it('ignores spec.yaml and other non-source files', () => {
@@ -39,7 +49,7 @@ describe('pickFolderSourceFile', () => {
         specFile: 'euvm_cutouts_point.geojson',
         files: ['spec.yaml'],
       }),
-    ).toThrow(/No \.geojson or \.gpkg/)
+    ).toThrow(/No \.geojson, \.gpkg or \.sql/)
   })
 
   it('errors when several source files exist and spec.source.file is not among them', () => {

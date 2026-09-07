@@ -2,17 +2,18 @@
 
 How we combine route loaders with React Query. Setup lives in `router.tsx` (`queryClient` in router context and **required** pretty-JSON `parseSearch` / `stringifySearch` — see [router-search-serialization.md](router-search-serialization.md)).
 
-**Further reading:** [TkDodo — TanStack Router and Query](https://tkdodo.eu/blog/tan-stack-router-and-query), [Router Query integration](https://tanstack.com/router/latest/docs/integrations/query).
+**Further reading:** [TkDodo — TanStack Router and Query](https://tkdodo.eu/blog/tan-stack-router-and-query), [Router Query integration](https://tanstack.com/router/latest/docs/integrations/query), [Combining TanStack Query data](https://www.nop33.com/blog/combining-tanstack-query-data/).
 
 ---
 
 ## When to use what
 
-| Need                                                                     | Pattern                                                                                   |
-| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| Shared or refetchable data (invalidation, window focus, multiple routes) | `*QueryOptions` once, loader primes cache, component uses `useQuery` / `useSuspenseQuery` |
-| Data only for one route, no Query invalidation (most admin CRUD)         | Loader returns serializable data → `routeApi.useLoaderData()`                             |
-| Redirects, auth, light context                                           | `beforeLoad`                                                                              |
+| Need                                                                     | Pattern                                                                                       |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| Shared or refetchable data (invalidation, window focus, multiple routes) | `*QueryOptions` once, loader primes cache, component uses `useQuery` / `useSuspenseQuery`     |
+| Data only for one route, no Query invalidation (most admin CRUD)         | Loader returns serializable data → `routeApi.useLoaderData()`                                 |
+| Redirects, auth, light context                                           | `beforeLoad`                                                                                  |
+| UI needs a join of several Query-backed sources                          | Prefer a server/API join; else [Derived / combined Query data](#derived--combined-query-data) |
 
 Do **not** read Query-backed data only via `useLoaderData`. Query needs an observer (`useQuery` / `useSuspenseQuery`) for refetch, invalidation, and cache retention.
 
@@ -43,6 +44,23 @@ Pattern: route loader calls `ensureQueryData` with shared options; page or hooks
 - **`trailingSlash: 'never'`** — pair with root `beforeLoad` trailing-slash redirect.
 - Set **`defaultPreloadStaleTime: 0`** on the router when using Query so only one cache layer controls staleness ([TkDodo](https://tkdodo.eu/blog/tan-stack-router-and-query)).
 - **`defaultPreload: 'intent'`** — loaders (and prefetches) can run before navigation.
+
+## Derived / combined Query data
+
+When a screen needs a value built from **several** endpoints (or several `*QueryOptions`), prefer a **backend/API join**. If the client must compose:
+
+| Situation                                                                                          | Reach for                                                                                                 | Trade-off                                                                                                             |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Few consumers; keep source caches + normal invalidation                                            | Combine in the wrapper hook: separate `useQuery` / `useQueries`, derive with `useMemo` (or during render) | Derivation runs **per consumer**                                                                                      |
+| Same, but the **final** reduce is expensive and should skip rerenders when the result is unchanged | One `useQueries({ queries, combine })` that returns the derived value                                     | Any input change re-runs the whole `combine` (including cheap merges)                                                 |
+| Many consumers, **nothing else** needs the raw sources                                             | One `queryOptions` whose `queryFn` does `Promise.all` over fetches                                        | Shared QueryCache entry; loses granular caches; one failure retries the whole fan-out                                 |
+| Many consumers, **other screens** still need the sources                                           | Derived `queryFn` that `queryClient.fetchQuery`s each `*QueryOptions`                                     | Shared derived entry + granular source caches; derived is a **snapshot** — invalidate it yourself when sources change |
+
+**Default for FMC:** the first row (combine in the hook). Export `*QueryOptions` for each source; wrap composition in a custom hook. Use `select` only to shape **one** query’s data for a consumer — not as a substitute for multi-query joins.
+
+Avoid inventing a derived QueryCache key unless many consumers share the same expensive join **and** you accept either lost granularity (`Promise.all`) or manual invalidation (`fetchQuery`). Prefer prop-drilling or a small parent-owned composition over mounting the same derived hook in every list row.
+
+**Further reading:** [nop33 — Combining TanStack Query data](https://www.nop33.com/blog/combining-tanstack-query-data/) (decision table + trade-offs), TkDodo discussion [Derived Queries](https://github.com/TanStack/query/discussions/2178).
 
 ---
 

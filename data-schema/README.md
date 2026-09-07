@@ -18,7 +18,7 @@ Each environment restores the same S3 `data.dump` into Postgres `data.<table>`. 
 
 If processing SQL reads this table for map layers, run processing afterwards to update the user facing data.
 
-`bun run data-schema-pull` and `bun run seed` copy `spec.yaml` onto this machine. Postgres `data.*` is filled by Import (Admin UI or MCP) above.
+`bun run data-schema-pull` and `bun run seed` copy `spec.yaml` onto this machine. Postgres `data.*` is filled by Import (Admin UI or MCP) above. `bun run db-pull` restores the prisma schema only; it does not fill `data.*`.
 
 ## New or updated data
 
@@ -26,7 +26,7 @@ On your local machine:
 
 1. Always `bun run data-schema-pull` so local `spec.yaml` matches S3.
 2. Use skill [add-db-data-table](../.cursor/skills/add-db-data-table/SKILL.md) to write or update `data-schema/<table>/spec.yaml`.
-3. Place the GeoJSON/GPKG next to `spec.yaml`.
+3. Place the GeoJSON/GPKG/SQL next to `spec.yaml`. Use a `.sql` dump when the exact DDL must be preserved (text primary keys, production-generated baselines such as the QA voronoi tables) — omit the `import` block in that case.
 4. Run `bun run data-schema-load` to import that source into local `data.<table>`.
 5. Run `bun run data-schema-publish` to dump the local table and upload spec + dump to S3.
 6. **Import** on each environment (Admin UI or MCP above) so that environment’s Postgres picks up the dump.
@@ -35,12 +35,22 @@ Specs and dumps are created on this machine. Staging and production Import the p
 
 ## This folder
 
-Gitignored local mirror of specs, plus the source GeoJSON/GPKG used by load. Dumps never live here — they are only on S3. Do not commit table folders.
+Gitignored local mirror of specs, plus the source GeoJSON/GPKG/SQL used by load. Dumps never live here — they are only on S3. Do not commit table folders.
 
 ```
 data-schema/<table>/spec.yaml              # pulled from S3
-data-schema/<table>/*.geojson|.gpkg        # local load input (not on S3)
+data-schema/<table>/*.geojson|.gpkg|.sql   # local load input (not on S3)
 ```
+
+## SQL dumps (`.sql` sources)
+
+Most tables load from GeoJSON/GPKG via `ogr2ogr`. Some tables — notably the QA voronoi baselines — are generated on production and exported as SQL dumps so column types and the text `id` primary key survive. For those:
+
+- `source.file` ends in `.sql` and the `import` block is omitted.
+- `data-schema-load` runs the dump with `psql` (Docker Postgres CLI); GDAL is not required.
+- Do not convert those dumps to GPKG/GeoJSON for load: ogr2ogr would replace the text PK with an integer `ogc_fid`.
+
+See [Parking client freeze + QA](../docs/Parking-Client-Freeze-QA.md).
 
 ## What is on S3
 

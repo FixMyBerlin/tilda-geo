@@ -154,7 +154,7 @@ export default defineConfig({
       rolldownConfig: {
         external: ['@aws-sdk/client-s3', /^@aws-crypto\//, /^@smithy\//],
       },
-    }),
+    } as Parameters<typeof nitro>[0]),
     tailwindcss(),
     tanstackStart({}),
     viteReact({ compiler: true }),
