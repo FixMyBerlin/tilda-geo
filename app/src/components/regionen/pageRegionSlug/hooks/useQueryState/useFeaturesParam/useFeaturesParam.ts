@@ -53,11 +53,14 @@ export const useFeaturesParam = () => {
   const wire = search[searchParamsRegistry.f]
   const featuresParam = wire ? parseFeaturesParam(wire) : []
 
-  const setFeaturesParam = (value: UrlFeature[] | null) => {
-    updateSearch({
-      [searchParamsRegistry.f]:
-        value && value.length > 0 ? serializeFeaturesParam(value) : undefined,
-    })
+  const setFeaturesParam = (value: UrlFeature[] | null, options?: { replace?: boolean }) => {
+    updateSearch(
+      {
+        [searchParamsRegistry.f]:
+          value && value.length > 0 ? serializeFeaturesParam(value) : undefined,
+      },
+      options,
+    )
   }
 
   return { featuresParam, setFeaturesParam }

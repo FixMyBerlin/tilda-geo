@@ -18,7 +18,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as RegionenIndexRouteImport } from './routes/regionen/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as RegionenStatsRouteImport } from './routes/regionen/stats'
-import { Route as RegionenRegionSlugRouteImport } from './routes/regionen/$regionSlug'
 import { Route as PreviewRootFallbackRouteImport } from './routes/preview/root-fallback'
 import { Route as PreviewRegionPendingRouteImport } from './routes/preview/region-pending'
 import { Route as PreviewRegionErrorRouteImport } from './routes/preview/region-error'
@@ -33,6 +32,7 @@ import { Route as ApiProcessingDatesRouteImport } from './routes/api/processing-
 import { Route as ApiMapStyleRouteImport } from './routes/api/map-style'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
 import { Route as ApiBoundaryRouteImport } from './routes/api/boundary'
+import { Route as AdminReviewListsRouteImport } from './routes/admin/review-lists'
 import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
 import { Route as AdminRegionContractsRouteImport } from './routes/admin/region-contracts'
 import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
@@ -47,6 +47,9 @@ import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
 import { Route as PagesKontaktRouteImport } from './routes/_pages/kontakt'
 import { Route as PagesDatenschutzRouteImport } from './routes/_pages/datenschutz'
 import { Route as PagesAccessDeniedRouteImport } from './routes/_pages/access-denied'
+import { Route as RegionenRegionSlugRouteRouteImport } from './routes/regionen/$regionSlug/route'
+import { Route as RegionenRegionSlugIndexRouteImport } from './routes/regionen/$regionSlug/index'
+import { Route as AdminReviewListsIndexRouteImport } from './routes/admin/review-lists/index'
 import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/index'
 import { Route as AdminRegionContractsIndexRouteImport } from './routes/admin/region-contracts/index'
 import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
@@ -54,9 +57,13 @@ import { Route as AdminProcessingIndexRouteImport } from './routes/admin/process
 import { Route as AdminMembershipsIndexRouteImport } from './routes/admin/memberships/index'
 import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
 import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
+import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
+import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
+import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
 import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
+import { Route as ApiReviewListsUploadRouteImport } from './routes/api/review-lists.upload'
 import { Route as ApiPrivateWarmCacheRouteImport } from './routes/api/private/warm-cache'
 import { Route as ApiPrivateRegisterSqlFunctionsRouteImport } from './routes/api/private/register-sql-functions'
 import { Route as ApiPrivateRegionsRouteImport } from './routes/api/private/regions'
@@ -95,6 +102,7 @@ import { Route as ApiAdminRegionsSlugRouteImport } from './routes/api/admin/regi
 import { Route as ApiAdminRegionUploadsUploadRouteImport } from './routes/api/admin/region-uploads.upload'
 import { Route as ApiAdminProcessingMetaIdRouteImport } from './routes/api/admin/processing.$metaId'
 import { Route as ApiAdminDataSchemaImportRouteImport } from './routes/api/admin/data-schema.import'
+import { Route as AdminReviewListsIdEditRouteImport } from './routes/admin/review-lists/$id.edit'
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
 import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
 import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
@@ -142,11 +150,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const RegionenStatsRoute = RegionenStatsRouteImport.update({
   id: '/stats',
   path: '/stats',
-  getParentRoute: () => RegionenRoute,
-} as any)
-const RegionenRegionSlugRoute = RegionenRegionSlugRouteImport.update({
-  id: '/$regionSlug',
-  path: '/$regionSlug',
   getParentRoute: () => RegionenRoute,
 } as any)
 const PreviewRootFallbackRoute = PreviewRootFallbackRouteImport.update({
@@ -220,6 +223,11 @@ const ApiBoundaryRoute = ApiBoundaryRouteImport.update({
   path: '/api/boundary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminReviewListsRoute = AdminReviewListsRouteImport.update({
+  id: '/review-lists',
+  path: '/review-lists',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRegionsRoute = AdminRegionsRouteImport.update({
   id: '/regions',
   path: '/regions',
@@ -291,6 +299,21 @@ const PagesAccessDeniedRoute = PagesAccessDeniedRouteImport.update({
   path: '/access-denied',
   getParentRoute: () => PagesRoute,
 } as any)
+const RegionenRegionSlugRouteRoute = RegionenRegionSlugRouteRouteImport.update({
+  id: '/$regionSlug',
+  path: '/$regionSlug',
+  getParentRoute: () => RegionenRoute,
+} as any)
+const RegionenRegionSlugIndexRoute = RegionenRegionSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegionenRegionSlugRouteRoute,
+} as any)
+const AdminReviewListsIndexRoute = AdminReviewListsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminReviewListsRoute,
+} as any)
 const AdminRegionsIndexRoute = AdminRegionsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -329,6 +352,23 @@ const AdminMapDatasetCategoriesIndexRoute =
     path: '/',
     getParentRoute: () => AdminMapDatasetCategoriesRoute,
   } as any)
+const RegionenRegionSlugQaRoute = RegionenRegionSlugQaRouteImport.update({
+  id: '/qa',
+  path: '/qa',
+  getParentRoute: () => RegionenRegionSlugRouteRoute,
+} as any)
+const RegionenRegionSlugPrueflistenRoute =
+  RegionenRegionSlugPrueflistenRouteImport.update({
+    id: '/prueflisten',
+    path: '/prueflisten',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugHinweiseRoute =
+  RegionenRegionSlugHinweiseRouteImport.update({
+    id: '/hinweise',
+    path: '/hinweise',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
 const ApiUploadsCreateRoute = ApiUploadsCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -342,6 +382,11 @@ const ApiUploadsSlugRoute = ApiUploadsSlugRouteImport.update({
 const ApiSignInOsmRoute = ApiSignInOsmRouteImport.update({
   id: '/api/sign-in/osm',
   path: '/api/sign-in/osm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReviewListsUploadRoute = ApiReviewListsUploadRouteImport.update({
+  id: '/api/review-lists/upload',
+  path: '/api/review-lists/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPrivateWarmCacheRoute = ApiPrivateWarmCacheRouteImport.update({
@@ -555,6 +600,11 @@ const ApiAdminDataSchemaImportRoute =
     path: '/api/admin/data-schema/import',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminReviewListsIdEditRoute = AdminReviewListsIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AdminReviewListsRoute,
+} as any)
 const AdminRegionsRegionSlugEditRoute =
   AdminRegionsRegionSlugEditRouteImport.update({
     id: '/$regionSlug/edit',
@@ -585,6 +635,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/preview': typeof PreviewRouteWithChildren
   '/regionen': typeof RegionenRouteWithChildren
+  '/regionen/$regionSlug': typeof RegionenRegionSlugRouteRouteWithChildren
   '/access-denied': typeof PagesAccessDeniedRoute
   '/datenschutz': typeof PagesDatenschutzRoute
   '/kontakt': typeof PagesKontaktRoute
@@ -599,6 +650,7 @@ export interface FileRoutesByFullPath {
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
   '/admin/regions': typeof AdminRegionsRouteWithChildren
+  '/admin/review-lists': typeof AdminReviewListsRouteWithChildren
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -613,7 +665,6 @@ export interface FileRoutesByFullPath {
   '/preview/region-error': typeof PreviewRegionErrorRoute
   '/preview/region-pending': typeof PreviewRegionPendingRoute
   '/preview/root-fallback': typeof PreviewRootFallbackRoute
-  '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
   '/admin/': typeof AdminIndexRoute
   '/regionen/': typeof RegionenIndexRoute
@@ -641,9 +692,13 @@ export interface FileRoutesByFullPath {
   '/api/private/regions': typeof ApiPrivateRegionsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
+  '/api/review-lists/upload': typeof ApiReviewListsUploadRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
+  '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
@@ -651,9 +706,12 @@ export interface FileRoutesByFullPath {
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
+  '/admin/review-lists/': typeof AdminReviewListsIndexRoute
+  '/regionen/$regionSlug/': typeof RegionenRegionSlugIndexRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
+  '/admin/review-lists/$id/edit': typeof AdminReviewListsIdEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
   '/api/admin/processing/$metaId': typeof ApiAdminProcessingMetaIdRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
@@ -695,7 +753,6 @@ export interface FileRoutesByTo {
   '/preview/region-error': typeof PreviewRegionErrorRoute
   '/preview/region-pending': typeof PreviewRegionPendingRoute
   '/preview/root-fallback': typeof PreviewRootFallbackRoute
-  '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
   '/admin': typeof AdminIndexRoute
   '/regionen': typeof RegionenIndexRoute
@@ -723,9 +780,13 @@ export interface FileRoutesByTo {
   '/api/private/regions': typeof ApiPrivateRegionsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
+  '/api/review-lists/upload': typeof ApiReviewListsUploadRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
+  '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/memberships': typeof AdminMembershipsIndexRoute
@@ -733,9 +794,12 @@ export interface FileRoutesByTo {
   '/admin/qa-configs': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts': typeof AdminRegionContractsIndexRoute
   '/admin/regions': typeof AdminRegionsIndexRoute
+  '/admin/review-lists': typeof AdminReviewListsIndexRoute
+  '/regionen/$regionSlug': typeof RegionenRegionSlugIndexRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
+  '/admin/review-lists/$id/edit': typeof AdminReviewListsIdEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
   '/api/admin/processing/$metaId': typeof ApiAdminProcessingMetaIdRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
@@ -760,6 +824,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/preview': typeof PreviewRouteWithChildren
   '/regionen': typeof RegionenRouteWithChildren
+  '/regionen/$regionSlug': typeof RegionenRegionSlugRouteRouteWithChildren
   '/_pages/access-denied': typeof PagesAccessDeniedRoute
   '/_pages/datenschutz': typeof PagesDatenschutzRoute
   '/_pages/kontakt': typeof PagesKontaktRoute
@@ -774,6 +839,7 @@ export interface FileRoutesById {
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
   '/admin/regions': typeof AdminRegionsRouteWithChildren
+  '/admin/review-lists': typeof AdminReviewListsRouteWithChildren
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -788,7 +854,6 @@ export interface FileRoutesById {
   '/preview/region-error': typeof PreviewRegionErrorRoute
   '/preview/region-pending': typeof PreviewRegionPendingRoute
   '/preview/root-fallback': typeof PreviewRootFallbackRoute
-  '/regionen/$regionSlug': typeof RegionenRegionSlugRoute
   '/regionen/stats': typeof RegionenStatsRoute
   '/admin/': typeof AdminIndexRoute
   '/regionen/': typeof RegionenIndexRoute
@@ -816,9 +881,13 @@ export interface FileRoutesById {
   '/api/private/regions': typeof ApiPrivateRegionsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
+  '/api/review-lists/upload': typeof ApiReviewListsUploadRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
+  '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
@@ -826,9 +895,12 @@ export interface FileRoutesById {
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
+  '/admin/review-lists/': typeof AdminReviewListsIndexRoute
+  '/regionen/$regionSlug/': typeof RegionenRegionSlugIndexRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
+  '/admin/review-lists/$id/edit': typeof AdminReviewListsIdEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
   '/api/admin/processing/$metaId': typeof ApiAdminProcessingMetaIdRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
@@ -853,6 +925,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/preview'
     | '/regionen'
+    | '/regionen/$regionSlug'
     | '/access-denied'
     | '/datenschutz'
     | '/kontakt'
@@ -867,6 +940,7 @@ export interface FileRouteTypes {
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
+    | '/admin/review-lists'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -881,7 +955,6 @@ export interface FileRouteTypes {
     | '/preview/region-error'
     | '/preview/region-pending'
     | '/preview/root-fallback'
-    | '/regionen/$regionSlug'
     | '/regionen/stats'
     | '/admin/'
     | '/regionen/'
@@ -909,9 +982,13 @@ export interface FileRouteTypes {
     | '/api/private/regions'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
+    | '/api/review-lists/upload'
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/prueflisten'
+    | '/regionen/$regionSlug/qa'
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/memberships/'
@@ -919,9 +996,12 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
     | '/admin/regions/'
+    | '/admin/review-lists/'
+    | '/regionen/$regionSlug/'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
+    | '/admin/review-lists/$id/edit'
     | '/api/admin/data-schema/import'
     | '/api/admin/processing/$metaId'
     | '/api/admin/region-uploads/upload'
@@ -963,7 +1043,6 @@ export interface FileRouteTypes {
     | '/preview/region-error'
     | '/preview/region-pending'
     | '/preview/root-fallback'
-    | '/regionen/$regionSlug'
     | '/regionen/stats'
     | '/admin'
     | '/regionen'
@@ -991,9 +1070,13 @@ export interface FileRouteTypes {
     | '/api/private/regions'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
+    | '/api/review-lists/upload'
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/prueflisten'
+    | '/regionen/$regionSlug/qa'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
@@ -1001,9 +1084,12 @@ export interface FileRouteTypes {
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
+    | '/admin/review-lists'
+    | '/regionen/$regionSlug'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
+    | '/admin/review-lists/$id/edit'
     | '/api/admin/data-schema/import'
     | '/api/admin/processing/$metaId'
     | '/api/admin/region-uploads/upload'
@@ -1027,6 +1113,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/preview'
     | '/regionen'
+    | '/regionen/$regionSlug'
     | '/_pages/access-denied'
     | '/_pages/datenschutz'
     | '/_pages/kontakt'
@@ -1041,6 +1128,7 @@ export interface FileRouteTypes {
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
+    | '/admin/review-lists'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -1055,7 +1143,6 @@ export interface FileRouteTypes {
     | '/preview/region-error'
     | '/preview/region-pending'
     | '/preview/root-fallback'
-    | '/regionen/$regionSlug'
     | '/regionen/stats'
     | '/admin/'
     | '/regionen/'
@@ -1083,9 +1170,13 @@ export interface FileRouteTypes {
     | '/api/private/regions'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
+    | '/api/review-lists/upload'
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/prueflisten'
+    | '/regionen/$regionSlug/qa'
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/memberships/'
@@ -1093,9 +1184,12 @@ export interface FileRouteTypes {
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
     | '/admin/regions/'
+    | '/admin/review-lists/'
+    | '/regionen/$regionSlug/'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
+    | '/admin/review-lists/$id/edit'
     | '/api/admin/data-schema/import'
     | '/api/admin/processing/$metaId'
     | '/api/admin/region-uploads/upload'
@@ -1141,6 +1235,7 @@ export interface RootRouteChildren {
   ApiPrivateRegionsRoute: typeof ApiPrivateRegionsRoute
   ApiPrivateRegisterSqlFunctionsRoute: typeof ApiPrivateRegisterSqlFunctionsRoute
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
+  ApiReviewListsUploadRoute: typeof ApiReviewListsUploadRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
   ApiAdminDataSchemaImportRoute: typeof ApiAdminDataSchemaImportRoute
   ApiExportOgrRegionSlugTableNameRoute: typeof ApiExportOgrRegionSlugTableNameRoute
@@ -1217,13 +1312,6 @@ declare module '@tanstack/react-router' {
       path: '/stats'
       fullPath: '/regionen/stats'
       preLoaderRoute: typeof RegionenStatsRouteImport
-      parentRoute: typeof RegionenRoute
-    }
-    '/regionen/$regionSlug': {
-      id: '/regionen/$regionSlug'
-      path: '/$regionSlug'
-      fullPath: '/regionen/$regionSlug'
-      preLoaderRoute: typeof RegionenRegionSlugRouteImport
       parentRoute: typeof RegionenRoute
     }
     '/preview/root-fallback': {
@@ -1324,6 +1412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBoundaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/review-lists': {
+      id: '/admin/review-lists'
+      path: '/review-lists'
+      fullPath: '/admin/review-lists'
+      preLoaderRoute: typeof AdminReviewListsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/regions': {
       id: '/admin/regions'
       path: '/regions'
@@ -1422,6 +1517,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesAccessDeniedRouteImport
       parentRoute: typeof PagesRoute
     }
+    '/regionen/$regionSlug': {
+      id: '/regionen/$regionSlug'
+      path: '/$regionSlug'
+      fullPath: '/regionen/$regionSlug'
+      preLoaderRoute: typeof RegionenRegionSlugRouteRouteImport
+      parentRoute: typeof RegionenRoute
+    }
+    '/regionen/$regionSlug/': {
+      id: '/regionen/$regionSlug/'
+      path: '/'
+      fullPath: '/regionen/$regionSlug/'
+      preLoaderRoute: typeof RegionenRegionSlugIndexRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/admin/review-lists/': {
+      id: '/admin/review-lists/'
+      path: '/'
+      fullPath: '/admin/review-lists/'
+      preLoaderRoute: typeof AdminReviewListsIndexRouteImport
+      parentRoute: typeof AdminReviewListsRoute
+    }
     '/admin/regions/': {
       id: '/admin/regions/'
       path: '/'
@@ -1471,6 +1587,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMapDatasetCategoriesIndexRouteImport
       parentRoute: typeof AdminMapDatasetCategoriesRoute
     }
+    '/regionen/$regionSlug/qa': {
+      id: '/regionen/$regionSlug/qa'
+      path: '/qa'
+      fullPath: '/regionen/$regionSlug/qa'
+      preLoaderRoute: typeof RegionenRegionSlugQaRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/prueflisten': {
+      id: '/regionen/$regionSlug/prueflisten'
+      path: '/prueflisten'
+      fullPath: '/regionen/$regionSlug/prueflisten'
+      preLoaderRoute: typeof RegionenRegionSlugPrueflistenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/hinweise': {
+      id: '/regionen/$regionSlug/hinweise'
+      path: '/hinweise'
+      fullPath: '/regionen/$regionSlug/hinweise'
+      preLoaderRoute: typeof RegionenRegionSlugHinweiseRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
     '/api/uploads/create': {
       id: '/api/uploads/create'
       path: '/create'
@@ -1490,6 +1627,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sign-in/osm'
       fullPath: '/api/sign-in/osm'
       preLoaderRoute: typeof ApiSignInOsmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/review-lists/upload': {
+      id: '/api/review-lists/upload'
+      path: '/api/review-lists/upload'
+      fullPath: '/api/review-lists/upload'
+      preLoaderRoute: typeof ApiReviewListsUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/private/warm-cache': {
@@ -1758,6 +1902,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminDataSchemaImportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/review-lists/$id/edit': {
+      id: '/admin/review-lists/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/admin/review-lists/$id/edit'
+      preLoaderRoute: typeof AdminReviewListsIdEditRouteImport
+      parentRoute: typeof AdminReviewListsRoute
+    }
     '/admin/regions/$regionSlug/edit': {
       id: '/admin/regions/$regionSlug/edit'
       path: '/$regionSlug/edit'
@@ -1920,6 +2071,19 @@ const AdminRegionsRouteWithChildren = AdminRegionsRoute._addFileChildren(
   AdminRegionsRouteChildren,
 )
 
+interface AdminReviewListsRouteChildren {
+  AdminReviewListsIndexRoute: typeof AdminReviewListsIndexRoute
+  AdminReviewListsIdEditRoute: typeof AdminReviewListsIdEditRoute
+}
+
+const AdminReviewListsRouteChildren: AdminReviewListsRouteChildren = {
+  AdminReviewListsIndexRoute: AdminReviewListsIndexRoute,
+  AdminReviewListsIdEditRoute: AdminReviewListsIdEditRoute,
+}
+
+const AdminReviewListsRouteWithChildren =
+  AdminReviewListsRoute._addFileChildren(AdminReviewListsRouteChildren)
+
 interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
@@ -1931,6 +2095,7 @@ interface AdminRouteChildren {
   AdminQaConfigsRoute: typeof AdminQaConfigsRouteWithChildren
   AdminRegionContractsRoute: typeof AdminRegionContractsRouteWithChildren
   AdminRegionsRoute: typeof AdminRegionsRouteWithChildren
+  AdminReviewListsRoute: typeof AdminReviewListsRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -1945,6 +2110,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminQaConfigsRoute: AdminQaConfigsRouteWithChildren,
   AdminRegionContractsRoute: AdminRegionContractsRouteWithChildren,
   AdminRegionsRoute: AdminRegionsRouteWithChildren,
+  AdminReviewListsRoute: AdminReviewListsRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 
@@ -1971,14 +2137,34 @@ const PreviewRouteChildren: PreviewRouteChildren = {
 const PreviewRouteWithChildren =
   PreviewRoute._addFileChildren(PreviewRouteChildren)
 
+interface RegionenRegionSlugRouteRouteChildren {
+  RegionenRegionSlugHinweiseRoute: typeof RegionenRegionSlugHinweiseRoute
+  RegionenRegionSlugPrueflistenRoute: typeof RegionenRegionSlugPrueflistenRoute
+  RegionenRegionSlugQaRoute: typeof RegionenRegionSlugQaRoute
+  RegionenRegionSlugIndexRoute: typeof RegionenRegionSlugIndexRoute
+}
+
+const RegionenRegionSlugRouteRouteChildren: RegionenRegionSlugRouteRouteChildren =
+  {
+    RegionenRegionSlugHinweiseRoute: RegionenRegionSlugHinweiseRoute,
+    RegionenRegionSlugPrueflistenRoute: RegionenRegionSlugPrueflistenRoute,
+    RegionenRegionSlugQaRoute: RegionenRegionSlugQaRoute,
+    RegionenRegionSlugIndexRoute: RegionenRegionSlugIndexRoute,
+  }
+
+const RegionenRegionSlugRouteRouteWithChildren =
+  RegionenRegionSlugRouteRoute._addFileChildren(
+    RegionenRegionSlugRouteRouteChildren,
+  )
+
 interface RegionenRouteChildren {
-  RegionenRegionSlugRoute: typeof RegionenRegionSlugRoute
+  RegionenRegionSlugRouteRoute: typeof RegionenRegionSlugRouteRouteWithChildren
   RegionenStatsRoute: typeof RegionenStatsRoute
   RegionenIndexRoute: typeof RegionenIndexRoute
 }
 
 const RegionenRouteChildren: RegionenRouteChildren = {
-  RegionenRegionSlugRoute: RegionenRegionSlugRoute,
+  RegionenRegionSlugRouteRoute: RegionenRegionSlugRouteRouteWithChildren,
   RegionenStatsRoute: RegionenStatsRoute,
   RegionenIndexRoute: RegionenIndexRoute,
 }
@@ -2089,6 +2275,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPrivateRegionsRoute: ApiPrivateRegionsRoute,
   ApiPrivateRegisterSqlFunctionsRoute: ApiPrivateRegisterSqlFunctionsRoute,
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
+  ApiReviewListsUploadRoute: ApiReviewListsUploadRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,
   ApiAdminDataSchemaImportRoute: ApiAdminDataSchemaImportRoute,
   ApiExportOgrRegionSlugTableNameRoute: ApiExportOgrRegionSlugTableNameRoute,

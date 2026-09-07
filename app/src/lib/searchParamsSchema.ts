@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { parseCommaList } from '@/shared/orderedList/commaList'
 
 const emptyish = z.union([z.null(), z.undefined(), z.literal('')])
 
@@ -41,7 +42,7 @@ export const optionalSearchBoolean = () =>
     })
     .optional()
 
-/** String list from comma-separated wire, JSON array string, or native array. */
+/** String list from comma-separated wire, legacy JSON array string, or native array. */
 export const searchStringArray = () =>
   z
     .union([z.array(z.coerce.string()), z.string(), emptyish])
@@ -51,12 +52,12 @@ export const searchStringArray = () =>
       if (raw.startsWith('[')) {
         try {
           const parsed = JSON.parse(raw) as unknown
-          return Array.isArray(parsed) ? parsed.map(String) : [raw]
+          return Array.isArray(parsed) ? parsed.map(String) : parseCommaList(raw)
         } catch {
-          return raw.split(',').filter(Boolean)
+          return parseCommaList(raw)
         }
       }
-      return raw.includes(',') ? raw.split(',').filter(Boolean) : [raw]
+      return parseCommaList(raw)
     })
     .catch([])
 
