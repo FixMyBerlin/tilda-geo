@@ -1,111 +1,86 @@
-import { useCallback, useEffect } from 'react'
+import { useEffect } from 'react'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMap } from 'react-map-gl/maplibre'
+import { qaLayerId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
+import { qaStatusForMapFilter } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import {
-  qaLayerId,
-  qaSourceId,
-} from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
+  qaMapPayloadAppliesDefault,
+  resolveQaMapStatus,
+} from '@/components/regionen/pageRegionSlug/modes/qa/qaMapDefaultStatus'
 import { isProd } from '@/components/shared/utils/isEnv'
 import { useMapActions, useMapLoaded } from './useMapState'
-import { filterQaDataByStyle, useQaMapData } from './useQaMapData'
+import { qaMapRowMatchesStatus, useQaMapData } from './useQaMapData'
 
+/** Keeps QA feature-state in sync with the payload. `syncQaFeatureStates` is also called from `<Map onSourceData>`. */
 export const useQaMapState = () => {
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
   const { startFeatureStateSync, finishFeatureStateSync } = useMapActions()
-  const { data: currentQaData, isLoading, filteredQaData, qaParamData } = useQaMapData()
+  const { data: currentQaData, qaDataByAreaId, qaParamData } = useQaMapData()
 
   const shouldUpdateFeatureStates = mainMap !== undefined && mapLoaded
+  const applyDefault =
+    currentQaData !== undefined &&
+    qaMapPayloadAppliesDefault({ search: qaParamData.search, userIds: qaParamData.users })
+  const statusFilter = qaStatusForMapFilter(qaParamData.status)
 
-  // Extract setFeatureState logic into a function
-  const updateFeatureStates = useCallback(() => {
+  const updateFeatureStates = () => {
     if (!mainMap || !shouldUpdateFeatureStates) return
 
-    // Check if the QA layer exists before querying it
     const qaLayer = mainMap.getMap().getLayer(qaLayerId)
     if (!qaLayer) {
       if (!isProd) console.log('[DEV][useQaMapState]', 'QA layer does not exist yet')
       return
     }
 
-    // Get all rendered QA features from the map
     const mapQaFeatures: MapGeoJSONFeature[] = mainMap.queryRenderedFeatures({
       layers: [qaLayerId],
     })
 
     if (!isProd) console.time('[DEV][useQaMapState] setFeatureState')
 
-    // Set feature states for all map features
-    if (mapQaFeatures.length > 0) {
-      const styleFilteredQaData = currentQaData
-        ? filterQaDataByStyle(currentQaData, qaParamData.style)
-        : []
-      const visibleAreaIds = new Set(styleFilteredQaData.map((item) => item.areaId))
+    mapQaFeatures.forEach((feature) => {
+      const featureId = feature.id?.toString()
+      if (!featureId) return
 
-      // Update all map features
-      mapQaFeatures.forEach((feature) => {
-        const featureId = feature.id?.toString()
-        if (!featureId) return
+      const resolved = resolveQaMapStatus(qaDataByAreaId.get(featureId), applyDefault)
+      if (!resolved || !qaMapRowMatchesStatus(resolved, statusFilter)) {
+        mainMap.setFeatureState(feature, { systemStatus: null, userStatus: null })
+        return
+      }
 
-        const qaDataItem = currentQaData?.find((item) => item.areaId === featureId)
-
-        // Set feature state - only set status if visible
-        const isVisible = qaDataItem && visibleAreaIds.has(featureId)
-
-        mainMap.setFeatureState(feature, {
-          systemStatus: isVisible ? qaDataItem.systemStatus : null,
-          userStatus: isVisible ? qaDataItem.userStatus : null,
-        })
+      mainMap.setFeatureState(feature, {
+        systemStatus: resolved.systemStatus,
+        userStatus: resolved.userStatus,
       })
-    }
+    })
 
     if (!isProd) console.timeEnd('[DEV][useQaMapState] setFeatureState')
-  }, [mainMap, shouldUpdateFeatureStates, currentQaData, qaParamData.style])
+  }
+
+  const syncQaFeatureStates = () => {
+    if (!shouldUpdateFeatureStates) return
+    startFeatureStateSync()
+    updateFeatureStates()
+    finishFeatureStateSync()
+  }
 
   // Initial loading effect - runs when QA data first loads or style changes
   useEffect(
     function syncFeatureStatesAfterQaDataChanges() {
-      if (shouldUpdateFeatureStates) {
-        startFeatureStateSync()
-        updateFeatureStates()
-        finishFeatureStateSync()
-      }
+      syncQaFeatureStates()
     },
-    [finishFeatureStateSync, shouldUpdateFeatureStates, startFeatureStateSync, updateFeatureStates],
-  )
-
-  // Data loading effect - runs when QA source data is loaded
-  useEffect(
-    function resyncFeatureStatesWhenQaSourceLoads() {
-      if (!mainMap) return
-
-      const handleData = (event: { sourceId?: string }) => {
-        if (event.sourceId === qaSourceId && shouldUpdateFeatureStates) {
-          startFeatureStateSync()
-          updateFeatureStates()
-          finishFeatureStateSync()
-        }
-      }
-
-      mainMap.getMap().on('data', handleData)
-
-      return function removeQaSourceDataListener() {
-        mainMap.getMap().off('data', handleData)
-      }
-    },
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- Compiler memoizes syncQaFeatureStates; listing it fails "changes every render"
     [
+      applyDefault,
       finishFeatureStateSync,
       mainMap,
+      qaDataByAreaId,
       shouldUpdateFeatureStates,
       startFeatureStateSync,
-      updateFeatureStates,
+      statusFilter,
     ],
   )
 
-  return {
-    qaData: currentQaData,
-    isLoading,
-    filteredQaData,
-    filterQaDataByStyle,
-  }
+  return { syncQaFeatureStates }
 }
