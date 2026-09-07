@@ -14,6 +14,12 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
 import type { DrawArea } from '@/components/regionen/pageRegionSlug/Map/Calculator/drawing/drawAreaTypes'
+import { zodNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
+import {
+  defaultQaParam,
+  zodQaParam,
+} from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
+import { zodReviewListsModeParam } from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewListsModeParam'
 import {
   optionalSearchJson,
   optionalSearchBoolean,
@@ -21,36 +27,7 @@ import {
   searchBoolean,
   searchStringArray,
 } from '@/lib/searchParamsSchema'
-import {
-  zodInternalNotesFilterParam,
-  zodOsmFilterParam,
-  zodQaFilterParam,
-} from '@/shared/regionen/regionSearchZod'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
-
-export type QaParamData = {
-  configSlug: string
-  style: string
-}
-
-/** Legacy key: renamed to user-pending-problematic so old URLs/bookmarks still work. */
-const LEGACY_QA_STYLE_MAP: Record<string, string> = {
-  'user-pending': 'user-pending-problematic',
-}
-
-export const parseQaParam = (query: string | undefined): QaParamData => {
-  if (!query) return { configSlug: '', style: 'none' }
-  const parts = query.split('--')
-  if (parts.length < 2) return { configSlug: '', style: 'none' }
-  const style = parts[parts.length - 1] || 'none'
-  const configSlug = parts.slice(0, -1).join('--')
-  return { configSlug, style: LEGACY_QA_STYLE_MAP[style] ?? style }
-}
-
-export const serializeQaParam = (data: QaParamData) => {
-  if (!data.configSlug || data.style === 'none') return undefined
-  return `${data.configSlug}--${data.style}`
-}
 
 const parseDrawParam = (query: string | undefined): DrawArea[] => {
   if (!query) return []
@@ -72,11 +49,6 @@ const normalizeMapSearchParam = (raw: unknown, defaultValue: string) => {
   return parsed ? serializeMapParam(parsed) : defaultValue
 }
 
-const normalizeQaSearchParam = (raw: unknown) => {
-  const wire = optionalSearchString().safeParse(raw).data
-  return serializeQaParam(parseQaParam(wire)) ?? ''
-}
-
 const mapSearchParam = (defaultValue: string) =>
   z.preprocess(
     (raw) => normalizeMapSearchParam(raw, defaultValue),
@@ -88,13 +60,12 @@ const backgroundSearchParam = () =>
     .transform((s) => s ?? defaultBackgroundParam)
     .pipe(z.enum(validBackgroundParams).catch(defaultBackgroundParam))
 
-const qaSearchParam = () => z.preprocess(normalizeQaSearchParam, z.string().default('').catch(''))
-
 export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
 
 export type RegionDialogParam = z.infer<typeof regionDialogParamSchema>
 
 export const regionSearchSchema = z.object({
+  [searchParamsRegistry.v]: optionalSearchString(),
   [searchParamsRegistry.map]: mapSearchParam(defaultMapSearchValue),
   [searchParamsRegistry.config]: optionalSearchString(),
   [searchParamsRegistry.data]: searchStringArray().default([]),
@@ -102,21 +73,20 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.bg]: backgroundSearchParam(),
   [searchParamsRegistry.bg3d]: searchBoolean(false),
   [searchParamsRegistry.draw]: optionalSearchString(),
-  [searchParamsRegistry.osmNotes]: searchBoolean(false),
   [searchParamsRegistry.osmNote]: optionalSearchString(),
-  [searchParamsRegistry.atlasNotes]: searchBoolean(false),
-  [searchParamsRegistry.atlasNote]: optionalSearchString(),
-  [searchParamsRegistry.atlasNotesFilter]: optionalSearchJson(zodInternalNotesFilterParam),
-  [searchParamsRegistry.osmNotesFilter]: optionalSearchJson(zodOsmFilterParam),
+  [searchParamsRegistry.internalNote]: optionalSearchString(),
   [searchParamsRegistry.debugMap]: optionalSearchBoolean(),
-  [searchParamsRegistry.qa]: qaSearchParam(),
-  [searchParamsRegistry.qaFilter]: optionalSearchJson(zodQaFilterParam),
+  [searchParamsRegistry.qa]: optionalSearchJson(zodQaParam),
   // Invalid values (e.g. ?dialog=foo) clear rather than throwing the region route into error UI.
   [searchParamsRegistry.dialog]: regionDialogParamSchema.optional().catch(undefined),
   [searchParamsRegistry.welcomeSkipDialog]: z
     .literal(regionDialogParamSchema.enum.welcome)
     .optional()
     .catch(undefined),
+  // Mode filters stay on the shared region search so switching modes keeps one URL without
+  // per-child validateSearch schemas.
+  [searchParamsRegistry.notesMode]: optionalSearchJson(zodNotesModeParam),
+  [searchParamsRegistry.reviewLists]: optionalSearchJson(zodReviewListsModeParam),
 })
 
 export type RegionSearch = z.infer<typeof regionSearchSchema>
@@ -130,10 +100,10 @@ export const getMapParamFromSearch = (search: RegionSearch): MapParam => {
   return parseMapParam(search[searchParamsRegistry.map]) ?? mapParamFallback
 }
 
-export const getQaParamFromSearch = (search: RegionSearch): QaParamData => {
-  return parseQaParam(search[searchParamsRegistry.qa] || undefined)
+export const getQaParamFromSearch = (search: RegionSearch) => {
+  return search[searchParamsRegistry.qa] ?? defaultQaParam
 }
 
-export const getDrawAreasFromSearch = (search: RegionSearch): DrawArea[] => {
+export const getDrawAreasFromSearch = (search: RegionSearch) => {
   return parseDrawParam(search[searchParamsRegistry.draw])
 }

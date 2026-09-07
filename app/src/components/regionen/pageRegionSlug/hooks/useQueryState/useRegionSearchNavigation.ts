@@ -9,15 +9,19 @@ type NavigateOptions = {
 
 export const useRegionSearchNavigation = () => {
   const search = regionRouteApi.useSearch()
-  const navigate = useNavigate({ from: '/regionen/$regionSlug' })
+  // No `from`: with `from: '/regionen/$regionSlug'`, navigations resolve to the layout route's own
+  // path and kick users out of the mode sub-routes (`/qa`, `/hinweise`, …) on every search-param
+  // write (map pan, QA selects, calculator dataset). `to: '.'` stays on the current location.
+  const navigate = useNavigate()
 
   const updateSearch = (
     partial: Partial<RegionSearch> | ((prev: RegionSearch) => Partial<RegionSearch>),
     options?: NavigateOptions,
   ) => {
     void navigate({
-      search: (prev) => {
-        const updates = typeof partial === 'function' ? partial(prev) : partial
+      to: '.',
+      search: (prev: Record<string, unknown>) => {
+        const updates = typeof partial === 'function' ? partial(prev as RegionSearch) : partial
         const next: Record<string, unknown> = { ...prev }
 
         for (const [key, value] of Object.entries(updates)) {
