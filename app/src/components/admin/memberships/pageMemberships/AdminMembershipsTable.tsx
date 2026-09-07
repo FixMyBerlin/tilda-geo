@@ -10,6 +10,7 @@ import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
 import { toastError } from '@/components/shared/toast/toastError'
+import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { deleteMembershipFn } from '@/server/memberships/memberships.functions'
 import type { UserWithMemberships } from '@/server/users/queries/getUsersAndMemberships.server'
@@ -134,12 +135,11 @@ export const AdminMembershipsTable = ({ users, total }: Props) => {
                                 >
                                   {accessedRegion.slug}
                                 </Link>
-                                <span
-                                  className="text-gray-400"
-                                  title={formatDateTimeBerlin(accessedRegion.lastAccessedDay)}
+                                <Tooltip
+                                  text={formatDateTimeBerlin(accessedRegion.lastAccessedDay)}
                                 >
-                                  zuletzt {relativeTime}
-                                </span>
+                                  <span className="text-gray-400">zuletzt {relativeTime}</span>
+                                </Tooltip>
                               </div>
                               {hasAccess ? (
                                 <span className="text-xs text-green-600">Has access</span>

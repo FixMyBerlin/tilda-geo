@@ -22,12 +22,7 @@ import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
 import { buttonStylesSecondary } from '@/components/shared/links/styles'
 import { regionProductFormItems } from '@/data/tildaProductNames.const'
-import {
-  RegionContractStatus,
-  RegionNotesMode,
-  RegionProduct,
-  RegionStatus,
-} from '@/prisma/generated/browser'
+import { RegionContractStatus, RegionProduct, RegionStatus } from '@/prisma/generated/browser'
 import { regionenIndexQueryKey } from '@/server/regions/regionenIndexQueryOptions'
 import { createRegionFn, updateRegionFn } from '@/server/regions/regions.functions'
 import {
@@ -38,9 +33,9 @@ import {
 } from '@/server/regions/regionWriteSchema'
 
 const notesItems = [
-  { value: RegionNotesMode.osmNotes, label: 'OSM Notes' },
-  { value: RegionNotesMode.internalNotes, label: 'Internal Notes' },
-  { value: RegionNotesMode.disabled, label: 'Deaktiviert' },
+  { value: 'osmNotes', label: 'OSM-Hinweise' },
+  { value: 'internalNotes', label: 'Interne Hinweise (TILDA)' },
+  { value: 'disabled', label: 'Deaktiviert' },
 ] as const
 
 export const regionFormEmptyDefaults = {
@@ -50,7 +45,7 @@ export const regionFormEmptyDefaults = {
   promoted: 'false' as const,
   status: RegionStatus.PUBLIC,
   product: RegionProduct.radverkehr,
-  notes: RegionNotesMode.osmNotes,
+  notes: 'osmNotes' as const,
   showSearch: 'false' as const,
   mapLat: '52.5',
   mapLng: '13.4',
@@ -177,13 +172,7 @@ export function RegionForm(props: Props) {
               label="Produkt"
               items={regionProductFormItems}
             />
-            <RadioGroup
-              inline
-              form={form}
-              name="notes"
-              label="Notes-Modus"
-              items={[...notesItems]}
-            />
+            <RadioGroup inline form={form} name="notes" label="Hinweise" items={[...notesItems]} />
             <RadioGroup
               inline
               form={form}

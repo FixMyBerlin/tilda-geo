@@ -122,11 +122,14 @@ function WelcomeImageEditor({
   })
   const [dimensionWarnings, setDimensionWarnings] = useState<string[]>([])
 
-  useEffect(() => {
-    if (!uploadId || !shouldFocusAltRef.current) return
-    shouldFocusAltRef.current = false
-    document.getElementById('welcomeImageAltText')?.focus()
-  }, [uploadId])
+  useEffect(
+    function focusWelcomeImageAltAfterUpload() {
+      if (!uploadId || !shouldFocusAltRef.current) return
+      shouldFocusAltRef.current = false
+      document.getElementById('welcomeImageAltText')?.focus()
+    },
+    [uploadId],
+  )
 
   return (
     <div className="space-y-3">
@@ -223,6 +226,7 @@ function WelcomeSectionsEditor({
               <MarkdownEditor
                 value={section.bodyMarkdown}
                 onChange={(bodyMarkdown) => commit(updateSectionRow(rows, index, { bodyMarkdown }))}
+                toolbar="full"
               />
             </div>
             {!isTrailingEmpty ? (
@@ -312,6 +316,7 @@ export function RegionWelcomeEditor({ form, regionId, regionSlug }: Props) {
                 label="Intro (Markdown)"
                 help="Markdown wird auf der Regionsseite gerendert."
                 optional
+                toolbar="full"
               />
               <form.Subscribe selector={(state) => state.values.welcomeImageUploadId}>
                 {(uploadId) => (
