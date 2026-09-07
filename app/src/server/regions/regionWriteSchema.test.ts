@@ -23,7 +23,8 @@ const validBase: RegionWriteInput = {
   promoted: false,
   status: 'PUBLIC',
   product: 'radverkehr',
-  notes: 'osmNotes',
+  notesOsm: true,
+  notesInternal: false,
   showSearch: false,
   mapLat: 52.5,
   mapLng: 13.4,
@@ -172,6 +173,15 @@ describe('RegionWriteSchema', () => {
       })
       expect(result.success).toBe(false)
     })
+  })
+
+  test('rejects OSM and internal notes both enabled', () => {
+    const result = RegionWriteSchema.safeParse({
+      ...validBase,
+      notesOsm: true,
+      notesInternal: true,
+    })
+    expect(result.success).toBe(false)
   })
 })
 
