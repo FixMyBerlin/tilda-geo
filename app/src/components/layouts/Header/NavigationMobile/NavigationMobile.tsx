@@ -7,16 +7,9 @@ import { User } from '../User/User'
 
 type Props = PrimaryNavigationProps & {
   logo: React.ReactElement
-  /** Region mode switcher (see modes/ModeSwitcher.tsx), rendered above the menu links */
-  modeSwitcher?: React.ReactNode
 }
 
-export const NavigationMobile = ({
-  primaryNavigation,
-  secondaryNavigation,
-  logo: Logo,
-  modeSwitcher,
-}: Props) => {
+export const NavigationMobile = ({ primaryNavigation, secondaryNavigation, logo: Logo }: Props) => {
   const pathname = useRouter().state.location.pathname
 
   return (
@@ -41,7 +34,6 @@ export const NavigationMobile = ({
           </div>
 
           <DisclosurePanel className="divide-y-2 divide-gray-900">
-            {modeSwitcher && <div className="pt-2 pb-3">{modeSwitcher}</div>}
             <div className="space-y-1 pt-2 pb-3">
               {primaryNavigation.map((item) => {
                 if ('to' in item) {

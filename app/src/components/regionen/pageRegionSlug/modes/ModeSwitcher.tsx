@@ -1,4 +1,4 @@
-import { getRouteApi, Link } from '@tanstack/react-router'
+import { getRouteApi, Link, useMatch } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
@@ -39,9 +39,16 @@ type HighlightPill = {
 
 /**
  * Header links between region mode pages. Search params stay on the URL so map view, category
- * config, and per-mode filters survive a switch. Hidden when only the default map is available.
+ * config, and per-mode filters survive a switch. Hidden when only the default map is available
+ * or when this header is reused outside a region route.
  */
 export const ModeSwitcher = () => {
+  const match = useMatch({ from: '/regionen/$regionSlug', shouldThrow: false })
+  if (!match) return null
+  return <ModeSwitcherNav />
+}
+
+const ModeSwitcherNav = () => {
   const { regionSlug } = routeApi.useParams()
   const { availableModes } = routeApi.useLoaderData()
   const optimisticMode = useOptimisticMode()
