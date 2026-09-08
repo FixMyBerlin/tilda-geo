@@ -22,7 +22,7 @@ export function createUploadSourceProps({
     : { type: 'vector' as const, url: createPmtilesUrl(mapRenderUrl) }
 }
 
-export const UPLOAD_FALLBACK_BEFORE_ID = 'atlas-app-beforeid-fallback'
+const UPLOAD_FALLBACK_BEFORE_ID = 'atlas-app-beforeid-fallback'
 
 // Upload config layers may specify a beforeId anchor; default to the fallback anchor group.
 export function resolveUploadBeforeId(layer: object) {

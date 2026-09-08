@@ -21,7 +21,7 @@ export const GROUP_LABELS: Record<GroupKey, string> = {
 
 export type GroupedState = Record<GroupKey, string[]>
 
-export const EMPTY_GROUPED_STATE = {
+const EMPTY_GROUPED_STATE = {
   default: [],
   'atlas-app-beforeid-above-landuse': [],
   'atlas-app-beforeid-below-road': [],
