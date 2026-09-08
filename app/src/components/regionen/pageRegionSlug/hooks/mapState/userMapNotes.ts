@@ -27,7 +27,7 @@ type StorenewNoteTildaDeeplink = {
 
 const useMapNotes = create<Store>()((set) => {
   return {
-    // Data for <Inspector> AND <SourcesLayersOsmNotes>
+    // Data for <Inspector> AND <SourcesOsmNotes> / <LayersOsmNotes>
     osmNotesFeatures: featureCollection([]),
     // Data for <OsmNotesNew>, <InternalNotesNew>
     osmNewNoteFeature: undefined,

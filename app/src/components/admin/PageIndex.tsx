@@ -23,6 +23,7 @@ const items = [
   { to: '/admin/memberships', label: 'Nutzer:innen & Mitgliedschaften' },
   { to: '/admin/map-dataset-uploads', label: 'Statische Daten (Uploads)' },
   { to: '/admin/map-dataset-categories', label: 'Statische Daten: Kategorien' },
+  { to: '/admin/layer-order', label: 'Karten-Layer-Reihenfolge' },
   { to: '/admin/audit-log', label: 'Änderungsverlauf (Audit-Log)' },
   { to: '/admin/api-tokens', label: 'API-Tokens (MCP)' },
   { to: '/admin/processing', label: 'Processing' },

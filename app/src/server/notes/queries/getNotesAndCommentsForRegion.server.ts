@@ -48,7 +48,7 @@ export async function getNotesAndCommentsForRegion(
 
   const notePoints = notes.map((note) => {
     const coordinates = [note.longitude, note.latitude]
-    // We transform the properties for <SourcesLayersInternalNotes />
+    // We transform the properties for <SourcesInternalNotes />
     const properties = {
       id: note.id,
       status: note.resolvedAt ? 'closed' : 'open',

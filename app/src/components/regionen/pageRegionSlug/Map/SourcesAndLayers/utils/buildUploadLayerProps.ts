@@ -8,6 +8,19 @@ import { wrapFilterWithAll } from './filterUtils/wrapFilterWithAll'
 type UploadLayer = RegionDataset['layers'][number]
 export type UploadLayerWithAtlasType = Extract<UploadLayer, { type: AtlasLayerType }>
 
+const UPLOAD_LAYER_TYPES = [
+  'fill',
+  'line',
+  'circle',
+  'symbol',
+  'heatmap',
+] as const satisfies AtlasLayerType[]
+
+/** Convention: upload configs use only these layer types; filter before buildUploadLayerProps. */
+export function isUploadStyleLayer(layer: UploadLayer): layer is UploadLayerWithAtlasType {
+  return UPLOAD_LAYER_TYPES.includes(layer.type)
+}
+
 type BuildUploadLayerPropsParams = {
   layer: UploadLayerWithAtlasType
   layerId: string
@@ -15,6 +28,7 @@ type BuildUploadLayerPropsParams = {
   debugLayerStyles: boolean
   beforeId?: string
   sourceLayer?: 'default'
+  visibility?: { visibility: 'visible' | 'none' }
 }
 
 /** Build LayerProps from upload config layer. Same switch-on-type rhythm as buildAtlasLayerProps; shared by Static and System dataset layers. */
@@ -25,6 +39,7 @@ export function buildUploadLayerProps({
   debugLayerStyles,
   beforeId,
   sourceLayer,
+  visibility,
 }: BuildUploadLayerPropsParams) {
   const filter: FilterSpecification = debugLayerStyles
     ? (['all'] as const)
@@ -37,7 +52,10 @@ export function buildUploadLayerProps({
     ...(sourceLayer !== undefined && { 'source-layer': sourceLayer }),
   }
   const debugStyle = debugLayerStyles ? getDebugStyleForLayerType(layer.type) : undefined
-  const layout = debugStyle ? { ...debugStyle.layout } : { ...layer.layout }
+  const layout = {
+    ...(debugStyle ? debugStyle.layout : layer.layout),
+    ...visibility,
+  }
   const paint = debugStyle ? debugStyle.paint : layer.paint
 
   switch (layer.type) {

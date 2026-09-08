@@ -32,6 +32,7 @@ Helpers in [`tests/utils/maps.ts`](utils/maps.ts):
 
 - `waitForMapLoad` — waits for `mapLoaded` or canvas
 - `getMapLayerIds` — reads `window.__mainMap.getStyle().layers` (requires prior `waitForMapLoad`)
+- `waitForAtlasGeoLayers` — waits until at least one Atlas-Geo `source:…` layer is in the style
 - `verifyMapRendered`, `checkMapTilesLoaded`
 
 App wiring: `exposeMainMapForDebugging` / `firePlaywrightMapLoadedEvent` in `src/components/shared/utils/playwright.ts` (called from `RegionMap` `onLoad`). Skills: [playwright-skill](../../.agents/skills/playwright-skill/SKILL.md), [react-map-gl map-debug-exposure](../../.agents/skills/react-map-gl/references/map-debug-exposure.md).
