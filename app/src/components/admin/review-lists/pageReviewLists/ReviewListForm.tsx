@@ -7,6 +7,7 @@ import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import type { ReviewListFormInput } from '@/server/review-lists/schemas'
 import type { FormState } from '@/server/utils/validation'
+import { regionsWithSelectedFirst } from './regionsWithSelectedFirst'
 
 type ReviewListFormRegion = {
   slug: string
@@ -56,7 +57,7 @@ export function ReviewListForm<TSchema extends z.ZodTypeAny>({
             label="Name"
             help="Anzeigename der Prüfliste (z.B. 'Problematische Kreuzungen 2026')"
           />
-          <form.Field name="regionSlugs">
+          <form.Field name="regionSlugs" defaultValue={defaultValues.regionSlugs}>
             {(field) => {
               const selectedSlugs = field.state.value ?? []
               return (
@@ -66,13 +67,18 @@ export function ReviewListForm<TSchema extends z.ZodTypeAny>({
                     Prüflisten können mehreren Regionen zugeordnet werden (z.B. gleiche Kund:in,
                     mehrere Gebietsausschnitte).
                   </p>
+                  <p className="mb-2 text-sm text-gray-600">
+                    {selectedSlugs.length === 0
+                      ? 'Keine Region ausgewählt.'
+                      : `Ausgewählt: ${selectedSlugs.join(', ')}`}
+                  </p>
                   <div
                     className={twJoin(
                       'max-h-64 overflow-y-auto rounded border border-gray-200 p-3',
                       choiceOptionListClassName,
                     )}
                   >
-                    {regions.map((region) => {
+                    {regionsWithSelectedFirst(regions, selectedSlugs).map((region) => {
                       const checked = selectedSlugs.includes(region.slug)
                       return (
                         <ChoiceCheckbox

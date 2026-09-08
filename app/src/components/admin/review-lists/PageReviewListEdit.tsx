@@ -65,6 +65,7 @@ export function PageReviewListEdit() {
       </div>
 
       <ReviewListForm
+        key={`${list.id}:${list.regionSlugs.join(',')}`}
         actionBarRight={
           <AdminTrashIconButton
             ariaLabel={`Prüfliste ${list.name} löschen`}
