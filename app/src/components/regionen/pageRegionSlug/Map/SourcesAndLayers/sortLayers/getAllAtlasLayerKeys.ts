@@ -11,9 +11,12 @@ import { isAtlasStyleLayer } from '../utils/buildAtlasLayerProps'
 // subcategory appearing in multiple categories yields one key — deduplicated here.
 // `defaultBeforeId` is the anchor the layer gets on the default background without an admin
 // override — same precedence as buildAtlasLayerProps (layer > subcategory > type default).
+// `defaultBeforeIdSource` says which of the three supplied it, so the admin UI can explain it.
 type AtlasLayerEntry = {
   layerKey: string
+  layerType: string
   defaultBeforeId: string | undefined
+  defaultBeforeIdSource: 'layer' | 'subcategory' | 'layerType'
 }
 
 export function getAllAtlasLayerEntries() {
@@ -34,7 +37,12 @@ export function getAllAtlasLayerEntries() {
               subcategoryBeforeId: subcategory.beforeId,
               layerType: layer.type,
             })
-          entries.push({ layerKey, defaultBeforeId })
+          const defaultBeforeIdSource = layer.beforeId
+            ? 'layer'
+            : subcategory.beforeId
+              ? 'subcategory'
+              : 'layerType'
+          entries.push({ layerKey, layerType: layer.type, defaultBeforeId, defaultBeforeIdSource })
         }
       }
     }

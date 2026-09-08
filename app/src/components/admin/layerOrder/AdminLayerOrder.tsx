@@ -3,6 +3,7 @@ import { Reorder, useDragControls } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
 import { getAllAtlasLayerEntries } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerKeys'
+import { buttonStyles } from '@/components/shared/links/styles'
 import { updateMapLayerOrderFn } from '@/server/map-layer-order/map-layer-order.functions'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import type { MapLayerOrderEntry } from '@/server/map-layer-order/queries/getMapLayerOrder.server'
@@ -21,18 +22,30 @@ import {
 const CODE_ENTRIES = getAllAtlasLayerEntries()
 const CODE_KEYS = CODE_ENTRIES.map((e) => e.layerKey)
 const CODE_KEY_SET = new Set(CODE_KEYS)
-const CODE_DEFAULT_BEFORE_ID = new Map(CODE_ENTRIES.map((e) => [e.layerKey, e.defaultBeforeId]))
+const CODE_ENTRY_BY_KEY = new Map(CODE_ENTRIES.map((e) => [e.layerKey, e]))
+
+type CodeEntry = (typeof CODE_ENTRIES)[number]
+
+// Where the config-based position comes from, for the note below a "Standard" row.
+function describeDefaultPosition(entry: CodeEntry) {
+  const origin = {
+    layer: 'beforeId aus der Layer-Konfiguration',
+    subcategory: 'beforeId aus der Subkategorie-Konfiguration',
+    layerType: `Standard für Layer-Typ „${entry.layerType}“`,
+  }[entry.defaultBeforeIdSource]
+  return `Position aus Konfiguration: vor „${entry.defaultBeforeId}“ (${origin})`
+}
 
 type LayerRowProps = {
   layerKey: string
   group: GroupKey
   isStale: boolean
   isNew: boolean
-  defaultBeforeId?: string
+  positionNote?: string
   onMove: (layerKey: string, from: GroupKey, to: GroupKey) => void
 }
 
-function LayerRow({ layerKey, group, isStale, isNew, defaultBeforeId, onMove }: LayerRowProps) {
+function LayerRow({ layerKey, group, isStale, isNew, positionNote, onMove }: LayerRowProps) {
   // Dedicated drag handle so dragging never conflicts with the group <select>
   // (touch/trackpad: the whole row as drag surface swallows select interactions).
   const dragControls = useDragControls()
@@ -63,10 +76,8 @@ function LayerRow({ layerKey, group, isStale, isNew, defaultBeforeId, onMove }: 
       </button>
       <span className="grow font-mono break-all">
         {layerKey}
-        {defaultBeforeId && (
-          <span className="ml-2 rounded bg-gray-100 px-1 py-0.5 text-gray-600">
-            → {defaultBeforeId}
-          </span>
+        {positionNote && (
+          <span className="mt-0.5 block font-sans text-gray-500">{positionNote}</span>
         )}
         {isStale && (
           <span className="ml-2 rounded bg-red-100 px-1 py-0.5 text-red-700">
@@ -144,11 +155,11 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
         Die Gruppe „Standard“ ist ein Sonderfall: Diese Layer haben keine eigene Gruppe, sondern
         übernehmen ihre Position aus der Karten-Konfiguration – meist abhängig vom Layer-Typ:
         Flächen liegen unter der Landnutzung, Linien unter den Landesgrenzen, Punkte und
-        Beschriftungen unter den Hausnummern. Der graue Hinweis hinter dem Namen (z. B. „→ landuse“)
-        zeigt diese Position. Beim Sortieren zählt deshalb nur die Reihenfolge zwischen Layern mit
-        demselben grauen Hinweis; Layer mit unterschiedlichen Hinweisen beeinflussen sich nicht,
-        egal wo sie in der Liste stehen. Um einen Layer gezielt zu verschieben, weist man ihm rechts
-        eine feste Gruppe zu.
+        Beschriftungen unter den Hausnummern. Die Zeile unter dem Layer-Namen nennt diese Position
+        und woher sie stammt. Beim Sortieren zählt deshalb nur die Reihenfolge zwischen Layern mit
+        derselben Position; Layer mit unterschiedlichen Positionen beeinflussen sich nicht, egal wo
+        sie in der Liste stehen. Um einen Layer gezielt zu verschieben, weist man ihm rechts eine
+        feste Gruppe zu.
       </p>
       <p className="text-sm text-gray-600">
         Hintergrundkarten: Alle Raster-Hintergründe (Luftbild, Mapnik usw.) stecken immer in der
@@ -175,12 +186,19 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
       <p className="text-sm text-gray-600">
         Gespeichert wird eine einzige globale Liste – nicht eine Liste pro Region. Jede Region zeigt
         nur die Layer ihrer Kategorien; diese Teilmenge wird beim Laden der Karte nach der globalen
-        Liste sortiert. Solange noch nichts gespeichert wurde, gilt die Reihenfolge aus dem Code –
-        dort folgt sie der Kategorie-Reihenfolge der jeweiligen Region. Ab dem ersten Speichern gilt
-        für alle Regionen dieselbe Liste; Regionen mit abweichender Kategorie-Reihenfolge können
-        sich dadurch leicht ändern. Gespeicherte Änderungen sind sichtbar, sobald die Karte neu
-        geladen wird.
+        Liste sortiert. Gespeicherte Änderungen sind sichtbar, sobald die Karte neu geladen wird.
       </p>
+      {dbEntries.length === 0 && (
+        <p className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          Noch nichts gespeichert – die Karten nutzen derzeit die Reihenfolge aus dem Code. Dabei
+          werden die Layer in der Kategorie-Reihenfolge der jeweiligen Region gezeichnet: Layer
+          einer späteren Kategorie liegen über denen einer früheren, wenn sie dieselbe Position
+          teilen (zum Beispiel alle Linien). Regionen mit unterschiedlicher Kategorie-Reihenfolge
+          stapeln heute also unterschiedlich. Mit dem ersten Speichern gilt für alle Regionen die
+          Liste auf dieser Seite – in Regionen, deren Kategorie-Reihenfolge davon abweicht, kann
+          sich die Stapelung dadurch ändern. Bitte danach ein paar Regionen kurz prüfen.
+        </p>
+      )}
       {GROUPS.map((group) => (
         <section key={group}>
           <h2 className="mb-2 text-sm font-semibold text-gray-900">
@@ -205,8 +223,10 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
                   group={group}
                   isStale={!CODE_KEY_SET.has(layerKey)}
                   isNew={!dbKeySet.has(layerKey)}
-                  defaultBeforeId={
-                    group === DEFAULT_GROUP ? CODE_DEFAULT_BEFORE_ID.get(layerKey) : undefined
+                  positionNote={
+                    group === DEFAULT_GROUP && CODE_ENTRY_BY_KEY.has(layerKey)
+                      ? describeDefaultPosition(CODE_ENTRY_BY_KEY.get(layerKey)!)
+                      : undefined
                   }
                   onMove={moveToGroup}
                 />
@@ -218,12 +238,7 @@ function LayerOrderEditor({ dbEntries }: LayerOrderEditorProps) {
       {saveError && saveError.message !== 'Abgebrochen' && (
         <p className="text-sm text-red-700">{saveError.message}</p>
       )}
-      <button
-        type="button"
-        onClick={() => save()}
-        disabled={saving}
-        className="rounded bg-yellow-400 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-yellow-300 disabled:opacity-50"
-      >
+      <button type="button" onClick={() => save()} disabled={saving} className={buttonStyles}>
         {saving ? 'Speichern…' : 'Reihenfolge speichern'}
       </button>
     </div>

@@ -63,7 +63,7 @@ test.describe('Admin layer order', () => {
     await page.goto('/admin/layer-order')
     await expect(page).toHaveURL(/\/admin\/layer-order/)
     await expect(
-      page.getByRole('heading', { name: /Standard \(Platzierung aus Config\)/ }),
+      page.getByRole('heading', { name: /Standard \(Position aus der Layer-Konfiguration\)/ }),
     ).toBeVisible()
     await expect(page.locator('li', { hasText: SAMPLE_KEY })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Reihenfolge speichern' })).toBeVisible()

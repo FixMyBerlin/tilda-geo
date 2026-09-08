@@ -25,6 +25,7 @@ describe('getAllAtlasLayerKeys', () => {
     for (const entry of entries) {
       // Every atlas layer type has a type default in beforeId.ts, so this is always resolved in code.
       expect(entry.defaultBeforeId, `no default anchor for ${entry.layerKey}`).toBeTruthy()
+      expect(['layer', 'subcategory', 'layerType']).toContain(entry.defaultBeforeIdSource)
     }
     expect(keys).toEqual(entries.map((entry) => entry.layerKey))
   })

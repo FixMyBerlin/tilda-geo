@@ -9,7 +9,7 @@ export type GroupKey = (typeof GROUPS)[number]
 export const GroupKeySchema = z.enum(GROUPS)
 
 export const GROUP_LABELS: Record<GroupKey, string> = {
-  default: 'Standard (Platzierung aus Config)',
+  default: 'Standard (Position aus der Layer-Konfiguration)',
   'atlas-app-beforeid-above-landuse': 'Über Landnutzung (ganz unten)',
   'atlas-app-beforeid-below-road': 'Unter Straßen',
   'atlas-app-beforeid-below-roadname': 'Unter Straßennamen',
