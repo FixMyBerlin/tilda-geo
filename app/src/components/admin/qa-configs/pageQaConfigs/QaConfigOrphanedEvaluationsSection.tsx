@@ -87,7 +87,7 @@ export function QaConfigOrphanedEvaluationsSection({ items, totalCount }: Props)
                     firstName: item.authorFirstName,
                     lastName: item.authorLastName,
                     osmName: item.authorOsmName,
-                  })}
+                  }) || '—'}
                 </td>
                 <td className={adminTableClasses.td}>{formatDateTimeBerlin(item.createdAt)}</td>
               </tr>

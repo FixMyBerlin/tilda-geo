@@ -14,8 +14,8 @@ describe('formatUserName', () => {
     )
   })
 
-  test('returns em dash when nothing is set', () => {
-    expect(formatUserName({ firstName: null, lastName: null, osmName: null })).toBe('—')
+  test('returns nothing when name and OSM username are unset', () => {
+    expect(formatUserName({ firstName: null, lastName: null, osmName: null })).toBeNull()
   })
 })
 

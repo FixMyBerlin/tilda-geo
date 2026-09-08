@@ -6,5 +6,5 @@ export const formatAuditLogUser = (row: Pick<AuditLogRow, 'userId' | 'user'>) =>
   if (!row.userId) return '—'
   if (!row.user) return row.userId
 
-  return formatUserName(row.user, row.user.email)
+  return formatUserName(row.user) || row.user.email
 }
