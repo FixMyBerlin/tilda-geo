@@ -32,6 +32,8 @@ jobs:
     with:
       ENVIRONMENT: staging
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
+      # Staging runs red/green (generate-tiles.staging.yml); processing is on-demand there.
+      START_PROCESSING_ON_DEPLOY: false
     secrets: inherit
   deploy_app:
     uses: ./.github/workflows/deploy-app.yml

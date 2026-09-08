@@ -3,8 +3,10 @@ name: Regenerate Production Tiles
 on:
   workflow_dispatch:
   schedule:
-    # Every 3 hours
-    - cron: '0 */3 * * *'
+    # Every day at 0:00 AM UTC (legacy in-place run).
+    # Red/green (PIPELINE: red-green, cron '0 */3 * * *') is enabled here only after the
+    # staging soak passed — see docs/osm-red-green-status-2026-09.md.
+    - cron: '0 0 * * *'
 permissions:
   contents: read
 
@@ -16,7 +18,6 @@ jobs:
       ENVIRONMENT: production
       url: https://tiles.tilda-geo.de
       PROCESSING_DIFFING_MODE: off
-      PIPELINE: red-green
     secrets:
       SSH_HOST: ${{ secrets.SSH_HOST }}
       SSH_USERNAME: ${{ secrets.SSH_USERNAME }}

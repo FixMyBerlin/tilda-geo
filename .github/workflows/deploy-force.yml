@@ -38,6 +38,8 @@ jobs:
       ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
       CONFIG_CHANGED: ${{ needs.restart_services.outputs.CHANGES == 'true' }}
       DIFF_CHECK_MODE: skip
+      # Mirrors deploy.staging.yml: staging is red/green (on-demand processing).
+      START_PROCESSING_ON_DEPLOY: ${{ inputs.ENVIRONMENT != 'staging' }}
     secrets: inherit
   deploy_app:
     uses: ./.github/workflows/deploy-app.yml

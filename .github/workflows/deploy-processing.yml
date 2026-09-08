@@ -13,6 +13,12 @@ on:
         required: false
         type: string
         default: apply
+      # Legacy environments run index.ts on every deploy. Red/green environments must not:
+      # there 'processing' is an on-demand worker started by generate-tiles.yml.
+      START_PROCESSING_ON_DEPLOY:
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -109,13 +115,18 @@ jobs:
             cd /srv
             echo "Pulling latest 'processing' image"
             docker compose pull processing
-            # Red/green: 'processing' is an on-demand worker, not a long-running service.
-            # Data refresh runs via 'docker compose run --rm processing bun run red-green'
-            # from the generate-tiles workflow. We deliberately do NOT
-            # 'docker compose up -d processing' here — that launched the legacy in-place
-            # index.ts against the PRIMARY DB on every deploy, racing the red/green run.
-            # Pulling the image is enough; the next scheduled run uses it.
-            echo "Skipping 'docker compose up processing' (on-demand worker; see comment)"
+            if [ "${{ inputs.START_PROCESSING_ON_DEPLOY }}" = "true" ]; then
+              echo "Restarting 'processing' container"
+              docker compose up -d processing
+            else
+              # Red/green: 'processing' is an on-demand worker, not a long-running service.
+              # Data refresh runs via 'docker compose run --rm processing bun run red-green'
+              # from the generate-tiles workflow. We deliberately do NOT
+              # 'docker compose up -d processing' here — that launched the legacy in-place
+              # index.ts against the PRIMARY DB on every deploy, racing the red/green run.
+              # Pulling the image is enough; the next scheduled run uses it.
+              echo "Skipping 'docker compose up processing' (on-demand worker; see comment)"
+            fi
             echo "Cleanup docker (containers and images) that are older than 72h"
             docker container prune -f --filter "until=72h"
             docker image prune -fa --filter "until=72h"
