@@ -1,12 +1,12 @@
-import type { InternalPath } from '@/router'
+import type { InternalLinkTo } from '@/router'
 
 export type PrimaryNavigation =
-  | { name: string; to: InternalPath; hash?: string }
+  | { name: string; to: InternalLinkTo; hash?: string }
   | { name: string; href: `https://${string}` }
 
 export type SecondaryNavigation = {
   name: string
-  to: InternalPath
+  to: InternalLinkTo
   hash?: string
 }
 

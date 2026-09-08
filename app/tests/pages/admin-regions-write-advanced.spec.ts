@@ -22,7 +22,8 @@ const baseRegionConfig = (slug: string) => ({
   promoted: false,
   status: 'PUBLIC' as const,
   product: 'radverkehr' as const,
-  notes: 'osmNotes' as const,
+  notesOsm: true,
+  notesInternal: false,
   showSearch: false,
   mapLat: 52.5,
   mapLng: 13.4,
@@ -117,7 +118,7 @@ test.describe('Admin regions REST API — advanced writes', () => {
     expect(updateRes.status()).toBe(200)
     const body = await updateRes.json()
     expect(body.categories).toEqual(['bikelanes'])
-    expect(body.exports).toEqual([])
+    expect(body.exports).toBeNull()
     expect(body.navigationLinks).toEqual([])
 
     const updated = await db.region.findUniqueOrThrow({
@@ -156,7 +157,7 @@ test.describe('Admin regions REST API — advanced writes', () => {
         mapRenderUrl: 'https://example.com/e2e-mask.geojson',
         githubUrl: '',
         geojsonUrl: 'https://example.com/e2e-mask.geojson',
-        systemLayer: true,
+        systemLayer: false,
         regions: { connect: { id: region.id } },
       },
     })

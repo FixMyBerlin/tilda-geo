@@ -1,18 +1,20 @@
 import type React from 'react'
 import { useState } from 'react'
+import type { ModeAccentMode } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { ModalDialog } from './ModalDialog'
 
 type ModalDialogProps = {
   title: string
-  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs'
+  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs' | 'reviewList'
+  mode?: ModeAccentMode
   buttonCloseName?: string
   open: boolean
   setOpen: (value: boolean) => void
   children: React.ReactNode
 }
 
-export type Props = Pick<ModalDialogProps, 'title' | 'buttonCloseName'> & {
+export type Props = Pick<ModalDialogProps, 'title' | 'buttonCloseName' | 'mode'> & {
   titleIcon?: ModalDialogProps['icon']
   /* @desc: Either one of the 3 or custom css classes */
   triggerStyle: 'circle' | 'button' | 'debugCircle' | (string & {})
@@ -23,6 +25,7 @@ export type Props = Pick<ModalDialogProps, 'title' | 'buttonCloseName'> & {
 export const IconModal = ({
   title,
   titleIcon = 'info',
+  mode,
   triggerStyle = 'button',
   children,
   buttonCloseName = 'Schließen',
@@ -56,6 +59,7 @@ export const IconModal = ({
       <ModalDialog
         title={title}
         icon={titleIcon}
+        mode={mode}
         open={open}
         setOpen={setOpen}
         buttonCloseName={buttonCloseName}

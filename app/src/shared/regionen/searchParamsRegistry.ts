@@ -1,4 +1,6 @@
 export const searchParamsRegistry = {
+  // URL migration version written by migrateUrl; kept in the typed search so client-side navigations preserve it and the layout loader does not re-run migrations
+  v: 'v',
   map: 'map',
   config: 'config',
   data: 'data',
@@ -6,15 +8,12 @@ export const searchParamsRegistry = {
   bg: 'bg',
   bg3d: 'bg3d',
   draw: 'draw',
-  osmNotes: 'osmNotes', // show osmNotes on the map
-  osmNote: 'osmNote', // show new osmNotes dialogue
-  atlasNotes: 'notes', // show atlasNotes on the map
-  atlasNote: 'atlasNote', // show new atlasNotes dialogue
-  atlasNotesFilter: 'atlasNotesFilter', // TODO: We renamed everything to internalNotes except the URL param. We need to add a migration for this.
-  osmNotesFilter: 'osmNotesFilter',
+  osmNote: 'osmNote', // notes compose open + pin (zoom/lat/lng)
+  internalNote: 'internalNote', // notes compose open + pin (zoom/lat/lng)
   debugMap: 'debugMap',
-  qa: 'qa', // QA layer selection
-  qaFilter: 'qaFilter', // QA filter params
+  qa: 'qa', // QA mode JSON: key, status, users, search
   dialog: 'dialog',
   welcomeSkipDialog: '__skipDialog',
+  notesMode: 'notesMode', // JSON: key, search, extent, chips (`notesModeParam.ts`)
+  reviewLists: 'rl', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
 } as const

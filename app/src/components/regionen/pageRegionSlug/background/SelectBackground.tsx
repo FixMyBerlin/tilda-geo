@@ -1,7 +1,6 @@
 import { Listbox, ListboxButton, ListboxOptions } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/20/solid'
-import { ChevronUpDownIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
-import type React from 'react'
+import { GlobeAltIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin, twMerge } from 'tailwind-merge'
@@ -15,15 +14,20 @@ import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQuery
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
+import {
+  mapOverlayAnchoredMenuMaxHeightClassName,
+  mapOverlayMenuClassName,
+} from '../mapOverlayChrome.const'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
 import {
+  mapControlIconClassName,
   mobileControlButtonActiveClassName,
-  mobileControlButtonClassName,
+  mobileMapIconButtonClassName,
 } from '../mobile/mobileControlButton.const'
 import { Background3dToggleRow } from './Background3dToggleRow'
 import { ListOption } from './ListOption'
 
-export const SelectBackground: React.FC = () => {
+export const SelectBackground = () => {
   const { mainMap } = useMap()
   const { backgroundParam, setBackgroundParam } = useBackgroundParam()
   const { mapParam, setMapParam } = useMapParam()
@@ -46,7 +50,7 @@ export const SelectBackground: React.FC = () => {
     toggle3d(active)
     if (active || !mainMap || !mapParam) return
 
-    // Same API as NavigationControl compass click (visualizePitch path).
+    // Same API as MapNavigationButtons compass click (visualizePitch path).
     mainMap.getMap().resetNorthPitch({ duration: 500 })
     // Use `=== undefined` — bearing/pitch of 0 are valid and must still be stripped.
     if (mapParam.bearing === undefined && mapParam.pitch === undefined) return
@@ -82,12 +86,11 @@ export const SelectBackground: React.FC = () => {
           aria-label="Hintergrundkarten"
           aria-expanded={sheetOpen}
           className={twMerge(
-            mobileControlButtonClassName,
-            'size-10',
+            mobileMapIconButtonClassName,
             sheetOpen && mobileControlButtonActiveClassName,
           )}
         >
-          <GlobeAltIcon className="size-6" aria-hidden="true" />
+          <GlobeAltIcon className={mapControlIconClassName} aria-hidden="true" />
         </button>
 
         <MobileBottomSheet
@@ -135,23 +138,24 @@ export const SelectBackground: React.FC = () => {
   }
 
   return (
-    <Listbox<'section', BackgroundParam>
-      as="section"
-      className=""
+    <Listbox<'div', BackgroundParam>
+      as="div"
+      className="relative"
       value={backgroundParam}
       onChange={onChange}
     >
-      <ListboxButton
-        aria-label="Hintergrundkarten"
-        className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-      >
-        Hintergrundkarten
-        <ChevronUpDownIcon className="-mr-1 ml-2 size-5" aria-hidden="true" />
+      <ListboxButton aria-label="Hintergrundkarten" className={mobileMapIconButtonClassName}>
+        <GlobeAltIcon className={mapControlIconClassName} aria-hidden="true" />
       </ListboxButton>
       <ListboxOptions
         transition
-        anchor="top end"
-        className="absolute right-0 z-10 mt-2 max-h-[calc(100%-2.5rem)] w-60 overflow-auto rounded-md bg-white text-sm shadow-lg outline-1 outline-black/5 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+        portal={false}
+        anchor={false}
+        className={twMerge(
+          'absolute right-0 bottom-full z-30 mb-2 w-60 overflow-auto text-sm transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in',
+          mapOverlayAnchoredMenuMaxHeightClassName,
+          mapOverlayMenuClassName,
+        )}
       >
         {backgrounds.map(({ name, id }) => {
           return <ListOption key={id} value={id} name={name} />

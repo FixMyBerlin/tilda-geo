@@ -48,13 +48,19 @@ export async function getNotesAndCommentsForRegion(
 
   const notePoints = notes.map((note) => {
     const coordinates = [note.longitude, note.latitude]
-    // We transform the properties for <SourcesLayersInternalNotes />
+    // Properties are shared by the map layer <SourcesLayersInternalNotes /> and the notes mode
+    // list panel; the latter additionally reads subject/comment preview.
     const properties = {
       id: note.id,
       status: note.resolvedAt ? 'closed' : 'open',
       regionId: note.regionId,
+      subject: note.subject,
       authorId: note.author.id,
+      authorName: note.author.osmName ?? '',
       hasComments: note.noteComments.length > 0,
+      commentCount: note.noteComments.length,
+      // Newest comment first (orderBy desc) — used as a compact preview line in the list.
+      latestComment: note.noteComments[0]?.body ?? null,
       lastCommentFromUser:
         note.noteComments.length > 0 && note.noteComments[0]?.userId === session?.userId,
       isAuthor: note.author.id === session?.userId,

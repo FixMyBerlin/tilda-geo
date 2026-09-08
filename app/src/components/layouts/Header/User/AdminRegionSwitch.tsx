@@ -4,7 +4,10 @@ import { useLocation, useNavigate } from '@tanstack/react-router'
 import { type KeyboardEvent, type MouseEvent, useLayoutEffect, useRef, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
-import { useAdminRegionSlug } from '@/components/shared/hooks/useOptionalRegionSlug'
+import {
+  useAdminRegionSlug,
+  useOptionalRegionSlug,
+} from '@/components/shared/hooks/useOptionalRegionSlug'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { regionenIndexQueryOptions } from '@/server/regions/regionenIndexQueryOptions'
 import { defaultRegionSearch, parseRegionSearch } from '@/shared/regionen/regionSearchSchemas'
@@ -84,6 +87,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
   const [focusedSlug, setFocusedSlug] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const regionSlug = useAdminRegionSlug()
+  const regionMapSlug = useOptionalRegionSlug()
   const location = useLocation()
   const navigate = useNavigate()
   const { data, isPending } = useQuery(regionenIndexQueryOptions())
@@ -134,7 +138,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
     void navigate({
       to: '/regionen/$regionSlug',
       params: { regionSlug: region.slug },
-      search: regionSlug ? parseRegionSearch(location.search) : defaultRegionSearch(),
+      search: regionMapSlug ? parseRegionSearch(location.search) : defaultRegionSearch(),
     })
     closePanel()
   }

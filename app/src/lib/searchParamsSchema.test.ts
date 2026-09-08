@@ -66,6 +66,12 @@ describe('searchStringArray', () => {
 
   it('parses comma-separated strings', () => {
     expect(schema.parse({ data: 'a,b' })).toEqual({ data: ['a', 'b'] })
+    expect(schema.parse({ data: 'a, b' })).toEqual({ data: ['a', 'b'] })
+  })
+
+  it('parses legacy JSON array strings', () => {
+    expect(schema.parse({ data: '["a","b"]' })).toEqual({ data: ['a', 'b'] })
+    expect(schema.parse({ data: '[]' })).toEqual({ data: [] })
   })
 
   it('accepts native arrays', () => {

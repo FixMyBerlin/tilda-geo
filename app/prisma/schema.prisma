@@ -46,6 +46,11 @@ model User {
   adminApiTokens  AdminApiToken[]
   dataSchemaImportsCreated DataSchemaImport[] @relation("DataSchemaImportCreatedBy")
   dataSchemaImportsUpdated DataSchemaImport[] @relation("DataSchemaImportUpdatedBy")
+  reviewEntryComments ReviewEntryComment[]
+  reviewListsCreated ReviewList[] @relation("ReviewListCreatedBy")
+  reviewListsUpdated ReviewList[] @relation("ReviewListUpdatedBy")
+  reviewEntriesCreated ReviewEntry[] @relation("ReviewEntryCreatedBy")
+  reviewEntriesUpdated ReviewEntry[] @relation("ReviewEntryUpdatedBy")
 
   @@map("User")
   @@schema("prisma")
@@ -131,14 +136,6 @@ enum RegionProduct {
   @@schema("prisma")
 }
 
-enum RegionNotesMode {
-  osmNotes
-  internalNotes
-  disabled
-
-  @@schema("prisma")
-}
-
 enum RegionContractStatus {
   ACTIVE
   INACTIVE
@@ -171,7 +168,9 @@ model Region {
   name       String        @default("")
   fullName   String        @default("")
   product    RegionProduct @default(radverkehr)
-  notes      RegionNotesMode @default(osmNotes)
+  // Independent flags on purpose (product may allow both later); today RegionWriteSchema rejects both being true.
+  notesOsm      Boolean @default(true)
+  notesInternal Boolean @default(false)
   showSearch Boolean       @default(false)
 
   mapLat  Float @default(0)
@@ -216,6 +215,7 @@ model Region {
   regionUploads     RegionUpload[]     @relation("RegionUploadLibrary")
   noteRecords       Note[]
   qaConfigs         QaConfig[]
+  reviewLists       ReviewList[]
 
   @@index([contractId])
   @@index([headerLogoId])
@@ -509,6 +509,110 @@ model NoteComment {
   @@schema("prisma")
 }
 
+// Review lists ("Prüflisten"): uploadable/drawable lists of candidate locations to review.
+// A list has a many-to-many relation to regions (one list can be shared across region views).
+// Entries are deliberately a separate table from Notes (Prisma has no polymorphic associations);
+// they are functionally analogous but not shared code.
+model ReviewList {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  name      String
+  //
+  createdById String?
+  createdBy   User?   @relation("ReviewListCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("ReviewListUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  //
+  regions   Region[]
+  entries   ReviewEntry[]
+
+  @@map("ReviewList")
+  @@schema("prisma")
+}
+
+model ReviewEntry {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  list      ReviewList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId    Int
+  //
+  // GeoJSON geometry + free-form display properties (from upload or drawing).
+  geometry     Json
+  geometryType ReviewEntryGeometryType
+  properties   Json?
+  //
+  // Import identity (not the SQL id). A dedicated column so matching survives user edits
+  // to `properties` and can use @@index([listId, importId]) instead of a JSON scan.
+  importId String?
+  //
+  // Provenance: uploaded (from a GeoJSON file) vs. manually drawn in the app.
+  source     ReviewEntrySource @default(UPLOAD)
+  sourceMeta Json? // e.g. { filename } for uploads, { date } for manual entries
+  // Author of a manually drawn entry is createdBy; uploaded entries carry the importer as createdBy.
+  createdById String?
+  createdBy   User?   @relation("ReviewEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("ReviewEntryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  //
+  // Evaluation status set by members in the Prüflisten panel; OPEN → OK | PROBLEM.
+  status   ReviewEntryStatus @default(OPEN)
+  //
+  comments ReviewEntryComment[]
+
+  // Serves both list scans and import matching (listId is a prefix of this composite).
+  @@index([listId, importId])
+  @@map("ReviewEntry")
+  @@schema("prisma")
+}
+
+model ReviewEntryComment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  author  User        @relation(fields: [userId], references: [id])
+  userId  String
+  //
+  entry   ReviewEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId Int
+  //
+  body    String
+
+  @@index([entryId])
+  @@map("ReviewEntryComment")
+  @@schema("prisma")
+}
+
+enum ReviewEntryGeometryType {
+  POINT
+  LINESTRING
+  POLYGON
+  MULTIPOINT
+  MULTILINESTRING
+  MULTIPOLYGON
+
+  @@schema("prisma")
+}
+
+enum ReviewEntrySource {
+  UPLOAD
+  MANUAL
+
+  @@schema("prisma")
+}
+
+enum ReviewEntryStatus {
+  OPEN
+  OK
+  PROBLEM
+
+  @@schema("prisma")
+}
+
 // QA System Models
 model QaConfig {
   id        Int      @id @default(autoincrement())
@@ -571,6 +675,7 @@ model QaEvaluation {
   // Remove unique constraint to allow evaluation history
   // @@unique([configId, areaId])  // REMOVED
 
+  @@index([configId, areaId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("QaEvaluation")
   @@schema("prisma")
 }

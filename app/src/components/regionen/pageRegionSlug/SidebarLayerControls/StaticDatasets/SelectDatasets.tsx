@@ -5,6 +5,7 @@ import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQuer
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { createSourceKeyStaticDatasets } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { categoryHeaderTitleBoxClassName } from '../categoryHeader.const'
 import { SelectDataset } from './SelectDataset'
 
 export const SelectDatasets = ({
@@ -19,7 +20,6 @@ export const SelectDatasets = ({
   const first = datasets[0]
   const categoryTitle = first?.categoryTitle ?? category
   const categorySubtitle = first?.categorySubtitle ?? undefined
-  const hasFallbackTitle = category === categoryTitle
 
   const allDatasetKeysForThisCategory = datasets.map((d) =>
     createSourceKeyStaticDatasets(d.id, d.subId),
@@ -38,6 +38,7 @@ export const SelectDatasets = ({
   }
 
   const active = dataParam.some((param) => allDatasetKeysForThisCategory.includes(param))
+  const showBulkToggle = datasets.length > 1
 
   return (
     <Disclosure
@@ -47,20 +48,33 @@ export const SelectDatasets = ({
     >
       {({ open }) => (
         <>
-          <DisclosureButton className="group flex w-full justify-between text-left hover:bg-yellow-50">
+          <DisclosureButton
+            className={twJoin(
+              'group flex w-full min-w-0 justify-between text-left hover:bg-yellow-50',
+              open ? 'items-start' : 'items-center',
+            )}
+          >
             <div
               className={twJoin(
-                'ml-2 flex min-h-12 flex-col items-start text-sm leading-4.25',
+                categoryHeaderTitleBoxClassName,
+                'flex-1',
                 active ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-900',
-                hasFallbackTitle ? 'justify-center' : 'justify-start pt-2',
+                open && categorySubtitle ? 'justify-start' : 'justify-center',
               )}
             >
-              <h2 className="font-semibold">{categoryTitle}</h2>
+              <h2
+                className={twJoin(
+                  'w-full font-semibold',
+                  open ? '' : 'overflow-hidden text-ellipsis whitespace-nowrap',
+                )}
+              >
+                {categoryTitle}
+              </h2>
               {categorySubtitle && (
                 <p
                   className={twJoin(
-                    'mt-0.5 pr-1.5 text-xs leading-3 text-gray-400',
-                    open ? '' : 'w-44 min-w-full overflow-hidden text-ellipsis whitespace-nowrap',
+                    'mt-0.5 w-full text-xs leading-3 text-gray-400',
+                    open ? '' : 'overflow-hidden text-ellipsis whitespace-nowrap',
                   )}
                   title={open ? undefined : categorySubtitle}
                 >
@@ -68,7 +82,7 @@ export const SelectDatasets = ({
                 </p>
               )}
             </div>
-            <div className="flex min-h-12 flex-none items-center justify-center px-1 text-yellow-500">
+            <div className="flex min-h-10 flex-none items-center justify-center px-1 text-yellow-500">
               {open ? (
                 <ChevronDownIcon className="h-7 w-7" />
               ) : (
@@ -78,27 +92,33 @@ export const SelectDatasets = ({
           </DisclosureButton>
 
           <MotionCollapse open={open}>
-            <DisclosurePanel static as="section" className="mt-1 mb-2">
-              <div className="mx-1 mt-1 flex items-center justify-end gap-1">
-                {!allCategoryDatasetsInParam && (
-                  <button
-                    type="button"
-                    onClick={activateAll}
-                    className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
-                  >
-                    Alle aktivieren
-                  </button>
-                )}
-                {active && (
-                  <button
-                    type="button"
-                    onClick={deactivateAll}
-                    className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
-                  >
-                    Alle deaktivieren
-                  </button>
-                )}
-              </div>
+            <DisclosurePanel
+              static
+              as="section"
+              className={twJoin('mb-2', showBulkToggle && 'pt-1')}
+            >
+              {showBulkToggle && (
+                <div className="mx-1 flex items-center justify-end gap-1">
+                  {!allCategoryDatasetsInParam && (
+                    <button
+                      type="button"
+                      onClick={activateAll}
+                      className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
+                    >
+                      Alle aktivieren
+                    </button>
+                  )}
+                  {active && (
+                    <button
+                      type="button"
+                      onClick={deactivateAll}
+                      className="rounded-md border border-gray-300 bg-gray-50 px-1 py-0.5 text-xs leading-none shadow-sm hover:bg-yellow-50 focus:ring-1 focus:ring-yellow-500"
+                    >
+                      Alle deaktivieren
+                    </button>
+                  )}
+                </div>
+              )}
               <ul
                 className={twJoin(
                   'py-1 text-sm focus:outline-none',

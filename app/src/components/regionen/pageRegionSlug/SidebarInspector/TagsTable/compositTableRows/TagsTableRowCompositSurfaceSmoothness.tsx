@@ -1,5 +1,6 @@
 import { isDev } from '@/components/shared/utils/isEnv'
 import {
+  tagsTableCompositRowClass,
   tagsTableCompositSubLabelCellClass,
   tagsTableCompositSubRowHeaderClass,
   tagsTableCompositSubValueCellClass,
@@ -26,118 +27,106 @@ export const TagsTableRowCompositSurfaceSmoothness = ({
         `Ober${TRANSLATION_BREAK_MARKER}flächen${TRANSLATION_BREAK_MARKER}qualität`,
       )}
     >
-      <table className={tagsTableCompositTableClass}>
-        <tbody>
-          <tr>
-            <td colSpan={2} className="py-1">
-              <NodataFallbackWrapper fallback={!properties.surface}>
-                <ValueDisclosure>
-                  <div className={tagsTableCompositSubRowHeaderClass}>
-                    <div className={tagsTableCompositSubLabelCellClass}>Belag</div>
-                    <div className={tagsTableCompositSubValueCellClass}>
-                      <ValueDisclosureButton>
-                        <span
-                          title={isDev ? `${sourceId}--surface=${properties.surface}` : undefined}
-                        >
-                          <ConditionalFormattedValue
-                            sourceId={sourceId}
-                            tagKey={'surface'}
-                            tagValue={properties.surface}
-                          />
-                        </span>
-                      </ValueDisclosureButton>
-                    </div>
-                  </div>
-                  <ValueDisclosurePanel>
-                    <p
-                      title={
-                        isDev
-                          ? `${sourceId}--surface_source=${properties.surface_source}`
-                          : undefined
-                      }
-                    >
-                      <em>Quelle:</em>{' '}
+      <div className={tagsTableCompositTableClass}>
+        <div className={tagsTableCompositRowClass}>
+          <NodataFallbackWrapper fallback={!properties.surface}>
+            <ValueDisclosure>
+              <div className={tagsTableCompositSubRowHeaderClass}>
+                <div className={tagsTableCompositSubLabelCellClass}>Belag</div>
+                <div className={tagsTableCompositSubValueCellClass}>
+                  <ValueDisclosureButton>
+                    <span title={isDev ? `${sourceId}--surface=${properties.surface}` : undefined}>
                       <ConditionalFormattedValue
                         sourceId={sourceId}
-                        tagKey={'surface_source'}
-                        tagValue={properties.surface_source}
+                        tagKey={'surface'}
+                        tagValue={properties.surface}
                       />
-                    </p>
-                    <p
-                      title={
-                        isDev
-                          ? `${sourceId}--surface_confidence=${properties.surface_confidence}`
-                          : undefined
-                      }
+                    </span>
+                  </ValueDisclosureButton>
+                </div>
+              </div>
+              <ValueDisclosurePanel>
+                <p
+                  title={
+                    isDev ? `${sourceId}--surface_source=${properties.surface_source}` : undefined
+                  }
+                >
+                  <em>Quelle:</em>{' '}
+                  <ConditionalFormattedValue
+                    sourceId={sourceId}
+                    tagKey={'surface_source'}
+                    tagValue={properties.surface_source}
+                  />
+                </p>
+                <p
+                  title={
+                    isDev
+                      ? `${sourceId}--surface_confidence=${properties.surface_confidence}`
+                      : undefined
+                  }
+                >
+                  <em>Genauigkeit der Quelle:</em>{' '}
+                  <NodataFallbackWrapper fallback={!properties.surface_confidence}>
+                    Hoch
+                  </NodataFallbackWrapper>
+                </p>
+              </ValueDisclosurePanel>
+            </ValueDisclosure>
+          </NodataFallbackWrapper>
+        </div>
+        <div className={tagsTableCompositRowClass}>
+          <NodataFallbackWrapper fallback={!properties.smoothness}>
+            <ValueDisclosure>
+              <div className={tagsTableCompositSubRowHeaderClass}>
+                <div className={tagsTableCompositSubLabelCellClass}>Fahrqualität</div>
+                <div className={tagsTableCompositSubValueCellClass}>
+                  <ValueDisclosureButton>
+                    <span
+                      title={isDev ? `${sourceId}--smoothness=${properties.smoothness}` : undefined}
                     >
-                      <em>Genauigkeit der Quelle:</em>{' '}
-                      <NodataFallbackWrapper fallback={!properties.surface_confidence}>
-                        Hoch
-                      </NodataFallbackWrapper>
-                    </p>
-                  </ValueDisclosurePanel>
-                </ValueDisclosure>
-              </NodataFallbackWrapper>
-            </td>
-          </tr>
-          <tr className="border-t">
-            <td colSpan={2} className="py-1">
-              <NodataFallbackWrapper fallback={!properties.smoothness}>
-                <ValueDisclosure>
-                  <div className={tagsTableCompositSubRowHeaderClass}>
-                    <div className={tagsTableCompositSubLabelCellClass}>Fahrqualität</div>
-                    <div className={tagsTableCompositSubValueCellClass}>
-                      <ValueDisclosureButton>
-                        <span
-                          title={
-                            isDev ? `${sourceId}--smoothness=${properties.smoothness}` : undefined
-                          }
-                        >
-                          <ConditionalFormattedValue
-                            sourceId={sourceId}
-                            tagKey={'smoothness'}
-                            tagValue={properties.smoothness}
-                          />
-                        </span>
-                      </ValueDisclosureButton>
-                    </div>
-                  </div>
-                  <ValueDisclosurePanel>
-                    <p
-                      title={
-                        isDev
-                          ? `${sourceId}--smoothness_source=${properties.smoothness_source}`
-                          : undefined
-                      }
-                    >
-                      <em>Quelle:</em>{' '}
                       <ConditionalFormattedValue
                         sourceId={sourceId}
-                        tagKey={'smoothness_source'}
-                        tagValue={properties.smoothness_source}
+                        tagKey={'smoothness'}
+                        tagValue={properties.smoothness}
                       />
-                    </p>
-                    <p
-                      title={
-                        isDev
-                          ? `${sourceId}--smoothness_confidence=${properties.smoothness_confidence}`
-                          : undefined
-                      }
-                    >
-                      <em>Genauigkeit der Quelle:</em>{' '}
-                      <ConditionalFormattedValue
-                        sourceId={sourceId}
-                        tagKey={'smoothness_confidence'}
-                        tagValue={properties.smoothness_confidence}
-                      />
-                    </p>
-                  </ValueDisclosurePanel>
-                </ValueDisclosure>
-              </NodataFallbackWrapper>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                    </span>
+                  </ValueDisclosureButton>
+                </div>
+              </div>
+              <ValueDisclosurePanel>
+                <p
+                  title={
+                    isDev
+                      ? `${sourceId}--smoothness_source=${properties.smoothness_source}`
+                      : undefined
+                  }
+                >
+                  <em>Quelle:</em>{' '}
+                  <ConditionalFormattedValue
+                    sourceId={sourceId}
+                    tagKey={'smoothness_source'}
+                    tagValue={properties.smoothness_source}
+                  />
+                </p>
+                <p
+                  title={
+                    isDev
+                      ? `${sourceId}--smoothness_confidence=${properties.smoothness_confidence}`
+                      : undefined
+                  }
+                >
+                  <em>Genauigkeit der Quelle:</em>{' '}
+                  <ConditionalFormattedValue
+                    sourceId={sourceId}
+                    tagKey={'smoothness_confidence'}
+                    tagValue={properties.smoothness_confidence}
+                  />
+                </p>
+              </ValueDisclosurePanel>
+            </ValueDisclosure>
+          </NodataFallbackWrapper>
+        </div>
+      </div>
     </TagsTableRowFrame>
   )
 }

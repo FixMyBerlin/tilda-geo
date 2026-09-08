@@ -49,9 +49,7 @@ function decisionDataToText(data: Prisma.JsonValue | null) {
   return JSON.stringify(data)
 }
 
-/** QA map style segment for shared links (`slug--all`; matches QA_STYLE_OPTIONS / regionSearchSchemas qa param). */
-const QA_DEEPLINK_STYLE = 'all'
-
+/** QA map link for shared exports (`qa` JSON with config slug). */
 const QA_DEEPLINK_MAP_ZOOM = 19
 
 function buildTildaLink(input: {
@@ -68,9 +66,9 @@ function buildTildaLink(input: {
     lat: input.centroidLat,
     lng: input.centroidLng,
   })
-  const qa = `${input.configSlug}--${QA_DEEPLINK_STYLE}`
-  const params = new URLSearchParams({ map, qa, v: '2' })
-  return `${origin}/regionen/${input.regionSlug}?${params.toString()}`
+  const qa = JSON.stringify({ key: input.configSlug })
+  const params = new URLSearchParams({ map, qa, v: '3' })
+  return `${origin}/regionen/${input.regionSlug}/qa?${params.toString()}`
 }
 
 export async function getQaConfigExportRows(input: z.infer<typeof ExportInputSchema>) {

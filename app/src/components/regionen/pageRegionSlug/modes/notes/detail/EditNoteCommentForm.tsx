@@ -1,0 +1,159 @@
+import { PencilSquareIcon } from '@heroicons/react/20/solid'
+import { TrashIcon } from '@heroicons/react/24/outline'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useId, useState } from 'react'
+import { twJoin, twMerge } from 'tailwind-merge'
+import { z } from 'zod'
+import { useInternalNotesQueryKey } from '@/components/regionen/pageRegionSlug/modes/notes/useInternalNotesQueryKey'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
+import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
+import { Form } from '@/components/shared/form/Form'
+import { buttonStylesOnYellow, notesButtonStyle } from '@/components/shared/links/styles'
+import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
+import { toastError } from '@/components/shared/toast/toastError'
+import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
+import type {
+  DeleteNoteCommentInputType,
+  UpdateNoteCommentInputType,
+} from '@/server/notes/notes.functions'
+import { deleteNoteCommentFn, updateNoteCommentFn } from '@/server/notes/notes.functions'
+import type { NoteComment } from '@/server/notes/queries/getNoteAndComments.server'
+import { useIsAuthor } from './utils/useIsAuthor'
+
+const EditNoteCommentSchema = z.object({
+  body: z.string().min(1, 'Bitte Antwort eingeben.'),
+})
+
+type Props = { comment: NoteComment }
+
+export const EditNoteCommentForm = ({ comment }: Props) => {
+  const formId = useId()
+  const queryClient = useQueryClient()
+  const queryKeyMap = useInternalNotesQueryKey()
+  const [open, setOpen] = useState(false)
+  const region = useRegion()
+
+  const {
+    mutateAsync: updateNoteCommentMutation,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: (input: UpdateNoteCommentInputType) => updateNoteCommentFn({ data: input }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notes', 'getNoteAndComments', { id: comment.noteId }],
+      })
+      queryClient.invalidateQueries({ queryKey: queryKeyMap })
+      setOpen(false)
+    },
+  })
+  const { mutate: deleteNoteCommentMutation } = useMutation({
+    mutationFn: (input: DeleteNoteCommentInputType) => deleteNoteCommentFn({ data: input }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['notes', 'getNoteAndComments', { id: comment.noteId }],
+      })
+      queryClient.invalidateQueries({ queryKey: queryKeyMap })
+      setOpen(false)
+    },
+    onError: (error) => toastError(error, 'Kommentar konnte nicht gelöscht werden'),
+  })
+
+  const isAuthor = useIsAuthor(comment.author.id)
+  if (!isAuthor) {
+    return null
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          captureModalOpenOrigin(e.currentTarget)
+          setOpen(true)
+        }}
+        className={notesButtonStyle}
+      >
+        <PencilSquareIcon className="size-6" />
+      </button>
+
+      <ModalDialog
+        title="Antwort bearbeiten"
+        icon="edit"
+        mode="notes"
+        buttonCloseName="Abbrechen"
+        open={open}
+        setOpen={setOpen}
+        footerStart={
+          <button
+            type="button"
+            title="Kommentar löschen"
+            onClick={() => {
+              if (window.confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?')) {
+                deleteNoteCommentMutation({
+                  regionSlug: region.slug,
+                  commentId: comment.id,
+                })
+              }
+            }}
+            className={twMerge(notesButtonStyle, 'hover:bg-orange-400')}
+          >
+            <TrashIcon className="size-6" />
+          </button>
+        }
+        primaryAction={
+          <div className="flex items-center gap-1">
+            <button
+              type="submit"
+              form={formId}
+              className={twJoin(
+                buttonStylesOnYellow,
+                'inline-flex w-full justify-center sm:w-auto',
+              )}
+              disabled={isPending}
+            >
+              Änderung speichern
+            </button>
+            {isPending ? <SmallSpinner /> : null}
+          </div>
+        }
+      >
+        <Form
+          id={formId}
+          defaultValues={{ body: comment.body }}
+          schema={EditNoteCommentSchema}
+          onSubmit={async (values) => {
+            try {
+              await updateNoteCommentMutation({
+                regionSlug: region.slug,
+                commentId: comment.id,
+                body: sanitizeHtml(values.body) ?? values.body,
+              })
+              return { success: true }
+            } catch (e) {
+              return {
+                success: false,
+                message: e instanceof Error ? e.message : String(e),
+              }
+            }
+          }}
+        >
+          {(form) => (
+            <>
+              <MarkdownEditorField
+                form={form}
+                name="body"
+                label="Antwort bearbeiten (Markdown)"
+                placeholder="Antwort"
+              />
+
+              {error ? <p className="text-red-500">{error.message}</p> : null}
+            </>
+          )}
+        </Form>
+      </ModalDialog>
+    </>
+  )
+}

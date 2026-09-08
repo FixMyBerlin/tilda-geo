@@ -20,8 +20,8 @@ export const useCategoriesConfig = () => {
       ? parse(configWire, freshConfig)
       : freshConfig
 
-  const setCategoriesConfig = (value: MapDataCategoryConfig[]) => {
-    updateSearch({ [searchParamsRegistry.config]: serialize(value) })
+  const setCategoriesConfig = (value: MapDataCategoryConfig[], options?: { replace?: boolean }) => {
+    updateSearch({ [searchParamsRegistry.config]: serialize(value) }, options)
   }
 
   return { categoriesConfig, setCategoriesConfig }

@@ -21,10 +21,17 @@ import { UI_SPRING } from '@/components/shared/motion/spring.const'
 type Props = {
   text: string
   className?: string
+  /** Floating UI placement; defaults to top. */
+  placement?: 'top' | 'bottom' | 'left' | 'right'
   children: React.ReactNode
 }
 
-export const Tooltip = ({ text, children, className }: Props) => {
+export const Tooltip = ({
+  text,
+  children,
+  className,
+  placement: preferredPlacement = 'top',
+}: Props) => {
   const [open, setOpen] = useState(false)
   const reducedMotion = useReducedMotion()
 
@@ -32,7 +39,7 @@ export const Tooltip = ({ text, children, className }: Props) => {
   const { refs, floatingStyles, context, placement, isPositioned } = useFloating({
     open,
     onOpenChange: setOpen,
-    placement: 'top',
+    placement: preferredPlacement,
     transform: false,
     whileElementsMounted: autoUpdate,
     middleware: [offset(8), flip({ padding: 8 }), shift({ padding: 8 })],
@@ -42,7 +49,7 @@ export const Tooltip = ({ text, children, className }: Props) => {
   // (needed for multi-line copy users may want to read).
   const hover = useHover(context, {
     move: false,
-    delay: { open: 200, close: 0 },
+    delay: { open: 50, close: 0 },
     handleClose: safePolygon(),
   })
   // React `onFocus` uses focusin, so focusing a wrapped button still opens the tooltip.

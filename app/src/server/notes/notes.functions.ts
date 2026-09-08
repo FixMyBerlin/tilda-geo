@@ -14,7 +14,9 @@ import { getNoteAndComments } from './queries/getNoteAndComments.server'
 import { getNotesAndCommentsForRegion } from './queries/getNotesAndCommentsForRegion.server'
 import { CreateNoteCommentSchema, CreateNoteSchema } from './schemas'
 
-const CreateNoteInput = CreateNoteSchema.extend({ regionSlug: z.string() })
+const CreateNoteInput = CreateNoteSchema.extend({
+  regionSlug: z.string(),
+})
 const CreateNoteCommentInput = CreateNoteCommentSchema.extend({ regionSlug: z.string() })
 const UpdateNoteResolvedAtInput = z.object({
   noteId: z.number(),

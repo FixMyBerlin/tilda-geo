@@ -12,7 +12,7 @@ LayoutRoot          __root__     document shell (html/body, providers, app heade
 ├── LayoutPages     _pages       prose content pages (legal, docs, settings, …)
 ├── LayoutAdmin     admin        admin area
 └── LayoutRegionen  regionen     pass-through
-    └── LayoutRegionSlug  regionen/$regionSlug   map page (NuqsAdapter)
+    └── LayoutRegionSlug  regionen/$regionSlug   map page (map + mode panel outlet)
 ```
 
 `LayoutRoot` hides app header/footer on full-bleed routes: `regionen/$regionSlug`, `preview/region-pending`, `preview/region-error`.

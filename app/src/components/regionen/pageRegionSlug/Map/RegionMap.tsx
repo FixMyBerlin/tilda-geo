@@ -1,25 +1,22 @@
 import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { MapLibreEvent, MapStyleImageMissingEvent } from 'maplibre-gl'
+import type { MapLibreEvent, MapSourceDataEvent, MapStyleImageMissingEvent } from 'maplibre-gl'
 import { useEffect, useRef, useState } from 'react'
 import type {
   MapGeoJSONFeature,
   MapLayerMouseEvent,
   ViewStateChangeEvent,
 } from 'react-map-gl/maplibre'
-import { AttributionControl, Map as MapGl, NavigationControl, useMap } from 'react-map-gl/maplibre'
+import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
 import {
   useMapActions,
   useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useQaMapState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
-import {
-  convertToUrlFeature,
-  isPersistableFeature,
-  useFeaturesParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
+import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { type MapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
@@ -28,7 +25,6 @@ import {
   type InteracitvityConfiguartion,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
-import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
 import {
   exposeMainMapForDebugging,
@@ -36,10 +32,16 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import { MapListHoverMarker } from '../modes/MapListHoverMarker'
+import { useModeListActions } from '../modes/mode-list-store'
+import { NotesNewRelatedGeometry } from '../modes/notes/new/NotesNewRelatedGeometry'
+import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
+import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
+import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
+import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
-import { QaZoomNotice } from './QaZoomNotice'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
@@ -48,12 +50,14 @@ import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInte
 import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
-import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
+import { qaSourceId, SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
+import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
+import { partitionClickedFeatures } from './utils/partitionClickedFeatures'
 import { safeSetFeatureState } from './utils/safeSetFeatureState'
 import { useInteractiveLayers } from './utils/useInteractiveLayers'
 
@@ -79,19 +83,20 @@ const NO_INTERACTIVE_LAYERS: string[] = []
 export const RegionMap = () => {
   const { mapParam, setMapParam } = useMapParam()
   const { is3dActive } = useBg3dParam()
-  const { setFeaturesParam } = useFeaturesParam()
+  const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const {
     replaceInspectorFeatures,
-    clearInspectorFeatures,
     markMapLoaded,
     startMapDataLoading,
     finishMapDataLoading,
     updateMapBounds,
   } = useMapActions()
   const region = useRegion()
-  const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
+  const currentMode = useCurrentMode()
+  const { syncQaFeatureStates } = useQaMapState()
+  const { notifyMapViewChanged } = useModeListActions()
 
   const { mainMap } = useMap()
 
@@ -102,8 +107,11 @@ export const RegionMap = () => {
 
   const inspectorFeatures = useMapInspectorFeatures()
   const calculatorDrawActive = useMapCalculatorDrawActive()
+  const notesComposeActive = useNotesComposeActive()
+  const reviewDrawActive = useReviewDrawActive()
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
+    if (reviewDrawActive) return
     if (containMaskFeature(features)) {
       return
     }
@@ -123,33 +131,17 @@ export const RegionMap = () => {
     const interactiveFeatures = extractInteractiveFeatures(mapParam, features)
     const uniqueFeatures = uniqBy(interactiveFeatures, (f) => createInspectorFeatureKey(f))
 
-    if (uniqueFeatures) {
-      let newInspectorFeatures: MapGeoJSONFeature[] = []
-      // Allow multi select with Control (Windows) / Command (Mac)
-      if (event.originalEvent.ctrlKey || event.originalEvent.metaKey) {
-        // ctrl/command is down - toggle features
-        const featureInArray = (f0: MapGeoJSONFeature, farr: MapGeoJSONFeature[]) =>
-          !!farr.find((f1) => f0.properties?.id === f1.properties?.id)
-        const keepFeatures = inspectorFeatures.filter((f) => !featureInArray(f, uniqueFeatures))
-        const addFeatures = uniqueFeatures.filter((f) => !featureInArray(f, inspectorFeatures))
-        newInspectorFeatures = [...keepFeatures, ...addFeatures]
-      } else {
-        // ctrl/command is not down - just set features
-        newInspectorFeatures = uniqueFeatures
-      }
-      replaceInspectorFeatures(newInspectorFeatures)
-
-      const persistableFeatures = newInspectorFeatures.filter((f) =>
-        isPersistableFeature(f, regionDatasets ?? []),
-      )
-      if (persistableFeatures.length) {
-        setFeaturesParam(persistableFeatures.map((feature) => convertToUrlFeature(feature)))
-      } else {
-        setFeaturesParam(null)
-      }
-    } else {
-      clearInspectorFeatures()
-    }
+    const { nextInspectorFeatures, nextUrlFeatures } = partitionClickedFeatures({
+      clickedFeatures: uniqueFeatures,
+      currentMode,
+      previousUrlFeatures: featuresParam,
+      previousInspectorFeatures: inspectorFeatures,
+      regionDatasets: regionDatasets ?? [],
+      // Allow multi select with Control (Windows) / Command (Mac) — inspector domain only
+      multiselect: event.originalEvent.ctrlKey || event.originalEvent.metaKey,
+    })
+    replaceInspectorFeatures(nextInspectorFeatures)
+    setFeaturesParam(nextUrlFeatures.length > 0 ? nextUrlFeatures : null)
   }
 
   const updateCursor = (features: MapGeoJSONFeature[] | undefined) => {
@@ -197,6 +189,12 @@ export const RegionMap = () => {
     updateHover([])
   }
 
+  const handleSourceData = (event: MapSourceDataEvent) => {
+    if (currentMode !== 'qa') return
+    if (event.sourceId !== qaSourceId || !event.isSourceLoaded) return
+    syncQaFeatureStates()
+  }
+
   const handleLoad = (event: MapLibreEvent) => {
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
     // Rotate/pitch handlers: Map3dTouchRotation (runs once mapLoaded is set).
@@ -241,14 +239,15 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // While the calculator draw tool is active, no layers are interactive: clicking/hovering
-  // the data does nothing and the inspector can't open (queryRenderedFeatures returns none),
-  // so the draw tool owns all map interaction. This replaces a special-case guard in the
-  // click handler with the map's own interactivity mechanism.
+  // While the calculator draw tool or notes compose is active, no layers are interactive:
+  // clicking/hovering the data does nothing and the inspector can't open
+  // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
+  // handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
-  const interactiveLayerIds = calculatorDrawActive
-    ? NO_INTERACTIVE_LAYERS
-    : computedInteractiveLayerIds
+  const interactiveLayerIds =
+    calculatorDrawActive || notesComposeActive || reviewDrawActive
+      ? NO_INTERACTIVE_LAYERS
+      : computedInteractiveLayerIds
 
   if (!mapParam) {
     return null
@@ -261,7 +260,9 @@ export const RegionMap = () => {
   let mapMaxBoundsSettings: MapMaxBoundsProps | Record<string, never> = {}
   if (region?.bbox) {
     const maxBounds = region.bbox
-    const buffered = buffer(bboxPolygon(maxBounds), 60, { units: 'kilometers' })
+    const buffered = buffer(bboxPolygon(maxBounds), 60, {
+      units: 'kilometers',
+    })
     if (buffered) {
       // turf bbox() returns 4 numbers for 2D; we have no elevation data
       const b = bbox(buffered) as [number, number, number, number]
@@ -292,12 +293,15 @@ export const RegionMap = () => {
       // onMouseMove={}
       // onLoad={handleInspect}
       cursor={cursorStyle}
+      onMove={notifyMapViewChanged}
+      onResize={notifyMapViewChanged}
       onMoveEnd={handleMoveEnd}
       // onZoomEnd={} // zooming is always also moving
       onClick={handleClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onLoad={handleLoad}
+      onSourceData={handleSourceData}
       onData={startMapDataLoading}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
@@ -317,24 +321,17 @@ export const RegionMap = () => {
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
       <SearchResultLayers />
+      <NotesNewRelatedGeometry />
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
       <TerrainProfileHoverMarkerLayer />
+      <SourcesLayersReviewEntries />
+      <MapListHoverMarker />
       <AttributionControl compact={true} position="bottom-left" />
-
-      {/* Desktop always gets zoom controls; mobile only when 3D is active (compass reset).
-          key remounts the control: react-map-gl only applies showCompass at create time. */}
-      {(isSmBreakpointOrAbove || is3dActive) && (
-        <NavigationControl
-          key={is3dActive ? 'nav-3d' : 'nav-2d'}
-          showCompass={is3dActive}
-          visualizePitch={true}
-        />
-      )}
       <Map3dTouchRotation />
       <Calculator />
+      {currentMode === 'reviewLists' && <ReviewMapDrawing />}
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}
-      <QaZoomNotice />
     </MapGl>
   )
 }

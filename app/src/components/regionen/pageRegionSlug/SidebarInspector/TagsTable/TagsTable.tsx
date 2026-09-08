@@ -41,7 +41,12 @@ import { TagsTableRowlifecycle } from './compositTableRows/TagsTableRowLifecycle
 import { TagsTableRowValueSourceConfidence } from './compositTableRows/TagsTableRowValueSourceConfidence'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
 import { TagsTableRowWikipedia, tableKeyWikipedia } from './compositTableRows/TagsTableRowWikipedia'
-import { tagsTableClass, tagsTableContainerClass } from './tagsTableLayout'
+import {
+  tagsTableBodyClass,
+  tagsTableClass,
+  tagsTableContainerClass,
+  tagsTableLeadingClass,
+} from './tagsTableLayout'
 import { TagsTableRow } from './TagsTableRow'
 import { cleanKey, KEY_IF_PRESENCE } from './utils/cleanKey'
 
@@ -66,16 +71,19 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
           <tr>
             <th
               scope="col"
-              className="py-1.5 pr-3 pl-4 text-left text-sm font-semibold text-gray-900"
+              className={`py-1.5 pr-2 pl-2 text-left text-sm ${tagsTableLeadingClass} font-semibold text-gray-900`}
             >
               Schlüssel
             </th>
-            <th scope="col" className="px-3 py-1.5 text-left text-sm font-semibold text-gray-900">
+            <th
+              scope="col"
+              className={`px-2 py-1.5 text-left text-sm ${tagsTableLeadingClass} font-semibold text-gray-900`}
+            >
               Wert
             </th>
           </tr>
         </thead>
-        <tbody className="block divide-y divide-gray-200 @[350px]:table-row-group">
+        <tbody className={tagsTableBodyClass}>
           <TagsTableRowlifecycle
             key="lifecycle"
             sourceId={sourceId}

@@ -55,7 +55,7 @@ export const MobileRegionMenu = () => {
         aria-expanded={isOpen}
         className={twMerge(
           mobileControlButtonClassName,
-          'h-10 min-w-10 gap-1.5 px-2',
+          'h-8.5 min-w-8.5 gap-1.5 px-2',
           customLogo && region.logoWhiteBackgroundRequired ? 'bg-white' : '',
           isOpen && mobileControlButtonActiveClassName,
         )}
@@ -77,6 +77,7 @@ export const MobileRegionMenu = () => {
         mapPeek="15%"
         panelClassName="bg-gray-900 text-white"
         grabberClassName="bg-white/30"
+        grabIconClassName="text-white"
         footer={
           <RegionWelcomeMobileCtaFooter
             onClose={closeMenu}

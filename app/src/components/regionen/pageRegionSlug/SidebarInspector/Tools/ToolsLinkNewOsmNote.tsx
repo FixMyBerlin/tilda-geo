@@ -1,14 +1,14 @@
+import { useNavigate } from '@tanstack/react-router'
+import { bbox } from '@turf/turf'
 import { useMap } from 'react-map-gl/maplibre'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useOsmNotesActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import {
-  useNewOsmNoteMapParam,
-  useShowOsmNotesParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import { serializeMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import type { MapDataOsmIdConfig } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { buttonStyles } from '@/components/shared/links/styles'
-import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import { pointFromGeometry } from './osmUrls/pointFromGeometry'
 
@@ -20,14 +20,14 @@ type Props = {
 
 export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props) => {
   const { mainMap } = useMap()
-  const { setShowOsmNotesParam } = useShowOsmNotesParam()
+  const navigate = useNavigate({ from: '/regionen/$regionSlug' })
   const { setOsmNewNoteFeature, setNewNoteTildaDeeplink } = useOsmNotesActions()
-  const { setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
+  const { clearInspectorFeatures } = useMapActions()
 
   const { osmType, osmId } = extractOsmTypeIdByConfig(properties, osmIdConfig)
 
   const region = useRegion()
-  if (region?.notes !== 'osmNotes') return null
+  if (!region?.notesOsm) return null
 
   if (!mainMap || !properties || !geometry || !osmType || !osmId) return null
 
@@ -35,15 +35,24 @@ export const ToolsLinkNewOsmNote = ({ properties, geometry, osmIdConfig }: Props
     <button
       type="button"
       className={buttonStyles}
-      onClick={(e) => {
-        captureModalOpenOrigin(e.currentTarget)
-        setShowOsmNotesParam(true)
+      onClick={() => {
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         setNewNoteTildaDeeplink(window.location.href)
-        // Note: The zoom will be specified by the `bounds` prop in <OsmNotesNewMap/>
-        // BUT it needs to be > 17 so that `roundByZoom` keeps precision of 5
+        clearInspectorFeatures()
+        // Zoom > 17 so roundByZoom keeps 5 decimal places if the create param is bookmarked.
         const [lng, lat] = pointFromGeometry(geometry)
-        setNewOsmNoteMapParam({ zoom: 18, lng, lat })
+        const bounds = bbox(geometry) as [number, number, number, number]
+        mainMap.fitBounds(bounds, { padding: 100, maxZoom: 17 })
+        void navigate({
+          to: '/regionen/$regionSlug/hinweise',
+          search: (prev) => {
+            const next = { ...prev }
+            next[searchParamsRegistry.osmNote] = serializeMapParam({ zoom: 18, lng, lat })
+            delete next[searchParamsRegistry.f]
+            return next
+          },
+          replace: true,
+        })
       }}
     >
       Hinweis zu diesem Kartenobjekt erstellen

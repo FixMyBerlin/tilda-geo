@@ -1,10 +1,9 @@
 import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
-import { Link } from '@tanstack/react-router'
 import { RegionMetaPills } from '@/components/regionen/regionMeta/RegionMetaPills'
 import { Img } from '@/components/shared/Img'
+import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
-import { defaultRegionSearch } from '@/shared/regionen/regionSearchSchemas'
 
 type Props = { region: TRegion }
 
@@ -13,11 +12,7 @@ export const RegionTeaser = ({ region }: Props) => {
   const contract = region.contract
 
   return (
-    <Link
-      to="/regionen/$regionSlug"
-      params={{ regionSlug: region.slug }}
-      search={defaultRegionSearch()}
-    >
+    <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }} classNameOverwrite="">
       <div
         key={region.slug}
         className="group relative border-r border-b border-gray-200 px-4 pt-4 hover:bg-yellow-50 sm:px-6 sm:pt-6"

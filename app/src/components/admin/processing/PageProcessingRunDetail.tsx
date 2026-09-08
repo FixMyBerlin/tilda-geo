@@ -149,6 +149,7 @@ export function PageProcessingRunDetail() {
           })}
         </AdminTable>
         <ProcessingOrphanedTopicsTable topics={orphanedTopics} />
+        <ObjectDump title={`Run #${run.id} — topics`} data={run.topics} />
       </section>
 
       <section className={twMerge(cardClassName, 'mt-8')}>
@@ -185,13 +186,6 @@ export function PageProcessingRunDetail() {
             )
           })}
         </AdminTable>
-      </section>
-
-      <section className={twMerge(cardClassName, 'mt-8')}>
-        <ObjectDump title={`Run #${run.id} — topics`} data={run.topics} />
-      </section>
-
-      <section className={twMerge(cardClassName, 'mt-8')}>
         <ObjectDump title={`Run #${run.id} — afterthoughts`} data={run.afterthoughts} />
       </section>
     </div>
