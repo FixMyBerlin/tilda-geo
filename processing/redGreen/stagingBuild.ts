@@ -20,9 +20,14 @@ export async function runStagingBuild(config: RedGreenConfig) {
 	const processingId = await createProcessingEntry();
 	const startedAt = Date.now();
 
-	await exportSidepathData(true);
-	await processTopics(recutFileName, true);
+	const ranTopics = await processTopics(
+		recutFileName,
+		true,
+		processingId,
+		recutFileName,
+	);
 	await generateTypes();
+	await exportSidepathData(true, ranTopics);
 
 	await updateProcessingEntry(
 		processingId,
