@@ -57,6 +57,7 @@ import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/adm
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
 import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
+import { Route as ApiPrivateWarmCacheDeltaRouteImport } from './routes/api/private/warm-cache-delta'
 import { Route as ApiPrivateWarmCacheRouteImport } from './routes/api/private/warm-cache'
 import { Route as ApiPrivateRegisterSqlFunctionsRouteImport } from './routes/api/private/register-sql-functions'
 import { Route as ApiPrivateRegionsRouteImport } from './routes/api/private/regions'
@@ -344,6 +345,12 @@ const ApiSignInOsmRoute = ApiSignInOsmRouteImport.update({
   path: '/api/sign-in/osm',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPrivateWarmCacheDeltaRoute =
+  ApiPrivateWarmCacheDeltaRouteImport.update({
+    id: '/api/private/warm-cache-delta',
+    path: '/api/private/warm-cache-delta',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPrivateWarmCacheRoute = ApiPrivateWarmCacheRouteImport.update({
   id: '/api/private/warm-cache',
   path: '/api/private/warm-cache',
@@ -641,6 +648,7 @@ export interface FileRoutesByFullPath {
   '/api/private/regions': typeof ApiPrivateRegionsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
+  '/api/private/warm-cache-delta': typeof ApiPrivateWarmCacheDeltaRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
@@ -723,6 +731,7 @@ export interface FileRoutesByTo {
   '/api/private/regions': typeof ApiPrivateRegionsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
+  '/api/private/warm-cache-delta': typeof ApiPrivateWarmCacheDeltaRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
@@ -816,6 +825,7 @@ export interface FileRoutesById {
   '/api/private/regions': typeof ApiPrivateRegionsRoute
   '/api/private/register-sql-functions': typeof ApiPrivateRegisterSqlFunctionsRoute
   '/api/private/warm-cache': typeof ApiPrivateWarmCacheRoute
+  '/api/private/warm-cache-delta': typeof ApiPrivateWarmCacheDeltaRoute
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
@@ -909,6 +919,7 @@ export interface FileRouteTypes {
     | '/api/private/regions'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
+    | '/api/private/warm-cache-delta'
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
@@ -991,6 +1002,7 @@ export interface FileRouteTypes {
     | '/api/private/regions'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
+    | '/api/private/warm-cache-delta'
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
@@ -1083,6 +1095,7 @@ export interface FileRouteTypes {
     | '/api/private/regions'
     | '/api/private/register-sql-functions'
     | '/api/private/warm-cache'
+    | '/api/private/warm-cache-delta'
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
@@ -1141,6 +1154,7 @@ export interface RootRouteChildren {
   ApiPrivateRegionsRoute: typeof ApiPrivateRegionsRoute
   ApiPrivateRegisterSqlFunctionsRoute: typeof ApiPrivateRegisterSqlFunctionsRoute
   ApiPrivateWarmCacheRoute: typeof ApiPrivateWarmCacheRoute
+  ApiPrivateWarmCacheDeltaRoute: typeof ApiPrivateWarmCacheDeltaRoute
   ApiSignInOsmRoute: typeof ApiSignInOsmRoute
   ApiAdminDataSchemaImportRoute: typeof ApiAdminDataSchemaImportRoute
   ApiExportOgrRegionSlugTableNameRoute: typeof ApiExportOgrRegionSlugTableNameRoute
@@ -1490,6 +1504,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sign-in/osm'
       fullPath: '/api/sign-in/osm'
       preLoaderRoute: typeof ApiSignInOsmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/warm-cache-delta': {
+      id: '/api/private/warm-cache-delta'
+      path: '/api/private/warm-cache-delta'
+      fullPath: '/api/private/warm-cache-delta'
+      preLoaderRoute: typeof ApiPrivateWarmCacheDeltaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/private/warm-cache': {
@@ -2089,6 +2110,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPrivateRegionsRoute: ApiPrivateRegionsRoute,
   ApiPrivateRegisterSqlFunctionsRoute: ApiPrivateRegisterSqlFunctionsRoute,
   ApiPrivateWarmCacheRoute: ApiPrivateWarmCacheRoute,
+  ApiPrivateWarmCacheDeltaRoute: ApiPrivateWarmCacheDeltaRoute,
   ApiSignInOsmRoute: ApiSignInOsmRoute,
   ApiAdminDataSchemaImportRoute: ApiAdminDataSchemaImportRoute,
   ApiExportOgrRegionSlugTableNameRoute: ApiExportOgrRegionSlugTableNameRoute,

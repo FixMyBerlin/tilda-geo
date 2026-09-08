@@ -36,7 +36,7 @@ bun run red-green
 ## Notes
 
 - Verification is mandatory. The run fails if `RED_GREEN_VERIFY_ENDPOINTS` is missing.
-- Staging build applies `dbEnv(staging)` to `process.env` for the build only (`withProcessEnv`), then dynamically imports processing steps so `params` and `sql`/`psql` target the staging DB. It does not run `index.ts` finishing steps (hooks, tile restart, cache).
+- Staging build applies `dbEnv(staging)` to `process.env` for the build only (`withProcessEnv`), then dynamically imports processing steps so `sql`/`psql` (which read `PG*` at connect time) target the staging DB. It runs `processTopics` plus `runAfterthoughts`. It does not run `index.ts` finishing steps (hooks, tile restart, cache). `meta`, `todos_lines_campaign_stats`, and `spatial_ref_sys` are never promoted.
 - Post-promotion side effects (tile restart, hooks, cache clear/warm) are triggered explicitly by `orchestrate.ts` against primary. They retry transient failures and warn (do not roll back) on persistent ones — only the verifier failure-streak budget rolls back a promotion.
 - Promotion swaps geo tables in primary while preserving previous tables in `geo_prev` for rollback.
 

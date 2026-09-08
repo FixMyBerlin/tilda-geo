@@ -8,6 +8,7 @@ import type {
 import { isProd } from '@/components/shared/utils/isEnv'
 import { GuardEndpointSchema, guardEndpoint } from '@/server/api/private/guardEndpoint'
 import { warmCache } from '@/server/api/private/warmCache'
+import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 
 const Schema = GuardEndpointSchema.extend({
   bbox: z
@@ -30,10 +31,14 @@ const Schema = GuardEndpointSchema.extend({
 })
 
 export const Route = createFileRoute('/api/private/warm-cache-delta')({
-  ssr: true,
+  ssr: false,
   server: {
     handlers: {
       GET: async ({ request }) => {
+        // Full warming can take minutes with zero response bytes until complete.
+        // Bun's default ~10s idleTimeout otherwise closes the connection (empty reply).
+        extendBunRequestIdleTimeout(request, 0)
+
         const { access, response } = guardEndpoint(request, GuardEndpointSchema)
         if (access === false) return response
 
@@ -50,7 +55,7 @@ export const Route = createFileRoute('/api/private/warm-cache-delta')({
             return Response.json({ message: 'minZoom must be <= maxZoom' }, { status: 400 })
           }
 
-          const [minLon, minLat, maxLon, maxLat] = parsed.bbox as [number, number, number, number]
+          const bbox = parsed.bbox as [number, number, number, number]
           const whiteCircle = styleText(['bold', 'white'], ' ○')
           console.log(
             whiteCircle,
@@ -58,7 +63,7 @@ export const Route = createFileRoute('/api/private/warm-cache-delta')({
           )
 
           await warmCache(
-            { min: [minLon, minLat], max: [maxLon, maxLat] },
+            bbox,
             parsed.minZoom,
             parsed.maxZoom,
             parsed.tables as Array<UnionTiles<TableId>>,
