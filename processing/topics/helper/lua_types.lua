@@ -19,20 +19,24 @@
 ---@field type 'way'|'node'|'relation'
 ---@field tags OsmTags
 ---@field geom OsmGeometry|nil
----@field is_closed boolean|nil
----@field timestamp string|nil
----@field user string|nil
----@field changeset number|nil
+---@field is_closed boolean|nil Ways only
+---@field nodes number[]|nil Ways only
+---@field members table[]|nil Relations only
 ---@field version number|nil
+---@field timestamp number|nil Unix seconds since epoch; nil when the OSM file has no extra attributes
+---@field changeset number|nil
+---@field uid number|nil
+---@field user string|nil
 ---@field as_linestring fun(self: OsmObject): OsmGeometry
 ---@field as_multipolygon fun(self: OsmObject): OsmGeometry
 ---@field as_point fun(self: OsmObject): OsmGeometry
+---@field grab_tag fun(self: OsmObject, key: string): OsmTagValue
 
 ---@class Osm2pgsqlTable
 ---@field insert fun(self: Osm2pgsqlTable, row: table)
 
 ---@class ObjectMeta
----@field updated_at string|nil
+---@field updated_at number|nil Unix seconds copied from OsmObject.timestamp
 ---@field updated_by string|nil
 ---@field changeset_id number|nil
 
