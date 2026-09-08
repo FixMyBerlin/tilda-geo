@@ -13,7 +13,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
   {
     id: 'tilda_parkings',
     // NOTE: We have the lines, the labels and the areas (as "shadow" data) in one response
-    tileTables: ['parkings', 'parkings_labels', 'parkings_separate'],
+    tileTables: ['parkings', 'parkings_edges', 'parkings_labels', 'parkings_separate'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     // We need to apply a higher maxzoom here so the data from parkings_separate gets loaded that is only visible starting at 17
     // We could add the "separate" from 14 (our default) and only hide it visually.

@@ -3631,6 +3631,104 @@ const data = {
         ],
       },
       {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
         key: 'access',
         type: 'string',
         label: 'Zugang',
@@ -4080,6 +4178,12 @@ const data = {
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
       },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+      },
     ],
   },
   off_street_parking_quantized: {
@@ -4188,6 +4292,104 @@ const data = {
         type: 'string',
         label: 'Parkbeschränkung',
         chapterRefs: ['condition-category'],
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -4629,6 +4831,12 @@ const data = {
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
       },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+      },
     ],
   },
   parkings: {
@@ -4817,6 +5025,104 @@ const data = {
         type: 'string',
         label: 'Parkbeschränkung',
         chapterRefs: ['condition-category'],
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -5726,6 +6032,12 @@ const data = {
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
       },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+      },
     ],
   },
   parkings_cutouts: {
@@ -6336,6 +6648,951 @@ const data = {
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+      },
+    ],
+  },
+  parkings_edges: {
+    topic: 'parking',
+    tableName: 'parkings_edges',
+    sourceIds: ['tilda_parkings'],
+    title: 'Straßenparken Kanten',
+    summary:
+      'Zusammengefasste Straßenkanten zwischen Knotenpunkten mit Stellplatzsumme je Straßenseite. Die Objekt-ID ist das OSM-Knotenpaar (Start-Ende), bei parallelen Kanten mit Suffix. `capacity_*` ist die öffentliche Summe (Zählung/Export). `capacity_private_*` ist die private Summe, wenn vorhanden. Pro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich); Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe.',
+    groups: [
+      {
+        id: 'parking',
+        label: 'Parkraum-Prozessierung',
+      },
+    ],
+    attributes: [
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Straßenname',
+        description: 'Name der Straße, übernommen vom längsten OSM-Way der Kante.',
+        values: [],
+      },
+      {
+        key: 'highway',
+        type: 'string',
+        label: 'OSM-Straßentyp',
+        description: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
+        values: [
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'road',
+            label: 'Unkategorisierte Straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'trunk',
+            label: 'Kraftfahrstraße',
+          },
+          {
+            value: 'trunk_link',
+            label: 'Kraftfahrstraßen-Anschluss',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+        ],
+      },
+      {
+        key: 'road',
+        type: 'string',
+        label: 'Straßentyp',
+        description: 'Art der Straße, an dem der Parkraum liegt.',
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radverkehr)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fußverkehr)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'service',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'steps',
+            label: 'Stufen',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'capacity_left',
+        type: 'number',
+        label: 'Öffentliche Stellplätze links',
+        description:
+          'Summe der öffentlichen Stellplätze (`operator_type=public`) auf der linken Seite (relativ zur Kantenrichtung). Enthält Straßenparken und separat erfasste Flächen (z. B. `street_side`) nach dem Schnappen an die Bordsteinkante. Das Feld fehlt, wenn auf dieser Seite keine öffentlichen Stellplätze liegen.',
+        chapterRefs: ['capacity-calculation', 'kanten'],
+        values: [],
+      },
+      {
+        key: 'capacity_right',
+        type: 'number',
+        label: 'Öffentliche Stellplätze rechts',
+        description:
+          'Summe der öffentlichen Stellplätze (`operator_type=public`) auf der rechten Seite (relativ zur Kantenrichtung). Enthält Straßenparken und separat erfasste Flächen (z. B. `street_side`) nach dem Schnappen an die Bordsteinkante. Das Feld fehlt, wenn auf dieser Seite keine öffentlichen Stellplätze liegen.',
+        chapterRefs: ['capacity-calculation', 'kanten'],
+        values: [],
+      },
+      {
+        key: 'capacity_private_left',
+        type: 'number',
+        label: 'Private Stellplätze links',
+        description:
+          'Summe der privaten Stellplätze auf der linken Seite der Kante. Fehlt, wenn keine privaten Stellplätze vorhanden sind.',
+        chapterRefs: ['kanten'],
+        values: [],
+      },
+      {
+        key: 'capacity_private_right',
+        type: 'number',
+        label: 'Private Stellplätze rechts',
+        description:
+          'Summe der privaten Stellplätze auf der rechten Seite der Kante. Fehlt, wenn keine privaten Stellplätze vorhanden sind.',
+        chapterRefs: ['kanten'],
+        values: [],
+      },
+      {
+        key: 'operator_type_left',
+        type: 'string',
+        label: 'Operator links',
+        description:
+          'Öffentlich oder privat. Die Gruppe mit mehr Stellplätzen auf der linken Straßenseite. Bei gleicher Summe gewinnt öffentlich. Bestimmt, welche Unterkategorie die Hilfslinie und die Zahl zeigt.',
+        chapterRefs: ['kanten'],
+        values: [
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+        ],
+      },
+      {
+        key: 'operator_type_right',
+        type: 'string',
+        label: 'Operator rechts',
+        description:
+          'Öffentlich oder privat. Die Gruppe mit mehr Stellplätzen auf der rechten Straßenseite. Bei gleicher Summe gewinnt öffentlich. Bestimmt, welche Unterkategorie die Hilfslinie und die Zahl zeigt.',
+        chapterRefs: ['kanten'],
+        values: [
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+        ],
+      },
+      {
+        key: 'condition_category_left',
+        type: 'string',
+        label: 'Parkbeschränkung links',
+        purpose: 'rendering',
+        description:
+          'Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
+        key: 'condition_category_right',
+        type: 'string',
+        label: 'Parkbeschränkung rechts',
+        purpose: 'rendering',
+        description:
+          'Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
+        key: 'parking_left',
+        type: 'string',
+        label: 'Parkposition links',
+        description:
+          'Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.',
+        values: [
+          {
+            value: 'lane',
+            label: 'Auf der Fahrbahn',
+          },
+          {
+            value: 'half_on_kerb',
+            label: 'Halb auf dem Gehweg',
+          },
+          {
+            value: 'on_kerb',
+            label: 'Ganz auf dem Gehweg',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'separate',
+            label: 'Parkraum als separate Geometrie erfasst',
+          },
+          {
+            value: 'shoulder',
+            label: 'Auf dem Seitenstreifen',
+          },
+          {
+            value: 'street_side',
+            label: 'Parkbucht',
+          },
+          {
+            value: 'yes',
+            label: 'Nicht näher bestimmtes Straßenparken',
+          },
+          {
+            value: 'no',
+            label: 'Kein Parken (Sonstiger/Unbekannter Grund)',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'missing',
+            label: 'Daten in OSM fehlen',
+          },
+          {
+            value: 'not_expected',
+            label: 'Kein Parken zu erwarten',
+          },
+        ],
+      },
+      {
+        key: 'parking_right',
+        type: 'string',
+        label: 'Parkposition rechts',
+        description:
+          'Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der rechten Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.',
+        values: [
+          {
+            value: 'lane',
+            label: 'Auf der Fahrbahn',
+          },
+          {
+            value: 'half_on_kerb',
+            label: 'Halb auf dem Gehweg',
+          },
+          {
+            value: 'on_kerb',
+            label: 'Ganz auf dem Gehweg',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'separate',
+            label: 'Parkraum als separate Geometrie erfasst',
+          },
+          {
+            value: 'shoulder',
+            label: 'Auf dem Seitenstreifen',
+          },
+          {
+            value: 'street_side',
+            label: 'Parkbucht',
+          },
+          {
+            value: 'yes',
+            label: 'Nicht näher bestimmtes Straßenparken',
+          },
+          {
+            value: 'no',
+            label: 'Kein Parken (Sonstiger/Unbekannter Grund)',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'missing',
+            label: 'Daten in OSM fehlen',
+          },
+          {
+            value: 'not_expected',
+            label: 'Kein Parken zu erwarten',
+          },
+        ],
+      },
+      {
+        key: 'surface_left',
+        type: 'string',
+        label: 'Oberfläche links',
+        purpose: 'rendering',
+        description:
+          'Dominanter `surface`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung im Stil „Oberfläche“.',
+        values: [
+          {
+            value: 'asphalt',
+            label: 'Asphalt',
+          },
+          {
+            value: 'paved',
+            label: 'Befestigt (unspezifisch)',
+          },
+          {
+            value: 'unpaved',
+            label: 'Unbefestigt',
+          },
+          {
+            value: 'concrete',
+            label: 'Beton',
+          },
+          {
+            value: 'concrete:plates',
+            label: 'Betonplatten',
+          },
+          {
+            value: 'concrete:lanes',
+            label: 'Betonstreifen / -bahnen',
+          },
+          {
+            value: 'paving_stones',
+            label: 'Verbund&shy;pflastersteine',
+          },
+          {
+            value: 'paving_stones:lanes',
+            label: 'Pflasterstein&shy;bahnen',
+          },
+          {
+            value: 'sett',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
+          },
+          {
+            value: 'mosaic_sett',
+            label: 'Mosaikpflaster',
+          },
+          {
+            value: 'small_sett',
+            label: 'Kleinpflaster',
+          },
+          {
+            value: 'large_sett',
+            label: 'Großpflaster',
+          },
+          {
+            value: 'bricks',
+            label: 'Ziegel',
+          },
+          {
+            value: 'stone',
+            label: 'Stein',
+          },
+          {
+            value: 'ground',
+            label: 'Erde/Boden',
+          },
+          {
+            value: 'grass',
+            label: 'Gras',
+          },
+          {
+            value: 'sand',
+            label: 'Sand',
+          },
+          {
+            value: 'compacted',
+            label: 'Verdichteter Untergrund',
+          },
+          {
+            value: 'fine_gravel',
+            label: 'Splitt',
+          },
+          {
+            value: 'gravel',
+            label: 'Schotter',
+          },
+          {
+            value: 'pebblestone',
+            label: 'Kieselsteine',
+          },
+          {
+            value: 'wood',
+            label: 'Holz',
+          },
+          {
+            value: 'woodchips',
+            label: 'Hackschnitzel',
+          },
+          {
+            value: 'metal',
+            label: 'Metall',
+          },
+          {
+            value: 'metal_grid',
+            label: 'Metallgitter',
+          },
+          {
+            value: 'plastic',
+            label: 'Kunststoff',
+          },
+          {
+            value: 'rubber',
+            label: 'Gummi',
+          },
+          {
+            value: 'grass_paver',
+            label: 'Rasengitter / Grasgitter',
+          },
+        ],
+      },
+      {
+        key: 'surface_right',
+        type: 'string',
+        label: 'Oberfläche rechts',
+        purpose: 'rendering',
+        description:
+          'Dominanter `surface`-Wert der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung im Stil „Oberfläche“.',
+        values: [
+          {
+            value: 'asphalt',
+            label: 'Asphalt',
+          },
+          {
+            value: 'paved',
+            label: 'Befestigt (unspezifisch)',
+          },
+          {
+            value: 'unpaved',
+            label: 'Unbefestigt',
+          },
+          {
+            value: 'concrete',
+            label: 'Beton',
+          },
+          {
+            value: 'concrete:plates',
+            label: 'Betonplatten',
+          },
+          {
+            value: 'concrete:lanes',
+            label: 'Betonstreifen / -bahnen',
+          },
+          {
+            value: 'paving_stones',
+            label: 'Verbund&shy;pflastersteine',
+          },
+          {
+            value: 'paving_stones:lanes',
+            label: 'Pflasterstein&shy;bahnen',
+          },
+          {
+            value: 'sett',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
+          },
+          {
+            value: 'mosaic_sett',
+            label: 'Mosaikpflaster',
+          },
+          {
+            value: 'small_sett',
+            label: 'Kleinpflaster',
+          },
+          {
+            value: 'large_sett',
+            label: 'Großpflaster',
+          },
+          {
+            value: 'bricks',
+            label: 'Ziegel',
+          },
+          {
+            value: 'stone',
+            label: 'Stein',
+          },
+          {
+            value: 'ground',
+            label: 'Erde/Boden',
+          },
+          {
+            value: 'grass',
+            label: 'Gras',
+          },
+          {
+            value: 'sand',
+            label: 'Sand',
+          },
+          {
+            value: 'compacted',
+            label: 'Verdichteter Untergrund',
+          },
+          {
+            value: 'fine_gravel',
+            label: 'Splitt',
+          },
+          {
+            value: 'gravel',
+            label: 'Schotter',
+          },
+          {
+            value: 'pebblestone',
+            label: 'Kieselsteine',
+          },
+          {
+            value: 'wood',
+            label: 'Holz',
+          },
+          {
+            value: 'woodchips',
+            label: 'Hackschnitzel',
+          },
+          {
+            value: 'metal',
+            label: 'Metall',
+          },
+          {
+            value: 'metal_grid',
+            label: 'Metallgitter',
+          },
+          {
+            value: 'plastic',
+            label: 'Kunststoff',
+          },
+          {
+            value: 'rubber',
+            label: 'Gummi',
+          },
+          {
+            value: 'grass_paver',
+            label: 'Rasengitter / Grasgitter',
+          },
+        ],
+      },
+      {
+        key: 'way_ids',
+        type: 'sanitized_strings',
+        label: 'OSM-Way-IDs',
+        purpose: 'processing',
+        description:
+          'JSON-Array der OSM-Way-IDs, aus denen diese Kante zusammengesetzt ist. Nicht Teil der Kanten-ID.',
+        values: [],
+      },
+      {
+        key: 'way_reversed',
+        type: 'sanitized_strings',
+        label: 'Way-Richtung',
+        purpose: 'processing',
+        description:
+          'JSON-Array analog zu `way_ids`. Pro Way, ob die OSM-Digitization der Kantenrichtung entgegengesetzt ist.',
+        values: [],
+      },
+      {
+        key: 'start_node',
+        type: 'number',
+        label: 'Startknoten',
+        description: 'OSM-Node-ID am Anfang der Kante. Zusammen mit `end_node` die Objekt-ID.',
+        chapterRefs: ['kanten'],
+        values: [],
+      },
+      {
+        key: 'end_node',
+        type: 'number',
+        label: 'Endknoten',
+        description: 'OSM-Node-ID am Ende der Kante. Zusammen mit `start_node` die Objekt-ID.',
+        chapterRefs: ['kanten'],
+        values: [],
+      },
+    ],
+    chapters: [
+      {
+        id: 'capacity-calculation',
+        title: 'Berechnung der Kapazität',
+        markdown:
+          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+      },
+      {
+        id: 'condition-category',
+        title: 'Parkbeschränkung',
+        markdown:
+          'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
       },
     ],
   },
@@ -7411,6 +8668,12 @@ const data = {
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
       },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+      },
     ],
   },
   parkings_quantized: {
@@ -8288,6 +9551,12 @@ const data = {
         title: 'Parkbeschränkung',
         markdown:
           'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
       },
     ],
   },

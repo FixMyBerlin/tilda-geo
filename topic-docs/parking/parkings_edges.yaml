@@ -1,0 +1,104 @@
+title: Straßenparken Kanten
+summary: Zusammengefasste Straßenkanten zwischen Knotenpunkten mit Stellplatzsumme je Straßenseite. Die Objekt-ID ist das OSM-Knotenpaar (Start-Ende), bei parallelen Kanten mit Suffix. `capacity_*` ist die öffentliche Summe (Zählung/Export). `capacity_private_*` ist die private Summe, wenn vorhanden. Pro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich); Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe.
+sourceIds:
+  - tilda_parkings
+attributes:
+  - key: name
+    format: sanitized_strings
+    label: Straßenname
+    description: Name der Straße, übernommen vom längsten OSM-Way der Kante.
+  - key: highway
+    ref: roads.highway
+    valuesAdd:
+      - value: construction
+        label: Straße ist in Bau
+  - key: road
+    ref: parkings.road
+  - key: capacity_left
+    format: number
+    label: Öffentliche Stellplätze links
+    description: Summe der öffentlichen Stellplätze (`operator_type=public`) auf der linken Seite (relativ zur Kantenrichtung). Enthält Straßenparken und separat erfasste Flächen (z. B. `street_side`) nach dem Schnappen an die Bordsteinkante. Das Feld fehlt, wenn auf dieser Seite keine öffentlichen Stellplätze liegen.
+    chapterRefs:
+      - chapterId: capacity-calculation
+      - chapterId: kanten
+  - key: capacity_right
+    format: number
+    label: Öffentliche Stellplätze rechts
+    description: Summe der öffentlichen Stellplätze (`operator_type=public`) auf der rechten Seite (relativ zur Kantenrichtung). Enthält Straßenparken und separat erfasste Flächen (z. B. `street_side`) nach dem Schnappen an die Bordsteinkante. Das Feld fehlt, wenn auf dieser Seite keine öffentlichen Stellplätze liegen.
+    chapterRefs:
+      - chapterId: capacity-calculation
+      - chapterId: kanten
+  - key: capacity_private_left
+    format: number
+    label: Private Stellplätze links
+    description: Summe der privaten Stellplätze auf der linken Seite der Kante. Fehlt, wenn keine privaten Stellplätze vorhanden sind.
+    chapterRefs:
+      - chapterId: kanten
+  - key: capacity_private_right
+    format: number
+    label: Private Stellplätze rechts
+    description: Summe der privaten Stellplätze auf der rechten Seite der Kante. Fehlt, wenn keine privaten Stellplätze vorhanden sind.
+    chapterRefs:
+      - chapterId: kanten
+  - key: operator_type_left
+    label: Operator links
+    description: Öffentlich oder privat. Die Gruppe mit mehr Stellplätzen auf der linken Straßenseite. Bei gleicher Summe gewinnt öffentlich. Bestimmt, welche Unterkategorie die Hilfslinie und die Zahl zeigt.
+    valuesRef: parkings.operator_type
+    chapterRefs:
+      - chapterId: kanten
+  - key: operator_type_right
+    label: Operator rechts
+    description: Öffentlich oder privat. Die Gruppe mit mehr Stellplätzen auf der rechten Straßenseite. Bei gleicher Summe gewinnt öffentlich. Bestimmt, welche Unterkategorie die Hilfslinie und die Zahl zeigt.
+    valuesRef: parkings.operator_type
+    chapterRefs:
+      - chapterId: kanten
+  - key: condition_category_left
+    purpose: rendering
+    label: Parkbeschränkung links
+    description: Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung.
+    valuesRef: parkings.condition_category
+  - key: condition_category_right
+    purpose: rendering
+    label: Parkbeschränkung rechts
+    description: Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung.
+    valuesRef: parkings.condition_category
+  - key: parking_left
+    label: Parkposition links
+    description: Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.
+    valuesRef: parkings.parking
+  - key: parking_right
+    label: Parkposition rechts
+    description: Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der rechten Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.
+    valuesRef: parkings.parking
+  - key: surface_left
+    purpose: rendering
+    label: Oberfläche links
+    description: Dominanter `surface`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung im Stil „Oberfläche“.
+    ref: parkings.surface
+  - key: surface_right
+    purpose: rendering
+    label: Oberfläche rechts
+    description: Dominanter `surface`-Wert der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung im Stil „Oberfläche“.
+    ref: parkings.surface
+  - key: way_ids
+    purpose: processing
+    format: sanitized_strings
+    label: OSM-Way-IDs
+    description: JSON-Array der OSM-Way-IDs, aus denen diese Kante zusammengesetzt ist. Nicht Teil der Kanten-ID.
+  - key: way_reversed
+    purpose: processing
+    format: sanitized_strings
+    label: Way-Richtung
+    description: JSON-Array analog zu `way_ids`. Pro Way, ob die OSM-Digitization der Kantenrichtung entgegengesetzt ist.
+  - key: start_node
+    format: number
+    label: Startknoten
+    description: OSM-Node-ID am Anfang der Kante. Zusammen mit `end_node` die Objekt-ID.
+    chapterRefs:
+      - chapterId: kanten
+  - key: end_node
+    format: number
+    label: Endknoten
+    description: OSM-Node-ID am Ende der Kante. Zusammen mit `start_node` die Objekt-ID.
+    chapterRefs:
+      - chapterId: kanten

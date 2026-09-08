@@ -1,6 +1,7 @@
 -- WHAT IT DOES:
 -- Finalize parking data: transform to 3857, create final tables, indexes.
 -- * Insert `parkings` table (excl `parkings_no`), reverse left side kerbs
+-- * On-street parking lines (`parkings`) are tiled from z14; zoomed-out view uses `parkings_edges`
 -- * Insert `parkings_cutouts` table (excl roads, separate_parking)
 -- * Insert `parkings_separate` table (minzoom 17)
 -- * Create indexes for all tables
@@ -16,17 +17,15 @@ SELECT
   id,
   jsonb_strip_nulls(
     tags || jsonb_build_object(
-      'area',
-      ROUND(NULLIF(tags ->> 'area', '')::NUMERIC, 2),
-      'length',
-      ROUND(length::NUMERIC, 2),
-      'capacity',
-      tilda_round_capacity ((tags ->> 'capacity')::NUMERIC)
+      'area', ROUND(NULLIF(tags ->> 'area', '')::NUMERIC, 2),
+      'length', ROUND(length::NUMERIC, 2),
+      'capacity', tilda_round_capacity ((tags ->> 'capacity')::NUMERIC),
+      'condition_category_primary', tilda_condition_category_primary (tags ->> 'condition_category')
     )
   ),
   '{}'::jsonb,
   ST_Transform (geom, 3857),
-  0
+  14 -- on-street parking lines are tiled from z14; zoomed-out view uses parkings_edges
 FROM
   _parking_parkings_merged pm
 WHERE

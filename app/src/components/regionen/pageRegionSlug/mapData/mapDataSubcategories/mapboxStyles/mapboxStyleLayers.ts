@@ -10,6 +10,8 @@ export type MapboxStyleLayersProps = {
   sourceLayer: string
   idPrefix?: string
   interactive?: false
+  minzoom?: number
+  maxzoom?: number
   additionalFilter?:
     | ['match', ['get', string], string[], boolean, boolean]
     | ['has', string]
@@ -23,6 +25,8 @@ export const mapboxStyleLayers = ({
   sourceLayer,
   idPrefix,
   interactive,
+  minzoom,
+  maxzoom,
   additionalFilter,
 }: MapboxStyleLayersProps) => {
   return layers.map((layer) => {
@@ -32,10 +36,12 @@ export const mapboxStyleLayers = ({
       source,
       'source-layer': sourceLayer,
       id: [idPrefix, layer.id].filter(Boolean).join('--'),
-      interactive,
+      ...(interactive !== undefined ? { interactive } : {}),
       filter: additionalFilter
         ? wrapFilterWithAll(flattenFilterArrays(layerFilter, additionalFilter))
         : layer.filter,
+      ...(minzoom !== undefined ? { minzoom } : {}),
+      ...(maxzoom !== undefined ? { maxzoom } : {}),
     }
   }) as FileMapDataSubcategoryStyleLayer[]
 }

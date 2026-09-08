@@ -58,6 +58,9 @@ attributes:
   - key: condition_category
     ref: parkings.condition_category
 
+  - key: condition_category_primary
+    ref: parkings.condition_category_primary
+
   - key: access
     ref: parkings.access
 

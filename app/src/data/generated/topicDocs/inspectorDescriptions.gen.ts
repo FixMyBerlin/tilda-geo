@@ -138,10 +138,45 @@ const data = {
   },
   tilda_parkings: {
     keys: {
+      name: 'Name der Straße, übernommen vom längsten OSM-Way der Kante.',
+      highway: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
+      road: 'Art der Straße, an dem der Parkraum liegt.',
+      capacity_left:
+        'Summe der öffentlichen Stellplätze (`operator_type=public`) auf der linken Seite (relativ zur Kantenrichtung). Enthält Straßenparken und separat erfasste Flächen (z. B. `street_side`) nach dem Schnappen an die Bordsteinkante. Das Feld fehlt, wenn auf dieser Seite keine öffentlichen Stellplätze liegen.',
+      capacity_right:
+        'Summe der öffentlichen Stellplätze (`operator_type=public`) auf der rechten Seite (relativ zur Kantenrichtung). Enthält Straßenparken und separat erfasste Flächen (z. B. `street_side`) nach dem Schnappen an die Bordsteinkante. Das Feld fehlt, wenn auf dieser Seite keine öffentlichen Stellplätze liegen.',
+      capacity_private_left:
+        'Summe der privaten Stellplätze auf der linken Seite der Kante. Fehlt, wenn keine privaten Stellplätze vorhanden sind.',
+      capacity_private_right:
+        'Summe der privaten Stellplätze auf der rechten Seite der Kante. Fehlt, wenn keine privaten Stellplätze vorhanden sind.',
+      operator_type_left:
+        'Öffentlich oder privat. Die Gruppe mit mehr Stellplätzen auf der linken Straßenseite. Bei gleicher Summe gewinnt öffentlich. Bestimmt, welche Unterkategorie die Hilfslinie und die Zahl zeigt.',
+      operator_type_right:
+        'Öffentlich oder privat. Die Gruppe mit mehr Stellplätzen auf der rechten Straßenseite. Bei gleicher Summe gewinnt öffentlich. Bestimmt, welche Unterkategorie die Hilfslinie und die Zahl zeigt.',
+      condition_category_left:
+        'Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung.',
+      condition_category_right:
+        'Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung.',
+      parking_left:
+        'Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.',
+      parking_right:
+        'Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der rechten Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.',
+      surface_left:
+        'Dominanter `surface`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung im Stil „Oberfläche“.',
+      surface_right:
+        'Dominanter `surface`-Wert der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung im Stil „Oberfläche“.',
+      way_ids:
+        'JSON-Array der OSM-Way-IDs, aus denen diese Kante zusammengesetzt ist. Nicht Teil der Kanten-ID.',
+      way_reversed:
+        'JSON-Array analog zu `way_ids`. Pro Way, ob die OSM-Digitization der Kantenrichtung entgegengesetzt ist.',
+      start_node: 'OSM-Node-ID am Anfang der Kante. Zusammen mit `end_node` die Objekt-ID.',
+      end_node: 'OSM-Node-ID am Ende der Kante. Zusammen mit `start_node` die Objekt-ID.',
       parking: 'Lage oder Art des Parkraums im Straßenland.',
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+      condition_category_primary:
+        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
       staggered:
         'Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.',
       length:
@@ -151,7 +186,6 @@ const data = {
         'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
       tag_sources:
         'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
-      road: 'Art der Straße, an dem der Parkraum liegt.',
       road_name: 'Name der Straße, an dem der Parkraum liegt.',
       road_oneway: 'Verkehrsrichtung der Straße, an dem der Parkraum liegt.',
       road_width: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
@@ -230,6 +264,8 @@ const data = {
       parking: 'Typ der Parkmöglichkeit.',
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
+      condition_category_primary:
+        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
       area: 'Fläche in Quadratmetern.',
       surface: 'Oberflächenbelag des Parkraumabschnitts.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
@@ -245,6 +281,8 @@ const data = {
       category: 'Kategorie der Parkmöglichkeit.',
       parking: 'Typ der Parkmöglichkeit.',
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
+      condition_category_primary:
+        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
       area: 'Fläche in Quadratmetern.',
       surface: 'Oberflächenbelag des Parkraumabschnitts.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',

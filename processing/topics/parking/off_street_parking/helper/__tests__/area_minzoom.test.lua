@@ -1,0 +1,15 @@
+describe('off_street_parking area minzoom', function()
+  local area_minzoom = require('topics.parking.off_street_parking.helper.area_minzoom')
+
+  it('uses z14 for missing or tiny areas (street-parking detail)', function()
+    assert.are.same(area_minzoom(nil), 14)
+    assert.are.same(area_minzoom(199), 14)
+  end)
+
+  it('steps down for larger lots', function()
+    assert.are.same(area_minzoom(200), 13)
+    assert.are.same(area_minzoom(600), 12)
+    assert.are.same(area_minzoom(2500), 11)
+    assert.are.same(area_minzoom(10000), 10)
+  end)
+end)

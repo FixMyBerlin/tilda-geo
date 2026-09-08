@@ -137,6 +137,11 @@ attributes:
         label: Unbestimmt
       - value: vehicle_restriction
         label: Beschränkung auf Fahrzeugklassen
+  - key: condition_category_primary
+    purpose: rendering
+    label: Primäre Parkbeschränkung
+    description: Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.
+    valuesRef: parkings.condition_category
   - key: staggered
     label: Parkweise
     description: Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.

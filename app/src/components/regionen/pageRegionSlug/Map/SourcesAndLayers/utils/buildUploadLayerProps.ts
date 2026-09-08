@@ -35,6 +35,8 @@ export function buildUploadLayerProps({
     filter,
     ...(beforeId !== undefined && { beforeId }),
     ...(sourceLayer !== undefined && { 'source-layer': sourceLayer }),
+    ...(typeof layer.minzoom === 'number' && { minzoom: layer.minzoom }),
+    ...(typeof layer.maxzoom === 'number' && { maxzoom: layer.maxzoom }),
   }
   const debugStyle = debugLayerStyles ? getDebugStyleForLayerType(layer.type) : undefined
   const layout = debugStyle ? { ...debugStyle.layout } : { ...layer.layout }

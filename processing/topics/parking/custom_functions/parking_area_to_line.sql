@@ -117,15 +117,22 @@ BEGIN
       AND ST_DWithin(ST_Centroid(t.geom), r.geom, radius)
     CROSS JOIN LATERAL tilda_projected_info(t.geom, r.geom) proj_info
     ),
+    -- Do not SUM(half_space). Every nearby road in `closeby_roads` votes ±1 with
+    -- equal weight, including ways that barely align (score ~0). One opposing
+    -- vote cancels the street the bay actually faces; a zero sum then becomes
+    -- `right` (`half_space > 0` is false). Footways next to street_side bays are
+    -- a common trigger, but any neighbour in the radius can do this (parallel
+    -- street, crossing, service). Side comes from the highest-scoring road on
+    -- that polygon edge; ignore score <= 0.
     aggregated AS (
       SELECT
         edge_idx,
         SUM(road_score) AS road_score,
-        SUM(half_space) AS half_space
+        (ARRAY_AGG(half_space ORDER BY road_score DESC))[1] AS half_space
       FROM
         closeby_roads
       WHERE
-        road_score IS NOT NULL
+        road_score > 0
       GROUP BY edge_idx
     )
   SELECT
