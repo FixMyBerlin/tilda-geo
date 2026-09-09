@@ -149,7 +149,7 @@ SCORING_STEPS = [
     "Zielorte laden",
     "Hangneigung berechnen",
     "Vegetationsabdeckung verschneiden",
-    "Eigene Flächen verschneiden",
+    "Eigene Daten verschneiden",
     "MCE-Score berechnen",
     "Ergebnisse speichern",
 ]
@@ -666,7 +666,7 @@ def run_flaechenfinder(
             del hexes
         del veg_proj
 
-    # ── 12. Eigene Flächen verschneiden ────────────────────────────
+    # ── 12. Eigene Daten verschneiden ────────────────────────────
     # Nutzer-Upload (factorConfig.user_geojson): Punkte/Linien werden gepuffert
     # (1,5 m / 2,5 m), Flächen unverändert; Distanz je Hexagon zur Union. Die
     # eigentliche Score-/Ausschluss-Ableitung passiert im MCE-Schritt. Ohne Datei
@@ -678,7 +678,7 @@ def run_flaechenfinder(
             _feats = user_geojson.get("features", []) if isinstance(user_geojson, dict) else user_geojson
             user_gdf = gpd.GeoDataFrame.from_features(_feats, crs="EPSG:4326")
         except Exception as exc:  # defensive: sanitisiert, aber nie dem Client trauen
-            print(f"   ⚠️  Eigene Flächen unlesbar, übersprungen: {exc}")
+            print(f"   ⚠️  Eigene Daten unlesbar, übersprungen: {exc}")
             user_gdf = None
         if user_gdf is not None and len(user_gdf):
             user_gdf = user_gdf[user_gdf.geometry.notna() & ~user_gdf.geometry.is_empty]
@@ -984,7 +984,7 @@ def run_flaechenfinder(
         hex_proj["score_bestand"] = np.nan
         bestand_delta = 0.0
 
-    # ── Eigene Flächen: weicher Modifier ODER harter Ausschluss ────────────
+    # ── Eigene Daten: weicher Modifier ODER harter Ausschluss ────────────
     # `user_geojson_mode` bestimmt die Wirkung der in Schritt 12 berechneten
     # Distanz. Punkte/Linien sind bereits gepuffert, Flächen exakt – ein Hexagon
     # gilt als „innerhalb", wenn seine Distanz zur (gepufferten) Union 0 ist.
@@ -1017,7 +1017,7 @@ def run_flaechenfinder(
             hex_proj["score_eigendaten"] = np.nan
 
     # Persistiertes Flag analog `gebaeude`/`fahrbahn` – erlaubt der Sidebar, den
-    # Ausschlussgrund „Eigene Flächen" anzuzeigen, auch wenn `score_eigendaten`
+    # Ausschlussgrund „Eigene Daten" anzuzeigen, auch wenn `score_eigendaten`
     # in Ausschluss-Modi NaN ist (siehe oben).
     hex_proj["eigendaten_ausschluss"] = (
         eigendaten_exclude if eigendaten_exclude is not None

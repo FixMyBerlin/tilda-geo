@@ -188,7 +188,7 @@ const FactorParamInputs = ({
   })
 }
 
-/** Gewichte-/Schwellen-Formularfelder (ohne Geometrie / eigene Flächen). */
+/** Gewichte-/Schwellen-Formularfelder (ohne Geometrie / eigene Daten). */
 const FactorFields = ({
   config,
   setWeights,

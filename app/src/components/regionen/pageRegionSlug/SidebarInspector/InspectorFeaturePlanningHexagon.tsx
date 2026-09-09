@@ -36,7 +36,7 @@ const SCORE_LABELS: Record<string, string> = {
   score_platz: 'Plätze',
   score_fussgaengerzone: 'Fußgängerzonen',
   score_bestand: 'Bestandsanlagen',
-  score_eigendaten: 'Eigene Flächen',
+  score_eigendaten: 'Eigene Daten',
   score_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
@@ -116,7 +116,7 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
   },
   {
     check: (props) => !!props.eigendaten_ausschluss,
-    text: 'Diese Fläche liegt im Ausschlussbereich eigener Flächen.',
+    text: 'Diese Fläche liegt im Ausschlussbereich eigener Daten.',
   },
 ]
 
@@ -347,7 +347,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
             )
           })}
 
-          {/* Eigene Flächen: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
+          {/* Eigene Daten: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
               Farbabstand zu Blau/Lila auf dem Farbkreis, siehe planningPanelStyles.ts) —
               unabhängig von der Kartenlayer-Farbe der hochgeladenen Flächen (Violett).
               Signierter Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
@@ -364,7 +364,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                   planningGroupStyle.eigendaten.text,
                 )}
               >
-                Eigene Flächen
+                Eigene Daten
               </div>
               <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
                 <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>

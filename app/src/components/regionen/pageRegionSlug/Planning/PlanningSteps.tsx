@@ -15,7 +15,7 @@ const SCORING_STEPS = [
   'Zielorte laden',
   'Hangneigung berechnen',
   'Vegetationsabdeckung verschneiden',
-  'Eigene Flächen verschneiden',
+  'Eigene Daten verschneiden',
   'MCE-Score berechnen',
   'Ergebnisse speichern',
 ] as const
@@ -36,7 +36,7 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_target'], //          9 Zielorte laden
   ['w_slope'], //           10 Hangneigung berechnen
   ['w_vegetation'], //      11 Vegetationsabdeckung verschneiden
-  ['w_eigendaten'], //      12 Eigene Flächen verschneiden (Sonderfall, siehe stepDisplay)
+  ['w_eigendaten'], //      12 Eigene Daten verschneiden (Sonderfall, siehe stepDisplay)
   [], //                    13 MCE-Score berechnen
   [], //                    14 Ergebnisse speichern
 ]

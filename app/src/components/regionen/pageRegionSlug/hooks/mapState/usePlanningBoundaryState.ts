@@ -24,7 +24,7 @@ type Store = {
   setDrawnGeometry: (geom: GeoJsonGeometry | null) => void
 
   /**
-   * The active scenario's uploaded "Eigene Flächen" GeoJSON (factorConfig.user_geojson),
+   * The active scenario's uploaded "Eigene Daten" GeoJSON (factorConfig.user_geojson),
    * shown as a control layer on the map. Set by ScenarioDetail when a scenario is opened;
    * null when none is uploaded.
    */

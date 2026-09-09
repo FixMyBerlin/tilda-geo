@@ -261,7 +261,7 @@ const BoundaryHighlightLayer = () => {
   )
 }
 
-// Kontroll-Layer für die hochgeladenen „Eigene Flächen" (factorConfig.user_geojson).
+// Kontroll-Layer für die hochgeladenen „Eigene Daten" (factorConfig.user_geojson).
 // Die Geometrie liegt clientseitig im Store (von ScenarioDetail gesetzt); Punkte,
 // Linien und Flächen werden mit eigenen Layern dargestellt. Über den Schalter im
 // Panel (userObstaclesVisible) ein- und ausblendbar wie Vegetation/Fahrbahnen.

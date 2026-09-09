@@ -609,7 +609,7 @@ enum QaEvaluatorType {
 }
 
 // ── Planning module (Flächenfinder) ──────────────────────────────────────────
-// Planungsgebiet (selten geändert: Geometrie, eigene Flächen) + Variante
+// Planungsgebiet (selten geändert: Geometrie, eigene Daten) + Variante
 // (häufig: Gewichte, Schwellen, Use-Case). Ein Lauf merged beides in
 // factorConfigSnapshot; PostGIS-Ergebnisse hängen an PlanningRun.id.
 //

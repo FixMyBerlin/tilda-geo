@@ -81,7 +81,7 @@ const UserGeojsonSchema = z
       if (userGeojsonByteSize(clean) > MAX_USER_GEOJSON_BYTES) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: `Eigene Flächen zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`,
+          message: `Eigene Daten zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`,
         })
         return z.NEVER
       }
@@ -553,7 +553,7 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
       select: { id: true },
     })
     if (areaInputsChanged) await markRunsStaleForArea(data.areaId)
-    // Nur die Geometrie verschiebt die Zensus-Kennzahlen; Titel, Nutzung oder eigene Flächen nicht.
+    // Nur die Geometrie verschiebt die Zensus-Kennzahlen; Titel, Nutzung oder eigene Daten nicht.
     if (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) {
       await refreshAreaCensusStats(data.areaId, data.studyArea)
     }

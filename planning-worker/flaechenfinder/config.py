@@ -226,7 +226,7 @@ class UseCaseConfig:
     # Explizite Werte: "bayern" | "bb" | "hessen"
     cir_source: str = "auto"
 
-    # Eigene Flächen (Nutzer-Upload): wie die hochgeladene Geometrie in den Score
+    # Eigene Daten (Nutzer-Upload): wie die hochgeladene Geometrie in den Score
     # eingeht. Die Geometrie selbst (factorConfig.user_geojson) liest der Worker
     # separat aus dem Config-Dict, analog study_area. Stärke = weights["w_eigendaten"].
     #   "bonus"           → weicher Zuschlag innerhalb des Puffers
@@ -262,7 +262,7 @@ DEFAULT_WEIGHTS = {
     "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
     "w_bestand": 0.0,          # Bestandsanlagen-Bedarfssenkung (neutral per Default → non-breaking)
     "w_bewohnerbedarf": 0.0,   # Bewohnerbedarf aus Zensusdaten; neutral per Default → non-breaking
-    "w_eigendaten": 0.0,       # Eigene Flächen (Nutzer-Upload); neutral per Default → non-breaking
+    "w_eigendaten": 0.0,       # Eigene Daten (Nutzer-Upload); neutral per Default → non-breaking
 }
 
 

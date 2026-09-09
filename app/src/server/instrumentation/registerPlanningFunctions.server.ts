@@ -70,7 +70,7 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand real;`,
   )
-  // Eigene Flächen (Nutzer-Upload): signierter Effekt in Punkten; NULL bei Alt-Läufen
+  // Eigene Daten (Nutzer-Upload): signierter Effekt in Punkten; NULL bei Alt-Läufen
   // und Ausschluss-Modi.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigendaten real;`,
@@ -101,7 +101,7 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;`,
   )
-  // Hexagon liegt im Ausschlussbereich eigener Flächen (Nutzer-Upload,
+  // Hexagon liegt im Ausschlussbereich eigener Daten (Nutzer-Upload,
   // exclude_inside/exclude_outside) → hart ausgeschlossen; das Flag erlaubt der
   // Sidebar, den Ausschlussgrund anzuzeigen, auch wenn score_eigendaten in
   // diesem Modus NULL bleibt.
