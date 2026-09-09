@@ -1,5 +1,6 @@
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
+import { DEFAULT_OEPNV_SHARES } from './oepnvCategories'
 import { DEFAULT_ZIELORT_SHARES } from './zielortCategories'
 
 // Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX).
@@ -34,6 +35,9 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   // Gleichverteilung der vier Zielort-Arten: der Faktor verhält sich damit wie vor der
   // Kategorie-Gewichtung (siehe `zielortShares.ts`).
   zielort_category_shares: { ...DEFAULT_ZIELORT_SHARES },
+  // 50/50 zwischen ÖPNV und Bikesharing — ANDERS als bei Zielorte NICHT der Stand von vor der
+  // Kategorie-Gewichtung (siehe `oepnvCategories.ts`).
+  oepnv_category_shares: { ...DEFAULT_OEPNV_SHARES },
   // `bewohnerbedarf_saettigung_ew` fehlt hier bewusst: ohne Wert in der Varianten-Config gilt der
   // Zensus-Vorschlag des Planungsgebiets (siehe `mergeFactorConfig`). Erst wenn jemand das Feld
   // von Hand ändert, steht eine Zahl in der Variante.
@@ -83,7 +87,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_cyclepath:
     'Vorhandene Radwege aus OpenStreetMap heben den Bedarf. Bis 20 m Entfernung gibt es die volle Punktzahl, danach fällt sie bis zur eingestellten Maximaldistanz auf null. Das Gewicht bestimmt, wie stark diese Nähe im Grundscore zählt.',
   w_transit:
-    'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore.',
+    'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore. Unter „ÖPNV-Arten“ steht das Verhältnis von ÖPNV und Bikesharing zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor.',
   w_target:
     'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit aus OpenStreetMap) heben den Bedarf in ihrer Nähe — unabhängig davon, wie viele Zielorte in einem Gebäude liegen. Schon ein einzelnes solches Gebäude direkt an der Gebäudekante löst den vollen Zuschlag aus; mit zunehmendem Abstand nimmt er linear ab und ist ab 20 m verbraucht. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen. Unter „Zielort-Arten“ steht das Verhältnis der vier Arten zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor.',
   w_fussgaengerzone:
@@ -159,8 +163,8 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation'
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
-//   Bedarf   → Radwegnähe, ÖPNV + Modifier Fußgängerzonen (Zuschlag), Bewohnerbedarf
-//              (Zuschlag), Zielorte (Zuschlag) und Bestandsanlagen (Abzug)
+//   Bedarf   → Radwegnähe, ÖPNV + Modifier Bestandsanlagen (Abzug), Bewohnerbedarf
+//              (Zuschlag), Zielorte (Zuschlag) und Fußgängerzonen (Zuschlag)
 //   Bebauung → Hangneigung + Modifier
 //              (Vegetation, Kreuzungen, Parken)
 //
@@ -183,10 +187,10 @@ export const WEIGHT_GROUPS: {
     label: 'Bedarf',
     criteria: ['w_cyclepath', 'w_transit'],
     modifiers: [
-      { key: 'w_fussgaengerzone', direction: 'positive' },
+      { key: 'w_bestand', direction: 'negative' },
       { key: 'w_bewohnerbedarf', direction: 'positive' },
       { key: 'w_target', direction: 'positive' },
-      { key: 'w_bestand', direction: 'negative' },
+      { key: 'w_fussgaengerzone', direction: 'positive' },
     ],
   },
   {

@@ -15,6 +15,8 @@ import {
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
 import { DisclosureChevron } from './CollapsibleBox'
 import { InfoTooltip } from './InfoTooltip'
+import { OepnvCategorySliders } from './OepnvCategorySliders'
+import { readOepnvShares, type OepnvShares } from './oepnvShares'
 import {
   DEFAULT_FACTOR_TEMPLATE,
   FACTOR_HELP,
@@ -194,6 +196,7 @@ const FactorFields = ({
   restoreAutoSaettigung,
   setVegetationDirection,
   setZielortShares,
+  setOepnvShares,
   setUserGeojsonMode,
   onReset,
   readOnly = false,
@@ -205,6 +208,7 @@ const FactorFields = ({
   restoreAutoSaettigung: () => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
   setZielortShares: (shares: ZielortShares) => void
+  setOepnvShares: (shares: OepnvShares) => void
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
   onReset?: () => void
   readOnly?: boolean
@@ -221,6 +225,9 @@ const FactorFields = ({
   // Offen/zu der Zielort-Arten liegt hier, weil davon die Hervorhebung der ganzen Zielorte-Zeile
   // abhängt (siehe unten) — nicht nur der Inhalt unterhalb des Reglers.
   const [zielortCategoriesOpen, setZielortCategoriesOpen] = useState(false)
+  const oepnvShares = readOepnvShares(config.oepnv_category_shares)
+  // Gleiches Muster wie bei Zielorte, nur am Kriterien-Regler w_transit statt am Modifier w_target.
+  const [oepnvCategoriesOpen, setOepnvCategoriesOpen] = useState(false)
 
   return (
     <>
@@ -257,28 +264,57 @@ const FactorFields = ({
               </span>
             </div>
 
-            <div className="mt-1 text-[11px] tracking-wide text-gray-400 uppercase">Kriterien</div>
-            {group.criteria.map((key) => (
-              <CriterionSlider
-                key={key}
-                label={WEIGHT_LABELS[key] ?? key}
-                weight={weights[key]}
-                sharePct={shares[key] ?? 0}
-                onChange={(value) => setWeightFromWeights(key, value)}
-                readOnly={readOnly}
-                info={<FactorInfo factorKey={key} />}
-                nested={
-                  <FactorParamInputs
-                    factorKey={key}
-                    config={config}
-                    weight={weights[key]}
-                    setField={setField}
-                    restoreAutoSaettigung={restoreAutoSaettigung}
-                    readOnly={readOnly}
-                  />
-                }
-              />
-            ))}
+            <div className="mt-1 text-sm font-semibold tracking-wide text-black uppercase">
+              Kriterien
+            </div>
+            {group.criteria.map((key) => {
+              const criterionSlider = (
+                <CriterionSlider
+                  label={WEIGHT_LABELS[key] ?? key}
+                  weight={weights[key]}
+                  sharePct={shares[key] ?? 0}
+                  onChange={(value) => setWeightFromWeights(key, value)}
+                  readOnly={readOnly}
+                  info={<FactorInfo factorKey={key} />}
+                  nested={
+                    <>
+                      <FactorParamInputs
+                        factorKey={key}
+                        config={config}
+                        weight={weights[key]}
+                        setField={setField}
+                        restoreAutoSaettigung={restoreAutoSaettigung}
+                        readOnly={readOnly}
+                      />
+                      {/* Die Gruppen-Aufteilung hängt am ÖPNV-Regler: sie verteilt dessen Anteil
+                          auf ÖPNV und Bikesharing, ohne die übrigen Faktoren zu berühren. */}
+                      {key === 'w_transit' && (
+                        <OepnvCategorySliders
+                          shares={oepnvShares}
+                          onChange={setOepnvShares}
+                          open={oepnvCategoriesOpen}
+                          onOpenChange={setOepnvCategoriesOpen}
+                          disabled={readOnly || weightToStep(weights[key]) === 0}
+                        />
+                      )}
+                    </>
+                  }
+                />
+              )
+              // Aufgeklappt gehören ÖPNV-Regler und Arten-Regler sichtbar zusammen, gleiches
+              // Muster wie bei Zielorte weiter unten.
+              if (key === 'w_transit' && oepnvCategoriesOpen) {
+                return (
+                  <div
+                    key={key}
+                    className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+                  >
+                    {criterionSlider}
+                  </div>
+                )
+              }
+              return <div key={key}>{criterionSlider}</div>
+            })}
             {group.comingSoon?.map((key) => (
               <ComingSoonFactorRow
                 key={key}
@@ -287,7 +323,7 @@ const FactorFields = ({
               />
             ))}
 
-            <div className="mt-1.5 text-[11px] tracking-wide text-gray-400 uppercase">
+            <div className="mt-1.5 text-sm font-semibold tracking-wide text-black uppercase">
               Zu- und Abschläge
             </div>
             {group.modifiers.map(({ key, direction }) => {
@@ -589,6 +625,9 @@ const FactorEditorPanelForm = ({
   const setZielortShares = (shares: ZielortShares) =>
     setConfig((c) => ({ ...c, zielort_category_shares: shares }))
 
+  const setOepnvShares = (shares: OepnvShares) =>
+    setConfig((c) => ({ ...c, oepnv_category_shares: shares }))
+
   // `user_geojson_mode` gehört zum Planungsgebiet (nicht zur Variante, siehe `toVariantConfig`
   // oben) — er geht deshalb an eine eigene Mutation und wirkt auf alle Varianten dieses
   // Planungsgebiets, statt wie die Gewichte über den Auto-Save der Variante zu laufen.
@@ -680,6 +719,7 @@ const FactorEditorPanelForm = ({
             restoreAutoSaettigung={restoreAutoSaettigung}
             setVegetationDirection={setVegetationDirection}
             setZielortShares={setZielortShares}
+            setOepnvShares={setOepnvShares}
             setUserGeojsonMode={setUserGeojsonMode}
             onReset={readOnly ? undefined : resetWeightsToDefaults}
             readOnly={readOnly}

@@ -20,6 +20,11 @@ export type VariantFactorConfig = {
    * innerhalb des Faktors `w_target`, siehe `zielortShares.ts` und `scorer.py`. Fehlt das Feld
    * (Varianten von vor der Kategorie-Gewichtung), gilt Gleichverteilung. */
   zielort_category_shares?: Record<string, number>
+  /** Verhältnis von ÖPNV zu Bikesharing zueinander in Prozent (Summe 100) — wirkt nur innerhalb
+   * des Faktors `w_transit`, siehe `oepnvShares.ts` und `scorer.py`. Fehlt das Feld (Varianten
+   * von vor der Kategorie-Gewichtung), gilt 50/50 — ANDERS als bei `zielort_category_shares`
+   * NICHT der Stand von vor der Umstellung (siehe Kommentar in `oepnvCategories.ts`). */
+  oepnv_category_shares?: Record<string, number>
   min_score_threshold?: number
   /** Zielgröße der Flächensuche (m²), Client-Filter auf cluster_area_m2 — pro Variante. */
   min_area_m2?: number | null

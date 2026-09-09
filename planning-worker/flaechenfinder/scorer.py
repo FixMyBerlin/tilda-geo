@@ -12,6 +12,7 @@ from .config import (
     USER_POINT_BUFFER_M,
     ZIELORT_CATEGORIES,
     UseCaseConfig,
+    oepnv_category_factors,
     zielort_category_factors,
 )
 from .dem import DEMAdapter
@@ -481,9 +482,12 @@ def run_flaechenfinder(
     # score_oepnv als NaN (→ DB NULL, Sidebar „–") markieren.
     _step(6)
     if (use_case.weights.get("w_transit", 0) or 0) > 0:
+        # Die fünf klassischen Haltestellentypen bleiben intern über max() kombiniert (der
+        # nächstgelegene Typ zählt) — das UI-Verhältnis „ÖPNV vs. Bikesharing" wirkt erst danach,
+        # zwischen dieser Gruppe und dem separat geladenen Bikesharing-Typ (siehe unten).
         _TRANSIT_TYPES = [
-            # U-Bahn-Eingang, Bahnhofsgebäude und Bikesharing haben keinen publicTransport-
-            # Tag-Dict-Eintrag, sondern eigene Tabelle/Loader, siehe unten.
+            # U-Bahn-Eingang und Bahnhofsgebäude haben keinen publicTransport-Tag-Dict-Eintrag,
+            # sondern eigene Tabelle/Loader, siehe unten.
             ("U-Bahn-Eingang",   None,                          50),
             ("Straßenbahn",      {"railway": "tram_stop"},       50),
             ("Bus",              {"highway": "bus_stop"},         30),
@@ -491,9 +495,6 @@ def run_flaechenfinder(
             # Bahnhofsgebäude (building=train_station): Abstellanlagen sollen möglichst
             # nah ans Gebäude, nicht nur an den Bahnsteig-/Stationspunkt.
             ("Bahnhofsgebäude",  None,                          100),
-            # Bikesharing (poiClassification, *=bicycle_rental): wie Bushaltestellen ein
-            # „Last Mile"-Zugangspunkt, deshalb derselbe Radius von 30 m.
-            ("Bikesharing",      None,                           30),
         ]
         _transit_scores = []
         for _tname, _ttags, _tradius in _TRANSIT_TYPES:
@@ -502,8 +503,6 @@ def run_flaechenfinder(
                     _stops = osm_loader.load_subway_entrances(study_area_geom)
                 elif _tname == "Bahnhofsgebäude":
                     _stops = osm_loader.load_train_station_buildings(study_area_geom)
-                elif _tname == "Bikesharing":
-                    _stops = osm_loader.load_bikesharing(study_area_geom)
                 else:
                     _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
                 if not len(_stops):
@@ -518,8 +517,33 @@ def run_flaechenfinder(
             except Exception as _e:
                 print(f"   ⚠️  {_tname}: {_e}")
                 _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
-        hex_proj["score_oepnv"] = pd.concat(_transit_scores, axis=1).max(axis=1)
+        _oepnv_group_score = pd.concat(_transit_scores, axis=1).max(axis=1)
         del _transit_scores
+
+        # Bikesharing (poiClassification, *=bicycle_rental): eigene Gruppe, wie Bushaltestellen
+        # ein „Last Mile"-Zugangspunkt, deshalb derselbe Radius von 30 m.
+        try:
+            _bike_stops = osm_loader.load_bikesharing(study_area_geom)
+            if len(_bike_stops):
+                _bike_stops_p = _bike_stops.to_crs("EPSG:25832")
+                _bike_dist = _dist_to_union(centroids, _bike_stops_p)
+                _bikesharing_score = _bike_dist.apply(lambda d: max(0.0, 100.0 * (1.0 - d / 30)))
+            else:
+                _bikesharing_score = pd.Series(0.0, index=hex_proj.index)
+        except Exception as _e:
+            print(f"   ⚠️  Bikesharing: {_e}")
+            _bikesharing_score = pd.Series(0.0, index=hex_proj.index)
+
+        # Verhältnis der beiden Gruppen zueinander (siehe `oepnv_category_factors`): die stärker
+        # gewichtete Gruppe trägt ihren Teilscore voll bei, die schwächere anteilig. Anders als
+        # beim max() vorher können sich beide Gruppen bis zum Deckel 100 addieren — ein Hexagon
+        # nah an Bus UND Bikesharing schneidet damit besser ab als eines nur nah an einem von
+        # beiden (User-Entscheid, ändert bewusst auch das Gleichverteilungs-Verhalten).
+        _oepnv_factors = oepnv_category_factors(use_case.oepnv_category_shares)
+        _oepnv_frac = (_oepnv_group_score / 100.0) * _oepnv_factors["ÖPNV"]
+        _bikesharing_frac = (_bikesharing_score / 100.0) * _oepnv_factors["Bikesharing"]
+        hex_proj["score_oepnv"] = ((_oepnv_frac + _bikesharing_frac).clip(0.0, 1.0) * 100.0).round(1)
+        del _oepnv_group_score, _bikesharing_score, _oepnv_frac, _bikesharing_frac
     else:
         hex_proj["score_oepnv"] = np.nan
 

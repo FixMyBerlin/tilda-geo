@@ -37,6 +37,41 @@ def zielort_category_factors(shares: Dict[str, float]) -> Dict[str, float]:
     return {c: v / largest for c, v in values.items()}
 
 
+# ── ÖPNV/Bikesharing-Gruppen ────────────────────────────────────────────────────
+# Die beiden Gruppen, in die score_oepnv zerfällt: "ÖPNV" fasst die fünf klassischen
+# Haltestellentypen (U-Bahn-Eingang, Straßenbahn, Bus, Bahnhof, Bahnhofsgebäude) weiterhin per
+# max() zusammen, "Bikesharing" bleibt ein eigener Typ. Reihenfolge/Schreibweise müssen zur
+# UI-Liste in app/.../Planning/oepnvCategories.ts passen.
+OEPNV_CATEGORIES = ("ÖPNV", "Bikesharing")
+
+# Gleichverteilung (50/50) — ANDERS als bei Zielorte NICHT der Stand von vor der
+# Kategorie-Gewichtung: score_oepnv kombinierte die sechs Typen bisher über ein reines max(),
+# die neue Gewichtung summiert die beiden Gruppenanteile stattdessen gekappt bei 1.0 (siehe
+# `oepnv_category_factors` und scorer.py) — das ändert bestehende Läufe auch bei Gleichverteilung
+# (User-Entscheid, bewusst in Kauf genommen).
+DEFAULT_OEPNV_CATEGORY_SHARES = {c: 50.0 for c in OEPNV_CATEGORIES}
+
+
+def oepnv_category_factors(shares: Dict[str, float]) -> Dict[str, float]:
+    """Anteile (Prozent, Summe 100) → Faktor 0–1 je Gruppe, normiert auf den größten Anteil.
+
+    Exaktes Pendant zu `zielort_category_factors`, nur für die beiden ÖPNV/Bikesharing-Gruppen
+    statt der vier Zielort-Kategorien. Siehe dort für die Normierungslogik.
+    """
+    values = {}
+    for category in OEPNV_CATEGORIES:
+        raw = shares.get(category) if shares else None
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            value = 0.0
+        values[category] = max(0.0, value)
+    largest = max(values.values()) if values else 0.0
+    if largest <= 0:
+        return {c: 1.0 for c in OEPNV_CATEGORIES}
+    return {c: v / largest for c, v in values.items()}
+
+
 @dataclass
 class UseCaseConfig:
     name: str
@@ -149,6 +184,15 @@ class UseCaseConfig:
         default_factory=lambda: dict(DEFAULT_ZIELORT_CATEGORY_SHARES)
     )
 
+    # Verhältnis von ÖPNV zu Bikesharing zueinander, in Prozent (Summe 100; UI-Regler, siehe
+    # app/.../Planning/OepnvCategorySliders.tsx). Anders als bei Zielorte ist Gleichverteilung
+    # HIER NICHT non-breaking (siehe Kommentar an `DEFAULT_OEPNV_CATEGORY_SHARES` in diesem
+    # Modul) — score_oepnv kombinierte die Typen vorher über max(), jetzt über die gekappte
+    # Summe der beiden Gruppenanteile.
+    oepnv_category_shares: Dict[str, float] = field(
+        default_factory=lambda: dict(DEFAULT_OEPNV_CATEGORY_SHARES)
+    )
+
     # Harte Ausschlussgrenzen
     max_cyclepath_dist_m: float = 50.0      # weiter weg → Score 0
 
@@ -244,6 +288,9 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         zielort_radius_m=float(cfg.get("zielort_radius_m", 20.0)),
         zielort_category_shares=dict(
             cfg.get("zielort_category_shares") or DEFAULT_ZIELORT_CATEGORY_SHARES
+        ),
+        oepnv_category_shares=dict(
+            cfg.get("oepnv_category_shares") or DEFAULT_OEPNV_CATEGORY_SHARES
         ),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
