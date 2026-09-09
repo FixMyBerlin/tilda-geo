@@ -41,7 +41,6 @@ const VariantFactorConfigSchema = z
     exclude_carriageways: z.boolean().optional(),
     intersection_radius_m: z.number().optional(),
     parken_radius_m: z.number().optional(),
-    platz_radius_m: z.number().optional(),
     fussgaengerzone_radius_m: z.number().optional(),
     bestand_default_diameter_m: z.number().optional(),
     bewohnerbedarf_radius_m: z.number().optional(),

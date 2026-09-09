@@ -70,7 +70,7 @@ const SCORE_GROUPS: {
     label: 'Bebauung',
     scoreKey: 'score_bebauung',
     criteria: ['score_hangneigung'],
-    modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken', 'score_platz'],
+    modifiers: ['score_vegetation', 'score_platz', 'score_kreuzung', 'score_parken'],
   },
 ]
 
@@ -99,8 +99,10 @@ const CRITERION_WEIGHT_KEYS: Record<string, string> = {
 // Z. 966-975 `exclusion` bzw. Z. 902-906 `eigendaten_exclude`), jeweils mit
 // erklärendem Sidebar-Hinweis. Gebäude/Fahrbahn/Eigene-Flächen haben dafür ein
 // eigenes persistiertes Flag (analog `gebaeude`); Steilhang braucht keins –
-// `score_hangneigung` wird unconditional berechnet und ist exakt 0 nur bei
-// Hangneigung > 8°, identisch zur Ausschlussbedingung im Worker.
+// `score_hangneigung` ist nur bei Gewicht > 0 gesetzt (sonst NULL) und exakt 0
+// nur bei Hangneigung > 10°, identisch zur Ausschlussbedingung im Worker. Bei
+// Gewicht 0 ist `score_hangneigung` NULL, der Check greift dann also nicht –
+// wie bei jedem anderen ausgeschalteten Faktor entfällt der Ausschluss.
 const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text: string }[] = [
   {
     check: (props) => !!props.gebaeude,
@@ -112,7 +114,7 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
   },
   {
     check: (props) => props.score_hangneigung === 0,
-    text: 'Diese Fläche ist zu steil (Hangneigung > 8°) – eine Bebauung ist hier nicht möglich.',
+    text: 'Diese Fläche ist zu steil (Hangneigung > 10°) – eine Bebauung ist hier nicht möglich.',
   },
   {
     check: (props) => !!props.eigendaten_ausschluss,

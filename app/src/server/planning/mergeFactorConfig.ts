@@ -13,7 +13,6 @@ export type VariantFactorConfig = {
   exclude_carriageways?: boolean
   intersection_radius_m?: number
   parken_radius_m?: number
-  platz_radius_m?: number
   fussgaengerzone_radius_m?: number
   bestand_default_diameter_m?: number
   bewohnerbedarf_radius_m?: number

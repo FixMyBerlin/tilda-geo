@@ -633,8 +633,15 @@ def run_flaechenfinder(
         del targets
 
     # ── 10. DEM / Hangneigung ─────────────────────────────────────────
+    # Nur bei Gewicht > 0 abfragen – wie bei allen anderen Faktoren (siehe z. B.
+    # Radweg in Schritt 3) entfällt sonst die teure DEM-Abfrage und
+    # hangneigung_grad bleibt NaN (→ score_hangneigung NaN → DB NULL, kein
+    # Ausschluss).
     _step(10)
-    hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
+    if (use_case.weights.get("w_slope", 0) or 0) > 0:
+        hex_proj["hangneigung_grad"] = dem_adapter.get_slopes(latlng_points)
+    else:
+        hex_proj["hangneigung_grad"] = np.nan
     del latlng_points
 
     # ── 11. Vegetationsabdeckung verschneiden ───────────────────────
@@ -695,10 +702,10 @@ def run_flaechenfinder(
     w = use_case.weights
 
     def slope_score(deg):
-        if deg <= 2:   return 100.0
-        elif deg <= 5: return 100.0 - (deg - 2) / 3 * 40
-        elif deg <= 8: return 60.0 - (deg - 5) / 3 * 60
-        else:          return 0.0
+        if deg <= 2:    return 100.0
+        elif deg <= 5:  return 100.0 - (deg - 2) / 3 * 40
+        elif deg <= 10: return 60.0 - (deg - 5) / 5 * 60
+        else:           return 0.0
 
     # Radwegnähe: Bedarfsfaktor, nur bei Gewicht > 0 berechnet (abstand_radweg_m
     # ist sonst NaN, da Schritt 3 übersprungen wurde) → score_radweg NaN → DB NULL.
@@ -708,7 +715,15 @@ def run_flaechenfinder(
         )
     else:
         hex_proj["score_radweg"] = np.nan
-    hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
+    # Nur bei Gewicht > 0 – wie score_radweg oben. Ohne Gewicht bleibt
+    # hangneigung_grad bereits NaN (Schritt 10); score_hangneigung wird hier
+    # zusätzlich explizit auf NaN gesetzt, weil slope_score(NaN) über die
+    # else-Zweig-Vergleiche sonst fälschlich 0.0 liefern würde – und genau
+    # dieses „0.0" ist die Ausschlussbedingung weiter unten (`== 0`).
+    if (w.get("w_slope", 0) or 0) > 0:
+        hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
+    else:
+        hex_proj["score_hangneigung"] = np.nan
 
     # ── Basis-Score: gewichteter Durchschnitt der Kriterien ───────────────
     # Vegetation ist KEIN Kriterium, sondern ein separater Abzug (bzw. Bonus)
@@ -827,13 +842,13 @@ def run_flaechenfinder(
         hex_proj["score_parken"] = np.nan
         parken_delta = 0.0
 
-    # ── Platz-Bonus/Abschlag: Zu-/Abschlag auf/nahe Platzflächen ───────────
+    # ── Platz-Bonus/Abschlag: Zu-/Abschlag auf Platzflächen ────────────────
     # Platzflächen (place=square, public._places_squares) sind attraktiver
     # öffentlicher Raum. Der Effekt ist ein Modifier auf den Basis-Score (wie
-    # Kreuzung/Parken); `w_platz` (0–1) ist der maximale Effekt in Punkten
-    # (× 100). Distanzprofil identisch zum Parken-Bonus: direkt auf der
-    # Platzfläche (Distanz 0) voller Effekt, linearer Abfall bis
-    # `platz_radius_m`, darüber 0. `platz_direction` bestimmt das Vorzeichen
+    # Kreuzung/Parken); `w_platz` (0–1) ist der Effekt in Punkten (× 100).
+    # Anders als bei Kreuzung/Parken kein Distanzabfall: nur Hexagone, die
+    # direkt auf der Platzfläche liegen (Distanz 0), erhalten den vollen
+    # Effekt, alle anderen 0. `platz_direction` bestimmt das Vorzeichen
     # (analog Vegetation): "positive" = Bonus (Belebung/Sichtbarkeit),
     # "negative" = Abzug (Platz als Freifläche erhalten). Die Flächen-Distanz
     # `abstand_platz_m` wurde bereits in Schritt 8 geladen (NaN ohne Gewicht);
@@ -841,16 +856,7 @@ def run_flaechenfinder(
     w_platz = w.get("w_platz", 0) or 0
     if w_platz > 0:
         abstand_platz = hex_proj["abstand_platz_m"]
-        _plr = use_case.platz_radius_m
-
-        def _platz_faktor(d, r=_plr):
-            if d <= 0:      # Hexagon liegt auf der Platzfläche → voller Effekt
-                return 1.0
-            if d <= r:
-                return max(0.0, (r - d) / max(1.0, r))
-            return 0.0
-
-        platz_effect = (w_platz * 100.0) * abstand_platz.apply(_platz_faktor)
+        platz_effect = (w_platz * 100.0) * (abstand_platz <= 0).astype(float)
         platz_sign = 1.0 if use_case.platz_direction == "positive" else -1.0
         platz_delta = platz_sign * platz_effect
         hex_proj["score_platz"] = platz_delta.round(1)
@@ -1073,6 +1079,9 @@ def run_flaechenfinder(
     # nullen Bebauung UND Kombination, aber NICHT den Bedarf (der Bedarf besteht
     # auch dort, wo nicht gebaut werden kann). Die Radwegdistanz zählt bewusst
     # NICHT mehr dazu – Radwegnähe ist ein Bedarfs-, kein Bebauungskriterium.
+    # Ist Hangneigung ausgeschaltet (w_slope = 0), ist score_hangneigung NaN
+    # (siehe oben) und `NaN == 0` immer False – der Steilhang-Ausschluss greift
+    # dann konsequent nicht, genau wie bei jedem anderen Faktor mit Gewicht 0.
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
         hex_proj["gebaeude"] |

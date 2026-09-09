@@ -32,7 +32,6 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   exclude_carriageways: false,
   intersection_radius_m: 20,
   parken_radius_m: 15,
-  platz_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
   // Gleichverteilung der vier Zielort-Arten: der Faktor verhält sich damit wie vor der
@@ -98,7 +97,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_bestand:
     'Bestehende Fahrradabstellanlagen senken den Bedarf: wo schon geparkt werden kann, braucht es weniger neue Anlagen. Jede Anlage hat einen Einzugskreis (aus der Kapazität, sonst dem Standard-Durchmesser); darin voller Abzug, außerhalb keiner. Das Gewicht bestimmt, wie viele Punkte maximal abgezogen werden.',
   w_slope:
-    'Die Geländeneigung kommt aus dem Höhenmodell. Flach (bis etwa 2°) ist ideal; ab etwa 8° wird die Fläche ganz ausgeschlossen. Das Gewicht bestimmt den Anteil am Grundscore; der Ausschluss steiler Lagen gilt immer.',
+    'Die Geländeneigung kommt aus dem Höhenmodell. Flach (bis etwa 2°) ist ideal; ab etwa 10° wird die Fläche ganz ausgeschlossen. Das Gewicht bestimmt den Anteil am Grundscore; ist das Gewicht 0, ist Hangneigung wie jeder andere ausgeschaltete Faktor komplett wirkungslos – auch der Ausschluss steiler Lagen entfällt dann.',
   w_vegetation:
     'Aus Infrarot-Luftbildern wird der Grünanteil je Fläche geschätzt. „Grün schützen“ zieht Punkte ab, „Grün bevorzugen“ gibt Bonus — umso mehr, je höher die Bedeckung; kleine Grünreste bleiben ohne Effekt. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
   w_intersection:
@@ -106,7 +105,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_parken:
     'Bestehende Kfz-Parkflächen am Straßenrand und auf Parkplätzen eignen sich zur Umwidmung. Liegt die Fläche direkt auf dem Parken, gibt es den vollen Zuschlag; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_platz:
-    '„Belebung bevorzugen" gibt Bonus in der Nähe von Plätzen (place=square aus OpenStreetMap), „Platz freihalten" zieht dort Punkte ab. Liegt die Fläche direkt auf dem Platz, gibt es den vollen Effekt; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
+    '„Belebung bevorzugen" gibt Bonus auf Plätzen (place=square aus OpenStreetMap), „Platz freihalten" zieht dort Punkte ab. Liegt die Fläche direkt auf dem Platz, gibt es den vollen Effekt; außerhalb keinen. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
   w_eigendaten:
     'Laden Sie eigene Punkte, Linien oder Flächen hoch. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Das Gewicht gilt nur für Bonus und Abzug.',
   w_bewohnerbedarf:
@@ -126,7 +125,7 @@ export const FACTOR_PARAMS: Record<
   ],
   w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
-  w_platz: [{ key: 'platz_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
+  // Kein Eintrag für w_platz: kein Radius/Distanzabfall, nur direkt auf der Platzfläche wirksam.
   // Der 20-m-Radius ist bewusst fest verdrahtet (kein UI-Feld) und steht als Konstante in
   // flaechenfinder/config.py. Einstellbar ist nur die Sättigung; ihr Label nennt die Einheit,
   // weil „Einwohner" allein nicht erkennen lässt, dass der Abstand schon eingerechnet ist.
@@ -174,7 +173,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 //   Bedarf   → Radwegnähe, ÖPNV + Modifier Bestandsanlagen (Abzug), Bewohnerbedarf
 //              (Zuschlag), Zielorte (Zuschlag) und Fußgängerzonen (Zuschlag)
 //   Bebauung → Hangneigung + Modifier
-//              (Vegetation, Kreuzungen, Parken, Plätze)
+//              (Vegetation, Plätze, Kreuzungen, Parken)
 //
 // Innerhalb der Gruppen trennen wir zusätzlich nach Rechenart, weil beide Arten in scorer.py
 // unterschiedlich wirken und deshalb auch unterschiedlich eingestellt werden (siehe
@@ -207,9 +206,9 @@ export const WEIGHT_GROUPS: {
     criteria: ['w_slope'],
     modifiers: [
       { key: 'w_vegetation', direction: 'vegetation' },
+      { key: 'w_platz', direction: 'platz' },
       { key: 'w_intersection', direction: 'positive' },
       { key: 'w_parken', direction: 'positive' },
-      { key: 'w_platz', direction: 'platz' },
     ],
   },
 ]

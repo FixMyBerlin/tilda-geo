@@ -46,11 +46,6 @@ const STEP_WEIGHT_KEYS: string[][] = [
 // wird er übersprungen.
 const USER_OBSTACLES_STEP_INDEX = 11
 
-// Schritte, deren Ausgabe zusätzlich den harten Ausschluss steuert
-// (scorer.py::exclusion). Diese laufen auch bei Gewicht 0 weiter – sie werden
-// dann nicht „übersprungen", sondern „nur Ausschluss" markiert.
-const EXCLUSION_STEP_INDICES = new Set([9]) // Hangneigung
-
 /** Präsenz + Modus des Eigendaten-Uploads (aus getPlanningJobFn). */
 export type UserObstaclesInfo = { present: boolean; mode: string | null }
 
@@ -62,10 +57,8 @@ const LOAD_GROUP = { firstStep: 3, lastStep: 12, label: 'Eingangsdaten & Faktore
 type StepDisplay = {
   done: boolean
   active: boolean
-  /** Gewicht 0 & entkoppelt → wird gar nicht ausgeführt. */
+  /** Gewicht 0 → wird gar nicht ausgeführt. */
   skipped: boolean
-  /** Gewicht 0 & ausschluss-gekoppelt → läuft weiter, trägt aber keine Punkte bei. */
-  exclusionOnly: boolean
 }
 
 /**
@@ -98,7 +91,6 @@ function stepDisplay(
   const keys = STEP_WEIGHT_KEYS[i] ?? []
   const structural = keys.length === 0
   const weightZero = !structural && keys.every((k) => !(weights?.[k] ?? 0))
-  const excluded = EXCLUSION_STEP_INDICES.has(i)
   const base = { done: step < currentStep, active: step === currentStep }
 
   // Eigendaten-Schritt: die Distanzberechnung (scorer.py) läuft immer, sobald
@@ -107,14 +99,10 @@ function stepDisplay(
   // der Schritt übersprungen.
   if (i === USER_OBSTACLES_STEP_INDEX) {
     const present = userObstacles?.present ?? false
-    return { ...base, skipped: !present, exclusionOnly: false }
+    return { ...base, skipped: !present }
   }
 
-  return {
-    ...base,
-    skipped: weightZero && !excluded,
-    exclusionOnly: weightZero && excluded,
-  }
+  return { ...base, skipped: weightZero }
 }
 
 /** Der Status-Marker (Kreis/Punkt) links neben dem Schrittnamen. */
@@ -129,13 +117,7 @@ const StepMarker = ({
   const label = d.skipped ? '–' : d.done ? '✓' : (numbered ?? '')
   return (
     <span
-      title={
-        d.skipped
-          ? 'Übersprungen (Gewicht ist 0)'
-          : d.exclusionOnly
-            ? 'Läuft nur für den harten Ausschluss (trägt keine Punkte bei)'
-            : undefined
-      }
+      title={d.skipped ? 'Übersprungen (Gewicht ist 0)' : undefined}
       className={twJoin(
         'flex size-4 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold',
         d.skipped && 'bg-gray-100 text-gray-400',
@@ -151,22 +133,19 @@ const StepMarker = ({
 
 /** Eine Schrittzeile (top-level oder als Kind im Block). */
 const StepRow = ({ label, d, numbered }: { label: string; d: StepDisplay; numbered?: number }) => {
-  const muted = d.skipped || d.exclusionOnly
   return (
     <li className="flex items-center gap-2 text-xs">
       <StepMarker d={d} numbered={numbered} />
       <span
         className={twJoin(
           d.skipped && 'text-gray-400 italic',
-          !d.skipped && d.exclusionOnly && 'text-gray-500',
-          !muted && d.done && 'text-gray-500',
-          !muted && d.active && 'font-medium text-gray-900',
-          !muted && !d.done && !d.active && 'text-gray-400',
+          !d.skipped && d.done && 'text-gray-500',
+          !d.skipped && d.active && 'font-medium text-gray-900',
+          !d.skipped && !d.done && !d.active && 'text-gray-400',
         )}
       >
         {label}
         {d.skipped ? ' (übersprungen)' : ''}
-        {d.exclusionOnly ? ' (nur Ausschluss)' : ''}
       </span>
     </li>
   )
@@ -252,9 +231,8 @@ const CollapsibleStepGroup = ({
 /**
  * Checkliste der Scoring-Schritte mit Hervorhebung des aktuellen Schritts. Die
  * Faktor-Schritte (3–10) sind in einem ausklappbaren Block zusammengefasst.
- * `weights` (Faktor-Gewichte des Szenarios) steuert je Schritt, ob er als
- * „übersprungen" (Gewicht 0, entkoppelt) bzw. „nur Ausschluss" (Gewicht 0,
- * ausschluss-gekoppelt) markiert wird.
+ * `weights` (Faktor-Gewichte des Szenarios) markiert einen Schritt bei Gewicht
+ * 0 als „übersprungen".
  */
 export const PlanningSteps = ({
   currentStep,

@@ -117,13 +117,11 @@ class UseCaseConfig:
     # attraktiver öffentlicher Raum – je nach Nutzungsziel ein Argument FÜR eine
     # Bebauung in der Nähe (Belebung, Sichtbarkeit) oder GEGEN eine Bebauung (Platz
     # als Freifläche erhalten). Richtung analog Vegetation:
-    #   "positive" → Nähe zu einem Platz = Punktbonus [Default]
-    #   "negative" → Nähe zu einem Platz = Punktabzug (Platz freihalten)
-    # Distanzprofil wie beim Parken-Bonus: direkt auf der Platzfläche voller Effekt,
-    # linearer Abfall bis platz_radius_m, darüber 0. Modifier auf den Basis-Score
-    # (siehe scorer.py); Stärke = weights["w_platz"].
+    #   "positive" → auf der Platzfläche = Punktbonus [Default]
+    #   "negative" → auf der Platzfläche = Punktabzug (Platz freihalten)
+    # Kein Distanzabfall: nur direkt auf der Platzfläche (Distanz 0) voller Effekt,
+    # sonst 0. Modifier auf den Basis-Score (siehe scorer.py); Stärke = weights["w_platz"].
     platz_direction: str = "positive"
-    platz_radius_m: float = 15.0              # Reichweite des Effekts (UI-einstellbar)
 
     # Fußgängerzonen-Bonus: an Kreuzungen, wo eine der üblichen Straßenkategorien
     # auf eine Fußgängerzone (highway=pedestrian) trifft, besteht besonders hoher
@@ -295,7 +293,6 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
         platz_direction=cfg.get("platz_direction", "positive"),
-        platz_radius_m=float(cfg.get("platz_radius_m", 15.0)),
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
         bewohnerbedarf_radius_m=float(cfg.get("bewohnerbedarf_radius_m", 20.0)),
