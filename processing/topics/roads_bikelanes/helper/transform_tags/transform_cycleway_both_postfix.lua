@@ -1,8 +1,8 @@
 
 -- Mutate `cycleway=no` to `cycleway:both=no` for consistent transformation handling.
 -- For other cycleway-tags our transformation works fine but for `no` in combination with `bicycle_road=yes` it exited the processing too early.
----@param destTags table<string, string> The input table of OSM tags to mutate in-place
----@return table<string, string> unmodified_tags A table containing the original values that were overwritten
+---@param destTags OsmTags The input table of OSM tags to mutate in-place
+---@return OsmTags unmodified_tags A table containing the original values that were overwritten
 local function transform_cycleway_both_postfix(destTags)
   local unmodified_tags = {}
 

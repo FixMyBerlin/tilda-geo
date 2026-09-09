@@ -500,6 +500,107 @@ describe('getRegionRedirectUrl()', () => {
       )
     })
 
+    test('MIGRATION: Old lit config activates Beleuchtung with all dataset checkboxes on (12nu7if completeness on)', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=12nu7if.l.0&v=2'
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+      expect(mockGetRegionConfigTemplate).toHaveBeenCalledWith('12nu7if')
+
+      const bibiCategories = regionFixtures.bibi!.categories as MapDataCategoryId[]
+      const bibiFresh = createFreshCategoriesConfig(bibiCategories)
+      const bibiChecksum = calcConfigChecksum(bibiFresh)
+      const resultConfig = getUrl(redirectUrl).searchParams.get('config')
+      expect(resultConfig?.startsWith(bibiChecksum)).toBe(true)
+
+      const parsed = parse(
+        resultConfig!,
+        simplifyConfigForParams(bibiFresh) as MapDataCategoryConfig[],
+      )
+      const litCategory = parsed.find((category) => category.id === 'lit')
+      expect(litCategory?.active).toBe(true)
+      expect(
+        litCategory!.subcategories.some((subcategory) => subcategory.id === 'lit-completeness'),
+      ).toBe(false)
+
+      for (const subcategory of litCategory!.subcategories) {
+        expect(subcategory.styles.find((style) => style.id === 'default')?.active).toBe(true)
+      }
+    })
+
+    test('MIGRATION: Old lit config activates Beleuchtung with all dataset checkboxes on (12nu7if completeness off)', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=12nu7if.5.0&v=2'
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+
+      const bibiCategories = regionFixtures.bibi!.categories as MapDataCategoryId[]
+      const bibiFresh = createFreshCategoriesConfig(bibiCategories)
+      const resultConfig = getUrl(redirectUrl).searchParams.get('config')
+      const parsed = parse(
+        resultConfig!,
+        simplifyConfigForParams(bibiFresh) as MapDataCategoryConfig[],
+      )
+      const litCategory = parsed.find((category) => category.id === 'lit')
+      expect(litCategory?.active).toBe(true)
+      expect(
+        litCategory!.subcategories.some((subcategory) => subcategory.id === 'lit-completeness'),
+      ).toBe(false)
+
+      for (const subcategory of litCategory!.subcategories) {
+        expect(subcategory.styles.find((style) => style.id === 'default')?.active).toBe(true)
+      }
+    })
+
+    test('MIGRATION: Old hidden lighting dataset still activates all checkboxes', async () => {
+      const oldHiddenLitConfig = [
+        {
+          id: 'lit',
+          name: 'Beleuchtung',
+          desc: '',
+          active: false,
+          subcategories: [
+            {
+              id: 'lit',
+              name: 'Straßen',
+              ui: 'dropdown' as const,
+              sourceId: 'atlas_roads',
+              defaultStyle: 'hidden' as const,
+              styles: [
+                { id: 'hidden' as const, name: 'Ausgeblendet', active: true },
+                { id: 'default' as const, name: 'Beleuchtung', active: false, layers: [] },
+                { id: 'lit' as const, name: 'Beleuchtet', active: false, layers: [] },
+              ],
+            },
+          ],
+        },
+      ] satisfies MapDataCategoryConfig[]
+      const oldTemplate = simplifyConfigForParams(oldHiddenLitConfig)
+      const oldWire = serialize(oldHiddenLitConfig)
+
+      mockGetRegionConfigTemplate.mockImplementation(async (checksum: string) => {
+        if (checksum === oldWire.split('.')[0]) return oldTemplate
+        return getLegacyConfigTemplate(checksum)
+      })
+
+      const url = `http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=${oldWire}&v=2`
+      const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
+      expect(redirectUrl).toBeTruthy()
+
+      const bibiCategories = regionFixtures.bibi!.categories as MapDataCategoryId[]
+      const bibiFresh = createFreshCategoriesConfig(bibiCategories)
+      const resultConfig = getUrl(redirectUrl).searchParams.get('config')
+      const parsed = parse(
+        resultConfig!,
+        simplifyConfigForParams(bibiFresh) as MapDataCategoryConfig[],
+      )
+      const litCategory = parsed.find((category) => category.id === 'lit')
+      expect(litCategory?.active).toBe(true)
+      for (const subcategory of litCategory!.subcategories) {
+        expect(subcategory.styles.find((style) => style.id === 'default')?.active).toBe(true)
+      }
+    })
+
     test('MIGRATION: Ensure hidden is active when checkbox was off and no style is active after merge (14ltyea.a099j9.0 to 1qldklk)', async () => {
       // Background: When migrating from old format (checkbox) to new format (dropdown),
       // if a checkbox was OFF (default: false), it should become "hidden" active in the new format.

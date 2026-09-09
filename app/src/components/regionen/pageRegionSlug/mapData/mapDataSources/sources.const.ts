@@ -7,7 +7,7 @@ import { sourcesParkingLars } from './sourcesParkingLars.const'
 import type { SourcesParkingTildaId } from './sourcesParkingTilda.const'
 import { sourcesParkingTilda } from './sourcesParkingTilda.const'
 
-type AtlasSourceId =
+type TildaSourceId =
   | 'atlas_barriers'
   | 'atlas_bicycleParking'
   | 'atlas_bikelanes'
@@ -25,6 +25,7 @@ type AtlasSourceId =
   | 'atlas_trafficSigns'
   | 'atlas_todos_lines'
   | 'atlas_aggregated_lengths'
+  | 'tilda_highwayAreas'
 
 type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapillary_trafficSigns'
 
@@ -32,7 +33,7 @@ type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapil
 export type SourcesId =
   | SourcesParkingLarsId
   | SourcesParkingTildaId
-  | AtlasSourceId
+  | TildaSourceId
   | MapillarySourceId
   | 'accidents_unfallatlas'
 
@@ -215,6 +216,36 @@ export const sources: MapDataSource<SourcesId>[] = [
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
+    calculator: { enabled: false },
+  },
+  {
+    id: 'tilda_highwayAreas',
+    tileTables: ['highwayAreas'],
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: SIMPLIFY_MAX_ZOOM,
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+    promoteId: 'id',
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'id',
+      documentedKeys: [
+        'name',
+        'road',
+        'oneway__if_present',
+        'oneway_bicycle__if_present',
+        'lit__if_present',
+        'composit_surface_smoothness',
+        'traffic_sign',
+        'width__if_present',
+        'bridge__if_present',
+        'tunnel__if_present',
+        'area',
+        'description__if_present',
+      ],
+    },
     calculator: { enabled: false },
   },
   {

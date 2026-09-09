@@ -18,6 +18,7 @@ export const exportApiIdentifier = [
   'trafficSigns',
   'barrierAreas',
   'barrierLines',
+  'highwayAreas',
   // 'aggregated_lengths', // Does not work because the table does not conform to the required table structure with `tags` and `meta`
   'todos_lines',
   // Parking tables

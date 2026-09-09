@@ -49,7 +49,7 @@ local categorize_bikelane = bikelane_categories.categorize_bikelane
 ---@param result_tags OsmTags
 ---@param object_tags OsmTags
 ---@param log_overrides OsmTags
----@param object_geom table
+---@param object_geom OsmGeometry
 local function merge_bikelane_public_tags(result_tags, object_tags, log_overrides, object_geom)
   local public_result_tags = extract_public_tags(result_tags)
   local cleaned_public, replaced_tags =
@@ -61,7 +61,7 @@ local function merge_bikelane_public_tags(result_tags, object_tags, log_override
 end
 
 ---@param object_tags OsmTags
----@param object_geom table
+---@param object_geom OsmGeometry
 ---@return OsmTags[]
 local function bikelanes(object_tags, object_geom)
   ---@type OsmTags[]
