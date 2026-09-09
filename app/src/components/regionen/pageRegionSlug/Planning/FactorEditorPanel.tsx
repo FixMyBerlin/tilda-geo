@@ -69,11 +69,25 @@ const groupHeadlineBaseClass =
 const groupHeadlineClass = twJoin(groupHeadlineBaseClass, 'border-gray-200 text-gray-800')
 
 /**
- * Anteil beider Faktorgruppen am Grundscore als farbige Chips — die Kurzfassung der
- * Gruppenüberschriften für den zugeklappten Faktoren-Kopf.
+ * Wert-Text des Eigene-Daten-Chips im zugeklappten Faktoren-Kopf: bei Bonus/Abzug die Punkte in
+ * Wirkrichtung, bei den Ausschluss-Modi gibt es keine Punkte — dort nur der Modus-Name.
  */
-const GroupShareChips = ({ weights }: { weights: Record<string, number> | undefined }) => {
-  const shares = criterionShares(weights)
+const eigendatenChipValue = (config: FactorConfig) => {
+  const mode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
+  if (mode === 'exclude_inside' || mode === 'exclude_outside') {
+    return USER_GEOJSON_MODES.find(([value]) => value === mode)?.[1] ?? mode
+  }
+  const points = weightToPoints(config.weights?.w_eigendaten)
+  return `${mode === 'penalty' ? '−' : '+'}${points}`
+}
+
+/**
+ * Anteil beider Faktorgruppen am Grundscore als farbige Chips — die Kurzfassung der
+ * Gruppenüberschriften für den zugeklappten Faktoren-Kopf. Sind eigene Daten hochgeladen, kommt
+ * ihr Chip (Amber, wie der Eigene-Daten-Block) dazu, damit ihr Effekt auch zugeklappt sichtbar ist.
+ */
+const GroupShareChips = ({ config }: { config: FactorConfig }) => {
+  const shares = criterionShares(config.weights)
   return (
     <div className="flex w-full items-center gap-1.5">
       {WEIGHT_GROUPS.map((group) => (
@@ -90,6 +104,16 @@ const GroupShareChips = ({ weights }: { weights: Record<string, number> | undefi
           </span>
         </span>
       ))}
+      {config.user_geojson != null && (
+        <span
+          className={twJoin(
+            'rounded px-1.5 py-0.5 text-[11px] font-medium',
+            planningGroupStyle.eigendaten.chip,
+          )}
+        >
+          Eigene Daten <span className="font-bold tabular-nums">{eigendatenChipValue(config)}</span>
+        </span>
+      )}
     </div>
   )
 }
@@ -418,12 +442,6 @@ const FactorFields = ({
             })}
           </div>
         ))}
-        <p className="mt-2 text-[11px] text-gray-500">
-          Zu- und Abschläge zusammen: max.{' '}
-          <span className="font-semibold text-black">+{points.plus}</span> /{' '}
-          <span className="font-semibold text-black">−{points.minus}</span> Punkte auf den
-          Grundscore.
-        </p>
       </div>
 
       {config.user_geojson != null && (
@@ -460,6 +478,12 @@ const FactorFields = ({
           )}
         </div>
       )}
+
+      <p className="text-[11px] text-gray-500">
+        Zu- und Abschläge zusammen: max.{' '}
+        <span className="font-semibold text-black">+{points.plus}</span> /{' '}
+        <span className="font-semibold text-black">−{points.minus}</span> Punkte auf den Grundscore.
+      </p>
 
       <div>
         <div className={groupHeadlineClass}>
@@ -718,7 +742,7 @@ const FactorEditorPanelForm = ({
         {/* Zugeklappt ist nicht zu sehen, wie die Gewichte stehen — die zweite Zeile zeigt
             deshalb den Anteil beider Gruppen am Grundscore (wie die Gruppenüberschriften im
             geöffneten Formular). */}
-        {!open && <GroupShareChips weights={config.weights} />}
+        {!open && <GroupShareChips config={config} />}
       </DisclosureButton>
 
       <Transition
