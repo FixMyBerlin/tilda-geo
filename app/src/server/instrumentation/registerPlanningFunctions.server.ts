@@ -35,6 +35,7 @@ async function ensurePlanningSchema() {
       score_vegetation        real,
       score_kreuzung          real,
       score_parken            real,
+      score_platz             real,
       score_fussgaengerzone   real,
       score_bestand           real,
       score_eigendaten        real,
@@ -59,6 +60,9 @@ async function ensurePlanningSchema() {
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_platz real;`,
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_fussgaengerzone real;`,
@@ -174,6 +178,7 @@ async function registerHexagonsFunction() {
           score_vegetation,
           score_kreuzung,
           score_parken,
+          score_platz,
           score_fussgaengerzone,
           score_bestand,
           score_eigendaten,
@@ -231,6 +236,7 @@ async function registerHexagonsFunction() {
           score_vegetation: 'real',
           score_kreuzung: 'real',
           score_parken: 'real',
+          score_platz: 'real',
           score_fussgaengerzone: 'real',
           score_bestand: 'real',
           score_eigendaten: 'real',

@@ -53,27 +53,42 @@ describe('groupShare', () => {
   })
 })
 
+const NEG_DIRECTIONS = { vegetation: 'negative', platz: 'positive' } as const
+const POS_VEG_DIRECTIONS = { vegetation: 'positive', platz: 'positive' } as const
+
 describe('modifierPointRange', () => {
   it('trennt Zuschläge von Abschlägen', () => {
     // Defaults: Kreuzungen + Parken + Fußgängerzonen + Zielorte je 10 Punkte Zuschlag,
-    // keine Abschläge.
-    expect(modifierPointRange(DEFAULT_WEIGHTS, 'negative')).toEqual({ plus: 40, minus: 0 })
+    // keine Abschläge. Plätze bei Default-Gewicht 0 tragen nichts bei.
+    expect(modifierPointRange(DEFAULT_WEIGHTS, NEG_DIRECTIONS)).toEqual({ plus: 40, minus: 0 })
   })
 
   it('zählt Bestandsanlagen als Abschlag', () => {
     const weights = { ...DEFAULT_WEIGHTS, w_bestand: 0.2 }
-    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 40, minus: 20 })
+    expect(modifierPointRange(weights, NEG_DIRECTIONS)).toEqual({ plus: 40, minus: 20 })
   })
 
   it('richtet die Vegetation nach der Vegetationsrichtung', () => {
     const weights = { ...DEFAULT_WEIGHTS, w_vegetation: 0.15 }
-    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 40, minus: 15 })
-    expect(modifierPointRange(weights, 'positive')).toEqual({ plus: 55, minus: 0 })
+    expect(modifierPointRange(weights, NEG_DIRECTIONS)).toEqual({ plus: 40, minus: 15 })
+    expect(modifierPointRange(weights, POS_VEG_DIRECTIONS)).toEqual({ plus: 55, minus: 0 })
+  })
+
+  it('richtet Plätze nach der Platz-Richtung', () => {
+    const weights = { ...DEFAULT_WEIGHTS, w_platz: 0.15 }
+    expect(modifierPointRange(weights, { vegetation: 'negative', platz: 'positive' })).toEqual({
+      plus: 55,
+      minus: 0,
+    })
+    expect(modifierPointRange(weights, { vegetation: 'negative', platz: 'negative' })).toEqual({
+      plus: 40,
+      minus: 15,
+    })
   })
 
   it('lässt das Eigendaten-Gewicht außen vor (eigene Kategorie)', () => {
     const weights = { ...DEFAULT_WEIGHTS, w_eigendaten: 0.4 }
-    expect(modifierPointRange(weights, 'negative')).toEqual({ plus: 40, minus: 0 })
+    expect(modifierPointRange(weights, NEG_DIRECTIONS)).toEqual({ plus: 40, minus: 0 })
   })
 })
 

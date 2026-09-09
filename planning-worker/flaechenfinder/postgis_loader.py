@@ -186,6 +186,16 @@ class PostgisLoader:
         gdf = self._read_table("_publicTransport_entrances", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
+    def load_squares(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Platzflächen (place=square) aus `public._places_squares` (für den Platz-Bonus/Abschlag).
+
+        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/places/places_squares.lua),
+        EPSG:3857 wie die publicTransport-Haupttabelle. MVP: nur geschlossene Ways, keine
+        Multipolygon-Relationen (analog zur Fußgängerzonen-MVP-Entscheidung).
+        """
+        gdf = self._read_table("_places_squares", polygon_4326)
+        return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
+
     def load_bikesharing(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """Bikesharing-Stationen (`*=bicycle_rental`) aus `public."poiClassification"`.
 

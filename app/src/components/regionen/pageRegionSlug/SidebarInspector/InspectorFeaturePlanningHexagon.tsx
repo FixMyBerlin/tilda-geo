@@ -33,6 +33,7 @@ const SCORE_LABELS: Record<string, string> = {
   score_vegetation: 'Vegetation',
   score_kreuzung: 'Kreuzungen',
   score_parken: 'Parken',
+  score_platz: 'Plätze',
   score_fussgaengerzone: 'Fußgängerzonen',
   score_bestand: 'Bestandsanlagen',
   score_eigendaten: 'Eigene Flächen',
@@ -69,7 +70,7 @@ const SCORE_GROUPS: {
     label: 'Bebauung',
     scoreKey: 'score_bebauung',
     criteria: ['score_hangneigung'],
-    modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken'],
+    modifiers: ['score_vegetation', 'score_kreuzung', 'score_parken', 'score_platz'],
   },
 ]
 
@@ -81,6 +82,7 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_vegetation: 'w_vegetation',
   score_kreuzung: 'w_intersection',
   score_parken: 'w_parken',
+  score_platz: 'w_platz',
   score_eigendaten: 'w_eigendaten',
   score_zielorte: 'w_target',
 }

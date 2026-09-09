@@ -45,11 +45,18 @@ export const criterionShares = (weights: Weights) => {
   ) as Record<string, number>
 }
 
-/** Wirkrichtung eines Modifiers; `vegetation` folgt der eingestellten Vegetationsrichtung. */
+/** Konfigurierbare Richtungen je Modifier-Typ, die keine feste `positive`/`negative`-Richtung
+ * haben (siehe `ModifierDirection`). Schlüssel = der Wert von `direction` in `WEIGHT_GROUPS`. */
+export type DirectionOverrides = {
+  vegetation: 'positive' | 'negative'
+  platz: 'positive' | 'negative'
+}
+
+/** Wirkrichtung eines Modifiers; `vegetation`/`platz` folgen der jeweils eingestellten Richtung. */
 export const resolveModifierDirection = (
   direction: ModifierDirection,
-  vegetationDirection: 'positive' | 'negative',
-) => (direction === 'vegetation' ? vegetationDirection : direction)
+  directions: DirectionOverrides,
+) => (direction === 'vegetation' || direction === 'platz' ? directions[direction] : direction)
 
 /** Summierter Anteil einer Faktorgruppe (Bedarf bzw. Bebauung) am Grundscore, in Prozent. */
 export const groupShare = (shares: Record<string, number>, criteriaKeys: string[]) =>
@@ -60,16 +67,13 @@ export const groupShare = (shares: Record<string, number>, criteriaKeys: string[
  * Gesamtscore wird danach auf 0–100 gekappt, die Spanne ist also eine Ober-, keine Punktgrenze.
  * `w_eigendaten` zählt bewusst nicht mit: eigene Kategorie mit eigenem Block in der UI.
  */
-export const modifierPointRange = (
-  weights: Weights,
-  vegetationDirection: 'positive' | 'negative',
-) => {
+export const modifierPointRange = (weights: Weights, directions: DirectionOverrides) => {
   let plus = 0
   let minus = 0
   for (const group of WEIGHT_GROUPS) {
     for (const { key, direction } of group.modifiers) {
       const points = weightToPoints(weights?.[key])
-      if (resolveModifierDirection(direction, vegetationDirection) === 'positive') plus += points
+      if (resolveModifierDirection(direction, directions) === 'positive') plus += points
       else minus += points
     }
   }

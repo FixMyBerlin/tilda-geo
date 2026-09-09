@@ -7,11 +7,13 @@ export type VariantFactorConfig = {
   dem_source?: 'srtm' | 'dgm1' | 'mapterhorn'
   weights?: Record<string, number>
   vegetation_direction?: 'positive' | 'negative'
+  platz_direction?: 'positive' | 'negative'
   cir_source?: 'auto' | 'bayern' | 'bb' | 'hessen'
   max_cyclepath_dist_m?: number
   exclude_carriageways?: boolean
   intersection_radius_m?: number
   parken_radius_m?: number
+  platz_radius_m?: number
   fussgaengerzone_radius_m?: number
   bestand_default_diameter_m?: number
   bewohnerbedarf_radius_m?: number

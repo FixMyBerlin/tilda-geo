@@ -75,6 +75,15 @@ class TildaLoader:
             print(f"   ⚠️  KFZ-Parkflächen-Abfrage fehlgeschlagen: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_squares(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Platzflächen (place=square) für den Platz-Bonus/Abschlag."""
+        try:
+            gdf = self._loader.load_squares(study_area_geom)
+            return gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Platz-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     def load_bicycle_parking(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
         """Bestehende Fahrradabstellanlagen (für den Bestands-Bedarfsfaktor)."""
         try:

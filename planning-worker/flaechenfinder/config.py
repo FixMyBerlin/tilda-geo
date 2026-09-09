@@ -113,6 +113,18 @@ class UseCaseConfig:
     #   d > radius               → 0
     parken_radius_m: float = 15.0             # Reichweite des Bonus (UI-einstellbar)
 
+    # Platz-Bonus/Abschlag: Platzflächen (place=square, public._places_squares) sind
+    # attraktiver öffentlicher Raum – je nach Nutzungsziel ein Argument FÜR eine
+    # Bebauung in der Nähe (Belebung, Sichtbarkeit) oder GEGEN eine Bebauung (Platz
+    # als Freifläche erhalten). Richtung analog Vegetation:
+    #   "positive" → Nähe zu einem Platz = Punktbonus [Default]
+    #   "negative" → Nähe zu einem Platz = Punktabzug (Platz freihalten)
+    # Distanzprofil wie beim Parken-Bonus: direkt auf der Platzfläche voller Effekt,
+    # linearer Abfall bis platz_radius_m, darüber 0. Modifier auf den Basis-Score
+    # (siehe scorer.py); Stärke = weights["w_platz"].
+    platz_direction: str = "positive"
+    platz_radius_m: float = 15.0              # Reichweite des Effekts (UI-einstellbar)
+
     # Fußgängerzonen-Bonus: an Kreuzungen, wo eine der üblichen Straßenkategorien
     # auf eine Fußgängerzone (highway=pedestrian) trifft, besteht besonders hoher
     # Bedarf. Nutzt denselben Bordstein-Ecken-Mechanismus wie der Kreuzungs-Bonus
@@ -246,6 +258,7 @@ DEFAULT_WEIGHTS = {
     "w_vegetation": 0.0,   # neutral per Default → kein Verhaltensbruch bestehender Szenarien
     "w_intersection": 0.1, # Kreuzungs-Bonus (max. Bonus in Punkten × 100)
     "w_parken": 0.1,       # Parken-Bonus (KFZ→Rad Umwidmung)
+    "w_platz": 0.0,        # Platz-Bonus/Abschlag; neutral per Default → non-breaking
     "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
     "w_bestand": 0.0,          # Bestandsanlagen-Bedarfssenkung (neutral per Default → non-breaking)
     "w_bewohnerbedarf": 0.0,   # Bewohnerbedarf aus Zensusdaten; neutral per Default → non-breaking
@@ -281,6 +294,8 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),
         intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
+        platz_direction=cfg.get("platz_direction", "positive"),
+        platz_radius_m=float(cfg.get("platz_radius_m", 15.0)),
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),
         bewohnerbedarf_radius_m=float(cfg.get("bewohnerbedarf_radius_m", 20.0)),

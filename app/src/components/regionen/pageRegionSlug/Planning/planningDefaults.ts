@@ -20,16 +20,19 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
     w_vegetation: 0,
     w_intersection: 0.1,
     w_parken: 0.1,
+    w_platz: 0,
     w_fussgaengerzone: 0.1,
     w_bestand: 0,
     w_bewohnerbedarf: 0,
   },
   vegetation_direction: 'negative',
+  platz_direction: 'positive',
   cir_source: 'auto' as const,
   max_cyclepath_dist_m: 50,
   exclude_carriageways: false,
   intersection_radius_m: 20,
   parken_radius_m: 15,
+  platz_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
   // Gleichverteilung der vier Zielort-Arten: der Faktor verhält sich damit wie vor der
@@ -78,7 +81,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
   bedarf:
     'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege und ÖPNV, plus Zuschläge an Fußgängerzonen, rund um bewohnte Gebäude und rund um Gebäude mit Alltagszielen sowie ein Abzug, wo schon Anlagen stehen.',
   bebauung:
-    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen und Parkflächen schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
+    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen, Parkflächen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
     'Ihre hochgeladenen Flächen greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Damit lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen berücksichtigen.',
 }
@@ -102,6 +105,8 @@ export const FACTOR_HELP: Record<string, string> = {
     'Abstellanlagen an Straßenecken sind gut auffindbar und kurz anzufahren. Hexagone rund 5–8 m von der Bordsteinecke erhalten den vollen Bonus, bis zum eingestellten Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_parken:
     'Bestehende Kfz-Parkflächen am Straßenrand und auf Parkplätzen eignen sich zur Umwidmung. Liegt die Fläche direkt auf dem Parken, gibt es den vollen Zuschlag; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+  w_platz:
+    '„Belebung bevorzugen" gibt Bonus in der Nähe von Plätzen (place=square aus OpenStreetMap), „Platz freihalten" zieht dort Punkte ab. Liegt die Fläche direkt auf dem Platz, gibt es den vollen Effekt; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
   w_eigendaten:
     'Laden Sie eigene Punkte, Linien oder Flächen hoch. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Das Gewicht gilt nur für Bonus und Abzug.',
   w_bewohnerbedarf:
@@ -121,6 +126,7 @@ export const FACTOR_PARAMS: Record<
   ],
   w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
+  w_platz: [{ key: 'platz_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   // Der 20-m-Radius ist bewusst fest verdrahtet (kein UI-Feld) und steht als Konstante in
   // flaechenfinder/config.py. Einstellbar ist nur die Sättigung; ihr Label nennt die Einheit,
   // weil „Einwohner" allein nicht erkennen lässt, dass der Abstand schon eingerechnet ist.
@@ -151,14 +157,16 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_vegetation: 'Vegetation',
   w_intersection: 'Kreuzungen',
   w_parken: 'Parken (Umwidmung)',
+  w_platz: 'Plätze',
   w_fussgaengerzone: 'Fußgängerzonen',
   w_bestand: 'Bestandsanlagen',
   w_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
-// Wirkrichtung eines Zu-/Abschlags. `vegetation` steht für „richtet sich nach
-// `vegetation_direction`" — nur die Vegetation kann je nach Einstellung Bonus oder Abzug sein.
-export type ModifierDirection = 'positive' | 'negative' | 'vegetation'
+// Wirkrichtung eines Zu-/Abschlags. `vegetation`/`platz` stehen für „richtet sich nach
+// `vegetation_direction`"/`platz_direction`" — nur diese beiden können je nach Einstellung Bonus
+// oder Abzug sein.
+export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
@@ -166,7 +174,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation'
 //   Bedarf   → Radwegnähe, ÖPNV + Modifier Bestandsanlagen (Abzug), Bewohnerbedarf
 //              (Zuschlag), Zielorte (Zuschlag) und Fußgängerzonen (Zuschlag)
 //   Bebauung → Hangneigung + Modifier
-//              (Vegetation, Kreuzungen, Parken)
+//              (Vegetation, Kreuzungen, Parken, Plätze)
 //
 // Innerhalb der Gruppen trennen wir zusätzlich nach Rechenart, weil beide Arten in scorer.py
 // unterschiedlich wirken und deshalb auch unterschiedlich eingestellt werden (siehe
@@ -201,6 +209,7 @@ export const WEIGHT_GROUPS: {
       { key: 'w_vegetation', direction: 'vegetation' },
       { key: 'w_intersection', direction: 'positive' },
       { key: 'w_parken', direction: 'positive' },
+      { key: 'w_platz', direction: 'platz' },
     ],
   },
 ]

@@ -195,6 +195,7 @@ const FactorFields = ({
   setField,
   restoreAutoSaettigung,
   setVegetationDirection,
+  setPlatzDirection,
   setZielortShares,
   setOepnvShares,
   setUserGeojsonMode,
@@ -207,6 +208,7 @@ const FactorFields = ({
   setField: (key: keyof FactorConfig, value: number | boolean) => void
   restoreAutoSaettigung: () => void
   setVegetationDirection: (value: 'positive' | 'negative') => void
+  setPlatzDirection: (value: 'positive' | 'negative') => void
   setZielortShares: (shares: ZielortShares) => void
   setOepnvShares: (shares: OepnvShares) => void
   setUserGeojsonMode: (mode: UserGeojsonMode) => void
@@ -216,11 +218,13 @@ const FactorFields = ({
 }) => {
   const weights = config.weights ?? {}
   const vegetationDirection = config.vegetation_direction ?? 'negative'
+  const platzDirection = config.platz_direction ?? 'positive'
+  const directions = { vegetation: vegetationDirection, platz: platzDirection }
   const eigendatenMode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
   const setWeightFromWeights = (key: string, value: number) =>
     setWeights({ ...weights, [key]: value })
   const shares = criterionShares(weights)
-  const points = modifierPointRange(weights, vegetationDirection)
+  const points = modifierPointRange(weights, directions)
   const zielortShares = readZielortShares(config.zielort_category_shares)
   // Offen/zu der Zielort-Arten liegt hier, weil davon die Hervorhebung der ganzen Zielorte-Zeile
   // abhängt (siehe unten) — nicht nur der Inhalt unterhalb des Reglers.
@@ -342,7 +346,7 @@ const FactorFields = ({
                 <ModifierSlider
                   label={WEIGHT_LABELS[key] ?? key}
                   weight={weights[key]}
-                  direction={resolveModifierDirection(direction, vegetationDirection)}
+                  direction={resolveModifierDirection(direction, directions)}
                   onChange={(value) => setWeightFromWeights(key, value)}
                   readOnly={readOnly}
                   info={<FactorInfo factorKey={key} />}
@@ -358,6 +362,19 @@ const FactorFields = ({
                           }
                           value={vegetationDirection}
                           onChange={setVegetationDirection}
+                          disabled={readOnly || weightToPoints(weights[key]) === 0}
+                        />
+                      )}
+                      {key === 'w_platz' && (
+                        <SegmentedChoice
+                          options={
+                            [
+                              ['negative', 'Platz freihalten'],
+                              ['positive', 'Belebung bevorzugen'],
+                            ] as const
+                          }
+                          value={platzDirection}
+                          onChange={setPlatzDirection}
                           disabled={readOnly || weightToPoints(weights[key]) === 0}
                         />
                       )}
@@ -622,6 +639,9 @@ const FactorEditorPanelForm = ({
   const setVegetationDirection = (value: 'positive' | 'negative') =>
     setConfig((c) => ({ ...c, vegetation_direction: value }))
 
+  const setPlatzDirection = (value: 'positive' | 'negative') =>
+    setConfig((c) => ({ ...c, platz_direction: value }))
+
   const setZielortShares = (shares: ZielortShares) =>
     setConfig((c) => ({ ...c, zielort_category_shares: shares }))
 
@@ -718,6 +738,7 @@ const FactorEditorPanelForm = ({
             setField={setField}
             restoreAutoSaettigung={restoreAutoSaettigung}
             setVegetationDirection={setVegetationDirection}
+            setPlatzDirection={setPlatzDirection}
             setZielortShares={setZielortShares}
             setOepnvShares={setOepnvShares}
             setUserGeojsonMode={setUserGeojsonMode}

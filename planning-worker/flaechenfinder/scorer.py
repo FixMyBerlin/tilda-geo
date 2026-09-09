@@ -36,7 +36,7 @@ _SCORE_COLS = [
     "mce_gesamtscore", "score_bedarf", "score_bebauung",
     "score_radweg", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
-    "score_kreuzung", "score_parken", "score_fussgaengerzone",
+    "score_kreuzung", "score_parken", "score_platz", "score_fussgaengerzone",
     "score_bestand", "score_eigendaten", "score_bewohnerbedarf",
 ]
 
@@ -583,6 +583,17 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_parken_m"] = np.nan
 
+    # Platzflächen (place=square) für den Platz-Bonus/Abschlag – gleicher
+    # Flächen-Distanz-Mechanismus wie Parken, aber eigener Loader/Gewicht.
+    # Nur bei Gewicht > 0 laden. Effekt-Ableitung ebenfalls im MCE-Schritt (13).
+    if (use_case.weights.get("w_platz", 0) or 0) > 0:
+        platz = tilda_loader.load_squares(study_area_geom)
+        platz_proj = platz.to_crs("EPSG:25832") if len(platz) else platz
+        hex_proj["abstand_platz_m"] = _dist_to_union(centroids, platz_proj)
+        del platz, platz_proj
+    else:
+        hex_proj["abstand_platz_m"] = np.nan
+
     # ── 9. Zielorte laden ────────────────────────────────────────────
     # Alltagsziele (public."poiClassification": Grundversorgung, Bildung, Einkauf,
     # Freizeit – siehe `load_target_locations`) erzeugen rund um ihre Gebäude Bedarf,
@@ -816,6 +827,37 @@ def run_flaechenfinder(
         hex_proj["score_parken"] = np.nan
         parken_delta = 0.0
 
+    # ── Platz-Bonus/Abschlag: Zu-/Abschlag auf/nahe Platzflächen ───────────
+    # Platzflächen (place=square, public._places_squares) sind attraktiver
+    # öffentlicher Raum. Der Effekt ist ein Modifier auf den Basis-Score (wie
+    # Kreuzung/Parken); `w_platz` (0–1) ist der maximale Effekt in Punkten
+    # (× 100). Distanzprofil identisch zum Parken-Bonus: direkt auf der
+    # Platzfläche (Distanz 0) voller Effekt, linearer Abfall bis
+    # `platz_radius_m`, darüber 0. `platz_direction` bestimmt das Vorzeichen
+    # (analog Vegetation): "positive" = Bonus (Belebung/Sichtbarkeit),
+    # "negative" = Abzug (Platz als Freifläche erhalten). Die Flächen-Distanz
+    # `abstand_platz_m` wurde bereits in Schritt 8 geladen (NaN ohne Gewicht);
+    # ohne Gewicht bleibt auch `score_platz` NaN (→ DB NULL).
+    w_platz = w.get("w_platz", 0) or 0
+    if w_platz > 0:
+        abstand_platz = hex_proj["abstand_platz_m"]
+        _plr = use_case.platz_radius_m
+
+        def _platz_faktor(d, r=_plr):
+            if d <= 0:      # Hexagon liegt auf der Platzfläche → voller Effekt
+                return 1.0
+            if d <= r:
+                return max(0.0, (r - d) / max(1.0, r))
+            return 0.0
+
+        platz_effect = (w_platz * 100.0) * abstand_platz.apply(_platz_faktor)
+        platz_sign = 1.0 if use_case.platz_direction == "positive" else -1.0
+        platz_delta = platz_sign * platz_effect
+        hex_proj["score_platz"] = platz_delta.round(1)
+    else:
+        hex_proj["score_platz"] = np.nan
+        platz_delta = 0.0
+
     # ── Fußgängerzonen-Bonus: Zuschlag an Ecken Straße × Fußgängerzone ─────
     # An Kreuzungen, wo eine der üblichen Straßenkategorien auf eine
     # Fußgängerzone trifft, besteht besonders hoher Bedarf. Gleicher
@@ -991,7 +1033,7 @@ def run_flaechenfinder(
     # vorher ein Kriterium mit Default-Gewicht 0.15, jetzt ein Modifier mit demselben
     # Gewicht – bestehende Läufe verhalten sich also beim nächsten Neuberechnen anders.
     total = (
-        base_score + veg_delta + kreuz_delta + parken_delta
+        base_score + veg_delta + kreuz_delta + parken_delta + platz_delta
         + fussgz_delta + bewohner_delta + ziel_delta + bestand_delta + eigendaten_delta
     )
     # Gesamtscore auf [0, 100] begrenzen – darf nie unter 0 fallen.
@@ -1005,7 +1047,7 @@ def run_flaechenfinder(
     #       Zielorte (w_target) + Modifier Fußgängerzonen (Zuschlag),
     #       Bewohnerbedarf (Zuschlag) und Bestandsanlagen (Abzug)
     #   Bebauung („kann hier bauen") → Hangneigung (w_slope)
-    #       + Modifier Vegetation, Kreuzungen, Parken; harte Ausschlüsse.
+    #       + Modifier Vegetation, Kreuzungen, Parken, Plätze; harte Ausschlüsse.
     # Jede Gruppe wird durch die Summe ihrer aktiven Gewichte geteilt (dasselbe
     # `_group_score` wie beim Grundscore oben), damit der Teil-Score unabhängig
     # von der Gewichtsverteilung 0–100 bleibt. Ist eine Gruppe komplett
@@ -1020,9 +1062,9 @@ def run_flaechenfinder(
     ).clip(lower=0.0, upper=100.0)
 
     base_bebauung = _group_score(BEBAUUNG_TERMS)
-    score_bebauung = (base_bebauung + veg_delta + kreuz_delta + parken_delta).clip(
-        lower=0.0, upper=100.0
-    )
+    score_bebauung = (
+        base_bebauung + veg_delta + kreuz_delta + parken_delta + platz_delta
+    ).clip(lower=0.0, upper=100.0)
 
     hex_proj["score_bedarf"] = score_bedarf.round(1)
     hex_proj["score_bebauung"] = score_bebauung.round(1)

@@ -43,6 +43,11 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzung r
 -- gewichtet ist.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;
 
+-- Platz-Bonus/Abschlag: signierter Effekt (bonus > 0 / Abzug < 0, je
+-- platz_direction) auf/nahe Platzflächen (place=square); NULL wenn der Faktor
+-- (w_platz) im Szenario nicht gewichtet ist.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_platz real;
+
 -- Fußgängerzonen-Bonus: besonders hoher Zuschlag an Ecken, wo eine Straße auf
 -- eine Fußgängerzone trifft (Bedarfsgruppe); NULL wenn der Faktor
 -- (w_fussgaengerzone) im Szenario nicht gewichtet ist.
