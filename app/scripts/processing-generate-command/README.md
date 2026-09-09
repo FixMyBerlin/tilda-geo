@@ -28,7 +28,7 @@ bun run processing -- --help
 
 ```bash
 bun run processing -- \
-  --preset xhain \
+  --preset xhain-kreuzberg \
   --diff-mode fixed \
   --all-daily-topics \
   --skip-download 1 \

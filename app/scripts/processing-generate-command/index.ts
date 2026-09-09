@@ -2,7 +2,7 @@
 import path from 'node:path'
 import { parseArgs, styleText } from 'node:util'
 import * as p from '@clack/prompts'
-import { area, bboxPolygon } from '@turf/turf'
+import { area, bboxPolygon, featureCollection } from '@turf/turf'
 import { $ } from 'bun'
 import dotenv from 'dotenv'
 import { topicsConfig } from '../../../processing/constants/topics.const'
@@ -11,26 +11,13 @@ import {
   composeContainerPrefixFromEnv,
   dockerComposeProjectFromEnv,
 } from '../predev/ensureDevStack'
+import { BBOX_PRESETS } from './bboxPresets'
 
 const repoRootFromScript = path.resolve(import.meta.dir, '../../..')
 dotenv.config({ path: path.join(repoRootFromScript, '.env') })
 dotenv.config({ path: path.join(repoRootFromScript, '.env.local') })
 exitOnInvalidDevPortSlot('processing')
 const devPortSlot = applyDevPortSlotToProcessEnv()
-
-const BBOX_PRESETS = {
-  bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
-  'berlin-full': '13.0883,52.3382,13.7611,52.6755',
-  berlin: '13.0883,52.3382,13.7611,52.6755',
-  'obstacle-parking-yes':
-    '13.405287099192833,52.50837530588882,13.410218310776344,52.51078864624628',
-  'circle-kreisverkehr':
-    '13.304848152351326,52.44115376821972,13.317513299482641,52.446557694962536',
-  xhain: '13.380,52.488,13.418,52.503',
-  'berlin-parking': '13.41904861,52.467335,13.4616607,52.487559',
-  'lane-centre': '13.427407,52.51004,13.46981,52.528016',
-  'berlin-parking-bus-stop': '13.295719,52.49283,13.33790,52.514279',
-} as const satisfies Record<string, string>
 
 const DIFFING_MODES = ['off', 'previous', 'fixed', 'reference'] as const
 type DiffingMode = (typeof DIFFING_MODES)[number]
@@ -94,6 +81,16 @@ function bboxAreaSqm(csv: string) {
   const bbox = parseBboxCsv(csv)
   if (!bbox) return undefined
   return area(bboxPolygon(bbox))
+}
+
+async function writeBboxPresetsGeojson() {
+  const features = Object.entries(BBOX_PRESETS).flatMap(([name, csv]) => {
+    const bbox = parseBboxCsv(csv)
+    if (!bbox) return []
+    return [bboxPolygon(bbox, { properties: { name } })]
+  })
+  const outPath = path.join(import.meta.dir, 'bbox-presets.geojson')
+  await Bun.write(outPath, `${JSON.stringify(featureCollection(features), null, 2)}\n`)
 }
 
 function formatAreaSqm(sqm: number) {
@@ -251,7 +248,7 @@ Optional (CLI only, never prompted): --osm2pgsql-log-level, --download-url (over
 Example (preset, all daily topics; bun run injects skip defaults):
 
   bun run processing -- \\
-    --preset xhain \\
+    --preset xhain-kreuzberg \\
     --diff-mode fixed \\
     --all-daily-topics \\
     --skip-download 1 \\
@@ -772,6 +769,8 @@ function buildOverridesFromCliBatch() {
     detach: rk === 'detach',
   }
 }
+
+await writeBboxPresetsGeojson()
 
 if (values.help) {
   printHelp()
