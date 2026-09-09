@@ -21,7 +21,7 @@ const buildHeader = (showModel: boolean, showRecordId: boolean) => {
   const header: AdminTableHeaderCell[] = ['Zeitpunkt']
   if (showModel) header.push('Modell')
   if (showRecordId) header.push('ID')
-  header.push('Aktion', 'Quelle', 'User', 'Felder', { id: 'audit-diff', label: '' })
+  header.push('Aktion', 'Quelle', 'User', 'Felder')
   return header
 }
 
@@ -58,10 +58,16 @@ const AuditLogTableRow = ({
       <AuditLogUserCell row={row} />
     </td>
     <td className={adminTableClasses.td}>
-      {row.changedFields.length > 0 ? row.changedFields.join(', ') : '—'}
-    </td>
-    <td className={adminTableClasses.td}>
-      <AdminConsoleDumpButton name={`audit-${row.id}`} data={row} />
+      <div className="flex min-w-0 items-center gap-2">
+        <AdminConsoleDumpButton name={`audit-${row.id}`} data={row} />
+        {row.changedFields.length > 0 ? (
+          <span className="min-w-0 truncate" title={row.changedFields.join(', ')}>
+            {row.changedFields.join(', ')}
+          </span>
+        ) : (
+          '—'
+        )}
+      </div>
     </td>
   </tr>
 )
@@ -73,16 +79,18 @@ export const AuditLogTable = ({ rows, fixedModel, fixedRecordId, footer }: Props
     fixedRecordId === undefined || rows.some((row) => row.recordId !== fixedRecordId)
 
   const table = (
-    <AdminTable header={buildHeader(showModel, showRecordId)}>
-      {rows.map((row) => (
-        <AuditLogTableRow
-          key={row.id}
-          row={row}
-          showModel={showModel}
-          showRecordId={showRecordId}
-        />
-      ))}
-    </AdminTable>
+    <div className="min-w-0 overflow-x-auto">
+      <AdminTable header={buildHeader(showModel, showRecordId)}>
+        {rows.map((row) => (
+          <AuditLogTableRow
+            key={row.id}
+            row={row}
+            showModel={showModel}
+            showRecordId={showRecordId}
+          />
+        ))}
+      </AdminTable>
+    </div>
   )
 
   if (!footer) return table

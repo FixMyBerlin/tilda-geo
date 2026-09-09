@@ -27,8 +27,8 @@ export const adminTableClasses = {
   thRow: twMerge(td, 'text-left font-medium text-gray-900'),
   /** Wrapper for `AdminTable` + `PaginationControls` (strips inner table shell). */
   paginatedShell: twMerge(
-    'overflow-hidden rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
-    '[&>table]:rounded-none [&>table]:bg-transparent [&>table]:shadow-none [&>table]:ring-0',
+    'overflow-x-auto rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
+    '[&_table]:rounded-none [&_table]:bg-transparent [&_table]:shadow-none [&_table]:ring-0',
   ),
 } as const
 
