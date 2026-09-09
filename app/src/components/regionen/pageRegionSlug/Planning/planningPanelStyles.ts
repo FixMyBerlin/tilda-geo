@@ -34,19 +34,25 @@ export const planningDisclosureHeaderClass = (open: boolean, twoLine = false) =>
   )
 
 /**
- * Farbe der beiden Faktorgruppen. Dient nur dazu, die Gruppen auf einen Blick auseinanderzuhalten
- * — Anteil-Chip im zugeklappten Faktoren-Kopf, Block/Überschrift im geöffneten Formular, dieselben
+ * Farbe der Faktorgruppen. Dient nur dazu, die Gruppen auf einen Blick auseinanderzuhalten —
+ * Anteil-Chip im zugeklappten Faktoren-Kopf, Block/Überschrift im geöffneten Formular, dieselben
  * Gruppen in der Sidebar (Hexagon-Inspector) und die Modus-Buttons (`ScoreModeSwitcher`).
  * Kombination hat bewusst keine eigene Farbe (bleibt neutral/grün) — sie ist keine Faktorgruppe,
- * sondern das gemeinsame Ergebnis. Die Farben selbst haben keine eigene Bedeutung und sind bewusst
- * nicht die der Kartenlayer.
+ * sondern das gemeinsame Ergebnis. `eigendaten` ist Amber: auf dem Farbkreis der größte Abstand zu
+ * Blau (bedarf, ~221°) und Lila (bebauung, ~271°) — Violett (~258°) läge dazwischen und wäre kaum
+ * unterscheidbar. Bewusst in Kauf genommen: der Kartenlayer der hochgeladenen Flächen
+ * (`UserObstaclesLayer` in `SourcesLayersPlanning.tsx`) bleibt Violett (`#7c3aed`) und der
+ * Fahrbahnen-Ausschluss-Layer ist ebenfalls Amber (`carriageways.py`/`SourcesLayersPlanning.tsx`,
+ * anderer Layer, andere Bedeutung) — beides Farbüberschneidungen mit anderen Kartenlayern, aber
+ * keine mit den beiden übrigen Faktorgruppen. Die übrigen Farben selbst haben keine eigene
+ * Bedeutung und sind bewusst nicht die der Kartenlayer.
  *
  * `chip` = farbiger Wert-Chip, `block` = linker Streifen + Tönung eines Gruppenblocks,
  * `headline` = Überschrift mit Unterstrich, `text` = nur die Textfarbe, `button` = aktiver
  * Zustand eines Toggle-Buttons (siehe `planningGroupButtonClass`).
  */
 export const planningGroupStyle: Record<
-  'bedarf' | 'bebauung',
+  'bedarf' | 'bebauung' | 'eigendaten',
   { chip: string; block: string; headline: string; text: string; button: string }
 > = {
   bedarf: {
@@ -63,6 +69,13 @@ export const planningGroupStyle: Record<
     text: 'text-purple-800',
     button: 'border-purple-600 bg-purple-50 text-purple-700',
   },
+  eigendaten: {
+    chip: 'bg-amber-100 text-amber-800',
+    block: 'border-amber-400 bg-amber-50/60',
+    headline: 'border-amber-200 text-amber-900',
+    text: 'text-amber-800',
+    button: 'border-amber-600 bg-amber-50 text-amber-700',
+  },
 }
 
 /**
@@ -71,11 +84,14 @@ export const planningGroupStyle: Record<
  * `full` = Kriterien-Balken sowie Zuschläge, `pale` = Abschläge (Vorzeichen bleibt so über die
  * Sättigung erkennbar, ohne die Gruppenzuordnung zu verlassen).
  */
-export const planningGroupBarStyle: Record<'bedarf' | 'bebauung', { full: string; pale: string }> =
-  {
-    bedarf: { full: 'bg-blue-600', pale: 'bg-blue-200' },
-    bebauung: { full: 'bg-purple-600', pale: 'bg-purple-200' },
-  }
+export const planningGroupBarStyle: Record<
+  'bedarf' | 'bebauung' | 'eigendaten',
+  { full: string; pale: string }
+> = {
+  bedarf: { full: 'bg-blue-600', pale: 'bg-blue-200' },
+  bebauung: { full: 'bg-purple-600', pale: 'bg-purple-200' },
+  eigendaten: { full: 'bg-amber-600', pale: 'bg-amber-200' },
+}
 
 /**
  * Toggle-Button in der Gruppenfarbe (aktiv) bzw. neutral (inaktiv) — für `ScoreModeSwitcher`.

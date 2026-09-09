@@ -427,8 +427,13 @@ const FactorFields = ({
       </div>
 
       {config.user_geojson != null && (
-        <div>
-          <div className={groupHeadlineClass}>
+        <div
+          className={twJoin(
+            'rounded-r border-l-[3px] py-1.5 pr-1 pl-2',
+            planningGroupStyle.eigendaten.block,
+          )}
+        >
+          <div className={twJoin(groupHeadlineBaseClass, planningGroupStyle.eigendaten.headline)}>
             <span className="flex items-center gap-1">
               Eigene Daten
               <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>

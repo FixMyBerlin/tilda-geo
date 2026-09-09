@@ -171,21 +171,12 @@ const modifierBarPct = (value: number | null | undefined, max: number) =>
 
 const modifierFillClassName = (
   value: number | null | undefined,
-  groupKey: 'bedarf' | 'bebauung',
+  groupKey: 'bedarf' | 'bebauung' | 'eigendaten',
 ) =>
   value != null && value > 0
     ? planningGroupBarStyle[groupKey].full
     : value != null && value < 0
       ? planningGroupBarStyle[groupKey].pale
-      : 'bg-gray-300'
-
-// Eigene Flächen gehören zu keiner der beiden Gruppen (siehe unten) — daher weiterhin
-// gruppenunabhängig grün/rot statt Bedarf-/Bebauung-Farbe.
-const ungroupedModifierFillClassName = (value: number | null | undefined) =>
-  value != null && value > 0
-    ? 'bg-green-600'
-    : value != null && value < 0
-      ? 'bg-red-600'
       : 'bg-gray-300'
 
 export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
@@ -356,18 +347,30 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
             )
           })}
 
-          {/* Eigene Flächen: eigene Kategorie (nicht in Bedarf/Bebauung). Signierter
-              Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
+          {/* Eigene Flächen: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
+              Farbabstand zu Blau/Lila auf dem Farbkreis, siehe planningPanelStyles.ts) —
+              unabhängig von der Kartenlayer-Farbe der hochgeladenen Flächen (Violett).
+              Signierter Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
           {props.score_eigendaten != null && (
-            <div>
-              <div className="mb-1 text-xs font-semibold text-gray-500 uppercase">
+            <div
+              className={twJoin(
+                'rounded-r border-l-[3px] py-1 pr-1 pl-2',
+                planningGroupStyle.eigendaten.block,
+              )}
+            >
+              <div
+                className={twJoin(
+                  'mb-1 text-xs font-semibold uppercase',
+                  planningGroupStyle.eigendaten.text,
+                )}
+              >
                 Eigene Flächen
               </div>
               <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
                 <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
                 <BarTrack
                   pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
-                  fillClassName={ungroupedModifierFillClassName(props.score_eigendaten)}
+                  fillClassName={modifierFillClassName(props.score_eigendaten, 'eigendaten')}
                 />
                 <span className="col-span-2 text-right font-mono text-black">
                   {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
