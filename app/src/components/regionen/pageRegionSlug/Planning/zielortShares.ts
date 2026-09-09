@@ -1,5 +1,4 @@
 import {
-  CATEGORY_SHARE_STEP,
   CATEGORY_SHARE_TOTAL,
   categoryEffect,
   readCategoryShares,
@@ -17,7 +16,6 @@ export type ZielortShares = CategoryShares<ZielortCategory>
 /** Bindet den generischen Kategorie-Algorithmus (`categoryShares.ts`) an die vier
  * Zielort-Kategorien — siehe dort für die Rechenlogik. */
 export const ZIELORT_SHARE_TOTAL = CATEGORY_SHARE_TOTAL
-export const ZIELORT_SHARE_STEP = CATEGORY_SHARE_STEP
 
 export const readZielortShares = (
   stored: Partial<Record<string, number>> | undefined | null,
