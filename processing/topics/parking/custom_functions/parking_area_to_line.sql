@@ -109,12 +109,12 @@ BEGIN
             COALESCE(proj_info.alignment * proj_info.length, 0) / (ST_Distance(t.geom, r.geom) + 1 + 2 * (r.is_driveway)::int) AS road_score,
             half_space
     FROM unnest(edges_arr) AS t(geom, edge_idx)
+    -- Candidates are chosen by geometry only. Do not filter by name:
+    -- `_parking_roads.tags` has `name` (not `street_name`), and a bay's `road_name`
+    -- can be a plaza/lot name that matches no road, which would drop every candidate.
     LEFT JOIN _parking_roads r
       ON ST_Expand(ST_Centroid(t.geom), radius) && r.geom
       AND ST_DWithin(ST_Centroid(t.geom), r.geom, radius)
-      AND (parking_tags->>'road_name' IS NULL
-        OR r.tags->>'street_name' IS NULL
-        OR parking_tags->>'road_name' != r.tags->>'street_name')
     CROSS JOIN LATERAL tilda_projected_info(t.geom, r.geom) proj_info
     ),
     aggregated AS (
