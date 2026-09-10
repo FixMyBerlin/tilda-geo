@@ -129,7 +129,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'operator_type__if_present',
         'oneway',
         'traffic_sign',
-        'width',
+        'composit_era_width',
         'bridge__if_present',
         'covered__if_present',
         'separation_left__if_present',

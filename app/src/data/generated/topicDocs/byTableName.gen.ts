@@ -1213,6 +1213,142 @@ const data = {
         ],
       },
       {
+        key: 'era_anlagentyp',
+        type: 'string',
+        label: 'ERA-Anlagentyp',
+        description:
+          'Zeile der FGSV ERA 2010, Tabelle 5, an der diese Anlage gemessen wird. Wird aus der Führungsform, der Verkehrsrichtung und der Lage an der Straße abgeleitet. Sind mehrere Anlagentypen möglich, stehen sie alle hier – bewertet wird dann gegen alle. Führungsformen, für die Tabelle 5 kein Breitenmaß kennt (z. B. Fahrradstraßen, Gehwege mit Radfahrer frei), haben keinen Wert.',
+        chapterRefs: ['era-check'],
+        values: [
+          {
+            value: 'schutzstreifen',
+            label: 'Schutzstreifen',
+          },
+          {
+            value: 'radfahrstreifen',
+            label: 'Radfahrstreifen',
+          },
+          {
+            value: 'einrichtungsradweg',
+            label: 'Einrichtungsradweg',
+          },
+          {
+            value: 'zweirichtungsradweg_beidseitig',
+            label: 'Zweirichtungsradweg (beidseitig)',
+            description:
+              'Zweirichtungsradweg, dem auf der anderen Straßenseite ein weiterer Radweg gegenübersteht. Erkennen können wir das nur bei seitenbezogen erfasster Radinfrastruktur (`cycleway:left`/`:right`), nicht bei eigenständig erfassten Geometrien.',
+          },
+          {
+            value: 'zweirichtungsradweg_einseitig',
+            label: 'Zweirichtungsradweg (einseitig)',
+            description:
+              'Einziger Radweg an der Straße, deshalb das größte Regelmaß der Tabelle 5.',
+          },
+          {
+            value: 'gemeinsamer_geh_und_radweg',
+            label: 'Gemeinsamer Geh- und Radweg',
+          },
+        ],
+      },
+      {
+        key: 'era_lage',
+        type: 'string',
+        label: 'ERA-Lage (Annahme)',
+        description:
+          'Steht nur dort, wo die geschätzte Lage innerorts/außerorts den Anlagentyp bestimmt hat – nämlich bei baulichen Radwegen, deren Verkehrsrichtung nicht erfasst ist. Innerorts nehmen wir dann einen Einrichtungsradweg an, außerorts einen Zweirichtungsradweg. Die Bewertung ist damit nur „vermutlich“ richtig.',
+        chapterRefs: ['era-check'],
+        values: [
+          {
+            value: 'innerorts',
+            label: 'Innerorts (angenommen)',
+            description: 'Der Weg liegt überwiegend innerhalb einer Siedlungsfläche.',
+          },
+          {
+            value: 'ausserorts',
+            label: 'Außerorts (angenommen)',
+            description: 'Der Weg liegt überwiegend außerhalb aller Siedlungsflächen.',
+          },
+        ],
+      },
+      {
+        key: 'era_width_check',
+        type: 'string',
+        label: 'ERA-Konformität der Breite',
+        description: 'Ergebnis der Breitenprüfung nach FGSV ERA 2010, Tabelle 5.',
+        chapterRefs: ['era-check'],
+        values: [
+          {
+            value: 'regelmass',
+            label: 'Regelmaß erfüllt',
+            description:
+              'Die Anlage erreicht das Regelmaß der ERA. Damit ist sie zugleich konform zur FGSV E-Klima, die die Regelmaße als Mindestwerte versteht.',
+          },
+          {
+            value: 'mindestmass',
+            label: 'Nur Mindestmaß erfüllt',
+            description:
+              'Das echte ERA-Mindestmaß ist erreicht, das Regelmaß nicht. Gibt es nur beim Schutzstreifen (1,25 m statt 1,50 m). Nicht konform zur FGSV E-Klima.',
+          },
+          {
+            value: 'klammerwert',
+            label: 'Nur Klammerwert erfüllt',
+            description:
+              'Erreicht wird nur der ERA-Klammerwert für geringe Radverkehrsstärke. Dieser ist nach FGSV E-Klima nicht mehr anzuwenden.',
+          },
+          {
+            value: 'unterschritten',
+            label: 'Unterschritten',
+            description:
+              'Die Breite bleibt unter allen Werten, die die ERA für diesen Anlagentyp nennt.',
+          },
+          {
+            value: 'unbekannt',
+            label: 'Nicht bewertbar',
+            description:
+              'Es fehlt die Breite, oder die möglichen Anlagentypen führen zu unterschiedlichen Ergebnissen. Welche Anlagentypen geprüft wurden, steht im Attribut ERA-Anlagentyp.',
+          },
+        ],
+      },
+      {
+        key: 'era_width_confidence',
+        type: 'string',
+        label: 'Konfidenz der ERA-Bewertung',
+        description:
+          'Beruht die Bewertung auf einer angenommenen Verkehrsrichtung, ist sie nur „vermutlich“ richtig. Angenommen ist die Richtung, wenn sie nicht aus einem OSM-Tag stammt, sondern aus der Führungsform abgeleitet (`implicit_yes`) oder geschätzt wurde (`assumed_no`) – im letzten Fall gegebenenfalls anhand der geschätzten Lage innerorts/außerorts, siehe Attribut ERA-Lage.',
+        chapterRefs: ['era-check'],
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Alle Angaben, die in die Bewertung eingehen, stammen aus OSM-Tags.',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
+            description:
+              'Die Verkehrsrichtung ist angenommen, unter Umständen aus der ebenfalls geschätzten Lage innerorts/außerorts. Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.',
+          },
+        ],
+      },
+      {
+        key: 'era_width_used',
+        type: 'meter',
+        label: 'Geprüfte Breite',
+        description:
+          'Breite, die mit der ERA verglichen wurde, einschließlich Markierung. Bei markierten Anlagen (Schutz- und Radfahrstreifen) ist das die erfasste Breite zuzüglich 0,25 m Markierung, bei baulichen Anlagen die erfasste Breite.',
+        chapterRefs: ['era-check'],
+        values: [],
+      },
+      {
+        key: 'era_width_regelmass',
+        type: 'meter',
+        label: 'ERA-Regelmaß',
+        description:
+          'Regelmaß, an dem gemessen wurde. Kommen mehrere Anlagentypen in Frage, ist es bei erfülltem Regelmaß das strengste erfüllte, sonst das mildeste verfehlte.',
+        chapterRefs: ['era-check'],
+        values: [],
+      },
+      {
         key: 'oneway',
         type: 'string',
         label: 'Verkehrsrichtung',
@@ -2029,6 +2165,12 @@ const data = {
     ],
     chapters: [
       {
+        id: 'era-check',
+        title: 'ERA-Check',
+        markdown:
+          'Der ERA-Check prüft Radverkehrsanlagen automatisiert gegen die **FGSV ERA 2010, Tabelle 5** („Breitenmaße von Radverkehrsanlagen und Sicherheitstrennstreifen“). Derzeit wird nur die **Breite** geprüft; weitere Attribute – zuerst der Sicherheitstrennstreifen zum ruhenden Verkehr – kommen später dazu.\n\n## Grundsatz: bewertet wird nur, was erfasst ist\n\nFehlende Angaben führen nie zu einem Mangel, sondern zu „nicht bewertbar“. Das gilt auch für die Führungsform: Ist aus den Daten nicht eindeutig, um welchen Anlagentyp es sich handelt, wird gegen **alle** in Frage kommenden Zeilen der Tabelle geprüft. Ein Ergebnis wird nur ausgewiesen, wenn es für alle gleich ausfällt. Ein Beispiel: Eine 1,70 m breite Anlage, bei der offen ist, ob sie Schutz- oder Radfahrstreifen ist, erfüllt in beiden Fällen das Regelmaß und wird deshalb als konform ausgewiesen.\n\n## Die geprüften Maße\n\n| Anlagentyp                       | Regelmaß | Mindestmaß | Klammerwert |\n| -------------------------------- | -------- | ---------- | ----------- |\n| Schutzstreifen                   | 1,50 m   | 1,25 m     | –           |\n| Radfahrstreifen                  | 1,85 m   | –          | –           |\n| Einrichtungsradweg               | 2,00 m   | –          | (1,60 m)    |\n| Beidseitiger Zweirichtungsradweg | 2,50 m   | –          | (2,00 m)    |\n| Einseitiger Zweirichtungsradweg  | 3,00 m   | –          | (2,50 m)    |\n| Gemeinsamer Geh- und Radweg      | 2,50 m   | –          | –           |\n\nTabelle 5 führt den gemeinsamen Geh- und Radweg getrennt nach innerorts (≥ 2,50 m, abhängig von Fußgänger- und Radverkehrsstärke) und außerorts (2,50 m). Für die Breite macht das keinen Unterschied, deshalb steht hier eine Zeile.\n\n## Markierung: 0,25 m\n\nDie Breiten der Tabelle 5 gelten „jeweils einschließlich Markierung“. Wir gehen davon aus, dass das OSM-Tag `width` **ohne** Markierung erfasst wurde. Bei Schutz- und Radfahrstreifen rechnen wir deshalb 0,25 m Markierung hinzu, bevor wir vergleichen; bei baulichen Anlagen ohne Markierung nicht. Ein Radfahrstreifen mit `width=1.6` wird also mit 1,85 m gemessen und erfüllt das Regelmaß.\n\n## Verkehrsrichtung\n\nOb ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hängt an der Verkehrsrichtung. Steht sie nicht in einem OSM-Tag, sondern ist aus der Führungsform abgeleitet oder geschätzt, folgen wir dieser Annahme – kennzeichnen die Bewertung aber als **„vermutlich“** (Attribut Konfidenz der ERA-Bewertung). Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.\n\nBeim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.\n\n## Innerorts und außerorts\n\nSteht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.\n\nWo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.\n\nFür den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.\n\n## Getrennte Geh- und Radwege\n\nTabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.\n\n## Verhältnis zur FGSV E-Klima\n\n> Um objektive und subjektive Sicherheit und damit eine gesteigerte Nutzung von Radverkehrsanlagen zu gewährleisten, sind ausreichend breite Anlagen zur Verfügung zu stellen. Die in den RASt 06 und ERA, Ausgabe 2010 angegebenen Regelmaße für Radverkehrsführungen sind als Mindestwerte anzusehen und diese Anlagen sind möglichst breiter zu wählen. Die in den RASt 06 und ERA angegebenen Klammerwerte für Radverkehrsanlagen sind nicht mehr anzuwenden.\n\nDaraus folgt: **E-Klima-konform ist genau, was das Regelmaß erfüllt.** „Nur Mindestmaß erfüllt“ und „nur Klammerwert erfüllt“ sind es nicht.\n\n## Führungsformen ohne Vorgabe\n\nFür Fahrradstraßen, Gehwege mit Radfahrer frei, Bussonderfahrstreifen, Fußgängerzonen, Querungen und Verbindungsstücke nennt Tabelle 5 kein Breitenmaß. Sie erhalten keine ERA-Attribute; im Inspektor steht dann ausdrücklich, dass keine ERA-Bewertung möglich ist.\n\nZwei Führungsformen kennt die ERA 2010 noch nicht; wir messen sie hilfsweise am Radfahrstreifen: den **geschützten Radfahrstreifen** und den **Radfahrstreifen in Mittellage** (Fahrradweiche).\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -2476,6 +2618,12 @@ const data = {
       },
     ],
     chapters: [
+      {
+        id: 'era-check',
+        title: 'ERA-Check',
+        markdown:
+          'Der ERA-Check prüft Radverkehrsanlagen automatisiert gegen die **FGSV ERA 2010, Tabelle 5** („Breitenmaße von Radverkehrsanlagen und Sicherheitstrennstreifen“). Derzeit wird nur die **Breite** geprüft; weitere Attribute – zuerst der Sicherheitstrennstreifen zum ruhenden Verkehr – kommen später dazu.\n\n## Grundsatz: bewertet wird nur, was erfasst ist\n\nFehlende Angaben führen nie zu einem Mangel, sondern zu „nicht bewertbar“. Das gilt auch für die Führungsform: Ist aus den Daten nicht eindeutig, um welchen Anlagentyp es sich handelt, wird gegen **alle** in Frage kommenden Zeilen der Tabelle geprüft. Ein Ergebnis wird nur ausgewiesen, wenn es für alle gleich ausfällt. Ein Beispiel: Eine 1,70 m breite Anlage, bei der offen ist, ob sie Schutz- oder Radfahrstreifen ist, erfüllt in beiden Fällen das Regelmaß und wird deshalb als konform ausgewiesen.\n\n## Die geprüften Maße\n\n| Anlagentyp                       | Regelmaß | Mindestmaß | Klammerwert |\n| -------------------------------- | -------- | ---------- | ----------- |\n| Schutzstreifen                   | 1,50 m   | 1,25 m     | –           |\n| Radfahrstreifen                  | 1,85 m   | –          | –           |\n| Einrichtungsradweg               | 2,00 m   | –          | (1,60 m)    |\n| Beidseitiger Zweirichtungsradweg | 2,50 m   | –          | (2,00 m)    |\n| Einseitiger Zweirichtungsradweg  | 3,00 m   | –          | (2,50 m)    |\n| Gemeinsamer Geh- und Radweg      | 2,50 m   | –          | –           |\n\nTabelle 5 führt den gemeinsamen Geh- und Radweg getrennt nach innerorts (≥ 2,50 m, abhängig von Fußgänger- und Radverkehrsstärke) und außerorts (2,50 m). Für die Breite macht das keinen Unterschied, deshalb steht hier eine Zeile.\n\n## Markierung: 0,25 m\n\nDie Breiten der Tabelle 5 gelten „jeweils einschließlich Markierung“. Wir gehen davon aus, dass das OSM-Tag `width` **ohne** Markierung erfasst wurde. Bei Schutz- und Radfahrstreifen rechnen wir deshalb 0,25 m Markierung hinzu, bevor wir vergleichen; bei baulichen Anlagen ohne Markierung nicht. Ein Radfahrstreifen mit `width=1.6` wird also mit 1,85 m gemessen und erfüllt das Regelmaß.\n\n## Verkehrsrichtung\n\nOb ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hängt an der Verkehrsrichtung. Steht sie nicht in einem OSM-Tag, sondern ist aus der Führungsform abgeleitet oder geschätzt, folgen wir dieser Annahme – kennzeichnen die Bewertung aber als **„vermutlich“** (Attribut Konfidenz der ERA-Bewertung). Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.\n\nBeim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.\n\n## Innerorts und außerorts\n\nSteht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.\n\nWo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.\n\nFür den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.\n\n## Getrennte Geh- und Radwege\n\nTabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.\n\n## Verhältnis zur FGSV E-Klima\n\n> Um objektive und subjektive Sicherheit und damit eine gesteigerte Nutzung von Radverkehrsanlagen zu gewährleisten, sind ausreichend breite Anlagen zur Verfügung zu stellen. Die in den RASt 06 und ERA, Ausgabe 2010 angegebenen Regelmaße für Radverkehrsführungen sind als Mindestwerte anzusehen und diese Anlagen sind möglichst breiter zu wählen. Die in den RASt 06 und ERA angegebenen Klammerwerte für Radverkehrsanlagen sind nicht mehr anzuwenden.\n\nDaraus folgt: **E-Klima-konform ist genau, was das Regelmaß erfüllt.** „Nur Mindestmaß erfüllt“ und „nur Klammerwert erfüllt“ sind es nicht.\n\n## Führungsformen ohne Vorgabe\n\nFür Fahrradstraßen, Gehwege mit Radfahrer frei, Bussonderfahrstreifen, Fußgängerzonen, Querungen und Verbindungsstücke nennt Tabelle 5 kein Breitenmaß. Sie erhalten keine ERA-Attribute; im Inspektor steht dann ausdrücklich, dass keine ERA-Bewertung möglich ist.\n\nZwei Führungsformen kennt die ERA 2010 noch nicht; wir messen sie hilfsweise am Radfahrstreifen: den **geschützten Radfahrstreifen** und den **Radfahrstreifen in Mittellage** (Fahrradweiche).\n',
+      },
       {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
@@ -3086,6 +3234,12 @@ const data = {
       },
     ],
     chapters: [
+      {
+        id: 'era-check',
+        title: 'ERA-Check',
+        markdown:
+          'Der ERA-Check prüft Radverkehrsanlagen automatisiert gegen die **FGSV ERA 2010, Tabelle 5** („Breitenmaße von Radverkehrsanlagen und Sicherheitstrennstreifen“). Derzeit wird nur die **Breite** geprüft; weitere Attribute – zuerst der Sicherheitstrennstreifen zum ruhenden Verkehr – kommen später dazu.\n\n## Grundsatz: bewertet wird nur, was erfasst ist\n\nFehlende Angaben führen nie zu einem Mangel, sondern zu „nicht bewertbar“. Das gilt auch für die Führungsform: Ist aus den Daten nicht eindeutig, um welchen Anlagentyp es sich handelt, wird gegen **alle** in Frage kommenden Zeilen der Tabelle geprüft. Ein Ergebnis wird nur ausgewiesen, wenn es für alle gleich ausfällt. Ein Beispiel: Eine 1,70 m breite Anlage, bei der offen ist, ob sie Schutz- oder Radfahrstreifen ist, erfüllt in beiden Fällen das Regelmaß und wird deshalb als konform ausgewiesen.\n\n## Die geprüften Maße\n\n| Anlagentyp                       | Regelmaß | Mindestmaß | Klammerwert |\n| -------------------------------- | -------- | ---------- | ----------- |\n| Schutzstreifen                   | 1,50 m   | 1,25 m     | –           |\n| Radfahrstreifen                  | 1,85 m   | –          | –           |\n| Einrichtungsradweg               | 2,00 m   | –          | (1,60 m)    |\n| Beidseitiger Zweirichtungsradweg | 2,50 m   | –          | (2,00 m)    |\n| Einseitiger Zweirichtungsradweg  | 3,00 m   | –          | (2,50 m)    |\n| Gemeinsamer Geh- und Radweg      | 2,50 m   | –          | –           |\n\nTabelle 5 führt den gemeinsamen Geh- und Radweg getrennt nach innerorts (≥ 2,50 m, abhängig von Fußgänger- und Radverkehrsstärke) und außerorts (2,50 m). Für die Breite macht das keinen Unterschied, deshalb steht hier eine Zeile.\n\n## Markierung: 0,25 m\n\nDie Breiten der Tabelle 5 gelten „jeweils einschließlich Markierung“. Wir gehen davon aus, dass das OSM-Tag `width` **ohne** Markierung erfasst wurde. Bei Schutz- und Radfahrstreifen rechnen wir deshalb 0,25 m Markierung hinzu, bevor wir vergleichen; bei baulichen Anlagen ohne Markierung nicht. Ein Radfahrstreifen mit `width=1.6` wird also mit 1,85 m gemessen und erfüllt das Regelmaß.\n\n## Verkehrsrichtung\n\nOb ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hängt an der Verkehrsrichtung. Steht sie nicht in einem OSM-Tag, sondern ist aus der Führungsform abgeleitet oder geschätzt, folgen wir dieser Annahme – kennzeichnen die Bewertung aber als **„vermutlich“** (Attribut Konfidenz der ERA-Bewertung). Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.\n\nBeim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.\n\n## Innerorts und außerorts\n\nSteht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.\n\nWo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.\n\nFür den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.\n\n## Getrennte Geh- und Radwege\n\nTabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.\n\n## Verhältnis zur FGSV E-Klima\n\n> Um objektive und subjektive Sicherheit und damit eine gesteigerte Nutzung von Radverkehrsanlagen zu gewährleisten, sind ausreichend breite Anlagen zur Verfügung zu stellen. Die in den RASt 06 und ERA, Ausgabe 2010 angegebenen Regelmaße für Radverkehrsführungen sind als Mindestwerte anzusehen und diese Anlagen sind möglichst breiter zu wählen. Die in den RASt 06 und ERA angegebenen Klammerwerte für Radverkehrsanlagen sind nicht mehr anzuwenden.\n\nDaraus folgt: **E-Klima-konform ist genau, was das Regelmaß erfüllt.** „Nur Mindestmaß erfüllt“ und „nur Klammerwert erfüllt“ sind es nicht.\n\n## Führungsformen ohne Vorgabe\n\nFür Fahrradstraßen, Gehwege mit Radfahrer frei, Bussonderfahrstreifen, Fußgängerzonen, Querungen und Verbindungsstücke nennt Tabelle 5 kein Breitenmaß. Sie erhalten keine ERA-Attribute; im Inspektor steht dann ausdrücklich, dass keine ERA-Bewertung möglich ist.\n\nZwei Führungsformen kennt die ERA 2010 noch nicht; wir messen sie hilfsweise am Radfahrstreifen: den **geschützten Radfahrstreifen** und den **Radfahrstreifen in Mittellage** (Fahrradweiche).\n',
+      },
       {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
@@ -10924,6 +11078,12 @@ const data = {
     ],
     chapters: [
       {
+        id: 'era-check',
+        title: 'ERA-Check',
+        markdown:
+          'Der ERA-Check prüft Radverkehrsanlagen automatisiert gegen die **FGSV ERA 2010, Tabelle 5** („Breitenmaße von Radverkehrsanlagen und Sicherheitstrennstreifen“). Derzeit wird nur die **Breite** geprüft; weitere Attribute – zuerst der Sicherheitstrennstreifen zum ruhenden Verkehr – kommen später dazu.\n\n## Grundsatz: bewertet wird nur, was erfasst ist\n\nFehlende Angaben führen nie zu einem Mangel, sondern zu „nicht bewertbar“. Das gilt auch für die Führungsform: Ist aus den Daten nicht eindeutig, um welchen Anlagentyp es sich handelt, wird gegen **alle** in Frage kommenden Zeilen der Tabelle geprüft. Ein Ergebnis wird nur ausgewiesen, wenn es für alle gleich ausfällt. Ein Beispiel: Eine 1,70 m breite Anlage, bei der offen ist, ob sie Schutz- oder Radfahrstreifen ist, erfüllt in beiden Fällen das Regelmaß und wird deshalb als konform ausgewiesen.\n\n## Die geprüften Maße\n\n| Anlagentyp                       | Regelmaß | Mindestmaß | Klammerwert |\n| -------------------------------- | -------- | ---------- | ----------- |\n| Schutzstreifen                   | 1,50 m   | 1,25 m     | –           |\n| Radfahrstreifen                  | 1,85 m   | –          | –           |\n| Einrichtungsradweg               | 2,00 m   | –          | (1,60 m)    |\n| Beidseitiger Zweirichtungsradweg | 2,50 m   | –          | (2,00 m)    |\n| Einseitiger Zweirichtungsradweg  | 3,00 m   | –          | (2,50 m)    |\n| Gemeinsamer Geh- und Radweg      | 2,50 m   | –          | –           |\n\nTabelle 5 führt den gemeinsamen Geh- und Radweg getrennt nach innerorts (≥ 2,50 m, abhängig von Fußgänger- und Radverkehrsstärke) und außerorts (2,50 m). Für die Breite macht das keinen Unterschied, deshalb steht hier eine Zeile.\n\n## Markierung: 0,25 m\n\nDie Breiten der Tabelle 5 gelten „jeweils einschließlich Markierung“. Wir gehen davon aus, dass das OSM-Tag `width` **ohne** Markierung erfasst wurde. Bei Schutz- und Radfahrstreifen rechnen wir deshalb 0,25 m Markierung hinzu, bevor wir vergleichen; bei baulichen Anlagen ohne Markierung nicht. Ein Radfahrstreifen mit `width=1.6` wird also mit 1,85 m gemessen und erfüllt das Regelmaß.\n\n## Verkehrsrichtung\n\nOb ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hängt an der Verkehrsrichtung. Steht sie nicht in einem OSM-Tag, sondern ist aus der Führungsform abgeleitet oder geschätzt, folgen wir dieser Annahme – kennzeichnen die Bewertung aber als **„vermutlich“** (Attribut Konfidenz der ERA-Bewertung). Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.\n\nBeim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.\n\n## Innerorts und außerorts\n\nSteht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.\n\nWo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.\n\nFür den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.\n\n## Getrennte Geh- und Radwege\n\nTabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.\n\n## Verhältnis zur FGSV E-Klima\n\n> Um objektive und subjektive Sicherheit und damit eine gesteigerte Nutzung von Radverkehrsanlagen zu gewährleisten, sind ausreichend breite Anlagen zur Verfügung zu stellen. Die in den RASt 06 und ERA, Ausgabe 2010 angegebenen Regelmaße für Radverkehrsführungen sind als Mindestwerte anzusehen und diese Anlagen sind möglichst breiter zu wählen. Die in den RASt 06 und ERA angegebenen Klammerwerte für Radverkehrsanlagen sind nicht mehr anzuwenden.\n\nDaraus folgt: **E-Klima-konform ist genau, was das Regelmaß erfüllt.** „Nur Mindestmaß erfüllt“ und „nur Klammerwert erfüllt“ sind es nicht.\n\n## Führungsformen ohne Vorgabe\n\nFür Fahrradstraßen, Gehwege mit Radfahrer frei, Bussonderfahrstreifen, Fußgängerzonen, Querungen und Verbindungsstücke nennt Tabelle 5 kein Breitenmaß. Sie erhalten keine ERA-Attribute; im Inspektor steht dann ausdrücklich, dass keine ERA-Bewertung möglich ist.\n\nZwei Führungsformen kennt die ERA 2010 noch nicht; wir messen sie hilfsweise am Radfahrstreifen: den **geschützten Radfahrstreifen** und den **Radfahrstreifen in Mittellage** (Fahrradweiche).\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -12004,6 +12164,12 @@ const data = {
     ],
     chapters: [
       {
+        id: 'era-check',
+        title: 'ERA-Check',
+        markdown:
+          'Der ERA-Check prüft Radverkehrsanlagen automatisiert gegen die **FGSV ERA 2010, Tabelle 5** („Breitenmaße von Radverkehrsanlagen und Sicherheitstrennstreifen“). Derzeit wird nur die **Breite** geprüft; weitere Attribute – zuerst der Sicherheitstrennstreifen zum ruhenden Verkehr – kommen später dazu.\n\n## Grundsatz: bewertet wird nur, was erfasst ist\n\nFehlende Angaben führen nie zu einem Mangel, sondern zu „nicht bewertbar“. Das gilt auch für die Führungsform: Ist aus den Daten nicht eindeutig, um welchen Anlagentyp es sich handelt, wird gegen **alle** in Frage kommenden Zeilen der Tabelle geprüft. Ein Ergebnis wird nur ausgewiesen, wenn es für alle gleich ausfällt. Ein Beispiel: Eine 1,70 m breite Anlage, bei der offen ist, ob sie Schutz- oder Radfahrstreifen ist, erfüllt in beiden Fällen das Regelmaß und wird deshalb als konform ausgewiesen.\n\n## Die geprüften Maße\n\n| Anlagentyp                       | Regelmaß | Mindestmaß | Klammerwert |\n| -------------------------------- | -------- | ---------- | ----------- |\n| Schutzstreifen                   | 1,50 m   | 1,25 m     | –           |\n| Radfahrstreifen                  | 1,85 m   | –          | –           |\n| Einrichtungsradweg               | 2,00 m   | –          | (1,60 m)    |\n| Beidseitiger Zweirichtungsradweg | 2,50 m   | –          | (2,00 m)    |\n| Einseitiger Zweirichtungsradweg  | 3,00 m   | –          | (2,50 m)    |\n| Gemeinsamer Geh- und Radweg      | 2,50 m   | –          | –           |\n\nTabelle 5 führt den gemeinsamen Geh- und Radweg getrennt nach innerorts (≥ 2,50 m, abhängig von Fußgänger- und Radverkehrsstärke) und außerorts (2,50 m). Für die Breite macht das keinen Unterschied, deshalb steht hier eine Zeile.\n\n## Markierung: 0,25 m\n\nDie Breiten der Tabelle 5 gelten „jeweils einschließlich Markierung“. Wir gehen davon aus, dass das OSM-Tag `width` **ohne** Markierung erfasst wurde. Bei Schutz- und Radfahrstreifen rechnen wir deshalb 0,25 m Markierung hinzu, bevor wir vergleichen; bei baulichen Anlagen ohne Markierung nicht. Ein Radfahrstreifen mit `width=1.6` wird also mit 1,85 m gemessen und erfüllt das Regelmaß.\n\n## Verkehrsrichtung\n\nOb ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hängt an der Verkehrsrichtung. Steht sie nicht in einem OSM-Tag, sondern ist aus der Führungsform abgeleitet oder geschätzt, folgen wir dieser Annahme – kennzeichnen die Bewertung aber als **„vermutlich“** (Attribut Konfidenz der ERA-Bewertung). Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.\n\nBeim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.\n\n## Innerorts und außerorts\n\nSteht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.\n\nWo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.\n\nFür den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.\n\n## Getrennte Geh- und Radwege\n\nTabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.\n\n## Verhältnis zur FGSV E-Klima\n\n> Um objektive und subjektive Sicherheit und damit eine gesteigerte Nutzung von Radverkehrsanlagen zu gewährleisten, sind ausreichend breite Anlagen zur Verfügung zu stellen. Die in den RASt 06 und ERA, Ausgabe 2010 angegebenen Regelmaße für Radverkehrsführungen sind als Mindestwerte anzusehen und diese Anlagen sind möglichst breiter zu wählen. Die in den RASt 06 und ERA angegebenen Klammerwerte für Radverkehrsanlagen sind nicht mehr anzuwenden.\n\nDaraus folgt: **E-Klima-konform ist genau, was das Regelmaß erfüllt.** „Nur Mindestmaß erfüllt“ und „nur Klammerwert erfüllt“ sind es nicht.\n\n## Führungsformen ohne Vorgabe\n\nFür Fahrradstraßen, Gehwege mit Radfahrer frei, Bussonderfahrstreifen, Fußgängerzonen, Querungen und Verbindungsstücke nennt Tabelle 5 kein Breitenmaß. Sie erhalten keine ERA-Attribute; im Inspektor steht dann ausdrücklich, dass keine ERA-Bewertung möglich ist.\n\nZwei Führungsformen kennt die ERA 2010 noch nicht; wir messen sie hilfsweise am Radfahrstreifen: den **geschützten Radfahrstreifen** und den **Radfahrstreifen in Mittellage** (Fahrradweiche).\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -12055,6 +12221,12 @@ const data = {
       },
     ],
     chapters: [
+      {
+        id: 'era-check',
+        title: 'ERA-Check',
+        markdown:
+          'Der ERA-Check prüft Radverkehrsanlagen automatisiert gegen die **FGSV ERA 2010, Tabelle 5** („Breitenmaße von Radverkehrsanlagen und Sicherheitstrennstreifen“). Derzeit wird nur die **Breite** geprüft; weitere Attribute – zuerst der Sicherheitstrennstreifen zum ruhenden Verkehr – kommen später dazu.\n\n## Grundsatz: bewertet wird nur, was erfasst ist\n\nFehlende Angaben führen nie zu einem Mangel, sondern zu „nicht bewertbar“. Das gilt auch für die Führungsform: Ist aus den Daten nicht eindeutig, um welchen Anlagentyp es sich handelt, wird gegen **alle** in Frage kommenden Zeilen der Tabelle geprüft. Ein Ergebnis wird nur ausgewiesen, wenn es für alle gleich ausfällt. Ein Beispiel: Eine 1,70 m breite Anlage, bei der offen ist, ob sie Schutz- oder Radfahrstreifen ist, erfüllt in beiden Fällen das Regelmaß und wird deshalb als konform ausgewiesen.\n\n## Die geprüften Maße\n\n| Anlagentyp                       | Regelmaß | Mindestmaß | Klammerwert |\n| -------------------------------- | -------- | ---------- | ----------- |\n| Schutzstreifen                   | 1,50 m   | 1,25 m     | –           |\n| Radfahrstreifen                  | 1,85 m   | –          | –           |\n| Einrichtungsradweg               | 2,00 m   | –          | (1,60 m)    |\n| Beidseitiger Zweirichtungsradweg | 2,50 m   | –          | (2,00 m)    |\n| Einseitiger Zweirichtungsradweg  | 3,00 m   | –          | (2,50 m)    |\n| Gemeinsamer Geh- und Radweg      | 2,50 m   | –          | –           |\n\nTabelle 5 führt den gemeinsamen Geh- und Radweg getrennt nach innerorts (≥ 2,50 m, abhängig von Fußgänger- und Radverkehrsstärke) und außerorts (2,50 m). Für die Breite macht das keinen Unterschied, deshalb steht hier eine Zeile.\n\n## Markierung: 0,25 m\n\nDie Breiten der Tabelle 5 gelten „jeweils einschließlich Markierung“. Wir gehen davon aus, dass das OSM-Tag `width` **ohne** Markierung erfasst wurde. Bei Schutz- und Radfahrstreifen rechnen wir deshalb 0,25 m Markierung hinzu, bevor wir vergleichen; bei baulichen Anlagen ohne Markierung nicht. Ein Radfahrstreifen mit `width=1.6` wird also mit 1,85 m gemessen und erfüllt das Regelmaß.\n\n## Verkehrsrichtung\n\nOb ein Radweg als Einrichtungs- oder als Zweirichtungsradweg zu messen ist, hängt an der Verkehrsrichtung. Steht sie nicht in einem OSM-Tag, sondern ist aus der Führungsform abgeleitet oder geschätzt, folgen wir dieser Annahme – kennzeichnen die Bewertung aber als **„vermutlich“** (Attribut Konfidenz der ERA-Bewertung). Trifft die Annahme nicht zu, gilt ein anderes Regelmaß und die Bewertung kann kippen.\n\nBeim Zweirichtungsradweg unterscheidet die ERA zusätzlich, ob es an der Straße nur diesen einen (einseitig, 3,00 m) oder auf beiden Seiten je einen gibt (beidseitig, 2,50 m). Bei eigenständig erfassten Geometrien ist das nicht bestimmbar; dann wird gegen beide Varianten geprüft.\n\n## Innerorts und außerorts\n\nSteht zur Verkehrsrichtung eines baulichen Radwegs gar nichts in OSM, hilft die Lage weiter: Innerorts sind Radwege in der Regel Einrichtungsradwege (Regelmaß 2,00 m), außerorts führen sie in der Regel beide Richtungen (2,50 bzw. 3,00 m). Wir nutzen dafür eine Schätzung, ob der Weg **überwiegend** – also mit mehr als der Hälfte seiner Länge – innerhalb einer Siedlungsfläche liegt.\n\nWo diese Annahme das Ergebnis trägt, steht sie im Attribut **ERA-Lage** und die Bewertung gilt nur als „vermutlich“ richtig. Die Lage ist eine Schätzung, kein erfasster Wert; die Bewertung ist an diesen Stellen also entsprechend zurückhaltend zu lesen.\n\nFür den gemeinsamen Geh- und Radweg spielt die Lage keine Rolle: Tabelle 5 nennt innerorts wie außerorts 2,50 m. Gebraucht wird sie darüber hinaus beim Sicherheitstrennstreifen zur Fahrbahn (1,75 m an Landstraßen), der noch nicht geprüft wird.\n\n## Getrennte Geh- und Radwege\n\nTabelle 5 hat für den getrennten Geh- und Radweg keine eigene Zeile; sein Radwegteil ist ein Einrichtungs- oder Zweirichtungsradweg und wird auch so gemessen. Voraussetzung ist, dass die erfasste Breite tatsächlich den Radweg meint. Davon gehen wir aus, wenn sie aus `cycleway:<seite>:width` stammt, oder wenn über `traffic_mode:right` erfasst ist, was neben dem Weg liegt – dann ist der Gehweg eine eigene Geometrie. Beschreibt eine Linie dagegen Geh- und Radweg zusammen, bleibt die Breite unbewertet.\n\n## Verhältnis zur FGSV E-Klima\n\n> Um objektive und subjektive Sicherheit und damit eine gesteigerte Nutzung von Radverkehrsanlagen zu gewährleisten, sind ausreichend breite Anlagen zur Verfügung zu stellen. Die in den RASt 06 und ERA, Ausgabe 2010 angegebenen Regelmaße für Radverkehrsführungen sind als Mindestwerte anzusehen und diese Anlagen sind möglichst breiter zu wählen. Die in den RASt 06 und ERA angegebenen Klammerwerte für Radverkehrsanlagen sind nicht mehr anzuwenden.\n\nDaraus folgt: **E-Klima-konform ist genau, was das Regelmaß erfüllt.** „Nur Mindestmaß erfüllt“ und „nur Klammerwert erfüllt“ sind es nicht.\n\n## Führungsformen ohne Vorgabe\n\nFür Fahrradstraßen, Gehwege mit Radfahrer frei, Bussonderfahrstreifen, Fußgängerzonen, Querungen und Verbindungsstücke nennt Tabelle 5 kein Breitenmaß. Sie erhalten keine ERA-Attribute; im Inspektor steht dann ausdrücklich, dass keine ERA-Bewertung möglich ist.\n\nZwei Führungsformen kennt die ERA 2010 noch nicht; wir messen sie hilfsweise am Radfahrstreifen: den **geschützten Radfahrstreifen** und den **Radfahrstreifen in Mittellage** (Fahrradweiche).\n',
+      },
       {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',

@@ -9,22 +9,31 @@ a way is **innerorts** (inside a settlement area) or **außerorts**. Same round-
 `is_sidepath` (see `../pseudo_tags_sidepath/`).
 
 > [!IMPORTANT]
-> **Produced but not yet consumed.** The value is stored as an internal `_`-prefixed tag and is
-> not used downstream yet. It is a heuristic (see the generator's README), hence the value is
-> `assumed_yes` / `assumed_no`.
+> **A heuristic**, hence the values `assumed_yes` / `assumed_no` (see the generator's README).
+> The only consumer so far is the ERA check
+> ([`../bikelanes/era_check/`](../bikelanes/era_check/README.md)): innerorts it assumes a
+> one-way cycleway where OSM says nothing about the direction, außerorts a two-way one, and it
+> marks that assumption in the data (`era_lage`) so the app can show it. Since the attach is off,
+> that path is currently dead code.
 
 ## Round-trip
 
 1. **Export (afterthoughts, this run)** — [exportSettlementAreaData.ts](exportSettlementAreaData.ts)
    runs [sql/run_settlement_area_estimation.sql](sql/run_settlement_area_estimation.sql): classify
-   roads + bikelanes by `ST_Intersects` against `public._settlement_areas` (chosen over %-coverage —
-   see [BENCHMARK_DOCUMENTATION.md](../../landcover/settlement_areas/BENCHMARK_DOCUMENTATION.md)), and write
-   `settlement_area_estimation.csv` for the **next** run. Only
-   the **minority class** (außerorts / outside, ~32% by way count on Germany) is exported; inside is
-   the inferred default. See
+   roads + bikelanes by whether they lie **mostly** (more than half their length) inside
+   `public._settlement_areas`, and write `settlement_area_estimation.csv` for the **next** run. Only
+   the **minority class** (außerorts / outside) is exported; inside is the inferred default. See
    [CLASSIFICATION_STATS.md](../../landcover/settlement_areas/CLASSIFICATION_STATS.md) for production
-   splits (count vs length, per-Bundesland). If `public._settlement_areas` doesn't exist yet, the
-   export skips gracefully.
+   splits (count vs length, per-Bundesland) — those numbers were measured with the earlier
+   touches-at-all rule and shift towards außerorts under the majority rule. If
+   `public._settlement_areas` doesn't exist yet, the export skips gracefully.
+
+   The majority rule is staged so the expensive part stays small: the index-only tests
+   ("touches any area?", "fully covered by one area?") decide almost every way, and
+   `ST_Intersection` runs only for the ways that actually cross a settlement boundary. The
+   %-coverage variant that the benchmark rejected measured _every_ way that way — see
+   [BENCHMARK_DOCUMENTATION.md](../../landcover/settlement_areas/BENCHMARK_DOCUMENTATION.md).
+
 2. **Attach (Lua, next run)** — [in_settlement_area.lua](in_settlement_area.lua) +
    [load_csv_in_settlement_area.lua](load_csv_in_settlement_area.lua), wired in
    `../pseudo_tags/prepare_pseudo_tags_roads_bikelanes.lua`, set

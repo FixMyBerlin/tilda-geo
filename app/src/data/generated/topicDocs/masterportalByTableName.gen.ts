@@ -467,6 +467,59 @@ const data = {
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
         },
       },
+      era_anlagentyp: {
+        name: 'ERA-Anlagentyp',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          schutzstreifen: 'Schutzstreifen',
+          radfahrstreifen: 'Radfahrstreifen',
+          einrichtungsradweg: 'Einrichtungsradweg',
+          zweirichtungsradweg_beidseitig: 'Zweirichtungsradweg (beidseitig)',
+          zweirichtungsradweg_einseitig: 'Zweirichtungsradweg (einseitig)',
+          gemeinsamer_geh_und_radweg: 'Gemeinsamer Geh- und Radweg',
+        },
+      },
+      era_lage: {
+        name: 'ERA-Lage (Annahme)',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          innerorts: 'Innerorts (angenommen)',
+          ausserorts: 'Außerorts (angenommen)',
+        },
+      },
+      era_width_check: {
+        name: 'ERA-Konformität der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          regelmass: 'Regelmaß erfüllt',
+          mindestmass: 'Nur Mindestmaß erfüllt',
+          klammerwert: 'Nur Klammerwert erfüllt',
+          unterschritten: 'Unterschritten',
+          unbekannt: 'Nicht bewertbar',
+        },
+      },
+      era_width_confidence: {
+        name: 'Konfidenz der ERA-Bewertung',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          low: 'Niedrig',
+        },
+      },
+      era_width_used: {
+        name: 'Geprüfte Breite',
+        type: 'number',
+        suffix: 'm',
+      },
+      era_width_regelmass: {
+        name: 'ERA-Regelmaß',
+        type: 'number',
+        suffix: 'm',
+      },
       oneway: {
         name: 'Verkehrsrichtung',
         condition: 'contains',
