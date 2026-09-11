@@ -1,23 +1,25 @@
 ---
 name: tilda-geo-private-repo
 description: >-
-  Two-remote workflow between public FixMyBerlin/tilda-geo (origin) and private
-  FixMyBerlin/tilda-geo-private (private). Use when pushing experimental branches
-  privately, opening PRs on the private repo, syncing develop, or bringing
-  finished work back to the public repo.
+  Two remotes for the same TILDA code: public FixMyBerlin/tilda-geo (origin) and
+  private FixMyBerlin/tilda-geo-private (private). Use when pushing the current
+  local branch to the private repo and opening a PR there.
 ---
 
 # Private experimental repo (two remotes)
 
-Use when work should stay off the public repo until ready for review, or when syncing `develop` between the two mirrors.
+TILDA exists as two GitHub repos with the same code. `origin` is public
+(`FixMyBerlin/tilda-geo`). `private` is the experimental copy
+(`FixMyBerlin/tilda-geo-private`).
 
-## When to use
+Use this skill when the **current local branch** should get a PR on the private
+repo. Do not create a new branch for that — the branch already exists. Prefer an
+`experiment/` or `priv/` prefix on new private-only work; do not rename an
+existing branch unless asked.
 
-- Start an experimental branch without publishing it on `origin`
-- Open a PR (draft or not) that stays on the private repo
-- Keep a private mirror of `develop` up to date
-- Bring finished work back to the public repo via PR on `develop`
-- Test a public branch (e.g. Dependabot) in the private mirror first
+This skill’s PR target is **always** `FixMyBerlin/tilda-geo-private`. Do not
+`git push origin` and do not open a PR on `FixMyBerlin/tilda-geo` unless the
+user explicitly asks to publish.
 
 ## Remotes
 
@@ -26,153 +28,72 @@ Use when work should stay off the public repo until ready for review, or when sy
 | `origin`  | `git@github.com:FixMyBerlin/tilda-geo.git`         |
 | `private` | `git@github.com:FixMyBerlin/tilda-geo-private.git` |
 
-### One-time setup (main checkout)
+One-time, in the **main checkout** (sibling worktrees share the same `.git` store):
 
 ```bash
 git remote add private git@github.com:FixMyBerlin/tilda-geo-private.git
 ```
 
-`git remote add private` in the **main checkout** is enough — all sibling worktrees share the same `.git` store.
+`tilda-geo-private` keeps `develop` plus branches you explicitly push. Do **not**
+run `git push private --all`.
 
-Initial mirror (one-time, from any checkout with both remotes):
+## Private PR
 
-```bash
-git push private --all
-git push private --tags
-```
-
-**Branch policy:** `tilda-geo-private` keeps only `develop` plus branches you explicitly push (e.g. `experiment/*`). Do **not** run `git push private --all` — sync individual branches or `origin/develop:develop` instead.
-
-## Agent rules
-
-- **Never** copy deploy secrets (SSH, ECR, DB) into `tilda-geo-private`
-- **Never** commit `.env`, credentials, or real secrets
-- **PR base** is always `develop` — but the **repo** depends on the decision below
-- **CI** runs in both repos; **deploy** runs only on `FixMyBerlin/tilda-geo` (see deploy guard below)
-- **Branch naming** for private-only work: `experiment/` or `priv/` prefix — also when that branch gets a PR on the private repo
-
-## Which repo does the PR go to?
-
-A PR on the private repo works on its own. It does **not** require the branch on `origin`.
-
-| Situation                                                                  | Do this                                                                                              |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Work is an experiment, unfinished, or the user said it should stay private | Recipe A + E: push to `private`, PR on `FixMyBerlin/tilda-geo-private`. **Never** `git push origin`. |
-| Work is finished and meant for review/merge in public TILDA                | Recipe C: push to `origin`, PR on `FixMyBerlin/tilda-geo`                                            |
-| Unclear which of the two                                                   | **AskQuestion** first: public PR on `tilda-geo`, or private PR on `tilda-geo-private`?               |
-
-Default to the private path. Pushing a branch to `origin` and opening a public PR is permanent
-(branch names and commits stay visible) and needs the user's explicit intent for _public_, not just
-their intent to open "a PR". If the work is described as exploring, a draft, or not production-ready,
-that is the private path.
-
-## Recipes
-
-### A) Start an experimental branch privately
-
-```bash
-git fetch origin develop
-git checkout -b experiment/xyz origin/develop
-# ... work ...
-git push -u private experiment/xyz
-```
-
-### B) Sync public `develop` into the private mirror
-
-```bash
-git fetch origin develop
-git push private origin/develop:develop
-```
-
-Or merge into your experiment branch first:
-
-```bash
-git checkout experiment/xyz
-git merge origin/develop   # resolve conflicts here
-git push private experiment/xyz
-```
-
-### C) Bring finished work back to the public repo
-
-Only for work that is meant for public review or merge. This publishes the branch permanently — not
-for experiments or drafts that should stay private (use E instead).
-
-```bash
-git fetch private experiment/xyz
-git push origin experiment/xyz
-
-gh pr create --repo FixMyBerlin/tilda-geo \
-  --base develop \
-  --head experiment/xyz \
-  --title "…" \
-  --body "…"
-```
-
-After merge, optionally mirror `develop` back:
-
-```bash
-git fetch origin develop
-git push private origin/develop:develop
-```
-
-### D) Mirror a public branch to private (e.g. Dependabot)
-
-```bash
-git fetch origin dependabot/…
-git push private origin/dependabot/…:dependabot/…
-```
-
-### E) Open a PR on the private repo (draft or normal)
-
-Continues A. The branch exists only on `private`; that is enough for a PR there.
+Push the current branch to `private` and open the PR there. That is enough; the
+branch does not need to exist on `origin`.
 
 ```bash
 git push -u private HEAD
 
 gh pr create --repo FixMyBerlin/tilda-geo-private \
   --base develop \
-  --head experiment/xyz \
+  --head "$(git branch --show-current)" \
   --draft \
   --title "…" \
   --body "…"
 ```
 
-Do **not** `git push origin` for this path, and do not open a PR on `FixMyBerlin/tilda-geo`.
-Drop `--draft` only if the user asked for a ready-for-review PR on the private repo.
+Drop `--draft` only if the user asked for a ready-for-review PR on the private
+repo.
 
-## Limitations
+## Optional: publish the same branch on public TILDA
 
-- **No cross-repo PRs** — GitHub cannot open a PR from a branch on `tilda-geo-private` into `tilda-geo`. That is the only reason Recipe C copies the branch to `origin` first. A PR **on** `tilda-geo-private` needs no `origin` branch.
-- **No auto-sync** — every branch sync is a deliberate `fetch` + `push` (or merge/rebase)
-- **Branch visibility** — once pushed to `origin`, the branch name and commits are visible before merge
-- **Issues, PRs, Dependabot, secrets** do not sync between repos
+Only when the user asks to publish, open a public PR, or merge into TILDA.
+GitHub cannot open a PR from `tilda-geo-private` into `tilda-geo`, so the branch
+must exist on `origin` first.
 
-## Deploy guard
+```bash
+git push -u origin HEAD
 
-Deploy workflows are gated with `if: github.repository == 'FixMyBerlin/tilda-geo'` in:
+gh pr create --repo FixMyBerlin/tilda-geo \
+  --base develop \
+  --head "$(git branch --show-current)" \
+  --title "…" \
+  --body "…"
+```
 
-- `.github/workflows/deploy.staging.yml`
-- `.github/workflows/deploy.production.yml`
-- `.github/workflows/deploy-force.yml`
-- `.github/workflows/generate-tiles.production.yml`
-- `.github/workflows/generate-tiles.staging.yml`
-- `.github/workflows/generate-maproulette-tasks.production.yml`
+Pushing to `origin` makes the branch name and commits public before merge.
 
-CI (`.github/workflows/ci.yml`) runs in both repos. Do not add deploy secrets to the private repo.
+## Optional: refresh private `develop`
 
-## Worktrees
+If the private PR’s base is stale:
 
-Sibling worktrees (`../tilda-geo--my-branch/`) share remotes with the main checkout. After one-time `git remote add private` in the main checkout, all worktrees can `git push private …`.
+```bash
+git fetch origin develop
+git push private origin/develop:develop
+```
+
+## Safety
+
+- Never copy deploy secrets (SSH, ECR, DB) into `tilda-geo-private`
+- Never commit `.env`, credentials, or real secrets
+- CI runs in both repos; deploy runs only on `FixMyBerlin/tilda-geo`
 
 ## Agent checklist
 
 ```
-- [ ] Private experiment? -> load this skill; use `experiment/` or `priv/` branch prefix
 - [ ] Remote missing? -> `git remote add private git@github.com:FixMyBerlin/tilda-geo-private.git` (main checkout once)
-- [ ] Before starting work -> `git fetch origin develop`
-- [ ] Before any PR -> decide the repo (see "Which repo does the PR go to?"); ask if unclear
-- [ ] Private PR -> Recipe E: `gh pr create --repo FixMyBerlin/tilda-geo-private`; do NOT push `origin`
-- [ ] Public PR -> Recipe C: sync with `origin/develop`; push branch to `origin`; PR base = `develop`
-- [ ] After merge -> optional `git push private origin/develop:develop`
-- [ ] Never copy deploy secrets to `tilda-geo-private`
+- [ ] `git push -u private HEAD`
+- [ ] `gh pr create --repo FixMyBerlin/tilda-geo-private --base develop`
+- [ ] Do not push `origin` unless the user asked to publish
 ```
