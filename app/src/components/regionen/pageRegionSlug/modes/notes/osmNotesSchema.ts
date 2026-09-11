@@ -34,7 +34,7 @@ const osmApiNoteSchema = z.object({
   closed_at: osmApiDateSchemaNullish, // ONLY when `status=closed`
   comment_url: z.url().nullish(), // ONLY when `status=open` `https://api.openstreetmap.org/api/0.6/notes/${number}/comment.json`
   reopen_url: z.url().nullish(), // ONLY when `status=closed` `https://api.openstreetmap.org/api/0.6/notes/${number}/reopen.json`
-  close_url: z.url().nullish(), // ONLY when `status=closed` `https://api.openstreetmap.org/api/0.6/notes/${number}/close.json`
+  close_url: z.url().nullish(), // ONLY when `status=open` `https://api.openstreetmap.org/api/0.6/notes/${number}/close.json`
   comments: z.array(osmNotesCommentSchema),
 })
 
@@ -53,9 +53,10 @@ const sharedFeaturePointSchema = z.object({
     coordinates: z.tuple([z.number(), z.number()]), // [longitude, latitude]
   }),
 })
-const osmApiFeaturePointSchema = sharedFeaturePointSchema.extend({
+export const osmApiFeaturePointSchema = sharedFeaturePointSchema.extend({
   properties: osmApiNoteSchema,
 })
+export type OsmApiFeaturePointType = z.infer<typeof osmApiFeaturePointSchema>
 const osmFeaturePointSchema = sharedFeaturePointSchema.extend({
   id: z.number(),
   properties: osmNoteSchema,

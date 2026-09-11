@@ -5,6 +5,9 @@ export const osmNewNoteDraftId = (regionSlug: string) => `note:new:osm:${regionS
 
 export const noteCommentDraftId = (noteId: number | string) => `note:comment:${noteId}` as const
 
+export const osmNoteCommentDraftId = (noteId: number | string) =>
+  `note:comment:osm:${noteId}` as const
+
 export const qaEvalDraftId = (regionSlug: string, configSlug: string, areaId: string) =>
   `qa:eval:${regionSlug}:${configSlug}:${areaId}` as const
 
