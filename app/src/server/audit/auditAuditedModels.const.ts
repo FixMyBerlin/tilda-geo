@@ -1,9 +1,10 @@
-/** Prisma models included in the audit-log extension (see prismaAuditExtensions.server). */
+/** Prisma models included in the audit-log extension (see prismaAuditExtensions.server).
+ * Better Auth's `Verification` model is intentionally excluded: it only holds short-lived
+ * OAuth/email tokens (create-then-delete noise, no actor). */
 export const AUDITED_MODELS = [
   'User',
   'Session',
   'Account',
-  'Verification',
   'Region',
   'RegionCategoryAssignment',
   'RegionBackgroundAssignment',
