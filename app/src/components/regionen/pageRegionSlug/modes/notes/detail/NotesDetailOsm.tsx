@@ -5,6 +5,7 @@ import {
   modeAccentTintClassName,
   modeAccentTintEmphasisClassName,
 } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import { NotesNewLoginNotice } from '@/components/regionen/pageRegionSlug/modes/notes/new/NotesNewLoginNotice'
 import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
 import { SvgNotesCheckmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesCheckmark'
 import { SvgNotesQuestionmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesQuestionmark'
@@ -15,6 +16,7 @@ import { Link } from '@/components/shared/links/Link'
 import { proseClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { isDev } from '@/components/shared/utils/isEnv'
+import { OsmNoteCommentForm } from './OsmNoteCommentForm'
 
 type Props = {
   noteId: number
@@ -78,27 +80,36 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
       })}
       <div className="space-y-3 px-3 py-3">
         <p>Erstellt am {thread.date_created}</p>
-        <p className="flex items-center gap-2">
-          Status:{' '}
-          {thread.status === 'closed' && (
-            <span className="inline-flex gap-1">
-              <SvgNotesCheckmark className="size-5 text-teal-800" />
-              geschlossen
-            </span>
-          )}
-          {thread.status === 'open' && (
-            <span className="inline-flex gap-1">
-              <SvgNotesQuestionmark className="size-5 text-teal-800" />
-              offen
-            </span>
-          )}
-        </p>
+        {/* Logged-in users get the status switch in OsmNoteCommentForm below instead. */}
+        {!session && (
+          <p className="flex items-center gap-2">
+            Status:{' '}
+            {thread.status === 'closed' && (
+              <span className="inline-flex gap-1">
+                <SvgNotesCheckmark className="size-5 text-teal-800" />
+                geschlossen
+              </span>
+            )}
+            {thread.status === 'open' && (
+              <span className="inline-flex gap-1">
+                <SvgNotesQuestionmark className="size-5 text-teal-800" />
+                offen
+              </span>
+            )}
+          </p>
+        )}
         <p>
-          <Link button blank href={getOsmUrl(`/note/${thread.id}`)}>
-            Auf openstreetmap.org ansehen und kommentieren
+          <Link blank href={getOsmUrl(`/note/${thread.id}`)}>
+            Auf openstreetmap.org ansehen
           </Link>
         </p>
       </div>
+
+      {session ? (
+        <OsmNoteCommentForm key={thread.id} thread={thread} />
+      ) : (
+        <NotesNewLoginNotice message="Um diesen Hinweis zu kommentieren, müssen Sie eingeloggt sein." />
+      )}
 
       {isDev && <ObjectDump data={thread} />}
     </div>
