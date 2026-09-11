@@ -64,7 +64,7 @@ function shouldCreateNewEvaluation(
   return shouldResetUserDecision(newSystemStatus, previousEvaluation.userStatus)
 }
 
-function getEffectiveSystemStatus(input: {
+export function getEffectiveSystemStatus(input: {
   systemStatus: QaSystemStatus
   absoluteDifference: number | null
   absoluteDifferenceThreshold: number

@@ -110,8 +110,16 @@ When there is **a user decision** (`userStatus !== null`), the system respects u
 - **OK_QA_TOOLING_ERROR** and **NOT_OK** (`NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`): reset only when system status becomes GOOD.
 - **Reset**: new evaluation with `userStatus = null`, `body = null`, `userId = null`.
 - **Effective system status** (and thus "GOOD") follows [§3.1](#31-system-overwrites-system-no-user-decision) (absolute diff before %).
+- **Stored system status on a user evaluation**: computed from the counts in the saved decision data (same thresholds as nightly), not a `NEEDS_REVIEW` placeholder. Users cannot set system status; `NEEDS_REVIEW` is only a system value.
 
-All updates require data to have changed (`previousRelative !== currentRelative`); otherwise no new evaluation is created.
+**Order of checks** (`getQaUpdateDecision` in `qaEvaluationRules.ts`):
+
+1. No previous evaluation → always create a `SYSTEM` evaluation (first run).
+2. **Reset check** (independent of, and before, any data-changed gate): previous user status is `NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`, or `OK_QA_TOOLING_ERROR` and the effective status is `GOOD` → create a reset evaluation (see above).
+3. Otherwise, a **data-changed gate** applies: `dataChanged = (effective status !== previous systemStatus) OR (previousRelative !== currentRelative AND |absoluteDifference| > threshold)`. If `dataChanged` is false → keep the existing evaluation.
+4. If `dataChanged` is true, a new evaluation is created only when [§3.1](#31-system-overwrites-system-no-user-decision)/[§3.2](#32-system-overwrites-user-decision) say so — without a user decision, whenever the effective status changed; with a user decision, only the reset case from step 2 (already handled above).
+
+The relative-change part of the gate (`previousRelative !== currentRelative`) therefore never creates an evaluation by itself — it only opens the gate for the effective-status check, so the tables in §3.1/§3.2 remain the full truth for when an evaluation is created. `previousRelative` comes from the processing table's previous run (`public.qa_parkings_euvm*.previous_relative`), not from the previously stored evaluation.
 
 ## Data Flow
 

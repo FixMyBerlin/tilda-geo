@@ -8,6 +8,10 @@ import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import {
+  calculateSystemStatus,
+  getEffectiveSystemStatus,
+} from '@/server/qa-configs/evaluation/qaEvaluationRules'
+import {
   qaDecisionDataSchema,
   transformEvaluationWithDecisionData,
 } from '@/server/qa-configs/schemas/qaDecisionDataSchema'
@@ -34,10 +38,10 @@ export async function createQaEvaluation(
   const appSession = await requireAuth(headers)
   await authorizeRegionMemberByRegionSlug(appSession, input.regionSlug)
 
-  const { configSlug, areaId, userStatus, body, decisionData } =
+  const { configSlug, areaId, regionSlug, userStatus, body, decisionData } =
     CreateQaEvaluationSchema.parse(input)
   const qaConfig = await db.qaConfig.findFirstOrThrow({
-    where: { slug: configSlug },
+    where: { slug: configSlug, region: { slug: regionSlug } },
   })
 
   let storedDecisionData: undefined | QaDecisionData
@@ -50,6 +54,22 @@ export async function createQaEvaluation(
     })
   }
 
+  // Nightly compares against this row. Prefer the counts the user is saving so a
+  // previous user row with the old NEEDS_REVIEW placeholder is not copied forward.
+  const systemStatus = storedDecisionData
+    ? getEffectiveSystemStatus({
+        systemStatus: calculateSystemStatus(storedDecisionData.relative, qaConfig),
+        absoluteDifference: storedDecisionData.absoluteChange,
+        absoluteDifferenceThreshold: qaConfig.absoluteDifferenceThreshold,
+      }).effectiveSystemStatus
+    : ((
+        await db.qaEvaluation.findFirst({
+          where: { configId: qaConfig.id, areaId },
+          orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+          select: { systemStatus: true },
+        })
+      )?.systemStatus ?? 'NEEDS_REVIEW')
+
   const evaluation = await runWithAuditContextAsync(
     memberFormAuditContext(headers, appSession.userId),
     () =>
@@ -61,7 +81,7 @@ export async function createQaEvaluation(
           body: body || null,
           evaluatorType: 'USER',
           userId: appSession.userId,
-          systemStatus: 'NEEDS_REVIEW', // Default, will be updated by system
+          systemStatus,
           decisionData: storedDecisionData,
         },
         include: {
