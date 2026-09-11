@@ -571,6 +571,7 @@ model QaEvaluation {
   // Remove unique constraint to allow evaluation history
   // @@unique([configId, areaId])  // REMOVED
 
+  @@index([configId, areaId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("QaEvaluation")
   @@schema("prisma")
 }

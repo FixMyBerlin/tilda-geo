@@ -1,109 +1,39 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { QaSystemStatus } from '@/prisma/generated/client'
+import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
 import { GuardEndpointSchema, guardEndpoint } from '@/server/api/private/guardEndpoint'
 import { runWithAuditContextAsync, systemApiAuditContext } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import {
-  calculateSystemStatus,
-  getQaUpdateDecision,
-} from '@/server/qa-configs/evaluation/qaEvaluationRules'
-import type { QaDecisionDataStored } from '@/server/qa-configs/schemas/qaDecisionDataSchema'
-import {
-  qaDecisionDataSchema,
-  transformEvaluationWithDecisionData,
-} from '@/server/qa-configs/schemas/qaDecisionDataSchema'
+  planQaEvaluationCreates,
+  type QaAreaRow,
+} from '@/server/qa-configs/evaluation/planQaEvaluationCreates'
 import { getQaTableName } from '@/server/qa-configs/utils/getQaTableName'
 import { updateProcessingMetaAsync } from '@/server/statistics/analysis/updateProcessingStatus.server'
 
-async function getCurrentEvaluation(configId: number, areaId: string) {
-  const evaluation = await db.qaEvaluation.findFirst({
-    where: { configId, areaId },
-    orderBy: { createdAt: 'desc' },
-  })
+// Keeps the audit-log createMany (12 columns per row) below the Postgres bind parameter limit.
+const QA_EVALUATION_INSERT_CHUNK_SIZE = 2000
 
-  if (!evaluation) return null
-  return transformEvaluationWithDecisionData(evaluation)
+function getSecondsElapsed(startTime: number) {
+  return Math.round((Date.now() - startTime) / 100) / 10
 }
 
-async function upsertQaEvaluationWithRules(
-  configId: number,
-  areaId: string,
-  evaluation: {
+async function getLatestEvaluationsByAreaId(configId: number) {
+  type LatestEvaluationRow = {
+    areaId: string
     systemStatus: QaSystemStatus
-    previousRelative: number | null
-    currentRelative: number | null
-    absoluteDifference: number | null
-    absoluteDifferenceThreshold: number
-    decisionData: QaDecisionDataStored
-  },
-) {
-  const previousEvaluation = await getCurrentEvaluation(configId, areaId)
-  const qaUpdateDecision = getQaUpdateDecision({
-    previousEvaluation: previousEvaluation
-      ? {
-          systemStatus: previousEvaluation.systemStatus,
-          userStatus: previousEvaluation.userStatus,
-        }
-      : null,
-    evaluation,
-  })
-
-  if (!previousEvaluation) {
-    const newEvaluation = await db.qaEvaluation.create({
-      data: {
-        configId,
-        areaId,
-        systemStatus: qaUpdateDecision.effectiveSystemStatus,
-        evaluatorType: 'SYSTEM',
-        userStatus: null,
-        body: null,
-        userId: null,
-        decisionData: evaluation.decisionData,
-      },
-    })
-
-    return transformEvaluationWithDecisionData(newEvaluation)
+    userStatus: QaEvaluationStatus | null
   }
+  const rows = await db.$queryRaw<LatestEvaluationRow[]>`
+    SELECT DISTINCT ON ("areaId")
+      "areaId",
+      "systemStatus"::text AS "systemStatus",
+      "userStatus"::text AS "userStatus"
+    FROM prisma."QaEvaluation"
+    WHERE "configId" = ${configId}
+    ORDER BY "areaId", "createdAt" DESC, id DESC
+  `
 
-  if (qaUpdateDecision.shouldReset) {
-    const newEvaluation = await db.qaEvaluation.create({
-      data: {
-        configId,
-        areaId,
-        systemStatus: qaUpdateDecision.effectiveSystemStatus,
-        evaluatorType: 'SYSTEM',
-        userStatus: null,
-        body: null,
-        userId: null,
-        decisionData: evaluation.decisionData,
-      },
-    })
-
-    return transformEvaluationWithDecisionData(newEvaluation)
-  }
-
-  if (!qaUpdateDecision.dataChanged) {
-    return previousEvaluation
-  }
-
-  if (qaUpdateDecision.shouldCreate) {
-    const newEvaluation = await db.qaEvaluation.create({
-      data: {
-        configId,
-        areaId,
-        systemStatus: qaUpdateDecision.effectiveSystemStatus,
-        evaluatorType: 'SYSTEM',
-        userStatus: null,
-        body: null,
-        userId: null,
-        decisionData: evaluation.decisionData,
-      },
-    })
-
-    return transformEvaluationWithDecisionData(newEvaluation)
-  } else {
-    return previousEvaluation
-  }
+  return new Map(rows.map(({ areaId, ...previous }) => [areaId, previous]))
 }
 
 async function qaUpdate(headers: Headers) {
@@ -123,16 +53,9 @@ async function qaUpdate(headers: Headers) {
       let newEvaluations = 0
 
       for (const config of qaConfigs) {
+        const configStartTime = Date.now()
         const tableName = getQaTableName(config.mapTable)
 
-        type QaAreaRow = {
-          id: string
-          relative: number | null
-          previous_relative: number | null
-          count_reference: number | null
-          count_current: number | null
-          absoluteDifference: number | null
-        }
         const areas = await db.$queryRawUnsafe<QaAreaRow[]>(`
         SELECT
           id,
@@ -143,36 +66,29 @@ async function qaUpdate(headers: Headers) {
           difference as "absoluteDifference"
         FROM ${tableName}
       `)
+        const previousByAreaId = await getLatestEvaluationsByAreaId(config.id)
 
-        for (const area of areas) {
-          const systemStatus = calculateSystemStatus(area.relative, config)
+        const evaluationsToCreate = planQaEvaluationCreates({
+          configId: config.id,
+          config,
+          areas,
+          previousByAreaId,
+        })
 
-          const decisionData = qaDecisionDataSchema.parse({
-            relative: area.relative,
-            currentCount: area.count_current,
-            referenceCount: area.count_reference,
-            absoluteChange: area.absoluteDifference,
-            goodThreshold: config.goodThreshold,
-            needsReviewThreshold: config.needsReviewThreshold,
+        let createdCount = 0
+        for (let i = 0; i < evaluationsToCreate.length; i += QA_EVALUATION_INSERT_CHUNK_SIZE) {
+          // createManyAndReturn (not createMany) so the audit-log extension records the real row ids
+          const created = await db.qaEvaluation.createManyAndReturn({
+            data: evaluationsToCreate.slice(i, i + QA_EVALUATION_INSERT_CHUNK_SIZE),
           })
-
-          const evaluation = await upsertQaEvaluationWithRules(config.id, area.id.toString(), {
-            systemStatus,
-            previousRelative: area.previous_relative,
-            currentRelative: area.relative,
-            absoluteDifference: area.absoluteDifference,
-            absoluteDifferenceThreshold: config.absoluteDifferenceThreshold,
-            decisionData,
-          })
-
-          totalEvaluations++
-          if (
-            evaluation?.createdAt &&
-            new Date(evaluation.createdAt).getTime() > Date.now() - 60000
-          ) {
-            newEvaluations++
-          }
+          createdCount += created.length
         }
+
+        totalEvaluations += areas.length
+        newEvaluations += createdCount
+        console.log(
+          `QA update: ${config.region.slug}/${config.slug}: ${areas.length} areas, ${createdCount} created in ${getSecondsElapsed(configStartTime)} s`,
+        )
       }
 
       await updateProcessingMetaAsync('qa_update_completed_at')
@@ -185,8 +101,7 @@ async function qaUpdate(headers: Headers) {
       }
     })
 
-    const secondsElapsed = Math.round((Date.now() - startTime) / 100) / 10
-    console.log(`QA update: Completed in ${secondsElapsed} s`)
+    console.log(`QA update: Completed in ${getSecondsElapsed(startTime)} s`)
 
     return result
   } catch (error) {
