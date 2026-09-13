@@ -24,8 +24,6 @@ const UpdateOsmNoteInput = z
     path: ['text'],
   })
 
-export type UpdateOsmNoteInputType = z.infer<typeof UpdateOsmNoteInput>
-
 export const updateOsmNoteFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof UpdateOsmNoteInput>) => UpdateOsmNoteInput.parse(data))
   .handler(async ({ data }) => updateOsmNote(data))
