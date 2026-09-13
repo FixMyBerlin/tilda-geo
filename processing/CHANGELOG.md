@@ -2,7 +2,15 @@
 
 Manual and incomplete list of changes to processing output. Attribute documentation for all datasets lives in `topic-docs/` YAML (built into in-app docs via `topic-docs-build`); this file tracks schema and value-contract changes over time.
 
-## 2026-09-09
+## 2026-09
+
+### `parkings`, `parkings_no`, `parkings_quantized`
+
+- `meta` (`updated_at`, `updated_by`, `changeset_id`) is filled again (was `{}`). A merged parking line keeps the meta of its most recently edited source way; quantized points inherit it.
+
+### `off_street_parking_areas`, `off_street_parking_quantized`
+
+- `meta` now comes from the OSM object and carries `updated_at`, `updated_by` and `changeset_id` (was empty). Obstacle and crossing source data got the same fix.
 
 ### `parkings_edges`
 
@@ -22,8 +30,6 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 - `minzoom` follows polygon area (m²): < 200 → 14, ≥ 200 → 13, ≥ 600 → 12, ≥ 2500 → 11, ≥ 10000 → 10 (was always 0). Labels stay at least z11.
 - Add `condition_category_primary` (same as `parkings`). Also written on `off_street_parking_points`; quantized points inherit it from areas.
-
-## 2026-09
 
 ### `bikelanes`
 

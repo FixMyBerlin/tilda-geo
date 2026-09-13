@@ -23,7 +23,7 @@ SELECT
       'condition_category_primary', tilda_condition_category_primary (tags ->> 'condition_category')
     )
   ),
-  '{}'::jsonb,
+  meta,
   ST_Transform (geom, 3857),
   14 -- on-street parking lines are tiled from z14; zoomed-out view uses parkings_edges
 FROM

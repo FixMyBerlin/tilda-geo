@@ -75,7 +75,7 @@ local function result_tags_off_street_parking(result, area)
     _log_unexpected_amenity_values = SANITIZE_PARKING_TAGS.amenity_off_street_parking(result.object.tags.amenity),
   }
 
-  local result_meta = metadata(result)
+  local result_meta = metadata(result.object)
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
 
