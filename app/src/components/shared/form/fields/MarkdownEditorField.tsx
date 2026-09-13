@@ -11,6 +11,7 @@ type Props<T extends Record<string, unknown>> = FieldProps & {
   name: DeepKeys<T>
   placeholder?: string
   disabled?: boolean
+  toolbar?: 'comment' | 'full'
 }
 
 export function MarkdownEditorField<T extends Record<string, unknown>>({
@@ -24,6 +25,7 @@ export function MarkdownEditorField<T extends Record<string, unknown>>({
   labelSrOnly,
   placeholder,
   disabled,
+  toolbar,
 }: Props<T>) {
   return (
     <form.Field name={name}>
@@ -46,6 +48,8 @@ export function MarkdownEditorField<T extends Record<string, unknown>>({
               onBlur={field.handleBlur}
               placeholder={placeholder}
               disabled={disabled}
+              hasError={hasError}
+              toolbar={toolbar}
             />
             {help && <p className="mt-2 text-sm text-gray-500">{help}</p>}
             {hasError && (

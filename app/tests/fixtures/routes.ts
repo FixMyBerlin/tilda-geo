@@ -1,8 +1,10 @@
 /** Seeded PUBLIC region (`radinfra` in regionSeedCatalog). */
 const TEST_REGION_SLUG = 'radinfra'
 export const TEST_REGION_URL = `/regionen/${TEST_REGION_SLUG}`
+/** Notes mode page ("Hinweise") — available because the test region has notes enabled. */
+export const TEST_REGION_NOTES_MODE_URL = `${TEST_REGION_URL}/hinweise`
 export const TEST_REGION_URL_WITH_CONFIG =
-  '/regionen/radinfra?map=17/52.3494/13.6267&config=1p2va4k.7h3d.9klzpc&data=mapillary-cycleway-traffic-signs&bg=esri&osmNotes=true&v=2'
+  '/regionen/radinfra?map=17/52.3494/13.6267&config=1p2va4k.7h3d.9klzpc&data=mapillary-cycleway-traffic-signs&bg=esri&v=2'
 
 /** Docs topic page: table param + optional region search (`r`). */
 const DOCS_TABLE_TOPIC_SMOKE = `/docs/roads?r=${TEST_REGION_SLUG}` as const
@@ -27,6 +29,7 @@ export const PUBLIC_SMOKE_ROUTES = [
   '/regionen',
   '/regionen/stats',
   TEST_REGION_URL,
+  TEST_REGION_NOTES_MODE_URL,
 ] as const
 
 export const ADMIN_REDIRECT_SMOKE_ROUTE = '/admin' as const

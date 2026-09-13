@@ -59,16 +59,22 @@
   @apply bg-white/20! leading-tight;
 }
 
-/* Keep MapLibre's own corner controls (attribution bottom-left, zoom) out of the iOS safe areas.
-   The map is a full-screen backdrop now, so without this the attribution sits under the home
-   indicator. These controls render outside React, so env() padding on our floating chrome can't
-   reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
+/* Keep MapLibre's own corner controls (attribution bottom-left, calculator top-left) out of the
+   iOS safe areas. The map is a full-screen backdrop now, so without this the attribution sits
+   under the home indicator. These controls render outside React, so env() padding on our floating
+   chrome can't reach them. env() is 0 without a notch/home indicator, so this is a no-op elsewhere. */
 :root {
   /* Must be `0px` (not unitless `0`): `calc(var(--inspector-width) + …)` is invalid if the
-     custom property is a bare number, which parks bottom map controls on the left until JS
+     custom property is a bare number, which parks top-right map controls on the left until JS
      seeds a px value (e.g. pending/error shells never mount the inspector). */
   --inspector-width: 0px;
-  --map-controls-inset: 10px;
+  /* Same unit rule as --inspector-width. Seeded to the stored panel width only while a
+     desktop mode column is open; stays 0px on the default map and on mobile. */
+  --mode-panel-width: 0px;
+  /* Mobile mode dock height; bottom map controls sit above it. 0px off mode routes. */
+  --mode-mobile-dock-height: 0px;
+  /* Map-edge gap for inspector/categories AND floating buttons (10px to the inspector). */
+  --map-overlay-inset: 10px;
   /* Desktop `HeaderRegionen` height (`sm:h-16`). The region map sizes to the viewport *minus*
      this, so the map box matches the visible area below the header. */
   --app-header-height: 4rem;
@@ -78,9 +84,11 @@
 
 @media (min-width: 640px) {
   :root {
-    /* Desktop map UI height: header, top-2 controls, bottom-4 + size-10 trigger, anchor gap. */
+    /* Cap portaled map menus (background list) to the map column: viewport minus desktop
+       header, overlay inset top/bottom, the size-10 trigger, and the 8px anchor gap. */
     --map-chrome-max-height: calc(
-      100dvh - var(--app-header-height) - 0.5rem - 1rem - 2.5rem - 0.5rem
+      var(--app-height, 100dvh) - var(--app-header-height) - var(--map-overlay-inset) -
+        var(--map-overlay-inset) - 2.5rem - 0.5rem
     );
   }
 }
@@ -88,14 +96,6 @@
 .maplibregl-ctrl-top-left {
   padding-top: env(safe-area-inset-top);
   padding-left: env(safe-area-inset-left);
-}
-html .maplibregl-ctrl-top-right {
-  right: calc(var(--inspector-width) + var(--map-controls-inset));
-  padding-top: env(safe-area-inset-top);
-  padding-right: env(safe-area-inset-right);
-}
-[data-map-controls='true'] {
-  right: calc(var(--inspector-width) + var(--map-controls-inset));
 }
 .maplibregl-ctrl-bottom-left {
   padding-bottom: env(safe-area-inset-bottom);

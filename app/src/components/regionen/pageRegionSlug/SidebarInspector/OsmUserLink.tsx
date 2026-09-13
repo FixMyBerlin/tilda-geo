@@ -9,26 +9,35 @@ type Props = {
   firstName?: string | null
   lastName?: string | null
   showMembership?: boolean
+  showDisplayName?: boolean
 }
 
-export const OsmUserLink = ({ osmName, firstName, lastName, showMembership = true }: Props) => {
+export const OsmUserLink = ({
+  osmName,
+  firstName,
+  lastName,
+  showMembership = true,
+  showDisplayName = true,
+}: Props) => {
   const hasPermission = useHasPermissions()
+  const displayName = [firstName, lastName].filter(Boolean).join(' ')
 
   if (!osmName) return <>Eine anonyme Nutzer:in</>
 
+  const membershipBadge =
+    hasPermission && showMembership ? (
+      <Tooltip text="Ist Mitarbeiter:in dieser Region">
+        <CheckBadgeIcon className="size-5" />
+      </Tooltip>
+    ) : null
+
   return (
-    <span className="inline-flex items-center gap-1">
-      {firstName} {lastName}
+    <span className="inline">
+      {showDisplayName && displayName ? <>{displayName} </> : null}
       <Link blank href={getOsmUrl(`/user/${osmName}`)}>
-        {osmName}{' '}
-      </Link>{' '}
-      {hasPermission && showMembership ? (
-        <Tooltip text="Ist Mitarbeiter:in dieser Region">
-          <CheckBadgeIcon className="size-5" />
-        </Tooltip>
-      ) : (
-        ''
-      )}
+        {osmName}
+      </Link>
+      {membershipBadge ? <> {membershipBadge}</> : null}
     </span>
   )
 }

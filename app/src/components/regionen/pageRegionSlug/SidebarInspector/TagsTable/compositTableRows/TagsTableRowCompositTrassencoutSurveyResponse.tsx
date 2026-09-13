@@ -1,6 +1,6 @@
 import { Markdown } from '@/components/shared/text/Markdown'
 import { Pill } from '@/components/shared/text/Pill'
-import { tagsTableRowClass } from '../tagsTableLayout'
+import { tagsTableLeadingClass, tagsTableRowClass } from '../tagsTableLayout'
 import type { CompositTableRow } from './types'
 
 // Use by `app/scripts/StaticDatasets/geojson/region-bb/bb-trassenscout-beteiligung/meta.ts`
@@ -15,11 +15,11 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
   return (
     <tr className={tagsTableRowClass}>
       <td
-        className="space-y-3 border-l-2 py-2 pr-3 pl-4 text-sm font-medium text-gray-900"
+        className={`space-y-3 border-l-2 py-2 pr-2 pl-2 text-sm ${tagsTableLeadingClass} font-medium text-gray-900`}
         colSpan={2}
         style={{ borderColor: color }}
       >
-        <div style={{ backgroundColor: dimColor }} className="-mt-2 -mr-3 -ml-4 px-4 py-3">
+        <div style={{ backgroundColor: dimColor }} className="-mt-2 -mr-2 -ml-2 px-2 py-2.5">
           {properties.precision === 'point'
             ? 'Dieser Hinweis ist an einer konkreten Stelle verortet'
             : 'Dieser Hinweis bezieht sich auf die gesamte Verbindung'}
@@ -42,7 +42,7 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
         <Markdown markdown={properties.text} />
 
         {properties.answer ? (
-          <div className="-mt-2 -mr-3 -ml-4 bg-gray-800 px-4 py-3">
+          <div className="-mt-2 -mr-2 -ml-2 bg-gray-800 px-2 py-2.5">
             <Markdown className="prose-invert" markdown={properties.answer} />
           </div>
         ) : null}

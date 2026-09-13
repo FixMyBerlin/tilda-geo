@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { getAppSession } from '@/server/auth/session.server'
+import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
-import { canAccessQaForRegion } from '@/server/qa-configs/authorization/canAccessQaForRegion.server'
 import { transformEvaluationWithDecisionData } from '@/server/qa-configs/schemas/qaDecisionDataSchema'
 
 const Schema = z.object({
@@ -15,7 +15,7 @@ export async function getQaEvaluationsForArea(input: z.infer<typeof Schema>, hea
 
   const { configSlug, areaId, regionSlug } = Schema.parse(input)
 
-  const { isAuthorized } = await canAccessQaForRegion(appSession, regionSlug)
+  const { isAuthorized } = await canAccessMemberModeForRegion(appSession, regionSlug)
 
   if (!isAuthorized) {
     return []

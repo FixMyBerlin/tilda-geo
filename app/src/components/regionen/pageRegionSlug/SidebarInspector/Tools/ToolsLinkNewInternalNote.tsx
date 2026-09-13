@@ -1,14 +1,15 @@
+import { useNavigate } from '@tanstack/react-router'
+import { bbox } from '@turf/turf'
 import { useMap } from 'react-map-gl/maplibre'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useOsmNotesActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import {
-  useNewInternalNoteMapParam,
-  useShowInternalNotesParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
+import { serializeMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import type { MapDataOsmIdConfig } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/modes/notes/useAllowInternalNotes'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { buttonStyles } from '@/components/shared/links/styles'
-import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
-import { useAllowInternalNotes } from '../../notes/InternalNotes/utils/useAllowInternalNotes'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import { pointFromGeometry } from './osmUrls/pointFromGeometry'
 
@@ -20,14 +21,15 @@ type Props = {
 
 export const ToolsLinkNewInternalNote = ({ properties, geometry, osmIdConfig }: Props) => {
   const { mainMap } = useMap()
-  const { setShowInternalNotesParam } = useShowInternalNotesParam()
+  const navigate = useNavigate({ from: '/regionen/$regionSlug' })
   const { setOsmNewNoteFeature, setNewNoteTildaDeeplink } = useOsmNotesActions()
-  const { setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
+  const { clearInspectorFeatures } = useMapActions()
+  const region = useRegion()
 
   const { osmType, osmId } = extractOsmTypeIdByConfig(properties, osmIdConfig)
 
   const allowInternalNotes = useAllowInternalNotes()
-  if (!allowInternalNotes) return null
+  if (!allowInternalNotes || !region) return null
 
   if (!mainMap || !properties || !geometry || !osmType || !osmId) return null
 
@@ -35,15 +37,24 @@ export const ToolsLinkNewInternalNote = ({ properties, geometry, osmIdConfig }: 
     <button
       type="button"
       className={buttonStyles}
-      onClick={(e) => {
-        captureModalOpenOrigin(e.currentTarget)
-        setShowInternalNotesParam(true)
+      onClick={() => {
         setOsmNewNoteFeature({ geometry, osmType, osmId })
         setNewNoteTildaDeeplink(window.location.href)
-        // Note: The zoom will be specified by the `bounds` prop in <InternalNotesNewMap/>
-        // BUT it needs to be > 17 so that `roundByZoom` keeps precision of 5
+        clearInspectorFeatures()
+        // Zoom > 17 so roundByZoom keeps 5 decimal places if the create param is bookmarked.
         const [lng, lat] = pointFromGeometry(geometry)
-        setNewInternalNoteMapParam({ zoom: 18, lng, lat })
+        const bounds = bbox(geometry) as [number, number, number, number]
+        mainMap.fitBounds(bounds, { padding: 100, maxZoom: 17 })
+        void navigate({
+          to: '/regionen/$regionSlug/hinweise',
+          search: (prev) => {
+            const next = { ...prev }
+            next[searchParamsRegistry.internalNote] = serializeMapParam({ zoom: 18, lng, lat })
+            delete next[searchParamsRegistry.f]
+            return next
+          },
+          replace: true,
+        })
       }}
     >
       internen Hinweis zu diesem Kartenobjekt erstellen
