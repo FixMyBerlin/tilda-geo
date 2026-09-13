@@ -5,14 +5,15 @@ import { ChoiceCheckbox } from '@/components/shared/form/fields/ChoiceCheckbox'
 import { choiceOptionListClassName } from '@/components/shared/form/fields/sharedStyles'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
+import {
+  groupRegionsByContract,
+  SINGLETON_CONTRACT_PARAM,
+  UNASSIGNED_CONTRACT_GROUP_LABEL,
+} from '@/server/region-contracts/regionContracts.utils'
+import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import type { ReviewListFormInput } from '@/server/review-lists/schemas'
 import type { FormState } from '@/server/utils/validation'
 import { regionsWithSelectedFirst } from './regionsWithSelectedFirst'
-
-type ReviewListFormRegion = {
-  slug: string
-  name: string
-}
 
 type ReviewListFormProps<TSchema extends z.ZodTypeAny> = {
   actionBarRight?: ReactNode
@@ -20,7 +21,7 @@ type ReviewListFormProps<TSchema extends z.ZodTypeAny> = {
   defaultValues: ReviewListFormInput
   onSubmit: (values: z.infer<TSchema>) => Promise<FormState | undefined>
   submitLabel: string
-  regions: ReviewListFormRegion[]
+  regions: TRegion[]
 }
 
 export function ReviewListForm<TSchema extends z.ZodTypeAny>({
@@ -60,12 +61,14 @@ export function ReviewListForm<TSchema extends z.ZodTypeAny>({
           <form.Field name="regionSlugs" defaultValue={defaultValues.regionSlugs}>
             {(field) => {
               const selectedSlugs = field.state.value ?? []
+              const groups = groupRegionsByContract(regions)
               return (
                 <fieldset>
                   <legend className="mb-2 block text-sm font-medium text-gray-700">Regionen</legend>
                   <p className="mb-2 text-sm text-gray-500">
-                    Prüflisten können mehreren Regionen zugeordnet werden (z.B. gleiche Kund:in,
-                    mehrere Gebietsausschnitte).
+                    Prüflisten können mehreren Regionen zugeordnet werden. Das ist beispielsweise
+                    hilfreich, wenn für einen Auftrag mehrere Regionen mit unterschiedlichen Daten
+                    und Nutzer-Gruppen (Freigaben) erstellt werden.
                   </p>
                   <p className="mb-2 text-sm text-gray-600">
                     {selectedSlugs.length === 0
@@ -75,32 +78,42 @@ export function ReviewListForm<TSchema extends z.ZodTypeAny>({
                   <div
                     className={twJoin(
                       'max-h-64 overflow-y-auto rounded border border-gray-200 p-3',
-                      choiceOptionListClassName,
+                      'space-y-4',
                     )}
                   >
-                    {regionsWithSelectedFirst(regions, selectedSlugs).map((region) => {
-                      const checked = selectedSlugs.includes(region.slug)
-                      return (
-                        <ChoiceCheckbox
-                          key={region.slug}
-                          id={`region-${region.slug}`}
-                          checked={checked}
-                          ariaLabel={`${region.name} (${region.slug})`}
-                          label={
-                            <>
-                              {region.name} ({region.slug})
-                            </>
-                          }
-                          onBlur={field.handleBlur}
-                          onChange={(nextChecked) => {
-                            const next = nextChecked
-                              ? [...selectedSlugs, region.slug]
-                              : selectedSlugs.filter((slug) => slug !== region.slug)
-                            field.handleChange(next)
-                          }}
-                        />
-                      )
-                    })}
+                    {groups.map(({ contract, regions: contractRegions }) => (
+                      <section
+                        key={contract?.slug ?? SINGLETON_CONTRACT_PARAM}
+                        className={choiceOptionListClassName}
+                      >
+                        <h3 className="text-xs font-semibold tracking-wide text-gray-600 uppercase">
+                          {contract?.name ?? UNASSIGNED_CONTRACT_GROUP_LABEL}
+                        </h3>
+                        {regionsWithSelectedFirst(contractRegions, selectedSlugs).map((region) => {
+                          const checked = selectedSlugs.includes(region.slug)
+                          return (
+                            <ChoiceCheckbox
+                              key={region.slug}
+                              id={`region-${region.slug}`}
+                              checked={checked}
+                              ariaLabel={`${region.name} (${region.slug})`}
+                              label={
+                                <>
+                                  {region.name} ({region.slug})
+                                </>
+                              }
+                              onBlur={field.handleBlur}
+                              onChange={(nextChecked) => {
+                                const next = nextChecked
+                                  ? [...selectedSlugs, region.slug]
+                                  : selectedSlugs.filter((slug) => slug !== region.slug)
+                                field.handleChange(next)
+                              }}
+                            />
+                          )
+                        })}
+                      </section>
+                    ))}
                   </div>
                 </fieldset>
               )

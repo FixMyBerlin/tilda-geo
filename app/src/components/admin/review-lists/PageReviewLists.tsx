@@ -16,7 +16,8 @@ export function PageReviewLists() {
       </HeaderWrapper>
 
       <p className="mb-6 text-sm text-gray-500">
-        Neue Prüflisten werden in der Region unter Prüflisten angelegt (Mitglieder und Admins).
+        Neue Prüflisten werden in der Region im Modus Prüflisten angelegt. Das können Mitglieder und
+        Admins tun.
       </p>
 
       {lists.length === 0 ? (

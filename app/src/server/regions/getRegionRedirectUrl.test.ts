@@ -319,7 +319,7 @@ describe('getRegionRedirectUrl()', () => {
   })
 
   describe('v3: notes param cleanup', () => {
-    test('renames atlasNote and converts filter params into notesMode', async () => {
+    test('renames atlasNote and converts filter params into notes', async () => {
       const url =
         'http://127.0.0.1:5173/regionen/berlin?notes=true&atlasNote=15/52.5/13.4&atlasNotesFilter=%7B%7D&osmNotesFilter=%7B%7D&v=2'
       const redirectUrl = await redirectOnly(url, 'berlin')
@@ -336,9 +336,9 @@ describe('getRegionRedirectUrl()', () => {
       expect(params.get('v')).toBe('3')
     })
 
-    test('a v3 URL with notesMode is stable (no redirect loop)', async () => {
+    test('a v3 URL with notes JSON is stable (no redirect loop)', async () => {
       const url =
-        'http://127.0.0.1:5173/regionen/berlin/hinweise?notesMode={"completed":false,"extent":"view"}'
+        'http://127.0.0.1:5173/regionen/berlin/hinweise?notes={"completed":false,"extent":"view"}'
       const first = await redirectOnly(url, 'berlin')
       expect(first).toBeTruthy()
       expect(getUrl(first).pathname).toBe('/regionen/berlin/hinweise')

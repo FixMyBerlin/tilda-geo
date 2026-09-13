@@ -1,4 +1,5 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
+import { useRegionSearchNavigation } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useRegionSearchNavigation'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import {
   compactReviewListsModeParam,
@@ -6,7 +7,7 @@ import {
   type ReviewListsModeParam,
 } from './reviewListsModeParam'
 
-/** Read the review lists mode param (`rl` JSON). Route-agnostic so map layers can read it too. */
+/** Read the review lists mode param (`review` JSON). Route-agnostic so map layers can read it too. */
 export const useReviewListsModeValue = () => {
   const value = useSearch({
     strict: false,
@@ -18,17 +19,13 @@ export const useReviewListsModeValue = () => {
 /** Read/update the review lists mode param. Updates preserve other params and replace history. */
 export const useReviewListsModeParam = () => {
   const reviewListsMode = useReviewListsModeValue()
-  const navigate = useNavigate()
+  const { updateSearch } = useRegionSearchNavigation()
 
   const setReviewListsModeParam = (next: ReviewListsModeParam) => {
-    void navigate({
-      to: '.',
-      search: (prev: Record<string, unknown>) => ({
-        ...prev,
-        [searchParamsRegistry.reviewLists]: compactReviewListsModeParam(next),
-      }),
-      replace: true,
-    })
+    updateSearch(
+      { [searchParamsRegistry.reviewLists]: compactReviewListsModeParam(next) },
+      { replace: true },
+    )
   }
 
   return { reviewListsMode, setReviewListsModeParam }

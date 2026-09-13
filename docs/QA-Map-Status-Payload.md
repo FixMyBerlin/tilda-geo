@@ -46,7 +46,7 @@ gcTime: GC_TIME_QA_MAP_MS // Infinity — keep after leaving QA
 
 The `status` filter is **not** in the query key; `qaMapRowMatchesStatus` applies it on the render path. `users` and `search` **are** in the key, so those changes refetch (and with `gcTime: Infinity`, unused variants stay until the tab closes).
 
-`useQaMapData` builds an `areaId → row` `Map` once per payload. [`useQaMapState`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState.ts) `syncQaFeatureStates` does a hash lookup per rendered polygon (`O(rendered)`), including the re-sync `RegionMap` triggers from `<Map onSourceData>` when `qa-source` tiles finish loading in QA mode.
+`useQaMapData` builds an `areaId → row` `Map` once per payload. [`useQaMapState`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState.ts) `syncQaFeatureStates` does a hash lookup per rendered polygon (`O(rendered)`), including the re-sync the hook triggers from MapLibre `sourcedata` when `qa-source` tiles finish loading in QA mode.
 
 Notes and review-list queries keep the v5 default `gcTime` (5 minutes) and `STALE_TIME_NOTES_MS` (1 minute). OSM notes load through [`osmNotesQueryOptions.ts`](../app/src/components/regionen/pageRegionSlug/modes/notes/osmNotesQueryOptions.ts) / [`useOsmNotesQuery.ts`](../app/src/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery.ts) (bbox in the query key), not a dedicated notes Zustand merge store.
 

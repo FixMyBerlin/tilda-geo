@@ -1,3 +1,4 @@
+import { getRouteApi } from '@tanstack/react-router'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
 import { formatUserNameWithOsmHandle } from '@/components/admin/memberships/pageMemberships/utils/formatUserName'
 import {
@@ -5,12 +6,19 @@ import {
   systemStatusConfig,
   userStatusConfig,
 } from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
-import type { QaOrphanedEvaluation } from '@/server/qa-configs/queries/getQaOrphanedEvaluationsForAdmin.server'
+import { PaginationControls } from '@/components/shared/pagination/PaginationControls'
+import { useAdminTablePagination } from '@/components/shared/pagination/useAdminTablePagination'
+import type {
+  QaOrphanedEvaluation,
+  QaOrphanedEvaluationsResult,
+} from '@/server/qa-configs/queries/getQaOrphanedEvaluationsForAdmin.server'
+
+const routeApi = getRouteApi('/admin/qa-configs/$id/edit')
 
 type Props = {
-  items: QaOrphanedEvaluation[]
-  totalCount: number
+  orphanedEvaluations: QaOrphanedEvaluationsResult
 }
 
 const latestStatusLabel = (item: QaOrphanedEvaluation) => {
@@ -20,9 +28,10 @@ const latestStatusLabel = (item: QaOrphanedEvaluation) => {
   return systemStatusConfig[item.systemStatus].label
 }
 
-export function QaConfigOrphanedEvaluationsSection({ items, totalCount }: Props) {
-  const shown = items.length.toLocaleString('de-DE')
-  const total = totalCount.toLocaleString('de-DE')
+export function QaConfigOrphanedEvaluationsSection({ orphanedEvaluations }: Props) {
+  const search = routeApi.useSearch()
+  const navigate = routeApi.useNavigate()
+  const { page, goToPage, result } = useAdminTablePagination(search, navigate, orphanedEvaluations)
 
   return (
     <section
@@ -35,21 +44,19 @@ export function QaConfigOrphanedEvaluationsSection({ items, totalCount }: Props)
       >
         Verwaiste Bewertungen
       </h2>
-      <p className="mb-3 text-sm text-gray-600">
-        Verwaiste Bewertungen verweisen auf Bereiche, die in der Kartentabelle dieser Konfiguration
-        nicht mehr vorkommen — typischerweise nach dem Import einer neuen Voronoi-Grundlage. Sie
-        haben keine Geometrie und erscheinen daher nicht in der Mitglieder-Kartenliste.
-      </p>
+      <Callout tone="warning" className="mb-3">
+        <p>
+          Verwaiste Bewertungen verweisen auf Bereiche, die in der Kartentabelle dieser
+          Konfiguration nicht mehr vorkommen — typischerweise nach dem Import einer neuen
+          Voronoi-Grundlage. Sie haben keine Geometrie und erscheinen daher nicht in der Region
+          (Karte/Liste).
+        </p>
+      </Callout>
 
-      {items.length === 0 ? (
+      {orphanedEvaluations.total === 0 ? (
         <p className="text-sm text-gray-600">Keine verwaisten Bewertungen.</p>
       ) : (
-        <>
-          {totalCount > items.length ? (
-            <p className="mb-3 text-sm text-gray-600">
-              Es werden {shown} von {total} verwaisten Bewertungen angezeigt.
-            </p>
-          ) : null}
+        <div className={adminTableClasses.paginatedShell}>
           <AdminTable
             header={[
               'Bereich',
@@ -61,7 +68,7 @@ export function QaConfigOrphanedEvaluationsSection({ items, totalCount }: Props)
               'Letzte Bewertung',
             ]}
           >
-            {items.map((item) => (
+            {orphanedEvaluations.rows.map((item) => (
               <tr key={item.areaId}>
                 <th scope="row" className={adminTableClasses.thRow}>
                   <span className="font-mono text-sm">{item.areaId}</span>
@@ -93,7 +100,8 @@ export function QaConfigOrphanedEvaluationsSection({ items, totalCount }: Props)
               </tr>
             ))}
           </AdminTable>
-        </>
+          <PaginationControls page={page} result={result} onPageChange={goToPage} />
+        </div>
       )}
     </section>
   )

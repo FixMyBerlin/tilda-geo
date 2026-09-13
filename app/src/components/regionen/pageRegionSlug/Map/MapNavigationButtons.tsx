@@ -8,7 +8,7 @@ import {
   mobileMapIconButtonClassName,
 } from '../mobile/mobileControlButton.const'
 import { compassNeedleTransform } from './compassNeedleTransform'
-import { type MapNavigationMapId, useMapNavigationCamera } from './useMapNavigationCamera'
+import { useMapNavigationCamera } from './useMapNavigationCamera'
 
 const navButtonClassName = twMerge(
   mobileMapIconButtonClassName,
@@ -17,16 +17,14 @@ const navButtonClassName = twMerge(
 )
 
 type Props = {
-  mapId: MapNavigationMapId
   showCompass?: boolean
 }
 
-export const MapNavigationButtons = ({ mapId, showCompass = false }: Props) => {
-  const { mapRef, camera } = useMapNavigationCamera(mapId)
+export const MapNavigationButtons = ({ showCompass = false }: Props) => {
+  const { map, camera } = useMapNavigationCamera()
 
-  if (!mapRef) return null
+  if (!map) return null
 
-  const map = mapRef.getMap()
   const zoomInDisabled = camera.zoom === camera.maxZoom
   const zoomOutDisabled = camera.zoom === camera.minZoom
 

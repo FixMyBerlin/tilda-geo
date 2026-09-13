@@ -2,8 +2,6 @@ import type { Map as MaplibreMap } from 'maplibre-gl'
 import { useSyncExternalStore } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 
-export type MapNavigationMapId = 'mainMap'
-
 type MapNavigationCamera = {
   zoom: number
   bearing: number
@@ -65,13 +63,13 @@ const subscribeToNavigationCamera = (map: MaplibreMap, onStoreChange: () => void
 /**
  * Live zoom/bearing/pitch/roll for nav chrome.
  *
- * MapLibre's NavigationControl listens to `zoom` / `rotate` / `pitch` / `roll` (not every
- * `move`). We subscribe the same way via `useSyncExternalStore` so 2D pans do not re-render
- * the buttons. This is not URL/viewport sync — that stays on `<Map onMoveEnd>`.
+ * Subscribes through MapLibre's event emitter (`map.on('zoom')` / `rotate` / `pitch` / `roll`),
+ * the same events NavigationControl uses — not a window CustomEvent, and not
+ * `<Map onZoom onRotate>` which would re-render the whole RegionMap on every camera tick.
+ * URL/viewport sync stays on `<Map onMoveEnd>`.
  */
-export const useMapNavigationCamera = (mapId: MapNavigationMapId) => {
-  const maps = useMap()
-  const mapRef = maps[mapId]
+export const useMapNavigationCamera = () => {
+  const { mainMap: mapRef } = useMap()
   const map = mapRef?.getMap()
 
   const camera = useSyncExternalStore(
@@ -83,5 +81,5 @@ export const useMapNavigationCamera = (mapId: MapNavigationMapId) => {
     () => idleCamera,
   )
 
-  return { mapRef, camera }
+  return { map, camera }
 }

@@ -14,11 +14,11 @@ nuqs is gone. The only remaining mentions in `app/src` are comments that describ
 
 Mode filters sit on that shared layout search (not on child `validateSearch`) so switching modes keeps one URL. Each mode owns **one JSON object**:
 
-| URL key     | Schema                    | Shape (compact: omit defaults)                                           |
-| ----------- | ------------------------- | ------------------------------------------------------------------------ |
-| `qa`        | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                             |
-| `notesMode` | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user? }` |
-| `rl`        | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`              |
+| URL key  | Schema                    | Shape (compact: omit defaults)                                           |
+| -------- | ------------------------- | ------------------------------------------------------------------------ |
+| `qa`     | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                             |
+| `notes`  | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user? }` |
+| `review` | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`              |
 
 `optionalSearchJson` drops the whole object if the Zod object fails. Each field therefore uses `.catch` so a stale bookmark field (retired status, bad chip) does not wipe the rest. QA `key` stays strict — without it there is nothing to show.
 

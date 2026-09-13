@@ -2,14 +2,16 @@ import { z } from 'zod'
 import type { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@/prisma/generated/client'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
+import { clampSkipTake } from '@/shared/pagination/clampSkipTake'
+import type { PaginatedList } from '@/shared/pagination/types'
 import { getQaTableName } from '../utils/getQaTableName'
 
 const Schema = z.object({
   configId: z.number(),
   mapTable: z.string(),
+  skip: z.number().optional(),
+  take: z.number().optional(),
 })
-
-const QA_ORPHANED_EVALUATIONS_LIMIT = 200
 
 export type QaOrphanedEvaluation = {
   areaId: string
@@ -25,10 +27,7 @@ export type QaOrphanedEvaluation = {
   userEvaluationCount: number
 }
 
-type QaOrphanedEvaluationsResult = {
-  items: QaOrphanedEvaluation[]
-  totalCount: number
-}
+export type QaOrphanedEvaluationsResult = PaginatedList<QaOrphanedEvaluation>
 
 type OrphanRow = {
   areaId: string
@@ -45,24 +44,15 @@ type OrphanRow = {
   total_count: bigint | number | null
 }
 
-const emptyResult = { items: [], totalCount: 0 } satisfies QaOrphanedEvaluationsResult
-
 /** Neither sibling map-table query handles a missing relation; catch 42P01 so the admin page still renders. */
 function isMissingMapTableError(error: unknown) {
   if (!(error instanceof Error)) return false
   return /relation .+ does not exist|42P01/i.test(error.message)
 }
 
-export async function getQaOrphanedEvaluationsForAdmin(
-  input: z.infer<typeof Schema>,
-  headers: Headers,
-) {
-  await requireAdmin(headers)
-  const { configId, mapTable } = Schema.parse(input)
-  const tableName = getQaTableName(mapTable)
-
+export function buildQaOrphanedEvaluationsSql(tableName: string) {
   // User evaluations and comments first: those orphans carry human work an admin must act on.
-  const sql = `
+  return `
 WITH latest AS (
   SELECT DISTINCT ON (e."areaId")
          e."areaId", e."systemStatus", e."userStatus", e."createdAt", e."evaluatorType", e."userId"
@@ -90,14 +80,31 @@ LEFT JOIN ${tableName} a ON a.id = l."areaId"
 WHERE a.id IS NULL
 ORDER BY s.user_evaluation_count DESC, s.comment_count DESC, l."createdAt" DESC
 LIMIT $2
+OFFSET $3
 `
+}
+
+export async function getQaOrphanedEvaluationsForAdmin(
+  input: z.infer<typeof Schema>,
+  headers: Headers,
+) {
+  await requireAdmin(headers)
+  const { configId, mapTable, skip: skipInput, take: takeInput } = Schema.parse(input)
+  const { skip, take } = clampSkipTake(skipInput, takeInput)
+  const tableName = getQaTableName(mapTable)
+  const emptyResult = { rows: [], total: 0, skip, take } satisfies QaOrphanedEvaluationsResult
 
   try {
-    const rows = await db.$queryRawUnsafe<OrphanRow[]>(sql, configId, QA_ORPHANED_EVALUATIONS_LIMIT)
-    const totalCount = rows[0] ? Number(rows[0].total_count ?? 0) : 0
+    const rows = await db.$queryRawUnsafe<OrphanRow[]>(
+      buildQaOrphanedEvaluationsSql(tableName),
+      configId,
+      take,
+      skip,
+    )
+    const total = rows[0] ? Number(rows[0].total_count ?? 0) : 0
 
     return {
-      items: rows.map(
+      rows: rows.map(
         (row) =>
           ({
             areaId: row.areaId,
@@ -113,7 +120,9 @@ LIMIT $2
             userEvaluationCount: Number(row.user_evaluation_count ?? 0),
           }) satisfies QaOrphanedEvaluation,
       ),
-      totalCount,
+      total,
+      skip,
+      take,
     } satisfies QaOrphanedEvaluationsResult
   } catch (error) {
     if (isMissingMapTableError(error)) {

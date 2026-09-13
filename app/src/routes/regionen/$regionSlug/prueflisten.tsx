@@ -9,7 +9,7 @@ import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 /**
  * Review lists mode ("Prüflisten"). Region members/admins can open this mode even when no list
  * exists yet (to create the first). Guests are redirected by the parent region loader.
- * Discoverability is the header switcher (`availableModes.reviewLists`). `rl` is validated on the
+ * Discoverability is the header switcher (`availableModes.reviewLists`). `review` is validated on the
  * parent region route.
  */
 export const Route = createFileRoute('/regionen/$regionSlug/prueflisten')({

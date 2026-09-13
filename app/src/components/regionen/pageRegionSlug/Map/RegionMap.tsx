@@ -1,7 +1,7 @@
 import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { MapLibreEvent, MapSourceDataEvent, MapStyleImageMissingEvent } from 'maplibre-gl'
+import type { MapLibreEvent, MapStyleImageMissingEvent } from 'maplibre-gl'
 import { useEffect, useRef, useState } from 'react'
 import type {
   MapGeoJSONFeature,
@@ -14,7 +14,6 @@ import {
   useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useQaMapState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
@@ -50,7 +49,7 @@ import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInte
 import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
-import { qaSourceId, SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
+import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
@@ -95,7 +94,6 @@ export const RegionMap = () => {
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
-  const { syncQaFeatureStates } = useQaMapState()
   const { notifyMapViewChanged } = useModeListActions()
 
   const { mainMap } = useMap()
@@ -187,12 +185,6 @@ export const RegionMap = () => {
   const handleMouseLeave = (_e: MapLayerMouseEvent) => {
     updateCursor([])
     updateHover([])
-  }
-
-  const handleSourceData = (event: MapSourceDataEvent) => {
-    if (currentMode !== 'qa') return
-    if (event.sourceId !== qaSourceId || !event.isSourceLoaded) return
-    syncQaFeatureStates()
   }
 
   const handleLoad = (event: MapLibreEvent) => {
@@ -301,7 +293,6 @@ export const RegionMap = () => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onLoad={handleLoad}
-      onSourceData={handleSourceData}
       onData={startMapDataLoading}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}

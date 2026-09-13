@@ -66,10 +66,7 @@ export function PageQaConfigEdit() {
         mapTable={qaConfig.mapTable}
       />
 
-      <QaConfigOrphanedEvaluationsSection
-        items={orphanedEvaluations.items}
-        totalCount={orphanedEvaluations.totalCount}
-      />
+      <QaConfigOrphanedEvaluationsSection orphanedEvaluations={orphanedEvaluations} />
 
       <QaConfigForm
         actionBarRight={

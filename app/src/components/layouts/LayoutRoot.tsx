@@ -1,19 +1,15 @@
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
 import { HeadContent, Outlet, Scripts, useMatches, useRouteContext } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { MotionConfig } from 'motion/react'
 import { StrictMode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { Footer } from '@/components/layouts/Footer/Footer'
 import { HeaderApp } from '@/components/layouts/Header/HeaderApp/HeaderApp'
 import { TailwindResponsiveHelper } from '@/components/layouts/helper/TailwindResponsiveHelper'
+import { TanStackAppDevtools } from '@/components/shared/devtools/TanStackAppDevtools'
 import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
 import { useVisibleViewportHeightVar } from '@/components/shared/hooks/viewport/useVisibleViewportHeightVar'
-import TanStackQueryDevtools from '@/components/shared/providers/tanstack-query/devtools'
 import { Provider as TanStackQueryProvider } from '@/components/shared/providers/tanstack-query/root-provider'
 import { AppToaster } from '@/components/shared/toast/AppToaster'
-import { isDev } from '@/components/shared/utils/isEnv'
 
 // Region map/preview routes use their own chrome — skip app header/footer here.
 const HIDE_APP_CHROME_ROUTE_IDS = new Set([
@@ -56,17 +52,8 @@ export function LayoutRoot() {
               </div>
               {!hideAppChrome && <Footer />}
               <AppToaster />
-              <TanStackDevtools
-                config={{
-                  position: 'bottom-left',
-                  customTrigger: isDev ? <TailwindResponsiveHelper /> : undefined,
-                }}
-                plugins={[
-                  { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
-                  { name: 'TanStack Query', render: <TanStackQueryDevtools /> },
-                  formDevtoolsPlugin(),
-                ]}
-              />
+              <TanStackAppDevtools />
+              <TailwindResponsiveHelper />
             </TanStackQueryProvider>
           </MotionConfig>
         </StrictMode>

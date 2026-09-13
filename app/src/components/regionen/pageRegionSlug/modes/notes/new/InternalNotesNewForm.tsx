@@ -7,7 +7,7 @@ import {
   useOsmNewNoteFeature,
   useOsmNotesActions,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
+import { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNewInternalNoteMapParam'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import {
   osmOrgUrl,

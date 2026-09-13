@@ -20,9 +20,12 @@ export const useRegionSearchNavigation = () => {
   ) => {
     void navigate({
       to: '.',
-      search: (prev: Record<string, unknown>) => {
-        const updates = typeof partial === 'function' ? partial(prev as RegionSearch) : partial
-        const next: Record<string, unknown> = { ...prev }
+      // `useNavigate()` (no `from`) types `prev` as the union of every route's search.
+      // Region pages still use RegionSearch; a parameter annotation is not assignable.
+      search: (prev) => {
+        const current = prev as RegionSearch
+        const updates = typeof partial === 'function' ? partial(current) : partial
+        const next: Record<string, unknown> = { ...current }
 
         for (const [key, value] of Object.entries(updates)) {
           if (value === undefined) {

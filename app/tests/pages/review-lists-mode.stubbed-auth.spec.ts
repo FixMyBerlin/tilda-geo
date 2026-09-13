@@ -27,7 +27,7 @@ const SAMPLE_GEOJSON = JSON.stringify({
 })
 
 const parseReviewListsParam = (page: Page) => {
-  const raw = new URL(page.url()).searchParams.get('rl')
+  const raw = new URL(page.url()).searchParams.get('review')
   if (!raw) return {}
   try {
     return JSON.parse(raw) as { move?: boolean }

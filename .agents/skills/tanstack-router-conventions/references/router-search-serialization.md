@@ -104,7 +104,7 @@ Router pretty-JSON is the baseline. Each search param picks the **smallest** enc
 | Structured but bounded  | domain compact string                  | `answers=240.sidepath.yes,237.color.red` | Avoid JSON `"` churn; custom parse/serialize in Zod preprocess        |
 | Small object / array    | TanStack JSON + pretty stringify       | `filter={"users":[1,2]}`                 | Few keys; router handles (de)serialization                            |
 | Slash-containing scalar | custom string, no `encodeURIComponent` | `map=13.5/52.4918/13.4261`               | `/` is part of the value — [map-search-param.md](map-search-param.md) |
-| **Large** nested state  | **jsurl2** (optional)                  | `notesMode=(folder~7~…)`                 | Only when JSON/compact strings get too long                           |
+| **Large** nested state  | **jsurl2** (optional)                  | `notes=(folder~7~…)`                     | Only when JSON/compact strings get too long                           |
 
 Implement per-param logic in:
 
@@ -125,7 +125,7 @@ export const coerceAnswersSearchParam = (raw: unknown): string | undefined => { 
 
 ## Layer 3 — jsurl2 (large objects only)
 
-[jsurl2](https://github.com/wmertens/jsurl2) is **not** the default. Use it when a param holds a large nested object and both JSON and a hand-rolled compact format would be unwieldy (FMC region modes: `notesMode`, `draw`, legacy `config`).
+[jsurl2](https://github.com/wmertens/jsurl2) is **not** the default. Use it when a param holds a large nested object and both JSON and a hand-rolled compact format would be unwieldy (FMC region modes: `notes`, `draw`, legacy `config`).
 
 When a route-owned param uses jsurl:
 

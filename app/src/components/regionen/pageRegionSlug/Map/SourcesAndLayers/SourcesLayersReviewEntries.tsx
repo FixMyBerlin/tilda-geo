@@ -72,8 +72,7 @@ export const SourcesLayersReviewEntries = () => {
       <Source
         id={reviewEntriesSourceId}
         type="geojson"
-        // Geometry is stored as Prisma Json; the runtime value is valid GeoJSON.
-        data={data.featureCollection as unknown as GeoJSON.FeatureCollection}
+        data={data.featureCollection}
         promoteId="id"
       />
       {/* Selection halo; status colors stay on the base layers. */}

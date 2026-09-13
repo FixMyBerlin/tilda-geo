@@ -36,7 +36,7 @@ Switching modes keeps map position and layer configuration. Mode-specific filter
 
 ## Hinweise (notes)
 
-Lists the region’s one notes kind — OSM **or** TILDA internal notes, not both (`regionWriteSchema` rejects enabling both). Search, extent, and chip filters live in `notesMode`. There are no folders. Note pins render only in this mode. From the default-map inspector, “new note” tools still jump here (`osmNote` / `internalNote` compose params).
+Lists the region’s one notes kind — OSM **or** TILDA internal notes, not both (`regionWriteSchema` rejects enabling both). Search, extent, and chip filters live in `notes`. There are no folders. Note pins render only in this mode. From the default-map inspector, “new note” tools still jump here (`osmNote` / `internalNote` compose params).
 
 OSM notes are public; internal notes are member-only. Hinweise is member-only when the region has only internal notes.
 

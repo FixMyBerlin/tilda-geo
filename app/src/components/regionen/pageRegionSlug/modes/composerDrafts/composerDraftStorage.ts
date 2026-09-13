@@ -1,18 +1,22 @@
+import { z } from 'zod'
+
 export const COMPOSER_DRAFTS_STORAGE_KEY = 'tilda-composer-drafts'
 export const COMPOSER_DRAFT_TTL_MS = 24 * 60 * 60 * 1000
 
-export type ComposerDraftSlot = {
-  updatedAt: number
-  values: Record<string, string>
-}
+const zodComposerDraftSlot = z.object({
+  updatedAt: z.number(),
+  values: z.record(z.string(), z.string()),
+})
 
-export type ComposerDraftsForUser = {
-  [draftId: string]: ComposerDraftSlot
-}
+export type ComposerDraftSlot = z.infer<typeof zodComposerDraftSlot>
 
-type ComposerDraftsBlob = {
-  [userId: string]: ComposerDraftsForUser
-}
+const zodComposerDraftsForUser = z.record(z.string(), zodComposerDraftSlot)
+
+export type ComposerDraftsForUser = z.infer<typeof zodComposerDraftsForUser>
+
+const zodComposerDraftsBlob = z.record(z.string(), zodComposerDraftsForUser)
+
+type ComposerDraftsBlob = z.infer<typeof zodComposerDraftsBlob>
 
 export const isEmptyComposerDraftValues = (values: Record<string, string>) =>
   Object.values(values).every((value) => value.trim() === '')
@@ -28,20 +32,10 @@ export const toComposerDraftStringValues = (values: object) => {
   return next
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-
-const isComposerDraftSlot = (value: unknown): value is ComposerDraftSlot => {
-  if (!isRecord(value)) return false
-  if (typeof value.updatedAt !== 'number' || !Number.isFinite(value.updatedAt)) return false
-  if (!isRecord(value.values)) return false
-  return Object.values(value.values).every((entry) => typeof entry === 'string')
-}
-
 const sweepComposerDraftsForUser = (drafts: ComposerDraftsForUser, now = Date.now()) => {
   const next: ComposerDraftsForUser = {}
   for (const [draftId, slot] of Object.entries(drafts)) {
-    if (!isComposerDraftSlot(slot) || isComposerDraftExpired(slot, now)) continue
+    if (isComposerDraftExpired(slot, now)) continue
     next[draftId] = slot
   }
   return next
@@ -52,18 +46,8 @@ const readBlob = () => {
   try {
     const raw = localStorage.getItem(COMPOSER_DRAFTS_STORAGE_KEY)
     if (!raw) return {} satisfies ComposerDraftsBlob
-    const parsed: unknown = JSON.parse(raw)
-    if (!isRecord(parsed)) return {} satisfies ComposerDraftsBlob
-    const blob: ComposerDraftsBlob = {}
-    for (const [userId, userDrafts] of Object.entries(parsed)) {
-      if (!isRecord(userDrafts)) continue
-      const slots: ComposerDraftsForUser = {}
-      for (const [draftId, slot] of Object.entries(userDrafts)) {
-        if (isComposerDraftSlot(slot)) slots[draftId] = slot
-      }
-      blob[userId] = slots
-    }
-    return blob
+    const parsed = zodComposerDraftsBlob.safeParse(JSON.parse(raw))
+    return parsed.success ? parsed.data : {}
   } catch {
     return {} satisfies ComposerDraftsBlob
   }

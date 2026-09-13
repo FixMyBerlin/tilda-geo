@@ -1,9 +1,10 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
+import { useRegionSearchNavigation } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useRegionSearchNavigation'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { compactNotesModeParam, zodNotesModeParam, type NotesModeParam } from './notesModeParam'
 
 /**
- * Read the notes mode URL param (`notesMode` JSON). Route-agnostic (`strict: false`) so the
+ * Read the notes mode URL param (`notes` JSON). Route-agnostic (`strict: false`) so the
  * shared map layer can read it too; returns `{}` when the param is absent.
  */
 export const useNotesModeValue = () => {
@@ -20,17 +21,13 @@ export const useNotesModeValue = () => {
  */
 export const useNotesModeParam = () => {
   const notesMode = useNotesModeValue()
-  const navigate = useNavigate()
+  const { updateSearch } = useRegionSearchNavigation()
 
   const setNotesModeParam = (next: NotesModeParam) => {
-    void navigate({
-      to: '.',
-      search: (prev: Record<string, unknown>) => ({
-        ...prev,
-        [searchParamsRegistry.notesMode]: compactNotesModeParam(next),
-      }),
-      replace: true,
-    })
+    updateSearch(
+      { [searchParamsRegistry.notesMode]: compactNotesModeParam(next) },
+      { replace: true },
+    )
   }
 
   return { notesMode, setNotesModeParam }

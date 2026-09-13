@@ -16,22 +16,29 @@ describe('0003_notes_params migration', () => {
     expect(params.has('atlasNote')).toBe(false)
   })
 
-  test('converts v2 osmNotesFilter into flat notesMode JSON', () => {
+  test('renames notes=true then writes filter JSON onto notes', () => {
+    const filter = encodeURIComponent(JSON.stringify({ query: 'foo' }))
+    const params = run(`?notes=true&osmNotesFilter=${filter}`)
+    expect(params.get('internalNotes')).toBe('true')
+    expect(JSON.parse(params.get('notes')!)).toEqual({ search: 'foo' })
+  })
+
+  test('converts v2 osmNotesFilter into flat notes JSON', () => {
     const filter = encodeURIComponent(JSON.stringify({ query: 'kreuzung', completed: false }))
     const params = run(`?osmNotesFilter=${filter}&osmNotes=true`)
     expect(params.has('osmNotesFilter')).toBe(false)
     expect(params.get('osmNotes')).toBe('true')
-    expect(JSON.parse(params.get('notesMode')!)).toEqual({
+    expect(JSON.parse(params.get('notes')!)).toEqual({
       search: 'kreuzung',
       completed: false,
     })
   })
 
-  test('converts v2 atlasNotesFilter into flat notesMode JSON', () => {
+  test('converts v2 atlasNotesFilter into flat notes JSON', () => {
     const filter = encodeURIComponent(JSON.stringify({ commented: true, user: '12' }))
     const params = run(`?atlasNotesFilter=${filter}`)
     expect(params.has('atlasNotesFilter')).toBe(false)
-    expect(JSON.parse(params.get('notesMode')!)).toEqual({
+    expect(JSON.parse(params.get('notes')!)).toEqual({
       commented: true,
       user: '12',
     })

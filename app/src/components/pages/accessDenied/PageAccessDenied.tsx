@@ -17,8 +17,7 @@ export function PageAccessDenied() {
       <div className="py-8">
         <h1 className="text-xl font-semibold">Diese Region ist deaktiviert</h1>
         <p className="text-stone-600 mt-2">
-          Die Lizenz ist ausgelaufen und die Region wurde archiviert. Nehmen Sie mit uns Kontakt auf
-          um die Region wieder zu aktivieren.
+          Diese Region wurde archiviert. Nehmen Sie mit uns Kontakt auf.
         </p>
         <p className="mt-4">
           <Link to="/kontakt" button>

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ExpressionSpecification } from 'maplibre-gl'
 import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
+import { useQaMapState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
@@ -23,6 +24,7 @@ export const qaSourceId = 'qa-source'
 export const qaMinZoom = 12
 
 export const SourcesLayersQa = () => {
+  useQaMapState()
   const hasPermissions = useHasPermissions()
   const { qaParamData } = useQaParam()
   const regionSlug = useRegionSlug()

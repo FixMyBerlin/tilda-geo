@@ -12,6 +12,7 @@ import {
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
+import { zodQaParam } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
@@ -22,14 +23,8 @@ const isTruthySearchFlag = (value: string | null) => value === 'true' || value =
 const qaParamHasKey = (qaValue: string | null) => {
   if (!qaValue) return false
   try {
-    const parsed: unknown = JSON.parse(qaValue)
-    return (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'key' in parsed &&
-      typeof parsed.key === 'string' &&
-      parsed.key.length > 0
-    )
+    const parsed = zodQaParam.safeParse(JSON.parse(qaValue))
+    return parsed.success && parsed.data.key.length > 0
   } catch {
     return false
   }
@@ -168,7 +163,7 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
  * (not beforeLoad — search-param navigations must not re-run this), so it also runs for mode child
  * routes (`/regionen/berlin/hinweise`, …). Pathname is mode identity; root rewrites are only for
  * unmigrated overlay bookmarks (legacy `osmNotes`/`notes`/`internalNotes` flags, pre-migration
- * `atlasNote`, or a legacy `qa=` string), not for live `qa` JSON or compose params (`osmNote` /
+ * `atlasNote`, or a legacy `qa=` string), not for live `qa`/`notes` JSON or compose params (`osmNote` /
  * `internalNote`). Region-rename rewrites only the slug segment; existing mode paths are not nested.
  *
  * Routes that trigger this:
@@ -213,7 +208,7 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   const regionEnablesNotes = Boolean(region.notesOsm || region.notesInternal)
 
   // Mode identity is the pathname. Root rewrites are only for unmigrated overlay bookmarks
-  // (legacy flags / legacy qa string), not for live `qa` JSON or compose params.
+  // (legacy flags / legacy qa string), not for live `qa`/`notes` JSON or compose params.
   // QA wins when both legacy signals are on. Already on a mode path: do not nest `/qa/qa`.
   if (u.pathname === regionRootPath) {
     if (hadLegacyQaBookmark && qaParamHasKey(params.get('qa'))) {
@@ -224,8 +219,12 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   }
 
   params.delete('osmNotes')
-  params.delete('notes')
   params.delete('internalNotes')
+  // Legacy overlay flag `notes=true` (already renamed in 0003). Keep live `notes` JSON.
+  const notesWire = params.get(searchParamsRegistry.notesMode)
+  if (notesWire !== null && !notesWire.trim().startsWith('{')) {
+    params.delete(searchParamsRegistry.notesMode)
+  }
 
   if (!region.notesOsm) params.delete('osmNote')
   if (!region.notesInternal) params.delete('internalNote')

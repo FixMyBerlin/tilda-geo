@@ -65,12 +65,12 @@ export const MapInterface = () => {
       <DesktopOnly>
         <div className={mapOverlayTopRightControlsClassName}>
           <PlaceSearch />
-          <MapNavigationButtons mapId="mainMap" showCompass={is3dActive} />
+          <MapNavigationButtons showCompass={is3dActive} />
         </div>
       </DesktopOnly>
       {!isDesktop && is3dActive && (
         <div className="pointer-events-none absolute top-[calc(var(--map-chrome-top-inset)+3rem)] right-[calc(env(safe-area-inset-right)+0.5rem)] z-20 *:pointer-events-auto">
-          <MapNavigationButtons mapId="mainMap" showCompass />
+          <MapNavigationButtons showCompass />
         </div>
       )}
       <ModeScopedSelectionReset />

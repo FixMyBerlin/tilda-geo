@@ -126,9 +126,7 @@ export default defineConfig({
     },
   },
   plugins: [
-    // Dev-only: let `<img src="/api/...">` (Sec-Fetch-Dest: image) reach the route handlers instead
-    // of Vite's static-asset pipeline (which 404s). Must run before Vite's asset middleware.
-    forwardApiRequestsPastViteAssetMiddleware(),
+    // First: strips `<TanStackDevtools>` and inline panel imports from production builds.
     devtools({
       injectSource: {
         enabled: true,
@@ -142,6 +140,9 @@ export default defineConfig({
         },
       },
     }),
+    // Dev-only: let `<img src="/api/...">` (Sec-Fetch-Dest: image) reach the route handlers instead
+    // of Vite's static-asset pipeline (which 404s). Must run before Vite's asset middleware.
+    forwardApiRequestsPastViteAssetMiddleware(),
     nitro({
       preset: 'bun',
       plugins: [

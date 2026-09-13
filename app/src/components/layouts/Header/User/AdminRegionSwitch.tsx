@@ -86,14 +86,15 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [focusedSlug, setFocusedSlug] = useState<string | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const regionSlug = useAdminRegionSlug()
-  const regionMapSlug = useOptionalRegionSlug()
+  // currentRegionSlug is map OR admin-edit region; mapSearchSlug is map-route-only (preserve live map search when switching). Selecting still always navigates to the map.
+  const currentRegionSlug = useAdminRegionSlug()
+  const mapSearchSlug = useOptionalRegionSlug()
   const location = useLocation()
   const navigate = useNavigate()
   const { data, isPending } = useQuery(regionenIndexQueryOptions())
 
   const mergedRegions = mergeRegionenIndexRegions(data)
-  const currentRegion = mergedRegions.find((region) => region.slug === regionSlug) ?? null
+  const currentRegion = mergedRegions.find((region) => region.slug === currentRegionSlug) ?? null
   const { active, deactivated } = filterPartitionedRegions(
     partitionRegionsByStatus(mergedRegions),
     searchQuery,
@@ -130,7 +131,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
   )
 
   const handleSelect = (region: TRegion) => {
-    if (region.slug === regionSlug) {
+    if (region.slug === currentRegionSlug) {
       closePanel()
       return
     }
@@ -138,7 +139,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
     void navigate({
       to: '/regionen/$regionSlug',
       params: { regionSlug: region.slug },
-      search: regionMapSlug ? parseRegionSearch(location.search) : defaultRegionSearch(),
+      search: mapSearchSlug ? parseRegionSearch(location.search) : defaultRegionSearch(),
     })
     closePanel()
   }
@@ -260,7 +261,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
               <RegionListOption
                 key={region.slug}
                 region={region}
-                isCurrent={region.slug === regionSlug}
+                isCurrent={region.slug === currentRegionSlug}
                 isFocused={region.slug === focusedSlug}
                 onSelect={handleSelect}
               />
@@ -277,7 +278,7 @@ export const AdminRegionSwitch = ({ inHeadlessMenu = false }: Props) => {
                   <RegionListOption
                     key={region.slug}
                     region={region}
-                    isCurrent={region.slug === regionSlug}
+                    isCurrent={region.slug === currentRegionSlug}
                     isFocused={region.slug === focusedSlug}
                     onSelect={handleSelect}
                     className="opacity-60"

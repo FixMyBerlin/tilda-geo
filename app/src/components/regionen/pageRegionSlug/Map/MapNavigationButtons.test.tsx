@@ -37,7 +37,7 @@ vi.mock('react-map-gl/maplibre', () => ({
 describe('MapNavigationButtons', () => {
   test('calls MapLibre zoomIn/zoomOut with the original event', () => {
     camera.zoom = 10
-    render(<MapNavigationButtons mapId="mainMap" />)
+    render(<MapNavigationButtons />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Hineinzoomen' }))
     expect(zoomIn).toHaveBeenCalledWith({}, { originalEvent: expect.any(MouseEvent) })
@@ -49,7 +49,7 @@ describe('MapNavigationButtons', () => {
 
   test('shows compass and resets north pitch', () => {
     camera.zoom = 10
-    render(<MapNavigationButtons mapId="mainMap" showCompass />)
+    render(<MapNavigationButtons showCompass />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Nach Norden ausrichten' }))
     expect(resetNorthPitch).toHaveBeenCalledWith({}, { originalEvent: expect.any(MouseEvent) })
@@ -57,12 +57,12 @@ describe('MapNavigationButtons', () => {
 
   test('disables zoom in at max zoom and zoom out at min zoom', () => {
     camera.zoom = 22
-    const { rerender } = render(<MapNavigationButtons mapId="mainMap" />)
+    const { rerender } = render(<MapNavigationButtons />)
     expect(screen.getByRole('button', { name: 'Hineinzoomen' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Herauszoomen' })).toBeEnabled()
 
     camera.zoom = 4
-    rerender(<MapNavigationButtons mapId="mainMap" />)
+    rerender(<MapNavigationButtons />)
     expect(screen.getByRole('button', { name: 'Hineinzoomen' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Herauszoomen' })).toBeDisabled()
   })

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /**
- * Single JSON param for the review lists mode (`rl`). `key` is the review-list Prisma id.
+ * Single JSON param for the review lists mode (`review`). `key` is the review-list Prisma id.
  * `extent` is omitted when `'view'` (the default). `new` is the compose/draw session (like Hinweise).
  * `move` is the geometry-edit session for the selected entry (header pencil).
  */

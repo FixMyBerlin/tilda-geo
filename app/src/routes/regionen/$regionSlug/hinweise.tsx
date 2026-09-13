@@ -6,7 +6,7 @@ import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 /**
  * Notes mode ("Hinweise"). Redirects to the region root unless OSM or TILDA notes are enabled
- * (`availableModes.ts`). `notesMode` JSON is validated on the parent region route.
+ * (`availableModes.ts`). `notes` JSON is validated on the parent region route.
  */
 export const Route = createFileRoute('/regionen/$regionSlug/hinweise')({
   ssr: 'data-only',

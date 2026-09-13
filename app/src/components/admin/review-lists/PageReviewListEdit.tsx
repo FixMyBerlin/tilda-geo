@@ -80,7 +80,7 @@ export function PageReviewListEdit() {
           regionSlugs: list.regionSlugs,
         })}
         submitLabel="Prüfliste aktualisieren"
-        regions={regions.map((r) => ({ slug: r.slug, name: r.name }))}
+        regions={regions}
         onSubmit={async (values) =>
           updateReviewListForAdminFn({ data: { id: list.id, ...values } })
         }

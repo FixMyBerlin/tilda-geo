@@ -97,7 +97,9 @@ export const getAdminUploadLoaderFn = createServerFn({ method: 'GET' })
     return { upload, auditHistory }
   })
 
-const AdminQaConfigEditInput = z.object({ id: z.number() })
+const AdminQaConfigEditInput = z
+  .object({ id: z.number() })
+  .merge(createOffsetSearchSchema({ maxTake: 200 }))
 
 export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof AdminQaConfigEditInput>) => AdminQaConfigEditInput.parse(data))
@@ -109,7 +111,7 @@ export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
       getAuditHistoryForRecord(headers, 'QaConfig', String(data.id)),
     ])
     const orphanedEvaluations = await getQaOrphanedEvaluationsForAdmin(
-      { configId: qaConfig.id, mapTable: qaConfig.mapTable },
+      { configId: qaConfig.id, mapTable: qaConfig.mapTable, skip: data.skip, take: data.take },
       headers,
     )
     return { qaConfig, regions, auditHistory, orphanedEvaluations }
@@ -149,7 +151,7 @@ export const getAdminReviewListEditLoaderFn = createServerFn({ method: 'GET' })
     const headers = getRequestHeaders()
     const [list, regions, auditHistory] = await Promise.all([
       getReviewList({ id: data.id }, headers),
-      getRegionRows({}, headers),
+      getRegions(),
       getAuditHistoryForRecord(headers, 'ReviewList', String(data.id)),
     ])
     return { list, regions, auditHistory }

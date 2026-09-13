@@ -1,3 +1,6 @@
+import { z } from 'zod'
+import { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import type { UrlMigration } from './types'
 
 /** Known QA config slugs. `slug--style` bookmarks for these become `{ key }` with the same slug. */
@@ -25,14 +28,6 @@ const QA_STATUS_MAP = {
   'user-ok-qa-tooling-error': 'ok-qa-tooling-error',
 } as const satisfies Record<string, string | undefined>
 
-type LegacyNotesFilter = {
-  query?: string | null
-  completed?: boolean | null
-  user?: string | null
-  commented?: boolean | null
-  notReacted?: boolean | null
-}
-
 const parseJsonObject = (raw: string | null) => {
   if (!raw) return null
   try {
@@ -46,15 +41,23 @@ const parseJsonObject = (raw: string | null) => {
   return null
 }
 
-const flattenNotesFilter = (raw: Record<string, unknown> | null) => {
-  if (!raw) return {}
-  const filter = raw as LegacyNotesFilter
+const parseNotesFilter = (raw: string | null) => {
+  if (!raw) return null
+  try {
+    const parsed = zodInternalNotesFilterParam.safeParse(JSON.parse(raw))
+    return parsed.success ? parsed.data : null
+  } catch {
+    return null
+  }
+}
+
+const flattenNotesFilter = (filter: z.infer<typeof zodInternalNotesFilterParam>) => {
   const next: Record<string, unknown> = {}
-  if (typeof filter.query === 'string' && filter.query) next.search = filter.query
+  if (filter.query) next.search = filter.query
   if (typeof filter.completed === 'boolean') next.completed = filter.completed
   if (typeof filter.commented === 'boolean') next.commented = filter.commented
   if (typeof filter.notReacted === 'boolean') next.notReacted = filter.notReacted
-  if (typeof filter.user === 'string' && filter.user) next.user = filter.user
+  if (filter.user) next.user = filter.user
   return next
 }
 
@@ -116,7 +119,7 @@ const migrateQaParam = (params: URLSearchParams) => {
  * MIGRATION: Notes + QA URL params (v3).
  * - `atlasNote` → `internalNote`. Visibility keys `osmNotes` / `notes` stay for the path redirect.
  * - `notes` → `internalNotes` (legacy TILDA visibility flag; stripped after redirect).
- * - `osmNotesFilter` / `atlasNotesFilter` → flat `notesMode` JSON. Old filter keys deleted.
+ * - `osmNotesFilter` / `atlasNotesFilter` → flat `notes` JSON. Old filter keys deleted.
  * - JSON `qa` with a string `key` is kept (unknown slugs included); leftover `qaFilter.users` is merged.
  * - `qa` `slug--style` plus `qaFilter.users` → one `qa` object (same slug). Unknown slug/status drops `qa`.
  * Does not change the pathname.
@@ -135,17 +138,18 @@ const migration: UrlMigration = (initialUrl) => {
   rename('notes', 'internalNotes')
   rename('atlasNote', 'internalNote')
 
-  const osmFilter = parseJsonObject(params.get('osmNotesFilter'))
-  const atlasFilter = parseJsonObject(params.get('atlasNotesFilter'))
+  const osmFilter = parseNotesFilter(params.get('osmNotesFilter'))
+  const atlasFilter = parseNotesFilter(params.get('atlasNotesFilter'))
   params.delete('osmNotesFilter')
   params.delete('atlasNotesFilter')
 
-  const notesMode = {
-    ...flattenNotesFilter(osmFilter),
-    ...flattenNotesFilter(atlasFilter),
+  const notes = {
+    ...(osmFilter ? flattenNotesFilter(osmFilter) : {}),
+    ...(atlasFilter ? flattenNotesFilter(atlasFilter) : {}),
   }
-  if (Object.keys(notesMode).length > 0 && !params.has('notesMode')) {
-    params.set('notesMode', JSON.stringify(notesMode))
+  const notesKey = searchParamsRegistry.notesMode
+  if (Object.keys(notes).length > 0 && !params.has(notesKey)) {
+    params.set(notesKey, JSON.stringify(notes))
   }
 
   migrateQaParam(params)

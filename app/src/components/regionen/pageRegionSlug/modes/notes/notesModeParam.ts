@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 /**
- * Single JSON param for the notes mode (`notesMode`). `key` is `'osm'` or a TILDA folder id;
+ * Single JSON param for the notes mode (`notes`). `key` is `'osm'` or a TILDA folder id;
  * omitted while a region has one notes kind. `extent` is omitted when `'view'` (the default).
  */
 // Per-field `.catch` keeps stale bookmarks usable: `optionalSearchJson` drops the whole object

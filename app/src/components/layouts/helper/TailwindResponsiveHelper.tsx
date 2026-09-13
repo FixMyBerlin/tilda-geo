@@ -1,20 +1,13 @@
 import { isDev } from '@/components/shared/utils/isEnv'
 
-function ignoreParentTriggerClick(event: React.MouseEvent<HTMLAnchorElement>) {
-  event.stopPropagation()
-}
-
 export const TailwindResponsiveHelper = () => {
   if (!isDev) return null
 
   return (
-    <span className="flex h-5 flex-row items-center rounded border border-white/70 bg-pink-300 text-xs shadow-xl print:hidden">
-      <span className="px-1 hover:underline">TanStack</span>
-      <span className="w-px self-stretch bg-white/70" aria-hidden />
+    <div className="pointer-events-none fixed bottom-1.5 left-14 z-50 print:hidden">
       <a
-        className="flex h-full flex-row items-center space-x-1 px-1 hover:underline"
+        className="pointer-events-auto flex h-5 flex-row items-center space-x-1 rounded border border-white/70 bg-pink-300 px-1 text-xs shadow-xl hover:underline"
         href="https://tailwindcss.com/docs/responsive-design"
-        onClick={ignoreParentTriggerClick}
       >
         <span className="font-bold underline" title="<640px Mobile">
           📱
@@ -35,6 +28,6 @@ export const TailwindResponsiveHelper = () => {
           2xl
         </span>
       </a>
-    </span>
+    </div>
   )
 }

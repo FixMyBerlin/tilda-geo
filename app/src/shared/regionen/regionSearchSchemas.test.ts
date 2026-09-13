@@ -50,11 +50,11 @@ describe('routerSearch', () => {
     expect(stringified).not.toContain('data=')
   })
 
-  test('stringifies notesMode as pretty JSON, not jsurl', () => {
-    const search = { notesMode: { completed: false, extent: 'view' } }
+  test('stringifies notes as pretty JSON, not jsurl', () => {
+    const search = { notes: { completed: false, extent: 'view' } }
     const stringified = decodeURIComponent(routerSearch.stringify(search))
-    expect(stringified).toContain('notesMode={"completed":false,"extent":"view"}')
-    expect(stringified).not.toContain('notesMode=(')
+    expect(stringified).toContain('notes={"completed":false,"extent":"view"}')
+    expect(stringified).not.toContain('notes=(')
   })
 })
 
@@ -175,21 +175,21 @@ describe('regionSearchSchema', () => {
     expect(routerSearch.stringify(cleared)).not.toContain('data=')
   })
 
-  test('parses flat notesMode JSON', () => {
+  test('parses flat notes JSON', () => {
     const parsed = parseRegionSearch({
-      notesMode: { search: 'kreuzung', completed: false, extent: 'view' },
+      notes: { search: 'kreuzung', completed: false, extent: 'view' },
     })
-    expect(parsed.notesMode).toEqual({
+    expect(parsed.notes).toEqual({
       search: 'kreuzung',
       completed: false,
       extent: 'view',
     })
   })
 
-  test('parses flat rl JSON with key', () => {
+  test('parses flat review JSON with key', () => {
     const parsed = parseRegionSearch({
-      rl: { key: 7, search: 'foo', status: 'OPEN' },
+      review: { key: 7, search: 'foo', status: 'OPEN' },
     })
-    expect(parsed.rl).toEqual({ key: 7, search: 'foo', status: 'OPEN' })
+    expect(parsed.review).toEqual({ key: 7, search: 'foo', status: 'OPEN' })
   })
 })

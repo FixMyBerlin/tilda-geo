@@ -30,6 +30,11 @@ type PartitionClickedFeaturesInput = {
   multiselect: boolean
 }
 
+/*
+ * Click handling splits inspector layers vs mode-owned layers (notes/QA/review lists)
+ * so they do not share selection. Inspector supports multi-select; the active mode
+ * keeps a single selected feature in the URL.
+ */
 export const partitionClickedFeatures = ({
   clickedFeatures,
   currentMode,
