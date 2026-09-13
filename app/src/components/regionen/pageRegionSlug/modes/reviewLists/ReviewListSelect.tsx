@@ -5,6 +5,7 @@ import type { ReviewListForRegion } from '@/server/review-lists/queries/getRevie
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
+import { formatLinkedRegionsHint } from './linkedRegionsHint'
 import { ReviewListGeojsonUploadModal } from './ReviewListGeojsonUploadModal'
 import { ReviewListNameModal } from './ReviewListNameModal'
 import type { ReviewListCommands } from './useReviewListCommands'
@@ -45,6 +46,7 @@ export const ReviewListSelect = ({
             label: list.name,
             description: String(list.entryCount),
             private: true,
+            regionHint: formatLinkedRegionsHint(list.regions.map((region) => region.name)),
           }))}
           onChange={(next) => onSelect(Number(next))}
         />

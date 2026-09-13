@@ -52,8 +52,6 @@ export const PageModeReviewLists = () => {
 
   const features = entriesData?.featureCollection.features ?? []
 
-  const sharedRegionSlugs = (selectedList?.regionSlugs ?? []).filter((slug) => slug !== region.slug)
-
   const onSelectList = (list: number) =>
     setReviewListsModeParam({
       ...reviewListsMode,
@@ -104,11 +102,6 @@ export const PageModeReviewLists = () => {
     <ModePanel
       title={selectedList ? `Liste ${frenchQuote(selectedList.name)}` : 'Prüflisten'}
       detail={panelDetail}
-      subtitle={
-        sharedRegionSlugs.length > 0
-          ? `Liste geteilt mit: ${sharedRegionSlugs.join(', ')}`
-          : undefined
-      }
       collectionAlwaysOpen={lists.length === 0}
       collection={
         <ReviewListSelect

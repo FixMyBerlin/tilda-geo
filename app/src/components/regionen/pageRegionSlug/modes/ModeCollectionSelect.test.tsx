@@ -28,6 +28,24 @@ describe('ModeCollectionSelect', () => {
     expect(screen.getAllByTitle(PRIVATE_DATASET_TITLE)).toHaveLength(2)
   })
 
+  test('shows an info icon with the shared-region hint next to the lock', () => {
+    const hint = 'Diese Liste ist mit den Regionen »Alpha« und »Beta« verknüpft.'
+    render(
+      <ModeCollectionSelect
+        aria-label="Prüfliste"
+        value="9"
+        options={[
+          { value: '9', label: 'Geteilt', description: '2', private: true, regionHint: hint },
+          { value: '2', label: 'Lokal', description: '1', private: true },
+        ]}
+      />,
+    )
+
+    expect(screen.queryByTitle(hint)).toBeNull()
+    expect(screen.getByLabelText(hint)).toBeTruthy()
+    expect(screen.getAllByTitle(PRIVATE_DATASET_TITLE)).toHaveLength(2)
+  })
+
   test('QA/Prüflisten marks the selected list and has no placeholder option', () => {
     render(
       <ModeCollectionSelect

@@ -1,6 +1,7 @@
-import { CheckBadgeIcon, LockClosedIcon } from '@heroicons/react/20/solid'
+import { CheckBadgeIcon, InformationCircleIcon, LockClosedIcon } from '@heroicons/react/20/solid'
 import { CheckBadgeIcon as CheckBadgeIconOutline } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
+import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 
 export const PRIVATE_DATASET_TITLE =
   'Datensatz nur für angemeldete Nutzer:innen mit Rechten für die Region sichtbar.'
@@ -14,6 +15,8 @@ type ModeCollectionOption = {
   /** Secondary text in the menu (e.g. entry count). */
   description?: string
   private?: boolean
+  /** Shared across regions (Prüflisten). Keep empty when the list is local. */
+  regionHint?: string
   /** QA configs: filled vs outline check-badge. Omit when status does not apply. */
   inactive?: boolean
 }
@@ -84,6 +87,16 @@ export const ModeCollectionSelect = ({
                 <span className="font-normal text-white/70"> · {option.description}</span>
               ) : null}
             </span>
+            {option.regionHint ? (
+              <Tooltip
+                as="span"
+                text={option.regionHint}
+                className="shrink-0"
+                aria-label={option.regionHint}
+              >
+                <InformationCircleIcon className="size-4 text-white/60" aria-hidden />
+              </Tooltip>
+            ) : null}
             {option.private ? (
               <LockClosedIcon
                 className="size-4 flex-none text-white/60"

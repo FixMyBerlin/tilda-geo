@@ -23,7 +23,10 @@ type Props = {
   className?: string
   /** Floating UI placement; defaults to top. */
   placement?: 'top' | 'bottom' | 'left' | 'right'
+  /** `span` when the trigger sits inside a `<button>` (phrasing content only). */
+  as?: 'div' | 'span'
   children: React.ReactNode
+  'aria-label'?: string
 }
 
 export const Tooltip = ({
@@ -31,6 +34,8 @@ export const Tooltip = ({
   children,
   className,
   placement: preferredPlacement = 'top',
+  as: Wrapper = 'div',
+  'aria-label': ariaLabel,
 }: Props) => {
   const [open, setOpen] = useState(false)
   const reducedMotion = useReducedMotion()
@@ -69,9 +74,9 @@ export const Tooltip = ({
           : { y: 4 }
 
   return (
-    <div
-      className={twJoin('relative', className)}
-      {...getReferenceProps({ ref: refs.setReference })}
+    <Wrapper
+      className={twJoin('relative', Wrapper === 'span' && 'inline-flex', className)}
+      {...getReferenceProps({ ref: refs.setReference, 'aria-label': ariaLabel })}
     >
       {children}
       <FloatingPortal>
@@ -96,6 +101,6 @@ export const Tooltip = ({
           )}
         </AnimatePresence>
       </FloatingPortal>
-    </div>
+    </Wrapper>
   )
 }

@@ -5,12 +5,17 @@ import db from '@/server/db.server'
 
 const Schema = z.object({ regionSlug: z.string() })
 
+type ReviewListRegion = {
+  slug: string
+  name: string
+}
+
 export type ReviewListForRegion = {
   id: number
   name: string
   entryCount: number
-  /** Slugs of all regions this list is linked to. >1 means shared (UI hint). */
-  regionSlugs: string[]
+  /** All regions this list is linked to. >1 means shared (UI hint). */
+  regions: ReviewListRegion[]
 }
 
 /** Review lists linked to a region, with entry counts + shared-region info. */
@@ -27,17 +32,23 @@ export async function getReviewListsForRegion(input: z.infer<typeof Schema>, hea
       id: true,
       name: true,
       _count: { select: { entries: true } },
-      regions: { select: { slug: true } },
+      regions: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
     },
     orderBy: { createdAt: 'desc' },
   })
 
   return {
-    lists: lists.map((list): ReviewListForRegion => ({
-      id: list.id,
-      name: list.name,
-      entryCount: list._count.entries,
-      regionSlugs: list.regions.map((region) => region.slug),
-    })),
+    lists: lists.map((list): ReviewListForRegion => {
+      const regions = list.regions.map((region) => ({
+        slug: region.slug,
+        name: region.name.trim() || region.slug,
+      }))
+      return {
+        id: list.id,
+        name: list.name,
+        entryCount: list._count.entries,
+        regions,
+      }
+    }),
   }
 }
