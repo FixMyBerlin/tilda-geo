@@ -30,8 +30,8 @@ describe.skipIf(!integrationDb)('syncRegionMaskAfterWrite (integration)', () => 
   let regionRecordId = ''
 
   beforeAll(async () => {
-    fetchBoundaryGeometry.mockResolvedValue({
-      type: 'Polygon',
+    const square = {
+      type: 'Polygon' as const,
       coordinates: [
         [
           [0, 0],
@@ -41,6 +41,10 @@ describe.skipIf(!integrationDb)('syncRegionMaskAfterWrite (integration)', () => 
           [0, 0],
         ],
       ],
+    }
+    fetchBoundaryGeometry.mockResolvedValue({
+      geometry: square,
+      bufferedGeometry: square,
     })
 
     await db.region.deleteMany({ where: { slug: REGION_SLUG } })
