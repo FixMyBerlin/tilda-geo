@@ -3,11 +3,7 @@ import { useSignInUrl } from '@/components/shared/hooks/useSignInUrl'
 import { Link } from '@/components/shared/links/Link'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 
-type Props = { message?: string }
-
-export const NotesNewLoginNotice = ({
-  message = 'Um einen Hinweis zu erstellen, müssen Sie eingeloggt sein.',
-}: Props = {}) => {
+export const NotesNewLoginNotice = () => {
   const signInHref = useSignInUrl()
 
   return (
@@ -21,7 +17,7 @@ export const NotesNewLoginNotice = ({
           </Link>
         }
       >
-        <p>{message}</p>
+        <p>Um einen Hinweis zu erstellen, müssen Sie eingeloggt sein.</p>
       </Callout>
     </section>
   )

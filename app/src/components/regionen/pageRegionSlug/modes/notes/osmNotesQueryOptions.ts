@@ -4,7 +4,6 @@ import { getOsmApiUrl } from '@/components/shared/utils/getOsmUrl'
 import { STALE_TIME_NOTES_MS } from '@/config/queryStaleTimes'
 import {
   osmApiFeatureCollectionSchema,
-  type OsmApiFeaturePointType,
   type OsmFeatureCollectionType,
   type OsmFeaturePointType,
 } from './osmNotesSchema'
@@ -12,21 +11,6 @@ import {
 export const osmNotesQueryKey = (bbox: string | undefined) => ['osmNotes', bbox] as const
 
 const TILDA_NOTE_SEARCH_TERMS = ['#tilda', '#radverkehrsatlas']
-
-// Some of our features require a feature.id
-// In addition, we add a property to change the note icon (tilda notes vs. other)
-// Shared between the list query (below) and the comment/close/reopen mutation, which needs to
-// map its single-feature OSM API response the same way.
-export const toOsmFeaturePoint = (feature: OsmApiFeaturePointType): OsmFeaturePointType => ({
-  ...feature,
-  id: feature.properties.id,
-  properties: {
-    ...feature.properties,
-    tilda: feature.properties.comments.some((c) =>
-      TILDA_NOTE_SEARCH_TERMS.some((term) => c.text?.toLocaleLowerCase().includes(term)),
-    ),
-  },
-})
 
 export const osmNotesQueryOptions = ({ bbox }: { bbox: string | undefined }) => {
   return queryOptions({
@@ -39,7 +23,20 @@ export const osmNotesQueryOptions = ({ bbox }: { bbox: string | undefined }) => 
       }
       const rawJson = await response.json()
       const parsed = osmApiFeatureCollectionSchema.parse(rawJson)
-      const featuresWithId: OsmFeaturePointType[] = parsed.features.map(toOsmFeaturePoint)
+      // Some of our features require a feature.id
+      // In addition, we add a property to change the note icon (tilda notes vs. other)
+      const featuresWithId: OsmFeaturePointType[] = parsed.features.map((feature) => {
+        return {
+          ...feature,
+          id: feature.properties.id,
+          properties: {
+            ...feature.properties,
+            tilda: feature.properties.comments.some((c) =>
+              TILDA_NOTE_SEARCH_TERMS.some((term) => c.text?.toLocaleLowerCase().includes(term)),
+            ),
+          },
+        }
+      })
       // @ts-expect-error turf.featureCollection has an option `id` but we are sure it is there. But this causes a type missmatch.
       const result: OsmFeatureCollectionType = featureCollection(featuresWithId)
       return result
