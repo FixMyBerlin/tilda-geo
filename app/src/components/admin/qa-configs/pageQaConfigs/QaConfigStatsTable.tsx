@@ -89,6 +89,26 @@ export function QaConfigStatsTable({ stats }: { stats: QaConfigStats | undefined
                 {stats.evaluationStats.SYSTEM.PROBLEMATIC}
               </td>
             </tr>
+            <tr>
+              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
+                {evaluatorTypeConfig.SYSTEM.label}
+              </td>
+              <td className="px-4 py-2 text-sm text-gray-900">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor }}
+                  />
+                  <span>
+                    {systemStatusConfig.TRUSTED_EDITOR_CHANGE.label}{' '}
+                    <code className="text-xs">TRUSTED_EDITOR_CHANGE</code>
+                  </span>
+                </div>
+              </td>
+              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
+                {stats.evaluationStats.SYSTEM.TRUSTED_EDITOR_CHANGE}
+              </td>
+            </tr>
             {/* User evaluations */}
             <tr>
               <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">

@@ -61,6 +61,8 @@ export async function createQaEvaluation(
         systemStatus: calculateSystemStatus(storedDecisionData.relative, qaConfig),
         absoluteDifference: storedDecisionData.absoluteChange,
         absoluteDifferenceThreshold: qaConfig.absoluteDifferenceThreshold,
+        // User decisions store the count-based status; the trusted-editor check only runs in the nightly update.
+        changedByTrustedEditors: false,
       }).effectiveSystemStatus
     : ((
         await db.qaEvaluation.findFirst({

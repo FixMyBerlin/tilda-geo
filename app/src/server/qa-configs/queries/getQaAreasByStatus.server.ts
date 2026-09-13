@@ -37,6 +37,8 @@ function matchesStyle(
       return evaluation.userStatus === null && evaluation.systemStatus === 'NEEDS_REVIEW'
     case 'user-pending-problematic':
       return evaluation.userStatus === null && evaluation.systemStatus === 'PROBLEMATIC'
+    case 'system-trusted-editor-change':
+      return evaluation.userStatus === null && evaluation.systemStatus === 'TRUSTED_EDITOR_CHANGE'
   }
 }
 

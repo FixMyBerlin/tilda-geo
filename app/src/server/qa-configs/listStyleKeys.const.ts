@@ -13,6 +13,7 @@ const QA_LIST_STYLE_KEYS = [
   'user-ok-qa-tooling-error',
   'user-pending-needs-review',
   'user-pending-problematic',
+  'system-trusted-editor-change',
 ] as const
 
 export type QaListStyleKey = (typeof QA_LIST_STYLE_KEYS)[number]

@@ -87,6 +87,8 @@ export const SourcesLayersQa = () => {
               systemStatusConfig.NEEDS_REVIEW.hexColor,
               ['==', ['feature-state', 'systemStatus'], 'P'],
               systemStatusConfig.PROBLEMATIC.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'T'],
+              systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor,
               'gray',
             ],
             'fill-opacity': [
@@ -117,6 +119,8 @@ export const SourcesLayersQa = () => {
               systemStatusConfig.NEEDS_REVIEW.hexColor,
               ['==', ['feature-state', 'systemStatus'], 'P'],
               systemStatusConfig.PROBLEMATIC.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'T'],
+              systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor,
               '#333333',
             ],
           }}
@@ -145,6 +149,8 @@ export const SourcesLayersQa = () => {
               systemStatusConfig.NEEDS_REVIEW.hexColor,
               ['==', ['feature-state', 'systemStatus'], 'P'],
               systemStatusConfig.PROBLEMATIC.hexColor,
+              ['==', ['feature-state', 'systemStatus'], 'T'],
+              systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor,
               '#333333',
             ],
             'line-width': 3,

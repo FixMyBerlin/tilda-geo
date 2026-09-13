@@ -63,7 +63,8 @@ async function qaUpdate(headers: Headers) {
           previous_relative::float,
           count_reference,
           count_current,
-          difference as "absoluteDifference"
+          difference as "absoluteDifference",
+          last_editors
         FROM ${tableName}
       `)
         const previousByAreaId = await getLatestEvaluationsByAreaId(config.id)
@@ -74,6 +75,10 @@ async function qaUpdate(headers: Headers) {
           areas,
           previousByAreaId,
         })
+        // Trusted-editor auto-OK rows, counted separately for visibility in the log line below.
+        const trustedEditorChangeCount = evaluationsToCreate.filter(
+          (evaluation) => evaluation.systemStatus === 'TRUSTED_EDITOR_CHANGE',
+        ).length
 
         let createdCount = 0
         for (let i = 0; i < evaluationsToCreate.length; i += QA_EVALUATION_INSERT_CHUNK_SIZE) {
@@ -87,7 +92,7 @@ async function qaUpdate(headers: Headers) {
         totalEvaluations += areas.length
         newEvaluations += createdCount
         console.log(
-          `QA update: ${config.region.slug}/${config.slug}: ${areas.length} areas, ${createdCount} created in ${getSecondsElapsed(configStartTime)} s`,
+          `QA update: ${config.region.slug}/${config.slug}: ${areas.length} areas, ${createdCount} created (${trustedEditorChangeCount} by trusted editors) in ${getSecondsElapsed(configStartTime)} s`,
         )
       }
 
