@@ -18,7 +18,7 @@ import { useOptimisticMode } from './useCurrentMode'
 const MODE_MOBILE_DOCK_PEEK = '5.5rem'
 const MODE_MOBILE_DOCK_EXPANDED = '62dvh'
 
-/** Required: `mapOverlayBottomRightControlsClassName` and `getModeMapCameraPadding` read this var; height is measured via ResizeObserver. */
+/** Required: `mapOverlayBottomRightControlsClassName` reads this var; height is measured via ResizeObserver. */
 const setModeMobileDockHeightCssVar = (height: string) =>
   document.documentElement.style.setProperty('--mode-mobile-dock-height', height)
 
@@ -51,12 +51,7 @@ export const ModeMobileDock = () => {
 
   useLayoutEffect(
     function syncModeMobileDockHeightCssVar() {
-      const applyDockMetrics = (cssHeight: string) => {
-        setModeMobileDockHeightCssVar(cssHeight)
-        applyModeMapCameraPadding(mainMap)
-      }
-
-      applyDockMetrics(height)
+      setModeMobileDockHeightCssVar(height)
       const el = dockRef.current
       if (!el || typeof ResizeObserver === 'undefined') {
         return function clearModeMobileDockHeightCssVar() {
@@ -66,9 +61,10 @@ export const ModeMobileDock = () => {
       }
 
       const applyMeasuredHeight = () => {
-        const measured = el.getBoundingClientRect().height
+        const measured = Math.round(el.getBoundingClientRect().height)
         if (measured > 0) {
-          applyDockMetrics(`${Math.round(measured)}px`)
+          setModeMobileDockHeightCssVar(`${measured}px`)
+          applyModeMapCameraPadding(mainMap, measured)
         }
       }
       applyMeasuredHeight()
