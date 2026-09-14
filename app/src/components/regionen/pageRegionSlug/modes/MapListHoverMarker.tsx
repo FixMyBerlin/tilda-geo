@@ -21,8 +21,8 @@ export const MapListHoverMarker = () => {
   const { mode } = useCurrentMode()
   if (!position || !hoveredListItem) return null
 
-  const { hex, rgb } = modeIdentity[mode].accent
-  const rgba = (alpha: number) => `rgba(${rgb.join(',')}, ${alpha})`
+  const { accent } = modeIdentity[mode]
+  const rgba = (alpha: number) => `rgba(${accent.rgb.join(',')}, ${alpha})`
   const size = position.atEdge ? LIST_HOVER_EDGE_RING_PX : LIST_HOVER_RING_PX
   const jump = position.atEdge ? edgeJumpOffset(position.edges) : { x: 0, y: 0 }
 
@@ -52,7 +52,7 @@ export const MapListHoverMarker = () => {
         style={{
           width: size,
           height: size,
-          borderColor: hex,
+          borderColor: accent.hex,
           backgroundColor: rgba(position.atEdge ? 0.55 : 0.35),
           boxShadow: `0 0 0 3px rgba(255,255,255,0.9), 0 0 16px ${rgba(0.7)}`,
         }}
