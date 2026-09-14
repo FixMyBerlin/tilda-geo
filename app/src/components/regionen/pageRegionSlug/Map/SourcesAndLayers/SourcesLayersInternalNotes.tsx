@@ -16,9 +16,9 @@ export const SourcesLayersInternalNotes = () => {
   const region = useRegion()
   const allowInternalNotes = useAllowInternalNotes()
   const { featuresParam } = useFeaturesParam()
-  const { isNotes } = useCurrentMode()
+  const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
-  const showLayers = isNotes && region.notesInternal && allowInternalNotes
+  const showLayers = currentMode.isNotes && region.notesInternal && allowInternalNotes
   const { data: result } = useQuery({
     ...internalNotesQueryOptions(region.slug, notesModeToServerFilter(notesModeValue)),
     enabled: showLayers,

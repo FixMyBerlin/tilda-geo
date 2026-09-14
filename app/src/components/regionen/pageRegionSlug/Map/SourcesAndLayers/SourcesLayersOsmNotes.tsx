@@ -13,9 +13,9 @@ export const osmNotesSourceId = 'osm-notes-source'
 export const SourcesLayersOsmNotes = () => {
   const region = useRegion()
   const { featuresParam } = useFeaturesParam()
-  const { isNotes } = useCurrentMode()
+  const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
-  const showLayers = isNotes && region.notesOsm
+  const showLayers = currentMode.isNotes && region.notesOsm
   const filteredFeatures = useFilteredOsmNotes(
     showLayers ? notesModeToServerFilter(notesModeValue) : undefined,
   )

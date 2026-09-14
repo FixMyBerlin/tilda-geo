@@ -28,7 +28,7 @@ export const SourcesLayersQa = () => {
   const hasPermissions = useHasPermissions()
   const { qaParamData } = useQaParam()
   const regionSlug = useRegionSlug()
-  const { isQa } = useCurrentMode()
+  const currentMode = useCurrentMode()
   const { featuresParam } = useFeaturesParam()
   const { data: qaConfigs } = useQuery({
     ...regionQaConfigsQueryOptions(regionSlug ?? ''),
@@ -54,7 +54,7 @@ export const SourcesLayersQa = () => {
   }
 
   // QA lives only in the QA mode now (not on the default map / other modes).
-  if (!isQa) {
+  if (!currentMode.isQa) {
     return null
   }
 

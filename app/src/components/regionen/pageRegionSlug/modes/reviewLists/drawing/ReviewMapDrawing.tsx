@@ -31,7 +31,7 @@ import { type ReviewDrawMode } from './reviewTerraDrawConfig'
  * after delete or for a non-member is not a draw session, so map clicks work again.
  */
 export const ReviewMapDrawing = () => {
-  const { isReviewLists } = useCurrentMode()
+  const currentMode = useCurrentMode()
   const canManage = useHasPermissions()
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
@@ -41,7 +41,7 @@ export const ReviewMapDrawing = () => {
 
   const { data: lists } = useQuery({
     ...reviewListsQueryOptions(regionSlug),
-    enabled: isReviewLists,
+    enabled: currentMode.isReviewLists,
   })
   const activeListId = key ?? lists?.lists[0]?.id
 
@@ -66,7 +66,7 @@ export const ReviewMapDrawing = () => {
 
   const { data: entriesData } = useQuery({
     ...reviewEntriesQueryOptions(regionSlug, activeListId),
-    enabled: isReviewLists && isEditing && activeListId !== undefined,
+    enabled: currentMode.isReviewLists && isEditing && activeListId !== undefined,
   })
   const editingGeometry = entriesData?.featureCollection.features.find(
     (feature) => feature.id === editingEntryId,
@@ -199,7 +199,10 @@ export const ReviewMapDrawing = () => {
   useEffect(
     function syncReviewDrawEnabledWithSession() {
       const enabled =
-        isReviewLists && canManage && activeListId !== undefined && drawSession !== 'idle'
+        currentMode.isReviewLists &&
+        canManage &&
+        activeListId !== undefined &&
+        drawSession !== 'idle'
       // Session start mode is kind-based, not toolbar state: compose → point, edit → select.
       // Must run before setEnabled so pendingMode is applied instead of a leftover select.
       // Do not depend on `mode` — the edit toolbar calls setMode directly when adding a part.
@@ -208,16 +211,16 @@ export const ReviewMapDrawing = () => {
       }
       control.setEnabled(enabled)
     },
-    [isReviewLists, canManage, activeListId, drawSession, sessionKind, control],
+    [currentMode.isReviewLists, canManage, activeListId, drawSession, sessionKind, control],
   )
 
   useEffect(
     function syncComposeDrawMode() {
       if (sessionKind !== 'compose') return
-      if (!(isReviewLists && canManage && activeListId !== undefined)) return
+      if (!(currentMode.isReviewLists && canManage && activeListId !== undefined)) return
       control.setMode(reviewDrawStartMode('compose', mode))
     },
-    [isReviewLists, canManage, activeListId, drawSession, sessionKind, mode, control],
+    [currentMode.isReviewLists, canManage, activeListId, drawSession, sessionKind, mode, control],
   )
 
   useEffect(
@@ -237,7 +240,12 @@ export const ReviewMapDrawing = () => {
     [drawSession, editingEntryId, editingGeometry, control],
   )
 
-  if (!isReviewLists || !canManage || activeListId === undefined || drawSession === 'idle') {
+  if (
+    !currentMode.isReviewLists ||
+    !canManage ||
+    activeListId === undefined ||
+    drawSession === 'idle'
+  ) {
     return null
   }
 

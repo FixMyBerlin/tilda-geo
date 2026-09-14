@@ -22,12 +22,12 @@ export const reviewEditingEntryId = (
  * after delete or in a shared URL opened by a non-member is not a draw session.
  */
 export const useReviewDrawActive = () => {
-  const { isReviewLists } = useCurrentMode()
+  const currentMode = useCurrentMode()
   const canManage = useHasPermissions()
   const { selected } = useModeDetailSelection()
   const { new: isComposing, move } = useReviewListsModeValue()
   const isEditing = !Number.isNaN(
     reviewEditingEntryId(selected, isComposing === true, move === true),
   )
-  return isReviewLists && canManage && (isComposing === true || isEditing)
+  return currentMode.isReviewLists && canManage && (isComposing === true || isEditing)
 }
