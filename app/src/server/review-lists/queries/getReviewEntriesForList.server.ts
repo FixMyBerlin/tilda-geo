@@ -58,7 +58,8 @@ export async function getReviewEntriesForList(input: z.infer<typeof Schema>, hea
         authorName: entry.createdBy?.osmName ?? null,
         commentCount: entry._count.comments,
         // Display attributes from upload/drawing (kept under a namespace to avoid clobbering ours).
-        data: entry.properties ?? {},
+        // Writes store `normalizeProperties` → Record<string, string>; Prisma types the column as Json.
+        data: (entry.properties ?? {}) as Record<string, string>,
       },
       { id: entry.id },
     ),
