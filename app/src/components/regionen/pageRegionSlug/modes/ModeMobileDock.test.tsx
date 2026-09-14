@@ -31,11 +31,18 @@ vi.mock('../SidebarInspector/useInspectorRenderableFeatures', () => ({
   useInspectorRenderableFeatures,
 }))
 
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 describe('ModeMobileDock', () => {
   beforeEach(() => {
     useNotesComposeActive.mockReturnValue(false)
     useReviewDrawActive.mockReturnValue(false)
     useInspectorRenderableFeatures.mockReturnValue([])
+    vi.stubGlobal('ResizeObserver', ResizeObserverStub)
   })
 
   afterEach(() => {

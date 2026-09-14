@@ -51,21 +51,11 @@ export const ModeMobileDock = () => {
 
   useLayoutEffect(
     function syncModeMobileDockHeightCssVar() {
-      setModeMobileDockHeightCssVar(height)
-      const el = dockRef.current
-      if (!el || typeof ResizeObserver === 'undefined') {
-        return function clearModeMobileDockHeightCssVar() {
-          setModeMobileDockHeightCssVar('0px')
-          resetModeMapCameraPadding(mainMap)
-        }
-      }
-
+      const el = dockRef.current!
       const applyMeasuredHeight = () => {
         const measured = Math.round(el.getBoundingClientRect().height)
-        if (measured > 0) {
-          setModeMobileDockHeightCssVar(`${measured}px`)
-          applyModeMapCameraPadding(mainMap, measured)
-        }
+        setModeMobileDockHeightCssVar(`${measured}px`)
+        applyModeMapCameraPadding(mainMap, measured)
       }
       applyMeasuredHeight()
       const observer = new ResizeObserver(applyMeasuredHeight)
@@ -76,7 +66,7 @@ export const ModeMobileDock = () => {
         resetModeMapCameraPadding(mainMap)
       }
     },
-    [height, mainMap],
+    [mainMap],
   )
 
   const toggleExpanded = () => {
