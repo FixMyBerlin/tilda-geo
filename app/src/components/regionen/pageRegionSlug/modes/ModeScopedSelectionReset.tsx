@@ -22,7 +22,7 @@ import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCu
  * Covers ModeSwitcher, deep links, and back/forward.
  */
 export const ModeScopedSelectionReset = () => {
-  const mode = useCurrentMode()
+  const { mode } = useCurrentMode()
   const inspectorFeatures = useMapInspectorFeatures()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const { replaceInspectorFeatures } = useMapActions()

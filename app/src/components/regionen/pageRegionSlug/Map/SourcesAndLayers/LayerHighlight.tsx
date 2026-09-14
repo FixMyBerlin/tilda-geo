@@ -47,7 +47,7 @@ export const LayerHighlight = ({
   ...props
 }: Props) => {
   const mapLoaded = useMapLoaded()
-  const mode = useCurrentMode()
+  const { mode } = useCurrentMode()
   // Selected uses the mode accent (QA purple, notes blue, …). Default hover stays orange so
   // pointer interest stays distinct from “this feature is open in the panel”.
   const selectedColor = modeIdentity[mode].accent

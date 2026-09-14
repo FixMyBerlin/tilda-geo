@@ -34,7 +34,7 @@ const STATUS_COLOR: ExpressionSpecification = [
  * active in the review lists mode.
  */
 export const SourcesLayersReviewEntries = () => {
-  const isReviewMode = useCurrentMode() === 'reviewLists'
+  const { isReviewLists } = useCurrentMode()
   const canManage = useHasPermissions()
   const regionSlug = useRegionSlug()
   const { key, new: isComposing, move: isMoveArmed } = useReviewListsModeValue()
@@ -42,16 +42,16 @@ export const SourcesLayersReviewEntries = () => {
 
   const { data: lists } = useQuery({
     ...reviewListsQueryOptions(regionSlug),
-    enabled: isReviewMode,
+    enabled: isReviewLists,
   })
   const activeListId = key ?? lists?.lists[0]?.id
 
   const { data } = useQuery({
     ...reviewEntriesQueryOptions(regionSlug, activeListId),
-    enabled: isReviewMode && activeListId !== undefined,
+    enabled: isReviewLists && activeListId !== undefined,
   })
 
-  if (!isReviewMode || !data) return null
+  if (!isReviewLists || !data) return null
 
   const selectedIds = featuresParam
     .filter((feature) => feature.sourceId === reviewEntriesSourceId)

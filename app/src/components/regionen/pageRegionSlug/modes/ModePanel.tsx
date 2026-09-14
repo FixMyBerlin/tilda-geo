@@ -85,8 +85,8 @@ export const ModePanel = ({
   detail,
   children,
 }: Props) => {
-  const currentMode = useCurrentMode()
-  const identity = modeIdentity[currentMode]
+  const { mode } = useCurrentMode()
+  const identity = modeIdentity[mode]
   const Icon = identity.icon
   const isDesktop = useBreakpoint('sm')
   const { panelRef, onResizeHandlePointerDown } = useResizableModePanelWidth({
@@ -113,7 +113,7 @@ export const ModePanel = ({
         className={twJoin(
           isDetail ? 'flex items-stretch border-b border-gray-200' : 'border-b border-gray-200',
           modeAccentInvertedClassName,
-          modeAccentInvertedFgClassName(currentMode),
+          modeAccentInvertedFgClassName(mode),
         )}
       >
         {isDetail ? (
@@ -148,7 +148,7 @@ export const ModePanel = ({
                 <ModePanelListHeading
                   title={title}
                   subtitle={subtitle}
-                  mutedClassName={modeAccentInvertedMutedClassName(currentMode)}
+                  mutedClassName={modeAccentInvertedMutedClassName(mode)}
                 />
               </div>
               {actions && <div className={modePanelListHeaderActionsClassName}>{actions}</div>}
@@ -171,7 +171,7 @@ export const ModePanel = ({
                       <ModePanelListHeading
                         title={title}
                         subtitle={subtitle}
-                        mutedClassName={modeAccentInvertedMutedClassName(currentMode)}
+                        mutedClassName={modeAccentInvertedMutedClassName(mode)}
                       />
                     </div>
                     <ChevronDownIcon
@@ -199,7 +199,7 @@ export const ModePanel = ({
               <ModePanelListHeading
                 title={title}
                 subtitle={subtitle}
-                mutedClassName={modeAccentInvertedMutedClassName(currentMode)}
+                mutedClassName={modeAccentInvertedMutedClassName(mode)}
               />
             </div>
             {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

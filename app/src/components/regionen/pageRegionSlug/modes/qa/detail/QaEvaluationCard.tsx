@@ -3,8 +3,8 @@ import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
-import { Markdown } from '@/components/shared/text/Markdown'
 import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
+import { ModeCommentMarkdown } from '../../ModeCommentMarkdown'
 import { systemStatusConfig, userStatusConfig } from './qaConfigs'
 import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
 import { QaEvaluatorDisplay } from './QaEvaluatorDisplay'
@@ -93,14 +93,7 @@ export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => 
         statusPill
       )}
 
-      {evaluation.body && (
-        <div className="text-gray-700">
-          <Markdown
-            markdown={evaluation.body}
-            className="prose-li:p:0 prose-sm prose-p:leading-tight prose-p:text-gray-700 prose-ol:leading-tight prose-ul:leading-tight prose-li:m-0"
-          />
-        </div>
-      )}
+      <ModeCommentMarkdown markdown={evaluation.body} />
     </div>
   )
 }

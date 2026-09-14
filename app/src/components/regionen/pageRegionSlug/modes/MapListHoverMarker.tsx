@@ -18,7 +18,7 @@ import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
 export const MapListHoverMarker = () => {
   const position = useListHoverMarkerPosition()
   const hoveredListItem = useHoveredListItem()
-  const mode = useCurrentMode()
+  const { mode } = useCurrentMode()
   if (!position || !hoveredListItem) return null
 
   const accent = modeIdentity[mode].accent

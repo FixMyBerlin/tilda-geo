@@ -106,16 +106,16 @@ export const useInteractiveLayers = () => {
     categories: activeCategoriesConfig,
   })
 
-  if (region.notesOsm && currentMode === 'notes') {
+  if (region.notesOsm && currentMode.isNotes) {
     activeCategoryLayerIds.push(osmNotesLayerId)
   }
-  if (region.notesInternal && hasPermissions && currentMode === 'notes') {
+  if (region.notesInternal && hasPermissions && currentMode.isNotes) {
     activeCategoryLayerIds.push(internalNotesLayerId)
   }
-  if (hasPermissions && qaParamData.key && currentMode === 'qa') {
+  if (hasPermissions && qaParamData.key && currentMode.isQa) {
     activeCategoryLayerIds.push(qaLayerId)
   }
-  if (currentMode === 'reviewLists') {
+  if (currentMode.isReviewLists) {
     activeCategoryLayerIds.push(...reviewEntriesInteractiveLayerIds)
   }
 

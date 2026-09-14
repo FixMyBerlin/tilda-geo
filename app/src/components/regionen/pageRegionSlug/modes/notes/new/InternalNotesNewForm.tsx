@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMap } from 'react-map-gl/maplibre'
-import { twJoin } from 'tailwind-merge'
 import { z } from 'zod'
 import {
   useNewNoteTildaDeeplink,
@@ -16,7 +15,6 @@ import {
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
-import { buttonStylesOnYellow, buttonStylesSecondary } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type { CreateNoteInputType } from '@/server/notes/notes.functions'
@@ -28,6 +26,7 @@ import {
   confirmDiscardComposerDraft,
   useComposerDraft,
 } from '../../composerDrafts/useComposerDraft'
+import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { modePanelMutedClassName } from '../../modePanel.const'
 import { useInternalNotesQueryKey } from '../useInternalNotesQueryKey'
 
@@ -170,38 +169,27 @@ export const InternalNotesNewForm = () => {
               labelSrOnly
               placeholder="Hinweis"
             />
-            <div className="flex gap-2">
-              <form.Subscribe selector={(s) => s.isSubmitting}>
-                {(isSubmitting) => (
-                  <button
-                    type="submit"
-                    className={twJoin(
-                      buttonStylesOnYellow,
-                      'inline-flex min-w-0 flex-1 items-center justify-center gap-2',
-                    )}
-                    disabled={isSubmitting || isPending}
-                  >
-                    Speichern
-                    {(isPending || isSubmitting) && <SmallSpinner />}
-                  </button>
-                )}
-              </form.Subscribe>
-              <button
-                type="button"
-                className={twJoin(buttonStylesSecondary, 'shrink-0')}
-                onClick={() => {
-                  if (
-                    !confirmDiscardComposerDraft(toComposerDraftStringValues(form.state.values))
-                  ) {
-                    return
-                  }
-                  clearDraft()
-                  closeCompose()
-                }}
-              >
-                Abbrechen
-              </button>
-            </div>
+            <form.Subscribe selector={(s) => s.isSubmitting}>
+              {(isSubmitting) => (
+                <ModeFormSubmit
+                  label="Speichern"
+                  variant="yellow"
+                  spinner="inside"
+                  pending={isSubmitting || isPending}
+                  cancel={{
+                    onClick: () => {
+                      if (
+                        !confirmDiscardComposerDraft(toComposerDraftStringValues(form.state.values))
+                      ) {
+                        return
+                      }
+                      clearDraft()
+                      closeCompose()
+                    },
+                  }}
+                />
+              )}
+            </form.Subscribe>
             {error ? <p className="text-red-500">{error.message}</p> : null}
           </>
         )}

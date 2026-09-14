@@ -3,11 +3,22 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, test, vi } from 'vitest'
 import type { ListHoverMarkerPosition } from './mapListHoverMarkerPosition'
 import { ModePanel } from './ModePanel'
+import type { RegionMode } from './useCurrentMode'
 
-const { useCurrentMode, useListHoverMarkerPosition } = vi.hoisted(() => ({
-  useCurrentMode: vi.fn(() => 'notes' as 'map' | 'notes' | 'qa' | 'reviewLists'),
-  useListHoverMarkerPosition: vi.fn((): ListHoverMarkerPosition | null => null),
-}))
+const { useCurrentMode, useListHoverMarkerPosition, currentModeFlags } = vi.hoisted(() => {
+  const currentModeFlags = (mode: RegionMode) => ({
+    mode,
+    isMap: mode === 'map',
+    isNotes: mode === 'notes',
+    isQa: mode === 'qa',
+    isReviewLists: mode === 'reviewLists',
+  })
+  return {
+    currentModeFlags,
+    useCurrentMode: vi.fn(() => currentModeFlags('notes')),
+    useListHoverMarkerPosition: vi.fn((): ListHoverMarkerPosition | null => null),
+  }
+})
 
 vi.mock('./useCurrentMode', () => ({
   useCurrentMode,
@@ -47,7 +58,7 @@ const atEdgePosition = {
 
 describe('ModePanel', () => {
   test('list header shows mode title, actions, subtitle, collection and filter', () => {
-    useCurrentMode.mockReturnValue('reviewLists')
+    useCurrentMode.mockReturnValue(currentModeFlags('reviewLists'))
     useListHoverMarkerPosition.mockReturnValue(null)
     render(
       <ModePanel
@@ -75,7 +86,7 @@ describe('ModePanel', () => {
   })
 
   test('collection stays visible without a disclosure when always open', () => {
-    useCurrentMode.mockReturnValue('reviewLists')
+    useCurrentMode.mockReturnValue(currentModeFlags('reviewLists'))
     useListHoverMarkerPosition.mockReturnValue(null)
     render(
       <ModePanel title="Prüflisten" collection={<div>Collection</div>} collectionAlwaysOpen>
@@ -88,7 +99,7 @@ describe('ModePanel', () => {
   })
 
   test('does not show the OSM notes subtitle on the Hinweise list', () => {
-    useCurrentMode.mockReturnValue('notes')
+    useCurrentMode.mockReturnValue(currentModeFlags('notes'))
     useListHoverMarkerPosition.mockReturnValue(null)
     render(
       <ModePanel title="Hinweise" actions={<button type="button">Neuer Hinweis</button>}>
@@ -101,7 +112,7 @@ describe('ModePanel', () => {
   })
 
   test('detail header shows back button and detail title without list chrome', () => {
-    useCurrentMode.mockReturnValue('notes')
+    useCurrentMode.mockReturnValue(currentModeFlags('notes'))
     useListHoverMarkerPosition.mockReturnValue(atEdgePosition)
     const onBack = vi.fn()
     render(
@@ -135,7 +146,7 @@ describe('ModePanel', () => {
   })
 
   test('list footer is only shown when the hovered item is at the map edge', () => {
-    useCurrentMode.mockReturnValue('notes')
+    useCurrentMode.mockReturnValue(currentModeFlags('notes'))
     useListHoverMarkerPosition.mockReturnValue(atEdgePosition)
     const { rerender } = render(
       <ModePanel title="Hinweise">

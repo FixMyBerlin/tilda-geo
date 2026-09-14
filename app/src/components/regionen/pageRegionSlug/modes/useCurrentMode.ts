@@ -26,18 +26,33 @@ export const regionModeOrder = ['map', 'notes', 'qa', 'reviewLists'] as const
 
 export type RegionMode = keyof typeof regionModeRouteIds
 
+const regionModeFlags = (mode: RegionMode) =>
+  ({
+    mode,
+    isMap: mode === 'map',
+    isNotes: mode === 'notes',
+    isQa: mode === 'qa',
+    isReviewLists: mode === 'reviewLists',
+  }) satisfies {
+    mode: RegionMode
+    isMap: boolean
+    isNotes: boolean
+    isQa: boolean
+    isReviewLists: boolean
+  }
+
 /**
- * Returns the active region mode, derived from the matched route.
+ * Returns the active region mode and boolean flags, derived from the matched route.
  * Only call below the `/regionen/$regionSlug` layout route.
  */
 export const useCurrentMode = () => {
   const deepestRouteId = useMatches({
     select: (matches) => matches[matches.length - 1]?.routeId,
   })
-  if (deepestRouteId === regionModeRouteIds.notes) return 'notes'
-  if (deepestRouteId === regionModeRouteIds.qa) return 'qa'
-  if (deepestRouteId === regionModeRouteIds.reviewLists) return 'reviewLists'
-  return 'map'
+  if (deepestRouteId === regionModeRouteIds.notes) return regionModeFlags('notes')
+  if (deepestRouteId === regionModeRouteIds.qa) return regionModeFlags('qa')
+  if (deepestRouteId === regionModeRouteIds.reviewLists) return regionModeFlags('reviewLists')
+  return regionModeFlags('map')
 }
 
 /**
@@ -61,5 +76,5 @@ export const useOptimisticMode = () => {
     if (pendingMatch) return mode
   }
 
-  return committedMode
+  return committedMode.mode
 }

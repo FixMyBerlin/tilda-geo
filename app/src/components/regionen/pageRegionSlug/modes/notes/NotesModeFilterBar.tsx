@@ -13,14 +13,14 @@ import type { NotesModeParam } from './notesModeParam'
 type Props = {
   notesMode: NotesModeParam
   setNotesModeParam: (next: NotesModeParam) => void
-  showingOsm: boolean
+  showReactionFilter: boolean
   authorOptions: { value: string; label: string }[]
 }
 
 export const NotesModeFilterBar = ({
   notesMode,
   setNotesModeParam,
-  showingOsm,
+  showReactionFilter,
   authorOptions,
 }: Props) => {
   const search = notesMode.search ?? ''
@@ -58,7 +58,7 @@ export const NotesModeFilterBar = ({
           })
         }
       />
-      {showingOsm ? null : (
+      {showReactionFilter ? (
         <ModeFilterSelect
           label="Reaktion"
           icon={modeFilterIcons.reaction}
@@ -70,7 +70,7 @@ export const NotesModeFilterBar = ({
             })
           }
         />
-      )}
+      ) : null}
       <ModeFilterSelect
         label="Autor:in"
         icon={modeFilterIcons.author}

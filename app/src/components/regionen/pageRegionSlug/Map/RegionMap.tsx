@@ -93,7 +93,7 @@ export const RegionMap = () => {
   const region = useRegion()
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
-  const currentMode = useCurrentMode()
+  const { mode, isReviewLists } = useCurrentMode()
   const { notifyMapViewChanged } = useModeListActions()
 
   const { mainMap } = useMap()
@@ -131,7 +131,7 @@ export const RegionMap = () => {
 
     const { nextInspectorFeatures, nextUrlFeatures } = partitionClickedFeatures({
       clickedFeatures: uniqueFeatures,
-      currentMode,
+      currentMode: mode,
       previousUrlFeatures: featuresParam,
       previousInspectorFeatures: inspectorFeatures,
       regionDatasets: regionDatasets ?? [],
@@ -320,7 +320,7 @@ export const RegionMap = () => {
       <AttributionControl compact={true} position="bottom-left" />
       <Map3dTouchRotation />
       <Calculator />
-      {currentMode === 'reviewLists' && <ReviewMapDrawing />}
+      {isReviewLists && <ReviewMapDrawing />}
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}
     </MapGl>

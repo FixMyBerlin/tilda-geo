@@ -11,7 +11,13 @@ import { useResizableModePanelWidth } from './useResizableModePanelWidth'
 
 vi.mock('./useCurrentMode', () => ({
   useOptimisticMode: () => 'notes' as const,
-  useCurrentMode: () => 'notes' as const,
+  useCurrentMode: () => ({
+    mode: 'notes' as const,
+    isMap: false,
+    isNotes: true,
+    isQa: false,
+    isReviewLists: false,
+  }),
 }))
 
 type HookApi = ReturnType<typeof useResizableModePanelWidth>

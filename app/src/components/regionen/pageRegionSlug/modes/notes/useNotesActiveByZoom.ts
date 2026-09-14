@@ -9,7 +9,7 @@ export const useNotesActiveByZoom = () => {
 
   // InternalNotes should be visible always, we load all data anyways
   let minZoomNotesActive = 5
-  if (currentMode === 'notes' && region.notesOsm) {
+  if (currentMode.isNotes && region.notesOsm) {
     // OsmNotes however need stonger limit, because the API will only return a limited number of notes and we don't handle this "pagination" well, yet
     minZoomNotesActive = 10
   }

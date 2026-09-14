@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { z } from 'zod'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
-import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import { ComposerDraftAutosave } from './composerDrafts/ComposerDraftAutosave'
 import { useComposerDraft } from './composerDrafts/useComposerDraft'
+import { ModeFormSubmit } from './ModeFormSubmit'
 
 const bodySchema = (requiredMessage: string) =>
   z.object({
@@ -75,15 +75,16 @@ export const ModeCommentComposer = ({
             labelSrOnly={labelSrOnly}
             placeholder={placeholder}
           />
-          <div className="flex items-center gap-1 leading-tight">
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <button type="submit" className={buttonStylesOnYellow} disabled={isSubmitting}>
-                  {submitLabel}
-                </button>
-              )}
-            </form.Subscribe>
-          </div>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <ModeFormSubmit
+                label={submitLabel}
+                variant="yellow"
+                spinner="inside"
+                pending={isSubmitting}
+              />
+            )}
+          </form.Subscribe>
         </>
       )}
     </Form>

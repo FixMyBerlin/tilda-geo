@@ -1,12 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { twJoin, twMerge } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { buttonStyles, buttonStylesOnYellow } from '@/components/shared/links/styles'
-import { Markdown } from '@/components/shared/text/Markdown'
-import { proseClasses } from '@/components/shared/text/prose'
 import { ReviewEntryStatus } from '@/prisma/generated/enums'
 import {
   createReviewEntryCommentFn,
@@ -15,6 +13,7 @@ import {
 } from '@/server/review-lists/review-lists.functions'
 import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
+import { ModeCommentMarkdown } from '../../ModeCommentMarkdown'
 import { modePanelMutedClassName } from '../../modePanel.const'
 import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../reviewEntryMapColors'
 import { STATUS_LABEL } from '../reviewListsModeFilters'
@@ -148,13 +147,7 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
             <div className="text-gray-500">
               {c.author?.osmName ?? 'Unbekannt'} · {formatRelativeTime(new Date(c.createdAt))}
             </div>
-            <Markdown
-              markdown={c.body}
-              className={twJoin(
-                proseClasses,
-                'prose-sm prose-p:leading-tight prose-p:text-gray-800',
-              )}
-            />
+            <ModeCommentMarkdown markdown={c.body} />
           </div>
         ))}
         {hasPermissions ? (

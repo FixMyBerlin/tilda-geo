@@ -4,9 +4,8 @@ import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEdi
 import { Form } from '@/components/shared/form/Form'
 import { formatFormError } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
-import { buttonStyles } from '@/components/shared/links/styles'
-import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { ComposerDraftAutosave } from '../../composerDrafts/ComposerDraftAutosave'
+import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { userStatusOptions } from './qaConfigs'
 
 const schema = z.object({
@@ -130,22 +129,7 @@ export const QaEvaluationForm = ({
 
             <form.Subscribe selector={(s) => s.values.userStatus}>
               {(userStatus) => (
-                <div className="flex items-center gap-3">
-                  <button
-                    type="submit"
-                    disabled={isLoading || !userStatus}
-                    className={twJoin(
-                      buttonStyles,
-                      'bg-white px-3 py-1',
-                      isLoading || !userStatus
-                        ? 'cursor-not-allowed border-gray-300 text-gray-400 shadow-sm hover:bg-white'
-                        : 'border-gray-400 shadow-md',
-                    )}
-                  >
-                    Speichern
-                  </button>
-                  {isLoading && <SmallSpinner />}
-                </div>
+                <ModeFormSubmit label="Speichern" pending={isLoading} disabled={!userStatus} />
               )}
             </form.Subscribe>
           </div>

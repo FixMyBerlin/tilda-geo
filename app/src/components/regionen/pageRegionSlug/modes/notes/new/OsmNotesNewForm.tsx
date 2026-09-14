@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { useMap } from 'react-map-gl/maplibre'
-import { twJoin } from 'tailwind-merge'
 import { z } from 'zod'
 import {
   useOsmNewNoteFeature,
@@ -16,7 +15,6 @@ import {
 import { Textarea } from '@/components/shared/form/fields/Textarea'
 import { Form } from '@/components/shared/form/Form'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
-import { buttonStylesOnYellow, buttonStylesSecondary } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 import { createOsmNoteFn } from '@/server/osm/osm.functions'
@@ -27,6 +25,7 @@ import {
   confirmDiscardComposerDraft,
   useComposerDraft,
 } from '../../composerDrafts/useComposerDraft'
+import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { modePanelMutedClassName } from '../../modePanel.const'
 import { osmNotesQueryKey } from '../osmNotesQueryOptions'
 import type { OsmApiNotesThreadType } from '../osmNotesSchema'
@@ -179,39 +178,30 @@ export const OsmNotesNewForm = () => {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
-                <form.Subscribe selector={(s) => s.isSubmitting}>
-                  {(isSubmitting) => (
-                    <button
-                      type="submit"
-                      className={twJoin(
-                        buttonStylesOnYellow,
-                        'inline-flex min-w-0 flex-1 items-center justify-center gap-2',
-                      )}
-                      disabled={isSubmitting || isPending}
-                    >
-                      Veröffentlichen
-                      {(isPending || isSubmitting) && <SmallSpinner />}
-                    </button>
-                  )}
-                </form.Subscribe>
-                <button
-                  type="button"
-                  className={twJoin(buttonStylesSecondary, 'shrink-0')}
-                  onClick={() => {
-                    if (
-                      !confirmDiscardComposerDraft(toComposerDraftStringValues(form.state.values))
-                    ) {
-                      return
-                    }
-                    clearDraft()
-                    setNewOsmNoteMapParam(null)
-                    setOsmNewNoteFeature(undefined)
-                  }}
-                >
-                  Abbrechen
-                </button>
-              </div>
+              <form.Subscribe selector={(s) => s.isSubmitting}>
+                {(isSubmitting) => (
+                  <ModeFormSubmit
+                    label="Veröffentlichen"
+                    variant="yellow"
+                    spinner="inside"
+                    pending={isSubmitting || isPending}
+                    cancel={{
+                      onClick: () => {
+                        if (
+                          !confirmDiscardComposerDraft(
+                            toComposerDraftStringValues(form.state.values),
+                          )
+                        ) {
+                          return
+                        }
+                        clearDraft()
+                        setNewOsmNoteMapParam(null)
+                        setOsmNewNoteFeature(undefined)
+                      },
+                    }}
+                  />
+                )}
+              </form.Subscribe>
               <p className={modePanelMutedClassName}>
                 Wird öffentlich auf openstreetmap.org gespeichert.
               </p>

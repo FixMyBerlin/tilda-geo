@@ -13,15 +13,15 @@ import { SvgNotesQuestionmark } from '@/components/regionen/pageRegionSlug/Sideb
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
-import { buttonStylesOnYellow, notesButtonStyle } from '@/components/shared/links/styles'
+import { notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
-import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { toastError } from '@/components/shared/toast/toastError'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type { DeleteNoteInputType, UpdateNoteInputType } from '@/server/notes/notes.functions'
 import { deleteNoteFn, updateNoteFn } from '@/server/notes/notes.functions'
 import type { NoteAndComments } from '@/server/notes/queries/getNoteAndComments.server'
+import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { useIsAuthor } from './utils/useIsAuthor'
 
 const EditNoteSchema = z.object({
@@ -106,20 +106,13 @@ export const EditNoteForm = ({ note }: Props) => {
           </button>
         }
         primaryAction={
-          <div className="flex items-center gap-1">
-            <button
-              type="submit"
-              form={formId}
-              className={twJoin(
-                buttonStylesOnYellow,
-                'inline-flex w-full justify-center sm:w-auto',
-              )}
-              disabled={isPending}
-            >
-              Änderung speichern
-            </button>
-            {isPending ? <SmallSpinner /> : null}
-          </div>
+          <ModeFormSubmit
+            label="Änderung speichern"
+            variant="yellow"
+            pending={isPending}
+            form={formId}
+            buttonClassName="w-full sm:w-auto"
+          />
         }
       >
         <Form

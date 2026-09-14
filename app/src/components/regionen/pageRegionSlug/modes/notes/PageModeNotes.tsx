@@ -1,26 +1,21 @@
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import { useMap } from 'react-map-gl/maplibre'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useOsmNotesActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
-import { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNewInternalNoteMapParam'
-import { useNewOsmNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import {
+  useFlyMainMapToComposePin,
+  useNotesComposePin,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesComposePin'
 import { useRegionSearchNavigation } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useRegionSearchNavigation'
 import { serializeMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import { RegionMembershipCallout } from '@/components/regionen/pageRegionSlug/RegionMembershipCallout'
-import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { authClient } from '@/components/shared/auth/auth-client'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { getNoteAndCommentsFn } from '@/server/notes/notes.functions'
-import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
-import { useFilteredOsmNotes } from '../../Map/SourcesAndLayers/utils/useFilteredOsmNotes'
 import { DraftIndicatorDot } from '../composerDrafts/DraftIndicatorDot'
-import { useHasNewNoteComposerDraft } from '../composerDrafts/useHasComposerDraft'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { ModePanel } from '../ModePanel'
 import { modePanelPrimaryButtonClassName } from '../modePanel.const'
@@ -32,58 +27,36 @@ import { InternalNotesNewForm } from './new/InternalNotesNewForm'
 import { NotesNewLoginNotice } from './new/NotesNewLoginNotice'
 import { OsmNotesNewForm } from './new/OsmNotesNewForm'
 import { NotesModeFilterBar } from './NotesModeFilterBar'
-import { notesAuthorFilterOptions, uniqueOsmNoteAuthorNames } from './notesModeFilters'
 import { NotesModeList } from './NotesModeList'
-import { internalNotesToListEntries, osmNotesToListEntries } from './notesModeListEntry'
-import { notesModeToServerFilter } from './notesModeParam'
-import { resolveNotesSelection, type NotesSelection } from './notesSelection'
+import { useNotesModeListData } from './useNotesModeListData'
 import { useNotesModeParam } from './useNotesModeParam'
-import { useOsmNotesQuery } from './useOsmNotesQuery'
 
 export const PageModeNotes = () => {
-  const region = useRegion()
-  const hasPermissions = useHasPermissions()
   const { data: session } = authClient.useSession()
   const isAuthenticated = Boolean(session?.user)
-  const { mainMap } = useMap()
   const { mapParam } = useMapParam()
   const { clearInspectorFeatures } = useMapActions()
   const { setOsmNewNoteFeature } = useOsmNotesActions()
   const { selected, clearModeDetail } = useModeDetailSelection()
   const { notesMode, setNotesModeParam } = useNotesModeParam()
-  const { newOsmNoteMapParam, setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
-  const { newInternalNoteMapParam, setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
+  const { composingOsm, isComposing, clearComposeParams } = useNotesComposePin()
   const { updateSearch } = useRegionSearchNavigation()
-
-  const hasInternalNotes = region.notesInternal
-  const hasOsmNotes = region.notesOsm
-  const lacksInternalAccess = hasInternalNotes && !hasPermissions
-
-  const extent = notesMode.extent ?? 'view'
-  const serverFilter = notesModeToServerFilter(notesMode)
-
-  const selection = resolveNotesSelection({
-    hasInternalNotes: hasInternalNotes && hasPermissions,
-    hasOsmNotes,
-  }) satisfies NotesSelection
-  const showingOsm = selection.kind === 'osm'
-  const showInternalAuthCallout = lacksInternalAccess
-  const hasNewNoteDraft = useHasNewNoteComposerDraft(region.slug, showingOsm ? 'osm' : 'internal')
-
-  const composingOsm = Boolean(newOsmNoteMapParam)
-  const composingInternal = Boolean(newInternalNoteMapParam)
-  const isComposing = composingOsm || composingInternal
+  useFlyMainMapToComposePin()
 
   const {
-    data: internalData,
-    isLoading: isInternalLoading,
-    isError: isInternalError,
-  } = useQuery({
-    ...internalNotesQueryOptions(region.slug, serverFilter),
-    enabled: selection.kind === 'internal' && hasPermissions && !isComposing,
-  })
-  const { isError: isOsmError } = useOsmNotesQuery()
-  const osmCollection = useFilteredOsmNotes(serverFilter)
+    kind,
+    showingOsm,
+    entries,
+    authorOptions,
+    isInternalLoading,
+    isInternalError,
+    isOsmError,
+    hasNewNoteDraft,
+    showInternalAuthCallout,
+    capabilities,
+  } = useNotesModeListData()
+
+  const extent = notesMode.extent ?? 'view'
 
   const selectedNoteId = selected ? Number(selected.id) : undefined
   const isInternalNoteSelected =
@@ -98,33 +71,12 @@ export const PageModeNotes = () => {
     enabled: !isComposing && isInternalNoteSelected,
   })
 
-  const entries = showingOsm
-    ? osmNotesToListEntries(osmCollection.features)
-    : internalNotesToListEntries(internalData?.featureCollection)
-
-  const authors = internalData?.authors ?? []
-  const osmAuthorNames = showingOsm ? uniqueOsmNoteAuthorNames(osmCollection.features) : []
-  const myAuthorValue = showingOsm
-    ? session?.user?.additionalFields?.osmName || undefined
-    : (authors.find((author) => author.currentUser)?.id ?? session?.user?.id)
-  const authorOptions = notesAuthorFilterOptions({
-    authors: showingOsm ? [] : authors,
-    osmAuthorNames,
-    myValue: myAuthorValue,
-  })
-  const notesCollectionOptions = showingOsm
-    ? [{ value: 'osm', label: 'OpenStreetMap-Hinweise (öffentlich)', private: false }]
-    : selection.kind === 'internal'
-      ? [{ value: 'internal', label: 'TILDA-Hinweise', private: true }]
-      : []
-
   const openNewNote = () => {
     if (!mapParam) return
     clearInspectorFeatures()
-    const createKey = showingOsm ? searchParamsRegistry.osmNote : searchParamsRegistry.internalNote
     updateSearch(
       {
-        [createKey]: serializeMapParam(mapParam),
+        [capabilities.composeParamKey]: serializeMapParam(mapParam),
         [searchParamsRegistry.f]: undefined,
       },
       { replace: true },
@@ -132,38 +84,9 @@ export const PageModeNotes = () => {
   }
 
   const closeCompose = () => {
-    setNewOsmNoteMapParam(null)
-    setNewInternalNoteMapParam(null)
+    clearComposeParams()
     setOsmNewNoteFeature(undefined)
   }
-
-  const composePin = newOsmNoteMapParam ?? newInternalNoteMapParam
-  const composeZoom = composePin?.zoom
-  const composeLat = composePin?.lat
-  const composeLng = composePin?.lng
-
-  // Bookmark / inspector open: fly main map to the create-param pin when compose starts or the pin changes.
-  useEffect(
-    function flyMainMapToComposePinOnEnter() {
-      if (
-        !mainMap ||
-        composeZoom === undefined ||
-        composeLat === undefined ||
-        composeLng === undefined
-      ) {
-        return
-      }
-      const center = mainMap.getCenter()
-      const currentZoom = mainMap.getZoom()
-      const samePlace =
-        Math.abs(center.lat - composeLat) < 1e-5 &&
-        Math.abs(center.lng - composeLng) < 1e-5 &&
-        Math.abs(currentZoom - composeZoom) < 0.05
-      if (samePlace) return
-      mainMap.flyTo({ center: [composeLng, composeLat], zoom: composeZoom })
-    },
-    [mainMap, composeZoom, composeLat, composeLng],
-  )
 
   const composeDetail = isComposing
     ? {
@@ -206,17 +129,18 @@ export const PageModeNotes = () => {
       : undefined
 
   const panelDetail = composeDetail ?? noteDetail
+  const collectionOption = capabilities.collectionOptions[0]
 
   return (
     <ModePanel
       title="Hinweise"
       detail={panelDetail}
       collection={
-        notesCollectionOptions[0] ? (
+        collectionOption ? (
           <ModeCollectionSelect
             aria-label="Hinweise-Sammlung"
-            value={notesCollectionOptions[0].value}
-            options={notesCollectionOptions}
+            value={collectionOption.value}
+            options={capabilities.collectionOptions}
             readOnly
           />
         ) : undefined
@@ -233,7 +157,7 @@ export const PageModeNotes = () => {
               Neuer Hinweis
               {hasNewNoteDraft ? <DraftIndicatorDot /> : null}
             </button>
-            {showingOsm ? null : <InternalNotesDownloadModal />}
+            {capabilities.showDownload ? <InternalNotesDownloadModal /> : null}
           </>
         )
       }
@@ -242,7 +166,7 @@ export const PageModeNotes = () => {
           <NotesModeFilterBar
             notesMode={notesMode}
             setNotesModeParam={setNotesModeParam}
-            showingOsm={showingOsm}
+            showReactionFilter={capabilities.showReactionFilter}
             authorOptions={authorOptions}
           />
         )
@@ -257,7 +181,7 @@ export const PageModeNotes = () => {
         <NotesModeList
           entries={entries}
           showingOsm={showingOsm}
-          selectionKind={selection.kind}
+          selectionKind={kind}
           isInternalLoading={isInternalLoading}
           isInternalError={isInternalError}
           isOsmError={isOsmError}

@@ -3,7 +3,7 @@ import { isModeOwnedSource, modeForSource } from './modeScopedSelection'
 import { useCurrentMode } from './useCurrentMode'
 
 export const useModeDetailSelection = () => {
-  const mode = useCurrentMode()
+  const { mode } = useCurrentMode()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
 
   const selected = featuresParam.find((feature) => modeForSource(feature.sourceId) === mode)

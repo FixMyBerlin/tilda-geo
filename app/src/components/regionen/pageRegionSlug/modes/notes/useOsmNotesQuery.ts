@@ -9,13 +9,13 @@ import { useOsmNotesBbox } from './useOsmNotesBbox'
 /** Shared OSM-notes query; `enabled` is the fetch gate, cached/placeholder data still reads. */
 export const useOsmNotesQuery = () => {
   const mapLoaded = useMapLoaded()
-  const isNotesMode = useCurrentMode() === 'notes'
+  const { isNotes } = useCurrentMode()
   const region = useRegion()
   const notesActiveByZoom = useNotesActiveByZoom()
   const bbox = useOsmNotesBbox()
 
   return useQuery({
     ...osmNotesQueryOptions({ bbox }),
-    enabled: mapLoaded && Boolean(bbox) && isNotesMode && region.notesOsm && notesActiveByZoom,
+    enabled: mapLoaded && Boolean(bbox) && isNotes && region.notesOsm && notesActiveByZoom,
   })
 }
