@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest'
 import type { QaMapData } from '@/server/qa-configs/queries/getQaDataForMap.server'
 import { SYSTEM_STATUS_TO_LETTER, USER_STATUS_TO_LETTER } from './detail/qaConfigs'
 import {
-  isQaMapDefaultStatus,
   qaMapPayloadAppliesDefault,
   QA_MAP_DEFAULT_STATUS,
   resolveQaMapStatus,
@@ -14,7 +13,10 @@ const exception = {
   userStatus: null,
 } satisfies QaMapData
 
-describe('isQaMapDefaultStatus', () => {
+const isQaMapDefaultStatus = (item: { systemStatus: string | null; userStatus: string | null }) =>
+  item.systemStatus === QA_MAP_DEFAULT_STATUS.systemStatus && item.userStatus === null
+
+describe('QA_MAP_DEFAULT_STATUS', () => {
   test('matches Gut with no user decision', () => {
     expect(isQaMapDefaultStatus(QA_MAP_DEFAULT_STATUS)).toBe(true)
   })

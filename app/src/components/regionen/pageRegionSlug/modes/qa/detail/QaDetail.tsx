@@ -9,6 +9,7 @@ import {
   upsertQaMapDataRow,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapData'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
+import { qaLayerId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
 import { safeSetFeatureState } from '@/components/regionen/pageRegionSlug/Map/utils/safeSetFeatureState'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
@@ -117,10 +118,12 @@ export const QaDetail = ({ areaId }: Props) => {
   const userStatus = optimisticUserStatus
   const hasUserEvaluation = hasEvaluation && userStatus !== null
 
+  // Look up the currently rendered QA polygon so we can set/restore MapLibre feature-state
+  // on optimistic save. Same queryRenderedFeatures as useQaMapState, filtered to this areaId.
   const queryRenderedQaFeature = () => {
     if (!mainMap) return undefined
     return mainMap.queryRenderedFeatures({
-      layers: ['qa-layer'],
+      layers: [qaLayerId],
       filter: ['==', ['get', 'id'], areaId],
     })[0]
   }
@@ -287,9 +290,7 @@ export const QaDetail = ({ areaId }: Props) => {
             <QaEvaluationHistory evaluations={evaluations} />
           </div>
         )}
-        {isDev && <ObjectDump title="decisionData" data={decisionData} />}
-        {isDev && <ObjectDump title="areaId" data={{ areaId }} />}
-        {isDev && <ObjectDump title="evaluations" data={evaluations} />}
+        {isDev && <ObjectDump title="QaDetail" data={{ areaId, decisionData, evaluations }} />}
       </div>
     </IntlProvider>
   )

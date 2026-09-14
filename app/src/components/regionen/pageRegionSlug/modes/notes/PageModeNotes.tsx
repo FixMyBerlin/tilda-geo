@@ -138,27 +138,31 @@ export const PageModeNotes = () => {
   }
 
   const composePin = newOsmNoteMapParam ?? newInternalNoteMapParam
-  const composePinKey = composePin ? `${composePin.zoom}/${composePin.lat}/${composePin.lng}` : null
+  const composeZoom = composePin?.zoom
+  const composeLat = composePin?.lat
+  const composeLng = composePin?.lng
 
   // Bookmark / inspector open: fly main map to the create-param pin when compose starts or the pin changes.
   useEffect(
     function flyMainMapToComposePinOnEnter() {
-      if (!mainMap || !composePinKey) return
-      const parts = composePinKey.split('/')
-      const zoom = Number(parts[0])
-      const lat = Number(parts[1])
-      const lng = Number(parts[2])
-      if (!Number.isFinite(zoom) || !Number.isFinite(lat) || !Number.isFinite(lng)) return
+      if (
+        !mainMap ||
+        composeZoom === undefined ||
+        composeLat === undefined ||
+        composeLng === undefined
+      ) {
+        return
+      }
       const center = mainMap.getCenter()
       const currentZoom = mainMap.getZoom()
       const samePlace =
-        Math.abs(center.lat - lat) < 1e-5 &&
-        Math.abs(center.lng - lng) < 1e-5 &&
-        Math.abs(currentZoom - zoom) < 0.05
+        Math.abs(center.lat - composeLat) < 1e-5 &&
+        Math.abs(center.lng - composeLng) < 1e-5 &&
+        Math.abs(currentZoom - composeZoom) < 0.05
       if (samePlace) return
-      mainMap.flyTo({ center: [lng, lat], zoom })
+      mainMap.flyTo({ center: [composeLng, composeLat], zoom: composeZoom })
     },
-    [mainMap, composePinKey],
+    [mainMap, composeZoom, composeLat, composeLng],
   )
 
   const composeDetail = isComposing

@@ -1,3 +1,4 @@
+import { twJoin } from 'tailwind-merge'
 import { OsmUserLink } from '@/components/regionen/pageRegionSlug/SidebarInspector/OsmUserLink'
 import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
 import { evaluatorTypeConfig } from './qaConfigs'
@@ -20,7 +21,7 @@ export const QaEvaluatorDisplay = ({
 
   if (evaluation.evaluatorType === 'SYSTEM') {
     if (!showDisplayName) return null
-    return <span className={`text-sm font-medium text-gray-900 ${className}`}>System</span>
+    return <span className={twJoin('text-sm font-medium text-gray-900', className)}>System</span>
   }
 
   if (evaluation.author) {
@@ -45,7 +46,7 @@ export const QaEvaluatorDisplay = ({
   }
 
   return (
-    <span className={`text-sm font-medium text-gray-900 ${className}`}>
+    <span className={twJoin('text-sm font-medium text-gray-900', className)}>
       {evaluatorConfig.label}
     </span>
   )

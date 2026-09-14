@@ -90,43 +90,51 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
           mapOverlayMenuClassName,
         )}
       >
-        <div className="flex items-center gap-1.5 px-1 pb-1 text-[11px] font-medium text-gray-500">
-          <UsersIcon className="size-3.5 shrink-0" aria-hidden="true" />
-          Nutzer:innen
-        </div>
-        {qaUsers?.map((user) => {
-          const isUserSelected = selectedUserIds.includes(user.id)
-          return (
-            <label
-              key={user.id}
-              className={`flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs ${modePanelListItemHoverClassName}`}
-            >
-              <input
-                type="checkbox"
-                checked={isUserSelected}
-                onChange={() => toggleUser(user.id)}
-                className="size-4 rounded border-gray-300 text-brand focus:ring-brand"
-              />
-              <span>
-                {user.currentUser
-                  ? 'Meine Bewertungen'
-                  : `…von ${getFullname(user) || user.osmName}`}{' '}
-                {noFilterActive && <span className="text-gray-500">({user.count})</span>}
-              </span>
-            </label>
-          )
-        })}
-        <label
-          className={`flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs ${modePanelListItemHoverClassName}`}
-        >
-          <input
-            type="checkbox"
-            checked={noFilterActive}
-            onChange={clearUsers}
-            className="size-4 rounded border-gray-300 text-brand focus:ring-brand"
-          />
-          <span>Alle Nutzer:innen</span>
-        </label>
+        <fieldset className="space-y-0.5">
+          <legend className="flex items-center gap-1.5 px-1 pb-1 text-[11px] font-medium text-gray-500">
+            <UsersIcon className="size-3.5 shrink-0" aria-hidden="true" />
+            Nutzer:innen
+          </legend>
+          {qaUsers?.map((user) => {
+            const isUserSelected = selectedUserIds.includes(user.id)
+            return (
+              <label
+                key={user.id}
+                className={twJoin(
+                  'flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs',
+                  modePanelListItemHoverClassName,
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={isUserSelected}
+                  onChange={() => toggleUser(user.id)}
+                  className="size-4 rounded border-gray-300 text-brand focus:ring-brand"
+                />
+                <span>
+                  {user.currentUser
+                    ? 'Meine Bewertungen'
+                    : `…von ${getFullname(user) || user.osmName}`}{' '}
+                  {noFilterActive && <span className="text-gray-500">({user.count})</span>}
+                </span>
+              </label>
+            )
+          })}
+          <label
+            className={twJoin(
+              'flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs',
+              modePanelListItemHoverClassName,
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={noFilterActive}
+              onChange={clearUsers}
+              className="size-4 rounded border-gray-300 text-brand focus:ring-brand"
+            />
+            <span>Alle Nutzer:innen</span>
+          </label>
+        </fieldset>
       </MenuItems>
     </Menu>
   )

@@ -3,10 +3,7 @@ import {
   SYSTEM_STATUS_TO_LETTER,
   USER_STATUS_TO_LETTER,
 } from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
-import {
-  QA_MAP_DEFAULT_SQL_PREDICATE,
-  qaMapPayloadAppliesDefault,
-} from '@/components/regionen/pageRegionSlug/modes/qa/qaMapDefaultStatus'
+import { qaMapPayloadAppliesDefault } from '@/components/regionen/pageRegionSlug/modes/qa/qaMapDefaultStatus'
 import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
 import { getAppSession } from '@/server/auth/session.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
@@ -60,7 +57,9 @@ export async function getQaDataForMap(input: z.infer<typeof Schema>, headers: He
 
   // Only the unfiltered payload may omit Gut rows, because only then does the client backfill
   // them with QA_MAP_DEFAULT_STATUS. A search or user filter must return its matches in full,
-  // including Gut ones — same rule on both sides, so the two cannot drift apart.
+  // including Gut ones. Omit-Gut SQL must match `QA_MAP_DEFAULT_STATUS` on the client —
+  // do not let JS + SQL defaults drift.
+  const QA_MAP_DEFAULT_SQL_PREDICATE = `l."systemStatus" = 'GOOD' AND l."userStatus" IS NULL`
   const omitDefaultSql = qaMapPayloadAppliesDefault({ search, userIds })
     ? `NOT (${QA_MAP_DEFAULT_SQL_PREDICATE})`
     : 'TRUE'

@@ -3,6 +3,10 @@ import { frenchQuote } from '@/components/shared/text/Quotes'
 import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
 import { systemStatusConfig, userStatusConfig } from './detail/qaConfigs'
 
+type QaStatusOption =
+  | { key: string; label: string; userStatus: null; systemStatus: QaSystemStatus }
+  | { key: string; label: string; userStatus: QaEvaluationStatus; systemStatus: null }
+
 export const QA_STATUS_OPTIONS = [
   {
     key: 'pending-needs-review',
@@ -46,12 +50,7 @@ export const QA_STATUS_OPTIONS = [
     userStatus: 'OK_QA_TOOLING_ERROR',
     systemStatus: null,
   },
-] as const satisfies readonly {
-  key: string
-  label: string
-  userStatus: QaEvaluationStatus | null
-  systemStatus: QaSystemStatus | null
-}[]
+] as const satisfies readonly QaStatusOption[]
 
 export type QaStatusKey = (typeof QA_STATUS_OPTIONS)[number]['key']
 

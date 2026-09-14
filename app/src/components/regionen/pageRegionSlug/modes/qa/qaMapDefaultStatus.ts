@@ -15,12 +15,6 @@ export const QA_MAP_DEFAULT_STATUS = {
   userStatus: null,
 } as const satisfies QaMapStatusFields
 
-/** Latest-evaluation SQL (`l`) matching {@link QA_MAP_DEFAULT_STATUS}. */
-export const QA_MAP_DEFAULT_SQL_PREDICATE = `l."systemStatus" = 'GOOD' AND l."userStatus" IS NULL`
-
-export const isQaMapDefaultStatus = (item: QaMapStatusFields) =>
-  item.systemStatus === QA_MAP_DEFAULT_STATUS.systemStatus && item.userStatus === null
-
 /** Defaults are only omitted when the payload is the full config, not a user/search subset. */
 export const qaMapPayloadAppliesDefault = (filters: { search?: string; userIds?: string[] }) =>
   !filters.search && !(filters.userIds && filters.userIds.length > 0)

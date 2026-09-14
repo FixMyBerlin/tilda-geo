@@ -28,8 +28,9 @@ import {
   useComposerDraft,
 } from '../../composerDrafts/useComposerDraft'
 import { modePanelMutedClassName } from '../../modePanel.const'
+import { osmNotesQueryKey } from '../osmNotesQueryOptions'
 import type { OsmApiNotesThreadType } from '../osmNotesSchema'
-import { useOsmNotesQueryKey } from '../useOsmNotesQueryKey'
+import { useOsmNotesBbox } from '../useOsmNotesBbox'
 
 const OsmNoteSchema = z.object({ comment: z.string().min(1, 'Bitte Hinweistext eingeben.') })
 
@@ -77,7 +78,7 @@ export const OsmNotesNewForm = () => {
   const { newOsmNoteMapParam, setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
   const { mainMap } = useMap()
   const queryClient = useQueryClient()
-  const queryKey = useOsmNotesQueryKey()
+  const queryKey = osmNotesQueryKey(useOsmNotesBbox())
   const hasPermissions = useHasPermissions()
   const { region } = useRegionLoaderData()
   const searchStr = useRouter().state.location.searchStr
